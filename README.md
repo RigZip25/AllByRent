@@ -19,6 +19,8 @@ Foundation notes:
   `docs/figma-content-audit.md`.
 - Canonical category data lives in `src/data/taxonomy.ts` and separates Personal vs
   Business/Professional subcategories.
+- Screen-source and architecture rules live in `docs/figma-screen-inventory.md` and
+  `docs/product-architecture.md`.
 
 ## Scripts
 
