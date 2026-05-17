@@ -105,7 +105,7 @@ button {
   min-height: 100%;
   flex-direction: column;
   align-items: center;
-  padding: 242px 32px 118px;
+  padding: 270px 26px 118px;
   text-align: center;
 }
 
@@ -117,13 +117,13 @@ button {
 }
 
 h1 {
-  max-width: 324px;
+  max-width: 345px;
   margin: 0;
   color: #080a0d;
-  font-size: clamp(28px, 7.35vw, 32px);
+  font-size: clamp(26px, 7vw, 29px);
   font-weight: 900;
   line-height: 1.38;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.035em;
 }
 
 p {
@@ -168,7 +168,7 @@ p {
   }
 
   .content {
-    padding-top: 212px;
+    padding-top: 236px;
   }
 
   .rental-illustration {
