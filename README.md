@@ -3,6 +3,9 @@
 React/Vite implementation of the All By Rent onboarding and authentication flows from the provided
 Figma design. The screens use PNG exports from the Figma frames for visual fidelity.
 
+The authentication screens include interactive input overlays, basic local validation, and a
+localStorage-backed demo session. There is no backend integration yet.
+
 ## Scripts
 
 - `npm run dev` - start the local development server
