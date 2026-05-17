@@ -1,0 +1,41 @@
+{
+  "name": "all-by-rent",
+  "version": "1.0.0",
+  "description": "All By Rent onboarding screen",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RigZip25/AllByRent.git"
+  },
+  "keywords": [
+    "rental",
+    "onboarding",
+    "react"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RigZip25/AllByRent/issues"
+  },
+  "homepage": "https://github.com/RigZip25/AllByRent#readme",
+  "dependencies": {
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitejs/plugin-react": "^6.0.2",
+    "eslint": "^10.4.0",
+    "globals": "^17.6.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.3",
+    "vite": "^8.0.13"
+  }
+}
