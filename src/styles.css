@@ -46,6 +46,43 @@ button {
   box-shadow: 0 24px 80px rgb(21 44 75 / 14%);
 }
 
+.phone-frame-welcome .shape-red,
+.phone-frame-welcome .skip-button {
+  display: none;
+}
+
+.phone-frame-welcome .shape-blue {
+  top: -38px;
+  left: -48px;
+  width: 190px;
+  height: 190px;
+}
+
+.phone-frame-welcome .shape-orange {
+  right: -54px;
+  bottom: -68px;
+  left: auto;
+}
+
+.phone-frame-local .shape-red {
+  display: none;
+}
+
+.phone-frame-local .shape-blue {
+  right: -22px;
+  left: auto;
+  transform: skewY(-8deg) translate(0, -17px);
+}
+
+.phone-frame-local .shape-orange {
+  top: 0;
+  bottom: auto;
+  left: -34px;
+  height: 180px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 118px;
+}
+
 .shape {
   position: absolute;
   pointer-events: none;
@@ -109,11 +146,44 @@ button {
   text-align: center;
 }
 
-.rental-illustration {
+.phone-frame-welcome .content {
+  justify-content: center;
+  padding-top: 132px;
+}
+
+.phone-frame-local .content {
+  padding-top: 260px;
+}
+
+.phone-frame-secure .content,
+.phone-frame-business .content {
+  padding-top: 248px;
+}
+
+.onboarding-illustration {
   width: min(100%, 318px);
   height: auto;
   flex: 0 0 auto;
   margin-bottom: 40px;
+}
+
+.welcome-logo {
+  width: min(100%, 285px);
+  height: auto;
+  flex: 0 0 auto;
+  margin-bottom: 52px;
+}
+
+.local-illustration {
+  width: min(100%, 330px);
+}
+
+.business-illustration {
+  width: min(100%, 324px);
+}
+
+.secure-illustration {
+  width: min(100%, 318px);
 }
 
 h1 {
@@ -136,6 +206,41 @@ p {
   letter-spacing: -0.02em;
 }
 
+.phone-frame-local p {
+  max-width: 245px;
+  color: #8b8b8d;
+  font-size: 19px;
+  line-height: 1.38;
+}
+
+.phone-frame-welcome p {
+  max-width: 280px;
+}
+
+.progress-dots {
+  position: absolute;
+  right: 28px;
+  bottom: 118px;
+  left: 28px;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.progress-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  background: #d8deec;
+  border-radius: 999px;
+}
+
+.progress-dot-active {
+  width: 24px;
+  background: #073f9f;
+}
+
 .next-button {
   position: absolute;
   right: 28px;
@@ -152,7 +257,8 @@ p {
 }
 
 .skip-button:focus-visible,
-.next-button:focus-visible {
+.next-button:focus-visible,
+.progress-dot:focus-visible {
   outline: 4px solid rgb(7 63 159 / 28%);
   outline-offset: 3px;
 }
@@ -171,9 +277,24 @@ p {
     padding-top: 236px;
   }
 
-  .rental-illustration {
+  .phone-frame-welcome .content {
+    padding-top: 112px;
+  }
+
+  .phone-frame-local .content,
+  .phone-frame-secure .content,
+  .phone-frame-business .content {
+    padding-top: 220px;
+  }
+
+  .onboarding-illustration {
     width: min(100%, 292px);
     margin-bottom: 28px;
+  }
+
+  .welcome-logo {
+    width: min(100%, 260px);
+    margin-bottom: 38px;
   }
 }
 
