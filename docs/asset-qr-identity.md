@@ -60,6 +60,22 @@ The first frontend/domain contract lives in `src/data/listing.ts`:
 This is still local/domain code. Real production QR generation should be moved behind a backend API
 so ids can be stable, signed, and auditable.
 
+The prototype flow is reachable at:
+
+- `?screen=listing-scope`
+- `?screen=listing-categories`
+- `?screen=listing-subcategories`
+- `?screen=listing-detail`
+- `?screen=listing-price`
+- `?screen=listing-location`
+- `?screen=listing-rules`
+- `?screen=listing-photos`
+- `?screen=listing-order-preview`
+- `?screen=listing-published`
+
+The `listing-published` screen currently demonstrates five identical Shure SM58 microphones and
+creates five separate `AssetUnit` records locally.
+
 ## Backend implications
 
 Suggested tables/collections:

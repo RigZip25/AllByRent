@@ -53,6 +53,16 @@ pass `?step=0` through `?step=15`, or use screen ids such as:
 - `?screen=order-confirm`
 - `?screen=order-detail`
 - `?screen=favorites`
+- `?screen=listing-scope`
+- `?screen=listing-categories`
+- `?screen=listing-subcategories`
+- `?screen=listing-detail`
+- `?screen=listing-price`
+- `?screen=listing-location`
+- `?screen=listing-rules`
+- `?screen=listing-photos`
+- `?screen=listing-order-preview`
+- `?screen=listing-published`
 
 ## Deployment
 

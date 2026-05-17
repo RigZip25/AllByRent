@@ -335,6 +335,22 @@ button {
   border-radius: 8px;
 }
 
+.hotspot-listing-previous,
+.hotspot-listing-next {
+  bottom: 32px;
+  width: 150px;
+  height: 64px;
+  border-radius: 8px;
+}
+
+.hotspot-listing-previous {
+  left: 16px;
+}
+
+.hotspot-listing-next {
+  right: 16px;
+}
+
 .hotspot-bottom-home,
 .hotspot-bottom-categories,
 .hotspot-bottom-favorites {
@@ -513,6 +529,114 @@ button {
   border: 1px solid rgb(224 72 72 / 20%);
   border-radius: 10px;
   box-shadow: 0 10px 22px rgb(21 44 75 / 10%);
+}
+
+.custom-screen {
+  width: 100%;
+  height: 100%;
+  padding: 92px 24px 28px;
+  color: #17233f;
+  background:
+    radial-gradient(circle at 0 0, #287bb4 0 92px, transparent 93px),
+    radial-gradient(circle at 100% 0, #cf4d5d 0 86px, transparent 87px),
+    #ffffff;
+}
+
+.custom-screen h1 {
+  margin: 0 0 12px;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.custom-screen p {
+  margin: 0 0 24px;
+  color: #6f7b8e;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.listing-card {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  min-height: 132px;
+  margin-bottom: 16px;
+  padding: 20px;
+  color: #17233f;
+  text-align: left;
+  background: #ffffff;
+  border: 2px solid #e8edf5;
+  border-radius: 18px;
+  box-shadow: 0 14px 34px rgb(21 44 75 / 10%);
+}
+
+.listing-card strong {
+  font-size: 18px;
+}
+
+.listing-card span {
+  color: #758298;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.listing-card-business {
+  border-color: #ff9f2d;
+}
+
+.asset-qr-screen {
+  padding-top: 84px;
+}
+
+.qr-card {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  background: #f8fbff;
+  border: 1px solid #dfe8f6;
+  border-radius: 18px;
+}
+
+.qr-visual {
+  display: grid;
+  width: 154px;
+  height: 154px;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  padding: 10px;
+  background: #ffffff;
+  border: 8px solid #ffffff;
+  box-shadow: 0 10px 26px rgb(21 44 75 / 12%);
+}
+
+.qr-cell {
+  background: #eef3f8;
+}
+
+.qr-cell-dark {
+  background: #173b70;
+}
+
+.qr-card small {
+  overflow-wrap: anywhere;
+  color: #66758b;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.asset-qr-screen ul {
+  display: grid;
+  gap: 6px;
+  max-height: 190px;
+  margin: 16px 0 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  color: #3f4b5d;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .rentano-fab {

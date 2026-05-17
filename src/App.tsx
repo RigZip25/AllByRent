@@ -19,12 +19,27 @@ import orderDetailScreen from "./assets/browsing/order-detail.png";
 import productDetailScreen from "./assets/browsing/product-detail.png";
 import productListScreen from "./assets/browsing/product-list.png";
 import subcategoriesScreen from "./assets/browsing/subcategories.png";
+import addItemCategoriesScreen from "./assets/listing/add-item-categories.png";
+import addItemDetailScreen from "./assets/listing/add-item-detail.png";
+import addItemSubcategoriesScreen from "./assets/listing/add-item-subcategories.png";
+import expectedPriceScreen from "./assets/listing/expected-price.png";
+import listingOrderScreen from "./assets/listing/listing-order.png";
+import policyRulesScreen from "./assets/listing/policy-rules.png";
+import uploadPhotosScreen from "./assets/listing/upload-photos.png";
+import whereYourPlaceScreen from "./assets/listing/where-your-place.png";
 import businessRentalsScreen from "./assets/onboarding/business-rentals.png";
 import mrRentanoScreen from "./assets/onboarding/mr-rentano.png";
 import rentalHubScreen from "./assets/onboarding/rental-hub.png";
 import rentLocallyScreen from "./assets/onboarding/rent-locally.png";
 import secureLocalFlexibleScreen from "./assets/onboarding/secure-local-flexible.png";
 import welcomeScreen from "./assets/onboarding/welcome.png";
+import {
+  createEmptyListingDraft,
+  createPublishedListing,
+  encodeAssetQrPayload,
+  type ListingScope,
+  type PublishedListing,
+} from "./data/listing";
 import { type ListingIntent } from "./data/taxonomy";
 
 type Hotspot = {
@@ -88,11 +103,12 @@ type AppScreen = {
   backTargetId?: string;
   id: string;
   title: string;
-  image: string;
+  image?: string;
   fields?: FormField[];
   hotspots?: Hotspot[];
   primaryLabel?: string;
   primaryTargetId?: string;
+  render?: "asset-qr" | "listing-scope";
   hasSkip?: boolean;
   tall?: boolean;
   showDots?: boolean;
@@ -104,6 +120,7 @@ type SessionState = {
   email?: string;
   isAuthenticated: boolean;
   lastBookingId?: string;
+  lastPublishedListing?: PublishedListing;
   listingIntent?: ListingIntent;
 };
 
@@ -458,7 +475,7 @@ const authScreens: AppScreen[] = [
     title: "How much is your clutter worth?",
     image: earningYourStuffScreen,
     hotspots: [
-      { className: "hotspot-auth-primary", label: "Sign up", targetId: "signup" },
+      { className: "hotspot-auth-primary", label: "Start listing", targetId: "listing-scope" },
       { className: "hotspot-auth-signin-bottom", label: "Log in", targetId: "login" },
     ],
   },
@@ -684,7 +701,105 @@ const browsingScreens: AppScreen[] = [
   },
 ];
 
-const screens = [...onboardingScreens, ...authScreens, ...browsingScreens];
+const listingScreens: AppScreen[] = [
+  {
+    backTargetId: "earning-your-stuff",
+    id: "listing-scope",
+    render: "listing-scope",
+    title: "Choose Listing Type",
+  },
+  {
+    backTargetId: "listing-scope",
+    id: "listing-categories",
+    image: addItemCategoriesScreen,
+    title: "Add Item Categories",
+    hotspots: [
+      { className: "hotspot-listing-previous", label: "Previous", targetId: "listing-scope" },
+      { className: "hotspot-listing-next", label: "Next", targetId: "listing-subcategories" },
+      { className: "hotspot-category-grid", label: "Choose category", targetId: "listing-subcategories" },
+    ],
+  },
+  {
+    backTargetId: "listing-categories",
+    id: "listing-subcategories",
+    image: addItemSubcategoriesScreen,
+    title: "Listing Subcategories",
+    hotspots: [
+      { className: "hotspot-listing-previous", label: "Previous", targetId: "listing-categories" },
+      { className: "hotspot-listing-next", label: "Next", targetId: "listing-detail" },
+      { className: "hotspot-category-grid", label: "Choose subcategory", targetId: "listing-detail" },
+    ],
+  },
+  {
+    backTargetId: "listing-subcategories",
+    id: "listing-detail",
+    image: addItemDetailScreen,
+    title: "Add Item Detail",
+    hotspots: [
+      { className: "hotspot-listing-previous", label: "Previous", targetId: "listing-subcategories" },
+      { className: "hotspot-listing-next", label: "Next", targetId: "listing-price" },
+    ],
+  },
+  {
+    backTargetId: "listing-detail",
+    id: "listing-price",
+    image: expectedPriceScreen,
+    title: "Expected Price",
+    hotspots: [
+      { className: "hotspot-listing-previous", label: "Previous", targetId: "listing-detail" },
+      { className: "hotspot-listing-next", label: "Next", targetId: "listing-location" },
+    ],
+  },
+  {
+    backTargetId: "listing-price",
+    id: "listing-location",
+    image: whereYourPlaceScreen,
+    tall: true,
+    title: "Where's Your Place",
+    hotspots: [
+      { className: "hotspot-listing-previous", label: "Previous", targetId: "listing-price" },
+      { className: "hotspot-listing-next", label: "Next", targetId: "listing-rules" },
+    ],
+  },
+  {
+    backTargetId: "listing-location",
+    id: "listing-rules",
+    image: policyRulesScreen,
+    title: "Policy & Rules",
+    hotspots: [
+      { className: "hotspot-listing-previous", label: "Previous", targetId: "listing-location" },
+      { className: "hotspot-listing-next", label: "Next", targetId: "listing-photos" },
+    ],
+  },
+  {
+    backTargetId: "listing-rules",
+    id: "listing-photos",
+    image: uploadPhotosScreen,
+    title: "Upload Photos",
+    hotspots: [
+      { className: "hotspot-listing-previous", label: "Previous", targetId: "listing-rules" },
+      { className: "hotspot-listing-next", label: "Next", targetId: "listing-order-preview" },
+    ],
+  },
+  {
+    backTargetId: "listing-photos",
+    id: "listing-order-preview",
+    image: listingOrderScreen,
+    title: "Listing Order Preview",
+    hotspots: [
+      { className: "hotspot-listing-previous", label: "Previous", targetId: "listing-photos" },
+      { className: "hotspot-listing-next", label: "Publish", targetId: "listing-published" },
+    ],
+  },
+  {
+    backTargetId: "listing-order-preview",
+    id: "listing-published",
+    render: "asset-qr",
+    title: "Asset QR Identity",
+  },
+];
+
+const screens = [...onboardingScreens, ...authScreens, ...browsingScreens, ...listingScreens];
 
 const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 
@@ -848,6 +963,41 @@ export const App = () => {
     goToScreen(targetId);
   };
 
+  const chooseListingScope = (scope: ListingScope, targetId: string) => {
+    updateSession({
+      ...session,
+      listingIntent: scope,
+    });
+    goToScreen(targetId);
+  };
+
+  const publishDemoListing = (targetId: string) => {
+    const draft = {
+      ...createEmptyListingDraft(
+        session.listingIntent === "list-business" ? "list-business" : "list-personal",
+      ),
+      brand: "Shure",
+      categoryId: "electronics",
+      complianceFlags: ["deposit-required" as const],
+      description: "Five identical microphones tracked as separate physical asset units.",
+      model: "SM58",
+      priceAmount: 20,
+      priceCurrency: currentLocale.currency,
+      quantity: 5,
+      serialNumbers: ["MIC-001", "MIC-002", "MIC-003", "MIC-004", "MIC-005"],
+      subcategoryId: "event-av",
+      title: "Shure SM58 Microphone",
+    };
+    const listing = createPublishedListing(draft, session.email ?? "demo-owner");
+
+    updateSession({
+      ...session,
+      lastPublishedListing: listing,
+      listingIntent: draft.scope,
+    });
+    goToScreen(targetId);
+  };
+
   const handleHotspotClick = (hotspot: Hotspot) => {
     switch (activeScreen.id) {
       case "login":
@@ -909,9 +1059,28 @@ export const App = () => {
         }
         break;
 
+      case "listing-scope":
+        if (hotspot.className === "hotspot-listing-personal") {
+          chooseListingScope("list-personal", hotspot.targetId);
+          return;
+        }
+
+        if (hotspot.className === "hotspot-listing-business") {
+          chooseListingScope("list-business", hotspot.targetId);
+          return;
+        }
+        break;
+
       case "booking":
         if (hotspot.className === "hotspot-booking-confirm") {
           confirmBooking(hotspot.targetId);
+          return;
+        }
+        break;
+
+      case "listing-order-preview":
+        if (hotspot.className === "hotspot-listing-next") {
+          publishDemoListing(hotspot.targetId);
           return;
         }
         break;
@@ -973,11 +1142,68 @@ export const App = () => {
         </select>
       </div>
       <section className="phone-frame">
-        <img
-          className={activeScreen.tall ? "figma-screen figma-screen-tall" : "figma-screen"}
-          src={activeScreen.image}
-          alt={activeScreen.title}
-        />
+        {activeScreen.image ? (
+          <img
+            className={activeScreen.tall ? "figma-screen figma-screen-tall" : "figma-screen"}
+            src={activeScreen.image}
+            alt={activeScreen.title}
+          />
+        ) : null}
+        {activeScreen.render === "listing-scope" ? (
+          <div className="custom-screen listing-scope-screen">
+            <h1>What are you listing?</h1>
+            <p>Choose the right owner type before the listing form starts.</p>
+            <button
+              className="listing-card listing-card-personal"
+              onClick={() => chooseListingScope("list-personal", "listing-categories")}
+              type="button"
+            >
+              <strong>Personal item</strong>
+              <span>One-off items you own personally.</span>
+            </button>
+            <button
+              className="listing-card listing-card-business"
+              onClick={() => chooseListingScope("list-business", "listing-categories")}
+              type="button"
+            >
+              <strong>Business / Professional inventory</strong>
+              <span>Fleet, equipment, locations, services, or multiple units.</span>
+            </button>
+          </div>
+        ) : null}
+        {activeScreen.render === "asset-qr" ? (
+          <div className="custom-screen asset-qr-screen">
+            <h1>Asset QR created</h1>
+            <p>
+              Each physical unit gets a unique identity. This demo listing creates five separate
+              QR payloads for identical Shure SM58 microphones.
+            </p>
+            <div className="qr-card">
+              <div className="qr-visual" aria-hidden="true">
+                {Array.from({ length: 49 }, (_, index) => {
+                  const payload =
+                    session.lastPublishedListing?.assetUnits[0]?.qrPayload.assetUnitId ??
+                    "asset-demo";
+                  const isDark = (payload.charCodeAt(index % payload.length) + index) % 3 !== 0;
+                  return <span className={isDark ? "qr-cell qr-cell-dark" : "qr-cell"} key={index} />;
+                })}
+              </div>
+              <strong>{session.lastPublishedListing?.assetUnits[0]?.assetUnitId ?? "asset-demo"}</strong>
+              <small>
+                {session.lastPublishedListing
+                  ? encodeAssetQrPayload(session.lastPublishedListing.assetUnits[0].qrPayload)
+                  : "Publish the listing to generate QR payloads."}
+              </small>
+            </div>
+            <ul>
+              {(session.lastPublishedListing?.assetUnits ?? []).map((assetUnit) => (
+                <li key={assetUnit.assetUnitId}>
+                  Unit {assetUnit.unitIndex}: {assetUnit.assetUnitId}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         {activeScreen.backTargetId ? (
           <button
