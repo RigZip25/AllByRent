@@ -54,6 +54,7 @@ button {
 
 .hotspot {
   position: absolute;
+  z-index: 3;
   overflow: hidden;
   color: transparent;
   background: transparent;
@@ -89,6 +90,126 @@ button {
   border-radius: 8px;
 }
 
+.hotspot-explore {
+  right: 27px;
+  bottom: 105px;
+  left: 27px;
+  height: 54px;
+  border-radius: 8px;
+}
+
+.hotspot-login-signup {
+  right: 27px;
+  bottom: 42px;
+  left: 27px;
+  height: 54px;
+  border-radius: 8px;
+}
+
+.hotspot-back {
+  top: 39px;
+  left: 8px;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+}
+
+.hotspot-auth-primary {
+  right: 27px;
+  bottom: 42px;
+  left: 27px;
+  height: 58px;
+  border-radius: 8px;
+}
+
+.hotspot-login-primary {
+  top: 531px;
+  right: 17px;
+  left: 17px;
+  height: 50px;
+  border-radius: 8px;
+}
+
+.hotspot-signup-primary {
+  top: 586px;
+  right: 17px;
+  left: 17px;
+  height: 50px;
+  border-radius: 8px;
+}
+
+.hotspot-reset-primary {
+  top: 404px;
+  right: 17px;
+  left: 17px;
+  height: 50px;
+  border-radius: 8px;
+}
+
+.hotspot-auth-forgot {
+  top: 397px;
+  right: 104px;
+  width: 110px;
+  height: 26px;
+  border-radius: 999px;
+}
+
+.hotspot-auth-signup {
+  right: 80px;
+  bottom: 211px;
+  left: 80px;
+  height: 28px;
+  border-radius: 999px;
+}
+
+.hotspot-auth-signin-bottom {
+  right: 80px;
+  bottom: 18px;
+  left: 80px;
+  height: 28px;
+  border-radius: 999px;
+}
+
+.hotspot-auth-provider-left {
+  bottom: 63px;
+  left: 22px;
+  width: 128px;
+  height: 58px;
+  border-radius: 8px;
+}
+
+.hotspot-auth-provider-right {
+  right: 22px;
+  bottom: 63px;
+  width: 128px;
+  height: 58px;
+  border-radius: 8px;
+}
+
+.hotspot-otp-area {
+  top: 232px;
+  right: 18px;
+  left: 18px;
+  height: 316px;
+  border-radius: 12px;
+}
+
+.hotspot-choice-left {
+  top: 260px;
+  left: 35px;
+  width: 142px;
+  height: 236px;
+  border-radius: 10px;
+}
+
+.hotspot-choice-right {
+  top: 260px;
+  right: 35px;
+  width: 142px;
+  height: 236px;
+  border-radius: 10px;
+}
+
 .hotspot-dots {
   position: absolute;
   right: 120px;
@@ -106,6 +227,146 @@ button {
   background: transparent;
   border-radius: 999px;
   cursor: pointer;
+}
+
+.form-field {
+  position: absolute;
+  z-index: 2;
+  display: block;
+}
+
+.form-field span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.form-field input {
+  width: 100%;
+  height: 100%;
+  padding: 0 18px;
+  color: #17233f;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  outline: none;
+}
+
+.form-field input::placeholder {
+  color: transparent;
+  opacity: 0;
+}
+
+.form-field input:focus {
+  box-shadow: 0 0 0 3px rgb(7 63 159 / 15%);
+}
+
+.field-login-email {
+  top: 207px;
+  right: 17px;
+  left: 17px;
+  height: 65px;
+}
+
+.field-login-password {
+  top: 328px;
+  right: 17px;
+  left: 17px;
+  height: 65px;
+}
+
+.field-signup-full-name {
+  top: 190px;
+  right: 17px;
+  left: 17px;
+  height: 55px;
+}
+
+.field-signup-email {
+  top: 296px;
+  right: 17px;
+  left: 17px;
+  height: 55px;
+}
+
+.field-signup-phone {
+  top: 390px;
+  right: 17px;
+  left: 17px;
+  height: 55px;
+}
+
+.field-signup-password {
+  top: 494px;
+  right: 17px;
+  left: 17px;
+  height: 55px;
+}
+
+.field-signup-full-name input,
+.field-signup-email input,
+.field-signup-phone input,
+.field-signup-password input,
+.field-new-password input,
+.field-confirm-password input {
+  padding-left: 58px;
+}
+
+.field-verification-code {
+  top: 252px;
+  left: 58px;
+  width: 250px;
+  height: 50px;
+}
+
+.field-verification-code input {
+  padding: 0 0 0 18px;
+  font-size: 22px;
+  letter-spacing: 34px;
+}
+
+.field-reset-email {
+  top: 320px;
+  right: 17px;
+  left: 17px;
+  height: 55px;
+}
+
+.field-new-password {
+  top: 244px;
+  right: 17px;
+  left: 17px;
+  height: 55px;
+}
+
+.field-confirm-password {
+  top: 307px;
+  right: 17px;
+  left: 17px;
+  height: 55px;
+}
+
+.screen-message {
+  position: absolute;
+  right: 22px;
+  bottom: 106px;
+  left: 22px;
+  z-index: 4;
+  padding: 10px 12px;
+  color: #8f2f2f;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+  background: rgb(255 244 244 / 92%);
+  border: 1px solid rgb(224 72 72 / 20%);
+  border-radius: 10px;
+  box-shadow: 0 10px 22px rgb(21 44 75 / 10%);
 }
 
 @media (max-width: 430px) {
