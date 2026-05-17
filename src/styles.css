@@ -107,10 +107,10 @@ button {
 }
 
 .hotspot-back {
-  top: 39px;
-  left: 8px;
-  width: 42px;
-  height: 42px;
+  top: 28px;
+  left: 0;
+  width: 76px;
+  height: 76px;
   border-radius: 999px;
 }
 
