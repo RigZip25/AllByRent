@@ -104,3 +104,11 @@ Before implementing real backend data models, define a canonical taxonomy:
 6. Whether the category supports renting, listing, or both
 
 Only after that should categories become backend seed data.
+
+## Current implementation follow-up
+
+- A first canonical taxonomy source exists in `src/data/taxonomy.ts`.
+- The app session now stores `listingIntent` instead of the older ambiguous `preference`.
+- The current Figma screen still has only one visible "I want to list something for rent" card. In
+  product UI, that click should lead to a Personal vs Business/Professional listing choice before
+  any listing form starts.

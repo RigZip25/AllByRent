@@ -25,6 +25,7 @@ import rentalHubScreen from "./assets/onboarding/rental-hub.png";
 import rentLocallyScreen from "./assets/onboarding/rent-locally.png";
 import secureLocalFlexibleScreen from "./assets/onboarding/secure-local-flexible.png";
 import welcomeScreen from "./assets/onboarding/welcome.png";
+import { type ListingIntent } from "./data/taxonomy";
 
 type Hotspot = {
   className: string;
@@ -103,7 +104,7 @@ type SessionState = {
   email?: string;
   isAuthenticated: boolean;
   lastBookingId?: string;
-  preference?: "list" | "rent";
+  listingIntent?: ListingIntent;
 };
 
 const emptyAuthForm: AuthForm = {
@@ -834,8 +835,8 @@ export const App = () => {
     goToScreen(targetId);
   };
 
-  const choosePreference = (preference: "list" | "rent", targetId: string) => {
-    updateSession({ ...session, preference });
+  const choosePreference = (listingIntent: ListingIntent, targetId: string) => {
+    updateSession({ ...session, listingIntent });
     goToScreen(targetId);
   };
 
@@ -903,7 +904,7 @@ export const App = () => {
         }
 
         if (hotspot.className === "hotspot-choice-right") {
-          choosePreference("list", hotspot.targetId);
+          choosePreference("list-undecided", hotspot.targetId);
           return;
         }
         break;

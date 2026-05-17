@@ -17,6 +17,8 @@ Foundation notes:
   integration is intentionally left for a later API layer.
 - Figma category/listing content is being audited before it becomes backend seed data. See
   `docs/figma-content-audit.md`.
+- Canonical category data lives in `src/data/taxonomy.ts` and separates Personal vs
+  Business/Professional subcategories.
 
 ## Scripts
 
