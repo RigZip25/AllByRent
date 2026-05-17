@@ -1,10 +1,12 @@
 # All By Rent
 
-React/Vite implementation of the All By Rent onboarding and authentication flows from the provided
-Figma design. The screens use PNG exports from the Figma frames for visual fidelity.
+React/Vite implementation of the All By Rent onboarding, authentication, and browsing/rental flows
+from the provided Figma design. The screens use PNG exports from the Figma frames for visual
+fidelity.
 
 The authentication screens include interactive input overlays, basic local validation, and a
-localStorage-backed demo session. There is no backend integration yet.
+localStorage-backed demo session. The browsing flow includes local demo booking state. There is no
+backend integration yet.
 
 ## Scripts
 
@@ -26,6 +28,15 @@ pass `?step=0` through `?step=15`, or use screen ids such as:
 - `?screen=like-to-do-list`
 - `?screen=rental`
 - `?screen=earning-your-stuff`
+- `?screen=home`
+- `?screen=categories`
+- `?screen=subcategories`
+- `?screen=product-list`
+- `?screen=product-detail`
+- `?screen=booking`
+- `?screen=order-confirm`
+- `?screen=order-detail`
+- `?screen=favorites`
 
 ## Deployment
 
