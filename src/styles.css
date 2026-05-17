@@ -1,0 +1,122 @@
+:root {
+  color: #111317;
+  background: #f7f5f1;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+button {
+  border: 0;
+  font: inherit;
+}
+
+.screen-shell {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.phone-frame {
+  position: relative;
+  width: min(100%, 393px);
+  aspect-ratio: 393 / 852;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 24px 80px rgb(21 44 75 / 14%);
+}
+
+.figma-screen {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+
+.hotspot {
+  position: absolute;
+  overflow: hidden;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
+.hotspot::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  border-radius: inherit;
+}
+
+.hotspot:focus-visible::after,
+.hotspot-dot:focus-visible {
+  outline: 4px solid rgb(7 63 159 / 28%);
+  outline-offset: 3px;
+}
+
+.hotspot-skip {
+  top: 48px;
+  right: 25px;
+  width: 78px;
+  height: 42px;
+  border-radius: 999px;
+}
+
+.hotspot-primary {
+  right: 27px;
+  bottom: 42px;
+  left: 27px;
+  height: 58px;
+  border-radius: 8px;
+}
+
+.hotspot-dots {
+  position: absolute;
+  right: 120px;
+  bottom: 124px;
+  left: 120px;
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+}
+
+.hotspot-dot {
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  background: transparent;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+@media (max-width: 430px) {
+  .screen-shell {
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .phone-frame {
+    width: 100%;
+    min-height: 100dvh;
+    box-shadow: none;
+  }
+}
