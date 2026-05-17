@@ -393,7 +393,7 @@ button {
 
 .form-field {
   position: absolute;
-  z-index: 2;
+  z-index: 4;
   display: block;
 }
 
@@ -480,16 +480,52 @@ button {
 }
 
 .field-verification-code {
-  top: 252px;
-  left: 58px;
-  width: 250px;
-  height: 50px;
+  top: 428px;
+  left: 42px;
+  width: 318px;
+  height: 64px;
 }
 
 .field-verification-code input {
-  padding: 0 0 0 18px;
+  padding: 0 0 0 33px;
   font-size: 22px;
-  letter-spacing: 34px;
+  letter-spacing: 48px;
+}
+
+.verification-clean-copy {
+  position: absolute;
+  top: 374px;
+  right: 32px;
+  left: 32px;
+  z-index: 3;
+  min-height: 56px;
+  padding: 8px 8px 10px;
+  color: #8b8b8d;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+  background: #ffffff;
+}
+
+.verification-code-mask {
+  position: absolute;
+  top: 428px;
+  left: 42px;
+  z-index: 3;
+  display: grid;
+  width: 318px;
+  height: 64px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  pointer-events: none;
+}
+
+.verification-code-mask span {
+  background: #ffffff;
+  border: 1.5px solid #e7eaf0;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgb(21 44 75 / 8%);
 }
 
 .field-reset-email {

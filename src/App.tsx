@@ -846,6 +846,8 @@ export const App = () => {
   const [session, setSession] = useState<SessionState>(getStoredSession);
   const [activeIndex, setActiveIndex] = useState(getInitialStep);
   const activeScreen = screens[activeIndex];
+  const isVerificationScreen =
+    activeScreen.id === "verification-phone" || activeScreen.id === "verification-code";
   const isOnboardingScreen = onboardingScreens.some((screen) => screen.id === activeScreen.id);
   const showAssistant = !isOnboardingScreen;
   const hasDeepLink =
@@ -919,10 +921,6 @@ export const App = () => {
     ) {
       setMessage("Fill name, email, phone, and a password with at least 6 characters.");
       return;
-    }
-
-    if (!authForm.verificationCode) {
-      setAuthForm((currentForm) => ({ ...currentForm, verificationCode: "5319" }));
     }
 
     goToScreen(targetId);
@@ -1167,6 +1165,19 @@ export const App = () => {
         ) : null}
         {activeScreen.id === "mr-rentano" ? (
           <div className="rentano-intro-hint">{t("assistant.introHint")}</div>
+        ) : null}
+        {isVerificationScreen ? (
+          <>
+            <div className="verification-clean-copy">
+              Please type the verification code sent to your email.
+            </div>
+            <div className="verification-code-mask" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+          </>
         ) : null}
         {activeScreen.render === "listing-scope" ? (
           <div className="custom-screen listing-scope-screen">
