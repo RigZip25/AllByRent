@@ -1,4 +1,4 @@
-import { type CSSProperties, useState } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 
 import createNewPasswordScreen from "./assets/auth/create-new-password.png";
 import earningYourStuffScreen from "./assets/auth/earning-your-stuff.png";
@@ -255,14 +255,8 @@ const onboardingScreens: AppScreen[] = [
     id: "mr-rentano",
     title: "Hi, I'm Mr. Rentano.",
     image: mrRentanoScreen,
-    hasSkip: true,
     showDots: true,
     hotspots: [
-      {
-        className: "hotspot-explore",
-        label: "Explore categories",
-        targetId: "like-to-do-rent",
-      },
       {
         className: "hotspot-login-signup",
         label: "Log in or sign up",
@@ -833,6 +827,14 @@ const getInitialStep = () => {
     return stepFromUrl;
   }
 
+  if (getStoredSession().isAuthenticated) {
+    const choiceScreenIndex = screens.findIndex((screen) => screen.id === "like-to-do-rent");
+
+    if (choiceScreenIndex >= 0) {
+      return choiceScreenIndex;
+    }
+  }
+
   return 0;
 };
 
@@ -846,6 +848,9 @@ export const App = () => {
   const activeScreen = screens[activeIndex];
   const isOnboardingScreen = onboardingScreens.some((screen) => screen.id === activeScreen.id);
   const showAssistant = !isOnboardingScreen;
+  const hasDeepLink =
+    new URLSearchParams(window.location.search).has("screen") ||
+    new URLSearchParams(window.location.search).has("step");
   const currentLocale = localeSettings[locale];
   const t = (key: TranslationKey) => translations[locale][key];
 
@@ -867,6 +872,12 @@ export const App = () => {
       setActiveIndex(targetIndex);
     }
   };
+
+  useEffect(() => {
+    if (!hasDeepLink && session.isAuthenticated && activeScreen.id === "welcome") {
+      goToScreen("like-to-do-rent");
+    }
+  });
 
   const updateField = (fieldName: FormFieldName, value: string) => {
     const nextValue =
