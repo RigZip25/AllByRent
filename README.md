@@ -8,6 +8,23 @@ The authentication screens include interactive input overlays, basic local valid
 localStorage-backed demo session. The browsing flow includes local demo booking state. There is no
 backend integration yet.
 
+Foundation notes:
+
+- New hotspots can use percentage-based `rect` coordinates so tap areas scale with the screen frame.
+- Locale state is stored locally and currently supports English/Spanish system UI strings.
+- Locale-aware currency/date formatting uses `Intl`.
+- Mr. Rentano is represented as a screen-aware assistant layer with mock responses; backend/LLM
+  integration is intentionally left for a later API layer.
+- Figma category/listing content is being audited before it becomes backend seed data. See
+  `docs/figma-content-audit.md`.
+- Canonical category data lives in `src/data/taxonomy.ts` and separates Personal vs
+  Business/Professional subcategories.
+- Listing flow and per-asset QR identity contracts live in `src/data/listing.ts` and
+  `docs/asset-qr-identity.md`.
+- Screen-source and architecture rules live in `docs/figma-screen-inventory.md` and
+  `docs/product-architecture.md`.
+- Backend planning notes live in `docs/backend-api-draft.md`.
+
 ## Scripts
 
 - `npm run dev` - start the local development server
@@ -37,6 +54,16 @@ pass `?step=0` through `?step=15`, or use screen ids such as:
 - `?screen=order-confirm`
 - `?screen=order-detail`
 - `?screen=favorites`
+- `?screen=listing-scope`
+- `?screen=listing-categories`
+- `?screen=listing-subcategories`
+- `?screen=listing-detail`
+- `?screen=listing-price`
+- `?screen=listing-location`
+- `?screen=listing-rules`
+- `?screen=listing-photos`
+- `?screen=listing-order-preview`
+- `?screen=listing-published`
 
 ## Deployment
 
