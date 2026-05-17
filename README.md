@@ -19,6 +19,7 @@ Foundation notes:
   `docs/figma-content-audit.md`.
 - Canonical category data lives in `src/data/taxonomy.ts` and separates Personal vs
   Business/Professional subcategories.
+- Listing flow contracts live in `src/data/listing.ts`.
 - Screen-source and architecture rules live in `docs/figma-screen-inventory.md` and
   `docs/product-architecture.md`.
 

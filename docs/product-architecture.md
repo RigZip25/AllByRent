@@ -17,6 +17,7 @@ international marketplace/PWA without letting prototype artifacts become product
 - Lives in TypeScript data/models first, then backend seed data later.
 - Must be reviewed and cleaned before connecting to backend.
 - Current first piece: `src/data/taxonomy.ts`.
+- Listing flow contract: `src/data/listing.ts`.
 
 ### 3. Functional frontend layer
 
@@ -57,6 +58,15 @@ Listing is not one flow. It has at least three intents:
 
 The current Figma choice screen only shows "I want to list something for rent". Product flow must
 insert a Personal vs Business/Professional decision before listing forms.
+
+The first implementation contract is `src/data/listing.ts`:
+
+- `ListingScope`: `list-personal` or `list-business`
+- `ListingStepId`: normalized listing step ids
+- `ListingDraft`: local draft shape
+- `listingSteps`: ordered required steps
+
+Business/pro listings currently require an additional `rules` step for compliance requirements.
 
 ## Internationalization requirements
 
