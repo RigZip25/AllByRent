@@ -49,7 +49,12 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top center;
   user-select: none;
+}
+
+.figma-screen-tall {
+  object-position: top center;
 }
 
 .hotspot {
@@ -208,6 +213,115 @@ button {
   width: 142px;
   height: 236px;
   border-radius: 10px;
+}
+
+.hotspot-home-search {
+  top: 44px;
+  right: 16px;
+  left: 16px;
+  height: 42px;
+  border-radius: 999px;
+}
+
+.hotspot-home-category {
+  top: 88px;
+  right: 17px;
+  left: 17px;
+  height: 132px;
+  border-radius: 10px;
+}
+
+.hotspot-home-product-left {
+  top: 526px;
+  left: 16px;
+  width: 174px;
+  height: 220px;
+  border-radius: 12px;
+}
+
+.hotspot-category-grid {
+  top: 86px;
+  right: 12px;
+  left: 12px;
+  height: 620px;
+  border-radius: 12px;
+}
+
+.hotspot-product-list-area {
+  top: 86px;
+  right: 0;
+  left: 0;
+  height: 610px;
+  border-radius: 12px;
+}
+
+.hotspot-product-favorite {
+  top: 40px;
+  right: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+}
+
+.hotspot-product-book {
+  right: 17px;
+  bottom: 42px;
+  left: 17px;
+  height: 58px;
+  border-radius: 8px;
+}
+
+.hotspot-booking-confirm {
+  top: 430px;
+  right: 17px;
+  left: 17px;
+  height: 56px;
+  border-radius: 8px;
+}
+
+.hotspot-view-booking {
+  top: 536px;
+  right: 17px;
+  left: 17px;
+  height: 54px;
+  border-radius: 8px;
+}
+
+.hotspot-continue-explore {
+  top: 598px;
+  right: 17px;
+  left: 17px;
+  height: 54px;
+  border-radius: 8px;
+}
+
+.hotspot-checkout {
+  right: 17px;
+  bottom: 42px;
+  left: 17px;
+  height: 58px;
+  border-radius: 8px;
+}
+
+.hotspot-bottom-home,
+.hotspot-bottom-categories,
+.hotspot-bottom-favorites {
+  bottom: 0;
+  width: 74px;
+  height: 72px;
+  border-radius: 12px;
+}
+
+.hotspot-bottom-home {
+  left: 22px;
+}
+
+.hotspot-bottom-categories {
+  left: 158px;
+}
+
+.hotspot-bottom-favorites {
+  right: 22px;
 }
 
 .hotspot-dots {

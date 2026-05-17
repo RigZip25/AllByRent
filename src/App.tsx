@@ -10,6 +10,15 @@ import resetPasswordScreen from "./assets/auth/reset-password.png";
 import signupScreen from "./assets/auth/signup.png";
 import verificationCodeScreen from "./assets/auth/verification-code.png";
 import verificationPhoneScreen from "./assets/auth/verification-phone.png";
+import bookingScreen from "./assets/browsing/booking.png";
+import categoriesScreen from "./assets/browsing/categories.png";
+import favoritesScreen from "./assets/browsing/favorites.png";
+import homeScreen from "./assets/browsing/home.png";
+import orderConfirmScreen from "./assets/browsing/order-confirm.png";
+import orderDetailScreen from "./assets/browsing/order-detail.png";
+import productDetailScreen from "./assets/browsing/product-detail.png";
+import productListScreen from "./assets/browsing/product-list.png";
+import subcategoriesScreen from "./assets/browsing/subcategories.png";
 import businessRentalsScreen from "./assets/onboarding/business-rentals.png";
 import mrRentanoScreen from "./assets/onboarding/mr-rentano.png";
 import rentalHubScreen from "./assets/onboarding/rental-hub.png";
@@ -56,6 +65,7 @@ type AppScreen = {
   primaryLabel?: string;
   primaryTargetId?: string;
   hasSkip?: boolean;
+  tall?: boolean;
   showDots?: boolean;
 };
 
@@ -64,6 +74,7 @@ type AuthForm = Record<FormFieldName, string>;
 type SessionState = {
   email?: string;
   isAuthenticated: boolean;
+  lastBookingId?: string;
   preference?: "list" | "rent";
 };
 
@@ -362,7 +373,7 @@ const authScreens: AppScreen[] = [
     title: "Ready to explore rentals near you?",
     image: rentalScreen,
     hotspots: [
-      { className: "hotspot-auth-primary", label: "Sign up", targetId: "signup" },
+      { className: "hotspot-auth-primary", label: "Start exploring", targetId: "home" },
       { className: "hotspot-auth-signin-bottom", label: "Log in", targetId: "login" },
     ],
   },
@@ -378,7 +389,107 @@ const authScreens: AppScreen[] = [
   },
 ];
 
-const screens = [...onboardingScreens, ...authScreens];
+const browsingScreens: AppScreen[] = [
+  {
+    id: "home",
+    title: "Home",
+    image: homeScreen,
+    tall: true,
+    hotspots: [
+      { className: "hotspot-home-search", label: "Search", targetId: "product-list" },
+      { className: "hotspot-home-category", label: "Browse categories", targetId: "categories" },
+      { className: "hotspot-home-product-left", label: "Open product", targetId: "product-detail" },
+      { className: "hotspot-bottom-categories", label: "Categories", targetId: "categories" },
+      { className: "hotspot-bottom-favorites", label: "Favorites", targetId: "favorites" },
+    ],
+  },
+  {
+    backTargetId: "home",
+    id: "categories",
+    title: "Categories",
+    image: categoriesScreen,
+    hotspots: [
+      { className: "hotspot-category-grid", label: "Open subcategories", targetId: "subcategories" },
+      { className: "hotspot-bottom-home", label: "Home", targetId: "home" },
+      { className: "hotspot-bottom-favorites", label: "Favorites", targetId: "favorites" },
+    ],
+  },
+  {
+    backTargetId: "categories",
+    id: "subcategories",
+    title: "Subcategories",
+    image: subcategoriesScreen,
+    hotspots: [
+      { className: "hotspot-product-list-area", label: "Open product list", targetId: "product-list" },
+      { className: "hotspot-bottom-home", label: "Home", targetId: "home" },
+      { className: "hotspot-bottom-categories", label: "Categories", targetId: "categories" },
+    ],
+  },
+  {
+    backTargetId: "subcategories",
+    id: "product-list",
+    title: "Product List",
+    image: productListScreen,
+    hotspots: [
+      { className: "hotspot-product-list-area", label: "Open product detail", targetId: "product-detail" },
+      { className: "hotspot-bottom-home", label: "Home", targetId: "home" },
+      { className: "hotspot-bottom-categories", label: "Categories", targetId: "categories" },
+      { className: "hotspot-bottom-favorites", label: "Favorites", targetId: "favorites" },
+    ],
+  },
+  {
+    backTargetId: "product-list",
+    id: "product-detail",
+    title: "Product Detail",
+    image: productDetailScreen,
+    hotspots: [
+      { className: "hotspot-product-favorite", label: "Favorite product", targetId: "favorites" },
+      { className: "hotspot-product-book", label: "Book product", targetId: "booking" },
+    ],
+  },
+  {
+    backTargetId: "product-detail",
+    id: "booking",
+    title: "Booking",
+    image: bookingScreen,
+    tall: true,
+    hotspots: [
+      { className: "hotspot-booking-confirm", label: "Confirm booking", targetId: "order-confirm" },
+    ],
+  },
+  {
+    backTargetId: "booking",
+    id: "order-confirm",
+    title: "Order Confirmed",
+    image: orderConfirmScreen,
+    hotspots: [
+      { className: "hotspot-view-booking", label: "View booking details", targetId: "order-detail" },
+      { className: "hotspot-continue-explore", label: "Continue exploring", targetId: "home" },
+    ],
+  },
+  {
+    backTargetId: "order-confirm",
+    id: "order-detail",
+    title: "Order Detail",
+    image: orderDetailScreen,
+    hotspots: [
+      { className: "hotspot-checkout", label: "Checkout", targetId: "home" },
+    ],
+  },
+  {
+    backTargetId: "home",
+    id: "favorites",
+    title: "Favorites",
+    image: favoritesScreen,
+    hotspots: [
+      { className: "hotspot-product-list-area", label: "Open favorite product", targetId: "product-detail" },
+      { className: "hotspot-bottom-home", label: "Home", targetId: "home" },
+      { className: "hotspot-bottom-categories", label: "Categories", targetId: "categories" },
+    ],
+  },
+];
+
+const screens = [...onboardingScreens, ...authScreens, ...browsingScreens];
 
 const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 
@@ -512,6 +623,14 @@ export const App = () => {
     goToScreen(targetId);
   };
 
+  const confirmBooking = (targetId: string) => {
+    updateSession({
+      ...session,
+      lastBookingId: `ABR-${Date.now().toString().slice(-6)}`,
+    });
+    goToScreen(targetId);
+  };
+
   const handleHotspotClick = (hotspot: Hotspot) => {
     switch (activeScreen.id) {
       case "login":
@@ -573,6 +692,13 @@ export const App = () => {
         }
         break;
 
+      case "booking":
+        if (hotspot.className === "hotspot-booking-confirm") {
+          confirmBooking(hotspot.targetId);
+          return;
+        }
+        break;
+
       default:
         break;
     }
@@ -596,7 +722,11 @@ export const App = () => {
   return (
     <main className="screen-shell" aria-label="All By Rent onboarding">
       <section className="phone-frame">
-        <img className="figma-screen" src={activeScreen.image} alt={activeScreen.title} />
+        <img
+          className={activeScreen.tall ? "figma-screen figma-screen-tall" : "figma-screen"}
+          src={activeScreen.image}
+          alt={activeScreen.title}
+        />
 
         {activeScreen.backTargetId ? (
           <button
