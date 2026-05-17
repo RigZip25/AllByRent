@@ -47,6 +47,7 @@ type FormField = {
 };
 
 type AppScreen = {
+  backTargetId?: string;
   id: string;
   title: string;
   image: string;
@@ -114,6 +115,7 @@ const onboardingScreens: AppScreen[] = [
     showDots: true,
   },
   {
+    backTargetId: "rent-locally",
     id: "rental-hub",
     title: "Get what you need. Profit from what you don't.",
     image: rentalHubScreen,
@@ -123,6 +125,7 @@ const onboardingScreens: AppScreen[] = [
     showDots: true,
   },
   {
+    backTargetId: "rental-hub",
     id: "business-rentals",
     title: "Unlock Business Potential with Rentals",
     image: businessRentalsScreen,
@@ -132,6 +135,7 @@ const onboardingScreens: AppScreen[] = [
     showDots: true,
   },
   {
+    backTargetId: "business-rentals",
     id: "secure-local-flexible",
     title: "Secure. Local. Flexible.",
     image: secureLocalFlexibleScreen,
@@ -141,6 +145,7 @@ const onboardingScreens: AppScreen[] = [
     showDots: true,
   },
   {
+    backTargetId: "secure-local-flexible",
     id: "mr-rentano",
     title: "Hi, I'm Mr. Rentano.",
     image: mrRentanoScreen,
@@ -163,6 +168,7 @@ const onboardingScreens: AppScreen[] = [
 
 const authScreens: AppScreen[] = [
   {
+    backTargetId: "mr-rentano",
     id: "login",
     title: "Login",
     image: loginScreen,
@@ -191,10 +197,10 @@ const authScreens: AppScreen[] = [
       { className: "hotspot-auth-signup", label: "Sign up", targetId: "signup" },
       { className: "hotspot-auth-provider-left", label: "Apple login", targetId: "like-to-do-rent" },
       { className: "hotspot-auth-provider-right", label: "Google login", targetId: "like-to-do-rent" },
-      { className: "hotspot-back", label: "Back to intro", targetId: "mr-rentano" },
     ],
   },
   {
+    backTargetId: "login",
     id: "signup",
     title: "Sign Up",
     image: signupScreen,
@@ -239,10 +245,10 @@ const authScreens: AppScreen[] = [
       { className: "hotspot-auth-signin-bottom", label: "Log in", targetId: "login" },
       { className: "hotspot-auth-provider-left", label: "Apple sign up", targetId: "verification-phone" },
       { className: "hotspot-auth-provider-right", label: "Google sign up", targetId: "verification-phone" },
-      { className: "hotspot-back", label: "Back to login", targetId: "login" },
     ],
   },
   {
+    backTargetId: "signup",
     id: "verification-phone",
     title: "Verification Code",
     image: verificationPhoneScreen,
@@ -259,10 +265,10 @@ const authScreens: AppScreen[] = [
     ],
     hotspots: [
       { className: "hotspot-otp-area", label: "Enter verification code", targetId: "verification-code" },
-      { className: "hotspot-back", label: "Back to sign up", targetId: "signup" },
     ],
   },
   {
+    backTargetId: "verification-phone",
     id: "verification-code",
     title: "Verification Code",
     image: verificationCodeScreen,
@@ -279,10 +285,10 @@ const authScreens: AppScreen[] = [
     ],
     hotspots: [
       { className: "hotspot-otp-area", label: "Complete verification", targetId: "like-to-do-rent" },
-      { className: "hotspot-back", label: "Back to verification", targetId: "verification-phone" },
     ],
   },
   {
+    backTargetId: "login",
     id: "reset-password",
     title: "Reset Password",
     image: resetPasswordScreen,
@@ -299,10 +305,10 @@ const authScreens: AppScreen[] = [
     ],
     hotspots: [
       { className: "hotspot-reset-primary", label: "Send OTP", targetId: "create-new-password" },
-      { className: "hotspot-back", label: "Back to login", targetId: "login" },
     ],
   },
   {
+    backTargetId: "reset-password",
     id: "create-new-password",
     title: "Create New Password",
     image: createNewPasswordScreen,
@@ -326,10 +332,10 @@ const authScreens: AppScreen[] = [
     ],
     hotspots: [
       { className: "hotspot-auth-primary", label: "Save new password", targetId: "login" },
-      { className: "hotspot-back", label: "Back to reset password", targetId: "reset-password" },
     ],
   },
   {
+    backTargetId: "mr-rentano",
     id: "like-to-do-rent",
     title: "What would you like to do? Rent or List?",
     image: likeToDoRentScreen,
@@ -340,6 +346,7 @@ const authScreens: AppScreen[] = [
     ],
   },
   {
+    backTargetId: "mr-rentano",
     id: "like-to-do-list",
     title: "What would you like to do? Rent or List?",
     image: likeToDoListScreen,
@@ -350,23 +357,23 @@ const authScreens: AppScreen[] = [
     ],
   },
   {
+    backTargetId: "like-to-do-rent",
     id: "rental",
     title: "Ready to explore rentals near you?",
     image: rentalScreen,
     hotspots: [
       { className: "hotspot-auth-primary", label: "Sign up", targetId: "signup" },
       { className: "hotspot-auth-signin-bottom", label: "Log in", targetId: "login" },
-      { className: "hotspot-back", label: "Back to choice", targetId: "like-to-do-rent" },
     ],
   },
   {
+    backTargetId: "like-to-do-list",
     id: "earning-your-stuff",
     title: "How much is your clutter worth?",
     image: earningYourStuffScreen,
     hotspots: [
       { className: "hotspot-auth-primary", label: "Sign up", targetId: "signup" },
       { className: "hotspot-auth-signin-bottom", label: "Log in", targetId: "login" },
-      { className: "hotspot-back", label: "Back to choice", targetId: "like-to-do-list" },
     ],
   },
 ];
@@ -590,6 +597,16 @@ export const App = () => {
     <main className="screen-shell" aria-label="All By Rent onboarding">
       <section className="phone-frame">
         <img className="figma-screen" src={activeScreen.image} alt={activeScreen.title} />
+
+        {activeScreen.backTargetId ? (
+          <button
+            className="hotspot hotspot-back"
+            onClick={() => goToScreen(activeScreen.backTargetId!)}
+            type="button"
+          >
+            Back
+          </button>
+        ) : null}
 
         {activeScreen.fields?.map((field) => (
           <label className={`form-field ${field.className}`} key={field.name}>
