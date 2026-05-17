@@ -8,6 +8,14 @@ The authentication screens include interactive input overlays, basic local valid
 localStorage-backed demo session. The browsing flow includes local demo booking state. There is no
 backend integration yet.
 
+Foundation notes:
+
+- New hotspots can use percentage-based `rect` coordinates so tap areas scale with the screen frame.
+- Locale state is stored locally and currently supports English/Spanish system UI strings.
+- Locale-aware currency/date formatting uses `Intl`.
+- Mr. Rentano is represented as a screen-aware assistant layer with mock responses; backend/LLM
+  integration is intentionally left for a later API layer.
+
 ## Scripts
 
 - `npm run dev` - start the local development server

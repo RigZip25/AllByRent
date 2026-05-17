@@ -29,10 +29,37 @@ button {
 }
 
 .screen-shell {
+  position: relative;
   min-height: 100dvh;
   display: grid;
   place-items: center;
   padding: 0;
+}
+
+.app-toolbar {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  color: #173b70;
+  font-size: 12px;
+  font-weight: 800;
+  background: rgb(255 255 255 / 90%);
+  border: 1px solid rgb(7 63 159 / 10%);
+  border-radius: 999px;
+  box-shadow: 0 10px 28px rgb(21 44 75 / 12%);
+}
+
+.app-toolbar select {
+  color: #173b70;
+  font-weight: 800;
+  background: transparent;
+  border: 0;
+  outline: 0;
 }
 
 .phone-frame {
@@ -64,6 +91,11 @@ button {
   color: transparent;
   background: transparent;
   cursor: pointer;
+}
+
+.hotspot-rect {
+  right: auto;
+  bottom: auto;
 }
 
 .hotspot::after {
@@ -481,6 +513,72 @@ button {
   border: 1px solid rgb(224 72 72 / 20%);
   border-radius: 10px;
   box-shadow: 0 10px 22px rgb(21 44 75 / 10%);
+}
+
+.rentano-fab {
+  position: absolute;
+  right: 14px;
+  bottom: 116px;
+  z-index: 5;
+  width: 48px;
+  height: 48px;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 900;
+  background: #073f9f;
+  border: 3px solid #ffffff;
+  border-radius: 999px;
+  box-shadow: 0 12px 28px rgb(7 63 159 / 30%);
+}
+
+.rentano-panel {
+  position: absolute;
+  right: 14px;
+  bottom: 172px;
+  left: 14px;
+  z-index: 5;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  color: #17233f;
+  background: rgb(255 255 255 / 96%);
+  border: 1px solid rgb(7 63 159 / 10%);
+  border-radius: 18px;
+  box-shadow: 0 16px 38px rgb(21 44 75 / 20%);
+}
+
+.rentano-panel div {
+  display: grid;
+  gap: 2px;
+}
+
+.rentano-panel strong {
+  color: #073f9f;
+  font-size: 16px;
+}
+
+.rentano-panel span,
+.rentano-panel small {
+  color: #7d8797;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.rentano-panel p {
+  margin: 0;
+  color: #3f4b5d;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.rentano-panel button {
+  min-height: 38px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  background: #073f9f;
+  border-radius: 10px;
 }
 
 @media (max-width: 430px) {

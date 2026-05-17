@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type CSSProperties, useState } from "react";
 
 import createNewPasswordScreen from "./assets/auth/create-new-password.png";
 import earningYourStuffScreen from "./assets/auth/earning-your-stuff.png";
@@ -29,8 +29,38 @@ import welcomeScreen from "./assets/onboarding/welcome.png";
 type Hotspot = {
   className: string;
   label: string;
+  rect?: RectPercent;
   targetId: string;
 };
+
+type RectPercent = {
+  height: number;
+  left: number;
+  top: number;
+  width: number;
+};
+
+type LocaleCode = "en" | "es";
+
+type LocaleSettings = {
+  code: LocaleCode;
+  currency: string;
+  dateLocale: string;
+  dir: "ltr" | "rtl";
+  label: string;
+};
+
+type TranslationKey =
+  | "assistant.close"
+  | "assistant.cta"
+  | "assistant.examples"
+  | "assistant.locale"
+  | "assistant.open"
+  | "assistant.subtitle"
+  | "assistant.title"
+  | "assistant.value"
+  | "locale.english"
+  | "locale.spanish";
 
 type FormFieldName =
   | "loginEmail"
@@ -92,6 +122,56 @@ const emptyAuthForm: AuthForm = {
 };
 
 const sessionStorageKey = "all-by-rent-session";
+const localeStorageKey = "all-by-rent-locale";
+
+const localeSettings: Record<LocaleCode, LocaleSettings> = {
+  en: {
+    code: "en",
+    currency: "USD",
+    dateLocale: "en-US",
+    dir: "ltr",
+    label: "English",
+  },
+  es: {
+    code: "es",
+    currency: "EUR",
+    dateLocale: "es-ES",
+    dir: "ltr",
+    label: "Español",
+  },
+};
+
+const translations: Record<LocaleCode, Record<TranslationKey, string>> = {
+  en: {
+    "assistant.close": "Close assistant",
+    "assistant.cta": "Ask Mr. Rentano",
+    "assistant.examples": "I can explain this screen, suggest the next step, or help compare rental choices.",
+    "assistant.locale": "Language",
+    "assistant.open": "Open assistant",
+    "assistant.subtitle": "Screen-aware AI guide foundation",
+    "assistant.title": "Mr. Rentano",
+    "assistant.value": "Example local price: {price} · today: {date}",
+    "locale.english": "English",
+    "locale.spanish": "Spanish",
+  },
+  es: {
+    "assistant.close": "Cerrar asistente",
+    "assistant.cta": "Preguntar a Mr. Rentano",
+    "assistant.examples": "Puedo explicar esta pantalla, sugerir el siguiente paso o comparar opciones.",
+    "assistant.locale": "Idioma",
+    "assistant.open": "Abrir asistente",
+    "assistant.subtitle": "Base de guia IA segun pantalla",
+    "assistant.title": "Mr. Rentano",
+    "assistant.value": "Precio local de ejemplo: {price} · hoy: {date}",
+    "locale.english": "Ingles",
+    "locale.spanish": "Espanol",
+  },
+};
+
+const getStoredLocale = (): LocaleCode => {
+  const storedLocale = window.localStorage.getItem(localeStorageKey);
+  return storedLocale === "es" ? "es" : "en";
+};
 
 const getStoredSession = (): SessionState => {
   try {
@@ -396,11 +476,36 @@ const browsingScreens: AppScreen[] = [
     image: homeScreen,
     tall: true,
     hotspots: [
-      { className: "hotspot-home-search", label: "Search", targetId: "product-list" },
-      { className: "hotspot-home-category", label: "Browse categories", targetId: "categories" },
-      { className: "hotspot-home-product-left", label: "Open product", targetId: "product-detail" },
-      { className: "hotspot-bottom-categories", label: "Categories", targetId: "categories" },
-      { className: "hotspot-bottom-favorites", label: "Favorites", targetId: "favorites" },
+      {
+        className: "hotspot-home-search",
+        label: "Search",
+        rect: { height: 5, left: 4, top: 5, width: 92 },
+        targetId: "product-list",
+      },
+      {
+        className: "hotspot-home-category",
+        label: "Browse categories",
+        rect: { height: 15.5, left: 4, top: 10.5, width: 92 },
+        targetId: "categories",
+      },
+      {
+        className: "hotspot-home-product-left",
+        label: "Open product",
+        rect: { height: 26, left: 4, top: 61.7, width: 44 },
+        targetId: "product-detail",
+      },
+      {
+        className: "hotspot-bottom-categories",
+        label: "Categories",
+        rect: { height: 8.5, left: 40, top: 91.5, width: 19 },
+        targetId: "categories",
+      },
+      {
+        className: "hotspot-bottom-favorites",
+        label: "Favorites",
+        rect: { height: 8.5, left: 75, top: 91.5, width: 19 },
+        targetId: "favorites",
+      },
     ],
   },
   {
@@ -409,9 +514,24 @@ const browsingScreens: AppScreen[] = [
     title: "Categories",
     image: categoriesScreen,
     hotspots: [
-      { className: "hotspot-category-grid", label: "Open subcategories", targetId: "subcategories" },
-      { className: "hotspot-bottom-home", label: "Home", targetId: "home" },
-      { className: "hotspot-bottom-favorites", label: "Favorites", targetId: "favorites" },
+      {
+        className: "hotspot-category-grid",
+        label: "Open subcategories",
+        rect: { height: 73, left: 3, top: 10, width: 94 },
+        targetId: "subcategories",
+      },
+      {
+        className: "hotspot-bottom-home",
+        label: "Home",
+        rect: { height: 8.5, left: 5.5, top: 91.5, width: 19 },
+        targetId: "home",
+      },
+      {
+        className: "hotspot-bottom-favorites",
+        label: "Favorites",
+        rect: { height: 8.5, left: 75, top: 91.5, width: 19 },
+        targetId: "favorites",
+      },
     ],
   },
   {
@@ -420,9 +540,24 @@ const browsingScreens: AppScreen[] = [
     title: "Subcategories",
     image: subcategoriesScreen,
     hotspots: [
-      { className: "hotspot-product-list-area", label: "Open product list", targetId: "product-list" },
-      { className: "hotspot-bottom-home", label: "Home", targetId: "home" },
-      { className: "hotspot-bottom-categories", label: "Categories", targetId: "categories" },
+      {
+        className: "hotspot-product-list-area",
+        label: "Open product list",
+        rect: { height: 71.5, left: 0, top: 10, width: 100 },
+        targetId: "product-list",
+      },
+      {
+        className: "hotspot-bottom-home",
+        label: "Home",
+        rect: { height: 8.5, left: 5.5, top: 91.5, width: 19 },
+        targetId: "home",
+      },
+      {
+        className: "hotspot-bottom-categories",
+        label: "Categories",
+        rect: { height: 8.5, left: 40, top: 91.5, width: 19 },
+        targetId: "categories",
+      },
     ],
   },
   {
@@ -431,10 +566,30 @@ const browsingScreens: AppScreen[] = [
     title: "Product List",
     image: productListScreen,
     hotspots: [
-      { className: "hotspot-product-list-area", label: "Open product detail", targetId: "product-detail" },
-      { className: "hotspot-bottom-home", label: "Home", targetId: "home" },
-      { className: "hotspot-bottom-categories", label: "Categories", targetId: "categories" },
-      { className: "hotspot-bottom-favorites", label: "Favorites", targetId: "favorites" },
+      {
+        className: "hotspot-product-list-area",
+        label: "Open product detail",
+        rect: { height: 71.5, left: 0, top: 10, width: 100 },
+        targetId: "product-detail",
+      },
+      {
+        className: "hotspot-bottom-home",
+        label: "Home",
+        rect: { height: 8.5, left: 5.5, top: 91.5, width: 19 },
+        targetId: "home",
+      },
+      {
+        className: "hotspot-bottom-categories",
+        label: "Categories",
+        rect: { height: 8.5, left: 40, top: 91.5, width: 19 },
+        targetId: "categories",
+      },
+      {
+        className: "hotspot-bottom-favorites",
+        label: "Favorites",
+        rect: { height: 8.5, left: 75, top: 91.5, width: 19 },
+        targetId: "favorites",
+      },
     ],
   },
   {
@@ -443,8 +598,18 @@ const browsingScreens: AppScreen[] = [
     title: "Product Detail",
     image: productDetailScreen,
     hotspots: [
-      { className: "hotspot-product-favorite", label: "Favorite product", targetId: "favorites" },
-      { className: "hotspot-product-book", label: "Book product", targetId: "booking" },
+      {
+        className: "hotspot-product-favorite",
+        label: "Favorite product",
+        rect: { height: 6.2, left: 85, top: 4.7, width: 12 },
+        targetId: "favorites",
+      },
+      {
+        className: "hotspot-product-book",
+        label: "Book product",
+        rect: { height: 6.8, left: 4.4, top: 88.3, width: 91.2 },
+        targetId: "booking",
+      },
     ],
   },
   {
@@ -454,7 +619,12 @@ const browsingScreens: AppScreen[] = [
     image: bookingScreen,
     tall: true,
     hotspots: [
-      { className: "hotspot-booking-confirm", label: "Confirm booking", targetId: "order-confirm" },
+      {
+        className: "hotspot-booking-confirm",
+        label: "Confirm booking",
+        rect: { height: 6.6, left: 4.4, top: 50.5, width: 91.2 },
+        targetId: "order-confirm",
+      },
     ],
   },
   {
@@ -463,8 +633,18 @@ const browsingScreens: AppScreen[] = [
     title: "Order Confirmed",
     image: orderConfirmScreen,
     hotspots: [
-      { className: "hotspot-view-booking", label: "View booking details", targetId: "order-detail" },
-      { className: "hotspot-continue-explore", label: "Continue exploring", targetId: "home" },
+      {
+        className: "hotspot-view-booking",
+        label: "View booking details",
+        rect: { height: 6.4, left: 4.4, top: 63, width: 91.2 },
+        targetId: "order-detail",
+      },
+      {
+        className: "hotspot-continue-explore",
+        label: "Continue exploring",
+        rect: { height: 6.4, left: 4.4, top: 70.2, width: 91.2 },
+        targetId: "home",
+      },
     ],
   },
   {
@@ -473,7 +653,12 @@ const browsingScreens: AppScreen[] = [
     title: "Order Detail",
     image: orderDetailScreen,
     hotspots: [
-      { className: "hotspot-checkout", label: "Checkout", targetId: "home" },
+      {
+        className: "hotspot-checkout",
+        label: "Checkout",
+        rect: { height: 6.8, left: 4.4, top: 88.3, width: 91.2 },
+        targetId: "home",
+      },
     ],
   },
   {
@@ -482,9 +667,24 @@ const browsingScreens: AppScreen[] = [
     title: "Favorites",
     image: favoritesScreen,
     hotspots: [
-      { className: "hotspot-product-list-area", label: "Open favorite product", targetId: "product-detail" },
-      { className: "hotspot-bottom-home", label: "Home", targetId: "home" },
-      { className: "hotspot-bottom-categories", label: "Categories", targetId: "categories" },
+      {
+        className: "hotspot-product-list-area",
+        label: "Open favorite product",
+        rect: { height: 71.5, left: 0, top: 10, width: 100 },
+        targetId: "product-detail",
+      },
+      {
+        className: "hotspot-bottom-home",
+        label: "Home",
+        rect: { height: 8.5, left: 5.5, top: 91.5, width: 19 },
+        targetId: "home",
+      },
+      {
+        className: "hotspot-bottom-categories",
+        label: "Categories",
+        rect: { height: 8.5, left: 40, top: 91.5, width: 19 },
+        targetId: "categories",
+      },
     ],
   },
 ];
@@ -492,6 +692,25 @@ const browsingScreens: AppScreen[] = [
 const screens = [...onboardingScreens, ...authScreens, ...browsingScreens];
 
 const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
+
+const getHotspotStyle = (hotspot: Hotspot): CSSProperties | undefined => {
+  if (!hotspot.rect) {
+    return undefined;
+  }
+
+  return {
+    height: `${hotspot.rect.height}%`,
+    left: `${hotspot.rect.left}%`,
+    top: `${hotspot.rect.top}%`,
+    width: `${hotspot.rect.width}%`,
+  };
+};
+
+const interpolate = (template: string, values: Record<string, string>) =>
+  Object.entries(values).reduce(
+    (currentText, [key, value]) => currentText.replace(`{${key}}`, value),
+    template,
+  );
 
 const getInitialStep = () => {
   const screenFromUrl = new URLSearchParams(window.location.search).get("screen");
@@ -512,10 +731,31 @@ const getInitialStep = () => {
 
 export const App = () => {
   const [authForm, setAuthForm] = useState<AuthForm>(emptyAuthForm);
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const [locale, setLocale] = useState<LocaleCode>(getStoredLocale);
   const [message, setMessage] = useState("");
   const [session, setSession] = useState<SessionState>(getStoredSession);
   const [activeIndex, setActiveIndex] = useState(getInitialStep);
   const activeScreen = screens[activeIndex];
+  const currentLocale = localeSettings[locale];
+  const t = (key: TranslationKey) => translations[locale][key];
+  const formattedExamplePrice = new Intl.NumberFormat(currentLocale.dateLocale, {
+    currency: currentLocale.currency,
+    style: "currency",
+  }).format(128);
+  const formattedDate = new Intl.DateTimeFormat(currentLocale.dateLocale, {
+    day: "numeric",
+    month: "short",
+  }).format(new Date());
+  const assistantValueText = interpolate(t("assistant.value"), {
+    date: formattedDate,
+    price: formattedExamplePrice,
+  });
+
+  const changeLocale = (nextLocale: LocaleCode) => {
+    setLocale(nextLocale);
+    window.localStorage.setItem(localeStorageKey, nextLocale);
+  };
 
   const updateSession = (nextSession: SessionState) => {
     setSession(nextSession);
@@ -719,8 +959,42 @@ export const App = () => {
     setActiveIndex(onboardingScreens.length - 1);
   };
 
+  const assistantSuggestion = (() => {
+    if (activeScreen.id === "booking") {
+      return locale === "es"
+        ? "Puedo ayudarte a revisar fechas, precio y condiciones antes de confirmar."
+        : "I can help review dates, pricing, and pickup terms before you confirm.";
+    }
+
+    if (activeScreen.id.includes("product")) {
+      return locale === "es"
+        ? "Puedo resumir este articulo, comparar opciones o explicar el deposito."
+        : "I can summarize this item, compare options, or explain the deposit.";
+    }
+
+    if (activeScreen.id === "login" || activeScreen.id === "signup") {
+      return locale === "es"
+        ? "Puedo guiarte por el registro y explicar por que necesitamos estos datos."
+        : "I can guide sign-up and explain why each detail is needed.";
+    }
+
+    return locale === "es"
+      ? `Estas en: ${activeScreen.title}. Puedo guiarte al siguiente paso.`
+      : `You are on: ${activeScreen.title}. I can guide you to the next step.`;
+  })();
+
   return (
-    <main className="screen-shell" aria-label="All By Rent onboarding">
+    <main className="screen-shell" aria-label="All By Rent onboarding" dir={currentLocale.dir}>
+      <div className="app-toolbar" aria-label={t("assistant.locale")}>
+        <span>{t("assistant.locale")}</span>
+        <select
+          onChange={(event) => changeLocale(event.target.value as LocaleCode)}
+          value={locale}
+        >
+          <option value="en">{t("locale.english")}</option>
+          <option value="es">{t("locale.spanish")}</option>
+        </select>
+      </div>
       <section className="phone-frame">
         <img
           className={activeScreen.tall ? "figma-screen figma-screen-tall" : "figma-screen"}
@@ -767,9 +1041,10 @@ export const App = () => {
 
         {activeScreen.hotspots?.map((hotspot) => (
           <button
-            className={`hotspot ${hotspot.className}`}
+            className={`hotspot ${hotspot.className}${hotspot.rect ? " hotspot-rect" : ""}`}
             key={`${activeScreen.id}-${hotspot.className}`}
             onClick={() => handleHotspotClick(hotspot)}
+            style={getHotspotStyle(hotspot)}
             type="button"
           >
             {hotspot.label}
@@ -793,6 +1068,27 @@ export const App = () => {
               />
             ))}
           </nav>
+        ) : null}
+        <button
+          aria-expanded={assistantOpen}
+          aria-label={assistantOpen ? t("assistant.close") : t("assistant.open")}
+          className="rentano-fab"
+          onClick={() => setAssistantOpen((isOpen) => !isOpen)}
+          type="button"
+        >
+          R
+        </button>
+        {assistantOpen ? (
+          <aside className="rentano-panel" aria-label={t("assistant.title")}>
+            <div>
+              <strong>{t("assistant.title")}</strong>
+              <span>{t("assistant.subtitle")}</span>
+            </div>
+            <p>{assistantSuggestion}</p>
+            <p>{t("assistant.examples")}</p>
+            <small>{assistantValueText}</small>
+            <button type="button">{t("assistant.cta")}</button>
+          </aside>
         ) : null}
       </section>
     </main>
