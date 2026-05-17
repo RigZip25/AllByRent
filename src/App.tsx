@@ -69,6 +69,7 @@ type LocaleSettings = {
 type TranslationKey =
   | "assistant.close"
   | "assistant.cta"
+  | "assistant.introHint"
   | "assistant.locale"
   | "assistant.open"
   | "assistant.subtitle"
@@ -161,6 +162,7 @@ const translations: Record<LocaleCode, Record<TranslationKey, string>> = {
   en: {
     "assistant.close": "Close assistant",
     "assistant.cta": "Ask Mr. Rentano",
+    "assistant.introHint": "If you ever get stuck, call me from the app footer.",
     "assistant.locale": "Language",
     "assistant.open": "Open assistant",
     "assistant.subtitle": "Screen-aware AI guide foundation",
@@ -171,6 +173,7 @@ const translations: Record<LocaleCode, Record<TranslationKey, string>> = {
   es: {
     "assistant.close": "Cerrar asistente",
     "assistant.cta": "Preguntar a Mr. Rentano",
+    "assistant.introHint": "Si te atascas, llamame desde el pie de la app.",
     "assistant.locale": "Idioma",
     "assistant.open": "Abrir asistente",
     "assistant.subtitle": "Base de guia IA segun pantalla",
@@ -841,6 +844,8 @@ export const App = () => {
   const [session, setSession] = useState<SessionState>(getStoredSession);
   const [activeIndex, setActiveIndex] = useState(getInitialStep);
   const activeScreen = screens[activeIndex];
+  const isOnboardingScreen = onboardingScreens.some((screen) => screen.id === activeScreen.id);
+  const showAssistant = !isOnboardingScreen;
   const currentLocale = localeSettings[locale];
   const t = (key: TranslationKey) => translations[locale][key];
 
@@ -1149,6 +1154,9 @@ export const App = () => {
             alt={activeScreen.title}
           />
         ) : null}
+        {activeScreen.id === "mr-rentano" ? (
+          <div className="rentano-intro-hint">{t("assistant.introHint")}</div>
+        ) : null}
         {activeScreen.render === "listing-scope" ? (
           <div className="custom-screen listing-scope-screen">
             <h1>What are you listing?</h1>
@@ -1272,16 +1280,18 @@ export const App = () => {
             ))}
           </nav>
         ) : null}
-        <button
-          aria-expanded={assistantOpen}
-          aria-label={assistantOpen ? t("assistant.close") : t("assistant.open")}
-          className="rentano-fab"
-          onClick={() => setAssistantOpen((isOpen) => !isOpen)}
-          type="button"
-        >
-          R
-        </button>
-        {assistantOpen ? (
+        {showAssistant ? (
+          <button
+            aria-expanded={assistantOpen}
+            aria-label={assistantOpen ? t("assistant.close") : t("assistant.open")}
+            className="rentano-fab"
+            onClick={() => setAssistantOpen((isOpen) => !isOpen)}
+            type="button"
+          >
+            R
+          </button>
+        ) : null}
+        {showAssistant && assistantOpen ? (
           <aside className="rentano-panel" aria-label={t("assistant.title")}>
             <div>
               <strong>{t("assistant.title")}</strong>
