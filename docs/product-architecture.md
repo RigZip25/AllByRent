@@ -47,6 +47,8 @@ Suggested backend modules:
 8. `messages/chat`
 9. `payments/deposits`
 10. `assistant/rentano`
+11. `asset-units/qr`
+12. `insurance/claims`
 
 ## Listing model
 
@@ -67,6 +69,18 @@ The first implementation contract is `src/data/listing.ts`:
 - `listingSteps`: ordered required steps
 
 Business/pro listings currently require an additional `rules` step for compliance requirements.
+
+## Asset identity and QR codes
+
+A listing can contain multiple physical units of the same item. The backend must model this
+explicitly:
+
+- one listing can have many asset units
+- every asset unit has a unique QR code
+- check-in/check-out, damage, loss, and insurance events attach to `assetUnitId`
+- QR payloads should use signed ids/checksums and should not expose private owner data directly
+
+See `docs/asset-qr-identity.md` for the current contract.
 
 ## Internationalization requirements
 

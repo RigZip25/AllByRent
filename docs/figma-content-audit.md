@@ -110,6 +110,8 @@ Only after that should categories become backend seed data.
 - A first canonical taxonomy source exists in `src/data/taxonomy.ts`.
 - A first listing flow contract exists in `src/data/listing.ts`.
 - The app session now stores `listingIntent` instead of the older ambiguous `preference`.
+- Listing contracts now include quantity, per-unit asset ids, and QR payload generation for
+  duplicate physical items. See `docs/asset-qr-identity.md`.
 - The current Figma screen still has only one visible "I want to list something for rent" card. In
   product UI, that click should lead to a Personal vs Business/Professional listing choice before
   any listing form starts.
