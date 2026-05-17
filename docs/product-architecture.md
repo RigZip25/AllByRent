@@ -50,6 +50,8 @@ Suggested backend modules:
 11. `asset-units/qr`
 12. `insurance/claims`
 
+Draft API boundaries are tracked in `docs/backend-api-draft.md`.
+
 ## Listing model
 
 Listing is not one flow. It has at least three intents:

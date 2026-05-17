@@ -23,6 +23,7 @@ Foundation notes:
   `docs/asset-qr-identity.md`.
 - Screen-source and architecture rules live in `docs/figma-screen-inventory.md` and
   `docs/product-architecture.md`.
+- Backend planning notes live in `docs/backend-api-draft.md`.
 
 ## Scripts
 
