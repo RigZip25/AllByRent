@@ -53,6 +53,7 @@ type AppScreen = {
   fields?: FormField[];
   hotspots?: Hotspot[];
   primaryLabel?: string;
+  primaryTargetId?: string;
   hasSkip?: boolean;
   showDots?: boolean;
 };
@@ -100,6 +101,7 @@ const onboardingScreens: AppScreen[] = [
     title: "Welcome to All By Rent",
     image: welcomeScreen,
     primaryLabel: "Welcome to All By Rent",
+    primaryTargetId: "rent-locally",
     showDots: true,
   },
   {
@@ -107,6 +109,7 @@ const onboardingScreens: AppScreen[] = [
     title: "Rent locally",
     image: rentLocallyScreen,
     primaryLabel: "Next",
+    primaryTargetId: "rental-hub",
     hasSkip: true,
     showDots: true,
   },
@@ -115,6 +118,7 @@ const onboardingScreens: AppScreen[] = [
     title: "Get what you need. Profit from what you don't.",
     image: rentalHubScreen,
     primaryLabel: "Next",
+    primaryTargetId: "business-rentals",
     hasSkip: true,
     showDots: true,
   },
@@ -123,6 +127,7 @@ const onboardingScreens: AppScreen[] = [
     title: "Unlock Business Potential with Rentals",
     image: businessRentalsScreen,
     primaryLabel: "Next",
+    primaryTargetId: "secure-local-flexible",
     hasSkip: true,
     showDots: true,
   },
@@ -131,6 +136,7 @@ const onboardingScreens: AppScreen[] = [
     title: "Secure. Local. Flexible.",
     image: secureLocalFlexibleScreen,
     primaryLabel: "Next",
+    primaryTargetId: "mr-rentano",
     hasSkip: true,
     showDots: true,
   },
@@ -567,7 +573,12 @@ export const App = () => {
     goToScreen(hotspot.targetId);
   };
 
-  const goToNextStep = () => {
+  const goToPrimaryTarget = () => {
+    if (activeScreen.primaryTargetId) {
+      goToScreen(activeScreen.primaryTargetId);
+      return;
+    }
+
     setActiveIndex((currentIndex) => Math.min(currentIndex + 1, onboardingScreens.length - 1));
   };
 
@@ -602,7 +613,7 @@ export const App = () => {
         ) : null}
 
         {activeScreen.primaryLabel ? (
-          <button className="hotspot hotspot-primary" type="button" onClick={goToNextStep}>
+          <button className="hotspot hotspot-primary" type="button" onClick={goToPrimaryTarget}>
             {activeScreen.primaryLabel}
           </button>
         ) : null}
