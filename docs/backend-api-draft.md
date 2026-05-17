@@ -36,6 +36,45 @@ Required:
 - channel
 - code
 
+Frontend-only verification screens must not be treated as real authentication. Production needs a
+backend to generate, deliver, expire, rate-limit, and verify codes. The backend should also bind the
+code to a specific user/contact method and prevent replay.
+
+### `POST /auth/verification-code`
+
+Requests a verification code.
+
+Required:
+
+- channel: email or phone
+- destination: normalized email or phone
+- purpose: signup, login, password-reset, or sensitive-action
+
+Backend responsibilities:
+
+- generate one-time code
+- store hashed code with expiration
+- rate-limit requests per destination, user, and IP/device
+- send via email/SMS provider
+- avoid exposing whether an account exists where that creates enumeration risk
+
+### `POST /auth/password-reset/request`
+
+Requests password reset code/link.
+
+Required:
+
+- email or phone
+
+### `POST /auth/password-reset/confirm`
+
+Confirms reset and sets new password.
+
+Required:
+
+- reset token or verification code
+- new password
+
 ## Taxonomy
 
 ### `GET /taxonomy/categories`
