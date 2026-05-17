@@ -89,6 +89,95 @@ button {
   border-radius: 8px;
 }
 
+.hotspot-explore {
+  right: 27px;
+  bottom: 105px;
+  left: 27px;
+  height: 54px;
+  border-radius: 8px;
+}
+
+.hotspot-login-signup {
+  right: 27px;
+  bottom: 42px;
+  left: 27px;
+  height: 54px;
+  border-radius: 8px;
+}
+
+.hotspot-back {
+  top: 39px;
+  left: 8px;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+}
+
+.hotspot-auth-primary {
+  right: 27px;
+  bottom: 42px;
+  left: 27px;
+  height: 58px;
+  border-radius: 8px;
+}
+
+.hotspot-auth-forgot {
+  top: 191px;
+  right: 70px;
+  width: 110px;
+  height: 26px;
+  border-radius: 999px;
+}
+
+.hotspot-auth-signup,
+.hotspot-auth-signin {
+  right: 80px;
+  bottom: 319px;
+  left: 80px;
+  height: 28px;
+  border-radius: 999px;
+}
+
+.hotspot-auth-provider-left {
+  bottom: 243px;
+  left: 22px;
+  width: 128px;
+  height: 58px;
+  border-radius: 8px;
+}
+
+.hotspot-auth-provider-right {
+  right: 22px;
+  bottom: 243px;
+  width: 128px;
+  height: 58px;
+  border-radius: 8px;
+}
+
+.hotspot-otp-area {
+  top: 232px;
+  right: 18px;
+  left: 18px;
+  height: 316px;
+  border-radius: 12px;
+}
+
+.hotspot-choice-left {
+  top: 260px;
+  left: 35px;
+  width: 142px;
+  height: 236px;
+  border-radius: 10px;
+}
+
+.hotspot-choice-right {
+  top: 260px;
+  right: 35px;
+  width: 142px;
+  height: 236px;
+  border-radius: 10px;
+}
+
 .hotspot-dots {
   position: absolute;
   right: 120px;
