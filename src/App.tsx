@@ -53,12 +53,10 @@ type LocaleSettings = {
 type TranslationKey =
   | "assistant.close"
   | "assistant.cta"
-  | "assistant.examples"
   | "assistant.locale"
   | "assistant.open"
   | "assistant.subtitle"
   | "assistant.title"
-  | "assistant.value"
   | "locale.english"
   | "locale.spanish";
 
@@ -145,24 +143,20 @@ const translations: Record<LocaleCode, Record<TranslationKey, string>> = {
   en: {
     "assistant.close": "Close assistant",
     "assistant.cta": "Ask Mr. Rentano",
-    "assistant.examples": "I can explain this screen, suggest the next step, or help compare rental choices.",
     "assistant.locale": "Language",
     "assistant.open": "Open assistant",
     "assistant.subtitle": "Screen-aware AI guide foundation",
     "assistant.title": "Mr. Rentano",
-    "assistant.value": "Example local price: {price} · today: {date}",
     "locale.english": "English",
     "locale.spanish": "Spanish",
   },
   es: {
     "assistant.close": "Cerrar asistente",
     "assistant.cta": "Preguntar a Mr. Rentano",
-    "assistant.examples": "Puedo explicar esta pantalla, sugerir el siguiente paso o comparar opciones.",
     "assistant.locale": "Idioma",
     "assistant.open": "Abrir asistente",
     "assistant.subtitle": "Base de guia IA segun pantalla",
     "assistant.title": "Mr. Rentano",
-    "assistant.value": "Precio local de ejemplo: {price} · hoy: {date}",
     "locale.english": "Ingles",
     "locale.spanish": "Espanol",
   },
@@ -706,12 +700,6 @@ const getHotspotStyle = (hotspot: Hotspot): CSSProperties | undefined => {
   };
 };
 
-const interpolate = (template: string, values: Record<string, string>) =>
-  Object.entries(values).reduce(
-    (currentText, [key, value]) => currentText.replace(`{${key}}`, value),
-    template,
-  );
-
 const getInitialStep = () => {
   const screenFromUrl = new URLSearchParams(window.location.search).get("screen");
   const screenIndex = screens.findIndex((screen) => screen.id === screenFromUrl);
@@ -739,18 +727,6 @@ export const App = () => {
   const activeScreen = screens[activeIndex];
   const currentLocale = localeSettings[locale];
   const t = (key: TranslationKey) => translations[locale][key];
-  const formattedExamplePrice = new Intl.NumberFormat(currentLocale.dateLocale, {
-    currency: currentLocale.currency,
-    style: "currency",
-  }).format(128);
-  const formattedDate = new Intl.DateTimeFormat(currentLocale.dateLocale, {
-    day: "numeric",
-    month: "short",
-  }).format(new Date());
-  const assistantValueText = interpolate(t("assistant.value"), {
-    date: formattedDate,
-    price: formattedExamplePrice,
-  });
 
   const changeLocale = (nextLocale: LocaleCode) => {
     setLocale(nextLocale);
@@ -1085,8 +1061,6 @@ export const App = () => {
               <span>{t("assistant.subtitle")}</span>
             </div>
             <p>{assistantSuggestion}</p>
-            <p>{t("assistant.examples")}</p>
-            <small>{assistantValueText}</small>
             <button type="button">{t("assistant.cta")}</button>
           </aside>
         ) : null}
