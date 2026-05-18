@@ -420,8 +420,8 @@ button {
 }
 
 .form-field input::placeholder {
-  color: transparent;
-  opacity: 0;
+  color: #8793a7;
+  opacity: 0.75;
 }
 
 .form-field input:focus {
@@ -530,12 +530,17 @@ button {
 
 .field-reset-email {
   top: 421px;
-  right: 32px;
-  left: 32px;
-  height: 64px;
+  right: 37px;
+  left: 38px;
+  height: 72px;
   background: #ffffff;
-  border: 1.5px solid #073f9f;
+  border: 0;
   border-radius: 8px;
+}
+
+.field-reset-email input {
+  padding: 0 24px;
+  font-size: 19px;
 }
 
 .field-new-password {
