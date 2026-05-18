@@ -76,6 +76,17 @@ The prototype flow is reachable at:
 The `listing-published` screen currently demonstrates five identical Shure SM58 microphones and
 creates five separate `AssetUnit` records locally.
 
+The prototype now distinguishes listing scope:
+
+- Personal listing path publishes one personal asset unit.
+- Business/Professional listing path publishes five inventory units in the microphone demo.
+- Personal listing skips the business rules/compliance screen; Business/Professional listing keeps
+  it in the flow.
+- The current automated check verifies both branches:
+  - Personal: Categories -> Subcategories -> Detail -> Price -> Location -> Photos -> Preview -> QR
+  - Business: Categories -> Subcategories -> Detail -> Price -> Location -> Rules -> Photos ->
+    Preview -> QR
+
 ## Backend implications
 
 Suggested tables/collections:
