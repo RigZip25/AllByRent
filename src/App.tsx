@@ -67,13 +67,8 @@ type LocaleSettings = {
 };
 
 type TranslationKey =
-  | "assistant.close"
-  | "assistant.cta"
   | "assistant.introHint"
   | "assistant.locale"
-  | "assistant.open"
-  | "assistant.subtitle"
-  | "assistant.title"
   | "locale.english"
   | "locale.spanish";
 
@@ -160,24 +155,14 @@ const localeSettings: Record<LocaleCode, LocaleSettings> = {
 
 const translations: Record<LocaleCode, Record<TranslationKey, string>> = {
   en: {
-    "assistant.close": "Close assistant",
-    "assistant.cta": "Ask Mr. Rentano",
     "assistant.introHint": "If you ever get stuck, call me from the app footer.",
     "assistant.locale": "Language",
-    "assistant.open": "Open assistant",
-    "assistant.subtitle": "Screen-aware AI guide foundation",
-    "assistant.title": "Mr. Rentano",
     "locale.english": "English",
     "locale.spanish": "Spanish",
   },
   es: {
-    "assistant.close": "Cerrar asistente",
-    "assistant.cta": "Preguntar a Mr. Rentano",
     "assistant.introHint": "Si te atascas, llamame desde el pie de la app.",
     "assistant.locale": "Idioma",
-    "assistant.open": "Abrir asistente",
-    "assistant.subtitle": "Base de guia IA segun pantalla",
-    "assistant.title": "Mr. Rentano",
     "locale.english": "Ingles",
     "locale.spanish": "Espanol",
   },
@@ -840,7 +825,6 @@ const getInitialStep = () => {
 
 export const App = () => {
   const [authForm, setAuthForm] = useState<AuthForm>(emptyAuthForm);
-  const [assistantOpen, setAssistantOpen] = useState(false);
   const [locale, setLocale] = useState<LocaleCode>(getStoredLocale);
   const [message, setMessage] = useState("");
   const [session, setSession] = useState<SessionState>(getStoredSession);
@@ -848,8 +832,6 @@ export const App = () => {
   const activeScreen = screens[activeIndex];
   const isVerificationScreen =
     activeScreen.id === "verification-phone" || activeScreen.id === "verification-code";
-  const isOnboardingScreen = onboardingScreens.some((screen) => screen.id === activeScreen.id);
-  const showAssistant = !isOnboardingScreen;
   const hasDeepLink =
     new URLSearchParams(window.location.search).has("screen") ||
     new URLSearchParams(window.location.search).has("step");
@@ -1119,30 +1101,6 @@ export const App = () => {
     setActiveIndex(onboardingScreens.length - 1);
   };
 
-  const assistantSuggestion = (() => {
-    if (activeScreen.id === "booking") {
-      return locale === "es"
-        ? "Puedo ayudarte a revisar fechas, precio y condiciones antes de confirmar."
-        : "I can help review dates, pricing, and pickup terms before you confirm.";
-    }
-
-    if (activeScreen.id.includes("product")) {
-      return locale === "es"
-        ? "Puedo resumir este articulo, comparar opciones o explicar el deposito."
-        : "I can summarize this item, compare options, or explain the deposit.";
-    }
-
-    if (activeScreen.id === "login" || activeScreen.id === "signup") {
-      return locale === "es"
-        ? "Puedo guiarte por el registro y explicar por que necesitamos estos datos."
-        : "I can guide sign-up and explain why each detail is needed.";
-    }
-
-    return locale === "es"
-      ? `Estas en: ${activeScreen.title}. Puedo guiarte al siguiente paso.`
-      : `You are on: ${activeScreen.title}. I can guide you to the next step.`;
-  })();
-
   return (
     <main className="screen-shell" aria-label="All By Rent onboarding" dir={currentLocale.dir}>
       <div className="app-toolbar" aria-label={t("assistant.locale")}>
@@ -1301,27 +1259,6 @@ export const App = () => {
               />
             ))}
           </nav>
-        ) : null}
-        {showAssistant ? (
-          <button
-            aria-expanded={assistantOpen}
-            aria-label={assistantOpen ? t("assistant.close") : t("assistant.open")}
-            className="rentano-fab"
-            onClick={() => setAssistantOpen((isOpen) => !isOpen)}
-            type="button"
-          >
-            R
-          </button>
-        ) : null}
-        {showAssistant && assistantOpen ? (
-          <aside className="rentano-panel" aria-label={t("assistant.title")}>
-            <div>
-              <strong>{t("assistant.title")}</strong>
-              <span>{t("assistant.subtitle")}</span>
-            </div>
-            <p>{assistantSuggestion}</p>
-            <button type="button">{t("assistant.cta")}</button>
-          </aside>
         ) : null}
       </section>
     </main>
