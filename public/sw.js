@@ -1,4 +1,4 @@
-const CACHE_NAME = "all-by-rent-v1";
+const CACHE_NAME = "all-by-rent-v2";
 const APP_SHELL = ["/AllByRent/", "/AllByRent/manifest.webmanifest", "/AllByRent/pwa-icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -19,6 +19,19 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") {
+    return;
+  }
+
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put("/AllByRent/", responseClone));
+          return networkResponse;
+        })
+        .catch(() => caches.match("/AllByRent/")),
+    );
     return;
   }
 
