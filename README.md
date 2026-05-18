@@ -6,7 +6,8 @@ fidelity.
 
 The authentication screens include interactive input overlays, basic local validation, and a
 localStorage-backed demo session. The browsing flow includes local demo booking state. There is no
-backend integration yet.
+backend integration yet. Real verification codes, login sessions, password resets, QR signing,
+insurance claims, bookings, and payments require backend APIs.
 
 Foundation notes:
 

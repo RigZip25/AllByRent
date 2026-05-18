@@ -1,4 +1,4 @@
-import { type CSSProperties, useState } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 
 import createNewPasswordScreen from "./assets/auth/create-new-password.png";
 import earningYourStuffScreen from "./assets/auth/earning-your-stuff.png";
@@ -69,6 +69,7 @@ type LocaleSettings = {
 type TranslationKey =
   | "assistant.close"
   | "assistant.cta"
+  | "assistant.introHint"
   | "assistant.locale"
   | "assistant.open"
   | "assistant.subtitle"
@@ -161,6 +162,7 @@ const translations: Record<LocaleCode, Record<TranslationKey, string>> = {
   en: {
     "assistant.close": "Close assistant",
     "assistant.cta": "Ask Mr. Rentano",
+    "assistant.introHint": "If you ever get stuck, call me from the app footer.",
     "assistant.locale": "Language",
     "assistant.open": "Open assistant",
     "assistant.subtitle": "Screen-aware AI guide foundation",
@@ -171,6 +173,7 @@ const translations: Record<LocaleCode, Record<TranslationKey, string>> = {
   es: {
     "assistant.close": "Cerrar asistente",
     "assistant.cta": "Preguntar a Mr. Rentano",
+    "assistant.introHint": "Si te atascas, llamame desde el pie de la app.",
     "assistant.locale": "Idioma",
     "assistant.open": "Abrir asistente",
     "assistant.subtitle": "Base de guia IA segun pantalla",
@@ -252,14 +255,8 @@ const onboardingScreens: AppScreen[] = [
     id: "mr-rentano",
     title: "Hi, I'm Mr. Rentano.",
     image: mrRentanoScreen,
-    hasSkip: true,
     showDots: true,
     hotspots: [
-      {
-        className: "hotspot-explore",
-        label: "Explore categories",
-        targetId: "like-to-do-rent",
-      },
       {
         className: "hotspot-login-signup",
         label: "Log in or sign up",
@@ -830,6 +827,14 @@ const getInitialStep = () => {
     return stepFromUrl;
   }
 
+  if (getStoredSession().isAuthenticated) {
+    const choiceScreenIndex = screens.findIndex((screen) => screen.id === "like-to-do-rent");
+
+    if (choiceScreenIndex >= 0) {
+      return choiceScreenIndex;
+    }
+  }
+
   return 0;
 };
 
@@ -841,6 +846,13 @@ export const App = () => {
   const [session, setSession] = useState<SessionState>(getStoredSession);
   const [activeIndex, setActiveIndex] = useState(getInitialStep);
   const activeScreen = screens[activeIndex];
+  const isVerificationScreen =
+    activeScreen.id === "verification-phone" || activeScreen.id === "verification-code";
+  const isOnboardingScreen = onboardingScreens.some((screen) => screen.id === activeScreen.id);
+  const showAssistant = !isOnboardingScreen;
+  const hasDeepLink =
+    new URLSearchParams(window.location.search).has("screen") ||
+    new URLSearchParams(window.location.search).has("step");
   const currentLocale = localeSettings[locale];
   const t = (key: TranslationKey) => translations[locale][key];
 
@@ -862,6 +874,12 @@ export const App = () => {
       setActiveIndex(targetIndex);
     }
   };
+
+  useEffect(() => {
+    if (!hasDeepLink && session.isAuthenticated && activeScreen.id === "welcome") {
+      goToScreen("like-to-do-rent");
+    }
+  });
 
   const updateField = (fieldName: FormFieldName, value: string) => {
     const nextValue =
@@ -903,10 +921,6 @@ export const App = () => {
     ) {
       setMessage("Fill name, email, phone, and a password with at least 6 characters.");
       return;
-    }
-
-    if (!authForm.verificationCode) {
-      setAuthForm((currentForm) => ({ ...currentForm, verificationCode: "5319" }));
     }
 
     goToScreen(targetId);
@@ -1149,6 +1163,22 @@ export const App = () => {
             alt={activeScreen.title}
           />
         ) : null}
+        {activeScreen.id === "mr-rentano" ? (
+          <div className="rentano-intro-hint">{t("assistant.introHint")}</div>
+        ) : null}
+        {isVerificationScreen ? (
+          <>
+            <div className="verification-clean-copy">
+              Please type the verification code sent to your email.
+            </div>
+            <div className="verification-code-mask" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+          </>
+        ) : null}
         {activeScreen.render === "listing-scope" ? (
           <div className="custom-screen listing-scope-screen">
             <h1>What are you listing?</h1>
@@ -1272,16 +1302,18 @@ export const App = () => {
             ))}
           </nav>
         ) : null}
-        <button
-          aria-expanded={assistantOpen}
-          aria-label={assistantOpen ? t("assistant.close") : t("assistant.open")}
-          className="rentano-fab"
-          onClick={() => setAssistantOpen((isOpen) => !isOpen)}
-          type="button"
-        >
-          R
-        </button>
-        {assistantOpen ? (
+        {showAssistant ? (
+          <button
+            aria-expanded={assistantOpen}
+            aria-label={assistantOpen ? t("assistant.close") : t("assistant.open")}
+            className="rentano-fab"
+            onClick={() => setAssistantOpen((isOpen) => !isOpen)}
+            type="button"
+          >
+            R
+          </button>
+        ) : null}
+        {showAssistant && assistantOpen ? (
           <aside className="rentano-panel" aria-label={t("assistant.title")}>
             <div>
               <strong>{t("assistant.title")}</strong>
