@@ -384,7 +384,7 @@ const authScreens: AppScreen[] = [
         inputMode: "email",
         label: "Email",
         name: "resetEmail",
-        placeholder: "",
+        placeholder: "Enter your email",
         type: "email",
       },
     ],
