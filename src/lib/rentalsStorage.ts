@@ -30,6 +30,11 @@ export type RentalBooking = {
   status: RentalStatus;
   itemTitle: string;
   itemEmoji: string;
+  /**
+   * Stable per-physical-item QR token (demo/localStorage).
+   * This replaces the older per-rental `qrCheckInCode` concept.
+   */
+  itemQrToken?: string;
   startDate: string;
   endDate: string;
   counterpartyId: string;
@@ -59,6 +64,12 @@ export type RentalBooking = {
   approvalDeadline?: string;
   paymentOnHold?: boolean;
   manualBooking?: boolean;
+  /** 6-digit PIN required for pickup confirmation (generated at pending_checkin). */
+  pickupPin?: string;
+  /** 6-digit PIN required for return confirmation (generated when active). */
+  returnPin?: string;
+  pickupConfirmedAt?: string;
+  returnConfirmedAt?: string;
   qrCheckInCode?: string;
   runningLateMessage?: string;
   runningLateSentAt?: string;
@@ -68,7 +79,7 @@ export type RentalBooking = {
 
 const RENTALS_KEY = "allbyrent_rental_bookings";
 const RENTALS_VERSION_KEY = "allbyrent_rental_bookings_version";
-const RENTALS_VERSION = "4";
+const RENTALS_VERSION = "6";
 
 const now = new Date();
 const today = now.toISOString().slice(0, 10);
@@ -88,6 +99,11 @@ const disputeDeadline = new Date(now);
 disputeDeadline.setHours(disputeDeadline.getHours() + 36);
 const completedRecent = new Date(now);
 completedRecent.setDate(completedRecent.getDate() - 1);
+const completedFiveDaysAgo = new Date(now);
+completedFiveDaysAgo.setDate(completedFiveDaysAgo.getDate() - 5);
+const completedTwelveDaysAgo = new Date(now);
+completedTwelveDaysAgo.setDate(completedTwelveDaysAgo.getDate() - 12);
+const completedLastMonthMid = new Date(now.getFullYear(), now.getMonth() - 1, 15, 18, 0, 0, 0);
 const approvalDeadline = new Date(now);
 approvalDeadline.setHours(approvalDeadline.getHours() + 18);
 
@@ -107,6 +123,52 @@ function cp(
   };
 }
 
+export function generatePin(): string {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function slugifyTitle(input: string): string {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function seedItemQrToken(itemTitle: string): string {
+  // Demo policy: stable per `itemTitle` (not cryptographically secure).
+  return `abr-item-${slugifyTitle(itemTitle)}`;
+}
+
+function ensurePinsAndQr(next: RentalBooking, prev?: RentalBooking | null): RentalBooking {
+  const withQr: RentalBooking = {
+    ...next,
+    itemQrToken: next.itemQrToken ?? seedItemQrToken(next.itemTitle),
+  };
+
+  if (withQr.status === "pending_checkin") {
+    return {
+      ...withQr,
+      pickupPin: withQr.pickupPin ?? generatePin(),
+    };
+  }
+
+  if (withQr.status === "active" || withQr.status === "overdue") {
+    return {
+      ...withQr,
+      returnPin: withQr.returnPin ?? generatePin(),
+    };
+  }
+
+  // Preserve previous pins when status changes away from these stages.
+  return {
+    ...withQr,
+    pickupPin: withQr.pickupPin ?? prev?.pickupPin,
+    returnPin: withQr.returnPin ?? prev?.returnPin,
+  };
+}
+
 const DEMO_BOOKINGS: RentalBooking[] = [
   {
     id: "rent-pending-renter",
@@ -114,6 +176,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     status: "pending_approval",
     itemTitle: "GoPro Hero 12",
     itemEmoji: "🎥",
+    itemQrToken: seedItemQrToken("GoPro Hero 12"),
     startDate: "2026-05-28",
     endDate: "2026-05-30",
     ...cp("John Davis", true, true),
@@ -132,6 +195,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     status: "pending_approval",
     itemTitle: "Table Saw",
     itemEmoji: "🪚",
+    itemQrToken: seedItemQrToken("Table Saw"),
     startDate: "2026-05-29",
     endDate: "2026-05-31",
     counterpartyId: "chris-t",
@@ -152,6 +216,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     status: "pending_checkin",
     itemTitle: "Canon EOS R6 Kit",
     itemEmoji: "📷",
+    itemQrToken: seedItemQrToken("Canon EOS R6 Kit"),
     startDate: today,
     endDate: "2026-05-28",
     ...cp("John Davis", true, true),
@@ -163,7 +228,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     pickupWindowStart: pickupTodayStart.toISOString(),
     pickupWindowEnd: pickupTodayEnd.toISOString(),
     pickupScheduledAt: pickupTodayStart.toISOString(),
-    qrCheckInCode: "482917",
+    pickupPin: "482917",
     stripePayment: true,
   },
   {
@@ -172,6 +237,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     status: "pending_checkin",
     itemTitle: "Pressure Washer 3000 PSI",
     itemEmoji: "💦",
+    itemQrToken: seedItemQrToken("Pressure Washer 3000 PSI"),
     startDate: today,
     endDate: "2026-05-27",
     ...cp("Sam K.", false, true),
@@ -191,6 +257,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     status: "upcoming",
     itemTitle: "4-Person Camping Tent",
     itemEmoji: "⛺",
+    itemQrToken: seedItemQrToken("4-Person Camping Tent"),
     startDate: "2026-06-02",
     endDate: "2026-06-05",
     ...cp("Maria S.", true, true),
@@ -207,6 +274,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     status: "active",
     itemTitle: "Milwaukee M18 Drill Kit",
     itemEmoji: "🔧",
+    itemQrToken: seedItemQrToken("Milwaukee M18 Drill Kit"),
     startDate: "2026-05-24",
     endDate: "2026-05-27",
     ...cp("Chris T.", true, false),
@@ -215,7 +283,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     insuranceIncluded: true,
     listingModes: ["rent", "rto"],
     returnDueAt: returnSoon.toISOString(),
-    qrCheckInCode: "193846",
+    returnPin: "193846",
     stripePayment: true,
   },
   {
@@ -224,6 +292,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     status: "upcoming",
     itemTitle: "Pressure Washer 3000 PSI",
     itemEmoji: "💦",
+    itemQrToken: seedItemQrToken("Pressure Washer 3000 PSI"),
     startDate: "2026-05-30",
     endDate: "2026-05-31",
     ...cp("Sam K.", false, false),
@@ -242,6 +311,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     status: "overdue",
     itemTitle: "Kayak · 2-Person",
     itemEmoji: "🛶",
+    itemQrToken: seedItemQrToken("Kayak · 2-Person"),
     startDate: "2026-05-20",
     endDate: "2026-05-24",
     ...cp("Pat R.", true, true),
@@ -259,6 +329,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     status: "overdue",
     itemTitle: "Party Speaker PA",
     itemEmoji: "🔊",
+    itemQrToken: seedItemQrToken("Party Speaker PA"),
     startDate: "2026-05-18",
     endDate: "2026-05-23",
     ...cp("Dana W.", true, true),
@@ -276,6 +347,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     status: "no_show",
     itemTitle: "Lawn Aerator",
     itemEmoji: "🌿",
+    itemQrToken: seedItemQrToken("Lawn Aerator"),
     startDate: today,
     endDate: today,
     ...cp("Mike L.", false, false),
@@ -294,6 +366,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     status: "disputed",
     itemTitle: "DSLR Lens 24-70mm",
     itemEmoji: "📸",
+    itemQrToken: seedItemQrToken("DSLR Lens 24-70mm"),
     startDate: "2026-05-15",
     endDate: "2026-05-22",
     ...cp("Taylor H.", true, true),
@@ -311,6 +384,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     status: "disputed",
     itemTitle: "Electric Bike",
     itemEmoji: "🚴",
+    itemQrToken: seedItemQrToken("Electric Bike"),
     startDate: "2026-05-10",
     endDate: "2026-05-18",
     ...cp("Riley N.", true, true),
@@ -328,6 +402,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     status: "completed",
     itemTitle: "DJI Mini 3 Drone",
     itemEmoji: "🚁",
+    itemQrToken: seedItemQrToken("DJI Mini 3 Drone"),
     startDate: "2026-04-10",
     endDate: "2026-04-12",
     ...cp("Lee P.", true, true),
@@ -340,11 +415,67 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     stripePayment: true,
   },
   {
+    id: "rent-host-may-drill",
+    role: "host",
+    status: "completed",
+    itemTitle: "Milwaukee M18 Drill Kit",
+    itemEmoji: "🔧",
+    itemQrToken: seedItemQrToken("Milwaukee M18 Drill Kit"),
+    startDate: completedFiveDaysAgo.toISOString().slice(0, 10),
+    endDate: completedFiveDaysAgo.toISOString().slice(0, 10),
+    ...cp("Alex B.", true, true),
+    pickupLabel: "Home pickup",
+    totalUsd: 65,
+    insuranceIncluded: true,
+    listingModes: ["rent", "rto"],
+    completedAt: completedFiveDaysAgo.toISOString(),
+    review: { rating: 5, leftAt: completedFiveDaysAgo.toISOString() },
+    stripePayment: true,
+  },
+  {
+    id: "rent-host-may-washer",
+    role: "host",
+    status: "completed",
+    itemTitle: "Pressure Washer 3000 PSI",
+    itemEmoji: "💦",
+    itemQrToken: seedItemQrToken("Pressure Washer 3000 PSI"),
+    startDate: completedTwelveDaysAgo.toISOString().slice(0, 10),
+    endDate: completedTwelveDaysAgo.toISOString().slice(0, 10),
+    ...cp("Jordan M.", true, true),
+    pickupLabel: "Delivery · 5 mi",
+    totalUsd: 55,
+    insuranceIncluded: true,
+    listingModes: ["rent"],
+    fulfillmentMethod: "delivery",
+    completedAt: completedTwelveDaysAgo.toISOString(),
+    review: null,
+    stripePayment: true,
+  },
+  {
+    id: "rent-host-apr-speaker",
+    role: "host",
+    status: "completed",
+    itemTitle: "Party Speaker PA",
+    itemEmoji: "🔊",
+    itemQrToken: seedItemQrToken("Party Speaker PA"),
+    startDate: completedLastMonthMid.toISOString().slice(0, 10),
+    endDate: completedLastMonthMid.toISOString().slice(0, 10),
+    ...cp("Dana W.", true, true),
+    pickupLabel: "Home pickup",
+    totalUsd: 40,
+    insuranceIncluded: true,
+    listingModes: ["rent"],
+    completedAt: completedLastMonthMid.toISOString(),
+    review: { rating: 4, leftAt: completedLastMonthMid.toISOString() },
+    stripePayment: true,
+  },
+  {
     id: "rent-6",
     role: "host",
     status: "completed",
     itemTitle: "Beach Cruiser Bike",
     itemEmoji: "🚲",
+    itemQrToken: seedItemQrToken("Beach Cruiser Bike"),
     startDate: "2026-03-15",
     endDate: "2026-03-17",
     ...cp("Jordan M.", true, true),
@@ -362,6 +493,7 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     status: "no_show",
     itemTitle: "Projector 4K",
     itemEmoji: "📽️",
+    itemQrToken: seedItemQrToken("Projector 4K"),
     startDate: "2026-02-01",
     endDate: "2026-02-03",
     ...cp("Sam K.", true, true),
@@ -386,7 +518,7 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
     false;
   const phone = raw.counterpartyPhoneVerified ?? false;
   return {
-    ...raw,
+    ...ensurePinsAndQr(raw),
     counterpartyName,
     counterpartyId: raw.counterpartyId ?? resolveCounterpartyId(counterpartyName),
     counterpartyIdentityVerified: identity,
@@ -438,7 +570,12 @@ export function updateBooking(
   patch: Partial<RentalBooking>,
 ): RentalBooking[] {
   const bookings = loadRentalBookings();
-  const next = bookings.map((b) => (b.id === id ? normalizeBooking({ ...b, ...patch }) : b));
+  const current = bookings.find((b) => b.id === id) ?? null;
+  const next = bookings.map((b) => {
+    if (b.id !== id) return b;
+    const merged = { ...b, ...patch } as RentalBooking;
+    return normalizeBooking(ensurePinsAndQr(merged, current));
+  });
   saveRentalBookings(next);
   return next;
 }

@@ -175,16 +175,14 @@ function sortHistory(list: RentalBooking[], sort: HistorySort): RentalBooking[] 
 
 export function RentalsScreen({
   onHome,
-  onPostRequest,
-  onRentano,
   onProfile,
+  onFourthTab,
   onOpenRental,
   onViewProfile,
 }: {
   onHome: () => void;
-  onPostRequest: () => void;
-  onRentano: () => void;
   onProfile: () => void;
+  onFourthTab: () => void;
   onOpenRental: (bookingId: string) => void;
   onViewProfile: (userId: string) => void;
 }) {
@@ -392,9 +390,11 @@ export function RentalsScreen({
       <div className="shrink-0">
         <BottomNav
           activeTab="rentals"
+          appMode={mode}
           onHome={onHome}
-          onPostRequest={onPostRequest}
+          onRentals={() => undefined}
           onRentano={() => setRentanoOpen(true)}
+          onFourthTab={onFourthTab}
           onProfile={onProfile}
         />
       </div>

@@ -17,6 +17,11 @@ import { ListingIntro } from "../screens/listing/ListingIntro";
 import { ListingWizard } from "../screens/listing/ListingWizard";
 import { YouAreAllSet } from "../screens/onboarding/YouAreAllSet";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
+import { RentalsScreen } from "../screens/RentalsScreen";
+import { ProfileScreen } from "../screens/ProfileScreen";
+import { FavoritesScreen } from "../screens/FavoritesScreen";
+import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
+import { SubscriptionPlansScreen } from "../screens/SubscriptionPlansScreen";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
 import { getAppMode, setAppMode } from "../lib/appMode";
@@ -44,7 +49,12 @@ type Screen =
   | "postRequest"
   | "activeRental"
   | "listingIntro"
-  | "listItem";
+  | "listItem"
+  | "rentals"
+  | "profile"
+  | "favorites"
+  | "earnBusiness"
+  | "subscriptionPlans";
 
 function readBootQuery() {
   if (typeof window === "undefined") {
@@ -130,6 +140,25 @@ function AppRoutes() {
     setNavStack([]);
     setCurrentScreen("home");
   };
+
+  const goToTab = useCallback((screen: Screen) => {
+    setNavStack([]);
+    setCurrentScreen(screen);
+  }, []);
+
+  const handleOpenHome = useCallback(() => goToTab("home"), [goToTab]);
+  const handleOpenRentals = useCallback(() => goToTab("rentals"), [goToTab]);
+  const handleOpenProfile = useCallback(() => goToTab("profile"), [goToTab]);
+  const handleOpenFavorites = useCallback(() => goToTab("favorites"), [goToTab]);
+  const handleOpenBusiness = useCallback(() => goToTab("earnBusiness"), [goToTab]);
+  const handleOpenFourthTab = useCallback(() => {
+    if (getAppMode() === "earn") {
+      goToTab("earnBusiness");
+    } else {
+      goToTab("favorites");
+    }
+  }, [goToTab]);
+  const handleOpenPlans = useCallback(() => navigateTo("subscriptionPlans"), []);
 
   const openRentLocationSetup = useCallback(() => {
     setHomeLocationError(null);
@@ -369,12 +398,57 @@ function AppRoutes() {
         {currentScreen === "home" && (
           <HomeFeed
             selectedCategoryId={selectedCategoryId}
-            onPostRequest={handlePostRequest}
             onNavigate={handleNavigate}
             onCategorySelect={handleCategorySelect}
             onOpenNotifications={handleOpenNotifications}
             onEditLocation={openRentLocationSetup}
+            onHome={handleOpenHome}
+            onRentals={handleOpenRentals}
+            onFourthTab={handleOpenFourthTab}
+            onProfile={handleOpenProfile}
           />
+        )}
+
+        {currentScreen === "rentals" && (
+          <RentalsScreen
+            onHome={handleOpenHome}
+            onProfile={handleOpenProfile}
+            onFourthTab={handleOpenFourthTab}
+            onOpenRental={() => navigateTo("activeRental")}
+            onViewProfile={() => undefined}
+          />
+        )}
+
+        {currentScreen === "profile" && (
+          <ProfileScreen
+            onHome={handleOpenHome}
+            onRentals={handleOpenRentals}
+            onFourthTab={handleOpenFourthTab}
+            onEditLocation={openRentLocationSetup}
+            onOpenPlans={handleOpenPlans}
+          />
+        )}
+
+        {currentScreen === "favorites" && (
+          <FavoritesScreen
+            onHome={handleOpenHome}
+            onRentals={handleOpenRentals}
+            onFourthTab={handleOpenFourthTab}
+            onProfile={handleOpenProfile}
+          />
+        )}
+
+        {currentScreen === "earnBusiness" && (
+          <EarnBusinessScreen
+            onHome={handleOpenHome}
+            onRentals={handleOpenRentals}
+            onFourthTab={handleOpenFourthTab}
+            onProfile={handleOpenProfile}
+          />
+        )}
+
+        {currentScreen === "subscriptionPlans" && (
+          <SubscriptionPlansScreen onBack={handleBack} />
         )}
 
         {currentScreen === "notifications" && (
@@ -387,6 +461,10 @@ function AppRoutes() {
             onBack={handleBackFromSubcategory}
             onPostRequest={handlePostRequest}
             onItemSelect={handleItemSelect}
+            onHome={handleOpenHome}
+            onRentals={handleOpenRentals}
+            onFourthTab={handleOpenFourthTab}
+            onProfile={handleOpenProfile}
           />
         )}
 

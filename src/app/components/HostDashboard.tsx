@@ -5,7 +5,6 @@ import { getListingDisplayTitle } from "../../lib/listingQr";
 
 const GREEN = "#1A9E6E";
 const GREEN_DARK = "#0D5C3A";
-const AMBER = "#F0B429";
 const BORDER = "#E8E6E0";
 
 function StatCard({
@@ -89,16 +88,17 @@ export function HostDashboard({ onListItem }: { onListItem: () => void }) {
           >
             <p className="text-base font-semibold text-gray-800">No listings yet</p>
             <p className="mt-1 text-sm text-gray-500">
-              List your first item and start earning in your area.
+              Publish from a category when you are ready — or tap{" "}
+              <button
+                type="button"
+                onClick={onListItem}
+                className="font-semibold underline"
+                style={{ color: GREEN }}
+              >
+                New
+              </button>{" "}
+              above.
             </p>
-            <button
-              type="button"
-              onClick={onListItem}
-              className="mt-4 w-full rounded-xl py-3 text-base font-bold text-white"
-              style={{ backgroundColor: AMBER, color: GREEN_DARK }}
-            >
-              List something →
-            </button>
           </div>
         ) : (
           <ul className="space-y-2">

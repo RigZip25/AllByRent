@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   ArrowLeft,
   Star,
@@ -11,7 +12,12 @@ import {
   Share2,
   Calendar,
   Camera,
+  Heart,
 } from "lucide-react";
+import {
+  isFavoriteListing,
+  toggleFavoriteListing,
+} from "../../lib/favoritesStorage";
 
 interface ItemDetailProps {
   itemId: string;
@@ -20,6 +26,11 @@ interface ItemDetailProps {
 }
 
 export function ItemDetail({ itemId, onBack, onBook }: ItemDetailProps) {
+  const [favorited, setFavorited] = useState(() => isFavoriteListing(itemId));
+
+  const handleToggleFavorite = () => {
+    setFavorited(toggleFavoriteListing(itemId));
+  };
   return (
     <div className="screen bg-background flex flex-col">
       <div className="shrink-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-3 sm:px-4 py-3 flex items-center gap-3">
@@ -30,6 +41,16 @@ export function ItemDetail({ itemId, onBack, onBook }: ItemDetailProps) {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h1 className="font-semibold flex-1">Item Details</h1>
+        <button
+          type="button"
+          onClick={handleToggleFavorite}
+          className="p-2 hover:bg-muted rounded-full transition-colors"
+          aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+        >
+          <Heart
+            className={`w-5 h-5 ${favorited ? "fill-[#E11D48] text-[#E11D48]" : "text-muted-foreground"}`}
+          />
+        </button>
       </div>
 
       <div className="screen-scroll flex-1 min-h-0 pb-24">

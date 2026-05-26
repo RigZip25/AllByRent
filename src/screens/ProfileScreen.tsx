@@ -131,17 +131,15 @@ function ModeToggle({ mode, onChange }: { mode: AppMode; onChange: (m: AppMode) 
 
 export function ProfileScreen({
   onHome,
-  onPostRequest,
-  onRentano,
   onRentals,
+  onFourthTab,
   onEditLocation,
   onOpenPlans,
   onViewPublicProfile,
 }: {
   onHome: () => void;
-  onPostRequest: () => void;
-  onRentano: () => void;
   onRentals: () => void;
+  onFourthTab: () => void;
   onEditLocation: () => void;
   onOpenPlans: () => void;
   onViewPublicProfile?: () => void;
@@ -355,10 +353,12 @@ export function ProfileScreen({
       <div className="shrink-0">
         <BottomNav
           activeTab="profile"
+          appMode={mode}
           onHome={onHome}
-          onPostRequest={onPostRequest}
-          onRentano={() => setRentanoOpen(true)}
           onRentals={onRentals}
+          onRentano={() => setRentanoOpen(true)}
+          onFourthTab={onFourthTab}
+          onProfile={() => undefined}
         />
       </div>
 

@@ -36,7 +36,6 @@ export function BookingRequestCard({
       status: "pending_checkin",
       pickupWindowStart: new Date().toISOString(),
       approvalDeadline: undefined,
-      qrCheckInCode: String(Math.floor(100000 + Math.random() * 900000)),
     });
     pushInAppNotification({
       type: "booking_request",

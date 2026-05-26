@@ -121,9 +121,22 @@ interface SubcategoryProps {
   onBack: () => void;
   onPostRequest: () => void;
   onItemSelect: (id: string) => void;
+  onHome: () => void;
+  onRentals: () => void;
+  onFourthTab: () => void;
+  onProfile: () => void;
 }
 
-export function Subcategory({ category, onBack, onPostRequest, onItemSelect }: SubcategoryProps) {
+export function Subcategory({
+  category,
+  onBack,
+  onPostRequest,
+  onItemSelect,
+  onHome,
+  onRentals,
+  onFourthTab,
+  onProfile,
+}: SubcategoryProps) {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [rentanoOpen, setRentanoOpen] = useState(false);
 
@@ -341,9 +354,12 @@ export function Subcategory({ category, onBack, onPostRequest, onItemSelect }: S
 
       <BottomNav
         activeTab="none"
-        onHome={onBack}
-        onPostRequest={onPostRequest}
+        appMode="rent"
+        onHome={onHome}
+        onRentals={onRentals}
         onRentano={() => setRentanoOpen(true)}
+        onFourthTab={onFourthTab}
+        onProfile={onProfile}
       />
       <RentanoChatSheet
         open={rentanoOpen}

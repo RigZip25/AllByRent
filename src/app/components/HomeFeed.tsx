@@ -66,18 +66,24 @@ function ModeSwitcher({
 
 export function HomeFeed({
   selectedCategoryId,
-  onPostRequest,
   onNavigate,
   onCategorySelect,
   onOpenNotifications,
   onEditLocation,
+  onHome,
+  onRentals,
+  onFourthTab,
+  onProfile,
 }: {
   selectedCategoryId: string | null;
-  onPostRequest: () => void;
   onNavigate: (screen: string) => void;
   onCategorySelect: (categoryId: string, categoryLabel: string) => void;
   onOpenNotifications: () => void;
   onEditLocation: () => void;
+  onHome: () => void;
+  onRentals: () => void;
+  onFourthTab: () => void;
+  onProfile: () => void;
 }) {
   const [rentanoOpen, setRentanoOpen] = useState(false);
   const [mode, setMode] = useState<AppMode>(() => getAppMode());
@@ -215,9 +221,12 @@ export function HomeFeed({
       <div className="shrink-0">
         <BottomNav
           activeTab={rentanoOpen ? "rentano" : "home"}
-          onHome={() => undefined}
-          onPostRequest={onPostRequest}
+          appMode={mode}
+          onHome={onHome}
+          onRentals={onRentals}
           onRentano={() => setRentanoOpen(true)}
+          onFourthTab={onFourthTab}
+          onProfile={onProfile}
         />
       </div>
       <RentanoChatSheet

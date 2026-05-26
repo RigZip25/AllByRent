@@ -14,12 +14,15 @@ export function QrScanPanel({
   itemTitle,
   itemEmoji,
   expectedCode,
+  expectedPin,
+  alreadyConfirmed,
   returnByLabel,
   onClose,
   onScanned,
   onConfirm,
   onManualCode,
   onOwnerManualConfirm,
+  isHost,
 }: {
   open: boolean;
   phase: QrScanPhase;
@@ -27,6 +30,8 @@ export function QrScanPanel({
   itemTitle: string;
   itemEmoji: string;
   expectedCode?: string;
+  expectedPin?: string;
+  alreadyConfirmed?: boolean;
   returnByLabel?: string;
   onClose: () => void;
   onScanned: () => void;
@@ -40,6 +45,7 @@ export function QrScanPanel({
   const [error, setError] = useState<string | null>(null);
   const [manualOpen, setManualOpen] = useState(false);
   const [codeInput, setCodeInput] = useState("");
+  const [pinInput, setPinInput] = useState("");
 
   const stopStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -82,6 +88,7 @@ export function QrScanPanel({
     if (!open) {
       setManualOpen(false);
       setCodeInput("");
+      setPinInput("");
     }
   }, [open]);
 
@@ -109,7 +116,9 @@ export function QrScanPanel({
           <h2 className="text-[18px] font-bold" style={{ color: GREEN }}>
             {itemTitle}
           </h2>
-          <p className="mt-1 text-[14px] text-gray-600">QR scan verified · Stripe payment on file</p>
+          <p className="mt-1 text-[14px] text-gray-600">
+            QR scan verified · PIN required
+          </p>
 
           <div className="mt-4">
             <RentanoTip
@@ -126,6 +135,31 @@ export function QrScanPanel({
             />
           </div>
 
+          <div className="mt-4 rounded-2xl border bg-white p-4">
+            <p className="text-[13px] font-bold" style={{ color: GREEN }}>
+              Enter the {mode === "pickup" ? "pickup" : "return"} PIN
+            </p>
+            <p className="mt-1 text-[12px] text-gray-500">
+              This scan only works inside the AllByRent app for the renter/host on this booking. The PIN prevents random scans.
+            </p>
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={pinInput}
+              onChange={(e) => {
+                setError(null);
+                setPinInput(e.target.value.replace(/\D/g, "").slice(0, 6));
+              }}
+              className="mt-3 w-full rounded-xl border px-4 py-3 text-center text-[20px] tracking-widest"
+              placeholder="000000"
+              aria-label="6-digit PIN"
+            />
+            {error ? (
+              <p className="mt-2 text-[12px] font-semibold text-red-700">{error}</p>
+            ) : null}
+          </div>
+
           {mode === "pickup" ? (
             <button
               type="button"
@@ -138,11 +172,24 @@ export function QrScanPanel({
 
           <button
             type="button"
-            onClick={onConfirm}
+            disabled={alreadyConfirmed || pinInput.length !== 6}
+            onClick={() => {
+              if (alreadyConfirmed) {
+                setError("Already confirmed.");
+                return;
+              }
+              if (expectedPin && pinInput !== expectedPin) {
+                setError("PIN doesn't match. Ask your counterparty for the correct PIN.");
+                return;
+              }
+              onConfirm();
+            }}
             className="mt-4 w-full rounded-2xl py-4 text-[16px] font-bold text-white"
             style={{ backgroundColor: CTA }}
           >
-            Confirm {mode === "pickup" ? "pickup" : "return"}
+            {alreadyConfirmed
+              ? "Already confirmed"
+              : `Confirm ${mode === "pickup" ? "pickup" : "return"}`}
           </button>
         </div>
       </div>
@@ -182,6 +229,9 @@ export function QrScanPanel({
         >
           {error ? "Camera unavailable" : "Simulate QR scan (demo)"}
         </button>
+        <p className="text-center text-[12px] text-white/80">
+          Tip: scanning is not enough — you’ll still need the 6‑digit PIN from your counterparty.
+        </p>
         <button
           type="button"
           onClick={() => setManualOpen(true)}
