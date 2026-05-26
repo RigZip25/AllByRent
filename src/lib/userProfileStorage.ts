@@ -1,0 +1,214 @@
+import { getAppMode, setAppMode, type AppMode } from "./appMode";
+import {
+  getActiveRentLocationLabel,
+  getHomeLocation,
+  getRentContext,
+  hasRentLocationSetup,
+  loadPublishedListings,
+} from "./listingStorage";
+import { hasAvatarPhoto, loadAvatarDataUrl } from "./avatarStorage";
+import { loadSubscriptionPlanId, type SubscriptionPlanId } from "./subscriptionPlans";
+
+const PROFILE_KEY = "allbyrent_user_profile";
+
+export type UserProfile = {
+  id: string;
+  displayName: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  bio: string;
+  subscriptionPlan: SubscriptionPlanId;
+  memberSince: string;
+  preferredMode: AppMode;
+  avatarUrl: string | null;
+  verification: {
+    email: boolean;
+    phone: boolean;
+    identity: boolean;
+  };
+  host: {
+    listingsCount: number;
+    rating: number;
+    reviewCount: number;
+    /** Manual booking (approve/decline requests) — enables response rate stat */
+    usesManualBooking: boolean;
+  };
+  renter: {
+    completedRentals: number;
+    rating: number;
+    reviewCount: number;
+    noShowCount: number;
+  };
+  payoutConnected: boolean;
+  notificationsEnabled: boolean;
+};
+
+function createDefaultProfile(): UserProfile {
+  const listings = loadPublishedListings();
+  const id = "demo-user";
+
+  return {
+    id,
+    displayName: "Alex Morgan",
+    firstName: "Alex",
+    lastName: "Morgan",
+    email: "alex@example.com",
+    phone: "",
+    bio: "",
+    subscriptionPlan: loadSubscriptionPlanId(),
+    memberSince: new Date().toISOString().slice(0, 10),
+    preferredMode: getAppMode(),
+    avatarUrl: loadAvatarDataUrl(id),
+    verification: {
+      email: true,
+      phone: true,
+      identity: true,
+    },
+    host: {
+      listingsCount: listings.length,
+      rating: listings.length > 0 ? 4.9 : 0,
+      reviewCount: listings.length > 0 ? 12 : 0,
+      usesManualBooking: true,
+    },
+    renter: {
+      completedRentals: 3,
+      rating: 4.8,
+      reviewCount: 5,
+      noShowCount: 0,
+    },
+    payoutConnected: false,
+    notificationsEnabled: true,
+  };
+}
+
+function migrateLegacyProfile(parsed: Record<string, unknown>): Partial<UserProfile> {
+  const patch: Partial<UserProfile> = {};
+  if ("accountType" in parsed && !("subscriptionPlan" in parsed)) {
+    patch.subscriptionPlan =
+      parsed.accountType === "business" ? "business" : "free";
+  }
+  if ("avatarEmoji" in parsed) {
+    patch.avatarUrl = null;
+  }
+  return patch;
+}
+
+export function loadUserProfile(): UserProfile {
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY);
+    if (!raw) {
+      const seeded = createDefaultProfile();
+      saveUserProfile(seeded);
+      return seeded;
+    }
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    const migrated = migrateLegacyProfile(parsed);
+    const base = createDefaultProfile();
+    const parsedHost =
+      parsed.host && typeof parsed.host === "object"
+        ? (parsed.host as UserProfile["host"])
+        : {};
+    const parsedRenter =
+      parsed.renter && typeof parsed.renter === "object"
+        ? (parsed.renter as UserProfile["renter"])
+        : {};
+    const merged = {
+      ...base,
+      ...parsed,
+      ...migrated,
+      host: { ...base.host, ...parsedHost },
+      renter: { ...base.renter, ...parsedRenter },
+    } as UserProfile;
+    if (merged.host.usesManualBooking === undefined) {
+      merged.host.usesManualBooking = true;
+    }
+    if (merged.renter.noShowCount === undefined) {
+      merged.renter.noShowCount = 0;
+    }
+    merged.avatarUrl = hasAvatarPhoto(merged.id)
+      ? loadAvatarDataUrl(merged.id)
+      : null;
+    merged.subscriptionPlan = loadSubscriptionPlanId();
+    return merged;
+  } catch {
+    const seeded = createDefaultProfile();
+    saveUserProfile(seeded);
+    return seeded;
+  }
+}
+
+export function saveUserProfile(profile: UserProfile): void {
+  try {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function refreshProfileStats(profile: UserProfile): UserProfile {
+  const listings = loadPublishedListings();
+  return {
+    ...profile,
+    avatarUrl: hasAvatarPhoto(profile.id) ? loadAvatarDataUrl(profile.id) : null,
+    subscriptionPlan: loadSubscriptionPlanId(),
+    host: {
+      ...profile.host,
+      listingsCount: listings.length,
+      rating: listings.length > 0 ? profile.host.rating || 4.9 : 0,
+      reviewCount: listings.length > 0 ? profile.host.reviewCount || 12 : 0,
+    },
+    preferredMode: getAppMode(),
+  };
+}
+
+export function getProfileLocationSummary(): string {
+  if (!hasRentLocationSetup()) return "Not set";
+  const context = getRentContext();
+  const label = getActiveRentLocationLabel();
+  if (!label) return "Not set";
+  return context === "trip" ? `Trip · ${label}` : label;
+}
+
+export function getProfileLocationCoords(): { lat: number; lng: number } | null {
+  const home = getHomeLocation();
+  if (!home) return null;
+  return { lat: home.lat, lng: home.lng };
+}
+
+export function updatePreferredMode(mode: AppMode): void {
+  setAppMode(mode);
+  const profile = refreshProfileStats(loadUserProfile());
+  profile.preferredMode = mode;
+  saveUserProfile(profile);
+}
+
+export function updateProfileFields(
+  patch: Partial<
+    Pick<
+      UserProfile,
+      | "displayName"
+      | "firstName"
+      | "lastName"
+      | "email"
+      | "phone"
+      | "bio"
+      | "avatarUrl"
+      | "subscriptionPlan"
+    >
+  >,
+): UserProfile {
+  const profile = loadUserProfile();
+  const next = { ...profile, ...patch };
+  if (patch.firstName !== undefined || patch.lastName !== undefined) {
+    const name = `${next.firstName} ${next.lastName}`.trim();
+    if (name) next.displayName = name;
+  }
+  saveUserProfile(next);
+  return next;
+}
+
+export function setProfileAvatarUrl(url: string | null): UserProfile {
+  return updateProfileFields({ avatarUrl: url });
+}
