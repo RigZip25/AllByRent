@@ -14,7 +14,8 @@ function pwaPlugin() {
     const { VitePWA } = require('vite-plugin-pwa') as typeof import('vite-plugin-pwa')
     pwaEnabled = true
     return VitePWA({
-      registerType: 'autoUpdate',
+      // "prompt" keeps the new SW waiting until the user confirms in-app (bell notification).
+      registerType: 'prompt',
       includeAssets: ['pwa-192.png', 'pwa-512.png'],
       manifest: {
         name: 'AllByRent',
@@ -40,6 +41,8 @@ function pwaPlugin() {
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: '/index.html',
+        skipWaiting: false,
+        clientsClaim: true,
       },
       devOptions: { enabled: true },
     })
@@ -68,8 +71,15 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   // HTTPS only when VITE_DEV_HTTPS=true (Safari on iPhone blocks self-signed IP certs).
   const useHttps = process.env.VITE_DEV_HTTPS === 'true'
+  const githubRepo =
+    process.env.GITHUB_REPOSITORY?.split('/')[1] ??
+    process.env.VITE_GITHUB_PAGES_REPO ??
+    'v0-allbyrent-app-design'
+  const base =
+    process.env.GITHUB_PAGES === 'true' ? `/${githubRepo}/` : '/'
 
   return {
+  base,
   plugins: [
     ...(useHttps ? [basicSsl()] : []),
     figmaAssetResolver(),

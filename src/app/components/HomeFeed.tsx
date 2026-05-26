@@ -1,18 +1,20 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Bell, MapPin, ChevronRight } from "lucide-react";
 import { Emoji } from "./Emoji";
 import { BottomNav } from "./BottomNav";
 import { HostDashboard } from "./HostDashboard";
 import { RentanoChatSheet } from "../../components/RentanoChat";
+import { usePwaUpdate } from "../../hooks/PwaUpdateProvider";
 import { getAppMode, setAppMode, type AppMode } from "../../lib/appMode";
-import { getActiveRentLocationLabel } from "../../lib/listingStorage";
+import {
+  getActiveRentLocationLabel,
+  hasRentLocationSetup,
+} from "../../lib/listingStorage";
 import {
   CATEGORIES,
   categoryGridLabel,
   categoryIdFromName,
 } from "../../screens/listing/listingItemCategories";
-import { usePwaInstallPrompt } from "../../hooks/PwaInstallProvider";
-import { PwaInstallRentanoTip } from "../../components/PwaInstallRentanoTip";
 
 const GREEN = "#1A9E6E";
 const GREEN_DARK = "#0D5C3A";
@@ -68,23 +70,49 @@ export function HomeFeed({
   onNavigate,
   onCategorySelect,
   onOpenNotifications,
+  onEditLocation,
 }: {
   selectedCategoryId: string | null;
   onPostRequest: () => void;
   onNavigate: (screen: string) => void;
   onCategorySelect: (categoryId: string, categoryLabel: string) => void;
   onOpenNotifications: () => void;
+  onEditLocation: () => void;
 }) {
   const [rentanoOpen, setRentanoOpen] = useState(false);
   const [mode, setMode] = useState<AppMode>(() => getAppMode());
-  const pwa = usePwaInstallPrompt();
+  const { updateAvailable, updateJustCompleted, simulateUpdateNotification } = usePwaUpdate();
+  const showBellBadge = updateAvailable || updateJustCompleted;
+  const bellTapRef = useRef({ count: 0, openTimer: 0 });
 
+  const handleBellPress = () => {
+    const taps = bellTapRef.current;
+    taps.count += 1;
+    window.clearTimeout(taps.openTimer);
+
+    if (taps.count >= 5) {
+      taps.count = 0;
+      simulateUpdateNotification();
+      onOpenNotifications();
+      return;
+    }
+
+    // Wait briefly — if more taps come, don't open yet (allows 5 quick taps).
+    taps.openTimer = window.setTimeout(() => {
+      taps.count = 0;
+      onOpenNotifications();
+    }, 450);
+  };
   const handleModeChange = (newMode: AppMode) => {
     setMode(newMode);
     setAppMode(newMode);
+    if (newMode === "rent" && !hasRentLocationSetup()) {
+      onEditLocation();
+    }
   };
 
   const cityLabel = getActiveRentLocationLabel() || "Set your location";
+  const needsLocation = mode === "rent" && !hasRentLocationSetup();
 
   return (
     <div className="screen bg-[#F0F4F2] flex flex-col overflow-hidden">
@@ -93,30 +121,52 @@ export function HomeFeed({
           <ModeSwitcher mode={mode} onChange={handleModeChange} />
           <button
             type="button"
-            onClick={onOpenNotifications}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border bg-white transition-colors active:bg-gray-50"
+            onClick={handleBellPress}
+            className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border bg-white transition-colors active:bg-gray-50"
             style={{ borderColor: BORDER }}
-            aria-label="Notifications"
+            aria-label={
+              showBellBadge ? "Notifications — update available" : "Notifications"
+            }
           >
             <Bell className="h-6 w-6" style={{ color: GREEN_DARK }} />
+            {showBellBadge ? (
+              <span
+                className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full border-2 border-white"
+                style={{ backgroundColor: "#F0B429" }}
+                aria-hidden
+              />
+            ) : null}
           </button>
         </div>
 
         <div className="mb-3 min-w-0">
           <p className="mb-1 text-[14px] text-gray-500">Good morning</p>
-          <button type="button" className="flex min-w-0 items-center gap-1.5">
+          <button
+            type="button"
+            onClick={onEditLocation}
+            className="flex min-w-0 items-center gap-1.5 text-left"
+            aria-label={needsLocation ? "Set your location" : "Change location"}
+          >
             <MapPin
               className="h-5 w-5 shrink-0"
-              style={{ color: GREEN }}
-              fill={GREEN}
+              style={{ color: needsLocation ? "#F59E0B" : GREEN }}
+              fill={needsLocation ? "#F59E0B" : GREEN}
               stroke={GREEN_DARK}
               strokeWidth={1.5}
             />
-            <span className="truncate text-[18px] font-bold" style={{ color: GREEN_DARK }}>
+            <span
+              className="truncate text-[18px] font-bold"
+              style={{ color: needsLocation ? "#B45309" : GREEN_DARK }}
+            >
               {cityLabel}
             </span>
             <ChevronRight className="h-4 w-4 shrink-0" style={{ color: GREEN }} />
           </button>
+          {needsLocation ? (
+            <p className="mt-1 text-[13px] text-amber-800">
+              Tap to choose: at home or planning a trip
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -163,23 +213,18 @@ export function HomeFeed({
       </div>
 
       <div className="shrink-0">
-        {pwa.visible ? (
-          <PwaInstallRentanoTip
-            nativeInstallReady={pwa.nativeInstallReady}
-            manualIos={pwa.manualIos}
-            onInstall={() => void pwa.install()}
-            onDismiss={pwa.dismiss}
-          />
-        ) : null}
-
         <BottomNav
-          activeTab="home"
+          activeTab={rentanoOpen ? "rentano" : "home"}
           onHome={() => undefined}
           onPostRequest={onPostRequest}
           onRentano={() => setRentanoOpen(true)}
         />
       </div>
-      <RentanoChatSheet open={rentanoOpen} onClose={() => setRentanoOpen(false)} />
+      <RentanoChatSheet
+        open={rentanoOpen}
+        onClose={() => setRentanoOpen(false)}
+        context={{ screen: "home", appMode: mode }}
+      />
     </div>
   );
 }

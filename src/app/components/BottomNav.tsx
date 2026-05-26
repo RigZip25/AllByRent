@@ -84,7 +84,7 @@ export function BottomNav({
           type="button"
           onClick={onRentano}
           className="flex min-w-[64px] flex-col items-center gap-1.5 py-1"
-          aria-label="Chat with Rentano"
+          aria-label="Open Rentano menu"
         >
           <NavIconRentano active={activeTab === "rentano"} />
           <span

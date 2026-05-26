@@ -27,6 +27,7 @@ const T_FLYIN_END = 2000;
 const T_SPIN_END = 3200;
 const T_REVEAL_END = 3800;
 const T_META_END = 4200;
+const T_AUTO_ADVANCE = 5200;
 
 /** Global size tweak (−15% from previous large layout) */
 const S = 0.85;
@@ -101,10 +102,10 @@ function TrustChip({ icon, label }: { icon: ReactNode; label: string }) {
 }
 
 type SplashScreenProps = {
-  onGetStarted: () => void;
+  onDone: () => void;
 };
 
-export function SplashScreen({ onGetStarted }: SplashScreenProps) {
+export function SplashScreen({ onDone }: SplashScreenProps) {
   const [phase, setPhase] = useState<Phase>("pulse");
 
   useEffect(() => {
@@ -112,13 +113,15 @@ export function SplashScreen({ onGetStarted }: SplashScreenProps) {
     const t2 = setTimeout(() => setPhase("spin"), T_FLYIN_END);
     const t3 = setTimeout(() => setPhase("reveal"), T_SPIN_END);
     const t4 = setTimeout(() => setPhase("ready"), T_REVEAL_END);
+    const t5 = setTimeout(() => onDone(), T_AUTO_ADVANCE);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
       clearTimeout(t4);
+      clearTimeout(t5);
     };
-  }, []);
+  }, [onDone]);
 
   /** Full-screen on iOS/PWA: paint under safe-area; only while this screen is mounted */
   useEffect(() => {
@@ -145,7 +148,6 @@ export function SplashScreen({ onGetStarted }: SplashScreenProps) {
   const showRentano = phase === "spin" || phase === "reveal" || phase === "ready";
   const showTitle = phase === "reveal" || phase === "ready";
   const showMeta = phase === "ready";
-  const showCta = phase === "ready";
 
   const flyDuration = (T_FLYIN_END - T_PULSE_END) / 1000;
 
@@ -322,21 +324,7 @@ export function SplashScreen({ onGetStarted }: SplashScreenProps) {
       </div>
 
       <footer className="relative z-20 shrink-0 px-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))]">
-        <AnimatePresence>
-          {showCta && (
-            <motion.button
-              type="button"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: 0.1 }}
-              onClick={onGetStarted}
-              className="btn-primary min-h-[3.2rem] w-full py-3.5 text-[clamp(0.95rem,3.8vw,1.8rem)] font-semibold shadow-xl"
-              style={{ backgroundColor: BRAND_AMBER, color: BRAND_GREEN }}
-            >
-              Get Started →
-            </motion.button>
-          )}
-        </AnimatePresence>
+        <div className="min-h-[3.2rem]" />
       </footer>
 
       <motion.div

@@ -46,6 +46,11 @@ export function hasProfileCity(): boolean {
   return getProfileCity().trim().length > 0;
 }
 
+/** Rent browse needs at-home or trip destination chosen at least once. */
+export function hasRentLocationSetup(): boolean {
+  return getHomeLocation() !== null || getTripDestination().trim().length > 0;
+}
+
 /** @deprecated Prefer setHomeLocation or setTripDestination */
 export function setProfileCity(city: string): void {
   try {

@@ -8,9 +8,15 @@
     "build": "vite build",
     "dev": "vite",
     "dev:https": "set VITE_DEV_HTTPS=true&& vite",
-    "start": "vite"
+    "start": "vite",
+    "preview": "vite preview"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
     "@mui/icons-material": "7.3.5",
@@ -71,6 +77,8 @@
     "vaul": "1.1.2"
   },
   "devDependencies": {
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
     "@tailwindcss/vite": "4.1.12",
     "@vitejs/plugin-basic-ssl": "^2.3.0",
     "@vitejs/plugin-react": "4.7.0",
@@ -79,18 +87,6 @@
     "vite": "6.3.5",
     "vite-plugin-pwa": "^0.21.2",
     "workbox-window": "^7.4.1"
-  },
-  "peerDependencies": {
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    },
-    "react-dom": {
-      "optional": true
-    }
   },
   "pnpm": {
     "overrides": {

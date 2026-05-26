@@ -1,5 +1,5 @@
 const DISMISS_KEY = "allbyrent_pwa_install_dismissed";
-const DISMISS_DAYS = 14;
+export const PWA_INSTALL_DISMISS_DAYS = 14;
 
 export type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -41,7 +41,7 @@ export function canShowInstallPrompt(): boolean {
     if (!raw) return true;
     const dismissedAt = Number.parseInt(raw, 10);
     if (Number.isNaN(dismissedAt)) return true;
-    const ms = DISMISS_DAYS * 24 * 60 * 60 * 1000;
+    const ms = PWA_INSTALL_DISMISS_DAYS * 24 * 60 * 60 * 1000;
     return Date.now() - dismissedAt > ms;
   } catch {
     return true;
@@ -62,6 +62,14 @@ export function clearInstallPromptDismissal(): void {
   } catch {
     /* ignore */
   }
+}
+
+/** Ask before hiding the install tip (avoids accidental taps). */
+export function confirmDismissInstallTip(): boolean {
+  if (typeof window === "undefined") return true;
+  return window.confirm(
+    `Hide the install tip for ${PWA_INSTALL_DISMISS_DAYS} days?\n\nYou can still add AllByRent from your browser menu anytime.`,
+  );
 }
 
 let deferredInstallPrompt: BeforeInstallPromptEvent | null = null;

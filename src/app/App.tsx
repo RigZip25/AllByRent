@@ -18,8 +18,16 @@ import { ListingWizard } from "../screens/listing/ListingWizard";
 import { YouAreAllSet } from "../screens/onboarding/YouAreAllSet";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
+import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
 import { getAppMode, setAppMode } from "../lib/appMode";
-import { completeOnboarding, getInitialRoute } from "../lib/onboardingStorage";
+import {
+  completeOnboarding,
+  isOnboardingComplete,
+  isIntroDone,
+  markIntroDone,
+} from "../lib/onboardingStorage";
+import { hasRentLocationSetup } from "../lib/listingStorage";
+import { isSimulateUpdateRequested } from "../lib/pwaUpdateStorage";
 
 type Screen =
   | "splash"
@@ -38,10 +46,47 @@ type Screen =
   | "listingIntro"
   | "listItem";
 
+function readBootQuery() {
+  if (typeof window === "undefined") {
+    return { skipSplash: false, openNotifications: false, simulateUpdate: false };
+  }
+  const params = new URLSearchParams(window.location.search);
+  const simulateUpdate =
+    params.get("simulateUpdate") === "1" || isSimulateUpdateRequested();
+  return {
+    skipSplash: params.get("skipSplash") === "1",
+    openNotifications: params.get("openNotifications") === "1",
+    simulateUpdate,
+  };
+}
+
+function clearBootQuery(keys: string[]) {
+  const params = new URLSearchParams(window.location.search);
+  let changed = false;
+  for (const key of keys) {
+    if (params.has(key)) {
+      params.delete(key);
+      changed = true;
+    }
+  }
+  if (!changed) return;
+  const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}${window.location.hash}`;
+  window.history.replaceState({}, "", next);
+}
+
 function AppRoutes() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>(() =>
-    getInitialRoute() === "home" ? "home" : "splash",
-  );
+  const boot = readBootQuery();
+  const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
+    if (boot.skipSplash) {
+      if (boot.openNotifications || boot.simulateUpdate) {
+        markIntroDone();
+        completeOnboarding();
+        return "home";
+      }
+      return isIntroDone() ? "home" : "firstHello";
+    }
+    return "splash";
+  });
   const [navStack, setNavStack] = useState<Screen[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -63,6 +108,14 @@ function AppRoutes() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!boot.openNotifications) return;
+    if (currentScreen !== "home" && currentScreen !== "notifications") return;
+    setNavStack([]);
+    setCurrentScreen("notifications");
+    clearBootQuery(["openNotifications", "skipSplash", "simulateUpdate"]);
+  }, [boot.openNotifications, currentScreen]);
+
   const finishRentOnboarding = () => {
     setNavStack([]);
     setCurrentScreen("youAreAllSet");
@@ -78,12 +131,45 @@ function AppRoutes() {
     setCurrentScreen("home");
   };
 
+  const openRentLocationSetup = useCallback(() => {
+    setHomeLocationError(null);
+    setNavStack([]);
+    setCurrentScreen("whereAreYou");
+  }, []);
+
+  useEffect(() => {
+    if (currentScreen !== "home") return;
+    if (getAppMode() !== "rent") return;
+    if (hasRentLocationSetup()) return;
+    if (isOnboardingComplete()) return;
+    openRentLocationSetup();
+  }, [currentScreen, openRentLocationSetup]);
+
   const skipOnboarding = useCallback(() => {
-    completeOnboarding();
+    markIntroDone();
+
+    if (
+      currentScreen === "whereAreYou" ||
+      currentScreen === "whereAreYouManual" ||
+      currentScreen === "whereAreYouHeading"
+    ) {
+      completeOnboarding();
+      setNavStack([]);
+      setCurrentScreen("home");
+      return;
+    }
+
+    if (currentScreen === "firstHello" || currentScreen === "whatDoYouWant") {
+      setAppMode("rent");
+      setNavStack([]);
+      setCurrentScreen("whereAreYou");
+      return;
+    }
+
     setAppMode("rent");
     setNavStack([]);
     setCurrentScreen("home");
-  }, []);
+  }, [currentScreen]);
 
   const finishOnboardingToHome = useCallback(() => {
     completeOnboarding();
@@ -92,6 +178,13 @@ function AppRoutes() {
   }, []);
 
   const handleSplashContinue = () => {
+    // Splash is always shown. After it finishes, route:
+    // - If intro already done (user completed onboarding before), go to home.
+    // - Otherwise show the Rentano intro.
+    if (isIntroDone()) {
+      setCurrentScreen("home");
+      return;
+    }
     setCurrentScreen("firstHello");
   };
 
@@ -227,7 +320,7 @@ function AppRoutes() {
 
         <div className="app-screen-host">
         {currentScreen === "splash" && (
-          <SplashScreen onGetStarted={handleSplashContinue} />
+          <SplashScreen onDone={handleSplashContinue} />
         )}
 
         {currentScreen === "firstHello" && (
@@ -280,6 +373,7 @@ function AppRoutes() {
             onNavigate={handleNavigate}
             onCategorySelect={handleCategorySelect}
             onOpenNotifications={handleOpenNotifications}
+            onEditLocation={openRentLocationSetup}
           />
         )}
 
@@ -333,8 +427,10 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <PwaInstallProvider>
-      <AppRoutes />
-    </PwaInstallProvider>
+    <PwaUpdateProvider>
+      <PwaInstallProvider>
+        <AppRoutes />
+      </PwaInstallProvider>
+    </PwaUpdateProvider>
   );
 }

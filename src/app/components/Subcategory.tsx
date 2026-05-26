@@ -345,7 +345,11 @@ export function Subcategory({ category, onBack, onPostRequest, onItemSelect }: S
         onPostRequest={onPostRequest}
         onRentano={() => setRentanoOpen(true)}
       />
-      <RentanoChatSheet open={rentanoOpen} onClose={() => setRentanoOpen(false)} />
+      <RentanoChatSheet
+        open={rentanoOpen}
+        onClose={() => setRentanoOpen(false)}
+        context={{ screen: "subcategory", appMode: "rent" }}
+      />
     </div>
   );
 }

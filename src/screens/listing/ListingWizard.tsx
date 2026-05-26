@@ -308,6 +308,8 @@ export function ListingWizard({
         open={chatOpen}
         onClose={() => setChatOpen(false)}
         context={{
+          screen: "listItem",
+          appMode: "earn",
           step,
           totalSteps: TOTAL_LISTING_STEPS,
           draft,

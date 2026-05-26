@@ -3,6 +3,7 @@ import {
   canShowInstallPrompt,
   captureInstallPrompt,
   clearDeferredInstallPrompt,
+  confirmDismissInstallTip,
   dismissInstallPrompt,
   getDeferredInstallPrompt,
   isStandalonePwa,
@@ -60,6 +61,7 @@ export function usePwaInstall() {
   }, []);
 
   const dismiss = useCallback(() => {
+    if (!confirmDismissInstallTip()) return;
     dismissInstallPrompt();
     setVisible(false);
   }, []);
