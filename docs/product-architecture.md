@@ -71,6 +71,13 @@ The first implementation contract is `src/data/listing.ts`:
 - `listingSteps`: ordered required steps
 
 Business/pro listings currently require an additional `rules` step for compliance requirements.
+The frontend prototype should mirror this: personal listings skip the business rules screen, while
+business/pro listings include it.
+
+Current prototype behavior:
+
+- `list-personal`: publishes one asset unit in the demo QR screen.
+- `list-business`: publishes multiple asset units in the demo QR screen.
 
 ## Asset identity and QR codes
 
