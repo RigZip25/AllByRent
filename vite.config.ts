@@ -74,7 +74,7 @@ export default defineConfig(({ mode }) => {
   const githubRepo =
     process.env.GITHUB_REPOSITORY?.split('/')[1] ??
     process.env.VITE_GITHUB_PAGES_REPO ??
-    'v0-allbyrent-app-design'
+    'AllByRent'
   const base =
     process.env.GITHUB_PAGES === 'true' ? `/${githubRepo}/` : '/'
 
