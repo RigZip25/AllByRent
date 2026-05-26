@@ -40,7 +40,7 @@ import {
   type ListingScope,
   type PublishedListing,
 } from "./data/listing";
-import { type ListingIntent } from "./data/taxonomy";
+import { type ComplianceFlag, type ListingIntent } from "./data/taxonomy";
 
 type Hotspot = {
   className: string;
@@ -968,21 +968,26 @@ export const App = () => {
   };
 
   const publishDemoListing = (targetId: string) => {
+    const isBusinessListing = session.listingIntent === "list-business";
     const draft = {
       ...createEmptyListingDraft(
-        session.listingIntent === "list-business" ? "list-business" : "list-personal",
+        isBusinessListing ? "list-business" : "list-personal",
       ),
-      brand: "Shure",
-      categoryId: "electronics",
-      complianceFlags: ["deposit-required" as const],
-      description: "Five identical microphones tracked as separate physical asset units.",
-      model: "SM58",
-      priceAmount: 20,
+      brand: isBusinessListing ? "Shure" : "Coleman",
+      categoryId: isBusinessListing ? "electronics" : "outdoor-patio",
+      complianceFlags: isBusinessListing ? (["deposit-required"] as ComplianceFlag[]) : [],
+      description: isBusinessListing
+        ? "Five identical microphones tracked as separate physical asset units."
+        : "One personal camping tent tracked as a single physical asset.",
+      model: isBusinessListing ? "SM58" : "Sundome",
+      priceAmount: isBusinessListing ? 20 : 12,
       priceCurrency: currentLocale.currency,
-      quantity: 5,
-      serialNumbers: ["MIC-001", "MIC-002", "MIC-003", "MIC-004", "MIC-005"],
-      subcategoryId: "event-av",
-      title: "Shure SM58 Microphone",
+      quantity: isBusinessListing ? 5 : 1,
+      serialNumbers: isBusinessListing
+        ? ["MIC-001", "MIC-002", "MIC-003", "MIC-004", "MIC-005"]
+        : ["TENT-001"],
+      subcategoryId: isBusinessListing ? "event-av" : "camping-tents-sleeping-bags",
+      title: isBusinessListing ? "Shure SM58 Microphone" : "Personal Camping Tent",
     };
     const listing = createPublishedListing(draft, session.email ?? "demo-owner");
 
@@ -994,28 +999,50 @@ export const App = () => {
     goToScreen(targetId);
   };
 
+  const getDynamicTarget = (hotspot: Hotspot) => {
+    if (activeScreen.id === "listing-location" && hotspot.className === "hotspot-listing-next") {
+      return session.listingIntent === "list-business" ? "listing-rules" : "listing-photos";
+    }
+
+    if (activeScreen.id === "listing-photos" && hotspot.className === "hotspot-listing-previous") {
+      return session.listingIntent === "list-business" ? "listing-rules" : "listing-location";
+    }
+
+    return hotspot.targetId;
+  };
+
+  const getActiveBackTarget = () => {
+    if (activeScreen.id === "listing-photos") {
+      return session.listingIntent === "list-business" ? "listing-rules" : "listing-location";
+    }
+
+    return activeScreen.backTargetId;
+  };
+
   const handleHotspotClick = (hotspot: Hotspot) => {
+    const targetId = getDynamicTarget(hotspot);
+
     switch (activeScreen.id) {
       case "login":
         if (hotspot.className.includes("primary")) {
-          submitLogin(hotspot.targetId);
+          submitLogin(targetId);
           return;
         }
 
         if (hotspot.className.includes("provider")) {
-          submitProviderAuth(hotspot.targetId);
+          submitProviderAuth(targetId);
           return;
         }
         break;
 
       case "signup":
         if (hotspot.className.includes("primary")) {
-          submitSignup(hotspot.targetId);
+          submitSignup(targetId);
           return;
         }
 
         if (hotspot.className.includes("provider")) {
-          submitProviderAuth(hotspot.targetId);
+          submitProviderAuth(targetId);
           return;
         }
         break;
@@ -1023,21 +1050,21 @@ export const App = () => {
       case "verification-phone":
       case "verification-code":
         if (hotspot.className === "hotspot-otp-area") {
-          submitVerification(hotspot.targetId);
+          submitVerification(targetId);
           return;
         }
         break;
 
       case "reset-password":
         if (hotspot.className.includes("primary")) {
-          submitResetPassword(hotspot.targetId);
+          submitResetPassword(targetId);
           return;
         }
         break;
 
       case "create-new-password":
         if (hotspot.className.includes("primary")) {
-          submitNewPassword(hotspot.targetId);
+          submitNewPassword(targetId);
           return;
         }
         break;
@@ -1045,38 +1072,38 @@ export const App = () => {
       case "like-to-do-rent":
       case "like-to-do-list":
         if (hotspot.className === "hotspot-choice-left") {
-          choosePreference("rent", hotspot.targetId);
+          choosePreference("rent", targetId);
           return;
         }
 
         if (hotspot.className === "hotspot-choice-right") {
-          choosePreference("list-undecided", hotspot.targetId);
+          choosePreference("list-undecided", targetId);
           return;
         }
         break;
 
       case "listing-scope":
         if (hotspot.className === "hotspot-listing-personal") {
-          chooseListingScope("list-personal", hotspot.targetId);
+          chooseListingScope("list-personal", targetId);
           return;
         }
 
         if (hotspot.className === "hotspot-listing-business") {
-          chooseListingScope("list-business", hotspot.targetId);
+          chooseListingScope("list-business", targetId);
           return;
         }
         break;
 
       case "booking":
         if (hotspot.className === "hotspot-booking-confirm") {
-          confirmBooking(hotspot.targetId);
+          confirmBooking(targetId);
           return;
         }
         break;
 
       case "listing-order-preview":
         if (hotspot.className === "hotspot-listing-next") {
-          publishDemoListing(hotspot.targetId);
+          publishDemoListing(targetId);
           return;
         }
         break;
@@ -1085,8 +1112,10 @@ export const App = () => {
         break;
     }
 
-    goToScreen(hotspot.targetId);
+    goToScreen(targetId);
   };
+
+  const activeBackTarget = getActiveBackTarget();
 
   const goToPrimaryTarget = () => {
     if (activeScreen.primaryTargetId) {
@@ -1163,8 +1192,9 @@ export const App = () => {
           <div className="custom-screen asset-qr-screen">
             <h1>Asset QR created</h1>
             <p>
-              Each physical unit gets a unique identity. This demo listing creates five separate
-              QR payloads for identical Shure SM58 microphones.
+              {session.lastPublishedListing?.quantity === 1
+                ? "This personal listing creates one QR identity for one physical item."
+                : "Business inventory creates one QR identity for each physical unit, even when items are identical."}
             </p>
             <div className="qr-card">
               <div className="qr-visual" aria-hidden="true">
@@ -1193,10 +1223,10 @@ export const App = () => {
           </div>
         ) : null}
 
-        {activeScreen.backTargetId ? (
+        {activeBackTarget ? (
           <button
             className="hotspot hotspot-back"
-            onClick={() => goToScreen(activeScreen.backTargetId!)}
+            onClick={() => goToScreen(activeBackTarget)}
             type="button"
           >
             Back
