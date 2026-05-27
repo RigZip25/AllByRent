@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getSupabaseClient, isSupabaseConfigured } from "../lib/supabaseClient";
-import { onAuthStateChange } from "../lib/auth";
+import { completeAuthCallbackFromUrl, onAuthStateChange } from "../lib/auth";
 
 type AuthContextValue = {
   configured: boolean;
@@ -34,6 +34,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     let mounted = true;
     setLoading(true);
+
+    void completeAuthCallbackFromUrl().catch(() => {
+      // URL cleanup errors are surfaced in AuthGate when user retries sign-in.
+    });
 
     void supabase.auth
       .getSession()

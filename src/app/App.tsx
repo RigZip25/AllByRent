@@ -27,6 +27,13 @@ import { SubscriptionPlansScreen } from "../screens/SubscriptionPlansScreen";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
 import { AuthProvider, useAuth } from "../hooks/AuthProvider";
+import { RequireAuthProvider } from "../hooks/RequireAuth";
+import {
+  consumeAuthReturn,
+  peekAuthReturn,
+  peekPendingAuthEmail,
+  setAuthReturn,
+} from "../lib/authReturn";
 import { getAppMode, setAppMode } from "../lib/appMode";
 import {
   completeOnboarding,
@@ -204,6 +211,7 @@ function AppRoutes() {
 
     if (authRequired && auth.configured && !auth.session) {
       setPostAuthTarget(screen);
+      setAuthReturn(screen);
       setCurrentScreen((from) => {
         setNavStack((stack) => [...stack, from]);
         return "authGate";
@@ -216,6 +224,39 @@ function AppRoutes() {
       return screen;
     });
   }, [auth.configured, auth.session]);
+
+  const requireAuth = useCallback(() => {
+    if (!auth.configured || auth.session) return true;
+    setPostAuthTarget(currentScreen);
+    setAuthReturn(currentScreen);
+    setCurrentScreen((from) => {
+      setNavStack((stack) => [...stack, from]);
+      return "authGate";
+    });
+    return false;
+  }, [auth.configured, auth.session, currentScreen]);
+
+  const resolvePostAuthScreen = useCallback((): Screen => {
+    const stored = consumeAuthReturn();
+    const candidate = (postAuthTarget ?? stored) as Screen | null;
+    const validScreens: Screen[] = [
+      "home",
+      "booking",
+      "postRequest",
+      "listingIntro",
+      "listItem",
+      "hostListingDetail",
+      "activeRental",
+      "profile",
+      "rentals",
+      "favorites",
+      "earnBusiness",
+      "subcategory",
+      "itemDetail",
+    ];
+    if (candidate && validScreens.includes(candidate)) return candidate;
+    return "home";
+  }, [postAuthTarget]);
 
   const resetToHome = () => {
     setNavStack([]);
@@ -430,33 +471,34 @@ function AppRoutes() {
 
     // If we just came back from OAuth, prompt for passkey enrollment once.
     const provider = consumeLastOauthProvider();
+    const finishAuth = () => {
+      const target = resolvePostAuthScreen();
+      setNavStack([]);
+      setCurrentScreen(target);
+      setPostAuthTarget(null);
+    };
+
     if (!provider) {
-      if (currentScreen === "authGate") {
-        setNavStack([]);
-        setCurrentScreen(postAuthTarget ?? "home");
-        setPostAuthTarget(null);
+      if (currentScreen === "authGate" || peekPendingAuthEmail()) {
+        finishAuth();
       }
       return;
     }
 
     if (!shouldPromptEnablePasskey()) {
-      setNavStack([]);
-      setCurrentScreen(postAuthTarget ?? "home");
-      setPostAuthTarget(null);
+      finishAuth();
       return;
     }
 
     void userHasPasskey().then((has) => {
       if (has) {
-        setNavStack([]);
-        setCurrentScreen(postAuthTarget ?? "home");
-        setPostAuthTarget(null);
+        finishAuth();
         return;
       }
       setNavStack([]);
       setCurrentScreen("enablePasskey");
     });
-  }, [auth.configured, auth.session, currentScreen, postAuthTarget]);
+  }, [auth.configured, auth.session, currentScreen, resolvePostAuthScreen]);
 
   const handleBackFromSubcategory = () => {
     handleBack();
@@ -498,6 +540,7 @@ function AppRoutes() {
   }
 
   return (
+    <RequireAuthProvider requireAuth={requireAuth}>
     <div className="app-shell">
       <div
         className={`app-container bg-background ${showBrandHeader ? "app-container--with-brand" : ""}`}
@@ -708,10 +751,13 @@ function AppRoutes() {
 
         {currentScreen === "authGate" && (
           <AuthGate
+            initialStep={peekPendingAuthEmail() ? "sent" : undefined}
             onBack={handleBack}
             onContinueAsGuest={() => {
+              const stored = peekAuthReturn();
+              const target = (postAuthTarget ?? stored ?? "home") as Screen;
               setNavStack([]);
-              setCurrentScreen(postAuthTarget ?? "home");
+              setCurrentScreen(target === "authGate" ? "home" : target);
               setPostAuthTarget(null);
             }}
           />
@@ -720,13 +766,15 @@ function AppRoutes() {
         {currentScreen === "enablePasskey" && (
           <EnablePasskeyPrompt
             onBack={() => {
+              const target = resolvePostAuthScreen();
               setNavStack([]);
-              setCurrentScreen(postAuthTarget ?? "home");
+              setCurrentScreen(target);
               setPostAuthTarget(null);
             }}
             onDone={() => {
+              const target = resolvePostAuthScreen();
               setNavStack([]);
-              setCurrentScreen(postAuthTarget ?? "home");
+              setCurrentScreen(target);
               setPostAuthTarget(null);
             }}
           />
@@ -744,6 +792,7 @@ function AppRoutes() {
         </div>
       </div>
     </div>
+    </RequireAuthProvider>
   );
 }
 

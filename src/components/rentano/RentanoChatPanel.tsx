@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, Mic, MicOff, Send } from "lucide-react";
 import rentanoImg from "../../imports/No_back_rentano.png";
 import { useSpeechRecognition } from "../../hooks/useSpeechRecognition";
+import { useRequireAuth } from "../../hooks/RequireAuth";
 import { isAnthropicConfigured } from "../../lib/anthropicClient";
 import { sendRentanoMessage, type RentanoChatTurn } from "../../lib/rentanoChatApi";
 import type { RentanoRequestContext } from "../../lib/rentanoPrompt";
@@ -40,6 +41,7 @@ export function RentanoChatPanel({
   const speech = useSpeechRecognition();
 
   const configured = isAnthropicConfigured();
+  const requireAuth = useRequireAuth();
 
   const scrollToBottom = useCallback(() => {
     requestAnimationFrame(() => {
@@ -55,6 +57,8 @@ export function RentanoChatPanel({
     async (raw: string) => {
       const text = raw.trim();
       if (!text || loading) return;
+
+      if (!requireAuth()) return;
 
       if (!configured) {
         setError(
@@ -87,7 +91,7 @@ export function RentanoChatPanel({
         setLoading(false);
       }
     },
-    [apiContext, configured, loading],
+    [apiContext, configured, loading, requireAuth],
   );
 
   useEffect(() => {

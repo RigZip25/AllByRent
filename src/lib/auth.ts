@@ -1,4 +1,5 @@
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import { clearPendingAuthEmail } from "./authReturn";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 export type AuthProvider = "google" | "apple";
@@ -29,6 +30,92 @@ export function onAuthStateChange(
   }
   const { data } = supabase.auth.onAuthStateChange((event, session) => cb(event, session));
   return { unsubscribe: () => data.subscription.unsubscribe() };
+}
+
+export function getAuthRedirectUrl(): string {
+  if (typeof window === "undefined") return "";
+  return window.location.origin;
+}
+
+export async function signInWithEmailOtp(email: string): Promise<void> {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    throw new Error("Supabase is not configured.");
+  }
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) throw new Error("Enter your email address.");
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email: normalized,
+    options: {
+      emailRedirectTo: getAuthRedirectUrl(),
+      shouldCreateUser: true,
+    },
+  });
+  if (error) throw error;
+}
+
+export async function verifyEmailOtp(email: string, token: string): Promise<void> {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    throw new Error("Supabase is not configured.");
+  }
+  const normalized = email.trim().toLowerCase();
+  const code = token.replace(/\D/g, "");
+  if (!normalized) throw new Error("Enter your email address.");
+  if (code.length !== 8) throw new Error("Enter the 8-digit code from your email.");
+
+  const { error } = await supabase.auth.verifyOtp({
+    email: normalized,
+    token: code,
+    type: "email",
+  });
+  if (error) throw error;
+  clearPendingAuthEmail();
+}
+
+/**
+ * Exchange PKCE `?code=` from magic-link redirects and strip auth params from the URL.
+ * `detectSessionInUrl` on the client also runs; this makes cold loads reliable.
+ */
+export async function completeAuthCallbackFromUrl(): Promise<boolean> {
+  const supabase = getSupabaseClient();
+  if (!supabase || typeof window === "undefined") return false;
+
+  const url = new URL(window.location.href);
+  const code = url.searchParams.get("code");
+  const authError = url.searchParams.get("error_description") ?? url.searchParams.get("error");
+
+  if (authError) {
+    url.searchParams.delete("error");
+    url.searchParams.delete("error_description");
+    url.searchParams.delete("error_code");
+    const next = `${url.pathname}${url.search}${url.hash}`;
+    window.history.replaceState({}, "", next);
+    throw new Error(authError);
+  }
+
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    url.searchParams.delete("code");
+    url.searchParams.delete("type");
+    const next = `${url.pathname}${url.search}${url.hash}`;
+    window.history.replaceState({}, "", next);
+    if (error) throw error;
+    return true;
+  }
+
+  const hash = url.hash.startsWith("#") ? url.hash.slice(1) : url.hash;
+  if (hash && (hash.includes("access_token=") || hash.includes("error="))) {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) throw error;
+    if (data.session) {
+      window.history.replaceState({}, "", `${url.pathname}${url.search}`);
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export async function signInWithProvider(provider: AuthProvider): Promise<void> {
