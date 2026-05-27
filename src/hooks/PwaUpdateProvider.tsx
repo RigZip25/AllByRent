@@ -14,6 +14,12 @@ import {
   watchServiceWorkerUpdates,
 } from "../lib/pwaUpdateCheck";
 import {
+  APP_BUILD_ID,
+  hasBuildIdChanged,
+  writeStoredBuildId,
+} from "../lib/buildInfo";
+import { refreshAppShell } from "../lib/refreshAppShell";
+import {
   clearSimulateUpdateRequest,
   consumePwaUpdateSuccess,
   isSimulateUpdateRequested,
@@ -58,6 +64,13 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (hasBuildIdChanged()) {
+      writeStoredBuildId(APP_BUILD_ID);
+      void refreshAppShell();
+      return;
+    }
+    writeStoredBuildId(APP_BUILD_ID);
+
     if (consumePwaUpdateSuccess()) {
       setUpdateJustCompleted(true);
     }

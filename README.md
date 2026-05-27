@@ -80,4 +80,17 @@ Plain `npm run dev` works for email auth; passkey register/login needs `vercel d
 ### Notes
 
 - **Account deletion**: requires a Supabase Edge Function with the service role key; the UI signs out locally as a placeholder.
+
+## Production deploy & stale UI
+
+Vercel injects `VERCEL_GIT_COMMIT_SHA` at build time. The app shows a **build stamp** at the bottom of **Profile** (e.g. `Build f3994e1 · …`) so you can confirm what shipped without guessing bundle hashes.
+
+If `app.allbyrent.com` looks old after a green deploy:
+
+1. **Profile → build stamp** — should match the latest commit on `main` (first 7 chars of the SHA).
+2. **Hard refresh** the tab, or open the site in a private window.
+3. **`?resetApp=1`** — clears local data, unregisters the service worker, and reloads (use when the PWA still serves an old precache).
+4. **Vercel** — if the stamp never updates, redeploy with **Clear build cache** enabled (Project → Deployments → … on a deployment, or redeploy from the latest commit).
+
+`vercel.json` sets `Cache-Control: no-cache` on `/`, `/index.html`, `/sw.js`, and `/workbox-*.js` so the CDN does not serve a stale app shell. Hashed assets under `/assets/*` remain long-cache safe.
   

@@ -34,6 +34,7 @@ import {
   updatePreferredMode,
   type UserProfile,
 } from "../lib/userProfileStorage";
+import { formatBuildStamp } from "../lib/buildInfo";
 import { confirmAndResetAppData } from "../lib/resetAppStorage";
 import { useAuth } from "../hooks/AuthProvider";
 import { signOut } from "../lib/auth";
@@ -392,6 +393,13 @@ export function ProfileScreen({
         >
           Reset app
         </button>
+
+        <p
+          className="mt-4 text-center text-[11px] text-gray-400"
+          title="Deployment id — compare after a release"
+        >
+          {formatBuildStamp()}
+        </p>
       </div>
 
       <div className="shrink-0">

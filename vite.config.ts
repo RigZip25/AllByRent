@@ -41,7 +41,8 @@ function pwaPlugin() {
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: '/index.html',
-        skipWaiting: false,
+        // Activate new SW quickly; BUILD_ID mismatch still forces a shell refresh in-app.
+        skipWaiting: true,
         clientsClaim: true,
         runtimeCaching: [
           // Cache cheap GET requests (maps/geocode) to avoid repeated paid/slow calls.
@@ -113,6 +114,11 @@ function figmaAssetResolver() {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+  const appBuildId =
+    process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ??
+    process.env.VERCEL_DEPLOYMENT_ID?.slice(0, 12) ??
+    (mode === 'production' ? 'unknown' : 'dev')
+  const appBuildTime = new Date().toISOString()
   // HTTPS only when VITE_DEV_HTTPS=true (Safari on iPhone blocks self-signed IP certs).
   const useHttps = process.env.VITE_DEV_HTTPS === 'true'
   const githubRepo =
@@ -124,6 +130,10 @@ export default defineConfig(({ mode }) => {
 
   return {
   base,
+  define: {
+    'import.meta.env.VITE_APP_BUILD_ID': JSON.stringify(appBuildId),
+    'import.meta.env.VITE_APP_BUILD_TIME': JSON.stringify(appBuildTime),
+  },
   plugins: [
     ...(useHttps ? [basicSsl()] : []),
     figmaAssetResolver(),
