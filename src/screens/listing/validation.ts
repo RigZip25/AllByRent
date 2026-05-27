@@ -13,9 +13,25 @@ function getRateFieldsForMinimumPeriod(minimumPeriod: MinimumRentalPeriod) {
 
 function isHandoffValid(draft: ListingDraft): boolean {
   const { handoff } = draft;
+  if (handoff.itemHeavy && handoff.delivery) {
+    const weight = handoff.itemWeightLbs;
+    if (
+      typeof weight !== "number" ||
+      !Number.isFinite(weight) ||
+      weight <= 0
+    ) {
+      return false;
+    }
+  }
   if (handoff.inPerson || handoff.contactless) return true;
   if (handoff.delivery) {
-    return handoff.deliveryPrices.some((row) => row.price.trim() !== "" && row.price !== "0");
+    const fee = handoff.deliveryRoundTripFee?.trim() ?? "";
+    if (fee && fee !== "0") return true;
+    const rows = Array.isArray(handoff.deliveryPrices) ? handoff.deliveryPrices : [];
+    return rows.some(
+      (row) =>
+        typeof row?.price === "string" && row.price.trim() !== "" && row.price !== "0",
+    );
   }
   return false;
 }
@@ -62,6 +78,11 @@ export function isListingStepValid(step: number, draft: ListingDraft): boolean {
         }
         if (showMonthly && (!pricing.monthlyRate.trim() || pricing.monthlyRate === "0")) {
           return false;
+        }
+
+        if (pricing.longTermEnabled) {
+          const rate = pricing.longTermMonthlyRate?.trim() ?? "";
+          if (!rate || rate === "0") return false;
         }
       }
       if (modes.sell && rules.sell && !pricing.salePrice.trim()) return false;

@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { MrRentano } from "../../app/components/MrRentano";
-import { RentanoTip } from "../RentanoTip";
+import { RentanoHint } from "../RentanoHint";
 import { ProfilePhotoCapture } from "./ProfilePhotoCapture";
 import { setPhotoPromptDeferred } from "../../lib/avatarStorage";
 
@@ -23,13 +22,11 @@ export function ProfilePhotoOnboarding({
       style={{ backgroundColor: "#F0F4F2" }}
     >
       <div className="mx-auto flex w-full max-w-[400px] flex-1 flex-col">
-        <div className="mb-6 flex justify-center">
-          <MrRentano size={100} />
-        </div>
-
-        <RentanoTip
-          message={
-            <span className="text-[15px] leading-relaxed text-gray-700">
+        <RentanoHint
+          className="mb-6 flex justify-center"
+          size={100}
+          hint={
+            <span className="text-[15px] leading-relaxed text-gray-700 not-italic">
               People trust you with their things. A real photo builds that trust — let&apos;s take
               one now.
             </span>

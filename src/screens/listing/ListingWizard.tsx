@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import confetti from "canvas-confetti";
-import { RentanoChatFab, RentanoChatSheet } from "../../components/RentanoChat";
 import { getProfileCity, savePublishedListing } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
-import { analyzeListingPhotos } from "./listingAnalysis";
+import { analyzeListingMediaPhotos } from "./listingAnalysis";
 import { ListingPublishSuccess } from "./ListingPublishSuccess";
 import { QRStoryScreen } from "./QRStoryScreen";
 import { QRStickerScreen } from "./QRStickerScreen";
@@ -18,6 +17,8 @@ import {
   Step6QR,
   Step7Review,
 } from "./steps";
+import { subcategoriesData } from "../../app/data/subcategories";
+import type { ShelfPrefill } from "../../lib/shelfListings";
 import {
   createInitialListingDraft,
   STEPS,
@@ -25,6 +26,29 @@ import {
   type ListingDraft,
 } from "./types";
 import { isListingStepValid } from "./validation";
+
+function gradeForSubcategory(
+  category: string,
+  subcategoryLabel: string,
+): ListingDraft["grade"] {
+  const data = subcategoriesData[category];
+  if (!data) return "";
+  if (data.personal.some((sub) => sub.label === subcategoryLabel)) return "personal";
+  if (data.professional.some((sub) => sub.label === subcategoryLabel)) return "professional";
+  return "";
+}
+
+function createPrefilledListingDraft(prefill?: ShelfPrefill | null): ListingDraft {
+  const draft = createInitialListingDraft();
+  if (!prefill?.category) return draft;
+  const subcategory = prefill.subcategory?.trim() ?? "";
+  return {
+    ...draft,
+    category: prefill.category,
+    subcategory,
+    grade: subcategory ? gradeForSubcategory(prefill.category, subcategory) : draft.grade,
+  };
+}
 
 const PRIMARY_GREEN = "#0D5C3A";
 const BACKGROUND = "#F9FAFB";
@@ -62,20 +86,26 @@ function firePublishConfetti() {
 }
 
 export function ListingWizard({
+  initialPrefill,
+  initialDraft,
   onExit,
-  onListAnother,
 }: {
+  initialPrefill?: ShelfPrefill | null;
+  initialDraft?: ListingDraft | null;
   onExit: () => void;
-  onListAnother?: () => void;
 }) {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState<SlideDirection>(1);
-  const [draft, setDraft] = useState<ListingDraft>(createInitialListingDraft);
+  const [draft, setDraft] = useState<ListingDraft>(() =>
+    initialDraft ? initialDraft : createPrefilledListingDraft(initialPrefill),
+  );
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
   const [phase, setPhase] = useState<WizardPhase>("steps");
   const [isPublishing, setIsPublishing] = useState(false);
   const profileCity = getProfileCity();
+  const [wizardStack, setWizardStack] = useState<
+    { step: number; draft: ListingDraft; phase: WizardPhase }[]
+  >([]);
 
   const canContinue = isListingStepValid(step, draft);
   const progress = (step / TOTAL_LISTING_STEPS) * 100;
@@ -83,17 +113,41 @@ export function ListingWizard({
   const stepLabel = STEPS[step - 1]?.name ?? "";
   const showStepChrome = phase === "steps";
 
+  const canReturnToPrevious = wizardStack.length > 0;
+
+  const headerTitle = useMemo(() => {
+    if (phase === "qrStory") return "How your QR works";
+    if (phase === "qrSticker") return "QR setup";
+    if (phase === "success") return "Published";
+    return `Step ${step} of ${TOTAL_LISTING_STEPS}`;
+  }, [phase, step]);
+
   const goToStep = (nextStep: number, nextDirection: SlideDirection) => {
     setDirection(nextDirection);
     setStep(nextStep);
   };
 
   const handleBack = () => {
-    if (!showStepChrome) return;
+    if (phase !== "steps") {
+      // Within the same listing's publish flow, treat Back as returning to the prior phase.
+      if (phase === "qrSticker") {
+        setPhase("qrStory");
+        return;
+      }
+      if (phase === "qrStory") {
+        setPhase("steps");
+        return;
+      }
+      // Success screen uses onExit (back to app).
+      onExit();
+      return;
+    }
+
     if (step === 1) {
       setShowDiscardDialog(true);
       return;
     }
+
     goToStep(step - 1, -1);
   };
 
@@ -104,7 +158,8 @@ export function ListingWizard({
       const giftOrSellOnly = isGiftOrSellOnly(draft);
       const publishedDraft: ListingDraft = {
         ...draft,
-        listingStatus: giftOrSellOnly ? "active" : "pending_sticker",
+        generateQR: true,
+        listingStatus: giftOrSellOnly ? "active" : "pending_qr",
       };
 
       setDraft(publishedDraft);
@@ -112,7 +167,7 @@ export function ListingWizard({
       firePublishConfetti();
       setIsPublishing(false);
 
-      if (publishedDraft.generateQR && !giftOrSellOnly) {
+      if (!giftOrSellOnly) {
         setPhase("qrStory");
       } else {
         setPhase("success");
@@ -125,23 +180,6 @@ export function ListingWizard({
       if (draft.photos.length === 0 || draft.aiAnalysisPending || draft.photoEnhancementPending) {
         return;
       }
-
-      setDraft((current) => ({ ...current, aiAnalysisPending: true }));
-
-      try {
-        const suggestions = await analyzeListingPhotos(draft.photos);
-        setDraft((current) => ({
-          ...current,
-          aiSuggestions: suggestions,
-          aiAnalysisPending: false,
-        }));
-      } catch (error) {
-        setDraft((current) => ({ ...current, aiAnalysisPending: false }));
-        if (import.meta.env.DEV) {
-          console.warn("AI photo analysis failed:", error);
-        }
-      }
-
       goToStep(2, 1);
       return;
     }
@@ -149,6 +187,28 @@ export function ListingWizard({
     if (!canContinue) return;
     if (isLastStep) return;
     goToStep(step + 1, 1);
+  };
+
+  const handleAnalyzePhotos = async () => {
+    if (draft.photos.length === 0 || draft.aiAnalysisPending || draft.photoEnhancementPending) {
+      return;
+    }
+
+    setDraft((current) => ({ ...current, aiAnalysisPending: true }));
+
+    try {
+      const suggestions = await analyzeListingMediaPhotos(draft.photos);
+      setDraft((current) => ({
+        ...current,
+        aiSuggestions: suggestions,
+        aiAnalysisPending: false,
+      }));
+    } catch (error) {
+      setDraft((current) => ({ ...current, aiAnalysisPending: false }));
+      if (import.meta.env.DEV) {
+        console.warn("AI photo analysis failed:", error);
+      }
+    }
   };
 
   const continueLabel =
@@ -170,7 +230,27 @@ export function ListingWizard({
 
   const handleDiscard = () => {
     setShowDiscardDialog(false);
+
+    if (wizardStack.length > 0) {
+      const previous = wizardStack[wizardStack.length - 1];
+      setWizardStack((stack) => stack.slice(0, -1));
+      setDraft(previous.draft);
+      setPhase(previous.phase);
+      setStep(previous.step);
+      setDirection(-1);
+      return;
+    }
+
     onExit();
+  };
+
+  const handleStartAnotherListing = () => {
+    setWizardStack((stack) => [...stack, { step, draft, phase }]);
+    setDraft(createPrefilledListingDraft(initialPrefill));
+    setStep(1);
+    setDirection(1);
+    setPhase("steps");
+    setShowDiscardDialog(false);
   };
 
   if (phase === "qrStory") {
@@ -194,7 +274,7 @@ export function ListingWizard({
           draft={draft}
           setDraft={setDraft}
           onComplete={() => setPhase("success")}
-          onListAnother={onListAnother ?? onExit}
+          onListAnother={handleStartAnotherListing}
           onBackToStory={() => setPhase("qrStory")}
         />
       </div>
@@ -231,10 +311,13 @@ export function ListingWizard({
             <ArrowLeft className="h-5 w-5" style={{ color: PRIMARY_GREEN }} />
           </button>
           <div className="text-center">
-            <p className="text-xs font-medium text-[#9CA3AF]">
-              Step {step} of {TOTAL_LISTING_STEPS}
-            </p>
+            <p className="text-xs font-medium text-[#9CA3AF]">{headerTitle}</p>
             <p className="text-sm font-semibold text-[#374151]">{stepLabel}</p>
+            {canReturnToPrevious ? (
+              <p className="mt-0.5 text-[11px] font-medium text-[#9CA3AF]">
+                You can return to your previous QR setup anytime.
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -268,7 +351,11 @@ export function ListingWizard({
                 onGoToStep={(target) => goToStep(target, -1)}
               />
             ) : step === 1 ? (
-              <Step1Photos draft={draft} setDraft={setDraft} />
+              <Step1Photos
+                draft={draft}
+                setDraft={setDraft}
+                onAnalyzePhotos={() => void handleAnalyzePhotos()}
+              />
             ) : step === 2 ? (
               <Step2ItemInfo draft={draft} setDraft={setDraft} />
             ) : step === 3 ? (
@@ -283,10 +370,6 @@ export function ListingWizard({
           </motion.div>
         </AnimatePresence>
       </main>
-
-      <div className="absolute bottom-[5.5rem] right-4 z-30">
-        <RentanoChatFab onClick={() => setChatOpen(true)} />
-      </div>
 
       {!isLastStep ? (
         <footer className="shrink-0 border-t border-[#E5E7EB] bg-white px-4 pb-6 pt-4">
@@ -303,18 +386,6 @@ export function ListingWizard({
           </button>
         </footer>
       ) : null}
-
-      <RentanoChatSheet
-        open={chatOpen}
-        onClose={() => setChatOpen(false)}
-        context={{
-          screen: "listItem",
-          appMode: "earn",
-          step,
-          totalSteps: TOTAL_LISTING_STEPS,
-          draft,
-        }}
-      />
 
       <AnimatePresence>
         {showDiscardDialog && (
