@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { DollarSign, Package, Plus, TrendingUp } from "lucide-react";
 import { loadPublishedListings } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
+import { useMediaUrl } from "../../lib/useMediaUrl";
 
 const GREEN = "#1A9E6E";
 const GREEN_DARK = "#0D5C3A";
@@ -32,14 +33,16 @@ function StatCard({
   );
 }
 
-export function HostDashboard({ onListItem }: { onListItem: () => void }) {
+export function HostDashboard({
+  onListItem,
+  onOpenListing,
+}: {
+  onListItem: () => void;
+  onOpenListing: (listingId: string) => void;
+}) {
   const listings = loadPublishedListings();
-  const activeCount = listings.filter(
-    (item) =>
-      item.listingStatus === "active" ||
-      item.listingStatus === "published" ||
-      item.listingStatus === "pending_sticker",
-  ).length;
+  const activeCount = listings.filter((item) => item.listingStatus === "active").length;
+  const needsQrCount = listings.filter((item) => item.listingStatus === "pending_qr").length;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -52,6 +55,11 @@ export function HostDashboard({ onListItem }: { onListItem: () => void }) {
           <StatCard
             label="Active listings"
             value={String(activeCount)}
+            icon={<Package className="h-4 w-4" style={{ color: GREEN }} />}
+          />
+          <StatCard
+            label="Needs QR"
+            value={String(needsQrCount)}
             icon={<Package className="h-4 w-4" style={{ color: GREEN }} />}
           />
           <StatCard
@@ -108,28 +116,25 @@ export function HostDashboard({ onListItem }: { onListItem: () => void }) {
                 className="flex items-center gap-3 rounded-2xl border bg-white p-3"
                 style={{ borderColor: BORDER }}
               >
-                <div
-                  className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F0F4F2] text-2xl"
+                <button
+                  type="button"
+                  onClick={() => onOpenListing(listing.id)}
+                  className="flex w-full items-center gap-3 text-left"
+                  aria-label={`Open ${getListingDisplayTitle(listing.title)} listing details`}
                 >
-                  {listing.photos[0] ? (
-                    <img
-                      src={listing.photos[0]}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span aria-hidden>📦</span>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold text-gray-900">
-                    {getListingDisplayTitle(listing.title)}
-                  </p>
-                  <p className="text-sm capitalize text-gray-500">
-                    {listing.listingStatus}
-                    {listing.category ? ` · ${listing.category}` : ""}
-                  </p>
-                </div>
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F0F4F2] text-2xl">
+                    <ListingThumb media={listing.photos?.[0] ?? null} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-gray-900">
+                      {getListingDisplayTitle(listing.title)}
+                    </p>
+                    <p className="text-sm capitalize text-gray-500">
+                      {listing.listingStatus === "pending_qr" ? "Needs QR setup" : listing.listingStatus}
+                      {listing.category ? ` · ${listing.category}` : ""}
+                    </p>
+                  </div>
+                </button>
               </li>
             ))}
           </ul>
@@ -137,4 +142,13 @@ export function HostDashboard({ onListItem }: { onListItem: () => void }) {
       </div>
     </div>
   );
+}
+
+function ListingThumb({ media }: { media: { id: string; mimeType: string; thumbId?: string } | null }) {
+  const thumb = media?.thumbId ? { ...media, id: media.thumbId } : media;
+  const { url } = useMediaUrl(thumb);
+  if (url) {
+    return <img src={url} alt="" className="h-full w-full object-cover" />;
+  }
+  return <span aria-hidden>📦</span>;
 }

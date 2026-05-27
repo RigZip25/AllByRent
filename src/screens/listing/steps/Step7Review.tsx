@@ -1,7 +1,8 @@
 import { motion } from "motion/react";
 import { MapPin } from "lucide-react";
-import { RentanoTip } from "../../../components/RentanoTip";
+import { RentanoHint } from "../../../components/RentanoHint";
 import type { Step7ReviewProps } from "../types";
+import { useMediaUrl } from "../../../lib/useMediaUrl";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F0B429";
@@ -50,7 +51,21 @@ function handoffSummary(draft: Step7ReviewProps["draft"]): string {
   const parts: string[] = [];
   if (draft.handoff.inPerson) parts.push("In-person");
   if (draft.handoff.contactless) parts.push("Contactless");
-  if (draft.handoff.delivery) parts.push("Delivery");
+  if (draft.handoff.itemHeavy) parts.push("Heavy item");
+  if (draft.handoff.delivery) {
+    const miles = draft.handoff.deliveryMaxMiles ?? 20;
+    const fee = draft.handoff.deliveryRoundTripFee?.trim();
+    const weight =
+      typeof draft.handoff.itemWeightLbs === "number" &&
+      draft.handoff.itemWeightLbs > 0
+        ? ` · ${draft.handoff.itemWeightLbs} lbs`
+        : "";
+    parts.push(
+      fee
+        ? `Delivery ≤${miles} mi · $${fee} round trip${weight}`
+        : `Delivery ≤${miles} mi${weight}`,
+    );
+  }
   return parts.length > 0 ? parts.join(" · ") : "Not set";
 }
 
@@ -61,7 +76,9 @@ export function Step7Review({
   onPublish,
   onGoToStep,
 }: Step7ReviewProps) {
-  const coverPhoto = draft.photos[0];
+  const coverPhoto = draft.photos[0] ?? null;
+  const coverThumb = coverPhoto?.thumbId ? { ...coverPhoto, id: coverPhoto.thumbId } : coverPhoto;
+  const coverUrl = useMediaUrl(coverThumb).url;
   const conditionStyle = draft.condition
     ? CONDITION_STYLES[draft.condition]
     : null;
@@ -126,9 +143,9 @@ export function Step7Review({
           <span className="absolute right-3 top-3 z-10">
             <EditLink onClick={() => onGoToStep(1)} />
           </span>
-          {coverPhoto ? (
+          {coverPhoto && coverUrl ? (
             <img
-              src={coverPhoto}
+              src={coverUrl}
               alt=""
               className="h-[200px] w-full rounded-t-2xl object-cover"
             />
@@ -242,9 +259,10 @@ export function Step7Review({
         </div>
       </div>
 
-      <RentanoTip
+      <RentanoHint
         className="mt-5"
-        message="Looking good. Once you publish I'll create your share content — ready to post in one tap."
+        hint="Looking good. Once you publish I'll create your share content — ready to post in one tap."
+        showTapLabel
       />
 
       <button

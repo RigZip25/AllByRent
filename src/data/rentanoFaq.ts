@@ -84,7 +84,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "QR & pickup",
     question: "How do pickup and delivery work?",
     answer:
-      "On step 4 choose in-person meetup times, contactless pickup instructions, and/or paid delivery by distance. Renters see what you offer on the listing.",
+      "On step 4 choose in-person pickup, contactless pickup (exact address shared with your confirmed renter after booking; lockbox and gate codes unlock at check-in PIN), and/or round-trip delivery with your own fee and max miles.",
     keywords: ["handoff", "meet", "drop off"],
   },
   {
@@ -118,6 +118,14 @@ export const RENTANO_FAQ: FaqItem[] = [
     answer:
       "Document the issue with photos and messages in the app. For urgent safety issues contact local authorities first. Rentano can guide you on next in-app steps but cannot decide disputes alone.",
     keywords: ["damage", "problem", "refund"],
+  },
+  {
+    id: "availability-step5",
+    category: "Hosting & listings",
+    question: "How do I set my availability in step 5?",
+    answer:
+      "Step 5 lets you control when renters can book handoffs:\n• Tap the Sat or Sun day chip to reveal separate weekend hours — weekday and weekend times are set independently.\n• Adjust start and end times for weekdays (Mon–Fri) and weekends (Sat–Sun) using the From / To time pickers that appear once a day is selected.\n• Pause your listing temporarily with the Pause toggle — it hides your item from search instantly without deleting it. Turn it back on when you're available again.\n• Block specific dates (e.g. a vacation) using the date picker: tap + Add blocked period, pick a start and end date, then tap Block this period. Remove any blocked range by tapping Remove next to it.",
+    keywords: ["hours", "weekend", "pause", "block", "dates", "schedule", "times"],
   },
   {
     id: "skip-onboarding",

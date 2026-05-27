@@ -2,14 +2,23 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { motion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import QRCode from "qrcode";
-import { RentanoTip } from "../../components/RentanoTip";
-import { generateQRStickerSheet } from "../../lib/generateQRSticker";
+import { generateQRStickerPdf } from "../../lib/generateQRSticker";
 import { getListingDisplayTitle, getListingQrUrl, listingDraftToStickerRow } from "../../lib/listingQr";
-import { loadStickerEligibleListings, updateStoredListing } from "../../lib/listingStorage";
+import {
+  addListingToQrBulkQueue,
+  clearQrBulkQueue,
+  isListingQueuedForBulk,
+  loadQrBulkQueueListingIds,
+  loadStickerEligibleListings,
+  removeListingFromQrBulkQueue,
+  updateStoredListing,
+} from "../../lib/listingStorage";
+import { loadUserProfile, saveUserProfile } from "../../lib/userProfileStorage";
 import type { ListingDraft } from "./types";
 import type { Dispatch, SetStateAction } from "react";
 
 const GREEN = "#0D5C3A";
+const QR_SHEET_CAPACITY = 12;
 
 type QRStickerScreenProps = {
   draft: ListingDraft;
@@ -29,7 +38,14 @@ export function QRStickerScreen({
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfFilename, setPdfFilename] = useState<string>("AllByRent-QR-Stickers.pdf");
+  const [actionsOpen, setActionsOpen] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const libraryInputRef = useRef<HTMLInputElement>(null);
+  const [email, setEmail] = useState(() => loadUserProfile().email ?? "");
+  const [bulkCount, setBulkCount] = useState(() => loadQrBulkQueueListingIds().length);
+  const emptySpotsLeft = Math.max(0, QR_SHEET_CAPACITY - bulkCount);
 
   const eligibleListings = useMemo(() => {
     const stored = loadStickerEligibleListings();
@@ -37,46 +53,48 @@ export function QRStickerScreen({
     return [draft, ...stored];
   }, [draft]);
 
-  const [selectedIds, setSelectedIds] = useState<string[]>(() =>
-    eligibleListings.map((l) => l.id),
-  );
+  const queuedForBulk = useMemo(() => isListingQueuedForBulk(draft.id), [draft.id]);
 
   useEffect(() => {
-    void QRCode.toDataURL(getListingQrUrl(draft.id), {
+    void QRCode.toDataURL(getListingQrUrl(draft.qrToken ?? draft.id), {
       width: 180,
       margin: 1,
       color: { dark: "#0D5C3A", light: "#FFFFFF" },
     }).then(setQrDataUrl);
-  }, [draft.id]);
+  }, [draft.id, draft.qrToken]);
 
-  const selectedCount = selectedIds.length;
   const otherListings = eligibleListings.filter((l) => l.id !== draft.id);
 
-  const toggleSelection = (id: string) => {
-    setSelectedIds((current) =>
-      current.includes(id)
-        ? current.length > 1
-          ? current.filter((itemId) => itemId !== id)
-          : current
-        : [...current, id],
-    );
-  };
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    };
+  }, [pdfUrl]);
 
-  const runPdfDownload = async (ids: string[]) => {
+  const generatePdf = async (ids: string[]) => {
     let rows = eligibleListings
       .filter((l) => ids.includes(l.id))
       .map(listingDraftToStickerRow);
     if (rows.length === 0) {
       rows = [listingDraftToStickerRow(draft)];
     }
-    await generateQRStickerSheet(rows);
+    const generated = await generateQRStickerPdf(rows, {
+      filename: ids.length > 1 ? "AllByRent-QR-Stickers-Bulk.pdf" : "AllByRent-QR-Sticker.pdf",
+    });
+    if (!generated) throw new Error("No PDF generated");
+    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    setPdfUrl(generated.objectUrl);
+    setPdfFilename(generated.filename);
+    setActionsOpen(true);
+    return generated.objectUrl;
   };
 
   const handlePrintNow = async () => {
     setPdfLoading(true);
     setPdfError(null);
     try {
-      await runPdfDownload([draft.id]);
+      const url = await generatePdf([draft.id]);
+      window.open(url, "_blank", "noopener,noreferrer");
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
     } finally {
@@ -84,13 +102,57 @@ export function QRStickerScreen({
     }
   };
 
-  const handlePrintSheet = async () => {
+  const handleBulkPrint = async () => {
     setPdfLoading(true);
     setPdfError(null);
     try {
-      await runPdfDownload(selectedIds);
+      const ids = loadQrBulkQueueListingIds();
+      if (ids.length === 0) {
+        setPdfError("No items in bulk queue yet.");
+        return;
+      }
+      const url = await generatePdf(ids);
+      window.open(url, "_blank", "noopener,noreferrer");
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    setPdfLoading(true);
+    setPdfError(null);
+    try {
+      await generatePdf([draft.id]);
+    } catch {
+      setPdfError("Could not generate PDF. Please try again.");
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
+  const handleEmail = async () => {
+    setPdfLoading(true);
+    setPdfError(null);
+    try {
+      await generatePdf([draft.id]);
+      const trimmedEmail = email.trim();
+      if (trimmedEmail) {
+        const profile = loadUserProfile();
+        if (profile.email !== trimmedEmail) {
+          saveUserProfile({ ...profile, email: trimmedEmail });
+        }
+      }
+      const to = encodeURIComponent(email.trim());
+      const subject = encodeURIComponent("AllByRent QR sticker PDF");
+      const listingUrl = getListingQrUrl(draft.qrToken ?? draft.id);
+      const body = encodeURIComponent(
+        `Here’s your AllByRent QR sticker.\n\nListing link:\n${listingUrl}\n\nPDF tip:\nMost email clients can’t attach a PDF from the browser automatically. Use the Download button in the app, then attach the PDF from your files (desktop is easiest).`,
+      );
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    } catch {
+      setPdfError("Could not generate email. Please try again.");
     } finally {
       setPdfLoading(false);
     }
@@ -109,6 +171,7 @@ export function QRStickerScreen({
         const updated: ListingDraft = {
           ...current,
           verificationPhoto: photo,
+          qrReady: true,
           listingStatus: "active",
         };
         updateStoredListing(updated);
@@ -139,7 +202,7 @@ export function QRStickerScreen({
           Your sticker is ready
         </h2>
         <p className="mt-1 text-center text-base text-gray-500">
-          Print it, attach it, go live.
+          Publish first, then set up QR to go live.
         </p>
       </header>
 
@@ -175,90 +238,152 @@ export function QRStickerScreen({
             className="w-full rounded-xl py-3.5 text-base font-bold text-white disabled:opacity-60"
             style={{ backgroundColor: GREEN }}
           >
-            {pdfLoading ? "Preparing PDF…" : "🖨️ Print this sticker now"}
+            {pdfLoading ? "Preparing PDF…" : "🖨️ Print this QR"}
           </button>
 
-          <RentanoTip
-            message={
-              <>
-                No special paper needed — regular paper + clear tape works great.
-                Pick up Avery #94107 at Walmart for professional waterproof stickers.
-              </>
-            }
-          />
+          <p className="text-center text-sm leading-relaxed text-gray-600">
+            You can download the PDF to print later (desktop is easiest). Print on an Avery-compatible label sheet, or use regular paper + clear tape on top to protect it.
+          </p>
+
+          {email.trim() ? null : (
+            <div className="rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
+              <p className="text-sm font-semibold text-gray-900">Email (optional)</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Add an email to prefill the “Email PDF” action.
+              </p>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-green-700"
+              />
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => void handleDownload()}
+              disabled={pdfLoading}
+              className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
+              style={{ borderColor: GREEN, color: GREEN }}
+            >
+              ⬇️ Download PDF
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleEmail()}
+              disabled={pdfLoading || !email.trim()}
+              className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
+              style={{ borderColor: GREEN, color: GREEN }}
+            >
+              ✉️ Email link
+            </button>
+          </div>
+
+          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-gray-900">Bulk printing</p>
+              <p className="text-xs text-gray-500">{bulkCount} queued</p>
+            </div>
+
+            <div className="mt-2 rounded-2xl bg-[#F0FDF4] px-4 py-3">
+              <p className="text-sm font-semibold text-gray-900">
+                You have {emptySpotsLeft} empty spot{emptySpotsLeft === 1 ? "" : "s"} left on this sheet
+              </p>
+              <p className="mt-1 text-xs text-gray-600">
+                Fill the page now so you can print once, stick once, and get more items live faster.
+              </p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-gray-600">
+                <li>Popular: ladders, pressure washers, party tables, cameras, bike racks</li>
+                <li>High-value items (over $200) tend to get attention quickly</li>
+                <li>If it’s seasonal, list it now — your neighborhood searches early</li>
+              </ul>
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const next = queuedForBulk
+                    ? removeListingFromQrBulkQueue(draft.id)
+                    : addListingToQrBulkQueue(draft.id);
+                  setBulkCount(next);
+                }}
+                className="w-full rounded-xl border-2 py-3 text-sm font-bold"
+                style={{ borderColor: GREEN, color: GREEN }}
+              >
+                {queuedForBulk ? "Remove from bulk" : "Add to bulk"}
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleBulkPrint()}
+                disabled={pdfLoading || bulkCount === 0}
+                className="w-full rounded-xl py-3 text-sm font-bold text-white disabled:opacity-50"
+                style={{ backgroundColor: GREEN }}
+              >
+                🖨️ Print bulk
+              </button>
+            </div>
+            {bulkCount > 0 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  clearQrBulkQueue();
+                  setBulkCount(0);
+                }}
+                className="mt-2 w-full text-center text-xs font-semibold underline"
+                style={{ color: "#6B7280" }}
+              >
+                Clear bulk queue
+              </button>
+            ) : null}
+          </div>
         </div>
 
         {otherListings.length > 0 ? (
-          <div className="mt-8 rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
-            <h3 className="text-base font-bold text-gray-900">
-              More items to rent?
-            </h3>
+          <div className="mt-6 rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
+            <h3 className="text-base font-bold text-gray-900">More items?</h3>
             <p className="mt-1 text-sm text-gray-500">
-              Add more listings, then print up to 12 stickers on one Avery sheet.
+              Add each item to the bulk queue from its QR screen, then use “Print bulk” when ready.
             </p>
-
-            <ul className="mt-3 space-y-2">
-              {eligibleListings.map((listing) => (
-                <li key={listing.id}>
-                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2.5">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.includes(listing.id)}
-                      onChange={() => toggleSelection(listing.id)}
-                      className="h-4 w-4 accent-[#0D5C3A]"
-                    />
-                    <span className="min-w-0 flex-1 text-left">
-                      <span className="block truncate text-sm font-semibold text-gray-900">
-                        {getListingDisplayTitle(listing.title)}
-                        {listing.id === draft.id ? (
-                          <span className="ml-1 text-xs font-normal text-gray-400">
-                            (this item)
-                          </span>
-                        ) : null}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        #{listing.id.substring(0, 8).toUpperCase()}
-                      </span>
-                    </span>
-                  </label>
-                </li>
-              ))}
-            </ul>
-
-            <button
-              type="button"
-              onClick={() => void handlePrintSheet()}
-              disabled={pdfLoading || selectedCount === 0}
-              className="mt-4 w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
-              style={{ borderColor: GREEN, color: GREEN }}
-            >
-              🖨️ Download sticker sheet ({selectedCount}{" "}
-              {selectedCount === 1 ? "item" : "items"})
-            </button>
           </div>
         ) : null}
 
         <button
           type="button"
           onClick={onListAnother}
-          className="mt-4 w-full rounded-xl border-2 border-dashed border-gray-300 py-3 text-sm font-semibold text-gray-600"
+          className="mt-4 w-full rounded-xl border-2 border-dashed border-gray-300 py-3 text-sm font-semibold text-gray-700"
         >
-          + List another item first
+          + Add another item
         </button>
+        <p className="mt-2 text-center text-xs text-gray-500">
+          You’ll be able to come right back here to email/print/verify this QR.
+        </p>
 
         {pdfError ? (
           <p className="mt-3 text-center text-xs text-red-600">{pdfError}</p>
         ) : null}
 
         <div className="mt-8 border-t border-gray-100 pt-6">
-          <button
-            type="button"
-            onClick={() => cameraInputRef.current?.click()}
-            className="w-full rounded-xl border-2 py-3.5 text-base font-bold"
-            style={{ borderColor: GREEN, color: GREEN }}
-          >
-            📸 Sticker is on — take verification photo
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => libraryInputRef.current?.click()}
+              className="w-full rounded-xl border-2 py-3 text-sm font-bold"
+              style={{ borderColor: GREEN, color: GREEN }}
+            >
+              Choose from library
+            </button>
+            <button
+              type="button"
+              onClick={() => cameraInputRef.current?.click()}
+              className="w-full rounded-xl py-3 text-sm font-bold text-white"
+              style={{ backgroundColor: GREEN }}
+            >
+              📸 Take photo
+            </button>
+          </div>
           <input
             ref={cameraInputRef}
             type="file"
@@ -267,11 +392,74 @@ export function QRStickerScreen({
             className="hidden"
             onChange={handleVerificationPhoto}
           />
+          <input
+            ref={libraryInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleVerificationPhoto}
+          />
           <p className="mt-3 text-center text-xs text-gray-500">
-            Gift and Sell listings are active immediately.
+            Your listing won’t be visible to renters until this verification step is done. Gift and Sell listings are active immediately.
           </p>
         </div>
       </div>
+
+      {actionsOpen && pdfUrl ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-6 pt-10"
+          onClick={() => setActionsOpen(false)}
+        >
+          <div
+            className="w-full max-w-[390px] rounded-2xl bg-white p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-base font-bold" style={{ color: GREEN }}>
+              PDF ready
+            </h3>
+            <p className="mt-1 text-xs text-gray-500">
+              You can download, print, or email yourself a link/instructions.
+            </p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <a
+                href={pdfUrl}
+                download={pdfFilename}
+                className="w-full rounded-xl border-2 py-3 text-center text-sm font-bold"
+                style={{ borderColor: GREEN, color: GREEN }}
+              >
+                ⬇️ Download
+              </a>
+              <button
+                type="button"
+                onClick={() => window.open(pdfUrl, "_blank", "noopener,noreferrer")}
+                className="w-full rounded-xl py-3 text-sm font-bold text-white"
+                style={{ backgroundColor: GREEN }}
+              >
+                🖨️ Print
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleEmail()}
+                disabled={!email.trim()}
+                className="col-span-2 w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
+                style={{ borderColor: GREEN, color: GREEN }}
+              >
+                ✉️ Email link/instructions
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActionsOpen(false)}
+              className="mt-3 w-full text-center text-xs font-semibold underline"
+              style={{ color: "#6B7280" }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      ) : null}
     </motion.div>
   );
 }

@@ -6,14 +6,24 @@ import {
   Phone,
   CheckCircle2,
   Clock,
+  Lock,
+  MapPin,
+  ExternalLink,
 } from "lucide-react";
 import { useMemo, useState, useCallback } from "react";
 import {
   loadRentalBookings,
   updateBooking,
+  getRenterPickupLocation,
   type RentalBooking,
 } from "../../lib/rentalsStorage";
 import { QrScanPanel, type QrScanPhase } from "../../components/rentals/QrScanPanel";
+import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
+import {
+  computeRentalPriceBreakdown,
+  formatUsd,
+  type RentalPriceBreakdown,
+} from "../../lib/rentalPricing";
 
 export function ActiveRental({ onBack }: { onBack: () => void }) {
   const [scanOpen, setScanOpen] = useState(false);
@@ -33,6 +43,61 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
 
   const mode: "pickup" | "return" =
     booking?.status === "pending_checkin" ? "pickup" : "return";
+
+  const renterPickupLocation = useMemo(
+    () => (booking ? getRenterPickupLocation(booking) : undefined),
+    [booking],
+  );
+
+  const priceBreakdown = useMemo<RentalPriceBreakdown | null>(() => {
+    if (!booking) return null;
+    if (
+      booking.rentalSubtotalUsd !== undefined &&
+      booking.serviceFeeUsd !== undefined
+    ) {
+      const rentalDays = Math.max(
+        1,
+        Math.round(
+          (new Date(booking.endDate).getTime() - new Date(booking.startDate).getTime()) /
+            (1000 * 60 * 60 * 24),
+        ) + 1,
+      );
+      const daily =
+        rentalDays > 0 ? (booking.rentalSubtotalUsd ?? 0) / rentalDays : booking.rentalSubtotalUsd ?? 0;
+      const deliveryRoundTripUsd =
+        booking.deliveryRoundTripUsd ??
+        (booking.heavySurchargeUsd
+          ? Math.max(0, (booking.deliveryFee ?? 0) - (booking.heavySurchargeUsd ?? 0))
+          : booking.deliveryFee ?? 0);
+      const heavySurchargeUsd = booking.heavySurchargeUsd ?? 0;
+      return {
+        rentalDays,
+        dailyRateUsd: daily,
+        rentalSubtotalUsd: booking.rentalSubtotalUsd ?? 0,
+        deliveryRequested: Boolean(booking.deliveryRequested && (booking.deliveryFee ?? 0) > 0),
+        deliveryRoundTripUsd,
+        heavySurchargeUsd,
+        poundsOverThreshold: booking.poundsOverThreshold ?? 0,
+        itemWeightLbs: booking.itemWeightLbs,
+        deliveryFeeUsd: booking.deliveryFee ?? 0,
+        serviceFeeUsd: booking.serviceFeeUsd ?? 0,
+        totalUsd: booking.totalUsd,
+      };
+    }
+    const deliveryRoundTripUsd = booking.deliveryRoundTripUsd ?? booking.deliveryFee ?? 0;
+    return computeRentalPriceBreakdown({
+      dailyRateUsd: booking.totalUsd,
+      rentalDays: 1,
+      deliveryRequested: Boolean(booking.deliveryRequested),
+      deliveryRoundTripUsd,
+      heavySurchargeUsd: booking.heavySurchargeUsd ?? 0,
+      itemWeightLbs: booking.itemWeightLbs,
+    });
+  }, [booking]);
+
+  const pickupMapsUrl = renterPickupLocation
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(renterPickupLocation)}`
+    : undefined;
 
   const alreadyConfirmed = useMemo(() => {
     if (!booking) return false;
@@ -167,6 +232,81 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
+        {renterPickupLocation ? (
+          <div className="bg-card rounded-xl border border-border p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <MapPin className="w-4 h-4 text-primary" />
+              <h3 className="font-semibold">Pickup location</h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {booking?.role === "host"
+                ? "Exact address is shared only with your confirmed renter — not on the public listing."
+                : "This address is only for you as the confirmed renter — it is not shown on the public listing."}
+            </p>
+            <p className="mt-3 text-sm font-medium leading-relaxed">{renterPickupLocation}</p>
+            {pickupMapsUrl ? (
+              <a
+                href={pickupMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+              >
+                Open in Maps
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            ) : null}
+          </div>
+        ) : null}
+
+        {booking?.fulfillmentMethod === "contactless" && mode === "pickup" ? (
+          <div className="bg-card rounded-xl border border-border p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Lock className="w-4 h-4 text-primary" />
+              <h3 className="font-semibold">Contactless access</h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Step-by-step access instructions and codes unlock at check-in with PIN — not
+              before. Use the pickup address above to get here; scan the item QR when you
+              arrive.
+            </p>
+            {booking.role === "renter" ? (
+              <p className="mt-2 text-sm text-muted-foreground">
+                Tap <span className="font-medium">Scan QR Code</span>, then enter the pickup PIN
+                to view lockbox codes and access steps.
+              </p>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">
+                Share the pickup PIN only with this renter. They unlock access details during
+                check-in — the address is already visible on their rental screen.
+              </p>
+            )}
+          </div>
+        ) : null}
+
+        {priceBreakdown ? (
+          <RentalPriceBreakdownView breakdown={priceBreakdown} compact />
+        ) : null}
+
+        {booking?.fulfillmentMethod === "delivery" ? (
+          <div className="bg-card rounded-xl border border-border p-4">
+            <h3 className="font-semibold mb-2">Round-trip delivery</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              One delivery fee covers bringing the item before the rental starts and picking it
+              up after it ends — not split 50/50 and not one-way host delivery with renter return.
+            </p>
+            {booking.deliveryFee ? (
+              <p className="mt-2 text-sm font-medium">
+                Round-trip delivery: ${formatUsd(booking.deliveryFee)}
+              </p>
+            ) : null}
+            {booking.deliveryAddress ? (
+              <p className="mt-2 text-sm">
+                <span className="font-medium">Drop-off:</span> {booking.deliveryAddress}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
         {booking ? (
           <div className="bg-card rounded-xl border border-border p-4">
             <h3 className="font-semibold mb-2">Security</h3>
@@ -278,6 +418,11 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
           itemEmoji={booking.itemEmoji}
           expectedCode={booking.itemQrToken}
           expectedPin={mode === "pickup" ? booking.pickupPin : booking.returnPin}
+          contactlessInstructions={
+            booking.fulfillmentMethod === "contactless"
+              ? booking.contactlessInstructions
+              : undefined
+          }
           alreadyConfirmed={alreadyConfirmed}
           returnByLabel={booking.returnDueAt ? new Date(booking.returnDueAt).toLocaleString() : undefined}
           onClose={closeScanner}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ArrowLeft,
   Star,
@@ -13,24 +13,49 @@ import {
   Calendar,
   Camera,
   Heart,
+  Package,
 } from "lucide-react";
 import {
   isFavoriteListing,
   toggleFavoriteListing,
 } from "../../lib/favoritesStorage";
+import { getPublishedListingById } from "../../lib/listingStorage";
+import { getListingDisplayTitle } from "../../lib/listingQr";
+import { useMediaUrl } from "../../lib/useMediaUrl";
+import {
+  deliverySummaryForListing,
+  listingOffersDelivery,
+  parseListingDailyRate,
+} from "../../lib/rentalPricing";
 
 interface ItemDetailProps {
   itemId: string;
   onBack: () => void;
   onBook: () => void;
+  onOpenAttachment: (url: string, title?: string) => void;
 }
 
-export function ItemDetail({ itemId, onBack, onBook }: ItemDetailProps) {
+export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDetailProps) {
   const [favorited, setFavorited] = useState(() => isFavoriteListing(itemId));
+  const listing = useMemo(() => getPublishedListingById(itemId), [itemId]);
+  const cover = listing?.photos?.[0] ?? null;
+  const coverThumb = cover?.thumbId ? { ...cover, id: cover.thumbId } : cover;
+  const coverUrl = useMediaUrl(coverThumb).url;
+
+  const title = listing
+    ? getListingDisplayTitle(listing) || listing.title || "Listing"
+    : "DSLR Camera";
+  const dailyRate = listing
+    ? parseListingDailyRate(listing.pricing.dailyRate) || 35
+    : 35;
+  const deliverySummary = listing ? deliverySummaryForListing(listing) : null;
+  const hasDelivery = listing ? listingOffersDelivery(listing) : true;
+  const isHeavy = listing?.handoff.itemHeavy ?? false;
 
   const handleToggleFavorite = () => {
     setFavorited(toggleFavoriteListing(itemId));
   };
+
   return (
     <div className="screen bg-background flex flex-col">
       <div className="shrink-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-3 sm:px-4 py-3 flex items-center gap-3">
@@ -54,22 +79,35 @@ export function ItemDetail({ itemId, onBack, onBook }: ItemDetailProps) {
       </div>
 
       <div className="screen-scroll flex-1 min-h-0 pb-24">
-        <div className="relative aspect-square bg-[#F0F4F2] flex flex-col items-center justify-center gap-3">
-          <Camera className="w-16 h-16 text-primary" />
-          <span className="text-sm text-muted-foreground">Photo by owner</span>
+        <div className="relative aspect-square bg-[#F0F4F2] flex flex-col items-center justify-center gap-3 overflow-hidden">
+          {coverUrl ? (
+            <img src={coverUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          ) : (
+            <>
+              <Camera className="w-16 h-16 text-primary" />
+              <span className="text-sm text-muted-foreground">Photo by owner</span>
+            </>
+          )}
 
           <div className="absolute top-4 left-4 bg-primary/90 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5">
             <Shield className="w-3.5 h-3.5" />
             <span>Auto-Insurance Included</span>
           </div>
+
+          {isHeavy ? (
+            <div className="absolute top-4 right-4 flex items-center gap-1 rounded-lg bg-amber-500/95 px-2.5 py-1.5 text-xs font-semibold text-white">
+              <Package className="h-3.5 w-3.5" aria-hidden />
+              Heavy item
+            </div>
+          ) : null}
         </div>
 
         <div className="p-4 space-y-6">
           <div>
             <div className="flex items-start justify-between mb-2">
-              <h2 className="text-2xl font-bold flex-1">DSLR Camera</h2>
+              <h2 className="text-2xl font-bold flex-1">{title}</h2>
               <div className="text-right">
-                <div className="text-2xl font-bold text-primary">$35</div>
+                <div className="text-2xl font-bold text-primary">${dailyRate}</div>
                 <div className="text-sm text-muted-foreground">/day</div>
               </div>
             </div>
@@ -85,18 +123,24 @@ export function ItemDetail({ itemId, onBack, onBook }: ItemDetailProps) {
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-medium flex items-center gap-1.5">
-                <span>🔄</span>
-                <span>Rent</span>
-              </span>
-              <span className="px-3 py-1.5 bg-blue-500/10 text-blue-600 rounded-lg text-xs font-medium flex items-center gap-1.5">
-                <span>💰</span>
-                <span>Buy</span>
-              </span>
-              <span className="px-3 py-1.5 bg-purple-500/10 text-purple-600 rounded-lg text-xs font-medium flex items-center gap-1.5">
-                <span>🔑</span>
-                <span>Rent to Own</span>
-              </span>
+              {listing?.modes.rent !== false ? (
+                <span className="px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-medium flex items-center gap-1.5">
+                  <span>🔄</span>
+                  <span>Rent</span>
+                </span>
+              ) : null}
+              {listing?.modes.sell ? (
+                <span className="px-3 py-1.5 bg-blue-500/10 text-blue-600 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                  <span>💰</span>
+                  <span>Buy</span>
+                </span>
+              ) : null}
+              {listing?.modes.rentToOwn ? (
+                <span className="px-3 py-1.5 bg-purple-500/10 text-purple-600 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                  <span>🔑</span>
+                  <span>Rent to Own</span>
+                </span>
+              ) : null}
             </div>
           </div>
 
@@ -143,23 +187,36 @@ export function ItemDetail({ itemId, onBack, onBook }: ItemDetailProps) {
           <div>
             <h3 className="font-semibold mb-3">About this item</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Professional Canon DSLR camera with 24-70mm lens. Perfect for
-              events, portraits, and everyday photography. Comes with battery,
-              charger, memory card, and carrying case. Great condition, well
-              maintained.
+              {listing?.description?.trim() ||
+                "Professional gear in great condition. Contact the owner with any questions before booking."}
             </p>
           </div>
+
+          {listing?.instructionsUrl?.trim() ? (
+            <button
+              type="button"
+              onClick={() => onOpenAttachment(listing.instructionsUrl, "Instructions")}
+              className="w-full bg-card border border-border py-3 rounded-xl flex items-center justify-between px-4 hover:border-primary/50 transition-colors"
+            >
+              <span className="font-medium">Instructions</span>
+              <span className="text-sm text-primary">View</span>
+            </button>
+          ) : null}
 
           <div className="bg-muted/50 rounded-xl p-4">
             <h3 className="font-semibold mb-3">Rental includes</h3>
 
             <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Truck className="w-4 h-4 text-primary" />
+              {hasDelivery ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Truck className="w-4 h-4 text-primary" />
+                  </div>
+                  <span className="text-sm">
+                    {deliverySummary ?? "Round-trip delivery available"}
+                  </span>
                 </div>
-                <span className="text-sm">Free delivery within 5mi</span>
-              </div>
+              ) : null}
 
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -204,7 +261,7 @@ export function ItemDetail({ itemId, onBack, onBook }: ItemDetailProps) {
           onClick={onBook}
           className="flex-1 bg-primary hover:bg-primary/90 text-white py-3 px-6 rounded-xl transition-colors font-medium"
         >
-          Book Now · $35/day
+          Book Now · ${dailyRate}/day
         </button>
       </div>
     </div>

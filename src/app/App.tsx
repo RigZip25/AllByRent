@@ -11,10 +11,13 @@ import { WhereAreYouManual } from "../screens/onboarding/WhereAreYouManual";
 import { HomeFeed } from "./components/HomeFeed";
 import { Subcategory } from "./components/Subcategory";
 import { ItemDetail } from "./components/ItemDetail";
+import { BookingScreen } from "./components/BookingScreen";
 import { PostRequest } from "./components/PostRequest";
 import { ActiveRental } from "./components/ActiveRental";
 import { ListingIntro } from "../screens/listing/ListingIntro";
 import { ListingWizard } from "../screens/listing/ListingWizard";
+import { HostListingDetailScreen } from "../screens/listing/HostListingDetailScreen";
+import { AttachmentViewerScreen } from "../screens/AttachmentViewerScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { RentalsScreen } from "../screens/RentalsScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
@@ -30,8 +33,10 @@ import {
   isIntroDone,
   markIntroDone,
 } from "../lib/onboardingStorage";
-import { hasRentLocationSetup } from "../lib/listingStorage";
+import { getPublishedListingById, hasRentLocationSetup } from "../lib/listingStorage";
+import type { ShelfPrefill } from "../lib/shelfListings";
 import { isSimulateUpdateRequested } from "../lib/pwaUpdateStorage";
+import { isResetAppQueryParam, resetAllAppData } from "../lib/resetAppStorage";
 
 type Screen =
   | "splash"
@@ -44,15 +49,36 @@ type Screen =
   | "notifications"
   | "subcategory"
   | "itemDetail"
+  | "booking"
   | "postRequest"
   | "activeRental"
   | "listingIntro"
   | "listItem"
+  | "hostListingDetail"
+  | "attachmentViewer"
   | "rentals"
   | "profile"
   | "favorites"
   | "earnBusiness"
   | "subscriptionPlans";
+
+/** When nav stack is empty, in-app Back still returns to the prior onboarding step. */
+const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
+  whatDoYouWant: "firstHello",
+  whereAreYou: "whatDoYouWant",
+  whereAreYouManual: "whereAreYou",
+  whereAreYouHeading: "whereAreYou",
+};
+
+/** Listing flow only — used when the nav stack is empty (not onboarding fallbacks). */
+const LISTING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
+  listItem: "listingIntro",
+  listingIntro: "home",
+};
+
+function isOnboardingScreen(screen: Screen): boolean {
+  return screen in ONBOARDING_BACK_FALLBACK || screen === "firstHello";
+}
 
 function readBootQuery() {
   if (typeof window === "undefined") {
@@ -82,6 +108,12 @@ function clearBootQuery(keys: string[]) {
   window.history.replaceState({}, "", next);
 }
 
+function cleanupSplashGlobals() {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  root.classList.remove("splash-v2-active");
+}
+
 function AppRoutes() {
   const boot = readBootQuery();
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
@@ -97,8 +129,14 @@ function AppRoutes() {
   });
   const [navStack, setNavStack] = useState<Screen[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [selectedHostListingId, setSelectedHostListingId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [listingPrefill, setListingPrefill] = useState<ShelfPrefill | null>(null);
+  const [editingListingId, setEditingListingId] = useState<string | null>(null);
+  const [postRequestPrefill, setPostRequestPrefill] = useState<ShelfPrefill | null>(null);
+  const [attachmentUrl, setAttachmentUrl] = useState<string | null>(null);
+  const [attachmentTitle, setAttachmentTitle] = useState<string | null>(null);
   const [isLocatingHome, setIsLocatingHome] = useState(false);
   const [homeLocationError, setHomeLocationError] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(
@@ -117,6 +155,13 @@ function AppRoutes() {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!isResetAppQueryParam(params)) return;
+    clearBootQuery(["reset", "resetApp"]);
+    void resetAllAppData();
+  }, []);
+
+  useEffect(() => {
     if (!boot.openNotifications) return;
     if (currentScreen !== "home" && currentScreen !== "notifications") return;
     setNavStack([]);
@@ -132,10 +177,13 @@ function AppRoutes() {
 
   const finishRentOnboarding = finishOnboardingToHome;
 
-  const navigateTo = (screen: Screen) => {
-    setNavStack((stack) => [...stack, currentScreen]);
-    setCurrentScreen(screen);
-  };
+  /** Push the screen we are leaving, then open the next screen (avoids stale currentScreen in the stack). */
+  const navigateTo = useCallback((screen: Screen) => {
+    setCurrentScreen((from) => {
+      setNavStack((stack) => [...stack, from]);
+      return screen;
+    });
+  }, []);
 
   const resetToHome = () => {
     setNavStack([]);
@@ -159,13 +207,12 @@ function AppRoutes() {
       goToTab("favorites");
     }
   }, [goToTab]);
-  const handleOpenPlans = useCallback(() => navigateTo("subscriptionPlans"), []);
+  const handleOpenPlans = useCallback(() => navigateTo("subscriptionPlans"), [navigateTo]);
 
   const openRentLocationSetup = useCallback(() => {
     setHomeLocationError(null);
-    setNavStack([]);
-    setCurrentScreen("whereAreYou");
-  }, []);
+    navigateTo("whereAreYou");
+  }, [navigateTo]);
 
   useEffect(() => {
     if (currentScreen !== "home") return;
@@ -176,6 +223,7 @@ function AppRoutes() {
   }, [currentScreen, openRentLocationSetup]);
 
   const skipOnboarding = useCallback(() => {
+    cleanupSplashGlobals();
     markIntroDone();
 
     if (
@@ -191,15 +239,14 @@ function AppRoutes() {
 
     if (currentScreen === "firstHello" || currentScreen === "whatDoYouWant") {
       setAppMode("rent");
-      setNavStack([]);
-      setCurrentScreen("whereAreYou");
+      navigateTo("whereAreYou");
       return;
     }
 
     setAppMode("rent");
     setNavStack([]);
     setCurrentScreen("home");
-  }, [currentScreen]);
+  }, [currentScreen, navigateTo]);
 
   const handleSplashContinue = () => {
     // Splash is always shown. After it finishes, route:
@@ -213,11 +260,11 @@ function AppRoutes() {
   };
 
   const handleContinueFromHello = () => {
-    setCurrentScreen("whatDoYouWant");
+    navigateTo("whatDoYouWant");
   };
 
   const handleEarn = () => {
-    completeOnboarding();
+    setAppMode("earn");
     navigateTo("listingIntro");
   };
 
@@ -247,7 +294,7 @@ function AppRoutes() {
     } finally {
       setIsLocatingHome(false);
     }
-  }, []);
+  }, [finishRentOnboarding, navigateTo]);
 
   const handleManualLocationContinue = () => {
     finishRentOnboarding();
@@ -262,10 +309,12 @@ function AppRoutes() {
   };
 
   const handleListingIntroStart = () => {
+    setEditingListingId(null);
     navigateTo("listItem");
   };
 
   const handleListingIntroSkip = () => {
+    setEditingListingId(null);
     navigateTo("listItem");
   };
 
@@ -284,7 +333,16 @@ function AppRoutes() {
     navigateTo("itemDetail");
   };
 
-  const handlePostRequest = () => {
+  const handleOpenAttachment = (url: string, title?: string) => {
+    const trimmed = url.trim();
+    if (!trimmed) return;
+    setAttachmentUrl(trimmed);
+    setAttachmentTitle(title?.trim() ? title.trim() : "Attachment");
+    navigateTo("attachmentViewer");
+  };
+
+  const handlePostRequest = (prefill?: ShelfPrefill) => {
+    setPostRequestPrefill(prefill ?? null);
     navigateTo("postRequest");
   };
 
@@ -293,20 +351,42 @@ function AppRoutes() {
   };
 
   const handleBook = () => {
+    navigateTo("booking");
+  };
+
+  const handleBookingConfirmed = () => {
     navigateTo("activeRental");
   };
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     setNavStack((stack) => {
-      if (stack.length === 0) {
-        setCurrentScreen("home");
+      if (stack.length > 0) {
+        const previous = stack[stack.length - 1];
+        setCurrentScreen(previous);
+        return stack.slice(0, -1);
+      }
+      if (currentScreen === "listItem" || currentScreen === "listingIntro") {
+        const listingFallback = LISTING_BACK_FALLBACK[currentScreen];
+        if (listingFallback) {
+          setCurrentScreen(listingFallback);
+        } else {
+          setCurrentScreen("home");
+        }
         return stack;
       }
-      const previous = stack[stack.length - 1];
-      setCurrentScreen(previous);
-      return stack.slice(0, -1);
+      if (isOnboardingScreen(currentScreen)) {
+        const fallback = ONBOARDING_BACK_FALLBACK[currentScreen];
+        if (fallback) {
+          setCurrentScreen(fallback);
+        } else {
+          setCurrentScreen("home");
+        }
+        return stack;
+      }
+      setCurrentScreen("home");
+      return stack;
     });
-  };
+  }, [currentScreen]);
 
   const handleBackFromSubcategory = () => {
     handleBack();
@@ -317,12 +397,21 @@ function AppRoutes() {
   };
 
   const handleNavigate = (screen: string) => {
+    if (screen.startsWith("hostListingDetail:")) {
+      const id = screen.slice("hostListingDetail:".length).trim();
+      if (!id) return;
+      setSelectedHostListingId(id);
+      navigateTo("hostListingDetail");
+      return;
+    }
     if (screen === "listItem" || screen === "startEarning") {
       navigateTo("listingIntro");
     }
   };
 
-  const handleStartListing = () => {
+  const handleStartListing = (prefill?: ShelfPrefill) => {
+    setListingPrefill(prefill ?? null);
+    setEditingListingId(null);
     navigateTo("listingIntro");
   };
 
@@ -359,6 +448,7 @@ function AppRoutes() {
             onEarn={handleEarn}
             onSave={handleSave}
             onSkip={skipOnboarding}
+            onBack={handleBack}
           />
         )}
 
@@ -366,6 +456,7 @@ function AppRoutes() {
           <WhereAreYou
             onAtHome={handleAtHome}
             onTraveling={handleTraveling}
+            onBack={handleBack}
             isLocatingHome={isLocatingHome}
             locationError={homeLocationError}
             onSkip={skipOnboarding}
@@ -469,11 +560,30 @@ function AppRoutes() {
             itemId={selectedItemId}
             onBack={handleBack}
             onBook={handleBook}
+            onOpenAttachment={handleOpenAttachment}
+          />
+        )}
+
+        {currentScreen === "booking" && selectedItemId && (
+          <BookingScreen
+            listingId={selectedItemId}
+            onBack={handleBack}
+            onConfirmed={handleBookingConfirmed}
           />
         )}
 
         {currentScreen === "postRequest" && (
-          <PostRequest onBack={handleBack} onPost={handlePost} />
+          <PostRequest
+            prefill={postRequestPrefill}
+            onBack={() => {
+              setPostRequestPrefill(null);
+              handleBack();
+            }}
+            onPost={() => {
+              setPostRequestPrefill(null);
+              handlePost();
+            }}
+          />
         )}
 
         {currentScreen === "activeRental" && (
@@ -484,13 +594,44 @@ function AppRoutes() {
           <ListingIntro
             onStart={handleListingIntroStart}
             onSkip={handleListingIntroSkip}
+            onBack={handleBack}
           />
         )}
 
         {currentScreen === "listItem" && (
           <ListingWizard
-            onExit={handleListingWizardExit}
-            onListAnother={() => navigateTo("listingIntro")}
+            initialPrefill={listingPrefill}
+            initialDraft={editingListingId ? getPublishedListingById(editingListingId) : null}
+            onExit={() => {
+              setListingPrefill(null);
+              setEditingListingId(null);
+              handleListingWizardExit();
+            }}
+          />
+        )}
+
+        {currentScreen === "hostListingDetail" && selectedHostListingId && (
+          <HostListingDetailScreen
+            listingId={selectedHostListingId}
+            onBack={handleBack}
+            onEdit={(listingId) => {
+              setSelectedHostListingId(listingId);
+              setListingPrefill(null);
+              setEditingListingId(listingId);
+              navigateTo("listItem");
+            }}
+          />
+        )}
+
+        {currentScreen === "attachmentViewer" && attachmentUrl && (
+          <AttachmentViewerScreen
+            url={attachmentUrl}
+            title={attachmentTitle ?? undefined}
+            onBack={() => {
+              setAttachmentUrl(null);
+              setAttachmentTitle(null);
+              handleBack();
+            }}
           />
         )}
         </div>

@@ -70,6 +70,9 @@ export function BookingRequestCard({
           </p>
           <p className="text-[13px] text-gray-500">
             {formatRentalDateRange(booking.startDate, booking.endDate)} · ${booking.totalUsd}
+            {booking.deliveryRequested && booking.deliveryFee
+              ? ` (incl. $${booking.deliveryFee} delivery)`
+              : ""}
           </p>
           <p className="mt-1 text-[13px]">
             <CounterpartyName

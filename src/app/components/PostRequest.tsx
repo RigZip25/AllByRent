@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { hasPostRequestContext, type ShelfPrefill } from "../../lib/shelfListings";
 import {
   ArrowLeft,
   Wrench,
@@ -9,7 +10,6 @@ import {
   Home,
   Calendar,
   Share2,
-  MessageSquare,
   Copy,
 } from "lucide-react";
 import { MrRentano } from "./MrRentano";
@@ -25,9 +25,34 @@ const categories = [
 
 const radiusOptions = ["5mi", "10mi", "25mi", "50mi"];
 
-export function PostRequest({ onBack, onPost }: { onBack: () => void; onPost: () => void }) {
+function buildPrefillDescription(prefill: ShelfPrefill | null | undefined): string {
+  if (!prefill?.subcategory && !prefill?.category) return "";
+  const parts: string[] = [];
+  const query = (prefill?.query ?? "").trim();
+  if (prefill.subcategory) {
+    parts.push(`Looking for ${prefill.subcategory}`);
+    if (prefill.category) parts[0] += ` (${prefill.category})`;
+  } else if (prefill.category) {
+    parts.push(`Looking for items in ${prefill.category}`);
+  }
+  if (query) parts.push(`matching "${query}"`);
+  if (prefill.city) parts.push(`near ${prefill.city}`);
+  return `${parts.join(" ")}.`;
+}
+
+export function PostRequest({
+  prefill,
+  onBack,
+  onPost,
+}: {
+  prefill?: ShelfPrefill | null;
+  onBack: () => void;
+  onPost: () => void;
+}) {
+  const prefillDescription = useMemo(() => buildPrefillDescription(prefill), [prefill]);
+  const lockedContext = hasPostRequestContext(prefill);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(prefillDescription);
   const [selectedRadius, setSelectedRadius] = useState("10mi");
   const [budget, setBudget] = useState(25);
   const [startDate, setStartDate] = useState("");
@@ -57,42 +82,64 @@ export function PostRequest({ onBack, onPost }: { onBack: () => void; onPost: ()
           <MrRentano size={40} className="flex-shrink-0" />
           <div className="flex-1">
             <h2 className="font-semibold text-lg mb-1">
-              Can't find it? Ask your neighbors
+              {lockedContext ? "Tell neighbors what you need" : "Can't find it? Ask your neighbors"}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Someone nearby might have exactly what you need
+              {lockedContext
+                ? "Add details below — hosts in your area will see your request"
+                : "Someone nearby might have exactly what you need"}
             </p>
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-3">
-            Select category
-          </label>
+        {lockedContext && prefill ? (
+          <div
+            className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm"
+            aria-live="polite"
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+              Request for
+            </p>
+            <p className="mt-1 font-semibold text-foreground">
+              {prefill.subcategory} in {prefill.category}
+              {prefill.city ? (
+                <>
+                  {" "}
+                  <span className="font-normal text-muted-foreground">· {prefill.city}</span>
+                </>
+              ) : null}
+            </p>
+          </div>
+        ) : null}
 
-          <div className="grid grid-cols-3 gap-3">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                  selectedCategory === cat.id
-                    ? "border-primary bg-primary/5"
-                    : "border-border bg-card hover:border-primary/50"
-                }`}
-              >
-                <div
-                  className={`${
-                    selectedCategory === cat.id ? "text-primary" : "text-muted-foreground"
+        {!lockedContext ? (
+          <div>
+            <label className="block text-sm font-medium mb-3">Select category</label>
+
+            <div className="grid grid-cols-3 gap-3">
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                    selectedCategory === cat.id
+                      ? "border-primary bg-primary/5"
+                      : "border-border bg-card hover:border-primary/50"
                   }`}
                 >
-                  {cat.icon}
-                </div>
-                <span className="text-xs font-medium">{cat.label}</span>
-              </button>
-            ))}
+                  <div
+                    className={`${
+                      selectedCategory === cat.id ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  >
+                    {cat.icon}
+                  </div>
+                  <span className="text-xs font-medium">{cat.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : null}
 
         <div>
           <label className="block text-sm font-medium mb-3">

@@ -1,7 +1,7 @@
 const LISTING_QR_BASE_URL = "https://allbyrent.com/item";
 
-export function getListingQrUrl(listingId: string): string {
-  return `${LISTING_QR_BASE_URL}/${listingId}`;
+export function getListingQrUrl(qrTokenOrListingId: string): string {
+  return `${LISTING_QR_BASE_URL}/${qrTokenOrListingId}`;
 }
 
 export function getListingDisplayTitle(title: string): string {
@@ -12,10 +12,11 @@ export function getListingDisplayTitle(title: string): string {
 export function listingDraftToStickerRow(draft: {
   id: string;
   title: string;
+  qrToken?: string;
 }) {
   return {
     id: draft.id,
     title: getListingDisplayTitle(draft.title),
-    qrUrl: getListingQrUrl(draft.id),
+    qrUrl: getListingQrUrl(draft.qrToken ?? draft.id),
   };
 }

@@ -7,12 +7,14 @@ export type QRStickerListing = {
   qrUrl: string;
 };
 
-/** Avery #94107 — 2"×2" labels, 3×4 grid on US Letter. */
-export async function generateQRStickerSheet(
-  listings: QRStickerListing[],
-): Promise<void> {
-  if (listings.length === 0) return;
+/** US Letter sheet — 2"×2" cells, 3×4 grid (up to 12 QRs). */
+export type GeneratedQrPdf = {
+  blob: Blob;
+  objectUrl: string;
+  filename: string;
+};
 
+async function renderQrStickerPdf(listings: QRStickerListing[]): Promise<jsPDF> {
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "in",
@@ -73,5 +75,28 @@ export async function generateQRStickerSheet(
     doc.rect(x, y, labelW, labelH);
   }
 
-  doc.save("AllByRent-QR-Stickers.pdf");
+  return doc;
+}
+
+export async function generateQRStickerPdf(
+  listings: QRStickerListing[],
+  options?: { filename?: string },
+): Promise<GeneratedQrPdf | null> {
+  if (listings.length === 0) return null;
+  const doc = await renderQrStickerPdf(listings);
+  const blob = doc.output("blob") as Blob;
+  const objectUrl = URL.createObjectURL(blob);
+  const filename = options?.filename ?? "AllByRent-QR-Stickers.pdf";
+  return { blob, objectUrl, filename };
+}
+
+export async function generateQRStickerSheet(listings: QRStickerListing[]): Promise<void> {
+  const generated = await generateQRStickerPdf(listings);
+  if (!generated) return;
+  const { objectUrl, filename } = generated;
+  const a = document.createElement("a");
+  a.href = objectUrl;
+  a.download = filename;
+  a.click();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 15_000);
 }

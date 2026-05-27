@@ -178,7 +178,10 @@ export function HomeFeed({
 
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden px-4">
         {mode === "earn" ? (
-          <HostDashboard onListItem={() => onNavigate("listItem")} />
+          <HostDashboard
+            onListItem={() => onNavigate("listItem")}
+            onOpenListing={(listingId) => onNavigate(`hostListingDetail:${listingId}`)}
+          />
         ) : (
           <>
             <h2 className="mb-3 shrink-0 text-[20px] font-extrabold" style={{ color: GREEN_DARK }}>

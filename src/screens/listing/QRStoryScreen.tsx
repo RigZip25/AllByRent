@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import qrStory1 from "../../imports/qr_story_1.png";
 import qrStory2 from "../../imports/qr_story_2.png";
 import qrStory3 from "../../imports/qr_story_3.png";
-import { RentanoTip } from "../../components/RentanoTip";
+import { RentanoHint } from "../../components/RentanoHint";
 
 const GREEN = "#0D5C3A";
 
@@ -10,7 +10,7 @@ const STORY_STEPS = [
   {
     image: qrStory1,
     title: "Attach your QR sticker",
-    tip: "Print on any paper, cut out and cover with clear tape. Or order waterproof vinyl stickers. Then take a verification photo.",
+    tip: "You can email the QR to yourself and print later. Print on an Avery-compatible label sheet, or use regular paper + clear tape on top to protect it. Then take a verification photo.",
   },
   {
     image: qrStory2,
@@ -48,7 +48,7 @@ function StoryBlock({
       <h3 className="mt-4 text-center text-xl font-bold" style={{ color: GREEN }}>
         {title}
       </h3>
-      <RentanoTip className="mt-4" message={tip} />
+      <RentanoHint className="mt-4" hint={tip} showTapLabel />
     </section>
   );
 }

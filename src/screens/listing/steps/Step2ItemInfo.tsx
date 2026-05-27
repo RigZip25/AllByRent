@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Loader2 } from "lucide-react";
 import type { StepProps } from "../types";
-import { RentanoTip } from "../../../components/RentanoTip";
+import { RentanoHint } from "../../../components/RentanoHint";
 import { improveListingDescription } from "../listingDescriptionImprove";
 import {
   CATEGORIES,
@@ -476,9 +476,9 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
           </div>
           <p className="text-label mt-2 text-sm text-gray-500">{replacementValueHelper}</p>
           {draft.title.length > 0 ? (
-            <RentanoTip
+            <RentanoHint
               className="mt-3"
-              message="Not sure about the value?"
+              hint="Not sure about the value?"
               linkText={`Search "${marketValueLinkTitle} price new"`}
               linkUrl={`https://www.google.com/search?q=${encodeURIComponent(
                 `${draft.title} price new`,

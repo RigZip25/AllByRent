@@ -1,8 +1,8 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Check } from "lucide-react";
 import type { ListingDraft, MinimumRentalPeriod, StepProps } from "../types";
-import { RentanoTip } from "../../../components/RentanoTip";
+import { RentanoHint } from "../../../components/RentanoHint";
 import {
   calculateRentalPrices,
   categoryHasRestrictedModes,
@@ -214,6 +214,7 @@ const rateFieldMotion = {
 
 export function Step3Modes({ draft, setDraft }: StepProps) {
   const minimumPeriodCategoryRef = useRef<string | null>(null);
+  const [showLongTermPricingHelp, setShowLongTermPricingHelp] = useState(false);
 
   const categoryRules = getCategoryModeRules(draft.category);
   const showRestrictedModesNote = categoryHasRestrictedModes(draft.category);
@@ -232,6 +233,14 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
         : "Earn daily or weekly";
 
   const visibleModeCards = MODE_CARD_CONFIG.filter((card) => categoryRules[card.key]);
+
+  const suggestedLongTermMonthly = useMemo(() => {
+    const daily = Number.parseFloat(draft.pricing.dailyRate);
+    if (!Number.isFinite(daily) || daily <= 0) return null;
+    const suggested = daily * 30 * 0.65;
+    if (!Number.isFinite(suggested) || suggested <= 0) return null;
+    return Math.round(suggested);
+  }, [draft.pricing.dailyRate]);
 
   useEffect(() => {
     setDraft((current) => {
@@ -310,6 +319,8 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
       pricing: { ...current.pricing, [key]: value },
     }));
   };
+
+  const longTermEnabled = Boolean(draft.pricing.longTermEnabled);
 
   const rtoTotal = parseFloat(draft.pricing.rtoTotalPrice);
   const rtoPeriod = parseFloat(draft.pricing.rtoPeriodMonths);
@@ -433,6 +444,86 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                       </motion.div>
                     ) : null}
                   </AnimatePresence>
+
+                  <motion.div layout="position" className="rounded-2xl border border-gray-100 bg-white p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900">Allow long-term rentals</p>
+                        <p className="mt-0.5 text-xs text-gray-500">
+                          Optional monthly pricing for bookings 30+ days.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDraft((current) => ({
+                            ...current,
+                            pricing: {
+                              ...current.pricing,
+                              longTermEnabled: !Boolean(current.pricing.longTermEnabled),
+                            },
+                          }));
+                        }}
+                        className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+                          longTermEnabled ? "bg-green-700" : "bg-gray-200"
+                        }`}
+                        aria-label="Toggle long-term rentals"
+                        aria-pressed={longTermEnabled}
+                      >
+                        <span
+                          className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                            longTermEnabled ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    <AnimatePresence initial={false}>
+                      {longTermEnabled ? (
+                        <motion.div
+                          key="long-term-fields"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-3">
+                            <FieldLabel label="Monthly rate (30+ days)" required />
+                            <MoneyInput
+                              value={draft.pricing.longTermMonthlyRate ?? ""}
+                              onChange={(value) => updatePricing("longTermMonthlyRate", value)}
+                              placeholder="450"
+                            />
+                            <div className="mt-2 flex items-center justify-between gap-2">
+                              <p className="text-xs text-gray-500">
+                                Renters will see monthly pricing for long bookings.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => setShowLongTermPricingHelp((s) => !s)}
+                                className="text-xs font-semibold underline"
+                                style={{ color: GREEN }}
+                              >
+                                How to price?
+                              </button>
+                            </div>
+
+                            {showLongTermPricingHelp ? (
+                              <div className="mt-2 rounded-xl bg-[#F0FDF4] px-3 py-2 text-xs text-gray-700">
+                                Example only: some hosts start around{" "}
+                                <span className="font-semibold">
+                                  {suggestedLongTermMonthly ? `$${suggestedLongTermMonthly}/mo` : "daily × 30 × 0.65"}
+                                </span>{" "}
+                                for long stays, then adjust based on demand and wear.
+                              </div>
+                            ) : null}
+                          </div>
+                        </motion.div>
+                      ) : null}
+                    </AnimatePresence>
+                  </motion.div>
+
                   <motion.div layout="position">
                     <FieldLabel label="Security deposit" />
                     <MoneyInput
@@ -562,7 +653,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
         })}
       </div>
 
-      <RentanoTip className="mt-6" message={pricingTipMessage} />
+      <RentanoHint className="mt-6" hint={pricingTipMessage} showTapLabel />
 
       {showRestrictedModesNote ? (
         <p className="mt-4 text-center text-xs italic text-gray-400">

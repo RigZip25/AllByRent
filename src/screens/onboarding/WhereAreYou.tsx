@@ -8,6 +8,8 @@ const AMBER = "#F59E0B";
 type WhereAreYouProps = {
   onAtHome: () => void;
   onTraveling: () => void;
+  onBack: () => void;
+  onSkip: () => void;
   isLocatingHome?: boolean;
   locationError?: string | null;
 };
@@ -73,13 +75,14 @@ function ChoiceCard({
 export function WhereAreYou({
   onAtHome,
   onTraveling,
+  onBack,
   onSkip,
   isLocatingHome = false,
   locationError = null,
 }: WhereAreYouProps) {
   return (
     <div className="screen screen-adaptive mx-auto w-full max-w-[390px] flex-col bg-white">
-      <OnboardingTopBar onSkip={onSkip} />
+      <OnboardingTopBar onBack={onBack} onSkip={onSkip} />
       <div className="shrink-0 px-4 pb-3 pt-2 text-center">
         <h1 className="text-2xl font-bold" style={{ color: GREEN }}>
           Where are you?

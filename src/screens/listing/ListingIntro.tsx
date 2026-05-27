@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
-import { RentanoTip } from "../../components/RentanoTip";
+import { RentanoHint } from "../../components/RentanoHint";
 import listingSnap from "../../imports/listing_snap.png";
 import listingMagic from "../../imports/listing_magic.png";
 import listingShare from "../../imports/listing_share.png";
@@ -29,9 +30,11 @@ const SLIDES = [
 export function ListingIntro({
   onStart,
   onSkip,
+  onBack,
 }: {
   onStart: () => void;
   onSkip: () => void;
+  onBack: () => void;
 }) {
   const [activeSlide, setActiveSlide] = useState(0);
 
@@ -62,9 +65,17 @@ export function ListingIntro({
   return (
     <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-white">
       <header
-        className="flex shrink-0 justify-end border-b px-4 py-2"
+        className="flex shrink-0 items-center justify-between border-b px-4 py-2"
         style={{ borderColor: `${PRIMARY_GREEN}33` }}
       >
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center gap-1 rounded-full p-1 text-sm font-medium text-gray-600 transition-colors hover:bg-[#F3F4F6]"
+          aria-label="Go back"
+        >
+          <ArrowLeft className="h-5 w-5" style={{ color: PRIMARY_GREEN }} />
+        </button>
         <button
           type="button"
           onClick={onSkip}
@@ -129,10 +140,11 @@ export function ListingIntro({
           ))}
         </div>
 
-        <RentanoTip
+        <RentanoHint
           key={`tip-${activeSlide}`}
-          message={SLIDES[activeSlide].tip}
+          hint={SLIDES[activeSlide].tip}
           className="mt-4"
+          showTapLabel
         />
 
         <button

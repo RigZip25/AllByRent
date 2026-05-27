@@ -116,12 +116,20 @@ export function BottomNav({
       style={{ borderColor: BORDER, minHeight: 84 }}
     >
       <div className="mx-auto flex w-full max-w-md items-end justify-around">
-        <button type="button" onClick={onHome} className="flex min-w-[56px] flex-col items-center gap-1.5 py-1">
+        <button
+          type="button"
+          onClick={onHome}
+          className="flex min-w-[56px] flex-col items-center gap-1.5 py-1"
+        >
           <NavIconHome active={activeTab === "home"} />
           <TabLabel active={activeTab === "home"}>Home</TabLabel>
         </button>
 
-        <button type="button" onClick={onRentals} className="flex min-w-[56px] flex-col items-center gap-1.5 py-1">
+        <button
+          type="button"
+          onClick={onRentals}
+          className="flex min-w-[56px] flex-col items-center gap-1.5 py-1"
+        >
           <NavIconRentals active={activeTab === "rentals"} />
           <TabLabel active={activeTab === "rentals"}>Rentals</TabLabel>
         </button>
@@ -151,7 +159,11 @@ export function BottomNav({
           <TabLabel active={activeTab === "rentano"}>Rentano</TabLabel>
         </button>
 
-        <button type="button" onClick={onFourthTab} className="flex min-w-[56px] flex-col items-center gap-1.5 py-1">
+        <button
+          type="button"
+          onClick={onFourthTab}
+          className="flex min-w-[56px] flex-col items-center gap-1.5 py-1"
+        >
           {appMode === "earn" ? (
             <NavIconBusiness active={fourthActive} />
           ) : (
@@ -160,7 +172,11 @@ export function BottomNav({
           <TabLabel active={fourthActive}>{fourthLabel}</TabLabel>
         </button>
 
-        <button type="button" onClick={onProfile} className="flex min-w-[56px] flex-col items-center gap-1.5 py-1">
+        <button
+          type="button"
+          onClick={onProfile}
+          className="flex min-w-[56px] flex-col items-center gap-1.5 py-1"
+        >
           <NavIconProfile active={activeTab === "profile"} />
           <TabLabel active={activeTab === "profile"}>Profile</TabLabel>
         </button>

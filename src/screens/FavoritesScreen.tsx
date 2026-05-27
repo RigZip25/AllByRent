@@ -10,6 +10,7 @@ import {
 import { loadPublishedListings } from "../lib/listingStorage";
 import { getListingDisplayTitle } from "../lib/listingQr";
 import type { ListingDraft } from "./listing/types";
+import { useMediaUrl } from "../lib/useMediaUrl";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -24,14 +25,17 @@ function FavoriteCard({
 }) {
   const title = getListingDisplayTitle(listing.title);
   const rate = listing.pricing.dailyRate?.trim();
+  const cover = listing.photos?.[0] ?? null;
+  const coverThumb = cover?.thumbId ? { ...cover, id: cover.thumbId } : cover;
+  const coverUrl = useMediaUrl(coverThumb).url;
   return (
     <li
       className="flex items-center gap-3 rounded-2xl border bg-white p-3"
       style={{ borderColor: BORDER }}
     >
       <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F0F4F2]">
-        {listing.photos[0] ? (
-          <img src={listing.photos[0]} alt="" className="h-full w-full object-cover" />
+        {coverUrl ? (
+          <img src={coverUrl} alt="" className="h-full w-full object-cover" />
         ) : (
           <span className="text-2xl" aria-hidden>
             📦

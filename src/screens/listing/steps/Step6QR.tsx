@@ -1,13 +1,16 @@
 import { AnimatePresence, motion } from "motion/react";
 import qrItemImg from "../../../imports/qr_item.png";
-import { RentanoTip } from "../../../components/RentanoTip";
-import { QRStickerComingSoonOnly } from "../components/QRStickerExtras";
+import { RentanoHint } from "../../../components/RentanoHint";
 import type { StepProps } from "../types";
 
 const GREEN = "#0D5C3A";
 
 export function Step6QR({ draft, setDraft }: StepProps) {
-  const generateQR = draft.generateQR;
+  // QR is required for security + traceability; keep the draft locked on.
+  const generateQR = true;
+  if (!draft.generateQR) {
+    setDraft((current) => ({ ...current, generateQR: true }));
+  }
 
   return (
     <motion.div
@@ -35,32 +38,10 @@ export function Step6QR({ draft, setDraft }: StepProps) {
       </div>
 
       <div className="mb-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="font-semibold text-gray-900">Generate QR Code</p>
-            <p className="text-sm text-gray-400">Free · Ready after publishing</p>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={generateQR}
-            onClick={() =>
-              setDraft((current) => ({
-                ...current,
-                generateQR: !current.generateQR,
-              }))
-            }
-            className="relative h-7 w-12 shrink-0 rounded-full transition-colors"
-            style={{ backgroundColor: generateQR ? GREEN : "#D1D5DB" }}
-          >
-            <motion.span
-              layout
-              className="absolute top-0.5 block h-6 w-6 rounded-full bg-white shadow"
-              style={{ left: generateQR ? "22px" : "2px" }}
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            />
-          </button>
-        </div>
+        <p className="font-semibold text-gray-900">QR code is required</p>
+        <p className="mt-1 text-sm text-gray-400">
+          It keeps every handoff traceable, improves security, and makes insurance coverage more transparent if an item is lost or damaged.
+        </p>
       </div>
 
       <AnimatePresence initial={false}>
@@ -78,15 +59,23 @@ export function Step6QR({ draft, setDraft }: StepProps) {
             >
               <p className="mb-2 font-medium text-gray-800">After publishing you can:</p>
               <ul className="space-y-1.5">
-                <li>📱 Show on screen — renter scans at pickup</li>
-                <li>💾 Save to photos — use anytime</li>
-                <li>🖨️ Print — attach to item permanently</li>
+                <li>📧 Email it to yourself and print later</li>
+                <li>
+                  🖨️ Print on an Avery-compatible self-adhesive label sheet — or
+                  regular paper + clear tape on top
+                </li>
+                <li>📄 Print single now, or print in bulk once all items are ready</li>
               </ul>
+              <p className="mt-3 border-t border-[#BBF7D0] pt-3 text-gray-600">
+                You can publish before printing — but renters won’t see your listing until your QR is set up.
+              </p>
             </div>
 
-            <QRStickerComingSoonOnly />
-
-            <RentanoTip message="Tap me after publishing — I'll walk you through attaching it to your item." />
+            <RentanoHint
+              className="mt-4"
+              hint="The QR improves security and traceability: every pickup/return scan creates a timestamped record for both sides."
+              showTapLabel
+            />
           </motion.div>
         ) : null}
       </AnimatePresence>

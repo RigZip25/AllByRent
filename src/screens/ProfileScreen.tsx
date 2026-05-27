@@ -34,6 +34,7 @@ import {
   updatePreferredMode,
   type UserProfile,
 } from "../lib/userProfileStorage";
+import { confirmAndResetAppData } from "../lib/resetAppStorage";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -347,6 +348,14 @@ export function ProfileScreen({
         >
           <LogOut className="h-4 w-4" />
           Log out (demo)
+        </button>
+
+        <button
+          type="button"
+          onClick={() => confirmAndResetAppData()}
+          className="mt-3 w-full min-h-[44px] touch-manipulation py-2 text-center text-[12px] font-medium text-red-600/70 active:text-red-700"
+        >
+          Reset app
         </button>
       </div>
 

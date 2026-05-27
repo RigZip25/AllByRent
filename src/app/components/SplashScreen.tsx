@@ -126,20 +126,24 @@ export function SplashScreen({ onDone }: SplashScreenProps) {
   /** Full-screen on iOS/PWA: paint under safe-area; only while this screen is mounted */
   useEffect(() => {
     const root = document.documentElement;
+    const appRoot = document.getElementById("root");
     const prevHtmlBg = root.style.backgroundColor;
     const prevBodyBg = document.body.style.backgroundColor;
     const prevBodyOverflow = document.body.style.overflow;
+    const prevAppRootBg = appRoot?.style.backgroundColor ?? "";
 
     root.classList.add("splash-v2-active");
     root.style.backgroundColor = SPLASH_BG_DARK;
     document.body.style.backgroundColor = SPLASH_BG_DARK;
     document.body.style.overflow = "hidden";
+    if (appRoot) appRoot.style.backgroundColor = SPLASH_BG_DARK;
 
     return () => {
       root.classList.remove("splash-v2-active");
       root.style.backgroundColor = prevHtmlBg;
       document.body.style.backgroundColor = prevBodyBg;
       document.body.style.overflow = prevBodyOverflow;
+      if (appRoot) appRoot.style.backgroundColor = prevAppRootBg;
     };
   }, []);
 

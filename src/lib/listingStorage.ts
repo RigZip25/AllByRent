@@ -5,6 +5,7 @@ const PROFILE_CITY_KEY = "allbyrent_profile_city";
 const PROFILE_LOCATION_KEY = "allbyrent_profile_location";
 const TRIP_DESTINATION_KEY = "allbyrent_trip_destination";
 const RENT_CONTEXT_KEY = "allbyrent_rent_context";
+const QR_BULK_QUEUE_KEY = "allbyrent_qr_bulk_queue_listing_ids";
 
 export type RentLocationContext = "home" | "trip";
 
@@ -141,19 +142,101 @@ export function savePublishedListing(draft: ListingDraft): void {
   }
 }
 
+function createQrTokenFallback(): string {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `qr-${Date.now()}`;
+}
+
+function normalizeListingDraft(raw: ListingDraft): ListingDraft {
+  const status =
+    raw.listingStatus === "pending_sticker" ? "pending_qr" : raw.listingStatus;
+
+  return {
+    ...raw,
+    listingStatus: status,
+    photos: Array.isArray(raw.photos) && raw.photos.every((p) => p && typeof p === "object" && "id" in p)
+      ? raw.photos
+      : [],
+    videos: Array.isArray((raw as unknown as { videos?: unknown }).videos) &&
+      (raw as unknown as { videos: unknown[] }).videos.every(
+        (v) => v && typeof v === "object" && "id" in (v as object),
+      )
+      ? (raw as unknown as { videos: ListingDraft["videos"] }).videos
+      : [],
+    verificationPhoto:
+      raw.verificationPhoto && typeof raw.verificationPhoto === "object" && "id" in raw.verificationPhoto
+        ? raw.verificationPhoto
+        : null,
+    handoff: {
+      ...raw.handoff,
+      itemHeavy: raw.handoff.itemHeavy ?? false,
+      itemWeightLbs:
+        typeof raw.handoff.itemWeightLbs === "number" &&
+        Number.isFinite(raw.handoff.itemWeightLbs) &&
+        raw.handoff.itemWeightLbs > 0
+          ? Math.round(raw.handoff.itemWeightLbs)
+          : undefined,
+      deliveryMaxMiles: raw.handoff.deliveryMaxMiles ?? 20,
+      deliveryRoundTripFee: raw.handoff.deliveryRoundTripFee ?? "",
+      deliveryPrices: raw.handoff.deliveryPrices ?? [],
+    },
+    // QR is required for traceability; preserve stored value but default to true.
+    generateQR: raw.generateQR ?? true,
+    qrToken: raw.qrToken ?? createQrTokenFallback(),
+    qrReady: raw.qrReady ?? false,
+    qrPrintedConfirmed: raw.qrPrintedConfirmed ?? false,
+    qrQueuedForBulk: raw.qrQueuedForBulk ?? false,
+  };
+}
+
 export function loadPublishedListings(): ListingDraft[] {
   try {
     const raw = localStorage.getItem(LISTINGS_STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as ListingDraft[];
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? parsed.map(normalizeListingDraft) : [];
   } catch {
     return [];
   }
 }
 
+export function getPublishedListingById(id: string): ListingDraft | null {
+  return loadPublishedListings().find((listing) => listing.id === id) ?? null;
+}
+
 export function updateStoredListing(draft: ListingDraft): void {
   savePublishedListing(draft);
+}
+
+export type PublishedListingPatch = Partial<Omit<ListingDraft, "pricing" | "handoff" | "modes">> & {
+  pricing?: Partial<ListingDraft["pricing"]>;
+  handoff?: Partial<ListingDraft["handoff"]>;
+  modes?: Partial<ListingDraft["modes"]>;
+};
+
+export function updatePublishedListing(listingId: string, patch: PublishedListingPatch): void {
+  try {
+    const existing = loadPublishedListings();
+    const index = existing.findIndex((item) => item.id === listingId);
+    if (index < 0) return;
+    const current = existing[index]!;
+
+    const nextListing: ListingDraft = {
+      ...current,
+      ...patch,
+      modes: patch.modes ? { ...current.modes, ...patch.modes } : current.modes,
+      pricing: patch.pricing ? { ...current.pricing, ...patch.pricing } : current.pricing,
+      handoff: patch.handoff ? { ...current.handoff, ...patch.handoff } : current.handoff,
+    };
+
+    const next = existing.slice();
+    next[index] = nextListing;
+    localStorage.setItem(LISTINGS_STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Published listings with QR enabled — for batch sticker sheets. */
@@ -161,8 +244,62 @@ export function loadStickerEligibleListings(): ListingDraft[] {
   return loadPublishedListings().filter(
     (listing) =>
       listing.generateQR &&
-      (listing.listingStatus === "published" ||
-        listing.listingStatus === "pending_sticker" ||
-        listing.listingStatus === "active"),
+      (listing.listingStatus === "pending_qr" || listing.listingStatus === "active"),
   );
+}
+
+export function loadQrBulkQueueListingIds(): string[] {
+  try {
+    const raw = localStorage.getItem(QR_BULK_QUEUE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    const ids = parsed.filter((id): id is string => typeof id === "string" && id.trim() !== "");
+    return Array.from(new Set(ids));
+  } catch {
+    return [];
+  }
+}
+
+function saveQrBulkQueueListingIds(ids: string[]): void {
+  try {
+    localStorage.setItem(QR_BULK_QUEUE_KEY, JSON.stringify(Array.from(new Set(ids))));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function isListingQueuedForBulk(id: string): boolean {
+  return loadQrBulkQueueListingIds().includes(id);
+}
+
+export function addListingToQrBulkQueue(id: string): number {
+  const current = loadQrBulkQueueListingIds();
+  if (!current.includes(id)) {
+    current.push(id);
+    saveQrBulkQueueListingIds(current);
+  }
+  const listing = getPublishedListingById(id);
+  if (listing && !listing.qrQueuedForBulk) {
+    updateStoredListing({ ...listing, qrQueuedForBulk: true });
+  }
+  return loadQrBulkQueueListingIds().length;
+}
+
+export function removeListingFromQrBulkQueue(id: string): number {
+  const next = loadQrBulkQueueListingIds().filter((itemId) => itemId !== id);
+  saveQrBulkQueueListingIds(next);
+  const listing = getPublishedListingById(id);
+  if (listing?.qrQueuedForBulk) {
+    updateStoredListing({ ...listing, qrQueuedForBulk: false });
+  }
+  return next.length;
+}
+
+export function clearQrBulkQueue(): void {
+  saveQrBulkQueueListingIds([]);
+  const listings = loadPublishedListings();
+  listings
+    .filter((l) => l.qrQueuedForBulk)
+    .forEach((l) => updateStoredListing({ ...l, qrQueuedForBulk: false }));
 }

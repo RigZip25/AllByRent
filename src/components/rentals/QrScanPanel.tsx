@@ -15,6 +15,7 @@ export function QrScanPanel({
   itemEmoji,
   expectedCode,
   expectedPin,
+  contactlessInstructions,
   alreadyConfirmed,
   returnByLabel,
   onClose,
@@ -31,6 +32,7 @@ export function QrScanPanel({
   itemEmoji: string;
   expectedCode?: string;
   expectedPin?: string;
+  contactlessInstructions?: string;
   alreadyConfirmed?: boolean;
   returnByLabel?: string;
   onClose: () => void;
@@ -95,6 +97,12 @@ export function QrScanPanel({
   if (!open) return null;
 
   if (phase === "confirm") {
+    const pinUnlocksContactless =
+      mode === "pickup" &&
+      Boolean(contactlessInstructions?.trim()) &&
+      pinInput.length === 6 &&
+      (!expectedPin || pinInput === expectedPin);
+
     return (
       <div className="fixed inset-0 z-[90] flex flex-col bg-[#F0F4F2]">
         <header className="flex items-center justify-between px-4 py-3">
@@ -135,12 +143,37 @@ export function QrScanPanel({
             />
           </div>
 
+          {mode === "pickup" && contactlessInstructions?.trim() ? (
+            <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50 p-4">
+              <p className="text-[13px] font-bold text-amber-950">Contactless access details</p>
+              <p className="mt-1 text-[12px] text-amber-900/90">
+                Step-by-step access instructions and codes unlock at check-in with PIN — not
+                before. Your pickup address is on the rental screen so you can travel here
+                first.
+              </p>
+              {pinUnlocksContactless ? (
+                <p className="mt-3 whitespace-pre-wrap text-[14px] leading-relaxed text-gray-800">
+                  {contactlessInstructions.trim()}
+                </p>
+              ) : (
+                <p className="mt-3 text-[13px] italic text-gray-600">
+                  Enter the correct 6-digit pickup PIN below to view access codes and
+                  instructions.
+                </p>
+              )}
+            </div>
+          ) : null}
+
           <div className="mt-4 rounded-2xl border bg-white p-4">
             <p className="text-[13px] font-bold" style={{ color: GREEN }}>
               Enter the {mode === "pickup" ? "pickup" : "return"} PIN
             </p>
             <p className="mt-1 text-[12px] text-gray-500">
-              This scan only works inside the AllByRent app for the renter/host on this booking. The PIN prevents random scans.
+              This scan only works inside the AllByRent app for the renter/host on this booking.
+              The PIN prevents random scans
+              {mode === "pickup" && contactlessInstructions?.trim()
+                ? " and unlocks contactless access details (codes and steps)."
+                : "."}
             </p>
             <input
               type="text"

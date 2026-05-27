@@ -45,11 +45,30 @@ export type RentalBooking = {
   counterpartyVerified?: boolean;
   pickupLabel: string;
   totalUsd: number;
+  /** Rental period subtotal before delivery and platform fee. */
+  rentalSubtotalUsd?: number;
+  /** Total delivery (round trip + heavy surcharge) when renter chose delivery. */
+  deliveryFee?: number;
+  /** Round-trip miles fee portion (excludes heavy surcharge). */
+  deliveryRoundTripUsd?: number;
+  /** Weight surcharge when heavy item + delivery. */
+  heavySurchargeUsd?: number;
+  /** Weight in lbs used for surcharge at booking time. */
+  itemWeightLbs?: number;
+  /** Pounds over threshold used for surcharge label. */
+  poundsOverThreshold?: number;
+  deliveryRequested?: boolean;
+  /** Demo platform service fee portion of total. */
+  serviceFeeUsd?: number;
+  /** Copied from listing at booking time. */
+  itemHeavy?: boolean;
   insuranceIncluded: boolean;
   listingModes: ListingMode[];
   fulfillmentMethod?: FulfillmentMethod;
   deliveryAddress?: string;
   hostAddress?: string;
+  /** Exact pickup location — shared with confirmed renter before travel; not on public listing. */
+  pickupAddress?: string;
   deliveryStatus?: DeliveryStatus;
   pickupWindowStart?: string;
   pickupWindowEnd?: string;
@@ -64,6 +83,8 @@ export type RentalBooking = {
   approvalDeadline?: string;
   paymentOnHold?: boolean;
   manualBooking?: boolean;
+  /** Lockbox / gate codes and step-by-step access — revealed at check-in with pickup PIN only. */
+  contactlessInstructions?: string;
   /** 6-digit PIN required for pickup confirmation (generated at pending_checkin). */
   pickupPin?: string;
   /** 6-digit PIN required for return confirmation (generated when active). */
@@ -79,7 +100,7 @@ export type RentalBooking = {
 
 const RENTALS_KEY = "allbyrent_rental_bookings";
 const RENTALS_VERSION_KEY = "allbyrent_rental_bookings_version";
-const RENTALS_VERSION = "6";
+const RENTALS_VERSION = "9";
 
 const now = new Date();
 const today = now.toISOString().slice(0, 10);
@@ -220,11 +241,14 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     startDate: today,
     endDate: "2026-05-28",
     ...cp("John Davis", true, true),
-    pickupLabel: "In-person · Oak Park",
+    pickupLabel: "Contactless pickup",
     totalUsd: 84,
     insuranceIncluded: true,
     listingModes: ["rent"],
-    fulfillmentMethod: "pickup",
+    fulfillmentMethod: "contactless",
+    pickupAddress: "2847 N Ashland Ave, Chicago, IL 60657",
+    contactlessInstructions:
+      "Side gate lockbox on the north fence. Enter code 4829, then press #. Leave item latched when done.",
     pickupWindowStart: pickupTodayStart.toISOString(),
     pickupWindowEnd: pickupTodayEnd.toISOString(),
     pickupScheduledAt: pickupTodayStart.toISOString(),
@@ -242,7 +266,11 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     endDate: "2026-05-27",
     ...cp("Sam K.", false, true),
     pickupLabel: "Delivery · 5 mi",
-    totalUsd: 55,
+    rentalSubtotalUsd: 42,
+    deliveryFee: 35,
+    deliveryRequested: true,
+    serviceFeeUsd: 9.24,
+    totalUsd: 86.24,
     insuranceIncluded: true,
     listingModes: ["rent"],
     fulfillmentMethod: "delivery",
@@ -297,7 +325,11 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     endDate: "2026-05-31",
     ...cp("Sam K.", false, false),
     pickupLabel: "Delivery · 5 mi",
-    totalUsd: 55,
+    rentalSubtotalUsd: 42,
+    deliveryFee: 35,
+    deliveryRequested: true,
+    serviceFeeUsd: 9.24,
+    totalUsd: 86.24,
     insuranceIncluded: true,
     listingModes: ["rent"],
     fulfillmentMethod: "delivery",
@@ -443,7 +475,11 @@ const DEMO_BOOKINGS: RentalBooking[] = [
     endDate: completedTwelveDaysAgo.toISOString().slice(0, 10),
     ...cp("Jordan M.", true, true),
     pickupLabel: "Delivery · 5 mi",
-    totalUsd: 55,
+    rentalSubtotalUsd: 42,
+    deliveryFee: 35,
+    deliveryRequested: true,
+    serviceFeeUsd: 9.24,
+    totalUsd: 86.24,
     insuranceIncluded: true,
     listingModes: ["rent"],
     fulfillmentMethod: "delivery",
@@ -529,7 +565,26 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
     fulfillmentMethod:
       raw.fulfillmentMethod ??
       (raw.pickupLabel.toLowerCase().includes("delivery") ? "delivery" : "pickup"),
+    deliveryRequested:
+      raw.deliveryRequested ??
+      (raw.fulfillmentMethod === "delivery" ||
+        raw.pickupLabel.toLowerCase().includes("delivery")),
+    deliveryFee: raw.deliveryFee,
+    deliveryRoundTripUsd: raw.deliveryRoundTripUsd,
+    heavySurchargeUsd: raw.heavySurchargeUsd,
+    itemWeightLbs: raw.itemWeightLbs,
+    poundsOverThreshold: raw.poundsOverThreshold,
+    rentalSubtotalUsd: raw.rentalSubtotalUsd,
+    serviceFeeUsd: raw.serviceFeeUsd,
+    itemHeavy: raw.itemHeavy ?? false,
   };
+}
+
+export function appendRentalBooking(booking: RentalBooking): RentalBooking[] {
+  const bookings = loadRentalBookings();
+  const next = [normalizeBooking(booking), ...bookings];
+  saveRentalBookings(next);
+  return next;
 }
 
 export function loadRentalBookings(): RentalBooking[] {
@@ -642,4 +697,14 @@ export function canRenterSeeHostAddress(booking: RentalBooking): boolean {
     booking.role === "renter" &&
     ["pending_checkin", "active", "overdue"].includes(booking.status)
   );
+}
+
+/** Pickup location visible to confirmed renter before check-in (not on public listing). */
+export function getRenterPickupLocation(booking: RentalBooking): string | undefined {
+  if (!canRenterSeeHostAddress(booking)) return undefined;
+  if (booking.pickupAddress?.trim()) return booking.pickupAddress.trim();
+  if (booking.fulfillmentMethod === "delivery" && booking.hostAddress?.trim()) {
+    return booking.hostAddress.trim();
+  }
+  return undefined;
 }

@@ -234,6 +234,12 @@ export function RentalCard({
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
             <p className="text-[13px] font-semibold" style={{ color: GREEN_LIGHT }}>
               ${booking.totalUsd} total
+              {booking.deliveryRequested && booking.deliveryFee ? (
+                <span className="font-normal text-gray-500">
+                  {" "}
+                  · incl. ${booking.deliveryFee} delivery
+                </span>
+              ) : null}
             </p>
             {booking.insuranceIncluded ? (
               <InsuredLabel modes={booking.listingModes} compact />
