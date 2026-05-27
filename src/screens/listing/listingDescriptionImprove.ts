@@ -1,8 +1,5 @@
+import { extractAnthropicText, postAnthropicMessages } from "../../lib/anthropicClient";
 import type { ListingDraft } from "./types";
-
-const ANTHROPIC_API_URL = import.meta.env.DEV
-  ? "/anthropic-api/v1/messages"
-  : "https://api.anthropic.com/v1/messages";
 
 type DescriptionDraft = Pick<
   ListingDraft,
@@ -10,26 +7,13 @@ type DescriptionDraft = Pick<
 >;
 
 export async function improveListingDescription(draft: DescriptionDraft): Promise<string> {
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined;
-  if (!apiKey) {
-    throw new Error("Missing VITE_ANTHROPIC_API_KEY");
-  }
-
-  const response = await fetch(ANTHROPIC_API_URL, {
-    method: "POST",
-    headers: {
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-      "anthropic-dangerous-direct-browser-access": "true",
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 500,
-      messages: [
-        {
-          role: "user",
-          content: `You are Mr. Rentano, AI companion on AllByRent rental platform.
+  const data = await postAnthropicMessages({
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 500,
+    messages: [
+      {
+        role: "user",
+        content: `You are Mr. Rentano, AI companion on AllByRent rental platform.
 
 Item details:
 Title: ${draft.title}
@@ -45,20 +29,11 @@ Fix any factual inconsistencies.
 Keep it under 300 words.
 Return ONLY the improved description text, 
 nothing else.`,
-        },
-      ],
-    }),
+      },
+    ],
   });
 
-  if (!response.ok) {
-    throw new Error(`Claude request failed (${response.status})`);
-  }
-
-  const data = (await response.json()) as {
-    content?: { type: string; text?: string }[];
-  };
-
-  const text = data.content?.find((block) => block.type === "text")?.text?.trim();
+  const text = extractAnthropicText(data);
   if (!text) {
     throw new Error("Empty Claude response");
   }

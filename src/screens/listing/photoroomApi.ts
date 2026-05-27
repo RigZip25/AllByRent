@@ -15,7 +15,7 @@ type PhotoRoomCacheEntryV1 = {
   sizeBytes: number;
 };
 
-const API_URL = "https://image-api.photoroom.com/v2/edit";
+const API_URL = "/api/photoroom";
 const CACHE_PREFIX = "allbyrent:photoroom:edit:";
 const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 const RATE_LIMIT_PREFIX = "allbyrent:photoroom:rate:";
@@ -157,11 +157,6 @@ export async function processPhotoWithPhotoRoom(
   file: File,
   options?: PhotoRoomEditOptions,
 ): Promise<Blob> {
-  const apiKey = import.meta.env.VITE_PHOTOROOM_API_KEY as string | undefined;
-  if (!apiKey) {
-    throw new Error("Missing VITE_PHOTOROOM_API_KEY");
-  }
-
   const opts = stableOptions(options);
   const [imageHash, optsHash] = await Promise.all([
     blobHash(file),
@@ -195,7 +190,6 @@ export async function processPhotoWithPhotoRoom(
     const response = await requestWithRetry(() =>
       fetch(API_URL, {
         method: "POST",
-        headers: { "x-api-key": apiKey },
         body: formData,
       }),
     );

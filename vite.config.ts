@@ -163,15 +163,24 @@ export default defineConfig(({ mode }) => {
         secure: true,
         rewrite: (path) => path.replace(/^\/us-geocode/, '/geocoder'),
       },
-      '/anthropic-api': {
+      '/api/anthropic': {
         target: 'https://api.anthropic.com',
         changeOrigin: true,
         secure: true,
-        rewrite: (path) => path.replace(/^\/anthropic-api/, ''),
+        rewrite: () => '/v1/messages',
         headers: {
-          'x-api-key': env.VITE_ANTHROPIC_API_KEY,
+          'x-api-key': env.ANTHROPIC_API_KEY || env.VITE_ANTHROPIC_API_KEY || '',
           'anthropic-version': '2023-06-01',
           'anthropic-beta': 'prompt-caching-2024-07-31',
+        },
+      },
+      '/api/photoroom': {
+        target: 'https://image-api.photoroom.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: () => '/v2/edit',
+        headers: {
+          'x-api-key': env.PHOTOROOM_API_KEY || env.VITE_PHOTOROOM_API_KEY || '',
         },
       },
     },

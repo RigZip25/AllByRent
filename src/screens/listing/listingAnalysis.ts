@@ -1,8 +1,7 @@
-import type { ListingAiSuggestions } from "./types";
+import { fetchAnthropicMessages } from "../../lib/anthropicClient";
 import type { MediaRef } from "../../lib/mediaStore";
 import { getMediaBlob } from "../../lib/mediaStore";
-
-const ANTHROPIC_API_URL = "/anthropic-api/v1/messages";
+import type { ListingAiSuggestions } from "./types";
 
 const ANALYSIS_MODEL = "claude-sonnet-4-5";
 const ANALYSIS_PROMPT_VERSION = "2026-05-27-v1";
@@ -242,36 +241,28 @@ async function requestListingAnalysis(
     throw new Error("No photos to analyze");
   }
 
-  const response = await fetch(ANTHROPIC_API_URL, {
-    method: "POST",
-    headers: {
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-      "anthropic-dangerous-direct-browser-access": "true",
-    },
-    body: JSON.stringify({
-      model: ANALYSIS_MODEL,
-      max_tokens: 800,
-      system: [
-        {
-          type: "text",
-          text: ANALYSIS_SYSTEM_PROMPT,
-          cache_control: { type: "ephemeral" },
-        },
-      ],
-      messages: [
-        {
-          role: "user",
-          content: [
-            ...imageBlocks,
-            {
-              type: "text",
-              text: ANALYSIS_USER_PROMPT,
-            },
-          ],
-        },
-      ],
-    }),
+  const response = await fetchAnthropicMessages({
+    model: ANALYSIS_MODEL,
+    max_tokens: 800,
+    system: [
+      {
+        type: "text",
+        text: ANALYSIS_SYSTEM_PROMPT,
+        cache_control: { type: "ephemeral" },
+      },
+    ],
+    messages: [
+      {
+        role: "user",
+        content: [
+          ...imageBlocks,
+          {
+            type: "text",
+            text: ANALYSIS_USER_PROMPT,
+          },
+        ],
+      },
+    ],
   });
 
   if (!response.ok) {
@@ -332,36 +323,28 @@ export async function analyzeListingPhotos(
     );
 
     const response = await requestWithRetry(() =>
-      fetch(ANTHROPIC_API_URL, {
-        method: "POST",
-        headers: {
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
-        body: JSON.stringify({
-          model: ANALYSIS_MODEL,
-          max_tokens: 800,
-          system: [
-            {
-              type: "text",
-              text: ANALYSIS_SYSTEM_PROMPT,
-              cache_control: { type: "ephemeral" },
-            },
-          ],
-          messages: [
-            {
-              role: "user",
-              content: [
-                ...imageBlocks,
-                {
-                  type: "text",
-                  text: ANALYSIS_USER_PROMPT,
-                },
-              ],
-            },
-          ],
-        }),
+      fetchAnthropicMessages({
+        model: ANALYSIS_MODEL,
+        max_tokens: 800,
+        system: [
+          {
+            type: "text",
+            text: ANALYSIS_SYSTEM_PROMPT,
+            cache_control: { type: "ephemeral" },
+          },
+        ],
+        messages: [
+          {
+            role: "user",
+            content: [
+              ...imageBlocks,
+              {
+                type: "text",
+                text: ANALYSIS_USER_PROMPT,
+              },
+            ],
+          },
+        ],
       }),
     );
 
@@ -441,36 +424,28 @@ export async function analyzeListingMediaPhotos(photos: MediaRef[]): Promise<Lis
     );
 
     const response = await requestWithRetry(() =>
-      fetch(ANTHROPIC_API_URL, {
-        method: "POST",
-        headers: {
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
-        body: JSON.stringify({
-          model: ANALYSIS_MODEL,
-          max_tokens: 800,
-          system: [
-            {
-              type: "text",
-              text: ANALYSIS_SYSTEM_PROMPT,
-              cache_control: { type: "ephemeral" },
-            },
-          ],
-          messages: [
-            {
-              role: "user",
-              content: [
-                ...imageBlocks,
-                {
-                  type: "text",
-                  text: ANALYSIS_USER_PROMPT,
-                },
-              ],
-            },
-          ],
-        }),
+      fetchAnthropicMessages({
+        model: ANALYSIS_MODEL,
+        max_tokens: 800,
+        system: [
+          {
+            type: "text",
+            text: ANALYSIS_SYSTEM_PROMPT,
+            cache_control: { type: "ephemeral" },
+          },
+        ],
+        messages: [
+          {
+            role: "user",
+            content: [
+              ...imageBlocks,
+              {
+                type: "text",
+                text: ANALYSIS_USER_PROMPT,
+              },
+            ],
+          },
+        ],
       }),
     );
 

@@ -57,7 +57,9 @@ export function RentanoChatPanel({
       if (!text || loading) return;
 
       if (!configured) {
-        setError("Add VITE_ANTHROPIC_API_KEY to .env.local and restart the dev server.");
+        setError(
+          "AI is unavailable. Set ANTHROPIC_API_KEY for local dev or configure it on Vercel.",
+        );
         return;
       }
 

@@ -35,6 +35,8 @@ import {
   type UserProfile,
 } from "../lib/userProfileStorage";
 import { confirmAndResetAppData } from "../lib/resetAppStorage";
+import { useAuth } from "../hooks/AuthProvider";
+import { signOut } from "../lib/auth";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -136,6 +138,7 @@ export function ProfileScreen({
   onFourthTab,
   onEditLocation,
   onOpenPlans,
+  onDeleteAccount,
   onViewPublicProfile,
 }: {
   onHome: () => void;
@@ -143,11 +146,14 @@ export function ProfileScreen({
   onFourthTab: () => void;
   onEditLocation: () => void;
   onOpenPlans: () => void;
+  onDeleteAccount?: () => void;
   onViewPublicProfile?: () => void;
 }) {
   const [rentanoOpen, setRentanoOpen] = useState(false);
   const [profile, setProfile] = useState<UserProfile>(() => refreshProfileStats(loadUserProfile()));
   const [captureMode, setCaptureMode] = useState<"camera" | "library" | null>(null);
+  const auth = useAuth();
+  const [authBusy, setAuthBusy] = useState(false);
   const mode = getAppMode();
   const locationSummary = useMemo(() => getProfileLocationSummary(), [profile]);
 
@@ -343,12 +349,41 @@ export function ProfileScreen({
 
         <button
           type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-2xl border py-3 text-[15px] font-semibold text-gray-500"
+          disabled={auth.configured ? authBusy : true}
+          onClick={() => {
+            if (!auth.configured) return;
+            setAuthBusy(true);
+            void signOut()
+              .catch(() => undefined)
+              .finally(() => setAuthBusy(false));
+          }}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border py-3 text-[15px] font-semibold text-gray-500 disabled:opacity-60"
           style={{ borderColor: BORDER }}
         >
           <LogOut className="h-4 w-4" />
-          Log out (demo)
+          {auth.configured ? (authBusy ? "Signing out…" : "Sign out") : "Log out (demo)"}
         </button>
+
+        {auth.configured ? (
+          <div className="mt-3 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+              Auth
+            </p>
+            <p className="mt-1 text-[13px] text-gray-600">
+              {auth.session
+                ? `Signed in as ${auth.userEmail ?? auth.userId ?? "user"}`
+                : "Not signed in"}
+            </p>
+            <button
+              type="button"
+              onClick={onDeleteAccount}
+              className="mt-3 w-full min-h-[44px] touch-manipulation rounded-xl border py-2 text-center text-[13px] font-semibold text-red-600/80 active:text-red-700"
+              style={{ borderColor: BORDER }}
+            >
+              Delete account
+            </button>
+          </div>
+        ) : null}
 
         <button
           type="button"

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { resolveHomeLocation } from "../lib/geolocation";
 import { AppBrandHeader } from "../components/AppBrandHeader";
 import { OfflineScreen } from "./components/OfflineScreen";
@@ -26,6 +26,7 @@ import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
 import { SubscriptionPlansScreen } from "../screens/SubscriptionPlansScreen";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
+import { AuthProvider, useAuth } from "../hooks/AuthProvider";
 import { getAppMode, setAppMode } from "../lib/appMode";
 import {
   completeOnboarding,
@@ -37,6 +38,14 @@ import { getPublishedListingById, hasRentLocationSetup } from "../lib/listingSto
 import type { ShelfPrefill } from "../lib/shelfListings";
 import { isSimulateUpdateRequested } from "../lib/pwaUpdateStorage";
 import { isResetAppQueryParam, resetAllAppData } from "../lib/resetAppStorage";
+import {
+  consumeLastOauthProvider,
+  shouldPromptEnablePasskey,
+  userHasPasskey,
+} from "../lib/auth";
+import { AuthGate } from "../screens/auth/AuthGate";
+import { EnablePasskeyPrompt } from "../screens/auth/EnablePasskeyPrompt";
+import { DeleteAccountScreen } from "../screens/profile/DeleteAccount";
 
 type Screen =
   | "splash"
@@ -60,7 +69,10 @@ type Screen =
   | "profile"
   | "favorites"
   | "earnBusiness"
-  | "subscriptionPlans";
+  | "subscriptionPlans"
+  | "authGate"
+  | "enablePasskey"
+  | "deleteAccount";
 
 /** When nav stack is empty, in-app Back still returns to the prior onboarding step. */
 const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
@@ -115,7 +127,9 @@ function cleanupSplashGlobals() {
 }
 
 function AppRoutes() {
+  const auth = useAuth();
   const boot = readBootQuery();
+  const handledSessionTokenRef = useRef<string | null>(null);
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
     if (boot.skipSplash) {
       if (boot.openNotifications || boot.simulateUpdate) {
@@ -137,6 +151,7 @@ function AppRoutes() {
   const [postRequestPrefill, setPostRequestPrefill] = useState<ShelfPrefill | null>(null);
   const [attachmentUrl, setAttachmentUrl] = useState<string | null>(null);
   const [attachmentTitle, setAttachmentTitle] = useState<string | null>(null);
+  const [postAuthTarget, setPostAuthTarget] = useState<Screen | null>(null);
   const [isLocatingHome, setIsLocatingHome] = useState(false);
   const [homeLocationError, setHomeLocationError] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(
@@ -179,11 +194,28 @@ function AppRoutes() {
 
   /** Push the screen we are leaving, then open the next screen (avoids stale currentScreen in the stack). */
   const navigateTo = useCallback((screen: Screen) => {
+    const authRequired =
+      screen === "booking" ||
+      screen === "postRequest" ||
+      screen === "listingIntro" ||
+      screen === "listItem" ||
+      screen === "hostListingDetail" ||
+      screen === "activeRental";
+
+    if (authRequired && auth.configured && !auth.session) {
+      setPostAuthTarget(screen);
+      setCurrentScreen((from) => {
+        setNavStack((stack) => [...stack, from]);
+        return "authGate";
+      });
+      return;
+    }
+
     setCurrentScreen((from) => {
       setNavStack((stack) => [...stack, from]);
       return screen;
     });
-  }, []);
+  }, [auth.configured, auth.session]);
 
   const resetToHome = () => {
     setNavStack([]);
@@ -388,6 +420,44 @@ function AppRoutes() {
     });
   }, [currentScreen]);
 
+  useEffect(() => {
+    if (!auth.configured) return;
+    if (!auth.session) return;
+
+    const token = auth.session.access_token ?? null;
+    if (token && handledSessionTokenRef.current === token) return;
+    handledSessionTokenRef.current = token;
+
+    // If we just came back from OAuth, prompt for passkey enrollment once.
+    const provider = consumeLastOauthProvider();
+    if (!provider) {
+      if (currentScreen === "authGate") {
+        setNavStack([]);
+        setCurrentScreen(postAuthTarget ?? "home");
+        setPostAuthTarget(null);
+      }
+      return;
+    }
+
+    if (!shouldPromptEnablePasskey()) {
+      setNavStack([]);
+      setCurrentScreen(postAuthTarget ?? "home");
+      setPostAuthTarget(null);
+      return;
+    }
+
+    void userHasPasskey().then((has) => {
+      if (has) {
+        setNavStack([]);
+        setCurrentScreen(postAuthTarget ?? "home");
+        setPostAuthTarget(null);
+        return;
+      }
+      setNavStack([]);
+      setCurrentScreen("enablePasskey");
+    });
+  }, [auth.configured, auth.session, currentScreen, postAuthTarget]);
+
   const handleBackFromSubcategory = () => {
     handleBack();
   };
@@ -511,6 +581,7 @@ function AppRoutes() {
             onFourthTab={handleOpenFourthTab}
             onEditLocation={openRentLocationSetup}
             onOpenPlans={handleOpenPlans}
+            onDeleteAccount={() => navigateTo("deleteAccount")}
           />
         )}
 
@@ -634,6 +705,42 @@ function AppRoutes() {
             }}
           />
         )}
+
+        {currentScreen === "authGate" && (
+          <AuthGate
+            onBack={handleBack}
+            onContinueAsGuest={() => {
+              setNavStack([]);
+              setCurrentScreen(postAuthTarget ?? "home");
+              setPostAuthTarget(null);
+            }}
+          />
+        )}
+
+        {currentScreen === "enablePasskey" && (
+          <EnablePasskeyPrompt
+            onBack={() => {
+              setNavStack([]);
+              setCurrentScreen(postAuthTarget ?? "home");
+              setPostAuthTarget(null);
+            }}
+            onDone={() => {
+              setNavStack([]);
+              setCurrentScreen(postAuthTarget ?? "home");
+              setPostAuthTarget(null);
+            }}
+          />
+        )}
+
+        {currentScreen === "deleteAccount" && (
+          <DeleteAccountScreen
+            onBack={handleBack}
+            onDone={() => {
+              setNavStack([]);
+              setCurrentScreen("profile");
+            }}
+          />
+        )}
         </div>
       </div>
     </div>
@@ -644,7 +751,9 @@ export default function App() {
   return (
     <PwaUpdateProvider>
       <PwaInstallProvider>
-        <AppRoutes />
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
       </PwaInstallProvider>
     </PwaUpdateProvider>
   );

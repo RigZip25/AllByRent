@@ -7,13 +7,10 @@ export type AnthropicMessagesResponse = {
   content?: AnthropicContentBlock[];
 };
 
-const ANTHROPIC_API_URL = import.meta.env.DEV
-  ? "/anthropic-api/v1/messages"
-  : "https://api.anthropic.com/v1/messages";
+export const ANTHROPIC_API_URL = "/api/anthropic";
 
 export function isAnthropicConfigured(): boolean {
-  if (import.meta.env.DEV) return true;
-  return Boolean(import.meta.env.VITE_ANTHROPIC_API_KEY);
+  return true;
 }
 
 export function extractAnthropicText(data: AnthropicMessagesResponse): string {
@@ -26,28 +23,22 @@ export function extractAnthropicText(data: AnthropicMessagesResponse): string {
   );
 }
 
+export function fetchAnthropicMessages(body: Record<string, unknown>): Promise<Response> {
+  return fetch(ANTHROPIC_API_URL, {
+    method: "POST",
+    headers: {
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+      "anthropic-beta": "prompt-caching-2024-07-31",
+    },
+    body: JSON.stringify(body),
+  });
+}
+
 export async function postAnthropicMessages(
   body: Record<string, unknown>,
 ): Promise<AnthropicMessagesResponse> {
-  if (!isAnthropicConfigured()) {
-    throw new Error("Missing VITE_ANTHROPIC_API_KEY");
-  }
-
-  const headers: Record<string, string> = {
-    "anthropic-version": "2023-06-01",
-    "content-type": "application/json",
-    "anthropic-dangerous-direct-browser-access": "true",
-  };
-
-  if (!import.meta.env.DEV) {
-    headers["x-api-key"] = import.meta.env.VITE_ANTHROPIC_API_KEY as string;
-  }
-
-  const response = await fetch(ANTHROPIC_API_URL, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(body),
-  });
+  const response = await fetchAnthropicMessages(body);
 
   if (!response.ok) {
     const errorBody = await response.text();
