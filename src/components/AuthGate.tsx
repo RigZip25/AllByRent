@@ -14,6 +14,7 @@ import {
   signInWithPasskey,
   verifyEmailOtp,
 } from "../lib/auth";
+import { RentanoTip } from "./RentanoTip";
 
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
@@ -132,9 +133,9 @@ export function AuthGate({
       >
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gray-200" />
 
-        <p className="text-[12px] font-medium leading-snug text-gray-500">{copy.rentano}</p>
+        <RentanoTip message={copy.rentano} className="mb-1" />
 
-        <h2 className="mt-2 text-[22px] font-bold leading-tight" style={{ color: GREEN }}>
+        <h2 className="mt-3 text-[22px] font-bold leading-tight" style={{ color: GREEN }}>
           {step === "sent"
             ? "Check your inbox"
             : step === "otp"
