@@ -15,7 +15,6 @@ import { PostRequest } from "./components/PostRequest";
 import { ActiveRental } from "./components/ActiveRental";
 import { ListingIntro } from "../screens/listing/ListingIntro";
 import { ListingWizard } from "../screens/listing/ListingWizard";
-import { YouAreAllSet } from "../screens/onboarding/YouAreAllSet";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { RentalsScreen } from "../screens/RentalsScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
@@ -41,7 +40,6 @@ type Screen =
   | "whereAreYou"
   | "whereAreYouHeading"
   | "whereAreYouManual"
-  | "youAreAllSet"
   | "home"
   | "notifications"
   | "subcategory"
@@ -126,10 +124,13 @@ function AppRoutes() {
     clearBootQuery(["openNotifications", "skipSplash", "simulateUpdate"]);
   }, [boot.openNotifications, currentScreen]);
 
-  const finishRentOnboarding = () => {
+  const finishOnboardingToHome = useCallback(() => {
+    completeOnboarding();
     setNavStack([]);
-    setCurrentScreen("youAreAllSet");
-  };
+    setCurrentScreen("home");
+  }, []);
+
+  const finishRentOnboarding = finishOnboardingToHome;
 
   const navigateTo = (screen: Screen) => {
     setNavStack((stack) => [...stack, currentScreen]);
@@ -199,12 +200,6 @@ function AppRoutes() {
     setNavStack([]);
     setCurrentScreen("home");
   }, [currentScreen]);
-
-  const finishOnboardingToHome = useCallback(() => {
-    completeOnboarding();
-    setNavStack([]);
-    setCurrentScreen("home");
-  }, []);
 
   const handleSplashContinue = () => {
     // Splash is always shown. After it finishes, route:
@@ -327,8 +322,11 @@ function AppRoutes() {
     }
   };
 
-  const showBrandHeader =
-    currentScreen !== "splash" && currentScreen !== "youAreAllSet";
+  const handleStartListing = () => {
+    navigateTo("listingIntro");
+  };
+
+  const showBrandHeader = currentScreen !== "splash";
 
   if (!isOnline) {
     return (
@@ -389,10 +387,6 @@ function AppRoutes() {
             hint={homeLocationError ?? undefined}
             onSkip={skipOnboarding}
           />
-        )}
-
-        {currentScreen === "youAreAllSet" && (
-          <YouAreAllSet onContinue={finishOnboardingToHome} />
         )}
 
         {currentScreen === "home" && (
@@ -458,8 +452,10 @@ function AppRoutes() {
         {currentScreen === "subcategory" && selectedCategory && (
           <Subcategory
             category={selectedCategory}
+            appMode={getAppMode()}
             onBack={handleBackFromSubcategory}
             onPostRequest={handlePostRequest}
+            onStartListing={handleStartListing}
             onItemSelect={handleItemSelect}
             onHome={handleOpenHome}
             onRentals={handleOpenRentals}
