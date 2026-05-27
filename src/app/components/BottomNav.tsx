@@ -152,7 +152,7 @@ export function BottomNav({
             <img
               src={rentanoNavImg}
               alt=""
-              className="h-full w-full object-cover"
+              className="h-[90%] w-[90%] object-contain object-center"
               draggable={false}
             />
           </div>
