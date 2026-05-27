@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ScanFace } from "lucide-react";
 import { dismissEnablePasskeyPrompt, enrollPasskey } from "../lib/auth";
+import { formatPasskeyError } from "../lib/passkeyErrors";
 
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
@@ -30,7 +31,7 @@ export function PasskeySetup({
       dismissEnablePasskeyPrompt();
       onDone();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not enable Face ID.");
+      setError(formatPasskeyError(e));
     } finally {
       setBusy(false);
     }

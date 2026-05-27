@@ -1,12 +1,13 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { generateRegistrationOptions } from "@simplewebauthn/server";
 import { applyCors, handleOptions } from "../../_lib/cors";
-import { getPasskeyOrigin, getPasskeyRpId } from "../../_lib/keys";
+import { getPasskeyOrigin, getPasskeyRpIdForRequest } from "../../_lib/keys";
+import { withApiErrorHandling } from "../../_lib/safeHandler";
 import { signChallengeToken } from "../_lib/challenge";
 import { getProfileByUserId } from "../_lib/profiles";
 import { getUserFromBearer } from "../_lib/supabaseAdmin";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   const origin = typeof req.headers.origin === "string" ? req.headers.origin : undefined;
   applyCors(res, origin);
   if (handleOptions(req, res)) return;
@@ -32,9 +33,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ]
       : [];
 
+  const rpID = getPasskeyRpIdForRequest(origin);
+
   const options = await generateRegistrationOptions({
     rpName: "AllByRent",
-    rpID: getPasskeyRpId(),
+    rpID,
     userName: user.email,
     userID: new TextEncoder().encode(user.id),
     userDisplayName: user.email,
@@ -57,6 +60,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     options,
     challengeToken,
     expectedOrigin: getPasskeyOrigin(),
-    rpID: getPasskeyRpId(),
+    rpID,
   });
 }
+
+export default withApiErrorHandling(handler);

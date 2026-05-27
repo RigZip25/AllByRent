@@ -2,6 +2,7 @@ import {
   startAuthentication,
   startRegistration,
 } from "@simplewebauthn/browser";
+import { formatPasskeyError } from "./passkeyErrors";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 const DEVICE_PASSKEY_KEY = "abr_device_passkey_v1";
@@ -11,25 +12,43 @@ function apiBase(): string {
   return `${window.location.origin}/api`;
 }
 
+function mapApiStatus(status: number, serverError?: string): string {
+  if (serverError) return serverError;
+  if (status === 401) return "Sign in with email before using Face ID.";
+  if (status === 404) return "No passkey registered for this account. Use email sign-in.";
+  if (status === 503) return "Sign-in service is not configured. Use email sign-in.";
+  if (status >= 500) {
+    return "Sign-in service is temporarily unavailable. Use email sign-in, or try again shortly.";
+  }
+  return `Request failed (${status})`;
+}
+
 async function postJson<T>(path: string, body: unknown, accessToken?: string): Promise<T> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
-  const res = await fetch(`${apiBase()}${path}`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(body),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${apiBase()}${path}`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new Error("Failed to fetch");
+  }
 
   const data = (await res.json().catch(() => ({}))) as T & { error?: string };
   if (!res.ok) {
-    throw new Error(
-      typeof data === "object" && data && "error" in data && data.error
-        ? String(data.error)
-        : `Request failed (${res.status})`,
-    );
+    throw new Error(mapApiStatus(res.status, data?.error));
   }
   return data;
+}
+
+function wrapWebAuthn<T>(fn: () => Promise<T>): Promise<T> {
+  return fn().catch((err) => {
+    throw new Error(formatPasskeyError(err));
+  });
 }
 
 export function markDeviceHasPasskey(): void {
@@ -65,10 +84,10 @@ async function applySessionTokens(access_token: string, refresh_token: string): 
 
 export async function registerPasskey(): Promise<void> {
   if (!isSupabaseConfigured()) {
-    throw new Error("Passkeys require Supabase configuration.");
+    throw new Error(formatPasskeyError(new Error("Passkeys require Supabase configuration.")));
   }
   if (!isPasskeySupported()) {
-    throw new Error("Passkeys are not supported in this browser.");
+    throw new Error(formatPasskeyError(new Error("Passkeys are not supported in this browser.")));
   }
 
   const supabase = getSupabaseClient();
@@ -80,44 +99,56 @@ export async function registerPasskey(): Promise<void> {
     throw new Error("Sign in with email before enabling Face ID.");
   }
 
-  const { options, challengeToken } = await postJson<{
-    options: Parameters<typeof startRegistration>[0];
-    challengeToken: string;
-  }>("/passkey/register/options", {}, token);
+  try {
+    const { options, challengeToken } = await postJson<{
+      options: Parameters<typeof startRegistration>[0];
+      challengeToken: string;
+    }>("/passkey/register/options", {}, token);
 
-  const attestationResponse = await startRegistration({ optionsJSON: options });
+    const attestationResponse = await wrapWebAuthn(() =>
+      startRegistration({ optionsJSON: options }),
+    );
 
-  await postJson(
-    "/passkey/register/verify",
-    { attestationResponse, challengeToken },
-    token,
-  );
+    await postJson(
+      "/passkey/register/verify",
+      { attestationResponse, challengeToken },
+      token,
+    );
 
-  markDeviceHasPasskey();
+    markDeviceHasPasskey();
+  } catch (err) {
+    throw new Error(formatPasskeyError(err));
+  }
 }
 
 export async function signInWithPasskey(email?: string): Promise<void> {
   if (!isSupabaseConfigured()) {
-    throw new Error("Passkeys require Supabase configuration.");
+    throw new Error(formatPasskeyError(new Error("Passkeys require Supabase configuration.")));
   }
   if (!isPasskeySupported()) {
-    throw new Error("Passkeys are not supported in this browser.");
+    throw new Error(formatPasskeyError(new Error("Passkeys are not supported in this browser.")));
   }
 
-  const { options, challengeToken } = await postJson<{
-    options: Parameters<typeof startAuthentication>[0];
-    challengeToken: string;
-  }>("/passkey/auth/options", { email: email?.trim().toLowerCase() || undefined });
+  try {
+    const { options, challengeToken } = await postJson<{
+      options: Parameters<typeof startAuthentication>[0];
+      challengeToken: string;
+    }>("/passkey/auth/options", { email: email?.trim().toLowerCase() || undefined });
 
-  const assertionResponse = await startAuthentication({ optionsJSON: options });
+    const assertionResponse = await wrapWebAuthn(() =>
+      startAuthentication({ optionsJSON: options }),
+    );
 
-  const result = await postJson<{
-    access_token: string;
-    refresh_token: string;
-  }>("/passkey/auth/verify", { assertionResponse, challengeToken });
+    const result = await postJson<{
+      access_token: string;
+      refresh_token: string;
+    }>("/passkey/auth/verify", { assertionResponse, challengeToken });
 
-  await applySessionTokens(result.access_token, result.refresh_token);
-  markDeviceHasPasskey();
+    await applySessionTokens(result.access_token, result.refresh_token);
+    markDeviceHasPasskey();
+  } catch (err) {
+    throw new Error(formatPasskeyError(err));
+  }
 }
 
 export async function userHasPasskey(): Promise<boolean> {

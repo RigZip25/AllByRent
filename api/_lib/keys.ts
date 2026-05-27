@@ -31,10 +31,68 @@ export function getPasskeySecret(): string {
   );
 }
 
-export function getPasskeyRpId(): string {
-  return process.env.PASSKEY_RP_ID || "localhost";
+function normalizeOrigin(value: string): string {
+  return value.trim().replace(/\/$/, "");
 }
 
+/** Primary WebAuthn origin (must match the browser URL, no trailing slash). */
 export function getPasskeyOrigin(): string {
-  return process.env.PASSKEY_ORIGIN || "http://localhost:5173";
+  const configured = trimEnv(process.env.PASSKEY_ORIGIN);
+  if (configured) return normalizeOrigin(configured);
+  return "http://localhost:5173";
+}
+
+/** All origins accepted during verify (primary + PASSKEY_ORIGINS + local dev). */
+export function getPasskeyAllowedOrigins(): string[] {
+  const origins = new Set<string>([getPasskeyOrigin()]);
+  const extra = trimEnv(process.env.PASSKEY_ORIGINS);
+  if (extra) {
+    for (const part of extra.split(",")) {
+      const o = normalizeOrigin(part);
+      if (o) origins.add(o);
+    }
+  }
+  origins.add("http://localhost:5173");
+  origins.add("http://127.0.0.1:5173");
+  origins.add("https://localhost:5173");
+  return [...origins];
+}
+
+/**
+ * RP ID for WebAuthn (registrable domain, no scheme).
+ * Falls back to hostname of PASSKEY_ORIGIN when PASSKEY_RP_ID is unset.
+ */
+export function getPasskeyRpId(): string {
+  const configured = trimEnv(process.env.PASSKEY_RP_ID);
+  if (configured) return configured;
+  try {
+    return new URL(getPasskeyOrigin()).hostname;
+  } catch {
+    return "localhost";
+  }
+}
+
+/** Prefer configured RP ID; otherwise derive from the incoming request Origin. */
+export function getPasskeyRpIdForRequest(requestOrigin?: string): string {
+  const configured = trimEnv(process.env.PASSKEY_RP_ID);
+  if (configured) return configured;
+  if (requestOrigin) {
+    try {
+      return new URL(requestOrigin).hostname;
+    } catch {
+      // ignore
+    }
+  }
+  return getPasskeyRpId();
+}
+
+/** Pick request Origin when allowlisted; otherwise use PASSKEY_ORIGIN. */
+export function resolvePasskeyOrigin(requestOrigin?: string): string {
+  if (requestOrigin) {
+    const normalized = normalizeOrigin(requestOrigin);
+    if (getPasskeyAllowedOrigins().includes(normalized)) {
+      return normalized;
+    }
+  }
+  return getPasskeyOrigin();
 }

@@ -1,4 +1,5 @@
 import { AuthError } from "@supabase/supabase-js";
+import { formatPasskeyError } from "./passkeyErrors";
 
 export function isNetworkFetchError(err: unknown): boolean {
   if (err instanceof TypeError && err.message === "Failed to fetch") return true;
@@ -19,6 +20,13 @@ export function formatAuthError(err: unknown): string {
   if (err instanceof Error) {
     if (err.message === "Failed to fetch" || /ENOTFOUND|getaddrinfo/i.test(err.message)) {
       return networkHint();
+    }
+    if (
+      /passkey|Face ID|WebAuthn|NotAllowedError|invalid for this domain|Sign-in service/i.test(
+        err.message,
+      )
+    ) {
+      return formatPasskeyError(err);
     }
     return err.message;
   }

@@ -1,12 +1,13 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 import { applyCors, handleOptions } from "../../_lib/cors";
-import { getPasskeyOrigin, getPasskeyRpId } from "../../_lib/keys";
+import { getPasskeyAllowedOrigins, getPasskeyRpIdForRequest } from "../../_lib/keys";
+import { withApiErrorHandling } from "../../_lib/safeHandler";
 import { verifyChallengeToken } from "../_lib/challenge";
 import { getProfileByCredentialId, updatePasskeyCounter } from "../_lib/profiles";
 import { mintSessionForUserId } from "../_lib/supabaseAdmin";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   const origin = typeof req.headers.origin === "string" ? req.headers.origin : undefined;
   applyCors(res, origin);
   if (handleOptions(req, res)) return;
@@ -38,8 +39,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const verification = await verifyAuthenticationResponse({
       response: assertionResponse,
       expectedChallenge: challengePayload.challenge,
-      expectedOrigin: getPasskeyOrigin(),
-      expectedRPID: getPasskeyRpId(),
+      expectedOrigin: getPasskeyAllowedOrigins(),
+      expectedRPID: getPasskeyRpIdForRequest(origin),
       requireUserVerification: true,
       credential: {
         id: profile.passkey_credential_id!,
@@ -68,6 +69,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Verification failed";
-    return res.status(400).json({ error: message });
+    const hint =
+      /origin|rpId|RP ID/i.test(message)
+        ? "Face ID domain mismatch. Use https://app.allbyrent.com and check PASSKEY_ORIGIN / PASSKEY_RP_ID in Vercel."
+        : message;
+    return res.status(400).json({ error: hint });
   }
 }
+
+export default withApiErrorHandling(handler);

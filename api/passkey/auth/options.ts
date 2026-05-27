@@ -1,11 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { generateAuthenticationOptions } from "@simplewebauthn/server";
 import { applyCors, handleOptions } from "../../_lib/cors";
-import { getPasskeyRpId } from "../../_lib/keys";
+import { getPasskeyRpIdForRequest } from "../../_lib/keys";
+import { withApiErrorHandling } from "../../_lib/safeHandler";
 import { signChallengeToken } from "../_lib/challenge";
 import { getAdminClient } from "../_lib/supabaseAdmin";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   const origin = typeof req.headers.origin === "string" ? req.headers.origin : undefined;
   applyCors(res, origin);
   if (handleOptions(req, res)) return;
@@ -43,8 +44,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ];
   }
 
+  const rpID = getPasskeyRpIdForRequest(origin);
+
   const options = await generateAuthenticationOptions({
-    rpID: getPasskeyRpId(),
+    rpID,
     allowCredentials,
     userVerification: "required",
   });
@@ -58,6 +61,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({
     options,
     challengeToken,
-    rpID: getPasskeyRpId(),
+    rpID,
   });
 }
+
+export default withApiErrorHandling(handler);

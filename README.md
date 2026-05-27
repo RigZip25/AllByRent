@@ -77,6 +77,14 @@ npx vercel dev
 
 Plain `npm run dev` works for email auth; passkey register/login needs `vercel dev` (or production deploy).
 
+### Troubleshooting Face ID / passkeys (iOS Safari & PWA)
+
+1. **Vercel env (Production)** — set `PASSKEY_RP_ID=app.allbyrent.com` and `PASSKEY_ORIGIN=https://app.allbyrent.com` (no trailing slash). Also set `SUPABASE_SERVICE_ROLE_KEY` so `/api/passkey/*` can run.
+2. **Same URL every time** — register and sign in on the same origin (`https://app.allbyrent.com`). Avoid `www`, preview URLs, or opening the installed PWA on a different hostname than where you enrolled.
+3. **Safari vs home-screen app** — both use the same origin if installed from that site; if Face ID fails after install, sign in with email once, then re-enable Face ID.
+4. **User cancelled** — dismissing the system sheet is not an error; try again.
+5. **API errors** — test `POST https://app.allbyrent.com/api/passkey/auth/options` with `{}`; it should return **200** and JSON (not `FUNCTION_INVOCATION_FAILED`). If 500, check Vercel function logs and env vars.
+
 ### Notes
 
 - **Account deletion**: requires a Supabase Edge Function with the service role key; the UI signs out locally as a placeholder.
