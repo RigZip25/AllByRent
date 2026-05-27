@@ -43,6 +43,50 @@ function pwaPlugin() {
         navigateFallback: '/index.html',
         skipWaiting: false,
         clientsClaim: true,
+        runtimeCaching: [
+          // Cache cheap GET requests (maps/geocode) to avoid repeated paid/slow calls.
+          {
+            urlPattern: ({ url }) =>
+              url.origin === 'https://nominatim.openstreetmap.org' ||
+              url.origin === 'https://geocoding.geo.census.gov',
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'allbyrent-api-get',
+              expiration: {
+                maxEntries: 120,
+                maxAgeSeconds: 7 * 24 * 60 * 60,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          // Cache remote images (e.g. externally-linked manuals/screenshots).
+          {
+            urlPattern: ({ request }) => request.destination === 'image',
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'allbyrent-images',
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          // Cache remote PDFs and media when allowed (best-effort).
+          {
+            urlPattern: ({ request }) =>
+              request.destination === 'document' || request.destination === 'video',
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'allbyrent-attachments',
+              expiration: {
+                maxEntries: 60,
+                maxAgeSeconds: 14 * 24 * 60 * 60,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
       },
       devOptions: { enabled: true },
     })
