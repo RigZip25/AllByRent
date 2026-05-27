@@ -399,24 +399,40 @@
     object-position: center bottom;
   }
 
+  .where-are-you-choice {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Fixed illustration slot — image scales inside, never grows into body text. */
   .where-are-you-choice-art {
+    flex-shrink: 0;
+    box-sizing: border-box;
     overflow: hidden;
     background-color: #fff;
-    /* Reserve illustration space pre-load; prevent overlap with card body. */
-    min-height: clamp(168px, 32dvh, 248px);
+    height: clamp(140px, 26dvh, 200px);
+    min-height: clamp(140px, 26dvh, 200px);
+    max-height: clamp(140px, 26dvh, 200px);
+    padding: 0.75rem 0.75rem 0;
     display: flex;
     align-items: center;
+    justify-content: center;
   }
 
   .where-are-you-choice-illustration {
-    width: 100%;
-    max-height: clamp(168px, 32dvh, 248px);
-    min-height: clamp(152px, 28dvh, 220px);
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
     object-position: center center;
   }
 
   .where-are-you-choice-body {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
     background-color: #fff;
   }
 

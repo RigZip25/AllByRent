@@ -42,17 +42,17 @@ function ChoiceCard({
       disabled={disabled}
       aria-label={ariaLabel}
       aria-busy={disabled}
-      className="where-are-you-choice w-full rounded-2xl border border-[#E5E7EB] bg-white text-left shadow-sm transition-opacity active:opacity-90 disabled:opacity-70"
+      className="where-are-you-choice flex w-full flex-col overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white text-left shadow-sm transition-opacity active:opacity-90 disabled:opacity-70"
     >
-      <div className="where-are-you-choice-art flex justify-center rounded-t-2xl px-3 pt-3">
+      <div className="where-are-you-choice-art shrink-0 rounded-t-2xl">
         <img
           src={imageSrc}
           alt=""
-          className="where-are-you-choice-illustration w-full object-contain"
+          className="where-are-you-choice-illustration"
           draggable={false}
         />
       </div>
-      <div className="where-are-you-choice-body px-5 pb-5 pt-4 text-center">
+      <div className="where-are-you-choice-body shrink-0 px-5 pb-5 pt-4 text-center">
         <h2 className="text-lg font-bold" style={{ color: GREEN }}>
           {title}
         </h2>

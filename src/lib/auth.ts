@@ -19,7 +19,27 @@ export type AuthState = {
 
 const OAUTH_PROVIDER_KEY = "abr_auth_last_oauth_provider";
 const PASSKEY_SETUP_DISMISS_KEY = "abr_passkey_setup_dismissed_at_v1";
+/** Set when magic-link / OAuth callback finishes so App can skip splash without completing onboarding. */
+export const AUTH_CALLBACK_RESUME_KEY = "abr_auth_callback_resume_v1";
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+
+export function consumeAuthCallbackResume(): boolean {
+  try {
+    const value = sessionStorage.getItem(AUTH_CALLBACK_RESUME_KEY);
+    sessionStorage.removeItem(AUTH_CALLBACK_RESUME_KEY);
+    return value === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markAuthCallbackResume(): void {
+  try {
+    sessionStorage.setItem(AUTH_CALLBACK_RESUME_KEY, "1");
+  } catch {
+    /* ignore */
+  }
+}
 
 export { registerPasskey as enrollPasskey, passkeySignIn as signInWithPasskey };
 
@@ -158,6 +178,7 @@ export async function completeAuthCallbackFromUrl(): Promise<boolean> {
     if (data.user?.id && data.user.email) {
       await ensureProfileRow(data.user.id, data.user.email);
     }
+    markAuthCallbackResume();
     return true;
   }
 
@@ -170,6 +191,7 @@ export async function completeAuthCallbackFromUrl(): Promise<boolean> {
       if (data.session.user.id && data.session.user.email) {
         await ensureProfileRow(data.session.user.id, data.session.user.email);
       }
+      markAuthCallbackResume();
       return true;
     }
   }

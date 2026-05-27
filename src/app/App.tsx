@@ -42,12 +42,15 @@ import {
   isOnboardingComplete,
   isIntroDone,
   markIntroDone,
+  markRoleChosen,
+  resolveOnboardingResumeScreen,
 } from "../lib/onboardingStorage";
 import { getPublishedListingById, hasRentLocationSetup } from "../lib/listingStorage";
 import type { ShelfPrefill } from "../lib/shelfListings";
 import { isSimulateUpdateRequested } from "../lib/pwaUpdateStorage";
 import { isResetAppQueryParam, resetAllAppData } from "../lib/resetAppStorage";
 import {
+  consumeAuthCallbackResume,
   consumeLastOauthProvider,
   shouldPromptEnablePasskey,
   userHasPasskey,
@@ -146,6 +149,24 @@ function cleanupSplashGlobals() {
   root.classList.remove("splash-v2-active");
 }
 
+function resolvePostSplashScreen(): Screen {
+  const resume = resolveOnboardingResumeScreen();
+  if (resume === "home") return "home";
+  return resume;
+}
+
+/** After sign-in, prefer finishing onboarding over jumping to home. */
+function resolveScreenAfterAuth(storedTarget: Screen | null): Screen {
+  if (!isOnboardingComplete()) {
+    const resume = resolveOnboardingResumeScreen();
+    if (resume !== "home") return resume;
+    if (getAppMode() === "rent" && !hasRentLocationSetup()) {
+      return "whereAreYou";
+    }
+  }
+  return storedTarget ?? "home";
+}
+
 function AppRoutes() {
   const auth = useAuth();
   const boot = readBootQuery();
@@ -157,7 +178,7 @@ function AppRoutes() {
         completeOnboarding();
         return "home";
       }
-      return isIntroDone() ? "home" : "firstHello";
+      return resolvePostSplashScreen();
     }
     return "splash";
   });
@@ -272,9 +293,13 @@ function AppRoutes() {
       "subcategory",
       "itemDetail",
     ];
-    if (candidate && validScreens.includes(candidate)) return candidate;
-    if (getAppMode() === "earn") return "listItem";
-    return "home";
+    const storedTarget =
+      candidate && validScreens.includes(candidate)
+        ? candidate
+        : getAppMode() === "earn"
+          ? "listItem"
+          : "home";
+    return resolveScreenAfterAuth(storedTarget);
   }, [postAuthTarget]);
 
   const finishAuthFlow = useCallback(() => {
@@ -324,6 +349,22 @@ function AppRoutes() {
 
   const skipOnboarding = useCallback(() => {
     cleanupSplashGlobals();
+
+    if (currentScreen === "firstHello") {
+      markIntroDone();
+      setNavStack([]);
+      setCurrentScreen("whatDoYouWant");
+      return;
+    }
+
+    if (currentScreen === "whatDoYouWant") {
+      markIntroDone();
+      markRoleChosen();
+      setAppMode("rent");
+      navigateTo("whereAreYou");
+      return;
+    }
+
     markIntroDone();
 
     if (
@@ -337,38 +378,32 @@ function AppRoutes() {
       return;
     }
 
-    if (currentScreen === "firstHello" || currentScreen === "whatDoYouWant") {
-      setAppMode("rent");
-      navigateTo("whereAreYou");
-      return;
-    }
-
     setAppMode("rent");
     setNavStack([]);
     setCurrentScreen("home");
   }, [currentScreen, navigateTo]);
 
   const handleSplashContinue = () => {
-    // Splash is always shown. After it finishes, route:
-    // - If intro already done (user completed onboarding before), go to home.
-    // - Otherwise show the Rentano intro.
-    if (isIntroDone()) {
-      setCurrentScreen("home");
-      return;
-    }
-    setCurrentScreen("firstHello");
+    cleanupSplashGlobals();
+    setNavStack([]);
+    setCurrentScreen(resolvePostSplashScreen());
   };
 
   const handleContinueFromHello = () => {
+    markIntroDone();
     navigateTo("whatDoYouWant");
   };
 
   const handleEarn = () => {
+    markRoleChosen();
     setAppMode("earn");
+    completeOnboarding();
     navigateTo("listingIntro");
   };
 
   const handleSave = () => {
+    markRoleChosen();
+    setAppMode("rent");
     navigateTo("whereAreYou");
   };
 
@@ -490,11 +525,22 @@ function AppRoutes() {
 
   useEffect(() => {
     if (!auth.configured) return;
+    if (auth.loading) return;
     if (!auth.session) return;
 
     const token = auth.session.access_token ?? null;
     if (token && handledSessionTokenRef.current === token) return;
     handledSessionTokenRef.current = token;
+
+    const resumeAfterAuthCallback = () => {
+      if (!consumeAuthCallbackResume()) return;
+      markIntroDone();
+      cleanupSplashGlobals();
+      setNavStack([]);
+      setCurrentScreen(resolvePostSplashScreen());
+    };
+
+    resumeAfterAuthCallback();
 
     // If we just came back from OAuth, prompt for passkey enrollment once.
     const provider = consumeLastOauthProvider();
@@ -518,7 +564,7 @@ function AppRoutes() {
     }
 
     maybePromptPasskey();
-  }, [auth.configured, auth.session, authGateOpen, finishAuthFlow]);
+  }, [auth.configured, auth.loading, auth.session, authGateOpen, currentScreen, finishAuthFlow]);
 
   const handleBackFromSubcategory = () => {
     handleBack();
