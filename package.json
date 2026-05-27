@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "description": "AllByRent — The Social Rental Network (mobile-first PWA)",
   "type": "module",
+  "packageManager": "npm@10.9.3",
   "scripts": {
     "build": "vite build",
     "dev": "vite",
@@ -92,9 +93,7 @@
     "vite-plugin-pwa": "^0.21.2",
     "workbox-window": "^7.4.1"
   },
-  "pnpm": {
-    "overrides": {
-      "vite": "6.3.5"
-    }
+  "overrides": {
+    "vite": "6.3.5"
   }
 }
