@@ -6,12 +6,17 @@ export function getPhotoRoomApiKey(): string | undefined {
   return process.env.PHOTOROOM_API_KEY || process.env.VITE_PHOTOROOM_API_KEY;
 }
 
+function trimEnv(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : undefined;
+}
+
 export function getSupabaseUrl(): string | undefined {
-  return process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+  return trimEnv(process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL);
 }
 
 export function getSupabaseAnonKey(): string | undefined {
-  return process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  return trimEnv(process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY);
 }
 
 export function getSupabaseServiceRoleKey(): string | undefined {

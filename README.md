@@ -56,6 +56,13 @@ Stores `passkey_credential_id` and public key material for custom WebAuthn (no S
 - **Auth → URL Configuration**
   - **Site URL**: `https://app.allbyrent.com` (prod) or `http://localhost:5173` (dev)
   - **Redirect URLs**: `https://app.allbyrent.com/**`, `http://localhost:5173/**`
+
+### Troubleshooting “Failed to fetch” on magic link
+
+1. Copy **Project URL** from Supabase → **Settings → API** (not a random UUID from General).
+2. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel for **Production**, then **redeploy** (Vite bakes env vars at build time).
+3. Ensure the Supabase project is **active** (resume if paused). If `https://YOUR_REF.supabase.co` does not resolve in a browser, fix the project in Supabase before redeploying.
+4. The app falls back to `POST /api/auth/otp` when the browser cannot reach Supabase directly; that route returns a clearer error if the hostname is wrong.
 - **Auth → Providers**
   - **Email** enabled (magic link + 8-digit OTP)
   - Google / Apple optional later (UI shows “Coming soon”)

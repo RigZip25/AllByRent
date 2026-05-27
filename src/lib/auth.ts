@@ -7,6 +7,7 @@ import {
   signInWithPasskey as passkeySignIn,
   userHasPasskey as profileHasPasskey,
 } from "./passkey";
+import { isNetworkFetchError } from "./authErrors";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 export type AuthProvider = "google" | "apple";
@@ -53,22 +54,56 @@ async function ensureProfileRow(userId: string, email: string): Promise<void> {
   await supabase.from("profiles").upsert({ id: userId, email }, { onConflict: "id" });
 }
 
+async function signInWithEmailOtpViaProxy(email: string, redirectTo: string): Promise<void> {
+  const res = await fetch("/api/auth/otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, redirectTo }),
+  });
+
+  let payload: { error?: string } = {};
+  try {
+    payload = (await res.json()) as { error?: string };
+  } catch {
+    // ignore
+  }
+
+  if (!res.ok) {
+    throw new Error(
+      typeof payload.error === "string" && payload.error.length > 0
+        ? payload.error
+        : `Magic link request failed (${res.status})`,
+    );
+  }
+}
+
 export async function signInWithEmailOtp(email: string): Promise<void> {
-  const supabase = getSupabaseClient();
-  if (!supabase) {
+  if (!isSupabaseConfigured()) {
     throw new Error("Supabase is not configured.");
   }
   const normalized = email.trim().toLowerCase();
   if (!normalized) throw new Error("Enter your email address.");
 
-  const { error } = await supabase.auth.signInWithOtp({
-    email: normalized,
-    options: {
-      emailRedirectTo: getAuthRedirectUrl(),
-      shouldCreateUser: true,
-    },
-  });
-  if (error) throw error;
+  const redirectTo = getAuthRedirectUrl();
+  const supabase = getSupabaseClient();
+
+  if (supabase) {
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: normalized,
+        options: {
+          emailRedirectTo: redirectTo,
+          shouldCreateUser: true,
+        },
+      });
+      if (error) throw error;
+      return;
+    } catch (err) {
+      if (!isNetworkFetchError(err)) throw err;
+    }
+  }
+
+  await signInWithEmailOtpViaProxy(normalized, redirectTo);
 }
 
 export async function verifyEmailOtp(email: string, token: string): Promise<void> {

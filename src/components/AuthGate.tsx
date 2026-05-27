@@ -14,6 +14,7 @@ import {
   signInWithPasskey,
   verifyEmailOtp,
 } from "../lib/auth";
+import { formatAuthError } from "../lib/authErrors";
 import { RentanoTip } from "./RentanoTip";
 
 const BORDER = "#E8E6E0";
@@ -94,7 +95,8 @@ export function AuthGate({
     try {
       await fn();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      setError(formatAuthError(e));
+      if (import.meta.env.DEV) console.error("[AuthGate]", e);
     } finally {
       setBusy(null);
     }
