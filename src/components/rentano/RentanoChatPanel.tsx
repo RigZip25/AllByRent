@@ -58,7 +58,7 @@ export function RentanoChatPanel({
       const text = raw.trim();
       if (!text || loading) return;
 
-      if (!requireAuth()) return;
+      if (!requireAuth("message")) return;
 
       if (!configured) {
         setError(

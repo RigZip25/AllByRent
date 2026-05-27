@@ -32,7 +32,9 @@ import {
   consumeAuthReturn,
   peekAuthReturn,
   peekPendingAuthEmail,
+  setAuthIntent,
   setAuthReturn,
+  type AuthIntent,
 } from "../lib/authReturn";
 import { getAppMode, setAppMode } from "../lib/appMode";
 import {
@@ -50,8 +52,8 @@ import {
   shouldPromptEnablePasskey,
   userHasPasskey,
 } from "../lib/auth";
-import { AuthGate } from "../screens/auth/AuthGate";
-import { EnablePasskeyPrompt } from "../screens/auth/EnablePasskeyPrompt";
+import { AuthGate } from "../components/AuthGate";
+import { PasskeySetup } from "../components/PasskeySetup";
 import { DeleteAccountScreen } from "../screens/profile/DeleteAccount";
 
 type Screen =
@@ -77,9 +79,20 @@ type Screen =
   | "favorites"
   | "earnBusiness"
   | "subscriptionPlans"
-  | "authGate"
-  | "enablePasskey"
   | "deleteAccount";
+
+function screenToAuthIntent(screen: Screen): AuthIntent {
+  if (
+    screen === "listingIntro" ||
+    screen === "listItem" ||
+    screen === "hostListingDetail"
+  ) {
+    return "list";
+  }
+  if (screen === "booking" || screen === "activeRental") return "book";
+  if (screen === "postRequest") return "message";
+  return "generic";
+}
 
 /** When nav stack is empty, in-app Back still returns to the prior onboarding step. */
 const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
@@ -159,6 +172,9 @@ function AppRoutes() {
   const [attachmentUrl, setAttachmentUrl] = useState<string | null>(null);
   const [attachmentTitle, setAttachmentTitle] = useState<string | null>(null);
   const [postAuthTarget, setPostAuthTarget] = useState<Screen | null>(null);
+  const [authGateOpen, setAuthGateOpen] = useState(false);
+  const [authIntent, setAuthIntentState] = useState<AuthIntent>("generic");
+  const [passkeySetupOpen, setPasskeySetupOpen] = useState(false);
   const [isLocatingHome, setIsLocatingHome] = useState(false);
   const [homeLocationError, setHomeLocationError] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(
@@ -200,6 +216,15 @@ function AppRoutes() {
   const finishRentOnboarding = finishOnboardingToHome;
 
   /** Push the screen we are leaving, then open the next screen (avoids stale currentScreen in the stack). */
+  const showAuthGate = useCallback((target: Screen, intentOverride?: AuthIntent) => {
+    const intent = intentOverride ?? screenToAuthIntent(target);
+    setPostAuthTarget(target);
+    setAuthReturn(target);
+    setAuthIntent(intent);
+    setAuthIntentState(intent);
+    setAuthGateOpen(true);
+  }, []);
+
   const navigateTo = useCallback((screen: Screen) => {
     const authRequired =
       screen === "booking" ||
@@ -210,12 +235,7 @@ function AppRoutes() {
       screen === "activeRental";
 
     if (authRequired && auth.configured && !auth.session) {
-      setPostAuthTarget(screen);
-      setAuthReturn(screen);
-      setCurrentScreen((from) => {
-        setNavStack((stack) => [...stack, from]);
-        return "authGate";
-      });
+      showAuthGate(screen);
       return;
     }
 
@@ -223,18 +243,16 @@ function AppRoutes() {
       setNavStack((stack) => [...stack, from]);
       return screen;
     });
-  }, [auth.configured, auth.session]);
+  }, [auth.configured, auth.session, showAuthGate]);
 
-  const requireAuth = useCallback(() => {
-    if (!auth.configured || auth.session) return true;
-    setPostAuthTarget(currentScreen);
-    setAuthReturn(currentScreen);
-    setCurrentScreen((from) => {
-      setNavStack((stack) => [...stack, from]);
-      return "authGate";
-    });
-    return false;
-  }, [auth.configured, auth.session, currentScreen]);
+  const requireAuth = useCallback(
+    (intentOverride?: AuthIntent) => {
+      if (!auth.configured || auth.session) return true;
+      showAuthGate(currentScreen, intentOverride);
+      return false;
+    },
+    [auth.configured, auth.session, currentScreen, showAuthGate],
+  );
 
   const resolvePostAuthScreen = useCallback((): Screen => {
     const stored = consumeAuthReturn();
@@ -255,8 +273,17 @@ function AppRoutes() {
       "itemDetail",
     ];
     if (candidate && validScreens.includes(candidate)) return candidate;
+    if (getAppMode() === "earn") return "listItem";
     return "home";
   }, [postAuthTarget]);
+
+  const finishAuthFlow = useCallback(() => {
+    setAuthGateOpen(false);
+    const target = resolvePostAuthScreen();
+    setNavStack([]);
+    setCurrentScreen(target);
+    setPostAuthTarget(null);
+  }, [resolvePostAuthScreen]);
 
   const resetToHome = () => {
     setNavStack([]);
@@ -471,34 +498,27 @@ function AppRoutes() {
 
     // If we just came back from OAuth, prompt for passkey enrollment once.
     const provider = consumeLastOauthProvider();
-    const finishAuth = () => {
-      const target = resolvePostAuthScreen();
-      setNavStack([]);
-      setCurrentScreen(target);
-      setPostAuthTarget(null);
+    const afterLogin = () => {
+      if (authGateOpen || peekPendingAuthEmail()) {
+        finishAuthFlow();
+      }
     };
 
+    const maybePromptPasskey = () => {
+      if (!shouldPromptEnablePasskey()) return;
+      void userHasPasskey().then((has) => {
+        if (!has) setPasskeySetupOpen(true);
+      });
+    };
+
+    afterLogin();
     if (!provider) {
-      if (currentScreen === "authGate" || peekPendingAuthEmail()) {
-        finishAuth();
-      }
+      maybePromptPasskey();
       return;
     }
 
-    if (!shouldPromptEnablePasskey()) {
-      finishAuth();
-      return;
-    }
-
-    void userHasPasskey().then((has) => {
-      if (has) {
-        finishAuth();
-        return;
-      }
-      setNavStack([]);
-      setCurrentScreen("enablePasskey");
-    });
-  }, [auth.configured, auth.session, currentScreen, resolvePostAuthScreen]);
+    maybePromptPasskey();
+  }, [auth.configured, auth.session, authGateOpen, finishAuthFlow]);
 
   const handleBackFromSubcategory = () => {
     handleBack();
@@ -749,37 +769,6 @@ function AppRoutes() {
           />
         )}
 
-        {currentScreen === "authGate" && (
-          <AuthGate
-            initialStep={peekPendingAuthEmail() ? "sent" : undefined}
-            onBack={handleBack}
-            onContinueAsGuest={() => {
-              const stored = peekAuthReturn();
-              const target = (postAuthTarget ?? stored ?? "home") as Screen;
-              setNavStack([]);
-              setCurrentScreen(target === "authGate" ? "home" : target);
-              setPostAuthTarget(null);
-            }}
-          />
-        )}
-
-        {currentScreen === "enablePasskey" && (
-          <EnablePasskeyPrompt
-            onBack={() => {
-              const target = resolvePostAuthScreen();
-              setNavStack([]);
-              setCurrentScreen(target);
-              setPostAuthTarget(null);
-            }}
-            onDone={() => {
-              const target = resolvePostAuthScreen();
-              setNavStack([]);
-              setCurrentScreen(target);
-              setPostAuthTarget(null);
-            }}
-          />
-        )}
-
         {currentScreen === "deleteAccount" && (
           <DeleteAccountScreen
             onBack={handleBack}
@@ -791,6 +780,25 @@ function AppRoutes() {
         )}
         </div>
       </div>
+
+      <AuthGate
+        open={authGateOpen}
+        intent={authIntent}
+        initialStep={peekPendingAuthEmail() ? "sent" : undefined}
+        onClose={() => setAuthGateOpen(false)}
+        onContinueAsGuest={() => {
+          const stored = peekAuthReturn();
+          const target = (postAuthTarget ?? stored ?? "home") as Screen;
+          setAuthGateOpen(false);
+          setPostAuthTarget(null);
+          if (target !== currentScreen) {
+            setNavStack([]);
+            setCurrentScreen(target);
+          }
+        }}
+      />
+
+      <PasskeySetup open={passkeySetupOpen} onDone={() => setPasskeySetupOpen(false)} />
     </div>
     </RequireAuthProvider>
   );

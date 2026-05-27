@@ -12,8 +12,6 @@ export function getSupabaseClient(): SupabaseClient | null {
 
   cached = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY, {
     auth: {
-      // Supabase passkeys live behind this experimental flag.
-      experimental: { passkey: true },
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,

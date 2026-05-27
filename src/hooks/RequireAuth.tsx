@@ -1,6 +1,7 @@
 import { createContext, useContext, type ReactNode } from "react";
+import type { AuthIntent } from "../lib/authReturn";
 
-type RequireAuthFn = () => boolean;
+type RequireAuthFn = (intent?: AuthIntent) => boolean;
 
 const RequireAuthContext = createContext<RequireAuthFn | null>(null);
 

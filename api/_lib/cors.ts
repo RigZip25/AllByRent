@@ -8,7 +8,10 @@ export function applyCors(res: VercelResponse, origin?: string) {
     res.setHeader("Vary", "Origin");
   }
   res.setHeader("Access-Control-Allow-Methods", ALLOWED_METHODS);
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, anthropic-version");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, anthropic-version",
+  );
 }
 
 export function handleOptions(

@@ -1,9 +1,20 @@
 const AUTH_RETURN_KEY = "abr_auth_return";
+const AUTH_INTENT_KEY = "abr_auth_intent";
 const PENDING_EMAIL_KEY = "abr_auth_pending_email";
+
+export type AuthIntent = "list" | "book" | "message" | "generic";
 
 export function setAuthReturn(screen: string): void {
   try {
     sessionStorage.setItem(AUTH_RETURN_KEY, screen);
+  } catch {
+    // ignore
+  }
+}
+
+export function setAuthIntent(intent: AuthIntent): void {
+  try {
+    sessionStorage.setItem(AUTH_INTENT_KEY, intent);
   } catch {
     // ignore
   }
@@ -17,10 +28,21 @@ export function peekAuthReturn(): string | null {
   }
 }
 
+export function peekAuthIntent(): AuthIntent {
+  try {
+    const value = sessionStorage.getItem(AUTH_INTENT_KEY);
+    if (value === "list" || value === "book" || value === "message") return value;
+    return "generic";
+  } catch {
+    return "generic";
+  }
+}
+
 export function consumeAuthReturn(): string | null {
   try {
     const value = sessionStorage.getItem(AUTH_RETURN_KEY);
     sessionStorage.removeItem(AUTH_RETURN_KEY);
+    sessionStorage.removeItem(AUTH_INTENT_KEY);
     return value;
   } catch {
     return null;

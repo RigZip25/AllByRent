@@ -22,12 +22,19 @@ API keys stay **server-side**. The app calls `/api/anthropic` and `/api/photoroo
 
 For full parity with production handlers, you can also run `npx vercel dev`.
 
-## Supabase Auth (Passkeys-first)
+## Supabase Auth (email + custom WebAuthn passkeys)
 
 This app can run in **demo mode** if Supabase env vars are missing. To enable real auth, set:
 
 - **`VITE_SUPABASE_URL`**
 - **`VITE_SUPABASE_ANON_KEY`**
+
+**Vercel (passkey API routes)** — Project → Settings → Environment Variables:
+
+- `SUPABASE_SERVICE_ROLE_KEY` — mints sessions after passkey verify (never expose to the client)
+- `PASSKEY_RP_ID` — e.g. `app.allbyrent.com` (production) or `localhost` (local)
+- `PASSKEY_ORIGIN` — e.g. `https://app.allbyrent.com` or `http://localhost:5173`
+- `PASSKEY_SECRET` — random string for signing WebAuthn challenges (optional; falls back to service role key)
 
 Create a `.env.local` file in the project root:
 
@@ -36,18 +43,34 @@ VITE_SUPABASE_URL=your-project-url
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
+### Database: `profiles` table
+
+Run the migration in Supabase SQL editor (or CLI):
+
+`supabase/migrations/001_profiles.sql`
+
+Stores `passkey_credential_id` and public key material for custom WebAuthn (no Supabase Pro passkey add-on).
+
 ### Supabase dashboard setup
 
 - **Auth → URL Configuration**
-  - **Site URL**: `http://localhost:5173`
-  - **Additional Redirect URLs**: `http://localhost:5173/**`
+  - **Site URL**: `https://app.allbyrent.com` (prod) or `http://localhost:5173` (dev)
+  - **Redirect URLs**: `https://app.allbyrent.com/**`, `http://localhost:5173/**`
 - **Auth → Providers**
-  - Enable **Google** and/or **Apple**.
-- **Auth → Passkeys (WebAuthn)**
-  - Enable **Passkeys** and configure relying party origins for:
-    - `http://localhost:5173`
+  - **Email** enabled (magic link + 8-digit OTP)
+  - Google / Apple optional later (UI shows “Coming soon”)
+
+### Local passkey testing
+
+Passkey routes live under `/api/passkey/*` (Vercel serverless). Use:
+
+```bash
+npx vercel dev
+```
+
+Plain `npm run dev` works for email auth; passkey register/login needs `vercel dev` (or production deploy).
 
 ### Notes
 
-- **Account deletion**: a frontend-only app can’t securely call `auth.admin.deleteUser`. The UI implements a **“Request account deletion”** placeholder and signs out locally. To fully support deletion, add a Supabase **Edge Function** using the **service role key**.
+- **Account deletion**: requires a Supabase Edge Function with the service role key; the UI signs out locally as a placeholder.
   
