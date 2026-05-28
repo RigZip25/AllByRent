@@ -71,7 +71,10 @@ export function QRStickerScreen({
     };
   }, [pdfUrl]);
 
-  const generatePdf = async (ids: string[]) => {
+  const generatePdf = async (
+    ids: string[],
+    options?: { paper?: "letter" | "a4"; layout?: "sheet" | "single"; labelIn?: number; filename?: string },
+  ) => {
     let rows = eligibleListings
       .filter((l) => ids.includes(l.id))
       .map(listingDraftToStickerRow);
@@ -79,7 +82,12 @@ export function QRStickerScreen({
       rows = [listingDraftToStickerRow(draft)];
     }
     const generated = await generateQRStickerPdf(rows, {
-      filename: ids.length > 1 ? "AllByRent-QR-Stickers-Bulk.pdf" : "AllByRent-QR-Sticker.pdf",
+      filename:
+        options?.filename ??
+        (ids.length > 1 ? "AllByRent-QR-Stickers-Bulk.pdf" : "AllByRent-QR-Sticker.pdf"),
+      paper: options?.paper,
+      layout: options?.layout,
+      labelIn: options?.labelIn,
     });
     if (!generated) throw new Error("No PDF generated");
     if (pdfUrl) URL.revokeObjectURL(pdfUrl);
@@ -93,7 +101,7 @@ export function QRStickerScreen({
     setPdfLoading(true);
     setPdfError(null);
     try {
-      const url = await generatePdf([draft.id]);
+      const url = await generatePdf([draft.id], { paper: "letter", layout: "sheet", labelIn: 2, filename: "AllByRent-QR-Sticker-Letter.pdf" });
       window.open(url, "_blank", "noopener,noreferrer");
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
@@ -111,7 +119,7 @@ export function QRStickerScreen({
         setPdfError("No items in bulk queue yet.");
         return;
       }
-      const url = await generatePdf(ids);
+      const url = await generatePdf(ids, { paper: "letter", layout: "sheet", labelIn: 2, filename: "AllByRent-QR-Stickers-Bulk-Letter.pdf" });
       window.open(url, "_blank", "noopener,noreferrer");
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
@@ -120,11 +128,15 @@ export function QRStickerScreen({
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownload = async (kind: "a4" | "label") => {
     setPdfLoading(true);
     setPdfError(null);
     try {
-      await generatePdf([draft.id]);
+      if (kind === "a4") {
+        await generatePdf([draft.id], { paper: "a4", layout: "sheet", labelIn: 2, filename: "AllByRent-QR-Sticker-A4.pdf" });
+      } else {
+        await generatePdf([draft.id], { paper: "a4", layout: "single", labelIn: 3, filename: "AllByRent-QR-Sticker-3x3.pdf" });
+      }
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
     } finally {
@@ -136,7 +148,7 @@ export function QRStickerScreen({
     setPdfLoading(true);
     setPdfError(null);
     try {
-      await generatePdf([draft.id]);
+      await generatePdf([draft.id], { paper: "a4", layout: "single", labelIn: 3, filename: "AllByRent-QR-Sticker-3x3.pdf" });
       const trimmedEmail = email.trim();
       if (trimmedEmail) {
         const profile = loadUserProfile();
@@ -264,13 +276,25 @@ export function QRStickerScreen({
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => void handleDownload()}
+              onClick={() => void handleDownload("a4")}
               disabled={pdfLoading}
               className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
               style={{ borderColor: GREEN, color: GREEN }}
             >
-              ⬇️ Download PDF
+              ⬇️ A4 sheet PDF
             </button>
+            <button
+              type="button"
+              onClick={() => void handleDownload("label")}
+              disabled={pdfLoading}
+              className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
+              style={{ borderColor: GREEN, color: GREEN }}
+            >
+              ⬇️ 3×3 label PDF
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => void handleEmail()}
@@ -280,6 +304,7 @@ export function QRStickerScreen({
             >
               ✉️ Email link
             </button>
+            <div />
           </div>
 
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
