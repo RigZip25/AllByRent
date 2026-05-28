@@ -207,6 +207,29 @@ export function loadPublishedListings(): ListingDraft[] {
   }
 }
 
+export function countPublishedListingsForHost(hostId: string): number {
+  const normalizedHostId = hostId.trim() || "demo-user";
+  try {
+    const raw = localStorage.getItem(LISTINGS_STORAGE_KEY);
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return 0;
+    let count = 0;
+    for (const item of parsed) {
+      if (!item || typeof item !== "object") continue;
+      const listing = item as { hostId?: unknown };
+      const listingHost =
+        typeof listing.hostId === "string" && listing.hostId.trim()
+          ? listing.hostId.trim()
+          : "demo-user";
+      if (listingHost === normalizedHostId) count += 1;
+    }
+    return count;
+  } catch {
+    return 0;
+  }
+}
+
 export function getPublishedListingById(id: string): ListingDraft | null {
   return loadPublishedListings().find((listing) => listing.id === id) ?? null;
 }
