@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowDownCircle, CheckCircle2, Sparkles } from "lucide-react";
 import { usePwaUpdate } from "../hooks/PwaUpdateProvider";
+import { formatBuildStamp } from "../lib/buildInfo";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -59,6 +60,7 @@ export function PwaUpdateSuccessCard({ onDismiss }: { onDismiss: () => void }) {
         <p className="mt-0.5 text-[14px] leading-snug text-gray-500">
           You&apos;re on the latest AllByRent. Have a great day!
         </p>
+        <p className="mt-1 text-[11px] text-gray-400">{formatBuildStamp()}</p>
         <button
           type="button"
           onClick={onDismiss}
@@ -113,6 +115,7 @@ export function PwaUpdateConfirmSheet({
         <p className="mt-2 text-center text-[15px] leading-relaxed text-gray-500">
           The app will restart once to load the latest version with new fixes and improvements.
         </p>
+        <p className="mt-2 text-center text-[11px] text-gray-400">{formatBuildStamp()}</p>
         <div className="mt-5 flex flex-col gap-2.5">
           <button
             type="button"

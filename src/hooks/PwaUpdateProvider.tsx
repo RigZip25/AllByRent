@@ -15,6 +15,7 @@ import {
 } from "../lib/pwaUpdateCheck";
 import {
   APP_BUILD_ID,
+  formatBuildStamp,
   hasBuildIdChanged,
   writeStoredBuildId,
 } from "../lib/buildInfo";
@@ -34,6 +35,7 @@ export type UpdateCheckStatus = "available" | "current" | "unsupported" | "check
 type PwaUpdateContextValue = {
   updateAvailable: boolean;
   updateJustCompleted: boolean;
+  buildStamp: string;
   checkStatus: UpdateCheckStatus | null;
   applyUpdate: () => Promise<void>;
   dismissUpdateSuccess: () => void;
@@ -58,9 +60,26 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
   const [updateJustCompleted, setUpdateJustCompleted] = useState(false);
   const [checkStatus, setCheckStatus] = useState<UpdateCheckStatus | null>(null);
   const updateSWRef = useRef<UpdateSWFn | null>(null);
+  const autoApplyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const buildStamp = formatBuildStamp();
 
   const markUpdateAvailable = useCallback(() => {
     setUpdateAvailable(true);
+  }, []);
+
+  const scheduleAggressiveApply = useCallback(() => {
+    if (autoApplyTimerRef.current) return;
+    autoApplyTimerRef.current = window.setTimeout(() => {
+      autoApplyTimerRef.current = null;
+      if (isSimulateUpdateRequested()) return;
+      void (async () => {
+        const pending = await hasPendingAppUpdate();
+        if (!pending || !updateSWRef.current) return;
+        markPwaUpdateSuccessPending();
+        setUpdateAvailable(false);
+        await updateSWRef.current(true);
+      })();
+    }, 1200);
   }, []);
 
   useEffect(() => {
@@ -88,20 +107,38 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
       window.history.replaceState({}, "", next);
     }
 
+    const cleanups: (() => void)[] = [];
+
     const updateSW = registerSW({
       immediate: true,
       onNeedRefresh() {
         markUpdateAvailable();
+        scheduleAggressiveApply();
+      },
+      onRegisteredSW(_url, registration) {
+        if (!registration) return;
+        const tick = () => {
+          void registration.update().catch(() => undefined);
+        };
+        tick();
+        const intervalId = window.setInterval(tick, 5 * 60 * 1000);
+        cleanups.push(() => window.clearInterval(intervalId));
       },
     });
 
     updateSWRef.current = updateSW;
 
     void probeServiceWorkerUpdate().then((result) => {
-      if (result === "available") markUpdateAvailable();
+      if (result === "available") {
+        markUpdateAvailable();
+        scheduleAggressiveApply();
+      }
     });
 
-    const stopWatch = watchServiceWorkerUpdates(markUpdateAvailable);
+    const stopWatch = watchServiceWorkerUpdates(() => {
+      markUpdateAvailable();
+      scheduleAggressiveApply();
+    });
 
     const win = window as Window & {
       __simulatePwaUpdate?: () => void;
@@ -125,8 +162,15 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
       return result;
     };
 
-    return stopWatch;
-  }, [markUpdateAvailable]);
+    return () => {
+      if (autoApplyTimerRef.current) {
+        window.clearTimeout(autoApplyTimerRef.current);
+        autoApplyTimerRef.current = null;
+      }
+      stopWatch();
+      cleanups.forEach((fn) => fn());
+    };
+  }, [markUpdateAvailable, scheduleAggressiveApply]);
 
   const checkForUpdates = useCallback(async (): Promise<UpdateCheckStatus> => {
     setCheckStatus("checking");
@@ -167,6 +211,7 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
       value={{
         updateAvailable,
         updateJustCompleted,
+        buildStamp,
         checkStatus,
         applyUpdate,
         dismissUpdateSuccess,

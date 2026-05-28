@@ -8,6 +8,7 @@ import { WhatDoYouWant } from "../screens/onboarding/WhatDoYouWant";
 import { WhereAreYou } from "../screens/onboarding/WhereAreYou";
 import { WhereAreYouHeading } from "../screens/onboarding/WhereAreYouHeading";
 import { WhereAreYouManual } from "../screens/onboarding/WhereAreYouManual";
+import { YouAreAllSet } from "../screens/onboarding/YouAreAllSet";
 import { HomeFeed } from "./components/HomeFeed";
 import { Subcategory } from "./components/Subcategory";
 import { ItemDetail } from "./components/ItemDetail";
@@ -66,6 +67,7 @@ type Screen =
   | "whereAreYou"
   | "whereAreYouHeading"
   | "whereAreYouManual"
+  | "onboardingAllSet"
   | "home"
   | "notifications"
   | "subcategory"
@@ -103,6 +105,7 @@ const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
   whereAreYou: "whatDoYouWant",
   whereAreYouManual: "whereAreYou",
   whereAreYouHeading: "whereAreYou",
+  onboardingAllSet: "whereAreYou",
 };
 
 /** Listing flow only — used when the nav stack is empty (not onboarding fallbacks). */
@@ -112,7 +115,7 @@ const LISTING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
 };
 
 function isOnboardingScreen(screen: Screen): boolean {
-  return screen in ONBOARDING_BACK_FALLBACK || screen === "firstHello";
+  return screen in ONBOARDING_BACK_FALLBACK || screen === "firstHello" || screen === "onboardingAllSet";
 }
 
 function readBootQuery() {
@@ -234,8 +237,6 @@ function AppRoutes() {
     setCurrentScreen("home");
   }, []);
 
-  const finishRentOnboarding = finishOnboardingToHome;
-
   /** Push the screen we are leaving, then open the next screen (avoids stale currentScreen in the stack). */
   const showAuthGate = useCallback((target: Screen, intentOverride?: AuthIntent) => {
     const intent = intentOverride ?? screenToAuthIntent(target);
@@ -265,6 +266,10 @@ function AppRoutes() {
       return screen;
     });
   }, [auth.configured, auth.session, showAuthGate]);
+
+  const finishRentOnboarding = useCallback(() => {
+    navigateTo("onboardingAllSet");
+  }, [navigateTo]);
 
   const requireAuth = useCallback(
     (intentOverride?: AuthIntent) => {
@@ -660,6 +665,10 @@ function AppRoutes() {
             hint={homeLocationError ?? undefined}
             onSkip={skipOnboarding}
           />
+        )}
+
+        {currentScreen === "onboardingAllSet" && (
+          <YouAreAllSet onExplore={finishOnboardingToHome} />
         )}
 
         {currentScreen === "home" && (

@@ -1,3 +1,9 @@
+import {
+  detectPasskeyEnvironment,
+  isPasskeyProductionHost,
+  isStandalonePwa,
+} from "./passkeyEnvironment";
+
 /**
  * User-facing messages for WebAuthn / passkey (Face ID) failures.
  */
@@ -19,11 +25,32 @@ export function formatPasskeyError(err: unknown): string {
   }
 
   if (
-    /invalid for this domain|invalid domain|ERROR_INVALID_RP_ID|ERROR_INVALID_DOMAIN/i.test(msg)
+    /invalid for this domain|invalid domain|ERROR_INVALID_RP_ID|ERROR_INVALID_DOMAIN|rpId|RP ID|origin/i.test(
+      msg,
+    )
   ) {
+    const env = detectPasskeyEnvironment();
+    const hostNote = !isPasskeyProductionHost()
+      ? " Use https://app.allbyrent.com (not a preview link)."
+      : "";
+    if (env === "ios-pwa") {
+      return (
+        "Face ID does not match this installed app." +
+        hostNote +
+        " Sign in with email once, then tap Enable Face ID again from this Home Screen icon."
+      );
+    }
+    if (env === "ios-safari") {
+      return (
+        "Face ID was set up in a different place (Safari tab vs Home Screen app)." +
+        hostNote +
+        " Sign in with email, then enable Face ID from the same place you use daily."
+      );
+    }
     return (
-      "Face ID is not set up for this address. Open https://app.allbyrent.com " +
-      "(same tab you used to sign up), not a preview or copy URL."
+      "Face ID is not set up for this address." +
+      hostNote +
+      " Open the same app icon or Safari tab you used when you enabled Face ID."
     );
   }
 
@@ -37,6 +64,17 @@ export function formatPasskeyError(err: unknown): string {
 
   if (/No passkey registered|Passkey not found/i.test(msg)) {
     return "No Face ID passkey for this account. Sign in with email, then enable Face ID when prompted.";
+  }
+
+  if (name === "InvalidStateError" || /InvalidStateError|already registered|credential.*exists/i.test(msg)) {
+    return "Face ID is already enabled on this device. Try signing in with Face ID, or sign in with email.";
+  }
+
+  if (name === "SecurityError" || /SecurityError/i.test(msg)) {
+    const pwa = isStandalonePwa();
+    return pwa
+      ? "Face ID was blocked for the installed app. Check Settings → Face ID & Passcodes, then try again."
+      : "Face ID was blocked. Use Safari on iPhone (not a private tab), or sign in with email.";
   }
 
   if (/Passkeys are not supported/i.test(msg)) {

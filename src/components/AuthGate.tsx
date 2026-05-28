@@ -15,6 +15,7 @@ import {
   verifyEmailOtp,
 } from "../lib/auth";
 import { formatAuthError } from "../lib/authErrors";
+import { getPasskeyEnvironmentHint } from "../lib/passkeyEnvironment";
 import { RentanoTip } from "./RentanoTip";
 
 const BORDER = "#E8E6E0";
@@ -76,6 +77,7 @@ export function AuthGate({
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [passkeyPrimary, setPasskeyPrimary] = useState(false);
+  const passkeyHint = useMemo(() => getPasskeyEnvironmentHint(), []);
   const [emailCooldownUntil, setEmailCooldownUntil] = useState<number>(0);
   const [nowMs, setNowMs] = useState<number>(() => Date.now());
 
@@ -202,6 +204,9 @@ export function AuthGate({
               <ScanFace className="h-5 w-5" />
               {busy === "passkey" ? "Opening Face ID…" : "Login with Face ID"}
             </button>
+            {passkeyHint ? (
+              <p className="text-center text-[12px] leading-snug text-gray-500">{passkeyHint}</p>
+            ) : null}
             <button
               type="button"
               disabled={busy !== null}

@@ -14,8 +14,8 @@ function pwaPlugin() {
     const { VitePWA } = require('vite-plugin-pwa') as typeof import('vite-plugin-pwa')
     pwaEnabled = true
     return VitePWA({
-      // "prompt" keeps the new SW waiting until the user confirms in-app (bell notification).
-      registerType: 'prompt',
+      // Auto-activate new SW and reload so deploys reach phones without manual cache clear.
+      registerType: 'autoUpdate',
       includeAssets: ['pwa-192.png', 'pwa-512.png'],
       manifest: {
         name: 'AllByRent',
@@ -45,6 +45,16 @@ function pwaPlugin() {
         skipWaiting: true,
         clientsClaim: true,
         runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'allbyrent-html',
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 4, maxAgeSeconds: 60 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
           // Cache cheap GET requests (maps/geocode) to avoid repeated paid/slow calls.
           {
             urlPattern: ({ url }) =>

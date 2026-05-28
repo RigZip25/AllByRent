@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ScanFace } from "lucide-react";
 import { dismissEnablePasskeyPrompt, enrollPasskey } from "../lib/auth";
 import { formatPasskeyError } from "../lib/passkeyErrors";
+import { getPasskeyEnvironmentHint } from "../lib/passkeyEnvironment";
 
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
@@ -17,6 +18,8 @@ export function PasskeySetup({
   const [error, setError] = useState<string | null>(null);
 
   if (!open) return null;
+
+  const passkeyHint = getPasskeyEnvironmentHint();
 
   const handleLater = () => {
     dismissEnablePasskeyPrompt();
@@ -54,6 +57,9 @@ export function PasskeySetup({
         <p className="mt-2 text-[14px] text-gray-500">
           Use Face ID, Touch ID, or your device passcode next time — no email code needed.
         </p>
+        {passkeyHint ? (
+          <p className="mt-2 text-[12px] leading-snug text-gray-500">{passkeyHint}</p>
+        ) : null}
 
         {error ? (
           <div className="mt-3 rounded-2xl border bg-[#FEF2F2] p-3 text-[13px] text-red-700">
