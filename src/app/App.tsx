@@ -61,6 +61,7 @@ import { AuthGate } from "../components/AuthGate";
 import { PasskeySetup } from "../components/PasskeySetup";
 import { DeleteAccountScreen } from "../screens/profile/DeleteAccount";
 import { IdentityVerificationScreen } from "../screens/IdentityVerificationScreen";
+import { AgentActivityScreen } from "../screens/AgentActivityScreen";
 
 type Screen =
   | "splash"
@@ -88,6 +89,7 @@ type Screen =
   | "earnBusiness"
   | "subscriptionPlans"
   | "identity"
+  | "agentActivity"
   | "deleteAccount";
 
 function screenToAuthIntent(screen: Screen): AuthIntent {
@@ -240,6 +242,11 @@ function AppRoutes() {
       setCurrentScreen("identity");
       clearBootQuery(["screen"]);
     }
+    if (screen === "agent-activity") {
+      setNavStack([]);
+      setCurrentScreen("agentActivity");
+      clearBootQuery(["screen"]);
+    }
   }, [boot.screen]);
 
   useEffect(() => {
@@ -281,7 +288,8 @@ function AppRoutes() {
       screen === "listItem" ||
       screen === "hostListingDetail" ||
       screen === "activeRental" ||
-      screen === "identity";
+      screen === "identity" ||
+      screen === "agentActivity";
 
     if (authRequired && auth.configured && !auth.session) {
       showAuthGate(screen);
@@ -325,6 +333,7 @@ function AppRoutes() {
       "subcategory",
       "itemDetail",
       "identity",
+      "agentActivity",
     ];
     const storedTarget =
       candidate && validScreens.includes(candidate)
@@ -765,6 +774,10 @@ function AppRoutes() {
 
         {currentScreen === "identity" && (
           <IdentityVerificationScreen onBack={handleBack} />
+        )}
+
+        {currentScreen === "agentActivity" && (
+          <AgentActivityScreen onBack={handleBack} />
         )}
 
         {currentScreen === "notifications" && (

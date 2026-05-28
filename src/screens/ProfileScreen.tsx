@@ -495,6 +495,22 @@ export function ProfileScreen({
         <ul className="mb-4 flex flex-col gap-2">
           <li>
             <RowButton
+              icon={<span className="text-lg">🤖</span>}
+              label="Agent activity"
+              value="Admin feed"
+              onClick={() => {
+                try {
+                  const url = new URL(window.location.href);
+                  url.searchParams.set("screen", "agent-activity");
+                  window.location.href = url.toString();
+                } catch {
+                  window.location.href = "/?screen=agent-activity";
+                }
+              }}
+            />
+          </li>
+          <li>
+            <RowButton
               icon={<Bell className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label="Notifications"
               value={profile.notificationsEnabled ? "On" : "Off"}
