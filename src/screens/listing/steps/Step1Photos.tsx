@@ -159,7 +159,12 @@ export function Step1Photos({
     let nextIndex = draft.photos.length;
 
     for (const file of files) {
-      if (!file.type.startsWith("image/")) continue;
+      const lowerName = (file.name || "").toLowerCase();
+      const isImageLike =
+        (file.type || "").toLowerCase().startsWith("image/") ||
+        isHeicLike(file) ||
+        /\.(png|jpe?g|webp|gif)$/i.test(lowerName);
+      if (!isImageLike) continue;
       if (nextIndex >= MAX_LISTING_PHOTOS) break;
 
       const targetIndex = nextIndex;
@@ -183,7 +188,10 @@ export function Step1Photos({
 
         await appendPhotoBlob(blob);
         nextIndex += 1;
-      } catch {
+      } catch (error) {
+        setPhotoWarning(
+          `Couldn’t add this photo. (${formatUnknownError(error)})`,
+        );
         setErrorIndex(targetIndex);
         break;
       } finally {
