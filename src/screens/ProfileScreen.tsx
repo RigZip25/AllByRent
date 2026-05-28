@@ -41,6 +41,7 @@ import { confirmAndResetAppData } from "../lib/resetAppStorage";
 import { useAuth } from "../hooks/AuthProvider";
 import { signOut } from "../lib/auth";
 import { fetchRemoteProfile, updateRemoteProfile } from "../lib/supabaseProfile";
+import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -164,6 +165,7 @@ export function ProfileScreen({
   const [authBusy, setAuthBusy] = useState(false);
   const mode = getAppMode();
   const locationSummary = useMemo(() => getProfileLocationSummary(), [profile]);
+  const [recentReviews, setRecentReviews] = useState<{ rating: number; comment: string; createdAt: string }[]>([]);
 
   useEffect(() => {
     if (!auth.userId) return;
@@ -187,6 +189,18 @@ export function ProfileScreen({
         next.host.rating = Number(remote.rating);
       }
       setProfile(refreshProfileStats(next, auth.userId));
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [auth.userId]);
+
+  useEffect(() => {
+    if (!auth.userId) return;
+    let mounted = true;
+    void fetchReviewsForUserRemote(auth.userId).then((rows) => {
+      if (!mounted) return;
+      setRecentReviews(rows.slice(0, 3).map((r) => ({ rating: r.rating, comment: r.comment, createdAt: r.createdAt })));
     });
     return () => {
       mounted = false;
@@ -384,6 +398,26 @@ export function ProfileScreen({
             </li>
           ) : null}
         </ul>
+
+        {recentReviews.length > 0 ? (
+          <>
+            <SectionTitle>Reviews</SectionTitle>
+            <ul className="mb-4 flex flex-col gap-2">
+              {recentReviews.map((r, idx) => (
+                <li key={`${r.createdAt}-${idx}`} className="rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
+                  <p className="text-[14px] font-semibold" style={{ color: GREEN }}>
+                    {r.rating}★
+                  </p>
+                  {r.comment ? (
+                    <p className="mt-1 text-[13px] leading-relaxed text-gray-600">{r.comment}</p>
+                  ) : (
+                    <p className="mt-1 text-[13px] text-gray-400">No comment</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
 
         <SectionTitle>Trust &amp; payments</SectionTitle>
         <ul className="mb-4 flex flex-col gap-2">

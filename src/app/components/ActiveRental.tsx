@@ -11,12 +11,15 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { useMemo, useState, useCallback } from "react";
+import { useAuth } from "../../hooks/AuthProvider";
 import {
   loadRentalBookings,
   updateBooking,
   getRenterPickupLocation,
   type RentalBooking,
 } from "../../lib/rentalsStorage";
+import { hasLocalReview, submitReviewRemote } from "../../lib/reviewsStorage";
+import { ReviewPromptModal } from "../../components/reviews/ReviewPromptModal";
 import { QrScanPanel, type QrScanPhase } from "../../components/rentals/QrScanPanel";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
 import {
@@ -26,9 +29,11 @@ import {
 } from "../../lib/rentalPricing";
 
 export function ActiveRental({ onBack }: { onBack: () => void }) {
+  const auth = useAuth();
   const [scanOpen, setScanOpen] = useState(false);
   const [scanPhase, setScanPhase] = useState<QrScanPhase>("camera");
   const [notice, setNotice] = useState<string | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const [bookings, setBookings] = useState<RentalBooking[]>(() => loadRentalBookings());
 
   const booking = useMemo<RentalBooking | null>(() => {
@@ -150,6 +155,9 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
     setBookings(loadRentalBookings());
     setNotice("Return confirmed. Thanks!");
     closeScanner();
+    if (auth.userId && latest.counterpartyId && !hasLocalReview(latest.id, auth.userId)) {
+      setReviewOpen(true);
+    }
   }, [booking, mode]);
 
   return (
@@ -431,6 +439,24 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
           onManualCode={() => setScanPhase("confirm")}
           onOwnerManualConfirm={() => setScanPhase("confirm")}
           isHost={booking.role === "host"}
+        />
+      ) : null}
+
+      {booking && auth.userId ? (
+        <ReviewPromptModal
+          open={reviewOpen}
+          title={`for ${booking.counterpartyName}`}
+          onClose={() => setReviewOpen(false)}
+          onSubmit={(rating, comment) => {
+            void submitReviewRemote({
+              rentalId: booking.id,
+              reviewerId: auth.userId,
+              revieweeId: booking.counterpartyId,
+              role: booking.role === "renter" ? "renter" : "host",
+              rating,
+              comment,
+            }).finally(() => setReviewOpen(false));
+          }}
         />
       ) : null}
     </div>
