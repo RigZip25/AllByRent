@@ -166,6 +166,21 @@ function fetchWithTimeout(
   return fetch(input, nextInit).finally(() => window.clearTimeout(timer));
 }
 
+async function readErrorDetail(response: Response): Promise<string> {
+  try {
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      const parsed = (await response.json()) as { error?: string; message?: string };
+      const message = parsed?.error || parsed?.message;
+      if (typeof message === "string" && message.trim()) return message.trim();
+    }
+    const text = (await response.text()).trim();
+    return text ? text.slice(0, 160) : "";
+  } catch {
+    return "";
+  }
+}
+
 export async function processPhotoWithPhotoRoom(
   file: File,
   options?: PhotoRoomEditOptions,
@@ -214,7 +229,12 @@ export async function processPhotoWithPhotoRoom(
     );
 
     if (!response.ok) {
-      throw new Error(`PhotoRoom request failed (${response.status})`);
+      const detail = await readErrorDetail(response);
+      throw new Error(
+        detail
+          ? `PhotoRoom request failed (${response.status}): ${detail}`
+          : `PhotoRoom request failed (${response.status})`,
+      );
     }
 
     const blob = await response.blob();

@@ -3,7 +3,7 @@ export function getAnthropicApiKey(): string | undefined {
 }
 
 export function getPhotoRoomApiKey(): string | undefined {
-  return process.env.PHOTOROOM_API_KEY || process.env.VITE_PHOTOROOM_API_KEY;
+  return trimEnv(process.env.PHOTOROOM_API_KEY || process.env.VITE_PHOTOROOM_API_KEY);
 }
 
 function trimEnv(value: string | undefined): string | undefined {
