@@ -327,6 +327,7 @@ export function HomeFeed({
       <RentanoChatSheet
         open={rentanoOpen}
         onClose={() => setRentanoOpen(false)}
+        defaultView="chat"
         context={{ screen: "home", appMode: mode }}
       />
     </div>

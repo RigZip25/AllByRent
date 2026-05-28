@@ -806,6 +806,7 @@ export function Subcategory({
         open={rentanoOpen}
 
         onClose={() => setRentanoOpen(false)}
+        defaultView="chat"
 
         context={{
 

@@ -269,6 +269,7 @@ export function EarnBusinessScreen({
       <RentanoChatSheet
         open={rentanoOpen}
         onClose={() => setRentanoOpen(false)}
+        defaultView="chat"
         context={{ screen: "earnBusiness", appMode: mode }}
       />
     </div>

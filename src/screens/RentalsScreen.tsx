@@ -402,6 +402,7 @@ export function RentalsScreen({
       <RentanoChatSheet
         open={rentanoOpen}
         onClose={() => setRentanoOpen(false)}
+        defaultView="chat"
         context={{ screen: "rentals", appMode: mode }}
       />
     </div>

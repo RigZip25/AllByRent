@@ -579,7 +579,8 @@ export function ProfileScreen({
       <RentanoChatSheet
         open={rentanoOpen}
         onClose={() => setRentanoOpen(false)}
-        context={{ screen: "profile", appMode: mode }}
+        defaultView="chat"
+        context={{ screen: "profile", appMode: mode, userId: auth.userId ?? undefined }}
       />
     </div>
   );
