@@ -118,6 +118,39 @@ export function Step1Photos({
     return "Unknown error.";
   };
 
+  const isHeicLike = (file: File) => {
+    const type = (file.type || "").toLowerCase();
+    const name = (file.name || "").toLowerCase();
+    return (
+      type === "image/heic" ||
+      type === "image/heif" ||
+      name.endsWith(".heic") ||
+      name.endsWith(".heif")
+    );
+  };
+
+  const maybeConvertHeicToJpeg = async (file: File): Promise<File> => {
+    if (!isHeicLike(file)) return file;
+
+    // Lazy-load to avoid penalizing non-iOS users.
+    const mod = await import("heic2any");
+    const heic2any = (mod as unknown as { default: (opts: unknown) => Promise<Blob | Blob[]> })
+      .default;
+
+    const converted = await heic2any({
+      blob: file,
+      toType: "image/jpeg",
+      quality: 0.9,
+    });
+
+    const blob = Array.isArray(converted) ? converted[0] : converted;
+    const baseName = file.name.replace(/\.[^.]+$/, "") || "photo";
+    return new File([blob], `${baseName}.jpg`, {
+      type: "image/jpeg",
+      lastModified: Date.now(),
+    });
+  };
+
   const handleFilesSelected = async (files: File[]) => {
     if (files.length === 0) return;
     setStorageWarning(null);
@@ -135,13 +168,14 @@ export function Step1Photos({
       setDraft((current) => ({ ...current, photoEnhancementPending: true }));
 
       try {
+        const sourceFile = await maybeConvertHeicToJpeg(file);
         let blob: Blob;
         try {
-          blob = await processPhotoWithPhotoRoom(file);
+          blob = await processPhotoWithPhotoRoom(sourceFile);
         } catch (error) {
           // Enhancement is best-effort; still allow photo uploads if the proxy/API key is missing
           // or the image format can't be processed.
-          blob = file;
+          blob = sourceFile;
           setPhotoWarning(
             `Photo enhancement unavailable. Saved original photo. (${formatUnknownError(error)})`,
           );
