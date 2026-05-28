@@ -537,7 +537,10 @@ function AppRoutes() {
       markIntroDone();
       cleanupSplashGlobals();
       setNavStack([]);
-      setCurrentScreen(resolvePostSplashScreen());
+      // Prefer returning to the intent screen that triggered auth (e.g. list/book/message),
+      // not just "post splash". This makes magic-link callbacks feel like a real continuation.
+      setCurrentScreen(resolvePostAuthScreen());
+      setPostAuthTarget(null);
     };
 
     resumeAfterAuthCallback();
