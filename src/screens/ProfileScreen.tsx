@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   Bell,
   ChevronRight,
@@ -32,6 +32,7 @@ import {
   loadUserProfile,
   refreshProfileStats,
   setProfileAvatarUrl,
+  updateProfileFields,
   updatePreferredMode,
   type UserProfile,
 } from "../lib/userProfileStorage";
@@ -39,6 +40,7 @@ import { formatBuildStamp } from "../lib/buildInfo";
 import { confirmAndResetAppData } from "../lib/resetAppStorage";
 import { useAuth } from "../hooks/AuthProvider";
 import { signOut } from "../lib/auth";
+import { fetchRemoteProfile, updateRemoteProfile } from "../lib/supabaseProfile";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -163,6 +165,34 @@ export function ProfileScreen({
   const mode = getAppMode();
   const locationSummary = useMemo(() => getProfileLocationSummary(), [profile]);
 
+  useEffect(() => {
+    if (!auth.userId) return;
+    let mounted = true;
+    void fetchRemoteProfile(auth.userId).then((remote) => {
+      if (!mounted || !remote) return;
+      const displayName = remote.display_name?.trim() || profile.displayName;
+      const memberSince = remote.created_at?.slice(0, 10) || profile.memberSince;
+      const next = updateProfileFields({
+        displayName,
+        phone: remote.phone ?? profile.phone,
+        avatarUrl: profile.avatarUrl,
+      });
+      next.memberSince = memberSince;
+      next.verification = {
+        ...next.verification,
+        phone: Boolean(remote.phone_verified ?? next.verification.phone),
+        identity: Boolean(remote.identity_verified ?? next.verification.identity),
+      };
+      if (remote.rating != null && Number.isFinite(remote.rating)) {
+        next.host.rating = Number(remote.rating);
+      }
+      setProfile(refreshProfileStats(next, auth.userId));
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [auth.userId]);
+
   const hasPhoto = hasAvatarPhoto(profile.id);
   const showOnboarding = !hasPhoto && !isPhotoPromptDeferred();
 
@@ -181,6 +211,29 @@ export function ProfileScreen({
   const handleModeChange = (next: AppMode) => {
     updatePreferredMode(next);
     setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
+  };
+
+  const handleEditName = () => {
+    const nextName = window.prompt("Name", profile.displayName)?.trim();
+    if (!nextName) return;
+    const next = updateProfileFields({ displayName: nextName });
+    setProfile(refreshProfileStats(next, auth.userId));
+    if (auth.userId) {
+      void updateRemoteProfile(auth.userId, { display_name: nextName }).catch(() => {
+        // Local fallback already applied.
+      });
+    }
+  };
+
+  const handleEditPhone = () => {
+    const nextPhone = window.prompt("Phone", profile.phone)?.trim() ?? "";
+    const next = updateProfileFields({ phone: nextPhone });
+    setProfile(refreshProfileStats(next, auth.userId));
+    if (auth.userId) {
+      void updateRemoteProfile(auth.userId, { phone: nextPhone }).catch(() => {
+        // Local fallback already applied.
+      });
+    }
   };
 
   const persistPhoto = async (blob: Blob) => {
@@ -287,6 +340,22 @@ export function ProfileScreen({
               label="Location"
               value={locationSummary}
               onClick={onEditLocation}
+            />
+          </li>
+          <li>
+            <RowButton
+              icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+              label="Name"
+              value={profile.displayName}
+              onClick={handleEditName}
+            />
+          </li>
+          <li>
+            <RowButton
+              icon={<Sparkles className="h-5 w-5" style={{ color: "#F59E0B" }} />}
+              label="Phone"
+              value={profile.phone || "Add phone"}
+              onClick={handleEditPhone}
             />
           </li>
           <li>
