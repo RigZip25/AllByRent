@@ -11,11 +11,13 @@ import {
   loadQrBulkQueueListingIds,
   loadStickerEligibleListings,
   removeListingFromQrBulkQueue,
+  uploadQrVerificationPhotoRemote,
   updateStoredListing,
 } from "../../lib/listingStorage";
 import { loadUserProfile, saveUserProfile } from "../../lib/userProfileStorage";
 import type { ListingDraft } from "./types";
 import type { Dispatch, SetStateAction } from "react";
+import { useAuth } from "../../hooks/AuthProvider";
 
 const GREEN = "#0D5C3A";
 const QR_SHEET_CAPACITY = 12;
@@ -35,6 +37,7 @@ export function QRStickerScreen({
   onListAnother,
   onBackToStory,
 }: QRStickerScreenProps) {
+  const auth = useAuth();
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
@@ -42,7 +45,6 @@ export function QRStickerScreen({
   const [pdfFilename, setPdfFilename] = useState<string>("AllByRent-QR-Stickers.pdf");
   const [actionsOpen, setActionsOpen] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const libraryInputRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState(() => loadUserProfile().email ?? "");
   const [bulkCount, setBulkCount] = useState(() => loadQrBulkQueueListingIds().length);
   const emptySpotsLeft = Math.max(0, QR_SHEET_CAPACITY - bulkCount);
@@ -173,6 +175,37 @@ export function QRStickerScreen({
   const handleVerificationPhoto = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Camera-only: owner confirms QR is printed and attached.
+    if (auth.userId) {
+      setPdfLoading(true);
+      setPdfError(null);
+      void uploadQrVerificationPhotoRemote({
+        listingId: draft.id,
+        ownerId: auth.userId,
+        file,
+      })
+        .then(() => {
+          setDraft((current) => {
+            const updated: ListingDraft = {
+              ...current,
+              qrReady: true,
+              listingStatus: "active",
+            };
+            updateStoredListing(updated);
+            return updated;
+          });
+          onComplete();
+        })
+        .catch(() => {
+          setPdfError("Could not upload verification photo. Please try again.");
+        })
+        .finally(() => {
+          setPdfLoading(false);
+        });
+      event.target.value = "";
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -391,22 +424,14 @@ export function QRStickerScreen({
         ) : null}
 
         <div className="mt-8 border-t border-gray-100 pt-6">
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => libraryInputRef.current?.click()}
-              className="w-full rounded-xl border-2 py-3 text-sm font-bold"
-              style={{ borderColor: GREEN, color: GREEN }}
-            >
-              Choose from library
-            </button>
+          <div>
             <button
               type="button"
               onClick={() => cameraInputRef.current?.click()}
               className="w-full rounded-xl py-3 text-sm font-bold text-white"
               style={{ backgroundColor: GREEN }}
             >
-              📸 Take photo
+              📸 Take verification photo
             </button>
           </div>
           <input
@@ -417,13 +442,7 @@ export function QRStickerScreen({
             className="hidden"
             onChange={handleVerificationPhoto}
           />
-          <input
-            ref={libraryInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleVerificationPhoto}
-          />
+          {/* Camera-only to ensure sticker is attached to the physical item. */}
           <p className="mt-3 text-center text-xs text-gray-500">
             Your listing won’t be visible to renters until this verification step is done. Gift and Sell listings are active immediately.
           </p>

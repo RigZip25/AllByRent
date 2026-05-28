@@ -543,6 +543,50 @@ export async function savePublishedListingRemote(draft: ListingDraft, ownerId: s
   }
 }
 
+export async function uploadQrVerificationPhotoRemote(params: {
+  listingId: string;
+  ownerId: string;
+  file: File;
+}): Promise<{ path: string } | null> {
+  if (!isSupabaseConfigured()) return null;
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+
+  const ext = params.file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const path = `${params.ownerId}/${params.listingId}/qr_verification_${Date.now()}.${ext}`;
+  const { error: uploadError } = await supabase.storage
+    .from("listing-verification")
+    .upload(path, params.file, {
+      upsert: true,
+      contentType: params.file.type || "image/jpeg",
+    });
+  if (uploadError) throw uploadError;
+
+  const { error: updateError } = await supabase
+    .from("listings")
+    .update({
+      qr_verification_photo_path: path,
+      qr_verified_at: new Date().toISOString(),
+      listing_status: "active",
+    })
+    .eq("id", params.listingId)
+    .eq("owner_id", params.ownerId);
+  if (updateError) throw updateError;
+
+  // Update local cache for instant UX.
+  const listing = getPublishedListingById(params.listingId);
+  if (listing) {
+    updateStoredListing({
+      ...listing,
+      listingStatus: "active",
+      qrReady: true,
+      verificationPhoto: URL.createObjectURL(params.file),
+    });
+  }
+
+  return { path };
+}
+
 export async function fetchListingByIdRemote(id: string): Promise<ListingDraft | null> {
   if (!isSupabaseConfigured()) {
     return getPublishedListingById(id);
