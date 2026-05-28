@@ -2,6 +2,8 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { applyCors, handleOptions } from "../_lib/cors";
 import { getSupabaseAnonKey, getSupabaseUrl } from "../_lib/keys";
 
+const GOTRUE_API_VERSION = "2024-01-01";
+
 function normalizeBaseUrl(raw: string | undefined): string | undefined {
   if (!raw?.trim()) return undefined;
   let url = raw.trim();
@@ -9,6 +11,10 @@ function normalizeBaseUrl(raw: string | undefined): string | undefined {
   return url.replace(/\/$/, "");
 }
 
+/**
+ * Proxy for Supabase Auth `signInWithOtp` (POST /auth/v1/otp).
+ * Must match @supabase/auth-js body shape — not signUp, not nested `options`.
+ */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const origin = typeof req.headers.origin === "string" ? req.headers.origin : undefined;
   applyCors(res, origin);
@@ -28,7 +34,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  let body: { email?: string; redirectTo?: string };
+  let body: {
+    email?: string;
+    redirectTo?: string;
+    code_challenge?: string;
+    code_challenge_method?: string;
+  };
   try {
     body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body ?? {});
   } catch {
@@ -39,22 +50,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!email) return res.status(400).json({ error: "email is required" });
 
   const redirectTo = typeof body.redirectTo === "string" ? body.redirectTo.trim() : undefined;
+  const codeChallenge =
+    typeof body.code_challenge === "string" ? body.code_challenge.trim() : undefined;
+  const codeChallengeMethod =
+    typeof body.code_challenge_method === "string" ? body.code_challenge_method.trim() : undefined;
+
+  const otpUrl = new URL(`${baseUrl}/auth/v1/otp`);
+  if (redirectTo) {
+    otpUrl.searchParams.set("redirect_to", redirectTo);
+  }
+
+  const gotrueBody: Record<string, unknown> = {
+    email,
+    data: {},
+    create_user: true,
+    gotrue_meta_security: {},
+  };
+  if (codeChallenge) gotrueBody.code_challenge = codeChallenge;
+  if (codeChallengeMethod) gotrueBody.code_challenge_method = codeChallengeMethod;
 
   try {
-    const upstream = await fetch(`${baseUrl}/auth/v1/otp`, {
+    const upstream = await fetch(otpUrl.toString(), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         apikey: anonKey,
         Authorization: `Bearer ${anonKey}`,
+        "X-Supabase-Api-Version": GOTRUE_API_VERSION,
       },
-      body: JSON.stringify({
-        email,
-        options: {
-          email_redirect_to: redirectTo || undefined,
-          should_create_user: true,
-        },
-      }),
+      body: JSON.stringify(gotrueBody),
     });
 
     const text = await upstream.text();

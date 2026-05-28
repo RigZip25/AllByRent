@@ -74,11 +74,34 @@ async function ensureProfileRow(userId: string, email: string): Promise<void> {
   await supabase.from("profiles").upsert({ id: userId, email }, { onConflict: "id" });
 }
 
+async function readPkceChallengeForProxy(): Promise<{
+  code_challenge?: string;
+  code_challenge_method?: string;
+}> {
+  try {
+    const storageKey = Object.keys(localStorage).find((key) => key.endsWith("-code-verifier"));
+    if (!storageKey) return {};
+    const verifier = localStorage.getItem(storageKey);
+    if (!verifier) return {};
+    const data = new TextEncoder().encode(verifier);
+    const digest = await crypto.subtle.digest("SHA-256", data);
+    const hash = btoa(String.fromCharCode(...new Uint8Array(digest)))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+    return { code_challenge: hash, code_challenge_method: "s256" };
+  } catch {
+    return {};
+  }
+}
+
+/** Server fallback — mirrors `signInWithOtp`, never `signUp`. */
 async function signInWithEmailOtpViaProxy(email: string, redirectTo: string): Promise<void> {
+  const pkce = await readPkceChallengeForProxy();
   const res = await fetch("/api/auth/otp", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, redirectTo }),
+    body: JSON.stringify({ email, redirectTo, ...pkce }),
   });
 
   let payload: { error?: string } = {};
@@ -97,6 +120,10 @@ async function signInWithEmailOtpViaProxy(email: string, redirectTo: string): Pr
   }
 }
 
+/**
+ * Passwordless email sign-in — always `signInWithOtp` (magic link), never `signUp`.
+ * New users are created via the OTP endpoint when needed (`shouldCreateUser: true`).
+ */
 export async function signInWithEmailOtp(email: string): Promise<void> {
   if (!isSupabaseConfigured()) {
     throw new Error("Supabase is not configured.");
