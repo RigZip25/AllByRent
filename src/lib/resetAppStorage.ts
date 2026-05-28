@@ -42,6 +42,33 @@ async function clearCacheStorage(): Promise<void> {
   await Promise.all(names.map((name) => caches.delete(name)));
 }
 
+function resolvePostResetUrl(): string | null {
+  try {
+    const url = new URL(window.location.href);
+    const before = url.searchParams.toString();
+
+    // If the user was deep-linking into a screen or skipping splash, a reset should
+    // still return to the true "fresh launch" experience (splash + onboarding).
+    for (const key of [
+      "reset",
+      "resetApp",
+      "skipSplash",
+      "openNotifications",
+      "simulateUpdate",
+      "screen",
+      "step",
+    ]) {
+      url.searchParams.delete(key);
+    }
+
+    const after = url.searchParams.toString();
+    if (before === after) return null;
+    return `${url.pathname}${after ? `?${after}` : ""}${url.hash}`;
+  } catch {
+    return null;
+  }
+}
+
 /** Wipe AllByRent local state, PWA caches/service workers, and reload. */
 export async function resetAllAppData(): Promise<void> {
   if (typeof window === "undefined") return;
@@ -55,7 +82,12 @@ export async function resetAllAppData(): Promise<void> {
       /* still reload */
     }
   }
-  window.location.reload();
+  const nextUrl = resolvePostResetUrl();
+  if (nextUrl) {
+    window.location.replace(nextUrl);
+  } else {
+    window.location.reload();
+  }
 }
 
 export function confirmAndResetAppData(): void {
