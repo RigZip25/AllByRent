@@ -1,0 +1,5 @@
+-- Store phone collected in AuthGate (SMS verification later).
+
+alter table public.profiles
+  add column if not exists phone text;
+

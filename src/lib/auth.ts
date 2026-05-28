@@ -82,6 +82,7 @@ async function ensureProfileRow(userId: string, email: string): Promise<void> {
         ...(pending
           ? {
               display_name: pending.fullName.trim(),
+              phone: pending.phone ?? null,
               location_label: pending.location.label,
               location_city: pending.location.city,
               location_region: pending.location.region,

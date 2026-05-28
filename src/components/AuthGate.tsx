@@ -333,7 +333,7 @@ export function AuthGate({
             />
 
             <label className="mt-3 block text-[13px] font-semibold text-gray-600" htmlFor="auth-phone">
-              Phone (optional)
+              Phone
             </label>
             <input
               id="auth-phone"
