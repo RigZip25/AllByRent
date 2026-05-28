@@ -722,6 +722,11 @@ function AppRoutes() {
             onFourthTab={handleOpenFourthTab}
             onOpenRental={() => navigateTo("activeRental")}
             onViewProfile={() => undefined}
+            onReRent={() => {
+              // Best-effort: take renter back to home search to re-book.
+              setNavStack([]);
+              setCurrentScreen("home");
+            }}
           />
         )}
 

@@ -179,12 +179,14 @@ export function RentalsScreen({
   onFourthTab,
   onOpenRental,
   onViewProfile,
+  onReRent,
 }: {
   onHome: () => void;
   onProfile: () => void;
   onFourthTab: () => void;
   onOpenRental: (bookingId: string) => void;
   onViewProfile: (userId: string) => void;
+  onReRent?: (listingTitle: string) => void;
 }) {
   const [tab, setTab] = useState<RentalsTab>("active");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
@@ -368,6 +370,37 @@ export function RentalsScreen({
                     onRefresh={refresh}
                     onViewProfile={onViewProfile}
                   />
+                  {tab === "history" && booking.role === "renter" && booking.status === "completed" ? (
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onReRent?.(booking.itemTitle)}
+                        className="rounded-xl border bg-white px-3 py-2.5 text-[13px] font-semibold"
+                        style={{ borderColor: BORDER, color: GREEN }}
+                      >
+                        Re-rent
+                      </button>
+                      {!booking.review ? (
+                        <button
+                          type="button"
+                          onClick={() => onOpenRental(booking.id)}
+                          className="rounded-xl px-3 py-2.5 text-[13px] font-semibold text-white"
+                          style={{ backgroundColor: GREEN }}
+                        >
+                          Leave review
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => onOpenRental(booking.id)}
+                          className="rounded-xl border bg-white px-3 py-2.5 text-[13px] font-semibold"
+                          style={{ borderColor: BORDER, color: "#666" }}
+                        >
+                          View details
+                        </button>
+                      )}
+                    </div>
+                  ) : null}
                 </li>
               ))}
             </ul>
