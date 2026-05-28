@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, MapPin, Truck, Package } from "lucide-react";
 import { getPublishedListingById } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { useAuth } from "../../hooks/AuthProvider";
+import { fetchSafelyInsuranceQuote, parseUsdToCents } from "../../lib/insurance";
 import {
   breakdownForListingBooking,
   deliverySummaryForListing,
@@ -143,16 +144,8 @@ export function BookingScreen({
   const [rentalDays, setRentalDays] = useState(2);
   const [fulfillment, setFulfillment] = useState<FulfillmentMethod>(defaultFulfillment);
   const [deliveryAddress, setDeliveryAddress] = useState("");
-
-  const deliveryRequested = fulfillment === "delivery";
-  const breakdown: RentalPriceBreakdown = useMemo(
-    () =>
-      breakdownForListingBooking(listing, {
-        rentalDays,
-        deliveryRequested,
-      }),
-    [listing, rentalDays, deliveryRequested],
-  );
+  const [insuranceFeeUsd, setInsuranceFeeUsd] = useState(0);
+  const [safelyPolicyId, setSafelyPolicyId] = useState<string | null>(null);
 
   const startDate = useMemo(() => {
     const d = new Date();
@@ -160,6 +153,41 @@ export function BookingScreen({
     return d.toISOString().slice(0, 10);
   }, []);
   const endDate = addDays(startDate, rentalDays - 1);
+
+  const deliveryRequested = fulfillment === "delivery";
+  useEffect(() => {
+    const replacementValueCents = parseUsdToCents(listing.replacementValue);
+    if (replacementValueCents <= 0) {
+      setInsuranceFeeUsd(0);
+      setSafelyPolicyId(null);
+      return;
+    }
+
+    let cancelled = false;
+    void fetchSafelyInsuranceQuote({
+      replacementValueCents,
+      rentalDays,
+      startDateISO: startDate,
+      endDateISO: endDate,
+    }).then((quote) => {
+      if (cancelled) return;
+      setInsuranceFeeUsd(quote.feeCents / 100);
+      setSafelyPolicyId(typeof quote.policyId === "string" ? quote.policyId : null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [endDate, listing.replacementValue, rentalDays, startDate]);
+
+  const breakdown: RentalPriceBreakdown = useMemo(
+    () =>
+      breakdownForListingBooking(listing, {
+        rentalDays,
+        deliveryRequested,
+        insuranceFeeUsd,
+      }),
+    [listing, rentalDays, deliveryRequested, insuranceFeeUsd],
+  );
 
   const canConfirm =
     !deliveryRequested || deliveryAddress.trim().length > 0;
@@ -210,6 +238,8 @@ export function BookingScreen({
     };
 
     if (auth.userId && listing.hostId) {
+      const insuranceFeeCents = Math.max(0, Math.round(insuranceFeeUsd * 100));
+      const depositAmountCents = parseUsdToCents(listing.pricing.securityDeposit ?? "");
       const row = toSupabaseRentalInsert({
         id,
         listingId: listing.id,
@@ -222,6 +252,9 @@ export function BookingScreen({
         deliveryAddress: booking.deliveryAddress,
         pickupPin: booking.pickupPin,
         returnPin: booking.returnPin,
+        safelyPolicyId,
+        insuranceFeeCents,
+        depositAmountCents,
       });
       void createRentalRemote(row).catch(() => {
         // Local fallback is already appended below.

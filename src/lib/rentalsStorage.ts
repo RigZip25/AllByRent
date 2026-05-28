@@ -111,6 +111,9 @@ type SupabaseRentalRow = {
   return_pin: string | null;
   booking_mode: string | null;
   delivery_address: string | null;
+  safely_policy_id?: string | null;
+  insurance_fee_cents?: number;
+  deposit_amount_cents?: number;
   created_at: string;
   updated_at: string;
 };
@@ -616,6 +619,9 @@ export function toSupabaseRentalInsert(params: {
   deliveryAddress?: string;
   pickupPin?: string;
   returnPin?: string;
+  safelyPolicyId?: string | null;
+  insuranceFeeCents?: number;
+  depositAmountCents?: number;
 }): Omit<SupabaseRentalRow, "created_at" | "updated_at"> {
   return {
     id: params.id,
@@ -629,6 +635,9 @@ export function toSupabaseRentalInsert(params: {
     return_pin: params.returnPin ?? null,
     booking_mode: params.bookingMode ?? null,
     delivery_address: params.deliveryAddress ?? null,
+    safely_policy_id: params.safelyPolicyId ?? null,
+    insurance_fee_cents: Math.max(0, Math.round(params.insuranceFeeCents ?? 0)),
+    deposit_amount_cents: Math.max(0, Math.round(params.depositAmountCents ?? 0)),
   };
 }
 
