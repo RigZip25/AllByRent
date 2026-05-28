@@ -31,7 +31,7 @@ export function consumeAuthCallbackResume(): boolean {
       localStorage.getItem(AUTH_CALLBACK_RESUME_KEY);
     sessionStorage.removeItem(AUTH_CALLBACK_RESUME_KEY);
     localStorage.removeItem(AUTH_CALLBACK_RESUME_KEY);
-    return value === "1";
+    return value != null && value !== "0" && value !== "";
   } catch {
     return false;
   }
@@ -39,9 +39,20 @@ export function consumeAuthCallbackResume(): boolean {
 
 function markAuthCallbackResume(): void {
   try {
-    sessionStorage.setItem(AUTH_CALLBACK_RESUME_KEY, "1");
+    // Use a unique value so repeated callbacks always trigger `storage` events in other tabs.
+    const value = String(Date.now());
+    sessionStorage.setItem(AUTH_CALLBACK_RESUME_KEY, value);
     // Also write to localStorage so the original tab can detect the completion.
-    localStorage.setItem(AUTH_CALLBACK_RESUME_KEY, "1");
+    localStorage.setItem(AUTH_CALLBACK_RESUME_KEY, value);
+    try {
+      if (typeof BroadcastChannel !== "undefined") {
+        const channel = new BroadcastChannel("abr_auth_v1");
+        channel.postMessage({ type: "auth_callback_complete", at: value });
+        channel.close();
+      }
+    } catch {
+      /* ignore */
+    }
   } catch {
     /* ignore */
   }

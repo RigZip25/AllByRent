@@ -26,6 +26,10 @@ export type ListingDraft = {
   /** Primary host account that owns this listing (auth user id or demo-user). */
   hostId?: string;
   listingStatus: ListingPublishStatus;
+  /** Spotlight boost expiration (used for ranking; optional). */
+  boostedUntil?: string | null;
+  /** Boost tier (2/5/10 USD) (optional). */
+  boostedTier?: number | null;
   photos: MediaRef[];
   videos: MediaRef[];
   aiSuggestions: ListingAiSuggestions | null;
@@ -151,6 +155,8 @@ export function createInitialListingDraft(): ListingDraft {
   return {
     id: createListingId(),
     listingStatus: "draft",
+    boostedUntil: null,
+    boostedTier: null,
     photos: [],
     videos: [],
     aiSuggestions: null,

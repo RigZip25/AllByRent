@@ -51,6 +51,9 @@ export type RentalPriceBreakdown = {
 
   deliveryFeeUsd: number;
 
+  /** Guest-paid protection / insurance fee (e.g. Safely). */
+  insuranceFeeUsd: number;
+
   serviceFeeUsd: number;
 
   totalUsd: number;
@@ -149,6 +152,8 @@ export function computeRentalPriceBreakdown(input: {
 
   deliveryRoundTripUsd: number;
 
+  insuranceFeeUsd?: number;
+
   heavySurchargeUsd?: number;
 
   poundsOverThreshold?: number;
@@ -194,7 +199,9 @@ export function computeRentalPriceBreakdown(input: {
 
       : 0;
 
-  const taxable = rentalSubtotalUsd + deliveryFeeUsd;
+  const insuranceFeeUsd = roundUsd(Math.max(0, input.insuranceFeeUsd ?? 0));
+
+  const taxable = rentalSubtotalUsd + deliveryFeeUsd + insuranceFeeUsd;
 
   const serviceFeeUsd = roundUsd(taxable * DEMO_SERVICE_FEE_RATE);
 
@@ -225,6 +232,8 @@ export function computeRentalPriceBreakdown(input: {
 
     deliveryFeeUsd,
 
+    insuranceFeeUsd,
+
     serviceFeeUsd,
 
     totalUsd,
@@ -244,6 +253,8 @@ export function breakdownForListingBooking(
     rentalDays?: number;
 
     deliveryRequested: boolean;
+
+    insuranceFeeUsd?: number;
 
   },
 
@@ -302,6 +313,8 @@ export function breakdownForListingBooking(
     deliveryRequested: options.deliveryRequested,
 
     deliveryRoundTripUsd,
+
+    insuranceFeeUsd: options.insuranceFeeUsd,
 
     heavySurchargeUsd: heavy.surchargeUsd,
 

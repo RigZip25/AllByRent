@@ -1,4 +1,5 @@
 import type { ListingDraft } from "../screens/listing/types";
+import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 const LISTINGS_STORAGE_KEY = "allbyrent_published_listings";
 const PROFILE_CITY_KEY = "allbyrent_profile_city";
@@ -206,6 +207,29 @@ export function loadPublishedListings(): ListingDraft[] {
   }
 }
 
+export function countPublishedListingsForHost(hostId: string): number {
+  const normalizedHostId = hostId.trim() || "demo-user";
+  try {
+    const raw = localStorage.getItem(LISTINGS_STORAGE_KEY);
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return 0;
+    let count = 0;
+    for (const item of parsed) {
+      if (!item || typeof item !== "object") continue;
+      const listing = item as { hostId?: unknown };
+      const listingHost =
+        typeof listing.hostId === "string" && listing.hostId.trim()
+          ? listing.hostId.trim()
+          : "demo-user";
+      if (listingHost === normalizedHostId) count += 1;
+    }
+    return count;
+  } catch {
+    return 0;
+  }
+}
+
 export function getPublishedListingById(id: string): ListingDraft | null {
   return loadPublishedListings().find((listing) => listing.id === id) ?? null;
 }
@@ -306,4 +330,375 @@ export function clearQrBulkQueue(): void {
   listings
     .filter((l) => l.qrQueuedForBulk)
     .forEach((l) => updateStoredListing({ ...l, qrQueuedForBulk: false }));
+}
+
+type SupabaseListingRow = {
+  id: string;
+  owner_id: string;
+  city?: string;
+  title: string;
+  category: string;
+  subcategory: string;
+  grade: string;
+  condition: string;
+  description: string;
+  replacement_value: number | null;
+  photos: unknown;
+  modes: string[] | null;
+  pricing: unknown;
+  availability: unknown;
+  handoff: unknown;
+  qr_code: string | null;
+  listing_status: string;
+  boosted_until?: string | null;
+  boosted_tier?: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+function draftToRow(draft: ListingDraft, ownerId: string): Partial<SupabaseListingRow> {
+  return {
+    id: draft.id,
+    owner_id: ownerId,
+    city: getProfileCity(),
+    title: draft.title ?? "",
+    category: draft.category ?? "",
+    subcategory: draft.subcategory ?? "",
+    grade: draft.grade ?? "",
+    condition: draft.condition ?? "",
+    description: draft.description ?? "",
+    replacement_value:
+      draft.replacementValue.trim().length > 0 ? Number(draft.replacementValue) : null,
+    photos: draft.photos ?? [],
+    modes: Object.entries(draft.modes)
+      .filter(([, enabled]) => enabled)
+      .map(([mode]) => mode),
+    pricing: draft.pricing ?? {},
+    availability: {
+      blocked_dates: draft.blockedDates ?? [],
+      paused: draft.paused ?? false,
+    },
+    handoff: draft.handoff ?? {},
+    qr_code: draft.qrToken ?? null,
+    listing_status: draft.listingStatus ?? "draft",
+  };
+}
+
+function rowToDraft(row: SupabaseListingRow): ListingDraft {
+  const availability =
+    row.availability && typeof row.availability === "object"
+      ? (row.availability as Record<string, unknown>)
+      : {};
+  const blockedDates = Array.isArray(availability.blocked_dates)
+    ? (availability.blocked_dates as ListingDraft["blockedDates"])
+    : [];
+
+  const modesArr = Array.isArray(row.modes) ? row.modes : [];
+  const modes: ListingDraft["modes"] = {
+    rent: modesArr.includes("rent"),
+    sell: modesArr.includes("sell"),
+    rentToOwn: modesArr.includes("rentToOwn") || modesArr.includes("rent_to_own") || modesArr.includes("rto"),
+    gift: modesArr.includes("gift"),
+  };
+
+  return normalizeListingDraft({
+    id: row.id,
+    hostId: row.owner_id,
+    listingStatus: (row.listing_status as ListingDraft["listingStatus"]) ?? "draft",
+    boostedUntil: row.boosted_until ?? null,
+    boostedTier: typeof row.boosted_tier === "number" ? row.boosted_tier : null,
+    photos: Array.isArray(row.photos) ? (row.photos as ListingDraft["photos"]) : [],
+    videos: [],
+    aiSuggestions: null,
+    aiAnalysisPending: false,
+    photoEnhancementPending: false,
+    title: row.title ?? "",
+    category: row.category ?? "",
+    subcategory: row.subcategory ?? "",
+    grade: (row.grade as ListingDraft["grade"]) ?? "",
+    condition: (row.condition as ListingDraft["condition"]) ?? "",
+    description: row.description ?? "",
+    replacementValue: row.replacement_value != null ? String(row.replacement_value) : "",
+    instructionsUrl: "",
+    modes,
+    pricing:
+      row.pricing && typeof row.pricing === "object"
+        ? (row.pricing as ListingDraft["pricing"])
+        : createInitialPricingFallback(),
+    blockedDates,
+    paused: Boolean(availability.paused),
+    handoff:
+      row.handoff && typeof row.handoff === "object"
+        ? (row.handoff as ListingDraft["handoff"])
+        : createInitialHandoffFallback(),
+    generateQR: true,
+    qrToken: row.qr_code ?? createQrTokenFallback(),
+    qrReady: row.listing_status === "active",
+    qrPrintedConfirmed: false,
+    verificationPhoto: null,
+    qrQueuedForBulk: false,
+  });
+}
+
+function interleaveBoosted(list: ListingDraft[], organicPerBoost = 5): ListingDraft[] {
+  const now = Date.now();
+  const boosted = list.filter((l) => {
+    const until = l.boostedUntil ? new Date(l.boostedUntil).getTime() : 0;
+    return until > now;
+  });
+  const organic = list.filter((l) => {
+    const until = l.boostedUntil ? new Date(l.boostedUntil).getTime() : 0;
+    return !(until > now);
+  });
+
+  if (boosted.length === 0) return organic;
+
+  const out: ListingDraft[] = [];
+  let b = 0;
+  let o = 0;
+  while (b < boosted.length || o < organic.length) {
+    if (b < boosted.length) out.push(boosted[b++]);
+    for (let i = 0; i < organicPerBoost && o < organic.length; i++) out.push(organic[o++]);
+  }
+  return out;
+}
+
+export async function boostListingRemote(input: {
+  listingId: string;
+  boostedUntil: string;
+  boostedTier: number;
+  ownerId: string;
+}): Promise<void> {
+  const listing = getPublishedListingById(input.listingId);
+  if (listing) {
+    updateStoredListing({
+      ...listing,
+      boostedUntil: input.boostedUntil,
+      boostedTier: input.boostedTier,
+    });
+  }
+
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
+  await supabase
+    .from("listings")
+    .update({
+      boosted_until: input.boostedUntil,
+      boosted_tier: input.boostedTier,
+    })
+    .eq("id", input.listingId)
+    .eq("owner_id", input.ownerId);
+}
+
+function createInitialPricingFallback(): ListingDraft["pricing"] {
+  return {
+    dailyRate: "",
+    weeklyRate: "",
+    monthlyRate: "",
+    longTermEnabled: false,
+    longTermMonthlyRate: "",
+    salePrice: "",
+    rtoTotalPrice: "",
+    rtoPeriodMonths: "",
+    securityDeposit: "",
+    minimumPeriod: "1 day",
+  };
+}
+
+function createInitialHandoffFallback(): ListingDraft["handoff"] {
+  return {
+    inPerson: false,
+    inPersonDays: ["Mo", "Tu", "We", "Th", "Fr"],
+    inPersonTimeStart: "09:00",
+    inPersonTimeEnd: "17:00",
+    inPersonWeekendTimeStart: "10:00",
+    inPersonWeekendTimeEnd: "14:00",
+    contactless: false,
+    contactlessInstructions: "",
+    delivery: false,
+    itemHeavy: false,
+    deliveryMaxMiles: 20,
+    deliveryRoundTripFee: "",
+    deliveryPrices: [],
+  };
+}
+
+export async function savePublishedListingRemote(draft: ListingDraft, ownerId: string): Promise<void> {
+  if (!isSupabaseConfigured()) {
+    savePublishedListing(draft);
+    return;
+  }
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    savePublishedListing(draft);
+    return;
+  }
+  const { error } = await supabase
+    .from("listings")
+    .upsert(draftToRow(draft, ownerId), { onConflict: "id" });
+  if (error) {
+    // Fallback keeps UX working when network/Supabase is down.
+    savePublishedListing(draft);
+  }
+}
+
+export async function uploadQrVerificationPhotoRemote(params: {
+  listingId: string;
+  ownerId: string;
+  file: File;
+}): Promise<{ path: string } | null> {
+  if (!isSupabaseConfigured()) return null;
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+
+  const ext = params.file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const path = `${params.ownerId}/${params.listingId}/qr_verification_${Date.now()}.${ext}`;
+  const { error: uploadError } = await supabase.storage
+    .from("listing-verification")
+    .upload(path, params.file, {
+      upsert: true,
+      contentType: params.file.type || "image/jpeg",
+    });
+  if (uploadError) throw uploadError;
+
+  const { error: updateError } = await supabase
+    .from("listings")
+    .update({
+      qr_verification_photo_path: path,
+      qr_verified_at: new Date().toISOString(),
+      listing_status: "active",
+    })
+    .eq("id", params.listingId)
+    .eq("owner_id", params.ownerId);
+  if (updateError) throw updateError;
+
+  // Update local cache for instant UX.
+  const listing = getPublishedListingById(params.listingId);
+  if (listing) {
+    updateStoredListing({
+      ...listing,
+      listingStatus: "active",
+      qrReady: true,
+      verificationPhoto: URL.createObjectURL(params.file),
+    });
+  }
+
+  return { path };
+}
+
+export async function fetchListingByIdRemote(id: string): Promise<ListingDraft | null> {
+  if (!isSupabaseConfigured()) {
+    return getPublishedListingById(id);
+  }
+  const supabase = getSupabaseClient();
+  if (!supabase) return getPublishedListingById(id);
+  const { data, error } = await supabase
+    .from("listings")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error || !data) return getPublishedListingById(id);
+  return rowToDraft(data as SupabaseListingRow);
+}
+
+export async function fetchListingsByOwnerIdsRemote(ownerIds: string[]): Promise<ListingDraft[]> {
+  if (!isSupabaseConfigured()) {
+    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? "demo-user"));
+  }
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? "demo-user"));
+  }
+  const { data, error } = await supabase
+    .from("listings")
+    .select("*")
+    .in("owner_id", ownerIds)
+    .order("updated_at", { ascending: false });
+  if (error || !data) {
+    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? "demo-user"));
+  }
+  return (data as SupabaseListingRow[]).map(rowToDraft);
+}
+
+export async function fetchActiveListingsForCityRemote(city: string): Promise<ListingDraft[]> {
+  const cityNorm = city.trim();
+  if (!isSupabaseConfigured()) {
+    return loadPublishedListings().filter((l) => l.listingStatus === "active");
+  }
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return loadPublishedListings().filter((l) => l.listingStatus === "active");
+  }
+  const query = supabase
+    .from("listings")
+    .select("*")
+    .eq("listing_status", "active")
+    .order("boosted_until", { ascending: false, nullsFirst: false })
+    .order("updated_at", { ascending: false });
+  const { data, error } = cityNorm ? await query.ilike("city", `%${cityNorm}%`) : await query;
+  if (error || !data) {
+    return loadPublishedListings().filter((l) => l.listingStatus === "active");
+  }
+  return interleaveBoosted((data as SupabaseListingRow[]).map(rowToDraft));
+}
+
+export async function searchActiveListingsRemote(params: {
+  query: string;
+  city: string;
+  category?: string;
+}): Promise<ListingDraft[]> {
+  const q = params.query.trim().toLowerCase();
+  const cityNorm = params.city.trim();
+  const category = params.category?.trim() || "";
+
+  if (!isSupabaseConfigured()) {
+    return loadPublishedListings()
+      .filter((l) => l.listingStatus === "active")
+      .filter((l) => (category ? l.category === category : true))
+      .filter((l) => {
+        if (!q) return true;
+        const hay = `${l.title} ${l.description} ${l.category} ${l.subcategory}`.toLowerCase();
+        return hay.includes(q);
+      });
+  }
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return loadPublishedListings()
+      .filter((l) => l.listingStatus === "active")
+      .filter((l) => (category ? l.category === category : true))
+      .filter((l) => {
+        if (!q) return true;
+        const hay = `${l.title} ${l.description} ${l.category} ${l.subcategory}`.toLowerCase();
+        return hay.includes(q);
+      });
+  }
+
+  let queryBuilder = supabase
+    .from("listings")
+    .select("*")
+    .eq("listing_status", "active")
+    .order("boosted_until", { ascending: false, nullsFirst: false })
+    .order("updated_at", { ascending: false });
+
+  if (cityNorm) queryBuilder = queryBuilder.ilike("city", `%${cityNorm}%`);
+  if (category) queryBuilder = queryBuilder.eq("category", category);
+  if (q) {
+    queryBuilder = queryBuilder.or(
+      `title.ilike.%${q}%,description.ilike.%${q}%,subcategory.ilike.%${q}%`,
+    );
+  }
+
+  const { data, error } = await queryBuilder.limit(50);
+  if (error || !data) {
+    return loadPublishedListings()
+      .filter((l) => l.listingStatus === "active")
+      .filter((l) => (category ? l.category === category : true))
+      .filter((l) => {
+        if (!q) return true;
+        const hay = `${l.title} ${l.description} ${l.category} ${l.subcategory}`.toLowerCase();
+        return hay.includes(q);
+      });
+  }
+  return interleaveBoosted((data as SupabaseListingRow[]).map(rowToDraft));
 }

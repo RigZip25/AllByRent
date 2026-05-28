@@ -1,9 +1,11 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { DollarSign, Package, Plus, TrendingUp } from "lucide-react";
 import { useAuth } from "../../hooks/AuthProvider";
-import { loadManageableListings } from "../../lib/hostAccess";
+import { fetchManageableListings, loadManageableListings } from "../../lib/hostAccess";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { useMediaUrl } from "../../lib/useMediaUrl";
+import { loadRentalBookings, type RentalBooking } from "../../lib/rentalsStorage";
+import { BookingRequestCard } from "../../components/rentals/BookingRequestCard";
 
 const GREEN = "#1A9E6E";
 const GREEN_DARK = "#0D5C3A";
@@ -42,9 +44,34 @@ export function HostDashboard({
   onOpenListing: (listingId: string) => void;
 }) {
   const auth = useAuth();
-  const listings = loadManageableListings(auth.userId, auth.userEmail);
+  const [listings, setListings] = useState(() =>
+    loadManageableListings(auth.userId, auth.userEmail),
+  );
+  const [bookings, setBookings] = useState<RentalBooking[]>(() => loadRentalBookings());
+
+  useEffect(() => {
+    let mounted = true;
+    void fetchManageableListings(auth.userId, auth.userEmail).then((next) => {
+      if (!mounted) return;
+      setListings(next);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [auth.userId, auth.userEmail]);
+
+  useEffect(() => {
+    // Demo/local rentals list; Supabase wiring happens in rentals phase.
+    setBookings(loadRentalBookings());
+  }, []);
+
   const activeCount = listings.filter((item) => item.listingStatus === "active").length;
   const needsQrCount = listings.filter((item) => item.listingStatus === "pending_qr").length;
+  const pendingRequests = bookings.filter((b) => b.role === "host" && b.status === "pending_approval");
+  const activeRentals = bookings.filter((b) => b.role === "host" && (b.status === "active" || b.status === "pending_checkin" || b.status === "overdue"));
+  const totalEarned = bookings
+    .filter((b) => b.role === "host" && (b.status === "completed" || b.status === "active" || b.status === "overdue"))
+    .reduce((sum, b) => sum + (b.totalUsd ?? 0), 0);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -66,7 +93,7 @@ export function HostDashboard({
           />
           <StatCard
             label="This month"
-            value="$0"
+            value={`$${totalEarned}`}
             icon={<DollarSign className="h-4 w-4" style={{ color: GREEN }} />}
           />
           <StatCard
@@ -75,6 +102,42 @@ export function HostDashboard({
             icon={<TrendingUp className="h-4 w-4" style={{ color: GREEN }} />}
           />
         </div>
+
+        {pendingRequests.length > 0 ? (
+          <div className="mb-4">
+            <h3 className="mb-2 px-1 text-[13px] font-bold" style={{ color: GREEN_DARK }}>
+              Pending booking requests
+            </h3>
+            <div className="space-y-2">
+              {pendingRequests.slice(0, 3).map((b) => (
+                <BookingRequestCard
+                  key={b.id}
+                  booking={b}
+                  onRefresh={() => setBookings(loadRentalBookings())}
+                  onViewProfile={() => undefined}
+                />
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {activeRentals.length > 0 ? (
+          <div className="mb-4">
+            <h3 className="mb-2 px-1 text-[13px] font-bold" style={{ color: GREEN_DARK }}>
+              Active rentals
+            </h3>
+            <ul className="space-y-2">
+              {activeRentals.slice(0, 4).map((b) => (
+                <li key={b.id} className="rounded-2xl border bg-white p-3" style={{ borderColor: BORDER }}>
+                  <p className="text-[14px] font-semibold text-gray-900">{b.itemTitle}</p>
+                  <p className="mt-0.5 text-[12px] text-gray-500">
+                    {b.counterpartyName} · {b.status}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-[15px] font-bold" style={{ color: GREEN_DARK }}>

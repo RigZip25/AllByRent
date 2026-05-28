@@ -13,6 +13,7 @@ interface EmptySubcategoryShelfProps {
   subcategoryName: string;
   cityName: string;
   appMode: AppMode;
+  requests?: { id: string; description: string; createdAt: string }[];
   onBack: () => void;
   onPostRequest: () => void;
   onStartListing: () => void;
@@ -24,6 +25,7 @@ export function EmptySubcategoryShelf({
   subcategoryName,
   cityName,
   appMode,
+  requests,
   onBack,
   onPostRequest,
   onStartListing,
@@ -34,7 +36,7 @@ export function EmptySubcategoryShelf({
 
   const rentanoLine = isEarn
     ? `Zero competition in ${categoryName} in ${cityDisplay}. First host takes all the demand.`
-    : "Nothing here yet — your request tells hosts exactly what to list.";
+    : "Someone nearby might have exactly what you need";
 
   const badge = isEarn ? "🏆 Pioneer spot available" : "📣 High demand signal";
 
@@ -137,6 +139,27 @@ export function EmptySubcategoryShelf({
           </p>
         ) : null}
       </div>
+
+      {!isEarn && requests && requests.length > 0 ? (
+        <div
+          className="rounded-3xl border bg-white p-4"
+          style={{ borderColor: BORDER }}
+        >
+          <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+            Recent requests near {cityDisplay}
+          </p>
+          <ul className="mt-3 space-y-2">
+            {requests.slice(0, 3).map((r) => (
+              <li key={r.id} className="rounded-2xl border p-3" style={{ borderColor: BORDER }}>
+                <p className="text-sm font-semibold" style={{ color: GREEN_DARK }}>
+                  Wanted
+                </p>
+                <p className="mt-1 text-sm text-gray-600 line-clamp-2">{r.description}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </div>
   );
 }

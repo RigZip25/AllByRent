@@ -100,6 +100,10 @@ export function RentalPriceBreakdownView({
 
       ) : null}
 
+      {breakdown.insuranceFeeUsd > 0 ? (
+        <Line label="Protection fee (Safely)" amount={breakdown.insuranceFeeUsd} />
+      ) : null}
+
       <Line label="Service fee (demo)" amount={breakdown.serviceFeeUsd} muted />
 
       <div

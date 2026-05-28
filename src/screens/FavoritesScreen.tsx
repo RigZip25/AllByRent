@@ -149,6 +149,7 @@ export function FavoritesScreen({
       <RentanoChatSheet
         open={rentanoOpen}
         onClose={() => setRentanoOpen(false)}
+        defaultView="chat"
         context={{ screen: "favorites", appMode: mode }}
       />
     </div>

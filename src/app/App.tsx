@@ -13,6 +13,7 @@ import { HomeFeed } from "./components/HomeFeed";
 import { Subcategory } from "./components/Subcategory";
 import { ItemDetail } from "./components/ItemDetail";
 import { BookingScreen } from "./components/BookingScreen";
+import { BookingConfirmedScreen } from "./components/BookingConfirmedScreen";
 import { PostRequest } from "./components/PostRequest";
 import { ActiveRental } from "./components/ActiveRental";
 import { ListingIntro } from "../screens/listing/ListingIntro";
@@ -59,6 +60,7 @@ import {
 import { AuthGate } from "../components/AuthGate";
 import { PasskeySetup } from "../components/PasskeySetup";
 import { DeleteAccountScreen } from "../screens/profile/DeleteAccount";
+import { IdentityVerificationScreen } from "../screens/IdentityVerificationScreen";
 
 type Screen =
   | "splash"
@@ -73,6 +75,7 @@ type Screen =
   | "subcategory"
   | "itemDetail"
   | "booking"
+  | "bookingConfirmed"
   | "postRequest"
   | "activeRental"
   | "listingIntro"
@@ -84,6 +87,7 @@ type Screen =
   | "favorites"
   | "earnBusiness"
   | "subscriptionPlans"
+  | "identity"
   | "deleteAccount";
 
 function screenToAuthIntent(screen: Screen): AuthIntent {
@@ -120,9 +124,10 @@ function isOnboardingScreen(screen: Screen): boolean {
 
 function readBootQuery() {
   if (typeof window === "undefined") {
-    return { skipSplash: false, openNotifications: false, simulateUpdate: false };
+    return { skipSplash: false, openNotifications: false, simulateUpdate: false, screen: null as string | null };
   }
   const params = new URLSearchParams(window.location.search);
+  const screen = params.get("screen");
   // When returning from magic-link callback, skip splash immediately (prevents a visible flash).
   const hasAuthCode = params.get("code")?.trim().length ? true : false;
   const hash = window.location.hash ?? "";
@@ -137,6 +142,7 @@ function readBootQuery() {
     skipSplash: params.get("skipSplash") === "1" || hasAuthCode || hasAuthHash,
     openNotifications: params.get("openNotifications") === "1",
     simulateUpdate,
+    screen,
   };
 }
 
@@ -195,6 +201,7 @@ function AppRoutes() {
   });
   const [navStack, setNavStack] = useState<Screen[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [selectedHostListingId, setSelectedHostListingId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -223,6 +230,17 @@ function AppRoutes() {
       window.removeEventListener("offline", onOffline);
     };
   }, []);
+
+  useEffect(() => {
+    if (!boot.screen) return;
+    const screen = boot.screen.trim();
+    if (screen === "identity") {
+      // Don't force auth; existing route guard will show AuthGate if needed.
+      setNavStack([]);
+      setCurrentScreen("identity");
+      clearBootQuery(["screen"]);
+    }
+  }, [boot.screen]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -262,7 +280,8 @@ function AppRoutes() {
       screen === "listingIntro" ||
       screen === "listItem" ||
       screen === "hostListingDetail" ||
-      screen === "activeRental";
+      screen === "activeRental" ||
+      screen === "identity";
 
     if (authRequired && auth.configured && !auth.session) {
       showAuthGate(screen);
@@ -305,6 +324,7 @@ function AppRoutes() {
       "earnBusiness",
       "subcategory",
       "itemDetail",
+      "identity",
     ];
     const storedTarget =
       candidate && validScreens.includes(candidate)
@@ -502,8 +522,10 @@ function AppRoutes() {
     navigateTo("booking");
   };
 
-  const handleBookingConfirmed = () => {
-    navigateTo("activeRental");
+  const handleBookingConfirmed = (bookingId: string) => {
+    setSelectedBookingId(bookingId);
+    setNavStack((stack) => [...stack, currentScreen]);
+    setCurrentScreen("bookingConfirmed");
   };
 
   const handleBack = useCallback(() => {
@@ -700,6 +722,11 @@ function AppRoutes() {
             onFourthTab={handleOpenFourthTab}
             onOpenRental={() => navigateTo("activeRental")}
             onViewProfile={() => undefined}
+            onReRent={() => {
+              // Best-effort: take renter back to home search to re-book.
+              setNavStack([]);
+              setCurrentScreen("home");
+            }}
           />
         )}
 
@@ -736,6 +763,10 @@ function AppRoutes() {
           <SubscriptionPlansScreen onBack={handleBack} />
         )}
 
+        {currentScreen === "identity" && (
+          <IdentityVerificationScreen onBack={handleBack} />
+        )}
+
         {currentScreen === "notifications" && (
           <NotificationsScreen onBack={handleBack} mode={getAppMode()} />
         )}
@@ -770,6 +801,13 @@ function AppRoutes() {
             listingId={selectedItemId}
             onBack={handleBack}
             onConfirmed={handleBookingConfirmed}
+          />
+        )}
+
+        {currentScreen === "bookingConfirmed" && (
+          <BookingConfirmedScreen
+            onHome={handleOpenHome}
+            onRentals={handleOpenRentals}
           />
         )}
 

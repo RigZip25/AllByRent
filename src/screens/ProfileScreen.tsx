@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   Bell,
   ChevronRight,
@@ -32,6 +32,7 @@ import {
   loadUserProfile,
   refreshProfileStats,
   setProfileAvatarUrl,
+  updateProfileFields,
   updatePreferredMode,
   type UserProfile,
 } from "../lib/userProfileStorage";
@@ -39,6 +40,8 @@ import { formatBuildStamp } from "../lib/buildInfo";
 import { confirmAndResetAppData } from "../lib/resetAppStorage";
 import { useAuth } from "../hooks/AuthProvider";
 import { signOut } from "../lib/auth";
+import { fetchRemoteProfile, updateRemoteProfile } from "../lib/supabaseProfile";
+import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -162,6 +165,57 @@ export function ProfileScreen({
   const [authBusy, setAuthBusy] = useState(false);
   const mode = getAppMode();
   const locationSummary = useMemo(() => getProfileLocationSummary(), [profile]);
+  const [recentReviews, setRecentReviews] = useState<{ rating: number; comment: string; createdAt: string }[]>([]);
+  const [stripeStatus, setStripeStatus] = useState<{ connected: boolean; payoutsEnabled: boolean; last4?: string | null }>({
+    connected: false,
+    payoutsEnabled: false,
+    last4: null,
+  });
+
+  useEffect(() => {
+    if (!auth.userId) return;
+    let mounted = true;
+    void fetchRemoteProfile(auth.userId).then((remote) => {
+      if (!mounted || !remote) return;
+      const displayName = remote.display_name?.trim() || profile.displayName;
+      const memberSince = remote.created_at?.slice(0, 10) || profile.memberSince;
+      const next = updateProfileFields({
+        displayName,
+        phone: remote.phone ?? profile.phone,
+        avatarUrl: profile.avatarUrl,
+      });
+      next.memberSince = memberSince;
+      next.verification = {
+        ...next.verification,
+        phone: Boolean(remote.phone_verified ?? next.verification.phone),
+        identity: Boolean(remote.identity_verified ?? next.verification.identity),
+      };
+      if (remote.rating != null && Number.isFinite(remote.rating)) {
+        next.host.rating = Number(remote.rating);
+      }
+      setStripeStatus({
+        connected: Boolean(remote.stripe_connect_account_id),
+        payoutsEnabled: Boolean(remote.stripe_payouts_enabled),
+        last4: remote.stripe_bank_last4 ?? null,
+      });
+      setProfile(refreshProfileStats(next, auth.userId));
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [auth.userId]);
+
+  useEffect(() => {
+    if (!auth.userId) return;
+    let mounted = true;
+    void fetchReviewsForUserRemote(auth.userId).then((rows) => {
+      if (!mounted) return;
+      setRecentReviews(rows.slice(0, 3).map((r) => ({ rating: r.rating, comment: r.comment, createdAt: r.createdAt })));
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [auth.userId]);
 
   const hasPhoto = hasAvatarPhoto(profile.id);
   const showOnboarding = !hasPhoto && !isPhotoPromptDeferred();
@@ -181,6 +235,29 @@ export function ProfileScreen({
   const handleModeChange = (next: AppMode) => {
     updatePreferredMode(next);
     setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
+  };
+
+  const handleEditName = () => {
+    const nextName = window.prompt("Name", profile.displayName)?.trim();
+    if (!nextName) return;
+    const next = updateProfileFields({ displayName: nextName });
+    setProfile(refreshProfileStats(next, auth.userId));
+    if (auth.userId) {
+      void updateRemoteProfile(auth.userId, { display_name: nextName }).catch(() => {
+        // Local fallback already applied.
+      });
+    }
+  };
+
+  const handleEditPhone = () => {
+    const nextPhone = window.prompt("Phone", profile.phone)?.trim() ?? "";
+    const next = updateProfileFields({ phone: nextPhone });
+    setProfile(refreshProfileStats(next, auth.userId));
+    if (auth.userId) {
+      void updateRemoteProfile(auth.userId, { phone: nextPhone }).catch(() => {
+        // Local fallback already applied.
+      });
+    }
   };
 
   const persistPhoto = async (blob: Blob) => {
@@ -292,6 +369,22 @@ export function ProfileScreen({
           <li>
             <RowButton
               icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+              label="Name"
+              value={profile.displayName}
+              onClick={handleEditName}
+            />
+          </li>
+          <li>
+            <RowButton
+              icon={<Sparkles className="h-5 w-5" style={{ color: "#F59E0B" }} />}
+              label="Phone"
+              value={profile.phone || "Add phone"}
+              onClick={handleEditPhone}
+            />
+          </li>
+          <li>
+            <RowButton
+              icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label="Personal info"
               value={profile.email || "Add email"}
             />
@@ -316,6 +409,50 @@ export function ProfileScreen({
           ) : null}
         </ul>
 
+        <SectionTitle>Payouts</SectionTitle>
+        <ul className="mb-4 flex flex-col gap-2">
+          <li>
+            <RowButton
+              icon={<CreditCard className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+              label={stripeStatus.connected ? "Bank account connected" : "Connect bank account"}
+              value={
+                stripeStatus.connected
+                  ? stripeStatus.payoutsEnabled
+                    ? `Payouts enabled${stripeStatus.last4 ? ` · **** ${stripeStatus.last4}` : ""}`
+                    : "Pending verification"
+                  : "Required to receive payouts"
+              }
+              onClick={() => {
+                // Stripe Connect requires server-side endpoints + secret keys.
+                // For now, show a simple hint in demo builds.
+                window.alert(
+                  "Stripe Connect onboarding requires server-side configuration (Stripe secret key + account link endpoint). This build shows the UI and reads connection status from Supabase profiles.",
+                );
+              }}
+            />
+          </li>
+        </ul>
+
+        {recentReviews.length > 0 ? (
+          <>
+            <SectionTitle>Reviews</SectionTitle>
+            <ul className="mb-4 flex flex-col gap-2">
+              {recentReviews.map((r, idx) => (
+                <li key={`${r.createdAt}-${idx}`} className="rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
+                  <p className="text-[14px] font-semibold" style={{ color: GREEN }}>
+                    {r.rating}★
+                  </p>
+                  {r.comment ? (
+                    <p className="mt-1 text-[13px] leading-relaxed text-gray-600">{r.comment}</p>
+                  ) : (
+                    <p className="mt-1 text-[13px] text-gray-400">No comment</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+
         <SectionTitle>Trust &amp; payments</SectionTitle>
         <ul className="mb-4 flex flex-col gap-2">
           <li>
@@ -327,6 +464,15 @@ export function ProfileScreen({
                   ? "Fully verified"
                   : "Complete ID for higher limits"
               }
+              onClick={() => {
+                try {
+                  const url = new URL(window.location.href);
+                  url.searchParams.set("screen", "identity");
+                  window.location.href = url.toString();
+                } catch {
+                  window.location.href = "/?screen=identity";
+                }
+              }}
             />
           </li>
           <li>
@@ -442,7 +588,8 @@ export function ProfileScreen({
       <RentanoChatSheet
         open={rentanoOpen}
         onClose={() => setRentanoOpen(false)}
-        context={{ screen: "profile", appMode: mode }}
+        defaultView="chat"
+        context={{ screen: "profile", appMode: mode, userId: auth.userId ?? undefined }}
       />
     </div>
   );

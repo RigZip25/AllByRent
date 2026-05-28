@@ -9,14 +9,34 @@ import {
   Lock,
   MapPin,
   ExternalLink,
+  AlertTriangle,
+  Upload,
 } from "lucide-react";
-import { useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { useAuth } from "../../hooks/AuthProvider";
 import {
   loadRentalBookings,
   updateBooking,
   getRenterPickupLocation,
   type RentalBooking,
 } from "../../lib/rentalsStorage";
+import {
+  appendChatMessageLocal,
+  fetchChatMessagesRemote,
+  loadChatMessagesLocal,
+  sendChatMessageRemote,
+  subscribeToChatMessagesRemote,
+  type ChatMessage,
+} from "../../lib/messagesStorage";
+import { hasLocalReview, submitReviewRemote } from "../../lib/reviewsStorage";
+import { ReviewPromptModal } from "../../components/reviews/ReviewPromptModal";
+import { RentanoTip } from "../../components/RentanoTip";
+import {
+  addEvidenceRemote,
+  fetchDisputeForRentalRemote,
+  openDisputeRemote,
+  type Dispute,
+} from "../../lib/disputesStorage";
 import { QrScanPanel, type QrScanPhase } from "../../components/rentals/QrScanPanel";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
 import {
@@ -26,10 +46,17 @@ import {
 } from "../../lib/rentalPricing";
 
 export function ActiveRental({ onBack }: { onBack: () => void }) {
+  const auth = useAuth();
   const [scanOpen, setScanOpen] = useState(false);
   const [scanPhase, setScanPhase] = useState<QrScanPhase>("camera");
   const [notice, setNotice] = useState<string | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [disputeOpen, setDisputeOpen] = useState(false);
+  const [dispute, setDispute] = useState<Dispute | null>(null);
   const [bookings, setBookings] = useState<RentalBooking[]>(() => loadRentalBookings());
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatText, setChatText] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
   const booking = useMemo<RentalBooking | null>(() => {
     const list = bookings;
@@ -41,8 +68,44 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
     );
   }, [bookings]);
 
+  useEffect(() => {
+    if (!booking) return;
+    setChatMessages(loadChatMessagesLocal(booking.id));
+    if (!auth.userId) return;
+    let mounted = true;
+    void fetchChatMessagesRemote(booking.id).then((remote) => {
+      if (!mounted) return;
+      if (remote.length > 0) setChatMessages(remote);
+    });
+    const sub = subscribeToChatMessagesRemote({
+      rentalId: booking.id,
+      onInsert: (msg) => {
+        setChatMessages((prev) => {
+          if (prev.some((p) => p.id === msg.id)) return prev;
+          return [...prev, msg].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+        });
+      },
+    });
+    return () => {
+      mounted = false;
+      sub.unsubscribe();
+    };
+  }, [auth.userId, booking]);
+
+  const canDispute = Boolean(booking && (booking.status === "active" || booking.status === "overdue"));
+
+  const refreshDispute = useCallback(() => {
+    if (!booking) return;
+    void fetchDisputeForRentalRemote(booking.id).then(setDispute);
+  }, [booking]);
+
   const mode: "pickup" | "return" =
     booking?.status === "pending_checkin" ? "pickup" : "return";
+
+  const overdueWarning =
+    booking?.status === "overdue"
+      ? "Overdue: late fees may apply. Confirm return as soon as the item is back with the owner."
+      : null;
 
   const renterPickupLocation = useMemo(
     () => (booking ? getRenterPickupLocation(booking) : undefined),
@@ -150,7 +213,20 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
     setBookings(loadRentalBookings());
     setNotice("Return confirmed. Thanks!");
     closeScanner();
+    if (auth.userId && latest.counterpartyId && !hasLocalReview(latest.id, auth.userId)) {
+      setReviewOpen(true);
+    }
   }, [booking, mode]);
+
+  const timeLeftLabel = useMemo(() => {
+    if (!dispute?.evidenceDeadline) return null;
+    const ms = new Date(dispute.evidenceDeadline).getTime() - Date.now();
+    if (Number.isNaN(ms)) return null;
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    return `${h}h ${m}m`;
+  }, [dispute?.evidenceDeadline]);
 
   return (
     <div className="screen bg-background flex flex-col">
@@ -168,6 +244,35 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
         {notice ? (
           <div className="bg-card rounded-xl border border-border p-3 text-sm">
             {notice}
+          </div>
+        ) : null}
+        {overdueWarning ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            {overdueWarning}
+          </div>
+        ) : null}
+        {canDispute ? (
+          <div className="bg-card rounded-xl border border-border p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[14px] font-bold text-gray-900">Open a dispute</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-gray-600">
+                  Upload photo evidence. A 48h countdown is visible to both sides. Deposit is frozen during evidence collection.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    refreshDispute();
+                    setDisputeOpen(true);
+                  }}
+                  className="mt-3 w-full rounded-xl border py-2.5 text-[14px] font-semibold"
+                  style={{ borderColor: "#FDE68A", backgroundColor: "#FFFBEB", color: "#92400E" }}
+                >
+                  {dispute ? "View dispute" : "Start dispute"}
+                </button>
+              </div>
+            </div>
           </div>
         ) : null}
         <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -372,7 +477,11 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              <button className="flex items-center justify-center gap-2 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors">
+              <button
+                type="button"
+                onClick={() => setChatOpen(true)}
+                className="flex items-center justify-center gap-2 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors"
+              >
                 <MessageCircle className="w-4 h-4" />
                 <span className="text-sm font-medium">Message</span>
               </button>
@@ -384,6 +493,85 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
             </div>
           </div>
         </div>
+
+        {chatOpen && booking ? (
+          <div className="bg-card rounded-xl border border-border p-4">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="font-semibold">Chat</h3>
+              <button type="button" onClick={() => setChatOpen(false)} className="text-sm text-muted-foreground">
+                Close
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Tip: mention <span className="font-semibold">@rentano</span> for quick help.
+            </p>
+
+            <div className="mt-3 max-h-56 overflow-y-auto rounded-xl border border-border bg-background p-3 space-y-2">
+              {chatMessages.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No messages yet.</p>
+              ) : (
+                chatMessages.map((m) => {
+                  const mine = auth.userId && m.senderId === auth.userId;
+                  return (
+                    <div
+                      key={m.id}
+                      className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
+                        mine ? "ml-auto bg-primary text-white" : "bg-muted"
+                      }`}
+                    >
+                      {m.body}
+                      <div className={`mt-1 text-[10px] ${mine ? "text-white/70" : "text-muted-foreground"}`}>
+                        {new Date(m.createdAt).toLocaleString()}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="mt-3 flex gap-2">
+              <input
+                value={chatText}
+                onChange={(e) => setChatText(e.target.value)}
+                placeholder="Write a message…"
+                className="flex-1 rounded-xl border border-border bg-white px-3 py-2 text-sm outline-none focus:border-primary"
+              />
+              <button
+                type="button"
+                disabled={!chatText.trim()}
+                onClick={() => {
+                  const body = chatText.trim();
+                  setChatText("");
+                  const senderId = auth.userId ?? "local";
+                  const recipientId = booking.counterpartyId ?? "local";
+                  const msg: ChatMessage = {
+                    id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `msg-${Date.now()}`,
+                    rentalId: booking.id,
+                    senderId,
+                    recipientId,
+                    body,
+                    createdAt: new Date().toISOString(),
+                  };
+                  appendChatMessageLocal(msg);
+                  setChatMessages((prev) => [...prev, msg]);
+                  if (auth.userId) {
+                    void sendChatMessageRemote({
+                      rentalId: booking.id,
+                      senderId: auth.userId,
+                      recipientId: recipientId,
+                      body,
+                    }).catch(() => {
+                      // ignore; local message still shows
+                    });
+                  }
+                }}
+                className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         <div className="bg-muted/50 rounded-xl p-4">
           <h3 className="font-semibold mb-2">Before you check in</h3>
@@ -432,6 +620,108 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
           onOwnerManualConfirm={() => setScanPhase("confirm")}
           isHost={booking.role === "host"}
         />
+      ) : null}
+
+      {booking && auth.userId ? (
+        <ReviewPromptModal
+          open={reviewOpen}
+          title={`for ${booking.counterpartyName}`}
+          onClose={() => setReviewOpen(false)}
+          onSubmit={(rating, comment) => {
+            void submitReviewRemote({
+              rentalId: booking.id,
+              reviewerId: auth.userId,
+              revieweeId: booking.counterpartyId,
+              role: booking.role === "renter" ? "renter" : "host",
+              rating,
+              comment,
+            }).finally(() => setReviewOpen(false));
+          }}
+        />
+      ) : null}
+
+      {booking && auth.userId && disputeOpen ? (
+        <div className="fixed inset-0 z-[96] flex items-end justify-center bg-black/45 p-4">
+          <div className="w-full max-w-[420px] rounded-3xl border bg-white p-5 shadow-2xl" style={{ borderColor: "#E8E6E0" }}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-[18px] font-extrabold" style={{ color: "#0D5C3A" }}>
+                  Dispute evidence
+                </h2>
+                <p className="mt-0.5 text-[13px] text-gray-500">
+                  48h window · {timeLeftLabel ? `${timeLeftLabel} left` : "countdown running"}
+                </p>
+              </div>
+              <button type="button" onClick={() => setDisputeOpen(false)} className="text-gray-500">
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-3">
+              <RentanoTip message="Rentano: Take clear photos of the item, any damage, and accessories. Include the QR sticker in one photo if possible." />
+            </div>
+
+            <div className="mt-3 rounded-2xl border bg-[#FFFBEB] p-3 text-[12px] text-amber-900" style={{ borderColor: "#FDE68A" }}>
+              <strong>Deposit frozen</strong> while evidence is collected.
+            </div>
+
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (dispute) return;
+                  void openDisputeRemote({ rentalId: booking.id, openedBy: auth.userId }).then((d) => {
+                    setDispute(d);
+                    updateBooking(booking.id, { status: "disputed", disputeEvidenceDeadline: d.evidenceDeadline, paymentOnHold: true });
+                    setBookings(loadRentalBookings());
+                  });
+                }}
+                className="flex-1 rounded-2xl px-4 py-3 text-[13px] font-bold text-white disabled:opacity-60"
+                style={{ backgroundColor: "#0D5C3A" }}
+                disabled={Boolean(dispute)}
+              >
+                {dispute ? "Dispute opened" : "Start dispute"}
+              </button>
+              <label
+                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border bg-white px-4 py-3 text-[13px] font-semibold text-gray-700"
+                style={{ borderColor: "#E8E6E0" }}
+              >
+                <Upload className="h-4 w-4" />
+                Add photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (!file || !dispute) return;
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      const dataUrl = typeof reader.result === "string" ? reader.result : null;
+                      if (!dataUrl) return;
+                      const side = booking.role === "renter" ? "renter" : "owner";
+                      void addEvidenceRemote({ dispute, side, dataUrl }).then(setDispute);
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                />
+              </label>
+            </div>
+
+            {dispute ? (
+              <div className="mt-4">
+                <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">Evidence</p>
+                <div className="mt-2 grid grid-cols-3 gap-2">
+                  {[...(dispute.renterEvidence ?? []), ...(dispute.ownerEvidence ?? [])].slice(0, 6).map((src, idx) => (
+                    <img key={idx} src={src} alt="" className="h-20 w-full rounded-xl object-cover" />
+                  ))}
+                </div>
+                <p className="mt-2 text-[11px] text-gray-400">Visible to both sides</p>
+              </div>
+            ) : null}
+          </div>
+        </div>
       ) : null}
     </div>
   );

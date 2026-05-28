@@ -7,6 +7,7 @@ import {
   shouldShowPasskeyLogin,
   signInWithEmailOtp,
   signInWithPasskey,
+  signInWithProvider,
 } from "../lib/auth";
 import { formatAuthError } from "../lib/authErrors";
 import { detectCurrentLocation } from "../lib/geolocation";
@@ -165,6 +166,31 @@ export function AuthGate({
     });
   };
 
+  const handleOAuth = (provider: "google" | "apple") => {
+    const trimmedName = fullName.trim();
+    if (!trimmedName) {
+      setError("Enter your name.");
+      return;
+    }
+    if (!location) {
+      setError("Pick your location (auto-detect or search).");
+      return;
+    }
+    void run(provider, async () => {
+      savePendingAuthProfile({
+        fullName: trimmedName,
+        phone: phone.trim() || undefined,
+        location,
+      });
+      setHomeLocation({
+        displayName: location.label,
+        lat: location.lat,
+        lng: location.lng,
+      });
+      await signInWithProvider(provider);
+    });
+  };
+
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/45 p-4">
       <div
@@ -223,6 +249,45 @@ export function AuthGate({
 
             <button
               type="button"
+              disabled={!canUseSupabase || busy !== null}
+              onClick={() => handleOAuth("google")}
+              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
+              style={{ borderColor: BORDER }}
+            >
+              <Chrome className="h-5 w-5" />
+              Google
+              {busy === "google" ? (
+                <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-semibold uppercase">
+                  Loading
+                </span>
+              ) : null}
+            </button>
+            <button
+              type="button"
+              disabled={!canUseSupabase || busy !== null}
+              onClick={() => handleOAuth("apple")}
+              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
+              style={{ borderColor: BORDER }}
+            >
+              <Apple className="h-5 w-5" />
+              Apple
+              {busy === "apple" ? (
+                <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-semibold uppercase">
+                  Loading
+                </span>
+              ) : null}
+            </button>
+
+            <div className="flex items-center gap-3 py-1">
+              <div className="h-px flex-1 bg-gray-200" />
+              <span className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+                or
+              </span>
+              <div className="h-px flex-1 bg-gray-200" />
+            </div>
+
+            <button
+              type="button"
               disabled={busy !== null}
               onClick={() => setStep("email")}
               className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[15px] font-semibold text-gray-700"
@@ -238,29 +303,33 @@ export function AuthGate({
           <div className="mt-4 flex flex-col gap-2">
             <button
               type="button"
-              disabled
-              title="Coming soon"
-              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-[#F9FAFB] px-4 text-[14px] font-bold text-gray-400"
+              disabled={!canUseSupabase || busy !== null}
+              onClick={() => handleOAuth("google")}
+              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
               style={{ borderColor: BORDER }}
             >
               <Chrome className="h-5 w-5" />
               Google
-              <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-semibold uppercase">
-                Soon
-              </span>
+              {busy === "google" ? (
+                <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-semibold uppercase">
+                  Loading
+                </span>
+              ) : null}
             </button>
             <button
               type="button"
-              disabled
-              title="Coming soon"
-              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-[#F9FAFB] px-4 text-[14px] font-bold text-gray-400"
+              disabled={!canUseSupabase || busy !== null}
+              onClick={() => handleOAuth("apple")}
+              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
               style={{ borderColor: BORDER }}
             >
               <Apple className="h-5 w-5" />
               Apple
-              <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-semibold uppercase">
-                Soon
-              </span>
+              {busy === "apple" ? (
+                <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-semibold uppercase">
+                  Loading
+                </span>
+              ) : null}
             </button>
 
             <div className="flex items-center gap-3 py-1">
@@ -397,6 +466,30 @@ export function AuthGate({
                 />
               </div>
             </div>
+
+            <div className="mt-3 flex flex-col gap-2">
+              <button
+                type="button"
+                disabled={!canUseSupabase || busy !== null}
+                onClick={() => handleOAuth("google")}
+                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
+                style={{ borderColor: BORDER }}
+              >
+                <Chrome className="h-5 w-5" />
+                Continue with Google
+              </button>
+              <button
+                type="button"
+                disabled={!canUseSupabase || busy !== null}
+                onClick={() => handleOAuth("apple")}
+                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
+                style={{ borderColor: BORDER }}
+              >
+                <Apple className="h-5 w-5" />
+                Continue with Apple
+              </button>
+            </div>
+
             <button
               type="button"
               disabled={!canRequestEmail}

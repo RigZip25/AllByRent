@@ -11,11 +11,13 @@ import {
   loadQrBulkQueueListingIds,
   loadStickerEligibleListings,
   removeListingFromQrBulkQueue,
+  uploadQrVerificationPhotoRemote,
   updateStoredListing,
 } from "../../lib/listingStorage";
 import { loadUserProfile, saveUserProfile } from "../../lib/userProfileStorage";
 import type { ListingDraft } from "./types";
 import type { Dispatch, SetStateAction } from "react";
+import { useAuth } from "../../hooks/AuthProvider";
 
 const GREEN = "#0D5C3A";
 const QR_SHEET_CAPACITY = 12;
@@ -35,6 +37,7 @@ export function QRStickerScreen({
   onListAnother,
   onBackToStory,
 }: QRStickerScreenProps) {
+  const auth = useAuth();
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
@@ -42,7 +45,6 @@ export function QRStickerScreen({
   const [pdfFilename, setPdfFilename] = useState<string>("AllByRent-QR-Stickers.pdf");
   const [actionsOpen, setActionsOpen] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const libraryInputRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState(() => loadUserProfile().email ?? "");
   const [bulkCount, setBulkCount] = useState(() => loadQrBulkQueueListingIds().length);
   const emptySpotsLeft = Math.max(0, QR_SHEET_CAPACITY - bulkCount);
@@ -71,7 +73,10 @@ export function QRStickerScreen({
     };
   }, [pdfUrl]);
 
-  const generatePdf = async (ids: string[]) => {
+  const generatePdf = async (
+    ids: string[],
+    options?: { paper?: "letter" | "a4"; layout?: "sheet" | "single"; labelIn?: number; filename?: string },
+  ) => {
     let rows = eligibleListings
       .filter((l) => ids.includes(l.id))
       .map(listingDraftToStickerRow);
@@ -79,7 +84,12 @@ export function QRStickerScreen({
       rows = [listingDraftToStickerRow(draft)];
     }
     const generated = await generateQRStickerPdf(rows, {
-      filename: ids.length > 1 ? "AllByRent-QR-Stickers-Bulk.pdf" : "AllByRent-QR-Sticker.pdf",
+      filename:
+        options?.filename ??
+        (ids.length > 1 ? "AllByRent-QR-Stickers-Bulk.pdf" : "AllByRent-QR-Sticker.pdf"),
+      paper: options?.paper,
+      layout: options?.layout,
+      labelIn: options?.labelIn,
     });
     if (!generated) throw new Error("No PDF generated");
     if (pdfUrl) URL.revokeObjectURL(pdfUrl);
@@ -93,7 +103,7 @@ export function QRStickerScreen({
     setPdfLoading(true);
     setPdfError(null);
     try {
-      const url = await generatePdf([draft.id]);
+      const url = await generatePdf([draft.id], { paper: "letter", layout: "sheet", labelIn: 2, filename: "AllByRent-QR-Sticker-Letter.pdf" });
       window.open(url, "_blank", "noopener,noreferrer");
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
@@ -111,7 +121,7 @@ export function QRStickerScreen({
         setPdfError("No items in bulk queue yet.");
         return;
       }
-      const url = await generatePdf(ids);
+      const url = await generatePdf(ids, { paper: "letter", layout: "sheet", labelIn: 2, filename: "AllByRent-QR-Stickers-Bulk-Letter.pdf" });
       window.open(url, "_blank", "noopener,noreferrer");
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
@@ -120,11 +130,15 @@ export function QRStickerScreen({
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownload = async (kind: "a4" | "label") => {
     setPdfLoading(true);
     setPdfError(null);
     try {
-      await generatePdf([draft.id]);
+      if (kind === "a4") {
+        await generatePdf([draft.id], { paper: "a4", layout: "sheet", labelIn: 2, filename: "AllByRent-QR-Sticker-A4.pdf" });
+      } else {
+        await generatePdf([draft.id], { paper: "a4", layout: "single", labelIn: 3, filename: "AllByRent-QR-Sticker-3x3.pdf" });
+      }
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
     } finally {
@@ -136,7 +150,7 @@ export function QRStickerScreen({
     setPdfLoading(true);
     setPdfError(null);
     try {
-      await generatePdf([draft.id]);
+      await generatePdf([draft.id], { paper: "a4", layout: "single", labelIn: 3, filename: "AllByRent-QR-Sticker-3x3.pdf" });
       const trimmedEmail = email.trim();
       if (trimmedEmail) {
         const profile = loadUserProfile();
@@ -161,6 +175,37 @@ export function QRStickerScreen({
   const handleVerificationPhoto = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Camera-only: owner confirms QR is printed and attached.
+    if (auth.userId) {
+      setPdfLoading(true);
+      setPdfError(null);
+      void uploadQrVerificationPhotoRemote({
+        listingId: draft.id,
+        ownerId: auth.userId,
+        file,
+      })
+        .then(() => {
+          setDraft((current) => {
+            const updated: ListingDraft = {
+              ...current,
+              qrReady: true,
+              listingStatus: "active",
+            };
+            updateStoredListing(updated);
+            return updated;
+          });
+          onComplete();
+        })
+        .catch(() => {
+          setPdfError("Could not upload verification photo. Please try again.");
+        })
+        .finally(() => {
+          setPdfLoading(false);
+        });
+      event.target.value = "";
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -264,13 +309,25 @@ export function QRStickerScreen({
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => void handleDownload()}
+              onClick={() => void handleDownload("a4")}
               disabled={pdfLoading}
               className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
               style={{ borderColor: GREEN, color: GREEN }}
             >
-              ⬇️ Download PDF
+              ⬇️ A4 sheet PDF
             </button>
+            <button
+              type="button"
+              onClick={() => void handleDownload("label")}
+              disabled={pdfLoading}
+              className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
+              style={{ borderColor: GREEN, color: GREEN }}
+            >
+              ⬇️ 3×3 label PDF
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => void handleEmail()}
@@ -280,6 +337,7 @@ export function QRStickerScreen({
             >
               ✉️ Email link
             </button>
+            <div />
           </div>
 
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
@@ -366,22 +424,14 @@ export function QRStickerScreen({
         ) : null}
 
         <div className="mt-8 border-t border-gray-100 pt-6">
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => libraryInputRef.current?.click()}
-              className="w-full rounded-xl border-2 py-3 text-sm font-bold"
-              style={{ borderColor: GREEN, color: GREEN }}
-            >
-              Choose from library
-            </button>
+          <div>
             <button
               type="button"
               onClick={() => cameraInputRef.current?.click()}
               className="w-full rounded-xl py-3 text-sm font-bold text-white"
               style={{ backgroundColor: GREEN }}
             >
-              📸 Take photo
+              📸 Take verification photo
             </button>
           </div>
           <input
@@ -392,13 +442,7 @@ export function QRStickerScreen({
             className="hidden"
             onChange={handleVerificationPhoto}
           />
-          <input
-            ref={libraryInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleVerificationPhoto}
-          />
+          {/* Camera-only to ensure sticker is attached to the physical item. */}
           <p className="mt-3 text-center text-xs text-gray-500">
             Your listing won’t be visible to renters until this verification step is done. Gift and Sell listings are active immediately.
           </p>

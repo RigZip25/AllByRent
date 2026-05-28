@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Check } from "lucide-react";
 import type { ListingDraft, MinimumRentalPeriod, StepProps } from "../types";
 import { RentanoHint } from "../../../components/RentanoHint";
+import { estimateInsuranceFeeCents, parseUsdToCents } from "../../../lib/insurance";
 import {
   calculateRentalPrices,
   categoryHasRestrictedModes,
@@ -342,6 +343,16 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
     ? `Prices based on current market — 15% below rental stores. Rent it ${rentalsToBreakEven} times and it pays for itself.`
     : "Prices based on current market — 15% below rental stores.";
 
+  const insuranceFeeEstimateUsd = useMemo(() => {
+    const replacementValueCents = parseUsdToCents(draft.replacementValue);
+    if (replacementValueCents <= 0) return null;
+    const feeCents = estimateInsuranceFeeCents({
+      replacementValueCents,
+      rentalDays: avg,
+    });
+    return feeCents / 100;
+  }, [avg, draft.replacementValue]);
+
   return (
     <motion.div
       className="mx-auto w-full max-w-[390px] bg-[#F9FAFB] px-4 pb-8 pt-5"
@@ -536,7 +547,9 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                     </p>
                   </motion.div>
                 </motion.div>
-                <ModeNote>💡 Insurance via Safely API included automatically</ModeNote>
+                <ModeNote>
+                  💡 Safely protection fee {insuranceFeeEstimateUsd ? `~$${insuranceFeeEstimateUsd.toFixed(2)}` : ""} is added at checkout based on replacement value.
+                </ModeNote>
               </ModeCard>
             );
           }
