@@ -1,5 +1,36 @@
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 import { pushInAppNotification } from "./inAppNotifications";
+import type { Session } from "@supabase/supabase-js";
+
+async function trySendWebPush(input: {
+  recipientId: string;
+  title: string;
+  body: string;
+}): Promise<void> {
+  try {
+    if (!isSupabaseConfigured()) return;
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+    const { data } = await supabase.auth.getSession();
+    const session = data.session as Session | null;
+    if (!session?.access_token) return;
+    await fetch("/api/push/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        toUserId: input.recipientId,
+        title: input.title,
+        body: input.body,
+        url: "/?screen=notifications",
+      }),
+    });
+  } catch {
+    // ignore; in-app notification already covers the UX
+  }
+}
 
 export type NotificationType = "booking_request" | "general";
 
@@ -84,6 +115,12 @@ export async function createNotificationRemote(params: {
   const { error } = await supabase.from("notifications").insert(row);
   if (error) {
     // ignore; local notification already pushed
+  } else {
+    void trySendWebPush({
+      recipientId: params.recipientId,
+      title: params.title,
+      body: params.body,
+    });
   }
 }
 
