@@ -21,6 +21,7 @@ const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
 
 type Step = "landing" | "email" | "sent" | "otp";
+const EMAIL_COOLDOWN_SECONDS = 60;
 
 const INTENT_COPY: Record<
   AuthIntent,
@@ -74,6 +75,8 @@ export function AuthGate({
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [passkeyPrimary, setPasskeyPrimary] = useState(false);
+  const [emailCooldownUntil, setEmailCooldownUntil] = useState<number>(0);
+  const [nowMs, setNowMs] = useState<number>(() => Date.now());
 
   const canUseSupabase = useMemo(() => configured, [configured]);
 
@@ -87,6 +90,12 @@ export function AuthGate({
     else setStep(shouldShowPasskeyLogin() ? "landing" : "email");
   }, [open, initialStep]);
 
+  useEffect(() => {
+    if (!open) return;
+    const id = window.setInterval(() => setNowMs(Date.now()), 500);
+    return () => window.clearInterval(id);
+  }, [open]);
+
   if (!open) return null;
 
   const run = async (key: string, fn: () => Promise<void>) => {
@@ -95,21 +104,36 @@ export function AuthGate({
     try {
       await fn();
     } catch (e) {
-      setError(formatAuthError(e));
+      const message = formatAuthError(e);
+      if (/rate limit/i.test(message)) {
+        setError(
+          "Too many emails requested. Please wait a minute, then try again.",
+        );
+      } else {
+        setError(message);
+      }
       if (import.meta.env.DEV) console.error("[AuthGate]", e);
     } finally {
       setBusy(null);
     }
   };
 
+  const emailCooldownRemaining = Math.max(
+    0,
+    Math.ceil((emailCooldownUntil - nowMs) / 1000),
+  );
+  const canRequestEmail = emailCooldownRemaining === 0 && busy === null && canUseSupabase;
+
   const handleSendEmail = () => {
     if (!isValidEmail(email)) {
       setError("Enter a valid email address.");
       return;
     }
+    if (!canRequestEmail) return;
     void run("email", async () => {
       setPendingAuthEmail(email);
       await signInWithEmailOtp(email);
+      setEmailCooldownUntil(Date.now() + EMAIL_COOLDOWN_SECONDS * 1000);
       setStep("sent");
     });
   };
@@ -270,12 +294,16 @@ export function AuthGate({
             />
             <button
               type="button"
-              disabled={!canUseSupabase || busy !== null}
+              disabled={!canRequestEmail}
               onClick={handleSendEmail}
               className="mt-3 flex min-h-[48px] w-full items-center justify-center rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
               style={{ backgroundColor: GREEN }}
             >
-              {busy === "email" ? "Sending…" : "Send magic link & code"}
+              {busy === "email"
+                ? "Sending…"
+                : emailCooldownRemaining > 0
+                  ? `Wait ${emailCooldownRemaining}s to resend`
+                  : "Send magic link & code"}
             </button>
             {passkeyPrimary ? (
               <button
@@ -309,12 +337,16 @@ export function AuthGate({
             </button>
             <button
               type="button"
-              disabled={busy !== null}
+              disabled={busy !== null || emailCooldownRemaining > 0}
               onClick={handleSendEmail}
               className="w-full rounded-2xl border py-3 text-[13px] font-semibold text-gray-600 disabled:opacity-60"
               style={{ borderColor: BORDER }}
             >
-              {busy === "email" ? "Resending…" : "Resend email"}
+              {busy === "email"
+                ? "Resending…"
+                : emailCooldownRemaining > 0
+                  ? `Resend available in ${emailCooldownRemaining}s`
+                  : "Resend email"}
             </button>
             <button
               type="button"
