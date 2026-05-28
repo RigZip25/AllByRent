@@ -843,17 +843,6 @@ function AppRoutes() {
         open={authGateOpen}
         intent={authIntent}
         initialStep={peekPendingAuthEmail() ? "sent" : undefined}
-        onClose={() => setAuthGateOpen(false)}
-        onContinueAsGuest={() => {
-          const stored = peekAuthReturn();
-          const target = (postAuthTarget ?? stored ?? "home") as Screen;
-          setAuthGateOpen(false);
-          setPostAuthTarget(null);
-          if (target !== currentScreen) {
-            setNavStack([]);
-            setCurrentScreen(target);
-          }
-        }}
       />
 
       <PasskeySetup open={passkeySetupOpen} onDone={() => setPasskeySetupOpen(false)} />

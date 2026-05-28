@@ -1,10 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Apple, Chrome, Fingerprint, Mail, ScanFace } from "lucide-react";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "../app/components/ui/input-otp";
 import { useAuth } from "../hooks/AuthProvider";
 import type { AuthIntent } from "../lib/authReturn";
 import { peekPendingAuthEmail, setPendingAuthEmail } from "../lib/authReturn";
@@ -12,7 +7,6 @@ import {
   shouldShowPasskeyLogin,
   signInWithEmailOtp,
   signInWithPasskey,
-  verifyEmailOtp,
 } from "../lib/auth";
 import { formatAuthError } from "../lib/authErrors";
 import { getPasskeyEnvironmentHint } from "../lib/passkeyEnvironment";
@@ -21,7 +15,7 @@ import { RentanoTip } from "./RentanoTip";
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
 
-type Step = "landing" | "email" | "sent" | "otp";
+type Step = "landing" | "email" | "sent";
 const EMAIL_COOLDOWN_SECONDS = 60;
 const EMAIL_RATE_LIMIT_COOLDOWN_SECONDS = 15 * 60;
 
@@ -31,23 +25,23 @@ const INTENT_COPY: Record<
 > = {
   list: {
     title: "Sign in to list your item",
-    subtitle: "Create your listing in minutes — free to join.",
+    subtitle: "Enter your email — we'll send a magic link to sign in.",
     rentano:
       "Rentano: List your gear and start earning. Sign in so we can save your listing draft.",
   },
   book: {
     title: "Sign in to book",
-    subtitle: "Reserve this item — we'll hold your spot while you check out.",
+    subtitle: "Enter your email — we'll send a magic link to continue.",
     rentano: "Rentano: Booking needs an account so hosts can reach you. Quick email sign-in.",
   },
   message: {
     title: "Sign in to message",
-    subtitle: "Chat with hosts and renters securely.",
+    subtitle: "Enter your email — we'll send a magic link to continue.",
     rentano: "Rentano: Messaging is for members only — sign in to continue the conversation.",
   },
   generic: {
     title: "Join AllByRent",
-    subtitle: "Continue with email — we'll send a magic link or an 8-digit code.",
+    subtitle: "Enter your email — we'll send a magic link to sign in.",
     rentano: "Rentano: Sign in to unlock listing, booking, and chat.",
   },
 };
@@ -59,21 +53,16 @@ function isValidEmail(value: string): boolean {
 export function AuthGate({
   open,
   intent = "generic",
-  onClose,
-  onContinueAsGuest,
   initialStep,
 }: {
   open: boolean;
   intent?: AuthIntent;
-  onClose?: () => void;
-  onContinueAsGuest?: () => void;
   initialStep?: Step;
 }) {
   const { configured } = useAuth();
   const copy = INTENT_COPY[intent];
-  const [step, setStep] = useState<Step>(initialStep ?? "landing");
+  const [step, setStep] = useState<Step>(initialStep ?? "email");
   const [email, setEmail] = useState(() => peekPendingAuthEmail() ?? "");
-  const [otp, setOtp] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [passkeyPrimary, setPasskeyPrimary] = useState(false);
@@ -128,7 +117,7 @@ export function AuthGate({
   );
   const canRequestEmail = emailCooldownRemaining === 0 && busy === null && canUseSupabase;
 
-  const handleSendEmail = () => {
+  const handleSendMagicLink = () => {
     if (!isValidEmail(email)) {
       setError("Enter a valid email address.");
       return;
@@ -139,12 +128,6 @@ export function AuthGate({
       await signInWithEmailOtp(email);
       setEmailCooldownUntil(Date.now() + EMAIL_COOLDOWN_SECONDS * 1000);
       setStep("sent");
-    });
-  };
-
-  const handleVerifyOtp = () => {
-    void run("otp", async () => {
-      await verifyEmailOtp(email, otp);
     });
   };
 
@@ -166,23 +149,17 @@ export function AuthGate({
         <RentanoTip message={copy.rentano} className="mb-1" />
 
         <h2 className="mt-3 text-[22px] font-bold leading-tight" style={{ color: GREEN }}>
-          {step === "sent"
-            ? "Check your inbox"
-            : step === "otp"
-              ? "Enter your code"
-              : copy.title}
+          {step === "sent" ? "Check your email" : copy.title}
         </h2>
         <p className="mt-1 text-[14px] text-gray-500">
           {step === "sent"
-            ? `We sent a sign-in link to ${email}. If your email includes an 8-digit code, you can enter it here too.`
-            : step === "otp"
-              ? "Enter the 8-digit code from your email (if provided). If you don’t have a code, use the magic link instead."
-              : copy.subtitle}
+            ? `We sent a sign-in link to ${email}. Open the email on this device and tap the link.`
+            : copy.subtitle}
         </p>
 
         {!canUseSupabase ? (
           <div className="mt-4 rounded-2xl border bg-[#FFFBEB] p-3 text-[13px] text-amber-800">
-            Supabase env vars are missing — demo mode. You can keep browsing without signing in.
+            Supabase env vars are missing — sign-in is unavailable in this build.
           </div>
         ) : null}
 
@@ -207,14 +184,24 @@ export function AuthGate({
             {passkeyHint ? (
               <p className="text-center text-[12px] leading-snug text-gray-500">{passkeyHint}</p>
             ) : null}
+
+            <div className="flex items-center gap-3 py-1">
+              <div className="h-px flex-1 bg-gray-200" />
+              <span className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+                or
+              </span>
+              <div className="h-px flex-1 bg-gray-200" />
+            </div>
+
             <button
               type="button"
               disabled={busy !== null}
               onClick={() => setStep("email")}
-              className="w-full rounded-2xl border py-3 text-[13px] font-semibold text-gray-600 active:bg-[#F9FAFB]"
+              className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[15px] font-semibold text-gray-700"
               style={{ borderColor: BORDER }}
             >
-              Use email instead
+              <Mail className="h-5 w-5" style={{ color: GREEN }} />
+              Sign in with magic link
             </button>
           </div>
         ) : null}
@@ -264,7 +251,7 @@ export function AuthGate({
               style={{ backgroundColor: GREEN }}
             >
               <Mail className="h-5 w-5" />
-              Continue with email
+              Sign in with magic link
             </button>
 
             {canUseSupabase && shouldShowPasskeyLogin() ? (
@@ -276,7 +263,7 @@ export function AuthGate({
                 style={{ borderColor: BORDER }}
               >
                 <Fingerprint className="h-4 w-4" />
-                {busy === "passkey" ? "Opening passkey…" : "Use passkey"}
+                {busy === "passkey" ? "Opening passkey…" : "Use Face ID"}
               </button>
             ) : null}
           </div>
@@ -295,6 +282,9 @@ export function AuthGate({
               autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSendMagicLink();
+              }}
               placeholder="you@example.com"
               className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
               style={{ borderColor: BORDER }}
@@ -302,15 +292,16 @@ export function AuthGate({
             <button
               type="button"
               disabled={!canRequestEmail}
-              onClick={handleSendEmail}
-              className="mt-3 flex min-h-[48px] w-full items-center justify-center rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
+              onClick={handleSendMagicLink}
+              className="mt-3 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
               style={{ backgroundColor: GREEN }}
             >
+              <Mail className="h-5 w-5" />
               {busy === "email"
                 ? "Sending…"
                 : emailCooldownRemaining > 0
-                  ? `Wait ${emailCooldownRemaining}s to resend`
-                  : "Send magic link & code"}
+                  ? `Resend in ${emailCooldownRemaining}s`
+                  : "Send magic link"}
             </button>
             {passkeyPrimary ? (
               <button
@@ -318,42 +309,40 @@ export function AuthGate({
                 onClick={() => setStep("landing")}
                 className="mt-2 w-full py-2 text-[13px] font-semibold text-gray-500"
               >
-                Back
+                Back to Face ID
               </button>
-            ) : (
+            ) : shouldShowPasskeyLogin() ? (
               <button
                 type="button"
-                onClick={() => setStep("landing")}
-                className="mt-2 w-full py-2 text-[13px] font-semibold text-gray-500"
+                disabled={busy !== null}
+                onClick={handlePasskeyLogin}
+                className="mt-2 w-full py-2 text-[13px] font-semibold text-gray-600"
               >
-                Back to sign-in options
+                {busy === "passkey" ? "Opening Face ID…" : "Use Face ID instead"}
               </button>
-            )}
+            ) : null}
           </div>
         ) : null}
 
         {step === "sent" ? (
           <div className="mt-4 flex flex-col gap-2">
-            <button
-              type="button"
-              onClick={() => setStep("otp")}
-              className="flex min-h-[48px] w-full items-center justify-center rounded-2xl px-4 text-[15px] font-bold text-white"
-              style={{ backgroundColor: GREEN }}
-            >
-              Enter 8-digit code (if included)
-            </button>
+            <p className="rounded-2xl border bg-[#F0FDF4] px-4 py-3 text-[13px] leading-relaxed text-gray-700">
+              The link opens AllByRent in this browser. If you don&apos;t see the email, check
+              spam or promotions.
+            </p>
             <button
               type="button"
               disabled={busy !== null || emailCooldownRemaining > 0}
-              onClick={handleSendEmail}
-              className="w-full rounded-2xl border py-3 text-[13px] font-semibold text-gray-600 disabled:opacity-60"
-              style={{ borderColor: BORDER }}
+              onClick={handleSendMagicLink}
+              className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
+              style={{ backgroundColor: GREEN }}
             >
+              <Mail className="h-5 w-5" />
               {busy === "email"
-                ? "Resending…"
+                ? "Sending…"
                 : emailCooldownRemaining > 0
-                  ? `Resend available in ${emailCooldownRemaining}s`
-                  : "Resend email"}
+                  ? `Resend in ${emailCooldownRemaining}s`
+                  : "Resend magic link"}
             </button>
             <button
               type="button"
@@ -363,62 +352,6 @@ export function AuthGate({
               Use a different email
             </button>
           </div>
-        ) : null}
-
-        {step === "otp" ? (
-          <div className="mt-4">
-            <div className="flex justify-center">
-              <InputOTP
-                maxLength={8}
-                value={otp}
-                onChange={setOtp}
-                inputMode="numeric"
-                pattern="[0-9]*"
-              >
-                <InputOTPGroup>
-                  {Array.from({ length: 8 }, (_, i) => (
-                    <InputOTPSlot key={i} index={i} className="h-11 w-9 text-[16px] font-bold" />
-                  ))}
-                </InputOTPGroup>
-              </InputOTP>
-            </div>
-            <button
-              type="button"
-              disabled={!canUseSupabase || busy !== null || otp.replace(/\D/g, "").length !== 8}
-              onClick={handleVerifyOtp}
-              className="mt-4 flex min-h-[48px] w-full items-center justify-center rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
-              style={{ backgroundColor: GREEN }}
-            >
-              {busy === "otp" ? "Verifying…" : "Verify & continue"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setStep("sent")}
-              className="mt-2 w-full py-2 text-[13px] font-semibold text-gray-500"
-            >
-              Back (use magic link)
-            </button>
-          </div>
-        ) : null}
-
-        {onContinueAsGuest ? (
-          <button
-            type="button"
-            onClick={onContinueAsGuest}
-            className="mt-3 w-full py-2 text-[13px] font-semibold text-gray-500"
-          >
-            Continue browsing as guest
-          </button>
-        ) : null}
-
-        {onClose ? (
-          <button
-            type="button"
-            onClick={onClose}
-            className="mt-1 w-full py-2 text-[13px] font-semibold text-gray-400"
-          >
-            Close
-          </button>
         ) : null}
 
         <p className="mt-4 text-center text-[12px] text-gray-400">Free to join · No credit card</p>
