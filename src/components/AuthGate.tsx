@@ -170,9 +170,9 @@ export function AuthGate({
         </h2>
         <p className="mt-1 text-[14px] text-gray-500">
           {step === "sent"
-            ? `We sent a sign-in link and an 8-digit code to ${email}.`
+            ? `We sent a sign-in link to ${email}. If your email includes an 8-digit code, you can enter it here too.`
             : step === "otp"
-              ? "Enter the 8-digit code from your email."
+              ? "Enter the 8-digit code from your email (if provided). If you don’t have a code, use the magic link instead."
               : copy.subtitle}
         </p>
 
@@ -333,7 +333,7 @@ export function AuthGate({
               className="flex min-h-[48px] w-full items-center justify-center rounded-2xl px-4 text-[15px] font-bold text-white"
               style={{ backgroundColor: GREEN }}
             >
-              Enter 8-digit code
+              Enter 8-digit code (if included)
             </button>
             <button
               type="button"
@@ -389,7 +389,7 @@ export function AuthGate({
               onClick={() => setStep("sent")}
               className="mt-2 w-full py-2 text-[13px] font-semibold text-gray-500"
             >
-              Back
+              Back (use magic link)
             </button>
           </div>
         ) : null}
