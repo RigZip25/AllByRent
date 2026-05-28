@@ -8,6 +8,7 @@ import { getProfileCity, savePublishedListingRemote, savePublishedListing } from
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { analyzeListingMediaPhotos } from "./listingAnalysis";
 import { ListingPublishSuccess } from "./ListingPublishSuccess";
+import { ListingShareScreen } from "./ListingShareScreen";
 import { QRStoryScreen } from "./QRStoryScreen";
 import { QRStickerScreen } from "./QRStickerScreen";
 import {
@@ -56,7 +57,7 @@ const PRIMARY_GREEN = "#0D5C3A";
 const BACKGROUND = "#F9FAFB";
 
 type SlideDirection = 1 | -1;
-type WizardPhase = "steps" | "qrStory" | "qrSticker" | "success";
+type WizardPhase = "steps" | "qrStory" | "qrSticker" | "share" | "success";
 
 const slideVariants = {
   enter: (direction: SlideDirection) => ({
@@ -283,9 +284,23 @@ export function ListingWizard({
         <QRStickerScreen
           draft={draft}
           setDraft={setDraft}
-          onComplete={() => setPhase("success")}
+          onComplete={() => setPhase("share")}
           onListAnother={handleStartAnotherListing}
           onBackToStory={() => setPhase("qrStory")}
+        />
+      </div>
+    );
+  }
+
+  if (phase === "share") {
+    return (
+      <div
+        className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden"
+        style={{ backgroundColor: BACKGROUND }}
+      >
+        <ListingShareScreen
+          draft={draft}
+          onDone={() => setPhase("success")}
         />
       </div>
     );
