@@ -123,10 +123,12 @@ function readBootQuery() {
     return { skipSplash: false, openNotifications: false, simulateUpdate: false };
   }
   const params = new URLSearchParams(window.location.search);
+  // When returning from magic-link callback, skip splash immediately (prevents a visible flash).
+  const hasAuthCode = params.get("code")?.trim().length ? true : false;
   const simulateUpdate =
     params.get("simulateUpdate") === "1" || isSimulateUpdateRequested();
   return {
-    skipSplash: params.get("skipSplash") === "1",
+    skipSplash: params.get("skipSplash") === "1" || hasAuthCode,
     openNotifications: params.get("openNotifications") === "1",
     simulateUpdate,
   };

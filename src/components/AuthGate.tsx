@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Apple, Chrome, Fingerprint, Mail, ScanFace } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
 import type { AuthIntent } from "../lib/authReturn";
-import { peekPendingAuthEmail, setAuthReturn, setPendingAuthEmail } from "../lib/authReturn";
+import { peekPendingAuthEmail, setPendingAuthEmail } from "../lib/authReturn";
 import {
   shouldShowPasskeyLogin,
   signInWithEmailOtp,
@@ -141,7 +141,7 @@ export function AuthGate({
     }
     if (!canRequestEmail) return;
     void run("email", async () => {
-      setAuthReturn("home");
+      // Preserve the intent screen set by the caller (e.g. listing wizard).
       setPendingAuthEmail(email);
       savePendingAuthProfile({
         fullName: trimmedName,
