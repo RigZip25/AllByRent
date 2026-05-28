@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, MapPin, Truck, Package } from "lucide-react";
 import { getPublishedListingById } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
+import { useAuth } from "../../hooks/AuthProvider";
 import {
   breakdownForListingBooking,
   deliverySummaryForListing,
@@ -10,6 +11,8 @@ import {
 } from "../../lib/rentalPricing";
 import {
   appendRentalBooking,
+  createRentalRemote,
+  toSupabaseRentalInsert,
   type FulfillmentMethod,
   type RentalBooking,
 } from "../../lib/rentalsStorage";
@@ -126,6 +129,7 @@ export function BookingScreen({
   onBack: () => void;
   onConfirmed: () => void;
 }) {
+  const auth = useAuth();
   const listing = useMemo(
     () => getPublishedListingById(listingId) ?? demoListingFallback(),
     [listingId],
@@ -167,8 +171,12 @@ export function BookingScreen({
           ? "Contactless pickup"
           : "In-person pickup";
 
+    const id =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `rent-${Date.now()}`;
     const booking: RentalBooking = {
-      id: `rent-${Date.now()}`,
+      id,
       role: "renter",
       status: "pending_checkin",
       itemTitle: title,
@@ -199,6 +207,25 @@ export function BookingScreen({
       pickupWindowStart: new Date().toISOString(),
       stripePayment: true,
     };
+
+    if (auth.userId && listing.hostId) {
+      const row = toSupabaseRentalInsert({
+        id,
+        listingId: listing.id,
+        ownerId: listing.hostId,
+        renterId: auth.userId,
+        status: booking.status,
+        startDate,
+        endDate,
+        bookingMode: fulfillment,
+        deliveryAddress: booking.deliveryAddress,
+        pickupPin: booking.pickupPin,
+        returnPin: booking.returnPin,
+      });
+      void createRentalRemote(row).catch(() => {
+        // Local fallback is already appended below.
+      });
+    }
 
     appendRentalBooking(booking);
     onConfirmed();

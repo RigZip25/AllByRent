@@ -1,4 +1,5 @@
 import { resolveCounterpartyId } from "./demoUserProfiles";
+import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 export type RentalStatus =
   | "pending_approval"
@@ -96,6 +97,22 @@ export type RentalBooking = {
   runningLateSentAt?: string;
   runningLateAcknowledged?: boolean;
   stripePayment?: boolean;
+};
+
+type SupabaseRentalRow = {
+  id: string;
+  listing_id: string;
+  owner_id: string;
+  renter_id: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+  pickup_pin: string | null;
+  return_pin: string | null;
+  booking_mode: string | null;
+  delivery_address: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 const RENTALS_KEY = "allbyrent_rental_bookings";
@@ -585,6 +602,55 @@ export function appendRentalBooking(booking: RentalBooking): RentalBooking[] {
   const next = [normalizeBooking(booking), ...bookings];
   saveRentalBookings(next);
   return next;
+}
+
+export function toSupabaseRentalInsert(params: {
+  id: string;
+  listingId: string;
+  ownerId: string;
+  renterId: string;
+  status: string;
+  startDate: string;
+  endDate: string;
+  bookingMode?: string;
+  deliveryAddress?: string;
+  pickupPin?: string;
+  returnPin?: string;
+}): Omit<SupabaseRentalRow, "created_at" | "updated_at"> {
+  return {
+    id: params.id,
+    listing_id: params.listingId,
+    owner_id: params.ownerId,
+    renter_id: params.renterId,
+    status: params.status,
+    start_date: params.startDate,
+    end_date: params.endDate,
+    pickup_pin: params.pickupPin ?? null,
+    return_pin: params.returnPin ?? null,
+    booking_mode: params.bookingMode ?? null,
+    delivery_address: params.deliveryAddress ?? null,
+  };
+}
+
+export async function createRentalRemote(row: Omit<SupabaseRentalRow, "created_at" | "updated_at">): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
+  const { error } = await supabase.from("rentals").insert(row);
+  if (error) throw error;
+}
+
+export async function fetchRentalsForUserRemote(userId: string): Promise<SupabaseRentalRow[]> {
+  if (!isSupabaseConfigured()) return [];
+  const supabase = getSupabaseClient();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("rentals")
+    .select("*")
+    .or(`owner_id.eq.${userId},renter_id.eq.${userId}`)
+    .order("created_at", { ascending: false });
+  if (error || !data) return [];
+  return data as SupabaseRentalRow[];
 }
 
 export function loadRentalBookings(): RentalBooking[] {
