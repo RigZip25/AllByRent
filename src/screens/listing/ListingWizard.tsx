@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import confetti from "canvas-confetti";
+import { useAuth } from "../../hooks/AuthProvider";
+import { resolveHostAccountId } from "../../lib/hostIdentity";
 import { getProfileCity, savePublishedListing } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { analyzeListingMediaPhotos } from "./listingAnalysis";
@@ -94,6 +96,7 @@ export function ListingWizard({
   initialDraft?: ListingDraft | null;
   onExit: () => void;
 }) {
+  const auth = useAuth();
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState<SlideDirection>(1);
   const [draft, setDraft] = useState<ListingDraft>(() =>
@@ -156,8 +159,10 @@ export function ListingWizard({
 
     window.setTimeout(() => {
       const giftOrSellOnly = isGiftOrSellOnly(draft);
+      const hostId = draft.hostId ?? resolveHostAccountId(auth.userId);
       const publishedDraft: ListingDraft = {
         ...draft,
+        hostId,
         generateQR: true,
         listingStatus: giftOrSellOnly ? "active" : "pending_qr",
       };

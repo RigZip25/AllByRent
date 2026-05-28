@@ -134,8 +134,9 @@ export function setProfileLocation(location: ProfileLocation): void {
 export function savePublishedListing(draft: ListingDraft): void {
   try {
     const existing = loadPublishedListings();
-    const next = existing.filter((item) => item.id !== draft.id);
-    next.unshift(draft);
+    const normalized = normalizeListingDraft(draft);
+    const next = existing.filter((item) => item.id !== normalized.id);
+    next.unshift(normalized);
     localStorage.setItem(LISTINGS_STORAGE_KEY, JSON.stringify(next));
   } catch {
     /* ignore */
@@ -152,9 +153,12 @@ function createQrTokenFallback(): string {
 function normalizeListingDraft(raw: ListingDraft): ListingDraft {
   const status =
     raw.listingStatus === "pending_sticker" ? "pending_qr" : raw.listingStatus;
+  const hostId =
+    typeof raw.hostId === "string" && raw.hostId.trim() ? raw.hostId.trim() : "demo-user";
 
   return {
     ...raw,
+    hostId,
     listingStatus: status,
     photos: Array.isArray(raw.photos) && raw.photos.every((p) => p && typeof p === "object" && "id" in p)
       ? raw.photos

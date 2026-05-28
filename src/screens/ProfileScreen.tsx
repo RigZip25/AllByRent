@@ -10,6 +10,7 @@ import {
   Sparkles,
   Star,
   User,
+  Users,
 } from "lucide-react";
 import { BottomNav } from "../app/components/BottomNav";
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
@@ -139,6 +140,7 @@ export function ProfileScreen({
   onFourthTab,
   onEditLocation,
   onOpenPlans,
+  onOpenCoHosts,
   onDeleteAccount,
   onViewPublicProfile,
 }: {
@@ -147,13 +149,16 @@ export function ProfileScreen({
   onFourthTab: () => void;
   onEditLocation: () => void;
   onOpenPlans: () => void;
+  onOpenCoHosts?: () => void;
   onDeleteAccount?: () => void;
   onViewPublicProfile?: () => void;
 }) {
   const [rentanoOpen, setRentanoOpen] = useState(false);
-  const [profile, setProfile] = useState<UserProfile>(() => refreshProfileStats(loadUserProfile()));
-  const [captureMode, setCaptureMode] = useState<"camera" | "library" | null>(null);
   const auth = useAuth();
+  const [profile, setProfile] = useState<UserProfile>(() =>
+    refreshProfileStats(loadUserProfile(), auth.userId),
+  );
+  const [captureMode, setCaptureMode] = useState<"camera" | "library" | null>(null);
   const [authBusy, setAuthBusy] = useState(false);
   const mode = getAppMode();
   const locationSummary = useMemo(() => getProfileLocationSummary(), [profile]);
@@ -175,21 +180,21 @@ export function ProfileScreen({
 
   const handleModeChange = (next: AppMode) => {
     updatePreferredMode(next);
-    setProfile(refreshProfileStats(loadUserProfile()));
+    setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
   };
 
   const persistPhoto = async (blob: Blob) => {
     const dataUrl = await saveAvatarPhoto(profile.id, blob);
     setPhotoPromptDeferred(false);
     setProfileAvatarUrl(dataUrl);
-    setProfile(refreshProfileStats(loadUserProfile()));
+    setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
   };
 
   if (showOnboarding) {
     return (
       <ProfilePhotoOnboarding
         onPhotoSaved={(blob) => void persistPhoto(blob)}
-        onDeferred={() => setProfile(refreshProfileStats(loadUserProfile()))}
+        onDeferred={() => setProfile(refreshProfileStats(loadUserProfile(), auth.userId))}
       />
     );
   }
@@ -299,6 +304,16 @@ export function ProfileScreen({
               onClick={onOpenPlans}
             />
           </li>
+          {onOpenCoHosts ? (
+            <li>
+              <RowButton
+                icon={<Users className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+                label="Co-hosts"
+                value="Invite helpers for your listings"
+                onClick={onOpenCoHosts}
+              />
+            </li>
+          ) : null}
         </ul>
 
         <SectionTitle>Trust &amp; payments</SectionTitle>

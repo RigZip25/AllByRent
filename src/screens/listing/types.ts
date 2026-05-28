@@ -23,6 +23,8 @@ export type ListingPublishStatus =
 
 export type ListingDraft = {
   id: string;
+  /** Primary host account that owns this listing (auth user id or demo-user). */
+  hostId?: string;
   listingStatus: ListingPublishStatus;
   photos: MediaRef[];
   videos: MediaRef[];

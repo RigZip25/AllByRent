@@ -1,10 +1,10 @@
 import { getAppMode, setAppMode, type AppMode } from "./appMode";
+import { countOwnListings } from "./hostAccess";
 import {
   getActiveRentLocationLabel,
   getHomeLocation,
   getRentContext,
   hasRentLocationSetup,
-  loadPublishedListings,
 } from "./listingStorage";
 import { hasAvatarPhoto, loadAvatarDataUrl } from "./avatarStorage";
 import { loadSubscriptionPlanId, type SubscriptionPlanId } from "./subscriptionPlans";
@@ -46,7 +46,7 @@ export type UserProfile = {
 };
 
 function createDefaultProfile(): UserProfile {
-  const listings = loadPublishedListings();
+  const listingsCount = countOwnListings(null);
   const id = "demo-user";
 
   return {
@@ -67,9 +67,9 @@ function createDefaultProfile(): UserProfile {
       identity: true,
     },
     host: {
-      listingsCount: listings.length,
-      rating: listings.length > 0 ? 4.9 : 0,
-      reviewCount: listings.length > 0 ? 12 : 0,
+      listingsCount,
+      rating: listingsCount > 0 ? 4.9 : 0,
+      reviewCount: listingsCount > 0 ? 12 : 0,
       usesManualBooking: true,
     },
     renter: {
@@ -147,17 +147,20 @@ export function saveUserProfile(profile: UserProfile): void {
   }
 }
 
-export function refreshProfileStats(profile: UserProfile): UserProfile {
-  const listings = loadPublishedListings();
+export function refreshProfileStats(
+  profile: UserProfile,
+  authUserId: string | null = null,
+): UserProfile {
+  const listingsCount = countOwnListings(authUserId ?? profile.id);
   return {
     ...profile,
     avatarUrl: hasAvatarPhoto(profile.id) ? loadAvatarDataUrl(profile.id) : null,
     subscriptionPlan: loadSubscriptionPlanId(),
     host: {
       ...profile.host,
-      listingsCount: listings.length,
-      rating: listings.length > 0 ? profile.host.rating || 4.9 : 0,
-      reviewCount: listings.length > 0 ? profile.host.reviewCount || 12 : 0,
+      listingsCount,
+      rating: listingsCount > 0 ? profile.host.rating || 4.9 : 0,
+      reviewCount: listingsCount > 0 ? profile.host.reviewCount || 12 : 0,
     },
     preferredMode: getAppMode(),
   };

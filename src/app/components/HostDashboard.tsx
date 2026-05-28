@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { DollarSign, Package, Plus, TrendingUp } from "lucide-react";
-import { loadPublishedListings } from "../../lib/listingStorage";
+import { useAuth } from "../../hooks/AuthProvider";
+import { loadManageableListings } from "../../lib/hostAccess";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { useMediaUrl } from "../../lib/useMediaUrl";
 
@@ -40,7 +41,8 @@ export function HostDashboard({
   onListItem: () => void;
   onOpenListing: (listingId: string) => void;
 }) {
-  const listings = loadPublishedListings();
+  const auth = useAuth();
+  const listings = loadManageableListings(auth.userId, auth.userEmail);
   const activeCount = listings.filter((item) => item.listingStatus === "active").length;
   const needsQrCount = listings.filter((item) => item.listingStatus === "pending_qr").length;
 

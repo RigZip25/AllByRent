@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Pencil, QrCode, Truck } from "lucide-react";
 import QRCode from "qrcode";
+import { useAuth } from "../../hooks/AuthProvider";
+import { canManageListing } from "../../lib/hostAccess";
 import {
   addListingToQrBulkQueue,
   clearQrBulkQueue,
@@ -85,8 +87,12 @@ export function HostListingDetailScreen({
   onBack: () => void;
   onEdit: (listingId: string) => void;
 }) {
+  const auth = useAuth();
   const [version, setVersion] = useState(0);
   const listing = useMemo(() => getPublishedListingById(listingId), [listingId, version]);
+  const canManage = listing
+    ? canManageListing(listing, auth.userId, auth.userEmail)
+    : false;
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
@@ -270,6 +276,27 @@ export function HostListingDetailScreen({
         </header>
         <div className="screen-scroll flex-1 px-4 py-6">
           <p className="text-sm text-gray-600">Listing not found.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!canManage) {
+    return (
+      <div className="screen flex flex-col bg-[#F0F4F2]">
+        <header className="shrink-0 bg-white px-4 pb-3 pt-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
+          <button type="button" onClick={onBack} className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+            <ArrowLeft className="h-4 w-4" style={{ color: GREEN }} />
+            Back
+          </button>
+          <h1 className="mt-2 text-[18px] font-extrabold" style={{ color: GREEN }}>
+            Listing
+          </h1>
+        </header>
+        <div className="screen-scroll flex-1 px-4 py-6">
+          <p className="text-sm text-gray-600">
+            You do not have permission to manage this listing.
+          </p>
         </div>
       </div>
     );
