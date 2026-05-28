@@ -312,6 +312,7 @@ export function clearQrBulkQueue(): void {
 type SupabaseListingRow = {
   id: string;
   owner_id: string;
+  city?: string;
   title: string;
   category: string;
   subcategory: string;
@@ -334,6 +335,7 @@ function draftToRow(draft: ListingDraft, ownerId: string): Partial<SupabaseListi
   return {
     id: draft.id,
     owner_id: ownerId,
+    city: getProfileCity(),
     title: draft.title ?? "",
     category: draft.category ?? "",
     subcategory: draft.subcategory ?? "",
@@ -493,6 +495,27 @@ export async function fetchListingsByOwnerIdsRemote(ownerIds: string[]): Promise
     .order("updated_at", { ascending: false });
   if (error || !data) {
     return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? "demo-user"));
+  }
+  return (data as SupabaseListingRow[]).map(rowToDraft);
+}
+
+export async function fetchActiveListingsForCityRemote(city: string): Promise<ListingDraft[]> {
+  const cityNorm = city.trim();
+  if (!isSupabaseConfigured()) {
+    return loadPublishedListings().filter((l) => l.listingStatus === "active");
+  }
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return loadPublishedListings().filter((l) => l.listingStatus === "active");
+  }
+  const query = supabase
+    .from("listings")
+    .select("*")
+    .eq("listing_status", "active")
+    .order("updated_at", { ascending: false });
+  const { data, error } = cityNorm ? await query.ilike("city", `%${cityNorm}%`) : await query;
+  if (error || !data) {
+    return loadPublishedListings().filter((l) => l.listingStatus === "active");
   }
   return (data as SupabaseListingRow[]).map(rowToDraft);
 }

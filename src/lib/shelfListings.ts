@@ -2,6 +2,7 @@ import {
   getActiveRentLocationLabel,
   getProfileCity,
   loadPublishedListings,
+  fetchActiveListingsForCityRemote,
 } from "./listingStorage";
 import type { ListingDraft } from "../screens/listing/types";
 
@@ -63,6 +64,20 @@ export function loadShelfListings(filter: ShelfListingFilter): ListingDraft[] {
 
 export function countShelfListings(filter: ShelfListingFilter): number {
   return loadShelfListings(filter).length;
+}
+
+export async function fetchShelfListings(filter: ShelfListingFilter): Promise<ListingDraft[]> {
+  const categoryNorm = normalize(filter.category);
+  const subcategoryNorm = filter.subcategory ? normalize(filter.subcategory) : null;
+  const city = filter.city?.trim() || getActiveRentLocationLabel().trim() || getProfileCity().trim();
+
+  const active = await fetchActiveListingsForCityRemote(city);
+  return active.filter((listing) => {
+    if (!PUBLISHED_STATUSES.has(listing.listingStatus)) return false;
+    if (normalize(listing.category) !== categoryNorm) return false;
+    if (subcategoryNorm && normalize(listing.subcategory) !== subcategoryNorm) return false;
+    return true;
+  });
 }
 
 /** City label for empty-shelf copy — earn uses host city, rent uses active browse location. */

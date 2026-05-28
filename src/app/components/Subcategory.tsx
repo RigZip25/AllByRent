@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { EmptySubcategoryShelf } from "./EmptySubcategoryShelf";
 
@@ -18,11 +18,9 @@ import { readLastKnownFullName } from "../../lib/pendingAuthProfile";
 
 import {
 
-  countShelfListings,
-
   getShelfCityLabel,
 
-  loadShelfListings,
+  fetchShelfListings,
 
   type ShelfPrefill,
 
@@ -267,12 +265,29 @@ export function Subcategory({
 
 
 
-  const shelfListings = useMemo(() => {
+  const [shelfListings, setShelfListings] = useState(() => []);
+  const [shelfLoading, setShelfLoading] = useState(false);
 
-    if (!selectedSubcategory) return [];
-
-    return loadShelfListings(shelfFilter);
-
+  useEffect(() => {
+    if (!selectedSubcategory) {
+      setShelfListings([]);
+      setShelfLoading(false);
+      return;
+    }
+    let mounted = true;
+    setShelfLoading(true);
+    void fetchShelfListings(shelfFilter)
+      .then((next) => {
+        if (!mounted) return;
+        setShelfListings(next);
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setShelfLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
   }, [selectedSubcategory, shelfFilter]);
 
   const enableShelfSearch = Boolean(selectedSubcategory && shelfListings.length > 10);
@@ -289,9 +304,7 @@ export function Subcategory({
 
 
 
-  const hasItemsInSubcategory =
-
-    selectedSubcategory !== null && countShelfListings(shelfFilter) > 0;
+  const hasItemsInSubcategory = selectedSubcategory !== null && shelfListings.length > 0;
 
 
 
@@ -363,7 +376,7 @@ export function Subcategory({
 
 
 
-  const showEmptyState = Boolean(selectedSubcategory && !hasItemsInSubcategory);
+  const showEmptyState = Boolean(selectedSubcategory && !shelfLoading && !hasItemsInSubcategory);
 
   const showFilteredEmptyState =
 
