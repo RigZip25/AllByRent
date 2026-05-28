@@ -20,6 +20,7 @@ import {
 } from "../../lib/rentalsStorage";
 import { CounterpartyName } from "../trust/CounterpartyName";
 import { InsuredLabel } from "./InsuredLabel";
+import { DepositHoldActions } from "../payments/DepositHoldActions";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -294,6 +295,20 @@ export function RentalCard({
       {tab === "active" && booking.status === "disputed" ? (
         <div className="mt-3">
           <ActionButton label="Submit evidence" variant="cta" onClick={(e) => e.stopPropagation()} />
+        </div>
+      ) : null}
+
+      {tab === "active" &&
+      (booking.status === "active" ||
+        booking.status === "overdue" ||
+        booking.status === "completed") ? (
+        <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+          <DepositHoldActions
+            rentalId={booking.id}
+            role={booking.role}
+            depositStatus={booking.depositStatus}
+            depositAmountCents={booking.depositAmountCents}
+          />
         </div>
       ) : null}
 
