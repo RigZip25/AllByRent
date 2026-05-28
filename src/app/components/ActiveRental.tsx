@@ -12,7 +12,7 @@ import {
   AlertTriangle,
   Upload,
 } from "lucide-react";
-import { useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useAuth } from "../../hooks/AuthProvider";
 import {
   loadRentalBookings,
@@ -20,6 +20,14 @@ import {
   getRenterPickupLocation,
   type RentalBooking,
 } from "../../lib/rentalsStorage";
+import {
+  appendChatMessageLocal,
+  fetchChatMessagesRemote,
+  loadChatMessagesLocal,
+  sendChatMessageRemote,
+  subscribeToChatMessagesRemote,
+  type ChatMessage,
+} from "../../lib/messagesStorage";
 import { hasLocalReview, submitReviewRemote } from "../../lib/reviewsStorage";
 import { ReviewPromptModal } from "../../components/reviews/ReviewPromptModal";
 import { RentanoTip } from "../../components/RentanoTip";
@@ -46,6 +54,9 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
   const [disputeOpen, setDisputeOpen] = useState(false);
   const [dispute, setDispute] = useState<Dispute | null>(null);
   const [bookings, setBookings] = useState<RentalBooking[]>(() => loadRentalBookings());
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatText, setChatText] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
   const booking = useMemo<RentalBooking | null>(() => {
     const list = bookings;
@@ -56,6 +67,30 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
       null
     );
   }, [bookings]);
+
+  useEffect(() => {
+    if (!booking) return;
+    setChatMessages(loadChatMessagesLocal(booking.id));
+    if (!auth.userId) return;
+    let mounted = true;
+    void fetchChatMessagesRemote(booking.id).then((remote) => {
+      if (!mounted) return;
+      if (remote.length > 0) setChatMessages(remote);
+    });
+    const sub = subscribeToChatMessagesRemote({
+      rentalId: booking.id,
+      onInsert: (msg) => {
+        setChatMessages((prev) => {
+          if (prev.some((p) => p.id === msg.id)) return prev;
+          return [...prev, msg].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+        });
+      },
+    });
+    return () => {
+      mounted = false;
+      sub.unsubscribe();
+    };
+  }, [auth.userId, booking]);
 
   const canDispute = Boolean(booking && (booking.status === "active" || booking.status === "overdue"));
 
@@ -442,7 +477,11 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              <button className="flex items-center justify-center gap-2 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors">
+              <button
+                type="button"
+                onClick={() => setChatOpen(true)}
+                className="flex items-center justify-center gap-2 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors"
+              >
                 <MessageCircle className="w-4 h-4" />
                 <span className="text-sm font-medium">Message</span>
               </button>
@@ -454,6 +493,85 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
             </div>
           </div>
         </div>
+
+        {chatOpen && booking ? (
+          <div className="bg-card rounded-xl border border-border p-4">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="font-semibold">Chat</h3>
+              <button type="button" onClick={() => setChatOpen(false)} className="text-sm text-muted-foreground">
+                Close
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Tip: mention <span className="font-semibold">@rentano</span> for quick help.
+            </p>
+
+            <div className="mt-3 max-h-56 overflow-y-auto rounded-xl border border-border bg-background p-3 space-y-2">
+              {chatMessages.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No messages yet.</p>
+              ) : (
+                chatMessages.map((m) => {
+                  const mine = auth.userId && m.senderId === auth.userId;
+                  return (
+                    <div
+                      key={m.id}
+                      className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
+                        mine ? "ml-auto bg-primary text-white" : "bg-muted"
+                      }`}
+                    >
+                      {m.body}
+                      <div className={`mt-1 text-[10px] ${mine ? "text-white/70" : "text-muted-foreground"}`}>
+                        {new Date(m.createdAt).toLocaleString()}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="mt-3 flex gap-2">
+              <input
+                value={chatText}
+                onChange={(e) => setChatText(e.target.value)}
+                placeholder="Write a message…"
+                className="flex-1 rounded-xl border border-border bg-white px-3 py-2 text-sm outline-none focus:border-primary"
+              />
+              <button
+                type="button"
+                disabled={!chatText.trim()}
+                onClick={() => {
+                  const body = chatText.trim();
+                  setChatText("");
+                  const senderId = auth.userId ?? "local";
+                  const recipientId = booking.counterpartyId ?? "local";
+                  const msg: ChatMessage = {
+                    id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `msg-${Date.now()}`,
+                    rentalId: booking.id,
+                    senderId,
+                    recipientId,
+                    body,
+                    createdAt: new Date().toISOString(),
+                  };
+                  appendChatMessageLocal(msg);
+                  setChatMessages((prev) => [...prev, msg]);
+                  if (auth.userId) {
+                    void sendChatMessageRemote({
+                      rentalId: booking.id,
+                      senderId: auth.userId,
+                      recipientId: recipientId,
+                      body,
+                    }).catch(() => {
+                      // ignore; local message still shows
+                    });
+                  }
+                }}
+                className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         <div className="bg-muted/50 rounded-xl p-4">
           <h3 className="font-semibold mb-2">Before you check in</h3>
