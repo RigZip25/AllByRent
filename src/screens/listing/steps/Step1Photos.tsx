@@ -46,14 +46,14 @@ export function Step1Photos({
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [storageWarning, setStorageWarning] = useState<string | null>(null);
-  const [visibleSlots, setVisibleSlots] = useState(4);
+  const [photoWarning, setPhotoWarning] = useState<string | null>(null);
+  const [visibleSlots, setVisibleSlots] = useState(5);
 
   const atMax = draft.photos.length >= MAX_LISTING_PHOTOS;
   const atMaxVideos = draft.videos.length >= MAX_LISTING_VIDEOS;
   const rentanoMessage = draft.aiSuggestions ? AI_TIP : DEFAULT_TIP;
 
-  const clampToMaxSlots = (value: number) => Math.max(4, Math.min(MAX_LISTING_PHOTOS, value));
-  const ceilToBatchOf4 = (value: number) => Math.ceil(value / 4) * 4;
+  const clampToMaxSlots = (value: number) => Math.max(5, Math.min(MAX_LISTING_PHOTOS, value));
 
   const openLibraryPicker = useCallback(() => {
     if (atMax) return;
@@ -113,9 +113,15 @@ export function Step1Photos({
     }));
   };
 
+  const formatUnknownError = (error: unknown) => {
+    if (error instanceof Error && error.message) return error.message;
+    return "Unknown error.";
+  };
+
   const handleFilesSelected = async (files: File[]) => {
     if (files.length === 0) return;
     setStorageWarning(null);
+    setPhotoWarning(null);
 
     let nextIndex = draft.photos.length;
 
@@ -129,7 +135,18 @@ export function Step1Photos({
       setDraft((current) => ({ ...current, photoEnhancementPending: true }));
 
       try {
-        const blob = await processPhotoWithPhotoRoom(file);
+        let blob: Blob;
+        try {
+          blob = await processPhotoWithPhotoRoom(file);
+        } catch (error) {
+          // Enhancement is best-effort; still allow photo uploads if the proxy/API key is missing
+          // or the image format can't be processed.
+          blob = file;
+          setPhotoWarning(
+            `Photo enhancement unavailable. Saved original photo. (${formatUnknownError(error)})`,
+          );
+        }
+
         await appendPhotoBlob(blob);
         nextIndex += 1;
       } catch {
@@ -146,7 +163,7 @@ export function Step1Photos({
 
     setVisibleSlots((current) => {
       if (nextIndex <= current) return current;
-      return clampToMaxSlots(Math.max(current, ceilToBatchOf4(nextIndex)));
+      return clampToMaxSlots(Math.max(current, nextIndex));
     });
   };
 
@@ -330,20 +347,50 @@ export function Step1Photos({
     );
   };
 
-  function PhotoTile({ media }: { media: MediaRef }) {
+  function PhotoTile({
+    media,
+    fit,
+  }: {
+    media: MediaRef;
+    fit: "cover" | "contain";
+  }) {
     const thumb = media.thumbId ? { id: media.thumbId, mimeType: "image/jpeg" } : media;
     const { url } = useMediaUrl(thumb);
+    const [failed, setFailed] = useState(false);
     return (
       <div
-        className="h-full w-full bg-cover bg-center"
-        style={{ backgroundImage: url ? `url(${url})` : undefined }}
+        className="h-full w-full bg-gray-100"
         role="img"
         aria-label="Listing photo"
-      />
+      >
+        {url && !failed ? (
+          <img
+            src={url}
+            alt=""
+            className={`h-full w-full ${fit === "contain" ? "object-contain" : "object-cover"}`}
+            draggable={false}
+            onError={() => setFailed(true)}
+          />
+        ) : failed ? (
+          <div className="flex h-full w-full items-center justify-center px-3 text-center text-xs font-semibold text-gray-500">
+            Couldn’t display this photo on your device.
+          </div>
+        ) : null}
+      </div>
     );
   }
 
-  const renderFilledSlot = (index: number, className: string) => {
+  const renderFilledSlot = (
+    index: number,
+    className: string,
+    {
+      fit,
+      onTap,
+    }: {
+      fit: "cover" | "contain";
+      onTap?: () => void;
+    },
+  ) => {
     const media = draft.photos[index];
     const isCover = index === 0;
     const isDragTarget = dragOverIndex === index && draggingIndex !== null;
@@ -361,11 +408,22 @@ export function Step1Photos({
         onPointerMove={handleFilledPointerMove}
         onPointerUp={handleFilledPointerUp}
         onPointerCancel={handleFilledPointerUp}
-        className={`relative overflow-hidden rounded-2xl ${className} ${
+        className={`relative overflow-hidden rounded-2xl bg-white ${className} ${
           isDragging ? "z-10 scale-[0.98] opacity-80" : ""
         } ${isDragTarget ? "ring-2 ring-[#0D5C3A] ring-offset-2" : ""}`}
       >
-        <PhotoTile media={media} />
+        <button
+          type="button"
+          onClick={(event) => {
+            if (!onTap) return;
+            event.stopPropagation();
+            onTap();
+          }}
+          className="h-full w-full text-left"
+          aria-label={isCover ? "Cover photo" : "Set as cover"}
+        >
+          <PhotoTile media={media} fit={fit} />
+        </button>
         {isCover && (
           <span
             className="absolute bottom-2 left-2 rounded-full px-2.5 py-1 text-xs font-semibold text-white"
@@ -389,9 +447,16 @@ export function Step1Photos({
     );
   };
 
-  const renderSlot = (index: number, className: string) => {
+  const renderSlot = (
+    index: number,
+    className: string,
+    options?: { fit?: "cover" | "contain"; onTapFilled?: () => void },
+  ) => {
     if (draft.photos[index]) {
-      return renderFilledSlot(index, className);
+      return renderFilledSlot(index, className, {
+        fit: options?.fit ?? "cover",
+        onTap: options?.onTapFilled,
+      });
     }
     return renderEmptySlot(index, className);
   };
@@ -404,10 +469,17 @@ export function Step1Photos({
 
   useEffect(() => {
     if (draft.photos.length <= visibleSlots) return;
-    setVisibleSlots((current) =>
-      clampToMaxSlots(Math.max(current, ceilToBatchOf4(draft.photos.length))),
-    );
+    setVisibleSlots((current) => clampToMaxSlots(Math.max(current, draft.photos.length)));
   }, [draft.photos.length, visibleSlots]);
+
+  const makeCover = (index: number) => {
+    if (index <= 0 || index >= draft.photos.length) return;
+    setDraft((current) => ({
+      ...current,
+      photos: reorderArray(current.photos, index, 0),
+      aiSuggestions: null,
+    }));
+  };
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-[390px] flex-col bg-[#F9FAFB] px-4 pb-4 pt-5">
@@ -440,7 +512,8 @@ export function Step1Photos({
           Add photos
         </h2>
         <p className="mt-1 text-sm text-gray-500">
-          Up to {MAX_LISTING_PHOTOS} photos and {MAX_LISTING_VIDEOS} videos. Long-press to reorder photos.
+          Up to {MAX_LISTING_PHOTOS} photos and {MAX_LISTING_VIDEOS} videos. Tap a thumbnail to
+          set the cover photo; long-press any photo to reorder.
         </p>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <button
@@ -475,15 +548,38 @@ export function Step1Photos({
           {storageWarning ? (
             <p className="mt-2 text-xs font-semibold text-amber-700">{storageWarning}</p>
           ) : null}
+        {photoWarning ? (
+          <p className="mt-2 text-xs font-semibold text-amber-700">{photoWarning}</p>
+        ) : null}
         </div>
       </div>
 
       <motion.div layout className="space-y-3">
-        <div className="grid grid-cols-3 gap-2">
-          {Array.from({ length: Math.min(visibleSlots, MAX_LISTING_PHOTOS) }).map((_, index) =>
-            renderSlot(index, "aspect-square w-full"),
-          )}
+        <div className="space-y-2">
+          <div className="mx-auto w-full max-w-[340px]">
+            {renderSlot(0, "aspect-[4/3] w-full", { fit: "contain" })}
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {[1, 2, 3, 4].map((index) =>
+              index < Math.min(visibleSlots, MAX_LISTING_PHOTOS)
+                ? renderSlot(index, "aspect-square w-full", {
+                    fit: "cover",
+                    onTapFilled: index < draft.photos.length ? () => makeCover(index) : undefined,
+                  })
+                : null,
+            )}
+          </div>
         </div>
+        {Math.min(visibleSlots, MAX_LISTING_PHOTOS) > 5 ? (
+          <div className="grid grid-cols-3 gap-2">
+            {Array.from({
+              length: Math.min(visibleSlots, MAX_LISTING_PHOTOS) - 5,
+            }).map((_, offset) => {
+              const index = 5 + offset;
+              return renderSlot(index, "aspect-square w-full");
+            })}
+          </div>
+        ) : null}
         {visibleSlots < MAX_LISTING_PHOTOS ? (
           <button
             type="button"
