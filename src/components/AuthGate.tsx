@@ -2,15 +2,20 @@ import { useEffect, useMemo, useState } from "react";
 import { Apple, Chrome, Fingerprint, Mail, ScanFace } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
 import type { AuthIntent } from "../lib/authReturn";
-import { peekPendingAuthEmail, setPendingAuthEmail } from "../lib/authReturn";
+import { peekPendingAuthEmail, setAuthReturn, setPendingAuthEmail } from "../lib/authReturn";
 import {
   shouldShowPasskeyLogin,
   signInWithEmailOtp,
   signInWithPasskey,
 } from "../lib/auth";
 import { formatAuthError } from "../lib/authErrors";
+import { detectCurrentLocation } from "../lib/geolocation";
 import { getPasskeyEnvironmentHint } from "../lib/passkeyEnvironment";
+import { setHomeLocation } from "../lib/listingStorage";
+import { savePendingAuthProfile } from "../lib/pendingAuthProfile";
 import { RentanoTip } from "./RentanoTip";
+import { AddressLocationPicker } from "./AddressLocationPicker";
+import type { LocationSuggestion } from "../lib/geocoding";
 
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
@@ -62,7 +67,10 @@ export function AuthGate({
   const { configured } = useAuth();
   const copy = INTENT_COPY[intent];
   const [step, setStep] = useState<Step>(initialStep ?? "email");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState(() => peekPendingAuthEmail() ?? "");
+  const [location, setLocation] = useState<LocationSuggestion | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [passkeyPrimary, setPasskeyPrimary] = useState(false);
@@ -118,13 +126,33 @@ export function AuthGate({
   const canRequestEmail = emailCooldownRemaining === 0 && busy === null && canUseSupabase;
 
   const handleSendMagicLink = () => {
+    const trimmedName = fullName.trim();
+    if (!trimmedName) {
+      setError("Enter your name.");
+      return;
+    }
     if (!isValidEmail(email)) {
       setError("Enter a valid email address.");
       return;
     }
+    if (!location) {
+      setError("Pick your location (auto-detect or search).");
+      return;
+    }
     if (!canRequestEmail) return;
     void run("email", async () => {
+      setAuthReturn("home");
       setPendingAuthEmail(email);
+      savePendingAuthProfile({
+        fullName: trimmedName,
+        phone: phone.trim() || undefined,
+        location,
+      });
+      setHomeLocation({
+        displayName: location.label,
+        lat: location.lat,
+        lng: location.lng,
+      });
       await signInWithEmailOtp(email);
       setEmailCooldownUntil(Date.now() + EMAIL_COOLDOWN_SECONDS * 1000);
       setStep("sent");
@@ -271,6 +299,20 @@ export function AuthGate({
 
         {step === "email" ? (
           <div className="mt-4">
+            <label className="text-[13px] font-semibold text-gray-600" htmlFor="auth-name">
+              Name
+            </label>
+            <input
+              id="auth-name"
+              type="text"
+              autoComplete="name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Your name"
+              className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
+              style={{ borderColor: BORDER }}
+            />
+
             <label className="text-[13px] font-semibold text-gray-600" htmlFor="auth-email">
               Email
             </label>
@@ -289,6 +331,72 @@ export function AuthGate({
               className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
               style={{ borderColor: BORDER }}
             />
+
+            <label className="mt-3 block text-[13px] font-semibold text-gray-600" htmlFor="auth-phone">
+              Phone (optional)
+            </label>
+            <input
+              id="auth-phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+1 (555) 123-4567"
+              className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
+              style={{ borderColor: BORDER }}
+            />
+
+            <div className="mt-4 rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[13px] font-semibold text-gray-700">Location</p>
+                <button
+                  type="button"
+                  disabled={busy !== null}
+                  onClick={() => {
+                    void run("locate", async () => {
+                      const detected = await detectCurrentLocation();
+                      if (!detected.ok) {
+                        setError(
+                          detected.reason === "denied"
+                            ? "Location access was blocked. Type your city instead."
+                            : detected.reason === "timeout"
+                              ? "Location timed out. Type your city instead."
+                              : "Couldn’t detect location. Type your city instead.",
+                        );
+                        return;
+                      }
+                      const suggestion: LocationSuggestion = {
+                        label: detected.location.displayName,
+                        primaryLine: detected.location.displayName,
+                        secondaryLine: "",
+                        city: detected.location.displayName,
+                        country: "",
+                        region: "",
+                        countryCode: "",
+                        flag: "📍",
+                        lat: detected.location.lat,
+                        lng: detected.location.lng,
+                        precision: "gps",
+                      };
+                      setLocation(suggestion);
+                    });
+                  }}
+                  className="text-[12px] font-semibold text-gray-600 disabled:opacity-60"
+                >
+                  Auto-detect
+                </button>
+              </div>
+              <div className="mt-3">
+                <AddressLocationPicker
+                  placeholder="City + State (US) or City + Country"
+                  emptyHint="Type your city, then pick it from the list."
+                  selected={location}
+                  onSelect={setLocation}
+                  onClear={() => setLocation(null)}
+                />
+              </div>
+            </div>
             <button
               type="button"
               disabled={!canRequestEmail}

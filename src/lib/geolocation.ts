@@ -55,8 +55,12 @@ function getCurrentPosition(): Promise<
   });
 }
 
-/** Browser geolocation + reverse geocode for "at home" onboarding. */
-export async function resolveHomeLocation(): Promise<HomeLocationResult> {
+export type DetectedLocationResult =
+  | { ok: true; location: ResolvedLocation }
+  | { ok: false; reason: GeolocationFailureReason };
+
+/** Geolocation + reverse geocode, without persisting to storage. */
+export async function detectCurrentLocation(): Promise<DetectedLocationResult> {
   const positionResult = await getCurrentPosition();
   if (!positionResult.ok) {
     return { ok: false, reason: positionResult.reason };
@@ -67,11 +71,21 @@ export async function resolveHomeLocation(): Promise<HomeLocationResult> {
     (await reverseGeocode(latitude, longitude)) ??
     `Near you (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
 
-  const location: ResolvedLocation = {
-    displayName,
-    lat: latitude,
-    lng: longitude,
+  return {
+    ok: true,
+    location: {
+      displayName,
+      lat: latitude,
+      lng: longitude,
+    },
   };
+}
+
+/** Browser geolocation + reverse geocode for "at home" onboarding. */
+export async function resolveHomeLocation(): Promise<HomeLocationResult> {
+  const detected = await detectCurrentLocation();
+  if (!detected.ok) return { ok: false, reason: detected.reason };
+  const location = detected.location;
 
   setHomeLocation(location);
   return { ok: true, location };
