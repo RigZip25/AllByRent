@@ -5,8 +5,10 @@ import { getListingDisplayTitle } from "../../lib/listingQr";
 import { extractAnthropicText, postAnthropicMessages } from "../../lib/anthropicClient";
 import { useAuth } from "../../hooks/AuthProvider";
 import { boostListingRemote } from "../../lib/listingStorage";
+import { generateListingShareCards, type GeneratedShareCard, type ShareCardFormat } from "../../lib/shareCards";
 
 const GREEN = "#0D5C3A";
+const CTA = "#F59E0B";
 const BORDER = "#E8E6E0";
 
 function listingUrl(draft: ListingDraft): string {
@@ -58,6 +60,10 @@ export function ListingShareScreen({
   const [caption, setCaption] = useState<string>(`${title} on AllByRent.\n${url}`);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cards, setCards] = useState<GeneratedShareCard[]>([]);
+  const [cardsBusy, setCardsBusy] = useState(false);
+  const [cardsError, setCardsError] = useState<string | null>(null);
+  const [selectedFormat, setSelectedFormat] = useState<ShareCardFormat>("story");
 
   useEffect(() => {
     let mounted = true;
@@ -97,9 +103,55 @@ export function ListingShareScreen({
     };
   }, [draft.category, language, price, title, url]);
 
+  useEffect(() => {
+    let mounted = true;
+    setCardsBusy(true);
+    setCardsError(null);
+    void generateListingShareCards({
+      title,
+      dailyRate: draft.pricing.dailyRate ?? "",
+      photos: draft.photos,
+    })
+      .then((generated) => {
+        if (!mounted) return;
+        setCards((prev) => {
+          prev.forEach((c) => {
+            try { URL.revokeObjectURL(c.objectUrl); } catch { /* ignore */ }
+          });
+          return generated;
+        });
+      })
+      .catch((e) => {
+        if (!mounted) return;
+        setCardsError(e instanceof Error ? e.message : "Share image generation failed");
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setCardsBusy(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [draft.photos, draft.pricing.dailyRate, title]);
+
+  useEffect(() => {
+    return () => {
+      cards.forEach((c) => {
+        try { URL.revokeObjectURL(c.objectUrl); } catch { /* ignore */ }
+      });
+    };
+  }, [cards]);
+
+  const selectedCard = useMemo(() => cards.find((c) => c.format === selectedFormat) ?? null, [cards, selectedFormat]);
+
   const shareNative = async () => {
     if (typeof navigator === "undefined" || !("share" in navigator)) return false;
     try {
+      if (selectedCard && "canShare" in navigator && (navigator as any).canShare?.({ files: [new File([selectedCard.blob], selectedCard.filename, { type: "image/png" })] })) {
+        const file = new File([selectedCard.blob], selectedCard.filename, { type: "image/png" });
+        await navigator.share({ title: "AllByRent", text: caption, files: [file] });
+        return true;
+      }
       await navigator.share({ title: "AllByRent", text: caption, url });
       return true;
     } catch {
@@ -141,6 +193,78 @@ export function ListingShareScreen({
       </div>
 
       <div className="screen-scroll flex-1 min-h-0 p-5 pb-24 space-y-4">
+        <div className="rounded-3xl border bg-white p-4" style={{ borderColor: BORDER }}>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[13px] font-semibold text-gray-700">Share image</p>
+            {cardsBusy ? (
+              <span className="inline-flex items-center gap-2 text-[12px] text-gray-500">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Rendering…
+              </span>
+            ) : null}
+          </div>
+
+          <div className="mt-3 flex gap-2">
+            {([
+              { id: "story" as const, label: "Story 9:16" },
+              { id: "square" as const, label: "Square 1:1" },
+              { id: "landscape" as const, label: "Card 1200×628" },
+            ]).map((opt) => {
+              const active = selectedFormat === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setSelectedFormat(opt.id)}
+                  className="shrink-0 rounded-full border px-3 py-1.5 text-[12px] font-semibold"
+                  style={{
+                    borderColor: active ? CTA : BORDER,
+                    backgroundColor: active ? `${CTA}1A` : "white",
+                    color: active ? "#92400E" : "#666",
+                  }}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-3">
+            {selectedCard ? (
+              <img
+                src={selectedCard.objectUrl}
+                alt="Share card preview"
+                className="w-full rounded-2xl border"
+                style={{ borderColor: BORDER }}
+              />
+            ) : (
+              <div className="w-full rounded-2xl border bg-[#F9FAFB] p-6 text-center text-[13px] text-gray-500" style={{ borderColor: BORDER }}>
+                {cardsError ? cardsError : "Preparing image…"}
+              </div>
+            )}
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              disabled={!selectedCard}
+              onClick={() => void shareNative().then((ok) => (ok ? undefined : void copyLink()))}
+              className="flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-semibold text-white disabled:opacity-60"
+              style={{ backgroundColor: CTA }}
+            >
+              <Share2 className="h-4 w-4" />
+              Share image
+            </button>
+            <a
+              href={selectedCard?.objectUrl ?? "#"}
+              download={selectedCard?.filename ?? undefined}
+              className={`flex items-center justify-center gap-2 rounded-xl border bg-white px-3 py-2.5 text-[13px] font-semibold ${selectedCard ? "text-gray-700" : "text-gray-400 pointer-events-none"}`}
+              style={{ borderColor: BORDER }}
+            >
+              ⬇️ Download PNG
+            </a>
+          </div>
+        </div>
+
         <div className="rounded-3xl border bg-white p-4" style={{ borderColor: BORDER }}>
           <div className="flex items-center justify-between gap-3">
             <p className="text-[13px] font-semibold text-gray-700">Caption</p>
