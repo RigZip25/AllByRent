@@ -107,7 +107,9 @@ function enforceRateLimit(rateKey: string) {
 }
 
 function isRetryableStatus(status: number): boolean {
-  return status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+  // Treat 500 as non-retryable here: on mobile it creates long "hangs" and we prefer
+  // a fast fallback to the original photo.
+  return status === 429 || status === 502 || status === 503 || status === 504;
 }
 
 function parseRetryAfterMs(value: string | null): number | null {
@@ -153,6 +155,17 @@ async function requestWithRetry(makeRequest: () => Promise<Response>, attempts =
 
 const inFlight = new Map<string, Promise<Blob>>();
 
+function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit | undefined,
+  timeoutMs: number,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+  const nextInit: RequestInit = { ...(init ?? {}), signal: controller.signal };
+  return fetch(input, nextInit).finally(() => window.clearTimeout(timer));
+}
+
 export async function processPhotoWithPhotoRoom(
   file: File,
   options?: PhotoRoomEditOptions,
@@ -187,11 +200,17 @@ export async function processPhotoWithPhotoRoom(
     formData.append("outputSize", opts.outputSize);
     formData.append("padding", opts.padding);
 
-    const response = await requestWithRetry(() =>
-      fetch(API_URL, {
-        method: "POST",
-        body: formData,
-      }),
+    const response = await requestWithRetry(
+      () =>
+        fetchWithTimeout(
+          API_URL,
+          {
+            method: "POST",
+            body: formData,
+          },
+          12_000,
+        ),
+      2,
     );
 
     if (!response.ok) {
