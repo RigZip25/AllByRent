@@ -9,6 +9,9 @@ export type RemoteProfile = {
   phone_verified: boolean | null;
   identity_verified: boolean | null;
   rating: number | null;
+  stripe_connect_account_id?: string | null;
+  stripe_payouts_enabled?: boolean | null;
+  stripe_bank_last4?: string | null;
 };
 
 export async function fetchRemoteProfile(userId: string): Promise<RemoteProfile | null> {
@@ -18,7 +21,7 @@ export async function fetchRemoteProfile(userId: string): Promise<RemoteProfile 
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "id, display_name, phone, location_label, created_at, phone_verified, identity_verified, rating",
+      "id, display_name, phone, location_label, created_at, phone_verified, identity_verified, rating, stripe_connect_account_id, stripe_payouts_enabled, stripe_bank_last4",
     )
     .eq("id", userId)
     .maybeSingle();

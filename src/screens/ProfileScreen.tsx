@@ -166,6 +166,11 @@ export function ProfileScreen({
   const mode = getAppMode();
   const locationSummary = useMemo(() => getProfileLocationSummary(), [profile]);
   const [recentReviews, setRecentReviews] = useState<{ rating: number; comment: string; createdAt: string }[]>([]);
+  const [stripeStatus, setStripeStatus] = useState<{ connected: boolean; payoutsEnabled: boolean; last4?: string | null }>({
+    connected: false,
+    payoutsEnabled: false,
+    last4: null,
+  });
 
   useEffect(() => {
     if (!auth.userId) return;
@@ -188,6 +193,11 @@ export function ProfileScreen({
       if (remote.rating != null && Number.isFinite(remote.rating)) {
         next.host.rating = Number(remote.rating);
       }
+      setStripeStatus({
+        connected: Boolean(remote.stripe_connect_account_id),
+        payoutsEnabled: Boolean(remote.stripe_payouts_enabled),
+        last4: remote.stripe_bank_last4 ?? null,
+      });
       setProfile(refreshProfileStats(next, auth.userId));
     });
     return () => {
@@ -397,6 +407,30 @@ export function ProfileScreen({
               />
             </li>
           ) : null}
+        </ul>
+
+        <SectionTitle>Payouts</SectionTitle>
+        <ul className="mb-4 flex flex-col gap-2">
+          <li>
+            <RowButton
+              icon={<CreditCard className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+              label={stripeStatus.connected ? "Bank account connected" : "Connect bank account"}
+              value={
+                stripeStatus.connected
+                  ? stripeStatus.payoutsEnabled
+                    ? `Payouts enabled${stripeStatus.last4 ? ` · **** ${stripeStatus.last4}` : ""}`
+                    : "Pending verification"
+                  : "Required to receive payouts"
+              }
+              onClick={() => {
+                // Stripe Connect requires server-side endpoints + secret keys.
+                // For now, show a simple hint in demo builds.
+                window.alert(
+                  "Stripe Connect onboarding requires server-side configuration (Stripe secret key + account link endpoint). This build shows the UI and reads connection status from Supabase profiles.",
+                );
+              }}
+            />
+          </li>
         </ul>
 
         {recentReviews.length > 0 ? (
