@@ -542,3 +542,62 @@ export async function fetchActiveListingsForCityRemote(city: string): Promise<Li
   }
   return (data as SupabaseListingRow[]).map(rowToDraft);
 }
+
+export async function searchActiveListingsRemote(params: {
+  query: string;
+  city: string;
+  category?: string;
+}): Promise<ListingDraft[]> {
+  const q = params.query.trim().toLowerCase();
+  const cityNorm = params.city.trim();
+  const category = params.category?.trim() || "";
+
+  if (!isSupabaseConfigured()) {
+    return loadPublishedListings()
+      .filter((l) => l.listingStatus === "active")
+      .filter((l) => (category ? l.category === category : true))
+      .filter((l) => {
+        if (!q) return true;
+        const hay = `${l.title} ${l.description} ${l.category} ${l.subcategory}`.toLowerCase();
+        return hay.includes(q);
+      });
+  }
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return loadPublishedListings()
+      .filter((l) => l.listingStatus === "active")
+      .filter((l) => (category ? l.category === category : true))
+      .filter((l) => {
+        if (!q) return true;
+        const hay = `${l.title} ${l.description} ${l.category} ${l.subcategory}`.toLowerCase();
+        return hay.includes(q);
+      });
+  }
+
+  let queryBuilder = supabase
+    .from("listings")
+    .select("*")
+    .eq("listing_status", "active")
+    .order("updated_at", { ascending: false });
+
+  if (cityNorm) queryBuilder = queryBuilder.ilike("city", `%${cityNorm}%`);
+  if (category) queryBuilder = queryBuilder.eq("category", category);
+  if (q) {
+    queryBuilder = queryBuilder.or(
+      `title.ilike.%${q}%,description.ilike.%${q}%,subcategory.ilike.%${q}%`,
+    );
+  }
+
+  const { data, error } = await queryBuilder.limit(50);
+  if (error || !data) {
+    return loadPublishedListings()
+      .filter((l) => l.listingStatus === "active")
+      .filter((l) => (category ? l.category === category : true))
+      .filter((l) => {
+        if (!q) return true;
+        const hay = `${l.title} ${l.description} ${l.category} ${l.subcategory}`.toLowerCase();
+        return hay.includes(q);
+      });
+  }
+  return (data as SupabaseListingRow[]).map(rowToDraft);
+}
