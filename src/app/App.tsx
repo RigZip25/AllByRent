@@ -125,10 +125,16 @@ function readBootQuery() {
   const params = new URLSearchParams(window.location.search);
   // When returning from magic-link callback, skip splash immediately (prevents a visible flash).
   const hasAuthCode = params.get("code")?.trim().length ? true : false;
+  const hash = window.location.hash ?? "";
+  const hasAuthHash =
+    hash.includes("access_token=") ||
+    hash.includes("refresh_token=") ||
+    hash.includes("error=") ||
+    hash.includes("error_description=");
   const simulateUpdate =
     params.get("simulateUpdate") === "1" || isSimulateUpdateRequested();
   return {
-    skipSplash: params.get("skipSplash") === "1" || hasAuthCode,
+    skipSplash: params.get("skipSplash") === "1" || hasAuthCode || hasAuthHash,
     openNotifications: params.get("openNotifications") === "1",
     simulateUpdate,
   };
