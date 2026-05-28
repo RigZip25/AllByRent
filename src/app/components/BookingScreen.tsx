@@ -19,6 +19,9 @@ import {
 } from "../../lib/rentalsStorage";
 import { createNotificationRemote } from "../../lib/notificationsStorage";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
+import { StripePaymentForm } from "../../components/payments/StripePaymentForm";
+import { isStripePaymentsEnabled } from "../../lib/stripeConfig";
+import { createRentalPaymentIntent } from "../../lib/stripePayments";
 import type { ListingDraft } from "../../screens/listing/types";
 
 const GREEN = "#0D5C3A";
@@ -146,6 +149,10 @@ export function BookingScreen({
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [insuranceFeeUsd, setInsuranceFeeUsd] = useState(0);
   const [safelyPolicyId, setSafelyPolicyId] = useState<string | null>(null);
+  const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
+  const [pendingBookingId, setPendingBookingId] = useState<string | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
 
   const startDate = useMemo(() => {
     const d = new Date();
@@ -192,7 +199,10 @@ export function BookingScreen({
   const canConfirm =
     !deliveryRequested || deliveryAddress.trim().length > 0;
 
-  const handleConfirm = () => {
+  const stripeCheckout =
+    isStripePaymentsEnabled() && Boolean(auth.userId && listing.hostId);
+
+  const buildBooking = (id: string): RentalBooking => {
     const pickupLabel =
       fulfillment === "delivery"
         ? `Delivery · ${listing.handoff.deliveryMaxMiles ?? 20} mi`
@@ -200,11 +210,7 @@ export function BookingScreen({
           ? "Contactless pickup"
           : "In-person pickup";
 
-    const id =
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : `rent-${Date.now()}`;
-    const booking: RentalBooking = {
+    return {
       id,
       role: "renter",
       status: "pending_approval",
@@ -234,17 +240,70 @@ export function BookingScreen({
       deliveryAddress: deliveryRequested ? deliveryAddress.trim() : undefined,
       contactlessInstructions: listing.handoff.contactlessInstructions || undefined,
       pickupWindowStart: new Date().toISOString(),
-      stripePayment: true,
+      stripePayment: stripeCheckout,
+      paymentOnHold: stripeCheckout,
     };
+  };
 
+  const finalizeBooking = (id: string, booking: RentalBooking) => {
     if (auth.userId && listing.hostId) {
+      void createNotificationRemote({
+        recipientId: listing.hostId,
+        actorId: auth.userId,
+        type: "booking_request",
+        title: "New booking request",
+        body: `Someone wants to rent your ${title}.`,
+      });
+    }
+    appendRentalBooking(booking);
+    onConfirmed(id);
+  };
+
+  const handleConfirm = () => {
+    const id =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `rent-${Date.now()}`;
+    const booking = buildBooking(id);
+
+    if (!stripeCheckout) {
+      if (auth.userId && listing.hostId) {
+        const insuranceFeeCents = Math.max(0, Math.round(insuranceFeeUsd * 100));
+        const depositAmountCents = parseUsdToCents(listing.pricing.securityDeposit ?? "");
+        const row = toSupabaseRentalInsert({
+          id,
+          listingId: listing.id,
+          ownerId: listing.hostId,
+          renterId: auth.userId,
+          status: booking.status,
+          startDate,
+          endDate,
+          bookingMode: fulfillment,
+          deliveryAddress: booking.deliveryAddress,
+          pickupPin: booking.pickupPin,
+          returnPin: booking.returnPin,
+          safelyPolicyId,
+          insuranceFeeCents,
+          depositAmountCents,
+        });
+        void createRentalRemote(row).catch(() => {
+          // Local fallback is already appended below.
+        });
+      }
+      finalizeBooking(id, booking);
+      return;
+    }
+
+    setConfirmBusy(true);
+    setPaymentError(null);
+    void (async () => {
       const insuranceFeeCents = Math.max(0, Math.round(insuranceFeeUsd * 100));
       const depositAmountCents = parseUsdToCents(listing.pricing.securityDeposit ?? "");
       const row = toSupabaseRentalInsert({
         id,
         listingId: listing.id,
-        ownerId: listing.hostId,
-        renterId: auth.userId,
+        ownerId: listing.hostId!,
+        renterId: auth.userId!,
         status: booking.status,
         startDate,
         endDate,
@@ -255,21 +314,42 @@ export function BookingScreen({
         safelyPolicyId,
         insuranceFeeCents,
         depositAmountCents,
+        stripePaymentStatus: "requires_payment_method",
       });
-      void createRentalRemote(row).catch(() => {
-        // Local fallback is already appended below.
-      });
-      void createNotificationRemote({
-        recipientId: listing.hostId,
-        actorId: auth.userId,
-        type: "booking_request",
-        title: "New booking request",
-        body: `Someone wants to rent your ${title}.`,
-      });
-    }
 
-    appendRentalBooking(booking);
-    onConfirmed(id);
+      try {
+        await createRentalRemote(row);
+      } catch {
+        setPaymentError("Could not save booking. Check your connection and try again.");
+        return;
+      }
+
+      const amountCents = Math.max(50, Math.round(breakdown.totalUsd * 100));
+      const pi = await createRentalPaymentIntent({
+        rentalId: id,
+        listingId: listing.id,
+        ownerId: listing.hostId!,
+        amountCents,
+      });
+
+      if (!pi.ok) {
+        if (pi.reason === "Stripe not configured") {
+          finalizeBooking(id, { ...booking, stripePayment: false, paymentOnHold: false });
+          return;
+        }
+        setPaymentError(pi.reason);
+        return;
+      }
+
+      setPendingBookingId(id);
+      setPaymentClientSecret(pi.clientSecret);
+    })().finally(() => setConfirmBusy(false));
+  };
+
+  const handlePaymentSuccess = () => {
+    if (!pendingBookingId) return;
+    const booking = buildBooking(pendingBookingId);
+    finalizeBooking(pendingBookingId, { ...booking, paymentOnHold: false });
   };
 
   return (
@@ -377,18 +457,56 @@ export function BookingScreen({
         ) : null}
 
         <RentalPriceBreakdownView breakdown={breakdown} />
+
+        {paymentClientSecret ? (
+          <div className="rounded-xl border border-border bg-card p-4">
+            <p className="text-sm font-semibold mb-3">Card payment</p>
+            {paymentError ? (
+              <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
+                {paymentError}
+              </p>
+            ) : null}
+            <StripePaymentForm
+              clientSecret={paymentClientSecret}
+              totalLabel={`$${breakdown.totalUsd.toFixed(2)}`}
+              onSuccess={handlePaymentSuccess}
+              onError={setPaymentError}
+            />
+            <button
+              type="button"
+              className="mt-3 w-full text-center text-sm text-muted-foreground underline"
+              onClick={() => {
+                setPaymentClientSecret(null);
+                setPendingBookingId(null);
+                setPaymentError(null);
+              }}
+            >
+              Back to booking details
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <div className="screen-footer bg-card/95 backdrop-blur-sm border-t border-border p-3 sm:p-4">
-        <button
-          type="button"
-          disabled={!canConfirm}
-          onClick={handleConfirm}
-          className="w-full rounded-xl py-3.5 font-medium text-white transition-colors disabled:opacity-50"
-          style={{ backgroundColor: GREEN }}
-        >
-          Confirm · ${breakdown.totalUsd.toFixed(2)} total
-        </button>
+        {!paymentClientSecret ? (
+          <button
+            type="button"
+            disabled={!canConfirm || confirmBusy}
+            onClick={handleConfirm}
+            className="w-full rounded-xl py-3.5 font-medium text-white transition-colors disabled:opacity-50"
+            style={{ backgroundColor: GREEN }}
+          >
+            {confirmBusy
+              ? "Preparing payment…"
+              : stripeCheckout
+                ? `Continue to pay · $${breakdown.totalUsd.toFixed(2)}`
+                : `Confirm · $${breakdown.totalUsd.toFixed(2)} total`}
+          </button>
+        ) : (
+          <p className="text-center text-xs text-muted-foreground">
+            Complete card payment above to submit your booking request.
+          </p>
+        )}
       </div>
     </div>
   );

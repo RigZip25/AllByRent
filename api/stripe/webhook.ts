@@ -1,7 +1,23 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
+import { getStripeSecretKey, getStripeWebhookSecret, isStripeServerConfigured } from "../_lib/keys";
 import { withApiErrorHandling } from "../_lib/safeHandler";
 import { getAdminClient } from "../passkey/_lib/supabaseAdmin";
+
+async function syncRentalPaymentFromIntent(
+  admin: NonNullable<ReturnType<typeof getAdminClient>>,
+  intent: Stripe.PaymentIntent,
+): Promise<void> {
+  const rentalId = intent.metadata?.rental_id;
+  if (!rentalId) return;
+
+  const patch: Record<string, string> = {
+    stripe_payment_intent_id: intent.id,
+    stripe_payment_status: intent.status,
+  };
+
+  await admin.from("rentals").update(patch).eq("id", rentalId);
+}
 
 async function readRawBody(req: any): Promise<Buffer> {
   const chunks: Buffer[] = [];
@@ -15,14 +31,14 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
-  const secret = process.env.STRIPE_SECRET_KEY;
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!secret || !webhookSecret) {
+  const secret = getStripeSecretKey();
+  const webhookSecret = getStripeWebhookSecret();
+  if (!isStripeServerConfigured() || !webhookSecret) {
     res.status(200).json({ ok: false, reason: "Stripe webhook not configured" });
     return;
   }
 
-  const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as any });
+  const stripe = new Stripe(secret!, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
   const sig = req.headers["stripe-signature"];
   if (typeof sig !== "string") {
     res.status(400).send("Missing signature");
@@ -38,18 +54,44 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
+  const admin = getAdminClient();
+
   if (event.type.startsWith("identity.verification_session.")) {
     const session = event.data.object as Stripe.Identity.VerificationSession;
-    const userId = (session.metadata as any)?.supabase_user_id as string | undefined;
+    const userId = (session.metadata as { supabase_user_id?: string })?.supabase_user_id;
     const status = session.status;
-    if (userId) {
-      const admin = getAdminClient();
-      if (admin) {
-        const identityVerified = status === "verified";
-        await admin
-          .from("profiles")
-          .update({ identity_verified: identityVerified })
-          .eq("id", userId);
+    if (userId && admin) {
+      const identityVerified = status === "verified";
+      await admin
+        .from("profiles")
+        .update({ identity_verified: identityVerified })
+        .eq("id", userId);
+    }
+  }
+
+  if (admin && event.type.startsWith("payment_intent.")) {
+    const intent = event.data.object as Stripe.PaymentIntent;
+    const paymentType = intent.metadata?.payment_type;
+
+    if (paymentType === "rental" || paymentType === "deposit") {
+      if (
+        event.type === "payment_intent.succeeded" ||
+        event.type === "payment_intent.payment_failed" ||
+        event.type === "payment_intent.canceled" ||
+        event.type === "payment_intent.processing" ||
+        event.type === "payment_intent.amount_capturable_updated"
+      ) {
+        await syncRentalPaymentFromIntent(admin, intent);
+
+        if (paymentType === "deposit" && event.type === "payment_intent.succeeded") {
+          const rentalId = intent.metadata?.rental_id;
+          if (rentalId && intent.capture_method === "manual") {
+            await admin
+              .from("rentals")
+              .update({ deposit_status: "held" })
+              .eq("id", rentalId);
+          }
+        }
       }
     }
   }
