@@ -22,6 +22,7 @@ const GREEN = "#0D5C3A";
 
 type Step = "landing" | "email" | "sent" | "otp";
 const EMAIL_COOLDOWN_SECONDS = 60;
+const EMAIL_RATE_LIMIT_COOLDOWN_SECONDS = 15 * 60;
 
 const INTENT_COPY: Record<
   AuthIntent,
@@ -106,8 +107,9 @@ export function AuthGate({
     } catch (e) {
       const message = formatAuthError(e);
       if (/rate limit/i.test(message)) {
+        setEmailCooldownUntil(Date.now() + EMAIL_RATE_LIMIT_COOLDOWN_SECONDS * 1000);
         setError(
-          "Too many emails requested. Please wait a minute, then try again.",
+          "Too many emails requested. Please wait about 15 minutes, then try again.",
         );
       } else {
         setError(message);
