@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   ArrowLeft,
@@ -19,6 +19,10 @@ import {
 import { usePwaUpdate } from "../hooks/PwaUpdateProvider";
 import { getAppMode, type AppMode } from "../lib/appMode";
 import { isStandalonePwa } from "../lib/pwaInstall";
+import { useAuth } from "../hooks/AuthProvider";
+import { loadInAppNotifications } from "../lib/inAppNotifications";
+import { fetchNotificationsRemote, markNotificationReadRemote, type Notification } from "../lib/notificationsStorage";
+import { MrRentano } from "../app/components/MrRentano";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -193,6 +197,7 @@ type NotificationsScreenProps = {
 
 export function NotificationsScreen({ onBack, mode: modeProp }: NotificationsScreenProps) {
   const mode = modeProp ?? getAppMode();
+  const auth = useAuth();
   const [tab, setTab] = useState<NotificationTab>("all");
   const [updateSheetOpen, setUpdateSheetOpen] = useState(false);
   const {
@@ -210,7 +215,48 @@ export function NotificationsScreen({ onBack, mode: modeProp }: NotificationsScr
   const visiblePreviews = filterPreviews(allPreviews, tab);
   const empty = EMPTY_BY_TAB[mode][tab];
   const showUpdateInTab = tab === "all";
+  const [items, setItems] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!auth.userId) {
+      const local = loadInAppNotifications().map((n) => ({
+        id: n.id,
+        recipientId: "local",
+        actorId: null,
+        type: n.type === "booking_request" ? "booking_request" : "general",
+        title: n.title,
+        body: n.body,
+        readAt: n.read ? n.createdAt : null,
+        createdAt: n.createdAt,
+      }));
+      setItems(local);
+      return;
+    }
+    let mounted = true;
+    setLoading(true);
+    void fetchNotificationsRemote(auth.userId)
+      .then((data) => {
+        if (!mounted) return;
+        setItems(data);
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [auth.userId]);
+
+  const filteredItems = useMemo(() => {
+    if (tab === "messages") return [];
+    if (tab === "bookings") return items.filter((n) => n.type === "booking_request");
+    return items;
+  }, [items, tab]);
+
   const hasInboxItems =
+    filteredItems.length > 0 ||
     (showUpdateInTab && (updateAvailable || updateJustCompleted)) ||
     visiblePreviews.length > 0;
   const showEmptyState = !hasInboxItems;
@@ -294,6 +340,67 @@ export function NotificationsScreen({ onBack, mode: modeProp }: NotificationsScr
       </header>
 
       <div className="screen-scroll flex-1 px-4 py-6" role="tabpanel">
+        {filteredItems.length > 0 ? (
+          <div className="mx-auto mb-6 max-w-[390px]">
+            <p className="mb-3 px-1 text-[13px] font-semibold uppercase tracking-wide text-gray-400">
+              Inbox
+            </p>
+            <ul className="flex flex-col gap-3">
+              {filteredItems.map((n) => {
+                const unread = !n.readAt;
+                return (
+                  <li key={n.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!auth.userId) return;
+                        if (!unread) return;
+                        void markNotificationReadRemote(auth.userId, n.id).then(() => {
+                          setItems((prev) =>
+                            prev.map((p) =>
+                              p.id === n.id ? { ...p, readAt: new Date().toISOString() } : p,
+                            ),
+                          );
+                        });
+                      }}
+                      className="flex w-full items-start gap-3 rounded-2xl border bg-white p-4 text-left active:bg-[#F9FAFB]"
+                      style={{ borderColor: BORDER }}
+                      aria-label={unread ? "Mark as read" : "Notification"}
+                    >
+                      <div
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+                        style={{ backgroundColor: SURFACE }}
+                      >
+                        <MrRentano size={28} className="opacity-95" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="truncate text-[15px] font-bold" style={{ color: GREEN }}>
+                            {n.title}
+                          </p>
+                          {unread ? (
+                            <span
+                              className="mt-1 inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                              style={{ backgroundColor: GREEN_LIGHT }}
+                              aria-hidden
+                            />
+                          ) : null}
+                        </div>
+                        <p className="mt-0.5 text-[14px] leading-snug text-gray-500">{n.body}</p>
+                        <p className="mt-2 text-[11px] text-gray-400">
+                          {new Date(n.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            {loading ? (
+              <p className="mt-3 px-1 text-[12px] text-gray-500">Loading…</p>
+            ) : null}
+          </div>
+        ) : null}
         {showUpdateInTab && (updateAvailable || updateJustCompleted) ? (
           <div className="mx-auto mb-6 max-w-[390px]">
             <p className="mb-3 px-1 text-[13px] font-semibold uppercase tracking-wide text-gray-400">
