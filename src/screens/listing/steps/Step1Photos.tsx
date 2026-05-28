@@ -6,7 +6,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { motion } from "motion/react";
-import { Loader2, Plus, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Plus, X } from "lucide-react";
 import type { StepProps } from "../types";
 import { RentanoHint } from "../../../components/RentanoHint";
 import { processPhotoWithPhotoRoom } from "../photoroomApi";
@@ -48,12 +48,23 @@ export function Step1Photos({
   const [storageWarning, setStorageWarning] = useState<string | null>(null);
   const [photoWarning, setPhotoWarning] = useState<string | null>(null);
   const [visibleSlots, setVisibleSlots] = useState(5);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+  const didReorderRef = useRef(false);
 
   const atMax = draft.photos.length >= MAX_LISTING_PHOTOS;
   const atMaxVideos = draft.videos.length >= MAX_LISTING_VIDEOS;
   const rentanoMessage = draft.aiSuggestions ? AI_TIP : DEFAULT_TIP;
 
   const clampToMaxSlots = (value: number) => Math.max(5, Math.min(MAX_LISTING_PHOTOS, value));
+
+  /** Hero + rows of 4 thumbnails (indices 1–4, 5–8, …). */
+  const slotsNeededForPhotos =
+    draft.photos.length === 0
+      ? 5
+      : 1 + 4 * Math.ceil(draft.photos.length / 4);
+
+  const totalSlots = Math.max(5, visibleSlots, slotsNeededForPhotos);
+  const thumbRowCount = Math.max(1, Math.ceil((totalSlots - 1) / 4));
 
   const openLibraryPicker = useCallback(() => {
     if (atMax) return;
@@ -295,6 +306,7 @@ export function Step1Photos({
     reorderSourceRef.current = null;
 
     longPressTimerRef.current = setTimeout(() => {
+      didReorderRef.current = true;
       reorderSourceRef.current = index;
       setDraggingIndex(index);
       event.currentTarget.setPointerCapture(event.pointerId);
@@ -309,11 +321,11 @@ export function Step1Photos({
       return;
     }
 
-    const lastRenderedIndex = Math.min(visibleSlots, MAX_LISTING_PHOTOS) - 1;
+    const lastRenderedIndex = Math.min(totalSlots, MAX_LISTING_PHOTOS) - 1;
     const lastNode = slotRefs.current[lastRenderedIndex];
     if (!lastNode) return;
     const rect = lastNode.getBoundingClientRect();
-    if (event.clientY > rect.bottom + 24 && visibleSlots < MAX_LISTING_PHOTOS) {
+    if (event.clientY > rect.bottom + 24 && totalSlots < MAX_LISTING_PHOTOS) {
       setVisibleSlots((current) => clampToMaxSlots(current + 4));
     }
   };
@@ -334,6 +346,9 @@ export function Step1Photos({
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
+    window.setTimeout(() => {
+      didReorderRef.current = false;
+    }, 0);
   };
 
   const handleEmptySlotClick = (index: number) => {
@@ -382,7 +397,7 @@ export function Step1Photos({
           ) : isError ? (
             <span className="text-xs text-red-500">Tap to retry</span>
           ) : (
-            <Plus className="h-7 w-7 text-gray-400" strokeWidth={1.75} />
+            <Plus className="h-5 w-5 text-gray-400" strokeWidth={1.75} />
           )}
         </button>
       </div>
@@ -457,12 +472,16 @@ export function Step1Photos({
         <button
           type="button"
           onClick={(event) => {
-            if (!onTap) return;
             event.stopPropagation();
-            onTap();
+            if (didReorderRef.current) return;
+            if (onTap) {
+              onTap();
+              return;
+            }
+            setPreviewIndex(index);
           }}
           className="h-full w-full text-left"
-          aria-label={isCover ? "Cover photo" : "Set as cover"}
+          aria-label={isCover ? "View cover photo" : "View photo"}
         >
           <PhotoTile media={media} fit={fit} />
         </button>
@@ -510,9 +529,8 @@ export function Step1Photos({
   }, []);
 
   useEffect(() => {
-    if (draft.photos.length <= visibleSlots) return;
-    setVisibleSlots((current) => clampToMaxSlots(Math.max(current, draft.photos.length)));
-  }, [draft.photos.length, visibleSlots]);
+    setVisibleSlots((current) => clampToMaxSlots(Math.max(current, slotsNeededForPhotos)));
+  }, [slotsNeededForPhotos]);
 
   const makeCover = (index: number) => {
     if (index <= 0 || index >= draft.photos.length) return;
@@ -554,8 +572,8 @@ export function Step1Photos({
           Add photos
         </h2>
         <p className="mt-1 text-sm text-gray-500">
-          Up to {MAX_LISTING_PHOTOS} photos and {MAX_LISTING_VIDEOS} videos. Tap a thumbnail to
-          set the cover photo; long-press any photo to reorder.
+          Up to {MAX_LISTING_PHOTOS} photos and {MAX_LISTING_VIDEOS} videos. Tap any photo to
+          view it. Long-press to reorder.
         </p>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <button
@@ -596,40 +614,27 @@ export function Step1Photos({
         </div>
       </div>
 
-      <motion.div layout className="space-y-3">
-        <div className="space-y-2">
-          <div className="mx-auto w-full max-w-[340px]">
-            {renderSlot(0, "aspect-[4/3] w-full", { fit: "contain" })}
-          </div>
-          <div className="grid grid-cols-4 gap-2">
-            {[1, 2, 3, 4].map((index) =>
-              index < Math.min(visibleSlots, MAX_LISTING_PHOTOS)
-                ? renderSlot(index, "aspect-square w-full", {
-                    fit: "cover",
-                    onTapFilled: index < draft.photos.length ? () => makeCover(index) : undefined,
-                  })
-                : null,
-            )}
-          </div>
-        </div>
-        {Math.min(visibleSlots, MAX_LISTING_PHOTOS) > 5 ? (
-          <div className="grid grid-cols-3 gap-2">
-            {Array.from({
-              length: Math.min(visibleSlots, MAX_LISTING_PHOTOS) - 5,
-            }).map((_, offset) => {
-              const index = 5 + offset;
-              return renderSlot(index, "aspect-square w-full");
+      <div className="space-y-2">
+        {renderSlot(0, "aspect-[4/3] w-full", { fit: "cover" })}
+
+        {Array.from({ length: thumbRowCount }, (_, row) => (
+          <div key={`thumb-row-${row}`} className="grid grid-cols-4 gap-1.5">
+            {[0, 1, 2, 3].map((col) => {
+              const index = 1 + row * 4 + col;
+              if (index >= totalSlots || index >= MAX_LISTING_PHOTOS) return null;
+              return renderSlot(index, "aspect-square w-full min-w-0", { fit: "cover" });
             })}
           </div>
-        ) : null}
-        {visibleSlots < MAX_LISTING_PHOTOS ? (
+        ))}
+
+        {totalSlots < MAX_LISTING_PHOTOS ? (
           <button
             type="button"
             onClick={() => setVisibleSlots((current) => clampToMaxSlots(current + 4))}
             className="w-full rounded-xl border-2 py-2.5 text-sm font-semibold"
             style={{ borderColor: PRIMARY_GREEN, color: PRIMARY_GREEN }}
           >
-            Add more photos (+4)
+            Add more photo slots (+4)
           </button>
         ) : null}
         {draft.videos.length > 0 ? (
@@ -654,7 +659,20 @@ export function Step1Photos({
             </div>
           </div>
         ) : null}
-      </motion.div>
+      </div>
+
+      {previewIndex !== null && draft.photos[previewIndex] ? (
+        <PhotoPreviewOverlay
+          photos={draft.photos}
+          index={previewIndex}
+          onClose={() => setPreviewIndex(null)}
+          onSetCover={(idx) => {
+            makeCover(idx);
+            setPreviewIndex(0);
+          }}
+          onNavigate={setPreviewIndex}
+        />
+      ) : null}
 
       {onAnalyzePhotos ? (
         <div className="mt-5 rounded-2xl bg-white p-4 shadow-sm">
@@ -689,6 +707,92 @@ export function Step1Photos({
       ) : null}
 
       <RentanoHint key={rentanoMessage} hint={rentanoMessage} className="mt-5" showTapLabel />
+    </div>
+  );
+}
+
+function PhotoPreviewOverlay({
+  photos,
+  index,
+  onClose,
+  onSetCover,
+  onNavigate,
+}: {
+  photos: MediaRef[];
+  index: number;
+  onClose: () => void;
+  onSetCover: (index: number) => void;
+  onNavigate: (index: number) => void;
+}) {
+  const media = photos[index];
+  const { url } = useMediaUrl(media);
+  const hasPrev = index > 0;
+  const hasNext = index < photos.length - 1;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex flex-col bg-black/90"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Photo preview"
+    >
+      <div className="flex shrink-0 items-center justify-between px-4 py-3 text-white">
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-full p-2 hover:bg-white/10"
+          aria-label="Close preview"
+        >
+          <X className="h-6 w-6" />
+        </button>
+        <span className="text-sm font-medium">
+          {index + 1} / {photos.length}
+        </span>
+        {index !== 0 ? (
+          <button
+            type="button"
+            onClick={() => onSetCover(index)}
+            className="rounded-full px-3 py-1.5 text-xs font-semibold text-white"
+            style={{ backgroundColor: PRIMARY_GREEN }}
+          >
+            Set as cover
+          </button>
+        ) : (
+          <span className="w-[88px]" aria-hidden />
+        )}
+      </div>
+
+      <div className="relative flex min-h-0 flex-1 items-center justify-center px-4 pb-6">
+        {hasPrev ? (
+          <button
+            type="button"
+            onClick={() => onNavigate(index - 1)}
+            className="absolute left-2 z-10 rounded-full bg-white/15 p-2 text-white"
+            aria-label="Previous photo"
+          >
+            <ChevronLeft className="h-7 w-7" />
+          </button>
+        ) : null}
+        {url ? (
+          <img
+            src={url}
+            alt=""
+            className="max-h-full max-w-full object-contain"
+          />
+        ) : (
+          <p className="text-sm text-white/70">Loading…</p>
+        )}
+        {hasNext ? (
+          <button
+            type="button"
+            onClick={() => onNavigate(index + 1)}
+            className="absolute right-2 z-10 rounded-full bg-white/15 p-2 text-white"
+            aria-label="Next photo"
+          >
+            <ChevronRight className="h-7 w-7" />
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }
