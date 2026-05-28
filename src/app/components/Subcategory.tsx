@@ -389,7 +389,7 @@ export function Subcategory({
 
   const greetingName = readLastKnownFullName().trim().split(/\s+/)[0] || "";
   const personalizedLine = greetingName
-    ? `${greetingName} — круто, что ты среди первых. Мы только начали.`
+    ? `${greetingName} — so cool you’re among the first. We’re just getting started.`
     : "So cool you’re among the first. We’re just getting started.";
 
 
