@@ -49,6 +49,11 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
   const mode: "pickup" | "return" =
     booking?.status === "pending_checkin" ? "pickup" : "return";
 
+  const overdueWarning =
+    booking?.status === "overdue"
+      ? "Overdue: late fees may apply. Confirm return as soon as the item is back with the owner."
+      : null;
+
   const renterPickupLocation = useMemo(
     () => (booking ? getRenterPickupLocation(booking) : undefined),
     [booking],
@@ -176,6 +181,11 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
         {notice ? (
           <div className="bg-card rounded-xl border border-border p-3 text-sm">
             {notice}
+          </div>
+        ) : null}
+        {overdueWarning ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            {overdueWarning}
           </div>
         ) : null}
         <div className="bg-card rounded-xl border border-border overflow-hidden">
