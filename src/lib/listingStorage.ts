@@ -1,4 +1,5 @@
 import type { ListingDraft } from "../screens/listing/types";
+import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 const LISTINGS_STORAGE_KEY = "allbyrent_published_listings";
 const PROFILE_CITY_KEY = "allbyrent_profile_city";
@@ -306,4 +307,192 @@ export function clearQrBulkQueue(): void {
   listings
     .filter((l) => l.qrQueuedForBulk)
     .forEach((l) => updateStoredListing({ ...l, qrQueuedForBulk: false }));
+}
+
+type SupabaseListingRow = {
+  id: string;
+  owner_id: string;
+  title: string;
+  category: string;
+  subcategory: string;
+  grade: string;
+  condition: string;
+  description: string;
+  replacement_value: number | null;
+  photos: unknown;
+  modes: string[] | null;
+  pricing: unknown;
+  availability: unknown;
+  handoff: unknown;
+  qr_code: string | null;
+  listing_status: string;
+  created_at: string;
+  updated_at: string;
+};
+
+function draftToRow(draft: ListingDraft, ownerId: string): Partial<SupabaseListingRow> {
+  return {
+    id: draft.id,
+    owner_id: ownerId,
+    title: draft.title ?? "",
+    category: draft.category ?? "",
+    subcategory: draft.subcategory ?? "",
+    grade: draft.grade ?? "",
+    condition: draft.condition ?? "",
+    description: draft.description ?? "",
+    replacement_value:
+      draft.replacementValue.trim().length > 0 ? Number(draft.replacementValue) : null,
+    photos: draft.photos ?? [],
+    modes: Object.entries(draft.modes)
+      .filter(([, enabled]) => enabled)
+      .map(([mode]) => mode),
+    pricing: draft.pricing ?? {},
+    availability: {
+      blocked_dates: draft.blockedDates ?? [],
+      paused: draft.paused ?? false,
+    },
+    handoff: draft.handoff ?? {},
+    qr_code: draft.qrToken ?? null,
+    listing_status: draft.listingStatus ?? "draft",
+  };
+}
+
+function rowToDraft(row: SupabaseListingRow): ListingDraft {
+  const availability =
+    row.availability && typeof row.availability === "object"
+      ? (row.availability as Record<string, unknown>)
+      : {};
+  const blockedDates = Array.isArray(availability.blocked_dates)
+    ? (availability.blocked_dates as ListingDraft["blockedDates"])
+    : [];
+
+  const modesArr = Array.isArray(row.modes) ? row.modes : [];
+  const modes: ListingDraft["modes"] = {
+    rent: modesArr.includes("rent"),
+    sell: modesArr.includes("sell"),
+    rentToOwn: modesArr.includes("rentToOwn") || modesArr.includes("rent_to_own") || modesArr.includes("rto"),
+    gift: modesArr.includes("gift"),
+  };
+
+  return normalizeListingDraft({
+    id: row.id,
+    hostId: row.owner_id,
+    listingStatus: (row.listing_status as ListingDraft["listingStatus"]) ?? "draft",
+    photos: Array.isArray(row.photos) ? (row.photos as ListingDraft["photos"]) : [],
+    videos: [],
+    aiSuggestions: null,
+    aiAnalysisPending: false,
+    photoEnhancementPending: false,
+    title: row.title ?? "",
+    category: row.category ?? "",
+    subcategory: row.subcategory ?? "",
+    grade: (row.grade as ListingDraft["grade"]) ?? "",
+    condition: (row.condition as ListingDraft["condition"]) ?? "",
+    description: row.description ?? "",
+    replacementValue: row.replacement_value != null ? String(row.replacement_value) : "",
+    instructionsUrl: "",
+    modes,
+    pricing:
+      row.pricing && typeof row.pricing === "object"
+        ? (row.pricing as ListingDraft["pricing"])
+        : createInitialPricingFallback(),
+    blockedDates,
+    paused: Boolean(availability.paused),
+    handoff:
+      row.handoff && typeof row.handoff === "object"
+        ? (row.handoff as ListingDraft["handoff"])
+        : createInitialHandoffFallback(),
+    generateQR: true,
+    qrToken: row.qr_code ?? createQrTokenFallback(),
+    qrReady: row.listing_status === "active",
+    qrPrintedConfirmed: false,
+    verificationPhoto: null,
+    qrQueuedForBulk: false,
+  });
+}
+
+function createInitialPricingFallback(): ListingDraft["pricing"] {
+  return {
+    dailyRate: "",
+    weeklyRate: "",
+    monthlyRate: "",
+    longTermEnabled: false,
+    longTermMonthlyRate: "",
+    salePrice: "",
+    rtoTotalPrice: "",
+    rtoPeriodMonths: "",
+    securityDeposit: "",
+    minimumPeriod: "1 day",
+  };
+}
+
+function createInitialHandoffFallback(): ListingDraft["handoff"] {
+  return {
+    inPerson: false,
+    inPersonDays: ["Mo", "Tu", "We", "Th", "Fr"],
+    inPersonTimeStart: "09:00",
+    inPersonTimeEnd: "17:00",
+    inPersonWeekendTimeStart: "10:00",
+    inPersonWeekendTimeEnd: "14:00",
+    contactless: false,
+    contactlessInstructions: "",
+    delivery: false,
+    itemHeavy: false,
+    deliveryMaxMiles: 20,
+    deliveryRoundTripFee: "",
+    deliveryPrices: [],
+  };
+}
+
+export async function savePublishedListingRemote(draft: ListingDraft, ownerId: string): Promise<void> {
+  if (!isSupabaseConfigured()) {
+    savePublishedListing(draft);
+    return;
+  }
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    savePublishedListing(draft);
+    return;
+  }
+  const { error } = await supabase
+    .from("listings")
+    .upsert(draftToRow(draft, ownerId), { onConflict: "id" });
+  if (error) {
+    // Fallback keeps UX working when network/Supabase is down.
+    savePublishedListing(draft);
+  }
+}
+
+export async function fetchListingByIdRemote(id: string): Promise<ListingDraft | null> {
+  if (!isSupabaseConfigured()) {
+    return getPublishedListingById(id);
+  }
+  const supabase = getSupabaseClient();
+  if (!supabase) return getPublishedListingById(id);
+  const { data, error } = await supabase
+    .from("listings")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error || !data) return getPublishedListingById(id);
+  return rowToDraft(data as SupabaseListingRow);
+}
+
+export async function fetchListingsByOwnerIdsRemote(ownerIds: string[]): Promise<ListingDraft[]> {
+  if (!isSupabaseConfigured()) {
+    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? "demo-user"));
+  }
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? "demo-user"));
+  }
+  const { data, error } = await supabase
+    .from("listings")
+    .select("*")
+    .in("owner_id", ownerIds)
+    .order("updated_at", { ascending: false });
+  if (error || !data) {
+    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? "demo-user"));
+  }
+  return (data as SupabaseListingRow[]).map(rowToDraft);
 }

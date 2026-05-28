@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import confetti from "canvas-confetti";
 import { useAuth } from "../../hooks/AuthProvider";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
-import { getProfileCity, savePublishedListing } from "../../lib/listingStorage";
+import { getProfileCity, savePublishedListingRemote, savePublishedListing } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { analyzeListingMediaPhotos } from "./listingAnalysis";
 import { ListingPublishSuccess } from "./ListingPublishSuccess";
@@ -168,7 +168,12 @@ export function ListingWizard({
       };
 
       setDraft(publishedDraft);
-      savePublishedListing(publishedDraft);
+      // Prefer Supabase when configured; fall back to localStorage.
+      if (auth.userId) {
+        void savePublishedListingRemote(publishedDraft, auth.userId);
+      } else {
+        savePublishedListing(publishedDraft);
+      }
       firePublishConfetti();
       setIsPublishing(false);
 

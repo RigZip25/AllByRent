@@ -1,6 +1,6 @@
 import type { ListingDraft } from "../screens/listing/types";
 import { getActiveCoHostHostIds } from "./coHostStorage";
-import { loadPublishedListings } from "./listingStorage";
+import { fetchListingsByOwnerIdsRemote, loadPublishedListings } from "./listingStorage";
 import { resolveHostAccountEmail, resolveHostAccountId } from "./hostIdentity";
 
 const LEGACY_HOST_ID = "demo-user";
@@ -37,6 +37,14 @@ export function loadManageableListings(
   return loadPublishedListings().filter((listing) =>
     hostIds.includes(getListingHostId(listing)),
   );
+}
+
+export async function fetchManageableListings(
+  authUserId: string | null,
+  authUserEmail: string | null,
+): Promise<ListingDraft[]> {
+  const hostIds = getManageableHostIds(authUserId, authUserEmail);
+  return fetchListingsByOwnerIdsRemote(hostIds);
 }
 
 export function countOwnListings(authUserId: string | null): number {
