@@ -38,12 +38,20 @@ export function AddressLocationPicker({
   onClear,
   near,
 }: AddressLocationPickerProps) {
+  const COUNTRY_GROUPS: { label: string; codes: CountryCode[] }[] = [
+    { label: "North America", codes: ["US", "CA"] },
+    { label: "Europe", codes: ["GB", "FR", "DE", "PL", "UA"] },
+    { label: "Eurasia", codes: ["RU", "BY", "KZ"] },
+    { label: "Middle East", codes: ["IL"] },
+    { label: "Oceania", codes: ["AU"] },
+  ];
   const homeCoords = useMemo(() => {
     const home = getHomeLocation();
     return home ? { lat: home.lat, lng: home.lng } : near;
   }, [near?.lat, near?.lng]);
 
   const [countryCode, setCountryCode] = useState<CountryCode>(() => getSearchCountryCode());
+  const [limitToUsState, setLimitToUsState] = useState(false);
   const [usState, setUsState] = useState<string>(() => {
     const fromCoords = homeCoords ? detectUsStateFromCoords(homeCoords.lat, homeCoords.lng) : null;
     return getSavedUsState() ?? fromCoords ?? "";
@@ -70,7 +78,7 @@ export function AddressLocationPicker({
       return;
     }
 
-    if (countryCode === "US" && !usState && !queryHasUsCityHint(trimmed)) {
+    if (countryCode === "US" && limitToUsState && !usState && !queryHasUsCityHint(trimmed)) {
       setNeedsStateHint(true);
       setSuggestions([]);
       setSearchError(false);
@@ -86,7 +94,9 @@ export function AddressLocationPicker({
       const zipState = countryCode === "US" ? detectUsStateFromZip(trimmed) : null;
       const effectiveState =
         countryCode === "US"
-          ? (zipState ?? (usState || getPreferredUsState(trimmed, searchNear)))
+          ? limitToUsState
+            ? (zipState ?? (usState || getPreferredUsState(trimmed, searchNear)))
+            : null
           : null;
       if (zipState && zipState !== usState) {
         setUsState(zipState);
@@ -169,30 +179,49 @@ export function AddressLocationPicker({
           onChange={(e) => handleCountryChange(e.target.value as CountryCode)}
           className="w-full rounded-xl border-2 border-gray-200 bg-white px-3 py-2.5 text-base outline-none focus:border-green-700"
         >
-          {COUNTRY_OPTIONS.map((country) => (
-            <option key={country.code} value={country.code}>
-              {country.flag} {country.label}
-            </option>
+          {COUNTRY_GROUPS.map((group) => (
+            <optgroup key={group.label} label={group.label}>
+              {group.codes.map((code) => {
+                const country = COUNTRY_OPTIONS.find((c) => c.code === code);
+                if (!country) return null;
+                return (
+                  <option key={country.code} value={country.code}>
+                    {country.flag} {country.label}
+                  </option>
+                );
+              })}
+            </optgroup>
           ))}
         </select>
       </label>
 
       {countryCode === "US" ? (
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-gray-500">State</span>
-          <select
-            value={usState}
-            onChange={(e) => handleStateChange(e.target.value)}
-            className="w-full rounded-xl border-2 border-gray-200 bg-white px-3 py-2.5 text-base outline-none focus:border-green-700"
-          >
-            <option value="">Select your state</option>
-            {US_STATE_OPTIONS.map((state) => (
-              <option key={state.code} value={state.code}>
-                {state.label} ({state.code})
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center justify-between gap-3">
+            <span className="text-xs font-medium text-gray-500">Narrow search to a state (optional)</span>
+            <button
+              type="button"
+              className="text-xs font-semibold text-gray-600"
+              onClick={() => setLimitToUsState((v) => !v)}
+            >
+              {limitToUsState ? "Hide" : "Show"}
+            </button>
+          </label>
+          {limitToUsState ? (
+            <select
+              value={usState}
+              onChange={(e) => handleStateChange(e.target.value)}
+              className="w-full rounded-xl border-2 border-gray-200 bg-white px-3 py-2.5 text-base outline-none focus:border-green-700"
+            >
+              <option value="">Any state</option>
+              {US_STATE_OPTIONS.map((state) => (
+                <option key={state.code} value={state.code}>
+                  {state.label} ({state.code})
+                </option>
+              ))}
+            </select>
+          ) : null}
+        </div>
       ) : null}
 
       <input
@@ -216,9 +245,9 @@ export function AddressLocationPicker({
 
       <p className="text-center text-xs text-gray-400">
         {countryCode === "US"
-          ? usState
-            ? `Searching in ${usState} — use: street, city, ${usState}`
-            : "Select state above, or type: street, city, ST"
+          ? limitToUsState && usState
+            ? `Searching in ${usState} — type: city, ${usState}`
+            : "Tip: type your city like “Fayetteville, AR”"
           : `Searching in ${activeCountry.flag} ${activeCountry.label}`}
       </p>
 

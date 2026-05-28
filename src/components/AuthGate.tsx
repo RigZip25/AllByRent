@@ -306,6 +306,7 @@ export function AuthGate({
               id="auth-name"
               type="text"
               autoComplete="name"
+              autoFocus
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Your name"
@@ -321,7 +322,6 @@ export function AuthGate({
               type="email"
               inputMode="email"
               autoComplete="email"
-              autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => {
