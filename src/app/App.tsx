@@ -60,6 +60,7 @@ import {
 import { AuthGate } from "../components/AuthGate";
 import { PasskeySetup } from "../components/PasskeySetup";
 import { DeleteAccountScreen } from "../screens/profile/DeleteAccount";
+import { IdentityVerificationScreen } from "../screens/IdentityVerificationScreen";
 
 type Screen =
   | "splash"
@@ -86,6 +87,7 @@ type Screen =
   | "favorites"
   | "earnBusiness"
   | "subscriptionPlans"
+  | "identity"
   | "deleteAccount";
 
 function screenToAuthIntent(screen: Screen): AuthIntent {
@@ -122,9 +124,10 @@ function isOnboardingScreen(screen: Screen): boolean {
 
 function readBootQuery() {
   if (typeof window === "undefined") {
-    return { skipSplash: false, openNotifications: false, simulateUpdate: false };
+    return { skipSplash: false, openNotifications: false, simulateUpdate: false, screen: null as string | null };
   }
   const params = new URLSearchParams(window.location.search);
+  const screen = params.get("screen");
   // When returning from magic-link callback, skip splash immediately (prevents a visible flash).
   const hasAuthCode = params.get("code")?.trim().length ? true : false;
   const hash = window.location.hash ?? "";
@@ -139,6 +142,7 @@ function readBootQuery() {
     skipSplash: params.get("skipSplash") === "1" || hasAuthCode || hasAuthHash,
     openNotifications: params.get("openNotifications") === "1",
     simulateUpdate,
+    screen,
   };
 }
 
@@ -228,6 +232,17 @@ function AppRoutes() {
   }, []);
 
   useEffect(() => {
+    if (!boot.screen) return;
+    const screen = boot.screen.trim();
+    if (screen === "identity") {
+      // Don't force auth; existing route guard will show AuthGate if needed.
+      setNavStack([]);
+      setCurrentScreen("identity");
+      clearBootQuery(["screen"]);
+    }
+  }, [boot.screen]);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (!isResetAppQueryParam(params)) return;
     clearBootQuery(["reset", "resetApp"]);
@@ -265,7 +280,8 @@ function AppRoutes() {
       screen === "listingIntro" ||
       screen === "listItem" ||
       screen === "hostListingDetail" ||
-      screen === "activeRental";
+      screen === "activeRental" ||
+      screen === "identity";
 
     if (authRequired && auth.configured && !auth.session) {
       showAuthGate(screen);
@@ -308,6 +324,7 @@ function AppRoutes() {
       "earnBusiness",
       "subcategory",
       "itemDetail",
+      "identity",
     ];
     const storedTarget =
       candidate && validScreens.includes(candidate)
@@ -739,6 +756,10 @@ function AppRoutes() {
 
         {currentScreen === "subscriptionPlans" && (
           <SubscriptionPlansScreen onBack={handleBack} />
+        )}
+
+        {currentScreen === "identity" && (
+          <IdentityVerificationScreen onBack={handleBack} />
         )}
 
         {currentScreen === "notifications" && (

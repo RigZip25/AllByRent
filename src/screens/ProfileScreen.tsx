@@ -464,6 +464,15 @@ export function ProfileScreen({
                   ? "Fully verified"
                   : "Complete ID for higher limits"
               }
+              onClick={() => {
+                try {
+                  const url = new URL(window.location.href);
+                  url.searchParams.set("screen", "identity");
+                  window.location.href = url.toString();
+                } catch {
+                  window.location.href = "/?screen=identity";
+                }
+              }}
             />
           </li>
           <li>
