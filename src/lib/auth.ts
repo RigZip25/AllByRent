@@ -26,8 +26,11 @@ const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
 export function consumeAuthCallbackResume(): boolean {
   try {
-    const value = sessionStorage.getItem(AUTH_CALLBACK_RESUME_KEY);
+    const value =
+      sessionStorage.getItem(AUTH_CALLBACK_RESUME_KEY) ??
+      localStorage.getItem(AUTH_CALLBACK_RESUME_KEY);
     sessionStorage.removeItem(AUTH_CALLBACK_RESUME_KEY);
+    localStorage.removeItem(AUTH_CALLBACK_RESUME_KEY);
     return value === "1";
   } catch {
     return false;
@@ -37,6 +40,8 @@ export function consumeAuthCallbackResume(): boolean {
 function markAuthCallbackResume(): void {
   try {
     sessionStorage.setItem(AUTH_CALLBACK_RESUME_KEY, "1");
+    // Also write to localStorage so the original tab can detect the completion.
+    localStorage.setItem(AUTH_CALLBACK_RESUME_KEY, "1");
   } catch {
     /* ignore */
   }

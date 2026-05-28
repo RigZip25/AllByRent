@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getSupabaseClient, isSupabaseConfigured } from "../lib/supabaseClient";
-import { completeAuthCallbackFromUrl, onAuthStateChange } from "../lib/auth";
+import { AUTH_CALLBACK_RESUME_KEY, completeAuthCallbackFromUrl, onAuthStateChange } from "../lib/auth";
 
 type AuthContextValue = {
   configured: boolean;
@@ -54,9 +54,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(next);
     });
 
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== AUTH_CALLBACK_RESUME_KEY) return;
+      // Another tab finished the auth callback and wrote the resume flag.
+      void supabase.auth.getSession().then(({ data }) => {
+        if (!mounted) return;
+        setSession(data.session);
+      });
+    };
+    window.addEventListener("storage", onStorage);
+
     return () => {
       mounted = false;
       sub.unsubscribe();
+      window.removeEventListener("storage", onStorage);
     };
   }, [configured]);
 
