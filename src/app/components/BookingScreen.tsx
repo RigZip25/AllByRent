@@ -21,7 +21,7 @@ import { createNotificationRemote } from "../../lib/notificationsStorage";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
 import { StripePaymentForm } from "../../components/payments/StripePaymentForm";
 import { isStripePaymentsEnabled } from "../../lib/stripeConfig";
-import { createRentalPaymentIntent } from "../../lib/stripePayments";
+import { createDepositPaymentIntent, createRentalPaymentIntent } from "../../lib/stripePayments";
 import type { ListingDraft } from "../../screens/listing/types";
 
 const GREEN = "#0D5C3A";
@@ -150,7 +150,9 @@ export function BookingScreen({
   const [insuranceFeeUsd, setInsuranceFeeUsd] = useState(0);
   const [safelyPolicyId, setSafelyPolicyId] = useState<string | null>(null);
   const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
+  const [depositClientSecret, setDepositClientSecret] = useState<string | null>(null);
   const [pendingBookingId, setPendingBookingId] = useState<string | null>(null);
+  const [pendingDepositCents, setPendingDepositCents] = useState(0);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
 
@@ -242,6 +244,7 @@ export function BookingScreen({
       pickupWindowStart: new Date().toISOString(),
       stripePayment: stripeCheckout,
       paymentOnHold: stripeCheckout,
+      depositAmountCents: parseUsdToCents(listing.pricing.securityDeposit ?? ""),
     };
   };
 
@@ -270,6 +273,8 @@ export function BookingScreen({
       if (auth.userId && listing.hostId) {
         const insuranceFeeCents = Math.max(0, Math.round(insuranceFeeUsd * 100));
         const depositAmountCents = parseUsdToCents(listing.pricing.securityDeposit ?? "");
+        const pickupAt = new Date(`${startDate}T14:00:00`).toISOString();
+        const dueAt = new Date(`${endDate}T23:59:59`).toISOString();
         const row = toSupabaseRentalInsert({
           id,
           listingId: listing.id,
@@ -285,6 +290,9 @@ export function BookingScreen({
           safelyPolicyId,
           insuranceFeeCents,
           depositAmountCents,
+          rentalTotalCents: Math.round(breakdown.totalUsd * 100),
+          pickupAt,
+          dueAt,
         });
         void createRentalRemote(row).catch(() => {
           // Local fallback is already appended below.
@@ -299,6 +307,8 @@ export function BookingScreen({
     void (async () => {
       const insuranceFeeCents = Math.max(0, Math.round(insuranceFeeUsd * 100));
       const depositAmountCents = parseUsdToCents(listing.pricing.securityDeposit ?? "");
+      const pickupAt = new Date(`${startDate}T14:00:00`).toISOString();
+      const dueAt = new Date(`${endDate}T23:59:59`).toISOString();
       const row = toSupabaseRentalInsert({
         id,
         listingId: listing.id,
@@ -315,6 +325,9 @@ export function BookingScreen({
         insuranceFeeCents,
         depositAmountCents,
         stripePaymentStatus: "requires_payment_method",
+        rentalTotalCents: Math.round(breakdown.totalUsd * 100),
+        pickupAt,
+        dueAt,
       });
 
       try {
@@ -348,8 +361,48 @@ export function BookingScreen({
 
   const handlePaymentSuccess = () => {
     if (!pendingBookingId) return;
-    const booking = buildBooking(pendingBookingId);
-    finalizeBooking(pendingBookingId, { ...booking, paymentOnHold: false });
+    const depositCents = parseUsdToCents(listing.pricing.securityDeposit ?? "");
+    setPaymentClientSecret(null);
+
+    if (stripeCheckout && depositCents >= 50) {
+      setPendingDepositCents(depositCents);
+      setConfirmBusy(true);
+      void createDepositPaymentIntent(pendingBookingId)
+        .then((deposit) => {
+          if (deposit.ok) {
+            setDepositClientSecret(deposit.clientSecret);
+            return;
+          }
+          if (deposit.reason === "Stripe not configured") {
+            finalizeAfterPayment(pendingBookingId);
+            return;
+          }
+          setPaymentError(deposit.reason);
+        })
+        .finally(() => setConfirmBusy(false));
+      return;
+    }
+
+    finalizeAfterPayment(pendingBookingId);
+  };
+
+  const finalizeAfterPayment = (id: string) => {
+    const booking = buildBooking(id);
+    finalizeBooking(id, {
+      ...booking,
+      paymentOnHold: false,
+      depositStatus:
+        pendingDepositCents >= 50 ? "held" : booking.depositAmountCents ? booking.depositStatus : undefined,
+      depositAmountCents: pendingDepositCents >= 50 ? pendingDepositCents : booking.depositAmountCents,
+    });
+    setPendingBookingId(null);
+    setDepositClientSecret(null);
+    setPendingDepositCents(0);
+  };
+
+  const handleDepositSuccess = () => {
+    if (!pendingBookingId) return;
+    finalizeAfterPayment(pendingBookingId);
   };
 
   return (
@@ -458,6 +511,27 @@ export function BookingScreen({
 
         <RentalPriceBreakdownView breakdown={breakdown} />
 
+        {depositClientSecret ? (
+          <div className="rounded-xl border border-border bg-card p-4">
+            <p className="text-sm font-semibold mb-1">Security deposit hold</p>
+            <p className="text-xs text-muted-foreground mb-3">
+              We&apos;ll authorize ${(pendingDepositCents / 100).toFixed(2)} on your card. The hold
+              is released when the owner confirms the item was returned in good condition.
+            </p>
+            {paymentError ? (
+              <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
+                {paymentError}
+              </p>
+            ) : null}
+            <StripePaymentForm
+              clientSecret={depositClientSecret}
+              totalLabel={`$${(pendingDepositCents / 100).toFixed(2)} hold`}
+              onSuccess={handleDepositSuccess}
+              onError={setPaymentError}
+            />
+          </div>
+        ) : null}
+
         {paymentClientSecret ? (
           <div className="rounded-xl border border-border bg-card p-4">
             <p className="text-sm font-semibold mb-3">Card payment</p>
@@ -488,7 +562,7 @@ export function BookingScreen({
       </div>
 
       <div className="screen-footer bg-card/95 backdrop-blur-sm border-t border-border p-3 sm:p-4">
-        {!paymentClientSecret ? (
+        {!paymentClientSecret && !depositClientSecret ? (
           <button
             type="button"
             disabled={!canConfirm || confirmBusy}
@@ -504,7 +578,9 @@ export function BookingScreen({
           </button>
         ) : (
           <p className="text-center text-xs text-muted-foreground">
-            Complete card payment above to submit your booking request.
+            {depositClientSecret
+              ? "Authorize the deposit hold above to finish your request."
+              : "Complete card payment above to submit your booking request."}
           </p>
         )}
       </div>

@@ -97,6 +97,9 @@ export type RentalBooking = {
   runningLateSentAt?: string;
   runningLateAcknowledged?: boolean;
   stripePayment?: boolean;
+  /** Security deposit hold (Stripe manual-capture PI). */
+  depositAmountCents?: number;
+  depositStatus?: string;
 };
 
 type SupabaseRentalRow = {
@@ -116,6 +119,9 @@ type SupabaseRentalRow = {
   deposit_amount_cents?: number;
   stripe_payment_intent_id?: string | null;
   stripe_payment_status?: string | null;
+  rental_total_cents?: number;
+  pickup_at?: string | null;
+  due_at?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -626,6 +632,9 @@ export function toSupabaseRentalInsert(params: {
   depositAmountCents?: number;
   stripePaymentIntentId?: string | null;
   stripePaymentStatus?: string | null;
+  rentalTotalCents?: number;
+  pickupAt?: string | null;
+  dueAt?: string | null;
 }): Omit<SupabaseRentalRow, "created_at" | "updated_at"> {
   return {
     id: params.id,
@@ -644,6 +653,9 @@ export function toSupabaseRentalInsert(params: {
     deposit_amount_cents: Math.max(0, Math.round(params.depositAmountCents ?? 0)),
     stripe_payment_intent_id: params.stripePaymentIntentId ?? null,
     stripe_payment_status: params.stripePaymentStatus ?? null,
+    rental_total_cents: Math.max(0, Math.round(params.rentalTotalCents ?? 0)),
+    pickup_at: params.pickupAt ?? null,
+    due_at: params.dueAt ?? null,
   };
 }
 
