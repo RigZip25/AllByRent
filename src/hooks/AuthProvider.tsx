@@ -64,10 +64,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener("storage", onStorage);
 
+    let channel: BroadcastChannel | null = null;
+    const onBroadcast = () => {
+      // Another tab likely completed the auth callback; refresh the session.
+      void supabase.auth.getSession().then(({ data }) => {
+        if (!mounted) return;
+        setSession(data.session);
+      });
+    };
+    try {
+      if (typeof BroadcastChannel !== "undefined") {
+        channel = new BroadcastChannel("abr_auth_v1");
+        channel.addEventListener("message", onBroadcast);
+      }
+    } catch {
+      channel = null;
+    }
+
     return () => {
       mounted = false;
       sub.unsubscribe();
       window.removeEventListener("storage", onStorage);
+      if (channel) {
+        try {
+          channel.removeEventListener("message", onBroadcast);
+          channel.close();
+        } catch {
+          // ignore
+        }
+      }
     };
   }, [configured]);
 
