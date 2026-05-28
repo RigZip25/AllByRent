@@ -350,6 +350,8 @@ type SupabaseListingRow = {
   handoff: unknown;
   qr_code: string | null;
   listing_status: string;
+  boosted_until?: string | null;
+  boosted_tier?: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -403,6 +405,8 @@ function rowToDraft(row: SupabaseListingRow): ListingDraft {
     id: row.id,
     hostId: row.owner_id,
     listingStatus: (row.listing_status as ListingDraft["listingStatus"]) ?? "draft",
+    boostedUntil: row.boosted_until ?? null,
+    boostedTier: typeof row.boosted_tier === "number" ? row.boosted_tier : null,
     photos: Array.isArray(row.photos) ? (row.photos as ListingDraft["photos"]) : [],
     videos: [],
     aiSuggestions: null,
@@ -434,6 +438,57 @@ function rowToDraft(row: SupabaseListingRow): ListingDraft {
     verificationPhoto: null,
     qrQueuedForBulk: false,
   });
+}
+
+function interleaveBoosted(list: ListingDraft[], organicPerBoost = 5): ListingDraft[] {
+  const now = Date.now();
+  const boosted = list.filter((l) => {
+    const until = l.boostedUntil ? new Date(l.boostedUntil).getTime() : 0;
+    return until > now;
+  });
+  const organic = list.filter((l) => {
+    const until = l.boostedUntil ? new Date(l.boostedUntil).getTime() : 0;
+    return !(until > now);
+  });
+
+  if (boosted.length === 0) return organic;
+
+  const out: ListingDraft[] = [];
+  let b = 0;
+  let o = 0;
+  while (b < boosted.length || o < organic.length) {
+    if (b < boosted.length) out.push(boosted[b++]);
+    for (let i = 0; i < organicPerBoost && o < organic.length; i++) out.push(organic[o++]);
+  }
+  return out;
+}
+
+export async function boostListingRemote(input: {
+  listingId: string;
+  boostedUntil: string;
+  boostedTier: number;
+  ownerId: string;
+}): Promise<void> {
+  const listing = getPublishedListingById(input.listingId);
+  if (listing) {
+    updateStoredListing({
+      ...listing,
+      boostedUntil: input.boostedUntil,
+      boostedTier: input.boostedTier,
+    });
+  }
+
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
+  await supabase
+    .from("listings")
+    .update({
+      boosted_until: input.boostedUntil,
+      boosted_tier: input.boostedTier,
+    })
+    .eq("id", input.listingId)
+    .eq("owner_id", input.ownerId);
 }
 
 function createInitialPricingFallback(): ListingDraft["pricing"] {
@@ -535,12 +590,13 @@ export async function fetchActiveListingsForCityRemote(city: string): Promise<Li
     .from("listings")
     .select("*")
     .eq("listing_status", "active")
+    .order("boosted_until", { ascending: false, nullsFirst: false })
     .order("updated_at", { ascending: false });
   const { data, error } = cityNorm ? await query.ilike("city", `%${cityNorm}%`) : await query;
   if (error || !data) {
     return loadPublishedListings().filter((l) => l.listingStatus === "active");
   }
-  return (data as SupabaseListingRow[]).map(rowToDraft);
+  return interleaveBoosted((data as SupabaseListingRow[]).map(rowToDraft));
 }
 
 export async function searchActiveListingsRemote(params: {
@@ -578,6 +634,7 @@ export async function searchActiveListingsRemote(params: {
     .from("listings")
     .select("*")
     .eq("listing_status", "active")
+    .order("boosted_until", { ascending: false, nullsFirst: false })
     .order("updated_at", { ascending: false });
 
   if (cityNorm) queryBuilder = queryBuilder.ilike("city", `%${cityNorm}%`);
@@ -599,5 +656,5 @@ export async function searchActiveListingsRemote(params: {
         return hay.includes(q);
       });
   }
-  return (data as SupabaseListingRow[]).map(rowToDraft);
+  return interleaveBoosted((data as SupabaseListingRow[]).map(rowToDraft));
 }

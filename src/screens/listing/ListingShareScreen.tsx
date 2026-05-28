@@ -3,6 +3,8 @@ import { Copy, Facebook, Instagram, Link2, Loader2, MessageCircle, Send, Share2 
 import type { ListingDraft } from "./types";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { extractAnthropicText, postAnthropicMessages } from "../../lib/anthropicClient";
+import { useAuth } from "../../hooks/AuthProvider";
+import { boostListingRemote } from "../../lib/listingStorage";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -47,6 +49,7 @@ export function ListingShareScreen({
   draft: ListingDraft;
   onDone: () => void;
 }) {
+  const auth = useAuth();
   const url = useMemo(() => listingUrl(draft), [draft]);
   const title = getListingDisplayTitle(draft.title) || draft.title || "My listing";
   const price = draft.pricing.dailyRate ? `$${draft.pricing.dailyRate}/day` : "Available now";
@@ -119,6 +122,13 @@ export function ListingShareScreen({
     { id: "nextdoor", label: "Nextdoor", icon: <Send className="h-4 w-4" />, color: "#00B87C" },
     { id: "whatsapp", label: "WhatsApp", icon: <MessageCircle className="h-4 w-4" />, color: "#25D366" },
   ];
+
+  const activeBoostLabel = useMemo(() => {
+    if (!draft.boostedUntil) return null;
+    const until = new Date(draft.boostedUntil).getTime();
+    if (Number.isNaN(until) || until <= Date.now()) return null;
+    return `Boost active until ${new Date(draft.boostedUntil).toLocaleString()}`;
+  }, [draft.boostedUntil]);
 
   return (
     <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-[#F9FAFB]">
@@ -198,6 +208,66 @@ export function ListingShareScreen({
             <Link2 className="h-4 w-4" />
             Copy link
           </button>
+        </div>
+
+        <div className="rounded-3xl border bg-white p-4" style={{ borderColor: BORDER }}>
+          <p className="text-[13px] font-semibold text-gray-700">Boost this listing</p>
+          <p className="mt-1 text-[12px] text-gray-500">
+            Boosted listings show up near the top of the feed with a max of 1 boost per 5 organic.
+          </p>
+          {activeBoostLabel ? (
+            <p className="mt-2 text-[12px] font-semibold text-emerald-700">{activeBoostLabel}</p>
+          ) : null}
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {[
+              { label: "$2 · 24h", cents: 200, hours: 24 },
+              { label: "$5 · 7d", cents: 500, hours: 24 * 7 },
+              { label: "$10 · 30d", cents: 1000, hours: 24 * 30 },
+            ].map((opt) => (
+              <button
+                key={opt.label}
+                type="button"
+                onClick={() => {
+                  if (!auth.userId) {
+                    window.alert("Sign in to boost your listing.");
+                    return;
+                  }
+                  const until = new Date(Date.now() + opt.hours * 60 * 60 * 1000).toISOString();
+                  void fetch("/api/stripe/boost", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ listingId: draft.id, amountCents: opt.cents, durationHours: opt.hours }),
+                  })
+                    .then((r) => r.json().catch(() => ({})))
+                    .then((payload) => {
+                      if (payload && payload.checkoutUrl) {
+                        window.location.href = String(payload.checkoutUrl);
+                        return;
+                      }
+                      // Demo fallback: apply boost immediately if Stripe isn't configured.
+                      return boostListingRemote({
+                        listingId: draft.id,
+                        ownerId: auth.userId,
+                        boostedTier: opt.cents / 100,
+                        boostedUntil: until,
+                      });
+                    })
+                    .catch(() => {
+                      return boostListingRemote({
+                        listingId: draft.id,
+                        ownerId: auth.userId,
+                        boostedTier: opt.cents / 100,
+                        boostedUntil: until,
+                      });
+                    });
+                }}
+                className="rounded-2xl border bg-white px-2 py-2.5 text-[12px] font-bold text-gray-800"
+                style={{ borderColor: BORDER }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <button
