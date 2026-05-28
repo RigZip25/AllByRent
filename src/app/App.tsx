@@ -13,6 +13,7 @@ import { HomeFeed } from "./components/HomeFeed";
 import { Subcategory } from "./components/Subcategory";
 import { ItemDetail } from "./components/ItemDetail";
 import { BookingScreen } from "./components/BookingScreen";
+import { BookingConfirmedScreen } from "./components/BookingConfirmedScreen";
 import { PostRequest } from "./components/PostRequest";
 import { ActiveRental } from "./components/ActiveRental";
 import { ListingIntro } from "../screens/listing/ListingIntro";
@@ -73,6 +74,7 @@ type Screen =
   | "subcategory"
   | "itemDetail"
   | "booking"
+  | "bookingConfirmed"
   | "postRequest"
   | "activeRental"
   | "listingIntro"
@@ -195,6 +197,7 @@ function AppRoutes() {
   });
   const [navStack, setNavStack] = useState<Screen[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [selectedHostListingId, setSelectedHostListingId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -502,8 +505,10 @@ function AppRoutes() {
     navigateTo("booking");
   };
 
-  const handleBookingConfirmed = () => {
-    navigateTo("activeRental");
+  const handleBookingConfirmed = (bookingId: string) => {
+    setSelectedBookingId(bookingId);
+    setNavStack((stack) => [...stack, currentScreen]);
+    setCurrentScreen("bookingConfirmed");
   };
 
   const handleBack = useCallback(() => {
@@ -770,6 +775,13 @@ function AppRoutes() {
             listingId={selectedItemId}
             onBack={handleBack}
             onConfirmed={handleBookingConfirmed}
+          />
+        )}
+
+        {currentScreen === "bookingConfirmed" && (
+          <BookingConfirmedScreen
+            onHome={handleOpenHome}
+            onRentals={handleOpenRentals}
           />
         )}
 

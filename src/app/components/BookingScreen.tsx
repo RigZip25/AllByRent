@@ -16,6 +16,7 @@ import {
   type FulfillmentMethod,
   type RentalBooking,
 } from "../../lib/rentalsStorage";
+import { createNotificationRemote } from "../../lib/notificationsStorage";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
 import type { ListingDraft } from "../../screens/listing/types";
 
@@ -127,7 +128,7 @@ export function BookingScreen({
 }: {
   listingId: string;
   onBack: () => void;
-  onConfirmed: () => void;
+  onConfirmed: (bookingId: string) => void;
 }) {
   const auth = useAuth();
   const listing = useMemo(
@@ -178,7 +179,7 @@ export function BookingScreen({
     const booking: RentalBooking = {
       id,
       role: "renter",
-      status: "pending_checkin",
+      status: "pending_approval",
       itemTitle: title,
       itemEmoji: "📷",
       startDate,
@@ -225,10 +226,17 @@ export function BookingScreen({
       void createRentalRemote(row).catch(() => {
         // Local fallback is already appended below.
       });
+      void createNotificationRemote({
+        recipientId: listing.hostId,
+        actorId: auth.userId,
+        type: "booking_request",
+        title: "New booking request",
+        body: `Someone wants to rent your ${title}.`,
+      });
     }
 
     appendRentalBooking(booking);
-    onConfirmed();
+    onConfirmed(id);
   };
 
   return (
