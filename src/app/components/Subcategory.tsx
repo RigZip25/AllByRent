@@ -28,8 +28,8 @@ import {
 import { categoryIdFromName } from "../../screens/listing/listingItemCategories";
 
 import { getListingDisplayTitle } from "../../lib/listingQr";
-import { useMediaUrl } from "../../lib/useMediaUrl";
 import type { MediaRef } from "../../lib/mediaStore";
+import { ListingFeedCard, offerTypeFromModes } from "./ListingFeedCard";
 
 import {
 
@@ -158,190 +158,6 @@ function SubcategoryCard({
     </button>
 
   );
-
-}
-
-
-
-interface ItemCardProps {
-
-  title: string;
-
-  price: string;
-
-  rating: number;
-
-  reviews: number;
-
-  distance: string;
-
-  cover?: MediaRef | null;
-
-  offerType: string;
-
-  itemHeavy?: boolean;
-
-  onSelect: () => void;
-
-}
-
-
-
-function ItemCard({
-  title,
-  price,
-  rating,
-  reviews,
-  distance,
-  cover,
-  offerType,
-  itemHeavy,
-  onSelect,
-}: ItemCardProps) {
-
-  const offerColors: Record<string, string> = {
-
-    Rent: "bg-primary",
-
-    Buy: "bg-blue-500",
-
-    "Rent to Own": "bg-purple-500",
-
-    Gift: "bg-accent",
-
-  };
-
-
-
-  return (
-
-    <button
-
-      onClick={onSelect}
-
-      className="bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all text-left"
-
-    >
-
-      <div className="relative aspect-square bg-[#F0F4F2] overflow-hidden">
-        <CoverThumb cover={cover} />
-
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-
-          <Emoji emoji="📷" size={32} />
-
-          <span className="text-xs text-muted-foreground">Photo by owner</span>
-
-        </div>
-
-
-
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
-          <div className="bg-primary/90 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-md flex items-center gap-1 w-fit">
-            <Shield className="w-3 h-3" />
-            <span>Auto-Insurance</span>
-          </div>
-          {itemHeavy ? (
-            <span className="rounded-md bg-amber-500/95 px-2 py-0.5 text-[10px] font-semibold text-white w-fit">
-              Heavy
-            </span>
-          ) : null}
-        </div>
-
-
-
-        <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm p-1.5 rounded-md">
-
-          <QrCode className="w-4 h-4 text-foreground" />
-
-        </div>
-
-
-
-        <button className="absolute top-10 right-2 bg-white/90 backdrop-blur-sm p-1.5 rounded-md hover:bg-white transition-colors">
-
-          <Heart className="w-4 h-4 text-foreground" />
-
-        </button>
-
-      </div>
-
-
-
-      <div className="p-3">
-
-        <div className="flex items-start justify-between mb-1">
-
-          <h3 className="font-semibold text-sm line-clamp-2 flex-1">{title}</h3>
-
-          <span className="text-sm font-bold text-primary ml-2">${price}/day</span>
-
-        </div>
-
-
-
-        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-
-          <div className="flex items-center gap-0.5">
-
-            <Star className="w-3 h-3 fill-accent text-accent" />
-
-            <span className="font-medium text-foreground">{rating}</span>
-
-            <span>({reviews})</span>
-
-          </div>
-
-          <span>·</span>
-
-          <span>{distance}</span>
-
-        </div>
-
-
-
-        <div className={`${offerColors[offerType] || "bg-primary"} text-white text-xs px-2 py-1 rounded-md inline-block`}>
-
-          {offerType}
-
-        </div>
-
-      </div>
-
-    </button>
-
-  );
-
-}
-
-function CoverThumb({ cover }: { cover?: MediaRef | null }) {
-  const thumb = cover?.thumbId ? { ...cover, id: cover.thumbId } : cover ?? null;
-  const { url } = useMediaUrl(thumb);
-  if (!url) return null;
-  return <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />;
-}
-
-
-
-function offerTypeFromListing(modes: {
-
-  rent: boolean;
-
-  sell: boolean;
-
-  rentToOwn: boolean;
-
-  gift: boolean;
-
-}): string {
-
-  if (modes.gift) return "Gift";
-
-  if (modes.rentToOwn) return "Rent to Own";
-
-  if (modes.sell) return "Buy";
-
-  return "Rent";
 
 }
 
@@ -503,7 +319,7 @@ export function Subcategory({
 
     cover: listing.photos?.[0] ?? null,
 
-    offerType: offerTypeFromListing(listing.modes),
+    offerType: offerTypeFromModes(listing.modes),
 
     itemHeavy: listing.handoff.itemHeavy,
 
@@ -845,7 +661,7 @@ export function Subcategory({
 
               {gridItems.map((item) => (
 
-                <ItemCard
+                <ListingFeedCard
 
                   key={item.id}
 

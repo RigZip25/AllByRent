@@ -1,8 +1,8 @@
 import { motion } from "motion/react";
 import { MapPin } from "lucide-react";
 import { RentanoHint } from "../../../components/RentanoHint";
+import { ListingFeedCard, offerTypeFromModes } from "../../../app/components/ListingFeedCard";
 import type { Step7ReviewProps } from "../types";
-import { useMediaUrl } from "../../../lib/useMediaUrl";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F0B429";
@@ -76,9 +76,6 @@ export function Step7Review({
   onPublish,
   onGoToStep,
 }: Step7ReviewProps) {
-  const coverPhoto = draft.photos[0] ?? null;
-  const coverThumb = coverPhoto?.thumbId ? { ...coverPhoto, id: coverPhoto.thumbId } : coverPhoto;
-  const coverUrl = useMediaUrl(coverThumb).url;
   const conditionStyle = draft.condition
     ? CONDITION_STYLES[draft.condition]
     : null;
@@ -118,6 +115,10 @@ export function Step7Review({
     modeRows.push({ icon: "🎁", label: "Gift", detail: "Free" });
   }
 
+  const previewTitle = draft.title.trim() || "Untitled item";
+  const previewPrice = draft.pricing.dailyRate?.trim() || "—";
+  const previewOfferType = offerTypeFromModes(draft.modes);
+
   return (
     <motion.div
       className="mx-auto w-full max-w-[390px] bg-[#F9FAFB] px-4 pb-28 pt-5"
@@ -143,17 +144,20 @@ export function Step7Review({
           <span className="absolute right-3 top-3 z-10">
             <EditLink onClick={() => onGoToStep(1)} />
           </span>
-          {coverPhoto && coverUrl ? (
-            <img
-              src={coverUrl}
-              alt=""
-              className="h-[200px] w-full rounded-t-2xl object-cover"
+          <div className="p-3">
+            <ListingFeedCard
+              title={previewTitle}
+              price={previewPrice}
+              rating={4.8}
+              reviews={0}
+              distance="nearby"
+              cover={draft.photos?.[0] ?? null}
+              offerType={previewOfferType}
+              itemHeavy={draft.handoff.itemHeavy}
+              onSelect={() => onGoToStep(1)}
+              showFavoriteAction={false}
             />
-          ) : (
-            <div className="flex h-[200px] items-center justify-center rounded-t-2xl bg-[#F0F4F2] text-sm text-gray-400">
-              No photo yet
-            </div>
-          )}
+          </div>
         </button>
 
         <div className="p-4">
@@ -164,7 +168,7 @@ export function Step7Review({
           >
             <div className="mb-1 flex items-start justify-between gap-2">
               <h3 className="flex-1 text-lg font-bold text-gray-900">
-                {draft.title.trim() || "Untitled item"}
+                {previewTitle}
               </h3>
               <EditLink onClick={() => onGoToStep(2)} />
             </div>
