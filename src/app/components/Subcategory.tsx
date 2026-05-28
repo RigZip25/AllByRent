@@ -8,10 +8,13 @@ import { BottomNav } from "./BottomNav";
 
 import { RentanoChatSheet } from "../../components/RentanoChat";
 import { MrRentano } from "./MrRentano";
+import { FoundingHostPromo } from "./FoundingHostPromo";
 
 import { subcategoriesData } from "../data/subcategories";
 
 import type { AppMode } from "../../lib/appMode";
+import { useAuth } from "../../hooks/AuthProvider";
+import { readLastKnownFullName } from "../../lib/pendingAuthProfile";
 
 import {
 
@@ -185,6 +188,9 @@ interface SubcategoryProps {
 
   onProfile: () => void;
 
+  /** Opens AuthGate so the user can unlock/participate. */
+  onUnlock: () => void;
+
 }
 
 
@@ -210,8 +216,10 @@ export function Subcategory({
   onFourthTab,
 
   onProfile,
+  onUnlock,
 
 }: SubcategoryProps) {
+  const auth = useAuth();
 
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
 
@@ -379,6 +387,11 @@ export function Subcategory({
 
   };
 
+  const greetingName = readLastKnownFullName().trim().split(/\s+/)[0] || "";
+  const personalizedLine = greetingName
+    ? `${greetingName} — круто, что ты среди первых. Мы только начали.`
+    : "So cool you’re among the first. We’re just getting started.";
+
 
 
   return (
@@ -473,6 +486,34 @@ export function Subcategory({
 
           </div>
 
+        ) : selectedSubcategory && !auth.session ? (
+          <div className="p-4 space-y-4">
+            <div className="rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
+              <p className="text-sm font-semibold" style={{ color: GREEN_DARK }}>
+                {personalizedLine}
+              </p>
+              <p className="mt-1 text-xs text-gray-500">
+                Unlock this shelf with a magic link to browse listings, post a request, and save
+                favorites.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onUnlock}
+              className="w-full rounded-xl py-3.5 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-95"
+              style={{ backgroundColor: GREEN_DARK }}
+            >
+              Get magic link to unlock →
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedSubcategory(null)}
+              className="w-full rounded-xl border py-2.5 text-sm font-semibold"
+              style={{ borderColor: BORDER, color: GREEN_DARK }}
+            >
+              Back to subcategories
+            </button>
+          </div>
         ) : showEmptyState ? (
 
           <EmptySubcategoryShelf
@@ -498,6 +539,16 @@ export function Subcategory({
         ) : hasItemsInSubcategory ? (
 
           <div className="p-4 space-y-4">
+
+            <FoundingHostPromo
+              appMode={appMode}
+              subcategoryLabel={subcategoryLabel}
+              onPrimary={() => {
+                if (appMode === "earn") onStartListing(shelfPrefill);
+                else onPostRequest(shelfPrefill);
+              }}
+              onShare={handleShare}
+            />
 
             <button
 

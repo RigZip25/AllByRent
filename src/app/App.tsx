@@ -746,6 +746,7 @@ function AppRoutes() {
             onRentals={handleOpenRentals}
             onFourthTab={handleOpenFourthTab}
             onProfile={handleOpenProfile}
+            onUnlock={() => requireAuth("generic")}
           />
         )}
 

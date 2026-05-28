@@ -1,6 +1,7 @@
 import type { LocationSuggestion } from "./geocoding";
 
 const KEY = "abr_pending_auth_profile_v1";
+const LAST_NAME_KEY = "abr_last_full_name_v1";
 
 export type PendingAuthProfile = {
   fullName: string;
@@ -13,8 +14,17 @@ export function savePendingAuthProfile(value: Omit<PendingAuthProfile, "createdA
   try {
     const payload: PendingAuthProfile = { ...value, createdAt: new Date().toISOString() };
     localStorage.setItem(KEY, JSON.stringify(payload));
+    localStorage.setItem(LAST_NAME_KEY, payload.fullName);
   } catch {
     // ignore storage failures
+  }
+}
+
+export function readLastKnownFullName(): string {
+  try {
+    return localStorage.getItem(LAST_NAME_KEY) ?? "";
+  } catch {
+    return "";
   }
 }
 
