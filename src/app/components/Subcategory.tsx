@@ -25,6 +25,7 @@ import {
   type ShelfPrefill,
 
 } from "../../lib/shelfListings";
+import { fetchRequestsForShelfRemote, type WantedRequest } from "../../lib/requestsStorage";
 
 import { categoryIdFromName } from "../../screens/listing/listingItemCategories";
 
@@ -267,6 +268,7 @@ export function Subcategory({
 
   const [shelfListings, setShelfListings] = useState(() => []);
   const [shelfLoading, setShelfLoading] = useState(false);
+  const [requests, setRequests] = useState<WantedRequest[]>([]);
 
   useEffect(() => {
     if (!selectedSubcategory) {
@@ -289,6 +291,25 @@ export function Subcategory({
       mounted = false;
     };
   }, [selectedSubcategory, shelfFilter]);
+
+  useEffect(() => {
+    if (!selectedSubcategory) {
+      setRequests([]);
+      return;
+    }
+    let mounted = true;
+    void fetchRequestsForShelfRemote({
+      category,
+      subcategory: subcategoryLabel,
+      locationLabel: cityName,
+    }).then((next) => {
+      if (!mounted) return;
+      setRequests(next);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [category, cityName, selectedSubcategory, subcategoryLabel]);
 
   const enableShelfSearch = Boolean(selectedSubcategory && shelfListings.length > 10);
 
@@ -538,6 +559,7 @@ export function Subcategory({
             cityName={cityName}
 
             appMode={appMode}
+            requests={requests}
 
             onBack={() => setSelectedSubcategory(null)}
 

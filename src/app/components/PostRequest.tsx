@@ -13,6 +13,9 @@ import {
   Copy,
 } from "lucide-react";
 import { MrRentano } from "./MrRentano";
+import { useAuth } from "../../hooks/AuthProvider";
+import { getActiveRentLocationLabel } from "../../lib/listingStorage";
+import { createRequestRemote } from "../../lib/requestsStorage";
 
 const categories = [
   { id: "tools", label: "Tools", icon: <Wrench className="w-6 h-6" /> },
@@ -49,6 +52,7 @@ export function PostRequest({
   onBack: () => void;
   onPost: () => void;
 }) {
+  const auth = useAuth();
   const prefillDescription = useMemo(() => buildPrefillDescription(prefill), [prefill]);
   const lockedContext = hasPostRequestContext(prefill);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -58,6 +62,7 @@ export function PostRequest({
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   const formatDateRange = () => {
     if (!startDate && !endDate) return "Select dates";
@@ -306,10 +311,36 @@ export function PostRequest({
 
       <div className="screen-footer bg-card/95 backdrop-blur-sm border-t border-border p-3 sm:p-4">
         <button
-          onClick={onPost}
-          className="w-full bg-primary hover:bg-primary/90 text-white py-3.5 rounded-xl transition-colors font-medium"
+          disabled={busy}
+          onClick={() => {
+            if (busy) return;
+            const category = lockedContext ? (prefill?.category ?? "") : (selectedCategory ?? "");
+            const subcategory = lockedContext ? (prefill?.subcategory ?? "") : "";
+            const locationLabel = (prefill?.city ?? getActiveRentLocationLabel()).trim();
+            const desc = description.trim();
+            if (!category.trim()) return;
+            if (lockedContext && !subcategory.trim()) return;
+            if (!desc) return;
+            if (!auth.userId) {
+              onPost();
+              return;
+            }
+            setBusy(true);
+            void createRequestRemote({
+              renterId: auth.userId,
+              category,
+              subcategory,
+              description: desc,
+              locationLabel: locationLabel || "your area",
+              startDate: startDate || undefined,
+              endDate: endDate || undefined,
+            })
+              .then(() => onPost())
+              .finally(() => setBusy(false));
+          }}
+          className="w-full bg-primary hover:bg-primary/90 text-white py-3.5 rounded-xl transition-colors font-medium disabled:opacity-60"
         >
-          Post Request
+          {busy ? "Posting…" : "Post Request"}
         </button>
       </div>
     </div>
