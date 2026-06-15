@@ -191,7 +191,7 @@ function AppRoutes() {
   const boot = readBootQuery();
   const handledSessionTokenRef = useRef<string | null>(null);
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
-    if (boot.skipSplash) {
+    if (boot.skipSplash || isIntroDone()) {
       if (boot.openNotifications || boot.simulateUpdate) {
         markIntroDone();
         completeOnboarding();
