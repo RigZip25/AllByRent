@@ -10,7 +10,7 @@
 
   Run `npm run dev` to start the development server.
 
-  **Test garage splash:** `http://localhost:5173/?screen=splash` (after checkout `cursor/evorios-rebrand-ca09` or once merged to `main`).
+**Test splash preview:** `http://localhost:5173/?screen=splash` — static open-garage art, stays on screen.
 
 ## AI API keys (Anthropic + PhotoRoom)
 

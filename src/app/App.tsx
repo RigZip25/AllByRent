@@ -222,6 +222,8 @@ function AppRoutes() {
   const [isOnline, setIsOnline] = useState(
     () => typeof navigator === "undefined" || navigator.onLine,
   );
+  /** Captured once — `?screen=splash` shows artwork only (no Continue, no auto-advance). */
+  const [splashPreview] = useState(() => boot.screen === "splash");
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -669,7 +671,7 @@ function AppRoutes() {
 
         <div className="app-screen-host">
         {currentScreen === "splash" && (
-          <SplashScreen onDone={handleSplashContinue} />
+          <SplashScreen onDone={handleSplashContinue} preview={splashPreview} />
         )}
 
         {currentScreen === "firstHello" && (

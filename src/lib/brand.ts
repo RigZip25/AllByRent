@@ -15,8 +15,8 @@ export const BRAND_GREEN_LIGHT = "#1A9E6E";
 export const SPLASH_BG_DARK = "#062a1c";
 export const SPLASH_GRADIENT = `linear-gradient(165deg, ${SPLASH_BG_DARK} 0%, ${BRAND_GREEN} 42%, #0a3d28 100%)`;
 
-/** Mascot uses the same name as the app. */
-export const MASCOT_NAME = APP_NAME;
+/** Mascot — Mr. Evorios (same character as legacy Rentano art). */
+export const MASCOT_NAME = "Mr. Evorios";
 
 /** Home feed modes — internal keys stay earn/rent for storage compatibility. */
 export const APP_MODE_LABELS = {

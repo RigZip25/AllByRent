@@ -22,7 +22,7 @@
 
 | # | Screen | How to open | Status | Files | What to do |
 |---|--------|-------------|--------|-------|------------|
-| A1 | Splash | Fresh session / clear onboarding | ✅ P1 | `SplashScreen.tsx` | Test: `?screen=splash` or `?resetApp=1` |
+| A1 | Splash | Fresh session / clear onboarding | ✅ P1 | `SplashScreen.tsx`, `evorios_splash_garage.png` | Preview: `?screen=splash` (static art, no transition) |
 | A2 | First hello (Evorios bubbles) | After splash | ✅ P1 | `FirstHello.tsx` | — |
 | A3 | What do you want | Onboarding | 🟡 S | `WhatDoYouWant.tsx` | Reframe cards: **Stock your garage** vs **Browse the block** (not generic earn/save) |
 | A4 | Where are you | Pick path | 🟡 S | `WhereAreYou.tsx`, `WhereAreYouHeading.tsx`, `WhereAreYouManual.tsx` | Earn copy → **My Garage** context; rent → **Browse** / neighborhood |

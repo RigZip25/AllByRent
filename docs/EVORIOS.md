@@ -32,7 +32,7 @@ Evorios is not “another marketplace.” It is the **evolution of the household
 
 **One-liner:** *Evorios — evolve how your home shares.*
 
-**Mascot:** **Evorios** (same name as the product). Not a separate character name. Friendly neighbor-guide; green jacket visual (evolve from legacy Mr. Rentano art). Voice: warm, yard-sale practical, never corporate “AI assistant.”
+**Mascot:** **Mr. Evorios** (Мистер Эвориус) — same character as legacy Rentano art; green jacket, neighbor-guide voice.
 
 **Naming rules**
 
