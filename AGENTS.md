@@ -16,6 +16,8 @@ See `package.json` scripts and `README.md` for details:
 ### Navigating the app
 
 The app supports URL query parameters to jump to specific screens (useful for testing):
+- `?screen=splash` — force the garage-door splash (even if onboarding was completed before)
+- `?resetApp=1` — wipe local data + PWA cache, then reload (fresh splash + onboarding)
 - `?screen=login`, `?screen=signup`, `?screen=verification-phone`, `?screen=verification-code`, `?screen=reset-password`, `?screen=create-new-password`, `?screen=like-to-do-rent`, `?screen=like-to-do-list`, `?screen=rental`, `?screen=earning-your-stuff`
 - `?step=0` through `?step=15` for step-based navigation
 

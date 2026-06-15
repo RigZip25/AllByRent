@@ -22,7 +22,7 @@
 
 | # | Screen | How to open | Status | Files | What to do |
 |---|--------|-------------|--------|-------|------------|
-| A1 | Splash | Fresh session / clear onboarding | ✅ P1 | `SplashScreen.tsx` | — |
+| A1 | Splash | Fresh session / clear onboarding | ✅ P1 | `SplashScreen.tsx` | Test: `?screen=splash` or `?resetApp=1` |
 | A2 | First hello (Evorios bubbles) | After splash | ✅ P1 | `FirstHello.tsx` | — |
 | A3 | What do you want | Onboarding | 🟡 S | `WhatDoYouWant.tsx` | Reframe cards: **Stock your garage** vs **Browse the block** (not generic earn/save) |
 | A4 | Where are you | Pick path | 🟡 S | `WhereAreYou.tsx`, `WhereAreYouHeading.tsx`, `WhereAreYouManual.tsx` | Earn copy → **My Garage** context; rent → **Browse** / neighborhood |
@@ -30,7 +30,7 @@
 | A6 | Auth gate | Try book/list without login | 🟡 S | `AuthGate.tsx` | ✅ generic copy; 🟡 listing intent still says "Rentano" + "earning" |
 | A7 | Passkey setup | After first login | ⚪ | `PasskeySetup.tsx` | Optional Evorios one-liner |
 
-**Test:** clear site data → reload `http://localhost:5173/`
+**Test:** clear site data → reload `http://localhost:5173/` — or open `http://localhost:5173/?screen=splash` (garage splash is on branch `cursor/evorios-rebrand-ca09`, not `main` yet)
 
 ---
 

@@ -191,6 +191,7 @@ function AppRoutes() {
   const boot = readBootQuery();
   const handledSessionTokenRef = useRef<string | null>(null);
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
+    if (boot.screen === "splash") return "splash";
     if (boot.skipSplash || isIntroDone()) {
       if (boot.openNotifications || boot.simulateUpdate) {
         markIntroDone();
@@ -236,6 +237,12 @@ function AppRoutes() {
   useEffect(() => {
     if (!boot.screen) return;
     const screen = boot.screen.trim();
+    if (screen === "splash") {
+      setNavStack([]);
+      setCurrentScreen("splash");
+      clearBootQuery(["screen"]);
+      return;
+    }
     if (screen === "identity") {
       // Don't force auth; existing route guard will show AuthGate if needed.
       setNavStack([]);
