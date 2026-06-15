@@ -1,6 +1,8 @@
 
   # AllByRent Mobile App UI
 
+  > **Rebrand in progress → [Evorios](docs/EVORIOS.md)** — brand, repo status, and evolution log for continuing on any machine.
+
   This is a code bundle for AllByRent Mobile App UI. The original project is available at https://www.figma.com/design/2yZhDZ7DQtITTvIcRhkFTb/AllByRent-Mobile-App-UI.
 
   ## Running the code
