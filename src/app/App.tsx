@@ -126,7 +126,7 @@ function isOnboardingScreen(screen: Screen): boolean {
 
 function readBootQuery() {
   if (typeof window === "undefined") {
-    return { skipSplash: false, openNotifications: false, simulateUpdate: false, screen: null as string | null };
+    return { skipSplash: false, openNotifications: false, simulateUpdate: false, screen: null as string | null, splashArtOnly: false };
   }
   const params = new URLSearchParams(window.location.search);
   const screen = params.get("screen");
@@ -145,6 +145,7 @@ function readBootQuery() {
     openNotifications: params.get("openNotifications") === "1",
     simulateUpdate,
     screen,
+    splashArtOnly: screen === "splash" && params.get("art") === "1",
   };
 }
 
@@ -222,8 +223,9 @@ function AppRoutes() {
   const [isOnline, setIsOnline] = useState(
     () => typeof navigator === "undefined" || navigator.onLine,
   );
-  /** Captured once — `?screen=splash` shows artwork only (no Continue, no auto-advance). */
+  /** `?screen=splash` — full splash layout, no Continue; `&art=1` — PNG only */
   const [splashPreview] = useState(() => boot.screen === "splash");
+  const [splashArtOnly] = useState(() => boot.splashArtOnly);
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -671,7 +673,11 @@ function AppRoutes() {
 
         <div className="app-screen-host">
         {currentScreen === "splash" && (
-          <SplashScreen onDone={handleSplashContinue} preview={splashPreview} />
+          <SplashScreen
+            onDone={handleSplashContinue}
+            preview={splashPreview}
+            artOnly={splashArtOnly}
+          />
         )}
 
         {currentScreen === "firstHello" && (

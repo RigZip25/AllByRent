@@ -16,7 +16,8 @@ See `package.json` scripts and `README.md` for details:
 ### Navigating the app
 
 The app supports URL query parameters to jump to specific screens (useful for testing):
-- `?screen=splash` — preview splash artwork only (no Continue, no auto-advance); replace `src/imports/evorios_splash_garage.png`
+- `?screen=splash` — preview **full splash** (image + Evorios copy + chips), no Continue, no auto-advance
+- `?screen=splash&art=1` — preview **PNG only** (`src/imports/evorios_splash_garage.png`)
 - `?resetApp=1` — wipe local data + PWA cache, then reload (fresh splash + onboarding)
 - `?screen=login`, `?screen=signup`, `?screen=verification-phone`, `?screen=verification-code`, `?screen=reset-password`, `?screen=create-new-password`, `?screen=like-to-do-rent`, `?screen=like-to-do-list`, `?screen=rental`, `?screen=earning-your-stuff`
 - `?step=0` through `?step=15` for step-based navigation

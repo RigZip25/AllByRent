@@ -10,7 +10,7 @@
 
   Run `npm run dev` to start the development server.
 
-**Test splash preview:** `http://localhost:5173/?screen=splash` — static open-garage art, stays on screen.
+**Test splash preview:** `?screen=splash` — full layout (no transition). Art file only: `?screen=splash&art=1`.
 
 ## AI API keys (Anthropic + PhotoRoom)
 
