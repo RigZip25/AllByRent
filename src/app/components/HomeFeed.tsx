@@ -5,6 +5,7 @@ import { BottomNav } from "./BottomNav";
 import { HostDashboard } from "./HostDashboard";
 import { RentanoChatSheet } from "../../components/RentanoChat";
 import { usePwaUpdate } from "../../hooks/PwaUpdateProvider";
+import { APP_MODE_LABELS } from "../../lib/brand";
 import { getAppMode, setAppMode, type AppMode } from "../../lib/appMode";
 import {
   getActiveRentLocationLabel,
@@ -52,13 +53,13 @@ function ModeSwitcher({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(tab)}
-            className="rounded-full px-3.5 py-1.5 text-sm font-bold capitalize transition-colors"
+            className="rounded-full px-3.5 py-1.5 text-sm font-bold transition-colors"
             style={{
               backgroundColor: active ? GREEN_DARK : "transparent",
               color: active ? "white" : "#888",
             }}
           >
-            {tab === "earn" ? "Earn" : "Rent"}
+            {APP_MODE_LABELS[tab]}
           </button>
         );
       })}

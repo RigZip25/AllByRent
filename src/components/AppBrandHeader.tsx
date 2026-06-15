@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
+import { APP_NAME, BRAND_GREEN } from "../lib/brand";
 
-export const BRAND_GREEN = "#0D5C3A";
+export { BRAND_GREEN };
 
 type BrandSize = "sm" | "md" | "lg";
 
@@ -28,7 +29,7 @@ export function AppBrandMark({
       className={`inline-flex items-baseline font-bold leading-none ${brandTextClass[size]} ${className}`}
       style={{ color: BRAND_GREEN }}
     >
-      AllByRent
+      {APP_NAME}
       <sup
         className={`relative ml-0.5 font-bold leading-none ${brandTmClass[size]}`}
         style={{ color: BRAND_GREEN }}

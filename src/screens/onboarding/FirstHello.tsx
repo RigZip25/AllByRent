@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import rentanoFullImg from "../../imports/rentano_full.png";
 import allbyrentRolesImg from "../../imports/allbyrent_roles.png";
+import { APP_NAME, MASCOT_NAME, PRODUCT_METAPHOR } from "../../lib/brand";
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
 
 const GREEN = "#0D5C3A";
@@ -10,14 +11,14 @@ const BUBBLE_GAP_MS = 2600;
 const TYPING_CHAR_MS = 34;
 
 const BUBBLES = [
-  "Hey there! I'm Mr. Rentano — your AI companion on AllByRent.",
-  "Rent from neighbors. Earn from your stuff. Find gear wherever you travel.",
-  "Find me in the menu anytime — any language, any question, 24/7.",
+  `Hey! I'm ${MASCOT_NAME} — your guide to the ${PRODUCT_METAPHOR}.`,
+  "Turn your garage into a showcase. Browse neighbors for gear, tools, and more.",
+  "Tap me in the menu anytime — any language, any question, 24/7.",
 ];
 
 function FirstHelloRolesScene() {
   return (
-    <div className="first-hello-scene" aria-label="Rent, earn, and travel on AllByRent">
+    <div className="first-hello-scene" aria-label={`${PRODUCT_METAPHOR} on ${APP_NAME}`}>
       <img
         src={allbyrentRolesImg}
         alt=""
@@ -159,9 +160,9 @@ export function FirstHello({
             />
             <div className="min-w-0">
               <p className="text-base font-bold leading-tight" style={{ color: GREEN }}>
-                Mr. Rentano
+                {MASCOT_NAME}
               </p>
-              <p className="text-sm text-gray-500">Your AI companion</p>
+              <p className="text-sm text-gray-500">Your garage guide</p>
             </div>
           </div>
 

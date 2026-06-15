@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Apple, Chrome, Fingerprint, Mail, ScanFace } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
+import { APP_NAME, MASCOT_NAME } from "../lib/brand";
 import type { AuthIntent } from "../lib/authReturn";
 import { peekPendingAuthEmail, setPendingAuthEmail } from "../lib/authReturn";
 import {
@@ -38,17 +39,17 @@ const INTENT_COPY: Record<
   book: {
     title: "Sign in to book",
     subtitle: "Enter your email — we'll send a magic link to continue.",
-    rentano: "Rentano: Booking needs an account so hosts can reach you. Quick email sign-in.",
+    rentano: `${MASCOT_NAME}: Booking needs an account so hosts can reach you. Quick email sign-in.`,
   },
   message: {
     title: "Sign in to message",
     subtitle: "Enter your email — we'll send a magic link to continue.",
-    rentano: "Rentano: Messaging is for members only — sign in to continue the conversation.",
+    rentano: `${MASCOT_NAME}: Messaging is for members only — sign in to continue the conversation.`,
   },
   generic: {
-    title: "Join AllByRent",
+    title: `Join ${APP_NAME}`,
     subtitle: "Enter your email — we'll send a magic link to sign in.",
-    rentano: "Rentano: Sign in to unlock listing, booking, and chat.",
+    rentano: `${MASCOT_NAME}: Sign in to unlock your garage showcase, booking, and chat.`,
   },
 };
 
@@ -528,7 +529,7 @@ export function AuthGate({
         {step === "sent" ? (
           <div className="mt-4 flex flex-col gap-2">
             <p className="rounded-2xl border bg-[#F0FDF4] px-4 py-3 text-[13px] leading-relaxed text-gray-700">
-              The link opens AllByRent in this browser. If you don&apos;t see the email, check
+              The link opens {APP_NAME} in this browser. If you don&apos;t see the email, check
               spam or promotions.
             </p>
             <button

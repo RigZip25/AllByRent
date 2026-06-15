@@ -1,8 +1,8 @@
 {
-  "name": "allbyrent",
+  "name": "evorios",
   "private": true,
   "version": "0.0.1",
-  "description": "AllByRent — The Social Rental Network (mobile-first PWA)",
+  "description": "Evorios — Garage Showcase PWA (evorios.com)",
   "type": "module",
   "packageManager": "npm@10.9.3",
   "scripts": {

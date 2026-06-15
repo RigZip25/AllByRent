@@ -1,7 +1,8 @@
+  # AllByRent → Evorios (rebrand in progress)
 
-  # AllByRent Mobile App UI
+  > **Brand & tasks:** [docs/EVORIOS.md](docs/EVORIOS.md) · **Garage Showcase:** [docs/GARAGE_SHOWCASE.md](docs/GARAGE_SHOWCASE.md)
 
-  This is a code bundle for AllByRent Mobile App UI. The original project is available at https://www.figma.com/design/2yZhDZ7DQtITTvIcRhkFTb/AllByRent-Mobile-App-UI.
+  This is a code bundle for the Evorios PWA (legacy Figma: AllByRent Mobile App UI).
 
   ## Running the code
 

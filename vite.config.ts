@@ -18,9 +18,9 @@ function pwaPlugin() {
       registerType: 'autoUpdate',
       includeAssets: ['pwa-192.png', 'pwa-512.png'],
       manifest: {
-        name: 'AllByRent',
-        short_name: 'AllByRent',
-        description: 'The Social Rental Network',
+        name: 'Evorios',
+        short_name: 'Evorios',
+        description: 'Garage Showcase — evolve how your home shares.',
         theme_color: '#0D5C3A',
         background_color: '#062a1c',
         display: 'standalone',

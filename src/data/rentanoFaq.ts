@@ -6,22 +6,24 @@ export type FaqItem = {
   keywords: string[];
 };
 
+import { APP_MODE_LABELS, APP_NAME, MASCOT_NAME, PRODUCT_METAPHOR } from "../lib/brand";
+
 export const RENTANO_FAQ: FaqItem[] = [
   {
     id: "what-is",
     category: "Getting started",
-    question: "What is AllByRent?",
+    question: `What is ${APP_NAME}?`,
     answer:
-      "AllByRent is a social rental network: neighbors list items to rent or sell, and others book nearby. You can switch between Rent (find items) and Earn (host items) on the home screen.",
-    keywords: ["about", "platform", "social"],
+      `${APP_NAME} is a ${PRODUCT_METAPHOR} for every household: list items from your garage, browse neighbors, borrow or buy nearby. Switch between ${APP_MODE_LABELS.rent} and ${APP_MODE_LABELS.earn} on Home.`,
+    keywords: ["about", "platform", "garage"],
   },
   {
     id: "rent-vs-earn",
     category: "Getting started",
-    question: "What is the difference between Rent and Earn?",
+    question: `What is the difference between ${APP_MODE_LABELS.rent} and ${APP_MODE_LABELS.earn}?`,
     answer:
-      "Rent mode shows items near you to borrow. Earn mode is for hosts — list items, manage bookings, and get paid. Tap the toggle at the top of Home to switch.",
-    keywords: ["mode", "host", "renter"],
+      `${APP_MODE_LABELS.rent} shows items on neighborhood garages near you. ${APP_MODE_LABELS.earn} is your own garage showcase — list items, manage bookings, and get paid. Tap the toggle at the top of Home.`,
+    keywords: ["mode", "host", "browse"],
   },
   {
     id: "location-rent",

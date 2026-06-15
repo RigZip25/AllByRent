@@ -1,5 +1,6 @@
 import QRCode from "qrcode";
 import { jsPDF } from "jspdf";
+import { APP_NAME, MASCOT_NAME } from "./brand";
 
 export type QRStickerListing = {
   id: string;
@@ -53,7 +54,7 @@ async function renderStickerAt(doc: jsPDF, listing: QRStickerListing, x: number,
   doc.setFontSize(6.5);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(13, 92, 58);
-  doc.text("AllByRent · Rentano", x + 0.15, y + h - 0.35);
+  doc.text(`${APP_NAME} · ${MASCOT_NAME}`, x + 0.15, y + h - 0.35);
 
   doc.setTextColor(120, 120, 120);
   doc.setFontSize(6);
@@ -118,7 +119,7 @@ export async function generateQRStickerPdf(
   const doc = await renderQrStickerPdf(listings, { paper, layout, labelIn });
   const blob = doc.output("blob") as Blob;
   const objectUrl = URL.createObjectURL(blob);
-  const filename = options?.filename ?? "AllByRent-QR-Stickers.pdf";
+  const filename = options?.filename ?? `${APP_NAME}-QR-Stickers.pdf`;
   return { blob, objectUrl, filename };
 }
 

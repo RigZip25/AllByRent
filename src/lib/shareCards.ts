@@ -1,4 +1,5 @@
 import { getMediaBlob, type MediaRef } from "./mediaStore";
+import { APP_NAME } from "./brand";
 
 export type ShareCardFormat = "landscape" | "square" | "story";
 
@@ -155,7 +156,7 @@ async function generateOne(input: {
   }
 
   // Brand / logo
-  drawBadge(ctx, "AllByRent");
+  drawBadge(ctx, APP_NAME);
 
   // Bottom overlay
   drawBottomOverlay(ctx, dims.width, dims.height);

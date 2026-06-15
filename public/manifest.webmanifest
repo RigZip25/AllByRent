@@ -1,12 +1,12 @@
 {
-  "name": "All By Rent",
-  "short_name": "AllByRent",
-  "description": "Rent, list, and manage nearby items.",
-  "start_url": "/AllByRent/",
-  "scope": "/AllByRent/",
+  "name": "Evorios",
+  "short_name": "Evorios",
+  "description": "Garage Showcase — evolve how your home shares.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#073f9f",
+  "background_color": "#062a1c",
+  "theme_color": "#0D5C3A",
   "icons": [
     {
       "src": "/AllByRent/pwa-icon.svg",

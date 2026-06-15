@@ -1,4 +1,5 @@
 import rentanoNavImg from "../../imports/No_back_rentano.png";
+import { MASCOT_NAME } from "../../lib/brand";
 import type { AppMode } from "../../lib/appMode";
 
 const BORDER = "#E8E6E0";
@@ -138,7 +139,7 @@ export function BottomNav({
           type="button"
           onClick={onRentano}
           className="-mt-8 flex min-w-[64px] flex-col items-center gap-1"
-          aria-label="Open Rentano menu"
+          aria-label={`Open ${MASCOT_NAME} menu`}
         >
           <div
             className="flex h-[68px] w-[68px] items-center justify-center overflow-hidden rounded-full border-4 border-white shadow-lg"
@@ -156,7 +157,7 @@ export function BottomNav({
               draggable={false}
             />
           </div>
-          <TabLabel active={activeTab === "rentano"}>Rentano</TabLabel>
+          <TabLabel active={activeTab === "rentano"}>{MASCOT_NAME}</TabLabel>
         </button>
 
         <button

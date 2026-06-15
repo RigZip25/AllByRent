@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import rentanoSplashImg from "../../imports/rentano_splash_transparent.png";
 import {
+  APP_NAME,
+  APP_TAGLINE,
   BRAND_AMBER,
   BRAND_GREEN,
   BRAND_GREEN_LIGHT,
@@ -294,11 +296,8 @@ export function SplashScreen({ onDone }: SplashScreenProps) {
                 transition={{ duration: 0.55, type: "spring", stiffness: 110, damping: 16 }}
                 className="absolute left-1/2 top-1/2 z-30 max-w-[96vw] -translate-x-1/2 -translate-y-[calc(50%+9.75rem)] text-center whitespace-nowrap text-[clamp(2.35rem,12vw,4rem)] font-extrabold leading-none tracking-tight"
               >
-                <span style={{ color: BRAND_GREEN_LIGHT }}>All</span>{" "}
-                <span style={{ color: BRAND_AMBER }}>By</span>{" "}
-                <span style={{ color: "#fff" }}>
-                  Rent<sup className="ml-0.5 text-[0.45em] font-bold text-white/90">™</sup>
-                </span>
+                <span style={{ color: BRAND_GREEN_LIGHT }}>Evo</span>
+                <span style={{ color: BRAND_AMBER }}>rios</span>
               </motion.h1>
             )}
           </AnimatePresence>
@@ -313,7 +312,7 @@ export function SplashScreen({ onDone }: SplashScreenProps) {
               className="mt-2 w-full max-w-[390px] px-2 text-center"
             >
               <p className="text-[clamp(1.06rem,4.7vw,2rem)] font-medium leading-snug text-white/90">
-                The Social Rental Network
+                {APP_TAGLINE}
               </p>
               <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2.5">
                 <TrustChip icon={<Shield className="h-7 w-7" />} label="Insured" />

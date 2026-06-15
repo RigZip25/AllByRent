@@ -76,7 +76,7 @@ export function HostDashboard({
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <h2 className="mb-3 shrink-0 text-[20px] font-extrabold" style={{ color: GREEN_DARK }}>
-        Host Dashboard
+        My Garage
       </h2>
 
       <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1 pb-2">
