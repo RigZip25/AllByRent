@@ -4,6 +4,8 @@
 
 **Last updated:** 2026-06-15
 
+**Screen-by-screen walk:** [FLOW_AUDIT.md](FLOW_AUDIT.md) — use this on Mac while clicking through the app.
+
 ---
 
 ## One sentence

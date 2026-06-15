@@ -1,7 +1,8 @@
 # Evorios — brand, product & repo guide
 
-**Last updated:** 2026-05-28  
-**Purpose:** Single source of truth when continuing work from any machine (Windows, Mac, Cloud Agent). Track the evolution of **Evorios** here; update this file when brand or product decisions change.
+**Last updated:** 2026-06-15
+
+**Walk the app screen-by-screen:** [FLOW_AUDIT.md](FLOW_AUDIT.md) — what to change at each step (✅ / 🟡 / 🟠 / 🔴).
 
 ---
 
