@@ -2,13 +2,15 @@
 
   > **Brand & tasks:** [docs/EVORIOS.md](docs/EVORIOS.md) · **Garage Showcase:** [docs/GARAGE_SHOWCASE.md](docs/GARAGE_SHOWCASE.md) · **Flow audit:** [docs/FLOW_AUDIT.md](docs/FLOW_AUDIT.md)
 
-  This is a code bundle for the Evorios PWA (legacy Figma: AllByRent Mobile App UI).
+  This is a code bundle for the Evorios PWA (legacy Figma: [AllByRent Mobile App UI](https://www.figma.com/design/2yZhDZ7DQtITTvIcRhkFTb/AllByRent-Mobile-App-UI)).
 
   ## Running the code
 
   Run `npm i` to install the dependencies.
 
   Run `npm run dev` to start the development server.
+
+  **Test garage splash:** `http://localhost:5173/?screen=splash` (after checkout `cursor/evorios-rebrand-ca09` or once merged to `main`).
 
 ## AI API keys (Anthropic + PhotoRoom)
 
@@ -99,7 +101,7 @@ If `app.allbyrent.com` looks old after a green deploy:
 1. **Profile → build stamp** — should match the latest commit on `main` (first 7 chars of the SHA).
 2. **Hard refresh** the tab, or open the site in a private window.
 3. **`?resetApp=1`** — clears local data, unregisters the service worker, and reloads (use when the PWA still serves an old precache).
-4. **Vercel** — if the stamp never updates, redeploy with **Clear build cache** enabled (Project → Deployments → … on a deployment, or redeploy from the latest commit).
+4. **`?screen=splash`** — force the garage-door splash (even if onboarding was completed before).
+5. **Vercel** — if the stamp never updates, redeploy with **Clear build cache** enabled (Project → Deployments → … on a deployment, or redeploy from the latest commit).
 
 `vercel.json` sets `Cache-Control: no-cache` on `/`, `/index.html`, `/sw.js`, and `/workbox-*.js` so the CDN does not serve a stale app shell. Hashed assets under `/assets/*` remain long-cache safe.
-  

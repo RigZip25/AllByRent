@@ -23,6 +23,28 @@ export function getSupabaseServiceRoleKey(): string | undefined {
   return process.env.SUPABASE_SERVICE_ROLE_KEY;
 }
 
+export function getStripeSecretKey(): string | undefined {
+  return trimEnv(process.env.STRIPE_SECRET_KEY);
+}
+
+export function getStripeWebhookSecret(): string | undefined {
+  return trimEnv(process.env.STRIPE_WEBHOOK_SECRET);
+}
+
+export function getStripePublishableKey(): string | undefined {
+  return trimEnv(
+    process.env.VITE_STRIPE_PUBLISHABLE_KEY || process.env.STRIPE_PUBLISHABLE_KEY,
+  );
+}
+
+/** True when server-side Stripe secret is configured (not a placeholder). */
+export function isStripeServerConfigured(): boolean {
+  const key = getStripeSecretKey();
+  if (!key) return false;
+  const lower = key.toLowerCase();
+  return !lower.includes("placeholder") && !lower.includes("changeme");
+}
+
 export function getPasskeySecret(): string {
   return (
     process.env.PASSKEY_SECRET ||
