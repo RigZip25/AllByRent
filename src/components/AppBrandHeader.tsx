@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { APP_NAME, BRAND_GREEN } from "../lib/brand";
+import { BRAND_GREEN } from "../lib/brand";
+import { EvoriosWordmark } from "./EvoriosWordmark";
 
 export { BRAND_GREEN };
 
@@ -11,12 +12,6 @@ const brandTextClass: Record<BrandSize, string> = {
   lg: "text-responsive-title",
 };
 
-const brandTmClass: Record<BrandSize, string> = {
-  sm: "text-[0.55em] top-[-0.35em]",
-  md: "text-[0.5em] top-[-0.4em]",
-  lg: "text-[0.45em] top-[-0.45em]",
-};
-
 export function AppBrandMark({
   size = "md",
   className = "",
@@ -25,18 +20,10 @@ export function AppBrandMark({
   className?: string;
 }) {
   return (
-    <span
-      className={`inline-flex items-baseline font-bold leading-none ${brandTextClass[size]} ${className}`}
-      style={{ color: BRAND_GREEN }}
-    >
-      {APP_NAME}
-      <sup
-        className={`relative ml-0.5 font-bold leading-none ${brandTmClass[size]}`}
-        style={{ color: BRAND_GREEN }}
-      >
-        ™
-      </sup>
-    </span>
+    <EvoriosWordmark
+      variant="header"
+      className={`${brandTextClass[size]} ${className}`}
+    />
   );
 }
 

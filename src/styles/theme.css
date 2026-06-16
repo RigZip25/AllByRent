@@ -354,6 +354,108 @@
     user-select: none;
   }
 
+  /** Evorios wordmark — splash + header (Outfit display, Evo/rios split, ™) */
+  .evorios-wordmark {
+    font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 800;
+    line-height: 1;
+    display: inline-flex;
+    align-items: baseline;
+    letter-spacing: -0.035em;
+    user-select: none;
+  }
+
+  .evorios-wordmark-evo {
+    letter-spacing: -0.05em;
+    background: linear-gradient(128deg, #f59e0b 0%, #fcd34d 42%, #fde68a 88%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .evorios-wordmark-rios {
+    letter-spacing: -0.025em;
+    color: #6ee7b7;
+  }
+
+  .evorios-wordmark-tm {
+    font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.36em;
+    font-weight: 700;
+    line-height: 1;
+    margin-left: 0.1em;
+    position: relative;
+    top: -0.58em;
+    color: #f59e0b;
+    opacity: 0.9;
+  }
+
+  .evorios-wordmark--splash-dark {
+    filter: drop-shadow(0 6px 28px rgba(0, 0, 0, 0.28));
+  }
+
+  .evorios-wordmark--splash-dark .evorios-wordmark-rios {
+    color: #a7f3d0;
+    text-shadow: 0 0 48px rgba(26, 158, 110, 0.42);
+  }
+
+  .evorios-wordmark--splash-light .evorios-wordmark-evo {
+    background: linear-gradient(128deg, #0d5c3a 0%, #1a9e6e 52%, #34d399 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .evorios-wordmark--splash-light .evorios-wordmark-rios {
+    color: #1a9e6e;
+    text-shadow: none;
+  }
+
+  .evorios-wordmark--splash-light .evorios-wordmark-tm {
+    color: #0d5c3a;
+    opacity: 0.55;
+  }
+
+  .evorios-wordmark--header {
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  .evorios-wordmark--header .evorios-wordmark-evo {
+    background: linear-gradient(128deg, #0d5c3a 0%, #1a9e6e 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .evorios-wordmark--header .evorios-wordmark-rios {
+    color: #0d5c3a;
+    text-shadow: none;
+  }
+
+  .evorios-wordmark--header .evorios-wordmark-tm {
+    color: #0d5c3a;
+    opacity: 0.65;
+    top: -0.45em;
+    font-size: 0.5em;
+  }
+
+  @keyframes evorios-wordmark-reveal {
+    0% {
+      filter: drop-shadow(0 6px 28px rgba(0, 0, 0, 0.28)) brightness(0.85);
+    }
+    45% {
+      filter: drop-shadow(0 8px 36px rgba(245, 158, 11, 0.35)) brightness(1.08);
+    }
+    100% {
+      filter: drop-shadow(0 6px 28px rgba(0, 0, 0, 0.28)) brightness(1);
+    }
+  }
+
+  .evorios-wordmark--splash-dark.evorios-wordmark--reveal {
+    animation: evorios-wordmark-reveal 0.85s ease-out forwards;
+  }
+
   .app-screen-host > .screen {
     flex: 1;
     min-height: 0;

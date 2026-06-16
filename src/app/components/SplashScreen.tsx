@@ -3,11 +3,10 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Bike, Camera, Car, Guitar, Home, MapPin, Tent } from "lucide-react";
 import evoriosSplashImg from "../../imports/evorios_splash_garage.png";
+import { EvoriosWordmark } from "../../components/EvoriosWordmark";
 import {
-  APP_NAME,
   APP_TAGLINE,
   BRAND_AMBER,
-  BRAND_GREEN_LIGHT,
   MASCOT_NAME,
   PRODUCT_METAPHOR,
   SPLASH_BG_DARK,
@@ -124,11 +123,8 @@ function SplashStaticPreview() {
         </div>
 
         <div className="splash-static-copy shrink-0 px-5 pb-2 pt-1 text-center">
-          <h1
-            className="text-[clamp(2rem,10.5vw,3.25rem)] font-extrabold leading-none tracking-tight"
-            style={{ color: BRAND_GREEN_LIGHT }}
-          >
-            {APP_NAME}
+          <h1 className="text-[clamp(2rem,10.5vw,3.25rem)] leading-none">
+            <EvoriosWordmark variant="splash-light" />
           </h1>
           <p className="mt-1 text-[clamp(0.82rem,3.5vw,1rem)] font-semibold tracking-wide text-[#0D5C3A]/75">
             {PRODUCT_METAPHOR}
@@ -223,9 +219,9 @@ function SplashDynamic({ onDone, preview }: { onDone: () => void; preview: boole
                   initial={{ opacity: 0, y: 14, scale: 0.92 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ duration: 0.45, type: "spring", stiffness: 120, damping: 18 }}
-                  className="absolute left-1/2 top-1/2 z-30 max-w-[96vw] -translate-x-1/2 -translate-y-[calc(50%+8.5rem)] text-center text-[clamp(2.5rem,13vw,4.25rem)] font-extrabold leading-none tracking-tight"
+                  className="absolute left-1/2 top-1/2 z-30 max-w-[96vw] -translate-x-1/2 -translate-y-[calc(50%+8.5rem)] text-center text-[clamp(2.5rem,13vw,4.25rem)] leading-none"
                 >
-                  <span style={{ color: BRAND_GREEN_LIGHT }}>{APP_NAME}</span>
+                  <EvoriosWordmark variant="splash-dark" reveal />
                 </motion.h1>
               )}
             </AnimatePresence>
