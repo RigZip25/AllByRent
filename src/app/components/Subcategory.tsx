@@ -8,6 +8,7 @@ import { BottomNav } from "./BottomNav";
 
 import { RentanoChatSheet } from "../../components/RentanoChat";
 import { MrRentano } from "./MrRentano";
+import { MASCOT_NAME } from "../../lib/brand";
 import { FoundingHostPromo } from "./FoundingHostPromo";
 
 import { subcategoriesData } from "../data/subcategories";
@@ -693,7 +694,7 @@ export function Subcategory({
 
                   >
 
-                    Ask Rentano
+                    Ask {MASCOT_NAME}
 
                   </button>
 

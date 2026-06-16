@@ -126,7 +126,7 @@ function isOnboardingScreen(screen: Screen): boolean {
 
 function readBootQuery() {
   if (typeof window === "undefined") {
-    return { skipSplash: false, openNotifications: false, simulateUpdate: false, screen: null as string | null, splashArtOnly: false };
+    return { skipSplash: false, openNotifications: false, simulateUpdate: false, screen: null as string | null, splashArtOnly: false, splashDynamicPreview: false };
   }
   const params = new URLSearchParams(window.location.search);
   const screen = params.get("screen");
@@ -146,6 +146,7 @@ function readBootQuery() {
     simulateUpdate,
     screen,
     splashArtOnly: screen === "splash" && params.get("art") === "1",
+    splashDynamicPreview: screen === "splash" && params.get("dynamic") === "1",
   };
 }
 
@@ -223,9 +224,10 @@ function AppRoutes() {
   const [isOnline, setIsOnline] = useState(
     () => typeof navigator === "undefined" || navigator.onLine,
   );
-  /** `?screen=splash` — full splash layout, no Continue; `&art=1` — PNG only */
-  const [splashPreview] = useState(() => boot.screen === "splash");
+  /** `?screen=splash` static layout · `&dynamic=1` animated · `&art=1` PNG only */
+  const [splashPreview] = useState(() => boot.screen === "splash" && !boot.splashDynamicPreview);
   const [splashArtOnly] = useState(() => boot.splashArtOnly);
+  const [splashDynamicPreview] = useState(() => boot.splashDynamicPreview);
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -675,8 +677,9 @@ function AppRoutes() {
         {currentScreen === "splash" && (
           <SplashScreen
             onDone={handleSplashContinue}
-            preview={splashPreview}
+            preview={splashPreview || splashDynamicPreview}
             artOnly={splashArtOnly}
+            dynamicPreview={splashDynamicPreview}
           />
         )}
 

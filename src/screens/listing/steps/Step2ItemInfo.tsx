@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { Loader2 } from "lucide-react";
 import type { StepProps } from "../types";
 import { RentanoHint } from "../../../components/RentanoHint";
+import { MASCOT_NAME } from "../../../lib/brand";
 import { improveListingDescription } from "../listingDescriptionImprove";
 import {
   CATEGORIES,
@@ -438,7 +439,7 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
                 style={{ color: GREEN }}
               >
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                Rentano is rewriting...
+                {MASCOT_NAME} is rewriting...
               </div>
             ) : (
               <button
@@ -448,7 +449,7 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
                 className="mt-2 text-sm underline disabled:opacity-50"
                 style={{ color: GREEN }}
               >
-                ✨ Ask Rentano to improve
+                ✨ Ask {MASCOT_NAME} to improve
               </button>
             )
           ) : null}

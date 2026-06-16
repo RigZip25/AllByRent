@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, Mic, MicOff, Send } from "lucide-react";
 import rentanoImg from "../../imports/No_back_rentano.png";
+import { APP_NAME, MASCOT_NAME } from "../../lib/brand";
 import { useSpeechRecognition } from "../../hooks/useSpeechRecognition";
 import { useRequireAuth } from "../../hooks/RequireAuth";
 import { isAnthropicConfigured } from "../../lib/anthropicClient";
@@ -30,7 +31,7 @@ export function RentanoChatPanel({
       id: "welcome",
       role: "assistant",
       content:
-        "Hi! I'm Rentano — ask by voice or text. I know which screen and listing step you're on.",
+        `Hi! I'm ${MASCOT_NAME} — ask by voice or text. I know which screen and listing step you're on.`,
     },
   ]);
   const [input, setInput] = useState("");
@@ -169,7 +170,7 @@ export function RentanoChatPanel({
         {loading ? (
           <div className="flex items-center gap-2 px-2 text-[13px] text-gray-500">
             <Loader2 className="h-4 w-4 animate-spin" style={{ color: PRIMARY_GREEN }} />
-            Rentano is thinking…
+            {MASCOT_NAME} is thinking…
           </div>
         ) : null}
       </div>
@@ -224,7 +225,7 @@ export function RentanoChatPanel({
           placeholder="Type or tap mic…"
           className="max-h-24 min-h-[40px] min-w-0 flex-1 resize-none bg-transparent py-2 text-[15px] outline-none placeholder:text-gray-400"
           disabled={loading}
-          aria-label="Message to Rentano"
+          aria-label={`Message to ${MASCOT_NAME}`}
         />
         <button
           type="button"

@@ -5,7 +5,7 @@ import { BottomNav } from "./BottomNav";
 import { HostDashboard } from "./HostDashboard";
 import { RentanoChatSheet } from "../../components/RentanoChat";
 import { usePwaUpdate } from "../../hooks/PwaUpdateProvider";
-import { APP_MODE_LABELS } from "../../lib/brand";
+import { APP_MODE_LABELS, mascotSays } from "../../lib/brand";
 import { getAppMode, setAppMode, type AppMode } from "../../lib/appMode";
 import {
   getActiveRentLocationLabel,
@@ -252,7 +252,7 @@ export function HomeFeed({
                       No results
                     </p>
                     <p className="mt-1 text-[13px] text-gray-500">
-                      Rentano: Try a shorter keyword — or change category / city.
+                      {mascotSays("Try a shorter keyword — or change category / city.")}
                     </p>
                   </div>
                 ) : (

@@ -1,4 +1,5 @@
 import { extractAnthropicText, postAnthropicMessages } from "../../lib/anthropicClient";
+import { APP_NAME, MASCOT_NAME } from "../../lib/brand";
 import type { ListingDraft } from "./types";
 
 type DescriptionDraft = Pick<
@@ -13,7 +14,7 @@ export async function improveListingDescription(draft: DescriptionDraft): Promis
     messages: [
       {
         role: "user",
-        content: `You are Mr. Rentano, AI companion on AllByRent rental platform.
+        content: `You are ${MASCOT_NAME}, AI companion on ${APP_NAME} (${APP_NAME} Garage Showcase platform).
 
 Item details:
 Title: ${draft.title}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
+import { mascotSays } from "../lib/brand";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -20,7 +21,7 @@ export function IdentityVerificationScreen({ onBack }: { onBack: () => void }) {
           Identity verification
         </h1>
         <p className="mt-1 text-[13px] text-gray-500">
-          Rentano: One quick step before you go live.
+          {mascotSays("One quick step before you go live.")}
         </p>
       </header>
 

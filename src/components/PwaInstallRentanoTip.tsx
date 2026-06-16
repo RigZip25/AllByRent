@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { RentanoTip } from "./RentanoTip";
 import { PwaInstallPanel } from "./PwaInstallPanel";
-import { BRAND_GREEN } from "../lib/brand";
+import { BRAND_GREEN, APP_NAME } from "../lib/brand";
 
 type PwaInstallRentanoTipProps = {
   nativeInstallReady: boolean;
@@ -25,7 +25,7 @@ export function PwaInstallRentanoTip({
         message={
           <span className="flex items-center justify-between gap-3">
             <span className="min-w-0">
-              Install AllByRent to your Home Screen (works like an app).
+              Install {APP_NAME} to your Home Screen (works like an app).
               <span className="ml-2 not-italic font-medium" style={{ color: BRAND_GREEN }}>
                 {open ? "Hide" : "Show"}
               </span>

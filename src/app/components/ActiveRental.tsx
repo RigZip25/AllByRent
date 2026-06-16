@@ -30,7 +30,7 @@ import {
 } from "../../lib/messagesStorage";
 import { hasLocalReview, submitReviewRemote } from "../../lib/reviewsStorage";
 import { ReviewPromptModal } from "../../components/reviews/ReviewPromptModal";
-import { RentanoTip } from "../../components/RentanoTip";
+import { mascotSays } from "../../lib/brand";
 import {
   addEvidenceRemote,
   fetchDisputeForRentalRemote,
@@ -658,7 +658,7 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
             </div>
 
             <div className="mt-3">
-              <RentanoTip message="Rentano: Take clear photos of the item, any damage, and accessories. Include the QR sticker in one photo if possible." />
+              <RentanoTip message={mascotSays("Take clear photos of the item, any damage, and accessories. Include the QR sticker in one photo if possible.")} />
             </div>
 
             <div className="mt-3 rounded-2xl border bg-[#FFFBEB] p-3 text-[12px] text-amber-900" style={{ borderColor: "#FDE68A" }}>

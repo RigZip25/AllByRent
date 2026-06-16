@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { MASCOT_NAME } from "../../lib/brand";
 import frame1 from "../../imports/image-7.png";
 import frame2 from "../../imports/image-8.png";
 import frame3 from "../../imports/image-9.png";
@@ -50,7 +51,7 @@ export function MrRentanoAnimated({ size = 140, animate = true }: MrRentanoAnima
       <motion.img
         key={frameIndex}
         src={frames[frameIndex]}
-        alt="Mr. Rentano"
+        alt={MASCOT_NAME}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}

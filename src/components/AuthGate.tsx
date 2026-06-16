@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Apple, Chrome, Fingerprint, Mail, ScanFace } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
-import { APP_NAME, MASCOT_NAME } from "../lib/brand";
+import { APP_NAME, mascotSays, MASCOT_NAME } from "../lib/brand";
 import type { AuthIntent } from "../lib/authReturn";
 import { peekPendingAuthEmail, setPendingAuthEmail } from "../lib/authReturn";
 import {
@@ -33,8 +33,7 @@ const INTENT_COPY: Record<
   list: {
     title: "Sign in to list your item",
     subtitle: "Enter your email — we'll send a magic link to sign in.",
-    rentano:
-      "Rentano: List your gear and start earning. Sign in so we can save your listing draft.",
+    rentano: mascotSays("List your gear and start earning. Sign in so we can save your listing draft."),
   },
   book: {
     title: "Sign in to book",

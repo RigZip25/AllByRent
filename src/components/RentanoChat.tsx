@@ -8,6 +8,7 @@ import {
   Smartphone,
   X,
 } from "lucide-react";
+import { APP_NAME, MASCOT_NAME } from "../lib/brand";
 import rentanoImg from "../imports/No_back_rentano.png";
 import type { ListingDraft } from "../screens/listing/types";
 import { LISTING_STEP_LABELS } from "../screens/listing/types";
@@ -102,7 +103,7 @@ export function RentanoChatFab({ onClick }: { onClick: () => void }) {
         border: `2px solid ${PRIMARY_GREEN}`,
         boxShadow: "0 4px 14px rgba(13, 92, 58, 0.25)",
       }}
-      aria-label="Open Rentano menu"
+      aria-label={`Open ${MASCOT_NAME} menu`}
     >
       <img
         src={rentanoImg}
@@ -140,7 +141,7 @@ export function RentanoChatSheet({
     }
     if (defaultView === "chat") {
       setView("chat");
-      if (!chatSeed) setChatSeed("Hi Rentano — I need help on this screen.");
+      if (!chatSeed) setChatSeed(`Hi ${MASCOT_NAME} — I need help on this screen.`);
     }
   }, [defaultView, open]);
 
@@ -163,8 +164,8 @@ export function RentanoChatSheet({
         : view === "chat"
           ? isListingHelp
             ? "Listing help"
-            : "Chat with Rentano"
-          : "Rentano";
+            : `Chat with ${MASCOT_NAME}`
+          : MASCOT_NAME;
 
   return (
     <AnimatePresence>
@@ -172,7 +173,7 @@ export function RentanoChatSheet({
         <>
           <motion.button
             type="button"
-            aria-label="Close Rentano menu"
+            aria-label={`Close ${MASCOT_NAME} menu`}
             className="fixed inset-0 z-[70] bg-black/40"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -279,7 +280,7 @@ export function RentanoChatSheet({
                         />
                       }
                       title="Help & FAQ"
-                      subtitle="Common questions — or ask Rentano"
+                      subtitle={`Common questions — or ask ${MASCOT_NAME}`}
                       onClick={() => setView("faq")}
                     />
                   </li>
@@ -292,7 +293,7 @@ export function RentanoChatSheet({
                           strokeWidth={1.75}
                         />
                       }
-                      title={isListingHelp ? "Help with this listing" : "Chat with Rentano"}
+                      title={isListingHelp ? "Help with this listing" : `Chat with ${MASCOT_NAME}`}
                       subtitle={
                         isListingHelp
                           ? `Voice or text · step ${context.step} of ${context.totalSteps}`

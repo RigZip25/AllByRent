@@ -29,6 +29,7 @@ import uploadPhotosScreen from "./assets/listing/upload-photos.png";
 import whereYourPlaceScreen from "./assets/listing/where-your-place.png";
 import businessRentalsScreen from "./assets/onboarding/business-rentals.png";
 import mrRentanoScreen from "./assets/onboarding/mr-rentano.png";
+import { MASCOT_NAME } from "./lib/brand";
 import rentalHubScreen from "./assets/onboarding/rental-hub.png";
 import rentLocallyScreen from "./assets/onboarding/rent-locally.png";
 import secureLocalFlexibleScreen from "./assets/onboarding/secure-local-flexible.png";
@@ -238,7 +239,7 @@ const onboardingScreens: AppScreen[] = [
   {
     backTargetId: "secure-local-flexible",
     id: "mr-rentano",
-    title: "Hi, I'm Mr. Rentano.",
+    title: `Hi, I'm ${MASCOT_NAME}.`,
     image: mrRentanoScreen,
     showDots: true,
     hotspots: [

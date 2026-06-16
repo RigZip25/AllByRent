@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { HelpCircle, MessageCircle, Search } from "lucide-react";
 import { searchFaq, type FaqItem } from "../../data/rentanoFaq";
+import { MASCOT_NAME } from "../../lib/brand";
 
 const PRIMARY_GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -47,7 +48,7 @@ export function RentanoFaqPanel({
           <HelpCircle className="mx-auto mb-2 h-8 w-8 text-gray-300" />
           <p className="text-[15px] font-medium text-gray-700">No matches</p>
           <p className="mt-1 text-[13px] text-gray-500">
-            Try different words, or ask Rentano directly.
+            Try different words, or ask {MASCOT_NAME} directly.
           </p>
         </div>
       ) : (
@@ -92,7 +93,7 @@ export function RentanoFaqPanel({
         style={{ backgroundColor: PRIMARY_GREEN }}
       >
         <MessageCircle className="h-5 w-5" strokeWidth={2} />
-        {query.trim() ? "Ask Rentano about this" : "Didn't find an answer? Ask Rentano"}
+        {query.trim() ? `Ask ${MASCOT_NAME} about this` : `Didn't find an answer? Ask ${MASCOT_NAME}`}
       </button>
     </div>
   );

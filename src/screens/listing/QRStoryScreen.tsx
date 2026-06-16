@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import qrStory1 from "../../imports/qr_story_1.png";
 import qrStory2 from "../../imports/qr_story_2.png";
 import qrStory3 from "../../imports/qr_story_3.png";
+import { MASCOT_NAME } from "../../lib/brand";
 import { RentanoHint } from "../../components/RentanoHint";
 import { generateQRStickerPdf } from "../../lib/generateQRSticker";
 
@@ -88,7 +89,7 @@ export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
           How your QR works
         </h2>
         <p className="mb-5 text-center text-[13px] text-gray-500">
-          Rentano will guide you through 3 quick slides.
+          {MASCOT_NAME} will guide you through 3 quick slides.
         </p>
 
         <StoryBlock image={active.image} title={active.title} tip={active.tip} />
@@ -118,7 +119,7 @@ export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
       <footer className="shrink-0 border-t border-gray-100 bg-white px-4 pb-6 pt-4">
         <div className="mb-3 flex items-center justify-between text-xs font-semibold text-gray-400">
           <span>Slide {step + 1} of 3</span>
-          <span className="rounded-full bg-gray-100 px-2 py-1">Rentano guided</span>
+          <span className="rounded-full bg-gray-100 px-2 py-1">{MASCOT_NAME} guided</span>
         </div>
         <div className="flex gap-2">
           <button

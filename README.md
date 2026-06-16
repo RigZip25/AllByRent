@@ -1,6 +1,6 @@
   # AllByRent → Evorios (rebrand in progress)
 
-  > **Brand & tasks:** [docs/EVORIOS.md](docs/EVORIOS.md) · **Garage Showcase:** [docs/GARAGE_SHOWCASE.md](docs/GARAGE_SHOWCASE.md) · **Flow audit:** [docs/FLOW_AUDIT.md](docs/FLOW_AUDIT.md)
+  > **Brand & tasks:** [docs/EVORIOS.md](docs/EVORIOS.md) · **App concept & flows:** [docs/APP_CONCEPT.md](docs/APP_CONCEPT.md) · **Garage Showcase:** [docs/GARAGE_SHOWCASE.md](docs/GARAGE_SHOWCASE.md) · **Flow audit:** [docs/FLOW_AUDIT.md](docs/FLOW_AUDIT.md)
 
   This is a code bundle for the Evorios PWA (legacy Figma: [AllByRent Mobile App UI](https://www.figma.com/design/2yZhDZ7DQtITTvIcRhkFTb/AllByRent-Mobile-App-UI)).
 

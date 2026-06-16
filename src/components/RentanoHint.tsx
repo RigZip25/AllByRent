@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
+import { MASCOT_NAME } from "../lib/brand";
 import rentanoImg from "../imports/No_back_rentano.png";
 
 const PRIMARY_GREEN = "#0D5C3A";
@@ -18,7 +19,7 @@ export function RentanoHint({
   size?: number;
   linkText?: string;
   linkUrl?: string;
-  /** When true, shows “Tap Rentano for a hint” beside the avatar while collapsed. */
+  /** When true, shows “Tap Mr. Evorios for a hint” beside the avatar while collapsed. */
   showTapLabel?: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -98,7 +99,7 @@ export function RentanoHint({
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
           aria-controls={hintId}
-          aria-label={open ? "Hide Rentano hint (currently open)" : "Show Rentano hint (currently closed)"}
+          aria-label={open ? `Hide ${MASCOT_NAME} hint (currently open)` : `Show ${MASCOT_NAME} hint (currently closed)`}
           className="rentano-hint-button shrink-0 overflow-hidden rounded-full transition-transform active:scale-95"
           style={{
             ["--rentano-hint-size" as string]: `${size}px`,
@@ -113,7 +114,7 @@ export function RentanoHint({
           />
         </button>
         {(showTapLabel || !open) && !open ? (
-          <p className="text-xs italic text-gray-500">Tap Rentano for tips</p>
+          <p className="text-xs italic text-gray-500">Tap {MASCOT_NAME} for tips</p>
         ) : null}
       </div>
 
@@ -134,13 +135,13 @@ export function RentanoHint({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                aria-label="Close Rentano hint"
+                aria-label={`Close ${MASCOT_NAME} hint`}
                 className="shrink-0 rounded px-1 text-lg leading-none text-[#4B5563] transition-colors hover:text-[#111827]"
               >
                 ×
               </button>
             </div>
-            <p className="text-xs italic text-gray-500">Tap Rentano again to close</p>
+            <p className="text-xs italic text-gray-500">Tap {MASCOT_NAME} again to close</p>
             {linkText && linkUrl ? (
               <button
                 type="button"

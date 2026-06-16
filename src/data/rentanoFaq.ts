@@ -38,7 +38,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Getting started",
     question: "How do I install the app on my phone?",
     answer:
-      "Open Rentano in the footer → Add to Home Screen. On iPhone use Share → Add to Home Screen. On Android use the browser install prompt when it appears.",
+      "Open Evorios in the footer → Add to Home Screen. On iPhone use Share → Add to Home Screen. On Android use the browser install prompt when it appears.",
     keywords: ["pwa", "home screen", "install"],
   },
   {
@@ -46,7 +46,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Hosting & listings",
     question: "How do I list my first item?",
     answer:
-      "Switch to Earn, tap the green + button, then follow the 7-step wizard: photos, item info, pricing modes, pickup, availability, QR, and review. Rentano can help on each step.",
+      `Switch to ${APP_MODE_LABELS.earn}, tap the green + button, then follow the 7-step wizard: photos, item info, pricing modes, pickup, availability, QR, and review. ${MASCOT_NAME} can help on each step.`,
     keywords: ["sell", "post", "wizard"],
   },
   {
@@ -54,7 +54,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Hosting & listings",
     question: "What happens after I add photos?",
     answer:
-      "On step 1, when you continue, Rentano analyzes your photos and suggests title, category, condition, description, and replacement value. You can edit everything on step 2.",
+      `On step 1, when you continue, ${MASCOT_NAME} analyzes your photos and suggests title, category, condition, description, and replacement value. You can edit everything on step 2.`,
     keywords: ["ai", "analyze", "camera"],
   },
   {
@@ -110,7 +110,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Payments & safety",
     question: "How do payments work?",
     answer:
-      "Payments and identity verification are handled by Stripe — AllByRent does not store your card or bank details in the app. You'll connect payout settings when hosting goes live.",
+      `Payments and identity verification are handled by Stripe — ${APP_NAME} does not store your card or bank details in the app. You'll connect payout settings when hosting goes live.`,
     keywords: ["stripe", "card", "money"],
   },
   {
@@ -118,7 +118,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Payments & safety",
     question: "Something went wrong with a rental — what now?",
     answer:
-      "Document the issue with photos and messages in the app. For urgent safety issues contact local authorities first. Rentano can guide you on next in-app steps but cannot decide disputes alone.",
+      `Document the issue with photos and messages in the app. For urgent safety issues contact local authorities first. ${MASCOT_NAME} can guide you on next in-app steps but cannot decide disputes alone.`,
     keywords: ["damage", "problem", "refund"],
   },
   {

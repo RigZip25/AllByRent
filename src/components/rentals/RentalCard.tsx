@@ -1,3 +1,4 @@
+import { MASCOT_NAME } from "../../lib/brand";
 import { Star } from "lucide-react";
 import { useMemo } from "react";
 import { useNow } from "../../hooks/useNow";
@@ -328,7 +329,7 @@ export function RentalCard({
                   className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
                   style={{ backgroundColor: `${GREEN_LIGHT}22`, color: GREEN }}
                 >
-                  Rentano
+                  {MASCOT_NAME}
                 </span>
                 Your review helps build trust
               </p>

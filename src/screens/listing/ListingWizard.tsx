@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import confetti from "canvas-confetti";
-import { useAuth } from "../../hooks/AuthProvider";
+import { MASCOT_NAME } from "../../lib/brand";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
 import { getProfileCity, savePublishedListingRemote, savePublishedListing } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
@@ -234,7 +234,7 @@ export function ListingWizard({
     step === 1 && draft.aiAnalysisPending ? (
       <span className="flex items-center justify-center gap-2">
         <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-        Rentano is analyzing your photos...
+        {MASCOT_NAME} is analyzing your photos...
       </span>
     ) : (
       "Continue"

@@ -9,6 +9,7 @@ import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Loader2, Plus, X } from "lucide-react";
 import type { StepProps } from "../types";
 import { RentanoHint } from "../../../components/RentanoHint";
+import { MASCOT_NAME } from "../../../lib/brand";
 import { processPhotoWithPhotoRoom } from "../photoroomApi";
 import { MAX_LISTING_PHOTOS, MAX_LISTING_VIDEOS } from "../photoUtils";
 import { putMediaBlob, deleteMedia, type MediaRef } from "../../../lib/mediaStore";
@@ -16,7 +17,7 @@ import { useMediaUrl } from "../../../lib/useMediaUrl";
 
 const PRIMARY_GREEN = "#0D5C3A";
 const DEFAULT_TIP =
-  "Optional: tap Analyze to let Rentano fill in Step 2. You can also skip and enter details manually.";
+  `Optional: tap Analyze to let ${MASCOT_NAME} fill in Step 2. You can also skip and enter details manually.`;
 const AI_TIP = "I analyzed your photos — check Step 2, I filled everything in for you! 🎩";
 
 function reorderArray<T>(items: T[], from: number, to: number): T[] {
