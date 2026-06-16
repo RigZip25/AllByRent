@@ -1,5 +1,5 @@
 import { Share, Smartphone, X } from "lucide-react";
-import { BRAND_AMBER, BRAND_GREEN } from "../lib/brand";
+import { APP_NAME, BRAND_AMBER, BRAND_GREEN } from "../lib/brand";
 
 type PwaInstallBannerProps = {
   onInstall: () => void;
@@ -44,7 +44,7 @@ export function PwaInstallBanner({
 
         <div className="min-w-0 flex-1 text-left">
           <p className="text-sm font-bold leading-snug text-white">
-            Add AllByRent to your Home Screen
+            Add {APP_NAME} to your Home Screen
           </p>
           {manualIos ? (
             <p className="mt-1 text-xs leading-relaxed text-white/85">

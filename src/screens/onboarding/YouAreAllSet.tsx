@@ -1,10 +1,13 @@
-import rentanoImg from "../../imports/rentano_full.png";
+import { APP_MODE_LABELS, APP_NAME, APP_TAGLINE, ONBOARDING } from "../../lib/brand";
+import { onboardingAssets } from "../../lib/onboardingAssets";
 import { getAppMode } from "../../lib/appMode";
 import { getRentContext } from "../../lib/listingStorage";
 import { getProfileLocationSummary } from "../../lib/userProfileStorage";
 import { loadSubscriptionPlanId } from "../../lib/subscriptionPlans";
 
 const GREEN = "#0D5C3A";
+
+const { allSet: copy } = ONBOARDING;
 
 type YouAreAllSetProps = {
   onExplore: () => void;
@@ -18,11 +21,11 @@ function accountTypeLabel(): string {
 function goalTags(): string[] {
   const mode = getAppMode();
   const tags: string[] = [];
-  if (mode === "earn") tags.push("Earn");
-  if (mode === "rent") tags.push("Rent & save");
+  if (mode === "earn") tags.push(APP_MODE_LABELS.earn);
+  if (mode === "rent") tags.push(APP_MODE_LABELS.rent);
   const context = getRentContext();
-  if (context === "trip") tags.push("Traveling");
-  if (context === "home") tags.push("At home");
+  if (context === "trip") tags.push("Visiting");
+  if (context === "home") tags.push("On my block");
   if (tags.length === 0) tags.push("Explore");
   return tags;
 }
@@ -36,20 +39,21 @@ export function YouAreAllSet({ onExplore }: YouAreAllSetProps) {
       <div className="screen-scroll flex min-h-0 flex-1 flex-col px-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] pt-6">
         <div className="flex flex-col items-center text-center">
           <img
-            src={rentanoImg}
+            src={onboardingAssets.mrEvoriosFull}
             alt=""
             className="h-36 w-auto max-w-[220px] object-contain"
             draggable={false}
           />
           <h1 className="mt-4 text-2xl font-bold" style={{ color: GREEN }}>
-            You are all set!
+            {copy.title}
           </h1>
-          <p className="mt-2 text-base text-gray-500">Welcome to the sharing economy</p>
+          <p className="mt-2 text-base text-gray-500">{copy.subtitle}</p>
+          <p className="mt-1 text-sm font-medium text-gray-600">{APP_TAGLINE}</p>
         </div>
 
         <div className="mt-6 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-            Your profile
+            Your {APP_NAME} profile
           </p>
           <dl className="mt-3 space-y-2.5 text-sm">
             <div className="flex justify-between gap-3">
@@ -57,13 +61,13 @@ export function YouAreAllSet({ onExplore }: YouAreAllSetProps) {
               <dd className="font-semibold text-gray-900">{accountTypeLabel()}</dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-gray-500">Location</dt>
+              <dt className="text-gray-500">Block</dt>
               <dd className="max-w-[58%] text-right font-semibold text-gray-900">
                 {location}
               </dd>
             </div>
             <div>
-              <dt className="text-gray-500">Goals</dt>
+              <dt className="text-gray-500">Focus</dt>
               <dd className="mt-2 flex flex-wrap gap-2">
                 {goals.map((tag) => (
                   <span
@@ -80,11 +84,7 @@ export function YouAreAllSet({ onExplore }: YouAreAllSetProps) {
         </div>
 
         <div className="mt-4 grid grid-cols-3 gap-2">
-          {[
-            { label: "Items nearby", value: "120+" },
-            { label: "Neighbors", value: "2.4k" },
-            { label: "Avg earned/mo", value: "$340" },
-          ].map((stat) => (
+          {copy.stats.map((stat) => (
             <div
               key={stat.label}
               className="rounded-2xl border border-[#E5E7EB] bg-white px-2 py-3 text-center shadow-sm"
@@ -103,7 +103,7 @@ export function YouAreAllSet({ onExplore }: YouAreAllSetProps) {
           className="btn-primary mt-auto w-full rounded-xl py-3.5 text-base font-bold text-white"
           style={{ backgroundColor: GREEN }}
         >
-          Explore AllByRent →
+          {copy.exploreCta}
         </button>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import travelerImg from "../../imports/traveler.png";
+import { ONBOARDING } from "../../lib/brand";
+import { onboardingAssets } from "../../lib/onboardingAssets";
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
 import { AddressLocationPicker } from "../../components/AddressLocationPicker";
 import type { LocationSuggestion } from "../../lib/geocoding";
@@ -7,44 +8,46 @@ import { setTripDestination } from "../../lib/listingStorage";
 
 const GREEN = "#0D5C3A";
 
+const { tripDestination: copy } = ONBOARDING;
+
 const exampleDestinations: LocationSuggestion[] = [
   {
-    label: "Vienna, Austria",
-    primaryLine: "Vienna",
-    secondaryLine: "Austria",
-    city: "Vienna",
-    country: "Austria",
-    countryCode: "AT",
-    region: "",
-    flag: "🇦🇹",
-    lat: 48.2082,
-    lng: 16.3738,
+    label: "Austin, TX",
+    primaryLine: "Austin",
+    secondaryLine: "Texas, USA",
+    city: "Austin",
+    country: "United States",
+    countryCode: "US",
+    region: "TX",
+    flag: "🇺🇸",
+    lat: 30.2672,
+    lng: -97.7431,
     precision: "city",
   },
   {
-    label: "Tokyo, Japan",
-    primaryLine: "Tokyo",
-    secondaryLine: "Japan",
-    city: "Tokyo",
-    country: "Japan",
-    countryCode: "JP",
-    region: "",
-    flag: "🇯🇵",
-    lat: 35.6762,
-    lng: 139.6503,
+    label: "Denver, CO",
+    primaryLine: "Denver",
+    secondaryLine: "Colorado, USA",
+    city: "Denver",
+    country: "United States",
+    countryCode: "US",
+    region: "CO",
+    flag: "🇺🇸",
+    lat: 39.7392,
+    lng: -104.9903,
     precision: "city",
   },
   {
-    label: "Paris, France",
-    primaryLine: "Paris",
-    secondaryLine: "France",
-    city: "Paris",
-    country: "France",
-    countryCode: "FR",
-    region: "",
-    flag: "🇫🇷",
-    lat: 48.8566,
-    lng: 2.3522,
+    label: "Portland, OR",
+    primaryLine: "Portland",
+    secondaryLine: "Oregon, USA",
+    city: "Portland",
+    country: "United States",
+    countryCode: "US",
+    region: "OR",
+    flag: "🇺🇸",
+    lat: 45.5152,
+    lng: -122.6784,
     precision: "city",
   },
 ];
@@ -73,17 +76,15 @@ export function WhereAreYouHeading({ onBack, onContinue, onSkip }: WhereAreYouHe
             📍
           </span>
           <h1 className="mt-2 text-2xl font-bold" style={{ color: GREEN }}>
-            Where are you heading?
+            {copy.title}
           </h1>
-          <p className="mt-1 text-base text-gray-500">
-            City, neighborhood, or area where you&apos;ll pick up rentals
-          </p>
+          <p className="mt-1 text-base text-gray-500">{copy.subtitle}</p>
         </div>
 
         <div className="mt-5 flex min-h-0 flex-1 flex-col gap-3">
           <AddressLocationPicker
             placeholder="City, neighborhood, or area"
-            emptyHint="Pick a popular destination or type where you'll need gear"
+            emptyHint="Pick a US city or type where you'll browse garages"
             selected={selectedLocation}
             onSelect={setSelectedLocation}
             onClear={() => setSelectedLocation(null)}
@@ -105,7 +106,7 @@ export function WhereAreYouHeading({ onBack, onContinue, onSkip }: WhereAreYouHe
           ) : null}
 
           <img
-            src={travelerImg}
+            src={onboardingAssets.traveler}
             alt=""
             className="mx-auto mt-auto max-h-[160px] w-full object-contain"
             draggable={false}
@@ -122,8 +123,8 @@ export function WhereAreYouHeading({ onBack, onContinue, onSkip }: WhereAreYouHe
           style={{ backgroundColor: GREEN }}
         >
           {selectedLocation
-            ? `Find rentals near ${selectedLocation.city} →`
-            : "Continue →"}
+            ? copy.ctaWithCity(selectedLocation.city)
+            : copy.ctaDefault}
         </button>
       </footer>
     </div>

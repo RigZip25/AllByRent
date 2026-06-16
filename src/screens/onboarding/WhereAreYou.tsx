@@ -1,9 +1,11 @@
-import atHomeImg from "../../imports/at_home.png";
-import whileTravelingImg from "../../imports/while_traveling.png";
+import { ONBOARDING } from "../../lib/brand";
+import { onboardingAssets } from "../../lib/onboardingAssets";
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
+
+const { location: copy } = ONBOARDING;
 
 type WhereAreYouProps = {
   onAtHome: () => void;
@@ -85,11 +87,9 @@ export function WhereAreYou({
       <OnboardingTopBar onBack={onBack} onSkip={onSkip} />
       <div className="shrink-0 px-4 pb-3 pt-2 text-center">
         <h1 className="text-2xl font-bold" style={{ color: GREEN }}>
-          Where are you?
+          {copy.title}
         </h1>
-        <p className="mt-1 text-base text-gray-500">
-          This helps us show the right listings.
-        </p>
+        <p className="mt-1 text-base text-gray-500">{copy.subtitle}</p>
         {locationError ? (
           <p
             className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-left text-sm text-amber-900"
@@ -103,22 +103,22 @@ export function WhereAreYou({
       <div className="screen-scroll flex flex-col gap-5 px-4 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]">
         <ChoiceCard
           variant="earn"
-          imageSrc={atHomeImg}
-          title="I'm at home"
-          subtitle="Use your location or street address — we sort by distance to you."
-          ctaLabel={isLocatingHome ? "Finding your location…" : "Browse near me →"}
-          ariaLabel="I'm at home. Browse listings near you."
+          imageSrc={onboardingAssets.onBlock}
+          title={copy.onBlock.title}
+          subtitle={copy.onBlock.subtitle}
+          ctaLabel={isLocatingHome ? "Finding your location…" : copy.onBlock.cta}
+          ariaLabel={`${copy.onBlock.title}. Browse neighborhood garages near you.`}
           onClick={onAtHome}
           disabled={isLocatingHome}
         />
 
         <ChoiceCard
           variant="save"
-          imageSrc={whileTravelingImg}
-          title="I'm planning a trip"
-          subtitle="Find what you need at your destination before you land."
-          ctaLabel="Find at destination →"
-          ariaLabel="I'm planning a trip. Find what you need at your destination."
+          imageSrc={onboardingAssets.tripDestination}
+          title={copy.trip.title}
+          subtitle={copy.trip.subtitle}
+          ctaLabel={copy.trip.cta}
+          ariaLabel={`${copy.trip.title}. Pick a destination area.`}
           onClick={onTraveling}
           disabled={isLocatingHome}
         />

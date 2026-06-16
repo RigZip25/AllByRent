@@ -8,7 +8,7 @@ import { BottomNav } from "./BottomNav";
 
 import { RentanoChatSheet } from "../../components/RentanoChat";
 import { MrRentano } from "./MrRentano";
-import { MASCOT_NAME } from "../../lib/brand";
+import { APP_NAME, MARKETING_URL, MASCOT_NAME } from "../../lib/brand";
 import { FoundingHostPromo } from "./FoundingHostPromo";
 
 import { subcategoriesData } from "../data/subcategories";
@@ -376,13 +376,13 @@ export function Subcategory({
 
       appMode === "earn"
 
-        ? `I'm listing ${subcategoryLabel} on AllByRent — be an early host in ${cityName}! allbyrent.app`
+        ? `I'm listing ${subcategoryLabel} on ${APP_NAME} — open your garage showcase in ${cityName}! ${MARKETING_URL}`
 
-        : `Looking for ${subcategoryLabel} to rent near ${cityName} on AllByRent. Join and help fill local shelves → allbyrent.app`;
+        : `Looking for ${subcategoryLabel} near ${cityName} on ${APP_NAME}. Browse neighborhood garages → ${MARKETING_URL}`;
 
     if (typeof navigator !== "undefined" && navigator.share) {
 
-      void navigator.share({ title: "AllByRent", text: message, url: "https://allbyrent.app" }).catch(() => {
+      void navigator.share({ title: APP_NAME, text: message, url: MARKETING_URL }).catch(() => {
 
         void navigator.clipboard?.writeText(message);
 

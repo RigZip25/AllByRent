@@ -1,4 +1,4 @@
-import { BRAND_GREEN } from "../../lib/brand";
+import { APP_NAME, BRAND_GREEN } from "../../lib/brand";
 
 export function OfflineScreen() {
   return (
@@ -10,7 +10,7 @@ export function OfflineScreen() {
         You&apos;re offline
       </h1>
       <p className="mt-2 text-base text-gray-500">
-        AllByRent needs a connection. Check Wi‑Fi or mobile data and try again.
+        {APP_NAME} needs a connection. Check Wi‑Fi or mobile data and try again.
       </p>
     </div>
   );

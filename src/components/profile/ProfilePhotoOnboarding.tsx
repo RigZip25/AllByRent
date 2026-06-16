@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { APP_NAME } from "../../lib/brand";
 import { RentanoHint } from "../RentanoHint";
 import { ProfilePhotoCapture } from "./ProfilePhotoCapture";
 import { setPhotoPromptDeferred } from "../../lib/avatarStorage";
@@ -37,7 +38,7 @@ export function ProfilePhotoOnboarding({
           Add your profile photo
         </h1>
         <p className="mt-2 text-center text-[14px] leading-relaxed text-gray-600">
-          A clear photo of your face is required on AllByRent. No emoji or random avatars — this is
+          A clear photo of your face is required on {APP_NAME}. No emoji or random avatars — this is
           a trust platform.
         </p>
 

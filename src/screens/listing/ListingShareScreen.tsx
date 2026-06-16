@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Copy, Facebook, Instagram, Link2, Loader2, MessageCircle, Send, Share2 } from "lucide-react";
+import { APP_NAME, MARKETING_URL } from "../../lib/brand";
 import type { ListingDraft } from "./types";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { extractAnthropicText, postAnthropicMessages } from "../../lib/anthropicClient";
@@ -13,12 +14,12 @@ const BORDER = "#E8E6E0";
 
 function listingUrl(draft: ListingDraft): string {
   try {
-    const origin = typeof window !== "undefined" ? window.location.origin : "https://allbyrent.app";
+    const origin = typeof window !== "undefined" ? window.location.origin : MARKETING_URL;
     const url = new URL(origin);
     url.searchParams.set("listingId", draft.id);
     return url.toString();
   } catch {
-    return `https://allbyrent.app?listingId=${draft.id}`;
+    return `${MARKETING_URL}?listingId=${draft.id}`;
   }
 }
 
@@ -33,7 +34,7 @@ function buildPrompt(params: {
     `Write a short social caption in ${params.language}.`,
     "Constraints:",
     "- 1-2 sentences, friendly, neighborhood vibe.",
-    "- Mention the item and that it's available on AllByRent.",
+    `- Mention the item and that it's on ${APP_NAME} Garage Showcase.`,
     "- Include the URL at the end on a new line.",
     "- No hashtags.",
     "",
@@ -57,7 +58,7 @@ export function ListingShareScreen({
   const price = draft.pricing.dailyRate ? `$${draft.pricing.dailyRate}/day` : "Available now";
   const language = typeof navigator !== "undefined" ? navigator.language : "English";
 
-  const [caption, setCaption] = useState<string>(`${title} on AllByRent.\n${url}`);
+  const [caption, setCaption] = useState<string>(`${title} on ${APP_NAME}.\n${url}`);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cards, setCards] = useState<GeneratedShareCard[]>([]);
@@ -149,10 +150,10 @@ export function ListingShareScreen({
     try {
       if (selectedCard && "canShare" in navigator && (navigator as any).canShare?.({ files: [new File([selectedCard.blob], selectedCard.filename, { type: "image/png" })] })) {
         const file = new File([selectedCard.blob], selectedCard.filename, { type: "image/png" });
-        await navigator.share({ title: "AllByRent", text: caption, files: [file] });
+        await navigator.share({ title: APP_NAME, text: caption, files: [file] });
         return true;
       }
-      await navigator.share({ title: "AllByRent", text: caption, url });
+      await navigator.share({ title: APP_NAME, text: caption, url });
       return true;
     } catch {
       return false;

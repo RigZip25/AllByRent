@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { APP_NAME } from "../lib/brand";
 import { ArrowDownCircle, CheckCircle2, Sparkles } from "lucide-react";
 import { usePwaUpdate } from "../hooks/PwaUpdateProvider";
 import { formatBuildStamp } from "../lib/buildInfo";
@@ -58,7 +59,7 @@ export function PwaUpdateSuccessCard({ onDismiss }: { onDismiss: () => void }) {
           Version updated
         </p>
         <p className="mt-0.5 text-[14px] leading-snug text-gray-500">
-          You&apos;re on the latest AllByRent. Have a great day!
+          You&apos;re on the latest {APP_NAME}. Have a great day!
         </p>
         <p className="mt-1 text-[11px] text-gray-400">{formatBuildStamp()}</p>
         <button

@@ -2,6 +2,8 @@
 
 **How to use:** Walk the app on your Mac in order. For each row: open the screen, compare copy/UX to **Garage Showcase**, tick when done.
 
+**Screen overhaul (keep/redo/assets):** [SCREEN_OVERHAUL.md](SCREEN_OVERHAUL.md) · **App concept:** [APP_CONCEPT.md](APP_CONCEPT.md)
+
 **Brand rules:** [EVORIOS.md](EVORIOS.md) · **Task phases:** [GARAGE_SHOWCASE.md](GARAGE_SHOWCASE.md)
 
 **Legend**
@@ -22,12 +24,12 @@
 
 | # | Screen | How to open | Status | Files | What to do |
 |---|--------|-------------|--------|-------|------------|
-| A1 | Splash | Fresh session / clear onboarding | ✅ P1 | `SplashScreen.tsx`, `evorios_splash_garage.png` | Full layout: `?screen=splash` · art only: `?screen=splash&art=1` |
-| A2 | First hello (Evorios bubbles) | After splash | ✅ P1 | `FirstHello.tsx` | — |
-| A3 | What do you want | Onboarding | 🟡 S | `WhatDoYouWant.tsx` | Reframe cards: **Stock your garage** vs **Browse the block** (not generic earn/save) |
-| A4 | Where are you | Pick path | 🟡 S | `WhereAreYou.tsx`, `WhereAreYouHeading.tsx`, `WhereAreYouManual.tsx` | Earn copy → **My Garage** context; rent → **Browse** / neighborhood |
-| A5 | You are all set | End onboarding | 🟡 S | `YouAreAllSet.tsx` | Tags `Earn`/`Rent` → **My Garage** / **Browse**; button **Explore Evorios** |
-| A6 | Auth gate | Try book/list without login | 🟡 S | `AuthGate.tsx` | ✅ generic copy; 🟡 listing intent still says "Rentano" + "earning" |
+| A1 | Splash (dynamic) | Fresh session | 🟢 DONE | `SplashScreen.tsx` | `?screen=splash&dynamic=1` preview |
+| A2 | First hello | After splash | 🟢 copy | `FirstHello.tsx` | New art: `evorios_garage_roles.png` |
+| A3 | What brings you here | Onboarding | 🟢 DONE | `WhatDoYouWant.tsx` | Stock garage / Browse block |
+| A4 | Where's your block | Browse path | 🟢 DONE | `WhereAreYou*.tsx` | US trip examples |
+| A5 | You're all set | End onboarding | 🟢 DONE | `YouAreAllSet.tsx` | Explore Evorios |
+| A6 | Auth gate | Book/list w/o login | 🟢 DONE | `AuthGate.tsx` | Mr. Evorios tips |
 | A7 | Passkey setup | After first login | ⚪ | `PasskeySetup.tsx` | Optional Evorios one-liner |
 
 **Test:** clear site data → reload `http://localhost:5173/` — or open `http://localhost:5173/?screen=splash` (garage splash is on branch `cursor/evorios-rebrand-ca09`, not `main` yet)
@@ -170,15 +172,15 @@ Open: My Garage → **+** → wizard. URL: `?step=0` … `?step=6` (when wired).
 
 | Section | Copy done | UX done | Notes |
 |---------|-----------|---------|-------|
-| A Onboarding | | | |
-| B Browse | | | |
-| C My Garage | | | |
-| D Wizard | | | |
-| E Post-publish | | | |
-| F Booking | | | |
-| G Profile | | | |
-| H Evorios | | | |
-| I Infra | | | |
+| A Onboarding | ✅ | 🟡 | Need new PNGs per SCREEN_OVERHAUL |
+| B Browse | 🟡 | — | P2 feed |
+| C My Garage | 🟡 | — | Listing intro art |
+| D Wizard | 🟡 | — | Mode labels P2 |
+| E Post-publish | 🟡 | — | QR/share art |
+| F Booking | 🟡 | — | Sell checkout P4 |
+| G Profile | 🟡 | — | — |
+| H Mr. Evorios | ✅ | 🟡 | Avatar art |
+| I Infra | 🟡 | — | PWA icons |
 
 *Update this table as you walk the flow.*
 
@@ -188,4 +190,5 @@ Open: My Garage → **+** → wizard. URL: `?step=0` … `?step=6` (when wired).
 
 | Date | Note |
 |------|------|
+| 2026-06-16 | **SCREEN_OVERHAUL.md** — full keep/redo/asset audit; onboarding A2–A5 rebrand in code |
 | 2026-06-15 | Initial flow audit created — walk screen-by-screen before P2 feed redesign |

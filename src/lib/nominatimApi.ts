@@ -1,5 +1,5 @@
 const NOMINATIM_ORIGIN = "https://nominatim.openstreetmap.org";
-const USER_AGENT = "AllByRent App (contact@allbyrent.app)";
+const USER_AGENT = "Evorios App (support@evorios.com)";
 
 /** Dev server proxies /nominatim → nominatim.openstreetmap.org (avoids browser blocks). */
 export function getNominatimBaseUrl(): string {

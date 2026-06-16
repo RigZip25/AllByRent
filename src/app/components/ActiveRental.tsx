@@ -30,7 +30,7 @@ import {
 } from "../../lib/messagesStorage";
 import { hasLocalReview, submitReviewRemote } from "../../lib/reviewsStorage";
 import { ReviewPromptModal } from "../../components/reviews/ReviewPromptModal";
-import { mascotSays } from "../../lib/brand";
+import { MASCOT_NAME, mascotSays } from "../../lib/brand";
 import {
   addEvidenceRemote,
   fetchDisputeForRentalRemote,
@@ -503,7 +503,7 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
               </button>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Tip: mention <span className="font-semibold">@rentano</span> for quick help.
+              Tip: mention <span className="font-semibold">@{MASCOT_NAME.replace(/\s+/g, "").toLowerCase()}</span> for quick help.
             </p>
 
             <div className="mt-3 max-h-56 overflow-y-auto rounded-xl border border-border bg-background p-3 space-y-2">

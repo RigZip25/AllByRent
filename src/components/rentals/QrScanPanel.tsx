@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { APP_NAME } from "../../lib/brand";
 import { RentanoTip } from "../RentanoTip";
 
 const GREEN = "#0D5C3A";
@@ -169,7 +170,7 @@ export function QrScanPanel({
               Enter the {mode === "pickup" ? "pickup" : "return"} PIN
             </p>
             <p className="mt-1 text-[12px] text-gray-500">
-              This scan only works inside the AllByRent app for the renter/host on this booking.
+              This scan only works inside the {APP_NAME} app for the renter/host on this booking.
               The PIN prevents random scans
               {mode === "pickup" && contactlessInstructions?.trim()
                 ? " and unlocks contactless access details (codes and steps)."

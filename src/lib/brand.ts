@@ -38,5 +38,63 @@ export const APP_MODE_DESCRIPTIONS = {
   rent: "Browse neighborhood garages — borrow, buy, or pick up nearby.",
 } as const;
 
+/** Onboarding card copy — single source for garage showcase narrative */
+export const ONBOARDING = {
+  roleChoice: {
+    title: "What brings you here?",
+    subtitle: "We'll set up your block or your garage.",
+    stockGarage: {
+      title: "Stock my garage",
+      subtitle: "List what you own — borrow, sell, or pass along from your showcase.",
+      cta: "Open my showcase →",
+    },
+    browseBlock: {
+      title: "Browse the block",
+      subtitle: "Find gear, tools, and deals in neighborhood garages nearby.",
+      cta: "See garages near me →",
+    },
+    footer: "You can switch between My Garage and Browse anytime.",
+  },
+  location: {
+    title: "Where's your block?",
+    subtitle: "We show garages and shelves near you.",
+    onBlock: {
+      title: "I'm on my block",
+      subtitle: "Use GPS or your street address — sort by distance from home.",
+      cta: "Browse near me →",
+    },
+    trip: {
+      title: "I'm visiting another area",
+      subtitle: "Pick a city or neighborhood before you arrive.",
+      cta: "Choose destination →",
+    },
+  },
+  tripDestination: {
+    title: "Where are you headed?",
+    subtitle: "City or neighborhood where you'll pick up from a garage",
+    ctaWithCity: (city: string) => `Browse garages near ${city} →`,
+    ctaDefault: "Continue →",
+  },
+  allSet: {
+    title: "You're all set!",
+    subtitle: "Welcome to Evorios — the evolution of your household.",
+    exploreCta: "Explore Evorios →",
+    stats: [
+      { label: "Garages nearby", value: "120+" },
+      { label: "On your block", value: "2.4k" },
+      { label: "Avg showcase/mo", value: "$340" },
+    ],
+  },
+  firstHello: {
+    mascotRole: "Your garage guide",
+    bubbles: [
+      (mascot: string, product: string) =>
+        `Hey! I'm ${mascot} — your guide to the ${product}.`,
+      "Open your garage showcase or browse what's on the block.",
+      "Tap me in the menu anytime — neighbor help, any language, 24/7.",
+    ],
+  },
+} as const;
+
 export const SUPPORT_EMAIL = "support@evorios.com";
 export const MARKETING_URL = "https://evorios.com";

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
+import { APP_NAME, MASCOT_NAME } from "../../lib/brand";
 import { RentanoHint } from "../../components/RentanoHint";
 import listingSnap from "../../imports/listing_snap.png";
 import listingMagic from "../../imports/listing_magic.png";
@@ -12,18 +13,18 @@ const SWIPE_THRESHOLD = 60;
 const SLIDES = [
   {
     image: listingSnap,
-    title: "Snap a photo",
-    tip: "Snap a photo — I'll take it from there.",
+    title: "Snap from your garage",
+    tip: "Snap a photo on your shelf — I'll help with the rest.",
   },
   {
     image: listingMagic,
-    title: "Your listing, ready in seconds",
-    tip: "I filled everything in. Just check if I got it right.",
+    title: "Your showcase, ready in seconds",
+    tip: `${MASCOT_NAME} filled in the details — just check the shelf info.`,
   },
   {
     image: listingShare,
-    title: "Go live. Your neighbors are already looking.",
-    tip: "Built-in tools help you reach more people — share, boost, or just let the platform work for you.",
+    title: "Go live on the block",
+    tip: "Neighbors can browse your garage — share, boost, or let the showcase work for you.",
   },
 ] as const;
 

@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import rentanoFullImg from "../../imports/rentano_full.png";
-import allbyrentRolesImg from "../../imports/allbyrent_roles.png";
-import { APP_NAME, MASCOT_NAME, PRODUCT_METAPHOR } from "../../lib/brand";
+import { APP_NAME, MASCOT_NAME, ONBOARDING, PRODUCT_METAPHOR } from "../../lib/brand";
+import { onboardingAssets } from "../../lib/onboardingAssets";
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
 
 const GREEN = "#0D5C3A";
@@ -11,16 +10,16 @@ const BUBBLE_GAP_MS = 2600;
 const TYPING_CHAR_MS = 34;
 
 const BUBBLES = [
-  `Hey! I'm ${MASCOT_NAME} — your guide to the ${PRODUCT_METAPHOR}.`,
-  "Turn your garage into a showcase. Browse neighbors for gear, tools, and more.",
-  "Tap me in the menu anytime — any language, any question, 24/7.",
+  ONBOARDING.firstHello.bubbles[0](MASCOT_NAME, PRODUCT_METAPHOR),
+  ONBOARDING.firstHello.bubbles[1],
+  ONBOARDING.firstHello.bubbles[2],
 ];
 
 function FirstHelloRolesScene() {
   return (
     <div className="first-hello-scene" aria-label={`${PRODUCT_METAPHOR} on ${APP_NAME}`}>
       <img
-        src={allbyrentRolesImg}
+        src={onboardingAssets.garageRoles}
         alt=""
         className="first-hello-scene-hero"
         draggable={false}
@@ -153,7 +152,7 @@ export function FirstHello({
         <div className="first-hello-top">
           <div className="first-hello-mascot">
             <img
-              src={rentanoFullImg}
+              src={onboardingAssets.mrEvoriosFull}
               alt=""
               className="first-hello-mascot-avatar"
               draggable={false}
@@ -162,7 +161,7 @@ export function FirstHello({
               <p className="text-base font-bold leading-tight" style={{ color: GREEN }}>
                 {MASCOT_NAME}
               </p>
-              <p className="text-sm text-gray-500">Your garage guide</p>
+              <p className="text-sm text-gray-500">{ONBOARDING.firstHello.mascotRole}</p>
             </div>
           </div>
 
