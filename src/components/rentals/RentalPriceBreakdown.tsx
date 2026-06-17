@@ -1,3 +1,4 @@
+import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
 import { formatUsd, type RentalPriceBreakdown } from "../../lib/rentalPricing";
 
 import { formatPoundsOverLabel } from "../../lib/deliveryPricing";
@@ -101,7 +102,7 @@ export function RentalPriceBreakdownView({
       ) : null}
 
       {breakdown.insuranceFeeUsd > 0 ? (
-        <Line label="Protection fee (Safely)" amount={breakdown.insuranceFeeUsd} />
+        <Line label={DEPOSIT_PROTECTION_LABEL} amount={breakdown.insuranceFeeUsd} />
       ) : null}
 
       <Line label="Service fee (demo)" amount={breakdown.serviceFeeUsd} muted />

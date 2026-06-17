@@ -22,11 +22,7 @@ import {
 import { getPublishedListingById } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { useMediaUrl } from "../../lib/useMediaUrl";
-import {
-  deliverySummaryForListing,
-  listingOffersDelivery,
-  parseListingDailyRate,
-} from "../../lib/rentalPricing";
+import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
 
 interface ItemDetailProps {
   itemId: string;
@@ -91,7 +87,7 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
 
           <div className="absolute top-4 left-4 bg-primary/90 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5">
             <Shield className="w-3.5 h-3.5" />
-            <span>Auto-Insurance Included</span>
+            <span>{DEPOSIT_PROTECTION_LABEL}</span>
           </div>
 
           {isHeavy ? (
@@ -222,7 +218,7 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Shield className="w-4 h-4 text-primary" />
                 </div>
-                <span className="text-sm">Auto-insurance coverage</span>
+                <span className="text-sm">{DEPOSIT_PROTECTION_LABEL} on rentals</span>
               </div>
 
               <div className="flex items-center gap-3">

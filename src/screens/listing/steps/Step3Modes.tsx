@@ -552,7 +552,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                     placeholder="500"
                   />
                 </motion.div>
-                <ModeNote>💡 No insurance. Platform commission applies.</ModeNote>
+                <ModeNote>💡 Platform commission applies. No deposit on buys.</ModeNote>
               </ModeCard>
             );
           }
@@ -573,7 +573,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
               >
                 This item will be offered completely free
               </motion.div>
-              <ModeNote>💡 No commission, no insurance, no deposit.</ModeNote>
+              <ModeNote>💡 Free giveaway — no deposit, no commission.</ModeNote>
             </ModeCard>
           );
         })}

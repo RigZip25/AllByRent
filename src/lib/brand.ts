@@ -78,12 +78,8 @@ export const ONBOARDING = {
   allSet: {
     title: "You're all set!",
     subtitle: "Welcome to Evorios — the evolution of your household.",
-    exploreCta: "Explore Evorios →",
-    stats: [
-      { label: "Garages nearby", value: "120+" },
-      { label: "On your block", value: "2.4k" },
-      { label: "Avg showcase/mo", value: "$340" },
-    ],
+    exploreCta: "Explore the block →",
+    stockGarageCta: "Stock my garage →",
   },
   firstHello: {
     mascotRole: "Your garage guide",

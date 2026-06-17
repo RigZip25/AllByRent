@@ -69,7 +69,7 @@ function resolvePostResetUrl(): string | null {
   }
 }
 
-/** Wipe AllByRent local state, PWA caches/service workers, and reload. */
+/** Wipe Evorios local state, PWA caches/service workers, and reload. */
 export async function resetAllAppData(): Promise<void> {
   if (typeof window === "undefined") return;
   try {
