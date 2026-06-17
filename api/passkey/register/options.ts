@@ -36,7 +36,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const rpID = getPasskeyRpIdForRequest(origin);
 
   const options = await generateRegistrationOptions({
-    rpName: "AllByRent",
+    rpName: "Evorios",
     rpID,
     userName: user.email,
     userID: new TextEncoder().encode(user.id),

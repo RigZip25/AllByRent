@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { APP_NAME } from "../../lib/brand";
 
 type Props = { children: ReactNode };
 type State = { error: Error | null };
@@ -11,7 +12,7 @@ export class AppErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
-    console.error("[AllByRent]", error, info.componentStack);
+    console.error(`[${APP_NAME}]`, error, info.componentStack);
   }
 
   render() {

@@ -62,7 +62,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Hosting & listings",
     question: "Which pricing modes should I choose?",
     answer:
-      "Rent is most common. Add Sell or Rent-to-own if you want to offer purchase. Gift is for free items. Step 3 shows only fields relevant to the modes you turn on.",
+      "Rent is most common. Add Buy if you want to sell, or Gift for free items. Step 3 shows only fields relevant to the modes you turn on.",
     keywords: ["daily", "weekly", "deposit"],
   },
   {

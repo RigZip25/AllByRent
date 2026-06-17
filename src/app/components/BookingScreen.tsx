@@ -237,7 +237,7 @@ export function BookingScreen({
       totalUsd: breakdown.totalUsd,
       itemHeavy: listing.handoff.itemHeavy,
       insuranceIncluded: true,
-      listingModes: listing.modes.rentToOwn ? ["rent", "rto"] : ["rent"],
+      listingModes: ["rent"],
       fulfillmentMethod: fulfillment,
       deliveryAddress: deliveryRequested ? deliveryAddress.trim() : undefined,
       contactlessInstructions: listing.handoff.contactlessInstructions || undefined,

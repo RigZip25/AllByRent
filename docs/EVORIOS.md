@@ -6,7 +6,7 @@
 
 **Walk the app screen-by-screen:** [FLOW_AUDIT.md](FLOW_AUDIT.md) — what to change at each step (✅ / 🟡 / 🟠 / 🔴).
 
-**Master reshape brief (10 tasks):** [EVORIOS_CURSOR_BRIEF.md](EVORIOS_CURSOR_BRIEF.md) · [status tracker](EVORIOS_RESHAPE_STATUS.md)
+**Master reshape brief (10 tasks):** [EVORIOS_CURSOR_BRIEF.md](EVORIOS_CURSOR_BRIEF.md) · [status tracker](EVORIOS_RESHAPE_STATUS.md) · [task board](TASK_BOARD.md)
 
 ---
 

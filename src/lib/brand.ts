@@ -98,3 +98,24 @@ export const ONBOARDING = {
 
 export const SUPPORT_EMAIL = "support@evorios.com";
 export const MARKETING_URL = "https://evorios.com";
+
+/** QR sticker PDF download names (user-visible). */
+export const QR_PDF_FILENAMES = {
+  sticker: "Evorios-QR-Sticker.pdf",
+  stickerLetter: "Evorios-QR-Sticker-Letter.pdf",
+  stickerA4: "Evorios-QR-Sticker-A4.pdf",
+  sticker3x3: "Evorios-QR-Sticker-3x3.pdf",
+  stickers: "Evorios-QR-Stickers.pdf",
+  stickersBulk: "Evorios-QR-Stickers-Bulk.pdf",
+  stickersBulkLetter: "Evorios-QR-Stickers-Bulk-Letter.pdf",
+} as const;
+
+/** Stage 1 listing modes shown in UI (RTO removed; enum kept in types). */
+export const LISTING_MODE_LABELS = {
+  rent: "Rent",
+  sell: "Buy",
+  gift: "Gift",
+} as const;
+
+/** Risk copy — Stage 1 deposit only, not insurance. */
+export const DEPOSIT_PROTECTION_LABEL = "Deposit protection";

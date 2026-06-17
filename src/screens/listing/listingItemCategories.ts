@@ -495,7 +495,7 @@ export type CategoryModeRules = {
 const DEFAULT_CATEGORY_MODES: CategoryModeRules = {
   rent: true,
   sell: true,
-  rentToOwn: true,
+  rentToOwn: false,
   gift: true,
   replacementValueLabel: "Estimated Replacement Value",
   replacementValueHelper: "Cost to buy new — used for insurance calculation",
@@ -507,7 +507,7 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   "Tools & DIY": {
     rent: true,
     sell: true,
-    rentToOwn: true,
+    rentToOwn: false,
     gift: true,
     replacementValueLabel: "Estimated Replacement Value",
     replacementValueHelper: "Cost to buy new",
@@ -517,7 +517,7 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   "Photo & Video": {
     rent: true,
     sell: true,
-    rentToOwn: true,
+    rentToOwn: false,
     gift: true,
     replacementValueLabel: "Estimated Replacement Value",
     replacementValueHelper: "Cost to buy new",
@@ -527,7 +527,7 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   "Electronics & Tech": {
     rent: true,
     sell: true,
-    rentToOwn: true,
+    rentToOwn: false,
     gift: true,
     replacementValueLabel: "Estimated Replacement Value",
     replacementValueHelper: "Cost to buy new",
@@ -537,7 +537,7 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   "Home & Kitchen": {
     rent: true,
     sell: true,
-    rentToOwn: true,
+    rentToOwn: false,
     gift: true,
     replacementValueLabel: "Estimated Replacement Value",
     replacementValueHelper: "Cost to buy new",
@@ -547,7 +547,7 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   "Outdoor & Camping": {
     rent: true,
     sell: true,
-    rentToOwn: true,
+    rentToOwn: false,
     gift: true,
     replacementValueLabel: "Estimated Replacement Value",
     replacementValueHelper: "Cost to buy new",
@@ -557,7 +557,7 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   "Sports & Recreation": {
     rent: true,
     sell: true,
-    rentToOwn: true,
+    rentToOwn: false,
     gift: true,
     replacementValueLabel: "Estimated Replacement Value",
     replacementValueHelper: "Cost to buy new",
@@ -567,7 +567,7 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   "Bikes & Scooters": {
     rent: true,
     sell: true,
-    rentToOwn: true,
+    rentToOwn: false,
     gift: true,
     replacementValueLabel: "Estimated Replacement Value",
     replacementValueHelper: "Cost to buy new",
@@ -577,7 +577,7 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   "Music & Audio": {
     rent: true,
     sell: true,
-    rentToOwn: true,
+    rentToOwn: false,
     gift: true,
     replacementValueLabel: "Estimated Replacement Value",
     replacementValueHelper: "Cost to buy new",
@@ -587,7 +587,7 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   "Gym & Fitness": {
     rent: true,
     sell: true,
-    rentToOwn: true,
+    rentToOwn: false,
     gift: true,
     replacementValueLabel: "Estimated Replacement Value",
     replacementValueHelper: "Cost to buy new",
@@ -597,7 +597,7 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   "Baby & Kids": {
     rent: true,
     sell: true,
-    rentToOwn: true,
+    rentToOwn: false,
     gift: true,
     replacementValueLabel: "Estimated Replacement Value",
     replacementValueHelper: "Cost to buy new",
@@ -607,7 +607,7 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   "Office & Business": {
     rent: true,
     sell: true,
-    rentToOwn: true,
+    rentToOwn: false,
     gift: true,
     replacementValueLabel: "Estimated Replacement Value",
     replacementValueHelper: "Cost to buy new",
@@ -617,7 +617,7 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   "Garden & Yard": {
     rent: true,
     sell: true,
-    rentToOwn: true,
+    rentToOwn: false,
     gift: true,
     replacementValueLabel: "Estimated Replacement Value",
     replacementValueHelper: "Cost to buy new",
@@ -627,7 +627,7 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   "Unique & Other": {
     rent: true,
     sell: true,
-    rentToOwn: true,
+    rentToOwn: false,
     gift: true,
     replacementValueLabel: "Estimated Replacement Value",
     replacementValueHelper: "Cost to buy new",
@@ -712,7 +712,7 @@ export function getCategoryModeRules(category: string): CategoryModeRules {
 
 export function categoryHasRestrictedModes(category: string): boolean {
   const rules = getCategoryModeRules(category);
-  return !rules.rent || !rules.sell || !rules.rentToOwn || !rules.gift;
+  return !rules.rent || !rules.sell || !rules.gift;
 }
 
 /** Period-tier rental pricing: event (1 day), short-term (3 days / 1 week), long-term (2 weeks / 1 month). */

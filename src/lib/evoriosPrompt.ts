@@ -26,7 +26,7 @@ export type EvoriosRequestContext = {
 const LISTING_STEP_HINTS: Record<number, string> = {
   1: "Photos: clear, well-lit shots from the garage or shelf; AI can suggest title and category after upload.",
   2: "Item Info: title, category, condition, description, replacement value.",
-  3: "How to share: borrow, sell, rent-to-own, or gift — set prices for the modes you enable.",
+  3: "How to share: rent, sell, or gift — set prices for the modes you enable.",
   4: "Pickup & Delivery: porch, in-person, contactless, or delivery by distance.",
   5: "Availability: blocked dates and pause your showcase.",
   6: "QR Code: sticker for pickup verification on borrow listings.",

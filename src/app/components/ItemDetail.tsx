@@ -135,10 +135,10 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
                   <span>Buy</span>
                 </span>
               ) : null}
-              {listing?.modes.rentToOwn ? (
-                <span className="px-3 py-1.5 bg-purple-500/10 text-purple-600 rounded-lg text-xs font-medium flex items-center gap-1.5">
-                  <span>🔑</span>
-                  <span>Rent to Own</span>
+              {listing?.modes.gift ? (
+                <span className="px-3 py-1.5 bg-amber-500/10 text-amber-700 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                  <span>🎁</span>
+                  <span>Gift</span>
                 </span>
               ) : null}
             </div>

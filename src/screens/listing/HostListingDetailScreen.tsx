@@ -13,6 +13,7 @@ import {
   removeListingFromQrBulkQueue,
   updatePublishedListing,
 } from "../../lib/listingStorage";
+import { QR_PDF_FILENAMES } from "../../lib/brand";
 import { generateQRStickerPdf } from "../../lib/generateQRSticker";
 import { getListingDisplayTitle, getListingQrUrl, listingDraftToStickerRow } from "../../lib/listingQr";
 import {
@@ -229,7 +230,7 @@ export function HostListingDetailScreen({
     setPdfError(null);
     try {
       const row = listingDraftToStickerRow(listing);
-      const generated = await generateQRStickerPdf([row], { filename: "AllByRent-QR-Sticker.pdf" });
+      const generated = await generateQRStickerPdf([row], { filename: QR_PDF_FILENAMES.sticker });
       if (!generated) throw new Error("No PDF generated");
       window.open(generated.objectUrl, "_blank", "noopener,noreferrer");
     } catch {
@@ -252,7 +253,7 @@ export function HostListingDetailScreen({
         .map((id) => getPublishedListingById(id))
         .filter((l): l is NonNullable<typeof l> => Boolean(l))
         .map(listingDraftToStickerRow);
-      const generated = await generateQRStickerPdf(rows, { filename: "AllByRent-QR-Stickers-Bulk.pdf" });
+      const generated = await generateQRStickerPdf(rows, { filename: QR_PDF_FILENAMES.stickersBulk });
       if (!generated) throw new Error("No PDF generated");
       window.open(generated.objectUrl, "_blank", "noopener,noreferrer");
     } catch {

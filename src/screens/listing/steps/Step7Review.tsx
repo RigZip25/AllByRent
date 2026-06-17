@@ -103,14 +103,6 @@ export function Step7Review({
       detail: price ?? "Price set",
     });
   }
-  if (draft.modes.rentToOwn) {
-    const monthly = formatMoney(draft.pricing.rtoTotalPrice);
-    modeRows.push({
-      icon: "🤝",
-      label: "RTO",
-      detail: monthly ? `${monthly} total` : "Terms set",
-    });
-  }
   if (draft.modes.gift) {
     modeRows.push({ icon: "🎁", label: "Gift", detail: "Free" });
   }

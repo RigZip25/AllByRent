@@ -9,7 +9,7 @@
   "theme_color": "#0D5C3A",
   "icons": [
     {
-      "src": "/AllByRent/pwa-icon.svg",
+      "src": "/pwa-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"

@@ -1,3 +1,5 @@
+import { APP_NAME } from "../lib/brand";
+
 const DISMISS_KEY = "allbyrent_pwa_install_dismissed";
 export const PWA_INSTALL_DISMISS_DAYS = 14;
 
@@ -68,7 +70,7 @@ export function clearInstallPromptDismissal(): void {
 export function confirmDismissInstallTip(): boolean {
   if (typeof window === "undefined") return true;
   return window.confirm(
-    `Hide the install tip for ${PWA_INSTALL_DISMISS_DAYS} days?\n\nYou can still add AllByRent from your browser menu anytime.`,
+    `Hide the install tip for ${PWA_INSTALL_DISMISS_DAYS} days?\n\nYou can still add ${APP_NAME} from your browser menu anytime.`,
   );
 }
 

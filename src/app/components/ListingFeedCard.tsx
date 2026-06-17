@@ -2,7 +2,7 @@ import { Heart, QrCode, Shield, Star } from "lucide-react";
 import type { MediaRef } from "../../lib/mediaStore";
 import { useMediaUrl } from "../../lib/useMediaUrl";
 
-type OfferType = "Rent" | "Buy" | "Rent to Own" | "Gift";
+type OfferType = "Rent" | "Buy" | "Gift";
 
 export function offerTypeFromModes(modes: {
   rent: boolean;
@@ -11,7 +11,6 @@ export function offerTypeFromModes(modes: {
   gift: boolean;
 }): OfferType {
   if (modes.gift) return "Gift";
-  if (modes.rentToOwn) return "Rent to Own";
   if (modes.sell) return "Buy";
   return "Rent";
 }
@@ -42,7 +41,6 @@ export function ListingFeedCard({
   const offerColors: Record<string, string> = {
     Rent: "bg-primary",
     Buy: "bg-blue-500",
-    "Rent to Own": "bg-purple-500",
     Gift: "bg-accent",
   };
 

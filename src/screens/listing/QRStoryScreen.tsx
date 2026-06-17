@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import qrStory1 from "../../imports/qr_story_1.png";
 import qrStory2 from "../../imports/qr_story_2.png";
 import qrStory3 from "../../imports/qr_story_3.png";
-import { MASCOT_NAME } from "../../lib/brand";
+import { MASCOT_NAME, QR_PDF_FILENAMES } from "../../lib/brand";
 import { RentanoHint } from "../../components/RentanoHint";
 import { generateQRStickerPdf } from "../../lib/generateQRSticker";
 
@@ -68,7 +68,7 @@ export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
     setPdfError(null);
     try {
       // Generic sheet — host will also get per-listing PDF on the next screen.
-      const generated = await generateQRStickerPdf([], { filename: "AllByRent-QR-Stickers.pdf" });
+      const generated = await generateQRStickerPdf([], { filename: QR_PDF_FILENAMES.stickers });
       if (!generated) throw new Error("No PDF generated");
       window.open(generated.objectUrl, "_blank", "noopener,noreferrer");
     } catch {

@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Check } from "lucide-react";
 import type { ListingDraft, MinimumRentalPeriod, StepProps } from "../types";
 import { RentanoHint } from "../../../components/RentanoHint";
-import { estimateInsuranceFeeCents, parseUsdToCents } from "../../../lib/insurance";
+import { DEPOSIT_PROTECTION_LABEL, LISTING_MODE_LABELS } from "../../../lib/brand";
 import {
   calculateRentalPrices,
   categoryHasRestrictedModes,
@@ -187,12 +187,6 @@ const MODE_CARD_CONFIG: {
 }[] = [
   { key: "rent", icon: "🔑", title: "Rent", subtitle: "Earn daily, weekly or monthly" },
   { key: "sell", icon: "🏷️", title: "Sell", subtitle: "One-time sale, item leaves your hands" },
-  {
-    key: "rentToOwn",
-    icon: "🤝",
-    title: "Rent to Own",
-    subtitle: "Monthly payments until they own it",
-  },
   { key: "gift", icon: "🎁", title: "Gift", subtitle: "Give it away for free" },
 ];
 
@@ -249,15 +243,19 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
       const nextModes = { ...current.modes };
       let changed = false;
 
-      (["rent", "sell", "rentToOwn", "gift"] as const).forEach((key) => {
+      (["rent", "sell", "gift"] as const).forEach((key) => {
         if (!rules[key] && nextModes[key]) {
           nextModes[key] = false;
           changed = true;
         }
       });
 
-      const hasActiveMode =
-        nextModes.rent || nextModes.sell || nextModes.rentToOwn || nextModes.gift;
+      if (nextModes.rentToOwn) {
+        nextModes.rentToOwn = false;
+        changed = true;
+      }
+
+      const hasActiveMode = nextModes.rent || nextModes.sell || nextModes.gift;
       if (!hasActiveMode && rules.rent) {
         nextModes.rent = true;
         changed = true;
@@ -305,8 +303,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
     setDraft((current) => {
       const nextModes = { ...current.modes, [key]: !current.modes[key] };
       const rules = getCategoryModeRules(current.category);
-      const hasActiveMode =
-        nextModes.rent || nextModes.sell || nextModes.rentToOwn || nextModes.gift;
+      const hasActiveMode = nextModes.rent || nextModes.sell || nextModes.gift;
       if (!hasActiveMode && rules.rent) {
         nextModes.rent = true;
       }
@@ -323,13 +320,6 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
 
   const longTermEnabled = Boolean(draft.pricing.longTermEnabled);
 
-  const rtoTotal = parseFloat(draft.pricing.rtoTotalPrice);
-  const rtoPeriod = parseFloat(draft.pricing.rtoPeriodMonths);
-  const monthlyPayment =
-    !Number.isNaN(rtoTotal) && !Number.isNaN(rtoPeriod) && rtoTotal > 0 && rtoPeriod > 0
-      ? rtoTotal / rtoPeriod
-      : 0;
-
   const replacementValue = parseFloat(draft.replacementValue);
   const dailyRate = parseFloat(draft.pricing.dailyRate);
   const avg = AVG_RENTAL_DAYS[draft.category] ?? 3;
@@ -342,16 +332,6 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
   const pricingTipMessage = showRoiTip
     ? `Prices based on current market — 15% below rental stores. Rent it ${rentalsToBreakEven} times and it pays for itself.`
     : "Prices based on current market — 15% below rental stores.";
-
-  const insuranceFeeEstimateUsd = useMemo(() => {
-    const replacementValueCents = parseUsdToCents(draft.replacementValue);
-    if (replacementValueCents <= 0) return null;
-    const feeCents = estimateInsuranceFeeCents({
-      replacementValueCents,
-      rentalDays: avg,
-    });
-    return feeCents / 100;
-  }, [avg, draft.replacementValue]);
 
   return (
     <motion.div
@@ -548,7 +528,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                   </motion.div>
                 </motion.div>
                 <ModeNote>
-                  💡 Safely protection fee {insuranceFeeEstimateUsd ? `~$${insuranceFeeEstimateUsd.toFixed(2)}` : ""} is added at checkout based on replacement value.
+                  💡 {DEPOSIT_PROTECTION_LABEL} via Stripe hold — released when the item is returned.
                 </ModeNote>
               </ModeCard>
             );
@@ -573,73 +553,6 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                   />
                 </motion.div>
                 <ModeNote>💡 No insurance. Platform commission applies.</ModeNote>
-              </ModeCard>
-            );
-          }
-
-          if (card.key === "rentToOwn") {
-            return (
-              <ModeCard
-                key="rentToOwn"
-                icon={card.icon}
-                title={card.title}
-                subtitle={card.subtitle}
-                active={draft.modes.rentToOwn}
-                onToggle={() => toggleMode("rentToOwn")}
-              >
-                <motion.div layout className="space-y-3">
-                  <motion.div layout="position">
-                    <FieldLabel label="Total price" required />
-                    <MoneyInput
-                      value={draft.pricing.rtoTotalPrice}
-                      onChange={(value) => updatePricing("rtoTotalPrice", value)}
-                      placeholder="1200"
-                    />
-                  </motion.div>
-                  <motion.div layout="position">
-                    <FieldLabel label="Period" required />
-                    <motion.div className="flex items-center gap-2" layout="position">
-                      <input
-                        type="number"
-                        min={1}
-                        value={draft.pricing.rtoPeriodMonths}
-                        onChange={(event) =>
-                          updatePricing("rtoPeriodMonths", event.target.value)
-                        }
-                        placeholder="12"
-                        className={selectClassName}
-                      />
-                      <span className="shrink-0 text-sm text-gray-500">months</span>
-                    </motion.div>
-                  </motion.div>
-                  <motion.div layout="position">
-                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-700">
-                      MINIMUM RENTAL PERIOD
-                    </label>
-                    <div className={`${selectClassName} bg-gray-50 text-gray-600`}>
-                      1 month
-                    </div>
-                  </motion.div>
-                  <motion.div
-                    layout="position"
-                    className="rounded-xl px-4 py-3 text-center font-bold"
-                    style={{ backgroundColor: "#F0FDF4", color: GREEN }}
-                  >
-                    Monthly payment: $
-                    {monthlyPayment > 0 ? monthlyPayment.toFixed(0) : "___"}
-                  </motion.div>
-                  <motion.div layout="position">
-                    <FieldLabel label="Security deposit" />
-                    <MoneyInput
-                      value={draft.pricing.securityDeposit}
-                      onChange={(value) => updatePricing("securityDeposit", value)}
-                      placeholder="200"
-                    />
-                  </motion.div>
-                </motion.div>
-                <ModeNote>
-                  💡 Insurance active full duration. 5-day grace period on default.
-                </ModeNote>
               </ModeCard>
             );
           }

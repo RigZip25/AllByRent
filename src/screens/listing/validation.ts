@@ -61,7 +61,6 @@ export function isListingStepValid(step: number, draft: ListingDraft): boolean {
       const hasMode =
         (rules.rent && modes.rent) ||
         (rules.sell && modes.sell) ||
-        (rules.rentToOwn && modes.rentToOwn) ||
         (rules.gift && modes.gift);
       if (!hasMode) return false;
       if (modes.rent && rules.rent) {
@@ -86,13 +85,6 @@ export function isListingStepValid(step: number, draft: ListingDraft): boolean {
         }
       }
       if (modes.sell && rules.sell && !pricing.salePrice.trim()) return false;
-      if (
-        modes.rentToOwn &&
-        rules.rentToOwn &&
-        (!pricing.rtoTotalPrice.trim() || !pricing.rtoPeriodMonths.trim())
-      ) {
-        return false;
-      }
       return true;
     }
 

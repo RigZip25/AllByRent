@@ -103,7 +103,7 @@ function pwaPlugin() {
     })
   } catch {
     console.warn(
-      '[AllByRent] vite-plugin-pwa not installed — run: npm install -D vite-plugin-pwa',
+      '[Evorios] vite-plugin-pwa not installed — run: npm install -D vite-plugin-pwa',
     )
     return null
   }
@@ -134,7 +134,7 @@ export default defineConfig(({ mode }) => {
   const githubRepo =
     process.env.GITHUB_REPOSITORY?.split('/')[1] ??
     process.env.VITE_GITHUB_PAGES_REPO ??
-    'AllByRent'
+    'Evorios'
   const base =
     process.env.GITHUB_PAGES === 'true' ? `/${githubRepo}/` : '/'
 

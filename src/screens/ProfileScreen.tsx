@@ -25,6 +25,7 @@ import {
   saveAvatarPhoto,
   setPhotoPromptDeferred,
 } from "../lib/avatarStorage";
+import { APP_MODE_LABELS } from "../lib/brand";
 import { getAppMode, type AppMode } from "../lib/appMode";
 import { formatPlanUsage, loadSubscriptionPlanId } from "../lib/subscriptionPlans";
 import {
@@ -129,7 +130,7 @@ function ModeToggle({ mode, onChange }: { mode: AppMode; onChange: (m: AppMode) 
               color: active ? "white" : "#888",
             }}
           >
-            {tab === "rent" ? "Rent" : "Earn"}
+            {APP_MODE_LABELS[tab]}
           </button>
         );
       })}
@@ -335,7 +336,7 @@ export function ProfileScreen({
         <div className="mb-4">
           <ModeToggle mode={mode} onChange={handleModeChange} />
           <p className="mt-2 px-1 text-[12px] text-gray-500">
-            Rent or Earn — same profile. Home opens in this mode.
+            Browse or stock your garage — same profile. Home opens on the block.
           </p>
         </div>
 

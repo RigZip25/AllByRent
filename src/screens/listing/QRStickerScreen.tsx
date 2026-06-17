@@ -17,6 +17,7 @@ import {
 import { loadUserProfile, saveUserProfile } from "../../lib/userProfileStorage";
 import type { ListingDraft } from "./types";
 import type { Dispatch, SetStateAction } from "react";
+import { APP_NAME, QR_PDF_FILENAMES } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
 
 const GREEN = "#0D5C3A";
@@ -42,7 +43,7 @@ export function QRStickerScreen({
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [pdfFilename, setPdfFilename] = useState<string>("AllByRent-QR-Stickers.pdf");
+  const [pdfFilename, setPdfFilename] = useState<string>(QR_PDF_FILENAMES.stickers);
   const [actionsOpen, setActionsOpen] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState(() => loadUserProfile().email ?? "");
@@ -86,7 +87,7 @@ export function QRStickerScreen({
     const generated = await generateQRStickerPdf(rows, {
       filename:
         options?.filename ??
-        (ids.length > 1 ? "AllByRent-QR-Stickers-Bulk.pdf" : "AllByRent-QR-Sticker.pdf"),
+        (ids.length > 1 ? QR_PDF_FILENAMES.stickersBulk : QR_PDF_FILENAMES.sticker),
       paper: options?.paper,
       layout: options?.layout,
       labelIn: options?.labelIn,
@@ -103,7 +104,7 @@ export function QRStickerScreen({
     setPdfLoading(true);
     setPdfError(null);
     try {
-      const url = await generatePdf([draft.id], { paper: "letter", layout: "sheet", labelIn: 2, filename: "AllByRent-QR-Sticker-Letter.pdf" });
+      const url = await generatePdf([draft.id], { paper: "letter", layout: "sheet", labelIn: 2, filename: QR_PDF_FILENAMES.stickerLetter });
       window.open(url, "_blank", "noopener,noreferrer");
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
@@ -121,7 +122,7 @@ export function QRStickerScreen({
         setPdfError("No items in bulk queue yet.");
         return;
       }
-      const url = await generatePdf(ids, { paper: "letter", layout: "sheet", labelIn: 2, filename: "AllByRent-QR-Stickers-Bulk-Letter.pdf" });
+      const url = await generatePdf(ids, { paper: "letter", layout: "sheet", labelIn: 2, filename: QR_PDF_FILENAMES.stickersBulkLetter });
       window.open(url, "_blank", "noopener,noreferrer");
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
@@ -135,9 +136,9 @@ export function QRStickerScreen({
     setPdfError(null);
     try {
       if (kind === "a4") {
-        await generatePdf([draft.id], { paper: "a4", layout: "sheet", labelIn: 2, filename: "AllByRent-QR-Sticker-A4.pdf" });
+        await generatePdf([draft.id], { paper: "a4", layout: "sheet", labelIn: 2, filename: QR_PDF_FILENAMES.stickerA4 });
       } else {
-        await generatePdf([draft.id], { paper: "a4", layout: "single", labelIn: 3, filename: "AllByRent-QR-Sticker-3x3.pdf" });
+        await generatePdf([draft.id], { paper: "a4", layout: "single", labelIn: 3, filename: QR_PDF_FILENAMES.sticker3x3 });
       }
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
@@ -159,10 +160,10 @@ export function QRStickerScreen({
         }
       }
       const to = encodeURIComponent(email.trim());
-      const subject = encodeURIComponent("AllByRent QR sticker PDF");
+      const subject = encodeURIComponent(`${APP_NAME} QR sticker PDF`);
       const listingUrl = getListingQrUrl(draft.qrToken ?? draft.id);
       const body = encodeURIComponent(
-        `Here’s your AllByRent QR sticker.\n\nListing link:\n${listingUrl}\n\nPDF tip:\nMost email clients can’t attach a PDF from the browser automatically. Use the Download button in the app, then attach the PDF from your files (desktop is easiest).`,
+        `Here’s your ${APP_NAME} QR sticker.\n\nListing link:\n${listingUrl}\n\nPDF tip:\nMost email clients can’t attach a PDF from the browser automatically. Use the Download button in the app, then attach the PDF from your files (desktop is easiest).`,
       );
       window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
     } catch {
