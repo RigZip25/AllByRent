@@ -185,9 +185,9 @@ const MODE_CARD_CONFIG: {
   title: string;
   subtitle: string;
 }[] = [
-  { key: "rent", icon: "🔑", title: "Rent", subtitle: "Earn daily, weekly or monthly" },
-  { key: "sell", icon: "🏷️", title: "Sell", subtitle: "One-time sale, item leaves your hands" },
-  { key: "gift", icon: "🎁", title: "Gift", subtitle: "Give it away for free" },
+  { key: "rent", icon: "🔑", title: LISTING_MODE_LABELS.rent, subtitle: "Earn daily, weekly or monthly" },
+  { key: "sell", icon: "🏷️", title: LISTING_MODE_LABELS.sell, subtitle: "One-time sale, item leaves your hands" },
+  { key: "gift", icon: "🎁", title: LISTING_MODE_LABELS.gift, subtitle: "Give it away for free" },
 ];
 
 function getRateFieldsForMinimumPeriod(minimumPeriod: MinimumRentalPeriod) {
