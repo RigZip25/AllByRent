@@ -58,14 +58,13 @@ export function markRoleChosen(): void {
 
 export type OnboardingResumeScreen =
   | "firstHello"
-  | "whatDoYouWant"
   | "whereAreYou"
   | "home";
 
 /** Next screen after splash (or when skipping splash after auth callback). */
 export function resolveOnboardingResumeScreen(): OnboardingResumeScreen {
   if (!isIntroDone()) return "firstHello";
-  if (!hasRoleChoice() && !isOnboardingComplete()) return "whatDoYouWant";
+  if (!isOnboardingComplete()) return "whereAreYou";
   return "home";
 }
 

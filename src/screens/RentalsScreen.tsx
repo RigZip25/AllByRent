@@ -175,15 +175,19 @@ function sortHistory(list: RentalBooking[], sort: HistorySort): RentalBooking[] 
 
 export function RentalsScreen({
   onHome,
+  onSearch,
+  onGarage,
+  onStockGarage,
   onProfile,
-  onFourthTab,
   onOpenRental,
   onViewProfile,
   onReRent,
 }: {
   onHome: () => void;
-  onProfile: () => void;
-  onFourthTab: () => void;
+  onSearch: () => void;
+  onGarage: () => void;
+  onStockGarage: () => void;
+  onProfile?: () => void;
   onOpenRental: (bookingId: string) => void;
   onViewProfile: (userId: string) => void;
   onReRent?: (listingTitle: string) => void;
@@ -422,13 +426,12 @@ export function RentalsScreen({
 
       <div className="shrink-0">
         <BottomNav
-          activeTab="rentals"
-          appMode={mode}
+          activeTab="none"
           onHome={onHome}
-          onRentals={() => undefined}
+          onSearch={onSearch}
+          onAdd={onStockGarage}
+          onGarage={onGarage}
           onRentano={() => setRentanoOpen(true)}
-          onFourthTab={onFourthTab}
-          onProfile={onProfile}
         />
       </div>
 

@@ -65,12 +65,16 @@ function FavoriteCard({
 export function FavoritesScreen({
   onHome,
   onRentals,
-  onFourthTab,
+  onSearch,
+  onGarage,
+  onStockGarage,
   onProfile,
 }: {
   onHome: () => void;
   onRentals: () => void;
-  onFourthTab: () => void;
+  onSearch: () => void;
+  onGarage: () => void;
+  onStockGarage: () => void;
   onProfile: () => void;
 }) {
   const [rentanoOpen, setRentanoOpen] = useState(false);
@@ -136,13 +140,12 @@ export function FavoritesScreen({
 
       <div className="shrink-0">
         <BottomNav
-          activeTab="favorites"
-          appMode={mode}
+          activeTab="none"
           onHome={onHome}
-          onRentals={onRentals}
+          onSearch={onSearch}
+          onAdd={onStockGarage}
+          onGarage={onGarage}
           onRentano={() => setRentanoOpen(true)}
-          onFourthTab={onFourthTab}
-          onProfile={onProfile}
         />
       </div>
 

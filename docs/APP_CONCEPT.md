@@ -33,32 +33,21 @@
 
 ### Домашняя страница (Home)
 
-Два режима — переключатель сверху:
+**Спека (согласовано):** [HOME_REDESIGN.md](HOME_REDESIGN.md)
 
-| Режим | Ключ | UI | Ощущение |
-|-------|------|-----|----------|
-| **My Garage** | `earn` | Мой гараж | «Что у меня на витрине», статистика, + добавить |
-| **Browse** | `rent` | Обзор квартала | «Гаражи соседей рядом», категории, поиск |
+Home = **окно на квартал**, без переключателя My Garage / Browse.
 
-**P2 (целевой вид Browse):**
+| Слой | Содержание |
+|------|------------|
+| **Search-hero** | «What do you need?» — семантический поиск (P2), сейчас keyword |
+| **Чипсы** | All · Rent · Buy · Gift — фильтры, не ворота |
+| **Линзы** | **Feed** (default) · **Garages** · Map (Stage 2) |
+| **Карточка** | Вещь + цена + **доверие** (гараж · ⭐ · mi) |
+| **Nav** | Home · Search · **＋** · Garage · Mr.E |
 
-- Лента **домов/гаражей**, а не только товаров: аватар хозяина, расстояние, «3 items on shelf»
-- Категории = полки (Tools, Outdoor, Kids…)
-- Локация: «On the block» / ваш адрес
+**My Garage** — отдельная вкладка **Garage** (витрина, брони, CTA stock). Настройки — gear в Garage → Profile.
 
-**P2 (целевой вид My Garage):**
-
-- Сводка: активные листинги, брони, доход
-- Быстрые действия: Add to showcase, QR, insights
-- Mr. Evorios: «Stock one more item this week?»
-
-**Нижняя навигация (5 вкладок):**
-
-1. Home  
-2. Rentals / Activity (брони и сделки)  
-3. **Mr. Evorios** (центр — чат, FAQ, установка PWA)  
-4. Favorites  
-5. Profile  
+**Онбординг:** Splash → Hello → блок → сразу Feed (без «What brings you here»).
 
 ---
 

@@ -1,6 +1,6 @@
 # Evorios reshape — статус по Cursor Brief v1.0
 
-**Обновлено:** 2026-06-17  
+**Обновлено:** 2026-06-17 (Home P0 in progress — [HOME_REDESIGN.md](HOME_REDESIGN.md))  
 **Источник:** [EVORIOS_CURSOR_BRIEF.md](EVORIOS_CURSOR_BRIEF.md)
 
 Легенда: ✅ готово · 🟡 частично · ⬜ не начато · 🚫 заблокировано

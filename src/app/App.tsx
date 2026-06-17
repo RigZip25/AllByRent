@@ -23,6 +23,8 @@ import { AttachmentViewerScreen } from "../screens/AttachmentViewerScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { RentalsScreen } from "../screens/RentalsScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
+import { GarageScreen } from "../screens/GarageScreen";
+import { NeighborGarageScreen } from "../screens/NeighborGarageScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
 import { SubscriptionPlansScreen } from "../screens/SubscriptionPlansScreen";
@@ -72,6 +74,9 @@ type Screen =
   | "whereAreYouManual"
   | "onboardingAllSet"
   | "home"
+  | "search"
+  | "garage"
+  | "neighborGarage"
   | "notifications"
   | "subcategory"
   | "itemDetail"
@@ -107,11 +112,9 @@ function screenToAuthIntent(screen: Screen): AuthIntent {
 
 /** When nav stack is empty, in-app Back still returns to the prior onboarding step. */
 const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
-  whatDoYouWant: "firstHello",
-  whereAreYou: "whatDoYouWant",
+  whereAreYou: "firstHello",
   whereAreYouManual: "whereAreYou",
   whereAreYouHeading: "whereAreYou",
-  onboardingAllSet: "whereAreYou",
 };
 
 /** Listing flow only — used when the nav stack is empty (not onboarding fallbacks). */
@@ -208,6 +211,7 @@ function AppRoutes() {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [selectedHostListingId, setSelectedHostListingId] = useState<string | null>(null);
+  const [selectedNeighborGarageHostId, setSelectedNeighborGarageHostId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [listingPrefill, setListingPrefill] = useState<ShelfPrefill | null>(null);
@@ -316,8 +320,10 @@ function AppRoutes() {
   }, [auth.configured, auth.session, showAuthGate]);
 
   const finishRentOnboarding = useCallback(() => {
-    navigateTo("onboardingAllSet");
-  }, [navigateTo]);
+    completeOnboarding();
+    setNavStack([]);
+    setCurrentScreen("home");
+  }, []);
 
   const requireAuth = useCallback(
     (intentOverride?: AuthIntent) => {
@@ -333,6 +339,8 @@ function AppRoutes() {
     const candidate = (postAuthTarget ?? stored) as Screen | null;
     const validScreens: Screen[] = [
       "home",
+      "search",
+      "garage",
       "booking",
       "postRequest",
       "listingIntro",
@@ -351,9 +359,7 @@ function AppRoutes() {
     const storedTarget =
       candidate && validScreens.includes(candidate)
         ? candidate
-        : getAppMode() === "earn"
-          ? "listItem"
-          : "home";
+        : "home";
     return resolveScreenAfterAuth(storedTarget);
   }, [postAuthTarget]);
 
@@ -376,17 +382,12 @@ function AppRoutes() {
   }, []);
 
   const handleOpenHome = useCallback(() => goToTab("home"), [goToTab]);
+  const handleOpenSearch = useCallback(() => goToTab("search"), [goToTab]);
+  const handleOpenGarage = useCallback(() => goToTab("garage"), [goToTab]);
   const handleOpenRentals = useCallback(() => goToTab("rentals"), [goToTab]);
   const handleOpenProfile = useCallback(() => goToTab("profile"), [goToTab]);
   const handleOpenFavorites = useCallback(() => goToTab("favorites"), [goToTab]);
   const handleOpenBusiness = useCallback(() => goToTab("earnBusiness"), [goToTab]);
-  const handleOpenFourthTab = useCallback(() => {
-    if (getAppMode() === "earn") {
-      goToTab("earnBusiness");
-    } else {
-      goToTab("favorites");
-    }
-  }, [goToTab]);
   const handleOpenPlans = useCallback(() => navigateTo("subscriptionPlans"), [navigateTo]);
 
   const openRentLocationSetup = useCallback(() => {
@@ -395,8 +396,7 @@ function AppRoutes() {
   }, [navigateTo]);
 
   useEffect(() => {
-    if (currentScreen !== "home") return;
-    if (getAppMode() !== "rent") return;
+    if (currentScreen !== "home" && currentScreen !== "search") return;
     if (hasRentLocationSetup()) return;
     if (isOnboardingComplete()) return;
     openRentLocationSetup();
@@ -408,15 +408,15 @@ function AppRoutes() {
     if (currentScreen === "firstHello") {
       markIntroDone();
       setNavStack([]);
-      setCurrentScreen("whatDoYouWant");
+      setCurrentScreen(isOnboardingComplete() ? "home" : "whereAreYou");
       return;
     }
 
     if (currentScreen === "whatDoYouWant") {
       markIntroDone();
       markRoleChosen();
-      setAppMode("rent");
-      navigateTo("whereAreYou");
+      setNavStack([]);
+      setCurrentScreen(isOnboardingComplete() ? "home" : "whereAreYou");
       return;
     }
 
@@ -446,7 +446,12 @@ function AppRoutes() {
 
   const handleContinueFromHello = () => {
     markIntroDone();
-    navigateTo("whatDoYouWant");
+    if (isOnboardingComplete()) {
+      setNavStack([]);
+      setCurrentScreen("home");
+      return;
+    }
+    navigateTo("whereAreYou");
   };
 
   const handleEarn = () => {
@@ -642,6 +647,13 @@ function AppRoutes() {
       navigateTo("hostListingDetail");
       return;
     }
+    if (screen.startsWith("neighborGarage:")) {
+      const hostId = screen.slice("neighborGarage:".length).trim();
+      if (!hostId) return;
+      setSelectedNeighborGarageHostId(hostId);
+      navigateTo("neighborGarage");
+      return;
+    }
     if (screen === "listItem" || screen === "startEarning") {
       navigateTo("listingIntro");
     }
@@ -730,27 +742,65 @@ function AppRoutes() {
 
         {currentScreen === "home" && (
           <HomeFeed
-            selectedCategoryId={selectedCategoryId}
+            variant="home"
             onNavigate={handleNavigate}
-            onCategorySelect={handleCategorySelect}
             onOpenNotifications={handleOpenNotifications}
             onEditLocation={openRentLocationSetup}
+            onPostRequest={handlePostRequest}
+            onStockGarage={handleStartListing}
             onHome={handleOpenHome}
+            onSearch={handleOpenSearch}
+            onGarage={handleOpenGarage}
             onRentals={handleOpenRentals}
-            onFourthTab={handleOpenFourthTab}
-            onProfile={handleOpenProfile}
+          />
+        )}
+
+        {currentScreen === "search" && (
+          <HomeFeed
+            variant="search"
+            onNavigate={handleNavigate}
+            onOpenNotifications={handleOpenNotifications}
+            onEditLocation={openRentLocationSetup}
+            onPostRequest={handlePostRequest}
+            onStockGarage={handleStartListing}
+            onHome={handleOpenHome}
+            onSearch={handleOpenSearch}
+            onGarage={handleOpenGarage}
+            onRentals={handleOpenRentals}
+          />
+        )}
+
+        {currentScreen === "garage" && (
+          <GarageScreen
+            onNavigate={handleNavigate}
+            onHome={handleOpenHome}
+            onSearch={handleOpenSearch}
+            onStockGarage={handleStartListing}
+            onOpenSettings={handleOpenProfile}
+          />
+        )}
+
+        {currentScreen === "neighborGarage" && selectedNeighborGarageHostId && (
+          <NeighborGarageScreen
+            hostId={selectedNeighborGarageHostId}
+            onBack={handleBack}
+            onOpenListing={(id) => {
+              setSelectedHostListingId(id);
+              navigateTo("hostListingDetail");
+            }}
           />
         )}
 
         {currentScreen === "rentals" && (
           <RentalsScreen
             onHome={handleOpenHome}
+            onSearch={handleOpenSearch}
+            onGarage={handleOpenGarage}
+            onStockGarage={handleStartListing}
             onProfile={handleOpenProfile}
-            onFourthTab={handleOpenFourthTab}
             onOpenRental={() => navigateTo("activeRental")}
             onViewProfile={() => undefined}
             onReRent={() => {
-              // Best-effort: take renter back to home search to re-book.
               setNavStack([]);
               setCurrentScreen("home");
             }}
@@ -760,8 +810,10 @@ function AppRoutes() {
         {currentScreen === "profile" && (
           <ProfileScreen
             onHome={handleOpenHome}
+            onSearch={handleOpenSearch}
+            onGarage={handleOpenGarage}
+            onStockGarage={handleStartListing}
             onRentals={handleOpenRentals}
-            onFourthTab={handleOpenFourthTab}
             onEditLocation={openRentLocationSetup}
             onOpenPlans={handleOpenPlans}
             onDeleteAccount={() => navigateTo("deleteAccount")}
@@ -771,8 +823,10 @@ function AppRoutes() {
         {currentScreen === "favorites" && (
           <FavoritesScreen
             onHome={handleOpenHome}
+            onSearch={handleOpenSearch}
+            onGarage={handleOpenGarage}
+            onStockGarage={handleStartListing}
             onRentals={handleOpenRentals}
-            onFourthTab={handleOpenFourthTab}
             onProfile={handleOpenProfile}
           />
         )}
@@ -780,8 +834,10 @@ function AppRoutes() {
         {currentScreen === "earnBusiness" && (
           <EarnBusinessScreen
             onHome={handleOpenHome}
+            onSearch={handleOpenSearch}
+            onGarage={handleOpenGarage}
+            onStockGarage={handleStartListing}
             onRentals={handleOpenRentals}
-            onFourthTab={handleOpenFourthTab}
             onProfile={handleOpenProfile}
           />
         )}
@@ -812,8 +868,9 @@ function AppRoutes() {
             onItemSelect={handleItemSelect}
             onHome={handleOpenHome}
             onRentals={handleOpenRentals}
-            onFourthTab={handleOpenFourthTab}
-            onProfile={handleOpenProfile}
+            onSearch={handleOpenSearch}
+            onGarage={handleOpenGarage}
+            onStockGarage={handleStartListing}
             onUnlock={() => requireAuth("generic")}
           />
         )}

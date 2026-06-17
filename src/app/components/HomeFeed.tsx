@@ -1,335 +1,377 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, MapPin, ChevronRight } from "lucide-react";
-import { Emoji } from "./Emoji";
+import { Bell, ClipboardList, MapPin, ChevronRight } from "lucide-react";
 import { BottomNav } from "./BottomNav";
-import { HostDashboard } from "./HostDashboard";
+import { HomeFeedCard } from "./HomeFeedCard";
+import { GarageLensCard } from "./GarageLensCard";
 import { RentanoChatSheet } from "../../components/RentanoChat";
 import { usePwaUpdate } from "../../hooks/PwaUpdateProvider";
-import { APP_MODE_LABELS, mascotSays } from "../../lib/brand";
-import { getAppMode, setAppMode, type AppMode } from "../../lib/appMode";
+import { mascotSays } from "../../lib/brand";
 import {
+  fetchActiveListingsForCityRemote,
   getActiveRentLocationLabel,
   hasRentLocationSetup,
+  searchActiveListingsRemote,
 } from "../../lib/listingStorage";
-import { searchActiveListingsRemote } from "../../lib/listingStorage";
 import {
-  CATEGORIES,
-  categoryGridLabel,
-  categoryIdFromName,
-} from "../../screens/listing/listingItemCategories";
+  groupListingsByGarage,
+  listingMatchesModeChip,
+  type ModeChip,
+} from "../../lib/garageDisplay";
 import { MrRentano } from "./MrRentano";
 
 const GREEN = "#1A9E6E";
 const GREEN_DARK = "#0D5C3A";
 const BORDER = "#E8E6E0";
+const SPARSE_CLUSTER_MAX = 10;
 
-const categories = Object.entries(CATEGORIES).map(([fullLabel, data]) => ({
-  id: categoryIdFromName(fullLabel),
-  label: categoryGridLabel(fullLabel),
-  fullLabel,
-  emoji: data.icon,
-}));
+type HomeLens = "feed" | "garages";
 
-function ModeSwitcher({
-  mode,
-  onChange,
-}: {
-  mode: AppMode;
-  onChange: (mode: AppMode) => void;
-}) {
-  return (
-    <div
-      className="flex shrink-0 rounded-full border p-0.5"
-      style={{ borderColor: BORDER, backgroundColor: "white" }}
-      role="tablist"
-      aria-label="Home mode"
-    >
-      {(["earn", "rent"] as const).map((tab) => {
-        const active = mode === tab;
-        return (
-          <button
-            key={tab}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => onChange(tab)}
-            className="rounded-full px-3.5 py-1.5 text-sm font-bold transition-colors"
-            style={{
-              backgroundColor: active ? GREEN_DARK : "transparent",
-              color: active ? "white" : "#888",
-            }}
-          >
-            {APP_MODE_LABELS[tab]}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-export function HomeFeed({
-  selectedCategoryId,
-  onNavigate,
-  onCategorySelect,
-  onOpenNotifications,
-  onEditLocation,
-  onHome,
-  onRentals,
-  onFourthTab,
-  onProfile,
-}: {
-  selectedCategoryId: string | null;
+type HomeFeedProps = {
+  variant?: "home" | "search";
   onNavigate: (screen: string) => void;
-  onCategorySelect: (categoryId: string, categoryLabel: string) => void;
   onOpenNotifications: () => void;
   onEditLocation: () => void;
+  onPostRequest: (query?: string) => void;
+  onStockGarage: () => void;
   onHome: () => void;
+  onSearch: () => void;
+  onGarage: () => void;
   onRentals: () => void;
-  onFourthTab: () => void;
-  onProfile: () => void;
-}) {
+};
+
+export function HomeFeed({
+  variant = "home",
+  onNavigate,
+  onOpenNotifications,
+  onEditLocation,
+  onPostRequest,
+  onStockGarage,
+  onHome,
+  onSearch,
+  onGarage,
+  onRentals,
+}: HomeFeedProps) {
   const [rentanoOpen, setRentanoOpen] = useState(false);
-  const [mode, setMode] = useState<AppMode>(() => getAppMode());
   const [query, setQuery] = useState("");
-  const [searching, setSearching] = useState(false);
-  const [results, setResults] = useState<{ id: string; title: string; subtitle: string }[]>([]);
+  const [modeChip, setModeChip] = useState<ModeChip>("all");
+  const [lens, setLens] = useState<HomeLens>("feed");
+  const [loading, setLoading] = useState(true);
+  const [listings, setListings] = useState<Awaited<ReturnType<typeof fetchActiveListingsForCityRemote>>>([]);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { updateAvailable, updateJustCompleted, simulateUpdateNotification } = usePwaUpdate();
   const showBellBadge = updateAvailable || updateJustCompleted;
   const bellTapRef = useRef({ count: 0, openTimer: 0 });
+
+  const city = getActiveRentLocationLabel().trim();
+  const clusterLabel = city ? `${city} · within 12 mi` : "Set your block";
+  const needsLocation = !hasRentLocationSetup();
 
   const handleBellPress = () => {
     const taps = bellTapRef.current;
     taps.count += 1;
     window.clearTimeout(taps.openTimer);
-
     if (taps.count >= 5) {
       taps.count = 0;
       simulateUpdateNotification();
       onOpenNotifications();
       return;
     }
-
-    // Wait briefly — if more taps come, don't open yet (allows 5 quick taps).
     taps.openTimer = window.setTimeout(() => {
       taps.count = 0;
       onOpenNotifications();
     }, 450);
   };
-  const handleModeChange = (newMode: AppMode) => {
-    setMode(newMode);
-    setAppMode(newMode);
-    if (newMode === "rent" && !hasRentLocationSetup()) {
-      onEditLocation();
-    }
-  };
-
-  const cityLabel = getActiveRentLocationLabel() || "Set your location";
-  const needsLocation = mode === "rent" && !hasRentLocationSetup();
-
-  const city = getActiveRentLocationLabel().trim();
-  const selectedCategory = useMemo(() => {
-    const match = categories.find((c) => c.id === selectedCategoryId);
-    return match?.fullLabel ?? undefined;
-  }, [selectedCategoryId]);
 
   useEffect(() => {
-    if (mode !== "rent") return;
-    const q = query.trim();
-    if (!q) {
-      setResults([]);
-      setSearching(false);
-      return;
-    }
+    if (variant !== "search") return;
+    const t = window.setTimeout(() => searchInputRef.current?.focus(), 120);
+    return () => window.clearTimeout(t);
+  }, [variant]);
+
+  useEffect(() => {
     let mounted = true;
-    setSearching(true);
-    void searchActiveListingsRemote({ query: q, city, category: selectedCategory })
+    setLoading(true);
+    const q = query.trim();
+    const loader = q
+      ? searchActiveListingsRemote({ query: q, city })
+      : fetchActiveListingsForCityRemote(city);
+
+    void loader
       .then((list) => {
         if (!mounted) return;
-        setResults(
-          list.slice(0, 10).map((l) => ({
-            id: l.id,
-            title: l.title || "Listing",
-            subtitle: `${l.subcategory || l.category}`,
-          })),
-        );
+        setListings(list.filter((l) => l.listingStatus === "active"));
       })
       .finally(() => {
-        if (!mounted) return;
-        setSearching(false);
+        if (mounted) setLoading(false);
       });
+
     return () => {
       mounted = false;
     };
-  }, [city, mode, query, selectedCategory]);
+  }, [city, query]);
+
+  const filtered = useMemo(
+    () => listings.filter((l) => listingMatchesModeChip(l, modeChip)),
+    [listings, modeChip],
+  );
+
+  const garages = useMemo(() => groupListingsByGarage(filtered), [filtered]);
+  const isSparse = filtered.length < SPARSE_CLUSTER_MAX;
+  const isSearchActive = query.trim().length > 0;
+  const navTab = variant === "search" ? "search" : "home";
+
+  const modeChips: { id: ModeChip; label: string }[] = [
+    { id: "all", label: "All" },
+    { id: "rent", label: "Rent" },
+    { id: "buy", label: "Buy" },
+    { id: "gift", label: "Gift" },
+  ];
 
   return (
-    <div className="screen bg-[#F0F4F2] flex flex-col overflow-hidden">
-      <div className="shrink-0 px-4 pt-4 pb-3 bg-[#F0F4F2]">
-        <div className="mb-3 flex items-start justify-between gap-2">
-          <ModeSwitcher mode={mode} onChange={handleModeChange} />
+    <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
+      <div className="shrink-0 bg-[#F0F4F2] px-4 pb-3 pt-3">
+        <div className="mb-3 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onRentals}
+            className="flex h-11 w-11 items-center justify-center rounded-full border bg-white active:bg-gray-50"
+            style={{ borderColor: BORDER }}
+            aria-label="Bookings"
+          >
+            <ClipboardList className="h-5 w-5" style={{ color: GREEN_DARK }} />
+          </button>
           <button
             type="button"
             onClick={handleBellPress}
-            className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border bg-white transition-colors active:bg-gray-50"
+            className="relative flex h-11 w-11 items-center justify-center rounded-full border bg-white active:bg-gray-50"
             style={{ borderColor: BORDER }}
-            aria-label={
-              showBellBadge ? "Notifications — update available" : "Notifications"
-            }
+            aria-label={showBellBadge ? "Notifications — update available" : "Notifications"}
           >
-            <Bell className="h-6 w-6" style={{ color: GREEN_DARK }} />
+            <Bell className="h-5 w-5" style={{ color: GREEN_DARK }} />
             {showBellBadge ? (
               <span
-                className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full border-2 border-white"
-                style={{ backgroundColor: "#F0B429" }}
+                className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#F0B429]"
                 aria-hidden
               />
             ) : null}
           </button>
         </div>
 
-        <div className="mb-3 min-w-0">
-          <p className="mb-1 text-[14px] text-gray-500">Good morning</p>
-          <button
-            type="button"
-            onClick={onEditLocation}
-            className="flex min-w-0 items-center gap-1.5 text-left"
-            aria-label={needsLocation ? "Set your location" : "Change location"}
+        <button
+          type="button"
+          onClick={onEditLocation}
+          className="mb-3 flex min-w-0 items-center gap-1.5 text-left"
+          aria-label={needsLocation ? "Set your block" : "Change block cluster"}
+        >
+          <MapPin
+            className="h-5 w-5 shrink-0"
+            style={{ color: needsLocation ? "#F59E0B" : GREEN }}
+            fill={needsLocation ? "#F59E0B" : GREEN}
+            stroke={GREEN_DARK}
+            strokeWidth={1.5}
+          />
+          <span
+            className="truncate text-[17px] font-bold"
+            style={{ color: needsLocation ? "#B45309" : GREEN_DARK }}
           >
-            <MapPin
-              className="h-5 w-5 shrink-0"
-              style={{ color: needsLocation ? "#F59E0B" : GREEN }}
-              fill={needsLocation ? "#F59E0B" : GREEN}
-              stroke={GREEN_DARK}
-              strokeWidth={1.5}
-            />
-            <span
-              className="truncate text-[18px] font-bold"
-              style={{ color: needsLocation ? "#B45309" : GREEN_DARK }}
-            >
-              {cityLabel}
+            {clusterLabel}
+          </span>
+          <ChevronRight className="h-4 w-4 shrink-0" style={{ color: GREEN }} />
+        </button>
+
+        <div
+          className="rounded-2xl border-2 bg-white px-4 py-3.5 shadow-sm"
+          style={{ borderColor: needsLocation ? "#F59E0B55" : `${GREEN_DARK}33` }}
+        >
+          <label className="sr-only" htmlFor="home-search">
+            What do you need?
+          </label>
+          <div className="flex items-center gap-2">
+            <span className="text-xl" aria-hidden>
+              🔍
             </span>
-            <ChevronRight className="h-4 w-4 shrink-0" style={{ color: GREEN }} />
-          </button>
-          {needsLocation ? (
-            <p className="mt-1 text-[13px] text-amber-800">
-              Tap to choose: at home or planning a trip
+            <input
+              id="home-search"
+              ref={searchInputRef}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="What do you need?"
+              className="min-w-0 flex-1 bg-transparent text-[17px] font-medium outline-none placeholder:text-gray-400"
+            />
+            {loading && isSearchActive ? (
+              <span className="text-[12px] text-gray-400">…</span>
+            ) : null}
+          </div>
+          {!isSearchActive ? (
+            <p className="mt-1.5 pl-8 text-[13px] text-gray-500">
+              e.g. tile saw near me this weekend
             </p>
           ) : null}
         </div>
 
-        {mode === "rent" ? (
-          <div className="mb-1">
-            <div className="flex items-center gap-2 rounded-2xl border bg-white px-3 py-2.5" style={{ borderColor: BORDER }}>
-              <span className="text-[14px] text-gray-400">🔎</span>
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search gear, keywords…"
-                className="min-w-0 flex-1 bg-transparent text-[14px] outline-none"
-              />
-              {searching ? <span className="text-[12px] text-gray-400">Searching…</span> : null}
-            </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {modeChips.map((chip) => {
+            const active = modeChip === chip.id;
+            return (
+              <button
+                key={chip.id}
+                type="button"
+                onClick={() => setModeChip(chip.id)}
+                className="rounded-full px-3.5 py-1.5 text-[13px] font-bold transition-colors"
+                style={{
+                  backgroundColor: active ? GREEN_DARK : "white",
+                  color: active ? "white" : "#666",
+                  border: `1px solid ${active ? GREEN_DARK : BORDER}`,
+                }}
+              >
+                {chip.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {!isSearchActive ? (
+          <div
+            className="mt-3 flex rounded-full border bg-white p-0.5"
+            style={{ borderColor: BORDER }}
+            role="tablist"
+            aria-label="Browse lenses"
+          >
+            {(
+              [
+                { id: "feed" as const, label: "Feed" },
+                { id: "garages" as const, label: "Garages" },
+              ] as const
+            ).map((tab) => {
+              const active = lens === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setLens(tab.id)}
+                  className="flex-1 rounded-full py-2 text-[13px] font-bold transition-colors"
+                  style={{
+                    backgroundColor: active ? GREEN_DARK : "transparent",
+                    color: active ? "white" : "#888",
+                  }}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         ) : null}
       </div>
 
-      <div className="flex-1 min-h-0 flex flex-col overflow-hidden px-4">
-        {mode === "earn" ? (
-          <HostDashboard
-            onListItem={() => onNavigate("listItem")}
-            onOpenListing={(listingId) => onNavigate(`hostListingDetail:${listingId}`)}
-          />
-        ) : (
-          <>
-            {query.trim() ? (
-              <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1 pb-2">
-                {results.length === 0 && !searching ? (
-                  <div className="mx-auto mt-10 max-w-[320px] text-center">
-                    <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border bg-white" style={{ borderColor: BORDER }}>
-                      <MrRentano size={34} />
-                    </div>
-                    <p className="text-[16px] font-bold" style={{ color: GREEN_DARK }}>
-                      No results
-                    </p>
-                    <p className="mt-1 text-[13px] text-gray-500">
-                      {mascotSays("Try a shorter keyword — or change category / city.")}
-                    </p>
-                  </div>
-                ) : (
-                  <ul className="space-y-2">
-                    {results.map((r) => (
-                      <li key={r.id}>
-                        <button
-                          type="button"
-                          onClick={() => onNavigate(`hostListingDetail:${r.id}`)}
-                          className="w-full rounded-2xl border bg-white p-3 text-left"
-                          style={{ borderColor: BORDER }}
-                        >
-                          <p className="font-semibold text-gray-900">{r.title}</p>
-                          <p className="mt-0.5 text-[13px] text-gray-500">{r.subtitle}</p>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-2">
+        {isSparse && !isSearchActive ? (
+          <div
+            className="mb-3 flex gap-3 rounded-2xl border bg-white p-3"
+            style={{ borderColor: BORDER }}
+          >
+            <MrRentano size={40} className="shrink-0" />
+            <div className="min-w-0 text-[13px] leading-snug text-gray-700">
+              <p className="font-bold" style={{ color: GREEN_DARK }}>
+                {mascotSays("Your block is just getting started.")}
+              </p>
+              <p className="mt-1">
+                Here&apos;s what&apos;s nearby — or{" "}
+                <button
+                  type="button"
+                  className="font-bold underline"
+                  style={{ color: GREEN_DARK }}
+                  onClick={onStockGarage}
+                >
+                  stock your garage
+                </button>{" "}
+                and be first on the block.
+              </p>
+            </div>
+          </div>
+        ) : null}
+
+        {loading && filtered.length === 0 ? (
+          <p className="py-10 text-center text-[14px] text-gray-500">Loading nearby…</p>
+        ) : null}
+
+        {!loading && isSearchActive && filtered.length === 0 ? (
+          <div className="mx-auto mt-8 max-w-[320px] text-center">
+            <p className="text-[17px] font-bold" style={{ color: GREEN_DARK }}>
+              Nothing for &ldquo;{query.trim()}&rdquo; yet
+            </p>
+            <p className="mt-2 text-[14px] text-gray-600">
+              {mascotSays("Post a request — neighbors with the right gear can respond.")}
+            </p>
+            <button
+              type="button"
+              onClick={() => onPostRequest(query.trim())}
+              className="btn-primary mt-5 w-full rounded-xl py-3 text-[15px] font-bold text-white"
+              style={{ backgroundColor: GREEN_DARK }}
+            >
+              Post a request →
+            </button>
+          </div>
+        ) : null}
+
+        {!loading && filtered.length > 0 && (isSearchActive || lens === "feed") ? (
+          <ul className="space-y-2.5 pb-2">
+            {filtered.map((listing) => (
+              <li key={listing.id}>
+                <HomeFeedCard
+                  listing={listing}
+                  onSelect={() => onNavigate(`hostListingDetail:${listing.id}`)}
+                />
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        {!loading && !isSearchActive && lens === "garages" ? (
+          <ul className="space-y-2.5 pb-2">
+            {garages.length === 0 ? (
+              <div className="mt-8 text-center">
+                <p className="text-[15px] font-bold text-gray-800">No garages on shelf yet</p>
+                <button
+                  type="button"
+                  onClick={onStockGarage}
+                  className="mt-4 text-[14px] font-bold underline"
+                  style={{ color: GREEN_DARK }}
+                >
+                  Stock your garage first →
+                </button>
               </div>
             ) : (
-              <>
-                <h2 className="mb-3 shrink-0 text-[20px] font-extrabold" style={{ color: GREEN_DARK }}>
-                  Browse by Category
-                </h2>
-                <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1 pb-2">
-                  <div className="grid grid-cols-2 gap-[10px]">
-                    {categories.map(({ id, fullLabel, emoji }) => {
-                      const active = selectedCategoryId === id;
-                      return (
-                        <button
-                          key={id}
-                          type="button"
-                          onClick={() => onCategorySelect(id, fullLabel)}
-                          className="flex flex-col items-center justify-center gap-2 border transition-colors"
-                          style={{
-                            minHeight: 112,
-                            padding: 14,
-                            borderRadius: 16,
-                            borderColor: active ? GREEN : BORDER,
-                            backgroundColor: active ? GREEN : "white",
-                          }}
-                        >
-                          <Emoji emoji={emoji} size={52} />
-                          <span
-                            className="line-clamp-2 w-full px-0.5 text-center text-[14px] font-semibold leading-snug"
-                            style={{ color: active ? "white" : "#888" }}
-                          >
-                            {fullLabel}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </>
+              garages.map((garage) => (
+                <li key={garage.hostId}>
+                  <GarageLensCard
+                    garage={garage}
+                    onSelect={() => onNavigate(`neighborGarage:${garage.hostId}`)}
+                  />
+                </li>
+              ))
             )}
-          </>
-        )}
+          </ul>
+        ) : null}
       </div>
 
       <div className="shrink-0">
         <BottomNav
-          activeTab={rentanoOpen ? "rentano" : "home"}
-          appMode={mode}
+          activeTab={rentanoOpen ? "rentano" : navTab}
           onHome={onHome}
-          onRentals={onRentals}
+          onSearch={onSearch}
+          onAdd={onStockGarage}
+          onGarage={onGarage}
           onRentano={() => setRentanoOpen(true)}
-          onFourthTab={onFourthTab}
-          onProfile={onProfile}
         />
       </div>
+
       <RentanoChatSheet
         open={rentanoOpen}
         onClose={() => setRentanoOpen(false)}
         defaultView="chat"
-        context={{ screen: "home", appMode: mode }}
+        context={{ screen: variant === "search" ? "search" : "home", appMode: "rent" }}
       />
     </div>
   );

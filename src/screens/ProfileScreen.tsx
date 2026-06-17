@@ -140,7 +140,9 @@ function ModeToggle({ mode, onChange }: { mode: AppMode; onChange: (m: AppMode) 
 export function ProfileScreen({
   onHome,
   onRentals,
-  onFourthTab,
+  onSearch,
+  onGarage,
+  onStockGarage,
   onEditLocation,
   onOpenPlans,
   onOpenCoHosts,
@@ -149,7 +151,9 @@ export function ProfileScreen({
 }: {
   onHome: () => void;
   onRentals: () => void;
-  onFourthTab: () => void;
+  onSearch: () => void;
+  onGarage: () => void;
+  onStockGarage: () => void;
   onEditLocation: () => void;
   onOpenPlans: () => void;
   onOpenCoHosts?: () => void;
@@ -581,13 +585,12 @@ export function ProfileScreen({
 
       <div className="shrink-0">
         <BottomNav
-          activeTab="profile"
-          appMode={mode}
+          activeTab="none"
           onHome={onHome}
-          onRentals={onRentals}
+          onSearch={onSearch}
+          onAdd={onStockGarage}
+          onGarage={onGarage}
           onRentano={() => setRentanoOpen(true)}
-          onFourthTab={onFourthTab}
-          onProfile={() => undefined}
         />
       </div>
 

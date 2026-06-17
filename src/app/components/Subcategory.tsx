@@ -184,9 +184,11 @@ interface SubcategoryProps {
 
   onRentals: () => void;
 
-  onFourthTab: () => void;
+  onSearch: () => void;
 
-  onProfile: () => void;
+  onGarage: () => void;
+
+  onStockGarage: () => void;
 
   /** Opens AuthGate so the user can unlock/participate. */
   onUnlock: () => void;
@@ -213,9 +215,11 @@ export function Subcategory({
 
   onRentals,
 
-  onFourthTab,
+  onSearch,
 
-  onProfile,
+  onGarage,
+
+  onStockGarage,
   onUnlock,
 
 }: SubcategoryProps) {
@@ -788,17 +792,15 @@ export function Subcategory({
 
         activeTab="none"
 
-        appMode={appMode}
-
         onHome={onHome}
 
-        onRentals={onRentals}
+        onSearch={onSearch}
+
+        onAdd={onStockGarage}
+
+        onGarage={onGarage}
 
         onRentano={() => setRentanoOpen(true)}
-
-        onFourthTab={onFourthTab}
-
-        onProfile={onProfile}
 
       />
 

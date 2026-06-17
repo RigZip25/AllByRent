@@ -6,6 +6,8 @@
 
 **Статус реализации:** см. [EVORIOS_RESHAPE_STATUS.md](EVORIOS_RESHAPE_STATUS.md) (обновляется по мере работы).
 
+**Home UX (agreed):** [HOME_REDESIGN.md](HOME_REDESIGN.md) — search-hero, Feed/Garages lenses, nav ＋ center, no role fork.
+
 ---
 
 ## 1. Как именно работает Evorios

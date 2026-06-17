@@ -104,12 +104,16 @@ function ListingRow({ row }: { row: ListingEarnBreakdown }) {
 export function EarnBusinessScreen({
   onHome,
   onRentals,
-  onFourthTab,
+  onSearch,
+  onGarage,
+  onStockGarage,
   onProfile,
 }: {
   onHome: () => void;
   onRentals: () => void;
-  onFourthTab: () => void;
+  onSearch: () => void;
+  onGarage: () => void;
+  onStockGarage: () => void;
   onProfile: () => void;
 }) {
   const [rentanoOpen, setRentanoOpen] = useState(false);
@@ -256,13 +260,12 @@ export function EarnBusinessScreen({
 
       <div className="shrink-0">
         <BottomNav
-          activeTab="business"
-          appMode={mode}
+          activeTab="none"
           onHome={onHome}
-          onRentals={onRentals}
+          onSearch={onSearch}
+          onAdd={onStockGarage}
+          onGarage={onGarage}
           onRentano={() => setRentanoOpen(true)}
-          onFourthTab={onFourthTab}
-          onProfile={onProfile}
         />
       </div>
 
