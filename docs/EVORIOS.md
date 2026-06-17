@@ -6,6 +6,8 @@
 
 **Walk the app screen-by-screen:** [FLOW_AUDIT.md](FLOW_AUDIT.md) — what to change at each step (✅ / 🟡 / 🟠 / 🔴).
 
+**Master reshape brief (10 tasks):** [EVORIOS_CURSOR_BRIEF.md](EVORIOS_CURSOR_BRIEF.md) · [status tracker](EVORIOS_RESHAPE_STATUS.md)
+
 ---
 
 ## Company & domain
@@ -46,7 +48,7 @@ Evorios is not “another marketplace.” It is the **evolution of the household
 
 **Garage Showcase** — each household runs a vitrina on the block. Full task map: **[GARAGE_SHOWCASE.md](GARAGE_SHOWCASE.md)**.
 
-**Listing modes (code):** borrow · sell · rent-to-own · gift.
+**Listing modes (target):** Rent · Sell · Gift. RTO removed from UI (enum kept in types for Stage 2).
 
 **Home UI labels:** **My Garage** / **Browse** (internal keys `earn` / `rent`).
 
