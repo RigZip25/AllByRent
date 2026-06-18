@@ -22,6 +22,7 @@ import {
   expandClusterRadius,
   getClusterRadiusMi,
 } from "../../lib/clusterConfig";
+import { AutoGrowTextarea } from "../../components/AutoGrowTextarea";
 import { MrRentano } from "./MrRentano";
 
 const GREEN = "#1A9E6E";
@@ -64,7 +65,7 @@ export function HomeFeed({
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState<Awaited<ReturnType<typeof fetchActiveListingsForCityRemote>>>([]);
   const [clusterRadiusMi, setClusterRadiusMi] = useState(() => getClusterRadiusMi());
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLTextAreaElement>(null);
   const { updateAvailable, updateJustCompleted, simulateUpdateNotification } = usePwaUpdate();
   const showBellBadge = updateAvailable || updateJustCompleted;
   const bellTapRef = useRef({ count: 0, openTimer: 0 });
@@ -172,23 +173,23 @@ export function HomeFeed({
         <button
           type="button"
           onClick={onEditLocation}
-          className="mb-3 flex min-w-0 items-center gap-1.5 text-left"
+          className="mb-3 flex min-w-0 items-start gap-1.5 text-left"
           aria-label={needsLocation ? "Set your block" : "Change block cluster"}
         >
           <MapPin
-            className="h-5 w-5 shrink-0"
+            className="mt-0.5 h-5 w-5 shrink-0"
             style={{ color: needsLocation ? "#F59E0B" : GREEN }}
             fill={needsLocation ? "#F59E0B" : GREEN}
             stroke={GREEN_DARK}
             strokeWidth={1.5}
           />
           <span
-            className="truncate text-[17px] font-bold"
+            className="min-w-0 flex-1 break-words text-[17px] font-bold leading-snug [overflow-wrap:anywhere]"
             style={{ color: needsLocation ? "#B45309" : GREEN_DARK }}
           >
             {clusterLabel}
           </span>
-          <ChevronRight className="h-4 w-4 shrink-0" style={{ color: GREEN }} />
+          <ChevronRight className="mt-1 h-4 w-4 shrink-0" style={{ color: GREEN }} />
         </button>
 
         <div
@@ -198,17 +199,18 @@ export function HomeFeed({
           <label className="sr-only" htmlFor="home-search">
             What do you need?
           </label>
-          <div className="flex items-center gap-2">
-            <span className="text-xl" aria-hidden>
+          <div className="flex items-start gap-2">
+            <span className="pt-0.5 text-xl" aria-hidden>
               🔍
             </span>
-            <input
+            <AutoGrowTextarea
               id="home-search"
               ref={searchInputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="What do you need?"
-              className="min-w-0 flex-1 bg-transparent text-[17px] font-medium outline-none placeholder:text-gray-400"
+              className="min-w-0 flex-1 bg-transparent py-0 text-[17px] font-medium outline-none placeholder:text-gray-400"
+              maxRows={3}
             />
             {loading && isSearchActive ? (
               <span className="text-[12px] text-gray-400">…</span>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { AutoGrowTextarea } from "./AutoGrowTextarea";
 import {
   minQueryLength,
   searchPlaces,
@@ -156,11 +157,16 @@ export function AddressLocationPicker({
           className="w-full rounded-xl border-2 px-4 py-3 text-center"
           style={{ borderColor: "#0D5C3A", backgroundColor: "#0D5C3A14" }}
         >
-          <p className="text-sm font-semibold" style={{ color: "#0D5C3A" }}>
+          <p
+            className="break-words text-sm font-semibold leading-snug [overflow-wrap:anywhere]"
+            style={{ color: "#0D5C3A" }}
+          >
             📍 {selected.primaryLine}
           </p>
           {selected.secondaryLine ? (
-            <p className="mt-1 text-sm text-gray-700">{selected.secondaryLine}</p>
+            <p className="mt-1 break-words text-sm leading-snug text-gray-700 [overflow-wrap:anywhere]">
+              {selected.secondaryLine}
+            </p>
           ) : null}
           <p className="mt-1 text-xs text-gray-500">
             {variant === "area"
@@ -234,8 +240,7 @@ export function AddressLocationPicker({
         </div>
       ) : null}
 
-      <input
-        type="text"
+      <AutoGrowTextarea
         value={inputValue}
         onChange={(e) => {
           setInputValue(e.target.value);
@@ -257,6 +262,7 @@ export function AddressLocationPicker({
         data-1p-ignore
         data-lpignore="true"
         enterKeyHint="search"
+        maxRows={3}
       />
 
       <p className="text-center text-xs text-gray-400">
@@ -297,11 +303,11 @@ export function AddressLocationPicker({
                 }}
                 className="w-full border-b border-gray-100 px-4 py-3 text-left last:border-b-0 hover:bg-gray-50 active:bg-gray-100 touch-manipulation"
               >
-                <span className="block text-sm font-medium text-gray-900">
+                <span className="block break-words text-sm font-medium leading-snug text-gray-900 [overflow-wrap:anywhere]">
                   {suggestion.flag} {suggestion.primaryLine}
                 </span>
                 {suggestion.secondaryLine ? (
-                  <span className="mt-0.5 block text-xs text-gray-500">
+                  <span className="mt-0.5 block break-words text-xs leading-snug text-gray-500 [overflow-wrap:anywhere]">
                     {suggestion.secondaryLine}
                   </span>
                 ) : null}
