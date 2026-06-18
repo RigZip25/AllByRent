@@ -17,6 +17,12 @@ import {
   listingMatchesModeChip,
   type ModeChip,
 } from "../../lib/garageDisplay";
+import {
+  CLUSTER_RADIUS_EXPANDED_MI,
+  clusterLabelForCity,
+  expandClusterRadius,
+  getClusterRadiusMi,
+} from "../../lib/clusterConfig";
 import { MrRentano } from "./MrRentano";
 
 const GREEN = "#1A9E6E";
@@ -57,14 +63,20 @@ export function HomeFeed({
   const [lens, setLens] = useState<HomeLens>("feed");
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState<Awaited<ReturnType<typeof fetchActiveListingsForCityRemote>>>([]);
+  const [clusterRadiusMi, setClusterRadiusMi] = useState(() => getClusterRadiusMi());
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { updateAvailable, updateJustCompleted, simulateUpdateNotification } = usePwaUpdate();
   const showBellBadge = updateAvailable || updateJustCompleted;
   const bellTapRef = useRef({ count: 0, openTimer: 0 });
 
   const city = getActiveRentLocationLabel().trim();
-  const clusterLabel = city ? `${city} · within 12 mi` : "Set your block";
+  const clusterLabel = clusterLabelForCity(city, clusterRadiusMi);
   const needsLocation = !hasRentLocationSetup();
+  const canWidenCluster = clusterRadiusMi < CLUSTER_RADIUS_EXPANDED_MI;
+
+  const handleWidenCluster = () => {
+    setClusterRadiusMi(expandClusterRadius());
+  };
 
   const handleBellPress = () => {
     const taps = bellTapRef.current;
@@ -288,6 +300,16 @@ export function HomeFeed({
                 </button>{" "}
                 and be first on the block.
               </p>
+              {canWidenCluster ? (
+                <button
+                  type="button"
+                  className="mt-2 font-bold underline"
+                  style={{ color: GREEN_DARK }}
+                  onClick={handleWidenCluster}
+                >
+                  Search wider ({CLUSTER_RADIUS_EXPANDED_MI} mi) →
+                </button>
+              ) : null}
             </div>
           </div>
         ) : null}
