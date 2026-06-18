@@ -38,7 +38,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Getting started",
     question: "Why do I need to set my block?",
     answer:
-      "We show garages and items in your cluster (~12 mi). Set your block during onboarding or tap the location chip on Home. Visiting another area? Change the cluster — no separate traveler mode.",
+      "We show garages and items in your cluster (25 mi by default). Set your block during onboarding or tap the location chip on Home. Rural or sparse? Tap Search wider for 50+ mi.",
     keywords: ["gps", "address", "where", "cluster"],
   },
   {

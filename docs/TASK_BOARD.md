@@ -41,7 +41,7 @@
 
 | # | Задача | Блокирует | Статус |
 |---|--------|-----------|--------|
-| **1** | **Клин-категория + кластер ~50 mi** (решение №1) | pgvector, feed departments, ranking | ⬜ |
+| **1** | **Кластер: 25 mi default, expand 50+** | pgvector, feed departments, ranking | ✅ решение → [CLUSTER_POLICY.md](CLUSTER_POLICY.md) |
 | 2 | Stripe keys в Vercel (`STRIPE_*`, `CRON_SECRET`) | реальные платежи/депозит | ⬜ проверить |
 | 3 | Прогнать миграции 021–022 на prod Supabase | deposit cron | ⬜ |
 | 4 | pgvector migration (когда будет кластер) | semantic search | ⬜ |

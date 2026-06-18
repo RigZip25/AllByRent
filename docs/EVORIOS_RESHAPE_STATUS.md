@@ -39,7 +39,7 @@
 | Блокер | Статус |
 |--------|--------|
 | PR #16 Stripe в main | ✅ |
-| Клин-категория + кластер ~50 mi | ⬜ **решение №1** |
+| Кластер 25 mi (expand 50+) | ✅ [CLUSTER_POLICY.md](CLUSTER_POLICY.md) |
 | Stripe keys в Vercel | ⬜ проверить |
 | Миграции 021–022 | ⬜ прогнать на prod |
 | pgvector migration | ⬜ не создана |
