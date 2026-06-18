@@ -1,5 +1,10 @@
 import { postAnthropicMessages, extractAnthropicText } from "./anthropicClient";
 import {
+  buildRentanoCacheKey,
+  readCachedRentanoAnswer,
+  writeCachedRentanoAnswer,
+} from "./rentanoChatCache";
+import {
   RENTANO_MODEL,
   RENTANO_SYSTEM_PROMPT,
   buildRentanoUserContext,
@@ -26,6 +31,15 @@ export async function sendRentanoMessage(
   history: RentanoChatTurn[],
   context: RentanoRequestContext,
 ): Promise<string> {
+  const lastUser = [...history].reverse().find((turn) => turn.role === "user");
+  const cacheKey = lastUser
+    ? buildRentanoCacheKey(lastUser.content, context.screen)
+    : null;
+  if (cacheKey) {
+    const cached = readCachedRentanoAnswer(cacheKey);
+    if (cached) return cached;
+  }
+
   const data = await postAnthropicMessages({
     model: RENTANO_MODEL,
     max_tokens: 900,
@@ -40,5 +54,7 @@ export async function sendRentanoMessage(
   if (!text) {
     throw new Error("Empty Claude response");
   }
+
+  if (cacheKey) writeCachedRentanoAnswer(cacheKey, text);
   return text;
 }

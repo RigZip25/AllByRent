@@ -5,6 +5,7 @@ import { APP_NAME, MASCOT_NAME } from "../../lib/brand";
 import { useSpeechRecognition } from "../../hooks/useSpeechRecognition";
 import { useRequireAuth } from "../../hooks/RequireAuth";
 import { isAnthropicConfigured } from "../../lib/anthropicClient";
+import { findLocalRentanoAnswer } from "../../lib/rentanoLocalAnswer";
 import { sendRentanoMessage, type RentanoChatTurn } from "../../lib/rentanoChatApi";
 import type { RentanoRequestContext } from "../../lib/rentanoPrompt";
 
@@ -31,12 +32,13 @@ export function RentanoChatPanel({
       id: "welcome",
       role: "assistant",
       content:
-        `Hi! I'm ${MASCOT_NAME} — ask by voice or text. I know which screen and listing step you're on.`,
+        `Hi! I'm ${MASCOT_NAME}. Check the FAQ tab first — most answers are instant. Here in Chat I try those answers before any AI. Ask by voice or text.`,
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingAiQuestion, setPendingAiQuestion] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const initialSentRef = useRef(false);
   const speech = useSpeechRecognition();
@@ -55,20 +57,14 @@ export function RentanoChatPanel({
   }, [messages, loading, scrollToBottom]);
 
   const submitText = useCallback(
-    async (raw: string) => {
+    async (raw: string, options?: { forceAi?: boolean }) => {
       const text = raw.trim();
       if (!text || loading) return;
 
       if (!requireAuth("message")) return;
 
-      if (!configured) {
-        setError(
-          "AI is unavailable. Set ANTHROPIC_API_KEY for local dev or configure it on Vercel.",
-        );
-        return;
-      }
-
       setError(null);
+      setPendingAiQuestion(null);
       const userMsg: ChatMessage = { id: nextId(), role: "user", content: text };
       setInput("");
       setLoading(true);
@@ -82,18 +78,43 @@ export function RentanoChatPanel({
       });
 
       try {
+        if (!options?.forceAi) {
+          const local = findLocalRentanoAnswer(text);
+          if (local) {
+            setMessages((prev) => [
+              ...prev,
+              { id: nextId(), role: "assistant", content: local.answer },
+            ]);
+            return;
+          }
+        }
+
+        if (!configured) {
+          setPendingAiQuestion(text);
+          setError(
+            "No ready FAQ match. AI chat is off in this environment — open the FAQ tab or rephrase your question.",
+          );
+          return;
+        }
+
         const reply = await sendRentanoMessage(historyForApi, apiContext);
         setMessages((prev) => [...prev, { id: nextId(), role: "assistant", content: reply }]);
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Something went wrong. Please try again.";
         setError(message);
+        if (configured) setPendingAiQuestion(text);
       } finally {
         setLoading(false);
       }
     },
     [apiContext, configured, loading, requireAuth],
   );
+
+  const handleAskAi = () => {
+    if (!pendingAiQuestion?.trim() || !configured) return;
+    void submitText(pendingAiQuestion, { forceAi: true });
+  };
 
   useEffect(() => {
     if (!initialMessage?.trim() || initialSentRef.current) return;
@@ -176,7 +197,20 @@ export function RentanoChatPanel({
       </div>
 
       {error ? (
-        <p className="mb-2 text-center text-[12px] leading-snug text-red-600">{error}</p>
+        <div className="mb-2 text-center">
+          <p className="text-[12px] leading-snug text-red-600">{error}</p>
+          {pendingAiQuestion && configured ? (
+            <button
+              type="button"
+              onClick={handleAskAi}
+              disabled={loading}
+              className="mt-2 text-[12px] font-semibold underline"
+              style={{ color: PRIMARY_GREEN }}
+            >
+              Ask AI anyway (cached when possible)
+            </button>
+          ) : null}
+        </div>
       ) : null}
       {speech.error ? (
         <p className="mb-2 text-center text-[12px] text-amber-700">{speech.error}</p>

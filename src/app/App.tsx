@@ -37,6 +37,7 @@ import { RequireAuthProvider } from "../hooks/RequireAuth";
 import {
   consumeAuthReturn,
   peekAuthReturn,
+  clearPendingAuthEmail,
   peekPendingAuthEmail,
   setAuthIntent,
   setAuthReturn,
@@ -373,6 +374,7 @@ function AppRoutes() {
 
   const finishAuthFlow = useCallback(() => {
     setAuthGateOpen(false);
+    clearPendingAuthEmail();
     const target = resolvePostAuthScreen();
     setNavStack([]);
     setCurrentScreen(target);
@@ -603,8 +605,9 @@ function AppRoutes() {
     if (auth.loading) return;
     if (!auth.session) return;
 
-    const token = auth.session.access_token ?? null;
-    if (token && handledSessionTokenRef.current === token) return;
+    const token = auth.session.access_token;
+    if (!token) return;
+    if (handledSessionTokenRef.current === token) return;
     handledSessionTokenRef.current = token;
 
     const resumeAfterAuthCallback = () => {
@@ -642,7 +645,7 @@ function AppRoutes() {
     }
 
     maybePromptPasskey();
-  }, [auth.configured, auth.loading, auth.session, authGateOpen, currentScreen, finishAuthFlow]);
+  }, [auth.configured, auth.loading, auth.session, authGateOpen, finishAuthFlow, resolvePostAuthScreen]);
 
   const handleBackFromSubcategory = () => {
     handleBack();

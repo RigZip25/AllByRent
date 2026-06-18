@@ -17,10 +17,11 @@ const BORDER = "#E8E6E0";
 type AssistantView = "chat" | "faq" | "install";
 
 const QUICK_PROMPTS = [
-  "What can I rent near me?",
-  "How do I list an item in my garage?",
+  "Menu buttons — what does each tab do?",
+  "I'm in 71909 — how does search work?",
   "How does the deposit hold work?",
-  "Help me find a tile saw for the weekend",
+  "Profile vs Garage — what's the difference?",
+  "How do I list my first item?",
 ];
 
 export function MrEvoriosScreen({
@@ -69,7 +70,7 @@ export function MrEvoriosScreen({
               {MASCOT_NAME}
             </h1>
             <p className="text-[13px] text-gray-500">
-              Your {APP_NAME} guide — ask anything, voice or text
+              Your {APP_NAME} guide — FAQ first, chat when you need more
             </p>
           </div>
         </div>

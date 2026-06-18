@@ -153,6 +153,180 @@ export const RENTANO_FAQ: FaqItem[] = [
       "Yes — Skip on intro screens sends you to set your block, then straight to Home. You can finish location later from the location chip on Home.",
     keywords: ["skip", "later"],
   },
+  {
+    id: "bottom-nav",
+    category: "Navigation",
+    question: "What do the bottom menu buttons do?",
+    answer:
+      `Home = browse & search. ${MASCOT_NAME} = help (FAQ + chat). Green + = stock a new item. Garage = your storefront & earnings. More = profile, rentals, favorites, notifications.`,
+    keywords: ["menu", "tabs", "footer", "navigate", "stuck", "freeze"],
+  },
+  {
+    id: "more-menu",
+    category: "Navigation",
+    question: "What is in the More menu?",
+    answer:
+      "More holds your profile card, Rentals (active & history), Favorites, Notifications, My Garage shortcut, Earn dashboard, and a link to chat with Mr. Evorios.",
+    keywords: ["more", "settings", "account"],
+  },
+  {
+    id: "mre-tab",
+    category: "Navigation",
+    question: `How do I use ${MASCOT_NAME}?`,
+    answer:
+      `Tap his tab in the footer. FAQ = instant answers (no AI cost). Chat checks FAQ first, then AI only if needed (answers are cached). Install tab helps add the app to your home screen.`,
+    keywords: ["help", "assistant", "chat", "faq", "evorios"],
+  },
+  {
+    id: "profile-vs-garage",
+    category: "Navigation",
+    question: "Profile vs Garage — what is the difference?",
+    answer:
+      "Garage is for hosting: your listings, requests, and stats. Profile is your identity: name, photo, phone, payout setup, notifications prefs, and sign out.",
+    keywords: ["profile", "garage", "account", "settings"],
+  },
+  {
+    id: "zip-only",
+    category: "Location",
+    question: "Do I need my exact street address?",
+    answer:
+      "No. City + ZIP (e.g. Hot Springs Village, AR 71909) is enough for browsing nearby garages. Exact address is only shared with a confirmed renter at handoff when you choose that pickup mode.",
+    keywords: ["address", "privacy", "zip", "71909", "street", "area"],
+  },
+  {
+    id: "arkansas-rural",
+    category: "Location",
+    question: "I'm in rural Arkansas — why so few listings?",
+    answer:
+      "New blocks fill in as neighbors stock their garages. Use Search wider on Home (50+ mi), post a request, or list your own gear — early hosts get more visibility.",
+    keywords: ["arkansas", "rural", "sparse", "71909", "hot springs"],
+  },
+  {
+    id: "traveling-mode",
+    category: "Location",
+    question: "I'm traveling — how do I browse another area?",
+    answer:
+      "During onboarding choose Traveling, or change location from the chip on Home. Pick destination city/ZIP — we show garages there, not your home block.",
+    keywords: ["trip", "travel", "vacation", "destination"],
+  },
+  {
+    id: "neighbor-garage",
+    category: "Renting",
+    question: "How do I open a neighbor's garage?",
+    answer:
+      "On Home switch to Garages lens, or tap a host card in the feed. You will see their storefront and active listings.",
+    keywords: ["neighbor", "storefront", "host", "browse"],
+  },
+  {
+    id: "favorites",
+    category: "Renting",
+    question: "How do saved favorites work?",
+    answer: "More → Favorites saves listings you hearted. Tap any favorite to open the item and book again.",
+    keywords: ["favorite", "saved", "heart", "wishlist"],
+  },
+  {
+    id: "active-rental",
+    category: "Renting",
+    question: "Where is my active rental?",
+    answer:
+      "More → Rentals, or the clipboard icon on Home. Open the booking for pickup window, messages, QR check-in, and return steps.",
+    keywords: ["active", "current", "pickup", "return"],
+  },
+  {
+    id: "extend-rental",
+    category: "Renting",
+    question: "Can I extend a rental?",
+    answer:
+      "If the host allows it, open the active rental and request more days before return. The host approves and pricing updates in the app.",
+    keywords: ["extend", "longer", "extra days"],
+  },
+  {
+    id: "cancel-booking",
+    category: "Renting",
+    question: "How do I cancel a booking?",
+    answer:
+      "Open the rental in Rentals and choose Cancel if still before pickup. Refund rules follow the host policy and timing — see the booking summary.",
+    keywords: ["cancel", "refund"],
+  },
+  {
+    id: "host-payouts",
+    category: "Payments & safety",
+    question: "How do hosts get paid?",
+    answer:
+      "Connect Stripe in Profile → payouts. Rental payouts land after successful return; platform fees are shown before you publish.",
+    keywords: ["payout", "stripe connect", "earn", "money"],
+  },
+  {
+    id: "deposit-release",
+    category: "Payments & safety",
+    question: "When is my deposit released?",
+    answer:
+      "After the host confirms return (or auto-release timer if no dispute). Holds are separate from the rental charge on your card statement.",
+    keywords: ["deposit", "release", "hold", "refund"],
+  },
+  {
+    id: "passkey",
+    category: "Account",
+    question: "What is a passkey?",
+    answer:
+      "Passkeys let you sign in with Face ID / fingerprint instead of email links. After first sign-in, the app may offer to set one up — optional but faster.",
+    keywords: ["passkey", "face id", "fingerprint", "login"],
+  },
+  {
+    id: "co-host",
+    category: "Hosting & listings",
+    question: "Can I add a co-host?",
+    answer:
+      "Profile → Co-hosts lets you invite someone to help manage your garage. They can respond to requests depending on permissions you set.",
+    keywords: ["cohost", "co-host", "partner", "family"],
+  },
+  {
+    id: "pause-listing",
+    category: "Hosting & listings",
+    question: "How do I pause a listing?",
+    answer:
+      "Listing wizard step 5 → Pause toggle hides the item from search instantly without deleting. Turn it back on when you are available.",
+    keywords: ["pause", "hide", "vacation", "unavailable"],
+  },
+  {
+    id: "edit-listing",
+    category: "Hosting & listings",
+    question: "How do I edit a published listing?",
+    answer: "Garage → tap the listing → Edit. You can update photos, price, availability, and pickup options anytime.",
+    keywords: ["edit", "change price", "update"],
+  },
+  {
+    id: "boost-listing",
+    category: "Hosting & listings",
+    question: "How do I get more views?",
+    answer:
+      "Clear photos, fair pricing, and complete availability help most. Paid boost (when available) highlights your item on the block feed.",
+    keywords: ["boost", "views", "promote", "traffic"],
+  },
+  {
+    id: "report-issue",
+    category: "Payments & safety",
+    question: "How do I report a user or listing?",
+    answer:
+      "Open the listing or rental thread → Report. For emergencies call local authorities first. Include photos and dates for damage claims.",
+    keywords: ["report", "scam", "safety", "block"],
+  },
+  {
+    id: "app-update",
+    category: "Getting started",
+    question: "The app asked me to update — what should I do?",
+    answer:
+      "Open Notifications (bell on Home) and tap Update when offered. If the screen feels stuck after update, close the tab and reopen the app.",
+    keywords: ["update", "pwa", "refresh", "stuck"],
+  },
+  {
+    id: "offline",
+    category: "Getting started",
+    question: "Does Evorios work offline?",
+    answer:
+      "Browsing cached pages may work briefly, but booking, chat, and new search need internet. You will see an offline screen when there is no connection.",
+    keywords: ["offline", "internet", "wifi"],
+  },
 ];
 
 export function searchFaq(query: string): FaqItem[] {

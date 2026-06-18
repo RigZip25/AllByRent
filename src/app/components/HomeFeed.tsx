@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Bell, ClipboardList, MapPin, ChevronRight } from "lucide-react";
 import { BottomNav } from "./BottomNav";
 import { HomeFeedCard } from "./HomeFeedCard";
