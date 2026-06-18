@@ -383,6 +383,10 @@ function AppRoutes() {
   };
 
   const goToTab = useCallback((screen: Screen) => {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) {
+      active.blur();
+    }
     setNavStack([]);
     setCurrentScreen(screen);
   }, []);

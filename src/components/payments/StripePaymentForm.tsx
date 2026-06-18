@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { loadStripe, type StripeElementsOptions } from "@stripe/stripe-js";
-import { getStripePublishableKey } from "../../lib/stripeConfig";
+import type { StripeElementsOptions } from "@stripe/stripe-js";
+import { getStripePromise } from "../../lib/stripeLoader";
+import { removeStripeControllerIframes } from "../../lib/stripeCleanup";
 
 const GREEN = "#0D5C3A";
 
@@ -72,10 +73,16 @@ export function StripePaymentForm({
   onSuccess: () => void;
   onError: (message: string) => void;
 }) {
-  const publishableKey = getStripePublishableKey();
-  if (!publishableKey) return null;
+  const stripePromise = useMemo(() => getStripePromise(), []);
 
-  const stripePromise = loadStripe(publishableKey);
+  useEffect(() => {
+    return () => {
+      window.setTimeout(removeStripeControllerIframes, 0);
+    };
+  }, []);
+
+  if (!stripePromise) return null;
+
   const options: StripeElementsOptions = {
     clientSecret,
     appearance: { theme: "stripe" },

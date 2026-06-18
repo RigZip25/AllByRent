@@ -899,6 +899,24 @@
     z-index: 20;
   }
 
+  /**
+   * Bottom tab bar — stay above scroll content and Stripe.js controller iframes.
+   */
+  .bottom-nav-bar {
+    position: relative;
+    z-index: 50;
+    isolation: isolate;
+    touch-action: manipulation;
+  }
+
+  /**
+   * Stripe fraud-detection controller iframe must not eat taps on the rest of the app.
+   * Payment Element iframes stay interactive inside their container.
+   */
+  iframe[name^="__privateStripeController"] {
+    pointer-events: none !important;
+  }
+
   .btn-padding {
     padding: clamp(0.5rem, 2.5vw, 1rem) clamp(0.75rem, 3vw, 1.25rem);
   }
