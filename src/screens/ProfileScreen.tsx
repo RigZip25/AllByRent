@@ -141,24 +141,26 @@ function ModeToggle({ mode, onChange }: { mode: AppMode; onChange: (m: AppMode) 
 export function ProfileScreen({
   onHome,
   onRentals,
-  onSearch,
+  onMrE,
   onGarage,
   onStockGarage,
   onMore,
   onEditLocation,
   onOpenPlans,
+  onOpenNotifications,
   onOpenCoHosts,
   onDeleteAccount,
   onViewPublicProfile,
 }: {
   onHome: () => void;
   onRentals: () => void;
-  onSearch: () => void;
+  onMrE: () => void;
   onGarage: () => void;
   onStockGarage: () => void;
   onMore: () => void;
   onEditLocation: () => void;
   onOpenPlans: () => void;
+  onOpenNotifications: () => void;
   onOpenCoHosts?: () => void;
   onDeleteAccount?: () => void;
   onViewPublicProfile?: () => void;
@@ -521,13 +523,14 @@ export function ProfileScreen({
               icon={<Bell className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label="Notifications"
               value={profile.notificationsEnabled ? "On" : "Off"}
+              onClick={onOpenNotifications}
             />
           </li>
           <li>
             <RowButton
               icon={<HelpCircle className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label="Help &amp; FAQ"
-              onClick={() => setRentanoOpen(true)}
+              onClick={onMrE}
             />
           </li>
         </ul>
@@ -590,7 +593,7 @@ export function ProfileScreen({
         <BottomNav
           activeTab="more"
           onHome={onHome}
-          onSearch={onSearch}
+          onMrE={onMrE}
           onAdd={onStockGarage}
           onGarage={onGarage}
           onMore={onMore}

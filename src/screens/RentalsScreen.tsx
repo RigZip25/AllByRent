@@ -174,7 +174,7 @@ function sortHistory(list: RentalBooking[], sort: HistorySort): RentalBooking[] 
 
 export function RentalsScreen({
   onHome,
-  onSearch,
+  onMrE,
   onGarage,
   onStockGarage,
   onMore,
@@ -183,7 +183,7 @@ export function RentalsScreen({
   onReRent,
 }: {
   onHome: () => void;
-  onSearch: () => void;
+  onMrE: () => void;
   onGarage: () => void;
   onStockGarage: () => void;
   onMore: () => void;
@@ -426,7 +426,7 @@ export function RentalsScreen({
         <BottomNav
           activeTab="more"
           onHome={onHome}
-          onSearch={onSearch}
+          onMrE={onMrE}
           onAdd={onStockGarage}
           onGarage={onGarage}
           onMore={onMore}

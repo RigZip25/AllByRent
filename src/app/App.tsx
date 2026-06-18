@@ -25,6 +25,7 @@ import { RentalsScreen } from "../screens/RentalsScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { GarageScreen } from "../screens/GarageScreen";
 import { MoreScreen } from "../screens/MoreScreen";
+import { MrEvoriosScreen } from "../screens/MrEvoriosScreen";
 import { NeighborGarageScreen } from "../screens/NeighborGarageScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
@@ -50,6 +51,7 @@ import {
   markRoleChosen,
   resolveOnboardingResumeScreen,
 } from "../lib/onboardingStorage";
+import { categoryIdFromName } from "../screens/listing/listingItemCategories";
 import { getPublishedListingById, hasRentLocationSetup } from "../lib/listingStorage";
 import type { ShelfPrefill } from "../lib/shelfListings";
 import { isSimulateUpdateRequested } from "../lib/pwaUpdateStorage";
@@ -75,7 +77,7 @@ type Screen =
   | "whereAreYouManual"
   | "onboardingAllSet"
   | "home"
-  | "search"
+  | "mre"
   | "garage"
   | "more"
   | "neighborGarage"
@@ -344,7 +346,7 @@ function AppRoutes() {
     const candidate = (postAuthTarget ?? stored) as Screen | null;
     const validScreens: Screen[] = [
       "home",
-      "search",
+      "mre",
       "garage",
       "more",
       "booking",
@@ -392,7 +394,7 @@ function AppRoutes() {
   }, []);
 
   const handleOpenHome = useCallback(() => goToTab("home"), [goToTab]);
-  const handleOpenSearch = useCallback(() => goToTab("search"), [goToTab]);
+  const handleOpenMrE = useCallback(() => goToTab("mre"), [goToTab]);
   const handleOpenGarage = useCallback(() => goToTab("garage"), [goToTab]);
   const handleOpenMore = useCallback(() => goToTab("more"), [goToTab]);
   const handleOpenRentals = useCallback(() => goToTab("rentals"), [goToTab]);
@@ -407,7 +409,7 @@ function AppRoutes() {
   }, [navigateTo]);
 
   useEffect(() => {
-    if (currentScreen !== "home" && currentScreen !== "search") return;
+    if (currentScreen !== "home") return;
     if (hasRentLocationSetup()) return;
     if (isOnboardingComplete()) return;
     openRentLocationSetup();
@@ -761,40 +763,35 @@ function AppRoutes() {
 
         {currentScreen === "home" && (
           <HomeFeed
-            variant="home"
             onNavigate={handleNavigate}
             onOpenNotifications={handleOpenNotifications}
             onEditLocation={openRentLocationSetup}
             onPostRequest={handlePostRequest}
             onStockGarage={handleStartListing}
+            onBrowseCategory={(label) =>
+              handleCategorySelect(categoryIdFromName(label), label)
+            }
             onHome={handleOpenHome}
-            onSearch={handleOpenSearch}
+            onMrE={handleOpenMrE}
             onGarage={handleOpenGarage}
             onMore={handleOpenMore}
             onRentals={handleOpenRentals}
           />
         )}
 
-        {currentScreen === "search" && (
-          <HomeFeed
-            variant="search"
-            onNavigate={handleNavigate}
-            onOpenNotifications={handleOpenNotifications}
-            onEditLocation={openRentLocationSetup}
-            onPostRequest={handlePostRequest}
-            onStockGarage={handleStartListing}
+        {currentScreen === "mre" && (
+          <MrEvoriosScreen
             onHome={handleOpenHome}
-            onSearch={handleOpenSearch}
             onGarage={handleOpenGarage}
+            onStockGarage={handleStartListing}
             onMore={handleOpenMore}
-            onRentals={handleOpenRentals}
           />
         )}
 
         {currentScreen === "more" && (
           <MoreScreen
             onHome={handleOpenHome}
-            onSearch={handleOpenSearch}
+            onMrE={handleOpenMrE}
             onStockGarage={handleStartListing}
             onGarage={handleOpenGarage}
             onProfile={handleOpenProfile}
@@ -809,7 +806,7 @@ function AppRoutes() {
           <GarageScreen
             onNavigate={handleNavigate}
             onHome={handleOpenHome}
-            onSearch={handleOpenSearch}
+            onMrE={handleOpenMrE}
             onStockGarage={handleStartListing}
             onMore={handleOpenMore}
           />
@@ -829,13 +826,13 @@ function AppRoutes() {
         {currentScreen === "rentals" && (
           <RentalsScreen
             onHome={handleOpenHome}
-            onSearch={handleOpenSearch}
+            onMrE={handleOpenMrE}
             onGarage={handleOpenGarage}
             onStockGarage={handleStartListing}
             onProfile={handleOpenProfile}
             onMore={handleOpenMore}
             onOpenRental={() => navigateTo("activeRental")}
-            onViewProfile={() => undefined}
+            onViewProfile={() => handleOpenProfile()}
             onReRent={() => {
               setNavStack([]);
               setCurrentScreen("home");
@@ -846,13 +843,14 @@ function AppRoutes() {
         {currentScreen === "profile" && (
           <ProfileScreen
             onHome={handleOpenHome}
-            onSearch={handleOpenSearch}
+            onMrE={handleOpenMrE}
             onGarage={handleOpenGarage}
             onStockGarage={handleStartListing}
             onRentals={handleOpenRentals}
             onMore={handleOpenMore}
             onEditLocation={openRentLocationSetup}
             onOpenPlans={handleOpenPlans}
+            onOpenNotifications={handleOpenNotifications}
             onDeleteAccount={() => navigateTo("deleteAccount")}
           />
         )}
@@ -860,19 +858,23 @@ function AppRoutes() {
         {currentScreen === "favorites" && (
           <FavoritesScreen
             onHome={handleOpenHome}
-            onSearch={handleOpenSearch}
+            onMrE={handleOpenMrE}
             onGarage={handleOpenGarage}
             onStockGarage={handleStartListing}
             onRentals={handleOpenRentals}
             onProfile={handleOpenProfile}
             onMore={handleOpenMore}
+            onOpenListing={(id) => {
+              setSelectedHostListingId(id);
+              navigateTo("hostListingDetail");
+            }}
           />
         )}
 
         {currentScreen === "earnBusiness" && (
           <EarnBusinessScreen
             onHome={handleOpenHome}
-            onSearch={handleOpenSearch}
+            onMrE={handleOpenMrE}
             onGarage={handleOpenGarage}
             onStockGarage={handleStartListing}
             onRentals={handleOpenRentals}
@@ -907,7 +909,7 @@ function AppRoutes() {
             onItemSelect={handleItemSelect}
             onHome={handleOpenHome}
             onRentals={handleOpenRentals}
-            onSearch={handleOpenSearch}
+            onMrE={handleOpenMrE}
             onGarage={handleOpenGarage}
             onStockGarage={handleStartListing}
             onMore={handleOpenMore}

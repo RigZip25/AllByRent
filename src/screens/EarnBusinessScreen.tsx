@@ -103,14 +103,14 @@ function ListingRow({ row }: { row: ListingEarnBreakdown }) {
 export function EarnBusinessScreen({
   onHome,
   onRentals,
-  onSearch,
+  onMrE,
   onGarage,
   onStockGarage,
   onMore,
 }: {
   onHome: () => void;
   onRentals: () => void;
-  onSearch: () => void;
+  onMrE: () => void;
   onGarage: () => void;
   onStockGarage: () => void;
   onProfile: () => void;
@@ -261,7 +261,7 @@ export function EarnBusinessScreen({
         <BottomNav
           activeTab="more"
           onHome={onHome}
-          onSearch={onSearch}
+          onMrE={onMrE}
           onAdd={onStockGarage}
           onGarage={onGarage}
           onMore={onMore}

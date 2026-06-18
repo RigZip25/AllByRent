@@ -184,7 +184,7 @@ interface SubcategoryProps {
 
   onRentals: () => void;
 
-  onSearch: () => void;
+  onMrE: () => void;
 
   onGarage: () => void;
 
@@ -217,7 +217,7 @@ export function Subcategory({
 
   onRentals,
 
-  onSearch,
+  onMrE,
 
   onGarage,
 
@@ -797,7 +797,7 @@ export function Subcategory({
 
         onHome={onHome}
 
-        onSearch={onSearch}
+        onMrE={onMrE}
 
         onAdd={onStockGarage}
 

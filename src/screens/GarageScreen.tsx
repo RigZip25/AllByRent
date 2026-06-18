@@ -6,7 +6,7 @@ const GREEN_DARK = "#0D5C3A";
 type GarageScreenProps = {
   onNavigate: (screen: string) => void;
   onHome: () => void;
-  onSearch: () => void;
+  onMrE: () => void;
   onStockGarage: () => void;
   onMore: () => void;
 };
@@ -14,7 +14,7 @@ type GarageScreenProps = {
 export function GarageScreen({
   onNavigate,
   onHome,
-  onSearch,
+  onMrE,
   onStockGarage,
   onMore,
 }: GarageScreenProps) {
@@ -40,7 +40,7 @@ export function GarageScreen({
         <BottomNav
           activeTab="garage"
           onHome={onHome}
-          onSearch={onSearch}
+          onMrE={onMrE}
           onAdd={onStockGarage}
           onGarage={() => undefined}
           onMore={onMore}

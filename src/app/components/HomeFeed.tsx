@@ -1,10 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bell, ClipboardList, MapPin, ChevronRight } from "lucide-react";
 import { BottomNav } from "./BottomNav";
 import { HomeFeedCard } from "./HomeFeedCard";
 import { GarageLensCard } from "./GarageLensCard";
 import { usePwaUpdate } from "../../hooks/PwaUpdateProvider";
 import { mascotSays } from "../../lib/brand";
+import { CATEGORIES } from "../../screens/listing/listingItemCategories";
+import {
+  loadHomeFeedLens,
+  loadHomeFeedMode,
+  loadHomeFeedQuery,
+  saveHomeFeedLens,
+  saveHomeFeedMode,
+  saveHomeFeedQuery,
+} from "../../lib/homeFeedStorage";
 import {
   fetchActiveListingsForCityRemote,
   getActiveRentLocationLabel,
@@ -30,42 +39,52 @@ const GREEN_DARK = "#0D5C3A";
 const BORDER = "#E8E6E0";
 const SPARSE_CLUSTER_MAX = 10;
 
+const HOME_CATEGORY_PICKS = [
+  "Tools & DIY",
+  "Garden & Yard",
+  "Photo & Video",
+  "Electronics & Tech",
+  "Party & Events",
+  "Sports & Recreation",
+  "Baby & Kids",
+  "Home & Kitchen",
+] as const;
+
 type HomeLens = "feed" | "garages";
 
 type HomeFeedProps = {
-  variant?: "home" | "search";
   onNavigate: (screen: string) => void;
   onOpenNotifications: () => void;
   onEditLocation: () => void;
   onPostRequest: (query?: string) => void;
   onStockGarage: () => void;
+  onBrowseCategory: (categoryLabel: string) => void;
   onHome: () => void;
-  onSearch: () => void;
+  onMrE: () => void;
   onGarage: () => void;
   onMore: () => void;
   onRentals: () => void;
 };
 
 export function HomeFeed({
-  variant = "home",
   onNavigate,
   onOpenNotifications,
   onEditLocation,
   onPostRequest,
   onStockGarage,
+  onBrowseCategory,
   onHome,
-  onSearch,
+  onMrE,
   onGarage,
   onMore,
   onRentals,
 }: HomeFeedProps) {
-  const [query, setQuery] = useState("");
-  const [modeChip, setModeChip] = useState<ModeChip>("all");
-  const [lens, setLens] = useState<HomeLens>("feed");
+  const [query, setQuery] = useState(() => loadHomeFeedQuery());
+  const [modeChip, setModeChip] = useState<ModeChip>(() => loadHomeFeedMode());
+  const [lens, setLens] = useState<HomeLens>(() => loadHomeFeedLens());
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState<Awaited<ReturnType<typeof fetchActiveListingsForCityRemote>>>([]);
   const [clusterRadiusMi, setClusterRadiusMi] = useState(() => getClusterRadiusMi());
-  const searchInputRef = useRef<HTMLTextAreaElement>(null);
   const { updateAvailable, updateJustCompleted, simulateUpdateNotification } = usePwaUpdate();
   const showBellBadge = updateAvailable || updateJustCompleted;
   const bellTapRef = useRef({ count: 0, openTimer: 0 });
@@ -96,10 +115,16 @@ export function HomeFeed({
   };
 
   useEffect(() => {
-    if (variant !== "search") return;
-    const t = window.setTimeout(() => searchInputRef.current?.focus(), 120);
-    return () => window.clearTimeout(t);
-  }, [variant]);
+    saveHomeFeedQuery(query);
+  }, [query]);
+
+  useEffect(() => {
+    saveHomeFeedMode(modeChip);
+  }, [modeChip]);
+
+  useEffect(() => {
+    saveHomeFeedLens(lens);
+  }, [lens]);
 
   useEffect(() => {
     let mounted = true;
@@ -131,7 +156,15 @@ export function HomeFeed({
   const garages = useMemo(() => groupListingsByGarage(filtered), [filtered]);
   const isSparse = filtered.length < SPARSE_CLUSTER_MAX;
   const isSearchActive = query.trim().length > 0;
-  const navTab = variant === "search" ? "search" : "home";
+
+  const browseCategories = useMemo(
+    () =>
+      HOME_CATEGORY_PICKS.filter((name) => name in CATEGORIES).map((name) => ({
+        name,
+        icon: CATEGORIES[name]?.icon ?? "📦",
+      })),
+    [],
+  );
 
   const modeChips: { id: ModeChip; label: string }[] = [
     { id: "all", label: "All" },
@@ -205,7 +238,6 @@ export function HomeFeed({
             </span>
             <AutoGrowTextarea
               id="home-search"
-              ref={searchInputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="What do you need?"
@@ -218,10 +250,32 @@ export function HomeFeed({
           </div>
           {!isSearchActive ? (
             <p className="mt-1.5 pl-8 text-[13px] text-gray-500">
-              e.g. tile saw near me this weekend
+              Search rentals on Home — tap a category or type above
             </p>
           ) : null}
         </div>
+
+        {!isSearchActive && browseCategories.length > 0 ? (
+          <div className="mt-3">
+            <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+              Browse by category
+            </p>
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+              {browseCategories.map((cat) => (
+                <button
+                  key={cat.name}
+                  type="button"
+                  onClick={() => onBrowseCategory(cat.name)}
+                  className="flex shrink-0 items-center gap-1.5 rounded-full border bg-white px-3 py-2 text-[13px] font-semibold text-gray-800 active:bg-gray-50"
+                  style={{ borderColor: BORDER }}
+                >
+                  <span aria-hidden>{cat.icon}</span>
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <div className="mt-3 flex flex-wrap gap-2">
           {modeChips.map((chip) => {
@@ -382,9 +436,9 @@ export function HomeFeed({
 
       <div className="shrink-0">
         <BottomNav
-          activeTab={navTab}
+          activeTab="home"
           onHome={onHome}
-          onSearch={onSearch}
+          onMrE={onMrE}
           onAdd={onStockGarage}
           onGarage={onGarage}
           onMore={onMore}

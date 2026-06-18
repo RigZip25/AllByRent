@@ -1,9 +1,11 @@
 import { Menu, Plus } from "lucide-react";
+import { MASCOT_NAME } from "../../lib/brand";
+import rentanoImg from "../../imports/No_back_rentano.png";
 
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
 
-export type BottomNavTab = "home" | "search" | "add" | "garage" | "more" | "none";
+export type BottomNavTab = "home" | "mre" | "add" | "garage" | "more" | "none";
 
 function runNavAction(action: () => void) {
   const active = document.activeElement;
@@ -28,13 +30,14 @@ function NavIconHome({ active }: { active?: boolean }) {
   );
 }
 
-function NavIconSearch({ active }: { active?: boolean }) {
-  const c = active ? GREEN : "#888";
+function NavIconMrE({ active }: { active?: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" className="h-[26px] w-[26px]" fill="none" aria-hidden="true">
-      <circle cx="11" cy="11" r="6" stroke={c} strokeWidth="2" />
-      <path d="M16 16 L20 20" stroke={c} strokeWidth="2" strokeLinecap="round" />
-    </svg>
+    <div
+      className="flex h-[30px] w-[30px] items-center justify-center overflow-hidden rounded-full"
+      style={{ border: `2px solid ${active ? GREEN : "#ccc"}` }}
+    >
+      <img src={rentanoImg} alt="" className="h-full w-full object-cover" draggable={false} />
+    </div>
   );
 }
 
@@ -56,7 +59,7 @@ function NavIconGarage({ active }: { active?: boolean }) {
 function TabLabel({ children, active }: { children: string; active: boolean }) {
   return (
     <span
-      className="text-[12px]"
+      className="max-w-[64px] truncate text-[11px] leading-tight"
       style={{ color: active ? GREEN : "#888", fontWeight: active ? 600 : 400 }}
     >
       {children}
@@ -72,18 +75,20 @@ function NavIconMore({ active }: { active?: boolean }) {
 export function BottomNav({
   activeTab = "home",
   onHome,
-  onSearch,
+  onMrE,
   onAdd,
   onGarage,
   onMore,
 }: {
   activeTab?: BottomNavTab;
   onHome: () => void;
-  onSearch: () => void;
+  onMrE: () => void;
   onAdd: () => void;
   onGarage: () => void;
   onMore: () => void;
 }) {
+  const mreLabel = MASCOT_NAME.replace("Mr. ", "Mr.");
+
   return (
     <nav
       className="bottom-nav-bar flex shrink-0 items-center border-t bg-white px-1 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] pt-2"
@@ -102,11 +107,12 @@ export function BottomNav({
 
         <button
           type="button"
-          onClick={() => runNavAction(onSearch)}
+          onClick={() => runNavAction(onMrE)}
           className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
+          aria-label={`Open ${MASCOT_NAME} assistant`}
         >
-          <NavIconSearch active={activeTab === "search"} />
-          <TabLabel active={activeTab === "search"}>Search</TabLabel>
+          <NavIconMrE active={activeTab === "mre"} />
+          <TabLabel active={activeTab === "mre"}>{mreLabel}</TabLabel>
         </button>
 
         <button

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import {
   Bell,
   ChevronRight,
@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { BottomNav } from "../app/components/BottomNav";
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
-import { RentanoChatSheet } from "../components/RentanoChat";
 import { useAuth } from "../hooks/AuthProvider";
 import { MASCOT_NAME } from "../lib/brand";
 import { loadUserProfile, refreshProfileStats } from "../lib/userProfileStorage";
@@ -66,7 +65,7 @@ function MenuRow({
 
 export function MoreScreen({
   onHome,
-  onSearch,
+  onMrE,
   onStockGarage,
   onGarage,
   onProfile,
@@ -76,7 +75,7 @@ export function MoreScreen({
   onEarnBusiness,
 }: {
   onHome: () => void;
-  onSearch: () => void;
+  onMrE: () => void;
   onStockGarage: () => void;
   onGarage: () => void;
   onProfile: () => void;
@@ -85,7 +84,6 @@ export function MoreScreen({
   onNotifications: () => void;
   onEarnBusiness: () => void;
 }) {
-  const [helpOpen, setHelpOpen] = useState(false);
   const auth = useAuth();
   const profile = refreshProfileStats(loadUserProfile(), auth.userId);
 
@@ -166,9 +164,9 @@ export function MoreScreen({
           <li>
             <MenuRow
               icon={<HelpCircle className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label={`Help & ${MASCOT_NAME}`}
-              hint="FAQ and chat assistant"
-              onClick={() => setHelpOpen(true)}
+              label={`Chat with ${MASCOT_NAME}`}
+              hint="Always in the bottom menu — tap his tab anytime"
+              onClick={onMrE}
             />
           </li>
           <li>
@@ -186,19 +184,12 @@ export function MoreScreen({
         <BottomNav
           activeTab="more"
           onHome={onHome}
-          onSearch={onSearch}
+          onMrE={onMrE}
           onAdd={onStockGarage}
           onGarage={onGarage}
           onMore={() => undefined}
         />
       </div>
-
-      <RentanoChatSheet
-        open={helpOpen}
-        onClose={() => setHelpOpen(false)}
-        defaultView="chat"
-        context={{ screen: "more", appMode: profile.preferredMode }}
-      />
     </div>
   );
 }

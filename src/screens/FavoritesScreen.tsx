@@ -17,9 +17,11 @@ const BORDER = "#E8E6E0";
 function FavoriteCard({
   listing,
   onRemove,
+  onOpen,
 }: {
   listing: ListingDraft;
   onRemove: () => void;
+  onOpen: () => void;
 }) {
   const title = getListingDisplayTitle(listing.title);
   const rate = listing.pricing.dailyRate?.trim();
@@ -31,22 +33,28 @@ function FavoriteCard({
       className="flex items-center gap-3 rounded-2xl border bg-white p-3"
       style={{ borderColor: BORDER }}
     >
-      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F0F4F2]">
-        {coverUrl ? (
-          <img src={coverUrl} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <span className="text-2xl" aria-hidden>
-            📦
-          </span>
-        )}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-gray-900">{title}</p>
-        <p className="text-sm text-gray-500">
-          {listing.category || "Listing"}
-          {rate ? ` · $${rate}/day` : ""}
-        </p>
-      </div>
+      <button
+        type="button"
+        onClick={onOpen}
+        className="flex min-w-0 flex-1 items-center gap-3 text-left active:opacity-80"
+      >
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F0F4F2]">
+          {coverUrl ? (
+            <img src={coverUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <span className="text-2xl" aria-hidden>
+              📦
+            </span>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold text-gray-900">{title}</p>
+          <p className="text-sm text-gray-500">
+            {listing.category || "Listing"}
+            {rate ? ` · $${rate}/day` : ""}
+          </p>
+        </div>
+      </button>
       <button
         type="button"
         onClick={onRemove}
@@ -63,19 +71,21 @@ function FavoriteCard({
 export function FavoritesScreen({
   onHome,
   onRentals,
-  onSearch,
+  onMrE,
   onGarage,
   onStockGarage,
   onProfile,
   onMore,
+  onOpenListing,
 }: {
   onHome: () => void;
   onRentals: () => void;
-  onSearch: () => void;
+  onMrE: () => void;
   onGarage: () => void;
   onStockGarage: () => void;
   onProfile: () => void;
   onMore: () => void;
+  onOpenListing: (listingId: string) => void;
 }) {
   const [favoriteIds, setFavoriteIds] = useState(() => loadFavoriteListingIds());
 
@@ -120,7 +130,7 @@ export function FavoritesScreen({
               className="mt-5 w-full rounded-xl py-3 text-[15px] font-bold text-white"
               style={{ backgroundColor: GREEN_LIGHT }}
             >
-              Browse categories
+              Browse on Home
             </button>
           </div>
         ) : (
@@ -130,6 +140,7 @@ export function FavoritesScreen({
                 key={listing.id}
                 listing={listing}
                 onRemove={() => handleRemove(listing.id)}
+                onOpen={() => onOpenListing(listing.id)}
               />
             ))}
           </ul>
@@ -140,7 +151,7 @@ export function FavoritesScreen({
         <BottomNav
           activeTab="more"
           onHome={onHome}
-          onSearch={onSearch}
+          onMrE={onMrE}
           onAdd={onStockGarage}
           onGarage={onGarage}
           onMore={onMore}

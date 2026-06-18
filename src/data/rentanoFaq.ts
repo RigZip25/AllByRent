@@ -46,7 +46,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Getting started",
     question: "How do I install the app on my phone?",
     answer:
-      `Tap Mr.E in the footer for install tips, or use Add to Home Screen. On iPhone: Share → Add to Home Screen. On Android: use the browser install prompt when it appears.`,
+      `Tap ${MASCOT_NAME} in the bottom menu for install tips, or use Add to Home Screen. On iPhone: Share → Add to Home Screen. On Android: use the browser install prompt when it appears.`,
     keywords: ["pwa", "home screen", "install"],
   },
   {
