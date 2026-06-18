@@ -10,7 +10,7 @@
 | 1 | **Brand pass** | 🟡 | QR PDFs, manifest, passkey, README, PWA strings, Evorios in reset/PWA stub | `Rentano*` file renames |
 | 2 | **Remove RTO** | ✅ | Hidden in UI; rules off; enum in types | — |
 | 3 | **Garage view** | 🟡 P0 | Garage tab, Garages lens, neighbor shelf | Storefront polish P1 |
-| 4 | **Frictionless listing** | ⬜ | AI на фото в Step 2 | 7 шагов; QR после publish; тяжёлое не отложено |
+| 4 | **Frictionless listing** | 🟡 P0 | 3-step wizard; AI on Continue; defaults for pickup/hours | value ceiling gate; edit flow for pickup/delivery |
 | 5 | **AI + dynamic taxonomy** | 🟡 | `listingAnalysis.ts` → static categories | provisional buckets, promotion job, Haiku + prompt cache |
 | 6 | **Semantic search** | 🚫 | ILIKE в `listingStorage.ts` | pgvector migration, embeddings, similarity API; **нужен кластер 50mi** |
 | 7 | **Feed logic** | 🟡 P0 | Unified feed default, mode chips, sparse banner | Departments at N; ranking P1 |

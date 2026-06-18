@@ -16,7 +16,7 @@
 | **P1b** | **Brand pass (strings)** | 🟡 | `Rentano*` file renames defer |
 | **P1c** | Copy pass (wizard, FAQ, empty) | ✅ | — |
 | **P1d** | Deposit-only UI (hide Safely) | ✅ | value ceiling gate → P3 |
-| P2 | Frictionless listing (3-step) | ⬜ | Отложить verify/Stripe из wizard |
+| P2 | Frictionless listing (3-step) | ✅ | Pickup/hours/QR after publish |
 | P2 | Garage storefront polish | ⬜ | Public profile = vitrina |
 | P2 | Feed ranking + departments | ⬜ | N items per cluster |
 | P3 | Semantic search (pgvector) | 🚫 | Нужен кластер + migration |

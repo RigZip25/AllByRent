@@ -190,14 +190,14 @@ export function Step7Review({
 
           <button
             type="button"
-            onClick={() => onGoToStep(3)}
+            onClick={() => onGoToStep(2)}
             className="mt-4 w-full border-t border-gray-100 pt-4 text-left"
           >
             <div className="mb-2 flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
                 Modes
               </p>
-              <EditLink onClick={() => onGoToStep(3)} />
+              <EditLink onClick={() => onGoToStep(2)} />
             </div>
             <ul className="space-y-2">
               {modeRows.map((row) => (
@@ -214,16 +214,12 @@ export function Step7Review({
             </ul>
           </button>
 
-          <button
-            type="button"
-            onClick={() => onGoToStep(4)}
-            className="mt-4 w-full border-t border-gray-100 pt-4 text-left"
-          >
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-600">{handoffSummary(draft)}</p>
-              <EditLink onClick={() => onGoToStep(4)} />
-            </div>
-          </button>
+          <div className="mt-4 border-t border-gray-100 pt-4">
+            <p className="text-sm text-gray-600">{handoffSummary(draft)}</p>
+            <p className="mt-1 text-xs text-gray-400">
+              Pickup hours and delivery — adjust after publishing in My Garage.
+            </p>
+          </div>
 
           <div className="mt-4 border-t border-gray-100 pt-4">
             <p className="flex items-center gap-1.5 text-sm text-gray-600">
@@ -232,26 +228,19 @@ export function Step7Review({
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => onGoToStep(5)}
-            className="mt-3 w-full border-t border-gray-100 pt-3 text-left"
-          >
-            <div className="flex items-center justify-between">
-              <p className="flex items-center gap-2 text-sm font-medium text-gray-800">
-                <span
-                  className="h-2 w-2 rounded-full"
-                  style={{ backgroundColor: draft.paused ? AMBER : GREEN }}
-                />
-                {draft.paused ? (
-                  <span style={{ color: AMBER }}>Paused</span>
-                ) : (
-                  <span style={{ color: GREEN }}>Available</span>
-                )}
-              </p>
-              <EditLink onClick={() => onGoToStep(5)} />
-            </div>
-          </button>
+          <div className="mt-3 w-full border-t border-gray-100 pt-3">
+            <p className="flex items-center gap-2 text-sm font-medium text-gray-800">
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: draft.paused ? AMBER : GREEN }}
+              />
+              {draft.paused ? (
+                <span style={{ color: AMBER }}>Paused</span>
+              ) : (
+                <span style={{ color: GREEN }}>Available · Mon–Fri 9am–5pm</span>
+              )}
+            </p>
+          </div>
         </div>
       </div>
 
