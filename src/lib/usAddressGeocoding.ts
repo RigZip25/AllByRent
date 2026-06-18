@@ -88,7 +88,7 @@ export function formatUsAddressLines(parts: {
 
 function getUsGeocoderBaseUrl(): string {
   if (import.meta.env.DEV) return "/us-geocode";
-  return "https://geocoding.geo.census.gov/geocoder";
+  return "/api/geocode/us";
 }
 
 type CensusMatch = {

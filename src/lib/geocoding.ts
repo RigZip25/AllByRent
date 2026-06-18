@@ -410,14 +410,16 @@ export async function searchPlaces(
     const usCensus =
       countryCode === "US" ? await searchUsAddresses(trimmed, usState) : [];
 
-    const allowPhotonFallback =
-      countryCode !== "US" || Boolean(usState) || queryHasUsCityHint(trimmed);
+    const cityFragment =
+      trimmed
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .pop() ?? trimmed;
 
     const [photonResults, meteoResults] = await Promise.all([
-      allowPhotonFallback
-        ? searchPhoton(biasedQuery, countryCode, options?.near, usState)
-        : Promise.resolve([]),
-      countryCode === "US" ? Promise.resolve([]) : searchOpenMeteo(trimmed, countryCode),
+      searchPhoton(biasedQuery, countryCode, options?.near, usState),
+      searchOpenMeteo(cityFragment, countryCode),
     ]);
 
     const merged = sortSuggestions(
@@ -430,29 +432,22 @@ export async function searchPlaces(
       usState,
     );
 
-    if (merged.length > 0) return merged.slice(0, 8);
+    if (merged.length > 0) return merged.slice(0, 10);
 
-    // US: many rural / new addresses are missing from Census + OSM — offer city-level pick
-    if (countryCode === "US") {
-      const cityQuery =
-        trimmed.split(",").map((p) => p.trim()).filter(Boolean).pop() ?? trimmed;
-      const cityFallback = await searchOpenMeteo(cityQuery, "US");
-      const normalized = cityFallback.map((item) => ({
-        ...item,
-        region: abbreviateUsState(item.region),
-      }));
-      const cityResults = filterMatchesByUsState(normalized, usState).slice(0, 5);
-      if (cityResults.length > 0) return cityResults;
-    }
-
-    if (biasedQuery !== trimmed && allowPhotonFallback) {
-      const retry = await searchPhoton(
+    if (biasedQuery !== trimmed) {
+      const retryPhoton = await searchPhoton(
         appendCountryToQuery(trimmed, countryCode),
         countryCode,
         options?.near,
         usState,
       );
-      return filterByCountry(retry, countryCode).slice(0, 8);
+      const retryMerged = sortSuggestions(
+        filterByCountry(dedupeSuggestions([...usCensus, ...retryPhoton]), countryCode),
+        trimmed,
+        countryCode,
+        usState,
+      );
+      if (retryMerged.length > 0) return retryMerged.slice(0, 10);
     }
 
     return [];
