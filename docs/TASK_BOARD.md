@@ -30,7 +30,7 @@
 1. ✅ Home P0 (`a9bca4b`)
 2. ✅ Task 2 — RTO out (`ec3869a`)
 3. ✅ Task 10 — copy + deposit pass (`cursor/copy-deposit-pass-ca09`)
-4. ⬜ Task 4 — frictionless listing (3-step wizard)
+4. ✅ Task 4 — frictionless listing (3-step wizard)
 5. ⬜ Task 3 — garage storefront polish
 
 ---
