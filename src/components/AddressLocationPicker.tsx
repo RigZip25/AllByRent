@@ -115,7 +115,7 @@ export function AddressLocationPicker({
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [inputValue, searchNear?.lat, searchNear?.lng, countryCode, usState]);
+  }, [inputValue, searchNear?.lat, searchNear?.lng, countryCode, usState, limitToUsState]);
 
   const handleCountryChange = (code: CountryCode) => {
     setCountryCode(code);
@@ -236,7 +236,7 @@ export function AddressLocationPicker({
             setShowSuggestions(true);
           }
         }}
-        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+        onBlur={() => setTimeout(() => setShowSuggestions(false), 300)}
         placeholder={placeholder}
         className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-base outline-none focus:border-green-700"
         autoComplete="street-address"
@@ -263,15 +263,21 @@ export function AddressLocationPicker({
       ) : null}
 
       {showAutocomplete ? (
-        <ul className="max-h-52 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+        <ul
+          className="relative z-20 max-h-52 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-md"
+          role="listbox"
+          aria-label="Address suggestions"
+        >
           {suggestions.map((suggestion, index) => (
-            <li key={`${suggestion.label}-${index}`}>
+            <li key={`${suggestion.label}-${index}`} role="option">
               <button
                 type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onTouchStart={(e) => e.preventDefault()}
-                onClick={() => handlePick(suggestion)}
-                className="w-full border-b border-gray-100 px-4 py-3 text-left last:border-b-0 hover:bg-gray-50 active:bg-gray-100"
+                onPointerDown={(event) => {
+                  // Select before input blur hides the list (mobile + desktop).
+                  event.preventDefault();
+                  handlePick(suggestion);
+                }}
+                className="w-full border-b border-gray-100 px-4 py-3 text-left last:border-b-0 hover:bg-gray-50 active:bg-gray-100 touch-manipulation"
               >
                 <span className="block text-sm font-medium text-gray-900">
                   {suggestion.flag} {suggestion.primaryLine}
