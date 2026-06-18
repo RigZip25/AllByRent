@@ -24,6 +24,7 @@ import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { RentalsScreen } from "../screens/RentalsScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { GarageScreen } from "../screens/GarageScreen";
+import { MoreScreen } from "../screens/MoreScreen";
 import { NeighborGarageScreen } from "../screens/NeighborGarageScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
@@ -76,6 +77,7 @@ type Screen =
   | "home"
   | "search"
   | "garage"
+  | "more"
   | "neighborGarage"
   | "notifications"
   | "subcategory"
@@ -344,6 +346,7 @@ function AppRoutes() {
       "home",
       "search",
       "garage",
+      "more",
       "booking",
       "postRequest",
       "listingIntro",
@@ -387,6 +390,7 @@ function AppRoutes() {
   const handleOpenHome = useCallback(() => goToTab("home"), [goToTab]);
   const handleOpenSearch = useCallback(() => goToTab("search"), [goToTab]);
   const handleOpenGarage = useCallback(() => goToTab("garage"), [goToTab]);
+  const handleOpenMore = useCallback(() => goToTab("more"), [goToTab]);
   const handleOpenRentals = useCallback(() => goToTab("rentals"), [goToTab]);
   const handleOpenProfile = useCallback(() => goToTab("profile"), [goToTab]);
   const handleOpenFavorites = useCallback(() => goToTab("favorites"), [goToTab]);
@@ -762,6 +766,7 @@ function AppRoutes() {
             onHome={handleOpenHome}
             onSearch={handleOpenSearch}
             onGarage={handleOpenGarage}
+            onMore={handleOpenMore}
             onRentals={handleOpenRentals}
           />
         )}
@@ -777,7 +782,22 @@ function AppRoutes() {
             onHome={handleOpenHome}
             onSearch={handleOpenSearch}
             onGarage={handleOpenGarage}
+            onMore={handleOpenMore}
             onRentals={handleOpenRentals}
+          />
+        )}
+
+        {currentScreen === "more" && (
+          <MoreScreen
+            onHome={handleOpenHome}
+            onSearch={handleOpenSearch}
+            onStockGarage={handleStartListing}
+            onGarage={handleOpenGarage}
+            onProfile={handleOpenProfile}
+            onRentals={handleOpenRentals}
+            onFavorites={handleOpenFavorites}
+            onNotifications={handleOpenNotifications}
+            onEarnBusiness={handleOpenBusiness}
           />
         )}
 
@@ -787,7 +807,7 @@ function AppRoutes() {
             onHome={handleOpenHome}
             onSearch={handleOpenSearch}
             onStockGarage={handleStartListing}
-            onOpenSettings={handleOpenProfile}
+            onMore={handleOpenMore}
           />
         )}
 
@@ -809,6 +829,7 @@ function AppRoutes() {
             onGarage={handleOpenGarage}
             onStockGarage={handleStartListing}
             onProfile={handleOpenProfile}
+            onMore={handleOpenMore}
             onOpenRental={() => navigateTo("activeRental")}
             onViewProfile={() => undefined}
             onReRent={() => {
@@ -825,6 +846,7 @@ function AppRoutes() {
             onGarage={handleOpenGarage}
             onStockGarage={handleStartListing}
             onRentals={handleOpenRentals}
+            onMore={handleOpenMore}
             onEditLocation={openRentLocationSetup}
             onOpenPlans={handleOpenPlans}
             onDeleteAccount={() => navigateTo("deleteAccount")}
@@ -839,6 +861,7 @@ function AppRoutes() {
             onStockGarage={handleStartListing}
             onRentals={handleOpenRentals}
             onProfile={handleOpenProfile}
+            onMore={handleOpenMore}
           />
         )}
 
@@ -850,6 +873,7 @@ function AppRoutes() {
             onStockGarage={handleStartListing}
             onRentals={handleOpenRentals}
             onProfile={handleOpenProfile}
+            onMore={handleOpenMore}
           />
         )}
 
@@ -882,6 +906,7 @@ function AppRoutes() {
             onSearch={handleOpenSearch}
             onGarage={handleOpenGarage}
             onStockGarage={handleStartListing}
+            onMore={handleOpenMore}
             onUnlock={() => requireAuth("generic")}
           />
         )}

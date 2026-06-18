@@ -144,6 +144,7 @@ export function ProfileScreen({
   onSearch,
   onGarage,
   onStockGarage,
+  onMore,
   onEditLocation,
   onOpenPlans,
   onOpenCoHosts,
@@ -155,6 +156,7 @@ export function ProfileScreen({
   onSearch: () => void;
   onGarage: () => void;
   onStockGarage: () => void;
+  onMore: () => void;
   onEditLocation: () => void;
   onOpenPlans: () => void;
   onOpenCoHosts?: () => void;
@@ -586,12 +588,12 @@ export function ProfileScreen({
 
       <div className="shrink-0">
         <BottomNav
-          activeTab="none"
+          activeTab="more"
           onHome={onHome}
           onSearch={onSearch}
           onAdd={onStockGarage}
           onGarage={onGarage}
-          onRentano={() => setRentanoOpen(true)}
+          onMore={onMore}
         />
       </div>
 

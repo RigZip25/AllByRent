@@ -1,8 +1,6 @@
 import { useMemo, useState } from "react";
 import { Heart } from "lucide-react";
 import { BottomNav } from "../app/components/BottomNav";
-import { RentanoChatSheet } from "../components/RentanoChat";
-import { getAppMode } from "../lib/appMode";
 import {
   loadFavoriteListingIds,
   toggleFavoriteListing,
@@ -69,6 +67,7 @@ export function FavoritesScreen({
   onGarage,
   onStockGarage,
   onProfile,
+  onMore,
 }: {
   onHome: () => void;
   onRentals: () => void;
@@ -76,10 +75,9 @@ export function FavoritesScreen({
   onGarage: () => void;
   onStockGarage: () => void;
   onProfile: () => void;
+  onMore: () => void;
 }) {
-  const [rentanoOpen, setRentanoOpen] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState(() => loadFavoriteListingIds());
-  const mode = getAppMode();
 
   const favorites = useMemo(() => {
     const listings = loadPublishedListings();
@@ -140,21 +138,14 @@ export function FavoritesScreen({
 
       <div className="shrink-0">
         <BottomNav
-          activeTab="none"
+          activeTab="more"
           onHome={onHome}
           onSearch={onSearch}
           onAdd={onStockGarage}
           onGarage={onGarage}
-          onRentano={() => setRentanoOpen(true)}
+          onMore={onMore}
         />
       </div>
-
-      <RentanoChatSheet
-        open={rentanoOpen}
-        onClose={() => setRentanoOpen(false)}
-        defaultView="chat"
-        context={{ screen: "favorites", appMode: mode }}
-      />
     </div>
   );
 }

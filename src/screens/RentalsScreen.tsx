@@ -11,7 +11,6 @@ import { BottomNav } from "../app/components/BottomNav";
 import { BookingRequestCard } from "../components/rentals/BookingRequestCard";
 import { PendingApprovalCard } from "../components/rentals/PendingApprovalCard";
 import { RentalCard } from "../components/rentals/RentalCard";
-import { RentanoChatSheet } from "../components/RentanoChat";
 import { getAppMode } from "../lib/appMode";
 import { pushInAppNotification } from "../lib/inAppNotifications";
 import {
@@ -178,7 +177,7 @@ export function RentalsScreen({
   onSearch,
   onGarage,
   onStockGarage,
-  onProfile,
+  onMore,
   onOpenRental,
   onViewProfile,
   onReRent,
@@ -187,7 +186,7 @@ export function RentalsScreen({
   onSearch: () => void;
   onGarage: () => void;
   onStockGarage: () => void;
-  onProfile?: () => void;
+  onMore: () => void;
   onOpenRental: (bookingId: string) => void;
   onViewProfile: (userId: string) => void;
   onReRent?: (listingTitle: string) => void;
@@ -197,7 +196,6 @@ export function RentalsScreen({
   const [historySort, setHistorySort] = useState<HistorySort>("recent");
   const [searchQuery, setSearchQuery] = useState("");
   const [historyVisible, setHistoryVisible] = useState(HISTORY_PAGE_SIZE);
-  const [rentanoOpen, setRentanoOpen] = useState(false);
   const [bookings, setBookings] = useState<RentalBooking[]>(() => loadRentalBookings());
   const mode = getAppMode();
 
@@ -426,21 +424,14 @@ export function RentalsScreen({
 
       <div className="shrink-0">
         <BottomNav
-          activeTab="none"
+          activeTab="more"
           onHome={onHome}
           onSearch={onSearch}
           onAdd={onStockGarage}
           onGarage={onGarage}
-          onRentano={() => setRentanoOpen(true)}
+          onMore={onMore}
         />
       </div>
-
-      <RentanoChatSheet
-        open={rentanoOpen}
-        onClose={() => setRentanoOpen(false)}
-        defaultView="chat"
-        context={{ screen: "rentals", appMode: mode }}
-      />
     </div>
   );
 }

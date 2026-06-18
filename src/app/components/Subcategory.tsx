@@ -190,6 +190,8 @@ interface SubcategoryProps {
 
   onStockGarage: () => void;
 
+  onMore: () => void;
+
   /** Opens AuthGate so the user can unlock/participate. */
   onUnlock: () => void;
 
@@ -220,6 +222,7 @@ export function Subcategory({
   onGarage,
 
   onStockGarage,
+  onMore,
   onUnlock,
 
 }: SubcategoryProps) {
@@ -800,7 +803,7 @@ export function Subcategory({
 
         onGarage={onGarage}
 
-        onRentano={() => setRentanoOpen(true)}
+        onMore={onMore}
 
       />
 
