@@ -60,27 +60,13 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
   const [updateJustCompleted, setUpdateJustCompleted] = useState(false);
   const [checkStatus, setCheckStatus] = useState<UpdateCheckStatus | null>(null);
   const updateSWRef = useRef<UpdateSWFn | null>(null);
-  const autoApplyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const buildStamp = formatBuildStamp();
 
   const markUpdateAvailable = useCallback(() => {
     setUpdateAvailable(true);
   }, []);
 
-  const scheduleAggressiveApply = useCallback(() => {
-    if (autoApplyTimerRef.current) return;
-    autoApplyTimerRef.current = window.setTimeout(() => {
-      autoApplyTimerRef.current = null;
-      if (isSimulateUpdateRequested()) return;
-      void (async () => {
-        const pending = await hasPendingAppUpdate();
-        if (!pending || !updateSWRef.current) return;
-        markPwaUpdateSuccessPending();
-        setUpdateAvailable(false);
-        await updateSWRef.current(true);
-      })();
-    }, 1200);
-  }, []);
+  // Do not auto-reload the shell — user confirms via Notifications (avoids "frozen" taps mid-update).
 
   useEffect(() => {
     if (hasBuildIdChanged()) {
@@ -113,7 +99,6 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
       immediate: true,
       onNeedRefresh() {
         markUpdateAvailable();
-        scheduleAggressiveApply();
       },
       onRegisteredSW(_url, registration) {
         if (!registration) return;
@@ -131,13 +116,11 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
     void probeServiceWorkerUpdate().then((result) => {
       if (result === "available") {
         markUpdateAvailable();
-        scheduleAggressiveApply();
       }
     });
 
     const stopWatch = watchServiceWorkerUpdates(() => {
       markUpdateAvailable();
-      scheduleAggressiveApply();
     });
 
     const win = window as Window & {
@@ -163,14 +146,10 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
     };
 
     return () => {
-      if (autoApplyTimerRef.current) {
-        window.clearTimeout(autoApplyTimerRef.current);
-        autoApplyTimerRef.current = null;
-      }
       stopWatch();
       cleanups.forEach((fn) => fn());
     };
-  }, [markUpdateAvailable, scheduleAggressiveApply]);
+  }, [markUpdateAvailable]);
 
   const checkForUpdates = useCallback(async (): Promise<UpdateCheckStatus> => {
     setCheckStatus("checking");

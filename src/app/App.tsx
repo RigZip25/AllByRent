@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, startTransition } from "react";
 import { resolveHomeLocation } from "../lib/geolocation";
 import { AppBrandHeader } from "../components/AppBrandHeader";
 import { OfflineScreen } from "./components/OfflineScreen";
@@ -68,6 +68,8 @@ import { PasskeySetup } from "../components/PasskeySetup";
 import { DeleteAccountScreen } from "../screens/profile/DeleteAccount";
 import { IdentityVerificationScreen } from "../screens/IdentityVerificationScreen";
 import { AgentActivityScreen } from "../screens/AgentActivityScreen";
+import { BottomNav, type BottomNavTab } from "./components/BottomNav";
+import { removeStripeControllerIframes } from "../lib/stripeCleanup";
 
 type Screen =
   | "splash"
@@ -101,6 +103,41 @@ type Screen =
   | "identity"
   | "agentActivity"
   | "deleteAccount";
+
+const BOTTOM_NAV_SCREENS = new Set<Screen>([
+  "home",
+  "mre",
+  "garage",
+  "more",
+  "rentals",
+  "profile",
+  "favorites",
+  "earnBusiness",
+  "subcategory",
+]);
+
+const TAB_BOOT_SCREENS: Partial<Record<string, Screen>> = {
+  home: "home",
+  mre: "mre",
+  garage: "garage",
+  more: "more",
+};
+
+function bottomNavTabForScreen(screen: Screen): BottomNavTab {
+  if (screen === "home") return "home";
+  if (screen === "mre") return "mre";
+  if (screen === "garage") return "garage";
+  if (screen === "more") return "more";
+  if (
+    screen === "rentals" ||
+    screen === "profile" ||
+    screen === "favorites" ||
+    screen === "earnBusiness"
+  ) {
+    return "more";
+  }
+  return "none";
+}
 
 function screenToAuthIntent(screen: Screen): AuthIntent {
   if (
@@ -253,6 +290,10 @@ function AppRoutes() {
   }, []);
 
   useEffect(() => {
+    removeStripeControllerIframes();
+  }, [currentScreen]);
+
+  useEffect(() => {
     if (!boot.screen) return;
     const screen = boot.screen.trim();
     if (screen === "splash") {
@@ -271,6 +312,13 @@ function AppRoutes() {
       setNavStack([]);
       setCurrentScreen("agentActivity");
       clearBootQuery(["screen"]);
+    }
+    const tabScreen = TAB_BOOT_SCREENS[screen];
+    if (tabScreen) {
+      markIntroDone();
+      setNavStack([]);
+      setCurrentScreen(tabScreen);
+      clearBootQuery(["screen", "skipSplash"]);
     }
   }, [boot.screen]);
 
@@ -391,8 +439,11 @@ function AppRoutes() {
     if (active instanceof HTMLElement) {
       active.blur();
     }
-    setNavStack([]);
-    setCurrentScreen(screen);
+    removeStripeControllerIframes();
+    startTransition(() => {
+      setNavStack([]);
+      setCurrentScreen(screen);
+    });
   }, []);
 
   const handleOpenHome = useCallback(() => goToTab("home"), [goToTab]);
@@ -682,6 +733,7 @@ function AppRoutes() {
   };
 
   const showBrandHeader = currentScreen !== "splash";
+  const showBottomNav = BOTTOM_NAV_SCREENS.has(currentScreen);
 
   if (!isOnline) {
     return (
@@ -697,7 +749,7 @@ function AppRoutes() {
     <RequireAuthProvider requireAuth={requireAuth}>
     <div className="app-shell">
       <div
-        className={`app-container bg-background ${showBrandHeader ? "app-container--with-brand" : ""}`}
+        className={`app-container bg-background ${showBrandHeader ? "app-container--with-brand" : ""} ${showBottomNav ? "app-container--with-bottom-nav" : ""}`}
       >
         {showBrandHeader ? <AppBrandHeader /> : null}
 
@@ -774,28 +826,15 @@ function AppRoutes() {
             onBrowseCategory={(label) =>
               handleCategorySelect(categoryIdFromName(label), label)
             }
-            onHome={handleOpenHome}
-            onMrE={handleOpenMrE}
-            onGarage={handleOpenGarage}
-            onMore={handleOpenMore}
             onRentals={handleOpenRentals}
           />
         )}
 
-        {currentScreen === "mre" && (
-          <MrEvoriosScreen
-            onHome={handleOpenHome}
-            onGarage={handleOpenGarage}
-            onStockGarage={handleStartListing}
-            onMore={handleOpenMore}
-          />
-        )}
+        {currentScreen === "mre" && <MrEvoriosScreen />}
 
         {currentScreen === "more" && (
           <MoreScreen
-            onHome={handleOpenHome}
             onMrE={handleOpenMrE}
-            onStockGarage={handleStartListing}
             onGarage={handleOpenGarage}
             onProfile={handleOpenProfile}
             onRentals={handleOpenRentals}
@@ -808,10 +847,7 @@ function AppRoutes() {
         {currentScreen === "garage" && (
           <GarageScreen
             onNavigate={handleNavigate}
-            onHome={handleOpenHome}
-            onMrE={handleOpenMrE}
             onStockGarage={handleStartListing}
-            onMore={handleOpenMore}
           />
         )}
 
@@ -828,12 +864,6 @@ function AppRoutes() {
 
         {currentScreen === "rentals" && (
           <RentalsScreen
-            onHome={handleOpenHome}
-            onMrE={handleOpenMrE}
-            onGarage={handleOpenGarage}
-            onStockGarage={handleStartListing}
-            onProfile={handleOpenProfile}
-            onMore={handleOpenMore}
             onOpenRental={() => navigateTo("activeRental")}
             onViewProfile={() => handleOpenProfile()}
             onReRent={() => {
@@ -845,12 +875,8 @@ function AppRoutes() {
 
         {currentScreen === "profile" && (
           <ProfileScreen
-            onHome={handleOpenHome}
             onMrE={handleOpenMrE}
-            onGarage={handleOpenGarage}
-            onStockGarage={handleStartListing}
             onRentals={handleOpenRentals}
-            onMore={handleOpenMore}
             onEditLocation={openRentLocationSetup}
             onOpenPlans={handleOpenPlans}
             onOpenNotifications={handleOpenNotifications}
@@ -861,12 +887,6 @@ function AppRoutes() {
         {currentScreen === "favorites" && (
           <FavoritesScreen
             onHome={handleOpenHome}
-            onMrE={handleOpenMrE}
-            onGarage={handleOpenGarage}
-            onStockGarage={handleStartListing}
-            onRentals={handleOpenRentals}
-            onProfile={handleOpenProfile}
-            onMore={handleOpenMore}
             onOpenListing={(id) => {
               setSelectedHostListingId(id);
               navigateTo("hostListingDetail");
@@ -875,15 +895,7 @@ function AppRoutes() {
         )}
 
         {currentScreen === "earnBusiness" && (
-          <EarnBusinessScreen
-            onHome={handleOpenHome}
-            onMrE={handleOpenMrE}
-            onGarage={handleOpenGarage}
-            onStockGarage={handleStartListing}
-            onRentals={handleOpenRentals}
-            onProfile={handleOpenProfile}
-            onMore={handleOpenMore}
-          />
+          <EarnBusinessScreen onHome={handleOpenHome} onRentals={handleOpenRentals} />
         )}
 
         {currentScreen === "subscriptionPlans" && (
@@ -910,12 +922,6 @@ function AppRoutes() {
             onPostRequest={handlePostRequest}
             onStartListing={handleStartListing}
             onItemSelect={handleItemSelect}
-            onHome={handleOpenHome}
-            onRentals={handleOpenRentals}
-            onMrE={handleOpenMrE}
-            onGarage={handleOpenGarage}
-            onStockGarage={handleStartListing}
-            onMore={handleOpenMore}
             onUnlock={() => requireAuth("generic")}
           />
         )}
@@ -1017,6 +1023,17 @@ function AppRoutes() {
           />
         )}
         </div>
+
+        {showBottomNav ? (
+          <BottomNav
+            activeTab={bottomNavTabForScreen(currentScreen)}
+            onHome={handleOpenHome}
+            onMrE={handleOpenMrE}
+            onAdd={handleStartListing}
+            onGarage={handleOpenGarage}
+            onMore={handleOpenMore}
+          />
+        ) : null}
       </div>
 
       <AuthGate

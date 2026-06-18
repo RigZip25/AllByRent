@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Bell, ClipboardList, MapPin, ChevronRight } from "lucide-react";
-import { BottomNav } from "./BottomNav";
 import { HomeFeedCard } from "./HomeFeedCard";
 import { GarageLensCard } from "./GarageLensCard";
 import { usePwaUpdate } from "../../hooks/PwaUpdateProvider";
@@ -59,10 +58,6 @@ type HomeFeedProps = {
   onPostRequest: (query?: string) => void;
   onStockGarage: () => void;
   onBrowseCategory: (categoryLabel: string) => void;
-  onHome: () => void;
-  onMrE: () => void;
-  onGarage: () => void;
-  onMore: () => void;
   onRentals: () => void;
 };
 
@@ -73,10 +68,6 @@ export function HomeFeed({
   onPostRequest,
   onStockGarage,
   onBrowseCategory,
-  onHome,
-  onMrE,
-  onGarage,
-  onMore,
   onRentals,
 }: HomeFeedProps) {
   const [query, setQuery] = useState(() => loadHomeFeedQuery());
@@ -432,17 +423,6 @@ export function HomeFeed({
             )}
           </ul>
         ) : null}
-      </div>
-
-      <div className="shrink-0">
-        <BottomNav
-          activeTab="home"
-          onHome={onHome}
-          onMrE={onMrE}
-          onAdd={onStockGarage}
-          onGarage={onGarage}
-          onMore={onMore}
-        />
       </div>
     </div>
   );

@@ -1,9 +1,8 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, startTransition, type ReactNode } from "react";
 import { DollarSign, Package, Plus, TrendingUp } from "lucide-react";
 import { useAuth } from "../../hooks/AuthProvider";
 import { fetchManageableListings, loadManageableListings } from "../../lib/hostAccess";
 import { getListingDisplayTitle } from "../../lib/listingQr";
-import { useMediaUrl } from "../../lib/useMediaUrl";
 import { loadRentalBookings, type RentalBooking } from "../../lib/rentalsStorage";
 import { BookingRequestCard } from "../../components/rentals/BookingRequestCard";
 
@@ -44,26 +43,40 @@ export function HostDashboard({
   onOpenListing: (listingId: string) => void;
 }) {
   const auth = useAuth();
-  const [listings, setListings] = useState(() =>
-    loadManageableListings(auth.userId, auth.userEmail),
-  );
-  const [bookings, setBookings] = useState<RentalBooking[]>(() => loadRentalBookings());
+  const [listings, setListings] = useState<Awaited<ReturnType<typeof loadManageableListings>>>([]);
+  const [bookings, setBookings] = useState<RentalBooking[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
-    void fetchManageableListings(auth.userId, auth.userEmail).then((next) => {
-      if (!mounted) return;
-      setListings(next);
-    });
+    setLoading(true);
+
+    const syncLoad = () => {
+      const localListings = loadManageableListings(auth.userId, auth.userEmail);
+      const localBookings = loadRentalBookings();
+      startTransition(() => {
+        if (!mounted) return;
+        setListings(localListings);
+        setBookings(localBookings);
+      });
+    };
+
+    const idleId = window.setTimeout(syncLoad, 0);
+
+    void fetchManageableListings(auth.userId, auth.userEmail)
+      .then((next) => {
+        if (!mounted) return;
+        startTransition(() => setListings(next));
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
     return () => {
       mounted = false;
+      window.clearTimeout(idleId);
     };
   }, [auth.userId, auth.userEmail]);
-
-  useEffect(() => {
-    // Demo/local rentals list; Supabase wiring happens in rentals phase.
-    setBookings(loadRentalBookings());
-  }, []);
 
   const activeCount = listings.filter((item) => item.listingStatus === "active").length;
   const needsQrCount = listings.filter((item) => item.listingStatus === "pending_qr").length;
@@ -154,7 +167,9 @@ export function HostDashboard({
           </button>
         </div>
 
-        {listings.length === 0 ? (
+        {loading && listings.length === 0 ? (
+          <p className="py-8 text-center text-sm text-gray-500">Loading your garage…</p>
+        ) : listings.length === 0 ? (
           <div
             className="rounded-2xl border bg-white px-4 py-8 text-center"
             style={{ borderColor: BORDER }}
@@ -188,7 +203,7 @@ export function HostDashboard({
                   aria-label={`Open ${getListingDisplayTitle(listing.title)} listing details`}
                 >
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F0F4F2] text-2xl">
-                    <ListingThumb media={listing.photos?.[0] ?? null} />
+                    <span aria-hidden>📦</span>
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-gray-900">
@@ -207,13 +222,4 @@ export function HostDashboard({
       </div>
     </div>
   );
-}
-
-function ListingThumb({ media }: { media: { id: string; mimeType: string; thumbId?: string } | null }) {
-  const thumb = media?.thumbId ? { ...media, id: media.thumbId } : media;
-  const { url } = useMediaUrl(thumb);
-  if (url) {
-    return <img src={url} alt="" className="h-full w-full object-cover" />;
-  }
-  return <span aria-hidden>📦</span>;
 }

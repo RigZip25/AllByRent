@@ -11,6 +11,7 @@ export function isResetAppQueryParam(params: URLSearchParams): boolean {
 function shouldClearStorageKey(key: string): boolean {
   return (
     key.startsWith("allbyrent_") ||
+    key.startsWith("abr_") ||
     key === FOUNDING_HOST_PROMO_SEEN_KEY ||
     key.startsWith("all-by-rent-")
   );

@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { HelpCircle, MessageCircle, Smartphone } from "lucide-react";
-import { BottomNav } from "../app/components/BottomNav";
 import { RentanoChatPanel } from "../components/rentano/RentanoChatPanel";
 import { RentanoFaqPanel } from "../components/rentano/RentanoFaqPanel";
 import { PwaInstallPanel } from "../components/PwaInstallPanel";
@@ -24,17 +23,7 @@ const QUICK_PROMPTS = [
   "How do I list my first item?",
 ];
 
-export function MrEvoriosScreen({
-  onHome,
-  onGarage,
-  onStockGarage,
-  onMore,
-}: {
-  onHome: () => void;
-  onGarage: () => void;
-  onStockGarage: () => void;
-  onMore: () => void;
-}) {
+export function MrEvoriosScreen() {
   const auth = useAuth();
   const pwa = usePwaInstallPrompt();
   const installed = isStandalonePwa();
@@ -143,17 +132,6 @@ export function MrEvoriosScreen({
             showDismissActions
           />
         ) : null}
-      </div>
-
-      <div className="shrink-0">
-        <BottomNav
-          activeTab="mre"
-          onHome={onHome}
-          onMrE={() => undefined}
-          onAdd={onStockGarage}
-          onGarage={onGarage}
-          onMore={onMore}
-        />
       </div>
     </div>
   );

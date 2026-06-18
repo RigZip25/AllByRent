@@ -900,13 +900,23 @@
   }
 
   /**
-   * Bottom tab bar — stay above scroll content and Stripe.js controller iframes.
+   * Bottom tab bar — fixed above overlays; Stripe controller iframes stay non-interactive.
    */
   .bottom-nav-bar {
-    position: relative;
-    z-index: 50;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    z-index: 100;
     isolation: isolate;
     touch-action: manipulation;
+    pointer-events: auto;
+  }
+
+  .app-container--with-bottom-nav .app-screen-host {
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
   }
 
   /**

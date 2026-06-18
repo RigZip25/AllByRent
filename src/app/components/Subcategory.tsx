@@ -4,8 +4,6 @@ import { EmptySubcategoryShelf } from "./EmptySubcategoryShelf";
 
 import { Emoji } from "./Emoji";
 
-import { BottomNav } from "./BottomNav";
-
 import { RentanoChatSheet } from "../../components/RentanoChat";
 import { MrRentano } from "./MrRentano";
 import { APP_NAME, MARKETING_URL, MASCOT_NAME } from "../../lib/brand";
@@ -180,18 +178,6 @@ interface SubcategoryProps {
 
   onItemSelect: (id: string) => void;
 
-  onHome: () => void;
-
-  onRentals: () => void;
-
-  onMrE: () => void;
-
-  onGarage: () => void;
-
-  onStockGarage: () => void;
-
-  onMore: () => void;
-
   /** Opens AuthGate so the user can unlock/participate. */
   onUnlock: () => void;
 
@@ -213,16 +199,6 @@ export function Subcategory({
 
   onItemSelect,
 
-  onHome,
-
-  onRentals,
-
-  onMrE,
-
-  onGarage,
-
-  onStockGarage,
-  onMore,
   onUnlock,
 
 }: SubcategoryProps) {
@@ -788,24 +764,6 @@ export function Subcategory({
         ) : null}
 
       </div>
-
-
-
-      <BottomNav
-
-        activeTab="none"
-
-        onHome={onHome}
-
-        onMrE={onMrE}
-
-        onAdd={onStockGarage}
-
-        onGarage={onGarage}
-
-        onMore={onMore}
-
-      />
 
       <RentanoChatSheet
 

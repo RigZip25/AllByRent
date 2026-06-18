@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   Bell,
   ChevronRight,
@@ -9,7 +9,6 @@ import {
   User,
   Warehouse,
 } from "lucide-react";
-import { BottomNav } from "../app/components/BottomNav";
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { useAuth } from "../hooks/AuthProvider";
 import { MASCOT_NAME } from "../lib/brand";
@@ -64,28 +63,28 @@ function MenuRow({
 }
 
 export function MoreScreen({
-  onHome,
-  onMrE,
-  onStockGarage,
-  onGarage,
   onProfile,
   onRentals,
   onFavorites,
   onNotifications,
   onEarnBusiness,
+  onGarage,
+  onMrE,
 }: {
-  onHome: () => void;
-  onMrE: () => void;
-  onStockGarage: () => void;
-  onGarage: () => void;
   onProfile: () => void;
   onRentals: () => void;
   onFavorites: () => void;
   onNotifications: () => void;
   onEarnBusiness: () => void;
+  onGarage: () => void;
+  onMrE: () => void;
 }) {
   const auth = useAuth();
-  const profile = refreshProfileStats(loadUserProfile(), auth.userId);
+  const [baseProfile] = useState(() => loadUserProfile());
+  const profile = useMemo(
+    () => refreshProfileStats(baseProfile, auth.userId),
+    [baseProfile, auth.userId],
+  );
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -178,17 +177,6 @@ export function MoreScreen({
             />
           </li>
         </ul>
-      </div>
-
-      <div className="shrink-0">
-        <BottomNav
-          activeTab="more"
-          onHome={onHome}
-          onMrE={onMrE}
-          onAdd={onStockGarage}
-          onGarage={onGarage}
-          onMore={() => undefined}
-        />
       </div>
     </div>
   );

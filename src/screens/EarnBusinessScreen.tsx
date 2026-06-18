@@ -8,7 +8,6 @@ import {
   Package,
   TrendingUp,
 } from "lucide-react";
-import { BottomNav } from "../app/components/BottomNav";
 import { getAppMode } from "../lib/appMode";
 import {
   computeEarnBusinessStats,
@@ -103,18 +102,9 @@ function ListingRow({ row }: { row: ListingEarnBreakdown }) {
 export function EarnBusinessScreen({
   onHome,
   onRentals,
-  onMrE,
-  onGarage,
-  onStockGarage,
-  onMore,
 }: {
   onHome: () => void;
   onRentals: () => void;
-  onMrE: () => void;
-  onGarage: () => void;
-  onStockGarage: () => void;
-  onProfile: () => void;
-  onMore: () => void;
 }) {
   const mode = getAppMode();
   const stats = useMemo(() => computeEarnBusinessStats(), []);
@@ -255,17 +245,6 @@ export function EarnBusinessScreen({
         </section>
 
         <p className="px-1 text-center text-[11px] text-gray-400">{stats.planUsageLabel}</p>
-      </div>
-
-      <div className="shrink-0">
-        <BottomNav
-          activeTab="more"
-          onHome={onHome}
-          onMrE={onMrE}
-          onAdd={onStockGarage}
-          onGarage={onGarage}
-          onMore={onMore}
-        />
       </div>
     </div>
   );

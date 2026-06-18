@@ -1,23 +1,13 @@
-import { BottomNav } from "../app/components/BottomNav";
 import { HostDashboard } from "../app/components/HostDashboard";
 
 const GREEN_DARK = "#0D5C3A";
 
 type GarageScreenProps = {
   onNavigate: (screen: string) => void;
-  onHome: () => void;
-  onMrE: () => void;
   onStockGarage: () => void;
-  onMore: () => void;
 };
 
-export function GarageScreen({
-  onNavigate,
-  onHome,
-  onMrE,
-  onStockGarage,
-  onMore,
-}: GarageScreenProps) {
+export function GarageScreen({ onNavigate, onStockGarage }: GarageScreenProps) {
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <div className="flex shrink-0 items-center justify-between px-4 pb-2 pt-3">
@@ -33,17 +23,6 @@ export function GarageScreen({
         <HostDashboard
           onListItem={onStockGarage}
           onOpenListing={(listingId) => onNavigate(`hostListingDetail:${listingId}`)}
-        />
-      </div>
-
-      <div className="shrink-0">
-        <BottomNav
-          activeTab="garage"
-          onHome={onHome}
-          onMrE={onMrE}
-          onAdd={onStockGarage}
-          onGarage={() => undefined}
-          onMore={onMore}
         />
       </div>
     </div>

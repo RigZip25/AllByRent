@@ -12,7 +12,6 @@ import {
   User,
   Users,
 } from "lucide-react";
-import { BottomNav } from "../app/components/BottomNav";
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { ProfilePhotoCapture } from "../components/profile/ProfilePhotoCapture";
 import { ProfilePhotoOnboarding } from "../components/profile/ProfilePhotoOnboarding";
@@ -139,12 +138,8 @@ function ModeToggle({ mode, onChange }: { mode: AppMode; onChange: (m: AppMode) 
 }
 
 export function ProfileScreen({
-  onHome,
   onRentals,
   onMrE,
-  onGarage,
-  onStockGarage,
-  onMore,
   onEditLocation,
   onOpenPlans,
   onOpenNotifications,
@@ -152,12 +147,8 @@ export function ProfileScreen({
   onDeleteAccount,
   onViewPublicProfile,
 }: {
-  onHome: () => void;
   onRentals: () => void;
   onMrE: () => void;
-  onGarage: () => void;
-  onStockGarage: () => void;
-  onMore: () => void;
   onEditLocation: () => void;
   onOpenPlans: () => void;
   onOpenNotifications: () => void;
@@ -587,17 +578,6 @@ export function ProfileScreen({
         >
           {formatBuildStamp()}
         </p>
-      </div>
-
-      <div className="shrink-0">
-        <BottomNav
-          activeTab="more"
-          onHome={onHome}
-          onMrE={onMrE}
-          onAdd={onStockGarage}
-          onGarage={onGarage}
-          onMore={onMore}
-        />
       </div>
 
       <ProfilePhotoCapture

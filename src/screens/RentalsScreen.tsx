@@ -7,7 +7,6 @@ import {
   ScanLine,
   Search,
 } from "lucide-react";
-import { BottomNav } from "../app/components/BottomNav";
 import { BookingRequestCard } from "../components/rentals/BookingRequestCard";
 import { PendingApprovalCard } from "../components/rentals/PendingApprovalCard";
 import { RentalCard } from "../components/rentals/RentalCard";
@@ -173,20 +172,10 @@ function sortHistory(list: RentalBooking[], sort: HistorySort): RentalBooking[] 
 }
 
 export function RentalsScreen({
-  onHome,
-  onMrE,
-  onGarage,
-  onStockGarage,
-  onMore,
   onOpenRental,
   onViewProfile,
   onReRent,
 }: {
-  onHome: () => void;
-  onMrE: () => void;
-  onGarage: () => void;
-  onStockGarage: () => void;
-  onMore: () => void;
   onOpenRental: (bookingId: string) => void;
   onViewProfile: (userId: string) => void;
   onReRent?: (listingTitle: string) => void;
@@ -420,17 +409,6 @@ export function RentalsScreen({
         ) : (
           <EmptyState tab={tab} />
         )}
-      </div>
-
-      <div className="shrink-0">
-        <BottomNav
-          activeTab="more"
-          onHome={onHome}
-          onMrE={onMrE}
-          onAdd={onStockGarage}
-          onGarage={onGarage}
-          onMore={onMore}
-        />
       </div>
     </div>
   );

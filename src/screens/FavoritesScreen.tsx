@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { Heart } from "lucide-react";
-import { BottomNav } from "../app/components/BottomNav";
 import {
   loadFavoriteListingIds,
   toggleFavoriteListing,
@@ -70,21 +69,9 @@ function FavoriteCard({
 
 export function FavoritesScreen({
   onHome,
-  onRentals,
-  onMrE,
-  onGarage,
-  onStockGarage,
-  onProfile,
-  onMore,
   onOpenListing,
 }: {
   onHome: () => void;
-  onRentals: () => void;
-  onMrE: () => void;
-  onGarage: () => void;
-  onStockGarage: () => void;
-  onProfile: () => void;
-  onMore: () => void;
   onOpenListing: (listingId: string) => void;
 }) {
   const [favoriteIds, setFavoriteIds] = useState(() => loadFavoriteListingIds());
@@ -145,17 +132,6 @@ export function FavoritesScreen({
             ))}
           </ul>
         )}
-      </div>
-
-      <div className="shrink-0">
-        <BottomNav
-          activeTab="more"
-          onHome={onHome}
-          onMrE={onMrE}
-          onAdd={onStockGarage}
-          onGarage={onGarage}
-          onMore={onMore}
-        />
       </div>
     </div>
   );
