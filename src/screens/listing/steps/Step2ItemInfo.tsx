@@ -96,7 +96,7 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
     categoryModeRules.replacementValueLabel ?? "Estimated Replacement Value";
   const replacementValueHelper =
     categoryModeRules.replacementValueHelper ??
-    "Cost to buy new — used for insurance calculation";
+    "Cost to buy new — used for deposit protection ceiling";
 
   const clearTypewriter = useCallback(() => {
     if (typewriterRef.current) {

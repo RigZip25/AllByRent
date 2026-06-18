@@ -443,18 +443,12 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
         <div className="bg-card rounded-xl border border-border p-4">
           <div className="flex items-center gap-3 mb-3">
             <Shield className="w-5 h-5 text-muted-foreground" />
-            <h3 className="font-semibold flex-1">Auto-Insurance</h3>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-amber-400" />
-              <span className="text-xs text-muted-foreground">
-                Activates on check-in
-              </span>
-            </div>
+            <h3 className="font-semibold flex-1">Deposit protection</h3>
           </div>
 
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Full coverage activates when you scan the QR code. Protects against
-            accidental damage, theft, and loss during your rental period.
+            A card hold may cover the security deposit. It is released when the
+            host confirms the item was returned in good condition.
           </p>
         </div>
 

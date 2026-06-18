@@ -498,7 +498,7 @@ const DEFAULT_CATEGORY_MODES: CategoryModeRules = {
   rentToOwn: false,
   gift: true,
   replacementValueLabel: "Estimated Replacement Value",
-  replacementValueHelper: "Cost to buy new — used for insurance calculation",
+  replacementValueHelper: "Cost to buy new — used for deposit protection ceiling",
   showDailyRate: true,
   showMonthlyRate: true,
 };

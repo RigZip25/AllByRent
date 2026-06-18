@@ -10,7 +10,7 @@ type RegisterSWOptions = {
 export function registerSW(_options?: RegisterSWOptions) {
   if (import.meta.env.DEV) {
     console.info(
-      "[AllByRent] Install vite-plugin-pwa for full PWA (manifest + offline cache)",
+      "[Evorios] Install vite-plugin-pwa for full PWA (manifest + offline cache)",
     );
   }
   return () => {};

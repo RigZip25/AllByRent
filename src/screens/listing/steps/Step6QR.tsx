@@ -40,7 +40,7 @@ export function Step6QR({ draft, setDraft }: StepProps) {
       <div className="mb-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
         <p className="font-semibold text-gray-900">QR code is required</p>
         <p className="mt-1 text-sm text-gray-400">
-          It keeps every handoff traceable, improves security, and makes insurance coverage more transparent if an item is lost or damaged.
+          It keeps every handoff traceable, improves security, and supports deposit protection if something goes wrong.
         </p>
       </div>
 

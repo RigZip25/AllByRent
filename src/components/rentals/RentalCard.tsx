@@ -194,7 +194,7 @@ export function RentalCard({
 
   const disputeSubtext = useMemo(() => {
     if (booking.status !== "disputed") return null;
-    if (booking.disputeEscalated) return "Awaiting Safely API";
+    if (booking.disputeEscalated) return "Escalated — support reviewing";
     return null;
   }, [booking]);
 

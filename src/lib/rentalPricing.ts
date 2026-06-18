@@ -51,7 +51,7 @@ export type RentalPriceBreakdown = {
 
   deliveryFeeUsd: number;
 
-  /** Guest-paid protection / insurance fee (e.g. Safely). */
+  /** Guest-paid protection fee — Stage 1 unused (deposit-only). */
   insuranceFeeUsd: number;
 
   serviceFeeUsd: number;

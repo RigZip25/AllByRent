@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, MapPin, Truck, Package } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ArrowLeft, MapPin, Truck, Package, Shield } from "lucide-react";
+import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
 import { getPublishedListingById } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { useAuth } from "../../hooks/AuthProvider";
-import { fetchSafelyInsuranceQuote, parseUsdToCents } from "../../lib/insurance";
+import { parseUsdToCents } from "../../lib/insurance";
 import {
   breakdownForListingBooking,
   deliverySummaryForListing,
@@ -49,7 +50,7 @@ function demoListingFallback(): ListingDraft {
     description: "",
     replacementValue: "800",
     instructionsUrl: "",
-    modes: { rent: true, sell: true, rentToOwn: true, gift: false },
+    modes: { rent: true, sell: true, rentToOwn: false, gift: false },
     pricing: {
       dailyRate: "35",
       weeklyRate: "",
@@ -59,7 +60,7 @@ function demoListingFallback(): ListingDraft {
       salePrice: "",
       rtoTotalPrice: "",
       rtoPeriodMonths: "",
-      securityDeposit: "",
+      securityDeposit: "50",
       minimumPeriod: "1 day",
     },
     blockedDates: [],
@@ -147,8 +148,6 @@ export function BookingScreen({
   const [rentalDays, setRentalDays] = useState(2);
   const [fulfillment, setFulfillment] = useState<FulfillmentMethod>(defaultFulfillment);
   const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [insuranceFeeUsd, setInsuranceFeeUsd] = useState(0);
-  const [safelyPolicyId, setSafelyPolicyId] = useState<string | null>(null);
   const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
   const [depositClientSecret, setDepositClientSecret] = useState<string | null>(null);
   const [pendingBookingId, setPendingBookingId] = useState<string | null>(null);
@@ -164,42 +163,19 @@ export function BookingScreen({
   const endDate = addDays(startDate, rentalDays - 1);
 
   const deliveryRequested = fulfillment === "delivery";
-  useEffect(() => {
-    const replacementValueCents = parseUsdToCents(listing.replacementValue);
-    if (replacementValueCents <= 0) {
-      setInsuranceFeeUsd(0);
-      setSafelyPolicyId(null);
-      return;
-    }
-
-    let cancelled = false;
-    void fetchSafelyInsuranceQuote({
-      replacementValueCents,
-      rentalDays,
-      startDateISO: startDate,
-      endDateISO: endDate,
-    }).then((quote) => {
-      if (cancelled) return;
-      setInsuranceFeeUsd(quote.feeCents / 100);
-      setSafelyPolicyId(typeof quote.policyId === "string" ? quote.policyId : null);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [endDate, listing.replacementValue, rentalDays, startDate]);
+  const depositAmountCents = parseUsdToCents(listing.pricing.securityDeposit ?? "");
 
   const breakdown: RentalPriceBreakdown = useMemo(
     () =>
       breakdownForListingBooking(listing, {
         rentalDays,
         deliveryRequested,
-        insuranceFeeUsd,
+        insuranceFeeUsd: 0,
       }),
-    [listing, rentalDays, deliveryRequested, insuranceFeeUsd],
+    [listing, rentalDays, deliveryRequested],
   );
 
-  const canConfirm =
-    !deliveryRequested || deliveryAddress.trim().length > 0;
+  const canConfirm = !deliveryRequested || deliveryAddress.trim().length > 0;
 
   const stripeCheckout =
     isStripePaymentsEnabled() && Boolean(auth.userId && listing.hostId);
@@ -236,7 +212,7 @@ export function BookingScreen({
       serviceFeeUsd: breakdown.serviceFeeUsd,
       totalUsd: breakdown.totalUsd,
       itemHeavy: listing.handoff.itemHeavy,
-      insuranceIncluded: true,
+      insuranceIncluded: false,
       listingModes: ["rent"],
       fulfillmentMethod: fulfillment,
       deliveryAddress: deliveryRequested ? deliveryAddress.trim() : undefined,
@@ -244,7 +220,7 @@ export function BookingScreen({
       pickupWindowStart: new Date().toISOString(),
       stripePayment: stripeCheckout,
       paymentOnHold: stripeCheckout,
-      depositAmountCents: parseUsdToCents(listing.pricing.securityDeposit ?? ""),
+      depositAmountCents,
     };
   };
 
@@ -262,6 +238,35 @@ export function BookingScreen({
     onConfirmed(id);
   };
 
+  const persistRentalRow = (id: string, booking: RentalBooking) => {
+    if (!auth.userId || !listing.hostId) return;
+    const pickupAt = new Date(`${startDate}T14:00:00`).toISOString();
+    const dueAt = new Date(`${endDate}T23:59:59`).toISOString();
+    const row = toSupabaseRentalInsert({
+      id,
+      listingId: listing.id,
+      ownerId: listing.hostId,
+      renterId: auth.userId,
+      status: booking.status,
+      startDate,
+      endDate,
+      bookingMode: fulfillment,
+      deliveryAddress: booking.deliveryAddress,
+      pickupPin: booking.pickupPin,
+      returnPin: booking.returnPin,
+      safelyPolicyId: null,
+      insuranceFeeCents: 0,
+      depositAmountCents,
+      rentalTotalCents: Math.round(breakdown.totalUsd * 100),
+      pickupAt,
+      dueAt,
+      stripePaymentStatus: stripeCheckout ? "requires_payment_method" : undefined,
+    });
+    void createRentalRemote(row).catch(() => {
+      // Local fallback is already appended below.
+    });
+  };
+
   const handleConfirm = () => {
     const id =
       typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -270,34 +275,7 @@ export function BookingScreen({
     const booking = buildBooking(id);
 
     if (!stripeCheckout) {
-      if (auth.userId && listing.hostId) {
-        const insuranceFeeCents = Math.max(0, Math.round(insuranceFeeUsd * 100));
-        const depositAmountCents = parseUsdToCents(listing.pricing.securityDeposit ?? "");
-        const pickupAt = new Date(`${startDate}T14:00:00`).toISOString();
-        const dueAt = new Date(`${endDate}T23:59:59`).toISOString();
-        const row = toSupabaseRentalInsert({
-          id,
-          listingId: listing.id,
-          ownerId: listing.hostId,
-          renterId: auth.userId,
-          status: booking.status,
-          startDate,
-          endDate,
-          bookingMode: fulfillment,
-          deliveryAddress: booking.deliveryAddress,
-          pickupPin: booking.pickupPin,
-          returnPin: booking.returnPin,
-          safelyPolicyId,
-          insuranceFeeCents,
-          depositAmountCents,
-          rentalTotalCents: Math.round(breakdown.totalUsd * 100),
-          pickupAt,
-          dueAt,
-        });
-        void createRentalRemote(row).catch(() => {
-          // Local fallback is already appended below.
-        });
-      }
+      persistRentalRow(id, booking);
       finalizeBooking(id, booking);
       return;
     }
@@ -305,37 +283,7 @@ export function BookingScreen({
     setConfirmBusy(true);
     setPaymentError(null);
     void (async () => {
-      const insuranceFeeCents = Math.max(0, Math.round(insuranceFeeUsd * 100));
-      const depositAmountCents = parseUsdToCents(listing.pricing.securityDeposit ?? "");
-      const pickupAt = new Date(`${startDate}T14:00:00`).toISOString();
-      const dueAt = new Date(`${endDate}T23:59:59`).toISOString();
-      const row = toSupabaseRentalInsert({
-        id,
-        listingId: listing.id,
-        ownerId: listing.hostId!,
-        renterId: auth.userId!,
-        status: booking.status,
-        startDate,
-        endDate,
-        bookingMode: fulfillment,
-        deliveryAddress: booking.deliveryAddress,
-        pickupPin: booking.pickupPin,
-        returnPin: booking.returnPin,
-        safelyPolicyId,
-        insuranceFeeCents,
-        depositAmountCents,
-        stripePaymentStatus: "requires_payment_method",
-        rentalTotalCents: Math.round(breakdown.totalUsd * 100),
-        pickupAt,
-        dueAt,
-      });
-
-      try {
-        await createRentalRemote(row);
-      } catch {
-        setPaymentError("Could not save booking. Check your connection and try again.");
-        return;
-      }
+      persistRentalRow(id, booking);
 
       const amountCents = Math.max(50, Math.round(breakdown.totalUsd * 100));
       const pi = await createRentalPaymentIntent({
@@ -361,7 +309,7 @@ export function BookingScreen({
 
   const handlePaymentSuccess = () => {
     if (!pendingBookingId) return;
-    const depositCents = parseUsdToCents(listing.pricing.securityDeposit ?? "");
+    const depositCents = depositAmountCents;
     setPaymentClientSecret(null);
 
     if (stripeCheckout && depositCents >= 50) {
@@ -509,11 +457,22 @@ export function BookingScreen({
           </div>
         ) : null}
 
+        {depositAmountCents >= 50 ? (
+          <div className="flex gap-2 rounded-xl border border-[#0D5C3A]/20 bg-[#0D5C3A]/5 p-3 text-sm text-gray-800">
+            <Shield className="h-5 w-5 shrink-0" style={{ color: GREEN }} aria-hidden />
+            <p>
+              <span className="font-semibold">{DEPOSIT_PROTECTION_LABEL}.</span> A{" "}
+              <span className="font-semibold">${(depositAmountCents / 100).toFixed(2)}</span> card
+              hold may be authorized after rental payment — released when the item is returned.
+            </p>
+          </div>
+        ) : null}
+
         <RentalPriceBreakdownView breakdown={breakdown} />
 
         {depositClientSecret ? (
           <div className="rounded-xl border border-border bg-card p-4">
-            <p className="text-sm font-semibold mb-1">Security deposit hold</p>
+            <p className="text-sm font-semibold mb-1">{DEPOSIT_PROTECTION_LABEL} hold</p>
             <p className="text-xs text-muted-foreground mb-3">
               We&apos;ll authorize ${(pendingDepositCents / 100).toFixed(2)} on your card. The hold
               is released when the owner confirms the item was returned in good condition.

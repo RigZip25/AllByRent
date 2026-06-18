@@ -1,6 +1,6 @@
 # Evorios — task board
 
-**Обновлено:** 2026-06-17  
+**Обновлено:** 2026-05-28  
 **План:** [EVORIOS_CURSOR_BRIEF.md](EVORIOS_CURSOR_BRIEF.md) · **Home:** [HOME_REDESIGN.md](HOME_REDESIGN.md) · **Статус:** [EVORIOS_RESHAPE_STATUS.md](EVORIOS_RESHAPE_STATUS.md)
 
 ---
@@ -13,23 +13,25 @@
 |-----------|------|--------|----------------|
 | P0 | Home redesign | ✅ | — |
 | **P1a** | **Remove RTO from UI** | ✅ | — |
-| **P1b** | **Brand pass (strings)** | 🟡 | QR PDFs, manifest, passkey; Rentano* files defer |
-| **P1c** | Copy pass (wizard, FAQ, empty) | 🔄 | Step3 titles Borrow/Buy/Gift |
-| P1d | Deposit-only UI (hide Safely) | ⬜ | BookingScreen, Step3 ModeNote |
+| **P1b** | **Brand pass (strings)** | 🟡 | `Rentano*` file renames defer |
+| **P1c** | Copy pass (wizard, FAQ, empty) | ✅ | — |
+| **P1d** | Deposit-only UI (hide Safely) | ✅ | value ceiling gate → P3 |
 | P2 | Frictionless listing (3-step) | ⬜ | Отложить verify/Stripe из wizard |
 | P2 | Garage storefront polish | ⬜ | Public profile = vitrina |
 | P2 | Feed ranking + departments | ⬜ | N items per cluster |
 | P3 | Semantic search (pgvector) | 🚫 | Нужен кластер + migration |
 | P3 | Sell buy-now checkout | ⬜ | Отдельно от booking |
 | P3 | Map lens | ⬜ | Stage 2, после плотности |
+| P3 | Deposit value ceiling gate | ⬜ | replacement value → hold cap |
 | defer | Rename `Rentano*` files | ⬜ | Отдельный refactor PR |
 
 ### Текущий спринт (агент)
 
 1. ✅ Home P0 (`a9bca4b`)
-2. ✅ Task 2 — RTO out
-3. 🔄 Task 1 — brand strings (partial)
-4. 🔄 Task 10 — wizard/FAQ copy
+2. ✅ Task 2 — RTO out (`ec3869a`)
+3. ✅ Task 10 — copy + deposit pass (`cursor/copy-deposit-pass-ca09`)
+4. ⬜ Task 4 — frictionless listing (3-step wizard)
+5. ⬜ Task 3 — garage storefront polish
 
 ---
 
@@ -65,6 +67,7 @@ npm run dev
 | Полный сброс | `http://localhost:5173/?resetApp=1` |
 | Splash | `?screen=splash&dynamic=1` |
 | Home P0 | после онбординга → Feed + search-hero |
+| Booking deposit | открыть listing → Request booking |
 
 **Build stamp:** Profile → первые 7 символов commit SHA.
 
@@ -79,5 +82,6 @@ npm run dev
 | Listings | ✅ Wizard + AI analyze (нужен `ANTHROPIC_API_KEY` на Vercel) |
 | Payments | 🟡 Stripe в коде; нужны live keys |
 | Search | 🟡 ILIKE; pgvector позже |
+| Risk / deposit | 🟡 Stripe hold UI; Safely скрыт; ceiling gate позже |
 
 Деплой: push `main` → Vercel auto-deploy.

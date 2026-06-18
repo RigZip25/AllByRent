@@ -83,20 +83,6 @@ export function YouAreAllSet({ onExplore }: YouAreAllSetProps) {
           </dl>
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          {copy.stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-2xl border border-[#E5E7EB] bg-white px-2 py-3 text-center shadow-sm"
-            >
-              <p className="text-lg font-bold" style={{ color: GREEN }}>
-                {stat.value}
-              </p>
-              <p className="mt-1 text-[11px] leading-tight text-gray-500">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-
         <button
           type="button"
           onClick={onExplore}

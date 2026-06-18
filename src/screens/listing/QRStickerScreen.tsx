@@ -151,7 +151,7 @@ export function QRStickerScreen({
     setPdfLoading(true);
     setPdfError(null);
     try {
-      await generatePdf([draft.id], { paper: "a4", layout: "single", labelIn: 3, filename: "AllByRent-QR-Sticker-3x3.pdf" });
+      await generatePdf([draft.id], { paper: "a4", layout: "single", labelIn: 3, filename: QR_PDF_FILENAMES.sticker3x3 });
       const trimmedEmail = email.trim();
       if (trimmedEmail) {
         const profile = loadUserProfile();

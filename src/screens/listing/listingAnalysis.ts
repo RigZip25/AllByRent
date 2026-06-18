@@ -22,7 +22,7 @@ Return ONLY valid JSON, no other text:
   "estimatedValue": <current retail price to buy this item NEW today>
 }
 estimatedValue: current retail price to buy this item NEW today. Use MSRP or current Amazon/Home Depot/Best Buy price — not used/secondhand price.
-This is replacement value — what insurance would pay to replace it if lost or damaged.
+This is replacement value — what we'd use to size a deposit hold if the item is lost or damaged.
 Always round to nearest $10.
 Examples:
 - ECHO CS-3410 chainsaw → 230 (Home Depot current price)

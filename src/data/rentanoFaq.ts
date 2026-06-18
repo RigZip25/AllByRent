@@ -1,3 +1,5 @@
+import { APP_MODE_LABELS, APP_NAME, DEPOSIT_PROTECTION_LABEL, MASCOT_NAME, PRODUCT_METAPHOR } from "../lib/brand";
+
 export type FaqItem = {
   id: string;
   category: string;
@@ -6,39 +8,45 @@ export type FaqItem = {
   keywords: string[];
 };
 
-import { APP_MODE_LABELS, APP_NAME, MASCOT_NAME, PRODUCT_METAPHOR } from "../lib/brand";
-
 export const RENTANO_FAQ: FaqItem[] = [
   {
     id: "what-is",
     category: "Getting started",
     question: `What is ${APP_NAME}?`,
     answer:
-      `${APP_NAME} is a ${PRODUCT_METAPHOR} for every household: list items from your garage, browse neighbors, borrow or buy nearby. Switch between ${APP_MODE_LABELS.rent} and ${APP_MODE_LABELS.earn} on Home.`,
+      `${APP_NAME} is a neighborhood ${PRODUCT_METAPHOR}: every household has a garage storefront on the block. Search what you need, browse nearby shelves, or stock your own garage with the + button.`,
     keywords: ["about", "platform", "garage"],
   },
   {
-    id: "rent-vs-earn",
+    id: "home-feed",
     category: "Getting started",
-    question: `What is the difference between ${APP_MODE_LABELS.rent} and ${APP_MODE_LABELS.earn}?`,
+    question: "How does Home work?",
     answer:
-      `${APP_MODE_LABELS.rent} shows items on neighborhood garages near you. ${APP_MODE_LABELS.earn} is your own garage showcase — list items, manage bookings, and get paid. Tap the toggle at the top of Home.`,
-    keywords: ["mode", "host", "browse"],
+      `Home is your window on the block. Search at the top, filter by Rent · Buy · Gift, and switch between Feed (items) and Garages (neighbor storefronts). Tap the center + to list from your garage.`,
+    keywords: ["home", "feed", "search", "browse"],
+  },
+  {
+    id: "garage-tab",
+    category: "Getting started",
+    question: `What is the ${APP_MODE_LABELS.earn} tab?`,
+    answer:
+      `The Garage tab is your household storefront — active listings, booking requests, and stats. Settings (gear icon) opens your profile. Stock items anytime with the center + button.`,
+    keywords: ["garage", "host", "supply"],
   },
   {
     id: "location-rent",
     category: "Getting started",
-    question: "Why do I need to set my location?",
+    question: "Why do I need to set my block?",
     answer:
-      "In Rent mode we show items near you. Set home location during onboarding, or tap your location on Home to update it. Travelers can set a trip destination instead.",
-    keywords: ["gps", "address", "where"],
+      "We show garages and items in your cluster (~12 mi). Set your block during onboarding or tap the location chip on Home. Visiting another area? Change the cluster — no separate traveler mode.",
+    keywords: ["gps", "address", "where", "cluster"],
   },
   {
     id: "install-pwa",
     category: "Getting started",
     question: "How do I install the app on my phone?",
     answer:
-      "Open Evorios in the footer → Add to Home Screen. On iPhone use Share → Add to Home Screen. On Android use the browser install prompt when it appears.",
+      `Tap Mr.E in the footer for install tips, or use Add to Home Screen. On iPhone: Share → Add to Home Screen. On Android: use the browser install prompt when it appears.`,
     keywords: ["pwa", "home screen", "install"],
   },
   {
@@ -46,15 +54,15 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Hosting & listings",
     question: "How do I list my first item?",
     answer:
-      `Switch to ${APP_MODE_LABELS.earn}, tap the green + button, then follow the 7-step wizard: photos, item info, pricing modes, pickup, availability, QR, and review. ${MASCOT_NAME} can help on each step.`,
-    keywords: ["sell", "post", "wizard"],
+      `Tap the green + in the footer (or Garage tab → Add), then follow the wizard: photos, item info, Rent/Buy/Gift pricing, pickup, availability, QR, and review. ${MASCOT_NAME} helps on each step.`,
+    keywords: ["sell", "post", "wizard", "stock"],
   },
   {
     id: "photos-ai",
     category: "Hosting & listings",
     question: "What happens after I add photos?",
     answer:
-      `On step 1, when you continue, ${MASCOT_NAME} analyzes your photos and suggests title, category, condition, description, and replacement value. You can edit everything on step 2.`,
+      `On step 1, when you continue, ${MASCOT_NAME} analyzes your photos and suggests title, category, condition, description, and estimated value. You can edit everything on step 2.`,
     keywords: ["ai", "analyze", "camera"],
   },
   {
@@ -70,15 +78,15 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Hosting & listings",
     question: "What is replacement value?",
     answer:
-      "It is the cost to replace the item new today (for insurance if lost or damaged). Use current retail price, not used price. AI suggests a value from your photos.",
-    keywords: ["insurance", "value", "estimated"],
+      `It is the cost to replace the item new today — used for ${DEPOSIT_PROTECTION_LABEL.toLowerCase()} and rent eligibility. Use current retail price, not used price. AI suggests a value from your photos.`,
+    keywords: ["deposit", "value", "estimated"],
   },
   {
     id: "qr-sticker",
     category: "QR & pickup",
     question: "Why do I need a QR sticker?",
     answer:
-      "For rentals, a physical QR on the item helps verify handoff. After publish you may print a sticker or use the on-screen QR story. Some sale-only listings skip the sticker.",
+      "For rentals, a physical QR on the item helps verify handoff. After publish you may print a sticker or use the on-screen QR story. Buy-only or gift-only listings may skip the sticker.",
     keywords: ["code", "scan", "sticker"],
   },
   {
@@ -94,15 +102,23 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Renting",
     question: "How do I rent an item?",
     answer:
-      "In Rent mode browse categories on Home, open an item, and book. You'll see pickup details and messaging in your rental flow (demo in this build).",
+      "Search on Home or browse the Feed, open an item, and request a booking. You'll authorize rental payment and any deposit hold separately. Track active rentals from the bookings icon on Home.",
     keywords: ["borrow", "reserve", "request"],
+  },
+  {
+    id: "post-request",
+    category: "Renting",
+    question: "Nothing shows up in search — what now?",
+    answer:
+      "Post a request from the empty search result. Neighbors with the right gear can respond. No fake counts — we show real listings on your block as garages fill up.",
+    keywords: ["request", "empty", "search"],
   },
   {
     id: "notifications",
     category: "Renting",
     question: "Where are my notifications?",
     answer:
-      "Tap the bell on Home. Tabs show All, Bookings, and Messages. Content differs for Rent vs Earn mode.",
+      "Tap the bell on Home. Tabs show All, Bookings, and Messages.",
     keywords: ["bell", "messages", "alerts"],
   },
   {
@@ -110,8 +126,8 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Payments & safety",
     question: "How do payments work?",
     answer:
-      `Payments and identity verification are handled by Stripe — ${APP_NAME} does not store your card or bank details in the app. You'll connect payout settings when hosting goes live.`,
-    keywords: ["stripe", "card", "money"],
+      `Rentals: pay the rental total, then a separate ${DEPOSIT_PROTECTION_LABEL.toLowerCase()} hold if the host set a deposit. Payments run through Stripe — ${APP_NAME} does not store your card. Hosts connect Stripe for payouts.`,
+    keywords: ["stripe", "card", "money", "deposit"],
   },
   {
     id: "dispute",
@@ -134,7 +150,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Getting started",
     question: "Can I skip onboarding?",
     answer:
-      "Yes — Skip on intro screens sends you to set location (Rent) or home. You can finish location later from Home if you skipped.",
+      "Yes — Skip on intro screens sends you to set your block, then straight to Home. You can finish location later from the location chip on Home.",
     keywords: ["skip", "later"],
   },
 ];
