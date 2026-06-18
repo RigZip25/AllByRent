@@ -40,6 +40,7 @@ function pwaPlugin() {
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        importScripts: ['push-sw.js'],
         navigateFallback: '/index.html',
         // Activate new SW quickly; BUILD_ID mismatch still forces a shell refresh in-app.
         skipWaiting: true,

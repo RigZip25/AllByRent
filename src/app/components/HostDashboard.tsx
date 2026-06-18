@@ -1,10 +1,14 @@
 import { useEffect, useState, startTransition, type ReactNode } from "react";
-import { DollarSign, Package, Plus, TrendingUp } from "lucide-react";
+import { DollarSign, Package, Plus, Share2, TrendingUp } from "lucide-react";
 import { useAuth } from "../../hooks/AuthProvider";
 import { fetchManageableListings, loadManageableListings } from "../../lib/hostAccess";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { loadRentalBookings, type RentalBooking } from "../../lib/rentalsStorage";
 import { BookingRequestCard } from "../../components/rentals/BookingRequestCard";
+import { ProactiveAgentCard, wasAgentStepDismissed } from "../../components/agent/ProactiveAgentCard";
+import { hasRecentShare } from "../../lib/socialShare";
+import { loadNotificationPreferences } from "../../lib/notificationPreferences";
+import { resolveHostAccountId } from "../../lib/hostIdentity";
 
 const GREEN = "#1A9E6E";
 const GREEN_DARK = "#0D5C3A";
@@ -38,9 +42,11 @@ function StatCard({
 export function HostDashboard({
   onListItem,
   onOpenListing,
+  onShareGarage,
 }: {
   onListItem: () => void;
   onOpenListing: (listingId: string) => void;
+  onShareGarage?: () => void;
 }) {
   const auth = useAuth();
   const [listings, setListings] = useState<Awaited<ReturnType<typeof loadManageableListings>>>([]);
@@ -86,11 +92,44 @@ export function HostDashboard({
     .filter((b) => b.role === "host" && (b.status === "completed" || b.status === "active" || b.status === "overdue"))
     .reduce((sum, b) => sum + (b.totalUsd ?? 0), 0);
 
+  const hostId = resolveHostAccountId(auth.userId);
+  const showShareNudge =
+    loadNotificationPreferences().agentTips &&
+    listings.length > 0 &&
+    !hasRecentShare("garage", hostId) &&
+    !wasAgentStepDismissed(`garage-share-${hostId}`) &&
+    Boolean(onShareGarage);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <h2 className="mb-3 shrink-0 text-[20px] font-extrabold" style={{ color: GREEN_DARK }}>
-        My Garage
-      </h2>
+      {showShareNudge ? (
+        <div className="mb-3 shrink-0">
+          <ProactiveAgentCard
+            step={{
+              id: "garage-share",
+              dismissKey: `garage-share-${hostId}`,
+              title: "Your garage is live — share it",
+              body: "Post your showcase to Nextdoor or Facebook so neighbors know you're open for rentals.",
+              cta: "Open share sheet",
+              onAction: () => onShareGarage?.(),
+            }}
+          />
+        </div>
+      ) : null}
+
+      <div className="mb-3 flex shrink-0 items-center justify-end gap-2">
+        {onShareGarage && listings.length > 0 ? (
+          <button
+            type="button"
+            onClick={onShareGarage}
+            className="flex items-center gap-1 text-sm font-semibold"
+            style={{ color: GREEN }}
+          >
+            <Share2 className="h-4 w-4" />
+            Share garage
+          </button>
+        ) : null}
+      </div>
 
       <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1 pb-2">
         <div className="mb-4 flex gap-2">

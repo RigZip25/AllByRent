@@ -1,7 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { HomeFeedCard } from "../app/components/HomeFeedCard";
 import { garageDisplayName } from "../lib/garageDisplay";
 import { fetchActiveListingsForCityRemote, getActiveRentLocationLabel } from "../lib/listingStorage";
+import {
+  followGarage,
+  isFollowingGarage,
+  unfollowGarage,
+} from "../lib/garageFollowStorage";
+import { pushInAppNotification } from "../lib/inAppNotifications";
 
 const GREEN = "#0D5C3A";
 
@@ -16,7 +22,9 @@ export function NeighborGarageScreen({
 }) {
   const [listings, setListings] = useState<Awaited<ReturnType<typeof fetchActiveListingsForCityRemote>>>([]);
   const [loading, setLoading] = useState(true);
+  const [following, setFollowing] = useState(() => isFollowingGarage(hostId));
   const city = getActiveRentLocationLabel().trim();
+  const garageName = useMemo(() => garageDisplayName(hostId), [hostId]);
 
   useEffect(() => {
     let mounted = true;
@@ -44,9 +52,34 @@ export function NeighborGarageScreen({
           ← Back
         </button>
         <h1 className="mt-2 text-[22px] font-extrabold" style={{ color: GREEN }}>
-          {garageDisplayName(hostId)}
+          {garageName}
         </h1>
         <p className="text-[14px] text-gray-500">Peek inside — garage sale style</p>
+        <button
+          type="button"
+          onClick={() => {
+            if (following) {
+              unfollowGarage(hostId);
+              setFollowing(false);
+              return;
+            }
+            followGarage({ hostId, displayName: garageName });
+            setFollowing(true);
+            pushInAppNotification({
+              type: "general",
+              title: "Following garage",
+              body: `You'll get alerts when ${garageName} lists something new (push when enabled).`,
+            });
+          }}
+          className="mt-3 rounded-full border px-4 py-2 text-[13px] font-semibold"
+          style={{
+            borderColor: following ? GREEN : "#E8E6E0",
+            color: following ? "white" : GREEN,
+            backgroundColor: following ? GREEN : "white",
+          }}
+        >
+          {following ? "Following · alerts on" : "Follow · get new listing alerts"}
+        </button>
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">

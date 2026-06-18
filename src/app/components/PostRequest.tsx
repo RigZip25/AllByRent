@@ -16,6 +16,8 @@ import { MrRentano } from "./MrRentano";
 import { useAuth } from "../../hooks/AuthProvider";
 import { getActiveRentLocationLabel } from "../../lib/listingStorage";
 import { createRequestRemote } from "../../lib/requestsStorage";
+import { SocialShareButtons } from "../../components/share/SocialShareButtons";
+import { APP_NAME, MARKETING_URL } from "../../lib/brand";
 
 const categories = [
   { id: "tools", label: "Tools", icon: <Wrench className="w-6 h-6" /> },
@@ -63,6 +65,16 @@ export function PostRequest({
   const [endDate, setEndDate] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  const sharePayload = useMemo(() => {
+    const city = (prefill?.city ?? getActiveRentLocationLabel()).trim();
+    const text = description.trim() || `Looking for gear near ${city || "my block"} on ${APP_NAME}.`;
+    return {
+      title: `Request on ${APP_NAME}`,
+      text,
+      url: MARKETING_URL,
+    };
+  }, [description, prefill?.city]);
 
   const formatDateRange = () => {
     if (!startDate && !endDate) return "Select dates";
@@ -286,32 +298,7 @@ export function PostRequest({
             The more people see it, the faster you find it.
           </p>
 
-          <div className="grid grid-cols-2 gap-2">
-            <button className="flex items-center justify-center gap-2 py-2.5 bg-[#000000] hover:bg-[#1a1a1a] text-white rounded-lg transition-colors text-sm font-medium">
-              <span className="text-base">🎵</span>
-              TikTok
-            </button>
-
-            <button className="flex items-center justify-center gap-2 py-2.5 bg-[#1877F2] hover:bg-[#1565c0] text-white rounded-lg transition-colors text-sm font-medium">
-              <Share2 className="w-4 h-4" />
-              Facebook
-            </button>
-
-            <button className="flex items-center justify-center gap-2 py-2.5 bg-[#00B87C] hover:bg-[#009a68] text-white rounded-lg transition-colors text-sm font-medium">
-              <Home className="w-4 h-4" />
-              Nextdoor
-            </button>
-
-            <button className="flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] hover:opacity-90 text-white rounded-lg transition-opacity text-sm font-medium">
-              <Camera className="w-4 h-4" />
-              Instagram
-            </button>
-
-            <button className="col-span-2 flex items-center justify-center gap-2 py-2.5 bg-card border border-border hover:bg-muted text-foreground rounded-lg transition-colors text-sm font-medium">
-              <Copy className="w-4 h-4" />
-              Copy Link
-            </button>
-          </div>
+          <SocialShareButtons payload={sharePayload} shareKind="request" compact />
         </div>
       </div>
 

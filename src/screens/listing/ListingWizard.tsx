@@ -6,6 +6,8 @@ import { MASCOT_NAME } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
 import { getProfileCity, savePublishedListingRemote, savePublishedListing } from "../../lib/listingStorage";
+import { notifyGarageFollowersOfNewListing } from "../../lib/garageFollowNotify";
+import { loadUserProfile } from "../../lib/userProfileStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { getPlanById, loadSubscriptionPlanId } from "../../lib/subscriptionPlans";
 import { loadManageableListings } from "../../lib/hostAccess";
@@ -182,6 +184,12 @@ export function ListingWizard({
       } else {
         savePublishedListing(publishedDraft);
       }
+      const profile = loadUserProfile();
+      notifyGarageFollowersOfNewListing({
+        hostId,
+        hostName: profile.displayName,
+        listingTitle: publishedDraft.title || "New listing",
+      });
       firePublishConfetti();
       setIsPublishing(false);
 

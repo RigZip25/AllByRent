@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Copy, Facebook, Instagram, Link2, Loader2, MessageCircle, Send, Share2 } from "lucide-react";
+import { Copy, Loader2, Share2 } from "lucide-react";
 import { APP_NAME, MARKETING_URL } from "../../lib/brand";
 import type { ListingDraft } from "./types";
 import { getListingDisplayTitle } from "../../lib/listingQr";
@@ -7,6 +7,10 @@ import { extractAnthropicText, postAnthropicMessages } from "../../lib/anthropic
 import { useAuth } from "../../hooks/AuthProvider";
 import { boostListingRemote } from "../../lib/listingStorage";
 import { generateListingShareCards, type GeneratedShareCard, type ShareCardFormat } from "../../lib/shareCards";
+import { SocialShareButtons } from "../../components/share/SocialShareButtons";
+import { buildListingSharePayload, shareNative as shareNativePayload, copyText } from "../../lib/socialShare";
+import { ProactiveAgentCard, wasAgentStepDismissed } from "../../components/agent/ProactiveAgentCard";
+import { loadNotificationPreferences } from "../../lib/notificationPreferences";
 
 const GREEN = "#0D5C3A";
 const CTA = "#F59E0B";
@@ -145,36 +149,26 @@ export function ListingShareScreen({
 
   const selectedCard = useMemo(() => cards.find((c) => c.format === selectedFormat) ?? null, [cards, selectedFormat]);
 
-  const shareNative = async () => {
-    if (typeof navigator === "undefined" || !("share" in navigator)) return false;
-    try {
-      if (selectedCard && "canShare" in navigator && (navigator as any).canShare?.({ files: [new File([selectedCard.blob], selectedCard.filename, { type: "image/png" })] })) {
-        const file = new File([selectedCard.blob], selectedCard.filename, { type: "image/png" });
-        await navigator.share({ title: APP_NAME, text: caption, files: [file] });
-        return true;
-      }
-      await navigator.share({ title: APP_NAME, text: caption, url });
-      return true;
-    } catch {
-      return false;
-    }
+  const sharePayload = useMemo(
+    () => ({ ...buildListingSharePayload({ title, dailyRate: draft.pricing.dailyRate ?? "", url }), text: caption }),
+    [caption, draft.pricing.dailyRate, title, url],
+  );
+
+  const showShareNudge =
+    loadNotificationPreferences().agentTips && !wasAgentStepDismissed(`share-listing-${draft.id}`);
+
+  const shareWithImage = async () => {
+    const ok = await shareNativePayload({
+      ...sharePayload,
+      imageBlob: selectedCard?.blob,
+      imageFilename: selectedCard?.filename,
+    });
+    if (!ok) await copyText(sharePayload.text + "\n" + url);
   };
 
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(caption);
-    } catch {
-      // ignore
-    }
+  const copyCaption = async () => {
+    await copyText(caption);
   };
-
-  const buttons: { id: string; label: string; icon: JSX.Element; color: string }[] = [
-    { id: "tiktok", label: "TikTok", icon: <span className="text-base">🎵</span>, color: "#111" },
-    { id: "instagram", label: "Instagram", icon: <Instagram className="h-4 w-4" />, color: "#C13584" },
-    { id: "facebook", label: "Facebook", icon: <Facebook className="h-4 w-4" />, color: "#1877F2" },
-    { id: "nextdoor", label: "Nextdoor", icon: <Send className="h-4 w-4" />, color: "#00B87C" },
-    { id: "whatsapp", label: "WhatsApp", icon: <MessageCircle className="h-4 w-4" />, color: "#25D366" },
-  ];
 
   const activeBoostLabel = useMemo(() => {
     if (!draft.boostedUntil) return null;
@@ -194,6 +188,21 @@ export function ListingShareScreen({
       </div>
 
       <div className="screen-scroll flex-1 min-h-0 p-5 pb-24 space-y-4">
+        {showShareNudge ? (
+          <ProactiveAgentCard
+            step={{
+              id: "share-listing",
+              dismissKey: `share-listing-${draft.id}`,
+              title: "Share while it's fresh",
+              body: "Neighbors who see your listing in the first hour are 3× more likely to book. Pick Story for TikTok and Instagram.",
+              cta: "Scroll to share buttons",
+              onAction: () => {
+                document.getElementById("listing-social-share")?.scrollIntoView({ behavior: "smooth" });
+              },
+            }}
+          />
+        ) : null}
+
         <div className="rounded-3xl border bg-white p-4" style={{ borderColor: BORDER }}>
           <div className="flex items-center justify-between gap-3">
             <p className="text-[13px] font-semibold text-gray-700">Share image</p>
@@ -248,7 +257,7 @@ export function ListingShareScreen({
             <button
               type="button"
               disabled={!selectedCard}
-              onClick={() => void shareNative().then((ok) => (ok ? undefined : void copyLink()))}
+              onClick={() => void shareWithImage()}
               className="flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-semibold text-white disabled:opacity-60"
               style={{ backgroundColor: CTA }}
             >
@@ -291,7 +300,7 @@ export function ListingShareScreen({
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => void shareNative().then((ok) => (ok ? undefined : void copyLink()))}
+              onClick={() => void shareWithImage()}
               className="flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-semibold text-white"
               style={{ backgroundColor: GREEN }}
             >
@@ -300,7 +309,7 @@ export function ListingShareScreen({
             </button>
             <button
               type="button"
-              onClick={() => void copyLink()}
+              onClick={() => void copyCaption()}
               className="flex items-center justify-center gap-2 rounded-xl border bg-white px-3 py-2.5 text-[13px] font-semibold text-gray-700"
               style={{ borderColor: BORDER }}
             >
@@ -310,29 +319,16 @@ export function ListingShareScreen({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          {buttons.map((b) => (
-            <button
-              key={b.id}
-              type="button"
-              onClick={() => void shareNative().then((ok) => (ok ? undefined : void copyLink()))}
-              className="flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-semibold text-white"
-              style={{ backgroundColor: b.color }}
-              aria-label={`Share to ${b.label}`}
-            >
-              {b.icon}
-              {b.label}
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={() => void copyLink()}
-            className="col-span-2 flex items-center justify-center gap-2 rounded-xl border bg-white px-3 py-2.5 text-[13px] font-semibold text-gray-700"
-            style={{ borderColor: BORDER }}
-          >
-            <Link2 className="h-4 w-4" />
-            Copy link
-          </button>
+        <div id="listing-social-share" className="rounded-3xl border bg-white p-4" style={{ borderColor: BORDER }}>
+          <p className="mb-3 text-[13px] font-semibold text-gray-700">Share to your networks</p>
+          <SocialShareButtons
+            payload={sharePayload}
+            imageBlob={selectedCard?.blob}
+            imageFilename={selectedCard?.filename}
+            shareKind="listing"
+            targetId={draft.id}
+            onFormatHint={(format) => setSelectedFormat(format)}
+          />
         </div>
 
         <div className="rounded-3xl border bg-white p-4" style={{ borderColor: BORDER }}>

@@ -23,6 +23,7 @@ import { useAuth } from "../hooks/AuthProvider";
 import { loadInAppNotifications } from "../lib/inAppNotifications";
 import { fetchNotificationsRemote, markNotificationReadRemote, type Notification } from "../lib/notificationsStorage";
 import { savePushSubscriptionRemote, subscribeToPush } from "../lib/pushNotifications";
+import { NotificationPreferencesPanel } from "../components/notifications/NotificationPreferencesPanel";
 import { MrRentano } from "../app/components/MrRentano";
 
 const GREEN = "#0D5C3A";
@@ -381,6 +382,10 @@ export function NotificationsScreen({ onBack, mode: modeProp }: NotificationsScr
             {pushError ? <p className="mt-2 text-xs text-red-600">{pushError}</p> : null}
           </div>
         ) : null}
+
+        <div className="mx-auto mb-4 max-w-[390px]">
+          <NotificationPreferencesPanel />
+        </div>
 
         {filteredItems.length > 0 ? (
           <div className="mx-auto mb-6 max-w-[390px]">

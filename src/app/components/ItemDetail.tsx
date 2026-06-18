@@ -19,10 +19,12 @@ import {
   isFavoriteListing,
   toggleFavoriteListing,
 } from "../../lib/favoritesStorage";
-import { getPublishedListingById } from "../../lib/listingStorage";
+import { getPublishedListingById, getActiveRentLocationLabel } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { useMediaUrl } from "../../lib/useMediaUrl";
 import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
+import { SocialShareButtons } from "../../components/share/SocialShareButtons";
+import { buildListingSharePayload, listingShareUrl } from "../../lib/socialShare";
 
 interface ItemDetailProps {
   itemId: string;
@@ -33,6 +35,7 @@ interface ItemDetailProps {
 
 export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDetailProps) {
   const [favorited, setFavorited] = useState(() => isFavoriteListing(itemId));
+  const [shareOpen, setShareOpen] = useState(false);
   const listing = useMemo(() => getPublishedListingById(itemId), [itemId]);
   const cover = listing?.photos?.[0] ?? null;
   const coverThumb = cover?.thumbId ? { ...cover, id: cover.thumbId } : cover;
@@ -47,6 +50,16 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
   const deliverySummary = listing ? deliverySummaryForListing(listing) : null;
   const hasDelivery = listing ? listingOffersDelivery(listing) : true;
   const isHeavy = listing?.handoff.itemHeavy ?? false;
+
+  const sharePayload = useMemo(() => {
+    const city = getActiveRentLocationLabel().trim();
+    return buildListingSharePayload({
+      title,
+      dailyRate: String(dailyRate),
+      url: listingShareUrl(itemId),
+      city: city || undefined,
+    });
+  }, [dailyRate, itemId, title]);
 
   const handleToggleFavorite = () => {
     setFavorited(toggleFavoriteListing(itemId));
@@ -247,8 +260,24 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
         </div>
       </div>
 
+      {shareOpen ? (
+        <div className="shrink-0 border-t border-border bg-card p-4">
+          <p className="mb-2 text-sm font-semibold">Share this listing</p>
+          <SocialShareButtons
+            payload={sharePayload}
+            shareKind="listing"
+            targetId={itemId}
+            compact
+          />
+        </div>
+      ) : null}
+
       <div className="screen-footer bg-card/95 backdrop-blur-sm border-t border-border p-3 sm:p-4 flex gap-3">
-        <button className="flex-shrink-0 border border-border py-3 px-5 rounded-xl hover:bg-muted transition-colors flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setShareOpen((v) => !v)}
+          className="flex-shrink-0 border border-border py-3 px-5 rounded-xl hover:bg-muted transition-colors flex items-center gap-2"
+        >
           <Share2 className="w-5 h-5" />
           <span className="font-medium">Share</span>
         </button>
