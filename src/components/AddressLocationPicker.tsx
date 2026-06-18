@@ -50,6 +50,11 @@ export function AddressLocationPicker({
     return home ? { lat: home.lat, lng: home.lng } : near;
   }, [near?.lat, near?.lng]);
 
+  const homeCityHint = useMemo(() => {
+    const home = getHomeLocation();
+    return home?.displayName?.trim() || null;
+  }, []);
+
   const [countryCode, setCountryCode] = useState<CountryCode>(() => getSearchCountryCode());
   const [limitToUsState, setLimitToUsState] = useState(() => countryCode === "US");
   const [usState, setUsState] = useState<string>(() => {
@@ -103,6 +108,7 @@ export function AddressLocationPicker({
         near: searchNear,
         countryCode,
         usState: effectiveState,
+        cityHint: homeCityHint,
       });
       setSuggestions(results);
       setShowSuggestions(results.length > 0);
@@ -111,7 +117,7 @@ export function AddressLocationPicker({
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [inputValue, searchNear?.lat, searchNear?.lng, countryCode, usState, limitToUsState]);
+  }, [inputValue, searchNear?.lat, searchNear?.lng, countryCode, usState, limitToUsState, homeCityHint]);
 
   const handleCountryChange = (code: CountryCode) => {
     setCountryCode(code);
@@ -235,7 +241,13 @@ export function AddressLocationPicker({
         onBlur={() => setTimeout(() => setShowSuggestions(false), 300)}
         placeholder={placeholder}
         className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-base outline-none focus:border-green-700"
-        autoComplete="street-address"
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck={false}
+        name="allbyrent-address-search"
+        data-1p-ignore
+        data-lpignore="true"
         enterKeyHint="search"
       />
 
@@ -243,9 +255,17 @@ export function AddressLocationPicker({
         {countryCode === "US"
           ? limitToUsState && usState
             ? `Searching in ${usState} — try “Fayetteville, ${usState}” or a street + city`
-            : "Tip: city + state works best — e.g. “Fayetteville, AR” or “123 Main St, Hot Springs, AR”"
+            : "Tip: city + state works best — e.g. “Fayetteville, AR”. Full home address usually shows one match."
           : `Searching in ${activeCountry.flag} ${activeCountry.label}`}
       </p>
+
+      {!isLoading && showAutocomplete ? (
+        <p className="text-center text-xs text-gray-500">
+          {suggestions.length === 1
+            ? "1 address found (US Census + OpenStreetMap)"
+            : `${suggestions.length} addresses found (US Census + OpenStreetMap)`}
+        </p>
+      ) : null}
 
       {needsStateHint ? (
         <p className="text-center text-xs leading-relaxed text-amber-800">
@@ -255,7 +275,7 @@ export function AddressLocationPicker({
       ) : null}
 
       {isLoading ? (
-        <p className="text-center text-xs text-gray-500">Finding addresses…</p>
+        <p className="text-center text-xs text-gray-500">Searching US Census & OpenStreetMap…</p>
       ) : null}
 
       {showAutocomplete ? (
