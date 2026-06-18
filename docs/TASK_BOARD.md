@@ -16,7 +16,7 @@
 | **P1b** | **Brand pass (strings)** | 🟡 | `Rentano*` file renames defer |
 | **P1c** | Copy pass (wizard, FAQ, empty) | ✅ | — |
 | **P1d** | Deposit-only UI (hide Safely) | ✅ | value ceiling gate → P3 |
-| P2 | Frictionless listing (3-step) | ⬜ | Отложить verify/Stripe из wizard |
+| P2 | Frictionless listing (3-step) | ✅ | Pickup/hours/QR after publish |
 | P2 | Garage storefront polish | ⬜ | Public profile = vitrina |
 | P2 | Feed ranking + departments | ⬜ | N items per cluster |
 | P3 | Semantic search (pgvector) | 🚫 | Нужен кластер + migration |
@@ -30,7 +30,7 @@
 1. ✅ Home P0 (`a9bca4b`)
 2. ✅ Task 2 — RTO out (`ec3869a`)
 3. ✅ Task 10 — copy + deposit pass (`cursor/copy-deposit-pass-ca09`)
-4. ⬜ Task 4 — frictionless listing (3-step wizard)
+4. ✅ Task 4 — frictionless listing (3-step wizard)
 5. ⬜ Task 3 — garage storefront polish
 
 ---

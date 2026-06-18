@@ -17,7 +17,7 @@ import { useMediaUrl } from "../../../lib/useMediaUrl";
 
 const PRIMARY_GREEN = "#0D5C3A";
 const DEFAULT_TIP =
-  `Optional: tap Analyze to let ${MASCOT_NAME} fill in Step 2. You can also skip and enter details manually.`;
+  `Add at least one photo, then tap Continue — ${MASCOT_NAME} fills in title, category, and price on the next step.`;
 const AI_TIP = "I analyzed your photos — check Step 2, I filled everything in for you! 🎩";
 
 function reorderArray<T>(items: T[], from: number, to: number): T[] {
@@ -677,33 +677,24 @@ export function Step1Photos({
 
       {onAnalyzePhotos ? (
         <div className="mt-5 rounded-2xl bg-white p-4 shadow-sm">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-gray-900">Analyze photos (optional)</p>
-              <p className="mt-1 text-xs text-gray-500">
-                Uses AI to suggest title, category, description, and replacement value. This can
-                take 10–30 seconds.
-              </p>
-            </div>
+          <p className="text-sm font-semibold text-gray-900">AI fills the next step</p>
+          <p className="mt-1 text-xs text-gray-500">
+            Tap Continue — {MASCOT_NAME} suggests title, category, description, and price from
+            your photos (about 10–30 seconds).
+          </p>
+          {draft.aiSuggestions ? (
             <button
               type="button"
               onClick={onAnalyzePhotos}
               disabled={
                 draft.photos.length === 0 || draft.aiAnalysisPending || draft.photoEnhancementPending
               }
-              className="btn-primary shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-              style={{ backgroundColor: PRIMARY_GREEN }}
+              className="mt-3 text-xs font-semibold underline disabled:opacity-50"
+              style={{ color: PRIMARY_GREEN }}
             >
-              {draft.aiAnalysisPending ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                  Analyzing…
-                </span>
-              ) : (
-                "Analyze"
-              )}
+              {draft.aiAnalysisPending ? "Re-analyzing…" : "Re-analyze photos"}
             </button>
-          </div>
+          ) : null}
         </div>
       ) : null}
 

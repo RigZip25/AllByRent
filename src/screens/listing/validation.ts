@@ -11,31 +11,6 @@ function getRateFieldsForMinimumPeriod(minimumPeriod: MinimumRentalPeriod) {
   return { showDaily: false, showWeekly: false, showMonthly: true };
 }
 
-function isHandoffValid(draft: ListingDraft): boolean {
-  const { handoff } = draft;
-  if (handoff.itemHeavy && handoff.delivery) {
-    const weight = handoff.itemWeightLbs;
-    if (
-      typeof weight !== "number" ||
-      !Number.isFinite(weight) ||
-      weight <= 0
-    ) {
-      return false;
-    }
-  }
-  if (handoff.inPerson || handoff.contactless) return true;
-  if (handoff.delivery) {
-    const fee = handoff.deliveryRoundTripFee?.trim() ?? "";
-    if (fee && fee !== "0") return true;
-    const rows = Array.isArray(handoff.deliveryPrices) ? handoff.deliveryPrices : [];
-    return rows.some(
-      (row) =>
-        typeof row?.price === "string" && row.price.trim() !== "" && row.price !== "0",
-    );
-  }
-  return false;
-}
-
 export function isListingStepValid(step: number, draft: ListingDraft): boolean {
   switch (step) {
     case 1:
@@ -45,17 +20,16 @@ export function isListingStepValid(step: number, draft: ListingDraft): boolean {
         !draft.photoEnhancementPending
       );
 
-    case 2:
-      return (
+    case 2: {
+      const itemInfoValid =
         draft.title.trim() !== "" &&
         draft.category.trim() !== "" &&
         draft.subcategory.trim() !== "" &&
         draft.grade !== "" &&
         draft.condition !== "" &&
-        draft.replacementValue.trim() !== ""
-      );
+        draft.replacementValue.trim() !== "";
+      if (!itemInfoValid) return false;
 
-    case 3: {
       const { modes, pricing, category } = draft;
       const rules = getCategoryModeRules(category);
       const hasMode =
@@ -88,14 +62,7 @@ export function isListingStepValid(step: number, draft: ListingDraft): boolean {
       return true;
     }
 
-    case 4:
-      return isHandoffValid(draft);
-
-    case 5:
-    case 6:
-      return true;
-
-    case 7:
+    case 3:
       return true;
 
     default:

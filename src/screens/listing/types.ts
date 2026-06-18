@@ -112,14 +112,11 @@ export type Step7ReviewProps = StepProps & {
 /** @deprecated Use Step7ReviewProps */
 export type Step6ReviewProps = Step7ReviewProps;
 
+/** Fast-path listing wizard (pickup, hours, QR deferred to post-publish). */
 export const STEPS = [
   { id: 1, name: "Photos" },
-  { id: 2, name: "Item Info" },
-  { id: 3, name: "Transaction Modes" },
-  { id: 4, name: "Pickup & Delivery" },
-  { id: 5, name: "Availability" },
-  { id: 6, name: "QR Code" },
-  { id: 7, name: "Review & Publish" },
+  { id: 2, name: "Details & pricing" },
+  { id: 3, name: "Review & publish" },
 ] as const;
 
 export const TOTAL_LISTING_STEPS = STEPS.length;
@@ -191,7 +188,7 @@ export function createInitialListingDraft(): ListingDraft {
     blockedDates: [],
     paused: false,
     handoff: {
-      inPerson: false,
+      inPerson: true,
       inPersonDays: ["Mo", "Tu", "We", "Th", "Fr"],
       inPersonTimeStart: "09:00",
       inPersonTimeEnd: "17:00",

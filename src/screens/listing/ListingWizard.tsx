@@ -3,6 +3,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import confetti from "canvas-confetti";
 import { MASCOT_NAME } from "../../lib/brand";
+import { useAuth } from "../../hooks/AuthProvider";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
 import { getProfileCity, savePublishedListingRemote, savePublishedListing } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
@@ -13,13 +14,10 @@ import { ListingPublishSuccess } from "./ListingPublishSuccess";
 import { ListingShareScreen } from "./ListingShareScreen";
 import { QRStoryScreen } from "./QRStoryScreen";
 import { QRStickerScreen } from "./QRStickerScreen";
+import { applyFrictionlessDefaults } from "./frictionlessDefaults";
 import {
   Step1Photos,
-  Step2ItemInfo,
-  Step3Modes,
-  Step4PickupDelivery,
-  Step5Availability,
-  Step6QR,
+  Step2Details,
   Step7Review,
 } from "./steps";
 import { subcategoriesData } from "../../app/data/subcategories";
@@ -169,8 +167,9 @@ export function ListingWizard({
     window.setTimeout(() => {
       const giftOrSellOnly = isGiftOrSellOnly(draft);
       const hostId = draft.hostId ?? resolveHostAccountId(auth.userId);
+      const normalizedDraft = applyFrictionlessDefaults(draft);
       const publishedDraft: ListingDraft = {
-        ...draft,
+        ...normalizedDraft,
         hostId,
         generateQR: true,
         listingStatus: giftOrSellOnly ? "active" : "pending_qr",
@@ -198,6 +197,9 @@ export function ListingWizard({
     if (step === 1) {
       if (draft.photos.length === 0 || draft.aiAnalysisPending || draft.photoEnhancementPending) {
         return;
+      }
+      if (!draft.aiSuggestions) {
+        await handleAnalyzePhotos();
       }
       goToStep(2, 1);
       return;
@@ -374,7 +376,7 @@ export function ListingWizard({
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0 flex flex-col overflow-y-auto"
           >
-            {step === 7 ? (
+            {step === 3 ? (
               <Step7Review
                 draft={draft}
                 setDraft={setDraft}
@@ -389,16 +391,8 @@ export function ListingWizard({
                 setDraft={setDraft}
                 onAnalyzePhotos={() => void handleAnalyzePhotos()}
               />
-            ) : step === 2 ? (
-              <Step2ItemInfo draft={draft} setDraft={setDraft} />
-            ) : step === 3 ? (
-              <Step3Modes draft={draft} setDraft={setDraft} />
-            ) : step === 4 ? (
-              <Step4PickupDelivery draft={draft} setDraft={setDraft} />
-            ) : step === 5 ? (
-              <Step5Availability draft={draft} setDraft={setDraft} />
             ) : (
-              <Step6QR draft={draft} setDraft={setDraft} />
+              <Step2Details draft={draft} setDraft={setDraft} />
             )}
           </motion.div>
         </AnimatePresence>
