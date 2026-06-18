@@ -51,7 +51,7 @@ export function AddressLocationPicker({
   }, [near?.lat, near?.lng]);
 
   const [countryCode, setCountryCode] = useState<CountryCode>(() => getSearchCountryCode());
-  const [limitToUsState, setLimitToUsState] = useState(false);
+  const [limitToUsState, setLimitToUsState] = useState(() => countryCode === "US");
   const [usState, setUsState] = useState<string>(() => {
     const fromCoords = homeCoords ? detectUsStateFromCoords(homeCoords.lat, homeCoords.lng) : null;
     return getSavedUsState() ?? fromCoords ?? "";
@@ -80,13 +80,9 @@ export function AddressLocationPicker({
 
     if (countryCode === "US" && limitToUsState && !usState && !queryHasUsCityHint(trimmed)) {
       setNeedsStateHint(true);
-      setSuggestions([]);
-      setSearchError(false);
-      setIsLoading(false);
-      return;
+    } else {
+      setNeedsStateHint(false);
     }
-
-    setNeedsStateHint(false);
 
     const timer = setTimeout(async () => {
       setIsLoading(true);
@@ -198,7 +194,7 @@ export function AddressLocationPicker({
       {countryCode === "US" ? (
         <div className="flex flex-col gap-2">
           <label className="flex items-center justify-between gap-3">
-            <span className="text-xs font-medium text-gray-500">Narrow search to a state (optional)</span>
+            <span className="text-xs font-medium text-gray-500">Narrow search to a state (recommended)</span>
             <button
               type="button"
               className="text-xs font-semibold text-gray-600"
@@ -246,8 +242,8 @@ export function AddressLocationPicker({
       <p className="text-center text-xs text-gray-400">
         {countryCode === "US"
           ? limitToUsState && usState
-            ? `Searching in ${usState} — type: city, ${usState}`
-            : "Tip: type your city like “Fayetteville, AR”"
+            ? `Searching in ${usState} — try “Fayetteville, ${usState}” or a street + city`
+            : "Tip: city + state works best — e.g. “Fayetteville, AR” or “123 Main St, Hot Springs, AR”"
           : `Searching in ${activeCountry.flag} ${activeCountry.label}`}
       </p>
 
