@@ -97,12 +97,16 @@ export function PwaUpdateConfirmSheet({
   };
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/45 p-4">
+    <div
+      className="fixed inset-0 z-[80] flex items-end justify-center bg-black/45 p-4"
+      onClick={onClose}
+    >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="pwa-update-title"
         className="w-full max-w-[390px] rounded-3xl bg-white p-5 shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
       >
         <div
           className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl"

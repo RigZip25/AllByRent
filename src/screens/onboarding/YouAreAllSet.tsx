@@ -1,3 +1,4 @@
+import { OnboardingTopBar } from "../../components/OnboardingTopBar";
 import { APP_MODE_LABELS, APP_NAME, APP_TAGLINE, ONBOARDING } from "../../lib/brand";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 import { getAppMode } from "../../lib/appMode";
@@ -11,6 +12,8 @@ const { allSet: copy } = ONBOARDING;
 
 type YouAreAllSetProps = {
   onExplore: () => void;
+  onBack?: () => void;
+  onSkip?: () => void;
 };
 
 function accountTypeLabel(): string {
@@ -30,12 +33,15 @@ function goalTags(): string[] {
   return tags;
 }
 
-export function YouAreAllSet({ onExplore }: YouAreAllSetProps) {
+export function YouAreAllSet({ onExplore, onBack, onSkip }: YouAreAllSetProps) {
   const location = getProfileLocationSummary();
   const goals = goalTags();
 
   return (
     <div className="screen mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-white">
+      {onBack || onSkip ? (
+        <OnboardingTopBar onBack={onBack} onSkip={onSkip ?? onExplore} />
+      ) : null}
       <div className="screen-scroll flex min-h-0 flex-1 flex-col px-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] pt-6">
         <div className="flex flex-col items-center text-center">
           <img

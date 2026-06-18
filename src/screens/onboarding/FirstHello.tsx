@@ -60,9 +60,11 @@ function ChatBubble({
 export function FirstHello({
   onNext,
   onSkip,
+  onBack,
 }: {
   onNext: () => void;
   onSkip: () => void;
+  onBack?: () => void;
 }) {
   const [displayed, setDisplayed] = useState<{ index: number; text: string }[]>([]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -147,7 +149,7 @@ export function FirstHello({
 
   return (
     <div className="screen relative mx-auto w-full max-w-[390px] bg-white">
-      <OnboardingTopBar onSkip={onSkip} />
+      <OnboardingTopBar onSkip={onSkip} onBack={onBack} />
       <div className="first-hello-main">
         <div className="first-hello-top">
           <div className="first-hello-mascot">

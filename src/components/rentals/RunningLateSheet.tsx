@@ -38,8 +38,14 @@ export function RunningLateSheet({
   };
 
   return (
-    <div className="fixed inset-0 z-[85] flex items-end bg-black/50 p-4">
-      <div className="w-full max-w-[400px] rounded-2xl bg-white p-5 mx-auto">
+    <div
+      className="fixed inset-0 z-[85] flex items-end bg-black/50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-[400px] rounded-2xl bg-white p-5 mx-auto"
+        onClick={(event) => event.stopPropagation()}
+      >
         <h2 className="text-[17px] font-bold" style={{ color: GREEN }}>
           Send a message to {ownerName}?
         </h2>
