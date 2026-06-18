@@ -66,6 +66,11 @@
       min-height: 96px;
     }
 
+    textarea.field-autogrow {
+      min-height: 44px;
+      field-sizing: content;
+    }
+
     button {
       min-height: 44px;
       padding: 12px 16px;
@@ -892,6 +897,24 @@
     right: 0;
     flex-shrink: 0;
     z-index: 20;
+  }
+
+  /**
+   * Bottom tab bar — stay above scroll content and Stripe.js controller iframes.
+   */
+  .bottom-nav-bar {
+    position: relative;
+    z-index: 50;
+    isolation: isolate;
+    touch-action: manipulation;
+  }
+
+  /**
+   * Stripe fraud-detection controller iframe must not eat taps on the rest of the app.
+   * Payment Element iframes stay interactive inside their container.
+   */
+  iframe[name^="__privateStripeController"] {
+    pointer-events: none !important;
   }
 
   .btn-padding {

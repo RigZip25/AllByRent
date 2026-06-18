@@ -5,6 +5,14 @@ const GREEN = "#0D5C3A";
 
 export type BottomNavTab = "home" | "search" | "add" | "garage" | "more" | "none";
 
+function runNavAction(action: () => void) {
+  const active = document.activeElement;
+  if (active instanceof HTMLElement) {
+    active.blur();
+  }
+  action();
+}
+
 function NavIconHome({ active }: { active?: boolean }) {
   const c = active ? GREEN : "#888";
   return (
@@ -77,15 +85,16 @@ export function BottomNav({
   onMore: () => void;
 }) {
   return (
-    <div
-      className="flex shrink-0 items-center border-t bg-white px-1 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] pt-2"
+    <nav
+      className="bottom-nav-bar flex shrink-0 items-center border-t bg-white px-1 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] pt-2"
       style={{ borderColor: BORDER, minHeight: 80 }}
+      aria-label="Main navigation"
     >
       <div className="mx-auto flex w-full max-w-md items-end justify-around">
         <button
           type="button"
-          onClick={onHome}
-          className="flex min-w-[52px] flex-col items-center gap-1 py-1"
+          onClick={() => runNavAction(onHome)}
+          className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
         >
           <NavIconHome active={activeTab === "home"} />
           <TabLabel active={activeTab === "home"}>Home</TabLabel>
@@ -93,8 +102,8 @@ export function BottomNav({
 
         <button
           type="button"
-          onClick={onSearch}
-          className="flex min-w-[52px] flex-col items-center gap-1 py-1"
+          onClick={() => runNavAction(onSearch)}
+          className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
         >
           <NavIconSearch active={activeTab === "search"} />
           <TabLabel active={activeTab === "search"}>Search</TabLabel>
@@ -102,8 +111,8 @@ export function BottomNav({
 
         <button
           type="button"
-          onClick={onAdd}
-          className="-mt-7 flex min-w-[64px] flex-col items-center gap-1"
+          onClick={() => runNavAction(onAdd)}
+          className="relative z-10 -mt-7 flex min-h-[44px] min-w-[64px] touch-manipulation flex-col items-center justify-end gap-1"
           aria-label="Stock an item in your garage"
         >
           <div
@@ -123,8 +132,8 @@ export function BottomNav({
 
         <button
           type="button"
-          onClick={onGarage}
-          className="flex min-w-[52px] flex-col items-center gap-1 py-1"
+          onClick={() => runNavAction(onGarage)}
+          className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
         >
           <NavIconGarage active={activeTab === "garage"} />
           <TabLabel active={activeTab === "garage"}>Garage</TabLabel>
@@ -132,14 +141,14 @@ export function BottomNav({
 
         <button
           type="button"
-          onClick={onMore}
-          className="flex min-w-[52px] flex-col items-center gap-1 py-1"
+          onClick={() => runNavAction(onMore)}
+          className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
           aria-label="More — account and settings"
         >
           <NavIconMore active={activeTab === "more"} />
           <TabLabel active={activeTab === "more"}>More</TabLabel>
         </button>
       </div>
-    </div>
+    </nav>
   );
 }

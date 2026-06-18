@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, MapPin, Truck, Package, Shield } from "lucide-react";
 import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
 import { getPublishedListingById } from "../../lib/listingStorage";
@@ -22,6 +22,7 @@ import { createNotificationRemote } from "../../lib/notificationsStorage";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
 import { StripePaymentForm } from "../../components/payments/StripePaymentForm";
 import { isStripePaymentsEnabled } from "../../lib/stripeConfig";
+import { removeStripeControllerIframes } from "../../lib/stripeCleanup";
 import { createDepositPaymentIntent, createRentalPaymentIntent } from "../../lib/stripePayments";
 import type { ListingDraft } from "../../screens/listing/types";
 
@@ -154,6 +155,12 @@ export function BookingScreen({
   const [pendingDepositCents, setPendingDepositCents] = useState(0);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      window.setTimeout(removeStripeControllerIframes, 0);
+    };
+  }, []);
 
   const startDate = useMemo(() => {
     const d = new Date();
