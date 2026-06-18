@@ -37,18 +37,19 @@ export function WhereAreYouManual({ onBack, onContinue, onSkip, hint }: WhereAre
             📍
           </span>
           <h1 className="mt-2 text-2xl font-bold" style={{ color: GREEN }}>
-            Your pickup area
+            Your area
           </h1>
           <p className="mt-2 text-base leading-relaxed text-gray-500">
             {hint ??
-              "Pick the address or neighborhood where you want to pick up rentals — we show listings closest to this spot."}
+              "Enter your ZIP code or city — we show rentals near you. No need for your exact street address."}
           </p>
         </div>
 
         <div className="mt-5 flex min-h-0 flex-1 flex-col">
           <AddressLocationPicker
-            placeholder="Street address, city, state"
-            emptyHint="Example: 123 Main St, Fayetteville, AR 72701 — or city only: Fayetteville, AR"
+            variant="area"
+            placeholder="ZIP code or city, state"
+            emptyHint="Best: 5-digit ZIP (71909). Or city: Hot Springs Village, AR"
             selected={selectedLocation}
             onSelect={setSelectedLocation}
             onClear={() => setSelectedLocation(null)}

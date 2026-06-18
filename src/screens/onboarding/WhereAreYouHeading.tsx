@@ -83,8 +83,9 @@ export function WhereAreYouHeading({ onBack, onContinue, onSkip }: WhereAreYouHe
 
         <div className="mt-5 flex min-h-0 flex-1 flex-col gap-3">
           <AddressLocationPicker
-            placeholder="City, neighborhood, or area"
-            emptyHint="Pick a US city or type where you'll browse garages"
+            variant="area"
+            placeholder="ZIP code or city, neighborhood"
+            emptyHint="ZIP (e.g. 78701) or city — Austin, TX"
             selected={selectedLocation}
             onSelect={setSelectedLocation}
             onClear={() => setSelectedLocation(null)}
