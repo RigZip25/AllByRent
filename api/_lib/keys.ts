@@ -37,6 +37,11 @@ export function getStripePublishableKey(): string | undefined {
   );
 }
 
+/** USPS Web Tools USERID for Address Verify API (optional — improves US match rate). */
+export function getUspsWebToolsUserId(): string | undefined {
+  return trimEnv(process.env.USPS_WEBTOOLS_USER_ID || process.env.USPS_USER_ID);
+}
+
 /** True when server-side Stripe secret is configured (not a placeholder). */
 export function isStripeServerConfigured(): boolean {
   const key = getStripeSecretKey();

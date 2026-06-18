@@ -45,6 +45,11 @@ export function AddressLocationPicker({
     { label: "Middle East", codes: ["IL"] },
     { label: "Oceania", codes: ["AU"] },
   ];
+  const homeCityHint = useMemo(() => {
+    const home = getHomeLocation();
+    return home?.displayName?.trim() || null;
+  }, []);
+
   const homeCoords = useMemo(() => {
     const home = getHomeLocation();
     return home ? { lat: home.lat, lng: home.lng } : near;
@@ -103,6 +108,7 @@ export function AddressLocationPicker({
         near: searchNear,
         countryCode,
         usState: effectiveState,
+        cityHint: homeCityHint,
       });
       setSuggestions(results);
       setShowSuggestions(results.length > 0);
@@ -111,7 +117,7 @@ export function AddressLocationPicker({
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [inputValue, searchNear?.lat, searchNear?.lng, countryCode, usState, limitToUsState]);
+  }, [inputValue, searchNear?.lat, searchNear?.lng, countryCode, usState, limitToUsState, homeCityHint]);
 
   const handleCountryChange = (code: CountryCode) => {
     setCountryCode(code);
@@ -235,15 +241,21 @@ export function AddressLocationPicker({
         onBlur={() => setTimeout(() => setShowSuggestions(false), 300)}
         placeholder={placeholder}
         className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-base outline-none focus:border-green-700"
-        autoComplete="street-address"
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck={false}
+        name="allbyrent-address-search"
+        data-1p-ignore
+        data-lpignore="true"
         enterKeyHint="search"
       />
 
       <p className="text-center text-xs text-gray-400">
         {countryCode === "US"
           ? limitToUsState && usState
-            ? `Searching in ${usState} — try “Fayetteville, ${usState}” or a street + city`
-            : "Tip: city + state works best — e.g. “Fayetteville, AR” or “123 Main St, Hot Springs, AR”"
+            ? `Searching in ${usState} — include ZIP when possible`
+            : "US format: number + street, city, state ZIP — e.g. 19 Gozar Ln, Hot Springs Village, AR 71909"
           : `Searching in ${activeCountry.flag} ${activeCountry.label}`}
       </p>
 
@@ -255,7 +267,7 @@ export function AddressLocationPicker({
       ) : null}
 
       {isLoading ? (
-        <p className="text-center text-xs text-gray-500">Finding addresses…</p>
+        <p className="text-center text-xs text-gray-500">Searching US Census address database…</p>
       ) : null}
 
       {showAutocomplete ? (
@@ -291,13 +303,12 @@ export function AddressLocationPicker({
 
       {!isLoading && searchError && inputValue.trim().length >= minQueryLength(inputValue) ? (
         <p className="text-center text-xs leading-relaxed text-gray-500">
-          No exact address in the database. Try full format with ZIP, e.g.{" "}
+          Address not found. Use your full mailing address with ZIP, e.g.{" "}
           <strong>19 Gozar Ln, Hot Springs Village, AR 71909</strong>
-          {countryCode === "US" && usState ? (
+          {countryCode === "US" ? (
             <>
               {" "}
-              — or type only your city: <strong>Fayetteville, {usState}</strong> and pick
-              it from the list.
+              — or pick your city: <strong>Hot Springs Village, AR</strong>
             </>
           ) : null}
         </p>

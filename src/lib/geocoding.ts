@@ -33,6 +33,8 @@ export type SearchPlacesOptions = {
   countryCode?: CountryCode;
   /** US only — e.g. AR */
   usState?: string | null;
+  /** City from saved home — helps partial street search. */
+  cityHint?: string | null;
 };
 
 type PhotonProperties = {
@@ -389,6 +391,15 @@ export function minQueryLength(query: string): number {
   return 3;
 }
 
+function augmentUsQueryWithCityHint(query: string, cityHint?: string | null): string | null {
+  const trimmed = query.trim();
+  if (!cityHint?.trim() || trimmed.includes(",")) return null;
+  const city = cityHint.split(",")[0]?.trim();
+  if (!city || city.length < 2) return null;
+  if (trimmed.toLowerCase().includes(city.toLowerCase())) return null;
+  return `${trimmed}, ${city}`;
+}
+
 export async function searchPlaces(
   query: string,
   options?: SearchPlacesOptions,
@@ -417,14 +428,32 @@ export async function searchPlaces(
         .filter(Boolean)
         .pop() ?? trimmed;
 
-    const [photonResults, meteoResults] = await Promise.all([
-      searchPhoton(biasedQuery, countryCode, options?.near, usState),
+    const countryQuery = appendCountryToQuery(trimmed, countryCode);
+    const cityAugmented =
+      countryCode === "US" ? augmentUsQueryWithCityHint(trimmed, options?.cityHint) : null;
+    const cityAugmentedBiased =
+      countryCode === "US" && cityAugmented && usState
+        ? appendUsStateToQuery(appendCountryToQuery(cityAugmented, countryCode), usState)
+        : cityAugmented
+          ? appendCountryToQuery(cityAugmented, countryCode)
+          : null;
+
+    const photonQueries = [
+      biasedQuery,
+      cityAugmentedBiased,
+      countryQuery !== biasedQuery ? countryQuery : null,
+    ].filter((q): q is string => Boolean(q && q.trim()));
+
+    const [photonBatches, meteoResults] = await Promise.all([
+      Promise.all(
+        photonQueries.map((q) => searchPhoton(q, countryCode, options?.near, usState)),
+      ),
       searchOpenMeteo(cityFragment, countryCode),
     ]);
 
     const merged = sortSuggestions(
       filterByCountry(
-        dedupeSuggestions([...usCensus, ...photonResults, ...meteoResults]),
+        dedupeSuggestions([...usCensus, ...photonBatches.flat(), ...meteoResults]),
         countryCode,
       ),
       trimmed,
@@ -432,23 +461,7 @@ export async function searchPlaces(
       usState,
     );
 
-    if (merged.length > 0) return merged.slice(0, 10);
-
-    if (biasedQuery !== trimmed) {
-      const retryPhoton = await searchPhoton(
-        appendCountryToQuery(trimmed, countryCode),
-        countryCode,
-        options?.near,
-        usState,
-      );
-      const retryMerged = sortSuggestions(
-        filterByCountry(dedupeSuggestions([...usCensus, ...retryPhoton]), countryCode),
-        trimmed,
-        countryCode,
-        usState,
-      );
-      if (retryMerged.length > 0) return retryMerged.slice(0, 10);
-    }
+    if (merged.length > 0) return merged.slice(0, 12);
 
     return [];
   } catch {
