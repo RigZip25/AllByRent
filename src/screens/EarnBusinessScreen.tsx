@@ -9,7 +9,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { BottomNav } from "../app/components/BottomNav";
-import { RentanoChatSheet } from "../components/RentanoChat";
 import { getAppMode } from "../lib/appMode";
 import {
   computeEarnBusinessStats,
@@ -107,7 +106,7 @@ export function EarnBusinessScreen({
   onSearch,
   onGarage,
   onStockGarage,
-  onProfile,
+  onMore,
 }: {
   onHome: () => void;
   onRentals: () => void;
@@ -115,8 +114,8 @@ export function EarnBusinessScreen({
   onGarage: () => void;
   onStockGarage: () => void;
   onProfile: () => void;
+  onMore: () => void;
 }) {
-  const [rentanoOpen, setRentanoOpen] = useState(false);
   const mode = getAppMode();
   const stats = useMemo(() => computeEarnBusinessStats(), []);
 
@@ -260,21 +259,14 @@ export function EarnBusinessScreen({
 
       <div className="shrink-0">
         <BottomNav
-          activeTab="none"
+          activeTab="more"
           onHome={onHome}
           onSearch={onSearch}
           onAdd={onStockGarage}
           onGarage={onGarage}
-          onRentano={() => setRentanoOpen(true)}
+          onMore={onMore}
         />
       </div>
-
-      <RentanoChatSheet
-        open={rentanoOpen}
-        onClose={() => setRentanoOpen(false)}
-        defaultView="chat"
-        context={{ screen: "earnBusiness", appMode: mode }}
-      />
     </div>
   );
 }

@@ -3,7 +3,6 @@ import { Bell, ClipboardList, MapPin, ChevronRight } from "lucide-react";
 import { BottomNav } from "./BottomNav";
 import { HomeFeedCard } from "./HomeFeedCard";
 import { GarageLensCard } from "./GarageLensCard";
-import { RentanoChatSheet } from "../../components/RentanoChat";
 import { usePwaUpdate } from "../../hooks/PwaUpdateProvider";
 import { mascotSays } from "../../lib/brand";
 import {
@@ -42,6 +41,7 @@ type HomeFeedProps = {
   onHome: () => void;
   onSearch: () => void;
   onGarage: () => void;
+  onMore: () => void;
   onRentals: () => void;
 };
 
@@ -55,9 +55,9 @@ export function HomeFeed({
   onHome,
   onSearch,
   onGarage,
+  onMore,
   onRentals,
 }: HomeFeedProps) {
-  const [rentanoOpen, setRentanoOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [modeChip, setModeChip] = useState<ModeChip>("all");
   const [lens, setLens] = useState<HomeLens>("feed");
@@ -380,21 +380,14 @@ export function HomeFeed({
 
       <div className="shrink-0">
         <BottomNav
-          activeTab={rentanoOpen ? "rentano" : navTab}
+          activeTab={navTab}
           onHome={onHome}
           onSearch={onSearch}
           onAdd={onStockGarage}
           onGarage={onGarage}
-          onRentano={() => setRentanoOpen(true)}
+          onMore={onMore}
         />
       </div>
-
-      <RentanoChatSheet
-        open={rentanoOpen}
-        onClose={() => setRentanoOpen(false)}
-        defaultView="chat"
-        context={{ screen: variant === "search" ? "search" : "home", appMode: "rent" }}
-      />
     </div>
   );
 }

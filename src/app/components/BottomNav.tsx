@@ -1,11 +1,9 @@
-import { Plus } from "lucide-react";
-import rentanoNavImg from "../../imports/No_back_rentano.png";
-import { MASCOT_NAME } from "../../lib/brand";
+import { Menu, Plus } from "lucide-react";
 
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
 
-export type BottomNavTab = "home" | "search" | "add" | "garage" | "rentano" | "none";
+export type BottomNavTab = "home" | "search" | "add" | "garage" | "more" | "none";
 
 function NavIconHome({ active }: { active?: boolean }) {
   const c = active ? GREEN : "#888";
@@ -58,20 +56,25 @@ function TabLabel({ children, active }: { children: string; active: boolean }) {
   );
 }
 
+function NavIconMore({ active }: { active?: boolean }) {
+  const c = active ? GREEN : "#888";
+  return <Menu className="h-[26px] w-[26px]" style={{ color: c }} strokeWidth={2} aria-hidden="true" />;
+}
+
 export function BottomNav({
   activeTab = "home",
   onHome,
   onSearch,
   onAdd,
   onGarage,
-  onRentano,
+  onMore,
 }: {
   activeTab?: BottomNavTab;
   onHome: () => void;
   onSearch: () => void;
   onAdd: () => void;
   onGarage: () => void;
-  onRentano?: () => void;
+  onMore: () => void;
 }) {
   return (
     <div
@@ -129,19 +132,12 @@ export function BottomNav({
 
         <button
           type="button"
-          onClick={onRentano}
+          onClick={onMore}
           className="flex min-w-[52px] flex-col items-center gap-1 py-1"
-          aria-label={`Open ${MASCOT_NAME}`}
+          aria-label="More — account and settings"
         >
-          <div className="flex h-[30px] w-[30px] items-center justify-center overflow-hidden rounded-full">
-            <img
-              src={rentanoNavImg}
-              alt=""
-              className="h-full w-full object-contain object-center"
-              draggable={false}
-            />
-          </div>
-          <TabLabel active={activeTab === "rentano"}>Mr.E</TabLabel>
+          <NavIconMore active={activeTab === "more"} />
+          <TabLabel active={activeTab === "more"}>More</TabLabel>
         </button>
       </div>
     </div>
