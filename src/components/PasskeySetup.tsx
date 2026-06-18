@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ScanFace } from "lucide-react";
+import { ScanFace, X } from "lucide-react";
 import { dismissEnablePasskeyPrompt, enrollPasskey } from "../lib/auth";
 import { formatPasskeyError } from "../lib/passkeyErrors";
 import { getPasskeyEnvironmentHint } from "../lib/passkeyEnvironment";
@@ -41,12 +41,24 @@ export function PasskeySetup({
   };
 
   return (
-    <div className="fixed inset-0 z-[95] flex items-end justify-center bg-black/45 p-4">
+    <div
+      className="fixed inset-0 z-[95] flex items-end justify-center bg-black/45 p-4"
+      onClick={handleLater}
+    >
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-[390px] rounded-3xl bg-white p-5 shadow-2xl"
+        className="relative w-full max-w-[390px] rounded-3xl bg-white p-5 shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
       >
+        <button
+          type="button"
+          onClick={handleLater}
+          className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#374151]"
+          aria-label="Close"
+        >
+          <X className="h-5 w-5" />
+        </button>
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gray-200" />
         <div className="flex items-center gap-2">
           <ScanFace className="h-6 w-6" style={{ color: GREEN }} />

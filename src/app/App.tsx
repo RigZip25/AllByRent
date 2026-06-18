@@ -112,9 +112,12 @@ function screenToAuthIntent(screen: Screen): AuthIntent {
 
 /** When nav stack is empty, in-app Back still returns to the prior onboarding step. */
 const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
+  firstHello: "splash",
+  whatDoYouWant: "firstHello",
   whereAreYou: "firstHello",
   whereAreYouManual: "whereAreYou",
   whereAreYouHeading: "whereAreYou",
+  onboardingAllSet: "whereAreYou",
 };
 
 /** Listing flow only — used when the nav stack is empty (not onboarding fallbacks). */
@@ -696,7 +699,11 @@ function AppRoutes() {
         )}
 
         {currentScreen === "firstHello" && (
-          <FirstHello onNext={handleContinueFromHello} onSkip={skipOnboarding} />
+          <FirstHello
+            onNext={handleContinueFromHello}
+            onSkip={skipOnboarding}
+            onBack={handleBack}
+          />
         )}
 
         {currentScreen === "whatDoYouWant" && (
@@ -737,7 +744,11 @@ function AppRoutes() {
         )}
 
         {currentScreen === "onboardingAllSet" && (
-          <YouAreAllSet onExplore={finishOnboardingToHome} />
+          <YouAreAllSet
+            onExplore={finishOnboardingToHome}
+            onBack={handleBack}
+            onSkip={finishOnboardingToHome}
+          />
         )}
 
         {currentScreen === "home" && (
@@ -978,6 +989,7 @@ function AppRoutes() {
         open={authGateOpen}
         intent={authIntent}
         initialStep={peekPendingAuthEmail() ? "sent" : undefined}
+        onDismiss={() => setAuthGateOpen(false)}
       />
 
       <PasskeySetup open={passkeySetupOpen} onDone={() => setPasskeySetupOpen(false)} />

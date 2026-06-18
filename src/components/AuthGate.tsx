@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Apple, Chrome, Fingerprint, Mail, ScanFace } from "lucide-react";
+import { Apple, Chrome, Fingerprint, Mail, ScanFace, X } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
 import { APP_NAME, mascotSays, MASCOT_NAME } from "../lib/brand";
 import type { AuthIntent } from "../lib/authReturn";
@@ -60,10 +60,12 @@ export function AuthGate({
   open,
   intent = "generic",
   initialStep,
+  onDismiss,
 }: {
   open: boolean;
   intent?: AuthIntent;
   initialStep?: Step;
+  onDismiss?: () => void;
 }) {
   const { configured } = useAuth();
   const copy = INTENT_COPY[intent];
@@ -192,12 +194,27 @@ export function AuthGate({
   };
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/45 p-4">
+    <div
+      className="fixed inset-0 z-[90] flex items-end justify-center bg-black/45 p-4"
+      onClick={() => onDismiss?.()}
+    >
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-[390px] max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl"
+        className="relative w-full max-w-[390px] max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
       >
+        {onDismiss ? (
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#374151]"
+            aria-label="Close sign-in"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        ) : null}
+
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gray-200" />
 
         <RentanoTip message={copy.rentano} className="mb-1" />

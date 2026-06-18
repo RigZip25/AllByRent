@@ -421,6 +421,7 @@ export function ListingWizard({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            onClick={() => setShowDiscardDialog(false)}
           >
             <motion.div
               role="dialog"
@@ -430,6 +431,7 @@ export function ListingWizard({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(event) => event.stopPropagation()}
             >
               <h2
                 id="discard-listing-title"

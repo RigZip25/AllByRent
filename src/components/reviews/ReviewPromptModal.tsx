@@ -24,12 +24,16 @@ export function ReviewPromptModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[95] flex items-end justify-center bg-black/45 p-4">
+    <div
+      className="fixed inset-0 z-[95] flex items-end justify-center bg-black/45 p-4"
+      onClick={onClose}
+    >
       <div
         role="dialog"
         aria-modal="true"
         className="w-full max-w-[420px] rounded-3xl border bg-white p-5 shadow-2xl"
         style={{ borderColor: BORDER }}
+        onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
