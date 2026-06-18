@@ -13,6 +13,11 @@ import {
   queryHasUsCityHint,
   US_STATE_BBOX,
 } from "./usStates";
+import {
+  isUsZipQuery,
+  queryLooksLikeStreet,
+  type LocationSearchGranularity,
+} from "./locationQuery";
 
 export type LocationSuggestion = {
   label: string;
@@ -33,6 +38,10 @@ export type SearchPlacesOptions = {
   countryCode?: CountryCode;
   /** US only — e.g. AR */
   usState?: string | null;
+  /** City from saved home — helps partial street search. */
+  cityHint?: string | null;
+  /** `area` = ZIP / city only (no street required). `any` = include street-level Census. */
+  granularity?: LocationSearchGranularity;
 };
 
 type PhotonProperties = {
@@ -161,6 +170,31 @@ function parsePhotonFeature(feature: PhotonFeature): LocationSuggestion | null {
 
   const props = feature.properties;
   const countryCode = (props.countrycode ?? "").toUpperCase();
+  const zipName = props.name?.trim() ?? "";
+  if (
+    countryCode === "US" &&
+    props.osm_value === "postcode" &&
+    /^\d{5}$/.test(zipName)
+  ) {
+    const stateLabel = abbreviateUsState(props.state ?? "");
+    const place = props.city || props.county || "";
+    return {
+      label: place
+        ? `ZIP ${zipName} — ${place}, ${stateLabel}`
+        : `ZIP ${zipName}, ${stateLabel}`,
+      primaryLine: `ZIP ${zipName}`,
+      secondaryLine: [place, stateLabel].filter(Boolean).join(", "),
+      city: place || zipName,
+      country: props.country ?? "United States",
+      region: stateLabel,
+      countryCode: "US",
+      flag: countryCodeToFlag("US"),
+      lat,
+      lng,
+      precision: "postcode",
+    };
+  }
+
   const hasStreet = Boolean(props.street || props.housenumber);
   if (
     countryCode === "US" &&
@@ -174,7 +208,9 @@ function parsePhotonFeature(feature: PhotonFeature): LocationSuggestion | null {
     formatPhotonAddress(props);
   if (!label) return null;
 
-  if (countryCode === "US" && !city && !props.postcode) return null;
+  if (countryCode === "US" && !city && !props.postcode && props.osm_value !== "postcode") {
+    return null;
+  }
 
   const stateLabel = countryCode === "US" ? abbreviateUsState(region) : region;
 
@@ -323,9 +359,19 @@ function rankSuggestion(
   query: string,
   preferredCountry: CountryCode,
   preferredUsState?: string | null,
+  granularity: LocationSearchGranularity = "any",
 ): number {
   const precision = PRECISION_RANK[item.precision] ?? 12;
   let score = precision;
+
+  if (granularity === "area") {
+    if (item.precision === "postcode") score -= 14;
+    else if (item.precision === "city" || item.precision === "town" || item.precision === "village") {
+      score -= 10;
+    } else if (item.precision === "house" || item.precision === "building") {
+      score += 12;
+    }
+  }
 
   if (item.precision === "house" && preferredCountry === "US") score -= 4;
 
@@ -363,11 +409,12 @@ function sortSuggestions(
   query: string,
   countryCode: CountryCode,
   preferredUsState?: string | null,
+  granularity: LocationSearchGranularity = "any",
 ): LocationSuggestion[] {
   return [...items].sort(
     (a, b) =>
-      rankSuggestion(a, query, countryCode, preferredUsState) -
-      rankSuggestion(b, query, countryCode, preferredUsState),
+      rankSuggestion(a, query, countryCode, preferredUsState, granularity) -
+      rankSuggestion(b, query, countryCode, preferredUsState, granularity),
   );
 }
 
@@ -383,10 +430,49 @@ function dedupeSuggestions(items: LocationSuggestion[]): LocationSuggestion[] {
   return out;
 }
 
-export function minQueryLength(query: string): number {
+export function minQueryLength(
+  query: string,
+  granularity: LocationSearchGranularity = "any",
+): number {
   const trimmed = query.trim();
+  if (/^\d{5}(-\d{4})?$/.test(trimmed)) return 5;
+  if (granularity === "area" && /^\d+$/.test(trimmed)) return 5;
   if (/^\d/.test(trimmed)) return 2;
   return 3;
+}
+
+async function searchUsZipCode(
+  zip: string,
+  usState?: string | null,
+): Promise<LocationSuggestion[]> {
+  const zip5 = zip.trim().slice(0, 5);
+  const [photonResults, meteoResults] = await Promise.all([
+    searchPhoton(zip5, "US", undefined, usState),
+    searchOpenMeteo(zip5, "US"),
+  ]);
+
+  let results = dedupeSuggestions([...photonResults, ...meteoResults]).filter(
+    (item) => item.precision === "postcode" || item.precision === "city",
+  );
+
+  if (usState) {
+    results = filterMatchesByUsState(results, usState);
+  }
+
+  if (results.length === 0 && meteoResults.length > 0) {
+    results = meteoResults;
+  }
+
+  return results;
+}
+
+function augmentUsQueryWithCityHint(query: string, cityHint?: string | null): string | null {
+  const trimmed = query.trim();
+  if (!cityHint?.trim() || trimmed.includes(",")) return null;
+  const city = cityHint.split(",")[0]?.trim();
+  if (!city || city.length < 2) return null;
+  if (trimmed.toLowerCase().includes(city.toLowerCase())) return null;
+  return `${trimmed}, ${city}`;
 }
 
 export async function searchPlaces(
@@ -394,7 +480,8 @@ export async function searchPlaces(
   options?: SearchPlacesOptions,
 ): Promise<LocationSuggestion[]> {
   const trimmed = query.trim();
-  if (trimmed.length < minQueryLength(trimmed)) return [];
+  const granularity = options?.granularity ?? "any";
+  if (trimmed.length < minQueryLength(trimmed, granularity)) return [];
 
   const countryCode = options?.countryCode ?? getSearchCountryCode();
   const usState =
@@ -407,8 +494,17 @@ export async function searchPlaces(
       : appendCountryToQuery(trimmed, countryCode);
 
   try {
+    if (countryCode === "US" && isUsZipQuery(trimmed)) {
+      const zipResults = await searchUsZipCode(trimmed, usState);
+      if (zipResults.length > 0) return zipResults.slice(0, 8);
+    }
+
+    const areaMode = granularity === "area";
+    const streetSearch = queryLooksLikeStreet(trimmed);
     const usCensus =
-      countryCode === "US" ? await searchUsAddresses(trimmed, usState) : [];
+      countryCode === "US" && (!areaMode || streetSearch)
+        ? await searchUsAddresses(trimmed, usState)
+        : [];
 
     const cityFragment =
       trimmed
@@ -417,38 +513,41 @@ export async function searchPlaces(
         .filter(Boolean)
         .pop() ?? trimmed;
 
-    const [photonResults, meteoResults] = await Promise.all([
-      searchPhoton(biasedQuery, countryCode, options?.near, usState),
+    const countryQuery = appendCountryToQuery(trimmed, countryCode);
+    const cityAugmented =
+      countryCode === "US" ? augmentUsQueryWithCityHint(trimmed, options?.cityHint) : null;
+    const cityAugmentedBiased =
+      countryCode === "US" && cityAugmented && usState
+        ? appendUsStateToQuery(appendCountryToQuery(cityAugmented, countryCode), usState)
+        : cityAugmented
+          ? appendCountryToQuery(cityAugmented, countryCode)
+          : null;
+
+    const photonQueries = [
+      biasedQuery,
+      cityAugmentedBiased,
+      countryQuery !== biasedQuery ? countryQuery : null,
+    ].filter((q): q is string => Boolean(q && q.trim()));
+
+    const [photonBatches, meteoResults] = await Promise.all([
+      Promise.all(
+        photonQueries.map((q) => searchPhoton(q, countryCode, options?.near, usState)),
+      ),
       searchOpenMeteo(cityFragment, countryCode),
     ]);
 
     const merged = sortSuggestions(
       filterByCountry(
-        dedupeSuggestions([...usCensus, ...photonResults, ...meteoResults]),
+        dedupeSuggestions([...usCensus, ...photonBatches.flat(), ...meteoResults]),
         countryCode,
       ),
       trimmed,
       countryCode,
       usState,
+      granularity,
     );
 
-    if (merged.length > 0) return merged.slice(0, 10);
-
-    if (biasedQuery !== trimmed) {
-      const retryPhoton = await searchPhoton(
-        appendCountryToQuery(trimmed, countryCode),
-        countryCode,
-        options?.near,
-        usState,
-      );
-      const retryMerged = sortSuggestions(
-        filterByCountry(dedupeSuggestions([...usCensus, ...retryPhoton]), countryCode),
-        trimmed,
-        countryCode,
-        usState,
-      );
-      if (retryMerged.length > 0) return retryMerged.slice(0, 10);
-    }
+    if (merged.length > 0) return merged.slice(0, 12);
 
     return [];
   } catch {

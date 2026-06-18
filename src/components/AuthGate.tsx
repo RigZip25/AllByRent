@@ -475,8 +475,9 @@ export function AuthGate({
               </div>
               <div className="mt-3">
                 <AddressLocationPicker
-                  placeholder="City + State (US) or City + Country"
-                  emptyHint="Type your city, then pick it from the list."
+                  variant="area"
+                  placeholder="ZIP code or city, state"
+                  emptyHint="ZIP (e.g. 72701) or city — Fayetteville, AR"
                   selected={location}
                   onSelect={setLocation}
                   onClear={() => setLocation(null)}

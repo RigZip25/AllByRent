@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
+const CENSUS_BASE = "https://geocoding.geo.census.gov/geocoder";
+
 /** Proxy US Census geocoder — browser cannot call census.gov directly (no CORS). */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const origin = typeof req.headers.origin === "string" ? req.headers.origin : "*";
@@ -16,20 +18,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const address = req.query.address;
-  if (typeof address !== "string" || !address.trim()) {
-    return res.status(400).json({ error: "Missing address query parameter" });
+  const benchmark =
+    typeof req.query.benchmark === "string" ? req.query.benchmark : "Public_AR_Current";
+  const format = "json";
+
+  const street = typeof req.query.street === "string" ? req.query.street.trim() : "";
+  const city = typeof req.query.city === "string" ? req.query.city.trim() : "";
+  const state = typeof req.query.state === "string" ? req.query.state.trim() : "";
+  const zip = typeof req.query.zip === "string" ? req.query.zip.trim() : "";
+
+  let upstream: URL;
+  if (street) {
+    upstream = new URL(`${CENSUS_BASE}/locations/address`);
+    upstream.searchParams.set("street", street);
+    if (city) upstream.searchParams.set("city", city);
+    if (state) upstream.searchParams.set("state", state);
+    if (zip) upstream.searchParams.set("zip", zip);
+  } else {
+    const address = req.query.address;
+    if (typeof address !== "string" || !address.trim()) {
+      return res.status(400).json({ error: "Missing address or street query parameter" });
+    }
+    upstream = new URL(`${CENSUS_BASE}/locations/onelineaddress`);
+    upstream.searchParams.set("address", address.trim());
   }
 
-  const upstream = new URL(
-    "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress",
-  );
-  upstream.searchParams.set("address", address.trim());
-  upstream.searchParams.set(
-    "benchmark",
-    typeof req.query.benchmark === "string" ? req.query.benchmark : "Public_AR_Current",
-  );
-  upstream.searchParams.set("format", "json");
+  upstream.searchParams.set("benchmark", benchmark);
+  upstream.searchParams.set("format", format);
 
   try {
     const response = await fetch(upstream.toString());

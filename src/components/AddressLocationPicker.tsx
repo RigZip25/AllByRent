@@ -4,6 +4,7 @@ import {
   searchPlaces,
   type LocationSuggestion,
 } from "../lib/geocoding";
+import type { LocationSearchGranularity } from "../lib/locationQuery";
 import { getHomeLocation } from "../lib/listingStorage";
 import {
   COUNTRY_OPTIONS,
@@ -28,6 +29,8 @@ type AddressLocationPickerProps = {
   selected: LocationSuggestion | null;
   onClear: () => void;
   near?: { lat: number; lng: number };
+  /** `area` = ZIP or city (default). `address` = street-level also allowed. */
+  variant?: "area" | "address";
 };
 
 export function AddressLocationPicker({
@@ -37,7 +40,9 @@ export function AddressLocationPicker({
   selected,
   onClear,
   near,
+  variant = "area",
 }: AddressLocationPickerProps) {
+  const granularity: LocationSearchGranularity = variant === "area" ? "area" : "any";
   const COUNTRY_GROUPS: { label: string; codes: CountryCode[] }[] = [
     { label: "North America", codes: ["US", "CA"] },
     { label: "Europe", codes: ["GB", "FR", "DE", "PL", "UA"] },
@@ -45,6 +50,11 @@ export function AddressLocationPicker({
     { label: "Middle East", codes: ["IL"] },
     { label: "Oceania", codes: ["AU"] },
   ];
+  const homeCityHint = useMemo(() => {
+    const home = getHomeLocation();
+    return home?.displayName?.trim() || null;
+  }, []);
+
   const homeCoords = useMemo(() => {
     const home = getHomeLocation();
     return home ? { lat: home.lat, lng: home.lng } : near;
@@ -70,7 +80,7 @@ export function AddressLocationPicker({
 
   useEffect(() => {
     const trimmed = inputValue.trim();
-    if (trimmed.length < minQueryLength(trimmed)) {
+    if (trimmed.length < minQueryLength(trimmed, granularity)) {
       setSuggestions([]);
       setIsLoading(false);
       setSearchError(false);
@@ -103,6 +113,8 @@ export function AddressLocationPicker({
         near: searchNear,
         countryCode,
         usState: effectiveState,
+        cityHint: homeCityHint,
+        granularity,
       });
       setSuggestions(results);
       setShowSuggestions(results.length > 0);
@@ -111,7 +123,7 @@ export function AddressLocationPicker({
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [inputValue, searchNear?.lat, searchNear?.lng, countryCode, usState, limitToUsState]);
+  }, [inputValue, searchNear?.lat, searchNear?.lng, countryCode, usState, limitToUsState, homeCityHint, granularity]);
 
   const handleCountryChange = (code: CountryCode) => {
     setCountryCode(code);
@@ -151,7 +163,9 @@ export function AddressLocationPicker({
             <p className="mt-1 text-sm text-gray-700">{selected.secondaryLine}</p>
           ) : null}
           <p className="mt-1 text-xs text-gray-500">
-            Rentals sorted nearest to this spot
+            {variant === "area"
+              ? "Listings shown near this ZIP or city"
+              : "Rentals sorted nearest to this spot"}
           </p>
         </div>
         <button
@@ -225,25 +239,33 @@ export function AddressLocationPicker({
         value={inputValue}
         onChange={(e) => {
           setInputValue(e.target.value);
-          setShowSuggestions(e.target.value.trim().length >= minQueryLength(e.target.value));
+          setShowSuggestions(e.target.value.trim().length >= minQueryLength(e.target.value, granularity));
         }}
         onFocus={() => {
-          if (inputValue.trim().length >= minQueryLength(inputValue) && suggestions.length > 0) {
+          if (inputValue.trim().length >= minQueryLength(inputValue, granularity) && suggestions.length > 0) {
             setShowSuggestions(true);
           }
         }}
         onBlur={() => setTimeout(() => setShowSuggestions(false), 300)}
         placeholder={placeholder}
         className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-base outline-none focus:border-green-700"
-        autoComplete="street-address"
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck={false}
+        name="allbyrent-address-search"
+        data-1p-ignore
+        data-lpignore="true"
         enterKeyHint="search"
       />
 
       <p className="text-center text-xs text-gray-400">
         {countryCode === "US"
-          ? limitToUsState && usState
-            ? `Searching in ${usState} — try “Fayetteville, ${usState}” or a street + city`
-            : "Tip: city + state works best — e.g. “Fayetteville, AR” or “123 Main St, Hot Springs, AR”"
+          ? variant === "area"
+            ? "ZIP code is best — e.g. 71909 — or city: Hot Springs Village, AR"
+            : limitToUsState && usState
+              ? `Searching in ${usState} — include ZIP when possible`
+              : "Full address optional — ZIP or city works too"
           : `Searching in ${activeCountry.flag} ${activeCountry.label}`}
       </p>
 
@@ -255,7 +277,7 @@ export function AddressLocationPicker({
       ) : null}
 
       {isLoading ? (
-        <p className="text-center text-xs text-gray-500">Finding addresses…</p>
+        <p className="text-center text-xs text-gray-500">Searching ZIP and city database…</p>
       ) : null}
 
       {showAutocomplete ? (
@@ -289,17 +311,20 @@ export function AddressLocationPicker({
         </ul>
       ) : null}
 
-      {!isLoading && searchError && inputValue.trim().length >= minQueryLength(inputValue) ? (
+      {!isLoading && searchError && inputValue.trim().length >= minQueryLength(inputValue, granularity) ? (
         <p className="text-center text-xs leading-relaxed text-gray-500">
-          No exact address in the database. Try full format with ZIP, e.g.{" "}
-          <strong>19 Gozar Ln, Hot Springs Village, AR 71909</strong>
-          {countryCode === "US" && usState ? (
+          {variant === "area" ? (
             <>
-              {" "}
-              — or type only your city: <strong>Fayetteville, {usState}</strong> and pick
-              it from the list.
+              Try your <strong>5-digit ZIP</strong> (e.g. <strong>71909</strong>) or{" "}
+              <strong>city + state</strong> (e.g. <strong>Hot Springs Village, AR</strong>). Street
+              address is not required.
             </>
-          ) : null}
+          ) : (
+            <>
+              Address not found. Try ZIP <strong>71909</strong> or city{" "}
+              <strong>Hot Springs Village, AR</strong>
+            </>
+          )}
         </p>
       ) : null}
 
