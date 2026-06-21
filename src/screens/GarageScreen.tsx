@@ -50,7 +50,7 @@ export function GarageScreen({ onNavigate, onStockGarage, onViewShop }: GarageSc
             style={{ borderColor: "#E8E6E0", color: GREEN_DARK }}
           >
             <Store className="h-4 w-4" />
-            Shop
+            Active sale
           </button>
           <button
             type="button"

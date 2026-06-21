@@ -591,10 +591,10 @@ function AppRoutes() {
     [navigateTo],
   );
 
-  const handleOpenGarageShopPreview = useCallback(() => {
+  const handleOpenMyGarageShop = useCallback(() => {
     const hostId = resolveHostAccountId(auth.userId);
     setSelectedNeighborGarageHostId(hostId);
-    setGarageShopPreview(true);
+    setGarageShopPreview(false);
     navigateTo("garageShop");
   }, [auth.userId, navigateTo]);
 
@@ -795,6 +795,12 @@ function AppRoutes() {
         setCurrentScreen("garageShop");
         return stack;
       }
+      if (currentScreen === "garageShop") {
+        setGarageShopPreview(false);
+        const ownHostId = resolveHostAccountId(auth.userId);
+        setCurrentScreen(selectedNeighborGarageHostId === ownHostId ? "garage" : "yardSales");
+        return stack;
+      }
       if (currentScreen === "snapSale") {
         setCurrentScreen("openGarageSale");
         return stack;
@@ -842,7 +848,7 @@ function AppRoutes() {
       setCurrentScreen("browseHub");
       return stack;
     });
-  }, [currentScreen]);
+  }, [auth.userId, currentScreen, selectedNeighborGarageHostId]);
 
   useEffect(() => {
     if (!auth.configured) return;
@@ -1048,7 +1054,7 @@ function AppRoutes() {
           <OpenGarageSaleScreen
             onBack={openYardSaleHub}
             onAddSaleItems={handleStartYardSaleListing}
-            onOpenMyGarage={handleOpenGarageShopPreview}
+            onOpenMyGarage={handleOpenMyGarageShop}
             onViewSaleRules={handleOpenGarageSaleRules}
           />
         )}
@@ -1074,7 +1080,7 @@ function AppRoutes() {
         {currentScreen === "snapSale" && (
           <SnapSaleScreen
             onBack={handleBack}
-            onViewShop={handleOpenGarageShopPreview}
+            onViewShop={handleOpenMyGarageShop}
           />
         )}
 
@@ -1104,7 +1110,7 @@ function AppRoutes() {
           <GarageScreen
             onNavigate={handleNavigate}
             onStockGarage={handleStartListing}
-            onViewShop={handleOpenGarageShopPreview}
+            onViewShop={handleOpenMyGarageShop}
           />
         )}
 
@@ -1116,7 +1122,7 @@ function AppRoutes() {
             onOpenCart={handleOpenGarageCart}
             onOpenWinnerCheckout={handleOpenWinnerCheckout}
             onOpenHostOffers={
-              garageShopPreview || selectedNeighborGarageHostId !== resolveHostAccountId(auth.userId)
+              selectedNeighborGarageHostId !== resolveHostAccountId(auth.userId)
                 ? undefined
                 : handleOpenHostOffers
             }

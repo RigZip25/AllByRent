@@ -264,12 +264,10 @@ export function ActiveGarageShopScreen({
         >
           <Store className="h-4 w-4 shrink-0" aria-hidden />
           {preview
-            ? "Shop preview — neighbors see photo + price, Buy now or Bid, and a shared cart."
-            : preview
-              ? "Shop preview — neighbors see photo + price, offers, and buy now."
-              : isOwnGarage
-                ? "Tap Edit on any item — photo, price, or remove from shelf."
-                : auctionCopy.shopBanner}
+            ? "Neighbor view — photo, price, buy now or bid."
+            : isOwnGarage
+              ? "Tap Edit on any item — photo, price, or remove from shelf."
+              : auctionCopy.shopBanner}
         </div>
 
         {!preview && pendingWins.length > 0 ? (
