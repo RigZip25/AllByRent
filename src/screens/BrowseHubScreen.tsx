@@ -9,7 +9,7 @@ const BORDER = "#E8E6E0";
 
 const { browseHub: copy } = ONBOARDING;
 
-type HubChoice = "findGear" | "yardSales" | "neighborGarages" | "stockGarage";
+type HubChoice = "findGear" | "yardSales" | "stockGarage";
 
 type BrowseHubScreenProps = {
   onChoose: (choice: HubChoice) => void;
@@ -126,14 +126,6 @@ export function BrowseHubScreen({ onChoose, onEditLocation }: BrowseHubScreenPro
           subtitle={copy.yardSales.subtitle}
           ctaLabel={copy.yardSales.cta}
           onClick={() => onChoose("yardSales")}
-        />
-        <HubCard
-          variant="neutral"
-          emoji="🏘️"
-          title={copy.neighborGarages.title}
-          subtitle={copy.neighborGarages.subtitle}
-          ctaLabel={copy.neighborGarages.cta}
-          onClick={() => onChoose("neighborGarages")}
         />
         <HubCard
           variant="neutral"

@@ -258,7 +258,8 @@ export function HomeFeed({
           </div>
           {!isSearchActive ? (
             <p className="mt-1.5 pl-8 text-[13px] text-gray-500">
-              Search rentals on Home — tap a category or type above
+              Search above, or switch <strong className="font-semibold text-gray-600">Feed</strong> /{" "}
+              <strong className="font-semibold text-gray-600">Garages</strong> below
             </p>
           ) : null}
         </div>

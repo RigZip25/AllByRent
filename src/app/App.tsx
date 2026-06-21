@@ -78,7 +78,7 @@ import {
   saveHomeFeedQuery,
 } from "../lib/homeFeedStorage";
 
-type BrowseHubChoice = "findGear" | "yardSales" | "neighborGarages" | "stockGarage";
+type BrowseHubChoice = "findGear" | "yardSales" | "stockGarage";
 
 type Screen =
   | "splash"
@@ -487,12 +487,6 @@ function AppRoutes() {
       }
       if (choice === "yardSales") {
         navigateTo("yardSales");
-        return;
-      }
-      if (choice === "neighborGarages") {
-        saveHomeFeedLens("garages");
-        saveHomeFeedMode("all");
-        navigateTo("home");
         return;
       }
       setListingPrefill(null);
