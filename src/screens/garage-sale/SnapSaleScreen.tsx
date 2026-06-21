@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from "react";
-import { ArrowLeft, Camera, Gavel, Loader2, ShoppingBag, Tag } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, Camera, Loader2, ShoppingBag, Tag } from "lucide-react";
 import { BRAND_AMBER, BRAND_GREEN, MASCOT_NAME, ONBOARDING } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
@@ -12,12 +12,12 @@ import { applyFrictionlessDefaults } from "../listing/frictionlessDefaults";
 import { createInitialListingDraft } from "../listing/types";
 import { applyYardSaleListingDefaults } from "../../lib/yardSaleListing";
 import {
-  defaultAuctionEndsAt,
-  defaultStartingBid,
+  buildInitialOfferPrefs,
+  defaultAuctionOfferWindow,
   setGarageSaleOfferPrefs,
-  type GarageSaleOfferPrefs,
 } from "../../lib/garageSaleOfferStorage";
-import type { ShopOfferKind } from "../../lib/garageShopStorage";
+import type { GarageListingSaleMode } from "../../lib/garageSaleOfferStorage";
+import { formatAuctionWindowLabel } from "../../lib/garageAuctionWindow";
 import { garageSaleOpenLabel, getGarageSaleSchedule } from "../../lib/garageSaleStorage";
 
 const GREEN = BRAND_GREEN;
@@ -31,7 +31,7 @@ type SnapSaleScreenProps = {
   onViewShop: () => void;
 };
 
-type PricingMode = ShopOfferKind;
+type SaleMode = GarageListingSaleMode;
 
 async function createThumbnail(blob: Blob): Promise<Blob> {
   const bitmap = await createImageBitmap(blob);
@@ -73,27 +73,29 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
 
   const [photo, setPhoto] = useState<MediaRef | null>(null);
   const [note, setNote] = useState("");
-  const [pricingMode, setPricingMode] = useState<PricingMode>("buy_now");
+  const [saleMode, setSaleMode] = useState<SaleMode>("open");
   const [price, setPrice] = useState("");
-  const [startingBid, setStartingBid] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [justPublished, setJustPublished] = useState(false);
   const [shelfCount, setShelfCount] = useState(0);
+  const [scheduleTick, setScheduleTick] = useState(0);
+
+  useEffect(() => {
+    const sync = () => setScheduleTick((tick) => tick + 1);
+    window.addEventListener("evorios-garage-schedule", sync);
+    return () => window.removeEventListener("evorios-garage-schedule", sync);
+  }, []);
 
   const openHours = garageSaleOpenLabel(getGarageSaleSchedule());
+  const auctionWindowLabel = useMemo(() => {
+    void scheduleTick;
+    return formatAuctionWindowLabel(defaultAuctionOfferWindow());
+  }, [scheduleTick]);
   const hasPhoto = Boolean(photo);
   const priceUsd = Number.parseFloat(price.replace(/[^0-9.]/g, ""));
-  const bidUsd = Number.parseFloat(startingBid.replace(/[^0-9.]/g, ""));
 
-  const canPublish =
-    hasPhoto &&
-    !busy &&
-    (pricingMode === "buy_now"
-      ? Number.isFinite(priceUsd) && priceUsd > 0
-      : pricingMode === "auction"
-        ? Number.isFinite(bidUsd) && bidUsd > 0
-        : Number.isFinite(priceUsd) && priceUsd > 0 && Number.isFinite(bidUsd) && bidUsd > 0);
+  const canPublish = hasPhoto && !busy && Number.isFinite(priceUsd) && priceUsd > 0;
 
   const ingestFile = useCallback(async (file: File) => {
     setError(null);
@@ -136,8 +138,6 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
     window.setTimeout(() => {
       const hostId = resolveHostAccountId(auth.userId);
       const title = note.trim().slice(0, 60) || copy.defaultTitle;
-      const buyNow =
-        pricingMode === "auction" ? bidUsd : priceUsd;
       const draft = applyYardSaleListingDefaults(
         applyFrictionlessDefaults({
           ...createInitialListingDraft(),
@@ -147,24 +147,14 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
           description: note.trim(),
           pricing: {
             ...createInitialListingDraft().pricing,
-            salePrice: String(buyNow),
+            salePrice: String(priceUsd),
           },
           listingStatus: "active",
           generateQR: false,
         }),
       );
 
-      const offerPrefs: GarageSaleOfferPrefs = {
-        kind: pricingMode,
-        startingBidUsd:
-          pricingMode === "buy_now"
-            ? defaultStartingBid(priceUsd)
-            : pricingMode === "both"
-              ? bidUsd
-              : bidUsd,
-        endsAt: defaultAuctionEndsAt(),
-      };
-      setGarageSaleOfferPrefs(draft.id, offerPrefs);
+      setGarageSaleOfferPrefs(draft.id, buildInitialOfferPrefs({ saleMode, buyNowUsd: priceUsd }));
 
       if (auth.userId) {
         void savePublishedListingRemote(draft, auth.userId);
@@ -184,7 +174,6 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
       setPhoto(null);
       setNote("");
       setPrice("");
-      setStartingBid("");
       setBusy(false);
     }, 400);
   };
@@ -349,22 +338,21 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
           </label>
 
           <p className="mt-4 text-xs font-semibold text-gray-700">{copy.pricingLabel}</p>
-          <div className="mt-2 grid grid-cols-3 gap-1.5">
+          <div className="mt-2 grid grid-cols-2 gap-2">
             {(
               [
-                { id: "buy_now" as const, label: copy.modeBuy, icon: ShoppingBag },
-                { id: "auction" as const, label: copy.modeBid, icon: Gavel },
-                { id: "both" as const, label: copy.modeBoth, icon: Tag },
+                { id: "quick" as const, label: copy.modeQuick, icon: ShoppingBag },
+                { id: "open" as const, label: copy.modeOpen, icon: Tag },
               ] as const
             ).map((mode) => {
-              const selected = pricingMode === mode.id;
+              const selected = saleMode === mode.id;
               const Icon = mode.icon;
               return (
                 <button
                   key={mode.id}
                   type="button"
-                  onClick={() => setPricingMode(mode.id)}
-                  className="flex flex-col items-center gap-1 rounded-xl border px-1 py-2.5 text-center"
+                  onClick={() => setSaleMode(mode.id)}
+                  className="flex flex-col items-center gap-1 rounded-xl border px-2 py-2.5 text-center"
                   style={{
                     borderColor: selected ? AMBER : BORDER,
                     backgroundColor: selected ? `${AMBER}18` : "#fff",
@@ -377,46 +365,44 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
             })}
           </div>
 
-          {pricingMode !== "auction" ? (
-            <label className="mt-3 block">
-              <span className="text-xs font-medium text-gray-500">
-                {pricingMode === "both" ? copy.buyNowLabel : copy.priceLabel}
-              </span>
-              <div className="relative mt-1">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={price}
-                  onChange={(event) => setPrice(event.target.value)}
-                  placeholder="12"
-                  className="w-full rounded-xl border bg-white py-3 pl-7 pr-3 text-lg font-bold"
-                  style={{ borderColor: BORDER, color: GREEN }}
-                />
-              </div>
-            </label>
-          ) : null}
+          <label className="mt-3 block">
+            <span className="text-xs font-medium text-gray-500">{copy.priceLabel}</span>
+            <div className="relative mt-1">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={price}
+                onChange={(event) => setPrice(event.target.value)}
+                placeholder="12"
+                className="w-full rounded-xl border bg-white py-3 pl-7 pr-3 text-lg font-bold"
+                style={{ borderColor: BORDER, color: GREEN }}
+              />
+            </div>
+          </label>
 
-          {pricingMode === "auction" || pricingMode === "both" ? (
-            <label className="mt-3 block">
-              <span className="text-xs font-medium text-gray-500">{copy.startingBidLabel}</span>
-              <div className="relative mt-1">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={startingBid}
-                  onChange={(event) => setStartingBid(event.target.value)}
-                  placeholder={pricingMode === "both" && priceUsd > 0 ? String(defaultStartingBid(priceUsd)) : "5"}
-                  className="w-full rounded-xl border bg-white py-3 pl-7 pr-3 text-lg font-bold"
-                  style={{ borderColor: BORDER, color: GREEN }}
-                />
-              </div>
-            </label>
-          ) : null}
+          <p className="mt-2 text-xs text-gray-500">{saleMode === "quick" ? copy.quickHint : copy.openHint}</p>
 
-          {pricingMode === "both" ? (
-            <p className="mt-2 text-xs text-gray-500">{copy.bothHint}</p>
+          {saleMode === "open" ? (
+            <>
+              <div
+                className="mt-3 rounded-xl border px-3 py-2.5 text-xs"
+                style={{ borderColor: `${GREEN}44`, backgroundColor: `${GREEN}08` }}
+              >
+                <p className="font-bold text-gray-800">{copy.auctionWindowLabel}</p>
+                <p className="mt-1 font-semibold" style={{ color: GREEN }}>
+                  {auctionWindowLabel}
+                </p>
+                <p className="mt-1 text-gray-500">{copy.auctionWindowHint}</p>
+              </div>
+              <div
+                className="mt-3 rounded-xl border bg-white p-3 text-xs leading-relaxed text-gray-600"
+                style={{ borderColor: BORDER }}
+              >
+                <p className="font-bold text-gray-800">{copy.auctionTermsTitle}</p>
+                <p className="mt-1.5">{copy.auctionTermsBody}</p>
+              </div>
+            </>
           ) : null}
         </section>
 

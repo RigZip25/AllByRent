@@ -146,7 +146,7 @@ export function GarageCartScreen({ onBack, onCheckoutComplete }: GarageCartScree
             Checkout · demo
           </button>
           <p className="mt-2 text-center text-[11px] text-gray-500">
-            One cart per garage · winning auction lots checkout separately later
+            Buy now reserves the lot · Auction wins pay on the yellow banner
           </p>
         </div>
       ) : null}

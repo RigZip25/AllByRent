@@ -15,6 +15,8 @@ import { YardSalesScreen } from "../screens/YardSalesScreen";
 import { OpenGarageSaleScreen } from "../screens/OpenGarageSaleScreen";
 import { SnapSaleScreen } from "../screens/garage-sale/SnapSaleScreen";
 import { GarageWorkflowScreen } from "../screens/garage-sale/GarageWorkflowScreen";
+import { GarageSaleRulesScreen } from "../screens/garage-sale/GarageSaleRulesScreen";
+import { GarageHostOffersScreen } from "../screens/GarageHostOffersScreen";
 import { HomeFeed } from "./components/HomeFeed";
 import { Subcategory } from "./components/Subcategory";
 import { ItemDetail } from "./components/ItemDetail";
@@ -32,6 +34,7 @@ import { ProfileScreen } from "../screens/ProfileScreen";
 import { GarageScreen } from "../screens/GarageScreen";
 import { ActiveGarageShopScreen } from "../screens/ActiveGarageShopScreen";
 import { GarageCartScreen } from "../screens/GarageCartScreen";
+import { GarageWinnerCheckoutScreen } from "../screens/GarageWinnerCheckoutScreen";
 import { MoreScreen } from "../screens/MoreScreen";
 import { MrEvoriosScreen } from "../screens/MrEvoriosScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
@@ -83,6 +86,7 @@ import {
   setYardSaleListingActive,
 } from "../lib/yardSaleListing";
 import { hasSeenGarageWorkflow } from "../lib/garageWorkflowStorage";
+import { hasSeenGarageSaleRules } from "../lib/garageSaleRulesStorage";
 import { resolveHostAccountId } from "../lib/hostIdentity";
 
 import {
@@ -107,6 +111,8 @@ type Screen =
   | "openGarageSale"
   | "snapSale"
   | "garageWorkflow"
+  | "garageSaleRules"
+  | "garageHostOffers"
   | "home"
   | "yardSales"
   | "mre"
@@ -115,6 +121,7 @@ type Screen =
   | "neighborGarage"
   | "garageShop"
   | "garageCart"
+  | "garageWinnerCheckout"
   | "notifications"
   | "subcategory"
   | "itemDetail"
@@ -141,6 +148,7 @@ const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
   "openGarageSale",
   "snapSale",
   "garageWorkflow",
+  "garageSaleRules",
 ]);
 
 const BOTTOM_NAV_SCREENS = new Set<Screen>([
@@ -301,6 +309,7 @@ function AppRoutes() {
   const [selectedHostListingId, setSelectedHostListingId] = useState<string | null>(null);
   const [selectedNeighborGarageHostId, setSelectedNeighborGarageHostId] = useState<string | null>(null);
   const [garageShopPreview, setGarageShopPreview] = useState(false);
+  const [winnerCheckoutListingId, setWinnerCheckoutListingId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [listingPrefill, setListingPrefill] = useState<ShelfPrefill | null>(null);
@@ -541,11 +550,31 @@ function AppRoutes() {
     clearYardSaleListingActive();
     setListingPrefill(null);
     setEditingListingId(null);
-    navigateTo(hasSeenGarageWorkflow() ? "snapSale" : "garageWorkflow");
+    if (!hasSeenGarageWorkflow()) {
+      navigateTo("garageWorkflow");
+      return;
+    }
+    if (!hasSeenGarageSaleRules()) {
+      navigateTo("garageSaleRules");
+      return;
+    }
+    navigateTo("snapSale");
   }, [navigateTo]);
 
   const handleGarageWorkflowContinue = useCallback(() => {
+    navigateTo(hasSeenGarageSaleRules() ? "snapSale" : "garageSaleRules");
+  }, [navigateTo]);
+
+  const handleGarageSaleRulesContinue = useCallback(() => {
     navigateTo("snapSale");
+  }, [navigateTo]);
+
+  const handleOpenGarageSaleRules = useCallback(() => {
+    navigateTo("garageSaleRules");
+  }, [navigateTo]);
+
+  const handleOpenHostOffers = useCallback(() => {
+    navigateTo("garageHostOffers");
   }, [navigateTo]);
 
   const openYardSaleHub = useCallback(() => {
@@ -572,6 +601,14 @@ function AppRoutes() {
   const handleOpenGarageCart = useCallback(() => {
     navigateTo("garageCart");
   }, [navigateTo]);
+
+  const handleOpenWinnerCheckout = useCallback(
+    (listingId: string) => {
+      setWinnerCheckoutListingId(listingId);
+      navigateTo("garageWinnerCheckout");
+    },
+    [navigateTo],
+  );
 
   const openRentLocationSetup = useCallback(() => {
     setHomeLocationError(null);
@@ -745,6 +782,18 @@ function AppRoutes() {
         const previous = stack[stack.length - 1];
         setCurrentScreen(previous);
         return stack.slice(0, -1);
+      }
+      if (currentScreen === "garageWinnerCheckout") {
+        setCurrentScreen("garageShop");
+        return stack;
+      }
+      if (currentScreen === "garageSaleRules") {
+        setCurrentScreen(hasSeenGarageWorkflow() ? "openGarageSale" : "garageWorkflow");
+        return stack;
+      }
+      if (currentScreen === "garageHostOffers") {
+        setCurrentScreen("garageShop");
+        return stack;
       }
       if (currentScreen === "snapSale") {
         setCurrentScreen("openGarageSale");
@@ -1000,6 +1049,7 @@ function AppRoutes() {
             onBack={openYardSaleHub}
             onAddSaleItems={handleStartYardSaleListing}
             onOpenMyGarage={handleOpenGarageShopPreview}
+            onViewSaleRules={handleOpenGarageSaleRules}
           />
         )}
 
@@ -1007,6 +1057,17 @@ function AppRoutes() {
           <GarageWorkflowScreen
             onBack={handleBack}
             onContinue={handleGarageWorkflowContinue}
+          />
+        )}
+
+        {currentScreen === "garageSaleRules" && (
+          <GarageSaleRulesScreen
+            onBack={handleBack}
+            onContinue={() => {
+              const prev = navStack[navStack.length - 1];
+              if (prev === "openGarageSale") handleBack();
+              else handleGarageSaleRulesContinue();
+            }}
           />
         )}
 
@@ -1053,6 +1114,30 @@ function AppRoutes() {
             preview={garageShopPreview}
             onBack={handleBack}
             onOpenCart={handleOpenGarageCart}
+            onOpenWinnerCheckout={handleOpenWinnerCheckout}
+            onOpenHostOffers={
+              garageShopPreview || selectedNeighborGarageHostId !== resolveHostAccountId(auth.userId)
+                ? undefined
+                : handleOpenHostOffers
+            }
+          />
+        )}
+
+        {currentScreen === "garageHostOffers" && (
+          <GarageHostOffersScreen
+            hostId={resolveHostAccountId(auth.userId)}
+            onBack={handleBack}
+          />
+        )}
+
+        {currentScreen === "garageWinnerCheckout" && winnerCheckoutListingId && (
+          <GarageWinnerCheckoutScreen
+            listingId={winnerCheckoutListingId}
+            onBack={handleBack}
+            onComplete={() => {
+              setNavStack([]);
+              setCurrentScreen("garageShop");
+            }}
           />
         )}
 

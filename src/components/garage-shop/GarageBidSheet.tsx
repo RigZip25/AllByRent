@@ -1,16 +1,19 @@
 import { useMemo, useState } from "react";
 import { X } from "lucide-react";
 import type { ListingDraft } from "../../screens/listing/types";
+import { ONBOARDING } from "../../lib/brand";
 import {
   formatShopUsd,
   getHighBid,
   placeGarageBid,
   type ShopOffer,
 } from "../../lib/garageShopStorage";
+import { formatAuctionWindowLabel } from "../../lib/garageAuctionWindow";
 
 const GREEN = "#0D5C3A";
 const BLUE = "#2563EB";
 const BORDER = "#E8E6E0";
+const auctionCopy = ONBOARDING.garageAuction;
 
 type GarageBidSheetProps = {
   listing: ListingDraft;
@@ -49,6 +52,9 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
       hostId: listing.hostId ?? "demo-user",
       amountUsd: value,
       minBidUsd,
+      endsAt: offer.endsAt,
+      startsAt: offer.startsAt,
+      listingTitle: listing.title || "Sale item",
     });
     if (!result.ok) {
       setError(result.reason);
@@ -75,6 +81,9 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
               High bid {highBid ? formatShopUsd(highBid.amountUsd) : formatShopUsd(offer.startingBidUsd)}
               {" · "}
               Buy now {formatShopUsd(offer.buyNowUsd)}
+            </p>
+            <p className="mt-1 text-[12px] font-medium text-gray-600">
+              {formatAuctionWindowLabel({ startsAt: offer.startsAt, endsAt: offer.endsAt })}
             </p>
           </div>
           <button
@@ -131,6 +140,8 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
         <p className="mt-1 text-xs text-gray-500">Minimum next bid {formatShopUsd(minBidUsd)}</p>
 
         {error ? <p className="mt-2 text-sm font-medium text-red-600">{error}</p> : null}
+
+        <p className="mt-3 text-xs leading-relaxed text-gray-500">{auctionCopy.bidTerms}</p>
 
         <button
           type="button"

@@ -1,7 +1,18 @@
 import type { ListingDraft } from "../screens/listing/types";
 import {
+  canBidOnLot,
+  canBuyNowLot,
+  getGarageBidderId,
+  isLotOnShelf,
+  markBuyNowSold,
+  notifyOutbidIfNeeded,
+} from "./garageAuctionState";
+import {
   getGarageSaleOfferPrefs,
 } from "./garageSaleOfferStorage";
+import { getInterestedCount, getNegotiationPhase, isEligibleAuctionBidder } from "./garageOfferStorage";
+import { defaultAuctionWindow, formatAuctionTiming, inferAuctionStartsAt } from "./garageAuctionWindow";
+import { getGarageSaleSchedule } from "./garageSaleStorage";
 
 const CART_KEY = "evorios_garage_cart";
 const BIDS_KEY = "evorios_garage_bids";
@@ -20,16 +31,22 @@ export type GarageBid = {
   hostId: string;
   amountUsd: number;
   placedAt: string;
+  bidderId: string;
 };
 
-export type ShopOfferKind = "buy_now" | "auction" | "both";
+export type ShopOfferKind = "buy_now" | "open" | "auction" | "both";
 
 export type ShopOffer = {
   kind: ShopOfferKind;
+  saleMode: "quick" | "open";
   buyNowUsd: number;
   startingBidUsd: number;
   minIncrementUsd: number;
+  startsAt: string;
   endsAt: string;
+  negotiationPhase: "none" | "one_on_one" | "multi_auction";
+  interestedCount: number;
+  allowsOffers: boolean;
 };
 
 const PLATFORM_FEE_RATE = 0.1;
@@ -68,23 +85,38 @@ function hashListingId(id: string): number {
 
 export function getShopOffer(listing: ListingDraft): ShopOffer | null {
   if (!listing.modes.sell) return null;
+  if (!isLotOnShelf(listing.id)) return null;
   const buyNowUsd = parseSalePrice(listing);
   if (buyNowUsd <= 0) return null;
 
   const stored = getGarageSaleOfferPrefs(listing.id);
   const startingBidUsd = stored?.startingBidUsd ?? Math.max(1, Math.round(buyNowUsd * 0.55 * 100) / 100);
-  const endsAt =
-    stored?.endsAt ??
-    new Date(Date.now() + (2 + (hashListingId(listing.id) % 5)) * 3_600_000).toISOString();
+  const fallbackWindow = defaultAuctionWindow(getGarageSaleSchedule());
+  const endsAt = stored?.endsAt ?? fallbackWindow.endsAt;
+  const startsAt =
+    stored?.startsAt ?? inferAuctionStartsAt(endsAt, getGarageSaleSchedule());
+  const negotiationPhase = getNegotiationPhase(listing.id);
+  const saleMode = stored?.saleMode ?? "open";
   const kind: ShopOfferKind =
-    stored?.kind ?? (hashListingId(listing.id) % 3 !== 0 ? "both" : "buy_now");
+    negotiationPhase === "multi_auction"
+      ? "auction"
+      : saleMode === "quick"
+        ? "buy_now"
+        : stored?.kind === "auction"
+          ? "auction"
+          : "open";
 
   return {
     kind,
+    saleMode,
     buyNowUsd,
     startingBidUsd,
     minIncrementUsd: buyNowUsd >= 50 ? 5 : 1,
+    startsAt,
     endsAt,
+    negotiationPhase,
+    interestedCount: getInterestedCount(listing.id),
+    allowsOffers: saleMode === "open" && negotiationPhase !== "multi_auction",
   };
 }
 
@@ -140,7 +172,10 @@ export function getCartTotals() {
 }
 
 function readBids(): GarageBid[] {
-  return readJson<GarageBid[]>(BIDS_KEY, []);
+  return readJson<GarageBid[]>(BIDS_KEY, []).map((bid) => ({
+    ...bid,
+    bidderId: bid.bidderId ?? "legacy-bidder",
+  }));
 }
 
 export function getBidsForListing(listingId: string): GarageBid[] {
@@ -149,13 +184,35 @@ export function getBidsForListing(listingId: string): GarageBid[] {
     .sort((a, b) => b.amountUsd - a.amountUsd);
 }
 
+export function clearBidsForListing(listingId: string): void {
+  writeJson(
+    BIDS_KEY,
+    readBids().filter((bid) => bid.listingId !== listingId),
+  );
+  window.dispatchEvent(new Event("evorios-garage-bids"));
+}
+
 export function getHighBid(listingId: string): GarageBid | null {
   const bids = getBidsForListing(listingId);
   return bids[0] ?? null;
 }
 
+/** Highest bid from a bidder not in `excludedBidderIds` (for runner-up after forfeit). */
+export function getBestBidExcluding(listingId: string, excludedBidderIds: string[]): GarageBid | null {
+  if (excludedBidderIds.length === 0) return getHighBid(listingId);
+  const excluded = new Set(excludedBidderIds);
+  let best: GarageBid | null = null;
+  for (const bid of getBidsForListing(listingId)) {
+    if (excluded.has(bid.bidderId)) continue;
+    if (!best || bid.amountUsd > best.amountUsd) best = bid;
+  }
+  return best;
+}
+
 export function getMyBid(listingId: string): GarageBid | null {
-  return getHighBid(listingId);
+  const me = getGarageBidderId();
+  const bids = getBidsForListing(listingId).filter((bid) => bid.bidderId === me);
+  return bids[0] ?? null;
 }
 
 export function placeGarageBid(input: {
@@ -163,32 +220,62 @@ export function placeGarageBid(input: {
   hostId: string;
   amountUsd: number;
   minBidUsd: number;
+  endsAt: string;
+  startsAt: string;
+  listingTitle?: string;
 }): { ok: true; bid: GarageBid } | { ok: false; reason: string } {
+  if (!canBidOnLot(input.listingId, input.startsAt, input.endsAt)) {
+    const now = Date.now();
+    if (now < new Date(input.startsAt).getTime()) {
+      return { ok: false, reason: "Auction hasn't started yet" };
+    }
+    return { ok: false, reason: "Auction ended or item sold" };
+  }
+  if (!isEligibleAuctionBidder(input.listingId)) {
+    return { ok: false, reason: "Only neighbors who made offers can bid in this auction" };
+  }
   if (input.amountUsd < input.minBidUsd) {
     return { ok: false, reason: `Bid must be at least ${formatShopUsd(input.minBidUsd)}` };
   }
-  const high = getHighBid(input.listingId);
-  if (high && input.amountUsd <= high.amountUsd) {
-    return { ok: false, reason: `Beat the high bid of ${formatShopUsd(high.amountUsd)}` };
+  const previousLeader = getHighBid(input.listingId);
+  if (previousLeader && input.amountUsd <= previousLeader.amountUsd) {
+    return { ok: false, reason: `Beat the high bid of ${formatShopUsd(previousLeader.amountUsd)}` };
   }
   const bid: GarageBid = {
     listingId: input.listingId,
     hostId: input.hostId,
     amountUsd: input.amountUsd,
     placedAt: new Date().toISOString(),
+    bidderId: getGarageBidderId(),
   };
   writeJson(BIDS_KEY, [...readBids(), bid]);
   window.dispatchEvent(new Event("evorios-garage-bids"));
+  notifyOutbidIfNeeded(input.listingId, input.listingTitle ?? "Sale item", previousLeader);
   return { ok: true, bid };
 }
 
-export function formatAuctionEnds(iso: string): string {
-  const ms = new Date(iso).getTime() - Date.now();
-  if (ms <= 0) return "Ended";
-  const hours = Math.floor(ms / 3_600_000);
-  const minutes = Math.floor((ms % 3_600_000) / 60_000);
-  if (hours > 0) return `${hours}h ${minutes}m left`;
-  return `${minutes}m left`;
+export function buyNowGarageItem(input: {
+  listing: ListingDraft;
+  offer: ShopOffer;
+}): { ok: true } | { ok: false; reason: string } {
+  if (!canBuyNowLot(input.listing.id)) {
+    return { ok: false, reason: "This item is no longer available" };
+  }
+  if (input.offer.negotiationPhase === "multi_auction") {
+    return { ok: false, reason: "Buy now paused — auction among interested neighbors" };
+  }
+  markBuyNowSold(
+    input.listing.id,
+    input.offer.buyNowUsd,
+    input.listing.title || "Sale item",
+  );
+  const result = addToGarageCart(cartLineFromListing(input.listing, input.offer.buyNowUsd));
+  if (!result.ok) return result;
+  return { ok: true };
+}
+
+export function formatAuctionEnds(startsAt: string, endsAt: string): string {
+  return formatAuctionTiming({ startsAt, endsAt });
 }
 
 export function cartLineFromListing(listing: ListingDraft, priceUsd: number): GarageCartLine {
