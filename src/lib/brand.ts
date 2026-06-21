@@ -126,7 +126,8 @@ export const ONBOARDING = {
     shelfHint: "Garage-sale snap — photo first, optional tag, price or auction. Not the full listing form.",
     shelfNote: "Each snap lands on your open shop · neighbors buy or bid",
     addItemsCta: "Snap onto shelf →",
-    myGarageCta: "Preview active shop",
+    myGarageCta: "My active garage →",
+    shareGarageCta: "Share open garage",
     rulesViewCta: "How selling works — pictures →",
     mascotHint: "can help price odd items once they're on the shelf.",
   },
@@ -215,6 +216,13 @@ export const ONBOARDING = {
     makeOffer: "Offer",
     interestedLabel: "interested",
     auctionAuto: "Auction — interested neighbors only",
+  },
+  garageShare: {
+    openGarageTitle: "Share open garage",
+    itemTitle: "Share this item",
+    afterSnapTitle: "Spread the word",
+    afterSnapHint: "Story, Nextdoor, WhatsApp — link opens your shelf, not the app home page.",
+    shopBannerHost: "Tap Edit on any item — or share your shelf to pull buyers in.",
   },
   garageShelfEdit: {
     eyebrow: "Your shelf",

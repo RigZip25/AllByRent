@@ -8,7 +8,7 @@ import { useAuth } from "../../hooks/AuthProvider";
 import { boostListingRemote } from "../../lib/listingStorage";
 import { generateListingShareCards, type GeneratedShareCard, type ShareCardFormat } from "../../lib/shareCards";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
-import { buildListingSharePayload, shareNative as shareNativePayload, copyText } from "../../lib/socialShare";
+import { buildListingSharePayload, listingShareUrl, shareNative as shareNativePayload, copyText } from "../../lib/socialShare";
 import { ProactiveAgentCard, wasAgentStepDismissed } from "../../components/agent/ProactiveAgentCard";
 import { loadNotificationPreferences } from "../../lib/notificationPreferences";
 
@@ -17,14 +17,7 @@ const CTA = "#F59E0B";
 const BORDER = "#E8E6E0";
 
 function listingUrl(draft: ListingDraft): string {
-  try {
-    const origin = typeof window !== "undefined" ? window.location.origin : MARKETING_URL;
-    const url = new URL(origin);
-    url.searchParams.set("listingId", draft.id);
-    return url.toString();
-  } catch {
-    return `${MARKETING_URL}?listingId=${draft.id}`;
-  }
+  return listingShareUrl(draft.id);
 }
 
 function buildPrompt(params: {

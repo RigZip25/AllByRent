@@ -3,10 +3,9 @@ import { Share2, Store } from "lucide-react";
 import { HostDashboard } from "../app/components/HostDashboard";
 import { useAuth } from "../hooks/AuthProvider";
 import { resolveHostAccountId } from "../lib/hostIdentity";
-import { getActiveRentLocationLabel } from "../lib/listingStorage";
-import { loadUserProfile } from "../lib/userProfileStorage";
 import { SocialShareButtons } from "../components/share/SocialShareButtons";
-import { buildGarageSharePayload, garageShareUrl } from "../lib/socialShare";
+import { hostGarageSharePayload } from "../lib/garageMarketingShare";
+import { garageSaleOpenLabel, getGarageSaleSchedule } from "../lib/garageSaleStorage";
 
 const GREEN_DARK = "#0D5C3A";
 
@@ -20,17 +19,14 @@ export function GarageScreen({ onNavigate, onStockGarage, onViewShop }: GarageSc
   const auth = useAuth();
   const [shareOpen, setShareOpen] = useState(false);
   const hostId = resolveHostAccountId(auth.userId);
-  const profile = useMemo(() => loadUserProfile(), []);
-  const city = getActiveRentLocationLabel().trim();
 
   const sharePayload = useMemo(
     () =>
-      buildGarageSharePayload({
-        garageName: profile.displayName || "My garage",
-        url: garageShareUrl(hostId),
-        city: city || undefined,
+      hostGarageSharePayload({
+        hostId,
+        openUntilLabel: garageSaleOpenLabel(getGarageSaleSchedule()),
       }),
-    [city, hostId, profile.displayName],
+    [hostId],
   );
 
   return (

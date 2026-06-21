@@ -64,6 +64,12 @@ import {
 } from "../lib/onboardingStorage";
 import { categoryIdFromName } from "../screens/listing/listingItemCategories";
 import { getPublishedListingById, hasRentLocationSetup } from "../lib/listingStorage";
+import {
+  deepLinkQueryKeys,
+  parseDeepLink,
+  resolveListingDeepLink,
+  type DeepLinkTarget,
+} from "../lib/deepLinks";
 import type { ShelfPrefill } from "../lib/shelfListings";
 import { isSimulateUpdateRequested } from "../lib/pwaUpdateStorage";
 import { isResetAppQueryParam, resetAllAppData } from "../lib/resetAppStorage";
@@ -223,6 +229,23 @@ function isOnboardingScreen(screen: Screen): boolean {
   return screen in ONBOARDING_BACK_FALLBACK || screen === "firstHello" || screen === "onboardingAllSet";
 }
 
+function resolveBootDeepLinkTarget(target: DeepLinkTarget | null): DeepLinkTarget | null {
+  if (!target) return null;
+  if (target.kind === "listing") return resolveListingDeepLink(target.listingId);
+  return target;
+}
+
+function readBootDeepLink() {
+  if (typeof window === "undefined") {
+    return { skipSplash: false, target: null as DeepLinkTarget | null };
+  }
+  const parsed = parseDeepLink(window.location.search, window.location.pathname);
+  return {
+    skipSplash: parsed.skipSplash,
+    target: resolveBootDeepLinkTarget(parsed.target),
+  };
+}
+
 function readBootQuery() {
   if (typeof window === "undefined") {
     return { skipSplash: false, openNotifications: false, simulateUpdate: false, screen: null as string | null, splashArtOnly: false, splashDynamicPreview: false };
@@ -239,8 +262,13 @@ function readBootQuery() {
     hash.includes("error_description=");
   const simulateUpdate =
     params.get("simulateUpdate") === "1" || isSimulateUpdateRequested();
+  const deepLink = parseDeepLink(window.location.search, window.location.pathname);
   return {
-    skipSplash: params.get("skipSplash") === "1" || hasAuthCode || hasAuthHash,
+    skipSplash:
+      params.get("skipSplash") === "1" ||
+      hasAuthCode ||
+      hasAuthHash ||
+      deepLink.skipSplash,
     openNotifications: params.get("openNotifications") === "1",
     simulateUpdate,
     screen,
@@ -287,12 +315,38 @@ function resolveScreenAfterAuth(storedTarget: Screen | null): Screen {
   return storedTarget ?? "browseHub";
 }
 
+function bootScreenForDeepLink(target: DeepLinkTarget | null): Screen | null {
+  if (!target) return null;
+  if (target.kind === "garage") return "garageShop";
+  return "itemDetail";
+}
+
+function bootHostIdForDeepLink(target: DeepLinkTarget | null): string | null {
+  if (!target) return null;
+  if (target.kind === "garage") return target.hostId;
+  return null;
+}
+
+function bootItemIdForDeepLink(target: DeepLinkTarget | null): string | null {
+  if (!target) return null;
+  if (target.kind === "garage") return target.itemId ?? null;
+  if (target.kind === "listing") return target.listingId;
+  return null;
+}
+
 function AppRoutes() {
   const auth = useAuth();
   const boot = readBootQuery();
+  const bootDeepLink = useRef(readBootDeepLink()).current;
   const handledSessionTokenRef = useRef<string | null>(null);
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
     if (boot.screen === "splash") return "splash";
+    const deepScreen = bootScreenForDeepLink(bootDeepLink.target);
+    if (deepScreen && (boot.skipSplash || bootDeepLink.skipSplash)) {
+      markIntroDone();
+      completeOnboarding();
+      return deepScreen;
+    }
     if (boot.skipSplash || isIntroDone()) {
       if (boot.openNotifications || boot.simulateUpdate) {
         markIntroDone();
@@ -304,10 +358,17 @@ function AppRoutes() {
     return "splash";
   });
   const [navStack, setNavStack] = useState<Screen[]>([]);
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
+    bootDeepLink.target?.kind === "listing" ? bootDeepLink.target.listingId : null,
+  );
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [selectedHostListingId, setSelectedHostListingId] = useState<string | null>(null);
-  const [selectedNeighborGarageHostId, setSelectedNeighborGarageHostId] = useState<string | null>(null);
+  const [selectedNeighborGarageHostId, setSelectedNeighborGarageHostId] = useState<string | null>(() =>
+    bootHostIdForDeepLink(bootDeepLink.target),
+  );
+  const [focusGarageItemId, setFocusGarageItemId] = useState<string | null>(() =>
+    bootItemIdForDeepLink(bootDeepLink.target),
+  );
   const [garageShopPreview, setGarageShopPreview] = useState(false);
   const [winnerCheckoutListingId, setWinnerCheckoutListingId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -341,6 +402,29 @@ function AppRoutes() {
       window.removeEventListener("offline", onOffline);
     };
   }, []);
+
+  useEffect(() => {
+    if (!bootDeepLink.target) return;
+    markIntroDone();
+    completeOnboarding();
+    setGarageShopPreview(false);
+    if (bootDeepLink.target.kind === "garage") {
+      setSelectedNeighborGarageHostId(bootDeepLink.target.hostId);
+      setFocusGarageItemId(bootDeepLink.target.itemId ?? null);
+      setNavStack([]);
+      setCurrentScreen("garageShop");
+    } else {
+      setSelectedItemId(bootDeepLink.target.listingId);
+      setNavStack([]);
+      setCurrentScreen("itemDetail");
+    }
+    if (typeof window !== "undefined" && /^\/item\/[^/]+\/?$/i.test(window.location.pathname)) {
+      const params = new URLSearchParams(window.location.search);
+      const next = `${window.location.pathname.replace(/\/item\/[^/]+\/?$/i, "/")}${params.toString() ? `?${params}` : ""}${window.location.hash}`;
+      window.history.replaceState({}, "", next);
+    }
+    clearBootQuery(deepLinkQueryKeys());
+  }, [bootDeepLink.target, bootDeepLink.skipSplash]);
 
   useEffect(() => {
     removeStripeControllerIframes();
@@ -585,16 +669,18 @@ function AppRoutes() {
   const handleOpenNeighborGarage = useCallback(
     (hostId: string) => {
       setSelectedNeighborGarageHostId(hostId);
+      setFocusGarageItemId(null);
       setGarageShopPreview(false);
       navigateTo("garageShop");
     },
     [navigateTo],
   );
 
-  const handleOpenGarageShopPreview = useCallback(() => {
+  const handleOpenMyGarageShop = useCallback(() => {
     const hostId = resolveHostAccountId(auth.userId);
     setSelectedNeighborGarageHostId(hostId);
-    setGarageShopPreview(true);
+    setFocusGarageItemId(null);
+    setGarageShopPreview(false);
     navigateTo("garageShop");
   }, [auth.userId, navigateTo]);
 
@@ -1048,7 +1134,7 @@ function AppRoutes() {
           <OpenGarageSaleScreen
             onBack={openYardSaleHub}
             onAddSaleItems={handleStartYardSaleListing}
-            onOpenMyGarage={handleOpenGarageShopPreview}
+            onOpenMyGarage={handleOpenMyGarageShop}
             onViewSaleRules={handleOpenGarageSaleRules}
           />
         )}
@@ -1074,7 +1160,7 @@ function AppRoutes() {
         {currentScreen === "snapSale" && (
           <SnapSaleScreen
             onBack={handleBack}
-            onViewShop={handleOpenGarageShopPreview}
+            onViewShop={handleOpenMyGarageShop}
           />
         )}
 
@@ -1104,7 +1190,7 @@ function AppRoutes() {
           <GarageScreen
             onNavigate={handleNavigate}
             onStockGarage={handleStartListing}
-            onViewShop={handleOpenGarageShopPreview}
+            onViewShop={handleOpenMyGarageShop}
           />
         )}
 
@@ -1112,11 +1198,13 @@ function AppRoutes() {
           <ActiveGarageShopScreen
             hostId={selectedNeighborGarageHostId}
             preview={garageShopPreview}
+            focusListingId={focusGarageItemId}
+            onFocusListingHandled={() => setFocusGarageItemId(null)}
             onBack={handleBack}
             onOpenCart={handleOpenGarageCart}
             onOpenWinnerCheckout={handleOpenWinnerCheckout}
             onOpenHostOffers={
-              garageShopPreview || selectedNeighborGarageHostId !== resolveHostAccountId(auth.userId)
+              selectedNeighborGarageHostId !== resolveHostAccountId(auth.userId)
                 ? undefined
                 : handleOpenHostOffers
             }
