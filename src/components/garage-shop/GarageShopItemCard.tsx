@@ -1,4 +1,4 @@
-import { Gavel, ShoppingBag, Tag } from "lucide-react";
+import { Gavel, Pencil, ShoppingBag, Tag } from "lucide-react";
 import type { ListingDraft } from "../../screens/listing/types";
 import { getLotState, isAuctionTimeActive } from "../../lib/garageAuctionState";
 import { getMyActiveOffer } from "../../lib/garageOfferStorage";
@@ -23,19 +23,23 @@ const offerCopy = ONBOARDING.garageOffers;
 type GarageShopItemCardProps = {
   listing: ListingDraft;
   preview?: boolean;
+  hostManage?: boolean;
   onBuyNow: (listing: ListingDraft, offer: ShopOffer) => void;
   onBid: (listing: ListingDraft, offer: ShopOffer) => void;
   onMakeOffer: (listing: ListingDraft, offer: ShopOffer) => void;
   onViewMyOffer: (listing: ListingDraft, offer: ShopOffer) => void;
+  onEdit?: (listing: ListingDraft) => void;
 };
 
 export function GarageShopItemCard({
   listing,
   preview = false,
+  hostManage = false,
   onBuyNow,
   onBid,
   onMakeOffer,
   onViewMyOffer,
+  onEdit,
 }: GarageShopItemCardProps) {
   const offer = getShopOffer(listing);
   const lotState = getLotState(listing.id);
@@ -104,6 +108,16 @@ export function GarageShopItemCard({
             Leading
           </span>
         ) : null}
+        {hostManage && onEdit ? (
+          <button
+            type="button"
+            onClick={() => onEdit(listing)}
+            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 shadow"
+            aria-label="Edit shelf item"
+          >
+            <Pencil className="h-3.5 w-3.5" style={{ color: GREEN }} />
+          </button>
+        ) : null}
       </div>
 
       <div className="flex flex-1 flex-col p-2.5">
@@ -130,7 +144,7 @@ export function GarageShopItemCard({
         </div>
 
         <div className="mt-auto flex flex-col gap-1.5 pt-2.5">
-          {showAuction && auctionLive ? (
+          {!hostManage && showAuction && auctionLive ? (
             <button
               type="button"
               disabled={preview}
@@ -143,7 +157,7 @@ export function GarageShopItemCard({
             </button>
           ) : null}
 
-          {!showAuction && offer.allowsOffers && !preview ? (
+          {!hostManage && !showAuction && offer.allowsOffers && !preview ? (
             myOffer ? (
               <button
                 type="button"
@@ -167,16 +181,28 @@ export function GarageShopItemCard({
             )
           ) : null}
 
-          <button
-            type="button"
-            disabled={preview || (multiAuction && auctionEnded) || (multiAuction && auctionLive)}
-            onClick={() => onBuyNow(listing, offer)}
-            className="flex w-full items-center justify-center gap-1 rounded-xl py-2 text-[12px] font-bold text-white disabled:opacity-50"
-            style={{ backgroundColor: AMBER, color: GREEN }}
-          >
-            <ShoppingBag className="h-3.5 w-3.5" aria-hidden />
-            Buy
-          </button>
+          {!hostManage ? (
+            <button
+              type="button"
+              disabled={preview || (multiAuction && auctionEnded) || (multiAuction && auctionLive)}
+              onClick={() => onBuyNow(listing, offer)}
+              className="flex w-full items-center justify-center gap-1 rounded-xl py-2 text-[12px] font-bold text-white disabled:opacity-50"
+              style={{ backgroundColor: AMBER, color: GREEN }}
+            >
+              <ShoppingBag className="h-3.5 w-3.5" aria-hidden />
+              Buy
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onEdit?.(listing)}
+              className="flex w-full items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold"
+              style={{ borderColor: GREEN, color: GREEN }}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              Edit
+            </button>
+          )}
         </div>
       </div>
     </article>

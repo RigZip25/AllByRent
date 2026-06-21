@@ -3,6 +3,7 @@ import { ArrowLeft, Inbox, ShoppingCart, Store, Trophy } from "lucide-react";
 import { GarageBidSheet } from "../components/garage-shop/GarageBidSheet";
 import { GarageMakeOfferSheet } from "../components/garage-shop/GarageMakeOfferSheet";
 import { GarageMyOfferSheet } from "../components/garage-shop/GarageMyOfferSheet";
+import { GarageShelfEditSheet } from "../components/garage-shop/GarageShelfEditSheet";
 import { GarageShopItemCard } from "../components/garage-shop/GarageShopItemCard";
 import { getHostPendingOffers } from "../lib/garageOfferStorage";
 import { garageDisplayName } from "../lib/garageDisplay";
@@ -55,6 +56,7 @@ export function ActiveGarageShopScreen({
   const [bidTarget, setBidTarget] = useState<{ listing: ListingDraft; offer: ShopOffer } | null>(null);
   const [offerTarget, setOfferTarget] = useState<{ listing: ListingDraft; offer: ShopOffer } | null>(null);
   const [myOfferTarget, setMyOfferTarget] = useState<{ listing: ListingDraft; offer: ShopOffer } | null>(null);
+  const [editTarget, setEditTarget] = useState<ListingDraft | null>(null);
   const [pendingOfferCount, setPendingOfferCount] = useState(() => getHostPendingOffers(hostId).length);
   const [toast, setToast] = useState<string | null>(null);
   const [pendingWins, setPendingWins] = useState(() => getMyPendingWinnerCheckouts());
@@ -263,7 +265,11 @@ export function ActiveGarageShopScreen({
           <Store className="h-4 w-4 shrink-0" aria-hidden />
           {preview
             ? "Shop preview — neighbors see photo + price, Buy now or Bid, and a shared cart."
-            : auctionCopy.shopBanner}
+            : preview
+              ? "Shop preview — neighbors see photo + price, offers, and buy now."
+              : isOwnGarage
+                ? "Tap Edit on any item — photo, price, or remove from shelf."
+                : auctionCopy.shopBanner}
         </div>
 
         {!preview && pendingWins.length > 0 ? (
@@ -306,10 +312,12 @@ export function ActiveGarageShopScreen({
                 key={listing.id}
                 listing={listing}
                 preview={preview}
+                hostManage={isOwnGarage && !preview}
                 onBuyNow={handleBuyNow}
                 onBid={(item, offer) => setBidTarget({ listing: item, offer })}
                 onMakeOffer={(item, offer) => setOfferTarget({ listing: item, offer })}
                 onViewMyOffer={(item, offer) => setMyOfferTarget({ listing: item, offer })}
+                onEdit={(item) => setEditTarget(item)}
               />
             ))}
           </div>
@@ -346,6 +354,21 @@ export function ActiveGarageShopScreen({
           offer={myOfferTarget.offer}
           onClose={() => setMyOfferTarget(null)}
           onUpdated={() => loadShelf()}
+        />
+      ) : null}
+
+      {editTarget && isOwnGarage && !preview ? (
+        <GarageShelfEditSheet
+          listing={editTarget}
+          onClose={() => setEditTarget(null)}
+          onSaved={() => {
+            loadShelf();
+            showToast("Shelf updated");
+          }}
+          onRemoved={() => {
+            loadShelf();
+            showToast("Removed from shelf");
+          }}
         />
       ) : null}
     </div>
