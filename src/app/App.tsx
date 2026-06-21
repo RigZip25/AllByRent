@@ -9,6 +9,8 @@ import { WhereAreYou } from "../screens/onboarding/WhereAreYou";
 import { WhereAreYouHeading } from "../screens/onboarding/WhereAreYouHeading";
 import { WhereAreYouManual } from "../screens/onboarding/WhereAreYouManual";
 import { YouAreAllSet } from "../screens/onboarding/YouAreAllSet";
+import { BrowseHubScreen } from "../screens/BrowseHubScreen";
+import { YardSalesScreen } from "../screens/YardSalesScreen";
 import { HomeFeed } from "./components/HomeFeed";
 import { Subcategory } from "./components/Subcategory";
 import { ItemDetail } from "./components/ItemDetail";
@@ -70,6 +72,13 @@ import { IdentityVerificationScreen } from "../screens/IdentityVerificationScree
 import { AgentActivityScreen } from "../screens/AgentActivityScreen";
 import { BottomNav, type BottomNavTab } from "./components/BottomNav";
 import { removeStripeControllerIframes } from "../lib/stripeCleanup";
+import {
+  saveHomeFeedLens,
+  saveHomeFeedMode,
+  saveHomeFeedQuery,
+} from "../lib/homeFeedStorage";
+
+type BrowseHubChoice = "findGear" | "yardSales" | "neighborGarages" | "stockGarage";
 
 type Screen =
   | "splash"
@@ -79,7 +88,9 @@ type Screen =
   | "whereAreYouHeading"
   | "whereAreYouManual"
   | "onboardingAllSet"
+  | "browseHub"
   | "home"
+  | "yardSales"
   | "mre"
   | "garage"
   | "more"
@@ -105,7 +116,9 @@ type Screen =
   | "deleteAccount";
 
 const BOTTOM_NAV_SCREENS = new Set<Screen>([
+  "browseHub",
   "home",
+  "yardSales",
   "mre",
   "garage",
   "more",
@@ -117,14 +130,14 @@ const BOTTOM_NAV_SCREENS = new Set<Screen>([
 ]);
 
 const TAB_BOOT_SCREENS: Partial<Record<string, Screen>> = {
-  home: "home",
+  home: "browseHub",
   mre: "mre",
   garage: "garage",
   more: "more",
 };
 
 function bottomNavTabForScreen(screen: Screen): BottomNavTab {
-  if (screen === "home") return "home";
+  if (screen === "browseHub" || screen === "home" || screen === "yardSales") return "home";
   if (screen === "mre") return "mre";
   if (screen === "garage") return "garage";
   if (screen === "more") return "more";
@@ -165,7 +178,7 @@ const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
 /** Listing flow only — used when the nav stack is empty (not onboarding fallbacks). */
 const LISTING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
   listItem: "listingIntro",
-  listingIntro: "home",
+  listingIntro: "browseHub",
 };
 
 function isOnboardingScreen(screen: Screen): boolean {
@@ -220,7 +233,7 @@ function cleanupSplashGlobals() {
 
 function resolvePostSplashScreen(): Screen {
   const resume = resolveOnboardingResumeScreen();
-  if (resume === "home") return "home";
+  if (resume === "browseHub") return "browseHub";
   return resume;
 }
 
@@ -228,12 +241,12 @@ function resolvePostSplashScreen(): Screen {
 function resolveScreenAfterAuth(storedTarget: Screen | null): Screen {
   if (!isOnboardingComplete()) {
     const resume = resolveOnboardingResumeScreen();
-    if (resume !== "home") return resume;
+    if (resume !== "browseHub") return resume;
     if (getAppMode() === "rent" && !hasRentLocationSetup()) {
       return "whereAreYou";
     }
   }
-  return storedTarget ?? "home";
+  return storedTarget ?? "browseHub";
 }
 
 function AppRoutes() {
@@ -246,7 +259,7 @@ function AppRoutes() {
       if (boot.openNotifications || boot.simulateUpdate) {
         markIntroDone();
         completeOnboarding();
-        return "home";
+        return "browseHub";
       }
       return resolvePostSplashScreen();
     }
@@ -331,7 +344,7 @@ function AppRoutes() {
 
   useEffect(() => {
     if (!boot.openNotifications) return;
-    if (currentScreen !== "home" && currentScreen !== "notifications") return;
+    if (currentScreen !== "browseHub" && currentScreen !== "home" && currentScreen !== "notifications") return;
     setNavStack([]);
     setCurrentScreen("notifications");
     clearBootQuery(["openNotifications", "skipSplash", "simulateUpdate"]);
@@ -340,7 +353,7 @@ function AppRoutes() {
   const finishOnboardingToHome = useCallback(() => {
     completeOnboarding();
     setNavStack([]);
-    setCurrentScreen("home");
+    setCurrentScreen("browseHub");
   }, []);
 
   /** Push the screen we are leaving, then open the next screen (avoids stale currentScreen in the stack). */
@@ -378,7 +391,7 @@ function AppRoutes() {
   const finishRentOnboarding = useCallback(() => {
     completeOnboarding();
     setNavStack([]);
-    setCurrentScreen("home");
+    setCurrentScreen("browseHub");
   }, []);
 
   const requireAuth = useCallback(
@@ -394,7 +407,9 @@ function AppRoutes() {
     const stored = consumeAuthReturn();
     const candidate = (postAuthTarget ?? stored) as Screen | null;
     const validScreens: Screen[] = [
+      "browseHub",
       "home",
+      "yardSales",
       "mre",
       "garage",
       "more",
@@ -416,7 +431,7 @@ function AppRoutes() {
     const storedTarget =
       candidate && validScreens.includes(candidate)
         ? candidate
-        : "home";
+        : "browseHub";
     return resolveScreenAfterAuth(storedTarget);
   }, [postAuthTarget]);
 
@@ -431,8 +446,13 @@ function AppRoutes() {
 
   const resetToHome = () => {
     setNavStack([]);
-    setCurrentScreen("home");
+    setCurrentScreen("browseHub");
   };
+
+  const openBrowseHub = useCallback(() => {
+    setNavStack([]);
+    setCurrentScreen("browseHub");
+  }, []);
 
   const goToTab = useCallback((screen: Screen) => {
     const active = document.activeElement;
@@ -446,7 +466,7 @@ function AppRoutes() {
     });
   }, []);
 
-  const handleOpenHome = useCallback(() => goToTab("home"), [goToTab]);
+  const handleOpenHome = useCallback(() => goToTab("browseHub"), [goToTab]);
   const handleOpenMrE = useCallback(() => goToTab("mre"), [goToTab]);
   const handleOpenGarage = useCallback(() => goToTab("garage"), [goToTab]);
   const handleOpenMore = useCallback(() => goToTab("more"), [goToTab]);
@@ -455,6 +475,40 @@ function AppRoutes() {
   const handleOpenFavorites = useCallback(() => goToTab("favorites"), [goToTab]);
   const handleOpenBusiness = useCallback(() => goToTab("earnBusiness"), [goToTab]);
   const handleOpenPlans = useCallback(() => navigateTo("subscriptionPlans"), [navigateTo]);
+
+  const handleBrowseHubChoice = useCallback(
+    (choice: BrowseHubChoice) => {
+      if (choice === "findGear") {
+        saveHomeFeedLens("feed");
+        saveHomeFeedMode("all");
+        saveHomeFeedQuery("");
+        navigateTo("home");
+        return;
+      }
+      if (choice === "yardSales") {
+        navigateTo("yardSales");
+        return;
+      }
+      if (choice === "neighborGarages") {
+        saveHomeFeedLens("garages");
+        saveHomeFeedMode("all");
+        navigateTo("home");
+        return;
+      }
+      setListingPrefill(null);
+      setEditingListingId(null);
+      navigateTo("listingIntro");
+    },
+    [navigateTo],
+  );
+
+  const handleOpenNeighborGarage = useCallback(
+    (hostId: string) => {
+      setSelectedNeighborGarageHostId(hostId);
+      navigateTo("neighborGarage");
+    },
+    [navigateTo],
+  );
 
   const openRentLocationSetup = useCallback(() => {
     setHomeLocationError(null);
@@ -474,7 +528,7 @@ function AppRoutes() {
     if (currentScreen === "firstHello") {
       markIntroDone();
       setNavStack([]);
-      setCurrentScreen(isOnboardingComplete() ? "home" : "whereAreYou");
+      setCurrentScreen(isOnboardingComplete() ? "browseHub" : "whereAreYou");
       return;
     }
 
@@ -482,7 +536,7 @@ function AppRoutes() {
       markIntroDone();
       markRoleChosen();
       setNavStack([]);
-      setCurrentScreen(isOnboardingComplete() ? "home" : "whereAreYou");
+      setCurrentScreen(isOnboardingComplete() ? "browseHub" : "whereAreYou");
       return;
     }
 
@@ -495,13 +549,13 @@ function AppRoutes() {
     ) {
       completeOnboarding();
       setNavStack([]);
-      setCurrentScreen("home");
+      setCurrentScreen("browseHub");
       return;
     }
 
     setAppMode("rent");
     setNavStack([]);
-    setCurrentScreen("home");
+    setCurrentScreen("browseHub");
   }, [currentScreen, navigateTo]);
 
   const handleSplashContinue = () => {
@@ -514,7 +568,7 @@ function AppRoutes() {
     markIntroDone();
     if (isOnboardingComplete()) {
       setNavStack([]);
-      setCurrentScreen("home");
+      setCurrentScreen("browseHub");
       return;
     }
     navigateTo("whereAreYou");
@@ -628,12 +682,16 @@ function AppRoutes() {
         setCurrentScreen(previous);
         return stack.slice(0, -1);
       }
+      if (currentScreen === "home" || currentScreen === "yardSales") {
+        setCurrentScreen("browseHub");
+        return stack;
+      }
       if (currentScreen === "listItem" || currentScreen === "listingIntro") {
         const listingFallback = LISTING_BACK_FALLBACK[currentScreen];
         if (listingFallback) {
           setCurrentScreen(listingFallback);
         } else {
-          setCurrentScreen("home");
+          setCurrentScreen("browseHub");
         }
         return stack;
       }
@@ -642,11 +700,11 @@ function AppRoutes() {
         if (fallback) {
           setCurrentScreen(fallback);
         } else {
-          setCurrentScreen("home");
+          setCurrentScreen("browseHub");
         }
         return stack;
       }
-      setCurrentScreen("home");
+      setCurrentScreen("browseHub");
       return stack;
     });
   }, [currentScreen]);
@@ -816,6 +874,13 @@ function AppRoutes() {
           />
         )}
 
+        {currentScreen === "browseHub" && (
+          <BrowseHubScreen
+            onChoose={handleBrowseHubChoice}
+            onEditLocation={openRentLocationSetup}
+          />
+        )}
+
         {currentScreen === "home" && (
           <HomeFeed
             onNavigate={handleNavigate}
@@ -827,6 +892,15 @@ function AppRoutes() {
               handleCategorySelect(categoryIdFromName(label), label)
             }
             onRentals={handleOpenRentals}
+            onBackToHub={openBrowseHub}
+          />
+        )}
+
+        {currentScreen === "yardSales" && (
+          <YardSalesScreen
+            onBack={openBrowseHub}
+            onEditLocation={openRentLocationSetup}
+            onOpenGarage={handleOpenNeighborGarage}
           />
         )}
 
@@ -868,7 +942,7 @@ function AppRoutes() {
             onViewProfile={() => handleOpenProfile()}
             onReRent={() => {
               setNavStack([]);
-              setCurrentScreen("home");
+              setCurrentScreen("browseHub");
             }}
           />
         )}

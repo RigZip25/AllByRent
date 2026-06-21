@@ -652,6 +652,16 @@
     }
   }
 
+  .browse-hub-cards {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .browse-hub-card-art {
+    min-height: clamp(72px, 14dvh, 120px);
+    padding: 0.75rem;
+  }
+
   .onboarding-step {
     flex: 1;
     min-height: 0;

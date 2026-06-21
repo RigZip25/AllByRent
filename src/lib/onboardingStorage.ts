@@ -59,13 +59,13 @@ export function markRoleChosen(): void {
 export type OnboardingResumeScreen =
   | "firstHello"
   | "whereAreYou"
-  | "home";
+  | "browseHub";
 
 /** Next screen after splash (or when skipping splash after auth callback). */
 export function resolveOnboardingResumeScreen(): OnboardingResumeScreen {
   if (!isIntroDone()) return "firstHello";
   if (!isOnboardingComplete()) return "whereAreYou";
-  return "home";
+  return "browseHub";
 }
 
 /** Dev: run in console to see full onboarding again */
@@ -79,8 +79,8 @@ export function clearOnboardingComplete(): void {
   }
 }
 
-export type InitialRoute = "splash" | "home";
+export type InitialRoute = "splash" | "browseHub";
 
 export function getInitialRoute(): InitialRoute {
-  return isIntroDone() ? "home" : "splash";
+  return isIntroDone() ? "browseHub" : "splash";
 }
