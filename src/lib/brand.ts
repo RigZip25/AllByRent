@@ -115,7 +115,7 @@ export const ONBOARDING = {
     title: "Open your garage",
     subtitle: "Set your hours, then snap items straight onto the sale shelf.",
     hoursTitle: "When are you open?",
-    hoursHint: "Pick your day(s) and hours — followers get a heads-up when you're open.",
+    hoursHint: "Pick your day(s) and hours — auction items bid until you close. Followers get a heads-up when you're open.",
     daysLabel: "Day of week",
     timeLabel: "Open hours",
     timeFrom: "From",
@@ -148,10 +148,12 @@ export const ONBOARDING = {
     priceLabel: "Price",
     buyNowLabel: "Buy now price",
     startingBidLabel: "Starting bid",
-    bothHint: "Auction ~30 min · winner pays at checkout within 30 min or lot goes to next bidder.",
+    bothHint: "Buy now anytime · auction bids until your garage closes.",
+    auctionWindowLabel: "Auction date & time",
+    auctionWindowHint: "Uses your garage open hours above — bidding opens and closes on that schedule.",
     auctionTermsTitle: "Auction terms",
     auctionTermsBody:
-      "When the auction ends, the high bidder must pay at checkout immediately, within 30 minutes. If payment isn't completed in time, the lot automatically goes to the next-highest bidder at their bid price — and so on until someone pays or no eligible bidders remain.",
+      "Bidding runs during your garage open hours and ends when you close. When the auction ends, the high bidder must pay at checkout within 30 minutes. If payment isn't completed in time, the lot automatically goes to the next-highest bidder at their bid price.",
     publishCta: "Put on shelf →",
     publishing: "Adding to shelf…",
     defaultTitle: "Sale item",
@@ -164,12 +166,12 @@ export const ONBOARDING = {
   },
   garageAuction: {
     bidTerms:
-      "By bidding you agree: the high bidder pays at checkout within 30 minutes. If they don't pay, the lot goes to the next-highest bidder at their bid price.",
+      "By bidding you agree: auction ends when the garage closes. The high bidder pays at checkout within 30 minutes. If they don't pay, the lot goes to the next-highest bidder.",
     checkoutTerms:
-      "Pay at checkout now. You have 30 minutes — if payment isn't completed, the lot automatically goes to the next-highest bidder.",
+      "Pay at checkout now. You have 30 minutes after the auction ends — if payment isn't completed, the lot automatically goes to the next-highest bidder.",
     runnerUpTitle: "You're the next bidder",
     runnerUpSubtitle: "The previous winner didn't pay in time — pay your bid within 30 minutes.",
-    shopBanner: "Auction ends → pay at checkout within 30 min or lot goes to next bidder",
+    shopBanner: "Auction ends when garage closes → winner pays within 30 min or lot goes to next bidder",
     winBannerSuffix: "now (30 min)",
   },
   garageWorkflow: {
@@ -181,7 +183,7 @@ export const ONBOARDING = {
     step2Title: "Snap onto the shelf",
     step2Body: "One photo, optional tag, price or auction — each item in seconds.",
     step3Title: "Neighbors shop your garage",
-    step3Body: "They browse your shelf, buy now or bid. Auction winners pay within 30 min or the lot passes to the next bidder.",
+    step3Body: "They browse your shelf, buy now or bid until you close. Auction winners pay within 30 min or the lot passes to the next bidder.",
     cta: "Got it — snap my first item →",
     skip: "Skip intro",
   },

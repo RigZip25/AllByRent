@@ -1,3 +1,5 @@
+import { defaultAuctionWindow, inferAuctionStartsAt, type AuctionWindow } from "./garageAuctionWindow";
+import { getGarageSaleSchedule } from "./garageSaleStorage";
 import type { ShopOfferKind } from "./garageShopStorage";
 
 const OFFERS_KEY = "evorios_garage_sale_offers";
@@ -5,7 +7,9 @@ const OFFERS_KEY = "evorios_garage_sale_offers";
 export type GarageSaleOfferPrefs = {
   kind: ShopOfferKind;
   startingBidUsd: number;
-  /** ISO timestamp when auction ends (demo). */
+  /** ISO — bidding opens (garage hours). */
+  startsAt: string;
+  /** ISO — auction closes (end of garage hours that day). */
   endsAt: string;
 };
 
@@ -30,6 +34,12 @@ function writeOffers(map: OfferMap): void {
   }
 }
 
+function normalizeOfferPrefs(raw: GarageSaleOfferPrefs): GarageSaleOfferPrefs {
+  const startsAt =
+    raw.startsAt ?? inferAuctionStartsAt(raw.endsAt, getGarageSaleSchedule());
+  return { ...raw, startsAt };
+}
+
 export function setGarageSaleOfferPrefs(listingId: string, prefs: GarageSaleOfferPrefs): void {
   const map = readOffers();
   map[listingId] = prefs;
@@ -37,11 +47,13 @@ export function setGarageSaleOfferPrefs(listingId: string, prefs: GarageSaleOffe
 }
 
 export function getGarageSaleOfferPrefs(listingId: string): GarageSaleOfferPrefs | null {
-  return readOffers()[listingId] ?? null;
+  const raw = readOffers()[listingId];
+  if (!raw) return null;
+  return normalizeOfferPrefs(raw);
 }
 
-export function defaultAuctionEndsAt(): string {
-  return new Date(Date.now() + 30 * 60_000).toISOString();
+export function defaultAuctionOfferWindow(): AuctionWindow {
+  return defaultAuctionWindow(getGarageSaleSchedule());
 }
 
 export function defaultStartingBid(buyNowUsd: number): number {

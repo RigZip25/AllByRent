@@ -8,6 +8,7 @@ import {
   placeGarageBid,
   type ShopOffer,
 } from "../../lib/garageShopStorage";
+import { formatAuctionWindowLabel } from "../../lib/garageAuctionWindow";
 
 const GREEN = "#0D5C3A";
 const BLUE = "#2563EB";
@@ -52,6 +53,7 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
       amountUsd: value,
       minBidUsd,
       endsAt: offer.endsAt,
+      startsAt: offer.startsAt,
       listingTitle: listing.title || "Sale item",
     });
     if (!result.ok) {
@@ -79,6 +81,9 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
               High bid {highBid ? formatShopUsd(highBid.amountUsd) : formatShopUsd(offer.startingBidUsd)}
               {" · "}
               Buy now {formatShopUsd(offer.buyNowUsd)}
+            </p>
+            <p className="mt-1 text-[12px] font-medium text-gray-600">
+              {formatAuctionWindowLabel({ startsAt: offer.startsAt, endsAt: offer.endsAt })}
             </p>
           </div>
           <button

@@ -10,6 +10,8 @@ import {
 import {
   getGarageSaleOfferPrefs,
 } from "./garageSaleOfferStorage";
+import { defaultAuctionWindow, formatAuctionTiming, inferAuctionStartsAt } from "./garageAuctionWindow";
+import { getGarageSaleSchedule } from "./garageSaleStorage";
 
 const CART_KEY = "evorios_garage_cart";
 const BIDS_KEY = "evorios_garage_bids";
@@ -38,6 +40,7 @@ export type ShopOffer = {
   buyNowUsd: number;
   startingBidUsd: number;
   minIncrementUsd: number;
+  startsAt: string;
   endsAt: string;
 };
 
@@ -83,9 +86,10 @@ export function getShopOffer(listing: ListingDraft): ShopOffer | null {
 
   const stored = getGarageSaleOfferPrefs(listing.id);
   const startingBidUsd = stored?.startingBidUsd ?? Math.max(1, Math.round(buyNowUsd * 0.55 * 100) / 100);
-  const endsAt =
-    stored?.endsAt ??
-    new Date(Date.now() + (2 + (hashListingId(listing.id) % 5)) * 3_600_000).toISOString();
+  const fallbackWindow = defaultAuctionWindow(getGarageSaleSchedule());
+  const endsAt = stored?.endsAt ?? fallbackWindow.endsAt;
+  const startsAt =
+    stored?.startsAt ?? inferAuctionStartsAt(endsAt, getGarageSaleSchedule());
   const kind: ShopOfferKind =
     stored?.kind ?? (hashListingId(listing.id) % 3 !== 0 ? "both" : "buy_now");
 
@@ -94,6 +98,7 @@ export function getShopOffer(listing: ListingDraft): ShopOffer | null {
     buyNowUsd,
     startingBidUsd,
     minIncrementUsd: buyNowUsd >= 50 ? 5 : 1,
+    startsAt,
     endsAt,
   };
 }
@@ -199,9 +204,14 @@ export function placeGarageBid(input: {
   amountUsd: number;
   minBidUsd: number;
   endsAt: string;
+  startsAt: string;
   listingTitle?: string;
 }): { ok: true; bid: GarageBid } | { ok: false; reason: string } {
-  if (!canBidOnLot(input.listingId, input.endsAt)) {
+  if (!canBidOnLot(input.listingId, input.startsAt, input.endsAt)) {
+    const now = Date.now();
+    if (now < new Date(input.startsAt).getTime()) {
+      return { ok: false, reason: "Auction hasn't started yet" };
+    }
     return { ok: false, reason: "Auction ended or item sold" };
   }
   if (input.amountUsd < input.minBidUsd) {
@@ -241,13 +251,8 @@ export function buyNowGarageItem(input: {
   return { ok: true };
 }
 
-export function formatAuctionEnds(iso: string): string {
-  const ms = new Date(iso).getTime() - Date.now();
-  if (ms <= 0) return "Ended";
-  const hours = Math.floor(ms / 3_600_000);
-  const minutes = Math.floor((ms % 3_600_000) / 60_000);
-  if (hours > 0) return `${hours}h ${minutes}m left`;
-  return `${minutes}m left`;
+export function formatAuctionEnds(startsAt: string, endsAt: string): string {
+  return formatAuctionTiming({ startsAt, endsAt });
 }
 
 export function cartLineFromListing(listing: ListingDraft, priceUsd: number): GarageCartLine {

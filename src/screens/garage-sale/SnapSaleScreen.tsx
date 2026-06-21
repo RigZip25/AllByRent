@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Camera, Gavel, Loader2, ShoppingBag, Tag } from "lucide-react";
 import { BRAND_AMBER, BRAND_GREEN, MASCOT_NAME, ONBOARDING } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
@@ -12,11 +12,12 @@ import { applyFrictionlessDefaults } from "../listing/frictionlessDefaults";
 import { createInitialListingDraft } from "../listing/types";
 import { applyYardSaleListingDefaults } from "../../lib/yardSaleListing";
 import {
-  defaultAuctionEndsAt,
+  defaultAuctionOfferWindow,
   defaultStartingBid,
   setGarageSaleOfferPrefs,
   type GarageSaleOfferPrefs,
 } from "../../lib/garageSaleOfferStorage";
+import { formatAuctionWindowLabel } from "../../lib/garageAuctionWindow";
 import type { ShopOfferKind } from "../../lib/garageShopStorage";
 import { garageSaleOpenLabel, getGarageSaleSchedule } from "../../lib/garageSaleStorage";
 
@@ -80,8 +81,19 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
   const [error, setError] = useState<string | null>(null);
   const [justPublished, setJustPublished] = useState(false);
   const [shelfCount, setShelfCount] = useState(0);
+  const [scheduleTick, setScheduleTick] = useState(0);
+
+  useEffect(() => {
+    const sync = () => setScheduleTick((tick) => tick + 1);
+    window.addEventListener("evorios-garage-schedule", sync);
+    return () => window.removeEventListener("evorios-garage-schedule", sync);
+  }, []);
 
   const openHours = garageSaleOpenLabel(getGarageSaleSchedule());
+  const auctionWindowLabel = useMemo(() => {
+    void scheduleTick;
+    return formatAuctionWindowLabel(defaultAuctionOfferWindow());
+  }, [scheduleTick]);
   const hasPhoto = Boolean(photo);
   const priceUsd = Number.parseFloat(price.replace(/[^0-9.]/g, ""));
   const bidUsd = Number.parseFloat(startingBid.replace(/[^0-9.]/g, ""));
@@ -154,6 +166,7 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
         }),
       );
 
+      const window = defaultAuctionOfferWindow();
       const offerPrefs: GarageSaleOfferPrefs = {
         kind: pricingMode,
         startingBidUsd:
@@ -162,7 +175,8 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
             : pricingMode === "both"
               ? bidUsd
               : bidUsd,
-        endsAt: defaultAuctionEndsAt(),
+        startsAt: window.startsAt,
+        endsAt: window.endsAt,
       };
       setGarageSaleOfferPrefs(draft.id, offerPrefs);
 
@@ -413,6 +427,19 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
                 />
               </div>
             </label>
+          ) : null}
+
+          {pricingMode === "auction" || pricingMode === "both" ? (
+            <div
+              className="mt-3 rounded-xl border px-3 py-2.5 text-xs"
+              style={{ borderColor: `${GREEN}44`, backgroundColor: `${GREEN}08` }}
+            >
+              <p className="font-bold text-gray-800">{copy.auctionWindowLabel}</p>
+              <p className="mt-1 font-semibold" style={{ color: GREEN }}>
+                {auctionWindowLabel}
+              </p>
+              <p className="mt-1 text-gray-500">{copy.auctionWindowHint}</p>
+            </div>
           ) : null}
 
           {pricingMode === "both" ? (

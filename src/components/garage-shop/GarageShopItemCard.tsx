@@ -1,6 +1,7 @@
 import { Gavel, ShoppingBag } from "lucide-react";
 import type { ListingDraft } from "../../screens/listing/types";
 import { getLotState, isAuctionTimeActive } from "../../lib/garageAuctionState";
+import { isAuctionNotStarted } from "../../lib/garageAuctionWindow";
 import {
   formatAuctionEnds,
   formatShopUsd,
@@ -38,7 +39,9 @@ export function GarageShopItemCard({
   const myBid = offer ? getMyBid(listing.id) : null;
   const currentBidUsd = highBid?.amountUsd ?? offer?.startingBidUsd ?? 0;
   const showAuction = offer?.kind === "auction" || offer?.kind === "both";
-  const auctionLive = offer ? isAuctionTimeActive(offer.endsAt) : false;
+  const auctionLive = offer ? isAuctionTimeActive(offer.startsAt, offer.endsAt) : false;
+  const auctionPending = offer ? isAuctionNotStarted({ startsAt: offer.startsAt, endsAt: offer.endsAt }) : false;
+  const auctionEnded = offer ? !auctionLive && !auctionPending : false;
   const isLeading =
     Boolean(myBid && highBid && myBid.bidderId === highBid.bidderId && myBid.amountUsd === highBid.amountUsd);
   const sold = lotState.status === "sold";
@@ -72,14 +75,21 @@ export function GarageShopItemCard({
         ) : (
           <div className="flex h-full w-full items-center justify-center text-3xl text-gray-300">📷</div>
         )}
-        {showAuction && auctionLive ? (
+        {showAuction && auctionPending ? (
+          <span
+            className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
+            style={{ backgroundColor: "#6B7280" }}
+          >
+            Soon
+          </span>
+        ) : showAuction && auctionLive ? (
           <span
             className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
             style={{ backgroundColor: BLUE }}
           >
             Bid
           </span>
-        ) : showAuction && !auctionLive ? (
+        ) : showAuction && auctionEnded ? (
           <span className="absolute left-2 top-2 rounded-full bg-gray-700 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
             Ended
           </span>
@@ -104,7 +114,7 @@ export function GarageShopItemCard({
             <div className="text-[12px] text-gray-500">
               <span className="font-semibold text-gray-800">{formatShopUsd(currentBidUsd)}</span>
               <span className="mx-1">·</span>
-              <span>{formatAuctionEnds(offer.endsAt)}</span>
+              <span>{formatAuctionEnds(offer.startsAt, offer.endsAt)}</span>
             </div>
           ) : null}
           <p className="text-[17px] font-extrabold leading-tight" style={{ color: GREEN }}>
@@ -130,10 +140,17 @@ export function GarageShopItemCard({
               <Gavel className="h-3.5 w-3.5" aria-hidden />
               Bid
             </button>
+          ) : showAuction && auctionPending ? (
+            <span
+              className="flex flex-1 items-center justify-center rounded-xl border py-2 text-[11px] font-bold text-gray-500"
+              style={{ borderColor: BORDER }}
+            >
+              Opens soon
+            </span>
           ) : null}
           <button
             type="button"
-            disabled={preview || (showAuction && !auctionLive && offer.kind === "auction")}
+            disabled={preview || (showAuction && auctionEnded && offer.kind === "auction")}
             onClick={() => onBuyNow(listing, offer)}
             className="flex flex-1 items-center justify-center gap-1 rounded-xl py-2 text-[12px] font-bold text-white disabled:opacity-50"
             style={{ backgroundColor: showAuction ? GREEN : AMBER, color: showAuction ? "#fff" : GREEN }}

@@ -73,13 +73,14 @@ export function isLotOnShelf(listingId: string): boolean {
   return state.status === "active";
 }
 
-export function isAuctionTimeActive(endsAt: string): boolean {
-  return new Date(endsAt).getTime() > Date.now();
+export function isAuctionTimeActive(startsAt: string, endsAt: string): boolean {
+  const now = Date.now();
+  return now >= new Date(startsAt).getTime() && now < new Date(endsAt).getTime();
 }
 
-export function canBidOnLot(listingId: string, endsAt: string): boolean {
+export function canBidOnLot(listingId: string, startsAt: string, endsAt: string): boolean {
   if (!isLotOnShelf(listingId)) return false;
-  return isAuctionTimeActive(endsAt);
+  return isAuctionTimeActive(startsAt, endsAt);
 }
 
 export function canBuyNowLot(listingId: string): boolean {
