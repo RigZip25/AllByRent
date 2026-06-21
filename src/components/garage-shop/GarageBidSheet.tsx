@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { X } from "lucide-react";
 import type { ListingDraft } from "../../screens/listing/types";
+import { ONBOARDING } from "../../lib/brand";
 import {
   formatShopUsd,
   getHighBid,
@@ -11,6 +12,7 @@ import {
 const GREEN = "#0D5C3A";
 const BLUE = "#2563EB";
 const BORDER = "#E8E6E0";
+const auctionCopy = ONBOARDING.garageAuction;
 
 type GarageBidSheetProps = {
   listing: ListingDraft;
@@ -133,6 +135,8 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
         <p className="mt-1 text-xs text-gray-500">Minimum next bid {formatShopUsd(minBidUsd)}</p>
 
         {error ? <p className="mt-2 text-sm font-medium text-red-600">{error}</p> : null}
+
+        <p className="mt-3 text-xs leading-relaxed text-gray-500">{auctionCopy.bidTerms}</p>
 
         <button
           type="button"

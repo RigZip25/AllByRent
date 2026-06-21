@@ -175,6 +175,18 @@ export function getHighBid(listingId: string): GarageBid | null {
   return bids[0] ?? null;
 }
 
+/** Highest bid from a bidder not in `excludedBidderIds` (for runner-up after forfeit). */
+export function getBestBidExcluding(listingId: string, excludedBidderIds: string[]): GarageBid | null {
+  if (excludedBidderIds.length === 0) return getHighBid(listingId);
+  const excluded = new Set(excludedBidderIds);
+  let best: GarageBid | null = null;
+  for (const bid of getBidsForListing(listingId)) {
+    if (excluded.has(bid.bidderId)) continue;
+    if (!best || bid.amountUsd > best.amountUsd) best = bid;
+  }
+  return best;
+}
+
 export function getMyBid(listingId: string): GarageBid | null {
   const me = getGarageBidderId();
   const bids = getBidsForListing(listingId).filter((bid) => bid.bidderId === me);

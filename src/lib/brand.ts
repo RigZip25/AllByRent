@@ -148,7 +148,10 @@ export const ONBOARDING = {
     priceLabel: "Price",
     buyNowLabel: "Buy now price",
     startingBidLabel: "Starting bid",
-    bothHint: "Neighbors can buy now or bid — auction runs ~30 min (demo).",
+    bothHint: "Auction ~30 min · winner pays at checkout within 30 min or lot goes to next bidder.",
+    auctionTermsTitle: "Auction terms",
+    auctionTermsBody:
+      "When the auction ends, the high bidder must pay at checkout immediately, within 30 minutes. If payment isn't completed in time, the lot automatically goes to the next-highest bidder at their bid price — and so on until someone pays or no eligible bidders remain.",
     publishCta: "Put on shelf →",
     publishing: "Adding to shelf…",
     defaultTitle: "Sale item",
@@ -159,6 +162,16 @@ export const ONBOARDING = {
     viewShopCta: "Preview my shop",
     mascotHint: "skips categories and long forms — this is garage-sale speed.",
   },
+  garageAuction: {
+    bidTerms:
+      "By bidding you agree: the high bidder pays at checkout within 30 minutes. If they don't pay, the lot goes to the next-highest bidder at their bid price.",
+    checkoutTerms:
+      "Pay at checkout now. You have 30 minutes — if payment isn't completed, the lot automatically goes to the next-highest bidder.",
+    runnerUpTitle: "You're the next bidder",
+    runnerUpSubtitle: "The previous winner didn't pay in time — pay your bid within 30 minutes.",
+    shopBanner: "Auction ends → pay at checkout within 30 min or lot goes to next bidder",
+    winBannerSuffix: "now (30 min)",
+  },
   garageWorkflow: {
     eyebrow: "Your household garage",
     title: "How an open garage works",
@@ -168,7 +181,7 @@ export const ONBOARDING = {
     step2Title: "Snap onto the shelf",
     step2Body: "One photo, optional tag, price or auction — each item in seconds.",
     step3Title: "Neighbors shop your garage",
-    step3Body: "They browse your shelf, buy now or bid, checkout in one cart.",
+    step3Body: "They browse your shelf, buy now or bid. Auction winners pay within 30 min or the lot passes to the next bidder.",
     cta: "Got it — snap my first item →",
     skip: "Skip intro",
   },

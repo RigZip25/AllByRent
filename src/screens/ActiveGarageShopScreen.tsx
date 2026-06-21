@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ShoppingCart, Store, Trophy } from "lucide-react";
 import { GarageBidSheet } from "../components/garage-shop/GarageBidSheet";
 import { GarageShopItemCard } from "../components/garage-shop/GarageShopItemCard";
@@ -8,6 +8,7 @@ import {
   resolveEndedAuctions,
   resolveExpiredWinnerCheckouts,
 } from "../lib/garageAuctionState";
+import { ONBOARDING } from "../lib/brand";
 import { garageSaleOpenLabel, getGarageSaleSchedule } from "../lib/garageSaleStorage";
 import {
   buyNowGarageItem,
@@ -24,6 +25,7 @@ import { pushInAppNotification } from "../lib/inAppNotifications";
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 const BORDER = "#E8E6E0";
+const auctionCopy = ONBOARDING.garageAuction;
 
 type ActiveGarageShopScreenProps = {
   hostId: string;
@@ -48,6 +50,7 @@ export function ActiveGarageShopScreen({
   const [bidTarget, setBidTarget] = useState<{ listing: ListingDraft; offer: ShopOffer } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [pendingWins, setPendingWins] = useState(() => getMyPendingWinnerCheckouts());
+  const seenPendingWinIdsRef = useRef<Set<string>>(new Set());
   const city = getActiveRentLocationLabel().trim();
   const garageName = useMemo(() => garageDisplayName(hostId), [hostId]);
   const [openLabel, setOpenLabel] = useState(() => garageSaleOpenLabel(getGarageSaleSchedule()));
@@ -123,6 +126,16 @@ export function ActiveGarageShopScreen({
     const timer = window.setInterval(() => loadShelf(), 30_000);
     return () => window.clearInterval(timer);
   }, [loadShelf, preview]);
+
+  useEffect(() => {
+    if (preview || pendingWins.length === 0) return;
+    const fresh = pendingWins.find(
+      (win) => !seenPendingWinIdsRef.current.has(`${win.listingId}:${win.runnerUpAttempt}`),
+    );
+    if (!fresh) return;
+    seenPendingWinIdsRef.current.add(`${fresh.listingId}:${fresh.runnerUpAttempt}`);
+    onOpenWinnerCheckout(fresh.listingId);
+  }, [pendingWins, preview, onOpenWinnerCheckout]);
 
   const showToast = (message: string) => {
     setToast(message);
@@ -209,7 +222,7 @@ export function ActiveGarageShopScreen({
           <Store className="h-4 w-4 shrink-0" aria-hidden />
           {preview
             ? "Shop preview — neighbors see photo + price, Buy now or Bid, and a shared cart."
-            : "Buy now removes the lot · Auction ends → winner pays separately"}
+            : auctionCopy.shopBanner}
         </div>
 
         {!preview && pendingWins.length > 0 ? (
@@ -224,7 +237,8 @@ export function ActiveGarageShopScreen({
               >
                 <Trophy className="h-5 w-5 shrink-0" style={{ color: AMBER }} />
                 <span className="min-w-0 flex-1 text-[13px] font-semibold text-gray-900">
-                  You won — pay ${win.winningBidUsd} to claim
+                  {win.runnerUpAttempt > 1 ? "Next bidder —" : "You won —"} pay ${win.winningBidUsd}{" "}
+                  {auctionCopy.winBannerSuffix}
                 </span>
               </button>
             ))}

@@ -418,6 +418,16 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
           {pricingMode === "both" ? (
             <p className="mt-2 text-xs text-gray-500">{copy.bothHint}</p>
           ) : null}
+
+          {pricingMode === "auction" || pricingMode === "both" ? (
+            <div
+              className="mt-3 rounded-xl border bg-white p-3 text-xs leading-relaxed text-gray-600"
+              style={{ borderColor: BORDER }}
+            >
+              <p className="font-bold text-gray-800">{copy.auctionTermsTitle}</p>
+              <p className="mt-1.5">{copy.auctionTermsBody}</p>
+            </div>
+          ) : null}
         </section>
 
         {error ? <p className="mt-3 text-sm font-medium text-red-600">{error}</p> : null}

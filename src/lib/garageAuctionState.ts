@@ -1,12 +1,12 @@
-import { getGarageSaleOfferPrefs, restartAuctionAfterForfeit } from "./garageSaleOfferStorage";
-import { clearBidsForListing, getHighBid, type GarageBid } from "./garageShopStorage";
+import { getGarageSaleOfferPrefs } from "./garageSaleOfferStorage";
+import { getBestBidExcluding, getHighBid, type GarageBid } from "./garageShopStorage";
 import { pushInAppNotification } from "./inAppNotifications";
 
 const LOT_STATE_KEY = "evorios_garage_lot_state";
 const BIDDER_ID_KEY = "evorios_garage_bidder_id";
 
-/** Hours winner has to pay after auction ends (demo). */
-const WINNER_PAY_HOURS = 24;
+/** Minutes winner has to pay after auction ends or after becoming runner-up (demo). */
+export const GARAGE_AUCTION_PAY_MINUTES = 30;
 
 export type GarageLotState =
   | { status: "active" }
@@ -17,6 +17,10 @@ export type GarageLotState =
       winningBidUsd: number;
       endedAt: string;
       payByIso: string;
+      /** Bidders who did not pay in time — skipped when passing the lot down. */
+      forfeitedBidderIds: string[];
+      /** 1 = auction winner, 2+ = next-highest bidder after forfeit. */
+      runnerUpAttempt: number;
     }
   | { status: "expired_no_bids"; endedAt: string };
 
@@ -39,6 +43,10 @@ function writeLotStates(map: LotStateMap): void {
   } catch {
     /* */
   }
+}
+
+function payByFromNow(): string {
+  return new Date(Date.now() + GARAGE_AUCTION_PAY_MINUTES * 60_000).toISOString();
 }
 
 export function getGarageBidderId(): string {
@@ -118,6 +126,7 @@ export function getMyPendingWinnerCheckouts(): Array<{
   listingId: string;
   winningBidUsd: number;
   payByIso: string;
+  runnerUpAttempt: number;
 }> {
   const me = getGarageBidderId();
   const map = readLotStates();
@@ -130,6 +139,7 @@ export function getMyPendingWinnerCheckouts(): Array<{
       listingId,
       winningBidUsd: state.winningBidUsd,
       payByIso: state.payByIso,
+      runnerUpAttempt: state.runnerUpAttempt ?? 1,
     }));
 }
 
@@ -141,7 +151,30 @@ export function isAwaitingCheckoutForMe(listingId: string): boolean {
 export function getWinnerCheckoutDetails(listingId: string): Extract<GarageLotState, { status: "awaiting_checkout" }> | null {
   const state = getLotState(listingId);
   if (state.status !== "awaiting_checkout") return null;
-  return state;
+  return {
+    ...state,
+    forfeitedBidderIds: state.forfeitedBidderIds ?? [],
+    runnerUpAttempt: state.runnerUpAttempt ?? 1,
+  };
+}
+
+function assignAwaitingCheckout(
+  map: LotStateMap,
+  listingId: string,
+  bid: GarageBid,
+  endedAt: string,
+  forfeitedBidderIds: string[],
+  runnerUpAttempt: number,
+): void {
+  map[listingId] = {
+    status: "awaiting_checkout",
+    winnerBidderId: bid.bidderId,
+    winningBidUsd: bid.amountUsd,
+    endedAt,
+    payByIso: payByFromNow(),
+    forfeitedBidderIds,
+    runnerUpAttempt,
+  };
 }
 
 /**
@@ -166,19 +199,12 @@ export function resolveEndedAuctions(listingIds: string[]): void {
 
     const high: GarageBid | null = getHighBid(listingId);
     if (high && high.bidderId) {
-      const payByIso = new Date(now + WINNER_PAY_HOURS * 3_600_000).toISOString();
-      map[listingId] = {
-        status: "awaiting_checkout",
-        winnerBidderId: high.bidderId,
-        winningBidUsd: high.amountUsd,
-        endedAt: new Date().toISOString(),
-        payByIso,
-      };
+      assignAwaitingCheckout(map, listingId, high, new Date().toISOString(), [], 1);
       if (high.bidderId === getGarageBidderId()) {
         pushInAppNotification({
           type: "general",
           title: "You won the auction!",
-          body: `Pay $${high.amountUsd} within ${WINNER_PAY_HOURS}h to claim your item.`,
+          body: `Pay $${high.amountUsd} now — ${GARAGE_AUCTION_PAY_MINUTES} minutes before the lot goes to the next bidder.`,
         });
       }
     } else {
@@ -191,7 +217,7 @@ export function resolveEndedAuctions(listingIds: string[]): void {
 }
 
 /**
- * Winner did not pay in time — lot goes back on shelf with a fresh auction window (demo).
+ * Winner did not pay in time — lot passes to the next-highest bidder (same 30-min window).
  */
 export function resolveExpiredWinnerCheckouts(listingIds: string[]): void {
   const map = readLotStates();
@@ -203,18 +229,38 @@ export function resolveExpiredWinnerCheckouts(listingIds: string[]): void {
     if (!current || current.status !== "awaiting_checkout") continue;
     if (new Date(current.payByIso).getTime() > now) continue;
 
-    map[listingId] = { status: "active" };
-    clearBidsForListing(listingId);
-    restartAuctionAfterForfeit(listingId);
-    changed = true;
+    const forfeited = [...(current.forfeitedBidderIds ?? []), current.winnerBidderId];
+    const next = getBestBidExcluding(listingId, forfeited);
+    const me = getGarageBidderId();
 
-    if (current.winnerBidderId === getGarageBidderId()) {
+    if (current.winnerBidderId === me) {
       pushInAppNotification({
         type: "general",
         title: "Payment window expired",
-        body: "You didn't pay in time — this lot is open to bid again.",
+        body: "You didn't pay in time — this lot goes to the next-highest bidder.",
       });
     }
+
+    if (next) {
+      assignAwaitingCheckout(
+        map,
+        listingId,
+        next,
+        current.endedAt,
+        forfeited,
+        (current.runnerUpAttempt ?? 1) + 1,
+      );
+      if (next.bidderId === me) {
+        pushInAppNotification({
+          type: "general",
+          title: "You're the next bidder",
+          body: `Pay $${next.amountUsd} now — ${GARAGE_AUCTION_PAY_MINUTES} minutes to claim this lot.`,
+        });
+      }
+    } else {
+      map[listingId] = { status: "expired_no_bids", endedAt: new Date().toISOString() };
+    }
+    changed = true;
   }
 
   if (changed) writeLotStates(map);
