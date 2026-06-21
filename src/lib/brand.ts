@@ -83,28 +83,23 @@ export const ONBOARDING = {
   },
   browseHub: {
     title: "What brings you here?",
-    subtitle: "Pick a path — search, yard sales, or your own garage.",
+    subtitle: "Browse the block, yard sales, or stock your garage.",
     findGear: {
-      title: "Find something I need",
-      subtitle: "Search tools, gear, and deals to rent or buy nearby.",
-      cta: "Search the block →",
+      title: "Browse the block",
+      subtitle: "Search items or switch Feed / Garages — rent, buy, or peek at neighbor shelves.",
+      cta: "Open browse →",
     },
     yardSales: {
       title: "Yard sales & open garages",
       subtitle: "See who's open today — perfect for a Saturday drive.",
       cta: "Browse open sales →",
     },
-    neighborGarages: {
-      title: "Browse neighbor garages",
-      subtitle: "Peek inside storefronts on your block — no rush.",
-      cta: "Walk the block →",
-    },
     stockGarage: {
       title: "Stock my garage",
       subtitle: "List what you own — rent, sell, or give away from your showcase.",
       cta: "Open my showcase →",
     },
-    footer: "You can switch paths anytime from Home.",
+    footer: "Feed and Garages live on Browse — yard sales are separate.",
   },
   firstHello: {
     mascotRole: "Your garage guide",
