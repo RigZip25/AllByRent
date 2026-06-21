@@ -3,7 +3,11 @@ import { ArrowLeft, ShoppingCart, Store, Trophy } from "lucide-react";
 import { GarageBidSheet } from "../components/garage-shop/GarageBidSheet";
 import { GarageShopItemCard } from "../components/garage-shop/GarageShopItemCard";
 import { garageDisplayName } from "../lib/garageDisplay";
-import { getMyPendingWinnerCheckouts, resolveEndedAuctions } from "../lib/garageAuctionState";
+import {
+  getMyPendingWinnerCheckouts,
+  resolveEndedAuctions,
+  resolveExpiredWinnerCheckouts,
+} from "../lib/garageAuctionState";
 import { garageSaleOpenLabel, getGarageSaleSchedule } from "../lib/garageSaleStorage";
 import {
   buyNowGarageItem,
@@ -59,7 +63,9 @@ export function ActiveGarageShopScreen({
           (listing.hostId ?? "demo-user") === hostId &&
           listing.modes.sell,
       );
-      resolveEndedAuctions(candidates.map((listing) => listing.id));
+      const listingIds = candidates.map((listing) => listing.id);
+      resolveEndedAuctions(listingIds);
+      resolveExpiredWinnerCheckouts(listingIds);
       const shelf = candidates.filter((listing) => getShopOffer(listing));
       setListings(shelf);
       refreshPendingWins();
@@ -98,7 +104,9 @@ export function ActiveGarageShopScreen({
             (listing.hostId ?? "demo-user") === hostId &&
             listing.modes.sell,
         );
-        resolveEndedAuctions(candidates.map((listing) => listing.id));
+        const listingIds = candidates.map((listing) => listing.id);
+        resolveEndedAuctions(listingIds);
+        resolveExpiredWinnerCheckouts(listingIds);
         setListings(candidates.filter((listing) => getShopOffer(listing)));
         refreshPendingWins();
       })

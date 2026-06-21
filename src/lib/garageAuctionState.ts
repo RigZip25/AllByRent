@@ -1,5 +1,5 @@
-import { getGarageSaleOfferPrefs } from "./garageSaleOfferStorage";
-import { getHighBid, type GarageBid } from "./garageShopStorage";
+import { getGarageSaleOfferPrefs, restartAuctionAfterForfeit } from "./garageSaleOfferStorage";
+import { clearBidsForListing, getHighBid, type GarageBid } from "./garageShopStorage";
 import { pushInAppNotification } from "./inAppNotifications";
 
 const LOT_STATE_KEY = "evorios_garage_lot_state";
@@ -185,6 +185,36 @@ export function resolveEndedAuctions(listingIds: string[]): void {
       map[listingId] = { status: "expired_no_bids", endedAt: new Date().toISOString() };
     }
     changed = true;
+  }
+
+  if (changed) writeLotStates(map);
+}
+
+/**
+ * Winner did not pay in time — lot goes back on shelf with a fresh auction window (demo).
+ */
+export function resolveExpiredWinnerCheckouts(listingIds: string[]): void {
+  const map = readLotStates();
+  const now = Date.now();
+  let changed = false;
+
+  for (const listingId of listingIds) {
+    const current = map[listingId];
+    if (!current || current.status !== "awaiting_checkout") continue;
+    if (new Date(current.payByIso).getTime() > now) continue;
+
+    map[listingId] = { status: "active" };
+    clearBidsForListing(listingId);
+    restartAuctionAfterForfeit(listingId);
+    changed = true;
+
+    if (current.winnerBidderId === getGarageBidderId()) {
+      pushInAppNotification({
+        type: "general",
+        title: "Payment window expired",
+        body: "You didn't pay in time — this lot is open to bid again.",
+      });
+    }
   }
 
   if (changed) writeLotStates(map);

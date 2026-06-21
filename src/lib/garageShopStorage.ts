@@ -162,6 +162,14 @@ export function getBidsForListing(listingId: string): GarageBid[] {
     .sort((a, b) => b.amountUsd - a.amountUsd);
 }
 
+export function clearBidsForListing(listingId: string): void {
+  writeJson(
+    BIDS_KEY,
+    readBids().filter((bid) => bid.listingId !== listingId),
+  );
+  window.dispatchEvent(new Event("evorios-garage-bids"));
+}
+
 export function getHighBid(listingId: string): GarageBid | null {
   const bids = getBidsForListing(listingId);
   return bids[0] ?? null;

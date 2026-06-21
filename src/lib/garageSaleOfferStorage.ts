@@ -47,3 +47,13 @@ export function defaultAuctionEndsAt(): string {
 export function defaultStartingBid(buyNowUsd: number): number {
   return Math.max(1, Math.round(buyNowUsd * 0.55 * 100) / 100);
 }
+
+/** Restart auction timer after winner forfeits payment (demo). */
+export function restartAuctionAfterForfeit(listingId: string): void {
+  const existing = getGarageSaleOfferPrefs(listingId);
+  if (!existing) return;
+  setGarageSaleOfferPrefs(listingId, {
+    ...existing,
+    endsAt: defaultAuctionEndsAt(),
+  });
+}
