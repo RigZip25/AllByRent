@@ -1,5 +1,6 @@
 import { Gavel, ShoppingBag } from "lucide-react";
 import type { ListingDraft } from "../../screens/listing/types";
+import { getLotState, isAuctionTimeActive } from "../../lib/garageAuctionState";
 import {
   formatAuctionEnds,
   formatShopUsd,
@@ -29,6 +30,7 @@ export function GarageShopItemCard({
   onBid,
 }: GarageShopItemCardProps) {
   const offer = getShopOffer(listing);
+  const lotState = getLotState(listing.id);
   const cover = listing.photos[0] ?? null;
   const thumb = cover?.thumbId ? { ...cover, id: cover.thumbId } : cover;
   const { url } = useMediaUrl(thumb);
@@ -36,7 +38,27 @@ export function GarageShopItemCard({
   const myBid = offer ? getMyBid(listing.id) : null;
   const currentBidUsd = highBid?.amountUsd ?? offer?.startingBidUsd ?? 0;
   const showAuction = offer?.kind === "auction" || offer?.kind === "both";
+  const auctionLive = offer ? isAuctionTimeActive(offer.endsAt) : false;
+  const isLeading =
+    Boolean(myBid && highBid && myBid.bidderId === highBid.bidderId && myBid.amountUsd === highBid.amountUsd);
+  const sold = lotState.status === "sold";
 
+  if (!offer && lotState.status !== "sold") return null;
+  if (!offer && sold) {
+    return (
+      <article className="garage-shop-card flex flex-col overflow-hidden rounded-2xl border bg-gray-50 opacity-60" style={{ borderColor: BORDER }}>
+        <div className="relative aspect-square w-full bg-[#F3F4F6]">
+          {url ? <img src={url} alt="" className="h-full w-full object-cover grayscale" /> : null}
+          <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-sm font-bold uppercase text-white">
+            Sold
+          </span>
+        </div>
+        <div className="p-2.5">
+          <p className="line-clamp-2 text-[13px] font-semibold text-gray-500">{listing.title || "Sale item"}</p>
+        </div>
+      </article>
+    );
+  }
   if (!offer) return null;
 
   return (
@@ -50,15 +72,19 @@ export function GarageShopItemCard({
         ) : (
           <div className="flex h-full w-full items-center justify-center text-3xl text-gray-300">📷</div>
         )}
-        {showAuction ? (
+        {showAuction && auctionLive ? (
           <span
             className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
             style={{ backgroundColor: BLUE }}
           >
             Bid
           </span>
+        ) : showAuction && !auctionLive ? (
+          <span className="absolute left-2 top-2 rounded-full bg-gray-700 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+            Ended
+          </span>
         ) : null}
-        {myBid ? (
+        {isLeading && auctionLive ? (
           <span
             className="absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold text-white"
             style={{ backgroundColor: GREEN }}
@@ -93,7 +119,7 @@ export function GarageShopItemCard({
         </div>
 
         <div className="mt-auto flex gap-1.5 pt-2.5">
-          {showAuction ? (
+          {showAuction && auctionLive ? (
             <button
               type="button"
               disabled={preview}
@@ -107,7 +133,7 @@ export function GarageShopItemCard({
           ) : null}
           <button
             type="button"
-            disabled={preview}
+            disabled={preview || (showAuction && !auctionLive && offer.kind === "auction")}
             onClick={() => onBuyNow(listing, offer)}
             className="flex flex-1 items-center justify-center gap-1 rounded-xl py-2 text-[12px] font-bold text-white disabled:opacity-50"
             style={{ backgroundColor: showAuction ? GREEN : AMBER, color: showAuction ? "#fff" : GREEN }}

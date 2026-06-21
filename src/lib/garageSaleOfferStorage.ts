@@ -41,7 +41,7 @@ export function getGarageSaleOfferPrefs(listingId: string): GarageSaleOfferPrefs
 }
 
 export function defaultAuctionEndsAt(): string {
-  return new Date(Date.now() + 4 * 3_600_000).toISOString();
+  return new Date(Date.now() + 30 * 60_000).toISOString();
 }
 
 export function defaultStartingBid(buyNowUsd: number): number {

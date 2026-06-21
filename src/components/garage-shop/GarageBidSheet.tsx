@@ -49,6 +49,8 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
       hostId: listing.hostId ?? "demo-user",
       amountUsd: value,
       minBidUsd,
+      endsAt: offer.endsAt,
+      listingTitle: listing.title || "Sale item",
     });
     if (!result.ok) {
       setError(result.reason);

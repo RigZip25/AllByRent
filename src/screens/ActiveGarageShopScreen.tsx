@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ShoppingCart, Store } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Store, Trophy } from "lucide-react";
 import { GarageBidSheet } from "../components/garage-shop/GarageBidSheet";
 import { GarageShopItemCard } from "../components/garage-shop/GarageShopItemCard";
 import { garageDisplayName } from "../lib/garageDisplay";
+import { getMyPendingWinnerCheckouts, resolveEndedAuctions } from "../lib/garageAuctionState";
 import { garageSaleOpenLabel, getGarageSaleSchedule } from "../lib/garageSaleStorage";
 import {
-  addToGarageCart,
-  cartLineFromListing,
+  buyNowGarageItem,
   getCartCount,
   getShopOffer,
   type ShopOffer,
@@ -26,6 +26,7 @@ type ActiveGarageShopScreenProps = {
   preview?: boolean;
   onBack: () => void;
   onOpenCart: () => void;
+  onOpenWinnerCheckout: (listingId: string) => void;
 };
 
 export function ActiveGarageShopScreen({
@@ -33,20 +34,37 @@ export function ActiveGarageShopScreen({
   preview = false,
   onBack,
   onOpenCart,
+  onOpenWinnerCheckout,
 }: ActiveGarageShopScreenProps) {
-  const auth = useAuth();
-  const ownHostId = resolveHostAccountId(auth.userId);
+  const ownHostId = resolveHostAccountId(useAuth().userId);
   const isOwnGarage = hostId === ownHostId;
   const [listings, setListings] = useState<ListingDraft[]>([]);
   const [loading, setLoading] = useState(true);
   const [cartCount, setCartCount] = useState(() => getCartCount());
   const [bidTarget, setBidTarget] = useState<{ listing: ListingDraft; offer: ShopOffer } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [pendingWins, setPendingWins] = useState(() => getMyPendingWinnerCheckouts());
   const city = getActiveRentLocationLabel().trim();
   const garageName = useMemo(() => garageDisplayName(hostId), [hostId]);
   const [openLabel, setOpenLabel] = useState(() => garageSaleOpenLabel(getGarageSaleSchedule()));
 
   const refreshCartCount = useCallback(() => setCartCount(getCartCount()), []);
+  const refreshPendingWins = useCallback(() => setPendingWins(getMyPendingWinnerCheckouts()), []);
+
+  const loadShelf = useCallback(() => {
+    void fetchActiveListingsForCityRemote(city).then((all) => {
+      const candidates = all.filter(
+        (listing) =>
+          listing.listingStatus === "active" &&
+          (listing.hostId ?? "demo-user") === hostId &&
+          listing.modes.sell,
+      );
+      resolveEndedAuctions(candidates.map((listing) => listing.id));
+      const shelf = candidates.filter((listing) => getShopOffer(listing));
+      setListings(shelf);
+      refreshPendingWins();
+    });
+  }, [city, hostId, refreshPendingWins]);
 
   useEffect(() => {
     const syncSchedule = () => setOpenLabel(garageSaleOpenLabel(getGarageSaleSchedule()));
@@ -55,27 +73,34 @@ export function ActiveGarageShopScreen({
   }, []);
 
   useEffect(() => {
-    window.addEventListener("evorios-garage-cart", refreshCartCount);
-    window.addEventListener("evorios-garage-bids", refreshCartCount);
-    return () => {
-      window.removeEventListener("evorios-garage-cart", refreshCartCount);
-      window.removeEventListener("evorios-garage-bids", refreshCartCount);
+    const onChange = () => {
+      refreshCartCount();
+      loadShelf();
     };
-  }, [refreshCartCount]);
+    window.addEventListener("evorios-garage-cart", onChange);
+    window.addEventListener("evorios-garage-bids", onChange);
+    window.addEventListener("evorios-garage-lots", onChange);
+    return () => {
+      window.removeEventListener("evorios-garage-cart", onChange);
+      window.removeEventListener("evorios-garage-bids", onChange);
+      window.removeEventListener("evorios-garage-lots", onChange);
+    };
+  }, [loadShelf, refreshCartCount]);
 
   useEffect(() => {
     let mounted = true;
     void fetchActiveListingsForCityRemote(city)
       .then((all) => {
         if (!mounted) return;
-        const shelf = all.filter(
+        const candidates = all.filter(
           (listing) =>
             listing.listingStatus === "active" &&
             (listing.hostId ?? "demo-user") === hostId &&
-            listing.modes.sell &&
-            getShopOffer(listing),
+            listing.modes.sell,
         );
-        setListings(shelf);
+        resolveEndedAuctions(candidates.map((listing) => listing.id));
+        setListings(candidates.filter((listing) => getShopOffer(listing)));
+        refreshPendingWins();
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -83,7 +108,13 @@ export function ActiveGarageShopScreen({
     return () => {
       mounted = false;
     };
-  }, [city, hostId]);
+  }, [city, hostId, refreshPendingWins]);
+
+  useEffect(() => {
+    if (preview) return undefined;
+    const timer = window.setInterval(() => loadShelf(), 30_000);
+    return () => window.clearInterval(timer);
+  }, [loadShelf, preview]);
 
   const showToast = (message: string) => {
     setToast(message);
@@ -92,20 +123,22 @@ export function ActiveGarageShopScreen({
 
   const handleBuyNow = (listing: ListingDraft, offer: ShopOffer) => {
     if (preview) return;
-    const result = addToGarageCart(cartLineFromListing(listing, offer.buyNowUsd));
+    const result = buyNowGarageItem({ listing, offer });
     if (!result.ok) {
       showToast(result.reason);
       return;
     }
     refreshCartCount();
-    showToast("Added to cart");
+    loadShelf();
+    showToast("Reserved — in your cart");
   };
 
   const handleBidPlaced = () => {
+    loadShelf();
     pushInAppNotification({
       type: "general",
       title: "Bid placed",
-      body: "We'll notify you if you're outbid before the auction ends.",
+      body: "We'll notify you if you're outbid or when the auction ends.",
     });
     showToast("Bid placed — good luck!");
   };
@@ -168,8 +201,27 @@ export function ActiveGarageShopScreen({
           <Store className="h-4 w-4 shrink-0" aria-hidden />
           {preview
             ? "Shop preview — neighbors see photo + price, Buy now or Bid, and a shared cart."
-            : "Household storefront · Buy now or bid · checkout in one cart"}
+            : "Buy now removes the lot · Auction ends → winner pays separately"}
         </div>
+
+        {!preview && pendingWins.length > 0 ? (
+          <div className="mt-2 space-y-2">
+            {pendingWins.map((win) => (
+              <button
+                key={win.listingId}
+                type="button"
+                onClick={() => onOpenWinnerCheckout(win.listingId)}
+                className="flex w-full items-center gap-2 rounded-xl border px-3 py-2.5 text-left"
+                style={{ borderColor: `${AMBER}88`, backgroundColor: `${AMBER}15` }}
+              >
+                <Trophy className="h-5 w-5 shrink-0" style={{ color: AMBER }} />
+                <span className="min-w-0 flex-1 text-[13px] font-semibold text-gray-900">
+                  You won — pay ${win.winningBidUsd} to claim
+                </span>
+              </button>
+            ))}
+          </div>
+        ) : null}
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">

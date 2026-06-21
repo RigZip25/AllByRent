@@ -32,6 +32,7 @@ import { ProfileScreen } from "../screens/ProfileScreen";
 import { GarageScreen } from "../screens/GarageScreen";
 import { ActiveGarageShopScreen } from "../screens/ActiveGarageShopScreen";
 import { GarageCartScreen } from "../screens/GarageCartScreen";
+import { GarageWinnerCheckoutScreen } from "../screens/GarageWinnerCheckoutScreen";
 import { MoreScreen } from "../screens/MoreScreen";
 import { MrEvoriosScreen } from "../screens/MrEvoriosScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
@@ -115,6 +116,7 @@ type Screen =
   | "neighborGarage"
   | "garageShop"
   | "garageCart"
+  | "garageWinnerCheckout"
   | "notifications"
   | "subcategory"
   | "itemDetail"
@@ -301,6 +303,7 @@ function AppRoutes() {
   const [selectedHostListingId, setSelectedHostListingId] = useState<string | null>(null);
   const [selectedNeighborGarageHostId, setSelectedNeighborGarageHostId] = useState<string | null>(null);
   const [garageShopPreview, setGarageShopPreview] = useState(false);
+  const [winnerCheckoutListingId, setWinnerCheckoutListingId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [listingPrefill, setListingPrefill] = useState<ShelfPrefill | null>(null);
@@ -573,6 +576,14 @@ function AppRoutes() {
     navigateTo("garageCart");
   }, [navigateTo]);
 
+  const handleOpenWinnerCheckout = useCallback(
+    (listingId: string) => {
+      setWinnerCheckoutListingId(listingId);
+      navigateTo("garageWinnerCheckout");
+    },
+    [navigateTo],
+  );
+
   const openRentLocationSetup = useCallback(() => {
     setHomeLocationError(null);
     navigateTo("whereAreYou");
@@ -745,6 +756,10 @@ function AppRoutes() {
         const previous = stack[stack.length - 1];
         setCurrentScreen(previous);
         return stack.slice(0, -1);
+      }
+      if (currentScreen === "garageWinnerCheckout") {
+        setCurrentScreen("garageShop");
+        return stack;
       }
       if (currentScreen === "snapSale") {
         setCurrentScreen("openGarageSale");
@@ -1053,6 +1068,18 @@ function AppRoutes() {
             preview={garageShopPreview}
             onBack={handleBack}
             onOpenCart={handleOpenGarageCart}
+            onOpenWinnerCheckout={handleOpenWinnerCheckout}
+          />
+        )}
+
+        {currentScreen === "garageWinnerCheckout" && winnerCheckoutListingId && (
+          <GarageWinnerCheckoutScreen
+            listingId={winnerCheckoutListingId}
+            onBack={handleBack}
+            onComplete={() => {
+              setNavStack([]);
+              setCurrentScreen("garageShop");
+            }}
           />
         )}
 

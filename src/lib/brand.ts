@@ -148,7 +148,7 @@ export const ONBOARDING = {
     priceLabel: "Price",
     buyNowLabel: "Buy now price",
     startingBidLabel: "Starting bid",
-    bothHint: "Neighbors can buy now or bid — auction runs ~4 hours (demo).",
+    bothHint: "Neighbors can buy now or bid — auction runs ~30 min (demo).",
     publishCta: "Put on shelf →",
     publishing: "Adding to shelf…",
     defaultTitle: "Sale item",
