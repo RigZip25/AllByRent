@@ -4,8 +4,30 @@
   "framework": "vite",
   "installCommand": "npm ci",
   "rewrites": [
-    { "source": "/link", "destination": "/api/link" },
-    { "source": "/item/:id", "destination": "/api/link?listingId=:id&skipSplash=1" },
+    {
+      "source": "/link",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|WhatsApp|Twitterbot|LinkedInBot|Slackbot|TelegramBot|Discordbot|Applebot|bingbot|Googlebot).*"
+        }
+      ],
+      "destination": "/api/link"
+    },
+    { "source": "/link", "destination": "/link.html" },
+    {
+      "source": "/item/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|WhatsApp|Twitterbot|LinkedInBot|Slackbot|TelegramBot|Discordbot|Applebot|bingbot|Googlebot).*"
+        }
+      ],
+      "destination": "/api/link?listingId=:id&skipSplash=1"
+    },
+    { "source": "/item/:id", "destination": "/link.html?listingId=:id&skipSplash=1" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
