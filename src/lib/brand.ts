@@ -86,20 +86,20 @@ export const ONBOARDING = {
     subtitle: "Browse the block, yard sales, or stock your garage.",
     findGear: {
       title: "Browse the block",
-      subtitle: "Search items or switch Feed / Garages — rent, buy, or peek at neighbor shelves.",
-      cta: "Open browse →",
+      subtitle: "Search items · switch Feed or Garages",
+      cta: "Start browsing →",
     },
     yardSales: {
       title: "Yard sales & open garages",
-      subtitle: "See who's open today — perfect for a Saturday drive.",
-      cta: "Browse open sales →",
+      subtitle: "Who's open today — Saturday-drive mode",
+      cta: "See open sales →",
     },
     stockGarage: {
       title: "Stock my garage",
-      subtitle: "List what you own — rent, sell, or give away from your showcase.",
+      subtitle: "List gear to rent, sell, or give away",
       cta: "Open my showcase →",
     },
-    footer: "Feed and Garages live on Browse — yard sales are separate.",
+    footer: "Tap Home anytime to switch paths.",
   },
   firstHello: {
     mascotRole: "Your garage guide",

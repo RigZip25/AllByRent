@@ -652,14 +652,116 @@
     }
   }
 
+  .browse-hub-header {
+    flex-shrink: 0;
+  }
+
   .browse-hub-cards {
     flex: 1;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(10px, 2dvh, 14px);
+    padding: 0 16px 8px;
+    overflow: hidden;
   }
 
-  .browse-hub-card-art {
-    min-height: clamp(72px, 14dvh, 120px);
-    padding: 0.75rem;
+  .browse-hub-choice {
+    flex: 1 1 0;
+    min-height: 0;
+    border-color: #e5e7eb;
+  }
+
+  .browse-hub-choice--yard-sale {
+    border-color: rgba(245, 158, 11, 0.45);
+    box-shadow: 0 4px 18px rgba(245, 158, 11, 0.12);
+  }
+
+  .browse-hub-choice-art {
+    position: relative;
+    flex: 1 1 0;
+    min-height: clamp(64px, 12dvh, 130px);
+    max-height: clamp(88px, 18dvh, 150px);
+    overflow: hidden;
+    background: linear-gradient(180deg, #f8faf9 0%, #ffffff 100%);
+    padding: 0.5rem 0.75rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .browse-hub-choice--yard-sale .browse-hub-choice-art {
+    background: linear-gradient(180deg, #fff8eb 0%, #ffffff 100%);
+  }
+
+  .browse-hub-choice-illustration {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center bottom;
+  }
+
+  .browse-hub-choice-badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.625rem;
+    border-radius: 9999px;
+    background: #f59e0b;
+    color: #0d5c3a;
+    font-size: 0.625rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 0.2rem 0.45rem;
+    line-height: 1;
+  }
+
+  .browse-hub-choice-body {
+    flex-shrink: 0;
+    background: #fff;
+  }
+
+  .browse-hub-footer {
+    flex-shrink: 0;
+  }
+
+  @media (max-height: 780px) {
+    .browse-hub-choice-title {
+      font-size: 1rem;
+      line-height: 1.35rem;
+    }
+
+    .browse-hub-choice-subtitle {
+      font-size: 0.8125rem;
+    }
+
+    .browse-hub-choice-art {
+      min-height: clamp(56px, 10dvh, 110px);
+      max-height: clamp(72px, 14dvh, 120px);
+    }
+
+    .browse-hub-choice-cta {
+      font-size: 0.875rem;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+  }
+
+  @media (max-height: 680px) {
+    .browse-hub-header {
+      padding-bottom: 0.25rem;
+    }
+
+    .browse-hub-cards {
+      gap: 8px;
+    }
+
+    .browse-hub-choice-body {
+      padding-top: 0.5rem;
+      padding-bottom: 0.625rem;
+    }
   }
 
   .onboarding-step {

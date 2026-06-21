@@ -1,11 +1,11 @@
-import { MapPin } from "lucide-react";
+import { ChevronRight, MapPin } from "lucide-react";
 import { BRAND_AMBER, BRAND_GREEN, ONBOARDING } from "../lib/brand";
 import { clusterLabelForCity, getClusterRadiusMi } from "../lib/clusterConfig";
 import { getActiveRentLocationLabel, hasRentLocationSetup } from "../lib/listingStorage";
+import { onboardingAssets } from "../lib/onboardingAssets";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
-const BORDER = "#E8E6E0";
 
 const { browseHub: copy } = ONBOARDING;
 
@@ -16,52 +16,71 @@ type BrowseHubScreenProps = {
   onEditLocation: () => void;
 };
 
-function HubCard({
-  title,
-  subtitle,
-  ctaLabel,
-  emoji,
-  variant,
-  onClick,
-}: {
+type HubCardProps = {
+  imageSrc: string;
   title: string;
   subtitle: string;
   ctaLabel: string;
-  emoji: string;
-  variant: "green" | "amber" | "neutral";
+  variant: "primary" | "yardSale" | "outline";
+  badge?: string;
   onClick: () => void;
-}) {
-  const isAmber = variant === "amber";
-  const isGreen = variant === "green";
+};
+
+function HubCard({
+  imageSrc,
+  title,
+  subtitle,
+  ctaLabel,
+  variant,
+  badge,
+  onClick,
+}: HubCardProps) {
+  const isYardSale = variant === "yardSale";
+  const isPrimary = variant === "primary";
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="browse-hub-card flex w-full flex-col overflow-hidden rounded-2xl border bg-white text-left shadow-sm transition-opacity active:opacity-90"
-      style={{ borderColor: isAmber ? `${AMBER}66` : BORDER }}
+      className={`browse-hub-choice flex w-full min-h-0 flex-col overflow-hidden rounded-2xl border bg-white text-left shadow-sm transition-transform active:scale-[0.99] ${
+        isYardSale ? "browse-hub-choice--yard-sale" : ""
+      }`}
     >
-      <div
-        className="browse-hub-card-art flex items-center justify-center rounded-t-2xl"
-        style={{
-          backgroundColor: isAmber ? `${AMBER}18` : isGreen ? `${GREEN}12` : "#F3F4F6",
-        }}
-      >
-        <span className="text-5xl" aria-hidden>
-          {emoji}
-        </span>
+      <div className="browse-hub-choice-art rounded-t-2xl">
+        <img
+          src={imageSrc}
+          alt=""
+          className="browse-hub-choice-illustration"
+          draggable={false}
+        />
+        {badge ? (
+          <span className="browse-hub-choice-badge" aria-hidden>
+            {badge}
+          </span>
+        ) : null}
       </div>
-      <div className="browse-hub-card-body px-4 pb-4 pt-3 text-center sm:px-5 sm:pb-5 sm:pt-4">
-        <h2 className="text-lg font-bold" style={{ color: GREEN }}>
-          {title}
-        </h2>
-        <p className="mt-1 text-sm leading-relaxed text-gray-500">{subtitle}</p>
+      <div className="browse-hub-choice-body shrink-0 px-4 pb-4 pt-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <h2 className="browse-hub-choice-title text-[17px] font-bold leading-snug" style={{ color: GREEN }}>
+              {title}
+            </h2>
+            <p className="browse-hub-choice-subtitle mt-0.5 text-sm leading-snug text-gray-500">
+              {subtitle}
+            </p>
+          </div>
+          <ChevronRight
+            className="mt-0.5 h-5 w-5 shrink-0 text-gray-300"
+            strokeWidth={2.5}
+            aria-hidden
+          />
+        </div>
         <span
-          className="mt-3 flex w-full items-center justify-center rounded-xl py-2.5 text-base font-bold sm:mt-4 sm:py-3"
+          className="browse-hub-choice-cta mt-3 flex w-full items-center justify-center rounded-xl py-2.5 text-[15px] font-bold"
           style={
-            isAmber
+            isYardSale
               ? { backgroundColor: AMBER, color: GREEN }
-              : isGreen
+              : isPrimary
                 ? { backgroundColor: GREEN, color: "white" }
                 : { border: `2px solid ${GREEN}`, color: GREEN }
           }
@@ -79,8 +98,8 @@ export function BrowseHubScreen({ onChoose, onEditLocation }: BrowseHubScreenPro
   const needsLocation = !hasRentLocationSetup();
 
   return (
-    <div className="screen onboarding-step mx-auto w-full max-w-[390px] bg-[#F0F4F2]">
-      <div className="shrink-0 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top,0px))]">
+    <div className="screen onboarding-step mx-auto w-full max-w-[390px] bg-white">
+      <div className="browse-hub-header shrink-0 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top,0px))]">
         <button
           type="button"
           onClick={onEditLocation}
@@ -95,7 +114,7 @@ export function BrowseHubScreen({ onChoose, onEditLocation }: BrowseHubScreenPro
             strokeWidth={1.5}
           />
           <span
-            className="min-w-0 flex-1 break-words text-[16px] font-bold leading-snug [overflow-wrap:anywhere]"
+            className="min-w-0 flex-1 break-words text-[15px] font-semibold leading-snug [overflow-wrap:anywhere]"
             style={{ color: needsLocation ? "#B45309" : GREEN }}
           >
             {clusterLabel}
@@ -103,40 +122,44 @@ export function BrowseHubScreen({ onChoose, onEditLocation }: BrowseHubScreenPro
         </button>
 
         <div className="text-center">
-          <h1 className="text-2xl font-bold" style={{ color: GREEN }}>
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: GREEN }}>
             {copy.title}
           </h1>
-          <p className="mt-1 text-base text-gray-500">{copy.subtitle}</p>
+          <p className="mt-1 text-[15px] text-gray-500">{copy.subtitle}</p>
         </div>
       </div>
 
-      <div className="browse-hub-cards screen-scroll flex flex-col gap-3 px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
+      <div className="browse-hub-cards">
         <HubCard
-          variant="green"
-          emoji="🔍"
+          variant="primary"
+          imageSrc={onboardingAssets.browseBlock}
           title={copy.findGear.title}
           subtitle={copy.findGear.subtitle}
           ctaLabel={copy.findGear.cta}
           onClick={() => onChoose("findGear")}
         />
         <HubCard
-          variant="amber"
-          emoji="🏷️"
+          variant="yardSale"
+          imageSrc={onboardingAssets.onBlock}
           title={copy.yardSales.title}
           subtitle={copy.yardSales.subtitle}
           ctaLabel={copy.yardSales.cta}
+          badge="OPEN"
           onClick={() => onChoose("yardSales")}
         />
         <HubCard
-          variant="neutral"
-          emoji="🛠️"
+          variant="outline"
+          imageSrc={onboardingAssets.stockGarage}
           title={copy.stockGarage.title}
           subtitle={copy.stockGarage.subtitle}
           ctaLabel={copy.stockGarage.cta}
           onClick={() => onChoose("stockGarage")}
         />
-        <p className="pb-1 text-center text-xs text-gray-400">{copy.footer}</p>
       </div>
+
+      <p className="browse-hub-footer shrink-0 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] text-center text-xs text-gray-400">
+        {copy.footer}
+      </p>
     </div>
   );
 }
