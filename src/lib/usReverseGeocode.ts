@@ -132,6 +132,81 @@ export async function lookupClosestZipForPlace(
   }
 }
 
+/** City / area label when full street reverse-geocode is unavailable — never raw coordinates. */
+export async function resolveAreaLabelAtCoordinates(
+  lat: number,
+  lng: number,
+): Promise<string | null> {
+  const censusPlace = await fetchCensusPlaceAtCoordinates(lat, lng);
+  if (censusPlace) {
+    const zip = await lookupClosestZipForPlace(
+      censusPlace.state,
+      censusPlace.city,
+      lat,
+      lng,
+    );
+    const formatted = formatUsAddressLines({
+      city: censusPlace.city,
+      state: censusPlace.state,
+      zip: zip ?? undefined,
+    });
+    if (formatted.label.trim()) return formatted.label;
+    return `${censusPlace.city}, ${abbreviateUsState(censusPlace.state)}`;
+  }
+
+  try {
+    const url = new URL("https://photon.komoot.io/reverse");
+    url.searchParams.set("lat", String(lat));
+    url.searchParams.set("lon", String(lng));
+    url.searchParams.set("lang", "en");
+
+    const response = await fetch(url.toString());
+    if (!response.ok) return null;
+
+    const data = (await response.json()) as {
+      features?: Array<{
+        properties?: {
+          city?: string;
+          town?: string;
+          village?: string;
+          suburb?: string;
+          locality?: string;
+          state?: string;
+          country?: string;
+          postcode?: string;
+        };
+      }>;
+    };
+
+    const props = data.features?.[0]?.properties;
+    if (!props) return null;
+
+    const city =
+      props.city ||
+      props.town ||
+      props.village ||
+      props.suburb ||
+      props.locality ||
+      "";
+    const state = props.state?.trim() ?? "";
+    const zip = props.postcode?.trim() ?? "";
+
+    if (city && state) {
+      const stateAbbr = abbreviateUsState(state);
+      return zip ? `${city}, ${stateAbbr} ${zip}` : `${city}, ${stateAbbr}`;
+    }
+    if (city && props.country) return `${city}, ${props.country}`;
+    if (city) return city;
+    if (state && props.country) {
+      return `${abbreviateUsState(state) || state}, ${props.country}`;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 async function resolveZip(
   parts: UsReverseParts,
   lat: number,
