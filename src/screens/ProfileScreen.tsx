@@ -26,8 +26,6 @@ import {
 } from "../lib/avatarStorage";
 import { APP_MODE_LABELS } from "../lib/brand";
 import { getAppMode, type AppMode } from "../lib/appMode";
-import { formatPlanUsage, loadSubscriptionPlanId } from "../lib/subscriptionPlans";
-import { applySubscriptionPlanFromRemote } from "../lib/repositories/billingRepository";
 import {
   getProfileLocationSummary,
   loadUserProfile,
@@ -143,7 +141,6 @@ export function ProfileScreen({
   onRentals,
   onMrE,
   onEditLocation,
-  onOpenPlans,
   onOpenNotifications,
   onOpenCoHosts,
   onDeleteAccount,
@@ -153,7 +150,6 @@ export function ProfileScreen({
   onRentals: () => void;
   onMrE: () => void;
   onEditLocation: () => void;
-  onOpenPlans: () => void;
   onOpenNotifications: () => void;
   onOpenCoHosts?: () => void;
   onDeleteAccount?: () => void;
@@ -191,7 +187,6 @@ export function ProfileScreen({
     });
     void fetchRemoteProfile(auth.userId).then((remote) => {
       if (!mounted || !remote) return;
-      applySubscriptionPlanFromRemote(remote.subscription_plan_id);
       const displayName = remote.display_name?.trim() || profile.displayName;
       const memberSince = remote.created_at?.slice(0, 10) || profile.memberSince;
       const next = updateProfileFields({
@@ -235,8 +230,6 @@ export function ProfileScreen({
   const hasPhoto = hasAvatarPhoto(profile.id);
   const showOnboarding = !hasPhoto && !isPhotoPromptDeferred();
 
-  const planId = loadSubscriptionPlanId();
-  const planSummary = formatPlanUsage(planId, profile.host.listingsCount);
   const responseDisplay = getHostResponseDisplay(profile.id, profile.host.usesManualBooking);
 
   const memberYear = useMemo(() => {
@@ -402,14 +395,6 @@ export function ProfileScreen({
               icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label="Personal info"
               value={profile.email || "Add email"}
-            />
-          </li>
-          <li>
-            <RowButton
-              icon={<Sparkles className="h-5 w-5" style={{ color: "#F59E0B" }} />}
-              label="Subscription plan"
-              value={planSummary}
-              onClick={onOpenPlans}
             />
           </li>
           {onOpenCoHosts ? (

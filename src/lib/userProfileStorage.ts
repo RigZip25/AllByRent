@@ -7,7 +7,6 @@ import {
   hasRentLocationSetup,
 } from "./listingStorage";
 import { hasAvatarPhoto, loadAvatarDataUrl } from "./avatarStorage";
-import { loadSubscriptionPlanId, type SubscriptionPlanId } from "./subscriptionPlans";
 
 const PROFILE_KEY = "allbyrent_user_profile";
 
@@ -19,7 +18,6 @@ export type UserProfile = {
   email: string;
   phone: string;
   bio: string;
-  subscriptionPlan: SubscriptionPlanId;
   memberSince: string;
   preferredMode: AppMode;
   avatarUrl: string | null;
@@ -57,7 +55,6 @@ function createDefaultProfile(authUserId?: string | null): UserProfile {
     email: "",
     phone: "",
     bio: "",
-    subscriptionPlan: loadSubscriptionPlanId(),
     memberSince: new Date().toISOString().slice(0, 10),
     preferredMode: getAppMode(),
     avatarUrl: id ? loadAvatarDataUrl(id) : null,
@@ -85,10 +82,6 @@ function createDefaultProfile(authUserId?: string | null): UserProfile {
 
 function migrateLegacyProfile(parsed: Record<string, unknown>): Partial<UserProfile> {
   const patch: Partial<UserProfile> = {};
-  if ("accountType" in parsed && !("subscriptionPlan" in parsed)) {
-    patch.subscriptionPlan =
-      parsed.accountType === "business" ? "business" : "free";
-  }
   if ("avatarEmoji" in parsed) {
     patch.avatarUrl = null;
   }
@@ -130,7 +123,6 @@ export function loadUserProfile(): UserProfile {
     merged.avatarUrl = hasAvatarPhoto(merged.id)
       ? loadAvatarDataUrl(merged.id)
       : null;
-    merged.subscriptionPlan = loadSubscriptionPlanId();
     return merged;
   } catch {
     const seeded = createDefaultProfile();
@@ -155,7 +147,6 @@ export function refreshProfileStats(
   return {
     ...profile,
     avatarUrl: hasAvatarPhoto(profile.id) ? loadAvatarDataUrl(profile.id) : null,
-    subscriptionPlan: loadSubscriptionPlanId(),
     host: {
       ...profile.host,
       listingsCount,
@@ -198,7 +189,6 @@ export function updateProfileFields(
       | "phone"
       | "bio"
       | "avatarUrl"
-      | "subscriptionPlan"
     >
   >,
 ): UserProfile {

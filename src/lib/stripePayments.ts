@@ -262,45 +262,6 @@ export async function createConnectAccountLink(returnPath: string): Promise<Conn
   return payload;
 }
 
-export type SubscriptionCheckoutResult =
-  | { ok: true; checkoutUrl: string; sessionId: string }
-  | { ok: false; reason: string };
-
-export async function createSubscriptionCheckoutSession(
-  planId: string,
-): Promise<SubscriptionCheckoutResult> {
-  if (!isStripePaymentsEnabled()) {
-    return { ok: false, reason: "Stripe not configured" };
-  }
-
-  const token = await getAccessToken();
-  if (!token) {
-    return { ok: false, reason: "Sign in required" };
-  }
-
-  const res = await fetch("/api/stripe/subscription_checkout", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ planId }),
-  });
-
-  const payload = (await res.json()) as SubscriptionCheckoutResult & { error?: string };
-  if (!res.ok) {
-    return { ok: false, reason: payload.error ?? payload.reason ?? `Subscription failed (${res.status})` };
-  }
-  if (!payload.ok) {
-    return { ok: false, reason: payload.reason ?? "Subscription checkout not configured" };
-  }
-  if (!("checkoutUrl" in payload) || !payload.checkoutUrl) {
-    return { ok: false, reason: "Missing checkout URL" };
-  }
-
-  return payload;
-}
-
 export type ListingBoostIntentResult =
   | {
       ok: true;

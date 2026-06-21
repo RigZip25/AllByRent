@@ -9,7 +9,6 @@ import { getProfileCity, savePublishedListingRemote, savePublishedListing } from
 import { notifyGarageFollowersOfNewListing } from "../../lib/garageFollowNotify";
 import { loadUserProfile } from "../../lib/userProfileStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
-import { getPlanById, loadSubscriptionPlanId } from "../../lib/subscriptionPlans";
 import { loadManageableListings } from "../../lib/hostAccess";
 import { analyzeListingMediaPhotos } from "./listingAnalysis";
 import { ListingPublishSuccess } from "./ListingPublishSuccess";
@@ -164,12 +163,6 @@ export function ListingWizard({
   };
 
   const handlePublish = () => {
-    const plan = getPlanById(loadSubscriptionPlanId());
-    const used = loadManageableListings(auth.userId, auth.userEmail).filter((l) => l.listingStatus === "active").length;
-    if (used >= plan.listingLimit) {
-      window.alert(`Listing limit reached: ${plan.name} allows up to ${plan.listingLimit} active listings. Upgrade your plan to list more.`);
-      return;
-    }
     setIsPublishing(true);
 
     window.setTimeout(() => {

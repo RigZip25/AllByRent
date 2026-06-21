@@ -41,7 +41,6 @@ import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
 import { SetupRequiredScreen } from "../screens/SetupRequiredScreen";
 import { IntegrationStatusScreen } from "../screens/IntegrationStatusScreen";
-import { SubscriptionPlansScreen } from "../screens/SubscriptionPlansScreen";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
 import { AuthProvider, useAuth } from "../hooks/AuthProvider";
@@ -145,7 +144,6 @@ type Screen =
   | "profile"
   | "favorites"
   | "earnBusiness"
-  | "subscriptionPlans"
   | "integrationStatus"
   | "identity"
   | "agentActivity"
@@ -603,7 +601,6 @@ function AppRoutes() {
   const handleOpenProfile = useCallback(() => goToTab("profile"), [goToTab]);
   const handleOpenFavorites = useCallback(() => goToTab("favorites"), [goToTab]);
   const handleOpenBusiness = useCallback(() => goToTab("earnBusiness"), [goToTab]);
-  const handleOpenPlans = useCallback(() => navigateTo("subscriptionPlans"), [navigateTo]);
   const handleOpenIntegrations = useCallback(() => navigateTo("integrationStatus"), [navigateTo]);
 
   const handleBrowseHubChoice = useCallback(
@@ -1264,7 +1261,6 @@ function AppRoutes() {
             onMrE={handleOpenMrE}
             onRentals={handleOpenRentals}
             onEditLocation={openRentLocationSetup}
-            onOpenPlans={handleOpenPlans}
             onOpenNotifications={handleOpenNotifications}
             onOpenIntegrations={handleOpenIntegrations}
             onDeleteAccount={() => navigateTo("deleteAccount")}
@@ -1283,10 +1279,6 @@ function AppRoutes() {
 
         {currentScreen === "earnBusiness" && (
           <EarnBusinessScreen onHome={handleOpenHome} onRentals={handleOpenRentals} />
-        )}
-
-        {currentScreen === "subscriptionPlans" && (
-          <SubscriptionPlansScreen onBack={handleBack} />
         )}
 
         {currentScreen === "integrationStatus" && (

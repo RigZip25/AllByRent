@@ -203,15 +203,6 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     }
   }
 
-  if (admin && event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-    const planId = session.metadata?.subscription_plan_id;
-    const userId = session.metadata?.supabase_user_id;
-    if (planId && userId) {
-      await admin.from("profiles").update({ subscription_plan_id: planId }).eq("id", userId);
-    }
-  }
-
   if (admin && event.type === "account.updated") {
     const account = event.data.object as Stripe.Account;
     const userId = account.metadata?.supabase_user_id;

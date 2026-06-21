@@ -15,10 +15,9 @@ Everything in this document is **code in the repo**. When these items are done, 
 | Bids, offers, lot states, schedules, prefs, follows — read + write | Done |
 | Stripe garage cart / auction checkout + webhook sold-state | Done |
 | Listing boost API (`api/stripe/boost.ts`) + webhook `listing_boost` | Done |
-| Subscription checkout + webhook `profiles.subscription_plan_id` | Done |
 | Connect onboarding + webhook `account.updated` | Done |
 | Co-host remote sync (`coHostSupabaseSync.ts`, `coHostRepository.ts`) | Done |
-| Repositories: payments, billing, connect, garage, coHost | Done |
+| Repositories: payments, connect, garage, coHost | Done |
 | Integration status screen + `.env.example` | Done |
 
 ---
@@ -46,12 +45,10 @@ Everything in this document is **code in the repo**. When these items are done, 
 2. Set Vercel env:
    - `VITE_STRIPE_PUBLISHABLE_KEY`
    - `STRIPE_SECRET_KEY`
-3. Create Products / Prices for **Starter** and **Pro** plans → set:
-   - `STRIPE_PRICE_STARTER`
-   - `STRIPE_PRICE_PRO`
+3. Create Products / Prices only if you add new paid SKUs later (listing boost uses PaymentIntents, not Price IDs).
 4. Add webhook endpoint:
    - URL: `https://<your-domain>/api/stripe/webhook`
-   - Events: `payment_intent.*`, `checkout.session.completed`, `account.updated`, Identity events if used
+   - Events: `payment_intent.*`, `account.updated`, Identity events if used
    - Copy signing secret → `STRIPE_WEBHOOK_SECRET`
 
 **Verify:** Profile → Integration status shows Stripe green; garage cart pays with test card `4242…`.
@@ -76,7 +73,7 @@ Everything in this document is **code in the repo**. When these items are done, 
 | Garage buy-now cart | Order paid + lot `sold` in Supabase |
 | Auction winner pay | `garage_auction_payments` paid + lot sold |
 | Listing boost | Payment succeeds + `listings.boosted_until` set |
-| Host plan upgrade | Checkout → webhook → profile plan |
+| Host plan upgrade | N/A — all hosts list for free |
 | Connect bank | Onboarding URL → payouts flag on profile |
 | Co-host invite | Row in `co_hosts` after invite on signed-in host |
 

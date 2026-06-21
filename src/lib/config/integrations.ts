@@ -7,8 +7,7 @@ export type IntegrationId =
   | "anthropic"
   | "photoroom"
   | "push"
-  | "garageCommerce"
-  | "subscriptions";
+  | "garageCommerce";
 
 export type IntegrationStatus = "ready" | "partial" | "missing";
 
@@ -58,7 +57,7 @@ export function getIntegrationItems(): IntegrationItem[] {
       status: stripe ? "partial" : "missing",
       summary: stripe
         ? "Checkout UI enabled — Connect payouts + webhooks need server secrets."
-        : "Required for bookings, garage checkout, and host plans.",
+        : "Required for bookings, garage checkout, and listing boosts.",
       envKeys: [
         "VITE_STRIPE_PUBLISHABLE_KEY",
         "STRIPE_SECRET_KEY",
@@ -103,20 +102,6 @@ export function getIntegrationItems(): IntegrationItem[] {
         : "Requires Supabase + Stripe before cart and auction checkout work.",
       envKeys: ["VITE_STRIPE_PUBLISHABLE_KEY", "STRIPE_SECRET_KEY"],
       nextStep: "Apply migration 023 and test garage cart + auction payment webhooks.",
-    },
-    {
-      id: "subscriptions",
-      label: "Host plans",
-      status: stripe ? "partial" : "missing",
-      summary: stripe
-        ? "Plan picker wired — map plan IDs to Stripe Price IDs."
-        : "Requires Stripe before paid plan upgrades work.",
-      envKeys: [
-        "STRIPE_SECRET_KEY",
-        "STRIPE_PRICE_STARTER",
-        "STRIPE_PRICE_PRO",
-      ],
-      nextStep: "Create Stripe Products/Prices and set STRIPE_PRICE_* env vars.",
     },
   ];
 }

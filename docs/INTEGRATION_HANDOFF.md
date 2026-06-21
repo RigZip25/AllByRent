@@ -1,15 +1,17 @@
 # Integration handoff — Evorios / AllByRent
 
-This document lists what is **already wired in the UI and API** and what you need to **connect in production** (Supabase, Stripe, subscriptions, push).
+This document lists what is **already wired in the UI and API** and what you need to **connect in production** (Supabase, Stripe, push).
 
 For a step-by-step external checklist after code is merged, see **`docs/LOCAL_COMPLETION.md`**.
+
+**Host listings are free with no plan limits.** Stripe is used for rentals, garage checkout, listing boosts, and Connect payouts — not subscriptions.
 
 ---
 
 ## Architecture
 
 ```
-Screens → repositories (garage, payments, billing, connect, coHost)
+Screens → repositories (garage, payments, connect, coHost)
        → local cache + *SupabaseSync modules
        → Supabase (when env vars are set)
        → Stripe API routes → webhook
@@ -34,7 +36,7 @@ Screens → repositories (garage, payments, billing, connect, coHost)
 | Migration | Purpose |
 |-----------|---------|
 | Existing `001`–`022` | Auth, profiles, listings, rentals, messages, … |
-| `023_garage_commerce.sql` | `garage_orders`, `garage_order_lines`, `garage_auction_payments`, `garage_follows`, `subscription_plan_id` on profiles |
+| `023_garage_commerce.sql` | `garage_orders`, `garage_order_lines`, `garage_auction_payments`, `garage_follows` |
 | `024_garage_domain.sql` | `garage_bids`, `garage_neighbor_offers`, `garage_lot_states`, `garage_sale_schedules`, `garage_sale_offer_prefs` |
 | `002_co_hosts.sql` | Co-host invites (already in repo) |
 
@@ -56,8 +58,6 @@ Screens → repositories (garage, payments, billing, connect, coHost)
 | `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe Elements (cart, auction, rentals, boost) |
 | `STRIPE_SECRET_KEY` | All `/api/stripe/*` routes |
 | `STRIPE_WEBHOOK_SECRET` | `api/stripe/webhook.ts` |
-| `STRIPE_PRICE_STARTER` | Subscription Checkout — Starter |
-| `STRIPE_PRICE_PRO` | Subscription Checkout — Pro |
 
 ### API routes
 
@@ -69,8 +69,7 @@ Screens → repositories (garage, payments, billing, connect, coHost)
 | `POST /api/stripe/auction_checkout` | Auction winner pay |
 | `POST /api/stripe/boost` | Listing boost PaymentIntent |
 | `POST /api/stripe/connect_account_link` | Host payout onboarding |
-| `POST /api/stripe/subscription_checkout` | Host plan upgrade |
-| `POST /api/stripe/webhook` | Payments, boosts, subscriptions, Connect |
+| `POST /api/stripe/webhook` | Payments, boosts, Connect |
 
 ### Webhook metadata
 
@@ -80,24 +79,11 @@ Screens → repositories (garage, payments, billing, connect, coHost)
 | `garage_auction` | Mark auction payment paid; upsert sold lot state |
 | `listing_boost` | Set `listings.boosted_until` / `boosted_tier` |
 | `rental` / `deposit` | Update rental payment fields |
-| `checkout.session.completed` | Set `profiles.subscription_plan_id` |
 | `account.updated` | Sync `stripe_payouts_enabled` on profile |
 
 ---
 
-## 3. Subscriptions
-
-**UI:** Profile → Your plan
-
-**Flow:**
-
-1. Free → saved locally; remote plan loaded from `profiles.subscription_plan_id` on profile fetch
-2. Starter / Pro → Stripe Checkout → webhook updates profile
-3. Business → sales-assisted (not self-serve)
-
----
-
-## 4. Stripe Connect
+## 3. Stripe Connect
 
 **UI:** Profile → Connect bank account
 
@@ -105,7 +91,7 @@ Express account + onboarding link; webhook syncs payout status to `profiles`.
 
 ---
 
-## 5. Push notifications
+## 4. Push notifications
 
 | Variable | Purpose |
 |----------|---------|
@@ -117,13 +103,13 @@ After deploy: add DB trigger on new listings → push followers (`garage_follows
 
 ---
 
-## 6. In-app integration checklist
+## 5. In-app integration checklist
 
 **More → Integrations** or **Profile → Integration status** reflects client-detectable env vars (`integrations.ts`, `production.ts`).
 
 ---
 
-## 7. Deploy checklist
+## 6. Deploy checklist
 
 1. Merge integration + production PRs to `main`
 2. Set env vars on Vercel (see `.env.example`)
