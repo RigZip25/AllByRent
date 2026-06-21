@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
-import { PaymentModeBanner } from "../components/payments/PaymentModeBanner";
+import { PaymentsReadyBadge, PaymentsRequiredBanner } from "../components/payments/PaymentModeBanner";
 import {
   formatCurrentPlanUsage,
   getCurrentPlanId,
-  getPlanSelectionMode,
   selectSubscriptionPlan,
   SUBSCRIPTION_PLANS,
   type SubscriptionPlanId,
 } from "../lib/repositories/billingRepository";
+import { isPaymentsReady } from "../lib/config/production";
 import { refreshProfileStats, loadUserProfile } from "../lib/userProfileStorage";
 
 const GREEN = "#0D5C3A";
@@ -25,7 +25,7 @@ export function SubscriptionPlansScreen({
   const profile = refreshProfileStats(loadUserProfile());
   const currentId = getCurrentPlanId();
   const listingsUsed = profile.host.listingsCount;
-  const planMode = getPlanSelectionMode();
+  const paymentsReady = isPaymentsReady();
   const [busyPlanId, setBusyPlanId] = useState<SubscriptionPlanId | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,7 +38,7 @@ export function SubscriptionPlansScreen({
           setError(result.reason);
           return;
         }
-        if (result.mode === "stripe") {
+        if (result.mode === "checkout") {
           window.location.href = result.checkoutUrl;
           return;
         }
@@ -67,8 +67,9 @@ export function SubscriptionPlansScreen({
       </header>
 
       <div className="screen-scroll flex-1 px-4 pb-6">
-        <div className="mb-4">
-          <PaymentModeBanner context="subscription" />
+        <div className="mb-4 space-y-2">
+          <PaymentsRequiredBanner />
+          <PaymentsReadyBadge />
         </div>
 
         <p className="mb-4 text-[14px] text-gray-600">
@@ -85,11 +86,12 @@ export function SubscriptionPlansScreen({
           {SUBSCRIPTION_PLANS.map((plan) => {
             const selected = plan.id === currentId;
             const busy = busyPlanId === plan.id;
+            const paidPlan = plan.id !== "free" && plan.id !== "business";
             return (
               <li key={plan.id}>
                 <button
                   type="button"
-                  disabled={busy}
+                  disabled={busy || (paidPlan && !paymentsReady)}
                   onClick={() => selectPlan(plan.id)}
                   className="w-full rounded-2xl border bg-white p-4 text-left disabled:opacity-60"
                   style={{
@@ -137,11 +139,7 @@ export function SubscriptionPlansScreen({
                     </p>
                   ) : (
                     <p className="mt-3 text-[13px] font-bold" style={{ color: CTA }}>
-                      {busy
-                        ? "Opening checkout…"
-                        : planMode === "stripe"
-                          ? "Upgrade with Stripe →"
-                          : "Upgrade (demo) →"}
+                      {busy ? "Opening checkout…" : "Upgrade with Stripe →"}
                     </p>
                   )}
                 </button>
@@ -151,8 +149,8 @@ export function SubscriptionPlansScreen({
         </ul>
 
         <p className="mt-4 text-[12px] leading-relaxed text-gray-500">
-          Paid plans use Stripe Checkout when STRIPE_PRICE_STARTER and STRIPE_PRICE_PRO are set on
-          Vercel. Until then, plan changes save locally for demo.
+          Paid plans bill through Stripe Checkout. Configure STRIPE_PRICE_STARTER and
+          STRIPE_PRICE_PRO on Vercel.
         </p>
       </div>
     </div>

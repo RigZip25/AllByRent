@@ -6,19 +6,17 @@ import {
   SUBSCRIPTION_PLANS,
   type SubscriptionPlanId,
 } from "../subscriptionPlans";
-import { isStripePaymentsEnabled } from "../stripeConfig";
+import {
+  getSignInRequiredMessage,
+  getStripeRequiredMessage,
+  isPaymentsReady,
+} from "../config/production";
 import { createSubscriptionCheckoutSession, getAccessToken } from "../stripePayments";
 
-export type PlanSelectionMode = "demo" | "stripe";
-
 export type PlanSelectionResult =
-  | { ok: true; mode: "demo"; planId: SubscriptionPlanId }
-  | { ok: true; mode: "stripe"; checkoutUrl: string; planId: SubscriptionPlanId }
+  | { ok: true; mode: "local"; planId: SubscriptionPlanId }
+  | { ok: true; mode: "checkout"; checkoutUrl: string; planId: SubscriptionPlanId }
   | { ok: false; reason: string };
-
-export function getPlanSelectionMode(): PlanSelectionMode {
-  return isStripePaymentsEnabled() ? "stripe" : "demo";
-}
 
 export function getCurrentPlanId(): SubscriptionPlanId {
   return loadSubscriptionPlanId();
@@ -39,33 +37,28 @@ export async function selectSubscriptionPlan(
 
   if (planId === "free") {
     applyPlanLocally(planId);
-    return { ok: true, mode: "demo", planId };
+    return { ok: true, mode: "local", planId };
   }
 
   if (planId === "business") {
     return { ok: false, reason: "Business plans use sales-assisted billing — contact support." };
   }
 
-  if (!isStripePaymentsEnabled()) {
-    applyPlanLocally(planId);
-    return { ok: true, mode: "demo", planId };
+  if (!isPaymentsReady()) {
+    return { ok: false, reason: getStripeRequiredMessage() };
   }
 
   const token = await getAccessToken();
   if (!token) {
-    return { ok: false, reason: "Sign in required to upgrade" };
+    return { ok: false, reason: getSignInRequiredMessage() };
   }
 
   const session = await createSubscriptionCheckoutSession(planId);
   if (!session.ok) {
-    if (session.reason === "Stripe not configured" || session.reason.includes("Price")) {
-      applyPlanLocally(planId);
-      return { ok: true, mode: "demo", planId };
-    }
     return { ok: false, reason: session.reason };
   }
 
-  return { ok: true, mode: "stripe", checkoutUrl: session.checkoutUrl, planId };
+  return { ok: true, mode: "checkout", checkoutUrl: session.checkoutUrl, planId };
 }
 
 export { SUBSCRIPTION_PLANS, type SubscriptionPlanId };

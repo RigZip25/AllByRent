@@ -33,7 +33,7 @@ export function NeighborGarageScreen({
         if (!mounted) return;
         setListings(
           all.filter(
-            (l) => l.listingStatus === "active" && (l.hostId ?? "demo-user") === hostId,
+            (l) => l.listingStatus === "active" && (l.hostId ?? "") === hostId,
           ),
         );
       })

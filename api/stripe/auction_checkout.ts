@@ -76,7 +76,19 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     },
   });
 
-  // TODO: upsert garage_auction_payments when migration is applied.
+  await admin.from("garage_auction_payments").insert({
+    id: orderId,
+    listing_id: listingId,
+    buyer_id: user.id,
+    host_id: hostId,
+    stripe_payment_intent_id: paymentIntent.id,
+    stripe_payment_status: paymentIntent.status,
+    winning_bid_cents: Math.round(winningBidUsd * 100),
+    platform_fee_cents: typeof body.platformFeeCents === "number" ? Math.round(body.platformFeeCents) : 0,
+    total_cents: amountCents,
+    runner_up_attempt: runnerUpAttempt,
+    status: "pending",
+  });
 
   if (!paymentIntent.client_secret) {
     res.status(500).json({ error: "PaymentIntent missing client secret" });

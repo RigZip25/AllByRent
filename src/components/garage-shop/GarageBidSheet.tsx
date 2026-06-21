@@ -49,7 +49,7 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
     }
     const result = placeGarageBid({
       listingId: listing.id,
-      hostId: listing.hostId ?? "demo-user",
+      hostId: listing.hostId ?? "",
       amountUsd: value,
       minBidUsd,
       endsAt: offer.endsAt,

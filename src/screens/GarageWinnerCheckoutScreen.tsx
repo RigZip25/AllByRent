@@ -10,11 +10,10 @@ import { formatShopUsd } from "../lib/garageShopStorage";
 import { getPublishedListingById } from "../lib/listingStorage";
 import { useMediaUrl } from "../lib/useMediaUrl";
 import { StripePaymentForm } from "../components/payments/StripePaymentForm";
-import { PaymentModeBanner } from "../components/payments/PaymentModeBanner";
+import { PaymentsReadyBadge, PaymentsRequiredBanner } from "../components/payments/PaymentModeBanner";
 import {
-  completeAuctionCheckoutDemo,
-  completeAuctionCheckoutLive,
-  getGarageCheckoutMode,
+  canProcessGaragePayments,
+  completeAuctionCheckout,
   startAuctionCheckout,
   type AuctionCheckoutInput,
 } from "../lib/repositories/paymentsRepository";
@@ -52,7 +51,7 @@ export function GarageWinnerCheckoutScreen({
   const [countdown, setCountdown] = useState(() =>
     checkout ? formatPayCountdown(checkout.payByIso) : "",
   );
-  const checkoutMode = getGarageCheckoutMode();
+  const paymentsReady = canProcessGaragePayments();
   const [busy, setBusy] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -65,11 +64,11 @@ export function GarageWinnerCheckoutScreen({
   }, [checkout]);
 
   const checkoutInput = useMemo<AuctionCheckoutInput | null>(() => {
-    if (!listing || !checkout) return null;
+    if (!listing || !checkout || !listing.hostId) return null;
     return {
       listingId,
-      hostId: listing.hostId ?? "demo-user",
-      hostName: garageDisplayName(listing.hostId ?? "demo-user"),
+      hostId: listing.hostId,
+      hostName: garageDisplayName(listing.hostId),
       itemTitle: listing.title || "Sale item",
       winningBidUsd: checkout.winningBidUsd,
       platformFeeUsd: totals.platformFeeUsd,
@@ -86,7 +85,7 @@ export function GarageWinnerCheckoutScreen({
     return () => window.clearInterval(timer);
   }, [checkout]);
 
-  if (!listing || !checkout || !isAwaitingCheckoutForMe(listingId)) {
+  if (!listing || !checkout || !isAwaitingCheckoutForMe(listingId) || !checkoutInput) {
     return (
       <div className="screen flex flex-col items-center justify-center bg-[#F9FAFB] px-6 text-center">
         <p className="font-bold text-gray-900">Nothing to pay</p>
@@ -98,32 +97,23 @@ export function GarageWinnerCheckoutScreen({
     );
   }
 
-  const hostName = garageDisplayName(listing.hostId ?? "demo-user");
+  const hostName = garageDisplayName(listing.hostId!);
   const isRunnerUp = checkout.runnerUpAttempt > 1;
 
-  const finishCheckout = (mode: "demo" | "stripe") => {
-    if (!checkoutInput) return;
-    if (mode === "stripe") {
-      completeAuctionCheckoutLive(checkoutInput);
-    } else {
-      completeAuctionCheckoutDemo(checkoutInput);
-    }
+  const finishCheckout = () => {
+    completeAuctionCheckout(checkoutInput);
     setClientSecret(null);
     onComplete();
   };
 
   const beginCheckout = () => {
-    if (!checkoutInput) return;
+    if (!paymentsReady) return;
     setBusy(true);
     setPaymentError(null);
     void startAuctionCheckout(checkoutInput)
       .then((result) => {
         if (!result.ok) {
           setPaymentError(result.reason);
-          return;
-        }
-        if (result.mode === "demo") {
-          finishCheckout("demo");
           return;
         }
         setClientSecret(result.clientSecret);
@@ -154,8 +144,9 @@ export function GarageWinnerCheckoutScreen({
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
-        <div className="mb-3">
-          <PaymentModeBanner context="garage" />
+        <div className="mb-3 space-y-2">
+          <PaymentsRequiredBanner />
+          <PaymentsReadyBadge />
         </div>
 
         <div
@@ -201,11 +192,6 @@ export function GarageWinnerCheckoutScreen({
           </div>
         </div>
 
-        <div className="mt-4 rounded-2xl border bg-white p-4 text-xs leading-relaxed text-gray-600" style={{ borderColor: BORDER }}>
-          <p className="font-bold text-gray-800">Auction terms</p>
-          <p className="mt-1.5">{auctionCopy.checkoutTerms}</p>
-        </div>
-
         {clientSecret ? (
           <div className="mt-4 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
             <p className="mb-3 text-sm font-semibold text-gray-900">Card payment</p>
@@ -217,7 +203,7 @@ export function GarageWinnerCheckoutScreen({
             <StripePaymentForm
               clientSecret={clientSecret}
               totalLabel={formatShopUsd(totals.totalUsd)}
-              onSuccess={() => finishCheckout("stripe")}
+              onSuccess={finishCheckout}
               onError={setPaymentError}
             />
           </div>
@@ -233,16 +219,12 @@ export function GarageWinnerCheckoutScreen({
           ) : null}
           <button
             type="button"
-            disabled={busy}
+            disabled={busy || !paymentsReady}
             onClick={beginCheckout}
             className="w-full rounded-xl py-3.5 text-base font-bold disabled:opacity-60"
             style={{ backgroundColor: AMBER, color: GREEN }}
           >
-            {busy
-              ? "Preparing payment…"
-              : checkoutMode === "stripe"
-                ? `Pay ${formatShopUsd(totals.totalUsd)} now`
-                : `Pay ${formatShopUsd(totals.totalUsd)} now · demo`}
+            {busy ? "Preparing payment…" : `Pay ${formatShopUsd(totals.totalUsd)} now`}
           </button>
         </div>
       ) : null}

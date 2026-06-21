@@ -175,7 +175,7 @@ export function submitNeighborOffer(input: {
   }
 
   const buyerId = getGarageBidderId();
-  const hostId = input.listing.hostId ?? "demo-user";
+  const hostId = input.listing.hostId ?? "";
   const title = input.listing.title || "Sale item";
 
   const existing = activeOffersForListing(input.listing.id).find((offer) => offer.buyerId === buyerId);
@@ -250,7 +250,7 @@ export function hostAcceptOffer(
   pushInAppNotification({
     type: "general",
     title: "Offer accepted",
-    body: `${offer.listingTitle} — sold for ${formatShopUsd(offer.amountUsd)} (demo).`,
+    body: `${offer.listingTitle} — sold for ${formatShopUsd(offer.amountUsd)}.`,
   });
 
   return { ok: true };
@@ -346,7 +346,7 @@ export function buyerAcceptCounter(
   pushInAppNotification({
     type: "general",
     title: "Deal!",
-    body: `${offer.listingTitle} — ${formatShopUsd(offer.amountUsd)} (demo).`,
+    body: `${offer.listingTitle} — ${formatShopUsd(offer.amountUsd)}.`,
   });
 
   return { ok: true };

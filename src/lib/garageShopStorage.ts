@@ -282,7 +282,7 @@ export function cartLineFromListing(listing: ListingDraft, priceUsd: number): Ga
   const cover = listing.photos[0];
   return {
     listingId: listing.id,
-    hostId: listing.hostId ?? "demo-user",
+    hostId: listing.hostId ?? "",
     title: listing.title || "Sale item",
     priceUsd,
     photoId: cover?.id,

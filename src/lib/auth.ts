@@ -336,7 +336,7 @@ export async function signOut(): Promise<void> {
 export async function requestAccountDeletion(): Promise<{ ok: true; message: string }> {
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return { ok: true, message: "Demo mode: account deletion is not available." };
+    return { ok: false, message: "Account deletion requires Supabase auth configuration." };
   }
   const { data } = await supabase.auth.getSession();
   const email = data.session?.user?.email ?? "";

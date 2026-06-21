@@ -5,7 +5,6 @@ import type { ListingDraft } from "./types";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { extractAnthropicText, postAnthropicMessages } from "../../lib/anthropicClient";
 import { useAuth } from "../../hooks/AuthProvider";
-import { boostListingRemote } from "../../lib/listingStorage";
 import { generateListingShareCards, type GeneratedShareCard, type ShareCardFormat } from "../../lib/shareCards";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
 import { buildListingSharePayload, listingShareUrl, shareNative as shareNativePayload, copyText } from "../../lib/socialShare";
@@ -346,7 +345,6 @@ export function ListingShareScreen({
                     window.alert("Sign in to boost your listing.");
                     return;
                   }
-                  const until = new Date(Date.now() + opt.hours * 60 * 60 * 1000).toISOString();
                   void fetch("/api/stripe/boost", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -358,21 +356,13 @@ export function ListingShareScreen({
                         window.location.href = String(payload.checkoutUrl);
                         return;
                       }
-                      // Demo fallback: apply boost immediately if Stripe isn't configured.
-                      return boostListingRemote({
-                        listingId: draft.id,
-                        ownerId: auth.userId,
-                        boostedTier: opt.cents / 100,
-                        boostedUntil: until,
-                      });
+                      window.alert(
+                        payload?.reason ??
+                          "Boost checkout is not configured. Set STRIPE_SECRET_KEY and implement boost checkout.",
+                      );
                     })
                     .catch(() => {
-                      return boostListingRemote({
-                        listingId: draft.id,
-                        ownerId: auth.userId,
-                        boostedTier: opt.cents / 100,
-                        boostedUntil: until,
-                      });
+                      window.alert("Boost checkout failed. Check Stripe configuration.");
                     });
                 }}
                 className="rounded-2xl border bg-white px-2 py-2.5 text-[12px] font-bold text-gray-800"

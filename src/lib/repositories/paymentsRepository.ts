@@ -2,11 +2,12 @@ import type { GarageCartLine } from "../garageShopStorage";
 import { clearGarageCart, formatShopUsd } from "../garageShopStorage";
 import { markAuctionCheckoutComplete } from "../garageAuctionState";
 import { pushInAppNotification } from "../inAppNotifications";
-import { isGarageCommerceBackendReady } from "../config/integrations";
-import { isStripePaymentsEnabled } from "../stripeConfig";
+import {
+  getSignInRequiredMessage,
+  getStripeRequiredMessage,
+  isPaymentsReady,
+} from "../config/production";
 import { createAuctionCheckoutIntent, createGarageCartCheckoutIntent, getAccessToken } from "../stripePayments";
-
-export type CheckoutMode = "demo" | "stripe";
 
 export type GarageCartCheckoutInput = {
   hostId: string;
@@ -29,28 +30,23 @@ export type AuctionCheckoutInput = {
 };
 
 export type CheckoutIntentResult =
-  | { ok: true; mode: "demo" }
-  | { ok: true; mode: "stripe"; clientSecret: string; paymentIntentId: string; orderId: string }
+  | { ok: true; clientSecret: string; paymentIntentId: string; orderId: string }
   | { ok: false; reason: string };
 
-export function getGarageCheckoutMode(): CheckoutMode {
-  return isGarageCommerceBackendReady() ? "stripe" : "demo";
-}
-
-export function formatCheckoutModeLabel(mode: CheckoutMode): string {
-  return mode === "stripe" ? "Live Stripe checkout" : "Demo checkout";
+export function canProcessGaragePayments(): boolean {
+  return isPaymentsReady();
 }
 
 export async function startGarageCartCheckout(
   input: GarageCartCheckoutInput,
 ): Promise<CheckoutIntentResult> {
-  if (!isStripePaymentsEnabled()) {
-    return { ok: true, mode: "demo" };
+  if (!isPaymentsReady()) {
+    return { ok: false, reason: getStripeRequiredMessage() };
   }
 
   const token = await getAccessToken();
   if (!token) {
-    return { ok: false, reason: "Sign in required for live checkout" };
+    return { ok: false, reason: getSignInRequiredMessage() };
   }
 
   const amountCents = Math.max(50, Math.round(input.totalUsd * 100));
@@ -67,15 +63,11 @@ export async function startGarageCartCheckout(
   });
 
   if (!result.ok) {
-    if (result.reason === "Stripe not configured" || result.reason.includes("not implemented")) {
-      return { ok: true, mode: "demo" };
-    }
     return result;
   }
 
   return {
     ok: true,
-    mode: "stripe",
     clientSecret: result.clientSecret,
     paymentIntentId: result.paymentIntentId,
     orderId: result.orderId,
@@ -85,13 +77,13 @@ export async function startGarageCartCheckout(
 export async function startAuctionCheckout(
   input: AuctionCheckoutInput,
 ): Promise<CheckoutIntentResult> {
-  if (!isStripePaymentsEnabled()) {
-    return { ok: true, mode: "demo" };
+  if (!isPaymentsReady()) {
+    return { ok: false, reason: getStripeRequiredMessage() };
   }
 
   const token = await getAccessToken();
   if (!token) {
-    return { ok: false, reason: "Sign in required for live checkout" };
+    return { ok: false, reason: getSignInRequiredMessage() };
   }
 
   const amountCents = Math.max(50, Math.round(input.totalUsd * 100));
@@ -105,49 +97,27 @@ export async function startAuctionCheckout(
   });
 
   if (!result.ok) {
-    if (result.reason === "Stripe not configured" || result.reason.includes("not implemented")) {
-      return { ok: true, mode: "demo" };
-    }
     return result;
   }
 
   return {
     ok: true,
-    mode: "stripe",
     clientSecret: result.clientSecret,
     paymentIntentId: result.paymentIntentId,
     orderId: result.orderId,
   };
 }
 
-export function completeGarageCartCheckoutDemo(input: GarageCartCheckoutInput): void {
+export function completeGarageCartCheckout(input: GarageCartCheckoutInput): void {
   pushInAppNotification({
     type: "general",
-    title: "Order placed (demo)",
+    title: "Garage order paid",
     body: `${input.lines.length} item(s) from ${input.garageName} · ${formatShopUsd(input.totalUsd)} total.`,
   });
   clearGarageCart();
 }
 
-export function completeGarageCartCheckoutLive(input: GarageCartCheckoutInput): void {
-  pushInAppNotification({
-    type: "general",
-    title: "Garage order paid",
-    body: `${input.lines.length} item(s) from ${input.garageName} · pick up at the sale.`,
-  });
-  clearGarageCart();
-}
-
-export function completeAuctionCheckoutDemo(input: AuctionCheckoutInput): void {
-  markAuctionCheckoutComplete(input.listingId, input.winningBidUsd, input.itemTitle);
-  pushInAppNotification({
-    type: "general",
-    title: "Auction paid (demo)",
-    body: `${input.itemTitle} — pick up from ${input.hostName}.`,
-  });
-}
-
-export function completeAuctionCheckoutLive(input: AuctionCheckoutInput): void {
+export function completeAuctionCheckout(input: AuctionCheckoutInput): void {
   markAuctionCheckoutComplete(input.listingId, input.winningBidUsd, input.itemTitle);
   pushInAppNotification({
     type: "general",

@@ -3,9 +3,9 @@ import { getActiveCoHostHostIds } from "./coHostStorage";
 import { countPublishedListingsForHost, fetchListingsByOwnerIdsRemote, loadPublishedListings } from "./listingStorage";
 import { resolveHostAccountEmail, resolveHostAccountId } from "./hostIdentity";
 
-const LEGACY_HOST_ID = "demo-user";
+const LEGACY_HOST_ID = "";
 
-/** Host id stamped on listings; legacy rows without hostId belong to demo-user. */
+/** Host id stamped on listings; legacy rows without hostId are unassigned until migrated. */
 export function getListingHostId(listing: ListingDraft): string {
   return listing.hostId?.trim() || LEGACY_HOST_ID;
 }

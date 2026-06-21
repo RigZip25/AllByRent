@@ -515,7 +515,7 @@ export function ProfileScreen({
             <RowButton
               icon={<CreditCard className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label="Payouts (Stripe)"
-              value={profile.payoutConnected ? "Connected" : "Not connected — demo"}
+              value={profile.payoutConnected ? "Connected" : "Not connected"}
             />
           </li>
           <li>
@@ -576,7 +576,7 @@ export function ProfileScreen({
           style={{ borderColor: BORDER }}
         >
           <LogOut className="h-4 w-4" />
-          {auth.configured ? (authBusy ? "Signing out…" : "Sign out") : "Log out (demo)"}
+          {auth.configured ? (authBusy ? "Signing out…" : "Sign out") : "Sign in required"}
         </button>
 
         {auth.configured ? (

@@ -145,6 +145,6 @@ After `garage_follows` table: trigger on new listing → call push API for follo
 
 ---
 
-## 8. Demo / pilot without backend
+## Production-only builds
 
-The app remains fully usable in localStorage demo mode for friends-and-family pilots. No keys required until you want real payments or sync.
+This branch **does not** run without Supabase configured. Payments require Stripe keys. There is no offline demo seed data for rentals or fake checkout completion.

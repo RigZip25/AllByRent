@@ -78,7 +78,35 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     },
   });
 
-  // TODO: insert into garage_orders + garage_order_lines when migration is applied.
+  // Persist order for webhook reconciliation.
+  const { error: orderError } = await admin.from("garage_orders").insert({
+    id: orderId,
+    buyer_id: user.id,
+    host_id: hostId,
+    stripe_payment_intent_id: paymentIntent.id,
+    stripe_payment_status: paymentIntent.status,
+    subtotal_cents: typeof body.subtotalCents === "number" ? Math.round(body.subtotalCents) : amountCents,
+    platform_fee_cents: typeof body.platformFeeCents === "number" ? Math.round(body.platformFeeCents) : 0,
+    total_cents: amountCents,
+    status: "pending",
+  });
+
+  if (orderError) {
+    res.status(500).json({ error: "Failed to create garage order" });
+    return;
+  }
+
+  for (const line of lines) {
+    const listingId = typeof line.listingId === "string" ? line.listingId.trim() : "";
+    if (!listingId) continue;
+    const priceUsd = typeof line.priceUsd === "number" ? line.priceUsd : 0;
+    await admin.from("garage_order_lines").insert({
+      order_id: orderId,
+      listing_id: listingId,
+      title: typeof line.title === "string" ? line.title.slice(0, 200) : "",
+      price_cents: Math.round(priceUsd * 100),
+    });
+  }
 
   if (!paymentIntent.client_secret) {
     res.status(500).json({ error: "PaymentIntent missing client secret" });

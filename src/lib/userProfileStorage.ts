@@ -45,37 +45,37 @@ export type UserProfile = {
   notificationsEnabled: boolean;
 };
 
-function createDefaultProfile(): UserProfile {
-  const listingsCount = countOwnListings(null);
-  const id = "demo-user";
+function createDefaultProfile(authUserId?: string | null): UserProfile {
+  const listingsCount = countOwnListings(authUserId ?? null);
+  const id = authUserId?.trim() ?? "";
 
   return {
     id,
-    displayName: "Alex Morgan",
-    firstName: "Alex",
-    lastName: "Morgan",
-    email: "alex@example.com",
+    displayName: "",
+    firstName: "",
+    lastName: "",
+    email: "",
     phone: "",
     bio: "",
     subscriptionPlan: loadSubscriptionPlanId(),
     memberSince: new Date().toISOString().slice(0, 10),
     preferredMode: getAppMode(),
-    avatarUrl: loadAvatarDataUrl(id),
+    avatarUrl: id ? loadAvatarDataUrl(id) : null,
     verification: {
-      email: true,
-      phone: true,
-      identity: true,
+      email: false,
+      phone: false,
+      identity: false,
     },
     host: {
       listingsCount,
-      rating: listingsCount > 0 ? 4.9 : 0,
-      reviewCount: listingsCount > 0 ? 12 : 0,
+      rating: 0,
+      reviewCount: 0,
       usesManualBooking: true,
     },
     renter: {
-      completedRentals: 3,
-      rating: 4.8,
-      reviewCount: 5,
+      completedRentals: 0,
+      rating: 0,
+      reviewCount: 0,
       noShowCount: 0,
     },
     payoutConnected: false,

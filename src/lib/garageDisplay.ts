@@ -2,7 +2,7 @@ import type { ListingDraft } from "../screens/listing/types";
 import { getPublicProfile } from "./demoUserProfiles";
 
 export function garageDisplayName(hostId: string | undefined): string {
-  if (!hostId || hostId === "demo-user") return "Neighbor's Garage";
+  if (!hostId) return "Host's Garage";
   const profile = getPublicProfile(hostId);
   if (profile) return `${profile.displayName}'s Garage`;
   return "Neighbor's Garage";
@@ -71,7 +71,7 @@ export type GarageSummary = {
 export function groupListingsByGarage(listings: ListingDraft[]): GarageSummary[] {
   const byHost = new Map<string, ListingDraft[]>();
   for (const listing of listings) {
-    const hostId = listing.hostId ?? "demo-user";
+    const hostId = listing.hostId ?? "";
     const bucket = byHost.get(hostId) ?? [];
     bucket.push(listing);
     byHost.set(hostId, bucket);

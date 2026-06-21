@@ -155,7 +155,7 @@ function normalizeListingDraft(raw: ListingDraft): ListingDraft {
   const status =
     raw.listingStatus === "pending_sticker" ? "pending_qr" : raw.listingStatus;
   const hostId =
-    typeof raw.hostId === "string" && raw.hostId.trim() ? raw.hostId.trim() : "demo-user";
+    typeof raw.hostId === "string" && raw.hostId.trim() ? raw.hostId.trim() : "";
 
   return {
     ...raw,
@@ -208,7 +208,7 @@ export function loadPublishedListings(): ListingDraft[] {
 }
 
 export function countPublishedListingsForHost(hostId: string): number {
-  const normalizedHostId = hostId.trim() || "demo-user";
+  const normalizedHostId = hostId.trim();
   try {
     const raw = localStorage.getItem(LISTINGS_STORAGE_KEY);
     if (!raw) return 0;
@@ -221,7 +221,7 @@ export function countPublishedListingsForHost(hostId: string): number {
       const listingHost =
         typeof listing.hostId === "string" && listing.hostId.trim()
           ? listing.hostId.trim()
-          : "demo-user";
+          : "";
       if (listingHost === normalizedHostId) count += 1;
     }
     return count;
@@ -604,11 +604,11 @@ export async function fetchListingByIdRemote(id: string): Promise<ListingDraft |
 
 export async function fetchListingsByOwnerIdsRemote(ownerIds: string[]): Promise<ListingDraft[]> {
   if (!isSupabaseConfigured()) {
-    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? "demo-user"));
+    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? ""));
   }
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? "demo-user"));
+    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? ""));
   }
   const { data, error } = await supabase
     .from("listings")
@@ -616,7 +616,7 @@ export async function fetchListingsByOwnerIdsRemote(ownerIds: string[]): Promise
     .in("owner_id", ownerIds)
     .order("updated_at", { ascending: false });
   if (error || !data) {
-    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? "demo-user"));
+    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? ""));
   }
   return (data as SupabaseListingRow[]).map(rowToDraft);
 }

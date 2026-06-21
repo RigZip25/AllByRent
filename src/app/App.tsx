@@ -39,6 +39,7 @@ import { MoreScreen } from "../screens/MoreScreen";
 import { MrEvoriosScreen } from "../screens/MrEvoriosScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
+import { SetupRequiredScreen } from "../screens/SetupRequiredScreen";
 import { IntegrationStatusScreen } from "../screens/IntegrationStatusScreen";
 import { SubscriptionPlansScreen } from "../screens/SubscriptionPlansScreen";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
@@ -338,6 +339,9 @@ function bootItemIdForDeepLink(target: DeepLinkTarget | null): string | null {
 
 function AppRoutes() {
   const auth = useAuth();
+  if (!auth.configured) {
+    return <SetupRequiredScreen />;
+  }
   const boot = readBootQuery();
   const bootDeepLink = useRef(readBootDeepLink()).current;
   const handledSessionTokenRef = useRef<string | null>(null);

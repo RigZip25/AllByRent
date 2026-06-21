@@ -1,4 +1,4 @@
-import { resolveCounterpartyId } from "./demoUserProfiles";
+import { fetchListingByIdRemote, getPublishedListingById } from "./listingStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 export type RentalStatus =
@@ -128,49 +128,7 @@ type SupabaseRentalRow = {
 
 const RENTALS_KEY = "allbyrent_rental_bookings";
 const RENTALS_VERSION_KEY = "allbyrent_rental_bookings_version";
-const RENTALS_VERSION = "9";
-
-const now = new Date();
-const today = now.toISOString().slice(0, 10);
-const pickupTodayStart = new Date(now);
-pickupTodayStart.setHours(14, 0, 0, 0);
-const pickupTodayEnd = new Date(now);
-pickupTodayEnd.setHours(16, 0, 0, 0);
-const pickupPast = new Date(now);
-pickupPast.setMinutes(pickupPast.getMinutes() - 75);
-const returnSoon = new Date(now);
-returnSoon.setDate(returnSoon.getDate() + 2);
-returnSoon.setHours(returnSoon.getHours() + 4);
-const overdueStart = new Date(now);
-overdueStart.setHours(overdueStart.getHours() - 6);
-overdueStart.setMinutes(overdueStart.getMinutes() - 23);
-const disputeDeadline = new Date(now);
-disputeDeadline.setHours(disputeDeadline.getHours() + 36);
-const completedRecent = new Date(now);
-completedRecent.setDate(completedRecent.getDate() - 1);
-const completedFiveDaysAgo = new Date(now);
-completedFiveDaysAgo.setDate(completedFiveDaysAgo.getDate() - 5);
-const completedTwelveDaysAgo = new Date(now);
-completedTwelveDaysAgo.setDate(completedTwelveDaysAgo.getDate() - 12);
-const completedLastMonthMid = new Date(now.getFullYear(), now.getMonth() - 1, 15, 18, 0, 0, 0);
-const approvalDeadline = new Date(now);
-approvalDeadline.setHours(approvalDeadline.getHours() + 18);
-
-function cp(
-  name: string,
-  identity: boolean,
-  phone: boolean,
-): Pick<
-  RentalBooking,
-  "counterpartyId" | "counterpartyName" | "counterpartyIdentityVerified" | "counterpartyPhoneVerified"
-> {
-  return {
-    counterpartyId: resolveCounterpartyId(name),
-    counterpartyName: name,
-    counterpartyIdentityVerified: identity,
-    counterpartyPhoneVerified: phone,
-  };
-}
+const RENTALS_VERSION = "10-production";
 
 export function generatePin(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
@@ -186,7 +144,6 @@ function slugifyTitle(input: string): string {
 }
 
 function seedItemQrToken(itemTitle: string): string {
-  // Demo policy: stable per `itemTitle` (not cryptographically secure).
   return `abr-item-${slugifyTitle(itemTitle)}`;
 }
 
@@ -210,7 +167,6 @@ function ensurePinsAndQr(next: RentalBooking, prev?: RentalBooking | null): Rent
     };
   }
 
-  // Preserve previous pins when status changes away from these stages.
   return {
     ...withQr,
     pickupPin: withQr.pickupPin ?? prev?.pickupPin,
@@ -218,358 +174,68 @@ function ensurePinsAndQr(next: RentalBooking, prev?: RentalBooking | null): Rent
   };
 }
 
-const DEMO_BOOKINGS: RentalBooking[] = [
-  {
-    id: "rent-pending-renter",
-    role: "renter",
-    status: "pending_approval",
-    itemTitle: "GoPro Hero 12",
-    itemEmoji: "🎥",
-    itemQrToken: seedItemQrToken("GoPro Hero 12"),
-    startDate: "2026-05-28",
-    endDate: "2026-05-30",
-    ...cp("John Davis", true, true),
-    pickupLabel: "In-person · Oak Park",
-    totalUsd: 45,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    approvalDeadline: approvalDeadline.toISOString(),
-    paymentOnHold: true,
-    manualBooking: true,
-    stripePayment: true,
-  },
-  {
-    id: "rent-pending-host",
-    role: "host",
-    status: "pending_approval",
-    itemTitle: "Table Saw",
-    itemEmoji: "🪚",
-    itemQrToken: seedItemQrToken("Table Saw"),
-    startDate: "2026-05-29",
-    endDate: "2026-05-31",
-    counterpartyId: "chris-t",
-    counterpartyName: "Chris T.",
-    counterpartyIdentityVerified: true,
-    counterpartyPhoneVerified: false,
-    pickupLabel: "Home pickup",
-    totalUsd: 78,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    approvalDeadline: approvalDeadline.toISOString(),
-    manualBooking: true,
-    stripePayment: true,
-  },
-  {
-    id: "rent-1",
-    role: "renter",
-    status: "pending_checkin",
-    itemTitle: "Canon EOS R6 Kit",
-    itemEmoji: "📷",
-    itemQrToken: seedItemQrToken("Canon EOS R6 Kit"),
-    startDate: today,
-    endDate: "2026-05-28",
-    ...cp("John Davis", true, true),
-    pickupLabel: "Contactless pickup",
-    totalUsd: 84,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    fulfillmentMethod: "contactless",
-    pickupAddress: "2847 N Ashland Ave, Chicago, IL 60657",
-    contactlessInstructions:
-      "Side gate lockbox on the north fence. Enter code 4829, then press #. Leave item latched when done.",
-    pickupWindowStart: pickupTodayStart.toISOString(),
-    pickupWindowEnd: pickupTodayEnd.toISOString(),
-    pickupScheduledAt: pickupTodayStart.toISOString(),
-    pickupPin: "482917",
-    stripePayment: true,
-  },
-  {
-    id: "rent-delivery",
-    role: "renter",
-    status: "pending_checkin",
-    itemTitle: "Pressure Washer 3000 PSI",
-    itemEmoji: "💦",
-    itemQrToken: seedItemQrToken("Pressure Washer 3000 PSI"),
-    startDate: today,
-    endDate: "2026-05-27",
-    ...cp("Sam K.", false, true),
-    pickupLabel: "Delivery · 5 mi",
-    rentalSubtotalUsd: 42,
-    deliveryFee: 35,
-    deliveryRequested: true,
-    serviceFeeUsd: 9.24,
-    totalUsd: 86.24,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    fulfillmentMethod: "delivery",
-    deliveryAddress: "742 Evergreen Terrace, Springfield",
-    hostAddress: "1200 W Lake St, Chicago, IL 60607",
-    deliveryStatus: "scheduled",
-    stripePayment: true,
-  },
-  {
-    id: "rent-2",
-    role: "renter",
-    status: "upcoming",
-    itemTitle: "4-Person Camping Tent",
-    itemEmoji: "⛺",
-    itemQrToken: seedItemQrToken("4-Person Camping Tent"),
-    startDate: "2026-06-02",
-    endDate: "2026-06-05",
-    ...cp("Maria S.", true, true),
-    pickupLabel: "Contactless pickup",
-    totalUsd: 120,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    fulfillmentMethod: "contactless",
-    stripePayment: true,
-  },
-  {
-    id: "rent-3",
-    role: "host",
-    status: "active",
-    itemTitle: "Milwaukee M18 Drill Kit",
-    itemEmoji: "🔧",
-    itemQrToken: seedItemQrToken("Milwaukee M18 Drill Kit"),
-    startDate: "2026-05-24",
-    endDate: "2026-05-27",
-    ...cp("Chris T.", true, false),
-    pickupLabel: "Your listing · Home pickup",
-    totalUsd: 65,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    returnDueAt: returnSoon.toISOString(),
-    returnPin: "193846",
-    stripePayment: true,
-  },
-  {
-    id: "rent-4",
-    role: "host",
-    status: "upcoming",
-    itemTitle: "Pressure Washer 3000 PSI",
-    itemEmoji: "💦",
-    itemQrToken: seedItemQrToken("Pressure Washer 3000 PSI"),
-    startDate: "2026-05-30",
-    endDate: "2026-05-31",
-    ...cp("Sam K.", false, false),
-    pickupLabel: "Delivery · 5 mi",
-    rentalSubtotalUsd: 42,
-    deliveryFee: 35,
-    deliveryRequested: true,
-    serviceFeeUsd: 9.24,
-    totalUsd: 86.24,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    fulfillmentMethod: "delivery",
-    deliveryAddress: "742 Evergreen Terrace, Springfield",
-    deliveryStatus: "scheduled",
-    stripePayment: true,
-  },
-  {
-    id: "rent-7",
-    role: "renter",
-    status: "overdue",
-    itemTitle: "Kayak · 2-Person",
-    itemEmoji: "🛶",
-    itemQrToken: seedItemQrToken("Kayak · 2-Person"),
-    startDate: "2026-05-20",
-    endDate: "2026-05-24",
-    ...cp("Pat R.", true, true),
-    pickupLabel: "Lakefront dock",
-    totalUsd: 72,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    returnDueAt: overdueStart.toISOString(),
-    overdueSince: overdueStart.toISOString(),
-    stripePayment: true,
-  },
-  {
-    id: "rent-8",
-    role: "host",
-    status: "overdue",
-    itemTitle: "Party Speaker PA",
-    itemEmoji: "🔊",
-    itemQrToken: seedItemQrToken("Party Speaker PA"),
-    startDate: "2026-05-18",
-    endDate: "2026-05-23",
-    ...cp("Dana W.", true, true),
-    pickupLabel: "Home pickup",
-    totalUsd: 40,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    returnDueAt: overdueStart.toISOString(),
-    overdueSince: overdueStart.toISOString(),
-    stripePayment: true,
-  },
-  {
-    id: "rent-9",
-    role: "host",
-    status: "no_show",
-    itemTitle: "Lawn Aerator",
-    itemEmoji: "🌿",
-    itemQrToken: seedItemQrToken("Lawn Aerator"),
-    startDate: today,
-    endDate: today,
-    ...cp("Mike L.", false, false),
-    pickupLabel: "Driveway pickup",
-    totalUsd: 35,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    pickupScheduledAt: pickupPast.toISOString(),
-    pickupWindowStart: pickupPast.toISOString(),
-    pickupWindowEnd: new Date(pickupPast.getTime() + 2 * 60 * 60 * 1000).toISOString(),
-    stripePayment: true,
-  },
-  {
-    id: "rent-10",
-    role: "renter",
-    status: "disputed",
-    itemTitle: "DSLR Lens 24-70mm",
-    itemEmoji: "📸",
-    itemQrToken: seedItemQrToken("DSLR Lens 24-70mm"),
-    startDate: "2026-05-15",
-    endDate: "2026-05-22",
-    ...cp("Taylor H.", true, true),
-    pickupLabel: "In-person",
-    totalUsd: 58,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    disputeEvidenceDeadline: disputeDeadline.toISOString(),
-    disputeEscalated: false,
-    stripePayment: true,
-  },
-  {
-    id: "rent-11",
-    role: "host",
-    status: "disputed",
-    itemTitle: "Electric Bike",
-    itemEmoji: "🚴",
-    itemQrToken: seedItemQrToken("Electric Bike"),
-    startDate: "2026-05-10",
-    endDate: "2026-05-18",
-    ...cp("Riley N.", true, true),
-    pickupLabel: "Home pickup",
-    totalUsd: 110,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    disputeEvidenceDeadline: disputeDeadline.toISOString(),
-    disputeEscalated: true,
-    stripePayment: true,
-  },
-  {
-    id: "rent-5",
-    role: "renter",
-    status: "completed",
-    itemTitle: "DJI Mini 3 Drone",
-    itemEmoji: "🚁",
-    itemQrToken: seedItemQrToken("DJI Mini 3 Drone"),
-    startDate: "2026-04-10",
-    endDate: "2026-04-12",
-    ...cp("Lee P.", true, true),
-    pickupLabel: "In-person",
-    totalUsd: 95,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    completedAt: completedRecent.toISOString(),
-    review: null,
-    stripePayment: true,
-  },
-  {
-    id: "rent-host-may-drill",
-    role: "host",
-    status: "completed",
-    itemTitle: "Milwaukee M18 Drill Kit",
-    itemEmoji: "🔧",
-    itemQrToken: seedItemQrToken("Milwaukee M18 Drill Kit"),
-    startDate: completedFiveDaysAgo.toISOString().slice(0, 10),
-    endDate: completedFiveDaysAgo.toISOString().slice(0, 10),
-    ...cp("Alex B.", true, true),
-    pickupLabel: "Home pickup",
-    totalUsd: 65,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    completedAt: completedFiveDaysAgo.toISOString(),
-    review: { rating: 5, leftAt: completedFiveDaysAgo.toISOString() },
-    stripePayment: true,
-  },
-  {
-    id: "rent-host-may-washer",
-    role: "host",
-    status: "completed",
-    itemTitle: "Pressure Washer 3000 PSI",
-    itemEmoji: "💦",
-    itemQrToken: seedItemQrToken("Pressure Washer 3000 PSI"),
-    startDate: completedTwelveDaysAgo.toISOString().slice(0, 10),
-    endDate: completedTwelveDaysAgo.toISOString().slice(0, 10),
-    ...cp("Jordan M.", true, true),
-    pickupLabel: "Delivery · 5 mi",
-    rentalSubtotalUsd: 42,
-    deliveryFee: 35,
-    deliveryRequested: true,
-    serviceFeeUsd: 9.24,
-    totalUsd: 86.24,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    fulfillmentMethod: "delivery",
-    completedAt: completedTwelveDaysAgo.toISOString(),
-    review: null,
-    stripePayment: true,
-  },
-  {
-    id: "rent-host-apr-speaker",
-    role: "host",
-    status: "completed",
-    itemTitle: "Party Speaker PA",
-    itemEmoji: "🔊",
-    itemQrToken: seedItemQrToken("Party Speaker PA"),
-    startDate: completedLastMonthMid.toISOString().slice(0, 10),
-    endDate: completedLastMonthMid.toISOString().slice(0, 10),
-    ...cp("Dana W.", true, true),
-    pickupLabel: "Home pickup",
-    totalUsd: 40,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    completedAt: completedLastMonthMid.toISOString(),
-    review: { rating: 4, leftAt: completedLastMonthMid.toISOString() },
-    stripePayment: true,
-  },
-  {
-    id: "rent-6",
-    role: "host",
-    status: "completed",
-    itemTitle: "Beach Cruiser Bike",
-    itemEmoji: "🚲",
-    itemQrToken: seedItemQrToken("Beach Cruiser Bike"),
-    startDate: "2026-03-15",
-    endDate: "2026-03-17",
-    ...cp("Jordan M.", true, true),
-    pickupLabel: "Home pickup",
-    totalUsd: 48,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    completedAt: "2026-03-17T18:00:00.000Z",
-    review: { rating: 5, leftAt: "2026-03-18T10:00:00.000Z" },
-    stripePayment: true,
-  },
-  {
-    id: "rent-12",
-    role: "host",
-    status: "no_show",
-    itemTitle: "Projector 4K",
-    itemEmoji: "📽️",
-    itemQrToken: seedItemQrToken("Projector 4K"),
-    startDate: "2026-02-01",
-    endDate: "2026-02-03",
-    ...cp("Sam K.", true, true),
-    pickupLabel: "Contactless",
-    totalUsd: 62,
-    insuranceIncluded: false,
-    listingModes: ["rent"],
-    noShowMarkedAt: "2026-02-03T21:00:00.000Z",
-    review: null,
-    stripePayment: true,
-  },
+const RENTAL_STATUSES: RentalStatus[] = [
+  "pending_approval",
+  "pending_checkin",
+  "active",
+  "upcoming",
+  "overdue",
+  "no_show",
+  "disputed",
+  "completed",
+  "cancelled",
 ];
+
+function rowStatusToRentalStatus(status: string): RentalStatus {
+  if (RENTAL_STATUSES.includes(status as RentalStatus)) {
+    return status as RentalStatus;
+  }
+  return "pending_approval";
+}
+
+export function rentalBookingFromRemoteRow(
+  row: SupabaseRentalRow,
+  userId: string,
+  listingTitle?: string,
+): RentalBooking {
+  const role: RentalRole = row.owner_id === userId ? "host" : "renter";
+  const counterpartyId = role === "host" ? row.renter_id : row.owner_id;
+  const fulfillmentMethod: FulfillmentMethod =
+    row.booking_mode === "delivery"
+      ? "delivery"
+      : row.booking_mode === "contactless"
+        ? "contactless"
+        : "pickup";
+
+  return normalizeBooking({
+    id: row.id,
+    role,
+    status: rowStatusToRentalStatus(row.status),
+    itemTitle: listingTitle?.trim() || "Rental item",
+    itemEmoji: "📦",
+    startDate: row.start_date,
+    endDate: row.end_date,
+    counterpartyId,
+    counterpartyName: role === "host" ? "Renter" : "Host",
+    counterpartyIdentityVerified: false,
+    counterpartyPhoneVerified: false,
+    pickupLabel:
+      fulfillmentMethod === "delivery"
+        ? "Delivery"
+        : fulfillmentMethod === "contactless"
+          ? "Contactless"
+          : "Pickup",
+    totalUsd: Math.max(0, (row.rental_total_cents ?? 0) / 100),
+    insuranceIncluded: Boolean(row.insurance_fee_cents && row.insurance_fee_cents > 0),
+    listingModes: ["rent"],
+    fulfillmentMethod,
+    deliveryAddress: row.delivery_address ?? undefined,
+    pickupPin: row.pickup_pin ?? undefined,
+    returnPin: row.return_pin ?? undefined,
+    depositAmountCents: row.deposit_amount_cents ?? undefined,
+    stripePayment: Boolean(row.stripe_payment_intent_id),
+  });
+}
 
 function normalizeBooking(raw: RentalBooking): RentalBooking {
   const counterpartyName =
@@ -584,7 +250,7 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
   return {
     ...ensurePinsAndQr(raw),
     counterpartyName,
-    counterpartyId: raw.counterpartyId ?? resolveCounterpartyId(counterpartyName),
+    counterpartyId: raw.counterpartyId ?? "",
     counterpartyIdentityVerified: identity,
     counterpartyPhoneVerified: phone,
     listingModes: raw.listingModes ?? ["rent"],
@@ -660,48 +326,66 @@ export function toSupabaseRentalInsert(params: {
 }
 
 export async function createRentalRemote(row: Omit<SupabaseRentalRow, "created_at" | "updated_at">): Promise<void> {
-  if (!isSupabaseConfigured()) return;
+  if (!isSupabaseConfigured()) {
+    throw new Error("Database not configured");
+  }
   const supabase = getSupabaseClient();
-  if (!supabase) return;
+  if (!supabase) {
+    throw new Error("Database not configured");
+  }
   const { error } = await supabase.from("rentals").insert(row);
   if (error) throw error;
 }
 
 export async function fetchRentalsForUserRemote(userId: string): Promise<SupabaseRentalRow[]> {
-  if (!isSupabaseConfigured()) return [];
+  if (!isSupabaseConfigured()) {
+    throw new Error("Database not configured");
+  }
   const supabase = getSupabaseClient();
-  if (!supabase) return [];
+  if (!supabase) {
+    throw new Error("Database not configured");
+  }
   const { data, error } = await supabase
     .from("rentals")
     .select("*")
     .or(`owner_id.eq.${userId},renter_id.eq.${userId}`)
     .order("created_at", { ascending: false });
-  if (error || !data) return [];
-  return data as SupabaseRentalRow[];
+  if (error) throw error;
+  return (data ?? []) as SupabaseRentalRow[];
+}
+
+export async function syncRentalsFromRemote(userId: string): Promise<RentalBooking[]> {
+  const rows = await fetchRentalsForUserRemote(userId);
+  const bookings: RentalBooking[] = [];
+
+  for (const row of rows) {
+    const localListing = getPublishedListingById(row.listing_id);
+    let title = localListing?.title;
+    if (!title) {
+      const remoteListing = await fetchListingByIdRemote(row.listing_id);
+      title = remoteListing?.title;
+    }
+    bookings.push(rentalBookingFromRemoteRow(row, userId, title));
+  }
+
+  saveRentalBookings(bookings);
+  return bookings;
 }
 
 export function loadRentalBookings(): RentalBooking[] {
   try {
     if (localStorage.getItem(RENTALS_VERSION_KEY) !== RENTALS_VERSION) {
-      localStorage.setItem(RENTALS_KEY, JSON.stringify(DEMO_BOOKINGS));
+      localStorage.removeItem(RENTALS_KEY);
       localStorage.setItem(RENTALS_VERSION_KEY, RENTALS_VERSION);
-      return DEMO_BOOKINGS.map(normalizeBooking);
+      return [];
     }
     const raw = localStorage.getItem(RENTALS_KEY);
-    if (!raw) {
-      localStorage.setItem(RENTALS_KEY, JSON.stringify(DEMO_BOOKINGS));
-      localStorage.setItem(RENTALS_VERSION_KEY, RENTALS_VERSION);
-      return DEMO_BOOKINGS.map(normalizeBooking);
-    }
+    if (!raw) return [];
     const parsed = JSON.parse(raw) as RentalBooking[];
-    if (!Array.isArray(parsed)) {
-      throw new Error("Invalid bookings data");
-    }
+    if (!Array.isArray(parsed)) return [];
     return parsed.map(normalizeBooking);
   } catch {
-    localStorage.setItem(RENTALS_KEY, JSON.stringify(DEMO_BOOKINGS));
-    localStorage.setItem(RENTALS_VERSION_KEY, RENTALS_VERSION);
-    return DEMO_BOOKINGS.map(normalizeBooking);
+    return [];
   }
 }
 

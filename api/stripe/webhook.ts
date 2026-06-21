@@ -110,6 +110,26 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     const intent = event.data.object as Stripe.PaymentIntent;
     const paymentType = intent.metadata?.payment_type;
 
+    if (paymentType === "garage_cart" && event.type === "payment_intent.succeeded") {
+      const orderId = intent.metadata?.order_id;
+      if (orderId) {
+        await admin
+          .from("garage_orders")
+          .update({ stripe_payment_status: intent.status, status: "paid" })
+          .eq("id", orderId);
+      }
+    }
+
+    if (paymentType === "garage_auction" && event.type === "payment_intent.succeeded") {
+      const orderId = intent.metadata?.order_id;
+      if (orderId) {
+        await admin
+          .from("garage_auction_payments")
+          .update({ stripe_payment_status: intent.status, status: "paid" })
+          .eq("id", orderId);
+      }
+    }
+
     if (paymentType === "rental" || paymentType === "deposit") {
       if (
         event.type === "payment_intent.succeeded" ||
@@ -120,6 +140,26 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       ) {
         await syncRentalPaymentFromIntent(admin, intent);
       }
+    }
+  }
+
+  if (admin && event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const planId = session.metadata?.subscription_plan_id;
+    const userId = session.metadata?.supabase_user_id;
+    if (planId && userId) {
+      await admin.from("profiles").update({ subscription_plan_id: planId }).eq("id", userId);
+    }
+  }
+
+  if (admin && event.type === "account.updated") {
+    const account = event.data.object as Stripe.Account;
+    const userId = account.metadata?.supabase_user_id;
+    if (userId) {
+      await admin
+        .from("profiles")
+        .update({ stripe_payouts_enabled: Boolean(account.payouts_enabled) })
+        .eq("id", userId);
     }
   }
 

@@ -102,7 +102,7 @@ export function ActiveGarageShopScreen({
       const candidates = all.filter(
         (listing) =>
           listing.listingStatus === "active" &&
-          (listing.hostId ?? "demo-user") === hostId &&
+          (listing.hostId ?? "") === hostId &&
           listing.modes.sell,
       );
       const listingIds = candidates.map((listing) => listing.id);
@@ -146,7 +146,7 @@ export function ActiveGarageShopScreen({
         const candidates = all.filter(
           (listing) =>
             listing.listingStatus === "active" &&
-            (listing.hostId ?? "demo-user") === hostId &&
+            (listing.hostId ?? "") === hostId &&
             listing.modes.sell,
         );
         const listingIds = candidates.map((listing) => listing.id);

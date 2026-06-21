@@ -56,7 +56,7 @@ export function resolveListingDeepLink(listingId: string): DeepLinkTarget {
     return { kind: "listing", listingId };
   }
 
-  const hostId = listing.hostId ?? "demo-user";
+  const hostId = listing.hostId ?? "";
   if (listing.modes.sell) {
     return { kind: "garage", hostId, itemId: listing.id };
   }

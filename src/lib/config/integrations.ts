@@ -26,12 +26,10 @@ function hasClientEnv(key: string): boolean {
   return Boolean(value && value.length > 0);
 }
 
-/** Client-safe: push needs public VAPID key in the bundle. */
 export function isPushConfigured(): boolean {
   return hasClientEnv("VITE_VAPID_PUBLIC_KEY");
 }
 
-/** Garage commerce uses Stripe PaymentIntents today; Supabase `garage_orders` is the next backend step. */
 export function isGarageCommerceBackendReady(): boolean {
   return isSupabaseConfigured() && isStripePaymentsEnabled();
 }
@@ -48,10 +46,10 @@ export function getIntegrationItems(): IntegrationItem[] {
       id: "supabase",
       label: "Supabase",
       status: supabase ? "ready" : "missing",
-      summary: supabase ? "Auth, profiles, listings sync enabled." : "Running in localStorage demo mode.",
+      summary: supabase ? "Auth, profiles, listings sync enabled." : "Required — app will not start without Supabase.",
       envKeys: ["VITE_SUPABASE_URL", "VITE_SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY"],
       nextStep: supabase
-        ? "Run migrations for garage_orders, garage_bids, garage_follows."
+        ? "Run migration 023_garage_commerce.sql for garage orders and follows."
         : "Create a Supabase project and add URL + anon key to Vercel.",
     },
     {
@@ -59,16 +57,16 @@ export function getIntegrationItems(): IntegrationItem[] {
       label: "Stripe",
       status: stripe ? "partial" : "missing",
       summary: stripe
-        ? "Rentals + garage checkout UI wired. Connect payouts + webhooks need server secrets."
-        : "Payments stay in demo mode until publishable key is set.",
+        ? "Checkout UI enabled — Connect payouts + webhooks need server secrets."
+        : "Required for bookings, garage checkout, and host plans.",
       envKeys: [
         "VITE_STRIPE_PUBLISHABLE_KEY",
         "STRIPE_SECRET_KEY",
         "STRIPE_WEBHOOK_SECRET",
       ],
       nextStep: stripe
-        ? "Add STRIPE_SECRET_KEY on Vercel and finish Connect account link + webhook handlers."
-        : "Add VITE_STRIPE_PUBLISHABLE_KEY to enable Stripe Elements in checkout screens.",
+        ? "Add STRIPE_SECRET_KEY on Vercel and configure webhook endpoint."
+        : "Add VITE_STRIPE_PUBLISHABLE_KEY to enable payments.",
     },
     {
       id: "anthropic",
@@ -92,19 +90,19 @@ export function getIntegrationItems(): IntegrationItem[] {
       status: push ? "partial" : "missing",
       summary: push
         ? "Client subscribe works; server fan-out needs garage_follows table."
-        : "In-app notifications only.",
+        : "In-app notifications only until VAPID keys are set.",
       envKeys: ["VITE_VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY"],
-      nextStep: "Generate VAPID keys and add garage_follows + listing insert triggers.",
+      nextStep: "Generate VAPID keys and wire garage_follows insert triggers.",
     },
     {
       id: "garageCommerce",
       label: "Garage checkout",
       status: garageCommerce ? "partial" : "missing",
       summary: garageCommerce
-        ? "Stripe PaymentIntents ready — persist orders in Supabase next."
-        : "Cart and auction checkout run as demo until Supabase + Stripe are live.",
+        ? "Stripe + garage_orders migration ready — run SQL on Supabase."
+        : "Requires Supabase + Stripe before cart and auction checkout work.",
       envKeys: ["VITE_STRIPE_PUBLISHABLE_KEY", "STRIPE_SECRET_KEY"],
-      nextStep: "Add garage_orders migration and extend stripe/webhook for payment_type=garage_cart|auction.",
+      nextStep: "Apply migration 023 and test garage cart + auction payment webhooks.",
     },
     {
       id: "subscriptions",
@@ -112,7 +110,7 @@ export function getIntegrationItems(): IntegrationItem[] {
       status: stripe ? "partial" : "missing",
       summary: stripe
         ? "Plan picker wired — map plan IDs to Stripe Price IDs."
-        : "Plans saved locally in demo mode.",
+        : "Requires Stripe before paid plan upgrades work.",
       envKeys: [
         "STRIPE_SECRET_KEY",
         "STRIPE_PRICE_STARTER",
