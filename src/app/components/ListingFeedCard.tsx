@@ -1,5 +1,6 @@
 import { Heart, QrCode, Shield, Star } from "lucide-react";
 import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
+import type { MediaRef } from "../../lib/mediaStore";
 import { useMediaUrl } from "../../lib/useMediaUrl";
 
 type OfferType = "Rent" | "Buy" | "Gift";

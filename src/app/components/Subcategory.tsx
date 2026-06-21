@@ -27,6 +27,7 @@ import {
 import { fetchRequestsForShelfRemote, type WantedRequest } from "../../lib/requestsStorage";
 
 import { categoryIdFromName } from "../../screens/listing/listingItemCategories";
+import type { ListingDraft } from "../../screens/listing/types";
 
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import type { MediaRef } from "../../lib/mediaStore";
@@ -250,7 +251,7 @@ export function Subcategory({
 
 
 
-  const [shelfListings, setShelfListings] = useState(() => []);
+  const [shelfListings, setShelfListings] = useState<ListingDraft[]>(() => []);
   const [shelfLoading, setShelfLoading] = useState(false);
   const [requests, setRequests] = useState<WantedRequest[]>([]);
 
@@ -333,7 +334,7 @@ export function Subcategory({
 
     id: listing.id,
 
-    title: getListingDisplayTitle(listing) || listing.title || "Listing",
+    title: getListingDisplayTitle(listing.title) || listing.title || "Listing",
 
     price: listing.pricing.dailyRate || "—",
 
@@ -790,7 +791,7 @@ export function Subcategory({
 
             .slice(0, 20)
 
-            .map((l) => getListingDisplayTitle(l) || l.title)
+            .map((l) => getListingDisplayTitle(l.title) || l.title)
 
             .filter(Boolean),
 

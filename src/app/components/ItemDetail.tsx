@@ -21,6 +21,11 @@ import {
 } from "../../lib/favoritesStorage";
 import { getPublishedListingById, getActiveRentLocationLabel } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
+import {
+  deliverySummaryForListing,
+  listingOffersDelivery,
+  parseListingDailyRate,
+} from "../../lib/rentalPricing";
 import { useMediaUrl } from "../../lib/useMediaUrl";
 import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
@@ -42,7 +47,7 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
   const coverUrl = useMediaUrl(coverThumb).url;
 
   const title = listing
-    ? getListingDisplayTitle(listing) || listing.title || "Listing"
+    ? getListingDisplayTitle(listing.title) || listing.title || "Listing"
     : "DSLR Camera";
   const dailyRate = listing
     ? parseListingDailyRate(listing.pricing.dailyRate) || 35

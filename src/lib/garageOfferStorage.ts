@@ -118,7 +118,7 @@ function activateMultiBuyerAuction(listingId: string, listingTitle: string): voi
 
   const amounts = activeOffersForListing(listingId).map((offer) => offer.amountUsd);
   const highOffer = Math.max(...amounts);
-  const window = defaultAuctionOfferWindow();
+  const auctionWindow = defaultAuctionOfferWindow();
   const existing = getGarageSaleOfferPrefs(listingId);
   const hostId = activeOffersForListing(listingId)[0]?.hostId;
 
@@ -128,8 +128,8 @@ function activateMultiBuyerAuction(listingId: string, listingTitle: string): voi
       kind: "auction",
       saleMode: existing?.saleMode ?? "open",
       startingBidUsd: highOffer,
-      startsAt: window.startsAt,
-      endsAt: window.endsAt,
+      startsAt: auctionWindow.startsAt,
+      endsAt: auctionWindow.endsAt,
       negotiationPhase: "multi_auction",
       eligibleBuyerIds: buyers,
     },
@@ -154,7 +154,7 @@ function activateMultiBuyerAuction(listingId: string, listingTitle: string): voi
     }
   }
 
-  window.dispatchEvent(new Event("evorios-garage-offers"));
+  globalThis.dispatchEvent(new Event("evorios-garage-offers"));
 }
 
 function completeSale(listing: ListingDraft, priceUsd: number, buyerId: string): { ok: true } | { ok: false; reason: string } {

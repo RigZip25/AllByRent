@@ -61,6 +61,8 @@ export type RentalBooking = {
   deliveryRequested?: boolean;
   /** Demo platform service fee portion of total. */
   serviceFeeUsd?: number;
+  /** Optional insurance fee portion of total. */
+  insuranceFeeUsd?: number;
   /** Copied from listing at booking time. */
   itemHeavy?: boolean;
   insuranceIncluded: boolean;

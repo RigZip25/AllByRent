@@ -38,6 +38,7 @@ import {
   type Dispute,
 } from "../../lib/disputesStorage";
 import { QrScanPanel, type QrScanPhase } from "../../components/rentals/QrScanPanel";
+import { RentanoTip } from "../../components/RentanoTip";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
 import {
   computeRentalPriceBreakdown,
@@ -144,6 +145,7 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
         itemWeightLbs: booking.itemWeightLbs,
         deliveryFeeUsd: booking.deliveryFee ?? 0,
         serviceFeeUsd: booking.serviceFeeUsd ?? 0,
+        insuranceFeeUsd: booking.insuranceFeeUsd ?? 0,
         totalUsd: booking.totalUsd,
       };
     }
@@ -622,9 +624,11 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
           title={`for ${booking.counterpartyName}`}
           onClose={() => setReviewOpen(false)}
           onSubmit={(rating, comment) => {
+            const reviewerId = auth.userId;
+            if (!reviewerId) return;
             void submitReviewRemote({
               rentalId: booking.id,
-              reviewerId: auth.userId,
+              reviewerId,
               revieweeId: booking.counterpartyId,
               role: booking.role === "renter" ? "renter" : "host",
               rating,
@@ -664,7 +668,7 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
                 type="button"
                 onClick={() => {
                   if (dispute) return;
-                  void openDisputeRemote({ rentalId: booking.id, openedBy: auth.userId }).then((d) => {
+                  void openDisputeRemote({ rentalId: booking.id, openedBy: auth.userId! }).then((d) => {
                     setDispute(d);
                     updateBooking(booking.id, { status: "disputed", disputeEvidenceDeadline: d.evidenceDeadline, paymentOnHold: true });
                     setBookings(loadRentalBookings());

@@ -65,7 +65,10 @@ export function IdentityVerificationScreen({ onBack }: { onBack: () => void }) {
                   },
                   body: JSON.stringify({ returnUrl: window.location.origin + "/?screen=profile" }),
                 });
-                const payload = (await res.json()) as any;
+                const payload = (await res.json()) as {
+                  client_secret?: string;
+                  reason?: string;
+                };
                 if (!payload?.client_secret) throw new Error(payload?.reason || "Stripe Identity unavailable.");
 
                 // Client-side Stripe Identity SDK wiring is environment-specific.

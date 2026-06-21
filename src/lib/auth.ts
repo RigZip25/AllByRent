@@ -333,7 +333,7 @@ export async function signOut(): Promise<void> {
   if (error) throw error;
 }
 
-export async function requestAccountDeletion(): Promise<{ ok: true; message: string }> {
+export async function requestAccountDeletion(): Promise<{ ok: boolean; message: string }> {
   const supabase = getSupabaseClient();
   if (!supabase) {
     return { ok: false, message: "Account deletion requires Supabase auth configuration." };

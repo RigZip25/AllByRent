@@ -25,7 +25,8 @@ function escapeHtml(value: string): string {
 async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET" && req.method !== "HEAD") {
     res.setHeader("Allow", "GET, HEAD");
-    return res.status(405).send("Method not allowed");
+    res.status(405).send("Method not allowed");
+    return;
   }
 
   const origin = siteOrigin(req);
@@ -42,7 +43,8 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
 
   if (req.method === "HEAD") {
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
 
   const html = `<!DOCTYPE html>
@@ -76,7 +78,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   </body>
 </html>`;
 
-  return res.status(200).send(html);
+  res.status(200).send(html);
 }
 
 export default withApiErrorHandling(handler);

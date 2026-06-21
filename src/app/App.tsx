@@ -1117,7 +1117,9 @@ function AppRoutes() {
             onNavigate={handleNavigate}
             onOpenNotifications={handleOpenNotifications}
             onEditLocation={openRentLocationSetup}
-            onPostRequest={handlePostRequest}
+            onPostRequest={(query) =>
+              handlePostRequest(query?.trim() ? { category: "", query: query.trim() } : undefined)
+            }
             onStockGarage={handleStartListing}
             onBrowseCategory={(label) =>
               handleCategorySelect(categoryIdFromName(label), label)

@@ -12,6 +12,12 @@ type AgentLogRow = {
   ok: boolean;
 };
 
+type AgentActivityResponse = {
+  ok?: boolean;
+  error?: string;
+  data?: { items?: AgentLogRow[] };
+};
+
 export function AgentActivityScreen({ onBack }: { onBack: () => void }) {
   const [items, setItems] = useState<AgentLogRow[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -30,19 +36,19 @@ export function AgentActivityScreen({ onBack }: { onBack: () => void }) {
           },
           body: JSON.stringify({ limit: 80 }),
         });
-        const payload = (await res.json()) as any;
+        const payload = (await res.json()) as AgentActivityResponse;
         if (!mounted) return;
         if (!payload?.ok) {
           setError(payload?.error || "Agent feed unavailable.");
           return;
         }
         setError(null);
-        setItems((payload.data?.items ?? []) as AgentLogRow[]);
+        setItems(payload.data?.items ?? []);
       } catch (e) {
         if (!mounted) return;
         setError(e instanceof Error ? e.message : "Agent feed unavailable.");
-      } finally {
-        if (!mounted) return;
+      }
+      if (mounted) {
         timer = window.setTimeout(run, 4000);
       }
     };

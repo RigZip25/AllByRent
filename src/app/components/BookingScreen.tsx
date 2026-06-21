@@ -107,7 +107,7 @@ function BookingScreenLoaded({
   onConfirmed: (bookingId: string) => void;
 }) {
   const auth = useAuth();
-  const title = getListingDisplayTitle(listing) || listing.title || "Item";
+  const title = getListingDisplayTitle(listing.title) || listing.title || "Item";
   const options = useMemo(() => fulfillmentOptions(listing), [listing]);
   const defaultFulfillment =
     options.find((o) => !o.disabled)?.id ?? options[0]?.id ?? "pickup";
