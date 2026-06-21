@@ -1,4 +1,5 @@
 import { reverseGeocode } from "./geocoding";
+import { resolveAreaLabelAtCoordinates } from "./usReverseGeocode";
 import { setHomeLocation } from "./listingStorage";
 
 export type ResolvedLocation = {
@@ -59,6 +60,16 @@ export type DetectedLocationResult =
   | { ok: true; location: ResolvedLocation }
   | { ok: false; reason: GeolocationFailureReason };
 
+async function resolveDisplayName(lat: number, lng: number): Promise<string> {
+  const full = await reverseGeocode(lat, lng);
+  if (full?.trim()) return full;
+
+  const area = await resolveAreaLabelAtCoordinates(lat, lng);
+  if (area?.trim()) return area;
+
+  return "Your area";
+}
+
 /** Geolocation + reverse geocode, without persisting to storage. */
 export async function detectCurrentLocation(): Promise<DetectedLocationResult> {
   const positionResult = await getCurrentPosition();
@@ -67,9 +78,7 @@ export async function detectCurrentLocation(): Promise<DetectedLocationResult> {
   }
 
   const { latitude, longitude } = positionResult.position.coords;
-  const displayName =
-    (await reverseGeocode(latitude, longitude)) ??
-    `Near you (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
+  const displayName = await resolveDisplayName(latitude, longitude);
 
   return {
     ok: true,
