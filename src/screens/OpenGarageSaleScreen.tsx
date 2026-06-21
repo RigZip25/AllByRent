@@ -1,12 +1,17 @@
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BRAND_AMBER, BRAND_GREEN, MASCOT_NAME, ONBOARDING } from "../lib/brand";
 import {
-  GARAGE_SALE_OPEN_OPTIONS,
+  GARAGE_SALE_DAY_LABELS,
+  GARAGE_SALE_PRESETS,
   garageSaleOpenLabel,
-  getGarageSaleOpenWindow,
-  setGarageSaleOpenWindow,
-  type GarageSaleOpenWindow,
+  garageSalePresetSchedule,
+  getGarageSaleSchedule,
+  isGarageSaleScheduleValid,
+  setGarageSaleSchedule,
+  toggleGarageSaleDay,
+  type GarageSalePresetId,
+  type GarageSaleSchedule,
 } from "../lib/garageSaleStorage";
 import { onboardingAssets } from "../lib/onboardingAssets";
 
@@ -27,16 +32,31 @@ export function OpenGarageSaleScreen({
   onAddSaleItems,
   onOpenMyGarage,
 }: OpenGarageSaleScreenProps) {
-  const [openWindow, setOpenWindow] = useState<GarageSaleOpenWindow>(() => getGarageSaleOpenWindow());
+  const [schedule, setSchedule] = useState<GarageSaleSchedule>(() => getGarageSaleSchedule());
 
-  const pickWindow = (window: GarageSaleOpenWindow) => {
-    setOpenWindow(window);
-    setGarageSaleOpenWindow(window);
+  const persist = useCallback((next: GarageSaleSchedule) => {
+    setSchedule(next);
+    setGarageSaleSchedule(next);
+  }, []);
+
+  useEffect(() => {
+    const sync = () => setSchedule(getGarageSaleSchedule());
+    window.addEventListener("evorios-garage-schedule", sync);
+    return () => window.removeEventListener("evorios-garage-schedule", sync);
+  }, []);
+
+  const applyPreset = (preset: GarageSalePresetId) => {
+    persist(garageSalePresetSchedule(preset));
   };
+
+  const scheduleValid = isGarageSaleScheduleValid(schedule);
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#FFF9F0]">
-      <div className="shrink-0 border-b px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top,0px))]" style={{ borderColor: `${AMBER}44` }}>
+      <div
+        className="shrink-0 border-b px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top,0px))]"
+        style={{ borderColor: `${AMBER}44` }}
+      >
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -61,7 +81,7 @@ export function OpenGarageSaleScreen({
           <img
             src={onboardingAssets.stockGarage}
             alt=""
-            className="max-h-[clamp(120px,22dvh,180px)] w-full max-w-[280px] object-contain"
+            className="max-h-[clamp(100px,18dvh,160px)] w-full max-w-[280px] object-contain"
             draggable={false}
           />
         </div>
@@ -69,28 +89,77 @@ export function OpenGarageSaleScreen({
         <section className="mt-2 rounded-2xl border bg-white p-4" style={{ borderColor: `${AMBER}55` }}>
           <h2 className="text-base font-bold text-gray-900">{copy.hoursTitle}</h2>
           <p className="mt-1 text-sm text-gray-500">{copy.hoursHint}</p>
-          <div className="mt-3 flex flex-col gap-2">
-            {GARAGE_SALE_OPEN_OPTIONS.map((option) => {
-              const selected = openWindow === option.id;
+
+          <p className="mt-4 text-[13px] font-semibold text-gray-800">{copy.daysLabel}</p>
+          <div className="mt-2 grid grid-cols-7 gap-1.5">
+            {GARAGE_SALE_DAY_LABELS.map((label, day) => {
+              const selected = schedule.daysOfWeek.includes(day);
               return (
                 <button
-                  key={option.id}
+                  key={label}
                   type="button"
-                  onClick={() => pickWindow(option.id)}
-                  className="flex items-center justify-between rounded-xl border px-3 py-3 text-left transition-colors"
+                  onClick={() => persist(toggleGarageSaleDay(schedule, day))}
+                  className="flex aspect-square items-center justify-center rounded-xl border text-[12px] font-bold transition-colors"
                   style={{
                     borderColor: selected ? AMBER : BORDER,
-                    backgroundColor: selected ? `${AMBER}18` : "#fff",
+                    backgroundColor: selected ? `${AMBER}22` : "#fff",
+                    color: selected ? "#92400E" : "#4B5563",
                   }}
+                  aria-pressed={selected}
                 >
-                  <span className="text-[15px] font-semibold text-gray-900">{option.label}</span>
-                  <span className="text-sm text-gray-500">{option.hours}</span>
+                  {label}
                 </button>
               );
             })}
           </div>
+
+          <p className="mt-4 text-[13px] font-semibold text-gray-800">{copy.timeLabel}</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <label className="block">
+              <span className="text-[12px] font-medium text-gray-500">{copy.timeFrom}</span>
+              <input
+                type="time"
+                value={schedule.startTime}
+                onChange={(event) => persist({ ...schedule, startTime: event.target.value })}
+                className="mt-1 w-full rounded-xl border px-3 py-2.5 text-base font-semibold text-gray-900"
+                style={{ borderColor: BORDER }}
+              />
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-medium text-gray-500">{copy.timeTo}</span>
+              <input
+                type="time"
+                value={schedule.endTime}
+                onChange={(event) => persist({ ...schedule, endTime: event.target.value })}
+                className="mt-1 w-full rounded-xl border px-3 py-2.5 text-base font-semibold text-gray-900"
+                style={{ borderColor: BORDER }}
+              />
+            </label>
+          </div>
+
+          {!scheduleValid ? (
+            <p className="mt-2 text-xs font-medium text-red-600">
+              Pick at least one day and make sure end time is after start.
+            </p>
+          ) : null}
+
+          <p className="mt-3 text-[12px] font-semibold text-gray-600">{copy.presetsLabel}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {GARAGE_SALE_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => applyPreset(preset.id)}
+                className="rounded-full border px-3 py-1.5 text-[12px] font-semibold active:opacity-90"
+                style={{ borderColor: BORDER, color: GREEN }}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+
           <p className="mt-3 text-xs font-medium" style={{ color: "#92400E" }}>
-            Neighbors will see: {garageSaleOpenLabel(openWindow)}
+            {copy.neighborsSee} {garageSaleOpenLabel(schedule)}
           </p>
         </section>
 
@@ -106,7 +175,8 @@ export function OpenGarageSaleScreen({
           <button
             type="button"
             onClick={onAddSaleItems}
-            className="mt-4 w-full rounded-xl py-3.5 text-base font-bold text-white active:opacity-90"
+            disabled={!scheduleValid}
+            className="mt-4 w-full rounded-xl py-3.5 text-base font-bold text-white active:opacity-90 disabled:opacity-50"
             style={{ backgroundColor: AMBER, color: GREEN }}
           >
             {copy.addItemsCta}

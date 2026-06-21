@@ -3,7 +3,7 @@ import { ArrowLeft, ShoppingCart, Store } from "lucide-react";
 import { GarageBidSheet } from "../components/garage-shop/GarageBidSheet";
 import { GarageShopItemCard } from "../components/garage-shop/GarageShopItemCard";
 import { garageDisplayName } from "../lib/garageDisplay";
-import { garageSaleOpenLabel, getGarageSaleOpenWindow } from "../lib/garageSaleStorage";
+import { garageSaleOpenLabel, getGarageSaleSchedule } from "../lib/garageSaleStorage";
 import {
   addToGarageCart,
   cartLineFromListing,
@@ -44,9 +44,15 @@ export function ActiveGarageShopScreen({
   const [toast, setToast] = useState<string | null>(null);
   const city = getActiveRentLocationLabel().trim();
   const garageName = useMemo(() => garageDisplayName(hostId), [hostId]);
-  const openLabel = garageSaleOpenLabel(getGarageSaleOpenWindow());
+  const [openLabel, setOpenLabel] = useState(() => garageSaleOpenLabel(getGarageSaleSchedule()));
 
   const refreshCartCount = useCallback(() => setCartCount(getCartCount()), []);
+
+  useEffect(() => {
+    const syncSchedule = () => setOpenLabel(garageSaleOpenLabel(getGarageSaleSchedule()));
+    window.addEventListener("evorios-garage-schedule", syncSchedule);
+    return () => window.removeEventListener("evorios-garage-schedule", syncSchedule);
+  }, []);
 
   useEffect(() => {
     window.addEventListener("evorios-garage-cart", refreshCartCount);
