@@ -55,13 +55,16 @@ Everything in this document is **code in the repo**. When these items are done, 
 
 ---
 
-### Step 3 — Vercel deploy
+### Step 3 — Vercel deploy + DNS
 
 1. Merge PR to `main` (or deploy preview branch).
-2. Set all env vars from `.env.example` on the Vercel project.
-3. Redeploy after env changes.
+2. Set all env vars from `.env.example` on the Vercel project (`PASSKEY_RP_ID=app.evorios.com`, `PASSKEY_ORIGIN=https://app.evorios.com`).
+3. Point DNS:
+   - **App (PWA):** `app.evorios.com` → Vercel
+   - **Marketing site:** `evorios.com` → your web host (separate from the PWA)
+4. Redeploy after env and DNS changes.
 
-**Verify:** `npm run build` passed in CI; production URL loads.
+**Verify:** `npm run build` passed in CI; `https://app.evorios.com` loads the app.
 
 ---
 

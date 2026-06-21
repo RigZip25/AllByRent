@@ -1,4 +1,4 @@
-import { APP_NAME } from "./brand";
+import { APP_NAME, APP_ORIGIN } from "./brand";
 import { shareAppOrigin } from "./deepLinks";
 import type { ShareCardFormat } from "./shareCards";
 
@@ -278,7 +278,7 @@ export function listingShareUrl(listingId: string): string {
   try {
     return withShareParams("/link", { listingId });
   } catch {
-    return `https://app.allbyrent.com/link?listingId=${encodeURIComponent(listingId)}&skipSplash=1`;
+    return `${APP_ORIGIN}/link?listingId=${encodeURIComponent(listingId)}&skipSplash=1`;
   }
 }
 
@@ -286,7 +286,7 @@ export function garageShareUrl(hostId: string): string {
   try {
     return withShareParams("/link", { garage: hostId });
   } catch {
-    return `https://app.allbyrent.com/link?garage=${encodeURIComponent(hostId)}&skipSplash=1`;
+    return `${APP_ORIGIN}/link?garage=${encodeURIComponent(hostId)}&skipSplash=1`;
   }
 }
 
@@ -294,6 +294,6 @@ export function garageItemShareUrl(hostId: string, listingId: string): string {
   try {
     return withShareParams("/link", { garage: hostId, item: listingId });
   } catch {
-    return `https://app.allbyrent.com/link?garage=${encodeURIComponent(hostId)}&item=${encodeURIComponent(listingId)}&skipSplash=1`;
+    return `${APP_ORIGIN}/link?garage=${encodeURIComponent(hostId)}&item=${encodeURIComponent(listingId)}&skipSplash=1`;
   }
 }

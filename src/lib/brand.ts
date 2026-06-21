@@ -265,6 +265,11 @@ export const ONBOARDING = {
 
 export const SUPPORT_EMAIL = "support@evorios.com";
 export const MARKETING_URL = "https://evorios.com";
+/** Production PWA origin (deep links, passkeys, Stripe return URLs). */
+export const APP_ORIGIN = "https://app.evorios.com";
+export const APP_HOST = "app.evorios.com";
+/** Public marketing site — QR codes and outbound links to the web. */
+export const LISTING_QR_BASE_URL = `${MARKETING_URL}/item`;
 
 /** QR sticker PDF download names (user-visible). */
 export const QR_PDF_FILENAMES = {

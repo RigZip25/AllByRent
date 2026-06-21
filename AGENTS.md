@@ -31,12 +31,12 @@ The app supports URL query parameters to jump to specific screens (useful for te
 
 ### Deploy (required for agents)
 
-Production: **https://app.allbyrent.com** (Vercel, auto-deploy on push to `main`).
+Production: **https://app.evorios.com** (Vercel, auto-deploy on push to `main`). Marketing site: **https://evorios.com**.
 
 After fixes are built and tested, **merge the PR to `main` yourself** — do not leave deploy to the user.
 
 1. `npm run build` (and `npm run lint` when relevant files changed)
 2. Push branch, open/update PR, wait for Vercel preview check if present
 3. `gh pr ready <n>` if draft, then `gh pr merge <n> --merge`
-4. Confirm production picked up the deploy (new `assets/index-*.css` hash on app.allbyrent.com)
+4. Confirm production picked up the deploy (new `assets/index-*.css` hash on app.evorios.com)
 5. Tell the user to hard-refresh or open `?resetApp=1` if they still see old UI (PWA cache)

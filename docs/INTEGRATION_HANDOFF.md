@@ -1,4 +1,4 @@
-# Integration handoff — Evorios / AllByRent
+# Integration handoff — Evorios
 
 This document lists what is **already wired in the UI and API** and what you need to **connect in production** (Supabase, Stripe, push).
 
@@ -114,7 +114,7 @@ After deploy: add DB trigger on new listings → push followers (`garage_follows
 1. Merge integration + production PRs to `main`
 2. Set env vars on Vercel (see `.env.example`)
 3. Run Supabase migrations **023** and **024**
-4. Configure Stripe webhook → `https://<domain>/api/stripe/webhook`
+4. Configure Stripe webhook → `https://app.evorios.com/api/stripe/webhook`
 5. Smoke-test flows listed in `docs/LOCAL_COMPLETION.md`
 
 ---

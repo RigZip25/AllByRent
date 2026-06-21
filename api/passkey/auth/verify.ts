@@ -71,7 +71,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     const message = error instanceof Error ? error.message : "Verification failed";
     const hint =
       /origin|rpId|RP ID/i.test(message)
-        ? "Face ID domain mismatch. Use https://app.allbyrent.com and check PASSKEY_ORIGIN / PASSKEY_RP_ID in Vercel."
+        ? "Face ID domain mismatch. Use https://app.evorios.com and check PASSKEY_ORIGIN / PASSKEY_RP_ID in Vercel."
         : message;
     return res.status(400).json({ error: hint });
   }

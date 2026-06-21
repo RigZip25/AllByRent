@@ -1,3 +1,5 @@
+import { APP_HOST, APP_ORIGIN } from "./brand";
+
 /** True when opened from iOS home screen (standalone display mode). */
 export function isStandalonePwa(): boolean {
   if (typeof window === "undefined") return false;
@@ -17,7 +19,7 @@ export function isIosDevice(): boolean {
 export function isPasskeyProductionHost(): boolean {
   if (typeof window === "undefined") return false;
   const host = window.location.hostname;
-  return host === "app.allbyrent.com" || host === "localhost" || host === "127.0.0.1";
+  return host === APP_HOST || host === "localhost" || host === "127.0.0.1";
 }
 
 export type PasskeyEnvironment = "ios-pwa" | "ios-safari" | "pwa" | "browser";
@@ -42,7 +44,7 @@ export function getPasskeyEnvironmentHint(): string | null {
     return "Using the installed app. Face ID is tied to this app icon, not a browser tab.";
   }
   if (!isPasskeyProductionHost()) {
-    return "Passkeys work best at app.allbyrent.com — preview URLs may not match Face ID.";
+    return `Passkeys work best at ${APP_ORIGIN} — preview URLs may not match Face ID.`;
   }
   return null;
 }

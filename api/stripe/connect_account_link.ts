@@ -5,17 +5,16 @@ import { isStripeServerConfigured } from "../_lib/keys";
 import { withApiErrorHandling } from "../_lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../passkey/_lib/supabaseAdmin";
 import { getOrCreateStripeCustomer } from "./_lib/customer";
+import { resolveConfiguredAppOrigin } from "../_lib/brand";
 
 type Body = {
   returnPath?: string;
 };
 
 function resolveOrigin(req: VercelRequest): string {
-  const configured = process.env.PASSKEY_ORIGIN?.trim();
-  if (configured) return configured.replace(/\/$/, "");
   const origin = typeof req.headers.origin === "string" ? req.headers.origin : "";
   if (origin) return origin.replace(/\/$/, "");
-  return "https://app.allbyrent.com";
+  return resolveConfiguredAppOrigin();
 }
 
 export default withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {

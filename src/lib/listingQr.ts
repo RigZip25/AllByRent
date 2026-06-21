@@ -1,4 +1,4 @@
-const LISTING_QR_BASE_URL = "https://allbyrent.com/item";
+import { LISTING_QR_BASE_URL } from "./brand";
 
 export function getListingQrUrl(qrTokenOrListingId: string): string {
   return `${LISTING_QR_BASE_URL}/${qrTokenOrListingId}`;

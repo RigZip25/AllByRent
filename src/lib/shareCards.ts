@@ -218,7 +218,7 @@ async function generateOne(input: {
   });
 
   const objectUrl = URL.createObjectURL(blob);
-  const filename = `allbyrent_share_${input.format}.png`;
+  const filename = `evorios_share_${input.format}.png`;
   return { format: input.format, width: dims.width, height: dims.height, blob, objectUrl, filename };
 }
 

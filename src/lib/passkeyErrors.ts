@@ -1,3 +1,4 @@
+import { APP_ORIGIN } from "./brand";
 import {
   detectPasskeyEnvironment,
   isPasskeyProductionHost,
@@ -31,7 +32,7 @@ export function formatPasskeyError(err: unknown): string {
   ) {
     const env = detectPasskeyEnvironment();
     const hostNote = !isPasskeyProductionHost()
-      ? " Use https://app.allbyrent.com (not a preview link)."
+      ? ` Use ${APP_ORIGIN} (not a preview link).`
       : "";
     if (env === "ios-pwa") {
       return (

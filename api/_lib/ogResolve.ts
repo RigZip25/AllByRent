@@ -1,4 +1,5 @@
 import { getAdminClient } from "../passkey/_lib/supabaseAdmin";
+import { APP_NAME } from "./brand";
 
 type ListingRow = {
   id: string;
@@ -120,7 +121,7 @@ export async function resolveOgShareContext(input: {
       const priceLabel = salePrice ? `$${salePrice}` : dailyRate ? `$${dailyRate}/day` : "";
       const description = isSell
         ? `Buy or make an offer from ${hostName}'s garage shelf.`
-        : `Rent from a neighbor on AllByRent.`;
+        : `Rent from a neighbor on ${APP_NAME}.`;
 
       return {
         title: isSell ? title : `${title} — rent nearby`,
@@ -162,17 +163,17 @@ export async function resolveOgShareContext(input: {
     };
   }
 
-  const title = "Garage sale on AllByRent";
+  const title = `Garage sale on ${APP_NAME}`;
   const description = "Browse open garages near you — buy, offer, or pick up.";
   return {
     title,
     description,
-    badge: "AllByRent",
+    badge: APP_NAME,
     priceLabel: "",
     imageParams: {
       title,
       subtitle: description,
-      badge: "AllByRent",
+      badge: APP_NAME,
     },
     appQuery,
   };

@@ -10,7 +10,7 @@ export type ParsedDeepLink = {
   target: DeepLinkTarget;
 };
 
-const APP_ORIGIN = "https://app.allbyrent.com";
+import { APP_ORIGIN } from "./brand";
 
 function listingIdFromPath(pathname: string): string | null {
   const match = pathname.match(/^\/item\/([^/]+)\/?$/i);

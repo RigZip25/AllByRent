@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { APP_HOST, APP_NAME } from "./_lib/brand";
 import { withApiErrorHandling } from "./_lib/safeHandler";
 import {
   buildAppDeepLink,
@@ -8,7 +9,7 @@ import {
 } from "./_lib/ogResolve";
 
 function siteOrigin(req: VercelRequest): string {
-  const host = req.headers["x-forwarded-host"] || req.headers.host || "app.allbyrent.com";
+  const host = req.headers["x-forwarded-host"] || req.headers.host || APP_HOST;
   const proto = req.headers["x-forwarded-proto"] || "https";
   return `${proto}://${Array.isArray(host) ? host[0] : host}`;
 }
@@ -52,7 +53,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     <title>${escapeHtml(context.title)}</title>
     <meta name="description" content="${escapeHtml(context.description)}" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="AllByRent" />
+    <meta property="og:site_name" content="${escapeHtml(APP_NAME)}" />
     <meta property="og:title" content="${escapeHtml(context.title)}" />
     <meta property="og:description" content="${escapeHtml(context.description)}" />
     <meta property="og:url" content="${escapeHtml(shareUrl)}" />
