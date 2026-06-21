@@ -28,9 +28,10 @@ import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { RentalsScreen } from "../screens/RentalsScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { GarageScreen } from "../screens/GarageScreen";
+import { ActiveGarageShopScreen } from "../screens/ActiveGarageShopScreen";
+import { GarageCartScreen } from "../screens/GarageCartScreen";
 import { MoreScreen } from "../screens/MoreScreen";
 import { MrEvoriosScreen } from "../screens/MrEvoriosScreen";
-import { NeighborGarageScreen } from "../screens/NeighborGarageScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
 import { SubscriptionPlansScreen } from "../screens/SubscriptionPlansScreen";
@@ -79,6 +80,7 @@ import {
   isYardSaleListingActive,
   setYardSaleListingActive,
 } from "../lib/yardSaleListing";
+import { resolveHostAccountId } from "../lib/hostIdentity";
 
 import {
   saveHomeFeedLens,
@@ -106,6 +108,8 @@ type Screen =
   | "garage"
   | "more"
   | "neighborGarage"
+  | "garageShop"
+  | "garageCart"
   | "notifications"
   | "subcategory"
   | "itemDetail"
@@ -283,6 +287,7 @@ function AppRoutes() {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [selectedHostListingId, setSelectedHostListingId] = useState<string | null>(null);
   const [selectedNeighborGarageHostId, setSelectedNeighborGarageHostId] = useState<string | null>(null);
+  const [garageShopPreview, setGarageShopPreview] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [listingPrefill, setListingPrefill] = useState<ShelfPrefill | null>(null);
@@ -535,10 +540,22 @@ function AppRoutes() {
   const handleOpenNeighborGarage = useCallback(
     (hostId: string) => {
       setSelectedNeighborGarageHostId(hostId);
-      navigateTo("neighborGarage");
+      setGarageShopPreview(false);
+      navigateTo("garageShop");
     },
     [navigateTo],
   );
+
+  const handleOpenGarageShopPreview = useCallback(() => {
+    const hostId = resolveHostAccountId(auth.userId);
+    setSelectedNeighborGarageHostId(hostId);
+    setGarageShopPreview(true);
+    navigateTo("garageShop");
+  }, [auth.userId, navigateTo]);
+
+  const handleOpenGarageCart = useCallback(() => {
+    navigateTo("garageCart");
+  }, [navigateTo]);
 
   const openRentLocationSetup = useCallback(() => {
     setHomeLocationError(null);
@@ -821,7 +838,8 @@ function AppRoutes() {
       const hostId = screen.slice("neighborGarage:".length).trim();
       if (!hostId) return;
       setSelectedNeighborGarageHostId(hostId);
-      navigateTo("neighborGarage");
+      setGarageShopPreview(false);
+      navigateTo("garageShop");
       return;
     }
     if (screen === "listItem" || screen === "startEarning") {
@@ -954,7 +972,7 @@ function AppRoutes() {
           <OpenGarageSaleScreen
             onBack={openYardSaleHub}
             onAddSaleItems={handleStartYardSaleListing}
-            onOpenMyGarage={handleOpenGarage}
+            onOpenMyGarage={handleOpenGarageShopPreview}
           />
         )}
 
@@ -984,16 +1002,25 @@ function AppRoutes() {
           <GarageScreen
             onNavigate={handleNavigate}
             onStockGarage={handleStartListing}
+            onViewShop={handleOpenGarageShopPreview}
           />
         )}
 
-        {currentScreen === "neighborGarage" && selectedNeighborGarageHostId && (
-          <NeighborGarageScreen
+        {currentScreen === "garageShop" && selectedNeighborGarageHostId && (
+          <ActiveGarageShopScreen
             hostId={selectedNeighborGarageHostId}
+            preview={garageShopPreview}
             onBack={handleBack}
-            onOpenListing={(id) => {
-              setSelectedHostListingId(id);
-              navigateTo("hostListingDetail");
+            onOpenCart={handleOpenGarageCart}
+          />
+        )}
+
+        {currentScreen === "garageCart" && (
+          <GarageCartScreen
+            onBack={handleBack}
+            onCheckoutComplete={() => {
+              setNavStack([]);
+              setCurrentScreen("garageShop");
             }}
           />
         )}

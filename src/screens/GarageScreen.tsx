@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Share2 } from "lucide-react";
+import { Share2, Store } from "lucide-react";
 import { HostDashboard } from "../app/components/HostDashboard";
 import { useAuth } from "../hooks/AuthProvider";
 import { resolveHostAccountId } from "../lib/hostIdentity";
@@ -13,9 +13,10 @@ const GREEN_DARK = "#0D5C3A";
 type GarageScreenProps = {
   onNavigate: (screen: string) => void;
   onStockGarage: () => void;
+  onViewShop: () => void;
 };
 
-export function GarageScreen({ onNavigate, onStockGarage }: GarageScreenProps) {
+export function GarageScreen({ onNavigate, onStockGarage, onViewShop }: GarageScreenProps) {
   const auth = useAuth();
   const [shareOpen, setShareOpen] = useState(false);
   const hostId = resolveHostAccountId(auth.userId);
@@ -41,15 +42,26 @@ export function GarageScreen({ onNavigate, onStockGarage }: GarageScreenProps) {
           </h1>
           <p className="text-[13px] text-gray-500">Your household storefront</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShareOpen((v) => !v)}
-          className="flex items-center gap-1.5 rounded-xl border bg-white px-3 py-2 text-[13px] font-semibold text-gray-700"
-          style={{ borderColor: "#E8E6E0" }}
-        >
-          <Share2 className="h-4 w-4" />
-          Share
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onViewShop}
+            className="flex items-center gap-1.5 rounded-xl border bg-white px-3 py-2 text-[13px] font-semibold"
+            style={{ borderColor: "#E8E6E0", color: GREEN_DARK }}
+          >
+            <Store className="h-4 w-4" />
+            Shop
+          </button>
+          <button
+            type="button"
+            onClick={() => setShareOpen((v) => !v)}
+            className="flex items-center gap-1.5 rounded-xl border bg-white px-3 py-2 text-[13px] font-semibold text-gray-700"
+            style={{ borderColor: "#E8E6E0" }}
+          >
+            <Share2 className="h-4 w-4" />
+            Share
+          </button>
+        </div>
       </div>
 
       {shareOpen ? (

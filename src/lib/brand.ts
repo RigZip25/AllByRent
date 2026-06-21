@@ -120,7 +120,7 @@ export const ONBOARDING = {
     shelfHint: "Snap what's on the table — title, price, done. We skip category pickers for garage sales.",
     shelfNote: "Items show as For sale on your garage · neighbors browse like a yard sale",
     addItemsCta: "Snap sale items →",
-    myGarageCta: "Preview my garage",
+    myGarageCta: "Preview active shop",
     mascotHint: "can help price odd items once they're on the shelf.",
   },
   firstHello: {
