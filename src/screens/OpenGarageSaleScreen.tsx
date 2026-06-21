@@ -19,6 +19,9 @@ const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
 const BORDER = "#E8E6E0";
 
+const timeInputClassName =
+  "box-border mt-1 w-full min-w-0 max-w-full rounded-xl border px-2 py-2 text-center text-sm font-semibold text-gray-900 outline-none";
+
 const { openGarageSale: copy } = ONBOARDING;
 
 type OpenGarageSaleScreenProps = {
@@ -116,24 +119,24 @@ export function OpenGarageSaleScreen({
           </div>
 
           <p className="mt-4 text-[13px] font-semibold text-gray-800">{copy.timeLabel}</p>
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            <label className="block">
+          <div className="mt-2 grid grid-cols-1 gap-3">
+            <label className="block min-w-0">
               <span className="text-[12px] font-medium text-gray-500">{copy.timeFrom}</span>
               <input
                 type="time"
                 value={schedule.startTime}
                 onChange={(event) => persist({ ...schedule, startTime: event.target.value })}
-                className="mt-1 w-full rounded-xl border px-3 py-2.5 text-base font-semibold text-gray-900"
+                className={timeInputClassName}
                 style={{ borderColor: BORDER }}
               />
             </label>
-            <label className="block">
+            <label className="block min-w-0">
               <span className="text-[12px] font-medium text-gray-500">{copy.timeTo}</span>
               <input
                 type="time"
                 value={schedule.endTime}
                 onChange={(event) => persist({ ...schedule, endTime: event.target.value })}
-                className="mt-1 w-full rounded-xl border px-3 py-2.5 text-base font-semibold text-gray-900"
+                className={timeInputClassName}
                 style={{ borderColor: BORDER }}
               />
             </label>
