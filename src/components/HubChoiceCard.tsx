@@ -44,15 +44,13 @@ export function HubChoiceCard({
           </span>
         ) : null}
       </div>
-      <div className="browse-hub-choice-body shrink-0 px-4 pb-4 pt-3">
-        <div className="flex items-start justify-between gap-2">
+      <div className="browse-hub-choice-body min-h-0 shrink px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3">
+        <div className="flex min-h-0 items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <h2 className="browse-hub-choice-title text-[17px] font-bold leading-snug" style={{ color: GREEN }}>
+            <h2 className="browse-hub-choice-title font-bold" style={{ color: GREEN }}>
               {title}
             </h2>
-            <p className="browse-hub-choice-subtitle mt-0.5 text-sm leading-snug text-gray-500">
-              {subtitle}
-            </p>
+            <p className="browse-hub-choice-subtitle mt-0.5 text-gray-500">{subtitle}</p>
           </div>
           <ChevronRight
             className="mt-0.5 h-5 w-5 shrink-0 text-gray-300"
@@ -61,7 +59,7 @@ export function HubChoiceCard({
           />
         </div>
         <span
-          className="browse-hub-choice-cta mt-3 flex w-full items-center justify-center rounded-xl py-2.5 text-[15px] font-bold"
+          className="browse-hub-choice-cta mt-2.5 flex w-full items-center justify-center rounded-xl py-2 font-bold sm:mt-3 sm:py-2.5"
           style={
             isYardSale
               ? { backgroundColor: AMBER, color: GREEN }
