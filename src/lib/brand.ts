@@ -159,6 +159,19 @@ export const ONBOARDING = {
     viewShopCta: "Preview my shop",
     mascotHint: "skips categories and long forms — this is garage-sale speed.",
   },
+  garageWorkflow: {
+    eyebrow: "Your household garage",
+    title: "How an open garage works",
+    subtitle: "Three steps — not the normal listing form. This is your sale shelf on the block.",
+    step1Title: "Set open hours",
+    step1Body: "Pick day(s) and times so neighbors know when to stop by.",
+    step2Title: "Snap onto the shelf",
+    step2Body: "One photo, optional tag, price or auction — each item in seconds.",
+    step3Title: "Neighbors shop your garage",
+    step3Body: "They browse your shelf, buy now or bid, checkout in one cart.",
+    cta: "Got it — snap my first item →",
+    skip: "Skip intro",
+  },
   firstHello: {
     mascotRole: "Your garage guide",
     bubbles: [

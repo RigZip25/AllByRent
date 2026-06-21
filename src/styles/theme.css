@@ -883,6 +883,22 @@
     min-height: clamp(140px, 28dvh, 200px);
   }
 
+  .garage-workflow-step-art {
+    width: clamp(72px, 22vw, 96px);
+    height: clamp(72px, 22vw, 96px);
+  }
+
+  @media (max-height: 700px) {
+    .garage-workflow-step {
+      padding: 0.625rem;
+    }
+
+    .garage-workflow-step-art {
+      width: clamp(64px, 18vw, 80px);
+      height: clamp(64px, 18vw, 80px);
+    }
+  }
+
   .garage-bid-sheet {
     animation: garage-sheet-in 0.2s ease-out;
   }

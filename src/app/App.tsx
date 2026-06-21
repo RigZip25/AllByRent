@@ -14,6 +14,7 @@ import { YardSaleHubScreen } from "../screens/YardSaleHubScreen";
 import { YardSalesScreen } from "../screens/YardSalesScreen";
 import { OpenGarageSaleScreen } from "../screens/OpenGarageSaleScreen";
 import { SnapSaleScreen } from "../screens/garage-sale/SnapSaleScreen";
+import { GarageWorkflowScreen } from "../screens/garage-sale/GarageWorkflowScreen";
 import { HomeFeed } from "./components/HomeFeed";
 import { Subcategory } from "./components/Subcategory";
 import { ItemDetail } from "./components/ItemDetail";
@@ -81,6 +82,7 @@ import {
   isYardSaleListingActive,
   setYardSaleListingActive,
 } from "../lib/yardSaleListing";
+import { hasSeenGarageWorkflow } from "../lib/garageWorkflowStorage";
 import { resolveHostAccountId } from "../lib/hostIdentity";
 
 import {
@@ -104,6 +106,7 @@ type Screen =
   | "yardSaleHub"
   | "openGarageSale"
   | "snapSale"
+  | "garageWorkflow"
   | "home"
   | "yardSales"
   | "mre"
@@ -132,7 +135,13 @@ type Screen =
   | "agentActivity"
   | "deleteAccount";
 
-const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>(["browseHub", "yardSaleHub", "openGarageSale", "snapSale"]);
+const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
+  "browseHub",
+  "yardSaleHub",
+  "openGarageSale",
+  "snapSale",
+  "garageWorkflow",
+]);
 
 const BOTTOM_NAV_SCREENS = new Set<Screen>([
   "browseHub",
@@ -532,6 +541,10 @@ function AppRoutes() {
     clearYardSaleListingActive();
     setListingPrefill(null);
     setEditingListingId(null);
+    navigateTo(hasSeenGarageWorkflow() ? "snapSale" : "garageWorkflow");
+  }, [navigateTo]);
+
+  const handleGarageWorkflowContinue = useCallback(() => {
     navigateTo("snapSale");
   }, [navigateTo]);
 
@@ -734,6 +747,10 @@ function AppRoutes() {
         return stack.slice(0, -1);
       }
       if (currentScreen === "snapSale") {
+        setCurrentScreen("openGarageSale");
+        return stack;
+      }
+      if (currentScreen === "garageWorkflow") {
         setCurrentScreen("openGarageSale");
         return stack;
       }
@@ -983,6 +1000,13 @@ function AppRoutes() {
             onBack={openYardSaleHub}
             onAddSaleItems={handleStartYardSaleListing}
             onOpenMyGarage={handleOpenGarageShopPreview}
+          />
+        )}
+
+        {currentScreen === "garageWorkflow" && (
+          <GarageWorkflowScreen
+            onBack={handleBack}
+            onContinue={handleGarageWorkflowContinue}
           />
         )}
 
