@@ -5,6 +5,7 @@ import type { StepProps } from "../types";
 import { RentanoHint } from "../../../components/RentanoHint";
 import { MASCOT_NAME } from "../../../lib/brand";
 import { improveListingDescription } from "../listingDescriptionImprove";
+import { isYardSaleListingActive } from "../../../lib/yardSaleListing";
 import {
   CATEGORIES,
   getCategoryModeRules,
@@ -91,6 +92,7 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
   const [isAnimatingDescription, setIsAnimatingDescription] = useState(false);
   const [isDescriptionUserEdited, setIsDescriptionUserEdited] = useState(false);
 
+  const yardSaleListing = isYardSaleListingActive();
   const categoryModeRules = getCategoryModeRules(draft.category);
   const replacementValueLabel =
     categoryModeRules.replacementValueLabel ?? "Estimated Replacement Value";
@@ -253,12 +255,23 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
       >
         <div className="mb-6">
           <h2 className="text-xl font-bold" style={{ color: GREEN }}>
-            Item details
+            {yardSaleListing ? "Sale item" : "Item details"}
           </h2>
           <p className="text-label mt-1 text-base text-gray-500">
-            Tell renters what you&apos;re listing.
+            {yardSaleListing
+              ? "Photo first — we skip categories on garage-sale shelves."
+              : "Tell renters what you're listing."}
           </p>
         </div>
+
+        {yardSaleListing ? (
+          <div
+            className="mb-6 rounded-xl border px-3 py-2.5 text-sm font-medium"
+            style={{ borderColor: `${GREEN}33`, backgroundColor: `${GREEN}08`, color: GREEN }}
+          >
+            On your garage sale shelf · For sale
+          </div>
+        ) : null}
 
         <div className="mb-6">
           <FieldLabel label="Title" required />
@@ -279,6 +292,8 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
           </div>
         </div>
 
+        {!yardSaleListing ? (
+        <>
         <div className="mb-6">
           <FieldLabel label="Category" required />
           <select
@@ -362,6 +377,8 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
             ))}
           </select>
         </div>
+        </>
+        ) : null}
 
         <div className="mb-6">
           <FieldLabel label="Condition" required />

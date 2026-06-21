@@ -30,6 +30,11 @@ import {
   TOTAL_LISTING_STEPS,
   type ListingDraft,
 } from "./types";
+import {
+  applyYardSaleListingDefaults,
+  clearYardSaleListingActive,
+  isYardSaleListingActive,
+} from "../../lib/yardSaleListing";
 import { isListingStepValid } from "./validation";
 
 function gradeForSubcategory(
@@ -102,9 +107,10 @@ export function ListingWizard({
   const auth = useAuth();
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState<SlideDirection>(1);
-  const [draft, setDraft] = useState<ListingDraft>(() =>
-    initialDraft ? initialDraft : createPrefilledListingDraft(initialPrefill),
-  );
+  const [draft, setDraft] = useState<ListingDraft>(() => {
+    const base = initialDraft ? initialDraft : createPrefilledListingDraft(initialPrefill);
+    return isYardSaleListingActive() ? applyYardSaleListingDefaults(base) : base;
+  });
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [phase, setPhase] = useState<WizardPhase>("steps");
   const [isPublishing, setIsPublishing] = useState(false);

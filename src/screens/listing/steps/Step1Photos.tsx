@@ -10,15 +10,21 @@ import { ChevronLeft, ChevronRight, Loader2, Plus, X } from "lucide-react";
 import type { StepProps } from "../types";
 import { RentanoHint } from "../../../components/RentanoHint";
 import { MASCOT_NAME } from "../../../lib/brand";
+import { isYardSaleListingActive } from "../../../lib/yardSaleListing";
 import { processPhotoWithPhotoRoom } from "../photoroomApi";
 import { MAX_LISTING_PHOTOS, MAX_LISTING_VIDEOS } from "../photoUtils";
 import { putMediaBlob, deleteMedia, type MediaRef } from "../../../lib/mediaStore";
 import { useMediaUrl } from "../../../lib/useMediaUrl";
 
 const PRIMARY_GREEN = "#0D5C3A";
-const DEFAULT_TIP =
-  `Add at least one photo, then tap Continue — ${MASCOT_NAME} fills in title, category, and price on the next step.`;
 const AI_TIP = "I analyzed your photos — check Step 2, I filled everything in for you! 🎩";
+
+function photoStepTip(): string {
+  if (isYardSaleListingActive()) {
+    return `Add a photo of what's on your sale table — ${MASCOT_NAME} fills title & price next.`;
+  }
+  return `Add at least one photo, then tap Continue — ${MASCOT_NAME} fills in title, category, and price on the next step.`;
+}
 
 function reorderArray<T>(items: T[], from: number, to: number): T[] {
   if (from === to || from < 0 || to < 0 || from >= items.length || to >= items.length) {
@@ -54,7 +60,7 @@ export function Step1Photos({
 
   const atMax = draft.photos.length >= MAX_LISTING_PHOTOS;
   const atMaxVideos = draft.videos.length >= MAX_LISTING_VIDEOS;
-  const rentanoMessage = draft.aiSuggestions ? AI_TIP : DEFAULT_TIP;
+  const rentanoMessage = draft.aiSuggestions ? AI_TIP : photoStepTip();
 
   const clampToMaxSlots = (value: number) => Math.max(5, Math.min(MAX_LISTING_PHOTOS, value));
 
