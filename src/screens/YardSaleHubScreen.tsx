@@ -57,10 +57,10 @@ export function YardSaleHubScreen({ onBack, onChoose, onEditLocation }: YardSale
         </div>
 
         <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: GREEN }}>
+          <h1 className="browse-hub-page-title font-bold tracking-tight" style={{ color: GREEN }}>
             {copy.title}
           </h1>
-          <p className="mt-1 text-[15px] text-gray-600">{copy.subtitle}</p>
+          <p className="browse-hub-page-subtitle mt-1 text-gray-600">{copy.subtitle}</p>
         </div>
       </div>
 

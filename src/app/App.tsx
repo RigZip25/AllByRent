@@ -130,6 +130,8 @@ type Screen =
   | "agentActivity"
   | "deleteAccount";
 
+const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>(["browseHub", "yardSaleHub"]);
+
 const BOTTOM_NAV_SCREENS = new Set<Screen>([
   "browseHub",
   "yardSaleHub",
@@ -854,7 +856,10 @@ function AppRoutes() {
     navigateTo("listingIntro");
   };
 
-  const showBrandHeader = currentScreen !== "splash" && !isOnboardingScreen(currentScreen);
+  const showBrandHeader =
+    currentScreen !== "splash" &&
+    !isOnboardingScreen(currentScreen) &&
+    !HIDE_BRAND_HEADER_SCREENS.has(currentScreen);
   const showBottomNav = BOTTOM_NAV_SCREENS.has(currentScreen);
 
   if (!isOnline) {

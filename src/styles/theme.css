@@ -656,12 +656,23 @@
     flex-shrink: 0;
   }
 
+  .browse-hub-page-title {
+    font-size: clamp(1.125rem, 4.8vw, 1.5rem);
+    line-height: 1.2;
+  }
+
+  .browse-hub-page-subtitle {
+    font-size: clamp(0.8125rem, 3.4vw, 0.9375rem);
+    line-height: 1.4;
+    padding-inline: 0.25rem;
+  }
+
   .browse-hub-cards {
     flex: 1;
     min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: clamp(10px, 2dvh, 14px);
+    gap: clamp(8px, 1.5dvh, 14px);
     padding: 0 16px 8px;
     overflow: hidden;
   }
@@ -680,11 +691,11 @@
   .browse-hub-choice-art {
     position: relative;
     flex: 1 1 0;
-    min-height: clamp(64px, 12dvh, 130px);
-    max-height: clamp(88px, 18dvh, 150px);
+    min-height: clamp(56px, 11dvh, 120px);
+    max-height: clamp(72px, 15dvh, 130px);
     overflow: hidden;
     background: linear-gradient(180deg, #f8faf9 0%, #ffffff 100%);
-    padding: 0.5rem 0.75rem 0;
+    padding: 0.375rem 0.625rem 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -719,62 +730,133 @@
   }
 
   .browse-hub-choice-body {
-    flex-shrink: 0;
+    flex-shrink: 1;
+    min-height: 0;
     background: #fff;
+  }
+
+  .browse-hub-choice-title {
+    font-size: clamp(0.9375rem, 3.8vw, 1.0625rem);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+
+  .browse-hub-choice-subtitle {
+    font-size: clamp(0.75rem, 3.1vw, 0.875rem);
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+
+  .browse-hub-choice-cta {
+    font-size: clamp(0.8125rem, 3.4vw, 0.9375rem);
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-inline: 0.5rem;
   }
 
   .browse-hub-footer {
     flex-shrink: 0;
+    font-size: clamp(0.6875rem, 2.8vw, 0.75rem);
+    line-height: 1.35;
+  }
+
+  .browse-hub-cards--duo {
+    gap: clamp(8px, 1.5dvh, 14px);
+  }
+
+  .browse-hub-cards--duo .browse-hub-choice {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  .browse-hub-cards--duo .browse-hub-choice-art {
+    min-height: clamp(56px, 11dvh, 120px);
+    max-height: clamp(72px, 15dvh, 130px);
   }
 
   @media (max-height: 780px) {
-    .browse-hub-choice-title {
-      font-size: 1rem;
-      line-height: 1.35rem;
+    .browse-hub-page-title {
+      font-size: clamp(1.0625rem, 4.2vw, 1.25rem);
     }
 
-    .browse-hub-choice-subtitle {
+    .browse-hub-page-subtitle {
       font-size: 0.8125rem;
     }
 
-    .browse-hub-choice-art {
-      min-height: clamp(56px, 10dvh, 110px);
-      max-height: clamp(72px, 14dvh, 120px);
+    .browse-hub-choice-art,
+    .browse-hub-cards--duo .browse-hub-choice-art {
+      min-height: clamp(48px, 9dvh, 96px);
+      max-height: clamp(64px, 12dvh, 104px);
+      padding-top: 0.25rem;
+    }
+
+    .browse-hub-choice-title {
+      font-size: 0.9375rem;
+      line-height: 1.3;
+    }
+
+    .browse-hub-choice-subtitle {
+      font-size: 0.75rem;
+      line-height: 1.3;
     }
 
     .browse-hub-choice-cta {
-      font-size: 0.875rem;
-      padding-top: 0.5rem;
+      font-size: 0.8125rem;
+      padding-top: 0.4375rem;
+      padding-bottom: 0.4375rem;
+    }
+  }
+
+  @media (max-height: 700px) {
+    .browse-hub-header {
+      padding-bottom: 0.25rem;
+    }
+
+    .browse-hub-cards,
+    .browse-hub-cards--duo {
+      gap: 6px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      justify-content: flex-start;
+    }
+
+    .browse-hub-choice,
+    .browse-hub-cards--duo .browse-hub-choice {
+      flex: 0 0 auto;
+    }
+
+    .browse-hub-choice-art,
+    .browse-hub-cards--duo .browse-hub-choice-art {
+      flex: 0 0 auto;
+      min-height: clamp(44px, 8dvh, 80px);
+      max-height: clamp(56px, 10dvh, 88px);
+    }
+
+    .browse-hub-choice-body {
+      padding-top: 0.375rem;
       padding-bottom: 0.5rem;
     }
   }
 
   @media (max-height: 680px) {
-    .browse-hub-header {
-      padding-bottom: 0.25rem;
+    .browse-hub-page-title {
+      font-size: 1.0625rem;
     }
 
-    .browse-hub-cards {
-      gap: 8px;
+    .browse-hub-footer {
+      padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
     }
-
-    .browse-hub-choice-body {
-      padding-top: 0.5rem;
-      padding-bottom: 0.625rem;
-    }
-  }
-
-  .browse-hub-cards--duo {
-    gap: clamp(12px, 2.5dvh, 18px);
-  }
-
-  .browse-hub-cards--duo .browse-hub-choice {
-    flex: 1 1 0;
-  }
-
-  .browse-hub-cards--duo .browse-hub-choice-art {
-    min-height: clamp(88px, 18dvh, 160px);
-    max-height: clamp(110px, 22dvh, 180px);
   }
 
   .garage-shop-grid {
