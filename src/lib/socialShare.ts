@@ -262,7 +262,9 @@ export function buildGarageItemSharePayload(params: {
   };
 }
 
-function withShareParams(url: URL, extra?: Record<string, string>): string {
+function withShareParams(pathname: string, extra?: Record<string, string>): string {
+  const url = new URL(shareAppOrigin());
+  url.pathname = pathname;
   url.searchParams.set("skipSplash", "1");
   if (extra) {
     for (const [key, value] of Object.entries(extra)) {
@@ -274,27 +276,24 @@ function withShareParams(url: URL, extra?: Record<string, string>): string {
 
 export function listingShareUrl(listingId: string): string {
   try {
-    const url = new URL(shareAppOrigin());
-    return withShareParams(url, { listingId });
+    return withShareParams("/link", { listingId });
   } catch {
-    return `https://app.allbyrent.com/?listingId=${encodeURIComponent(listingId)}&skipSplash=1`;
+    return `https://app.allbyrent.com/link?listingId=${encodeURIComponent(listingId)}&skipSplash=1`;
   }
 }
 
 export function garageShareUrl(hostId: string): string {
   try {
-    const url = new URL(shareAppOrigin());
-    return withShareParams(url, { garage: hostId });
+    return withShareParams("/link", { garage: hostId });
   } catch {
-    return `https://app.allbyrent.com/?garage=${encodeURIComponent(hostId)}&skipSplash=1`;
+    return `https://app.allbyrent.com/link?garage=${encodeURIComponent(hostId)}&skipSplash=1`;
   }
 }
 
 export function garageItemShareUrl(hostId: string, listingId: string): string {
   try {
-    const url = new URL(shareAppOrigin());
-    return withShareParams(url, { garage: hostId, item: listingId });
+    return withShareParams("/link", { garage: hostId, item: listingId });
   } catch {
-    return `https://app.allbyrent.com/?garage=${encodeURIComponent(hostId)}&item=${encodeURIComponent(listingId)}&skipSplash=1`;
+    return `https://app.allbyrent.com/link?garage=${encodeURIComponent(hostId)}&item=${encodeURIComponent(listingId)}&skipSplash=1`;
   }
 }

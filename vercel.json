@@ -4,6 +4,8 @@
   "framework": "vite",
   "installCommand": "npm ci",
   "rewrites": [
+    { "source": "/link", "destination": "/api/link" },
+    { "source": "/item/:id", "destination": "/api/link?listingId=:id&skipSplash=1" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
