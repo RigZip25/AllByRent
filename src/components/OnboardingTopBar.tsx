@@ -9,7 +9,7 @@ type OnboardingTopBarProps = {
 
 export function OnboardingTopBar({ onSkip, onBack }: OnboardingTopBarProps) {
   return (
-    <div className="flex shrink-0 items-center justify-between px-4 pb-1 pt-3">
+    <div className="flex shrink-0 items-center justify-between px-4 pb-1 pt-[max(0.75rem,env(safe-area-inset-top,0px))]">
       {onBack ? (
         <button
           type="button"
