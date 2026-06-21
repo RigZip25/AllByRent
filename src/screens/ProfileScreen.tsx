@@ -42,6 +42,7 @@ import { useAuth } from "../hooks/AuthProvider";
 import { signOut } from "../lib/auth";
 import { fetchRemoteProfile, updateRemoteProfile } from "../lib/supabaseProfile";
 import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
+import { loadConnectStatus, startConnectOnboarding } from "../lib/repositories/connectRepository";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -146,6 +147,7 @@ export function ProfileScreen({
   onOpenCoHosts,
   onDeleteAccount,
   onViewPublicProfile,
+  onOpenIntegrations,
 }: {
   onRentals: () => void;
   onMrE: () => void;
@@ -155,6 +157,7 @@ export function ProfileScreen({
   onOpenCoHosts?: () => void;
   onDeleteAccount?: () => void;
   onViewPublicProfile?: () => void;
+  onOpenIntegrations?: () => void;
 }) {
   const [rentanoOpen, setRentanoOpen] = useState(false);
   const auth = useAuth();
@@ -171,10 +174,20 @@ export function ProfileScreen({
     payoutsEnabled: false,
     last4: null,
   });
+  const [connectBusy, setConnectBusy] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!auth.userId) return;
     let mounted = true;
+    void loadConnectStatus(auth.userId).then((status) => {
+      if (!mounted) return;
+      setStripeStatus({
+        connected: status.connected,
+        payoutsEnabled: status.payoutsEnabled,
+        last4: status.last4,
+      });
+    });
     void fetchRemoteProfile(auth.userId).then((remote) => {
       if (!mounted || !remote) return;
       const displayName = remote.display_name?.trim() || profile.displayName;
@@ -416,21 +429,44 @@ export function ProfileScreen({
               icon={<CreditCard className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label={stripeStatus.connected ? "Bank account connected" : "Connect bank account"}
               value={
-                stripeStatus.connected
-                  ? stripeStatus.payoutsEnabled
-                    ? `Payouts enabled${stripeStatus.last4 ? ` · **** ${stripeStatus.last4}` : ""}`
-                    : "Pending verification"
-                  : "Required to receive payouts"
+                connectBusy
+                  ? "Opening Stripe…"
+                  : stripeStatus.connected
+                    ? stripeStatus.payoutsEnabled
+                      ? `Payouts enabled${stripeStatus.last4 ? ` · **** ${stripeStatus.last4}` : ""}`
+                      : "Pending verification"
+                    : "Required to receive payouts"
               }
               onClick={() => {
-                // Stripe Connect requires server-side endpoints + secret keys.
-                // For now, show a simple hint in demo builds.
-                window.alert(
-                  "Stripe Connect onboarding requires server-side configuration (Stripe secret key + account link endpoint). This build shows the UI and reads connection status from Supabase profiles.",
-                );
+                setConnectBusy(true);
+                setConnectError(null);
+                void startConnectOnboarding("/?screen=profile")
+                  .then((result) => {
+                    if (!result.ok) {
+                      setConnectError(result.reason);
+                      return;
+                    }
+                    window.location.href = result.url;
+                  })
+                  .finally(() => setConnectBusy(false));
               }}
             />
           </li>
+          {connectError ? (
+            <li className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[12px] text-red-800">
+              {connectError}
+            </li>
+          ) : null}
+          {onOpenIntegrations ? (
+            <li>
+              <RowButton
+                icon={<Sparkles className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+                label="Integration status"
+                value="Supabase, Stripe, push — what’s left to connect"
+                onClick={onOpenIntegrations}
+              />
+            </li>
+          ) : null}
         </ul>
 
         {recentReviews.length > 0 ? (

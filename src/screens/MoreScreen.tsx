@@ -5,6 +5,7 @@ import {
   ClipboardList,
   Heart,
   HelpCircle,
+  Plug,
   TrendingUp,
   User,
   Warehouse,
@@ -70,6 +71,7 @@ export function MoreScreen({
   onEarnBusiness,
   onGarage,
   onMrE,
+  onOpenIntegrations,
 }: {
   onProfile: () => void;
   onRentals: () => void;
@@ -78,6 +80,7 @@ export function MoreScreen({
   onEarnBusiness: () => void;
   onGarage: () => void;
   onMrE: () => void;
+  onOpenIntegrations?: () => void;
 }) {
   const auth = useAuth();
   const [baseProfile] = useState(() => loadUserProfile());
@@ -176,6 +179,16 @@ export function MoreScreen({
               onClick={onProfile}
             />
           </li>
+          {onOpenIntegrations ? (
+            <li>
+              <MenuRow
+                icon={<Plug className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+                label="Integrations"
+                hint="Supabase, Stripe, push — launch checklist"
+                onClick={onOpenIntegrations}
+              />
+            </li>
+          ) : null}
         </ul>
       </div>
     </div>

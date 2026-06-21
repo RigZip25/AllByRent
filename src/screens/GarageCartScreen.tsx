@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import {
-  clearGarageCart,
   formatShopUsd,
   getCartLines,
   getCartTotals,
@@ -9,7 +8,15 @@ import {
 } from "../lib/garageShopStorage";
 import { garageDisplayName } from "../lib/garageDisplay";
 import { useMediaUrl } from "../lib/useMediaUrl";
-import { pushInAppNotification } from "../lib/inAppNotifications";
+import { StripePaymentForm } from "../components/payments/StripePaymentForm";
+import { PaymentModeBanner } from "../components/payments/PaymentModeBanner";
+import {
+  completeGarageCartCheckoutDemo,
+  completeGarageCartCheckoutLive,
+  getGarageCheckoutMode,
+  startGarageCartCheckout,
+  type GarageCartCheckoutInput,
+} from "../lib/repositories/paymentsRepository";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
@@ -39,6 +46,22 @@ export function GarageCartScreen({ onBack, onCheckoutComplete }: GarageCartScree
   const totals = getCartTotals();
   const hostId = lines[0]?.hostId;
   const garageName = hostId ? garageDisplayName(hostId) : "Garage";
+  const checkoutMode = getGarageCheckoutMode();
+  const [busy, setBusy] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+
+  const checkoutInput = useMemo<GarageCartCheckoutInput | null>(() => {
+    if (lines.length === 0 || !hostId) return null;
+    return {
+      hostId,
+      garageName,
+      lines,
+      subtotalUsd: totals.subtotalUsd,
+      platformFeeUsd: totals.platformFeeUsd,
+      totalUsd: totals.totalUsd,
+    };
+  }, [garageName, hostId, lines, totals.platformFeeUsd, totals.subtotalUsd, totals.totalUsd]);
 
   const refresh = () => setLines(getCartLines());
 
@@ -47,14 +70,34 @@ export function GarageCartScreen({ onBack, onCheckoutComplete }: GarageCartScree
     return () => window.removeEventListener("evorios-garage-cart", refresh);
   }, []);
 
-  const checkout = () => {
-    pushInAppNotification({
-      type: "general",
-      title: "Order placed (demo)",
-      body: `${totals.lineCount} item(s) from ${garageName} — Stripe checkout ships next.`,
-    });
-    clearGarageCart();
+  const finishCheckout = (mode: "demo" | "stripe") => {
+    if (!checkoutInput) return;
+    if (mode === "stripe") {
+      completeGarageCartCheckoutLive(checkoutInput);
+    } else {
+      completeGarageCartCheckoutDemo(checkoutInput);
+    }
+    setClientSecret(null);
     onCheckoutComplete();
+  };
+
+  const beginCheckout = () => {
+    if (!checkoutInput) return;
+    setBusy(true);
+    setPaymentError(null);
+    void startGarageCartCheckout(checkoutInput)
+      .then((result) => {
+        if (!result.ok) {
+          setPaymentError(result.reason);
+          return;
+        }
+        if (result.mode === "demo") {
+          finishCheckout("demo");
+          return;
+        }
+        setClientSecret(result.clientSecret);
+      })
+      .finally(() => setBusy(false));
   };
 
   return (
@@ -80,6 +123,10 @@ export function GarageCartScreen({ onBack, onCheckoutComplete }: GarageCartScree
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        <div className="mb-3">
+          <PaymentModeBanner context="garage" />
+        </div>
+
         {lines.length === 0 ? (
           <div className="rounded-2xl border bg-white p-8 text-center" style={{ borderColor: BORDER }}>
             <p className="font-bold text-gray-900">Cart is empty</p>
@@ -116,9 +163,26 @@ export function GarageCartScreen({ onBack, onCheckoutComplete }: GarageCartScree
             ))}
           </ul>
         )}
+
+        {clientSecret ? (
+          <div className="mt-4 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
+            <p className="mb-3 text-sm font-semibold text-gray-900">Card payment</p>
+            {paymentError ? (
+              <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
+                {paymentError}
+              </p>
+            ) : null}
+            <StripePaymentForm
+              clientSecret={clientSecret}
+              totalLabel={formatShopUsd(totals.totalUsd)}
+              onSuccess={() => finishCheckout("stripe")}
+              onError={setPaymentError}
+            />
+          </div>
+        ) : null}
       </div>
 
-      {lines.length > 0 ? (
+      {lines.length > 0 && !clientSecret ? (
         <div
           className="shrink-0 border-t bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-4"
           style={{ borderColor: BORDER }}
@@ -137,13 +201,23 @@ export function GarageCartScreen({ onBack, onCheckoutComplete }: GarageCartScree
               <span style={{ color: GREEN }}>{formatShopUsd(totals.totalUsd)}</span>
             </div>
           </div>
+          {paymentError ? (
+            <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
+              {paymentError}
+            </p>
+          ) : null}
           <button
             type="button"
-            onClick={checkout}
-            className="mt-4 w-full rounded-xl py-3.5 text-base font-bold"
+            disabled={busy}
+            onClick={beginCheckout}
+            className="mt-4 w-full rounded-xl py-3.5 text-base font-bold disabled:opacity-60"
             style={{ backgroundColor: AMBER, color: GREEN }}
           >
-            Checkout · demo
+            {busy
+              ? "Preparing checkout…"
+              : checkoutMode === "stripe"
+                ? `Pay ${formatShopUsd(totals.totalUsd)}`
+                : `Checkout · demo`}
           </button>
           <p className="mt-2 text-center text-[11px] text-gray-500">
             Buy now reserves the lot · Auction wins pay on the yellow banner

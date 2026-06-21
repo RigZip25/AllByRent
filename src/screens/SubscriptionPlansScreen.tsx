@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { Check } from "lucide-react";
+import { PaymentModeBanner } from "../components/payments/PaymentModeBanner";
 import {
-  formatPlanUsage,
-  loadSubscriptionPlanId,
-  saveSubscriptionPlanId,
+  formatCurrentPlanUsage,
+  getCurrentPlanId,
+  getPlanSelectionMode,
+  selectSubscriptionPlan,
   SUBSCRIPTION_PLANS,
   type SubscriptionPlanId,
-} from "../lib/subscriptionPlans";
+} from "../lib/repositories/billingRepository";
 import { refreshProfileStats, loadUserProfile } from "../lib/userProfileStorage";
 
 const GREEN = "#0D5C3A";
@@ -20,15 +23,31 @@ export function SubscriptionPlansScreen({
   onPlanChanged?: () => void;
 }) {
   const profile = refreshProfileStats(loadUserProfile());
-  const currentId = loadSubscriptionPlanId();
+  const currentId = getCurrentPlanId();
   const listingsUsed = profile.host.listingsCount;
+  const planMode = getPlanSelectionMode();
+  const [busyPlanId, setBusyPlanId] = useState<SubscriptionPlanId | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const selectPlan = (id: SubscriptionPlanId) => {
-    saveSubscriptionPlanId(id);
-    const next = refreshProfileStats(loadUserProfile());
-    next.subscriptionPlan = id;
-    onPlanChanged?.();
-    onBack();
+    setBusyPlanId(id);
+    setError(null);
+    void selectSubscriptionPlan(id)
+      .then((result) => {
+        if (!result.ok) {
+          setError(result.reason);
+          return;
+        }
+        if (result.mode === "stripe") {
+          window.location.href = result.checkoutUrl;
+          return;
+        }
+        const next = refreshProfileStats(loadUserProfile());
+        next.subscriptionPlan = result.planId;
+        onPlanChanged?.();
+        onBack();
+      })
+      .finally(() => setBusyPlanId(null));
   };
 
   return (
@@ -48,19 +67,31 @@ export function SubscriptionPlansScreen({
       </header>
 
       <div className="screen-scroll flex-1 px-4 pb-6">
+        <div className="mb-4">
+          <PaymentModeBanner context="subscription" />
+        </div>
+
         <p className="mb-4 text-[14px] text-gray-600">
-          {formatPlanUsage(currentId, listingsUsed)}
+          {formatCurrentPlanUsage(listingsUsed)}
         </p>
+
+        {error ? (
+          <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
+            {error}
+          </p>
+        ) : null}
 
         <ul className="flex flex-col gap-3">
           {SUBSCRIPTION_PLANS.map((plan) => {
             const selected = plan.id === currentId;
+            const busy = busyPlanId === plan.id;
             return (
               <li key={plan.id}>
                 <button
                   type="button"
+                  disabled={busy}
                   onClick={() => selectPlan(plan.id)}
-                  className="w-full rounded-2xl border bg-white p-4 text-left"
+                  className="w-full rounded-2xl border bg-white p-4 text-left disabled:opacity-60"
                   style={{
                     borderColor: selected ? GREEN : BORDER,
                     boxShadow: selected ? `0 0 0 1px ${GREEN}` : undefined,
@@ -96,13 +127,21 @@ export function SubscriptionPlansScreen({
                     <p className="mt-2 text-[12px] font-semibold" style={{ color: GREEN }}>
                       Current plan
                     </p>
-                  ) : plan.id !== "business" ? (
+                  ) : plan.id === "business" ? (
+                    <p className="mt-3 text-[13px] font-semibold text-gray-500">
+                      Contact sales
+                    </p>
+                  ) : plan.id === "free" ? (
                     <p className="mt-3 text-[13px] font-bold" style={{ color: CTA }}>
-                      Upgrade →
+                      Switch to free →
                     </p>
                   ) : (
-                    <p className="mt-3 text-[13px] font-semibold text-gray-500">
-                      Contact sales (demo)
+                    <p className="mt-3 text-[13px] font-bold" style={{ color: CTA }}>
+                      {busy
+                        ? "Opening checkout…"
+                        : planMode === "stripe"
+                          ? "Upgrade with Stripe →"
+                          : "Upgrade (demo) →"}
                     </p>
                   )}
                 </button>
@@ -112,8 +151,8 @@ export function SubscriptionPlansScreen({
         </ul>
 
         <p className="mt-4 text-[12px] leading-relaxed text-gray-500">
-          Plans control how many items you can list as a host. Renting is unlimited on all plans in
-          this demo.
+          Paid plans use Stripe Checkout when STRIPE_PRICE_STARTER and STRIPE_PRICE_PRO are set on
+          Vercel. Until then, plan changes save locally for demo.
         </p>
       </div>
     </div>

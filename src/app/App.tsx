@@ -39,6 +39,7 @@ import { MoreScreen } from "../screens/MoreScreen";
 import { MrEvoriosScreen } from "../screens/MrEvoriosScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
+import { IntegrationStatusScreen } from "../screens/IntegrationStatusScreen";
 import { SubscriptionPlansScreen } from "../screens/SubscriptionPlansScreen";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
@@ -144,6 +145,7 @@ type Screen =
   | "favorites"
   | "earnBusiness"
   | "subscriptionPlans"
+  | "integrationStatus"
   | "identity"
   | "agentActivity"
   | "deleteAccount";
@@ -601,6 +603,7 @@ function AppRoutes() {
   const handleOpenFavorites = useCallback(() => goToTab("favorites"), [goToTab]);
   const handleOpenBusiness = useCallback(() => goToTab("earnBusiness"), [goToTab]);
   const handleOpenPlans = useCallback(() => navigateTo("subscriptionPlans"), [navigateTo]);
+  const handleOpenIntegrations = useCallback(() => navigateTo("integrationStatus"), [navigateTo]);
 
   const handleBrowseHubChoice = useCallback(
     (choice: BrowseHubChoice) => {
@@ -1183,6 +1186,7 @@ function AppRoutes() {
             onFavorites={handleOpenFavorites}
             onNotifications={handleOpenNotifications}
             onEarnBusiness={handleOpenBusiness}
+            onOpenIntegrations={handleOpenIntegrations}
           />
         )}
 
@@ -1257,6 +1261,7 @@ function AppRoutes() {
             onEditLocation={openRentLocationSetup}
             onOpenPlans={handleOpenPlans}
             onOpenNotifications={handleOpenNotifications}
+            onOpenIntegrations={handleOpenIntegrations}
             onDeleteAccount={() => navigateTo("deleteAccount")}
           />
         )}
@@ -1277,6 +1282,10 @@ function AppRoutes() {
 
         {currentScreen === "subscriptionPlans" && (
           <SubscriptionPlansScreen onBack={handleBack} />
+        )}
+
+        {currentScreen === "integrationStatus" && (
+          <IntegrationStatusScreen onBack={handleBack} />
         )}
 
         {currentScreen === "identity" && (
