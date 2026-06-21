@@ -1,7 +1,9 @@
-import { Gavel, ShoppingBag } from "lucide-react";
+import { Gavel, ShoppingBag, Tag } from "lucide-react";
 import type { ListingDraft } from "../../screens/listing/types";
 import { getLotState, isAuctionTimeActive } from "../../lib/garageAuctionState";
+import { getMyActiveOffer } from "../../lib/garageOfferStorage";
 import { isAuctionNotStarted } from "../../lib/garageAuctionWindow";
+import { ONBOARDING } from "../../lib/brand";
 import {
   formatAuctionEnds,
   formatShopUsd,
@@ -16,12 +18,15 @@ const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 const BLUE = "#2563EB";
 const BORDER = "#E8E6E0";
+const offerCopy = ONBOARDING.garageOffers;
 
 type GarageShopItemCardProps = {
   listing: ListingDraft;
   preview?: boolean;
   onBuyNow: (listing: ListingDraft, offer: ShopOffer) => void;
   onBid: (listing: ListingDraft, offer: ShopOffer) => void;
+  onMakeOffer: (listing: ListingDraft, offer: ShopOffer) => void;
+  onViewMyOffer: (listing: ListingDraft, offer: ShopOffer) => void;
 };
 
 export function GarageShopItemCard({
@@ -29,19 +34,23 @@ export function GarageShopItemCard({
   preview = false,
   onBuyNow,
   onBid,
+  onMakeOffer,
+  onViewMyOffer,
 }: GarageShopItemCardProps) {
   const offer = getShopOffer(listing);
   const lotState = getLotState(listing.id);
+  const myOffer = getMyActiveOffer(listing.id);
   const cover = listing.photos[0] ?? null;
   const thumb = cover?.thumbId ? { ...cover, id: cover.thumbId } : cover;
   const { url } = useMediaUrl(thumb);
   const highBid = offer ? getHighBid(listing.id) : null;
   const myBid = offer ? getMyBid(listing.id) : null;
   const currentBidUsd = highBid?.amountUsd ?? offer?.startingBidUsd ?? 0;
-  const showAuction = offer?.kind === "auction" || offer?.kind === "both";
-  const auctionLive = offer ? isAuctionTimeActive(offer.startsAt, offer.endsAt) : false;
-  const auctionPending = offer ? isAuctionNotStarted({ startsAt: offer.startsAt, endsAt: offer.endsAt }) : false;
-  const auctionEnded = offer ? !auctionLive && !auctionPending : false;
+  const multiAuction = offer?.negotiationPhase === "multi_auction";
+  const showAuction = multiAuction;
+  const auctionLive = offer && showAuction ? isAuctionTimeActive(offer.startsAt, offer.endsAt) : false;
+  const auctionPending = offer && showAuction ? isAuctionNotStarted({ startsAt: offer.startsAt, endsAt: offer.endsAt }) : false;
+  const auctionEnded = offer && showAuction ? !auctionLive && !auctionPending : false;
   const isLeading =
     Boolean(myBid && highBid && myBid.bidderId === highBid.bidderId && myBid.amountUsd === highBid.amountUsd);
   const sold = lotState.status === "sold";
@@ -65,40 +74,33 @@ export function GarageShopItemCard({
   if (!offer) return null;
 
   return (
-    <article
-      className="garage-shop-card flex flex-col overflow-hidden rounded-2xl border bg-white"
-      style={{ borderColor: BORDER }}
-    >
+    <article className="garage-shop-card flex flex-col overflow-hidden rounded-2xl border bg-white" style={{ borderColor: BORDER }}>
       <div className="relative aspect-square w-full bg-[#F3F4F6]">
         {url ? (
           <img src={url} alt="" className="h-full w-full object-cover" draggable={false} />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-3xl text-gray-300">📷</div>
         )}
-        {showAuction && auctionPending ? (
-          <span
-            className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
-            style={{ backgroundColor: "#6B7280" }}
-          >
+        {multiAuction && auctionPending ? (
+          <span className="absolute left-2 top-2 rounded-full bg-gray-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
             Soon
           </span>
-        ) : showAuction && auctionLive ? (
-          <span
-            className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
-            style={{ backgroundColor: BLUE }}
-          >
+        ) : multiAuction && auctionLive ? (
+          <span className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase text-white" style={{ backgroundColor: BLUE }}>
             Bid
           </span>
-        ) : showAuction && auctionEnded ? (
-          <span className="absolute left-2 top-2 rounded-full bg-gray-700 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
-            Ended
+        ) : offer.interestedCount === 1 ? (
+          <span className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase text-white" style={{ backgroundColor: AMBER, color: GREEN }}>
+            Offer
+          </span>
+        ) : null}
+        {offer.interestedCount >= 2 && !multiAuction ? (
+          <span className="absolute left-2 top-2 rounded-full bg-orange-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+            {offer.interestedCount} {offerCopy.interestedLabel}
           </span>
         ) : null}
         {isLeading && auctionLive ? (
-          <span
-            className="absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold text-white"
-            style={{ backgroundColor: GREEN }}
-          >
+          <span className="absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: GREEN }}>
             Leading
           </span>
         ) : null}
@@ -116,44 +118,61 @@ export function GarageShopItemCard({
               <span className="mx-1">·</span>
               <span>{formatAuctionEnds(offer.startsAt, offer.endsAt)}</span>
             </div>
+          ) : offer.interestedCount > 0 ? (
+            <p className="text-[12px] font-medium text-amber-800">
+              {offer.interestedCount} {offerCopy.interestedLabel}
+              {offer.interestedCount >= 2 ? ` · ${offerCopy.auctionAuto}` : ""}
+            </p>
           ) : null}
           <p className="text-[17px] font-extrabold leading-tight" style={{ color: GREEN }}>
-            {showAuction ? (
-              <span className="text-[12px] font-semibold text-gray-500">
-                Buy now {formatShopUsd(offer.buyNowUsd)}
-              </span>
-            ) : (
-              formatShopUsd(offer.buyNowUsd)
-            )}
+            {formatShopUsd(offer.buyNowUsd)}
           </p>
         </div>
 
-        <div className="mt-auto flex gap-1.5 pt-2.5">
+        <div className="mt-auto flex flex-col gap-1.5 pt-2.5">
           {showAuction && auctionLive ? (
             <button
               type="button"
               disabled={preview}
               onClick={() => onBid(listing, offer)}
-              className="flex flex-1 items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold disabled:opacity-50"
               style={{ borderColor: BLUE, color: BLUE }}
             >
               <Gavel className="h-3.5 w-3.5" aria-hidden />
               Bid
             </button>
-          ) : showAuction && auctionPending ? (
-            <span
-              className="flex flex-1 items-center justify-center rounded-xl border py-2 text-[11px] font-bold text-gray-500"
-              style={{ borderColor: BORDER }}
-            >
-              Opens soon
-            </span>
           ) : null}
+
+          {!showAuction && offer.allowsOffers && !preview ? (
+            myOffer ? (
+              <button
+                type="button"
+                onClick={() => onViewMyOffer(listing, offer)}
+                className="flex w-full items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold"
+                style={{ borderColor: AMBER, color: "#92400E", backgroundColor: `${AMBER}15` }}
+              >
+                <Tag className="h-3.5 w-3.5" />
+                Your offer · {formatShopUsd(myOffer.amountUsd)}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onMakeOffer(listing, offer)}
+                className="flex w-full items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold"
+                style={{ borderColor: GREEN, color: GREEN }}
+              >
+                <Tag className="h-3.5 w-3.5" />
+                {offerCopy.makeOffer}
+              </button>
+            )
+          ) : null}
+
           <button
             type="button"
-            disabled={preview || (showAuction && auctionEnded && offer.kind === "auction")}
+            disabled={preview || (multiAuction && auctionEnded) || (multiAuction && auctionLive)}
             onClick={() => onBuyNow(listing, offer)}
-            className="flex flex-1 items-center justify-center gap-1 rounded-xl py-2 text-[12px] font-bold text-white disabled:opacity-50"
-            style={{ backgroundColor: showAuction ? GREEN : AMBER, color: showAuction ? "#fff" : GREEN }}
+            className="flex w-full items-center justify-center gap-1 rounded-xl py-2 text-[12px] font-bold text-white disabled:opacity-50"
+            style={{ backgroundColor: AMBER, color: GREEN }}
           >
             <ShoppingBag className="h-3.5 w-3.5" aria-hidden />
             Buy

@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ShoppingCart, Store, Trophy } from "lucide-react";
+import { ArrowLeft, Inbox, ShoppingCart, Store, Trophy } from "lucide-react";
 import { GarageBidSheet } from "../components/garage-shop/GarageBidSheet";
+import { GarageMakeOfferSheet } from "../components/garage-shop/GarageMakeOfferSheet";
+import { GarageMyOfferSheet } from "../components/garage-shop/GarageMyOfferSheet";
 import { GarageShopItemCard } from "../components/garage-shop/GarageShopItemCard";
+import { getHostPendingOffers } from "../lib/garageOfferStorage";
 import { garageDisplayName } from "../lib/garageDisplay";
 import {
   getMyPendingWinnerCheckouts,
@@ -33,6 +36,7 @@ type ActiveGarageShopScreenProps = {
   onBack: () => void;
   onOpenCart: () => void;
   onOpenWinnerCheckout: (listingId: string) => void;
+  onOpenHostOffers?: () => void;
 };
 
 export function ActiveGarageShopScreen({
@@ -41,6 +45,7 @@ export function ActiveGarageShopScreen({
   onBack,
   onOpenCart,
   onOpenWinnerCheckout,
+  onOpenHostOffers,
 }: ActiveGarageShopScreenProps) {
   const ownHostId = resolveHostAccountId(useAuth().userId);
   const isOwnGarage = hostId === ownHostId;
@@ -48,6 +53,9 @@ export function ActiveGarageShopScreen({
   const [loading, setLoading] = useState(true);
   const [cartCount, setCartCount] = useState(() => getCartCount());
   const [bidTarget, setBidTarget] = useState<{ listing: ListingDraft; offer: ShopOffer } | null>(null);
+  const [offerTarget, setOfferTarget] = useState<{ listing: ListingDraft; offer: ShopOffer } | null>(null);
+  const [myOfferTarget, setMyOfferTarget] = useState<{ listing: ListingDraft; offer: ShopOffer } | null>(null);
+  const [pendingOfferCount, setPendingOfferCount] = useState(() => getHostPendingOffers(hostId).length);
   const [toast, setToast] = useState<string | null>(null);
   const [pendingWins, setPendingWins] = useState(() => getMyPendingWinnerCheckouts());
   const seenPendingWinIdsRef = useRef<Set<string>>(new Set());
@@ -57,6 +65,10 @@ export function ActiveGarageShopScreen({
 
   const refreshCartCount = useCallback(() => setCartCount(getCartCount()), []);
   const refreshPendingWins = useCallback(() => setPendingWins(getMyPendingWinnerCheckouts()), []);
+  const refreshOfferCount = useCallback(
+    () => setPendingOfferCount(getHostPendingOffers(hostId).length),
+    [hostId],
+  );
 
   const loadShelf = useCallback(() => {
     void fetchActiveListingsForCityRemote(city).then((all) => {
@@ -72,8 +84,9 @@ export function ActiveGarageShopScreen({
       const shelf = candidates.filter((listing) => getShopOffer(listing));
       setListings(shelf);
       refreshPendingWins();
+      refreshOfferCount();
     });
-  }, [city, hostId, refreshPendingWins]);
+  }, [city, hostId, refreshPendingWins, refreshOfferCount]);
 
   useEffect(() => {
     const syncSchedule = () => setOpenLabel(garageSaleOpenLabel(getGarageSaleSchedule()));
@@ -89,10 +102,12 @@ export function ActiveGarageShopScreen({
     window.addEventListener("evorios-garage-cart", onChange);
     window.addEventListener("evorios-garage-bids", onChange);
     window.addEventListener("evorios-garage-lots", onChange);
+    window.addEventListener("evorios-garage-offers-neighbor", onChange);
     return () => {
       window.removeEventListener("evorios-garage-cart", onChange);
       window.removeEventListener("evorios-garage-bids", onChange);
       window.removeEventListener("evorios-garage-lots", onChange);
+      window.removeEventListener("evorios-garage-offers-neighbor", onChange);
     };
   }, [loadShelf, refreshCartCount]);
 
@@ -164,6 +179,11 @@ export function ActiveGarageShopScreen({
     showToast("Bid placed — good luck!");
   };
 
+  const handleOfferSubmitted = () => {
+    loadShelf();
+    showToast("Offer sent — host will push back");
+  };
+
   return (
     <div className="screen garage-shop-screen flex flex-col overflow-hidden bg-[#FFF9F0]">
       <header
@@ -195,23 +215,44 @@ export function ActiveGarageShopScreen({
             <p className="text-[13px] text-gray-600">{openLabel}</p>
           </div>
           {!preview ? (
-            <button
-              type="button"
-              onClick={onOpenCart}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full border bg-white"
-              style={{ borderColor: BORDER }}
-              aria-label={`Cart, ${cartCount} items`}
-            >
-              <ShoppingCart className="h-5 w-5" style={{ color: GREEN }} />
-              {cartCount > 0 ? (
-                <span
-                  className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
-                  style={{ backgroundColor: GREEN }}
+            <div className="flex items-center gap-1.5">
+              {isOwnGarage && onOpenHostOffers ? (
+                <button
+                  type="button"
+                  onClick={onOpenHostOffers}
+                  className="relative flex h-10 w-10 items-center justify-center rounded-full border bg-white"
+                  style={{ borderColor: BORDER }}
+                  aria-label={`Offers, ${pendingOfferCount} pending`}
                 >
-                  {cartCount}
-                </span>
+                  <Inbox className="h-5 w-5" style={{ color: GREEN }} />
+                  {pendingOfferCount > 0 ? (
+                    <span
+                      className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
+                      style={{ backgroundColor: AMBER, color: GREEN }}
+                    >
+                      {pendingOfferCount}
+                    </span>
+                  ) : null}
+                </button>
               ) : null}
-            </button>
+              <button
+                type="button"
+                onClick={onOpenCart}
+                className="relative flex h-10 w-10 items-center justify-center rounded-full border bg-white"
+                style={{ borderColor: BORDER }}
+                aria-label={`Cart, ${cartCount} items`}
+              >
+                <ShoppingCart className="h-5 w-5" style={{ color: GREEN }} />
+                {cartCount > 0 ? (
+                  <span
+                    className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
+                    style={{ backgroundColor: GREEN }}
+                  >
+                    {cartCount}
+                  </span>
+                ) : null}
+              </button>
+            </div>
           ) : null}
         </div>
 
@@ -267,6 +308,8 @@ export function ActiveGarageShopScreen({
                 preview={preview}
                 onBuyNow={handleBuyNow}
                 onBid={(item, offer) => setBidTarget({ listing: item, offer })}
+                onMakeOffer={(item, offer) => setOfferTarget({ listing: item, offer })}
+                onViewMyOffer={(item, offer) => setMyOfferTarget({ listing: item, offer })}
               />
             ))}
           </div>
@@ -285,6 +328,24 @@ export function ActiveGarageShopScreen({
           offer={bidTarget.offer}
           onClose={() => setBidTarget(null)}
           onBidPlaced={handleBidPlaced}
+        />
+      ) : null}
+
+      {offerTarget && !preview ? (
+        <GarageMakeOfferSheet
+          listing={offerTarget.listing}
+          offer={offerTarget.offer}
+          onClose={() => setOfferTarget(null)}
+          onSubmitted={handleOfferSubmitted}
+        />
+      ) : null}
+
+      {myOfferTarget && !preview ? (
+        <GarageMyOfferSheet
+          listing={myOfferTarget.listing}
+          offer={myOfferTarget.offer}
+          onClose={() => setMyOfferTarget(null)}
+          onUpdated={() => loadShelf()}
         />
       ) : null}
     </div>

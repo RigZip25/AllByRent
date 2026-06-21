@@ -10,6 +10,7 @@ import {
 import {
   getGarageSaleOfferPrefs,
 } from "./garageSaleOfferStorage";
+import { getInterestedCount, getNegotiationPhase, isEligibleAuctionBidder } from "./garageOfferStorage";
 import { defaultAuctionWindow, formatAuctionTiming, inferAuctionStartsAt } from "./garageAuctionWindow";
 import { getGarageSaleSchedule } from "./garageSaleStorage";
 
@@ -33,15 +34,19 @@ export type GarageBid = {
   bidderId: string;
 };
 
-export type ShopOfferKind = "buy_now" | "auction" | "both";
+export type ShopOfferKind = "buy_now" | "open" | "auction" | "both";
 
 export type ShopOffer = {
   kind: ShopOfferKind;
+  saleMode: "quick" | "open";
   buyNowUsd: number;
   startingBidUsd: number;
   minIncrementUsd: number;
   startsAt: string;
   endsAt: string;
+  negotiationPhase: "none" | "one_on_one" | "multi_auction";
+  interestedCount: number;
+  allowsOffers: boolean;
 };
 
 const PLATFORM_FEE_RATE = 0.1;
@@ -90,16 +95,28 @@ export function getShopOffer(listing: ListingDraft): ShopOffer | null {
   const endsAt = stored?.endsAt ?? fallbackWindow.endsAt;
   const startsAt =
     stored?.startsAt ?? inferAuctionStartsAt(endsAt, getGarageSaleSchedule());
+  const negotiationPhase = getNegotiationPhase(listing.id);
+  const saleMode = stored?.saleMode ?? "open";
   const kind: ShopOfferKind =
-    stored?.kind ?? (hashListingId(listing.id) % 3 !== 0 ? "both" : "buy_now");
+    negotiationPhase === "multi_auction"
+      ? "auction"
+      : saleMode === "quick"
+        ? "buy_now"
+        : stored?.kind === "auction"
+          ? "auction"
+          : "open";
 
   return {
     kind,
+    saleMode,
     buyNowUsd,
     startingBidUsd,
     minIncrementUsd: buyNowUsd >= 50 ? 5 : 1,
     startsAt,
     endsAt,
+    negotiationPhase,
+    interestedCount: getInterestedCount(listing.id),
+    allowsOffers: saleMode === "open" && negotiationPhase !== "multi_auction",
   };
 }
 
@@ -214,6 +231,9 @@ export function placeGarageBid(input: {
     }
     return { ok: false, reason: "Auction ended or item sold" };
   }
+  if (!isEligibleAuctionBidder(input.listingId)) {
+    return { ok: false, reason: "Only neighbors who made offers can bid in this auction" };
+  }
   if (input.amountUsd < input.minBidUsd) {
     return { ok: false, reason: `Bid must be at least ${formatShopUsd(input.minBidUsd)}` };
   }
@@ -240,6 +260,9 @@ export function buyNowGarageItem(input: {
 }): { ok: true } | { ok: false; reason: string } {
   if (!canBuyNowLot(input.listing.id)) {
     return { ok: false, reason: "This item is no longer available" };
+  }
+  if (input.offer.negotiationPhase === "multi_auction") {
+    return { ok: false, reason: "Buy now paused — auction among interested neighbors" };
   }
   markBuyNowSold(
     input.listing.id,

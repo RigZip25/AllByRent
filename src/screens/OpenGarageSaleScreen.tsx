@@ -25,12 +25,14 @@ type OpenGarageSaleScreenProps = {
   onBack: () => void;
   onAddSaleItems: () => void;
   onOpenMyGarage: () => void;
+  onViewSaleRules: () => void;
 };
 
 export function OpenGarageSaleScreen({
   onBack,
   onAddSaleItems,
   onOpenMyGarage,
+  onViewSaleRules,
 }: OpenGarageSaleScreenProps) {
   const [schedule, setSchedule] = useState<GarageSaleSchedule>(() => getGarageSaleSchedule());
 
@@ -190,6 +192,15 @@ export function OpenGarageSaleScreen({
           style={{ borderColor: GREEN, color: GREEN }}
         >
           {copy.myGarageCta}
+        </button>
+
+        <button
+          type="button"
+          onClick={onViewSaleRules}
+          className="mt-3 w-full py-2 text-center text-[13px] font-semibold"
+          style={{ color: GREEN }}
+        >
+          {copy.rulesViewCta}
         </button>
 
         <p className="mt-4 text-center text-xs text-gray-500">

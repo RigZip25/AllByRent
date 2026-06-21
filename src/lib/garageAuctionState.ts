@@ -193,7 +193,8 @@ export function resolveEndedAuctions(listingIds: string[]): void {
 
     const prefs = getGarageSaleOfferPrefs(listingId);
     if (!prefs) continue;
-    if (prefs.kind === "buy_now") continue;
+    if (prefs.kind === "buy_now" && prefs.saleMode === "quick") continue;
+    if (prefs.kind !== "auction" && prefs.negotiationPhase !== "multi_auction") continue;
 
     const endsMs = new Date(prefs.endsAt).getTime();
     if (endsMs > now) continue;
