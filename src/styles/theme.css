@@ -867,6 +867,22 @@
     min-height: 100%;
   }
 
+  .snap-sale-screen .snap-sale-step-label {
+    font-size: clamp(0.75rem, 3vw, 0.8125rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #92400e;
+  }
+
+  .snap-sale-photo-slot {
+    min-height: clamp(140px, 28dvh, 220px);
+  }
+
+  .snap-sale-photo-slot .aspect-\[4\/3\] {
+    min-height: clamp(140px, 28dvh, 200px);
+  }
+
   .garage-bid-sheet {
     animation: garage-sheet-in 0.2s ease-out;
   }
