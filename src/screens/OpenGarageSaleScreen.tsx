@@ -183,21 +183,21 @@ export function OpenGarageSaleScreen({
           >
             {copy.addItemsCta}
           </button>
+          <button
+            type="button"
+            onClick={onOpenMyGarage}
+            disabled={!scheduleValid}
+            className="mt-2 w-full rounded-xl border-2 py-3 text-base font-bold active:opacity-90 disabled:opacity-50"
+            style={{ borderColor: GREEN, color: GREEN }}
+          >
+            {copy.myGarageCta}
+          </button>
         </section>
 
         <button
           type="button"
-          onClick={onOpenMyGarage}
-          className="mt-4 w-full rounded-xl border-2 py-3 text-base font-bold active:opacity-90"
-          style={{ borderColor: GREEN, color: GREEN }}
-        >
-          {copy.myGarageCta}
-        </button>
-
-        <button
-          type="button"
           onClick={onViewSaleRules}
-          className="mt-3 w-full py-2 text-center text-[13px] font-semibold"
+          className="mt-4 w-full py-2 text-center text-[13px] font-semibold"
           style={{ color: GREEN }}
         >
           {copy.rulesViewCta}
