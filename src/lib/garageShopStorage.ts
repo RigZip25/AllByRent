@@ -1,4 +1,7 @@
 import type { ListingDraft } from "../screens/listing/types";
+import {
+  getGarageSaleOfferPrefs,
+} from "./garageSaleOfferStorage";
 
 const CART_KEY = "evorios_garage_cart";
 const BIDS_KEY = "evorios_garage_bids";
@@ -68,12 +71,16 @@ export function getShopOffer(listing: ListingDraft): ShopOffer | null {
   const buyNowUsd = parseSalePrice(listing);
   if (buyNowUsd <= 0) return null;
 
-  const auctionEligible = hashListingId(listing.id) % 3 !== 0;
-  const startingBidUsd = Math.max(1, Math.round(buyNowUsd * 0.55 * 100) / 100);
-  const endsAt = new Date(Date.now() + (2 + (hashListingId(listing.id) % 5)) * 3_600_000).toISOString();
+  const stored = getGarageSaleOfferPrefs(listing.id);
+  const startingBidUsd = stored?.startingBidUsd ?? Math.max(1, Math.round(buyNowUsd * 0.55 * 100) / 100);
+  const endsAt =
+    stored?.endsAt ??
+    new Date(Date.now() + (2 + (hashListingId(listing.id) % 5)) * 3_600_000).toISOString();
+  const kind: ShopOfferKind =
+    stored?.kind ?? (hashListingId(listing.id) % 3 !== 0 ? "both" : "buy_now");
 
   return {
-    kind: auctionEligible ? "both" : "buy_now",
+    kind,
     buyNowUsd,
     startingBidUsd,
     minIncrementUsd: buyNowUsd >= 50 ? 5 : 1,
