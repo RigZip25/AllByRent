@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, ClipboardList, MapPin, ChevronRight } from "lucide-react";
+import { Bell, ClipboardList, MapPin, ChevronRight, ArrowLeft } from "lucide-react";
 import { HomeFeedCard } from "./HomeFeedCard";
 import { GarageLensCard } from "./GarageLensCard";
 import { usePwaUpdate } from "../../hooks/PwaUpdateProvider";
@@ -59,6 +59,7 @@ type HomeFeedProps = {
   onStockGarage: () => void;
   onBrowseCategory: (categoryLabel: string) => void;
   onRentals: () => void;
+  onBackToHub?: () => void;
 };
 
 export function HomeFeed({
@@ -69,6 +70,7 @@ export function HomeFeed({
   onStockGarage,
   onBrowseCategory,
   onRentals,
+  onBackToHub,
 }: HomeFeedProps) {
   const [query, setQuery] = useState(() => loadHomeFeedQuery());
   const [modeChip, setModeChip] = useState<ModeChip>(() => loadHomeFeedMode());
@@ -167,7 +169,21 @@ export function HomeFeed({
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <div className="shrink-0 bg-[#F0F4F2] px-4 pb-3 pt-3">
-        <div className="mb-3 flex items-center justify-end gap-2">
+        <div className="mb-3 flex items-center justify-between gap-2">
+          {onBackToHub ? (
+            <button
+              type="button"
+              onClick={onBackToHub}
+              className="flex h-11 w-11 items-center justify-center rounded-full border bg-white active:bg-gray-50"
+              style={{ borderColor: BORDER }}
+              aria-label="Back to browse choices"
+            >
+              <ArrowLeft className="h-5 w-5" style={{ color: GREEN_DARK }} />
+            </button>
+          ) : (
+            <span className="w-11" aria-hidden />
+          )}
+          <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={onRentals}
@@ -192,6 +208,7 @@ export function HomeFeed({
               />
             ) : null}
           </button>
+          </div>
         </div>
 
         <button
