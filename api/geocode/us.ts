@@ -26,9 +26,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const city = typeof req.query.city === "string" ? req.query.city.trim() : "";
   const state = typeof req.query.state === "string" ? req.query.state.trim() : "";
   const zip = typeof req.query.zip === "string" ? req.query.zip.trim() : "";
+  const x = typeof req.query.x === "string" ? req.query.x.trim() : "";
+  const y = typeof req.query.y === "string" ? req.query.y.trim() : "";
+  const mode = typeof req.query.mode === "string" ? req.query.mode.trim() : "";
 
   let upstream: URL;
-  if (street) {
+  if (x && y && mode === "geographies") {
+    upstream = new URL(`${CENSUS_BASE}/geographies/coordinates`);
+    upstream.searchParams.set("x", x);
+    upstream.searchParams.set("y", y);
+    upstream.searchParams.set("vintage", "Current_Current");
+  } else if (street) {
     upstream = new URL(`${CENSUS_BASE}/locations/address`);
     upstream.searchParams.set("street", street);
     if (city) upstream.searchParams.set("city", city);
