@@ -10,14 +10,14 @@ export type CoHostStatus = "pending" | "active";
 
 export type CoHostRecord = {
   id: string;
-  /** Primary host account id (auth user id or demo-user). */
+  /** Primary host account id (auth user id). */
   hostId: string;
   email: string;
   displayName?: string;
   status: CoHostStatus;
   invitedAt: string;
   acceptedAt?: string;
-  /** Set when invitee accepts (auth user id or demo profile id). */
+  /** Set when invitee accepts (auth user id). */
   coHostUserId?: string;
 };
 
@@ -180,7 +180,7 @@ export function declineCoHostInvite(inviteId: string): boolean {
   return true;
 }
 
-/** Primary host can activate a pending invite without email delivery (demo helper). */
+/** Primary host can activate a pending invite without email delivery. */
 export function activateCoHostInvite(hostId: string, coHostId: string): boolean {
   const records = loadCoHostRecords();
   const index = records.findIndex((r) => r.hostId === hostId && r.id === coHostId);

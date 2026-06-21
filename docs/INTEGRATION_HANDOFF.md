@@ -2,23 +2,20 @@
 
 This document lists what is **already wired in the UI and API** and what you need to **connect in production** (Supabase, Stripe, subscriptions, push).
 
+For a step-by-step external checklist after code is merged, see **`docs/LOCAL_COMPLETION.md`**.
+
 ---
 
 ## Architecture
 
 ```
-Screens (GarageCart, WinnerCheckout, Plans, Profile)
-        ↓
-Repositories (paymentsRepository, billingRepository, connectRepository)
-        ↓
-Client API helpers (stripePayments.ts)
-        ↓
-Vercel serverless (/api/stripe/*)
-        ↓
-Stripe + Supabase (when env vars are set)
+Screens → repositories (garage, payments, billing, connect, coHost)
+       → local cache + *SupabaseSync modules
+       → Supabase (when env vars are set)
+       → Stripe API routes → webhook
 ```
 
-Until env vars are set, the app runs in **demo mode** (localStorage + in-app notifications).
+**Production builds require Supabase.** Payments require Stripe + signed-in user. There is no demo checkout or fake booking data.
 
 ---
 
@@ -32,28 +29,21 @@ Until env vars are set, the app runs in **demo mode** (localStorage + in-app not
 | `VITE_SUPABASE_ANON_KEY` | Vercel + `.env.local` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Vercel only (server routes) |
 
-### Already using Supabase
+### Migrations (run all in order)
 
-- Auth (magic link, OAuth, passkeys)
-- `profiles` (incl. `stripe_customer_id`, `stripe_connect_account_id`)
-- `listings`, `rentals`, messages, notifications tables (see existing migrations)
+| Migration | Purpose |
+|-----------|---------|
+| Existing `001`–`022` | Auth, profiles, listings, rentals, messages, … |
+| `023_garage_commerce.sql` | `garage_orders`, `garage_order_lines`, `garage_auction_payments`, `garage_follows`, `subscription_plan_id` on profiles |
+| `024_garage_domain.sql` | `garage_bids`, `garage_neighbor_offers`, `garage_lot_states`, `garage_sale_schedules`, `garage_sale_offer_prefs` |
+| `002_co_hosts.sql` | Co-host invites (already in repo) |
 
-### Migrations still needed for garage commerce
+### Client sync modules
 
-Add tables (names are suggestions — align with your schema):
-
-```sql
--- garage_orders: buy-now cart checkouts
--- garage_order_lines: line items per order
--- garage_auction_payments: auction winner payments
--- garage_bids: persisted bids (today: localStorage)
--- garage_follows: neighbor follow + push fan-out
-```
-
-Wire webhook handler in `api/stripe/webhook.ts` for:
-
-- `payment_intent.succeeded` where `metadata.payment_type` is `garage_cart` or `garage_auction`
-- `checkout.session.completed` where `metadata.subscription_plan_id` is set
+- `src/lib/garage/garageSupabaseSync.ts` — garage domain tables
+- `src/lib/coHost/coHostSupabaseSync.ts` — co-host rows
+- `src/lib/repositories/garageRepository.ts` — screen-facing garage API
+- `src/lib/repositories/coHostRepository.ts` — co-host invite/accept/remove
 
 ---
 
@@ -63,53 +53,55 @@ Wire webhook handler in `api/stripe/webhook.ts` for:
 
 | Variable | Purpose |
 |----------|---------|
-| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe Elements in cart, auction, rentals |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe Elements (cart, auction, rentals, boost) |
 | `STRIPE_SECRET_KEY` | All `/api/stripe/*` routes |
 | `STRIPE_WEBHOOK_SECRET` | `api/stripe/webhook.ts` |
-| `STRIPE_PRICE_STARTER` | Subscription Checkout for Starter plan |
-| `STRIPE_PRICE_PRO` | Subscription Checkout for Pro plan |
+| `STRIPE_PRICE_STARTER` | Subscription Checkout — Starter |
+| `STRIPE_PRICE_PRO` | Subscription Checkout — Pro |
 
-### API routes (ready)
+### API routes
 
 | Route | Used by |
 |-------|---------|
 | `POST /api/stripe/payment_intent` | Rental booking |
 | `POST /api/stripe/deposit_intent` | Rental deposit hold |
-| `POST /api/stripe/garage_checkout` | Garage cart — creates PaymentIntent |
+| `POST /api/stripe/garage_checkout` | Garage cart PaymentIntent + order rows |
 | `POST /api/stripe/auction_checkout` | Auction winner pay |
-| `POST /api/stripe/connect_account_link` | Host payout onboarding (Express) |
+| `POST /api/stripe/boost` | Listing boost PaymentIntent |
+| `POST /api/stripe/connect_account_link` | Host payout onboarding |
 | `POST /api/stripe/subscription_checkout` | Host plan upgrade |
-| `POST /api/stripe/webhook` | Payment + subscription events |
+| `POST /api/stripe/webhook` | Payments, boosts, subscriptions, Connect |
 
-Garage routes create PaymentIntents with metadata today. Persist orders in Supabase when migrations exist (TODO comments in route files).
+### Webhook metadata
+
+| `payment_type` | Action |
+|----------------|--------|
+| `garage_cart` | Mark order paid; upsert `garage_lot_states` from order lines |
+| `garage_auction` | Mark auction payment paid; upsert sold lot state |
+| `listing_boost` | Set `listings.boosted_until` / `boosted_tier` |
+| `rental` / `deposit` | Update rental payment fields |
+| `checkout.session.completed` | Set `profiles.subscription_plan_id` |
+| `account.updated` | Sync `stripe_payouts_enabled` on profile |
 
 ---
 
 ## 3. Subscriptions
 
-**UI:** Profile → Your plan (`SubscriptionPlansScreen`)
+**UI:** Profile → Your plan
 
 **Flow:**
 
-1. Free plan → saved locally / profile field when synced
-2. Starter / Pro → `POST /api/stripe/subscription_checkout` → redirect to Stripe Checkout
-3. On success → webhook updates `profiles.subscription_plan_id` (implement in webhook)
-
-Create Products in Stripe Dashboard, copy Price IDs to `STRIPE_PRICE_*`.
+1. Free → saved locally; remote plan loaded from `profiles.subscription_plan_id` on profile fetch
+2. Starter / Pro → Stripe Checkout → webhook updates profile
+3. Business → sales-assisted (not self-serve)
 
 ---
 
-## 4. Stripe Connect (host payouts)
+## 4. Stripe Connect
 
 **UI:** Profile → Connect bank account
 
-**Flow:**
-
-1. `POST /api/stripe/connect_account_link` creates Express account if missing
-2. Returns Stripe onboarding URL
-3. On return, refresh profile — `stripe_connect_account_id`, `stripe_payouts_enabled`, `stripe_bank_last4`
-
-Extend webhook for `account.updated` to sync payout status to `profiles`.
+Express account + onboarding link; webhook syncs payout status to `profiles`.
 
 ---
 
@@ -119,32 +111,30 @@ Extend webhook for `account.updated` to sync payout status to `profiles`.
 |----------|---------|
 | `VITE_VAPID_PUBLIC_KEY` | Client subscribe |
 | `VAPID_PRIVATE_KEY` | `api/push/send.ts` |
-| `VAPID_SUBJECT` | mailto: contact for push service |
+| `VAPID_SUBJECT` | mailto: contact |
 
-After `garage_follows` table: trigger on new listing → call push API for followers with pref enabled.
+After deploy: add DB trigger on new listings → push followers (`garage_follows` with prefs). Not required for core commerce.
 
 ---
 
 ## 6. In-app integration checklist
 
-**More → Integrations** or **Profile → Integration status** shows live status from client-detectable env vars.
+**More → Integrations** or **Profile → Integration status** reflects client-detectable env vars (`integrations.ts`, `production.ts`).
 
 ---
 
 ## 7. Deploy checklist
 
-1. Merge PR with integration layer to `main`
-2. Set all env vars on Vercel (see `.env.example`)
-3. Run Supabase migrations (garage + follows)
-4. Configure Stripe webhook endpoint → `https://app.allbyrent.com/api/stripe/webhook`
-5. Test on device:
-   - Garage cart checkout (signed-in user + Stripe test card)
-   - Auction winner pay
-   - Connect onboarding (test mode)
-   - Plan upgrade → Checkout → webhook → profile plan
+1. Merge integration + production PRs to `main`
+2. Set env vars on Vercel (see `.env.example`)
+3. Run Supabase migrations **023** and **024**
+4. Configure Stripe webhook → `https://<domain>/api/stripe/webhook`
+5. Smoke-test flows listed in `docs/LOCAL_COMPLETION.md`
 
 ---
 
-## Production-only builds
+## Intentionally deferred
 
-This branch **does not** run without Supabase configured. Payments require Stripe keys. There is no offline demo seed data for rentals or fake checkout completion.
+- Agent orchestrator (`api/agent/*`, `api/orchestrator/run.ts`) — post-launch
+- Co-host transactional email
+- Push fan-out DB triggers (code path exists; trigger is ops)

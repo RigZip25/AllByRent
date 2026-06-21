@@ -22,6 +22,7 @@ import {
   getShopOffer,
   type ShopOffer,
 } from "../lib/garageShopStorage";
+import { syncGarageFromRemote } from "../lib/repositories/garageRepository";
 import { fetchActiveListingsForCityRemote, getActiveRentLocationLabel } from "../lib/listingStorage";
 import { resolveHostAccountId } from "../lib/hostIdentity";
 import { useAuth } from "../hooks/AuthProvider";
@@ -55,7 +56,8 @@ export function ActiveGarageShopScreen({
   onOpenWinnerCheckout,
   onOpenHostOffers,
 }: ActiveGarageShopScreenProps) {
-  const ownHostId = resolveHostAccountId(useAuth().userId);
+  const auth = useAuth();
+  const ownHostId = resolveHostAccountId(auth.userId);
   const isOwnGarage = hostId === ownHostId;
   const [listings, setListings] = useState<ListingDraft[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,7 +100,7 @@ export function ActiveGarageShopScreen({
   );
 
   const loadShelf = useCallback(() => {
-    void fetchActiveListingsForCityRemote(city).then((all) => {
+    void fetchActiveListingsForCityRemote(city).then(async (all) => {
       const candidates = all.filter(
         (listing) =>
           listing.listingStatus === "active" &&
@@ -106,6 +108,7 @@ export function ActiveGarageShopScreen({
           listing.modes.sell,
       );
       const listingIds = candidates.map((listing) => listing.id);
+      await syncGarageFromRemote({ hostId, userId: auth.userId, listingIds });
       resolveEndedAuctions(listingIds);
       resolveExpiredWinnerCheckouts(listingIds);
       const shelf = candidates.filter((listing) => getShopOffer(listing));
@@ -113,7 +116,7 @@ export function ActiveGarageShopScreen({
       refreshPendingWins();
       refreshOfferCount();
     });
-  }, [city, hostId, refreshPendingWins, refreshOfferCount]);
+  }, [auth.userId, city, hostId, refreshPendingWins, refreshOfferCount]);
 
   useEffect(() => {
     const syncSchedule = () => setOpenLabel(garageSaleOpenLabel(getGarageSaleSchedule()));

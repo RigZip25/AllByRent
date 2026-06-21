@@ -119,12 +119,16 @@ export function updateGarageShelfItem(input: {
 
   const existing = getGarageSaleOfferPrefs(input.listing.id);
   if (existing) {
-    setGarageSaleOfferPrefs(input.listing.id, {
-      ...existing,
-      saleMode: input.saleMode,
-      kind: input.saleMode === "quick" ? "buy_now" : "open",
-      startingBidUsd: input.priceUsd,
-    });
+    setGarageSaleOfferPrefs(
+      input.listing.id,
+      {
+        ...existing,
+        saleMode: input.saleMode,
+        kind: input.saleMode === "quick" ? "buy_now" : "open",
+        startingBidUsd: input.priceUsd,
+      },
+      input.listing.hostId ?? undefined,
+    );
   }
 
   window.dispatchEvent(new Event("evorios-listings"));

@@ -36,7 +36,11 @@ function readLotStates(): LotStateMap {
   }
 }
 
-function writeLotStates(map: LotStateMap): void {
+export function writeLotStates(map: LotStateMap): void {
+  writeLotStatesInternal(map);
+}
+
+function writeLotStatesInternal(map: LotStateMap): void {
   try {
     localStorage.setItem(LOT_STATE_KEY, JSON.stringify(map));
     window.dispatchEvent(new Event("evorios-garage-lots"));
@@ -95,7 +99,7 @@ export function markBuyNowSold(listingId: string, priceUsd: number, listingTitle
     priceUsd,
     soldAt: new Date().toISOString(),
   };
-  writeLotStates(map);
+  writeLotStatesInternal(map);
   pushInAppNotification({
     type: "general",
     title: "Sold · Buy now",
@@ -113,7 +117,7 @@ export function markAuctionCheckoutComplete(listingId: string, priceUsd: number,
     priceUsd,
     soldAt: new Date().toISOString(),
   };
-  writeLotStates(map);
+  writeLotStatesInternal(map);
   pushInAppNotification({
     type: "general",
     title: "Auction won & paid",
@@ -278,4 +282,10 @@ export function notifyOutbidIfNeeded(listingId: string, listingTitle: string, pr
     title: "You've been outbid",
     body: `${listingTitle || "Sale item"} — high bid is now $${newLeader.amountUsd}.`,
   });
+}
+
+/** Merge remote lot states into local cache (remote wins on conflict). */
+export function mergeLotStatesFromRemote(remote: Record<string, GarageLotState>): void {
+  const local = readLotStates();
+  writeLotStatesInternal({ ...local, ...remote });
 }

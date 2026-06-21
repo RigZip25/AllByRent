@@ -149,6 +149,10 @@ export function isGarageSaleScheduleValid(schedule: GarageSaleSchedule): boolean
   return normalized.endTime > normalized.startTime;
 }
 
+export function mergeSaleScheduleFromRemote(schedule: GarageSaleSchedule): void {
+  setGarageSaleSchedule(schedule);
+}
+
 /** @deprecated Use getGarageSaleSchedule — kept for any stale imports. */
 export type GarageSaleOpenWindow = GarageSalePresetId;
 

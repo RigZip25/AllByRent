@@ -1,3 +1,4 @@
+import { pushOfferPrefsRemote } from "./garage/garageSupabaseSync";
 import { defaultAuctionWindow, type AuctionWindow } from "./garageAuctionWindow";
 import { getGarageSaleSchedule } from "./garageSaleStorage";
 import type { ShopOfferKind } from "./garageShopStorage";
@@ -59,10 +60,17 @@ function normalizeLegacy(raw: Partial<GarageSaleOfferPrefs> & { kind?: ShopOffer
   };
 }
 
-export function setGarageSaleOfferPrefs(listingId: string, prefs: GarageSaleOfferPrefs): void {
+export function setGarageSaleOfferPrefs(
+  listingId: string,
+  prefs: GarageSaleOfferPrefs,
+  hostId?: string,
+): void {
   const map = readOffers();
   map[listingId] = prefs;
   writeOffers(map);
+  if (hostId) {
+    void pushOfferPrefsRemote(listingId, hostId, prefs);
+  }
 }
 
 export function getGarageSaleOfferPrefs(listingId: string): GarageSaleOfferPrefs | null {
@@ -92,4 +100,9 @@ export function buildInitialOfferPrefs(input: {
     endsAt: window.endsAt,
     negotiationPhase: "none",
   };
+}
+
+export function mergeOfferPrefsFromRemote(remote: Record<string, GarageSaleOfferPrefs>): void {
+  const map = readOffers();
+  writeOffers({ ...map, ...remote });
 }

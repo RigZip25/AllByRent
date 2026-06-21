@@ -1,3 +1,4 @@
+import type { SubscriptionPlanId } from "./subscriptionPlans";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 export type RemoteProfile = {
@@ -13,6 +14,7 @@ export type RemoteProfile = {
   stripe_payouts_enabled?: boolean | null;
   stripe_bank_last4?: string | null;
   stripe_customer_id?: string | null;
+  subscription_plan_id?: SubscriptionPlanId | null;
 };
 
 export async function fetchRemoteProfile(userId: string): Promise<RemoteProfile | null> {
@@ -22,7 +24,7 @@ export async function fetchRemoteProfile(userId: string): Promise<RemoteProfile 
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "id, display_name, phone, location_label, created_at, phone_verified, identity_verified, rating, stripe_connect_account_id, stripe_payouts_enabled, stripe_bank_last4, stripe_customer_id",
+      "id, display_name, phone, location_label, created_at, phone_verified, identity_verified, rating, stripe_connect_account_id, stripe_payouts_enabled, stripe_bank_last4, stripe_customer_id, subscription_plan_id",
     )
     .eq("id", userId)
     .maybeSingle();

@@ -101,9 +101,10 @@ export function GarageWinnerCheckoutScreen({
   const isRunnerUp = checkout.runnerUpAttempt > 1;
 
   const finishCheckout = () => {
-    completeAuctionCheckout(checkoutInput);
-    setClientSecret(null);
-    onComplete();
+    void completeAuctionCheckout(checkoutInput).then(() => {
+      setClientSecret(null);
+      onComplete();
+    });
   };
 
   const beginCheckout = () => {

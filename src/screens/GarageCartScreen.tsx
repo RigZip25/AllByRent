@@ -71,9 +71,10 @@ export function GarageCartScreen({ onBack, onCheckoutComplete }: GarageCartScree
 
   const finishCheckout = () => {
     if (!checkoutInput) return;
-    completeGarageCartCheckout(checkoutInput);
-    setClientSecret(null);
-    onCheckoutComplete();
+    void completeGarageCartCheckout(checkoutInput).then(() => {
+      setClientSecret(null);
+      onCheckoutComplete();
+    });
   };
 
   const beginCheckout = () => {

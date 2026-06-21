@@ -1,12 +1,12 @@
 import type { GarageCartLine } from "../garageShopStorage";
 import { clearGarageCart, formatShopUsd } from "../garageShopStorage";
-import { markAuctionCheckoutComplete } from "../garageAuctionState";
 import { pushInAppNotification } from "../inAppNotifications";
 import {
   getSignInRequiredMessage,
   getStripeRequiredMessage,
   isPaymentsReady,
 } from "../config/production";
+import { completeAuctionPayment, completeBuyNowSale } from "./garageRepository";
 import { createAuctionCheckoutIntent, createGarageCartCheckoutIntent, getAccessToken } from "../stripePayments";
 
 export type GarageCartCheckoutInput = {
@@ -108,7 +108,17 @@ export async function startAuctionCheckout(
   };
 }
 
-export function completeGarageCartCheckout(input: GarageCartCheckoutInput): void {
+export async function completeGarageCartCheckout(input: GarageCartCheckoutInput): Promise<void> {
+  await Promise.all(
+    input.lines.map((line) =>
+      completeBuyNowSale({
+        listingId: line.listingId,
+        hostId: input.hostId,
+        priceUsd: line.priceUsd,
+        listingTitle: line.title,
+      }),
+    ),
+  );
   pushInAppNotification({
     type: "general",
     title: "Garage order paid",
@@ -117,8 +127,13 @@ export function completeGarageCartCheckout(input: GarageCartCheckoutInput): void
   clearGarageCart();
 }
 
-export function completeAuctionCheckout(input: AuctionCheckoutInput): void {
-  markAuctionCheckoutComplete(input.listingId, input.winningBidUsd, input.itemTitle);
+export async function completeAuctionCheckout(input: AuctionCheckoutInput): Promise<void> {
+  await completeAuctionPayment({
+    listingId: input.listingId,
+    hostId: input.hostId,
+    priceUsd: input.winningBidUsd,
+    listingTitle: input.itemTitle,
+  });
   pushInAppNotification({
     type: "general",
     title: "Auction paid",

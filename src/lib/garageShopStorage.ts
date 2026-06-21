@@ -289,3 +289,21 @@ export function cartLineFromListing(listing: ListingDraft, priceUsd: number): Ga
     photoThumbId: cover?.thumbId,
   };
 }
+
+/** Merge remote bids into local cache (keeps highest per listing). */
+export function mergeBidsFromRemote(remote: GarageBid[]): void {
+  const local = readBids();
+  const byListing = new Map<string, GarageBid[]>();
+  for (const bid of [...local, ...remote]) {
+    const list = byListing.get(bid.listingId) ?? [];
+    list.push(bid);
+    byListing.set(bid.listingId, list);
+  }
+  const merged: GarageBid[] = [];
+  for (const bids of byListing.values()) {
+    bids.sort((a, b) => b.amountUsd - a.amountUsd || b.placedAt.localeCompare(a.placedAt));
+    merged.push(...bids);
+  }
+  writeJson(BIDS_KEY, merged);
+  window.dispatchEvent(new Event("evorios-garage-bids"));
+}

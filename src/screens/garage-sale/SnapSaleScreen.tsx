@@ -175,7 +175,11 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
         }),
       );
 
-      setGarageSaleOfferPrefs(draft.id, buildInitialOfferPrefs({ saleMode, buyNowUsd: priceUsd }));
+      setGarageSaleOfferPrefs(
+        draft.id,
+        buildInitialOfferPrefs({ saleMode, buyNowUsd: priceUsd }),
+        hostId,
+      );
 
       if (auth.userId) {
         void savePublishedListingRemote(draft, auth.userId);

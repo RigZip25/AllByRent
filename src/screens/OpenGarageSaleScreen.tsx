@@ -12,11 +12,11 @@ import {
   garageSalePresetSchedule,
   getGarageSaleSchedule,
   isGarageSaleScheduleValid,
-  setGarageSaleSchedule,
   toggleGarageSaleDay,
   type GarageSalePresetId,
   type GarageSaleSchedule,
 } from "../lib/garageSaleStorage";
+import { persistSaleSchedule } from "../lib/repositories/garageRepository";
 import { onboardingAssets } from "../lib/onboardingAssets";
 
 const GREEN = BRAND_GREEN;
@@ -42,10 +42,13 @@ export function OpenGarageSaleScreen({
   const hostId = resolveHostAccountId(auth.userId);
   const [schedule, setSchedule] = useState<GarageSaleSchedule>(() => getGarageSaleSchedule());
 
-  const persist = useCallback((next: GarageSaleSchedule) => {
-    setSchedule(next);
-    setGarageSaleSchedule(next);
-  }, []);
+  const persist = useCallback(
+    (next: GarageSaleSchedule) => {
+      setSchedule(next);
+      void persistSaleSchedule(hostId, next);
+    },
+    [hostId],
+  );
 
   useEffect(() => {
     const sync = () => setSchedule(getGarageSaleSchedule());

@@ -2,10 +2,10 @@ import { useMemo, useState } from "react";
 import { X } from "lucide-react";
 import type { ListingDraft } from "../../screens/listing/types";
 import { ONBOARDING } from "../../lib/brand";
+import { placeBidWithSync } from "../../lib/repositories/garageRepository";
 import {
   formatShopUsd,
   getHighBid,
-  placeGarageBid,
   type ShopOffer,
 } from "../../lib/garageShopStorage";
 import { formatAuctionWindowLabel } from "../../lib/garageAuctionWindow";
@@ -47,7 +47,7 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
       setError("Enter a valid amount");
       return;
     }
-    const result = placeGarageBid({
+    void placeBidWithSync({
       listingId: listing.id,
       hostId: listing.hostId ?? "",
       amountUsd: value,
@@ -55,13 +55,14 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
       endsAt: offer.endsAt,
       startsAt: offer.startsAt,
       listingTitle: listing.title || "Sale item",
+    }).then((result) => {
+      if (!result.ok) {
+        setError(result.reason);
+        return;
+      }
+      onBidPlaced();
+      onClose();
     });
-    if (!result.ok) {
-      setError(result.reason);
-      return;
-    }
-    onBidPlaced();
-    onClose();
   };
 
   return (

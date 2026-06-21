@@ -110,23 +110,83 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     const intent = event.data.object as Stripe.PaymentIntent;
     const paymentType = intent.metadata?.payment_type;
 
-    if (paymentType === "garage_cart" && event.type === "payment_intent.succeeded") {
+    if (paymentType === "garage_cart") {
       const orderId = intent.metadata?.order_id;
+      const hostId = intent.metadata?.host_id;
       if (orderId) {
         await admin
           .from("garage_orders")
-          .update({ stripe_payment_status: intent.status, status: "paid" })
+          .update({
+            stripe_payment_status: intent.status,
+            status: intent.status === "succeeded" ? "paid" : intent.status,
+          })
           .eq("id", orderId);
+
+        if (event.type === "payment_intent.succeeded" && hostId) {
+          const { data: lines } = await admin
+            .from("garage_order_lines")
+            .select("listing_id, price_cents")
+            .eq("order_id", orderId);
+          for (const line of lines ?? []) {
+            await admin.from("garage_lot_states").upsert({
+              listing_id: line.listing_id,
+              host_id: hostId,
+              state: {
+                status: "sold",
+                method: "buy_now",
+                priceUsd: (line.price_cents as number) / 100,
+                soldAt: new Date().toISOString(),
+              },
+              updated_at: new Date().toISOString(),
+            });
+          }
+        }
       }
     }
 
-    if (paymentType === "garage_auction" && event.type === "payment_intent.succeeded") {
+    if (paymentType === "garage_auction") {
       const orderId = intent.metadata?.order_id;
+      const listingId = intent.metadata?.listing_id;
+      const hostId = intent.metadata?.host_id;
+      const winningBidUsd = Number.parseFloat(intent.metadata?.winning_bid_usd ?? "0");
       if (orderId) {
         await admin
           .from("garage_auction_payments")
-          .update({ stripe_payment_status: intent.status, status: "paid" })
+          .update({
+            stripe_payment_status: intent.status,
+            status: intent.status === "succeeded" ? "paid" : intent.status,
+          })
           .eq("id", orderId);
+      }
+      if (event.type === "payment_intent.succeeded" && listingId && hostId) {
+        await admin.from("garage_lot_states").upsert({
+          listing_id: listingId,
+          host_id: hostId,
+          state: {
+            status: "sold",
+            method: "auction",
+            priceUsd: winningBidUsd,
+            soldAt: new Date().toISOString(),
+          },
+          updated_at: new Date().toISOString(),
+        });
+      }
+    }
+
+    if (paymentType === "listing_boost" && event.type === "payment_intent.succeeded") {
+      const listingId = intent.metadata?.listing_id;
+      const ownerId = intent.metadata?.owner_id;
+      const boostedUntil = intent.metadata?.boosted_until;
+      const boostedTier = intent.metadata?.boosted_tier;
+      if (listingId && ownerId && boostedUntil) {
+        await admin
+          .from("listings")
+          .update({
+            boosted_until: boostedUntil,
+            boosted_tier: boostedTier ? Number.parseFloat(boostedTier) : null,
+          })
+          .eq("id", listingId)
+          .eq("owner_id", ownerId);
       }
     }
 

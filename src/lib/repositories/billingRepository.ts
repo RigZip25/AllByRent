@@ -30,6 +30,13 @@ export function applyPlanLocally(planId: SubscriptionPlanId): void {
   saveSubscriptionPlanId(planId);
 }
 
+export function applySubscriptionPlanFromRemote(planId: string | null | undefined): void {
+  if (!planId) return;
+  if (SUBSCRIPTION_PLANS.some((plan) => plan.id === planId)) {
+    saveSubscriptionPlanId(planId as SubscriptionPlanId);
+  }
+}
+
 export async function selectSubscriptionPlan(
   planId: SubscriptionPlanId,
 ): Promise<PlanSelectionResult> {

@@ -27,6 +27,7 @@ import {
 import { APP_MODE_LABELS } from "../lib/brand";
 import { getAppMode, type AppMode } from "../lib/appMode";
 import { formatPlanUsage, loadSubscriptionPlanId } from "../lib/subscriptionPlans";
+import { applySubscriptionPlanFromRemote } from "../lib/repositories/billingRepository";
 import {
   getProfileLocationSummary,
   loadUserProfile,
@@ -190,6 +191,7 @@ export function ProfileScreen({
     });
     void fetchRemoteProfile(auth.userId).then((remote) => {
       if (!mounted || !remote) return;
+      applySubscriptionPlanFromRemote(remote.subscription_plan_id);
       const displayName = remote.display_name?.trim() || profile.displayName;
       const memberSince = remote.created_at?.slice(0, 10) || profile.memberSince;
       const next = updateProfileFields({

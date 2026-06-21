@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useAuth } from "../../hooks/AuthProvider";
 import {
   loadNotificationPreferences,
   patchNotificationPreferences,
   type NotificationPreferences,
 } from "../../lib/notificationPreferences";
-import { loadGarageFollows, updateGarageFollow } from "../../lib/garageFollowStorage";
+import { loadGarageFollows } from "../../lib/garageFollowStorage";
+import { persistFollowPatch } from "../../lib/repositories/garageRepository";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -37,6 +39,7 @@ function PrefToggle({
 }
 
 export function NotificationPreferencesPanel() {
+  const auth = useAuth();
   const [prefs, setPrefs] = useState<NotificationPreferences>(() => loadNotificationPreferences());
   const follows = loadGarageFollows();
 
@@ -104,7 +107,11 @@ export function NotificationPreferencesPanel() {
                     type="checkbox"
                     checked={f.notifyNewListings}
                     onChange={(e) => {
-                      updateGarageFollow(f.hostId, { notifyNewListings: e.target.checked });
+                      if (auth.userId) {
+                        void persistFollowPatch(f.hostId, auth.userId, {
+                          notifyNewListings: e.target.checked,
+                        });
+                      }
                       setPrefs(loadNotificationPreferences());
                     }}
                     className="accent-[#0D5C3A]"
@@ -116,7 +123,11 @@ export function NotificationPreferencesPanel() {
                     type="checkbox"
                     checked={f.notifyOpenHouse}
                     onChange={(e) => {
-                      updateGarageFollow(f.hostId, { notifyOpenHouse: e.target.checked });
+                      if (auth.userId) {
+                        void persistFollowPatch(f.hostId, auth.userId, {
+                          notifyOpenHouse: e.target.checked,
+                        });
+                      }
                       setPrefs(loadNotificationPreferences());
                     }}
                     className="accent-[#0D5C3A]"

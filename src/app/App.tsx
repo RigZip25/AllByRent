@@ -339,9 +339,6 @@ function bootItemIdForDeepLink(target: DeepLinkTarget | null): string | null {
 
 function AppRoutes() {
   const auth = useAuth();
-  if (!auth.configured) {
-    return <SetupRequiredScreen />;
-  }
   const boot = readBootQuery();
   const bootDeepLink = useRef(readBootDeepLink()).current;
   const handledSessionTokenRef = useRef<string | null>(null);
@@ -1025,6 +1022,10 @@ function AppRoutes() {
     !isOnboardingScreen(currentScreen) &&
     !HIDE_BRAND_HEADER_SCREENS.has(currentScreen);
   const showBottomNav = BOTTOM_NAV_SCREENS.has(currentScreen);
+
+  if (!auth.configured) {
+    return <SetupRequiredScreen />;
+  }
 
   if (!isOnline) {
     return (

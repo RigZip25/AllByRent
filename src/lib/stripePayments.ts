@@ -300,3 +300,51 @@ export async function createSubscriptionCheckoutSession(
 
   return payload;
 }
+
+export type ListingBoostIntentResult =
+  | {
+      ok: true;
+      clientSecret: string;
+      paymentIntentId: string;
+      boostedUntil: string;
+      boostedTier: number;
+      status: string;
+    }
+  | { ok: false; reason: string };
+
+export async function createListingBoostIntent(params: {
+  listingId: string;
+  amountCents: number;
+  durationHours: number;
+}): Promise<ListingBoostIntentResult> {
+  if (!isStripePaymentsEnabled()) {
+    return { ok: false, reason: "Stripe not configured" };
+  }
+
+  const token = await getAccessToken();
+  if (!token) {
+    return { ok: false, reason: "Sign in required" };
+  }
+
+  const res = await fetch("/api/stripe/boost", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(params),
+  });
+
+  const payload = (await res.json()) as ListingBoostIntentResult & { error?: string };
+  if (!res.ok) {
+    return { ok: false, reason: payload.error ?? payload.reason ?? `Boost failed (${res.status})` };
+  }
+  if (!payload.ok) {
+    return { ok: false, reason: payload.reason ?? "Stripe not configured" };
+  }
+  if (!("clientSecret" in payload) || !payload.clientSecret) {
+    return { ok: false, reason: "Missing client secret" };
+  }
+
+  return payload;
+}
