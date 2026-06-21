@@ -5,6 +5,7 @@ import {
   type CountryCode,
 } from "./locationCountry";
 import { abbreviateUsState, formatUsAddressLines, searchUsAddresses } from "./usAddressGeocoding";
+import { refineUsReverseGeocode } from "./usReverseGeocode";
 import {
   appendUsStateToQuery,
   detectUsStateFromZip,
@@ -555,6 +556,35 @@ export async function searchPlaces(
   }
 }
 
+function photonToUsParts(properties: PhotonProperties): {
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+} {
+  const streetLine = [properties.housenumber, properties.street].filter(Boolean).join(" ");
+  const useNameAsStreet =
+    !streetLine &&
+    properties.name &&
+    !PHOTON_NOT_STREET.has(properties.osm_value ?? "");
+  const city =
+    properties.city ||
+    properties.town ||
+    properties.village ||
+    properties.locality ||
+    properties.district ||
+    properties.suburb ||
+    properties.neighbourhood ||
+    "";
+
+  return {
+    street: streetLine || (useNameAsStreet ? properties.name! : ""),
+    city,
+    state: properties.state || "",
+    zip: properties.postcode || "",
+  };
+}
+
 export async function reverseGeocode(
   lat: number,
   lng: number,
@@ -574,7 +604,15 @@ export async function reverseGeocode(
     const feature = data.features?.[0];
     if (!feature) return null;
 
-    return formatPhotonAddress(feature.properties).label;
+    const props = feature.properties;
+    const photonCountry = (props.countrycode ?? cc).toUpperCase();
+
+    if (photonCountry === "US") {
+      const refined = await refineUsReverseGeocode(lat, lng, photonToUsParts(props));
+      if (refined) return refined;
+    }
+
+    return formatPhotonAddress(props).label;
   } catch {
     return null;
   }
