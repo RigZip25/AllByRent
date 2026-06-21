@@ -44,9 +44,9 @@ function ChoiceCard({
       disabled={disabled}
       aria-label={ariaLabel}
       aria-busy={disabled}
-      className="where-are-you-choice flex w-full flex-col overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white text-left shadow-sm transition-opacity active:opacity-90 disabled:opacity-70"
+      className="where-are-you-choice flex w-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white text-left shadow-sm transition-opacity active:opacity-90 disabled:opacity-70"
     >
-      <div className="where-are-you-choice-art shrink-0 rounded-t-2xl">
+      <div className="where-are-you-choice-art rounded-t-2xl">
         <img
           src={imageSrc}
           alt=""
@@ -54,13 +54,15 @@ function ChoiceCard({
           draggable={false}
         />
       </div>
-      <div className="where-are-you-choice-body shrink-0 px-5 pb-5 pt-4 text-center">
-        <h2 className="text-lg font-bold" style={{ color: GREEN }}>
+      <div className="where-are-you-choice-body shrink-0 px-4 pb-4 pt-3 text-center sm:px-5 sm:pb-5 sm:pt-4">
+        <h2 className="where-are-you-choice-title text-lg font-bold" style={{ color: GREEN }}>
           {title}
         </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-gray-500">{subtitle}</p>
+        <p className="where-are-you-choice-subtitle mt-1 text-sm leading-relaxed text-gray-500">
+          {subtitle}
+        </p>
         <span
-          className="mt-4 flex w-full items-center justify-center rounded-xl py-3 text-base font-bold"
+          className="where-are-you-choice-cta mt-3 flex w-full items-center justify-center rounded-xl py-2.5 text-base font-bold sm:mt-4 sm:py-3"
           style={
             isEarn
               ? { backgroundColor: AMBER, color: GREEN }
@@ -83,16 +85,16 @@ export function WhereAreYou({
   locationError = null,
 }: WhereAreYouProps) {
   return (
-    <div className="screen screen-adaptive mx-auto w-full max-w-[390px] flex-col bg-white">
+    <div className="screen onboarding-step mx-auto w-full max-w-[390px] bg-white">
       <OnboardingTopBar onBack={onBack} onSkip={onSkip} />
-      <div className="shrink-0 px-4 pb-3 pt-2 text-center">
-        <h1 className="text-2xl font-bold" style={{ color: GREEN }}>
+      <div className="where-are-you-header shrink-0 px-4 pb-2 pt-1 text-center">
+        <h1 className="where-are-you-page-title text-2xl font-bold" style={{ color: GREEN }}>
           {copy.title}
         </h1>
         <p className="mt-1 text-base text-gray-500">{copy.subtitle}</p>
         {locationError ? (
           <p
-            className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-left text-sm text-amber-900"
+            className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-left text-sm text-amber-900"
             role="status"
           >
             {locationError}
@@ -100,7 +102,7 @@ export function WhereAreYou({
         ) : null}
       </div>
 
-      <div className="screen-scroll flex flex-col gap-5 px-4 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]">
+      <div className="where-are-you-cards">
         <ChoiceCard
           variant="earn"
           imageSrc={onboardingAssets.onBlock}

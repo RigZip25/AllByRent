@@ -17,7 +17,7 @@ type WhatDoYouWantProps = {
 
 export function WhatDoYouWant({ onEarn, onSave, onSkip, onBack }: WhatDoYouWantProps) {
   return (
-    <div className="screen screen-adaptive mx-auto w-full max-w-[390px] flex-col bg-white">
+    <div className="screen onboarding-step mx-auto w-full max-w-[390px] bg-white">
       <OnboardingTopBar onBack={onBack} onSkip={onSkip} />
       <div className="shrink-0 px-4 pb-2 pt-2 text-center">
         <h1 className="text-2xl font-bold" style={{ color: GREEN }}>

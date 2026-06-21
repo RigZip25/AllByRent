@@ -732,7 +732,7 @@ function AppRoutes() {
     navigateTo("listingIntro");
   };
 
-  const showBrandHeader = currentScreen !== "splash";
+  const showBrandHeader = currentScreen !== "splash" && !isOnboardingScreen(currentScreen);
   const showBottomNav = BOTTOM_NAV_SCREENS.has(currentScreen);
 
   if (!isOnline) {
