@@ -1,4 +1,5 @@
-import { ChevronRight, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
+import { HubChoiceCard } from "../components/HubChoiceCard";
 import { BRAND_AMBER, BRAND_GREEN, ONBOARDING } from "../lib/brand";
 import { clusterLabelForCity, getClusterRadiusMi } from "../lib/clusterConfig";
 import { getActiveRentLocationLabel, hasRentLocationSetup } from "../lib/listingStorage";
@@ -9,88 +10,12 @@ const AMBER = BRAND_AMBER;
 
 const { browseHub: copy } = ONBOARDING;
 
-type HubChoice = "findGear" | "yardSales" | "stockGarage";
+export type BrowseHubChoice = "findGear" | "yardSales";
 
 type BrowseHubScreenProps = {
-  onChoose: (choice: HubChoice) => void;
+  onChoose: (choice: BrowseHubChoice) => void;
   onEditLocation: () => void;
 };
-
-type HubCardProps = {
-  imageSrc: string;
-  title: string;
-  subtitle: string;
-  ctaLabel: string;
-  variant: "primary" | "yardSale" | "outline";
-  badge?: string;
-  onClick: () => void;
-};
-
-function HubCard({
-  imageSrc,
-  title,
-  subtitle,
-  ctaLabel,
-  variant,
-  badge,
-  onClick,
-}: HubCardProps) {
-  const isYardSale = variant === "yardSale";
-  const isPrimary = variant === "primary";
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`browse-hub-choice flex w-full min-h-0 flex-col overflow-hidden rounded-2xl border bg-white text-left shadow-sm transition-transform active:scale-[0.99] ${
-        isYardSale ? "browse-hub-choice--yard-sale" : ""
-      }`}
-    >
-      <div className="browse-hub-choice-art rounded-t-2xl">
-        <img
-          src={imageSrc}
-          alt=""
-          className="browse-hub-choice-illustration"
-          draggable={false}
-        />
-        {badge ? (
-          <span className="browse-hub-choice-badge" aria-hidden>
-            {badge}
-          </span>
-        ) : null}
-      </div>
-      <div className="browse-hub-choice-body shrink-0 px-4 pb-4 pt-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <h2 className="browse-hub-choice-title text-[17px] font-bold leading-snug" style={{ color: GREEN }}>
-              {title}
-            </h2>
-            <p className="browse-hub-choice-subtitle mt-0.5 text-sm leading-snug text-gray-500">
-              {subtitle}
-            </p>
-          </div>
-          <ChevronRight
-            className="mt-0.5 h-5 w-5 shrink-0 text-gray-300"
-            strokeWidth={2.5}
-            aria-hidden
-          />
-        </div>
-        <span
-          className="browse-hub-choice-cta mt-3 flex w-full items-center justify-center rounded-xl py-2.5 text-[15px] font-bold"
-          style={
-            isYardSale
-              ? { backgroundColor: AMBER, color: GREEN }
-              : isPrimary
-                ? { backgroundColor: GREEN, color: "white" }
-                : { border: `2px solid ${GREEN}`, color: GREEN }
-          }
-        >
-          {ctaLabel}
-        </span>
-      </div>
-    </button>
-  );
-}
 
 export function BrowseHubScreen({ onChoose, onEditLocation }: BrowseHubScreenProps) {
   const city = getActiveRentLocationLabel().trim();
@@ -129,8 +54,8 @@ export function BrowseHubScreen({ onChoose, onEditLocation }: BrowseHubScreenPro
         </div>
       </div>
 
-      <div className="browse-hub-cards">
-        <HubCard
+      <div className="browse-hub-cards browse-hub-cards--duo">
+        <HubChoiceCard
           variant="primary"
           imageSrc={onboardingAssets.browseBlock}
           title={copy.findGear.title}
@@ -138,22 +63,14 @@ export function BrowseHubScreen({ onChoose, onEditLocation }: BrowseHubScreenPro
           ctaLabel={copy.findGear.cta}
           onClick={() => onChoose("findGear")}
         />
-        <HubCard
+        <HubChoiceCard
           variant="yardSale"
           imageSrc={onboardingAssets.onBlock}
           title={copy.yardSales.title}
           subtitle={copy.yardSales.subtitle}
           ctaLabel={copy.yardSales.cta}
-          badge="OPEN"
+          badge="SALE"
           onClick={() => onChoose("yardSales")}
-        />
-        <HubCard
-          variant="outline"
-          imageSrc={onboardingAssets.stockGarage}
-          title={copy.stockGarage.title}
-          subtitle={copy.stockGarage.subtitle}
-          ctaLabel={copy.stockGarage.cta}
-          onClick={() => onChoose("stockGarage")}
         />
       </div>
 

@@ -10,7 +10,9 @@ import { WhereAreYouHeading } from "../screens/onboarding/WhereAreYouHeading";
 import { WhereAreYouManual } from "../screens/onboarding/WhereAreYouManual";
 import { YouAreAllSet } from "../screens/onboarding/YouAreAllSet";
 import { BrowseHubScreen } from "../screens/BrowseHubScreen";
+import { YardSaleHubScreen } from "../screens/YardSaleHubScreen";
 import { YardSalesScreen } from "../screens/YardSalesScreen";
+import { OpenGarageSaleScreen } from "../screens/OpenGarageSaleScreen";
 import { HomeFeed } from "./components/HomeFeed";
 import { Subcategory } from "./components/Subcategory";
 import { ItemDetail } from "./components/ItemDetail";
@@ -73,12 +75,19 @@ import { AgentActivityScreen } from "../screens/AgentActivityScreen";
 import { BottomNav, type BottomNavTab } from "./components/BottomNav";
 import { removeStripeControllerIframes } from "../lib/stripeCleanup";
 import {
+  clearYardSaleListingActive,
+  isYardSaleListingActive,
+  setYardSaleListingActive,
+} from "../lib/yardSaleListing";
+
+import {
   saveHomeFeedLens,
   saveHomeFeedMode,
   saveHomeFeedQuery,
 } from "../lib/homeFeedStorage";
 
-type BrowseHubChoice = "findGear" | "yardSales" | "stockGarage";
+type BrowseHubChoice = "findGear" | "yardSales";
+type YardSaleHubChoice = "browse" | "host";
 
 type Screen =
   | "splash"
@@ -89,6 +98,8 @@ type Screen =
   | "whereAreYouManual"
   | "onboardingAllSet"
   | "browseHub"
+  | "yardSaleHub"
+  | "openGarageSale"
   | "home"
   | "yardSales"
   | "mre"
@@ -117,6 +128,8 @@ type Screen =
 
 const BOTTOM_NAV_SCREENS = new Set<Screen>([
   "browseHub",
+  "yardSaleHub",
+  "openGarageSale",
   "home",
   "yardSales",
   "mre",
@@ -137,7 +150,7 @@ const TAB_BOOT_SCREENS: Partial<Record<string, Screen>> = {
 };
 
 function bottomNavTabForScreen(screen: Screen): BottomNavTab {
-  if (screen === "browseHub" || screen === "home" || screen === "yardSales") return "home";
+  if (screen === "browseHub" || screen === "home" || screen === "yardSaleHub" || screen === "yardSales" || screen === "openGarageSale") return "home";
   if (screen === "mre") return "mre";
   if (screen === "garage") return "garage";
   if (screen === "more") return "more";
@@ -408,6 +421,8 @@ function AppRoutes() {
     const candidate = (postAuthTarget ?? stored) as Screen | null;
     const validScreens: Screen[] = [
       "browseHub",
+      "yardSaleHub",
+      "openGarageSale",
       "home",
       "yardSales",
       "mre",
@@ -486,15 +501,36 @@ function AppRoutes() {
         return;
       }
       if (choice === "yardSales") {
-        navigateTo("yardSales");
+        navigateTo("yardSaleHub");
         return;
       }
-      setListingPrefill(null);
-      setEditingListingId(null);
-      navigateTo("listingIntro");
     },
     [navigateTo],
   );
+
+  const handleYardSaleHubChoice = useCallback(
+    (choice: YardSaleHubChoice) => {
+      if (choice === "browse") {
+        navigateTo("yardSales");
+        return;
+      }
+      navigateTo("openGarageSale");
+    },
+    [navigateTo],
+  );
+
+  const handleStartYardSaleListing = useCallback(() => {
+    clearYardSaleListingActive();
+    setYardSaleListingActive(true);
+    setListingPrefill(null);
+    setEditingListingId(null);
+    navigateTo("listingIntro");
+  }, [navigateTo]);
+
+  const openYardSaleHub = useCallback(() => {
+    setNavStack([]);
+    setCurrentScreen("yardSaleHub");
+  }, []);
 
   const handleOpenNeighborGarage = useCallback(
     (hostId: string) => {
@@ -628,6 +664,7 @@ function AppRoutes() {
   };
 
   const handleListingWizardExit = () => {
+    clearYardSaleListingActive();
     handleBack();
   };
 
@@ -676,12 +713,26 @@ function AppRoutes() {
         setCurrentScreen(previous);
         return stack.slice(0, -1);
       }
-      if (currentScreen === "home" || currentScreen === "yardSales") {
+      if (currentScreen === "openGarageSale") {
+        setCurrentScreen("yardSaleHub");
+        return stack;
+      }
+      if (currentScreen === "yardSales") {
+        setCurrentScreen("yardSaleHub");
+        return stack;
+      }
+      if (currentScreen === "yardSaleHub") {
+        setCurrentScreen("browseHub");
+        return stack;
+      }
+      if (currentScreen === "home") {
         setCurrentScreen("browseHub");
         return stack;
       }
       if (currentScreen === "listItem" || currentScreen === "listingIntro") {
-        const listingFallback = LISTING_BACK_FALLBACK[currentScreen];
+        const listingFallback = isYardSaleListingActive()
+          ? "openGarageSale"
+          : LISTING_BACK_FALLBACK[currentScreen];
         if (listingFallback) {
           setCurrentScreen(listingFallback);
         } else {
@@ -779,6 +830,7 @@ function AppRoutes() {
   };
 
   const handleStartListing = (prefill?: ShelfPrefill) => {
+    clearYardSaleListingActive();
     setListingPrefill(prefill ?? null);
     setEditingListingId(null);
     navigateTo("listingIntro");
@@ -890,9 +942,25 @@ function AppRoutes() {
           />
         )}
 
+        {currentScreen === "yardSaleHub" && (
+          <YardSaleHubScreen
+            onBack={openBrowseHub}
+            onChoose={handleYardSaleHubChoice}
+            onEditLocation={openRentLocationSetup}
+          />
+        )}
+
+        {currentScreen === "openGarageSale" && (
+          <OpenGarageSaleScreen
+            onBack={openYardSaleHub}
+            onAddSaleItems={handleStartYardSaleListing}
+            onOpenMyGarage={handleOpenGarage}
+          />
+        )}
+
         {currentScreen === "yardSales" && (
           <YardSalesScreen
-            onBack={openBrowseHub}
+            onBack={openYardSaleHub}
             onEditLocation={openRentLocationSetup}
             onOpenGarage={handleOpenNeighborGarage}
           />

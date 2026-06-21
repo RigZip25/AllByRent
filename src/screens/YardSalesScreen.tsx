@@ -120,7 +120,7 @@ export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage }: YardSa
             onClick={onBack}
             className="flex h-10 w-10 items-center justify-center rounded-full border bg-white active:bg-gray-50"
             style={{ borderColor: BORDER }}
-            aria-label="Back to browse choices"
+            aria-label="Back to garage sales"
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>

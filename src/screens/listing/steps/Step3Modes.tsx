@@ -10,6 +10,7 @@ import {
   getCategoryModeRules,
   type CategoryModeKey,
 } from "../listingItemCategories";
+import { isYardSaleListingActive } from "../../../lib/yardSaleListing";
 
 const GREEN = "#0D5C3A";
 
@@ -208,6 +209,7 @@ const rateFieldMotion = {
 };
 
 export function Step3Modes({ draft, setDraft }: StepProps) {
+  const yardSaleListing = isYardSaleListingActive();
   const minimumPeriodCategoryRef = useRef<string | null>(null);
   const [showLongTermPricingHelp, setShowLongTermPricingHelp] = useState(false);
 
@@ -227,7 +229,23 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
         ? "Earn monthly"
         : "Earn daily or weekly";
 
-  const visibleModeCards = MODE_CARD_CONFIG.filter((card) => categoryRules[card.key]);
+  const visibleModeCards = yardSaleListing
+    ? MODE_CARD_CONFIG.filter((card) => card.key === "sell")
+    : MODE_CARD_CONFIG.filter((card) => categoryRules[card.key]);
+
+  useEffect(() => {
+    if (!yardSaleListing) return;
+    setDraft((current) => ({
+      ...current,
+      modes: {
+        rent: false,
+        sell: true,
+        buy: false,
+        rentToOwn: false,
+        gift: false,
+      },
+    }));
+  }, [yardSaleListing, setDraft]);
 
   const suggestedLongTermMonthly = useMemo(() => {
     const daily = Number.parseFloat(draft.pricing.dailyRate);
