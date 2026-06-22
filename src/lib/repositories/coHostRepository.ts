@@ -16,7 +16,7 @@ import {
   fetchCoHostsForHostRemote,
   fetchPendingCoHostInvitesRemote,
   pushCoHostRemote,
-} from "./coHostSupabaseSync";
+} from "../coHost/coHostSupabaseSync";
 import { isSupabaseConfigured } from "../supabaseClient";
 
 function mergeCoHostRecords(remote: CoHostRecord[]): void {

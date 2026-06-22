@@ -1,6 +1,7 @@
 const AUTH_RETURN_KEY = "abr_auth_return";
 const AUTH_INTENT_KEY = "abr_auth_intent";
 const PENDING_EMAIL_KEY = "abr_auth_pending_email";
+const EDITING_LISTING_KEY = "abr_editing_listing_id";
 
 export type AuthIntent = "list" | "book" | "message" | "generic";
 
@@ -70,5 +71,35 @@ export function clearPendingAuthEmail(): void {
     sessionStorage.removeItem(PENDING_EMAIL_KEY);
   } catch {
     // ignore
+  }
+}
+
+export function setEditingListingReturn(listingId: string | null): void {
+  try {
+    if (listingId?.trim()) {
+      sessionStorage.setItem(EDITING_LISTING_KEY, listingId.trim());
+    } else {
+      sessionStorage.removeItem(EDITING_LISTING_KEY);
+    }
+  } catch {
+    // ignore
+  }
+}
+
+export function peekEditingListingReturn(): string | null {
+  try {
+    return sessionStorage.getItem(EDITING_LISTING_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function consumeEditingListingReturn(): string | null {
+  try {
+    const value = sessionStorage.getItem(EDITING_LISTING_KEY);
+    sessionStorage.removeItem(EDITING_LISTING_KEY);
+    return value;
+  } catch {
+    return null;
   }
 }

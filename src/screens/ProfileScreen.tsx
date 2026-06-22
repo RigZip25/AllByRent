@@ -143,6 +143,8 @@ export function ProfileScreen({
   onEditLocation,
   onOpenNotifications,
   onOpenCoHosts,
+  onOpenIdentity,
+  onOpenAgentActivity,
   onDeleteAccount,
   onViewPublicProfile,
   onOpenIntegrations,
@@ -152,6 +154,8 @@ export function ProfileScreen({
   onEditLocation: () => void;
   onOpenNotifications: () => void;
   onOpenCoHosts?: () => void;
+  onOpenIdentity?: () => void;
+  onOpenAgentActivity?: () => void;
   onDeleteAccount?: () => void;
   onViewPublicProfile?: () => void;
   onOpenIntegrations?: () => void;
@@ -488,6 +492,10 @@ export function ProfileScreen({
                   : "Complete ID for higher limits"
               }
               onClick={() => {
+                if (onOpenIdentity) {
+                  onOpenIdentity();
+                  return;
+                }
                 try {
                   const url = new URL(window.location.href);
                   url.searchParams.set("screen", "identity");
@@ -522,6 +530,10 @@ export function ProfileScreen({
               label="Agent activity"
               value="Admin feed"
               onClick={() => {
+                if (onOpenAgentActivity) {
+                  onOpenAgentActivity();
+                  return;
+                }
                 try {
                   const url = new URL(window.location.href);
                   url.searchParams.set("screen", "agent-activity");

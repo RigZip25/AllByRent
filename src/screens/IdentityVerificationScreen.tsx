@@ -66,14 +66,25 @@ export function IdentityVerificationScreen({ onBack }: { onBack: () => void }) {
                   body: JSON.stringify({ returnUrl: window.location.origin + "/?screen=profile" }),
                 });
                 const payload = (await res.json()) as {
+                  ok?: boolean;
                   client_secret?: string;
+                  url?: string | null;
                   reason?: string;
+                  error?: string;
                 };
-                if (!payload?.client_secret) throw new Error(payload?.reason || "Stripe Identity unavailable.");
-
-                // Client-side Stripe Identity SDK wiring is environment-specific.
-                // For now we direct users to complete verification in Stripe's hosted flow (when enabled).
-                window.alert("Identity session created. Wire Stripe Identity SDK to present the flow.");
+                if (!payload?.ok) {
+                  throw new Error(payload?.reason || payload?.error || "Stripe Identity unavailable.");
+                }
+                if (payload.url) {
+                  window.location.href = payload.url;
+                  return;
+                }
+                if (payload.client_secret) {
+                  throw new Error(
+                    "Stripe Identity is configured but no hosted URL was returned. Check Stripe dashboard settings.",
+                  );
+                }
+                throw new Error("Stripe Identity unavailable.");
               })().catch((e) => {
                 setError(e instanceof Error ? e.message : "Verification failed.");
               }).finally(() => setBusy(false));

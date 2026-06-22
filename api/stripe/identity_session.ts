@@ -45,6 +45,10 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return_url: returnUrl,
   });
 
-  res.status(200).json({ ok: true, client_secret: session.client_secret });
+  res.status(200).json({
+    ok: true,
+    client_secret: session.client_secret,
+    url: session.url ?? null,
+  });
 });
 

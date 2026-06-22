@@ -23,11 +23,16 @@ export function AgentActivityScreen({ onBack }: { onBack: () => void }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const key = (import.meta.env.VITE_AGENT_API_KEY as string | undefined) ?? "";
+    if (!key.trim()) {
+      setError("Agent activity requires VITE_AGENT_API_KEY in your deployment environment.");
+      return;
+    }
+
     let mounted = true;
     let timer = 0;
     const run = async () => {
       try {
-        const key = (import.meta.env.VITE_AGENT_API_KEY as string | undefined) ?? "";
         const res = await fetch("/api/agent/activity", {
           method: "POST",
           headers: {

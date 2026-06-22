@@ -46,7 +46,13 @@ import {
   type RentalPriceBreakdown,
 } from "../../lib/rentalPricing";
 
-export function ActiveRental({ onBack }: { onBack: () => void }) {
+export function ActiveRental({
+  bookingId,
+  onBack,
+}: {
+  bookingId?: string | null;
+  onBack: () => void;
+}) {
   const auth = useAuth();
   const [scanOpen, setScanOpen] = useState(false);
   const [scanPhase, setScanPhase] = useState<QrScanPhase>("camera");
@@ -61,13 +67,16 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
 
   const booking = useMemo<RentalBooking | null>(() => {
     const list = bookings;
+    if (bookingId) {
+      return list.find((b) => b.id === bookingId) ?? null;
+    }
     return (
       list.find((b) => b.status === "pending_checkin") ??
       list.find((b) => b.status === "active" || b.status === "overdue") ??
       list[0] ??
       null
     );
-  }, [bookings]);
+  }, [bookings, bookingId]);
 
   useEffect(() => {
     if (!booking) return;
@@ -229,6 +238,34 @@ export function ActiveRental({ onBack }: { onBack: () => void }) {
     const m = Math.floor((totalSec % 3600) / 60);
     return `${h}h ${m}m`;
   }, [dispute?.evidenceDeadline]);
+
+  if (!booking) {
+    return (
+      <div className="screen bg-background flex flex-col">
+        <div className="shrink-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-3 sm:px-4 py-3 flex items-center gap-3">
+          <button
+            onClick={onBack}
+            className="p-2 hover:bg-muted rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="font-semibold flex-1">Active Rental</h1>
+        </div>
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
+          <p className="text-muted-foreground">
+            {mascotSays("No active rental yet. Book something from the feed or check Rentals.")}
+          </p>
+          <button
+            type="button"
+            onClick={onBack}
+            className="rounded-xl bg-primary px-6 py-3 font-medium text-white"
+          >
+            Back to Rentals
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="screen bg-background flex flex-col">

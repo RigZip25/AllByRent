@@ -26,7 +26,10 @@ export function canManageListing(
   authUserEmail: string | null,
 ): boolean {
   const hostIds = getManageableHostIds(authUserId, authUserEmail);
-  return hostIds.includes(getListingHostId(listing));
+  const listingHostId = getListingHostId(listing);
+  if (listingHostId && hostIds.includes(listingHostId)) return true;
+  // Legacy local rows without hostId: only the signed-in user can claim/manage.
+  return !listingHostId && Boolean(authUserId);
 }
 
 export function loadManageableListings(

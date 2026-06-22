@@ -281,6 +281,29 @@ function mergePublishedListingPatch(
   };
 }
 
+/** Stamp hostId on legacy local listings the first time a signed-in host edits them. */
+export async function claimListingOwnershipIfUnassigned(
+  listingId: string,
+  ownerId: string,
+): Promise<ListingDraft | null> {
+  const normalizedOwnerId = ownerId.trim();
+  if (!normalizedOwnerId) return getPublishedListingById(listingId);
+
+  let current = getPublishedListingById(listingId);
+  if (!current) {
+    current = await fetchListingByIdRemote(listingId);
+  }
+  if (!current) return null;
+  if (current.hostId?.trim()) return current;
+
+  const result = await updatePublishedListingRemote(
+    listingId,
+    { hostId: normalizedOwnerId },
+    normalizedOwnerId,
+  );
+  return result.ok ? result.listing : current;
+}
+
 export async function updatePublishedListingRemote(
   listingId: string,
   patch: PublishedListingPatch,

@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef, startTransition } from "react
 import { resolveHomeLocation } from "../lib/geolocation";
 import { AppBrandHeader } from "../components/AppBrandHeader";
 import { OfflineScreen } from "./components/OfflineScreen";
+import { GarageShopMissingScreen } from "./components/GarageShopMissingScreen";
 import { SplashScreen } from "./components/SplashScreen";
 import { FirstHello } from "../screens/onboarding/FirstHello";
 import { WhatDoYouWant } from "../screens/onboarding/WhatDoYouWant";
@@ -47,11 +48,13 @@ import { AuthProvider, useAuth } from "../hooks/AuthProvider";
 import { RequireAuthProvider } from "../hooks/RequireAuth";
 import {
   consumeAuthReturn,
-  peekAuthReturn,
   clearPendingAuthEmail,
   peekPendingAuthEmail,
   setAuthIntent,
   setAuthReturn,
+  setEditingListingReturn,
+  consumeEditingListingReturn,
+  peekEditingListingReturn,
   type AuthIntent,
 } from "../lib/authReturn";
 import { getAppMode, setAppMode } from "../lib/appMode";
@@ -65,6 +68,7 @@ import {
 } from "../lib/onboardingStorage";
 import { categoryIdFromName } from "../screens/listing/listingItemCategories";
 import { getPublishedListingById, hasRentLocationSetup } from "../lib/listingStorage";
+import { canManageListing } from "../lib/hostAccess";
 import {
   deepLinkQueryKeys,
   parseDeepLink,
@@ -83,6 +87,7 @@ import {
 import { AuthGate } from "../components/AuthGate";
 import { PasskeySetup } from "../components/PasskeySetup";
 import { DeleteAccountScreen } from "../screens/profile/DeleteAccount";
+import { CoHostsScreen } from "../screens/profile/CoHostsScreen";
 import { IdentityVerificationScreen } from "../screens/IdentityVerificationScreen";
 import { AgentActivityScreen } from "../screens/AgentActivityScreen";
 import { BottomNav, type BottomNavTab } from "./components/BottomNav";
@@ -147,7 +152,8 @@ type Screen =
   | "integrationStatus"
   | "identity"
   | "agentActivity"
-  | "deleteAccount";
+  | "deleteAccount"
+  | "coHosts";
 
 const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
   "browseHub",
@@ -375,7 +381,9 @@ function AppRoutes() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [listingPrefill, setListingPrefill] = useState<ShelfPrefill | null>(null);
-  const [editingListingId, setEditingListingId] = useState<string | null>(null);
+  const [editingListingId, setEditingListingId] = useState<string | null>(() =>
+    peekEditingListingReturn(),
+  );
   const [postRequestPrefill, setPostRequestPrefill] = useState<ShelfPrefill | null>(null);
   const [attachmentUrl, setAttachmentUrl] = useState<string | null>(null);
   const [attachmentTitle, setAttachmentTitle] = useState<string | null>(null);
@@ -554,6 +562,7 @@ function AppRoutes() {
       "itemDetail",
       "identity",
       "agentActivity",
+      "coHosts",
     ];
     const storedTarget =
       candidate && validScreens.includes(candidate)
@@ -565,6 +574,11 @@ function AppRoutes() {
   const finishAuthFlow = useCallback(() => {
     setAuthGateOpen(false);
     clearPendingAuthEmail();
+    const restoredEditId = peekEditingListingReturn();
+    if (restoredEditId) {
+      setEditingListingId(restoredEditId);
+      setSelectedHostListingId(restoredEditId);
+    }
     const target = resolvePostAuthScreen();
     setNavStack([]);
     setCurrentScreen(target);
@@ -832,8 +846,18 @@ function AppRoutes() {
   };
 
   const handleItemSelect = (itemId: string) => {
+    const listing = getPublishedListingById(itemId);
+    if (listing && canManageListing(listing, auth.userId, auth.userEmail)) {
+      setSelectedHostListingId(itemId);
+      navigateTo("hostListingDetail");
+      return;
+    }
     setSelectedItemId(itemId);
     navigateTo("itemDetail");
+  };
+
+  const handleOpenListingFromFeed = (itemId: string) => {
+    handleItemSelect(itemId);
   };
 
   const handleOpenAttachment = (url: string, title?: string) => {
@@ -946,8 +970,11 @@ function AppRoutes() {
       markIntroDone();
       cleanupSplashGlobals();
       setNavStack([]);
-      // Prefer returning to the intent screen that triggered auth (e.g. list/book/message),
-      // not just "post splash". This makes magic-link callbacks feel like a real continuation.
+      const restoredEditId = consumeEditingListingReturn();
+      if (restoredEditId) {
+        setEditingListingId(restoredEditId);
+        setSelectedHostListingId(restoredEditId);
+      }
       setCurrentScreen(resolvePostAuthScreen());
       setPostAuthTarget(null);
     };
@@ -987,6 +1014,12 @@ function AppRoutes() {
   };
 
   const handleNavigate = (screen: string) => {
+    if (screen.startsWith("itemDetail:")) {
+      const id = screen.slice("itemDetail:".length).trim();
+      if (!id) return;
+      handleOpenListingFromFeed(id);
+      return;
+    }
     if (screen.startsWith("hostListingDetail:")) {
       const id = screen.slice("hostListingDetail:".length).trim();
       if (!id) return;
@@ -1011,6 +1044,7 @@ function AppRoutes() {
     clearYardSaleListingActive();
     setListingPrefill(prefill ?? null);
     setEditingListingId(null);
+    setEditingListingReturn(null);
     navigateTo("listingIntro");
   };
 
@@ -1028,7 +1062,7 @@ function AppRoutes() {
     return (
       <div className="app-shell">
         <div className="app-container bg-background">
-          <OfflineScreen />
+          <OfflineScreen onRetry={() => setIsOnline(typeof navigator === "undefined" || navigator.onLine)} />
         </div>
       </div>
     );
@@ -1202,6 +1236,16 @@ function AppRoutes() {
           />
         )}
 
+        {currentScreen === "garageShop" && !selectedNeighborGarageHostId && (
+          <GarageShopMissingScreen
+            onBack={handleBack}
+            onBrowseYardSales={() => {
+              setNavStack([]);
+              setCurrentScreen("yardSales");
+            }}
+          />
+        )}
+
         {currentScreen === "garageShop" && selectedNeighborGarageHostId && (
           <ActiveGarageShopScreen
             hostId={selectedNeighborGarageHostId}
@@ -1249,7 +1293,10 @@ function AppRoutes() {
 
         {currentScreen === "rentals" && (
           <RentalsScreen
-            onOpenRental={() => navigateTo("activeRental")}
+            onOpenRental={(bookingId) => {
+              setSelectedBookingId(bookingId);
+              navigateTo("activeRental");
+            }}
             onViewProfile={() => handleOpenProfile()}
             onReRent={() => {
               setNavStack([]);
@@ -1266,16 +1313,18 @@ function AppRoutes() {
             onOpenNotifications={handleOpenNotifications}
             onOpenIntegrations={handleOpenIntegrations}
             onDeleteAccount={() => navigateTo("deleteAccount")}
+            onOpenCoHosts={() => navigateTo("coHosts")}
+            onOpenIdentity={() => navigateTo("identity")}
+            onOpenAgentActivity={() => navigateTo("agentActivity")}
           />
         )}
+
+        {currentScreen === "coHosts" && <CoHostsScreen onBack={handleBack} />}
 
         {currentScreen === "favorites" && (
           <FavoritesScreen
             onHome={handleOpenHome}
-            onOpenListing={(id) => {
-              setSelectedHostListingId(id);
-              navigateTo("hostListingDetail");
-            }}
+            onOpenListing={(id) => handleOpenListingFromFeed(id)}
           />
         )}
 
@@ -1350,7 +1399,7 @@ function AppRoutes() {
         )}
 
         {currentScreen === "activeRental" && (
-          <ActiveRental onBack={handleBack} />
+          <ActiveRental bookingId={selectedBookingId} onBack={handleBack} />
         )}
 
         {currentScreen === "listingIntro" && (
@@ -1369,6 +1418,7 @@ function AppRoutes() {
             onExit={() => {
               setListingPrefill(null);
               setEditingListingId(null);
+              setEditingListingReturn(null);
               handleListingWizardExit();
             }}
           />
@@ -1382,6 +1432,7 @@ function AppRoutes() {
               setSelectedHostListingId(listingId);
               setListingPrefill(null);
               setEditingListingId(listingId);
+              setEditingListingReturn(listingId);
               navigateTo("listItem");
             }}
           />

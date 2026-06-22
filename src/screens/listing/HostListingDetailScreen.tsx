@@ -6,6 +6,7 @@ import { canManageListing } from "../../lib/hostAccess";
 import {
   addListingToQrBulkQueue,
   clearQrBulkQueue,
+  claimListingOwnershipIfUnassigned,
   fetchListingByIdRemote,
   getProfileCity,
   getPublishedListingById,
@@ -113,15 +114,23 @@ export function HostListingDetailScreen({
   useEffect(() => {
     let mounted = true;
     setLoading((current) => current || !getPublishedListingById(listingId));
-    void fetchListingByIdRemote(listingId).then((next) => {
+    void fetchListingByIdRemote(listingId).then(async (next) => {
       if (!mounted) return;
-      setListing(next);
+      if (next && !next.hostId?.trim() && auth.userId) {
+        const claimed = await claimListingOwnershipIfUnassigned(
+          listingId,
+          resolveHostAccountId(auth.userId),
+        );
+        setListing(claimed ?? next);
+      } else {
+        setListing(next);
+      }
       setLoading(false);
     });
     return () => {
       mounted = false;
     };
-  }, [listingId, version]);
+  }, [auth.userId, listingId, version]);
 
   useEffect(() => {
     if (!listing) return;

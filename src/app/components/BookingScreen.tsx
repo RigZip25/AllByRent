@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, MapPin, Truck, Package, Shield } from "lucide-react";
 import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
-import { getPublishedListingById } from "../../lib/listingStorage";
+import { fetchListingByIdRemote, getPublishedListingById } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { useAuth } from "../../hooks/AuthProvider";
 import { parseUsdToCents } from "../../lib/insurance";
@@ -81,7 +81,29 @@ export function BookingScreen({
   onBack: () => void;
   onConfirmed: (bookingId: string) => void;
 }) {
-  const listing = useMemo(() => getPublishedListingById(listingId), [listingId]);
+  const [listing, setListing] = useState<ListingDraft | null>(() => getPublishedListingById(listingId));
+  const [loading, setLoading] = useState(() => !getPublishedListingById(listingId));
+
+  useEffect(() => {
+    let mounted = true;
+    void fetchListingByIdRemote(listingId).then((next) => {
+      if (!mounted) return;
+      setListing(next);
+      setLoading(false);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [listingId]);
+
+  if (loading) {
+    return (
+      <div className="screen flex flex-col items-center justify-center bg-background px-6 text-center">
+        <p className="text-sm text-muted-foreground">Loading booking…</p>
+      </div>
+    );
+  }
+
   if (!listing) {
     return (
       <div className="screen flex flex-col items-center justify-center bg-background px-6 text-center">
