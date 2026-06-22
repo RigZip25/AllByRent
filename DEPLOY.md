@@ -37,7 +37,7 @@ This repo uses **12** grouped routers under `api/` (Hobby limit):
 - `api/stripe/[...slug].ts`, `api/passkey/[...slug].ts`, `api/agent/[...slug].ts`
 - `api/auth/[...slug].ts`, `api/geocode/[...slug].ts`, `api/cron/[...slug].ts`
 - `api/push/[...slug].ts`, `api/safely/[...slug].ts`, `api/orchestrator/[...slug].ts`
-- `api/proxy/[...slug].ts` (anthropic + photoroom), `api/link.ts`, `api/og/image.tsx`
+- `api/proxy/[...slug].ts` (anthropic + photoroom), `api/link.ts`, `api/og/image.ts`
 
 Handler code lives in `server/routes/`. Add new endpoints to the matching group router.
 
