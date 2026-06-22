@@ -12,16 +12,27 @@ type AgentLogRow = {
   ok: boolean;
 };
 
+type AgentActivityResponse = {
+  ok?: boolean;
+  error?: string;
+  data?: { items?: AgentLogRow[] };
+};
+
 export function AgentActivityScreen({ onBack }: { onBack: () => void }) {
   const [items, setItems] = useState<AgentLogRow[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const key = (import.meta.env.VITE_AGENT_API_KEY as string | undefined) ?? "";
+    if (!key.trim()) {
+      setError("Agent activity requires VITE_AGENT_API_KEY in your deployment environment.");
+      return;
+    }
+
     let mounted = true;
     let timer = 0;
     const run = async () => {
       try {
-        const key = (import.meta.env.VITE_AGENT_API_KEY as string | undefined) ?? "";
         const res = await fetch("/api/agent/activity", {
           method: "POST",
           headers: {
@@ -30,19 +41,19 @@ export function AgentActivityScreen({ onBack }: { onBack: () => void }) {
           },
           body: JSON.stringify({ limit: 80 }),
         });
-        const payload = (await res.json()) as any;
+        const payload = (await res.json()) as AgentActivityResponse;
         if (!mounted) return;
         if (!payload?.ok) {
           setError(payload?.error || "Agent feed unavailable.");
           return;
         }
         setError(null);
-        setItems((payload.data?.items ?? []) as AgentLogRow[]);
+        setItems(payload.data?.items ?? []);
       } catch (e) {
         if (!mounted) return;
         setError(e instanceof Error ? e.message : "Agent feed unavailable.");
-      } finally {
-        if (!mounted) return;
+      }
+      if (mounted) {
         timer = window.setTimeout(run, 4000);
       }
     };

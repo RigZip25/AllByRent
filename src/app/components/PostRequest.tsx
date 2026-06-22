@@ -65,6 +65,7 @@ export function PostRequest({
   const [endDate, setEndDate] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const sharePayload = useMemo(() => {
     const city = (prefill?.city ?? getActiveRentLocationLabel()).trim();
@@ -303,6 +304,11 @@ export function PostRequest({
       </div>
 
       <div className="screen-footer bg-card/95 backdrop-blur-sm border-t border-border p-3 sm:p-4">
+        {submitError ? (
+          <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
+            {submitError}
+          </p>
+        ) : null}
         <button
           disabled={busy}
           onClick={() => {
@@ -315,9 +321,10 @@ export function PostRequest({
             if (lockedContext && !subcategory.trim()) return;
             if (!desc) return;
             if (!auth.userId) {
-              onPost();
+              setSubmitError("Sign in to post a request.");
               return;
             }
+            setSubmitError(null);
             setBusy(true);
             void createRequestRemote({
               renterId: auth.userId,

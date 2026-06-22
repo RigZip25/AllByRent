@@ -126,7 +126,8 @@ export const ONBOARDING = {
     shelfHint: "Garage-sale snap — photo first, optional tag, price or auction. Not the full listing form.",
     shelfNote: "Each snap lands on your open shop · neighbors buy or bid",
     addItemsCta: "Snap onto shelf →",
-    myGarageCta: "Preview active shop",
+    myGarageCta: "My active garage →",
+    shareGarageCta: "Share open garage",
     rulesViewCta: "How selling works — pictures →",
     mascotHint: "can help price odd items once they're on the shelf.",
   },
@@ -216,6 +217,13 @@ export const ONBOARDING = {
     interestedLabel: "interested",
     auctionAuto: "Auction — interested neighbors only",
   },
+  garageShare: {
+    openGarageTitle: "Share open garage",
+    itemTitle: "Share this item",
+    afterSnapTitle: "Spread the word",
+    afterSnapHint: "Story, Nextdoor, WhatsApp — link opens your shelf, not the app home page.",
+    shopBannerHost: "Tap Edit on any item — or share your shelf to pull buyers in.",
+  },
   garageShelfEdit: {
     eyebrow: "Your shelf",
     title: "Edit sale item",
@@ -257,6 +265,11 @@ export const ONBOARDING = {
 
 export const SUPPORT_EMAIL = "support@evorios.com";
 export const MARKETING_URL = "https://evorios.com";
+/** Production PWA origin (deep links, passkeys, Stripe return URLs). */
+export const APP_ORIGIN = "https://app.evorios.com";
+export const APP_HOST = "app.evorios.com";
+/** Public marketing site — QR codes and outbound links to the web. */
+export const LISTING_QR_BASE_URL = `${MARKETING_URL}/item`;
 
 /** QR sticker PDF download names (user-visible). */
 export const QR_PDF_FILENAMES = {

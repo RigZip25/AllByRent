@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   Star,
@@ -14,17 +14,28 @@ import {
   Camera,
   Heart,
   Package,
+  X,
 } from "lucide-react";
 import {
   isFavoriteListing,
   toggleFavoriteListing,
 } from "../../lib/favoritesStorage";
-import { getPublishedListingById, getActiveRentLocationLabel } from "../../lib/listingStorage";
+import {
+  fetchListingByIdRemote,
+  getActiveRentLocationLabel,
+  getPublishedListingById,
+} from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
+import {
+  deliverySummaryForListing,
+  listingOffersDelivery,
+  parseListingDailyRate,
+} from "../../lib/rentalPricing";
 import { useMediaUrl } from "../../lib/useMediaUrl";
-import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
+import { APP_NAME, DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
 import { buildListingSharePayload, listingShareUrl } from "../../lib/socialShare";
+import type { ListingDraft } from "../../screens/listing/types";
 
 interface ItemDetailProps {
   itemId: string;
@@ -33,29 +44,142 @@ interface ItemDetailProps {
   onOpenAttachment: (url: string, title?: string) => void;
 }
 
+function formatBlockedDates(listing: ListingDraft): string[] {
+  return (listing.blockedDates ?? [])
+    .map((entry) => {
+      if (typeof entry === "string") return entry;
+      if (entry && typeof entry === "object" && "start" in entry) {
+        const row = entry as { start?: string; end?: string };
+        if (row.start && row.end && row.start !== row.end) {
+          return `${row.start} – ${row.end}`;
+        }
+        return row.start ?? row.end ?? "";
+      }
+      return "";
+    })
+    .filter(Boolean);
+}
+
+function AvailabilityPanel({
+  listing,
+  onClose,
+}: {
+  listing: ListingDraft;
+  onClose: () => void;
+}) {
+  const blocked = formatBlockedDates(listing);
+  const weekday =
+    listing.handoff.inPersonTimeStart && listing.handoff.inPersonTimeEnd
+      ? `${listing.handoff.inPersonTimeStart}–${listing.handoff.inPersonTimeEnd}`
+      : null;
+  const weekend =
+    listing.handoff.inPersonWeekendTimeStart && listing.handoff.inPersonWeekendTimeEnd
+      ? `${listing.handoff.inPersonWeekendTimeStart}–${listing.handoff.inPersonWeekendTimeEnd}`
+      : null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4">
+      <div className="w-full max-w-[390px] rounded-2xl border border-border bg-card p-4 shadow-xl">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">Availability</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-2 hover:bg-muted"
+            aria-label="Close availability"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {listing.paused ? (
+          <p className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            This listing is paused — the owner is not accepting new bookings right now.
+          </p>
+        ) : (
+          <p className="mb-3 text-sm text-muted-foreground">
+            Pickup windows below. Confirm exact dates when you book.
+          </p>
+        )}
+
+        <dl className="space-y-2 text-sm">
+          {weekday ? (
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">Weekdays</dt>
+              <dd className="font-medium">{weekday}</dd>
+            </div>
+          ) : null}
+          {weekend ? (
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">Weekends</dt>
+              <dd className="font-medium">{weekend}</dd>
+            </div>
+          ) : null}
+        </dl>
+
+        {blocked.length > 0 ? (
+          <div className="mt-4">
+            <p className="text-sm font-semibold">Blocked dates</p>
+            <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-sm text-muted-foreground">
+              {blocked.map((line) => (
+                <li key={line}>• {line}</li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p className="mt-4 text-sm text-muted-foreground">No blocked dates listed.</p>
+        )}
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="btn-primary mt-4 w-full rounded-xl py-3 font-semibold text-white"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDetailProps) {
   const [favorited, setFavorited] = useState(() => isFavoriteListing(itemId));
   const [shareOpen, setShareOpen] = useState(false);
-  const listing = useMemo(() => getPublishedListingById(itemId), [itemId]);
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
+  const [messageHint, setMessageHint] = useState(false);
+  const [listing, setListing] = useState<ListingDraft | null>(() => getPublishedListingById(itemId));
+  const [loading, setLoading] = useState(() => !getPublishedListingById(itemId));
+
+  useEffect(() => {
+    let mounted = true;
+    void fetchListingByIdRemote(itemId).then((next) => {
+      if (!mounted) return;
+      setListing(next);
+      setLoading(false);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [itemId]);
+
   const cover = listing?.photos?.[0] ?? null;
   const coverThumb = cover?.thumbId ? { ...cover, id: cover.thumbId } : cover;
   const coverUrl = useMediaUrl(coverThumb).url;
 
   const title = listing
-    ? getListingDisplayTitle(listing) || listing.title || "Listing"
-    : "DSLR Camera";
-  const dailyRate = listing
-    ? parseListingDailyRate(listing.pricing.dailyRate) || 35
-    : 35;
+    ? getListingDisplayTitle(listing.title) || listing.title || "Listing"
+    : "Listing";
+  const dailyRate = listing ? parseListingDailyRate(listing.pricing.dailyRate) || 0 : 0;
   const deliverySummary = listing ? deliverySummaryForListing(listing) : null;
-  const hasDelivery = listing ? listingOffersDelivery(listing) : true;
+  const hasDelivery = listing ? listingOffersDelivery(listing) : false;
   const isHeavy = listing?.handoff.itemHeavy ?? false;
+  const canBook = Boolean(listing && listing.listingStatus === "active" && !listing.paused);
 
   const sharePayload = useMemo(() => {
     const city = getActiveRentLocationLabel().trim();
     return buildListingSharePayload({
       title,
-      dailyRate: String(dailyRate),
+      dailyRate: String(dailyRate || "—"),
       url: listingShareUrl(itemId),
       city: city || undefined,
     });
@@ -64,6 +188,51 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
   const handleToggleFavorite = () => {
     setFavorited(toggleFavoriteListing(itemId));
   };
+
+  const handleMessageHost = () => {
+    setMessageHint(true);
+    onBook();
+  };
+
+  if (loading) {
+    return (
+      <div className="screen flex flex-col bg-background">
+        <div className="shrink-0 border-b border-border px-4 py-3">
+          <button type="button" onClick={onBack} className="p-2 hover:bg-muted rounded-full">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="flex flex-1 items-center justify-center p-6 text-sm text-muted-foreground">
+          Loading item…
+        </div>
+      </div>
+    );
+  }
+
+  if (!listing) {
+    return (
+      <div className="screen flex flex-col bg-background">
+        <div className="shrink-0 border-b border-border px-4 py-3 flex items-center gap-3">
+          <button type="button" onClick={onBack} className="p-2 hover:bg-muted rounded-full">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="font-semibold flex-1">Item not found</h1>
+        </div>
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
+          <p className="text-muted-foreground">
+            This listing may have been removed or is no longer available in your area.
+          </p>
+          <button
+            type="button"
+            onClick={onBack}
+            className="rounded-xl bg-primary px-6 py-3 font-medium text-white"
+          >
+            Go back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="screen bg-background flex flex-col">
@@ -74,7 +243,7 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="font-semibold flex-1">Item Details</h1>
+        <h1 className="font-semibold flex-1 truncate">{title}</h1>
         <button
           type="button"
           onClick={handleToggleFavorite}
@@ -111,47 +280,44 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
           ) : null}
         </div>
 
-        <div className="p-4 space-y-6">
+        <div className="p-4 space-y-4">
           <div>
-            <div className="flex items-start justify-between mb-2">
-              <h2 className="text-2xl font-bold flex-1">{title}</h2>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-primary">${dailyRate}</div>
-                <div className="text-sm text-muted-foreground">/day</div>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-2xl font-bold">{title}</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {[listing.category, listing.subcategory].filter(Boolean).join(" · ")}
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                {dailyRate > 0 ? (
+                  <>
+                    <p className="text-2xl font-bold text-primary">${dailyRate}</p>
+                    <p className="text-xs text-muted-foreground">per day</p>
+                  </>
+                ) : (
+                  <p className="text-sm font-semibold text-muted-foreground">Ask owner</p>
+                )}
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-sm mb-3">
-              <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 fill-accent text-accent" />
-                <span className="font-semibold">5.0</span>
-              </div>
-              <span className="text-muted-foreground">(12 reviews)</span>
-              <span className="text-muted-foreground">·</span>
-              <span className="text-muted-foreground">0.5 mi away</span>
-            </div>
-
-            <div className="flex items-center gap-2 flex-wrap">
-              {listing?.modes.rent !== false ? (
-                <span className="px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-medium flex items-center gap-1.5">
-                  <span>🔄</span>
-                  <span>Rent</span>
-                </span>
-              ) : null}
-              {listing?.modes.sell ? (
-                <span className="px-3 py-1.5 bg-blue-500/10 text-blue-600 rounded-lg text-xs font-medium flex items-center gap-1.5">
-                  <span>💰</span>
-                  <span>Buy</span>
-                </span>
-              ) : null}
-              {listing?.modes.gift ? (
-                <span className="px-3 py-1.5 bg-amber-500/10 text-amber-700 rounded-lg text-xs font-medium flex items-center gap-1.5">
-                  <span>🎁</span>
-                  <span>Gift</span>
-                </span>
-              ) : null}
+            <div className="flex items-center gap-2 mt-3">
+              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+              <span className="text-sm font-medium">New on block</span>
             </div>
           </div>
+
+          {listing.paused ? (
+            <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              Paused — not accepting new bookings right now.
+            </p>
+          ) : null}
+
+          {messageHint ? (
+            <p className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-primary">
+              In-app chat with the owner opens once your booking is confirmed.
+            </p>
+          ) : null}
 
           <div className="bg-card rounded-xl border border-primary/20 p-4">
             <div className="flex items-start gap-4">
@@ -160,12 +326,10 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
                   <QrCode className="w-10 h-10 text-foreground" />
                 </div>
               </div>
-
               <div className="flex-1">
                 <h3 className="font-semibold mb-1">Unique QR Code</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Scan to instantly check-in, track rental status, and verify
-                  authenticity
+                  Scan to check in, track rental status, and verify the item at pickup.
                 </p>
               </div>
             </div>
@@ -174,20 +338,22 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
           <div className="bg-card rounded-xl border border-border p-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-sm font-medium text-primary">
-                JD
+                {listing.hostId?.slice(0, 2).toUpperCase() || "H"}
               </div>
-
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="font-semibold">John Davis</span>
+                  <span className="font-semibold">Garage host</span>
                   <CheckCircle2 className="w-4 h-4 text-primary" />
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Verified owner · 47 rentals
-                </p>
+                <p className="text-sm text-muted-foreground">Verified host on {APP_NAME}</p>
               </div>
-
-              <button className="flex-shrink-0 p-2 hover:bg-muted rounded-full transition-colors">
+              <button
+                type="button"
+                onClick={handleMessageHost}
+                disabled={!canBook}
+                className="flex-shrink-0 p-2 hover:bg-muted rounded-full transition-colors disabled:opacity-40"
+                aria-label="Message host after booking"
+              >
                 <MessageCircle className="w-5 h-5 text-primary" />
               </button>
             </div>
@@ -196,12 +362,12 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
           <div>
             <h3 className="font-semibold mb-3">About this item</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {listing?.description?.trim() ||
-                "Professional gear in great condition. Contact the owner with any questions before booking."}
+              {listing.description?.trim() ||
+                "Contact the owner with any questions before booking."}
             </p>
           </div>
 
-          {listing?.instructionsUrl?.trim() ? (
+          {listing.instructionsUrl?.trim() ? (
             <button
               type="button"
               onClick={() => onOpenAttachment(listing.instructionsUrl, "Instructions")}
@@ -214,7 +380,6 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
 
           <div className="bg-muted/50 rounded-xl p-4">
             <h3 className="font-semibold mb-3">Rental includes</h3>
-
             <div className="space-y-3">
               {hasDelivery ? (
                 <div className="flex items-center gap-3">
@@ -226,31 +391,32 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
                   </span>
                 </div>
               ) : null}
-
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Shield className="w-4 h-4 text-primary" />
                 </div>
                 <span className="text-sm">{DEPOSIT_PROTECTION_LABEL} on rentals</span>
               </div>
-
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Headphones className="w-4 h-4 text-primary" />
                 </div>
-                <span className="text-sm">24/7 support</span>
+                <span className="text-sm">In-app support via Mr.E</span>
               </div>
-
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <ScanLine className="w-4 h-4 text-primary" />
                 </div>
-                <span className="text-sm">QR tracking system</span>
+                <span className="text-sm">QR check-in at pickup</span>
               </div>
             </div>
           </div>
 
-          <button className="w-full bg-card border border-border py-3 rounded-xl flex items-center justify-between px-4 hover:border-primary/50 transition-colors">
+          <button
+            type="button"
+            onClick={() => setAvailabilityOpen(true)}
+            className="w-full bg-card border border-border py-3 rounded-xl flex items-center justify-between px-4 hover:border-primary/50 transition-colors"
+          >
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-muted-foreground" />
               <span className="font-medium">Check availability</span>
@@ -259,6 +425,10 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
           </button>
         </div>
       </div>
+
+      {availabilityOpen ? (
+        <AvailabilityPanel listing={listing} onClose={() => setAvailabilityOpen(false)} />
+      ) : null}
 
       {shareOpen ? (
         <div className="shrink-0 border-t border-border bg-card p-4">
@@ -283,10 +453,18 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
         </button>
 
         <button
+          type="button"
           onClick={onBook}
-          className="flex-1 bg-primary hover:bg-primary/90 text-white py-3 px-6 rounded-xl transition-colors font-medium"
+          disabled={!canBook}
+          className="flex-1 bg-primary hover:bg-primary/90 disabled:opacity-50 text-white py-3 px-6 rounded-xl transition-colors font-medium"
         >
-          Book Now · ${dailyRate}/day
+          {canBook
+            ? dailyRate > 0
+              ? `Book Now · $${dailyRate}/day`
+              : "Book Now"
+            : listing.paused
+              ? "Paused"
+              : "Not available"}
         </button>
       </div>
     </div>

@@ -7,11 +7,11 @@ import {
   ScanLine,
   Search,
 } from "lucide-react";
+import { useAuth } from "../hooks/AuthProvider";
 import { BookingRequestCard } from "../components/rentals/BookingRequestCard";
 import { PendingApprovalCard } from "../components/rentals/PendingApprovalCard";
 import { RentalCard } from "../components/rentals/RentalCard";
 import { getAppMode } from "../lib/appMode";
-import { pushInAppNotification } from "../lib/inAppNotifications";
 import {
   getActiveBookings,
   getHistoryBookings,
@@ -19,6 +19,7 @@ import {
   getPendingApprovalWaiting,
   getUpcomingBookings,
   loadRentalBookings,
+  syncRentalsFromRemote,
   type RentalBooking,
   type RentalRole,
 } from "../lib/rentalsStorage";
@@ -29,7 +30,6 @@ const AMBER = "#F0B429";
 const BORDER = "#E8E6E0";
 
 const HISTORY_PAGE_SIZE = 5;
-const REQUEST_PUSH_KEY = "allbyrent_demo_request_push_sent";
 
 type RentalsTab = "active" | "upcoming" | "history";
 type RoleFilter = "all" | RentalRole;
@@ -180,6 +180,7 @@ export function RentalsScreen({
   onViewProfile: (userId: string) => void;
   onReRent?: (listingTitle: string) => void;
 }) {
+  const auth = useAuth();
   const [tab, setTab] = useState<RentalsTab>("active");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [historySort, setHistorySort] = useState<HistorySort>("recent");
@@ -191,16 +192,14 @@ export function RentalsScreen({
   const refresh = useCallback(() => setBookings(loadRentalBookings()), []);
 
   useEffect(() => {
-    if (localStorage.getItem(REQUEST_PUSH_KEY)) return;
-    const requests = getPendingApprovalRequests(loadRentalBookings());
-    if (requests.length === 0) return;
-    pushInAppNotification({
-      type: "booking_request",
-      title: "New booking request",
-      body: `${requests[0].counterpartyName} wants to rent your ${requests[0].itemTitle}.`,
-    });
-    localStorage.setItem(REQUEST_PUSH_KEY, "1");
-  }, []);
+    if (!auth.userId) {
+      setBookings([]);
+      return;
+    }
+    void syncRentalsFromRemote(auth.userId)
+      .then(setBookings)
+      .catch(() => setBookings(loadRentalBookings()));
+  }, [auth.userId]);
 
   const hostRequests = useMemo(
     () => getPendingApprovalRequests(bookings),

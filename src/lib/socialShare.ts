@@ -1,4 +1,5 @@
-import { APP_NAME } from "./brand";
+import { APP_NAME, APP_ORIGIN } from "./brand";
+import { shareAppOrigin } from "./deepLinks";
 import type { ShareCardFormat } from "./shareCards";
 
 export type SocialPlatform =
@@ -229,38 +230,70 @@ export function buildGarageSharePayload(params: {
   url: string;
   city?: string;
   listingCount?: number;
+  openUntilLabel?: string;
 }): SharePayload {
   const place = params.city?.trim() ? ` in ${params.city.trim()}` : "";
   const count =
     params.listingCount && params.listingCount > 0
       ? ` ${params.listingCount} item${params.listingCount === 1 ? "" : "s"} on the shelf.`
       : "";
+  const hours = params.openUntilLabel?.trim() ? ` ${params.openUntilLabel.trim()}.` : "";
   return {
-    title: `${params.garageName} on ${APP_NAME}`,
+    title: `${params.garageName} — garage open`,
     url: params.url,
-    text: `Peek inside ${params.garageName}'s garage${place} — neighborhood rentals on ${APP_NAME}.${count}`,
+    text: `My garage is open${place}${hours}${count} Tap to browse, buy, or make an offer.`,
   };
+}
+
+export function buildGarageItemSharePayload(params: {
+  title: string;
+  priceUsd: number;
+  url: string;
+  city?: string;
+  garageName?: string;
+}): SharePayload {
+  const place = params.city?.trim() ? ` · ${params.city.trim()}` : "";
+  const from = params.garageName?.trim() ? ` from ${params.garageName.trim()}` : "";
+  const price = Number.isFinite(params.priceUsd) ? `$${params.priceUsd}` : "Ask";
+  return {
+    title: params.title,
+    url: params.url,
+    text: `${params.title} — ${price}${from}${place}. Buy or offer from my garage shelf.`,
+  };
+}
+
+function withShareParams(pathname: string, extra?: Record<string, string>): string {
+  const url = new URL(shareAppOrigin());
+  url.pathname = pathname;
+  url.searchParams.set("skipSplash", "1");
+  if (extra) {
+    for (const [key, value] of Object.entries(extra)) {
+      if (value.trim()) url.searchParams.set(key, value.trim());
+    }
+  }
+  return url.toString();
 }
 
 export function listingShareUrl(listingId: string): string {
   try {
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const url = new URL(origin || "https://app.allbyrent.com");
-    url.searchParams.set("listingId", listingId);
-    return url.toString();
+    return withShareParams("/link", { listingId });
   } catch {
-    return `https://app.allbyrent.com/?listingId=${listingId}`;
+    return `${APP_ORIGIN}/link?listingId=${encodeURIComponent(listingId)}&skipSplash=1`;
   }
 }
 
 export function garageShareUrl(hostId: string): string {
   try {
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const url = new URL(origin || "https://app.allbyrent.com");
-    url.searchParams.set("screen", "home");
-    url.searchParams.set("garage", hostId);
-    return url.toString();
+    return withShareParams("/link", { garage: hostId });
   } catch {
-    return `https://app.allbyrent.com/?garage=${hostId}`;
+    return `${APP_ORIGIN}/link?garage=${encodeURIComponent(hostId)}&skipSplash=1`;
+  }
+}
+
+export function garageItemShareUrl(hostId: string, listingId: string): string {
+  try {
+    return withShareParams("/link", { garage: hostId, item: listingId });
+  } catch {
+    return `${APP_ORIGIN}/link?garage=${encodeURIComponent(hostId)}&item=${encodeURIComponent(listingId)}&skipSplash=1`;
   }
 }

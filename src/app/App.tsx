@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef, startTransition } from "react
 import { resolveHomeLocation } from "../lib/geolocation";
 import { AppBrandHeader } from "../components/AppBrandHeader";
 import { OfflineScreen } from "./components/OfflineScreen";
+import { GarageShopMissingScreen } from "./components/GarageShopMissingScreen";
 import { SplashScreen } from "./components/SplashScreen";
 import { FirstHello } from "../screens/onboarding/FirstHello";
 import { WhatDoYouWant } from "../screens/onboarding/WhatDoYouWant";
@@ -39,18 +40,21 @@ import { MoreScreen } from "../screens/MoreScreen";
 import { MrEvoriosScreen } from "../screens/MrEvoriosScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
-import { SubscriptionPlansScreen } from "../screens/SubscriptionPlansScreen";
+import { SetupRequiredScreen } from "../screens/SetupRequiredScreen";
+import { IntegrationStatusScreen } from "../screens/IntegrationStatusScreen";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
 import { AuthProvider, useAuth } from "../hooks/AuthProvider";
 import { RequireAuthProvider } from "../hooks/RequireAuth";
 import {
   consumeAuthReturn,
-  peekAuthReturn,
   clearPendingAuthEmail,
   peekPendingAuthEmail,
   setAuthIntent,
   setAuthReturn,
+  setEditingListingReturn,
+  consumeEditingListingReturn,
+  peekEditingListingReturn,
   type AuthIntent,
 } from "../lib/authReturn";
 import { getAppMode, setAppMode } from "../lib/appMode";
@@ -64,6 +68,13 @@ import {
 } from "../lib/onboardingStorage";
 import { categoryIdFromName } from "../screens/listing/listingItemCategories";
 import { getPublishedListingById, hasRentLocationSetup } from "../lib/listingStorage";
+import { canManageListing } from "../lib/hostAccess";
+import {
+  deepLinkQueryKeys,
+  parseDeepLink,
+  resolveListingDeepLink,
+  type DeepLinkTarget,
+} from "../lib/deepLinks";
 import type { ShelfPrefill } from "../lib/shelfListings";
 import { isSimulateUpdateRequested } from "../lib/pwaUpdateStorage";
 import { isResetAppQueryParam, resetAllAppData } from "../lib/resetAppStorage";
@@ -76,6 +87,7 @@ import {
 import { AuthGate } from "../components/AuthGate";
 import { PasskeySetup } from "../components/PasskeySetup";
 import { DeleteAccountScreen } from "../screens/profile/DeleteAccount";
+import { CoHostsScreen } from "../screens/profile/CoHostsScreen";
 import { IdentityVerificationScreen } from "../screens/IdentityVerificationScreen";
 import { AgentActivityScreen } from "../screens/AgentActivityScreen";
 import { BottomNav, type BottomNavTab } from "./components/BottomNav";
@@ -137,10 +149,11 @@ type Screen =
   | "profile"
   | "favorites"
   | "earnBusiness"
-  | "subscriptionPlans"
+  | "integrationStatus"
   | "identity"
   | "agentActivity"
-  | "deleteAccount";
+  | "deleteAccount"
+  | "coHosts";
 
 const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
   "browseHub",
@@ -223,6 +236,23 @@ function isOnboardingScreen(screen: Screen): boolean {
   return screen in ONBOARDING_BACK_FALLBACK || screen === "firstHello" || screen === "onboardingAllSet";
 }
 
+function resolveBootDeepLinkTarget(target: DeepLinkTarget | null): DeepLinkTarget | null {
+  if (!target) return null;
+  if (target.kind === "listing") return resolveListingDeepLink(target.listingId);
+  return target;
+}
+
+function readBootDeepLink() {
+  if (typeof window === "undefined") {
+    return { skipSplash: false, target: null as DeepLinkTarget | null };
+  }
+  const parsed = parseDeepLink(window.location.search, window.location.pathname);
+  return {
+    skipSplash: parsed.skipSplash,
+    target: resolveBootDeepLinkTarget(parsed.target),
+  };
+}
+
 function readBootQuery() {
   if (typeof window === "undefined") {
     return { skipSplash: false, openNotifications: false, simulateUpdate: false, screen: null as string | null, splashArtOnly: false, splashDynamicPreview: false };
@@ -239,8 +269,13 @@ function readBootQuery() {
     hash.includes("error_description=");
   const simulateUpdate =
     params.get("simulateUpdate") === "1" || isSimulateUpdateRequested();
+  const deepLink = parseDeepLink(window.location.search, window.location.pathname);
   return {
-    skipSplash: params.get("skipSplash") === "1" || hasAuthCode || hasAuthHash,
+    skipSplash:
+      params.get("skipSplash") === "1" ||
+      hasAuthCode ||
+      hasAuthHash ||
+      deepLink.skipSplash,
     openNotifications: params.get("openNotifications") === "1",
     simulateUpdate,
     screen,
@@ -287,12 +322,38 @@ function resolveScreenAfterAuth(storedTarget: Screen | null): Screen {
   return storedTarget ?? "browseHub";
 }
 
+function bootScreenForDeepLink(target: DeepLinkTarget | null): Screen | null {
+  if (!target) return null;
+  if (target.kind === "garage") return "garageShop";
+  return "itemDetail";
+}
+
+function bootHostIdForDeepLink(target: DeepLinkTarget | null): string | null {
+  if (!target) return null;
+  if (target.kind === "garage") return target.hostId;
+  return null;
+}
+
+function bootItemIdForDeepLink(target: DeepLinkTarget | null): string | null {
+  if (!target) return null;
+  if (target.kind === "garage") return target.itemId ?? null;
+  if (target.kind === "listing") return target.listingId;
+  return null;
+}
+
 function AppRoutes() {
   const auth = useAuth();
   const boot = readBootQuery();
+  const bootDeepLink = useRef(readBootDeepLink()).current;
   const handledSessionTokenRef = useRef<string | null>(null);
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
     if (boot.screen === "splash") return "splash";
+    const deepScreen = bootScreenForDeepLink(bootDeepLink.target);
+    if (deepScreen && (boot.skipSplash || bootDeepLink.skipSplash)) {
+      markIntroDone();
+      completeOnboarding();
+      return deepScreen;
+    }
     if (boot.skipSplash || isIntroDone()) {
       if (boot.openNotifications || boot.simulateUpdate) {
         markIntroDone();
@@ -304,16 +365,25 @@ function AppRoutes() {
     return "splash";
   });
   const [navStack, setNavStack] = useState<Screen[]>([]);
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
+    bootDeepLink.target?.kind === "listing" ? bootDeepLink.target.listingId : null,
+  );
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [selectedHostListingId, setSelectedHostListingId] = useState<string | null>(null);
-  const [selectedNeighborGarageHostId, setSelectedNeighborGarageHostId] = useState<string | null>(null);
+  const [selectedNeighborGarageHostId, setSelectedNeighborGarageHostId] = useState<string | null>(() =>
+    bootHostIdForDeepLink(bootDeepLink.target),
+  );
+  const [focusGarageItemId, setFocusGarageItemId] = useState<string | null>(() =>
+    bootItemIdForDeepLink(bootDeepLink.target),
+  );
   const [garageShopPreview, setGarageShopPreview] = useState(false);
   const [winnerCheckoutListingId, setWinnerCheckoutListingId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [listingPrefill, setListingPrefill] = useState<ShelfPrefill | null>(null);
-  const [editingListingId, setEditingListingId] = useState<string | null>(null);
+  const [editingListingId, setEditingListingId] = useState<string | null>(() =>
+    peekEditingListingReturn(),
+  );
   const [postRequestPrefill, setPostRequestPrefill] = useState<ShelfPrefill | null>(null);
   const [attachmentUrl, setAttachmentUrl] = useState<string | null>(null);
   const [attachmentTitle, setAttachmentTitle] = useState<string | null>(null);
@@ -341,6 +411,29 @@ function AppRoutes() {
       window.removeEventListener("offline", onOffline);
     };
   }, []);
+
+  useEffect(() => {
+    if (!bootDeepLink.target) return;
+    markIntroDone();
+    completeOnboarding();
+    setGarageShopPreview(false);
+    if (bootDeepLink.target.kind === "garage") {
+      setSelectedNeighborGarageHostId(bootDeepLink.target.hostId);
+      setFocusGarageItemId(bootDeepLink.target.itemId ?? null);
+      setNavStack([]);
+      setCurrentScreen("garageShop");
+    } else {
+      setSelectedItemId(bootDeepLink.target.listingId);
+      setNavStack([]);
+      setCurrentScreen("itemDetail");
+    }
+    if (typeof window !== "undefined" && /^\/item\/[^/]+\/?$/i.test(window.location.pathname)) {
+      const params = new URLSearchParams(window.location.search);
+      const next = `${window.location.pathname.replace(/\/item\/[^/]+\/?$/i, "/")}${params.toString() ? `?${params}` : ""}${window.location.hash}`;
+      window.history.replaceState({}, "", next);
+    }
+    clearBootQuery(deepLinkQueryKeys());
+  }, [bootDeepLink.target, bootDeepLink.skipSplash]);
 
   useEffect(() => {
     removeStripeControllerIframes();
@@ -469,6 +562,7 @@ function AppRoutes() {
       "itemDetail",
       "identity",
       "agentActivity",
+      "coHosts",
     ];
     const storedTarget =
       candidate && validScreens.includes(candidate)
@@ -480,6 +574,11 @@ function AppRoutes() {
   const finishAuthFlow = useCallback(() => {
     setAuthGateOpen(false);
     clearPendingAuthEmail();
+    const restoredEditId = peekEditingListingReturn();
+    if (restoredEditId) {
+      setEditingListingId(restoredEditId);
+      setSelectedHostListingId(restoredEditId);
+    }
     const target = resolvePostAuthScreen();
     setNavStack([]);
     setCurrentScreen(target);
@@ -516,7 +615,7 @@ function AppRoutes() {
   const handleOpenProfile = useCallback(() => goToTab("profile"), [goToTab]);
   const handleOpenFavorites = useCallback(() => goToTab("favorites"), [goToTab]);
   const handleOpenBusiness = useCallback(() => goToTab("earnBusiness"), [goToTab]);
-  const handleOpenPlans = useCallback(() => navigateTo("subscriptionPlans"), [navigateTo]);
+  const handleOpenIntegrations = useCallback(() => navigateTo("integrationStatus"), [navigateTo]);
 
   const handleBrowseHubChoice = useCallback(
     (choice: BrowseHubChoice) => {
@@ -585,16 +684,18 @@ function AppRoutes() {
   const handleOpenNeighborGarage = useCallback(
     (hostId: string) => {
       setSelectedNeighborGarageHostId(hostId);
+      setFocusGarageItemId(null);
       setGarageShopPreview(false);
       navigateTo("garageShop");
     },
     [navigateTo],
   );
 
-  const handleOpenGarageShopPreview = useCallback(() => {
+  const handleOpenMyGarageShop = useCallback(() => {
     const hostId = resolveHostAccountId(auth.userId);
     setSelectedNeighborGarageHostId(hostId);
-    setGarageShopPreview(true);
+    setFocusGarageItemId(null);
+    setGarageShopPreview(false);
     navigateTo("garageShop");
   }, [auth.userId, navigateTo]);
 
@@ -745,8 +846,18 @@ function AppRoutes() {
   };
 
   const handleItemSelect = (itemId: string) => {
+    const listing = getPublishedListingById(itemId);
+    if (listing && canManageListing(listing, auth.userId, auth.userEmail)) {
+      setSelectedHostListingId(itemId);
+      navigateTo("hostListingDetail");
+      return;
+    }
     setSelectedItemId(itemId);
     navigateTo("itemDetail");
+  };
+
+  const handleOpenListingFromFeed = (itemId: string) => {
+    handleItemSelect(itemId);
   };
 
   const handleOpenAttachment = (url: string, title?: string) => {
@@ -859,8 +970,11 @@ function AppRoutes() {
       markIntroDone();
       cleanupSplashGlobals();
       setNavStack([]);
-      // Prefer returning to the intent screen that triggered auth (e.g. list/book/message),
-      // not just "post splash". This makes magic-link callbacks feel like a real continuation.
+      const restoredEditId = consumeEditingListingReturn();
+      if (restoredEditId) {
+        setEditingListingId(restoredEditId);
+        setSelectedHostListingId(restoredEditId);
+      }
       setCurrentScreen(resolvePostAuthScreen());
       setPostAuthTarget(null);
     };
@@ -900,6 +1014,12 @@ function AppRoutes() {
   };
 
   const handleNavigate = (screen: string) => {
+    if (screen.startsWith("itemDetail:")) {
+      const id = screen.slice("itemDetail:".length).trim();
+      if (!id) return;
+      handleOpenListingFromFeed(id);
+      return;
+    }
     if (screen.startsWith("hostListingDetail:")) {
       const id = screen.slice("hostListingDetail:".length).trim();
       if (!id) return;
@@ -924,6 +1044,7 @@ function AppRoutes() {
     clearYardSaleListingActive();
     setListingPrefill(prefill ?? null);
     setEditingListingId(null);
+    setEditingListingReturn(null);
     navigateTo("listingIntro");
   };
 
@@ -933,11 +1054,15 @@ function AppRoutes() {
     !HIDE_BRAND_HEADER_SCREENS.has(currentScreen);
   const showBottomNav = BOTTOM_NAV_SCREENS.has(currentScreen);
 
+  if (!auth.configured) {
+    return <SetupRequiredScreen />;
+  }
+
   if (!isOnline) {
     return (
       <div className="app-shell">
         <div className="app-container bg-background">
-          <OfflineScreen />
+          <OfflineScreen onRetry={() => setIsOnline(typeof navigator === "undefined" || navigator.onLine)} />
         </div>
       </div>
     );
@@ -1026,7 +1151,9 @@ function AppRoutes() {
             onNavigate={handleNavigate}
             onOpenNotifications={handleOpenNotifications}
             onEditLocation={openRentLocationSetup}
-            onPostRequest={handlePostRequest}
+            onPostRequest={(query) =>
+              handlePostRequest(query?.trim() ? { category: "", query: query.trim() } : undefined)
+            }
             onStockGarage={handleStartListing}
             onBrowseCategory={(label) =>
               handleCategorySelect(categoryIdFromName(label), label)
@@ -1048,7 +1175,7 @@ function AppRoutes() {
           <OpenGarageSaleScreen
             onBack={openYardSaleHub}
             onAddSaleItems={handleStartYardSaleListing}
-            onOpenMyGarage={handleOpenGarageShopPreview}
+            onOpenMyGarage={handleOpenMyGarageShop}
             onViewSaleRules={handleOpenGarageSaleRules}
           />
         )}
@@ -1074,7 +1201,7 @@ function AppRoutes() {
         {currentScreen === "snapSale" && (
           <SnapSaleScreen
             onBack={handleBack}
-            onViewShop={handleOpenGarageShopPreview}
+            onViewShop={handleOpenMyGarageShop}
           />
         )}
 
@@ -1097,6 +1224,7 @@ function AppRoutes() {
             onFavorites={handleOpenFavorites}
             onNotifications={handleOpenNotifications}
             onEarnBusiness={handleOpenBusiness}
+            onOpenIntegrations={handleOpenIntegrations}
           />
         )}
 
@@ -1104,7 +1232,17 @@ function AppRoutes() {
           <GarageScreen
             onNavigate={handleNavigate}
             onStockGarage={handleStartListing}
-            onViewShop={handleOpenGarageShopPreview}
+            onViewShop={handleOpenMyGarageShop}
+          />
+        )}
+
+        {currentScreen === "garageShop" && !selectedNeighborGarageHostId && (
+          <GarageShopMissingScreen
+            onBack={handleBack}
+            onBrowseYardSales={() => {
+              setNavStack([]);
+              setCurrentScreen("yardSales");
+            }}
           />
         )}
 
@@ -1112,11 +1250,13 @@ function AppRoutes() {
           <ActiveGarageShopScreen
             hostId={selectedNeighborGarageHostId}
             preview={garageShopPreview}
+            focusListingId={focusGarageItemId}
+            onFocusListingHandled={() => setFocusGarageItemId(null)}
             onBack={handleBack}
             onOpenCart={handleOpenGarageCart}
             onOpenWinnerCheckout={handleOpenWinnerCheckout}
             onOpenHostOffers={
-              garageShopPreview || selectedNeighborGarageHostId !== resolveHostAccountId(auth.userId)
+              selectedNeighborGarageHostId !== resolveHostAccountId(auth.userId)
                 ? undefined
                 : handleOpenHostOffers
             }
@@ -1153,7 +1293,10 @@ function AppRoutes() {
 
         {currentScreen === "rentals" && (
           <RentalsScreen
-            onOpenRental={() => navigateTo("activeRental")}
+            onOpenRental={(bookingId) => {
+              setSelectedBookingId(bookingId);
+              navigateTo("activeRental");
+            }}
             onViewProfile={() => handleOpenProfile()}
             onReRent={() => {
               setNavStack([]);
@@ -1167,19 +1310,21 @@ function AppRoutes() {
             onMrE={handleOpenMrE}
             onRentals={handleOpenRentals}
             onEditLocation={openRentLocationSetup}
-            onOpenPlans={handleOpenPlans}
             onOpenNotifications={handleOpenNotifications}
+            onOpenIntegrations={handleOpenIntegrations}
             onDeleteAccount={() => navigateTo("deleteAccount")}
+            onOpenCoHosts={() => navigateTo("coHosts")}
+            onOpenIdentity={() => navigateTo("identity")}
+            onOpenAgentActivity={() => navigateTo("agentActivity")}
           />
         )}
+
+        {currentScreen === "coHosts" && <CoHostsScreen onBack={handleBack} />}
 
         {currentScreen === "favorites" && (
           <FavoritesScreen
             onHome={handleOpenHome}
-            onOpenListing={(id) => {
-              setSelectedHostListingId(id);
-              navigateTo("hostListingDetail");
-            }}
+            onOpenListing={(id) => handleOpenListingFromFeed(id)}
           />
         )}
 
@@ -1187,8 +1332,8 @@ function AppRoutes() {
           <EarnBusinessScreen onHome={handleOpenHome} onRentals={handleOpenRentals} />
         )}
 
-        {currentScreen === "subscriptionPlans" && (
-          <SubscriptionPlansScreen onBack={handleBack} />
+        {currentScreen === "integrationStatus" && (
+          <IntegrationStatusScreen onBack={handleBack} />
         )}
 
         {currentScreen === "identity" && (
@@ -1254,7 +1399,7 @@ function AppRoutes() {
         )}
 
         {currentScreen === "activeRental" && (
-          <ActiveRental onBack={handleBack} />
+          <ActiveRental bookingId={selectedBookingId} onBack={handleBack} />
         )}
 
         {currentScreen === "listingIntro" && (
@@ -1269,9 +1414,11 @@ function AppRoutes() {
           <ListingWizard
             initialPrefill={listingPrefill}
             initialDraft={editingListingId ? getPublishedListingById(editingListingId) : null}
+            editingListingId={editingListingId}
             onExit={() => {
               setListingPrefill(null);
               setEditingListingId(null);
+              setEditingListingReturn(null);
               handleListingWizardExit();
             }}
           />
@@ -1285,6 +1432,7 @@ function AppRoutes() {
               setSelectedHostListingId(listingId);
               setListingPrefill(null);
               setEditingListingId(listingId);
+              setEditingListingReturn(listingId);
               navigateTo("listItem");
             }}
           />

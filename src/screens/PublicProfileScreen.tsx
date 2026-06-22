@@ -31,7 +31,7 @@ export function PublicProfileScreen({
   onBack: () => void;
 }) {
   const own = loadUserProfile();
-  const isSelf = userId === own.id || userId === "demo-user";
+  const isSelf = userId === own.id;
   const profile = isSelf ? publicFromOwn(own) : getPublicProfile(userId);
 
   if (!profile) {

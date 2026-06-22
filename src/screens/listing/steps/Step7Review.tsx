@@ -73,6 +73,7 @@ export function Step7Review({
   draft,
   profileCity,
   isPublishing,
+  isEditing = false,
   onPublish,
   onGoToStep,
 }: Step7ReviewProps) {
@@ -246,7 +247,11 @@ export function Step7Review({
 
       <RentanoHint
         className="mt-5"
-        hint="Looking good. Once you publish I'll create your share content — ready to post in one tap."
+        hint={
+          isEditing
+            ? "Review your changes, then save — your QR and listing status stay as they are."
+            : "Looking good. Once you publish I'll create your share content — ready to post in one tap."
+        }
         showTapLabel
       />
 
@@ -257,7 +262,13 @@ export function Step7Review({
         className="btn-primary mt-6 flex h-14 w-full items-center justify-center text-lg font-bold text-white disabled:opacity-70"
         style={{ backgroundColor: GREEN }}
       >
-        {isPublishing ? "Publishing..." : "Publish listing 🚀"}
+        {isPublishing
+          ? isEditing
+            ? "Saving..."
+            : "Publishing..."
+          : isEditing
+            ? "Save changes"
+            : "Publish listing 🚀"}
       </button>
     </motion.div>
   );

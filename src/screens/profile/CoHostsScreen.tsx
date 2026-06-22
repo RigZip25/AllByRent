@@ -1,16 +1,17 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Mail, Trash2, UserPlus, Users } from "lucide-react";
 import { useAuth } from "../../hooks/AuthProvider";
 import {
-  acceptCoHostInvite,
-  activateCoHostInvite,
-  declineCoHostInvite,
+  acceptCoHostInviteWithSync,
+  activateCoHostInviteWithSync,
+  declineCoHostInviteWithSync,
   getCoHostsForHost,
   getPendingInvitesForEmail,
-  inviteCoHost,
-  removeCoHost,
+  inviteCoHostWithSync,
+  removeCoHostWithSync,
+  syncCoHostsFromRemote,
   type CoHostRecord,
-} from "../../lib/coHostStorage";
+} from "../../lib/repositories/coHostRepository";
 import { resolveHostAccountEmail, resolveHostAccountId } from "../../lib/hostIdentity";
 
 const BORDER = "#E8E6E0";
@@ -96,27 +97,34 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
   const activeCoHosts = coHosts.filter((r) => r.status === "active");
   const pendingCoHosts = coHosts.filter((r) => r.status === "pending");
 
+  useEffect(() => {
+    void syncCoHostsFromRemote(hostId, hostEmail).then(() => refresh());
+  }, [hostEmail, hostId, refresh]);
+
   const handleInvite = () => {
     setError(null);
     setBusy(true);
-    const result = inviteCoHost(hostId, inviteEmail, hostEmail);
-    setBusy(false);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-    setInviteEmail("");
-    refresh();
+    void inviteCoHostWithSync(hostId, inviteEmail, hostEmail)
+      .then((result) => {
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setInviteEmail("");
+        refresh();
+      })
+      .finally(() => setBusy(false));
   };
 
   const handleAccept = (inviteId: string) => {
-    const result = acceptCoHostInvite(inviteId, acceptorId);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-    setError(null);
-    refresh();
+    void acceptCoHostInviteWithSync(inviteId, acceptorId).then((result) => {
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      setError(null);
+      refresh();
+    });
   };
 
   return (
@@ -172,8 +180,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
                     <button
                       type="button"
                       onClick={() => {
-                        declineCoHostInvite(invite.id);
-                        refresh();
+                        void declineCoHostInviteWithSync(invite.id).then(() => refresh());
                       }}
                       className="flex-1 rounded-xl border py-2.5 text-[14px] font-semibold text-gray-600"
                       style={{ borderColor: BORDER }}
@@ -224,8 +231,8 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
               {busy ? "Sending…" : "Send invite"}
             </button>
             <p className="mt-3 text-[12px] leading-snug text-gray-500">
-              Invites are saved on this device. Email delivery is not wired yet — share the app and
-              have them sign in with this email, then accept under Invitations for you.
+              Invites sync to Supabase when configured. Email delivery is not wired yet — share the
+              app and have them sign in with this email, then accept under Invitations for you.
             </p>
           </div>
         </section>
@@ -241,12 +248,10 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
                   key={record.id}
                   record={record}
                   onActivate={() => {
-                    activateCoHostInvite(hostId, record.id);
-                    refresh();
+                    void activateCoHostInviteWithSync(hostId, record.id).then(() => refresh());
                   }}
                   onRemove={() => {
-                    removeCoHost(hostId, record.id);
-                    refresh();
+                    void removeCoHostWithSync(hostId, record.id).then(() => refresh());
                   }}
                 />
               ))}
@@ -277,8 +282,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
                   key={record.id}
                   record={record}
                   onRemove={() => {
-                    removeCoHost(hostId, record.id);
-                    refresh();
+                    void removeCoHostWithSync(hostId, record.id).then(() => refresh());
                   }}
                 />
               ))}

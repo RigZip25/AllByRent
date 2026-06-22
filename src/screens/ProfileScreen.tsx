@@ -26,12 +26,14 @@ import {
 } from "../lib/avatarStorage";
 import { APP_MODE_LABELS } from "../lib/brand";
 import { getAppMode, type AppMode } from "../lib/appMode";
-import { formatPlanUsage, loadSubscriptionPlanId } from "../lib/subscriptionPlans";
 import {
+  getProfileDisplayLabel,
+  getProfileEmailLabel,
   getProfileLocationSummary,
   loadUserProfile,
   refreshProfileStats,
   setProfileAvatarUrl,
+  syncUserProfileFromAuth,
   updateProfileFields,
   updatePreferredMode,
   type UserProfile,
@@ -42,6 +44,7 @@ import { useAuth } from "../hooks/AuthProvider";
 import { signOut } from "../lib/auth";
 import { fetchRemoteProfile, updateRemoteProfile } from "../lib/supabaseProfile";
 import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
+import { loadConnectStatus, startConnectOnboarding } from "../lib/repositories/connectRepository";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -141,20 +144,24 @@ export function ProfileScreen({
   onRentals,
   onMrE,
   onEditLocation,
-  onOpenPlans,
   onOpenNotifications,
   onOpenCoHosts,
+  onOpenIdentity,
+  onOpenAgentActivity,
   onDeleteAccount,
   onViewPublicProfile,
+  onOpenIntegrations,
 }: {
   onRentals: () => void;
   onMrE: () => void;
   onEditLocation: () => void;
-  onOpenPlans: () => void;
   onOpenNotifications: () => void;
   onOpenCoHosts?: () => void;
+  onOpenIdentity?: () => void;
+  onOpenAgentActivity?: () => void;
   onDeleteAccount?: () => void;
   onViewPublicProfile?: () => void;
+  onOpenIntegrations?: () => void;
 }) {
   const [rentanoOpen, setRentanoOpen] = useState(false);
   const auth = useAuth();
@@ -171,22 +178,52 @@ export function ProfileScreen({
     payoutsEnabled: false,
     last4: null,
   });
+  const [connectBusy, setConnectBusy] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
+  const [namePromptChecked, setNamePromptChecked] = useState(false);
+
+  const displayNameLabel = getProfileDisplayLabel(profile.displayName);
+  const emailLabel = getProfileEmailLabel(profile.email, auth.userEmail);
+
+  useEffect(() => {
+    if (!auth.userId) return;
+    const synced = syncUserProfileFromAuth({
+      userId: auth.userId,
+      userEmail: auth.userEmail,
+    });
+    setProfile(refreshProfileStats(synced, auth.userId));
+  }, [auth.userId, auth.userEmail]);
 
   useEffect(() => {
     if (!auth.userId) return;
     let mounted = true;
+    void loadConnectStatus(auth.userId).then((status) => {
+      if (!mounted) return;
+      setStripeStatus({
+        connected: status.connected,
+        payoutsEnabled: status.payoutsEnabled,
+        last4: status.last4,
+      });
+    });
     void fetchRemoteProfile(auth.userId).then((remote) => {
       if (!mounted || !remote) return;
-      const displayName = remote.display_name?.trim() || profile.displayName;
-      const memberSince = remote.created_at?.slice(0, 10) || profile.memberSince;
+      const synced = syncUserProfileFromAuth({
+        userId: auth.userId!,
+        userEmail: auth.userEmail,
+        remoteDisplayName: remote.display_name,
+      });
+      const displayName = synced.displayName;
+      const memberSince = remote.created_at?.slice(0, 10) || synced.memberSince;
       const next = updateProfileFields({
         displayName,
-        phone: remote.phone ?? profile.phone,
-        avatarUrl: profile.avatarUrl,
+        email: auth.userEmail ?? synced.email,
+        phone: remote.phone ?? synced.phone,
+        avatarUrl: synced.avatarUrl,
       });
       next.memberSince = memberSince;
       next.verification = {
         ...next.verification,
+        email: Boolean(auth.userEmail ?? next.email),
         phone: Boolean(remote.phone_verified ?? next.verification.phone),
         identity: Boolean(remote.identity_verified ?? next.verification.identity),
       };
@@ -199,11 +236,23 @@ export function ProfileScreen({
         last4: remote.stripe_bank_last4 ?? null,
       });
       setProfile(refreshProfileStats(next, auth.userId));
+
+      if (!namePromptChecked && !displayName.trim()) {
+        setNamePromptChecked(true);
+        const nextName = window.prompt("What should we call you?")?.trim();
+        if (nextName) {
+          const updated = updateProfileFields({ displayName: nextName });
+          setProfile(refreshProfileStats(updated, auth.userId));
+          void updateRemoteProfile(auth.userId!, { display_name: nextName }).catch(() => {
+            // Local fallback already applied.
+          });
+        }
+      }
     });
     return () => {
       mounted = false;
     };
-  }, [auth.userId]);
+  }, [auth.userId, auth.userEmail, namePromptChecked]);
 
   useEffect(() => {
     if (!auth.userId) return;
@@ -220,8 +269,6 @@ export function ProfileScreen({
   const hasPhoto = hasAvatarPhoto(profile.id);
   const showOnboarding = !hasPhoto && !isPhotoPromptDeferred();
 
-  const planId = loadSubscriptionPlanId();
-  const planSummary = formatPlanUsage(planId, profile.host.listingsCount);
   const responseDisplay = getHostResponseDisplay(profile.id, profile.host.usesManualBooking);
 
   const memberYear = useMemo(() => {
@@ -293,7 +340,7 @@ export function ProfileScreen({
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-[22px] font-bold leading-tight" style={{ color: GREEN }}>
-                  {profile.displayName}
+                  {displayNameLabel}
                 </h1>
               </div>
               <p className="mt-0.5 text-[14px] text-gray-500">Member since {memberYear}</p>
@@ -370,7 +417,7 @@ export function ProfileScreen({
             <RowButton
               icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label="Name"
-              value={profile.displayName}
+              value={displayNameLabel}
               onClick={handleEditName}
             />
           </li>
@@ -386,15 +433,7 @@ export function ProfileScreen({
             <RowButton
               icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label="Personal info"
-              value={profile.email || "Add email"}
-            />
-          </li>
-          <li>
-            <RowButton
-              icon={<Sparkles className="h-5 w-5" style={{ color: "#F59E0B" }} />}
-              label="Subscription plan"
-              value={planSummary}
-              onClick={onOpenPlans}
+              value={emailLabel}
             />
           </li>
           {onOpenCoHosts ? (
@@ -416,21 +455,44 @@ export function ProfileScreen({
               icon={<CreditCard className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label={stripeStatus.connected ? "Bank account connected" : "Connect bank account"}
               value={
-                stripeStatus.connected
-                  ? stripeStatus.payoutsEnabled
-                    ? `Payouts enabled${stripeStatus.last4 ? ` · **** ${stripeStatus.last4}` : ""}`
-                    : "Pending verification"
-                  : "Required to receive payouts"
+                connectBusy
+                  ? "Opening Stripe…"
+                  : stripeStatus.connected
+                    ? stripeStatus.payoutsEnabled
+                      ? `Payouts enabled${stripeStatus.last4 ? ` · **** ${stripeStatus.last4}` : ""}`
+                      : "Pending verification"
+                    : "Required to receive payouts"
               }
               onClick={() => {
-                // Stripe Connect requires server-side endpoints + secret keys.
-                // For now, show a simple hint in demo builds.
-                window.alert(
-                  "Stripe Connect onboarding requires server-side configuration (Stripe secret key + account link endpoint). This build shows the UI and reads connection status from Supabase profiles.",
-                );
+                setConnectBusy(true);
+                setConnectError(null);
+                void startConnectOnboarding("/?screen=profile")
+                  .then((result) => {
+                    if (!result.ok) {
+                      setConnectError(result.reason);
+                      return;
+                    }
+                    window.location.href = result.url;
+                  })
+                  .finally(() => setConnectBusy(false));
               }}
             />
           </li>
+          {connectError ? (
+            <li className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[12px] text-red-800">
+              {connectError}
+            </li>
+          ) : null}
+          {onOpenIntegrations ? (
+            <li>
+              <RowButton
+                icon={<Sparkles className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+                label="Integration status"
+                value="Supabase, Stripe, push — what’s left to connect"
+                onClick={onOpenIntegrations}
+              />
+            </li>
+          ) : null}
         </ul>
 
         {recentReviews.length > 0 ? (
@@ -465,6 +527,10 @@ export function ProfileScreen({
                   : "Complete ID for higher limits"
               }
               onClick={() => {
+                if (onOpenIdentity) {
+                  onOpenIdentity();
+                  return;
+                }
                 try {
                   const url = new URL(window.location.href);
                   url.searchParams.set("screen", "identity");
@@ -479,7 +545,7 @@ export function ProfileScreen({
             <RowButton
               icon={<CreditCard className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label="Payouts (Stripe)"
-              value={profile.payoutConnected ? "Connected" : "Not connected — demo"}
+              value={profile.payoutConnected ? "Connected" : "Not connected"}
             />
           </li>
           <li>
@@ -499,6 +565,10 @@ export function ProfileScreen({
               label="Agent activity"
               value="Admin feed"
               onClick={() => {
+                if (onOpenAgentActivity) {
+                  onOpenAgentActivity();
+                  return;
+                }
                 try {
                   const url = new URL(window.location.href);
                   url.searchParams.set("screen", "agent-activity");
@@ -540,7 +610,7 @@ export function ProfileScreen({
           style={{ borderColor: BORDER }}
         >
           <LogOut className="h-4 w-4" />
-          {auth.configured ? (authBusy ? "Signing out…" : "Sign out") : "Log out (demo)"}
+          {auth.configured ? (authBusy ? "Signing out…" : "Sign out") : "Sign in required"}
         </button>
 
         {auth.configured ? (

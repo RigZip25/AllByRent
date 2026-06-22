@@ -118,7 +118,7 @@ async function getRentanoLogoUrl(): Promise<string | null> {
   try {
     // shipped in repo at src/imports
     const mod = await import("../imports/rentano_full.png");
-    return (mod as any).default as string;
+    return (mod as { default: string }).default;
   } catch {
     return null;
   }
@@ -218,7 +218,7 @@ async function generateOne(input: {
   });
 
   const objectUrl = URL.createObjectURL(blob);
-  const filename = `allbyrent_share_${input.format}.png`;
+  const filename = `evorios_share_${input.format}.png`;
   return { format: input.format, width: dims.width, height: dims.height, blob, objectUrl, filename };
 }
 

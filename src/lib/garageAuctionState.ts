@@ -5,7 +5,7 @@ import { pushInAppNotification } from "./inAppNotifications";
 const LOT_STATE_KEY = "evorios_garage_lot_state";
 const BIDDER_ID_KEY = "evorios_garage_bidder_id";
 
-/** Minutes winner has to pay after auction ends or after becoming runner-up (demo). */
+/** Minutes winner has to pay after auction ends or after becoming runner-up. */
 export const GARAGE_AUCTION_PAY_MINUTES = 30;
 
 export type GarageLotState =
@@ -36,7 +36,11 @@ function readLotStates(): LotStateMap {
   }
 }
 
-function writeLotStates(map: LotStateMap): void {
+export function writeLotStates(map: LotStateMap): void {
+  writeLotStatesInternal(map);
+}
+
+function writeLotStatesInternal(map: LotStateMap): void {
   try {
     localStorage.setItem(LOT_STATE_KEY, JSON.stringify(map));
     window.dispatchEvent(new Event("evorios-garage-lots"));
@@ -60,7 +64,7 @@ export function getGarageBidderId(): string {
     localStorage.setItem(BIDDER_ID_KEY, id);
     return id;
   } catch {
-    return "bidder-demo";
+    return "bidder-anonymous";
   }
 }
 
@@ -95,12 +99,12 @@ export function markBuyNowSold(listingId: string, priceUsd: number, listingTitle
     priceUsd,
     soldAt: new Date().toISOString(),
   };
-  writeLotStates(map);
+  writeLotStatesInternal(map);
   pushInAppNotification({
     type: "general",
     title: "Sold · Buy now",
     body: listingTitle
-      ? `${listingTitle} sold for $${priceUsd} — payout after pickup (demo).`
+      ? `${listingTitle} sold for $${priceUsd} — payout after pickup.`
       : `Item sold for $${priceUsd} via Buy now.`,
   });
 }
@@ -113,12 +117,12 @@ export function markAuctionCheckoutComplete(listingId: string, priceUsd: number,
     priceUsd,
     soldAt: new Date().toISOString(),
   };
-  writeLotStates(map);
+  writeLotStatesInternal(map);
   pushInAppNotification({
     type: "general",
     title: "Auction won & paid",
     body: listingTitle
-      ? `${listingTitle} — $${priceUsd} collected (demo).`
+      ? `${listingTitle} — $${priceUsd} collected.`
       : `Auction lot paid — $${priceUsd}.`,
   });
 }
@@ -278,4 +282,10 @@ export function notifyOutbidIfNeeded(listingId: string, listingTitle: string, pr
     title: "You've been outbid",
     body: `${listingTitle || "Sale item"} — high bid is now $${newLeader.amountUsd}.`,
   });
+}
+
+/** Merge remote lot states into local cache (remote wins on conflict). */
+export function mergeLotStatesFromRemote(remote: Record<string, GarageLotState>): void {
+  const local = readLotStates();
+  writeLotStatesInternal({ ...local, ...remote });
 }

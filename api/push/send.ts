@@ -3,6 +3,7 @@ import webpush from "web-push";
 import { applyCors, handleOptions } from "../_lib/cors";
 import { withApiErrorHandling } from "../_lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../passkey/_lib/supabaseAdmin";
+import { SUPPORT_EMAIL } from "../_lib/brand";
 
 type SendBody = {
   toUserId: string;
@@ -59,7 +60,9 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
-  webpush.setVapidDetails("mailto:support@allbyrent.com", vapidPublicKey, vapidPrivateKey);
+  const vapidSubject =
+    process.env.VAPID_SUBJECT?.trim().replace(/^mailto:/i, "") || SUPPORT_EMAIL;
+  webpush.setVapidDetails(`mailto:${vapidSubject}`, vapidPublicKey, vapidPrivateKey);
 
   const { data } = await admin.from("profiles").select("push_subscriptions").eq("id", toUserId).maybeSingle();
   const subs = (data?.push_subscriptions ?? []) as unknown;

@@ -137,3 +137,175 @@ export async function claimDepositHold(rentalId: string): Promise<{ ok: boolean;
   }
   return { ok: true };
 }
+
+export type GarageCheckoutIntentResult =
+  | {
+      ok: true;
+      clientSecret: string;
+      paymentIntentId: string;
+      orderId: string;
+      status: string;
+    }
+  | { ok: false; reason: string };
+
+export async function createGarageCartCheckoutIntent(params: {
+  hostId: string;
+  lines: Array<{ listingId: string; title: string; priceUsd: number }>;
+  amountCents: number;
+  subtotalCents: number;
+  platformFeeCents: number;
+}): Promise<GarageCheckoutIntentResult> {
+  if (!isStripePaymentsEnabled()) {
+    return { ok: false, reason: "Stripe not configured" };
+  }
+
+  const token = await getAccessToken();
+  if (!token) {
+    return { ok: false, reason: "Sign in required" };
+  }
+
+  const res = await fetch("/api/stripe/garage_checkout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(params),
+  });
+
+  const payload = (await res.json()) as GarageCheckoutIntentResult & { error?: string };
+  if (!res.ok) {
+    return { ok: false, reason: payload.error ?? payload.reason ?? `Checkout failed (${res.status})` };
+  }
+  if (!payload.ok) {
+    return { ok: false, reason: payload.reason ?? "Stripe not configured" };
+  }
+  if (!("clientSecret" in payload) || !payload.clientSecret) {
+    return { ok: false, reason: "Missing client secret" };
+  }
+
+  return payload;
+}
+
+export async function createAuctionCheckoutIntent(params: {
+  listingId: string;
+  hostId: string;
+  winningBidUsd: number;
+  amountCents: number;
+  platformFeeCents: number;
+  runnerUpAttempt: number;
+}): Promise<GarageCheckoutIntentResult> {
+  if (!isStripePaymentsEnabled()) {
+    return { ok: false, reason: "Stripe not configured" };
+  }
+
+  const token = await getAccessToken();
+  if (!token) {
+    return { ok: false, reason: "Sign in required" };
+  }
+
+  const res = await fetch("/api/stripe/auction_checkout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(params),
+  });
+
+  const payload = (await res.json()) as GarageCheckoutIntentResult & { error?: string };
+  if (!res.ok) {
+    return { ok: false, reason: payload.error ?? payload.reason ?? `Checkout failed (${res.status})` };
+  }
+  if (!payload.ok) {
+    return { ok: false, reason: payload.reason ?? "Stripe not configured" };
+  }
+  if (!("clientSecret" in payload) || !payload.clientSecret) {
+    return { ok: false, reason: "Missing client secret" };
+  }
+
+  return payload;
+}
+
+export type ConnectAccountLinkResult = { ok: true; url: string } | { ok: false; reason: string };
+
+export async function createConnectAccountLink(returnPath: string): Promise<ConnectAccountLinkResult> {
+  if (!isStripePaymentsEnabled()) {
+    return { ok: false, reason: "Stripe not configured" };
+  }
+
+  const token = await getAccessToken();
+  if (!token) {
+    return { ok: false, reason: "Sign in required" };
+  }
+
+  const res = await fetch("/api/stripe/connect_account_link", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ returnPath }),
+  });
+
+  const payload = (await res.json()) as ConnectAccountLinkResult & { error?: string };
+  if (!res.ok) {
+    return { ok: false, reason: payload.error ?? payload.reason ?? `Connect failed (${res.status})` };
+  }
+  if (!payload.ok) {
+    return { ok: false, reason: payload.reason ?? "Stripe Connect not configured" };
+  }
+  if (!("url" in payload) || !payload.url) {
+    return { ok: false, reason: "Missing onboarding URL" };
+  }
+
+  return payload;
+}
+
+export type ListingBoostIntentResult =
+  | {
+      ok: true;
+      clientSecret: string;
+      paymentIntentId: string;
+      boostedUntil: string;
+      boostedTier: number;
+      status: string;
+    }
+  | { ok: false; reason: string };
+
+export async function createListingBoostIntent(params: {
+  listingId: string;
+  amountCents: number;
+  durationHours: number;
+}): Promise<ListingBoostIntentResult> {
+  if (!isStripePaymentsEnabled()) {
+    return { ok: false, reason: "Stripe not configured" };
+  }
+
+  const token = await getAccessToken();
+  if (!token) {
+    return { ok: false, reason: "Sign in required" };
+  }
+
+  const res = await fetch("/api/stripe/boost", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(params),
+  });
+
+  const payload = (await res.json()) as ListingBoostIntentResult & { error?: string };
+  if (!res.ok) {
+    return { ok: false, reason: payload.error ?? payload.reason ?? `Boost failed (${res.status})` };
+  }
+  if (!payload.ok) {
+    return { ok: false, reason: payload.reason ?? "Stripe not configured" };
+  }
+  if (!("clientSecret" in payload) || !payload.clientSecret) {
+    return { ok: false, reason: "Missing client secret" };
+  }
+
+  return payload;
+}

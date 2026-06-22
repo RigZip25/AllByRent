@@ -1,7 +1,8 @@
 # Evorios — Launch Readiness Report
 
 **Date:** 2026-06-18  
-**Production:** https://app.allbyrent.com  
+**Production:** https://app.evorios.com  
+**Marketing:** https://evorios.com
 **Repo branch:** `main` (after PR #30 nav fix + launch share/push work)
 
 This document is the single launch checklist. Use it when preparing a public launch (e.g. Arkansas 71909 pilot).
@@ -163,7 +164,7 @@ Vision: **native-feeling agents** that nudge hosts and renters at the right mome
 ## Launch tomorrow — runbook
 
 ### You (15 min)
-1. Open https://app.allbyrent.com/?resetApp=1 on phone (install PWA).
+1. Open https://app.evorios.com/?resetApp=1 on phone (install PWA).
 2. Complete onboarding with **71909** / your block.
 3. Publish one test listing → share screen → try **Nextdoor** + **Copy caption**.
 4. Tap **Garage → Share** and **More → Notifications → Enable push** (if prompted).

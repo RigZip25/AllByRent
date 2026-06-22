@@ -35,8 +35,8 @@ This app can run in **demo mode** if Supabase env vars are missing. To enable re
 **Vercel (passkey API routes)** — Project → Settings → Environment Variables:
 
 - `SUPABASE_SERVICE_ROLE_KEY` — mints sessions after passkey verify (never expose to the client)
-- `PASSKEY_RP_ID` — e.g. `app.allbyrent.com` (production) or `localhost` (local)
-- `PASSKEY_ORIGIN` — e.g. `https://app.allbyrent.com` or `http://localhost:5173`
+- `PASSKEY_RP_ID` — e.g. `app.evorios.com` (production) or `localhost` (local)
+- `PASSKEY_ORIGIN` — e.g. `https://app.evorios.com` or `http://localhost:5173`
 - `PASSKEY_SECRET` — random string for signing WebAuthn challenges (optional; falls back to service role key)
 
 Create a `.env.local` file in the project root:
@@ -57,8 +57,8 @@ Stores `passkey_credential_id` and public key material for custom WebAuthn (no S
 ### Supabase dashboard setup
 
 - **Auth → URL Configuration**
-  - **Site URL**: `https://app.allbyrent.com` (prod) or `http://localhost:5173` (dev)
-  - **Redirect URLs**: `https://app.allbyrent.com/**`, `http://localhost:5173/**`
+  - **Site URL**: `https://app.evorios.com` (prod) or `http://localhost:5173` (dev)
+  - **Redirect URLs**: `https://app.evorios.com/**`, `http://localhost:5173/**`
 
 ### Troubleshooting “Failed to fetch” on magic link
 
@@ -82,11 +82,11 @@ Plain `npm run dev` works for email auth; passkey register/login needs `vercel d
 
 ### Troubleshooting Face ID / passkeys (iOS Safari & PWA)
 
-1. **Vercel env (Production)** — set `PASSKEY_RP_ID=app.allbyrent.com` and `PASSKEY_ORIGIN=https://app.allbyrent.com` (no trailing slash). Also set `SUPABASE_SERVICE_ROLE_KEY` so `/api/passkey/*` can run.
-2. **Same URL every time** — register and sign in on the same origin (`https://app.allbyrent.com`). Avoid `www`, preview URLs, or opening the installed PWA on a different hostname than where you enrolled.
+1. **Vercel env (Production)** — set `PASSKEY_RP_ID=app.evorios.com` and `PASSKEY_ORIGIN=https://app.evorios.com` (no trailing slash). Also set `SUPABASE_SERVICE_ROLE_KEY` so `/api/passkey/*` can run.
+2. **Same URL every time** — register and sign in on the same origin (`https://app.evorios.com`). Avoid `www`, preview URLs, or opening the installed PWA on a different hostname than where you enrolled.
 3. **Safari vs home-screen app** — both use the same origin if installed from that site; if Face ID fails after install, sign in with email once, then re-enable Face ID.
 4. **User cancelled** — dismissing the system sheet is not an error; try again.
-5. **API errors** — test `POST https://app.allbyrent.com/api/passkey/auth/options` with `{}`; it should return **200** and JSON (not `FUNCTION_INVOCATION_FAILED`). If 500, check Vercel function logs and env vars.
+5. **API errors** — test `POST https://app.evorios.com/api/passkey/auth/options` with `{}`; it should return **200** and JSON (not `FUNCTION_INVOCATION_FAILED`). If 500, check Vercel function logs and env vars.
 
 ### Notes
 
@@ -96,7 +96,7 @@ Plain `npm run dev` works for email auth; passkey register/login needs `vercel d
 
 Vercel injects `VERCEL_GIT_COMMIT_SHA` at build time. The app shows a **build stamp** at the bottom of **Profile** (e.g. `Build f3994e1 · …`) so you can confirm what shipped without guessing bundle hashes.
 
-If `app.allbyrent.com` looks old after a green deploy:
+If `app.evorios.com` looks old after a green deploy:
 
 1. **Profile → build stamp** — should match the latest commit on `main` (first 7 chars of the SHA).
 2. **Hard refresh** the tab, or open the site in a private window.

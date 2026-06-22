@@ -1,4 +1,4 @@
-const url = process.argv[2] ?? 'https://app.allbyrent.com';
+const url = process.argv[2] ?? 'https://app.evorios.com';
 const res = await fetch(url);
 const html = await res.text();
 const bundle = html.match(/assets\/index-[^"']+\.js/)?.[0] ?? 'none';

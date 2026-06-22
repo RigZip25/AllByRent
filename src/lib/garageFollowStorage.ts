@@ -69,3 +69,7 @@ export function updateGarageFollow(
   saveGarageFollows(follows);
   return next;
 }
+
+export function saveGarageFollowsFromRemote(follows: GarageFollow[]): void {
+  saveGarageFollows(follows);
+}

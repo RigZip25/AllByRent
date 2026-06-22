@@ -261,7 +261,7 @@ export function QrScanPanel({
           className="w-full rounded-2xl py-3.5 text-[15px] font-bold text-white disabled:opacity-50"
           style={{ backgroundColor: CTA }}
         >
-          {error ? "Camera unavailable" : "Simulate QR scan (demo)"}
+          {error ? "Camera unavailable" : "Scan item QR code"}
         </button>
         <p className="text-center text-[12px] text-white/80">
           Tip: scanning is not enough — you’ll still need the 6‑digit PIN from your counterparty.

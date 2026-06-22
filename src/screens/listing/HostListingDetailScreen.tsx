@@ -6,13 +6,18 @@ import { canManageListing } from "../../lib/hostAccess";
 import {
   addListingToQrBulkQueue,
   clearQrBulkQueue,
+  claimListingOwnershipIfUnassigned,
+  fetchListingByIdRemote,
   getProfileCity,
   getPublishedListingById,
   isListingQueuedForBulk,
   loadQrBulkQueueListingIds,
   removeListingFromQrBulkQueue,
-  updatePublishedListing,
+  updatePublishedListingRemote,
+  type PublishedListingPatch,
 } from "../../lib/listingStorage";
+import { resolveHostAccountId } from "../../lib/hostIdentity";
+import type { ListingDraft } from "./types";
 import { QR_PDF_FILENAMES } from "../../lib/brand";
 import { generateQRStickerPdf } from "../../lib/generateQRSticker";
 import { getListingDisplayTitle, getListingQrUrl, listingDraftToStickerRow } from "../../lib/listingQr";
@@ -90,7 +95,9 @@ export function HostListingDetailScreen({
 }) {
   const auth = useAuth();
   const [version, setVersion] = useState(0);
-  const listing = useMemo(() => getPublishedListingById(listingId), [listingId, version]);
+  const [listing, setListing] = useState<ListingDraft | null>(() => getPublishedListingById(listingId));
+  const [loading, setLoading] = useState(() => !getPublishedListingById(listingId));
+  const [saveBusy, setSaveBusy] = useState(false);
   const canManage = listing
     ? canManageListing(listing, auth.userId, auth.userEmail)
     : false;
@@ -103,6 +110,27 @@ export function HostListingDetailScreen({
   const [editError, setEditError] = useState<string | null>(null);
 
   const queuedForBulk = useMemo(() => isListingQueuedForBulk(listingId), [listingId]);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading((current) => current || !getPublishedListingById(listingId));
+    void fetchListingByIdRemote(listingId).then(async (next) => {
+      if (!mounted) return;
+      if (next && !next.hostId?.trim() && auth.userId) {
+        const claimed = await claimListingOwnershipIfUnassigned(
+          listingId,
+          resolveHostAccountId(auth.userId),
+        );
+        setListing(claimed ?? next);
+      } else {
+        setListing(next);
+      }
+      setLoading(false);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [auth.userId, listingId, version]);
 
   useEffect(() => {
     if (!listing) return;
@@ -135,9 +163,11 @@ export function HostListingDetailScreen({
     }
   };
 
-  const saveEditor = () => {
-    if (!listing || !activeEdit) return;
+  const saveEditor = async () => {
+    if (!listing || !activeEdit || saveBusy) return;
     setEditError(null);
+
+    let patch: PublishedListingPatch | null = null;
 
     if (activeEdit === "title") {
       const next = editValue.trim();
@@ -145,9 +175,9 @@ export function HostListingDetailScreen({
         setEditError("Title is required.");
         return;
       }
-      updatePublishedListing(listing.id, { title: next });
+      patch = { title: next };
     } else if (activeEdit === "description") {
-      updatePublishedListing(listing.id, { description: editValue.trim() });
+      patch = { description: editValue.trim() };
     } else if (activeEdit === "dailyRate") {
       const raw = editValue.replace(/^\$/, "").trim();
       if (!raw) {
@@ -159,24 +189,24 @@ export function HostListingDetailScreen({
         setEditError(parsed.message);
         return;
       }
-      updatePublishedListing(listing.id, { pricing: { dailyRate: String(parsed.value) } });
+      patch = { pricing: { dailyRate: String(parsed.value) } };
     } else if (activeEdit === "minimumPeriod") {
       const allowed: MinimumRentalPeriod[] = ["1 day", "3 days", "1 week", "2 weeks", "1 month"];
       const next = allowed.includes(editValue as MinimumRentalPeriod)
         ? (editValue as MinimumRentalPeriod)
         : listing.pricing.minimumPeriod;
-      updatePublishedListing(listing.id, { pricing: { minimumPeriod: next } });
+      patch = { pricing: { minimumPeriod: next } };
     } else if (activeEdit === "weight") {
       const trimmed = editValue.trim();
       if (!trimmed) {
-        updatePublishedListing(listing.id, { handoff: { itemWeightLbs: undefined } });
+        patch = { handoff: { itemWeightLbs: undefined } };
       } else {
         const parsed = parseNonNegativeNumber(trimmed);
         if (!parsed.ok) {
           setEditError(parsed.message);
           return;
         }
-        updatePublishedListing(listing.id, { handoff: { itemWeightLbs: Math.round(parsed.value) } });
+        patch = { handoff: { itemWeightLbs: Math.round(parsed.value) } };
       }
     } else if (activeEdit === "deliveryMaxMiles") {
       const parsed = parseNonNegativeNumber(editValue);
@@ -184,18 +214,18 @@ export function HostListingDetailScreen({
         setEditError(parsed.message);
         return;
       }
-      updatePublishedListing(listing.id, { handoff: { deliveryMaxMiles: Math.round(parsed.value) } });
+      patch = { handoff: { deliveryMaxMiles: Math.round(parsed.value) } };
     } else if (activeEdit === "deliveryRoundTripFee") {
       const raw = editValue.replace(/^\$/, "").trim();
       if (!raw) {
-        updatePublishedListing(listing.id, { handoff: { deliveryRoundTripFee: "" } });
+        patch = { handoff: { deliveryRoundTripFee: "" } };
       } else {
         const parsed = parseNonNegativeNumber(raw);
         if (!parsed.ok) {
           setEditError(parsed.message);
           return;
         }
-        updatePublishedListing(listing.id, { handoff: { deliveryRoundTripFee: String(parsed.value) } });
+        patch = { handoff: { deliveryRoundTripFee: String(parsed.value) } };
       }
     } else if (activeEdit === "availabilityTimes") {
       const parts = editValue.split(",").map((p) => p.trim());
@@ -209,16 +239,29 @@ export function HostListingDetailScreen({
         return;
       }
       const [wdStart, wdEnd, weStart, weEnd] = parts;
-      updatePublishedListing(listing.id, {
+      patch = {
         handoff: {
           inPersonTimeStart: wdStart,
           inPersonTimeEnd: wdEnd,
           inPersonWeekendTimeStart: weStart,
           inPersonWeekendTimeEnd: weEnd,
         },
-      });
+      };
     }
 
+    if (!patch) return;
+
+    setSaveBusy(true);
+    const ownerId = resolveHostAccountId(auth.userId);
+    const result = await updatePublishedListingRemote(listing.id, patch, ownerId);
+    setSaveBusy(false);
+
+    if (!result.ok) {
+      setEditError(result.reason);
+      return;
+    }
+
+    setListing(result.listing);
     setActiveEdit(null);
     setEditError(null);
     setVersion((v) => v + 1);
@@ -262,6 +305,25 @@ export function HostListingDetailScreen({
       setPdfLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="screen flex flex-col bg-[#F0F4F2]">
+        <header className="shrink-0 bg-white px-4 pb-3 pt-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
+          <button type="button" onClick={onBack} className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+            <ArrowLeft className="h-4 w-4" style={{ color: GREEN }} />
+            Back
+          </button>
+          <h1 className="mt-2 text-[18px] font-extrabold" style={{ color: GREEN }}>
+            Listing
+          </h1>
+        </header>
+        <div className="screen-scroll flex-1 px-4 py-6">
+          <p className="text-sm text-gray-600">Loading listing…</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!listing) {
     return (
@@ -544,11 +606,12 @@ export function HostListingDetailScreen({
               </button>
               <button
                 type="button"
-                onClick={saveEditor}
-                className="flex-1 rounded-xl py-3 text-sm font-semibold text-white"
+                onClick={() => void saveEditor()}
+                disabled={saveBusy}
+                className="flex-1 rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-60"
                 style={{ backgroundColor: GREEN }}
               >
-                Save
+                {saveBusy ? "Saving…" : "Save"}
               </button>
             </div>
           </div>

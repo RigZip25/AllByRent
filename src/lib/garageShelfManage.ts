@@ -6,7 +6,7 @@ import {
   type GarageListingSaleMode,
 } from "./garageSaleOfferStorage";
 import { getBidsForListing } from "./garageShopStorage";
-import { updatePublishedListing } from "./listingStorage";
+import { updatePublishedListingRemote } from "./listingStorage";
 import type { ListingDraft } from "../screens/listing/types";
 import type { MediaRef } from "./mediaStore";
 
@@ -80,7 +80,7 @@ export function removeGarageShelfItem(listingId: string): { ok: true } | { ok: f
   const check = canRemoveGarageShelfItem(listingId);
   if (!check.ok) return check;
 
-  updatePublishedListing(listingId, { listingStatus: "draft" });
+  void updatePublishedListingRemote(listingId, { listingStatus: "draft" }, "");
   clearGarageItemSideData(listingId);
   window.dispatchEvent(new Event("evorios-listings"));
   return { ok: true };
@@ -110,21 +110,29 @@ export function updateGarageShelfItem(input: {
     return { ok: false, reason: "Active offer — resolve in inbox or remove item" };
   }
 
-  updatePublishedListing(input.listing.id, {
-    title: input.title.trim() || "Sale item",
-    description: input.description.trim(),
-    photos: [input.photo],
-    pricing: { salePrice: String(input.priceUsd) },
-  });
+  void updatePublishedListingRemote(
+    input.listing.id,
+    {
+      title: input.title.trim() || "Sale item",
+      description: input.description.trim(),
+      photos: [input.photo],
+      pricing: { salePrice: String(input.priceUsd) },
+    },
+    input.listing.hostId ?? "",
+  );
 
   const existing = getGarageSaleOfferPrefs(input.listing.id);
   if (existing) {
-    setGarageSaleOfferPrefs(input.listing.id, {
-      ...existing,
-      saleMode: input.saleMode,
-      kind: input.saleMode === "quick" ? "buy_now" : "open",
-      startingBidUsd: input.priceUsd,
-    });
+    setGarageSaleOfferPrefs(
+      input.listing.id,
+      {
+        ...existing,
+        saleMode: input.saleMode,
+        kind: input.saleMode === "quick" ? "buy_now" : "open",
+        startingBidUsd: input.priceUsd,
+      },
+      input.listing.hostId ?? undefined,
+    );
   }
 
   window.dispatchEvent(new Event("evorios-listings"));

@@ -5,26 +5,22 @@ import type { ListingDraft } from "./types";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { extractAnthropicText, postAnthropicMessages } from "../../lib/anthropicClient";
 import { useAuth } from "../../hooks/AuthProvider";
-import { boostListingRemote } from "../../lib/listingStorage";
 import { generateListingShareCards, type GeneratedShareCard, type ShareCardFormat } from "../../lib/shareCards";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
-import { buildListingSharePayload, shareNative as shareNativePayload, copyText } from "../../lib/socialShare";
+import { buildListingSharePayload, listingShareUrl, shareNative as shareNativePayload, copyText } from "../../lib/socialShare";
 import { ProactiveAgentCard, wasAgentStepDismissed } from "../../components/agent/ProactiveAgentCard";
 import { loadNotificationPreferences } from "../../lib/notificationPreferences";
+import { StripePaymentForm } from "../../components/payments/StripePaymentForm";
+import { isPaymentsReady, getStripeRequiredMessage, getSignInRequiredMessage } from "../../lib/config/production";
+import { createListingBoostIntent } from "../../lib/stripePayments";
+import { boostListingRemote } from "../../lib/listingStorage";
 
 const GREEN = "#0D5C3A";
 const CTA = "#F59E0B";
 const BORDER = "#E8E6E0";
 
 function listingUrl(draft: ListingDraft): string {
-  try {
-    const origin = typeof window !== "undefined" ? window.location.origin : MARKETING_URL;
-    const url = new URL(origin);
-    url.searchParams.set("listingId", draft.id);
-    return url.toString();
-  } catch {
-    return `${MARKETING_URL}?listingId=${draft.id}`;
-  }
+  return listingShareUrl(draft.id);
 }
 
 function buildPrompt(params: {
@@ -69,6 +65,14 @@ export function ListingShareScreen({
   const [cardsBusy, setCardsBusy] = useState(false);
   const [cardsError, setCardsError] = useState<string | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<ShareCardFormat>("story");
+  const [boostUntil, setBoostUntil] = useState<string | null>(draft.boostedUntil ?? null);
+  const [boostBusy, setBoostBusy] = useState(false);
+  const [boostError, setBoostError] = useState<string | null>(null);
+  const [boostClientSecret, setBoostClientSecret] = useState<string | null>(null);
+  const [boostPayLabel, setBoostPayLabel] = useState<string | null>(null);
+  const [pendingBoost, setPendingBoost] = useState<{ boostedUntil: string; boostedTier: number } | null>(
+    null,
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -171,11 +175,58 @@ export function ListingShareScreen({
   };
 
   const activeBoostLabel = useMemo(() => {
-    if (!draft.boostedUntil) return null;
-    const until = new Date(draft.boostedUntil).getTime();
+    const untilRaw = boostUntil ?? draft.boostedUntil;
+    if (!untilRaw) return null;
+    const until = new Date(untilRaw).getTime();
     if (Number.isNaN(until) || until <= Date.now()) return null;
-    return `Boost active until ${new Date(draft.boostedUntil).toLocaleString()}`;
-  }, [draft.boostedUntil]);
+    return `Boost active until ${new Date(untilRaw).toLocaleString()}`;
+  }, [boostUntil, draft.boostedUntil]);
+
+  const beginBoost = (opt: { label: string; cents: number; hours: number }) => {
+    if (!auth.userId) {
+      window.alert(getSignInRequiredMessage());
+      return;
+    }
+    if (!isPaymentsReady()) {
+      window.alert(getStripeRequiredMessage());
+      return;
+    }
+    setBoostBusy(true);
+    setBoostError(null);
+    void createListingBoostIntent({
+      listingId: draft.id,
+      amountCents: opt.cents,
+      durationHours: opt.hours,
+    })
+      .then((result) => {
+        if (!result.ok) {
+          setBoostError(result.reason);
+          return;
+        }
+        setPendingBoost({ boostedUntil: result.boostedUntil, boostedTier: result.boostedTier });
+        setBoostClientSecret(result.clientSecret);
+        setBoostPayLabel(opt.label.split(" · ")[0] ?? opt.label);
+      })
+      .catch(() => {
+        setBoostError("Boost checkout failed. Check Stripe configuration.");
+      })
+      .finally(() => setBoostBusy(false));
+  };
+
+  const finishBoost = () => {
+    if (!pendingBoost || !auth.userId) return;
+    void boostListingRemote({
+      listingId: draft.id,
+      boostedUntil: pendingBoost.boostedUntil,
+      boostedTier: pendingBoost.boostedTier,
+      ownerId: auth.userId,
+    }).then(() => {
+      setBoostUntil(pendingBoost.boostedUntil);
+      setBoostClientSecret(null);
+      setPendingBoost(null);
+      setBoostError(null);
+    });
+  };
 
   return (
     <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-[#F9FAFB]">
@@ -339,6 +390,19 @@ export function ListingShareScreen({
           {activeBoostLabel ? (
             <p className="mt-2 text-[12px] font-semibold text-emerald-700">{activeBoostLabel}</p>
           ) : null}
+          {boostError ? (
+            <p className="mt-2 text-[12px] text-amber-700">{boostError}</p>
+          ) : null}
+          {boostClientSecret && boostPayLabel ? (
+            <div className="mt-3 rounded-2xl border bg-[#F9FAFB] p-3" style={{ borderColor: BORDER }}>
+              <StripePaymentForm
+                clientSecret={boostClientSecret}
+                totalLabel={boostPayLabel}
+                onSuccess={finishBoost}
+                onError={(message) => setBoostError(message)}
+              />
+            </div>
+          ) : (
           <div className="mt-3 grid grid-cols-3 gap-2">
             {[
               { label: "$2 · 24h", cents: 200, hours: 24 },
@@ -348,47 +412,16 @@ export function ListingShareScreen({
               <button
                 key={opt.label}
                 type="button"
-                onClick={() => {
-                  if (!auth.userId) {
-                    window.alert("Sign in to boost your listing.");
-                    return;
-                  }
-                  const until = new Date(Date.now() + opt.hours * 60 * 60 * 1000).toISOString();
-                  void fetch("/api/stripe/boost", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ listingId: draft.id, amountCents: opt.cents, durationHours: opt.hours }),
-                  })
-                    .then((r) => r.json().catch(() => ({})))
-                    .then((payload) => {
-                      if (payload && payload.checkoutUrl) {
-                        window.location.href = String(payload.checkoutUrl);
-                        return;
-                      }
-                      // Demo fallback: apply boost immediately if Stripe isn't configured.
-                      return boostListingRemote({
-                        listingId: draft.id,
-                        ownerId: auth.userId,
-                        boostedTier: opt.cents / 100,
-                        boostedUntil: until,
-                      });
-                    })
-                    .catch(() => {
-                      return boostListingRemote({
-                        listingId: draft.id,
-                        ownerId: auth.userId,
-                        boostedTier: opt.cents / 100,
-                        boostedUntil: until,
-                      });
-                    });
-                }}
-                className="rounded-2xl border bg-white px-2 py-2.5 text-[12px] font-bold text-gray-800"
+                disabled={boostBusy}
+                onClick={() => beginBoost(opt)}
+                className="rounded-2xl border bg-white px-2 py-2.5 text-[12px] font-bold text-gray-800 disabled:opacity-60"
                 style={{ borderColor: BORDER }}
               >
                 {opt.label}
               </button>
             ))}
           </div>
+          )}
         </div>
 
         <button

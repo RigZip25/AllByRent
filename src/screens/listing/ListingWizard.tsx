@@ -1,15 +1,14 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import confetti from "canvas-confetti";
 import { MASCOT_NAME } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
-import { getProfileCity, savePublishedListingRemote, savePublishedListing } from "../../lib/listingStorage";
+import { getProfileCity, savePublishedListingRemote, savePublishedListing, fetchListingByIdRemote, getPublishedListingById } from "../../lib/listingStorage";
 import { notifyGarageFollowersOfNewListing } from "../../lib/garageFollowNotify";
 import { loadUserProfile } from "../../lib/userProfileStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
-import { getPlanById, loadSubscriptionPlanId } from "../../lib/subscriptionPlans";
 import { loadManageableListings } from "../../lib/hostAccess";
 import { analyzeListingMediaPhotos } from "./listingAnalysis";
 import { ListingPublishSuccess } from "./ListingPublishSuccess";
@@ -98,19 +97,31 @@ function firePublishConfetti() {
 export function ListingWizard({
   initialPrefill,
   initialDraft,
+  editingListingId,
   onExit,
 }: {
   initialPrefill?: ShelfPrefill | null;
   initialDraft?: ListingDraft | null;
+  editingListingId?: string | null;
   onExit: () => void;
 }) {
   const auth = useAuth();
+  const isEditing = Boolean(
+    editingListingId ||
+    (initialDraft?.listingStatus && initialDraft.listingStatus !== "draft"),
+  );
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState<SlideDirection>(1);
   const [draft, setDraft] = useState<ListingDraft>(() => {
-    const base = initialDraft ? initialDraft : createPrefilledListingDraft(initialPrefill);
+    const cached =
+      initialDraft ??
+      (editingListingId ? getPublishedListingById(editingListingId) : null);
+    const base = cached ?? createPrefilledListingDraft(initialPrefill);
     return isYardSaleListingActive() ? applyYardSaleListingDefaults(base) : base;
   });
+  const [loadingEdit, setLoadingEdit] = useState(
+    () => Boolean(editingListingId && !initialDraft && !getPublishedListingById(editingListingId)),
+  );
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [phase, setPhase] = useState<WizardPhase>("steps");
   const [isPublishing, setIsPublishing] = useState(false);
@@ -118,6 +129,21 @@ export function ListingWizard({
   const [wizardStack, setWizardStack] = useState<
     { step: number; draft: ListingDraft; phase: WizardPhase }[]
   >([]);
+
+  useEffect(() => {
+    if (!editingListingId || initialDraft) return;
+    let mounted = true;
+    void fetchListingByIdRemote(editingListingId).then((remote) => {
+      if (!mounted) return;
+      if (remote) {
+        setDraft(isYardSaleListingActive() ? applyYardSaleListingDefaults(remote) : remote);
+      }
+      setLoadingEdit(false);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [editingListingId, initialDraft]);
 
   const canContinue = isListingStepValid(step, draft);
   const progress = (step / TOTAL_LISTING_STEPS) * 100;
@@ -130,9 +156,9 @@ export function ListingWizard({
   const headerTitle = useMemo(() => {
     if (phase === "qrStory") return "How your QR works";
     if (phase === "qrSticker") return "QR setup";
-    if (phase === "success") return "Published";
-    return `Step ${step} of ${TOTAL_LISTING_STEPS}`;
-  }, [phase, step]);
+    if (phase === "success") return isEditing ? "Saved" : "Published";
+    return isEditing ? "Edit listing" : `Step ${step} of ${TOTAL_LISTING_STEPS}`;
+  }, [isEditing, phase, step]);
 
   const goToStep = (nextStep: number, nextDirection: SlideDirection) => {
     setDirection(nextDirection);
@@ -164,18 +190,37 @@ export function ListingWizard({
   };
 
   const handlePublish = () => {
-    const plan = getPlanById(loadSubscriptionPlanId());
-    const used = loadManageableListings(auth.userId, auth.userEmail).filter((l) => l.listingStatus === "active").length;
-    if (used >= plan.listingLimit) {
-      window.alert(`Listing limit reached: ${plan.name} allows up to ${plan.listingLimit} active listings. Upgrade your plan to list more.`);
-      return;
-    }
     setIsPublishing(true);
 
     window.setTimeout(() => {
       const giftOrSellOnly = isGiftOrSellOnly(draft);
       const hostId = draft.hostId ?? resolveHostAccountId(auth.userId);
       const normalizedDraft = applyFrictionlessDefaults(draft);
+
+      if (isEditing && draft.id) {
+        const savedDraft: ListingDraft = {
+          ...normalizedDraft,
+          hostId,
+          id: draft.id,
+          listingStatus: draft.listingStatus === "draft" ? "active" : draft.listingStatus,
+          qrToken: draft.qrToken,
+          qrReady: draft.qrReady,
+          qrPrintedConfirmed: draft.qrPrintedConfirmed,
+          generateQR: draft.generateQR,
+          verificationPhoto: draft.verificationPhoto,
+        };
+
+        setDraft(savedDraft);
+        if (auth.userId) {
+          void savePublishedListingRemote(savedDraft, auth.userId);
+        } else {
+          savePublishedListing(savedDraft);
+        }
+        setIsPublishing(false);
+        onExit();
+        return;
+      }
+
       const publishedDraft: ListingDraft = {
         ...normalizedDraft,
         hostId,
@@ -288,6 +333,18 @@ export function ListingWizard({
     setShowDiscardDialog(false);
   };
 
+  if (loadingEdit) {
+    return (
+      <div
+        className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col items-center justify-center overflow-hidden px-6"
+        style={{ backgroundColor: BACKGROUND }}
+      >
+        <Loader2 className="h-8 w-8 animate-spin" style={{ color: PRIMARY_GREEN }} aria-hidden />
+        <p className="mt-3 text-sm font-medium text-[#6B7280]">Loading listing…</p>
+      </div>
+    );
+  }
+
   if (phase === "qrStory") {
     return (
       <div
@@ -396,6 +453,7 @@ export function ListingWizard({
                 setDraft={setDraft}
                 profileCity={profileCity}
                 isPublishing={isPublishing}
+                isEditing={isEditing}
                 onPublish={handlePublish}
                 onGoToStep={(target) => goToStep(target, -1)}
               />

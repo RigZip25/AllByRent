@@ -1,4 +1,4 @@
-import { Gavel, Pencil, ShoppingBag, Tag } from "lucide-react";
+import { Gavel, Pencil, Share2, ShoppingBag, Tag } from "lucide-react";
 import type { ListingDraft } from "../../screens/listing/types";
 import { getLotState, isAuctionTimeActive } from "../../lib/garageAuctionState";
 import { getMyActiveOffer } from "../../lib/garageOfferStorage";
@@ -29,6 +29,7 @@ type GarageShopItemCardProps = {
   onMakeOffer: (listing: ListingDraft, offer: ShopOffer) => void;
   onViewMyOffer: (listing: ListingDraft, offer: ShopOffer) => void;
   onEdit?: (listing: ListingDraft) => void;
+  onShare?: (listing: ListingDraft) => void;
 };
 
 export function GarageShopItemCard({
@@ -40,6 +41,7 @@ export function GarageShopItemCard({
   onMakeOffer,
   onViewMyOffer,
   onEdit,
+  onShare,
 }: GarageShopItemCardProps) {
   const offer = getShopOffer(listing);
   const lotState = getLotState(listing.id);
@@ -193,15 +195,28 @@ export function GarageShopItemCard({
               Buy
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={() => onEdit?.(listing)}
-              className="flex w-full items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold"
-              style={{ borderColor: GREEN, color: GREEN }}
-            >
-              <Pencil className="h-3.5 w-3.5" />
-              Edit
-            </button>
+            <div className="flex flex-col gap-1.5">
+              <button
+                type="button"
+                onClick={() => onEdit?.(listing)}
+                className="flex w-full items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold"
+                style={{ borderColor: GREEN, color: GREEN }}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                Edit
+              </button>
+              {onShare ? (
+                <button
+                  type="button"
+                  onClick={() => onShare(listing)}
+                  className="flex w-full items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold"
+                  style={{ borderColor: AMBER, color: "#92400E", backgroundColor: `${AMBER}12` }}
+                >
+                  <Share2 className="h-3.5 w-3.5" />
+                  Share
+                </button>
+              ) : null}
+            </div>
           )}
         </div>
       </div>

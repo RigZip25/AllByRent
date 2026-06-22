@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, MapPin, Truck, Package, Shield } from "lucide-react";
 import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
-import { getPublishedListingById } from "../../lib/listingStorage";
+import { fetchListingByIdRemote, getPublishedListingById } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { useAuth } from "../../hooks/AuthProvider";
 import { parseUsdToCents } from "../../lib/insurance";
@@ -21,7 +21,7 @@ import {
 import { createNotificationRemote } from "../../lib/notificationsStorage";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
 import { StripePaymentForm } from "../../components/payments/StripePaymentForm";
-import { isStripePaymentsEnabled } from "../../lib/stripeConfig";
+import { getStripeRequiredMessage, isPaymentsReady } from "../../lib/config/production";
 import { removeStripeControllerIframes } from "../../lib/stripeCleanup";
 import { createDepositPaymentIntent, createRentalPaymentIntent } from "../../lib/stripePayments";
 import type { ListingDraft } from "../../screens/listing/types";
@@ -32,61 +32,6 @@ function addDays(isoDate: string, days: number): string {
   const d = new Date(isoDate);
   d.setDate(d.getDate() + days);
   return d.toISOString().slice(0, 10);
-}
-
-function demoListingFallback(): ListingDraft {
-  return {
-    id: "demo-dslr",
-    listingStatus: "active",
-    photos: [],
-    videos: [],
-    aiSuggestions: null,
-    aiAnalysisPending: false,
-    photoEnhancementPending: false,
-    title: "DSLR Camera",
-    category: "Electronics",
-    subcategory: "Cameras",
-    grade: "personal",
-    condition: "good",
-    description: "",
-    replacementValue: "800",
-    instructionsUrl: "",
-    modes: { rent: true, sell: true, rentToOwn: false, gift: false },
-    pricing: {
-      dailyRate: "35",
-      weeklyRate: "",
-      monthlyRate: "",
-      longTermEnabled: false,
-      longTermMonthlyRate: "",
-      salePrice: "",
-      rtoTotalPrice: "",
-      rtoPeriodMonths: "",
-      securityDeposit: "50",
-      minimumPeriod: "1 day",
-    },
-    blockedDates: [],
-    paused: false,
-    handoff: {
-      inPerson: true,
-      inPersonDays: [],
-      inPersonTimeStart: "09:00",
-      inPersonTimeEnd: "17:00",
-      inPersonWeekendTimeStart: "10:00",
-      inPersonWeekendTimeEnd: "14:00",
-      contactless: false,
-      contactlessInstructions: "",
-      delivery: true,
-      itemHeavy: false,
-      deliveryMaxMiles: 5,
-      deliveryRoundTripFee: "12",
-      deliveryPrices: [{ miles: 5, price: "12" }],
-    },
-    generateQR: true,
-    qrToken: "demo-token",
-    qrReady: true,
-    qrPrintedConfirmed: true,
-    verificationPhoto: null,
-  };
 }
 
 function fulfillmentOptions(listing: ListingDraft): {
@@ -136,12 +81,55 @@ export function BookingScreen({
   onBack: () => void;
   onConfirmed: (bookingId: string) => void;
 }) {
-  const auth = useAuth();
-  const listing = useMemo(
-    () => getPublishedListingById(listingId) ?? demoListingFallback(),
-    [listingId],
+  const [listing, setListing] = useState<ListingDraft | null>(() => getPublishedListingById(listingId));
+  const [loading, setLoading] = useState(() => !getPublishedListingById(listingId));
+
+  useEffect(() => {
+    let mounted = true;
+    void fetchListingByIdRemote(listingId).then((next) => {
+      if (!mounted) return;
+      setListing(next);
+      setLoading(false);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [listingId]);
+
+  if (loading) {
+    return (
+      <div className="screen flex flex-col items-center justify-center bg-background px-6 text-center">
+        <p className="text-sm text-muted-foreground">Loading booking…</p>
+      </div>
+    );
+  }
+
+  if (!listing) {
+    return (
+      <div className="screen flex flex-col items-center justify-center bg-background px-6 text-center">
+        <p className="font-semibold">Listing not found</p>
+        <button type="button" onClick={onBack} className="mt-4 text-sm underline">
+          Go back
+        </button>
+      </div>
+    );
+  }
+  return (
+    <BookingScreenLoaded listing={listing} onBack={onBack} onConfirmed={onConfirmed} />
   );
-  const title = getListingDisplayTitle(listing) || listing.title || "Item";
+}
+
+function BookingScreenLoaded({
+  listing,
+  onBack,
+  onConfirmed,
+}: {
+  listing: ListingDraft;
+  onBack: () => void;
+  onConfirmed: (bookingId: string) => void;
+}) {
+  const auth = useAuth();
+  const title = getListingDisplayTitle(listing.title) || listing.title || "Item";
   const options = useMemo(() => fulfillmentOptions(listing), [listing]);
   const defaultFulfillment =
     options.find((o) => !o.disabled)?.id ?? options[0]?.id ?? "pickup";
@@ -185,7 +173,7 @@ export function BookingScreen({
   const canConfirm = !deliveryRequested || deliveryAddress.trim().length > 0;
 
   const stripeCheckout =
-    isStripePaymentsEnabled() && Boolean(auth.userId && listing.hostId);
+    isPaymentsReady() && Boolean(auth.userId && listing.hostId);
 
   const buildBooking = (id: string): RentalBooking => {
     const pickupLabel =
@@ -203,10 +191,10 @@ export function BookingScreen({
       itemEmoji: "📷",
       startDate,
       endDate,
-      counterpartyId: "john-davis",
-      counterpartyName: "John Davis",
-      counterpartyIdentityVerified: true,
-      counterpartyPhoneVerified: true,
+      counterpartyId: listing.hostId ?? "",
+      counterpartyName: "Host",
+      counterpartyIdentityVerified: false,
+      counterpartyPhoneVerified: false,
       pickupLabel,
       rentalSubtotalUsd: breakdown.rentalSubtotalUsd,
       deliveryFee: breakdown.deliveryFeeUsd,
@@ -269,23 +257,22 @@ export function BookingScreen({
       dueAt,
       stripePaymentStatus: stripeCheckout ? "requires_payment_method" : undefined,
     });
-    void createRentalRemote(row).catch(() => {
-      // Local fallback is already appended below.
+    void createRentalRemote(row).catch((error) => {
+      setPaymentError(error instanceof Error ? error.message : "Failed to save booking");
     });
   };
 
   const handleConfirm = () => {
+    if (!stripeCheckout) {
+      setPaymentError(getStripeRequiredMessage());
+      return;
+    }
+
     const id =
       typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
         : `rent-${Date.now()}`;
     const booking = buildBooking(id);
-
-    if (!stripeCheckout) {
-      persistRentalRow(id, booking);
-      finalizeBooking(id, booking);
-      return;
-    }
 
     setConfirmBusy(true);
     setPaymentError(null);
@@ -301,10 +288,6 @@ export function BookingScreen({
       });
 
       if (!pi.ok) {
-        if (pi.reason === "Stripe not configured") {
-          finalizeBooking(id, { ...booking, stripePayment: false, paymentOnHold: false });
-          return;
-        }
         setPaymentError(pi.reason);
         return;
       }
@@ -326,10 +309,6 @@ export function BookingScreen({
         .then((deposit) => {
           if (deposit.ok) {
             setDepositClientSecret(deposit.clientSecret);
-            return;
-          }
-          if (deposit.reason === "Stripe not configured") {
-            finalizeAfterPayment(pendingBookingId);
             return;
           }
           setPaymentError(deposit.reason);

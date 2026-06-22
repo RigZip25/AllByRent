@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { HomeFeedCard } from "../app/components/HomeFeedCard";
 import { garageDisplayName } from "../lib/garageDisplay";
 import { fetchActiveListingsForCityRemote, getActiveRentLocationLabel } from "../lib/listingStorage";
+import { useAuth } from "../hooks/AuthProvider";
 import {
-  followGarage,
   isFollowingGarage,
-  unfollowGarage,
 } from "../lib/garageFollowStorage";
+import { persistFollow, persistUnfollow } from "../lib/repositories/garageRepository";
 import { pushInAppNotification } from "../lib/inAppNotifications";
 
 const GREEN = "#0D5C3A";
@@ -20,6 +20,7 @@ export function NeighborGarageScreen({
   onBack: () => void;
   onOpenListing: (listingId: string) => void;
 }) {
+  const auth = useAuth();
   const [listings, setListings] = useState<Awaited<ReturnType<typeof fetchActiveListingsForCityRemote>>>([]);
   const [loading, setLoading] = useState(true);
   const [following, setFollowing] = useState(() => isFollowingGarage(hostId));
@@ -33,7 +34,7 @@ export function NeighborGarageScreen({
         if (!mounted) return;
         setListings(
           all.filter(
-            (l) => l.listingStatus === "active" && (l.hostId ?? "demo-user") === hostId,
+            (l) => l.listingStatus === "active" && (l.hostId ?? "") === hostId,
           ),
         );
       })
@@ -58,17 +59,31 @@ export function NeighborGarageScreen({
         <button
           type="button"
           onClick={() => {
-            if (following) {
-              unfollowGarage(hostId);
-              setFollowing(false);
+            const followerId = auth.userId;
+            if (!followerId) {
+              window.alert("Sign in to follow this garage.");
               return;
             }
-            followGarage({ hostId, displayName: garageName });
-            setFollowing(true);
-            pushInAppNotification({
-              type: "general",
-              title: "Following garage",
-              body: `You'll get alerts when ${garageName} lists something new (push when enabled).`,
+            if (following) {
+              void persistUnfollow(hostId, followerId).then(() => setFollowing(false));
+              return;
+            }
+            void persistFollow(
+              {
+                hostId,
+                displayName: garageName,
+                followedAt: new Date().toISOString(),
+                notifyNewListings: true,
+                notifyOpenHouse: true,
+              },
+              followerId,
+            ).then(() => {
+              setFollowing(true);
+              pushInAppNotification({
+                type: "general",
+                title: "Following garage",
+                body: `You'll get alerts when ${garageName} lists something new (push when enabled).`,
+              });
             });
           }}
           className="mt-3 rounded-full border px-4 py-2 text-[13px] font-semibold"

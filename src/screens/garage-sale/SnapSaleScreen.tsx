@@ -5,7 +5,9 @@ import { useAuth } from "../../hooks/AuthProvider";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
 import { deleteMedia, putMediaBlob, type MediaRef } from "../../lib/mediaStore";
 import { useMediaUrl } from "../../lib/useMediaUrl";
-import { savePublishedListing, savePublishedListingRemote } from "../../lib/listingStorage";
+import { getPublishedListingById, savePublishedListing, savePublishedListingRemote } from "../../lib/listingStorage";
+import { GarageSharePanel } from "../../components/share/GarageSharePanel";
+import { hostGarageItemSharePayload, hostGarageSharePayload } from "../../lib/garageMarketingShare";
 import { notifyGarageFollowersOfNewListing } from "../../lib/garageFollowNotify";
 import { loadUserProfile } from "../../lib/userProfileStorage";
 import { applyFrictionlessDefaults } from "../listing/frictionlessDefaults";
@@ -24,7 +26,7 @@ const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
 const BORDER = "#E8E6E0";
 
-const { snapSale: copy } = ONBOARDING;
+const { snapSale: copy, garageShare: shareCopy } = ONBOARDING;
 
 type SnapSaleScreenProps = {
   onBack: () => void;
@@ -79,6 +81,7 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
   const [error, setError] = useState<string | null>(null);
   const [justPublished, setJustPublished] = useState(false);
   const [shelfCount, setShelfCount] = useState(0);
+  const [publishedListingId, setPublishedListingId] = useState<string | null>(null);
   const [scheduleTick, setScheduleTick] = useState(0);
 
   useEffect(() => {
@@ -88,6 +91,24 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
   }, []);
 
   const openHours = garageSaleOpenLabel(getGarageSaleSchedule());
+  const hostId = resolveHostAccountId(auth.userId);
+  const garageSharePayload = useMemo(
+    () =>
+      hostGarageSharePayload({
+        hostId,
+        listingCount: shelfCount,
+        openUntilLabel: openHours,
+      }),
+    [hostId, openHours, shelfCount],
+  );
+  const publishedListing = useMemo(
+    () => (publishedListingId ? getPublishedListingById(publishedListingId) : null),
+    [publishedListingId, shelfCount],
+  );
+  const itemSharePayload = useMemo(() => {
+    if (!publishedListing) return null;
+    return hostGarageItemSharePayload({ hostId, listing: publishedListing });
+  }, [hostId, publishedListing]);
   const auctionWindowLabel = useMemo(() => {
     void scheduleTick;
     return formatAuctionWindowLabel(defaultAuctionOfferWindow());
@@ -154,7 +175,11 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
         }),
       );
 
-      setGarageSaleOfferPrefs(draft.id, buildInitialOfferPrefs({ saleMode, buyNowUsd: priceUsd }));
+      setGarageSaleOfferPrefs(
+        draft.id,
+        buildInitialOfferPrefs({ saleMode, buyNowUsd: priceUsd }),
+        hostId,
+      );
 
       if (auth.userId) {
         void savePublishedListingRemote(draft, auth.userId);
@@ -169,6 +194,7 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
         listingTitle: title,
       });
 
+      setPublishedListingId(draft.id);
       setShelfCount((count) => count + 1);
       setJustPublished(true);
       setPhoto(null);
@@ -180,6 +206,7 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
 
   const snapAnother = () => {
     setJustPublished(false);
+    setPublishedListingId(null);
     setError(null);
   };
 
@@ -203,7 +230,30 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
             {openHours}
           </p>
         </div>
-        <div className="shrink-0 space-y-2 px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
+        <div className="shrink-0 space-y-3 px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
+          <div className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: BORDER }}>
+            <p className="text-sm font-bold text-gray-900">{shareCopy.afterSnapTitle}</p>
+            <p className="mt-1 text-[12px] text-gray-500">{shareCopy.afterSnapHint}</p>
+            <div className="mt-3 space-y-3">
+              <GarageSharePanel
+                title={shareCopy.openGarageTitle}
+                payload={garageSharePayload}
+                shareKind="garage"
+                targetId={hostId}
+                defaultOpen
+                compact
+              />
+              {itemSharePayload && publishedListingId ? (
+                <GarageSharePanel
+                  title={shareCopy.itemTitle}
+                  payload={itemSharePayload}
+                  shareKind="shelf"
+                  targetId={publishedListingId}
+                  compact
+                />
+              ) : null}
+            </div>
+          </div>
           <button
             type="button"
             onClick={snapAnother}

@@ -1,4 +1,5 @@
 import { getGarageBidderId, markBuyNowSold } from "./garageAuctionState";
+import { pushNeighborOfferRemote } from "./garage/garageSupabaseSync";
 import {
   defaultAuctionOfferWindow,
   getGarageSaleOfferPrefs,
@@ -48,6 +49,10 @@ function writeOffers(offers: GarageNeighborOffer[]): void {
   }
 }
 
+function syncOfferRemote(offer: GarageNeighborOffer): void {
+  void pushNeighborOfferRemote(offer);
+}
+
 function newId(): string {
   return typeof crypto !== "undefined" && crypto.randomUUID
     ? crypto.randomUUID()
@@ -91,16 +96,20 @@ export function isEligibleAuctionBidder(listingId: string, bidderId?: string): b
 }
 
 function closeOffersForListing(listingId: string, exceptBuyerId?: string): void {
-  writeOffers(
-    readOffers().map((offer) => {
-      if (offer.listingId !== listingId) return offer;
-      if (exceptBuyerId && offer.buyerId === exceptBuyerId) return offer;
-      if (offer.status === "pending_host" || offer.status === "pending_buyer") {
-        return { ...offer, status: "withdrawn" as const, updatedAt: new Date().toISOString() };
-      }
-      return offer;
-    }),
-  );
+  const next = readOffers().map((offer) => {
+    if (offer.listingId !== listingId) return offer;
+    if (exceptBuyerId && offer.buyerId === exceptBuyerId) return offer;
+    if (offer.status === "pending_host" || offer.status === "pending_buyer") {
+      return { ...offer, status: "withdrawn" as const, updatedAt: new Date().toISOString() };
+    }
+    return offer;
+  });
+  writeOffers(next);
+  for (const offer of next) {
+    if (offer.listingId === listingId && offer.status === "withdrawn") {
+      syncOfferRemote(offer);
+    }
+  }
 }
 
 function activateMultiBuyerAuction(listingId: string, listingTitle: string): void {
@@ -109,18 +118,23 @@ function activateMultiBuyerAuction(listingId: string, listingTitle: string): voi
 
   const amounts = activeOffersForListing(listingId).map((offer) => offer.amountUsd);
   const highOffer = Math.max(...amounts);
-  const window = defaultAuctionOfferWindow();
+  const auctionWindow = defaultAuctionOfferWindow();
   const existing = getGarageSaleOfferPrefs(listingId);
+  const hostId = activeOffersForListing(listingId)[0]?.hostId;
 
-  setGarageSaleOfferPrefs(listingId, {
-    kind: "auction",
-    saleMode: existing?.saleMode ?? "open",
-    startingBidUsd: highOffer,
-    startsAt: window.startsAt,
-    endsAt: window.endsAt,
-    negotiationPhase: "multi_auction",
-    eligibleBuyerIds: buyers,
-  });
+  setGarageSaleOfferPrefs(
+    listingId,
+    {
+      kind: "auction",
+      saleMode: existing?.saleMode ?? "open",
+      startingBidUsd: highOffer,
+      startsAt: auctionWindow.startsAt,
+      endsAt: auctionWindow.endsAt,
+      negotiationPhase: "multi_auction",
+      eligibleBuyerIds: buyers,
+    },
+    hostId,
+  );
 
   closeOffersForListing(listingId);
 
@@ -140,7 +154,7 @@ function activateMultiBuyerAuction(listingId: string, listingTitle: string): voi
     }
   }
 
-  window.dispatchEvent(new Event("evorios-garage-offers"));
+  globalThis.dispatchEvent(new Event("evorios-garage-offers"));
 }
 
 function completeSale(listing: ListingDraft, priceUsd: number, buyerId: string): { ok: true } | { ok: false; reason: string } {
@@ -175,7 +189,7 @@ export function submitNeighborOffer(input: {
   }
 
   const buyerId = getGarageBidderId();
-  const hostId = input.listing.hostId ?? "demo-user";
+  const hostId = input.listing.hostId ?? "";
   const title = input.listing.title || "Sale item";
 
   const existing = activeOffersForListing(input.listing.id).find((offer) => offer.buyerId === buyerId);
@@ -196,14 +210,19 @@ export function submitNeighborOffer(input: {
   };
 
   writeOffers([...readOffers(), offer]);
+  syncOfferRemote(offer);
 
   const prefsUpdate = getGarageSaleOfferPrefs(input.listing.id);
   if (prefsUpdate) {
-    setGarageSaleOfferPrefs(input.listing.id, {
-      ...prefsUpdate,
-      negotiationPhase: getInterestedCount(input.listing.id) >= 2 ? "multi_auction" : "one_on_one",
-      activeBuyerId: buyerId,
-    });
+    setGarageSaleOfferPrefs(
+      input.listing.id,
+      {
+        ...prefsUpdate,
+        negotiationPhase: getInterestedCount(input.listing.id) >= 2 ? "multi_auction" : "one_on_one",
+        activeBuyerId: buyerId,
+      },
+      hostId,
+    );
   }
 
   if (getInterestedCount(input.listing.id) >= 2) {
@@ -236,13 +255,14 @@ export function hostAcceptOffer(
     return { ok: false, reason: "Auction started — offers closed" };
   }
 
-  writeOffers(
-    readOffers().map((item) =>
-      item.id === offerId
-        ? { ...item, status: "accepted" as const, updatedAt: new Date().toISOString() }
-        : item,
-    ),
+  const updated = readOffers().map((item) =>
+    item.id === offerId
+      ? { ...item, status: "accepted" as const, updatedAt: new Date().toISOString() }
+      : item,
   );
+  writeOffers(updated);
+  const accepted = updated.find((item) => item.id === offerId);
+  if (accepted) syncOfferRemote(accepted);
 
   const result = completeSale(listing, offer.amountUsd, offer.buyerId);
   if (!result.ok) return result;
@@ -250,7 +270,7 @@ export function hostAcceptOffer(
   pushInAppNotification({
     type: "general",
     title: "Offer accepted",
-    body: `${offer.listingTitle} — sold for ${formatShopUsd(offer.amountUsd)} (demo).`,
+    body: `${offer.listingTitle} — sold for ${formatShopUsd(offer.amountUsd)}.`,
   });
 
   return { ok: true };
@@ -271,18 +291,19 @@ export function hostCounterOffer(
     return { ok: false, reason: "Counter must be above their offer" };
   }
 
-  writeOffers(
-    readOffers().map((item) =>
-      item.id === offerId
-        ? {
-            ...item,
-            amountUsd: counterUsd,
-            status: "pending_buyer" as const,
-            updatedAt: new Date().toISOString(),
-          }
-        : item,
-    ),
+  const updated = readOffers().map((item) =>
+    item.id === offerId
+      ? {
+          ...item,
+          amountUsd: counterUsd,
+          status: "pending_buyer" as const,
+          updatedAt: new Date().toISOString(),
+        }
+      : item,
   );
+  writeOffers(updated);
+  const countered = updated.find((item) => item.id === offerId);
+  if (countered) syncOfferRemote(countered);
 
   if (offer.buyerId === getGarageBidderId()) {
     pushInAppNotification({
@@ -301,13 +322,14 @@ export function hostDeclineOffer(offerId: string): { ok: true } | { ok: false; r
     return { ok: false, reason: "Offer not available" };
   }
 
-  writeOffers(
-    readOffers().map((item) =>
-      item.id === offerId
-        ? { ...item, status: "declined" as const, updatedAt: new Date().toISOString() }
-        : item,
-    ),
+  const updated = readOffers().map((item) =>
+    item.id === offerId
+      ? { ...item, status: "declined" as const, updatedAt: new Date().toISOString() }
+      : item,
   );
+  writeOffers(updated);
+  const declined = updated.find((item) => item.id === offerId);
+  if (declined) syncOfferRemote(declined);
 
   if (offer.buyerId === getGarageBidderId()) {
     pushInAppNotification({
@@ -332,13 +354,14 @@ export function buyerAcceptCounter(
     return { ok: false, reason: "Not your offer" };
   }
 
-  writeOffers(
-    readOffers().map((item) =>
-      item.id === offerId
-        ? { ...item, status: "accepted" as const, updatedAt: new Date().toISOString() }
-        : item,
-    ),
+  const updated = readOffers().map((item) =>
+    item.id === offerId
+      ? { ...item, status: "accepted" as const, updatedAt: new Date().toISOString() }
+      : item,
   );
+  writeOffers(updated);
+  const accepted = updated.find((item) => item.id === offerId);
+  if (accepted) syncOfferRemote(accepted);
 
   const result = completeSale(listing, offer.amountUsd, offer.buyerId);
   if (!result.ok) return result;
@@ -346,7 +369,7 @@ export function buyerAcceptCounter(
   pushInAppNotification({
     type: "general",
     title: "Deal!",
-    body: `${offer.listingTitle} — ${formatShopUsd(offer.amountUsd)} (demo).`,
+    body: `${offer.listingTitle} — ${formatShopUsd(offer.amountUsd)}.`,
   });
 
   return { ok: true };
@@ -372,18 +395,19 @@ export function buyerSendNewOffer(input: {
     return { ok: false, reason: "At asking price, use Buy now" };
   }
 
-  writeOffers(
-    readOffers().map((item) =>
-      item.id === input.offerId
-        ? {
-            ...item,
-            amountUsd: input.amountUsd,
-            status: "pending_host" as const,
-            updatedAt: new Date().toISOString(),
-          }
-        : item,
-    ),
+  const updated = readOffers().map((item) =>
+    item.id === input.offerId
+      ? {
+          ...item,
+          amountUsd: input.amountUsd,
+          status: "pending_host" as const,
+          updatedAt: new Date().toISOString(),
+        }
+      : item,
   );
+  writeOffers(updated);
+  const nextOffer = updated.find((item) => item.id === input.offerId);
+  if (nextOffer) syncOfferRemote(nextOffer);
 
   pushInAppNotification({
     type: "general",
@@ -416,4 +440,12 @@ export function getOffersForListing(listingId: string): GarageNeighborOffer[] {
   return readOffers()
     .filter((offer) => offer.listingId === listingId)
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
+export function mergeNeighborOffersFromRemote(remote: GarageNeighborOffer[]): void {
+  const local = readOffers();
+  const byId = new Map<string, GarageNeighborOffer>();
+  for (const offer of local) byId.set(offer.id, offer);
+  for (const offer of remote) byId.set(offer.id, offer);
+  writeOffers([...byId.values()]);
 }

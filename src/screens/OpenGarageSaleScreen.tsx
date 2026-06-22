@@ -1,5 +1,9 @@
 import { ArrowLeft } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { GarageSharePanel } from "../components/share/GarageSharePanel";
+import { useAuth } from "../hooks/AuthProvider";
+import { resolveHostAccountId } from "../lib/hostIdentity";
+import { hostGarageSharePayload } from "../lib/garageMarketingShare";
 import { BRAND_AMBER, BRAND_GREEN, MASCOT_NAME, ONBOARDING } from "../lib/brand";
 import {
   GARAGE_SALE_DAY_LABELS,
@@ -8,11 +12,11 @@ import {
   garageSalePresetSchedule,
   getGarageSaleSchedule,
   isGarageSaleScheduleValid,
-  setGarageSaleSchedule,
   toggleGarageSaleDay,
   type GarageSalePresetId,
   type GarageSaleSchedule,
 } from "../lib/garageSaleStorage";
+import { persistSaleSchedule } from "../lib/repositories/garageRepository";
 import { onboardingAssets } from "../lib/onboardingAssets";
 
 const GREEN = BRAND_GREEN;
@@ -34,12 +38,17 @@ export function OpenGarageSaleScreen({
   onOpenMyGarage,
   onViewSaleRules,
 }: OpenGarageSaleScreenProps) {
+  const auth = useAuth();
+  const hostId = resolveHostAccountId(auth.userId);
   const [schedule, setSchedule] = useState<GarageSaleSchedule>(() => getGarageSaleSchedule());
 
-  const persist = useCallback((next: GarageSaleSchedule) => {
-    setSchedule(next);
-    setGarageSaleSchedule(next);
-  }, []);
+  const persist = useCallback(
+    (next: GarageSaleSchedule) => {
+      setSchedule(next);
+      void persistSaleSchedule(hostId, next);
+    },
+    [hostId],
+  );
 
   useEffect(() => {
     const sync = () => setSchedule(getGarageSaleSchedule());
@@ -52,6 +61,15 @@ export function OpenGarageSaleScreen({
   };
 
   const scheduleValid = isGarageSaleScheduleValid(schedule);
+  const openLabel = garageSaleOpenLabel(schedule);
+  const garageSharePayload = useMemo(
+    () =>
+      hostGarageSharePayload({
+        hostId,
+        openUntilLabel: openLabel,
+      }),
+    [hostId, openLabel],
+  );
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#FFF9F0]">
@@ -183,21 +201,32 @@ export function OpenGarageSaleScreen({
           >
             {copy.addItemsCta}
           </button>
+          <button
+            type="button"
+            onClick={onOpenMyGarage}
+            disabled={!scheduleValid}
+            className="mt-2 w-full rounded-xl border-2 py-3 text-base font-bold active:opacity-90 disabled:opacity-50"
+            style={{ borderColor: GREEN, color: GREEN }}
+          >
+            {copy.myGarageCta}
+          </button>
         </section>
 
-        <button
-          type="button"
-          onClick={onOpenMyGarage}
-          className="mt-4 w-full rounded-xl border-2 py-3 text-base font-bold active:opacity-90"
-          style={{ borderColor: GREEN, color: GREEN }}
-        >
-          {copy.myGarageCta}
-        </button>
+        {scheduleValid ? (
+          <div className="mt-4">
+            <GarageSharePanel
+              title={copy.shareGarageCta}
+              payload={garageSharePayload}
+              shareKind="garage"
+              targetId={hostId}
+            />
+          </div>
+        ) : null}
 
         <button
           type="button"
           onClick={onViewSaleRules}
-          className="mt-3 w-full py-2 text-center text-[13px] font-semibold"
+          className="mt-4 w-full py-2 text-center text-[13px] font-semibold"
           style={{ color: GREEN }}
         >
           {copy.rulesViewCta}

@@ -408,7 +408,7 @@ export function HomeFeed({
               <li key={listing.id}>
                 <HomeFeedCard
                   listing={listing}
-                  onSelect={() => onNavigate(`hostListingDetail:${listing.id}`)}
+                  onSelect={() => onNavigate(`itemDetail:${listing.id}`)}
                 />
               </li>
             ))}

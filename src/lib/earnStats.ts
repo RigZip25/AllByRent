@@ -5,11 +5,15 @@ import {
   loadRentalBookings,
   type RentalBooking,
 } from "./rentalsStorage";
-import { formatPlanUsage, loadSubscriptionPlanId } from "./subscriptionPlans";
 import {
   loadUserProfile,
   refreshProfileStats,
 } from "./userProfileStorage";
+
+function formatActiveListingsCount(count: number): string {
+  if (count === 1) return "1 active listing";
+  return `${count} active listings`;
+}
 
 export type EarningsTrend = "up" | "down" | "flat";
 
@@ -278,10 +282,7 @@ export function computeEarnBusinessStats(now = new Date()): EarnBusinessStats {
     activeItemsOut,
     listingsCount: listings.length,
     completedRentals: completed.length,
-    planUsageLabel: formatPlanUsage(
-      loadSubscriptionPlanId(),
-      profile.host.listingsCount,
-    ),
+    planUsageLabel: formatActiveListingsCount(profile.host.listingsCount),
     perListing,
     growthTips,
     totalEarnedUsd: totalEarnedAllTime,

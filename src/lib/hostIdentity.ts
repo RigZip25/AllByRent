@@ -1,6 +1,4 @@
 const PROFILE_KEY = "allbyrent_user_profile";
-const LEGACY_HOST_ID = "demo-user";
-const LEGACY_HOST_EMAIL = "alex@example.com";
 
 function readProfileField(field: "id" | "email"): string | null {
   try {
@@ -19,11 +17,11 @@ function readProfileField(field: "id" | "email"): string | null {
 /** Stable account id for host-scoped data (listings, co-hosts, booking stats). */
 export function resolveHostAccountId(authUserId: string | null): string {
   if (authUserId?.trim()) return authUserId.trim();
-  return readProfileField("id") ?? LEGACY_HOST_ID;
+  return readProfileField("id") ?? "";
 }
 
 export function resolveHostAccountEmail(authUserEmail: string | null): string {
   const fromAuth = authUserEmail?.trim().toLowerCase() ?? "";
   if (fromAuth) return fromAuth;
-  return (readProfileField("email") ?? LEGACY_HOST_EMAIL).toLowerCase();
+  return (readProfileField("email") ?? "").toLowerCase();
 }

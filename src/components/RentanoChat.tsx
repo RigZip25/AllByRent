@@ -35,6 +35,11 @@ export type RentanoChatContext = {
   draft?: ListingDraft;
   rentalStatus?: string;
   userId?: string;
+  category?: string;
+  subcategory?: string;
+  city?: string;
+  query?: string;
+  listingTitles?: string[];
 };
 
 type SheetView = "menu" | "install" | "faq" | "chat";

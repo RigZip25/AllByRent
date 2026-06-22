@@ -4,7 +4,6 @@ import { onboardingAssets } from "../../lib/onboardingAssets";
 import { getAppMode } from "../../lib/appMode";
 import { getRentContext } from "../../lib/listingStorage";
 import { getProfileLocationSummary } from "../../lib/userProfileStorage";
-import { loadSubscriptionPlanId } from "../../lib/subscriptionPlans";
 
 const GREEN = "#0D5C3A";
 
@@ -17,8 +16,7 @@ type YouAreAllSetProps = {
 };
 
 function accountTypeLabel(): string {
-  const plan = loadSubscriptionPlanId();
-  return plan === "business" ? "Business" : "Individual";
+  return "Individual";
 }
 
 function goalTags(): string[] {
