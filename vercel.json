@@ -4,7 +4,6 @@
   "framework": "vite",
   "installCommand": "npm ci",
   "rewrites": [
-    { "source": "/api/((?!og/image).*)", "destination": "/api/router?route=$1" },
     { "source": "/link", "destination": "/link.html" },
     { "source": "/item/:id", "destination": "/link.html?listingId=:id&skipSplash=1" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }

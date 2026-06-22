@@ -1,0 +1,22 @@
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+
+import rentalNoShow from "../../server/routes/cron/rental-no-show";
+import rentalOverdue from "../../server/routes/cron/rental-overdue";
+
+type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
+
+const ROUTES: Record<string, Handler> = {
+  "rental-no-show": rentalNoShow,
+  "rental-overdue": rentalOverdue,
+};
+
+export default function handler(req: VercelRequest, res: VercelResponse): unknown {
+  const slug = req.query.slug;
+  const key = Array.isArray(slug) ? slug.join("/") : (slug ?? "");
+  const routeHandler = ROUTES[key];
+  if (!routeHandler) {
+    res.status(404).json({ error: "Not found", route: key || null });
+    return;
+  }
+  return routeHandler(req, res);
+}
