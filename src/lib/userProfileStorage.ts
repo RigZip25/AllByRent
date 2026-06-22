@@ -7,8 +7,49 @@ import {
   hasRentLocationSetup,
 } from "./listingStorage";
 import { hasAvatarPhoto, loadAvatarDataUrl } from "./avatarStorage";
+import { readLastKnownFullName } from "./pendingAuthProfile";
 
 const PROFILE_KEY = "allbyrent_user_profile";
+
+const DEMO_DISPLAY_NAMES = new Set(
+  ["Alex Morgan", "Demo User", "Test User"].map((name) => name.toLowerCase()),
+);
+
+const DEMO_EMAILS = new Set(
+  ["alex@example.com", "demo@example.com", "test@example.com"].map((email) =>
+    email.toLowerCase(),
+  ),
+);
+
+function normalizeEmail(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function isDemoDisplayName(value: string): boolean {
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  return DEMO_DISPLAY_NAMES.has(trimmed.toLowerCase());
+}
+
+function isDemoEmail(value: string): boolean {
+  const normalized = normalizeEmail(value);
+  if (!normalized) return false;
+  if (DEMO_EMAILS.has(normalized)) return true;
+  return normalized.endsWith("@example.com") || normalized.endsWith("@example.org");
+}
+
+function isStaleDemoField(
+  value: string,
+  authEmail: string | null | undefined,
+  kind: "name" | "email",
+): boolean {
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  if (kind === "name") return isDemoDisplayName(trimmed);
+  if (!isDemoEmail(trimmed)) return false;
+  const signedInEmail = normalizeEmail(authEmail ?? "");
+  return !signedInEmail || normalizeEmail(trimmed) !== signedInEmail;
+}
 
 export type UserProfile = {
   id: string;
@@ -204,4 +245,81 @@ export function updateProfileFields(
 
 export function setProfileAvatarUrl(url: string | null): UserProfile {
   return updateProfileFields({ avatarUrl: url });
+}
+
+export function getProfileDisplayLabel(displayName: string): string {
+  const trimmed = displayName.trim();
+  return trimmed || "Add your name";
+}
+
+export function getProfileEmailLabel(email: string, signedInEmail?: string | null): string {
+  const trimmed = email.trim() || signedInEmail?.trim() || "";
+  return trimmed || "Add email";
+}
+
+/** Drop legacy v0 demo placeholders so they never appear after real sign-in. */
+export function sanitizeDemoProfileFields(
+  profile: UserProfile,
+  authUserId?: string | null,
+  authEmail?: string | null,
+): UserProfile {
+  const next = { ...profile };
+  const signedInEmail = authEmail?.trim() ?? "";
+
+  if (authUserId?.trim()) {
+    next.id = authUserId.trim();
+  }
+
+  if (isStaleDemoField(next.displayName, signedInEmail, "name")) {
+    next.displayName = "";
+    next.firstName = "";
+    next.lastName = "";
+  }
+
+  if (signedInEmail) {
+    if (!next.email.trim() || isStaleDemoField(next.email, signedInEmail, "email")) {
+      next.email = signedInEmail;
+      next.verification = { ...next.verification, email: true };
+    }
+  } else if (isDemoEmail(next.email)) {
+    next.email = "";
+  }
+
+  return next;
+}
+
+export type ProfileAuthSyncInput = {
+  userId: string;
+  userEmail?: string | null;
+  remoteDisplayName?: string | null;
+};
+
+/** Bind local profile to the signed-in account and replace stale demo fields. */
+export function syncUserProfileFromAuth(input: ProfileAuthSyncInput): UserProfile {
+  const userId = input.userId.trim();
+  if (!userId) return loadUserProfile();
+
+  const current = loadUserProfile();
+  let next = sanitizeDemoProfileFields(current, userId, input.userEmail ?? null);
+
+  const remoteName = input.remoteDisplayName?.trim() ?? "";
+  const pendingName = readLastKnownFullName().trim();
+  const resolvedName =
+    remoteName ||
+    (next.displayName.trim() && !isDemoDisplayName(next.displayName) ? next.displayName.trim() : "") ||
+    pendingName;
+
+  if (resolvedName) {
+    next.displayName = resolvedName;
+  }
+
+  if (input.userEmail?.trim()) {
+    next.email = input.userEmail.trim();
+    next.verification = { ...next.verification, email: true };
+  }
+
+  next.avatarUrl = hasAvatarPhoto(userId) ? loadAvatarDataUrl(userId) : null;
+  next = refreshProfileStats(next, userId);
+  saveUserProfile(next);
+  return next;
 }

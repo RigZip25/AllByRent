@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import type { Session } from "@supabase/supabase-js";
 import { getSupabaseClient, isSupabaseConfigured } from "../lib/supabaseClient";
 import { AUTH_CALLBACK_RESUME_KEY, completeAuthCallbackFromUrl, onAuthStateChange } from "../lib/auth";
+import { syncUserProfileFromAuth } from "../lib/userProfileStorage";
+import { fetchRemoteProfile } from "../lib/supabaseProfile";
 
 type AuthContextValue = {
   configured: boolean;
@@ -95,6 +97,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
   }, [configured]);
+
+  useEffect(() => {
+    const user = session?.user;
+    if (!user?.id) return;
+
+    syncUserProfileFromAuth({
+      userId: user.id,
+      userEmail: user.email ?? null,
+    });
+
+    void fetchRemoteProfile(user.id).then((remote) => {
+      if (!remote) return;
+      syncUserProfileFromAuth({
+        userId: user.id,
+        userEmail: user.email ?? null,
+        remoteDisplayName: remote.display_name,
+      });
+    });
+  }, [session]);
 
   const value = useMemo<AuthContextValue>(() => {
     const user = session?.user ?? null;

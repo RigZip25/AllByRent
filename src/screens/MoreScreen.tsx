@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Bell,
   ChevronRight,
@@ -13,7 +13,7 @@ import {
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { useAuth } from "../hooks/AuthProvider";
 import { MASCOT_NAME } from "../lib/brand";
-import { loadUserProfile, refreshProfileStats } from "../lib/userProfileStorage";
+import { loadUserProfile, refreshProfileStats, getProfileDisplayLabel } from "../lib/userProfileStorage";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -83,11 +83,15 @@ export function MoreScreen({
   onOpenIntegrations?: () => void;
 }) {
   const auth = useAuth();
-  const [baseProfile] = useState(() => loadUserProfile());
-  const profile = useMemo(
-    () => refreshProfileStats(baseProfile, auth.userId),
-    [baseProfile, auth.userId],
+  const [profile, setProfile] = useState(() =>
+    refreshProfileStats(loadUserProfile(), auth.userId),
   );
+
+  useEffect(() => {
+    setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
+  }, [auth.userId, auth.userEmail]);
+
+  const displayNameLabel = getProfileDisplayLabel(profile.displayName);
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -106,7 +110,7 @@ export function MoreScreen({
           <ProfileAvatar avatarUrl={profile.avatarUrl} size={56} />
           <div className="min-w-0 flex-1">
             <p className="text-[18px] font-bold" style={{ color: GREEN }}>
-              {profile.displayName}
+              {displayNameLabel}
             </p>
             <p className="mt-0.5 text-[13px] text-gray-500">Profile &amp; account settings</p>
           </div>

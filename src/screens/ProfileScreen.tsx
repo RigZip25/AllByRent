@@ -27,10 +27,13 @@ import {
 import { APP_MODE_LABELS } from "../lib/brand";
 import { getAppMode, type AppMode } from "../lib/appMode";
 import {
+  getProfileDisplayLabel,
+  getProfileEmailLabel,
   getProfileLocationSummary,
   loadUserProfile,
   refreshProfileStats,
   setProfileAvatarUrl,
+  syncUserProfileFromAuth,
   updateProfileFields,
   updatePreferredMode,
   type UserProfile,
@@ -177,6 +180,19 @@ export function ProfileScreen({
   });
   const [connectBusy, setConnectBusy] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
+  const [namePromptChecked, setNamePromptChecked] = useState(false);
+
+  const displayNameLabel = getProfileDisplayLabel(profile.displayName);
+  const emailLabel = getProfileEmailLabel(profile.email, auth.userEmail);
+
+  useEffect(() => {
+    if (!auth.userId) return;
+    const synced = syncUserProfileFromAuth({
+      userId: auth.userId,
+      userEmail: auth.userEmail,
+    });
+    setProfile(refreshProfileStats(synced, auth.userId));
+  }, [auth.userId, auth.userEmail]);
 
   useEffect(() => {
     if (!auth.userId) return;
@@ -191,16 +207,23 @@ export function ProfileScreen({
     });
     void fetchRemoteProfile(auth.userId).then((remote) => {
       if (!mounted || !remote) return;
-      const displayName = remote.display_name?.trim() || profile.displayName;
-      const memberSince = remote.created_at?.slice(0, 10) || profile.memberSince;
+      const synced = syncUserProfileFromAuth({
+        userId: auth.userId!,
+        userEmail: auth.userEmail,
+        remoteDisplayName: remote.display_name,
+      });
+      const displayName = synced.displayName;
+      const memberSince = remote.created_at?.slice(0, 10) || synced.memberSince;
       const next = updateProfileFields({
         displayName,
-        phone: remote.phone ?? profile.phone,
-        avatarUrl: profile.avatarUrl,
+        email: auth.userEmail ?? synced.email,
+        phone: remote.phone ?? synced.phone,
+        avatarUrl: synced.avatarUrl,
       });
       next.memberSince = memberSince;
       next.verification = {
         ...next.verification,
+        email: Boolean(auth.userEmail ?? next.email),
         phone: Boolean(remote.phone_verified ?? next.verification.phone),
         identity: Boolean(remote.identity_verified ?? next.verification.identity),
       };
@@ -213,11 +236,23 @@ export function ProfileScreen({
         last4: remote.stripe_bank_last4 ?? null,
       });
       setProfile(refreshProfileStats(next, auth.userId));
+
+      if (!namePromptChecked && !displayName.trim()) {
+        setNamePromptChecked(true);
+        const nextName = window.prompt("What should we call you?")?.trim();
+        if (nextName) {
+          const updated = updateProfileFields({ displayName: nextName });
+          setProfile(refreshProfileStats(updated, auth.userId));
+          void updateRemoteProfile(auth.userId!, { display_name: nextName }).catch(() => {
+            // Local fallback already applied.
+          });
+        }
+      }
     });
     return () => {
       mounted = false;
     };
-  }, [auth.userId]);
+  }, [auth.userId, auth.userEmail, namePromptChecked]);
 
   useEffect(() => {
     if (!auth.userId) return;
@@ -305,7 +340,7 @@ export function ProfileScreen({
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-[22px] font-bold leading-tight" style={{ color: GREEN }}>
-                  {profile.displayName}
+                  {displayNameLabel}
                 </h1>
               </div>
               <p className="mt-0.5 text-[14px] text-gray-500">Member since {memberYear}</p>
@@ -382,7 +417,7 @@ export function ProfileScreen({
             <RowButton
               icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label="Name"
-              value={profile.displayName}
+              value={displayNameLabel}
               onClick={handleEditName}
             />
           </li>
@@ -398,7 +433,7 @@ export function ProfileScreen({
             <RowButton
               icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label="Personal info"
-              value={profile.email || "Add email"}
+              value={emailLabel}
             />
           </li>
           {onOpenCoHosts ? (
