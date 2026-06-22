@@ -33,15 +33,16 @@ Or connect the GitHub repo **RigZip25/AllByRent** and import — `vercel.json` i
 Vercel Hobby allows **12 serverless functions per deployment**. Each file under `api/` counts as one.
 
 This repo uses:
-- `api/[...route].ts` — single router for all `/api/*` handlers (code lives in `server/routes/`)
+- `api/router.ts` — single router for all `/api/*` handlers (code lives in `server/routes/`)
 - `api/og/image.tsx` — OG image edge function
-- `middleware.ts` — edge middleware for share-link bot previews
 
-If you add new API endpoints, register them in `api/[...route].ts` instead of creating new files under `api/`.
+Vercel rewrites `/api/*` (except `/api/og/image`) to `/api/router?route=...`.
+
+If you add new API endpoints, register them in `api/router.ts` instead of creating new files under `api/`.
 
 ### Invalid `vercel.json` rewrites (fixed)
 
-Regex in `has[].value` (e.g. bot `user-agent` matching) can fail deployment validation. Bot OG previews now use root `middleware.ts` instead.
+Regex in `has[].value` (e.g. bot `user-agent` matching) can fail deployment validation. Bot OG previews for `/link` are served via `/api/link` (same router). Social crawlers can use that URL directly.
 
 ### Stale lockfile
 
