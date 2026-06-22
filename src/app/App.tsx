@@ -1365,6 +1365,7 @@ function AppRoutes() {
           <ListingWizard
             initialPrefill={listingPrefill}
             initialDraft={editingListingId ? getPublishedListingById(editingListingId) : null}
+            editingListingId={editingListingId}
             onExit={() => {
               setListingPrefill(null);
               setEditingListingId(null);

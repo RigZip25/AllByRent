@@ -244,11 +244,11 @@ export type PublishedListingPatch = Partial<Omit<ListingDraft, "pricing" | "hand
   modes?: Partial<ListingDraft["modes"]>;
 };
 
-export function updatePublishedListing(listingId: string, patch: PublishedListingPatch): void {
+export function updatePublishedListing(listingId: string, patch: PublishedListingPatch): boolean {
   try {
     const existing = loadPublishedListings();
     const index = existing.findIndex((item) => item.id === listingId);
-    if (index < 0) return;
+    if (index < 0) return false;
     const current = existing[index]!;
 
     const nextListing: ListingDraft = {
@@ -262,9 +262,47 @@ export function updatePublishedListing(listingId: string, patch: PublishedListin
     const next = existing.slice();
     next[index] = nextListing;
     localStorage.setItem(LISTINGS_STORAGE_KEY, JSON.stringify(next));
+    return true;
   } catch {
-    /* ignore */
+    return false;
   }
+}
+
+function mergePublishedListingPatch(
+  current: ListingDraft,
+  patch: PublishedListingPatch,
+): ListingDraft {
+  return {
+    ...current,
+    ...patch,
+    modes: patch.modes ? { ...current.modes, ...patch.modes } : current.modes,
+    pricing: patch.pricing ? { ...current.pricing, ...patch.pricing } : current.pricing,
+    handoff: patch.handoff ? { ...current.handoff, ...patch.handoff } : current.handoff,
+  };
+}
+
+export async function updatePublishedListingRemote(
+  listingId: string,
+  patch: PublishedListingPatch,
+  ownerId: string,
+): Promise<{ ok: true; listing: ListingDraft } | { ok: false; reason: string }> {
+  let current = getPublishedListingById(listingId);
+  if (!current) {
+    current = await fetchListingByIdRemote(listingId);
+  }
+  if (!current) {
+    return { ok: false, reason: "Listing not found." };
+  }
+
+  const nextListing = mergePublishedListingPatch(current, patch);
+  savePublishedListing(nextListing);
+
+  const normalizedOwnerId = ownerId.trim() || nextListing.hostId?.trim() || "";
+  if (normalizedOwnerId) {
+    await savePublishedListingRemote(nextListing, normalizedOwnerId);
+  }
+
+  return { ok: true, listing: nextListing };
 }
 
 /** Published listings with QR enabled — for batch sticker sheets. */
@@ -525,21 +563,19 @@ function createInitialHandoffFallback(): ListingDraft["handoff"] {
 }
 
 export async function savePublishedListingRemote(draft: ListingDraft, ownerId: string): Promise<void> {
+  savePublishedListing(draft);
   if (!isSupabaseConfigured()) {
-    savePublishedListing(draft);
     return;
   }
   const supabase = getSupabaseClient();
   if (!supabase) {
-    savePublishedListing(draft);
     return;
   }
   const { error } = await supabase
     .from("listings")
     .upsert(draftToRow(draft, ownerId), { onConflict: "id" });
-  if (error) {
-    // Fallback keeps UX working when network/Supabase is down.
-    savePublishedListing(draft);
+  if (error && import.meta.env.DEV) {
+    console.warn("savePublishedListingRemote failed:", error.message);
   }
 }
 
@@ -599,7 +635,9 @@ export async function fetchListingByIdRemote(id: string): Promise<ListingDraft |
     .eq("id", id)
     .maybeSingle();
   if (error || !data) return getPublishedListingById(id);
-  return rowToDraft(data as SupabaseListingRow);
+  const draft = rowToDraft(data as SupabaseListingRow);
+  savePublishedListing(draft);
+  return draft;
 }
 
 export async function fetchListingsByOwnerIdsRemote(ownerIds: string[]): Promise<ListingDraft[]> {
@@ -618,7 +656,11 @@ export async function fetchListingsByOwnerIdsRemote(ownerIds: string[]): Promise
   if (error || !data) {
     return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? ""));
   }
-  return (data as SupabaseListingRow[]).map(rowToDraft);
+  const drafts = (data as SupabaseListingRow[]).map(rowToDraft);
+  for (const draft of drafts) {
+    savePublishedListing(draft);
+  }
+  return drafts;
 }
 
 export async function fetchActiveListingsForCityRemote(city: string): Promise<ListingDraft[]> {
