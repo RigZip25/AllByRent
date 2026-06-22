@@ -26,6 +26,16 @@ Or connect the GitHub repo **RigZip25/AllByRent** and import — `vercel.json` i
 
 **Node.js:** 20+ (see `package.json` `engines`).
 
-## Common failure (fixed)
+## Common failures
+
+### Invalid `vercel.json` rewrites (fixed)
+
+Regex in `has[].value` (e.g. bot `user-agent` matching) can fail deployment validation. Bot OG previews now use root `middleware.ts` instead.
+
+### Stale lockfile
 
 `package-lock.json` must match `package.json`. CI uses `npm ci`; a stale lockfile causes **Install dependencies** to fail.
+
+### v0 project still on Next.js
+
+If Vercel fails with Next.js build errors, the project may still be set up for **Next.js** from v0. This app is **Vite + React** (`dist/`).
