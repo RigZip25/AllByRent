@@ -32,13 +32,14 @@ Or connect the GitHub repo **RigZip25/AllByRent** and import — `vercel.json` i
 
 Vercel Hobby allows **12 serverless functions per deployment**. Each file under `api/` counts as one.
 
-This repo uses:
-- `api/router.ts` — single router for all `/api/*` handlers (code lives in `server/routes/`)
-- `api/og/image.tsx` — OG image edge function
+This repo uses **12** grouped routers under `api/` (Hobby limit):
 
-Vercel rewrites `/api/*` (except `/api/og/image`) to `/api/router?route=...`.
+- `api/stripe/[...slug].ts`, `api/passkey/[...slug].ts`, `api/agent/[...slug].ts`
+- `api/auth/[...slug].ts`, `api/geocode/[...slug].ts`, `api/cron/[...slug].ts`
+- `api/push/[...slug].ts`, `api/safely/[...slug].ts`, `api/orchestrator/[...slug].ts`
+- `api/proxy/[...slug].ts` (anthropic + photoroom), `api/link.ts`, `api/og/image.tsx`
 
-If you add new API endpoints, register them in `api/router.ts` instead of creating new files under `api/`.
+Handler code lives in `server/routes/`. Add new endpoints to the matching group router.
 
 ### Invalid `vercel.json` rewrites (fixed)
 

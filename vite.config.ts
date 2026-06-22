@@ -184,7 +184,7 @@ export default defineConfig(({ mode }) => {
         secure: true,
         rewrite: (path) => path.replace(/^\/us-geocode/, '/geocoder'),
       },
-      '/api/anthropic': {
+      '/api/proxy/anthropic': {
         target: 'https://api.anthropic.com',
         changeOrigin: true,
         secure: true,
@@ -195,7 +195,7 @@ export default defineConfig(({ mode }) => {
           'anthropic-beta': 'prompt-caching-2024-07-31',
         },
       },
-      '/api/photoroom': {
+      '/api/proxy/photoroom': {
         target: 'https://image-api.photoroom.com',
         changeOrigin: true,
         secure: true,

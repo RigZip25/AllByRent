@@ -15,7 +15,7 @@ type PhotoRoomCacheEntryV1 = {
   sizeBytes: number;
 };
 
-const API_URL = "/api/photoroom";
+const API_URL = "/api/proxy/photoroom";
 const CACHE_PREFIX = "allbyrent:photoroom:edit:";
 const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 const RATE_LIMIT_PREFIX = "allbyrent:photoroom:rate:";

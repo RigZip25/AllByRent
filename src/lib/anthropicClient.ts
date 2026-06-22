@@ -7,7 +7,7 @@ export type AnthropicMessagesResponse = {
   content?: AnthropicContentBlock[];
 };
 
-export const ANTHROPIC_API_URL = "/api/anthropic";
+export const ANTHROPIC_API_URL = "/api/proxy/anthropic";
 
 export function isAnthropicConfigured(): boolean {
   if (import.meta.env.VITE_AI_CHAT_ENABLED === "false") return false;

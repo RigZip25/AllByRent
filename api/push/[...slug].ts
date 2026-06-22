@@ -1,0 +1,20 @@
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+
+import pushSend from "../../server/routes/push/send";
+
+type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
+
+const ROUTES: Record<string, Handler> = {
+  send: pushSend,
+};
+
+export default function handler(req: VercelRequest, res: VercelResponse): unknown {
+  const slug = req.query.slug;
+  const key = Array.isArray(slug) ? slug.join("/") : (slug ?? "");
+  const routeHandler = ROUTES[key];
+  if (!routeHandler) {
+    res.status(404).json({ error: "Not found", route: key || null });
+    return;
+  }
+  return routeHandler(req, res);
+}
