@@ -1,11 +1,13 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import authOtp from "../../server/routes/auth/otp";
+import deleteAccount from "../../server/routes/auth/delete_account";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 
 const ROUTES: Record<string, Handler> = {
   otp: authOtp,
+  delete_account: deleteAccount,
 };
 
 export default function handler(req: VercelRequest, res: VercelResponse): unknown {

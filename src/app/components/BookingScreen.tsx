@@ -420,7 +420,7 @@ function BookingScreenLoaded({
     const booking = buildBooking(id, Boolean(stripeCheckout));
     finalizeBooking(id, {
       ...booking,
-      paymentOnHold: false,
+      paymentOnHold: Boolean(stripeCheckout),
       depositStatus:
         pendingDepositCents >= 50 ? "held" : booking.depositAmountCents ? booking.depositStatus : undefined,
       depositAmountCents: pendingDepositCents >= 50 ? pendingDepositCents : booking.depositAmountCents,

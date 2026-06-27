@@ -4,12 +4,10 @@ import { applyCors, handleOptions } from "../../lib/cors";
 import { isStripeServerConfigured } from "../../lib/keys";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
+import { fetchRentalForPayments } from "../../lib/stripe/rentalAccess";
 import { syncRentalPaymentFromIntent } from "../../lib/stripe/syncRentalPaymentIntent";
 
 type Body = { rentalId?: string };
-
-const PAID_STATUSES = new Set(["succeeded", "processing"]);
-const AUTHORIZED_STATUSES = new Set(["requires_capture", "succeeded", "processing"]);
 
 export default withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
@@ -43,41 +41,42 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
-  const { data: rental, error: rentalError } = await admin
-    .from("rentals")
-    .select("id, renter_id, stripe_payment_intent_id, stripe_payment_status")
-    .eq("id", rentalId)
-    .maybeSingle();
-
-  if (rentalError || !rental) {
+  const rental = await fetchRentalForPayments(admin, rentalId);
+  if (!rental) {
     res.status(404).json({ error: "Rental not found" });
     return;
   }
 
-  if (rental.renter_id !== user.id) {
-    res.status(403).json({ error: "Only the renter can confirm this payment" });
+  if (rental.owner_id !== user.id) {
+    res.status(403).json({ error: "Only the host can capture payment for this booking" });
     return;
   }
 
   if (!rental.stripe_payment_intent_id) {
-    res.status(400).json({ error: "No payment started for this rental" });
+    res.status(200).json({ ok: true, status: "no_payment" });
     return;
   }
 
   const secret = process.env.STRIPE_SECRET_KEY!;
   const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
+
   const intent = await stripe.paymentIntents.retrieve(rental.stripe_payment_intent_id);
 
-  await syncRentalPaymentFromIntent(admin, intent);
+  if (intent.status === "succeeded") {
+    await syncRentalPaymentFromIntent(admin, intent);
+    res.status(200).json({ ok: true, status: "succeeded", captured: true });
+    return;
+  }
 
-  const paid = PAID_STATUSES.has(intent.status);
-  const authorized = AUTHORIZED_STATUSES.has(intent.status);
+  if (intent.status !== "requires_capture") {
+    res.status(400).json({
+      error: `Payment cannot be captured (status: ${intent.status}). Renter may need to complete checkout first.`,
+    });
+    return;
+  }
 
-  res.status(200).json({
-    ok: true,
-    status: intent.status,
-    paid,
-    authorized,
-    onHold: intent.status === "requires_capture",
-  });
+  const captured = await stripe.paymentIntents.capture(intent.id);
+  await syncRentalPaymentFromIntent(admin, captured);
+
+  res.status(200).json({ ok: true, status: captured.status, captured: true });
 });

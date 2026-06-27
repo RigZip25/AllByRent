@@ -141,7 +141,7 @@ export function Step7Review({
             <ListingFeedCard
               title={previewTitle}
               price={previewPrice}
-              rating={4.8}
+              rating={0}
               reviews={0}
               distance="nearby"
               cover={draft.photos?.[0] ?? null}

@@ -25,6 +25,7 @@ export function BookingRequestCard({
 }) {
   const auth = useAuth();
   const [busy, setBusy] = useState<"approve" | "decline" | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const now = useNow(30_000);
   const timerLabel = useMemo(() => {
     if (!booking.approvalDeadline) return "Auto-cancelled soon";
@@ -37,6 +38,7 @@ export function BookingRequestCard({
     const hostUserId = auth.userId;
     if (!hostUserId || busy) return;
     setBusy(action);
+    setError(null);
     try {
       if (action === "approve") {
         await approveRentalBooking(booking, hostUserId);
@@ -44,6 +46,8 @@ export function BookingRequestCard({
         await declineRentalBooking(booking, hostUserId);
       }
       onRefresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setBusy(null);
     }
@@ -84,6 +88,12 @@ export function BookingRequestCard({
       {booking.paymentOnHold ? (
         <p className="mb-3 text-[12px] text-gray-500">
           Renter payment is authorized — it is not captured until you approve.
+        </p>
+      ) : null}
+
+      {error ? (
+        <p className="mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700">
+          {error}
         </p>
       ) : null}
 

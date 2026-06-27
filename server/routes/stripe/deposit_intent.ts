@@ -9,7 +9,7 @@ import { fetchRentalForPayments } from "../../lib/stripe/rentalAccess";
 
 type Body = { rentalId?: string };
 
-const RENTAL_PAID_STATUSES = new Set(["succeeded", "processing"]);
+const RENTAL_AUTHORIZED_STATUSES = new Set(["requires_capture", "succeeded", "processing"]);
 
 export default withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
@@ -60,13 +60,13 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
-  if (!rental.stripe_payment_status || !RENTAL_PAID_STATUSES.has(rental.stripe_payment_status)) {
+  if (!rental.stripe_payment_status || !RENTAL_AUTHORIZED_STATUSES.has(rental.stripe_payment_status)) {
     if (rental.stripe_payment_intent_id) {
       const secret = process.env.STRIPE_SECRET_KEY!;
       const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
       try {
         const rentalPi = await stripe.paymentIntents.retrieve(rental.stripe_payment_intent_id);
-        if (RENTAL_PAID_STATUSES.has(rentalPi.status)) {
+        if (RENTAL_AUTHORIZED_STATUSES.has(rentalPi.status)) {
           await admin
             .from("rentals")
             .update({ stripe_payment_status: rentalPi.status })

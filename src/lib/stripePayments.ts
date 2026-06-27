@@ -56,7 +56,7 @@ export async function createRentalPaymentIntent(params: {
 }
 
 export type SyncRentalPaymentResult =
-  | { ok: true; status: string; paid: boolean }
+  | { ok: true; status: string; paid: boolean; authorized?: boolean; onHold?: boolean }
   | { ok: false; reason: string };
 
 export async function syncRentalPaymentStatus(rentalId: string): Promise<SyncRentalPaymentResult> {
@@ -93,7 +93,42 @@ export async function syncRentalPaymentStatus(rentalId: string): Promise<SyncRen
     ok: true,
     status: payload.status,
     paid: Boolean(payload.paid),
+    authorized: Boolean(payload.authorized),
+    onHold: Boolean(payload.onHold),
   };
+}
+
+export async function captureRentalPayment(
+  rentalId: string,
+): Promise<{ ok: boolean; reason?: string; status?: string }> {
+  if (!isStripePaymentsEnabled()) {
+    return { ok: true, status: "no_payment" };
+  }
+
+  const token = await getAccessToken();
+  if (!token) {
+    return { ok: false, reason: "Sign in required" };
+  }
+
+  const res = await fetch("/api/stripe/payment_capture", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ rentalId }),
+  });
+
+  const payload = (await res.json()) as {
+    ok?: boolean;
+    error?: string;
+    reason?: string;
+    status?: string;
+  };
+  if (!res.ok || payload.ok === false) {
+    return { ok: false, reason: payload.error ?? payload.reason ?? "Payment capture failed" };
+  }
+  return { ok: true, status: payload.status };
 }
 
 export async function cancelRentalPayment(

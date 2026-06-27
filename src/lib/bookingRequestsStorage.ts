@@ -44,6 +44,22 @@ export function trackManualBookingRequest(bookingId: string, hostId: string): vo
   saveManualBookingRequests(records);
 }
 
+export function recordManualBookingExpired(bookingId: string, hostId: string): void {
+  const records = loadManualBookingRequests();
+  const idx = records.findIndex((r) => r.id === bookingId);
+  const createdAt = idx >= 0 ? records[idx].createdAt : new Date().toISOString();
+  const record: ManualRequestRecord = {
+    id: bookingId,
+    hostId,
+    createdAt,
+    respondedWithin24h: false,
+    outcome: "expired",
+  };
+  if (idx >= 0) records[idx] = record;
+  else records.unshift(record);
+  saveManualBookingRequests(records);
+}
+
 export function recordManualBookingResponse(
   bookingId: string,
   hostId: string,

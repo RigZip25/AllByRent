@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AlertTriangle, ArrowLeft, KeyRound } from "lucide-react";
 import { requestAccountDeletion, signInWithPasskey } from "../../lib/auth";
+import { resetAllAppData } from "../../lib/resetAppStorage";
 
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
@@ -37,7 +38,12 @@ export function DeleteAccountScreen({
   const handleRequestDeletion = () =>
     run("delete", async () => {
       const result = await requestAccountDeletion();
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
       setMessage(result.message);
+      await resetAllAppData();
       onDone();
     });
 
@@ -61,9 +67,8 @@ export function DeleteAccountScreen({
           </div>
 
           <p className="mt-2 text-[14px] text-gray-600">
-            For a frontend-only app, permanent deletion requires a secure server-side call (Supabase
-            Admin API / Edge Function). This screen implements a user-initiated request flow and
-            signs you out locally.
+            This permanently deletes your Supabase auth account and clears local app data on this
+            device. Active rentals and listings may still need manual review on the server.
           </p>
 
           {message ? (
@@ -97,17 +102,15 @@ export function DeleteAccountScreen({
               className="min-h-[48px] w-full rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
               style={{ backgroundColor: "#B91C1C" }}
             >
-              {busy === "delete" ? "Submitting…" : "Request account deletion"}
+              {busy === "delete" ? "Deleting…" : "Delete account permanently"}
             </button>
           </div>
 
           <p className="mt-4 text-[12px] text-gray-500">
-            Next step: implement a Supabase Edge Function (service role) and call it here after
-            re-auth.
+            Requires `SUPABASE_SERVICE_ROLE_KEY` on Vercel. Without it, deletion cannot complete.
           </p>
         </div>
       </div>
     </div>
   );
 }
-

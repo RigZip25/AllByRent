@@ -338,16 +338,35 @@ export async function requestAccountDeletion(): Promise<{ ok: boolean; message: 
   if (!supabase) {
     return { ok: false, message: "Account deletion requires Supabase auth configuration." };
   }
+
   const { data } = await supabase.auth.getSession();
-  const email = data.session?.user?.email ?? "";
-  const uid = data.session?.user?.id ?? "";
-  const message = [
-    "Account deletion requires a server-side component (Supabase Edge Function) to securely call the Admin API.",
-    "For now, this app can only sign you out locally.",
-    email || uid ? `Signed-in account: ${email || uid}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
-  await supabase.auth.signOut();
-  return { ok: true, message };
+  const token = data.session?.access_token;
+  if (!token) {
+    return { ok: false, message: "Sign in required to delete your account." };
+  }
+
+  try {
+    const res = await fetch("/api/auth/delete_account", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const payload = (await res.json()) as { ok?: boolean; message?: string; reason?: string };
+    if (!res.ok || !payload.ok) {
+      const reason = payload.reason ?? payload.message ?? `Deletion failed (${res.status})`;
+      return { ok: false, message: reason };
+    }
+
+    await supabase.auth.signOut();
+    return {
+      ok: true,
+      message: payload.message ?? "Your account was permanently deleted.",
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Account deletion failed.",
+    };
+  }
 }
