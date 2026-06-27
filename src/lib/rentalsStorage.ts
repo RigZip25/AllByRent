@@ -239,6 +239,15 @@ export function rentalBookingFromRemoteRow(
     returnPin: row.return_pin ?? undefined,
     depositAmountCents: row.deposit_amount_cents ?? undefined,
     stripePayment: Boolean(row.stripe_payment_intent_id),
+    paymentOnHold:
+      Boolean(row.stripe_payment_intent_id) &&
+      row.stripe_payment_status !== "succeeded" &&
+      row.status === "pending_approval",
+    approvalDeadline:
+      row.status === "pending_approval"
+        ? new Date(new Date(row.created_at).getTime() + 24 * 60 * 60 * 1000).toISOString()
+        : undefined,
+    manualBooking: row.status === "pending_approval",
   });
 }
 
@@ -260,7 +269,7 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
     counterpartyPhoneVerified: phone,
     listingModes: raw.listingModes ?? ["rent"],
     insuranceIncluded: raw.insuranceIncluded ?? false,
-    stripePayment: raw.stripePayment ?? true,
+    stripePayment: raw.stripePayment ?? false,
     fulfillmentMethod:
       raw.fulfillmentMethod ??
       (raw.pickupLabel.toLowerCase().includes("delivery") ? "delivery" : "pickup"),

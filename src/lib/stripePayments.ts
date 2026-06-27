@@ -96,6 +96,34 @@ export async function syncRentalPaymentStatus(rentalId: string): Promise<SyncRen
   };
 }
 
+export async function cancelRentalPayment(
+  rentalId: string,
+): Promise<{ ok: boolean; reason?: string }> {
+  if (!isStripePaymentsEnabled()) {
+    return { ok: true };
+  }
+
+  const token = await getAccessToken();
+  if (!token) {
+    return { ok: false, reason: "Sign in required" };
+  }
+
+  const res = await fetch("/api/stripe/payment_cancel", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ rentalId }),
+  });
+
+  const payload = (await res.json()) as { ok?: boolean; error?: string; reason?: string };
+  if (!res.ok || payload.ok === false) {
+    return { ok: false, reason: payload.error ?? payload.reason ?? "Payment cancel failed" };
+  }
+  return { ok: true };
+}
+
 export type DepositIntentResult =
   | {
       ok: true;

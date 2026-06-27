@@ -1,10 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useAuth } from "../../hooks/AuthProvider";
 import { useNow } from "../../hooks/useNow";
+import { approveRentalBooking, declineRentalBooking } from "../../lib/rentalApprovalActions";
 import { formatCountdownShort, getCountdownParts } from "../../lib/rentalTiming";
-import { pushInAppNotification } from "../../lib/inAppNotifications";
 import {
   formatRentalDateRange,
-  updateBooking,
   type RentalBooking,
 } from "../../lib/rentalsStorage";
 import { CounterpartyName } from "../trust/CounterpartyName";
@@ -23,6 +23,8 @@ export function BookingRequestCard({
   onRefresh: () => void;
   onViewProfile: (userId: string) => void;
 }) {
+  const auth = useAuth();
+  const [busy, setBusy] = useState<"approve" | "decline" | null>(null);
   const now = useNow(30_000);
   const timerLabel = useMemo(() => {
     if (!booking.approvalDeadline) return "Auto-cancelled soon";
@@ -31,28 +33,20 @@ export function BookingRequestCard({
     return `Auto-cancelled in ${formatCountdownShort(parts)}`;
   }, [booking.approvalDeadline, now]);
 
-  const approve = () => {
-    updateBooking(booking.id, {
-      status: "pending_checkin",
-      pickupWindowStart: new Date().toISOString(),
-      approvalDeadline: undefined,
-    });
-    pushInAppNotification({
-      type: "booking_request",
-      title: "Booking approved",
-      body: `${booking.counterpartyName} was notified — pickup details sent.`,
-    });
-    onRefresh();
-  };
-
-  const decline = () => {
-    updateBooking(booking.id, { status: "cancelled" });
-    pushInAppNotification({
-      type: "booking_request",
-      title: "Request declined",
-      body: `${booking.counterpartyName} received a full refund.`,
-    });
-    onRefresh();
+  const run = async (action: "approve" | "decline") => {
+    const hostUserId = auth.userId;
+    if (!hostUserId || busy) return;
+    setBusy(action);
+    try {
+      if (action === "approve") {
+        await approveRentalBooking(booking, hostUserId);
+      } else {
+        await declineRentalBooking(booking, hostUserId);
+      }
+      onRefresh();
+    } finally {
+      setBusy(null);
+    }
   };
 
   return (
@@ -87,23 +81,30 @@ export function BookingRequestCard({
       </div>
 
       <p className="mb-3 text-[12px] font-semibold text-amber-700">{timerLabel}</p>
+      {booking.paymentOnHold ? (
+        <p className="mb-3 text-[12px] text-gray-500">
+          Renter payment is authorized — it is not captured until you approve.
+        </p>
+      ) : null}
 
       <div className="flex gap-2">
         <button
           type="button"
-          onClick={approve}
-          className="flex-1 rounded-xl py-2.5 text-[14px] font-bold text-white"
+          disabled={Boolean(busy)}
+          onClick={() => void run("approve")}
+          className="flex-1 rounded-xl py-2.5 text-[14px] font-bold text-white disabled:opacity-60"
           style={{ backgroundColor: GREEN }}
         >
-          Approve
+          {busy === "approve" ? "Approving…" : "Approve"}
         </button>
         <button
           type="button"
-          onClick={decline}
-          className="flex-1 rounded-xl border py-2.5 text-[14px] font-semibold text-gray-600"
+          disabled={Boolean(busy)}
+          onClick={() => void run("decline")}
+          className="flex-1 rounded-xl border py-2.5 text-[14px] font-semibold text-gray-600 disabled:opacity-60"
           style={{ borderColor: BORDER }}
         >
-          Decline
+          {busy === "decline" ? "Declining…" : "Decline"}
         </button>
       </div>
     </article>

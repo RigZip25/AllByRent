@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useAuth } from "../../hooks/AuthProvider";
 import { useNow } from "../../hooks/useNow";
+import { cancelRefundLabel, cancelRentalRequest } from "../../lib/rentalApprovalActions";
 import { formatCountdownShort, getCountdownParts } from "../../lib/rentalTiming";
 import {
   formatRentalDateRange,
-  updateBooking,
   type RentalBooking,
 } from "../../lib/rentalsStorage";
 import { CounterpartyName } from "../trust/CounterpartyName";
@@ -22,6 +23,8 @@ export function PendingApprovalCard({
   onRefresh: () => void;
   onViewProfile: (userId: string) => void;
 }) {
+  const auth = useAuth();
+  const [busy, setBusy] = useState(false);
   const now = useNow(30_000);
   const ownerTimeLeft = useMemo(() => {
     if (!booking.approvalDeadline) return null;
@@ -29,6 +32,18 @@ export function PendingApprovalCard({
     if (parts.totalMs <= 0) return "Expired";
     return formatCountdownShort(parts);
   }, [booking.approvalDeadline, now]);
+
+  const handleCancel = async () => {
+    const renterUserId = auth.userId;
+    if (!renterUserId || busy) return;
+    setBusy(true);
+    try {
+      await cancelRentalRequest(booking, renterUserId);
+      onRefresh();
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <article className="rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
@@ -62,19 +77,19 @@ export function PendingApprovalCard({
           <p className="font-semibold" style={{ color: GREEN }}>
             Payment on hold — not charged until approved
           </p>
-        ) : null}
+        ) : (
+          <p>No payment required until the owner approves.</p>
+        )}
       </div>
 
       <button
         type="button"
-        className="mt-3 w-full rounded-xl border py-2.5 text-[14px] font-semibold text-gray-600"
+        disabled={busy}
+        className="mt-3 w-full rounded-xl border py-2.5 text-[14px] font-semibold text-gray-600 disabled:opacity-60"
         style={{ borderColor: BORDER }}
-        onClick={() => {
-          updateBooking(booking.id, { status: "cancelled" });
-          onRefresh();
-        }}
+        onClick={() => void handleCancel()}
       >
-        Cancel request (full refund)
+        {busy ? "Cancelling…" : cancelRefundLabel(booking)}
       </button>
     </article>
   );
