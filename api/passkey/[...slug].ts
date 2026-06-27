@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import authOptions from "@allbyrent/server/routes/passkey/auth/options";
-import { resolveApiRouteKey } from "@allbyrent/server/lib/resolveApiRouteKey";
+import { resolveApiRouteKey } from "@allbyrent/server/lib/safeHandler";
 import authVerify from "@allbyrent/server/routes/passkey/auth/verify";
 import registerOptions from "@allbyrent/server/routes/passkey/register/options";
 import registerVerify from "@allbyrent/server/routes/passkey/register/verify";

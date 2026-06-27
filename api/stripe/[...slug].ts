@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import auctionCheckout from "@allbyrent/server/routes/stripe/auction_checkout";
-import { resolveApiRouteKey } from "@allbyrent/server/lib/resolveApiRouteKey";
+import { resolveApiRouteKey } from "@allbyrent/server/lib/safeHandler";
 import boost from "@allbyrent/server/routes/stripe/boost";
 import connectAccountLink from "@allbyrent/server/routes/stripe/connect_account_link";
 import depositClaim from "@allbyrent/server/routes/stripe/deposit_claim";

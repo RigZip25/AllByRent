@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import authOtp from "@allbyrent/server/routes/auth/otp";
-import { resolveApiRouteKey } from "@allbyrent/server/lib/resolveApiRouteKey";
+import { resolveApiRouteKey } from "@allbyrent/server/lib/safeHandler";
 import deleteAccount from "@allbyrent/server/routes/auth/delete_account";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
