@@ -1,10 +1,33 @@
+import { useEffect, useState } from "react";
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { BadgeCheck, Shield, Star as StarIcon } from "lucide-react";
 import { getPublicProfile, type PublicUserProfile } from "../lib/demoUserProfiles";
+import { fetchRemoteProfile, type RemoteProfile } from "../lib/supabaseProfile";
 import { loadUserProfile, type UserProfile } from "../lib/userProfileStorage";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
+
+function looksLikeUuid(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+}
+
+function publicFromRemote(profile: RemoteProfile): PublicUserProfile {
+  return {
+    id: profile.id,
+    displayName: profile.display_name?.trim() || "Neighbor",
+    memberSince: profile.created_at,
+    avatarUrl: null,
+    identityVerified: Boolean(profile.identity_verified),
+    phoneVerified: Boolean(profile.phone_verified),
+    rating: profile.rating ?? 0,
+    transactionCount: 0,
+    reviewCount: 0,
+    noShowCount: 0,
+    listings: [],
+    reviews: [],
+  };
+}
 
 function publicFromOwn(profile: UserProfile): PublicUserProfile {
   return {
@@ -32,7 +55,45 @@ export function PublicProfileScreen({
 }) {
   const own = loadUserProfile();
   const isSelf = userId === own.id;
-  const profile = isSelf ? publicFromOwn(own) : getPublicProfile(userId);
+  const [remoteProfile, setRemoteProfile] = useState<PublicUserProfile | null>(null);
+  const [remoteLoading, setRemoteLoading] = useState(false);
+
+  const demoProfile = isSelf ? null : getPublicProfile(userId);
+  const profile = isSelf
+    ? publicFromOwn(own)
+    : demoProfile ?? remoteProfile;
+
+  useEffect(() => {
+    if (isSelf || demoProfile || !looksLikeUuid(userId)) {
+      setRemoteProfile(null);
+      setRemoteLoading(false);
+      return;
+    }
+    let mounted = true;
+    setRemoteLoading(true);
+    void fetchRemoteProfile(userId)
+      .then((remote) => {
+        if (!mounted) return;
+        setRemoteProfile(remote ? publicFromRemote(remote) : null);
+      })
+      .finally(() => {
+        if (mounted) setRemoteLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [userId, isSelf, demoProfile]);
+
+  if (remoteLoading && !profile) {
+    return (
+      <div className="screen flex flex-col bg-[#F0F4F2] p-4">
+        <button type="button" onClick={onBack} className="text-[15px] font-semibold" style={{ color: GREEN }}>
+          Back
+        </button>
+        <p className="mt-8 text-center text-gray-500">Loading profile…</p>
+      </div>
+    );
+  }
 
   if (!profile) {
     return (

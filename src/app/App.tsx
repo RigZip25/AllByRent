@@ -32,6 +32,7 @@ import { AttachmentViewerScreen } from "../screens/AttachmentViewerScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { RentalsScreen } from "../screens/RentalsScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
+import { PublicProfileScreen } from "../screens/PublicProfileScreen";
 import { GarageScreen } from "../screens/GarageScreen";
 import { ActiveGarageShopScreen } from "../screens/ActiveGarageShopScreen";
 import { GarageCartScreen } from "../screens/GarageCartScreen";
@@ -100,6 +101,7 @@ import {
 import { hasSeenGarageWorkflow } from "../lib/garageWorkflowStorage";
 import { hasSeenGarageSaleRules } from "../lib/garageSaleRulesStorage";
 import { resolveHostAccountId } from "../lib/hostIdentity";
+import { loadUserProfile } from "../lib/userProfileStorage";
 
 import {
   saveHomeFeedLens,
@@ -153,7 +155,8 @@ type Screen =
   | "identity"
   | "agentActivity"
   | "deleteAccount"
-  | "coHosts";
+  | "coHosts"
+  | "publicProfile";
 
 const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
   "browseHub",
@@ -369,6 +372,7 @@ function AppRoutes() {
     bootDeepLink.target?.kind === "listing" ? bootDeepLink.target.listingId : null,
   );
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [selectedPublicProfileUserId, setSelectedPublicProfileUserId] = useState<string | null>(null);
   const [selectedHostListingId, setSelectedHostListingId] = useState<string | null>(null);
   const [selectedNeighborGarageHostId, setSelectedNeighborGarageHostId] = useState<string | null>(() =>
     bootHostIdForDeepLink(bootDeepLink.target),
@@ -613,6 +617,15 @@ function AppRoutes() {
   const handleOpenMore = useCallback(() => goToTab("more"), [goToTab]);
   const handleOpenRentals = useCallback(() => goToTab("rentals"), [goToTab]);
   const handleOpenProfile = useCallback(() => goToTab("profile"), [goToTab]);
+  const handleViewPublicProfile = useCallback(
+    (userId: string) => {
+      const id = userId.trim();
+      if (!id) return;
+      setSelectedPublicProfileUserId(id);
+      navigateTo("publicProfile");
+    },
+    [navigateTo],
+  );
   const handleOpenFavorites = useCallback(() => goToTab("favorites"), [goToTab]);
   const handleOpenBusiness = useCallback(() => goToTab("earnBusiness"), [goToTab]);
   const handleOpenIntegrations = useCallback(() => navigateTo("integrationStatus"), [navigateTo]);
@@ -1233,6 +1246,11 @@ function AppRoutes() {
             onNavigate={handleNavigate}
             onStockGarage={handleStartListing}
             onViewShop={handleOpenMyGarageShop}
+            onViewProfile={handleViewPublicProfile}
+            onOpenRental={(bookingId) => {
+              setSelectedBookingId(bookingId);
+              navigateTo("activeRental");
+            }}
           />
         )}
 
@@ -1297,7 +1315,7 @@ function AppRoutes() {
               setSelectedBookingId(bookingId);
               navigateTo("activeRental");
             }}
-            onViewProfile={() => handleOpenProfile()}
+            onViewProfile={handleViewPublicProfile}
             onReRent={() => {
               setNavStack([]);
               setCurrentScreen("browseHub");
@@ -1316,6 +1334,17 @@ function AppRoutes() {
             onOpenCoHosts={() => navigateTo("coHosts")}
             onOpenIdentity={() => navigateTo("identity")}
             onOpenAgentActivity={() => navigateTo("agentActivity")}
+            onViewPublicProfile={() => {
+              const userId = auth.userId ?? loadUserProfile().id;
+              handleViewPublicProfile(userId);
+            }}
+          />
+        )}
+
+        {currentScreen === "publicProfile" && selectedPublicProfileUserId && (
+          <PublicProfileScreen
+            userId={selectedPublicProfileUserId}
+            onBack={handleBack}
           />
         )}
 
