@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { BadgeCheck, Shield, Star as StarIcon } from "lucide-react";
 import { getPublicProfile, type PublicUserProfile } from "../lib/demoUserProfiles";
 import { fetchRemoteProfile, type RemoteProfile } from "../lib/supabaseProfile";
 import { loadUserProfile, type UserProfile } from "../lib/userProfileStorage";
+import { loadPublishedListings } from "../lib/listingStorage";
+import { getListingDisplayTitle } from "../lib/listingQr";
+import { categoryEmoji } from "../lib/listingCardMeta";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -46,12 +49,26 @@ function publicFromOwn(profile: UserProfile): PublicUserProfile {
   };
 }
 
+function listingsForHost(hostId: string): PublicUserProfile["listings"] {
+  return loadPublishedListings()
+    .filter((listing) => listing.hostId === hostId && listing.listingStatus === "active")
+    .slice(0, 12)
+    .map((listing) => ({
+      id: listing.id,
+      title: getListingDisplayTitle(listing.title),
+      emoji: categoryEmoji(listing.category),
+      pricePerDay: Number.parseFloat(listing.pricing.dailyRate) || 0,
+    }));
+}
+
 export function PublicProfileScreen({
   userId,
   onBack,
+  onOpenListing,
 }: {
   userId: string;
   onBack: () => void;
+  onOpenListing?: (listingId: string) => void;
 }) {
   const own = loadUserProfile();
   const isSelf = userId === own.id;
@@ -59,9 +76,14 @@ export function PublicProfileScreen({
   const [remoteLoading, setRemoteLoading] = useState(false);
 
   const demoProfile = isSelf ? null : getPublicProfile(userId);
-  const profile = isSelf
-    ? publicFromOwn(own)
-    : demoProfile ?? remoteProfile;
+  const baseProfile = isSelf ? publicFromOwn(own) : demoProfile ?? remoteProfile;
+  const hostListings = useMemo(() => listingsForHost(userId), [userId]);
+  const profile = baseProfile
+    ? {
+        ...baseProfile,
+        listings: baseProfile.listings.length > 0 ? baseProfile.listings : hostListings,
+      }
+    : null;
 
   useEffect(() => {
     if (isSelf || demoProfile || !looksLikeUuid(userId)) {
@@ -216,18 +238,22 @@ export function PublicProfileScreen({
             </h3>
             <ul className="flex flex-col gap-2">
               {profile.listings.map((l) => (
-                <li
-                  key={l.id}
-                  className="flex items-center gap-3 rounded-2xl border bg-white p-3"
-                  style={{ borderColor: BORDER }}
-                >
-                  <span className="text-2xl">{l.emoji}</span>
-                  <div className="flex-1">
-                    <p className="font-semibold" style={{ color: GREEN }}>
-                      {l.title}
-                    </p>
-                    <p className="text-[13px] text-gray-500">${l.pricePerDay}/day</p>
-                  </div>
+                <li key={l.id}>
+                  <button
+                    type="button"
+                    disabled={!onOpenListing}
+                    onClick={() => onOpenListing?.(l.id)}
+                    className="flex w-full items-center gap-3 rounded-2xl border bg-white p-3 text-left disabled:cursor-default"
+                    style={{ borderColor: BORDER }}
+                  >
+                    <span className="text-2xl">{l.emoji}</span>
+                    <div className="flex-1">
+                      <p className="font-semibold" style={{ color: GREEN }}>
+                        {l.title}
+                      </p>
+                      <p className="text-[13px] text-gray-500">${l.pricePerDay}/day</p>
+                    </div>
+                  </button>
                 </li>
               ))}
             </ul>

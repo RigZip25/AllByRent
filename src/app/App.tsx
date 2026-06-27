@@ -1362,6 +1362,7 @@ function AppRoutes() {
           <PublicProfileScreen
             userId={selectedPublicProfileUserId}
             onBack={handleBack}
+            onOpenListing={handleOpenListingFromFeed}
           />
         )}
 
@@ -1395,6 +1396,10 @@ function AppRoutes() {
             onBack={handleBack}
             mode={getAppMode()}
             onOpenRentals={handleOpenRentals}
+            onOpenRental={(bookingId) => {
+              setSelectedBookingId(bookingId);
+              navigateTo("activeRental");
+            }}
           />
         )}
 

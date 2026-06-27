@@ -1,5 +1,6 @@
 import type { ListingDraft } from "../screens/listing/types";
 import { getPublicProfile } from "./demoUserProfiles";
+import { getActiveRentLocationLabel, getProfileCity } from "./listingStorage";
 
 export function garageDisplayName(hostId: string | undefined): string {
   if (!hostId) return "Host's Garage";
@@ -15,8 +16,11 @@ export function garageTrustLine(hostId: string | undefined): {
 } {
   const profile = hostId ? getPublicProfile(hostId) : null;
   const name = garageDisplayName(hostId);
-  const rating = profile?.rating ?? 4.8;
-  const distance = mockDistanceMi(hostId ?? "neighbor");
+  const rating = profile?.rating ?? 0;
+  const city = getProfileCity().trim().toLowerCase();
+  const active = getActiveRentLocationLabel().trim().toLowerCase();
+  const distance =
+    city && active && city === active ? "Near you" : mockDistanceMi(hostId ?? "neighbor");
   return { name, rating, distance };
 }
 

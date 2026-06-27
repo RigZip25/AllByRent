@@ -19,6 +19,7 @@ import {
   type RentalBooking,
 } from "../../lib/rentalsStorage";
 import { createNotificationRemote } from "../../lib/notificationsStorage";
+import { fetchRemoteProfile } from "../../lib/supabaseProfile";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
 import { StripePaymentForm } from "../../components/payments/StripePaymentForm";
 import { getStripeRequiredMessage, isPaymentsReady } from "../../lib/config/production";
@@ -32,6 +33,34 @@ function addDays(isoDate: string, days: number): string {
   const d = new Date(isoDate);
   d.setDate(d.getDate() + days);
   return d.toISOString().slice(0, 10);
+}
+
+function defaultStartIso(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 2);
+  return d.toISOString().slice(0, 10);
+}
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function isRangeBlocked(
+  start: string,
+  end: string,
+  blocked: ListingDraft["blockedDates"],
+): boolean {
+  const startMs = new Date(start).getTime();
+  const endMs = new Date(end).getTime();
+  if (Number.isNaN(startMs) || Number.isNaN(endMs)) return false;
+  for (const entry of blocked ?? []) {
+    const bStart = new Date(entry.start).getTime();
+    const bEnd = new Date(entry.end).getTime();
+    if (!Number.isNaN(bStart) && !Number.isNaN(bEnd) && startMs <= bEnd && endMs >= bStart) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function fulfillmentOptions(listing: ListingDraft): {
@@ -143,6 +172,21 @@ function BookingScreenLoaded({
   const [pendingDepositCents, setPendingDepositCents] = useState(0);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
+  const [startDate, setStartDate] = useState(defaultStartIso);
+  const [hostDisplayName, setHostDisplayName] = useState("Host");
+
+  useEffect(() => {
+    const hostId = listing.hostId?.trim();
+    if (!hostId) return;
+    let mounted = true;
+    void fetchRemoteProfile(hostId).then((remote) => {
+      if (!mounted || !remote?.display_name?.trim()) return;
+      setHostDisplayName(remote.display_name.trim());
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [listing.hostId]);
 
   useEffect(() => {
     return () => {
@@ -150,12 +194,8 @@ function BookingScreenLoaded({
     };
   }, []);
 
-  const startDate = useMemo(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 2);
-    return d.toISOString().slice(0, 10);
-  }, []);
   const endDate = addDays(startDate, rentalDays - 1);
+  const datesBlocked = isRangeBlocked(startDate, endDate, listing.blockedDates);
 
   const deliveryRequested = fulfillment === "delivery";
   const depositAmountCents = parseUsdToCents(listing.pricing.securityDeposit ?? "");
@@ -170,7 +210,8 @@ function BookingScreenLoaded({
     [listing, rentalDays, deliveryRequested],
   );
 
-  const canConfirm = !deliveryRequested || deliveryAddress.trim().length > 0;
+  const canConfirm =
+    (!deliveryRequested || deliveryAddress.trim().length > 0) && !datesBlocked;
 
   const stripeCheckout =
     isPaymentsReady() && Boolean(auth.userId && listing.hostId);
@@ -193,7 +234,7 @@ function BookingScreenLoaded({
       endDate,
       listingId: listing.id,
       counterpartyId: listing.hostId ?? "",
-      counterpartyName: "Host",
+      counterpartyName: hostDisplayName,
       counterpartyIdentityVerified: false,
       counterpartyPhoneVerified: false,
       pickupLabel,
@@ -228,6 +269,8 @@ function BookingScreenLoaded({
         type: "booking_request",
         title: "New booking request",
         body: `Someone wants to rent your ${title}.`,
+        rentalId: id,
+        listingId: listing.id,
       });
     }
     appendRentalBooking(booking);
@@ -394,6 +437,21 @@ function BookingScreenLoaded({
             {new Date(startDate).toLocaleDateString()} –{" "}
             {new Date(endDate).toLocaleDateString()}
           </p>
+          <label className="mt-3 block text-xs font-medium text-muted-foreground">
+            Pickup start date
+          </label>
+          <input
+            type="date"
+            value={startDate}
+            min={todayIso()}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+          />
+          {datesBlocked ? (
+            <p className="mt-2 text-xs font-semibold text-red-600">
+              These dates overlap blocked availability on the listing.
+            </p>
+          ) : null}
         </div>
 
         <div className="space-y-2">

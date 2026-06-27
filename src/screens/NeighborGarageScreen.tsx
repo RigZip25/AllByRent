@@ -24,6 +24,7 @@ export function NeighborGarageScreen({
   const [listings, setListings] = useState<Awaited<ReturnType<typeof fetchActiveListingsForCityRemote>>>([]);
   const [loading, setLoading] = useState(true);
   const [following, setFollowing] = useState(() => isFollowingGarage(hostId));
+  const [followHint, setFollowHint] = useState<string | null>(null);
   const city = getActiveRentLocationLabel().trim();
   const garageName = useMemo(() => garageDisplayName(hostId), [hostId]);
 
@@ -61,9 +62,10 @@ export function NeighborGarageScreen({
           onClick={() => {
             const followerId = auth.userId;
             if (!followerId) {
-              window.alert("Sign in to follow this garage.");
+              setFollowHint("Sign in to follow this garage and get listing alerts.");
               return;
             }
+            setFollowHint(null);
             if (following) {
               void persistUnfollow(hostId, followerId).then(() => setFollowing(false));
               return;
@@ -95,6 +97,7 @@ export function NeighborGarageScreen({
         >
           {following ? "Following · alerts on" : "Follow · get new listing alerts"}
         </button>
+        {followHint ? <p className="mt-2 text-[13px] font-medium text-amber-800">{followHint}</p> : null}
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">

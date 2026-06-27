@@ -1,5 +1,5 @@
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
-import { pushInAppNotification } from "./inAppNotifications";
+import { loadInAppNotifications, pushInAppNotification } from "./inAppNotifications";
 import type { Session } from "@supabase/supabase-js";
 
 async function trySendWebPush(input: {
@@ -43,6 +43,8 @@ export type Notification = {
   body: string;
   readAt: string | null;
   createdAt: string;
+  rentalId?: string | null;
+  listingId?: string | null;
 };
 
 export type RemoteNotificationInsert = {
@@ -89,12 +91,15 @@ export async function createNotificationRemote(params: {
   type: NotificationType;
   title: string;
   body: string;
+  rentalId?: string;
+  listingId?: string;
 }): Promise<void> {
-  // Local fallback is still useful for demo/single-device flows.
   pushInAppNotification({
     type: params.type === "booking_request" ? "booking_request" : "general",
     title: params.title,
     body: params.body,
+    rentalId: params.rentalId,
+    listingId: params.listingId,
   });
 
   if (!isSupabaseConfigured()) return;
@@ -145,6 +150,24 @@ export async function fetchNotificationsRemote(recipientId: string): Promise<Not
     read_at: string | null;
     created_at: string;
   }>).map(rowToNotification);
+}
+
+export function mergeWithLocalNotifications(remote: Notification[]): Notification[] {
+  const local = loadInAppNotifications().map((n) => ({
+    id: n.id,
+    recipientId: "local",
+    actorId: null,
+    type: (n.type === "booking_request" ? "booking_request" : "general") as NotificationType,
+    title: n.title,
+    body: n.body,
+    readAt: n.read ? n.createdAt : null,
+    createdAt: n.createdAt,
+    rentalId: n.rentalId ?? null,
+    listingId: n.listingId ?? null,
+  }));
+  const seen = new Set(remote.map((row) => row.id));
+  const extras = local.filter((row) => !seen.has(row.id));
+  return [...remote, ...extras].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export async function markNotificationReadRemote(

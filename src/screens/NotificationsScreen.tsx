@@ -21,7 +21,7 @@ import { getAppMode, type AppMode } from "../lib/appMode";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { useAuth } from "../hooks/AuthProvider";
 import { loadInAppNotifications, type InAppNotification } from "../lib/inAppNotifications";
-import { fetchNotificationsRemote, markNotificationReadRemote, type Notification } from "../lib/notificationsStorage";
+import { fetchNotificationsRemote, markNotificationReadRemote, mergeWithLocalNotifications, type Notification } from "../lib/notificationsStorage";
 import { savePushSubscriptionRemote, subscribeToPush } from "../lib/pushNotifications";
 import { NotificationPreferencesPanel } from "../components/notifications/NotificationPreferencesPanel";
 import { MrRentano } from "../app/components/MrRentano";
@@ -196,9 +196,15 @@ type NotificationsScreenProps = {
   onBack: () => void;
   mode?: AppMode;
   onOpenRentals?: () => void;
+  onOpenRental?: (bookingId: string) => void;
 };
 
-export function NotificationsScreen({ onBack, mode: modeProp, onOpenRentals }: NotificationsScreenProps) {
+export function NotificationsScreen({
+  onBack,
+  mode: modeProp,
+  onOpenRentals,
+  onOpenRental,
+}: NotificationsScreenProps) {
   const mode = modeProp ?? getAppMode();
   const auth = useAuth();
   const [tab, setTab] = useState<NotificationTab>("all");
@@ -237,6 +243,8 @@ export function NotificationsScreen({ onBack, mode: modeProp, onOpenRentals }: N
         body: n.body,
         readAt: n.read ? n.createdAt : null,
         createdAt: n.createdAt,
+        rentalId: n.rentalId ?? null,
+        listingId: n.listingId ?? null,
       }));
       setItems(local);
       return;
@@ -246,7 +254,7 @@ export function NotificationsScreen({ onBack, mode: modeProp, onOpenRentals }: N
     void fetchNotificationsRemote(auth.userId)
       .then((data) => {
         if (!mounted) return;
-        setItems(data);
+        setItems(mergeWithLocalNotifications(data));
       })
       .finally(() => {
         if (!mounted) return;
@@ -277,7 +285,10 @@ export function NotificationsScreen({ onBack, mode: modeProp, onOpenRentals }: N
         );
       });
     }
-    if (n.type === "booking_request") onOpenRentals?.();
+    if (n.type === "booking_request") {
+      if (n.rentalId && onOpenRental) onOpenRental(n.rentalId);
+      else onOpenRentals?.();
+    }
   };
 
   const hasInboxItems =

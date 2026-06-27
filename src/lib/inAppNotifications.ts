@@ -7,6 +7,8 @@ export type InAppNotification = {
   createdAt: string;
   read: boolean;
   type: "booking_request" | "running_late" | "return" | "general";
+  rentalId?: string;
+  listingId?: string;
 };
 
 export function loadInAppNotifications(): InAppNotification[] {

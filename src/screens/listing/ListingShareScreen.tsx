@@ -184,11 +184,11 @@ export function ListingShareScreen({
 
   const beginBoost = (opt: { label: string; cents: number; hours: number }) => {
     if (!auth.userId) {
-      window.alert(getSignInRequiredMessage());
+      setBoostError(getSignInRequiredMessage());
       return;
     }
     if (!isPaymentsReady()) {
-      window.alert(getStripeRequiredMessage());
+      setBoostError(getStripeRequiredMessage());
       return;
     }
     setBoostBusy(true);

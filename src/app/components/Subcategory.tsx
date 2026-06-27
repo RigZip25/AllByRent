@@ -30,6 +30,7 @@ import { categoryIdFromName } from "../../screens/listing/listingItemCategories"
 import type { ListingDraft } from "../../screens/listing/types";
 
 import { getListingDisplayTitle } from "../../lib/listingQr";
+import { listingCardMeta } from "../../lib/listingCardMeta";
 import type { MediaRef } from "../../lib/mediaStore";
 import { ListingFeedCard, offerTypeFromModes } from "./ListingFeedCard";
 
@@ -330,19 +331,20 @@ export function Subcategory({
 
 
 
-  const gridItems = filteredShelfListings.map((listing) => ({
-
+  const gridItems = filteredShelfListings.map((listing) => {
+    const meta = listingCardMeta(listing);
+    return {
     id: listing.id,
 
     title: getListingDisplayTitle(listing.title) || listing.title || "Listing",
 
     price: listing.pricing.dailyRate || "—",
 
-    rating: 4.8,
+    rating: meta.rating,
 
-    reviews: 0,
+    reviews: meta.reviews,
 
-    distance: "nearby",
+    distance: meta.distance,
 
     cover: listing.photos?.[0] ?? null,
 
@@ -350,7 +352,8 @@ export function Subcategory({
 
     itemHeavy: listing.handoff.itemHeavy,
 
-  }));
+  };
+  });
 
 
 
