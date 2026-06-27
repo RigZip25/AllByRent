@@ -700,7 +700,14 @@ export function ActiveRental({
               role: booking.role === "renter" ? "renter" : "host",
               rating,
               comment,
-            }).finally(() => setReviewOpen(false));
+            })
+              .then(() => {
+                updateBooking(booking.id, {
+                  review: { rating, leftAt: new Date().toISOString() },
+                });
+                setBookings(loadRentalBookings());
+              })
+              .finally(() => setReviewOpen(false));
           }}
         />
       ) : null}
