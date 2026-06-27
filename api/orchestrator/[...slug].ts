@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import orchestratorRun from "../../server/routes/orchestrator/run";
+import orchestratorRun from "@allbyrent/server/routes/orchestrator/run";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 

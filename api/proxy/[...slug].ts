@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import anthropic from "../../server/routes/anthropic";
-import photoroom from "../../server/routes/photoroom";
+import anthropic from "@allbyrent/server/routes/anthropic";
+import photoroom from "@allbyrent/server/routes/photoroom";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 

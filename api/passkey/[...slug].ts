@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import authOptions from "../../server/routes/passkey/auth/options";
-import authVerify from "../../server/routes/passkey/auth/verify";
-import registerOptions from "../../server/routes/passkey/register/options";
-import registerVerify from "../../server/routes/passkey/register/verify";
+import authOptions from "@allbyrent/server/routes/passkey/auth/options";
+import authVerify from "@allbyrent/server/routes/passkey/auth/verify";
+import registerOptions from "@allbyrent/server/routes/passkey/register/options";
+import registerVerify from "@allbyrent/server/routes/passkey/register/verify";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 

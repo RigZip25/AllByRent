@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import safelyQuote from "../../server/routes/safely/quote";
+import safelyQuote from "@allbyrent/server/routes/safely/quote";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 

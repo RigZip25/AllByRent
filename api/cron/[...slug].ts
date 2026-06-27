@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import rentalNoShow from "../../server/routes/cron/rental-no-show";
-import rentalOverdue from "../../server/routes/cron/rental-overdue";
-import rentalPendingExpiry from "../../server/routes/cron/rental-pending-expiry";
+import rentalNoShow from "@allbyrent/server/routes/cron/rental-no-show";
+import rentalOverdue from "@allbyrent/server/routes/cron/rental-overdue";
+import rentalPendingExpiry from "@allbyrent/server/routes/cron/rental-pending-expiry";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 
