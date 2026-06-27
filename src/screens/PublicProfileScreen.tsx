@@ -7,6 +7,7 @@ import { loadUserProfile, type UserProfile } from "../lib/userProfileStorage";
 import { loadPublishedListings } from "../lib/listingStorage";
 import { getListingDisplayTitle } from "../lib/listingQr";
 import { categoryEmoji } from "../lib/listingCardMeta";
+import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -74,6 +75,8 @@ export function PublicProfileScreen({
   const isSelf = userId === own.id;
   const [remoteProfile, setRemoteProfile] = useState<PublicUserProfile | null>(null);
   const [remoteLoading, setRemoteLoading] = useState(false);
+  const [fetchedReviews, setFetchedReviews] = useState<PublicUserProfile["reviews"] | null>(null);
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   const demoProfile = isSelf ? null : getPublicProfile(userId);
   const baseProfile = isSelf ? publicFromOwn(own) : demoProfile ?? remoteProfile;
@@ -82,8 +85,40 @@ export function PublicProfileScreen({
     ? {
         ...baseProfile,
         listings: baseProfile.listings.length > 0 ? baseProfile.listings : hostListings,
+        reviews:
+          baseProfile.reviews.length > 0
+            ? baseProfile.reviews
+            : (fetchedReviews ?? baseProfile.reviews),
+        reviewCount:
+          baseProfile.reviews.length > 0
+            ? baseProfile.reviewCount
+            : Math.max(baseProfile.reviewCount, fetchedReviews?.length ?? 0),
       }
     : null;
+
+  useEffect(() => {
+    setShowAllReviews(false);
+    if (demoProfile) {
+      setFetchedReviews(null);
+      return;
+    }
+    let mounted = true;
+    void fetchReviewsForUserRemote(userId).then((rows) => {
+      if (!mounted) return;
+      setFetchedReviews(
+        rows.map((r) => ({
+          id: r.id,
+          authorName: r.role === "host" ? "Host" : "Renter",
+          rating: r.rating,
+          text: r.comment || "No comment",
+          date: r.createdAt,
+        })),
+      );
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [userId, demoProfile]);
 
   useEffect(() => {
     if (isSelf || demoProfile || !looksLikeUuid(userId)) {
@@ -210,7 +245,7 @@ export function PublicProfileScreen({
               Reviews
             </h3>
             <ul className="flex flex-col gap-2">
-              {profile.reviews.slice(0, 3).map((r) => (
+              {(showAllReviews ? profile.reviews : profile.reviews.slice(0, 3)).map((r) => (
                 <li key={r.id} className="rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
                   <div className="mb-1 flex items-center justify-between">
                     <span className="text-[14px] font-semibold">{r.authorName}</span>
@@ -223,9 +258,14 @@ export function PublicProfileScreen({
                 </li>
               ))}
             </ul>
-            {profile.reviewCount > 3 ? (
-              <button type="button" className="mt-2 text-[14px] font-semibold" style={{ color: GREEN }}>
-                See all {profile.reviewCount} reviews
+            {profile.reviews.length > 3 && !showAllReviews ? (
+              <button
+                type="button"
+                onClick={() => setShowAllReviews(true)}
+                className="mt-2 text-[14px] font-semibold"
+                style={{ color: GREEN }}
+              >
+                See all {profile.reviews.length} reviews
               </button>
             ) : null}
           </>

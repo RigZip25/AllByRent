@@ -1,7 +1,10 @@
 import { MASCOT_NAME } from "../../lib/brand";
 import { Star } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useAuth } from "../../hooks/AuthProvider";
 import { useNow } from "../../hooks/useNow";
+import { submitReviewRemote } from "../../lib/reviewsStorage";
+import { ReviewPromptModal } from "../reviews/ReviewPromptModal";
 import {
   canMarkNoShow,
   formatCountdownShort,
@@ -172,7 +175,9 @@ export function RentalCard({
   onViewProfile?: (userId: string) => void;
   onReRent?: (booking: RentalBooking) => void;
 }) {
+  const auth = useAuth();
   const [runningLateOpen, setRunningLateOpen] = useState(false);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const now = useNow(booking.status === "active" || booking.status === "overdue" ? 1000 : 30_000);
 
   const roleLabel = booking.role === "renter" ? "Renting" : "Hosting";
@@ -331,9 +336,10 @@ export function RentalCard({
               <ActionButton
                 label="Leave a review"
                 variant="cta"
-                onClick={handleAction({
-                  review: { rating: 5, leftAt: new Date().toISOString() },
-                })}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setReviewModalOpen(true);
+                }}
               />
               <p className="mt-2 flex items-center gap-2 text-[12px] text-gray-500">
                 <span
@@ -389,6 +395,33 @@ export function RentalCard({
         onClose={() => setRunningLateOpen(false)}
         onSent={onRefresh}
       />
+
+      {auth.userId ? (
+        <ReviewPromptModal
+          open={reviewModalOpen}
+          title={`for ${booking.counterpartyName}`}
+          onClose={() => setReviewModalOpen(false)}
+          onSubmit={(rating, comment) => {
+            const reviewerId = auth.userId;
+            if (!reviewerId) return;
+            void submitReviewRemote({
+              rentalId: booking.id,
+              reviewerId,
+              revieweeId: booking.counterpartyId,
+              role: booking.role === "renter" ? "renter" : "host",
+              rating,
+              comment,
+            })
+              .then(() => {
+                updateBooking(booking.id, {
+                  review: { rating, leftAt: new Date().toISOString() },
+                });
+                onRefresh();
+              })
+              .finally(() => setReviewModalOpen(false));
+          }}
+        />
+      ) : null}
     </article>
   );
 }

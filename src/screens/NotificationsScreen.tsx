@@ -20,7 +20,7 @@ import { usePwaUpdate } from "../hooks/PwaUpdateProvider";
 import { getAppMode, type AppMode } from "../lib/appMode";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { useAuth } from "../hooks/AuthProvider";
-import { loadInAppNotifications, type InAppNotification } from "../lib/inAppNotifications";
+import { loadInAppNotifications, markInAppNotificationRead, type InAppNotification } from "../lib/inAppNotifications";
 import { fetchNotificationsRemote, markNotificationReadRemote, mergeWithLocalNotifications, type Notification } from "../lib/notificationsStorage";
 import { savePushSubscriptionRemote, subscribeToPush } from "../lib/pushNotifications";
 import { NotificationPreferencesPanel } from "../components/notifications/NotificationPreferencesPanel";
@@ -276,6 +276,17 @@ export function NotificationsScreen({
     return items;
   }, [items, tab]);
 
+  const handleMessageTap = (n: InAppNotification) => {
+    if (!n.read) {
+      markInAppNotificationRead(n.id);
+      setLocalMessages((prev) =>
+        prev.map((p) => (p.id === n.id ? { ...p, read: true } : p)),
+      );
+    }
+    if (n.rentalId && onOpenRental) onOpenRental(n.rentalId);
+    else onOpenRentals?.();
+  };
+
   const handleNotificationTap = (n: Notification) => {
     if (!auth.userId) return;
     if (!n.readAt) {
@@ -426,9 +437,14 @@ export function NotificationsScreen({
             <ul className="flex flex-col gap-3">
               {messageItems.map((n) => (
                 <li key={n.id}>
-                  <div
+                  <button
+                    type="button"
+                    onClick={() => handleMessageTap(n)}
                     className="flex w-full items-start gap-3 rounded-2xl border bg-white p-4 text-left"
-                    style={{ borderColor: BORDER }}
+                    style={{
+                      borderColor: BORDER,
+                      opacity: n.read ? 0.75 : 1,
+                    }}
                   >
                     <div
                       className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
@@ -445,7 +461,7 @@ export function NotificationsScreen({
                         {new Date(n.createdAt).toLocaleString()}
                       </p>
                     </div>
-                  </div>
+                  </button>
                 </li>
               ))}
             </ul>
