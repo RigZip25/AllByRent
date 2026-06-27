@@ -547,13 +547,27 @@ export function Subcategory({
             cityName={cityName}
 
             appMode={appMode}
-            requests={requests}
+            fullRequests={requests}
+            requests={requests.map((r) => ({
+              id: r.id,
+              description: r.description,
+              createdAt: r.createdAt,
+            }))}
 
             onBack={() => setSelectedSubcategory(null)}
 
             onPostRequest={() => onPostRequest(shelfPrefill)}
 
             onStartListing={() => onStartListing(shelfPrefill)}
+
+            onFulfillRequest={(r) =>
+              onStartListing({
+                category: r.category,
+                subcategory: r.subcategory,
+                city: cityName,
+                query: r.description.slice(0, 120),
+              })
+            }
 
             onShare={handleShare}
 

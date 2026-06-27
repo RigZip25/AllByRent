@@ -146,6 +146,7 @@ export function ProfileScreen({
   onEditLocation,
   onOpenNotifications,
   onOpenCoHosts,
+  onOpenPersonalInfo,
   onOpenIdentity,
   onOpenAgentActivity,
   onDeleteAccount,
@@ -157,6 +158,7 @@ export function ProfileScreen({
   onEditLocation: () => void;
   onOpenNotifications: () => void;
   onOpenCoHosts?: () => void;
+  onOpenPersonalInfo?: () => void;
   onOpenIdentity?: () => void;
   onOpenAgentActivity?: () => void;
   onDeleteAccount?: () => void;
@@ -434,6 +436,7 @@ export function ProfileScreen({
               icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label="Personal info"
               value={emailLabel}
+              onClick={() => onOpenPersonalInfo?.()}
             />
           </li>
           {onOpenCoHosts ? (

@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Heart } from "lucide-react";
+import { useAuth } from "../hooks/AuthProvider";
 import {
   loadFavoriteListingIds,
-  toggleFavoriteListing,
+  syncFavoritesFromRemote,
+  toggleFavoriteListingForUser,
 } from "../lib/favoritesStorage";
 import { loadPublishedListings } from "../lib/listingStorage";
 import { getListingDisplayTitle } from "../lib/listingQr";
@@ -74,7 +76,19 @@ export function FavoritesScreen({
   onHome: () => void;
   onOpenListing: (listingId: string) => void;
 }) {
+  const auth = useAuth();
   const [favoriteIds, setFavoriteIds] = useState(() => loadFavoriteListingIds());
+
+  useEffect(() => {
+    if (!auth.userId) return;
+    let mounted = true;
+    void syncFavoritesFromRemote(auth.userId).then((ids) => {
+      if (mounted) setFavoriteIds(ids);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [auth.userId]);
 
   const favorites = useMemo(() => {
     const listings = loadPublishedListings();
@@ -85,8 +99,9 @@ export function FavoritesScreen({
   }, [favoriteIds]);
 
   const handleRemove = (id: string) => {
-    toggleFavoriteListing(id);
-    setFavoriteIds(loadFavoriteListingIds());
+    void toggleFavoriteListingForUser(auth.userId, id).then(() => {
+      setFavoriteIds(loadFavoriteListingIds());
+    });
   };
 
   return (

@@ -286,6 +286,87 @@ export function appendRentalBooking(booking: RentalBooking): RentalBooking[] {
   return next;
 }
 
+const STATUS_PROGRESS_RANK: Record<RentalStatus, number> = {
+  cancelled: 0,
+  pending_approval: 1,
+  upcoming: 2,
+  pending_checkin: 3,
+  active: 4,
+  no_show: 5,
+  overdue: 6,
+  disputed: 7,
+  completed: 10,
+};
+
+function mergeRentalBooking(local: RentalBooking, remote: RentalBooking): RentalBooking {
+  const localRank = STATUS_PROGRESS_RANK[local.status] ?? 0;
+  const remoteRank = STATUS_PROGRESS_RANK[remote.status] ?? 0;
+  const status = localRank >= remoteRank ? local.status : remote.status;
+  return normalizeBooking({
+    ...remote,
+    ...local,
+    status,
+    pickupPin: remote.pickupPin ?? local.pickupPin,
+    returnPin: remote.returnPin ?? local.returnPin,
+    review: local.review ?? remote.review,
+    runningLateMessage: local.runningLateMessage ?? remote.runningLateMessage,
+    runningLateSentAt: local.runningLateSentAt ?? remote.runningLateSentAt,
+    runningLateAcknowledged: local.runningLateAcknowledged ?? remote.runningLateAcknowledged,
+    disputeEscalated: local.disputeEscalated ?? remote.disputeEscalated,
+  });
+}
+
+export async function updateRentalRemote(
+  rentalId: string,
+  patch: {
+    status?: RentalStatus;
+    pickupPin?: string | null;
+    returnPin?: string | null;
+    pickupAt?: string | null;
+    dueAt?: string | null;
+    pickedUpAt?: string | null;
+    returnedAt?: string | null;
+    noShowMarkedAt?: string | null;
+  },
+): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
+
+  const row: Record<string, string | null> = {};
+  if (patch.status !== undefined) row.status = patch.status;
+  if (patch.pickupPin !== undefined) row.pickup_pin = patch.pickupPin;
+  if (patch.returnPin !== undefined) row.return_pin = patch.returnPin;
+  if (patch.pickupAt !== undefined) row.pickup_at = patch.pickupAt;
+  if (patch.dueAt !== undefined) row.due_at = patch.dueAt;
+  if (patch.pickedUpAt !== undefined) row.picked_up_at = patch.pickedUpAt;
+  if (patch.returnedAt !== undefined) row.returned_at = patch.returnedAt;
+  if (patch.noShowMarkedAt !== undefined) row.no_show_marked_at = patch.noShowMarkedAt;
+  if (Object.keys(row).length === 0) return;
+
+  const { error } = await supabase.from("rentals").update(row).eq("id", rentalId);
+  if (error) {
+    // Local state remains; host/renter can retry.
+  }
+}
+
+function remotePatchFromBooking(patch: Partial<RentalBooking>): Parameters<typeof updateRentalRemote>[1] {
+  const remote: Parameters<typeof updateRentalRemote>[1] = {};
+  if (patch.status !== undefined) remote.status = patch.status;
+  if (patch.pickupPin !== undefined) remote.pickupPin = patch.pickupPin ?? null;
+  if (patch.returnPin !== undefined) remote.returnPin = patch.returnPin ?? null;
+  if (patch.pickupScheduledAt !== undefined) remote.pickupAt = patch.pickupScheduledAt ?? null;
+  if (patch.returnDueAt !== undefined) remote.dueAt = patch.returnDueAt ?? null;
+  if (patch.pickupConfirmedAt !== undefined) remote.pickedUpAt = patch.pickupConfirmedAt ?? null;
+  if (patch.returnConfirmedAt !== undefined) remote.returnedAt = patch.returnConfirmedAt ?? null;
+  if (patch.noShowMarkedAt !== undefined) remote.noShowMarkedAt = patch.noShowMarkedAt ?? null;
+  return remote;
+}
+
+function shouldSyncBookingPatch(patch: Partial<RentalBooking>): boolean {
+  return Object.keys(remotePatchFromBooking(patch)).length > 0;
+}
+
 export function toSupabaseRentalInsert(params: {
   id: string;
   listingId: string;
@@ -360,8 +441,9 @@ export async function fetchRentalsForUserRemote(userId: string): Promise<Supabas
 }
 
 export async function syncRentalsFromRemote(userId: string): Promise<RentalBooking[]> {
+  const localBefore = loadRentalBookings();
   const rows = await fetchRentalsForUserRemote(userId);
-  const bookings: RentalBooking[] = [];
+  const remoteBookings: RentalBooking[] = [];
 
   for (const row of rows) {
     const localListing = getPublishedListingById(row.listing_id);
@@ -370,11 +452,21 @@ export async function syncRentalsFromRemote(userId: string): Promise<RentalBooki
       const remoteListing = await fetchListingByIdRemote(row.listing_id);
       title = remoteListing?.title;
     }
-    bookings.push(rentalBookingFromRemoteRow(row, userId, title));
+    remoteBookings.push(rentalBookingFromRemoteRow(row, userId, title));
   }
 
-  saveRentalBookings(bookings);
-  return bookings;
+  const byId = new Map<string, RentalBooking>();
+  for (const booking of localBefore) byId.set(booking.id, booking);
+  for (const remote of remoteBookings) {
+    const local = byId.get(remote.id);
+    byId.set(remote.id, local ? mergeRentalBooking(local, remote) : remote);
+  }
+
+  const merged = [...byId.values()].sort(
+    (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime(),
+  );
+  saveRentalBookings(merged);
+  return merged;
 }
 
 export function loadRentalBookings(): RentalBooking[] {
@@ -414,6 +506,9 @@ export function updateBooking(
     return normalizeBooking(ensurePinsAndQr(merged, current));
   });
   saveRentalBookings(next);
+  if (shouldSyncBookingPatch(patch)) {
+    void updateRentalRemote(id, remotePatchFromBooking(patch));
+  }
   return next;
 }
 

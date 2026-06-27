@@ -18,8 +18,9 @@ import {
 } from "lucide-react";
 import {
   isFavoriteListing,
-  toggleFavoriteListing,
+  toggleFavoriteListingForUser,
 } from "../../lib/favoritesStorage";
+import { useAuth } from "../../hooks/AuthProvider";
 import {
   fetchListingByIdRemote,
   getActiveRentLocationLabel,
@@ -144,6 +145,7 @@ function AvailabilityPanel({
 }
 
 export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment, onViewHostProfile }: ItemDetailProps) {
+  const auth = useAuth();
   const [favorited, setFavorited] = useState(() => isFavoriteListing(itemId));
   const [shareOpen, setShareOpen] = useState(false);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
@@ -187,7 +189,7 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment, onViewHos
   }, [dailyRate, itemId, title]);
 
   const handleToggleFavorite = () => {
-    setFavorited(toggleFavoriteListing(itemId));
+    void toggleFavoriteListingForUser(auth.userId, itemId).then(setFavorited);
   };
 
   const handleMessageHost = () => {

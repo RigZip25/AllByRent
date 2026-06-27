@@ -8,16 +8,20 @@ const GREEN_DARK = "#0D5C3A";
 const GOLD = "#F59E0B";
 const BORDER = "#E8E6E0";
 
+import type { WantedRequest } from "../../lib/requestsStorage";
+
 interface EmptySubcategoryShelfProps {
   categoryName: string;
   subcategoryName: string;
   cityName: string;
   appMode: AppMode;
   requests?: { id: string; description: string; createdAt: string }[];
+  fullRequests?: WantedRequest[];
   onBack: () => void;
   onPostRequest: () => void;
   onStartListing: () => void;
   onShare: () => void;
+  onFulfillRequest?: (request: WantedRequest) => void;
 }
 
 export function EmptySubcategoryShelf({
@@ -26,10 +30,12 @@ export function EmptySubcategoryShelf({
   cityName,
   appMode,
   requests,
+  fullRequests,
   onBack,
   onPostRequest,
   onStartListing,
   onShare,
+  onFulfillRequest,
 }: EmptySubcategoryShelfProps) {
   const isEarn = appMode === "earn";
   const cityDisplay = cityName.trim() || "your area";
@@ -140,23 +146,42 @@ export function EmptySubcategoryShelf({
         ) : null}
       </div>
 
-      {!isEarn && requests && requests.length > 0 ? (
+      {(requests && requests.length > 0) || (fullRequests && fullRequests.length > 0) ? (
         <div
           className="rounded-3xl border bg-white p-4"
           style={{ borderColor: BORDER }}
         >
           <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-            Recent requests near {cityDisplay}
+            {isEarn ? "Renters asking nearby" : `Recent requests near ${cityDisplay}`}
           </p>
           <ul className="mt-3 space-y-2">
-            {requests.slice(0, 3).map((r) => (
+            {(fullRequests ?? []).slice(0, 3).map((r) => (
               <li key={r.id} className="rounded-2xl border p-3" style={{ borderColor: BORDER }}>
                 <p className="text-sm font-semibold" style={{ color: GREEN_DARK }}>
-                  Wanted
+                  {r.subcategory || r.category || "Wanted"}
                 </p>
                 <p className="mt-1 text-sm text-gray-600 line-clamp-2">{r.description}</p>
+                {isEarn && onFulfillRequest ? (
+                  <button
+                    type="button"
+                    onClick={() => onFulfillRequest(r)}
+                    className="mt-2 text-[13px] font-bold"
+                    style={{ color: GREEN }}
+                  >
+                    List to fulfill →
+                  </button>
+                ) : null}
               </li>
             ))}
+            {!fullRequests?.length &&
+              requests?.slice(0, 3).map((r) => (
+                <li key={r.id} className="rounded-2xl border p-3" style={{ borderColor: BORDER }}>
+                  <p className="text-sm font-semibold" style={{ color: GREEN_DARK }}>
+                    Wanted
+                  </p>
+                  <p className="mt-1 text-sm text-gray-600 line-clamp-2">{r.description}</p>
+                </li>
+              ))}
           </ul>
         </div>
       ) : null}

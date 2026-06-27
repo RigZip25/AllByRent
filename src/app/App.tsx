@@ -91,6 +91,7 @@ import { AuthGate } from "../components/AuthGate";
 import { PasskeySetup } from "../components/PasskeySetup";
 import { DeleteAccountScreen } from "../screens/profile/DeleteAccount";
 import { CoHostsScreen } from "../screens/profile/CoHostsScreen";
+import { PersonalInfoScreen } from "../screens/profile/PersonalInfoScreen";
 import { IdentityVerificationScreen } from "../screens/IdentityVerificationScreen";
 import { AgentActivityScreen } from "../screens/AgentActivityScreen";
 import { BottomNav, type BottomNavTab } from "./components/BottomNav";
@@ -158,6 +159,7 @@ type Screen =
   | "agentActivity"
   | "deleteAccount"
   | "coHosts"
+  | "personalInfo"
   | "publicProfile";
 
 const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
@@ -1349,6 +1351,7 @@ function AppRoutes() {
             onOpenIntegrations={handleOpenIntegrations}
             onDeleteAccount={() => navigateTo("deleteAccount")}
             onOpenCoHosts={() => navigateTo("coHosts")}
+            onOpenPersonalInfo={() => navigateTo("personalInfo")}
             onOpenIdentity={() => navigateTo("identity")}
             onOpenAgentActivity={() => navigateTo("agentActivity")}
             onViewPublicProfile={() => {
@@ -1367,6 +1370,8 @@ function AppRoutes() {
         )}
 
         {currentScreen === "coHosts" && <CoHostsScreen onBack={handleBack} />}
+
+        {currentScreen === "personalInfo" && <PersonalInfoScreen onBack={handleBack} />}
 
         {currentScreen === "favorites" && (
           <FavoritesScreen
