@@ -15,7 +15,6 @@ import {
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { ProfilePhotoCapture } from "../components/profile/ProfilePhotoCapture";
 import { ProfilePhotoOnboarding } from "../components/profile/ProfilePhotoOnboarding";
-import { RentanoChatSheet } from "../components/RentanoChat";
 import { ProfileTrustBadges } from "../components/profile/ProfileTrustBadges";
 import { getHostResponseDisplay } from "../lib/hostResponseRate";
 import {
@@ -158,14 +157,13 @@ export function ProfileScreen({
   onEditLocation: () => void;
   onOpenNotifications: () => void;
   onOpenCoHosts?: () => void;
-  onOpenPersonalInfo?: () => void;
+  onOpenPersonalInfo?: (field?: "name" | "phone") => void;
   onOpenIdentity?: () => void;
   onOpenAgentActivity?: () => void;
   onDeleteAccount?: () => void;
   onViewPublicProfile?: () => void;
   onOpenIntegrations?: () => void;
 }) {
-  const [rentanoOpen, setRentanoOpen] = useState(false);
   const auth = useAuth();
   const [profile, setProfile] = useState<UserProfile>(() =>
     refreshProfileStats(loadUserProfile(), auth.userId),
@@ -182,7 +180,6 @@ export function ProfileScreen({
   });
   const [connectBusy, setConnectBusy] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
-  const [namePromptChecked, setNamePromptChecked] = useState(false);
 
   const displayNameLabel = getProfileDisplayLabel(profile.displayName);
   const emailLabel = getProfileEmailLabel(profile.email, auth.userEmail);
@@ -238,23 +235,11 @@ export function ProfileScreen({
         last4: remote.stripe_bank_last4 ?? null,
       });
       setProfile(refreshProfileStats(next, auth.userId));
-
-      if (!namePromptChecked && !displayName.trim()) {
-        setNamePromptChecked(true);
-        const nextName = window.prompt("What should we call you?")?.trim();
-        if (nextName) {
-          const updated = updateProfileFields({ displayName: nextName });
-          setProfile(refreshProfileStats(updated, auth.userId));
-          void updateRemoteProfile(auth.userId!, { display_name: nextName }).catch(() => {
-            // Local fallback already applied.
-          });
-        }
-      }
     });
     return () => {
       mounted = false;
     };
-  }, [auth.userId, auth.userEmail, namePromptChecked]);
+  }, [auth.userId, auth.userEmail]);
 
   useEffect(() => {
     if (!auth.userId) return;
@@ -287,27 +272,14 @@ export function ProfileScreen({
   };
 
   const handleEditName = () => {
-    const nextName = window.prompt("Name", profile.displayName)?.trim();
-    if (!nextName) return;
-    const next = updateProfileFields({ displayName: nextName });
-    setProfile(refreshProfileStats(next, auth.userId));
-    if (auth.userId) {
-      void updateRemoteProfile(auth.userId, { display_name: nextName }).catch(() => {
-        // Local fallback already applied.
-      });
-    }
+    onOpenPersonalInfo?.("name");
   };
 
   const handleEditPhone = () => {
-    const nextPhone = window.prompt("Phone", profile.phone)?.trim() ?? "";
-    const next = updateProfileFields({ phone: nextPhone });
-    setProfile(refreshProfileStats(next, auth.userId));
-    if (auth.userId) {
-      void updateRemoteProfile(auth.userId, { phone: nextPhone }).catch(() => {
-        // Local fallback already applied.
-      });
-    }
+    onOpenPersonalInfo?.("phone");
   };
+
+  const needsDisplayName = !profile.displayName?.trim();
 
   const persistPhoto = async (blob: Blob) => {
     const dataUrl = await saveAvatarPhoto(profile.id, blob);
@@ -328,6 +300,28 @@ export function ProfileScreen({
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <div className="screen-scroll flex-1 px-4 pb-4 pt-3">
+        {needsDisplayName ? (
+          <div
+            className="mb-4 rounded-2xl border bg-white p-4"
+            style={{ borderColor: BORDER }}
+          >
+            <p className="text-[14px] font-semibold" style={{ color: GREEN }}>
+              What should we call you?
+            </p>
+            <p className="mt-1 text-[13px] text-gray-500">
+              Add a display name so hosts and renters know who they are meeting.
+            </p>
+            <button
+              type="button"
+              onClick={() => onOpenPersonalInfo?.("name")}
+              className="mt-3 w-full rounded-xl py-2.5 text-[14px] font-bold text-white"
+              style={{ backgroundColor: "#F59E0B" }}
+            >
+              Add your name
+            </button>
+          </div>
+        ) : null}
+
         <div
           className="mb-4 rounded-3xl border bg-white p-5"
           style={{ borderColor: BORDER }}
@@ -657,12 +651,6 @@ export function ProfileScreen({
         }}
       />
 
-      <RentanoChatSheet
-        open={rentanoOpen}
-        onClose={() => setRentanoOpen(false)}
-        defaultView="chat"
-        context={{ screen: "profile", appMode: mode, userId: auth.userId ?? undefined }}
-      />
     </div>
   );
 }

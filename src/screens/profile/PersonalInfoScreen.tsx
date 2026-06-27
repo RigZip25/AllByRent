@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { ArrowLeft, Mail, Phone, User } from "lucide-react";
+import { ProfileFieldEditSheet } from "../../components/profile/ProfileFieldEditSheet";
 import { useAuth } from "../../hooks/AuthProvider";
 import {
   loadUserProfile,
@@ -11,6 +12,8 @@ import { updateRemoteProfile } from "../../lib/supabaseProfile";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
+
+type EditField = "name" | "phone" | null;
 
 function Row({
   icon,
@@ -57,28 +60,39 @@ function Row({
   );
 }
 
-export function PersonalInfoScreen({ onBack }: { onBack: () => void }) {
+export function PersonalInfoScreen({
+  onBack,
+  initialEdit,
+}: {
+  onBack: () => void;
+  initialEdit?: "name" | "phone";
+}) {
   const auth = useAuth();
   const [profile, setProfile] = useState(() => refreshProfileStats(loadUserProfile(), auth.userId));
+  const [editing, setEditing] = useState<EditField>(null);
+
+  useEffect(() => {
+    if (initialEdit) setEditing(initialEdit);
+  }, [initialEdit]);
 
   const email = auth.userEmail?.trim() || profile.email?.trim() || "Not signed in";
   const displayName = profile.displayName?.trim() || "Add your name";
   const phone = profile.phone?.trim() || "Add phone";
 
-  const handleEditName = () => {
-    const nextName = window.prompt("Name", profile.displayName)?.trim();
+  const saveName = (nextName: string) => {
     if (!nextName) return;
     const next = updateProfileFields({ displayName: nextName });
     setProfile(refreshProfileStats(next, auth.userId));
+    setEditing(null);
     if (auth.userId) {
       void updateRemoteProfile(auth.userId, { display_name: nextName }).catch(() => undefined);
     }
   };
 
-  const handleEditPhone = () => {
-    const nextPhone = window.prompt("Phone", profile.phone)?.trim() ?? "";
+  const savePhone = (nextPhone: string) => {
     const next = updateProfileFields({ phone: nextPhone });
     setProfile(refreshProfileStats(next, auth.userId));
+    setEditing(null);
     if (auth.userId) {
       void updateRemoteProfile(auth.userId, { phone: nextPhone }).catch(() => undefined);
     }
@@ -104,15 +118,35 @@ export function PersonalInfoScreen({ onBack }: { onBack: () => void }) {
           icon={<User className="h-5 w-5" style={{ color: GREEN }} />}
           label="Display name"
           value={displayName}
-          onClick={handleEditName}
+          onClick={() => setEditing("name")}
         />
         <Row
           icon={<Phone className="h-5 w-5" style={{ color: GREEN }} />}
           label="Phone"
           value={phone}
-          onClick={handleEditPhone}
+          onClick={() => setEditing("phone")}
         />
       </div>
+
+      <ProfileFieldEditSheet
+        open={editing === "name"}
+        title="Display name"
+        label="Name"
+        value={profile.displayName}
+        placeholder="Your name"
+        onClose={() => setEditing(null)}
+        onSave={saveName}
+      />
+      <ProfileFieldEditSheet
+        open={editing === "phone"}
+        title="Phone"
+        label="Phone number"
+        value={profile.phone}
+        inputType="tel"
+        placeholder="(555) 555-5555"
+        onClose={() => setEditing(null)}
+        onSave={savePhone}
+      />
     </div>
   );
 }

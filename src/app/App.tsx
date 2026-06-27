@@ -376,6 +376,9 @@ function AppRoutes() {
     bootDeepLink.target?.kind === "listing" ? bootDeepLink.target.listingId : null,
   );
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [personalInfoInitialEdit, setPersonalInfoInitialEdit] = useState<"name" | "phone" | undefined>(
+    undefined,
+  );
   const [selectedPublicProfileUserId, setSelectedPublicProfileUserId] = useState<string | null>(null);
   const [selectedHostListingId, setSelectedHostListingId] = useState<string | null>(null);
   const [selectedNeighborGarageHostId, setSelectedNeighborGarageHostId] = useState<string | null>(() =>
@@ -633,6 +636,14 @@ function AppRoutes() {
   const handleOpenFavorites = useCallback(() => goToTab("favorites"), [goToTab]);
   const handleOpenBusiness = useCallback(() => goToTab("earnBusiness"), [goToTab]);
   const handleOpenIntegrations = useCallback(() => navigateTo("integrationStatus"), [navigateTo]);
+
+  const handleOpenPersonalInfo = useCallback(
+    (field?: "name" | "phone") => {
+      setPersonalInfoInitialEdit(field);
+      navigateTo("personalInfo");
+    },
+    [navigateTo],
+  );
 
   const handleBrowseHubChoice = useCallback(
     (choice: BrowseHubChoice) => {
@@ -1351,7 +1362,7 @@ function AppRoutes() {
             onOpenIntegrations={handleOpenIntegrations}
             onDeleteAccount={() => navigateTo("deleteAccount")}
             onOpenCoHosts={() => navigateTo("coHosts")}
-            onOpenPersonalInfo={() => navigateTo("personalInfo")}
+            onOpenPersonalInfo={handleOpenPersonalInfo}
             onOpenIdentity={() => navigateTo("identity")}
             onOpenAgentActivity={() => navigateTo("agentActivity")}
             onViewPublicProfile={() => {
@@ -1371,7 +1382,15 @@ function AppRoutes() {
 
         {currentScreen === "coHosts" && <CoHostsScreen onBack={handleBack} />}
 
-        {currentScreen === "personalInfo" && <PersonalInfoScreen onBack={handleBack} />}
+        {currentScreen === "personalInfo" && (
+          <PersonalInfoScreen
+            initialEdit={personalInfoInitialEdit}
+            onBack={() => {
+              setPersonalInfoInitialEdit(undefined);
+              handleBack();
+            }}
+          />
+        )}
 
         {currentScreen === "favorites" && (
           <FavoritesScreen
