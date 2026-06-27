@@ -1,13 +1,13 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import activity from "../../server/routes/agent/activity";
-import finance from "../../server/routes/agent/finance";
-import growth from "../../server/routes/agent/growth";
-import listings from "../../server/routes/agent/listings";
-import marketing from "../../server/routes/agent/marketing";
-import market from "../../server/routes/agent/market";
-import pricing from "../../server/routes/agent/pricing";
-import safety from "../../server/routes/agent/safety";
+import activity from "@allbyrent/server/routes/agent/activity";
+import finance from "@allbyrent/server/routes/agent/finance";
+import growth from "@allbyrent/server/routes/agent/growth";
+import listings from "@allbyrent/server/routes/agent/listings";
+import marketing from "@allbyrent/server/routes/agent/marketing";
+import market from "@allbyrent/server/routes/agent/market";
+import pricing from "@allbyrent/server/routes/agent/pricing";
+import safety from "@allbyrent/server/routes/agent/safety";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 

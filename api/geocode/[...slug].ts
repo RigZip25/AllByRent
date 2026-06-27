@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import geocodeUs from "../../server/routes/geocode/us";
-import geocodeUsps from "../../server/routes/geocode/usps";
+import geocodeUs from "@allbyrent/server/routes/geocode/us";
+import geocodeUsps from "@allbyrent/server/routes/geocode/usps";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 

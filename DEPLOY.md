@@ -54,9 +54,16 @@ Expect: `{"ok":true,"expired":0}` (or a positive `expired` count).
 
 ### `FUNCTION_INVOCATION_FAILED` on every `/api/*` route (except `/api/og/image`)
 
-The root `package.json` sets `"type": "module"` for Vite. Without an override, Vercel’s Node builder may **not bundle** imports from `server/routes/` into each function — deploy succeeds but runtime crashes with `Cannot find module '/var/task/server/...'`.
+Vercel’s Node File Trace does **not** bundle relative `../../server/` imports when the root package uses `"type": "module"`. Deploy succeeds; runtime crashes with `Cannot find module '/var/task/server/...'`.
 
-**Fix:** `api/package.json` with `"type": "commonjs"` forces esbuild to inline the `server/` tree into each API function. After merging, **redeploy** on Vercel.
+**Fix (in repo):**
+
+1. `server/package.json` — local package `@allbyrent/server`
+2. Root `package.json` — `"@allbyrent/server": "file:./server"`
+3. API routers import `@allbyrent/server/routes/...` (via `node_modules`, which NFT traces)
+4. `api/package.json` with `"type": "commonjs"` — helps esbuild when applicable
+
+After merging, **redeploy** on Vercel.
 
 Smoke test (no auth → expect **401**, not 500):
 

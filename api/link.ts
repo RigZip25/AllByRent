@@ -1,12 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { APP_HOST, APP_NAME } from "../server/lib/brand";
-import { withApiErrorHandling } from "../server/lib/safeHandler";
+import { APP_HOST, APP_NAME } from "@allbyrent/server/lib/brand";
+import { withApiErrorHandling } from "@allbyrent/server/lib/safeHandler";
 import {
   buildAppDeepLink,
   buildOgImageUrl,
   buildShareLink,
   resolveOgShareContext,
-} from "../server/lib/ogResolve";
+} from "@allbyrent/server/lib/ogResolve";
 
 function siteOrigin(req: VercelRequest): string {
   const host = req.headers["x-forwarded-host"] || req.headers.host || APP_HOST;

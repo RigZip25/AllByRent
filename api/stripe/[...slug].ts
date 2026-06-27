@@ -1,18 +1,18 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import auctionCheckout from "../../server/routes/stripe/auction_checkout";
-import boost from "../../server/routes/stripe/boost";
-import connectAccountLink from "../../server/routes/stripe/connect_account_link";
-import depositClaim from "../../server/routes/stripe/deposit_claim";
-import depositIntent from "../../server/routes/stripe/deposit_intent";
-import depositRelease from "../../server/routes/stripe/deposit_release";
-import garageCheckout from "../../server/routes/stripe/garage_checkout";
-import identitySession from "../../server/routes/stripe/identity_session";
-import paymentCancel from "../../server/routes/stripe/payment_cancel";
-import paymentCapture from "../../server/routes/stripe/payment_capture";
-import paymentConfirm from "../../server/routes/stripe/payment_confirm";
-import paymentIntent from "../../server/routes/stripe/payment_intent";
-import webhook from "../../server/routes/stripe/webhook";
+import auctionCheckout from "@allbyrent/server/routes/stripe/auction_checkout";
+import boost from "@allbyrent/server/routes/stripe/boost";
+import connectAccountLink from "@allbyrent/server/routes/stripe/connect_account_link";
+import depositClaim from "@allbyrent/server/routes/stripe/deposit_claim";
+import depositIntent from "@allbyrent/server/routes/stripe/deposit_intent";
+import depositRelease from "@allbyrent/server/routes/stripe/deposit_release";
+import garageCheckout from "@allbyrent/server/routes/stripe/garage_checkout";
+import identitySession from "@allbyrent/server/routes/stripe/identity_session";
+import paymentCancel from "@allbyrent/server/routes/stripe/payment_cancel";
+import paymentCapture from "@allbyrent/server/routes/stripe/payment_capture";
+import paymentConfirm from "@allbyrent/server/routes/stripe/payment_confirm";
+import paymentIntent from "@allbyrent/server/routes/stripe/payment_intent";
+import webhook from "@allbyrent/server/routes/stripe/webhook";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 

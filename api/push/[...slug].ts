@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import pushSend from "../../server/routes/push/send";
+import pushSend from "@allbyrent/server/routes/push/send";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 
