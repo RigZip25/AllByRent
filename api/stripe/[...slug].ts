@@ -8,6 +8,7 @@ import depositIntent from "../../server/routes/stripe/deposit_intent";
 import depositRelease from "../../server/routes/stripe/deposit_release";
 import garageCheckout from "../../server/routes/stripe/garage_checkout";
 import identitySession from "../../server/routes/stripe/identity_session";
+import paymentCancel from "../../server/routes/stripe/payment_cancel";
 import paymentConfirm from "../../server/routes/stripe/payment_confirm";
 import paymentIntent from "../../server/routes/stripe/payment_intent";
 import webhook from "../../server/routes/stripe/webhook";
@@ -23,6 +24,7 @@ const ROUTES: Record<string, Handler> = {
   deposit_release: depositRelease,
   garage_checkout: garageCheckout,
   identity_session: identitySession,
+  payment_cancel: paymentCancel,
   payment_confirm: paymentConfirm,
   payment_intent: paymentIntent,
   webhook,

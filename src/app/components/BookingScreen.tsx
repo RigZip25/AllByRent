@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, MapPin, Truck, Package, Shield } from "lucide-react";
 import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
+import { trackManualBookingRequest } from "../../lib/bookingRequestsStorage";
 import { fetchListingByIdRemote, getPublishedListingById } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { useAuth } from "../../hooks/AuthProvider";
@@ -236,6 +237,8 @@ function BookingScreenLoaded({
           ? "Contactless pickup"
           : "In-person pickup";
 
+    const approvalDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
     return {
       id,
       role: "renter",
@@ -270,11 +273,14 @@ function BookingScreenLoaded({
       stripePayment: withStripePayment,
       paymentOnHold: withStripePayment,
       depositAmountCents,
+      approvalDeadline,
+      manualBooking: true,
     };
   };
 
   const finalizeBooking = (id: string, booking: RentalBooking) => {
     if (auth.userId && listing.hostId) {
+      trackManualBookingRequest(id, listing.hostId);
       void createNotificationRemote({
         recipientId: listing.hostId,
         actorId: auth.userId,
