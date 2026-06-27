@@ -52,6 +52,19 @@ Expect: `{"ok":true,"expired":0}` (or a positive `expired` count).
 
 ## Common failures
 
+### `FUNCTION_INVOCATION_FAILED` on every `/api/*` route (except `/api/og/image`)
+
+The root `package.json` sets `"type": "module"` for Vite. Without an override, Vercel’s Node builder may **not bundle** imports from `server/routes/` into each function — deploy succeeds but runtime crashes with `Cannot find module '/var/task/server/...'`.
+
+**Fix:** `api/package.json` with `"type": "commonjs"` forces esbuild to inline the `server/` tree into each API function. After merging, **redeploy** on Vercel.
+
+Smoke test (no auth → expect **401**, not 500):
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" \
+  "https://YOUR_PRODUCTION_HOST/api/cron/rental-pending-expiry"
+```
+
 ### Hobby plan: 12 serverless functions max
 
 Vercel Hobby allows **12 serverless functions per deployment**. Each file under `api/` counts as one.
