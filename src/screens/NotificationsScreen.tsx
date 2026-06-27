@@ -20,7 +20,7 @@ import { usePwaUpdate } from "../hooks/PwaUpdateProvider";
 import { getAppMode, type AppMode } from "../lib/appMode";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { useAuth } from "../hooks/AuthProvider";
-import { loadInAppNotifications } from "../lib/inAppNotifications";
+import { loadInAppNotifications, type InAppNotification } from "../lib/inAppNotifications";
 import { fetchNotificationsRemote, markNotificationReadRemote, type Notification } from "../lib/notificationsStorage";
 import { savePushSubscriptionRemote, subscribeToPush } from "../lib/pushNotifications";
 import { NotificationPreferencesPanel } from "../components/notifications/NotificationPreferencesPanel";
@@ -195,9 +195,10 @@ function NotificationTabs({
 type NotificationsScreenProps = {
   onBack: () => void;
   mode?: AppMode;
+  onOpenRentals?: () => void;
 };
 
-export function NotificationsScreen({ onBack, mode: modeProp }: NotificationsScreenProps) {
+export function NotificationsScreen({ onBack, mode: modeProp, onOpenRentals }: NotificationsScreenProps) {
   const mode = modeProp ?? getAppMode();
   const auth = useAuth();
   const [tab, setTab] = useState<NotificationTab>("all");
@@ -222,6 +223,7 @@ export function NotificationsScreen({ onBack, mode: modeProp }: NotificationsScr
   const empty = EMPTY_BY_TAB[mode][tab];
   const showUpdateInTab = tab === "all";
   const [items, setItems] = useState<Notification[]>([]);
+  const [localMessages, setLocalMessages] = useState<InAppNotification[]>(() => loadInAppNotifications());
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -255,14 +257,32 @@ export function NotificationsScreen({ onBack, mode: modeProp }: NotificationsScr
     };
   }, [auth.userId]);
 
+  const messageItems = useMemo(() => {
+    if (tab !== "messages") return [];
+    return localMessages.filter((n) => n.type === "running_late" || n.type === "return");
+  }, [localMessages, tab]);
+
   const filteredItems = useMemo(() => {
     if (tab === "messages") return [];
     if (tab === "bookings") return items.filter((n) => n.type === "booking_request");
     return items;
   }, [items, tab]);
 
+  const handleNotificationTap = (n: Notification) => {
+    if (!auth.userId) return;
+    if (!n.readAt) {
+      void markNotificationReadRemote(auth.userId, n.id).then(() => {
+        setItems((prev) =>
+          prev.map((p) => (p.id === n.id ? { ...p, readAt: new Date().toISOString() } : p)),
+        );
+      });
+    }
+    if (n.type === "booking_request") onOpenRentals?.();
+  };
+
   const hasInboxItems =
     filteredItems.length > 0 ||
+    messageItems.length > 0 ||
     (showUpdateInTab && (updateAvailable || updateJustCompleted)) ||
     visiblePreviews.length > 0;
   const showEmptyState = !hasInboxItems;
@@ -387,6 +407,40 @@ export function NotificationsScreen({ onBack, mode: modeProp }: NotificationsScr
           <NotificationPreferencesPanel />
         </div>
 
+        {messageItems.length > 0 ? (
+          <div className="mx-auto mb-6 max-w-[390px]">
+            <p className="mb-3 px-1 text-[13px] font-semibold uppercase tracking-wide text-gray-400">
+              Messages
+            </p>
+            <ul className="flex flex-col gap-3">
+              {messageItems.map((n) => (
+                <li key={n.id}>
+                  <div
+                    className="flex w-full items-start gap-3 rounded-2xl border bg-white p-4 text-left"
+                    style={{ borderColor: BORDER }}
+                  >
+                    <div
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+                      style={{ backgroundColor: SURFACE }}
+                    >
+                      <MessageCircle className="h-5 w-5" style={{ color: GREEN }} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[15px] font-bold" style={{ color: GREEN }}>
+                        {n.title}
+                      </p>
+                      <p className="mt-0.5 text-[14px] leading-snug text-gray-500">{n.body}</p>
+                      <p className="mt-2 text-[11px] text-gray-400">
+                        {new Date(n.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
         {filteredItems.length > 0 ? (
           <div className="mx-auto mb-6 max-w-[390px]">
             <p className="mb-3 px-1 text-[13px] font-semibold uppercase tracking-wide text-gray-400">
@@ -399,17 +453,7 @@ export function NotificationsScreen({ onBack, mode: modeProp }: NotificationsScr
                   <li key={n.id}>
                     <button
                       type="button"
-                      onClick={() => {
-                        if (!auth.userId) return;
-                        if (!unread) return;
-                        void markNotificationReadRemote(auth.userId, n.id).then(() => {
-                          setItems((prev) =>
-                            prev.map((p) =>
-                              p.id === n.id ? { ...p, readAt: new Date().toISOString() } : p,
-                            ),
-                          );
-                        });
-                      }}
+                      onClick={() => handleNotificationTap(n)}
                       className="flex w-full items-start gap-3 rounded-2xl border bg-white p-4 text-left active:bg-[#F9FAFB]"
                       style={{ borderColor: BORDER }}
                       aria-label={unread ? "Mark as read" : "Notification"}

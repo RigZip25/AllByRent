@@ -1,6 +1,6 @@
 import { MASCOT_NAME } from "../../lib/brand";
 import { Star } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNow } from "../../hooks/useNow";
 import {
   canMarkNoShow,
@@ -22,6 +22,7 @@ import {
 import { CounterpartyName } from "../trust/CounterpartyName";
 import { InsuredLabel } from "./InsuredLabel";
 import { DepositHoldActions } from "../payments/DepositHoldActions";
+import { RunningLateSheet } from "./RunningLateSheet";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -162,13 +163,16 @@ export function RentalCard({
   onOpen,
   onRefresh,
   onViewProfile,
+  onReRent,
 }: {
   booking: RentalBooking;
   tab: "active" | "upcoming" | "history";
   onOpen?: () => void;
   onRefresh: () => void;
   onViewProfile?: (userId: string) => void;
+  onReRent?: (booking: RentalBooking) => void;
 }) {
+  const [runningLateOpen, setRunningLateOpen] = useState(false);
   const now = useNow(booking.status === "active" || booking.status === "overdue" ? 1000 : 30_000);
 
   const roleLabel = booking.role === "renter" ? "Renting" : "Hosting";
@@ -265,10 +269,10 @@ export function RentalCard({
                 variant="cta"
                 onClick={handleAction({ status: "completed", completedAt: new Date().toISOString() })}
               />
-              <ActionButton label="Extend booking" variant="secondary" onClick={(e) => e.stopPropagation()} />
+              <ActionButton label="Extend booking" variant="secondary" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
             </>
           ) : (
-            <ActionButton label="Request return" variant="danger" onClick={(e) => e.stopPropagation()} />
+            <ActionButton label="Request return" variant="danger" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
           )}
         </div>
       ) : null}
@@ -276,7 +280,14 @@ export function RentalCard({
       {tab === "active" && booking.status === "no_show" && !booking.noShowMarkedAt ? (
         <div className="mt-3 flex flex-wrap gap-2">
           {booking.role === "renter" ? (
-            <ActionButton label="I'm running late" variant="secondary" onClick={(e) => e.stopPropagation()} />
+            <ActionButton
+              label="I'm running late"
+              variant="secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                setRunningLateOpen(true);
+              }}
+            />
           ) : markNoShowAvailable ? (
             <ActionButton
               label="Mark as no-show"
@@ -295,7 +306,7 @@ export function RentalCard({
 
       {tab === "active" && booking.status === "disputed" ? (
         <div className="mt-3">
-          <ActionButton label="Submit evidence" variant="cta" onClick={(e) => e.stopPropagation()} />
+          <ActionButton label="Submit evidence" variant="cta" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
         </div>
       ) : null}
 
@@ -337,17 +348,31 @@ export function RentalCard({
           ) : booking.review ? (
             <div className="flex flex-wrap items-center gap-3">
               <StarRating rating={booking.review.rating} />
-              <ActionButton label="See review" variant="secondary" onClick={(e) => e.stopPropagation()} />
+              <ActionButton label="See review" variant="secondary" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
               {booking.role === "renter" ? (
-                <ActionButton label="Rent again" variant="primary" onClick={(e) => e.stopPropagation()} />
+                <ActionButton
+                  label="Rent again"
+                  variant="primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onReRent?.(booking);
+                  }}
+                />
               ) : null}
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
               {booking.role === "renter" ? (
-                <ActionButton label="Rent again" variant="primary" onClick={(e) => e.stopPropagation()} />
+                <ActionButton
+                  label="Rent again"
+                  variant="primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onReRent?.(booking);
+                  }}
+                />
               ) : null}
-              <ActionButton label="See review" variant="secondary" onClick={(e) => e.stopPropagation()} />
+              <ActionButton label="See review" variant="secondary" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
             </div>
           )}
         </div>
@@ -356,6 +381,14 @@ export function RentalCard({
       {tab === "history" && isNoShowHistory(booking) ? (
         <p className="mt-2 text-[12px] font-semibold text-orange-700">Marked as no-show</p>
       ) : null}
+
+      <RunningLateSheet
+        open={runningLateOpen}
+        bookingId={booking.id}
+        ownerName={booking.counterpartyName}
+        onClose={() => setRunningLateOpen(false)}
+        onSent={onRefresh}
+      />
     </article>
   );
 }

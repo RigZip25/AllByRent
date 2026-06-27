@@ -191,6 +191,7 @@ function BookingScreenLoaded({
       itemEmoji: "📷",
       startDate,
       endDate,
+      listingId: listing.id,
       counterpartyId: listing.hostId ?? "",
       counterpartyName: "Host",
       counterpartyIdentityVerified: false,

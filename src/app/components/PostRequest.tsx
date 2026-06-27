@@ -30,10 +30,37 @@ const categories = [
 
 const radiusOptions = ["5mi", "10mi", "25mi", "50mi"];
 
-function buildPrefillDescription(prefill: ShelfPrefill | null | undefined): string {
-  if (!prefill?.subcategory && !prefill?.category) return "";
-  const parts: string[] = [];
+function categoryLabelFromSelection(selectedCategory: string | null): string {
+  if (!selectedCategory) return "";
+  const chip = categories.find((c) => c.id === selectedCategory);
+  return chip?.label ?? selectedCategory;
+}
+
+function resolveRequestCategory(
+  lockedContext: boolean,
+  prefill: ShelfPrefill | null | undefined,
+  selectedCategory: string | null,
+): string {
+  if (lockedContext) return (prefill?.category ?? "").trim();
+  const fromChip = categoryLabelFromSelection(selectedCategory);
+  if (fromChip) return fromChip;
+  const fromPrefill = (prefill?.category ?? "").trim();
+  if (fromPrefill) return fromPrefill;
   const query = (prefill?.query ?? "").trim();
+  if (query) return "General";
+  return "";
+}
+
+function buildPrefillDescription(prefill: ShelfPrefill | null | undefined): string {
+  const query = (prefill?.query ?? "").trim();
+  if (!prefill?.subcategory && !prefill?.category) {
+    if (query) {
+      const city = prefill?.city?.trim();
+      return city ? `Looking for "${query}" near ${city}.` : `Looking for "${query}".`;
+    }
+    return "";
+  }
+  const parts: string[] = [];
   if (prefill.subcategory) {
     parts.push(`Looking for ${prefill.subcategory}`);
     if (prefill.category) parts[0] += ` (${prefill.category})`;
@@ -313,24 +340,39 @@ export function PostRequest({
           disabled={busy}
           onClick={() => {
             if (busy) return;
-            const category = lockedContext ? (prefill?.category ?? "") : (selectedCategory ?? "");
+            const category = resolveRequestCategory(lockedContext, prefill, selectedCategory);
             const subcategory = lockedContext ? (prefill?.subcategory ?? "") : "";
             const locationLabel = (prefill?.city ?? getActiveRentLocationLabel()).trim();
             const desc = description.trim();
-            if (!category.trim()) return;
-            if (lockedContext && !subcategory.trim()) return;
-            if (!desc) return;
+            if (!category.trim()) {
+              setSubmitError(
+                lockedContext
+                  ? "Missing category context. Go back and try again."
+                  : "Pick a category or describe what you need in the text field.",
+              );
+              return;
+            }
+            if (lockedContext && !subcategory.trim()) {
+              setSubmitError("Missing subcategory. Go back to browse and try again.");
+              return;
+            }
+            if (!desc) {
+              setSubmitError("Add a short description so neighbors know what you need.");
+              return;
+            }
             if (!auth.userId) {
               setSubmitError("Sign in to post a request.");
               return;
             }
+            const budgetNote = `Budget up to $${budget}/day · within ${selectedRadius}`;
+            const fullDescription = desc.includes("$") ? desc : `${desc}\n\n${budgetNote}`;
             setSubmitError(null);
             setBusy(true);
             void createRequestRemote({
               renterId: auth.userId,
               category,
               subcategory,
-              description: desc,
+              description: fullDescription,
               locationLabel: locationLabel || "your area",
               startDate: startDate || undefined,
               endDate: endDate || undefined,

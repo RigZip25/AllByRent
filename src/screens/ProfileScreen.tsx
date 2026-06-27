@@ -543,16 +543,10 @@ export function ProfileScreen({
           </li>
           <li>
             <RowButton
-              icon={<CreditCard className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label="Payouts (Stripe)"
-              value={profile.payoutConnected ? "Connected" : "Not connected"}
-            />
-          </li>
-          <li>
-            <RowButton
               icon={<Star className="h-5 w-5" style={{ color: AMBER }} />}
               label="Reviews"
               value="View ratings as renter and host"
+              onClick={() => onViewPublicProfile?.()}
             />
           </li>
         </ul>

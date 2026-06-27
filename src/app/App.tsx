@@ -68,7 +68,9 @@ import {
   resolveOnboardingResumeScreen,
 } from "../lib/onboardingStorage";
 import { categoryIdFromName } from "../screens/listing/listingItemCategories";
-import { getPublishedListingById, hasRentLocationSetup } from "../lib/listingStorage";
+import { getPublishedListingById, hasRentLocationSetup, loadPublishedListings } from "../lib/listingStorage";
+import { getListingDisplayTitle } from "../lib/listingQr";
+import type { RentalBooking } from "../lib/rentalsStorage";
 import { canManageListing } from "../lib/hostAccess";
 import {
   deepLinkQueryKeys,
@@ -873,6 +875,24 @@ function AppRoutes() {
     handleItemSelect(itemId);
   };
 
+  const handleReRent = (booking: RentalBooking) => {
+    if (booking.listingId) {
+      handleOpenListingFromFeed(booking.listingId);
+      return;
+    }
+    const titleNorm = booking.itemTitle.trim().toLowerCase();
+    const listings = loadPublishedListings();
+    const match =
+      listings.find((l) => getListingDisplayTitle(l.title).toLowerCase() === titleNorm) ??
+      listings.find((l) => getListingDisplayTitle(l.title).toLowerCase().includes(titleNorm));
+    if (match) {
+      handleOpenListingFromFeed(match.id);
+      return;
+    }
+    setNavStack([]);
+    setCurrentScreen("browseHub");
+  };
+
   const handleOpenAttachment = (url: string, title?: string) => {
     const trimmed = url.trim();
     if (!trimmed) return;
@@ -1316,10 +1336,7 @@ function AppRoutes() {
               navigateTo("activeRental");
             }}
             onViewProfile={handleViewPublicProfile}
-            onReRent={() => {
-              setNavStack([]);
-              setCurrentScreen("browseHub");
-            }}
+            onReRent={handleReRent}
           />
         )}
 
@@ -1374,7 +1391,11 @@ function AppRoutes() {
         )}
 
         {currentScreen === "notifications" && (
-          <NotificationsScreen onBack={handleBack} mode={getAppMode()} />
+          <NotificationsScreen
+            onBack={handleBack}
+            mode={getAppMode()}
+            onOpenRentals={handleOpenRentals}
+          />
         )}
 
         {currentScreen === "subcategory" && selectedCategory && (
@@ -1395,6 +1416,7 @@ function AppRoutes() {
             onBack={handleBack}
             onBook={handleBook}
             onOpenAttachment={handleOpenAttachment}
+            onViewHostProfile={handleViewPublicProfile}
           />
         )}
 
@@ -1428,7 +1450,11 @@ function AppRoutes() {
         )}
 
         {currentScreen === "activeRental" && (
-          <ActiveRental bookingId={selectedBookingId} onBack={handleBack} />
+          <ActiveRental
+            bookingId={selectedBookingId}
+            onBack={handleBack}
+            onViewProfile={handleViewPublicProfile}
+          />
         )}
 
         {currentScreen === "listingIntro" && (

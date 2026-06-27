@@ -178,7 +178,7 @@ export function RentalsScreen({
 }: {
   onOpenRental: (bookingId: string) => void;
   onViewProfile: (userId: string) => void;
-  onReRent?: (listingTitle: string) => void;
+  onReRent?: (booking: RentalBooking) => void;
 }) {
   const auth = useAuth();
   const [tab, setTab] = useState<RentalsTab>("active");
@@ -359,12 +359,13 @@ export function RentalsScreen({
                     onOpen={() => onOpenRental(booking.id)}
                     onRefresh={refresh}
                     onViewProfile={onViewProfile}
+                    onReRent={onReRent}
                   />
                   {tab === "history" && booking.role === "renter" && booking.status === "completed" ? (
                     <div className="mt-2 grid grid-cols-2 gap-2">
                       <button
                         type="button"
-                        onClick={() => onReRent?.(booking.itemTitle)}
+                        onClick={() => onReRent?.(booking)}
                         className="rounded-xl border bg-white px-3 py-2.5 text-[13px] font-semibold"
                         style={{ borderColor: BORDER, color: GREEN }}
                       >

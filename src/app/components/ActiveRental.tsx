@@ -49,9 +49,11 @@ import {
 export function ActiveRental({
   bookingId,
   onBack,
+  onViewProfile,
 }: {
   bookingId?: string | null;
   onBack: () => void;
+  onViewProfile?: (userId: string) => void;
 }) {
   const auth = useAuth();
   const [scanOpen, setScanOpen] = useState(false);
@@ -172,6 +174,16 @@ export function ActiveRental({
   const pickupMapsUrl = renterPickupLocation
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(renterPickupLocation)}`
     : undefined;
+
+  const contactName = booking?.counterpartyName?.trim() || (booking?.role === "renter" ? "Host" : "Renter");
+  const contactInitials = contactName
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  const contactVerified = Boolean(booking?.counterpartyIdentityVerified);
+  const contactHeading = booking?.role === "renter" ? "Owner contact" : "Renter contact";
 
   const alreadyConfirmed = useMemo(() => {
     if (!booking) return false;
@@ -492,21 +504,34 @@ export function ActiveRental({
         </div>
 
         <div>
-          <h3 className="font-semibold mb-3">Owner contact</h3>
+          <h3 className="font-semibold mb-3">{contactHeading}</h3>
 
           <div className="bg-card rounded-xl border border-border p-4">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-sm font-medium text-primary">
-                JD
-              </div>
-
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="font-semibold">John Davis</span>
-                  <CheckCircle2 className="w-4 h-4 text-primary" />
+              <button
+                type="button"
+                disabled={!booking?.counterpartyId || !onViewProfile}
+                onClick={() => {
+                  if (booking?.counterpartyId && onViewProfile) {
+                    onViewProfile(booking.counterpartyId);
+                  }
+                }}
+                className="flex flex-1 items-center gap-3 text-left disabled:cursor-default"
+              >
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-sm font-medium text-primary">
+                  {contactInitials || "?"}
                 </div>
-                <p className="text-sm text-muted-foreground">Verified owner</p>
-              </div>
+
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="font-semibold">{contactName}</span>
+                    {contactVerified ? <CheckCircle2 className="w-4 h-4 text-primary" /> : null}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {contactVerified ? "Verified on Evorios" : "Tap to view public profile"}
+                  </p>
+                </div>
+              </button>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -519,7 +544,12 @@ export function ActiveRental({
                 <span className="text-sm font-medium">Message</span>
               </button>
 
-              <button className="flex items-center justify-center gap-2 py-2.5 border border-border hover:bg-muted rounded-lg transition-colors">
+              <button
+                type="button"
+                disabled
+                title="Phone numbers are shared in chat after check-in"
+                className="flex items-center justify-center gap-2 py-2.5 border border-border rounded-lg opacity-50 cursor-not-allowed"
+              >
                 <Phone className="w-4 h-4" />
                 <span className="text-sm font-medium">Call</span>
               </button>

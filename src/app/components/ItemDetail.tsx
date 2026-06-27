@@ -42,6 +42,7 @@ interface ItemDetailProps {
   onBack: () => void;
   onBook: () => void;
   onOpenAttachment: (url: string, title?: string) => void;
+  onViewHostProfile?: (hostId: string) => void;
 }
 
 function formatBlockedDates(listing: ListingDraft): string[] {
@@ -142,7 +143,7 @@ function AvailabilityPanel({
   );
 }
 
-export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDetailProps) {
+export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment, onViewHostProfile }: ItemDetailProps) {
   const [favorited, setFavorited] = useState(() => isFavoriteListing(itemId));
   const [shareOpen, setShareOpen] = useState(false);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
@@ -337,16 +338,27 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment }: ItemDet
 
           <div className="bg-card rounded-xl border border-border p-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-sm font-medium text-primary">
-                {listing.hostId?.slice(0, 2).toUpperCase() || "H"}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="font-semibold">Garage host</span>
-                  <CheckCircle2 className="w-4 h-4 text-primary" />
+              <button
+                type="button"
+                disabled={!listing.hostId || !onViewHostProfile}
+                onClick={() => {
+                  if (listing.hostId && onViewHostProfile) onViewHostProfile(listing.hostId);
+                }}
+                className="flex min-w-0 flex-1 items-center gap-3 text-left disabled:cursor-default"
+              >
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-sm font-medium text-primary">
+                  {listing.hostId?.slice(0, 2).toUpperCase() || "H"}
                 </div>
-                <p className="text-sm text-muted-foreground">Verified host on {APP_NAME}</p>
-              </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="font-semibold">Garage host</span>
+                    <CheckCircle2 className="w-4 h-4 text-primary" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {onViewHostProfile ? "Tap to view public profile" : `Verified host on ${APP_NAME}`}
+                  </p>
+                </div>
+              </button>
               <button
                 type="button"
                 onClick={handleMessageHost}

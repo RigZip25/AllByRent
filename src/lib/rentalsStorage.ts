@@ -102,6 +102,8 @@ export type RentalBooking = {
   /** Security deposit hold (Stripe manual-capture PI). */
   depositAmountCents?: number;
   depositStatus?: string;
+  /** Source listing id for re-book flows. */
+  listingId?: string;
 };
 
 type SupabaseRentalRow = {
@@ -221,6 +223,7 @@ export function rentalBookingFromRemoteRow(
     counterpartyName: role === "host" ? "Renter" : "Host",
     counterpartyIdentityVerified: false,
     counterpartyPhoneVerified: false,
+    listingId: row.listing_id,
     pickupLabel:
       fulfillmentMethod === "delivery"
         ? "Delivery"
