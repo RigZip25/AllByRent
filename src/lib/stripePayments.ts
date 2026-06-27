@@ -55,6 +55,47 @@ export async function createRentalPaymentIntent(params: {
   return payload;
 }
 
+export type SyncRentalPaymentResult =
+  | { ok: true; status: string; paid: boolean }
+  | { ok: false; reason: string };
+
+export async function syncRentalPaymentStatus(rentalId: string): Promise<SyncRentalPaymentResult> {
+  if (!isStripePaymentsEnabled()) {
+    return { ok: false, reason: "Stripe not configured" };
+  }
+
+  const token = await getAccessToken();
+  if (!token) {
+    return { ok: false, reason: "Sign in required" };
+  }
+
+  const res = await fetch("/api/stripe/payment_confirm", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ rentalId }),
+  });
+
+  const payload = (await res.json()) as SyncRentalPaymentResult & { error?: string };
+  if (!res.ok) {
+    return { ok: false, reason: payload.error ?? `Payment sync failed (${res.status})` };
+  }
+  if (!payload.ok) {
+    return { ok: false, reason: payload.reason ?? "Payment sync failed" };
+  }
+  if (!("status" in payload)) {
+    return { ok: false, reason: "Missing payment status" };
+  }
+
+  return {
+    ok: true,
+    status: payload.status,
+    paid: Boolean(payload.paid),
+  };
+}
+
 export type DepositIntentResult =
   | {
       ok: true;

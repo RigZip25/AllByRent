@@ -61,8 +61,28 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   }
 
   if (!rental.stripe_payment_status || !RENTAL_PAID_STATUSES.has(rental.stripe_payment_status)) {
-    res.status(400).json({ error: "Rental payment must complete before deposit hold" });
-    return;
+    if (rental.stripe_payment_intent_id) {
+      const secret = process.env.STRIPE_SECRET_KEY!;
+      const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
+      try {
+        const rentalPi = await stripe.paymentIntents.retrieve(rental.stripe_payment_intent_id);
+        if (RENTAL_PAID_STATUSES.has(rentalPi.status)) {
+          await admin
+            .from("rentals")
+            .update({ stripe_payment_status: rentalPi.status })
+            .eq("id", rentalId);
+        } else {
+          res.status(400).json({ error: "Rental payment must complete before deposit hold" });
+          return;
+        }
+      } catch {
+        res.status(400).json({ error: "Rental payment must complete before deposit hold" });
+        return;
+      }
+    } else {
+      res.status(400).json({ error: "Rental payment must complete before deposit hold" });
+      return;
+    }
   }
 
   const secret = process.env.STRIPE_SECRET_KEY!;

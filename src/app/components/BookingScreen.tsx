@@ -15,16 +15,28 @@ import {
   appendRentalBooking,
   createRentalRemote,
   toSupabaseRentalInsert,
+  updateBooking,
+  updateRentalRemote,
   type FulfillmentMethod,
   type RentalBooking,
 } from "../../lib/rentalsStorage";
 import { createNotificationRemote } from "../../lib/notificationsStorage";
 import { fetchRemoteProfile } from "../../lib/supabaseProfile";
+import { isSupabaseConfigured } from "../../lib/supabaseClient";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
 import { StripePaymentForm } from "../../components/payments/StripePaymentForm";
-import { getStripeRequiredMessage, isPaymentsReady } from "../../lib/config/production";
+import { BookingPaymentsBanner } from "../../components/payments/PaymentModeBanner";
+import {
+  canSubmitBookingRequest,
+  getSignInRequiredMessage,
+  isPaymentsReady,
+} from "../../lib/config/production";
 import { removeStripeControllerIframes } from "../../lib/stripeCleanup";
-import { createDepositPaymentIntent, createRentalPaymentIntent } from "../../lib/stripePayments";
+import {
+  createDepositPaymentIntent,
+  createRentalPaymentIntent,
+  syncRentalPaymentStatus,
+} from "../../lib/stripePayments";
 import type { ListingDraft } from "../../screens/listing/types";
 
 const GREEN = "#0D5C3A";
@@ -216,7 +228,7 @@ function BookingScreenLoaded({
   const stripeCheckout =
     isPaymentsReady() && Boolean(auth.userId && listing.hostId);
 
-  const buildBooking = (id: string): RentalBooking => {
+  const buildBooking = (id: string, withStripePayment: boolean): RentalBooking => {
     const pickupLabel =
       fulfillment === "delivery"
         ? `Delivery · ${listing.handoff.deliveryMaxMiles ?? 20} mi`
@@ -255,8 +267,8 @@ function BookingScreenLoaded({
       deliveryAddress: deliveryRequested ? deliveryAddress.trim() : undefined,
       contactlessInstructions: listing.handoff.contactlessInstructions || undefined,
       pickupWindowStart: new Date().toISOString(),
-      stripePayment: stripeCheckout,
-      paymentOnHold: stripeCheckout,
+      stripePayment: withStripePayment,
+      paymentOnHold: withStripePayment,
       depositAmountCents,
     };
   };
@@ -277,7 +289,7 @@ function BookingScreenLoaded({
     onConfirmed(id);
   };
 
-  const persistRentalRow = (id: string, booking: RentalBooking) => {
+  const persistRentalRow = async (id: string, booking: RentalBooking): Promise<void> => {
     if (!auth.userId || !listing.hostId) return;
     const pickupAt = new Date(`${startDate}T14:00:00`).toISOString();
     const dueAt = new Date(`${endDate}T23:59:59`).toISOString();
@@ -299,16 +311,19 @@ function BookingScreenLoaded({
       rentalTotalCents: Math.round(breakdown.totalUsd * 100),
       pickupAt,
       dueAt,
-      stripePaymentStatus: stripeCheckout ? "requires_payment_method" : undefined,
+      stripePaymentStatus: booking.stripePayment ? "requires_payment_method" : undefined,
     });
-    void createRentalRemote(row).catch((error) => {
-      setPaymentError(error instanceof Error ? error.message : "Failed to save booking");
-    });
+    await createRentalRemote(row);
+  };
+
+  const cancelPendingRental = (id: string) => {
+    void updateRentalRemote(id, { status: "cancelled" });
+    updateBooking(id, { status: "cancelled" });
   };
 
   const handleConfirm = () => {
-    if (!stripeCheckout) {
-      setPaymentError(getStripeRequiredMessage());
+    if (!canSubmitBookingRequest(auth.userId, listing.hostId)) {
+      setPaymentError(getSignInRequiredMessage());
       return;
     }
 
@@ -316,12 +331,36 @@ function BookingScreenLoaded({
       typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
         : `rent-${Date.now()}`;
-    const booking = buildBooking(id);
+
+    if (!stripeCheckout) {
+      setConfirmBusy(true);
+      setPaymentError(null);
+      void (async () => {
+        const booking = buildBooking(id, false);
+        try {
+          if (isSupabaseConfigured()) {
+            await persistRentalRow(id, booking);
+          }
+        } catch (error) {
+          setPaymentError(error instanceof Error ? error.message : "Failed to save booking");
+          return;
+        }
+        finalizeBooking(id, booking);
+      })().finally(() => setConfirmBusy(false));
+      return;
+    }
+
+    const booking = buildBooking(id, true);
 
     setConfirmBusy(true);
     setPaymentError(null);
     void (async () => {
-      persistRentalRow(id, booking);
+      try {
+        await persistRentalRow(id, booking);
+      } catch (error) {
+        setPaymentError(error instanceof Error ? error.message : "Failed to save booking");
+        return;
+      }
 
       const amountCents = Math.max(50, Math.round(breakdown.totalUsd * 100));
       const pi = await createRentalPaymentIntent({
@@ -333,6 +372,7 @@ function BookingScreenLoaded({
 
       if (!pi.ok) {
         setPaymentError(pi.reason);
+        cancelPendingRental(id);
         return;
       }
 
@@ -343,29 +383,35 @@ function BookingScreenLoaded({
 
   const handlePaymentSuccess = () => {
     if (!pendingBookingId) return;
-    const depositCents = depositAmountCents;
+    const bookingId = pendingBookingId;
     setPaymentClientSecret(null);
 
-    if (stripeCheckout && depositCents >= 50) {
-      setPendingDepositCents(depositCents);
+    if (stripeCheckout && depositAmountCents >= 50) {
+      setPendingDepositCents(depositAmountCents);
       setConfirmBusy(true);
-      void createDepositPaymentIntent(pendingBookingId)
-        .then((deposit) => {
-          if (deposit.ok) {
-            setDepositClientSecret(deposit.clientSecret);
-            return;
-          }
-          setPaymentError(deposit.reason);
-        })
-        .finally(() => setConfirmBusy(false));
+      void (async () => {
+        await syncRentalPaymentStatus(bookingId);
+
+        const deposit = await createDepositPaymentIntent(bookingId);
+        if (deposit.ok) {
+          setDepositClientSecret(deposit.clientSecret);
+          return;
+        }
+        setPaymentError(deposit.reason);
+      })().finally(() => setConfirmBusy(false));
       return;
     }
 
-    finalizeAfterPayment(pendingBookingId);
+    void (async () => {
+      if (stripeCheckout) {
+        await syncRentalPaymentStatus(bookingId);
+      }
+      finalizeAfterPayment(bookingId);
+    })();
   };
 
   const finalizeAfterPayment = (id: string) => {
-    const booking = buildBooking(id);
+    const booking = buildBooking(id, Boolean(stripeCheckout));
     finalizeBooking(id, {
       ...booking,
       paymentOnHold: false,
@@ -513,6 +559,16 @@ function BookingScreenLoaded({
           </div>
         ) : null}
 
+        {!stripeCheckout && canSubmitBookingRequest(auth.userId, listing.hostId) ? (
+          <BookingPaymentsBanner />
+        ) : null}
+
+        {paymentError && !paymentClientSecret && !depositClientSecret ? (
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
+            {paymentError}
+          </p>
+        ) : null}
+
         <RentalPriceBreakdownView breakdown={breakdown} />
 
         {depositClientSecret ? (
@@ -554,6 +610,9 @@ function BookingScreenLoaded({
               type="button"
               className="mt-3 w-full text-center text-sm text-muted-foreground underline"
               onClick={() => {
+                if (pendingBookingId) {
+                  cancelPendingRental(pendingBookingId);
+                }
                 setPaymentClientSecret(null);
                 setPendingBookingId(null);
                 setPaymentError(null);
@@ -575,10 +634,10 @@ function BookingScreenLoaded({
             style={{ backgroundColor: GREEN }}
           >
             {confirmBusy
-              ? "Preparing payment…"
+              ? "Preparing…"
               : stripeCheckout
                 ? `Continue to pay · $${breakdown.totalUsd.toFixed(2)}`
-                : `Confirm · $${breakdown.totalUsd.toFixed(2)} total`}
+                : `Send booking request · $${breakdown.totalUsd.toFixed(2)}`}
           </button>
         ) : (
           <p className="text-center text-xs text-muted-foreground">

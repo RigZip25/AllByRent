@@ -9,6 +9,18 @@ export function isPaymentsReady(): boolean {
   return isSupabaseConfigured() && isStripePaymentsEnabled();
 }
 
+/** Booking request without card (Supabase + auth, Stripe optional). */
+export function canSubmitBookingRequest(
+  userId: string | null | undefined,
+  hostId: string | undefined,
+): boolean {
+  return Boolean(userId?.trim() && hostId?.trim());
+}
+
+export function getBookingWithoutPaymentMessage(): string {
+  return "Card checkout is not configured yet. Your request will be sent to the host — payment can be arranged after approval.";
+}
+
 export function getSupabaseRequiredMessage(): string {
   return "Supabase is required. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY on Vercel.";
 }

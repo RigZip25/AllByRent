@@ -81,7 +81,14 @@ export function StripePaymentForm({
     };
   }, []);
 
-  if (!stripePromise) return null;
+  if (!stripePromise) {
+    return (
+      <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+        Card checkout is unavailable. Add <code className="text-xs">VITE_STRIPE_PUBLISHABLE_KEY</code> on
+        Vercel to enable payments.
+      </p>
+    );
+  }
 
   const options: StripeElementsOptions = {
     clientSecret,
