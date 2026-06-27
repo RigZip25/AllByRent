@@ -13,9 +13,17 @@ type GarageScreenProps = {
   onNavigate: (screen: string) => void;
   onStockGarage: () => void;
   onViewShop: () => void;
+  onViewProfile?: (userId: string) => void;
+  onOpenRental?: (bookingId: string) => void;
 };
 
-export function GarageScreen({ onNavigate, onStockGarage, onViewShop }: GarageScreenProps) {
+export function GarageScreen({
+  onNavigate,
+  onStockGarage,
+  onViewShop,
+  onViewProfile,
+  onOpenRental,
+}: GarageScreenProps) {
   const auth = useAuth();
   const [shareOpen, setShareOpen] = useState(false);
   const hostId = resolveHostAccountId(auth.userId);
@@ -82,6 +90,8 @@ export function GarageScreen({ onNavigate, onStockGarage, onViewShop }: GarageSc
           onListItem={onStockGarage}
           onOpenListing={(listingId) => onNavigate(`hostListingDetail:${listingId}`)}
           onShareGarage={() => setShareOpen(true)}
+          onViewProfile={onViewProfile}
+          onOpenRental={onOpenRental}
         />
       </div>
     </div>
