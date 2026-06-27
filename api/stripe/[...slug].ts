@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import auctionCheckout from "@allbyrent/server/routes/stripe/auction_checkout";
+import { resolveApiRouteKey } from "../lib/resolveRouteKey";
 import boost from "@allbyrent/server/routes/stripe/boost";
 import connectAccountLink from "@allbyrent/server/routes/stripe/connect_account_link";
 import depositClaim from "@allbyrent/server/routes/stripe/deposit_claim";
@@ -33,8 +34,7 @@ const ROUTES: Record<string, Handler> = {
 };
 
 export default function handler(req: VercelRequest, res: VercelResponse): unknown {
-  const slug = req.query.slug;
-  const key = Array.isArray(slug) ? slug.join("/") : (slug ?? "");
+  const key = resolveApiRouteKey(req, "stripe");
   const routeHandler = ROUTES[key];
   if (!routeHandler) {
     res.status(404).json({ error: "Not found", route: key || null });

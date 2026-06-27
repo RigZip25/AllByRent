@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import rentalNoShow from "@allbyrent/server/routes/cron/rental-no-show";
+import { resolveApiRouteKey } from "../lib/resolveRouteKey";
 import rentalOverdue from "@allbyrent/server/routes/cron/rental-overdue";
 import rentalPendingExpiry from "@allbyrent/server/routes/cron/rental-pending-expiry";
 
@@ -13,8 +14,7 @@ const ROUTES: Record<string, Handler> = {
 };
 
 export default function handler(req: VercelRequest, res: VercelResponse): unknown {
-  const slug = req.query.slug;
-  const key = Array.isArray(slug) ? slug.join("/") : (slug ?? "");
+  const key = resolveApiRouteKey(req, "cron");
   const routeHandler = ROUTES[key];
   if (!routeHandler) {
     res.status(404).json({ error: "Not found", route: key || null });

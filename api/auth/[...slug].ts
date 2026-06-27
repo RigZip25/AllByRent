@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import authOtp from "@allbyrent/server/routes/auth/otp";
+import { resolveApiRouteKey } from "../lib/resolveRouteKey";
 import deleteAccount from "@allbyrent/server/routes/auth/delete_account";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
@@ -11,8 +12,7 @@ const ROUTES: Record<string, Handler> = {
 };
 
 export default function handler(req: VercelRequest, res: VercelResponse): unknown {
-  const slug = req.query.slug;
-  const key = Array.isArray(slug) ? slug.join("/") : (slug ?? "");
+  const key = resolveApiRouteKey(req, "auth");
   const routeHandler = ROUTES[key];
   if (!routeHandler) {
     res.status(404).json({ error: "Not found", route: key || null });

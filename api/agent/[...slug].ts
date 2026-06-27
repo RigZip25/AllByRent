@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import activity from "@allbyrent/server/routes/agent/activity";
+import { resolveApiRouteKey } from "../lib/resolveRouteKey";
 import finance from "@allbyrent/server/routes/agent/finance";
 import growth from "@allbyrent/server/routes/agent/growth";
 import listings from "@allbyrent/server/routes/agent/listings";
@@ -23,8 +24,7 @@ const ROUTES: Record<string, Handler> = {
 };
 
 export default function handler(req: VercelRequest, res: VercelResponse): unknown {
-  const slug = req.query.slug;
-  const key = Array.isArray(slug) ? slug.join("/") : (slug ?? "");
+  const key = resolveApiRouteKey(req, "agent");
   const routeHandler = ROUTES[key];
   if (!routeHandler) {
     res.status(404).json({ error: "Not found", route: key || null });

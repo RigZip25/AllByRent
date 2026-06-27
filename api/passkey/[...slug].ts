@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import authOptions from "@allbyrent/server/routes/passkey/auth/options";
+import { resolveApiRouteKey } from "../lib/resolveRouteKey";
 import authVerify from "@allbyrent/server/routes/passkey/auth/verify";
 import registerOptions from "@allbyrent/server/routes/passkey/register/options";
 import registerVerify from "@allbyrent/server/routes/passkey/register/verify";
@@ -15,8 +16,7 @@ const ROUTES: Record<string, Handler> = {
 };
 
 export default function handler(req: VercelRequest, res: VercelResponse): unknown {
-  const slug = req.query.slug;
-  const key = Array.isArray(slug) ? slug.join("/") : (slug ?? "");
+  const key = resolveApiRouteKey(req, "passkey");
   const routeHandler = ROUTES[key];
   if (!routeHandler) {
     res.status(404).json({ error: "Not found", route: key || null });
