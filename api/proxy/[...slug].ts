@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import anthropic from "@allbyrent/server/routes/anthropic";
-import { resolveApiRouteKey } from "../lib/resolveRouteKey";
+import { resolveApiRouteKey } from "@allbyrent/server/lib/resolveApiRouteKey";
 import photoroom from "@allbyrent/server/routes/photoroom";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;

@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import activity from "@allbyrent/server/routes/agent/activity";
-import { resolveApiRouteKey } from "../lib/resolveRouteKey";
+import { resolveApiRouteKey } from "@allbyrent/server/lib/resolveApiRouteKey";
 import finance from "@allbyrent/server/routes/agent/finance";
 import growth from "@allbyrent/server/routes/agent/growth";
 import listings from "@allbyrent/server/routes/agent/listings";
