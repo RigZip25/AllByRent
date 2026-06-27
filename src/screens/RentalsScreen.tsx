@@ -12,6 +12,7 @@ import { BookingRequestCard } from "../components/rentals/BookingRequestCard";
 import { PendingApprovalCard } from "../components/rentals/PendingApprovalCard";
 import { RentalCard } from "../components/rentals/RentalCard";
 import { getAppMode } from "../lib/appMode";
+import { expireStalePendingApprovals } from "../lib/expirePendingApprovals";
 import {
   getActiveBookings,
   getHistoryBookings,
@@ -196,9 +197,15 @@ export function RentalsScreen({
       setBookings([]);
       return;
     }
-    void syncRentalsFromRemote(auth.userId)
-      .then(setBookings)
-      .catch(() => setBookings(loadRentalBookings()));
+    void expireStalePendingApprovals(auth.userId)
+      .then(() =>
+        syncRentalsFromRemote(auth.userId).then(setBookings).catch(() => setBookings(loadRentalBookings())),
+      )
+      .catch(() => {
+        void syncRentalsFromRemote(auth.userId)
+          .then(setBookings)
+          .catch(() => setBookings(loadRentalBookings()));
+      });
   }, [auth.userId]);
 
   const hostRequests = useMemo(

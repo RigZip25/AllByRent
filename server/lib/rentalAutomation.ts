@@ -284,3 +284,67 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
 
   return { lateFees, recoveryNotices, safelyEscalations };
 }
+
+type PendingApprovalRow = {
+  id: string;
+  owner_id: string;
+  renter_id: string;
+  listing_id: string;
+  created_at: string;
+  stripe_payment_intent_id: string | null;
+};
+
+export async function runPendingApprovalExpiry(admin: SupabaseClient): Promise<{ expired: number }> {
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  let expired = 0;
+
+  const { data: rows } = await admin
+    .from("rentals")
+    .select("id, owner_id, renter_id, listing_id, created_at, stripe_payment_intent_id")
+    .eq("status", "pending_approval")
+    .lt("created_at", cutoff);
+
+  const rentals = (rows ?? []) as PendingApprovalRow[];
+
+  for (const rental of rentals) {
+    if (isStripeServerConfigured() && rental.stripe_payment_intent_id) {
+      try {
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+          apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion,
+        });
+        const intent = await stripe.paymentIntents.retrieve(rental.stripe_payment_intent_id);
+        if (intent.status === "requires_capture" || intent.status === "requires_payment_method") {
+          const canceled = await stripe.paymentIntents.cancel(intent.id);
+          await admin
+            .from("rentals")
+            .update({ stripe_payment_status: canceled.status })
+            .eq("id", rental.id);
+        }
+      } catch {
+        // Continue with rental cancellation even if Stripe cancel fails.
+      }
+    }
+
+    await admin.from("rentals").update({ status: "cancelled" }).eq("id", rental.id);
+
+    await insertNotification(admin, {
+      recipientId: rental.renter_id,
+      actorId: rental.owner_id,
+      type: "booking_request",
+      title: "Booking request expired",
+      body: "No host response within 24h. Your request was cancelled and any authorized payment was released.",
+    });
+
+    await insertNotification(admin, {
+      recipientId: rental.owner_id,
+      actorId: rental.renter_id,
+      type: "booking_request",
+      title: "Request expired",
+      body: "A booking request auto-cancelled after 24h without a response.",
+    });
+
+    expired += 1;
+  }
+
+  return { expired };
+}

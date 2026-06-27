@@ -1,7 +1,7 @@
 import { recordManualBookingResponse } from "./bookingRequestsStorage";
 import { createNotificationRemote } from "./notificationsStorage";
 import { updateBooking, type RentalBooking } from "./rentalsStorage";
-import { cancelRentalPayment } from "./stripePayments";
+import { cancelRentalPayment, captureRentalPayment } from "./stripePayments";
 
 function refundNote(booking: RentalBooking): string {
   if (booking.stripePayment || booking.paymentOnHold) {
@@ -14,6 +14,13 @@ export async function approveRentalBooking(
   booking: RentalBooking,
   hostUserId: string,
 ): Promise<void> {
+  if (booking.stripePayment || booking.paymentOnHold) {
+    const captured = await captureRentalPayment(booking.id);
+    if (!captured.ok) {
+      throw new Error(captured.reason ?? "Could not capture payment. Try again or contact support.");
+    }
+  }
+
   updateBooking(booking.id, {
     status: "pending_checkin",
     pickupWindowStart: new Date().toISOString(),

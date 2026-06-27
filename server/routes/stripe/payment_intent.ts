@@ -100,6 +100,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
           amount: amountCents,
           currency: "usd",
           customer: customerId,
+          capture_method: "manual",
           automatic_payment_methods: { enabled: true },
           metadata,
         });
@@ -109,6 +110,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
         amount: amountCents,
         currency: "usd",
         customer: customerId,
+        capture_method: "manual",
         automatic_payment_methods: { enabled: true },
         metadata,
       });
@@ -118,6 +120,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       amount: amountCents,
       currency: "usd",
       customer: customerId,
+      capture_method: "manual",
       automatic_payment_methods: { enabled: true },
       metadata,
     });

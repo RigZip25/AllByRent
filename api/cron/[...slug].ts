@@ -2,12 +2,14 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import rentalNoShow from "../../server/routes/cron/rental-no-show";
 import rentalOverdue from "../../server/routes/cron/rental-overdue";
+import rentalPendingExpiry from "../../server/routes/cron/rental-pending-expiry";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 
 const ROUTES: Record<string, Handler> = {
   "rental-no-show": rentalNoShow,
   "rental-overdue": rentalOverdue,
+  "rental-pending-expiry": rentalPendingExpiry,
 };
 
 export default function handler(req: VercelRequest, res: VercelResponse): unknown {
