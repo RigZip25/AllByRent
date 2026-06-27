@@ -26,6 +26,30 @@ Or connect the GitHub repo **RigZip25/AllByRent** and import — `vercel.json` i
 
 **Node.js:** 20+ (see `package.json` `engines`).
 
+## Production env (before Stripe)
+
+Set in Vercel **Settings → Environment Variables** (Production), then **Redeploy**:
+
+| Variable | Required for |
+|----------|----------------|
+| `VITE_SUPABASE_URL` | Client auth + data |
+| `VITE_SUPABASE_ANON_KEY` | Client auth + data |
+| `SUPABASE_SERVICE_ROLE_KEY` | Delete account, cron, passkeys, Stripe API |
+| `CRON_SECRET` | `/api/cron/*` (generate: `openssl rand -hex 32`) |
+| `PASSKEY_RP_ID` | `app.evorios.com` on production |
+| `PASSKEY_ORIGIN` | `https://app.evorios.com` |
+
+Cron schedules are in `vercel.json` (`rental-pending-expiry` hourly; no-show & overdue every 15 min). Vercel sends `Authorization: Bearer <CRON_SECRET>` automatically when `CRON_SECRET` is set.
+
+Verify cron after deploy:
+
+```bash
+curl -s -H "Authorization: Bearer YOUR_CRON_SECRET" \
+  "https://YOUR_PRODUCTION_HOST/api/cron/rental-pending-expiry"
+```
+
+Expect: `{"ok":true,"expired":0}` (or a positive `expired` count).
+
 ## Common failures
 
 ### Hobby plan: 12 serverless functions max
