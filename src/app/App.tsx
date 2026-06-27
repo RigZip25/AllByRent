@@ -1440,6 +1440,7 @@ function AppRoutes() {
 
         {currentScreen === "bookingConfirmed" && (
           <BookingConfirmedScreen
+            bookingId={selectedBookingId}
             onHome={handleOpenHome}
             onRentals={handleOpenRentals}
           />

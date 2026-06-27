@@ -41,3 +41,13 @@ export function pushInAppNotification(
 export function unreadNotificationCount(): number {
   return loadInAppNotifications().filter((n) => !n.read).length;
 }
+
+export function markInAppNotificationRead(id: string): void {
+  const list = loadInAppNotifications();
+  const next = list.map((n) => (n.id === id ? { ...n, read: true } : n));
+  try {
+    localStorage.setItem(NOTIF_KEY, JSON.stringify(next.slice(0, 50)));
+  } catch {
+    /* ignore */
+  }
+}
