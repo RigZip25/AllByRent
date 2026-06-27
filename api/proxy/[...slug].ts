@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import anthropic from "@allbyrent/server/routes/anthropic";
+import { resolveApiRouteKey } from "../lib/resolveRouteKey";
 import photoroom from "@allbyrent/server/routes/photoroom";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
@@ -11,8 +12,7 @@ const ROUTES: Record<string, Handler> = {
 };
 
 export default function handler(req: VercelRequest, res: VercelResponse): unknown {
-  const slug = req.query.slug;
-  const key = Array.isArray(slug) ? slug.join("/") : (slug ?? "");
+  const key = resolveApiRouteKey(req, "proxy");
   const routeHandler = ROUTES[key];
   if (!routeHandler) {
     res.status(404).json({ error: "Not found", route: key || null });
