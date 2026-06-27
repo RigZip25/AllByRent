@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import safelyQuote from "@allbyrent/server/routes/safely/quote";
-import { resolveApiRouteKey } from "../lib/resolveRouteKey";
+import { resolveApiRouteKey } from "@allbyrent/server/lib/resolveApiRouteKey";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 

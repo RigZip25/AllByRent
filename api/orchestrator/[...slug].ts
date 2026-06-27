@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import orchestratorRun from "@allbyrent/server/routes/orchestrator/run";
-import { resolveApiRouteKey } from "../lib/resolveRouteKey";
+import { resolveApiRouteKey } from "@allbyrent/server/lib/resolveApiRouteKey";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 
