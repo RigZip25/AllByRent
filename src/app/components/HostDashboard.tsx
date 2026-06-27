@@ -43,10 +43,14 @@ export function HostDashboard({
   onListItem,
   onOpenListing,
   onShareGarage,
+  onViewProfile,
+  onOpenRental,
 }: {
   onListItem: () => void;
   onOpenListing: (listingId: string) => void;
   onShareGarage?: () => void;
+  onViewProfile?: (userId: string) => void;
+  onOpenRental?: (bookingId: string) => void;
 }) {
   const auth = useAuth();
   const [listings, setListings] = useState<Awaited<ReturnType<typeof loadManageableListings>>>([]);
@@ -166,7 +170,7 @@ export function HostDashboard({
                   key={b.id}
                   booking={b}
                   onRefresh={() => setBookings(loadRentalBookings())}
-                  onViewProfile={() => undefined}
+                  onViewProfile={onViewProfile ?? (() => undefined)}
                 />
               ))}
             </div>
@@ -180,11 +184,19 @@ export function HostDashboard({
             </h3>
             <ul className="space-y-2">
               {activeRentals.slice(0, 4).map((b) => (
-                <li key={b.id} className="rounded-2xl border bg-white p-3" style={{ borderColor: BORDER }}>
-                  <p className="text-[14px] font-semibold text-gray-900">{b.itemTitle}</p>
-                  <p className="mt-0.5 text-[12px] text-gray-500">
-                    {b.counterpartyName} · {b.status}
-                  </p>
+                <li key={b.id}>
+                  <button
+                    type="button"
+                    disabled={!onOpenRental}
+                    onClick={() => onOpenRental?.(b.id)}
+                    className="w-full rounded-2xl border bg-white p-3 text-left transition-colors disabled:cursor-default"
+                    style={{ borderColor: BORDER }}
+                  >
+                    <p className="text-[14px] font-semibold text-gray-900">{b.itemTitle}</p>
+                    <p className="mt-0.5 text-[12px] text-gray-500">
+                      {b.counterpartyName} · {b.status}
+                    </p>
+                  </button>
                 </li>
               ))}
             </ul>
