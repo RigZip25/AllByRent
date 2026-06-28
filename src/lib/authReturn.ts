@@ -1,6 +1,7 @@
 const AUTH_RETURN_KEY = "abr_auth_return";
 const AUTH_INTENT_KEY = "abr_auth_intent";
 const PENDING_EMAIL_KEY = "abr_auth_pending_email";
+const PENDING_EMAIL_LOCAL_KEY = "abr_auth_pending_email_local";
 const EDITING_LISTING_KEY = "abr_editing_listing_id";
 
 export type AuthIntent = "list" | "book" | "message" | "generic";
@@ -51,8 +52,10 @@ export function consumeAuthReturn(): string | null {
 }
 
 export function setPendingAuthEmail(email: string): void {
+  const normalized = email.trim().toLowerCase();
   try {
-    sessionStorage.setItem(PENDING_EMAIL_KEY, email.trim().toLowerCase());
+    sessionStorage.setItem(PENDING_EMAIL_KEY, normalized);
+    localStorage.setItem(PENDING_EMAIL_LOCAL_KEY, normalized);
   } catch {
     // ignore
   }
@@ -60,7 +63,10 @@ export function setPendingAuthEmail(email: string): void {
 
 export function peekPendingAuthEmail(): string | null {
   try {
-    return sessionStorage.getItem(PENDING_EMAIL_KEY);
+    return (
+      sessionStorage.getItem(PENDING_EMAIL_KEY) ??
+      localStorage.getItem(PENDING_EMAIL_LOCAL_KEY)
+    );
   } catch {
     return null;
   }
@@ -69,6 +75,7 @@ export function peekPendingAuthEmail(): string | null {
 export function clearPendingAuthEmail(): void {
   try {
     sessionStorage.removeItem(PENDING_EMAIL_KEY);
+    localStorage.removeItem(PENDING_EMAIL_LOCAL_KEY);
   } catch {
     // ignore
   }
