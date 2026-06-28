@@ -532,6 +532,7 @@ function AppRoutes() {
     });
   }, [auth.configured, auth.session, showAuthGate]);
 
+  const finishLocationSetup = useCallback(() => {
     completeOnboarding();
     setHomeLocationError(null);
     setNavStack((stack) => {
@@ -1579,7 +1580,7 @@ function AppRoutes() {
       <AuthGate
         open={authGateOpen}
         intent={authIntent}
-        initialStep={peekPendingAuthEmail() ? "sent" : undefined}
+        initialStep={peekPendingAuthEmail() ? "confirm" : undefined}
         onDismiss={() => setAuthGateOpen(false)}
       />
 
