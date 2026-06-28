@@ -130,12 +130,19 @@ export function ProfilePhotoCapture({
       className="fixed inset-0 z-[80] flex max-h-[100dvh] min-h-[100dvh] flex-col bg-black"
       style={{ height: "100dvh" }}
     >
-      <div className="flex shrink-0 items-center justify-between px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top,0px))] text-white">
-        <button type="button" onClick={onClose} aria-label="Close" className="min-h-[44px] min-w-[44px]">
+      <div className="flex shrink-0 items-center justify-between gap-2 px-3 pb-2 pt-[max(0.75rem,env(safe-area-inset-top,0px))] text-white">
+        <button type="button" onClick={onClose} aria-label="Close" className="min-h-[44px] min-w-[44px] shrink-0">
           <X className="h-6 w-6" />
         </button>
-        <p className="text-[15px] font-semibold">Take profile photo</p>
-        <span className="w-6" />
+        <p className="min-w-0 truncate text-center text-[15px] font-semibold">Take profile photo</p>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => fileInputRef.current?.click()}
+          className="min-h-[44px] shrink-0 px-1 text-[13px] font-semibold text-white/80 disabled:opacity-50"
+        >
+          Library
+        </button>
       </div>
 
       <div className="relative min-h-0 flex-1 overflow-hidden">
@@ -169,37 +176,24 @@ export function ProfilePhotoCapture({
                 style={{ width: "min(72vw, 280px)", height: "min(72vw, 280px)" }}
               />
             </div>
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-black/80 via-black/35 to-transparent pt-16"
+              style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom, 0px))" }}
+            >
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void handleCapture()}
+                aria-label={busy ? "Processing photo" : "Take photo"}
+                aria-busy={busy}
+                className="pointer-events-auto flex h-[72px] w-[72px] items-center justify-center rounded-full border-4 border-white disabled:opacity-50"
+              >
+                <span className="h-[56px] w-[56px] rounded-full bg-white" />
+              </button>
+            </div>
           </>
         )}
       </div>
-
-      {!error ? (
-        <div
-          className="flex shrink-0 flex-col items-center gap-3 px-4 pt-4"
-          style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))" }}
-        >
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => void handleCapture()}
-            aria-label="Take photo"
-            className="flex h-[76px] w-[76px] items-center justify-center rounded-full border-4 border-white disabled:opacity-50"
-          >
-            <span className="h-[60px] w-[60px] rounded-full bg-white" />
-          </button>
-          <p className="text-center text-[13px] font-medium text-white/80">
-            {busy ? "Processing…" : "Tap to capture"}
-          </p>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => fileInputRef.current?.click()}
-            className="min-h-[44px] text-[14px] font-semibold text-white/70 underline"
-          >
-            Choose from library instead
-          </button>
-        </div>
-      ) : null}
 
       <input
         ref={fileInputRef}

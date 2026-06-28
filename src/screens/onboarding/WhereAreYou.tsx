@@ -12,6 +12,7 @@ type WhereAreYouProps = {
   onTraveling: () => void;
   onBack: () => void;
   onSkip: () => void;
+  onEnterManually?: () => void;
   isLocatingHome?: boolean;
   locationError?: string | null;
 };
@@ -81,6 +82,7 @@ export function WhereAreYou({
   onTraveling,
   onBack,
   onSkip,
+  onEnterManually,
   isLocatingHome = false,
   locationError = null,
 }: WhereAreYouProps) {
@@ -125,6 +127,23 @@ export function WhereAreYou({
           disabled={isLocatingHome}
         />
       </div>
+
+      {onEnterManually ? (
+        <div className="shrink-0 px-4 pb-6 pt-2 text-center">
+          <button
+            type="button"
+            onClick={onEnterManually}
+            disabled={isLocatingHome}
+            className="text-[14px] font-semibold underline disabled:opacity-60"
+            style={{ color: GREEN }}
+          >
+            Enter my address manually
+          </button>
+          <p className="mt-2 text-[12px] leading-relaxed text-gray-500">
+            Allowed location on allbyrent.com? app.evorios.com needs its own permission — allow when prompted, or type your ZIP.
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }

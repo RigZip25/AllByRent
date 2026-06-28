@@ -1,7 +1,7 @@
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { resolveSessionUserEmail } from "./authEmail";
 import { clearPendingAuthEmail } from "./authReturn";
-import { consumePendingAuthProfile } from "./pendingAuthProfile";
+import { consumePendingAuthProfile, peekPendingAuthProfile } from "./pendingAuthProfile";
 import {
   deviceHasPasskeyHint,
   isPasskeySupported,
@@ -89,8 +89,8 @@ export function getAuthRedirectUrl(): string {
 async function ensureProfileRow(userId: string, email: string): Promise<void> {
   const supabase = getSupabaseClient();
   if (!supabase) return;
-  const pending = consumePendingAuthProfile();
-  await supabase
+  const pending = peekPendingAuthProfile();
+  const { error } = await supabase
     .from("profiles")
     .upsert(
       {
@@ -112,6 +112,9 @@ async function ensureProfileRow(userId: string, email: string): Promise<void> {
       },
       { onConflict: "id" },
     );
+  if (!error && pending) {
+    consumePendingAuthProfile();
+  }
 }
 
 async function readPkceChallengeForProxy(): Promise<{

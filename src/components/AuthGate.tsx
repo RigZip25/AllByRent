@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Apple, Chrome, Fingerprint, Mail, ScanFace, X } from "lucide-react";
+import { Apple, ChevronDown, Chrome, Fingerprint, Mail, ScanFace, X } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
 import { APP_NAME, mascotSays, MASCOT_NAME } from "../lib/brand";
 import type { AuthIntent } from "../lib/authReturn";
@@ -11,10 +11,10 @@ import {
   signInWithProvider,
 } from "../lib/auth";
 import { formatAuthError } from "../lib/authErrors";
-import { detectCurrentLocation } from "../lib/geolocation";
+import { detectCurrentLocation, formatGeolocationErrorMessage } from "../lib/geolocation";
 import { getPasskeyEnvironmentHint } from "../lib/passkeyEnvironment";
 import { setHomeLocation } from "../lib/listingStorage";
-import { savePendingAuthProfile } from "../lib/pendingAuthProfile";
+import { peekPendingAuthProfile, savePendingAuthProfile } from "../lib/pendingAuthProfile";
 import { RentanoTip } from "./RentanoTip";
 import { AddressLocationPicker } from "./AddressLocationPicker";
 import type { LocationSuggestion } from "../lib/geocoding";
@@ -22,7 +22,8 @@ import type { LocationSuggestion } from "../lib/geocoding";
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
 
-type Step = "landing" | "email" | "sent";
+type Step = "account" | "confirm" | "alternatives";
+
 const EMAIL_COOLDOWN_SECONDS = 60;
 const EMAIL_RATE_LIMIT_COOLDOWN_SECONDS = 15 * 60;
 
@@ -31,29 +32,60 @@ const INTENT_COPY: Record<
   { title: string; subtitle: string; rentano: string }
 > = {
   list: {
-    title: "Sign in to list your item",
-    subtitle: "Enter your email — we'll send a magic link to sign in.",
-    rentano: mascotSays("List your gear and start earning. Sign in so we can save your listing draft."),
+    title: "Sign in or create account",
+    subtitle: "Add your details — we'll email a confirmation link, then save your listing draft.",
+    rentano: mascotSays("List your gear and start earning. One quick sign-in to continue."),
   },
   book: {
-    title: "Sign in to book",
-    subtitle: "Enter your email — we'll send a magic link to continue.",
-    rentano: `${MASCOT_NAME}: Booking needs an account so hosts can reach you. Quick email sign-in.`,
+    title: "Sign in or create account",
+    subtitle: "Add your details — we'll email a confirmation link so hosts can reach you.",
+    rentano: `${MASCOT_NAME}: Booking needs an account. Confirm your email and you're in.`,
   },
   message: {
-    title: "Sign in to message",
-    subtitle: "Enter your email — we'll send a magic link to continue.",
-    rentano: `${MASCOT_NAME}: Messaging is for members only — sign in to continue the conversation.`,
+    title: "Sign in or create account",
+    subtitle: "Add your details — we'll email a confirmation link to unlock messaging.",
+    rentano: `${MASCOT_NAME}: Messaging is for members — confirm your email to continue.`,
   },
   generic: {
-    title: `Join ${APP_NAME}`,
-    subtitle: "Enter your email — we'll send a magic link to sign in.",
-    rentano: `${MASCOT_NAME}: Sign in to unlock your garage showcase, booking, and chat.`,
+    title: "Sign in or create account",
+    subtitle: "New or returning — enter your details and we'll send a confirmation link to your email.",
+    rentano: `${MASCOT_NAME}: One account for your garage, bookings, and chat.`,
   },
 };
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function hydrateAuthForm(): {
+  fullName: string;
+  phone: string;
+  email: string;
+  location: LocationSuggestion | null;
+} {
+  const pendingProfile = peekPendingAuthProfile();
+  return {
+    fullName: pendingProfile?.fullName ?? "",
+    phone: pendingProfile?.phone ?? "",
+    email: peekPendingAuthEmail() ?? "",
+    location: pendingProfile?.location ?? null,
+  };
+}
+
+function SummaryRow({ label, value, badge }: { label: string; value: string; badge?: string }) {
+  return (
+    <div className="flex items-start justify-between gap-3 text-[13px]">
+      <span className="shrink-0 font-medium text-gray-500">{label}</span>
+      <div className="min-w-0 text-right">
+        <p className="break-words font-semibold text-gray-800 [overflow-wrap:anywhere]">{value}</p>
+        {badge ? (
+          <span className="mt-0.5 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900">
+            {badge}
+          </span>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
 export function AuthGate({
@@ -69,11 +101,13 @@ export function AuthGate({
 }) {
   const { configured } = useAuth();
   const copy = INTENT_COPY[intent];
-  const [step, setStep] = useState<Step>(initialStep ?? "email");
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState(() => peekPendingAuthEmail() ?? "");
-  const [location, setLocation] = useState<LocationSuggestion | null>(null);
+  const hydrated = useMemo(() => hydrateAuthForm(), []);
+  const [step, setStep] = useState<Step>(initialStep ?? "account");
+  const [fullName, setFullName] = useState(hydrated.fullName);
+  const [phone, setPhone] = useState(hydrated.phone);
+  const [email, setEmail] = useState(hydrated.email);
+  const [location, setLocation] = useState<LocationSuggestion | null>(hydrated.location);
+  const [showAlternatives, setShowAlternatives] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [passkeyPrimary, setPasskeyPrimary] = useState(false);
@@ -86,11 +120,22 @@ export function AuthGate({
   useEffect(() => {
     if (!open) return;
     setPasskeyPrimary(shouldShowPasskeyLogin());
-    const pending = peekPendingAuthEmail();
-    if (pending) setEmail(pending);
-    if (initialStep) setStep(initialStep);
-    else if (pending) setStep("sent");
-    else setStep(shouldShowPasskeyLogin() ? "landing" : "email");
+    const next = hydrateAuthForm();
+    setFullName(next.fullName);
+    setPhone(next.phone);
+    setEmail(next.email);
+    setLocation(next.location);
+    setShowAlternatives(false);
+    setError(null);
+    if (initialStep) {
+      setStep(initialStep);
+    } else if (next.email) {
+      setStep("confirm");
+    } else if (shouldShowPasskeyLogin()) {
+      setStep("alternatives");
+    } else {
+      setStep("account");
+    }
   }, [open, initialStep]);
 
   useEffect(() => {
@@ -110,9 +155,7 @@ export function AuthGate({
       const message = formatAuthError(e);
       if (/rate limit/i.test(message)) {
         setEmailCooldownUntil(Date.now() + EMAIL_RATE_LIMIT_COOLDOWN_SECONDS * 1000);
-        setError(
-          "Too many emails requested. Please wait about 15 minutes, then try again.",
-        );
+        setError("Too many emails requested. Please wait about 15 minutes, then try again.");
       } else {
         setError(message);
       }
@@ -122,43 +165,47 @@ export function AuthGate({
     }
   };
 
-  const emailCooldownRemaining = Math.max(
-    0,
-    Math.ceil((emailCooldownUntil - nowMs) / 1000),
-  );
+  const emailCooldownRemaining = Math.max(0, Math.ceil((emailCooldownUntil - nowMs) / 1000));
   const canRequestEmail = emailCooldownRemaining === 0 && busy === null && canUseSupabase;
 
-  const handleSendMagicLink = () => {
-    const trimmedName = fullName.trim();
-    if (!trimmedName) {
+  const persistPendingProfile = () => {
+    if (!location) return;
+    savePendingAuthProfile({
+      fullName: fullName.trim(),
+      phone: phone.trim() || undefined,
+      location,
+    });
+    setHomeLocation({
+      displayName: location.label,
+      lat: location.lat,
+      lng: location.lng,
+    });
+  };
+
+  const validateAccountForm = (): boolean => {
+    if (!fullName.trim()) {
       setError("Enter your name.");
-      return;
+      return false;
     }
     if (!isValidEmail(email)) {
       setError("Enter a valid email address.");
-      return;
+      return false;
     }
     if (!location) {
-      setError("Pick your location (auto-detect or search).");
-      return;
+      setError("Pick your area — auto-detect or search by ZIP or city.");
+      return false;
     }
-    if (!canRequestEmail) return;
+    return true;
+  };
+
+  const handleSendConfirmationLink = () => {
+    if (!validateAccountForm() || !canRequestEmail || !location) return;
     void run("email", async () => {
-      // Preserve the intent screen set by the caller (e.g. listing wizard).
       setPendingAuthEmail(email);
-      savePendingAuthProfile({
-        fullName: trimmedName,
-        phone: phone.trim() || undefined,
-        location,
-      });
-      setHomeLocation({
-        displayName: location.label,
-        lat: location.lat,
-        lng: location.lng,
-      });
+      persistPendingProfile();
       await signInWithEmailOtp(email);
       setEmailCooldownUntil(Date.now() + EMAIL_COOLDOWN_SECONDS * 1000);
-      setStep("sent");
+      setStep("confirm");
     });
   };
 
@@ -168,30 +215,41 @@ export function AuthGate({
     });
   };
 
-  const handleOAuth = (provider: "google" | "apple") => {
-    const trimmedName = fullName.trim();
-    if (!trimmedName) {
-      setError("Enter your name.");
-      return;
-    }
-    if (!location) {
-      setError("Pick your location (auto-detect or search).");
-      return;
-    }
+  const handleOAuth = (provider: "google" | "apple", options?: { skipProfile?: boolean }) => {
+    if (!options?.skipProfile && !validateAccountForm()) return;
     void run(provider, async () => {
-      savePendingAuthProfile({
-        fullName: trimmedName,
-        phone: phone.trim() || undefined,
-        location,
-      });
-      setHomeLocation({
-        displayName: location.label,
-        lat: location.lat,
-        lng: location.lng,
-      });
+      if (!options?.skipProfile && location) {
+        persistPendingProfile();
+      }
       await signInWithProvider(provider);
     });
   };
+
+  const handleAutoDetectLocation = () => {
+    void run("locate", async () => {
+      const detected = await detectCurrentLocation();
+      if (!detected.ok) {
+        setError(formatGeolocationErrorMessage(detected.reason));
+        return;
+      }
+      setLocation({
+        label: detected.location.displayName,
+        primaryLine: detected.location.displayName,
+        secondaryLine: "",
+        city: detected.location.displayName,
+        country: "",
+        region: "",
+        countryCode: "",
+        flag: "📍",
+        lat: detected.location.lat,
+        lng: detected.location.lng,
+        precision: "gps",
+      });
+    });
+  };
+
+  const confirmTitle = "Confirm your email";
+  const confirmSubtitle = `We sent a link to ${email}. Open it on this device to finish signing in.`;
 
   return (
     <div
@@ -220,12 +278,14 @@ export function AuthGate({
         <RentanoTip message={copy.rentano} className="mb-1" />
 
         <h2 className="mt-3 text-[22px] font-bold leading-tight" style={{ color: GREEN }}>
-          {step === "sent" ? "Check your email" : copy.title}
+          {step === "confirm" ? confirmTitle : step === "alternatives" ? "Quick sign-in" : copy.title}
         </h2>
         <p className="mt-1 text-[14px] text-gray-500">
-          {step === "sent"
-            ? `We sent a sign-in link to ${email}. Open the email on this device and tap the link.`
-            : copy.subtitle}
+          {step === "confirm"
+            ? confirmSubtitle
+            : step === "alternatives"
+              ? "Already set up Face ID or Google on this device?"
+              : copy.subtitle}
         </p>
 
         {!canUseSupabase ? (
@@ -235,140 +295,51 @@ export function AuthGate({
         ) : null}
 
         {error ? (
-          <div className="mt-3 rounded-2xl border bg-[#FEF2F2] p-3 text-[13px] text-red-700">
-            {error}
-          </div>
+          <div className="mt-3 rounded-2xl border bg-[#FEF2F2] p-3 text-[13px] text-red-700">{error}</div>
         ) : null}
 
-        {step === "landing" && passkeyPrimary ? (
+        {step === "alternatives" ? (
           <div className="mt-4 flex flex-col gap-2">
-            <button
-              type="button"
-              disabled={!canUseSupabase || busy !== null}
-              onClick={handlePasskeyLogin}
-              className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
-              style={{ backgroundColor: GREEN }}
-            >
-              <ScanFace className="h-5 w-5" />
-              {busy === "passkey" ? "Opening Face ID…" : "Login with Face ID"}
-            </button>
-            {passkeyHint ? (
-              <p className="text-center text-[12px] leading-snug text-gray-500">{passkeyHint}</p>
+            {passkeyPrimary ? (
+              <>
+                <button
+                  type="button"
+                  disabled={!canUseSupabase || busy !== null}
+                  onClick={handlePasskeyLogin}
+                  className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
+                  style={{ backgroundColor: GREEN }}
+                >
+                  <ScanFace className="h-5 w-5" />
+                  {busy === "passkey" ? "Opening Face ID…" : "Continue with Face ID"}
+                </button>
+                {passkeyHint ? (
+                  <p className="text-center text-[12px] leading-snug text-gray-500">{passkeyHint}</p>
+                ) : null}
+              </>
             ) : null}
 
-            <div className="flex items-center gap-3 py-1">
-              <div className="h-px flex-1 bg-gray-200" />
-              <span className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-                or
-              </span>
-              <div className="h-px flex-1 bg-gray-200" />
-            </div>
-
             <button
               type="button"
               disabled={!canUseSupabase || busy !== null}
-              onClick={() => handleOAuth("google")}
+              onClick={() => handleOAuth("google", { skipProfile: true })}
               className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
               style={{ borderColor: BORDER }}
             >
               <Chrome className="h-5 w-5" />
               Google
-              {busy === "google" ? (
-                <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-semibold uppercase">
-                  Loading
-                </span>
-              ) : null}
             </button>
             <button
               type="button"
               disabled={!canUseSupabase || busy !== null}
-              onClick={() => handleOAuth("apple")}
+              onClick={() => handleOAuth("apple", { skipProfile: true })}
               className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
               style={{ borderColor: BORDER }}
             >
               <Apple className="h-5 w-5" />
               Apple
-              {busy === "apple" ? (
-                <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-semibold uppercase">
-                  Loading
-                </span>
-              ) : null}
             </button>
 
-            <div className="flex items-center gap-3 py-1">
-              <div className="h-px flex-1 bg-gray-200" />
-              <span className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-                or
-              </span>
-              <div className="h-px flex-1 bg-gray-200" />
-            </div>
-
-            <button
-              type="button"
-              disabled={busy !== null}
-              onClick={() => setStep("email")}
-              className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[15px] font-semibold text-gray-700"
-              style={{ borderColor: BORDER }}
-            >
-              <Mail className="h-5 w-5" style={{ color: GREEN }} />
-              Sign in with magic link
-            </button>
-          </div>
-        ) : null}
-
-        {step === "landing" && !passkeyPrimary ? (
-          <div className="mt-4 flex flex-col gap-2">
-            <button
-              type="button"
-              disabled={!canUseSupabase || busy !== null}
-              onClick={() => handleOAuth("google")}
-              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
-              style={{ borderColor: BORDER }}
-            >
-              <Chrome className="h-5 w-5" />
-              Google
-              {busy === "google" ? (
-                <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-semibold uppercase">
-                  Loading
-                </span>
-              ) : null}
-            </button>
-            <button
-              type="button"
-              disabled={!canUseSupabase || busy !== null}
-              onClick={() => handleOAuth("apple")}
-              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
-              style={{ borderColor: BORDER }}
-            >
-              <Apple className="h-5 w-5" />
-              Apple
-              {busy === "apple" ? (
-                <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-semibold uppercase">
-                  Loading
-                </span>
-              ) : null}
-            </button>
-
-            <div className="flex items-center gap-3 py-1">
-              <div className="h-px flex-1 bg-gray-200" />
-              <span className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-                or
-              </span>
-              <div className="h-px flex-1 bg-gray-200" />
-            </div>
-
-            <button
-              type="button"
-              disabled={!canUseSupabase || busy !== null}
-              onClick={() => setStep("email")}
-              className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
-              style={{ backgroundColor: GREEN }}
-            >
-              <Mail className="h-5 w-5" />
-              Sign in with magic link
-            </button>
-
-            {canUseSupabase && shouldShowPasskeyLogin() ? (
+            {!passkeyPrimary && shouldShowPasskeyLogin() ? (
               <button
                 type="button"
                 disabled={busy !== null}
@@ -380,13 +351,21 @@ export function AuthGate({
                 {busy === "passkey" ? "Opening passkey…" : "Use Face ID"}
               </button>
             ) : null}
+
+            <button
+              type="button"
+              onClick={() => setStep("account")}
+              className="mt-2 w-full py-2 text-[13px] font-semibold text-gray-600"
+            >
+              Sign in with email instead
+            </button>
           </div>
         ) : null}
 
-        {step === "email" ? (
+        {step === "account" ? (
           <div className="mt-4">
             <label className="text-[13px] font-semibold text-gray-600" htmlFor="auth-name">
-              Name
+              Your name
             </label>
             <input
               id="auth-name"
@@ -395,12 +374,12 @@ export function AuthGate({
               autoFocus
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="Your name"
+              placeholder="How neighbors will see you"
               className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
               style={{ borderColor: BORDER }}
             />
 
-            <label className="text-[13px] font-semibold text-gray-600" htmlFor="auth-email">
+            <label className="mt-3 block text-[13px] font-semibold text-gray-600" htmlFor="auth-email">
               Email
             </label>
             <input
@@ -411,7 +390,7 @@ export function AuthGate({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") handleSendMagicLink();
+                if (e.key === "Enter") handleSendConfirmationLink();
               }}
               placeholder="you@example.com"
               className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
@@ -419,7 +398,7 @@ export function AuthGate({
             />
 
             <label className="mt-3 block text-[13px] font-semibold text-gray-600" htmlFor="auth-phone">
-              Phone
+              Phone <span className="font-normal text-gray-400">(optional)</span>
             </label>
             <input
               id="auth-phone"
@@ -435,42 +414,14 @@ export function AuthGate({
 
             <div className="mt-4 rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-[13px] font-semibold text-gray-700">Location</p>
+                <p className="text-[13px] font-semibold text-gray-700">Your area</p>
                 <button
                   type="button"
                   disabled={busy !== null}
-                  onClick={() => {
-                    void run("locate", async () => {
-                      const detected = await detectCurrentLocation();
-                      if (!detected.ok) {
-                        setError(
-                          detected.reason === "denied"
-                            ? "Location access was blocked. Type your city instead."
-                            : detected.reason === "timeout"
-                              ? "Location timed out. Type your city instead."
-                              : "Couldn’t detect location. Type your city instead.",
-                        );
-                        return;
-                      }
-                      const suggestion: LocationSuggestion = {
-                        label: detected.location.displayName,
-                        primaryLine: detected.location.displayName,
-                        secondaryLine: "",
-                        city: detected.location.displayName,
-                        country: "",
-                        region: "",
-                        countryCode: "",
-                        flag: "📍",
-                        lat: detected.location.lat,
-                        lng: detected.location.lng,
-                        precision: "gps",
-                      };
-                      setLocation(suggestion);
-                    });
-                  }}
+                  onClick={handleAutoDetectLocation}
                   className="text-[12px] font-semibold text-gray-600 disabled:opacity-60"
                 >
-                  Auto-detect
+                  {busy === "locate" ? "Detecting…" : "Use my location"}
                 </button>
               </div>
               <div className="mt-3">
@@ -485,34 +436,11 @@ export function AuthGate({
               </div>
             </div>
 
-            <div className="mt-3 flex flex-col gap-2">
-              <button
-                type="button"
-                disabled={!canUseSupabase || busy !== null}
-                onClick={() => handleOAuth("google")}
-                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
-                style={{ borderColor: BORDER }}
-              >
-                <Chrome className="h-5 w-5" />
-                Continue with Google
-              </button>
-              <button
-                type="button"
-                disabled={!canUseSupabase || busy !== null}
-                onClick={() => handleOAuth("apple")}
-                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
-                style={{ borderColor: BORDER }}
-              >
-                <Apple className="h-5 w-5" />
-                Continue with Apple
-              </button>
-            </div>
-
             <button
               type="button"
               disabled={!canRequestEmail}
-              onClick={handleSendMagicLink}
-              className="mt-3 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
+              onClick={handleSendConfirmationLink}
+              className="mt-4 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
               style={{ backgroundColor: GREEN }}
             >
               <Mail className="h-5 w-5" />
@@ -520,39 +448,85 @@ export function AuthGate({
                 ? "Sending…"
                 : emailCooldownRemaining > 0
                   ? `Resend in ${emailCooldownRemaining}s`
-                  : "Send magic link"}
+                  : "Send confirmation link"}
             </button>
-            {passkeyPrimary ? (
-              <button
-                type="button"
-                onClick={() => setStep("landing")}
-                className="mt-2 w-full py-2 text-[13px] font-semibold text-gray-500"
-              >
-                Back to Face ID
-              </button>
-            ) : shouldShowPasskeyLogin() ? (
-              <button
-                type="button"
-                disabled={busy !== null}
-                onClick={handlePasskeyLogin}
-                className="mt-2 w-full py-2 text-[13px] font-semibold text-gray-600"
-              >
-                {busy === "passkey" ? "Opening Face ID…" : "Use Face ID instead"}
-              </button>
-            ) : null}
+
+            {(shouldShowPasskeyLogin() || canUseSupabase) && (
+              <div className="mt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAlternatives((open) => !open)}
+                  className="flex w-full items-center justify-center gap-1 py-2 text-[13px] font-semibold text-gray-500"
+                >
+                  Other sign-in options
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${showAlternatives ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {showAlternatives ? (
+                  <div className="mt-1 flex flex-col gap-2">
+                    {shouldShowPasskeyLogin() ? (
+                      <button
+                        type="button"
+                        disabled={busy !== null}
+                        onClick={handlePasskeyLogin}
+                        className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-semibold text-gray-700"
+                        style={{ borderColor: BORDER }}
+                      >
+                        <Fingerprint className="h-4 w-4" />
+                        {busy === "passkey" ? "Opening Face ID…" : "Face ID"}
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      disabled={!canUseSupabase || busy !== null}
+                      onClick={() => handleOAuth("google")}
+                      className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
+                      style={{ borderColor: BORDER }}
+                    >
+                      <Chrome className="h-5 w-5" />
+                      Google
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!canUseSupabase || busy !== null}
+                      onClick={() => handleOAuth("apple")}
+                      className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
+                      style={{ borderColor: BORDER }}
+                    >
+                      <Apple className="h-5 w-5" />
+                      Apple
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            )}
           </div>
         ) : null}
 
-        {step === "sent" ? (
-          <div className="mt-4 flex flex-col gap-2">
+        {step === "confirm" ? (
+          <div className="mt-4 flex flex-col gap-3">
+            <div className="space-y-3 rounded-2xl border bg-[#F9FAFB] p-4" style={{ borderColor: BORDER }}>
+              <SummaryRow label="Name" value={fullName.trim() || "—"} />
+              <SummaryRow label="Email" value={email} badge="Awaiting confirmation" />
+              {phone.trim() ? <SummaryRow label="Phone" value={phone.trim()} /> : null}
+              {location ? (
+                <SummaryRow
+                  label="Area"
+                  value={location.secondaryLine ? `${location.primaryLine}, ${location.secondaryLine}` : location.primaryLine}
+                />
+              ) : null}
+            </div>
+
             <p className="rounded-2xl border bg-[#F0FDF4] px-4 py-3 text-[13px] leading-relaxed text-gray-700">
-              The link opens {APP_NAME} in this browser. If you don&apos;t see the email, check
-              spam or promotions.
+              After you tap the link, your name and area will already be saved. Wrong detail? Edit
+              below and send a new link.
             </p>
+
             <button
               type="button"
               disabled={busy !== null || emailCooldownRemaining > 0}
-              onClick={handleSendMagicLink}
+              onClick={handleSendConfirmationLink}
               className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
               style={{ backgroundColor: GREEN }}
             >
@@ -561,15 +535,23 @@ export function AuthGate({
                 ? "Sending…"
                 : emailCooldownRemaining > 0
                   ? `Resend in ${emailCooldownRemaining}s`
-                  : "Resend magic link"}
+                  : "Resend confirmation link"}
             </button>
+
             <button
               type="button"
-              onClick={() => setStep("email")}
-              className="w-full py-2 text-[13px] font-semibold text-gray-500"
+              onClick={() => {
+                setError(null);
+                setStep("account");
+              }}
+              className="w-full py-2 text-[13px] font-semibold text-gray-600"
             >
-              Use a different email
+              Edit details
             </button>
+
+            <p className="text-center text-[12px] leading-relaxed text-gray-400">
+              Check spam or promotions if the email doesn&apos;t arrive within a minute.
+            </p>
           </div>
         ) : null}
 

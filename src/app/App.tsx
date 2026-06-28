@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, startTransition } from "react";
-import { resolveHomeLocation } from "../lib/geolocation";
+import { formatGeolocationErrorMessage, resolveHomeLocation } from "../lib/geolocation";
 import { AppBrandHeader } from "../components/AppBrandHeader";
 import { OfflineScreen } from "./components/OfflineScreen";
 import { GarageShopMissingScreen } from "./components/GarageShopMissingScreen";
@@ -104,7 +104,7 @@ import {
 import { hasSeenGarageWorkflow } from "../lib/garageWorkflowStorage";
 import { hasSeenGarageSaleRules } from "../lib/garageSaleRulesStorage";
 import { resolveHostAccountId } from "../lib/hostIdentity";
-import { loadUserProfile } from "../lib/userProfileStorage";
+import { loadUserProfile, syncUserProfileFromAuth } from "../lib/userProfileStorage";
 
 import {
   saveHomeFeedLens,
@@ -532,10 +532,18 @@ function AppRoutes() {
     });
   }, [auth.configured, auth.session, showAuthGate]);
 
-  const finishRentOnboarding = useCallback(() => {
+  const finishLocationSetup = useCallback(() => {
     completeOnboarding();
-    setNavStack([]);
-    setCurrentScreen("browseHub");
+    setHomeLocationError(null);
+    setNavStack((stack) => {
+      if (stack.length > 0) {
+        const previous = stack[stack.length - 1]!;
+        setCurrentScreen(previous);
+        return stack.slice(0, -1);
+      }
+      setCurrentScreen("browseHub");
+      return [];
+    });
   }, []);
 
   const requireAuth = useCallback(
@@ -574,6 +582,7 @@ function AppRoutes() {
       "identity",
       "agentActivity",
       "coHosts",
+      "publicProfile",
     ];
     const storedTarget =
       candidate && validScreens.includes(candidate)
@@ -625,13 +634,29 @@ function AppRoutes() {
   const handleOpenRentals = useCallback(() => goToTab("rentals"), [goToTab]);
   const handleOpenProfile = useCallback(() => goToTab("profile"), [goToTab]);
   const handleViewPublicProfile = useCallback(
-    (userId: string) => {
-      const id = userId.trim();
-      if (!id) return;
+    (userId?: string | null) => {
+      const id = (
+        userId?.trim() ||
+        auth.userId?.trim() ||
+        loadUserProfile().id?.trim() ||
+        ""
+      );
+      if (!id) {
+        if (auth.configured && !auth.session) {
+          showAuthGate("profile");
+        }
+        return;
+      }
+      if (auth.userId?.trim() === id) {
+        syncUserProfileFromAuth({
+          userId: auth.userId,
+          userEmail: auth.userEmail,
+        });
+      }
       setSelectedPublicProfileUserId(id);
       navigateTo("publicProfile");
     },
-    [navigateTo],
+    [auth.configured, auth.session, auth.userId, auth.userEmail, navigateTo, showAuthGate],
   );
   const handleOpenFavorites = useCallback(() => goToTab("favorites"), [goToTab]);
   const handleOpenBusiness = useCallback(() => goToTab("earnBusiness"), [goToTab]);
@@ -816,32 +841,28 @@ function AppRoutes() {
     navigateTo("whereAreYou");
   };
 
+  const handleEnterManualLocation = useCallback(() => {
+    setHomeLocationError(null);
+    navigateTo("whereAreYouManual");
+  }, [navigateTo]);
+
   const handleAtHome = useCallback(async () => {
     setHomeLocationError(null);
     setIsLocatingHome(true);
     try {
       const result = await resolveHomeLocation();
       if (result.ok) {
-        finishRentOnboarding();
+        finishLocationSetup();
       } else {
-        const message =
-          result.reason === "denied"
-            ? "Location access was blocked. Allow location in your browser, or enter it manually."
-            : result.reason === "timeout"
-              ? "Location timed out. Check GPS/Wi‑Fi or enter your address manually."
-              : result.reason === "unsupported"
-                ? "On your phone, open the app via https:// (not http://). Or enter your street address below."
-                : "We couldn't detect your location. Enter it manually.";
-        setHomeLocationError(message);
-        navigateTo("whereAreYouManual");
+        setHomeLocationError(formatGeolocationErrorMessage(result.reason));
       }
     } finally {
       setIsLocatingHome(false);
     }
-  }, [finishRentOnboarding, navigateTo]);
+  }, [finishLocationSetup]);
 
   const handleManualLocationContinue = () => {
-    finishRentOnboarding();
+    finishLocationSetup();
   };
 
   const handleTraveling = () => {
@@ -849,7 +870,7 @@ function AppRoutes() {
   };
 
   const handleDestinationContinue = () => {
-    finishRentOnboarding();
+    finishLocationSetup();
   };
 
   const handleListingIntroStart = () => {
@@ -1154,6 +1175,7 @@ function AppRoutes() {
             onAtHome={handleAtHome}
             onTraveling={handleTraveling}
             onBack={handleBack}
+            onEnterManually={handleEnterManualLocation}
             isLocatingHome={isLocatingHome}
             locationError={homeLocationError}
             onSkip={skipOnboarding}
@@ -1365,10 +1387,7 @@ function AppRoutes() {
             onOpenPersonalInfo={handleOpenPersonalInfo}
             onOpenIdentity={() => navigateTo("identity")}
             onOpenAgentActivity={() => navigateTo("agentActivity")}
-            onViewPublicProfile={() => {
-              const userId = auth.userId ?? loadUserProfile().id;
-              handleViewPublicProfile(userId);
-            }}
+            onViewPublicProfile={handleViewPublicProfile}
           />
         )}
 
@@ -1561,7 +1580,7 @@ function AppRoutes() {
       <AuthGate
         open={authGateOpen}
         intent={authIntent}
-        initialStep={peekPendingAuthEmail() ? "sent" : undefined}
+        initialStep={peekPendingAuthEmail() ? "confirm" : undefined}
         onDismiss={() => setAuthGateOpen(false)}
       />
 

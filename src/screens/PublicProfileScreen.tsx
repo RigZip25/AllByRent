@@ -8,6 +8,7 @@ import { loadPublishedListings } from "../lib/listingStorage";
 import { getListingDisplayTitle } from "../lib/listingQr";
 import { categoryEmoji } from "../lib/listingCardMeta";
 import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
+import { useAuth } from "../hooks/AuthProvider";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -71,8 +72,10 @@ export function PublicProfileScreen({
   onBack: () => void;
   onOpenListing?: (listingId: string) => void;
 }) {
+  const auth = useAuth();
   const own = loadUserProfile();
-  const isSelf = userId === own.id;
+  const ownUserId = (auth.userId ?? own.id).trim();
+  const isSelf = Boolean(ownUserId) && userId.trim() === ownUserId;
   const [remoteProfile, setRemoteProfile] = useState<PublicUserProfile | null>(null);
   const [remoteLoading, setRemoteLoading] = useState(false);
   const [fetchedReviews, setFetchedReviews] = useState<PublicUserProfile["reviews"] | null>(null);
