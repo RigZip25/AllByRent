@@ -204,7 +204,9 @@ export async function verifyEmailOtp(email: string, token: string): Promise<void
   const normalized = email.trim().toLowerCase();
   const code = token.replace(/\D/g, "");
   if (!normalized) throw new Error("Enter your email address.");
-  if (code.length !== 8) throw new Error("Enter the 8-digit code from your email.");
+  if (code.length < 6 || code.length > 8) {
+    throw new Error("Enter the 6-digit code from your Evorios email.");
+  }
 
   const { data, error } = await supabase.auth.verifyOtp({
     email: normalized,
@@ -217,6 +219,7 @@ export async function verifyEmailOtp(email: string, token: string): Promise<void
     await ensureProfileRow(data.user.id, resolved);
   }
   clearPendingAuthEmail();
+  markAuthCallbackResume();
 }
 
 /**
