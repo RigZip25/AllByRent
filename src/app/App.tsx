@@ -1582,6 +1582,7 @@ function AppRoutes() {
         intent={authIntent}
         initialStep={peekPendingAuthEmail() ? "confirm" : undefined}
         onDismiss={() => setAuthGateOpen(false)}
+        onAuthenticated={finishAuthFlow}
       />
 
       <PasskeySetup open={passkeySetupOpen} onDone={() => setPasskeySetupOpen(false)} />

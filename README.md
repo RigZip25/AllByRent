@@ -67,8 +67,25 @@ Stores `passkey_credential_id` and public key material for custom WebAuthn (no S
 3. Ensure the Supabase project is **active** (resume if paused). If `https://YOUR_REF.supabase.co` does not resolve in a browser, fix the project in Supabase before redeploying.
 4. The app falls back to `POST /api/auth/otp` when the browser cannot reach Supabase directly; that route returns a clearer error if the hostname is wrong.
 - **Auth → Providers**
-  - **Email** enabled (magic link + 8-digit OTP)
+  - **Email** enabled (magic link + 6-digit OTP)
   - Google / Apple optional later (UI shows “Coming soon”)
+
+### Email sign-in code (recommended UX)
+
+Users enter a **6-digit code inside the app** — they should not need to tap a link in email (links often open a new browser and lose the session on iOS).
+
+1. **Supabase → Authentication → Email Templates → Magic Link** (or Confirm signup)
+2. Set **Subject** to: `Your Evorios sign-in code`
+3. Set **Body** to highlight the code, e.g.:
+
+   ```
+   Your Evorios sign-in code is: {{ .Token }}
+
+   Enter this code in the app. You can ignore the link below.
+   {{ .ConfirmationURL }}
+   ```
+
+4. **Optional — sender branding:** Authentication → SMTP Settings → use Resend/SendGrid with `noreply@evorios.com` so the inbox shows **Evorios** instead of Supabase.
 
 ### Local passkey testing
 

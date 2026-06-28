@@ -9,6 +9,7 @@ import {
   signInWithEmailOtp,
   signInWithPasskey,
   signInWithProvider,
+  verifyEmailOtp,
 } from "../lib/auth";
 import { formatAuthError } from "../lib/authErrors";
 import { detectCurrentLocation, formatGeolocationErrorMessage } from "../lib/geolocation";
@@ -33,22 +34,22 @@ const INTENT_COPY: Record<
 > = {
   list: {
     title: "Sign in or create account",
-    subtitle: "Add your details — we'll email a confirmation link, then save your listing draft.",
+    subtitle: "Add your details — we'll email a sign-in code, then save your listing draft.",
     rentano: mascotSays("List your gear and start earning. One quick sign-in to continue."),
   },
   book: {
     title: "Sign in or create account",
-    subtitle: "Add your details — we'll email a confirmation link so hosts can reach you.",
-    rentano: `${MASCOT_NAME}: Booking needs an account. Confirm your email and you're in.`,
+    subtitle: "Add your details — we'll email a sign-in code so hosts can reach you.",
+    rentano: `${MASCOT_NAME}: Booking needs an account. Enter the code from your email and you're in.`,
   },
   message: {
     title: "Sign in or create account",
-    subtitle: "Add your details — we'll email a confirmation link to unlock messaging.",
-    rentano: `${MASCOT_NAME}: Messaging is for members — confirm your email to continue.`,
+    subtitle: "Add your details — we'll email a sign-in code to unlock messaging.",
+    rentano: `${MASCOT_NAME}: Messaging is for members — enter the code from your email to continue.`,
   },
   generic: {
     title: "Sign in or create account",
-    subtitle: "New or returning — enter your details and we'll send a confirmation link to your email.",
+    subtitle: "New or returning — enter your details and we'll email a sign-in code.",
     rentano: `${MASCOT_NAME}: One account for your garage, bookings, and chat.`,
   },
 };
@@ -93,13 +94,15 @@ export function AuthGate({
   intent = "generic",
   initialStep,
   onDismiss,
+  onAuthenticated,
 }: {
   open: boolean;
   intent?: AuthIntent;
   initialStep?: Step;
   onDismiss?: () => void;
+  onAuthenticated?: () => void;
 }) {
-  const { configured } = useAuth();
+  const { configured, session } = useAuth();
   const copy = INTENT_COPY[intent];
   const hydrated = useMemo(() => hydrateAuthForm(), []);
   const [step, setStep] = useState<Step>(initialStep ?? "account");
@@ -114,8 +117,14 @@ export function AuthGate({
   const passkeyHint = useMemo(() => getPasskeyEnvironmentHint(), []);
   const [emailCooldownUntil, setEmailCooldownUntil] = useState<number>(0);
   const [nowMs, setNowMs] = useState<number>(() => Date.now());
+  const [otpCode, setOtpCode] = useState("");
 
   const canUseSupabase = useMemo(() => configured, [configured]);
+
+  useEffect(() => {
+    if (!open || !session) return;
+    onAuthenticated?.();
+  }, [open, session, onAuthenticated]);
 
   useEffect(() => {
     if (!open) return;
@@ -125,6 +134,7 @@ export function AuthGate({
     setPhone(next.phone);
     setEmail(next.email);
     setLocation(next.location);
+    setOtpCode("");
     setShowAlternatives(false);
     setError(null);
     if (initialStep) {
@@ -198,14 +208,26 @@ export function AuthGate({
     return true;
   };
 
-  const handleSendConfirmationLink = () => {
+  const handleSendConfirmationCode = () => {
     if (!validateAccountForm() || !canRequestEmail || !location) return;
     void run("email", async () => {
       setPendingAuthEmail(email);
       persistPendingProfile();
       await signInWithEmailOtp(email);
       setEmailCooldownUntil(Date.now() + EMAIL_COOLDOWN_SECONDS * 1000);
+      setOtpCode("");
       setStep("confirm");
+    });
+  };
+
+  const handleVerifyCode = () => {
+    const digits = otpCode.replace(/\D/g, "");
+    if (digits.length < 6) {
+      setError("Enter the 6-digit code from your email.");
+      return;
+    }
+    void run("verify", async () => {
+      await verifyEmailOtp(email, digits);
     });
   };
 
@@ -248,8 +270,11 @@ export function AuthGate({
     });
   };
 
-  const confirmTitle = "Confirm your email";
-  const confirmSubtitle = `We sent a link to ${email}. Open it on this device to finish signing in.`;
+  const confirmTitle = "Enter your sign-in code";
+  const confirmSubtitle = `We sent a code to ${email}. Stay on this screen and type it below — no need to leave the app.`;
+
+  const otpDigits = otpCode.replace(/\D/g, "");
+  const canVerifyCode = otpDigits.length >= 6 && busy === null && canUseSupabase;
 
   return (
     <div
@@ -390,7 +415,7 @@ export function AuthGate({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") handleSendConfirmationLink();
+                if (e.key === "Enter") handleSendConfirmationCode();
               }}
               placeholder="you@example.com"
               className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
@@ -439,7 +464,7 @@ export function AuthGate({
             <button
               type="button"
               disabled={!canRequestEmail}
-              onClick={handleSendConfirmationLink}
+              onClick={handleSendConfirmationCode}
               className="mt-4 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
               style={{ backgroundColor: GREEN }}
             >
@@ -448,7 +473,7 @@ export function AuthGate({
                 ? "Sending…"
                 : emailCooldownRemaining > 0
                   ? `Resend in ${emailCooldownRemaining}s`
-                  : "Send confirmation link"}
+                  : "Send sign-in code"}
             </button>
 
             {(shouldShowPasskeyLogin() || canUseSupabase) && (
@@ -508,7 +533,7 @@ export function AuthGate({
           <div className="mt-4 flex flex-col gap-3">
             <div className="space-y-3 rounded-2xl border bg-[#F9FAFB] p-4" style={{ borderColor: BORDER }}>
               <SummaryRow label="Name" value={fullName.trim() || "—"} />
-              <SummaryRow label="Email" value={email} badge="Awaiting confirmation" />
+              <SummaryRow label="Email" value={email} badge="Code sent" />
               {phone.trim() ? <SummaryRow label="Phone" value={phone.trim()} /> : null}
               {location ? (
                 <SummaryRow
@@ -518,30 +543,66 @@ export function AuthGate({
               ) : null}
             </div>
 
+            <label className="text-[13px] font-semibold text-gray-600" htmlFor="auth-otp">
+              Sign-in code
+            </label>
+            <input
+              id="auth-otp"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              autoFocus
+              maxLength={8}
+              value={otpCode}
+              onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleVerifyCode();
+              }}
+              placeholder="6-digit code"
+              className="w-full rounded-2xl border bg-white px-4 py-3 text-center text-[22px] font-bold tracking-[0.35em] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
+              style={{ borderColor: BORDER }}
+            />
+
+            <button
+              type="button"
+              disabled={!canVerifyCode}
+              onClick={handleVerifyCode}
+              className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
+              style={{ backgroundColor: GREEN }}
+            >
+              {busy === "verify" ? "Checking code…" : "Confirm and sign in"}
+            </button>
+
+            <p className="rounded-2xl border bg-[#FFFBEB] px-4 py-3 text-[13px] leading-relaxed text-amber-950">
+              The email may show <strong>Supabase</strong> as the sender until {APP_NAME} mail is fully
+              set up. Open the message and look for your <strong>{APP_NAME} sign-in code</strong> — you
+              can ignore any link and just type the numbers here.
+            </p>
+
             <p className="rounded-2xl border bg-[#F0FDF4] px-4 py-3 text-[13px] leading-relaxed text-gray-700">
-              After you tap the link, your name and area will already be saved. Wrong detail? Edit
-              below and send a new link.
+              Wrong name or email? Tap Edit details, fix it, and send a new code.
             </p>
 
             <button
               type="button"
               disabled={busy !== null || emailCooldownRemaining > 0}
-              onClick={handleSendConfirmationLink}
-              className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
-              style={{ backgroundColor: GREEN }}
+              onClick={handleSendConfirmationCode}
+              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-semibold text-gray-700 disabled:opacity-60"
+              style={{ borderColor: BORDER }}
             >
-              <Mail className="h-5 w-5" />
+              <Mail className="h-4 w-4" />
               {busy === "email"
                 ? "Sending…"
                 : emailCooldownRemaining > 0
-                  ? `Resend in ${emailCooldownRemaining}s`
-                  : "Resend confirmation link"}
+                  ? `New code in ${emailCooldownRemaining}s`
+                  : "Send a new code"}
             </button>
 
             <button
               type="button"
               onClick={() => {
                 setError(null);
+                setOtpCode("");
                 setStep("account");
               }}
               className="w-full py-2 text-[13px] font-semibold text-gray-600"
@@ -550,7 +611,7 @@ export function AuthGate({
             </button>
 
             <p className="text-center text-[12px] leading-relaxed text-gray-400">
-              Check spam or promotions if the email doesn&apos;t arrive within a minute.
+              Check spam or promotions if the code doesn&apos;t arrive within a minute.
             </p>
           </div>
         ) : null}
