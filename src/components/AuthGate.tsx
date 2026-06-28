@@ -11,7 +11,7 @@ import {
   signInWithProvider,
 } from "../lib/auth";
 import { formatAuthError } from "../lib/authErrors";
-import { detectCurrentLocation } from "../lib/geolocation";
+import { detectCurrentLocation, formatGeolocationErrorMessage } from "../lib/geolocation";
 import { getPasskeyEnvironmentHint } from "../lib/passkeyEnvironment";
 import { setHomeLocation } from "../lib/listingStorage";
 import { savePendingAuthProfile } from "../lib/pendingAuthProfile";

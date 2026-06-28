@@ -140,7 +140,7 @@ export function WhereAreYou({
             Enter my address manually
           </button>
           <p className="mt-2 text-[12px] leading-relaxed text-gray-500">
-            Location blocked? Allow location in your browser or iOS Settings, or type your street address.
+            Allowed location on allbyrent.com? app.evorios.com needs its own permission — allow when prompted, or type your ZIP.
           </p>
         </div>
       ) : null}

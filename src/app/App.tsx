@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, startTransition } from "react";
-import { resolveHomeLocation } from "../lib/geolocation";
+import { formatGeolocationErrorMessage, resolveHomeLocation } from "../lib/geolocation";
 import { AppBrandHeader } from "../components/AppBrandHeader";
 import { OfflineScreen } from "./components/OfflineScreen";
 import { GarageShopMissingScreen } from "./components/GarageShopMissingScreen";
@@ -532,10 +532,17 @@ function AppRoutes() {
     });
   }, [auth.configured, auth.session, showAuthGate]);
 
-  const finishRentOnboarding = useCallback(() => {
     completeOnboarding();
-    setNavStack([]);
-    setCurrentScreen("browseHub");
+    setHomeLocationError(null);
+    setNavStack((stack) => {
+      if (stack.length > 0) {
+        const previous = stack[stack.length - 1]!;
+        setCurrentScreen(previous);
+        return stack.slice(0, -1);
+      }
+      setCurrentScreen("browseHub");
+      return [];
+    });
   }, []);
 
   const requireAuth = useCallback(
@@ -844,26 +851,17 @@ function AppRoutes() {
     try {
       const result = await resolveHomeLocation();
       if (result.ok) {
-        finishRentOnboarding();
+        finishLocationSetup();
       } else {
-        const message =
-          result.reason === "denied"
-            ? "Location access was blocked. Allow location in your browser, or enter it manually."
-            : result.reason === "timeout"
-              ? "Location timed out. Check GPS/Wi‑Fi or enter your address manually."
-              : result.reason === "unsupported"
-                ? "On your phone, open the app via https:// (not http://). Or enter your street address below."
-                : "We couldn't detect your location. Enter it manually.";
-        setHomeLocationError(message);
-        navigateTo("whereAreYouManual");
+        setHomeLocationError(formatGeolocationErrorMessage(result.reason));
       }
     } finally {
       setIsLocatingHome(false);
     }
-  }, [finishRentOnboarding, navigateTo]);
+  }, [finishLocationSetup]);
 
   const handleManualLocationContinue = () => {
-    finishRentOnboarding();
+    finishLocationSetup();
   };
 
   const handleTraveling = () => {
@@ -871,7 +869,7 @@ function AppRoutes() {
   };
 
   const handleDestinationContinue = () => {
-    finishRentOnboarding();
+    finishLocationSetup();
   };
 
   const handleListingIntroStart = () => {
