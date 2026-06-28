@@ -210,19 +210,21 @@ export function ProfileScreen({
         userId: auth.userId!,
         userEmail: auth.userEmail,
         remoteDisplayName: remote.display_name,
+        remoteEmail: remote.email,
       });
       const displayName = synced.displayName;
       const memberSince = remote.created_at?.slice(0, 10) || synced.memberSince;
+      const resolvedEmail = auth.userEmail ?? remote.email ?? synced.email;
       const next = updateProfileFields({
         displayName,
-        email: auth.userEmail ?? synced.email,
+        email: resolvedEmail,
         phone: remote.phone ?? synced.phone,
         avatarUrl: synced.avatarUrl,
       });
       next.memberSince = memberSince;
       next.verification = {
         ...next.verification,
-        email: Boolean(auth.userEmail ?? next.email),
+        email: Boolean(resolvedEmail),
         phone: Boolean(remote.phone_verified ?? next.verification.phone),
         identity: Boolean(remote.identity_verified ?? next.verification.identity),
       };

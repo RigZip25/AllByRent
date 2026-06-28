@@ -1,4 +1,5 @@
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import { resolveSessionUserEmail } from "./authEmail";
 import { clearPendingAuthEmail } from "./authReturn";
 import { consumePendingAuthProfile } from "./pendingAuthProfile";
 import {
@@ -208,10 +209,11 @@ export async function verifyEmailOtp(email: string, token: string): Promise<void
     type: "email",
   });
   if (error) throw error;
-  clearPendingAuthEmail();
   if (data.user?.id) {
-    await ensureProfileRow(data.user.id, normalized);
+    const resolved = resolveSessionUserEmail(data.user) ?? normalized;
+    await ensureProfileRow(data.user.id, resolved);
   }
+  clearPendingAuthEmail();
 }
 
 /**
@@ -241,9 +243,11 @@ export async function completeAuthCallbackFromUrl(): Promise<boolean> {
     const next = `${url.pathname}${url.search}${url.hash}`;
     window.history.replaceState({}, "", next);
     if (error) throw error;
-    if (data.user?.id && data.user.email) {
-      await ensureProfileRow(data.user.id, data.user.email);
+    if (data.user?.id) {
+      const resolved = resolveSessionUserEmail(data.user);
+      if (resolved) await ensureProfileRow(data.user.id, resolved);
     }
+    clearPendingAuthEmail();
     markAuthCallbackResume();
     return true;
   }
@@ -254,9 +258,11 @@ export async function completeAuthCallbackFromUrl(): Promise<boolean> {
     if (error) throw error;
     if (data.session) {
       window.history.replaceState({}, "", `${url.pathname}${url.search}`);
-      if (data.session.user.id && data.session.user.email) {
-        await ensureProfileRow(data.session.user.id, data.session.user.email);
+      const resolved = resolveSessionUserEmail(data.session.user);
+      if (data.session.user.id && resolved) {
+        await ensureProfileRow(data.session.user.id, resolved);
       }
+      clearPendingAuthEmail();
       markAuthCallbackResume();
       return true;
     }

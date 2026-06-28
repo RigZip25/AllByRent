@@ -292,6 +292,7 @@ export type ProfileAuthSyncInput = {
   userId: string;
   userEmail?: string | null;
   remoteDisplayName?: string | null;
+  remoteEmail?: string | null;
 };
 
 /** Bind local profile to the signed-in account and replace stale demo fields. */
@@ -315,6 +316,9 @@ export function syncUserProfileFromAuth(input: ProfileAuthSyncInput): UserProfil
 
   if (input.userEmail?.trim()) {
     next.email = input.userEmail.trim();
+    next.verification = { ...next.verification, email: true };
+  } else if (input.remoteEmail?.trim()) {
+    next.email = input.remoteEmail.trim();
     next.verification = { ...next.verification, email: true };
   }
 

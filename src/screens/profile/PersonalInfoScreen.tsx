@@ -3,12 +3,13 @@ import type { ReactNode } from "react";
 import { ArrowLeft, Mail, Phone, User } from "lucide-react";
 import { ProfileFieldEditSheet } from "../../components/profile/ProfileFieldEditSheet";
 import { useAuth } from "../../hooks/AuthProvider";
+import { fetchRemoteProfile, updateRemoteProfile } from "../../lib/supabaseProfile";
 import {
   loadUserProfile,
   refreshProfileStats,
+  syncUserProfileFromAuth,
   updateProfileFields,
 } from "../../lib/userProfileStorage";
-import { updateRemoteProfile } from "../../lib/supabaseProfile";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -75,7 +76,36 @@ export function PersonalInfoScreen({
     if (initialEdit) setEditing(initialEdit);
   }, [initialEdit]);
 
-  const email = auth.userEmail?.trim() || profile.email?.trim() || "Not signed in";
+  useEffect(() => {
+    if (!auth.userId) return;
+    let mounted = true;
+
+    const apply = (userEmail: string | null, remoteEmail?: string | null) => {
+      const synced = syncUserProfileFromAuth({
+        userId: auth.userId!,
+        userEmail,
+        remoteEmail: remoteEmail ?? null,
+      });
+      if (!mounted) return;
+      setProfile(refreshProfileStats(synced, auth.userId));
+    };
+
+    apply(auth.userEmail);
+
+    void fetchRemoteProfile(auth.userId).then((remote) => {
+      if (!mounted || !remote) return;
+      apply(auth.userEmail, remote.email);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [auth.userId, auth.userEmail]);
+
+  const email =
+    auth.userEmail?.trim() ||
+    profile.email?.trim() ||
+    (auth.userId ? "Loading sign-in email…" : "Not signed in");
   const displayName = profile.displayName?.trim() || "Add your name";
   const phone = profile.phone?.trim() || "Add phone";
 
@@ -111,9 +141,14 @@ export function PersonalInfoScreen({
 
       <div className="screen-scroll flex-1 space-y-3 p-4">
         <p className="text-[13px] text-gray-500">
-          Email is used for sign-in and receipts. Name and phone appear on your profile and rentals.
+          Email is your sign-in address (from magic link). Name and phone appear on your profile and
+          rentals.
         </p>
         <Row icon={<Mail className="h-5 w-5" style={{ color: GREEN }} />} label="Email" value={email} />
+        <p className="px-1 text-[12px] leading-relaxed text-gray-500">
+          To use a different email, sign out and sign in again with that address. Changing email here
+          is not supported yet.
+        </p>
         <Row
           icon={<User className="h-5 w-5" style={{ color: GREEN }} />}
           label="Display name"

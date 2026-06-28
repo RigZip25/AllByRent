@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getSupabaseClient, isSupabaseConfigured } from "../lib/supabaseClient";
+import { resolveSessionUserEmail } from "../lib/authEmail";
 import { AUTH_CALLBACK_RESUME_KEY, completeAuthCallbackFromUrl, onAuthStateChange } from "../lib/auth";
 import { syncUserProfileFromAuth } from "../lib/userProfileStorage";
 import { fetchRemoteProfile } from "../lib/supabaseProfile";
@@ -102,17 +103,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const user = session?.user;
     if (!user?.id) return;
 
+    const userEmail = resolveSessionUserEmail(user);
+
     syncUserProfileFromAuth({
       userId: user.id,
-      userEmail: user.email ?? null,
+      userEmail,
     });
 
     void fetchRemoteProfile(user.id).then((remote) => {
       if (!remote) return;
       syncUserProfileFromAuth({
         userId: user.id,
-        userEmail: user.email ?? null,
+        userEmail,
         remoteDisplayName: remote.display_name,
+        remoteEmail: remote.email,
       });
     });
   }, [session]);
@@ -124,7 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       session,
       userId: user?.id ?? null,
-      userEmail: user?.email ?? null,
+      userEmail: resolveSessionUserEmail(user),
     };
   }, [configured, loading, session]);
 
