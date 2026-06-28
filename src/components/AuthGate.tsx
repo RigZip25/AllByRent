@@ -443,13 +443,7 @@ export function AuthGate({
                     void run("locate", async () => {
                       const detected = await detectCurrentLocation();
                       if (!detected.ok) {
-                        setError(
-                          detected.reason === "denied"
-                            ? "Location access was blocked. Type your city instead."
-                            : detected.reason === "timeout"
-                              ? "Location timed out. Type your city instead."
-                              : "Couldn’t detect location. Type your city instead.",
-                        );
+                        setError(formatGeolocationErrorMessage(detected.reason));
                         return;
                       }
                       const suggestion: LocationSuggestion = {
