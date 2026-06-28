@@ -175,26 +175,24 @@ export function ProfilePhotoCapture({
 
       {!error ? (
         <div
-          className="flex shrink-0 flex-col items-center gap-3 px-4 pt-4"
-          style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))" }}
+          className="flex shrink-0 flex-col items-center gap-2 px-4 pt-3"
+          style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))" }}
         >
           <button
             type="button"
             disabled={busy}
             onClick={() => void handleCapture()}
-            aria-label="Take photo"
-            className="flex h-[76px] w-[76px] items-center justify-center rounded-full border-4 border-white disabled:opacity-50"
+            aria-label={busy ? "Processing photo" : "Take photo"}
+            aria-busy={busy}
+            className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-4 border-white disabled:opacity-50"
           >
-            <span className="h-[60px] w-[60px] rounded-full bg-white" />
+            <span className="h-[56px] w-[56px] rounded-full bg-white" />
           </button>
-          <p className="text-center text-[13px] font-medium text-white/80">
-            {busy ? "Processing…" : "Tap to capture"}
-          </p>
           <button
             type="button"
             disabled={busy}
             onClick={() => fileInputRef.current?.click()}
-            className="min-h-[44px] text-[14px] font-semibold text-white/70 underline"
+            className="min-h-[44px] max-w-full truncate px-2 text-[13px] font-semibold text-white/70 underline"
           >
             Choose from library instead
           </button>
