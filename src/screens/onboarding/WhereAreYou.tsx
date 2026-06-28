@@ -21,7 +21,6 @@ function ChoiceCard({
   onClick,
   imageSrc,
   title,
-  subtitle,
   ctaLabel,
   ariaLabel,
   variant,
@@ -30,7 +29,6 @@ function ChoiceCard({
   onClick: () => void;
   imageSrc: string;
   title: string;
-  subtitle: string;
   ctaLabel: string;
   ariaLabel: string;
   variant: "earn" | "save";
@@ -55,15 +53,12 @@ function ChoiceCard({
           draggable={false}
         />
       </div>
-      <div className="where-are-you-choice-body shrink-0 px-4 pb-4 pt-3 text-center sm:px-5 sm:pb-5 sm:pt-4">
+      <div className="where-are-you-choice-body shrink-0 px-4 pb-4 pt-3 text-center sm:px-5 sm:pb-4 sm:pt-3">
         <h2 className="where-are-you-choice-title text-lg font-bold" style={{ color: GREEN }}>
           {title}
         </h2>
-        <p className="where-are-you-choice-subtitle mt-1 text-sm leading-relaxed text-gray-500">
-          {subtitle}
-        </p>
         <span
-          className="where-are-you-choice-cta mt-3 flex w-full items-center justify-center rounded-xl py-2.5 text-base font-bold sm:mt-4 sm:py-3"
+          className="where-are-you-choice-cta mt-2.5 flex w-full items-center justify-center rounded-xl py-2.5 text-base font-bold sm:mt-3 sm:py-3"
           style={
             isEarn
               ? { backgroundColor: AMBER, color: GREEN }
@@ -93,7 +88,6 @@ export function WhereAreYou({
         <h1 className="where-are-you-page-title text-2xl font-bold" style={{ color: GREEN }}>
           {copy.title}
         </h1>
-        <p className="mt-1 text-base text-gray-500">{copy.subtitle}</p>
         {locationError ? (
           <p
             className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-left text-sm text-amber-900"
@@ -109,7 +103,6 @@ export function WhereAreYou({
           variant="earn"
           imageSrc={onboardingAssets.onBlock}
           title={copy.onBlock.title}
-          subtitle={copy.onBlock.subtitle}
           ctaLabel={isLocatingHome ? "Finding your location…" : copy.onBlock.cta}
           ariaLabel={`${copy.onBlock.title}. Browse neighborhood garages near you.`}
           onClick={onAtHome}
@@ -120,7 +113,6 @@ export function WhereAreYou({
           variant="save"
           imageSrc={onboardingAssets.tripDestination}
           title={copy.trip.title}
-          subtitle={copy.trip.subtitle}
           ctaLabel={copy.trip.cta}
           ariaLabel={`${copy.trip.title}. Pick a destination area.`}
           onClick={onTraveling}
