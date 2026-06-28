@@ -104,7 +104,7 @@ import {
 import { hasSeenGarageWorkflow } from "../lib/garageWorkflowStorage";
 import { hasSeenGarageSaleRules } from "../lib/garageSaleRulesStorage";
 import { resolveHostAccountId } from "../lib/hostIdentity";
-import { loadUserProfile } from "../lib/userProfileStorage";
+import { loadUserProfile, syncUserProfileFromAuth } from "../lib/userProfileStorage";
 
 import {
   saveHomeFeedLens,
@@ -574,6 +574,7 @@ function AppRoutes() {
       "identity",
       "agentActivity",
       "coHosts",
+      "publicProfile",
     ];
     const storedTarget =
       candidate && validScreens.includes(candidate)
@@ -625,13 +626,29 @@ function AppRoutes() {
   const handleOpenRentals = useCallback(() => goToTab("rentals"), [goToTab]);
   const handleOpenProfile = useCallback(() => goToTab("profile"), [goToTab]);
   const handleViewPublicProfile = useCallback(
-    (userId: string) => {
-      const id = userId.trim();
-      if (!id) return;
+    (userId?: string | null) => {
+      const id = (
+        userId?.trim() ||
+        auth.userId?.trim() ||
+        loadUserProfile().id?.trim() ||
+        ""
+      );
+      if (!id) {
+        if (auth.configured && !auth.session) {
+          showAuthGate("profile");
+        }
+        return;
+      }
+      if (auth.userId?.trim() === id) {
+        syncUserProfileFromAuth({
+          userId: auth.userId,
+          userEmail: auth.userEmail,
+        });
+      }
       setSelectedPublicProfileUserId(id);
       navigateTo("publicProfile");
     },
-    [navigateTo],
+    [auth.configured, auth.session, auth.userId, auth.userEmail, navigateTo, showAuthGate],
   );
   const handleOpenFavorites = useCallback(() => goToTab("favorites"), [goToTab]);
   const handleOpenBusiness = useCallback(() => goToTab("earnBusiness"), [goToTab]);
@@ -815,6 +832,11 @@ function AppRoutes() {
     setAppMode("rent");
     navigateTo("whereAreYou");
   };
+
+  const handleEnterManualLocation = useCallback(() => {
+    setHomeLocationError(null);
+    navigateTo("whereAreYouManual");
+  }, [navigateTo]);
 
   const handleAtHome = useCallback(async () => {
     setHomeLocationError(null);
@@ -1154,6 +1176,7 @@ function AppRoutes() {
             onAtHome={handleAtHome}
             onTraveling={handleTraveling}
             onBack={handleBack}
+            onEnterManually={handleEnterManualLocation}
             isLocatingHome={isLocatingHome}
             locationError={homeLocationError}
             onSkip={skipOnboarding}
@@ -1365,10 +1388,7 @@ function AppRoutes() {
             onOpenPersonalInfo={handleOpenPersonalInfo}
             onOpenIdentity={() => navigateTo("identity")}
             onOpenAgentActivity={() => navigateTo("agentActivity")}
-            onViewPublicProfile={() => {
-              const userId = auth.userId ?? loadUserProfile().id;
-              handleViewPublicProfile(userId);
-            }}
+            onViewPublicProfile={handleViewPublicProfile}
           />
         )}
 

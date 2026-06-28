@@ -161,7 +161,7 @@ export function ProfileScreen({
   onOpenIdentity?: () => void;
   onOpenAgentActivity?: () => void;
   onDeleteAccount?: () => void;
-  onViewPublicProfile?: () => void;
+  onViewPublicProfile?: (userId: string) => void;
   onOpenIntegrations?: () => void;
 }) {
   const auth = useAuth();
@@ -180,6 +180,7 @@ export function ProfileScreen({
   });
   const [connectBusy, setConnectBusy] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
+  const [publicProfileError, setPublicProfileError] = useState<string | null>(null);
 
   const displayNameLabel = getProfileDisplayLabel(profile.displayName);
   const emailLabel = getProfileEmailLabel(profile.email, auth.userEmail);
@@ -281,6 +282,16 @@ export function ProfileScreen({
     onOpenPersonalInfo?.("phone");
   };
 
+  const openPublicProfile = () => {
+    const userId = (auth.userId ?? profile.id).trim();
+    if (!userId) {
+      setPublicProfileError("Sign in to view your public profile.");
+      return;
+    }
+    setPublicProfileError(null);
+    onViewPublicProfile?.(userId);
+  };
+
   const needsDisplayName = !profile.displayName?.trim();
 
   const persistPhoto = async (blob: Blob) => {
@@ -346,12 +357,17 @@ export function ProfileScreen({
               {onViewPublicProfile ? (
                 <button
                   type="button"
-                  onClick={onViewPublicProfile}
+                  onClick={openPublicProfile}
                   className="mt-2 text-[13px] font-semibold underline"
                   style={{ color: GREEN }}
                 >
                   Preview public profile
                 </button>
+              ) : null}
+              {publicProfileError ? (
+                <p className="mt-2 text-[12px] font-medium text-amber-800" role="status">
+                  {publicProfileError}
+                </p>
               ) : null}
             </div>
           </div>
@@ -545,7 +561,7 @@ export function ProfileScreen({
               icon={<Star className="h-5 w-5" style={{ color: AMBER }} />}
               label="Reviews"
               value="View ratings as renter and host"
-              onClick={() => onViewPublicProfile?.()}
+              onClick={openPublicProfile}
             />
           </li>
         </ul>
