@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { cropAvatarToJpeg } from "../../lib/avatarStorage";
 
-const GREEN = "#0D5C3A";
 const CTA = "#F59E0B";
 
 type CaptureMode = "camera" | "library";
@@ -127,18 +126,31 @@ export function ProfilePhotoCapture({
   }
 
   return (
-    <div className="fixed inset-0 z-[80] flex flex-col bg-black">
-      <div className="flex items-center justify-between px-4 py-3 text-white">
-        <button type="button" onClick={onClose} aria-label="Close">
+    <div
+      className="fixed inset-0 z-[80] flex max-h-[100dvh] min-h-[100dvh] flex-col bg-black"
+      style={{ height: "100dvh" }}
+    >
+      <div className="flex shrink-0 items-center justify-between px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top,0px))] text-white">
+        <button type="button" onClick={onClose} aria-label="Close" className="min-h-[44px] min-w-[44px]">
           <X className="h-6 w-6" />
         </button>
         <p className="text-[15px] font-semibold">Take profile photo</p>
         <span className="w-6" />
       </div>
 
-      <div className="relative flex flex-1 items-center justify-center overflow-hidden">
+      <div className="relative min-h-0 flex-1 overflow-hidden">
         {error ? (
-          <p className="max-w-[280px] px-6 text-center text-[15px] text-white/90">{error}</p>
+          <div className="flex h-full flex-col items-center justify-center gap-4 px-6">
+            <p className="max-w-[280px] text-center text-[15px] text-white/90">{error}</p>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="rounded-2xl px-6 py-3 text-[15px] font-bold text-white"
+              style={{ backgroundColor: CTA }}
+            >
+              Choose from library
+            </button>
+          </div>
         ) : (
           <>
             <video
@@ -161,17 +173,44 @@ export function ProfilePhotoCapture({
         )}
       </div>
 
-      <div className="shrink-0 px-4 pb-8 pt-4">
-        <button
-          type="button"
-          disabled={Boolean(error) || busy}
-          onClick={() => void handleCapture()}
-          className="w-full rounded-2xl py-4 text-[16px] font-bold text-white disabled:opacity-50"
-          style={{ backgroundColor: CTA }}
+      {!error ? (
+        <div
+          className="flex shrink-0 flex-col items-center gap-3 px-4 pt-4"
+          style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))" }}
         >
-          {busy ? "Processing…" : "Use this photo"}
-        </button>
-      </div>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void handleCapture()}
+            aria-label="Take photo"
+            className="flex h-[76px] w-[76px] items-center justify-center rounded-full border-4 border-white disabled:opacity-50"
+          >
+            <span className="h-[60px] w-[60px] rounded-full bg-white" />
+          </button>
+          <p className="text-center text-[13px] font-medium text-white/80">
+            {busy ? "Processing…" : "Tap to capture"}
+          </p>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => fileInputRef.current?.click()}
+            className="min-h-[44px] text-[14px] font-semibold text-white/70 underline"
+          >
+            Choose from library instead
+          </button>
+        </div>
+      ) : null}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          void handleFile(e.target.files?.[0]);
+          e.target.value = "";
+        }}
+      />
     </div>
   );
 }
