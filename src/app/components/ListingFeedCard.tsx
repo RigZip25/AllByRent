@@ -1,7 +1,7 @@
 import { Heart, QrCode, Shield, Star } from "lucide-react";
 import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
 import type { MediaRef } from "../../lib/mediaStore";
-import { useMediaUrl } from "../../lib/useMediaUrl";
+import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 
 type OfferType = "Rent" | "Buy" | "Gift";
 
@@ -54,13 +54,6 @@ export function ListingFeedCard({
     >
       <div className="relative aspect-square bg-[#F0F4F2] overflow-hidden">
         <CoverThumb cover={cover} />
-
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-          <span aria-hidden className="text-2xl">
-            📷
-          </span>
-          <span className="text-xs text-muted-foreground">Photo by owner</span>
-        </div>
 
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           <div className="bg-primary/90 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-md flex items-center gap-1 w-fit">
@@ -119,9 +112,19 @@ export function ListingFeedCard({
 }
 
 function CoverThumb({ cover }: { cover?: MediaRef | null }) {
-  const thumb = cover?.thumbId ? { ...cover, id: cover.thumbId } : cover ?? null;
-  const { url } = useMediaUrl(thumb);
-  if (!url) return null;
-  return <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />;
+  const { url, status } = useCoverMediaUrl(cover ?? null);
+  if (url) {
+    return <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />;
+  }
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+      <span aria-hidden className="text-2xl">
+        📷
+      </span>
+      <span className="text-xs text-muted-foreground">
+        {status === "loading" ? "Loading…" : "Photo by owner"}
+      </span>
+    </div>
+  );
 }
 

@@ -32,7 +32,7 @@ import {
   listingOffersDelivery,
   parseListingDailyRate,
 } from "../../lib/rentalPricing";
-import { useMediaUrl } from "../../lib/useMediaUrl";
+import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 import { APP_NAME, DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
 import { buildListingSharePayload, listingShareUrl } from "../../lib/socialShare";
@@ -166,8 +166,7 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment, onViewHos
   }, [itemId]);
 
   const cover = listing?.photos?.[0] ?? null;
-  const coverThumb = cover?.thumbId ? { ...cover, id: cover.thumbId } : cover;
-  const coverUrl = useMediaUrl(coverThumb).url;
+  const coverUrl = useCoverMediaUrl(cover).url;
 
   const title = listing
     ? getListingDisplayTitle(listing.title) || listing.title || "Listing"

@@ -5,7 +5,7 @@ import {
   formatListingPriceLine,
   garageTrustLine,
 } from "../../lib/garageDisplay";
-import { useMediaUrl } from "../../lib/useMediaUrl";
+import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 
 const GREEN_DARK = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -21,8 +21,7 @@ export function HomeFeedCard({
   const price = formatListingPriceLine(listing);
   const modes = activeModeLabels(listing);
   const cover = listing.photos[0] ?? null;
-  const thumb = cover?.thumbId ? { ...cover, id: cover.thumbId } : cover;
-  const { url } = useMediaUrl(thumb);
+  const { url } = useCoverMediaUrl(cover);
 
   return (
     <button
