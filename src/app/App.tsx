@@ -1561,7 +1561,7 @@ function AppRoutes() {
       <AuthGate
         open={authGateOpen}
         intent={authIntent}
-        initialStep={peekPendingAuthEmail() ? "sent" : undefined}
+        initialStep={peekPendingAuthEmail() ? "confirm" : undefined}
         onDismiss={() => setAuthGateOpen(false)}
       />
 

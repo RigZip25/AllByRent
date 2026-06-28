@@ -99,3 +99,18 @@ export async function resolveHomeLocation(): Promise<HomeLocationResult> {
   setHomeLocation(location);
   return { ok: true, location };
 }
+
+export function formatGeolocationErrorMessage(reason: GeolocationFailureReason): string {
+  switch (reason) {
+    case "denied":
+      return "Location access is blocked. Allow it in browser settings, or search your ZIP or city.";
+    case "timeout":
+      return "Location timed out. Check GPS/Wi‑Fi or search your ZIP or city.";
+    case "unsupported":
+      return "Open the app via https://, or search your ZIP or city manually.";
+    case "unavailable":
+      return "Location is temporarily unavailable. Search your ZIP or city instead.";
+    default:
+      return "Couldn't detect your location. Search your ZIP or city instead.";
+  }
+}
