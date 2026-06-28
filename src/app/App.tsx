@@ -841,11 +841,6 @@ function AppRoutes() {
     navigateTo("whereAreYou");
   };
 
-  const handleEnterManualLocation = useCallback(() => {
-    setHomeLocationError(null);
-    navigateTo("whereAreYouManual");
-  }, [navigateTo]);
-
   const handleAtHome = useCallback(async () => {
     setHomeLocationError(null);
     setIsLocatingHome(true);
@@ -855,11 +850,12 @@ function AppRoutes() {
         finishLocationSetup();
       } else {
         setHomeLocationError(formatGeolocationErrorMessage(result.reason));
+        navigateTo("whereAreYouManual");
       }
     } finally {
       setIsLocatingHome(false);
     }
-  }, [finishLocationSetup]);
+  }, [finishLocationSetup, navigateTo]);
 
   const handleManualLocationContinue = () => {
     finishLocationSetup();
@@ -1175,9 +1171,7 @@ function AppRoutes() {
             onAtHome={handleAtHome}
             onTraveling={handleTraveling}
             onBack={handleBack}
-            onEnterManually={handleEnterManualLocation}
             isLocatingHome={isLocatingHome}
-            locationError={homeLocationError}
             onSkip={skipOnboarding}
           />
         )}
