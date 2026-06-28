@@ -12,9 +12,7 @@ type WhereAreYouProps = {
   onTraveling: () => void;
   onBack: () => void;
   onSkip: () => void;
-  onEnterManually?: () => void;
   isLocatingHome?: boolean;
-  locationError?: string | null;
 };
 
 function ChoiceCard({
@@ -77,9 +75,7 @@ export function WhereAreYou({
   onTraveling,
   onBack,
   onSkip,
-  onEnterManually,
   isLocatingHome = false,
-  locationError = null,
 }: WhereAreYouProps) {
   return (
     <div className="screen onboarding-step mx-auto w-full max-w-[390px] bg-white">
@@ -88,14 +84,6 @@ export function WhereAreYou({
         <h1 className="where-are-you-page-title text-2xl font-bold" style={{ color: GREEN }}>
           {copy.title}
         </h1>
-        {locationError ? (
-          <p
-            className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-left text-sm text-amber-900"
-            role="status"
-          >
-            {locationError}
-          </p>
-        ) : null}
       </div>
 
       <div className="where-are-you-cards">
@@ -119,20 +107,6 @@ export function WhereAreYou({
           disabled={isLocatingHome}
         />
       </div>
-
-      {onEnterManually ? (
-        <div className="shrink-0 px-4 pb-6 pt-2 text-center">
-          <button
-            type="button"
-            onClick={onEnterManually}
-            disabled={isLocatingHome}
-            className="text-[14px] font-semibold underline disabled:opacity-60"
-            style={{ color: GREEN }}
-          >
-            Enter my address manually
-          </button>
-        </div>
-      ) : null}
     </div>
   );
 }
