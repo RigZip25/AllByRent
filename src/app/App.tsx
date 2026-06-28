@@ -243,6 +243,14 @@ function isOnboardingScreen(screen: Screen): boolean {
   return screen in ONBOARDING_BACK_FALLBACK || screen === "firstHello" || screen === "onboardingAllSet";
 }
 
+function resolveLocationSetupReturn(stack: Screen[]): { target: Screen; nextStack: Screen[] } {
+  const previous = stack.length > 0 ? stack[stack.length - 1]! : null;
+  if (previous && !isOnboardingScreen(previous)) {
+    return { target: previous, nextStack: stack.slice(0, -1) };
+  }
+  return { target: "browseHub", nextStack: [] };
+}
+
 function resolveBootDeepLinkTarget(target: DeepLinkTarget | null): DeepLinkTarget | null {
   if (!target) return null;
   if (target.kind === "listing") return resolveListingDeepLink(target.listingId);
@@ -536,13 +544,9 @@ function AppRoutes() {
     completeOnboarding();
     setHomeLocationError(null);
     setNavStack((stack) => {
-      if (stack.length > 0) {
-        const previous = stack[stack.length - 1]!;
-        setCurrentScreen(previous);
-        return stack.slice(0, -1);
-      }
-      setCurrentScreen("browseHub");
-      return [];
+      const { target, nextStack } = resolveLocationSetupReturn(stack);
+      setCurrentScreen(target);
+      return nextStack;
     });
   }, []);
 
