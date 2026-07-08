@@ -1243,6 +1243,10 @@
     z-index: 200;
   }
 
+  .profile-photo-onboarding {
+    z-index: 190;
+  }
+
   .app-container--with-bottom-nav .app-screen-host {
     padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
   }
