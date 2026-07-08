@@ -302,6 +302,7 @@ export function syncUserProfileFromAuth(input: ProfileAuthSyncInput): UserProfil
 
   const current = loadUserProfile();
   let next = sanitizeDemoProfileFields(current, userId, input.userEmail ?? null);
+  next.id = userId;
 
   const remoteName = input.remoteDisplayName?.trim() ?? "";
   const pendingName = readLastKnownFullName().trim();
