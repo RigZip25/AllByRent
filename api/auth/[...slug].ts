@@ -2,12 +2,20 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import authOtp from "@allbyrent/server/routes/auth/otp";
 import deleteAccount from "@allbyrent/server/routes/auth/delete_account";
+import passkeyAuthOptions from "@allbyrent/server/routes/passkey/auth/options";
+import passkeyAuthVerify from "@allbyrent/server/routes/passkey/auth/verify";
+import passkeyRegisterOptions from "@allbyrent/server/routes/passkey/register/options";
+import passkeyRegisterVerify from "@allbyrent/server/routes/passkey/register/verify";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 
 const ROUTES: Record<string, Handler> = {
   otp: authOtp,
   delete_account: deleteAccount,
+  "passkey/auth/options": passkeyAuthOptions,
+  "passkey/auth/verify": passkeyAuthVerify,
+  "passkey/register/options": passkeyRegisterOptions,
+  "passkey/register/verify": passkeyRegisterVerify,
 };
 
 function routeKey(req: VercelRequest): string {

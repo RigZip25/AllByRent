@@ -1,11 +1,23 @@
 import {
   startAuthentication,
   startRegistration,
+  type AuthenticationResponseJSON,
+  type RegistrationResponseJSON,
 } from "@simplewebauthn/browser";
 import { formatPasskeyError } from "./passkeyErrors";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 const DEVICE_PASSKEY_KEY = "abr_device_passkey_v1";
+
+export type PasskeyRegistrationBundle = {
+  options: Parameters<typeof startRegistration>[0]["optionsJSON"];
+  challengeToken: string;
+};
+
+export type PasskeyAuthenticationBundle = {
+  options: Parameters<typeof startAuthentication>[0]["optionsJSON"];
+  challengeToken: string;
+};
 
 function apiBase(): string {
   if (typeof window === "undefined") return "/api";
@@ -15,7 +27,9 @@ function apiBase(): string {
 function mapApiStatus(status: number, serverError?: string): string {
   if (serverError) return serverError;
   if (status === 401) return "Sign in with email before using Face ID.";
-  if (status === 404) return "No passkey registered for this account. Use email sign-in.";
+  if (status === 404) {
+    return "Face ID sign-in is not available on this server. Use email sign-in for now.";
+  }
   if (status === 503) return "Sign-in service is not configured. Use email sign-in.";
   if (status >= 500) {
     return "Sign-in service is temporarily unavailable. Use email sign-in, or try again shortly.";
@@ -51,6 +65,17 @@ function wrapWebAuthn<T>(fn: () => Promise<T>): Promise<T> {
   });
 }
 
+async function requireAccessToken(): Promise<string> {
+  const supabase = getSupabaseClient();
+  if (!supabase) throw new Error("Supabase is not configured.");
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData.session?.access_token;
+  if (!token) {
+    throw new Error("Sign in with email before enabling Face ID.");
+  }
+  return token;
+}
+
 export function markDeviceHasPasskey(): void {
   try {
     localStorage.setItem(DEVICE_PASSKEY_KEY, "1");
@@ -82,70 +107,73 @@ async function applySessionTokens(access_token: string, refresh_token: string): 
   if (error) throw error;
 }
 
-export async function registerPasskey(): Promise<void> {
+function assertPasskeyEnvironment(): void {
   if (!isSupabaseConfigured()) {
     throw new Error(formatPasskeyError(new Error("Passkeys require Supabase configuration.")));
   }
   if (!isPasskeySupported()) {
     throw new Error(formatPasskeyError(new Error("Passkeys are not supported in this browser.")));
   }
+}
 
-  const supabase = getSupabaseClient();
-  if (!supabase) throw new Error("Supabase is not configured.");
+/** Prefetch before the Enable tap so iOS Safari can show Face ID immediately. */
+export async function fetchPasskeyRegistrationBundle(): Promise<PasskeyRegistrationBundle> {
+  assertPasskeyEnvironment();
+  const token = await requireAccessToken();
+  return postJson<PasskeyRegistrationBundle>("/auth/passkey/register/options", {}, token);
+}
 
-  const { data: sessionData } = await supabase.auth.getSession();
-  const token = sessionData.session?.access_token;
-  if (!token) {
-    throw new Error("Sign in with email before enabling Face ID.");
-  }
+export async function verifyPasskeyRegistration(
+  attestationResponse: RegistrationResponseJSON,
+  challengeToken: string,
+): Promise<void> {
+  assertPasskeyEnvironment();
+  const token = await requireAccessToken();
+  await postJson("/auth/passkey/register/verify", { attestationResponse, challengeToken }, token);
+  markDeviceHasPasskey();
+}
 
+export async function registerPasskey(): Promise<void> {
+  const bundle = await fetchPasskeyRegistrationBundle();
+  const attestationResponse = await wrapWebAuthn(() =>
+    startRegistration({ optionsJSON: bundle.options }),
+  );
   try {
-    const { options, challengeToken } = await postJson<{
-      options: Parameters<typeof startRegistration>[0];
-      challengeToken: string;
-    }>("/passkey/register/options", {}, token);
-
-    const attestationResponse = await wrapWebAuthn(() =>
-      startRegistration({ optionsJSON: options }),
-    );
-
-    await postJson(
-      "/passkey/register/verify",
-      { attestationResponse, challengeToken },
-      token,
-    );
-
-    markDeviceHasPasskey();
+    await verifyPasskeyRegistration(attestationResponse, bundle.challengeToken);
   } catch (err) {
     throw new Error(formatPasskeyError(err));
   }
 }
 
+export async function fetchPasskeyAuthenticationBundle(
+  email?: string,
+): Promise<PasskeyAuthenticationBundle> {
+  assertPasskeyEnvironment();
+  return postJson<PasskeyAuthenticationBundle>("/auth/passkey/auth/options", {
+    email: email?.trim().toLowerCase() || undefined,
+  });
+}
+
+export async function verifyPasskeyAuthentication(
+  assertionResponse: AuthenticationResponseJSON,
+  challengeToken: string,
+): Promise<void> {
+  assertPasskeyEnvironment();
+  const result = await postJson<{
+    access_token: string;
+    refresh_token: string;
+  }>("/auth/passkey/auth/verify", { assertionResponse, challengeToken });
+  await applySessionTokens(result.access_token, result.refresh_token);
+  markDeviceHasPasskey();
+}
+
 export async function signInWithPasskey(email?: string): Promise<void> {
-  if (!isSupabaseConfigured()) {
-    throw new Error(formatPasskeyError(new Error("Passkeys require Supabase configuration.")));
-  }
-  if (!isPasskeySupported()) {
-    throw new Error(formatPasskeyError(new Error("Passkeys are not supported in this browser.")));
-  }
-
   try {
-    const { options, challengeToken } = await postJson<{
-      options: Parameters<typeof startAuthentication>[0];
-      challengeToken: string;
-    }>("/passkey/auth/options", { email: email?.trim().toLowerCase() || undefined });
-
+    const bundle = await fetchPasskeyAuthenticationBundle(email);
     const assertionResponse = await wrapWebAuthn(() =>
-      startAuthentication({ optionsJSON: options }),
+      startAuthentication({ optionsJSON: bundle.options }),
     );
-
-    const result = await postJson<{
-      access_token: string;
-      refresh_token: string;
-    }>("/passkey/auth/verify", { assertionResponse, challengeToken });
-
-    await applySessionTokens(result.access_token, result.refresh_token);
-    markDeviceHasPasskey();
+    await verifyPasskeyAuthentication(assertionResponse, bundle.challengeToken);
   } catch (err) {
     throw new Error(formatPasskeyError(err));
   }
