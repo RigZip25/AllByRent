@@ -16,6 +16,12 @@ import { detectCurrentLocation, formatGeolocationErrorMessage } from "../lib/geo
 import { getPasskeyEnvironmentHint } from "../lib/passkeyEnvironment";
 import { setHomeLocation } from "../lib/listingStorage";
 import { peekPendingAuthProfile, savePendingAuthProfile } from "../lib/pendingAuthProfile";
+import {
+  emailOtpEntryError,
+  emailOtpLengthHint,
+  isCompleteEmailOtpLength,
+  normalizeEmailOtpInput,
+} from "../lib/authOtp";
 import { formatUsPhoneDisplay, formatUsPhoneInput, normalizeUsPhoneForStorage } from "../lib/usPhoneFormat";
 import { RentanoTip } from "./RentanoTip";
 import { AddressLocationPicker } from "./AddressLocationPicker";
@@ -222,9 +228,9 @@ export function AuthGate({
   };
 
   const handleVerifyCode = () => {
-    const digits = otpCode.replace(/\D/g, "");
-    if (digits.length < 6) {
-      setError("Enter the 6-digit code from your email.");
+    const digits = normalizeEmailOtpInput(otpCode);
+    if (!isCompleteEmailOtpLength(digits.length)) {
+      setError(emailOtpEntryError());
       return;
     }
     void run("verify", async () => {
@@ -272,10 +278,10 @@ export function AuthGate({
   };
 
   const confirmTitle = "Enter your sign-in code";
-  const confirmSubtitle = `We sent a code to ${email}. Stay on this screen and type it below — no need to leave the app.`;
+  const confirmSubtitle = `We sent a code to ${email}. Paste every digit from the email (${emailOtpLengthHint()}) — no need to leave the app.`;
 
-  const otpDigits = otpCode.replace(/\D/g, "");
-  const canVerifyCode = otpDigits.length >= 6 && busy === null && canUseSupabase;
+  const otpDigits = normalizeEmailOtpInput(otpCode);
+  const canVerifyCode = isCompleteEmailOtpLength(otpDigits.length) && busy === null && canUseSupabase;
 
   return (
     <div
@@ -557,11 +563,11 @@ export function AuthGate({
               autoFocus
               maxLength={8}
               value={otpCode}
-              onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
+              onChange={(e) => setOtpCode(normalizeEmailOtpInput(e.target.value))}
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleVerifyCode();
               }}
-              placeholder="6-digit code"
+              placeholder="Code from email"
               className="w-full rounded-2xl border bg-white px-4 py-3 text-center text-[22px] font-bold tracking-[0.35em] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
               style={{ borderColor: BORDER }}
             />
@@ -578,8 +584,8 @@ export function AuthGate({
 
             <p className="rounded-2xl border bg-[#FFFBEB] px-4 py-3 text-[13px] leading-relaxed text-amber-950">
               The email may show <strong>Supabase</strong> as the sender until {APP_NAME} mail is fully
-              set up. Open the message and look for your <strong>{APP_NAME} sign-in code</strong> — you
-              can ignore any link and just type the numbers here.
+              set up. Open the message and copy your <strong>{APP_NAME} sign-in code</strong> — it may be{" "}
+              <strong>{emailOtpLengthHint()}</strong>. You can ignore any link and paste the numbers here.
             </p>
 
             <p className="rounded-2xl border bg-[#F0FDF4] px-4 py-3 text-[13px] leading-relaxed text-gray-700">
