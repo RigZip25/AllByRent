@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cropAvatarToJpeg } from "../../lib/avatarStorage";
 
@@ -69,6 +70,15 @@ export function ProfilePhotoCapture({
     }
   }, [open, mode]);
 
+  useEffect(() => {
+    if (!open || mode !== "camera" || typeof document === "undefined") return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open, mode]);
+
   const handleCapture = async () => {
     const video = videoRef.current;
     if (!video || !video.videoWidth) return;
@@ -125,10 +135,13 @@ export function ProfilePhotoCapture({
     );
   }
 
-  return (
+  const cameraUi = (
     <div
-      className="profile-photo-capture fixed inset-0 z-[110] flex max-h-[100dvh] min-h-[100dvh] flex-col bg-black"
+      className="profile-photo-capture fixed inset-0 flex max-h-[100dvh] min-h-[100dvh] flex-col bg-black"
       style={{ height: "100dvh" }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Take profile photo"
     >
       <div className="flex shrink-0 items-center justify-between gap-2 px-3 pb-2 pt-[max(0.75rem,env(safe-area-inset-top,0px))] text-white">
         <button type="button" onClick={onClose} aria-label="Close" className="min-h-[44px] min-w-[44px] shrink-0">
@@ -178,7 +191,9 @@ export function ProfilePhotoCapture({
             </div>
             <div
               className="profile-photo-capture-controls pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-black/80 via-black/35 to-transparent pt-16"
-              style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom, 0px))" }}
+              style={{
+                paddingBottom: "max(1.5rem, calc(env(safe-area-inset-bottom, 0px) + 0.5rem))",
+              }}
             >
               <button
                 type="button"
@@ -207,4 +222,8 @@ export function ProfilePhotoCapture({
       />
     </div>
   );
+
+  if (typeof document === "undefined") return cameraUi;
+
+  return createPortal(cameraUi, document.body);
 }
