@@ -527,7 +527,10 @@ function AppRoutes() {
       screen === "hostListingDetail" ||
       screen === "activeRental" ||
       screen === "identity" ||
-      screen === "agentActivity";
+      screen === "agentActivity" ||
+      screen === "personalInfo" ||
+      screen === "coHosts" ||
+      screen === "deleteAccount";
 
     if (authRequired && auth.configured && !auth.session) {
       showAuthGate(screen);
@@ -636,7 +639,13 @@ function AppRoutes() {
   const handleOpenGarage = useCallback(() => goToTab("garage"), [goToTab]);
   const handleOpenMore = useCallback(() => goToTab("more"), [goToTab]);
   const handleOpenRentals = useCallback(() => goToTab("rentals"), [goToTab]);
-  const handleOpenProfile = useCallback(() => goToTab("profile"), [goToTab]);
+  const handleOpenProfile = useCallback(() => {
+    if (auth.configured && !auth.loading && !auth.session) {
+      showAuthGate("profile");
+      return;
+    }
+    goToTab("profile");
+  }, [auth.configured, auth.loading, auth.session, goToTab, showAuthGate]);
   const handleViewPublicProfile = useCallback(
     (userId?: string | null) => {
       const id = (
@@ -1388,7 +1397,7 @@ function AppRoutes() {
             onViewPublicProfile={handleViewPublicProfile}
             onRequireAuth={() => {
               if (auth.configured && !auth.session) {
-                showAuthGate("publicProfile");
+                showAuthGate("profile");
               }
             }}
           />
@@ -1589,7 +1598,12 @@ function AppRoutes() {
         open={authGateOpen}
         intent={authIntent}
         initialStep={peekPendingAuthEmail() ? "confirm" : undefined}
-        onDismiss={() => setAuthGateOpen(false)}
+        onDismiss={() => {
+          setAuthGateOpen(false);
+          if (currentScreen === "profile" && auth.configured && !auth.loading && !auth.session) {
+            goToTab("more");
+          }
+        }}
         onAuthenticated={finishAuthFlow}
       />
 
