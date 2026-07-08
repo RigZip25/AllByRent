@@ -253,11 +253,10 @@ export const ONBOARDING = {
     skip: "Skip intro",
   },
   firstHello: {
-    mascotRole: "Your garage guide",
+    mascotRole: "Your neighborhood guide",
     bubbles: [
-      (mascot: string, product: string) =>
-        `Hey! I'm ${mascot} — your guide to the ${product}.`,
-      "Open your garage showcase or browse what's on the block.",
+      (mascot: string) => `Hey! I'm ${mascot} — your guide on the block.`,
+      "Browse nearby, borrow gear, or share what you own from home.",
       "Tap me in the menu anytime — neighbor help, any language, 24/7.",
     ],
   },

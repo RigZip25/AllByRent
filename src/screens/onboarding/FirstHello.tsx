@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { APP_NAME, MASCOT_NAME, ONBOARDING, PRODUCT_METAPHOR } from "../../lib/brand";
+import { APP_NAME, MASCOT_NAME, ONBOARDING } from "../../lib/brand";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
 
@@ -10,14 +10,14 @@ const BUBBLE_GAP_MS = 2600;
 const TYPING_CHAR_MS = 34;
 
 const BUBBLES = [
-  ONBOARDING.firstHello.bubbles[0](MASCOT_NAME, PRODUCT_METAPHOR),
+  ONBOARDING.firstHello.bubbles[0](MASCOT_NAME),
   ONBOARDING.firstHello.bubbles[1],
   ONBOARDING.firstHello.bubbles[2],
 ];
 
 function FirstHelloRolesScene() {
   return (
-    <div className="first-hello-scene" aria-label={`${PRODUCT_METAPHOR} on ${APP_NAME}`}>
+    <div className="first-hello-scene" aria-label={`${APP_NAME} on the block`}>
       <img
         src={onboardingAssets.garageRoles}
         alt=""
