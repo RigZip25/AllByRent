@@ -1238,6 +1238,11 @@
     pointer-events: auto;
   }
 
+  /** Profile camera must sit above the bottom tab bar (z-index 100). */
+  .profile-photo-capture {
+    z-index: 110;
+  }
+
   .app-container--with-bottom-nav .app-screen-host {
     padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
   }

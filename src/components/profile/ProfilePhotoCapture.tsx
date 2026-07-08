@@ -127,7 +127,7 @@ export function ProfilePhotoCapture({
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex max-h-[100dvh] min-h-[100dvh] flex-col bg-black"
+      className="profile-photo-capture fixed inset-0 z-[110] flex max-h-[100dvh] min-h-[100dvh] flex-col bg-black"
       style={{ height: "100dvh" }}
     >
       <div className="flex shrink-0 items-center justify-between gap-2 px-3 pb-2 pt-[max(0.75rem,env(safe-area-inset-top,0px))] text-white">
@@ -177,7 +177,7 @@ export function ProfilePhotoCapture({
               />
             </div>
             <div
-              className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-black/80 via-black/35 to-transparent pt-16"
+              className="profile-photo-capture-controls pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-black/80 via-black/35 to-transparent pt-16"
               style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom, 0px))" }}
             >
               <button
