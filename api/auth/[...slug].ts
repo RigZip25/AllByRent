@@ -12,10 +12,10 @@ type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 const ROUTES: Record<string, Handler> = {
   otp: authOtp,
   delete_account: deleteAccount,
-  "passkey/auth/options": passkeyAuthOptions,
-  "passkey/auth/verify": passkeyAuthVerify,
-  "passkey/register/options": passkeyRegisterOptions,
-  "passkey/register/verify": passkeyRegisterVerify,
+  "passkey-register-options": passkeyRegisterOptions,
+  "passkey-register-verify": passkeyRegisterVerify,
+  "passkey-auth-options": passkeyAuthOptions,
+  "passkey-auth-verify": passkeyAuthVerify,
 };
 
 function routeKey(req: VercelRequest): string {
