@@ -1238,9 +1238,9 @@
     pointer-events: auto;
   }
 
-  /** Profile camera must sit above the bottom tab bar (z-index 100). */
+  /** Profile camera portal — above bottom tab bar (z-index 100) and in-app modals. */
   .profile-photo-capture {
-    z-index: 110;
+    z-index: 200;
   }
 
   .app-container--with-bottom-nav .app-screen-host {
