@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Bell,
   ChevronRight,
@@ -183,6 +183,7 @@ export function ProfileScreen({
   const [connectBusy, setConnectBusy] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
   const [publicProfileError, setPublicProfileError] = useState<string | null>(null);
+  const authPromptedRef = useRef(false);
 
   const displayNameLabel = getProfileDisplayLabel(profile.displayName);
   const emailLabel = getProfileEmailLabel(profile.email, auth.userEmail);
@@ -245,6 +246,12 @@ export function ProfileScreen({
       mounted = false;
     };
   }, [auth.userId, auth.userEmail]);
+
+  useEffect(() => {
+    if (!auth.configured || auth.loading || auth.session || authPromptedRef.current) return;
+    authPromptedRef.current = true;
+    onRequireAuth?.();
+  }, [auth.configured, auth.loading, auth.session, onRequireAuth]);
 
   useEffect(() => {
     if (!auth.userId) return;
@@ -633,22 +640,42 @@ export function ProfileScreen({
           </li>
         </ul>
 
-        <button
-          type="button"
-          disabled={auth.configured ? authBusy : true}
-          onClick={() => {
-            if (!auth.configured) return;
-            setAuthBusy(true);
-            void signOut()
-              .catch(() => undefined)
-              .finally(() => setAuthBusy(false));
-          }}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl border py-3 text-[15px] font-semibold text-gray-500 disabled:opacity-60"
-          style={{ borderColor: BORDER }}
-        >
-          <LogOut className="h-4 w-4" />
-          {auth.configured ? (authBusy ? "Signing out…" : "Sign out") : "Sign in required"}
-        </button>
+        {auth.session ? (
+          <button
+            type="button"
+            disabled={!auth.configured || authBusy}
+            onClick={() => {
+              if (!auth.configured) return;
+              setAuthBusy(true);
+              void signOut()
+                .catch(() => undefined)
+                .finally(() => setAuthBusy(false));
+            }}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border py-3 text-[15px] font-semibold text-gray-500 disabled:opacity-60"
+            style={{ borderColor: BORDER }}
+          >
+            <LogOut className="h-4 w-4" />
+            {authBusy ? "Signing out…" : "Sign out"}
+          </button>
+        ) : auth.configured && onRequireAuth ? (
+          <button
+            type="button"
+            onClick={onRequireAuth}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-[15px] font-bold text-white"
+            style={{ backgroundColor: GREEN }}
+          >
+            Sign in or create account
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border py-3 text-[15px] font-semibold text-gray-500 opacity-60"
+            style={{ borderColor: BORDER }}
+          >
+            Sign in required
+          </button>
+        )}
 
         {auth.configured ? (
           <div className="mt-3 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
