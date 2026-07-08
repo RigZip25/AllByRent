@@ -16,6 +16,7 @@ import { detectCurrentLocation, formatGeolocationErrorMessage } from "../lib/geo
 import { getPasskeyEnvironmentHint } from "../lib/passkeyEnvironment";
 import { setHomeLocation } from "../lib/listingStorage";
 import { peekPendingAuthProfile, savePendingAuthProfile } from "../lib/pendingAuthProfile";
+import { formatUsPhoneDisplay, formatUsPhoneInput, normalizeUsPhoneForStorage } from "../lib/usPhoneFormat";
 import { RentanoTip } from "./RentanoTip";
 import { AddressLocationPicker } from "./AddressLocationPicker";
 import type { LocationSuggestion } from "../lib/geocoding";
@@ -67,7 +68,7 @@ function hydrateAuthForm(): {
   const pendingProfile = peekPendingAuthProfile();
   return {
     fullName: pendingProfile?.fullName ?? "",
-    phone: pendingProfile?.phone ?? "",
+    phone: pendingProfile?.phone ? formatUsPhoneDisplay(pendingProfile.phone) : "",
     email: peekPendingAuthEmail() ?? "",
     location: pendingProfile?.location ?? null,
   };
@@ -182,7 +183,7 @@ export function AuthGate({
     if (!location) return;
     savePendingAuthProfile({
       fullName: fullName.trim(),
-      phone: phone.trim() || undefined,
+      phone: normalizeUsPhoneForStorage(phone) || undefined,
       location,
     });
     setHomeLocation({
@@ -429,10 +430,10 @@ export function AuthGate({
               id="auth-phone"
               type="tel"
               inputMode="tel"
-              autoComplete="tel"
+              autoComplete="tel-national"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+1 (555) 123-4567"
+              onChange={(e) => setPhone(formatUsPhoneInput(e.target.value))}
+              placeholder="(555) 123-4567"
               className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
               style={{ borderColor: BORDER }}
             />
@@ -534,7 +535,9 @@ export function AuthGate({
             <div className="space-y-3 rounded-2xl border bg-[#F9FAFB] p-4" style={{ borderColor: BORDER }}>
               <SummaryRow label="Name" value={fullName.trim() || "—"} />
               <SummaryRow label="Email" value={email} badge="Code sent" />
-              {phone.trim() ? <SummaryRow label="Phone" value={phone.trim()} /> : null}
+              {phone.trim() ? (
+                <SummaryRow label="Phone" value={formatUsPhoneDisplay(phone)} />
+              ) : null}
               {location ? (
                 <SummaryRow
                   label="Area"
