@@ -120,7 +120,7 @@ function assertPasskeyEnvironment(): void {
 export async function fetchPasskeyRegistrationBundle(): Promise<PasskeyRegistrationBundle> {
   assertPasskeyEnvironment();
   const token = await requireAccessToken();
-  return postJson<PasskeyRegistrationBundle>("/auth/passkey/register/options", {}, token);
+  return postJson<PasskeyRegistrationBundle>("/auth/passkey-register-options", {}, token);
 }
 
 export async function verifyPasskeyRegistration(
@@ -129,7 +129,7 @@ export async function verifyPasskeyRegistration(
 ): Promise<void> {
   assertPasskeyEnvironment();
   const token = await requireAccessToken();
-  await postJson("/auth/passkey/register/verify", { attestationResponse, challengeToken }, token);
+  await postJson("/auth/passkey-register-verify", { attestationResponse, challengeToken }, token);
   markDeviceHasPasskey();
 }
 
@@ -149,7 +149,7 @@ export async function fetchPasskeyAuthenticationBundle(
   email?: string,
 ): Promise<PasskeyAuthenticationBundle> {
   assertPasskeyEnvironment();
-  return postJson<PasskeyAuthenticationBundle>("/auth/passkey/auth/options", {
+  return postJson<PasskeyAuthenticationBundle>("/auth/passkey-auth-options", {
     email: email?.trim().toLowerCase() || undefined,
   });
 }
@@ -162,7 +162,7 @@ export async function verifyPasskeyAuthentication(
   const result = await postJson<{
     access_token: string;
     refresh_token: string;
-  }>("/auth/passkey/auth/verify", { assertionResponse, challengeToken });
+  }>("/auth/passkey-auth-verify", { assertionResponse, challengeToken });
   await applySessionTokens(result.access_token, result.refresh_token);
   markDeviceHasPasskey();
 }
