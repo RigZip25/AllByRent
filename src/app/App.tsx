@@ -647,7 +647,7 @@ function AppRoutes() {
       );
       if (!id) {
         if (auth.configured && !auth.session) {
-          showAuthGate("profile");
+          showAuthGate("publicProfile");
         }
         return;
       }
@@ -1386,6 +1386,11 @@ function AppRoutes() {
             onOpenIdentity={() => navigateTo("identity")}
             onOpenAgentActivity={() => navigateTo("agentActivity")}
             onViewPublicProfile={handleViewPublicProfile}
+            onRequireAuth={() => {
+              if (auth.configured && !auth.session) {
+                showAuthGate("publicProfile");
+              }
+            }}
           />
         )}
 

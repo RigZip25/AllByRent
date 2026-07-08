@@ -150,6 +150,7 @@ export function ProfileScreen({
   onOpenAgentActivity,
   onDeleteAccount,
   onViewPublicProfile,
+  onRequireAuth,
   onOpenIntegrations,
 }: {
   onRentals: () => void;
@@ -161,7 +162,8 @@ export function ProfileScreen({
   onOpenIdentity?: () => void;
   onOpenAgentActivity?: () => void;
   onDeleteAccount?: () => void;
-  onViewPublicProfile?: (userId: string) => void;
+  onViewPublicProfile?: (userId?: string) => void;
+  onRequireAuth?: () => void;
   onOpenIntegrations?: () => void;
 }) {
   const auth = useAuth();
@@ -256,7 +258,7 @@ export function ProfileScreen({
     };
   }, [auth.userId]);
 
-  const hasPhoto = hasAvatarPhoto(profile.id);
+  const hasPhoto = hasAvatarPhoto((auth.userId ?? profile.id).trim() || profile.id);
   const showOnboarding = !hasPhoto && !isPhotoPromptDeferred();
 
   const responseDisplay = getHostResponseDisplay(profile.id, profile.host.usesManualBooking);
@@ -283,19 +285,33 @@ export function ProfileScreen({
   };
 
   const openPublicProfile = () => {
-    const userId = (auth.userId ?? profile.id).trim();
-    if (!userId) {
-      setPublicProfileError("Sign in to view your public profile.");
+    setPublicProfileError(null);
+    if (auth.loading) return;
+
+    if (!onViewPublicProfile) {
+      setPublicProfileError("Public profile preview is unavailable right now.");
       return;
     }
-    setPublicProfileError(null);
-    onViewPublicProfile?.(userId);
+
+    const userId = (auth.userId ?? profile.id ?? loadUserProfile().id).trim();
+    if (!userId) {
+      if (auth.configured && !auth.session) {
+        onRequireAuth?.();
+        return;
+      }
+      setPublicProfileError("Could not load your account. Try signing out and back in.");
+      return;
+    }
+
+    onViewPublicProfile(userId);
   };
 
   const needsDisplayName = !profile.displayName?.trim();
 
   const persistPhoto = async (blob: Blob) => {
-    const dataUrl = await saveAvatarPhoto(profile.id, blob);
+    const ownerId = (auth.userId ?? profile.id).trim() || loadUserProfile().id.trim();
+    if (!ownerId) return;
+    const dataUrl = await saveAvatarPhoto(ownerId, blob);
     setPhotoPromptDeferred(false);
     setProfileAvatarUrl(dataUrl);
     setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
@@ -367,9 +383,19 @@ export function ProfileScreen({
                 </button>
               ) : null}
               {publicProfileError ? (
-                <p className="mt-2 text-[12px] font-medium text-amber-800" role="status">
-                  {publicProfileError}
-                </p>
+                <div className="mt-2 space-y-2" role="status">
+                  <p className="text-[12px] font-medium text-amber-800">{publicProfileError}</p>
+                  {auth.configured && !auth.session && onRequireAuth ? (
+                    <button
+                      type="button"
+                      onClick={onRequireAuth}
+                      className="text-[13px] font-semibold underline"
+                      style={{ color: GREEN }}
+                    >
+                      Sign in to view your public profile
+                    </button>
+                  ) : null}
+                </div>
               ) : null}
             </div>
           </div>
