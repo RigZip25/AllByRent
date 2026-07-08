@@ -10,6 +10,7 @@ import {
   userHasPasskey as profileHasPasskey,
 } from "./passkey";
 import { isNetworkFetchError } from "./authErrors";
+import { emailOtpEntryError, isCompleteEmailOtpLength, normalizeEmailOtpInput } from "./authOtp";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 export type AuthProvider = "google" | "apple";
@@ -202,10 +203,10 @@ export async function verifyEmailOtp(email: string, token: string): Promise<void
     throw new Error("Supabase is not configured.");
   }
   const normalized = email.trim().toLowerCase();
-  const code = token.replace(/\D/g, "");
+  const code = normalizeEmailOtpInput(token);
   if (!normalized) throw new Error("Enter your email address.");
-  if (code.length < 6 || code.length > 8) {
-    throw new Error("Enter the 6-digit code from your Evorios email.");
+  if (!isCompleteEmailOtpLength(code.length)) {
+    throw new Error(emailOtpEntryError());
   }
 
   const { data, error } = await supabase.auth.verifyOtp({
