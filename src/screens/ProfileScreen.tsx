@@ -38,6 +38,7 @@ import {
   type UserProfile,
 } from "../lib/userProfileStorage";
 import { formatBuildStamp } from "../lib/buildInfo";
+import { formatUsPhoneDisplay } from "../lib/usPhoneFormat";
 import { confirmAndResetAppData } from "../lib/resetAppStorage";
 import { useAuth } from "../hooks/AuthProvider";
 import { signOut } from "../lib/auth";
@@ -474,7 +475,7 @@ export function ProfileScreen({
             <RowButton
               icon={<Sparkles className="h-5 w-5" style={{ color: "#F59E0B" }} />}
               label="Phone"
-              value={profile.phone || "Add phone"}
+              value={profile.phone?.trim() ? formatUsPhoneDisplay(profile.phone) : "Add phone"}
               onClick={handleEditPhone}
             />
           </li>

@@ -10,6 +10,7 @@ import {
   syncUserProfileFromAuth,
   updateProfileFields,
 } from "../../lib/userProfileStorage";
+import { formatUsPhoneDisplay } from "../../lib/usPhoneFormat";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -107,7 +108,9 @@ export function PersonalInfoScreen({
     profile.email?.trim() ||
     (auth.userId ? "Loading sign-in email…" : "Not signed in");
   const displayName = profile.displayName?.trim() || "Add your name";
-  const phone = profile.phone?.trim() || "Add phone";
+  const phone = profile.phone?.trim()
+    ? formatUsPhoneDisplay(profile.phone)
+    : "Add phone";
 
   const saveName = (nextName: string) => {
     if (!nextName) return;
@@ -120,11 +123,12 @@ export function PersonalInfoScreen({
   };
 
   const savePhone = (nextPhone: string) => {
-    const next = updateProfileFields({ phone: nextPhone });
+    const normalized = formatUsPhoneDisplay(nextPhone);
+    const next = updateProfileFields({ phone: normalized });
     setProfile(refreshProfileStats(next, auth.userId));
     setEditing(null);
     if (auth.userId) {
-      void updateRemoteProfile(auth.userId, { phone: nextPhone }).catch(() => undefined);
+      void updateRemoteProfile(auth.userId, { phone: normalized }).catch(() => undefined);
     }
   };
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { formatUsPhoneDisplay, formatUsPhoneInput, normalizeUsPhoneForStorage } from "../../lib/usPhoneFormat";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -26,8 +27,9 @@ export function ProfileFieldEditSheet({
   const [draft, setDraft] = useState(value);
 
   useEffect(() => {
-    if (open) setDraft(value);
-  }, [open, value]);
+    if (!open) return;
+    setDraft(inputType === "tel" ? formatUsPhoneDisplay(value) : value);
+  }, [open, value, inputType]);
 
   if (!open) return null;
 
@@ -59,8 +61,12 @@ export function ProfileFieldEditSheet({
           <span className="text-[13px] font-semibold text-gray-700">{label}</span>
           <input
             type={inputType}
+            inputMode={inputType === "tel" ? "tel" : undefined}
+            autoComplete={inputType === "tel" ? "tel-national" : undefined}
             value={draft}
-            onChange={(e) => setDraft(e.target.value)}
+            onChange={(e) =>
+              setDraft(inputType === "tel" ? formatUsPhoneInput(e.target.value) : e.target.value)
+            }
             placeholder={placeholder}
             autoFocus
             className="mt-2 w-full rounded-2xl border bg-white px-3 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/20"
@@ -80,7 +86,9 @@ export function ProfileFieldEditSheet({
           <button
             type="button"
             disabled={!canSave}
-            onClick={() => onSave(trimmed)}
+            onClick={() =>
+              onSave(inputType === "tel" ? normalizeUsPhoneForStorage(trimmed) : trimmed)
+            }
             className="rounded-2xl px-4 py-3 text-[14px] font-bold text-white disabled:opacity-60"
             style={{ backgroundColor: GREEN }}
           >
