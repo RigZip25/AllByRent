@@ -229,38 +229,8 @@ export function PublicProfileScreen({
                     ID Verified ✓
                   </span>
                 ) : null}
-                {profile.reviewCount > 0 ? (
-                  <span
-                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
-                    style={{ backgroundColor: `${GREEN}14`, color: GREEN }}
-                  >
-                    <StarIcon className="h-3 w-3" />
-                    {profile.reviewCount} reviews
-                  </span>
-                ) : null}
               </div>
             </div>
-          </div>
-
-          <div className="mt-4 flex gap-4 text-center">
-            <div className="flex-1">
-              <p className="text-[18px] font-bold" style={{ color: GREEN }}>
-                {profile.rating > 0 ? `${profile.rating}★` : "—"}
-              </p>
-              <p className="text-[11px] text-gray-500">Rating</p>
-            </div>
-            <div className="flex-1">
-              <p className="text-[18px] font-bold" style={{ color: GREEN }}>
-                {profile.transactionCount}
-              </p>
-              <p className="text-[11px] text-gray-500">Transactions</p>
-            </div>
-            {profile.noShowCount > 0 ? (
-              <div className="flex-1">
-                <p className="text-[18px] font-bold text-orange-700">{profile.noShowCount}</p>
-                <p className="text-[11px] text-gray-500">No-shows</p>
-              </div>
-            ) : null}
           </div>
         </div>
 
