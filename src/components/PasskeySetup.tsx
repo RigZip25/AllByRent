@@ -1,6 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ScanFace, X } from "lucide-react";
-import { dismissEnablePasskeyPrompt, enrollPasskey } from "../lib/auth";
+import { startRegistration } from "@simplewebauthn/browser";
+import { dismissEnablePasskeyPrompt } from "../lib/auth";
+import {
+  fetchPasskeyRegistrationBundle,
+  verifyPasskeyRegistration,
+  type PasskeyRegistrationBundle,
+} from "../lib/passkey";
 import { formatPasskeyError } from "../lib/passkeyErrors";
 import { getPasskeyEnvironmentHint } from "../lib/passkeyEnvironment";
 
@@ -15,7 +21,39 @@ export function PasskeySetup({
   onDone: () => void;
 }) {
   const [busy, setBusy] = useState(false);
+  const [preparing, setPreparing] = useState(false);
+  const [bundle, setBundle] = useState<PasskeyRegistrationBundle | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setBundle(null);
+      setError(null);
+      setPreparing(false);
+      setBusy(false);
+      return;
+    }
+
+    let cancelled = false;
+    setPreparing(true);
+    setError(null);
+    setBundle(null);
+
+    void fetchPasskeyRegistrationBundle()
+      .then((next) => {
+        if (!cancelled) setBundle(next);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(formatPasskeyError(e));
+      })
+      .finally(() => {
+        if (!cancelled) setPreparing(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
 
   if (!open) return null;
 
@@ -26,19 +64,46 @@ export function PasskeySetup({
     onDone();
   };
 
+  const refreshBundle = async (): Promise<PasskeyRegistrationBundle> => {
+    const next = await fetchPasskeyRegistrationBundle();
+    setBundle(next);
+    return next;
+  };
+
   const handleEnable = async () => {
     setError(null);
+    let activeBundle = bundle;
+    if (!activeBundle) {
+      setPreparing(true);
+      try {
+        activeBundle = await refreshBundle();
+      } catch (e) {
+        setError(formatPasskeyError(e));
+        return;
+      } finally {
+        setPreparing(false);
+      }
+    }
+
     setBusy(true);
     try {
-      await enrollPasskey();
+      const attestationResponse = await startRegistration({ optionsJSON: activeBundle.options });
+      await verifyPasskeyRegistration(attestationResponse, activeBundle.challengeToken);
       dismissEnablePasskeyPrompt();
       onDone();
     } catch (e) {
       setError(formatPasskeyError(e));
+      void refreshBundle().catch(() => undefined);
     } finally {
       setBusy(false);
     }
   };
+
+  const enableLabel = busy
+    ? "Opening Face ID…"
+    : preparing
+      ? "Preparing Face ID…"
+      : "Enable Face ID";
 
   return (
     <div
@@ -74,7 +139,7 @@ export function PasskeySetup({
         ) : null}
 
         {error ? (
-          <div className="mt-3 rounded-2xl border bg-[#FEF2F2] p-3 text-[13px] text-red-700">
+          <div className="mt-3 rounded-2xl border bg-[#FEF2F2] p-3 text-[13px] text-red-700" role="alert">
             {error}
           </div>
         ) : null}
@@ -82,12 +147,12 @@ export function PasskeySetup({
         <div className="mt-4 flex flex-col gap-2">
           <button
             type="button"
-            disabled={busy}
+            disabled={busy || preparing}
             onClick={() => void handleEnable()}
             className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
             style={{ backgroundColor: GREEN }}
           >
-            {busy ? "Setting up…" : "Enable Face ID"}
+            {enableLabel}
           </button>
           <button
             type="button"
