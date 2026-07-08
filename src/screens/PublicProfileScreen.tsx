@@ -67,10 +67,12 @@ export function PublicProfileScreen({
   userId,
   onBack,
   onOpenListing,
+  onOpenProfileSettings,
 }: {
   userId: string;
   onBack: () => void;
   onOpenListing?: (listingId: string) => void;
+  onOpenProfileSettings?: () => void;
 }) {
   const auth = useAuth();
   const own = loadUserProfile();
@@ -180,6 +182,26 @@ export function PublicProfileScreen({
       </header>
 
       <div className="screen-scroll flex-1 px-4 pb-6">
+        {isSelf && onOpenProfileSettings ? (
+          <div
+            className="mb-4 rounded-2xl border bg-white p-4"
+            style={{ borderColor: BORDER }}
+          >
+            <p className="text-[13px] leading-relaxed text-gray-600">
+              Add your photo, email, and name in Profile settings — neighbors only see what you
+              choose to share publicly.
+            </p>
+            <button
+              type="button"
+              onClick={onOpenProfileSettings}
+              className="mt-3 w-full rounded-xl py-3 text-[14px] font-bold text-white"
+              style={{ backgroundColor: GREEN }}
+            >
+              Open Profile settings
+            </button>
+          </div>
+        ) : null}
+
         <div className="rounded-3xl border bg-white p-5" style={{ borderColor: BORDER }}>
           <div className="flex gap-4">
             <ProfileAvatar avatarUrl={profile.avatarUrl} size={72} showHint={!profile.avatarUrl} />

@@ -1394,6 +1394,11 @@ function AppRoutes() {
             userId={selectedPublicProfileUserId}
             onBack={handleBack}
             onOpenListing={handleOpenListingFromFeed}
+            onOpenProfileSettings={
+              auth.userId && selectedPublicProfileUserId === auth.userId
+                ? handleOpenProfile
+                : undefined
+            }
           />
         )}
 

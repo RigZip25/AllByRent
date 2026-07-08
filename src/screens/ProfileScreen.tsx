@@ -306,6 +306,8 @@ export function ProfileScreen({
       <ProfilePhotoOnboarding
         onPhotoSaved={(blob) => void persistPhoto(blob)}
         onDeferred={() => setProfile(refreshProfileStats(loadUserProfile(), auth.userId))}
+        onOpenPersonalInfo={() => onOpenPersonalInfo?.()}
+        onViewPublicProfile={() => openPublicProfile()}
       />
     );
   }
