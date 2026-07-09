@@ -32,6 +32,9 @@ const MAP = {
   "mr-evorios.png": "No_back_rentano.png",
   "mascot.png": "No_back_rentano.png",
   "splash-garage.png": "evorios_splash_garage.png",
+  "qr-story-1.png": "qr_story_1.png",
+  "qr-verification.png": "qr_story_1.png",
+  "qr-sticker-tag.png": "qr_story_1.png",
 };
 
 async function optimizePng(inputPath, outputPath, maxWidth = 1536) {
