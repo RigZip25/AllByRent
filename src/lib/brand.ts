@@ -7,11 +7,11 @@ export const APP_NAME_PRONUNCIATION = "eh-VOR-ee-ohs";
 export const PRODUCT_METAPHOR = "Garage Showcase";
 
 /** Ties the name to the evolution narrative (EN UI). */
-export const APP_TAGLINE = "The evolution of your household.";
+export const APP_TAGLINE = "The evolution of ownership.";
 export const APP_TAGLINE_SHORT = "Your garage, online.";
 
 /** Russian reference copy for docs / future i18n. */
-export const APP_TAGLINE_RU = "Эволюция вашего домашнего хозяйства.";
+export const APP_TAGLINE_RU = "Эволюция владения.";
 
 export const BRAND_GREEN = "#0D5C3A";
 export const BRAND_AMBER = "#F59E0B";
@@ -77,7 +77,7 @@ export const ONBOARDING = {
   },
   allSet: {
     title: "You're all set!",
-    subtitle: "Welcome to Evorios — the evolution of your household.",
+    subtitle: "Welcome to Evorios — the evolution of ownership.",
     exploreCta: "Choose how to browse →",
     stockGarageCta: "Stock my garage →",
   },
@@ -253,11 +253,12 @@ export const ONBOARDING = {
     skip: "Skip intro",
   },
   firstHello: {
-    mascotRole: "Your neighborhood guide",
+    mascotRole: "Your guide to smarter ownership",
     bubbles: [
-      (mascot: string) => `Hey! I'm ${mascot} — your guide on the block.`,
-      "Browse nearby, borrow gear, or share what you own from home.",
-      "Tap me in the menu anytime — neighbor help, any language, 24/7.",
+      (mascot: string) =>
+        `Hey! I'm ${mascot} — I help households evolve how they use what they own.`,
+      "Rent it out, sell it, gift it, or borrow from neighbors — before you buy new.",
+      "Tap me anytime — neighbor help, any language, 24/7.",
     ],
   },
 } as const;
