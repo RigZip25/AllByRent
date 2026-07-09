@@ -79,8 +79,8 @@ Supabase chooses link vs code from the **email template**, not from the app:
 - `{{ .ConfirmationURL }}` in the template → **magic link** email
 - `{{ .Token }}` only → **numeric code** email
 
-1. **Supabase → Authentication → Email Templates → Magic Link**
-2. Set **Subject** to: `Your Evorios code: {{ .Token }}`
+1. **Supabase → Authentication → Email Templates → Magic link or OTP**
+2. Set **Subject** to: `Mr. Evorios — your sign-in code: {{ .Token }}`
 3. Paste the HTML from `supabase/email-templates/sign-in-code.html` (code only — **no** `{{ .ConfirmationURL }}` anywhere in the body)
 4. Save, then request a **new** code (old emails keep the old format)
 
