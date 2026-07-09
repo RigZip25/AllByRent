@@ -50,9 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const gotrueBody: Record<string, unknown> = {
     email,
-    data: {},
     create_user: true,
-    gotrue_meta_security: {},
   };
 
   try {
