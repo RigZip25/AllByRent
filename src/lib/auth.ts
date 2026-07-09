@@ -143,8 +143,9 @@ async function signInWithEmailOtpViaProxy(email: string): Promise<void> {
 }
 
 /**
- * Passwordless email sign-in — `signInWithOtp` with a numeric code only (no magic link).
- * New users are created via the OTP endpoint when needed (`shouldCreateUser: true`).
+ * Passwordless email sign-in — numeric OTP only (no magic link).
+ * Always uses the server proxy first so we never send PKCE `code_challenge` or
+ * `redirect_to` (supabase-js with flowType pkce can still trigger link emails).
  */
 export async function signInWithEmailOtp(email: string): Promise<void> {
   if (!isSupabaseConfigured()) {
@@ -153,9 +154,14 @@ export async function signInWithEmailOtp(email: string): Promise<void> {
   const normalized = email.trim().toLowerCase();
   if (!normalized) throw new Error("Enter your email address.");
 
-  const supabase = getSupabaseClient();
+  try {
+    await signInWithEmailOtpViaProxy(normalized);
+    return;
+  } catch (proxyErr) {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw proxyErr;
 
-  if (supabase) {
+    // Local dev without `vercel dev` — proxy may be unavailable; try direct OTP.
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email: normalized,
@@ -164,13 +170,11 @@ export async function signInWithEmailOtp(email: string): Promise<void> {
         },
       });
       if (error) throw error;
-      return;
-    } catch (err) {
-      if (!isNetworkFetchError(err)) throw err;
+    } catch (directErr) {
+      if (isNetworkFetchError(directErr)) throw proxyErr;
+      throw directErr;
     }
   }
-
-  await signInWithEmailOtpViaProxy(normalized);
 }
 
 export async function verifyEmailOtp(email: string, token: string): Promise<void> {

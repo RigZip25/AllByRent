@@ -65,19 +65,28 @@ Stores `passkey_credential_id` and public key material for custom WebAuthn (no S
 1. Copy **Project URL** from Supabase → **Settings → API** (not a random UUID from General).
 2. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel for **Production**, then **redeploy** (Vite bakes env vars at build time).
 3. Ensure the Supabase project is **active** (resume if paused). If `https://YOUR_REF.supabase.co` does not resolve in a browser, fix the project in Supabase before redeploying.
-4. The app falls back to `POST /api/auth/otp` when the browser cannot reach Supabase directly; that route returns a clearer error if the hostname is wrong.
-- **Auth → Providers**
+4. Production sign-in uses `POST /api/auth/otp` first (no PKCE / no `redirect_to`). Plain `npm run dev` falls back to direct Supabase only if the proxy is unavailable.
+- **Auth → Providers → Email**
   - **Email** enabled with **Email OTP** (magic links are not used for sign-in)
+  - **Confirm email** → **off** for passwordless OTP (otherwise new users get a confirmation *link* instead of a code)
 
 ### Email sign-in code (required UX)
 
 Users enter a **6- or 8-digit code inside the app** — they should not tap a link in email.
 
+Supabase chooses link vs code from the **email template**, not from the app:
+
+- `{{ .ConfirmationURL }}` in the template → **magic link** email
+- `{{ .Token }}` only → **numeric code** email
+
 1. **Supabase → Authentication → Email Templates → Magic Link**
 2. Set **Subject** to: `Your Evorios code: {{ .Token }}`
-3. Paste the HTML from `supabase/email-templates/sign-in-code.html` (code only — **no** `{{ .ConfirmationURL }}`)
+3. Paste the HTML from `supabase/email-templates/sign-in-code.html` (code only — **no** `{{ .ConfirmationURL }}` anywhere in the body)
+4. Save, then request a **new** code (old emails keep the old format)
 
-4. **Optional — sender branding:** Authentication → SMTP Settings → use Resend/SendGrid with `noreply@evorios.com` so the inbox shows **Evorios** instead of Supabase.
+**Still getting a link?** Open the template and search for `ConfirmationURL`. Also check **Confirm signup** template — if it still has a link, disable **Confirm email** under Email provider or align that template too.
+
+5. **Optional — sender branding:** Authentication → SMTP Settings → use Resend/SendGrid with `noreply@evorios.com` so the inbox shows **Evorios** instead of Supabase.
 
 ### Local passkey testing
 
