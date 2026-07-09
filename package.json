@@ -9,6 +9,7 @@
     "build": "vite build",
     "dev": "vite",
     "dev:https": "set VITE_DEV_HTTPS=true&& vite",
+    "assets:apply": "node scripts/apply-incoming-assets.mjs",
     "lint": "node ./node_modules/eslint/bin/eslint.js src",
     "start": "vite",
     "preview": "vite preview"

@@ -1,6 +1,7 @@
 /**
  * Onboarding & marketing art — replace files in src/imports/onboarding/
- * without code changes. Spec: docs/SCREEN_OVERHAUL.md § Asset manifest
+ * without code changes. Drop PNGs in src/imports/incoming/ and run
+ * `node scripts/apply-incoming-assets.mjs`. Spec: docs/SCREEN_OVERHAUL.md § Asset manifest
  */
 import evoriosStockGarage from "../imports/onboarding/evorios_stock_garage.png";
 import evoriosBrowseBlock from "../imports/onboarding/evorios_browse_block.png";
