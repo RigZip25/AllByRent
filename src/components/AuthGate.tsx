@@ -1,19 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Apple, ChevronDown, Chrome, Fingerprint, Mail, ScanFace, X } from "lucide-react";
+import { Mail, X } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
 import { APP_NAME, mascotSays, MASCOT_NAME } from "../lib/brand";
 import type { AuthIntent } from "../lib/authReturn";
 import { peekPendingAuthEmail, setPendingAuthEmail } from "../lib/authReturn";
-import {
-  shouldShowPasskeyLogin,
-  signInWithEmailOtp,
-  signInWithPasskey,
-  signInWithProvider,
-  verifyEmailOtp,
-} from "../lib/auth";
+import { signInWithEmailOtp, verifyEmailOtp } from "../lib/auth";
 import { formatAuthError } from "../lib/authErrors";
 import { detectCurrentLocation, formatGeolocationErrorMessage } from "../lib/geolocation";
-import { getPasskeyEnvironmentHint } from "../lib/passkeyEnvironment";
 import { setHomeLocation } from "../lib/listingStorage";
 import { peekPendingAuthProfile, savePendingAuthProfile } from "../lib/pendingAuthProfile";
 import {
@@ -30,7 +23,7 @@ import type { LocationSuggestion } from "../lib/geocoding";
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
 
-type Step = "account" | "confirm" | "alternatives";
+type Step = "account" | "confirm";
 
 const EMAIL_COOLDOWN_SECONDS = 60;
 const EMAIL_RATE_LIMIT_COOLDOWN_SECONDS = 15 * 60;
@@ -117,11 +110,8 @@ export function AuthGate({
   const [phone, setPhone] = useState(hydrated.phone);
   const [email, setEmail] = useState(hydrated.email);
   const [location, setLocation] = useState<LocationSuggestion | null>(hydrated.location);
-  const [showAlternatives, setShowAlternatives] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [passkeyPrimary, setPasskeyPrimary] = useState(false);
-  const passkeyHint = useMemo(() => getPasskeyEnvironmentHint(), []);
   const [emailCooldownUntil, setEmailCooldownUntil] = useState<number>(0);
   const [nowMs, setNowMs] = useState<number>(() => Date.now());
   const [otpCode, setOtpCode] = useState("");
@@ -135,21 +125,17 @@ export function AuthGate({
 
   useEffect(() => {
     if (!open) return;
-    setPasskeyPrimary(shouldShowPasskeyLogin());
     const next = hydrateAuthForm();
     setFullName(next.fullName);
     setPhone(next.phone);
     setEmail(next.email);
     setLocation(next.location);
     setOtpCode("");
-    setShowAlternatives(false);
     setError(null);
     if (initialStep) {
       setStep(initialStep);
     } else if (next.email) {
       setStep("confirm");
-    } else if (shouldShowPasskeyLogin()) {
-      setStep("alternatives");
     } else {
       setStep("account");
     }
@@ -238,22 +224,6 @@ export function AuthGate({
     });
   };
 
-  const handlePasskeyLogin = () => {
-    void run("passkey", async () => {
-      await signInWithPasskey(passkeyPrimary ? undefined : email || undefined);
-    });
-  };
-
-  const handleOAuth = (provider: "google" | "apple", options?: { skipProfile?: boolean }) => {
-    if (!options?.skipProfile && !validateAccountForm()) return;
-    void run(provider, async () => {
-      if (!options?.skipProfile && location) {
-        persistPendingProfile();
-      }
-      await signInWithProvider(provider);
-    });
-  };
-
   const handleAutoDetectLocation = () => {
     void run("locate", async () => {
       const detected = await detectCurrentLocation();
@@ -310,14 +280,10 @@ export function AuthGate({
         <RentanoTip message={copy.rentano} className="mb-1" />
 
         <h2 className="mt-3 text-[22px] font-bold leading-tight" style={{ color: GREEN }}>
-          {step === "confirm" ? confirmTitle : step === "alternatives" ? "Quick sign-in" : copy.title}
+          {step === "confirm" ? confirmTitle : copy.title}
         </h2>
         <p className="mt-1 text-[14px] text-gray-500">
-          {step === "confirm"
-            ? confirmSubtitle
-            : step === "alternatives"
-              ? "Already set up Face ID or Google on this device?"
-              : copy.subtitle}
+          {step === "confirm" ? confirmSubtitle : copy.subtitle}
         </p>
 
         {!canUseSupabase ? (
@@ -328,70 +294,6 @@ export function AuthGate({
 
         {error ? (
           <div className="mt-3 rounded-2xl border bg-[#FEF2F2] p-3 text-[13px] text-red-700">{error}</div>
-        ) : null}
-
-        {step === "alternatives" ? (
-          <div className="mt-4 flex flex-col gap-2">
-            {passkeyPrimary ? (
-              <>
-                <button
-                  type="button"
-                  disabled={!canUseSupabase || busy !== null}
-                  onClick={handlePasskeyLogin}
-                  className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
-                  style={{ backgroundColor: GREEN }}
-                >
-                  <ScanFace className="h-5 w-5" />
-                  {busy === "passkey" ? "Opening Face ID…" : "Continue with Face ID"}
-                </button>
-                {passkeyHint ? (
-                  <p className="text-center text-[12px] leading-snug text-gray-500">{passkeyHint}</p>
-                ) : null}
-              </>
-            ) : null}
-
-            <button
-              type="button"
-              disabled={!canUseSupabase || busy !== null}
-              onClick={() => handleOAuth("google", { skipProfile: true })}
-              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
-              style={{ borderColor: BORDER }}
-            >
-              <Chrome className="h-5 w-5" />
-              Google
-            </button>
-            <button
-              type="button"
-              disabled={!canUseSupabase || busy !== null}
-              onClick={() => handleOAuth("apple", { skipProfile: true })}
-              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
-              style={{ borderColor: BORDER }}
-            >
-              <Apple className="h-5 w-5" />
-              Apple
-            </button>
-
-            {!passkeyPrimary && shouldShowPasskeyLogin() ? (
-              <button
-                type="button"
-                disabled={busy !== null}
-                onClick={handlePasskeyLogin}
-                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-semibold text-gray-700"
-                style={{ borderColor: BORDER }}
-              >
-                <Fingerprint className="h-4 w-4" />
-                {busy === "passkey" ? "Opening passkey…" : "Use Face ID"}
-              </button>
-            ) : null}
-
-            <button
-              type="button"
-              onClick={() => setStep("account")}
-              className="mt-2 w-full py-2 text-[13px] font-semibold text-gray-600"
-            >
-              Sign in with email instead
-            </button>
-          </div>
         ) : null}
 
         {step === "account" ? (
@@ -482,57 +384,6 @@ export function AuthGate({
                   ? `Resend in ${emailCooldownRemaining}s`
                   : "Send sign-in code"}
             </button>
-
-            {(shouldShowPasskeyLogin() || canUseSupabase) && (
-              <div className="mt-3">
-                <button
-                  type="button"
-                  onClick={() => setShowAlternatives((open) => !open)}
-                  className="flex w-full items-center justify-center gap-1 py-2 text-[13px] font-semibold text-gray-500"
-                >
-                  Other sign-in options
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform ${showAlternatives ? "rotate-180" : ""}`}
-                  />
-                </button>
-                {showAlternatives ? (
-                  <div className="mt-1 flex flex-col gap-2">
-                    {shouldShowPasskeyLogin() ? (
-                      <button
-                        type="button"
-                        disabled={busy !== null}
-                        onClick={handlePasskeyLogin}
-                        className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-semibold text-gray-700"
-                        style={{ borderColor: BORDER }}
-                      >
-                        <Fingerprint className="h-4 w-4" />
-                        {busy === "passkey" ? "Opening Face ID…" : "Face ID"}
-                      </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      disabled={!canUseSupabase || busy !== null}
-                      onClick={() => handleOAuth("google")}
-                      className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
-                      style={{ borderColor: BORDER }}
-                    >
-                      <Chrome className="h-5 w-5" />
-                      Google
-                    </button>
-                    <button
-                      type="button"
-                      disabled={!canUseSupabase || busy !== null}
-                      onClick={() => handleOAuth("apple")}
-                      className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-bold text-gray-800 disabled:opacity-60"
-                      style={{ borderColor: BORDER }}
-                    >
-                      <Apple className="h-5 w-5" />
-                      Apple
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-            )}
           </div>
         ) : null}
 
