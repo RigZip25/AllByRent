@@ -12,6 +12,7 @@
     "assets:apply": "node scripts/apply-incoming-assets.mjs",
     "assets:rebrand-at-home": "node scripts/rebrand-at-home.mjs",
     "assets:rebrand-qr-story-1": "node scripts/rebrand-qr-story-1.mjs",
+    "assets:rebrand-trip-destination": "node scripts/rebrand-trip-destination.mjs",
     "lint": "node ./node_modules/eslint/bin/eslint.js src",
     "start": "vite",
     "preview": "vite preview"
