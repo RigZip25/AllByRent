@@ -22,7 +22,7 @@ export type AuthState = {
 
 const OAUTH_PROVIDER_KEY = "abr_auth_last_oauth_provider";
 const PASSKEY_SETUP_DISMISS_KEY = "abr_passkey_setup_dismissed_at_v1";
-/** Set when magic-link / OAuth callback finishes so App can skip splash without completing onboarding. */
+/** Set when OAuth callback finishes so App can skip splash without completing onboarding. */
 export const AUTH_CALLBACK_RESUME_KEY = "abr_auth_callback_resume_v1";
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
@@ -118,34 +118,12 @@ async function ensureProfileRow(userId: string, email: string): Promise<void> {
   }
 }
 
-async function readPkceChallengeForProxy(): Promise<{
-  code_challenge?: string;
-  code_challenge_method?: string;
-}> {
-  try {
-    const storageKey = Object.keys(localStorage).find((key) => key.endsWith("-code-verifier"));
-    if (!storageKey) return {};
-    const verifier = localStorage.getItem(storageKey);
-    if (!verifier) return {};
-    const data = new TextEncoder().encode(verifier);
-    const digest = await crypto.subtle.digest("SHA-256", data);
-    const hash = btoa(String.fromCharCode(...new Uint8Array(digest)))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
-    return { code_challenge: hash, code_challenge_method: "s256" };
-  } catch {
-    return {};
-  }
-}
-
-/** Server fallback — mirrors `signInWithOtp`, never `signUp`. */
-async function signInWithEmailOtpViaProxy(email: string, redirectTo: string): Promise<void> {
-  const pkce = await readPkceChallengeForProxy();
+/** Server fallback — mirrors `signInWithOtp`, never `signUp`. OTP-only (no email redirect). */
+async function signInWithEmailOtpViaProxy(email: string): Promise<void> {
   const res = await fetch("/api/auth/otp", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, redirectTo, ...pkce }),
+    body: JSON.stringify({ email }),
   });
 
   let payload: { error?: string } = {};
@@ -159,13 +137,13 @@ async function signInWithEmailOtpViaProxy(email: string, redirectTo: string): Pr
     throw new Error(
       typeof payload.error === "string" && payload.error.length > 0
         ? payload.error
-        : `Magic link request failed (${res.status})`,
+        : `Sign-in code request failed (${res.status})`,
     );
   }
 }
 
 /**
- * Passwordless email sign-in — always `signInWithOtp` (magic link), never `signUp`.
+ * Passwordless email sign-in — `signInWithOtp` with a numeric code only (no magic link).
  * New users are created via the OTP endpoint when needed (`shouldCreateUser: true`).
  */
 export async function signInWithEmailOtp(email: string): Promise<void> {
@@ -175,7 +153,6 @@ export async function signInWithEmailOtp(email: string): Promise<void> {
   const normalized = email.trim().toLowerCase();
   if (!normalized) throw new Error("Enter your email address.");
 
-  const redirectTo = getAuthRedirectUrl();
   const supabase = getSupabaseClient();
 
   if (supabase) {
@@ -183,7 +160,6 @@ export async function signInWithEmailOtp(email: string): Promise<void> {
       const { error } = await supabase.auth.signInWithOtp({
         email: normalized,
         options: {
-          emailRedirectTo: redirectTo,
           shouldCreateUser: true,
         },
       });
@@ -194,7 +170,7 @@ export async function signInWithEmailOtp(email: string): Promise<void> {
     }
   }
 
-  await signInWithEmailOtpViaProxy(normalized, redirectTo);
+  await signInWithEmailOtpViaProxy(normalized);
 }
 
 export async function verifyEmailOtp(email: string, token: string): Promise<void> {
@@ -224,7 +200,7 @@ export async function verifyEmailOtp(email: string, token: string): Promise<void
 }
 
 /**
- * Exchange PKCE `?code=` from magic-link redirects and strip auth params from the URL.
+ * Exchange PKCE `?code=` from OAuth redirects and strip auth params from the URL.
  */
 export async function completeAuthCallbackFromUrl(): Promise<boolean> {
   const supabase = getSupabaseClient();

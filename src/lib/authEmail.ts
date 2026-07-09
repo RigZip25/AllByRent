@@ -1,7 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { peekPendingAuthEmail } from "./authReturn";
 
-/** Best-effort email from Supabase session (magic link tab may lack sessionStorage pending email). */
+/** Best-effort email from Supabase session (OAuth tab may lack sessionStorage pending email). */
 export function resolveSessionUserEmail(user: User | null | undefined): string | null {
   if (!user) return peekPendingAuthEmail();
 

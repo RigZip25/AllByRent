@@ -515,7 +515,7 @@ export function Subcategory({
                 {personalizedLine}
               </p>
               <p className="mt-1 text-xs text-gray-500">
-                Unlock this shelf with a magic link to browse listings, post a request, and save
+                Unlock this shelf with a sign-in code to browse listings, post a request, and save
                 favorites.
               </p>
             </div>
@@ -525,7 +525,7 @@ export function Subcategory({
               className="w-full rounded-xl py-3.5 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-95"
               style={{ backgroundColor: GREEN_DARK }}
             >
-              Get magic link to unlock →
+              Get sign-in code to unlock →
             </button>
             <button
               type="button"

@@ -5,7 +5,7 @@
   Subject (separate field):
   Your Evorios code: {{ .Token }}
 
-  Variables: {{ .Token }} = sign-in OTP (6 or 8 digits), {{ .ConfirmationURL }} = link (optional)
+  Variables: {{ .Token }} = sign-in OTP (6 or 8 digits). Do not include {{ .ConfirmationURL }}.
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -35,7 +35,10 @@
             <tr>
               <td style="padding: 28px 24px 12px;">
                 <p style="margin: 0 0 12px; font-size: 16px; line-height: 1.55; color: #374151;">
-                  Here’s your sign-in code. Open <strong>Evorios</strong> and type the numbers below — you don’t need to tap any link.
+                  Here’s your sign-in code. Open <strong>Evorios</strong>, go to the code screen, and <strong>copy &amp; paste</strong> the numbers below.
+                </p>
+                <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #6b7280;">
+                  <strong>How:</strong> tap the code to select it → <strong>Copy</strong> → switch back to Evorios → tap the code field → <strong>Paste</strong>.
                 </p>
               </td>
             </tr>
@@ -47,9 +50,9 @@
                   <tr>
                     <td align="center" style="background: #f0fdf4; border: 2px solid #0d5c3a; border-radius: 16px; padding: 22px 16px;">
                       <p style="margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #0d5c3a;">
-                        Your code
+                        Copy this code
                       </p>
-                      <p style="margin: 0; font-size: 36px; font-weight: 800; letter-spacing: 0.28em; color: #0d5c3a; font-variant-numeric: tabular-nums;">
+                      <p style="margin: 0; font-size: 36px; font-weight: 800; letter-spacing: 0.28em; color: #0d5c3a; font-variant-numeric: tabular-nums; user-select: all; -webkit-user-select: all;">
                         {{ .Token }}
                       </p>
                     </td>
@@ -61,8 +64,15 @@
             <!-- Hint -->
             <tr>
               <td style="padding: 0 24px 24px;">
+                <p style="margin: 0 0 12px; font-size: 14px; line-height: 1.5; color: #6b7280;">
+                  On iPhone, iOS may suggest the code above the keyboard when you tap the field in Safari — paste works either way.
+                </p>
                 <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #6b7280;">
                   This code expires soon. If you didn’t request it, you can ignore this email.
+                </p>
+                <!-- Helps iOS Mail + Safari autofill (last line, no https://) -->
+                <p style="margin: 12px 0 0; font-size: 1px; line-height: 1; color: #f0f4f2; user-select: all; -webkit-user-select: all;">
+                  @app.evorios.com #{{ .Token }}
                 </p>
               </td>
             </tr>

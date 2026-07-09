@@ -278,7 +278,7 @@ export function AuthGate({
   };
 
   const confirmTitle = "Enter your sign-in code";
-  const confirmSubtitle = `We sent a code to ${email}. Paste every digit from the email (${emailOtpLengthHint()}) — no need to leave the app.`;
+  const confirmSubtitle = `We sent a code to ${email}. Copy it from the email and paste here (${emailOtpLengthHint()}) — or type the digits.`;
 
   const otpDigits = normalizeEmailOtpInput(otpCode);
   const canVerifyCode = isCompleteEmailOtpLength(otpDigits.length) && busy === null && canUseSupabase;
@@ -567,7 +567,7 @@ export function AuthGate({
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleVerifyCode();
               }}
-              placeholder="Code from email"
+              placeholder="Paste code from email"
               className="w-full rounded-2xl border bg-white px-4 py-3 text-center text-[22px] font-bold tracking-[0.35em] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
               style={{ borderColor: BORDER }}
             />

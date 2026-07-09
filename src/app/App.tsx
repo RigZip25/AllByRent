@@ -274,7 +274,7 @@ function readBootQuery() {
   }
   const params = new URLSearchParams(window.location.search);
   const screen = params.get("screen");
-  // When returning from magic-link callback, skip splash immediately (prevents a visible flash).
+  // When returning from OAuth callback, skip splash immediately (prevents a visible flash).
   const hasAuthCode = params.get("code")?.trim().length ? true : false;
   const hash = window.location.hash ?? "";
   const hasAuthHash =
