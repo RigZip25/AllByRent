@@ -17,7 +17,7 @@ const BUBBLES = [
 
 function FirstHelloRolesScene() {
   return (
-    <div className="first-hello-scene" aria-label={`${APP_NAME} — evolution of ownership`}>
+    <div className="first-hello-scene" aria-label={`${APP_NAME} — neighborhood garage platform`}>
       <img
         src={onboardingAssets.garageRoles}
         alt=""

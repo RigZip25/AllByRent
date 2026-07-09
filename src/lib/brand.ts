@@ -253,12 +253,12 @@ export const ONBOARDING = {
     skip: "Skip intro",
   },
   firstHello: {
-    mascotRole: "Your guide to smarter ownership",
+    mascotRole: "Your Evorios guide",
     bubbles: [
       (mascot: string) =>
-        `Hey! I'm ${mascot} — I help households evolve how they use what they own.`,
-      "Rent it out, sell it, gift it, or borrow from neighbors — before you buy new.",
-      "Tap me anytime — neighbor help, any language, 24/7.",
+        `Hey! I'm ${mascot} — your guide on Evorios. I'm here to help you find your way around.`,
+      "I'll help you work out what to do with things you own — or things you're planning to borrow from a neighbor.",
+      "Evorios was built so households can put their garage online: rent out, sell, borrow nearby, and buy less new stuff. Tap me anytime.",
     ],
   },
 } as const;
