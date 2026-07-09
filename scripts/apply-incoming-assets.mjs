@@ -87,9 +87,10 @@ async function applyIncoming() {
     const src = path.join(incoming, name);
     if (!existsSync(src)) continue;
     const processBlackBg = name === "traveler.png";
-    await copyAsset(relTarget, src, { processBlackBg });
-    if (relTarget === "onboarding/evorios_garage_roles.png") {
-      await copyAsset("allbyrent_roles.png", src);
+    const isRolesHero = relTarget === "onboarding/evorios_garage_roles.png";
+    await copyAsset(relTarget, src, { processBlackBg, optimize: !isRolesHero });
+    if (isRolesHero) {
+      await copyAsset("allbyrent_roles.png", src, { optimize: false });
     }
     if (relTarget === "No_back_rentano.png") {
       await copyAsset("onboarding/evorios_mr_full.png", src);
@@ -123,5 +124,5 @@ await applyWorkspaceStaged();
 
 if (incomingCount === 0) {
   console.log("\nDrop PNGs into src/imports/incoming/ — see MAP in scripts/apply-incoming-assets.mjs");
-  console.log("Hero (First Hello): evorios-platform-hero.png → evorios_garage_roles.png");
+  console.log("Hero (First Hello): drop allbyrent_roles.png or evorios-platform-hero.png → evorios_garage_roles.png");
 }
