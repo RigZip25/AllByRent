@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Mail, X } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
-import { APP_NAME, mascotSays, MASCOT_NAME } from "../lib/brand";
+import { mascotSays, MASCOT_NAME } from "../lib/brand";
 import type { AuthIntent } from "../lib/authReturn";
 import { peekPendingAuthEmail, setPendingAuthEmail } from "../lib/authReturn";
 import { signInWithEmailOtp, verifyEmailOtp } from "../lib/auth";
@@ -248,22 +248,23 @@ export function AuthGate({
   };
 
   const confirmTitle = "Enter your sign-in code";
-  const confirmSubtitle = `We sent a code to ${email}. Copy it from the email and paste here (${emailOtpLengthHint()}) — or type the digits.`;
+  const confirmSubtitle = `We emailed ${email}. Paste the ${emailOtpLengthHint()} code below.`;
 
   const otpDigits = normalizeEmailOtpInput(otpCode);
   const canVerifyCode = isCompleteEmailOtpLength(otpDigits.length) && busy === null && canUseSupabase;
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-end justify-center bg-black/45 p-4"
+      className="fixed inset-0 z-[90] overflow-y-auto overscroll-y-contain bg-black/45 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]"
       onClick={() => onDismiss?.()}
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        className="relative w-full max-w-[390px] max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
-      >
+      <div className="mx-auto flex min-h-min w-full max-w-[390px] justify-center py-2">
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="relative w-full rounded-3xl bg-white p-5 shadow-2xl"
+          onClick={(event) => event.stopPropagation()}
+        >
         {onDismiss ? (
           <button
             type="button"
@@ -277,7 +278,7 @@ export function AuthGate({
 
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gray-200" />
 
-        <RentanoTip message={copy.rentano} className="mb-1" />
+        {step !== "confirm" ? <RentanoTip message={copy.rentano} className="mb-1" /> : null}
 
         <h2 className="mt-3 text-[22px] font-bold leading-tight" style={{ color: GREEN }}>
           {step === "confirm" ? confirmTitle : copy.title}
@@ -411,15 +412,18 @@ export function AuthGate({
               type="text"
               inputMode="numeric"
               autoComplete="one-time-code"
-              autoFocus
               maxLength={8}
               value={otpCode}
               onChange={(e) => setOtpCode(normalizeEmailOtpInput(e.target.value))}
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleVerifyCode();
               }}
-              placeholder="Paste code from email"
-              className="w-full rounded-2xl border bg-white px-4 py-3 text-center text-[22px] font-bold tracking-[0.35em] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
+              placeholder="6-digit code"
+              className={`w-full rounded-2xl border bg-white px-4 py-3 text-center outline-none focus:ring-2 focus:ring-[#0D5C3A]/30 ${
+                otpCode.length > 0
+                  ? "text-[22px] font-bold tracking-[0.35em] tabular-nums text-gray-900"
+                  : "text-[15px] font-normal tracking-normal text-gray-900 placeholder:text-[14px] placeholder:font-normal placeholder:tracking-normal placeholder:text-gray-400"
+              }`}
               style={{ borderColor: BORDER }}
             />
 
@@ -433,13 +437,12 @@ export function AuthGate({
               {busy === "verify" ? "Checking code…" : "Confirm and sign in"}
             </button>
 
-            <p className="rounded-2xl border bg-[#FFFBEB] px-4 py-3 text-[13px] leading-relaxed text-amber-950">
-              The email may show <strong>Supabase</strong> as the sender until {APP_NAME} mail is fully
-              set up. Open the message and copy your <strong>{APP_NAME} sign-in code</strong> — it may be{" "}
-              <strong>{emailOtpLengthHint()}</strong>. You can ignore any link and paste the numbers here.
+            <p className="rounded-2xl border bg-[#F0FDF4] px-4 py-3 text-[13px] leading-relaxed text-gray-700">
+              Look for an email from <strong>{MASCOT_NAME}</strong> with your sign-in code. Copy the{" "}
+              {emailOtpLengthHint()} here — you can ignore any link in the message.
             </p>
 
-            <p className="rounded-2xl border bg-[#F0FDF4] px-4 py-3 text-[13px] leading-relaxed text-gray-700">
+            <p className="text-[13px] leading-relaxed text-gray-500">
               Wrong name or email? Tap Edit details, fix it, and send a new code.
             </p>
 
@@ -477,6 +480,7 @@ export function AuthGate({
         ) : null}
 
         <p className="mt-4 text-center text-[12px] text-gray-400">Free to join · No credit card</p>
+        </div>
       </div>
     </div>
   );
