@@ -4,7 +4,7 @@ import { isSupabaseConfigured } from "../supabaseClient";
 export type IntegrationId =
   | "supabase"
   | "stripe"
-  | "anthropic"
+  | "llm"
   | "photoroom"
   | "push"
   | "garageCommerce";
@@ -68,12 +68,14 @@ export function getIntegrationItems(): IntegrationItem[] {
         : "Add VITE_STRIPE_PUBLISHABLE_KEY to enable payments.",
     },
     {
-      id: "anthropic",
-      label: "Anthropic (Mr.E)",
+      id: "llm",
+      label: "AI (Mr. Evorios)",
       status: "partial",
-      summary: "Server-side key — FAQ works offline; AI needs ANTHROPIC_API_KEY on Vercel.",
-      envKeys: ["ANTHROPIC_API_KEY"],
-      nextStep: "Set ANTHROPIC_API_KEY on Vercel for AI captions and Mr.E chat.",
+      summary:
+        "Server-side LLM — Gemini Flash by default (cheapest), or OpenAI / Anthropic via LLM_PROVIDER.",
+      envKeys: ["GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "LLM_PROVIDER"],
+      nextStep:
+        "Set GEMINI_API_KEY on Vercel (recommended), or OPENAI_API_KEY / ANTHROPIC_API_KEY. Optional: LLM_PROVIDER=gemini|openai|anthropic.",
     },
     {
       id: "photoroom",

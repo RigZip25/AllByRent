@@ -1,5 +1,22 @@
 export function getAnthropicApiKey(): string | undefined {
-  return process.env.ANTHROPIC_API_KEY || process.env.VITE_ANTHROPIC_API_KEY;
+  return trimEnv(process.env.ANTHROPIC_API_KEY || process.env.VITE_ANTHROPIC_API_KEY);
+}
+
+export function getGeminiApiKey(): string | undefined {
+  return trimEnv(process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+}
+
+export function getOpenAiApiKey(): string | undefined {
+  return trimEnv(process.env.OPENAI_API_KEY);
+}
+
+/** Optional override — otherwise provider defaults (Gemini Flash, GPT-4o mini, Claude Haiku). */
+export function getLlmChatModel(): string | undefined {
+  return trimEnv(process.env.LLM_CHAT_MODEL);
+}
+
+export function getLlmVisionModel(): string | undefined {
+  return trimEnv(process.env.LLM_VISION_MODEL || process.env.LLM_CHAT_MODEL);
 }
 
 export function getPhotoRoomApiKey(): string | undefined {

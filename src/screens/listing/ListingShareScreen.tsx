@@ -3,7 +3,7 @@ import { Copy, Loader2, Share2 } from "lucide-react";
 import { APP_NAME, MARKETING_URL } from "../../lib/brand";
 import type { ListingDraft } from "./types";
 import { getListingDisplayTitle } from "../../lib/listingQr";
-import { extractAnthropicText, postAnthropicMessages } from "../../lib/anthropicClient";
+import { postLlmChat } from "../../lib/llmClient";
 import { useAuth } from "../../hooks/AuthProvider";
 import { generateListingShareCards, type GeneratedShareCard, type ShareCardFormat } from "../../lib/shareCards";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
@@ -78,8 +78,8 @@ export function ListingShareScreen({
     let mounted = true;
     setBusy(true);
     setError(null);
-    void postAnthropicMessages({
-      model: "claude-3-5-haiku-latest",
+    void postLlmChat({
+      purpose: "chat",
       max_tokens: 180,
       messages: [
         {
@@ -96,7 +96,7 @@ export function ListingShareScreen({
     })
       .then((data) => {
         if (!mounted) return;
-        const text = extractAnthropicText(data);
+        const text = data.text;
         if (text) setCaption(text);
       })
       .catch((e) => {

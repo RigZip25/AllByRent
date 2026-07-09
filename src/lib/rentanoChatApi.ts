@@ -1,16 +1,15 @@
-import { postAnthropicMessages, extractAnthropicText } from "./anthropicClient";
+import { postLlmChat } from "./llmClient";
 import {
   buildRentanoCacheKey,
   readCachedRentanoAnswer,
   writeCachedRentanoAnswer,
 } from "./rentanoChatCache";
 import {
-  RENTANO_MODEL,
-  RENTANO_SYSTEM_PROMPT,
   buildRentanoUserContext,
   buildListingStepGuidance,
   type RentanoRequestContext,
 } from "./rentanoPrompt";
+import { EVORIOS_SYSTEM_PROMPT } from "./evoriosPrompt";
 
 export type RentanoChatTurn = {
   role: "user" | "assistant";
@@ -18,7 +17,7 @@ export type RentanoChatTurn = {
 };
 
 function buildSystemPrompt(context: RentanoRequestContext): string {
-  const parts = [RENTANO_SYSTEM_PROMPT, buildRentanoUserContext(context)];
+  const parts = [EVORIOS_SYSTEM_PROMPT, buildRentanoUserContext(context)];
   const stepGuide = buildListingStepGuidance(context.step);
   if (stepGuide) parts.push(stepGuide);
   parts.push(
@@ -40,8 +39,8 @@ export async function sendRentanoMessage(
     if (cached) return cached;
   }
 
-  const data = await postAnthropicMessages({
-    model: RENTANO_MODEL,
+  const data = await postLlmChat({
+    purpose: "chat",
     max_tokens: 900,
     system: buildSystemPrompt(context),
     messages: history.map((turn) => ({
@@ -50,9 +49,9 @@ export async function sendRentanoMessage(
     })),
   });
 
-  const text = extractAnthropicText(data);
+  const text = data.text;
   if (!text) {
-    throw new Error("Empty Claude response");
+    throw new Error("Empty AI response");
   }
 
   if (cacheKey) writeCachedRentanoAnswer(cacheKey, text);

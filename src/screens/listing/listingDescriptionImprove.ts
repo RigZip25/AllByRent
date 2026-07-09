@@ -1,4 +1,4 @@
-import { extractAnthropicText, postAnthropicMessages } from "../../lib/anthropicClient";
+import { postLlmChat } from "../../lib/llmClient";
 import { APP_NAME, MASCOT_NAME } from "../../lib/brand";
 import type { ListingDraft } from "./types";
 
@@ -8,8 +8,8 @@ type DescriptionDraft = Pick<
 >;
 
 export async function improveListingDescription(draft: DescriptionDraft): Promise<string> {
-  const data = await postAnthropicMessages({
-    model: "claude-sonnet-4-20250514",
+  const data = await postLlmChat({
+    purpose: "chat",
     max_tokens: 500,
     messages: [
       {
@@ -34,9 +34,9 @@ nothing else.`,
     ],
   });
 
-  const text = extractAnthropicText(data);
+  const text = data.text;
   if (!text) {
-    throw new Error("Empty Claude response");
+    throw new Error("Empty AI response");
   }
 
   return text.slice(0, 1000);
