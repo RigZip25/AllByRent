@@ -60,30 +60,22 @@ Stores `passkey_credential_id` and public key material for custom WebAuthn (no S
   - **Site URL**: `https://app.evorios.com` (prod) or `http://localhost:5173` (dev)
   - **Redirect URLs**: `https://app.evorios.com/**`, `http://localhost:5173/**`
 
-### Troubleshooting “Failed to fetch” on magic link
+### Troubleshooting “Failed to fetch” on sign-in code
 
 1. Copy **Project URL** from Supabase → **Settings → API** (not a random UUID from General).
 2. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel for **Production**, then **redeploy** (Vite bakes env vars at build time).
 3. Ensure the Supabase project is **active** (resume if paused). If `https://YOUR_REF.supabase.co` does not resolve in a browser, fix the project in Supabase before redeploying.
 4. The app falls back to `POST /api/auth/otp` when the browser cannot reach Supabase directly; that route returns a clearer error if the hostname is wrong.
 - **Auth → Providers**
-  - **Email** enabled (magic link + 6-digit OTP)
-  - Google / Apple optional later (UI shows “Coming soon”)
+  - **Email** enabled with **Email OTP** (magic links are not used for sign-in)
 
-### Email sign-in code (recommended UX)
+### Email sign-in code (required UX)
 
-Users enter a **6-digit code inside the app** — they should not need to tap a link in email (links often open a new browser and lose the session on iOS).
+Users enter a **6- or 8-digit code inside the app** — they should not tap a link in email.
 
-1. **Supabase → Authentication → Email Templates → Magic Link** (or Confirm signup)
-2. Set **Subject** to: `Your Evorios sign-in code`
-3. Set **Body** to highlight the code, e.g.:
-
-   ```
-   Your Evorios sign-in code is: {{ .Token }}
-
-   Enter this code in the app. You can ignore the link below.
-   {{ .ConfirmationURL }}
-   ```
+1. **Supabase → Authentication → Email Templates → Magic Link**
+2. Set **Subject** to: `Your Evorios code: {{ .Token }}`
+3. Paste the HTML from `supabase/email-templates/sign-in-code.html` (code only — **no** `{{ .ConfirmationURL }}`)
 
 4. **Optional — sender branding:** Authentication → SMTP Settings → use Resend/SendGrid with `noreply@evorios.com` so the inbox shows **Evorios** instead of Supabase.
 

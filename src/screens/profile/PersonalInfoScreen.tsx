@@ -145,7 +145,7 @@ export function PersonalInfoScreen({
 
       <div className="screen-scroll flex-1 space-y-3 p-4">
         <p className="text-[13px] text-gray-500">
-          Email is your sign-in address (from magic link). Name and phone appear on your profile and
+          Email is your sign-in address. Name and phone appear on your profile and
           rentals.
         </p>
         <Row icon={<Mail className="h-5 w-5" style={{ color: GREEN }} />} label="Email" value={email} />

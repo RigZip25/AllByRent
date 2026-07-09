@@ -66,7 +66,7 @@ const NAV_HINTS: Array<{ patterns: RegExp[]; answer: string }> = [
   {
     patterns: [/sign\s*in/i, /magic\s*link/i, /log\s*in/i, /account/i],
     answer:
-      "Sign in when booking, messaging, or listing. Enter email → magic link. Check spam. After sign-in you return to the screen you started from (e.g. booking or listing wizard).",
+      "Sign in when booking, messaging, or listing. Enter email → sign-in code. Check spam. After sign-in you return to the screen you started from (e.g. booking or listing wizard).",
   },
   {
     patterns: [/favorite/i, /saved/i, /heart/i],

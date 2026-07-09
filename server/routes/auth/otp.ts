@@ -13,7 +13,7 @@ function normalizeBaseUrl(raw: string | undefined): string | undefined {
 
 /**
  * Proxy for Supabase Auth `signInWithOtp` (POST /auth/v1/otp).
- * Must match @supabase/auth-js body shape — not signUp, not nested `options`.
+ * OTP-only — no `redirect_to` (magic links disabled for email sign-in).
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const origin = typeof req.headers.origin === "string" ? req.headers.origin : undefined;
@@ -36,9 +36,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   let body: {
     email?: string;
-    redirectTo?: string;
-    code_challenge?: string;
-    code_challenge_method?: string;
   };
   try {
     body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body ?? {});
@@ -49,16 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   if (!email) return res.status(400).json({ error: "email is required" });
 
-  const redirectTo = typeof body.redirectTo === "string" ? body.redirectTo.trim() : undefined;
-  const codeChallenge =
-    typeof body.code_challenge === "string" ? body.code_challenge.trim() : undefined;
-  const codeChallengeMethod =
-    typeof body.code_challenge_method === "string" ? body.code_challenge_method.trim() : undefined;
-
   const otpUrl = new URL(`${baseUrl}/auth/v1/otp`);
-  if (redirectTo) {
-    otpUrl.searchParams.set("redirect_to", redirectTo);
-  }
 
   const gotrueBody: Record<string, unknown> = {
     email,
@@ -66,8 +54,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     create_user: true,
     gotrue_meta_security: {},
   };
-  if (codeChallenge) gotrueBody.code_challenge = codeChallenge;
-  if (codeChallengeMethod) gotrueBody.code_challenge_method = codeChallengeMethod;
 
   try {
     const upstream = await fetch(otpUrl.toString(), {
