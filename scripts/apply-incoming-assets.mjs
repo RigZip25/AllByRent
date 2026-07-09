@@ -104,6 +104,16 @@ async function applyIncoming() {
 
 async function applyWorkspaceStaged() {
   const staged = [
+    {
+      src: path.join(root, "allbyrent_roles.png"),
+      targets: ["onboarding/evorios_garage_roles.png", "allbyrent_roles.png"],
+      optimize: false,
+    },
+    {
+      src: path.join(incoming, "allbyrent_roles.png"),
+      targets: ["onboarding/evorios_garage_roles.png", "allbyrent_roles.png"],
+      optimize: false,
+    },
     { src: path.join(root, "out.png"), targets: ["No_back_rentano.png", "onboarding/evorios_mr_full.png", "rentano_full.png"] },
     { src: path.join(root, "traveler.png.png"), targets: ["onboarding/evorios_traveler.png"], processBlackBg: true },
     { src: path.join(imports, "earn.png"), targets: ["onboarding/evorios_stock_garage.png"] },
