@@ -1,10 +1,9 @@
-import { fetchAnthropicMessages } from "../../lib/anthropicClient";
+import { postLlmChat, type LlmImagePart } from "../../lib/llmClient";
 import type { MediaRef } from "../../lib/mediaStore";
 import { getMediaBlob } from "../../lib/mediaStore";
 import type { ListingAiSuggestions } from "./types";
 
-const ANALYSIS_MODEL = "claude-sonnet-4-5";
-const ANALYSIS_PROMPT_VERSION = "2026-05-27-v1";
+const ANALYSIS_PROMPT_VERSION = "2026-07-09-llm-v1";
 
 const ANALYSIS_SYSTEM_PROMPT =
   "You are a product identification expert. Analyze product photos and return accurate item details. Always respond in the same language the user's device is set to.";
@@ -30,15 +29,6 @@ Examples:
 - Panasonic 75 inch TV → 598 (current retail)
 - Beach Cruiser bike → 560 (current retail)
 - REI tent 4-person → 349 (current retail)`;
-
-type AnthropicContentBlock = {
-  type: string;
-  text?: string;
-};
-
-type AnthropicResponse = {
-  content?: AnthropicContentBlock[];
-};
 
 const CACHE_PREFIX = "allbyrent:listings:ai-analysis:";
 const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
@@ -87,7 +77,7 @@ async function blobHash(blob: Blob): Promise<string> {
 
 function cacheKeyForHashes(hashes: string[]): string {
   const stable = [...hashes].sort();
-  return `${ANALYSIS_MODEL}|${ANALYSIS_PROMPT_VERSION}|${stable.join(",")}`;
+  return `${ANALYSIS_PROMPT_VERSION}|${stable.join(",")}`;
 }
 
 function getCachedSuggestions(key: string): ListingAiSuggestions | null {
@@ -119,7 +109,7 @@ function setCachedSuggestions(key: string, value: ListingAiSuggestions) {
 
 function enforceRateLimit() {
   const now = Date.now();
-  const bucketKey = `${RATE_LIMIT_PREFIX}${ANALYSIS_MODEL}|${ANALYSIS_PROMPT_VERSION}`;
+  const bucketKey = `${RATE_LIMIT_PREFIX}${ANALYSIS_PROMPT_VERSION}`;
   const arr = (() => {
     try {
       const raw = localStorage.getItem(bucketKey);
@@ -142,30 +132,16 @@ function enforceRateLimit() {
   }
 }
 
-async function requestWithRetry(
-  makeRequest: () => Promise<Response>,
-  attempts = 3,
-): Promise<Response> {
+async function requestWithRetry<T>(run: () => Promise<T>, attempts = 3): Promise<T> {
   let lastError: unknown;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
-      const response = await makeRequest();
-      if (response.ok) return response;
-
-      const retryable =
-        response.status === 429 ||
-        response.status === 500 ||
-        response.status === 502 ||
-        response.status === 503 ||
-        response.status === 504;
-
-      if (!retryable || attempt === attempts) return response;
-
-      const waitMs = attempt === 1 ? 500 : 1200;
-      await new Promise((resolve) => setTimeout(resolve, waitMs));
+      return await run();
     } catch (error) {
       lastError = error;
-      if (attempt === attempts) break;
+      const message = error instanceof Error ? error.message : "";
+      const retryable = /429|500|502|503|504|rate limit|temporarily unavailable/i.test(message);
+      if (!retryable || attempt === attempts) break;
       const waitMs = attempt === 1 ? 500 : 1200;
       await new Promise((resolve) => setTimeout(resolve, waitMs));
     }
@@ -173,20 +149,11 @@ async function requestWithRetry(
   throw lastError instanceof Error ? lastError : new Error("AI analysis failed");
 }
 
-async function photoUrlToImageBlock(photoUrl: string) {
-  const response = await fetch(photoUrl);
-  if (!response.ok) {
-    throw new Error("Failed to read photo");
-  }
-  const blob = await response.blob();
-  const base64 = await blobToBase64(blob);
+async function blobToImagePart(blob: Blob): Promise<LlmImagePart> {
   return {
-    type: "image" as const,
-    source: {
-      type: "base64" as const,
-      media_type: mediaTypeFromBlob(blob),
-      data: base64,
-    },
+    type: "image",
+    mimeType: mediaTypeFromBlob(blob),
+    data: await blobToBase64(blob),
   };
 }
 
@@ -204,14 +171,6 @@ function normalizeCondition(value: string): ListingAiSuggestions["condition"] {
   return "good";
 }
 
-function extractResponseText(content: AnthropicContentBlock[] | undefined): string {
-  if (!content?.length) return "";
-  return content
-    .map((item) => (item.type === "text" && item.text ? item.text : ""))
-    .filter(Boolean)
-    .join("");
-}
-
 function parseSuggestions(raw: string): ListingAiSuggestions {
   const trimmed = raw.trim();
   const jsonText = trimmed.startsWith("{")
@@ -219,7 +178,7 @@ function parseSuggestions(raw: string): ListingAiSuggestions {
     : trimmed.match(/\{[\s\S]*\}/)?.[0];
 
   if (!jsonText) {
-    throw new Error("No JSON in Claude response");
+    throw new Error("No JSON in AI response");
   }
 
   const parsed = JSON.parse(jsonText) as Partial<ListingAiSuggestions>;
@@ -234,46 +193,34 @@ function parseSuggestions(raw: string): ListingAiSuggestions {
   };
 }
 
-async function requestListingAnalysis(
-  imageBlocks: Awaited<ReturnType<typeof photoUrlToImageBlock>>[],
-): Promise<ListingAiSuggestions> {
+async function requestListingAnalysis(imageBlocks: LlmImagePart[]): Promise<ListingAiSuggestions> {
   if (imageBlocks.length === 0) {
     throw new Error("No photos to analyze");
   }
 
-  const response = await fetchAnthropicMessages({
-    model: ANALYSIS_MODEL,
-    max_tokens: 800,
-    system: [
-      {
-        type: "text",
-        text: ANALYSIS_SYSTEM_PROMPT,
-        cache_control: { type: "ephemeral" },
-      },
-    ],
-    messages: [
-      {
-        role: "user",
-        content: [
-          ...imageBlocks,
-          {
-            type: "text",
-            text: ANALYSIS_USER_PROMPT,
-          },
-        ],
-      },
-    ],
+  const fullResponse = await requestWithRetry(async () => {
+    const result = await postLlmChat({
+      purpose: "vision",
+      max_tokens: 800,
+      system: ANALYSIS_SYSTEM_PROMPT,
+      messages: [
+        {
+          role: "user",
+          content: [
+            ...imageBlocks,
+            {
+              type: "text",
+              text: ANALYSIS_USER_PROMPT,
+            },
+          ],
+        },
+      ],
+    });
+    return result.text;
   });
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`Claude request failed (${response.status}): ${errorBody.slice(0, 200)}`);
-  }
-
-  const data = (await response.json()) as AnthropicResponse;
-  const fullResponse = extractResponseText(data.content);
   if (!fullResponse.trim()) {
-    throw new Error("Empty Claude response");
+    throw new Error("Empty AI response");
   }
 
   return parseSuggestions(fullResponse);
@@ -308,60 +255,8 @@ export async function analyzeListingPhotos(
   enforceRateLimit();
 
   const promise = (async () => {
-    const imageBlocks = await Promise.all(
-      blobs.map(async (blob) => {
-        const base64 = await blobToBase64(blob);
-        return {
-          type: "image" as const,
-          source: {
-            type: "base64" as const,
-            media_type: mediaTypeFromBlob(blob),
-            data: base64,
-          },
-        };
-      }),
-    );
-
-    const response = await requestWithRetry(() =>
-      fetchAnthropicMessages({
-        model: ANALYSIS_MODEL,
-        max_tokens: 800,
-        system: [
-          {
-            type: "text",
-            text: ANALYSIS_SYSTEM_PROMPT,
-            cache_control: { type: "ephemeral" },
-          },
-        ],
-        messages: [
-          {
-            role: "user",
-            content: [
-              ...imageBlocks,
-              {
-                type: "text",
-                text: ANALYSIS_USER_PROMPT,
-              },
-            ],
-          },
-        ],
-      }),
-    );
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(
-        `Claude request failed (${response.status}): ${errorBody.slice(0, 200)}`,
-      );
-    }
-
-    const data = (await response.json()) as AnthropicResponse;
-    const fullResponse = extractResponseText(data.content);
-    if (!fullResponse.trim()) {
-      throw new Error("Empty Claude response");
-    }
-
-    const suggestions = parseSuggestions(fullResponse);
+    const imageBlocks = await Promise.all(blobs.map((blob) => blobToImagePart(blob)));
+    const suggestions = await requestListingAnalysis(imageBlocks);
     setCachedSuggestions(key, suggestions);
     return suggestions;
   })();
@@ -375,18 +270,7 @@ export async function analyzeListingPhotos(
 }
 
 export async function analyzeListingPhoto(blob: Blob): Promise<ListingAiSuggestions> {
-  const base64 = await blobToBase64(blob);
-  const mediaType = mediaTypeFromBlob(blob);
-  return requestListingAnalysis([
-    {
-      type: "image",
-      source: {
-        type: "base64",
-        media_type: mediaType,
-        data: base64,
-      },
-    },
-  ]);
+  return requestListingAnalysis([await blobToImagePart(blob)]);
 }
 
 export async function analyzeListingMediaPhotos(photos: MediaRef[]): Promise<ListingAiSuggestions> {
@@ -409,60 +293,8 @@ export async function analyzeListingMediaPhotos(photos: MediaRef[]): Promise<Lis
   enforceRateLimit();
 
   const promise = (async () => {
-    const imageBlocks = await Promise.all(
-      blobs.map(async (blob) => {
-        const base64 = await blobToBase64(blob);
-        return {
-          type: "image" as const,
-          source: {
-            type: "base64" as const,
-            media_type: mediaTypeFromBlob(blob),
-            data: base64,
-          },
-        };
-      }),
-    );
-
-    const response = await requestWithRetry(() =>
-      fetchAnthropicMessages({
-        model: ANALYSIS_MODEL,
-        max_tokens: 800,
-        system: [
-          {
-            type: "text",
-            text: ANALYSIS_SYSTEM_PROMPT,
-            cache_control: { type: "ephemeral" },
-          },
-        ],
-        messages: [
-          {
-            role: "user",
-            content: [
-              ...imageBlocks,
-              {
-                type: "text",
-                text: ANALYSIS_USER_PROMPT,
-              },
-            ],
-          },
-        ],
-      }),
-    );
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(
-        `Claude request failed (${response.status}): ${errorBody.slice(0, 200)}`,
-      );
-    }
-
-    const data = (await response.json()) as AnthropicResponse;
-    const fullResponse = extractResponseText(data.content);
-    if (!fullResponse.trim()) {
-      throw new Error("Empty Claude response");
-    }
-
-    const suggestions = parseSuggestions(fullResponse);
+    const imageBlocks = await Promise.all(blobs.map((blob) => blobToImagePart(blob)));
+    const suggestions = await requestListingAnalysis(imageBlocks);
     setCachedSuggestions(key, suggestions);
     return suggestions;
   })();

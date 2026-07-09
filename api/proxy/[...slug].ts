@@ -1,12 +1,14 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import anthropic from "@allbyrent/server/routes/anthropic";
+import llm from "@allbyrent/server/routes/llm";
 import photoroom from "@allbyrent/server/routes/photoroom";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 
 const ROUTES: Record<string, Handler> = {
   anthropic,
+  llm,
   photoroom,
 };
 

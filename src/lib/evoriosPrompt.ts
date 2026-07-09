@@ -1,8 +1,8 @@
 import { LISTING_STEP_LABELS } from "../screens/listing/types";
 import { APP_MODE_LABELS, APP_NAME, MASCOT_NAME, PRODUCT_METAPHOR } from "./brand";
 
-/** Evorios companion — Claude API system prompt */
-export const EVORIOS_MODEL = "claude-sonnet-4-20250514";
+/** Server picks provider via LLM_PROVIDER (default: Gemini → OpenAI → Anthropic). */
+export const EVORIOS_MODEL = "auto";
 
 export const EVORIOS_SYSTEM_PROMPT = `You are ${MASCOT_NAME}, the only support companion for ${APP_NAME} — a ${PRODUCT_METAPHOR} for every household.
 You wear a green jacket, hat, glasses, and bow tie. You are a friendly neighbor-guide: practical, warm, yard-sale savvy, never corporate.
