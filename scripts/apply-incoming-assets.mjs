@@ -24,6 +24,7 @@ const MAP = {
   "stock-garage.png": "onboarding/evorios_stock_garage.png",
   "earn.png": "onboarding/evorios_stock_garage.png",
   "on-block.png": "onboarding/evorios_on_block.png",
+  "evorios-at-home.png": "onboarding/evorios_on_block.png",
   "neighborhood.png": "onboarding/evorios_on_block.png",
   "trip-destination.png": "onboarding/evorios_trip_destination.png",
   "traveler.png": "onboarding/evorios_traveler.png",
