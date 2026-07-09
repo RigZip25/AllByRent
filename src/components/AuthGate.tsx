@@ -248,7 +248,7 @@ export function AuthGate({
   };
 
   const confirmTitle = "Enter your sign-in code";
-  const confirmSubtitle = `We emailed ${email}. Paste the ${emailOtpLengthHint()} code below.`;
+  const confirmSubtitle = `Check ${email} for a message from ${MASCOT_NAME} and paste your ${emailOtpLengthHint()} code below.`;
 
   const otpDigits = normalizeEmailOtpInput(otpCode);
   const canVerifyCode = isCompleteEmailOtpLength(otpDigits.length) && busy === null && canUseSupabase;
@@ -418,7 +418,7 @@ export function AuthGate({
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleVerifyCode();
               }}
-              placeholder="6-digit code"
+              placeholder="Your code"
               className={`w-full rounded-2xl border bg-white px-4 py-3 text-center outline-none focus:ring-2 focus:ring-[#0D5C3A]/30 ${
                 otpCode.length > 0
                   ? "text-[22px] font-bold tracking-[0.35em] tabular-nums text-gray-900"
@@ -436,11 +436,6 @@ export function AuthGate({
             >
               {busy === "verify" ? "Checking code…" : "Confirm and sign in"}
             </button>
-
-            <p className="rounded-2xl border bg-[#F0FDF4] px-4 py-3 text-[13px] leading-relaxed text-gray-700">
-              Look for an email from <strong>{MASCOT_NAME}</strong> with your sign-in code. Copy the{" "}
-              {emailOtpLengthHint()} here — you can ignore any link in the message.
-            </p>
 
             <p className="text-[13px] leading-relaxed text-gray-500">
               Wrong name or email? Tap Edit details, fix it, and send a new code.
