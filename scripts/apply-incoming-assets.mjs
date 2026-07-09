@@ -19,6 +19,8 @@ const MAP = {
   "platform-hero.png": "onboarding/evorios_garage_roles.png",
   "hero.png": "onboarding/evorios_garage_roles.png",
   "garage-roles.png": "onboarding/evorios_garage_roles.png",
+  "allbyrent_roles.png": "onboarding/evorios_garage_roles.png",
+  "allbyrent-roles.png": "onboarding/evorios_garage_roles.png",
   "browse-block.png": "onboarding/evorios_browse_block.png",
   "evorios-browse.png": "onboarding/evorios_browse_block.png",
   "stock-garage.png": "onboarding/evorios_stock_garage.png",
@@ -86,6 +88,9 @@ async function applyIncoming() {
     if (!existsSync(src)) continue;
     const processBlackBg = name === "traveler.png";
     await copyAsset(relTarget, src, { processBlackBg });
+    if (relTarget === "onboarding/evorios_garage_roles.png") {
+      await copyAsset("allbyrent_roles.png", src);
+    }
     if (relTarget === "No_back_rentano.png") {
       await copyAsset("onboarding/evorios_mr_full.png", src);
       await copyAsset("rentano_full.png", src);
