@@ -109,7 +109,7 @@ export function WhereAreYouHeading({ onBack, onContinue, onSkip }: WhereAreYouHe
           <img
             src={onboardingAssets.traveler}
             alt=""
-            className="mx-auto mt-auto max-h-[160px] w-full object-contain"
+            className="onboarding-traveler-illustration mx-auto mt-auto max-h-[160px] w-full object-contain"
             draggable={false}
           />
         </div>

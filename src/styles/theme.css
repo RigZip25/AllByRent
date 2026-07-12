@@ -517,6 +517,13 @@
     max-height: clamp(96px, 22dvh, 140px);
   }
 
+  .onboarding-traveler-illustration {
+    max-height: clamp(140px, 24dvh, 180px);
+    border-radius: 1rem;
+    background: linear-gradient(165deg, #052e16 0%, #14532d 55%, #166534 100%);
+    padding: 0.35rem 0.5rem;
+  }
+
   .where-are-you-card {
     min-height: clamp(280px, 52dvh, 340px);
   }
