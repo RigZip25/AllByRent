@@ -28,7 +28,7 @@ export function resolveLlmModel(provider: LlmProvider, request: LlmChatRequest):
   if (configured) return configured;
 
   if (provider === "gemini") {
-    return "gemini-2.0-flash";
+    return "gemini-3.1-flash-lite";
   }
   if (provider === "openai") {
     return "gpt-4o-mini";
