@@ -769,6 +769,16 @@ function AppRoutes() {
     navigateTo("garageCart");
   }, [navigateTo]);
 
+  const handleOpenGarageShopForListing = useCallback(
+    (hostId: string, listingId: string) => {
+      setSelectedNeighborGarageHostId(hostId);
+      setFocusGarageItemId(listingId);
+      setGarageShopPreview(false);
+      navigateTo("garageShop");
+    },
+    [navigateTo],
+  );
+
   const handleOpenWinnerCheckout = useCallback(
     (listingId: string) => {
       setWinnerCheckoutListingId(listingId);
@@ -1480,6 +1490,8 @@ function AppRoutes() {
             itemId={selectedItemId}
             onBack={handleBack}
             onBook={handleBook}
+            onOpenGarageCart={handleOpenGarageCart}
+            onOpenGarageShop={handleOpenGarageShopForListing}
             onOpenAttachment={handleOpenAttachment}
             onViewHostProfile={handleViewPublicProfile}
           />

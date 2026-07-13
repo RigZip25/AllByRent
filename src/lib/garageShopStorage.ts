@@ -69,7 +69,7 @@ function writeJson(key: string, value: unknown): void {
   }
 }
 
-function parseSalePrice(listing: ListingDraft): number {
+export function parseSalePrice(listing: ListingDraft): number {
   const raw = listing.pricing.salePrice.trim();
   const value = Number.parseFloat(raw.replace(/[^0-9.]/g, ""));
   return Number.isFinite(value) && value > 0 ? value : 0;
