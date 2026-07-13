@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { getListingPhotoPublicUrl } from "./listingPhotoStorage";
 import { getMediaBlob, type MediaRef } from "./mediaStore";
 
 type MediaUrlState =
@@ -7,18 +8,32 @@ type MediaUrlState =
   | { status: "ready"; url: string }
   | { status: "missing"; url: null };
 
-export function useMediaUrl(ref: Pick<MediaRef, "id" | "mimeType"> | null | undefined): MediaUrlState {
+type MediaUrlInput = Pick<MediaRef, "id" | "mimeType" | "storagePath" | "thumbStoragePath">;
+
+export function useMediaUrl(ref: MediaUrlInput | null | undefined): MediaUrlState {
   const id = ref?.id ?? "";
   const mimeType = ref?.mimeType ?? "";
-  const key = useMemo(() => `${id}|${mimeType}`, [id, mimeType]);
+  const storagePath = ref?.storagePath?.trim() ?? "";
+  const key = useMemo(() => `${id}|${mimeType}|${storagePath}`, [id, mimeType, storagePath]);
   const [state, setState] = useState<MediaUrlState>({ status: "idle", url: null });
 
   useEffect(() => {
     let cancelled = false;
     let objectUrl: string | null = null;
 
-    if (!id) {
+    if (!id && !storagePath) {
       setState({ status: "idle", url: null });
+      return () => undefined;
+    }
+
+    const remoteUrl = getListingPhotoPublicUrl(storagePath);
+    if (remoteUrl) {
+      setState({ status: "ready", url: remoteUrl });
+      return () => undefined;
+    }
+
+    if (!id) {
+      setState({ status: "missing", url: null });
       return () => undefined;
     }
 
@@ -39,25 +54,44 @@ export function useMediaUrl(ref: Pick<MediaRef, "id" | "mimeType"> | null | unde
       cancelled = true;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [key, id]);
+  }, [key, id, storagePath]);
 
   return state;
 }
 
 /** Prefer thumbnail blob; fall back to full-size if thumb was evicted from IndexedDB. */
-export function useCoverMediaUrl(cover: MediaRef | null | undefined): MediaUrlState {
+export function useCoverMediaUrl(cover: MediaUrlInput | null | undefined): MediaUrlState {
+  const thumbStoragePath = cover?.thumbStoragePath?.trim() ?? "";
+  const storagePath = cover?.storagePath?.trim() ?? "";
   const thumbId = cover?.thumbId?.trim() ?? "";
   const fullId = cover?.id?.trim() ?? "";
   const mimeType = cover?.mimeType ?? "";
-  const key = useMemo(() => `${thumbId}|${fullId}|${mimeType}`, [thumbId, fullId, mimeType]);
+  const key = useMemo(
+    () => `${thumbStoragePath}|${storagePath}|${thumbId}|${fullId}|${mimeType}`,
+    [thumbStoragePath, storagePath, thumbId, fullId, mimeType],
+  );
   const [state, setState] = useState<MediaUrlState>({ status: "idle", url: null });
 
   useEffect(() => {
     let cancelled = false;
     let objectUrl: string | null = null;
 
-    if (!thumbId && !fullId) {
+    if (!thumbStoragePath && !storagePath && !thumbId && !fullId) {
       setState({ status: "idle", url: null });
+      return () => undefined;
+    }
+
+    const remoteCandidates = [thumbStoragePath, storagePath].filter(Boolean);
+    for (const path of remoteCandidates) {
+      const remoteUrl = getListingPhotoPublicUrl(path);
+      if (remoteUrl) {
+        setState({ status: "ready", url: remoteUrl });
+        return () => undefined;
+      }
+    }
+
+    if (!thumbId && !fullId) {
+      setState({ status: "missing", url: null });
       return () => undefined;
     }
 
@@ -81,8 +115,7 @@ export function useCoverMediaUrl(cover: MediaRef | null | undefined): MediaUrlSt
       cancelled = true;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [key, thumbId, fullId]);
+  }, [key, thumbStoragePath, storagePath, thumbId, fullId]);
 
   return state;
 }
-

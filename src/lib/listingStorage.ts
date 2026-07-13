@@ -1,4 +1,5 @@
 import type { ListingDraft } from "../screens/listing/types";
+import { uploadListingPhotosToRemote } from "./listingPhotoStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 const LISTINGS_STORAGE_KEY = "allbyrent_published_listings";
@@ -594,9 +595,28 @@ export async function savePublishedListingRemote(draft: ListingDraft, ownerId: s
   if (!supabase) {
     return;
   }
+
+  let photos = draft.photos;
+  try {
+    photos = await uploadListingPhotosToRemote({
+      listingId: draft.id,
+      ownerId,
+      photos: draft.photos,
+    });
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.warn("uploadListingPhotosToRemote failed:", error);
+    }
+  }
+
+  const syncedDraft = photos !== draft.photos ? { ...draft, photos } : draft;
+  if (photos !== draft.photos) {
+    savePublishedListing(syncedDraft);
+  }
+
   const { error } = await supabase
     .from("listings")
-    .upsert(draftToRow(draft, ownerId), { onConflict: "id" });
+    .upsert(draftToRow(syncedDraft, ownerId), { onConflict: "id" });
   if (error && import.meta.env.DEV) {
     console.warn("savePublishedListingRemote failed:", error.message);
   }
