@@ -10,6 +10,7 @@ type SendBody = {
   title: string;
   body: string;
   url?: string;
+  notificationId?: string;
 };
 
 function getVapidPublicKey(): string | undefined {
@@ -22,6 +23,37 @@ function getVapidPrivateKey(): string | undefined {
   return key?.trim() ? key.trim() : undefined;
 }
 
+async function callerMayNotifyRecipient(
+  admin: NonNullable<ReturnType<typeof getAdminClient>>,
+  callerId: string,
+  toUserId: string,
+  notificationId: string,
+): Promise<boolean> {
+  const { data: notification } = await admin
+    .from("notifications")
+    .select("actor_id, recipient_id, created_at")
+    .eq("id", notificationId)
+    .maybeSingle();
+
+  if (
+    notification?.actor_id === callerId &&
+    notification.recipient_id === toUserId
+  ) {
+    return true;
+  }
+
+  const { data: rental } = await admin
+    .from("rentals")
+    .select("id")
+    .or(
+      `and(owner_id.eq.${callerId},renter_id.eq.${toUserId}),and(owner_id.eq.${toUserId},renter_id.eq.${callerId})`,
+    )
+    .limit(1)
+    .maybeSingle();
+
+  return Boolean(rental?.id);
+}
+
 export default withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
   applyCors(res, typeof req.headers.origin === "string" ? req.headers.origin : undefined);
@@ -31,7 +63,6 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
-  // Require a logged-in caller (any user) so this endpoint can't be abused anonymously.
   const caller = await getUserFromBearer(req.headers.authorization);
   if (!caller) {
     res.status(401).json({ error: "Unauthorized" });
@@ -39,17 +70,29 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   }
 
   const body = (req.body ?? {}) as Partial<SendBody>;
-  const toUserId = typeof body.toUserId === "string" ? body.toUserId : "";
-  const title = typeof body.title === "string" ? body.title : "";
-  const message = typeof body.body === "string" ? body.body : "";
-  if (!toUserId || !title || !message) {
+  const toUserId = typeof body.toUserId === "string" ? body.toUserId.trim() : "";
+  const title = typeof body.title === "string" ? body.title.trim() : "";
+  const message = typeof body.body === "string" ? body.body.trim() : "";
+  const notificationId = typeof body.notificationId === "string" ? body.notificationId.trim() : "";
+  if (!toUserId || !title || !message || !notificationId) {
     res.status(400).json({ error: "Missing fields" });
+    return;
+  }
+
+  if (toUserId === caller.id) {
+    res.status(400).json({ error: "Cannot push to self" });
     return;
   }
 
   const admin = getAdminClient();
   if (!admin) {
     res.status(200).json({ ok: false, reason: "Supabase admin not configured" });
+    return;
+  }
+
+  const allowed = await callerMayNotifyRecipient(admin, caller.id, toUserId, notificationId);
+  if (!allowed) {
+    res.status(403).json({ error: "Forbidden" });
     return;
   }
 
@@ -76,15 +119,18 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   const results: Array<{ ok: boolean; endpoint?: string; error?: string }> = [];
   for (const s of arr) {
-    if (!s || typeof (s as any).endpoint !== "string") continue;
+    if (!s || typeof (s as { endpoint?: string }).endpoint !== "string") continue;
     try {
-      await webpush.sendNotification(s as any, payload);
-      results.push({ ok: true, endpoint: (s as any).endpoint });
+      await webpush.sendNotification(s as webpush.PushSubscription, payload);
+      results.push({ ok: true, endpoint: (s as { endpoint: string }).endpoint });
     } catch (e) {
-      results.push({ ok: false, endpoint: (s as any).endpoint, error: e instanceof Error ? e.message : "send failed" });
+      results.push({
+        ok: false,
+        endpoint: (s as { endpoint: string }).endpoint,
+        error: e instanceof Error ? e.message : "send failed",
+      });
     }
   }
 
   res.status(200).json({ ok: true, sent: results.filter((r) => r.ok).length, results });
 });
-

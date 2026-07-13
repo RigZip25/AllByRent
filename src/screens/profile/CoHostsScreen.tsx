@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Mail, Trash2, UserPlus, Users } from "lucide-react";
+import { ArrowLeft, Copy, Mail, Trash2, UserPlus, Users } from "lucide-react";
 import { useAuth } from "../../hooks/AuthProvider";
+import { buildCoHostInviteUrl } from "../../lib/coHostStorage";
 import {
   acceptCoHostInviteWithSync,
   activateCoHostInviteWithSync,
@@ -84,7 +85,21 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
   const [inviteEmail, setInviteEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [copyHint, setCopyHint] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
+
+  const inviteUrl = useMemo(() => buildCoHostInviteUrl(), []);
+
+  const copyInviteLink = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopyHint("Invite link copied — they should sign in with the invited email.");
+      setError(null);
+    } catch {
+      setCopyHint(null);
+      setError("Could not copy link. Long-press the link below to copy manually.");
+    }
+  }, [inviteUrl]);
 
   const refresh = useCallback(() => setVersion((v) => v + 1), []);
 
@@ -111,6 +126,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
           return;
         }
         setInviteEmail("");
+        setCopyHint("Invite saved. Copy the link below and send it to your co-host.");
         refresh();
       })
       .finally(() => setBusy(false));
@@ -228,11 +244,29 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
               style={{ backgroundColor: GREEN }}
             >
               <UserPlus className="h-4 w-4" />
-              {busy ? "Sending…" : "Send invite"}
+              {busy ? "Saving…" : "Save invite"}
             </button>
+            <div className="mt-3 rounded-xl border px-3 py-3" style={{ borderColor: BORDER }}>
+              <p className="text-[12px] font-semibold text-gray-700">Share invite link</p>
+              <p className="mt-1 break-all text-[12px] text-gray-500">{inviteUrl}</p>
+              <button
+                type="button"
+                onClick={() => void copyInviteLink()}
+                className="mt-2 inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12px] font-semibold text-white"
+                style={{ backgroundColor: GREEN_LIGHT }}
+              >
+                <Copy className="h-3.5 w-3.5" />
+                Copy link
+              </button>
+            </div>
+            {copyHint ? (
+              <p className="mt-3 text-[12px] leading-snug text-emerald-700" role="status">
+                {copyHint}
+              </p>
+            ) : null}
             <p className="mt-3 text-[12px] leading-snug text-gray-500">
-              Invites sync to Supabase when configured. Email delivery is not wired yet — share the
-              app and have them sign in with this email, then accept under Invitations for you.
+              Email delivery is not wired yet. Save the invite, copy the link, and have them sign in
+              with the invited email — then accept under Invitations for you.
             </p>
           </div>
         </section>

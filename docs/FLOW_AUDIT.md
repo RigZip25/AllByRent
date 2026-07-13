@@ -26,9 +26,9 @@
 |---|--------|-------------|--------|-------|------------|
 | A1 | Splash (dynamic) | Fresh session | 🟢 DONE | `SplashScreen.tsx` | `?screen=splash&dynamic=1` preview |
 | A2 | First hello | After splash | 🟢 copy | `FirstHello.tsx` | New art: `evorios_garage_roles.png` |
-| A3 | What brings you here | Onboarding | 🟢 DONE | `WhatDoYouWant.tsx` | Stock garage / Browse block |
+| A3 | What brings you here | Onboarding | 🟢 DONE | `WhatDoYouWant.tsx` | Wired after FirstHello when role not chosen |
 | A4 | Where's your block | Browse path | 🟢 DONE | `WhereAreYou*.tsx` | US trip examples |
-| A5 | You're all set | End onboarding | 🟢 DONE | `YouAreAllSet.tsx` | Explore Evorios |
+| A5 | You're all set | End onboarding | 🟢 DONE | `YouAreAllSet.tsx` | Shown after location setup before Browse Hub |
 | A6 | Auth gate | Book/list w/o login | 🟢 DONE | `AuthGate.tsx` | Mr. Evorios tips |
 | A7 | Passkey setup | After first login | ⚪ | `PasskeySetup.tsx` | Optional Evorios one-liner |
 

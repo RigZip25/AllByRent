@@ -24,6 +24,8 @@ export type GarageCartLine = {
   priceUsd: number;
   photoThumbId?: string;
   photoId?: string;
+  photoThumbStoragePath?: string;
+  photoStoragePath?: string;
 };
 
 export type GarageBid = {
@@ -287,6 +289,8 @@ export function cartLineFromListing(listing: ListingDraft, priceUsd: number): Ga
     priceUsd,
     photoId: cover?.id,
     photoThumbId: cover?.thumbId,
+    photoThumbStoragePath: cover?.thumbStoragePath,
+    photoStoragePath: cover?.storagePath,
   };
 }
 

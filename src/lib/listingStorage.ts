@@ -1,5 +1,9 @@
 import type { ListingDraft } from "../screens/listing/types";
-import { uploadListingPhotosToRemote } from "./listingPhotoStorage";
+import {
+  collectListingPhotoStoragePaths,
+  deleteListingPhotosFromRemote,
+  uploadListingPhotosToRemote,
+} from "./listingPhotoStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 const LISTINGS_STORAGE_KEY = "allbyrent_published_listings";
@@ -596,6 +600,9 @@ export async function savePublishedListingRemote(draft: ListingDraft, ownerId: s
     return;
   }
 
+  const previous = getPublishedListingById(draft.id);
+  const previousPaths = collectListingPhotoStoragePaths(previous?.photos ?? []);
+
   let photos = draft.photos;
   try {
     photos = await uploadListingPhotosToRemote({
@@ -606,6 +613,18 @@ export async function savePublishedListingRemote(draft: ListingDraft, ownerId: s
   } catch (error) {
     if (import.meta.env.DEV) {
       console.warn("uploadListingPhotosToRemote failed:", error);
+    }
+  }
+
+  const nextPaths = collectListingPhotoStoragePaths(photos);
+  const orphanPaths = previousPaths.filter((path) => !nextPaths.includes(path));
+  if (orphanPaths.length > 0) {
+    try {
+      await deleteListingPhotosFromRemote(orphanPaths);
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.warn("deleteListingPhotosFromRemote failed:", error);
+      }
     }
   }
 
