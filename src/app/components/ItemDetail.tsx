@@ -32,6 +32,15 @@ import {
   listingOffersDelivery,
   parseListingDailyRate,
 } from "../../lib/rentalPricing";
+import { canBuyNowLot, getLotState, isAuctionTimeActive } from "../../lib/garageAuctionState";
+import { isAuctionNotStarted } from "../../lib/garageAuctionWindow";
+import { formatListingPriceLine } from "../../lib/garageDisplay";
+import {
+  buyNowGarageItem,
+  formatShopUsd,
+  getShopOffer,
+  type ShopOffer,
+} from "../../lib/garageShopStorage";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 import { APP_NAME, DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
@@ -42,6 +51,8 @@ interface ItemDetailProps {
   itemId: string;
   onBack: () => void;
   onBook: () => void;
+  onOpenGarageCart?: () => void;
+  onOpenGarageShop?: (hostId: string, listingId: string) => void;
   onOpenAttachment: (url: string, title?: string) => void;
   onViewHostProfile?: (hostId: string) => void;
 }
@@ -144,12 +155,21 @@ function AvailabilityPanel({
   );
 }
 
-export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment, onViewHostProfile }: ItemDetailProps) {
+export function ItemDetail({
+  itemId,
+  onBack,
+  onBook,
+  onOpenGarageCart,
+  onOpenGarageShop,
+  onOpenAttachment,
+  onViewHostProfile,
+}: ItemDetailProps) {
   const auth = useAuth();
   const [favorited, setFavorited] = useState(() => isFavoriteListing(itemId));
   const [shareOpen, setShareOpen] = useState(false);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
   const [messageHint, setMessageHint] = useState(false);
+  const [buyError, setBuyError] = useState<string | null>(null);
   const [listing, setListing] = useState<ListingDraft | null>(() => getPublishedListingById(itemId));
   const [loading, setLoading] = useState(() => !getPublishedListingById(itemId));
 
@@ -172,10 +192,36 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment, onViewHos
     ? getListingDisplayTitle(listing.title) || listing.title || "Listing"
     : "Listing";
   const dailyRate = listing ? parseListingDailyRate(listing.pricing.dailyRate) || 0 : 0;
+  const priceLine = listing ? formatListingPriceLine(listing) : "";
   const deliverySummary = listing ? deliverySummaryForListing(listing) : null;
   const hasDelivery = listing ? listingOffersDelivery(listing) : false;
   const isHeavy = listing?.handoff.itemHeavy ?? false;
-  const canBook = Boolean(listing && listing.listingStatus === "active" && !listing.paused);
+  const canTransact = Boolean(listing && listing.listingStatus === "active" && !listing.paused);
+  const lotState = listing ? getLotState(listing.id) : null;
+  const isSold = lotState?.status === "sold";
+
+  const shopOffer: ShopOffer | null = useMemo(() => {
+    if (!listing?.modes.sell || !canBuyNowLot(listing.id)) return null;
+    return getShopOffer(listing);
+  }, [listing]);
+
+  const multiAuction = shopOffer?.negotiationPhase === "multi_auction";
+  const auctionLive = Boolean(
+    shopOffer && multiAuction && isAuctionTimeActive(shopOffer.startsAt, shopOffer.endsAt),
+  );
+  const auctionPending = Boolean(
+    shopOffer && multiAuction && isAuctionNotStarted({ startsAt: shopOffer.startsAt, endsAt: shopOffer.endsAt }),
+  );
+  const auctionEnded = Boolean(shopOffer && multiAuction && !auctionLive && !auctionPending);
+  const buyBlockedByAuction = Boolean(multiAuction && (auctionLive || auctionEnded));
+
+  const canRent = Boolean(canTransact && listing && (listing.modes.rent || listing.modes.rentToOwn));
+  const canBuy = Boolean(
+    canTransact && listing?.modes.sell && shopOffer && shopOffer.buyNowUsd > 0 && !buyBlockedByAuction && !isSold,
+  );
+  const showGarageForAuction = Boolean(
+    listing?.modes.sell && shopOffer && buyBlockedByAuction && !isSold && listing.hostId,
+  );
 
   const sharePayload = useMemo(() => {
     const city = getActiveRentLocationLabel().trim();
@@ -193,7 +239,27 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment, onViewHos
 
   const handleMessageHost = () => {
     setMessageHint(true);
-    onBook();
+    if (canRent) {
+      onBook();
+    }
+  };
+
+  const handleBuy = () => {
+    if (!listing || !shopOffer) return;
+    if (buyBlockedByAuction) {
+      onOpenGarageShop?.(listing.hostId ?? "", listing.id);
+      return;
+    }
+    const result = buyNowGarageItem({ listing, offer: shopOffer });
+    if (!result.ok) {
+      setBuyError(result.reason);
+      if (/auction/i.test(result.reason)) {
+        onOpenGarageShop?.(listing.hostId ?? "", listing.id);
+      }
+      return;
+    }
+    setBuyError(null);
+    onOpenGarageCart?.();
   };
 
   if (loading) {
@@ -292,7 +358,9 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment, onViewHos
                 </p>
               </div>
               <div className="text-right shrink-0">
-                {dailyRate > 0 ? (
+                {priceLine && priceLine !== "—" ? (
+                  <p className="text-2xl font-bold text-primary">{priceLine}</p>
+                ) : dailyRate > 0 ? (
                   <>
                     <p className="text-2xl font-bold text-primary">${dailyRate}</p>
                     <p className="text-xs text-muted-foreground">per day</p>
@@ -312,6 +380,18 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment, onViewHos
           {listing.paused ? (
             <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
               Paused — not accepting new bookings right now.
+            </p>
+          ) : null}
+
+          {buyError ? (
+            <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              {buyError}
+            </p>
+          ) : null}
+
+          {isSold ? (
+            <p className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+              This item has been sold.
             </p>
           ) : null}
 
@@ -425,17 +505,19 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment, onViewHos
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setAvailabilityOpen(true)}
-            className="w-full bg-card border border-border py-3 rounded-xl flex items-center justify-between px-4 hover:border-primary/50 transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-muted-foreground" />
-              <span className="font-medium">Check availability</span>
-            </div>
-            <span className="text-sm text-primary">View calendar</span>
-          </button>
+          {listing.modes.rent || listing.modes.rentToOwn ? (
+            <button
+              type="button"
+              onClick={() => setAvailabilityOpen(true)}
+              className="w-full bg-card border border-border py-3 rounded-xl flex items-center justify-between px-4 hover:border-primary/50 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium">Check availability</span>
+              </div>
+              <span className="text-sm text-primary">View calendar</span>
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -465,20 +547,46 @@ export function ItemDetail({ itemId, onBack, onBook, onOpenAttachment, onViewHos
           <span className="font-medium">Share</span>
         </button>
 
-        <button
-          type="button"
-          onClick={onBook}
-          disabled={!canBook}
-          className="flex-1 bg-primary hover:bg-primary/90 disabled:opacity-50 text-white py-3 px-6 rounded-xl transition-colors font-medium"
-        >
-          {canBook
-            ? dailyRate > 0
-              ? `Book Now · $${dailyRate}/day`
-              : "Book Now"
-            : listing.paused
-              ? "Paused"
-              : "Not available"}
-        </button>
+        {canRent ? (
+          <button
+            type="button"
+            onClick={onBook}
+            disabled={!canRent}
+            className="flex-1 bg-primary hover:bg-primary/90 disabled:opacity-50 text-white py-3 px-4 rounded-xl transition-colors font-medium"
+          >
+            {dailyRate > 0 ? `Book · $${dailyRate}/day` : "Book Now"}
+          </button>
+        ) : null}
+
+        {canBuy && shopOffer ? (
+          <button
+            type="button"
+            onClick={handleBuy}
+            className="flex-1 bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-[#0D5C3A] py-3 px-4 rounded-xl transition-colors font-bold"
+          >
+            Buy · {formatShopUsd(shopOffer.buyNowUsd)}
+          </button>
+        ) : null}
+
+        {showGarageForAuction ? (
+          <button
+            type="button"
+            onClick={() => onOpenGarageShop?.(listing.hostId ?? "", listing.id)}
+            className="flex-1 border border-[#2563EB] bg-white py-3 px-4 rounded-xl font-bold text-[#2563EB] transition-colors hover:bg-blue-50"
+          >
+            {auctionLive ? "Bid in garage" : "View in garage"}
+          </button>
+        ) : null}
+
+        {!canRent && !canBuy && !showGarageForAuction ? (
+          <button
+            type="button"
+            disabled
+            className="flex-1 bg-primary/50 text-white py-3 px-6 rounded-xl font-medium"
+          >
+            {listing.paused ? "Paused" : isSold ? "Sold" : "Not available"}
+          </button>
+        ) : null}
       </div>
     </div>
   );
