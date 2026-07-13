@@ -10,13 +10,28 @@ export function getOpenAiApiKey(): string | undefined {
   return trimEnv(process.env.OPENAI_API_KEY);
 }
 
-/** Optional override — otherwise provider defaults (Gemini Flash, GPT-4o mini, Claude Haiku). */
+function normalizeLlmModelName(value: string | undefined): string | undefined {
+  let model = trimEnv(value);
+  if (!model) return undefined;
+  if (
+    (model.startsWith('"') && model.endsWith('"')) ||
+    (model.startsWith("'") && model.endsWith("'"))
+  ) {
+    model = model.slice(1, -1).trim();
+  }
+  if (model.startsWith("models/")) {
+    model = model.slice("models/".length).trim();
+  }
+  return model || undefined;
+}
+
+/** Optional override — otherwise provider defaults (Gemini Flash-Lite, GPT-4o mini, Claude Haiku). */
 export function getLlmChatModel(): string | undefined {
-  return trimEnv(process.env.LLM_CHAT_MODEL);
+  return normalizeLlmModelName(process.env.LLM_CHAT_MODEL);
 }
 
 export function getLlmVisionModel(): string | undefined {
-  return trimEnv(process.env.LLM_VISION_MODEL || process.env.LLM_CHAT_MODEL);
+  return normalizeLlmModelName(process.env.LLM_VISION_MODEL || process.env.LLM_CHAT_MODEL);
 }
 
 export function getPhotoRoomApiKey(): string | undefined {
