@@ -8,6 +8,10 @@ export type MediaRef = {
   sizeBytes: number;
   /** Optional thumbnail media id (stored as a separate blob). */
   thumbId?: string;
+  /** Supabase Storage path after cloud sync (public bucket). */
+  storagePath?: string;
+  /** Optional thumbnail path in Supabase Storage. */
+  thumbStoragePath?: string;
 };
 
 type MediaRecord = {
