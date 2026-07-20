@@ -26,6 +26,7 @@ import { fetchRemoteProfile } from "../../lib/supabaseProfile";
 import { isSupabaseConfigured } from "../../lib/supabaseClient";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
 import { StripePaymentForm } from "../../components/payments/StripePaymentForm";
+import { PaymentLegalNotice } from "../../components/payments/PaymentLegalNotice";
 import { BookingPaymentsBanner } from "../../components/payments/PaymentModeBanner";
 import {
   canSubmitBookingRequest,
@@ -612,6 +613,7 @@ function BookingScreenLoaded({
               onSuccess={handlePaymentSuccess}
               onError={setPaymentError}
             />
+            <PaymentLegalNotice className="mt-3" />
             <button
               type="button"
               className="mt-3 w-full text-center text-sm text-muted-foreground underline"

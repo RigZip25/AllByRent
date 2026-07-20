@@ -11,6 +11,11 @@ import {
   type YardSaleEvent,
   type YardSaleOpenStatus,
 } from "../lib/yardSaleDisplay";
+import { fetchSaleScheduleRemote } from "../lib/garage/garageSupabaseSync";
+import { getGarageSaleSchedule } from "../lib/garageSaleStorage";
+import { resolveHostAccountId } from "../lib/hostIdentity";
+import { useAuth } from "../hooks/AuthProvider";
+import type { GarageSaleSchedule } from "../lib/garageSaleStorage";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
@@ -20,6 +25,8 @@ const STATUS_LABEL: Record<YardSaleOpenStatus, string> = {
   now: "OPEN NOW",
   today: "TODAY",
   weekend: "WEEKEND",
+  scheduled: "SCHEDULED",
+  unset: "HOURS TBD",
 };
 
 function YardSaleCard({
@@ -81,6 +88,7 @@ type YardSalesScreenProps = {
 };
 
 export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage }: YardSalesScreenProps) {
+  const auth = useAuth();
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<YardSaleEvent[]>([]);
 
@@ -91,9 +99,25 @@ export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage }: YardSa
     let mounted = true;
     setLoading(true);
     void fetchActiveListingsForCityRemote(city)
-      .then((listings) => {
+      .then(async (listings) => {
         if (!mounted) return;
-        setEvents(buildYardSaleEvents(listings.filter((l) => l.listingStatus === "active")));
+        const active = listings.filter((l) => l.listingStatus === "active");
+        const hostIds = [
+          ...new Set(active.map((l) => l.hostId?.trim()).filter((id): id is string => Boolean(id))),
+        ];
+        const ownId = resolveHostAccountId(auth.userId);
+        const schedules: Record<string, GarageSaleSchedule | null> = {};
+        await Promise.all(
+          hostIds.map(async (hostId) => {
+            if (hostId === ownId) {
+              schedules[hostId] = getGarageSaleSchedule();
+              return;
+            }
+            schedules[hostId] = await fetchSaleScheduleRemote(hostId);
+          }),
+        );
+        if (!mounted) return;
+        setEvents(buildYardSaleEvents(active, schedules));
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -101,7 +125,7 @@ export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage }: YardSa
     return () => {
       mounted = false;
     };
-  }, [city]);
+  }, [auth.userId, city]);
 
   const openNowCount = useMemo(
     () => events.filter((event) => event.openStatus === "now" || event.openStatus === "today").length,

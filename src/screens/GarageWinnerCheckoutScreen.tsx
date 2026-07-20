@@ -10,6 +10,7 @@ import { formatShopUsd } from "../lib/garageShopStorage";
 import { getPublishedListingById } from "../lib/listingStorage";
 import { useMediaUrl } from "../lib/useMediaUrl";
 import { StripePaymentForm } from "../components/payments/StripePaymentForm";
+import { PaymentLegalNotice } from "../components/payments/PaymentLegalNotice";
 import { PaymentsReadyBadge, PaymentsRequiredBanner } from "../components/payments/PaymentModeBanner";
 import {
   canProcessGaragePayments,
@@ -207,6 +208,7 @@ export function GarageWinnerCheckoutScreen({
               onSuccess={finishCheckout}
               onError={setPaymentError}
             />
+            <PaymentLegalNotice className="mt-3" />
           </div>
         ) : null}
       </div>

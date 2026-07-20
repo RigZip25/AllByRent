@@ -402,6 +402,25 @@ export function HomeFeed({
           </div>
         ) : null}
 
+        {!loading && !isSearchActive && lens === "feed" && filtered.length === 0 ? (
+          <div className="mx-auto mt-10 max-w-[340px] text-center">
+            <p className="text-[18px] font-bold" style={{ color: GREEN_DARK }}>
+              No listings on this block yet
+            </p>
+            <p className="mt-2 text-[14px] text-gray-600">
+              {mascotSays("Be the first garage here — neighbors will follow.")}
+            </p>
+            <button
+              type="button"
+              onClick={onStockGarage}
+              className="mt-5 w-full rounded-xl py-3.5 text-[15px] font-bold text-white"
+              style={{ backgroundColor: GREEN_DARK }}
+            >
+              Stock your garage →
+            </button>
+          </div>
+        ) : null}
+
         {!loading && filtered.length > 0 && (isSearchActive || lens === "feed") ? (
           <ul className="space-y-2.5 pb-2">
             {filtered.map((listing) => (

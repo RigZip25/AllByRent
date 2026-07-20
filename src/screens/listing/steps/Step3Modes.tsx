@@ -229,9 +229,21 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
         ? "Earn monthly"
         : "Earn daily or weekly";
 
+  const MODE_CARDS_PUBLIC = MODE_CARD_CONFIG.filter((card) => card.key !== "gift");
+
   const visibleModeCards = yardSaleListing
-    ? MODE_CARD_CONFIG.filter((card) => card.key === "sell")
-    : MODE_CARD_CONFIG.filter((card) => categoryRules[card.key]);
+    ? MODE_CARDS_PUBLIC.filter((card) => card.key === "sell")
+    : MODE_CARDS_PUBLIC.filter((card) => categoryRules[card.key as "rent" | "sell"]);
+
+  useEffect(() => {
+    setDraft((current) => {
+      if (!current.modes.gift && !current.modes.rentToOwn) return current;
+      return {
+        ...current,
+        modes: { ...current.modes, gift: false, rentToOwn: false },
+      };
+    });
+  }, [setDraft]);
 
   useEffect(() => {
     if (!yardSaleListing) return;

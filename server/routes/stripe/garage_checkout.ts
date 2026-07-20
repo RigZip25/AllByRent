@@ -6,6 +6,7 @@ import { isStripeServerConfigured } from "../../lib/keys";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
+import { destinationChargeFields, requireHostPayoutAccount } from "../../lib/stripe/connectPayout";
 
 type Line = { listingId?: string; title?: string; priceUsd?: number };
 
@@ -47,9 +48,17 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const hostId = typeof body.hostId === "string" ? body.hostId.trim() : "";
   const amountCents = typeof body.amountCents === "number" ? Math.round(body.amountCents) : 0;
   const lines = Array.isArray(body.lines) ? body.lines : [];
+  const platformFeeCents =
+    typeof body.platformFeeCents === "number" ? Math.max(0, Math.round(body.platformFeeCents)) : 0;
 
   if (!hostId || amountCents < 50 || lines.length === 0) {
     res.status(400).json({ error: "hostId, amountCents (≥50), and lines are required" });
+    return;
+  }
+
+  const hostPayout = await requireHostPayoutAccount(admin, hostId);
+  if (!hostPayout.ok) {
+    res.status(400).json({ ok: false, error: hostPayout.error });
     return;
   }
 
@@ -62,6 +71,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const secret = process.env.STRIPE_SECRET_KEY!;
   const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
   const customerId = await getOrCreateStripeCustomer(stripe, admin, user.id, user.email);
+  const destination = destinationChargeFields(hostPayout.account.accountId, platformFeeCents);
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount: amountCents,
@@ -75,10 +85,11 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       buyer_id: user.id,
       listing_ids: listingIds.slice(0, 450),
       line_count: String(lines.length),
+      platform_fee_cents: String(platformFeeCents),
     },
+    ...destination,
   });
 
-  // Persist order for webhook reconciliation.
   const { error: orderError } = await admin.from("garage_orders").insert({
     id: orderId,
     buyer_id: user.id,
@@ -86,7 +97,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     stripe_payment_intent_id: paymentIntent.id,
     stripe_payment_status: paymentIntent.status,
     subtotal_cents: typeof body.subtotalCents === "number" ? Math.round(body.subtotalCents) : amountCents,
-    platform_fee_cents: typeof body.platformFeeCents === "number" ? Math.round(body.platformFeeCents) : 0,
+    platform_fee_cents: platformFeeCents,
     total_cents: amountCents,
     status: "pending",
   });

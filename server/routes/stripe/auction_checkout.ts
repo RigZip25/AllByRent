@@ -6,6 +6,7 @@ import { isStripeServerConfigured } from "../../lib/keys";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
+import { destinationChargeFields, requireHostPayoutAccount } from "../../lib/stripe/connectPayout";
 
 type Body = {
   listingId?: string;
@@ -47,6 +48,8 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const hostId = typeof body.hostId === "string" ? body.hostId.trim() : "";
   const amountCents = typeof body.amountCents === "number" ? Math.round(body.amountCents) : 0;
   const winningBidUsd = typeof body.winningBidUsd === "number" ? body.winningBidUsd : 0;
+  const platformFeeCents =
+    typeof body.platformFeeCents === "number" ? Math.max(0, Math.round(body.platformFeeCents)) : 0;
   const runnerUpAttempt =
     typeof body.runnerUpAttempt === "number" ? Math.max(1, Math.round(body.runnerUpAttempt)) : 1;
 
@@ -55,10 +58,17 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
+  const hostPayout = await requireHostPayoutAccount(admin, hostId);
+  if (!hostPayout.ok) {
+    res.status(400).json({ ok: false, error: hostPayout.error });
+    return;
+  }
+
   const orderId = randomUUID();
   const secret = process.env.STRIPE_SECRET_KEY!;
   const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
   const customerId = await getOrCreateStripeCustomer(stripe, admin, user.id, user.email);
+  const destination = destinationChargeFields(hostPayout.account.accountId, platformFeeCents);
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount: amountCents,
@@ -73,7 +83,9 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       buyer_id: user.id,
       winning_bid_usd: String(winningBidUsd),
       runner_up_attempt: String(runnerUpAttempt),
+      platform_fee_cents: String(platformFeeCents),
     },
+    ...destination,
   });
 
   await admin.from("garage_auction_payments").insert({
@@ -84,7 +96,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     stripe_payment_intent_id: paymentIntent.id,
     stripe_payment_status: paymentIntent.status,
     winning_bid_cents: Math.round(winningBidUsd * 100),
-    platform_fee_cents: typeof body.platformFeeCents === "number" ? Math.round(body.platformFeeCents) : 0,
+    platform_fee_cents: platformFeeCents,
     total_cents: amountCents,
     runner_up_attempt: runnerUpAttempt,
     status: "pending",
