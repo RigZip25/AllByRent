@@ -1,12 +1,14 @@
 import { useEffect, useState, startTransition, type ReactNode } from "react";
 import { DollarSign, Package, Plus, Share2, TrendingUp } from "lucide-react";
 import { useAuth } from "../../hooks/AuthProvider";
-import { fetchManageableListings, loadManageableListings } from "../../lib/hostAccess";
+import { fetchManageableListings, getManageableHostIds, loadManageableListings } from "../../lib/hostAccess";
+import { getAbandonedListingDrafts } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { loadRentalBookings, type RentalBooking } from "../../lib/rentalsStorage";
 import { BookingRequestCard } from "../../components/rentals/BookingRequestCard";
 import { ProactiveAgentCard, wasAgentStepDismissed } from "../../components/agent/ProactiveAgentCard";
 import { hasRecentShare } from "../../lib/socialShare";
+import { agentTipsEnabled } from "../../lib/agentPrefs";
 import { loadNotificationPreferences } from "../../lib/notificationPreferences";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
 
@@ -42,12 +44,14 @@ function StatCard({
 export function HostDashboard({
   onListItem,
   onOpenListing,
+  onResumeDraft,
   onShareGarage,
   onViewProfile,
   onOpenRental,
 }: {
   onListItem: () => void;
   onOpenListing: (listingId: string) => void;
+  onResumeDraft?: (listingId: string) => void;
   onShareGarage?: () => void;
   onViewProfile?: (userId: string) => void;
   onOpenRental?: (bookingId: string) => void;
@@ -97,7 +101,16 @@ export function HostDashboard({
     .reduce((sum, b) => sum + (b.totalUsd ?? 0), 0);
 
   const hostId = resolveHostAccountId(auth.userId);
+  const hostIds = getManageableHostIds(auth.userId, auth.userEmail);
+  const abandonedDraft = getAbandonedListingDrafts(hostIds)[0] ?? null;
+  const showDraftNudge =
+    Boolean(onResumeDraft) &&
+    Boolean(abandonedDraft) &&
+    agentTipsEnabled(loadNotificationPreferences()) &&
+    abandonedDraft != null &&
+    !wasAgentStepDismissed(`finish-draft-${abandonedDraft.id}`);
   const showShareNudge =
+    !showDraftNudge &&
     loadNotificationPreferences().agentTips &&
     listings.length > 0 &&
     !hasRecentShare("garage", hostId) &&
@@ -106,6 +119,20 @@ export function HostDashboard({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      {showDraftNudge && abandonedDraft ? (
+        <div className="mb-3 shrink-0">
+          <ProactiveAgentCard
+            step={{
+              id: `finish-draft-${abandonedDraft.id}`,
+              dismissKey: `finish-draft-${abandonedDraft.id}`,
+              title: "Finish publishing?",
+              body: `You left ${getListingDisplayTitle(abandonedDraft.title) || "a listing"} on step ${abandonedDraft.wizardStep ?? 1}. Tap to pick up where you stopped.`,
+              cta: "Resume draft",
+              onAction: () => onResumeDraft?.(abandonedDraft.id),
+            }}
+          />
+        </div>
+      ) : null}
       {showShareNudge ? (
         <div className="mb-3 shrink-0">
           <ProactiveAgentCard

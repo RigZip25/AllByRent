@@ -26,6 +26,13 @@ export type ListingDraft = {
   /** Primary host account that owns this listing (auth user id or demo-user). */
   hostId?: string;
   listingStatus: ListingPublishStatus;
+  /** Wizard step last visited (1–3) while status is draft. */
+  wizardStep?: number;
+  /** Client ISO timestamp of last draft edit (also mirrored via listings.updated_at). */
+  updatedAt?: string;
+  /** How many abandon-nudge pushes were sent for this draft. */
+  nudgeCount?: number;
+  lastNudgedAt?: string | null;
   /** Spotlight boost expiration (used for ranking; optional). */
   boostedUntil?: string | null;
   /** Boost tier (2/5/10 USD) (optional). */
@@ -153,6 +160,10 @@ export function createInitialListingDraft(): ListingDraft {
   return {
     id: createListingId(),
     listingStatus: "draft",
+    wizardStep: 1,
+    updatedAt: new Date().toISOString(),
+    nudgeCount: 0,
+    lastNudgedAt: null,
     boostedUntil: null,
     boostedTier: null,
     photos: [],

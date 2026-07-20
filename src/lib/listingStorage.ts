@@ -93,6 +93,13 @@ export function setHomeLocation(location: ProfileLocation): void {
   } catch {
     /* ignore */
   }
+  try {
+    // Side-effect import avoided — callers sync agent prefs after auth when needed.
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz) localStorage.setItem("allbyrent_user_timezone", tz);
+  } catch {
+    /* ignore */
+  }
 }
 
 export function getTripDestination(): string {
@@ -149,6 +156,60 @@ export function savePublishedListing(draft: ListingDraft): void {
   }
 }
 
+export function removePublishedListing(id: string): void {
+  try {
+    const next = loadPublishedListings().filter((item) => item.id !== id);
+    localStorage.setItem(LISTINGS_STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    /* ignore */
+  }
+}
+
+export async function removePublishedListingRemote(id: string, ownerId: string): Promise<void> {
+  removePublishedListing(id);
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
+  await supabase.from("listings").delete().eq("id", id).eq("owner_id", ownerId);
+}
+
+/** Persist an in-progress wizard draft (local always; remote when signed in). */
+export async function saveListingDraftProgress(
+  draft: ListingDraft,
+  ownerId: string | null | undefined,
+  wizardStep: number,
+): Promise<void> {
+  const stamped: ListingDraft = {
+    ...draft,
+    hostId: draft.hostId || ownerId || draft.hostId,
+    listingStatus: "draft",
+    wizardStep,
+    updatedAt: new Date().toISOString(),
+  };
+  savePublishedListing(stamped);
+  if (ownerId) {
+    try {
+      await savePublishedListingRemote(stamped, ownerId);
+    } catch {
+      /* local draft still saved */
+    }
+  }
+}
+
+export function getAbandonedListingDrafts(hostIds: string[]): ListingDraft[] {
+  const idleMs = 30 * 60 * 1000;
+  const now = Date.now();
+  return loadPublishedListings().filter((listing) => {
+    if (listing.listingStatus !== "draft") return false;
+    const host = listing.hostId?.trim() ?? "";
+    if (host && !hostIds.includes(host)) return false;
+    if (!host && hostIds.length === 0) return false;
+    const updated = listing.updatedAt ? Date.parse(listing.updatedAt) : 0;
+    if (!Number.isFinite(updated) || updated <= 0) return true;
+    return now - updated >= idleMs;
+  });
+}
+
 function createQrTokenFallback(): string {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -166,6 +227,16 @@ function normalizeListingDraft(raw: ListingDraft): ListingDraft {
     ...raw,
     hostId,
     listingStatus: status,
+    wizardStep:
+      typeof raw.wizardStep === "number" && raw.wizardStep >= 1 && raw.wizardStep <= 3
+        ? Math.floor(raw.wizardStep)
+        : undefined,
+    updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : undefined,
+    nudgeCount: typeof raw.nudgeCount === "number" ? raw.nudgeCount : undefined,
+    lastNudgedAt:
+      typeof raw.lastNudgedAt === "string" || raw.lastNudgedAt === null
+        ? raw.lastNudgedAt
+        : undefined,
     photos: Array.isArray(raw.photos) && raw.photos.every((p) => p && typeof p === "object" && "id" in p)
       ? raw.photos
       : [],
@@ -443,6 +514,9 @@ function draftToRow(draft: ListingDraft, ownerId: string): Partial<SupabaseListi
     availability: {
       blocked_dates: draft.blockedDates ?? [],
       paused: draft.paused ?? false,
+      wizard_step: draft.wizardStep ?? null,
+      nudge_count: draft.nudgeCount ?? 0,
+      last_nudged_at: draft.lastNudgedAt ?? null,
     },
     handoff: draft.handoff ?? {},
     qr_code: draft.qrToken ?? null,
@@ -471,6 +545,14 @@ function rowToDraft(row: SupabaseListingRow): ListingDraft {
     id: row.id,
     hostId: row.owner_id,
     listingStatus: (row.listing_status as ListingDraft["listingStatus"]) ?? "draft",
+    wizardStep:
+      typeof availability.wizard_step === "number" ? availability.wizard_step : undefined,
+    updatedAt: row.updated_at,
+    nudgeCount: typeof availability.nudge_count === "number" ? availability.nudge_count : undefined,
+    lastNudgedAt:
+      typeof availability.last_nudged_at === "string" || availability.last_nudged_at === null
+        ? (availability.last_nudged_at as string | null)
+        : undefined,
     boostedUntil: row.boosted_until ?? null,
     boostedTier: typeof row.boosted_tier === "number" ? row.boosted_tier : null,
     photos: Array.isArray(row.photos) ? (row.photos as ListingDraft["photos"]) : [],

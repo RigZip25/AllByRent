@@ -5,7 +5,8 @@ import confetti from "canvas-confetti";
 import { MASCOT_NAME } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
-import { getProfileCity, savePublishedListingRemote, savePublishedListing, fetchListingByIdRemote, getPublishedListingById } from "../../lib/listingStorage";
+import { getProfileCity, savePublishedListingRemote, savePublishedListing, saveListingDraftProgress, removePublishedListing, removePublishedListingRemote, fetchListingByIdRemote, getPublishedListingById } from "../../lib/listingStorage";
+import { syncAgentPrefsRemote, ensureBrowserTimeZoneCaptured } from "../../lib/agentPrefs";
 import { notifyGarageFollowersOfNewListing } from "../../lib/garageFollowNotify";
 import { loadUserProfile } from "../../lib/userProfileStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
@@ -106,11 +107,21 @@ export function ListingWizard({
   onExit: () => void;
 }) {
   const auth = useAuth();
-  const isEditing = Boolean(
-    editingListingId ||
-    (initialDraft?.listingStatus && initialDraft.listingStatus !== "draft"),
-  );
-  const [step, setStep] = useState(1);
+  const isEditing = (() => {
+    const status =
+      initialDraft?.listingStatus ??
+      (editingListingId ? getPublishedListingById(editingListingId)?.listingStatus : undefined);
+    return Boolean(status && status !== "draft");
+  })();
+  const [step, setStep] = useState(() => {
+    const cached =
+      initialDraft ??
+      (editingListingId ? getPublishedListingById(editingListingId) : null);
+    const resume = cached?.wizardStep;
+    return typeof resume === "number" && resume >= 1 && resume <= TOTAL_LISTING_STEPS
+      ? resume
+      : 1;
+  });
   const [direction, setDirection] = useState<SlideDirection>(1);
   const [draft, setDraft] = useState<ListingDraft>(() => {
     const cached =
@@ -144,6 +155,31 @@ export function ListingWizard({
       mounted = false;
     };
   }, [editingListingId, initialDraft]);
+
+  // Autosave unfinished drafts so Mr. Evorios can nudge if the host abandons mid-flow.
+  useEffect(() => {
+    if (phase !== "steps" || isPublishing || loadingEdit) return;
+    const meaningful =
+      draft.photos.length > 0 ||
+      draft.title.trim().length > 0 ||
+      step > 1;
+    if (!meaningful) return;
+
+    ensureBrowserTimeZoneCaptured();
+    const timer = window.setTimeout(() => {
+      void saveListingDraftProgress(
+        {
+          ...draft,
+          hostId: draft.hostId ?? resolveHostAccountId(auth.userId),
+        },
+        auth.userId,
+        step,
+      ).then(() => {
+        if (auth.userId) void syncAgentPrefsRemote(auth.userId);
+      });
+    }, 1200);
+    return () => window.clearTimeout(timer);
+  }, [auth.userId, draft, isPublishing, loadingEdit, phase, step]);
 
   const canContinue = isListingStepValid(step, draft);
   const progress = (step / TOTAL_LISTING_STEPS) * 100;
@@ -226,6 +262,9 @@ export function ListingWizard({
         hostId,
         generateQR: true,
         listingStatus: giftOrSellOnly ? "active" : "pending_qr",
+        nudgeCount: 0,
+        lastNudgedAt: null,
+        updatedAt: new Date().toISOString(),
       };
 
       setDraft(publishedDraft);
@@ -319,6 +358,14 @@ export function ListingWizard({
       setStep(previous.step);
       setDirection(-1);
       return;
+    }
+
+    if (draft.listingStatus === "draft" && draft.id) {
+      if (auth.userId) {
+        void removePublishedListingRemote(draft.id, auth.userId);
+      } else {
+        removePublishedListing(draft.id);
+      }
     }
 
     onExit();
