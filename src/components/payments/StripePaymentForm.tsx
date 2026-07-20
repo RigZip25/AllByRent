@@ -34,7 +34,11 @@ function PaymentFormInner({
         onError(error.message ?? "Payment failed");
         return;
       }
-      if (paymentIntent?.status === "succeeded" || paymentIntent?.status === "processing") {
+      if (
+        paymentIntent?.status === "succeeded" ||
+        paymentIntent?.status === "processing" ||
+        paymentIntent?.status === "requires_capture"
+      ) {
         onSuccess();
         return;
       }

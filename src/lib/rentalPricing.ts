@@ -16,9 +16,11 @@ import type { ListingDraft } from "../screens/listing/types";
 
 
 
-/** Demo platform service fee (12% of rental + delivery + heavy surcharge). */
+/** Platform service fee (12% of rental + delivery + heavy surcharge). */
+export const PLATFORM_SERVICE_FEE_RATE = 0.12;
 
-export const DEMO_SERVICE_FEE_RATE = 0.12;
+/** @deprecated Use PLATFORM_SERVICE_FEE_RATE */
+export const DEMO_SERVICE_FEE_RATE = PLATFORM_SERVICE_FEE_RATE;
 
 
 
@@ -203,7 +205,7 @@ export function computeRentalPriceBreakdown(input: {
 
   const taxable = rentalSubtotalUsd + deliveryFeeUsd + insuranceFeeUsd;
 
-  const serviceFeeUsd = roundUsd(taxable * DEMO_SERVICE_FEE_RATE);
+  const serviceFeeUsd = roundUsd(taxable * PLATFORM_SERVICE_FEE_RATE);
 
   const totalUsd = roundUsd(taxable + serviceFeeUsd);
 

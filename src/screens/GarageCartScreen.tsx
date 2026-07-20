@@ -9,6 +9,7 @@ import {
 import { garageDisplayName } from "../lib/garageDisplay";
 import { useMediaUrl } from "../lib/useMediaUrl";
 import { StripePaymentForm } from "../components/payments/StripePaymentForm";
+import { PaymentLegalNotice } from "../components/payments/PaymentLegalNotice";
 import { PaymentsReadyBadge, PaymentsRequiredBanner } from "../components/payments/PaymentModeBanner";
 import {
   canProcessGaragePayments,
@@ -194,6 +195,7 @@ export function GarageCartScreen({ onBack, onCheckoutComplete }: GarageCartScree
               onSuccess={finishCheckout}
               onError={setPaymentError}
             />
+            <PaymentLegalNotice className="mt-3" />
           </div>
         ) : null}
       </div>

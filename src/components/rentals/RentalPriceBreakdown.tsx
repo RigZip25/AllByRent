@@ -105,7 +105,7 @@ export function RentalPriceBreakdownView({
         <Line label={DEPOSIT_PROTECTION_LABEL} amount={breakdown.insuranceFeeUsd} />
       ) : null}
 
-      <Line label="Service fee" amount={breakdown.serviceFeeUsd} muted />
+      <Line label="Platform fee" amount={breakdown.serviceFeeUsd} muted />
 
       <div
 

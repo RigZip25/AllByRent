@@ -5,6 +5,11 @@ import { isStripeServerConfigured } from "../../lib/keys";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
+import {
+  destinationChargeFields,
+  platformFeeFromGrossTotal,
+  requireHostPayoutAccount,
+} from "../../lib/stripe/connectPayout";
 
 type Body = {
   rentalId?: string;
@@ -12,6 +17,9 @@ type Body = {
   ownerId?: string;
   amountCents?: number;
 };
+
+/** Matches client PLATFORM fee on rental totals (taxable + 12%). */
+const RENTAL_PLATFORM_FEE_RATE = 0.12;
 
 export default withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
@@ -50,6 +58,12 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
+  const hostPayout = await requireHostPayoutAccount(admin, ownerId);
+  if (!hostPayout.ok) {
+    res.status(400).json({ ok: false, error: hostPayout.error });
+    return;
+  }
+
   const { data: rental, error: rentalError } = await admin
     .from("rentals")
     .select("id, renter_id, owner_id, listing_id, stripe_payment_intent_id")
@@ -75,6 +89,8 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
 
   const customerId = await getOrCreateStripeCustomer(stripe, admin, user.id, user.email);
+  const applicationFeeCents = platformFeeFromGrossTotal(amountCents, RENTAL_PLATFORM_FEE_RATE);
+  const destination = destinationChargeFields(hostPayout.account.accountId, applicationFeeCents);
 
   const metadata = {
     rental_id: rentalId,
@@ -82,6 +98,17 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     owner_id: ownerId,
     renter_id: user.id,
     payment_type: "rental",
+    platform_fee_cents: String(applicationFeeCents),
+  };
+
+  const createParams: Stripe.PaymentIntentCreateParams = {
+    amount: amountCents,
+    currency: "usd",
+    customer: customerId,
+    capture_method: "manual",
+    automatic_payment_methods: { enabled: true },
+    metadata,
+    ...destination,
   };
 
   let paymentIntent: Stripe.PaymentIntent;
@@ -96,34 +123,13 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       ) {
         paymentIntent = existing;
       } else {
-        paymentIntent = await stripe.paymentIntents.create({
-          amount: amountCents,
-          currency: "usd",
-          customer: customerId,
-          capture_method: "manual",
-          automatic_payment_methods: { enabled: true },
-          metadata,
-        });
+        paymentIntent = await stripe.paymentIntents.create(createParams);
       }
     } catch {
-      paymentIntent = await stripe.paymentIntents.create({
-        amount: amountCents,
-        currency: "usd",
-        customer: customerId,
-        capture_method: "manual",
-        automatic_payment_methods: { enabled: true },
-        metadata,
-      });
+      paymentIntent = await stripe.paymentIntents.create(createParams);
     }
   } else {
-    paymentIntent = await stripe.paymentIntents.create({
-      amount: amountCents,
-      currency: "usd",
-      customer: customerId,
-      capture_method: "manual",
-      automatic_payment_methods: { enabled: true },
-      metadata,
-    });
+    paymentIntent = await stripe.paymentIntents.create(createParams);
   }
 
   const { error: updateError } = await admin

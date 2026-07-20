@@ -584,7 +584,13 @@ export function ItemDetail({
             disabled
             className="flex-1 bg-primary/50 text-white py-3 px-6 rounded-xl font-medium"
           >
-            {listing.paused ? "Paused" : isSold ? "Sold" : "Not available"}
+            {listing.paused
+              ? "Paused"
+              : isSold
+                ? "Sold"
+                : listing.modes.gift && !listing.modes.rent && !listing.modes.sell
+                  ? "Gift claims coming soon"
+                  : "Not available"}
           </button>
         ) : null}
       </div>

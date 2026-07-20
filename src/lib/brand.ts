@@ -269,7 +269,12 @@ export const MARKETING_URL = "https://evorios.com";
 export const APP_ORIGIN = "https://app.evorios.com";
 export const APP_HOST = "app.evorios.com";
 /** Public marketing site — QR codes and outbound links to the web. */
-export const LISTING_QR_BASE_URL = `${MARKETING_URL}/item`;
+export const LISTING_QR_BASE_URL = `${APP_ORIGIN}/item`;
+
+/** Public legal pages (host on marketing site). Update when live. */
+export const TERMS_URL = `${MARKETING_URL}/terms`;
+export const PRIVACY_URL = `${MARKETING_URL}/privacy`;
+export const REFUND_POLICY_URL = `${MARKETING_URL}/refunds`;
 
 /** QR sticker PDF download names (user-visible). */
 export const QR_PDF_FILENAMES = {
