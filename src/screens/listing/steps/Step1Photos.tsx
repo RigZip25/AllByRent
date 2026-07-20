@@ -105,6 +105,16 @@ export function Step1Photos({
     return thumb ?? blob;
   };
 
+  /** Detach camera File shells so IndexedDB / PhotoRoom always see a plain Blob. */
+  const normalizePhotoBlob = async (input: Blob): Promise<Blob> => {
+    const buffer = await input.arrayBuffer();
+    if (!buffer.byteLength) {
+      throw new Error("Photo is empty. Try again or pick from the library.");
+    }
+    const type = (input.type || "").trim() || "image/jpeg";
+    return new Blob([buffer], { type });
+  };
+
   const appendPhotoBlob = async (blob: Blob) => {
     const put = await putMediaBlob(blob, { kind: "image" });
     if (!put.ok) {
@@ -192,13 +202,15 @@ export function Step1Photos({
 
       try {
         const sourceFile = await maybeConvertHeicToJpeg(file);
-        let blob: Blob;
+        const sourceBlob = await normalizePhotoBlob(sourceFile);
+        let blob: Blob = sourceBlob;
         try {
-          blob = await processPhotoWithPhotoRoom(sourceFile);
+          const enhanced = await processPhotoWithPhotoRoom(sourceBlob);
+          blob = await normalizePhotoBlob(enhanced);
         } catch (error) {
           // Enhancement is best-effort; still allow photo uploads if the proxy/API key is missing
           // or the image format can't be processed.
-          blob = sourceFile;
+          blob = sourceBlob;
           setPhotoWarning(
             `Photo enhancement unavailable. Saved original photo. (${formatUnknownError(error)})`,
           );
