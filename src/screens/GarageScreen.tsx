@@ -12,6 +12,7 @@ const GREEN_DARK = "#0D5C3A";
 type GarageScreenProps = {
   onNavigate: (screen: string) => void;
   onStockGarage: () => void;
+  onResumeDraft?: (listingId: string) => void;
   onViewShop: () => void;
   onViewProfile?: (userId: string) => void;
   onOpenRental?: (bookingId: string) => void;
@@ -20,6 +21,7 @@ type GarageScreenProps = {
 export function GarageScreen({
   onNavigate,
   onStockGarage,
+  onResumeDraft,
   onViewShop,
   onViewProfile,
   onOpenRental,
@@ -89,6 +91,7 @@ export function GarageScreen({
         <HostDashboard
           onListItem={onStockGarage}
           onOpenListing={(listingId) => onNavigate(`hostListingDetail:${listingId}`)}
+          onResumeDraft={onResumeDraft}
           onShareGarage={() => setShareOpen(true)}
           onViewProfile={onViewProfile}
           onOpenRental={onOpenRental}

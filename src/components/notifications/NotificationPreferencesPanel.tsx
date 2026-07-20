@@ -5,6 +5,7 @@ import {
   patchNotificationPreferences,
   type NotificationPreferences,
 } from "../../lib/notificationPreferences";
+import { syncAgentPrefsRemote } from "../../lib/agentPrefs";
 import { loadGarageFollows } from "../../lib/garageFollowStorage";
 import { persistFollowPatch } from "../../lib/repositories/garageRepository";
 
@@ -44,7 +45,9 @@ export function NotificationPreferencesPanel() {
   const follows = loadGarageFollows();
 
   const update = (patch: Partial<NotificationPreferences>) => {
-    setPrefs(patchNotificationPreferences(patch));
+    const next = patchNotificationPreferences(patch);
+    setPrefs(next);
+    if (auth.userId) void syncAgentPrefsRemote(auth.userId);
   };
 
   return (

@@ -476,6 +476,22 @@ function AppRoutes() {
       setCurrentScreen("coHosts");
       clearBootQuery(["screen", "skipSplash"]);
     }
+    if (screen === "listItem") {
+      const params = new URLSearchParams(window.location.search);
+      const listingId = params.get("listingId")?.trim() || "";
+      markIntroDone();
+      setListingPrefill(null);
+      if (listingId) {
+        setEditingListingId(listingId);
+        setEditingListingReturn(listingId);
+      } else {
+        setEditingListingId(null);
+        setEditingListingReturn(null);
+      }
+      setNavStack([]);
+      setCurrentScreen("listItem");
+      clearBootQuery(["screen", "listingId", "skipSplash"]);
+    }
     const tabScreen = TAB_BOOT_SCREENS[screen];
     if (tabScreen) {
       markIntroDone();
@@ -1145,6 +1161,17 @@ function AppRoutes() {
     navigateTo("listingIntro");
   };
 
+  const handleResumeDraft = useCallback(
+    (listingId: string) => {
+      clearYardSaleListingActive();
+      setListingPrefill(null);
+      setEditingListingId(listingId);
+      setEditingListingReturn(listingId);
+      navigateTo("listItem");
+    },
+    [navigateTo],
+  );
+
   const showBrandHeader =
     currentScreen !== "splash" &&
     !isOnboardingScreen(currentScreen) &&
@@ -1328,6 +1355,7 @@ function AppRoutes() {
           <GarageScreen
             onNavigate={handleNavigate}
             onStockGarage={handleStartListing}
+            onResumeDraft={handleResumeDraft}
             onViewShop={handleOpenMyGarageShop}
             onViewProfile={handleViewPublicProfile}
             onOpenRental={(bookingId) => {
