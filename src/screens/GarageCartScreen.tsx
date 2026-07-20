@@ -21,8 +21,26 @@ const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 const BORDER = "#E8E6E0";
 
-function CartLineThumb({ photoId, photoThumbId }: { photoId?: string; photoThumbId?: string }) {
-  const media = photoThumbId ? { id: photoThumbId, thumbId: photoThumbId } : photoId ? { id: photoId } : null;
+function CartLineThumb({
+  photoId,
+  photoThumbId,
+  photoThumbStoragePath,
+  photoStoragePath,
+}: {
+  photoId?: string;
+  photoThumbId?: string;
+  photoThumbStoragePath?: string;
+  photoStoragePath?: string;
+}) {
+  const media =
+    photoThumbStoragePath || photoStoragePath || photoThumbId || photoId
+      ? {
+          id: photoId ?? photoThumbId ?? "",
+          thumbId: photoThumbId,
+          storagePath: photoStoragePath,
+          thumbStoragePath: photoThumbStoragePath,
+        }
+      : null;
   const { url } = useMediaUrl(media);
   return (
     <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[#F3F4F6]">
@@ -133,7 +151,12 @@ export function GarageCartScreen({ onBack, onCheckoutComplete }: GarageCartScree
                 className="flex gap-3 rounded-2xl border bg-white p-3"
                 style={{ borderColor: BORDER }}
               >
-                <CartLineThumb photoId={line.photoId} photoThumbId={line.photoThumbId} />
+                <CartLineThumb
+                  photoId={line.photoId}
+                  photoThumbId={line.photoThumbId}
+                  photoThumbStoragePath={line.photoThumbStoragePath}
+                  photoStoragePath={line.photoStoragePath}
+                />
                 <div className="min-w-0 flex-1">
                   <p className="line-clamp-2 text-[15px] font-semibold text-gray-900">{line.title}</p>
                   <p className="mt-1 text-[17px] font-extrabold" style={{ color: GREEN }}>

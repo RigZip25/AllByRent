@@ -4,6 +4,8 @@
  * Email delivery of invites is deferred — invites are stored locally until accepted in-app.
  */
 
+import { APP_ORIGIN } from "./brand";
+
 const CO_HOSTS_KEY = "allbyrent_co_hosts";
 
 export type CoHostStatus = "pending" | "active";
@@ -20,6 +22,13 @@ export type CoHostRecord = {
   /** Set when invitee accepts (auth user id). */
   coHostUserId?: string;
 };
+
+export function buildCoHostInviteUrl(): string {
+  if (typeof window !== "undefined" && window.location.origin) {
+    return `${window.location.origin}/?screen=coHosts&skipSplash=1`;
+  }
+  return `${APP_ORIGIN}/?screen=coHosts&skipSplash=1`;
+}
 
 function createId(): string {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {

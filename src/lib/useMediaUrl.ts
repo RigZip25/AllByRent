@@ -8,67 +8,17 @@ type MediaUrlState =
   | { status: "ready"; url: string }
   | { status: "missing"; url: null };
 
-type MediaUrlInput = Pick<MediaRef, "id" | "mimeType" | "storagePath" | "thumbStoragePath">;
+type MediaUrlInput = Pick<MediaRef, "id" | "mimeType" | "storagePath" | "thumbStoragePath" | "thumbId">;
 
 export function useMediaUrl(ref: MediaUrlInput | null | undefined): MediaUrlState {
   const id = ref?.id ?? "";
+  const thumbId = ref?.thumbId?.trim() ?? "";
   const mimeType = ref?.mimeType ?? "";
   const storagePath = ref?.storagePath?.trim() ?? "";
-  const key = useMemo(() => `${id}|${mimeType}|${storagePath}`, [id, mimeType, storagePath]);
-  const [state, setState] = useState<MediaUrlState>({ status: "idle", url: null });
-
-  useEffect(() => {
-    let cancelled = false;
-    let objectUrl: string | null = null;
-
-    if (!id && !storagePath) {
-      setState({ status: "idle", url: null });
-      return () => undefined;
-    }
-
-    const remoteUrl = getListingPhotoPublicUrl(storagePath);
-    if (remoteUrl) {
-      setState({ status: "ready", url: remoteUrl });
-      return () => undefined;
-    }
-
-    if (!id) {
-      setState({ status: "missing", url: null });
-      return () => undefined;
-    }
-
-    setState({ status: "loading", url: null });
-
-    void (async () => {
-      const blob = await getMediaBlob(id);
-      if (cancelled) return;
-      if (!blob) {
-        setState({ status: "missing", url: null });
-        return;
-      }
-      objectUrl = URL.createObjectURL(blob);
-      setState({ status: "ready", url: objectUrl });
-    })();
-
-    return () => {
-      cancelled = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [key, id, storagePath]);
-
-  return state;
-}
-
-/** Prefer thumbnail blob; fall back to full-size if thumb was evicted from IndexedDB. */
-export function useCoverMediaUrl(cover: MediaUrlInput | null | undefined): MediaUrlState {
-  const thumbStoragePath = cover?.thumbStoragePath?.trim() ?? "";
-  const storagePath = cover?.storagePath?.trim() ?? "";
-  const thumbId = cover?.thumbId?.trim() ?? "";
-  const fullId = cover?.id?.trim() ?? "";
-  const mimeType = cover?.mimeType ?? "";
+  const thumbStoragePath = ref?.thumbStoragePath?.trim() ?? "";
   const key = useMemo(
-    () => `${thumbStoragePath}|${storagePath}|${thumbId}|${fullId}|${mimeType}`,
-    [thumbStoragePath, storagePath, thumbId, fullId, mimeType],
+    () => `${id}|${thumbId}|${mimeType}|${thumbStoragePath}|${storagePath}`,
+    [id, thumbId, mimeType, thumbStoragePath, storagePath],
   );
   const [state, setState] = useState<MediaUrlState>({ status: "idle", url: null });
 
@@ -76,7 +26,7 @@ export function useCoverMediaUrl(cover: MediaUrlInput | null | undefined): Media
     let cancelled = false;
     let objectUrl: string | null = null;
 
-    if (!thumbStoragePath && !storagePath && !thumbId && !fullId) {
+    if (!id && !thumbId && !storagePath && !thumbStoragePath) {
       setState({ status: "idle", url: null });
       return () => undefined;
     }
@@ -90,7 +40,7 @@ export function useCoverMediaUrl(cover: MediaUrlInput | null | undefined): Media
       }
     }
 
-    if (!thumbId && !fullId) {
+    if (!thumbId && !id) {
       setState({ status: "missing", url: null });
       return () => undefined;
     }
@@ -98,9 +48,9 @@ export function useCoverMediaUrl(cover: MediaUrlInput | null | undefined): Media
     setState({ status: "loading", url: null });
 
     void (async () => {
-      const ids = [thumbId, fullId].filter((id, index, list) => id && list.indexOf(id) === index);
-      for (const id of ids) {
-        const blob = await getMediaBlob(id);
+      const ids = [thumbId, id].filter((candidate, index, list) => candidate && list.indexOf(candidate) === index);
+      for (const mediaId of ids) {
+        const blob = await getMediaBlob(mediaId);
         if (cancelled) return;
         if (blob) {
           objectUrl = URL.createObjectURL(blob);
@@ -115,7 +65,12 @@ export function useCoverMediaUrl(cover: MediaUrlInput | null | undefined): Media
       cancelled = true;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [key, thumbStoragePath, storagePath, thumbId, fullId]);
+  }, [key, id, thumbId, storagePath, thumbStoragePath]);
 
   return state;
+}
+
+/** Prefer thumbnail blob; fall back to full-size if thumb was evicted from IndexedDB. */
+export function useCoverMediaUrl(cover: MediaUrlInput | null | undefined): MediaUrlState {
+  return useMediaUrl(cover);
 }

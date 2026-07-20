@@ -61,6 +61,7 @@ import {
 import { getAppMode, setAppMode } from "../lib/appMode";
 import {
   completeOnboarding,
+  hasRoleChoice,
   isOnboardingComplete,
   isIntroDone,
   markIntroDone,
@@ -241,14 +242,6 @@ const LISTING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
 
 function isOnboardingScreen(screen: Screen): boolean {
   return screen in ONBOARDING_BACK_FALLBACK || screen === "firstHello" || screen === "onboardingAllSet";
-}
-
-function resolveLocationSetupReturn(stack: Screen[]): { target: Screen; nextStack: Screen[] } {
-  const previous = stack.length > 0 ? stack[stack.length - 1]! : null;
-  if (previous && !isOnboardingScreen(previous)) {
-    return { target: previous, nextStack: stack.slice(0, -1) };
-  }
-  return { target: "browseHub", nextStack: [] };
 }
 
 function resolveBootDeepLinkTarget(target: DeepLinkTarget | null): DeepLinkTarget | null {
@@ -478,6 +471,11 @@ function AppRoutes() {
       setCurrentScreen("agentActivity");
       clearBootQuery(["screen"]);
     }
+    if (screen === "coHosts") {
+      setNavStack([]);
+      setCurrentScreen("coHosts");
+      clearBootQuery(["screen", "skipSplash"]);
+    }
     const tabScreen = TAB_BOOT_SCREENS[screen];
     if (tabScreen) {
       markIntroDone();
@@ -544,12 +542,21 @@ function AppRoutes() {
   }, [auth.configured, auth.session, showAuthGate]);
 
   const finishLocationSetup = useCallback(() => {
-    completeOnboarding();
     setHomeLocationError(null);
     setNavStack((stack) => {
-      const { target, nextStack } = resolveLocationSetupReturn(stack);
-      setCurrentScreen(target);
-      return nextStack;
+      const previous = stack.length > 0 ? stack[stack.length - 1]! : null;
+      if (previous && !isOnboardingScreen(previous)) {
+        if (!isOnboardingComplete()) completeOnboarding();
+        setCurrentScreen(previous);
+        return stack.slice(0, -1);
+      }
+      if (!isOnboardingComplete()) {
+        setCurrentScreen("onboardingAllSet");
+        return [];
+      }
+      completeOnboarding();
+      setCurrentScreen("browseHub");
+      return [];
     });
   }, []);
 
@@ -846,6 +853,10 @@ function AppRoutes() {
     if (isOnboardingComplete()) {
       setNavStack([]);
       setCurrentScreen("browseHub");
+      return;
+    }
+    if (!hasRoleChoice()) {
+      navigateTo("whatDoYouWant");
       return;
     }
     navigateTo("whereAreYou");

@@ -6,6 +6,7 @@ async function trySendWebPush(input: {
   recipientId: string;
   title: string;
   body: string;
+  notificationId: string;
 }): Promise<void> {
   try {
     if (!isSupabaseConfigured()) return;
@@ -22,6 +23,7 @@ async function trySendWebPush(input: {
       },
       body: JSON.stringify({
         toUserId: input.recipientId,
+        notificationId: input.notificationId,
         title: input.title,
         body: input.body,
         url: "/?screen=notifications",
@@ -123,6 +125,7 @@ export async function createNotificationRemote(params: {
   } else {
     void trySendWebPush({
       recipientId: params.recipientId,
+      notificationId: row.id,
       title: params.title,
       body: params.body,
     });

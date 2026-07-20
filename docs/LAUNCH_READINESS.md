@@ -101,7 +101,7 @@ Until Supabase is live, the app runs in **localStorage demo mode** — fine for 
 
 ### Implemented
 - Client: subscribe + save to `profiles.push_subscriptions`
-- Server: `api/push/send.ts` (web-push)
+- Server: `api/push/send` (web-push) — **requires `notificationId` + rental/notification relationship** (see `docs/SECURITY_AUDIT.md`)
 - SW: `push` + `notificationclick` handlers
 - UI: Enable push + **preference toggles** (bookings, messages, new garages, open house, listing updates, Mr.E tips)
 - **Follow garage** stores intent locally; **in-app** notify on new listing (demo fan-out)
