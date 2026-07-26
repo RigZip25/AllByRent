@@ -7,6 +7,12 @@ import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
 import { destinationChargeFields, requireHostPayoutAccount } from "../../lib/stripe/connectPayout";
+import {
+  platformFeeFromSubtotalCents,
+  validateAuctionListing,
+  type GarageListingRow,
+  type GarageLotRow,
+} from "../../lib/stripe/garageInventory";
 
 type Body = {
   listingId?: string;
@@ -46,21 +52,55 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const body = (req.body ?? {}) as Body;
   const listingId = typeof body.listingId === "string" ? body.listingId.trim() : "";
   const hostId = typeof body.hostId === "string" ? body.hostId.trim() : "";
-  const amountCents = typeof body.amountCents === "number" ? Math.round(body.amountCents) : 0;
   const winningBidUsd = typeof body.winningBidUsd === "number" ? body.winningBidUsd : 0;
-  const platformFeeCents =
-    typeof body.platformFeeCents === "number" ? Math.max(0, Math.round(body.platformFeeCents)) : 0;
   const runnerUpAttempt =
     typeof body.runnerUpAttempt === "number" ? Math.max(1, Math.round(body.runnerUpAttempt)) : 1;
 
-  if (!listingId || !hostId || amountCents < 50 || winningBidUsd <= 0) {
-    res.status(400).json({ error: "listingId, hostId, winningBidUsd, and amountCents (≥50) are required" });
+  if (!listingId || !hostId || winningBidUsd <= 0) {
+    res.status(400).json({ error: "listingId, hostId, and winningBidUsd are required" });
     return;
   }
 
   const hostPayout = await requireHostPayoutAccount(admin, hostId);
   if (!hostPayout.ok) {
     res.status(400).json({ ok: false, error: hostPayout.error });
+    return;
+  }
+
+  const { data: listingRow, error: listingError } = await admin
+    .from("listings")
+    .select("id, owner_id, title, modes, pricing, availability, listing_status")
+    .eq("id", listingId)
+    .maybeSingle();
+
+  if (listingError) {
+    res.status(500).json({ error: "Failed to load listing" });
+    return;
+  }
+
+  const { data: lotRow } = await admin
+    .from("garage_lot_states")
+    .select("listing_id, state")
+    .eq("listing_id", listingId)
+    .maybeSingle();
+
+  const validated = validateAuctionListing({
+    hostId,
+    listingId,
+    listing: (listingRow as GarageListingRow | null) ?? null,
+    lot: (lotRow as GarageLotRow | null) ?? null,
+    winningBidUsd,
+  });
+  if (!validated.ok) {
+    res.status(409).json({ ok: false, error: validated.error });
+    return;
+  }
+
+  const bidCents = validated.bidCents;
+  const platformFeeCents = platformFeeFromSubtotalCents(bidCents);
+  const amountCents = bidCents + platformFeeCents;
+  if (amountCents < 50) {
+    res.status(400).json({ error: "amountCents (≥50) required" });
     return;
   }
 
@@ -95,7 +135,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     host_id: hostId,
     stripe_payment_intent_id: paymentIntent.id,
     stripe_payment_status: paymentIntent.status,
-    winning_bid_cents: Math.round(winningBidUsd * 100),
+    winning_bid_cents: bidCents,
     platform_fee_cents: platformFeeCents,
     total_cents: amountCents,
     runner_up_attempt: runnerUpAttempt,
@@ -113,5 +153,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     paymentIntentId: paymentIntent.id,
     orderId,
     status: paymentIntent.status,
+    amountCents,
+    platformFeeCents,
   });
 });

@@ -3,6 +3,23 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "installCommand": "npm ci",
+  "redirects": [
+    {
+      "source": "/legal/terms.html",
+      "destination": "https://evorios.com/terms.html",
+      "permanent": false
+    },
+    {
+      "source": "/legal/privacy.html",
+      "destination": "https://evorios.com/privacy.html",
+      "permanent": false
+    },
+    {
+      "source": "/legal/refunds.html",
+      "destination": "https://evorios.com/refunds.html",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     { "source": "/link", "destination": "/link.html" },
     { "source": "/item/:id", "destination": "/link.html?listingId=:id&skipSplash=1" },

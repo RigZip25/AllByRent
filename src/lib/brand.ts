@@ -91,14 +91,14 @@ export const ONBOARDING = {
     },
     yardSales: {
       title: "Yard & garage sales",
-      subtitle: "Drive the neighborhood — browse or open yours",
-      cta: "Garage sales →",
+      subtitle: "Beta — snap sales & auctions on your block",
+      cta: "Garage sales (Beta) →",
     },
     footer: "Rent & list anytime from Stock (+) or My Garage.",
   },
   yardSaleHub: {
-    title: "Garage sales",
-    subtitle: "Browse who's open — or set up your own sale.",
+    title: "Garage sales (Beta)",
+    subtitle: "Experimental — browse who's open or set up your own sale.",
     browse: {
       title: "Browse open garages",
       subtitle: "See who's open today on your block",

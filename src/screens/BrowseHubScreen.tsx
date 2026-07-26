@@ -69,7 +69,7 @@ export function BrowseHubScreen({ onChoose, onEditLocation }: BrowseHubScreenPro
           title={copy.yardSales.title}
           subtitle={copy.yardSales.subtitle}
           ctaLabel={copy.yardSales.cta}
-          badge="SALE"
+          badge="BETA"
           onClick={() => onChoose("yardSales")}
         />
       </div>

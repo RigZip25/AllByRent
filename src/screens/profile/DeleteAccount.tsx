@@ -107,7 +107,7 @@ export function DeleteAccountScreen({
           </div>
 
           <p className="mt-4 text-[12px] text-gray-500">
-            Requires `SUPABASE_SERVICE_ROLE_KEY` on Vercel. Without it, deletion cannot complete.
+            If deletion fails, email support@evorios.com and we’ll finish removing your account.
           </p>
         </div>
       </div>

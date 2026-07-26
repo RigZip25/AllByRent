@@ -4,7 +4,6 @@ import {
   canBuyNowLot,
   getGarageBidderId,
   isLotOnShelf,
-  markBuyNowSold,
   notifyOutbidIfNeeded,
 } from "./garageAuctionState";
 import {
@@ -258,11 +257,7 @@ export function buyNowGarageItem(input: {
   if (input.offer.negotiationPhase === "multi_auction") {
     return { ok: false, reason: "Buy now paused — auction among interested neighbors" };
   }
-  markBuyNowSold(
-    input.listing.id,
-    input.offer.buyNowUsd,
-    input.listing.title || "Sale item",
-  );
+  // Do not mark sold until Stripe payment succeeds (webhook / checkout complete).
   const result = addToGarageCart(cartLineFromListing(input.listing, input.offer.buyNowUsd));
   if (!result.ok) return result;
   return { ok: true };

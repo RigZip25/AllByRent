@@ -77,8 +77,19 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
             .select("listing_id, price_cents")
             .eq("order_id", orderId);
           for (const line of lines ?? []) {
+            const listingId = line.listing_id as string;
+            const { data: existing } = await admin
+              .from("garage_lot_states")
+              .select("state")
+              .eq("listing_id", listingId)
+              .maybeSingle();
+            const prevStatus =
+              existing?.state && typeof existing.state === "object"
+                ? (existing.state as { status?: string }).status
+                : undefined;
+            if (prevStatus === "sold") continue;
             await admin.from("garage_lot_states").upsert({
-              listing_id: line.listing_id,
+              listing_id: listingId,
               host_id: hostId,
               state: {
                 status: "sold",
@@ -108,17 +119,28 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
           .eq("id", orderId);
       }
       if (event.type === "payment_intent.succeeded" && listingId && hostId) {
-        await admin.from("garage_lot_states").upsert({
-          listing_id: listingId,
-          host_id: hostId,
-          state: {
-            status: "sold",
-            method: "auction",
-            priceUsd: winningBidUsd,
-            soldAt: new Date().toISOString(),
-          },
-          updated_at: new Date().toISOString(),
-        });
+        const { data: existing } = await admin
+          .from("garage_lot_states")
+          .select("state")
+          .eq("listing_id", listingId)
+          .maybeSingle();
+        const prevStatus =
+          existing?.state && typeof existing.state === "object"
+            ? (existing.state as { status?: string }).status
+            : undefined;
+        if (prevStatus !== "sold") {
+          await admin.from("garage_lot_states").upsert({
+            listing_id: listingId,
+            host_id: hostId,
+            state: {
+              status: "sold",
+              method: "auction",
+              priceUsd: winningBidUsd,
+              soldAt: new Date().toISOString(),
+            },
+            updated_at: new Date().toISOString(),
+          });
+        }
       }
     }
 

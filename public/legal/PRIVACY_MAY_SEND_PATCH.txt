@@ -1,0 +1,7 @@
+One-line patch for the live marketing Privacy page (evorios.com/privacy.html):
+
+FIND:
+  Evorios sends SMS messages only for transaction notifications
+
+REPLACE WITH:
+  Evorios may send SMS messages only for transaction notifications

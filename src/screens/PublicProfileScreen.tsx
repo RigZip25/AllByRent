@@ -4,7 +4,8 @@ import { BadgeCheck, Shield, Star as StarIcon } from "lucide-react";
 import type { PublicUserProfile } from "../lib/demoUserProfiles";
 import { fetchRemoteProfile, type RemoteProfile } from "../lib/supabaseProfile";
 import { loadUserProfile, type UserProfile } from "../lib/userProfileStorage";
-import { loadPublishedListings } from "../lib/listingStorage";
+import { fetchListingsByOwnerIdsRemote, loadPublishedListings } from "../lib/listingStorage";
+import type { ListingDraft } from "./listing/types";
 import { getListingDisplayTitle } from "../lib/listingQr";
 import { categoryEmoji } from "../lib/listingCardMeta";
 import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
@@ -15,6 +16,18 @@ const BORDER = "#E8E6E0";
 
 function looksLikeUuid(id: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+}
+
+function mapDraftsToPublicListings(drafts: ListingDraft[]): PublicUserProfile["listings"] {
+  return drafts
+    .filter((listing) => listing.listingStatus === "active" && !listing.paused)
+    .slice(0, 12)
+    .map((listing) => ({
+      id: listing.id,
+      title: getListingDisplayTitle(listing.title),
+      emoji: categoryEmoji(listing.category),
+      pricePerDay: Number.parseFloat(listing.pricing.dailyRate) || 0,
+    }));
 }
 
 function publicFromRemote(profile: RemoteProfile): PublicUserProfile {
@@ -51,16 +64,10 @@ function publicFromOwn(profile: UserProfile): PublicUserProfile {
   };
 }
 
-function listingsForHost(hostId: string): PublicUserProfile["listings"] {
-  return loadPublishedListings()
-    .filter((listing) => listing.hostId === hostId && listing.listingStatus === "active")
-    .slice(0, 12)
-    .map((listing) => ({
-      id: listing.id,
-      title: getListingDisplayTitle(listing.title),
-      emoji: categoryEmoji(listing.category),
-      pricePerDay: Number.parseFloat(listing.pricing.dailyRate) || 0,
-    }));
+function listingsForHostLocal(hostId: string): PublicUserProfile["listings"] {
+  return mapDraftsToPublicListings(
+    loadPublishedListings().filter((listing) => listing.hostId === hostId),
+  );
 }
 
 export function PublicProfileScreen({
@@ -80,10 +87,12 @@ export function PublicProfileScreen({
   const isSelf = Boolean(ownUserId) && userId.trim() === ownUserId;
   const [remoteProfile, setRemoteProfile] = useState<PublicUserProfile | null>(null);
   const [remoteLoading, setRemoteLoading] = useState(false);
+  const [remoteListings, setRemoteListings] = useState<PublicUserProfile["listings"] | null>(null);
   const [fetchedReviews, setFetchedReviews] = useState<PublicUserProfile["reviews"] | null>(null);
   const [showAllReviews, setShowAllReviews] = useState(false);
 
-  const hostListings = useMemo(() => listingsForHost(userId), [userId]);
+  const localHostListings = useMemo(() => listingsForHostLocal(userId), [userId]);
+  const hostListings = remoteListings && remoteListings.length > 0 ? remoteListings : localHostListings;
   const fallbackNeighbor: PublicUserProfile | null =
     !isSelf && !remoteProfile && hostListings.length > 0
       ? {
@@ -105,7 +114,7 @@ export function PublicProfileScreen({
   const profile = baseProfile
     ? {
         ...baseProfile,
-        listings: baseProfile.listings.length > 0 ? baseProfile.listings : hostListings,
+        listings: hostListings.length > 0 ? hostListings : baseProfile.listings,
         reviews:
           baseProfile.reviews.length > 0
             ? baseProfile.reviews
@@ -140,15 +149,19 @@ export function PublicProfileScreen({
   useEffect(() => {
     if (isSelf || !looksLikeUuid(userId)) {
       setRemoteProfile(null);
+      setRemoteListings(null);
       setRemoteLoading(false);
       return;
     }
     let mounted = true;
     setRemoteLoading(true);
-    void fetchRemoteProfile(userId)
-      .then((remote) => {
+    void Promise.all([fetchRemoteProfile(userId), fetchListingsByOwnerIdsRemote([userId])])
+      .then(([remote, drafts]) => {
         if (!mounted) return;
         setRemoteProfile(remote ? publicFromRemote(remote) : null);
+        setRemoteListings(
+          mapDraftsToPublicListings(drafts.filter((listing) => listing.hostId === userId)),
+        );
       })
       .finally(() => {
         if (mounted) setRemoteLoading(false);
