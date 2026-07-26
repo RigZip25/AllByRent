@@ -325,7 +325,6 @@ export function ListingWizard({
     setIsPublishing(true);
 
     window.setTimeout(() => {
-      const giftOrSellOnly = isGiftOrSellOnly(sourceDraft);
       const hostId = sourceDraft.hostId ?? resolveHostAccountId(auth.userId);
       const normalizedDraft = applyFrictionlessDefaults(sourceDraft);
 

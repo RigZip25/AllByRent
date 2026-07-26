@@ -304,6 +304,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
   }, [draft.category, setDraft]);
 
   useEffect(() => {
+    if (!draft.modes.rent) return;
     const value = parseFloat(draft.replacementValue);
     if (!draft.category || Number.isNaN(value) || value <= 0) return;
 
@@ -323,7 +324,13 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
         securityDeposit: prices.deposit.toString(),
       },
     }));
-  }, [draft.category, draft.replacementValue, draft.pricing.minimumPeriod, setDraft]);
+  }, [
+    draft.category,
+    draft.modes.rent,
+    draft.replacementValue,
+    draft.pricing.minimumPeriod,
+    setDraft,
+  ]);
 
   const toggleMode = (key: CategoryModeKey) => {
     setDraft((current) => {
