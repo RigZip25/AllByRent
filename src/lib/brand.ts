@@ -287,10 +287,13 @@ export const QR_PDF_FILENAMES = {
   stickersBulkLetter: "Evorios-QR-Stickers-Bulk-Letter.pdf",
 } as const;
 
-/** Stage 1 listing modes shown in UI (RTO removed; enum kept in types). */
+/**
+ * Host-facing listing mode labels (wizard / offer setup).
+ * Browse/renter UI uses "Buy" for the same mode — see feed chips & ItemDetail.
+ */
 export const LISTING_MODE_LABELS = {
   rent: "Rent",
-  sell: "Buy",
+  sell: "Sell",
   gift: "Gift",
 } as const;
 

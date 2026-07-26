@@ -374,7 +374,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
           How do you want to offer it?
         </h2>
         <p className="mt-1 text-sm text-gray-500">
-          Choose one or more. You can change this anytime.
+          Rent it out, sell it, or both. Neighbors will see Rent / Buy on the shelf.
         </p>
       </div>
 
