@@ -150,10 +150,9 @@ function SplashDynamic({ onDone, preview }: { onDone: () => void; preview: boole
   const [phase, setPhase] = useState<DynamicPhase>("flyIn");
 
   useEffect(() => {
-    if (preview) return;
     const t1 = setTimeout(() => setPhase("title"), T_FLYIN_END);
     const t2 = setTimeout(() => setPhase("ready"), T_TITLE_END);
-    const t3 = setTimeout(() => onDone(), T_AUTO_ADVANCE);
+    const t3 = setTimeout(() => !preview && onDone(), T_AUTO_ADVANCE);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
