@@ -164,7 +164,6 @@ export function HomeFeed({
     { id: "all", label: "All" },
     { id: "rent", label: "Rent" },
     { id: "buy", label: "Buy" },
-    { id: "gift", label: "Gift" },
   ];
 
   return (

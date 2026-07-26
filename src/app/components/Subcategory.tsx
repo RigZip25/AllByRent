@@ -348,7 +348,7 @@ export function Subcategory({
 
     cover: listing.photos?.[0] ?? null,
 
-    offerType: offerTypeFromModes(listing.modes),
+    offerType: offerTypeFromModes(listing.modes, listing.pricing.salePrice),
 
     itemHeavy: listing.handoff.itemHeavy,
 

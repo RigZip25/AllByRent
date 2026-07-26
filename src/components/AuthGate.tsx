@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Mail, X } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
-import { mascotSays, MASCOT_NAME } from "../lib/brand";
+import { mascotSays, MASCOT_NAME, PRIVACY_URL, TERMS_URL } from "../lib/brand";
 import type { AuthIntent } from "../lib/authReturn";
 import { peekPendingAuthEmail, setPendingAuthEmail } from "../lib/authReturn";
 import { signInWithEmailOtp, verifyEmailOtp } from "../lib/auth";
@@ -385,6 +385,18 @@ export function AuthGate({
                   ? `Resend in ${emailCooldownRemaining}s`
                   : "Send sign-in code"}
             </button>
+
+            <p className="mt-3 text-center text-[11px] leading-snug text-gray-500">
+              By continuing you agree to the{" "}
+              <a href={TERMS_URL} target="_blank" rel="noopener noreferrer" className="underline">
+                Terms
+              </a>{" "}
+              and{" "}
+              <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer" className="underline">
+                Privacy Policy
+              </a>
+              .
+            </p>
           </div>
         ) : null}
 

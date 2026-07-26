@@ -31,34 +31,43 @@ export function mockDistanceMi(seed: string): string {
   return `${(tenths / 10).toFixed(1)} mi`;
 }
 
-export type ModeChip = "all" | "rent" | "buy" | "gift";
+export type ModeChip = "all" | "rent" | "buy";
 
 export function listingMatchesModeChip(draft: ListingDraft, chip: ModeChip): boolean {
   if (chip === "all") return true;
-  if (chip === "rent") return draft.modes.rent && !draft.modes.gift;
+  if (chip === "rent") return draft.modes.rent;
   if (chip === "buy") return draft.modes.sell;
-  if (chip === "gift") return draft.modes.gift;
   return true;
 }
 
 export function formatListingPriceLine(draft: ListingDraft): string {
-  if (draft.modes.gift) return "Free";
   if (draft.modes.sell && draft.pricing.salePrice.trim()) {
+    const sale = Number.parseFloat(draft.pricing.salePrice.replace(/[^0-9.]/g, ""));
+    if (Number.isFinite(sale) && sale <= 0) return "Free";
     return `$${draft.pricing.salePrice}`;
   }
+  if (draft.modes.gift) return "Free";
   if (draft.modes.rent && draft.pricing.dailyRate.trim()) {
     return `$${draft.pricing.dailyRate}/day`;
   }
   if (draft.pricing.dailyRate.trim()) return `$${draft.pricing.dailyRate}/day`;
-  if (draft.pricing.salePrice.trim()) return `$${draft.pricing.salePrice}`;
+  if (draft.pricing.salePrice.trim()) {
+    const sale = Number.parseFloat(draft.pricing.salePrice.replace(/[^0-9.]/g, ""));
+    if (Number.isFinite(sale) && sale <= 0) return "Free";
+    return `$${draft.pricing.salePrice}`;
+  }
   return "Ask";
 }
 
 export function activeModeLabels(draft: ListingDraft): string[] {
   const labels: string[] = [];
-  if (draft.modes.rent && !draft.modes.gift) labels.push("Rent");
-  if (draft.modes.sell) labels.push("Buy");
-  if (draft.modes.gift) labels.push("Gift");
+  if (draft.modes.rent) labels.push("Rent");
+  if (draft.modes.sell) {
+    const sale = Number.parseFloat((draft.pricing.salePrice || "").replace(/[^0-9.]/g, ""));
+    labels.push(Number.isFinite(sale) && sale <= 0 ? "Free" : "Buy");
+  } else if (draft.modes.gift) {
+    labels.push("Free");
+  }
   return labels.length ? labels : ["Rent"];
 }
 

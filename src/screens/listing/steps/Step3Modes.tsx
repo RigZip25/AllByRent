@@ -374,7 +374,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
           How do you want to offer it?
         </h2>
         <p className="mt-1 text-sm text-gray-500">
-          Rent it out, sell it, or both. Neighbors will see Rent / Buy on the shelf.
+          Rent it out, sell it, or both. Want to give it away? Use Sell with price $0.
         </p>
       </div>
 
@@ -581,30 +581,14 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                     placeholder="500"
                   />
                 </motion.div>
-                <ModeNote>💡 Platform commission applies. No deposit on buys.</ModeNote>
+                <ModeNote>
+                  💡 Set $0 to give it away free (no separate Gift mode for now). Platform commission applies on paid sales.
+                </ModeNote>
               </ModeCard>
             );
           }
 
-          return (
-            <ModeCard
-              key="gift"
-              icon={card.icon}
-              title={card.title}
-              subtitle={card.subtitle}
-              active={draft.modes.gift}
-              onToggle={() => toggleMode("gift")}
-            >
-              <motion.div
-                layout="position"
-                className="rounded-xl px-4 py-3 text-center text-sm font-semibold"
-                style={{ backgroundColor: "#F0FDF4", color: GREEN }}
-              >
-                This item will be offered completely free
-              </motion.div>
-              <ModeNote>💡 Free giveaway — no deposit, no commission.</ModeNote>
-            </ModeCard>
-          );
+          return null;
         })}
       </div>
 

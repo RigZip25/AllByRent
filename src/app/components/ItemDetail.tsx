@@ -595,7 +595,7 @@ export function ItemDetail({
               : isSold
                 ? "Sold"
                 : listing.modes.gift && !listing.modes.rent && !listing.modes.sell
-                  ? "Gift handoff isn’t open yet — use Share to reach the host"
+                  ? "Gift handoff isn’t open yet — list as Sell with price $0 to give it away"
                   : "Not available right now"}
           </div>
         ) : null}

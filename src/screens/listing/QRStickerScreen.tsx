@@ -448,7 +448,7 @@ export function QRStickerScreen({
           />
           {/* Camera-only to ensure sticker is attached to the physical item. */}
           <p className="mt-3 text-center text-xs text-gray-500">
-            Your listing won’t be visible to renters until this verification step is done. Gift and Sell listings are active immediately.
+            Your listing won’t be visible to renters until this verification step is done. Sell (and free $0 sell) listings are active immediately.
           </p>
         </div>
       </div>

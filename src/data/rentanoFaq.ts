@@ -22,7 +22,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Getting started",
     question: "How does Home work?",
     answer:
-      `Home is your window on the block. Search at the top, filter by Rent · Buy · Gift, and switch between Feed (items) and Garages (neighbor storefronts). Tap the center + to list from your garage.`,
+      `Home is your window on the block. Search at the top, filter by Rent · Buy, and switch between Feed (items) and Garages (neighbor storefronts). Tap the center + to list from your garage.`,
     keywords: ["home", "feed", "search", "browse"],
   },
   {
@@ -54,7 +54,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Hosting & listings",
     question: "How do I list my first item?",
     answer:
-      `Tap the green + in the footer (or Garage → New), then the fast wizard: 1) photos, 2) details & pricing (Rent / Sell / Gift), 3) review & publish. For rentals you may set up a QR sticker after publish. ${MASCOT_NAME} helps on each step.`,
+      `Tap the green + in the footer (or Garage → New), then the fast wizard: 1) photos, 2) details & pricing (Rent / Sell), 3) review & publish. For rentals you may set up a QR sticker after publish. Want to give something away? Use Sell with price $0. ${MASCOT_NAME} helps on each step.`,
     keywords: [
       "sell",
       "post",
@@ -81,7 +81,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Hosting & listings",
     question: "Which pricing modes should I choose?",
     answer:
-      "On step 2 (Details & pricing) pick Rent, Sell, and/or Gift. Only the fields for the modes you turn on are required. Sell-only listings skip the rental QR sticker.",
+      "On step 2 (Details & pricing) pick Rent and/or Sell. Only the fields for the modes you turn on are required. Sell-only listings skip the rental QR sticker. Price $0 on Sell = free giveaway (no separate Gift mode yet).",
     keywords: ["daily", "weekly", "deposit"],
   },
   {

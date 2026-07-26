@@ -2,7 +2,7 @@ import { Step2ItemInfo } from "./Step2ItemInfo";
 import { Step3Modes } from "./Step3Modes";
 import type { StepProps } from "../types";
 
-/** Frictionless wizard step 2 — item details + rent/buy/gift pricing in one scroll. */
+/** Frictionless wizard step 2 — item details + rent/sell pricing in one scroll. */
 export function Step2Details({ draft, setDraft }: StepProps) {
   return (
     <div className="flex flex-col">

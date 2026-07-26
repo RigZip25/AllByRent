@@ -69,7 +69,7 @@ export function HomeFeedCard({
               className="rounded-md px-2 py-0.5 text-[11px] font-bold text-white"
               style={{
                 backgroundColor:
-                  mode === "Buy" ? "#3B82F6" : mode === "Gift" ? "#F59E0B" : GREEN_DARK,
+                  mode === "Buy" ? "#3B82F6" : mode === "Free" || mode === "Gift" ? "#F59E0B" : GREEN_DARK,
               }}
             >
               {mode}

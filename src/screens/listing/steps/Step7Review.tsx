@@ -97,20 +97,21 @@ export function Step7Review({
     });
   }
   if (draft.modes.sell) {
+    const sale = Number.parseFloat((draft.pricing.salePrice || "").replace(/[^0-9.]/g, ""));
+    const free = Number.isFinite(sale) && sale <= 0;
     const price = formatMoney(draft.pricing.salePrice);
     modeRows.push({
-      icon: "🏷️",
-      label: "Sell",
-      detail: price ?? "Price set",
+      icon: free ? "🎁" : "🏷️",
+      label: free ? "Free giveaway" : "Sell",
+      detail: free ? "$0" : price ?? "Price set",
     });
-  }
-  if (draft.modes.gift) {
-    modeRows.push({ icon: "🎁", label: "Gift", detail: "Free" });
+  } else if (draft.modes.gift) {
+    modeRows.push({ icon: "🎁", label: "Free giveaway", detail: "Free" });
   }
 
   const previewTitle = draft.title.trim() || "Untitled item";
   const previewPrice = draft.pricing.dailyRate?.trim() || "—";
-  const previewOfferType = offerTypeFromModes(draft.modes);
+  const previewOfferType = offerTypeFromModes(draft.modes, draft.pricing.salePrice);
 
   return (
     <motion.div

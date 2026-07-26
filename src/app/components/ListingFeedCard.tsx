@@ -3,15 +3,19 @@ import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
 import type { MediaRef } from "../../lib/mediaStore";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 
-type OfferType = "Rent" | "Buy" | "Gift";
+type OfferType = "Rent" | "Buy" | "Free";
 
-export function offerTypeFromModes(modes: {
-  rent: boolean;
-  sell: boolean;
-  rentToOwn: boolean;
-  gift: boolean;
-}): OfferType {
-  if (modes.gift) return "Gift";
+export function offerTypeFromModes(
+  modes: {
+    rent: boolean;
+    sell: boolean;
+    rentToOwn: boolean;
+    gift: boolean;
+  },
+  salePrice?: string,
+): OfferType {
+  const sale = Number.parseFloat((salePrice ?? "").replace(/[^0-9.]/g, ""));
+  if (modes.gift || (modes.sell && Number.isFinite(sale) && sale <= 0)) return "Free";
   if (modes.sell) return "Buy";
   return "Rent";
 }
@@ -42,7 +46,7 @@ export function ListingFeedCard({
   const offerColors: Record<string, string> = {
     Rent: "bg-primary",
     Buy: "bg-blue-500",
-    Gift: "bg-accent",
+    Free: "bg-accent",
   };
 
   return (
