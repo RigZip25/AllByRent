@@ -278,8 +278,8 @@
   html.splash-v2-active,
   html.splash-v2-active body {
     /* iOS Safari/PWA: avoid "bottom strip" by matching viewport + safe area */
-    background: #062a1c;
-    background-color: #062a1c;
+    background: #f7fbf8;
+    background-color: #f7fbf8;
     min-height: 100%;
     height: 100%;
     /* Prefer dynamic viewport units; avoid -webkit-fill-available (can under-measure on modern iOS). */
@@ -291,8 +291,8 @@
   }
 
   html.splash-v2-active #root {
-    background: #062a1c;
-    background-color: #062a1c;
+    background: #f7fbf8;
+    background-color: #f7fbf8;
   }
 
   .splash-v2-overlay {
@@ -302,7 +302,11 @@
     width: 100%;
     min-height: 100vh;
     min-height: 100dvh;
-    background-color: #062a1c;
+    background-color: #f7fbf8;
+  }
+
+  .splash-light-overlay {
+    background-color: #f7fbf8;
   }
 
   .splash-v2-safe {
@@ -459,6 +463,25 @@
 
   .evorios-wordmark--splash-dark.evorios-wordmark--reveal {
     animation: evorios-wordmark-reveal 0.85s ease-out forwards;
+  }
+
+  @keyframes evorios-wordmark-reveal-light {
+    0% {
+      filter: brightness(0.92);
+      opacity: 0.85;
+    }
+    45% {
+      filter: drop-shadow(0 6px 22px rgba(13, 92, 58, 0.18)) brightness(1.05);
+      opacity: 1;
+    }
+    100% {
+      filter: none;
+      opacity: 1;
+    }
+  }
+
+  .evorios-wordmark--splash-light.evorios-wordmark--reveal {
+    animation: evorios-wordmark-reveal-light 0.85s ease-out forwards;
   }
 
   .app-screen-host > .screen {

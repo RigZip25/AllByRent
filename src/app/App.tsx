@@ -321,7 +321,7 @@ function clearBootQuery(keys: string[]) {
 function cleanupSplashGlobals() {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  root.classList.remove("splash-v2-active");
+  root.classList.remove("splash-v2-active", "splash-v2-light");
 }
 
 function resolvePostSplashScreen(): Screen {
