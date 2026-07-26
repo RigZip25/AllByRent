@@ -56,13 +56,14 @@ export function QRStickerScreen({
 
   const queuedForBulk = useMemo(() => isListingQueuedForBulk(draft.id), [draft.id]);
 
+  const publicQrUrl = getListingPublicUrl(draft);
   useEffect(() => {
-    void QRCode.toDataURL(getListingPublicUrl(draft), {
+    void QRCode.toDataURL(publicQrUrl, {
       width: 180,
       margin: 1,
       color: { dark: "#0D5C3A", light: "#FFFFFF" },
     }).then(setQrDataUrl);
-  }, [draft.id]);
+  }, [publicQrUrl]);
 
   const otherListings = eligibleListings.filter((l) => l.id !== draft.id);
 
