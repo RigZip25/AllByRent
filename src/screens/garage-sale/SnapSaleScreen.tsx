@@ -89,6 +89,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [justPublished, setJustPublished] = useState(false);
+  const [showShareAfterPublish, setShowShareAfterPublish] = useState(false);
   const [shelfCount, setShelfCount] = useState(0);
   const [publishedListingId, setPublishedListingId] = useState<string | null>(null);
   const [scheduleTick, setScheduleTick] = useState(0);
@@ -260,6 +261,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
 
         setPublishedListingId(draft.id);
         setShelfCount((count) => count + 1);
+        setShowShareAfterPublish(false);
         setJustPublished(true);
         setPhoto(null);
         setNote("");
@@ -277,6 +279,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
 
   const snapAnother = () => {
     setJustPublished(false);
+    setShowShareAfterPublish(false);
     setPublishedListingId(null);
     setError(null);
   };
@@ -297,47 +300,64 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
           <p className="mt-2 text-sm text-gray-600">
             {shelfCount === 1 ? copy.publishedHintFirst : copy.publishedHintMore}
           </p>
-          <p className="mt-1 text-xs font-medium" style={{ color: "#92400E" }}>
+          <p
+            className="mt-3 rounded-full px-3 py-1 text-xs font-bold text-white"
+            style={{ backgroundColor: GREEN }}
+          >
+            On your shelf · active
+          </p>
+          <p className="mt-2 text-xs font-medium" style={{ color: "#92400E" }}>
             {openHours}
           </p>
         </div>
         <div className="shrink-0 space-y-3 px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
-          <div className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: BORDER }}>
-            <p className="text-sm font-bold text-gray-900">{shareCopy.afterSnapTitle}</p>
-            <p className="mt-1 text-[12px] text-gray-500">{shareCopy.afterSnapHint}</p>
-            <div className="mt-3 space-y-3">
-              <GarageSharePanel
-                title={shareCopy.openGarageTitle}
-                payload={garageSharePayload}
-                shareKind="garage"
-                targetId={hostId}
-                defaultOpen
-                compact
-              />
-              {itemSharePayload && publishedListingId ? (
+          {showShareAfterPublish ? (
+            <div className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: BORDER }}>
+              <p className="text-sm font-bold text-gray-900">{shareCopy.afterSnapTitle}</p>
+              <p className="mt-1 text-[12px] text-gray-500">{shareCopy.afterSnapHint}</p>
+              <div className="mt-3 space-y-3">
                 <GarageSharePanel
-                  title={shareCopy.itemTitle}
-                  payload={itemSharePayload}
-                  shareKind="shelf"
-                  targetId={publishedListingId}
+                  title={shareCopy.openGarageTitle}
+                  payload={garageSharePayload}
+                  shareKind="garage"
+                  targetId={hostId}
+                  defaultOpen
                   compact
                 />
-              ) : null}
+                {itemSharePayload && publishedListingId ? (
+                  <GarageSharePanel
+                    title={shareCopy.itemTitle}
+                    payload={itemSharePayload}
+                    shareKind="shelf"
+                    targetId={publishedListingId}
+                    compact
+                  />
+                ) : null}
+              </div>
             </div>
-          </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowShareAfterPublish(true)}
+              className="w-full rounded-xl py-3.5 text-base font-bold"
+              style={{ backgroundColor: AMBER, color: GREEN }}
+            >
+              Share with neighbors
+            </button>
+          )}
           <button
             type="button"
             onClick={snapAnother}
-            className="w-full rounded-xl py-3.5 text-base font-bold"
-            style={{ backgroundColor: AMBER, color: GREEN }}
+            className="w-full rounded-xl border-2 py-3 text-base font-bold"
+            style={{ borderColor: GREEN, color: GREEN }}
           >
             {copy.snapAnotherCta}
           </button>
           <button
             type="button"
             onClick={onViewShop}
-            className="w-full rounded-xl border-2 py-3 text-base font-bold"
-            style={{ borderColor: GREEN, color: GREEN }}
+            className="w-full text-center text-sm font-semibold underline"
+            style={{ color: GREEN }}
           >
             {copy.viewShopCta}
           </button>

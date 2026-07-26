@@ -231,11 +231,13 @@ export function ListingShareScreen({
   return (
     <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-[#F9FAFB]">
       <div className="shrink-0 border-b bg-white px-5 pb-4 pt-4" style={{ borderColor: BORDER }}>
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Share</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Optional next step</p>
         <h2 className="mt-1 text-[18px] font-extrabold" style={{ color: GREEN }}>
-          Tell neighbors about {title}
+          Your listing is live — share it?
         </h2>
-        <p className="mt-1 text-[13px] text-gray-500">Caption auto-generated in your language.</p>
+        <p className="mt-1 text-[13px] text-gray-500">
+          {title} is already on your garage. Sharing is optional — caption ready in your language.
+        </p>
       </div>
 
       <div className="screen-scroll flex-1 min-h-0 p-5 pb-24 space-y-4">

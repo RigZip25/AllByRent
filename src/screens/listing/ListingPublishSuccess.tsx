@@ -1,15 +1,24 @@
 import { motion } from "motion/react";
-import { Check } from "lucide-react";
+import { Check, Share2 } from "lucide-react";
 import { AppBrandMark } from "../../components/AppBrandHeader";
 
 const GREEN = "#0D5C3A";
+const AMBER = "#F59E0B";
 
 type ListingPublishSuccessProps = {
   title: string;
+  /** Status line under the title — e.g. active vs pending QR. */
+  statusLine?: string;
+  onShare?: () => void;
   onDone: () => void;
 };
 
-export function ListingPublishSuccess({ title, onDone }: ListingPublishSuccessProps) {
+export function ListingPublishSuccess({
+  title,
+  statusLine,
+  onShare,
+  onDone,
+}: ListingPublishSuccessProps) {
   return (
     <motion.div
       className="mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col items-center justify-center bg-[#F9FAFB] px-6 text-center"
@@ -26,17 +35,42 @@ export function ListingPublishSuccess({ title, onDone }: ListingPublishSuccessPr
         You&apos;re live!
       </h2>
       <p className="mt-2 text-base text-gray-500">
-        <span className="font-semibold text-gray-800">{title}</span> is active on{" "}
+        <span className="font-semibold text-gray-800">{title}</span> is on{" "}
         <AppBrandMark size="sm" className="inline-flex align-baseline" />.
       </p>
-      <button
-        type="button"
-        onClick={onDone}
-        className="btn-primary mt-8 w-full max-w-sm text-white"
-        style={{ backgroundColor: GREEN }}
-      >
-        Back to home
-      </button>
+      <p className="mt-3 rounded-full px-3 py-1 text-xs font-bold text-white" style={{ backgroundColor: GREEN }}>
+        {statusLine ?? "Listing active"}
+      </p>
+
+      <div className="mt-8 flex w-full max-w-sm flex-col gap-3">
+        {onShare ? (
+          <button
+            type="button"
+            onClick={onShare}
+            className="btn-primary flex w-full items-center justify-center gap-2 text-white"
+            style={{ backgroundColor: AMBER, color: GREEN }}
+          >
+            <Share2 className="h-5 w-5" strokeWidth={2.25} />
+            Share with neighbors
+          </button>
+        ) : null}
+        <button
+          type="button"
+          onClick={onDone}
+          className={
+            onShare
+              ? "w-full rounded-xl border-2 py-3.5 text-base font-bold"
+              : "btn-primary w-full text-white"
+          }
+          style={
+            onShare
+              ? { borderColor: GREEN, color: GREEN }
+              : { backgroundColor: GREEN }
+          }
+        >
+          {onShare ? "Not now — done" : "Back to home"}
+        </button>
+      </div>
     </motion.div>
   );
 }

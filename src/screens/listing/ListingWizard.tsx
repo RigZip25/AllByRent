@@ -296,6 +296,10 @@ export function ListingWizard({
         return;
       }
       // Within the same listing's publish flow, treat Back as returning to the prior phase.
+      if (phase === "share") {
+        setPhase("success");
+        return;
+      }
       if (phase === "qrSticker") {
         setPhase("qrStory");
         return;
@@ -377,6 +381,7 @@ export function ListingWizard({
       firePublishConfetti();
       setIsPublishing(false);
 
+      // Celebrate that the listing is live first; social share comes after (optional).
       if (!giftOrSellOnly) {
         setPhase("qrStory");
       } else {
@@ -384,6 +389,12 @@ export function ListingWizard({
       }
     }, 900);
   };
+
+  const publishStatusLine = isGiftOrSellOnly(draft)
+    ? "Listing active"
+    : draft.listingStatus === "active"
+      ? "Listing active"
+      : "Saved — finish QR to show renters";
 
   const handlePublish = () => {
     // Edits to already-live listings skip the first-time seller checklist.
@@ -647,23 +658,9 @@ export function ListingWizard({
         <QRStickerScreen
           draft={draft}
           setDraft={setDraft}
-          onComplete={() => setPhase("share")}
+          onComplete={() => setPhase("success")}
           onListAnother={handleStartAnotherListing}
           onBackToStory={() => setPhase("qrStory")}
-        />
-      </div>
-    );
-  }
-
-  if (phase === "share") {
-    return (
-      <div
-        className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden"
-        style={{ backgroundColor: BACKGROUND }}
-      >
-        <ListingShareScreen
-          draft={draft}
-          onDone={() => setPhase("success")}
         />
       </div>
     );
@@ -677,6 +674,22 @@ export function ListingWizard({
       >
         <ListingPublishSuccess
           title={getListingDisplayTitle(draft.title)}
+          statusLine={publishStatusLine}
+          onShare={() => setPhase("share")}
+          onDone={onExit}
+        />
+      </div>
+    );
+  }
+
+  if (phase === "share") {
+    return (
+      <div
+        className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden"
+        style={{ backgroundColor: BACKGROUND }}
+      >
+        <ListingShareScreen
+          draft={draft}
           onDone={onExit}
         />
       </div>
