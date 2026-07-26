@@ -20,7 +20,7 @@ import { resolveHostAccountId } from "../../lib/hostIdentity";
 import type { ListingDraft } from "./types";
 import { QR_PDF_FILENAMES } from "../../lib/brand";
 import { generateQRStickerPdf, presentGeneratedPdf } from "../../lib/generateQRSticker";
-import { getListingDisplayTitle, getListingQrUrl, listingDraftToStickerRow } from "../../lib/listingQr";
+import { getListingDisplayTitle, getListingPublicUrl, listingDraftToStickerRow } from "../../lib/listingQr";
 import {
   deliverySummaryForListing,
   listingOffersDelivery,
@@ -134,7 +134,7 @@ export function HostListingDetailScreen({
 
   useEffect(() => {
     if (!listing) return;
-    void QRCode.toDataURL(getListingQrUrl(listing.qrToken ?? listing.id), {
+    void QRCode.toDataURL(getListingPublicUrl(listing), {
       width: 128,
       margin: 1,
       color: { dark: "#0D5C3A", light: "#FFFFFF" },
@@ -413,7 +413,7 @@ export function HostListingDetailScreen({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-gray-900">QR for this listing</p>
-              <p className="mt-0.5 truncate text-xs text-gray-500">{getListingQrUrl(listing.qrToken ?? listing.id)}</p>
+              <p className="mt-0.5 truncate text-xs text-gray-500">{getListingPublicUrl(listing)}</p>
             </div>
           </div>
 

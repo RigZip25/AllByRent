@@ -322,7 +322,13 @@ export function countPublishedListingsForHost(hostId: string): number {
 }
 
 export function getPublishedListingById(id: string): ListingDraft | null {
-  return loadPublishedListings().find((listing) => listing.id === id) ?? null;
+  const key = id.trim();
+  if (!key) return null;
+  return (
+    loadPublishedListings().find(
+      (listing) => listing.id === key || (listing.qrToken?.trim() ?? "") === key,
+    ) ?? null
+  );
 }
 
 export function updateStoredListing(draft: ListingDraft): void {
@@ -783,20 +789,30 @@ export async function uploadQrVerificationPhotoRemote(params: {
 }
 
 export async function fetchListingByIdRemote(id: string): Promise<ListingDraft | null> {
+  const key = id.trim();
+  if (!key) return null;
   if (!isSupabaseConfigured()) {
-    return getPublishedListingById(id);
+    return getPublishedListingById(key);
   }
   const supabase = getSupabaseClient();
-  if (!supabase) return getPublishedListingById(id);
-  const { data, error } = await supabase
-    .from("listings")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-  if (error || !data) return getPublishedListingById(id);
-  const draft = rowToDraft(data as SupabaseListingRow);
-  savePublishedListing(draft);
-  return draft;
+  if (!supabase) return getPublishedListingById(key);
+
+  // Public QR links use /item/:qrToken — resolve by listing id or qr_code.
+  const byId = await supabase.from("listings").select("*").eq("id", key).maybeSingle();
+  if (!byId.error && byId.data) {
+    const draft = rowToDraft(byId.data as SupabaseListingRow);
+    savePublishedListing(draft);
+    return draft;
+  }
+
+  const byQr = await supabase.from("listings").select("*").eq("qr_code", key).maybeSingle();
+  if (!byQr.error && byQr.data) {
+    const draft = rowToDraft(byQr.data as SupabaseListingRow);
+    savePublishedListing(draft);
+    return draft;
+  }
+
+  return getPublishedListingById(key);
 }
 
 export async function fetchListingsByOwnerIdsRemote(ownerIds: string[]): Promise<ListingDraft[]> {

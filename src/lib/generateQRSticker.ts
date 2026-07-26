@@ -151,6 +151,7 @@ export async function presentGeneratedPdf(
 
   if (!options?.preferOpen && typeof nav.share === "function" && typeof nav.canShare === "function") {
     try {
+      // Share the PDF file only — never attach a page URL (recipients would open the app, not a PDF).
       if (nav.canShare({ files: [file] })) {
         await nav.share({
           files: [file],

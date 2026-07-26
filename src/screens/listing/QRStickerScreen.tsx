@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import QRCode from "qrcode";
 import { generateQRStickerPdf, presentGeneratedPdf } from "../../lib/generateQRSticker";
-import { getListingDisplayTitle, getListingQrUrl, listingDraftToStickerRow } from "../../lib/listingQr";
+import { getListingDisplayTitle, getListingPublicUrl, listingDraftToStickerRow } from "../../lib/listingQr";
 import {
   addListingToQrBulkQueue,
   clearQrBulkQueue,
@@ -14,10 +14,9 @@ import {
   uploadQrVerificationPhotoRemote,
   updateStoredListing,
 } from "../../lib/listingStorage";
-import { loadUserProfile, saveUserProfile } from "../../lib/userProfileStorage";
 import type { ListingDraft } from "./types";
 import type { Dispatch, SetStateAction } from "react";
-import { APP_NAME, QR_PDF_FILENAMES } from "../../lib/brand";
+import { QR_PDF_FILENAMES } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
 
 const GREEN = "#0D5C3A";
@@ -46,7 +45,6 @@ export function QRStickerScreen({
   const [pdfFilename, setPdfFilename] = useState<string>(QR_PDF_FILENAMES.stickers);
   const [actionsOpen, setActionsOpen] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const [email, setEmail] = useState(() => loadUserProfile().email ?? "");
   const [bulkCount, setBulkCount] = useState(() => loadQrBulkQueueListingIds().length);
   const emptySpotsLeft = Math.max(0, QR_SHEET_CAPACITY - bulkCount);
 
@@ -59,12 +57,12 @@ export function QRStickerScreen({
   const queuedForBulk = useMemo(() => isListingQueuedForBulk(draft.id), [draft.id]);
 
   useEffect(() => {
-    void QRCode.toDataURL(getListingQrUrl(draft.qrToken ?? draft.id), {
+    void QRCode.toDataURL(getListingPublicUrl(draft), {
       width: 180,
       margin: 1,
       color: { dark: "#0D5C3A", light: "#FFFFFF" },
     }).then(setQrDataUrl);
-  }, [draft.id, draft.qrToken]);
+  }, [draft.id]);
 
   const otherListings = eligibleListings.filter((l) => l.id !== draft.id);
 
@@ -174,27 +172,19 @@ export function QRStickerScreen({
     }
   };
 
-  const handleEmail = async () => {
+  /** Share/download the PDF file itself — never a web URL (those open the app, not a PDF). */
+  const handleSharePdf = async () => {
     setPdfLoading(true);
     setPdfError(null);
     try {
-      await generatePdf([draft.id], { paper: "a4", layout: "single", labelIn: 3, filename: QR_PDF_FILENAMES.sticker3x3 });
-      const trimmedEmail = email.trim();
-      if (trimmedEmail) {
-        const profile = loadUserProfile();
-        if (profile.email !== trimmedEmail) {
-          saveUserProfile({ ...profile, email: trimmedEmail });
-        }
-      }
-      const to = encodeURIComponent(email.trim());
-      const subject = encodeURIComponent(`${APP_NAME} QR sticker PDF`);
-      const listingUrl = getListingQrUrl(draft.qrToken ?? draft.id);
-      const body = encodeURIComponent(
-        `Here’s your ${APP_NAME} QR sticker.\n\nListing link:\n${listingUrl}\n\nPDF tip:\nMost email clients can’t attach a PDF from the browser automatically. Use the Download button in the app, then attach the PDF from your files (desktop is easiest).`,
-      );
-      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+      await generatePdf([draft.id], {
+        paper: "a4",
+        layout: "single",
+        labelIn: 3,
+        filename: QR_PDF_FILENAMES.sticker3x3,
+      });
     } catch {
-      setPdfError("Could not generate email. Please try again.");
+      setPdfError("Could not prepare the PDF. Please try again.");
     } finally {
       setPdfLoading(false);
     }
@@ -318,22 +308,6 @@ export function QRStickerScreen({
             You can download the PDF to print later (desktop is easiest). Print on an Avery-compatible label sheet, or use regular paper + clear tape on top to protect it.
           </p>
 
-          {email.trim() ? null : (
-            <div className="rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
-              <p className="text-sm font-semibold text-gray-900">Email (optional)</p>
-              <p className="mt-1 text-xs text-gray-500">
-                Add an email to prefill the “Email PDF” action.
-              </p>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-green-700"
-              />
-            </div>
-          )}
-
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
@@ -355,18 +329,19 @@ export function QRStickerScreen({
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => void handleEmail()}
-              disabled={pdfLoading || !email.trim()}
-              className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
-              style={{ borderColor: GREEN, color: GREEN }}
-            >
-              ✉️ Email link
-            </button>
-            <div />
-          </div>
+          <button
+            type="button"
+            onClick={() => void handleSharePdf()}
+            disabled={pdfLoading}
+            className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
+            style={{ borderColor: GREEN, color: GREEN }}
+          >
+            📤 Share / save PDF file
+          </button>
+          <p className="text-center text-xs text-gray-500">
+            Sends the PDF file itself (AirDrop, Files, Messages). There is no web “download link” —
+            a link would only open the app.
+          </p>
 
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
             <div className="flex items-center justify-between gap-2">
@@ -492,7 +467,7 @@ export function QRStickerScreen({
               PDF ready
             </h3>
             <p className="mt-1 text-xs text-gray-500">
-              You can download, print, or email yourself a link/instructions.
+              Download or print the file on this device. Sharing a website link won’t send the PDF.
             </p>
             <div className="mt-4 grid grid-cols-2 gap-2">
               <a
@@ -513,12 +488,12 @@ export function QRStickerScreen({
               </button>
               <button
                 type="button"
-                onClick={() => void handleEmail()}
-                disabled={!email.trim()}
+                onClick={() => void handleSharePdf()}
+                disabled={pdfLoading}
                 className="col-span-2 w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
                 style={{ borderColor: GREEN, color: GREEN }}
               >
-                ✉️ Email link/instructions
+                📤 Share PDF file
               </button>
             </div>
             <button
