@@ -42,7 +42,6 @@ import { MrEvoriosScreen } from "../screens/MrEvoriosScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
 import { SetupRequiredScreen } from "../screens/SetupRequiredScreen";
-import { IntegrationStatusScreen } from "../screens/IntegrationStatusScreen";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
 import { AuthProvider, useAuth } from "../hooks/AuthProvider";
@@ -155,7 +154,6 @@ type Screen =
   | "profile"
   | "favorites"
   | "earnBusiness"
-  | "integrationStatus"
   | "identity"
   | "agentActivity"
   | "deleteAccount"
@@ -710,7 +708,6 @@ function AppRoutes() {
   );
   const handleOpenFavorites = useCallback(() => goToTab("favorites"), [goToTab]);
   const handleOpenBusiness = useCallback(() => goToTab("earnBusiness"), [goToTab]);
-  const handleOpenIntegrations = useCallback(() => navigateTo("integrationStatus"), [navigateTo]);
 
   const handleOpenPersonalInfo = useCallback(
     (field?: "name" | "phone") => {
@@ -1362,7 +1359,6 @@ function AppRoutes() {
             onFavorites={handleOpenFavorites}
             onNotifications={handleOpenNotifications}
             onEarnBusiness={handleOpenBusiness}
-            onOpenIntegrations={handleOpenIntegrations}
           />
         )}
 
@@ -1452,7 +1448,6 @@ function AppRoutes() {
             onRentals={handleOpenRentals}
             onEditLocation={openRentLocationSetup}
             onOpenNotifications={handleOpenNotifications}
-            onOpenIntegrations={handleOpenIntegrations}
             onDeleteAccount={() => navigateTo("deleteAccount")}
             onOpenCoHosts={() => navigateTo("coHosts")}
             onOpenPersonalInfo={handleOpenPersonalInfo}
@@ -1501,10 +1496,6 @@ function AppRoutes() {
 
         {currentScreen === "earnBusiness" && (
           <EarnBusinessScreen onHome={handleOpenHome} onRentals={handleOpenRentals} />
-        )}
-
-        {currentScreen === "integrationStatus" && (
-          <IntegrationStatusScreen onBack={handleBack} />
         )}
 
         {currentScreen === "identity" && (

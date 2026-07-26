@@ -103,9 +103,9 @@ After deploy: add DB trigger on new listings → push followers (`garage_follows
 
 ---
 
-## 5. In-app integration checklist
+## 5. Integration checklist (ops / setup)
 
-**More → Integrations** or **Profile → Integration status** reflects client-detectable env vars (`integrations.ts`, `production.ts`).
+Client-detectable env status lives in `src/lib/config/integrations.ts` (also used by `SetupRequiredScreen`). It is **not** shown in Profile/More for end users.
 
 ---
 

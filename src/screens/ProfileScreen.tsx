@@ -152,7 +152,6 @@ export function ProfileScreen({
   onDeleteAccount,
   onViewPublicProfile,
   onRequireAuth,
-  onOpenIntegrations,
 }: {
   onRentals: () => void;
   onMrE: () => void;
@@ -165,7 +164,6 @@ export function ProfileScreen({
   onDeleteAccount?: () => void;
   onViewPublicProfile?: (userId?: string) => void;
   onRequireAuth?: () => void;
-  onOpenIntegrations?: () => void;
 }) {
   const auth = useAuth();
   const [profile, setProfile] = useState<UserProfile>(() =>
@@ -532,16 +530,6 @@ export function ProfileScreen({
           {connectError ? (
             <li className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[12px] text-red-800">
               {connectError}
-            </li>
-          ) : null}
-          {onOpenIntegrations ? (
-            <li>
-              <RowButton
-                icon={<Sparkles className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-                label="Integration status"
-                value="Supabase, Stripe, push — what’s left to connect"
-                onClick={onOpenIntegrations}
-              />
             </li>
           ) : null}
         </ul>
