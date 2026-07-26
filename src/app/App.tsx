@@ -533,11 +533,10 @@ function AppRoutes() {
   }, []);
 
   const navigateTo = useCallback((screen: Screen) => {
+    // Listing draft is allowed without sign-in; AuthGate runs on “Go public”.
     const authRequired =
       screen === "booking" ||
       screen === "postRequest" ||
-      screen === "listingIntro" ||
-      screen === "listItem" ||
       screen === "hostListingDetail" ||
       screen === "activeRental" ||
       screen === "identity" ||
@@ -1587,6 +1586,11 @@ function AppRoutes() {
             initialPrefill={listingPrefill}
             initialDraft={editingListingId ? getPublishedListingById(editingListingId) : null}
             editingListingId={editingListingId}
+            onRequireAuth={(listingId) => {
+              setEditingListingId(listingId);
+              setEditingListingReturn(listingId);
+              showAuthGate("listItem", "list");
+            }}
             onExit={() => {
               setListingPrefill(null);
               setEditingListingId(null);

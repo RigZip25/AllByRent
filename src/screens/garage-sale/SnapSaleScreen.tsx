@@ -13,6 +13,7 @@ import { loadUserProfile } from "../../lib/userProfileStorage";
 import { applyFrictionlessDefaults } from "../listing/frictionlessDefaults";
 import { createInitialListingDraft } from "../listing/types";
 import { applyYardSaleListingDefaults } from "../../lib/yardSaleListing";
+import { loadSellerGoPublicStatus } from "../../lib/sellerGoPublic";
 import {
   buildInitialOfferPrefs,
   defaultAuctionOfferWindow,
@@ -156,52 +157,66 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
     setBusy(true);
     setError(null);
 
-    window.setTimeout(() => {
-      const hostId = resolveHostAccountId(auth.userId);
-      const title = note.trim().slice(0, 60) || copy.defaultTitle;
-      const draft = applyYardSaleListingDefaults(
-        applyFrictionlessDefaults({
-          ...createInitialListingDraft(),
-          hostId,
-          photos: [photo],
-          title,
-          description: note.trim(),
-          pricing: {
-            ...createInitialListingDraft().pricing,
-            salePrice: String(priceUsd),
-          },
-          listingStatus: "active",
-          generateQR: false,
-        }),
-      );
-
-      setGarageSaleOfferPrefs(
-        draft.id,
-        buildInitialOfferPrefs({ saleMode, buyNowUsd: priceUsd }),
-        hostId,
-      );
-
-      if (auth.userId) {
-        void savePublishedListingRemote(draft, auth.userId);
-      } else {
-        savePublishedListing(draft);
+    void loadSellerGoPublicStatus(auth.userId).then((status) => {
+      if (!status.ready) {
+        const tip =
+          status.nextStep === "sign_in"
+            ? "Sign in first, then verify identity and connect Stripe before going public."
+            : status.nextStep === "identity"
+              ? "Verify your identity (listing Go public checklist or Profile), then connect Stripe."
+              : "Connect your bank with Stripe before this item can go public.";
+        setError(tip);
+        setBusy(false);
+        return;
       }
 
-      const profile = loadUserProfile();
-      notifyGarageFollowersOfNewListing({
-        hostId,
-        hostName: profile.displayName,
-        listingTitle: title,
-      });
+      window.setTimeout(() => {
+        const hostId = resolveHostAccountId(auth.userId);
+        const title = note.trim().slice(0, 60) || copy.defaultTitle;
+        const draft = applyYardSaleListingDefaults(
+          applyFrictionlessDefaults({
+            ...createInitialListingDraft(),
+            hostId,
+            photos: [photo],
+            title,
+            description: note.trim(),
+            pricing: {
+              ...createInitialListingDraft().pricing,
+              salePrice: String(priceUsd),
+            },
+            listingStatus: "active",
+            generateQR: false,
+          }),
+        );
 
-      setPublishedListingId(draft.id);
-      setShelfCount((count) => count + 1);
-      setJustPublished(true);
-      setPhoto(null);
-      setNote("");
-      setPrice("");
-      setBusy(false);
-    }, 400);
+        setGarageSaleOfferPrefs(
+          draft.id,
+          buildInitialOfferPrefs({ saleMode, buyNowUsd: priceUsd }),
+          hostId,
+        );
+
+        if (auth.userId) {
+          void savePublishedListingRemote(draft, auth.userId);
+        } else {
+          savePublishedListing(draft);
+        }
+
+        const profile = loadUserProfile();
+        notifyGarageFollowersOfNewListing({
+          hostId,
+          hostName: profile.displayName,
+          listingTitle: title,
+        });
+
+        setPublishedListingId(draft.id);
+        setShelfCount((count) => count + 1);
+        setJustPublished(true);
+        setPhoto(null);
+        setNote("");
+        setPrice("");
+        setBusy(false);
+      }, 400);
+    });
   };
 
   const snapAnother = () => {
