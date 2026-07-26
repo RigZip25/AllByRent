@@ -150,10 +150,9 @@ function SplashDynamic({ onDone, preview }: { onDone: () => void; preview: boole
   const [phase, setPhase] = useState<DynamicPhase>("flyIn");
 
   useEffect(() => {
-    if (preview) return;
     const t1 = setTimeout(() => setPhase("title"), T_FLYIN_END);
     const t2 = setTimeout(() => setPhase("ready"), T_TITLE_END);
-    const t3 = setTimeout(() => onDone(), T_AUTO_ADVANCE);
+    const t3 = setTimeout(() => !preview && onDone(), T_AUTO_ADVANCE);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
@@ -190,8 +189,8 @@ function SplashDynamic({ onDone, preview }: { onDone: () => void; preview: boole
                   return (
                     <motion.div
                       key={index}
-                      className="absolute left-1/2 top-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-[#0D5C3A]/12 bg-white shadow-[0_8px_18px_-8px_rgba(13,92,58,0.35)]"
-                      style={{ marginLeft: -22, marginTop: -22 }}
+                      className="absolute left-1/2 top-1/2 z-10 flex h-12 w-12 items-center justify-center rounded-full border border-[#0D5C3A]/18 bg-white shadow-[0_10px_22px_-8px_rgba(13,92,58,0.4)]"
+                      style={{ marginLeft: -24, marginTop: -24, backgroundColor: "#FFFFFF" }}
                       initial={{ x: 0, y: 0, opacity: 0, scale: 0.2 }}
                       animate={{ x: pos.x, y: pos.y, opacity: 1, scale: 1 }}
                       transition={{
@@ -202,7 +201,7 @@ function SplashDynamic({ onDone, preview }: { onDone: () => void; preview: boole
                         damping: 14,
                       }}
                     >
-                      <Icon className="h-[1.15rem] w-[1.15rem]" style={{ color: BRAND_GREEN }} strokeWidth={2} aria-hidden />
+                      <Icon className="h-5 w-5" style={{ color: BRAND_GREEN }} strokeWidth={2.25} aria-hidden />
                     </motion.div>
                   );
                 })}
