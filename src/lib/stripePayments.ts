@@ -343,13 +343,24 @@ export type ConnectAccountLinkResult = { ok: true; url: string } | { ok: false; 
 function friendlyConnectError(raw: string): string {
   const lower = raw.toLowerCase();
   if (
+    lower.includes("responsibilities") ||
+    lower.includes("managing losses") ||
+    lower.includes("platform-profile") ||
+    (lower.includes("platform profile") && lower.includes("connect"))
+  ) {
+    // Keep Stripe’s wording so the UI can detect + deep-link the Dashboard.
+    return raw.includes("dashboard.stripe.com")
+      ? raw
+      : `${raw} Open https://dashboard.stripe.com/settings/connect/platform-profile`;
+  }
+  if (
     lower.includes("signed up for connect") ||
     (lower.includes("connect") && lower.includes("not enabled"))
   ) {
     return "Stripe Connect isn’t enabled for this platform. In Stripe Dashboard → Connect, complete platform profile / get started, then try again.";
   }
   if (lower.includes("responsible") || lower.includes("platform profile")) {
-    return "Finish Stripe Connect platform setup in the Dashboard (responsibilities / platform profile), then try again.";
+    return "Finish Stripe Connect platform setup in the Dashboard (responsibilities / platform profile), then try again. https://dashboard.stripe.com/settings/connect/platform-profile";
   }
   if (lower.includes("invalid api key") || lower.includes("api key")) {
     return "Stripe API key problem. Check STRIPE_SECRET_KEY on Vercel (test vs live must match the publishable key).";

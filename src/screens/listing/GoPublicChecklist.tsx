@@ -1,6 +1,7 @@
 import { Check, Circle, Loader2 } from "lucide-react";
 import { motion } from "motion/react";
 import { RentanoHint } from "../../components/RentanoHint";
+import { ConnectSetupError } from "../../components/payments/ConnectSetupError";
 import { MASCOT_NAME } from "../../lib/brand";
 import type { SellerGoPublicStatus, SellerGoPublicStep } from "../../lib/sellerGoPublic";
 
@@ -180,11 +181,7 @@ export function GoPublicChecklist({
         </ol>
       )}
 
-      {error ? (
-        <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-800">
-          {error}
-        </p>
-      ) : null}
+      {error ? <ConnectSetupError message={error} /> : null}
 
       <button
         type="button"
