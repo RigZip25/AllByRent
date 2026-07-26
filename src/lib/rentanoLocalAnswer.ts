@@ -171,14 +171,20 @@ export function queryLooksNonEnglish(query: string): boolean {
   const trimmed = query.trim();
   if (!trimmed) return false;
 
-  // Any non-ASCII letter (Cyrillic, accented Spanish/French, etc.)
-  if (/\p{L}/u.test(trimmed) && /[^\u0000-\u007F]/.test(trimmed)) {
+  if (
+    /\p{Script=Cyrillic}|\p{Script=Arabic}|\p{Script=Han}|\p{Script=Hangul}|\p{Script=Hiragana}|\p{Script=Katakana}|\p{Script=Thai}|\p{Script=Hebrew}/u.test(
+      trimmed,
+    )
+  ) {
     return true;
   }
 
+  // Accented Latin (español, français, deutsch, …)
+  if (/[À-ÿ]/u.test(trimmed)) return true;
+
   // Common non-English Latin questions without accents (e.g. Spanish "como")
   if (
-    /\b(como|qué|que|dónde|donde|puedo|necesito|ayuda|publicar|anuncio|gracias|hola|por\s+favor|bonjour|merci|comment|bitte|danke|wie|kann|vender|alquilar|listing|publicar)\b/i.test(
+    /\b(como|qué|que|dónde|donde|puedo|necesito|ayuda|publicar|anuncio|gracias|hola|por\s+favor|bonjour|merci|comment|bitte|danke|wie|kann|vender|alquilar)\b/i.test(
       trimmed,
     )
   ) {
