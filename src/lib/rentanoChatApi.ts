@@ -39,14 +39,22 @@ export async function sendRentanoMessage(
     if (cached) return cached;
   }
 
+  const messages = history
+    .map((turn) => ({
+      role: turn.role,
+      content: turn.content.trim(),
+    }))
+    .filter((turn) => turn.content.length > 0);
+
+  if (messages.length === 0) {
+    throw new Error("Nothing to send — type a question first.");
+  }
+
   const data = await postLlmChat({
     purpose: "chat",
     max_tokens: 900,
     system: buildSystemPrompt(context),
-    messages: history.map((turn) => ({
-      role: turn.role,
-      content: turn.content,
-    })),
+    messages,
   });
 
   const text = data.text;

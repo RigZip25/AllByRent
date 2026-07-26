@@ -34,6 +34,17 @@ const STOP_WORDS = new Set([
 
 const NAV_HINTS: Array<{ patterns: RegExp[]; answer: string }> = [
   {
+    patterns: [
+      /как\s+размест/i,
+      /размест.*(листинг|объявлен|вещ)/i,
+      /как\s+(выложить|добавить|опубликовать)/i,
+      /list(ing)?\s*(an?\s+)?item/i,
+      /how\s+(do\s+i\s+)?(list|post|publish|stock)/i,
+    ],
+    answer:
+      "Tap the green + in the footer to stock your garage. Follow the wizard: photos → item info → pricing → pickup → availability → QR → publish. Then open Garage to see your listings.",
+  },
+  {
     patterns: [/bottom\s*nav/i, /menu.*(not|won.?t|doesn.?t)/i, /(stuck|freeze|hang)/i, /can.?t\s+(tap|click|navigate)/i],
     answer:
       `If taps do nothing, pull down to refresh once. Bottom menu: Home (browse), ${MASCOT_NAME} (help), green + (list an item), Garage (your storefront), More (profile & rentals). Each tab should switch instantly.`,
@@ -87,7 +98,8 @@ const NAV_HINTS: Array<{ patterns: RegExp[]; answer: string }> = [
 function tokenize(text: string): string[] {
   return text
     .toLowerCase()
-    .replace(/[^\w\s]/g, " ")
+    // Keep letters from any script (Cyrillic, Latin, …) — `\w` alone drops Russian.
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
     .split(/\s+/)
     .filter((word) => word.length > 2 && !STOP_WORDS.has(word));
 }

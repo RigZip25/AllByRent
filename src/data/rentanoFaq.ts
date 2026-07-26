@@ -55,7 +55,18 @@ export const RENTANO_FAQ: FaqItem[] = [
     question: "How do I list my first item?",
     answer:
       `Tap the green + in the footer (or Garage tab → Add), then follow the wizard: photos, item info, Rent/Buy/Gift pricing, pickup, availability, QR, and review. ${MASCOT_NAME} helps on each step.`,
-    keywords: ["sell", "post", "wizard", "stock"],
+    keywords: [
+      "sell",
+      "post",
+      "wizard",
+      "stock",
+      "listing",
+      "publish",
+      "листинг",
+      "разместить",
+      "объявление",
+      "выложить",
+    ],
   },
   {
     id: "photos-ai",
