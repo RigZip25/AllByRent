@@ -67,7 +67,6 @@ export function GoPublicChecklist({
   busy,
   error,
   onSignIn,
-  onVerifyIdentity,
   onConnectBank,
   onRefresh,
   onGoLive,
@@ -75,7 +74,6 @@ export function GoPublicChecklist({
   isPublishing,
 }: Props) {
   const signedIn = Boolean(status?.signedIn);
-  const identityVerified = Boolean(status?.identityVerified);
   const payoutsEnabled = Boolean(status?.payoutsEnabled);
   const next = status?.nextStep ?? "sign_in";
   const ready = Boolean(status?.ready);
@@ -94,32 +92,20 @@ export function GoPublicChecklist({
       disabled: signedIn || loading,
     },
     {
-      id: "identity",
-      title: "Verify identity",
-      detail: identityVerified
-        ? "Verified — neighbors can trust this listing."
-        : "One-time ID check with Stripe Identity.",
-      done: identityVerified,
-      actionLabel: busy === "identity" ? "Starting…" : "Verify now",
-      onAction: onVerifyIdentity,
-      actionBusy: busy === "identity",
-      disabled: !signedIn || identityVerified || loading || busy !== null,
-    },
-    {
       id: "stripe",
-      title: "Connect bank (Stripe)",
+      title: "Verify & connect bank",
       detail: payoutsEnabled
         ? status?.bankLast4
-          ? `Payouts enabled · **** ${status.bankLast4}`
-          : "Payouts enabled — you can get paid."
+          ? `Verified · payouts on · **** ${status.bankLast4}`
+          : "Verified with Stripe — payouts enabled."
         : status?.connected
-          ? "Stripe account started — finish bank setup to enable payouts."
-          : "Required so buyers can pay and you can receive payouts.",
+          ? "Stripe started — finish ID + bank in the Stripe form to enable payouts."
+          : "Stripe checks your ID and links your bank so neighbors can pay you.",
       done: payoutsEnabled,
-      actionLabel: busy === "stripe" ? "Opening Stripe…" : "Connect bank",
+      actionLabel: busy === "stripe" ? "Opening Stripe…" : "Continue with Stripe",
       onAction: onConnectBank,
       actionBusy: busy === "stripe",
-      disabled: !signedIn || !identityVerified || payoutsEnabled || loading || busy !== null,
+      disabled: !signedIn || payoutsEnabled || loading || busy !== null,
     },
   ];
 
@@ -142,7 +128,7 @@ export function GoPublicChecklist({
         Finish to go public
       </h2>
       <p className="mt-1 text-base text-gray-500">
-        Three steps — in order. Your listing stays a private draft until all are done.
+        Two steps — in order. Your listing stays a private draft until both are done.
       </p>
 
       {loading && !status ? (
@@ -207,12 +193,12 @@ export function GoPublicChecklist({
         className="mt-4 text-sm font-semibold underline disabled:opacity-50"
         style={{ color: GREEN }}
       >
-        {busy === "refresh" || loading ? "Refreshing…" : "I finished a step — refresh status"}
+        {busy === "refresh" || loading ? "Refreshing…" : "I finished Stripe — refresh status"}
       </button>
 
       <RentanoHint
         className="mt-5"
-        hint={`${MASCOT_NAME}: Sign in → verify → connect bank. Then tap Go live — no hunting through menus.`}
+        hint={`${MASCOT_NAME}: Sign in, then Stripe verifies your ID and bank in one flow. No separate Identity menu.`}
         showTapLabel
       />
 

@@ -36,19 +36,33 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       ? body.returnUrl.trim()
       : "http://localhost:5173/?screen=profile";
 
-  const session = await stripe.identity.verificationSessions.create({
-    type: "document",
-    metadata: {
-      supabase_user_id: user.id,
-      email: user.email ?? "",
-    },
-    return_url: returnUrl,
-  });
+  try {
+    const session = await stripe.identity.verificationSessions.create({
+      type: "document",
+      metadata: {
+        supabase_user_id: user.id,
+        email: user.email ?? "",
+      },
+      return_url: returnUrl,
+    });
 
-  res.status(200).json({
-    ok: true,
-    client_secret: session.client_secret,
-    url: session.url ?? null,
-  });
+    res.status(200).json({
+      ok: true,
+      client_secret: session.client_secret,
+      url: session.url ?? null,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Stripe Identity failed";
+    const lower = message.toLowerCase();
+    const reason =
+      lower.includes("identity") &&
+      (lower.includes("not enabled") ||
+        lower.includes("not been activated") ||
+        lower.includes("activate") ||
+        lower.includes("signed up"))
+        ? "Stripe Identity isn’t enabled. Enable it in Stripe Dashboard → Identity, or use Connect bank from Go public (ID check is included there)."
+        : message;
+    res.status(200).json({ ok: false, reason });
+  }
 });
 

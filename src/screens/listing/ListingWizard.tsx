@@ -405,7 +405,7 @@ export function ListingWizard({
       setGoPublicBusy("refresh");
       const status = await refreshGoPublicStatus();
       if (!status?.ready) {
-        setGoPublicError("Finish sign-in, identity, and bank connect before going live.");
+        setGoPublicError("Finish sign-in and Stripe (ID + bank) before going live.");
         return;
       }
       const saved = await persistDraftForGoPublic();

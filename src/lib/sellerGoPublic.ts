@@ -11,7 +11,12 @@ import {
 
 const GO_PUBLIC_PENDING_KEY = "allbyrent_go_public_listing";
 
-export type SellerGoPublicStep = "sign_in" | "identity" | "stripe" | "ready";
+/**
+ * Go-public checklist steps.
+ * Identity KYC is collected inside Stripe Connect Express — a separate Stripe Identity
+ * product step blocked hosts when Identity wasn’t enabled in the Dashboard.
+ */
+export type SellerGoPublicStep = "sign_in" | "stripe" | "ready";
 
 /** Persist that the host was mid “go public” so Stripe/auth returns reopen the checklist. */
 export function markGoPublicPending(listingId: string): void {
@@ -42,6 +47,7 @@ export function clearGoPublicPending(): void {
 
 export type SellerGoPublicStatus = {
   signedIn: boolean;
+  /** Stripe Identity badge and/or Connect KYC completed (payouts). */
   identityVerified: boolean;
   connected: boolean;
   payoutsEnabled: boolean;
@@ -54,7 +60,7 @@ export type SellerGoPublicActionResult =
   | { ok: true; url: string }
   | { ok: false; reason: string };
 
-/** Deep-link back into the listing wizard after Stripe Identity / Connect. */
+/** Deep-link back into the listing wizard after Stripe Connect. */
 export function listingWizardReturnPath(listingId: string): string {
   const id = listingId.trim();
   if (!id) return "/?screen=listItem";
@@ -62,10 +68,9 @@ export function listingWizardReturnPath(listingId: string): string {
 }
 
 export function resolveSellerGoPublicNextStep(
-  status: Pick<SellerGoPublicStatus, "signedIn" | "identityVerified" | "payoutsEnabled">,
+  status: Pick<SellerGoPublicStatus, "signedIn" | "payoutsEnabled">,
 ): SellerGoPublicStep {
   if (!status.signedIn) return "sign_in";
-  if (!status.identityVerified) return "identity";
   if (!status.payoutsEnabled) return "stripe";
   return "ready";
 }
@@ -79,7 +84,6 @@ export async function loadSellerGoPublicStatus(
     const localIdentity = Boolean(loadUserProfile().verification.identity);
     const next = resolveSellerGoPublicNextStep({
       signedIn,
-      identityVerified: localIdentity,
       payoutsEnabled: false,
     });
     return {
@@ -98,12 +102,14 @@ export async function loadSellerGoPublicStatus(
     loadConnectStatus(userId),
   ]);
 
+  // Connect Express already runs government-ID KYC; treat payouts as identity-complete too.
   const identityVerified =
-    Boolean(remote?.identity_verified) || Boolean(loadUserProfile().verification.identity);
+    Boolean(remote?.identity_verified) ||
+    Boolean(loadUserProfile().verification.identity) ||
+    connect.payoutsEnabled;
 
   const next = resolveSellerGoPublicNextStep({
     signedIn: true,
-    identityVerified,
     payoutsEnabled: connect.payoutsEnabled,
   });
 
@@ -116,6 +122,23 @@ export async function loadSellerGoPublicStatus(
     ready: next === "ready",
     nextStep: next,
   };
+}
+
+function friendlyIdentityError(raw: string): string {
+  const lower = raw.toLowerCase();
+  if (
+    lower.includes("identity") &&
+    (lower.includes("not enabled") ||
+      lower.includes("not been activated") ||
+      lower.includes("activate") ||
+      lower.includes("signed up"))
+  ) {
+    return "Stripe Identity isn’t enabled on this Stripe account. Use Connect bank in Go public instead (ID check is included), or enable Identity in Stripe Dashboard → Identity.";
+  }
+  if (lower.includes("invalid api key") || lower.includes("api key")) {
+    return "Stripe API key problem. Check STRIPE_SECRET_KEY on Vercel (test vs live).";
+  }
+  return raw;
 }
 
 export async function startIdentityVerificationForListing(
@@ -144,18 +167,29 @@ export async function startIdentityVerificationForListing(
       },
       body: JSON.stringify({ returnUrl: absoluteReturn }),
     });
-    const payload = (await res.json()) as {
+
+    let payload: {
       ok?: boolean;
       url?: string | null;
       client_secret?: string;
       reason?: string;
       error?: string;
-    };
-    if (!payload?.ok) {
+    } = {};
+    try {
+      payload = (await res.json()) as typeof payload;
+    } catch {
       return {
         ok: false,
-        reason: payload?.reason || payload?.error || "Stripe Identity unavailable.",
+        reason: `Identity request failed (HTTP ${res.status}). Try Connect bank instead — ID check is included there.`,
       };
+    }
+
+    if (!payload?.ok) {
+      const raw =
+        payload?.reason ||
+        payload?.error ||
+        (res.status === 401 ? "Sign in required." : `Stripe Identity unavailable (HTTP ${res.status}).`);
+      return { ok: false, reason: friendlyIdentityError(raw) };
     }
     if (payload.url) {
       return { ok: true, url: payload.url };
@@ -164,14 +198,19 @@ export async function startIdentityVerificationForListing(
       return {
         ok: false,
         reason:
-          "Stripe Identity is configured but no hosted URL was returned. Check Stripe dashboard settings.",
+          "Stripe Identity returned no hosted page URL. Enable hosted verification in Stripe Dashboard → Identity, or use Connect bank (ID included).",
       };
     }
-    return { ok: false, reason: "Stripe Identity unavailable." };
+    return {
+      ok: false,
+      reason: "Stripe Identity unavailable. Use Connect bank instead — ID check is included.",
+    };
   } catch (error) {
     return {
       ok: false,
-      reason: error instanceof Error ? error.message : "Verification failed.",
+      reason: friendlyIdentityError(
+        error instanceof Error ? error.message : "Verification failed.",
+      ),
     };
   }
 }

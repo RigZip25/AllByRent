@@ -161,10 +161,8 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
       if (!status.ready) {
         const tip =
           status.nextStep === "sign_in"
-            ? "Sign in first, then verify identity and connect Stripe before going public."
-            : status.nextStep === "identity"
-              ? "Verify your identity (listing Go public checklist or Profile), then connect Stripe."
-              : "Connect your bank with Stripe before this item can go public.";
+            ? "Sign in first, then finish Stripe (ID + bank) before going public."
+            : "Finish Stripe Connect (ID + bank) before this item can go public.";
         setError(tip);
         setBusy(false);
         return;
