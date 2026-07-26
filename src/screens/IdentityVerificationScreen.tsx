@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
 import { mascotSays } from "../lib/brand";
+import { startIdentityVerificationForListing } from "../lib/sellerGoPublic";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -34,7 +35,7 @@ export function IdentityVerificationScreen({ onBack }: { onBack: () => void }) {
             <div className="min-w-0">
               <p className="text-sm font-bold text-gray-900">Verify once</p>
               <p className="mt-1 text-[13px] text-gray-500">
-                Required for your first listing, or for high-value rentals ($200+).
+                Required before your listing goes public — also available from the Go public checklist.
               </p>
             </div>
           </div>
@@ -51,43 +52,17 @@ export function IdentityVerificationScreen({ onBack }: { onBack: () => void }) {
             onClick={() => {
               setBusy(true);
               setError(null);
-              void (async () => {
-                const supabase = (await import("../lib/supabaseClient")).getSupabaseClient();
-                const { data } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
-                const token = data.session?.access_token;
-                if (!token) throw new Error("Sign in required.");
-
-                const res = await fetch("/api/stripe/identity_session", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({ returnUrl: window.location.origin + "/?screen=profile" }),
-                });
-                const payload = (await res.json()) as {
-                  ok?: boolean;
-                  client_secret?: string;
-                  url?: string | null;
-                  reason?: string;
-                  error?: string;
-                };
-                if (!payload?.ok) {
-                  throw new Error(payload?.reason || payload?.error || "Stripe Identity unavailable.");
-                }
-                if (payload.url) {
-                  window.location.href = payload.url;
-                  return;
-                }
-                if (payload.client_secret) {
-                  throw new Error(
-                    "Stripe Identity is configured but no hosted URL was returned. Check Stripe dashboard settings.",
-                  );
-                }
-                throw new Error("Stripe Identity unavailable.");
-              })().catch((e) => {
-                setError(e instanceof Error ? e.message : "Verification failed.");
-              }).finally(() => setBusy(false));
+              void startIdentityVerificationForListing("/?screen=profile")
+                .then((result) => {
+                  if (!result.ok) {
+                    throw new Error(result.reason);
+                  }
+                  window.location.href = result.url;
+                })
+                .catch((e) => {
+                  setError(e instanceof Error ? e.message : "Verification failed.");
+                })
+                .finally(() => setBusy(false));
             }}
             className="mt-4 w-full rounded-2xl px-4 py-3 text-[14px] font-bold text-white disabled:opacity-60"
             style={{ backgroundColor: GREEN }}

@@ -250,7 +250,7 @@ export function Step7Review({
         hint={
           isEditing
             ? "Review your changes, then save — your QR and listing status stay as they are."
-            : "Looking good. Once you publish I'll create your share content — ready to post in one tap."
+            : "Next: sign in, verify identity, and connect Stripe — then your listing goes public. No menu hunting."
         }
         showTapLabel
       />
@@ -265,10 +265,10 @@ export function Step7Review({
         {isPublishing
           ? isEditing
             ? "Saving..."
-            : "Publishing..."
+            : "Opening…"
           : isEditing
             ? "Save changes"
-            : "Publish listing 🚀"}
+            : "Go public →"}
       </button>
     </motion.div>
   );
