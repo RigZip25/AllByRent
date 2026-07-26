@@ -8,7 +8,7 @@ import {
   Smartphone,
   X,
 } from "lucide-react";
-import { APP_NAME, MASCOT_NAME } from "../lib/brand";
+import { MASCOT_NAME } from "../lib/brand";
 import rentanoImg from "../imports/No_back_rentano.png";
 import type { ListingDraft } from "../screens/listing/types";
 import { LISTING_STEP_LABELS } from "../screens/listing/types";

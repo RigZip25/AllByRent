@@ -1,4 +1,5 @@
 import type { ListingDraft } from "../screens/listing/types";
+import type { MediaRef } from "./mediaStore";
 import {
   collectListingPhotoStoragePaths,
   deleteListingPhotosFromRemote,
@@ -253,8 +254,12 @@ function createQrTokenFallback(): string {
 }
 
 function normalizeListingDraft(raw: ListingDraft): ListingDraft {
+  const legacy = raw as ListingDraft & {
+    verificationPhoto?: unknown;
+  };
+  const legacyStatus = (raw as { listingStatus?: string }).listingStatus;
   const status =
-    raw.listingStatus === "pending_sticker" ? "pending_qr" : raw.listingStatus;
+    legacyStatus === "pending_sticker" ? "pending_qr" : raw.listingStatus;
   const hostId =
     typeof raw.hostId === "string" && raw.hostId.trim() ? raw.hostId.trim() : "";
 
@@ -282,8 +287,10 @@ function normalizeListingDraft(raw: ListingDraft): ListingDraft {
       ? (raw as unknown as { videos: ListingDraft["videos"] }).videos
       : [],
     verificationPhoto:
-      raw.verificationPhoto && typeof raw.verificationPhoto === "object" && "id" in raw.verificationPhoto
-        ? raw.verificationPhoto
+      legacy.verificationPhoto &&
+      typeof legacy.verificationPhoto === "object" &&
+      "id" in legacy.verificationPhoto
+        ? (legacy.verificationPhoto as MediaRef)
         : null,
     handoff: {
       ...raw.handoff,
@@ -816,7 +823,14 @@ export async function uploadQrVerificationPhotoRemote(params: {
       ...listing,
       listingStatus: "active",
       qrReady: true,
-      verificationPhoto: URL.createObjectURL(params.file),
+      verificationPhoto: {
+        id: path,
+        kind: "image",
+        mimeType: params.file.type || "image/jpeg",
+        createdAt: Date.now(),
+        sizeBytes: params.file.size,
+        storagePath: path,
+      },
     });
   }
 

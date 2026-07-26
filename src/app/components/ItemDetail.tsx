@@ -217,6 +217,10 @@ export function ItemDetail({
   const buyBlockedByAuction = Boolean(multiAuction && (auctionLive || auctionEnded));
 
   const canRent = Boolean(canTransact && listing && (listing.modes.rent || listing.modes.rentToOwn));
+  const saleCents = listing ? parseUsdToCents(listing.pricing.salePrice ?? "") : -1;
+  const isFreeGiveaway = Boolean(
+    canTransact && listing?.modes.sell && saleCents === 0 && !isSold && !buyBlockedByAuction,
+  );
   const canBuy = Boolean(
     canTransact && listing?.modes.sell && shopOffer && shopOffer.buyNowUsd > 0 && !buyBlockedByAuction && !isSold,
   );
@@ -401,7 +405,9 @@ export function ItemDetail({
 
           {messageHint ? (
             <p className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-primary">
-              In-app chat with the owner opens once your booking is confirmed.
+              {isFreeGiveaway
+                ? "Open Share to send this link and arrange a free pickup with the owner."
+                : "In-app chat with the owner opens once your booking is confirmed."}
             </p>
           ) : null}
 
@@ -578,6 +584,19 @@ export function ItemDetail({
           </button>
         ) : null}
 
+        {isFreeGiveaway ? (
+          <button
+            type="button"
+            onClick={() => {
+              setMessageHint(true);
+              setShareOpen(true);
+            }}
+            className="flex-1 bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-[#0D5C3A] py-3 px-4 rounded-xl transition-colors font-bold"
+          >
+            Free — arrange pickup
+          </button>
+        ) : null}
+
         {showGarageForAuction ? (
           <button
             type="button"
@@ -588,14 +607,14 @@ export function ItemDetail({
           </button>
         ) : null}
 
-        {!canRent && !canBuy && !showGarageForAuction ? (
+        {!canRent && !canBuy && !isFreeGiveaway && !showGarageForAuction ? (
           <div className="flex-1 rounded-xl border border-border bg-muted/40 px-4 py-3 text-center text-sm font-medium text-muted-foreground">
             {listing.paused
               ? "This listing is paused"
               : isSold
                 ? "Sold"
                 : listing.modes.gift && !listing.modes.rent && !listing.modes.sell
-                  ? "Gift handoff isn’t open yet — list as Sell with price $0 to give it away"
+                  ? "List as Sell with price $0 to give it away"
                   : "Not available right now"}
           </div>
         ) : null}

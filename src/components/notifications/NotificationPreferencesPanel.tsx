@@ -9,7 +9,6 @@ import { syncAgentPrefsRemote } from "../../lib/agentPrefs";
 import { loadGarageFollows } from "../../lib/garageFollowStorage";
 import { persistFollowPatch } from "../../lib/repositories/garageRepository";
 
-const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
 
 function PrefToggle({

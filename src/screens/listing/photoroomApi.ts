@@ -183,7 +183,7 @@ async function readErrorDetail(response: Response): Promise<string> {
 }
 
 export async function processPhotoWithPhotoRoom(
-  file: File,
+  file: Blob,
   options?: PhotoRoomEditOptions,
 ): Promise<Blob> {
   const opts = stableOptions(options);

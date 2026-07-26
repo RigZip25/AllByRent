@@ -18,6 +18,7 @@ import type { ListingDraft } from "./types";
 import type { Dispatch, SetStateAction } from "react";
 import { QR_PDF_FILENAMES } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
+import { putMediaBlob } from "../../lib/mediaStore";
 
 const GREEN = "#0D5C3A";
 const QR_SHEET_CAPACITY = 12;
@@ -226,15 +227,16 @@ export function QRStickerScreen({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const photo = typeof reader.result === "string" ? reader.result : null;
-      if (!photo) return;
+    void putMediaBlob(file, { kind: "image" }).then((put) => {
+      if (!put.ok) {
+        setPdfError(put.message);
+        return;
+      }
 
       setDraft((current) => {
         const updated: ListingDraft = {
           ...current,
-          verificationPhoto: photo,
+          verificationPhoto: put.ref,
           qrReady: true,
           listingStatus: "active",
         };
@@ -242,8 +244,7 @@ export function QRStickerScreen({
         return updated;
       });
       onComplete();
-    };
-    reader.readAsDataURL(file);
+    });
     event.target.value = "";
   };
 

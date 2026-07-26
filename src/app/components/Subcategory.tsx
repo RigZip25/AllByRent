@@ -31,22 +31,9 @@ import type { ListingDraft } from "../../screens/listing/types";
 
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { listingCardMeta } from "../../lib/listingCardMeta";
-import type { MediaRef } from "../../lib/mediaStore";
 import { ListingFeedCard, offerTypeFromModes } from "./ListingFeedCard";
 
-import {
-
-  ArrowLeft,
-
-  Shield,
-
-  QrCode,
-
-  Heart,
-
-  Star,
-
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 
 

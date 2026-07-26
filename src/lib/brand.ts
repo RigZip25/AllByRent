@@ -271,10 +271,10 @@ export const APP_HOST = "app.evorios.com";
 /** Public marketing site — QR codes and outbound links to the web. */
 export const LISTING_QR_BASE_URL = `${APP_ORIGIN}/item`;
 
-/** Public legal pages (host on marketing site). Update when live. */
-export const TERMS_URL = `${MARKETING_URL}/terms`;
-export const PRIVACY_URL = `${MARKETING_URL}/privacy`;
-export const REFUND_POLICY_URL = `${MARKETING_URL}/refunds`;
+/** Public legal pages — hosted on the PWA until marketing DNS (evorios.com) is live. */
+export const TERMS_URL = `${APP_ORIGIN}/legal/terms.html`;
+export const PRIVACY_URL = `${APP_ORIGIN}/legal/privacy.html`;
+export const REFUND_POLICY_URL = `${APP_ORIGIN}/legal/refunds.html`;
 
 /** QR sticker PDF download names (user-visible). */
 export const QR_PDF_FILENAMES = {
@@ -294,7 +294,8 @@ export const QR_PDF_FILENAMES = {
 export const LISTING_MODE_LABELS = {
   rent: "Rent",
   sell: "Sell",
-  gift: "Gift",
+  /** Legacy key — UI uses Sell @ $0 as free giveaway; label kept for old drafts. */
+  gift: "Free",
 } as const;
 
 /** Risk copy — Stage 1 deposit only, not insurance. */

@@ -10,7 +10,6 @@ import {
   Home,
   Calendar,
   Share2,
-  Copy,
 } from "lucide-react";
 import { MrRentano } from "./MrRentano";
 import { useAuth } from "../../hooks/AuthProvider";

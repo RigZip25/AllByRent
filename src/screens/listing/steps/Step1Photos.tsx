@@ -6,7 +6,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { motion } from "motion/react";
-import { ChevronLeft, ChevronRight, Loader2, Plus, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import type { StepProps } from "../types";
 import { RentanoHint } from "../../../components/RentanoHint";
 import { MASCOT_NAME } from "../../../lib/brand";

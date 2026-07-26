@@ -18,7 +18,6 @@ const SPLASH_CANVAS_BG = "#eef2ea";
 /** Dynamic splash: fly-in → title → tagline (~2.6s) */
 const T_FLYIN_END = 700;
 const T_TITLE_END = 1400;
-const T_READY_END = 2000;
 const T_AUTO_ADVANCE = 2600;
 
 const S = 0.85;

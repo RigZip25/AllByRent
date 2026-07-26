@@ -6,7 +6,7 @@
   "type": "module",
   "packageManager": "npm@10.9.3",
   "scripts": {
-    "build": "vite build",
+    "build": "tsc -b --pretty false && vite build",
     "typecheck": "tsc -b --pretty false",
     "dev": "vite",
     "dev:https": "set VITE_DEV_HTTPS=true&& vite",
@@ -93,6 +93,8 @@
   "devDependencies": {
     "@eslint/js": "^9.33.0",
     "@tailwindcss/vite": "4.1.12",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "18.3.18",
     "@types/react-dom": "18.3.5",
     "@vitejs/plugin-basic-ssl": "^2.3.0",

@@ -34,9 +34,5 @@ export function formatAuthError(err: unknown): string {
 }
 
 function networkHint(): string {
-  return (
-    "Cannot reach Supabase. In Vercel, set VITE_SUPABASE_URL to your Project URL " +
-    "(Supabase → Settings → API, e.g. https://YOUR_REF.supabase.co), confirm the project is " +
-    "active (not paused), then redeploy."
-  );
+  return "Cannot reach the sign-in service. Check your connection and try again in a moment.";
 }

@@ -47,7 +47,7 @@ export class AppErrorBoundary extends Component<Props, State> {
               window.location.reload();
             }}
           >
-            Reset demo data &amp; reload
+            Reset local data &amp; reload
           </button>
         </div>
       );

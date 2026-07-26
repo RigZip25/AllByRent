@@ -24,7 +24,7 @@ import {
   setGarageSaleSchedule,
   type GarageSaleSchedule,
 } from "../garageSaleStorage";
-import { mergeBidsFromRemote, placeGarageBid, type GarageBid } from "../garageShopStorage";
+import { mergeBidsFromRemote, placeGarageBid } from "../garageShopStorage";
 import {
   fetchGarageBidsRemote,
   fetchGarageFollowsRemote,

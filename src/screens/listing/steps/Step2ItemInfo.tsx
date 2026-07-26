@@ -88,7 +88,7 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
   const appliedSuggestionsKey = useRef<string | null>(null);
   const typewriterRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isImprovingDescription, setIsImprovingDescription] = useState(false);
-  const [descriptionImproveTip, setDescriptionImproveTip] = useState<string | null>(null);
+  const [, setDescriptionImproveTip] = useState<string | null>(null);
   const [isAnimatingDescription, setIsAnimatingDescription] = useState(false);
   const [isDescriptionUserEdited, setIsDescriptionUserEdited] = useState(false);
 
@@ -224,9 +224,9 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
   const marketValueLinkTitle =
     draft.title.length > 30 ? `${draft.title.substring(0, 30)}...` : draft.title;
 
+  const aiDescription = draft.aiSuggestions?.description ?? "";
   const aiDescriptionUnchanged =
-    Boolean(draft.aiSuggestions?.description) &&
-    draft.description === draft.aiSuggestions.description;
+    Boolean(aiDescription) && draft.description === aiDescription;
 
   const showImproveButton =
     draft.description.length > 20 &&

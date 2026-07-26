@@ -14,7 +14,7 @@ export function notifyGarageFollowersOfNewListing(params: {
   if (follows.length === 0) return;
   if (!shouldDeliverNotification("new_garage")) return;
 
-  for (const follow of follows) {
+  for (let index = 0; index < follows.length; index += 1) {
     pushInAppNotification({
       type: "general",
       title: `New on ${params.hostName}'s garage`,

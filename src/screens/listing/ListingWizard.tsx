@@ -10,7 +10,6 @@ import { syncAgentPrefsRemote, ensureBrowserTimeZoneCaptured } from "../../lib/a
 import { notifyGarageFollowersOfNewListing } from "../../lib/garageFollowNotify";
 import { loadUserProfile } from "../../lib/userProfileStorage";
 import { getListingDisplayTitle, listingRequiresQrSticker } from "../../lib/listingQr";
-import { loadManageableListings } from "../../lib/hostAccess";
 import {
   clearGoPublicPending,
   listingWizardReturnPath,
@@ -43,7 +42,6 @@ import {
 } from "./types";
 import {
   applyYardSaleListingDefaults,
-  clearYardSaleListingActive,
   isYardSaleListingActive,
 } from "../../lib/yardSaleListing";
 import { isListingStepValid } from "./validation";

@@ -74,7 +74,10 @@ export async function fetchCensusPlaceAtCoordinates(
 
     const data = (await response.json()) as {
       result?: {
-        geographies?: Record<string, Array<{ NAME?: string; STUSAB?: string; STATE?: string }>>;
+        geographies?: Record<
+          string,
+          Array<{ NAME?: string; BASENAME?: string; STUSAB?: string; STATE?: string }>
+        >;
       };
     };
 
