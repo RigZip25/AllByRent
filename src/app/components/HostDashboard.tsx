@@ -75,20 +75,32 @@ export function HostDashboard({
       });
     };
 
-    const idleId = window.setTimeout(syncLoad, 0);
+    const refreshRemote = (markLoaded = false) => {
+      void fetchManageableListings(auth.userId, auth.userEmail)
+        .then((next) => {
+          if (!mounted) return;
+          startTransition(() => setListings(next));
+        })
+        .finally(() => {
+          if (mounted && markLoaded) setLoading(false);
+        });
+    };
 
-    void fetchManageableListings(auth.userId, auth.userEmail)
-      .then((next) => {
-        if (!mounted) return;
-        startTransition(() => setListings(next));
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
+    const idleId = window.setTimeout(syncLoad, 0);
+    refreshRemote(true);
+
+    const onListingsChanged = () => {
+      syncLoad();
+      refreshRemote(false);
+    };
+    window.addEventListener("evorios-listings-changed", onListingsChanged);
+    window.addEventListener("focus", onListingsChanged);
 
     return () => {
       mounted = false;
       window.clearTimeout(idleId);
+      window.removeEventListener("evorios-listings-changed", onListingsChanged);
+      window.removeEventListener("focus", onListingsChanged);
     };
   }, [auth.userId, auth.userEmail]);
 

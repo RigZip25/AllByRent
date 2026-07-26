@@ -246,10 +246,9 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
           nextHostId,
         );
 
-        if (auth.userId) {
-          void savePublishedListingRemote(draft, auth.userId);
-        } else {
-          savePublishedListing(draft);
+        savePublishedListing(draft);
+        if (nextHostId) {
+          void savePublishedListingRemote(draft, nextHostId);
         }
 
         const profile = loadUserProfile();

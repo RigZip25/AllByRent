@@ -326,7 +326,7 @@ export function ListingWizard({
 
     window.setTimeout(() => {
       const giftOrSellOnly = isGiftOrSellOnly(sourceDraft);
-      const hostId = sourceDraft.hostId ?? resolveHostAccountId(auth.userId);
+      const hostId = resolveHostAccountId(auth.userId) || sourceDraft.hostId || "";
       const normalizedDraft = applyFrictionlessDefaults(sourceDraft);
 
       if (isEditing && sourceDraft.id) {
@@ -344,10 +344,10 @@ export function ListingWizard({
 
         setDraft(savedDraft);
         clearGoPublicPending();
-        if (auth.userId) {
-          void savePublishedListingRemote(savedDraft, auth.userId);
-        } else {
-          savePublishedListing(savedDraft);
+        // Always persist locally first so My Garage can show the listing immediately.
+        savePublishedListing(savedDraft);
+        if (hostId) {
+          void savePublishedListingRemote(savedDraft, hostId);
         }
         setIsPublishing(false);
         onExit();
@@ -366,11 +366,10 @@ export function ListingWizard({
 
       setDraft(publishedDraft);
       clearGoPublicPending();
-      // Prefer Supabase when configured; fall back to localStorage.
-      if (auth.userId) {
-        void savePublishedListingRemote(publishedDraft, auth.userId);
-      } else {
-        savePublishedListing(publishedDraft);
+      // Always persist locally first so My Garage can show the listing immediately.
+      savePublishedListing(publishedDraft);
+      if (hostId) {
+        void savePublishedListingRemote(publishedDraft, hostId);
       }
       const profile = loadUserProfile();
       notifyGarageFollowersOfNewListing({

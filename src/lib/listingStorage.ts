@@ -144,13 +144,19 @@ export function setProfileLocation(location: ProfileLocation): void {
   setHomeLocation(location);
 }
 
-export function savePublishedListing(draft: ListingDraft): void {
+export function savePublishedListing(
+  draft: ListingDraft,
+  opts?: { emitChange?: boolean },
+): void {
   try {
     const existing = loadPublishedListings();
     const normalized = normalizeListingDraft(draft);
     const next = existing.filter((item) => item.id !== normalized.id);
     next.unshift(normalized);
     localStorage.setItem(LISTINGS_STORAGE_KEY, JSON.stringify(next));
+    if (opts?.emitChange !== false && typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("evorios-listings-changed", { detail: { id: normalized.id } }));
+    }
   } catch {
     /* ignore */
   }
@@ -688,7 +694,16 @@ function createInitialHandoffFallback(): ListingDraft["handoff"] {
 }
 
 export async function savePublishedListingRemote(draft: ListingDraft, ownerId: string): Promise<void> {
-  savePublishedListing(draft);
+  const normalizedOwnerId = ownerId.trim();
+  if (!normalizedOwnerId) {
+    savePublishedListing(draft);
+    return;
+  }
+  const stamped: ListingDraft = {
+    ...draft,
+    hostId: draft.hostId?.trim() || normalizedOwnerId,
+  };
+  savePublishedListing(stamped);
   if (!isSupabaseConfigured()) {
     return;
   }
@@ -697,20 +712,28 @@ export async function savePublishedListingRemote(draft: ListingDraft, ownerId: s
     return;
   }
 
-  const previous = getPublishedListingById(draft.id);
+  // Upsert listing metadata first (no local blob photos) so My Garage can load it
+  // while photo upload is still running — and so large data-URLs don't fail the row write.
+  const earlyPhotos = (stamped.photos ?? []).filter((photo) => Boolean(photo.storagePath?.trim()));
+  const { error: earlyError } = await supabase
+    .from("listings")
+    .upsert(draftToRow({ ...stamped, photos: earlyPhotos }, normalizedOwnerId), { onConflict: "id" });
+  if (earlyError) {
+    console.warn("savePublishedListingRemote early upsert failed:", earlyError.message);
+  }
+
+  const previous = getPublishedListingById(stamped.id);
   const previousPaths = collectListingPhotoStoragePaths(previous?.photos ?? []);
 
-  let photos = draft.photos;
+  let photos = stamped.photos;
   try {
     photos = await uploadListingPhotosToRemote({
-      listingId: draft.id,
-      ownerId,
-      photos: draft.photos,
+      listingId: stamped.id,
+      ownerId: normalizedOwnerId,
+      photos: stamped.photos,
     });
   } catch (error) {
-    if (import.meta.env.DEV) {
-      console.warn("uploadListingPhotosToRemote failed:", error);
-    }
+    console.warn("uploadListingPhotosToRemote failed:", error);
   }
 
   const nextPaths = collectListingPhotoStoragePaths(photos);
@@ -719,21 +742,19 @@ export async function savePublishedListingRemote(draft: ListingDraft, ownerId: s
     try {
       await deleteListingPhotosFromRemote(orphanPaths);
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.warn("deleteListingPhotosFromRemote failed:", error);
-      }
+      console.warn("deleteListingPhotosFromRemote failed:", error);
     }
   }
 
-  const syncedDraft = photos !== draft.photos ? { ...draft, photos } : draft;
-  if (photos !== draft.photos) {
+  const syncedDraft = photos !== stamped.photos ? { ...stamped, photos } : stamped;
+  if (photos !== stamped.photos) {
     savePublishedListing(syncedDraft);
   }
 
   const { error } = await supabase
     .from("listings")
-    .upsert(draftToRow(syncedDraft, ownerId), { onConflict: "id" });
-  if (error && import.meta.env.DEV) {
+    .upsert(draftToRow(syncedDraft, normalizedOwnerId), { onConflict: "id" });
+  if (error) {
     console.warn("savePublishedListingRemote failed:", error.message);
   }
 }
@@ -795,29 +816,34 @@ export async function fetchListingByIdRemote(id: string): Promise<ListingDraft |
     .maybeSingle();
   if (error || !data) return getPublishedListingById(id);
   const draft = rowToDraft(data as SupabaseListingRow);
-  savePublishedListing(draft);
+  savePublishedListing(draft, { emitChange: false });
   return draft;
 }
 
 export async function fetchListingsByOwnerIdsRemote(ownerIds: string[]): Promise<ListingDraft[]> {
+  const ids = ownerIds.map((id) => id.trim()).filter(Boolean);
+  if (ids.length === 0) {
+    return [];
+  }
   if (!isSupabaseConfigured()) {
-    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? ""));
+    return loadPublishedListings().filter((l) => ids.includes(l.hostId ?? ""));
   }
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? ""));
+    return loadPublishedListings().filter((l) => ids.includes(l.hostId ?? ""));
   }
   const { data, error } = await supabase
     .from("listings")
     .select("*")
-    .in("owner_id", ownerIds)
+    .in("owner_id", ids)
     .order("updated_at", { ascending: false });
   if (error || !data) {
-    return loadPublishedListings().filter((l) => ownerIds.includes(l.hostId ?? ""));
+    return loadPublishedListings().filter((l) => ids.includes(l.hostId ?? ""));
   }
   const drafts = (data as SupabaseListingRow[]).map(rowToDraft);
+  // Cache remote rows quietly — HostDashboard merges local+remote for inventory.
   for (const draft of drafts) {
-    savePublishedListing(draft);
+    savePublishedListing(draft, { emitChange: false });
   }
   return drafts;
 }
