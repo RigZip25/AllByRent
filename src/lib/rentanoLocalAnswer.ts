@@ -163,10 +163,38 @@ function pickNavHint(query: string): string | null {
   return null;
 }
 
+/**
+ * Local FAQ/hints are English-only. When the user writes in another language,
+ * skip them so AI can answer in that language instead of pasting English copy.
+ */
+export function queryLooksNonEnglish(query: string): boolean {
+  const trimmed = query.trim();
+  if (!trimmed) return false;
+
+  // Any non-ASCII letter (Cyrillic, accented Spanish/French, etc.)
+  if (/\p{L}/u.test(trimmed) && /[^\u0000-\u007F]/.test(trimmed)) {
+    return true;
+  }
+
+  // Common non-English Latin questions without accents (e.g. Spanish "como")
+  if (
+    /\b(como|qué|que|dónde|donde|puedo|necesito|ayuda|publicar|anuncio|gracias|hola|por\s+favor|bonjour|merci|comment|bitte|danke|wie|kann|vender|alquilar|listing|publicar)\b/i.test(
+      trimmed,
+    )
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 /** Instant answer from FAQ / built-in hints — no API call. */
 export function findLocalRentanoAnswer(query: string): LocalAnswerResult | null {
   const trimmed = query.trim();
   if (!trimmed) return null;
+
+  // Don't serve English canned answers to RU/ES/… questions.
+  if (queryLooksNonEnglish(trimmed)) return null;
 
   const nav = pickNavHint(trimmed);
   if (nav) return { answer: nav, source: "hint" };

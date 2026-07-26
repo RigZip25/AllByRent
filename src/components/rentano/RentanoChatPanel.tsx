@@ -5,7 +5,7 @@ import { APP_NAME, MASCOT_NAME } from "../../lib/brand";
 import { useSpeechRecognition } from "../../hooks/useSpeechRecognition";
 import { useRequireAuth } from "../../hooks/RequireAuth";
 import { isAnthropicConfigured } from "../../lib/anthropicClient";
-import { findLocalRentanoAnswer } from "../../lib/rentanoLocalAnswer";
+import { findLocalRentanoAnswer, queryLooksNonEnglish } from "../../lib/rentanoLocalAnswer";
 import { sendRentanoMessage, type RentanoChatTurn } from "../../lib/rentanoChatApi";
 import type { RentanoRequestContext } from "../../lib/rentanoPrompt";
 
@@ -93,7 +93,9 @@ export function RentanoChatPanel({
         if (!configured) {
           setPendingAiQuestion(text);
           setError(
-            "No ready FAQ match. AI chat is off in this environment — open the FAQ tab or rephrase your question.",
+            queryLooksNonEnglish(text)
+              ? "AI chat is off here, so I can’t answer in your language yet — open the FAQ tab (English) or try again later."
+              : "No ready FAQ match. AI chat is off in this environment — open the FAQ tab or rephrase your question.",
           );
           return;
         }
