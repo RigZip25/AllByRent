@@ -13,7 +13,11 @@ import { loadUserProfile } from "../../lib/userProfileStorage";
 import { applyFrictionlessDefaults } from "../listing/frictionlessDefaults";
 import { createInitialListingDraft } from "../listing/types";
 import { applyYardSaleListingDefaults } from "../../lib/yardSaleListing";
-import { loadSellerGoPublicStatus } from "../../lib/sellerGoPublic";
+import {
+  loadSellerGoPublicStatus,
+  startConnectForListing,
+  type SellerGoPublicStatus,
+} from "../../lib/sellerGoPublic";
 import {
   buildInitialOfferPrefs,
   defaultAuctionOfferWindow,
@@ -26,12 +30,15 @@ import { garageSaleOpenLabel, getGarageSaleSchedule } from "../../lib/garageSale
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
 const BORDER = "#E8E6E0";
+const SNAP_SALE_RETURN = "/?screen=snapSale";
 
 const { snapSale: copy, garageShare: shareCopy } = ONBOARDING;
 
 type SnapSaleScreenProps = {
   onBack: () => void;
   onViewShop: () => void;
+  /** Open AuthGate and return to snap sale after sign-in. */
+  onRequireAuth?: () => void;
 };
 
 type SaleMode = GarageListingSaleMode;
@@ -69,7 +76,7 @@ function PhotoPreview({ photo }: { photo: MediaRef }) {
   return <img src={url} alt="" className="h-full w-full object-cover" draggable={false} />;
 }
 
-export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
+export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleScreenProps) {
   const auth = useAuth();
   const cameraRef = useRef<HTMLInputElement>(null);
   const libraryRef = useRef<HTMLInputElement>(null);
@@ -84,12 +91,56 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
   const [shelfCount, setShelfCount] = useState(0);
   const [publishedListingId, setPublishedListingId] = useState<string | null>(null);
   const [scheduleTick, setScheduleTick] = useState(0);
+  const [sellerStatus, setSellerStatus] = useState<SellerGoPublicStatus | null>(null);
+  const [sellerLoading, setSellerLoading] = useState(true);
+  const [connectBusy, setConnectBusy] = useState(false);
 
   useEffect(() => {
     const sync = () => setScheduleTick((tick) => tick + 1);
     window.addEventListener("evorios-garage-schedule", sync);
     return () => window.removeEventListener("evorios-garage-schedule", sync);
   }, []);
+
+  const refreshSellerStatus = useCallback(async () => {
+    setSellerLoading(true);
+    try {
+      const status = await loadSellerGoPublicStatus(auth.userId);
+      setSellerStatus(status);
+      return status;
+    } catch {
+      setSellerStatus(null);
+      return null;
+    } finally {
+      setSellerLoading(false);
+    }
+  }, [auth.userId]);
+
+  useEffect(() => {
+    void refreshSellerStatus();
+  }, [refreshSellerStatus]);
+
+  const handleConnectStripe = useCallback(() => {
+    void (async () => {
+      setConnectBusy(true);
+      setError(null);
+      try {
+        if (!auth.userId) {
+          onRequireAuth?.();
+          return;
+        }
+        const result = await startConnectForListing(SNAP_SALE_RETURN);
+        if (!result.ok) {
+          setError(result.reason);
+          return;
+        }
+        window.location.assign(result.url);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Stripe Connect failed.");
+      } finally {
+        setConnectBusy(false);
+      }
+    })();
+  }, [auth.userId, onRequireAuth]);
 
   const openHours = garageSaleOpenLabel(getGarageSaleSchedule());
   const hostId = resolveHostAccountId(auth.userId);
@@ -157,24 +208,24 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
     setBusy(true);
     setError(null);
 
-    void loadSellerGoPublicStatus(auth.userId).then((status) => {
-      if (!status.ready) {
-        const tip =
-          status.nextStep === "sign_in"
-            ? "Sign in first, then finish Stripe (ID + bank) before going public."
-            : "Finish Stripe Connect (ID + bank) before this item can go public.";
-        setError(tip);
+    void refreshSellerStatus().then((status) => {
+      if (!status?.ready) {
+        setError(
+          !status?.signedIn
+            ? "Sign in, then connect Stripe (ID + bank) before this item can go public."
+            : "Connect Stripe (ID + bank) below — then put it on the shelf.",
+        );
         setBusy(false);
         return;
       }
 
       window.setTimeout(() => {
-        const hostId = resolveHostAccountId(auth.userId);
+        const nextHostId = resolveHostAccountId(auth.userId);
         const title = note.trim().slice(0, 60) || copy.defaultTitle;
         const draft = applyYardSaleListingDefaults(
           applyFrictionlessDefaults({
             ...createInitialListingDraft(),
-            hostId,
+            hostId: nextHostId,
             photos: [photo],
             title,
             description: note.trim(),
@@ -190,7 +241,7 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
         setGarageSaleOfferPrefs(
           draft.id,
           buildInitialOfferPrefs({ saleMode, buyNowUsd: priceUsd }),
-          hostId,
+          nextHostId,
         );
 
         if (auth.userId) {
@@ -201,7 +252,7 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
 
         const profile = loadUserProfile();
         notifyGarageFollowersOfNewListing({
-          hostId,
+          hostId: nextHostId,
           hostName: profile.displayName,
           listingTitle: title,
         });
@@ -216,6 +267,10 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
       }, 400);
     });
   };
+
+  const sellerReady = Boolean(sellerStatus?.ready);
+  const needsSignIn = !sellerStatus?.signedIn;
+  const needsStripe = Boolean(sellerStatus?.signedIn && !sellerStatus.payoutsEnabled);
 
   const snapAnother = () => {
     setJustPublished(false);
@@ -469,16 +524,67 @@ export function SnapSaleScreen({ onBack, onViewShop }: SnapSaleScreenProps) {
           ) : null}
         </section>
 
+        {!sellerReady && !sellerLoading ? (
+          <div
+            className="mt-4 rounded-2xl border px-4 py-3"
+            style={{ borderColor: "#FECACA", backgroundColor: "#FEF2F2" }}
+          >
+            <p className="text-sm font-bold text-red-800">Finish setup to put items on the shelf</p>
+            <p className="mt-1 text-xs leading-relaxed text-red-700">
+              {needsSignIn
+                ? "Sign in, then Stripe verifies your ID and bank in one step."
+                : "Stripe verifies your ID and links your bank so neighbors can pay you."}
+            </p>
+            <div className="mt-3 flex flex-col gap-2">
+              {needsSignIn ? (
+                <button
+                  type="button"
+                  onClick={() => onRequireAuth?.()}
+                  className="w-full rounded-xl py-3 text-sm font-bold text-white"
+                  style={{ backgroundColor: GREEN }}
+                >
+                  Sign in to continue
+                </button>
+              ) : null}
+              {needsStripe ? (
+                <button
+                  type="button"
+                  onClick={handleConnectStripe}
+                  disabled={connectBusy}
+                  className="w-full rounded-xl py-3 text-sm font-bold text-white disabled:opacity-50"
+                  style={{ backgroundColor: GREEN }}
+                >
+                  {connectBusy ? "Opening Stripe…" : "Continue with Stripe"}
+                </button>
+              ) : null}
+              {needsStripe ? (
+                <button
+                  type="button"
+                  onClick={() => void refreshSellerStatus()}
+                  className="text-xs font-semibold underline"
+                  style={{ color: GREEN }}
+                >
+                  I finished Stripe — refresh
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
         {error ? <p className="mt-3 text-sm font-medium text-red-600">{error}</p> : null}
 
         <button
           type="button"
-          disabled={!canPublish}
+          disabled={!canPublish || (!sellerReady && !sellerLoading)}
           onClick={publishToShelf}
           className="mt-5 w-full rounded-xl py-3.5 text-base font-bold disabled:opacity-50"
           style={{ backgroundColor: AMBER, color: GREEN }}
         >
-          {busy ? copy.publishing : copy.publishCta}
+          {busy
+            ? copy.publishing
+            : sellerReady || sellerLoading
+              ? copy.publishCta
+              : "Finish setup above first"}
         </button>
 
         <p className="mt-3 text-center text-xs text-gray-500">
