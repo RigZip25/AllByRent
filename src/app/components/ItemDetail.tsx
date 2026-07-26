@@ -443,9 +443,10 @@ export function ItemDetail({
               <button
                 type="button"
                 onClick={handleMessageHost}
-                disabled={!canBook}
+                disabled={!canRent}
                 className="flex-shrink-0 p-2 hover:bg-muted rounded-full transition-colors disabled:opacity-40"
-                aria-label="Message host after booking"
+                aria-label="Message host"
+                title={canRent ? "Start a booking to contact the host" : "Messaging opens with a booking"}
               >
                 <MessageCircle className="w-5 h-5 text-primary" />
               </button>
