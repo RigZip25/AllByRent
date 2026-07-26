@@ -174,26 +174,41 @@ export async function removePublishedListingRemote(id: string, ownerId: string):
 }
 
 /** Persist an in-progress wizard draft (local always; remote when signed in). */
-export async function saveListingDraftProgress(
+export function stampListingDraftProgress(
   draft: ListingDraft,
   ownerId: string | null | undefined,
   wizardStep: number,
-): Promise<void> {
-  const stamped: ListingDraft = {
+): ListingDraft {
+  return {
     ...draft,
     hostId: draft.hostId || ownerId || draft.hostId,
     listingStatus: "draft",
     wizardStep,
     updatedAt: new Date().toISOString(),
   };
+}
+
+/**
+ * Persist draft progress. Local write is always sync.
+ * Remote sync uploads photos and can be slow — pass `{ syncRemote: false }` when
+ * about to redirect (e.g. Stripe Connect) so the user isn’t stuck on “Opening…”.
+ */
+export async function saveListingDraftProgress(
+  draft: ListingDraft,
+  ownerId: string | null | undefined,
+  wizardStep: number,
+  opts?: { syncRemote?: boolean },
+): Promise<ListingDraft> {
+  const stamped = stampListingDraftProgress(draft, ownerId, wizardStep);
   savePublishedListing(stamped);
-  if (ownerId) {
+  if (ownerId && opts?.syncRemote !== false) {
     try {
       await savePublishedListingRemote(stamped, ownerId);
     } catch {
       /* local draft still saved */
     }
   }
+  return stamped;
 }
 
 export function getAbandonedListingDrafts(hostIds: string[]): ListingDraft[] {

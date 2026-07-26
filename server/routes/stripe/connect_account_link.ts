@@ -4,7 +4,6 @@ import { applyCors, handleOptions } from "../../lib/cors";
 import { isStripeServerConfigured } from "../../lib/keys";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
-import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
 import { resolveConfiguredAppOrigin } from "../../lib/brand";
 
 type Body = {
@@ -65,34 +64,71 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   let accountId = profile?.stripe_connect_account_id ?? null;
 
-  if (!accountId) {
-    const account = await stripe.accounts.create({
-      type: "express",
-      email: user.email ?? undefined,
-      metadata: { supabase_user_id: user.id },
-      capabilities: {
-        transfers: { requested: true },
-      },
+  const appendConnectQuery = (path: string, flag: "refresh" | "done"): string => {
+    try {
+      const url = new URL(path, `${origin}/`);
+      url.searchParams.set("connect", flag);
+      return url.toString();
+    } catch {
+      const join = path.includes("?") ? "&" : "?";
+      return `${origin}${path}${join}connect=${flag}`;
+    }
+  };
+
+  try {
+    if (!accountId) {
+      const account = await stripe.accounts.create({
+        type: "express",
+        country: "US",
+        email: user.email ?? undefined,
+        metadata: { supabase_user_id: user.id },
+        capabilities: {
+          card_payments: { requested: true },
+          transfers: { requested: true },
+        },
+      });
+      accountId = account.id;
+
+      const { error: updateError } = await admin.from("profiles").upsert(
+        {
+          id: user.id,
+          email: user.email ?? null,
+          display_name: profile?.display_name ?? user.email ?? "Host",
+          stripe_connect_account_id: accountId,
+        },
+        { onConflict: "id" },
+      );
+
+      if (updateError) {
+        res.status(200).json({
+          ok: false,
+          reason: `Failed to save Connect account: ${updateError.message}`,
+        });
+        return;
+      }
+    }
+
+    const accountLink = await stripe.accountLinks.create({
+      account: accountId,
+      refresh_url: appendConnectQuery(returnPath, "refresh"),
+      return_url: appendConnectQuery(returnPath, "done"),
+      type: "account_onboarding",
     });
-    accountId = account.id;
 
-    const { error: updateError } = await admin
-      .from("profiles")
-      .update({ stripe_connect_account_id: accountId })
-      .eq("id", user.id);
-
-    if (updateError) {
-      res.status(500).json({ error: "Failed to save Connect account" });
+    if (!accountLink.url) {
+      res.status(200).json({ ok: false, reason: "Stripe returned no onboarding URL." });
       return;
     }
+
+    res.status(200).json({ ok: true, url: accountLink.url });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Stripe Connect failed";
+    const lower = message.toLowerCase();
+    const reason =
+      lower.includes("signed up for connect") ||
+      (lower.includes("connect") && lower.includes("not enabled"))
+        ? "Stripe Connect isn’t enabled. Open Stripe Dashboard → Connect → Get started, finish the platform profile, then retry."
+        : message;
+    res.status(200).json({ ok: false, reason });
   }
-
-  const accountLink = await stripe.accountLinks.create({
-    account: accountId,
-    refresh_url: `${origin}${returnPath}&connect=refresh`,
-    return_url: `${origin}${returnPath}&connect=done`,
-    type: "account_onboarding",
-  });
-
-  res.status(200).json({ ok: true, url: accountLink.url });
 });
