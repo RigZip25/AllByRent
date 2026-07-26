@@ -1,5 +1,5 @@
-const MAX_WIDTH = 1200;
-const JPEG_QUALITY = 0.85;
+const MAX_WIDTH = 2048;
+const JPEG_QUALITY = 0.9;
 
 export async function compressImageFile(
   file: File,
