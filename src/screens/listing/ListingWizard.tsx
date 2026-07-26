@@ -5,7 +5,7 @@ import confetti from "canvas-confetti";
 import { MASCOT_NAME } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
-import { getProfileCity, savePublishedListingRemote, savePublishedListing, saveListingDraftProgress, removePublishedListing, removePublishedListingRemote, fetchListingByIdRemote, getPublishedListingById } from "../../lib/listingStorage";
+import { getProfileCity, savePublishedListingRemote, savePublishedListing, saveListingDraftProgress, stampListingDraftProgress, removePublishedListing, removePublishedListingRemote, fetchListingByIdRemote, getPublishedListingById } from "../../lib/listingStorage";
 import { syncAgentPrefsRemote, ensureBrowserTimeZoneCaptured } from "../../lib/agentPrefs";
 import { notifyGarageFollowersOfNewListing } from "../../lib/garageFollowNotify";
 import { loadUserProfile } from "../../lib/userProfileStorage";
@@ -237,20 +237,35 @@ export function ListingWizard({
     void refreshGoPublicStatus();
   }, [phase, auth.userId, refreshGoPublicStatus]);
 
-  const persistDraftForGoPublic = useCallback(async () => {
-    const nextDraft: ListingDraft = {
-      ...draft,
-      hostId: draft.hostId ?? resolveHostAccountId(auth.userId),
-      listingStatus: "draft",
-      wizardStep: TOTAL_LISTING_STEPS,
-      updatedAt: new Date().toISOString(),
-    };
-    setDraft(nextDraft);
-    markGoPublicPending(nextDraft.id);
-    await saveListingDraftProgress(nextDraft, auth.userId, TOTAL_LISTING_STEPS);
-    if (auth.userId) void syncAgentPrefsRemote(auth.userId);
-    return nextDraft;
-  }, [auth.userId, draft]);
+  const persistDraftForGoPublic = useCallback(
+    async (opts?: { syncRemote?: boolean }) => {
+      const nextDraft = stampListingDraftProgress(
+        {
+          ...draft,
+          hostId: draft.hostId ?? resolveHostAccountId(auth.userId),
+        },
+        auth.userId,
+        TOTAL_LISTING_STEPS,
+      );
+      setDraft(nextDraft);
+      markGoPublicPending(nextDraft.id);
+      // Never block Stripe redirect on photo upload to Supabase.
+      const syncRemote = opts?.syncRemote === true;
+      if (syncRemote) {
+        await saveListingDraftProgress(nextDraft, auth.userId, TOTAL_LISTING_STEPS, {
+          syncRemote: true,
+        });
+      } else {
+        savePublishedListing(nextDraft);
+        void saveListingDraftProgress(nextDraft, auth.userId, TOTAL_LISTING_STEPS, {
+          syncRemote: true,
+        });
+      }
+      if (auth.userId) void syncAgentPrefsRemote(auth.userId);
+      return nextDraft;
+    },
+    [auth.userId, draft],
+  );
 
   const canContinue = isListingStepValid(step, draft);
   const progress = (step / TOTAL_LISTING_STEPS) * 100;
@@ -415,7 +430,7 @@ export function ListingWizard({
 
   const handleChecklistSignIn = () => {
     void (async () => {
-      const saved = await persistDraftForGoPublic();
+      const saved = await persistDraftForGoPublic({ syncRemote: false });
       if (onRequireAuth) {
         onRequireAuth(saved.id);
         return;
@@ -429,18 +444,18 @@ export function ListingWizard({
       setGoPublicBusy("identity");
       setGoPublicError(null);
       try {
-        const saved = await persistDraftForGoPublic();
+        const saved = await persistDraftForGoPublic({ syncRemote: false });
         const result = await startIdentityVerificationForListing(
           listingWizardReturnPath(saved.id),
         );
         if (!result.ok) {
           setGoPublicError(result.reason);
-          setGoPublicBusy(null);
           return;
         }
-        window.location.href = result.url;
+        window.location.assign(result.url);
       } catch (error) {
         setGoPublicError(error instanceof Error ? error.message : "Verification failed.");
+      } finally {
         setGoPublicBusy(null);
       }
     })();
@@ -451,16 +466,17 @@ export function ListingWizard({
       setGoPublicBusy("stripe");
       setGoPublicError(null);
       try {
-        const saved = await persistDraftForGoPublic();
+        // Local draft only — awaiting remote photo upload was blocking Stripe redirect.
+        const saved = await persistDraftForGoPublic({ syncRemote: false });
         const result = await startConnectForListing(listingWizardReturnPath(saved.id));
         if (!result.ok) {
           setGoPublicError(result.reason);
-          setGoPublicBusy(null);
           return;
         }
-        window.location.href = result.url;
+        window.location.assign(result.url);
       } catch (error) {
         setGoPublicError(error instanceof Error ? error.message : "Stripe Connect failed.");
+      } finally {
         setGoPublicBusy(null);
       }
     })();

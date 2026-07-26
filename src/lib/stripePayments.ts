@@ -14,7 +14,14 @@ export async function getAccessToken(): Promise<string | null> {
   const supabase = getSupabaseClient();
   if (!supabase) return null;
   const { data } = await supabase.auth.getSession();
-  return data.session?.access_token ?? null;
+  if (data.session?.access_token) return data.session.access_token;
+  // Right after OTP, session can lag one tick — refresh once.
+  try {
+    const refreshed = await supabase.auth.refreshSession();
+    return refreshed.data.session?.access_token ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function createRentalPaymentIntent(params: {
@@ -333,34 +340,73 @@ export async function createAuctionCheckoutIntent(params: {
 
 export type ConnectAccountLinkResult = { ok: true; url: string } | { ok: false; reason: string };
 
+function friendlyConnectError(raw: string): string {
+  const lower = raw.toLowerCase();
+  if (
+    lower.includes("signed up for connect") ||
+    (lower.includes("connect") && lower.includes("not enabled"))
+  ) {
+    return "Stripe Connect isn’t enabled for this platform. In Stripe Dashboard → Connect, complete platform profile / get started, then try again.";
+  }
+  if (lower.includes("responsible") || lower.includes("platform profile")) {
+    return "Finish Stripe Connect platform setup in the Dashboard (responsibilities / platform profile), then try again.";
+  }
+  if (lower.includes("invalid api key") || lower.includes("api key")) {
+    return "Stripe API key problem. Check STRIPE_SECRET_KEY on Vercel (test vs live must match the publishable key).";
+  }
+  return raw;
+}
+
 export async function createConnectAccountLink(returnPath: string): Promise<ConnectAccountLinkResult> {
   if (!isStripePaymentsEnabled()) {
-    return { ok: false, reason: "Stripe not configured" };
+    return { ok: false, reason: "Stripe not configured. Set VITE_STRIPE_PUBLISHABLE_KEY on Vercel." };
   }
 
   const token = await getAccessToken();
   if (!token) {
-    return { ok: false, reason: "Sign in required" };
+    return { ok: false, reason: "Sign in required — enter your email code again, then retry Connect." };
   }
 
-  const res = await fetch("/api/stripe/connect_account_link", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ returnPath }),
-  });
+  let res: Response;
+  try {
+    res = await fetch("/api/stripe/connect_account_link", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ returnPath }),
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error instanceof Error ? error.message : "Network error calling Stripe Connect.",
+    };
+  }
 
-  const payload = (await res.json()) as ConnectAccountLinkResult & { error?: string };
+  let payload: ConnectAccountLinkResult & { error?: string } = { ok: false, reason: "" };
+  try {
+    payload = (await res.json()) as ConnectAccountLinkResult & { error?: string };
+  } catch {
+    return { ok: false, reason: `Connect failed (HTTP ${res.status}, invalid response).` };
+  }
+
   if (!res.ok) {
-    return { ok: false, reason: payload.error ?? payload.reason ?? `Connect failed (${res.status})` };
+    return {
+      ok: false,
+      reason: friendlyConnectError(
+        payload.error ?? payload.reason ?? `Connect failed (${res.status})`,
+      ),
+    };
   }
   if (!payload.ok) {
-    return { ok: false, reason: payload.reason ?? "Stripe Connect not configured" };
+    return {
+      ok: false,
+      reason: friendlyConnectError(payload.reason ?? "Stripe Connect not configured"),
+    };
   }
   if (!("url" in payload) || !payload.url) {
-    return { ok: false, reason: "Missing onboarding URL" };
+    return { ok: false, reason: "Missing onboarding URL from Stripe." };
   }
 
   return payload;
