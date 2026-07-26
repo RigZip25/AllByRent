@@ -22,13 +22,35 @@ function listingIdFromPath(pathname: string): string | null {
   }
 }
 
+/** Host flows that use listingId for resume (Stripe return) — not public deep links. */
+const HOST_RESUME_SCREENS = new Set([
+  "listItem",
+  "listingIntro",
+  "snapSale",
+  "profile",
+  "identity",
+  "coHosts",
+]);
+
 export function parseDeepLink(search = "", pathname = ""): ParsedDeepLink {
   const params = new URLSearchParams(search);
+  const screen = params.get("screen")?.trim() || "";
+
+  // Stripe Connect return: /?screen=listItem&listingId=…&connect=done
+  // Must NOT open ItemDetail / GarageShop or the app can white-screen on a draft.
+  if (HOST_RESUME_SCREENS.has(screen)) {
+    return {
+      skipSplash: true,
+      target: null,
+    };
+  }
+
   const skipSplash =
     params.get("skipSplash") === "1" ||
     params.has("garage") ||
     params.has("item") ||
     params.has("listingId") ||
+    params.has("connect") ||
     Boolean(listingIdFromPath(pathname));
 
   const garage = params.get("garage")?.trim() || "";
@@ -65,7 +87,7 @@ export function resolveListingDeepLink(listingId: string): DeepLinkTarget {
 }
 
 export function deepLinkQueryKeys(): string[] {
-  return ["garage", "item", "listingId", "skipSplash", "screen"];
+  return ["garage", "item", "listingId", "skipSplash", "screen", "connect"];
 }
 
 export function shareAppOrigin(): string {
