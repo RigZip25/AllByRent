@@ -51,6 +51,8 @@ export type SellerGoPublicStatus = {
   identityVerified: boolean;
   connected: boolean;
   payoutsEnabled: boolean;
+  /** Express onboarding finished even if payouts are still enabling. */
+  onboardingComplete: boolean;
   bankLast4: string | null;
   ready: boolean;
   nextStep: SellerGoPublicStep;
@@ -68,10 +70,11 @@ export function listingWizardReturnPath(listingId: string): string {
 }
 
 export function resolveSellerGoPublicNextStep(
-  status: Pick<SellerGoPublicStatus, "signedIn" | "payoutsEnabled">,
+  status: Pick<SellerGoPublicStatus, "signedIn" | "payoutsEnabled" | "onboardingComplete">,
 ): SellerGoPublicStep {
   if (!status.signedIn) return "sign_in";
-  if (!status.payoutsEnabled) return "stripe";
+  // Allow go-public after Express form is done — don't wait only on payouts_enabled webhook.
+  if (!status.payoutsEnabled && !status.onboardingComplete) return "stripe";
   return "ready";
 }
 
@@ -85,12 +88,14 @@ export async function loadSellerGoPublicStatus(
     const next = resolveSellerGoPublicNextStep({
       signedIn,
       payoutsEnabled: false,
+      onboardingComplete: false,
     });
     return {
       signedIn,
       identityVerified: localIdentity,
       connected: false,
       payoutsEnabled: false,
+      onboardingComplete: false,
       bankLast4: null,
       ready: next === "ready",
       nextStep: next,
@@ -102,15 +107,17 @@ export async function loadSellerGoPublicStatus(
     loadConnectStatus(userId),
   ]);
 
-  // Connect Express already runs government-ID KYC; treat payouts as identity-complete too.
+  // Connect Express already runs government-ID KYC; treat Connect done as identity-complete too.
   const identityVerified =
     Boolean(remote?.identity_verified) ||
     Boolean(loadUserProfile().verification.identity) ||
-    connect.payoutsEnabled;
+    connect.payoutsEnabled ||
+    connect.onboardingComplete;
 
   const next = resolveSellerGoPublicNextStep({
     signedIn: true,
     payoutsEnabled: connect.payoutsEnabled,
+    onboardingComplete: connect.onboardingComplete,
   });
 
   return {
@@ -118,6 +125,7 @@ export async function loadSellerGoPublicStatus(
     identityVerified,
     connected: connect.connected,
     payoutsEnabled: connect.payoutsEnabled,
+    onboardingComplete: connect.onboardingComplete,
     bankLast4: connect.last4,
     ready: next === "ready",
     nextStep: next,

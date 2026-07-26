@@ -423,6 +423,57 @@ export async function createConnectAccountLink(returnPath: string): Promise<Conn
   return payload;
 }
 
+export type ConnectSyncResult =
+  | {
+      ok: true;
+      connected: boolean;
+      payoutsEnabled: boolean;
+      detailsSubmitted: boolean;
+      chargesEnabled: boolean;
+      onboardingComplete: boolean;
+      last4: string | null;
+    }
+  | { ok: false; reason: string };
+
+/** Refresh Connect flags from Stripe into Supabase (fixes stuck “Finish Stripe” after onboarding). */
+export async function syncConnectAccountStatus(): Promise<ConnectSyncResult> {
+  const token = await getAccessToken();
+  if (!token) {
+    return { ok: false, reason: "Sign in required" };
+  }
+
+  let res: Response;
+  try {
+    res = await fetch("/api/stripe/connect_sync", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error instanceof Error ? error.message : "Connect sync network error",
+    };
+  }
+
+  let payload: ConnectSyncResult & { error?: string; reason?: string };
+  try {
+    payload = (await res.json()) as ConnectSyncResult & { error?: string; reason?: string };
+  } catch {
+    return { ok: false, reason: `Connect sync failed (HTTP ${res.status})` };
+  }
+
+  if (!res.ok || !payload.ok) {
+    return {
+      ok: false,
+      reason: payload.error ?? payload.reason ?? `Connect sync failed (${res.status})`,
+    };
+  }
+
+  return payload;
+}
+
 export type ListingBoostIntentResult =
   | {
       ok: true;
