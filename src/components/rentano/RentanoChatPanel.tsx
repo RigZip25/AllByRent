@@ -66,16 +66,17 @@ export function RentanoChatPanel({
       setError(null);
       setPendingAiQuestion(null);
       const userMsg: ChatMessage = { id: nextId(), role: "user", content: text };
+      // Build API history synchronously — never rely on setState updater side effects
+      // (those can be deferred, which sent `messages: []` and failed with "messages are required").
+      const historyForApi: RentanoChatTurn[] = [
+        ...messages
+          .filter((m) => m.id !== "welcome")
+          .map(({ role, content }) => ({ role, content })),
+        { role: "user", content: text },
+      ];
       setInput("");
       setLoading(true);
-
-      let historyForApi: RentanoChatTurn[] = [];
-      setMessages((prev) => {
-        historyForApi = [...prev.filter((m) => m.id !== "welcome"), userMsg].map(
-          ({ role, content }) => ({ role, content }),
-        );
-        return [...prev, userMsg];
-      });
+      setMessages((prev) => [...prev, userMsg]);
 
       try {
         if (!options?.forceAi) {
@@ -108,7 +109,7 @@ export function RentanoChatPanel({
         setLoading(false);
       }
     },
-    [apiContext, configured, loading, requireAuth],
+    [apiContext, configured, loading, messages, requireAuth],
   );
 
   const handleAskAi = () => {
