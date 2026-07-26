@@ -271,9 +271,9 @@ export const APP_HOST = "app.evorios.com";
 /** Public marketing site — QR codes and outbound links to the web. */
 export const LISTING_QR_BASE_URL = `${APP_ORIGIN}/item`;
 
-/** Public legal pages — hosted on the PWA until marketing DNS (evorios.com) is live. */
-export const TERMS_URL = `${APP_ORIGIN}/legal/terms.html`;
-export const PRIVACY_URL = `${APP_ORIGIN}/legal/privacy.html`;
+/** Public legal pages on the marketing site. Refunds stays on the PWA until refunds.html exists on evorios.com. */
+export const TERMS_URL = `${MARKETING_URL}/terms.html`;
+export const PRIVACY_URL = `${MARKETING_URL}/privacy.html`;
 export const REFUND_POLICY_URL = `${APP_ORIGIN}/legal/refunds.html`;
 
 /** QR sticker PDF download names (user-visible). */
