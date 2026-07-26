@@ -504,8 +504,7 @@ function AppRoutes() {
       clearBootQuery(["screen"]);
     }
     if (screen === "agent-activity") {
-      setNavStack([]);
-      setCurrentScreen("agentActivity");
+      // Agent activity is internal-only — do not surface via deep link.
       clearBootQuery(["screen"]);
     }
     if (screen === "coHosts") {

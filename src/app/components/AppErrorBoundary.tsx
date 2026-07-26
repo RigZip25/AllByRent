@@ -21,7 +21,7 @@ export class AppErrorBoundary extends Component<Props, State> {
         <div className="flex min-h-screen flex-col items-center justify-center bg-[#F0F4F2] p-6 text-center">
           <h1 className="mb-2 text-[20px] font-bold text-[#0D5C3A]">Something went wrong</h1>
           <p className="mb-4 max-w-[320px] text-[14px] text-gray-600">
-            {this.state.error.message}
+            Please reload. If it keeps happening, email support@evorios.com.
           </p>
           <button
             type="button"

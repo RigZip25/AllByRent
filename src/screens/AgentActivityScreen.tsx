@@ -25,7 +25,7 @@ export function AgentActivityScreen({ onBack }: { onBack: () => void }) {
   useEffect(() => {
     const key = (import.meta.env.VITE_AGENT_API_KEY as string | undefined) ?? "";
     if (!key.trim()) {
-      setError("Agent activity requires VITE_AGENT_API_KEY in your deployment environment.");
+      setError("This internal screen isn’t available in this build.");
       return;
     }
 

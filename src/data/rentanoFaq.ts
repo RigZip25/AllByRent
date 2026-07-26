@@ -280,7 +280,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Account",
     question: "What is a passkey?",
     answer:
-      "Passkeys let you sign in with Face ID / fingerprint instead of email links. After first sign-in, the app may offer to set one up — optional but faster.",
+      "Passkeys let you sign in with Face ID / fingerprint instead of typing the email code each time. After first sign-in, the app may offer to set one up — optional but faster. Sign-in codes still come by email.",
     keywords: ["passkey", "face id", "fingerprint", "login"],
   },
   {

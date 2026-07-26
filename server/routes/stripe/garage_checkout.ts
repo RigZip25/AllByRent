@@ -7,6 +7,12 @@ import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
 import { destinationChargeFields, requireHostPayoutAccount } from "../../lib/stripe/connectPayout";
+import {
+  platformFeeFromSubtotalCents,
+  validateGarageSellLines,
+  type GarageListingRow,
+  type GarageLotRow,
+} from "../../lib/stripe/garageInventory";
 
 type Line = { listingId?: string; title?: string; priceUsd?: number };
 
@@ -46,13 +52,17 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   const body = (req.body ?? {}) as Body;
   const hostId = typeof body.hostId === "string" ? body.hostId.trim() : "";
-  const amountCents = typeof body.amountCents === "number" ? Math.round(body.amountCents) : 0;
   const lines = Array.isArray(body.lines) ? body.lines : [];
-  const platformFeeCents =
-    typeof body.platformFeeCents === "number" ? Math.max(0, Math.round(body.platformFeeCents)) : 0;
+  const listingIds = [
+    ...new Set(
+      lines
+        .map((line) => (typeof line.listingId === "string" ? line.listingId.trim() : ""))
+        .filter(Boolean),
+    ),
+  ];
 
-  if (!hostId || amountCents < 50 || lines.length === 0) {
-    res.status(400).json({ error: "hostId, amountCents (≥50), and lines are required" });
+  if (!hostId || listingIds.length === 0) {
+    res.status(400).json({ error: "hostId and lines are required" });
     return;
   }
 
@@ -62,12 +72,37 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
-  const orderId = randomUUID();
-  const listingIds = lines
-    .map((line) => (typeof line.listingId === "string" ? line.listingId.trim() : ""))
-    .filter(Boolean)
-    .join(",");
+  const { data: listingRows, error: listingError } = await admin
+    .from("listings")
+    .select("id, owner_id, title, modes, pricing, availability, listing_status")
+    .in("id", listingIds);
 
+  if (listingError) {
+    res.status(500).json({ error: "Failed to load listings" });
+    return;
+  }
+
+  const { data: lotRows } = await admin
+    .from("garage_lot_states")
+    .select("listing_id, state")
+    .in("listing_id", listingIds);
+
+  const validated = validateGarageSellLines({
+    hostId,
+    listingIds,
+    listings: (listingRows ?? []) as GarageListingRow[],
+    lots: (lotRows ?? []) as GarageLotRow[],
+  });
+  if (!validated.ok) {
+    res.status(409).json({ ok: false, error: validated.error });
+    return;
+  }
+
+  const subtotalCents = validated.subtotalCents;
+  const platformFeeCents = platformFeeFromSubtotalCents(subtotalCents);
+  const amountCents = subtotalCents + platformFeeCents;
+
+  const orderId = randomUUID();
   const secret = process.env.STRIPE_SECRET_KEY!;
   const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
   const customerId = await getOrCreateStripeCustomer(stripe, admin, user.id, user.email);
@@ -83,8 +118,8 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       order_id: orderId,
       host_id: hostId,
       buyer_id: user.id,
-      listing_ids: listingIds.slice(0, 450),
-      line_count: String(lines.length),
+      listing_ids: listingIds.join(",").slice(0, 450),
+      line_count: String(validated.lines.length),
       platform_fee_cents: String(platformFeeCents),
     },
     ...destination,
@@ -96,7 +131,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     host_id: hostId,
     stripe_payment_intent_id: paymentIntent.id,
     stripe_payment_status: paymentIntent.status,
-    subtotal_cents: typeof body.subtotalCents === "number" ? Math.round(body.subtotalCents) : amountCents,
+    subtotal_cents: subtotalCents,
     platform_fee_cents: platformFeeCents,
     total_cents: amountCents,
     status: "pending",
@@ -107,15 +142,12 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
-  for (const line of lines) {
-    const listingId = typeof line.listingId === "string" ? line.listingId.trim() : "";
-    if (!listingId) continue;
-    const priceUsd = typeof line.priceUsd === "number" ? line.priceUsd : 0;
+  for (const line of validated.lines) {
     await admin.from("garage_order_lines").insert({
       order_id: orderId,
-      listing_id: listingId,
-      title: typeof line.title === "string" ? line.title.slice(0, 200) : "",
-      price_cents: Math.round(priceUsd * 100),
+      listing_id: line.listingId,
+      title: line.title,
+      price_cents: line.priceCents,
     });
   }
 
@@ -130,5 +162,8 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     paymentIntentId: paymentIntent.id,
     orderId,
     status: paymentIntent.status,
+    amountCents,
+    subtotalCents,
+    platformFeeCents,
   });
 });
