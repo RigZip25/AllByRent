@@ -154,12 +154,18 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   if (admin && event.type === "account.updated") {
     const account = event.data.object as Stripe.Account;
-    const userId = account.metadata?.supabase_user_id;
+    const userId = account.metadata?.supabase_user_id?.trim() || "";
+    const patch = {
+      stripe_payouts_enabled: Boolean(account.payouts_enabled),
+    };
     if (userId) {
+      await admin.from("profiles").update(patch).eq("id", userId);
+    } else if (account.id) {
+      // Fallback when metadata was missing at account creation.
       await admin
         .from("profiles")
-        .update({ stripe_payouts_enabled: Boolean(account.payouts_enabled) })
-        .eq("id", userId);
+        .update(patch)
+        .eq("stripe_connect_account_id", account.id);
     }
   }
 

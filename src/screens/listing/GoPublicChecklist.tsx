@@ -75,7 +75,7 @@ export function GoPublicChecklist({
   isPublishing,
 }: Props) {
   const signedIn = Boolean(status?.signedIn);
-  const payoutsEnabled = Boolean(status?.payoutsEnabled);
+  const stripeDone = Boolean(status?.payoutsEnabled || status?.onboardingComplete);
   const next = status?.nextStep ?? "sign_in";
   const ready = Boolean(status?.ready);
 
@@ -95,18 +95,20 @@ export function GoPublicChecklist({
     {
       id: "stripe",
       title: "Verify & connect bank",
-      detail: payoutsEnabled
+      detail: stripeDone
         ? status?.bankLast4
-          ? `Verified · payouts on · **** ${status.bankLast4}`
-          : "Verified with Stripe — payouts enabled."
+          ? `Stripe connected · **** ${status.bankLast4}`
+          : status?.payoutsEnabled
+            ? "Stripe connected — payouts enabled."
+            : "Stripe onboarding complete — you can go live."
         : status?.connected
-          ? "Stripe started — finish ID + bank in the Stripe form to enable payouts."
+          ? "Stripe started — finish ID + bank in the Stripe form, then tap refresh."
           : "Stripe checks your ID and links your bank so neighbors can pay you.",
-      done: payoutsEnabled,
+      done: stripeDone,
       actionLabel: busy === "stripe" ? "Opening Stripe…" : "Continue with Stripe",
       onAction: onConnectBank,
       actionBusy: busy === "stripe",
-      disabled: !signedIn || payoutsEnabled || loading || busy !== null,
+      disabled: !signedIn || stripeDone || loading || busy !== null,
     },
   ];
 

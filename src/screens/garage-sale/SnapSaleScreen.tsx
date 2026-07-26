@@ -271,7 +271,9 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
 
   const sellerReady = Boolean(sellerStatus?.ready);
   const needsSignIn = !sellerStatus?.signedIn;
-  const needsStripe = Boolean(sellerStatus?.signedIn && !sellerStatus.payoutsEnabled);
+  const needsStripe = Boolean(
+    sellerStatus?.signedIn && !sellerStatus.payoutsEnabled && !sellerStatus.onboardingComplete,
+  );
 
   const snapAnother = () => {
     setJustPublished(false);

@@ -3,6 +3,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import auctionCheckout from "@allbyrent/server/routes/stripe/auction_checkout";
 import boost from "@allbyrent/server/routes/stripe/boost";
 import connectAccountLink from "@allbyrent/server/routes/stripe/connect_account_link";
+import connectSync from "@allbyrent/server/routes/stripe/connect_sync";
 import depositClaim from "@allbyrent/server/routes/stripe/deposit_claim";
 import depositIntent from "@allbyrent/server/routes/stripe/deposit_intent";
 import depositRelease from "@allbyrent/server/routes/stripe/deposit_release";
@@ -20,6 +21,7 @@ const ROUTES: Record<string, Handler> = {
   auction_checkout: auctionCheckout,
   boost,
   connect_account_link: connectAccountLink,
+  connect_sync: connectSync,
   deposit_claim: depositClaim,
   deposit_intent: depositIntent,
   deposit_release: depositRelease,
