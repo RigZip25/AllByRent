@@ -252,7 +252,6 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
       modes: {
         rent: false,
         sell: true,
-        buy: false,
         rentToOwn: false,
         gift: false,
       },
@@ -285,11 +284,8 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
         changed = true;
       }
 
-      const hasActiveMode = nextModes.rent || nextModes.sell || nextModes.gift;
-      if (!hasActiveMode && rules.rent) {
-        nextModes.rent = true;
-        changed = true;
-      }
+      // Do not auto-enable Rent — that forced QR stickers onto hosts who only wanted Sell.
+      // Validation on Continue requires at least one allowed mode.
 
       return changed ? { ...current, modes: nextModes } : current;
     });
@@ -332,11 +328,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
   const toggleMode = (key: CategoryModeKey) => {
     setDraft((current) => {
       const nextModes = { ...current.modes, [key]: !current.modes[key] };
-      const rules = getCategoryModeRules(current.category);
-      const hasActiveMode = nextModes.rent || nextModes.sell || nextModes.gift;
-      if (!hasActiveMode && rules.rent) {
-        nextModes.rent = true;
-      }
+      // Allow turning the last mode off — Continue stays disabled until one is chosen.
       return { ...current, modes: nextModes };
     });
   };

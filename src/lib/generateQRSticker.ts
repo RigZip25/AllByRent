@@ -123,13 +123,61 @@ export async function generateQRStickerPdf(
   return { blob, objectUrl, filename };
 }
 
+function triggerAnchorDownload(generated: GeneratedQrPdf): void {
+  const anchor = document.createElement("a");
+  anchor.href = generated.objectUrl;
+  anchor.download = generated.filename;
+  anchor.rel = "noopener";
+  anchor.style.display = "none";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+}
+
+/**
+ * Present a generated PDF on mobile + desktop.
+ * Prefers Web Share (files) on phones/PWAs where window.open(blob) is often blocked.
+ */
+export async function presentGeneratedPdf(
+  generated: GeneratedQrPdf,
+  options?: { preferOpen?: boolean },
+): Promise<"shared" | "downloaded" | "opened"> {
+  const file = new File([generated.blob], generated.filename, {
+    type: "application/pdf",
+  });
+  const nav = navigator as Navigator & {
+    canShare?: (data: ShareData) => boolean;
+  };
+
+  if (!options?.preferOpen && typeof nav.share === "function" && typeof nav.canShare === "function") {
+    try {
+      if (nav.canShare({ files: [file] })) {
+        await nav.share({
+          files: [file],
+          title: generated.filename,
+        });
+        return "shared";
+      }
+    } catch (error) {
+      // User cancelled share sheet — treat as handled.
+      if (error instanceof Error && error.name === "AbortError") {
+        return "shared";
+      }
+    }
+  }
+
+  if (options?.preferOpen) {
+    const opened = window.open(generated.objectUrl, "_blank", "noopener,noreferrer");
+    if (opened) return "opened";
+  }
+
+  triggerAnchorDownload(generated);
+  return "downloaded";
+}
+
 export async function generateQRStickerSheet(listings: QRStickerListing[]): Promise<void> {
   const generated = await generateQRStickerPdf(listings);
   if (!generated) return;
-  const { objectUrl, filename } = generated;
-  const a = document.createElement("a");
-  a.href = objectUrl;
-  a.download = filename;
-  a.click();
-  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 15_000);
+  await presentGeneratedPdf(generated);
+  window.setTimeout(() => URL.revokeObjectURL(generated.objectUrl), 15_000);
 }

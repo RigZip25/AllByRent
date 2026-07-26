@@ -31,11 +31,9 @@ export function applyYardSaleListingDefaults(draft: ListingDraft): ListingDraft 
     subcategory: draft.subcategory.trim() ? draft.subcategory : "Unusual Items",
     grade: draft.grade || "personal",
     modes: {
-      ...draft.modes,
       rent: false,
       rentToOwn: false,
       sell: true,
-      buy: false,
       gift: false,
     },
     condition: draft.condition || "good",

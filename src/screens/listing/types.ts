@@ -180,7 +180,8 @@ export function createInitialListingDraft(): ListingDraft {
     replacementValue: "",
     instructionsUrl: "",
     modes: {
-      rent: true,
+      // Host must pick Rent and/or Sell — defaulting rent ON forced QR stickers on sell-only posts.
+      rent: false,
       sell: false,
       rentToOwn: false,
       gift: false,

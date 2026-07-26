@@ -19,7 +19,7 @@ import {
 import { resolveHostAccountId } from "../../lib/hostIdentity";
 import type { ListingDraft } from "./types";
 import { QR_PDF_FILENAMES } from "../../lib/brand";
-import { generateQRStickerPdf } from "../../lib/generateQRSticker";
+import { generateQRStickerPdf, presentGeneratedPdf } from "../../lib/generateQRSticker";
 import { getListingDisplayTitle, getListingQrUrl, listingDraftToStickerRow } from "../../lib/listingQr";
 import {
   deliverySummaryForListing,
@@ -275,7 +275,7 @@ export function HostListingDetailScreen({
       const row = listingDraftToStickerRow(listing);
       const generated = await generateQRStickerPdf([row], { filename: QR_PDF_FILENAMES.sticker });
       if (!generated) throw new Error("No PDF generated");
-      window.open(generated.objectUrl, "_blank", "noopener,noreferrer");
+      await presentGeneratedPdf(generated, { preferOpen: true });
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
     } finally {
@@ -298,7 +298,7 @@ export function HostListingDetailScreen({
         .map(listingDraftToStickerRow);
       const generated = await generateQRStickerPdf(rows, { filename: QR_PDF_FILENAMES.stickersBulk });
       if (!generated) throw new Error("No PDF generated");
-      window.open(generated.objectUrl, "_blank", "noopener,noreferrer");
+      await presentGeneratedPdf(generated, { preferOpen: true });
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
     } finally {

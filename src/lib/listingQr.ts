@@ -1,5 +1,15 @@
 import { LISTING_QR_BASE_URL } from "./brand";
 
+/** QR handoff stickers are for rentals only — sell/gift listings skip them. */
+export function listingRequiresQrSticker(modes: {
+  rent?: boolean;
+  rentToOwn?: boolean;
+  sell?: boolean;
+  gift?: boolean;
+}): boolean {
+  return Boolean(modes.rent || modes.rentToOwn);
+}
+
 export function getListingQrUrl(qrTokenOrListingId: string): string {
   return `${LISTING_QR_BASE_URL}/${qrTokenOrListingId}`;
 }

@@ -9,7 +9,7 @@ import { getProfileCity, savePublishedListingRemote, savePublishedListing, saveL
 import { syncAgentPrefsRemote, ensureBrowserTimeZoneCaptured } from "../../lib/agentPrefs";
 import { notifyGarageFollowersOfNewListing } from "../../lib/garageFollowNotify";
 import { loadUserProfile } from "../../lib/userProfileStorage";
-import { getListingDisplayTitle } from "../../lib/listingQr";
+import { getListingDisplayTitle, listingRequiresQrSticker } from "../../lib/listingQr";
 import { loadManageableListings } from "../../lib/hostAccess";
 import {
   clearGoPublicPending,
@@ -94,8 +94,8 @@ const slideVariants = {
 };
 
 function isGiftOrSellOnly(draft: ListingDraft): boolean {
-  const { rent, sell, rentToOwn, gift } = draft.modes;
-  return (gift || sell) && !rent && !rentToOwn;
+  const { sell, gift } = draft.modes;
+  return (gift || sell) && !listingRequiresQrSticker(draft.modes);
 }
 
 function firePublishConfetti() {
@@ -354,11 +354,13 @@ export function ListingWizard({
         return;
       }
 
+      const needsQr = listingRequiresQrSticker(normalizedDraft.modes);
       const publishedDraft: ListingDraft = {
         ...normalizedDraft,
         hostId,
-        generateQR: true,
-        listingStatus: giftOrSellOnly ? "active" : "pending_qr",
+        generateQR: needsQr,
+        qrReady: !needsQr,
+        listingStatus: needsQr ? "pending_qr" : "active",
         nudgeCount: 0,
         lastNudgedAt: null,
         updatedAt: new Date().toISOString(),
@@ -381,8 +383,8 @@ export function ListingWizard({
       firePublishConfetti();
       setIsPublishing(false);
 
-      // Celebrate that the listing is live first; social share comes after (optional).
-      if (!giftOrSellOnly) {
+      // QR stickers are rental handoff only — sell/gift go straight to live success.
+      if (needsQr) {
         setPhase("qrStory");
       } else {
         setPhase("success");
@@ -644,7 +646,7 @@ export function ListingWizard({
         className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden"
         style={{ backgroundColor: BACKGROUND }}
       >
-        <QRStoryScreen onGotIt={() => setPhase("qrSticker")} />
+        <QRStoryScreen listing={draft} onGotIt={() => setPhase("qrSticker")} />
       </div>
     );
   }

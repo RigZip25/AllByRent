@@ -6,7 +6,9 @@ import qrStory2 from "../../imports/qr_story_2.png";
 import qrStory3 from "../../imports/qr_story_3.png";
 import { MASCOT_NAME, QR_PDF_FILENAMES } from "../../lib/brand";
 import { RentanoHint } from "../../components/RentanoHint";
-import { generateQRStickerPdf } from "../../lib/generateQRSticker";
+import { generateQRStickerPdf, presentGeneratedPdf } from "../../lib/generateQRSticker";
+import { listingDraftToStickerRow } from "../../lib/listingQr";
+import type { ListingDraft } from "./types";
 
 const GREEN = "#0D5C3A";
 
@@ -29,6 +31,7 @@ const STORY_STEPS = [
 ] as const;
 
 type QRStoryScreenProps = {
+  listing: ListingDraft;
   onGotIt: () => void;
 };
 
@@ -57,7 +60,7 @@ function StoryBlock({
   );
 }
 
-export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
+export function QRStoryScreen({ listing, onGotIt }: QRStoryScreenProps) {
   const [step, setStep] = useState(0);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
@@ -67,10 +70,15 @@ export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
     setPdfLoading(true);
     setPdfError(null);
     try {
-      // Generic sheet — host will also get per-listing PDF on the next screen.
-      const generated = await generateQRStickerPdf([], { filename: QR_PDF_FILENAMES.stickers });
+      const generated = await generateQRStickerPdf([listingDraftToStickerRow(listing)], {
+        filename: QR_PDF_FILENAMES.sticker,
+        paper: "letter",
+        layout: "sheet",
+        labelIn: 2,
+      });
       if (!generated) throw new Error("No PDF generated");
-      window.open(generated.objectUrl, "_blank", "noopener,noreferrer");
+      await presentGeneratedPdf(generated);
+      window.setTimeout(() => URL.revokeObjectURL(generated.objectUrl), 60_000);
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
     } finally {
@@ -97,8 +105,8 @@ export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
         <div className="mt-5 rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
           <p className="text-sm font-semibold text-gray-900">Printable sticker PDF</p>
           <p className="mt-1 text-xs text-gray-500">
-            Download a printable QR sticker sheet (Avery-compatible). You’ll also be able to download
-            your item’s QR on the next step.
+            Download a printable QR sticker for this item (Avery-compatible). You’ll also be able to
+            download again on the next step.
           </p>
           <button
             type="button"

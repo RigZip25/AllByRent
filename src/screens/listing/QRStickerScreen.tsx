@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { motion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import QRCode from "qrcode";
-import { generateQRStickerPdf } from "../../lib/generateQRSticker";
+import { generateQRStickerPdf, presentGeneratedPdf } from "../../lib/generateQRSticker";
 import { getListingDisplayTitle, getListingQrUrl, listingDraftToStickerRow } from "../../lib/listingQr";
 import {
   addListingToQrBulkQueue,
@@ -76,7 +76,13 @@ export function QRStickerScreen({
 
   const generatePdf = async (
     ids: string[],
-    options?: { paper?: "letter" | "a4"; layout?: "sheet" | "single"; labelIn?: number; filename?: string },
+    options?: {
+      paper?: "letter" | "a4";
+      layout?: "sheet" | "single";
+      labelIn?: number;
+      filename?: string;
+      preferOpen?: boolean;
+    },
   ) => {
     let rows = eligibleListings
       .filter((l) => ids.includes(l.id))
@@ -96,6 +102,7 @@ export function QRStickerScreen({
     if (pdfUrl) URL.revokeObjectURL(pdfUrl);
     setPdfUrl(generated.objectUrl);
     setPdfFilename(generated.filename);
+    await presentGeneratedPdf(generated, { preferOpen: options?.preferOpen });
     setActionsOpen(true);
     return generated.objectUrl;
   };
@@ -104,8 +111,13 @@ export function QRStickerScreen({
     setPdfLoading(true);
     setPdfError(null);
     try {
-      const url = await generatePdf([draft.id], { paper: "letter", layout: "sheet", labelIn: 2, filename: QR_PDF_FILENAMES.stickerLetter });
-      window.open(url, "_blank", "noopener,noreferrer");
+      await generatePdf([draft.id], {
+        paper: "letter",
+        layout: "sheet",
+        labelIn: 2,
+        filename: QR_PDF_FILENAMES.stickerLetter,
+        preferOpen: true,
+      });
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
     } finally {
@@ -122,8 +134,13 @@ export function QRStickerScreen({
         setPdfError("No items in bulk queue yet.");
         return;
       }
-      const url = await generatePdf(ids, { paper: "letter", layout: "sheet", labelIn: 2, filename: QR_PDF_FILENAMES.stickersBulkLetter });
-      window.open(url, "_blank", "noopener,noreferrer");
+      await generatePdf(ids, {
+        paper: "letter",
+        layout: "sheet",
+        labelIn: 2,
+        filename: QR_PDF_FILENAMES.stickersBulkLetter,
+        preferOpen: true,
+      });
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
     } finally {
@@ -136,9 +153,19 @@ export function QRStickerScreen({
     setPdfError(null);
     try {
       if (kind === "a4") {
-        await generatePdf([draft.id], { paper: "a4", layout: "sheet", labelIn: 2, filename: QR_PDF_FILENAMES.stickerA4 });
+        await generatePdf([draft.id], {
+          paper: "a4",
+          layout: "sheet",
+          labelIn: 2,
+          filename: QR_PDF_FILENAMES.stickerA4,
+        });
       } else {
-        await generatePdf([draft.id], { paper: "a4", layout: "single", labelIn: 3, filename: QR_PDF_FILENAMES.sticker3x3 });
+        await generatePdf([draft.id], {
+          paper: "a4",
+          layout: "single",
+          labelIn: 3,
+          filename: QR_PDF_FILENAMES.sticker3x3,
+        });
       }
     } catch {
       setPdfError("Could not generate PDF. Please try again.");
