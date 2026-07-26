@@ -7,6 +7,7 @@ import { deleteMedia, putMediaBlob, type MediaRef } from "../../lib/mediaStore";
 import { useMediaUrl } from "../../lib/useMediaUrl";
 import { getPublishedListingById, savePublishedListing, savePublishedListingRemote } from "../../lib/listingStorage";
 import { GarageSharePanel } from "../../components/share/GarageSharePanel";
+import { ConnectSetupError } from "../../components/payments/ConnectSetupError";
 import { hostGarageItemSharePayload, hostGarageSharePayload } from "../../lib/garageMarketingShare";
 import { notifyGarageFollowersOfNewListing } from "../../lib/garageFollowNotify";
 import { loadUserProfile } from "../../lib/userProfileStorage";
@@ -571,7 +572,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
           </div>
         ) : null}
 
-        {error ? <p className="mt-3 text-sm font-medium text-red-600">{error}</p> : null}
+        {error ? <ConnectSetupError message={error} /> : null}
 
         <button
           type="button"

@@ -124,11 +124,22 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   } catch (error) {
     const message = error instanceof Error ? error.message : "Stripe Connect failed";
     const lower = message.toLowerCase();
-    const reason =
+    let reason = message;
+    if (
+      lower.includes("responsibilities") ||
+      lower.includes("managing losses") ||
+      lower.includes("platform-profile")
+    ) {
+      reason = message.includes("dashboard.stripe.com")
+        ? message
+        : `${message} https://dashboard.stripe.com/settings/connect/platform-profile`;
+    } else if (
       lower.includes("signed up for connect") ||
       (lower.includes("connect") && lower.includes("not enabled"))
-        ? "Stripe Connect isn’t enabled. Open Stripe Dashboard → Connect → Get started, finish the platform profile, then retry."
-        : message;
+    ) {
+      reason =
+        "Stripe Connect isn’t enabled. Open Stripe Dashboard → Connect → Get started, finish the platform profile, then retry. https://dashboard.stripe.com/settings/connect/platform-profile";
+    }
     res.status(200).json({ ok: false, reason });
   }
 });
