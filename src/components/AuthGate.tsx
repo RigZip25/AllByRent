@@ -34,8 +34,8 @@ const INTENT_COPY: Record<
 > = {
   list: {
     title: "Sign in or create account",
-    subtitle: "Add your details — we'll email a sign-in code, then save your listing draft.",
-    rentano: mascotSays("List your gear and start earning. One quick sign-in to continue."),
+    subtitle: "Add your details — we'll email a sign-in code. Next: verify identity and connect Stripe to go public.",
+    rentano: mascotSays("Draft saved. Sign in is step 1 of going public — verify and bank connect come next."),
   },
   book: {
     title: "Sign in or create account",
