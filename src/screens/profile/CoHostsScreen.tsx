@@ -265,8 +265,8 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
               </p>
             ) : null}
             <p className="mt-3 text-[12px] leading-snug text-gray-500">
-              Email delivery is not wired yet. Save the invite, copy the link, and have them sign in
-              with the invited email — then accept under Invitations for you.
+              Copy the invite link and send it yourself. They sign in with the invited email, then
+              accept under Invitations for you.
             </p>
           </div>
         </section>

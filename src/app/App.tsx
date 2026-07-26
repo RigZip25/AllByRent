@@ -99,7 +99,6 @@ import { removeStripeControllerIframes } from "../lib/stripeCleanup";
 import {
   clearYardSaleListingActive,
   isYardSaleListingActive,
-  setYardSaleListingActive,
 } from "../lib/yardSaleListing";
 import { hasSeenGarageWorkflow } from "../lib/garageWorkflowStorage";
 import { hasSeenGarageSaleRules } from "../lib/garageSaleRulesStorage";
@@ -428,7 +427,7 @@ function AppRoutes() {
   );
   const [garageShopPreview, setGarageShopPreview] = useState(false);
   const [winnerCheckoutListingId, setWinnerCheckoutListingId] = useState<string | null>(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [listingPrefill, setListingPrefill] = useState<ShelfPrefill | null>(null);
   const [editingListingId, setEditingListingId] = useState<string | null>(() =>

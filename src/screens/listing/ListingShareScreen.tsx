@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Copy, Loader2, Share2 } from "lucide-react";
-import { APP_NAME, MARKETING_URL } from "../../lib/brand";
+import { APP_NAME } from "../../lib/brand";
 import type { ListingDraft } from "./types";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { postLlmChat } from "../../lib/llmClient";

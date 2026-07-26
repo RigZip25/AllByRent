@@ -1,11 +1,8 @@
 import type { ListingDraft } from "../screens/listing/types";
-import { getPublicProfile } from "./demoUserProfiles";
 import { getActiveRentLocationLabel, getProfileCity } from "./listingStorage";
 
 export function garageDisplayName(hostId: string | undefined): string {
   if (!hostId) return "Host's Garage";
-  const profile = getPublicProfile(hostId);
-  if (profile) return `${profile.displayName}'s Garage`;
   return "Neighbor's Garage";
 }
 
@@ -14,21 +11,16 @@ export function garageTrustLine(hostId: string | undefined): {
   rating: number;
   distance: string;
 } {
-  const profile = hostId ? getPublicProfile(hostId) : null;
   const name = garageDisplayName(hostId);
-  const rating = profile?.rating ?? 0;
   const city = getProfileCity().trim().toLowerCase();
   const active = getActiveRentLocationLabel().trim().toLowerCase();
-  const distance =
-    city && active && city === active ? "Near you" : mockDistanceMi(hostId ?? "neighbor");
-  return { name, rating, distance };
+  const distance = city && active && city === active ? "Near you" : "Nearby";
+  return { name, rating: 0, distance };
 }
 
-/** Deterministic mock distance until geolocation wiring (P1). */
-export function mockDistanceMi(seed: string): string {
-  const hash = seed.split("").reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
-  const tenths = (hash % 17) + 3;
-  return `${(tenths / 10).toFixed(1)} mi`;
+/** @deprecated Prefer "Nearby" — kept for call sites until distance is wired. */
+export function mockDistanceMi(_seed: string): string {
+  return "Nearby";
 }
 
 export type ModeChip = "all" | "rent" | "buy";

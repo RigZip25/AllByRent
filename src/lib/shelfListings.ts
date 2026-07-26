@@ -32,7 +32,7 @@ function normalize(value: string): string {
   return value.trim().toLowerCase();
 }
 
-function listingMatchesCity(listing: ListingDraft, city?: string): boolean {
+function listingMatchesCity(_listing: ListingDraft, city?: string): boolean {
   const cityNorm = normalize(city ?? "");
   if (!cityNorm) return true;
 

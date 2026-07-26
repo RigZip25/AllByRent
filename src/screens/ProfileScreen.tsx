@@ -42,7 +42,7 @@ import { formatUsPhoneDisplay } from "../lib/usPhoneFormat";
 import { confirmAndResetAppData } from "../lib/resetAppStorage";
 import { useAuth } from "../hooks/AuthProvider";
 import { signOut } from "../lib/auth";
-import { fetchRemoteProfile, updateRemoteProfile } from "../lib/supabaseProfile";
+import { fetchRemoteProfile } from "../lib/supabaseProfile";
 import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
 import { loadConnectStatus, startConnectOnboarding } from "../lib/repositories/connectRepository";
 
@@ -141,14 +141,14 @@ function ModeToggle({ mode, onChange }: { mode: AppMode; onChange: (m: AppMode) 
 }
 
 export function ProfileScreen({
-  onRentals,
+  onRentals: _onRentals,
   onMrE,
   onEditLocation,
   onOpenNotifications,
   onOpenCoHosts,
   onOpenPersonalInfo,
   onOpenIdentity,
-  onOpenAgentActivity,
+  onOpenAgentActivity: _onOpenAgentActivity,
   onDeleteAccount,
   onViewPublicProfile,
   onRequireAuth,
@@ -592,26 +592,6 @@ export function ProfileScreen({
 
         <SectionTitle>Preferences</SectionTitle>
         <ul className="mb-4 flex flex-col gap-2">
-          <li>
-            <RowButton
-              icon={<span className="text-lg">🤖</span>}
-              label="Agent activity"
-              value="Admin feed"
-              onClick={() => {
-                if (onOpenAgentActivity) {
-                  onOpenAgentActivity();
-                  return;
-                }
-                try {
-                  const url = new URL(window.location.href);
-                  url.searchParams.set("screen", "agent-activity");
-                  window.location.href = url.toString();
-                } catch {
-                  window.location.href = "/?screen=agent-activity";
-                }
-              }}
-            />
-          </li>
           <li>
             <RowButton
               icon={<Bell className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}

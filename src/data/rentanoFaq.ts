@@ -97,7 +97,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "QR & pickup",
     question: "Why do I need a QR sticker?",
     answer:
-      "For rentals, a physical QR on the item helps verify handoff. After publish you may print a sticker or use the on-screen QR story. Buy-only or gift-only listings may skip the sticker.",
+      "For rentals, a physical QR on the item helps verify handoff. After publish you may print a sticker or use the on-screen QR story. Buy-only or free ($0 sell) listings may skip the sticker.",
     keywords: ["code", "scan", "sticker"],
   },
   {

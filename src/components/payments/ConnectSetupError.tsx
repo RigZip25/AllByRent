@@ -33,7 +33,7 @@ export function ConnectSetupError({ message }: { message: string }) {
   if (!isPlatform) {
     return (
       <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-800">
-        {message}
+        Couldn’t connect payouts right now. Try again in a moment — if it keeps failing, email support.
       </p>
     );
   }
@@ -61,7 +61,6 @@ export function ConnectSetupError({ message }: { message: string }) {
           Open Stripe Dashboard →
         </a>
       ) : null}
-      <p className="mt-2 break-all text-[10px] text-red-600/80">{message}</p>
     </div>
   );
 }

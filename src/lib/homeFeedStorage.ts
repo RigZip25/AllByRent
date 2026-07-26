@@ -18,17 +18,19 @@ export function saveHomeFeedQuery(query: string): void {
   }
 }
 
-export function loadHomeFeedMode(): "all" | "rent" | "buy" | "gift" {
+export function loadHomeFeedMode(): "all" | "rent" | "buy" {
   try {
     const raw = sessionStorage.getItem(MODE_KEY);
-    if (raw === "rent" || raw === "buy" || raw === "gift" || raw === "all") return raw;
+    if (raw === "rent" || raw === "buy" || raw === "all") return raw;
+    // Legacy "gift" chip → show everything until user picks again.
+    if (raw === "gift") return "all";
   } catch {
     /* */
   }
   return "all";
 }
 
-export function saveHomeFeedMode(mode: "all" | "rent" | "buy" | "gift"): void {
+export function saveHomeFeedMode(mode: "all" | "rent" | "buy"): void {
   try {
     sessionStorage.setItem(MODE_KEY, mode);
   } catch {

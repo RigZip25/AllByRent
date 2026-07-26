@@ -259,6 +259,10 @@ export type GarageCheckoutIntentResult =
     }
   | { ok: false; reason: string };
 
+function responseFailureReason(payload: { error?: string; reason?: string }): string | undefined {
+  return payload.error ?? payload.reason;
+}
+
 export async function createGarageCartCheckoutIntent(params: {
   hostId: string;
   lines: Array<{ listingId: string; title: string; priceUsd: number }>;
@@ -286,7 +290,7 @@ export async function createGarageCartCheckoutIntent(params: {
 
   const payload = (await res.json()) as GarageCheckoutIntentResult & { error?: string };
   if (!res.ok) {
-    return { ok: false, reason: payload.error ?? payload.reason ?? `Checkout failed (${res.status})` };
+    return { ok: false, reason: responseFailureReason(payload) ?? `Checkout failed (${res.status})` };
   }
   if (!payload.ok) {
     return { ok: false, reason: payload.reason ?? "Stripe not configured" };
@@ -326,7 +330,7 @@ export async function createAuctionCheckoutIntent(params: {
 
   const payload = (await res.json()) as GarageCheckoutIntentResult & { error?: string };
   if (!res.ok) {
-    return { ok: false, reason: payload.error ?? payload.reason ?? `Checkout failed (${res.status})` };
+    return { ok: false, reason: responseFailureReason(payload) ?? `Checkout failed (${res.status})` };
   }
   if (!payload.ok) {
     return { ok: false, reason: payload.reason ?? "Stripe not configured" };
@@ -406,7 +410,7 @@ export async function createConnectAccountLink(returnPath: string): Promise<Conn
     return {
       ok: false,
       reason: friendlyConnectError(
-        payload.error ?? payload.reason ?? `Connect failed (${res.status})`,
+        responseFailureReason(payload) ?? `Connect failed (${res.status})`,
       ),
     };
   }
@@ -510,7 +514,7 @@ export async function createListingBoostIntent(params: {
 
   const payload = (await res.json()) as ListingBoostIntentResult & { error?: string };
   if (!res.ok) {
-    return { ok: false, reason: payload.error ?? payload.reason ?? `Boost failed (${res.status})` };
+    return { ok: false, reason: responseFailureReason(payload) ?? `Boost failed (${res.status})` };
   }
   if (!payload.ok) {
     return { ok: false, reason: payload.reason ?? "Stripe not configured" };

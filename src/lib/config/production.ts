@@ -22,11 +22,11 @@ export function getBookingWithoutPaymentMessage(): string {
 }
 
 export function getSupabaseRequiredMessage(): string {
-  return "Supabase is required. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY on Vercel.";
+  return "This app needs a live connection to start. Please try again shortly or contact support.";
 }
 
 export function getStripeRequiredMessage(): string {
-  return "Stripe is required. Set VITE_STRIPE_PUBLISHABLE_KEY and STRIPE_SECRET_KEY on Vercel.";
+  return "Card payments are temporarily unavailable. You can still send a request to the host.";
 }
 
 export function getSignInRequiredMessage(): string {

@@ -37,6 +37,7 @@ function CartLineThumb({
     photoThumbStoragePath || photoStoragePath || photoThumbId || photoId
       ? {
           id: photoId ?? photoThumbId ?? "",
+          mimeType: "image/jpeg",
           thumbId: photoThumbId,
           storagePath: photoStoragePath,
           thumbStoragePath: photoThumbStoragePath,

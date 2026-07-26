@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   ArrowDownRight,
   ArrowRight,
@@ -8,7 +8,6 @@ import {
   Package,
   TrendingUp,
 } from "lucide-react";
-import { getAppMode } from "../lib/appMode";
 import {
   computeEarnBusinessStats,
   formatGrowthBadge,
@@ -101,12 +100,11 @@ function ListingRow({ row }: { row: ListingEarnBreakdown }) {
 
 export function EarnBusinessScreen({
   onHome,
-  onRentals,
+  onRentals: _onRentals,
 }: {
   onHome: () => void;
   onRentals: () => void;
 }) {
-  const mode = getAppMode();
   const stats = useMemo(() => computeEarnBusinessStats(), []);
 
   const growthPositive =

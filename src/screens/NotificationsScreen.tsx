@@ -233,8 +233,9 @@ export function NotificationsScreen({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!auth.userId) {
-      const local = loadInAppNotifications().map((n) => ({
+    const userId = auth.userId;
+    if (!userId) {
+      const local: Notification[] = loadInAppNotifications().map((n) => ({
         id: n.id,
         recipientId: "local",
         actorId: null,
@@ -251,7 +252,7 @@ export function NotificationsScreen({
     }
     let mounted = true;
     setLoading(true);
-    void fetchNotificationsRemote(auth.userId)
+    void fetchNotificationsRemote(userId)
       .then((data) => {
         if (!mounted) return;
         setItems(mergeWithLocalNotifications(data));
@@ -401,13 +402,14 @@ export function NotificationsScreen({
                 type="button"
                 disabled={pushBusy}
                 onClick={() => {
-                  if (!auth.userId) return;
+                  const userId = auth.userId;
+                  if (!userId) return;
                   setPushBusy(true);
                   setPushError(null);
                   void subscribeToPush()
                     .then((sub) => {
                       if (!sub) throw new Error("Push not available or permission denied.");
-                      return savePushSubscriptionRemote(auth.userId, sub);
+                      return savePushSubscriptionRemote(userId, sub);
                     })
                     .catch((e) => {
                       const msg = e instanceof Error ? e.message : "Push setup failed.";

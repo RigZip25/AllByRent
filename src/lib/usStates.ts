@@ -120,7 +120,7 @@ const STATE_NAME_TO_CODE: Record<string, string> = Object.fromEntries(
   US_STATE_OPTIONS.map((s) => [s.label.toLowerCase(), s.code]),
 );
 
-for (const [code, bbox] of Object.entries(US_STATE_BBOX)) {
+for (const code of Object.keys(US_STATE_BBOX)) {
   STATE_NAME_TO_CODE[code.toLowerCase()] = code;
 }
 

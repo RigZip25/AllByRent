@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, Tag, X } from "lucide-react";
+import { Tag, X } from "lucide-react";
 import { ONBOARDING } from "../../lib/brand";
 import { submitNeighborOffer } from "../../lib/garageOfferStorage";
 import { formatShopUsd } from "../../lib/garageShopStorage";

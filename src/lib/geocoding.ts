@@ -8,10 +8,8 @@ import { abbreviateUsState, formatUsAddressLines, searchUsAddresses } from "./us
 import { refineUsReverseGeocode } from "./usReverseGeocode";
 import {
   appendUsStateToQuery,
-  detectUsStateFromZip,
   filterMatchesByUsState,
   getPreferredUsState,
-  queryHasUsCityHint,
   US_STATE_BBOX,
 } from "./usStates";
 import {
@@ -58,6 +56,7 @@ type PhotonProperties = {
   neighbourhood?: string;
   locality?: string;
   state?: string;
+  county?: string;
   country?: string;
   countrycode?: string;
   osm_value?: string;

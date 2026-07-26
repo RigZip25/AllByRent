@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { BadgeCheck, Shield, Star as StarIcon } from "lucide-react";
-import { getPublicProfile, type PublicUserProfile } from "../lib/demoUserProfiles";
+import type { PublicUserProfile } from "../lib/demoUserProfiles";
 import { fetchRemoteProfile, type RemoteProfile } from "../lib/supabaseProfile";
 import { loadUserProfile, type UserProfile } from "../lib/userProfileStorage";
 import { loadPublishedListings } from "../lib/listingStorage";
@@ -83,9 +83,25 @@ export function PublicProfileScreen({
   const [fetchedReviews, setFetchedReviews] = useState<PublicUserProfile["reviews"] | null>(null);
   const [showAllReviews, setShowAllReviews] = useState(false);
 
-  const demoProfile = isSelf ? null : getPublicProfile(userId);
-  const baseProfile = isSelf ? publicFromOwn(own) : demoProfile ?? remoteProfile;
   const hostListings = useMemo(() => listingsForHost(userId), [userId]);
+  const fallbackNeighbor: PublicUserProfile | null =
+    !isSelf && !remoteProfile && hostListings.length > 0
+      ? {
+          id: userId,
+          displayName: "Neighbor",
+          memberSince: new Date().toISOString(),
+          avatarUrl: null,
+          identityVerified: false,
+          phoneVerified: false,
+          rating: 0,
+          transactionCount: 0,
+          reviewCount: 0,
+          noShowCount: 0,
+          listings: hostListings,
+          reviews: [],
+        }
+      : null;
+  const baseProfile = isSelf ? publicFromOwn(own) : remoteProfile ?? fallbackNeighbor;
   const profile = baseProfile
     ? {
         ...baseProfile,
@@ -103,10 +119,6 @@ export function PublicProfileScreen({
 
   useEffect(() => {
     setShowAllReviews(false);
-    if (demoProfile) {
-      setFetchedReviews(null);
-      return;
-    }
     let mounted = true;
     void fetchReviewsForUserRemote(userId).then((rows) => {
       if (!mounted) return;
@@ -123,10 +135,10 @@ export function PublicProfileScreen({
     return () => {
       mounted = false;
     };
-  }, [userId, demoProfile]);
+  }, [userId]);
 
   useEffect(() => {
-    if (isSelf || demoProfile || !looksLikeUuid(userId)) {
+    if (isSelf || !looksLikeUuid(userId)) {
       setRemoteProfile(null);
       setRemoteLoading(false);
       return;
@@ -144,7 +156,7 @@ export function PublicProfileScreen({
     return () => {
       mounted = false;
     };
-  }, [userId, isSelf, demoProfile]);
+  }, [userId, isSelf]);
 
   if (remoteLoading && !profile) {
     return (

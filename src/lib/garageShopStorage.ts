@@ -77,14 +77,6 @@ export function parseSalePrice(listing: ListingDraft): number {
   return Number.isFinite(value) && value > 0 ? value : 0;
 }
 
-function hashListingId(id: string): number {
-  let hash = 0;
-  for (let i = 0; i < id.length; i += 1) {
-    hash = (hash * 31 + id.charCodeAt(i)) | 0;
-  }
-  return Math.abs(hash);
-}
-
 export function getShopOffer(listing: ListingDraft): ShopOffer | null {
   if (!listing.modes.sell) return null;
   if (!isLotOnShelf(listing.id)) return null;

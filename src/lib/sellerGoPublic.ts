@@ -83,7 +83,7 @@ export async function loadSellerGoPublicStatus(
 ): Promise<SellerGoPublicStatus> {
   const signedIn = Boolean(userId);
 
-  if (!signedIn || !isSupabaseConfigured()) {
+  if (!userId || !isSupabaseConfigured()) {
     const localIdentity = Boolean(loadUserProfile().verification.identity);
     const next = resolveSellerGoPublicNextStep({
       signedIn,

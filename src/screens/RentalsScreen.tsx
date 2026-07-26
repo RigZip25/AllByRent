@@ -193,16 +193,17 @@ export function RentalsScreen({
   const refresh = useCallback(() => setBookings(loadRentalBookings()), []);
 
   useEffect(() => {
-    if (!auth.userId) {
+    const userId = auth.userId;
+    if (!userId) {
       setBookings([]);
       return;
     }
-    void expireStalePendingApprovals(auth.userId)
+    void expireStalePendingApprovals(userId)
       .then(() =>
-        syncRentalsFromRemote(auth.userId).then(setBookings).catch(() => setBookings(loadRentalBookings())),
+        syncRentalsFromRemote(userId).then(setBookings).catch(() => setBookings(loadRentalBookings())),
       )
       .catch(() => {
-        void syncRentalsFromRemote(auth.userId)
+        void syncRentalsFromRemote(userId)
           .then(setBookings)
           .catch(() => setBookings(loadRentalBookings()));
       });
