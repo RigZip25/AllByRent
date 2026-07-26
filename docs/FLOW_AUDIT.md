@@ -71,7 +71,8 @@
 ## D. Listing wizard — host flow
 
 **Go public gate (required for first publish):** draft freely → Review → checklist
-`Sign in → Identity → Stripe Connect` → only then `active` / `pending_qr`.
+`Sign in → Stripe Connect (ID + bank)` → only then `active` / `pending_qr`.
+KYC is inside Connect Express (separate Stripe Identity product is optional).
 Edits to already-live listings skip the checklist.
 
 Open: My Garage → **+** → wizard. URL: `?step=0` … `?step=6` (when wired).

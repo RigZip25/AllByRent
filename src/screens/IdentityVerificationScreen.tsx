@@ -35,7 +35,7 @@ export function IdentityVerificationScreen({ onBack }: { onBack: () => void }) {
             <div className="min-w-0">
               <p className="text-sm font-bold text-gray-900">Verify once</p>
               <p className="mt-1 text-[13px] text-gray-500">
-                Required before your listing goes public — also available from the Go public checklist.
+                Optional extra badge. Going public uses Stripe Connect (ID + bank in one flow).
               </p>
             </div>
           </div>

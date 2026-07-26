@@ -250,7 +250,7 @@ export function Step7Review({
         hint={
           isEditing
             ? "Review your changes, then save — your QR and listing status stay as they are."
-            : "Next: sign in, verify identity, and connect Stripe — then your listing goes public. No menu hunting."
+            : "Next: sign in, then Stripe verifies your ID and bank — then your listing goes public."
         }
         showTapLabel
       />
