@@ -42,7 +42,8 @@ import {
   type ShopOffer,
 } from "../../lib/garageShopStorage";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
-import { APP_NAME, DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
+import { APP_NAME, DEPOSIT_PROTECTION_LABEL, MASCOT_NAME } from "../../lib/brand";
+import { parseUsdToCents } from "../../lib/insurance";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
 import { buildListingSharePayload, listingShareUrl } from "../../lib/socialShare";
 import type { ListingDraft } from "../../screens/listing/types";
@@ -335,10 +336,13 @@ export function ItemDetail({
             </>
           )}
 
-          <div className="absolute top-4 left-4 bg-primary/90 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-            <Shield className="w-3.5 h-3.5" />
-            <span>{DEPOSIT_PROTECTION_LABEL}</span>
-          </div>
+          {(listing.modes.rent || listing.modes.rentToOwn) &&
+          parseUsdToCents(listing.pricing.securityDeposit ?? "") >= 50 ? (
+            <div className="absolute top-4 left-4 bg-primary/90 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5" />
+              <span>{DEPOSIT_PROTECTION_LABEL}</span>
+            </div>
+          ) : null}
 
           {isHeavy ? (
             <div className="absolute top-4 right-4 flex items-center gap-1 rounded-lg bg-amber-500/95 px-2.5 py-1.5 text-xs font-semibold text-white">
@@ -373,7 +377,7 @@ export function ItemDetail({
 
             <div className="flex items-center gap-2 mt-3">
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-              <span className="text-sm font-medium">New on block</span>
+              <span className="text-sm font-medium text-muted-foreground">New on the block</span>
             </div>
           </div>
 
@@ -473,6 +477,7 @@ export function ItemDetail({
             </button>
           ) : null}
 
+          {(listing.modes.rent || listing.modes.rentToOwn) ? (
           <div className="bg-muted/50 rounded-xl p-4">
             <h3 className="font-semibold mb-3">Rental includes</h3>
             <div className="space-y-3">
@@ -486,17 +491,19 @@ export function ItemDetail({
                   </span>
                 </div>
               ) : null}
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Shield className="w-4 h-4 text-primary" />
+              {parseUsdToCents(listing.pricing.securityDeposit ?? "") >= 50 ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-4 h-4 text-primary" />
+                  </div>
+                  <span className="text-sm">{DEPOSIT_PROTECTION_LABEL} on rentals</span>
                 </div>
-                <span className="text-sm">{DEPOSIT_PROTECTION_LABEL} on rentals</span>
-              </div>
+              ) : null}
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Headphones className="w-4 h-4 text-primary" />
                 </div>
-                <span className="text-sm">In-app support via Mr.E</span>
+                <span className="text-sm">In-app support via {MASCOT_NAME}</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -506,6 +513,7 @@ export function ItemDetail({
               </div>
             </div>
           </div>
+          ) : null}
 
           {listing.modes.rent || listing.modes.rentToOwn ? (
             <button

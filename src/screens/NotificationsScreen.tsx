@@ -128,7 +128,7 @@ const EMPTY_BY_TAB: Record<
     bookings: {
       title: "No booking requests",
       body: "New rentals, pickup and return windows, and schedule changes for your items.",
-      hint: "List gear from Home (Earn mode) to start receiving requests.",
+      hint: "List gear from My Garage (or +) to start receiving requests.",
     },
     messages: {
       title: "No renter messages",

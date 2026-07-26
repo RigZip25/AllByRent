@@ -25,7 +25,7 @@ export function OnboardingTopBar({ onSkip, onBack }: OnboardingTopBarProps) {
       <button
         type="button"
         onClick={onSkip}
-        className="text-sm font-medium text-[#9CA3AF] transition-colors active:text-[#374151]"
+        className="text-sm font-semibold text-gray-600 transition-colors active:text-[#0D5C3A]"
       >
         Skip
       </button>

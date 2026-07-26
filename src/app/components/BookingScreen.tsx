@@ -39,9 +39,25 @@ import {
   createRentalPaymentIntent,
   syncRentalPaymentStatus,
 } from "../../lib/stripePayments";
-import type { ListingDraft } from "../../screens/listing/types";
+import type { ListingDraft, MinimumRentalPeriod } from "../../screens/listing/types";
 
 const GREEN = "#0D5C3A";
+
+function minimumPeriodToDays(period: MinimumRentalPeriod | string | undefined): number {
+  switch (period) {
+    case "3 days":
+      return 3;
+    case "1 week":
+      return 7;
+    case "2 weeks":
+      return 14;
+    case "1 month":
+      return 30;
+    case "1 day":
+    default:
+      return 1;
+  }
+}
 
 function addDays(isoDate: string, days: number): string {
   const d = new Date(isoDate);
@@ -176,8 +192,9 @@ function BookingScreenLoaded({
   const options = useMemo(() => fulfillmentOptions(listing), [listing]);
   const defaultFulfillment =
     options.find((o) => !o.disabled)?.id ?? options[0]?.id ?? "pickup";
+  const minRentalDays = minimumPeriodToDays(listing.pricing.minimumPeriod);
 
-  const [rentalDays, setRentalDays] = useState(2);
+  const [rentalDays, setRentalDays] = useState(() => Math.max(2, minRentalDays));
   const [fulfillment, setFulfillment] = useState<FulfillmentMethod>(defaultFulfillment);
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
@@ -188,6 +205,10 @@ function BookingScreenLoaded({
   const [confirmBusy, setConfirmBusy] = useState(false);
   const [startDate, setStartDate] = useState(defaultStartIso);
   const [hostDisplayName, setHostDisplayName] = useState("Host");
+
+  useEffect(() => {
+    setRentalDays((days) => Math.max(days, minRentalDays));
+  }, [minRentalDays]);
 
   useEffect(() => {
     const hostId = listing.hostId?.trim();
@@ -465,7 +486,7 @@ function BookingScreenLoaded({
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => setRentalDays((d) => Math.max(1, d - 1))}
+              onClick={() => setRentalDays((d) => Math.max(minRentalDays, d - 1))}
               className="h-9 w-9 rounded-lg border border-border text-lg font-bold"
             >
               −
@@ -481,6 +502,9 @@ function BookingScreenLoaded({
               +
             </button>
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Host minimum: {listing.pricing.minimumPeriod}
+          </p>
           {listing.pricing.longTermEnabled ? (
             <p className="mt-2 text-xs text-muted-foreground">
               Tip: pick 30+ days to see monthly pricing.

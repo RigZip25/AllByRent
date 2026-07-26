@@ -206,7 +206,7 @@ export function EarnBusinessScreen({
               <Package className="mx-auto mb-3 h-8 w-8" style={{ color: GREEN_LIGHT }} />
               <p className="font-semibold text-gray-800">No listings yet</p>
               <p className="mt-1 text-sm text-gray-500">
-                Publish a listing from Home (Earn mode) to track earnings growth here.
+                Publish from My Garage (or the + button) to track earnings here.
               </p>
               <button
                 type="button"
@@ -214,7 +214,7 @@ export function EarnBusinessScreen({
                 className="mt-4 inline-flex items-center gap-1 text-sm font-semibold"
                 style={{ color: GREEN_LIGHT }}
               >
-                Go to host overview
+                Back to browse
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>

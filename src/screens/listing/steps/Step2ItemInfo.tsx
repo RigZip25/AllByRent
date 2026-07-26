@@ -171,19 +171,6 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
       ? matchAiSubcategory(matchedCategory, aiGrade, suggestions.subcategory)
       : "";
 
-    console.log("[Subcategory match]", {
-      aiSub: suggestions.subcategory,
-      matched: matchedSubcategory,
-    });
-
-    console.log("[Step2ItemInfo] Category match:", {
-      aiCategory: suggestions.category,
-      matchedCategory: matchedCategory || null,
-      aiGrade,
-      aiSubcategory: suggestions.subcategory,
-      matchedSubcategory: matchedSubcategory || null,
-    });
-
     const steps: (() => void)[] = [
       () =>
         setDraft((current) => ({ ...current, title: suggestions.title ?? current.title })),

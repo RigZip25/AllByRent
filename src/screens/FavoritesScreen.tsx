@@ -110,7 +110,7 @@ export function FavoritesScreen({
         <h1 className="text-[22px] font-extrabold" style={{ color: GREEN }}>
           Favorites
         </h1>
-        <p className="mt-1 text-[14px] text-gray-500">Saved listings you want to rent later</p>
+        <p className="mt-1 text-[14px] text-gray-500">Saved for later — rent or buy</p>
       </div>
 
       <div className="screen-scroll flex-1 px-4 pb-4">
@@ -132,7 +132,7 @@ export function FavoritesScreen({
               className="mt-5 w-full rounded-xl py-3 text-[15px] font-bold text-white"
               style={{ backgroundColor: GREEN_LIGHT }}
             >
-              Browse on Home
+              Browse nearby
             </button>
           </div>
         ) : (

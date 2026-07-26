@@ -3,7 +3,7 @@ import { getManualRequestStats } from "./bookingRequestsStorage";
 export type HostResponseDisplay =
   | { kind: "rate"; label: string; percent: number }
   | { kind: "new_host"; label: "New host" }
-  | { kind: "na"; label: "—" };
+  | { kind: "na"; label: "Not tracked yet" };
 
 /**
  * Response rate for Manual booking owners only.
@@ -14,7 +14,7 @@ export function getHostResponseDisplay(
   usesManualBooking: boolean,
 ): HostResponseDisplay {
   if (!usesManualBooking) {
-    return { kind: "na", label: "—" };
+    return { kind: "na", label: "Not tracked yet" };
   }
 
   const { totalRequests, respondedWithin24h } = getManualRequestStats(hostId);

@@ -157,7 +157,7 @@ export const ONBOARDING = {
       "One neighbor → push to accept, counter, or decline. Two or more → auction between them. Winner pays within 30 minutes.",
     publishCta: "Put on shelf →",
     publishing: "Adding to shelf…",
-    defaultTitle: "Sale item",
+    defaultTitle: "Garage sale find",
     publishedTitle: "On your shelf!",
     publishedHintFirst: "Your garage shop is live — snap more or preview the shop.",
     publishedHintMore: "Another item tagged — keep snapping while you're open.",
@@ -257,8 +257,8 @@ export const ONBOARDING = {
     bubbles: [
       (mascot: string) =>
         `Hey! I'm ${mascot} — I'll show you around and help when you're stuck.`,
-      "I'll help you work out what to do with things you own — or things you're planning to borrow from a neighbor.",
-      "This app is for putting your garage online: rent out, sell, borrow nearby, and buy less new stuff. Tap me anytime.",
+      "I'll help you work out what to do with things you own — or borrow nearby.",
+      "Put your garage online: rent, sell, borrow. Tap me anytime.",
     ],
   },
 } as const;

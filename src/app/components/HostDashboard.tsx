@@ -14,6 +14,23 @@ import { resolveHostAccountId } from "../../lib/hostIdentity";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 import type { ListingDraft } from "../../screens/listing/types";
 
+function formatHostBookingStatus(status: RentalBooking["status"]): string {
+  switch (status) {
+    case "pending_approval":
+      return "Awaiting your OK";
+    case "pending_checkin":
+      return "Ready for pickup";
+    case "active":
+      return "Out with neighbor";
+    case "overdue":
+      return "Overdue";
+    case "completed":
+      return "Completed";
+    default:
+      return status.replace(/_/g, " ");
+  }
+}
+
 function ListingThumb({ listing }: { listing: ListingDraft }) {
   const cover = listing.photos?.[0] ?? null;
   const { url } = useCoverMediaUrl(cover);
@@ -212,7 +229,7 @@ export function HostDashboard({
           />
           <StatCard
             label="Earnings"
-            value={`$${totalEarned}`}
+            value={totalEarned > 0 ? `$${totalEarned}` : "None yet"}
             icon={<DollarSign className="h-4 w-4" style={{ color: GREEN }} />}
           />
         </div>
@@ -252,7 +269,7 @@ export function HostDashboard({
                   >
                     <p className="text-[14px] font-semibold text-gray-900">{b.itemTitle}</p>
                     <p className="mt-0.5 text-[12px] text-gray-500">
-                      {b.counterpartyName} · {b.status}
+                      {b.counterpartyName} · {formatHostBookingStatus(b.status)}
                     </p>
                   </button>
                 </li>

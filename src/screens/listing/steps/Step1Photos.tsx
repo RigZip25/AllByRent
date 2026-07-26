@@ -17,7 +17,7 @@ import { putMediaBlob, deleteMedia, type MediaRef } from "../../../lib/mediaStor
 import { useMediaUrl } from "../../../lib/useMediaUrl";
 
 const PRIMARY_GREEN = "#0D5C3A";
-const AI_TIP = "I analyzed your photos — check Step 2, I filled everything in for you! 🎩";
+const AI_TIP = "I analyzed your photos — check Step 2, I filled in the details for you.";
 
 function photoStepTip(): string {
   if (isYardSaleListingActive()) {

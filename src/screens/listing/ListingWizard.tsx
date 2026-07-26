@@ -377,7 +377,7 @@ export function ListingWizard({
       notifyGarageFollowersOfNewListing({
         hostId,
         hostName: profile.displayName,
-        listingTitle: publishedDraft.title || "New listing",
+        listingTitle: getListingDisplayTitle(publishedDraft.title) || publishedDraft.title || "New listing",
       });
       firePublishConfetti();
       setIsPublishing(false);

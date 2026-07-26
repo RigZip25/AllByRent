@@ -426,7 +426,7 @@ export function ProfileScreen({
         <div className="mb-4">
           <ModeToggle mode={mode} onChange={handleModeChange} />
           <p className="mt-2 px-1 text-[12px] text-gray-500">
-            Browse or stock your garage — same profile. Home opens on the block.
+            Browse or stock your garage — same profile. Browse opens on your block.
           </p>
         </div>
 
@@ -437,7 +437,7 @@ export function ProfileScreen({
             value={
               profile.renter.completedRentals > 0
                 ? `${profile.renter.rating}★ · ${profile.renter.completedRentals}`
-                : "—"
+                : "No rentals yet"
             }
           />
           <StatTile
@@ -445,7 +445,7 @@ export function ProfileScreen({
             value={
               profile.host.listingsCount > 0
                 ? `${profile.host.rating}★ · ${profile.host.listingsCount} listings`
-                : "—"
+                : "No listings yet"
             }
           />
           <StatTile label="Response" value={responseDisplay.label} />

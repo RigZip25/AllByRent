@@ -5,9 +5,10 @@ import { OnboardingTopBar } from "../../components/OnboardingTopBar";
 
 const GREEN = "#0D5C3A";
 
-const INITIAL_DELAY_MS = 900;
-const BUBBLE_GAP_MS = 2600;
-const TYPING_CHAR_MS = 34;
+/** Keep the hello short — users should not wait ~15s for a muted CTA. */
+const INITIAL_DELAY_MS = 400;
+const BUBBLE_GAP_MS = 900;
+const TYPING_CHAR_MS = 18;
 
 const BUBBLES = [
   ONBOARDING.firstHello.bubbles[0](MASCOT_NAME),
@@ -72,7 +73,9 @@ export function FirstHello({
   const [showTypingDots, setShowTypingDots] = useState(false);
   const [chatComplete, setChatComplete] = useState(false);
   const hasStarted = useRef(false);
+  const cancelledRef = useRef(false);
   const chatRef = useRef<HTMLDivElement>(null);
+  const clearTimersRef = useRef<(() => void) | null>(null);
 
   const scrollToLatest = useCallback(() => {
     const chat = chatRef.current;
@@ -81,13 +84,26 @@ export function FirstHello({
   }, []);
 
   const finishBubble = useCallback((index: number, fullText: string) => {
-    setDisplayed((prev) => [...prev, { index, text: fullText }]);
+    setDisplayed((prev) => {
+      if (prev.some((row) => row.index === index)) return prev;
+      return [...prev, { index, text: fullText }];
+    });
     setActiveIndex(null);
     setTypedChars(0);
     setShowTypingDots(false);
     if (index === BUBBLES.length - 1) {
       setChatComplete(true);
     }
+  }, []);
+
+  const skipAnimation = useCallback(() => {
+    cancelledRef.current = true;
+    clearTimersRef.current?.();
+    setDisplayed(BUBBLES.map((text, index) => ({ index, text })));
+    setActiveIndex(null);
+    setTypedChars(0);
+    setShowTypingDots(false);
+    setChatComplete(true);
   }, []);
 
   useEffect(() => {
@@ -106,37 +122,51 @@ export function FirstHello({
       }
     };
 
+    const clearAll = () => {
+      clearCharInterval();
+      timeouts.forEach((id) => clearTimeout(id));
+    };
+    clearTimersRef.current = clearAll;
+
     const startBubble = (index: number) => {
+      if (cancelledRef.current) return;
       setActiveIndex(index);
       setTypedChars(0);
       setShowTypingDots(true);
       charIndex = 0;
 
       const pauseBeforeType = setTimeout(() => {
+        if (cancelledRef.current) return;
         setShowTypingDots(false);
         charInterval = setInterval(() => {
+          if (cancelledRef.current) {
+            clearCharInterval();
+            return;
+          }
           charIndex += 1;
           setTypedChars(charIndex);
           if (charIndex >= BUBBLES[index].length) {
             clearCharInterval();
             finishBubble(index, BUBBLES[index]);
-            bubbleIndex += 1;
-            if (bubbleIndex < BUBBLES.length) {
-              const nextTimeout = setTimeout(() => startBubble(bubbleIndex), BUBBLE_GAP_MS);
-              timeouts.push(nextTimeout);
+            if (index < BUBBLES.length - 1) {
+              const next = setTimeout(() => {
+                bubbleIndex = index + 1;
+                startBubble(bubbleIndex);
+              }, BUBBLE_GAP_MS);
+              timeouts.push(next);
             }
           }
         }, TYPING_CHAR_MS);
-      }, 500);
+      }, 280);
       timeouts.push(pauseBeforeType);
     };
 
-    const startTimeout = setTimeout(() => startBubble(0), INITIAL_DELAY_MS);
-    timeouts.push(startTimeout);
+    const kickoff = setTimeout(() => startBubble(0), INITIAL_DELAY_MS);
+    timeouts.push(kickoff);
 
     return () => {
-      clearCharInterval();
-      timeouts.forEach(clearTimeout);
+      cancelledRef.current = true;
+      clearAll();
     };
   }, [finishBubble]);
 
@@ -167,7 +197,24 @@ export function FirstHello({
             </div>
           </div>
 
-          <div ref={chatRef} className="first-hello-chat">
+          <div
+            ref={chatRef}
+            role={chatComplete ? undefined : "button"}
+            tabIndex={chatComplete ? undefined : 0}
+            className={`first-hello-chat ${chatComplete ? "" : "cursor-pointer"}`}
+            onClick={chatComplete ? undefined : skipAnimation}
+            onKeyDown={
+              chatComplete
+                ? undefined
+                : (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      skipAnimation();
+                    }
+                  }
+            }
+            aria-label={chatComplete ? undefined : "Skip intro animation"}
+          >
             <div className="first-hello-bubbles">
               {displayed.map(({ index, text }) => (
                 <ChatBubble key={`msg-${index}`} text={text} />
@@ -190,11 +237,19 @@ export function FirstHello({
       </div>
 
       <footer className="first-hello-footer">
+        {!chatComplete ? (
+          <button
+            type="button"
+            onClick={skipAnimation}
+            className="mb-2 w-full text-center text-sm font-semibold text-gray-600"
+          >
+            Tap to skip intro
+          </button>
+        ) : null}
         <button
           type="button"
-          disabled={!chatComplete}
           onClick={onNext}
-          className="btn-primary first-hello-cta w-full text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+          className="btn-primary first-hello-cta w-full text-white"
           style={{ backgroundColor: GREEN }}
         >
           Let&apos;s go →
