@@ -645,7 +645,7 @@ export function ListingWizard({
         className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden"
         style={{ backgroundColor: BACKGROUND }}
       >
-        <QRStoryScreen listing={draft} onGotIt={() => setPhase("qrSticker")} />
+        <QRStoryScreen onGotIt={() => setPhase("qrSticker")} />
       </div>
     );
   }

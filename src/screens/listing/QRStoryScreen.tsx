@@ -1,14 +1,11 @@
 import { useState } from "react";
 import { motion } from "motion/react";
-import { ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import qrStory1 from "../../imports/qr_story_1.png";
 import qrStory2 from "../../imports/qr_story_2.png";
 import qrStory3 from "../../imports/qr_story_3.png";
-import { MASCOT_NAME, QR_PDF_FILENAMES } from "../../lib/brand";
+import { MASCOT_NAME } from "../../lib/brand";
 import { RentanoHint } from "../../components/RentanoHint";
-import { generateQRStickerPdf, presentGeneratedPdf } from "../../lib/generateQRSticker";
-import { listingDraftToStickerRow } from "../../lib/listingQr";
-import type { ListingDraft } from "./types";
 
 const GREEN = "#0D5C3A";
 
@@ -31,7 +28,6 @@ const STORY_STEPS = [
 ] as const;
 
 type QRStoryScreenProps = {
-  listing: ListingDraft;
   onGotIt: () => void;
 };
 
@@ -60,31 +56,10 @@ function StoryBlock({
   );
 }
 
-export function QRStoryScreen({ listing, onGotIt }: QRStoryScreenProps) {
+/** Educational slides only — printable PDF is on the next QR sticker screen. */
+export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
   const [step, setStep] = useState(0);
-  const [pdfLoading, setPdfLoading] = useState(false);
-  const [pdfError, setPdfError] = useState<string | null>(null);
   const active = STORY_STEPS[step]!;
-
-  const handleDownload = async () => {
-    setPdfLoading(true);
-    setPdfError(null);
-    try {
-      const generated = await generateQRStickerPdf([listingDraftToStickerRow(listing)], {
-        filename: QR_PDF_FILENAMES.sticker,
-        paper: "letter",
-        layout: "sheet",
-        labelIn: 2,
-      });
-      if (!generated) throw new Error("No PDF generated");
-      await presentGeneratedPdf(generated);
-      window.setTimeout(() => URL.revokeObjectURL(generated.objectUrl), 60_000);
-    } catch {
-      setPdfError("Could not generate PDF. Please try again.");
-    } finally {
-      setPdfLoading(false);
-    }
-  };
 
   return (
     <motion.div
@@ -97,31 +72,11 @@ export function QRStoryScreen({ listing, onGotIt }: QRStoryScreenProps) {
           How your QR works
         </h2>
         <p className="mb-5 text-center text-[13px] text-gray-500">
-          {MASCOT_NAME} will guide you through 3 quick slides.
+          For rentals — {MASCOT_NAME} explains pickup and return scans. Your printable sticker comes
+          on the next step.
         </p>
 
         <StoryBlock image={active.image} title={active.title} tip={active.tip} />
-
-        <div className="mt-5 rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
-          <p className="text-sm font-semibold text-gray-900">Printable sticker PDF</p>
-          <p className="mt-1 text-xs text-gray-500">
-            Download a printable QR sticker for this item (Avery-compatible). You’ll also be able to
-            download again on the next step.
-          </p>
-          <button
-            type="button"
-            onClick={() => void handleDownload()}
-            disabled={pdfLoading}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border bg-white px-3 py-2.5 text-sm font-semibold disabled:opacity-60"
-            style={{ borderColor: `${GREEN}33`, color: GREEN }}
-          >
-            <Download className="h-4 w-4" />
-            {pdfLoading ? "Preparing PDF…" : "Download PDF"}
-          </button>
-          {pdfError ? (
-            <p className="mt-2 text-xs text-amber-700">{pdfError}</p>
-          ) : null}
-        </div>
       </div>
 
       <footer className="shrink-0 border-t border-gray-100 bg-white px-4 pb-6 pt-4">
@@ -157,7 +112,7 @@ export function QRStoryScreen({ listing, onGotIt }: QRStoryScreenProps) {
               className="flex min-h-[48px] flex-1 items-center justify-center rounded-2xl px-4 text-base font-bold text-white"
               style={{ backgroundColor: GREEN }}
             >
-              Continue
+              Continue to sticker
             </button>
           )}
         </div>
