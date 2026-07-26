@@ -714,10 +714,7 @@ export async function savePublishedListingRemote(draft: ListingDraft, ownerId: s
 
   // Upsert listing metadata first (no local blob photos) so My Garage can load it
   // while photo upload is still running — and so large data-URLs don't fail the row write.
-  const earlyPhotos = (stamped.photos ?? []).filter((photo) => {
-    const path = "storagePath" in photo ? String(photo.storagePath ?? "").trim() : "";
-    return Boolean(path);
-  });
+  const earlyPhotos = (stamped.photos ?? []).filter((photo) => Boolean(photo.storagePath?.trim()));
   const { error: earlyError } = await supabase
     .from("listings")
     .upsert(draftToRow({ ...stamped, photos: earlyPhotos }, normalizedOwnerId), { onConflict: "id" });
