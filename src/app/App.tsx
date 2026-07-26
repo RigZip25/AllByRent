@@ -357,6 +357,12 @@ function AppRoutes() {
   const handledSessionTokenRef = useRef<string | null>(null);
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
     if (boot.screen === "splash") return "splash";
+    // Explicit screen= wins over listingId deep links (Stripe Connect return URLs).
+    if (boot.screen === "listItem" || boot.screen === "snapSale" || boot.screen === "identity") {
+      markIntroDone();
+      completeOnboarding();
+      return boot.screen;
+    }
     const deepScreen = bootScreenForDeepLink(bootDeepLink.target);
     if (deepScreen && (boot.skipSplash || bootDeepLink.skipSplash)) {
       markIntroDone();
@@ -491,13 +497,13 @@ function AppRoutes() {
       }
       setNavStack([]);
       setCurrentScreen("listItem");
-      clearBootQuery(["screen", "listingId", "skipSplash"]);
+      clearBootQuery(["screen", "listingId", "skipSplash", "connect"]);
     }
     if (screen === "snapSale") {
       markIntroDone();
       setNavStack([]);
       setCurrentScreen("snapSale");
-      clearBootQuery(["screen", "connect", "skipSplash"]);
+      clearBootQuery(["screen", "connect", "skipSplash", "listingId"]);
     }
     const tabScreen = TAB_BOOT_SCREENS[screen];
     if (tabScreen) {

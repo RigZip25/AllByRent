@@ -193,7 +193,7 @@ export function ListingWizard({
   useEffect(() => {
     if ((phase !== "steps" && phase !== "goPublic") || isPublishing || loadingEdit) return;
     const meaningful =
-      draft.photos.length > 0 ||
+      (draft.photos?.length ?? 0) > 0 ||
       draft.title.trim().length > 0 ||
       step > 1;
     if (!meaningful) return;
