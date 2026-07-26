@@ -4,7 +4,6 @@ import { applyCors, handleOptions } from "../../lib/cors";
 import { isStripeServerConfigured } from "../../lib/keys";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
-import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
 import { resolveConfiguredAppOrigin } from "../../lib/brand";
 
 type Body = {
