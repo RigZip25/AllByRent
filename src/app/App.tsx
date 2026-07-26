@@ -215,7 +215,8 @@ function screenToAuthIntent(screen: Screen): AuthIntent {
   if (
     screen === "listingIntro" ||
     screen === "listItem" ||
-    screen === "hostListingDetail"
+    screen === "hostListingDetail" ||
+    screen === "snapSale"
   ) {
     return "list";
   }
@@ -492,6 +493,12 @@ function AppRoutes() {
       setCurrentScreen("listItem");
       clearBootQuery(["screen", "listingId", "skipSplash"]);
     }
+    if (screen === "snapSale") {
+      markIntroDone();
+      setNavStack([]);
+      setCurrentScreen("snapSale");
+      clearBootQuery(["screen", "connect", "skipSplash"]);
+    }
     const tabScreen = TAB_BOOT_SCREENS[screen];
     if (tabScreen) {
       markIntroDone();
@@ -612,6 +619,8 @@ function AppRoutes() {
       "agentActivity",
       "coHosts",
       "publicProfile",
+      "snapSale",
+      "garageSaleRules",
     ];
     const storedTarget =
       candidate && validScreens.includes(candidate)
@@ -1324,6 +1333,7 @@ function AppRoutes() {
           <SnapSaleScreen
             onBack={handleBack}
             onViewShop={handleOpenMyGarageShop}
+            onRequireAuth={() => showAuthGate("snapSale", "list")}
           />
         )}
 
