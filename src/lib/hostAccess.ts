@@ -17,7 +17,7 @@ export function getManageableHostIds(
   const ownId = resolveHostAccountId(authUserId);
   const email = resolveHostAccountEmail(authUserEmail);
   const coHostFor = getActiveCoHostHostIds(ownId, email);
-  return Array.from(new Set([ownId, ...coHostFor]));
+  return Array.from(new Set([ownId, ...coHostFor].filter(Boolean)));
 }
 
 export function canManageListing(
@@ -36,9 +36,34 @@ export function loadManageableListings(
   authUserId: string | null,
   authUserEmail: string | null,
 ): ListingDraft[] {
-  const hostIds = getManageableHostIds(authUserId, authUserEmail);
   return loadPublishedListings().filter((listing) =>
-    hostIds.includes(getListingHostId(listing)),
+    canManageListing(listing, authUserId, authUserEmail),
+  );
+}
+
+function listingUpdatedAtMs(listing: ListingDraft): number {
+  const raw = listing.updatedAt ? Date.parse(listing.updatedAt) : 0;
+  return Number.isFinite(raw) ? raw : 0;
+}
+
+/** Prefer newer copy when the same id exists locally and remotely. */
+export function mergeManageableListings(
+  local: ListingDraft[],
+  remote: ListingDraft[],
+): ListingDraft[] {
+  const byId = new Map<string, ListingDraft>();
+  for (const listing of local) {
+    if (listing.id) byId.set(listing.id, listing);
+  }
+  for (const listing of remote) {
+    if (!listing.id) continue;
+    const prev = byId.get(listing.id);
+    if (!prev || listingUpdatedAtMs(listing) >= listingUpdatedAtMs(prev)) {
+      byId.set(listing.id, listing);
+    }
+  }
+  return Array.from(byId.values()).sort(
+    (a, b) => listingUpdatedAtMs(b) - listingUpdatedAtMs(a),
   );
 }
 
@@ -47,7 +72,17 @@ export async function fetchManageableListings(
   authUserEmail: string | null,
 ): Promise<ListingDraft[]> {
   const hostIds = getManageableHostIds(authUserId, authUserEmail);
-  return fetchListingsByOwnerIdsRemote(hostIds);
+  const local = loadManageableListings(authUserId, authUserEmail);
+  if (hostIds.length === 0) {
+    return local;
+  }
+  try {
+    const remote = await fetchListingsByOwnerIdsRemote(hostIds);
+    // Never replace local inventory with an empty/stale remote — that hid just-published listings.
+    return mergeManageableListings(local, remote);
+  } catch {
+    return local;
+  }
 }
 
 export function countOwnListings(authUserId: string | null): number {

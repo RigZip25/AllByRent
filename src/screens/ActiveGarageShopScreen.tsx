@@ -23,7 +23,13 @@ import {
   type ShopOffer,
 } from "../lib/garageShopStorage";
 import { syncGarageFromRemote } from "../lib/repositories/garageRepository";
-import { fetchActiveListingsForCityRemote, getActiveRentLocationLabel } from "../lib/listingStorage";
+import {
+  fetchActiveListingsForCityRemote,
+  fetchListingsByOwnerIdsRemote,
+  getActiveRentLocationLabel,
+  loadPublishedListings,
+} from "../lib/listingStorage";
+import { mergeManageableListings } from "../lib/hostAccess";
 import { resolveHostAccountId } from "../lib/hostIdentity";
 import { useAuth } from "../hooks/AuthProvider";
 import type { ListingDraft } from "./listing/types";
@@ -99,14 +105,26 @@ export function ActiveGarageShopScreen({
     [hostId],
   );
 
-  const loadShelf = useCallback(() => {
-    void fetchActiveListingsForCityRemote(city).then(async (all) => {
-      const candidates = all.filter(
-        (listing) =>
-          listing.listingStatus === "active" &&
-          (listing.hostId ?? "") === hostId &&
-          listing.modes.sell,
+  const loadOwnShelfCandidates = useCallback(async () => {
+    const localOwned = loadPublishedListings().filter(
+      (listing) =>
+        listing.listingStatus === "active" &&
+        (listing.hostId ?? "") === hostId &&
+        listing.modes.sell,
+    );
+    let remoteOwned: ListingDraft[] = [];
+    try {
+      remoteOwned = (await fetchListingsByOwnerIdsRemote([hostId])).filter(
+        (listing) => listing.listingStatus === "active" && listing.modes.sell,
       );
+    } catch {
+      remoteOwned = [];
+    }
+    return mergeManageableListings(localOwned, remoteOwned);
+  }, [hostId]);
+
+  const loadShelf = useCallback(() => {
+    const applyCandidates = async (candidates: ListingDraft[]) => {
       const listingIds = candidates.map((listing) => listing.id);
       await syncGarageFromRemote({ hostId, userId: auth.userId, listingIds });
       resolveEndedAuctions(listingIds);
@@ -115,8 +133,32 @@ export function ActiveGarageShopScreen({
       setListings(shelf);
       refreshPendingWins();
       refreshOfferCount();
+      setLoading(false);
+    };
+
+    if (isOwnGarage) {
+      void loadOwnShelfCandidates().then(applyCandidates);
+      return;
+    }
+
+    void fetchActiveListingsForCityRemote(city).then(async (all) => {
+      const candidates = all.filter(
+        (listing) =>
+          listing.listingStatus === "active" &&
+          (listing.hostId ?? "") === hostId &&
+          listing.modes.sell,
+      );
+      await applyCandidates(candidates);
     });
-  }, [auth.userId, city, hostId, refreshPendingWins, refreshOfferCount]);
+  }, [
+    auth.userId,
+    city,
+    hostId,
+    isOwnGarage,
+    loadOwnShelfCandidates,
+    refreshPendingWins,
+    refreshOfferCount,
+  ]);
 
   useEffect(() => {
     const syncSchedule = () => setOpenLabel(garageSaleOpenLabel(getGarageSaleSchedule()));
@@ -142,29 +184,9 @@ export function ActiveGarageShopScreen({
   }, [loadShelf, refreshCartCount]);
 
   useEffect(() => {
-    let mounted = true;
-    void fetchActiveListingsForCityRemote(city)
-      .then((all) => {
-        if (!mounted) return;
-        const candidates = all.filter(
-          (listing) =>
-            listing.listingStatus === "active" &&
-            (listing.hostId ?? "") === hostId &&
-            listing.modes.sell,
-        );
-        const listingIds = candidates.map((listing) => listing.id);
-        resolveEndedAuctions(listingIds);
-        resolveExpiredWinnerCheckouts(listingIds);
-        setListings(candidates.filter((listing) => getShopOffer(listing)));
-        refreshPendingWins();
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-    return () => {
-      mounted = false;
-    };
-  }, [city, hostId, refreshPendingWins]);
+    setLoading(true);
+    loadShelf();
+  }, [loadShelf]);
 
   useEffect(() => {
     if (preview) return undefined;
