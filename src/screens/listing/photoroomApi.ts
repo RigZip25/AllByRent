@@ -24,8 +24,9 @@ const RATE_LIMIT_MAX = 5;
 
 const DEFAULT_OPTIONS: Required<PhotoRoomEditOptions> = {
   backgroundColor: "ffffff",
-  outputSize: "1200x1200",
-  padding: "0.1",
+  // Marketplace listing hero needs more than 1200² — was looking soft on phones.
+  outputSize: "2048x2048",
+  padding: "0.08",
 };
 
 function stableOptions(opts?: PhotoRoomEditOptions): Required<PhotoRoomEditOptions> {

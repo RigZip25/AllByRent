@@ -85,7 +85,12 @@ export function Step1Photos({
 
   const createThumbnail = async (blob: Blob): Promise<Blob> => {
     const bitmap = await createImageBitmap(blob);
-    const maxSize = 420;
+    // Retina phone grids need ~900–1200px; 420px looked soft/blurry on cover + thumbs.
+    const dpr =
+      typeof window !== "undefined" && Number.isFinite(window.devicePixelRatio)
+        ? Math.min(3, Math.max(1, window.devicePixelRatio))
+        : 2;
+    const maxSize = Math.round(480 * dpr);
     const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
     const width = Math.max(1, Math.round(bitmap.width * scale));
     const height = Math.max(1, Math.round(bitmap.height * scale));
@@ -97,10 +102,12 @@ export function Step1Photos({
       bitmap.close();
       return blob;
     }
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     ctx.drawImage(bitmap, 0, 0, width, height);
     bitmap.close();
     const thumb = await new Promise<Blob | null>((resolve) => {
-      canvas.toBlob(resolve, "image/jpeg", 0.78);
+      canvas.toBlob(resolve, "image/jpeg", 0.88);
     });
     return thumb ?? blob;
   };
@@ -426,12 +433,18 @@ export function Step1Photos({
   function PhotoTile({
     media,
     fit,
+    preferFull,
   }: {
     media: MediaRef;
     fit: "cover" | "contain";
+    /** Cover / large slots: use full blob so the hero isn’t a soft 420px thumb. */
+    preferFull?: boolean;
   }) {
-    const thumb = media.thumbId ? { id: media.thumbId, mimeType: "image/jpeg" } : media;
-    const { url } = useMediaUrl(thumb);
+    const displayRef =
+      preferFull || !media.thumbId
+        ? media
+        : { id: media.thumbId, mimeType: "image/jpeg" as const };
+    const { url } = useMediaUrl(displayRef);
     const [failed, setFailed] = useState(false);
     return (
       <div
@@ -502,7 +515,7 @@ export function Step1Photos({
           className="h-full w-full text-left"
           aria-label={isCover ? "View cover photo" : "View photo"}
         >
-          <PhotoTile media={media} fit={fit} />
+          <PhotoTile media={media} fit={fit} preferFull={isCover} />
         </button>
         {isCover && (
           <span
