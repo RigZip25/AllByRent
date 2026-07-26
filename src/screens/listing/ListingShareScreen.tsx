@@ -432,7 +432,7 @@ export function ListingShareScreen({
           className="w-full rounded-2xl border bg-white px-4 py-3 text-[14px] font-semibold text-gray-700"
           style={{ borderColor: BORDER }}
         >
-          Done
+          Back to my listings
         </button>
       </div>
     </div>

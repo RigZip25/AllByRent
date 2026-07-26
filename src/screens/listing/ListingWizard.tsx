@@ -117,7 +117,8 @@ export function ListingWizard({
   initialPrefill?: ShelfPrefill | null;
   initialDraft?: ListingDraft | null;
   editingListingId?: string | null;
-  onExit: () => void;
+  /** finished = published/saved; discarded = user cancelled the wizard. */
+  onExit: (reason?: "finished" | "discarded") => void;
   /** Open AuthGate and resume this listing after sign-in. */
   onRequireAuth?: (listingId: string) => void;
 }) {
@@ -308,8 +309,8 @@ export function ListingWizard({
         setPhase("steps");
         return;
       }
-      // Success screen uses onExit (back to app).
-      onExit();
+      // Success screen: back means return to listings (same as Done).
+      onExit("finished");
       return;
     }
 
@@ -349,7 +350,7 @@ export function ListingWizard({
           void savePublishedListingRemote(savedDraft, hostId);
         }
         setIsPublishing(false);
-        onExit();
+        onExit("finished");
         return;
       }
 
@@ -570,7 +571,7 @@ export function ListingWizard({
       }
     }
 
-    onExit();
+    onExit("discarded");
   };
 
   const handleStartAnotherListing = () => {
@@ -676,7 +677,7 @@ export function ListingWizard({
           title={getListingDisplayTitle(draft.title)}
           statusLine={publishStatusLine}
           onShare={() => setPhase("share")}
-          onDone={onExit}
+          onDone={() => onExit("finished")}
         />
       </div>
     );
@@ -690,7 +691,7 @@ export function ListingWizard({
       >
         <ListingShareScreen
           draft={draft}
-          onDone={onExit}
+          onDone={() => onExit("finished")}
         />
       </div>
     );

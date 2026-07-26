@@ -235,9 +235,23 @@ const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
 
 /** Listing flow only — used when the nav stack is empty (not onboarding fallbacks). */
 const LISTING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
-  listItem: "listingIntro",
+  // Hosts who opened the wizard should land in My Garage, not listing intro / role pick.
+  listItem: "garage",
   listingIntro: "browseHub",
 };
+
+/** Screens we must not rewind into after leaving the listing wizard. */
+const LISTING_EXIT_SKIP_SCREENS = new Set<Screen>([
+  "splash",
+  "firstHello",
+  "whatDoYouWant",
+  "whereAreYou",
+  "whereAreYouManual",
+  "whereAreYouHeading",
+  "onboardingAllSet",
+  "listingIntro",
+  "listItem",
+]);
 
 function isOnboardingScreen(screen: Screen): boolean {
   return screen in ONBOARDING_BACK_FALLBACK || screen === "firstHello" || screen === "onboardingAllSet";
@@ -940,9 +954,37 @@ function AppRoutes() {
     navigateTo("listItem");
   };
 
-  const handleListingWizardExit = () => {
+  const handleListingWizardExit = (reason: "finished" | "discarded" = "finished") => {
+    const yardSaleActive = isYardSaleListingActive();
     clearYardSaleListingActive();
-    handleBack();
+    setListingPrefill(null);
+    setEditingListingId(null);
+    setEditingListingReturn(null);
+
+    // Anyone who created/edited a listing is a host — never replay role onboarding.
+    completeOnboarding();
+    markRoleChosen();
+    setAppMode("earn");
+
+    if (reason === "finished") {
+      setNavStack([]);
+      setCurrentScreen(yardSaleActive ? "openGarageSale" : "garage");
+      return;
+    }
+
+    // Cancel/discard: pop past onboarding + listing intro, or fall back to Garage.
+    setNavStack((stack) => {
+      let nextStack = stack;
+      while (nextStack.length > 0 && LISTING_EXIT_SKIP_SCREENS.has(nextStack[nextStack.length - 1]!)) {
+        nextStack = nextStack.slice(0, -1);
+      }
+      if (nextStack.length > 0) {
+        setCurrentScreen(nextStack[nextStack.length - 1]!);
+        return nextStack.slice(0, -1);
+      }
+      setCurrentScreen(yardSaleActive ? "openGarageSale" : "garage");
+      return [];
+    });
   };
 
   const handleCategorySelect = (categoryId: string, categoryLabel: string) => {
@@ -1598,12 +1640,7 @@ function AppRoutes() {
               setEditingListingReturn(listingId);
               showAuthGate("listItem", "list");
             }}
-            onExit={() => {
-              setListingPrefill(null);
-              setEditingListingId(null);
-              setEditingListingReturn(null);
-              handleListingWizardExit();
-            }}
+            onExit={handleListingWizardExit}
           />
         )}
 

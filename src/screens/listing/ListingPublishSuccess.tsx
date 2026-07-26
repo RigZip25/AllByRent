@@ -51,7 +51,7 @@ export function ListingPublishSuccess({
             style={{ backgroundColor: AMBER, color: GREEN }}
           >
             <Share2 className="h-5 w-5" strokeWidth={2.25} />
-            Share with neighbors
+            Share listing
           </button>
         ) : null}
         <button
@@ -68,7 +68,7 @@ export function ListingPublishSuccess({
               : { backgroundColor: GREEN }
           }
         >
-          {onShare ? "Not now — done" : "Back to home"}
+          Back to my listings
         </button>
       </div>
     </motion.div>
