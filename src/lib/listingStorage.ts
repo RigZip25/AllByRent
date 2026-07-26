@@ -164,8 +164,22 @@ export function savePublishedListing(
 
 export function removePublishedListing(id: string): void {
   try {
-    const next = loadPublishedListings().filter((item) => item.id !== id);
+    const existing = loadPublishedListings();
+    const victim = existing.find((item) => item.id === id) ?? null;
+    const next = existing.filter((item) => item.id !== id);
     localStorage.setItem(LISTINGS_STORAGE_KEY, JSON.stringify(next));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("evorios-listings-changed", { detail: { id, removed: true } }),
+      );
+    }
+    // Best-effort: drop remote gallery files when we still know the paths.
+    if (victim?.photos?.length) {
+      const paths = collectListingPhotoStoragePaths(victim.photos);
+      if (paths.length > 0) {
+        void deleteListingPhotosFromRemote(paths).catch(() => undefined);
+      }
+    }
   } catch {
     /* ignore */
   }
@@ -864,14 +878,19 @@ export async function fetchListingsByOwnerIdsRemote(ownerIds: string[]): Promise
   return drafts;
 }
 
+/** Active + not paused — what neighbors should see in browse. */
+export function isListingBrowsable(listing: ListingDraft): boolean {
+  return listing.listingStatus === "active" && !listing.paused;
+}
+
 export async function fetchActiveListingsForCityRemote(city: string): Promise<ListingDraft[]> {
   const cityNorm = city.trim();
   if (!isSupabaseConfigured()) {
-    return loadPublishedListings().filter((l) => l.listingStatus === "active");
+    return loadPublishedListings().filter(isListingBrowsable);
   }
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return loadPublishedListings().filter((l) => l.listingStatus === "active");
+    return loadPublishedListings().filter(isListingBrowsable);
   }
   const query = supabase
     .from("listings")
@@ -881,9 +900,11 @@ export async function fetchActiveListingsForCityRemote(city: string): Promise<Li
     .order("updated_at", { ascending: false });
   const { data, error } = cityNorm ? await query.ilike("city", `%${cityNorm}%`) : await query;
   if (error || !data) {
-    return loadPublishedListings().filter((l) => l.listingStatus === "active");
+    return loadPublishedListings().filter(isListingBrowsable);
   }
-  return interleaveBoosted((data as SupabaseListingRow[]).map(rowToDraft));
+  return interleaveBoosted(
+    (data as SupabaseListingRow[]).map(rowToDraft).filter(isListingBrowsable),
+  );
 }
 
 export async function searchActiveListingsRemote(params: {
@@ -897,7 +918,7 @@ export async function searchActiveListingsRemote(params: {
 
   if (!isSupabaseConfigured()) {
     return loadPublishedListings()
-      .filter((l) => l.listingStatus === "active")
+      .filter(isListingBrowsable)
       .filter((l) => (category ? l.category === category : true))
       .filter((l) => {
         if (!q) return true;
@@ -908,7 +929,7 @@ export async function searchActiveListingsRemote(params: {
   const supabase = getSupabaseClient();
   if (!supabase) {
     return loadPublishedListings()
-      .filter((l) => l.listingStatus === "active")
+      .filter(isListingBrowsable)
       .filter((l) => (category ? l.category === category : true))
       .filter((l) => {
         if (!q) return true;
@@ -935,7 +956,7 @@ export async function searchActiveListingsRemote(params: {
   const { data, error } = await queryBuilder.limit(50);
   if (error || !data) {
     return loadPublishedListings()
-      .filter((l) => l.listingStatus === "active")
+      .filter(isListingBrowsable)
       .filter((l) => (category ? l.category === category : true))
       .filter((l) => {
         if (!q) return true;
@@ -943,5 +964,7 @@ export async function searchActiveListingsRemote(params: {
         return hay.includes(q);
       });
   }
-  return interleaveBoosted((data as SupabaseListingRow[]).map(rowToDraft));
+  return interleaveBoosted(
+    (data as SupabaseListingRow[]).map(rowToDraft).filter(isListingBrowsable),
+  );
 }

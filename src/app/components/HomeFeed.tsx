@@ -15,6 +15,7 @@ import {
 } from "../../lib/homeFeedStorage";
 import {
   fetchActiveListingsForCityRemote,
+  isListingBrowsable,
   getActiveRentLocationLabel,
   hasRentLocationSetup,
   searchActiveListingsRemote,
@@ -130,7 +131,7 @@ export function HomeFeed({
     void loader
       .then((list) => {
         if (!mounted) return;
-        setListings(list.filter((l) => l.listingStatus === "active"));
+        setListings(list.filter(isListingBrowsable));
       })
       .finally(() => {
         if (mounted) setLoading(false);

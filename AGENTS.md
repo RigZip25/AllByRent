@@ -10,18 +10,20 @@ See `package.json` scripts and `README.md` for details:
 
 - **Dev server:** `npm run dev` → serves on `http://localhost:5173/`
 - **Lint:** `npm run lint`
-- **Build:** `npm run build` (runs `tsc -b && vite build`)
+- **Build:** `npm run build` (Vite production bundle; Vercel uses this)
+- **Typecheck:** `npm run typecheck` (`tsc -b` — not yet gated on build; fix debt before requiring it)
 - **Preview production build:** `npm run preview`
 
 ### Navigating the app
 
-The app supports URL query parameters to jump to specific screens (useful for testing):
-- `?screen=splash` — static layout preview (art + copy), no auto-advance
-- `?screen=splash&dynamic=1` — animated splash preview, no auto-advance
-- `?screen=splash&art=1` — PNG only (`evorios_splash_garage.png`)
-- `?resetApp=1` — wipe local data + PWA cache, then reload (fresh splash + onboarding)
-- `?screen=login`, `?screen=signup`, `?screen=verification-phone`, `?screen=verification-code`, `?screen=reset-password`, `?screen=create-new-password`, `?screen=like-to-do-rent`, `?screen=like-to-do-list`, `?screen=rental`, `?screen=earning-your-stuff`
-- `?step=0` through `?step=15` for step-based navigation
+Useful query params (wired in `App.tsx` / `deepLinks.ts`):
+- `?screen=splash` — splash preview (`&dynamic=1`, `&art=1`)
+- `?screen=browseHub|home|mre|garage|more|listItem|snapSale|identity|coHosts`
+- `?listingId=` / `/item/:id` — item detail (or garage shop for sell listings)
+- `?garage=` — neighbor garage shop
+- `?reset` / `?resetApp=1` — wipe local data
+- Auth is modal `AuthGate` (email OTP) — there is no `?screen=login` / signup stack
+- `?step=` is **not** wired (listing wizard is in-app steps, not URL steps)
 
 ### Notes
 

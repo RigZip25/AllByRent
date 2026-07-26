@@ -440,16 +440,17 @@ export function ItemDetail({
                   </p>
                 </div>
               </button>
-              <button
-                type="button"
-                onClick={handleMessageHost}
-                disabled={!canRent}
-                className="flex-shrink-0 p-2 hover:bg-muted rounded-full transition-colors disabled:opacity-40"
-                aria-label="Message host"
-                title={canRent ? "Start a booking to contact the host" : "Messaging opens with a booking"}
-              >
-                <MessageCircle className="w-5 h-5 text-primary" />
-              </button>
+              {canRent ? (
+                <button
+                  type="button"
+                  onClick={handleMessageHost}
+                  className="flex-shrink-0 p-2 hover:bg-muted rounded-full transition-colors"
+                  aria-label="Start booking to contact host"
+                  title="Messaging opens with a booking"
+                >
+                  <MessageCircle className="w-5 h-5 text-primary" />
+                </button>
+              ) : null}
             </div>
           </div>
 
@@ -580,19 +581,15 @@ export function ItemDetail({
         ) : null}
 
         {!canRent && !canBuy && !showGarageForAuction ? (
-          <button
-            type="button"
-            disabled
-            className="flex-1 bg-primary/50 text-white py-3 px-6 rounded-xl font-medium"
-          >
+          <div className="flex-1 rounded-xl border border-border bg-muted/40 px-4 py-3 text-center text-sm font-medium text-muted-foreground">
             {listing.paused
-              ? "Paused"
+              ? "This listing is paused"
               : isSold
                 ? "Sold"
                 : listing.modes.gift && !listing.modes.rent && !listing.modes.sell
-                  ? "Gift claims coming soon"
-                  : "Not available"}
-          </button>
+                  ? "Gift handoff isn’t open yet — use Share to reach the host"
+                  : "Not available right now"}
+          </div>
         ) : null}
       </div>
     </div>

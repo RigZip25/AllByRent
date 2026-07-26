@@ -331,8 +331,27 @@ function resolvePostSplashScreen(): Screen {
   return resume;
 }
 
-/** After sign-in, prefer finishing onboarding over jumping to home. */
+/** Screens the user was mid-flow on — never yank them back into role/location onboarding. */
+const AUTH_RESUME_PRESERVE = new Set<Screen>([
+  "booking",
+  "listItem",
+  "hostListingDetail",
+  "activeRental",
+  "itemDetail",
+  "postRequest",
+  "snapSale",
+  "garageShop",
+  "garageCart",
+  "profile",
+  "identity",
+  "coHosts",
+]);
+
+/** After sign-in, finish onboarding unless they were already in a transaction/listing flow. */
 function resolveScreenAfterAuth(storedTarget: Screen | null): Screen {
+  if (storedTarget && AUTH_RESUME_PRESERVE.has(storedTarget)) {
+    return storedTarget;
+  }
   if (!isOnboardingComplete()) {
     const resume = resolveOnboardingResumeScreen();
     if (resume !== "browseHub") return resume;
@@ -1654,6 +1673,11 @@ function AppRoutes() {
               setEditingListingId(listingId);
               setEditingListingReturn(listingId);
               navigateTo("listItem");
+            }}
+            onDeleted={() => {
+              setSelectedHostListingId(null);
+              setNavStack([]);
+              setCurrentScreen("garage");
             }}
           />
         )}

@@ -54,7 +54,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Hosting & listings",
     question: "How do I list my first item?",
     answer:
-      `Tap the green + in the footer (or Garage tab → Add), then follow the wizard: photos, item info, Rent/Buy/Gift pricing, pickup, availability, QR, and review. ${MASCOT_NAME} helps on each step.`,
+      `Tap the green + in the footer (or Garage → New), then the fast wizard: 1) photos, 2) details & pricing (Rent / Sell / Gift), 3) review & publish. For rentals you may set up a QR sticker after publish. ${MASCOT_NAME} helps on each step.`,
     keywords: [
       "sell",
       "post",
@@ -81,7 +81,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Hosting & listings",
     question: "Which pricing modes should I choose?",
     answer:
-      "Rent is most common. Add Buy if you want to sell, or Gift for free items. Step 3 shows only fields relevant to the modes you turn on.",
+      "On step 2 (Details & pricing) pick Rent, Sell, and/or Gift. Only the fields for the modes you turn on are required. Sell-only listings skip the rental QR sticker.",
     keywords: ["daily", "weekly", "deposit"],
   },
   {
@@ -105,7 +105,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "QR & pickup",
     question: "How do pickup and delivery work?",
     answer:
-      "On step 4 choose in-person pickup, contactless pickup (exact address shared with your confirmed renter after booking; lockbox and gate codes unlock at check-in PIN), and/or round-trip delivery with your own fee and max miles.",
+      "New listings start with sensible neighborhood defaults (weekday porch hours). After publish, open the listing from My Garage → Full edit (or quick edits on the detail screen) to set in-person / contactless pickup and delivery miles & fees. Exact address is shared with a confirmed renter after booking.",
     keywords: ["handoff", "meet", "drop off"],
   },
   {
@@ -151,10 +151,10 @@ export const RENTANO_FAQ: FaqItem[] = [
   {
     id: "availability-step5",
     category: "Hosting & listings",
-    question: "How do I set my availability in step 5?",
+    question: "How do I set availability or pause a listing?",
     answer:
-      "Step 5 lets you control when renters can book handoffs:\n• Tap the Sat or Sun day chip to reveal separate weekend hours — weekday and weekend times are set independently.\n• Adjust start and end times for weekdays (Mon–Fri) and weekends (Sat–Sun) using the From / To time pickers that appear once a day is selected.\n• Pause your listing temporarily with the Pause toggle — it hides your item from search instantly without deleting it. Turn it back on when you're available again.\n• Block specific dates (e.g. a vacation) using the date picker: tap + Add blocked period, pick a start and end date, then tap Block this period. Remove any blocked range by tapping Remove next to it.",
-    keywords: ["hours", "weekend", "pause", "block", "dates", "schedule", "times"],
+      "Open My Garage → tap the listing:\n• Pause / Unpause hides or restores the item in browse without deleting it.\n• Edit availability times (weekdays / weekend) from the detail quick-edit or Full edit.\n• Delete permanently removes the listing from your garage and the server.",
+    keywords: ["hours", "weekend", "pause", "block", "dates", "schedule", "times", "delete", "unpause"],
   },
   {
     id: "skip-onboarding",
@@ -296,14 +296,15 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Hosting & listings",
     question: "How do I pause a listing?",
     answer:
-      "Listing wizard step 5 → Pause toggle hides the item from search instantly without deleting. Turn it back on when you are available.",
-    keywords: ["pause", "hide", "vacation", "unavailable"],
+      "My Garage → open the listing → Pause listing. It disappears from browse instantly. Tap Unpause when you are ready again. Use Delete only if you want it gone forever.",
+    keywords: ["pause", "hide", "vacation", "unavailable", "delete"],
   },
   {
     id: "edit-listing",
     category: "Hosting & listings",
     question: "How do I edit a published listing?",
-    answer: "Garage → tap the listing → Edit. You can update photos, price, availability, and pickup options anytime.",
+    answer:
+      "Garage → tap the listing → use quick edits on the detail screen, or Full edit for photos and pricing. Pause and Delete are on the same Manage section.",
     keywords: ["edit", "change price", "update"],
   },
   {

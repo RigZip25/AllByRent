@@ -3,6 +3,7 @@ import {
   getProfileCity,
   loadPublishedListings,
   fetchActiveListingsForCityRemote,
+  isListingBrowsable,
 } from "./listingStorage";
 import type { ListingDraft } from "../screens/listing/types";
 
@@ -27,10 +28,6 @@ export type ShelfListingFilter = {
   city?: string;
 };
 
-const PUBLISHED_STATUSES = new Set<ListingDraft["listingStatus"]>([
-  "active",
-]);
-
 function normalize(value: string): string {
   return value.trim().toLowerCase();
 }
@@ -54,7 +51,7 @@ export function loadShelfListings(filter: ShelfListingFilter): ListingDraft[] {
   const subcategoryNorm = filter.subcategory ? normalize(filter.subcategory) : null;
 
   return loadPublishedListings().filter((listing) => {
-    if (!PUBLISHED_STATUSES.has(listing.listingStatus)) return false;
+    if (!isListingBrowsable(listing)) return false;
     if (normalize(listing.category) !== categoryNorm) return false;
     if (subcategoryNorm && normalize(listing.subcategory) !== subcategoryNorm) return false;
     if (!listingMatchesCity(listing, filter.city)) return false;
@@ -73,7 +70,7 @@ export async function fetchShelfListings(filter: ShelfListingFilter): Promise<Li
 
   const active = await fetchActiveListingsForCityRemote(city);
   return active.filter((listing) => {
-    if (!PUBLISHED_STATUSES.has(listing.listingStatus)) return false;
+    if (!isListingBrowsable(listing)) return false;
     if (normalize(listing.category) !== categoryNorm) return false;
     if (subcategoryNorm && normalize(listing.subcategory) !== subcategoryNorm) return false;
     return true;

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Pencil, QrCode, Truck } from "lucide-react";
+import { ArrowLeft, Pause, Pencil, Play, QrCode, Trash2 } from "lucide-react";
 import QRCode from "qrcode";
 import { useAuth } from "../../hooks/AuthProvider";
 import { canManageListing } from "../../lib/hostAccess";
@@ -13,6 +13,7 @@ import {
   isListingQueuedForBulk,
   loadQrBulkQueueListingIds,
   removeListingFromQrBulkQueue,
+  removePublishedListingRemote,
   updatePublishedListingRemote,
   type PublishedListingPatch,
 } from "../../lib/listingStorage";
@@ -88,10 +89,13 @@ export function HostListingDetailScreen({
   listingId,
   onBack,
   onEdit,
+  onDeleted,
 }: {
   listingId: string;
   onBack: () => void;
   onEdit: (listingId: string) => void;
+  /** Called after a successful delete so the host returns to My Garage. */
+  onDeleted?: () => void;
 }) {
   const auth = useAuth();
   const [version, setVersion] = useState(0);
@@ -108,6 +112,8 @@ export function HostListingDetailScreen({
   const [activeEdit, setActiveEdit] = useState<QuickEditKey | null>(null);
   const [editValue, setEditValue] = useState("");
   const [editError, setEditError] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const queuedForBulk = useMemo(() => isListingQueuedForBulk(listingId), [listingId]);
 
@@ -398,7 +404,8 @@ export function HostListingDetailScreen({
           {getListingDisplayTitle(listing.title)}
         </h1>
         <p className="mt-1 text-sm text-gray-500">
-          #{listing.id.substring(0, 8).toUpperCase()} · {listing.listingStatus}
+          #{listing.id.substring(0, 8).toUpperCase()} ·{" "}
+          {listing.paused ? "Paused" : listing.listingStatus}
         </p>
       </header>
 
@@ -537,6 +544,94 @@ export function HostListingDetailScreen({
               }
             />
           </dl>
+        </section>
+
+        <section className="mt-4 rounded-3xl border bg-white p-5" style={{ borderColor: BORDER }}>
+          <h2 className="text-[13px] font-bold uppercase tracking-wide text-gray-400">Manage</h2>
+          <p className="mt-1 text-[13px] text-gray-500">
+            Pause hides this item from browse without deleting. Delete removes it from your garage and the server.
+          </p>
+          <div className="mt-4 flex flex-col gap-2">
+            <button
+              type="button"
+              disabled={saveBusy}
+              onClick={() => {
+                if (!auth.userId || saveBusy) return;
+                setActionError(null);
+                setSaveBusy(true);
+                const nextPaused = !listing.paused;
+                void updatePublishedListingRemote(listing.id, { paused: nextPaused }, auth.userId)
+                  .then((result) => {
+                    if (!result.ok) {
+                      setActionError(result.reason);
+                      return;
+                    }
+                    setListing(result.listing);
+                    setVersion((v) => v + 1);
+                  })
+                  .finally(() => setSaveBusy(false));
+              }}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
+              style={{ borderColor: GREEN, color: GREEN }}
+            >
+              {listing.paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+              {listing.paused ? "Unpause listing" : "Pause listing"}
+            </button>
+            {!confirmDelete ? (
+              <button
+                type="button"
+                disabled={saveBusy}
+                onClick={() => {
+                  setActionError(null);
+                  setConfirmDelete(true);
+                }}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border py-3 text-sm font-bold text-red-700 disabled:opacity-50"
+                style={{ borderColor: "#FECACA", backgroundColor: "#FEF2F2" }}
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete listing
+              </button>
+            ) : (
+              <div className="rounded-2xl border p-3" style={{ borderColor: "#FECACA", backgroundColor: "#FEF2F2" }}>
+                <p className="text-[13px] font-semibold text-red-800">
+                  Delete permanently? This cannot be undone.
+                </p>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    disabled={saveBusy}
+                    onClick={() => setConfirmDelete(false)}
+                    className="rounded-xl border bg-white py-2.5 text-sm font-bold text-gray-700"
+                    style={{ borderColor: BORDER }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={saveBusy || !auth.userId}
+                    onClick={() => {
+                      if (!auth.userId || saveBusy) return;
+                      setSaveBusy(true);
+                      setActionError(null);
+                      void removePublishedListingRemote(listing.id, auth.userId)
+                        .then(() => {
+                          onDeleted?.();
+                          if (!onDeleted) onBack();
+                        })
+                        .catch(() => {
+                          setActionError("Could not delete listing. Try again.");
+                        })
+                        .finally(() => setSaveBusy(false));
+                    }}
+                    className="rounded-xl bg-red-600 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+                  >
+                    {saveBusy ? "Deleting…" : "Yes, delete"}
+                  </button>
+                </div>
+              </div>
+            )}
+            {actionError ? <p className="text-center text-xs text-red-600">{actionError}</p> : null}
+          </div>
         </section>
       </div>
 

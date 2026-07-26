@@ -7,6 +7,7 @@
   "packageManager": "npm@10.9.3",
   "scripts": {
     "build": "vite build",
+    "typecheck": "tsc -b --pretty false",
     "dev": "vite",
     "dev:https": "set VITE_DEV_HTTPS=true&& vite",
     "lint": "node ./node_modules/eslint/bin/eslint.js src",
