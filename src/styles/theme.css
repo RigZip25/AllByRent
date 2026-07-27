@@ -536,8 +536,24 @@
     -webkit-overflow-scrolling: touch;
   }
 
+  .what-do-you-want-art {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #f7fbf8;
+    min-height: clamp(120px, 22dvh, 168px);
+    padding: 0.65rem 0.85rem 0;
+  }
+
   .what-do-you-want-illustration {
-    max-height: clamp(96px, 22dvh, 140px);
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: clamp(120px, 22dvh, 168px);
+    object-fit: contain;
+    object-position: center center;
   }
 
   .where-are-you-card {

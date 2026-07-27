@@ -50,8 +50,8 @@ export const ONBOARDING = {
     },
     browseBlock: {
       title: "Browse the block",
-      subtitle: "Find gear, tools, and deals in neighborhood garages nearby.",
-      cta: "See garages near me →",
+      subtitle: "Find gear, tools, and deals in neighborhood garages.",
+      cta: "Choose where to browse →",
     },
     footer: "You can switch between My Garage and Browse anytime.",
   },

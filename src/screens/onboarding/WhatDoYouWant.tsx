@@ -27,12 +27,16 @@ export function WhatDoYouWant({ onEarn, onSave, onSkip, onBack }: WhatDoYouWantP
       </div>
 
       <div className="screen-scroll flex flex-col gap-4 px-4 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]">
-        <article className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
-          <div className="flex justify-center overflow-hidden rounded-t-2xl px-4 pt-4">
+        <article className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+          <div className="what-do-you-want-art rounded-t-2xl">
             <img
               src={onboardingAssets.stockGarage}
               alt=""
-              className="what-do-you-want-illustration w-full object-contain"
+              width={1536}
+              height={1024}
+              className="what-do-you-want-illustration"
+              decoding="async"
+              fetchPriority="high"
               draggable={false}
             />
           </div>
@@ -55,12 +59,15 @@ export function WhatDoYouWant({ onEarn, onSave, onSkip, onBack }: WhatDoYouWantP
           </div>
         </article>
 
-        <article className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
-          <div className="flex justify-center overflow-hidden rounded-t-2xl px-4 pt-4">
+        <article className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+          <div className="what-do-you-want-art rounded-t-2xl">
             <img
               src={onboardingAssets.browseBlock}
               alt=""
-              className="what-do-you-want-illustration w-full object-contain"
+              width={1536}
+              height={1024}
+              className="what-do-you-want-illustration"
+              decoding="async"
               draggable={false}
             />
           </div>
