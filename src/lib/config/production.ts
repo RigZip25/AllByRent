@@ -30,5 +30,5 @@ export function getStripeRequiredMessage(): string {
 }
 
 export function getSignInRequiredMessage(): string {
-  return "Sign in to continue.";
+  return "Sign in or continue as guest with your email.";
 }

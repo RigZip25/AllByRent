@@ -48,8 +48,14 @@ export function isLotUnavailable(status: string): boolean {
   return status === "sold" || status === "awaiting_checkout";
 }
 
+/** Platform cut taken from the seller via Connect application_fee (buyer pays listed price only). */
 export function platformFeeFromSubtotalCents(subtotalCents: number): number {
   return Math.round(subtotalCents * PLATFORM_FEE_RATE);
+}
+
+/** Buyer-facing charge = listed item total; seller absorbs platform fee. */
+export function buyerChargeFromSubtotalCents(subtotalCents: number): number {
+  return Math.max(0, Math.round(subtotalCents));
 }
 
 export type ValidatedGarageLine = {
