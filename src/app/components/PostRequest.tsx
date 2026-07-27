@@ -92,6 +92,7 @@ export function PostRequest({
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [busy, setBusy] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [posted, setPosted] = useState(false);
 
   const sharePayload = useMemo(() => {
     const city = (prefill?.city ?? getActiveRentLocationLabel()).trim();
@@ -109,10 +110,44 @@ export function PostRequest({
     return `${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`;
   };
 
+  if (posted) {
+    return (
+      <div className="screen bg-background flex flex-col">
+        <div className="shrink-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-3 sm:px-4 py-3 flex items-center gap-3">
+          <h1 className="font-semibold flex-1">Request posted</h1>
+        </div>
+        <div className="screen-scroll flex-1 min-h-0 p-4 space-y-5 pb-24">
+          <div className="flex items-start gap-3">
+            <MrRentano size={48} className="flex-shrink-0" />
+            <div>
+              <h2 className="font-semibold text-lg mb-1">Now share it</h2>
+              <p className="text-sm text-muted-foreground">
+                Same as hosts do with listings — the more neighbors see it, the faster you get a reply.
+              </p>
+            </div>
+          </div>
+          <div className="bg-muted/50 rounded-xl p-4">
+            <SocialShareButtons payload={sharePayload} shareKind="request" />
+          </div>
+        </div>
+        <div className="screen-footer bg-card/95 backdrop-blur-sm border-t border-border p-3 sm:p-4">
+          <button
+            type="button"
+            onClick={onPost}
+            className="w-full bg-primary hover:bg-primary/90 text-white py-3.5 rounded-xl transition-colors font-medium"
+          >
+            Done →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="screen bg-background flex flex-col">
       <div className="shrink-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-3 sm:px-4 py-3 flex items-center gap-3">
         <button
+          type="button"
           onClick={onBack}
           className="p-2 hover:bg-muted rounded-full transition-colors"
         >
@@ -376,7 +411,7 @@ export function PostRequest({
               startDate: startDate || undefined,
               endDate: endDate || undefined,
             })
-              .then(() => onPost())
+              .then(() => setPosted(true))
               .finally(() => setBusy(false));
           }}
           className="w-full bg-primary hover:bg-primary/90 text-white py-3.5 rounded-xl transition-colors font-medium disabled:opacity-60"

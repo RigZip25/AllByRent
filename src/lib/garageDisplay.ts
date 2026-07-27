@@ -57,6 +57,41 @@ export function listingMatchesModeChip(draft: ListingDraft, chip: ModeChip): boo
   return true;
 }
 
+export function listingPrimaryPrice(draft: ListingDraft): number | null {
+  if (draft.modes.sell && draft.pricing.salePrice.trim()) {
+    const sale = Number.parseFloat(draft.pricing.salePrice.replace(/[^0-9.]/g, ""));
+    return Number.isFinite(sale) ? sale : null;
+  }
+  if (draft.modes.gift) return 0;
+  if (draft.pricing.dailyRate.trim()) {
+    const day = Number.parseFloat(draft.pricing.dailyRate.replace(/[^0-9.]/g, ""));
+    return Number.isFinite(day) ? day : null;
+  }
+  if (draft.pricing.salePrice.trim()) {
+    const sale = Number.parseFloat(draft.pricing.salePrice.replace(/[^0-9.]/g, ""));
+    return Number.isFinite(sale) ? sale : null;
+  }
+  return null;
+}
+
+export function listingMatchesPriceRange(
+  draft: ListingDraft,
+  min: number | null,
+  max: number | null,
+): boolean {
+  if (min == null && max == null) return true;
+  const price = listingPrimaryPrice(draft);
+  if (price == null) return false;
+  if (min != null && price < min) return false;
+  if (max != null && price > max) return false;
+  return true;
+}
+
+export function listingMatchesCategory(draft: ListingDraft, category: string | null): boolean {
+  if (!category?.trim()) return true;
+  return draft.category.trim().toLowerCase() === category.trim().toLowerCase();
+}
+
 export function formatListingPriceLine(draft: ListingDraft): string {
   if (draft.modes.sell && draft.pricing.salePrice.trim()) {
     const sale = Number.parseFloat(draft.pricing.salePrice.replace(/[^0-9.]/g, ""));

@@ -69,8 +69,7 @@ import {
   markRoleChosen,
   resolveOnboardingResumeScreen,
 } from "../lib/onboardingStorage";
-import { categoryIdFromName } from "../screens/listing/listingItemCategories";
-import { getPublishedListingById, hasRentLocationSetup, loadPublishedListings } from "../lib/listingStorage";
+import { getPublishedListingById, getActiveRentLocationLabel, hasRentLocationSetup, loadPublishedListings } from "../lib/listingStorage";
 import { getListingDisplayTitle } from "../lib/listingQr";
 import type { RentalBooking } from "../lib/rentalsStorage";
 import { canManageListing } from "../lib/hostAccess";
@@ -177,6 +176,9 @@ const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
   "garageWorkflow",
   "garageSaleRules",
   "home",
+  "garageShop",
+  "garageCart",
+  "garageWinnerCheckout",
 ]);
 
 const BOTTOM_NAV_SCREENS = new Set<Screen>([
@@ -444,8 +446,7 @@ function AppRoutes() {
   );
   const [garageShopPreview, setGarageShopPreview] = useState(false);
   const [winnerCheckoutListingId, setWinnerCheckoutListingId] = useState<string | null>(null);
-  const [, setSelectedCategoryId] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory] = useState<string | null>(null);
   const [listingPrefill, setListingPrefill] = useState<ShelfPrefill | null>(null);
   const [editingListingId, setEditingListingId] = useState<string | null>(() =>
     peekEditingListingReturn(),
@@ -1037,12 +1038,6 @@ function AppRoutes() {
     });
   };
 
-  const handleCategorySelect = (categoryId: string, categoryLabel: string) => {
-    setSelectedCategoryId(categoryId);
-    setSelectedCategory(categoryLabel);
-    navigateTo("subcategory");
-  };
-
   const handleItemSelect = (itemId: string) => {
     const listing = getPublishedListingById(itemId);
     if (listing && canManageListing(listing, auth.userId, auth.userEmail)) {
@@ -1390,13 +1385,14 @@ function AppRoutes() {
             onNavigate={handleNavigate}
             onOpenNotifications={handleOpenNotifications}
             onEditLocation={openRentLocationSetup}
-            onPostRequest={(query) =>
-              handlePostRequest(query?.trim() ? { category: "", query: query.trim() } : undefined)
+            onPostRequest={(opts) =>
+              handlePostRequest({
+                category: opts?.category?.trim() ?? "",
+                query: opts?.query?.trim() ?? "",
+                city: getActiveRentLocationLabel().trim() || undefined,
+              })
             }
             onStockGarage={handleStartListing}
-            onBrowseCategory={(label) =>
-              handleCategorySelect(categoryIdFromName(label), label)
-            }
             onRentals={handleOpenRentals}
             onBackToHub={openBrowseHub}
           />
