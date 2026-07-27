@@ -1,3 +1,4 @@
+import { isIntroDone, isOnboardingComplete } from "./onboardingStorage";
 import { isStandalonePwa } from "./pwaInstall";
 
 const GATE_DONE_KEY = "evorios_install_gate_done";
@@ -7,7 +8,10 @@ export function hasCompletedInstallGate(): boolean {
   if (typeof window === "undefined") return true;
   if (isStandalonePwa()) return true;
   try {
-    return localStorage.getItem(GATE_DONE_KEY) === "1";
+    if (localStorage.getItem(GATE_DONE_KEY) === "1") return true;
+    // Returning users who already used the app in this browser — don't block again.
+    if (isOnboardingComplete() || isIntroDone()) return true;
+    return false;
   } catch {
     return false;
   }
