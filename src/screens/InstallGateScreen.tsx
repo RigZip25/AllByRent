@@ -37,8 +37,7 @@ export function InstallGateScreen({
           Add {APP_NAME} to your Home Screen
         </h1>
         <p className="mt-3 text-[15px] leading-relaxed text-gray-600">
-          In the browser, Back leaves {APP_NAME} and returns to the previous website. Installed from
-          Home Screen, Back stays inside the app — like a normal app.
+          Then open the icon and use {APP_NAME} like a normal app.
         </p>
 
         <div
@@ -52,8 +51,8 @@ export function InstallGateScreen({
                   1
                 </span>
                 <span>
-                  Tap <Share className="inline h-4 w-4 align-text-bottom text-[#0D5C3A]" />{" "}
-                  <strong>Share</strong> at the bottom of Safari
+                  Tap the square with arrow{" "}
+                  <Share className="inline h-4 w-4 align-text-bottom text-[#0D5C3A]" /> at the bottom
                 </span>
               </li>
               <li className="flex gap-3">
@@ -61,8 +60,7 @@ export function InstallGateScreen({
                   2
                 </span>
                 <span>
-                  Scroll past recent contacts, then social apps, then Copy / Add Bookmark / Add to
-                  Reading List
+                  Tap <strong>View More</strong>
                 </span>
               </li>
               <li className="flex gap-3">
@@ -70,31 +68,7 @@ export function InstallGateScreen({
                   3
                 </span>
                 <span>
-                  Expand the menu and tap <strong>View More</strong>
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[13px] font-bold text-[#0D5C3A]">
-                  4
-                </span>
-                <span className="min-w-0">
-                  Tap the <strong>4th</strong> button —{" "}
-                  <strong>Add to Home Screen</strong> (square with{" "}
-                  <span
-                    className="inline-flex h-5 w-5 items-center justify-center rounded border border-[#0D5C3A]/25 bg-white align-middle text-[13px] font-bold leading-none text-[#0D5C3A]"
-                    aria-hidden
-                  >
-                    +
-                  </span>
-                  )
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[13px] font-bold text-[#0D5C3A]">
-                  5
-                </span>
-                <span>
-                  Open the <strong>{APP_NAME}</strong> icon on your Home Screen
+                  Tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>
                 </span>
               </li>
             </ol>
