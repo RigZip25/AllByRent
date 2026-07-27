@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Smartphone } from "lucide-react";
 import { APP_NAME, BRAND_GREEN } from "../lib/brand";
 import { isAndroid, isIos, isStandalonePwa } from "../lib/pwaInstall";
@@ -81,7 +82,7 @@ function StepRow({
   hint,
 }: {
   n: number;
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   hint?: string;
 }) {
@@ -109,6 +110,7 @@ export function InstallGateScreen({
   const pwa = usePwaInstallPrompt();
   const ios = isIos();
   const android = isAndroid();
+  const showIosSteps = ios || (!android && pwa.manualIos);
 
   const handleInstalled = () => {
     if (isStandalonePwa()) {
@@ -116,7 +118,7 @@ export function InstallGateScreen({
       return;
     }
     window.alert(
-      `Almost there!\n\nOpen the ${APP_NAME} icon on your Home Screen (not this Safari tab).`,
+      `Almost there!\n\nOpen the ${APP_NAME} icon on your Home Screen (not this browser tab).`,
     );
   };
 
@@ -138,7 +140,7 @@ export function InstallGateScreen({
           className="mt-5 rounded-2xl border px-3.5 py-4"
           style={{ borderColor: `${BRAND_GREEN}33`, backgroundColor: "#F0FDF4" }}
         >
-          {ios || (!android && pwa.manualIos) ? (
+          {showIosSteps ? (
             <ol className="space-y-4">
               <StepRow
                 n={1}
@@ -186,40 +188,50 @@ export function InstallGateScreen({
           )}
         </div>
 
-        <p className="mt-4 text-[14px] leading-snug text-gray-500">
-          Open the {APP_NAME} icon from your Home Screen. You’re set — updates install on their own.
-        </p>
+        {showIosSteps ? (
+          <p className="mt-4 text-[14px] leading-snug text-gray-500">
+            After <strong>Add</strong>, Safari closes and the {APP_NAME} icon appears on your Home
+            Screen. Open it — updates install automatically.
+          </p>
+        ) : (
+          <>
+            <p className="mt-4 text-[14px] leading-snug text-gray-500">
+              Open the {APP_NAME} icon from your Home Screen. You’re set — updates install on their
+              own.
+            </p>
 
-        <div className="mt-auto flex flex-col gap-3 pt-8 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]">
-          {pwa.nativeInstallReady ? (
-            <button
-              type="button"
-              onClick={() => void pwa.install()}
-              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl text-[16px] font-bold text-white"
-              style={{ backgroundColor: BRAND_GREEN }}
-            >
-              <Smartphone className="h-5 w-5" />
-              Install {APP_NAME}
-            </button>
-          ) : null}
+            <div className="mt-auto flex flex-col gap-3 pt-8 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]">
+              {pwa.nativeInstallReady ? (
+                <button
+                  type="button"
+                  onClick={() => void pwa.install()}
+                  className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl text-[16px] font-bold text-white"
+                  style={{ backgroundColor: BRAND_GREEN }}
+                >
+                  <Smartphone className="h-5 w-5" />
+                  Install {APP_NAME}
+                </button>
+              ) : null}
 
-          <button
-            type="button"
-            onClick={handleInstalled}
-            className="flex min-h-[52px] w-full items-center justify-center rounded-2xl text-[16px] font-bold text-white"
-            style={{ backgroundColor: BRAND_GREEN }}
-          >
-            I’ve added it — continue
-          </button>
+              <button
+                type="button"
+                onClick={handleInstalled}
+                className="flex min-h-[52px] w-full items-center justify-center rounded-2xl text-[16px] font-bold text-white"
+                style={{ backgroundColor: BRAND_GREEN }}
+              >
+                I’ve added it — continue
+              </button>
 
-          <button
-            type="button"
-            onClick={onContinueInBrowser}
-            className="min-h-[44px] w-full text-[14px] font-semibold text-gray-500 underline"
-          >
-            Continue in browser
-          </button>
-        </div>
+              <button
+                type="button"
+                onClick={onContinueInBrowser}
+                className="min-h-[44px] w-full text-[14px] font-semibold text-gray-500 underline"
+              >
+                Continue in browser
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
