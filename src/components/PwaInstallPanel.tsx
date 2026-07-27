@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ExternalLink, Share, Smartphone } from "lucide-react";
+import { ExternalLink, Share } from "lucide-react";
 import { BRAND_AMBER, BRAND_GREEN } from "../lib/brand";
 import { PWA_INSTALL_DISMISS_DAYS } from "../lib/pwaInstall";
 
@@ -85,23 +85,17 @@ export function PwaInstallPanel({
       {platform === "ios" ? (
         <div className="mt-3 text-sm leading-relaxed text-[#374151]">
           <div className="flex items-start gap-2">
-            <Smartphone className="mt-0.5 h-4 w-4 shrink-0" style={{ color: BRAND_GREEN }} />
-            <div>
-              Open in <strong>Safari</strong>.
-            </div>
-          </div>
-          <div className="mt-2 flex items-start gap-2">
             <Share className="mt-0.5 h-4 w-4 shrink-0" style={{ color: BRAND_GREEN }} />
             <div>
-              Tap <strong>Share</strong>, scroll past contacts / apps / Copy / Bookmark / Reading
-              List, tap <strong>View More</strong>, then the <strong>4th</strong> item —{" "}
-              <strong>Add to Home Screen</strong> (square with +).
+              In Safari: square with arrow → <strong>View More</strong> →{" "}
+              <strong>Add to Home Screen</strong> → <strong>Add</strong>. Then open the icon like a
+              normal app.
             </div>
           </div>
           <div className="mt-2 flex items-start gap-2">
             <ExternalLink className="mt-0.5 h-4 w-4 shrink-0" style={{ color: BRAND_GREEN }} />
             <div>
-              Tip: if you opened via another app, use <strong>Open in Safari</strong> first.
+              Not in Safari? Use <strong>Open in Safari</strong> first.
             </div>
           </div>
         </div>
