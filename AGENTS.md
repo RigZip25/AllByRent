@@ -18,6 +18,7 @@ See `package.json` scripts and `README.md` for details:
 
 Useful query params (wired in `App.tsx` / `deepLinks.ts`):
 - `?screen=splash` — splash preview (`&dynamic=1`, `&art=1`)
+- `?skipInstall=1` — skip the Home Screen install gate (browser testing)
 - `?screen=browseHub|home|mre|garage|more|listItem|snapSale|identity|coHosts`
 - `?listingId=` / `/item/:id` — item detail (or garage shop for sell listings)
 - `?garage=` — neighbor garage shop
