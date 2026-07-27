@@ -4,6 +4,7 @@ import { AppBrandHeader } from "../components/AppBrandHeader";
 import { OfflineScreen } from "./components/OfflineScreen";
 import { GarageShopMissingScreen } from "./components/GarageShopMissingScreen";
 import { SplashScreen } from "./components/SplashScreen";
+import { InstallGateScreen } from "../screens/InstallGateScreen";
 import { FirstHello } from "../screens/onboarding/FirstHello";
 import { WhatDoYouWant } from "../screens/onboarding/WhatDoYouWant";
 import { WhereAreYou } from "../screens/onboarding/WhereAreYou";
@@ -43,6 +44,7 @@ import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
 import { SetupRequiredScreen } from "../screens/SetupRequiredScreen";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
+import { useBrowserBackTrap } from "../hooks/useBrowserBackTrap";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
 import { AuthProvider, useAuth } from "../hooks/AuthProvider";
 import { RequireAuthProvider } from "../hooks/RequireAuth";
@@ -82,6 +84,12 @@ import type { ShelfPrefill } from "../lib/shelfListings";
 import { isSimulateUpdateRequested } from "../lib/pwaUpdateStorage";
 import { isResetAppQueryParam, resetAllAppData } from "../lib/resetAppStorage";
 import {
+  markBrowserContinue,
+  markInstallGateDone,
+  shouldShowInstallGate,
+} from "../lib/pwaInstallGate";
+import { isStandalonePwa } from "../lib/pwaInstall";
+import {
   consumeAuthCallbackResume,
   consumeLastOauthProvider,
   shouldPromptEnablePasskey,
@@ -116,6 +124,7 @@ type YardSaleHubChoice = "browse" | "host";
 
 type Screen =
   | "splash"
+  | "installGate"
   | "firstHello"
   | "whatDoYouWant"
   | "whereAreYou"
@@ -230,6 +239,7 @@ const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
   whereAreYouManual: "whereAreYou",
   whereAreYouHeading: "whereAreYou",
   onboardingAllSet: "whereAreYou",
+  installGate: "splash",
 };
 
 /** Listing flow only — used when the nav stack is empty (not onboarding fallbacks). */
@@ -242,6 +252,7 @@ const LISTING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
 /** Screens we must not rewind into after leaving the listing wizard. */
 const LISTING_EXIT_SKIP_SCREENS = new Set<Screen>([
   "splash",
+  "installGate",
   "firstHello",
   "whatDoYouWant",
   "whereAreYou",
@@ -253,7 +264,12 @@ const LISTING_EXIT_SKIP_SCREENS = new Set<Screen>([
 ]);
 
 function isOnboardingScreen(screen: Screen): boolean {
-  return screen in ONBOARDING_BACK_FALLBACK || screen === "firstHello" || screen === "onboardingAllSet";
+  return (
+    screen in ONBOARDING_BACK_FALLBACK ||
+    screen === "firstHello" ||
+    screen === "onboardingAllSet" ||
+    screen === "installGate"
+  );
 }
 
 function resolveBootDeepLinkTarget(target: DeepLinkTarget | null): DeepLinkTarget | null {
@@ -903,6 +919,22 @@ function AppRoutes() {
   const handleSplashContinue = () => {
     cleanupSplashGlobals();
     setNavStack([]);
+    if (shouldShowInstallGate()) {
+      setCurrentScreen("installGate");
+      return;
+    }
+    setCurrentScreen(resolvePostSplashScreen());
+  };
+
+  const handleInstallGateInstalled = () => {
+    markInstallGateDone();
+    setNavStack([]);
+    setCurrentScreen(resolvePostSplashScreen());
+  };
+
+  const handleInstallGateBrowser = () => {
+    markBrowserContinue();
+    setNavStack([]);
     setCurrentScreen(resolvePostSplashScreen());
   };
 
@@ -1077,6 +1109,10 @@ function AppRoutes() {
         setCurrentScreen(previous);
         return stack.slice(0, -1);
       }
+      if (currentScreen === "installGate") {
+        setCurrentScreen("splash");
+        return stack;
+      }
       if (currentScreen === "garageWinnerCheckout") {
         setCurrentScreen("garageShop");
         return stack;
@@ -1137,6 +1173,8 @@ function AppRoutes() {
       return stack;
     });
   }, [currentScreen]);
+
+  useBrowserBackTrap(!isStandalonePwa() && currentScreen !== "splash", handleBack);
 
   useEffect(() => {
     if (!auth.configured) return;
@@ -1277,6 +1315,13 @@ function AppRoutes() {
             preview={splashPreview || splashDynamicPreview}
             artOnly={splashArtOnly}
             dynamicPreview={splashDynamicPreview}
+          />
+        )}
+
+        {currentScreen === "installGate" && (
+          <InstallGateScreen
+            onInstalledContinue={handleInstallGateInstalled}
+            onContinueInBrowser={handleInstallGateBrowser}
           />
         )}
 
