@@ -3,8 +3,27 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "installCommand": "npm ci",
+  "redirects": [
+    {
+      "source": "/legal/terms.html",
+      "destination": "https://evorios.com/terms.html",
+      "permanent": false
+    },
+    {
+      "source": "/legal/privacy.html",
+      "destination": "https://evorios.com/privacy.html",
+      "permanent": false
+    },
+    {
+      "source": "/legal/refunds.html",
+      "destination": "https://evorios.com/refunds.html",
+      "permanent": false
+    }
+  ],
   "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/link", "destination": "/link.html" },
+    { "source": "/item/:id", "destination": "/link.html?listingId=:id&skipSplash=1" },
+    { "source": "/((?!api/|legal/).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
@@ -42,6 +61,24 @@
           "value": "no-cache, no-store, must-revalidate"
         }
       ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/rental-pending-expiry",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/rental-no-show",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/rental-overdue",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/abandoned-listing-nudge",
+      "schedule": "0 * * * *"
     }
   ]
 }
