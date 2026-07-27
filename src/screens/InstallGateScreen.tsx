@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
+import { useEffect } from "react";
 import { Smartphone } from "lucide-react";
 import { APP_NAME, BRAND_GREEN } from "../lib/brand";
+import { markInstallGateDone } from "../lib/pwaInstallGate";
 import { isAndroid, isIos, isStandalonePwa } from "../lib/pwaInstall";
 import { usePwaInstallPrompt } from "../hooks/PwaInstallProvider";
 
@@ -105,6 +107,14 @@ export function InstallGateScreen({
   const ios = isIos();
   const android = isAndroid();
   const showIosSteps = ios || (!android && pwa.manualIos);
+
+  // iOS has no “continue” CTA (Safari closes after Add). Remember this browser
+  // saw the gate so “Open Evorios” from the marketing site doesn’t loop forever.
+  // Note: iOS still cannot deep-link https → the Home Screen PWA; only the icon can.
+  useEffect(() => {
+    if (!showIosSteps) return;
+    markInstallGateDone();
+  }, [showIosSteps]);
 
   const handleInstalled = () => {
     if (isStandalonePwa()) {
