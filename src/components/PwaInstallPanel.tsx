@@ -87,9 +87,8 @@ export function PwaInstallPanel({
           <div className="flex items-start gap-2">
             <Share className="mt-0.5 h-4 w-4 shrink-0" style={{ color: BRAND_GREEN }} />
             <div>
-              In Safari: square with arrow → <strong>View More</strong> →{" "}
-              <strong>Add to Home Screen</strong> → <strong>Add</strong>. Then open the icon like a
-              normal app.
+              Safari (bottom center): square with arrow → <strong>View More</strong> →{" "}
+              <strong>Add to Home Screen</strong> → <strong>Add</strong>. Updates are automatic.
             </div>
           </div>
           <div className="mt-2 flex items-start gap-2">
