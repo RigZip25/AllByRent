@@ -36,7 +36,7 @@ export const DEMO_TRIPS: Trip[] = [
         location: "Каньон Барра",
         accommodation: "Martian Dome Suite",
         activities: ["Тихий трек", "Фото на красных скалах", "Спа в lodge"],
-        photo: img("photo-1458966480398-cdad9a4d9f5a"),
+        photo: img("photo-1473580044384-7ba9967e16a0"),
       },
       {
         id: "s3",

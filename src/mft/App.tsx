@@ -38,8 +38,26 @@ function ScrollToTop() {
 
 function RequireOnboarding({ children }: { children: ReactNode }) {
   const done = useMftStore((s) => s.profile.onboardingComplete);
+  const hydrated = useMftStore((s) => s._hasHydrated);
   const location = useLocation();
-  if (!done && !location.pathname.startsWith("/onboarding") && location.pathname !== "/welcome") {
+  const params = new URLSearchParams(location.search);
+  const skip =
+    params.get("skipOnboarding") === "1" || params.get("skipInstall") === "1";
+
+  if (!hydrated) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="h-8 w-8 animate-pulse rounded-full bg-[var(--accent-gold)]/40" />
+      </div>
+    );
+  }
+
+  if (
+    !done &&
+    !skip &&
+    !location.pathname.startsWith("/onboarding") &&
+    location.pathname !== "/welcome"
+  ) {
     return <Navigate to="/welcome" replace />;
   }
   return children;
@@ -47,7 +65,12 @@ function RequireOnboarding({ children }: { children: ReactNode }) {
 
 function ResetGate({ children }: { children: ReactNode }) {
   const resetDemo = useMftStore((s) => s.resetDemo);
+  const completeOnboarding = useMftStore((s) => s.completeOnboarding);
+  const setName = useMftStore((s) => s.setName);
+  const hydrated = useMftStore((s) => s._hasHydrated);
+
   useEffect(() => {
+    if (!hydrated) return;
     const params = new URLSearchParams(window.location.search);
     if (params.has("reset") || params.get("resetApp") === "1") {
       resetDemo();
@@ -60,44 +83,63 @@ function ResetGate({ children }: { children: ReactNode }) {
         `${window.location.pathname}${qs ? `?${qs}` : ""}`,
       );
     }
-  }, [resetDemo]);
+    if (params.get("skipOnboarding") === "1") {
+      setName("Елена");
+      completeOnboarding();
+    }
+  }, [hydrated, resetDemo, completeOnboarding, setName]);
+  return children;
+}
+
+function HydrationBoot({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    const unsub = useMftStore.persist.onFinishHydration(() => {
+      useMftStore.getState().setHasHydrated(true);
+    });
+    if (useMftStore.persist.hasHydrated()) {
+      useMftStore.getState().setHasHydrated(true);
+    }
+    return unsub;
+  }, []);
   return children;
 }
 
 export default function App() {
   return (
     <BrowserRouter>
-      <ResetGate>
-        <div className="mft-shell">
-          <div className="mft-phone">
-            <ScrollToTop />
-            <RequireOnboarding>
-              <Routes>
-                <Route path="/welcome" element={<WelcomeScreen />} />
-                <Route path="/onboarding/interests" element={<InterestsScreen />} />
-                <Route path="/onboarding/profile" element={<ProfileOnboardingScreen />} />
-                <Route path="/" element={<HomeScreen />} />
-                <Route path="/explore" element={<ExploreScreen />} />
-                <Route path="/destination/:id" element={<DestinationScreen />} />
-                <Route path="/trip/create" element={<TripCreateScreen />} />
-                <Route path="/trip/:id" element={<TripOverviewScreen />} />
-                <Route path="/trip/:id/booking" element={<BookingScreen />} />
-                <Route path="/trip/:id/packing" element={<PackingScreen />} />
-                <Route path="/trip/:id/group" element={<GroupScreen />} />
-                <Route path="/trip/:id/countdown" element={<CountdownScreen />} />
-                <Route path="/trip/:id/live" element={<LiveDayScreen />} />
-                <Route path="/trip/:id/restaurants" element={<RestaurantsScreen />} />
-                <Route path="/trip/:id/translator" element={<TranslatorScreen />} />
-                <Route path="/trip/:id/summary" element={<SummaryScreen />} />
-                <Route path="/trip/:id/memories" element={<MemoriesScreen />} />
-                <Route path="/wishlist" element={<WishlistScreen />} />
-                <Route path="/profile" element={<ProfileScreen />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </RequireOnboarding>
+      <HydrationBoot>
+        <ResetGate>
+          <div className="mft-shell">
+            <div className="mft-phone">
+              <ScrollToTop />
+              <RequireOnboarding>
+                <Routes>
+                  <Route path="/welcome" element={<WelcomeScreen />} />
+                  <Route path="/onboarding/interests" element={<InterestsScreen />} />
+                  <Route path="/onboarding/profile" element={<ProfileOnboardingScreen />} />
+                  <Route path="/" element={<HomeScreen />} />
+                  <Route path="/explore" element={<ExploreScreen />} />
+                  <Route path="/destination/:id" element={<DestinationScreen />} />
+                  <Route path="/trip/create" element={<TripCreateScreen />} />
+                  <Route path="/trip/:id" element={<TripOverviewScreen />} />
+                  <Route path="/trip/:id/booking" element={<BookingScreen />} />
+                  <Route path="/trip/:id/packing" element={<PackingScreen />} />
+                  <Route path="/trip/:id/group" element={<GroupScreen />} />
+                  <Route path="/trip/:id/countdown" element={<CountdownScreen />} />
+                  <Route path="/trip/:id/live" element={<LiveDayScreen />} />
+                  <Route path="/trip/:id/restaurants" element={<RestaurantsScreen />} />
+                  <Route path="/trip/:id/translator" element={<TranslatorScreen />} />
+                  <Route path="/trip/:id/summary" element={<SummaryScreen />} />
+                  <Route path="/trip/:id/memories" element={<MemoriesScreen />} />
+                  <Route path="/wishlist" element={<WishlistScreen />} />
+                  <Route path="/profile" element={<ProfileScreen />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </RequireOnboarding>
+            </div>
           </div>
-        </div>
-      </ResetGate>
+        </ResetGate>
+      </HydrationBoot>
     </BrowserRouter>
   );
 }

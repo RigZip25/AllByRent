@@ -18,7 +18,7 @@ export const DESTINATIONS: Destination[] = [
     description:
       "Красные пустыни и роскошные lodges под звёздным небом. Место, где созерцание важнее спешки.",
     photos: [
-      img("photo-1458966480398-cdad9a4d9f5a"),
+      img("photo-1473580044384-7ba9967e16a0"),
       img("photo-1509316785289-025f5b846b35"),
     ],
     highlights: [
@@ -62,8 +62,8 @@ export const DESTINATIONS: Destination[] = [
     description:
       "Скалы над бирюзой, частные яхты и ужины в семейных trattoria вне туристических троп.",
     photos: [
-      img("photo-1534117628672-77857c7a0fdb"),
       img("photo-1516483638261-f4dbaf036963"),
+      img("photo-1534113414509-0eec2bfb493f"),
     ],
     highlights: [
       "Частный катер вдоль побережья на рассвете",
@@ -134,8 +134,8 @@ export const DESTINATIONS: Destination[] = [
     description:
       "Ледники, ветра и люксовые eco-lodges у подножия Торрес дель Пайне.",
     photos: [
-      img("photo-1483728642387-6c3bdd6cf93b"),
       img("photo-1469474968028-56623f02e42e"),
+      img("photo-1506905925346-21bda4d32df4"),
     ],
     highlights: [
       "Рассвет у Torres del Paine с гидом-натуралистом",
@@ -170,8 +170,8 @@ export const DESTINATIONS: Destination[] = [
     description:
       "Приватные overwater villas, рифы и ужины на песке — комфорт без массового туризма.",
     photos: [
-      img("photo-1514282401047-d79a71aba5b5"),
       img("photo-1573843981267-be1999ff37cd"),
+      img("photo-1439066615861-d1af74d74000"),
     ],
     highlights: [
       "Вилла с частным бассейном над лагуной",

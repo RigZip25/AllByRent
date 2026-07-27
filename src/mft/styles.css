@@ -104,6 +104,14 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  /* Improve hit-testing on desktop previews */
+  isolation: isolate;
+}
+
+@media (max-width: 430px) {
+  .mft-phone {
+    max-width: 100%;
+  }
 }
 
 .mft-scroll {

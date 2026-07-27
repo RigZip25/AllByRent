@@ -11,10 +11,12 @@ import { DEMO_TRIPS, createTripFromDestination } from "./data/trips";
 import { DESTINATIONS } from "./data/destinations";
 
 interface MftState {
+  _hasHydrated: boolean;
   profile: UserProfile;
   trips: Trip[];
   selectedMapDestinationId: string | null;
   aiDraftQuery: string;
+  setHasHydrated: (v: boolean) => void;
   setName: (name: string) => void;
   toggleInterest: (id: InterestId) => void;
   setCompanions: (c: CompanionType) => void;
@@ -49,10 +51,13 @@ const defaultProfile: UserProfile = {
 export const useMftStore = create<MftState>()(
   persist(
     (set, get) => ({
+      _hasHydrated: false,
       profile: defaultProfile,
       trips: DEMO_TRIPS,
       selectedMapDestinationId: DESTINATIONS[0].id,
       aiDraftQuery: "",
+
+      setHasHydrated: (v) => set({ _hasHydrated: v }),
 
       setName: (name) =>
         set((s) => ({ profile: { ...s.profile, name } })),
@@ -154,11 +159,14 @@ export const useMftStore = create<MftState>()(
         })),
 
       confirmBookings: (tripId) => {
+        const trip = get().trips.find((t) => t.id === tripId);
         get().updateTrip(tripId, {
           status: "preparing",
-          bookings: get()
-            .trips.find((t) => t.id === tripId)
-            ?.bookings.map((b) => ({ ...b, status: "confirmed" as const })) ?? [],
+          bookings:
+            trip?.bookings.map((b) => ({
+              ...b,
+              status: "confirmed" as const,
+            })) ?? [],
         });
       },
 
@@ -172,6 +180,17 @@ export const useMftStore = create<MftState>()(
           aiDraftQuery: "",
         }),
     }),
-    { name: "mft-store-v1" },
+    {
+      name: "mft-store-v2",
+      partialize: (s) => ({
+        profile: s.profile,
+        trips: s.trips,
+        selectedMapDestinationId: s.selectedMapDestinationId,
+        aiDraftQuery: s.aiDraftQuery,
+      }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+    },
   ),
 );
