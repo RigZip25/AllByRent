@@ -176,6 +176,7 @@ const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
   "snapSale",
   "garageWorkflow",
   "garageSaleRules",
+  "home",
 ]);
 
 const BOTTOM_NAV_SCREENS = new Set<Screen>([

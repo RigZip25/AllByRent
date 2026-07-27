@@ -13,11 +13,13 @@ const BORDER = "#E8E6E0";
 export function HomeFeedCard({
   listing,
   onSelect,
+  hostMeta,
 }: {
   listing: ListingDraft;
   onSelect: () => void;
+  hostMeta?: Record<string, { displayName: string; rating: number }>;
 }) {
-  const trust = garageTrustLine(listing.hostId);
+  const trust = garageTrustLine(listing.hostId, hostMeta);
   const price = formatListingPriceLine(listing);
   const modes = activeModeLabels(listing);
   const cover = listing.photos[0] ?? null;
