@@ -7,7 +7,9 @@ import { GarageShelfEditSheet } from "../components/garage-shop/GarageShelfEditS
 import { GarageShopItemCard } from "../components/garage-shop/GarageShopItemCard";
 import { GarageSharePanel } from "../components/share/GarageSharePanel";
 import { getHostPendingOffers } from "../lib/garageOfferStorage";
-import { garageDisplayName } from "../lib/garageDisplay";
+import { garageDisplayName, garageNameFromDisplayName } from "../lib/garageDisplay";
+import { fetchRemoteProfile } from "../lib/supabaseProfile";
+import { loadUserProfile } from "../lib/userProfileStorage";
 import {
   getMyPendingWinnerCheckouts,
   resolveEndedAuctions,
@@ -80,8 +82,30 @@ export function ActiveGarageShopScreen({
   const [pendingWins, setPendingWins] = useState(() => getMyPendingWinnerCheckouts());
   const seenPendingWinIdsRef = useRef<Set<string>>(new Set());
   const city = getActiveRentLocationLabel().trim();
-  const garageName = useMemo(() => garageDisplayName(hostId), [hostId]);
+  const [garageName, setGarageName] = useState(() => garageDisplayName(hostId));
   const [openLabel, setOpenLabel] = useState(() => garageSaleOpenLabel(getGarageSaleSchedule()));
+
+  useEffect(() => {
+    let mounted = true;
+    try {
+      const self = loadUserProfile();
+      if (self.id === hostId && self.displayName?.trim()) {
+        setGarageName(garageNameFromDisplayName(self.displayName));
+        return;
+      }
+    } catch {
+      /* ignore */
+    }
+    void fetchRemoteProfile(hostId).then((remote) => {
+      if (!mounted) return;
+      if (remote?.display_name?.trim()) {
+        setGarageName(garageNameFromDisplayName(remote.display_name));
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [hostId]);
 
   const garageSharePayload = useMemo(
     () =>

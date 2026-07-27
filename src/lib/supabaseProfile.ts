@@ -31,6 +31,31 @@ export async function fetchRemoteProfile(userId: string): Promise<RemoteProfile 
   return data as RemoteProfile;
 }
 
+/** Batch-load display names for garage cards / trust lines. */
+export async function fetchRemoteProfileNamesByIds(
+  userIds: string[],
+): Promise<Record<string, { displayName: string; rating: number }>> {
+  const ids = [...new Set(userIds.map((id) => id.trim()).filter(Boolean))];
+  if (ids.length === 0 || !isSupabaseConfigured()) return {};
+  const supabase = getSupabaseClient();
+  if (!supabase) return {};
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, display_name, rating")
+    .in("id", ids);
+  if (error || !data) return {};
+  const out: Record<string, { displayName: string; rating: number }> = {};
+  for (const row of data) {
+    const id = typeof row.id === "string" ? row.id : "";
+    if (!id) continue;
+    out[id] = {
+      displayName: (row.display_name as string | null)?.trim() || "Neighbor",
+      rating: typeof row.rating === "number" ? row.rating : 0,
+    };
+  }
+  return out;
+}
+
 export async function updateRemoteProfile(
   userId: string,
   patch: Partial<Pick<RemoteProfile, "display_name" | "phone" | "location_label">>,

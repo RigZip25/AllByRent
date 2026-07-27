@@ -1,21 +1,46 @@
 import type { ListingDraft } from "../screens/listing/types";
 import { getActiveRentLocationLabel, getProfileCity } from "./listingStorage";
+import { loadUserProfile } from "./userProfileStorage";
 
-export function garageDisplayName(hostId: string | undefined): string {
+export function garageNameFromDisplayName(displayName: string | undefined | null): string {
+  const name = displayName?.trim();
+  if (!name) return "Neighbor's Garage";
+  if (/['']s$/i.test(name)) return `${name} Garage`;
+  return `${name}'s Garage`;
+}
+
+export function garageDisplayName(
+  hostId: string | undefined,
+  hostNames?: Record<string, string>,
+): string {
   if (!hostId) return "Host's Garage";
+  const fromMap = hostNames?.[hostId]?.trim();
+  if (fromMap) return garageNameFromDisplayName(fromMap);
+  try {
+    const self = loadUserProfile();
+    if (self.id && self.id === hostId && self.displayName?.trim()) {
+      return garageNameFromDisplayName(self.displayName);
+    }
+  } catch {
+    /* ignore */
+  }
   return "Neighbor's Garage";
 }
 
-export function garageTrustLine(hostId: string | undefined): {
+export function garageTrustLine(
+  hostId: string | undefined,
+  hostMeta?: Record<string, { displayName: string; rating: number }>,
+): {
   name: string;
   rating: number;
   distance: string;
 } {
-  const name = garageDisplayName(hostId);
+  const meta = hostId ? hostMeta?.[hostId] : undefined;
+  const name = garageDisplayName(hostId, meta ? { [hostId!]: meta.displayName } : undefined);
   const city = getProfileCity().trim().toLowerCase();
   const active = getActiveRentLocationLabel().trim().toLowerCase();
   const distance = city && active && city === active ? "Near you" : "Nearby";
-  return { name, rating: 0, distance };
+  return { name, rating: meta?.rating ?? 0, distance };
 }
 
 /** @deprecated Prefer "Nearby" — kept for call sites until distance is wired. */
@@ -73,7 +98,10 @@ export type GarageSummary = {
   listings: ListingDraft[];
 };
 
-export function groupListingsByGarage(listings: ListingDraft[]): GarageSummary[] {
+export function groupListingsByGarage(
+  listings: ListingDraft[],
+  hostMeta?: Record<string, { displayName: string; rating: number }>,
+): GarageSummary[] {
   const byHost = new Map<string, ListingDraft[]>();
   for (const listing of listings) {
     const hostId = listing.hostId ?? "";
@@ -83,7 +111,7 @@ export function groupListingsByGarage(listings: ListingDraft[]): GarageSummary[]
   }
 
   return [...byHost.entries()].map(([hostId, items]) => {
-    const trust = garageTrustLine(hostId);
+    const trust = garageTrustLine(hostId || undefined, hostMeta);
     const categories = [...new Set(items.map((l) => l.category).filter(Boolean))].slice(0, 3);
     return {
       hostId,

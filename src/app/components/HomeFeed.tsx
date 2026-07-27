@@ -31,6 +31,7 @@ import {
   expandClusterRadius,
   getClusterRadiusMi,
 } from "../../lib/clusterConfig";
+import { fetchRemoteProfileNamesByIds } from "../../lib/supabaseProfile";
 import { AutoGrowTextarea } from "../../components/AutoGrowTextarea";
 import { MrRentano } from "./MrRentano";
 
@@ -78,6 +79,7 @@ export function HomeFeed({
   const [lens, setLens] = useState<HomeLens>(() => loadHomeFeedLens());
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState<Awaited<ReturnType<typeof fetchActiveListingsForCityRemote>>>([]);
+  const [hostMeta, setHostMeta] = useState<Record<string, { displayName: string; rating: number }>>({});
   const [clusterRadiusMi, setClusterRadiusMi] = useState(() => getClusterRadiusMi());
   const { updateAvailable, updateJustCompleted, simulateUpdateNotification } = usePwaUpdate();
   const showBellBadge = updateAvailable || updateJustCompleted;
@@ -129,9 +131,13 @@ export function HomeFeed({
       : fetchActiveListingsForCityRemote(city);
 
     void loader
-      .then((list) => {
+      .then(async (list) => {
         if (!mounted) return;
-        setListings(list.filter(isListingBrowsable));
+        const browsable = list.filter(isListingBrowsable);
+        setListings(browsable);
+        const hostIds = browsable.map((l) => l.hostId).filter(Boolean) as string[];
+        const names = await fetchRemoteProfileNamesByIds(hostIds);
+        if (mounted) setHostMeta(names);
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -147,7 +153,10 @@ export function HomeFeed({
     [listings, modeChip],
   );
 
-  const garages = useMemo(() => groupListingsByGarage(filtered), [filtered]);
+  const garages = useMemo(
+    () => groupListingsByGarage(filtered, hostMeta),
+    [filtered, hostMeta],
+  );
   const isSparse = filtered.length < SPARSE_CLUSTER_MAX;
   const isSearchActive = query.trim().length > 0;
 
@@ -168,26 +177,46 @@ export function HomeFeed({
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
-      <div className="shrink-0 bg-[#F0F4F2] px-4 pb-3 pt-3">
-        <div className="mb-3 flex items-center justify-between gap-2">
+      <div className="shrink-0 bg-[#F0F4F2] px-4 pb-2 pt-2">
+        <div className="mb-2 flex items-center gap-2">
           {onBackToHub ? (
             <button
               type="button"
               onClick={onBackToHub}
-              className="flex h-11 w-11 items-center justify-center rounded-full border bg-white active:bg-gray-50"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
               style={{ borderColor: BORDER }}
               aria-label="Back to browse choices"
             >
               <ArrowLeft className="h-5 w-5" style={{ color: GREEN_DARK }} />
             </button>
-          ) : (
-            <span className="w-11" aria-hidden />
-          )}
-          <div className="flex items-center gap-2">
+          ) : null}
+
+          <button
+            type="button"
+            onClick={onEditLocation}
+            className="flex min-w-0 flex-1 items-center gap-1 text-left"
+            aria-label={needsLocation ? "Set your block" : "Change block cluster"}
+          >
+            <MapPin
+              className="h-4 w-4 shrink-0"
+              style={{ color: needsLocation ? "#F59E0B" : GREEN }}
+              fill={needsLocation ? "#F59E0B" : GREEN}
+              stroke={GREEN_DARK}
+              strokeWidth={1.5}
+            />
+            <span
+              className="min-w-0 flex-1 truncate text-[14px] font-bold leading-snug"
+              style={{ color: needsLocation ? "#B45309" : GREEN_DARK }}
+            >
+              {clusterLabel}
+            </span>
+            <ChevronRight className="h-4 w-4 shrink-0" style={{ color: GREEN }} />
+          </button>
+
           <button
             type="button"
             onClick={onRentals}
-            className="flex h-11 w-11 items-center justify-center rounded-full border bg-white active:bg-gray-50"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
             style={{ borderColor: BORDER }}
             aria-label="Bookings"
           >
@@ -196,7 +225,7 @@ export function HomeFeed({
           <button
             type="button"
             onClick={handleBellPress}
-            className="relative flex h-11 w-11 items-center justify-center rounded-full border bg-white active:bg-gray-50"
+            className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
             style={{ borderColor: BORDER }}
             aria-label={showBellBadge ? "Notifications — update available" : "Notifications"}
           >
@@ -208,40 +237,17 @@ export function HomeFeed({
               />
             ) : null}
           </button>
-          </div>
         </div>
 
-        <button
-          type="button"
-          onClick={onEditLocation}
-          className="mb-3 flex min-w-0 items-start gap-1.5 text-left"
-          aria-label={needsLocation ? "Set your block" : "Change block cluster"}
-        >
-          <MapPin
-            className="mt-0.5 h-5 w-5 shrink-0"
-            style={{ color: needsLocation ? "#F59E0B" : GREEN }}
-            fill={needsLocation ? "#F59E0B" : GREEN}
-            stroke={GREEN_DARK}
-            strokeWidth={1.5}
-          />
-          <span
-            className="min-w-0 flex-1 break-words text-[17px] font-bold leading-snug [overflow-wrap:anywhere]"
-            style={{ color: needsLocation ? "#B45309" : GREEN_DARK }}
-          >
-            {clusterLabel}
-          </span>
-          <ChevronRight className="mt-1 h-4 w-4 shrink-0" style={{ color: GREEN }} />
-        </button>
-
         <div
-          className="rounded-2xl border-2 bg-white px-4 py-3.5 shadow-sm"
-          style={{ borderColor: needsLocation ? "#F59E0B55" : `${GREEN_DARK}33` }}
+          className="rounded-xl border bg-white px-3 py-2 shadow-sm"
+          style={{ borderColor: needsLocation ? "#F59E0B55" : BORDER }}
         >
           <label className="sr-only" htmlFor="home-search">
             What do you need?
           </label>
-          <div className="flex items-start gap-2">
-            <span className="pt-0.5 text-xl" aria-hidden>
+          <div className="flex items-center gap-2">
+            <span className="text-base" aria-hidden>
               🔍
             </span>
             <AutoGrowTextarea
@@ -249,132 +255,124 @@ export function HomeFeed({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="What do you need?"
-              className="min-w-0 flex-1 bg-transparent py-0 text-[17px] font-medium outline-none placeholder:text-gray-400"
-              maxRows={3}
+              className="min-w-0 flex-1 bg-transparent py-0 text-[15px] font-medium outline-none placeholder:text-gray-400"
+              maxRows={2}
             />
             {loading && isSearchActive ? (
               <span className="text-[12px] text-gray-400">…</span>
             ) : null}
           </div>
-          {!isSearchActive ? (
-            <p className="mt-1.5 pl-8 text-[13px] text-gray-500">
-              Search above, or switch <strong className="font-semibold text-gray-600">Feed</strong> /{" "}
-              <strong className="font-semibold text-gray-600">Garages</strong> below
-            </p>
-          ) : null}
         </div>
 
         {!isSearchActive && browseCategories.length > 0 ? (
-          <div className="mt-3">
-            <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-              Browse by category
-            </p>
-            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-              {browseCategories.map((cat) => (
-                <button
-                  key={cat.name}
-                  type="button"
-                  onClick={() => onBrowseCategory(cat.name)}
-                  className="flex shrink-0 items-center gap-1.5 rounded-full border bg-white px-3 py-2 text-[13px] font-semibold text-gray-800 active:bg-gray-50"
-                  style={{ borderColor: BORDER }}
-                >
-                  <span aria-hidden>{cat.icon}</span>
-                  {cat.name}
-                </button>
-              ))}
-            </div>
+          <div className="-mx-1 mt-2 flex gap-1.5 overflow-x-auto px-1 pb-0.5">
+            {browseCategories.map((cat) => (
+              <button
+                key={cat.name}
+                type="button"
+                onClick={() => onBrowseCategory(cat.name)}
+                className="flex shrink-0 items-center gap-1 rounded-full border bg-white px-2.5 py-1.5 text-[12px] font-semibold text-gray-800 active:bg-gray-50"
+                style={{ borderColor: BORDER }}
+              >
+                <span aria-hidden>{cat.icon}</span>
+                {cat.name}
+              </button>
+            ))}
           </div>
         ) : null}
 
-        <div className="mt-3 flex flex-wrap gap-2">
-          {modeChips.map((chip) => {
-            const active = modeChip === chip.id;
-            return (
-              <button
-                key={chip.id}
-                type="button"
-                onClick={() => setModeChip(chip.id)}
-                className="rounded-full px-3.5 py-1.5 text-[13px] font-bold transition-colors"
-                style={{
-                  backgroundColor: active ? GREEN_DARK : "white",
-                  color: active ? "white" : "#666",
-                  border: `1px solid ${active ? GREEN_DARK : BORDER}`,
-                }}
-              >
-                {chip.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {!isSearchActive ? (
-          <div
-            className="mt-3 flex rounded-full border bg-white p-0.5"
-            style={{ borderColor: BORDER }}
-            role="tablist"
-            aria-label="Browse lenses"
-          >
-            {(
-              [
-                { id: "feed" as const, label: "Feed" },
-                { id: "garages" as const, label: "Garages" },
-              ] as const
-            ).map((tab) => {
-              const active = lens === tab.id;
+        <div className="mt-2 flex items-center gap-2">
+          <div className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto">
+            {modeChips.map((chip) => {
+              const active = modeChip === chip.id;
               return (
                 <button
-                  key={tab.id}
+                  key={chip.id}
                   type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setLens(tab.id)}
-                  className="flex-1 rounded-full py-2 text-[13px] font-bold transition-colors"
+                  onClick={() => setModeChip(chip.id)}
+                  className="shrink-0 rounded-full px-3 py-1 text-[12px] font-bold transition-colors"
                   style={{
-                    backgroundColor: active ? GREEN_DARK : "transparent",
-                    color: active ? "white" : "#888",
+                    backgroundColor: active ? GREEN_DARK : "white",
+                    color: active ? "white" : "#666",
+                    border: `1px solid ${active ? GREEN_DARK : BORDER}`,
                   }}
                 >
-                  {tab.label}
+                  {chip.label}
                 </button>
               );
             })}
           </div>
-        ) : null}
+
+          {!isSearchActive ? (
+            <div
+              className="flex shrink-0 rounded-full border bg-white p-0.5"
+              style={{ borderColor: BORDER }}
+              role="tablist"
+              aria-label="Browse lenses"
+            >
+              {(
+                [
+                  { id: "feed" as const, label: "Feed" },
+                  { id: "garages" as const, label: "Garages" },
+                ] as const
+              ).map((tab) => {
+                const active = lens === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setLens(tab.id)}
+                    className="rounded-full px-3 py-1 text-[12px] font-bold transition-colors"
+                    style={{
+                      backgroundColor: active ? GREEN_DARK : "transparent",
+                      color: active ? "white" : "#888",
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-2">
         {isSparse && !isSearchActive ? (
           <div
-            className="mb-3 flex gap-3 rounded-2xl border bg-white p-3"
+            className="mb-2 flex gap-2.5 rounded-xl border bg-white px-3 py-2.5"
             style={{ borderColor: BORDER }}
           >
-            <MrRentano size={40} className="shrink-0" />
-            <div className="min-w-0 text-[13px] leading-snug text-gray-700">
+            <MrRentano size={36} className="shrink-0" />
+            <div className="min-w-0 text-[12px] leading-snug text-gray-700">
               <p className="font-bold" style={{ color: GREEN_DARK }}>
                 {mascotSays("Your block is just getting started.")}
               </p>
-              <p className="mt-1">
-                Here&apos;s what&apos;s nearby — or{" "}
+              <p className="mt-0.5">
                 <button
                   type="button"
                   className="font-bold underline"
                   style={{ color: GREEN_DARK }}
                   onClick={onStockGarage}
                 >
-                  stock your garage
-                </button>{" "}
-                and be first on the block.
-              </p>
-              {canWidenCluster ? (
-                <button
-                  type="button"
-                  className="mt-2 font-bold underline"
-                  style={{ color: GREEN_DARK }}
-                  onClick={handleWidenCluster}
-                >
-                  Search wider ({CLUSTER_RADIUS_EXPANDED_MI} mi) →
+                  Stock your garage
                 </button>
-              ) : null}
+                {canWidenCluster ? (
+                  <>
+                    {" · "}
+                    <button
+                      type="button"
+                      className="font-bold underline"
+                      style={{ color: GREEN_DARK }}
+                      onClick={handleWidenCluster}
+                    >
+                      Search wider ({CLUSTER_RADIUS_EXPANDED_MI} mi)
+                    </button>
+                  </>
+                ) : null}
+              </p>
             </div>
           </div>
         ) : null}
@@ -427,6 +425,7 @@ export function HomeFeed({
               <li key={listing.id}>
                 <HomeFeedCard
                   listing={listing}
+                  hostMeta={hostMeta}
                   onSelect={() => onNavigate(`itemDetail:${listing.id}`)}
                 />
               </li>
