@@ -4,6 +4,7 @@ import { ONBOARDING } from "../../lib/brand";
 import { submitNeighborOffer } from "../../lib/garageOfferStorage";
 import { formatShopUsd } from "../../lib/garageShopStorage";
 import { useAuth } from "../../hooks/AuthProvider";
+import { SignInPrompt } from "../SignInPrompt";
 import type { ListingDraft } from "../../screens/listing/types";
 import type { ShopOffer } from "../../lib/garageShopStorage";
 
@@ -35,7 +36,7 @@ export function GarageMakeOfferSheet({
 
   const submit = () => {
     if (!auth.userId) {
-      setError("Sign in so the seller gets your offer (push + inbox).");
+      setError("Sign in so the seller gets your offer.");
       return;
     }
     const value = Number.parseFloat(amount);
@@ -65,57 +66,63 @@ export function GarageMakeOfferSheet({
       >
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: AMBER }}>
+            <p className="text-[13px] font-bold uppercase tracking-wide" style={{ color: AMBER }}>
               {copy.sheetEyebrow}
             </p>
             <h2 className="text-lg font-bold text-gray-900">{listing.title || "Sale item"}</h2>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-[15px] text-gray-600">
               Asking {formatShopUsd(offer.buyNowUsd)} · {copy.sheetHint}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-full border bg-white"
+            className="flex h-11 w-11 items-center justify-center rounded-full border bg-white"
             style={{ borderColor: BORDER }}
             aria-label="Close"
           >
-            <X className="h-4 w-4 text-gray-600" />
+            <X className="h-5 w-5 text-gray-600" />
           </button>
         </div>
 
-        <label className="block text-sm font-semibold text-gray-700">
-          Your offer
-          <div className="relative mt-1.5">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-            <input
-              type="number"
-              inputMode="decimal"
-              max={offer.buyNowUsd - 0.01}
-              value={amount}
-              onChange={(event) => {
-                setAmount(event.target.value);
-                setError(null);
-              }}
-              className="w-full rounded-xl border py-3 pl-7 pr-3 text-base font-semibold"
-              style={{ borderColor: BORDER }}
-            />
-          </div>
-        </label>
+        {!auth.userId ? (
+          <SignInPrompt message="Sign in so the seller gets your offer (push + inbox)." intent="book" />
+        ) : (
+          <>
+            <label className="block text-[15px] font-semibold text-gray-700">
+              Your offer
+              <div className="relative mt-1.5">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  max={offer.buyNowUsd - 0.01}
+                  value={amount}
+                  onChange={(event) => {
+                    setAmount(event.target.value);
+                    setError(null);
+                  }}
+                  className="w-full rounded-xl border py-3 pl-7 pr-3 text-base font-semibold"
+                  style={{ borderColor: BORDER }}
+                />
+              </div>
+            </label>
 
-        {error ? <p className="mt-2 text-sm font-medium text-red-600">{error}</p> : null}
+            {error ? <p className="mt-2 text-[15px] font-medium text-red-600">{error}</p> : null}
 
-        <p className="mt-3 text-xs leading-relaxed text-gray-500">{copy.sheetTerms}</p>
+            <p className="mt-3 text-[14px] leading-relaxed text-gray-600">{copy.sheetTerms}</p>
 
-        <button
-          type="button"
-          onClick={submit}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-bold"
-          style={{ backgroundColor: GREEN, color: "#fff" }}
-        >
-          <Tag className="h-4 w-4" aria-hidden />
-          {copy.sheetSubmit}
-        </button>
+            <button
+              type="button"
+              onClick={submit}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-bold"
+              style={{ backgroundColor: GREEN, color: "#fff" }}
+            >
+              <Tag className="h-4 w-4" aria-hidden />
+              {copy.sheetSubmit}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

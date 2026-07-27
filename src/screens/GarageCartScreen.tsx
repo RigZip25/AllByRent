@@ -172,7 +172,7 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         <div className="mb-3 space-y-2">
-          <PaymentsRequiredBanner />
+          <PaymentsRequiredBanner variant="garage" />
           <PaymentsReadyBadge />
         </div>
 
@@ -180,6 +180,14 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
           <div className="rounded-2xl border bg-white p-8 text-center" style={{ borderColor: BORDER }}>
             <p className="text-lg font-bold text-gray-900">Cart is empty</p>
             <p className="mt-2 text-[15px] text-gray-600">Buy now items from an open garage shelf.</p>
+            <button
+              type="button"
+              onClick={onBack}
+              className="mt-4 w-full rounded-xl py-3.5 text-base font-bold"
+              style={{ backgroundColor: AMBER, color: GREEN }}
+            >
+              Back to garage
+            </button>
           </div>
         ) : (
           <ul className="space-y-3">

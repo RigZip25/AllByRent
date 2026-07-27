@@ -1449,6 +1449,7 @@ function AppRoutes() {
             onBack={openYardSaleHub}
             onEditLocation={openRentLocationSetup}
             onOpenGarage={handleOpenNeighborGarage}
+            onBrowseGear={() => handleBrowseHubChoice("findGear")}
           />
         )}
 
@@ -1504,6 +1505,9 @@ function AppRoutes() {
                 ? undefined
                 : handleOpenHostOffers
             }
+            onStockShelf={() => {
+              navigateTo(hasSeenGarageSaleRules() ? "snapSale" : "garageSaleRules");
+            }}
           />
         )}
 
@@ -1514,15 +1518,26 @@ function AppRoutes() {
           />
         )}
 
-        {currentScreen === "garageWinnerCheckout" && winnerCheckoutListingId && (
-          <GarageWinnerCheckoutScreen
-            listingId={winnerCheckoutListingId}
-            onBack={handleBack}
-            onComplete={() => {
-              setNavStack([]);
-              setCurrentScreen("garageShop");
-            }}
-          />
+        {currentScreen === "garageWinnerCheckout" && (
+          winnerCheckoutListingId ? (
+            <GarageWinnerCheckoutScreen
+              listingId={winnerCheckoutListingId}
+              onBack={handleBack}
+              onComplete={() => {
+                setNavStack([]);
+                setCurrentScreen("garageShop");
+              }}
+              onRequireAuth={() => showAuthGate("garageWinnerCheckout", "book")}
+            />
+          ) : (
+            <GarageShopMissingScreen
+              onBack={handleBack}
+              onBrowseYardSales={() => {
+                setNavStack([]);
+                setCurrentScreen("yardSales");
+              }}
+            />
+          )
         )}
 
         {currentScreen === "garageCart" && (

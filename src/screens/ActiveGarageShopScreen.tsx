@@ -6,7 +6,7 @@ import { GarageMyOfferSheet } from "../components/garage-shop/GarageMyOfferSheet
 import { GarageShelfEditSheet } from "../components/garage-shop/GarageShelfEditSheet";
 import { GarageShopItemCard } from "../components/garage-shop/GarageShopItemCard";
 import { GarageSharePanel } from "../components/share/GarageSharePanel";
-import { getHostPendingOffers } from "../lib/garageOfferStorage";
+import { getHostPendingOffers, ensureAcceptedOffersInCart } from "../lib/garageOfferStorage";
 import { garageDisplayName, garageNameFromDisplayName } from "../lib/garageDisplay";
 import { fetchRemoteProfile } from "../lib/supabaseProfile";
 import { loadUserProfile } from "../lib/userProfileStorage";
@@ -52,6 +52,8 @@ type ActiveGarageShopScreenProps = {
   onOpenCart: () => void;
   onOpenWinnerCheckout: (listingId: string) => void;
   onOpenHostOffers?: () => void;
+  /** Own empty shelf → snap sale flow */
+  onStockShelf?: () => void;
 };
 
 export function ActiveGarageShopScreen({
@@ -63,6 +65,7 @@ export function ActiveGarageShopScreen({
   onOpenCart,
   onOpenWinnerCheckout,
   onOpenHostOffers,
+  onStockShelf,
 }: ActiveGarageShopScreenProps) {
   const auth = useAuth();
   const ownHostId = resolveHostAccountId(auth.userId);
@@ -154,6 +157,10 @@ export function ActiveGarageShopScreen({
       resolveEndedAuctions(listingIds);
       resolveExpiredWinnerCheckouts(listingIds);
       const shelf = candidates.filter((listing) => getShopOffer(listing));
+      if (!preview) {
+        const added = ensureAcceptedOffersInCart(shelf);
+        if (added) refreshCartCount();
+      }
       setListings(shelf);
       refreshPendingWins();
       refreshOfferCount();
@@ -180,6 +187,8 @@ export function ActiveGarageShopScreen({
     hostId,
     isOwnGarage,
     loadOwnShelfCandidates,
+    preview,
+    refreshCartCount,
     refreshPendingWins,
     refreshOfferCount,
   ]);
@@ -403,12 +412,31 @@ export function ActiveGarageShopScreen({
           <p className="py-16 text-center text-gray-500">Loading shelf…</p>
         ) : listings.length === 0 ? (
           <div className="rounded-2xl border bg-white p-6 text-center" style={{ borderColor: BORDER }}>
-            <p className="text-base font-bold text-gray-900">Shelf is empty</p>
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="text-lg font-bold text-gray-900">Shelf is empty</p>
+            <p className="mt-2 text-[15px] text-gray-600">
               {isOwnGarage
                 ? "Snap sale items from Open my garage — one photo and a price each."
                 : "No sale items listed right now."}
             </p>
+            {isOwnGarage && onStockShelf && !preview ? (
+              <button
+                type="button"
+                onClick={onStockShelf}
+                className="mt-4 w-full rounded-xl py-3.5 text-base font-bold"
+                style={{ backgroundColor: AMBER, color: GREEN }}
+              >
+                Snap onto shelf →
+              </button>
+            ) : !isOwnGarage ? (
+              <button
+                type="button"
+                onClick={onBack}
+                className="mt-4 w-full rounded-xl border py-3.5 text-base font-bold"
+                style={{ borderColor: GREEN, color: GREEN }}
+              >
+                Back to yard sales
+              </button>
+            ) : null}
           </div>
         ) : (
           <div className="garage-shop-grid grid grid-cols-2 gap-2.5">
@@ -477,6 +505,7 @@ export function ActiveGarageShopScreen({
           offer={myOfferTarget.offer}
           onClose={() => setMyOfferTarget(null)}
           onUpdated={() => loadShelf()}
+          onOpenCart={onOpenCart}
         />
       ) : null}
 

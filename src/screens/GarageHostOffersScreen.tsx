@@ -82,22 +82,22 @@ export function GarageHostOffersScreen({ hostId, onBack }: GarageHostOffersScree
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#FFF9F0]">
-      <header className="shrink-0 border-b bg-white px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top,0px))]">
-        <div className="flex items-center gap-2">
+      <header className="shrink-0 border-b bg-white px-4 pb-3 pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))]">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onBack}
-            className="flex h-10 w-10 items-center justify-center rounded-full border"
+            className="flex h-11 w-11 items-center justify-center rounded-full border"
             style={{ borderColor: BORDER }}
             aria-label="Back"
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
           <div>
-            <h1 className="text-xl font-bold" style={{ color: GREEN }}>
+            <h1 className="text-xl font-bold sm:text-2xl" style={{ color: GREEN }}>
               {copy.inboxTitle}
             </h1>
-            <p className="text-[13px] text-gray-500">{copy.inboxSubtitle}</p>
+            <p className="text-[15px] text-gray-600">{copy.inboxSubtitle}</p>
           </div>
         </div>
       </header>
@@ -113,7 +113,7 @@ export function GarageHostOffersScreen({ hostId, onBack }: GarageHostOffersScree
           <div className="space-y-3">
             {offers.map((offer) => (
               <article key={offer.id} className="rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
-                <p className="text-[11px] font-bold uppercase tracking-wide text-amber-700">{copy.oneOnOneBadge}</p>
+                <p className="text-[13px] font-bold uppercase tracking-wide text-amber-700">{copy.oneOnOneBadge}</p>
                 <h2 className="mt-1 text-base font-bold text-gray-900">{offer.listingTitle}</h2>
                 <p className="mt-1 text-sm text-gray-600">
                   {copy.offerFrom} {formatShopUsd(offer.amountUsd)}

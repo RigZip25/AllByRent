@@ -2,6 +2,7 @@ import type { GarageCartLine } from "../garageShopStorage";
 import { clearGarageCart, formatShopUsd } from "../garageShopStorage";
 import { pushInAppNotification } from "../inAppNotifications";
 import {
+  getAuctionSignInRequiredMessage,
   getSignInRequiredMessage,
   getStripeRequiredMessage,
   isPaymentsReady,
@@ -91,7 +92,7 @@ export async function startAuctionCheckout(
 
   const token = await getAccessToken();
   if (!token) {
-    return { ok: false, reason: getSignInRequiredMessage() };
+    return { ok: false, reason: getAuctionSignInRequiredMessage() };
   }
 
   const amountCents = Math.max(50, Math.round(input.totalUsd * 100));

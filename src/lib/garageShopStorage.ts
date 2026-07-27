@@ -258,6 +258,18 @@ export function buyNowGarageItem(input: {
   if (input.offer.negotiationPhase === "multi_auction") {
     return { ok: false, reason: "Buy now paused — auction among interested neighbors" };
   }
+  // Soft-lock when an accepted offer is waiting for payment.
+  try {
+    const raw = localStorage.getItem("evorios_garage_neighbor_offers");
+    if (raw) {
+      const offers = JSON.parse(raw) as Array<{ listingId?: string; status?: string }>;
+      if (offers.some((o) => o.listingId === input.listing.id && o.status === "accepted")) {
+        return { ok: false, reason: "Deal pending payment — another neighbor’s offer was accepted" };
+      }
+    }
+  } catch {
+    /* private mode */
+  }
   // Do not mark sold until Stripe payment succeeds (webhook / checkout complete).
   const result = addToGarageCart(cartLineFromListing(input.listing, input.offer.buyNowUsd));
   if (!result.ok) return result;

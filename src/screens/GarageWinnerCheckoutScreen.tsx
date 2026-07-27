@@ -30,6 +30,7 @@ type GarageWinnerCheckoutScreenProps = {
   listingId: string;
   onBack: () => void;
   onComplete: () => void;
+  onRequireAuth?: () => void;
 };
 
 function formatPayCountdown(payByIso: string): string {
@@ -43,6 +44,7 @@ export function GarageWinnerCheckoutScreen({
   listingId,
   onBack,
   onComplete,
+  onRequireAuth,
 }: GarageWinnerCheckoutScreenProps) {
   const listing = getPublishedListingById(listingId);
   const checkout = getWinnerCheckoutDetails(listingId);
@@ -148,7 +150,7 @@ export function GarageWinnerCheckoutScreen({
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         <div className="mb-3 space-y-2">
-          <PaymentsRequiredBanner />
+          <PaymentsRequiredBanner variant="garage" />
           <PaymentsReadyBadge />
         </div>
 
@@ -212,9 +214,21 @@ export function GarageWinnerCheckoutScreen({
       {!clientSecret ? (
         <div className="shrink-0 border-t bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-4" style={{ borderColor: BORDER }}>
           {paymentError ? (
-            <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
-              {paymentError}
-            </p>
+            <div className="mb-3 space-y-2">
+              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[15px] text-red-800">
+                {paymentError}
+              </p>
+              {onRequireAuth && /sign in/i.test(paymentError) ? (
+                <button
+                  type="button"
+                  onClick={onRequireAuth}
+                  className="w-full rounded-xl border py-3.5 text-base font-bold"
+                  style={{ borderColor: GREEN, color: GREEN }}
+                >
+                  Sign in / Create account
+                </button>
+              ) : null}
+            </div>
           ) : null}
           <button
             type="button"

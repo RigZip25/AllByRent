@@ -85,9 +85,10 @@ type YardSalesScreenProps = {
   onBack: () => void;
   onEditLocation: () => void;
   onOpenGarage: (hostId: string) => void;
+  onBrowseGear?: () => void;
 };
 
-export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage }: YardSalesScreenProps) {
+export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage, onBrowseGear }: YardSalesScreenProps) {
   const auth = useAuth();
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<YardSaleEvent[]>([]);
@@ -185,10 +186,20 @@ export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage }: YardSa
             <p className="text-4xl" aria-hidden>
               🏷️
             </p>
-            <p className="mt-3 text-base font-bold text-gray-900">No yard sales on the map yet</p>
-            <p className="mt-1 text-sm text-gray-500">
-              Check back on weekends, or browse neighbor garages for buy deals.
+            <p className="mt-3 text-lg font-bold text-gray-900">No yard sales on the map yet</p>
+            <p className="mt-2 text-[15px] text-gray-600">
+              Check back on weekends, or browse neighbor items for buy deals.
             </p>
+            {onBrowseGear ? (
+              <button
+                type="button"
+                onClick={onBrowseGear}
+                className="mt-4 w-full rounded-xl py-3.5 text-base font-bold text-white"
+                style={{ backgroundColor: GREEN }}
+              >
+                Browse the block →
+              </button>
+            ) : null}
           </div>
         ) : (
           events.map((event) => (

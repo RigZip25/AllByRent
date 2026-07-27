@@ -233,16 +233,19 @@
 @layer utilities {
   /**
    * Microtext is a bit too small on large phones; gently upsize.
-   * This intentionally overrides Tailwind's defaults for these two common utilities.
+   * This intentionally overrides Tailwind's defaults for common utilities.
+   * Target: readable chrome for older / low-vision neighbors (≥13px).
    */
   .text-xs {
     font-size: 0.8125rem;
-    line-height: 1.15rem;
+    line-height: 1.2rem;
   }
 
+  .text-\[10px\],
+  .text-\[11px\],
   .text-\[12px\] {
-    font-size: 0.8125rem;
-    line-height: 1.15rem;
+    font-size: 0.8125rem; /* 13px */
+    line-height: 1.2rem;
   }
 
   .app-shell {

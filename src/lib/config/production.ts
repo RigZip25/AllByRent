@@ -29,6 +29,16 @@ export function getStripeRequiredMessage(): string {
   return "Card payments are temporarily unavailable. You can still send a request to the host.";
 }
 
+/** Buy-now / garage cart — not rental booking copy. */
+export function getGarageStripeRequiredMessage(): string {
+  return "Card checkout is temporarily unavailable. You can still browse and save items — try again shortly.";
+}
+
 export function getSignInRequiredMessage(): string {
   return "Sign in or continue as guest with your email.";
+}
+
+/** Auction winner pay — guest checkout not supported for bids. */
+export function getAuctionSignInRequiredMessage(): string {
+  return "Sign in to pay your winning bid.";
 }
