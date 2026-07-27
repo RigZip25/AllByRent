@@ -53,7 +53,7 @@ export function InstallGateScreen({
                 </span>
                 <span>
                   Tap <Share className="inline h-4 w-4 align-text-bottom text-[#0D5C3A]" />{" "}
-                  <strong>Share</strong> in Safari
+                  <strong>Share</strong> at the bottom of Safari
                 </span>
               </li>
               <li className="flex gap-3">
@@ -61,15 +61,30 @@ export function InstallGateScreen({
                   2
                 </span>
                 <span>
-                  Choose <strong>Add to Home Screen</strong>
+                  A list of apps appears first — <strong>scroll down</strong> past them
                 </span>
               </li>
               <li className="flex gap-3">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[13px] font-bold text-[#0D5C3A]">
                   3
                 </span>
+                <span className="min-w-0">
+                  Tap the row with a <strong>square and +</strong>
+                  <span
+                    className="ml-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md border border-[#0D5C3A]/25 bg-white align-middle text-[15px] font-bold leading-none text-[#0D5C3A]"
+                    aria-hidden
+                  >
+                    +
+                  </span>{" "}
+                  — <strong>Add to Home Screen</strong> (lower in the list)
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[13px] font-bold text-[#0D5C3A]">
+                  4
+                </span>
                 <span>
-                  Open the <strong>{APP_NAME}</strong> icon — then you’re in
+                  Open the <strong>{APP_NAME}</strong> icon on your Home Screen
                 </span>
               </li>
             </ol>
