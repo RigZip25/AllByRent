@@ -10,20 +10,15 @@ type InstallGateScreenProps = {
 };
 
 /** iOS Share — square with upward arrow (bottom-center Safari bar). */
-function IosShareIcon({ className = "h-11 w-11" }: { className?: string }) {
+function IosShareIcon({ className = "h-12 w-12" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 44 44" fill="none" aria-hidden>
-      <rect x="11" y="16" width="22" height="20" rx="4.5" stroke="#111827" strokeWidth="2.4" />
+    <svg className={className} viewBox="0 0 48 48" fill="none" aria-hidden>
+      <rect x="12" y="17" width="24" height="22" rx="5" stroke="#111827" strokeWidth="2.6" />
+      <path d="M24 6v20" stroke="#111827" strokeWidth="2.6" strokeLinecap="round" />
       <path
-        d="M22 6v18"
+        d="M16.5 13.5 24 6l7.5 7.5"
         stroke="#111827"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
-      <path
-        d="M15.5 12.5 22 6l6.5 6.5"
-        stroke="#111827"
-        strokeWidth="2.4"
+        strokeWidth="2.6"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -32,14 +27,14 @@ function IosShareIcon({ className = "h-11 w-11" }: { className?: string }) {
 }
 
 /** iOS Share sheet “View More” — gray circle with chevron down. */
-function IosViewMoreIcon({ className = "h-11 w-11" }: { className?: string }) {
+function IosViewMoreIcon({ className = "h-12 w-12" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 44 44" fill="none" aria-hidden>
-      <circle cx="22" cy="22" r="18" fill="#3A3A3C" />
+    <svg className={className} viewBox="0 0 48 48" fill="none" aria-hidden>
+      <circle cx="24" cy="24" r="20" fill="#3A3A3C" />
       <path
-        d="M14 19.5 22 27.5 30 19.5"
-        stroke="#E5E5EA"
-        strokeWidth="2.8"
+        d="M15 21.5 24 30.5 33 21.5"
+        stroke="#F2F2F7"
+        strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -48,16 +43,11 @@ function IosViewMoreIcon({ className = "h-11 w-11" }: { className?: string }) {
 }
 
 /** iOS “Add to Home Screen” — rounded square with plus. */
-function IosAddHomeIcon({ className = "h-11 w-11" }: { className?: string }) {
+function IosAddHomeIcon({ className = "h-12 w-12" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 44 44" fill="none" aria-hidden>
-      <rect x="7" y="7" width="30" height="30" rx="7" stroke="#111827" strokeWidth="2.4" />
-      <path
-        d="M22 14v16M14 22h16"
-        stroke="#111827"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
+    <svg className={className} viewBox="0 0 48 48" fill="none" aria-hidden>
+      <rect x="8" y="8" width="32" height="32" rx="8" stroke="#111827" strokeWidth="2.6" />
+      <path d="M24 15v18M15 24h18" stroke="#111827" strokeWidth="2.6" strokeLinecap="round" />
     </svg>
   );
 }
@@ -66,7 +56,7 @@ function IosAddHomeIcon({ className = "h-11 w-11" }: { className?: string }) {
 function IosAddButtonIcon() {
   return (
     <span
-      className="inline-flex h-11 min-w-[72px] items-center justify-center rounded-full px-5 text-[17px] font-semibold text-white"
+      className="inline-flex h-12 min-w-[84px] items-center justify-center rounded-full px-6 text-[18px] font-semibold tracking-tight text-white shadow-sm"
       style={{ backgroundColor: "#007AFF" }}
       aria-hidden
     >
@@ -87,17 +77,21 @@ function StepRow({
   hint?: string;
 }) {
   return (
-    <li className="flex items-center gap-3.5">
+    <li className="flex items-center gap-3.5 rounded-2xl bg-white px-3.5 py-3.5 shadow-sm ring-1 ring-black/[0.04]">
       <span
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[15px] font-extrabold text-white"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[16px] font-extrabold text-white"
         style={{ backgroundColor: BRAND_GREEN }}
       >
         {n}
       </span>
-      <span className="flex h-14 w-14 shrink-0 items-center justify-center">{icon}</span>
+      <span className="flex h-14 w-[4.25rem] shrink-0 items-center justify-center">{icon}</span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[17px] font-bold leading-snug text-gray-900">{title}</span>
-        {hint ? <span className="mt-0.5 block text-[13px] leading-snug text-gray-500">{hint}</span> : null}
+        <span className="block text-[18px] font-bold leading-snug tracking-tight text-gray-900">
+          {title}
+        </span>
+        {hint ? (
+          <span className="mt-1 block text-[15px] leading-snug text-gray-500">{hint}</span>
+        ) : null}
       </span>
     </li>
   );
@@ -123,37 +117,66 @@ export function InstallGateScreen({
   };
 
   return (
-    <div className="screen mx-auto flex w-full max-w-[390px] flex-col bg-white">
-      <div className="flex flex-1 flex-col px-5 pb-6 pt-[max(1.25rem,env(safe-area-inset-top,0px))]">
-        <p className="text-[13px] font-semibold uppercase tracking-wide text-[#0D5C3A]/70">
+    <div
+      className="screen mx-auto flex w-full max-w-[390px] flex-col"
+      style={{
+        background:
+          "linear-gradient(180deg, #F7FBF8 0%, #EEF7F1 42%, #FFFFFF 100%)",
+      }}
+    >
+      <div className="flex flex-1 flex-col px-5 pb-8 pt-[max(1.5rem,env(safe-area-inset-top,0px))]">
+        <p
+          className="text-[12px] font-bold uppercase tracking-[0.14em]"
+          style={{ color: `${BRAND_GREEN}B3` }}
+        >
           No App Store download
         </p>
-        <h1 className="mt-2 text-[26px] font-extrabold leading-tight" style={{ color: BRAND_GREEN }}>
-          Install {APP_NAME} in seconds
+        <h1
+          className="mt-3 text-[30px] font-extrabold leading-[1.12] tracking-tight"
+          style={{ color: BRAND_GREEN }}
+        >
+          Install {APP_NAME}
+          <br />
+          in seconds
         </h1>
-        <p className="mt-2.5 text-[15px] leading-relaxed text-gray-600">
-          Simplified install — the modern method. Four quick taps, then use the app. Updates happen
-          automatically.
+        <p className="mt-3.5 text-[17px] leading-relaxed text-gray-600">
+          Simplified install — the modern method. Four quick taps, then open your icon and go.
+          Updates happen automatically.
         </p>
 
-        <div
-          className="mt-5 rounded-2xl border px-3.5 py-4"
-          style={{ borderColor: `${BRAND_GREEN}33`, backgroundColor: "#F0FDF4" }}
-        >
+        <div className="mt-6">
           {showIosSteps ? (
-            <ol className="space-y-4">
+            <ol className="space-y-3">
               <StepRow
                 n={1}
                 icon={<IosShareIcon />}
                 title="Square with arrow"
                 hint="Center of the bottom bar"
               />
-              <StepRow n={2} icon={<IosViewMoreIcon />} title="View More" />
-              <StepRow n={3} icon={<IosAddHomeIcon />} title="Add to Home Screen" />
-              <StepRow n={4} icon={<IosAddButtonIcon />} title="Add" />
+              <StepRow
+                n={2}
+                icon={<IosViewMoreIcon />}
+                title="View More"
+                hint="Scroll the Share menu, then tap it"
+              />
+              <StepRow
+                n={3}
+                icon={<IosAddHomeIcon />}
+                title="Add to Home Screen"
+                hint="Square with a plus"
+              />
+              <StepRow
+                n={4}
+                icon={<IosAddButtonIcon />}
+                title="Add"
+                hint="Blue button at the top right"
+              />
             </ol>
           ) : (
-            <div className="space-y-3 text-[15px] leading-snug text-gray-700">
+            <div
+              className="rounded-2xl border px-4 py-4 text-[16px] leading-snug text-gray-700"
+              style={{ borderColor: `${BRAND_GREEN}33`, backgroundColor: "#F0FDF4" }}
+            >
               {pwa.nativeInstallReady ? (
                 <p>
                   Tap <strong>Install</strong> below — one tap, no store download.
@@ -162,23 +185,23 @@ export function InstallGateScreen({
                 <ol className="space-y-3">
                   <li className="flex gap-3">
                     <span
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[15px] font-extrabold text-white"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[16px] font-extrabold text-white"
                       style={{ backgroundColor: BRAND_GREEN }}
                     >
                       1
                     </span>
-                    <span className="pt-1">
+                    <span className="pt-1.5 text-[16px]">
                       Open the browser menu <strong>⋮</strong>
                     </span>
                   </li>
                   <li className="flex gap-3">
                     <span
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[15px] font-extrabold text-white"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[16px] font-extrabold text-white"
                       style={{ backgroundColor: BRAND_GREEN }}
                     >
                       2
                     </span>
-                    <span className="pt-1">
+                    <span className="pt-1.5 text-[16px]">
                       Tap <strong>Install app</strong> or <strong>Add to Home screen</strong>
                     </span>
                   </li>
@@ -189,13 +212,14 @@ export function InstallGateScreen({
         </div>
 
         {showIosSteps ? (
-          <p className="mt-4 text-[14px] leading-snug text-gray-500">
-            After <strong>Add</strong>, Safari closes and the {APP_NAME} icon appears on your Home
-            Screen. Open it — updates install automatically.
+          <p className="mt-6 text-[16px] leading-relaxed text-gray-600">
+            After <strong className="text-gray-800">Add</strong>, Safari closes and the{" "}
+            <strong className="text-gray-800">{APP_NAME}</strong> icon appears on your Home Screen.
+            Open it anytime — updates install on their own.
           </p>
         ) : (
           <>
-            <p className="mt-4 text-[14px] leading-snug text-gray-500">
+            <p className="mt-5 text-[16px] leading-relaxed text-gray-600">
               Open the {APP_NAME} icon from your Home Screen. You’re set — updates install on their
               own.
             </p>
