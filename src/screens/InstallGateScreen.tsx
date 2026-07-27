@@ -61,27 +61,37 @@ export function InstallGateScreen({
                   2
                 </span>
                 <span>
-                  A list of apps appears first — <strong>scroll down</strong> past them
+                  You’ll see contacts, social apps, then Copy / Add Bookmark / Add to Reading List —
+                  keep scrolling
                 </span>
               </li>
               <li className="flex gap-3">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[13px] font-bold text-[#0D5C3A]">
                   3
                 </span>
-                <span className="min-w-0">
-                  Tap the row with a <strong>square and +</strong>
-                  <span
-                    className="ml-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md border border-[#0D5C3A]/25 bg-white align-middle text-[15px] font-bold leading-none text-[#0D5C3A]"
-                    aria-hidden
-                  >
-                    +
-                  </span>{" "}
-                  — <strong>Add to Home Screen</strong> (lower in the list)
+                <span>
+                  Tap <strong>View More</strong> (or Edit Actions) to open the full list
                 </span>
               </li>
               <li className="flex gap-3">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[13px] font-bold text-[#0D5C3A]">
                   4
+                </span>
+                <span className="min-w-0">
+                  In that list, tap the <strong>4th</strong> row —{" "}
+                  <strong>Add to Home Screen</strong> (square with{" "}
+                  <span
+                    className="inline-flex h-5 w-5 items-center justify-center rounded border border-[#0D5C3A]/25 bg-white align-middle text-[13px] font-bold leading-none text-[#0D5C3A]"
+                    aria-hidden
+                  >
+                    +
+                  </span>
+                  )
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[13px] font-bold text-[#0D5C3A]">
+                  5
                 </span>
                 <span>
                   Open the <strong>{APP_NAME}</strong> icon on your Home Screen
