@@ -18,11 +18,11 @@ function pwaPlugin() {
       registerType: 'autoUpdate',
       includeAssets: ['pwa-192.png', 'pwa-512.png'],
       manifest: {
-        name: 'Evorios',
-        short_name: 'Evorios',
-        description: 'Garage Showcase — evolve how your home shares.',
-        theme_color: '#0D5C3A',
-        background_color: '#062a1c',
+        name: 'MyFantasticTrip',
+        short_name: 'MyFantasticTrip',
+        description: 'AI-powered personal travel companion for unique journeys.',
+        theme_color: '#0a0a0c',
+        background_color: '#0a0a0c',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
@@ -40,9 +40,7 @@ function pwaPlugin() {
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        importScripts: ['push-sw.js'],
         navigateFallback: '/index.html',
-        // Activate new SW quickly; BUILD_ID mismatch still forces a shell refresh in-app.
         skipWaiting: true,
         clientsClaim: true,
         runtimeCaching: [
@@ -50,33 +48,17 @@ function pwaPlugin() {
             urlPattern: ({ request }) => request.mode === 'navigate',
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'allbyrent-html',
+              cacheName: 'mft-html',
               networkTimeoutSeconds: 5,
               expiration: { maxEntries: 4, maxAgeSeconds: 60 * 60 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
-          // Cache cheap GET requests (maps/geocode) to avoid repeated paid/slow calls.
-          {
-            urlPattern: ({ url }) =>
-              url.origin === 'https://nominatim.openstreetmap.org' ||
-              url.origin === 'https://geocoding.geo.census.gov',
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'allbyrent-api-get',
-              expiration: {
-                maxEntries: 120,
-                maxAgeSeconds: 7 * 24 * 60 * 60,
-              },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          // Cache remote images (e.g. externally-linked manuals/screenshots).
           {
             urlPattern: ({ request }) => request.destination === 'image',
             handler: 'CacheFirst',
             options: {
-              cacheName: 'allbyrent-images',
+              cacheName: 'mft-images',
               expiration: {
                 maxEntries: 200,
                 maxAgeSeconds: 30 * 24 * 60 * 60,
