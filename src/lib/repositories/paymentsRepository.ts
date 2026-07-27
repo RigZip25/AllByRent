@@ -1,6 +1,8 @@
 import type { GarageCartLine } from "../garageShopStorage";
 import { clearGarageCart, formatShopUsd } from "../garageShopStorage";
+import { getGarageBidderId } from "../garageAuctionState";
 import { pushInAppNotification } from "../inAppNotifications";
+import { createNotificationRemote } from "../notificationsStorage";
 import {
   getAuctionSignInRequiredMessage,
   getSignInRequiredMessage,
@@ -128,10 +130,30 @@ export async function completeGarageCartCheckout(input: GarageCartCheckoutInput)
       }),
     ),
   );
+
+  const itemLabel =
+    input.lines.length === 1
+      ? input.lines[0]?.title || "Sale item"
+      : `${input.lines.length} items`;
+  const buyerId = getGarageBidderId();
+
+  // Direct buy — no offer negotiation. Seller is notified; buyer arranges pickup next.
+  if (input.hostId && input.hostId !== buyerId) {
+    void createNotificationRemote({
+      recipientId: input.hostId,
+      actorId: buyerId.startsWith("bidder-") ? null : buyerId,
+      type: "general",
+      title: "Sold — arrange pickup",
+      body: `${itemLabel} paid · ${formatShopUsd(input.totalUsd)}. Buyer will message you about a pickup time.`,
+      listingId: input.lines[0]?.listingId,
+      skipLocal: true,
+    });
+  }
+
   pushInAppNotification({
     type: "general",
-    title: "Garage order paid",
-    body: `${input.lines.length} item(s) from ${input.garageName} · ${formatShopUsd(input.totalUsd)} total.`,
+    title: "Paid — arrange pickup",
+    body: `${itemLabel} from ${input.garageName}. Message the seller to pick a convenient pickup time.`,
   });
   clearGarageCart();
 }
@@ -143,9 +165,23 @@ export async function completeAuctionCheckout(input: AuctionCheckoutInput): Prom
     priceUsd: input.winningBidUsd,
     listingTitle: input.itemTitle,
   });
+
+  const buyerId = getGarageBidderId();
+  if (input.hostId && input.hostId !== buyerId) {
+    void createNotificationRemote({
+      recipientId: input.hostId,
+      actorId: buyerId.startsWith("bidder-") ? null : buyerId,
+      type: "general",
+      title: "Auction paid — arrange pickup",
+      body: `${input.itemTitle} · ${formatShopUsd(input.winningBidUsd)}. Winner will message you about pickup.`,
+      listingId: input.listingId,
+      skipLocal: true,
+    });
+  }
+
   pushInAppNotification({
     type: "general",
-    title: "Auction paid",
-    body: `${input.itemTitle} — pick up from ${input.hostName}.`,
+    title: "Paid — arrange pickup",
+    body: `${input.itemTitle} — message ${input.hostName} to pick a pickup time.`,
   });
 }
