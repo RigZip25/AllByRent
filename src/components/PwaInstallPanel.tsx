@@ -93,9 +93,9 @@ export function PwaInstallPanel({
           <div className="mt-2 flex items-start gap-2">
             <Share className="mt-0.5 h-4 w-4 shrink-0" style={{ color: BRAND_GREEN }} />
             <div>
-              Tap <strong>Share</strong>, scroll past contacts / apps / Copy / Bookmark / Reading
-              List, tap <strong>View More</strong>, then the <strong>4th</strong> item —{" "}
-              <strong>Add to Home Screen</strong> (square with +).
+              Tap <strong>Share</strong>, scroll past recent contacts → social apps → Copy /
+              Bookmark / Reading List, expand the menu and tap <strong>View More</strong>, then the{" "}
+              <strong>4th</strong> button — <strong>Add to Home Screen</strong> (square with +).
             </div>
           </div>
           <div className="mt-2 flex items-start gap-2">

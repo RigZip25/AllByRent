@@ -61,8 +61,8 @@ export function InstallGateScreen({
                   2
                 </span>
                 <span>
-                  You’ll see contacts, social apps, then Copy / Add Bookmark / Add to Reading List —
-                  keep scrolling
+                  Scroll past recent contacts, then social apps, then Copy / Add Bookmark / Add to
+                  Reading List
                 </span>
               </li>
               <li className="flex gap-3">
@@ -70,7 +70,7 @@ export function InstallGateScreen({
                   3
                 </span>
                 <span>
-                  Tap <strong>View More</strong> (or Edit Actions) to open the full list
+                  Expand the menu and tap <strong>View More</strong>
                 </span>
               </li>
               <li className="flex gap-3">
@@ -78,7 +78,7 @@ export function InstallGateScreen({
                   4
                 </span>
                 <span className="min-w-0">
-                  In that list, tap the <strong>4th</strong> row —{" "}
+                  Tap the <strong>4th</strong> button —{" "}
                   <strong>Add to Home Screen</strong> (square with{" "}
                   <span
                     className="inline-flex h-5 w-5 items-center justify-center rounded border border-[#0D5C3A]/25 bg-white align-middle text-[13px] font-bold leading-none text-[#0D5C3A]"
