@@ -674,6 +674,9 @@ function AppRoutes() {
       "publicProfile",
       "snapSale",
       "garageSaleRules",
+      "garageCart",
+      "garageShop",
+      "garageWinnerCheckout",
     ];
     const storedTarget =
       candidate && validScreens.includes(candidate)
@@ -1529,6 +1532,7 @@ function AppRoutes() {
               setNavStack([]);
               setCurrentScreen("garageShop");
             }}
+            onRequireAuth={() => showAuthGate("garageCart", "book")}
           />
         )}
 

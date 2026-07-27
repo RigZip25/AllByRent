@@ -16,6 +16,8 @@ export type GarageCartCheckoutInput = {
   subtotalUsd: number;
   platformFeeUsd: number;
   totalUsd: number;
+  /** Guest one-time purchase — email receipt only, no account required. */
+  guestEmail?: string;
 };
 
 export type AuctionCheckoutInput = {
@@ -37,6 +39,10 @@ export function canProcessGaragePayments(): boolean {
   return isPaymentsReady();
 }
 
+function isValidGuestEmail(value: string | undefined): boolean {
+  return Boolean(value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()));
+}
+
 export async function startGarageCartCheckout(
   input: GarageCartCheckoutInput,
 ): Promise<CheckoutIntentResult> {
@@ -45,7 +51,8 @@ export async function startGarageCartCheckout(
   }
 
   const token = await getAccessToken();
-  if (!token) {
+  const guestEmail = input.guestEmail?.trim().toLowerCase() ?? "";
+  if (!token && !isValidGuestEmail(guestEmail)) {
     return { ok: false, reason: getSignInRequiredMessage() };
   }
 
@@ -60,6 +67,7 @@ export async function startGarageCartCheckout(
     amountCents,
     subtotalCents: Math.round(input.subtotalUsd * 100),
     platformFeeCents: Math.round(input.platformFeeUsd * 100),
+    guestEmail: token ? undefined : guestEmail,
   });
 
   if (!result.ok) {

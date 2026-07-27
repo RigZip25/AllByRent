@@ -51,7 +51,7 @@ function YardSaleCard({
         style={{ backgroundColor: `${AMBER}22` }}
         aria-hidden
       >
-        <span className="text-[10px] font-extrabold tracking-wide" style={{ color: GREEN }}>
+        <span className="text-[11px] font-extrabold tracking-wide" style={{ color: GREEN }}>
           {STATUS_LABEL[event.openStatus]}
         </span>
         <span className="text-xl leading-none">🏷️</span>
@@ -59,12 +59,12 @@ function YardSaleCard({
       <div className="min-w-0 flex-1">
         <p className="text-[16px] font-bold text-gray-900">{event.name}</p>
         <p
-          className="mt-1 text-[13px] font-semibold"
+          className="mt-1 text-[15px] font-semibold"
           style={{ color: event.openStatus === "now" ? "#B45309" : "#6B7280" }}
         >
           {event.openLabel}
         </p>
-        <p className="mt-1 flex flex-wrap items-center gap-1 text-[13px] font-semibold text-gray-800">
+        <p className="mt-1 flex flex-wrap items-center gap-1 text-[14px] font-semibold text-gray-800">
           <span className="inline-flex items-center gap-0.5">
             <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
             {event.rating.toFixed(1)}
@@ -74,7 +74,7 @@ function YardSaleCard({
           <span className="text-gray-400">·</span>
           <span>{event.saleItemCount} for sale</span>
         </p>
-        <p className="mt-1 line-clamp-1 text-[12px] font-medium text-gray-500">{categoryLine}</p>
+        <p className="mt-1 line-clamp-1 text-[14px] font-medium text-gray-600">{categoryLine}</p>
       </div>
       <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-gray-400" aria-hidden />
     </button>
@@ -135,24 +135,24 @@ export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage }: YardSa
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#FFF9F0]">
       <div
-        className="shrink-0 border-b px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top,0px))]"
+        className="shrink-0 border-b px-4 pb-3 pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))]"
         style={{ borderColor: `${AMBER}44`, backgroundColor: "#FFF9F0" }}
       >
         <div className="mb-3 flex items-center gap-2">
           <button
             type="button"
             onClick={onBack}
-            className="flex h-10 w-10 items-center justify-center rounded-full border bg-white active:bg-gray-50"
+            className="flex h-11 w-11 items-center justify-center rounded-full border bg-white active:bg-gray-50"
             style={{ borderColor: BORDER }}
             aria-label="Back to garage sales"
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-bold" style={{ color: GREEN }}>
+            <h1 className="text-xl font-bold sm:text-2xl" style={{ color: GREEN }}>
               Yard sales & open garages
             </h1>
-            <p className="text-[13px] text-gray-500">Saturday-drive mode — who's open near you</p>
+            <p className="text-[15px] text-gray-600">Saturday-drive mode — who&apos;s open near you</p>
           </div>
         </div>
 

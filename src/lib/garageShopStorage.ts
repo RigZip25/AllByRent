@@ -158,9 +158,10 @@ export function clearGarageCart(): void {
 
 export function getCartTotals() {
   const lines = getCartLines();
-  const subtotalUsd = lines.reduce((sum, line) => sum + line.priceUsd, 0);
+  const subtotalUsd = Math.round(lines.reduce((sum, line) => sum + line.priceUsd, 0) * 100) / 100;
+  // Seller absorbs platform fee via Connect; buyer pays listed item prices only.
   const platformFeeUsd = Math.round(subtotalUsd * PLATFORM_FEE_RATE * 100) / 100;
-  const totalUsd = Math.round((subtotalUsd + platformFeeUsd) * 100) / 100;
+  const totalUsd = subtotalUsd;
   return { subtotalUsd, platformFeeUsd, totalUsd, lineCount: lines.length };
 }
 
