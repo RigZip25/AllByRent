@@ -328,8 +328,8 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Getting started",
     question: "The app asked me to update — what should I do?",
     answer:
-      "Open Notifications (bell on Home) and tap Update when offered. If the screen feels stuck after update, close the tab and reopen the app.",
-    keywords: ["update", "pwa", "refresh", "stuck"],
+      "Evorios downloads updates in the background and installs them overnight around 2 AM on your phone (or the next time you open the app after that). You can also open Notifications (bell) and tap Update if you want it sooner. If the screen feels stuck after update, close and reopen the app.",
+    keywords: ["update", "pwa", "refresh", "stuck", "overnight"],
   },
   {
     id: "offline",
