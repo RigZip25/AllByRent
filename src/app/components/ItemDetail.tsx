@@ -26,7 +26,9 @@ import {
   getActiveRentLocationLabel,
   getPublishedListingById,
 } from "../../lib/listingStorage";
-import { getListingDisplayTitle } from "../../lib/listingQr";
+import { getListingDisplayTitle, listingRequiresQrSticker } from "../../lib/listingQr";
+import { createNotificationRemote } from "../../lib/notificationsStorage";
+import { pushInAppNotification } from "../../lib/inAppNotifications";
 import {
   deliverySummaryForListing,
   listingOffersDelivery,
@@ -171,6 +173,10 @@ export function ItemDetail({
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
   const [messageHint, setMessageHint] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [contactNote, setContactNote] = useState("");
+  const [contactBusy, setContactBusy] = useState(false);
+  const [contactSent, setContactSent] = useState(false);
   const [listing, setListing] = useState<ListingDraft | null>(() => getPublishedListingById(itemId));
   const [loading, setLoading] = useState(() => !getPublishedListingById(itemId));
 
@@ -242,10 +248,52 @@ export function ItemDetail({
     void toggleFavoriteListingForUser(auth.userId, itemId).then(setFavorited);
   };
 
+  const needsQr = listing ? listingRequiresQrSticker(listing.modes) : false;
+  const isSellOnly = Boolean(
+    listing?.modes.sell && !listing.modes.rent && !listing.modes.rentToOwn,
+  );
+
   const handleMessageHost = () => {
-    setMessageHint(true);
     if (canRent) {
+      setMessageHint(true);
       onBook();
+      return;
+    }
+    if (listing?.modes.sell) {
+      setContactOpen(true);
+      setContactSent(false);
+    }
+  };
+
+  const handleSendContact = async () => {
+    if (!listing?.hostId) return;
+    if (!auth.userId) {
+      setMessageHint(true);
+      setBuyError("Sign in to message the seller.");
+      return;
+    }
+    const note = contactNote.trim() || `Hi — I'm interested in "${title}".`;
+    setContactBusy(true);
+    try {
+      await createNotificationRemote({
+        recipientId: listing.hostId,
+        actorId: auth.userId,
+        type: "general",
+        title: `Message about ${title}`,
+        body: note,
+        listingId: listing.id,
+        skipLocal: true,
+      });
+      pushInAppNotification({
+        type: "general",
+        title: "Message sent",
+        body: "The seller gets a notification (and push if they enabled it).",
+      });
+      setContactSent(true);
+      setContactNote("");
+      setMessageHint(true);
+    } finally {
+      setContactBusy(false);
     }
   };
 
@@ -258,6 +306,10 @@ export function ItemDetail({
     const result = buyNowGarageItem({ listing, offer: shopOffer });
     if (!result.ok) {
       setBuyError(result.reason);
+      if (/already in cart/i.test(result.reason)) {
+        onOpenGarageCart?.();
+        return;
+      }
       if (/auction/i.test(result.reason)) {
         onOpenGarageShop?.(listing.hostId ?? "", listing.id);
       }
@@ -387,13 +439,7 @@ export function ItemDetail({
 
           {listing.paused ? (
             <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-              Paused — not accepting new bookings right now.
-            </p>
-          ) : null}
-
-          {buyError ? (
-            <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-              {buyError}
+              Paused — not available right now.
             </p>
           ) : null}
 
@@ -407,25 +453,39 @@ export function ItemDetail({
             <p className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-primary">
               {isFreeGiveaway
                 ? "Open Share to send this link and arrange a free pickup with the owner."
-                : "In-app chat with the owner opens once your booking is confirmed."}
+                : isSellOnly || listing.modes.sell
+                  ? contactSent
+                    ? "Message sent to the seller."
+                    : auth.userId
+                      ? "Use Message to ask the seller before you buy."
+                      : "Sign in to message the seller."
+                  : "In-app chat with the owner opens once your booking is confirmed."}
             </p>
           ) : null}
 
-          <div className="bg-card rounded-xl border border-primary/20 p-4">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center">
-                  <QrCode className="w-10 h-10 text-foreground" />
+          {buyError ? (
+            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+              {buyError}
+            </p>
+          ) : null}
+
+          {needsQr ? (
+            <div className="bg-card rounded-xl border border-primary/20 p-4">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center">
+                    <QrCode className="w-10 h-10 text-foreground" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Unique QR Code</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Scan to check in, track rental status, and verify the item at pickup.
+                  </p>
                 </div>
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold mb-1">Unique QR Code</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Scan to check in, track rental status, and verify the item at pickup.
-                </p>
-              </div>
             </div>
-          </div>
+          ) : null}
 
           <div className="bg-card rounded-xl border border-border p-4">
             <div className="flex items-center gap-3">
@@ -450,13 +510,13 @@ export function ItemDetail({
                   </p>
                 </div>
               </button>
-              {canRent ? (
+              {canRent || listing.modes.sell ? (
                 <button
                   type="button"
                   onClick={handleMessageHost}
                   className="flex-shrink-0 p-2 hover:bg-muted rounded-full transition-colors"
-                  aria-label="Start booking to contact host"
-                  title="Messaging opens with a booking"
+                  aria-label={canRent ? "Start booking to contact host" : "Message seller"}
+                  title={canRent ? "Messaging opens with a booking" : "Message the seller"}
                 >
                   <MessageCircle className="w-5 h-5 text-primary" />
                 </button>
@@ -468,7 +528,9 @@ export function ItemDetail({
             <h3 className="font-semibold mb-3">About this item</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {listing.description?.trim() ||
-                "Contact the owner with any questions before booking."}
+                (listing.modes.sell && !listing.modes.rent
+                  ? "Questions? Tap Message to contact the seller before you buy."
+                  : "Contact the owner with any questions before booking.")}
             </p>
           </div>
 
@@ -539,6 +601,51 @@ export function ItemDetail({
 
       {availabilityOpen ? (
         <AvailabilityPanel listing={listing} onClose={() => setAvailabilityOpen(false)} />
+      ) : null}
+
+      {contactOpen ? (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4">
+          <div className="w-full max-w-[390px] rounded-2xl border border-border bg-card p-4 shadow-xl">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">Message seller</h2>
+              <button
+                type="button"
+                onClick={() => setContactOpen(false)}
+                className="rounded-full p-2 hover:bg-muted"
+                aria-label="Close"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            {!auth.userId ? (
+              <p className="text-sm text-muted-foreground">
+                Sign in first so the seller can see who messaged them.
+              </p>
+            ) : contactSent ? (
+              <p className="text-sm text-primary">
+                Sent. The seller gets an in-app notification and push if they enabled it.
+              </p>
+            ) : (
+              <>
+                <textarea
+                  value={contactNote}
+                  onChange={(e) => setContactNote(e.target.value)}
+                  rows={4}
+                  placeholder={`Hi — I'm interested in "${title}". Is it still available?`}
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                <button
+                  type="button"
+                  disabled={contactBusy}
+                  onClick={() => void handleSendContact()}
+                  className="mt-3 w-full rounded-xl bg-primary py-3 font-semibold text-white disabled:opacity-60"
+                >
+                  {contactBusy ? "Sending…" : "Send message"}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       ) : null}
 
       {shareOpen ? (

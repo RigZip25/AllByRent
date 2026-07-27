@@ -6,6 +6,7 @@ import {
   setGarageSaleOfferPrefs,
 } from "./garageSaleOfferStorage";
 import { addToGarageCart, cartLineFromListing, formatShopUsd } from "./garageShopStorage";
+import { createNotificationRemote } from "./notificationsStorage";
 import { pushInAppNotification } from "./inAppNotifications";
 import type { ListingDraft } from "../screens/listing/types";
 
@@ -230,14 +231,20 @@ export function submitNeighborOffer(input: {
   } else {
     pushInAppNotification({
       type: "general",
-      title: "New offer on your shelf",
-      body: `${title} — ${formatShopUsd(input.amountUsd)} offered. Accept or counter.`,
-    });
-    pushInAppNotification({
-      type: "general",
       title: "Offer sent",
       body: `${title} — waiting for host on ${formatShopUsd(input.amountUsd)}.`,
     });
+    if (hostId && hostId !== buyerId) {
+      void createNotificationRemote({
+        recipientId: hostId,
+        actorId: buyerId,
+        type: "general",
+        title: "New offer on your shelf",
+        body: `${title} — ${formatShopUsd(input.amountUsd)} offered. Accept or counter.`,
+        listingId: input.listing.id,
+        skipLocal: true,
+      });
+    }
   }
 
   return { ok: true, offer };

@@ -3,6 +3,7 @@ import { Tag, X } from "lucide-react";
 import { ONBOARDING } from "../../lib/brand";
 import { submitNeighborOffer } from "../../lib/garageOfferStorage";
 import { formatShopUsd } from "../../lib/garageShopStorage";
+import { useAuth } from "../../hooks/AuthProvider";
 import type { ListingDraft } from "../../screens/listing/types";
 import type { ShopOffer } from "../../lib/garageShopStorage";
 
@@ -24,6 +25,7 @@ export function GarageMakeOfferSheet({
   onClose,
   onSubmitted,
 }: GarageMakeOfferSheetProps) {
+  const auth = useAuth();
   const suggested = useMemo(
     () => Math.max(1, Math.round(offer.buyNowUsd * 0.75 * 100) / 100),
     [offer.buyNowUsd],
@@ -32,6 +34,10 @@ export function GarageMakeOfferSheet({
   const [error, setError] = useState<string | null>(null);
 
   const submit = () => {
+    if (!auth.userId) {
+      setError("Sign in so the seller gets your offer (push + inbox).");
+      return;
+    }
     const value = Number.parseFloat(amount);
     if (!Number.isFinite(value)) {
       setError("Enter a valid amount");

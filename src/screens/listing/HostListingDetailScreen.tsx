@@ -21,7 +21,7 @@ import { resolveHostAccountId } from "../../lib/hostIdentity";
 import type { ListingDraft } from "./types";
 import { QR_PDF_FILENAMES } from "../../lib/brand";
 import { generateQRStickerPdf, presentGeneratedPdf } from "../../lib/generateQRSticker";
-import { getListingDisplayTitle, getListingPublicUrl, listingDraftToStickerRow } from "../../lib/listingQr";
+import { getListingDisplayTitle, getListingPublicUrl, listingDraftToStickerRow, listingRequiresQrSticker } from "../../lib/listingQr";
 import {
   deliverySummaryForListing,
   listingOffersDelivery,
@@ -410,6 +410,7 @@ export function HostListingDetailScreen({
       </header>
 
       <div className="screen-scroll flex-1 min-h-0 px-4 pb-6 pt-4">
+        {listingRequiresQrSticker(listing.modes) ? (
         <section
           className="sticky top-0 z-10 mb-4 rounded-3xl border bg-white p-4 shadow-sm"
           style={{ borderColor: BORDER }}
@@ -472,6 +473,7 @@ export function HostListingDetailScreen({
 
           {pdfError ? <p className="mt-2 text-center text-xs text-red-600">{pdfError}</p> : null}
         </section>
+        ) : null}
 
         <section className="rounded-3xl border bg-white p-5" style={{ borderColor: BORDER }}>
           <h2 className="text-[13px] font-bold uppercase tracking-wide text-gray-400">Details</h2>
