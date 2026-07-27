@@ -27,6 +27,14 @@ import {
   markPwaUpdateSuccessPending,
   requestSimulateUpdate,
 } from "../lib/pwaUpdateStorage";
+import {
+  clearPwaUpdatePending,
+  isQuietUpdateHour,
+  markPwaUpdatePending,
+  msUntilNextQuietUpdate,
+  readPwaUpdatePendingAt,
+  shouldAutoApplyDeferredUpdate,
+} from "../lib/pwaQuietUpdate";
 
 type UpdateSWFn = (reloadPage?: boolean) => Promise<void>;
 
@@ -60,13 +68,76 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
   const [updateJustCompleted, setUpdateJustCompleted] = useState(false);
   const [checkStatus, setCheckStatus] = useState<UpdateCheckStatus | null>(null);
   const updateSWRef = useRef<UpdateSWFn | null>(null);
+  const applyingRef = useRef(false);
+  const quietTimerRef = useRef(0);
+  const updateAvailableRef = useRef(false);
   const buildStamp = formatBuildStamp();
+
+  useEffect(() => {
+    updateAvailableRef.current = updateAvailable;
+  }, [updateAvailable]);
+
+  const applyUpdate = useCallback(async () => {
+    if (applyingRef.current) return;
+    applyingRef.current = true;
+    clearSimulateUpdateRequest();
+    clearPwaUpdatePending();
+    markPwaUpdateSuccessPending();
+    setUpdateAvailable(false);
+
+    try {
+      const pending = await hasPendingAppUpdate();
+      if (pending && updateSWRef.current) {
+        await updateSWRef.current(true);
+        return;
+      }
+      window.location.reload();
+    } finally {
+      applyingRef.current = false;
+    }
+  }, []);
+
+  const applyUpdateRef = useRef(applyUpdate);
+  useEffect(() => {
+    applyUpdateRef.current = applyUpdate;
+  }, [applyUpdate]);
+
+  const tryAutoApply = useCallback(() => {
+    if (!shouldAutoApplyDeferredUpdate()) return;
+    void (async () => {
+      const pendingSw = await hasPendingAppUpdate();
+      const pendingFlag = readPwaUpdatePendingAt() != null || isSimulateUpdateRequested();
+      if (!pendingSw && !pendingFlag && !updateAvailableRef.current) return;
+      await applyUpdateRef.current();
+    })();
+  }, []);
+
+  const scheduleQuietApply = useCallback(() => {
+    window.clearTimeout(quietTimerRef.current);
+    const delay = msUntilNextQuietUpdate();
+    const capped = Math.min(delay, 24 * 60 * 60 * 1000);
+    quietTimerRef.current = window.setTimeout(() => {
+      if (isQuietUpdateHour()) {
+        tryAutoApply();
+      } else {
+        scheduleQuietApply();
+      }
+    }, Math.max(capped, 1000));
+  }, [tryAutoApply]);
 
   const markUpdateAvailable = useCallback(() => {
     setUpdateAvailable(true);
-  }, []);
-
-  // Do not auto-reload the shell — user confirms via Notifications (avoids "frozen" taps mid-update).
+    updateAvailableRef.current = true;
+    if (readPwaUpdatePendingAt() == null) {
+      markPwaUpdatePending();
+    }
+    // Download anytime; apply only in quiet hours or on the next launch after 2 AM local.
+    if (shouldAutoApplyDeferredUpdate()) {
+      void applyUpdateRef.current();
+      return;
+    }
+    scheduleQuietApply();
+  }, [scheduleQuietApply]);
 
   useEffect(() => {
     if (hasBuildIdChanged()) {
@@ -78,16 +149,18 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
 
     if (consumePwaUpdateSuccess()) {
       setUpdateJustCompleted(true);
+      clearPwaUpdatePending();
     }
 
     if (readSimulateFromUrl() || isSimulateUpdateRequested()) {
-      setUpdateAvailable(true);
+      markUpdateAvailable();
     }
 
     const params = new URLSearchParams(window.location.search);
     if (params.get("simulateUpdateSuccess") === "1") {
       setUpdateJustCompleted(true);
       setUpdateAvailable(false);
+      clearPwaUpdatePending();
       params.delete("simulateUpdateSuccess");
       const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}${window.location.hash}`;
       window.history.replaceState({}, "", next);
@@ -116,12 +189,29 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
     void probeServiceWorkerUpdate().then((result) => {
       if (result === "available") {
         markUpdateAvailable();
+      } else if (readPwaUpdatePendingAt() != null) {
+        tryAutoApply();
       }
     });
 
     const stopWatch = watchServiceWorkerUpdates(() => {
       markUpdateAvailable();
     });
+
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      void probeServiceWorkerUpdate().then((result) => {
+        if (result === "available") markUpdateAvailable();
+        else tryAutoApply();
+      });
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    cleanups.push(() => document.removeEventListener("visibilitychange", onVisible));
+
+    if (readPwaUpdatePendingAt() != null) {
+      scheduleQuietApply();
+      tryAutoApply();
+    }
 
     const win = window as Window & {
       __simulatePwaUpdate?: () => void;
@@ -130,12 +220,13 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
     };
     win.__simulatePwaUpdate = () => {
       requestSimulateUpdate();
-      setUpdateAvailable(true);
+      markUpdateAvailable();
     };
     win.__simulatePwaUpdateSuccess = () => {
       setUpdateJustCompleted(true);
       setUpdateAvailable(false);
       clearSimulateUpdateRequest();
+      clearPwaUpdatePending();
     };
     win.__checkPwaUpdate = async () => {
       setCheckStatus("checking");
@@ -147,9 +238,10 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
 
     return () => {
       stopWatch();
+      window.clearTimeout(quietTimerRef.current);
       cleanups.forEach((fn) => fn());
     };
-  }, [markUpdateAvailable]);
+  }, [markUpdateAvailable, scheduleQuietApply, tryAutoApply]);
 
   const checkForUpdates = useCallback(async (): Promise<UpdateCheckStatus> => {
     setCheckStatus("checking");
@@ -163,22 +255,8 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
 
   const simulateUpdateNotification = useCallback(() => {
     requestSimulateUpdate();
-    setUpdateAvailable(true);
-  }, []);
-
-  const applyUpdate = useCallback(async () => {
-    clearSimulateUpdateRequest();
-    markPwaUpdateSuccessPending();
-    setUpdateAvailable(false);
-
-    const pending = await hasPendingAppUpdate();
-    if (pending && updateSWRef.current) {
-      await updateSWRef.current(true);
-      return;
-    }
-
-    window.location.reload();
-  }, []);
+    markUpdateAvailable();
+  }, [markUpdateAvailable]);
 
   const dismissUpdateSuccess = useCallback(() => {
     setUpdateJustCompleted(false);

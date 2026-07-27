@@ -151,7 +151,7 @@ export function InstallGateScreen({
         </h1>
         <p className="mt-3.5 text-[17px] leading-relaxed text-gray-600">
           Simplified install — the modern method. Four quick taps, then open your icon and go.
-          Updates happen automatically.
+          Updates download in the background and install overnight (~2 AM on your phone).
         </p>
 
         <div className="mt-6">
@@ -225,13 +225,14 @@ export function InstallGateScreen({
           <p className="mt-6 text-[16px] leading-relaxed text-gray-600">
             After <strong className="text-gray-800">Add</strong>, Safari closes and the{" "}
             <strong className="text-gray-800">{APP_NAME}</strong> icon appears on your Home Screen.
-            Open it anytime — updates install on their own.
+            Open it anytime — updates download quietly and install overnight (~2 AM local), not
+            while you&apos;re mid-tap.
           </p>
         ) : (
           <>
             <p className="mt-5 text-[16px] leading-relaxed text-gray-600">
-              Open the {APP_NAME} icon from your Home Screen. You’re set — updates install on their
-              own.
+              Open the {APP_NAME} icon from your Home Screen. Updates download quietly and install
+              overnight (~2 AM local), not while you&apos;re mid-tap.
             </p>
 
             <div className="mt-auto flex flex-col gap-3 pt-8 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]">
