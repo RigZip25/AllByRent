@@ -44,7 +44,7 @@ export function AppBrandHeader({
 }: AppBrandHeaderProps) {
   return (
     <header
-      className={`app-brand-header shrink-0 bg-white px-4 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top,0px))] ${bordered ? "border-b" : ""} ${className}`}
+      className={`app-brand-header shrink-0 bg-white px-4 pb-2.5 pt-[max(1.15rem,calc(env(safe-area-inset-top,0px)+0.65rem))] ${bordered ? "border-b" : ""} ${className}`}
       style={bordered ? { borderColor: `${BRAND_GREEN}33` } : undefined}
     >
       <div className="relative flex min-h-[1.75rem] items-center justify-center">

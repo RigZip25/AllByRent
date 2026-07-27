@@ -24,7 +24,7 @@ export function BrowseHubScreen({ onChoose, onEditLocation }: BrowseHubScreenPro
 
   return (
     <div className="screen onboarding-step mx-auto w-full max-w-[390px] bg-white">
-      <div className="browse-hub-header shrink-0 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top,0px))]">
+      <div className="browse-hub-header shrink-0 px-4 pb-2 pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))]">
         <button
           type="button"
           onClick={onEditLocation}
@@ -39,7 +39,7 @@ export function BrowseHubScreen({ onChoose, onEditLocation }: BrowseHubScreenPro
             strokeWidth={1.5}
           />
           <span
-            className="min-w-0 flex-1 break-words text-[15px] font-semibold leading-snug [overflow-wrap:anywhere]"
+            className="min-w-0 flex-1 break-words text-base font-semibold leading-snug [overflow-wrap:anywhere]"
             style={{ color: needsLocation ? "#B45309" : GREEN }}
           >
             {clusterLabel}
@@ -74,7 +74,7 @@ export function BrowseHubScreen({ onChoose, onEditLocation }: BrowseHubScreenPro
         />
       </div>
 
-      <p className="browse-hub-footer shrink-0 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] text-center text-xs text-gray-400">
+      <p className="browse-hub-footer shrink-0 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] text-center text-sm text-gray-500">
         {copy.footer}
       </p>
     </div>

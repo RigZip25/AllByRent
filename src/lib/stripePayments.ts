@@ -269,23 +269,34 @@ export async function createGarageCartCheckoutIntent(params: {
   amountCents: number;
   subtotalCents: number;
   platformFeeCents: number;
+  guestEmail?: string;
 }): Promise<GarageCheckoutIntentResult> {
   if (!isStripePaymentsEnabled()) {
     return { ok: false, reason: "Stripe not configured" };
   }
 
   const token = await getAccessToken();
-  if (!token) {
+  const guestEmail = params.guestEmail?.trim().toLowerCase() ?? "";
+  if (!token && !guestEmail) {
     return { ok: false, reason: "Sign in required" };
   }
 
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
   const res = await fetch("/api/stripe/garage_checkout", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(params),
+    headers,
+    body: JSON.stringify({
+      hostId: params.hostId,
+      lines: params.lines,
+      amountCents: params.amountCents,
+      subtotalCents: params.subtotalCents,
+      platformFeeCents: params.platformFeeCents,
+      guestEmail: guestEmail || undefined,
+    }),
   });
 
   const payload = (await res.json()) as GarageCheckoutIntentResult & { error?: string };
