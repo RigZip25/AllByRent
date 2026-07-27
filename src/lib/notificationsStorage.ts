@@ -95,14 +95,18 @@ export async function createNotificationRemote(params: {
   body: string;
   rentalId?: string;
   listingId?: string;
+  /** When true, skip local in-app toast (use for notifying another user). */
+  skipLocal?: boolean;
 }): Promise<void> {
-  pushInAppNotification({
-    type: params.type === "booking_request" ? "booking_request" : "general",
-    title: params.title,
-    body: params.body,
-    rentalId: params.rentalId,
-    listingId: params.listingId,
-  });
+  if (!params.skipLocal) {
+    pushInAppNotification({
+      type: params.type === "booking_request" ? "booking_request" : "general",
+      title: params.title,
+      body: params.body,
+      rentalId: params.rentalId,
+      listingId: params.listingId,
+    });
+  }
 
   if (!isSupabaseConfigured()) return;
   const supabase = getSupabaseClient();
@@ -121,7 +125,7 @@ export async function createNotificationRemote(params: {
   // Table is created in a later migration; insertion is best-effort.
   const { error } = await supabase.from("notifications").insert(row);
   if (error) {
-    // ignore; local notification already pushed
+    // ignore; local notification already pushed when applicable
   } else {
     void trySendWebPush({
       recipientId: params.recipientId,

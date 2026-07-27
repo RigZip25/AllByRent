@@ -4,6 +4,43 @@ import { pushInAppNotification } from "./inAppNotifications";
 
 const LOT_STATE_KEY = "evorios_garage_lot_state";
 const BIDDER_ID_KEY = "evorios_garage_bidder_id";
+const AUTH_BIDDER_ID_KEY = "evorios_garage_auth_bidder_id";
+
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+}
+
+/** Prefer signed-in user id so offers sync + push reach the host. */
+export function bindGarageBidderToUser(userId: string | null | undefined): void {
+  try {
+    if (userId && isUuid(userId)) {
+      localStorage.setItem(AUTH_BIDDER_ID_KEY, userId);
+      return;
+    }
+    localStorage.removeItem(AUTH_BIDDER_ID_KEY);
+  } catch {
+    /* private mode */
+  }
+}
+
+export function getGarageBidderId(): string {
+  try {
+    const authId = localStorage.getItem(AUTH_BIDDER_ID_KEY);
+    if (authId && isUuid(authId)) return authId;
+    const existing = localStorage.getItem(BIDDER_ID_KEY);
+    if (existing) return existing;
+    const id =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? `bidder-${crypto.randomUUID().slice(0, 8)}`
+        : `bidder-${Date.now().toString(36)}`;
+    localStorage.setItem(BIDDER_ID_KEY, id);
+    return id;
+  } catch {
+    return "bidder-anonymous";
+  }
+}
 
 /** Minutes winner has to pay after auction ends or after becoming runner-up. */
 export const GARAGE_AUCTION_PAY_MINUTES = 30;
@@ -51,21 +88,6 @@ function writeLotStatesInternal(map: LotStateMap): void {
 
 function payByFromNow(): string {
   return new Date(Date.now() + GARAGE_AUCTION_PAY_MINUTES * 60_000).toISOString();
-}
-
-export function getGarageBidderId(): string {
-  try {
-    const existing = localStorage.getItem(BIDDER_ID_KEY);
-    if (existing) return existing;
-    const id =
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? `bidder-${crypto.randomUUID().slice(0, 8)}`
-        : `bidder-${Date.now().toString(36)}`;
-    localStorage.setItem(BIDDER_ID_KEY, id);
-    return id;
-  } catch {
-    return "bidder-anonymous";
-  }
 }
 
 export function getLotState(listingId: string): GarageLotState {

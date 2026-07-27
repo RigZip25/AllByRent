@@ -5,6 +5,7 @@ import { resolveSessionUserEmail } from "../lib/authEmail";
 import { AUTH_CALLBACK_RESUME_KEY, completeAuthCallbackFromUrl, onAuthStateChange } from "../lib/auth";
 import { syncUserProfileFromAuth } from "../lib/userProfileStorage";
 import { fetchRemoteProfile } from "../lib/supabaseProfile";
+import { bindGarageBidderToUser } from "../lib/garageAuctionState";
 
 type AuthContextValue = {
   configured: boolean;
@@ -47,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then(({ data }) => {
         if (!mounted) return;
         setSession(data.session);
+        bindGarageBidderToUser(data.session?.user?.id ?? null);
       })
       .finally(() => {
         if (!mounted) return;
@@ -55,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const sub = onAuthStateChange((_event, next) => {
       setSession(next);
+      bindGarageBidderToUser(next?.user?.id ?? null);
     });
 
     const onStorage = (event: StorageEvent) => {

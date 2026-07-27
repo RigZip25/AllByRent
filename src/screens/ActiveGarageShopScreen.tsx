@@ -247,12 +247,18 @@ export function ActiveGarageShopScreen({
     if (preview) return;
     const result = buyNowGarageItem({ listing, offer });
     if (!result.ok) {
+      if (/already in cart/i.test(result.reason)) {
+        showToast("Already in your cart");
+        onOpenCart();
+        return;
+      }
       showToast(result.reason);
       return;
     }
     refreshCartCount();
     loadShelf();
-    showToast("Reserved — in your cart");
+    showToast("Added to cart — checkout next");
+    onOpenCart();
   };
 
   const handleBidPlaced = () => {
@@ -267,7 +273,7 @@ export function ActiveGarageShopScreen({
 
   const handleOfferSubmitted = () => {
     loadShelf();
-    showToast("Offer sent — host will push back");
+    showToast("Offer sent — seller notified");
   };
 
   return (
