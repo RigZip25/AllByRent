@@ -19,9 +19,11 @@ type GarageMyOfferSheetProps = {
   offer: ShopOffer;
   onClose: () => void;
   onUpdated: () => void;
+  /** After accepting a counter — open cart to pay. */
+  onOpenCart?: () => void;
 };
 
-export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated }: GarageMyOfferSheetProps) {
+export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated, onOpenCart }: GarageMyOfferSheetProps) {
   const active = useMemo(() => getMyActiveOffer(listing.id), [listing.id]);
   const [counterAmount, setCounterAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +39,7 @@ export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated }: Garag
     }
     onUpdated();
     onClose();
+    onOpenCart?.();
   };
 
   const sendCounter = () => {
@@ -68,9 +71,9 @@ export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated }: Garag
       >
         <div className="mb-3 flex items-start justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wide text-blue-600">{copy.myOfferTitle}</p>
+            <p className="text-[13px] font-bold uppercase tracking-wide text-blue-600">{copy.myOfferTitle}</p>
             <h2 className="text-lg font-bold text-gray-900">{listing.title || "Sale item"}</h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-1 text-[15px] text-gray-600">
               {active.status === "pending_host"
                 ? `${copy.waitingHost} ${formatShopUsd(active.amountUsd)}`
                 : `${copy.hostWants} ${formatShopUsd(active.amountUsd)}`}

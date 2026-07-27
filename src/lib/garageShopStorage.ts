@@ -158,9 +158,10 @@ export function clearGarageCart(): void {
 
 export function getCartTotals() {
   const lines = getCartLines();
-  const subtotalUsd = lines.reduce((sum, line) => sum + line.priceUsd, 0);
+  const subtotalUsd = Math.round(lines.reduce((sum, line) => sum + line.priceUsd, 0) * 100) / 100;
+  // Seller absorbs platform fee via Connect; buyer pays listed item prices only.
   const platformFeeUsd = Math.round(subtotalUsd * PLATFORM_FEE_RATE * 100) / 100;
-  const totalUsd = Math.round((subtotalUsd + platformFeeUsd) * 100) / 100;
+  const totalUsd = subtotalUsd;
   return { subtotalUsd, platformFeeUsd, totalUsd, lineCount: lines.length };
 }
 
@@ -256,6 +257,18 @@ export function buyNowGarageItem(input: {
   }
   if (input.offer.negotiationPhase === "multi_auction") {
     return { ok: false, reason: "Buy now paused — auction among interested neighbors" };
+  }
+  // Soft-lock when an accepted offer is waiting for payment.
+  try {
+    const raw = localStorage.getItem("evorios_garage_neighbor_offers");
+    if (raw) {
+      const offers = JSON.parse(raw) as Array<{ listingId?: string; status?: string }>;
+      if (offers.some((o) => o.listingId === input.listing.id && o.status === "accepted")) {
+        return { ok: false, reason: "Deal pending payment — another neighbor’s offer was accepted" };
+      }
+    }
+  } catch {
+    /* private mode */
   }
   // Do not mark sold until Stripe payment succeeds (webhook / checkout complete).
   const result = addToGarageCart(cartLineFromListing(input.listing, input.offer.buyNowUsd));

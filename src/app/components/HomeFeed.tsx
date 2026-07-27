@@ -189,14 +189,14 @@ export function HomeFeed({
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <div
         className="shrink-0 bg-[#F0F4F2] px-4 pb-2"
-        style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top, 0px))" }}
+        style={{ paddingTop: "max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))" }}
       >
         <div className="mb-2.5 flex items-start gap-2">
           {onBackToHub ? (
             <button
               type="button"
               onClick={onBackToHub}
-              className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
+              className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
               style={{ borderColor: BORDER }}
               aria-label="Back to browse choices"
             >
@@ -219,7 +219,7 @@ export function HomeFeed({
                 strokeWidth={1.5}
               />
               <span
-                className="min-w-0 flex-1 text-[15px] font-bold leading-snug [overflow-wrap:anywhere]"
+                className="min-w-0 flex-1 text-base font-bold leading-snug [overflow-wrap:anywhere]"
                 style={{ color: needsLocation ? "#B45309" : GREEN_DARK }}
               >
                 {clusterLabel}

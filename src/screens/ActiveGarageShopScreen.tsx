@@ -6,7 +6,7 @@ import { GarageMyOfferSheet } from "../components/garage-shop/GarageMyOfferSheet
 import { GarageShelfEditSheet } from "../components/garage-shop/GarageShelfEditSheet";
 import { GarageShopItemCard } from "../components/garage-shop/GarageShopItemCard";
 import { GarageSharePanel } from "../components/share/GarageSharePanel";
-import { getHostPendingOffers } from "../lib/garageOfferStorage";
+import { getHostPendingOffers, ensureAcceptedOffersInCart } from "../lib/garageOfferStorage";
 import { garageDisplayName, garageNameFromDisplayName } from "../lib/garageDisplay";
 import { fetchRemoteProfile } from "../lib/supabaseProfile";
 import { loadUserProfile } from "../lib/userProfileStorage";
@@ -52,6 +52,8 @@ type ActiveGarageShopScreenProps = {
   onOpenCart: () => void;
   onOpenWinnerCheckout: (listingId: string) => void;
   onOpenHostOffers?: () => void;
+  /** Own empty shelf → snap sale flow */
+  onStockShelf?: () => void;
 };
 
 export function ActiveGarageShopScreen({
@@ -63,6 +65,7 @@ export function ActiveGarageShopScreen({
   onOpenCart,
   onOpenWinnerCheckout,
   onOpenHostOffers,
+  onStockShelf,
 }: ActiveGarageShopScreenProps) {
   const auth = useAuth();
   const ownHostId = resolveHostAccountId(auth.userId);
@@ -154,6 +157,10 @@ export function ActiveGarageShopScreen({
       resolveEndedAuctions(listingIds);
       resolveExpiredWinnerCheckouts(listingIds);
       const shelf = candidates.filter((listing) => getShopOffer(listing));
+      if (!preview) {
+        const added = ensureAcceptedOffersInCart(shelf);
+        if (added) refreshCartCount();
+      }
       setListings(shelf);
       refreshPendingWins();
       refreshOfferCount();
@@ -180,6 +187,8 @@ export function ActiveGarageShopScreen({
     hostId,
     isOwnGarage,
     loadOwnShelfCandidates,
+    preview,
+    refreshCartCount,
     refreshPendingWins,
     refreshOfferCount,
   ]);
@@ -279,14 +288,14 @@ export function ActiveGarageShopScreen({
   return (
     <div className="screen garage-shop-screen flex flex-col overflow-hidden bg-[#FFF9F0]">
       <header
-        className="shrink-0 border-b px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top,0px))]"
+        className="shrink-0 border-b px-4 pb-3 pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))]"
         style={{ borderColor: `${AMBER}44`, backgroundColor: "#fff" }}
       >
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={onBack}
-            className="flex h-10 w-10 items-center justify-center rounded-full border bg-white active:bg-gray-50"
+            className="flex h-11 w-11 items-center justify-center rounded-full border bg-white active:bg-gray-50"
             style={{ borderColor: BORDER }}
             aria-label="Back"
           >
@@ -294,17 +303,17 @@ export function ActiveGarageShopScreen({
           </button>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="truncate text-xl font-bold" style={{ color: GREEN }}>
+              <h1 className="truncate text-xl font-bold sm:text-2xl" style={{ color: GREEN }}>
                 {isOwnGarage ? "My active garage" : garageName}
               </h1>
               <span
-                className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
+                className="rounded-full px-2.5 py-1 text-[12px] font-bold uppercase tracking-wide text-white"
                 style={{ backgroundColor: AMBER, color: GREEN }}
               >
                 Open
               </span>
             </div>
-            <p className="text-[13px] text-gray-600">{openLabel}</p>
+            <p className="text-[15px] text-gray-700">{openLabel}</p>
           </div>
           {!preview ? (
             <div className="flex items-center gap-1.5">
@@ -312,7 +321,7 @@ export function ActiveGarageShopScreen({
                 <button
                   type="button"
                   onClick={() => setShareGarageOpen(true)}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border bg-white"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border bg-white"
                   style={{ borderColor: BORDER }}
                   aria-label="Share open garage"
                 >
@@ -323,14 +332,14 @@ export function ActiveGarageShopScreen({
                 <button
                   type="button"
                   onClick={onOpenHostOffers}
-                  className="relative flex h-10 w-10 items-center justify-center rounded-full border bg-white"
+                  className="relative flex h-11 w-11 items-center justify-center rounded-full border bg-white"
                   style={{ borderColor: BORDER }}
                   aria-label={`Offers, ${pendingOfferCount} pending`}
                 >
                   <Inbox className="h-5 w-5" style={{ color: GREEN }} />
                   {pendingOfferCount > 0 ? (
                     <span
-                      className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
+                      className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold text-white"
                       style={{ backgroundColor: AMBER, color: GREEN }}
                     >
                       {pendingOfferCount}
@@ -341,14 +350,20 @@ export function ActiveGarageShopScreen({
               <button
                 type="button"
                 onClick={onOpenCart}
-                className="relative flex h-10 w-10 items-center justify-center rounded-full border bg-white"
-                style={{ borderColor: BORDER }}
+                className="relative flex h-11 items-center justify-center gap-1.5 rounded-full border bg-white px-3"
+                style={{
+                  borderColor: cartCount > 0 ? GREEN : BORDER,
+                  backgroundColor: cartCount > 0 ? `${GREEN}12` : "#fff",
+                }}
                 aria-label={`Cart, ${cartCount} items`}
               >
-                <ShoppingCart className="h-5 w-5" style={{ color: GREEN }} />
+                <ShoppingCart className="h-5 w-5 shrink-0" style={{ color: GREEN }} />
+                <span className="text-sm font-bold" style={{ color: GREEN }}>
+                  Cart
+                </span>
                 {cartCount > 0 ? (
                   <span
-                    className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
+                    className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold text-white"
                     style={{ backgroundColor: GREEN }}
                   >
                     {cartCount}
@@ -360,7 +375,7 @@ export function ActiveGarageShopScreen({
         </div>
 
         <div
-          className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-medium"
+          className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2.5 text-[14px] font-medium leading-snug"
           style={{ backgroundColor: `${GREEN}10`, color: GREEN }}
         >
           <Store className="h-4 w-4 shrink-0" aria-hidden />
@@ -397,12 +412,31 @@ export function ActiveGarageShopScreen({
           <p className="py-16 text-center text-gray-500">Loading shelf…</p>
         ) : listings.length === 0 ? (
           <div className="rounded-2xl border bg-white p-6 text-center" style={{ borderColor: BORDER }}>
-            <p className="text-base font-bold text-gray-900">Shelf is empty</p>
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="text-lg font-bold text-gray-900">Shelf is empty</p>
+            <p className="mt-2 text-[15px] text-gray-600">
               {isOwnGarage
                 ? "Snap sale items from Open my garage — one photo and a price each."
                 : "No sale items listed right now."}
             </p>
+            {isOwnGarage && onStockShelf && !preview ? (
+              <button
+                type="button"
+                onClick={onStockShelf}
+                className="mt-4 w-full rounded-xl py-3.5 text-base font-bold"
+                style={{ backgroundColor: AMBER, color: GREEN }}
+              >
+                Snap onto shelf →
+              </button>
+            ) : !isOwnGarage ? (
+              <button
+                type="button"
+                onClick={onBack}
+                className="mt-4 w-full rounded-xl border py-3.5 text-base font-bold"
+                style={{ borderColor: GREEN, color: GREEN }}
+              >
+                Back to yard sales
+              </button>
+            ) : null}
           </div>
         ) : (
           <div className="garage-shop-grid grid grid-cols-2 gap-2.5">
@@ -471,6 +505,7 @@ export function ActiveGarageShopScreen({
           offer={myOfferTarget.offer}
           onClose={() => setMyOfferTarget(null)}
           onUpdated={() => loadShelf()}
+          onOpenCart={onOpenCart}
         />
       ) : null}
 

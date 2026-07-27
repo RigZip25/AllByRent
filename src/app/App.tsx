@@ -199,10 +199,47 @@ const BOTTOM_NAV_SCREENS = new Set<Screen>([
 
 const TAB_BOOT_SCREENS: Partial<Record<string, Screen>> = {
   home: "browseHub",
+  browseHub: "browseHub",
+  yardSaleHub: "yardSaleHub",
+  yardSales: "yardSales",
+  garageShop: "garageShop",
+  garageCart: "garageCart",
+  openGarageSale: "openGarageSale",
+  snapSale: "snapSale",
   mre: "mre",
   garage: "garage",
   more: "more",
+  profile: "profile",
+  rentals: "rentals",
+  favorites: "favorites",
+  notifications: "notifications",
+  login: "browseHub",
+  signup: "browseHub",
 };
+
+/** Explicit ?screen= deep links for QA and return URLs (skips unfinished onboarding). */
+const BOOT_SCREEN_ALIASES: Partial<Record<string, Screen>> = {
+  ...TAB_BOOT_SCREENS,
+  listItem: "listItem",
+  identity: "identity",
+  coHosts: "coHosts",
+  postRequest: "postRequest",
+  "verification-phone": "browseHub",
+  "verification-code": "browseHub",
+  "reset-password": "browseHub",
+  "create-new-password": "browseHub",
+  "like-to-do-rent": "browseHub",
+  "like-to-do-list": "browseHub",
+  rental: "rentals",
+  "earning-your-stuff": "earnBusiness",
+  earnBusiness: "earnBusiness",
+};
+
+function resolveBootScreenParam(raw: string | null): Screen | null {
+  if (!raw) return null;
+  const key = raw.trim();
+  return BOOT_SCREEN_ALIASES[key] ?? null;
+}
 
 function bottomNavTabForScreen(screen: Screen): BottomNavTab {
   if (screen === "browseHub" || screen === "home" || screen === "yardSaleHub" || screen === "yardSales" || screen === "openGarageSale") return "home";
@@ -406,11 +443,12 @@ function AppRoutes() {
   const handledSessionTokenRef = useRef<string | null>(null);
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
     if (boot.screen === "splash") return "splash";
+    const bootScreen = resolveBootScreenParam(boot.screen);
     // Explicit screen= wins over listingId deep links (Stripe Connect return URLs).
-    if (boot.screen === "listItem" || boot.screen === "snapSale" || boot.screen === "identity") {
+    if (bootScreen) {
       markIntroDone();
       completeOnboarding();
-      return boot.screen;
+      return bootScreen;
     }
     const deepScreen = bootScreenForDeepLink(bootDeepLink.target);
     if (deepScreen && (boot.skipSplash || bootDeepLink.skipSplash)) {
@@ -515,25 +553,16 @@ function AppRoutes() {
       clearBootQuery(["screen"]);
       return;
     }
-    if (screen === "identity") {
-      // Don't force auth; existing route guard will show AuthGate if needed.
-      setNavStack([]);
-      setCurrentScreen("identity");
-      clearBootQuery(["screen"]);
-    }
     if (screen === "agent-activity") {
       // Agent activity is internal-only — do not surface via deep link.
       clearBootQuery(["screen"]);
-    }
-    if (screen === "coHosts") {
-      setNavStack([]);
-      setCurrentScreen("coHosts");
-      clearBootQuery(["screen", "skipSplash"]);
+      return;
     }
     if (screen === "listItem") {
       const params = new URLSearchParams(window.location.search);
       const listingId = params.get("listingId")?.trim() || "";
       markIntroDone();
+      completeOnboarding();
       setListingPrefill(null);
       if (listingId) {
         setEditingListingId(listingId);
@@ -545,19 +574,15 @@ function AppRoutes() {
       setNavStack([]);
       setCurrentScreen("listItem");
       clearBootQuery(["screen", "listingId", "skipSplash", "connect"]);
+      return;
     }
-    if (screen === "snapSale") {
+    const resolved = resolveBootScreenParam(screen);
+    if (resolved) {
       markIntroDone();
+      completeOnboarding();
       setNavStack([]);
-      setCurrentScreen("snapSale");
-      clearBootQuery(["screen", "connect", "skipSplash", "listingId"]);
-    }
-    const tabScreen = TAB_BOOT_SCREENS[screen];
-    if (tabScreen) {
-      markIntroDone();
-      setNavStack([]);
-      setCurrentScreen(tabScreen);
-      clearBootQuery(["screen", "skipSplash"]);
+      setCurrentScreen(resolved);
+      clearBootQuery(["screen", "skipSplash", "connect", "listingId"]);
     }
   }, [boot.screen]);
 
@@ -674,6 +699,9 @@ function AppRoutes() {
       "publicProfile",
       "snapSale",
       "garageSaleRules",
+      "garageCart",
+      "garageShop",
+      "garageWinnerCheckout",
     ];
     const storedTarget =
       candidate && validScreens.includes(candidate)
@@ -1446,6 +1474,7 @@ function AppRoutes() {
             onBack={openYardSaleHub}
             onEditLocation={openRentLocationSetup}
             onOpenGarage={handleOpenNeighborGarage}
+            onBrowseGear={() => handleBrowseHubChoice("findGear")}
           />
         )}
 
@@ -1501,6 +1530,9 @@ function AppRoutes() {
                 ? undefined
                 : handleOpenHostOffers
             }
+            onStockShelf={() => {
+              navigateTo(hasSeenGarageSaleRules() ? "snapSale" : "garageSaleRules");
+            }}
           />
         )}
 
@@ -1511,15 +1543,26 @@ function AppRoutes() {
           />
         )}
 
-        {currentScreen === "garageWinnerCheckout" && winnerCheckoutListingId && (
-          <GarageWinnerCheckoutScreen
-            listingId={winnerCheckoutListingId}
-            onBack={handleBack}
-            onComplete={() => {
-              setNavStack([]);
-              setCurrentScreen("garageShop");
-            }}
-          />
+        {currentScreen === "garageWinnerCheckout" && (
+          winnerCheckoutListingId ? (
+            <GarageWinnerCheckoutScreen
+              listingId={winnerCheckoutListingId}
+              onBack={handleBack}
+              onComplete={() => {
+                setNavStack([]);
+                setCurrentScreen("garageShop");
+              }}
+              onRequireAuth={() => showAuthGate("garageWinnerCheckout", "book")}
+            />
+          ) : (
+            <GarageShopMissingScreen
+              onBack={handleBack}
+              onBrowseYardSales={() => {
+                setNavStack([]);
+                setCurrentScreen("yardSales");
+              }}
+            />
+          )
         )}
 
         {currentScreen === "garageCart" && (
@@ -1529,6 +1572,7 @@ function AppRoutes() {
               setNavStack([]);
               setCurrentScreen("garageShop");
             }}
+            onRequireAuth={() => showAuthGate("garageCart", "book")}
           />
         )}
 

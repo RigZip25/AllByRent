@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { MrRentano } from "./MrRentano";
 import { useAuth } from "../../hooks/AuthProvider";
+import { SignInPrompt } from "../../components/SignInPrompt";
 import { getActiveRentLocationLabel } from "../../lib/listingStorage";
 import { createRequestRemote } from "../../lib/requestsStorage";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
@@ -365,11 +366,6 @@ export function PostRequest({
       </div>
 
       <div className="screen-footer bg-card/95 backdrop-blur-sm border-t border-border p-3 sm:p-4">
-        {submitError ? (
-          <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
-            {submitError}
-          </p>
-        ) : null}
         <button
           disabled={busy}
           onClick={() => {
@@ -418,6 +414,15 @@ export function PostRequest({
         >
           {busy ? "Posting…" : "Post Request"}
         </button>
+        {submitError ? (
+          /sign in/i.test(submitError) ? (
+            <div className="mt-3">
+              <SignInPrompt message={submitError} intent="generic" />
+            </div>
+          ) : (
+            <p className="mt-3 text-center text-[15px] font-medium text-red-600">{submitError}</p>
+          )
+        ) : null}
       </div>
     </div>
   );

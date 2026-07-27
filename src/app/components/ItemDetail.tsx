@@ -21,6 +21,7 @@ import {
   toggleFavoriteListingForUser,
 } from "../../lib/favoritesStorage";
 import { useAuth } from "../../hooks/AuthProvider";
+import { SignInPrompt } from "../../components/SignInPrompt";
 import {
   fetchListingByIdRemote,
   getActiveRentLocationLabel,
@@ -449,24 +450,28 @@ export function ItemDetail({
             </p>
           ) : null}
 
-          {messageHint ? (
-            <p className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-primary">
+          {messageHint && !auth.userId && (isSellOnly || listing.modes.sell) && !contactSent ? (
+            <SignInPrompt message="Sign in to message the seller." intent="message" />
+          ) : messageHint ? (
+            <p className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-[15px] text-primary">
               {isFreeGiveaway
                 ? "Open Share to send this link and arrange a free pickup with the owner."
                 : isSellOnly || listing.modes.sell
                   ? contactSent
                     ? "Message sent to the seller."
-                    : auth.userId
-                      ? "Use Message to ask the seller before you buy."
-                      : "Sign in to message the seller."
+                    : "Use Message to ask the seller before you buy."
                   : "In-app chat with the owner opens once your booking is confirmed."}
             </p>
           ) : null}
 
           {buyError ? (
-            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
-              {buyError}
-            </p>
+            /sign in/i.test(buyError) ? (
+              <SignInPrompt message={buyError} intent="message" />
+            ) : (
+              <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[15px] text-red-800">
+                {buyError}
+              </p>
+            )
           ) : null}
 
           {needsQr ? (
@@ -618,9 +623,10 @@ export function ItemDetail({
               </button>
             </div>
             {!auth.userId ? (
-              <p className="text-sm text-muted-foreground">
-                Sign in first so the seller can see who messaged them.
-              </p>
+              <SignInPrompt
+                message="Sign in first so the seller can see who messaged them."
+                intent="message"
+              />
             ) : contactSent ? (
               <p className="text-sm text-primary">
                 Sent. The seller gets an in-app notification and push if they enabled it.

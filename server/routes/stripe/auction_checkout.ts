@@ -8,6 +8,7 @@ import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdm
 import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
 import { destinationChargeFields, requireHostPayoutAccount } from "../../lib/stripe/connectPayout";
 import {
+  buyerChargeFromSubtotalCents,
   platformFeeFromSubtotalCents,
   validateAuctionListing,
   type GarageListingRow,
@@ -98,7 +99,8 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   const bidCents = validated.bidCents;
   const platformFeeCents = platformFeeFromSubtotalCents(bidCents);
-  const amountCents = bidCents + platformFeeCents;
+  // Winner pays the bid only; platform fee is deducted from the seller via Connect.
+  const amountCents = buyerChargeFromSubtotalCents(bidCents);
   if (amountCents < 50) {
     res.status(400).json({ error: "amountCents (≥50) required" });
     return;
@@ -124,6 +126,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       winning_bid_usd: String(winningBidUsd),
       runner_up_attempt: String(runnerUpAttempt),
       platform_fee_cents: String(platformFeeCents),
+      fee_paid_by: "seller",
     },
     ...destination,
   });

@@ -59,8 +59,8 @@ function NavIconGarage({ active }: { active?: boolean }) {
 function TabLabel({ children, active }: { children: string; active: boolean }) {
   return (
     <span
-      className="max-w-[64px] truncate text-[11px] leading-tight"
-      style={{ color: active ? GREEN : "#888", fontWeight: active ? 600 : 400 }}
+      className="max-w-[72px] truncate text-[13px] leading-tight"
+      style={{ color: active ? GREEN : "#666", fontWeight: active ? 600 : 500 }}
     >
       {children}
     </span>

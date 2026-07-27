@@ -103,6 +103,11 @@ export function WhereAreYouManual({ onBack, onContinue, onSkip, hint }: WhereAre
       </div>
 
       <footer className="shrink-0 border-t border-gray-100 px-4 pb-6 pt-4">
+        {!selectedLocation ? (
+          <p className="mb-2 text-center text-[14px] text-gray-500">
+            Pick a ZIP or city above, or tap Skip to browse first.
+          </p>
+        ) : null}
         <button
           type="button"
           onClick={handleContinue}

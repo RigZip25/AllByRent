@@ -28,6 +28,7 @@ import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBr
 import { StripePaymentForm } from "../../components/payments/StripePaymentForm";
 import { PaymentLegalNotice } from "../../components/payments/PaymentLegalNotice";
 import { BookingPaymentsBanner } from "../../components/payments/PaymentModeBanner";
+import { SignInPrompt } from "../../components/SignInPrompt";
 import {
   canSubmitBookingRequest,
   getSignInRequiredMessage,
@@ -595,9 +596,13 @@ function BookingScreenLoaded({
         ) : null}
 
         {paymentError && !paymentClientSecret && !depositClientSecret ? (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
-            {paymentError}
-          </p>
+          /sign in/i.test(paymentError) ? (
+            <SignInPrompt message={paymentError} intent="book" />
+          ) : (
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[15px] text-red-800">
+              {paymentError}
+            </p>
+          )
         ) : null}
 
         <RentalPriceBreakdownView breakdown={breakdown} />

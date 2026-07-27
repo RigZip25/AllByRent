@@ -72,7 +72,7 @@ export function GarageShopItemCard({
           </span>
         </div>
         <div className="p-2.5">
-          <p className="line-clamp-2 text-[13px] font-semibold text-gray-500">{listing.title || "Sale item"}</p>
+          <p className="line-clamp-2 text-[15px] font-semibold text-gray-500">{listing.title || "Sale item"}</p>
         </div>
       </article>
     );
@@ -88,25 +88,25 @@ export function GarageShopItemCard({
           <div className="flex h-full w-full items-center justify-center text-3xl text-gray-300">📷</div>
         )}
         {multiAuction && auctionPending ? (
-          <span className="absolute left-2 top-2 rounded-full bg-gray-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+          <span className="absolute left-2 top-2 rounded-full bg-gray-600 px-2 py-1 text-[11px] font-bold uppercase text-white">
             Soon
           </span>
         ) : multiAuction && auctionLive ? (
-          <span className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase text-white" style={{ backgroundColor: BLUE }}>
+          <span className="absolute left-2 top-2 rounded-full px-2 py-1 text-[11px] font-bold uppercase text-white" style={{ backgroundColor: BLUE }}>
             Bid
           </span>
         ) : offer.interestedCount === 1 ? (
-          <span className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase text-white" style={{ backgroundColor: AMBER, color: GREEN }}>
+          <span className="absolute left-2 top-2 rounded-full px-2 py-1 text-[11px] font-bold uppercase text-white" style={{ backgroundColor: AMBER, color: GREEN }}>
             Offer
           </span>
         ) : null}
         {offer.interestedCount >= 2 && !multiAuction ? (
-          <span className="absolute left-2 top-2 rounded-full bg-orange-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+          <span className="absolute left-2 top-2 rounded-full bg-orange-600 px-2 py-1 text-[11px] font-bold uppercase text-white">
             {offer.interestedCount} {offerCopy.interestedLabel}
           </span>
         ) : null}
         {isLeading && auctionLive ? (
-          <span className="absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: GREEN }}>
+          <span className="absolute right-2 top-2 rounded-full px-2 py-1 text-[11px] font-bold text-white" style={{ backgroundColor: GREEN }}>
             Leading
           </span>
         ) : null}
@@ -123,24 +123,24 @@ export function GarageShopItemCard({
       </div>
 
       <div className="flex flex-1 flex-col p-2.5">
-        <p className="line-clamp-2 min-h-[2.5rem] text-[13px] font-semibold leading-snug text-gray-900">
+        <p className="line-clamp-2 min-h-[2.75rem] text-[15px] font-semibold leading-snug text-gray-900">
           {listing.title || "Sale item"}
         </p>
 
         <div className="mt-1.5">
           {showAuction ? (
-            <div className="text-[12px] text-gray-500">
+            <div className="text-[13px] text-gray-600">
               <span className="font-semibold text-gray-800">{formatShopUsd(currentBidUsd)}</span>
               <span className="mx-1">·</span>
               <span>{formatAuctionEnds(offer.startsAt, offer.endsAt)}</span>
             </div>
           ) : offer.interestedCount > 0 ? (
-            <p className="text-[12px] font-medium text-amber-800">
+            <p className="text-[13px] font-medium text-amber-800">
               {offer.interestedCount} {offerCopy.interestedLabel}
               {offer.interestedCount >= 2 ? ` · ${offerCopy.auctionAuto}` : ""}
             </p>
           ) : null}
-          <p className="text-[17px] font-extrabold leading-tight" style={{ color: GREEN }}>
+          <p className="text-[18px] font-extrabold leading-tight" style={{ color: GREEN }}>
             {formatShopUsd(offer.buyNowUsd)}
           </p>
         </div>
@@ -151,10 +151,10 @@ export function GarageShopItemCard({
               type="button"
               disabled={preview}
               onClick={() => onBid(listing, offer)}
-              className="flex w-full items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-1 rounded-xl border py-2.5 text-[14px] font-bold disabled:opacity-50"
               style={{ borderColor: BLUE, color: BLUE }}
             >
-              <Gavel className="h-3.5 w-3.5" aria-hidden />
+              <Gavel className="h-4 w-4" aria-hidden />
               Bid
             </button>
           ) : null}
@@ -164,20 +164,20 @@ export function GarageShopItemCard({
               <button
                 type="button"
                 onClick={() => onViewMyOffer(listing, offer)}
-                className="flex w-full items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold"
+                className="flex w-full items-center justify-center gap-1 rounded-xl border py-2.5 text-[14px] font-bold"
                 style={{ borderColor: AMBER, color: "#92400E", backgroundColor: `${AMBER}15` }}
               >
-                <Tag className="h-3.5 w-3.5" />
+                <Tag className="h-4 w-4" />
                 Your offer · {formatShopUsd(myOffer.amountUsd)}
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => onMakeOffer(listing, offer)}
-                className="flex w-full items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold"
+                className="flex w-full items-center justify-center gap-1 rounded-xl border py-2.5 text-[14px] font-bold"
                 style={{ borderColor: GREEN, color: GREEN }}
               >
-                <Tag className="h-3.5 w-3.5" />
+                <Tag className="h-4 w-4" />
                 {offerCopy.makeOffer}
               </button>
             )
@@ -188,10 +188,10 @@ export function GarageShopItemCard({
               type="button"
               disabled={preview || (multiAuction && auctionEnded) || (multiAuction && auctionLive)}
               onClick={() => onBuyNow(listing, offer)}
-              className="flex w-full items-center justify-center gap-1 rounded-xl py-2 text-[12px] font-bold text-white disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-1 rounded-xl py-2.5 text-[14px] font-bold text-white disabled:opacity-50"
               style={{ backgroundColor: AMBER, color: GREEN }}
             >
-              <ShoppingBag className="h-3.5 w-3.5" aria-hidden />
+              <ShoppingBag className="h-4 w-4" aria-hidden />
               Buy
             </button>
           ) : (
@@ -199,20 +199,20 @@ export function GarageShopItemCard({
               <button
                 type="button"
                 onClick={() => onEdit?.(listing)}
-                className="flex w-full items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold"
+                className="flex w-full items-center justify-center gap-1 rounded-xl border py-2.5 text-[14px] font-bold"
                 style={{ borderColor: GREEN, color: GREEN }}
               >
-                <Pencil className="h-3.5 w-3.5" />
+                <Pencil className="h-4 w-4" />
                 Edit
               </button>
               {onShare ? (
                 <button
                   type="button"
                   onClick={() => onShare(listing)}
-                  className="flex w-full items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold"
+                  className="flex w-full items-center justify-center gap-1 rounded-xl border py-2.5 text-[14px] font-bold"
                   style={{ borderColor: AMBER, color: "#92400E", backgroundColor: `${AMBER}12` }}
                 >
-                  <Share2 className="h-3.5 w-3.5" />
+                  <Share2 className="h-4 w-4" />
                   Share
                 </button>
               ) : null}

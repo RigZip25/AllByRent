@@ -1,4 +1,4 @@
-import { getBookingWithoutPaymentMessage, getStripeRequiredMessage, isPaymentsReady } from "../../lib/config/production";
+import { getBookingWithoutPaymentMessage, getGarageStripeRequiredMessage, getStripeRequiredMessage, isPaymentsReady } from "../../lib/config/production";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
@@ -8,7 +8,7 @@ export function BookingPaymentsBanner() {
 
   return (
     <div
-      className="rounded-xl border px-3 py-2.5 text-[12px] leading-relaxed"
+      className="rounded-xl border px-3 py-2.5 text-[14px] leading-relaxed"
       style={{ backgroundColor: `${AMBER}18`, borderColor: `${AMBER}55`, color: "#92400E" }}
     >
       {getBookingWithoutPaymentMessage()}
@@ -16,15 +16,15 @@ export function BookingPaymentsBanner() {
   );
 }
 
-export function PaymentsRequiredBanner() {
+export function PaymentsRequiredBanner({ variant = "rental" }: { variant?: "rental" | "garage" }) {
   if (isPaymentsReady()) return null;
 
   return (
     <div
-      className="rounded-xl px-3 py-2 text-[12px] font-semibold"
+      className="rounded-xl px-3 py-2.5 text-[14px] font-semibold leading-snug"
       style={{ backgroundColor: `${AMBER}22`, color: "#92400E" }}
     >
-      {getStripeRequiredMessage()}
+      {variant === "garage" ? getGarageStripeRequiredMessage() : getStripeRequiredMessage()}
     </div>
   );
 }
@@ -34,7 +34,7 @@ export function PaymentsReadyBadge() {
 
   return (
     <div
-      className="rounded-xl px-3 py-2 text-[12px] font-semibold"
+      className="rounded-xl px-3 py-2.5 text-[14px] font-semibold"
       style={{ backgroundColor: `${GREEN}14`, color: GREEN }}
     >
       Secure card checkout enabled

@@ -1,4 +1,4 @@
-import { getGarageBidderId, markBuyNowSold } from "./garageAuctionState";
+import { getGarageBidderId } from "./garageAuctionState";
 import { pushNeighborOfferRemote } from "./garage/garageSupabaseSync";
 import {
   defaultAuctionOfferWindow,
@@ -158,16 +158,71 @@ function activateMultiBuyerAuction(listingId: string, listingTitle: string): voi
   globalThis.dispatchEvent(new Event("evorios-garage-offers"));
 }
 
-function completeSale(listing: ListingDraft, priceUsd: number, buyerId: string): { ok: true } | { ok: false; reason: string } {
-  markBuyNowSold(listing.id, priceUsd, listing.title || "Sale item");
+/** Accepted deal waiting for the buyer to pay (cart checkout). */
+export function getAcceptedOfferForListing(listingId: string): GarageNeighborOffer | null {
+  return (
+    readOffers().find(
+      (offer) => offer.listingId === listingId && offer.status === "accepted",
+    ) ?? null
+  );
+}
+
+export function hasAcceptedOfferPendingPayment(listingId: string): boolean {
+  return getAcceptedOfferForListing(listingId) != null;
+}
+
+/** When the buyer opens a garage, pull accepted deals into their cart. */
+export function ensureAcceptedOffersInCart(listings: ListingDraft[]): boolean {
+  const me = getGarageBidderId();
+  let added = false;
+  for (const listing of listings) {
+    const offer = readOffers().find(
+      (item) =>
+        item.listingId === listing.id &&
+        item.buyerId === me &&
+        item.status === "accepted",
+    );
+    if (!offer) continue;
+    const result = addToGarageCart(cartLineFromListing(listing, offer.amountUsd));
+    if (result.ok) added = true;
+  }
+  return added;
+}
+
+/**
+ * Close the deal at an agreed price. Does NOT mark sold — payment via cart does.
+ * Adds to cart when the buyer is on this device; otherwise notifies them to pay.
+ */
+function completeSale(
+  listing: ListingDraft,
+  priceUsd: number,
+  buyerId: string,
+): { ok: true; addedToCart: boolean } | { ok: false; reason: string } {
   closeOffersForListing(listing.id);
   const line = cartLineFromListing(listing, priceUsd);
-  if (buyerId !== getGarageBidderId()) {
-    return { ok: true };
+  const isBuyerHere = buyerId === getGarageBidderId();
+
+  if (isBuyerHere) {
+    const result = addToGarageCart(line);
+    if (!result.ok && !/already in cart/i.test(result.reason)) {
+      return result;
+    }
+    return { ok: true, addedToCart: true };
   }
-  const result = addToGarageCart(line);
-  if (!result.ok) return result;
-  return { ok: true };
+
+  if (buyerId) {
+    void createNotificationRemote({
+      recipientId: buyerId,
+      actorId: listing.hostId ?? getGarageBidderId(),
+      type: "general",
+      title: "Offer accepted — pay now",
+      body: `${listing.title || "Sale item"} — ${formatShopUsd(priceUsd)}. Open that garage → Cart to checkout.`,
+      listingId: listing.id,
+      skipLocal: true,
+    });
+  }
+
+  return { ok: true, addedToCart: false };
 }
 
 export function submitNeighborOffer(input: {
@@ -276,8 +331,10 @@ export function hostAcceptOffer(
 
   pushInAppNotification({
     type: "general",
-    title: "Offer accepted",
-    body: `${offer.listingTitle} — sold for ${formatShopUsd(offer.amountUsd)}.`,
+    title: result.addedToCart ? "Offer accepted — pay in Cart" : "Offer accepted",
+    body: result.addedToCart
+      ? `${offer.listingTitle} — ${formatShopUsd(offer.amountUsd)}. Checkout to finish.`
+      : `${offer.listingTitle} — buyer notified to pay ${formatShopUsd(offer.amountUsd)}.`,
   });
 
   return { ok: true };
@@ -375,8 +432,8 @@ export function buyerAcceptCounter(
 
   pushInAppNotification({
     type: "general",
-    title: "Deal!",
-    body: `${offer.listingTitle} — ${formatShopUsd(offer.amountUsd)}.`,
+    title: "Deal! Pay in Cart",
+    body: `${offer.listingTitle} — ${formatShopUsd(offer.amountUsd)}. Checkout to finish.`,
   });
 
   return { ok: true };

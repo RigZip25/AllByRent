@@ -30,6 +30,7 @@ type GarageWinnerCheckoutScreenProps = {
   listingId: string;
   onBack: () => void;
   onComplete: () => void;
+  onRequireAuth?: () => void;
 };
 
 function formatPayCountdown(payByIso: string): string {
@@ -43,6 +44,7 @@ export function GarageWinnerCheckoutScreen({
   listingId,
   onBack,
   onComplete,
+  onRequireAuth,
 }: GarageWinnerCheckoutScreenProps) {
   const listing = getPublishedListingById(listingId);
   const checkout = getWinnerCheckoutDetails(listingId);
@@ -59,8 +61,9 @@ export function GarageWinnerCheckoutScreen({
 
   const totals = useMemo(() => {
     const winningBidUsd = checkout?.winningBidUsd ?? 0;
+    // Seller absorbs platform fee; winner pays the bid only.
     const platformFeeUsd = Math.round(winningBidUsd * PLATFORM_FEE_RATE * 100) / 100;
-    const totalUsd = Math.round((winningBidUsd + platformFeeUsd) * 100) / 100;
+    const totalUsd = winningBidUsd;
     return { winningBidUsd, platformFeeUsd, totalUsd };
   }, [checkout]);
 
@@ -125,29 +128,29 @@ export function GarageWinnerCheckoutScreen({
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#FFF9F0]">
-      <header className="shrink-0 border-b bg-white px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top,0px))]">
-        <div className="flex items-center gap-2">
+      <header className="shrink-0 border-b bg-white px-4 pb-3 pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))]">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onBack}
-            className="flex h-10 w-10 items-center justify-center rounded-full border"
+            className="flex h-11 w-11 items-center justify-center rounded-full border"
             style={{ borderColor: BORDER }}
             aria-label="Back"
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
           <div>
-            <h1 className="text-xl font-bold" style={{ color: GREEN }}>
+            <h1 className="text-2xl font-bold" style={{ color: GREEN }}>
               {isRunnerUp ? auctionCopy.runnerUpTitle : "You won!"}
             </h1>
-            <p className="text-[13px] text-gray-500">{hostName}</p>
+            <p className="text-[15px] text-gray-600">{hostName}</p>
           </div>
         </div>
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         <div className="mb-3 space-y-2">
-          <PaymentsRequiredBanner />
+          <PaymentsRequiredBanner variant="garage" />
           <PaymentsReadyBadge />
         </div>
 
@@ -179,19 +182,14 @@ export function GarageWinnerCheckoutScreen({
           </div>
         </div>
 
-        <div className="mt-4 space-y-2 rounded-2xl border bg-white p-4 text-sm" style={{ borderColor: BORDER }}>
-          <div className="flex justify-between text-gray-600">
-            <span>{isRunnerUp ? "Your bid" : "Winning bid"}</span>
-            <span className="font-semibold text-gray-900">{formatShopUsd(totals.winningBidUsd)}</span>
-          </div>
-          <div className="flex justify-between text-gray-600">
-            <span>Platform fee (10%)</span>
-            <span className="font-semibold text-gray-900">{formatShopUsd(totals.platformFeeUsd)}</span>
-          </div>
-          <div className="flex justify-between border-t pt-2 text-base font-bold" style={{ borderColor: BORDER }}>
+        <div className="mt-4 space-y-2 rounded-2xl border bg-white p-4 text-[15px]" style={{ borderColor: BORDER }}>
+          <div className="flex justify-between border-b pb-2 text-lg font-bold" style={{ borderColor: BORDER }}>
             <span>Total due now</span>
             <span style={{ color: GREEN }}>{formatShopUsd(totals.totalUsd)}</span>
           </div>
+          <p className="text-[13px] leading-snug text-gray-500">
+            You pay your bid. The seller covers the platform fee.
+          </p>
         </div>
 
         {clientSecret ? (
@@ -216,9 +214,21 @@ export function GarageWinnerCheckoutScreen({
       {!clientSecret ? (
         <div className="shrink-0 border-t bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-4" style={{ borderColor: BORDER }}>
           {paymentError ? (
-            <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
-              {paymentError}
-            </p>
+            <div className="mb-3 space-y-2">
+              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[15px] text-red-800">
+                {paymentError}
+              </p>
+              {onRequireAuth && /sign in/i.test(paymentError) ? (
+                <button
+                  type="button"
+                  onClick={onRequireAuth}
+                  className="w-full rounded-xl border py-3.5 text-base font-bold"
+                  style={{ borderColor: GREEN, color: GREEN }}
+                >
+                  Sign in / Create account
+                </button>
+              ) : null}
+            </div>
           ) : null}
           <button
             type="button"
