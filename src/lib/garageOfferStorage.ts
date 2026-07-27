@@ -145,12 +145,34 @@ function activateMultiBuyerAuction(listingId: string, listingTitle: string): voi
     body: `${listingTitle} — ${buyers.length} neighbors interested. You don't need to counter; they bid until close.`,
   });
 
+  if (hostId && hostId !== getGarageBidderId()) {
+    void createNotificationRemote({
+      recipientId: hostId,
+      actorId: getGarageBidderId(),
+      type: "general",
+      title: "Auction on your shelf",
+      body: `${listingTitle} — ${buyers.length} interested neighbors. Auction runs until garage close; highest bid wins.`,
+      listingId,
+      skipLocal: true,
+    });
+  }
+
   for (const buyerId of buyers) {
     if (buyerId === getGarageBidderId()) {
       pushInAppNotification({
         type: "general",
         title: "Multiple offers — auction on",
         body: `${listingTitle}: bid against other interested neighbors until garage close.`,
+      });
+    } else {
+      void createNotificationRemote({
+        recipientId: buyerId,
+        actorId: hostId || getGarageBidderId(),
+        type: "general",
+        title: "Auction started",
+        body: `${listingTitle}: another neighbor wanted it too — bid until garage close.`,
+        listingId,
+        skipLocal: true,
       });
     }
   }
@@ -268,6 +290,19 @@ export function submitNeighborOffer(input: {
   writeOffers([...readOffers(), offer]);
   syncOfferRemote(offer);
 
+  // Host always gets a remote notification for every offer (push + inbox).
+  if (hostId && hostId !== buyerId) {
+    void createNotificationRemote({
+      recipientId: hostId,
+      actorId: buyerId,
+      type: "general",
+      title: "New offer on your shelf",
+      body: `${title} — ${formatShopUsd(input.amountUsd)} offered. Open Offers to accept, counter, or pass.`,
+      listingId: input.listing.id,
+      skipLocal: true,
+    });
+  }
+
   const prefsUpdate = getGarageSaleOfferPrefs(input.listing.id);
   if (prefsUpdate) {
     setGarageSaleOfferPrefs(
@@ -287,19 +322,8 @@ export function submitNeighborOffer(input: {
     pushInAppNotification({
       type: "general",
       title: "Offer sent",
-      body: `${title} — waiting for host on ${formatShopUsd(input.amountUsd)}.`,
+      body: `${title} — seller notified. Waiting on ${formatShopUsd(input.amountUsd)}.`,
     });
-    if (hostId && hostId !== buyerId) {
-      void createNotificationRemote({
-        recipientId: hostId,
-        actorId: buyerId,
-        type: "general",
-        title: "New offer on your shelf",
-        body: `${title} — ${formatShopUsd(input.amountUsd)} offered. Accept or counter.`,
-        listingId: input.listing.id,
-        skipLocal: true,
-      });
-    }
   }
 
   return { ok: true, offer };
@@ -375,6 +399,16 @@ export function hostCounterOffer(
       title: "Host countered",
       body: `${offer.listingTitle} — ${formatShopUsd(counterUsd)}. Accept or send a new offer.`,
     });
+  } else if (offer.buyerId) {
+    void createNotificationRemote({
+      recipientId: offer.buyerId,
+      actorId: offer.hostId || getGarageBidderId(),
+      type: "general",
+      title: "Seller countered your offer",
+      body: `${offer.listingTitle} — now ${formatShopUsd(counterUsd)}. Accept or send a new offer.`,
+      listingId: offer.listingId,
+      skipLocal: true,
+    });
   }
 
   return { ok: true };
@@ -400,6 +434,16 @@ export function hostDeclineOffer(offerId: string): { ok: true } | { ok: false; r
       type: "general",
       title: "Offer declined",
       body: `${offer.listingTitle} — host passed on your offer.`,
+    });
+  } else if (offer.buyerId) {
+    void createNotificationRemote({
+      recipientId: offer.buyerId,
+      actorId: offer.hostId || getGarageBidderId(),
+      type: "general",
+      title: "Offer declined",
+      body: `${offer.listingTitle} — seller passed. You can still Buy now at asking price if it's available.`,
+      listingId: offer.listingId,
+      skipLocal: true,
     });
   }
 
