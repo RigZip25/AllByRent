@@ -12,7 +12,10 @@ export function RestaurantsScreen() {
   const [cuisine, setCuisine] = useState("Все");
   const [booked, setBooked] = useState<string | null>(null);
 
-  const restaurants = trip?.restaurants ?? [];
+  const restaurants = useMemo(
+    () => trip?.restaurants ?? [],
+    [trip?.restaurants],
+  );
   const cuisines = useMemo(
     () => ["Все", ...Array.from(new Set(restaurants.map((r) => r.cuisine)))],
     [restaurants],
