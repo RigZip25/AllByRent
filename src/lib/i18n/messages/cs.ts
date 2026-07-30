@@ -1181,6 +1181,18 @@ export const cs: AppMessages = {
     itemFallback: "Položka",
     newRequestTitle: "Nová žádost o rezervaci",
     newRequestBody: (title) => `Někdo chce půjčit vaši položku ${title}.`,
+    approvedTitle: "Rezervace schválena",
+    approvedBody: (title) =>
+      `${title} je potvrzena — otevřete Půjčky pro PIN k vyzvednutí a detaily.`,
+    declinedTitle: "Žádost odmítnuta",
+    declinedBody: (title, refundNote) =>
+      `Vaše žádost o ${title} byla odmítnuta. ${refundNote}`,
+    cancelledTitle: "Žádost o rezervaci zrušena",
+    cancelledBody: (title) => `Nájemce zrušil žádost o ${title}.`,
+    refundNotePayment:
+      "Jakákoli autorizovaná platba bude uvolněna — refundace mohou trvat několik pracovních dní.",
+    refundNoteNone: "Za tuto žádost nebyla stržena žádná platba.",
+    captureFailed: "Platbu se nepodařilo zachytit. Zkuste to znovu nebo kontaktujte podporu.",
   },
   postRequest: {
     title: "Poslat žádost",
@@ -1808,6 +1820,8 @@ export const cs: AppMessages = {
     errorBody: "Znovu načtěte stránku. Pokud to trvá, napište na support@evorios.com.",
     reloadApp: "Znovu načíst aplikaci",
     resetLocalData: "Resetovat místní data a znovu načíst",
+    resetConfirm:
+      "Resetovat všechna data aplikace? Onboarding, profil, nabídky i půjčky budou vymazány.",
     garageMissingTitle: "Garáž nenalezena",
     garageMissingBody: (appName) =>
       `Tento odkaz na garáž může být zastaralý, nebo hostitel vitrínu odstranil. Procházejte jiné výprodeje na ${appName}.`,

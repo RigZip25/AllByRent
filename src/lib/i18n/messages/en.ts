@@ -1167,6 +1167,18 @@ export const en: AppMessages = {
     itemFallback: "Item",
     newRequestTitle: "New booking request",
     newRequestBody: (title) => `Someone wants to rent your ${title}.`,
+    approvedTitle: "Booking approved",
+    approvedBody: (title) =>
+      `${title} is confirmed — open Rentals for pickup PIN and details.`,
+    declinedTitle: "Request declined",
+    declinedBody: (title, refundNote) =>
+      `Your request for ${title} was declined. ${refundNote}`,
+    cancelledTitle: "Booking request cancelled",
+    cancelledBody: (title) => `The renter cancelled their request for ${title}.`,
+    refundNotePayment:
+      "Any authorized payment will be released — refunds may take a few business days.",
+    refundNoteNone: "No payment was charged for this request.",
+    captureFailed: "Could not capture payment. Try again or contact support.",
   },
   postRequest: {
     title: "Post a Request",
@@ -1791,6 +1803,8 @@ export const en: AppMessages = {
     errorBody: "Please reload. If it keeps happening, email support@evorios.com.",
     reloadApp: "Reload app",
     resetLocalData: "Reset local data & reload",
+    resetConfirm:
+      "Reset all app data? Onboarding, profile, listings, and rentals will be cleared.",
     garageMissingTitle: "Garage not found",
     garageMissingBody: (appName) =>
       `This garage link may be outdated or the host removed their showcase. Browse other yard sales on ${appName}.`,

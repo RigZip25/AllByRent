@@ -136,7 +136,7 @@ export function getSteps(listing: {
   ];
 }
 
-/** English fallback for non-React helpers; prefer getSteps(messages.listing). */
+/** @deprecated Prefer getSteps(getMessages().listing) — EN snapshot only. */
 export const LISTING_STEP_LABELS = [
   "Photos",
   "Details & pricing",

@@ -901,6 +901,15 @@ export type AppMessages = {
     itemFallback: string;
     newRequestTitle: string;
     newRequestBody: (title: string) => string;
+    approvedTitle: string;
+    approvedBody: (title: string) => string;
+    declinedTitle: string;
+    declinedBody: (title: string, refundNote: string) => string;
+    cancelledTitle: string;
+    cancelledBody: (title: string) => string;
+    refundNotePayment: string;
+    refundNoteNone: string;
+    captureFailed: string;
   };
   postRequest: {
     title: string;
@@ -2056,6 +2065,7 @@ export type SystemUiMessages = {
   errorBody: string;
   reloadApp: string;
   resetLocalData: string;
+  resetConfirm: string;
   garageMissingTitle: string;
   garageMissingBody: (appName: string) => string;
   browseYardSales: string;

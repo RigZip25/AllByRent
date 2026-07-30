@@ -1,4 +1,10 @@
-import { getMessages } from "./i18n";
+import { getLocale, getMessages } from "./i18n";
+import type { AppLocale } from "./i18n/types";
+
+const TIME_LOCALE_TAGS: Record<AppLocale, string> = {
+  en: "en-US",
+  cs: "cs-CZ",
+};
 
 const SCHEDULE_KEY = "abr_garage_sale_schedule";
 const LEGACY_WINDOW_KEY = "abr_garage_sale_open_window";
@@ -154,15 +160,18 @@ export function setGarageSaleSchedule(schedule: GarageSaleSchedule): void {
   }
 }
 
+/** Locale-aware clock label for HH:MM (e.g. en → 9:00 AM, cs → 9:00). */
 export function formatTime12h(time24: string): string {
   if (!isValidTime(time24)) return time24;
   const [hourRaw, minuteRaw] = time24.split(":");
   const hour = Number.parseInt(hourRaw, 10);
   const minute = Number.parseInt(minuteRaw, 10);
-  const period = hour >= 12 ? "pm" : "am";
-  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
-  if (minute === 0) return `${hour12}${period}`;
-  return `${hour12}:${minuteRaw}${period}`;
+  const date = new Date(2000, 0, 1, hour, minute, 0, 0);
+  const tag = TIME_LOCALE_TAGS[getLocale()] ?? "en-US";
+  return new Intl.DateTimeFormat(tag, {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
 }
 
 export function formatGarageSaleDays(daysOfWeek: number[]): string {

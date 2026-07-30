@@ -11,7 +11,7 @@ import {
 import { MASCOT_NAME } from "../lib/brand";
 import rentanoImg from "../imports/No_back_rentano.png";
 import type { ListingDraft } from "../screens/listing/types";
-import { LISTING_STEP_LABELS } from "../screens/listing/types";
+import { getSteps } from "../screens/listing/types";
 import type { AppMode } from "../lib/appMode";
 import { summarizeListingDraft } from "../lib/listingDraftSummary";
 import {
@@ -20,6 +20,7 @@ import {
 } from "../lib/rentanoPrompt";
 import { usePwaInstallPrompt } from "../hooks/PwaInstallProvider";
 import { isStandalonePwa } from "../lib/pwaInstall";
+import { getMessages } from "../lib/i18n";
 import { useMessages } from "../lib/i18n/react";
 import { PwaInstallPanel } from "./PwaInstallPanel";
 import { RentanoFaqPanel } from "./rentano/RentanoFaqPanel";
@@ -47,12 +48,14 @@ type SheetView = "menu" | "install" | "faq" | "chat";
 
 function buildApiContext(context?: RentanoChatContext): RentanoRequestContext {
   const step = context?.step;
+  const stepName =
+    step != null ? getSteps(getMessages().listing)[step - 1]?.name : undefined;
   return {
     screen: context?.screen,
     appMode: context?.appMode,
     step,
     totalSteps: context?.totalSteps,
-    stepName: step != null ? LISTING_STEP_LABELS[step - 1] : undefined,
+    stepName,
     userRole:
       context?.appMode === "earn"
         ? "host"
@@ -133,7 +136,8 @@ export function RentanoChatSheet({
   context?: RentanoChatContext;
   defaultView?: "chat" | "menu";
 }) {
-  const { mrEvorios: t, common } = useMessages();
+  const { mrEvorios: t, common, listing } = useMessages();
+  const wizardSteps = useMemo(() => getSteps(listing), [listing]);
   const pwa = usePwaInstallPrompt();
   const [view, setView] = useState<SheetView>("menu");
   const [chatSeed, setChatSeed] = useState<string | null>(null);
@@ -174,6 +178,9 @@ export function RentanoChatSheet({
             ? t.listingHelpTitle
             : t.chatWith(MASCOT_NAME)
           : MASCOT_NAME;
+
+  const listingStepLabel =
+    context?.step != null ? wizardSteps[context.step - 1]?.name : undefined;
 
   return (
     <AnimatePresence>
@@ -236,9 +243,7 @@ export function RentanoChatSheet({
                   {isListingHelp && view === "menu" && context.step != null && context.totalSteps != null ? (
                     <p className="text-xs text-[#9CA3AF]">
                       {t.listingStepOf(context.step, context.totalSteps)}
-                      {context.step != null
-                        ? ` · ${LISTING_STEP_LABELS[context.step - 1]}`
-                        : ""}
+                      {listingStepLabel ? ` · ${listingStepLabel}` : ""}
                     </p>
                   ) : view === "chat" && apiContext.step != null ? (
                     <p className="text-xs text-[#9CA3AF]">

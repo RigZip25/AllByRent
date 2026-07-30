@@ -1,5 +1,10 @@
-import { LISTING_STEP_LABELS } from "../screens/listing/types";
+import { getSteps } from "../screens/listing/types";
 import { APP_MODE_LABELS, APP_NAME, MASCOT_NAME, PRODUCT_METAPHOR } from "./brand";
+import { getMessages } from "./i18n";
+
+function listingStepName(step: number): string {
+  return getSteps(getMessages().listing)[step - 1]?.name ?? `Step ${step}`;
+}
 
 /** Server picks provider via LLM_PROVIDER (default: Gemini → OpenAI → Anthropic). */
 export const EVORIOS_MODEL = "auto";
@@ -37,7 +42,7 @@ const LISTING_STEP_HINTS: Record<number, string> = {
 
 export function buildListingStepGuidance(step?: number): string | null {
   if (step == null || step < 1 || step > 7) return null;
-  const label = LISTING_STEP_LABELS[step - 1] ?? `Step ${step}`;
+  const label = listingStepName(step);
   const hint = LISTING_STEP_HINTS[step];
   return `[Listing wizard focus]\nCurrent step: ${step} — ${label}.\n${hint}`;
 }
@@ -61,8 +66,7 @@ export function buildEvoriosUserContext(context: EvoriosRequestContext): string 
     lines.push("Home mode: unknown — do not assume rent-only; offer Browse and My Garage paths.");
   }
   if (context.step != null && context.totalSteps != null) {
-    const name =
-      context.stepName ?? LISTING_STEP_LABELS[context.step - 1] ?? `Step ${context.step}`;
+    const name = context.stepName ?? listingStepName(context.step);
     lines.push(`Wizard: step ${context.step} of ${context.totalSteps} (${name})`);
   }
   if (context.userRole) lines.push(`Role: ${context.userRole}`);
