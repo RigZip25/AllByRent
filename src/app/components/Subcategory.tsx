@@ -29,6 +29,7 @@ import { fetchRequestsForShelfRemote, type WantedRequest } from "../../lib/reque
 import { categoryIdFromName } from "../../screens/listing/listingItemCategories";
 import type { ListingDraft } from "../../screens/listing/types";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
+import { useMessages } from "../../lib/i18n/react";
 
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { listingCardMeta } from "../../lib/listingCardMeta";
@@ -193,6 +194,7 @@ export function Subcategory({
 
 }: SubcategoryProps) {
   const auth = useAuth();
+  const t = useMessages();
 
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
 
@@ -324,7 +326,7 @@ export function Subcategory({
     return {
     id: listing.id,
 
-    title: getListingDisplayTitle(listing.title) || listing.title || "Listing",
+    title: getListingDisplayTitle(listing.title) || listing.title || t.shelf.listingFallback,
 
     price: listing.pricing.dailyRate || "—",
 
@@ -351,9 +353,9 @@ export function Subcategory({
 
       appMode === "earn"
 
-        ? `I'm listing ${subcategoryLabel} on ${APP_NAME} — open your garage showcase in ${cityName}! ${MARKETING_URL}`
+        ? t.shelf.shareEarn(subcategoryLabel, APP_NAME, cityName, MARKETING_URL)
 
-        : `Looking for ${subcategoryLabel} near ${cityName} on ${APP_NAME}. Browse neighborhood garages → ${MARKETING_URL}`;
+        : t.shelf.shareRent(subcategoryLabel, APP_NAME, cityName, MARKETING_URL);
 
     if (typeof navigator !== "undefined" && navigator.share) {
 
@@ -399,8 +401,8 @@ export function Subcategory({
 
   const greetingName = readLastKnownFullName().trim().split(/\s+/)[0] || "";
   const personalizedLine = greetingName
-    ? `${greetingName} — so cool you’re among the first. We’re just getting started.`
-    : "So cool you’re among the first. We’re just getting started.";
+    ? t.shelf.greetingNamed(greetingName)
+    : t.shelf.greetingAnon;
 
 
 
@@ -444,7 +446,7 @@ export function Subcategory({
 
             <div>
 
-              <h2 className="font-bold text-[15px] mb-3" style={{ color: GREEN }}>Personal Use</h2>
+              <h2 className="font-bold text-[15px] mb-3" style={{ color: GREEN }}>{t.shelf.personalUse}</h2>
 
               <div className="grid grid-cols-2 gap-[10px]">
 
@@ -472,7 +474,7 @@ export function Subcategory({
 
             <div>
 
-              <h2 className="font-bold text-[15px] mb-3" style={{ color: GREEN_DARK }}>Professional Use</h2>
+              <h2 className="font-bold text-[15px] mb-3" style={{ color: GREEN_DARK }}>{t.shelf.professionalUse}</h2>
 
               <div className="grid grid-cols-2 gap-[10px]">
 
@@ -505,8 +507,7 @@ export function Subcategory({
                 {personalizedLine}
               </p>
               <p className="mt-1 text-xs text-gray-500">
-                Unlock this shelf with a sign-in code to browse listings, post a request, and save
-                favorites.
+                {t.shelf.unlockBody}
               </p>
             </div>
             <button
@@ -515,7 +516,7 @@ export function Subcategory({
               className="w-full rounded-xl py-3.5 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-95"
               style={{ backgroundColor: GREEN_DARK }}
             >
-              Get sign-in code to unlock →
+              {t.shelf.unlockCta}
             </button>
             <button
               type="button"
@@ -523,7 +524,7 @@ export function Subcategory({
               className="w-full rounded-xl border py-2.5 text-sm font-semibold"
               style={{ borderColor: BORDER, color: GREEN_DARK }}
             >
-              Back to subcategories
+              {t.shelf.backToSubcategories}
             </button>
           </div>
         ) : showEmptyState ? (
@@ -587,7 +588,7 @@ export function Subcategory({
 
               <ArrowLeft className="w-4 h-4" />
 
-              Back to subcategories
+              {t.shelf.backToSubcategories}
 
             </button>
 
@@ -613,7 +614,7 @@ export function Subcategory({
 
                     }}
 
-                    placeholder="Search in this shelf…"
+                    placeholder={t.shelf.searchPlaceholder}
 
                     className="flex-1 rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
 
@@ -637,7 +638,7 @@ export function Subcategory({
 
                   >
 
-                    Find
+                    {t.shelf.find}
 
                   </button>
 
@@ -651,15 +652,16 @@ export function Subcategory({
 
                     <span aria-live="polite">
 
-                      {filteredShelfListings.length} match{filteredShelfListings.length === 1 ? "" : "es"} in{" "}
-
-                      {localizeCategoryLabel(subcategoryLabel)}
+                      {t.shelf.matchCount(
+                        filteredShelfListings.length,
+                        localizeCategoryLabel(subcategoryLabel),
+                      )}
 
                     </span>
 
                   ) : (
 
-                    <span>Tip: use 1–2 keywords (e.g. “dewalt”, “tripod”)</span>
+                    <span>{t.shelf.searchTip}</span>
 
                   )}
 
@@ -681,11 +683,11 @@ export function Subcategory({
 
                     disabled={!searchDraft.trim()}
 
-                    title="Uses AI only when tapped"
+                    title={t.shelf.askAiTitle}
 
                   >
 
-                    Ask {MASCOT_NAME}
+                    {t.shelf.askMascot(MASCOT_NAME)}
 
                   </button>
 
@@ -703,13 +705,13 @@ export function Subcategory({
 
                 <p className="text-sm font-semibold" style={{ color: GREEN_DARK }}>
 
-                  No matches for “{activeQuery.trim()}”
+                  {t.shelf.noMatches(activeQuery.trim())}
 
                 </p>
 
                 <p className="mt-1 text-xs text-muted-foreground">
 
-                  Try fewer keywords, or post a request so hosts know what to list.
+                  {t.shelf.noMatchesHint}
 
                 </p>
 
@@ -725,7 +727,7 @@ export function Subcategory({
 
                 >
 
-                  Post request for “{activeQuery.trim()}”
+                  {t.shelf.postRequestFor(activeQuery.trim())}
 
                 </button>
 

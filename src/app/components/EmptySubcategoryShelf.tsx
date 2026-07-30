@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { MrRentanoAnimated } from "./MrRentanoAnimated";
 import type { AppMode } from "../../lib/appMode";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
+import { useMessages } from "../../lib/i18n/react";
 
 const GREEN = "#1A9E6E";
 const GREEN_DARK = "#0D5C3A";
@@ -38,22 +39,20 @@ export function EmptySubcategoryShelf({
   onShare,
   onFulfillRequest,
 }: EmptySubcategoryShelfProps) {
+  const t = useMessages();
   const isEarn = appMode === "earn";
-  const cityDisplay = cityName.trim() || "your area";
+  const cityDisplay = cityName.trim() || t.geo.yourArea;
   const categoryDisplay = localizeCategoryLabel(categoryName);
   const subcategoryDisplay = localizeCategoryLabel(subcategoryName);
+  const empty = t.shelf.empty;
 
   const rentanoLine = isEarn
-    ? `Zero competition in ${categoryDisplay} in ${cityDisplay}. First host takes all the demand.`
-    : "Someone nearby might have exactly what you need";
+    ? empty.rentanoEarn(categoryDisplay, cityDisplay)
+    : empty.rentanoRent;
 
-  const badge = isEarn ? "🏆 Pioneer spot available" : "📣 High demand signal";
-
-  const subtext = isEarn
-    ? "Early hosts earn 3× more — no competition, all the renters"
-    : "Hosts list where renters ask. Be first to ask.";
-
-  const primaryLabel = isEarn ? "List your first item →" : "Post a Request →";
+  const badge = isEarn ? empty.badgeEarn : empty.badgeRent;
+  const subtext = isEarn ? empty.subtextEarn : empty.subtextRent;
+  const primaryLabel = isEarn ? empty.listFirstCta : empty.postRequestCta;
 
   const handlePrimary = () => {
     if (isEarn) onStartListing();
@@ -68,7 +67,7 @@ export function EmptySubcategoryShelf({
         className="flex items-center gap-2 text-sm text-primary hover:underline"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to subcategories
+        {t.shelf.backToSubcategories}
       </button>
 
       <div
@@ -139,12 +138,12 @@ export function EmptySubcategoryShelf({
           className="w-full rounded-xl border py-2.5 text-sm font-medium transition-colors hover:bg-white/60"
           style={{ borderColor: BORDER, color: GREEN_DARK }}
         >
-          Share with neighbors
+          {empty.shareNeighbors}
         </button>
 
         {!isEarn ? (
           <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
-            Sharing spreads demand — the more neighbors join, faster shelves fill
+            {empty.shareHint}
           </p>
         ) : null}
       </div>
@@ -155,13 +154,13 @@ export function EmptySubcategoryShelf({
           style={{ borderColor: BORDER }}
         >
           <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-            {isEarn ? "Renters asking nearby" : `Recent requests near ${cityDisplay}`}
+            {isEarn ? empty.rentersAsking : empty.recentRequests(cityDisplay)}
           </p>
           <ul className="mt-3 space-y-2">
             {(fullRequests ?? []).slice(0, 3).map((r) => (
               <li key={r.id} className="rounded-2xl border p-3" style={{ borderColor: BORDER }}>
                 <p className="text-sm font-semibold" style={{ color: GREEN_DARK }}>
-                  {r.subcategory || r.category || "Wanted"}
+                  {r.subcategory || r.category || empty.wanted}
                 </p>
                 <p className="mt-1 text-sm text-gray-600 line-clamp-2">{r.description}</p>
                 {isEarn && onFulfillRequest ? (
@@ -171,7 +170,7 @@ export function EmptySubcategoryShelf({
                     className="mt-2 text-[13px] font-bold"
                     style={{ color: GREEN }}
                   >
-                    List to fulfill →
+                    {empty.listToFulfill}
                   </button>
                 ) : null}
               </li>
@@ -180,7 +179,7 @@ export function EmptySubcategoryShelf({
               requests?.slice(0, 3).map((r) => (
                 <li key={r.id} className="rounded-2xl border p-3" style={{ borderColor: BORDER }}>
                   <p className="text-sm font-semibold" style={{ color: GREEN_DARK }}>
-                    Wanted
+                    {empty.wanted}
                   </p>
                   <p className="mt-1 text-sm text-gray-600 line-clamp-2">{r.description}</p>
                 </li>

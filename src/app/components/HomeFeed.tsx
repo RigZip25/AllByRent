@@ -521,7 +521,7 @@ export function HomeFeed({
                 {home.distanceTitle}
               </h3>
               <p className="mb-2 text-[13px] text-gray-500">
-                Closer block first — widen if the shelf is thin.
+                {home.distanceHint}
               </p>
               <div className="flex flex-wrap gap-2">
                 {RADIUS_PRESETS.map((miles) => {
@@ -529,9 +529,9 @@ export function HomeFeed({
                   const milesLabel = home.miles(miles);
                   const label =
                     miles <= CLUSTER_RADIUS_DEFAULT_MI
-                      ? `Closer · ${milesLabel}`
+                      ? home.closerMiles(milesLabel)
                       : miles >= CLUSTER_RADIUS_MAX_MI
-                        ? `Farther · ${milesLabel}`
+                        ? home.fartherMiles(milesLabel)
                         : milesLabel;
                   return (
                     <button

@@ -194,7 +194,8 @@ function BookingScreenLoaded({
 }) {
   const auth = useAuth();
   const t = useMessages();
-  const title = getListingDisplayTitle(listing.title) || listing.title || "Item";
+  const title =
+    getListingDisplayTitle(listing.title) || listing.title || t.booking.itemFallback;
   const options = useMemo(() => fulfillmentOptions(listing, t.booking), [listing, t.booking]);
   const defaultFulfillment =
     options.find((o) => !o.disabled)?.id ?? options[0]?.id ?? "pickup";
@@ -210,7 +211,7 @@ function BookingScreenLoaded({
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
   const [startDate, setStartDate] = useState(defaultStartIso);
-  const [hostDisplayName, setHostDisplayName] = useState("Host");
+  const [hostDisplayName, setHostDisplayName] = useState(t.booking.hostFallback);
 
   useEffect(() => {
     setRentalDays((days) => Math.max(days, minRentalDays));
@@ -260,10 +261,10 @@ function BookingScreenLoaded({
   const buildBooking = (id: string, withStripePayment: boolean): RentalBooking => {
     const pickupLabel =
       fulfillment === "delivery"
-        ? `Delivery · ${listing.handoff.deliveryMaxMiles ?? 20} mi`
+        ? t.booking.deliveryMiles(listing.handoff.deliveryMaxMiles ?? 20)
         : fulfillment === "contactless"
-          ? "Contactless pickup"
-          : "In-person pickup";
+          ? t.booking.pickupContactless
+          : t.booking.pickupInPerson;
 
     const approvalDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
@@ -313,8 +314,8 @@ function BookingScreenLoaded({
         recipientId: listing.hostId,
         actorId: auth.userId,
         type: "booking_request",
-        title: "New booking request",
-        body: `Someone wants to rent your ${title}.`,
+        title: t.booking.newRequestTitle,
+        body: t.booking.newRequestBody(title),
         rentalId: id,
         listingId: listing.id,
       });
