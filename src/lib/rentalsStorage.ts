@@ -1,3 +1,4 @@
+import { getMessages } from "./i18n";
 import { fetchListingByIdRemote, getPublishedListingById } from "./listingStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
@@ -558,17 +559,20 @@ export function formatRentalDateRange(start: string, end: string): string {
   return `${s.toLocaleDateString(undefined, opts)} – ${e.toLocaleDateString(undefined, opts)}`;
 }
 
-export const RENTAL_STATUS_LABEL: Record<RentalStatus, string> = {
-  pending_approval: "Awaiting approval",
-  pending_checkin: "Confirmed",
-  active: "Active",
-  upcoming: "Upcoming",
-  overdue: "Overdue",
-  no_show: "No-show",
-  disputed: "In dispute",
-  completed: "Completed",
-  cancelled: "Cancelled",
-};
+export function getRentalStatusLabel(status: RentalStatus): string {
+  return getMessages().rentalStatus[status];
+}
+
+/** Localized via getMessages — prefer getRentalStatusLabel. */
+export const RENTAL_STATUS_LABEL: Record<RentalStatus, string> = new Proxy(
+  {} as Record<RentalStatus, string>,
+  {
+    get(_target, prop: string | symbol) {
+      if (typeof prop !== "string") return undefined;
+      return getMessages().rentalStatus[prop as RentalStatus];
+    },
+  },
+);
 
 export function isNoShowHistory(booking: RentalBooking): boolean {
   return Boolean(booking.noShowMarkedAt);

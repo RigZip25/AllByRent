@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { RentanoTip } from "./RentanoTip";
 import { PwaInstallPanel } from "./PwaInstallPanel";
 import { BRAND_GREEN, APP_NAME, PWA_SHORT_NAME } from "../lib/brand";
+import { useMessages } from "../lib/i18n/react";
 
 type PwaInstallRentanoTipProps = {
   nativeInstallReady: boolean;
@@ -18,6 +19,7 @@ export function PwaInstallRentanoTip({
   onDismiss,
 }: PwaInstallRentanoTipProps) {
   const [open, setOpen] = useState(false);
+  const { pwa } = useMessages();
 
   return (
     <div className="mx-4 mb-3">
@@ -25,10 +27,11 @@ export function PwaInstallRentanoTip({
         message={
           <span className="flex items-center justify-between gap-3">
             <span className="min-w-0">
-              Install {APP_NAME} — your neighborhood marketplace — as{" "}
-              <strong>{PWA_SHORT_NAME}</strong> on the Home Screen.
+              {pwa.tipInstallBefore(APP_NAME)}
+              <strong>{PWA_SHORT_NAME}</strong>
+              {pwa.tipInstallAfter}
               <span className="ml-2 not-italic font-medium" style={{ color: BRAND_GREEN }}>
-                {open ? "Hide" : "Show"}
+                {open ? pwa.tipHide : pwa.tipShow}
               </span>
             </span>
             {open ? (

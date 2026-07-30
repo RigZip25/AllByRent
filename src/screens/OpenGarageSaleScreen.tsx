@@ -7,7 +7,7 @@ import { resolveHostAccountId } from "../lib/hostIdentity";
 import { hostGarageSharePayload } from "../lib/garageMarketingShare";
 import { BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../lib/brand";
 import {
-  GARAGE_SALE_PRESETS,
+  getGarageSalePresets,
   garageSaleOpenLabel,
   garageSalePresetSchedule,
   getGarageSaleSchedule,
@@ -166,13 +166,7 @@ export function OpenGarageSaleScreen({
 
           <p className="mt-3 text-[12px] font-semibold text-gray-600">{copy.presetsLabel}</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {GARAGE_SALE_PRESETS.map((preset) => {
-              const label =
-                preset.id === "today"
-                  ? copy.presetToday
-                  : preset.id === "saturday"
-                    ? copy.presetSaturday
-                    : copy.presetWeekend;
+            {getGarageSalePresets().map((preset) => {
               return (
                 <button
                   key={preset.id}
@@ -181,7 +175,7 @@ export function OpenGarageSaleScreen({
                   className="rounded-full border px-3 py-1.5 text-[12px] font-semibold active:opacity-90"
                   style={{ borderColor: BORDER, color: GREEN }}
                 >
-                  {label}
+                  {preset.label}
                 </button>
               );
             })}

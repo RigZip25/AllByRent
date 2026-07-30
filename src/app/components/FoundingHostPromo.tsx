@@ -6,6 +6,7 @@ import {
   markFoundingHostPromoSeen,
 } from "../../lib/foundingHostPromoStorage";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
+import { useMessages } from "../../lib/i18n/react";
 
 const GREEN_DARK = "#0D5C3A";
 const GREEN = "#1A9E6E";
@@ -25,17 +26,18 @@ export function FoundingHostPromo({
   onPrimary,
   onShare,
 }: FoundingHostPromoProps) {
+  const t = useMessages();
+  const founding = t.shelf.founding;
   const isEarn = appMode === "earn";
   const seen = isFoundingHostPromoSeen();
+  const subcategoryDisplay = localizeCategoryLabel(subcategoryLabel);
 
   useEffect(() => {
     if (!seen) markFoundingHostPromoSeen();
   }, [seen]);
 
-  const primaryLabel = isEarn ? "List your first item" : "Post a Request";
-  const primaryHint = isEarn
-    ? "Start earning in minutes — neighbors are already looking."
-    : "Be first to ask — hosts list where demand shows up.";
+  const primaryLabel = isEarn ? founding.listFirstCta : founding.postRequestCta;
+  const primaryHint = isEarn ? founding.hintEarn : founding.hintRent;
 
   return (
     <div
@@ -59,14 +61,14 @@ export function FoundingHostPromo({
             style={{ backgroundColor: GREEN_DARK }}
           >
             <Trophy className="h-3.5 w-3.5" aria-hidden="true" />
-            {isEarn ? "Founding Host" : "Early Community"}
+            {isEarn ? founding.badgeFounding : founding.badgeCommunity}
           </span>
           <span
             className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold"
             style={{ borderColor: `${GOLD}66`, color: GREEN_DARK, backgroundColor: `${GOLD}18` }}
           >
             <Sparkles className="h-3 w-3" style={{ color: GOLD }} aria-hidden="true" />
-            First 1,000 hosts
+            {founding.firstHosts}
           </span>
         </div>
 
@@ -74,34 +76,21 @@ export function FoundingHostPromo({
           <p className="text-[22px] font-bold leading-tight" style={{ color: GREEN_DARK }}>
             {isEarn ? (
               <>
-                3 months <span style={{ color: GOLD }}>free listing</span>
+                {founding.titleEarnPrefix}{" "}
+                <span style={{ color: GOLD }}>{founding.titleEarnHighlight}</span>
               </>
             ) : (
-              <>Help fill this shelf first</>
+              <>{founding.titleRent}</>
             )}
           </p>
-          {isEarn ? (
-            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-              Launch offer for early hosts in{" "}
-              <span className="font-semibold text-foreground">
-                {localizeCategoryLabel(subcategoryLabel)}
-              </span>{" "}
-              — low
-              competition, priority placement while we grow.
-            </p>
-          ) : (
-            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-              Post what you need in{" "}
-              <span className="font-semibold text-foreground">
-                {localizeCategoryLabel(subcategoryLabel)}
-              </span>
-              . Your
-              request signals demand — the first hosts list where neighbors ask.
-            </p>
-          )}
+          <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+            {isEarn
+              ? founding.bodyEarn(subcategoryDisplay)
+              : founding.bodyRent(subcategoryDisplay)}
+          </p>
           <p className="mt-2 text-[11px] text-muted-foreground">
-            Launch offer · limited spots
-            {!seen ? " · spots filling" : null}
+            {founding.launchOffer}
+            {!seen ? founding.spotsFilling : null}
           </p>
         </div>
 
@@ -122,7 +111,7 @@ export function FoundingHostPromo({
             className="w-full rounded-xl border py-2.5 text-sm font-medium transition-colors hover:bg-white/60"
             style={{ borderColor: BORDER, color: GREEN_DARK }}
           >
-            Share with neighbors
+            {founding.shareNeighbors}
           </button>
         ) : null}
       </div>

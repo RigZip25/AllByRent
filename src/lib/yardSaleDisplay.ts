@@ -6,6 +6,7 @@ import {
 } from "./garageDisplay";
 import type { GarageSaleSchedule } from "./garageSaleStorage";
 import { garageSaleOpenLabel } from "./garageSaleStorage";
+import { getMessages } from "./i18n";
 
 export type YardSaleOpenStatus = "now" | "today" | "weekend" | "scheduled" | "unset";
 
@@ -38,8 +39,9 @@ function openStatusFromSchedule(
   schedule: GarageSaleSchedule | null | undefined,
   now = new Date(),
 ): { openLabel: string; openStatus: YardSaleOpenStatus } {
+  const copy = getMessages().garageSale.openGarageSale;
   if (!schedule || schedule.daysOfWeek.length === 0) {
-    return { openLabel: "Hours not set", openStatus: "unset" };
+    return { openLabel: copy.hoursNotSet, openStatus: "unset" };
   }
 
   const summary = garageSaleOpenLabel(schedule);
@@ -51,10 +53,10 @@ function openStatusFromSchedule(
   const inWindow = end > start ? minutes >= start && minutes < end : minutes >= start || minutes < end;
 
   if (isOpenDay && inWindow) {
-    return { openLabel: `Open now · ${summary}`, openStatus: "now" };
+    return { openLabel: copy.openNowWithSummary(summary), openStatus: "now" };
   }
   if (isOpenDay) {
-    return { openLabel: `Today · ${summary}`, openStatus: "today" };
+    return { openLabel: copy.todayWithSummary(summary), openStatus: "today" };
   }
   const weekendDays = schedule.daysOfWeek.filter((d) => d === 0 || d === 6);
   if (weekendDays.length > 0 && (day === 5 || day === 6 || day === 0)) {

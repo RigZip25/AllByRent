@@ -1,5 +1,6 @@
 import { Share, Smartphone, X } from "lucide-react";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN, PWA_SHORT_NAME } from "../lib/brand";
+import { useMessages } from "../lib/i18n/react";
 
 type PwaInstallBannerProps = {
   onInstall: () => void;
@@ -16,6 +17,8 @@ export function PwaInstallBanner({
   manualIos,
   compact = false,
 }: PwaInstallBannerProps) {
+  const { pwa } = useMessages();
+
   return (
     <div
       className={`relative overflow-hidden rounded-2xl border border-white/20 shadow-lg ${
@@ -29,7 +32,7 @@ export function PwaInstallBanner({
         type="button"
         onClick={onDismiss}
         className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-        aria-label="Dismiss install tip"
+        aria-label={pwa.dismissAria}
       >
         <X className="h-4 w-4" />
       </button>
@@ -43,27 +46,30 @@ export function PwaInstallBanner({
         </div>
 
         <div className="min-w-0 flex-1 text-left">
-          <p className="text-sm font-bold leading-snug text-white">
-            Add your neighborhood marketplace
-          </p>
+          <p className="text-sm font-bold leading-snug text-white">{pwa.bannerTitle}</p>
           {manualIos ? (
             <p className="mt-1 text-xs leading-relaxed text-white/85">
-              Tap{" "}
+              {pwa.bannerIosBeforeShare}
               <span className="inline-flex items-center gap-0.5 font-semibold text-white">
-                Share <Share className="inline h-3.5 w-3.5" />
-              </span>{" "}
-              in Safari → <strong>Add to Home Screen</strong> as{" "}
+                {pwa.bannerIosShare} <Share className="inline h-3.5 w-3.5" />
+              </span>
+              {pwa.bannerIosMid}
+              <strong>{pwa.bannerIosAddToHome}</strong>
+              {pwa.bannerIosAs}
               <strong>{PWA_SHORT_NAME}</strong>.
             </p>
           ) : nativeInstallReady ? (
             <p className="mt-1 text-xs leading-relaxed text-white/85">
-              Installs as <strong>{PWA_SHORT_NAME}</strong> — {APP_NAME}, rent · sell · gift on
-              your block.
+              {pwa.bannerInstallsAs}
+              <strong>{PWA_SHORT_NAME}</strong>
+              {pwa.bannerAndroidReady(APP_NAME)}
             </p>
           ) : (
             <p className="mt-1 text-xs leading-relaxed text-white/85">
-              In Chrome: menu <strong>⋮</strong> → <strong>Install app</strong> — look for{" "}
-              <strong>Neighborhood Marketplace</strong>.
+              {pwa.bannerAndroidManualBefore}
+              <strong>⋮</strong> → <strong>{pwa.bannerAndroidManualInstall}</strong>
+              {pwa.bannerAndroidManualLookFor}
+              <strong>{pwa.androidManual.promptName}</strong>.
             </p>
           )}
 
@@ -74,7 +80,7 @@ export function PwaInstallBanner({
               className="mt-2.5 rounded-full px-4 py-2 text-xs font-bold shadow-md transition-opacity hover:opacity-95"
               style={{ backgroundColor: BRAND_AMBER, color: BRAND_GREEN }}
             >
-              Install {PWA_SHORT_NAME}
+              {pwa.installShort(PWA_SHORT_NAME)}
             </button>
           ) : null}
         </div>

@@ -106,7 +106,7 @@ function AvailabilityPanel({
             type="button"
             onClick={onClose}
             className="rounded-full p-2 hover:bg-muted"
-            aria-label="Close availability"
+            aria-label={t.item.closeAvailabilityAria}
           >
             <X className="h-5 w-5" />
           </button>
@@ -114,24 +114,24 @@ function AvailabilityPanel({
 
         {listing.paused ? (
           <p className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-            This listing is paused — the owner is not accepting new bookings right now.
+            {t.item.pausedAvailabilityBanner}
           </p>
         ) : (
           <p className="mb-3 text-sm text-muted-foreground">
-            Pickup windows below. Confirm exact dates when you book.
+            {t.item.pickupWindowsHint}
           </p>
         )}
 
         <dl className="space-y-2 text-sm">
           {weekday ? (
             <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">Weekdays</dt>
+              <dt className="text-muted-foreground">{t.item.weekdays}</dt>
               <dd className="font-medium">{weekday}</dd>
             </div>
           ) : null}
           {weekend ? (
             <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">Weekends</dt>
+              <dt className="text-muted-foreground">{t.item.weekends}</dt>
               <dd className="font-medium">{weekend}</dd>
             </div>
           ) : null}
@@ -139,7 +139,7 @@ function AvailabilityPanel({
 
         {blocked.length > 0 ? (
           <div className="mt-4">
-            <p className="text-sm font-semibold">Blocked dates</p>
+            <p className="text-sm font-semibold">{t.item.blockedDates}</p>
             <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-sm text-muted-foreground">
               {blocked.map((line) => (
                 <li key={line}>• {line}</li>
@@ -147,7 +147,7 @@ function AvailabilityPanel({
             </ul>
           </div>
         ) : (
-          <p className="mt-4 text-sm text-muted-foreground">No blocked dates listed.</p>
+          <p className="mt-4 text-sm text-muted-foreground">{t.item.noBlockedDates}</p>
         )}
 
         <button
@@ -155,7 +155,7 @@ function AvailabilityPanel({
           onClick={onClose}
           className="btn-primary mt-4 w-full rounded-xl py-3 font-semibold text-white"
         >
-          Close
+          {t.common.close}
         </button>
       </div>
     </div>
@@ -198,8 +198,8 @@ export function ItemDetail({
   const coverUrl = useCoverMediaUrl(cover).url;
 
   const title = listing
-    ? getListingDisplayTitle(listing.title) || listing.title || "Listing"
-    : "Listing";
+    ? getListingDisplayTitle(listing.title) || listing.title || t.item.listingFallback
+    : t.item.listingFallback;
   const dailyRate = listing ? parseListingDailyRate(listing.pricing.dailyRate) || 0 : 0;
   const priceLine = listing ? formatListingPriceLine(listing) : "";
   const deliverySummary = listing ? deliverySummaryForListing(listing) : null;
@@ -310,7 +310,7 @@ export function ItemDetail({
           </button>
         </div>
         <div className="flex flex-1 items-center justify-center p-6 text-sm text-muted-foreground">
-          Loading item…
+          {t.item.loading}
         </div>
       </div>
     );
@@ -327,14 +327,14 @@ export function ItemDetail({
         </div>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
           <p className="text-muted-foreground">
-            This listing may have been removed or is no longer available in your area.
+            {t.item.removedBody}
           </p>
           <button
             type="button"
             onClick={onBack}
             className="rounded-xl bg-primary px-6 py-3 font-medium text-white"
           >
-            Go back
+            {t.item.goBack}
           </button>
         </div>
       </div>
@@ -370,7 +370,7 @@ export function ItemDetail({
           ) : (
             <>
               <Camera className="w-16 h-16 text-primary" />
-              <span className="text-sm text-muted-foreground">Photo by owner</span>
+              <span className="text-sm text-muted-foreground">{t.item.photoByOwner}</span>
             </>
           )}
 
@@ -385,7 +385,7 @@ export function ItemDetail({
           {isHeavy ? (
             <div className="absolute top-4 right-4 flex items-center gap-1 rounded-lg bg-amber-500/95 px-2.5 py-1.5 text-xs font-semibold text-white">
               <Package className="h-3.5 w-3.5" aria-hidden />
-              Heavy item
+              {t.item.heavyItem}
             </div>
           ) : null}
         </div>
@@ -408,7 +408,7 @@ export function ItemDetail({
                 ) : dailyRate > 0 ? (
                   <>
                     <p className="text-2xl font-bold text-primary">${dailyRate}</p>
-                    <p className="text-xs text-muted-foreground">per day</p>
+                    <p className="text-xs text-muted-foreground">{t.item.perDay}</p>
                   </>
                 ) : (
                   <p className="text-sm font-semibold text-muted-foreground">{t.item.askOwner}</p>
@@ -418,19 +418,19 @@ export function ItemDetail({
 
             <div className="flex items-center gap-2 mt-3">
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-              <span className="text-sm font-medium text-muted-foreground">New on the block</span>
+              <span className="text-sm font-medium text-muted-foreground">{t.item.newOnTheBlock}</span>
             </div>
           </div>
 
           {listing.paused ? (
             <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-              Paused — not available right now.
+              {t.item.pausedShort}
             </p>
           ) : null}
 
           {isSold ? (
             <p className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
-              This item has been sold.
+              {t.item.soldBanner}
             </p>
           ) : null}
 
@@ -465,9 +465,9 @@ export function ItemDetail({
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Unique QR Code</h3>
+                  <h3 className="font-semibold mb-1">{t.item.uniqueQrTitle}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Scan to check in, track rental status, and verify the item at pickup.
+                    {t.item.uniqueQrBody}
                   </p>
                 </div>
               </div>
@@ -489,7 +489,7 @@ export function ItemDetail({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-semibold">Garage host</span>
+                    <span className="font-semibold">{t.item.garageHost}</span>
                     <CheckCircle2 className="w-4 h-4 text-primary" />
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -530,7 +530,7 @@ export function ItemDetail({
               className="w-full bg-card border border-border py-3 rounded-xl flex items-center justify-between px-4 hover:border-primary/50 transition-colors"
             >
               <span className="font-medium">{t.item.instructions}</span>
-              <span className="text-sm text-primary">View</span>
+              <span className="text-sm text-primary">{t.item.view}</span>
             </button>
           ) : null}
 
@@ -562,13 +562,13 @@ export function ItemDetail({
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Headphones className="w-4 h-4 text-primary" />
                 </div>
-                <span className="text-sm">In-app support via {MASCOT_NAME}</span>
+                <span className="text-sm">{t.item.inAppSupport(MASCOT_NAME)}</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <ScanLine className="w-4 h-4 text-primary" />
                 </div>
-                <span className="text-sm">QR check-in at pickup</span>
+                <span className="text-sm">{t.item.qrCheckIn}</span>
               </div>
             </div>
           </div>
@@ -584,7 +584,7 @@ export function ItemDetail({
                 <Calendar className="w-5 h-5 text-muted-foreground" />
                 <span className="font-medium">{t.item.checkAvailability}</span>
               </div>
-              <span className="text-sm text-primary">View calendar</span>
+              <span className="text-sm text-primary">{t.item.viewCalendar}</span>
             </button>
           ) : null}
         </div>
@@ -596,7 +596,7 @@ export function ItemDetail({
 
       {shareOpen ? (
         <div className="shrink-0 border-t border-border bg-card p-4">
-          <p className="mb-2 text-sm font-semibold">Share this listing</p>
+          <p className="mb-2 text-sm font-semibold">{t.item.shareListing}</p>
           <SocialShareButtons
             payload={sharePayload}
             shareKind="listing"
@@ -623,7 +623,7 @@ export function ItemDetail({
             disabled={!canRent}
             className="flex-1 bg-primary hover:bg-primary/90 disabled:opacity-50 text-white py-3 px-4 rounded-xl transition-colors font-medium"
           >
-            {dailyRate > 0 ? `Book · $${dailyRate}/day` : "Book Now"}
+            {dailyRate > 0 ? t.item.bookWithRate(dailyRate) : t.item.bookNow}
           </button>
         ) : null}
 
@@ -633,7 +633,7 @@ export function ItemDetail({
             onClick={handleBuy}
             className="flex-1 bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-[#0D5C3A] py-3 px-4 rounded-xl transition-colors font-bold"
           >
-            Buy · {formatShopUsd(shopOffer.buyNowUsd)}
+            {t.item.buyWithPrice(formatShopUsd(shopOffer.buyNowUsd))}
           </button>
         ) : null}
 
@@ -650,7 +650,7 @@ export function ItemDetail({
             }}
             className="flex-1 bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-[#0D5C3A] py-3 px-4 rounded-xl transition-colors font-bold"
           >
-            Free — arrange pickup
+            {t.item.freeArrangePickup}
           </button>
         ) : null}
 
@@ -669,7 +669,7 @@ export function ItemDetail({
             {listing.paused
               ? t.item.paused
               : isSold
-                ? "Sold"
+                ? t.item.sold
                 : listing.modes.gift && !listing.modes.rent && !listing.modes.sell
                   ? t.item.giftHint
                   : t.item.notAvailable}

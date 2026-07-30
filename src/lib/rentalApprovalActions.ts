@@ -1,23 +1,26 @@
 import { recordManualBookingResponse } from "./bookingRequestsStorage";
+import { getMessages } from "./i18n";
 import { createNotificationRemote } from "./notificationsStorage";
 import { updateBooking, type RentalBooking } from "./rentalsStorage";
 import { cancelRentalPayment, captureRentalPayment } from "./stripePayments";
 
 function refundNote(booking: RentalBooking): string {
+  const t = getMessages().booking;
   if (booking.stripePayment || booking.paymentOnHold) {
-    return "Any authorized payment will be released — refunds may take a few business days.";
+    return t.refundNotePayment;
   }
-  return "No payment was charged for this request.";
+  return t.refundNoteNone;
 }
 
 export async function approveRentalBooking(
   booking: RentalBooking,
   hostUserId: string,
 ): Promise<void> {
+  const t = getMessages().booking;
   if (booking.stripePayment || booking.paymentOnHold) {
     const captured = await captureRentalPayment(booking.id);
     if (!captured.ok) {
-      throw new Error(captured.reason ?? "Could not capture payment. Try again or contact support.");
+      throw new Error(captured.reason ?? t.captureFailed);
     }
   }
 
@@ -32,8 +35,8 @@ export async function approveRentalBooking(
     recipientId: booking.counterpartyId,
     actorId: hostUserId,
     type: "booking_request",
-    title: "Booking approved",
-    body: `${booking.itemTitle} is confirmed — open Rentals for pickup PIN and details.`,
+    title: t.approvedTitle,
+    body: t.approvedBody(booking.itemTitle),
     rentalId: booking.id,
     listingId: booking.listingId,
   });
@@ -43,6 +46,7 @@ export async function declineRentalBooking(
   booking: RentalBooking,
   hostUserId: string,
 ): Promise<void> {
+  const t = getMessages().booking;
   updateBooking(booking.id, { status: "cancelled", paymentOnHold: false });
   recordManualBookingResponse(booking.id, hostUserId, "declined");
   void cancelRentalPayment(booking.id);
@@ -50,8 +54,8 @@ export async function declineRentalBooking(
     recipientId: booking.counterpartyId,
     actorId: hostUserId,
     type: "booking_request",
-    title: "Request declined",
-    body: `Your request for ${booking.itemTitle} was declined. ${refundNote(booking)}`,
+    title: t.declinedTitle,
+    body: t.declinedBody(booking.itemTitle, refundNote(booking)),
     rentalId: booking.id,
     listingId: booking.listingId,
   });
@@ -61,22 +65,24 @@ export async function cancelRentalRequest(
   booking: RentalBooking,
   renterUserId: string,
 ): Promise<void> {
+  const t = getMessages().booking;
   updateBooking(booking.id, { status: "cancelled", paymentOnHold: false });
   void cancelRentalPayment(booking.id);
   await createNotificationRemote({
     recipientId: booking.counterpartyId,
     actorId: renterUserId,
     type: "booking_request",
-    title: "Booking request cancelled",
-    body: `The renter cancelled their request for ${booking.itemTitle}.`,
+    title: t.cancelledTitle,
+    body: t.cancelledBody(booking.itemTitle),
     rentalId: booking.id,
     listingId: booking.listingId,
   });
 }
 
 export function cancelRefundLabel(booking: RentalBooking): string {
+  const t = getMessages().rentalCard;
   if (booking.stripePayment || booking.paymentOnHold) {
-    return "Cancel request (release payment)";
+    return t.cancelRequestRelease;
   }
-  return "Cancel request";
+  return t.cancelRequest;
 }

@@ -1,5 +1,13 @@
+import { getMessages } from "./i18n";
+
 const FOUNDING_HOST_PROMO_SEEN_KEY = "founding_host_promo_seen";
 
+/** @deprecated Prefer getMessages().systemUi.resetConfirm */
+export function getResetAppConfirmMessage(): string {
+  return getMessages().systemUi.resetConfirm;
+}
+
+/** @deprecated Prefer getMessages().systemUi.resetConfirm */
 export const RESET_APP_CONFIRM_MESSAGE =
   "Reset all app data? Onboarding, profile, listings, and rentals will be cleared.";
 
@@ -93,7 +101,7 @@ export async function resetAllAppData(): Promise<void> {
 }
 
 export function confirmAndResetAppData(): void {
-  if (window.confirm(RESET_APP_CONFIRM_MESSAGE)) {
+  if (window.confirm(getMessages().systemUi.resetConfirm)) {
     void resetAllAppData();
   }
 }

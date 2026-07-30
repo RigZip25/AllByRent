@@ -1,3 +1,11 @@
+import { getLocale, getMessages } from "./i18n";
+import type { AppLocale } from "./i18n/types";
+
+const TIME_LOCALE_TAGS: Record<AppLocale, string> = {
+  en: "en-US",
+  cs: "cs-CZ",
+};
+
 const SCHEDULE_KEY = "abr_garage_sale_schedule";
 const LEGACY_WINDOW_KEY = "abr_garage_sale_open_window";
 
@@ -10,7 +18,40 @@ export type GarageSaleSchedule = {
 
 export type GarageSalePresetId = "today" | "saturday" | "weekend";
 
+function openGarageSaleCopy() {
+  return getMessages().garageSale.openGarageSale;
+}
+
+/** Localized short day labels (Sun…Sat) via getMessages(). */
+export function getGarageSaleDayLabels(): readonly [
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+] {
+  return openGarageSaleCopy().dayLabels;
+}
+
+/** Localized full day names via getMessages(). */
+export function getGarageSaleDayNames(): readonly [
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+] {
+  return openGarageSaleCopy().dayNames;
+}
+
+/** @deprecated Prefer getGarageSaleDayLabels() — EN snapshot only. */
 export const GARAGE_SALE_DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+
+/** @deprecated Prefer getGarageSaleDayNames() — EN snapshot only. */
 export const GARAGE_SALE_DAY_NAMES = [
   "Sunday",
   "Monday",
@@ -21,6 +62,20 @@ export const GARAGE_SALE_DAY_NAMES = [
   "Saturday",
 ] as const;
 
+export function getGarageSalePresets(): Array<{
+  id: GarageSalePresetId;
+  label: string;
+  hint: string;
+}> {
+  const copy = openGarageSaleCopy();
+  return [
+    { id: "today", label: copy.presetToday, hint: copy.presetTodayHint },
+    { id: "saturday", label: copy.presetSaturday, hint: copy.presetSaturdayHint },
+    { id: "weekend", label: copy.presetWeekend, hint: copy.presetWeekendHint },
+  ];
+}
+
+/** @deprecated Prefer getGarageSalePresets() — EN snapshot only. */
 export const GARAGE_SALE_PRESETS: Array<{
   id: GarageSalePresetId;
   label: string;
@@ -105,23 +160,29 @@ export function setGarageSaleSchedule(schedule: GarageSaleSchedule): void {
   }
 }
 
+/** Locale-aware clock label for HH:MM (e.g. en → 9:00 AM, cs → 9:00). */
 export function formatTime12h(time24: string): string {
   if (!isValidTime(time24)) return time24;
   const [hourRaw, minuteRaw] = time24.split(":");
   const hour = Number.parseInt(hourRaw, 10);
   const minute = Number.parseInt(minuteRaw, 10);
-  const period = hour >= 12 ? "pm" : "am";
-  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
-  if (minute === 0) return `${hour12}${period}`;
-  return `${hour12}:${minuteRaw}${period}`;
+  const date = new Date(2000, 0, 1, hour, minute, 0, 0);
+  const tag = TIME_LOCALE_TAGS[getLocale()] ?? "en-US";
+  return new Intl.DateTimeFormat(tag, {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
 }
 
 export function formatGarageSaleDays(daysOfWeek: number[]): string {
+  const copy = openGarageSaleCopy();
+  const dayNames = copy.dayNames;
+  const dayLabels = copy.dayLabels;
   const days = [...new Set(daysOfWeek.filter(isValidDay))].sort((a, b) => a - b);
-  if (days.length === 0) return "Pick a day";
-  if (days.length === 1) return GARAGE_SALE_DAY_NAMES[days[0]];
-  if (days.length === 2 && days.includes(6) && days.includes(0)) return "Sat–Sun";
-  return days.map((day) => GARAGE_SALE_DAY_LABELS[day]).join(", ");
+  if (days.length === 0) return copy.pickADay;
+  if (days.length === 1) return dayNames[days[0]];
+  if (days.length === 2 && days.includes(6) && days.includes(0)) return copy.weekendSatSun;
+  return days.map((day) => dayLabels[day]).join(", ");
 }
 
 export function formatGarageSaleHours(schedule: GarageSaleSchedule): string {

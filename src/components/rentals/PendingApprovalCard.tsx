@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { useAuth } from "../../hooks/AuthProvider";
 import { useNow } from "../../hooks/useNow";
-import { cancelRefundLabel, cancelRentalRequest } from "../../lib/rentalApprovalActions";
+import { useMessages } from "../../lib/i18n/react";
+import { cancelRentalRequest } from "../../lib/rentalApprovalActions";
 import { formatCountdownShort, getCountdownParts } from "../../lib/rentalTiming";
 import {
   formatRentalDateRange,
@@ -24,14 +25,15 @@ export function PendingApprovalCard({
   onViewProfile: (userId: string) => void;
 }) {
   const auth = useAuth();
+  const { rentalCard: t } = useMessages();
   const [busy, setBusy] = useState(false);
   const now = useNow(30_000);
   const ownerTimeLeft = useMemo(() => {
     if (!booking.approvalDeadline) return null;
     const parts = getCountdownParts(booking.approvalDeadline, now);
-    if (parts.totalMs <= 0) return "Expired";
+    if (parts.totalMs <= 0) return t.expired;
     return formatCountdownShort(parts);
-  }, [booking.approvalDeadline, now]);
+  }, [booking.approvalDeadline, now, t.expired]);
 
   const handleCancel = async () => {
     const renterUserId = auth.userId;
@@ -45,6 +47,11 @@ export function PendingApprovalCard({
     }
   };
 
+  const cancelLabel =
+    booking.stripePayment || booking.paymentOnHold
+      ? t.cancelRequestRelease
+      : t.cancelRequest;
+
   return (
     <article className="rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
       <div className="mb-2 flex items-start justify-between gap-2">
@@ -55,7 +62,7 @@ export function PendingApprovalCard({
           className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold text-white"
           style={{ backgroundColor: BLUE }}
         >
-          Awaiting approval
+          {t.awaitingApproval}
         </span>
       </div>
       <p className="text-[13px] text-gray-500">
@@ -72,13 +79,13 @@ export function PendingApprovalCard({
       <InsuredLabel modes={booking.listingModes} compact />
 
       <div className="mt-3 space-y-1 text-[13px] text-gray-600">
-        <p>Owner has 24h to respond{ownerTimeLeft ? ` · ${ownerTimeLeft} left` : ""}</p>
+        <p>{t.ownerRespond24h(ownerTimeLeft)}</p>
         {booking.paymentOnHold ? (
           <p className="font-semibold" style={{ color: GREEN }}>
-            Payment on hold — not charged until approved
+            {t.paymentOnHoldRenter}
           </p>
         ) : (
-          <p>No payment required until the owner approves.</p>
+          <p>{t.noPaymentUntilApproved}</p>
         )}
       </div>
 
@@ -89,7 +96,7 @@ export function PendingApprovalCard({
         style={{ borderColor: BORDER }}
         onClick={() => void handleCancel()}
       >
-        {busy ? "Cancelling…" : cancelRefundLabel(booking)}
+        {busy ? t.cancelling : cancelLabel}
       </button>
     </article>
   );

@@ -1,3 +1,4 @@
+import { getMessages } from "../i18n";
 import { isSupabaseConfigured } from "../supabaseClient";
 import { isStripePaymentsEnabled } from "../stripeConfig";
 
@@ -18,27 +19,27 @@ export function canSubmitBookingRequest(
 }
 
 export function getBookingWithoutPaymentMessage(): string {
-  return "Card checkout is not configured yet. Your request will be sent to the host — payment can be arranged after approval.";
+  return getMessages().paymentsUi.bookingWithoutPayment;
 }
 
 export function getSupabaseRequiredMessage(): string {
-  return "This app needs a live connection to start. Please try again shortly or contact support.";
+  return getMessages().paymentsUi.supabaseRequired;
 }
 
 export function getStripeRequiredMessage(): string {
-  return "Card payments are temporarily unavailable. You can still send a request to the host.";
+  return getMessages().paymentsUi.stripeRequired;
 }
 
 /** Buy-now / garage cart — not rental booking copy. */
 export function getGarageStripeRequiredMessage(): string {
-  return "Card checkout is temporarily unavailable. You can still browse and save items — try again shortly.";
+  return getMessages().paymentsUi.garageStripeRequired;
 }
 
 export function getSignInRequiredMessage(): string {
-  return "Sign in or continue as guest with your email.";
+  return getMessages().paymentsUi.signInRequired;
 }
 
 /** Auction winner pay — guest checkout not supported for bids. */
 export function getAuctionSignInRequiredMessage(): string {
-  return "Sign in to pay your winning bid.";
+  return getMessages().paymentsUi.auctionSignInRequired;
 }
