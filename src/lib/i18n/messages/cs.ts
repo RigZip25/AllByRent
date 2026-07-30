@@ -26,7 +26,7 @@ export const cs: AppMessages = {
         title: "Naplnit garáž",
         subtitle:
           "Vystavte, co máte — půjčit, prodat nebo předat ze své vitríny.",
-        cta: "Otevřít vitrínu →",
+        cta: "Otevřít moji garáž →",
       },
       browseBlock: {
         title: "Procházet blok",

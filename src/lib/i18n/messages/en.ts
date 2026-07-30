@@ -26,7 +26,7 @@ export const en: AppMessages = {
         title: "Stock my garage",
         subtitle:
           "List what you own — borrow, sell, or pass along from your showcase.",
-        cta: "Open my showcase →",
+        cta: "Open my garage →",
       },
       browseBlock: {
         title: "Browse the block",

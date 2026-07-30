@@ -155,6 +155,7 @@ export function ProfileScreen({
   onDeleteAccount,
   onViewPublicProfile,
   onRequireAuth,
+  onPreferredModeChange,
 }: {
   onRentals: () => void;
   onMrE: () => void;
@@ -167,6 +168,7 @@ export function ProfileScreen({
   onDeleteAccount?: () => void;
   onViewPublicProfile?: (userId?: string) => void;
   onRequireAuth?: () => void;
+  onPreferredModeChange?: (mode: AppMode) => void;
 }) {
   const auth = useAuth();
   const { profile: profileCopy } = useMessages();
@@ -285,6 +287,7 @@ export function ProfileScreen({
   const handleModeChange = (next: AppMode) => {
     updatePreferredMode(next);
     setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
+    onPreferredModeChange?.(next);
   };
 
   const handleEditName = () => {
@@ -431,7 +434,7 @@ export function ProfileScreen({
         <div className="mb-4">
           <ModeToggle mode={mode} onChange={handleModeChange} />
           <p className="mt-2 px-1 text-[12px] text-gray-500">
-            Browse or stock your garage — same profile. Browse opens on your block.
+            Browse opens your block hub; My Garage opens your storefront. List items anytime with +.
           </p>
         </div>
 

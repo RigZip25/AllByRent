@@ -59,7 +59,7 @@ import {
   peekEditingListingReturn,
   type AuthIntent,
 } from "../lib/authReturn";
-import { getAppMode, setAppMode } from "../lib/appMode";
+import { getAppMode, setAppMode, type AppMode } from "../lib/appMode";
 import {
   completeOnboarding,
   hasRoleChoice,
@@ -986,7 +986,9 @@ function AppRoutes() {
     markRoleChosen();
     setAppMode("earn");
     completeOnboarding();
-    navigateTo("listingIntro");
+    // Open My Garage dashboard — listing creation stays on Stock (+), not role choice.
+    setNavStack([]);
+    setCurrentScreen("garage");
   };
 
   const handleSave = () => {
@@ -994,6 +996,18 @@ function AppRoutes() {
     setAppMode("rent");
     navigateTo("whereAreYou");
   };
+
+  const handlePreferredModeChange = useCallback(
+    (mode: AppMode) => {
+      setAppMode(mode);
+      if (mode === "earn") {
+        goToTab("garage");
+        return;
+      }
+      goToTab("browseHub");
+    },
+    [goToTab],
+  );
 
   const handleAtHome = useCallback(async () => {
     setHomeLocationError(null);
@@ -1598,6 +1612,7 @@ function AppRoutes() {
             onOpenPersonalInfo={handleOpenPersonalInfo}
             onOpenIdentity={() => navigateTo("identity")}
             onOpenAgentActivity={() => navigateTo("agentActivity")}
+            onPreferredModeChange={handlePreferredModeChange}
             onViewPublicProfile={handleViewPublicProfile}
             onRequireAuth={() => {
               if (auth.configured && !auth.session) {
