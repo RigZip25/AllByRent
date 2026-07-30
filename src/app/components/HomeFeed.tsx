@@ -32,18 +32,12 @@ import {
   setClusterRadiusMi,
 } from "../../lib/clusterConfig";
 import { fetchRemoteProfileNamesByIds } from "../../lib/supabaseProfile";
+import { useMessages } from "../../lib/i18n/react";
 import { MrRentano } from "./MrRentano";
 
 const GREEN = "#1A9E6E";
 const GREEN_DARK = "#0D5C3A";
 const BORDER = "#E8E6E0";
-
-const PRICE_PRESETS: { id: string; label: string; min: number | null; max: number | null }[] = [
-  { id: "any", label: "Any price", min: null, max: null },
-  { id: "under25", label: "Under $25", min: null, max: 25 },
-  { id: "25to75", label: "$25–$75", min: 25, max: 75 },
-  { id: "75plus", label: "$75+", min: 75, max: null },
-];
 
 const RADIUS_PRESETS = [
   CLUSTER_RADIUS_DEFAULT_MI,
@@ -70,6 +64,8 @@ export function HomeFeed({
   onRentals,
   onBackToHub,
 }: HomeFeedProps) {
+  const messages = useMessages();
+  const { home, common } = messages;
   const [modeChip, setModeChip] = useState<ModeChip>(() => loadHomeFeedMode());
   const [category, setCategory] = useState<string | null>(() => loadHomeFeedCategory());
   const [pricePresetId, setPricePresetId] = useState("any");
@@ -85,7 +81,17 @@ export function HomeFeed({
   const city = getActiveRentLocationLabel().trim();
   const clusterLabel = clusterLabelForCity(city, clusterRadiusMi);
   const needsLocation = !hasRentLocationSetup();
-  const pricePreset = PRICE_PRESETS.find((p) => p.id === pricePresetId) ?? PRICE_PRESETS[0];
+
+  const pricePresets = useMemo(
+    () => [
+      { id: "any", label: home.priceAny, min: null as number | null, max: null as number | null },
+      { id: "under25", label: home.priceUnder25, min: null, max: 25 },
+      { id: "25to75", label: home.price25to75, min: 25, max: 75 },
+      { id: "75plus", label: home.price75plus, min: 75, max: null },
+    ],
+    [home.priceAny, home.priceUnder25, home.price25to75, home.price75plus],
+  );
+  const pricePreset = pricePresets.find((p) => p.id === pricePresetId) ?? pricePresets[0];
 
   const handleBellPress = () => {
     const taps = bellTapRef.current;
@@ -156,9 +162,9 @@ export function HomeFeed({
     (clusterRadiusMi !== CLUSTER_RADIUS_DEFAULT_MI ? 1 : 0);
 
   const modeChips: { id: ModeChip; label: string }[] = [
-    { id: "all", label: "All" },
-    { id: "rent", label: "Rent" },
-    { id: "buy", label: "Buy" },
+    { id: "all", label: home.modeAny },
+    { id: "rent", label: home.modeRent },
+    { id: "buy", label: home.modeBuy },
   ];
 
   const clearFilters = () => {
@@ -173,6 +179,8 @@ export function HomeFeed({
     setClusterRadiusState(miles);
   };
 
+  const emptyIsFiltered = Boolean(category || pricePresetId !== "any");
+
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <div
@@ -186,7 +194,7 @@ export function HomeFeed({
               onClick={onBackToHub}
               className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
               style={{ borderColor: BORDER }}
-              aria-label="Back to browse choices"
+              aria-label={home.backToBrowseAria}
             >
               <ArrowLeft className="h-5 w-5" style={{ color: GREEN_DARK }} />
             </button>
@@ -196,7 +204,7 @@ export function HomeFeed({
             type="button"
             onClick={onEditLocation}
             className="min-w-0 flex-1 py-0.5 text-left"
-            aria-label={needsLocation ? "Set your block" : "Change block cluster"}
+            aria-label={needsLocation ? home.setBlockAria : home.changeBlockAria}
           >
             <span className="flex items-start gap-1.5">
               <MapPin
@@ -221,11 +229,11 @@ export function HomeFeed({
             onClick={() => setFiltersOpen(true)}
             className="relative mt-0.5 inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border bg-white px-3 active:bg-gray-50"
             style={{ borderColor: activeFilterCount ? GREEN_DARK : BORDER }}
-            aria-label="Price and distance filters"
+            aria-label={home.filtersAria}
           >
             <SlidersHorizontal className="h-4 w-4" style={{ color: GREEN_DARK }} />
             <span className="text-[12px] font-bold" style={{ color: GREEN_DARK }}>
-              Filters
+              {home.filters}
             </span>
             {activeFilterCount > 0 ? (
               <span
@@ -241,7 +249,7 @@ export function HomeFeed({
             onClick={onRentals}
             className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
             style={{ borderColor: BORDER }}
-            aria-label="Bookings"
+            aria-label={home.bookingsAria}
           >
             <ClipboardList className="h-5 w-5" style={{ color: GREEN_DARK }} />
           </button>
@@ -250,7 +258,7 @@ export function HomeFeed({
             onClick={handleBellPress}
             className="relative mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
             style={{ borderColor: BORDER }}
-            aria-label={showBellBadge ? "Notifications — update available" : "Notifications"}
+            aria-label={showBellBadge ? home.notificationsUpdateAria : home.notificationsAria}
           >
             <Bell className="h-5 w-5" style={{ color: GREEN_DARK }} />
             {showBellBadge ? (
@@ -305,7 +313,7 @@ export function HomeFeed({
               border: `1px solid ${!category ? GREEN_DARK : BORDER}`,
             }}
           >
-            All
+            {home.modeAny}
           </button>
           {browseCategories.map((cat) => {
             const active = category === cat.name;
@@ -331,26 +339,22 @@ export function HomeFeed({
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3">
         <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-          Garages near you
+          {home.garagesNearYou}
         </p>
 
         {loading && garages.length === 0 ? (
-          <p className="py-10 text-center text-[14px] text-gray-500">Loading garages…</p>
+          <p className="py-10 text-center text-[14px] text-gray-500">{home.loadingGarages}</p>
         ) : null}
 
         {!loading && garages.length === 0 ? (
           <div className="mx-auto mt-6 max-w-[340px] text-center">
             <MrRentano size={56} className="mx-auto" />
             <p className="mt-3 text-[18px] font-bold" style={{ color: GREEN_DARK }}>
-              {category || pricePresetId !== "any"
-                ? "No matching garages"
-                : "No garages on this block yet"}
+              {emptyIsFiltered ? home.emptyFilteredTitle : home.emptyBlockTitle}
             </p>
             <p className="mt-2 text-[14px] leading-relaxed text-gray-600">
               {mascotSays(
-                category
-                  ? `Nobody listed ${category} nearby yet. Post a request and share it — neighbors can respond.`
-                  : "Be first to stock a garage, or post a request for what you need and share it.",
+                category ? home.emptyFilteredBody(category) : home.emptyBlockBody,
               )}
             </p>
             <button
@@ -364,7 +368,7 @@ export function HomeFeed({
               className="mt-5 w-full rounded-xl py-3.5 text-[15px] font-bold text-white"
               style={{ backgroundColor: GREEN_DARK }}
             >
-              Post a request →
+              {home.postRequest}
             </button>
             <button
               type="button"
@@ -372,7 +376,7 @@ export function HomeFeed({
               className="mt-3 w-full rounded-xl border-2 py-3 text-[15px] font-bold"
               style={{ borderColor: GREEN_DARK, color: GREEN_DARK }}
             >
-              Stock your garage →
+              {home.stockGarage}
             </button>
             {activeFilterCount > 0 ? (
               <button
@@ -380,7 +384,7 @@ export function HomeFeed({
                 onClick={clearFilters}
                 className="mt-3 text-[14px] font-semibold text-gray-500 underline"
               >
-                Clear filters
+                {home.clearFilters}
               </button>
             ) : null}
           </div>
@@ -401,9 +405,9 @@ export function HomeFeed({
 
         {!loading && garages.length > 0 ? (
           <div className="mt-4 rounded-2xl border bg-white px-4 py-3.5 text-center" style={{ borderColor: BORDER }}>
-            <p className="text-[14px] font-semibold text-gray-700">Can&apos;t find what you need?</p>
+            <p className="text-[14px] font-semibold text-gray-700">{home.cantFind}</p>
             <p className="mt-1 text-[13px] text-gray-500">
-              Post a request, sign in if asked, then share it like a listing.
+              {home.cantFindBody}
             </p>
             <button
               type="button"
@@ -411,7 +415,7 @@ export function HomeFeed({
               className="mt-3 w-full rounded-xl py-3 text-[14px] font-bold text-white"
               style={{ backgroundColor: GREEN_DARK }}
             >
-              Post a request & share →
+              {home.postRequestShare}
             </button>
           </div>
         ) : null}
@@ -422,23 +426,23 @@ export function HomeFeed({
           <button
             type="button"
             className="min-h-0 flex-1"
-            aria-label="Close filters"
+            aria-label={home.closeFiltersAria}
             onClick={() => setFiltersOpen(false)}
           />
           <div
             className="max-h-[85dvh] overflow-y-auto rounded-t-3xl bg-white px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3"
             role="dialog"
-            aria-label="Filters"
+            aria-label={home.filtersTitle}
           >
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-[18px] font-extrabold" style={{ color: GREEN_DARK }}>
-                Filters
+                {home.filtersTitle}
               </h2>
               <button
                 type="button"
                 onClick={() => setFiltersOpen(false)}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100"
-                aria-label="Close"
+                aria-label={common.close}
               >
                 <X className="h-5 w-5 text-gray-700" />
               </button>
@@ -446,7 +450,7 @@ export function HomeFeed({
 
             <section className="mb-5">
               <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-400">
-                Category
+                {home.categoryTitle}
               </h3>
               <div className="flex flex-wrap gap-2">
                 <button
@@ -459,7 +463,7 @@ export function HomeFeed({
                     border: `1px solid ${!category ? GREEN_DARK : BORDER}`,
                   }}
                 >
-                  All categories
+                  {home.allCategories}
                 </button>
                 {browseCategories.map((cat) => {
                   const active = category === cat.name;
@@ -485,10 +489,10 @@ export function HomeFeed({
 
             <section className="mb-5">
               <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-400">
-                Price
+                {home.priceTitle}
               </h3>
               <div className="flex flex-wrap gap-2">
-                {PRICE_PRESETS.map((preset) => {
+                {pricePresets.map((preset) => {
                   const active = pricePresetId === preset.id;
                   return (
                     <button
@@ -511,7 +515,7 @@ export function HomeFeed({
 
             <section className="mb-5">
               <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-400">
-                Distance
+                {home.distanceTitle}
               </h3>
               <p className="mb-2 text-[13px] text-gray-500">
                 Closer block first — widen if the shelf is thin.
@@ -519,12 +523,13 @@ export function HomeFeed({
               <div className="flex flex-wrap gap-2">
                 {RADIUS_PRESETS.map((miles) => {
                   const active = clusterRadiusMi === miles;
+                  const milesLabel = home.miles(miles);
                   const label =
                     miles <= CLUSTER_RADIUS_DEFAULT_MI
-                      ? `Closer · ${miles} mi`
+                      ? `Closer · ${milesLabel}`
                       : miles >= CLUSTER_RADIUS_MAX_MI
-                        ? `Farther · ${miles} mi`
-                        : `${miles} mi`;
+                        ? `Farther · ${milesLabel}`
+                        : milesLabel;
                   return (
                     <button
                       key={miles}
@@ -551,7 +556,7 @@ export function HomeFeed({
                 className="flex-1 rounded-xl border-2 py-3 text-[15px] font-bold"
                 style={{ borderColor: BORDER, color: "#555" }}
               >
-                Reset
+                {home.clearFilters}
               </button>
               <button
                 type="button"
@@ -559,7 +564,7 @@ export function HomeFeed({
                 className="flex-[1.4] rounded-xl py-3 text-[15px] font-bold text-white"
                 style={{ backgroundColor: GREEN_DARK }}
               >
-                Show garages
+                {home.done}
               </button>
             </div>
           </div>

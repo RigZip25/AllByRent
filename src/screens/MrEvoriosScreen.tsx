@@ -3,7 +3,8 @@ import { HelpCircle, MessageCircle, Smartphone } from "lucide-react";
 import { RentanoChatPanel } from "../components/rentano/RentanoChatPanel";
 import { RentanoFaqPanel } from "../components/rentano/RentanoFaqPanel";
 import { PwaInstallPanel } from "../components/PwaInstallPanel";
-import { APP_NAME, APP_MODE_LABELS, MASCOT_NAME } from "../lib/brand";
+import { APP_NAME, MASCOT_NAME } from "../lib/brand";
+import { useAppModeLabels, useMessages } from "../lib/i18n/react";
 import { usePwaInstallPrompt } from "../hooks/PwaInstallProvider";
 import { getAppMode } from "../lib/appMode";
 import { useAuth } from "../hooks/AuthProvider";
@@ -33,6 +34,8 @@ const QUICK_PROMPTS_EARN = [
 export function MrEvoriosScreen() {
   const auth = useAuth();
   const pwa = usePwaInstallPrompt();
+  const t = useMessages();
+  const modeLabels = useAppModeLabels();
   const [view, setView] = useState<AssistantView>("chat");
   const [chatSeed, setChatSeed] = useState<string | null>(null);
   const [appMode, setAppModeState] = useState(() => getAppMode());
@@ -81,7 +84,7 @@ export function MrEvoriosScreen() {
               {MASCOT_NAME}
             </h1>
             <p className="text-[12px] text-gray-500">
-              {APP_NAME} guide · mode: {APP_MODE_LABELS[appMode]}
+              {t.mrEvorios.subtitle(APP_NAME, modeLabels[appMode])}
             </p>
           </div>
         </div>
@@ -89,9 +92,9 @@ export function MrEvoriosScreen() {
         <div className="mt-3 flex gap-2">
           {(
             [
-              { id: "chat" as const, label: "Chat", Icon: MessageCircle },
-              { id: "faq" as const, label: "FAQ", Icon: HelpCircle },
-              { id: "install" as const, label: "Install", Icon: Smartphone },
+              { id: "chat" as const, label: t.mrEvorios.chat, Icon: MessageCircle },
+              { id: "faq" as const, label: t.mrEvorios.faq, Icon: HelpCircle },
+              { id: "install" as const, label: t.mrEvorios.install, Icon: Smartphone },
             ] as const
           ).map((tab) => {
             const active = view === tab.id;

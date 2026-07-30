@@ -4,7 +4,7 @@ import rentanoImg from "../../imports/No_back_rentano.png";
 import { MASCOT_NAME } from "../../lib/brand";
 import { useSpeechRecognition } from "../../hooks/useSpeechRecognition";
 import { useRequireAuth } from "../../hooks/RequireAuth";
-import { useLocale } from "../../lib/i18n/react";
+import { useLocale, useMessages } from "../../lib/i18n/react";
 import { isAnthropicConfigured } from "../../lib/anthropicClient";
 import { findLocalRentanoAnswer, queryLooksNonEnglish } from "../../lib/rentanoLocalAnswer";
 import { sendRentanoMessage, type RentanoChatTurn } from "../../lib/rentanoChatApi";
@@ -32,8 +32,7 @@ export function RentanoChatPanel({
     {
       id: "welcome",
       role: "assistant",
-      content:
-        `Hi! I'm ${MASCOT_NAME}. Check the FAQ tab first — most answers are instant. Here in Chat I try those answers before any AI. Ask by voice or text.`,
+      content: "", // filled after first render via locale
     },
   ]);
   const [input, setInput] = useState("");
@@ -43,6 +42,7 @@ export function RentanoChatPanel({
   const scrollRef = useRef<HTMLDivElement>(null);
   const initialSentRef = useRef(false);
   const locale = useLocale();
+  const t = useMessages();
   // Prefer device language so RU/ES speech works even when UI locale is EN.
   const speechLang =
     locale === "cs"
@@ -51,6 +51,17 @@ export function RentanoChatPanel({
         ? navigator.language
         : "en-US";
   const speech = useSpeechRecognition(speechLang);
+
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0]?.id === "welcome") {
+        return [{ id: "welcome", role: "assistant", content: t.mrEvorios.welcome(MASCOT_NAME) }];
+      }
+      return prev.map((m) =>
+        m.id === "welcome" ? { ...m, content: t.mrEvorios.welcome(MASCOT_NAME) } : m,
+      );
+    });
+  }, [t, locale]);
 
   const configured = isAnthropicConfigured();
   const requireAuth = useRequireAuth();
@@ -237,12 +248,10 @@ export function RentanoChatPanel({
       ) : null}
       {speech.listening ? (
         <p className="mb-2 text-center text-[12px] font-medium text-red-600">
-          Listening… text appears in the box — stop the mic, edit if needed, then Send.
+          {t.mrEvorios.listeningHint}
         </p>
       ) : input.trim() && !loading ? (
-        <p className="mb-2 text-center text-[11px] text-gray-400">
-          Edit the text if needed, then tap Send.
-        </p>
+        <p className="mb-2 text-center text-[11px] text-gray-400">{t.mrEvorios.editThenSend}</p>
       ) : null}
 
       <div
@@ -286,7 +295,7 @@ export function RentanoChatPanel({
           }}
           rows={2}
           placeholder={
-            speech.listening ? "Listening — your words show up here…" : "Type or tap mic…"
+            speech.listening ? t.mrEvorios.placeholderListening : t.mrEvorios.placeholderIdle
           }
           className="max-h-28 min-h-[48px] min-w-0 flex-1 resize-none bg-transparent py-2 text-[15px] outline-none placeholder:text-gray-400"
           disabled={loading}

@@ -1,6 +1,7 @@
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
 import { CategoryCatalogExplorer } from "../../components/CategoryCatalogExplorer";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN } from "../../lib/brand";
+import { useMessages } from "../../lib/i18n/react";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 
 const GREEN = BRAND_GREEN;
@@ -14,6 +15,9 @@ type Props = {
 };
 
 export function WhatIsEvorios({ onContinue, onSkip, onBack }: Props) {
+  const t = useMessages();
+  const intro = t.onboarding.productIntro;
+
   return (
     <div className="screen onboarding-step mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-white">
       <OnboardingTopBar onBack={onBack} onSkip={onSkip} />
@@ -32,20 +36,15 @@ export function WhatIsEvorios({ onContinue, onSkip, onBack }: Props) {
           {APP_NAME}
         </p>
         <h1 className="mt-1 text-center text-[24px] font-extrabold leading-tight" style={{ color: GREEN }}>
-          Your neighborhood marketplace
+          {intro.title}
         </h1>
-        <p className="mt-2 text-center text-[15px] leading-relaxed text-gray-600">
-          Every household is a business cell on the block — a garage storefront that can{" "}
-          <span className="font-semibold text-gray-800">rent</span>,{" "}
-          <span className="font-semibold text-gray-800">sell</span>, or{" "}
-          <span className="font-semibold text-gray-800">gift</span> what it owns.
-        </p>
+        <p className="mt-2 text-center text-[15px] leading-relaxed text-gray-600">{intro.body}</p>
 
         <div className="mt-4 grid grid-cols-3 gap-2">
           {[
-            { title: "Rent", hint: "Borrow & earn" },
-            { title: "Sell", hint: "Buy nearby" },
-            { title: "Gift", hint: "Pass along free" },
+            { title: intro.rent, hint: intro.rentHint },
+            { title: intro.sell, hint: intro.sellHint },
+            { title: intro.gift, hint: intro.giftHint },
           ].map((mode) => (
             <div
               key={mode.title}
@@ -62,19 +61,14 @@ export function WhatIsEvorios({ onContinue, onSkip, onBack }: Props) {
 
         <div className="mt-5">
           <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-            What neighbors share
+            {intro.catalogTitle}
           </p>
           <div className="mt-2">
-            <CategoryCatalogExplorer
-              hint="Tap any category to open subcategories — tools, garden plants, cameras, party gear, and more."
-              defaultOpenFirst
-            />
+            <CategoryCatalogExplorer hint={intro.catalogHint} defaultOpenFirst />
           </div>
         </div>
 
-        <p className="mt-4 text-center text-[12px] leading-snug text-gray-500">
-          Next you’ll choose: stock your garage, or browse the block.
-        </p>
+        <p className="mt-4 text-center text-[12px] leading-snug text-gray-500">{intro.nextHint}</p>
       </div>
 
       <div className="shrink-0 border-t px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-3" style={{ borderColor: BORDER }}>
@@ -84,7 +78,7 @@ export function WhatIsEvorios({ onContinue, onSkip, onBack }: Props) {
           className="w-full rounded-xl py-3.5 text-[16px] font-bold"
           style={{ backgroundColor: AMBER, color: GREEN }}
         >
-          Continue →
+          {intro.continueCta}
         </button>
       </div>
     </div>

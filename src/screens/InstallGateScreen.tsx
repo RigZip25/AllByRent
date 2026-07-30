@@ -5,6 +5,7 @@ import { APP_NAME, BRAND_GREEN, PWA_SHORT_NAME } from "../lib/brand";
 import { markInstallGateDone } from "../lib/pwaInstallGate";
 import { isAndroid, isIos, isStandalonePwa } from "../lib/pwaInstall";
 import { usePwaInstallPrompt } from "../hooks/PwaInstallProvider";
+import { useMessages } from "../lib/i18n/react";
 
 type InstallGateScreenProps = {
   onInstalledContinue: () => void;
@@ -55,14 +56,14 @@ function IosAddHomeIcon({ className = "h-12 w-12" }: { className?: string }) {
 }
 
 /** Final iOS confirmation — blue Add pill. */
-function IosAddButtonIcon() {
+function IosAddButtonIcon({ label }: { label: string }) {
   return (
     <span
       className="inline-flex h-12 min-w-[84px] items-center justify-center rounded-full px-6 text-[18px] font-semibold tracking-tight text-white shadow-sm"
       style={{ backgroundColor: "#007AFF" }}
       aria-hidden
     >
-      Add
+      {label}
     </span>
   );
 }
@@ -103,6 +104,8 @@ export function InstallGateScreen({
   onInstalledContinue,
   onContinueInBrowser,
 }: InstallGateScreenProps) {
+  const t = useMessages();
+  const i = t.install;
   const pwa = usePwaInstallPrompt();
   const ios = isIos();
   const android = isAndroid();
@@ -121,9 +124,7 @@ export function InstallGateScreen({
       onInstalledContinue();
       return;
     }
-    window.alert(
-      `Almost there!\n\nOpen the ${PWA_SHORT_NAME} icon on your Home Screen (not this browser tab).`,
-    );
+    window.alert(i.almostThereAlert(PWA_SHORT_NAME));
   };
 
   return (
@@ -139,19 +140,18 @@ export function InstallGateScreen({
           className="text-[12px] font-bold uppercase tracking-[0.14em]"
           style={{ color: `${BRAND_GREEN}B3` }}
         >
-          No App Store download
+          {i.eyebrow}
         </p>
         <h1
           className="mt-3 text-[30px] font-extrabold leading-[1.12] tracking-tight"
           style={{ color: BRAND_GREEN }}
         >
-          Install your
+          {i.titleLine1}
           <br />
-          neighborhood marketplace
+          {i.titleLine2}
         </h1>
         <p className="mt-3.5 text-[17px] leading-relaxed text-gray-600">
-          {APP_NAME} goes on your Home Screen as <strong>{PWA_SHORT_NAME}</strong> — so you
-          remember it among other icons. Four quick taps; updates install overnight.
+          {i.body(APP_NAME, PWA_SHORT_NAME)}
         </p>
 
         <div className="mt-6">
@@ -160,26 +160,26 @@ export function InstallGateScreen({
               <StepRow
                 n={1}
                 icon={<IosShareIcon />}
-                title="Square with arrow"
-                hint="Center of the bottom bar"
+                title={i.iosStep1Title}
+                hint={i.iosStep1Hint}
               />
               <StepRow
                 n={2}
                 icon={<IosViewMoreIcon />}
-                title="View More"
-                hint="Scroll the Share menu, then tap it"
+                title={i.iosStep2Title}
+                hint={i.iosStep2Hint}
               />
               <StepRow
                 n={3}
                 icon={<IosAddHomeIcon />}
-                title="Add to Home Screen"
-                hint="Square with a plus"
+                title={i.iosStep3Title}
+                hint={i.iosStep3Hint}
               />
               <StepRow
                 n={4}
-                icon={<IosAddButtonIcon />}
-                title="Add"
-                hint={`Keep “${PWA_SHORT_NAME}” as the name (or edit it)`}
+                icon={<IosAddButtonIcon label={i.iosAddButton} />}
+                title={i.iosStep4Title}
+                hint={i.iosStep4Hint(PWA_SHORT_NAME)}
               />
             </ol>
           ) : (
@@ -188,9 +188,7 @@ export function InstallGateScreen({
               style={{ borderColor: `${BRAND_GREEN}33`, backgroundColor: "#F0FDF4" }}
             >
               {pwa.nativeInstallReady ? (
-                <p>
-                  Tap <strong>Install</strong> below — one tap, no store download.
-                </p>
+                <p>{i.androidInstallReady}</p>
               ) : (
                 <ol className="space-y-3">
                   <li className="flex gap-3">
@@ -200,9 +198,7 @@ export function InstallGateScreen({
                     >
                       1
                     </span>
-                    <span className="pt-1.5 text-[16px]">
-                      Open the browser menu <strong>⋮</strong>
-                    </span>
+                    <span className="pt-1.5 text-[16px]">{i.androidMenuStep}</span>
                   </li>
                   <li className="flex gap-3">
                     <span
@@ -211,9 +207,7 @@ export function InstallGateScreen({
                     >
                       2
                     </span>
-                    <span className="pt-1.5 text-[16px]">
-                      Tap <strong>Install app</strong> or <strong>Add to Home screen</strong>
-                    </span>
+                    <span className="pt-1.5 text-[16px]">{i.androidInstallStep}</span>
                   </li>
                 </ol>
               )}
@@ -223,16 +217,12 @@ export function InstallGateScreen({
 
         {showIosSteps ? (
           <p className="mt-6 text-[16px] leading-relaxed text-gray-600">
-            After <strong className="text-gray-800">Add</strong>, Safari closes and the{" "}
-            <strong className="text-gray-800">{APP_NAME}</strong> icon appears on your Home Screen.
-            Open it anytime — updates download quietly and install overnight (~2 AM local), not
-            while you&apos;re mid-tap.
+            {i.iosAfterAdd(APP_NAME)}
           </p>
         ) : (
           <>
             <p className="mt-5 text-[16px] leading-relaxed text-gray-600">
-              Open the {APP_NAME} icon from your Home Screen. Updates download quietly and install
-              overnight (~2 AM local), not while you&apos;re mid-tap.
+              {i.androidAfter(APP_NAME)}
             </p>
 
             <div className="mt-auto flex flex-col gap-3 pt-8 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]">
@@ -244,7 +234,7 @@ export function InstallGateScreen({
                   style={{ backgroundColor: BRAND_GREEN }}
                 >
                   <Smartphone className="h-5 w-5" />
-                  Install {APP_NAME}
+                  {i.installApp(APP_NAME)}
                 </button>
               ) : null}
 
@@ -254,7 +244,7 @@ export function InstallGateScreen({
                 className="flex min-h-[52px] w-full items-center justify-center rounded-2xl text-[16px] font-bold text-white"
                 style={{ backgroundColor: BRAND_GREEN }}
               >
-                I’ve added it — continue
+                {i.addedContinue}
               </button>
 
               <button
@@ -262,7 +252,7 @@ export function InstallGateScreen({
                 onClick={onContinueInBrowser}
                 className="min-h-[44px] w-full text-[14px] font-semibold text-gray-500 underline"
               >
-                Continue in browser
+                {i.continueBrowser}
               </button>
             </div>
           </>

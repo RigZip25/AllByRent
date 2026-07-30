@@ -24,6 +24,7 @@ import {
   type RentalBooking,
   type RentalRole,
 } from "../lib/rentalsStorage";
+import { useMessages } from "../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -36,24 +37,6 @@ type RentalsTab = "active" | "upcoming" | "history";
 type RoleFilter = "all" | RentalRole;
 type HistorySort = "recent" | "oldest" | "amount";
 
-const TABS: { id: RentalsTab; label: string }[] = [
-  { id: "active", label: "Active" },
-  { id: "upcoming", label: "Upcoming" },
-  { id: "history", label: "History" },
-];
-
-const ROLE_FILTERS: { id: RoleFilter; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "renter", label: "Renting" },
-  { id: "host", label: "Hosting" },
-];
-
-const SORT_OPTIONS: { id: HistorySort; label: string }[] = [
-  { id: "recent", label: "Recent" },
-  { id: "oldest", label: "Oldest" },
-  { id: "amount", label: "Highest amount" },
-];
-
 function RentalsTabs({
   active,
   onChange,
@@ -61,13 +44,20 @@ function RentalsTabs({
   active: RentalsTab;
   onChange: (tab: RentalsTab) => void;
 }) {
+  const t = useMessages();
+  const tabs: { id: RentalsTab; label: string }[] = [
+    { id: "active", label: t.rentals.tabActive },
+    { id: "upcoming", label: t.rentals.tabUpcoming },
+    { id: "history", label: t.rentals.tabHistory },
+  ];
+
   return (
     <div
       className="flex gap-1 rounded-full border bg-white p-1"
       style={{ borderColor: BORDER }}
       role="tablist"
     >
-      {TABS.map(({ id, label }) => {
+      {tabs.map(({ id, label }) => {
         const selected = active === id;
         return (
           <button
@@ -97,9 +87,16 @@ function RoleChips({
   active: RoleFilter;
   onChange: (role: RoleFilter) => void;
 }) {
+  const t = useMessages();
+  const roleFilters: { id: RoleFilter; label: string }[] = [
+    { id: "all", label: t.rentals.roleAll },
+    { id: "renter", label: t.rentals.roleRenting },
+    { id: "host", label: t.rentals.roleHosting },
+  ];
+
   return (
     <div className="flex gap-2 overflow-x-auto pb-1">
-      {ROLE_FILTERS.map(({ id, label }) => {
+      {roleFilters.map(({ id, label }) => {
         const selected = active === id;
         return (
           <button
@@ -122,18 +119,19 @@ function RoleChips({
 }
 
 function EmptyState({ tab }: { tab: RentalsTab }) {
+  const t = useMessages();
   const copy: Record<RentalsTab, { title: string; body: string }> = {
     active: {
-      title: "No active rentals",
-      body: "When you pick up an item or host a booking, it shows here with live timers and trust badges.",
+      title: t.rentals.emptyActiveTitle,
+      body: t.rentals.emptyActiveBody,
     },
     upcoming: {
-      title: "Nothing scheduled",
-      body: "Upcoming rentals and hosting handoffs appear here before start date.",
+      title: t.rentals.emptyUpcomingTitle,
+      body: t.rentals.emptyUpcomingBody,
     },
     history: {
-      title: "No history yet",
-      body: "Completed, cancelled, and resolved no-show bookings are kept here.",
+      title: t.rentals.emptyHistoryTitle,
+      body: t.rentals.emptyHistoryBody,
     },
   };
   const { title, body } = copy[tab];
@@ -182,6 +180,7 @@ export function RentalsScreen({
   onReRent?: (booking: RentalBooking) => void;
 }) {
   const auth = useAuth();
+  const t = useMessages();
   const [tab, setTab] = useState<RentalsTab>("active");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [historySort, setHistorySort] = useState<HistorySort>("recent");
@@ -189,6 +188,12 @@ export function RentalsScreen({
   const [historyVisible, setHistoryVisible] = useState(HISTORY_PAGE_SIZE);
   const [bookings, setBookings] = useState<RentalBooking[]>(() => loadRentalBookings());
   const mode = getAppMode();
+
+  const sortOptions: { id: HistorySort; label: string }[] = [
+    { id: "recent", label: t.rentals.sortRecent },
+    { id: "oldest", label: t.rentals.sortOldest },
+    { id: "amount", label: t.rentals.sortAmount },
+  ];
 
   const refresh = useCallback(() => setBookings(loadRentalBookings()), []);
 
@@ -252,12 +257,10 @@ export function RentalsScreen({
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <header className="shrink-0 px-4 pb-3 pt-3">
         <h1 className="mb-1 text-[22px] font-bold" style={{ color: GREEN }}>
-          Rentals
+          {t.rentals.title}
         </h1>
         <p className="mb-3 text-[14px] text-gray-500">
-          {mode === "earn"
-            ? "Hosting and renting — one place for every booking."
-            : "Your bookings as a renter and host."}
+          {mode === "earn" ? t.rentals.subtitleHost : t.rentals.subtitleGuest}
         </p>
         <RentalsTabs active={tab} onChange={setTab} />
         <div className="mt-3">
@@ -271,13 +274,13 @@ export function RentalsScreen({
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by item name"
+                placeholder={t.rentals.searchPlaceholder}
                 className="w-full rounded-xl border bg-white py-2.5 pl-9 pr-3 text-[14px]"
                 style={{ borderColor: BORDER }}
               />
             </div>
             <div className="flex gap-2 overflow-x-auto">
-              {SORT_OPTIONS.map(({ id, label }) => (
+              {sortOptions.map(({ id, label }) => (
                 <button
                   key={id}
                   type="button"
@@ -301,7 +304,7 @@ export function RentalsScreen({
           <section className="mb-4">
             <div className="mb-2 flex items-center gap-2">
               <h2 className="text-[15px] font-bold" style={{ color: GREEN }}>
-                Requests
+                {t.rentals.requests}
               </h2>
               <span
                 className="rounded-full px-2 py-0.5 text-[12px] font-bold text-white"
@@ -348,7 +351,7 @@ export function RentalsScreen({
             <ScanLine className="h-8 w-8 shrink-0" style={{ color: AMBER }} />
             <div className="min-w-0 flex-1">
               <p className="text-[14px] font-bold" style={{ color: GREEN }}>
-                Scan QR to check in
+                {t.rentals.scanCheckinTitle}
               </p>
               <p className="text-[13px] text-gray-600">{pendingCheckin.itemTitle}</p>
             </div>
@@ -377,7 +380,7 @@ export function RentalsScreen({
                         className="rounded-xl border bg-white px-3 py-2.5 text-[13px] font-semibold"
                         style={{ borderColor: BORDER, color: GREEN }}
                       >
-                        Re-rent
+                        {t.rentals.reRent}
                       </button>
                       {!booking.review ? (
                         <button
@@ -386,7 +389,7 @@ export function RentalsScreen({
                           className="rounded-xl px-3 py-2.5 text-[13px] font-semibold text-white"
                           style={{ backgroundColor: GREEN }}
                         >
-                          Leave review
+                          {t.rentals.leaveReview}
                         </button>
                       ) : (
                         <button
@@ -395,7 +398,7 @@ export function RentalsScreen({
                           className="rounded-xl border bg-white px-3 py-2.5 text-[13px] font-semibold"
                           style={{ borderColor: BORDER, color: "#666" }}
                         >
-                          View details
+                          {t.rentals.viewDetails}
                         </button>
                       )}
                     </div>
@@ -410,7 +413,7 @@ export function RentalsScreen({
                 className="mt-4 w-full rounded-xl border py-3 text-[14px] font-semibold"
                 style={{ borderColor: BORDER, color: GREEN }}
               >
-                Load more ({filtered.length - historyVisible} remaining)
+                {t.rentals.loadMore(filtered.length - historyVisible)}
               </button>
             ) : null}
           </>

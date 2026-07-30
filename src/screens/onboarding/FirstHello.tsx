@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { APP_NAME, MASCOT_NAME, ONBOARDING } from "../../lib/brand";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { APP_NAME, MASCOT_NAME } from "../../lib/brand";
+import { useMessages } from "../../lib/i18n/react";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
 
@@ -9,12 +10,6 @@ const GREEN = "#0D5C3A";
 const INITIAL_DELAY_MS = 400;
 const BUBBLE_GAP_MS = 900;
 const TYPING_CHAR_MS = 18;
-
-const BUBBLES = [
-  ONBOARDING.firstHello.bubbles[0](MASCOT_NAME),
-  ONBOARDING.firstHello.bubbles[1],
-  ONBOARDING.firstHello.bubbles[2],
-];
 
 function FirstHelloRolesScene() {
   return (
@@ -67,6 +62,12 @@ export function FirstHello({
   onSkip: () => void;
   onBack?: () => void;
 }) {
+  const t = useMessages();
+  const hello = t.onboarding.firstHello;
+  const BUBBLES = useMemo(
+    () => hello.bubbles.map((line) => line.replaceAll("{mascot}", MASCOT_NAME)),
+    [hello.bubbles],
+  );
   const [displayed, setDisplayed] = useState<{ index: number; text: string }[]>([]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [typedChars, setTypedChars] = useState(0);
@@ -94,7 +95,7 @@ export function FirstHello({
     if (index === BUBBLES.length - 1) {
       setChatComplete(true);
     }
-  }, []);
+  }, [BUBBLES.length]);
 
   const skipAnimation = useCallback(() => {
     cancelledRef.current = true;
@@ -104,7 +105,7 @@ export function FirstHello({
     setTypedChars(0);
     setShowTypingDots(false);
     setChatComplete(true);
-  }, []);
+  }, [BUBBLES]);
 
   useEffect(() => {
     if (hasStarted.current) return;
@@ -168,7 +169,7 @@ export function FirstHello({
       cancelledRef.current = true;
       clearAll();
     };
-  }, [finishBubble]);
+  }, [finishBubble, BUBBLES]);
 
   useEffect(() => {
     scrollToLatest();
@@ -193,7 +194,7 @@ export function FirstHello({
               <p className="text-base font-bold leading-tight" style={{ color: GREEN }}>
                 {MASCOT_NAME}
               </p>
-              <p className="text-sm text-gray-500">{ONBOARDING.firstHello.mascotRole}</p>
+              <p className="text-sm text-gray-500">{t.taglineShort}</p>
             </div>
           </div>
 
@@ -213,7 +214,7 @@ export function FirstHello({
                     }
                   }
             }
-            aria-label={chatComplete ? undefined : "Skip intro animation"}
+            aria-label={chatComplete ? undefined : hello.skipHint}
           >
             <div className="first-hello-bubbles">
               {displayed.map(({ index, text }) => (
@@ -243,7 +244,7 @@ export function FirstHello({
             onClick={skipAnimation}
             className="mb-2 w-full text-center text-sm font-semibold text-gray-600"
           >
-            Tap to skip intro
+            {hello.skipHint}
           </button>
         ) : null}
         <button
@@ -252,7 +253,7 @@ export function FirstHello({
           className="btn-primary first-hello-cta w-full text-white"
           style={{ backgroundColor: GREEN }}
         >
-          Let&apos;s go →
+          {hello.cta}
         </button>
       </footer>
     </div>
