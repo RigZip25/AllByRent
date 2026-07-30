@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-import { APP_NAME } from "../../lib/brand";
+import { useMessages } from "../../lib/i18n/react";
 import { getListingQrUrl } from "../../lib/listingQr";
 import { decodeListingQrFromVideoFrame } from "../../lib/verifyListingQrPhoto";
 import { RentanoTip } from "../RentanoTip";
@@ -47,6 +47,7 @@ export function QrScanPanel({
   onOwnerManualConfirm?: () => void;
   isHost?: boolean;
 }) {
+  const { qrScan: copy } = useMessages();
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const scannedRef = useRef(false);
@@ -54,7 +55,7 @@ export function QrScanPanel({
   const [manualOpen, setManualOpen] = useState(false);
   const [codeInput, setCodeInput] = useState("");
   const [pinInput, setPinInput] = useState("");
-  const [scanHint, setScanHint] = useState("Point the camera at the item QR sticker…");
+  const [scanHint, setScanHint] = useState(() => copy.scanHint);
 
   const stopStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -66,11 +67,11 @@ export function QrScanPanel({
     let cancelled = false;
     scannedRef.current = false;
     setError(null);
-    setScanHint("Point the camera at the item QR sticker…");
+    setScanHint(copy.scanHint);
     (async () => {
       try {
         if (!navigator.mediaDevices?.getUserMedia) {
-          setError("Camera is not available in this browser. Use manual code entry.");
+          setError(copy.cameraUnavailable);
           return;
         }
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -86,7 +87,7 @@ export function QrScanPanel({
           await videoRef.current.play();
         }
       } catch {
-        setError("Camera access is needed to scan the QR code on the item.");
+        setError(copy.cameraAccessNeeded);
       }
     })();
     return () => {
@@ -99,7 +100,7 @@ export function QrScanPanel({
     if (!open || phase !== "camera" || error) return;
     const listingId = (expectedListingId || expectedCode || "").trim();
     if (!listingId) {
-      setScanHint("QR target missing for this booking — use manual code or host confirm.");
+      setScanHint(copy.scanHintMissing);
       return;
     }
 
@@ -116,7 +117,7 @@ export function QrScanPanel({
         });
         if (match) {
           scannedRef.current = true;
-          setScanHint("QR matched — continue with PIN");
+          setScanHint(copy.scanHintMatched);
           stopStream();
           onScanned();
           return;
@@ -152,11 +153,11 @@ export function QrScanPanel({
     return (
       <div className="fixed inset-0 z-[90] flex flex-col bg-[#F0F4F2]">
         <header className="flex items-center justify-between px-4 py-3">
-          <button type="button" onClick={onClose} aria-label="Close">
+          <button type="button" onClick={onClose} aria-label={copy.closeAria}>
             <X className="h-6 w-6" style={{ color: GREEN }} />
           </button>
           <p className="text-[16px] font-bold" style={{ color: GREEN }}>
-            Confirm {mode === "pickup" ? "pickup" : "return"}
+            {mode === "pickup" ? copy.confirmPickup : copy.confirmReturn}
           </p>
           <span className="w-6" />
         </header>
@@ -170,18 +171,18 @@ export function QrScanPanel({
           <h2 className="text-[18px] font-bold" style={{ color: GREEN }}>
             {itemTitle}
           </h2>
-          <p className="mt-1 text-[14px] text-gray-600">QR scan verified · PIN required</p>
+          <p className="mt-1 text-[14px] text-gray-600">{copy.qrVerified}</p>
 
           <div className="mt-4">
             <RentanoTip
               message={
                 mode === "pickup" ? (
                   <>
-                    Item received! Your rental starts now.
-                    {returnByLabel ? ` Return by ${returnByLabel}.` : null}
+                    {copy.tipPickup}
+                    {returnByLabel ? copy.tipPickupReturnBy(returnByLabel) : null}
                   </>
                 ) : (
-                  "All done! We'll notify the owner."
+                  copy.tipReturn
                 )
               }
             />
@@ -189,10 +190,9 @@ export function QrScanPanel({
 
           {mode === "pickup" && contactlessInstructions?.trim() ? (
             <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50 p-4">
-              <p className="text-[13px] font-bold text-amber-950">Contactless access details</p>
+              <p className="text-[13px] font-bold text-amber-950">{copy.contactlessTitle}</p>
               <p className="mt-1 text-[12px] text-amber-900/90">
-                Step-by-step access instructions and codes unlock at check-in with PIN — not before.
-                Your pickup address is on the rental screen so you can travel here first.
+                {copy.contactlessBody}
               </p>
               {pinUnlocksContactless ? (
                 <p className="mt-3 whitespace-pre-wrap text-[14px] leading-relaxed text-gray-800">
@@ -200,7 +200,7 @@ export function QrScanPanel({
                 </p>
               ) : (
                 <p className="mt-3 text-[13px] italic text-gray-600">
-                  Enter the correct 6-digit pickup PIN below to view access codes and instructions.
+                  {copy.contactlessLocked}
                 </p>
               )}
             </div>
@@ -208,14 +208,12 @@ export function QrScanPanel({
 
           <div className="mt-4 rounded-2xl border bg-white p-4">
             <p className="text-[13px] font-bold" style={{ color: GREEN }}>
-              Enter the {mode === "pickup" ? "pickup" : "return"} PIN
+              {mode === "pickup" ? copy.enterPinPickup : copy.enterPinReturn}
             </p>
             <p className="mt-1 text-[12px] text-gray-500">
-              This scan only works inside the {APP_NAME} app for the renter/host on this booking. The
-              PIN prevents random scans
               {mode === "pickup" && contactlessInstructions?.trim()
-                ? " and unlocks contactless access details (codes and steps)."
-                : "."}
+                ? copy.pinBodyContactless
+                : copy.pinBody}
             </p>
             <input
               type="text"
@@ -227,8 +225,8 @@ export function QrScanPanel({
                 setPinInput(e.target.value.replace(/\D/g, "").slice(0, 6));
               }}
               className="mt-3 w-full rounded-xl border px-4 py-3 text-center text-[20px] tracking-widest"
-              placeholder="000000"
-              aria-label="6-digit PIN"
+              placeholder={copy.pinPlaceholder}
+              aria-label={copy.pinAria}
             />
             {error ? <p className="mt-2 text-[12px] font-semibold text-red-700">{error}</p> : null}
           </div>
@@ -238,9 +236,7 @@ export function QrScanPanel({
             disabled={pinInput.length !== 6 || (Boolean(expectedPin) && pinInput !== expectedPin)}
             onClick={() => {
               if (expectedPin && pinInput !== expectedPin) {
-                setError(
-                  `PIN doesn’t match. Ask your counterparty for the ${mode === "pickup" ? "pickup" : "return"} PIN.`,
-                );
+                setError(copy.pinMismatch(mode === "pickup" ? "pickup" : "return"));
                 return;
               }
               onConfirm();
@@ -248,11 +244,11 @@ export function QrScanPanel({
             className="mt-4 w-full rounded-2xl py-3.5 text-[15px] font-bold text-white disabled:opacity-40"
             style={{ backgroundColor: CTA }}
           >
-            Confirm {mode === "pickup" ? "pickup" : "return"}
+            {mode === "pickup" ? copy.confirmPickup : copy.confirmReturn}
           </button>
 
           {alreadyConfirmed ? (
-            <p className="mt-3 text-center text-[12px] text-gray-500">Already confirmed.</p>
+            <p className="mt-3 text-center text-[12px] text-gray-500">{copy.alreadyConfirmed}</p>
           ) : null}
         </div>
       </div>
@@ -262,11 +258,11 @@ export function QrScanPanel({
   return (
     <div className="fixed inset-0 z-[90] flex flex-col bg-black">
       <div className="flex items-center justify-between px-4 py-3">
-        <button type="button" onClick={onClose} aria-label="Close">
+        <button type="button" onClick={onClose} aria-label={copy.closeAria}>
           <X className="h-6 w-6 text-white" />
         </button>
         <p className="text-[16px] font-bold text-white">
-          Scan QR — {mode === "pickup" ? "pickup" : "return"}
+          {mode === "pickup" ? copy.scanPickup : copy.scanReturn}
         </p>
         <span className="w-6" />
       </div>
@@ -282,15 +278,14 @@ export function QrScanPanel({
       <div className="shrink-0 space-y-2 px-4 pb-8 pt-4">
         <p className="text-center text-[14px] font-semibold text-white">{scanHint}</p>
         <p className="text-center text-[12px] text-white/80">
-          The sticker must match this booking. You’ll still need the 6‑digit PIN after a successful
-          scan.
+          {copy.stickerMustMatch}
         </p>
         <button
           type="button"
           onClick={() => setManualOpen(true)}
           className="w-full rounded-xl py-2.5 text-[14px] font-semibold text-white/90 underline"
         >
-          Enter code manually
+          {copy.enterCodeManually}
         </button>
         {isHost && onOwnerManualConfirm ? (
           <button
@@ -298,7 +293,7 @@ export function QrScanPanel({
             onClick={onOwnerManualConfirm}
             className="w-full rounded-xl border border-white/30 py-2.5 text-[14px] font-semibold text-white"
           >
-            Owner confirms manually
+            {copy.ownerConfirms}
           </button>
         ) : null}
       </div>
@@ -307,7 +302,7 @@ export function QrScanPanel({
         <div className="absolute inset-0 flex items-end bg-black/60 p-4">
           <div className="w-full rounded-2xl bg-white p-4">
             <p className="mb-2 text-[15px] font-bold" style={{ color: GREEN }}>
-              Item QR / check-in code
+              {copy.manualTitle}
             </p>
             <input
               type="text"
@@ -315,7 +310,7 @@ export function QrScanPanel({
               value={codeInput}
               onChange={(e) => setCodeInput(e.target.value.trim())}
               className="mb-3 w-full rounded-xl border px-4 py-3 text-center text-[16px]"
-              placeholder="Paste listing code"
+              placeholder={copy.manualPlaceholder}
             />
             <button
               type="button"
@@ -327,7 +322,7 @@ export function QrScanPanel({
                   codeInput !== expected &&
                   codeInput !== (expectedListingId || "").trim()
                 ) {
-                  setError("Code doesn't match this item. Try again or scan the QR.");
+                  setError(copy.codeMismatch);
                   setManualOpen(false);
                   return;
                 }
@@ -337,7 +332,7 @@ export function QrScanPanel({
               className="w-full rounded-xl py-3 text-[15px] font-bold text-white disabled:opacity-40"
               style={{ backgroundColor: GREEN }}
             >
-              Verify code
+              {copy.verifyCode}
             </button>
           </div>
         </div>

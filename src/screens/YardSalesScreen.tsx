@@ -17,18 +17,11 @@ import { resolveHostAccountId } from "../lib/hostIdentity";
 import { useAuth } from "../hooks/AuthProvider";
 import type { GarageSaleSchedule } from "../lib/garageSaleStorage";
 import { localizeCategoryLabel } from "../lib/i18n/categoryLabels";
+import { useMessages } from "../lib/i18n/react";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
 const BORDER = "#E8E6E0";
-
-const STATUS_LABEL: Record<YardSaleOpenStatus, string> = {
-  now: "OPEN NOW",
-  today: "TODAY",
-  weekend: "WEEKEND",
-  scheduled: "SCHEDULED",
-  unset: "HOURS TBD",
-};
 
 function YardSaleCard({
   event,
@@ -37,10 +30,18 @@ function YardSaleCard({
   event: YardSaleEvent;
   onSelect: () => void;
 }) {
+  const { yardSales: copy } = useMessages();
+  const statusLabel: Record<YardSaleOpenStatus, string> = {
+    now: copy.openNow,
+    today: copy.today,
+    weekend: copy.weekend,
+    scheduled: copy.scheduled,
+    unset: copy.hoursTbd,
+  };
   const categoryLine =
     event.categories.length > 0
       ? event.categories.map((c) => localizeCategoryLabel(c)).join(" · ")
-      : "Mixed yard sale";
+      : copy.mixedSale;
 
   return (
     <button
@@ -55,7 +56,7 @@ function YardSaleCard({
         aria-hidden
       >
         <span className="text-[11px] font-extrabold tracking-wide" style={{ color: GREEN }}>
-          {STATUS_LABEL[event.openStatus]}
+          {statusLabel[event.openStatus]}
         </span>
         <span className="text-xl leading-none">🏷️</span>
       </div>
@@ -75,7 +76,7 @@ function YardSaleCard({
           <span className="text-gray-400">·</span>
           <span>{event.distance}</span>
           <span className="text-gray-400">·</span>
-          <span>{event.saleItemCount} for sale</span>
+          <span>{copy.forSale(event.saleItemCount)}</span>
         </p>
         <p className="mt-1 line-clamp-1 text-[14px] font-medium text-gray-600">{categoryLine}</p>
       </div>
@@ -92,6 +93,7 @@ type YardSalesScreenProps = {
 };
 
 export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage, onBrowseGear }: YardSalesScreenProps) {
+  const { yardSales: copy } = useMessages();
   const auth = useAuth();
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<YardSaleEvent[]>([]);
@@ -148,15 +150,15 @@ export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage, onBrowse
             onClick={onBack}
             className="flex h-11 w-11 items-center justify-center rounded-full border bg-white active:bg-gray-50"
             style={{ borderColor: BORDER }}
-            aria-label="Back to garage sales"
+            aria-label={copy.backAria}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
           <div className="min-w-0 flex-1">
             <h1 className="text-xl font-bold sm:text-2xl" style={{ color: GREEN }}>
-              Yard sales & open garages
+              {copy.title}
             </h1>
-            <p className="text-[15px] text-gray-600">Saturday-drive mode — who&apos;s open near you</p>
+            <p className="text-[15px] text-gray-600">{copy.subtitle}</p>
           </div>
         </div>
 
@@ -176,22 +178,22 @@ export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage, onBrowse
           style={{ backgroundColor: `${AMBER}22`, color: "#92400E" }}
         >
           {openNowCount > 0
-            ? `${openNowCount} open sale${openNowCount === 1 ? "" : "s"} near you today`
-            : "Weekend sales in your cluster — tap a garage to peek inside"}
+            ? copy.openCount(openNowCount)
+            : copy.noneOpenHint}
         </div>
       </div>
 
       <div className="screen-scroll flex flex-1 flex-col gap-3 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
         {loading ? (
-          <p className="py-8 text-center text-sm text-gray-500">Loading open sales near you…</p>
+          <p className="py-8 text-center text-sm text-gray-500">{copy.loading}</p>
         ) : events.length === 0 ? (
           <div className="rounded-2xl border bg-white p-5 text-center" style={{ borderColor: BORDER }}>
             <p className="text-4xl" aria-hidden>
               🏷️
             </p>
-            <p className="mt-3 text-lg font-bold text-gray-900">No yard sales on the map yet</p>
+            <p className="mt-3 text-lg font-bold text-gray-900">{copy.emptyTitle}</p>
             <p className="mt-2 text-[15px] text-gray-600">
-              Check back on weekends, or browse neighbor items for buy deals.
+              {copy.emptyBody}
             </p>
             {onBrowseGear ? (
               <button
@@ -200,7 +202,7 @@ export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage, onBrowse
                 className="mt-4 w-full rounded-xl py-3.5 text-base font-bold text-white"
                 style={{ backgroundColor: GREEN }}
               >
-                Browse the block →
+                {copy.browseCta}
               </button>
             ) : null}
           </div>

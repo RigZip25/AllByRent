@@ -1,5 +1,6 @@
+import { useMessages } from "../../lib/i18n/react";
 import { ArrowLeft, ArrowDown, Clock, ShoppingBag } from "lucide-react";
-import { BRAND_AMBER, BRAND_GREEN, ONBOARDING } from "../../lib/brand";
+import { BRAND_AMBER, BRAND_GREEN } from "../../lib/brand";
 import { markGarageWorkflowSeen } from "../../lib/garageWorkflowStorage";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 import listingSnap from "../../imports/listing_snap.png";
@@ -8,7 +9,15 @@ const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
 const BORDER = "#E8E6E0";
 
-const { garageWorkflow: copy } = ONBOARDING;
+
+type GarageWorkflowScreenProps = {
+  onBack: () => void;
+  onContinue: () => void;
+};
+
+export function GarageWorkflowScreen({ onBack, onContinue }: GarageWorkflowScreenProps) {
+  const { garageSale, common } = useMessages();
+  const copy = garageSale.garageWorkflow;
 
 const STEPS = [
   {
@@ -31,12 +40,6 @@ const STEPS = [
   },
 ] as const;
 
-type GarageWorkflowScreenProps = {
-  onBack: () => void;
-  onContinue: () => void;
-};
-
-export function GarageWorkflowScreen({ onBack, onContinue }: GarageWorkflowScreenProps) {
   const finish = () => {
     markGarageWorkflowSeen();
     onContinue();
@@ -54,7 +57,7 @@ export function GarageWorkflowScreen({ onBack, onContinue }: GarageWorkflowScree
             onClick={onBack}
             className="flex h-10 w-10 items-center justify-center rounded-full border bg-white"
             style={{ borderColor: BORDER }}
-            aria-label="Back"
+            aria-label={common.back}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>

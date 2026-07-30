@@ -1,3 +1,4 @@
+import { useMessages } from "../lib/i18n/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Inbox, ShoppingCart, Share2, Store, Trophy, X } from "lucide-react";
 import { GarageBidSheet } from "../components/garage-shop/GarageBidSheet";
@@ -15,7 +16,6 @@ import {
   resolveEndedAuctions,
   resolveExpiredWinnerCheckouts,
 } from "../lib/garageAuctionState";
-import { ONBOARDING } from "../lib/brand";
 import { hostGarageItemSharePayload, hostGarageSharePayload } from "../lib/garageMarketingShare";
 import { garageSaleOpenLabel, getGarageSaleSchedule } from "../lib/garageSaleStorage";
 import {
@@ -40,8 +40,6 @@ import { pushInAppNotification } from "../lib/inAppNotifications";
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 const BORDER = "#E8E6E0";
-const auctionCopy = ONBOARDING.garageAuction;
-const shareCopy = ONBOARDING.garageShare;
 
 type ActiveGarageShopScreenProps = {
   hostId: string;
@@ -67,6 +65,7 @@ export function ActiveGarageShopScreen({
   onOpenHostOffers,
   onStockShelf,
 }: ActiveGarageShopScreenProps) {
+  const { garageAuction: auctionCopy, garageShare: shareCopy } = useMessages().garageSale;
   const auth = useAuth();
   const ownHostId = resolveHostAccountId(auth.userId);
   const isOwnGarage = hostId === ownHostId;

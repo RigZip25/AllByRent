@@ -1,3 +1,4 @@
+import { useMessages } from "../lib/i18n/react";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { garageDisplayName } from "../lib/garageDisplay";
@@ -18,13 +19,11 @@ import {
   startAuctionCheckout,
   type AuctionCheckoutInput,
 } from "../lib/repositories/paymentsRepository";
-import { ONBOARDING } from "../lib/brand";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 const BORDER = "#E8E6E0";
 const PLATFORM_FEE_RATE = 0.1;
-const auctionCopy = ONBOARDING.garageAuction;
 
 type GarageWinnerCheckoutScreenProps = {
   listingId: string;
@@ -46,6 +45,7 @@ export function GarageWinnerCheckoutScreen({
   onComplete,
   onRequireAuth,
 }: GarageWinnerCheckoutScreenProps) {
+  const auctionCopy = useMessages().garageSale.garageAuction;
   const listing = getPublishedListingById(listingId);
   const checkout = getWinnerCheckoutDetails(listingId);
   const cover = listing?.photos[0] ?? null;

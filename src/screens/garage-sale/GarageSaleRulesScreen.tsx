@@ -1,5 +1,6 @@
+import { useMessages } from "../../lib/i18n/react";
 import { ArrowLeft, ArrowDown, Gavel, ShoppingBag, Tag, Users } from "lucide-react";
-import { BRAND_AMBER, BRAND_GREEN, ONBOARDING } from "../../lib/brand";
+import { BRAND_AMBER, BRAND_GREEN } from "../../lib/brand";
 import { markGarageSaleRulesSeen } from "../../lib/garageSaleRulesStorage";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 import listingSnap from "../../imports/listing_snap.png";
@@ -8,7 +9,15 @@ const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
 const BORDER = "#E8E6E0";
 
-const { garageSaleRules: copy } = ONBOARDING;
+
+type GarageSaleRulesScreenProps = {
+  onBack: () => void;
+  onContinue: () => void;
+};
+
+export function GarageSaleRulesScreen({ onBack, onContinue }: GarageSaleRulesScreenProps) {
+  const { garageSale, common } = useMessages();
+  const copy = garageSale.garageSaleRules;
 
 const STEPS = [
   {
@@ -37,12 +46,6 @@ const STEPS = [
   },
 ] as const;
 
-type GarageSaleRulesScreenProps = {
-  onBack: () => void;
-  onContinue: () => void;
-};
-
-export function GarageSaleRulesScreen({ onBack, onContinue }: GarageSaleRulesScreenProps) {
   const finish = () => {
     markGarageSaleRulesSeen();
     onContinue();
@@ -60,7 +63,7 @@ export function GarageSaleRulesScreen({ onBack, onContinue }: GarageSaleRulesScr
             onClick={onBack}
             className="flex h-10 w-10 items-center justify-center rounded-full border bg-white"
             style={{ borderColor: BORDER }}
-            aria-label="Back"
+            aria-label={common.back}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>

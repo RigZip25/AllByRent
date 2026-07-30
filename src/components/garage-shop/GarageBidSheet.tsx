@@ -1,7 +1,7 @@
+import { useMessages } from "../../lib/i18n/react";
 import { useMemo, useState } from "react";
 import { X } from "lucide-react";
 import type { ListingDraft } from "../../screens/listing/types";
-import { ONBOARDING } from "../../lib/brand";
 import { placeBidWithSync } from "../../lib/repositories/garageRepository";
 import {
   formatShopUsd,
@@ -13,7 +13,6 @@ import { formatAuctionWindowLabel } from "../../lib/garageAuctionWindow";
 const GREEN = "#0D5C3A";
 const BLUE = "#2563EB";
 const BORDER = "#E8E6E0";
-const auctionCopy = ONBOARDING.garageAuction;
 
 type GarageBidSheetProps = {
   listing: ListingDraft;
@@ -23,6 +22,7 @@ type GarageBidSheetProps = {
 };
 
 export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageBidSheetProps) {
+  const auctionCopy = useMessages().garageSale.garageAuction;
   const highBid = getHighBid(listing.id);
   const minBidUsd = useMemo(() => {
     const base = highBid?.amountUsd ?? offer.startingBidUsd - offer.minIncrementUsd;

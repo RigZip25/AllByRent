@@ -1,22 +1,24 @@
 import { PRIVACY_URL, REFUND_POLICY_URL, TERMS_URL } from "../../lib/brand";
+import { useMessages } from "../../lib/i18n/react";
 
 /** Required disclosure before card capture (public launch). */
 export function PaymentLegalNotice({ className = "" }: { className?: string }) {
+  const { paymentsUi: p } = useMessages();
   return (
     <p className={`text-[11px] leading-snug text-gray-500 ${className}`}>
-      By paying you agree to the{" "}
+      {p.agreePrefix}{" "}
       <a href={TERMS_URL} target="_blank" rel="noopener noreferrer" className="underline">
-        Terms
+        {p.terms}
       </a>
       ,{" "}
       <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer" className="underline">
-        Privacy Policy
+        {p.privacy}
       </a>
-      , and{" "}
+      , {p.and}{" "}
       <a href={REFUND_POLICY_URL} target="_blank" rel="noopener noreferrer" className="underline">
-        Refund Policy
+        {p.refund}
       </a>
-      . Card charges are processed by Stripe; hosts are paid through Stripe Connect.
+      . {p.agreeSuffix}
     </p>
   );
 }

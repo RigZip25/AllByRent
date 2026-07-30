@@ -1,9 +1,9 @@
+import { useMessages } from "../../lib/i18n/react";
 import { Gavel, Pencil, Share2, ShoppingBag, Tag } from "lucide-react";
 import type { ListingDraft } from "../../screens/listing/types";
 import { getLotState, isAuctionTimeActive } from "../../lib/garageAuctionState";
 import { getMyActiveOffer } from "../../lib/garageOfferStorage";
 import { isAuctionNotStarted } from "../../lib/garageAuctionWindow";
-import { ONBOARDING } from "../../lib/brand";
 import {
   formatAuctionEnds,
   formatShopUsd,
@@ -18,7 +18,6 @@ const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 const BLUE = "#2563EB";
 const BORDER = "#E8E6E0";
-const offerCopy = ONBOARDING.garageOffers;
 
 type GarageShopItemCardProps = {
   listing: ListingDraft;
@@ -43,6 +42,7 @@ export function GarageShopItemCard({
   onEdit,
   onShare,
 }: GarageShopItemCardProps) {
+  const offerCopy = useMessages().garageSale.garageOffers;
   const offer = getShopOffer(listing);
   const lotState = getLotState(listing.id);
   const myOffer = getMyActiveOffer(listing.id);

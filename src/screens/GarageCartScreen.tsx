@@ -18,6 +18,7 @@ import {
   startGarageCartCheckout,
   type GarageCartCheckoutInput,
 } from "../lib/repositories/paymentsRepository";
+import { useMessages } from "../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
@@ -68,12 +69,13 @@ type GarageCartScreenProps = {
 };
 
 export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: GarageCartScreenProps) {
+  const { garageCart: copy } = useMessages();
   const auth = useAuth();
   const signedIn = Boolean(auth.session);
   const [lines, setLines] = useState(() => getCartLines());
   const totals = getCartTotals();
   const hostId = lines[0]?.hostId;
-  const garageName = hostId ? garageDisplayName(hostId) : "Garage";
+  const garageName = hostId ? garageDisplayName(hostId) : copy.garageFallback;
   const paymentsReady = canProcessGaragePayments();
   const [busy, setBusy] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
@@ -126,11 +128,11 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
     if (!checkoutInput || !paymentsReady) return;
     if (!signedIn) {
       if (!guestMode) {
-        setPaymentError("Sign in, or continue as guest with your email.");
+        setPaymentError(copy.signInOrGuest);
         return;
       }
       if (!isValidEmail(guestEmail)) {
-        setPaymentError("Enter a valid email for your receipt.");
+        setPaymentError(copy.validEmail);
         return;
       }
     }
@@ -163,13 +165,13 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
             onClick={paidSuccess ? onCheckoutComplete : onBack}
             className="flex h-11 w-11 items-center justify-center rounded-full border bg-white"
             style={{ borderColor: BORDER }}
-            aria-label="Back"
+            aria-label={copy.backAria}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
           <div>
             <h1 className="text-2xl font-bold" style={{ color: GREEN }}>
-              {paidSuccess ? "Paid" : "Cart"}
+              {paidSuccess ? copy.paidTitle : copy.title}
             </h1>
             <p className="text-[15px] text-gray-600">{paidSuccess?.garageName ?? garageName}</p>
           </div>
@@ -179,18 +181,18 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
       {paidSuccess ? (
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6">
           <div className="rounded-2xl border bg-white p-6 text-center" style={{ borderColor: BORDER }}>
-            <p className="text-lg font-bold text-gray-900">Payment complete · {paidSuccess.totalLabel}</p>
+            <p className="text-lg font-bold text-gray-900">{copy.paymentComplete(paidSuccess.totalLabel)}</p>
             <p className="mt-3 text-[15px] leading-relaxed text-gray-700">
-              Direct buy — no offers needed. Message the seller to pick a convenient pickup time.
+              {copy.paymentCompleteBody}
             </p>
-            <p className="mt-2 text-[14px] text-gray-500">The seller was notified that you paid.</p>
+            <p className="mt-2 text-[14px] text-gray-500">{copy.sellerNotified}</p>
             <button
               type="button"
               onClick={onCheckoutComplete}
               className="mt-6 w-full rounded-xl py-3.5 text-base font-bold"
               style={{ backgroundColor: AMBER, color: GREEN }}
             >
-              Back to garage →
+              {copy.backToGarage}
             </button>
           </div>
         </div>
@@ -204,15 +206,15 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
 
             {lines.length === 0 ? (
               <div className="rounded-2xl border bg-white p-8 text-center" style={{ borderColor: BORDER }}>
-                <p className="text-lg font-bold text-gray-900">Cart is empty</p>
-                <p className="mt-2 text-[15px] text-gray-600">Buy now items from an open garage shelf.</p>
+                <p className="text-lg font-bold text-gray-900">{copy.emptyTitle}</p>
+                <p className="mt-2 text-[15px] text-gray-600">{copy.emptyBody}</p>
                 <button
                   type="button"
                   onClick={onBack}
                   className="mt-4 w-full rounded-xl py-3.5 text-base font-bold"
                   style={{ backgroundColor: AMBER, color: GREEN }}
                 >
-                  Back to garage
+                  {copy.backToGarage}
                 </button>
               </div>
             ) : (
@@ -243,7 +245,7 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
                       }}
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-gray-500"
                       style={{ borderColor: BORDER }}
-                      aria-label="Remove from cart"
+                      aria-label={copy.removeAria}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -254,7 +256,7 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
 
             {clientSecret ? (
               <div className="mt-4 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
-                <p className="mb-3 text-base font-semibold text-gray-900">Card payment</p>
+                <p className="mb-3 text-base font-semibold text-gray-900">{copy.cardPayment}</p>
                 {paymentError ? (
                   <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
                     {paymentError}
@@ -278,11 +280,11 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
             >
               <div className="space-y-2 text-[15px]">
                 <div className="flex justify-between border-b pb-2 text-lg font-bold" style={{ borderColor: BORDER }}>
-                  <span>Total</span>
+                  <span>{copy.total}</span>
                   <span style={{ color: GREEN }}>{formatShopUsd(totals.totalUsd)}</span>
                 </div>
                 <p className="text-[13px] leading-snug text-gray-500">
-                  You pay the listed price. After payment, message the seller to arrange pickup — no offer negotiation on Buy now.
+                  {copy.buyNowHint}
                 </p>
               </div>
 
@@ -295,7 +297,7 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
                       className="w-full rounded-xl border py-3.5 text-base font-bold"
                       style={{ borderColor: GREEN, color: GREEN }}
                     >
-                      Sign in / Create account
+                      {copy.signInCta}
                     </button>
                   ) : null}
                   {!guestMode ? (
@@ -307,12 +309,12 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
                       }}
                       className="w-full rounded-xl py-3 text-[15px] font-semibold text-gray-700 underline-offset-2"
                     >
-                      Continue as guest
+                      {copy.continueGuest}
                     </button>
                   ) : (
                     <div className="rounded-xl border bg-[#FFF9F0] p-3" style={{ borderColor: `${AMBER}66` }}>
                       <label htmlFor="guest-email" className="block text-[15px] font-semibold text-gray-800">
-                        Email for receipt
+                        {copy.emailLabel}
                       </label>
                       <input
                         id="guest-email"
@@ -321,12 +323,12 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
                         inputMode="email"
                         value={guestEmail}
                         onChange={(e) => setGuestEmail(e.target.value)}
-                        placeholder="you@example.com"
+                        placeholder={copy.emailPlaceholder}
                         className="mt-2 w-full rounded-xl border bg-white px-3 py-3 text-base"
                         style={{ borderColor: BORDER }}
                       />
                       <p className="mt-2 text-[13px] text-gray-600">
-                        One-time purchase — no account required.
+                        {copy.guestHint}
                       </p>
                     </div>
                   )}
@@ -346,10 +348,10 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
                 style={{ backgroundColor: AMBER, color: GREEN }}
               >
                 {busy
-                  ? "Preparing checkout…"
+                  ? copy.preparing
                   : !signedIn && !guestMode
-                    ? "Choose how to pay"
-                    : `Pay ${formatShopUsd(totals.totalUsd)}`}
+                    ? copy.chooseHowToPay
+                    : copy.payAmount(formatShopUsd(totals.totalUsd))}
               </button>
             </div>
           ) : null}

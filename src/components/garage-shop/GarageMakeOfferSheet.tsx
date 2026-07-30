@@ -1,6 +1,6 @@
+import { useMessages } from "../../lib/i18n/react";
 import { useMemo, useState } from "react";
 import { Tag, X } from "lucide-react";
-import { ONBOARDING } from "../../lib/brand";
 import { submitNeighborOffer } from "../../lib/garageOfferStorage";
 import { formatShopUsd } from "../../lib/garageShopStorage";
 import { useAuth } from "../../hooks/AuthProvider";
@@ -11,7 +11,6 @@ import type { ShopOffer } from "../../lib/garageShopStorage";
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 const BORDER = "#E8E6E0";
-const copy = ONBOARDING.garageOffers;
 
 type GarageMakeOfferSheetProps = {
   listing: ListingDraft;
@@ -26,6 +25,7 @@ export function GarageMakeOfferSheet({
   onClose,
   onSubmitted,
 }: GarageMakeOfferSheetProps) {
+  const copy = useMessages().garageSale.garageOffers;
   const auth = useAuth();
   const suggested = useMemo(
     () => Math.max(1, Math.round(offer.buyNowUsd * 0.75 * 100) / 100),

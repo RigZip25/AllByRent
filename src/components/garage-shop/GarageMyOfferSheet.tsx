@@ -1,3 +1,4 @@
+import { useMessages } from "../../lib/i18n/react";
 import { useMemo, useState } from "react";
 import { Check, X } from "lucide-react";
 import {
@@ -7,12 +8,10 @@ import {
 } from "../../lib/garageOfferStorage";
 import { formatShopUsd, type ShopOffer } from "../../lib/garageShopStorage";
 import type { ListingDraft } from "../../screens/listing/types";
-import { ONBOARDING } from "../../lib/brand";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 const BORDER = "#E8E6E0";
-const copy = ONBOARDING.garageOffers;
 
 type GarageMyOfferSheetProps = {
   listing: ListingDraft;
@@ -24,6 +23,7 @@ type GarageMyOfferSheetProps = {
 };
 
 export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated, onOpenCart }: GarageMyOfferSheetProps) {
+  const copy = useMessages().garageSale.garageOffers;
   const active = useMemo(() => getMyActiveOffer(listing.id), [listing.id]);
   const [counterAmount, setCounterAmount] = useState("");
   const [error, setError] = useState<string | null>(null);

@@ -1,6 +1,7 @@
+import { useMessages } from "../lib/i18n/react";
 import { ArrowLeft, MapPin } from "lucide-react";
 import { HubChoiceCard } from "../components/HubChoiceCard";
-import { BRAND_AMBER, BRAND_GREEN, ONBOARDING } from "../lib/brand";
+import { BRAND_AMBER, BRAND_GREEN } from "../lib/brand";
 import { clusterLabelForCity, getClusterRadiusMi } from "../lib/clusterConfig";
 import { getActiveRentLocationLabel, hasRentLocationSetup } from "../lib/listingStorage";
 import { onboardingAssets } from "../lib/onboardingAssets";
@@ -9,7 +10,6 @@ const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
 const BORDER = "#E8E6E0";
 
-const { yardSaleHub: copy } = ONBOARDING;
 
 export type YardSaleHubChoice = "browse" | "host";
 
@@ -20,6 +20,8 @@ type YardSaleHubScreenProps = {
 };
 
 export function YardSaleHubScreen({ onBack, onChoose, onEditLocation }: YardSaleHubScreenProps) {
+  const { garageSale, common } = useMessages();
+  const copy = garageSale.yardSaleHub;
   const city = getActiveRentLocationLabel().trim();
   const clusterLabel = clusterLabelForCity(city, getClusterRadiusMi());
   const needsLocation = !hasRentLocationSetup();
@@ -33,7 +35,7 @@ export function YardSaleHubScreen({ onBack, onChoose, onEditLocation }: YardSale
             onClick={onBack}
             className="flex h-10 w-10 items-center justify-center rounded-full border bg-white active:bg-gray-50"
             style={{ borderColor: BORDER }}
-            aria-label="Back"
+            aria-label={common.back}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
@@ -71,7 +73,7 @@ export function YardSaleHubScreen({ onBack, onChoose, onEditLocation }: YardSale
           title={copy.browse.title}
           subtitle={copy.browse.subtitle}
           ctaLabel={copy.browse.cta}
-          badge="OPEN"
+          badge={copy.openBadge}
           onClick={() => onChoose("browse")}
         />
         <HubChoiceCard

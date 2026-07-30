@@ -1,6 +1,7 @@
+import { useMessages } from "../../lib/i18n/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Camera, Loader2, ShoppingBag, Tag } from "lucide-react";
-import { BRAND_AMBER, BRAND_GREEN, MASCOT_NAME, ONBOARDING } from "../../lib/brand";
+import { BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
 import { deleteMedia, putMediaBlob, type MediaRef } from "../../lib/mediaStore";
@@ -33,7 +34,6 @@ const AMBER = BRAND_AMBER;
 const BORDER = "#E8E6E0";
 const SNAP_SALE_RETURN = "/?screen=snapSale";
 
-const { snapSale: copy, garageShare: shareCopy } = ONBOARDING;
 
 type SnapSaleScreenProps = {
   onBack: () => void;
@@ -78,6 +78,9 @@ function PhotoPreview({ photo }: { photo: MediaRef }) {
 }
 
 export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleScreenProps) {
+  const { garageSale, common } = useMessages();
+  const copy = garageSale.snapSale;
+  const shareCopy = garageSale.garageShare;
   const auth = useAuth();
   const cameraRef = useRef<HTMLInputElement>(null);
   const libraryRef = useRef<HTMLInputElement>(null);
@@ -377,7 +380,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
             onClick={onBack}
             className="flex h-10 w-10 items-center justify-center rounded-full border bg-white"
             style={{ borderColor: BORDER }}
-            aria-label="Back"
+            aria-label={common.back}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>

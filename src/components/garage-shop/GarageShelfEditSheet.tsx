@@ -1,6 +1,6 @@
+import { useMessages } from "../../lib/i18n/react";
 import { useCallback, useRef, useState } from "react";
 import { Camera, Loader2, Trash2, X } from "lucide-react";
-import { ONBOARDING } from "../../lib/brand";
 import { deleteMedia, putMediaBlob, type MediaRef } from "../../lib/mediaStore";
 import { useMediaUrl } from "../../lib/useMediaUrl";
 import {
@@ -16,7 +16,6 @@ import type { ListingDraft } from "../../screens/listing/types";
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 const BORDER = "#E8E6E0";
-const copy = ONBOARDING.garageShelfEdit;
 
 type GarageShelfEditSheetProps = {
   listing: ListingDraft;
@@ -55,6 +54,7 @@ export function GarageShelfEditSheet({
   onSaved,
   onRemoved,
 }: GarageShelfEditSheetProps) {
+  const copy = useMessages().garageSale.garageShelfEdit;
   const cameraRef = useRef<HTMLInputElement>(null);
   const prefs = getGarageSaleOfferPrefs(listing.id);
   const blockReason = getGarageShelfEditBlockReason(listing.id);
