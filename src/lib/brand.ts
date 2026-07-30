@@ -149,6 +149,8 @@ export const QR_PDF_FILENAMES = {
 /**
  * Host-facing listing mode labels (wizard / offer setup).
  * Browse/renter UI uses "Buy" for the same mode — see feed chips & ItemDetail.
+ * NOTE: EN-only constants — not currently rendered in UI; localize via getMessages
+ * if/when wired into visible copy (listing.modes already covers wizard labels).
  */
 export const LISTING_MODE_LABELS = {
   rent: "Rent",
@@ -157,5 +159,8 @@ export const LISTING_MODE_LABELS = {
   gift: "Free",
 } as const;
 
-/** Risk copy — Stage 1 deposit only, not insurance. */
+/**
+ * @deprecated Prefer `getMessages().item.depositProtection` / `rentalPrice.depositProtection`
+ * (or rentals.depositProtection). Kept for non-UI / legacy imports.
+ */
 export const DEPOSIT_PROTECTION_LABEL = "Deposit protection";

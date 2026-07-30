@@ -1,5 +1,5 @@
 import { Heart, QrCode, Shield, Star } from "lucide-react";
-import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
+import { useMessages } from "../../lib/i18n/react";
 import type { MediaRef } from "../../lib/mediaStore";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 
@@ -43,6 +43,7 @@ export function ListingFeedCard({
   onSelect?: () => void;
   showFavoriteAction?: boolean;
 }) {
+  const depositLabel = useMessages().item.depositProtection;
   const offerColors: Record<string, string> = {
     Rent: "bg-primary",
     Buy: "bg-blue-500",
@@ -62,7 +63,7 @@ export function ListingFeedCard({
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           <div className="bg-primary/90 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-md flex items-center gap-1 w-fit">
             <Shield className="w-3 h-3" />
-            <span>{DEPOSIT_PROTECTION_LABEL}</span>
+            <span>{depositLabel}</span>
           </div>
           {itemHeavy ? (
             <span className="rounded-md bg-amber-500/95 px-2 py-0.5 text-[10px] font-semibold text-white w-fit">

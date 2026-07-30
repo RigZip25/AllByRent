@@ -197,6 +197,8 @@ export const en: AppMessages = {
     notAvailable: "Not available right now",
     yourListing: "This is your listing.",
     sellerMissing: "Seller profile is missing — try again later.",
+    depositProtection: "Deposit protection",
+    depositProtectionOnRentals: (label) => `${label} on rentals`,
   },
   rentals: {
     title: "Rentals",
@@ -1556,4 +1558,36 @@ export const en: AppMessages = {
   bookingRequest,
   rentalPrice,
   paymentsUi,
+  addressPicker: {
+    country: "Country",
+    changeAddress: "Change address",
+    narrowToState: "Narrow search to a state (recommended)",
+    anyState: "Any state",
+    hide: "Hide",
+    show: "Show",
+    listingsNearZip: "Listings shown near this ZIP or city",
+    rentalsSortedNearest: "Rentals sorted nearest to this spot",
+    zipOrCityExample: (example) => `ZIP or city — e.g. ${example}`,
+    searchingInState: (state) => `Searching in ${state} — include ZIP when possible`,
+    fullAddressOptional: "Full address optional — ZIP or city works too",
+    searchingInCountry: (flag, label, example) =>
+      `Searching in ${flag} ${label} — e.g. ${example}`,
+    needsStateHint:
+      "Select your state above — otherwise short street names match many places across the US.",
+    searching: "Searching city and postal database…",
+    suggestionsAria: "Address suggestions",
+    nothingFound: (hint, flag, label) =>
+      `Nothing found. Try ${hint} in ${flag} ${label}.`,
+  },
+  geo: {
+    errors: {
+      denied:
+        "Location access is blocked for this site. After moving to app.evorios.com you may need to allow location again in browser or iOS Settings, or enter your ZIP manually.",
+      timeout: "Location timed out. Check GPS/Wi‑Fi or enter your ZIP or city manually.",
+      unsupported: "Open the app via https:// (not http://), or enter your ZIP or city manually.",
+      unavailable: "Location is temporarily unavailable. Enter your ZIP or city manually.",
+      unknown: "We couldn't detect your location. Enter your ZIP or city manually.",
+    },
+    yourArea: "Your area",
+  },
 };

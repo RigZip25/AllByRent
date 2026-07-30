@@ -65,7 +65,8 @@ export function ActiveGarageShopScreen({
   onOpenHostOffers,
   onStockShelf,
 }: ActiveGarageShopScreenProps) {
-  const { garageAuction: auctionCopy, garageShare: shareCopy } = useMessages().garageSale;
+  const { common, garageSale } = useMessages();
+  const { garageAuction: auctionCopy, garageShare: shareCopy, garageShop: shopCopy } = garageSale;
   const auth = useAuth();
   const ownHostId = resolveHostAccountId(auth.userId);
   const isOwnGarage = hostId === ownHostId;
@@ -256,7 +257,7 @@ export function ActiveGarageShopScreen({
     const result = buyNowGarageItem({ listing, offer });
     if (!result.ok) {
       if (/already in cart/i.test(result.reason)) {
-        showToast("Already in your cart");
+        showToast(shopCopy.alreadyInCart);
         onOpenCart();
         return;
       }
@@ -265,7 +266,7 @@ export function ActiveGarageShopScreen({
     }
     refreshCartCount();
     loadShelf();
-    showToast("Added to cart — checkout next");
+    showToast(shopCopy.addedToCart);
     onOpenCart();
   };
 
@@ -273,15 +274,15 @@ export function ActiveGarageShopScreen({
     loadShelf();
     pushInAppNotification({
       type: "general",
-      title: "Bid placed",
-      body: "We'll notify you if you're outbid or when the auction ends.",
+      title: shopCopy.bidPlacedTitle,
+      body: shopCopy.bidPlacedBody,
     });
-    showToast("Bid placed — good luck!");
+    showToast(shopCopy.bidPlacedToast);
   };
 
   const handleOfferSubmitted = () => {
     loadShelf();
-    showToast("Offer sent — seller notified");
+    showToast(shopCopy.offerSentToast);
   };
 
   return (
@@ -296,20 +297,20 @@ export function ActiveGarageShopScreen({
             onClick={onBack}
             className="flex h-11 w-11 items-center justify-center rounded-full border bg-white active:bg-gray-50"
             style={{ borderColor: BORDER }}
-            aria-label="Back"
+            aria-label={common.back}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="truncate text-xl font-bold sm:text-2xl" style={{ color: GREEN }}>
-                {isOwnGarage ? "My active garage" : garageName}
+                {isOwnGarage ? shopCopy.myActiveGarage : garageName}
               </h1>
               <span
                 className="rounded-full px-2.5 py-1 text-[12px] font-bold uppercase tracking-wide text-white"
                 style={{ backgroundColor: AMBER, color: GREEN }}
               >
-                Open
+                {shopCopy.openBadge}
               </span>
             </div>
             <p className="text-[15px] text-gray-700">{openLabel}</p>
@@ -322,7 +323,7 @@ export function ActiveGarageShopScreen({
                   onClick={() => setShareGarageOpen(true)}
                   className="flex h-11 w-11 items-center justify-center rounded-full border bg-white"
                   style={{ borderColor: BORDER }}
-                  aria-label="Share open garage"
+                  aria-label={shopCopy.shareGarageAria}
                 >
                   <Share2 className="h-5 w-5" style={{ color: GREEN }} />
                 </button>
@@ -333,7 +334,7 @@ export function ActiveGarageShopScreen({
                   onClick={onOpenHostOffers}
                   className="relative flex h-11 w-11 items-center justify-center rounded-full border bg-white"
                   style={{ borderColor: BORDER }}
-                  aria-label={`Offers, ${pendingOfferCount} pending`}
+                  aria-label={shopCopy.offersAria(pendingOfferCount)}
                 >
                   <Inbox className="h-5 w-5" style={{ color: GREEN }} />
                   {pendingOfferCount > 0 ? (
@@ -354,11 +355,11 @@ export function ActiveGarageShopScreen({
                   borderColor: cartCount > 0 ? GREEN : BORDER,
                   backgroundColor: cartCount > 0 ? `${GREEN}12` : "#fff",
                 }}
-                aria-label={`Cart, ${cartCount} items`}
+                aria-label={shopCopy.cartAria(cartCount)}
               >
                 <ShoppingCart className="h-5 w-5 shrink-0" style={{ color: GREEN }} />
                 <span className="text-sm font-bold" style={{ color: GREEN }}>
-                  Cart
+                  {shopCopy.cartLabel}
                 </span>
                 {cartCount > 0 ? (
                   <span
@@ -379,7 +380,7 @@ export function ActiveGarageShopScreen({
         >
           <Store className="h-4 w-4 shrink-0" aria-hidden />
           {preview
-            ? "Neighbor view — photo, price, buy now or bid."
+            ? shopCopy.neighborViewBanner
             : isOwnGarage
               ? shareCopy.shopBannerHost
               : auctionCopy.shopBanner}
@@ -397,8 +398,11 @@ export function ActiveGarageShopScreen({
               >
                 <Trophy className="h-5 w-5 shrink-0" style={{ color: AMBER }} />
                 <span className="min-w-0 flex-1 text-[13px] font-semibold text-gray-900">
-                  {win.runnerUpAttempt > 1 ? "Next bidder —" : "You won —"} pay ${win.winningBidUsd}{" "}
-                  {auctionCopy.winBannerSuffix}
+                  {shopCopy.winPayLine(
+                    win.runnerUpAttempt > 1 ? shopCopy.nextBidderPrefix : shopCopy.youWonPrefix,
+                    win.winningBidUsd,
+                    auctionCopy.winBannerSuffix,
+                  )}
                 </span>
               </button>
             ))}
@@ -408,14 +412,12 @@ export function ActiveGarageShopScreen({
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
         {loading ? (
-          <p className="py-16 text-center text-gray-500">Loading shelf…</p>
+          <p className="py-16 text-center text-gray-500">{shopCopy.loadingShelf}</p>
         ) : listings.length === 0 ? (
           <div className="rounded-2xl border bg-white p-6 text-center" style={{ borderColor: BORDER }}>
-            <p className="text-lg font-bold text-gray-900">Shelf is empty</p>
+            <p className="text-lg font-bold text-gray-900">{shopCopy.emptyTitle}</p>
             <p className="mt-2 text-[15px] text-gray-600">
-              {isOwnGarage
-                ? "Snap sale items from Open my garage — one photo and a price each."
-                : "No sale items listed right now."}
+              {isOwnGarage ? shopCopy.emptyOwnBody : shopCopy.emptyNeighborBody}
             </p>
             {isOwnGarage && onStockShelf && !preview ? (
               <button
@@ -424,7 +426,7 @@ export function ActiveGarageShopScreen({
                 className="mt-4 w-full rounded-xl py-3.5 text-base font-bold"
                 style={{ backgroundColor: AMBER, color: GREEN }}
               >
-                Snap onto shelf →
+                {shopCopy.snapOntoShelf}
               </button>
             ) : !isOwnGarage ? (
               <button
@@ -433,7 +435,7 @@ export function ActiveGarageShopScreen({
                 className="mt-4 w-full rounded-xl border py-3.5 text-base font-bold"
                 style={{ borderColor: GREEN, color: GREEN }}
               >
-                Back to yard sales
+                {shopCopy.backToYardSales}
               </button>
             ) : null}
           </div>
@@ -514,11 +516,11 @@ export function ActiveGarageShopScreen({
           onClose={() => setEditTarget(null)}
           onSaved={() => {
             loadShelf();
-            showToast("Shelf updated");
+            showToast(shopCopy.shelfUpdated);
           }}
           onRemoved={() => {
             loadShelf();
-            showToast("Removed from shelf");
+            showToast(shopCopy.removedFromShelf);
           }}
         />
       ) : null}
@@ -528,7 +530,7 @@ export function ActiveGarageShopScreen({
           <div className="max-h-[85dvh] w-full overflow-y-auto rounded-2xl bg-[#FFF9F0] p-4 shadow-xl">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-base font-bold text-gray-900">{shareCopy.openGarageTitle}</h2>
-              <button type="button" onClick={() => setShareGarageOpen(false)} aria-label="Close">
+              <button type="button" onClick={() => setShareGarageOpen(false)} aria-label={common.close}>
                 <X className="h-5 w-5 text-gray-500" />
               </button>
             </div>
@@ -548,7 +550,7 @@ export function ActiveGarageShopScreen({
           <div className="max-h-[85dvh] w-full overflow-y-auto rounded-2xl bg-[#FFF9F0] p-4 shadow-xl">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-base font-bold text-gray-900">{shareCopy.itemTitle}</h2>
-              <button type="button" onClick={() => setShareItemTarget(null)} aria-label="Close">
+              <button type="button" onClick={() => setShareItemTarget(null)} aria-label={common.close}>
                 <X className="h-5 w-5 text-gray-500" />
               </button>
             </div>

@@ -294,6 +294,8 @@ export type AppMessages = {
     notAvailable: string;
     yourListing: string;
     sellerMissing: string;
+    depositProtection: string;
+    depositProtectionOnRentals: (label: string) => string;
   };
   rentals: {
     title: string;
@@ -1430,6 +1432,38 @@ export type AppMessages = {
   bookingRequest: BookingRequestMessages;
   rentalPrice: RentalPriceMessages;
   paymentsUi: PaymentsUiMessages;
+  addressPicker: AddressPickerMessages;
+  geo: GeoMessages;
+};
+
+export type AddressPickerMessages = {
+  country: string;
+  changeAddress: string;
+  narrowToState: string;
+  anyState: string;
+  hide: string;
+  show: string;
+  listingsNearZip: string;
+  rentalsSortedNearest: string;
+  zipOrCityExample: (example: string) => string;
+  searchingInState: (state: string) => string;
+  fullAddressOptional: string;
+  searchingInCountry: (flag: string, label: string, example: string) => string;
+  needsStateHint: string;
+  searching: string;
+  suggestionsAria: string;
+  nothingFound: (hint: string, flag: string, label: string) => string;
+};
+
+export type GeoMessages = {
+  errors: {
+    denied: string;
+    timeout: string;
+    unsupported: string;
+    unavailable: string;
+    unknown: string;
+  };
+  yourArea: string;
 };
 
 export type GarageSaleMessages = {
@@ -1498,6 +1532,46 @@ export type GarageSaleMessages = {
     snapAnotherCta: string;
     viewShopCta: string;
     mascotHint: string;
+    photoLoadFailed: string;
+    publishNeedSignIn: string;
+    publishNeedStripe: string;
+    connectFailed: string;
+    setupTitle: string;
+    setupSignInBody: string;
+    setupStripeBody: string;
+    signInContinue: string;
+    openingStripe: string;
+    continueStripe: string;
+    refreshStripe: string;
+    finishSetupFirst: string;
+    onShelfActive: string;
+    shareWithNeighbors: string;
+  };
+  garageShop: {
+    myActiveGarage: string;
+    openBadge: string;
+    neighborViewBanner: string;
+    youWonPrefix: string;
+    nextBidderPrefix: string;
+    winPayLine: (prefix: string, amount: number, suffix: string) => string;
+    loadingShelf: string;
+    emptyTitle: string;
+    emptyOwnBody: string;
+    emptyNeighborBody: string;
+    snapOntoShelf: string;
+    backToYardSales: string;
+    alreadyInCart: string;
+    addedToCart: string;
+    bidPlacedTitle: string;
+    bidPlacedBody: string;
+    bidPlacedToast: string;
+    offerSentToast: string;
+    shelfUpdated: string;
+    removedFromShelf: string;
+    shareGarageAria: string;
+    offersAria: (count: number) => string;
+    cartAria: (count: number) => string;
+    cartLabel: string;
   };
   garageAuction: {
     bidTerms: string;

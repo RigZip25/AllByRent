@@ -43,7 +43,7 @@ import {
   type ShopOffer,
 } from "../../lib/garageShopStorage";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
-import { APP_NAME, DEPOSIT_PROTECTION_LABEL, MASCOT_NAME } from "../../lib/brand";
+import { APP_NAME, MASCOT_NAME } from "../../lib/brand";
 import { parseUsdToCents } from "../../lib/insurance";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
 import { buildListingSharePayload, listingShareUrl } from "../../lib/socialShare";
@@ -378,7 +378,7 @@ export function ItemDetail({
           parseUsdToCents(listing.pricing.securityDeposit ?? "") >= 50 ? (
             <div className="absolute top-4 left-4 bg-primary/90 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5">
               <Shield className="w-3.5 h-3.5" />
-              <span>{DEPOSIT_PROTECTION_LABEL}</span>
+              <span>{t.item.depositProtection}</span>
             </div>
           ) : null}
 
@@ -553,7 +553,9 @@ export function ItemDetail({
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <Shield className="w-4 h-4 text-primary" />
                   </div>
-                  <span className="text-sm">{DEPOSIT_PROTECTION_LABEL} on rentals</span>
+                  <span className="text-sm">
+                    {t.item.depositProtectionOnRentals(t.item.depositProtection)}
+                  </span>
                 </div>
               ) : null}
               <div className="flex items-center gap-3">

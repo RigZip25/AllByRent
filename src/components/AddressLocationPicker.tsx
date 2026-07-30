@@ -25,6 +25,7 @@ import {
   saveUsState,
   US_STATE_OPTIONS,
 } from "../lib/usStates";
+import { useMessages } from "../lib/i18n/react";
 
 type AddressLocationPickerProps = {
   placeholder: string;
@@ -46,6 +47,7 @@ export function AddressLocationPicker({
   near,
   variant = "area",
 }: AddressLocationPickerProps) {
+  const { addressPicker: copy } = useMessages();
   const granularity: LocationSearchGranularity = variant === "area" ? "area" : "any";
   const homeCityHint = useMemo(() => {
     const home = getHomeLocation();
@@ -165,9 +167,7 @@ export function AddressLocationPicker({
             </p>
           ) : null}
           <p className="mt-1 text-xs text-gray-500">
-            {variant === "area"
-              ? "Listings shown near this ZIP or city"
-              : "Rentals sorted nearest to this spot"}
+            {variant === "area" ? copy.listingsNearZip : copy.rentalsSortedNearest}
           </p>
         </div>
         <button
@@ -176,7 +176,7 @@ export function AddressLocationPicker({
           className="text-sm font-semibold"
           style={{ color: "#0D5C3A" }}
         >
-          Change address
+          {copy.changeAddress}
         </button>
       </div>
     );
@@ -185,7 +185,7 @@ export function AddressLocationPicker({
   return (
     <div className="flex flex-col gap-3">
       <label className="flex flex-col gap-1.5">
-        <span className="text-xs font-medium text-gray-500">Country</span>
+        <span className="text-xs font-medium text-gray-500">{copy.country}</span>
         <select
           value={countryCode}
           onChange={(e) => handleCountryChange(e.target.value as CountryCode)}
@@ -210,13 +210,13 @@ export function AddressLocationPicker({
       {countryCode === "US" ? (
         <div className="flex flex-col gap-2">
           <label className="flex items-center justify-between gap-3">
-            <span className="text-xs font-medium text-gray-500">Narrow search to a state (recommended)</span>
+            <span className="text-xs font-medium text-gray-500">{copy.narrowToState}</span>
             <button
               type="button"
               className="text-xs font-semibold text-gray-600"
               onClick={() => setLimitToUsState((v) => !v)}
             >
-              {limitToUsState ? "Hide" : "Show"}
+              {limitToUsState ? copy.hide : copy.show}
             </button>
           </label>
           {limitToUsState ? (
@@ -225,7 +225,7 @@ export function AddressLocationPicker({
               onChange={(e) => handleStateChange(e.target.value)}
               className="w-full rounded-xl border-2 border-gray-200 bg-white px-3 py-2.5 text-base outline-none focus:border-green-700"
             >
-              <option value="">Any state</option>
+              <option value="">{copy.anyState}</option>
               {US_STATE_OPTIONS.map((state) => (
                 <option key={state.code} value={state.code}>
                   {state.label} ({state.code})
@@ -264,29 +264,30 @@ export function AddressLocationPicker({
       <p className="text-center text-xs text-gray-400">
         {countryCode === "US"
           ? variant === "area"
-            ? `ZIP or city — e.g. ${getCountrySearchExample("US")}`
+            ? copy.zipOrCityExample(getCountrySearchExample("US"))
             : limitToUsState && usState
-              ? `Searching in ${usState} — include ZIP when possible`
-              : "Full address optional — ZIP or city works too"
-          : `Searching in ${activeCountry.flag} ${activeCountry.label} — e.g. ${getCountrySearchExample(countryCode)}`}
+              ? copy.searchingInState(usState)
+              : copy.fullAddressOptional
+          : copy.searchingInCountry(
+              activeCountry.flag,
+              activeCountry.label,
+              getCountrySearchExample(countryCode),
+            )}
       </p>
 
       {needsStateHint ? (
-        <p className="text-center text-xs leading-relaxed text-amber-800">
-          Select your <strong>state</strong> above — otherwise short street names
-          match many places across the US.
-        </p>
+        <p className="text-center text-xs leading-relaxed text-amber-800">{copy.needsStateHint}</p>
       ) : null}
 
       {isLoading ? (
-        <p className="text-center text-xs text-gray-500">Searching city and postal database…</p>
+        <p className="text-center text-xs text-gray-500">{copy.searching}</p>
       ) : null}
 
       {showAutocomplete ? (
         <ul
           className="relative z-20 max-h-52 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-md"
           role="listbox"
-          aria-label="Address suggestions"
+          aria-label={copy.suggestionsAria}
         >
           {suggestions.map((suggestion, index) => (
             <li key={`${suggestion.label}-${index}`} role="option">
@@ -315,8 +316,11 @@ export function AddressLocationPicker({
 
       {!isLoading && searchError && inputValue.trim().length >= minQueryLength(inputValue, granularity) ? (
         <p className="text-center text-xs leading-relaxed text-gray-500">
-          Nothing found. Try {getCountryEmptyHint(countryCode, variant)} in{" "}
-          {activeCountry.flag} {activeCountry.label}.
+          {copy.nothingFound(
+            getCountryEmptyHint(countryCode, variant),
+            activeCountry.flag,
+            activeCountry.label,
+          )}
         </p>
       ) : null}
 

@@ -206,6 +206,8 @@ export const cs: AppMessages = {
     notAvailable: "Momentálně nedostupné",
     yourListing: "Toto je vaše nabídka.",
     sellerMissing: "Profil prodejce chybí — zkuste to později.",
+    depositProtection: "Ochrana zálohy",
+    depositProtectionOnRentals: (label) => `${label} u půjček`,
   },
   rentals: {
     title: "Půjčky",
@@ -1569,4 +1571,36 @@ export const cs: AppMessages = {
   bookingRequest,
   rentalPrice,
   paymentsUi,
+  addressPicker: {
+    country: "Země",
+    changeAddress: "Změnit adresu",
+    narrowToState: "Zúžit hledání na stát (doporučeno)",
+    anyState: "Libovolný stát",
+    hide: "Skrýt",
+    show: "Zobrazit",
+    listingsNearZip: "Nabídky poblíž tohoto PSČ nebo města",
+    rentalsSortedNearest: "Půjčky seřazené od nejbližšího místa",
+    zipOrCityExample: (example) => `PSČ nebo město — např. ${example}`,
+    searchingInState: (state) => `Hledám v ${state} — pokud možno uveďte PSČ`,
+    fullAddressOptional: "Celá adresa je volitelná — stačí PSČ nebo město",
+    searchingInCountry: (flag, label, example) =>
+      `Hledám v ${flag} ${label} — např. ${example}`,
+    needsStateHint:
+      "Vyberte výše stát — jinak krátké názvy ulic najdou spoustu míst napříč USA.",
+    searching: "Prohledávám databázi měst a PSČ…",
+    suggestionsAria: "Návrhy adres",
+    nothingFound: (hint, flag, label) =>
+      `Nic nenalezeno. Zkuste ${hint} v ${flag} ${label}.`,
+  },
+  geo: {
+    errors: {
+      denied:
+        "Přístup k poloze je pro tento web zablokovaný. Po přesunu na app.evorios.com možná budete muset polohu znovu povolit v prohlížeči nebo v nastavení iOS, nebo zadejte PSČ ručně.",
+      timeout: "Vypršel čas na zjištění polohy. Zkontrolujte GPS/Wi‑Fi nebo zadejte PSČ či město ručně.",
+      unsupported: "Otevřete aplikaci přes https:// (ne http://), nebo zadejte PSČ či město ručně.",
+      unavailable: "Poloha je dočasně nedostupná. Zadejte PSČ nebo město ručně.",
+      unknown: "Polohu se nepodařilo zjistit. Zadejte PSČ nebo město ručně.",
+    },
+    yourArea: "Vaše okolí",
+  },
 };
