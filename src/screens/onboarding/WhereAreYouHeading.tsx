@@ -1,14 +1,12 @@
 import { useState } from "react";
-import { ONBOARDING } from "../../lib/brand";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
 import { AddressLocationPicker } from "../../components/AddressLocationPicker";
 import type { LocationSuggestion } from "../../lib/geocoding";
 import { setTripDestination } from "../../lib/listingStorage";
+import { useOnboardingCopy } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
-
-const { tripDestination: copy } = ONBOARDING;
 
 const exampleDestinations: LocationSuggestion[] = [
   {
@@ -59,6 +57,7 @@ type WhereAreYouHeadingProps = {
 };
 
 export function WhereAreYouHeading({ onBack, onContinue, onSkip }: WhereAreYouHeadingProps) {
+  const { tripDestination: copy } = useOnboardingCopy();
   const [selectedLocation, setSelectedLocation] = useState<LocationSuggestion | null>(null);
 
   const handleContinue = () => {

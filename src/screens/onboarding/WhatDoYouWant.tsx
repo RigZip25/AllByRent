@@ -1,12 +1,10 @@
-import { ONBOARDING } from "../../lib/brand";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 import { setAppMode } from "../../lib/appMode";
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
+import { useOnboardingCopy } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
-
-const { roleChoice: copy } = ONBOARDING;
 
 type WhatDoYouWantProps = {
   onEarn: () => void;
@@ -76,6 +74,8 @@ function RoleChoiceCard({
 }
 
 export function WhatDoYouWant({ onEarn, onSave, onSkip, onBack }: WhatDoYouWantProps) {
+  const { roleChoice: copy } = useOnboardingCopy();
+
   return (
     <div className="screen onboarding-step mx-auto w-full max-w-[390px] bg-white">
       <OnboardingTopBar onBack={onBack} onSkip={onSkip} />

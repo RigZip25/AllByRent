@@ -1,14 +1,13 @@
 import { MapPin } from "lucide-react";
 import { HubChoiceCard } from "../components/HubChoiceCard";
-import { BRAND_AMBER, BRAND_GREEN, ONBOARDING } from "../lib/brand";
+import { BRAND_AMBER, BRAND_GREEN } from "../lib/brand";
 import { clusterLabelForCity, getClusterRadiusMi } from "../lib/clusterConfig";
 import { getActiveRentLocationLabel, hasRentLocationSetup } from "../lib/listingStorage";
 import { onboardingAssets } from "../lib/onboardingAssets";
+import { useOnboardingCopy } from "../lib/i18n/react";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
-
-const { browseHub: copy } = ONBOARDING;
 
 export type BrowseHubChoice = "findGear" | "yardSales";
 
@@ -18,6 +17,7 @@ type BrowseHubScreenProps = {
 };
 
 export function BrowseHubScreen({ onChoose, onEditLocation }: BrowseHubScreenProps) {
+  const { browseHub: copy } = useOnboardingCopy();
   const city = getActiveRentLocationLabel().trim();
   const clusterLabel = clusterLabelForCity(city, getClusterRadiusMi());
   const needsLocation = !hasRentLocationSetup();

@@ -1,13 +1,12 @@
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
-import { APP_MODE_LABELS, APP_NAME, APP_TAGLINE, ONBOARDING } from "../../lib/brand";
+import { APP_NAME } from "../../lib/brand";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 import { getAppMode } from "../../lib/appMode";
 import { getRentContext } from "../../lib/listingStorage";
 import { getProfileLocationSummary } from "../../lib/userProfileStorage";
+import { useAppModeLabels, useMessages, useOnboardingCopy } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
-
-const { allSet: copy } = ONBOARDING;
 
 type YouAreAllSetProps = {
   onExplore: () => void;
@@ -19,21 +18,20 @@ function accountTypeLabel(): string {
   return "Individual";
 }
 
-function goalTags(): string[] {
+export function YouAreAllSet({ onExplore, onBack, onSkip }: YouAreAllSetProps) {
+  const { allSet: copy } = useOnboardingCopy();
+  const modeLabels = useAppModeLabels();
+  const { tagline } = useMessages();
+  const location = getProfileLocationSummary();
   const mode = getAppMode();
   const tags: string[] = [];
-  if (mode === "earn") tags.push(APP_MODE_LABELS.earn);
-  if (mode === "rent") tags.push(APP_MODE_LABELS.rent);
+  if (mode === "earn") tags.push(modeLabels.earn);
+  if (mode === "rent") tags.push(modeLabels.rent);
   const context = getRentContext();
   if (context === "trip") tags.push("Visiting");
   if (context === "home") tags.push("On my block");
   if (tags.length === 0) tags.push("Explore");
-  return tags;
-}
-
-export function YouAreAllSet({ onExplore, onBack, onSkip }: YouAreAllSetProps) {
-  const location = getProfileLocationSummary();
-  const goals = goalTags();
+  const goals = tags;
 
   return (
     <div className="screen mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-white">
@@ -52,7 +50,7 @@ export function YouAreAllSet({ onExplore, onBack, onSkip }: YouAreAllSetProps) {
             {copy.title}
           </h1>
           <p className="mt-2 text-base text-gray-500">{copy.subtitle}</p>
-          <p className="mt-1 text-sm font-medium text-gray-600">{APP_TAGLINE}</p>
+          <p className="mt-1 text-sm font-medium text-gray-600">{tagline}</p>
         </div>
 
         <div className="mt-6 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">

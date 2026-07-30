@@ -3,6 +3,7 @@ import {
   Bell,
   ChevronRight,
   CreditCard,
+  Globe,
   HelpCircle,
   LogOut,
   MapPin,
@@ -45,6 +46,8 @@ import { signOut } from "../lib/auth";
 import { fetchRemoteProfile } from "../lib/supabaseProfile";
 import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
 import { loadConnectStatus, startConnectOnboarding } from "../lib/repositories/connectRepository";
+import { useLocaleControls, useMessages } from "../lib/i18n/react";
+import type { AppLocale } from "../lib/i18n/types";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -166,6 +169,8 @@ export function ProfileScreen({
   onRequireAuth?: () => void;
 }) {
   const auth = useAuth();
+  const { profile: profileCopy } = useMessages();
+  const localeControls = useLocaleControls();
   const [profile, setProfile] = useState<UserProfile>(() =>
     refreshProfileStats(loadUserProfile(), auth.userId),
   );
@@ -592,6 +597,31 @@ export function ProfileScreen({
 
         <SectionTitle>Preferences</SectionTitle>
         <ul className="mb-4 flex flex-col gap-2">
+          <li>
+            <RowButton
+              icon={<Globe className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+              label={profileCopy.language}
+              value={
+                localeControls.auto
+                  ? profileCopy.languageAuto
+                  : profileCopy.languageValue(localeControls.labels[localeControls.locale])
+              }
+              onClick={() => {
+                if (localeControls.auto) {
+                  localeControls.setLocale("en");
+                  return;
+                }
+                const order = localeControls.supported;
+                const idx = order.indexOf(localeControls.locale);
+                const next = order[idx + 1];
+                if (next) {
+                  localeControls.setLocale(next as AppLocale);
+                  return;
+                }
+                localeControls.setLocaleAuto();
+              }}
+            />
+          </li>
           <li>
             <RowButton
               icon={<Bell className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}

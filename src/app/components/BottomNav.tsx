@@ -1,5 +1,6 @@
 import { Menu, Plus } from "lucide-react";
 import { MASCOT_NAME } from "../../lib/brand";
+import { useMessages } from "../../lib/i18n/react";
 import rentanoImg from "../../imports/No_back_rentano.png";
 
 const BORDER = "#E8E6E0";
@@ -88,6 +89,7 @@ export function BottomNav({
   onMore: () => void;
 }) {
   const mreLabel = MASCOT_NAME.replace("Mr. ", "Mr.");
+  const { nav } = useMessages();
 
   return (
     <nav
@@ -102,7 +104,7 @@ export function BottomNav({
           className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
         >
           <NavIconHome active={activeTab === "home"} />
-          <TabLabel active={activeTab === "home"}>Home</TabLabel>
+          <TabLabel active={activeTab === "home"}>{nav.home}</TabLabel>
         </button>
 
         <button
@@ -133,7 +135,7 @@ export function BottomNav({
           >
             <Plus className="h-8 w-8 text-white" strokeWidth={2.5} aria-hidden />
           </div>
-          <TabLabel active={activeTab === "add"}>Stock</TabLabel>
+          <TabLabel active={activeTab === "add"}>{nav.stock}</TabLabel>
         </button>
 
         <button
@@ -142,7 +144,7 @@ export function BottomNav({
           className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
         >
           <NavIconGarage active={activeTab === "garage"} />
-          <TabLabel active={activeTab === "garage"}>Garage</TabLabel>
+          <TabLabel active={activeTab === "garage"}>{nav.garage}</TabLabel>
         </button>
 
         <button
@@ -152,7 +154,7 @@ export function BottomNav({
           aria-label="More — account and settings"
         >
           <NavIconMore active={activeTab === "more"} />
-          <TabLabel active={activeTab === "more"}>More</TabLabel>
+          <TabLabel active={activeTab === "more"}>{nav.more}</TabLabel>
         </button>
       </div>
     </nav>
