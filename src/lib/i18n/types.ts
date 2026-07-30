@@ -405,6 +405,7 @@ export type AppMessages = {
   };
   listing: {
     stepOf: (step: number, total: number) => string;
+    continue: string;
     editListing: string;
     goPublicTitle: string;
     howQrWorks: string;

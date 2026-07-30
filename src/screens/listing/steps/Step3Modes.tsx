@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Check } from "lucide-react";
 import type { ListingDraft, MinimumRentalPeriod, StepProps } from "../types";
 import { RentanoHint } from "../../../components/RentanoHint";
-import { DEPOSIT_PROTECTION_LABEL, LISTING_MODE_LABELS } from "../../../lib/brand";
+import { DEPOSIT_PROTECTION_LABEL } from "../../../lib/brand";
 import {
   calculateRentalPrices,
   categoryHasRestrictedModes,
@@ -11,6 +11,7 @@ import {
   type CategoryModeKey,
 } from "../listingItemCategories";
 import { isYardSaleListingActive } from "../../../lib/yardSaleListing";
+import { useMessages } from "../../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 
@@ -180,16 +181,11 @@ function ModeCard({
   );
 }
 
-const MODE_CARD_CONFIG: {
-  key: CategoryModeKey;
-  icon: string;
-  title: string;
-  subtitle: string;
-}[] = [
-  { key: "rent", icon: "🔑", title: LISTING_MODE_LABELS.rent, subtitle: "Earn daily, weekly or monthly" },
-  { key: "sell", icon: "🏷️", title: LISTING_MODE_LABELS.sell, subtitle: "One-time sale, item leaves your hands" },
-  { key: "gift", icon: "🎁", title: LISTING_MODE_LABELS.gift, subtitle: "Give it away for free" },
-];
+const MODE_CARD_ICONS: Record<"rent" | "sell" | "gift", string> = {
+  rent: "🔑",
+  sell: "🏷️",
+  gift: "🎁",
+};
 
 function getRateFieldsForMinimumPeriod(minimumPeriod: MinimumRentalPeriod) {
   if (minimumPeriod === "1 day") {
@@ -209,6 +205,8 @@ const rateFieldMotion = {
 };
 
 export function Step3Modes({ draft, setDraft }: StepProps) {
+  const { listing } = useMessages();
+  const modesCopy = listing.modes;
   const yardSaleListing = isYardSaleListingActive();
   const minimumPeriodCategoryRef = useRef<string | null>(null);
   const [showLongTermPricingHelp, setShowLongTermPricingHelp] = useState(false);
@@ -222,14 +220,40 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
   const showMonthlyRate = categoryRules.showMonthlyRate && periodRateFields.showMonthly;
 
   const rentSubtitle = showDailyRate && showMonthlyRate
-    ? "Earn daily, weekly or monthly"
+    ? modesCopy.rentSubtitleDailyWeeklyMonthly
     : showMonthlyRate && showWeeklyRate
-      ? "Earn weekly or monthly"
+      ? modesCopy.rentSubtitleWeeklyMonthly
       : showMonthlyRate
-        ? "Earn monthly"
-        : "Earn daily or weekly";
+        ? modesCopy.rentSubtitleMonthly
+        : modesCopy.rentSubtitleDailyWeekly;
 
-  const MODE_CARDS_PUBLIC = MODE_CARD_CONFIG.filter((card) => card.key !== "gift");
+  const modeCardConfig: {
+    key: CategoryModeKey;
+    icon: string;
+    title: string;
+    subtitle: string;
+  }[] = [
+    {
+      key: "rent",
+      icon: MODE_CARD_ICONS.rent,
+      title: modesCopy.rent,
+      subtitle: modesCopy.rentSubtitleDailyWeeklyMonthly,
+    },
+    {
+      key: "sell",
+      icon: MODE_CARD_ICONS.sell,
+      title: modesCopy.sell,
+      subtitle: modesCopy.sellSubtitle,
+    },
+    {
+      key: "gift",
+      icon: MODE_CARD_ICONS.gift,
+      title: modesCopy.gift,
+      subtitle: modesCopy.giftSubtitle,
+    },
+  ];
+
+  const MODE_CARDS_PUBLIC = modeCardConfig.filter((card) => card.key !== "gift");
 
   const visibleModeCards = yardSaleListing
     ? MODE_CARDS_PUBLIC.filter((card) => card.key === "sell")
@@ -359,8 +383,17 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
     : 0;
 
   const pricingTipMessage = showRoiTip
-    ? `Prices based on current market — 15% below rental stores. Rent it ${rentalsToBreakEven} times and it pays for itself.`
-    : "Prices based on current market — 15% below rental stores.";
+    ? modesCopy.pricingTipRoi(rentalsToBreakEven)
+    : modesCopy.pricingTipDefault;
+
+
+  const periodLabels: Record<MinimumRentalPeriod, string> = {
+    "1 day": modesCopy.period1Day,
+    "3 days": modesCopy.period3Days,
+    "1 week": modesCopy.period1Week,
+    "2 weeks": modesCopy.period2Weeks,
+    "1 month": modesCopy.period1Month,
+  };
 
   return (
     <motion.div
@@ -371,10 +404,10 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
     >
       <div className="mb-6">
         <h2 className="text-xl font-bold" style={{ color: GREEN }}>
-          How do you want to offer it?
+          {modesCopy.title}
         </h2>
         <p className="mt-1 text-sm text-gray-500">
-          Rent it out, sell it, or both. Want to give it away? Use Sell with price $0.
+          {modesCopy.subtitle}
         </p>
       </div>
 
@@ -393,7 +426,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                 <motion.div layout className="space-y-3">
                   <motion.div layout="position">
                     <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-700">
-                      MINIMUM RENTAL PERIOD
+                      {modesCopy.minimumPeriod}
                     </label>
                     <select
                       value={draft.pricing.minimumPeriod}
@@ -407,7 +440,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                     >
                       {MINIMUM_PERIOD_OPTIONS.map((option) => (
                         <option key={option} value={option}>
-                          {option}
+                          {periodLabels[option]}
                         </option>
                       ))}
                     </select>
@@ -420,7 +453,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                         className="overflow-hidden"
                         {...rateFieldMotion}
                       >
-                        <FieldLabel label="Daily rate" required />
+                        <FieldLabel label={modesCopy.dailyRate} required />
                         <MoneyInput
                           value={draft.pricing.dailyRate}
                           onChange={(value) => updatePricing("dailyRate", value)}
@@ -435,7 +468,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                         className="overflow-hidden"
                         {...rateFieldMotion}
                       >
-                        <FieldLabel label="Weekly rate" required />
+                        <FieldLabel label={modesCopy.weeklyRate} required />
                         <MoneyInput
                           value={draft.pricing.weeklyRate}
                           onChange={(value) => updatePricing("weeklyRate", value)}
@@ -451,7 +484,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                         {...rateFieldMotion}
                       >
                         <FieldLabel
-                          label="Monthly rate"
+                          label={modesCopy.monthlyRate}
                           required={!showDailyRate && !showWeeklyRate}
                         />
                         <MoneyInput
@@ -468,9 +501,9 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                   <motion.div layout="position" className="rounded-2xl border border-gray-100 bg-white p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-900">Allow long-term rentals</p>
+                        <p className="text-sm font-semibold text-gray-900">{modesCopy.longTermTitle}</p>
                         <p className="mt-0.5 text-xs text-gray-500">
-                          Optional monthly pricing for bookings 30+ days.
+                          {modesCopy.longTermBody}
                         </p>
                       </div>
                       <button
@@ -487,7 +520,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                         className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
                           longTermEnabled ? "bg-green-700" : "bg-gray-200"
                         }`}
-                        aria-label="Toggle long-term rentals"
+                        aria-label={modesCopy.longTermToggleAria}
                         aria-pressed={longTermEnabled}
                       >
                         <span
@@ -509,7 +542,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                           className="overflow-hidden"
                         >
                           <div className="mt-3">
-                            <FieldLabel label="Monthly rate (30+ days)" required />
+                            <FieldLabel label={modesCopy.longTermMonthlyRate} required />
                             <MoneyInput
                               value={draft.pricing.longTermMonthlyRate ?? ""}
                               onChange={(value) => updatePricing("longTermMonthlyRate", value)}
@@ -517,7 +550,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                             />
                             <div className="mt-2 flex items-center justify-between gap-2">
                               <p className="text-xs text-gray-500">
-                                Renters will see monthly pricing for long bookings.
+                                {modesCopy.longTermRentersNote}
                               </p>
                               <button
                                 type="button"
@@ -525,17 +558,17 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                                 className="text-xs font-semibold underline"
                                 style={{ color: GREEN }}
                               >
-                                How to price?
+                                {modesCopy.howToPrice}
                               </button>
                             </div>
 
                             {showLongTermPricingHelp ? (
                               <div className="mt-2 rounded-xl bg-[#F0FDF4] px-3 py-2 text-xs text-gray-700">
-                                Example only: some hosts start around{" "}
-                                <span className="font-semibold">
-                                  {suggestedLongTermMonthly ? `$${suggestedLongTermMonthly}/mo` : "daily × 30 × 0.65"}
-                                </span>{" "}
-                                for long stays, then adjust based on demand and wear.
+                                {modesCopy.longTermHelp(
+                                  suggestedLongTermMonthly
+                                    ? `$${suggestedLongTermMonthly}/mo`
+                                    : "daily × 30 × 0.65",
+                                )}
                               </div>
                             ) : null}
                           </div>
@@ -545,19 +578,19 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                   </motion.div>
 
                   <motion.div layout="position">
-                    <FieldLabel label="Security deposit" />
+                    <FieldLabel label={modesCopy.securityDeposit} />
                     <MoneyInput
                       value={draft.pricing.securityDeposit}
                       onChange={(value) => updatePricing("securityDeposit", value)}
                       placeholder="200"
                     />
                     <p className="mt-1.5 text-xs text-gray-500">
-                      Held via Stripe, released on return
+                      {modesCopy.securityDepositHint}
                     </p>
                   </motion.div>
                 </motion.div>
                 <ModeNote>
-                  💡 {DEPOSIT_PROTECTION_LABEL} via Stripe hold — released when the item is returned.
+                  {modesCopy.depositProtectionNote(DEPOSIT_PROTECTION_LABEL)}
                 </ModeNote>
               </ModeCard>
             );
@@ -574,7 +607,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                 onToggle={() => toggleMode("sell")}
               >
                 <motion.div layout="position">
-                  <FieldLabel label="Sale price" required />
+                  <FieldLabel label={modesCopy.salePrice} required />
                   <MoneyInput
                     value={draft.pricing.salePrice}
                     onChange={(value) => updatePricing("salePrice", value)}
@@ -582,7 +615,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                   />
                 </motion.div>
                 <ModeNote>
-                  💡 Set $0 to give it away free (no separate Gift mode for now). Platform commission applies on paid sales.
+                  {modesCopy.sellNote}
                 </ModeNote>
               </ModeCard>
             );
@@ -596,7 +629,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
 
       {showRestrictedModesNote ? (
         <p className="mt-4 text-center text-xs italic text-gray-400">
-          Some transaction modes are not available for this category.
+          {modesCopy.restrictedModesNote}
         </p>
       ) : null}
     </motion.div>

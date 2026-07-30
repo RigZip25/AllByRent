@@ -642,6 +642,7 @@ export const cs: AppMessages = {
   },
   listing: {
     stepOf: (step, total) => `Krok ${step} z ${total}`,
+    continue: "Pokračovat",
     editListing: "Upravit nabídku",
     goPublicTitle: "Jít veřejně",
     howQrWorks: "Jak funguje váš QR",

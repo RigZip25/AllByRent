@@ -632,6 +632,7 @@ export const en: AppMessages = {
   },
   listing: {
     stepOf: (step, total) => `Step ${step} of ${total}`,
+    continue: "Continue",
     editListing: "Edit listing",
     goPublicTitle: "Go public",
     howQrWorks: "How your QR works",

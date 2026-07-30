@@ -36,7 +36,7 @@ import { subcategoriesData } from "../../app/data/subcategories";
 import type { ShelfPrefill } from "../../lib/shelfListings";
 import {
   createInitialListingDraft,
-  STEPS,
+  getSteps,
   TOTAL_LISTING_STEPS,
   type ListingDraft,
 } from "./types";
@@ -45,6 +45,7 @@ import {
   isYardSaleListingActive,
 } from "../../lib/yardSaleListing";
 import { isListingStepValid } from "./validation";
+import { useMessages } from "../../lib/i18n/react";
 
 function gradeForSubcategory(
   category: string,
@@ -121,6 +122,8 @@ export function ListingWizard({
   onRequireAuth?: (listingId: string) => void;
 }) {
   const auth = useAuth();
+  const t = useMessages();
+  const listing = t.listing;
   const isEditing = (() => {
     const status =
       initialDraft?.listingStatus ??
@@ -272,15 +275,18 @@ export function ListingWizard({
 
   const canReturnToPrevious = wizardStack.length > 0;
 
-  const headerTitle = useMemo(() => {
-    if (phase === "goPublic") return "Go public";
-    if (phase === "qrStory") return "How your QR works";
-    if (phase === "qrSticker") return "QR setup";
-    if (phase === "success") return isEditing ? "Saved" : "Published";
-    return isEditing ? "Edit listing" : `Step ${step} of ${TOTAL_LISTING_STEPS}`;
-  }, [isEditing, phase, step]);
+  const wizardSteps = useMemo(() => getSteps(listing), [listing]);
 
-  const stepLabel = phase === "goPublic" ? "Seller setup" : (STEPS[step - 1]?.name ?? "");
+  const headerTitle = useMemo(() => {
+    if (phase === "goPublic") return listing.goPublicTitle;
+    if (phase === "qrStory") return listing.howQrWorks;
+    if (phase === "qrSticker") return listing.qrSetup;
+    if (phase === "success") return isEditing ? listing.saved : listing.published;
+    return isEditing ? listing.editListing : listing.stepOf(step, TOTAL_LISTING_STEPS);
+  }, [isEditing, listing, phase, step]);
+
+  const stepLabel =
+    phase === "goPublic" ? listing.sellerSetup : (wizardSteps[step - 1]?.name ?? "");
 
   const goToStep = (nextStep: number, nextDirection: SlideDirection) => {
     setDirection(nextDirection);
@@ -390,10 +396,10 @@ export function ListingWizard({
   };
 
   const publishStatusLine = isGiftOrSellOnly(draft)
-    ? "Listing active"
+    ? listing.listingActive
     : draft.listingStatus === "active"
-      ? "Listing active"
-      : "Saved — finish QR to show renters";
+      ? listing.listingActive
+      : listing.savedFinishQr;
 
   const handlePublish = () => {
     // Edits to already-live listings skip the first-time seller checklist.
@@ -535,10 +541,10 @@ export function ListingWizard({
     step === 1 && draft.aiAnalysisPending ? (
       <span className="flex items-center justify-center gap-2">
         <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-        {MASCOT_NAME} is analyzing your photos...
+        {listing.analyzingPhotos(MASCOT_NAME)}
       </span>
     ) : (
-      "Continue"
+      listing.continue
     );
 
   const continueDisabled =
@@ -588,7 +594,7 @@ export function ListingWizard({
         style={{ backgroundColor: BACKGROUND }}
       >
         <Loader2 className="h-8 w-8 animate-spin" style={{ color: PRIMARY_GREEN }} aria-hidden />
-        <p className="mt-3 text-sm font-medium text-[#6B7280]">Loading listing…</p>
+        <p className="mt-3 text-sm font-medium text-[#6B7280]">{listing.loadingListing}</p>
       </div>
     );
   }
@@ -605,7 +611,7 @@ export function ListingWizard({
               type="button"
               onClick={handleBack}
               className="absolute left-0 rounded-full p-2 transition-colors hover:bg-[#F3F4F6]"
-              aria-label="Go back"
+              aria-label={listing.goBackAria}
             >
               <ArrowLeft className="h-5 w-5" style={{ color: PRIMARY_GREEN }} />
             </button>
@@ -706,7 +712,7 @@ export function ListingWizard({
             type="button"
             onClick={handleBack}
             className="absolute left-0 rounded-full p-2 transition-colors hover:bg-[#F3F4F6]"
-            aria-label="Go back"
+            aria-label={listing.goBackAria}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: PRIMARY_GREEN }} />
           </button>
@@ -715,7 +721,7 @@ export function ListingWizard({
             <p className="text-sm font-semibold text-[#374151]">{stepLabel}</p>
             {canReturnToPrevious ? (
               <p className="mt-0.5 text-[11px] font-medium text-[#9CA3AF]">
-                You can return to your previous QR setup anytime.
+                {listing.returnToPreviousQr}
               </p>
             ) : null}
           </div>
@@ -803,10 +809,10 @@ export function ListingWizard({
                 id="discard-listing-title"
                 className="text-lg font-semibold text-[#111827]"
               >
-                Discard listing?
+                {listing.discardTitle}
               </h2>
               <p className="mt-2 text-sm text-[#6B7280]">
-                Your progress will be lost if you leave now.
+                {listing.discardBody}
               </p>
               <div className="mt-6 flex gap-3">
                 <button
@@ -814,7 +820,7 @@ export function ListingWizard({
                   onClick={() => setShowDiscardDialog(false)}
                   className="flex-1 rounded-xl border border-[#E5E7EB] py-3 text-sm font-semibold text-[#374151]"
                 >
-                  Cancel
+                  {t.common.cancel}
                 </button>
                 <button
                   type="button"
@@ -822,7 +828,7 @@ export function ListingWizard({
                   className="flex-1 rounded-xl py-3 text-sm font-semibold text-white"
                   style={{ backgroundColor: PRIMARY_GREEN }}
                 >
-                  Discard
+                  {listing.discard}
                 </button>
               </div>
             </motion.div>

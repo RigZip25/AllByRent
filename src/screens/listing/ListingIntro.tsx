@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 import { MASCOT_NAME } from "../../lib/brand";
@@ -6,27 +6,12 @@ import { RentanoHint } from "../../components/RentanoHint";
 import listingSnap from "../../imports/listing_snap.png";
 import listingMagic from "../../imports/listing_magic.png";
 import listingShare from "../../imports/listing_share.png";
+import { useMessages } from "../../lib/i18n/react";
 
 const PRIMARY_GREEN = "#0D5C3A";
 const SWIPE_THRESHOLD = 60;
 
-const SLIDES = [
-  {
-    image: listingSnap,
-    title: "Snap from your garage",
-    tip: "Snap a photo on your shelf — I'll help with the rest.",
-  },
-  {
-    image: listingMagic,
-    title: "Your showcase, ready in seconds",
-    tip: `${MASCOT_NAME} filled in the details — just check the shelf info.`,
-  },
-  {
-    image: listingShare,
-    title: "Go live on the block",
-    tip: "Neighbors can browse your garage — share, boost, or let the showcase work for you.",
-  },
-] as const;
+const SLIDE_IMAGES = [listingSnap, listingMagic, listingShare] as const;
 
 export function ListingIntro({
   onStart,
@@ -37,10 +22,33 @@ export function ListingIntro({
   onSkip: () => void;
   onBack: () => void;
 }) {
+  const t = useMessages();
+  const intro = t.listing.intro;
   const [activeSlide, setActiveSlide] = useState(0);
 
+  const slides = useMemo(
+    () => [
+      {
+        image: SLIDE_IMAGES[0],
+        title: intro.slideSnapTitle,
+        tip: intro.slideSnapTip,
+      },
+      {
+        image: SLIDE_IMAGES[1],
+        title: intro.slideShowcaseTitle,
+        tip: intro.slideShowcaseTip(MASCOT_NAME),
+      },
+      {
+        image: SLIDE_IMAGES[2],
+        title: intro.slideGoLiveTitle,
+        tip: intro.slideGoLiveTip,
+      },
+    ],
+    [intro],
+  );
+
   const goNext = () => {
-    if (activeSlide < SLIDES.length - 1) {
+    if (activeSlide < slides.length - 1) {
       setActiveSlide((current) => current + 1);
       return;
     }
@@ -61,7 +69,7 @@ export function ListingIntro({
     }
   };
 
-  const slideWidthPercent = 100 / SLIDES.length;
+  const slideWidthPercent = 100 / slides.length;
 
   return (
     <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-white">
@@ -73,7 +81,7 @@ export function ListingIntro({
           type="button"
           onClick={onBack}
           className="flex items-center gap-1 rounded-full p-1 text-sm font-medium text-gray-600 transition-colors hover:bg-[#F3F4F6]"
-          aria-label="Go back"
+          aria-label={t.listing.goBackAria}
         >
           <ArrowLeft className="h-5 w-5" style={{ color: PRIMARY_GREEN }} />
         </button>
@@ -82,7 +90,7 @@ export function ListingIntro({
           onClick={onSkip}
           className="text-sm font-medium text-[#9CA3AF] transition-colors hover:text-[#374151]"
         >
-          Skip
+          {t.common.skip}
         </button>
       </header>
 
@@ -96,11 +104,11 @@ export function ListingIntro({
         >
           <motion.div
             className="flex h-full"
-            style={{ width: `${SLIDES.length * 100}%` }}
+            style={{ width: `${slides.length * 100}%` }}
             animate={{ x: `-${activeSlide * slideWidthPercent}%` }}
             transition={{ type: "spring", stiffness: 320, damping: 32 }}
           >
-            {SLIDES.map((slide) => (
+            {slides.map((slide) => (
               <div
                 key={slide.title}
                 className="flex h-full shrink-0 items-center justify-center"
@@ -121,11 +129,11 @@ export function ListingIntro({
           className="mt-4 shrink-0 text-center text-[26px] font-bold leading-tight"
           style={{ color: PRIMARY_GREEN }}
         >
-          {SLIDES[activeSlide].title}
+          {slides[activeSlide].title}
         </h2>
 
         <div className="mt-5 flex items-center justify-center gap-2">
-          {SLIDES.map((slide, index) => (
+          {slides.map((slide, index) => (
             <button
               key={slide.title}
               type="button"
@@ -136,14 +144,14 @@ export function ListingIntro({
                 backgroundColor:
                   index === activeSlide ? PRIMARY_GREEN : "#D1D5DB",
               }}
-              aria-label={`Go to slide ${index + 1}`}
+              aria-label={intro.goToSlideAria(index + 1)}
             />
           ))}
         </div>
 
         <RentanoHint
           key={`tip-${activeSlide}`}
-          hint={SLIDES[activeSlide].tip}
+          hint={slides[activeSlide].tip}
           className="mt-4"
           showTapLabel
         />
@@ -154,7 +162,7 @@ export function ListingIntro({
           className="btn-primary mt-4 w-full text-white"
           style={{ backgroundColor: PRIMARY_GREEN }}
         >
-          {activeSlide === SLIDES.length - 1 ? "Continue" : "Next"}
+          {activeSlide === slides.length - 1 ? t.listing.continue : t.common.next}
         </button>
       </motion.div>
     </div>
