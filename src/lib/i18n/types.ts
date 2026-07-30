@@ -920,12 +920,8 @@ export type AppMessages = {
     subtitleLocked: string;
     requestFor: string;
     selectCategory: string;
-    catTools: string;
-    catSports: string;
-    catPhoto: string;
-    catGaming: string;
-    catMusic: string;
-    catHome: string;
+    selectSubcategory: string;
+    pickSubcategoryHint: string;
     describeLabel: string;
     describePlaceholder: string;
     locationRadius: string;
@@ -938,6 +934,7 @@ export type AppMessages = {
     confirm: string;
     budgetPerDay: string;
     idPayUpTo: string;
+    budgetNote: (budget: number, radius: string) => string;
     shareTitle: string;
     shareBody: string;
     posting: string;
@@ -953,6 +950,10 @@ export type AppMessages = {
     done: string;
     lookingForQuery: (query: string) => string;
     lookingForQueryNear: (query: string, city: string) => string;
+    lookingForSubInCat: (sub: string, cat: string) => string;
+    lookingForItemsInCat: (cat: string) => string;
+    nearCity: (city: string) => string;
+    yourArea: string;
     shareTitleApp: (appName: string) => string;
     shareDefaultText: (appName: string, city: string) => string;
   };
