@@ -141,8 +141,8 @@ export function HowEvoriosWorksScreen({
                 body: "Your household storefront: listings, drafts, and host tools.",
               },
               {
-                title: `More / ${MASCOT_NAME}`,
-                body: `Account, rentals, favorites — and ${MASCOT_NAME} for FAQ + chat help.`,
+                title: "More / Messages",
+                body: `Account, rentals, favorites, and Messages — in-app chat for pickup details. ${MASCOT_NAME} is for FAQ + help chat.`,
               },
             ].map((row) => (
               <div

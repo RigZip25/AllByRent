@@ -28,8 +28,6 @@ import {
   getPublishedListingById,
 } from "../../lib/listingStorage";
 import { getListingDisplayTitle, listingRequiresQrSticker } from "../../lib/listingQr";
-import { createNotificationRemote } from "../../lib/notificationsStorage";
-import { pushInAppNotification } from "../../lib/inAppNotifications";
 import {
   deliverySummaryForListing,
   listingOffersDelivery,
@@ -59,6 +57,8 @@ interface ItemDetailProps {
   onOpenGarageShop?: (hostId: string, listingId: string) => void;
   onOpenAttachment: (url: string, title?: string) => void;
   onViewHostProfile?: (hostId: string) => void;
+  /** Open in-app chat with the listing host (sell / gift). */
+  onOpenListingChat?: (listingId: string, hostId: string) => void;
 }
 
 function formatBlockedDates(listing: ListingDraft): string[] {
@@ -167,6 +167,7 @@ export function ItemDetail({
   onOpenGarageShop,
   onOpenAttachment,
   onViewHostProfile,
+  onOpenListingChat,
 }: ItemDetailProps) {
   const auth = useAuth();
   const [favorited, setFavorited] = useState(() => isFavoriteListing(itemId));
@@ -174,10 +175,6 @@ export function ItemDetail({
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
   const [messageHint, setMessageHint] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
-  const [contactOpen, setContactOpen] = useState(false);
-  const [contactNote, setContactNote] = useState("");
-  const [contactBusy, setContactBusy] = useState(false);
-  const [contactSent, setContactSent] = useState(false);
   const [listing, setListing] = useState<ListingDraft | null>(() => getPublishedListingById(itemId));
   const [loading, setLoading] = useState(() => !getPublishedListingById(itemId));
 
@@ -260,41 +257,21 @@ export function ItemDetail({
       onBook();
       return;
     }
-    if (listing?.modes.sell) {
-      setContactOpen(true);
-      setContactSent(false);
-    }
-  };
-
-  const handleSendContact = async () => {
-    if (!listing?.hostId) return;
-    if (!auth.userId) {
-      setMessageHint(true);
-      setBuyError("Sign in to message the seller.");
-      return;
-    }
-    const note = contactNote.trim() || `Hi — I'm interested in "${title}".`;
-    setContactBusy(true);
-    try {
-      await createNotificationRemote({
-        recipientId: listing.hostId,
-        actorId: auth.userId,
-        type: "general",
-        title: `Message about ${title}`,
-        body: note,
-        listingId: listing.id,
-        skipLocal: true,
-      });
-      pushInAppNotification({
-        type: "general",
-        title: "Message sent",
-        body: "The seller gets a notification (and push if they enabled it).",
-      });
-      setContactSent(true);
-      setContactNote("");
-      setMessageHint(true);
-    } finally {
-      setContactBusy(false);
+    if (listing?.modes.sell || listing?.modes.gift) {
+      if (!listing.hostId) {
+        setBuyError("Seller profile is missing — try again later.");
+        return;
+      }
+      if (!auth.userId) {
+        setMessageHint(true);
+        setBuyError("Sign in to message the seller.");
+        return;
+      }
+      if (listing.hostId === auth.userId) {
+        setBuyError("This is your listing.");
+        return;
+      }
+      onOpenListingChat?.(listing.id, listing.hostId);
     }
   };
 
@@ -450,16 +427,14 @@ export function ItemDetail({
             </p>
           ) : null}
 
-          {messageHint && !auth.userId && (isSellOnly || listing.modes.sell) && !contactSent ? (
+          {messageHint && !auth.userId && (isSellOnly || listing.modes.sell) ? (
             <SignInPrompt message="Sign in to message the seller." intent="message" />
           ) : messageHint ? (
             <p className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-[15px] text-primary">
               {isFreeGiveaway
-                ? "Open Share to send this link and arrange a free pickup with the owner."
+                ? "Message the owner to arrange a free pickup, or Share the listing link."
                 : isSellOnly || listing.modes.sell
-                  ? contactSent
-                    ? "Message sent to the seller."
-                    : "Use Message to ask the seller before you buy."
+                  ? "Open Message for an in-app chat with the seller (they get a push if enabled)."
                   : "In-app chat with the owner opens once your booking is confirmed."}
             </p>
           ) : null}
@@ -608,52 +583,6 @@ export function ItemDetail({
         <AvailabilityPanel listing={listing} onClose={() => setAvailabilityOpen(false)} />
       ) : null}
 
-      {contactOpen ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4">
-          <div className="w-full max-w-[390px] rounded-2xl border border-border bg-card p-4 shadow-xl">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold">Message seller</h2>
-              <button
-                type="button"
-                onClick={() => setContactOpen(false)}
-                className="rounded-full p-2 hover:bg-muted"
-                aria-label="Close"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            {!auth.userId ? (
-              <SignInPrompt
-                message="Sign in first so the seller can see who messaged them."
-                intent="message"
-              />
-            ) : contactSent ? (
-              <p className="text-sm text-primary">
-                Sent. The seller gets an in-app notification and push if they enabled it.
-              </p>
-            ) : (
-              <>
-                <textarea
-                  value={contactNote}
-                  onChange={(e) => setContactNote(e.target.value)}
-                  rows={4}
-                  placeholder={`Hi — I'm interested in "${title}". Is it still available?`}
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
-                />
-                <button
-                  type="button"
-                  disabled={contactBusy}
-                  onClick={() => void handleSendContact()}
-                  className="mt-3 w-full rounded-xl bg-primary py-3 font-semibold text-white disabled:opacity-60"
-                >
-                  {contactBusy ? "Sending…" : "Send message"}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      ) : null}
-
       {shareOpen ? (
         <div className="shrink-0 border-t border-border bg-card p-4">
           <p className="mb-2 text-sm font-semibold">Share this listing</p>
@@ -702,7 +631,11 @@ export function ItemDetail({
             type="button"
             onClick={() => {
               setMessageHint(true);
-              setShareOpen(true);
+              if (listing?.hostId && auth.userId && onOpenListingChat) {
+                onOpenListingChat(listing.id, listing.hostId);
+              } else {
+                setShareOpen(true);
+              }
             }}
             className="flex-1 bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-[#0D5C3A] py-3 px-4 rounded-xl transition-colors font-bold"
           >

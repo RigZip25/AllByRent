@@ -195,8 +195,16 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Navigation",
     question: "What is in the More menu?",
     answer:
-      `More holds your profile card, Rentals (active & history), Favorites, Notifications, My Garage shortcut, Earn dashboard, the interactive How ${APP_NAME} works guide (marketplace + categories), and chat with ${MASCOT_NAME}.`,
-    keywords: ["more", "settings", "account", "guide", "how it works"],
+      `More holds your profile card, Rentals, Messages (in-app chat), Favorites, Notifications, My Garage shortcut, Earn dashboard, the interactive How ${APP_NAME} works guide, and chat with ${MASCOT_NAME}.`,
+    keywords: ["more", "settings", "account", "guide", "how it works", "messages", "chat"],
+  },
+  {
+    id: "in-app-chat",
+    category: "Navigation",
+    question: "How do I message a neighbor in the app?",
+    answer:
+      "Open More → Messages for all threads. For a rental: Rentals → open booking → Message. For a purchase: listing → message icon. Replies can send a push notification if the other person enabled push.",
+    keywords: ["chat", "message", "messages", "dm", "push", "seller", "host"],
   },
   {
     id: "mre-tab",
