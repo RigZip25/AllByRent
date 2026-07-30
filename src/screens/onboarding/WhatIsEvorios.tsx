@@ -1,6 +1,6 @@
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
+import { CategoryCatalogExplorer } from "../../components/CategoryCatalogExplorer";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN } from "../../lib/brand";
-import { getAllCategoryChips } from "../../lib/homeCategoryPicks";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 
 const GREEN = BRAND_GREEN;
@@ -14,8 +14,6 @@ type Props = {
 };
 
 export function WhatIsEvorios({ onContinue, onSkip, onBack }: Props) {
-  const categories = getAllCategoryChips();
-
   return (
     <div className="screen onboarding-step mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-white">
       <OnboardingTopBar onBack={onBack} onSkip={onSkip} />
@@ -66,24 +64,11 @@ export function WhatIsEvorios({ onContinue, onSkip, onBack }: Props) {
           <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
             What neighbors share
           </p>
-          <p className="mt-1 text-[13px] leading-snug text-gray-500">
-            Browse by category on Home — tools, garden plants, party gear, cameras, and more.
-          </p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            {categories.map((cat) => (
-              <div
-                key={cat.name}
-                className="flex items-center gap-2 rounded-xl border bg-white px-2.5 py-2"
-                style={{ borderColor: BORDER }}
-              >
-                <span className="text-[16px]" aria-hidden>
-                  {cat.icon}
-                </span>
-                <span className="min-w-0 truncate text-[12px] font-semibold text-gray-800">
-                  {cat.name}
-                </span>
-              </div>
-            ))}
+          <div className="mt-2">
+            <CategoryCatalogExplorer
+              hint="Tap any category to open subcategories — tools, garden plants, cameras, party gear, and more."
+              defaultOpenFirst
+            />
           </div>
         </div>
 
