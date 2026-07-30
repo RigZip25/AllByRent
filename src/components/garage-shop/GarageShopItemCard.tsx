@@ -42,7 +42,7 @@ export function GarageShopItemCard({
   onEdit,
   onShare,
 }: GarageShopItemCardProps) {
-  const offerCopy = useMessages().garageSale.garageOffers;
+  const { garageOffers: offerCopy, garageShop: shopCopy } = useMessages().garageSale;
   const offer = getShopOffer(listing);
   const lotState = getLotState(listing.id);
   const myOffer = getMyActiveOffer(listing.id);
@@ -60,6 +60,7 @@ export function GarageShopItemCard({
   const isLeading =
     Boolean(myBid && highBid && myBid.bidderId === highBid.bidderId && myBid.amountUsd === highBid.amountUsd);
   const sold = lotState.status === "sold";
+  const title = listing.title || shopCopy.saleItemFallback;
 
   if (!offer && lotState.status !== "sold") return null;
   if (!offer && sold) {
@@ -68,11 +69,11 @@ export function GarageShopItemCard({
         <div className="relative aspect-square w-full bg-[#F3F4F6]">
           {url ? <img src={url} alt="" className="h-full w-full object-cover grayscale" /> : null}
           <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-sm font-bold uppercase text-white">
-            Sold
+            {shopCopy.soldBadge}
           </span>
         </div>
         <div className="p-2.5">
-          <p className="line-clamp-2 text-[15px] font-semibold text-gray-500">{listing.title || "Sale item"}</p>
+          <p className="line-clamp-2 text-[15px] font-semibold text-gray-500">{title}</p>
         </div>
       </article>
     );
@@ -89,15 +90,15 @@ export function GarageShopItemCard({
         )}
         {multiAuction && auctionPending ? (
           <span className="absolute left-2 top-2 rounded-full bg-gray-600 px-2 py-1 text-[11px] font-bold uppercase text-white">
-            Soon
+            {shopCopy.badgeSoon}
           </span>
         ) : multiAuction && auctionLive ? (
           <span className="absolute left-2 top-2 rounded-full px-2 py-1 text-[11px] font-bold uppercase text-white" style={{ backgroundColor: BLUE }}>
-            Bid
+            {shopCopy.badgeBid}
           </span>
         ) : offer.interestedCount === 1 ? (
           <span className="absolute left-2 top-2 rounded-full px-2 py-1 text-[11px] font-bold uppercase text-white" style={{ backgroundColor: AMBER, color: GREEN }}>
-            Offer
+            {shopCopy.badgeOffer}
           </span>
         ) : null}
         {offer.interestedCount >= 2 && !multiAuction ? (
@@ -107,7 +108,7 @@ export function GarageShopItemCard({
         ) : null}
         {isLeading && auctionLive ? (
           <span className="absolute right-2 top-2 rounded-full px-2 py-1 text-[11px] font-bold text-white" style={{ backgroundColor: GREEN }}>
-            Leading
+            {shopCopy.badgeLeading}
           </span>
         ) : null}
         {hostManage && onEdit ? (
@@ -115,7 +116,7 @@ export function GarageShopItemCard({
             type="button"
             onClick={() => onEdit(listing)}
             className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 shadow"
-            aria-label="Edit shelf item"
+            aria-label={shopCopy.editShelfAria}
           >
             <Pencil className="h-3.5 w-3.5" style={{ color: GREEN }} />
           </button>
@@ -124,7 +125,7 @@ export function GarageShopItemCard({
 
       <div className="flex flex-1 flex-col p-2.5">
         <p className="line-clamp-2 min-h-[2.75rem] text-[15px] font-semibold leading-snug text-gray-900">
-          {listing.title || "Sale item"}
+          {title}
         </p>
 
         <div className="mt-1.5">
@@ -155,7 +156,7 @@ export function GarageShopItemCard({
               style={{ borderColor: BLUE, color: BLUE }}
             >
               <Gavel className="h-4 w-4" aria-hidden />
-              Bid
+              {shopCopy.bidCta}
             </button>
           ) : null}
 
@@ -168,7 +169,7 @@ export function GarageShopItemCard({
                 style={{ borderColor: AMBER, color: "#92400E", backgroundColor: `${AMBER}15` }}
               >
                 <Tag className="h-4 w-4" />
-                Your offer · {formatShopUsd(myOffer.amountUsd)}
+                {shopCopy.yourOfferLine(formatShopUsd(myOffer.amountUsd))}
               </button>
             ) : (
               <button
@@ -192,7 +193,7 @@ export function GarageShopItemCard({
               style={{ backgroundColor: AMBER, color: GREEN }}
             >
               <ShoppingBag className="h-4 w-4" aria-hidden />
-              Buy
+              {shopCopy.buyCta}
             </button>
           ) : (
             <div className="flex flex-col gap-1.5">
@@ -203,7 +204,7 @@ export function GarageShopItemCard({
                 style={{ borderColor: GREEN, color: GREEN }}
               >
                 <Pencil className="h-4 w-4" />
-                Edit
+                {shopCopy.editCta}
               </button>
               {onShare ? (
                 <button
@@ -213,7 +214,7 @@ export function GarageShopItemCard({
                   style={{ borderColor: AMBER, color: "#92400E", backgroundColor: `${AMBER}12` }}
                 >
                   <Share2 className="h-4 w-4" />
-                  Share
+                  {shopCopy.shareCta}
                 </button>
               ) : null}
             </div>

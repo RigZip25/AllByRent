@@ -1,3 +1,5 @@
+import { useMessages } from "../../lib/i18n/react";
+
 const GREEN = "#0D5C3A";
 
 const PLATFORM_PROFILE_URL = "https://dashboard.stripe.com/settings/connect/platform-profile";
@@ -27,28 +29,26 @@ export function extractStripeDashboardUrl(message: string): string | null {
 }
 
 export function ConnectSetupError({ message }: { message: string }) {
+  const copy = useMessages().paymentsUi;
   const isPlatform = isConnectPlatformSetupError(message);
   const dashUrl = extractStripeDashboardUrl(message) ?? (isPlatform ? PLATFORM_PROFILE_URL : null);
 
   if (!isPlatform) {
     return (
       <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-800">
-        Couldn’t connect payouts right now. Try again in a moment — if it keeps failing, email support.
+        {copy.connectGenericError}
       </p>
     );
   }
 
   return (
     <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-      <p className="text-sm font-bold text-red-900">Stripe platform setup required (one-time)</p>
-      <p className="mt-1.5 text-xs leading-relaxed text-red-800">
-        Your Evorios Stripe account must accept Connect responsibilities before sellers can link a
-        bank. This is done in the Stripe Dashboard — not inside the app.
-      </p>
+      <p className="text-sm font-bold text-red-900">{copy.connectPlatformTitle}</p>
+      <p className="mt-1.5 text-xs leading-relaxed text-red-800">{copy.connectPlatformBody}</p>
       <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs text-red-800">
-        <li>Open Platform profile in Stripe</li>
-        <li>Review / accept loss responsibilities for connected accounts</li>
-        <li>Return here and tap Continue with Stripe again</li>
+        <li>{copy.connectPlatformStep1}</li>
+        <li>{copy.connectPlatformStep2}</li>
+        <li>{copy.connectPlatformStep3}</li>
       </ol>
       {dashUrl ? (
         <a
@@ -58,7 +58,7 @@ export function ConnectSetupError({ message }: { message: string }) {
           className="mt-3 flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold text-white"
           style={{ backgroundColor: GREEN }}
         >
-          Open Stripe Dashboard →
+          {copy.connectOpenDashboard}
         </a>
       ) : null}
     </div>

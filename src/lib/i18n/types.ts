@@ -1572,6 +1572,22 @@ export type GarageSaleMessages = {
     offersAria: (count: number) => string;
     cartAria: (count: number) => string;
     cartLabel: string;
+    soldBadge: string;
+    saleItemFallback: string;
+    badgeSoon: string;
+    badgeBid: string;
+    badgeOffer: string;
+    badgeLeading: string;
+    bidCta: string;
+    buyCta: string;
+    editCta: string;
+    shareCta: string;
+    yourOfferLine: (amount: string) => string;
+    editShelfAria: string;
+    itemUnavailable: string;
+    buyNowPaused: string;
+    dealPendingPayment: string;
+    cartOneGarage: string;
   };
   garageAuction: {
     bidTerms: string;
@@ -1580,6 +1596,20 @@ export type GarageSaleMessages = {
     runnerUpSubtitle: string;
     shopBanner: string;
     winBannerSuffix: string;
+    youWonTitle: string;
+    nextBidderBadge: string;
+    auctionWonBadge: string;
+    payWithinMinutes: (minutes: number) => string;
+    countdownPayOrPass: (countdown: string) => string;
+    timeExpired: string;
+    minutesLeft: (minutes: number) => string;
+    totalDueNow: string;
+    winnerPaysBid: string;
+    nothingToPayTitle: string;
+    nothingToPayBody: string;
+    goBack: string;
+    preparingPayment: string;
+    payAmountNow: (total: string) => string;
   };
   garageSaleRules: {
     eyebrow: string;
@@ -1620,6 +1650,19 @@ export type GarageSaleMessages = {
     makeOffer: string;
     interestedLabel: string;
     auctionAuto: string;
+    askingLine: (amount: string) => string;
+    yourOfferLabel: string;
+    validAmount: string;
+    signInForOffer: string;
+    signInForOfferPrompt: string;
+    placeBidTitle: string;
+    highBidBuyNow: (high: string, buyNow: string) => string;
+    closeBidAria: string;
+    yourBidLabel: string;
+    minNextBid: (amount: string) => string;
+    confirmBid: string;
+    listingNotFound: string;
+    validCounter: string;
   };
   garageShare: {
     openGarageTitle: string;
@@ -1642,6 +1685,8 @@ export type GarageSaleMessages = {
     remove: string;
     removeConfirm: string;
     removeConfirmActive: string;
+    photoLoadFailed: string;
+    validPrice: string;
   };
   garageWorkflow: {
     eyebrow: string;
@@ -1806,5 +1851,12 @@ export type PaymentsUiMessages = {
   bookingWithoutPayment: string;
   stripeRequired: string;
   garageStripeRequired: string;
+  connectGenericError: string;
+  connectPlatformTitle: string;
+  connectPlatformBody: string;
+  connectPlatformStep1: string;
+  connectPlatformStep2: string;
+  connectPlatformStep3: string;
+  connectOpenDashboard: string;
 };
 

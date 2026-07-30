@@ -90,18 +90,18 @@ export function GarageShelfEditSheet({
         }
         setPhoto(next);
       } catch {
-        setError("Could not load photo");
+        setError(copy.photoLoadFailed);
       } finally {
         setBusy(false);
       }
     },
-    [listing.photos, photo],
+    [copy.photoLoadFailed, listing.photos, photo],
   );
 
   const save = () => {
     const priceUsd = Number.parseFloat(price);
     if (!Number.isFinite(priceUsd) || priceUsd <= 0) {
-      setError("Enter a valid price");
+      setError(copy.validPrice);
       return;
     }
     const result = updateGarageShelfItem({

@@ -43,7 +43,7 @@ export function GarageHostOffersScreen({ hostId, onBack }: GarageHostOffersScree
   const accept = (offer: GarageNeighborOffer) => {
     const listing = getPublishedListingById(offer.listingId);
     if (!listing) {
-      setError("Listing not found");
+      setError(copy.listingNotFound);
       return;
     }
     const result = hostAcceptOffer(offer.id, listing);
@@ -58,7 +58,7 @@ export function GarageHostOffersScreen({ hostId, onBack }: GarageHostOffersScree
   const counter = (offer: GarageNeighborOffer) => {
     const value = Number.parseFloat(counterDraft[offer.id] ?? "");
     if (!Number.isFinite(value)) {
-      setError("Enter a counter amount");
+      setError(copy.validCounter);
       return;
     }
     const result = hostCounterOffer(offer.id, value);

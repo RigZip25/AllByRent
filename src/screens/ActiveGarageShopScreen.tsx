@@ -252,6 +252,15 @@ export function ActiveGarageShopScreen({
     window.setTimeout(() => setToast(null), 2200);
   };
 
+  const localizeBuyNowReason = (reason: string) => {
+    if (/already in cart/i.test(reason)) return shopCopy.alreadyInCart;
+    if (/no longer available/i.test(reason)) return shopCopy.itemUnavailable;
+    if (/buy now paused/i.test(reason)) return shopCopy.buyNowPaused;
+    if (/deal pending payment/i.test(reason)) return shopCopy.dealPendingPayment;
+    if (/one garage at a time/i.test(reason)) return shopCopy.cartOneGarage;
+    return reason;
+  };
+
   const handleBuyNow = (listing: ListingDraft, offer: ShopOffer) => {
     if (preview) return;
     const result = buyNowGarageItem({ listing, offer });
@@ -261,7 +270,7 @@ export function ActiveGarageShopScreen({
         onOpenCart();
         return;
       }
-      showToast(result.reason);
+      showToast(localizeBuyNowReason(result.reason));
       return;
     }
     refreshCartCount();
