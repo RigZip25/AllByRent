@@ -19,6 +19,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { QR_PDF_FILENAMES } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
 import { putMediaBlob } from "../../lib/mediaStore";
+import { verifyListingQrInPhoto } from "../../lib/verifyListingQrPhoto";
 
 const GREEN = "#0D5C3A";
 const QR_SHEET_CAPACITY = 12;
@@ -196,38 +197,41 @@ export function QRStickerScreen({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Camera-only: owner confirms QR is printed and attached.
-    if (auth.userId) {
-      setPdfLoading(true);
-      setPdfError(null);
-      void uploadQrVerificationPhotoRemote({
-        listingId: draft.id,
-        ownerId: auth.userId,
-        file,
-      })
-        .then(() => {
-          setDraft((current) => {
-            const updated: ListingDraft = {
-              ...current,
-              qrReady: true,
-              listingStatus: "active",
-            };
-            updateStoredListing(updated);
-            return updated;
-          });
-          onComplete();
-        })
-        .catch(() => {
-          setPdfError("Could not upload verification photo. Please try again.");
-        })
-        .finally(() => {
-          setPdfLoading(false);
-        });
-      event.target.value = "";
-      return;
-    }
+    setPdfLoading(true);
+    setPdfError(null);
 
-    void putMediaBlob(file, { kind: "image" }).then((put) => {
+    void (async () => {
+      const verified = await verifyListingQrInPhoto(file, {
+        listingId: draft.id,
+        qrToken: draft.qrToken,
+        publicUrl: publicQrUrl,
+      });
+      if (!verified.ok) {
+        setPdfError(verified.reason);
+        return;
+      }
+
+      // Camera photo must contain this listing's QR sticker before going live.
+      if (auth.userId) {
+        await uploadQrVerificationPhotoRemote({
+          listingId: draft.id,
+          ownerId: auth.userId,
+          file,
+        });
+        setDraft((current) => {
+          const updated: ListingDraft = {
+            ...current,
+            qrReady: true,
+            listingStatus: "active",
+          };
+          updateStoredListing(updated);
+          return updated;
+        });
+        onComplete();
+        return;
+      }
+
+      const put = await putMediaBlob(file, { kind: "image" });
       if (!put.ok) {
         setPdfError(put.message);
         return;
@@ -244,8 +248,14 @@ export function QRStickerScreen({
         return updated;
       });
       onComplete();
-    });
-    event.target.value = "";
+    })()
+      .catch(() => {
+        setPdfError("Could not verify that photo. Retake with the QR sticker clearly visible.");
+      })
+      .finally(() => {
+        setPdfLoading(false);
+        event.target.value = "";
+      });
   };
 
   return (
@@ -436,7 +446,7 @@ export function QRStickerScreen({
               className="w-full rounded-xl py-3 text-sm font-bold text-white"
               style={{ backgroundColor: GREEN }}
             >
-              📸 Take verification photo
+            {pdfLoading ? "Verifying QR…" : "📸 Take verification photo"}
             </button>
           </div>
           <input
@@ -449,7 +459,8 @@ export function QRStickerScreen({
           />
           {/* Camera-only to ensure sticker is attached to the physical item. */}
           <p className="mt-3 text-center text-xs text-gray-500">
-            Your listing won’t be visible to renters until this verification step is done. Sell (and free $0 sell) listings are active immediately.
+            Point the camera at the printed QR on the item. A random photo won’t pass — we check
+            that this listing’s code is in the frame. Sell (and free $0 sell) listings skip this step.
           </p>
         </div>
       </div>

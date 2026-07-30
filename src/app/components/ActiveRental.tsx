@@ -668,6 +668,7 @@ export function ActiveRental({
           itemTitle={booking.itemTitle}
           itemEmoji={booking.itemEmoji}
           expectedCode={booking.itemQrToken}
+          expectedListingId={booking.listingId}
           expectedPin={mode === "pickup" ? booking.pickupPin : booking.returnPin}
           contactlessInstructions={
             booking.fulfillmentMethod === "contactless"
