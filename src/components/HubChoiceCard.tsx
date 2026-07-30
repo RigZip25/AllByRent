@@ -44,7 +44,7 @@ export function HubChoiceCard({
           </span>
         ) : null}
       </div>
-      <div className="browse-hub-choice-body min-h-0 shrink px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3">
+      <div className="browse-hub-choice-body shrink-0 px-3 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3">
         <div className="flex min-h-0 items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <h2 className="browse-hub-choice-title font-bold" style={{ color: GREEN }}>

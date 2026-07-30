@@ -26,8 +26,13 @@ export function WhatDoYouWant({ onEarn, onSave, onSkip, onBack }: WhatDoYouWantP
         <p className="mt-1 text-base text-gray-500">{copy.subtitle}</p>
       </div>
 
+      {/*
+        Cards must be shrink-0: this column is a flex scroller. Default flex-shrink
+        crushed the CTAs on short phones and scrollHeight never grew, so the second
+        active button was clipped with no way to reach it.
+      */}
       <div className="screen-scroll flex flex-col gap-4 px-4 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]">
-        <article className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+        <article className="shrink-0 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
           <div className="what-do-you-want-art rounded-t-2xl">
             <img
               src={onboardingAssets.stockGarage}
@@ -40,7 +45,7 @@ export function WhatDoYouWant({ onEarn, onSave, onSkip, onBack }: WhatDoYouWantP
               draggable={false}
             />
           </div>
-          <div className="px-4 pb-4 pt-3 text-center">
+          <div className="shrink-0 px-4 pb-4 pt-3 text-center">
             <h2 className="text-lg font-bold" style={{ color: GREEN }}>
               {copy.stockGarage.title}
             </h2>
@@ -59,7 +64,7 @@ export function WhatDoYouWant({ onEarn, onSave, onSkip, onBack }: WhatDoYouWantP
           </div>
         </article>
 
-        <article className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+        <article className="shrink-0 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
           <div className="what-do-you-want-art rounded-t-2xl">
             <img
               src={onboardingAssets.browseBlock}
@@ -71,7 +76,7 @@ export function WhatDoYouWant({ onEarn, onSave, onSkip, onBack }: WhatDoYouWantP
               draggable={false}
             />
           </div>
-          <div className="px-4 pb-4 pt-3 text-center">
+          <div className="shrink-0 px-4 pb-4 pt-3 text-center">
             <h2 className="text-lg font-bold" style={{ color: GREEN }}>
               {copy.browseBlock.title}
             </h2>
