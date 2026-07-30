@@ -8,7 +8,10 @@ import {
 import type { LocationSearchGranularity } from "../lib/locationQuery";
 import { getHomeLocation } from "../lib/listingStorage";
 import {
+  COUNTRY_GROUPS,
   COUNTRY_OPTIONS,
+  getCountryEmptyHint,
+  getCountrySearchExample,
   getSearchCountryCode,
   saveSearchCountry,
   type CountryCode,
@@ -44,13 +47,6 @@ export function AddressLocationPicker({
   variant = "area",
 }: AddressLocationPickerProps) {
   const granularity: LocationSearchGranularity = variant === "area" ? "area" : "any";
-  const COUNTRY_GROUPS: { label: string; codes: CountryCode[] }[] = [
-    { label: "North America", codes: ["US", "CA"] },
-    { label: "Europe", codes: ["GB", "FR", "DE", "PL", "UA"] },
-    { label: "Eurasia", codes: ["RU", "BY", "KZ"] },
-    { label: "Middle East", codes: ["IL"] },
-    { label: "Oceania", codes: ["AU"] },
-  ];
   const homeCityHint = useMemo(() => {
     const home = getHomeLocation();
     return home?.displayName?.trim() || null;
@@ -268,22 +264,22 @@ export function AddressLocationPicker({
       <p className="text-center text-xs text-gray-400">
         {countryCode === "US"
           ? variant === "area"
-            ? "ZIP code is best — e.g. 71909 — or city: Hot Springs Village, AR"
+            ? `ZIP or city — e.g. ${getCountrySearchExample("US")}`
             : limitToUsState && usState
               ? `Searching in ${usState} — include ZIP when possible`
               : "Full address optional — ZIP or city works too"
-          : `Searching in ${activeCountry.flag} ${activeCountry.label}`}
+          : `Searching in ${activeCountry.flag} ${activeCountry.label} — e.g. ${getCountrySearchExample(countryCode)}`}
       </p>
 
       {needsStateHint ? (
         <p className="text-center text-xs leading-relaxed text-amber-800">
-          Select <strong>Arkansas</strong> (or your state) above — otherwise
-          &quot;Main St&quot; matches Virginia or other states.
+          Select your <strong>state</strong> above — otherwise short street names
+          match many places across the US.
         </p>
       ) : null}
 
       {isLoading ? (
-        <p className="text-center text-xs text-gray-500">Searching ZIP and city database…</p>
+        <p className="text-center text-xs text-gray-500">Searching city and postal database…</p>
       ) : null}
 
       {showAutocomplete ? (
@@ -319,23 +315,15 @@ export function AddressLocationPicker({
 
       {!isLoading && searchError && inputValue.trim().length >= minQueryLength(inputValue, granularity) ? (
         <p className="text-center text-xs leading-relaxed text-gray-500">
-          {variant === "area" ? (
-            <>
-              Try your <strong>5-digit ZIP</strong> (e.g. <strong>71909</strong>) or{" "}
-              <strong>city + state</strong> (e.g. <strong>Hot Springs Village, AR</strong>). Street
-              address is not required.
-            </>
-          ) : (
-            <>
-              Address not found. Try ZIP <strong>71909</strong> or city{" "}
-              <strong>Hot Springs Village, AR</strong>
-            </>
-          )}
+          Nothing found. Try {getCountryEmptyHint(countryCode, variant)} in{" "}
+          {activeCountry.flag} {activeCountry.label}.
         </p>
       ) : null}
 
       {!isLoading && !showAutocomplete && inputValue.trim().length === 0 ? (
-        <p className="text-center text-xs leading-relaxed text-gray-500">{emptyHint}</p>
+        <p className="text-center text-xs leading-relaxed text-gray-500">
+          {emptyHint || getCountryEmptyHint(countryCode, variant)}
+        </p>
       ) : null}
     </div>
   );

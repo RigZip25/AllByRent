@@ -1,14 +1,84 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
 import { AddressLocationPicker } from "../../components/AddressLocationPicker";
 import type { LocationSuggestion } from "../../lib/geocoding";
 import { setTripDestination } from "../../lib/listingStorage";
 import { useOnboardingCopy } from "../../lib/i18n/react";
+import {
+  getCountryEmptyHint,
+  getSearchCountryCode,
+  type CountryCode,
+} from "../../lib/locationCountry";
 
 const GREEN = "#0D5C3A";
 
-const exampleDestinations: LocationSuggestion[] = [
+const EXAMPLE_POOL: LocationSuggestion[] = [
+  {
+    label: "Berlin, Germany",
+    primaryLine: "Berlin",
+    secondaryLine: "Germany",
+    city: "Berlin",
+    country: "Germany",
+    countryCode: "DE",
+    region: "Berlin",
+    flag: "🇩🇪",
+    lat: 52.52,
+    lng: 13.405,
+    precision: "city",
+  },
+  {
+    label: "Praha, Czechia",
+    primaryLine: "Praha",
+    secondaryLine: "Czechia",
+    city: "Praha",
+    country: "Czechia",
+    countryCode: "CZ",
+    region: "",
+    flag: "🇨🇿",
+    lat: 50.0755,
+    lng: 14.4378,
+    precision: "city",
+  },
+  {
+    label: "Toronto, ON",
+    primaryLine: "Toronto",
+    secondaryLine: "Ontario, Canada",
+    city: "Toronto",
+    country: "Canada",
+    countryCode: "CA",
+    region: "ON",
+    flag: "🇨🇦",
+    lat: 43.6532,
+    lng: -79.3832,
+    precision: "city",
+  },
+  {
+    label: "Ciudad de México",
+    primaryLine: "Ciudad de México",
+    secondaryLine: "Mexico",
+    city: "Ciudad de México",
+    country: "Mexico",
+    countryCode: "MX",
+    region: "CDMX",
+    flag: "🇲🇽",
+    lat: 19.4326,
+    lng: -99.1332,
+    precision: "city",
+  },
+  {
+    label: "São Paulo, Brazil",
+    primaryLine: "São Paulo",
+    secondaryLine: "Brazil",
+    city: "São Paulo",
+    country: "Brazil",
+    countryCode: "BR",
+    region: "SP",
+    flag: "🇧🇷",
+    lat: -23.5505,
+    lng: -46.6333,
+    precision: "city",
+  },
   {
     label: "Austin, TX",
     primaryLine: "Austin",
@@ -23,32 +93,39 @@ const exampleDestinations: LocationSuggestion[] = [
     precision: "city",
   },
   {
-    label: "Denver, CO",
-    primaryLine: "Denver",
-    secondaryLine: "Colorado, USA",
-    city: "Denver",
-    country: "United States",
-    countryCode: "US",
-    region: "CO",
-    flag: "🇺🇸",
-    lat: 39.7392,
-    lng: -104.9903,
+    label: "Paris, France",
+    primaryLine: "Paris",
+    secondaryLine: "France",
+    city: "Paris",
+    country: "France",
+    countryCode: "FR",
+    region: "",
+    flag: "🇫🇷",
+    lat: 48.8566,
+    lng: 2.3522,
     precision: "city",
   },
   {
-    label: "Portland, OR",
-    primaryLine: "Portland",
-    secondaryLine: "Oregon, USA",
-    city: "Portland",
-    country: "United States",
-    countryCode: "US",
-    region: "OR",
-    flag: "🇺🇸",
-    lat: 45.5152,
-    lng: -122.6784,
+    label: "Madrid, Spain",
+    primaryLine: "Madrid",
+    secondaryLine: "Spain",
+    city: "Madrid",
+    country: "Spain",
+    countryCode: "ES",
+    region: "",
+    flag: "🇪🇸",
+    lat: 40.4168,
+    lng: -3.7038,
     precision: "city",
   },
 ];
+
+function examplesForCountry(code: CountryCode): LocationSuggestion[] {
+  const same = EXAMPLE_POOL.filter((e) => e.countryCode === code);
+  if (same.length >= 3) return same.slice(0, 3);
+  const rest = EXAMPLE_POOL.filter((e) => e.countryCode !== code);
+  return [...same, ...rest].slice(0, 3);
+}
 
 type WhereAreYouHeadingProps = {
   onBack: () => void;
@@ -59,6 +136,8 @@ type WhereAreYouHeadingProps = {
 export function WhereAreYouHeading({ onBack, onContinue, onSkip }: WhereAreYouHeadingProps) {
   const { tripDestination: copy } = useOnboardingCopy();
   const [selectedLocation, setSelectedLocation] = useState<LocationSuggestion | null>(null);
+  const countryCode = getSearchCountryCode();
+  const exampleDestinations = useMemo(() => examplesForCountry(countryCode), [countryCode]);
 
   const handleContinue = () => {
     if (!selectedLocation) return;
@@ -83,8 +162,8 @@ export function WhereAreYouHeading({ onBack, onContinue, onSkip }: WhereAreYouHe
         <div className="mt-5 flex min-h-0 flex-1 flex-col gap-3">
           <AddressLocationPicker
             variant="area"
-            placeholder="ZIP code or city, neighborhood"
-            emptyHint="ZIP (e.g. 78701) or city — Austin, TX"
+            placeholder="Postal code or city, neighborhood"
+            emptyHint={getCountryEmptyHint(countryCode, "area")}
             selected={selectedLocation}
             onSelect={setSelectedLocation}
             onClear={() => setSelectedLocation(null)}
