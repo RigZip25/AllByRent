@@ -26,6 +26,7 @@ import { CounterpartyName } from "../trust/CounterpartyName";
 import { InsuredLabel } from "./InsuredLabel";
 import { DepositHoldActions } from "../payments/DepositHoldActions";
 import { RunningLateSheet } from "./RunningLateSheet";
+import { useMessages } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -34,6 +35,7 @@ const BORDER = "#E8E6E0";
 const SURFACE = "#F0F4F2";
 
 function StatusBadge({ booking }: { booking: RentalBooking }) {
+  const t = useMessages();
   const status = booking.status;
   const historyNoShow = isNoShowHistory(booking);
 
@@ -44,19 +46,19 @@ function StatusBadge({ booking }: { booking: RentalBooking }) {
   if (historyNoShow) {
     bg = "#FFEDD5";
     color = "#C2410C";
-    label = "No-show";
+    label = t.rentalCard.noShow;
   } else if (status === "overdue") {
     bg = "#FEE2E2";
     color = "#B91C1C";
-    label = "Overdue";
+    label = t.rentalCard.overdue;
   } else if (status === "no_show") {
     bg = "#FFEDD5";
     color = "#C2410C";
-    label = "No-show";
+    label = t.rentalCard.noShow;
   } else if (status === "disputed") {
     bg = "#FEF3C7";
     color = "#B45309";
-    label = "In dispute";
+    label = t.rentalCard.inDispute;
   } else if (status === "pending_approval") {
     bg = "#DBEAFE";
     color = "#2563EB";
@@ -82,6 +84,7 @@ function TimerBanner({
   booking: RentalBooking;
   now: number;
 }) {
+  const t = useMessages();
   let text = "";
   let red = false;
 
@@ -89,10 +92,10 @@ function TimerBanner({
     text = formatPickupWindow(booking.pickupWindowStart, booking.pickupWindowEnd);
   } else if (booking.status === "active" && booking.returnDueAt) {
     const parts = getCountdownParts(booking.returnDueAt, now);
-    text = `Returns in: ${formatCountdownShort(parts)}`;
+    text = t.rentalCard.returnsIn(formatCountdownShort(parts));
   } else if (booking.status === "overdue" && booking.overdueSince) {
     const parts = getOverdueParts(booking.overdueSince, now);
-    text = `Overdue: ${formatOverdueShort(parts)}`;
+    text = t.rentalCard.overdueTimer(formatOverdueShort(parts));
     red = true;
   } else if (booking.status === "disputed" && booking.disputeEvidenceDeadline) {
     text = formatDisputeDeadline(booking.disputeEvidenceDeadline, now);
@@ -176,11 +179,12 @@ export function RentalCard({
   onReRent?: (booking: RentalBooking) => void;
 }) {
   const auth = useAuth();
+  const t = useMessages();
   const [runningLateOpen, setRunningLateOpen] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const now = useNow(booking.status === "active" || booking.status === "overdue" ? 1000 : 30_000);
 
-  const roleLabel = booking.role === "renter" ? "Renting" : "Hosting";
+  const roleLabel = booking.role === "renter" ? t.rentalCard.renting : t.rentalCard.hosting;
   const showTimer = tab === "active";
   const markNoShowAvailable =
     booking.status === "no_show" &&
@@ -203,9 +207,9 @@ export function RentalCard({
 
   const disputeSubtext = useMemo(() => {
     if (booking.status !== "disputed") return null;
-    if (booking.disputeEscalated) return "Escalated — support reviewing";
+    if (booking.disputeEscalated) return t.rentalCard.escalated;
     return null;
-  }, [booking]);
+  }, [booking, t.rentalCard.escalated]);
 
   return (
     <article
@@ -244,11 +248,11 @@ export function RentalCard({
           </p>
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
             <p className="text-[13px] font-semibold" style={{ color: GREEN_LIGHT }}>
-              ${booking.totalUsd} total
+              {t.rentalCard.total(booking.totalUsd)}
               {booking.deliveryRequested && booking.deliveryFee ? (
                 <span className="font-normal text-gray-500">
                   {" "}
-                  · incl. ${booking.deliveryFee} delivery
+                  {t.rentalCard.inclDelivery(booking.deliveryFee)}
                 </span>
               ) : null}
             </p>
@@ -256,7 +260,7 @@ export function RentalCard({
               <InsuredLabel modes={booking.listingModes} compact />
             ) : null}
             {booking.stripePayment ? (
-              <span className="text-[10px] font-semibold text-gray-400">Stripe</span>
+              <span className="text-[10px] font-semibold text-gray-400">{t.rentalCard.stripe}</span>
             ) : null}
           </div>
           {disputeSubtext ? (
@@ -270,14 +274,14 @@ export function RentalCard({
           {booking.role === "renter" ? (
             <>
               <ActionButton
-                label="Return now"
+                label={t.rentalCard.returnNow}
                 variant="cta"
                 onClick={handleAction({ status: "completed", completedAt: new Date().toISOString() })}
               />
-              <ActionButton label="Extend booking" variant="secondary" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
+              <ActionButton label={t.rentalCard.extendBooking} variant="secondary" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
             </>
           ) : (
-            <ActionButton label="Request return" variant="danger" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
+            <ActionButton label={t.rentalCard.requestReturn} variant="danger" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
           )}
         </div>
       ) : null}
@@ -286,7 +290,7 @@ export function RentalCard({
         <div className="mt-3 flex flex-wrap gap-2">
           {booking.role === "renter" ? (
             <ActionButton
-              label="I'm running late"
+              label={t.rentalCard.runningLate}
               variant="secondary"
               onClick={(e) => {
                 e.stopPropagation();
@@ -295,7 +299,7 @@ export function RentalCard({
             />
           ) : markNoShowAvailable ? (
             <ActionButton
-              label="Mark as no-show"
+              label={t.rentalCard.markNoShow}
               variant="danger"
               onClick={handleAction({
                 noShowMarkedAt: new Date().toISOString(),
@@ -303,7 +307,7 @@ export function RentalCard({
             />
           ) : (
             <p className="text-[12px] text-gray-500">
-              Mark as no-show available 60 min after pickup time
+              {t.rentalCard.markNoShowHint}
             </p>
           )}
         </div>
@@ -311,7 +315,7 @@ export function RentalCard({
 
       {tab === "active" && booking.status === "disputed" ? (
         <div className="mt-3">
-          <ActionButton label="Submit evidence" variant="cta" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
+          <ActionButton label={t.rentalCard.submitEvidence} variant="cta" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
         </div>
       ) : null}
 
@@ -334,7 +338,7 @@ export function RentalCard({
           {reviewOpen ? (
             <>
               <ActionButton
-                label="Leave a review"
+                label={t.rentalCard.leaveReview}
                 variant="cta"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -348,16 +352,16 @@ export function RentalCard({
                 >
                   {MASCOT_NAME}
                 </span>
-                Your review helps build trust
+                {t.rentalCard.reviewHelpsTrust}
               </p>
             </>
           ) : booking.review ? (
             <div className="flex flex-wrap items-center gap-3">
               <StarRating rating={booking.review.rating} />
-              <ActionButton label="See review" variant="secondary" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
+              <ActionButton label={t.rentalCard.seeReview} variant="secondary" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
               {booking.role === "renter" ? (
                 <ActionButton
-                  label="Rent again"
+                  label={t.rentalCard.rentAgain}
                   variant="primary"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -370,7 +374,7 @@ export function RentalCard({
             <div className="flex flex-wrap gap-2">
               {booking.role === "renter" ? (
                 <ActionButton
-                  label="Rent again"
+                  label={t.rentalCard.rentAgain}
                   variant="primary"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -378,14 +382,14 @@ export function RentalCard({
                   }}
                 />
               ) : null}
-              <ActionButton label="See review" variant="secondary" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
+              <ActionButton label={t.rentalCard.seeReview} variant="secondary" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
             </div>
           )}
         </div>
       ) : null}
 
       {tab === "history" && isNoShowHistory(booking) ? (
-        <p className="mt-2 text-[12px] font-semibold text-orange-700">Marked as no-show</p>
+        <p className="mt-2 text-[12px] font-semibold text-orange-700">{t.rentalCard.markedAsNoShow}</p>
       ) : null}
 
       <RunningLateSheet

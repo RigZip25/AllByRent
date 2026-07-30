@@ -18,22 +18,44 @@ import { getActiveRentLocationLabel } from "../../lib/listingStorage";
 import { createRequestRemote } from "../../lib/requestsStorage";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
 import { APP_NAME, MARKETING_URL } from "../../lib/brand";
+import { useMessages } from "../../lib/i18n/react";
+import type { AppMessages } from "../../lib/i18n/types";
 
-const categories = [
-  { id: "tools", label: "Tools", icon: <Wrench className="w-6 h-6" /> },
-  { id: "sports", label: "Sports", icon: <Bike className="w-6 h-6" /> },
-  { id: "photo", label: "Photo", icon: <Camera className="w-6 h-6" /> },
-  { id: "gaming", label: "Gaming", icon: <Gamepad2 className="w-6 h-6" /> },
-  { id: "music", label: "Music", icon: <Music className="w-6 h-6" /> },
-  { id: "home", label: "Home", icon: <Home className="w-6 h-6" /> },
-];
+const categoryDefs = [
+  { id: "tools", storageLabel: "Tools", icon: <Wrench className="w-6 h-6" /> },
+  { id: "sports", storageLabel: "Sports", icon: <Bike className="w-6 h-6" /> },
+  { id: "photo", storageLabel: "Photo", icon: <Camera className="w-6 h-6" /> },
+  { id: "gaming", storageLabel: "Gaming", icon: <Gamepad2 className="w-6 h-6" /> },
+  { id: "music", storageLabel: "Music", icon: <Music className="w-6 h-6" /> },
+  { id: "home", storageLabel: "Home", icon: <Home className="w-6 h-6" /> },
+] as const;
 
 const radiusOptions = ["5mi", "10mi", "25mi", "50mi"];
 
+function categoryDisplayLabel(
+  id: (typeof categoryDefs)[number]["id"],
+  copy: AppMessages["postRequest"],
+): string {
+  switch (id) {
+    case "tools":
+      return copy.catTools;
+    case "sports":
+      return copy.catSports;
+    case "photo":
+      return copy.catPhoto;
+    case "gaming":
+      return copy.catGaming;
+    case "music":
+      return copy.catMusic;
+    case "home":
+      return copy.catHome;
+  }
+}
+
 function categoryLabelFromSelection(selectedCategory: string | null): string {
   if (!selectedCategory) return "";
-  const chip = categories.find((c) => c.id === selectedCategory);
-  return chip?.label ?? selectedCategory;
+  const chip = categoryDefs.find((c) => c.id === selectedCategory);
+  return chip?.storageLabel ?? selectedCategory;
 }
 
 function resolveRequestCategory(
@@ -51,12 +73,15 @@ function resolveRequestCategory(
   return "";
 }
 
-function buildPrefillDescription(prefill: ShelfPrefill | null | undefined): string {
+function buildPrefillDescription(
+  prefill: ShelfPrefill | null | undefined,
+  copy: AppMessages["postRequest"],
+): string {
   const query = (prefill?.query ?? "").trim();
   if (!prefill?.subcategory && !prefill?.category) {
     if (query) {
       const city = prefill?.city?.trim();
-      return city ? `Looking for "${query}" near ${city}.` : `Looking for "${query}".`;
+      return city ? copy.lookingForQueryNear(query, city) : copy.lookingForQuery(query);
     }
     return "";
   }
@@ -82,7 +107,11 @@ export function PostRequest({
   onPost: () => void;
 }) {
   const auth = useAuth();
-  const prefillDescription = useMemo(() => buildPrefillDescription(prefill), [prefill]);
+  const t = useMessages();
+  const prefillDescription = useMemo(
+    () => buildPrefillDescription(prefill, t.postRequest),
+    [prefill, t.postRequest],
+  );
   const lockedContext = hasPostRequestContext(prefill);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [description, setDescription] = useState(prefillDescription);
@@ -97,17 +126,19 @@ export function PostRequest({
 
   const sharePayload = useMemo(() => {
     const city = (prefill?.city ?? getActiveRentLocationLabel()).trim();
-    const text = description.trim() || `Looking for gear near ${city || "my block"} on ${APP_NAME}.`;
+    const text =
+      description.trim() ||
+      t.postRequest.shareDefaultText(APP_NAME, city || "my block");
     return {
-      title: `Request on ${APP_NAME}`,
+      title: t.postRequest.shareTitleApp(APP_NAME),
       text,
       url: MARKETING_URL,
     };
-  }, [description, prefill?.city]);
+  }, [description, prefill?.city, t.postRequest]);
 
   const formatDateRange = () => {
-    if (!startDate && !endDate) return "Select dates";
-    if (!endDate) return `From ${new Date(startDate).toLocaleDateString()}`;
+    if (!startDate && !endDate) return t.postRequest.selectDates;
+    if (!endDate) return t.postRequest.fromDate(new Date(startDate).toLocaleDateString());
     return `${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`;
   };
 
@@ -115,15 +146,15 @@ export function PostRequest({
     return (
       <div className="screen bg-background flex flex-col">
         <div className="shrink-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-3 sm:px-4 py-3 flex items-center gap-3">
-          <h1 className="font-semibold flex-1">Request posted</h1>
+          <h1 className="font-semibold flex-1">{t.postRequest.postedTitle}</h1>
         </div>
         <div className="screen-scroll flex-1 min-h-0 p-4 space-y-5 pb-24">
           <div className="flex items-start gap-3">
             <MrRentano size={48} className="flex-shrink-0" />
             <div>
-              <h2 className="font-semibold text-lg mb-1">Now share it</h2>
+              <h2 className="font-semibold text-lg mb-1">{t.postRequest.shareNowTitle}</h2>
               <p className="text-sm text-muted-foreground">
-                Same as hosts do with listings — the more neighbors see it, the faster you get a reply.
+                {t.postRequest.shareNowBody}
               </p>
             </div>
           </div>
@@ -137,7 +168,7 @@ export function PostRequest({
             onClick={onPost}
             className="w-full bg-primary hover:bg-primary/90 text-white py-3.5 rounded-xl transition-colors font-medium"
           >
-            Done →
+            {t.postRequest.done}
           </button>
         </div>
       </div>
@@ -154,7 +185,7 @@ export function PostRequest({
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="font-semibold flex-1">Post a Request</h1>
+        <h1 className="font-semibold flex-1">{t.postRequest.title}</h1>
       </div>
 
       <div className="screen-scroll flex-1 min-h-0 p-3 sm:p-4 space-y-5 sm:space-y-6 pb-24">
@@ -162,12 +193,10 @@ export function PostRequest({
           <MrRentano size={40} className="flex-shrink-0" />
           <div className="flex-1">
             <h2 className="font-semibold text-lg mb-1">
-              {lockedContext ? "Tell neighbors what you need" : "Can't find it? Ask your neighbors"}
+              {lockedContext ? t.postRequest.headlineLocked : t.postRequest.headline}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {lockedContext
-                ? "Add details below — hosts in your area will see your request"
-                : "Someone nearby might have exactly what you need"}
+              {lockedContext ? t.postRequest.subtitleLocked : t.postRequest.subtitle}
             </p>
           </div>
         </div>
@@ -178,7 +207,7 @@ export function PostRequest({
             aria-live="polite"
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-              Request for
+              {t.postRequest.requestFor}
             </p>
             <p className="mt-1 font-semibold text-foreground">
               {prefill.subcategory} in {prefill.category}
@@ -194,10 +223,10 @@ export function PostRequest({
 
         {!lockedContext ? (
           <div>
-            <label className="block text-sm font-medium mb-3">Select category</label>
+            <label className="block text-sm font-medium mb-3">{t.postRequest.selectCategory}</label>
 
             <div className="grid grid-cols-3 gap-3">
-              {categories.map((cat) => (
+              {categoryDefs.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
@@ -214,7 +243,9 @@ export function PostRequest({
                   >
                     {cat.icon}
                   </div>
-                  <span className="text-xs font-medium">{cat.label}</span>
+                  <span className="text-xs font-medium">
+                    {categoryDisplayLabel(cat.id, t.postRequest)}
+                  </span>
                 </button>
               ))}
             </div>
@@ -223,13 +254,13 @@ export function PostRequest({
 
         <div>
           <label className="block text-sm font-medium mb-3">
-            Describe what you need
+            {t.postRequest.describeLabel}
           </label>
 
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="E.g., Professional camera with tripod for weekend event..."
+            placeholder={t.postRequest.describePlaceholder}
             rows={4}
             className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
           />
@@ -237,7 +268,7 @@ export function PostRequest({
 
         <div>
           <label className="block text-sm font-medium mb-3">
-            Location radius
+            {t.postRequest.locationRadius}
           </label>
 
           <div className="flex gap-2">
@@ -259,7 +290,7 @@ export function PostRequest({
 
         <div>
           <label className="block text-sm font-medium mb-3">
-            Date range
+            {t.postRequest.dateRange}
           </label>
 
           <button
@@ -283,7 +314,7 @@ export function PostRequest({
               onClick={(event) => event.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-lg">Select Date Range</h3>
+                <h3 className="font-semibold text-lg">{t.postRequest.selectDateRange}</h3>
                 <button
                   onClick={() => setShowDatePicker(false)}
                   className="p-2 hover:bg-muted rounded-full transition-colors"
@@ -293,7 +324,7 @@ export function PostRequest({
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Start Date</label>
+                <label className="block text-sm font-medium mb-2">{t.postRequest.startDate}</label>
                 <input
                   type="date"
                   value={startDate}
@@ -303,7 +334,7 @@ export function PostRequest({
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">End Date</label>
+                <label className="block text-sm font-medium mb-2">{t.postRequest.endDate}</label>
                 <input
                   type="date"
                   value={endDate}
@@ -317,7 +348,7 @@ export function PostRequest({
                 onClick={() => setShowDatePicker(false)}
                 className="w-full bg-primary hover:bg-primary/90 text-white py-3 rounded-xl transition-colors font-medium"
               >
-                Confirm
+                {t.postRequest.confirm}
               </button>
             </div>
           </div>
@@ -325,12 +356,12 @@ export function PostRequest({
 
         <div>
           <label className="block text-sm font-medium mb-3">
-            Budget per day
+            {t.postRequest.budgetPerDay}
           </label>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-muted-foreground">I'd pay up to</span>
+              <span className="text-muted-foreground">{t.postRequest.idPayUpTo}</span>
               <span className="text-xl font-bold text-primary">${budget}</span>
             </div>
 
@@ -354,11 +385,11 @@ export function PostRequest({
         <div className="bg-muted/50 rounded-xl p-4">
           <h3 className="font-semibold mb-2 flex items-center gap-2">
             <Share2 className="w-4 h-4" />
-            Share with your community
+            {t.postRequest.shareTitle}
           </h3>
 
           <p className="text-sm text-muted-foreground mb-4">
-            The more people see it, the faster you find it.
+            {t.postRequest.shareBody}
           </p>
 
           <SocialShareButtons payload={sharePayload} shareKind="request" compact />
@@ -377,21 +408,21 @@ export function PostRequest({
             if (!category.trim()) {
               setSubmitError(
                 lockedContext
-                  ? "Missing category context. Go back and try again."
-                  : "Pick a category or describe what you need in the text field.",
+                  ? t.postRequest.errorMissingCategoryLocked
+                  : t.postRequest.errorPickCategory,
               );
               return;
             }
             if (lockedContext && !subcategory.trim()) {
-              setSubmitError("Missing subcategory. Go back to browse and try again.");
+              setSubmitError(t.postRequest.errorMissingSubcategory);
               return;
             }
             if (!desc) {
-              setSubmitError("Add a short description so neighbors know what you need.");
+              setSubmitError(t.postRequest.errorDescription);
               return;
             }
             if (!auth.userId) {
-              setSubmitError("Sign in to post a request.");
+              setSubmitError(t.postRequest.errorSignIn);
               return;
             }
             const budgetNote = `Budget up to $${budget}/day · within ${selectedRadius}`;
@@ -412,7 +443,7 @@ export function PostRequest({
           }}
           className="w-full bg-primary hover:bg-primary/90 text-white py-3.5 rounded-xl transition-colors font-medium disabled:opacity-60"
         >
-          {busy ? "Posting…" : "Post Request"}
+          {busy ? t.postRequest.posting : t.postRequest.postCta}
         </button>
         {submitError ? (
           /sign in/i.test(submitError) ? (

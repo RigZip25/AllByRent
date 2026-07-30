@@ -1,6 +1,7 @@
 import { CheckCircle2, ChevronRight } from "lucide-react";
 import { useMemo } from "react";
 import { formatRentalDateRange, loadRentalBookings } from "../../lib/rentalsStorage";
+import { useMessages } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -14,6 +15,7 @@ export function BookingConfirmedScreen({
   onHome: () => void;
   onRentals: () => void;
 }) {
+  const t = useMessages();
   const booking = useMemo(() => {
     if (!bookingId) return null;
     return loadRentalBookings().find((b) => b.id === bookingId) ?? null;
@@ -33,11 +35,10 @@ export function BookingConfirmedScreen({
         >
           <CheckCircle2 className="mx-auto h-12 w-12" style={{ color: GREEN }} />
           <h1 className="mt-3 text-[20px] font-extrabold" style={{ color: GREEN }}>
-            Booking request sent
+            {t.booking.confirmedTitle}
           </h1>
           <p className="mt-2 text-[14px] leading-relaxed text-gray-600">
-            The owner gets notified and will confirm availability. You’ll see status updates in
-            Rentals.
+            {t.booking.confirmedBody}
           </p>
 
           {booking ? (
@@ -51,7 +52,9 @@ export function BookingConfirmedScreen({
                   <p className="truncate text-[15px] font-bold" style={{ color: GREEN }}>
                     {booking.itemTitle}
                   </p>
-                  <p className="text-[13px] text-gray-500">with {booking.counterpartyName}</p>
+                  <p className="text-[13px] text-gray-500">
+                    {t.booking.withHost(booking.counterpartyName)}
+                  </p>
                 </div>
               </div>
               {dateLabel ? (
@@ -59,10 +62,12 @@ export function BookingConfirmedScreen({
               ) : null}
               {booking.totalUsd != null ? (
                 <p className="mt-1 text-[13px] font-semibold text-gray-700">
-                  Total ${booking.totalUsd.toFixed(2)}
+                  {t.booking.total(booking.totalUsd.toFixed(2))}
                 </p>
               ) : null}
-              <p className="mt-2 text-[11px] text-gray-400">Ref #{booking.id.slice(0, 8)}</p>
+              <p className="mt-2 text-[11px] text-gray-400">
+                {t.booking.ref(booking.id.slice(0, 8))}
+              </p>
             </div>
           ) : null}
 
@@ -73,7 +78,7 @@ export function BookingConfirmedScreen({
               className="flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-[14px] font-bold text-white"
               style={{ backgroundColor: GREEN }}
             >
-              View Rentals
+              {t.booking.viewRentals}
               <ChevronRight className="h-4 w-4" />
             </button>
             <button
@@ -82,7 +87,7 @@ export function BookingConfirmedScreen({
               className="w-full rounded-2xl border bg-white px-4 py-3 text-[14px] font-semibold text-gray-700"
               style={{ borderColor: BORDER }}
             >
-              Back to Home
+              {t.booking.backToHome}
             </button>
           </div>
         </div>

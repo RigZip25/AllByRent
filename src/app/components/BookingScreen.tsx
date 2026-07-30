@@ -41,6 +41,8 @@ import {
   syncRentalPaymentStatus,
 } from "../../lib/stripePayments";
 import type { ListingDraft, MinimumRentalPeriod } from "../../screens/listing/types";
+import { useMessages } from "../../lib/i18n/react";
+import type { AppMessages } from "../../lib/i18n/types";
 
 const GREEN = "#0D5C3A";
 
@@ -94,7 +96,10 @@ function isRangeBlocked(
   return false;
 }
 
-function fulfillmentOptions(listing: ListingDraft): {
+function fulfillmentOptions(
+  listing: ListingDraft,
+  booking: AppMessages["booking"],
+): {
   id: FulfillmentMethod;
   label: string;
   description: string;
@@ -109,24 +114,23 @@ function fulfillmentOptions(listing: ListingDraft): {
   if (listing.handoff.inPerson) {
     options.push({
       id: "pickup",
-      label: "In-person pickup",
-      description: "Meet the host at their location",
+      label: booking.pickupInPerson,
+      description: booking.pickupInPersonDesc,
     });
   }
   if (listing.handoff.contactless) {
     options.push({
       id: "contactless",
-      label: "Contactless pickup",
-      description: "Lockbox or porch — codes unlock at check-in",
+      label: booking.pickupContactless,
+      description: booking.pickupContactlessDesc,
     });
   }
   if (listingOffersDelivery(listing)) {
     options.push({
       id: "delivery",
-      label: "Round-trip delivery",
+      label: booking.deliveryRoundTrip,
       description:
-        deliverySummaryForListing(listing) ??
-        "Host delivers before start and picks up after end",
+        deliverySummaryForListing(listing) ?? booking.deliveryRoundTripDesc,
     });
   }
   return options;
@@ -141,6 +145,7 @@ export function BookingScreen({
   onBack: () => void;
   onConfirmed: (bookingId: string) => void;
 }) {
+  const t = useMessages();
   const [listing, setListing] = useState<ListingDraft | null>(() => getPublishedListingById(listingId));
   const [loading, setLoading] = useState(() => !getPublishedListingById(listingId));
 
@@ -159,7 +164,7 @@ export function BookingScreen({
   if (loading) {
     return (
       <div className="screen flex flex-col items-center justify-center bg-background px-6 text-center">
-        <p className="text-sm text-muted-foreground">Loading booking…</p>
+        <p className="text-sm text-muted-foreground">{t.booking.loading}</p>
       </div>
     );
   }
@@ -167,9 +172,9 @@ export function BookingScreen({
   if (!listing) {
     return (
       <div className="screen flex flex-col items-center justify-center bg-background px-6 text-center">
-        <p className="font-semibold">Listing not found</p>
+        <p className="font-semibold">{t.booking.notFound}</p>
         <button type="button" onClick={onBack} className="mt-4 text-sm underline">
-          Go back
+          {t.booking.goBack}
         </button>
       </div>
     );
@@ -189,8 +194,9 @@ function BookingScreenLoaded({
   onConfirmed: (bookingId: string) => void;
 }) {
   const auth = useAuth();
+  const t = useMessages();
   const title = getListingDisplayTitle(listing.title) || listing.title || "Item";
-  const options = useMemo(() => fulfillmentOptions(listing), [listing]);
+  const options = useMemo(() => fulfillmentOptions(listing, t.booking), [listing, t.booking]);
   const defaultFulfillment =
     options.find((o) => !o.disabled)?.id ?? options[0]?.id ?? "pickup";
   const minRentalDays = minimumPeriodToDays(listing.pricing.minimumPeriod);
@@ -371,7 +377,7 @@ function BookingScreenLoaded({
             await persistRentalRow(id, booking);
           }
         } catch (error) {
-          setPaymentError(error instanceof Error ? error.message : "Failed to save booking");
+          setPaymentError(error instanceof Error ? error.message : t.booking.failedToSave);
           return;
         }
         finalizeBooking(id, booking);
@@ -387,7 +393,7 @@ function BookingScreenLoaded({
       try {
         await persistRentalRow(id, booking);
       } catch (error) {
-        setPaymentError(error instanceof Error ? error.message : "Failed to save booking");
+        setPaymentError(error instanceof Error ? error.message : t.booking.failedToSave);
         return;
       }
 
@@ -468,7 +474,7 @@ function BookingScreenLoaded({
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="font-semibold flex-1">Request booking</h1>
+        <h1 className="font-semibold flex-1">{t.booking.title}</h1>
       </div>
 
       <div className="screen-scroll flex-1 min-h-0 p-4 space-y-5 pb-28">
@@ -477,13 +483,13 @@ function BookingScreenLoaded({
           {listing.handoff.itemHeavy ? (
             <span className="mt-2 inline-flex items-center gap-1 rounded-lg bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900">
               <Package className="h-3.5 w-3.5" aria-hidden />
-              Heavy item
+              {t.booking.heavyItem}
             </span>
           ) : null}
         </div>
 
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm font-semibold mb-2">Rental length</p>
+          <p className="text-sm font-semibold mb-2">{t.booking.rentalLength}</p>
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -493,7 +499,7 @@ function BookingScreenLoaded({
               −
             </button>
             <span className="min-w-[4rem] text-center font-semibold">
-              {rentalDays} day{rentalDays === 1 ? "" : "s"}
+              {t.booking.days(rentalDays)}
             </span>
             <button
               type="button"
@@ -504,11 +510,11 @@ function BookingScreenLoaded({
             </button>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            Host minimum: {listing.pricing.minimumPeriod}
+            {t.booking.hostMinimum(listing.pricing.minimumPeriod)}
           </p>
           {listing.pricing.longTermEnabled ? (
             <p className="mt-2 text-xs text-muted-foreground">
-              Tip: pick 30+ days to see monthly pricing.
+              {t.booking.longTermTip}
             </p>
           ) : null}
           <p className="mt-2 text-xs text-muted-foreground">
@@ -516,7 +522,7 @@ function BookingScreenLoaded({
             {new Date(endDate).toLocaleDateString()}
           </p>
           <label className="mt-3 block text-xs font-medium text-muted-foreground">
-            Pickup start date
+            {t.booking.pickupStartDate}
           </label>
           <input
             type="date"
@@ -527,13 +533,13 @@ function BookingScreenLoaded({
           />
           {datesBlocked ? (
             <p className="mt-2 text-xs font-semibold text-red-600">
-              These dates overlap blocked availability on the listing.
+              {t.booking.datesBlocked}
             </p>
           ) : null}
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-semibold">How do you want the item?</p>
+          <p className="text-sm font-semibold">{t.booking.howWantItem}</p>
           {options.map((opt) => (
             <button
               key={opt.id}
@@ -565,17 +571,16 @@ function BookingScreenLoaded({
 
         {deliveryRequested ? (
           <div className="rounded-xl border border-border bg-card p-4">
-            <label className="text-sm font-semibold block mb-2">Delivery address</label>
+            <label className="text-sm font-semibold block mb-2">{t.booking.deliveryAddress}</label>
             <input
               type="text"
               value={deliveryAddress}
               onChange={(e) => setDeliveryAddress(e.target.value)}
-              placeholder="Street, city, ZIP"
+              placeholder={t.booking.deliveryAddressPlaceholder}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary"
             />
             <p className="mt-2 text-xs text-muted-foreground">
-              Round-trip delivery is one fee for drop-off before your rental starts and pickup
-              after it ends.
+              {t.booking.deliveryFeeNote}
             </p>
           </div>
         ) : null}
@@ -584,9 +589,10 @@ function BookingScreenLoaded({
           <div className="flex gap-2 rounded-xl border border-[#0D5C3A]/20 bg-[#0D5C3A]/5 p-3 text-sm text-gray-800">
             <Shield className="h-5 w-5 shrink-0" style={{ color: GREEN }} aria-hidden />
             <p>
-              <span className="font-semibold">{DEPOSIT_PROTECTION_LABEL}.</span> A{" "}
-              <span className="font-semibold">${(depositAmountCents / 100).toFixed(2)}</span> card
-              hold may be authorized after rental payment — released when the item is returned.
+              {t.booking.depositHoldNote(
+                DEPOSIT_PROTECTION_LABEL,
+                `$${(depositAmountCents / 100).toFixed(2)}`,
+              )}
             </p>
           </div>
         ) : null}
@@ -609,10 +615,11 @@ function BookingScreenLoaded({
 
         {depositClientSecret ? (
           <div className="rounded-xl border border-border bg-card p-4">
-            <p className="text-sm font-semibold mb-1">{DEPOSIT_PROTECTION_LABEL} hold</p>
+            <p className="text-sm font-semibold mb-1">
+              {t.booking.depositHoldTitle(DEPOSIT_PROTECTION_LABEL)}
+            </p>
             <p className="text-xs text-muted-foreground mb-3">
-              We&apos;ll authorize ${(pendingDepositCents / 100).toFixed(2)} on your card. The hold
-              is released when the owner confirms the item was returned in good condition.
+              {t.booking.depositHoldBody(`$${(pendingDepositCents / 100).toFixed(2)}`)}
             </p>
             {paymentError ? (
               <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
@@ -630,7 +637,7 @@ function BookingScreenLoaded({
 
         {paymentClientSecret ? (
           <div className="rounded-xl border border-border bg-card p-4">
-            <p className="text-sm font-semibold mb-3">Card payment</p>
+            <p className="text-sm font-semibold mb-3">{t.booking.cardPayment}</p>
             {paymentError ? (
               <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
                 {paymentError}
@@ -655,7 +662,7 @@ function BookingScreenLoaded({
                 setPaymentError(null);
               }}
             >
-              Back to booking details
+              {t.booking.backToDetails}
             </button>
           </div>
         ) : null}
@@ -671,16 +678,16 @@ function BookingScreenLoaded({
             style={{ backgroundColor: GREEN }}
           >
             {confirmBusy
-              ? "Preparing…"
+              ? t.booking.preparing
               : stripeCheckout
-                ? `Continue to pay · $${breakdown.totalUsd.toFixed(2)}`
-                : `Send booking request · $${breakdown.totalUsd.toFixed(2)}`}
+                ? t.booking.continueToPay(breakdown.totalUsd.toFixed(2))
+                : t.booking.sendRequest(breakdown.totalUsd.toFixed(2))}
           </button>
         ) : (
           <p className="text-center text-xs text-muted-foreground">
             {depositClientSecret
-              ? "Authorize the deposit hold above to finish your request."
-              : "Complete card payment above to submit your booking request."}
+              ? t.booking.authorizeDepositFooter
+              : t.booking.completePaymentFooter}
           </p>
         )}
       </div>
