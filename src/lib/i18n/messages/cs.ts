@@ -35,7 +35,7 @@ export const cs: AppMessages = {
     intentListSubtitle:
       "Doplňte údaje — pošleme e-mailem přihlašovací kód. Pak Stripe ověří doklad a účet, abyste mohli jít veřejně.",
     intentListRentano:
-      "Mr. Evorios: Koncept uložen. Nejdřív se přihlaste — pak jeden krok Stripe pro doklad a účet.",
+      "Koncept uložen. Nejdřív se přihlaste — pak jeden krok Stripe pro doklad a účet.",
     intentBookSubtitle:
       "Doplňte údaje — pošleme e-mailem přihlašovací kód, aby vás hostitelé mohli kontaktovat.",
     intentBookRentano: (mascot) =>

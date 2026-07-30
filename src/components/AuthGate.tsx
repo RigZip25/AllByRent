@@ -16,6 +16,7 @@ import {
   normalizeEmailOtpInput,
 } from "../lib/authOtp";
 import { formatUsPhoneDisplay, formatUsPhoneInput, normalizeUsPhoneForStorage } from "../lib/usPhoneFormat";
+import { useMessages } from "../lib/i18n/react";
 import { RentanoTip } from "./RentanoTip";
 import { AddressLocationPicker } from "./AddressLocationPicker";
 import type { LocationSuggestion } from "../lib/geocoding";
@@ -27,32 +28,6 @@ type Step = "account" | "confirm";
 
 const EMAIL_COOLDOWN_SECONDS = 60;
 const EMAIL_RATE_LIMIT_COOLDOWN_SECONDS = 15 * 60;
-
-const INTENT_COPY: Record<
-  AuthIntent,
-  { title: string; subtitle: string; rentano: string }
-> = {
-  list: {
-    title: "Sign in or create account",
-    subtitle: "Add your details — we'll email a sign-in code. Next: Stripe verifies your ID and bank to go public.",
-    rentano: mascotSays("Draft saved. Sign in first — then one Stripe step for ID + bank."),
-  },
-  book: {
-    title: "Sign in or create account",
-    subtitle: "Add your details — we'll email a sign-in code so hosts can reach you.",
-    rentano: `${MASCOT_NAME}: Booking needs an account. Enter the code from your email and you're in.`,
-  },
-  message: {
-    title: "Sign in or create account",
-    subtitle: "Add your details — we'll email a sign-in code to unlock messaging.",
-    rentano: `${MASCOT_NAME}: Messaging is for members — enter the code from your email to continue.`,
-  },
-  generic: {
-    title: "Sign in or create account",
-    subtitle: "New or returning — enter your details and we'll email a sign-in code.",
-    rentano: `${MASCOT_NAME}: One account for your garage, bookings, and chat.`,
-  },
-};
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
@@ -103,7 +78,36 @@ export function AuthGate({
   onAuthenticated?: () => void;
 }) {
   const { configured, session } = useAuth();
-  const copy = INTENT_COPY[intent];
+  const t = useMessages();
+  const a = t.auth;
+  const copy = useMemo(
+    () =>
+      (
+        {
+          list: {
+            title: a.intentTitle,
+            subtitle: a.intentListSubtitle,
+            rentano: mascotSays(a.intentListRentano),
+          },
+          book: {
+            title: a.intentTitle,
+            subtitle: a.intentBookSubtitle,
+            rentano: a.intentBookRentano(MASCOT_NAME),
+          },
+          message: {
+            title: a.intentTitle,
+            subtitle: a.intentMessageSubtitle,
+            rentano: a.intentMessageRentano(MASCOT_NAME),
+          },
+          generic: {
+            title: a.intentTitle,
+            subtitle: a.intentGenericSubtitle,
+            rentano: a.intentGenericRentano(MASCOT_NAME),
+          },
+        } satisfies Record<AuthIntent, { title: string; subtitle: string; rentano: string }>
+      )[intent],
+    [a, intent],
+  );
   const hydrated = useMemo(() => hydrateAuthForm(), []);
   const [step, setStep] = useState<Step>(initialStep ?? "account");
   const [fullName, setFullName] = useState(hydrated.fullName);
@@ -158,7 +162,7 @@ export function AuthGate({
       const message = formatAuthError(e);
       if (/rate limit/i.test(message)) {
         setEmailCooldownUntil(Date.now() + EMAIL_RATE_LIMIT_COOLDOWN_SECONDS * 1000);
-        setError("Too many emails requested. Please wait about 15 minutes, then try again.");
+        setError(a.rateLimit);
       } else {
         setError(message);
       }
@@ -187,15 +191,15 @@ export function AuthGate({
 
   const validateAccountForm = (): boolean => {
     if (!fullName.trim()) {
-      setError("Enter your name.");
+      setError(a.nameRequired);
       return false;
     }
     if (!isValidEmail(email)) {
-      setError("Enter a valid email address.");
+      setError(a.emailInvalid);
       return false;
     }
     if (!location) {
-      setError("Pick your area — auto-detect or search by ZIP or city.");
+      setError(a.locationRequired);
       return false;
     }
     return true;
@@ -247,8 +251,8 @@ export function AuthGate({
     });
   };
 
-  const confirmTitle = "Enter your sign-in code";
-  const confirmSubtitle = `Check ${email} for a message from ${MASCOT_NAME} and paste your ${emailOtpLengthHint()} code below.`;
+  const confirmTitle = a.confirmTitle;
+  const confirmSubtitle = a.confirmSubtitle(email, MASCOT_NAME, emailOtpLengthHint());
 
   const otpDigits = normalizeEmailOtpInput(otpCode);
   const canVerifyCode = isCompleteEmailOtpLength(otpDigits.length) && busy === null && canUseSupabase;
@@ -270,7 +274,7 @@ export function AuthGate({
             type="button"
             onClick={onDismiss}
             className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#374151]"
-            aria-label="Close sign-in"
+            aria-label={a.closeAria}
           >
             <X className="h-5 w-5" />
           </button>
@@ -289,7 +293,7 @@ export function AuthGate({
 
         {!canUseSupabase ? (
           <div className="mt-4 rounded-2xl border bg-[#FFFBEB] p-3 text-[13px] text-amber-800">
-            Supabase env vars are missing — sign-in is unavailable in this build.
+            {a.supabaseMissing}
           </div>
         ) : null}
 
@@ -300,7 +304,7 @@ export function AuthGate({
         {step === "account" ? (
           <div className="mt-4">
             <label className="text-[13px] font-semibold text-gray-600" htmlFor="auth-name">
-              Your name
+              {a.nameLabel}
             </label>
             <input
               id="auth-name"
@@ -309,13 +313,13 @@ export function AuthGate({
               autoFocus
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="How neighbors will see you"
+              placeholder={a.namePlaceholder}
               className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
               style={{ borderColor: BORDER }}
             />
 
             <label className="mt-3 block text-[13px] font-semibold text-gray-600" htmlFor="auth-email">
-              Email
+              {a.emailLabel}
             </label>
             <input
               id="auth-email"
@@ -327,13 +331,13 @@ export function AuthGate({
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSendConfirmationCode();
               }}
-              placeholder="you@example.com"
+              placeholder={a.emailPlaceholder}
               className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
               style={{ borderColor: BORDER }}
             />
 
             <label className="mt-3 block text-[13px] font-semibold text-gray-600" htmlFor="auth-phone">
-              Phone <span className="font-normal text-gray-400">(optional)</span>
+              {a.phoneLabel} <span className="font-normal text-gray-400">{a.phoneOptional}</span>
             </label>
             <input
               id="auth-phone"
@@ -342,28 +346,28 @@ export function AuthGate({
               autoComplete="tel-national"
               value={phone}
               onChange={(e) => setPhone(formatUsPhoneInput(e.target.value))}
-              placeholder="(555) 123-4567"
+              placeholder={a.phonePlaceholder}
               className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
               style={{ borderColor: BORDER }}
             />
 
             <div className="mt-4 rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-[13px] font-semibold text-gray-700">Your area</p>
+                <p className="text-[13px] font-semibold text-gray-700">{a.areaLabel}</p>
                 <button
                   type="button"
                   disabled={busy !== null}
                   onClick={handleAutoDetectLocation}
                   className="text-[12px] font-semibold text-gray-600 disabled:opacity-60"
                 >
-                  {busy === "locate" ? "Detecting…" : "Use my location"}
+                  {busy === "locate" ? a.detecting : a.useMyLocation}
                 </button>
               </div>
               <div className="mt-3">
                 <AddressLocationPicker
                   variant="area"
-                  placeholder="ZIP code or city, state"
-                  emptyHint="ZIP (e.g. 72701) or city — Fayetteville, AR"
+                  placeholder={a.areaPlaceholder}
+                  emptyHint={a.areaEmptyHint}
                   selected={location}
                   onSelect={setLocation}
                   onClear={() => setLocation(null)}
@@ -380,20 +384,20 @@ export function AuthGate({
             >
               <Mail className="h-5 w-5" />
               {busy === "email"
-                ? "Sending…"
+                ? a.sending
                 : emailCooldownRemaining > 0
-                  ? `Resend in ${emailCooldownRemaining}s`
-                  : "Send sign-in code"}
+                  ? a.resendIn(emailCooldownRemaining)
+                  : a.sendCode}
             </button>
 
             <p className="mt-3 text-center text-[11px] leading-snug text-gray-500">
-              By continuing you agree to the{" "}
+              {a.agreePrefix}{" "}
               <a href={TERMS_URL} target="_blank" rel="noopener noreferrer" className="underline">
-                Terms
+                {a.terms}
               </a>{" "}
-              and{" "}
+              {a.and}{" "}
               <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer" className="underline">
-                Privacy Policy
+                {a.privacy}
               </a>
               .
             </p>
@@ -403,21 +407,21 @@ export function AuthGate({
         {step === "confirm" ? (
           <div className="mt-4 flex flex-col gap-3">
             <div className="space-y-3 rounded-2xl border bg-[#F9FAFB] p-4" style={{ borderColor: BORDER }}>
-              <SummaryRow label="Name" value={fullName.trim() || "—"} />
-              <SummaryRow label="Email" value={email} badge="Code sent" />
+              <SummaryRow label={a.summaryName} value={fullName.trim() || a.emptyValue} />
+              <SummaryRow label={a.summaryEmail} value={email} badge={a.codeSent} />
               {phone.trim() ? (
-                <SummaryRow label="Phone" value={formatUsPhoneDisplay(phone)} />
+                <SummaryRow label={a.summaryPhone} value={formatUsPhoneDisplay(phone)} />
               ) : null}
               {location ? (
                 <SummaryRow
-                  label="Area"
+                  label={a.summaryArea}
                   value={location.secondaryLine ? `${location.primaryLine}, ${location.secondaryLine}` : location.primaryLine}
                 />
               ) : null}
             </div>
 
             <label className="text-[13px] font-semibold text-gray-600" htmlFor="auth-otp">
-              Sign-in code
+              {a.otpLabel}
             </label>
             <input
               id="auth-otp"
@@ -430,7 +434,7 @@ export function AuthGate({
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleVerifyCode();
               }}
-              placeholder="Your code"
+              placeholder={a.otpPlaceholder}
               className={`w-full rounded-2xl border bg-white px-4 py-3 text-center outline-none focus:ring-2 focus:ring-[#0D5C3A]/30 ${
                 otpCode.length > 0
                   ? "text-[22px] font-bold tracking-[0.35em] tabular-nums text-gray-900"
@@ -446,11 +450,11 @@ export function AuthGate({
               className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
               style={{ backgroundColor: GREEN }}
             >
-              {busy === "verify" ? "Checking code…" : "Confirm and sign in"}
+              {busy === "verify" ? a.checking : a.verify}
             </button>
 
             <p className="text-[13px] leading-relaxed text-gray-500">
-              Wrong name or email? Tap Edit details, fix it, and send a new code.
+              {a.wrongDetailsHint}
             </p>
 
             <button
@@ -462,10 +466,10 @@ export function AuthGate({
             >
               <Mail className="h-4 w-4" />
               {busy === "email"
-                ? "Sending…"
+                ? a.sending
                 : emailCooldownRemaining > 0
-                  ? `New code in ${emailCooldownRemaining}s`
-                  : "Send a new code"}
+                  ? a.newCodeIn(emailCooldownRemaining)
+                  : a.sendNewCode}
             </button>
 
             <button
@@ -477,16 +481,16 @@ export function AuthGate({
               }}
               className="w-full py-2 text-[13px] font-semibold text-gray-600"
             >
-              Edit details
+              {a.editDetails}
             </button>
 
             <p className="text-center text-[12px] leading-relaxed text-gray-400">
-              Check spam or promotions if the code doesn&apos;t arrive within a minute.
+              {a.spamHint}
             </p>
           </div>
         ) : null}
 
-        <p className="mt-4 text-center text-[12px] text-gray-400">Free to join · No credit card</p>
+        <p className="mt-4 text-center text-[12px] text-gray-400">{a.freeToJoin}</p>
         </div>
       </div>
     </div>

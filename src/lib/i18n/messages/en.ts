@@ -34,7 +34,7 @@ export const en: AppMessages = {
     intentTitle: "Sign in or create account",
     intentListSubtitle:
       "Add your details — we'll email a sign-in code. Next: Stripe verifies your ID and bank to go public.",
-    intentListRentano: "Mr. Evorios: Draft saved. Sign in first — then one Stripe step for ID + bank.",
+    intentListRentano: "Draft saved. Sign in first — then one Stripe step for ID + bank.",
     intentBookSubtitle: "Add your details — we'll email a sign-in code so hosts can reach you.",
     intentBookRentano: (mascot) =>
       `${mascot}: Booking needs an account. Enter the code from your email and you're in.`,
