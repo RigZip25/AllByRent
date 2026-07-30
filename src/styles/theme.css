@@ -571,6 +571,109 @@
     }
   }
 
+  .role-choice-header {
+    flex-shrink: 0;
+  }
+
+  .role-choice-page-title {
+    line-height: 1.2;
+  }
+
+  .role-choice-cards {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(10px, 1.8dvh, 14px);
+    padding: 0 16px 8px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .role-choice-card {
+    flex: 0 0 auto;
+  }
+
+  .role-choice-art {
+    box-sizing: border-box;
+    flex-shrink: 0;
+    overflow: hidden;
+    background-color: #f7fbf8;
+    min-height: clamp(88px, 14dvh, 128px);
+    max-height: clamp(88px, 14dvh, 128px);
+    padding: 0.4rem 0.75rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .role-choice-illustration {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center center;
+  }
+
+  .role-choice-body {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    background-color: #fff;
+  }
+
+  .role-choice-cta {
+    box-sizing: border-box;
+  }
+
+  .role-choice-footer {
+    flex-shrink: 0;
+  }
+
+  @media (max-height: 780px) {
+    .role-choice-page-title {
+      font-size: 1.375rem;
+    }
+
+    .role-choice-art {
+      min-height: clamp(72px, 12dvh, 108px);
+      max-height: clamp(72px, 12dvh, 108px);
+      padding-top: 0.3rem;
+    }
+
+    .role-choice-subtitle {
+      font-size: 0.75rem;
+    }
+
+    .role-choice-cta {
+      min-height: 2.75rem;
+      margin-top: 0.625rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  @media (max-height: 680px) {
+    .role-choice-header {
+      padding-bottom: 0.15rem;
+    }
+
+    .role-choice-cards {
+      gap: 8px;
+    }
+
+    .role-choice-art {
+      min-height: clamp(64px, 10dvh, 92px);
+      max-height: clamp(64px, 10dvh, 92px);
+    }
+
+    .role-choice-body {
+      padding-top: 0.375rem;
+      padding-bottom: 0.5rem;
+    }
+  }
+
   .where-are-you-card {
     min-height: clamp(280px, 52dvh, 340px);
   }
