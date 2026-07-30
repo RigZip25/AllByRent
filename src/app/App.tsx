@@ -6,6 +6,7 @@ import { GarageShopMissingScreen } from "./components/GarageShopMissingScreen";
 import { SplashScreen } from "./components/SplashScreen";
 import { InstallGateScreen } from "../screens/InstallGateScreen";
 import { FirstHello } from "../screens/onboarding/FirstHello";
+import { WhatIsEvorios } from "../screens/onboarding/WhatIsEvorios";
 import { WhatDoYouWant } from "../screens/onboarding/WhatDoYouWant";
 import { WhereAreYou } from "../screens/onboarding/WhereAreYou";
 import { WhereAreYouHeading } from "../screens/onboarding/WhereAreYouHeading";
@@ -39,6 +40,7 @@ import { ActiveGarageShopScreen } from "../screens/ActiveGarageShopScreen";
 import { GarageCartScreen } from "../screens/GarageCartScreen";
 import { GarageWinnerCheckoutScreen } from "../screens/GarageWinnerCheckoutScreen";
 import { MoreScreen } from "../screens/MoreScreen";
+import { HowEvoriosWorksScreen } from "../screens/HowEvoriosWorksScreen";
 import { MrEvoriosScreen } from "../screens/MrEvoriosScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
@@ -63,9 +65,11 @@ import { getAppMode, setAppMode, type AppMode } from "../lib/appMode";
 import {
   completeOnboarding,
   hasRoleChoice,
+  hasProductIntro,
   isOnboardingComplete,
   isIntroDone,
   markIntroDone,
+  markProductIntroDone,
   markRoleChosen,
   resolveOnboardingResumeScreen,
 } from "../lib/onboardingStorage";
@@ -126,6 +130,7 @@ type Screen =
   | "splash"
   | "installGate"
   | "firstHello"
+  | "whatIsEvorios"
   | "whatDoYouWant"
   | "whereAreYou"
   | "whereAreYouHeading"
@@ -143,6 +148,7 @@ type Screen =
   | "mre"
   | "garage"
   | "more"
+  | "howEvoriosWorks"
   | "neighborGarage"
   | "garageShop"
   | "garageCart"
@@ -275,8 +281,9 @@ function screenToAuthIntent(screen: Screen): AuthIntent {
 /** When nav stack is empty, in-app Back still returns to the prior onboarding step. */
 const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
   firstHello: "splash",
-  whatDoYouWant: "firstHello",
-  whereAreYou: "firstHello",
+  whatIsEvorios: "firstHello",
+  whatDoYouWant: "whatIsEvorios",
+  whereAreYou: "whatDoYouWant",
   whereAreYouManual: "whereAreYou",
   whereAreYouHeading: "whereAreYou",
   onboardingAllSet: "whereAreYou",
@@ -295,6 +302,7 @@ const LISTING_EXIT_SKIP_SCREENS = new Set<Screen>([
   "splash",
   "installGate",
   "firstHello",
+  "whatIsEvorios",
   "whatDoYouWant",
   "whereAreYou",
   "whereAreYouManual",
@@ -929,12 +937,28 @@ function AppRoutes() {
     if (currentScreen === "firstHello") {
       markIntroDone();
       setNavStack([]);
-      setCurrentScreen(isOnboardingComplete() ? "browseHub" : "whereAreYou");
+      setCurrentScreen(
+        isOnboardingComplete()
+          ? "browseHub"
+          : hasProductIntro()
+            ? hasRoleChoice()
+              ? "whereAreYou"
+              : "whatDoYouWant"
+            : "whatIsEvorios",
+      );
+      return;
+    }
+
+    if (currentScreen === "whatIsEvorios") {
+      markProductIntroDone();
+      setNavStack([]);
+      setCurrentScreen(isOnboardingComplete() ? "browseHub" : hasRoleChoice() ? "whereAreYou" : "whatDoYouWant");
       return;
     }
 
     if (currentScreen === "whatDoYouWant") {
       markIntroDone();
+      markProductIntroDone();
       markRoleChosen();
       setNavStack([]);
       setCurrentScreen(isOnboardingComplete() ? "browseHub" : "whereAreYou");
@@ -983,6 +1007,24 @@ function AppRoutes() {
 
   const handleContinueFromHello = () => {
     markIntroDone();
+    if (isOnboardingComplete()) {
+      setNavStack([]);
+      setCurrentScreen("browseHub");
+      return;
+    }
+    if (!hasProductIntro()) {
+      navigateTo("whatIsEvorios");
+      return;
+    }
+    if (!hasRoleChoice()) {
+      navigateTo("whatDoYouWant");
+      return;
+    }
+    navigateTo("whereAreYou");
+  };
+
+  const handleContinueFromProductIntro = () => {
+    markProductIntroDone();
     if (isOnboardingComplete()) {
       setNavStack([]);
       setCurrentScreen("browseHub");
@@ -1384,6 +1426,14 @@ function AppRoutes() {
           />
         )}
 
+        {currentScreen === "whatIsEvorios" && (
+          <WhatIsEvorios
+            onContinue={handleContinueFromProductIntro}
+            onSkip={skipOnboarding}
+            onBack={handleBack}
+          />
+        )}
+
         {currentScreen === "whatDoYouWant" && (
           <WhatDoYouWant
             onEarn={handleEarn}
@@ -1508,6 +1558,15 @@ function AppRoutes() {
 
         {currentScreen === "mre" && <MrEvoriosScreen />}
 
+        {currentScreen === "howEvoriosWorks" && (
+          <HowEvoriosWorksScreen
+            onBack={handleBack}
+            onOpenBrowse={openBrowseHub}
+            onOpenStock={handleStartListing}
+            onAskEvorios={handleOpenMrE}
+          />
+        )}
+
         {currentScreen === "more" && (
           <MoreScreen
             onMrE={handleOpenMrE}
@@ -1517,6 +1576,7 @@ function AppRoutes() {
             onFavorites={handleOpenFavorites}
             onNotifications={handleOpenNotifications}
             onEarnBusiness={handleOpenBusiness}
+            onHowItWorks={() => navigateTo("howEvoriosWorks")}
           />
         )}
 

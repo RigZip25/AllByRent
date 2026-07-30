@@ -2,6 +2,8 @@
 const ONBOARDING_COMPLETE_KEY = "allbyrent_onboarding_complete";
 /** Intro finished or skipped — no more splash / Rentano hello on launch. */
 const INTRO_DONE_KEY = "allbyrent_intro_done";
+/** Product “what is Evorios” marketplace intro seen. */
+const PRODUCT_INTRO_DONE_KEY = "allbyrent_product_intro_done";
 /** User chose earn vs rent on WhatDoYouWant (or explicitly skipped that step). */
 const ROLE_CHOSEN_KEY = "allbyrent_role_chosen";
 
@@ -17,6 +19,7 @@ export function completeOnboarding(): void {
   try {
     localStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
     localStorage.setItem(INTRO_DONE_KEY, "true");
+    localStorage.setItem(PRODUCT_INTRO_DONE_KEY, "true");
     localStorage.setItem(ROLE_CHOSEN_KEY, "true");
   } catch {
     /* ignore quota / private mode */
@@ -34,6 +37,24 @@ export function isIntroDone(): boolean {
 
 export function markIntroDone(): void {
   try {
+    localStorage.setItem(INTRO_DONE_KEY, "true");
+  } catch {
+    /* ignore */
+  }
+}
+
+export function hasProductIntro(): boolean {
+  try {
+    if (localStorage.getItem(ONBOARDING_COMPLETE_KEY) === "true") return true;
+    return localStorage.getItem(PRODUCT_INTRO_DONE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+export function markProductIntroDone(): void {
+  try {
+    localStorage.setItem(PRODUCT_INTRO_DONE_KEY, "true");
     localStorage.setItem(INTRO_DONE_KEY, "true");
   } catch {
     /* ignore */
@@ -58,6 +79,7 @@ export function markRoleChosen(): void {
 
 export type OnboardingResumeScreen =
   | "firstHello"
+  | "whatIsEvorios"
   | "whatDoYouWant"
   | "whereAreYou"
   | "browseHub";
@@ -65,6 +87,7 @@ export type OnboardingResumeScreen =
 /** Next screen after splash (or when skipping splash after auth callback). */
 export function resolveOnboardingResumeScreen(): OnboardingResumeScreen {
   if (!isIntroDone()) return "firstHello";
+  if (!hasProductIntro()) return "whatIsEvorios";
   if (!hasRoleChoice()) return "whatDoYouWant";
   if (!isOnboardingComplete()) return "whereAreYou";
   return "browseHub";
@@ -75,6 +98,7 @@ export function clearOnboardingComplete(): void {
   try {
     localStorage.removeItem(ONBOARDING_COMPLETE_KEY);
     localStorage.removeItem(INTRO_DONE_KEY);
+    localStorage.removeItem(PRODUCT_INTRO_DONE_KEY);
     localStorage.removeItem(ROLE_CHOSEN_KEY);
   } catch {
     /* ignore */

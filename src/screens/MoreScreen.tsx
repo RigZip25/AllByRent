@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import {
   Bell,
+  BookOpen,
   ChevronRight,
   ClipboardList,
   Heart,
@@ -11,7 +12,7 @@ import {
 } from "lucide-react";
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { useAuth } from "../hooks/AuthProvider";
-import { MASCOT_NAME } from "../lib/brand";
+import { MASCOT_NAME, APP_NAME } from "../lib/brand";
 import { loadUserProfile, refreshProfileStats, getProfileDisplayLabel } from "../lib/userProfileStorage";
 
 const GREEN = "#0D5C3A";
@@ -70,6 +71,7 @@ export function MoreScreen({
   onEarnBusiness,
   onGarage,
   onMrE,
+  onHowItWorks,
 }: {
   onProfile: () => void;
   onRentals: () => void;
@@ -78,6 +80,7 @@ export function MoreScreen({
   onEarnBusiness: () => void;
   onGarage: () => void;
   onMrE: () => void;
+  onHowItWorks?: () => void;
 }) {
   const auth = useAuth();
   const [profile, setProfile] = useState(() =>
@@ -164,6 +167,16 @@ export function MoreScreen({
 
         <SectionTitle>Support</SectionTitle>
         <ul className="mb-2 flex flex-col gap-2">
+          {onHowItWorks ? (
+            <li>
+              <MenuRow
+                icon={<BookOpen className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+                label={`How ${APP_NAME} works`}
+                hint="Neighborhood marketplace · categories · where to tap"
+                onClick={onHowItWorks}
+              />
+            </li>
+          ) : null}
           <li>
             <MenuRow
               icon={<HelpCircle className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}

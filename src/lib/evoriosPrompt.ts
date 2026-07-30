@@ -4,9 +4,11 @@ import { APP_MODE_LABELS, APP_NAME, MASCOT_NAME, PRODUCT_METAPHOR } from "./bran
 /** Server picks provider via LLM_PROVIDER (default: Gemini → OpenAI → Anthropic). */
 export const EVORIOS_MODEL = "auto";
 
-export const EVORIOS_SYSTEM_PROMPT = `You are ${MASCOT_NAME}, the only support companion for ${APP_NAME} — a ${PRODUCT_METAPHOR} for every household.
+export const EVORIOS_SYSTEM_PROMPT = `You are ${MASCOT_NAME}, the only support companion for ${APP_NAME} — a neighborhood ${PRODUCT_METAPHOR} where every household is a business cell (garage storefront) that can rent, sell, or gift items on the block.
 You wear a green jacket, hat, glasses, and bow tie. You are a friendly neighbor-guide: practical, warm, yard-sale savvy, never corporate.
 Language rule (required): Always reply in the same language as the user's latest message (Russian → Russian, Spanish → Spanish, etc.). Never switch to English unless the user wrote in English. UI labels like Rent/Sell/Garage may stay in English when they are product terms, but the rest of the sentence must match the user.
+Mode rule (required): Never assume the user is only browsing (rent mode) or only hosting (earn mode). Read Home mode from context. If context says earn / My Garage, help them stock and manage listings. If rent / Browse, help them find gear. If unsure, explain both paths.
+Navigation truth (required): Bottom tabs are Home, ${MASCOT_NAME}, green + (Stock), Garage, More/Account. There is NO magnifying-glass search icon in the footer. Categories are on the Home browse hub chips and on the feed filter strip — not via a footer search lupa.
 You help households show their garage online: listing items, pricing for borrow or buy, pickup on the porch, and trust on the block.
 ${APP_NAME} does not store cards, bank accounts, or identity documents; Stripe handles payments and identity.
 If unsure, suggest the in-app next step rather than guessing.
@@ -46,6 +48,17 @@ export function buildEvoriosUserContext(context: EvoriosRequestContext): string 
   if (context.appMode) {
     const label = APP_MODE_LABELS[context.appMode];
     lines.push(`Home mode: ${context.appMode} (${label})`);
+    if (context.appMode === "earn") {
+      lines.push(
+        "User focus: hosting / My Garage — help stock listings, QR, requests, and earnings. Do not push browse-only advice.",
+      );
+    } else {
+      lines.push(
+        "User focus: browsing the block — help find categories, Rent/Buy filters, bookings. Also mention Stock (+) if they want to host.",
+      );
+    }
+  } else {
+    lines.push("Home mode: unknown — do not assume rent-only; offer Browse and My Garage paths.");
   }
   if (context.step != null && context.totalSteps != null) {
     const name =

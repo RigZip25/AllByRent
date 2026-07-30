@@ -1,4 +1,4 @@
-import { APP_MODE_LABELS, APP_NAME, DEPOSIT_PROTECTION_LABEL, MASCOT_NAME, PRODUCT_METAPHOR } from "../lib/brand";
+import { APP_MODE_LABELS, APP_NAME, DEPOSIT_PROTECTION_LABEL, MASCOT_NAME } from "../lib/brand";
 
 export type FaqItem = {
   id: string;
@@ -14,16 +14,34 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Getting started",
     question: `What is ${APP_NAME}?`,
     answer:
-      `${APP_NAME} is a neighborhood ${PRODUCT_METAPHOR}: every household has a garage storefront on the block. Search what you need, browse nearby shelves, or stock your own garage with the + button.`,
-    keywords: ["about", "platform", "garage"],
+      `${APP_NAME} is a neighborhood marketplace: every household is a business cell — a garage storefront on the block. Neighbors rent, sell, or gift (Sell at $0). Browse categories on Home, or stock your garage with the green + button.`,
+    keywords: ["about", "platform", "garage", "marketplace", "household", "бизнес", "сосед"],
   },
   {
     id: "home-feed",
     category: "Getting started",
     question: "How does Home work?",
     answer:
-      `Home is your window on the block. Search at the top, filter by Rent · Buy, and switch between Feed (items) and Garages (neighbor storefronts). Tap the center + to list from your garage.`,
-    keywords: ["home", "feed", "search", "browse"],
+      `Home opens the browse hub. Tap a category chip (Tools, Garden, Party…) or “Browse the block”, then filter All · Rent · Buy on the feed. There is no search magnifier in the footer — categories live on Home. Tap the center + to list from your garage.`,
+    keywords: ["home", "feed", "search", "browse", "category", "categories", "лупа", "категор"],
+  },
+  {
+    id: "categories-nav",
+    category: "Navigation",
+    question: "How do I browse by category?",
+    answer:
+      "Open Home → use the category chips on the browse hub, or on the feed strip under Rent/Buy. When listing with +, pick the same categories in the wizard. More → How Evorios works also shows the full list. There is no magnifying-glass search in the footer.",
+    keywords: [
+      "category",
+      "categories",
+      "категор",
+      "ориентир",
+      "browse by",
+      "garden",
+      "tools",
+      "лупа",
+      "search icon",
+    ],
   },
   {
     id: "garage-tab",
@@ -169,16 +187,16 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Navigation",
     question: "What do the bottom menu buttons do?",
     answer:
-      `Home = browse & search. ${MASCOT_NAME} = help (FAQ + chat). Green + = stock a new item. Garage = your storefront & earnings. More = profile, rentals, favorites, notifications.`,
-    keywords: ["menu", "tabs", "footer", "navigate", "stuck", "freeze"],
+      `Home = browse hub & categories. ${MASCOT_NAME} = help (FAQ + chat). Green + = stock a new item. Garage = your storefront & earnings. More = profile, rentals, favorites, and How ${APP_NAME} works. There is no search lupa in the footer.`,
+    keywords: ["menu", "tabs", "footer", "navigate", "stuck", "freeze", "лупа"],
   },
   {
     id: "more-menu",
     category: "Navigation",
     question: "What is in the More menu?",
     answer:
-      "More holds your profile card, Rentals (active & history), Favorites, Notifications, My Garage shortcut, Earn dashboard, and a link to chat with Mr. Evorios.",
-    keywords: ["more", "settings", "account"],
+      `More holds your profile card, Rentals (active & history), Favorites, Notifications, My Garage shortcut, Earn dashboard, the interactive How ${APP_NAME} works guide (marketplace + categories), and chat with ${MASCOT_NAME}.`,
+    keywords: ["more", "settings", "account", "guide", "how it works"],
   },
   {
     id: "mre-tab",
