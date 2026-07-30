@@ -406,7 +406,7 @@ export function ProfileScreen({
                       className="text-[13px] font-semibold underline"
                       style={{ color: GREEN }}
                     >
-                      Sign in to view your public profile
+                      {profileCopy.signInPublicProfile}
                     </button>
                   ) : null}
                 </div>
@@ -421,7 +421,7 @@ export function ProfileScreen({
               className="mt-3 w-full rounded-xl py-2.5 text-[14px] font-bold text-white"
               style={{ backgroundColor: "#F59E0B" }}
             >
-              Add profile photo
+              {profileCopy.addProfilePhoto}
             </button>
           ) : null}
 
@@ -430,41 +430,41 @@ export function ProfileScreen({
           ) : null}
         </div>
 
-        <SectionTitle>Default experience</SectionTitle>
+        <SectionTitle>{profileCopy.defaultExperience}</SectionTitle>
         <div className="mb-4">
           <ModeToggle mode={mode} onChange={handleModeChange} />
           <p className="mt-2 px-1 text-[12px] text-gray-500">
-            Browse opens your block hub; My Garage opens your storefront. List items anytime with +.
+            {profileCopy.defaultExperienceHint}
           </p>
         </div>
 
-        <SectionTitle>Your stats</SectionTitle>
+        <SectionTitle>{profileCopy.yourStats}</SectionTitle>
         <div className="mb-4 flex gap-2">
           <StatTile
-            label="As renter"
+            label={profileCopy.asRenter}
             value={
               profile.renter.completedRentals > 0
                 ? `${profile.renter.rating}★ · ${profile.renter.completedRentals}`
-                : "No rentals yet"
+                : profileCopy.noRentalsYet
             }
           />
           <StatTile
-            label="As host"
+            label={profileCopy.asHost}
             value={
               profile.host.listingsCount > 0
-                ? `${profile.host.rating}★ · ${profile.host.listingsCount} listings`
-                : "No listings yet"
+                ? `${profile.host.rating}★ · ${profileCopy.listingsCount(profile.host.listingsCount)}`
+                : profileCopy.noListingsYet
             }
           />
-          <StatTile label="Response" value={responseDisplay.label} />
+          <StatTile label={profileCopy.response} value={responseDisplay.label} />
         </div>
 
-        <SectionTitle>Account</SectionTitle>
+        <SectionTitle>{profileCopy.account}</SectionTitle>
         <ul className="mb-4 flex flex-col gap-2">
           <li>
             <RowButton
               icon={<MapPin className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label="Location"
+              label={profileCopy.location}
               value={locationSummary}
               onClick={onEditLocation}
             />
@@ -472,7 +472,7 @@ export function ProfileScreen({
           <li>
             <RowButton
               icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label="Name"
+              label={profileCopy.name}
               value={displayNameLabel}
               onClick={handleEditName}
             />
@@ -480,15 +480,15 @@ export function ProfileScreen({
           <li>
             <RowButton
               icon={<Sparkles className="h-5 w-5" style={{ color: "#F59E0B" }} />}
-              label="Phone"
-              value={profile.phone?.trim() ? formatUsPhoneDisplay(profile.phone) : "Add phone"}
+              label={profileCopy.phone}
+              value={profile.phone?.trim() ? formatUsPhoneDisplay(profile.phone) : profileCopy.addPhone}
               onClick={handleEditPhone}
             />
           </li>
           <li>
             <RowButton
               icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label="Personal info"
+              label={profileCopy.personalInfo}
               value={emailLabel}
               onClick={() => onOpenPersonalInfo?.()}
             />
@@ -497,28 +497,28 @@ export function ProfileScreen({
             <li>
               <RowButton
                 icon={<Users className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-                label="Co-hosts"
-                value="Invite helpers for your listings"
+                label={profileCopy.coHosts}
+                value={profileCopy.coHostsHint}
                 onClick={onOpenCoHosts}
               />
             </li>
           ) : null}
         </ul>
 
-        <SectionTitle>Payouts</SectionTitle>
+        <SectionTitle>{profileCopy.payouts}</SectionTitle>
         <ul className="mb-4 flex flex-col gap-2">
           <li>
             <RowButton
               icon={<CreditCard className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label={stripeStatus.connected ? "Bank account connected" : "Connect bank account"}
+              label={stripeStatus.connected ? profileCopy.bankConnected : profileCopy.connectBank}
               value={
                 connectBusy
-                  ? "Opening Stripe…"
+                  ? profileCopy.openingStripe
                   : stripeStatus.connected
                     ? stripeStatus.payoutsEnabled
-                      ? `Payouts enabled${stripeStatus.last4 ? ` · **** ${stripeStatus.last4}` : ""}`
-                      : "Pending verification"
-                    : "Required to receive payouts"
+                      ? profileCopy.payoutsEnabled(stripeStatus.last4 ?? undefined)
+                      : profileCopy.pendingVerification
+                    : profileCopy.requiredPayouts
               }
               onClick={() => {
                 setConnectBusy(true);
@@ -544,7 +544,7 @@ export function ProfileScreen({
 
         {recentReviews.length > 0 ? (
           <>
-            <SectionTitle>Reviews</SectionTitle>
+            <SectionTitle>{profileCopy.reviews}</SectionTitle>
             <ul className="mb-4 flex flex-col gap-2">
               {recentReviews.map((r, idx) => (
                 <li key={`${r.createdAt}-${idx}`} className="rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
@@ -554,7 +554,7 @@ export function ProfileScreen({
                   {r.comment ? (
                     <p className="mt-1 text-[13px] leading-relaxed text-gray-600">{r.comment}</p>
                   ) : (
-                    <p className="mt-1 text-[13px] text-gray-400">No comment</p>
+                    <p className="mt-1 text-[13px] text-gray-400">{profileCopy.noComment}</p>
                   )}
                 </li>
               ))}
@@ -562,16 +562,16 @@ export function ProfileScreen({
           </>
         ) : null}
 
-        <SectionTitle>Trust &amp; payments</SectionTitle>
+        <SectionTitle>{profileCopy.trustPayments}</SectionTitle>
         <ul className="mb-4 flex flex-col gap-2">
           <li>
             <RowButton
               icon={<Shield className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label="Verification"
+              label={profileCopy.verification}
               value={
                 profile.verification.identity
-                  ? "Fully verified"
-                  : "Complete ID for higher limits"
+                  ? profileCopy.fullyVerified
+                  : profileCopy.completeId
               }
               onClick={() => {
                 if (onOpenIdentity) {
@@ -591,14 +591,14 @@ export function ProfileScreen({
           <li>
             <RowButton
               icon={<Star className="h-5 w-5" style={{ color: AMBER }} />}
-              label="Reviews"
-              value="View ratings as renter and host"
+              label={profileCopy.reviews}
+              value={profileCopy.reviewsHint}
               onClick={openPublicProfile}
             />
           </li>
         </ul>
 
-        <SectionTitle>Preferences</SectionTitle>
+        <SectionTitle>{profileCopy.preferences}</SectionTitle>
         <ul className="mb-4 flex flex-col gap-2">
           <li>
             <RowButton
@@ -624,19 +624,20 @@ export function ProfileScreen({
                 localeControls.setLocaleAuto();
               }}
             />
+            <p className="mt-1.5 px-1 text-[12px] text-gray-500">{profileCopy.languageHint}</p>
           </li>
           <li>
             <RowButton
               icon={<Bell className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label="Notifications"
-              value={profile.notificationsEnabled ? "On" : "Off"}
+              label={profileCopy.notifications}
+              value={profile.notificationsEnabled ? profileCopy.on : profileCopy.off}
               onClick={onOpenNotifications}
             />
           </li>
           <li>
             <RowButton
               icon={<HelpCircle className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label="Help &amp; FAQ"
+              label={profileCopy.helpFaq}
               onClick={onMrE}
             />
           </li>
@@ -657,7 +658,7 @@ export function ProfileScreen({
             style={{ borderColor: BORDER }}
           >
             <LogOut className="h-4 w-4" />
-            {authBusy ? "Signing out…" : "Sign out"}
+            {authBusy ? profileCopy.signingOut : profileCopy.signOut}
           </button>
         ) : auth.configured && onRequireAuth ? (
           <button
@@ -666,7 +667,7 @@ export function ProfileScreen({
             className="flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-[15px] font-bold text-white"
             style={{ backgroundColor: GREEN }}
           >
-            Sign in or create account
+            {profileCopy.signInCreate}
           </button>
         ) : (
           <button
@@ -675,7 +676,7 @@ export function ProfileScreen({
             className="flex w-full items-center justify-center gap-2 rounded-2xl border py-3 text-[15px] font-semibold text-gray-500 opacity-60"
             style={{ borderColor: BORDER }}
           >
-            Sign in required
+            {profileCopy.signInRequired}
           </button>
         )}
 

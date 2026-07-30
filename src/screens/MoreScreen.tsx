@@ -14,6 +14,7 @@ import {
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { useAuth } from "../hooks/AuthProvider";
 import { MASCOT_NAME, APP_NAME } from "../lib/brand";
+import { useMessages } from "../lib/i18n/react";
 import { loadUserProfile, refreshProfileStats, getProfileDisplayLabel } from "../lib/userProfileStorage";
 
 const GREEN = "#0D5C3A";
@@ -86,6 +87,7 @@ export function MoreScreen({
   onHowItWorks?: () => void;
 }) {
   const auth = useAuth();
+  const t = useMessages();
   const [profile, setProfile] = useState(() =>
     refreshProfileStats(loadUserProfile(), auth.userId),
   );
@@ -100,9 +102,9 @@ export function MoreScreen({
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <div className="screen-scroll flex-1 px-4 pb-4 pt-3">
         <h1 className="mb-1 text-[22px] font-extrabold" style={{ color: GREEN }}>
-          More
+          {t.more.title}
         </h1>
-        <p className="mb-4 text-[14px] text-gray-500">Account, bookings, and app settings</p>
+        <p className="mb-4 text-[14px] text-gray-500">{t.more.subtitle}</p>
 
         <button
           type="button"
@@ -115,18 +117,18 @@ export function MoreScreen({
             <p className="text-[18px] font-bold" style={{ color: GREEN }}>
               {displayNameLabel}
             </p>
-            <p className="mt-0.5 text-[13px] text-gray-500">Profile &amp; account settings</p>
+            <p className="mt-0.5 text-[13px] text-gray-500">{t.more.profileHint}</p>
           </div>
           <ChevronRight className="h-5 w-5 shrink-0 text-gray-300" />
         </button>
 
-        <SectionTitle>Activity</SectionTitle>
+        <SectionTitle>{t.more.sectionActivity}</SectionTitle>
         <ul className="mb-5 flex flex-col gap-2">
           <li>
             <MenuRow
               icon={<ClipboardList className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label="Rentals"
-              hint="Active, upcoming, and history"
+              label={t.more.rentals}
+              hint={t.more.rentalsHint}
               onClick={onRentals}
             />
           </li>
@@ -134,8 +136,8 @@ export function MoreScreen({
             <li>
               <MenuRow
                 icon={<MessageCircle className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-                label="Messages"
-                hint="In-app chat for rentals and purchases"
+                label={t.more.messages}
+                hint={t.more.messagesHint}
                 onClick={onMessages}
               />
             </li>
@@ -143,49 +145,49 @@ export function MoreScreen({
           <li>
             <MenuRow
               icon={<Heart className="h-5 w-5" style={{ color: "#E11D48" }} />}
-              label="Favorites"
-              hint="Saved listings"
+              label={t.more.favorites}
+              hint={t.more.favoritesHint}
               onClick={onFavorites}
             />
           </li>
           <li>
             <MenuRow
               icon={<Bell className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label="Notifications"
-              hint="Bookings, messages, updates"
+              label={t.more.notifications}
+              hint={t.more.notificationsHint}
               onClick={onNotifications}
             />
           </li>
         </ul>
 
-        <SectionTitle>Your garage</SectionTitle>
+        <SectionTitle>{t.more.sectionGarage}</SectionTitle>
         <ul className="mb-5 flex flex-col gap-2">
           <li>
             <MenuRow
               icon={<Warehouse className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label="My Garage"
-              hint="Listings, requests, and earnings"
+              label={t.more.myGarage}
+              hint={t.more.myGarageHint}
               onClick={onGarage}
             />
           </li>
           <li>
             <MenuRow
               icon={<TrendingUp className="h-5 w-5" style={{ color: "#F59E0B" }} />}
-              label="Earn dashboard"
-              hint="Revenue and listing performance"
+              label={t.more.earnDashboard}
+              hint={t.more.earnDashboardHint}
               onClick={onEarnBusiness}
             />
           </li>
         </ul>
 
-        <SectionTitle>Support</SectionTitle>
+        <SectionTitle>{t.more.sectionSupport}</SectionTitle>
         <ul className="mb-2 flex flex-col gap-2">
           {onHowItWorks ? (
             <li>
               <MenuRow
                 icon={<BookOpen className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-                label={`How ${APP_NAME} works`}
-                hint="Neighborhood marketplace · categories · where to tap"
+                label={t.more.howItWorks(APP_NAME)}
+                hint={t.more.howItWorksHint}
                 onClick={onHowItWorks}
               />
             </li>
@@ -193,16 +195,16 @@ export function MoreScreen({
           <li>
             <MenuRow
               icon={<HelpCircle className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label={`Chat with ${MASCOT_NAME}`}
-              hint="Always in the bottom menu — tap his tab anytime"
+              label={t.more.chatWith(MASCOT_NAME)}
+              hint={t.more.chatWithHint}
               onClick={onMrE}
             />
           </li>
           <li>
             <MenuRow
               icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label="Account settings"
-              hint="Name, phone, payouts, sign out"
+              label={t.more.accountSettings}
+              hint={t.more.accountSettingsHint}
               onClick={onProfile}
             />
           </li>

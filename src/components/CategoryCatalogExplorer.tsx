@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { BRAND_GREEN } from "../lib/brand";
+import { useMessages } from "../lib/i18n/react";
 import { getCategoryCatalog, type CategoryCatalogEntry } from "../lib/homeCategoryPicks";
 import type { SubcategoryItem } from "../screens/listing/listingItemCategories";
 
@@ -23,10 +24,14 @@ function CategoryExpandRow({
   entry,
   open,
   onToggle,
+  householdLabel,
+  proLabel,
 }: {
   entry: CategoryCatalogEntry;
   open: boolean;
   onToggle: () => void;
+  householdLabel: string;
+  proLabel: string;
 }) {
   return (
     <div className="overflow-hidden rounded-2xl border bg-white" style={{ borderColor: BORDER }}>
@@ -54,7 +59,7 @@ function CategoryExpandRow({
           {entry.personal.length > 0 ? (
             <div>
               <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
-                Household
+                {householdLabel}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {entry.personal.map((item) => (
@@ -66,7 +71,7 @@ function CategoryExpandRow({
           {entry.professional.length > 0 ? (
             <div>
               <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
-                Pro / business
+                {proLabel}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {entry.professional.map((item) => (
@@ -82,24 +87,21 @@ function CategoryExpandRow({
 }
 
 type Props = {
-  /** Hint under the section title. */
   hint?: string;
-  /** Open the first category by default so the pattern is obvious. */
   defaultOpenFirst?: boolean;
 };
 
-export function CategoryCatalogExplorer({
-  hint = "Tap a category to see what’s inside — household and pro shelves.",
-  defaultOpenFirst = true,
-}: Props) {
+export function CategoryCatalogExplorer({ hint, defaultOpenFirst = true }: Props) {
+  const t = useMessages();
   const catalog = getCategoryCatalog();
   const [openName, setOpenName] = useState<string | null>(() =>
     defaultOpenFirst && catalog[0] ? catalog[0].name : null,
   );
+  const resolvedHint = hint ?? t.catalog.explorerHint;
 
   return (
     <div>
-      <p className="text-[13px] leading-snug text-gray-500">{hint}</p>
+      <p className="text-[13px] leading-snug text-gray-500">{resolvedHint}</p>
       <div className="mt-3 flex flex-col gap-2">
         {catalog.map((entry) => (
           <CategoryExpandRow
@@ -107,6 +109,8 @@ export function CategoryCatalogExplorer({
             entry={entry}
             open={openName === entry.name}
             onToggle={() => setOpenName((cur) => (cur === entry.name ? null : entry.name))}
+            householdLabel={t.catalog.household}
+            proLabel={t.catalog.pro}
           />
         ))}
       </div>

@@ -47,6 +47,7 @@ import { APP_NAME, DEPOSIT_PROTECTION_LABEL, MASCOT_NAME } from "../../lib/brand
 import { parseUsdToCents } from "../../lib/insurance";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
 import { buildListingSharePayload, listingShareUrl } from "../../lib/socialShare";
+import { useMessages } from "../../lib/i18n/react";
 import type { ListingDraft } from "../../screens/listing/types";
 
 interface ItemDetailProps {
@@ -84,6 +85,7 @@ function AvailabilityPanel({
   listing: ListingDraft;
   onClose: () => void;
 }) {
+  const t = useMessages();
   const blocked = formatBlockedDates(listing);
   const weekday =
     listing.handoff.inPersonTimeStart && listing.handoff.inPersonTimeEnd
@@ -98,7 +100,7 @@ function AvailabilityPanel({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4">
       <div className="w-full max-w-[390px] rounded-2xl border border-border bg-card p-4 shadow-xl">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">Availability</h2>
+          <h2 className="text-lg font-semibold">{t.item.availability}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -170,6 +172,7 @@ export function ItemDetail({
   onOpenListingChat,
 }: ItemDetailProps) {
   const auth = useAuth();
+  const t = useMessages();
   const [favorited, setFavorited] = useState(() => isFavoriteListing(itemId));
   const [shareOpen, setShareOpen] = useState(false);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
@@ -259,16 +262,16 @@ export function ItemDetail({
     }
     if (listing?.modes.sell || listing?.modes.gift) {
       if (!listing.hostId) {
-        setBuyError("Seller profile is missing — try again later.");
+        setBuyError(t.item.sellerMissing);
         return;
       }
       if (!auth.userId) {
         setMessageHint(true);
-        setBuyError("Sign in to message the seller.");
+        setBuyError(t.item.signInToMessage);
         return;
       }
       if (listing.hostId === auth.userId) {
-        setBuyError("This is your listing.");
+        setBuyError(t.item.yourListing);
         return;
       }
       onOpenListingChat?.(listing.id, listing.hostId);
@@ -319,7 +322,7 @@ export function ItemDetail({
           <button type="button" onClick={onBack} className="p-2 hover:bg-muted rounded-full">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="font-semibold flex-1">Item not found</h1>
+          <h1 className="font-semibold flex-1">{t.item.notFound}</h1>
         </div>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
           <p className="text-muted-foreground">
@@ -351,7 +354,7 @@ export function ItemDetail({
           type="button"
           onClick={handleToggleFavorite}
           className="p-2 hover:bg-muted rounded-full transition-colors"
-          aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+          aria-label={favorited ? t.item.removeFavoriteAria : t.item.addFavoriteAria}
         >
           <Heart
             className={`w-5 h-5 ${favorited ? "fill-[#E11D48] text-[#E11D48]" : "text-muted-foreground"}`}
@@ -404,7 +407,7 @@ export function ItemDetail({
                     <p className="text-xs text-muted-foreground">per day</p>
                   </>
                 ) : (
-                  <p className="text-sm font-semibold text-muted-foreground">Ask owner</p>
+                  <p className="text-sm font-semibold text-muted-foreground">{t.item.askOwner}</p>
                 )}
               </div>
             </div>
@@ -428,19 +431,19 @@ export function ItemDetail({
           ) : null}
 
           {messageHint && !auth.userId && (isSellOnly || listing.modes.sell) ? (
-            <SignInPrompt message="Sign in to message the seller." intent="message" />
+            <SignInPrompt message={t.item.signInToMessage} intent="message" />
           ) : messageHint ? (
             <p className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-[15px] text-primary">
               {isFreeGiveaway
-                ? "Message the owner to arrange a free pickup, or Share the listing link."
+                ? t.item.messageGiftHint
                 : isSellOnly || listing.modes.sell
-                  ? "Open Message for an in-app chat with the seller (they get a push if enabled)."
-                  : "In-app chat with the owner opens once your booking is confirmed."}
+                  ? t.item.messageSellHint
+                  : t.item.messageRentHint}
             </p>
           ) : null}
 
           {buyError ? (
-            /sign in/i.test(buyError) ? (
+            buyError === t.item.signInToMessage ? (
               <SignInPrompt message={buyError} intent="message" />
             ) : (
               <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[15px] text-red-800">
@@ -486,7 +489,9 @@ export function ItemDetail({
                     <CheckCircle2 className="w-4 h-4 text-primary" />
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {onViewHostProfile ? "Tap to view public profile" : `Verified host on ${APP_NAME}`}
+                    {onViewHostProfile
+                      ? t.item.viewPublicProfile
+                      : t.item.verifiedHost(APP_NAME)}
                   </p>
                 </div>
               </button>
@@ -495,8 +500,8 @@ export function ItemDetail({
                   type="button"
                   onClick={handleMessageHost}
                   className="flex-shrink-0 p-2 hover:bg-muted rounded-full transition-colors"
-                  aria-label={canRent ? "Start booking to contact host" : "Message seller"}
-                  title={canRent ? "Messaging opens with a booking" : "Message the seller"}
+                  aria-label={canRent ? t.item.startBookingAria : t.item.messageSellerAria}
+                  title={canRent ? t.item.messagingOpensWithBooking : t.item.messageSellerTitle}
                 >
                   <MessageCircle className="w-5 h-5 text-primary" />
                 </button>
@@ -505,29 +510,29 @@ export function ItemDetail({
           </div>
 
           <div>
-            <h3 className="font-semibold mb-3">About this item</h3>
+            <h3 className="font-semibold mb-3">{t.item.about}</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {listing.description?.trim() ||
                 (listing.modes.sell && !listing.modes.rent
-                  ? "Questions? Tap Message to contact the seller before you buy."
-                  : "Contact the owner with any questions before booking.")}
+                  ? t.item.questionsBeforeBuy
+                  : t.item.questionsBeforeBook)}
             </p>
           </div>
 
           {listing.instructionsUrl?.trim() ? (
             <button
               type="button"
-              onClick={() => onOpenAttachment(listing.instructionsUrl, "Instructions")}
+              onClick={() => onOpenAttachment(listing.instructionsUrl, t.item.instructions)}
               className="w-full bg-card border border-border py-3 rounded-xl flex items-center justify-between px-4 hover:border-primary/50 transition-colors"
             >
-              <span className="font-medium">Instructions</span>
+              <span className="font-medium">{t.item.instructions}</span>
               <span className="text-sm text-primary">View</span>
             </button>
           ) : null}
 
           {(listing.modes.rent || listing.modes.rentToOwn) ? (
           <div className="bg-muted/50 rounded-xl p-4">
-            <h3 className="font-semibold mb-3">Rental includes</h3>
+            <h3 className="font-semibold mb-3">{t.item.rentalIncludes}</h3>
             <div className="space-y-3">
               {hasDelivery ? (
                 <div className="flex items-center gap-3">
@@ -535,7 +540,7 @@ export function ItemDetail({
                     <Truck className="w-4 h-4 text-primary" />
                   </div>
                   <span className="text-sm">
-                    {deliverySummary ?? "Round-trip delivery available"}
+                    {deliverySummary ?? t.item.deliveryAvailable}
                   </span>
                 </div>
               ) : null}
@@ -571,7 +576,7 @@ export function ItemDetail({
             >
               <div className="flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-muted-foreground" />
-                <span className="font-medium">Check availability</span>
+                <span className="font-medium">{t.item.checkAvailability}</span>
               </div>
               <span className="text-sm text-primary">View calendar</span>
             </button>
@@ -602,7 +607,7 @@ export function ItemDetail({
           className="flex-shrink-0 border border-border py-3 px-5 rounded-xl hover:bg-muted transition-colors flex items-center gap-2"
         >
           <Share2 className="w-5 h-5" />
-          <span className="font-medium">Share</span>
+          <span className="font-medium">{t.item.share}</span>
         </button>
 
         {canRent ? (
@@ -649,19 +654,19 @@ export function ItemDetail({
             onClick={() => onOpenGarageShop?.(listing.hostId ?? "", listing.id)}
             className="flex-1 border border-[#2563EB] bg-white py-3 px-4 rounded-xl font-bold text-[#2563EB] transition-colors hover:bg-blue-50"
           >
-            {auctionLive ? "Bid in garage" : "View in garage"}
+            {auctionLive ? t.item.bidInGarage : t.item.viewInGarage}
           </button>
         ) : null}
 
         {!canRent && !canBuy && !isFreeGiveaway && !showGarageForAuction ? (
           <div className="flex-1 rounded-xl border border-border bg-muted/40 px-4 py-3 text-center text-sm font-medium text-muted-foreground">
             {listing.paused
-              ? "This listing is paused"
+              ? t.item.paused
               : isSold
                 ? "Sold"
                 : listing.modes.gift && !listing.modes.rent && !listing.modes.sell
-                  ? "List as Sell with price $0 to give it away"
-                  : "Not available right now"}
+                  ? t.item.giftHint
+                  : t.item.notAvailable}
           </div>
         ) : null}
       </div>

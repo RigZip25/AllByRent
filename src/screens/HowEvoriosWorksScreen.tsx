@@ -1,20 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { CategoryCatalogExplorer } from "../components/CategoryCatalogExplorer";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../lib/brand";
+import { useMessages } from "../lib/i18n/react";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
 const BORDER = "#E8E6E0";
 
 type StepId = "idea" | "modes" | "navigate" | "categories";
-
-const STEPS: { id: StepId; title: string; subtitle: string }[] = [
-  { id: "idea", title: "The idea", subtitle: "Households as storefronts" },
-  { id: "modes", title: "Rent · Sell · Gift", subtitle: "Three ways to share" },
-  { id: "navigate", title: "Where to tap", subtitle: "Home, +, Garage, More" },
-  { id: "categories", title: "Categories & subcategories", subtitle: "What’s on the block" },
-];
 
 type Props = {
   onBack: () => void;
@@ -29,9 +23,21 @@ export function HowEvoriosWorksScreen({
   onOpenStock,
   onAskEvorios,
 }: Props) {
+  const t = useMessages();
+  const hw = t.howItWorks;
+  const steps = useMemo(
+    () =>
+      [
+        { id: "idea" as const, ...hw.steps.idea },
+        { id: "modes" as const, ...hw.steps.modes },
+        { id: "navigate" as const, ...hw.steps.navigate },
+        { id: "categories" as const, ...hw.steps.categories },
+      ] satisfies { id: StepId; title: string; subtitle: string }[],
+    [hw.steps],
+  );
   const [step, setStep] = useState(0);
-  const current = STEPS[step]!;
-  const isLast = step >= STEPS.length - 1;
+  const current = steps[step]!;
+  const isLast = step >= steps.length - 1;
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -41,21 +47,21 @@ export function HowEvoriosWorksScreen({
             type="button"
             onClick={onBack}
             className="flex h-10 w-10 items-center justify-center rounded-full"
-            aria-label="Back"
+            aria-label={t.common.back}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-[18px] font-extrabold" style={{ color: GREEN }}>
-              How {APP_NAME} works
+              {hw.title(APP_NAME)}
             </h1>
             <p className="text-[12px] text-gray-500">
-              Step {step + 1} of {STEPS.length} · {current.subtitle}
+              {hw.stepOf(step + 1, steps.length)} · {current.subtitle}
             </p>
           </div>
         </div>
         <div className="mt-3 flex gap-1.5">
-          {STEPS.map((s, i) => (
+          {steps.map((s, i) => (
             <button
               key={s.id}
               type="button"
@@ -75,21 +81,11 @@ export function HowEvoriosWorksScreen({
 
         {current.id === "idea" ? (
           <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-gray-700">
-            <p>
-              {APP_NAME} is a <strong>neighborhood marketplace</strong>. Each household is a{" "}
-              <strong>business cell</strong> — your garage becomes an online storefront for the
-              block.
-            </p>
-            <p>
-              Neighbors browse nearby shelves. You stock tools, plants, cameras, party gear, and
-              more — without building a separate shop for every item.
-            </p>
+            <p>{hw.ideaBody1(APP_NAME)}</p>
+            <p>{hw.ideaBody2}</p>
             <div className="rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
-              <p className="text-[13px] font-semibold text-gray-900">Remember</p>
-              <p className="mt-1 text-[13px] text-gray-600">
-                Same profile for browsing and hosting. Switch anytime between Browse and My Garage
-                in Profile.
-              </p>
+              <p className="text-[13px] font-semibold text-gray-900">{hw.rememberTitle}</p>
+              <p className="mt-1 text-[13px] text-gray-600">{hw.rememberBody}</p>
             </div>
           </div>
         ) : null}
@@ -97,18 +93,9 @@ export function HowEvoriosWorksScreen({
         {current.id === "modes" ? (
           <div className="mt-3 space-y-2">
             {[
-              {
-                title: "Rent",
-                body: "Borrow for a day or week — or earn when someone borrows from your garage.",
-              },
-              {
-                title: "Sell",
-                body: "Buy from a neighbor’s shelf, or clear your own garage with priced listings.",
-              },
-              {
-                title: "Gift",
-                body: "Pass things along free — set Sell price to $0 when listing.",
-              },
+              { title: hw.modeRentTitle, body: hw.modeRentBody },
+              { title: hw.modeSellTitle, body: hw.modeSellBody },
+              { title: hw.modeGiftTitle, body: hw.modeGiftBody },
             ].map((row) => (
               <div
                 key={row.title}
@@ -127,22 +114,10 @@ export function HowEvoriosWorksScreen({
         {current.id === "navigate" ? (
           <div className="mt-3 space-y-2">
             {[
-              {
-                title: "Home",
-                body: "Browse hub → category chips or “Browse the block”. Filter Rent / Buy on the feed. There is no search magnifier in the footer.",
-              },
-              {
-                title: "Green + (Stock)",
-                body: "List something from your garage — photos, category, rent and/or sell.",
-              },
-              {
-                title: "Garage",
-                body: "Your household storefront: listings, drafts, and host tools.",
-              },
-              {
-                title: "More / Messages",
-                body: `Account, rentals, favorites, and Messages — in-app chat for pickup details. ${MASCOT_NAME} is for FAQ + help chat.`,
-              },
+              { title: hw.navHomeTitle, body: hw.navHomeBody },
+              { title: hw.navStockTitle, body: hw.navStockBody },
+              { title: hw.navGarageTitle, body: hw.navGarageBody },
+              { title: hw.navMoreTitle, body: hw.navMoreBody(MASCOT_NAME) },
             ].map((row) => (
               <div
                 key={row.title}
@@ -160,10 +135,7 @@ export function HowEvoriosWorksScreen({
 
         {current.id === "categories" ? (
           <div className="mt-3">
-            <CategoryCatalogExplorer
-              hint="Tap a category to see household and pro subcategories — the same list you use when browsing or stocking with +."
-              defaultOpenFirst
-            />
+            <CategoryCatalogExplorer hint={hw.catalogHint} defaultOpenFirst />
           </div>
         ) : null}
       </div>
@@ -181,7 +153,7 @@ export function HowEvoriosWorksScreen({
                 className="flex w-full items-center justify-center gap-1 rounded-xl py-3.5 text-[15px] font-bold text-white"
                 style={{ backgroundColor: GREEN }}
               >
-                Browse the block
+                {hw.browseCta}
                 <ChevronRight className="h-4 w-4" />
               </button>
             ) : null}
@@ -192,7 +164,7 @@ export function HowEvoriosWorksScreen({
                 className="w-full rounded-xl border-2 py-3 text-[15px] font-bold"
                 style={{ borderColor: GREEN, color: GREEN }}
               >
-                Stock my garage (+)
+                {hw.stockCta}
               </button>
             ) : null}
             {onAskEvorios ? (
@@ -202,18 +174,18 @@ export function HowEvoriosWorksScreen({
                 className="w-full py-2 text-center text-[13px] font-semibold underline"
                 style={{ color: GREEN }}
               >
-                Ask {MASCOT_NAME}
+                {hw.askCta(MASCOT_NAME)}
               </button>
             ) : null}
           </>
         ) : (
           <button
             type="button"
-            onClick={() => setStep((s) => Math.min(s + 1, STEPS.length - 1))}
+            onClick={() => setStep((s) => Math.min(s + 1, steps.length - 1))}
             className="flex w-full items-center justify-center gap-1 rounded-xl py-3.5 text-[15px] font-bold"
             style={{ backgroundColor: AMBER, color: GREEN }}
           >
-            Next
+            {t.common.next}
             <ChevronRight className="h-4 w-4" />
           </button>
         )}
@@ -223,7 +195,7 @@ export function HowEvoriosWorksScreen({
             onClick={() => setStep((s) => Math.max(0, s - 1))}
             className="w-full py-1 text-center text-[13px] font-medium text-gray-500"
           >
-            Back
+            {t.common.back}
           </button>
         ) : null}
       </div>

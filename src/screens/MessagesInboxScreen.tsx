@@ -10,6 +10,7 @@ import { loadRentalBookings } from "../lib/rentalsStorage";
 import { getPublishedListingById } from "../lib/listingStorage";
 import { getListingDisplayTitle } from "../lib/listingQr";
 import { BRAND_GREEN } from "../lib/brand";
+import { useMessages } from "../lib/i18n/react";
 
 const GREEN = BRAND_GREEN;
 const BORDER = "#E8E6E0";
@@ -45,6 +46,7 @@ function mergeThreads(local: ChatThreadSummary[], remote: ChatThreadSummary[]): 
 
 export function MessagesInboxScreen({ onBack, onOpenRentalChat, onOpenListingChat }: Props) {
   const auth = useAuth();
+  const copy = useMessages();
   const [remote, setRemote] = useState<ChatThreadSummary[]>([]);
   const [tick, setTick] = useState(0);
 
@@ -63,7 +65,6 @@ export function MessagesInboxScreen({ onBack, onOpenRentalChat, onOpenListingCha
   const threads = useMemo(() => {
     void tick;
     const local = listChatThreadsLocal(auth.userId);
-    // Also surface active/upcoming rentals with no messages yet so chat is discoverable.
     const bookings = loadRentalBookings().filter(
       (b) =>
         b.status === "active" ||
@@ -75,19 +76,21 @@ export function MessagesInboxScreen({ onBack, onOpenRentalChat, onOpenListingCha
     const extras: ChatThreadSummary[] = [];
     for (const b of bookings) {
       const key = `rental:${b.id}`;
-      if (local.some((t) => t.threadKey === key) || remote.some((t) => t.threadKey === key)) continue;
+      if (local.some((row) => row.threadKey === key) || remote.some((row) => row.threadKey === key)) {
+        continue;
+      }
       extras.push({
         kind: "rental",
         threadKey: key,
         rentalId: b.id,
         peerId: b.counterpartyId || "local",
-        preview: "Tap to discuss pickup details",
+        preview: copy.messages.tapToDiscuss,
         updatedAt: b.startDate || new Date(0).toISOString(),
         messageCount: 0,
       });
     }
     return mergeThreads([...local, ...extras], remote);
-  }, [auth.userId, remote, tick]);
+  }, [auth.userId, remote, tick, copy.messages.tapToDiscuss]);
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -97,15 +100,15 @@ export function MessagesInboxScreen({ onBack, onOpenRentalChat, onOpenListingCha
             type="button"
             onClick={onBack}
             className="flex h-10 w-10 items-center justify-center rounded-full"
-            aria-label="Back"
+            aria-label={copy.common.back}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-[18px] font-extrabold" style={{ color: GREEN }}>
-              Messages
+              {copy.messages.title}
             </h1>
-            <p className="text-[12px] text-gray-500">In-app chat for rentals and purchases</p>
+            <p className="text-[12px] text-gray-500">{copy.messages.subtitle}</p>
           </div>
         </div>
       </header>
@@ -113,7 +116,7 @@ export function MessagesInboxScreen({ onBack, onOpenRentalChat, onOpenListingCha
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         {!auth.userId ? (
           <p className="rounded-2xl border bg-white p-4 text-[14px] text-gray-600" style={{ borderColor: BORDER }}>
-            Sign in to sync chats across devices and get push when someone replies.
+            {copy.messages.signInHint}
           </p>
         ) : null}
 
@@ -124,22 +127,19 @@ export function MessagesInboxScreen({ onBack, onOpenRentalChat, onOpenListingCha
           >
             <MessageCircle className="h-10 w-10 text-gray-300" />
             <p className="mt-3 text-[15px] font-semibold" style={{ color: GREEN }}>
-              No conversations yet
+              {copy.messages.emptyTitle}
             </p>
-            <p className="mt-1 max-w-xs text-[13px] text-gray-500">
-              Open an active rental and tap Message, or message a seller from a listing — threads
-              show up here.
-            </p>
+            <p className="mt-1 max-w-xs text-[13px] text-gray-500">{copy.messages.emptyBody}</p>
           </div>
         ) : (
           <ul className="flex flex-col gap-2">
-            {threads.map((t) => (
-              <li key={t.threadKey}>
+            {threads.map((thread) => (
+              <li key={thread.threadKey}>
                 <button
                   type="button"
                   onClick={() => {
-                    if (t.kind === "rental" && t.rentalId) onOpenRentalChat(t.rentalId);
-                    else if (t.listingId) onOpenListingChat(t.listingId, t.peerId);
+                    if (thread.kind === "rental" && thread.rentalId) onOpenRentalChat(thread.rentalId);
+                    else if (thread.listingId) onOpenListingChat(thread.listingId, thread.peerId);
                   }}
                   className="flex w-full items-start gap-3 rounded-2xl border bg-white px-4 py-3.5 text-left active:bg-gray-50"
                   style={{ borderColor: BORDER }}
@@ -153,16 +153,16 @@ export function MessagesInboxScreen({ onBack, onOpenRentalChat, onOpenListingCha
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
                       <p className="truncate text-[15px] font-semibold" style={{ color: GREEN }}>
-                        {threadTitle(t)}
+                        {threadTitle(thread)}
                       </p>
                       <span className="shrink-0 text-[11px] text-gray-400">
-                        {new Date(t.updatedAt).toLocaleDateString()}
+                        {new Date(thread.updatedAt).toLocaleDateString()}
                       </span>
                     </div>
                     <p className="mt-0.5 text-[12px] font-medium uppercase tracking-wide text-gray-400">
-                      {t.kind === "rental" ? "Rental" : "Buy / gift"}
+                      {thread.kind === "rental" ? copy.messages.rental : copy.messages.buyGift}
                     </p>
-                    <p className="mt-1 line-clamp-2 text-[13px] text-gray-600">{t.preview}</p>
+                    <p className="mt-1 line-clamp-2 text-[13px] text-gray-600">{thread.preview}</p>
                   </div>
                 </button>
               </li>

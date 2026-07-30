@@ -6,6 +6,7 @@ import { resolveHostAccountId } from "../lib/hostIdentity";
 import { SocialShareButtons } from "../components/share/SocialShareButtons";
 import { hostGarageSharePayload } from "../lib/garageMarketingShare";
 import { garageSaleOpenLabel, getGarageSaleSchedule } from "../lib/garageSaleStorage";
+import { useMessages } from "../lib/i18n/react";
 
 const GREEN_DARK = "#0D5C3A";
 
@@ -27,6 +28,7 @@ export function GarageScreen({
   onOpenRental,
 }: GarageScreenProps) {
   const auth = useAuth();
+  const t = useMessages();
   const [shareOpen, setShareOpen] = useState(false);
   const hostId = resolveHostAccountId(auth.userId);
 
@@ -44,9 +46,9 @@ export function GarageScreen({
       <div className="flex shrink-0 items-center justify-between px-4 pb-2 pt-3">
         <div>
           <h1 className="text-[22px] font-extrabold" style={{ color: GREEN_DARK }}>
-            My Garage
+            {t.garage.title}
           </h1>
-          <p className="text-[13px] text-gray-500">Your household storefront</p>
+          <p className="text-[13px] text-gray-500">{t.garage.subtitle}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
