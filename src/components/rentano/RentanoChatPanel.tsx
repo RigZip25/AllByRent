@@ -4,6 +4,7 @@ import rentanoImg from "../../imports/No_back_rentano.png";
 import { MASCOT_NAME } from "../../lib/brand";
 import { useSpeechRecognition } from "../../hooks/useSpeechRecognition";
 import { useRequireAuth } from "../../hooks/RequireAuth";
+import { useLocale } from "../../lib/i18n/react";
 import { isAnthropicConfigured } from "../../lib/anthropicClient";
 import { findLocalRentanoAnswer, queryLooksNonEnglish } from "../../lib/rentanoLocalAnswer";
 import { sendRentanoMessage, type RentanoChatTurn } from "../../lib/rentanoChatApi";
@@ -41,7 +42,9 @@ export function RentanoChatPanel({
   const [pendingAiQuestion, setPendingAiQuestion] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const initialSentRef = useRef(false);
-  const speech = useSpeechRecognition();
+  const locale = useLocale();
+  const speechLang = locale === "cs" ? "cs-CZ" : "en-US";
+  const speech = useSpeechRecognition(speechLang);
 
   const configured = isAnthropicConfigured();
   const requireAuth = useRequireAuth();
@@ -135,9 +138,12 @@ export function RentanoChatPanel({
       speech.stop();
       return;
     }
-    speech.start((text) => {
-      setInput(text);
-      void submitText(text);
+    void speech.start((text) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      // Keep the transcript visible even if send is blocked (e.g. auth gate).
+      setInput(trimmed);
+      void submitText(trimmed);
     });
   };
 
