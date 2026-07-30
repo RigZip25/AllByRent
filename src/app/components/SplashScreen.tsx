@@ -5,12 +5,8 @@ import { Bike, Camera, Car, Guitar, Home, MapPin, Tent } from "lucide-react";
 import mascotImg from "../../imports/rentano_splash_transparent.png";
 import evoriosSplashImg from "../../imports/evorios_splash_garage.png";
 import { EvoriosWordmark } from "../../components/EvoriosWordmark";
-import {
-  APP_TAGLINE,
-  BRAND_GREEN,
-  MASCOT_NAME,
-  PRODUCT_METAPHOR,
-} from "../../lib/brand";
+import { BRAND_GREEN, MASCOT_NAME } from "../../lib/brand";
+import { useMessages } from "../../lib/i18n/react";
 
 /** Light splash — white field so the mascot artwork reads cleanly */
 const SPLASH_CANVAS_BG = "#FFFFFF";
@@ -112,6 +108,8 @@ function SplashArtOnly() {
 }
 
 function SplashStaticPreview() {
+  const messages = useMessages();
+
   return (
     <div className="splash-v2-overlay splash-static-overlay flex flex-col overflow-hidden">
       <div className="splash-v2-safe splash-static-layout relative flex min-h-0 flex-1 flex-col">
@@ -137,15 +135,21 @@ function SplashStaticPreview() {
           </div>
           <div className="splash-static-copy shrink-0 pt-1 text-center">
             <p className="text-[clamp(0.95rem,4vw,1.15rem)] font-medium leading-snug text-[#0D5C3A]/85">
-              {APP_TAGLINE}
+              {messages.tagline}
             </p>
             <p className="mt-1 text-[clamp(0.82rem,3.5vw,1rem)] font-semibold tracking-wide text-[#0D5C3A]/65">
-              {PRODUCT_METAPHOR}
+              {messages.taglineShort}
             </p>
             <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-              <TrustChip icon={<Home className="h-4 w-4 text-[#0D5C3A]" strokeWidth={2} />} label="Your garage" />
+              <TrustChip
+                icon={<Home className="h-4 w-4 text-[#0D5C3A]" strokeWidth={2} />}
+                label={messages.splash.chipGarage}
+              />
               <span className="text-[#0D5C3A]/25">·</span>
-              <TrustChip icon={<MapPin className="h-4 w-4 text-[#0D5C3A]" strokeWidth={2} />} label="On the block" />
+              <TrustChip
+                icon={<MapPin className="h-4 w-4 text-[#0D5C3A]" strokeWidth={2} />}
+                label={messages.splash.chipBlock}
+              />
             </div>
           </div>
         </div>
@@ -159,6 +163,7 @@ function SplashStaticPreview() {
 }
 
 function SplashDynamic({ onDone, preview }: { onDone: () => void; preview: boolean }) {
+  const messages = useMessages();
   const [phase, setPhase] = useState<DynamicPhase>("flyIn");
 
   useEffect(() => {
@@ -257,10 +262,10 @@ function SplashDynamic({ onDone, preview }: { onDone: () => void; preview: boole
                 className="mt-1 w-full max-w-[390px] px-2 text-center"
               >
                 <p className="text-[clamp(0.95rem,4.2vw,1.75rem)] font-medium leading-snug text-[#0D5C3A]/90">
-                  {APP_TAGLINE}
+                  {messages.tagline}
                 </p>
                 <p className="mt-2 text-[clamp(0.78rem,3.2vw,1rem)] font-semibold tracking-wide text-[#0D5C3A]/55">
-                  {PRODUCT_METAPHOR}
+                  {messages.taglineShort}
                 </p>
               </motion.div>
             )}
