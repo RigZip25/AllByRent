@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { APP_NAME } from "../../lib/brand";
+import { useMessages } from "../../lib/i18n/react";
 import { RentanoHint } from "../RentanoHint";
 import { ProfilePhotoCapture } from "./ProfilePhotoCapture";
 import { setPhotoPromptDeferred } from "../../lib/avatarStorage";
@@ -20,6 +21,8 @@ export function ProfilePhotoOnboarding({
   onOpenPersonalInfo?: () => void;
   onViewPublicProfile?: () => void;
 }) {
+  const { common, profileDeep } = useMessages();
+  const t = profileDeep.photoOnboarding;
   const [captureMode, setCaptureMode] = useState<"camera" | "library" | null>(null);
   const [libraryWarningOpen, setLibraryWarningOpen] = useState(false);
 
@@ -41,19 +44,15 @@ export function ProfilePhotoOnboarding({
           className="mb-6 flex justify-center"
           size={100}
           hint={
-            <span className="text-[15px] leading-relaxed text-gray-700 not-italic">
-              People trust you with their things. A real photo builds that trust — let&apos;s take
-              one now.
-            </span>
+            <span className="text-[15px] leading-relaxed text-gray-700 not-italic">{t.hint}</span>
           }
         />
 
         <h1 className="mt-6 text-center text-[22px] font-bold" style={{ color: GREEN }}>
-          Add your profile photo
+          {t.title}
         </h1>
         <p className="mt-2 text-center text-[14px] leading-relaxed text-gray-600">
-          A clear photo of your face is required on {APP_NAME}. No emoji or random avatars — this is
-          a trust platform.
+          {t.body(APP_NAME)}
         </p>
 
         <div className="mt-8 flex flex-col gap-3">
@@ -63,7 +62,7 @@ export function ProfilePhotoOnboarding({
             className="w-full rounded-2xl py-4 text-[16px] font-bold text-white shadow-sm"
             style={{ backgroundColor: CTA }}
           >
-            Take photo
+            {t.takePhoto}
           </button>
 
           <button
@@ -72,7 +71,7 @@ export function ProfilePhotoOnboarding({
             className="w-full rounded-2xl border bg-white py-3.5 text-[15px] font-semibold"
             style={{ borderColor: BORDER, color: GREEN }}
           >
-            Choose from library
+            {t.chooseLibrary}
           </button>
         </div>
 
@@ -81,17 +80,14 @@ export function ProfilePhotoOnboarding({
             className="mt-4 rounded-2xl border bg-white p-4"
             style={{ borderColor: "#F59E0B88" }}
           >
-            <p className="text-[14px] leading-relaxed text-gray-700">
-              Use a recent photo where your face is clearly visible. Library photos that don&apos;t
-              look like you at pickup may delay rentals.
-            </p>
+            <p className="text-[14px] leading-relaxed text-gray-700">{t.libraryWarning}</p>
             <div className="mt-3 flex gap-2">
               <button
                 type="button"
                 className="flex-1 rounded-xl py-2.5 text-[14px] font-semibold text-gray-500"
                 onClick={() => setLibraryWarningOpen(false)}
               >
-                Back
+                {common.back}
               </button>
               <button
                 type="button"
@@ -102,7 +98,7 @@ export function ProfilePhotoOnboarding({
                   setCaptureMode("library");
                 }}
               >
-                Continue
+                {common.continue}
               </button>
             </div>
           </div>
@@ -112,10 +108,7 @@ export function ProfilePhotoOnboarding({
           className="mt-8 rounded-2xl border bg-white p-4"
           style={{ borderColor: BORDER }}
         >
-          <p className="text-[13px] leading-relaxed text-gray-600">
-            Need to add email, your name, or preview how neighbors see you? Open full profile
-            settings — you can return to your photo anytime.
-          </p>
+          <p className="text-[13px] leading-relaxed text-gray-600">{t.settingsCardBody}</p>
           <div className="mt-3 flex flex-col gap-2">
             <button
               type="button"
@@ -123,7 +116,7 @@ export function ProfilePhotoOnboarding({
               className="w-full rounded-xl py-3 text-[15px] font-bold text-white"
               style={{ backgroundColor: GREEN }}
             >
-              Open full profile
+              {t.openFullProfile}
             </button>
             {onOpenPersonalInfo ? (
               <button
@@ -135,7 +128,7 @@ export function ProfilePhotoOnboarding({
                 className="w-full rounded-xl border bg-white py-3 text-[14px] font-semibold"
                 style={{ borderColor: BORDER, color: GREEN }}
               >
-                Personal info &amp; email
+                {t.personalInfoEmail}
               </button>
             ) : null}
             {onViewPublicProfile ? (
@@ -148,7 +141,7 @@ export function ProfilePhotoOnboarding({
                 className="w-full rounded-xl border bg-white py-3 text-[14px] font-semibold"
                 style={{ borderColor: BORDER, color: GREEN }}
               >
-                Preview public profile
+                {t.previewPublic}
               </button>
             ) : null}
           </div>
@@ -159,7 +152,7 @@ export function ProfilePhotoOnboarding({
           className="mt-6 pb-2 text-center text-[12px] text-gray-400 underline"
           onClick={skipForNow}
         >
-          Remind me later
+          {t.remindLater}
         </button>
       </div>
 

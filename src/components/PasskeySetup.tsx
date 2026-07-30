@@ -9,6 +9,7 @@ import {
 } from "../lib/passkey";
 import { formatPasskeyError } from "../lib/passkeyErrors";
 import { getPasskeyEnvironmentHint } from "../lib/passkeyEnvironment";
+import { useMessages } from "../lib/i18n/react";
 
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
@@ -20,6 +21,7 @@ export function PasskeySetup({
   open: boolean;
   onDone: () => void;
 }) {
+  const { common, passkey: t } = useMessages();
   const [busy, setBusy] = useState(false);
   const [preparing, setPreparing] = useState(false);
   const [bundle, setBundle] = useState<PasskeyRegistrationBundle | null>(null);
@@ -100,10 +102,10 @@ export function PasskeySetup({
   };
 
   const enableLabel = busy
-    ? "Opening Face ID…"
+    ? t.enableBusy
     : preparing
-      ? "Preparing Face ID…"
-      : "Enable Face ID";
+      ? t.enablePreparing
+      : t.enableCta;
 
   return (
     <div
@@ -120,7 +122,7 @@ export function PasskeySetup({
           type="button"
           onClick={handleLater}
           className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#374151]"
-          aria-label="Close"
+          aria-label={common.close}
         >
           <X className="h-5 w-5" />
         </button>
@@ -128,12 +130,10 @@ export function PasskeySetup({
         <div className="flex items-center gap-2">
           <ScanFace className="h-6 w-6" style={{ color: GREEN }} />
           <h2 className="text-[20px] font-bold leading-tight" style={{ color: GREEN }}>
-            Enable Face ID for faster login?
+            {t.title}
           </h2>
         </div>
-        <p className="mt-2 text-[14px] text-gray-500">
-          Use Face ID, Touch ID, or your device passcode next time — no email code needed.
-        </p>
+        <p className="mt-2 text-[14px] text-gray-500">{t.body}</p>
         {passkeyHint ? (
           <p className="mt-2 text-[12px] leading-snug text-gray-500">{passkeyHint}</p>
         ) : null}
@@ -161,7 +161,7 @@ export function PasskeySetup({
             className="w-full rounded-2xl border py-3 text-[13px] font-semibold text-gray-600 disabled:opacity-60"
             style={{ borderColor: BORDER }}
           >
-            Maybe later
+            {t.maybeLater}
           </button>
         </div>
       </div>

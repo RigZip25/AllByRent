@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, MapPin, Truck, Package, Shield } from "lucide-react";
-import { DEPOSIT_PROTECTION_LABEL } from "../../lib/brand";
 import { trackManualBookingRequest } from "../../lib/bookingRequestsStorage";
 import { fetchListingByIdRemote, getPublishedListingById } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
@@ -590,7 +589,7 @@ function BookingScreenLoaded({
             <Shield className="h-5 w-5 shrink-0" style={{ color: GREEN }} aria-hidden />
             <p>
               {t.booking.depositHoldNote(
-                DEPOSIT_PROTECTION_LABEL,
+                t.item.depositProtection,
                 `$${(depositAmountCents / 100).toFixed(2)}`,
               )}
             </p>
@@ -616,7 +615,7 @@ function BookingScreenLoaded({
         {depositClientSecret ? (
           <div className="rounded-xl border border-border bg-card p-4">
             <p className="text-sm font-semibold mb-1">
-              {t.booking.depositHoldTitle(DEPOSIT_PROTECTION_LABEL)}
+              {t.booking.depositHoldTitle(t.item.depositProtection)}
             </p>
             <p className="text-xs text-muted-foreground mb-3">
               {t.booking.depositHoldBody(`$${(pendingDepositCents / 100).toFixed(2)}`)}

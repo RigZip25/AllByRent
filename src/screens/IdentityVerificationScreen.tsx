@@ -3,6 +3,7 @@ import { ShieldCheck } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
 import { useRequireAuth } from "../hooks/RequireAuth";
 import { mascotSays } from "../lib/brand";
+import { useMessages } from "../lib/i18n/react";
 import { startIdentityVerificationForListing } from "../lib/sellerGoPublic";
 import { SignInPrompt } from "../components/SignInPrompt";
 
@@ -12,6 +13,8 @@ const BORDER = "#E8E6E0";
 export function IdentityVerificationScreen({ onBack }: { onBack: () => void }) {
   const auth = useAuth();
   const requireAuth = useRequireAuth();
+  const { common, profileDeep } = useMessages();
+  const t = profileDeep.identity;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,14 +25,12 @@ export function IdentityVerificationScreen({ onBack }: { onBack: () => void }) {
         style={{ borderColor: BORDER }}
       >
         <button type="button" onClick={onBack} className="text-[15px] font-semibold text-gray-600">
-          Back
+          {common.back}
         </button>
         <h1 className="mt-2 text-xl font-extrabold" style={{ color: GREEN }}>
-          Identity verification
+          {t.title}
         </h1>
-        <p className="mt-1 text-[15px] text-gray-600">
-          {mascotSays("One quick step before you go live.")}
-        </p>
+        <p className="mt-1 text-[15px] text-gray-600">{mascotSays(t.subtitle)}</p>
       </header>
 
       <div className="screen-scroll flex-1 p-4">
@@ -39,10 +40,8 @@ export function IdentityVerificationScreen({ onBack }: { onBack: () => void }) {
               <ShieldCheck className="h-5 w-5" style={{ color: GREEN }} />
             </div>
             <div className="min-w-0">
-              <p className="text-[15px] font-bold text-gray-900">Verify once</p>
-              <p className="mt-1 text-[15px] text-gray-600">
-                Optional extra badge. Going public uses Stripe Connect (ID + bank in one flow).
-              </p>
+              <p className="text-[15px] font-bold text-gray-900">{t.verifyOnceTitle}</p>
+              <p className="mt-1 text-[15px] text-gray-600">{t.verifyOnceBody}</p>
             </div>
           </div>
 
@@ -54,7 +53,7 @@ export function IdentityVerificationScreen({ onBack }: { onBack: () => void }) {
 
           {!auth.userId ? (
             <div className="mt-4">
-              <SignInPrompt message="Sign in to start identity verification." intent="list" />
+              <SignInPrompt message={t.signInHint} intent="list" />
             </div>
           ) : (
             <button
@@ -72,14 +71,14 @@ export function IdentityVerificationScreen({ onBack }: { onBack: () => void }) {
                     window.location.href = result.url;
                   })
                   .catch((e) => {
-                    setError(e instanceof Error ? e.message : "Verification failed.");
+                    setError(e instanceof Error ? e.message : t.failed);
                   })
                   .finally(() => setBusy(false));
               }}
               className="mt-4 w-full rounded-2xl px-4 py-3.5 text-base font-bold text-white disabled:opacity-60"
               style={{ backgroundColor: GREEN }}
             >
-              {busy ? "Starting…" : "Start verification"}
+              {busy ? t.starting : t.startCta}
             </button>
           )}
         </div>
@@ -87,4 +86,3 @@ export function IdentityVerificationScreen({ onBack }: { onBack: () => void }) {
     </div>
   );
 }
-

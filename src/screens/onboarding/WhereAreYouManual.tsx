@@ -3,6 +3,7 @@ import { AddressLocationPicker } from "../../components/AddressLocationPicker";
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
 import type { LocationSuggestion } from "../../lib/geocoding";
 import { detectCurrentLocation, formatGeolocationErrorMessage } from "../../lib/geolocation";
+import { useMessages } from "../../lib/i18n/react";
 import { setHomeLocation } from "../../lib/listingStorage";
 import { getCountryEmptyHint, getSearchCountryCode } from "../../lib/locationCountry";
 
@@ -16,6 +17,7 @@ type WhereAreYouManualProps = {
 };
 
 export function WhereAreYouManual({ onBack, onContinue, onSkip, hint }: WhereAreYouManualProps) {
+  const { whereAreYouManual: t } = useMessages();
   const [selectedLocation, setSelectedLocation] = useState<LocationSuggestion | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [locateError, setLocateError] = useState<string | null>(null);
@@ -70,11 +72,10 @@ export function WhereAreYouManual({ onBack, onContinue, onSkip, hint }: WhereAre
             📍
           </span>
           <h1 className="mt-2 text-2xl font-bold" style={{ color: GREEN }}>
-            Your area
+            {t.title}
           </h1>
           <p className="mt-2 text-base leading-relaxed text-gray-500">
-            {hint ??
-              "Enter your postal code or city — we show rentals near you. Street address is optional."}
+            {hint ?? t.defaultHint}
           </p>
         </div>
 
@@ -86,7 +87,7 @@ export function WhereAreYouManual({ onBack, onContinue, onSkip, hint }: WhereAre
             className="mb-4 w-full rounded-xl border-2 py-3 text-[15px] font-bold disabled:opacity-60"
             style={{ borderColor: GREEN, color: GREEN }}
           >
-            {isLocating ? "Finding your location…" : "Use my current location"}
+            {isLocating ? t.locating : t.useMyLocation}
           </button>
           {locateError ? (
             <p className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900" role="status">
@@ -95,7 +96,7 @@ export function WhereAreYouManual({ onBack, onContinue, onSkip, hint }: WhereAre
           ) : null}
           <AddressLocationPicker
             variant="area"
-            placeholder="Postal code or city"
+            placeholder={t.placeholder}
             emptyHint={getCountryEmptyHint(countryCode, "area")}
             selected={selectedLocation}
             onSelect={setSelectedLocation}
@@ -106,9 +107,7 @@ export function WhereAreYouManual({ onBack, onContinue, onSkip, hint }: WhereAre
 
       <footer className="shrink-0 border-t border-gray-100 px-4 pb-6 pt-4">
         {!selectedLocation ? (
-          <p className="mb-2 text-center text-[14px] text-gray-500">
-            Pick a postal code or city above, or tap Skip to browse first.
-          </p>
+          <p className="mb-2 text-center text-[14px] text-gray-500">{t.pickHint}</p>
         ) : null}
         <button
           type="button"
@@ -117,7 +116,7 @@ export function WhereAreYouManual({ onBack, onContinue, onSkip, hint }: WhereAre
           className="btn-primary w-full text-white disabled:opacity-50"
           style={{ backgroundColor: GREEN }}
         >
-          {nearLabel ? `Browse rentals near ${nearLabel} →` : "Continue →"}
+          {nearLabel ? t.browseNear(nearLabel) : t.continueCta}
         </button>
       </footer>
     </div>

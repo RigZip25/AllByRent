@@ -9,6 +9,7 @@ import {
 } from "../../lib/rentalsStorage";
 import { CounterpartyName } from "../trust/CounterpartyName";
 import { InsuredLabel } from "./InsuredLabel";
+import { useMessages } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -23,16 +24,17 @@ export function BookingRequestCard({
   onRefresh: () => void;
   onViewProfile: (userId: string) => void;
 }) {
+  const { bookingRequest: copy } = useMessages();
   const auth = useAuth();
   const [busy, setBusy] = useState<"approve" | "decline" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const now = useNow(30_000);
   const timerLabel = useMemo(() => {
-    if (!booking.approvalDeadline) return "Auto-cancelled soon";
+    if (!booking.approvalDeadline) return copy.autoCancelledSoon;
     const parts = getCountdownParts(booking.approvalDeadline, now);
-    if (parts.totalMs <= 0) return "Auto-cancelled soon";
-    return `Auto-cancelled in ${formatCountdownShort(parts)}`;
-  }, [booking.approvalDeadline, now]);
+    if (parts.totalMs <= 0) return copy.autoCancelledSoon;
+    return copy.autoCancelledIn(formatCountdownShort(parts));
+  }, [booking.approvalDeadline, copy, now]);
 
   const run = async (action: "approve" | "decline") => {
     const hostUserId = auth.userId;
@@ -47,7 +49,7 @@ export function BookingRequestCard({
       }
       onRefresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      setError(e instanceof Error ? e.message : copy.somethingWrong);
     } finally {
       setBusy(null);
     }
@@ -69,7 +71,7 @@ export function BookingRequestCard({
           <p className="text-[13px] text-gray-500">
             {formatRentalDateRange(booking.startDate, booking.endDate)} · ${booking.totalUsd}
             {booking.deliveryRequested && booking.deliveryFee
-              ? ` (incl. $${booking.deliveryFee} delivery)`
+              ? copy.inclDelivery(booking.deliveryFee)
               : ""}
           </p>
           <p className="mt-1 text-[13px]">
@@ -86,9 +88,7 @@ export function BookingRequestCard({
 
       <p className="mb-3 text-[12px] font-semibold text-amber-700">{timerLabel}</p>
       {booking.paymentOnHold ? (
-        <p className="mb-3 text-[12px] text-gray-500">
-          Renter payment is authorized — it is not captured until you approve.
-        </p>
+        <p className="mb-3 text-[12px] text-gray-500">{copy.paymentOnHold}</p>
       ) : null}
 
       {error ? (
@@ -105,7 +105,7 @@ export function BookingRequestCard({
           className="flex-1 rounded-xl py-2.5 text-[14px] font-bold text-white disabled:opacity-60"
           style={{ backgroundColor: GREEN }}
         >
-          {busy === "approve" ? "Approving…" : "Approve"}
+          {busy === "approve" ? copy.approving : copy.approve}
         </button>
         <button
           type="button"
@@ -114,7 +114,7 @@ export function BookingRequestCard({
           className="flex-1 rounded-xl border py-2.5 text-[14px] font-semibold text-gray-600 disabled:opacity-60"
           style={{ borderColor: BORDER }}
         >
-          {busy === "decline" ? "Declining…" : "Decline"}
+          {busy === "decline" ? copy.declining : copy.decline}
         </button>
       </div>
     </article>

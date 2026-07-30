@@ -1,12 +1,12 @@
+import { useMessages } from "../lib/i18n/react";
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GarageSharePanel } from "../components/share/GarageSharePanel";
 import { useAuth } from "../hooks/AuthProvider";
 import { resolveHostAccountId } from "../lib/hostIdentity";
 import { hostGarageSharePayload } from "../lib/garageMarketingShare";
-import { BRAND_AMBER, BRAND_GREEN, MASCOT_NAME, ONBOARDING } from "../lib/brand";
+import { BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../lib/brand";
 import {
-  GARAGE_SALE_DAY_LABELS,
   GARAGE_SALE_PRESETS,
   garageSaleOpenLabel,
   garageSalePresetSchedule,
@@ -23,7 +23,6 @@ const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
 const BORDER = "#E8E6E0";
 
-const { openGarageSale: copy } = ONBOARDING;
 
 type OpenGarageSaleScreenProps = {
   onBack: () => void;
@@ -38,6 +37,8 @@ export function OpenGarageSaleScreen({
   onOpenMyGarage,
   onViewSaleRules,
 }: OpenGarageSaleScreenProps) {
+  const { garageSale, common } = useMessages();
+  const copy = garageSale.openGarageSale;
   const auth = useAuth();
   const hostId = resolveHostAccountId(auth.userId);
   const [schedule, setSchedule] = useState<GarageSaleSchedule>(() => getGarageSaleSchedule());
@@ -83,7 +84,7 @@ export function OpenGarageSaleScreen({
             onClick={onBack}
             className="flex h-10 w-10 items-center justify-center rounded-full border bg-white active:bg-gray-50"
             style={{ borderColor: BORDER }}
-            aria-label="Back"
+            aria-label={common.back}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
@@ -112,7 +113,7 @@ export function OpenGarageSaleScreen({
 
           <p className="mt-4 text-[13px] font-semibold text-gray-800">{copy.daysLabel}</p>
           <div className="mt-2 grid grid-cols-7 gap-1.5">
-            {GARAGE_SALE_DAY_LABELS.map((label, day) => {
+            {copy.dayLabels.map((label, day) => {
               const selected = schedule.daysOfWeek.includes(day);
               return (
                 <button
@@ -159,23 +160,31 @@ export function OpenGarageSaleScreen({
 
           {!scheduleValid ? (
             <p className="mt-2 text-xs font-medium text-red-600">
-              Pick at least one day and make sure end time is after start.
+              {copy.scheduleInvalid}
             </p>
           ) : null}
 
           <p className="mt-3 text-[12px] font-semibold text-gray-600">{copy.presetsLabel}</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {GARAGE_SALE_PRESETS.map((preset) => (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => applyPreset(preset.id)}
-                className="rounded-full border px-3 py-1.5 text-[12px] font-semibold active:opacity-90"
-                style={{ borderColor: BORDER, color: GREEN }}
-              >
-                {preset.label}
-              </button>
-            ))}
+            {GARAGE_SALE_PRESETS.map((preset) => {
+              const label =
+                preset.id === "today"
+                  ? copy.presetToday
+                  : preset.id === "saturday"
+                    ? copy.presetSaturday
+                    : copy.presetWeekend;
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => applyPreset(preset.id)}
+                  className="rounded-full border px-3 py-1.5 text-[12px] font-semibold active:opacity-90"
+                  style={{ borderColor: BORDER, color: GREEN }}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
 
           <p className="mt-3 text-xs font-medium" style={{ color: "#92400E" }}>

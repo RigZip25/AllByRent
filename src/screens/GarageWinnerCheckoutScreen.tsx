@@ -1,3 +1,4 @@
+import { useMessages } from "../lib/i18n/react";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { garageDisplayName } from "../lib/garageDisplay";
@@ -18,13 +19,11 @@ import {
   startAuctionCheckout,
   type AuctionCheckoutInput,
 } from "../lib/repositories/paymentsRepository";
-import { ONBOARDING } from "../lib/brand";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 const BORDER = "#E8E6E0";
 const PLATFORM_FEE_RATE = 0.1;
-const auctionCopy = ONBOARDING.garageAuction;
 
 type GarageWinnerCheckoutScreenProps = {
   listingId: string;
@@ -33,27 +32,21 @@ type GarageWinnerCheckoutScreenProps = {
   onRequireAuth?: () => void;
 };
 
-function formatPayCountdown(payByIso: string): string {
-  const ms = new Date(payByIso).getTime() - Date.now();
-  if (ms <= 0) return "Time expired";
-  const minutes = Math.ceil(ms / 60_000);
-  return `${minutes} min left`;
-}
-
 export function GarageWinnerCheckoutScreen({
   listingId,
   onBack,
   onComplete,
   onRequireAuth,
 }: GarageWinnerCheckoutScreenProps) {
+  const { common, garageSale, garageCart } = useMessages();
+  const auctionCopy = garageSale.garageAuction;
+  const shopCopy = garageSale.garageShop;
   const listing = getPublishedListingById(listingId);
   const checkout = getWinnerCheckoutDetails(listingId);
   const cover = listing?.photos[0] ?? null;
   const thumb = cover?.thumbId ? { ...cover, id: cover.thumbId } : cover;
   const { url } = useMediaUrl(thumb);
-  const [countdown, setCountdown] = useState(() =>
-    checkout ? formatPayCountdown(checkout.payByIso) : "",
-  );
+  const [countdown, setCountdown] = useState("");
   const paymentsReady = canProcessGaragePayments();
   const [busy, setBusy] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
@@ -73,29 +66,36 @@ export function GarageWinnerCheckoutScreen({
       listingId,
       hostId: listing.hostId,
       hostName: garageDisplayName(listing.hostId),
-      itemTitle: listing.title || "Sale item",
+      itemTitle: listing.title || shopCopy.saleItemFallback,
       winningBidUsd: checkout.winningBidUsd,
       platformFeeUsd: totals.platformFeeUsd,
       totalUsd: totals.totalUsd,
       runnerUpAttempt: checkout.runnerUpAttempt,
     };
-  }, [checkout, listing, listingId, totals.platformFeeUsd, totals.totalUsd]);
+  }, [checkout, listing, listingId, shopCopy.saleItemFallback, totals.platformFeeUsd, totals.totalUsd]);
 
   useEffect(() => {
     if (!checkout) return undefined;
-    const tick = () => setCountdown(formatPayCountdown(checkout.payByIso));
+    const tick = () => {
+      const ms = new Date(checkout.payByIso).getTime() - Date.now();
+      if (ms <= 0) {
+        setCountdown(auctionCopy.timeExpired);
+        return;
+      }
+      setCountdown(auctionCopy.minutesLeft(Math.ceil(ms / 60_000)));
+    };
     tick();
     const timer = window.setInterval(tick, 10_000);
     return () => window.clearInterval(timer);
-  }, [checkout]);
+  }, [checkout, auctionCopy]);
 
   if (!listing || !checkout || !isAwaitingCheckoutForMe(listingId) || !checkoutInput) {
     return (
       <div className="screen flex flex-col items-center justify-center bg-[#F9FAFB] px-6 text-center">
-        <p className="font-bold text-gray-900">Nothing to pay</p>
-        <p className="mt-2 text-sm text-gray-500">This payment window expired or was already paid.</p>
+        <p className="font-bold text-gray-900">{auctionCopy.nothingToPayTitle}</p>
+        <p className="mt-2 text-sm text-gray-500">{auctionCopy.nothingToPayBody}</p>
         <button type="button" onClick={onBack} className="mt-4 font-semibold" style={{ color: GREEN }}>
-          Go back
+          {auctionCopy.goBack}
         </button>
       </div>
     );
@@ -135,13 +135,13 @@ export function GarageWinnerCheckoutScreen({
             onClick={onBack}
             className="flex h-11 w-11 items-center justify-center rounded-full border"
             style={{ borderColor: BORDER }}
-            aria-label="Back"
+            aria-label={common.back}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
           <div>
             <h1 className="text-2xl font-bold" style={{ color: GREEN }}>
-              {isRunnerUp ? auctionCopy.runnerUpTitle : "You won!"}
+              {isRunnerUp ? auctionCopy.runnerUpTitle : auctionCopy.youWonTitle}
             </h1>
             <p className="text-[15px] text-gray-600">{hostName}</p>
           </div>
@@ -158,7 +158,7 @@ export function GarageWinnerCheckoutScreen({
           className="mb-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold"
           style={{ backgroundColor: `${AMBER}22`, color: "#92400E" }}
         >
-          {countdown} · Pay now or the lot goes to the next bidder
+          {auctionCopy.countdownPayOrPass(countdown)}
         </div>
 
         <div className="rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
@@ -172,11 +172,15 @@ export function GarageWinnerCheckoutScreen({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-[11px] font-bold uppercase tracking-wide text-blue-600">
-                {isRunnerUp ? "Next bidder" : "Auction won"}
+                {isRunnerUp ? auctionCopy.nextBidderBadge : auctionCopy.auctionWonBadge}
               </p>
-              <h2 className="text-base font-bold text-gray-900">{listing.title || "Sale item"}</h2>
+              <h2 className="text-base font-bold text-gray-900">
+                {listing.title || shopCopy.saleItemFallback}
+              </h2>
               <p className="mt-1 text-sm text-gray-500">
-                {isRunnerUp ? auctionCopy.runnerUpSubtitle : `Pay within ${GARAGE_AUCTION_PAY_MINUTES} minutes`}
+                {isRunnerUp
+                  ? auctionCopy.runnerUpSubtitle
+                  : auctionCopy.payWithinMinutes(GARAGE_AUCTION_PAY_MINUTES)}
               </p>
             </div>
           </div>
@@ -184,17 +188,15 @@ export function GarageWinnerCheckoutScreen({
 
         <div className="mt-4 space-y-2 rounded-2xl border bg-white p-4 text-[15px]" style={{ borderColor: BORDER }}>
           <div className="flex justify-between border-b pb-2 text-lg font-bold" style={{ borderColor: BORDER }}>
-            <span>Total due now</span>
+            <span>{auctionCopy.totalDueNow}</span>
             <span style={{ color: GREEN }}>{formatShopUsd(totals.totalUsd)}</span>
           </div>
-          <p className="text-[13px] leading-snug text-gray-500">
-            You pay your bid. The seller covers the platform fee.
-          </p>
+          <p className="text-[13px] leading-snug text-gray-500">{auctionCopy.winnerPaysBid}</p>
         </div>
 
         {clientSecret ? (
           <div className="mt-4 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
-            <p className="mb-3 text-sm font-semibold text-gray-900">Card payment</p>
+            <p className="mb-3 text-sm font-semibold text-gray-900">{garageCart.cardPayment}</p>
             {paymentError ? (
               <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
                 {paymentError}
@@ -225,7 +227,7 @@ export function GarageWinnerCheckoutScreen({
                   className="w-full rounded-xl border py-3.5 text-base font-bold"
                   style={{ borderColor: GREEN, color: GREEN }}
                 >
-                  Sign in / Create account
+                  {garageCart.signInCta}
                 </button>
               ) : null}
             </div>
@@ -237,7 +239,9 @@ export function GarageWinnerCheckoutScreen({
             className="w-full rounded-xl py-3.5 text-base font-bold disabled:opacity-60"
             style={{ backgroundColor: AMBER, color: GREEN }}
           >
-            {busy ? "Preparing payment…" : `Pay ${formatShopUsd(totals.totalUsd)} now`}
+            {busy
+              ? auctionCopy.preparingPayment
+              : auctionCopy.payAmountNow(formatShopUsd(totals.totalUsd))}
           </button>
         </div>
       ) : null}

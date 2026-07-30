@@ -28,6 +28,8 @@ import {
 } from "../../lib/rentalPricing";
 import type { MinimumRentalPeriod } from "./types";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
+import { useMessages } from "../../lib/i18n/react";
+import type { AppMessages } from "../../lib/i18n/types";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -48,12 +50,15 @@ function formatMoney(value: string): string {
   return trimmed.startsWith("$") ? trimmed : `$${trimmed}`;
 }
 
-function parseNonNegativeNumber(raw: string): { ok: true; value: number } | { ok: false; message: string } {
+function parseNonNegativeNumber(
+  raw: string,
+  copy: AppMessages["hostListing"],
+): { ok: true; value: number } | { ok: false; message: string } {
   const trimmed = raw.trim();
-  if (!trimmed) return { ok: false, message: "Enter a number." };
+  if (!trimmed) return { ok: false, message: copy.enterNumber };
   const next = Number(trimmed);
-  if (!Number.isFinite(next)) return { ok: false, message: "Enter a valid number." };
-  if (next < 0) return { ok: false, message: "Must be 0 or more." };
+  if (!Number.isFinite(next)) return { ok: false, message: copy.enterValidNumber };
+  if (next < 0) return { ok: false, message: copy.mustBeZeroOrMore };
   return { ok: true, value: next };
 }
 
@@ -61,10 +66,12 @@ function DetailRow({
   label,
   value,
   onEdit,
+  editAria,
 }: {
   label: string;
   value: string;
   onEdit?: () => void;
+  editAria: (label: string) => string;
 }) {
   return (
     <div className="flex items-start justify-between gap-4">
@@ -76,7 +83,7 @@ function DetailRow({
             type="button"
             onClick={onEdit}
             className="rounded-full p-1 transition-colors hover:bg-[#F3F4F6]"
-            aria-label={`Edit ${label}`}
+            aria-label={editAria(label)}
           >
             <Pencil className="h-4 w-4" style={{ color: GREEN }} />
           </button>
@@ -98,6 +105,7 @@ export function HostListingDetailScreen({
   /** Called after a successful delete so the host returns to My Garage. */
   onDeleted?: () => void;
 }) {
+  const { hostListing: t } = useMessages();
   const auth = useAuth();
   const [version, setVersion] = useState(0);
   const [listing, setListing] = useState<ListingDraft | null>(() => getPublishedListingById(listingId));
@@ -179,7 +187,7 @@ export function HostListingDetailScreen({
     if (activeEdit === "title") {
       const next = editValue.trim();
       if (!next) {
-        setEditError("Title is required.");
+        setEditError(t.titleRequired);
         return;
       }
       patch = { title: next };
@@ -188,10 +196,10 @@ export function HostListingDetailScreen({
     } else if (activeEdit === "dailyRate") {
       const raw = editValue.replace(/^\$/, "").trim();
       if (!raw) {
-        setEditError("Daily price is required.");
+        setEditError(t.dailyPriceRequired);
         return;
       }
-      const parsed = parseNonNegativeNumber(raw);
+      const parsed = parseNonNegativeNumber(raw, t);
       if (!parsed.ok) {
         setEditError(parsed.message);
         return;
@@ -208,7 +216,7 @@ export function HostListingDetailScreen({
       if (!trimmed) {
         patch = { handoff: { itemWeightLbs: undefined } };
       } else {
-        const parsed = parseNonNegativeNumber(trimmed);
+        const parsed = parseNonNegativeNumber(trimmed, t);
         if (!parsed.ok) {
           setEditError(parsed.message);
           return;
@@ -216,7 +224,7 @@ export function HostListingDetailScreen({
         patch = { handoff: { itemWeightLbs: Math.round(parsed.value) } };
       }
     } else if (activeEdit === "deliveryMaxMiles") {
-      const parsed = parseNonNegativeNumber(editValue);
+      const parsed = parseNonNegativeNumber(editValue, t);
       if (!parsed.ok) {
         setEditError(parsed.message);
         return;
@@ -227,7 +235,7 @@ export function HostListingDetailScreen({
       if (!raw) {
         patch = { handoff: { deliveryRoundTripFee: "" } };
       } else {
-        const parsed = parseNonNegativeNumber(raw);
+        const parsed = parseNonNegativeNumber(raw, t);
         if (!parsed.ok) {
           setEditError(parsed.message);
           return;
@@ -237,12 +245,12 @@ export function HostListingDetailScreen({
     } else if (activeEdit === "availabilityTimes") {
       const parts = editValue.split(",").map((p) => p.trim());
       if (parts.length !== 4) {
-        setEditError("Enter 4 comma-separated times.");
+        setEditError(t.timesFormatError);
         return;
       }
       const timeRegex = /^\d{2}:\d{2}$/;
       if (!parts.every((p) => timeRegex.test(p))) {
-        setEditError("Times must be in HH:MM format (e.g. 09:00).");
+        setEditError(t.timesHhMmError);
         return;
       }
       const [wdStart, wdEnd, weStart, weEnd] = parts;
@@ -284,7 +292,7 @@ export function HostListingDetailScreen({
       if (!generated) throw new Error("No PDF generated");
       await presentGeneratedPdf(generated, { preferOpen: true });
     } catch {
-      setPdfError("Could not generate PDF. Please try again.");
+      setPdfError(t.errorPdfGenerate);
     } finally {
       setPdfLoading(false);
     }
@@ -296,7 +304,7 @@ export function HostListingDetailScreen({
     try {
       const queued = loadQrBulkQueueListingIds();
       if (queued.length === 0) {
-        setPdfError("No items in bulk queue yet.");
+        setPdfError(t.errorNoBulkItems);
         return;
       }
       const rows = queued
@@ -307,7 +315,7 @@ export function HostListingDetailScreen({
       if (!generated) throw new Error("No PDF generated");
       await presentGeneratedPdf(generated, { preferOpen: true });
     } catch {
-      setPdfError("Could not generate PDF. Please try again.");
+      setPdfError(t.errorPdfGenerate);
     } finally {
       setPdfLoading(false);
     }
@@ -319,14 +327,14 @@ export function HostListingDetailScreen({
         <header className="shrink-0 bg-white px-4 pb-3 pt-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
           <button type="button" onClick={onBack} className="flex items-center gap-2 text-sm font-semibold text-gray-600">
             <ArrowLeft className="h-4 w-4" style={{ color: GREEN }} />
-            Back
+            {t.back}
           </button>
           <h1 className="mt-2 text-[18px] font-extrabold" style={{ color: GREEN }}>
-            Listing
+            {t.listingTitle}
           </h1>
         </header>
         <div className="screen-scroll flex-1 px-4 py-6">
-          <p className="text-sm text-gray-600">Loading listing…</p>
+          <p className="text-sm text-gray-600">{t.loading}</p>
         </div>
       </div>
     );
@@ -338,14 +346,14 @@ export function HostListingDetailScreen({
         <header className="shrink-0 bg-white px-4 pb-3 pt-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
           <button type="button" onClick={onBack} className="flex items-center gap-2 text-sm font-semibold text-gray-600">
             <ArrowLeft className="h-4 w-4" style={{ color: GREEN }} />
-            Back
+            {t.back}
           </button>
           <h1 className="mt-2 text-[18px] font-extrabold" style={{ color: GREEN }}>
-            Listing
+            {t.listingTitle}
           </h1>
         </header>
         <div className="screen-scroll flex-1 px-4 py-6">
-          <p className="text-sm text-gray-600">Listing not found.</p>
+          <p className="text-sm text-gray-600">{t.notFound}</p>
         </div>
       </div>
     );
@@ -357,15 +365,15 @@ export function HostListingDetailScreen({
         <header className="shrink-0 bg-white px-4 pb-3 pt-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
           <button type="button" onClick={onBack} className="flex items-center gap-2 text-sm font-semibold text-gray-600">
             <ArrowLeft className="h-4 w-4" style={{ color: GREEN }} />
-            Back
+            {t.back}
           </button>
           <h1 className="mt-2 text-[18px] font-extrabold" style={{ color: GREEN }}>
-            Listing
+            {t.listingTitle}
           </h1>
         </header>
         <div className="screen-scroll flex-1 px-4 py-6">
           <p className="text-sm text-gray-600">
-            You do not have permission to manage this listing.
+            {t.noPermission}
           </p>
         </div>
       </div>
@@ -373,15 +381,22 @@ export function HostListingDetailScreen({
   }
 
   const availabilityDays =
-    listing.handoff.inPersonDays?.length ? listing.handoff.inPersonDays.join(", ") : "Not set";
+    listing.handoff.inPersonDays?.length ? listing.handoff.inPersonDays.join(", ") : t.notSet;
   const availabilityHours =
     listing.handoff.inPersonTimeStart && listing.handoff.inPersonTimeEnd
       ? `${listing.handoff.inPersonTimeStart}–${listing.handoff.inPersonTimeEnd}`
-      : "Not set";
+      : t.notSet;
   const weekendHours =
     listing.handoff.inPersonWeekendTimeStart && listing.handoff.inPersonWeekendTimeEnd
       ? `${listing.handoff.inPersonWeekendTimeStart}–${listing.handoff.inPersonWeekendTimeEnd}`
-      : "Not set";
+      : t.notSet;
+
+  const editFieldLabel =
+    activeEdit === "dailyRate"
+      ? t.editDailyPrice
+      : activeEdit === "minimumPeriod"
+        ? t.editMinimumRental
+        : activeEdit ?? "";
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -389,7 +404,7 @@ export function HostListingDetailScreen({
         <div className="flex items-center justify-between gap-2">
           <button type="button" onClick={onBack} className="flex items-center gap-2 text-sm font-semibold text-gray-600">
             <ArrowLeft className="h-4 w-4" style={{ color: GREEN }} />
-            Back
+            {t.back}
           </button>
           <button
             type="button"
@@ -398,7 +413,7 @@ export function HostListingDetailScreen({
             style={{ borderColor: BORDER, color: GREEN }}
           >
             <Pencil className="h-4 w-4" />
-            Full edit
+            {t.fullEdit}
           </button>
         </div>
         <h1 className="mt-3 text-[20px] font-extrabold" style={{ color: GREEN }}>
@@ -406,7 +421,7 @@ export function HostListingDetailScreen({
         </h1>
         <p className="mt-1 text-sm text-gray-500">
           #{listing.id.substring(0, 8).toUpperCase()} ·{" "}
-          {listing.paused ? "Paused" : listing.listingStatus}
+          {listing.paused ? t.statusPaused : listing.listingStatus}
         </p>
       </header>
 
@@ -418,10 +433,10 @@ export function HostListingDetailScreen({
         >
           <div className="flex items-center gap-3">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F9FAFB]">
-              {qrDataUrl ? <img src={qrDataUrl} alt="QR code" className="h-14 w-14" /> : <QrCode className="h-10 w-10 text-gray-400" />}
+              {qrDataUrl ? <img src={qrDataUrl} alt={t.qrAlt} className="h-14 w-14" /> : <QrCode className="h-10 w-10 text-gray-400" />}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-gray-900">QR for this listing</p>
+              <p className="text-sm font-semibold text-gray-900">{t.qrForListing}</p>
               <p className="mt-0.5 truncate text-xs text-gray-500">{getListingPublicUrl(listing)}</p>
             </div>
           </div>
@@ -434,7 +449,7 @@ export function HostListingDetailScreen({
               className="w-full rounded-xl py-3 text-sm font-bold text-white disabled:opacity-50"
               style={{ backgroundColor: GREEN }}
             >
-              🖨️ Print this QR
+              {t.printThisQr}
             </button>
             <button
               type="button"
@@ -445,7 +460,7 @@ export function HostListingDetailScreen({
               className="w-full rounded-xl border-2 py-3 text-sm font-bold"
               style={{ borderColor: GREEN, color: GREEN }}
             >
-              {queuedForBulk ? "Remove from bulk" : "Add to bulk"}
+              {queuedForBulk ? t.removeFromBulk : t.addToBulk}
             </button>
             <button
               type="button"
@@ -454,7 +469,7 @@ export function HostListingDetailScreen({
               className="col-span-2 w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
               style={{ borderColor: GREEN, color: GREEN }}
             >
-              🖨️ Bulk print ({bulkCount})
+              {t.bulkPrint(bulkCount)}
             </button>
           </div>
 
@@ -468,7 +483,7 @@ export function HostListingDetailScreen({
               className="mt-2 w-full text-center text-xs font-semibold underline"
               style={{ color: "#6B7280" }}
             >
-              Clear bulk queue
+              {t.clearBulkQueue}
             </button>
           ) : null}
 
@@ -477,15 +492,16 @@ export function HostListingDetailScreen({
         ) : null}
 
         <section className="rounded-3xl border bg-white p-5" style={{ borderColor: BORDER }}>
-          <h2 className="text-[13px] font-bold uppercase tracking-wide text-gray-400">Details</h2>
+          <h2 className="text-[13px] font-bold uppercase tracking-wide text-gray-400">{t.details}</h2>
           <dl className="mt-3 space-y-3 text-sm">
             <DetailRow
-              label="Title"
+              label={t.labelTitle}
               value={getListingDisplayTitle(listing.title)}
               onEdit={() => openEditor("title")}
+              editAria={t.editAria}
             />
             <DetailRow
-              label="Terms"
+              label={t.labelTerms}
               value={
                 listing.description?.trim()
                   ? listing.description.trim().length > 80
@@ -494,70 +510,80 @@ export function HostListingDetailScreen({
                   : "—"
               }
               onEdit={() => openEditor("description")}
+              editAria={t.editAria}
             />
             <DetailRow
-              label="Daily price"
+              label={t.labelDailyPrice}
               value={formatMoney(listing.pricing.dailyRate)}
               onEdit={() => openEditor("dailyRate")}
+              editAria={t.editAria}
             />
             <DetailRow
-              label="Minimum rental"
+              label={t.labelMinimumRental}
               value={listing.pricing.minimumPeriod}
               onEdit={() => openEditor("minimumPeriod")}
+              editAria={t.editAria}
             />
             {listing.pricing.longTermEnabled ? (
               <DetailRow
-                label="Long-term (30+ days)"
+                label={t.labelLongTerm}
                 value={
                   listing.pricing.longTermMonthlyRate?.trim()
-                    ? `$${listing.pricing.longTermMonthlyRate.trim()}/mo`
-                    : "Enabled"
+                    ? t.longTermMonthly(listing.pricing.longTermMonthlyRate.trim())
+                    : t.longTermEnabled
                 }
+                editAria={t.editAria}
               />
             ) : null}
             <DetailRow
-              label="Category"
+              label={t.labelCategory}
               value={`${listing.category ? localizeCategoryLabel(listing.category) : "—"}${
                 listing.subcategory ? ` · ${localizeCategoryLabel(listing.subcategory)}` : ""
               }`}
+              editAria={t.editAria}
             />
-            <DetailRow label="City" value={city || "—"} />
-            <DetailRow label="Availability days" value={availabilityDays} />
+            <DetailRow label={t.labelCity} value={city || "—"} editAria={t.editAria} />
+            <DetailRow label={t.labelAvailabilityDays} value={availabilityDays} editAria={t.editAria} />
             <DetailRow
-              label="Availability times"
-              value={`Weekdays ${availabilityHours} · Weekend ${weekendHours}`}
+              label={t.labelAvailabilityTimes}
+              value={t.availabilityTimesValue(availabilityHours, weekendHours)}
               onEdit={() => openEditor("availabilityTimes")}
+              editAria={t.editAria}
             />
             <DetailRow
-              label="Weight (lbs)"
+              label={t.labelWeight}
               value={typeof listing.handoff.itemWeightLbs === "number" ? String(listing.handoff.itemWeightLbs) : "—"}
               onEdit={() => openEditor("weight")}
+              editAria={t.editAria}
             />
             <DetailRow
-              label="Delivery max miles"
+              label={t.labelDeliveryMaxMiles}
               value={String(listing.handoff.deliveryMaxMiles)}
               onEdit={() => openEditor("deliveryMaxMiles")}
+              editAria={t.editAria}
             />
             <DetailRow
-              label="Delivery fee"
+              label={t.labelDeliveryFee}
               value={formatMoney(listing.handoff.deliveryRoundTripFee)}
               onEdit={() => openEditor("deliveryRoundTripFee")}
+              editAria={t.editAria}
             />
             <DetailRow
-              label="Delivery (summary)"
+              label={t.labelDeliverySummary}
               value={
                 hasDelivery
-                  ? `${deliverySummary ?? "Available"}`
-                  : "None"
+                  ? `${deliverySummary ?? t.deliveryAvailable}`
+                  : t.deliveryNone
               }
+              editAria={t.editAria}
             />
           </dl>
         </section>
 
         <section className="mt-4 rounded-3xl border bg-white p-5" style={{ borderColor: BORDER }}>
-          <h2 className="text-[13px] font-bold uppercase tracking-wide text-gray-400">Manage</h2>
+          <h2 className="text-[13px] font-bold uppercase tracking-wide text-gray-400">{t.manage}</h2>
           <p className="mt-1 text-[13px] text-gray-500">
-            Pause hides this item from browse without deleting. Delete removes it from your garage and the server.
+            {t.manageHint}
           </p>
           <div className="mt-4 flex flex-col gap-2">
             <button
@@ -583,7 +609,7 @@ export function HostListingDetailScreen({
               style={{ borderColor: GREEN, color: GREEN }}
             >
               {listing.paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-              {listing.paused ? "Unpause listing" : "Pause listing"}
+              {listing.paused ? t.unpauseListing : t.pauseListing}
             </button>
             {!confirmDelete ? (
               <button
@@ -597,12 +623,12 @@ export function HostListingDetailScreen({
                 style={{ borderColor: "#FECACA", backgroundColor: "#FEF2F2" }}
               >
                 <Trash2 className="h-4 w-4" />
-                Delete listing
+                {t.deleteListing}
               </button>
             ) : (
               <div className="rounded-2xl border p-3" style={{ borderColor: "#FECACA", backgroundColor: "#FEF2F2" }}>
                 <p className="text-[13px] font-semibold text-red-800">
-                  Delete permanently? This cannot be undone.
+                  {t.deleteConfirm}
                 </p>
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <button
@@ -612,7 +638,7 @@ export function HostListingDetailScreen({
                     className="rounded-xl border bg-white py-2.5 text-sm font-bold text-gray-700"
                     style={{ borderColor: BORDER }}
                   >
-                    Cancel
+                    {t.cancel}
                   </button>
                   <button
                     type="button"
@@ -627,13 +653,13 @@ export function HostListingDetailScreen({
                           if (!onDeleted) onBack();
                         })
                         .catch(() => {
-                          setActionError("Could not delete listing. Try again.");
+                          setActionError(t.deleteFailed);
                         })
                         .finally(() => setSaveBusy(false));
                     }}
                     className="rounded-xl bg-red-600 py-2.5 text-sm font-bold text-white disabled:opacity-50"
                   >
-                    {saveBusy ? "Deleting…" : "Yes, delete"}
+                    {saveBusy ? t.deleting : t.yesDelete}
                   </button>
                 </div>
               </div>
@@ -648,7 +674,7 @@ export function HostListingDetailScreen({
           <div className="w-full max-w-[390px] overflow-hidden rounded-3xl bg-white shadow-2xl">
             <div className="border-b px-5 pb-4 pt-5" style={{ borderColor: BORDER }}>
               <p className="text-[15px] font-extrabold" style={{ color: GREEN }}>
-                Edit {activeEdit === "dailyRate" ? "Daily price" : activeEdit === "minimumPeriod" ? "Minimum rental" : activeEdit}
+                {t.editTitle(editFieldLabel)}
               </p>
             </div>
             <div className="px-5 py-4">
@@ -670,7 +696,7 @@ export function HostListingDetailScreen({
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
                   className="min-h-[120px] w-full resize-none rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm font-medium text-gray-900 outline-none focus:ring-2 focus:ring-[#0D5C3A]/20"
-                  placeholder="Describe the item, what's included, and any rules."
+                  placeholder={t.descriptionPlaceholder}
                   autoFocus
                 />
               ) : (
@@ -681,17 +707,17 @@ export function HostListingDetailScreen({
                   className="w-full rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm font-semibold text-gray-900 outline-none focus:ring-2 focus:ring-[#0D5C3A]/20"
                   placeholder={
                     activeEdit === "availabilityTimes"
-                      ? "09:00,17:00,10:00,14:00"
+                      ? t.placeholderAvailabilityTimes
                       : activeEdit === "title"
-                        ? "Listing title"
-                        : "Enter a value"
+                        ? t.placeholderTitle
+                        : t.placeholderValue
                   }
                   autoFocus
                 />
               )}
               {activeEdit === "availabilityTimes" ? (
                 <p className="mt-2 text-xs text-gray-500">
-                  Format: weekdayStart,weekdayEnd,weekendStart,weekendEnd (HH:MM).
+                  {t.availabilityTimesHint}
                 </p>
               ) : null}
               {editError ? <p className="mt-2 text-xs font-semibold text-red-600">{editError}</p> : null}
@@ -705,7 +731,7 @@ export function HostListingDetailScreen({
                 }}
                 className="flex-1 rounded-xl border border-[#E5E7EB] py-3 text-sm font-semibold text-[#374151]"
               >
-                Cancel
+                {t.cancel}
               </button>
               <button
                 type="button"
@@ -714,7 +740,7 @@ export function HostListingDetailScreen({
                 className="flex-1 rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-60"
                 style={{ backgroundColor: GREEN }}
               >
-                {saveBusy ? "Saving…" : "Save"}
+                {saveBusy ? t.saving : t.save}
               </button>
             </div>
           </div>
@@ -723,4 +749,3 @@ export function HostListingDetailScreen({
     </div>
   );
 }
-

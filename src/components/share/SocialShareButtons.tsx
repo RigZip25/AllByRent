@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Copy, Facebook, Instagram, Link2, MessageCircle, Send, Share2 } from "lucide-react";
 import {
   logShareAction,
-  platformHint,
   preferredFormatForPlatform,
   shareToPlatform,
   type SharePayload,
   type SocialPlatform,
 } from "../../lib/socialShare";
+import { useMessages } from "../../lib/i18n/react";
 
 const BORDER = "#E8E6E0";
 
@@ -42,7 +42,27 @@ export function SocialShareButtons({
   onFormatHint?: (format: ReturnType<typeof preferredFormatForPlatform>) => void;
   compact?: boolean;
 }) {
+  const { listingShare: t } = useMessages();
   const [status, setStatus] = useState<string | null>(null);
+
+  const platformHintLocal = (platform: SocialPlatform): string | null => {
+    switch (platform) {
+      case "tiktok":
+        return t.hintTiktok;
+      case "instagram":
+        return t.hintInstagram;
+      case "facebook":
+        return t.hintFacebook;
+      case "nextdoor":
+        return t.hintNextdoor;
+      case "whatsapp":
+        return t.hintWhatsapp;
+      case "x":
+        return t.hintX;
+      default:
+        return null;
+    }
+  };
 
   const runShare = async (platform: SocialPlatform) => {
     onFormatHint?.(preferredFormatForPlatform(platform));
@@ -51,12 +71,12 @@ export function SocialShareButtons({
     if (result === "shared" || result === "opened" || result === "copied") {
       logShareAction({ platform, kind: shareKind, targetId });
     }
-    const hint = platformHint(platform);
-    if (result === "copied") setStatus("Caption copied — paste in the app.");
+    const hint = platformHintLocal(platform);
+    if (result === "copied") setStatus(t.statusCopied);
     else if (result === "opened" && hint) setStatus(hint);
-    else if (result === "shared") setStatus("Shared!");
+    else if (result === "shared") setStatus(t.statusShared);
     else if (result === "cancelled") setStatus(null);
-    else setStatus("Copy the caption and download the image if needed.");
+    else setStatus(t.statusFallback);
     window.setTimeout(() => setStatus(null), 5000);
   };
 
@@ -70,7 +90,7 @@ export function SocialShareButtons({
             onClick={() => void runShare(p.id)}
             className="flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-semibold text-white"
             style={{ backgroundColor: p.color }}
-            aria-label={`Share to ${p.label}`}
+            aria-label={t.shareToAria(p.label)}
           >
             {p.icon}
             {p.label}
@@ -83,7 +103,7 @@ export function SocialShareButtons({
           style={{ backgroundColor: "#0D5C3A" }}
         >
           <Share2 className="h-4 w-4" />
-          Share…
+          {t.shareEllipsis}
         </button>
         <button
           type="button"
@@ -92,7 +112,7 @@ export function SocialShareButtons({
           style={{ borderColor: BORDER }}
         >
           <Copy className="h-4 w-4" />
-          Copy caption
+          {t.copyCaption}
         </button>
         <button
           type="button"

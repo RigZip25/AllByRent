@@ -1,3 +1,4 @@
+import { useMessages } from "../../lib/i18n/react";
 import { useMemo, useState } from "react";
 import { Check, X } from "lucide-react";
 import {
@@ -7,12 +8,10 @@ import {
 } from "../../lib/garageOfferStorage";
 import { formatShopUsd, type ShopOffer } from "../../lib/garageShopStorage";
 import type { ListingDraft } from "../../screens/listing/types";
-import { ONBOARDING } from "../../lib/brand";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 const BORDER = "#E8E6E0";
-const copy = ONBOARDING.garageOffers;
 
 type GarageMyOfferSheetProps = {
   listing: ListingDraft;
@@ -24,6 +23,9 @@ type GarageMyOfferSheetProps = {
 };
 
 export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated, onOpenCart }: GarageMyOfferSheetProps) {
+  const { common, garageSale } = useMessages();
+  const copy = garageSale.garageOffers;
+  const shopCopy = garageSale.garageShop;
   const active = useMemo(() => getMyActiveOffer(listing.id), [listing.id]);
   const [counterAmount, setCounterAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +47,7 @@ export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated, onOpenC
   const sendCounter = () => {
     const value = Number.parseFloat(counterAmount);
     if (!Number.isFinite(value)) {
-      setError("Enter a valid amount");
+      setError(copy.validAmount);
       return;
     }
     const result = buyerSendNewOffer({
@@ -64,7 +66,7 @@ export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated, onOpenC
 
   return (
     <div className="garage-my-offer-sheet fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-      <button type="button" className="absolute inset-0" aria-label="Close" onClick={onClose} />
+      <button type="button" className="absolute inset-0" aria-label={common.close} onClick={onClose} />
       <div
         className="relative w-full max-w-[390px] rounded-t-3xl border bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-4"
         style={{ borderColor: BORDER }}
@@ -72,7 +74,9 @@ export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated, onOpenC
         <div className="mb-3 flex items-start justify-between">
           <div>
             <p className="text-[13px] font-bold uppercase tracking-wide text-blue-600">{copy.myOfferTitle}</p>
-            <h2 className="text-lg font-bold text-gray-900">{listing.title || "Sale item"}</h2>
+            <h2 className="text-lg font-bold text-gray-900">
+              {listing.title || shopCopy.saleItemFallback}
+            </h2>
             <p className="mt-1 text-[15px] text-gray-600">
               {active.status === "pending_host"
                 ? `${copy.waitingHost} ${formatShopUsd(active.amountUsd)}`

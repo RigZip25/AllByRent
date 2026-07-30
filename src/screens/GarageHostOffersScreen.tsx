@@ -1,3 +1,4 @@
+import { useMessages } from "../lib/i18n/react";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Check, MessageSquare, X } from "lucide-react";
 import {
@@ -9,12 +10,10 @@ import {
 } from "../lib/garageOfferStorage";
 import { formatShopUsd } from "../lib/garageShopStorage";
 import { getPublishedListingById } from "../lib/listingStorage";
-import { ONBOARDING } from "../lib/brand";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 const BORDER = "#E8E6E0";
-const copy = ONBOARDING.garageOffers;
 
 type GarageHostOffersScreenProps = {
   hostId: string;
@@ -22,6 +21,7 @@ type GarageHostOffersScreenProps = {
 };
 
 export function GarageHostOffersScreen({ hostId, onBack }: GarageHostOffersScreenProps) {
+  const copy = useMessages().garageSale.garageOffers;
   const [offers, setOffers] = useState<GarageNeighborOffer[]>(() => getHostPendingOffers(hostId));
   const [counterDraft, setCounterDraft] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +43,7 @@ export function GarageHostOffersScreen({ hostId, onBack }: GarageHostOffersScree
   const accept = (offer: GarageNeighborOffer) => {
     const listing = getPublishedListingById(offer.listingId);
     if (!listing) {
-      setError("Listing not found");
+      setError(copy.listingNotFound);
       return;
     }
     const result = hostAcceptOffer(offer.id, listing);
@@ -58,7 +58,7 @@ export function GarageHostOffersScreen({ hostId, onBack }: GarageHostOffersScree
   const counter = (offer: GarageNeighborOffer) => {
     const value = Number.parseFloat(counterDraft[offer.id] ?? "");
     if (!Number.isFinite(value)) {
-      setError("Enter a counter amount");
+      setError(copy.validCounter);
       return;
     }
     const result = hostCounterOffer(offer.id, value);

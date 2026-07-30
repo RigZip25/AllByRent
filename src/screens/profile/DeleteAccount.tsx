@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AlertTriangle, ArrowLeft, KeyRound } from "lucide-react";
 import { requestAccountDeletion, signInWithPasskey } from "../../lib/auth";
+import { useMessages } from "../../lib/i18n/react";
 import { resetAllAppData } from "../../lib/resetAppStorage";
 
 const BORDER = "#E8E6E0";
@@ -13,6 +14,8 @@ export function DeleteAccountScreen({
   onBack: () => void;
   onDone: () => void;
 }) {
+  const { common, profileDeep } = useMessages();
+  const t = profileDeep.deleteAccount;
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +26,7 @@ export function DeleteAccountScreen({
     try {
       await fn();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      setError(e instanceof Error ? e.message : t.somethingWrong);
     } finally {
       setBusy(null);
     }
@@ -32,7 +35,7 @@ export function DeleteAccountScreen({
   const handleReauthPasskey = () =>
     run("reauth", async () => {
       await signInWithPasskey();
-      setMessage("Re-authenticated with passkey. You can continue.");
+      setMessage(t.reauthSuccess);
     });
 
   const handleRequestDeletion = () =>
@@ -57,19 +60,16 @@ export function DeleteAccountScreen({
           style={{ borderColor: BORDER }}
         >
           <ArrowLeft className="h-4 w-4" />
-          Back
+          {common.back}
         </button>
 
         <div className="rounded-3xl border bg-white p-5" style={{ borderColor: BORDER }}>
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-red-600" />
-            <h1 className="text-[20px] font-bold leading-tight text-red-700">Delete account</h1>
+            <h1 className="text-[20px] font-bold leading-tight text-red-700">{t.title}</h1>
           </div>
 
-          <p className="mt-2 text-[14px] text-gray-600">
-            This permanently deletes your Supabase auth account and clears local app data on this
-            device. Active rentals and listings may still need manual review on the server.
-          </p>
+          <p className="mt-2 text-[14px] text-gray-600">{t.body}</p>
 
           {message ? (
             <div className="mt-4 whitespace-pre-wrap rounded-2xl border bg-[#F0FDF4] p-4 text-[13px] text-emerald-800">
@@ -92,7 +92,7 @@ export function DeleteAccountScreen({
               style={{ borderColor: BORDER, color: GREEN }}
             >
               <KeyRound className="h-5 w-5" />
-              {busy === "reauth" ? "Opening passkey…" : "Re-auth with Passkey"}
+              {busy === "reauth" ? t.reauthBusy : t.reauthCta}
             </button>
 
             <button
@@ -102,13 +102,11 @@ export function DeleteAccountScreen({
               className="min-h-[48px] w-full rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
               style={{ backgroundColor: "#B91C1C" }}
             >
-              {busy === "delete" ? "Deleting…" : "Delete account permanently"}
+              {busy === "delete" ? t.deleteBusy : t.deleteCta}
             </button>
           </div>
 
-          <p className="mt-4 text-[12px] text-gray-500">
-            If deletion fails, email support@evorios.com and we’ll finish removing your account.
-          </p>
+          <p className="mt-4 text-[12px] text-gray-500">{t.supportHint}</p>
         </div>
       </div>
     </div>

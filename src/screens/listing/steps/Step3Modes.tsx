@@ -3,12 +3,11 @@ import { AnimatePresence, motion } from "motion/react";
 import { Check } from "lucide-react";
 import type { ListingDraft, MinimumRentalPeriod, StepProps } from "../types";
 import { RentanoHint } from "../../../components/RentanoHint";
-import { DEPOSIT_PROTECTION_LABEL } from "../../../lib/brand";
 import {
   calculateRentalPrices,
   categoryHasRestrictedModes,
-  getCategoryModeRules,
   type CategoryModeKey,
+  getCategoryModeRules,
 } from "../listingItemCategories";
 import { isYardSaleListingActive } from "../../../lib/yardSaleListing";
 import { useMessages } from "../../../lib/i18n/react";
@@ -205,7 +204,7 @@ const rateFieldMotion = {
 };
 
 export function Step3Modes({ draft, setDraft }: StepProps) {
-  const { listing } = useMessages();
+  const { listing, item } = useMessages();
   const modesCopy = listing.modes;
   const yardSaleListing = isYardSaleListingActive();
   const minimumPeriodCategoryRef = useRef<string | null>(null);
@@ -590,7 +589,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                   </motion.div>
                 </motion.div>
                 <ModeNote>
-                  {modesCopy.depositProtectionNote(DEPOSIT_PROTECTION_LABEL)}
+                  {modesCopy.depositProtectionNote(item.depositProtection)}
                 </ModeNote>
               </ModeCard>
             );

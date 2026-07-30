@@ -3,6 +3,7 @@ import { APP_NAME } from "../lib/brand";
 import { ArrowDownCircle, CheckCircle2, Sparkles } from "lucide-react";
 import { usePwaUpdate } from "../hooks/PwaUpdateProvider";
 import { formatBuildStamp } from "../lib/buildInfo";
+import { useMessages } from "../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -14,6 +15,8 @@ export function PwaUpdateNotificationCard({
 }: {
   onOpenDetail: () => void;
 }) {
+  const { pwa: t } = useMessages();
+
   return (
     <button
       type="button"
@@ -29,13 +32,11 @@ export function PwaUpdateNotificationCard({
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-[15px] font-bold" style={{ color: GREEN }}>
-          App update ready
+          {t.updateReadyTitle}
         </p>
-        <p className="mt-0.5 text-[14px] leading-snug text-gray-500">
-          A new version is available. Tap to install and restart.
-        </p>
+        <p className="mt-0.5 text-[14px] leading-snug text-gray-500">{t.updateReadyBody}</p>
         <p className="mt-2 text-[12px] font-semibold" style={{ color: GREEN_LIGHT }}>
-          Tap to update →
+          {t.tapToUpdate}
         </p>
       </div>
     </button>
@@ -43,6 +44,8 @@ export function PwaUpdateNotificationCard({
 }
 
 export function PwaUpdateSuccessCard({ onDismiss }: { onDismiss: () => void }) {
+  const { pwa: t } = useMessages();
+
   return (
     <div
       className="flex w-full gap-3 rounded-2xl border bg-white p-4 text-left shadow-sm"
@@ -56,10 +59,10 @@ export function PwaUpdateSuccessCard({ onDismiss }: { onDismiss: () => void }) {
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-[15px] font-bold" style={{ color: GREEN }}>
-          Version updated
+          {t.versionUpdatedTitle}
         </p>
         <p className="mt-0.5 text-[14px] leading-snug text-gray-500">
-          You&apos;re on the latest {APP_NAME}. Have a great day!
+          {t.versionUpdatedBody(APP_NAME)}
         </p>
         <p className="mt-1 text-[11px] text-gray-400">{formatBuildStamp()}</p>
         <button
@@ -68,7 +71,7 @@ export function PwaUpdateSuccessCard({ onDismiss }: { onDismiss: () => void }) {
           className="mt-3 text-[13px] font-semibold underline-offset-2 hover:underline"
           style={{ color: GREEN_LIGHT }}
         >
-          Got it
+          {t.gotIt}
         </button>
       </div>
     </div>
@@ -82,6 +85,7 @@ export function PwaUpdateConfirmSheet({
   open: boolean;
   onClose: () => void;
 }) {
+  const { pwa: t } = useMessages();
   const { applyUpdate } = usePwaUpdate();
   const [updating, setUpdating] = useState(false);
 
@@ -115,10 +119,10 @@ export function PwaUpdateConfirmSheet({
           <Sparkles className="h-7 w-7" style={{ color: AMBER }} />
         </div>
         <h2 id="pwa-update-title" className="text-center text-[20px] font-bold" style={{ color: GREEN }}>
-          Install update?
+          {t.installUpdateTitle}
         </h2>
         <p className="mt-2 text-center text-[15px] leading-relaxed text-gray-500">
-          The app will restart once to load the latest version with new fixes and improvements.
+          {t.installUpdateBody}
         </p>
         <p className="mt-2 text-center text-[11px] text-gray-400">{formatBuildStamp()}</p>
         <div className="mt-5 flex flex-col gap-2.5">
@@ -129,7 +133,7 @@ export function PwaUpdateConfirmSheet({
             className="btn-primary w-full py-3.5 font-semibold text-white disabled:opacity-60"
             style={{ backgroundColor: GREEN }}
           >
-            {updating ? "Updating…" : "Update now"}
+            {updating ? t.updating : t.updateNow}
           </button>
           <button
             type="button"
@@ -138,7 +142,7 @@ export function PwaUpdateConfirmSheet({
             className="w-full rounded-2xl border py-3 text-[15px] font-semibold text-gray-600"
             style={{ borderColor: BORDER }}
           >
-            Not now
+            {t.notNow}
           </button>
         </div>
       </div>

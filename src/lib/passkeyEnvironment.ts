@@ -1,4 +1,5 @@
 import { APP_HOST, APP_ORIGIN } from "./brand";
+import { getMessages } from "./i18n";
 
 /** True when opened from iOS home screen (standalone display mode). */
 export function isStandalonePwa(): boolean {
@@ -33,18 +34,11 @@ export function detectPasskeyEnvironment(): PasskeyEnvironment {
 
 /** Short hint shown under Face ID buttons (Safari vs installed app). */
 export function getPasskeyEnvironmentHint(): string | null {
+  const { passkey: t } = getMessages();
   const env = detectPasskeyEnvironment();
-  if (env === "ios-pwa") {
-    return "Using the app from your Home Screen. Face ID must have been enabled on this same app icon.";
-  }
-  if (env === "ios-safari") {
-    return "Using Safari. To use the installed app later, enable Face ID again from that icon.";
-  }
-  if (env === "pwa") {
-    return "Using the installed app. Face ID is tied to this app icon, not a browser tab.";
-  }
-  if (!isPasskeyProductionHost()) {
-    return `Passkeys work best at ${APP_ORIGIN} — preview URLs may not match Face ID.`;
-  }
+  if (env === "ios-pwa") return t.hintIosPwa;
+  if (env === "ios-safari") return t.hintIosSafari;
+  if (env === "pwa") return t.hintPwa;
+  if (!isPasskeyProductionHost()) return t.hintPreview(APP_ORIGIN);
   return null;
 }

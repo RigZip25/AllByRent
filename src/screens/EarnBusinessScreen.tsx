@@ -10,11 +10,12 @@ import {
 } from "lucide-react";
 import {
   computeEarnBusinessStats,
-  formatGrowthBadge,
   formatUsd,
   type EarningsTrend,
   type ListingEarnBreakdown,
 } from "../lib/earnStats";
+import { useMessages } from "../lib/i18n/react";
+import type { EarnBusinessMessages } from "../lib/i18n/types";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -47,7 +48,7 @@ function KpiChip({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Sparkline({ points }: { points: { label: string; amountUsd: number }[] }) {
+function Sparkline({ points, hint }: { points: { label: string; amountUsd: number }[]; hint: string }) {
   const max = Math.max(...points.map((p) => p.amountUsd), 1);
 
   return (
@@ -72,12 +73,12 @@ function Sparkline({ points }: { points: { label: string; amountUsd: number }[] 
           );
         })}
       </div>
-      <p className="mt-2 text-[11px] text-gray-500">Last 7 days · completed payouts</p>
+      <p className="mt-2 text-[11px] text-gray-500">{hint}</p>
     </div>
   );
 }
 
-function ListingRow({ row }: { row: ListingEarnBreakdown }) {
+function ListingRow({ row, trendAria }: { row: ListingEarnBreakdown; trendAria: (t: string) => string }) {
   return (
     <tr className="border-b last:border-b-0" style={{ borderColor: BORDER }}>
       <td className="py-3 pr-2">
@@ -90,12 +91,61 @@ function ListingRow({ row }: { row: ListingEarnBreakdown }) {
         {formatUsd(row.earnedTotal)}
       </td>
       <td className="py-3 pl-2 text-right">
-        <span className="inline-flex items-center justify-end" aria-label={`Trend ${row.trend}`}>
+        <span className="inline-flex items-center justify-end" aria-label={trendAria(row.trend)}>
           <TrendIcon trend={row.trend} />
         </span>
       </td>
     </tr>
   );
+}
+
+
+function localizeGrowthTips(
+  stats: ReturnType<typeof computeEarnBusinessStats>,
+  copy: EarnBusinessMessages,
+) {
+  const tips: { title: string; body: string }[] = [];
+  const earningListings = stats.perListing.filter((row) => row.earnedTotal > 0);
+  const avgMonthlyPerListing =
+    earningListings.length > 0
+      ? Math.round(
+          earningListings.reduce((sum, row) => sum + row.earnedThisMonth, 0) /
+            Math.max(earningListings.filter((row) => row.earnedThisMonth > 0).length, 1),
+        )
+      : 40;
+  if (stats.listingsCount > 0) {
+    tips.push({
+      title: copy.tipExpandTitle,
+      body: copy.tipExpandBody(String(Math.max(avgMonthlyPerListing, 35))),
+    });
+  }
+  if (stats.growthPercentMonthOverMonth !== null && stats.growthPercentMonthOverMonth > 0) {
+    tips.push({
+      title: copy.tipMomentumTitle,
+      body: copy.tipMomentumBody(
+        stats.growthPercentMonthOverMonth,
+        String(stats.earnedLastMonth),
+        String(stats.earnedThisMonth),
+      ),
+    });
+  } else if (stats.earnedThisMonth < stats.earnedLastMonth && stats.earnedLastMonth > 0) {
+    tips.push({
+      title: copy.tipRecoverTitle,
+      body: copy.tipRecoverBody(String(stats.earnedLastMonth)),
+    });
+  } else {
+    tips.push({
+      title: copy.tipTargetTitle,
+      body: copy.tipTargetBody(String(Math.max(stats.earnedThisMonth + 40, 80))),
+    });
+  }
+  if (stats.activeItemsOut > 0) {
+    tips.push({
+      title: copy.tipFieldTitle,
+      body: copy.tipFieldBody(String(stats.activeEarningNowUsd), stats.activeItemsOut),
+    });
+  }
+  return tips.slice(0, 3);
 }
 
 export function EarnBusinessScreen({
@@ -105,12 +155,19 @@ export function EarnBusinessScreen({
   onHome: () => void;
   onRentals: () => void;
 }) {
+  const copy = useMessages().earnBusiness;
   const stats = useMemo(() => computeEarnBusinessStats(), []);
+  const tips = useMemo(() => localizeGrowthTips(stats, copy), [stats, copy]);
 
   const growthPositive =
     stats.growthPercentMonthOverMonth === null ||
     stats.growthPercentMonthOverMonth >= 0;
-  const growthLabel = formatGrowthBadge(stats.growthPercentMonthOverMonth);
+  const growthLabel =
+    stats.growthPercentMonthOverMonth === null
+      ? copy.growthNew
+      : copy.growthVsLast(
+          `${stats.growthPercentMonthOverMonth > 0 ? "+" : ""}${stats.growthPercentMonthOverMonth}`,
+        );
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -120,13 +177,13 @@ export function EarnBusinessScreen({
           style={{ borderColor: BORDER }}
         >
           <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">
-            Earned this month
+            {copy.earnedThisMonth}
           </p>
           <p className="mt-1 text-[40px] font-extrabold leading-none" style={{ color: GOLD }}>
             {formatUsd(stats.earnedThisMonth)}
           </p>
           <p className="mt-2 text-[14px] text-gray-500">
-            All time{" "}
+            {copy.allTime}{" "}
             <span className="font-semibold" style={{ color: GREEN }}>
               {formatUsd(stats.totalEarnedAllTime)}
             </span>
@@ -144,18 +201,18 @@ export function EarnBusinessScreen({
               {growthLabel}
             </span>
             <span className="text-[12px] text-gray-500">
-              Projected {formatUsd(stats.projectedThisMonth)} by month end
+              {copy.projectedByMonthEnd(formatUsd(stats.projectedThisMonth))}
             </span>
           </div>
 
-          <Sparkline points={stats.earnedLast7Days} />
+          <Sparkline points={stats.earnedLast7Days} hint={copy.sparklineHint} />
         </div>
 
         <div className="mb-4 flex gap-2">
-          <KpiChip label="This month" value={formatUsd(stats.earnedThisMonth)} />
-          <KpiChip label="Last month" value={formatUsd(stats.earnedLastMonth)} />
+          <KpiChip label={copy.kpiThisMonth} value={formatUsd(stats.earnedThisMonth)} />
+          <KpiChip label={copy.kpiLastMonth} value={formatUsd(stats.earnedLastMonth)} />
           <KpiChip
-            label="Active earning now"
+            label={copy.kpiActiveNow}
             value={
               stats.activeItemsOut > 0
                 ? formatUsd(stats.activeEarningNowUsd)
@@ -166,10 +223,10 @@ export function EarnBusinessScreen({
 
         <section className="mb-4">
           <h2 className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-            How you&apos;re growing
+            {copy.growingTitle}
           </h2>
           <ul className="space-y-2">
-            {stats.growthTips.map((tip) => (
+            {tips.map((tip) => (
               <li
                 key={tip.title}
                 className="flex gap-3 rounded-2xl border bg-white p-3"
@@ -194,7 +251,7 @@ export function EarnBusinessScreen({
 
         <section className="mb-3">
           <h2 className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-            By listing
+            {copy.byListing}
           </h2>
           {stats.perListing.length === 0 ? (
             <div
@@ -202,9 +259,9 @@ export function EarnBusinessScreen({
               style={{ borderColor: BORDER }}
             >
               <Package className="mx-auto mb-3 h-8 w-8" style={{ color: GREEN_LIGHT }} />
-              <p className="font-semibold text-gray-800">No listings yet</p>
+              <p className="font-semibold text-gray-800">{copy.emptyTitle}</p>
               <p className="mt-1 text-sm text-gray-500">
-                Publish from My Garage (or the + button) to track earnings here.
+                {copy.emptyBody}
               </p>
               <button
                 type="button"
@@ -212,7 +269,7 @@ export function EarnBusinessScreen({
                 className="mt-4 inline-flex items-center gap-1 text-sm font-semibold"
                 style={{ color: GREEN_LIGHT }}
               >
-                Back to browse
+                {copy.backToBrowse}
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
@@ -224,17 +281,17 @@ export function EarnBusinessScreen({
               <table className="w-full table-fixed px-3">
                 <thead>
                   <tr className="border-b text-[10px] font-semibold uppercase tracking-wide text-gray-400" style={{ borderColor: BORDER }}>
-                    <th className="py-2.5 pr-2 text-left font-semibold">Item</th>
-                    <th className="whitespace-nowrap px-2 py-2.5 text-right font-semibold">Month</th>
-                    <th className="whitespace-nowrap px-2 py-2.5 text-right font-semibold">All time</th>
-                    <th className="w-8 py-2.5 pl-2 text-right font-semibold" aria-label="Trend">
+                    <th className="py-2.5 pr-2 text-left font-semibold">{copy.colItem}</th>
+                    <th className="whitespace-nowrap px-2 py-2.5 text-right font-semibold">{copy.colMonth}</th>
+                    <th className="whitespace-nowrap px-2 py-2.5 text-right font-semibold">{copy.colAllTime}</th>
+                    <th className="w-8 py-2.5 pl-2 text-right font-semibold" aria-label={copy.colAllTime}>
                       <span className="sr-only">Trend</span>
                     </th>
                   </tr>
                 </thead>
                 <tbody className="px-3">
                   {stats.perListing.map((row) => (
-                    <ListingRow key={row.listingId} row={row} />
+                    <ListingRow key={row.listingId} row={row} trendAria={copy.trendAria} />
                   ))}
                 </tbody>
               </table>
@@ -242,7 +299,7 @@ export function EarnBusinessScreen({
           )}
         </section>
 
-        <p className="px-1 text-center text-[11px] text-gray-400">{stats.planUsageLabel}</p>
+        <p className="px-1 text-center text-[11px] text-gray-400">{copy.activeListings(stats.listingsCount)}</p>
       </div>
     </div>
   );

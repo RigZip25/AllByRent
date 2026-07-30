@@ -20,6 +20,7 @@ import { QR_PDF_FILENAMES } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
 import { putMediaBlob } from "../../lib/mediaStore";
 import { verifyListingQrInPhoto } from "../../lib/verifyListingQrPhoto";
+import { useMessages } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const QR_SHEET_CAPACITY = 12;
@@ -39,6 +40,7 @@ export function QRStickerScreen({
   onListAnother,
   onBackToStory,
 }: QRStickerScreenProps) {
+  const { listingQr: t } = useMessages();
   const auth = useAuth();
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -120,7 +122,7 @@ export function QRStickerScreen({
         preferOpen: true,
       });
     } catch {
-      setPdfError("Could not generate PDF. Please try again.");
+      setPdfError(t.errorPdfGenerate);
     } finally {
       setPdfLoading(false);
     }
@@ -132,7 +134,7 @@ export function QRStickerScreen({
     try {
       const ids = loadQrBulkQueueListingIds();
       if (ids.length === 0) {
-        setPdfError("No items in bulk queue yet.");
+        setPdfError(t.errorNoBulkItems);
         return;
       }
       await generatePdf(ids, {
@@ -143,7 +145,7 @@ export function QRStickerScreen({
         preferOpen: true,
       });
     } catch {
-      setPdfError("Could not generate PDF. Please try again.");
+      setPdfError(t.errorPdfGenerate);
     } finally {
       setPdfLoading(false);
     }
@@ -169,7 +171,7 @@ export function QRStickerScreen({
         });
       }
     } catch {
-      setPdfError("Could not generate PDF. Please try again.");
+      setPdfError(t.errorPdfGenerate);
     } finally {
       setPdfLoading(false);
     }
@@ -187,7 +189,7 @@ export function QRStickerScreen({
         filename: QR_PDF_FILENAMES.sticker3x3,
       });
     } catch {
-      setPdfError("Could not prepare the PDF. Please try again.");
+      setPdfError(t.errorPdfPrepare);
     } finally {
       setPdfLoading(false);
     }
@@ -250,7 +252,7 @@ export function QRStickerScreen({
       onComplete();
     })()
       .catch(() => {
-        setPdfError("Could not verify that photo. Retake with the QR sticker clearly visible.");
+        setPdfError(t.errorVerifyFailed);
       })
       .finally(() => {
         setPdfLoading(false);
@@ -271,13 +273,13 @@ export function QRStickerScreen({
           className="mb-2 flex items-center gap-1 text-sm font-medium text-gray-600"
         >
           <ArrowLeft className="h-4 w-4" style={{ color: GREEN }} />
-          How it works
+          {t.howItWorksBack}
         </button>
         <h2 className="text-center text-2xl font-bold" style={{ color: GREEN }}>
-          Your sticker is ready
+          {t.stickerReadyTitle}
         </h2>
         <p className="mt-1 text-center text-base text-gray-500">
-          Publish first, then set up QR to go live.
+          {t.stickerReadySubtitle}
         </p>
       </header>
 
@@ -286,7 +288,7 @@ export function QRStickerScreen({
           {qrDataUrl ? (
             <img
               src={qrDataUrl}
-              alt="Listing QR code"
+              alt={t.qrAlt}
               width={180}
               height={180}
               className="rounded-lg"
@@ -313,11 +315,11 @@ export function QRStickerScreen({
             className="w-full rounded-xl py-3.5 text-base font-bold text-white disabled:opacity-60"
             style={{ backgroundColor: GREEN }}
           >
-            {pdfLoading ? "Preparing PDF…" : "🖨️ Print this QR"}
+            {pdfLoading ? t.preparingPdf : t.printThisQr}
           </button>
 
           <p className="text-center text-sm leading-relaxed text-gray-600">
-            You can download the PDF to print later (desktop is easiest). Print on an Avery-compatible label sheet, or use regular paper + clear tape on top to protect it.
+            {t.printHint}
           </p>
 
           <div className="grid grid-cols-2 gap-2">
@@ -328,7 +330,7 @@ export function QRStickerScreen({
               className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
               style={{ borderColor: GREEN, color: GREEN }}
             >
-              ⬇️ A4 sheet PDF
+              {t.a4SheetPdf}
             </button>
             <button
               type="button"
@@ -337,7 +339,7 @@ export function QRStickerScreen({
               className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
               style={{ borderColor: GREEN, color: GREEN }}
             >
-              ⬇️ 3×3 label PDF
+              {t.label3x3Pdf}
             </button>
           </div>
 
@@ -348,30 +350,29 @@ export function QRStickerScreen({
             className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
             style={{ borderColor: GREEN, color: GREEN }}
           >
-            📤 Share / save PDF file
+            {t.shareSavePdf}
           </button>
           <p className="text-center text-xs text-gray-500">
-            Sends the PDF file itself (AirDrop, Files, Messages). There is no web “download link” —
-            a link would only open the app.
+            {t.sharePdfHint}
           </p>
 
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-semibold text-gray-900">Bulk printing</p>
-              <p className="text-xs text-gray-500">{bulkCount} queued</p>
+              <p className="text-sm font-semibold text-gray-900">{t.bulkPrinting}</p>
+              <p className="text-xs text-gray-500">{t.queuedCount(bulkCount)}</p>
             </div>
 
             <div className="mt-2 rounded-2xl bg-[#F0FDF4] px-4 py-3">
               <p className="text-sm font-semibold text-gray-900">
-                You have {emptySpotsLeft} empty spot{emptySpotsLeft === 1 ? "" : "s"} left on this sheet
+                {t.emptySpotsLeft(emptySpotsLeft)}
               </p>
               <p className="mt-1 text-xs text-gray-600">
-                Fill the page now so you can print once, stick once, and get more items live faster.
+                {t.fillPageHint}
               </p>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-gray-600">
-                <li>Popular: ladders, pressure washers, party tables, cameras, bike racks</li>
-                <li>High-value items (over $200) tend to get attention quickly</li>
-                <li>If it’s seasonal, list it now — your neighborhood searches early</li>
+                <li>{t.bulkTipPopular}</li>
+                <li>{t.bulkTipHighValue}</li>
+                <li>{t.bulkTipSeasonal}</li>
               </ul>
             </div>
             <div className="mt-2 grid grid-cols-2 gap-2">
@@ -386,7 +387,7 @@ export function QRStickerScreen({
                 className="w-full rounded-xl border-2 py-3 text-sm font-bold"
                 style={{ borderColor: GREEN, color: GREEN }}
               >
-                {queuedForBulk ? "Remove from bulk" : "Add to bulk"}
+                {queuedForBulk ? t.removeFromBulk : t.addToBulk}
               </button>
               <button
                 type="button"
@@ -395,7 +396,7 @@ export function QRStickerScreen({
                 className="w-full rounded-xl py-3 text-sm font-bold text-white disabled:opacity-50"
                 style={{ backgroundColor: GREEN }}
               >
-                🖨️ Print bulk
+                {t.printBulk}
               </button>
             </div>
             {bulkCount > 0 ? (
@@ -408,7 +409,7 @@ export function QRStickerScreen({
                 className="mt-2 w-full text-center text-xs font-semibold underline"
                 style={{ color: "#6B7280" }}
               >
-                Clear bulk queue
+                {t.clearBulkQueue}
               </button>
             ) : null}
           </div>
@@ -416,9 +417,9 @@ export function QRStickerScreen({
 
         {otherListings.length > 0 ? (
           <div className="mt-6 rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
-            <h3 className="text-base font-bold text-gray-900">More items?</h3>
+            <h3 className="text-base font-bold text-gray-900">{t.moreItems}</h3>
             <p className="mt-1 text-sm text-gray-500">
-              Add each item to the bulk queue from its QR screen, then use “Print bulk” when ready.
+              {t.moreItemsBody}
             </p>
           </div>
         ) : null}
@@ -428,10 +429,10 @@ export function QRStickerScreen({
           onClick={onListAnother}
           className="mt-4 w-full rounded-xl border-2 border-dashed border-gray-300 py-3 text-sm font-semibold text-gray-700"
         >
-          + Add another item
+          {t.addAnotherItem}
         </button>
         <p className="mt-2 text-center text-xs text-gray-500">
-          You’ll be able to come right back here to email/print/verify this QR.
+          {t.comeBackHint}
         </p>
 
         {pdfError ? (
@@ -446,7 +447,7 @@ export function QRStickerScreen({
               className="w-full rounded-xl py-3 text-sm font-bold text-white"
               style={{ backgroundColor: GREEN }}
             >
-            {pdfLoading ? "Verifying QR…" : "📸 Take verification photo"}
+            {pdfLoading ? t.verifyingQr : t.takeVerificationPhoto}
             </button>
           </div>
           <input
@@ -459,8 +460,7 @@ export function QRStickerScreen({
           />
           {/* Camera-only to ensure sticker is attached to the physical item. */}
           <p className="mt-3 text-center text-xs text-gray-500">
-            Point the camera at the printed QR on the item. A random photo won’t pass — we check
-            that this listing’s code is in the frame. Sell (and free $0 sell) listings skip this step.
+            {t.verificationHint}
           </p>
         </div>
       </div>
@@ -477,10 +477,10 @@ export function QRStickerScreen({
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-base font-bold" style={{ color: GREEN }}>
-              PDF ready
+              {t.pdfReady}
             </h3>
             <p className="mt-1 text-xs text-gray-500">
-              Download or print the file on this device. Sharing a website link won’t send the PDF.
+              {t.pdfReadyBody}
             </p>
             <div className="mt-4 grid grid-cols-2 gap-2">
               <a
@@ -489,7 +489,7 @@ export function QRStickerScreen({
                 className="w-full rounded-xl border-2 py-3 text-center text-sm font-bold"
                 style={{ borderColor: GREEN, color: GREEN }}
               >
-                ⬇️ Download
+                {t.download}
               </a>
               <button
                 type="button"
@@ -497,7 +497,7 @@ export function QRStickerScreen({
                 className="w-full rounded-xl py-3 text-sm font-bold text-white"
                 style={{ backgroundColor: GREEN }}
               >
-                🖨️ Print
+                {t.print}
               </button>
               <button
                 type="button"
@@ -506,7 +506,7 @@ export function QRStickerScreen({
                 className="col-span-2 w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
                 style={{ borderColor: GREEN, color: GREEN }}
               >
-                📤 Share PDF file
+                {t.sharePdfFile}
               </button>
             </div>
             <button
@@ -515,7 +515,7 @@ export function QRStickerScreen({
               className="mt-3 w-full text-center text-xs font-semibold underline"
               style={{ color: "#6B7280" }}
             >
-              Close
+              {t.close}
             </button>
           </div>
         </div>

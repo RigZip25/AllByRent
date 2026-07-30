@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { ArrowLeft, Mail, Phone, User } from "lucide-react";
 import { ProfileFieldEditSheet } from "../../components/profile/ProfileFieldEditSheet";
 import { useAuth } from "../../hooks/AuthProvider";
+import { useMessages } from "../../lib/i18n/react";
 import { fetchRemoteProfile, updateRemoteProfile } from "../../lib/supabaseProfile";
 import {
   loadUserProfile,
@@ -70,6 +71,8 @@ export function PersonalInfoScreen({
   initialEdit?: "name" | "phone";
 }) {
   const auth = useAuth();
+  const { common, profileDeep } = useMessages();
+  const t = profileDeep.personalInfo;
   const [profile, setProfile] = useState(() => refreshProfileStats(loadUserProfile(), auth.userId));
   const [editing, setEditing] = useState<EditField>(null);
 
@@ -106,11 +109,11 @@ export function PersonalInfoScreen({
   const email =
     auth.userEmail?.trim() ||
     profile.email?.trim() ||
-    (auth.userId ? "Loading sign-in email…" : "Not signed in");
-  const displayName = profile.displayName?.trim() || "Add your name";
+    (auth.userId ? t.loadingEmail : t.notSignedIn);
+  const displayName = profile.displayName?.trim() || t.addName;
   const phone = profile.phone?.trim()
     ? formatUsPhoneDisplay(profile.phone)
-    : "Add phone";
+    : t.addPhone;
 
   const saveName = (nextName: string) => {
     if (!nextName) return;
@@ -135,33 +138,27 @@ export function PersonalInfoScreen({
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <header className="shrink-0 flex items-center gap-3 border-b bg-white px-4 py-3" style={{ borderColor: BORDER }}>
-        <button type="button" onClick={onBack} className="p-2" aria-label="Back">
+        <button type="button" onClick={onBack} className="p-2" aria-label={common.back}>
           <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
         </button>
         <h1 className="text-[18px] font-bold" style={{ color: GREEN }}>
-          Personal info
+          {t.title}
         </h1>
       </header>
 
       <div className="screen-scroll flex-1 space-y-3 p-4">
-        <p className="text-[13px] text-gray-500">
-          Email is your sign-in address. Name and phone appear on your profile and
-          rentals.
-        </p>
-        <Row icon={<Mail className="h-5 w-5" style={{ color: GREEN }} />} label="Email" value={email} />
-        <p className="px-1 text-[12px] leading-relaxed text-gray-500">
-          To use a different email, sign out and sign in again with that address. Changing email here
-          is not supported yet.
-        </p>
+        <p className="text-[13px] text-gray-500">{t.subtitle}</p>
+        <Row icon={<Mail className="h-5 w-5" style={{ color: GREEN }} />} label={t.email} value={email} />
+        <p className="px-1 text-[12px] leading-relaxed text-gray-500">{t.emailChangeHint}</p>
         <Row
           icon={<User className="h-5 w-5" style={{ color: GREEN }} />}
-          label="Display name"
+          label={t.displayName}
           value={displayName}
           onClick={() => setEditing("name")}
         />
         <Row
           icon={<Phone className="h-5 w-5" style={{ color: GREEN }} />}
-          label="Phone"
+          label={t.phone}
           value={phone}
           onClick={() => setEditing("phone")}
         />
@@ -169,20 +166,20 @@ export function PersonalInfoScreen({
 
       <ProfileFieldEditSheet
         open={editing === "name"}
-        title="Display name"
-        label="Name"
+        title={t.displayName}
+        label={t.nameLabel}
         value={profile.displayName}
-        placeholder="Your name"
+        placeholder={t.namePlaceholder}
         onClose={() => setEditing(null)}
         onSave={saveName}
       />
       <ProfileFieldEditSheet
         open={editing === "phone"}
-        title="Phone"
-        label="Phone number"
+        title={t.phone}
+        label={t.phoneLabel}
         value={profile.phone}
         inputType="tel"
-        placeholder="(555) 555-5555"
+        placeholder={t.phonePlaceholder}
         onClose={() => setEditing(null)}
         onSave={savePhone}
       />

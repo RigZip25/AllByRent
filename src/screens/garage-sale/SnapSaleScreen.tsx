@@ -1,6 +1,7 @@
+import { useMessages } from "../../lib/i18n/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Camera, Loader2, ShoppingBag, Tag } from "lucide-react";
-import { BRAND_AMBER, BRAND_GREEN, MASCOT_NAME, ONBOARDING } from "../../lib/brand";
+import { BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
 import { deleteMedia, putMediaBlob, type MediaRef } from "../../lib/mediaStore";
@@ -33,7 +34,6 @@ const AMBER = BRAND_AMBER;
 const BORDER = "#E8E6E0";
 const SNAP_SALE_RETURN = "/?screen=snapSale";
 
-const { snapSale: copy, garageShare: shareCopy } = ONBOARDING;
 
 type SnapSaleScreenProps = {
   onBack: () => void;
@@ -78,6 +78,9 @@ function PhotoPreview({ photo }: { photo: MediaRef }) {
 }
 
 export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleScreenProps) {
+  const { garageSale, common } = useMessages();
+  const copy = garageSale.snapSale;
+  const shareCopy = garageSale.garageShare;
   const auth = useAuth();
   const cameraRef = useRef<HTMLInputElement>(null);
   const libraryRef = useRef<HTMLInputElement>(null);
@@ -137,12 +140,12 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
         }
         window.location.assign(result.url);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Stripe Connect failed.");
+        setError(err instanceof Error ? err.message : copy.connectFailed);
       } finally {
         setConnectBusy(false);
       }
     })();
-  }, [auth.userId, onRequireAuth]);
+  }, [auth.userId, onRequireAuth, copy.connectFailed]);
 
   const openHours = garageSaleOpenLabel(getGarageSaleSchedule());
   const hostId = resolveHostAccountId(auth.userId);
@@ -193,11 +196,11 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
       };
       setPhoto(ref);
     } catch {
-      setError("Could not load photo — try again.");
+      setError(copy.photoLoadFailed);
     } finally {
       setBusy(false);
     }
-  }, [photo]);
+  }, [photo, copy.photoLoadFailed]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -213,9 +216,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
     void refreshSellerStatus().then((status) => {
       if (!status?.ready) {
         setError(
-          !status?.signedIn
-            ? "Sign in, then connect Stripe (ID + bank) before this item can go public."
-            : "Connect Stripe (ID + bank) below — then put it on the shelf.",
+          !status?.signedIn ? copy.publishNeedSignIn : copy.publishNeedStripe,
         );
         setBusy(false);
         return;
@@ -303,7 +304,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
             className="mt-3 rounded-full px-3 py-1 text-xs font-bold text-white"
             style={{ backgroundColor: GREEN }}
           >
-            On your shelf · active
+            {copy.onShelfActive}
           </p>
           <p className="mt-2 text-xs font-medium" style={{ color: "#92400E" }}>
             {openHours}
@@ -341,7 +342,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
               className="w-full rounded-xl py-3.5 text-base font-bold"
               style={{ backgroundColor: AMBER, color: GREEN }}
             >
-              Share with neighbors
+              {copy.shareWithNeighbors}
             </button>
           )}
           <button
@@ -377,7 +378,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
             onClick={onBack}
             className="flex h-10 w-10 items-center justify-center rounded-full border bg-white"
             style={{ borderColor: BORDER }}
-            aria-label="Back"
+            aria-label={common.back}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
@@ -551,11 +552,9 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
             className="mt-4 rounded-2xl border px-4 py-3"
             style={{ borderColor: "#FECACA", backgroundColor: "#FEF2F2" }}
           >
-            <p className="text-sm font-bold text-red-800">Finish setup to put items on the shelf</p>
+            <p className="text-sm font-bold text-red-800">{copy.setupTitle}</p>
             <p className="mt-1 text-xs leading-relaxed text-red-700">
-              {needsSignIn
-                ? "Sign in, then Stripe verifies your ID and bank in one step."
-                : "Stripe verifies your ID and links your bank so neighbors can pay you."}
+              {needsSignIn ? copy.setupSignInBody : copy.setupStripeBody}
             </p>
             <div className="mt-3 flex flex-col gap-2">
               {needsSignIn ? (
@@ -565,7 +564,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
                   className="w-full rounded-xl py-3 text-sm font-bold text-white"
                   style={{ backgroundColor: GREEN }}
                 >
-                  Sign in to continue
+                  {copy.signInContinue}
                 </button>
               ) : null}
               {needsStripe ? (
@@ -576,7 +575,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
                   className="w-full rounded-xl py-3 text-sm font-bold text-white disabled:opacity-50"
                   style={{ backgroundColor: GREEN }}
                 >
-                  {connectBusy ? "Opening Stripe…" : "Continue with Stripe"}
+                  {connectBusy ? copy.openingStripe : copy.continueStripe}
                 </button>
               ) : null}
               {needsStripe ? (
@@ -586,7 +585,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
                   className="text-xs font-semibold underline"
                   style={{ color: GREEN }}
                 >
-                  I finished Stripe — refresh
+                  {copy.refreshStripe}
                 </button>
               ) : null}
             </div>
@@ -606,7 +605,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
             ? copy.publishing
             : sellerReady || sellerLoading
               ? copy.publishCta
-              : "Finish setup above first"}
+              : copy.finishSetupFirst}
         </button>
 
         <p className="mt-3 text-center text-xs text-gray-500">

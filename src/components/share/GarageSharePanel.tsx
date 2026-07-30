@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Share2 } from "lucide-react";
 import { SocialShareButtons } from "./SocialShareButtons";
 import type { SharePayload } from "../../lib/socialShare";
+import { useMessages } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -23,11 +24,8 @@ export function GarageSharePanel({
   compact = false,
   defaultOpen = false,
 }: GarageSharePanelProps) {
+  const { listingShare: t } = useMessages();
   const [open, setOpen] = useState(defaultOpen);
-  const hint = useMemo(
-    () => "Share your link — neighbors land on your shelf, not the app home page.",
-    [],
-  );
 
   return (
     <div className="rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
@@ -45,10 +43,10 @@ export function GarageSharePanel({
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-bold text-gray-900">{title}</span>
-          <span className="block text-[12px] text-gray-500">{hint}</span>
+          <span className="block text-[12px] text-gray-500">{t.garagePanelHint}</span>
         </span>
         <span className="text-[12px] font-semibold" style={{ color: GREEN }}>
-          {open ? "Hide" : "Share"}
+          {open ? t.hide : t.share}
         </span>
       </button>
 

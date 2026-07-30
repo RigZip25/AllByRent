@@ -1,4 +1,5 @@
 import { reverseGeocode } from "./geocoding";
+import { getMessages } from "./i18n";
 import { resolveAreaLabelAtCoordinates } from "./usReverseGeocode";
 import { setHomeLocation } from "./listingStorage";
 
@@ -94,17 +95,18 @@ async function getCurrentPosition(): Promise<
 }
 
 export function formatGeolocationErrorMessage(reason: GeolocationFailureReason): string {
+  const { errors } = getMessages().geo;
   switch (reason) {
     case "denied":
-      return "Location access is blocked for this site. After moving to app.evorios.com you may need to allow location again in browser or iOS Settings, or enter your ZIP manually.";
+      return errors.denied;
     case "timeout":
-      return "Location timed out. Check GPS/Wi‑Fi or enter your ZIP or city manually.";
+      return errors.timeout;
     case "unsupported":
-      return "Open the app via https:// (not http://), or enter your ZIP or city manually.";
+      return errors.unsupported;
     case "unavailable":
-      return "Location is temporarily unavailable. Enter your ZIP or city manually.";
+      return errors.unavailable;
     default:
-      return "We couldn't detect your location. Enter your ZIP or city manually.";
+      return errors.unknown;
   }
 }
 
@@ -119,7 +121,7 @@ async function resolveDisplayName(lat: number, lng: number): Promise<string> {
   const area = await resolveAreaLabelAtCoordinates(lat, lng);
   if (area?.trim()) return area;
 
-  return "Your area";
+  return getMessages().geo.yourArea;
 }
 
 /** Geolocation + reverse geocode, without persisting to storage. */
