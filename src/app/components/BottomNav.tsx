@@ -1,4 +1,4 @@
-import { Menu, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { MASCOT_NAME } from "../../lib/brand";
 import { useMessages } from "../../lib/i18n/react";
 import rentanoImg from "../../imports/No_back_rentano.png";
@@ -70,7 +70,17 @@ function TabLabel({ children, active }: { children: string; active: boolean }) {
 
 function NavIconMore({ active }: { active?: boolean }) {
   const c = active ? GREEN : "#888";
-  return <Menu className="h-[26px] w-[26px]" style={{ color: c }} strokeWidth={2} aria-hidden="true" />;
+  return (
+    <svg viewBox="0 0 24 24" className="h-[26px] w-[26px]" fill="none" aria-hidden="true">
+      <circle cx="12" cy="8" r="3.25" stroke={c} strokeWidth="2" />
+      <path
+        d="M5.5 19.25c.9-3.1 3.2-4.75 6.5-4.75s5.6 1.65 6.5 4.75"
+        stroke={c}
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
 }
 
 export function BottomNav({

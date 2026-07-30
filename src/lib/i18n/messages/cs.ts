@@ -11,7 +11,7 @@ export const cs: AppMessages = {
     home: "Domů",
     stock: "Přidat",
     garage: "Garáž",
-    more: "Více",
+    more: "Účet",
   },
   profile: {
     language: "Jazyk",
@@ -74,6 +74,8 @@ export const cs: AppMessages = {
         subtitle: "Beta — výprodeje a aukce ve vašem bloku",
         cta: "Výprodeje (Beta) →",
       },
+      categoriesTitle: "Podle kategorie",
+      categoriesHint: "Nářadí, zahrada, párty a další — rovnou do nabídky.",
       footer: "Půjčit a vystavit můžete kdykoli přes Přidat (+) nebo Moje garáž.",
     },
   },

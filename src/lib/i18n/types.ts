@@ -40,6 +40,8 @@ export type OnboardingMessages = {
     subtitle: string;
     findGear: { title: string; subtitle: string; cta: string };
     yardSales: { title: string; subtitle: string; cta: string };
+    categoriesTitle: string;
+    categoriesHint: string;
     footer: string;
   };
 };

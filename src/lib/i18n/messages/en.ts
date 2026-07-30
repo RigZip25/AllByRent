@@ -11,7 +11,7 @@ export const en: AppMessages = {
     home: "Home",
     stock: "Stock",
     garage: "Garage",
-    more: "More",
+    more: "Account",
   },
   profile: {
     language: "Language",
@@ -74,6 +74,8 @@ export const en: AppMessages = {
         subtitle: "Beta — snap sales & auctions on your block",
         cta: "Garage sales (Beta) →",
       },
+      categoriesTitle: "Browse by category",
+      categoriesHint: "Jump straight into tools, garden plants, party gear, and more.",
       footer: "Rent & list anytime from Stock (+) or My Garage.",
     },
   },

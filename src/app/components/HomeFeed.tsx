@@ -3,11 +3,13 @@ import { Bell, ClipboardList, MapPin, ChevronRight, ArrowLeft, SlidersHorizontal
 import { GarageLensCard } from "./GarageLensCard";
 import { usePwaUpdate } from "../../hooks/PwaUpdateProvider";
 import { mascotSays } from "../../lib/brand";
-import { CATEGORIES } from "../../screens/listing/listingItemCategories";
 import {
   loadHomeFeedMode,
   saveHomeFeedMode,
+  loadHomeFeedCategory,
+  saveHomeFeedCategory,
 } from "../../lib/homeFeedStorage";
+import { getHomeCategoryChips } from "../../lib/homeCategoryPicks";
 import {
   fetchActiveListingsForCityRemote,
   isListingBrowsable,
@@ -35,17 +37,6 @@ import { MrRentano } from "./MrRentano";
 const GREEN = "#1A9E6E";
 const GREEN_DARK = "#0D5C3A";
 const BORDER = "#E8E6E0";
-
-const HOME_CATEGORY_PICKS = [
-  "Tools & DIY",
-  "Garden & Yard",
-  "Photo & Video",
-  "Electronics & Tech",
-  "Party & Events",
-  "Sports & Recreation",
-  "Baby & Kids",
-  "Home & Kitchen",
-] as const;
 
 const PRICE_PRESETS: { id: string; label: string; min: number | null; max: number | null }[] = [
   { id: "any", label: "Any price", min: null, max: null },
@@ -80,7 +71,7 @@ export function HomeFeed({
   onBackToHub,
 }: HomeFeedProps) {
   const [modeChip, setModeChip] = useState<ModeChip>(() => loadHomeFeedMode());
-  const [category, setCategory] = useState<string | null>(null);
+  const [category, setCategory] = useState<string | null>(() => loadHomeFeedCategory());
   const [pricePresetId, setPricePresetId] = useState("any");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -115,6 +106,10 @@ export function HomeFeed({
   useEffect(() => {
     saveHomeFeedMode(modeChip);
   }, [modeChip]);
+
+  useEffect(() => {
+    saveHomeFeedCategory(category);
+  }, [category]);
 
   useEffect(() => {
     let mounted = true;
@@ -153,17 +148,10 @@ export function HomeFeed({
     [filteredListings, hostMeta],
   );
 
-  const browseCategories = useMemo(
-    () =>
-      HOME_CATEGORY_PICKS.filter((name) => name in CATEGORIES).map((name) => ({
-        name,
-        icon: CATEGORIES[name]?.icon ?? "📦",
-      })),
-    [],
-  );
+  const browseCategories = useMemo(() => getHomeCategoryChips(), []);
 
+  // Price + radius only — categories live on the main strip now.
   const activeFilterCount =
-    (category ? 1 : 0) +
     (pricePresetId !== "any" ? 1 : 0) +
     (clusterRadiusMi !== CLUSTER_RADIUS_DEFAULT_MI ? 1 : 0);
 
@@ -231,14 +219,17 @@ export function HomeFeed({
           <button
             type="button"
             onClick={() => setFiltersOpen(true)}
-            className="relative mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
+            className="relative mt-0.5 inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border bg-white px-3 active:bg-gray-50"
             style={{ borderColor: activeFilterCount ? GREEN_DARK : BORDER }}
-            aria-label="Filters"
+            aria-label="Price and distance filters"
           >
-            <SlidersHorizontal className="h-5 w-5" style={{ color: GREEN_DARK }} />
+            <SlidersHorizontal className="h-4 w-4" style={{ color: GREEN_DARK }} />
+            <span className="text-[12px] font-bold" style={{ color: GREEN_DARK }}>
+              Filters
+            </span>
             {activeFilterCount > 0 ? (
               <span
-                className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
+                className="flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
                 style={{ backgroundColor: GREEN_DARK }}
               >
                 {activeFilterCount}
@@ -290,17 +281,6 @@ export function HomeFeed({
               </button>
             );
           })}
-          {category ? (
-            <button
-              type="button"
-              onClick={() => setCategory(null)}
-              className="inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-bold text-white"
-              style={{ backgroundColor: GREEN }}
-            >
-              {category}
-              <X className="h-3.5 w-3.5" />
-            </button>
-          ) : null}
           {pricePresetId !== "any" ? (
             <button
               type="button"
@@ -312,6 +292,40 @@ export function HomeFeed({
               <X className="h-3.5 w-3.5" />
             </button>
           ) : null}
+        </div>
+
+        <div className="mt-1.5 flex gap-1.5 overflow-x-auto pb-0.5">
+          <button
+            type="button"
+            onClick={() => setCategory(null)}
+            className="shrink-0 rounded-full px-3 py-1.5 text-[12px] font-bold"
+            style={{
+              backgroundColor: !category ? GREEN_DARK : "white",
+              color: !category ? "white" : "#555",
+              border: `1px solid ${!category ? GREEN_DARK : BORDER}`,
+            }}
+          >
+            All
+          </button>
+          {browseCategories.map((cat) => {
+            const active = category === cat.name;
+            return (
+              <button
+                key={cat.name}
+                type="button"
+                onClick={() => setCategory(active ? null : cat.name)}
+                className="inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-bold"
+                style={{
+                  backgroundColor: active ? GREEN_DARK : "white",
+                  color: active ? "white" : "#444",
+                  border: `1px solid ${active ? GREEN_DARK : BORDER}`,
+                }}
+              >
+                <span aria-hidden>{cat.icon}</span>
+                {cat.name}
+              </button>
+            );
+          })}
         </div>
       </div>
 
