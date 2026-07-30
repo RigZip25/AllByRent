@@ -1,11 +1,9 @@
-import { ONBOARDING } from "../../lib/brand";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
+import { useOnboardingCopy } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
-
-const { location: copy } = ONBOARDING;
 
 type WhereAreYouProps = {
   onAtHome: () => void;
@@ -77,6 +75,8 @@ export function WhereAreYou({
   onSkip,
   isLocatingHome = false,
 }: WhereAreYouProps) {
+  const { location: copy } = useOnboardingCopy();
+
   return (
     <div className="screen onboarding-step mx-auto w-full max-w-[390px] bg-white">
       <OnboardingTopBar onBack={onBack} onSkip={onSkip} />
@@ -92,7 +92,7 @@ export function WhereAreYou({
           imageSrc={onboardingAssets.onBlock}
           title={copy.onBlock.title}
           ctaLabel={isLocatingHome ? "Finding your location…" : copy.onBlock.cta}
-          ariaLabel={`${copy.onBlock.title}. Browse neighborhood garages near you.`}
+          ariaLabel={`${copy.onBlock.title}. ${copy.onBlock.subtitle}`}
           onClick={onAtHome}
           disabled={isLocatingHome}
         />
@@ -102,7 +102,7 @@ export function WhereAreYou({
           imageSrc={onboardingAssets.tripDestination}
           title={copy.trip.title}
           ctaLabel={copy.trip.cta}
-          ariaLabel={`${copy.trip.title}. Pick a destination area.`}
+          ariaLabel={`${copy.trip.title}. ${copy.trip.subtitle}`}
           onClick={onTraveling}
           disabled={isLocatingHome}
         />
