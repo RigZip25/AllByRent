@@ -11,6 +11,7 @@ import {
   type ChatMessage,
 } from "../lib/messagesStorage";
 import { MASCOT_NAME } from "../lib/brand";
+import { useMessages } from "../lib/i18n/react";
 
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
@@ -34,6 +35,8 @@ export function PeerChatPanel({
   onRequireAuth,
 }: PeerChatPanelProps) {
   const auth = useAuth();
+  const { peerChat, common } = useMessages();
+  const mascotHandle = MASCOT_NAME.replace(/\s+/g, "").toLowerCase();
   const threadKey = rentalId
     ? rentalThreadKey(rentalId)
     : listingId && (auth.userId || peerId)
@@ -139,13 +142,9 @@ export function PeerChatPanel({
       {embedded ? (
         <>
           <h3 className="font-semibold" style={{ color: GREEN }}>
-            Chat
+            {peerChat.title}
           </h3>
-          <p className="mt-1 text-xs text-gray-500">
-            Tip: mention{" "}
-            <span className="font-semibold">@{MASCOT_NAME.replace(/\s+/g, "").toLowerCase()}</span>{" "}
-            for quick help. Push alerts the other person when they enabled notifications.
-          </p>
+          <p className="mt-1 text-xs text-gray-500">{peerChat.tip(mascotHandle)}</p>
         </>
       ) : null}
 
@@ -158,7 +157,7 @@ export function PeerChatPanel({
       >
         {messages.length === 0 ? (
           <p className="text-sm text-gray-500">
-            No messages yet — say hi and confirm pickup details.
+            {peerChat.empty}
           </p>
         ) : (
           messages.map((m) => {
@@ -188,7 +187,7 @@ export function PeerChatPanel({
           onKeyDown={(e) => {
             if (e.key === "Enter") void send();
           }}
-          placeholder="Write a message…"
+          placeholder={peerChat.placeholder}
           className="flex-1 rounded-xl border bg-white px-3 py-2 text-sm outline-none focus:border-[#0D5C3A]"
           style={{ borderColor: BORDER }}
         />
@@ -199,7 +198,7 @@ export function PeerChatPanel({
           className="rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
           style={{ backgroundColor: GREEN }}
         >
-          Send
+          {common.send}
         </button>
       </div>
     </div>

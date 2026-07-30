@@ -9,6 +9,60 @@ export const LOCALE_LABELS: Record<AppLocale, string> = {
 
 export const DEFAULT_LOCALE: AppLocale = "en";
 
+export type FaqSectionId =
+  | "gettingStarted"
+  | "navigation"
+  | "hosting"
+  | "qrPickup"
+  | "renting"
+  | "payments"
+  | "location"
+  | "account";
+
+export type FaqItemId =
+  | "what-is"
+  | "home-feed"
+  | "categories-nav"
+  | "garage-tab"
+  | "location-rent"
+  | "install-pwa"
+  | "list-first"
+  | "photos-ai"
+  | "pricing-modes"
+  | "replacement-value"
+  | "qr-sticker"
+  | "pickup-delivery"
+  | "book-item"
+  | "post-request"
+  | "notifications"
+  | "payments"
+  | "dispute"
+  | "availability-step5"
+  | "skip-onboarding"
+  | "bottom-nav"
+  | "more-menu"
+  | "in-app-chat"
+  | "mre-tab"
+  | "profile-vs-garage"
+  | "zip-only"
+  | "arkansas-rural"
+  | "traveling-mode"
+  | "neighbor-garage"
+  | "favorites"
+  | "active-rental"
+  | "extend-rental"
+  | "cancel-booking"
+  | "host-payouts"
+  | "deposit-release"
+  | "passkey"
+  | "co-host"
+  | "pause-listing"
+  | "edit-listing"
+  | "boost-listing"
+  | "report-issue"
+  | "app-update"
+  | "offline";
+
 export type OnboardingMessages = {
   roleChoice: {
     title: string;
@@ -974,6 +1028,39 @@ export type AppMessages = {
       openGarageDay: string;
       pushFooter: string;
     };
+  };
+  faq: {
+    panel: {
+      searchPlaceholder: string;
+      searchAria: string;
+      noMatchesTitle: string;
+      noMatchesBody: (mascot: string) => string;
+      askAboutQuery: (mascot: string) => string;
+      askDefault: (mascot: string) => string;
+    };
+    sections: Record<FaqSectionId, string>;
+    items: Record<FaqItemId, { q: string; a: string }>;
+  };
+  favorites: {
+    title: string;
+    subtitle: string;
+    emptyTitle: string;
+    emptyBody: string;
+    browseCta: string;
+    listingFallback: string;
+    removeAria: (title: string) => string;
+    ratePerDay: (rate: string) => string;
+  };
+  signInPrompt: {
+    cta: string;
+  };
+  peerChat: {
+    title: string;
+    tip: (mascotHandle: string) => string;
+    empty: string;
+    placeholder: string;
+    listingChatFallback: string;
+    listingChatSubtitle: string;
   };
   onboarding: OnboardingMessages;
 };

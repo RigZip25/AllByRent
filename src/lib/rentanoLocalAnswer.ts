@@ -1,5 +1,5 @@
 import { MASCOT_NAME, APP_NAME } from "./brand";
-import { RENTANO_FAQ, searchFaq, type FaqItem } from "../data/rentanoFaq";
+import { getRentanoFaq, searchFaq, type FaqItem } from "../data/rentanoFaq";
 
 export type LocalAnswerSource = "faq" | "hint";
 
@@ -171,7 +171,7 @@ function pickBestFaq(query: string): FaqItem | null {
   if (words.length === 0) return null;
 
   let best: { item: FaqItem; score: number } | null = null;
-  for (const item of RENTANO_FAQ) {
+  for (const item of getRentanoFaq()) {
     const score = scoreFaqItem(item, words, rawQuery);
     if (!best || score > best.score) best = { item, score };
   }

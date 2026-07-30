@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { HelpCircle, MessageCircle, Search } from "lucide-react";
-import { searchFaq, type FaqItem } from "../../data/rentanoFaq";
+import { searchFaq, buildFaqItems, type FaqItem } from "../../data/rentanoFaq";
 import { MASCOT_NAME } from "../../lib/brand";
+import { useMessages } from "../../lib/i18n/react";
 
 const PRIMARY_GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -11,10 +12,12 @@ export function RentanoFaqPanel({
 }: {
   onAskRentano: (prefill?: string) => void;
 }) {
+  const { faq } = useMessages();
   const [query, setQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const results = useMemo(() => searchFaq(query), [query]);
+  const catalog = useMemo(() => buildFaqItems(faq), [faq]);
+  const results = useMemo(() => searchFaq(query, catalog), [query, catalog]);
 
   const byCategory = useMemo(() => {
     const map = new Map<string, FaqItem[]>();
@@ -37,18 +40,18 @@ export function RentanoFaqPanel({
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search help…"
+          placeholder={faq.panel.searchPlaceholder}
           className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-gray-400"
-          aria-label="Search FAQ"
+          aria-label={faq.panel.searchAria}
         />
       </div>
 
       {results.length === 0 ? (
         <div className="rounded-2xl border border-dashed px-4 py-6 text-center" style={{ borderColor: BORDER }}>
           <HelpCircle className="mx-auto mb-2 h-8 w-8 text-gray-300" />
-          <p className="text-[15px] font-medium text-gray-700">No matches</p>
+          <p className="text-[15px] font-medium text-gray-700">{faq.panel.noMatchesTitle}</p>
           <p className="mt-1 text-[13px] text-gray-500">
-            Try different words, or ask {MASCOT_NAME} directly.
+            {faq.panel.noMatchesBody(MASCOT_NAME)}
           </p>
         </div>
       ) : (
@@ -93,7 +96,9 @@ export function RentanoFaqPanel({
         style={{ backgroundColor: PRIMARY_GREEN }}
       >
         <MessageCircle className="h-5 w-5" strokeWidth={2} />
-        {query.trim() ? `Ask ${MASCOT_NAME} about this` : `Didn't find an answer? Ask ${MASCOT_NAME}`}
+        {query.trim()
+          ? faq.panel.askAboutQuery(MASCOT_NAME)
+          : faq.panel.askDefault(MASCOT_NAME)}
       </button>
     </div>
   );

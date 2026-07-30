@@ -1,376 +1,257 @@
-import { APP_MODE_LABELS, APP_NAME, DEPOSIT_PROTECTION_LABEL, MASCOT_NAME } from "../lib/brand";
+import { getMessages } from "../lib/i18n";
+import type { AppMessages, FaqItemId, FaqSectionId } from "../lib/i18n/types";
 
 export type FaqItem = {
-  id: string;
+  id: FaqItemId;
   category: string;
   question: string;
   answer: string;
   keywords: string[];
 };
 
-export const RENTANO_FAQ: FaqItem[] = [
+type FaqMeta = {
+  id: FaqItemId;
+  section: FaqSectionId;
+  keywords: string[];
+};
+
+/** Structural FAQ index — copy lives in i18n catalogs. */
+export const FAQ_META: FaqMeta[] = [
   {
     id: "what-is",
-    category: "Getting started",
-    question: `What is ${APP_NAME}?`,
-    answer:
-      `${APP_NAME} is a neighborhood marketplace: every household is a business cell — a garage storefront on the block. Neighbors rent, sell, or gift (Sell at $0). Browse categories on Home, or stock your garage with the green + button.`,
+    section: "gettingStarted",
     keywords: ["about", "platform", "garage", "marketplace", "household", "бизнес", "сосед"],
   },
   {
     id: "home-feed",
-    category: "Getting started",
-    question: "How does Home work?",
-    answer:
-      `Home opens the browse hub. Tap a category chip (Tools, Garden, Party…) or “Browse the block”, then filter All · Rent · Buy on the feed. There is no search magnifier in the footer — categories live on Home. Tap the center + to list from your garage.`,
+    section: "gettingStarted",
     keywords: ["home", "feed", "search", "browse", "category", "categories", "лупа", "категор"],
   },
   {
     id: "categories-nav",
-    category: "Navigation",
-    question: "How do I browse by category?",
-    answer:
-      "Open Home → use the category chips on the browse hub, or on the feed strip under Rent/Buy. Tap a category in More → How Evorios works (or the intro screen) to expand household and pro subcategories. When listing with +, pick the same categories in the wizard. There is no magnifying-glass search in the footer.",
-    keywords: [
-      "category",
-      "categories",
-      "категор",
-      "ориентир",
-      "browse by",
-      "garden",
-      "tools",
-      "лупа",
-      "search icon",
-    ],
+    section: "navigation",
+    keywords: ["category", "categories", "категор", "ориентир", "browse by", "garden", "tools", "лупа", "search icon",],
   },
   {
     id: "garage-tab",
-    category: "Getting started",
-    question: `What is the ${APP_MODE_LABELS.earn} tab?`,
-    answer:
-      `The Garage tab is your household storefront — active listings, booking requests, and stats. Settings (gear icon) opens your profile. Stock items anytime with the center + button.`,
+    section: "gettingStarted",
     keywords: ["garage", "host", "supply"],
   },
   {
     id: "location-rent",
-    category: "Getting started",
-    question: "Why do I need to set my block?",
-    answer:
-      "We show garages and items in your cluster (25 mi by default). Set your block during onboarding or tap the location chip on Home. Rural or sparse? Tap Search wider for 50+ mi.",
+    section: "gettingStarted",
     keywords: ["gps", "address", "where", "cluster"],
   },
   {
     id: "install-pwa",
-    category: "Getting started",
-    question: "How do I install the app on my phone?",
-    answer:
-      `Tap ${MASCOT_NAME} in the bottom menu for install tips, or use Add to Home Screen. On iPhone: Share → Add to Home Screen. On Android: use the browser install prompt when it appears.`,
+    section: "gettingStarted",
     keywords: ["pwa", "home screen", "install"],
   },
   {
     id: "list-first",
-    category: "Hosting & listings",
-    question: "How do I list my first item?",
-    answer:
-      `Tap the green + in the footer (or Garage → New), then the fast wizard: 1) photos, 2) details & pricing (Rent / Sell), 3) review & publish. For rentals you may set up a QR sticker after publish. Want to give something away? Use Sell with price $0. ${MASCOT_NAME} helps on each step.`,
-    keywords: [
-      "sell",
-      "post",
-      "wizard",
-      "stock",
-      "listing",
-      "publish",
-      "листинг",
-      "разместить",
-      "объявление",
-      "выложить",
-    ],
+    section: "hosting",
+    keywords: ["sell", "post", "wizard", "stock", "listing", "publish", "листинг", "разместить", "объявление", "выложить",],
   },
   {
     id: "photos-ai",
-    category: "Hosting & listings",
-    question: "What happens after I add photos?",
-    answer:
-      `On step 1, when you continue, ${MASCOT_NAME} analyzes your photos and suggests title, category, condition, description, and estimated value. You can edit everything on step 2.`,
+    section: "hosting",
     keywords: ["ai", "analyze", "camera"],
   },
   {
     id: "pricing-modes",
-    category: "Hosting & listings",
-    question: "Which pricing modes should I choose?",
-    answer:
-      "On step 2 (Details & pricing) pick Rent and/or Sell. Only the fields for the modes you turn on are required. Sell-only listings skip the rental QR sticker. Price $0 on Sell = free giveaway (no separate Gift mode yet).",
+    section: "hosting",
     keywords: ["daily", "weekly", "deposit"],
   },
   {
     id: "replacement-value",
-    category: "Hosting & listings",
-    question: "What is replacement value?",
-    answer:
-      `It is the cost to replace the item new today — used for ${DEPOSIT_PROTECTION_LABEL.toLowerCase()} and rent eligibility. Use current retail price, not used price. AI suggests a value from your photos.`,
+    section: "hosting",
     keywords: ["deposit", "value", "estimated"],
   },
   {
     id: "qr-sticker",
-    category: "QR & pickup",
-    question: "Why do I need a QR sticker?",
-    answer:
-      "For rentals, a physical QR on the item helps verify handoff. After publish you may print a sticker or use the on-screen QR story. Buy-only or free ($0 sell) listings may skip the sticker.",
+    section: "qrPickup",
     keywords: ["code", "scan", "sticker"],
   },
   {
     id: "pickup-delivery",
-    category: "QR & pickup",
-    question: "How do pickup and delivery work?",
-    answer:
-      "New listings start with sensible neighborhood defaults (weekday porch hours). After publish, open the listing from My Garage → Full edit (or quick edits on the detail screen) to set in-person / contactless pickup and delivery miles & fees. Exact address is shared with a confirmed renter after booking.",
+    section: "qrPickup",
     keywords: ["handoff", "meet", "drop off"],
   },
   {
     id: "book-item",
-    category: "Renting",
-    question: "How do I rent an item?",
-    answer:
-      "Search on Home or browse the Feed, open an item, and request a booking. You'll authorize rental payment and any deposit hold separately. Track active rentals from the bookings icon on Home.",
+    section: "renting",
     keywords: ["borrow", "reserve", "request"],
   },
   {
     id: "post-request",
-    category: "Renting",
-    question: "Nothing shows up in search — what now?",
-    answer:
-      "Post a request from the empty search result. Neighbors with the right gear can respond. No fake counts — we show real listings on your block as garages fill up.",
+    section: "renting",
     keywords: ["request", "empty", "search"],
   },
   {
     id: "notifications",
-    category: "Renting",
-    question: "Where are my notifications?",
-    answer:
-      "Tap the bell on Home. Tabs show All, Bookings, and Messages.",
+    section: "renting",
     keywords: ["bell", "messages", "alerts"],
   },
   {
     id: "payments",
-    category: "Payments & safety",
-    question: "How do payments work?",
-    answer:
-      `Rentals: pay the rental total, then a separate ${DEPOSIT_PROTECTION_LABEL.toLowerCase()} hold if the host set a deposit. Payments run through Stripe — ${APP_NAME} does not store your card. Hosts connect Stripe for payouts.`,
+    section: "payments",
     keywords: ["stripe", "card", "money", "deposit"],
   },
   {
     id: "dispute",
-    category: "Payments & safety",
-    question: "Something went wrong with a rental — what now?",
-    answer:
-      `Document the issue with photos and messages in the app. For urgent safety issues contact local authorities first. ${MASCOT_NAME} can guide you on next in-app steps but cannot decide disputes alone.`,
+    section: "payments",
     keywords: ["damage", "problem", "refund"],
   },
   {
     id: "availability-step5",
-    category: "Hosting & listings",
-    question: "How do I set availability or pause a listing?",
-    answer:
-      "Open My Garage → tap the listing:\n• Pause / Unpause hides or restores the item in browse without deleting it.\n• Edit availability times (weekdays / weekend) from the detail quick-edit or Full edit.\n• Delete permanently removes the listing from your garage and the server.",
+    section: "hosting",
     keywords: ["hours", "weekend", "pause", "block", "dates", "schedule", "times", "delete", "unpause"],
   },
   {
     id: "skip-onboarding",
-    category: "Getting started",
-    question: "Can I skip onboarding?",
-    answer:
-      "Yes — Skip on intro screens sends you to set your block, then straight to Home. You can finish location later from the location chip on Home.",
+    section: "gettingStarted",
     keywords: ["skip", "later"],
   },
   {
     id: "bottom-nav",
-    category: "Navigation",
-    question: "What do the bottom menu buttons do?",
-    answer:
-      `Home = browse hub & categories. ${MASCOT_NAME} = help (FAQ + chat). Green + = stock a new item. Garage = your storefront & earnings. More = profile, rentals, favorites, and How ${APP_NAME} works. There is no search lupa in the footer.`,
+    section: "navigation",
     keywords: ["menu", "tabs", "footer", "navigate", "stuck", "freeze", "лупа"],
   },
   {
     id: "more-menu",
-    category: "Navigation",
-    question: "What is in the More menu?",
-    answer:
-      `More holds your profile card, Rentals, Messages (in-app chat), Favorites, Notifications, My Garage shortcut, Earn dashboard, the interactive How ${APP_NAME} works guide, and chat with ${MASCOT_NAME}.`,
+    section: "navigation",
     keywords: ["more", "settings", "account", "guide", "how it works", "messages", "chat"],
   },
   {
     id: "in-app-chat",
-    category: "Navigation",
-    question: "How do I message a neighbor in the app?",
-    answer:
-      "Open More → Messages for all threads. For a rental: Rentals → open booking → Message. For a purchase: listing → message icon. Replies can send a push notification if the other person enabled push.",
+    section: "navigation",
     keywords: ["chat", "message", "messages", "dm", "push", "seller", "host"],
   },
   {
     id: "mre-tab",
-    category: "Navigation",
-    question: `How do I use ${MASCOT_NAME}?`,
-    answer:
-      `Tap his tab in the footer. FAQ = instant answers (no AI cost). Chat checks FAQ first, then AI only if needed (answers are cached). Install tab helps add the app to your home screen.`,
+    section: "navigation",
     keywords: ["help", "assistant", "chat", "faq", "evorios"],
   },
   {
     id: "profile-vs-garage",
-    category: "Navigation",
-    question: "Profile vs Garage — what is the difference?",
-    answer:
-      "Garage is for hosting: your listings, requests, and stats. Profile is your identity: name, photo, phone, payout setup, notifications prefs, and sign out.",
+    section: "navigation",
     keywords: ["profile", "garage", "account", "settings"],
   },
   {
     id: "zip-only",
-    category: "Location",
-    question: "Do I need my exact street address?",
-    answer:
-      "No. City + ZIP (e.g. Hot Springs Village, AR 71909) is enough for browsing nearby garages. Exact address is only shared with a confirmed renter at handoff when you choose that pickup mode.",
+    section: "location",
     keywords: ["address", "privacy", "zip", "71909", "street", "area"],
   },
   {
     id: "arkansas-rural",
-    category: "Location",
-    question: "I'm in rural Arkansas — why so few listings?",
-    answer:
-      "New blocks fill in as neighbors stock their garages. Use Search wider on Home (50+ mi), post a request, or list your own gear — early hosts get more visibility.",
+    section: "location",
     keywords: ["arkansas", "rural", "sparse", "71909", "hot springs"],
   },
   {
     id: "traveling-mode",
-    category: "Location",
-    question: "I'm traveling — how do I browse another area?",
-    answer:
-      "During onboarding choose Traveling, or change location from the chip on Home. Pick destination city/ZIP — we show garages there, not your home block.",
+    section: "location",
     keywords: ["trip", "travel", "vacation", "destination"],
   },
   {
     id: "neighbor-garage",
-    category: "Renting",
-    question: "How do I open a neighbor's garage?",
-    answer:
-      "On Home switch to Garages lens, or tap a host card in the feed. You will see their storefront and active listings.",
+    section: "renting",
     keywords: ["neighbor", "storefront", "host", "browse"],
   },
   {
     id: "favorites",
-    category: "Renting",
-    question: "How do saved favorites work?",
-    answer: "More → Favorites saves listings you hearted. Tap any favorite to open the item and book again.",
+    section: "renting",
     keywords: ["favorite", "saved", "heart", "wishlist"],
   },
   {
     id: "active-rental",
-    category: "Renting",
-    question: "Where is my active rental?",
-    answer:
-      "More → Rentals, or the clipboard icon on Home. Open the booking for pickup window, messages, QR check-in, and return steps.",
+    section: "renting",
     keywords: ["active", "current", "pickup", "return"],
   },
   {
     id: "extend-rental",
-    category: "Renting",
-    question: "Can I extend a rental?",
-    answer:
-      "If the host allows it, open the active rental and request more days before return. The host approves and pricing updates in the app.",
+    section: "renting",
     keywords: ["extend", "longer", "extra days"],
   },
   {
     id: "cancel-booking",
-    category: "Renting",
-    question: "How do I cancel a booking?",
-    answer:
-      "Open the rental in Rentals and choose Cancel if still before pickup. Refund rules follow the host policy and timing — see the booking summary.",
+    section: "renting",
     keywords: ["cancel", "refund"],
   },
   {
     id: "host-payouts",
-    category: "Payments & safety",
-    question: "How do hosts get paid?",
-    answer:
-      "Connect Stripe in Profile → payouts. Rental payouts land after successful return; platform fees are shown before you publish.",
+    section: "payments",
     keywords: ["payout", "stripe connect", "earn", "money"],
   },
   {
     id: "deposit-release",
-    category: "Payments & safety",
-    question: "When is my deposit released?",
-    answer:
-      "After the host confirms return (or auto-release timer if no dispute). Holds are separate from the rental charge on your card statement.",
+    section: "payments",
     keywords: ["deposit", "release", "hold", "refund"],
   },
   {
     id: "passkey",
-    category: "Account",
-    question: "What is a passkey?",
-    answer:
-      "Passkeys let you sign in with Face ID / fingerprint instead of typing the email code each time. After first sign-in, the app may offer to set one up — optional but faster. Sign-in codes still come by email.",
+    section: "account",
     keywords: ["passkey", "face id", "fingerprint", "login"],
   },
   {
     id: "co-host",
-    category: "Hosting & listings",
-    question: "Can I add a co-host?",
-    answer:
-      "Profile → Co-hosts lets you invite someone to help manage your garage. They can respond to requests depending on permissions you set.",
+    section: "hosting",
     keywords: ["cohost", "co-host", "partner", "family"],
   },
   {
     id: "pause-listing",
-    category: "Hosting & listings",
-    question: "How do I pause a listing?",
-    answer:
-      "My Garage → open the listing → Pause listing. It disappears from browse instantly. Tap Unpause when you are ready again. Use Delete only if you want it gone forever.",
+    section: "hosting",
     keywords: ["pause", "hide", "vacation", "unavailable", "delete"],
   },
   {
     id: "edit-listing",
-    category: "Hosting & listings",
-    question: "How do I edit a published listing?",
-    answer:
-      "Garage → tap the listing → use quick edits on the detail screen, or Full edit for photos and pricing. Pause and Delete are on the same Manage section.",
+    section: "hosting",
     keywords: ["edit", "change price", "update"],
   },
   {
     id: "boost-listing",
-    category: "Hosting & listings",
-    question: "How do I get more views?",
-    answer:
-      "Clear photos, fair pricing, and complete availability help most. Paid boost (when available) highlights your item on the block feed.",
+    section: "hosting",
     keywords: ["boost", "views", "promote", "traffic"],
   },
   {
     id: "report-issue",
-    category: "Payments & safety",
-    question: "How do I report a user or listing?",
-    answer:
-      "Open the listing or rental thread → Report. For emergencies call local authorities first. Include photos and dates for damage claims.",
+    section: "payments",
     keywords: ["report", "scam", "safety", "block"],
   },
   {
     id: "app-update",
-    category: "Getting started",
-    question: "The app asked me to update — what should I do?",
-    answer:
-      "Evorios downloads updates in the background and installs them overnight around 2 AM on your phone (or the next time you open the app after that). You can also open Notifications (bell) and tap Update if you want it sooner. If the screen feels stuck after update, close and reopen the app.",
+    section: "gettingStarted",
     keywords: ["update", "pwa", "refresh", "stuck", "overnight"],
   },
   {
     id: "offline",
-    category: "Getting started",
-    question: "Does Evorios work offline?",
-    answer:
-      "Browsing cached pages may work briefly, but booking, chat, and new search need internet. You will see an offline screen when there is no connection.",
+    section: "gettingStarted",
     keywords: ["offline", "internet", "wifi"],
   },
 ];
 
-export function searchFaq(query: string): FaqItem[] {
+export function buildFaqItems(faq: AppMessages["faq"]): FaqItem[] {
+  return FAQ_META.map((meta) => {
+    const copy = faq.items[meta.id];
+    return {
+      id: meta.id,
+      category: faq.sections[meta.section],
+      question: copy.q,
+      answer: copy.a,
+      keywords: meta.keywords,
+    };
+  });
+}
+
+/** Localized FAQ for the active locale. */
+export function getRentanoFaq(): FaqItem[] {
+  return buildFaqItems(getMessages().faq);
+}
+
+export function searchFaq(query: string, items?: FaqItem[]): FaqItem[] {
+  const list = items ?? getRentanoFaq();
   const q = query.trim().toLowerCase();
-  if (!q) return RENTANO_FAQ;
-  return RENTANO_FAQ.filter((item) => {
+  if (!q) return list;
+  return list.filter((item) => {
     const haystack = [
       item.question,
       item.answer,

@@ -1,4 +1,5 @@
 import type { AppMessages } from "../types";
+import { faq } from "./faqCs";
 
 export const cs: AppMessages = {
   tagline: "Evoluce vlastnictví.",
@@ -1038,6 +1039,29 @@ export const cs: AppMessages = {
     shareTitleApp: (appName) => `Žádost na ${appName}`,
     shareDefaultText: (appName, city) =>
       `Hledám vybavení poblíž ${city} na ${appName}.`,
+  },
+  faq,
+  favorites: {
+    title: "Oblíbené",
+    subtitle: "Uloženo na později — půjčit nebo koupit",
+    emptyTitle: "Zatím žádné oblíbené",
+    emptyBody: "Klepněte na srdce u nabídky a uložte ji sem.",
+    browseCta: "Procházet poblíž",
+    listingFallback: "Nabídka",
+    removeAria: (title) => `Odebrat ${title} z oblíbených`,
+    ratePerDay: (rate) => `${rate} $/den`,
+  },
+  signInPrompt: {
+    cta: "Přihlásit se / Vytvořit účet",
+  },
+  peerChat: {
+    title: "Chat",
+    tip: (mascotHandle) =>
+      `Tip: zmiňte @${mascotHandle} pro rychlou pomoc. Push upozorní druhou osobu, pokud má oznámení zapnutá.`,
+    empty: "Zatím žádné zprávy — pozdravte a potvrďte detaily vyzvednutí.",
+    placeholder: "Napsat zprávu…",
+    listingChatFallback: "Chat k nabídce",
+    listingChatSubtitle: "Chat o vyzvednutí · push při odpovědi",
   },
   onboarding: {
     roleChoice: {

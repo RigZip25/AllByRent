@@ -3,6 +3,7 @@ import { PeerChatPanel } from "../components/PeerChatPanel";
 import { getPublishedListingById } from "../lib/listingStorage";
 import { getListingDisplayTitle } from "../lib/listingQr";
 import { BRAND_GREEN } from "../lib/brand";
+import { useMessages } from "../lib/i18n/react";
 
 const GREEN = BRAND_GREEN;
 const BORDER = "#E8E6E0";
@@ -15,10 +16,11 @@ type Props = {
 };
 
 export function ListingChatScreen({ listingId, peerId, onBack, onRequireAuth }: Props) {
+  const { peerChat, common } = useMessages();
   const listing = getPublishedListingById(listingId);
   const title = listing
-    ? getListingDisplayTitle(listing.title) || listing.title || "Listing chat"
-    : "Listing chat";
+    ? getListingDisplayTitle(listing.title) || listing.title || peerChat.listingChatFallback
+    : peerChat.listingChatFallback;
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -28,7 +30,7 @@ export function ListingChatScreen({ listingId, peerId, onBack, onRequireAuth }: 
             type="button"
             onClick={onBack}
             className="flex h-10 w-10 items-center justify-center rounded-full"
-            aria-label="Back"
+            aria-label={common.back}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
@@ -36,7 +38,7 @@ export function ListingChatScreen({ listingId, peerId, onBack, onRequireAuth }: 
             <h1 className="truncate text-[18px] font-extrabold" style={{ color: GREEN }}>
               {title}
             </h1>
-            <p className="text-[12px] text-gray-500">Chat about pickup · push when they reply</p>
+            <p className="text-[12px] text-gray-500">{peerChat.listingChatSubtitle}</p>
           </div>
         </div>
       </header>

@@ -1,4 +1,5 @@
 import type { AppMessages } from "../types";
+import { faq } from "./faqEn";
 
 export const en: AppMessages = {
   tagline: "The evolution of ownership.",
@@ -1028,6 +1029,29 @@ export const en: AppMessages = {
     shareTitleApp: (appName) => `Request on ${appName}`,
     shareDefaultText: (appName, city) =>
       `Looking for gear near ${city} on ${appName}.`,
+  },
+  faq,
+  favorites: {
+    title: "Favorites",
+    subtitle: "Saved for later — rent or buy",
+    emptyTitle: "No favorites yet",
+    emptyBody: "Tap the heart on a listing to save it here.",
+    browseCta: "Browse nearby",
+    listingFallback: "Listing",
+    removeAria: (title) => `Remove ${title} from favorites`,
+    ratePerDay: (rate) => `$${rate}/day`,
+  },
+  signInPrompt: {
+    cta: "Sign in / Create account",
+  },
+  peerChat: {
+    title: "Chat",
+    tip: (mascotHandle) =>
+      `Tip: mention @${mascotHandle} for quick help. Push alerts the other person when they enabled notifications.`,
+    empty: "No messages yet — say hi and confirm pickup details.",
+    placeholder: "Write a message…",
+    listingChatFallback: "Listing chat",
+    listingChatSubtitle: "Chat about pickup · push when they reply",
   },
   onboarding: {
     roleChoice: {
