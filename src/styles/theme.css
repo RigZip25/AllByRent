@@ -929,6 +929,13 @@
 
   .browse-hub-cards--duo {
     gap: clamp(8px, 1.5dvh, 14px);
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .browse-hub-categories {
+    border-top: 1px solid #f0f0ec;
+    padding-top: 0.5rem;
   }
 
   .browse-hub-cards--duo .browse-hub-choice {

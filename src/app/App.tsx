@@ -116,6 +116,7 @@ import {
   saveHomeFeedLens,
   saveHomeFeedMode,
   saveHomeFeedQuery,
+  saveHomeFeedCategory,
 } from "../lib/homeFeedStorage";
 
 type BrowseHubChoice = "findGear" | "yardSales";
@@ -800,6 +801,7 @@ function AppRoutes() {
         saveHomeFeedLens("feed");
         saveHomeFeedMode("all");
         saveHomeFeedQuery("");
+        saveHomeFeedCategory(null);
         navigateTo("home");
         return;
       }
@@ -807,6 +809,17 @@ function AppRoutes() {
         navigateTo("yardSaleHub");
         return;
       }
+    },
+    [navigateTo],
+  );
+
+  const handleBrowseHubCategory = useCallback(
+    (category: string) => {
+      saveHomeFeedLens("feed");
+      saveHomeFeedMode("all");
+      saveHomeFeedQuery("");
+      saveHomeFeedCategory(category);
+      navigateTo("home");
     },
     [navigateTo],
   );
@@ -1418,6 +1431,7 @@ function AppRoutes() {
         {currentScreen === "browseHub" && (
           <BrowseHubScreen
             onChoose={handleBrowseHubChoice}
+            onChooseCategory={handleBrowseHubCategory}
             onEditLocation={openRentLocationSetup}
           />
         )}

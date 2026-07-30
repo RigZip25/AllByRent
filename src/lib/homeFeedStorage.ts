@@ -1,6 +1,7 @@
 const QUERY_KEY = "evorios_home_query";
 const MODE_KEY = "evorios_home_mode";
 const LENS_KEY = "evorios_home_lens";
+const CATEGORY_KEY = "evorios_home_category";
 
 export function loadHomeFeedQuery(): string {
   try {
@@ -49,6 +50,27 @@ export function loadHomeFeedLens(): "feed" | "garages" {
 export function saveHomeFeedLens(lens: "feed" | "garages"): void {
   try {
     sessionStorage.setItem(LENS_KEY, lens);
+  } catch {
+    /* */
+  }
+}
+
+export function loadHomeFeedCategory(): string | null {
+  try {
+    const raw = sessionStorage.getItem(CATEGORY_KEY)?.trim() ?? "";
+    return raw || null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveHomeFeedCategory(category: string | null): void {
+  try {
+    if (!category?.trim()) {
+      sessionStorage.removeItem(CATEGORY_KEY);
+      return;
+    }
+    sessionStorage.setItem(CATEGORY_KEY, category.trim());
   } catch {
     /* */
   }

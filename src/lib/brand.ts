@@ -81,21 +81,23 @@ export const ONBOARDING = {
     exploreCta: "Choose how to browse →",
     stockGarageCta: "Stock my garage →",
   },
-  browseHub: {
-    title: "What brings you here?",
-    subtitle: "Everyday browse or a yard-sale run.",
-    findGear: {
-      title: "Browse the block",
-      subtitle: "Search items · Feed or Garages",
-      cta: "Start browsing →",
+    browseHub: {
+      title: "What brings you here?",
+      subtitle: "Everyday browse or a yard-sale run.",
+      findGear: {
+        title: "Browse the block",
+        subtitle: "Search items · Feed or Garages",
+        cta: "Start browsing →",
+      },
+      yardSales: {
+        title: "Yard & garage sales",
+        subtitle: "Beta — snap sales & auctions on your block",
+        cta: "Garage sales (Beta) →",
+      },
+      categoriesTitle: "Browse by category",
+      categoriesHint: "Jump straight into tools, garden plants, party gear, and more.",
+      footer: "Rent & list anytime from Stock (+) or My Garage.",
     },
-    yardSales: {
-      title: "Yard & garage sales",
-      subtitle: "Beta — snap sales & auctions on your block",
-      cta: "Garage sales (Beta) →",
-    },
-    footer: "Rent & list anytime from Stock (+) or My Garage.",
-  },
   yardSaleHub: {
     title: "Garage sales (Beta)",
     subtitle: "Experimental — browse who's open or set up your own sale.",
