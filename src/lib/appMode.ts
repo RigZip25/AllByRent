@@ -14,6 +14,7 @@ export function getAppMode(): AppMode {
 export function setAppMode(mode: AppMode): void {
   try {
     localStorage.setItem(APP_MODE_STORAGE_KEY, mode);
+    window.dispatchEvent(new CustomEvent("allbyrent-mode", { detail: mode }));
   } catch {
     /* ignore */
   }

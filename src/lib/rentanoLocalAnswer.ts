@@ -1,4 +1,4 @@
-import { MASCOT_NAME } from "./brand";
+import { MASCOT_NAME, APP_NAME } from "./brand";
 import { RENTANO_FAQ, searchFaq, type FaqItem } from "../data/rentanoFaq";
 
 export type LocalAnswerSource = "faq" | "hint";
@@ -32,7 +32,23 @@ const STOP_WORDS = new Set([
   "need",
 ]);
 
-const NAV_HINTS: Array<{ patterns: RegExp[]; answer: string }> = [
+const NAV_HINTS: Array<{ patterns: RegExp[]; answer: string; answerRu?: string }> = [
+  {
+    patterns: [
+      /категор/i,
+      /ориентир/i,
+      /browse\s+by\s+categor/i,
+      /how\s+(do\s+i\s+)?(find|use|see)\s+categor/i,
+      /where\s+(are\s+)?categor/i,
+      /луп[аыуе]/i,
+      /magnif/i,
+      /search\s+icon/i,
+    ],
+    answer:
+      "Categories are on Home: chips on the browse hub and on the feed under Rent/Buy (Tools, Garden & Yard, Party…). There is no magnifying-glass search in the footer. Full list: More → How Evorios works. When you list with +, pick a category in the wizard.",
+    answerRu:
+      "Категории на Home: чипы на browse hub и в ленте под Rent/Buy (Tools, Garden & Yard, Party…). Лупы (поиска) в футере нет. Полный список: More → How Evorios works. При листинге через + категория выбирается в мастере.",
+  },
   {
     patterns: [
       /как\s+размест/i,
@@ -43,31 +59,37 @@ const NAV_HINTS: Array<{ patterns: RegExp[]; answer: string }> = [
     ],
     answer:
       "Tap the green + in the footer to stock your garage. Follow the wizard: photos → item info → pricing → pickup → availability → QR → publish. Then open Garage to see your listings.",
+    answerRu:
+      "Нажмите зелёный + в футере, чтобы пополнить гараж. Мастер: фото → описание → цена → получение → доступность → QR → публикация. Потом откройте Garage.",
   },
   {
     patterns: [/bottom\s*nav/i, /menu.*(not|won.?t|doesn.?t)/i, /(stuck|freeze|hang)/i, /can.?t\s+(tap|click|navigate)/i],
     answer:
-      `If taps do nothing, pull down to refresh once. Bottom menu: Home (browse), ${MASCOT_NAME} (help), green + (list an item), Garage (your storefront), More (profile & rentals). Each tab should switch instantly.`,
+      `If taps do nothing, pull down to refresh once. Bottom menu: Home (browse + categories), ${MASCOT_NAME} (help), green + (list an item), Garage (your storefront), More (profile, rentals, How Evorios works). No search lupa in the footer.`,
+    answerRu:
+      `Если тапы не работают — потяните вниз для обновления. Меню внизу: Home (категории), ${MASCOT_NAME} (помощь), зелёный + (листинг), Garage (ваша витрина), More (профиль и гайд How Evorios works). Лупы поиска в футере нет.`,
   },
   {
-    patterns: [/mr\.?\s*e/i, /evorios/i, /mascot/i, /assistant/i],
+    patterns: [/mr\.?\s*e/i, /mascot/i, /assistant/i, /эвориус/i],
     answer:
-      `Tap ${MASCOT_NAME} in the bottom menu. Start with the FAQ tab for instant answers (deposits, listing, ZIP search). Chat tries those answers first; AI is only used when nothing matches.`,
+      `Tap ${MASCOT_NAME} in the bottom menu. Start with the FAQ tab for instant answers. Chat tries those answers first; AI is only used when nothing matches. For a guided tour open More → How Evorios works.`,
+    answerRu:
+      `Откройте ${MASCOT_NAME} во вкладке внизу. FAQ — быстрые ответы. Чат сначала ищет FAQ, AI только если нет совпадения. Тур: More → How Evorios works.`,
   },
   {
     patterns: [/profile.*garage/i, /garage.*profile/i, /difference.*garage/i],
     answer:
-      "Garage = your listings, requests, and earnings. Profile = your name, photo, phone, payouts, and sign-out. Open More → profile card, or Garage → gear for settings.",
+      "Garage = your listings, requests, and earnings. Profile = your name, photo, phone, payouts, and sign-out. Open More → profile card, or Garage → gear for settings. Browse vs My Garage is a preference in Profile — same account.",
   },
   {
     patterns: [/71909/i, /hot\s*springs/i, /arkansas/i, /rural/i, /zip\s*code/i],
     answer:
-      "For Hot Springs Village / 71909 we show nearby garages in your cluster (about 25 mi). You do not need an exact street address — city + ZIP is enough. If results are thin, tap Search wider on Home for 50+ mi.",
+      "For Hot Springs Village / 71909 we show nearby garages in your cluster (about 25 mi). You do not need an exact street address — city + ZIP is enough. If results are thin, expand the distance filter on Home.",
   },
   {
     patterns: [/search\s*wider/i, /expand.*radius/i, /nothing\s+near/i, /no\s+results/i],
     answer:
-      "On Home, if the cluster is sparse, use Search wider to expand the radius (50+ mi). You can also post a request so neighbors with the item get notified.",
+      "On Home, open Filters to expand distance if the cluster is sparse. You can also post a request so neighbors with the item get notified. Browse by category chips first.",
   },
   {
     patterns: [/deposit/i, /hold/i, /authorization/i],
@@ -92,6 +114,13 @@ const NAV_HINTS: Array<{ patterns: RegExp[]; answer: string }> = [
     patterns: [/stock/i, /list\s+an?\s+item/i, /add\s+listing/i, /green\s*\+/i],
     answer:
       "Tap the green + in the footer to stock your garage. Follow the wizard: photos → item info → pricing → pickup → availability → QR → publish.",
+  },
+  {
+    patterns: [/маркетплейс/i, /marketplace/i, /household/i, /домохозяйств/i, /бизнес\s*ячейк/i],
+    answer:
+      `${APP_NAME} is a neighborhood marketplace: each household is a business cell that can rent, sell, or gift from its garage. Open More → How Evorios works for the full tour, or Home for category chips.`,
+    answerRu:
+      `${APP_NAME} — соседский маркетплейс: каждое домохозяйство — бизнес-ячейка (гараж-витрина), где можно сдавать в аренду, продавать или дарить. Тур: More → How Evorios works. Категории — на Home.`,
   },
 ];
 
@@ -155,8 +184,10 @@ function pickBestFaq(query: string): FaqItem | null {
 function pickNavHint(query: string): string | null {
   const trimmed = query.trim();
   if (!trimmed) return null;
+  const preferRu = /\p{Script=Cyrillic}/u.test(trimmed);
   for (const hint of NAV_HINTS) {
     if (hint.patterns.some((pattern) => pattern.test(trimmed))) {
+      if (preferRu && hint.answerRu) return hint.answerRu;
       return hint.answer;
     }
   }
@@ -199,11 +230,12 @@ export function findLocalRentanoAnswer(query: string): LocalAnswerResult | null 
   const trimmed = query.trim();
   if (!trimmed) return null;
 
-  // Don't serve English canned answers to RU/ES/… questions.
-  if (queryLooksNonEnglish(trimmed)) return null;
-
+  // Navigation truth (categories, no footer lupa, marketplace) — even for RU/ES.
   const nav = pickNavHint(trimmed);
   if (nav) return { answer: nav, source: "hint" };
+
+  // Don't serve English canned FAQ to RU/ES/… questions — let AI reply in-language.
+  if (queryLooksNonEnglish(trimmed)) return null;
 
   const faq = pickBestFaq(trimmed);
   if (faq) return { answer: faq.answer, source: "faq", faqId: faq.id };

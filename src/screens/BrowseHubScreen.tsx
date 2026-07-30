@@ -2,7 +2,7 @@ import { MapPin } from "lucide-react";
 import { HubChoiceCard } from "../components/HubChoiceCard";
 import { BRAND_AMBER, BRAND_GREEN } from "../lib/brand";
 import { clusterLabelForCity, getClusterRadiusMi } from "../lib/clusterConfig";
-import { getHomeCategoryChips } from "../lib/homeCategoryPicks";
+import { getAllCategoryChips } from "../lib/homeCategoryPicks";
 import { getActiveRentLocationLabel, hasRentLocationSetup } from "../lib/listingStorage";
 import { onboardingAssets } from "../lib/onboardingAssets";
 import { useOnboardingCopy } from "../lib/i18n/react";
@@ -28,7 +28,7 @@ export function BrowseHubScreen({
   const city = getActiveRentLocationLabel().trim();
   const clusterLabel = clusterLabelForCity(city, getClusterRadiusMi());
   const needsLocation = !hasRentLocationSetup();
-  const categories = getHomeCategoryChips();
+  const categories = getAllCategoryChips();
 
   return (
     <div className="screen onboarding-step mx-auto w-full max-w-[390px] bg-white">

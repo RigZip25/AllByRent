@@ -1,11 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { HelpCircle, MessageCircle, Smartphone } from "lucide-react";
 import { RentanoChatPanel } from "../components/rentano/RentanoChatPanel";
 import { RentanoFaqPanel } from "../components/rentano/RentanoFaqPanel";
 import { PwaInstallPanel } from "../components/PwaInstallPanel";
-import { APP_NAME, MASCOT_NAME } from "../lib/brand";
+import { APP_NAME, APP_MODE_LABELS, MASCOT_NAME } from "../lib/brand";
 import { usePwaInstallPrompt } from "../hooks/PwaInstallProvider";
-import { isStandalonePwa } from "../lib/pwaInstall";
 import { getAppMode } from "../lib/appMode";
 import { useAuth } from "../hooks/AuthProvider";
 import rentanoImg from "../imports/No_back_rentano.png";
@@ -15,28 +14,51 @@ const BORDER = "#E8E6E0";
 
 type AssistantView = "chat" | "faq" | "install";
 
-const QUICK_PROMPTS = [
+const QUICK_PROMPTS_RENT = [
+  "How do I browse by category?",
   "Menu buttons — what does each tab do?",
-  "I'm in 71909 — how does search work?",
-  "How does the deposit hold work?",
+  "What is Evorios — household marketplace?",
   "Profile vs Garage — what's the difference?",
   "How do I list my first item?",
+];
+
+const QUICK_PROMPTS_EARN = [
+  "How do I stock my garage?",
+  "Which categories can I list?",
+  "What is Evorios — household marketplace?",
+  "Profile vs Garage — what's the difference?",
+  "How do I switch to Browse?",
 ];
 
 export function MrEvoriosScreen() {
   const auth = useAuth();
   const pwa = usePwaInstallPrompt();
-  const installed = isStandalonePwa();
   const [view, setView] = useState<AssistantView>("chat");
   const [chatSeed, setChatSeed] = useState<string | null>(null);
+  const [appMode, setAppModeState] = useState(() => getAppMode());
+
+  useEffect(() => {
+    const sync = () => setAppModeState(getAppMode());
+    window.addEventListener("storage", sync);
+    window.addEventListener("focus", sync);
+    window.addEventListener("allbyrent-mode", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("focus", sync);
+      window.removeEventListener("allbyrent-mode", sync);
+    };
+  }, []);
+
+  const quickPrompts = appMode === "earn" ? QUICK_PROMPTS_EARN : QUICK_PROMPTS_RENT;
 
   const apiContext = useMemo(
     () => ({
       screen: "mrE",
-      appMode: getAppMode(),
+      appMode,
+      userRole: appMode === "earn" ? ("host" as const) : ("renter" as const),
       userId: auth.userId ?? undefined,
     }),
-    [auth.userId],
+    [auth.userId, appMode],
   );
 
   const openChat = (prefill?: string) => {
@@ -49,17 +71,17 @@ export function MrEvoriosScreen() {
       <div className="shrink-0 border-b bg-white px-4 pb-3 pt-3" style={{ borderColor: BORDER }}>
         <div className="flex items-center gap-3">
           <div
-            className="h-14 w-14 shrink-0 overflow-hidden rounded-full"
+            className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full"
             style={{ border: `2px solid ${GREEN}` }}
           >
             <img src={rentanoImg} alt="" className="h-full w-full object-cover" draggable={false} />
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="text-[22px] font-extrabold leading-tight" style={{ color: GREEN }}>
+            <h1 className="truncate text-[18px] font-extrabold" style={{ color: GREEN }}>
               {MASCOT_NAME}
             </h1>
-            <p className="text-[13px] text-gray-500">
-              Your {APP_NAME} guide — FAQ first, chat when you need more
+            <p className="text-[12px] text-gray-500">
+              {APP_NAME} guide · mode: {APP_MODE_LABELS[appMode]}
             </p>
           </div>
         </div>
@@ -67,15 +89,13 @@ export function MrEvoriosScreen() {
         <div className="mt-3 flex gap-2">
           {(
             [
-              { id: "chat" as const, label: "Chat", icon: MessageCircle },
-              { id: "faq" as const, label: "FAQ", icon: HelpCircle },
-              ...(!installed
-                ? [{ id: "install" as const, label: "Install", icon: Smartphone }]
-                : []),
+              { id: "chat" as const, label: "Chat", Icon: MessageCircle },
+              { id: "faq" as const, label: "FAQ", Icon: HelpCircle },
+              { id: "install" as const, label: "Install", Icon: Smartphone },
             ] as const
           ).map((tab) => {
             const active = view === tab.id;
-            const Icon = tab.icon;
+            const Icon = tab.Icon;
             return (
               <button
                 key={tab.id}
@@ -100,7 +120,7 @@ export function MrEvoriosScreen() {
         {view === "chat" ? (
           <>
             <div className="mb-3 flex flex-wrap gap-2">
-              {QUICK_PROMPTS.map((prompt) => (
+              {quickPrompts.map((prompt) => (
                 <button
                   key={prompt}
                   type="button"
@@ -113,7 +133,7 @@ export function MrEvoriosScreen() {
               ))}
             </div>
             <RentanoChatPanel
-              key={chatSeed ?? "chat-default"}
+              key={`${chatSeed ?? "chat-default"}-${appMode}`}
               apiContext={apiContext}
               initialMessage={chatSeed}
               onInitialMessageConsumed={() => setChatSeed(null)}

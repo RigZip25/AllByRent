@@ -9,7 +9,7 @@ import {
   loadHomeFeedCategory,
   saveHomeFeedCategory,
 } from "../../lib/homeFeedStorage";
-import { getHomeCategoryChips } from "../../lib/homeCategoryPicks";
+import { getAllCategoryChips } from "../../lib/homeCategoryPicks";
 import {
   fetchActiveListingsForCityRemote,
   isListingBrowsable,
@@ -148,7 +148,7 @@ export function HomeFeed({
     [filteredListings, hostMeta],
   );
 
-  const browseCategories = useMemo(() => getHomeCategoryChips(), []);
+  const browseCategories = useMemo(() => getAllCategoryChips(), []);
 
   // Price + radius only — categories live on the main strip now.
   const activeFilterCount =
