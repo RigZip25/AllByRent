@@ -262,10 +262,35 @@ function parseOpenMeteoResult(item: OpenMeteoResult): LocationSuggestion | null 
 }
 
 function photonLang(countryCode: CountryCode): string {
-  if (countryCode === "RU" || countryCode === "BY" || countryCode === "KZ") return "ru";
-  if (countryCode === "UA") return "uk";
+  // Prefer device language; bias a few locales when Photon benefits from it.
+  const byCountry: Record<string, string> = {
+    UA: "uk",
+    DE: "de",
+    AT: "de",
+    CH: "de",
+    FR: "fr",
+    BE: "fr",
+    ES: "es",
+    MX: "es",
+    AR: "es",
+    CL: "es",
+    CO: "es",
+    PE: "es",
+    UY: "es",
+    BR: "pt",
+    PT: "pt",
+    IT: "it",
+    NL: "nl",
+    PL: "pl",
+    CZ: "default",
+  };
+  const forced = byCountry[countryCode];
+  if (forced && forced !== "default") return forced;
   if (typeof navigator === "undefined") return "en";
-  return (navigator.language || "en").split("-")[0] || "en";
+  const primary = (navigator.language || "en").split("-")[0] || "en";
+  // Photon supports a limited set; fall back to en for rare tags.
+  const supported = new Set(["en", "de", "fr", "it", "es", "pt", "nl", "pl", "uk", "default"]);
+  return supported.has(primary) ? primary : "en";
 }
 
 async function searchPhoton(
@@ -282,7 +307,7 @@ async function searchPhoton(
   const bbox =
     countryCode === "US" && usState && US_STATE_BBOX[usState]
       ? US_STATE_BBOX[usState]
-      : COUNTRY_BBOX[countryCode];
+      : COUNTRY_BBOX[countryCode] ?? COUNTRY_BBOX.US;
   url.searchParams.set("bbox", bbox.join(","));
 
   if (near) {

@@ -4,6 +4,7 @@ import { OnboardingTopBar } from "../../components/OnboardingTopBar";
 import type { LocationSuggestion } from "../../lib/geocoding";
 import { detectCurrentLocation, formatGeolocationErrorMessage } from "../../lib/geolocation";
 import { setHomeLocation } from "../../lib/listingStorage";
+import { getCountryEmptyHint, getSearchCountryCode } from "../../lib/locationCountry";
 
 const GREEN = "#0D5C3A";
 
@@ -18,6 +19,7 @@ export function WhereAreYouManual({ onBack, onContinue, onSkip, hint }: WhereAre
   const [selectedLocation, setSelectedLocation] = useState<LocationSuggestion | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [locateError, setLocateError] = useState<string | null>(null);
+  const countryCode = getSearchCountryCode();
 
   const handleUseMyLocation = async () => {
     setLocateError(null);
@@ -72,7 +74,7 @@ export function WhereAreYouManual({ onBack, onContinue, onSkip, hint }: WhereAre
           </h1>
           <p className="mt-2 text-base leading-relaxed text-gray-500">
             {hint ??
-              "Enter your ZIP code or city — we show rentals near you. No need for your exact street address."}
+              "Enter your postal code or city — we show rentals near you. Street address is optional."}
           </p>
         </div>
 
@@ -93,8 +95,8 @@ export function WhereAreYouManual({ onBack, onContinue, onSkip, hint }: WhereAre
           ) : null}
           <AddressLocationPicker
             variant="area"
-            placeholder="ZIP code or city, state"
-            emptyHint="Best: 5-digit ZIP (71909). Or city: Hot Springs Village, AR"
+            placeholder="Postal code or city"
+            emptyHint={getCountryEmptyHint(countryCode, "area")}
             selected={selectedLocation}
             onSelect={setSelectedLocation}
             onClear={() => setSelectedLocation(null)}
@@ -105,7 +107,7 @@ export function WhereAreYouManual({ onBack, onContinue, onSkip, hint }: WhereAre
       <footer className="shrink-0 border-t border-gray-100 px-4 pb-6 pt-4">
         {!selectedLocation ? (
           <p className="mb-2 text-center text-[14px] text-gray-500">
-            Pick a ZIP or city above, or tap Skip to browse first.
+            Pick a postal code or city above, or tap Skip to browse first.
           </p>
         ) : null}
         <button
