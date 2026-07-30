@@ -405,7 +405,52 @@ export const CATEGORIES: Record<string, CategoryData> = {
   },
 };
 
-export const CATEGORY_NAMES = Object.keys(CATEGORIES) as (keyof typeof CATEGORIES)[];
+/**
+ * Display / browse order — high neighborhood demand & share potential first.
+ * Keep in sync when adding categories to CATEGORIES.
+ */
+export const CATEGORY_DISPLAY_ORDER = [
+  "Tools & DIY",
+  "Garden & Yard",
+  "Home & Kitchen",
+  "Baby & Kids",
+  "Party & Events",
+  "Sports & Recreation",
+  "Outdoor & Camping",
+  "Electronics & Tech",
+  "Photo & Video",
+  "Bikes & Scooters",
+  "Gym & Fitness",
+  "Music & Audio",
+  "Vehicles",
+  "Costume & Cosplay",
+  "Office & Business",
+  "Construction",
+  "Heavy Equipment",
+  "Boats & Water",
+  "Real Estate",
+  "Unique & Other",
+] as const satisfies readonly (keyof typeof CATEGORIES)[];
+
+function orderedCategoryNames(): (keyof typeof CATEGORIES)[] {
+  const known = new Set<string>(Object.keys(CATEGORIES));
+  const ordered: (keyof typeof CATEGORIES)[] = [];
+  for (const name of CATEGORY_DISPLAY_ORDER) {
+    if (known.has(name)) {
+      ordered.push(name);
+      known.delete(name);
+    }
+  }
+  // Any newly added category not yet in DISPLAY_ORDER still appears (before Unique).
+  for (const name of known) {
+    if (name === "Unique & Other") continue;
+    ordered.push(name as keyof typeof CATEGORIES);
+  }
+  if (known.has("Unique & Other")) ordered.push("Unique & Other");
+  return ordered;
+}
+
+export const CATEGORY_NAMES = orderedCategoryNames();
 
 export type ListingCategory = keyof typeof CATEGORIES;
 

@@ -8,6 +8,7 @@ import { improveListingDescription } from "../listingDescriptionImprove";
 import { isYardSaleListingActive } from "../../../lib/yardSaleListing";
 import {
   CATEGORIES,
+  CATEGORY_NAMES,
   getCategoryModeRules,
   getSubcategories,
   matchListingCategory,
@@ -295,7 +296,7 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
             }}
           >
             <option value="">Select category</option>
-            {Object.keys(CATEGORIES).map((item) => (
+            {CATEGORY_NAMES.map((item) => (
               <option key={item} value={item}>
                 {item}
               </option>
