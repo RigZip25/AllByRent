@@ -6,6 +6,8 @@ import { RentanoHint } from "../../../components/RentanoHint";
 import { MASCOT_NAME } from "../../../lib/brand";
 import { improveListingDescription } from "../listingDescriptionImprove";
 import { isYardSaleListingActive } from "../../../lib/yardSaleListing";
+import { localizeCategoryLabel } from "../../../lib/i18n/categoryLabels";
+import { useMessages } from "../../../lib/i18n/react";
 import {
   CATEGORIES,
   CATEGORY_NAMES,
@@ -52,17 +54,6 @@ function matchAiSubcategory(
 
 const GREEN = "#0D5C3A";
 
-const GRADE_OPTIONS = [
-  { value: "personal" as const, label: "Personal" },
-  { value: "professional" as const, label: "Professional" },
-];
-
-const CONDITION_OPTIONS = [
-  { value: "new" as const, label: "New" },
-  { value: "like_new" as const, label: "Like New" },
-  { value: "good" as const, label: "Good" },
-  { value: "fair" as const, label: "Fair" },
-];
 
 function FieldLabel({
   label,
@@ -86,6 +77,18 @@ function inputClassName(extra = "") {
 }
 
 export function Step2ItemInfo({ draft, setDraft }: StepProps) {
+  const { listing } = useMessages();
+  const item = listing.itemInfo;
+  const gradeOptions = [
+    { value: "personal" as const, label: item.personal },
+    { value: "professional" as const, label: item.professional },
+  ];
+  const conditionOptions = [
+    { value: "new" as const, label: item.conditionNew },
+    { value: "like_new" as const, label: item.conditionLikeNew },
+    { value: "good" as const, label: item.conditionGood },
+    { value: "fair" as const, label: item.conditionFair },
+  ];
   const appliedSuggestionsKey = useRef<string | null>(null);
   const typewriterRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isImprovingDescription, setIsImprovingDescription] = useState(false);
@@ -96,10 +99,9 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
   const yardSaleListing = isYardSaleListingActive();
   const categoryModeRules = getCategoryModeRules(draft.category);
   const replacementValueLabel =
-    categoryModeRules.replacementValueLabel ?? "Estimated Replacement Value";
+    categoryModeRules.replacementValueLabel ?? item.replacementValue;
   const replacementValueHelper =
-    categoryModeRules.replacementValueHelper ??
-    "Cost to buy new — used for deposit protection ceiling";
+    categoryModeRules.replacementValueHelper ?? item.replacementValueHelper;
 
   const clearTypewriter = useCallback(() => {
     if (typewriterRef.current) {
@@ -243,12 +245,10 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
       >
         <div className="mb-6">
           <h2 className="text-xl font-bold" style={{ color: GREEN }}>
-            {yardSaleListing ? "Sale item" : "Item details"}
+            {yardSaleListing ? item.titleYardSale : item.title}
           </h2>
           <p className="text-label mt-1 text-base text-gray-500">
-            {yardSaleListing
-              ? "Photo first — we skip categories on garage-sale shelves."
-              : "Tell renters what you're listing."}
+            {yardSaleListing ? item.subtitleYardSale : item.subtitle}
           </p>
         </div>
 
@@ -257,18 +257,18 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
             className="mb-6 rounded-xl border px-3 py-2.5 text-sm font-medium"
             style={{ borderColor: `${GREEN}33`, backgroundColor: `${GREEN}08`, color: GREEN }}
           >
-            On your garage sale shelf · For sale
+            {item.yardSaleBadge}
           </div>
         ) : null}
 
         <div className="mb-6">
-          <FieldLabel label="Title" required />
+          <FieldLabel label={item.fieldTitle} required />
           <div className="relative">
             <input
               type="text"
               maxLength={80}
               value={draft.title}
-              placeholder="e.g., Milwaukee M18 Compact Drill Kit"
+              placeholder={item.titlePlaceholder}
               className={inputClassName("pr-14")}
               onChange={(event) => {
                 setDraft((current) => ({ ...current, title: event.target.value }));
@@ -283,7 +283,7 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
         {!yardSaleListing ? (
         <>
         <div className="mb-6">
-          <FieldLabel label="Category" required />
+          <FieldLabel label={item.category} required />
           <select
             value={draft.category}
             className={inputClassName()}
@@ -295,19 +295,19 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
               }));
             }}
           >
-            <option value="">Select category</option>
-            {CATEGORY_NAMES.map((item) => (
-              <option key={item} value={item}>
-                {item}
+            <option value="">{item.selectCategory}</option>
+            {CATEGORY_NAMES.map((name) => (
+              <option key={name} value={name}>
+                {localizeCategoryLabel(name)}
               </option>
             ))}
           </select>
         </div>
 
         <div className="mb-6">
-          <FieldLabel label="Grade" required />
+          <FieldLabel label={item.grade} required />
           <div className="flex gap-2">
-            {GRADE_OPTIONS.map((option) => {
+            {gradeOptions.map((option) => {
               const selected = draft.grade === option.value;
               return (
                 <button
@@ -333,15 +333,15 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
             })}
           </div>
           <p className="text-label mt-2 text-sm text-gray-500">
-            Personal = home, hobby, occasional use · Professional = commercial, heavy duty
+            {item.gradeHint}
           </p>
         </div>
 
         <div className="mb-6">
-          <FieldLabel label="Subcategory" required />
+          <FieldLabel label={item.subcategory} required />
           {!canPickSubcategory && category ? (
             <p className="text-label mb-2 text-sm text-amber-700">
-              Select Personal or Professional above to see subcategories
+              {item.selectGradeForSubs}
             </p>
           ) : null}
           <select
@@ -356,11 +356,11 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
             }}
           >
             <option value="">
-              {canPickSubcategory ? "Select subcategory" : "Select grade first"}
+              {canPickSubcategory ? item.selectSubcategory : item.selectGradeFirst}
             </option>
-            {subcategoryOptions.map((item) => (
-              <option key={item.label} value={item.label}>
-                {item.emoji} {item.label}
+            {subcategoryOptions.map((sub) => (
+              <option key={sub.label} value={sub.label}>
+                {sub.emoji} {localizeCategoryLabel(sub.label)}
               </option>
             ))}
           </select>
@@ -369,9 +369,9 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
         ) : null}
 
         <div className="mb-6">
-          <FieldLabel label="Condition" required />
+          <FieldLabel label={item.condition} required />
           <div className="grid grid-cols-2 gap-2">
-            {CONDITION_OPTIONS.map((option) => {
+            {conditionOptions.map((option) => {
               const selected = draft.condition === option.value;
               return (
                 <button
@@ -416,12 +416,12 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
               : { duration: 0.2 }
           }
         >
-          <FieldLabel label="Description" />
+          <FieldLabel label={item.description} />
           <motion.div className="relative" initial={false} animate={{ opacity: 1 }}>
             <textarea
               maxLength={1000}
               value={draft.description}
-              placeholder="Describe your item, included accessories, condition details..."
+              placeholder={item.descriptionPlaceholder}
               className={inputClassName("min-h-[120px] resize-none pr-16")}
               onChange={(event) => {
                 const value = event.target.value;
@@ -444,7 +444,7 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
                 style={{ color: GREEN }}
               >
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                {MASCOT_NAME} is rewriting...
+                {item.rewriting(MASCOT_NAME)}
               </div>
             ) : (
               <button
@@ -454,7 +454,7 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
                 className="mt-2 text-sm underline disabled:opacity-50"
                 style={{ color: GREEN }}
               >
-                ✨ Ask {MASCOT_NAME} to improve
+                {item.askImprove(MASCOT_NAME)}
               </button>
             )
           ) : null}
@@ -484,8 +484,8 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
           {draft.title.length > 0 ? (
             <RentanoHint
               className="mt-3"
-              hint="Not sure about the value?"
-              linkText={`Search "${marketValueLinkTitle} price new"`}
+              hint={item.notSureValue}
+              linkText={item.searchPriceLink(marketValueLinkTitle)}
               linkUrl={`https://www.google.com/search?q=${encodeURIComponent(
                 `${draft.title} price new`,
               )}`}
@@ -494,11 +494,11 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
         </div>
 
         <div className="mb-6">
-          <FieldLabel label="Instructions / manual URL" />
+          <FieldLabel label={item.instructionsUrl} />
           <input
             type="url"
             value={draft.instructionsUrl}
-            placeholder="https://... link to manual or tutorial video"
+            placeholder={item.instructionsPlaceholder}
             className={inputClassName()}
             onChange={(event) =>
               setDraft((current) => ({
@@ -508,7 +508,7 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
             }
           />
           <p className="text-label mt-2 text-sm text-gray-500">
-            Shown as Instructions button on your listing
+            {item.instructionsHelper}
           </p>
         </div>
       </motion.div>

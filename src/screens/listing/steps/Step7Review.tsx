@@ -3,21 +3,20 @@ import { MapPin } from "lucide-react";
 import { RentanoHint } from "../../../components/RentanoHint";
 import { ListingFeedCard, offerTypeFromModes } from "../../../app/components/ListingFeedCard";
 import type { Step7ReviewProps } from "../types";
+import { localizeCategoryLabel } from "../../../lib/i18n/categoryLabels";
+import { useMessages } from "../../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F0B429";
 
-const CONDITION_STYLES: Record<
-  string,
-  { label: string; className: string }
-> = {
-  new: { label: "New", className: "bg-emerald-100 text-emerald-800" },
-  like_new: { label: "Like New", className: "bg-teal-100 text-teal-800" },
-  good: { label: "Good", className: "bg-amber-100 text-amber-800" },
-  fair: { label: "Fair", className: "bg-orange-100 text-orange-800" },
+const CONDITION_STYLE_CLASSES: Record<string, string> = {
+  new: "bg-emerald-100 text-emerald-800",
+  like_new: "bg-teal-100 text-teal-800",
+  good: "bg-amber-100 text-amber-800",
+  fair: "bg-orange-100 text-orange-800",
 };
 
-function EditLink({ onClick }: { onClick: () => void }) {
+function EditLink({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <span
       role="button"
@@ -36,7 +35,7 @@ function EditLink({ onClick }: { onClick: () => void }) {
       className="text-xs font-semibold"
       style={{ color: GREEN }}
     >
-      Edit
+      {label}
     </span>
   );
 }
@@ -47,28 +46,6 @@ function formatMoney(value: string): string | null {
   return `$${trimmed}`;
 }
 
-function handoffSummary(draft: Step7ReviewProps["draft"]): string {
-  const parts: string[] = [];
-  if (draft.handoff.inPerson) parts.push("In-person");
-  if (draft.handoff.contactless) parts.push("Contactless");
-  if (draft.handoff.itemHeavy) parts.push("Heavy item");
-  if (draft.handoff.delivery) {
-    const miles = draft.handoff.deliveryMaxMiles ?? 20;
-    const fee = draft.handoff.deliveryRoundTripFee?.trim();
-    const weight =
-      typeof draft.handoff.itemWeightLbs === "number" &&
-      draft.handoff.itemWeightLbs > 0
-        ? ` · ${draft.handoff.itemWeightLbs} lbs`
-        : "";
-    parts.push(
-      fee
-        ? `Delivery ≤${miles} mi · $${fee} round trip${weight}`
-        : `Delivery ≤${miles} mi${weight}`,
-    );
-  }
-  return parts.length > 0 ? parts.join(" · ") : "Not set";
-}
-
 export function Step7Review({
   draft,
   profileCity,
@@ -77,23 +54,60 @@ export function Step7Review({
   onPublish,
   onGoToStep,
 }: Step7ReviewProps) {
-  const conditionStyle = draft.condition
-    ? CONDITION_STYLES[draft.condition]
+  const t = useMessages();
+  const review = t.listing.review;
+  const itemInfo = t.listing.itemInfo;
+
+  const conditionLabel =
+    draft.condition === "new"
+      ? itemInfo.conditionNew
+      : draft.condition === "like_new"
+        ? itemInfo.conditionLikeNew
+        : draft.condition === "good"
+          ? itemInfo.conditionGood
+          : draft.condition === "fair"
+            ? itemInfo.conditionFair
+            : null;
+  const conditionClassName = draft.condition
+    ? CONDITION_STYLE_CLASSES[draft.condition]
     : null;
+
   const gradeLabel =
     draft.grade === "professional"
-      ? "Professional"
+      ? itemInfo.professional
       : draft.grade === "personal"
-        ? "Personal"
+        ? itemInfo.personal
         : null;
+
+  const handoffSummary = (() => {
+    const parts: string[] = [];
+    if (draft.handoff.inPerson) parts.push(review.handoffInPerson);
+    if (draft.handoff.contactless) parts.push(review.handoffContactless);
+    if (draft.handoff.itemHeavy) parts.push(review.handoffHeavy);
+    if (draft.handoff.delivery) {
+      const miles = draft.handoff.deliveryMaxMiles ?? 20;
+      const fee = draft.handoff.deliveryRoundTripFee?.trim();
+      const weight =
+        typeof draft.handoff.itemWeightLbs === "number" &&
+        draft.handoff.itemWeightLbs > 0
+          ? ` · ${draft.handoff.itemWeightLbs} lbs`
+          : "";
+      parts.push(
+        fee
+          ? review.handoffDelivery(miles, fee, weight)
+          : review.handoffDeliveryNoFee(miles, weight),
+      );
+    }
+    return parts.length > 0 ? parts.join(" · ") : review.handoffNotSet;
+  })();
 
   const modeRows: { icon: string; label: string; detail: string }[] = [];
   if (draft.modes.rent) {
     const rate = formatMoney(draft.pricing.dailyRate);
     modeRows.push({
       icon: "🔑",
-      label: "Rent",
-      detail: rate ? `${rate}/day` : "Rate set",
+      label: review.rent,
+      detail: rate ? review.ratePerDay(rate) : review.rateSet,
     });
   }
   if (draft.modes.sell) {
@@ -102,14 +116,14 @@ export function Step7Review({
     const price = formatMoney(draft.pricing.salePrice);
     modeRows.push({
       icon: free ? "🎁" : "🏷️",
-      label: free ? "Free giveaway" : "Sell",
-      detail: free ? "$0" : price ?? "Price set",
+      label: free ? review.freeGiveaway : review.sell,
+      detail: free ? "$0" : price ?? review.priceSet,
     });
   } else if (draft.modes.gift) {
-    modeRows.push({ icon: "🎁", label: "Free giveaway", detail: "Free" });
+    modeRows.push({ icon: "🎁", label: review.freeGiveaway, detail: review.free });
   }
 
-  const previewTitle = draft.title.trim() || "Untitled item";
+  const previewTitle = draft.title.trim() || review.untitled;
   const previewPrice = draft.pricing.dailyRate?.trim() || "—";
   const previewOfferType = offerTypeFromModes(draft.modes, draft.pricing.salePrice);
 
@@ -122,10 +136,10 @@ export function Step7Review({
     >
       <div className="mb-5">
         <h2 className="text-2xl font-bold" style={{ color: GREEN }}>
-          Ready to go live?
+          {review.title}
         </h2>
         <p className="mt-1 text-base text-gray-500">
-          This is how renters will see your listing.
+          {review.subtitle}
         </p>
       </div>
 
@@ -136,7 +150,7 @@ export function Step7Review({
           className="relative block w-full text-left"
         >
           <span className="absolute right-3 top-3 z-10">
-            <EditLink onClick={() => onGoToStep(1)} />
+            <EditLink label={t.common.edit} onClick={() => onGoToStep(1)} />
           </span>
           <div className="p-3">
             <ListingFeedCard
@@ -144,7 +158,7 @@ export function Step7Review({
               price={previewPrice}
               rating={0}
               reviews={0}
-              distance="nearby"
+              distance={review.nearby}
               cover={draft.photos?.[0] ?? null}
               offerType={previewOfferType}
               itemHeavy={draft.handoff.itemHeavy}
@@ -164,7 +178,7 @@ export function Step7Review({
               <h3 className="flex-1 text-lg font-bold text-gray-900">
                 {previewTitle}
               </h3>
-              <EditLink onClick={() => onGoToStep(2)} />
+              <EditLink label={t.common.edit} onClick={() => onGoToStep(2)} />
             </div>
             <div className="flex flex-wrap gap-2">
               {draft.category ? (
@@ -172,7 +186,7 @@ export function Step7Review({
                   className="rounded-full px-2.5 py-0.5 text-xs font-semibold text-white"
                   style={{ backgroundColor: GREEN }}
                 >
-                  {draft.category}
+                  {localizeCategoryLabel(draft.category)}
                 </span>
               ) : null}
               {gradeLabel ? (
@@ -180,11 +194,11 @@ export function Step7Review({
                   {gradeLabel}
                 </span>
               ) : null}
-              {conditionStyle ? (
+              {conditionLabel && conditionClassName ? (
                 <span
-                  className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${conditionStyle.className}`}
+                  className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${conditionClassName}`}
                 >
-                  {conditionStyle.label}
+                  {conditionLabel}
                 </span>
               ) : null}
             </div>
@@ -197,9 +211,9 @@ export function Step7Review({
           >
             <div className="mb-2 flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Modes
+                {review.modes}
               </p>
-              <EditLink onClick={() => onGoToStep(2)} />
+              <EditLink label={t.common.edit} onClick={() => onGoToStep(2)} />
             </div>
             <ul className="space-y-2">
               {modeRows.map((row) => (
@@ -217,9 +231,9 @@ export function Step7Review({
           </button>
 
           <div className="mt-4 border-t border-gray-100 pt-4">
-            <p className="text-sm text-gray-600">{handoffSummary(draft)}</p>
+            <p className="text-sm text-gray-600">{handoffSummary}</p>
             <p className="mt-1 text-xs text-gray-400">
-              Pickup hours and delivery — adjust after publishing in My Garage.
+              {review.handoffAdjustHint}
             </p>
           </div>
 
@@ -237,9 +251,9 @@ export function Step7Review({
                 style={{ backgroundColor: draft.paused ? AMBER : GREEN }}
               />
               {draft.paused ? (
-                <span style={{ color: AMBER }}>Paused</span>
+                <span style={{ color: AMBER }}>{review.paused}</span>
               ) : (
-                <span style={{ color: GREEN }}>Available · Mon–Fri 9am–5pm</span>
+                <span style={{ color: GREEN }}>{review.availableDefault}</span>
               )}
             </p>
           </div>
@@ -248,11 +262,7 @@ export function Step7Review({
 
       <RentanoHint
         className="mt-5"
-        hint={
-          isEditing
-            ? "Review your changes, then save — your QR and listing status stay as they are."
-            : "Next: sign in, then Stripe verifies your ID and bank — then your listing goes public."
-        }
+        hint={isEditing ? review.tipEditing : review.tipNew}
         showTapLabel
       />
 
@@ -265,11 +275,11 @@ export function Step7Review({
       >
         {isPublishing
           ? isEditing
-            ? "Saving..."
-            : "Opening…"
+            ? review.saving
+            : review.opening
           : isEditing
-            ? "Save changes"
-            : "Go public →"}
+            ? review.saveChanges
+            : review.goPublicCta}
       </button>
     </motion.div>
   );

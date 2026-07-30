@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { BRAND_GREEN } from "../lib/brand";
+import { localizeCategoryLabel } from "../lib/i18n/categoryLabels";
 import { useMessages } from "../lib/i18n/react";
 import { getCategoryCatalog, type CategoryCatalogEntry } from "../lib/homeCategoryPicks";
 import type { SubcategoryItem } from "../screens/listing/listingItemCategories";
@@ -15,7 +16,7 @@ function SubChip({ item }: { item: SubcategoryItem }) {
       style={{ borderColor: BORDER }}
     >
       <span aria-hidden>{item.emoji}</span>
-      <span className="max-w-[9.5rem] truncate">{item.label}</span>
+      <span className="max-w-[9.5rem] truncate">{localizeCategoryLabel(item.label)}</span>
     </span>
   );
 }
@@ -44,7 +45,9 @@ function CategoryExpandRow({
         <span className="text-[18px]" aria-hidden>
           {entry.icon}
         </span>
-        <span className="min-w-0 flex-1 text-[13px] font-bold text-gray-900">{entry.name}</span>
+        <span className="min-w-0 flex-1 text-[13px] font-bold text-gray-900">
+          {localizeCategoryLabel(entry.name)}
+        </span>
         <span className="shrink-0 text-[11px] font-medium text-gray-400">
           {entry.personal.length + entry.professional.length}
         </span>

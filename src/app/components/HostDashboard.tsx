@@ -13,25 +13,32 @@ import { loadNotificationPreferences } from "../../lib/notificationPreferences";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 import type { ListingDraft } from "../../screens/listing/types";
+import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
+import { useMessages } from "../../lib/i18n/react";
+import type { AppMessages } from "../../lib/i18n/types";
 
-function formatHostBookingStatus(status: RentalBooking["status"]): string {
+function formatHostBookingStatus(
+  status: RentalBooking["status"],
+  copy: AppMessages["garageUi"],
+): string {
   switch (status) {
     case "pending_approval":
-      return "Awaiting your OK";
+      return copy.statusAwaitingOk;
     case "pending_checkin":
-      return "Ready for pickup";
+      return copy.statusReadyPickup;
     case "active":
-      return "Out with neighbor";
+      return copy.statusOutWithNeighbor;
     case "overdue":
-      return "Overdue";
+      return copy.statusOverdue;
     case "completed":
-      return "Completed";
+      return copy.statusCompleted;
     default:
       return status.replace(/_/g, " ");
   }
 }
 
 function ListingThumb({ listing }: { listing: ListingDraft }) {
+  const t = useMessages();
   const cover = listing.photos?.[0] ?? null;
   const { url } = useCoverMediaUrl(cover);
   if (url) {
@@ -46,7 +53,7 @@ function ListingThumb({ listing }: { listing: ListingDraft }) {
   }
   return (
     <span className="text-xs font-bold uppercase tracking-wide text-gray-400" aria-hidden>
-      {(listing.title || "Item").slice(0, 1)}
+      {(listing.title || t.garageUi.itemFallback).slice(0, 1)}
     </span>
   );
 }
@@ -96,6 +103,7 @@ export function HostDashboard({
   onOpenRental?: (bookingId: string) => void;
 }) {
   const auth = useAuth();
+  const t = useMessages();
   const [listings, setListings] = useState<Awaited<ReturnType<typeof loadManageableListings>>>([]);
   const [bookings, setBookings] = useState<RentalBooking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -178,9 +186,12 @@ export function HostDashboard({
             step={{
               id: `finish-draft-${abandonedDraft.id}`,
               dismissKey: `finish-draft-${abandonedDraft.id}`,
-              title: "Finish publishing?",
-              body: `You left ${getListingDisplayTitle(abandonedDraft.title) || "a listing"} on step ${abandonedDraft.wizardStep ?? 1}. Tap to pick up where you stopped.`,
-              cta: "Resume draft",
+              title: t.garageUi.finishPublishingTitle,
+              body: t.garageUi.finishPublishingBody(
+                getListingDisplayTitle(abandonedDraft.title) || "",
+                abandonedDraft.wizardStep ?? 1,
+              ),
+              cta: t.garageUi.resumeDraft,
               onAction: () => onResumeDraft?.(abandonedDraft.id),
             }}
           />
@@ -192,9 +203,9 @@ export function HostDashboard({
             step={{
               id: "garage-share",
               dismissKey: `garage-share-${hostId}`,
-              title: "Your garage is live — share it",
-              body: "Post your showcase to Nextdoor or Facebook so neighbors know you're open for rentals.",
-              cta: "Open share sheet",
+              title: t.garageUi.garageLiveShareTitle,
+              body: t.garageUi.garageLiveShareBody,
+              cta: t.garageUi.openShareSheet,
               onAction: () => onShareGarage?.(),
             }}
           />
@@ -210,7 +221,7 @@ export function HostDashboard({
             style={{ color: GREEN }}
           >
             <Share2 className="h-4 w-4" />
-            Share garage
+            {t.garageUi.shareGarage}
           </button>
         ) : null}
       </div>
@@ -218,18 +229,18 @@ export function HostDashboard({
       <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1 pb-2">
         <div className="mb-4 flex gap-2">
           <StatCard
-            label="Live"
+            label={t.garageUi.live}
             value={String(activeCount)}
             icon={<Package className="h-4 w-4" style={{ color: GREEN }} />}
           />
           <StatCard
-            label="Needs QR"
+            label={t.garageUi.needsQr}
             value={String(needsQrCount)}
             icon={<Package className="h-4 w-4" style={{ color: GREEN }} />}
           />
           <StatCard
-            label="Earnings"
-            value={totalEarned > 0 ? `$${totalEarned}` : "None yet"}
+            label={t.garageUi.earnings}
+            value={totalEarned > 0 ? `$${totalEarned}` : t.garageUi.noneYet}
             icon={<DollarSign className="h-4 w-4" style={{ color: GREEN }} />}
           />
         </div>
@@ -237,7 +248,7 @@ export function HostDashboard({
         {pendingRequests.length > 0 ? (
           <div className="mb-4">
             <h3 className="mb-2 px-1 text-[13px] font-bold" style={{ color: GREEN_DARK }}>
-              Pending booking requests
+              {t.garageUi.pendingBookingRequests}
             </h3>
             <div className="space-y-2">
               {pendingRequests.slice(0, 3).map((b) => (
@@ -255,7 +266,7 @@ export function HostDashboard({
         {activeRentals.length > 0 ? (
           <div className="mb-4">
             <h3 className="mb-2 px-1 text-[13px] font-bold" style={{ color: GREEN_DARK }}>
-              Active rentals
+              {t.garageUi.activeRentals}
             </h3>
             <ul className="space-y-2">
               {activeRentals.slice(0, 4).map((b) => (
@@ -269,7 +280,7 @@ export function HostDashboard({
                   >
                     <p className="text-[14px] font-semibold text-gray-900">{b.itemTitle}</p>
                     <p className="mt-0.5 text-[12px] text-gray-500">
-                      {b.counterpartyName} · {formatHostBookingStatus(b.status)}
+                      {b.counterpartyName} · {formatHostBookingStatus(b.status, t.garageUi)}
                     </p>
                   </button>
                 </li>
@@ -280,7 +291,7 @@ export function HostDashboard({
 
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-[15px] font-bold" style={{ color: GREEN_DARK }}>
-            Your listings
+            {t.garageUi.yourListings}
           </h3>
           <button
             type="button"
@@ -289,29 +300,29 @@ export function HostDashboard({
             style={{ color: GREEN }}
           >
             <Plus className="h-4 w-4" />
-            New
+            {t.garageUi.newListing}
           </button>
         </div>
 
         {loading && listings.length === 0 ? (
-          <p className="py-8 text-center text-sm text-gray-500">Loading your garage…</p>
+          <p className="py-8 text-center text-sm text-gray-500">{t.garageUi.loading}</p>
         ) : listings.length === 0 ? (
           <div
             className="rounded-2xl border bg-white px-4 py-8 text-center"
             style={{ borderColor: BORDER }}
           >
-            <p className="text-base font-semibold text-gray-800">No listings yet</p>
+            <p className="text-base font-semibold text-gray-800">{t.garageUi.noListingsYet}</p>
             <p className="mt-1 text-sm text-gray-500">
-              Publish from a category when you are ready — or tap{" "}
+              {t.garageUi.noListingsBodyBefore}{" "}
               <button
                 type="button"
                 onClick={onListItem}
                 className="font-semibold underline"
                 style={{ color: GREEN }}
               >
-                New
+                {t.garageUi.newListing}
               </button>{" "}
-              above.
+              {t.garageUi.noListingsBodyAfter}
             </p>
           </div>
         ) : (
@@ -326,7 +337,7 @@ export function HostDashboard({
                   type="button"
                   onClick={() => onOpenListing(listing.id)}
                   className="flex w-full items-center gap-3 text-left"
-                  aria-label={`Open ${getListingDisplayTitle(listing.title)} listing details`}
+                  aria-label={t.garageUi.openListingAria(getListingDisplayTitle(listing.title))}
                 >
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F0F4F2]">
                     <ListingThumb listing={listing} />
@@ -337,11 +348,11 @@ export function HostDashboard({
                     </p>
                     <p className="text-sm capitalize text-gray-500">
                       {listing.paused
-                        ? "Paused"
+                        ? t.garageUi.statusPaused
                         : listing.listingStatus === "pending_qr"
-                          ? "Needs QR setup"
+                          ? t.garageUi.statusNeedsQr
                           : listing.listingStatus}
-                      {listing.category ? ` · ${listing.category}` : ""}
+                      {listing.category ? ` · ${localizeCategoryLabel(listing.category)}` : ""}
                     </p>
                   </div>
                 </button>

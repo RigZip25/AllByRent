@@ -38,6 +38,7 @@ import {
   type RentalPriceBreakdown,
 } from "../../lib/rentalPricing";
 import { PeerChatPanel } from "../../components/PeerChatPanel";
+import { useMessages } from "../../lib/i18n/react";
 
 export function ActiveRental({
   bookingId,
@@ -51,6 +52,7 @@ export function ActiveRental({
   onViewProfile?: (userId: string) => void;
 }) {
   const auth = useAuth();
+  const t = useMessages();
   const [scanOpen, setScanOpen] = useState(false);
   const [scanPhase, setScanPhase] = useState<QrScanPhase>("camera");
   const [notice, setNotice] = useState<string | null>(null);
@@ -89,7 +91,7 @@ export function ActiveRental({
 
   const overdueWarning =
     booking?.status === "overdue"
-      ? "Overdue: late fees may apply. Confirm return as soon as the item is back with the owner."
+      ? t.rentalDetail.overdueWarning
       : null;
 
   const renterPickupLocation = useMemo(
@@ -148,7 +150,7 @@ export function ActiveRental({
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(renterPickupLocation)}`
     : undefined;
 
-  const contactName = booking?.counterpartyName?.trim() || (booking?.role === "renter" ? "Host" : "Renter");
+  const contactName = booking?.counterpartyName?.trim() || (booking?.role === "renter" ? t.rentalDetail.hostFallback : t.rentalDetail.renterFallback);
   const contactInitials = contactName
     .split(/\s+/)
     .map((part) => part[0])
@@ -156,7 +158,7 @@ export function ActiveRental({
     .slice(0, 2)
     .toUpperCase();
   const contactVerified = Boolean(booking?.counterpartyIdentityVerified);
-  const contactHeading = booking?.role === "renter" ? "Owner contact" : "Renter contact";
+  const contactHeading = booking?.role === "renter" ? t.rentalDetail.ownerContact : t.rentalDetail.renterContact;
 
   const alreadyConfirmed = useMemo(() => {
     if (!booking) return false;
@@ -182,7 +184,7 @@ export function ActiveRental({
 
     if (mode === "pickup") {
       if (latest.status !== "pending_checkin") {
-        setNotice("Already confirmed pickup for this booking.");
+        setNotice(t.rentalDetail.alreadyConfirmedPickup);
         closeScanner();
         return;
       }
@@ -191,13 +193,13 @@ export function ActiveRental({
         pickupConfirmedAt: new Date().toISOString(),
       });
       setBookings(loadRentalBookings());
-      setNotice("Pickup confirmed. Your rental is now active.");
+      setNotice(t.rentalDetail.pickupConfirmed);
       closeScanner();
       return;
     }
 
     if (latest.status === "completed" || latest.returnConfirmedAt) {
-      setNotice("Already confirmed return for this booking.");
+      setNotice(t.rentalDetail.alreadyConfirmedReturn);
       closeScanner();
       return;
     }
@@ -207,12 +209,12 @@ export function ActiveRental({
       returnConfirmedAt: new Date().toISOString(),
     });
     setBookings(loadRentalBookings());
-    setNotice("Return confirmed. Thanks!");
+    setNotice(t.rentalDetail.returnConfirmed);
     closeScanner();
     if (auth.userId && latest.counterpartyId && !hasLocalReview(latest.id, auth.userId)) {
       setReviewOpen(true);
     }
-  }, [booking, mode]);
+  }, [booking, mode, t.rentalDetail]);
 
   const timeLeftLabel = useMemo(() => {
     if (!dispute?.evidenceDeadline) return null;
@@ -234,18 +236,18 @@ export function ActiveRental({
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="font-semibold flex-1">Active Rental</h1>
+          <h1 className="font-semibold flex-1">{t.rentalDetail.title}</h1>
         </div>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
           <p className="text-muted-foreground">
-            {mascotSays("No active rental yet. Book something from the feed or check Rentals.")}
+            {mascotSays(t.rentalDetail.emptyBody)}
           </p>
           <button
             type="button"
             onClick={onBack}
             className="rounded-xl bg-primary px-6 py-3 font-medium text-white"
           >
-            Back to Rentals
+            {t.rentalDetail.backToRentals}
           </button>
         </div>
       </div>
@@ -261,7 +263,7 @@ export function ActiveRental({
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="font-semibold flex-1">Active Rental</h1>
+        <h1 className="font-semibold flex-1">{t.rentalDetail.title}</h1>
       </div>
 
       <div className="screen-scroll flex-1 min-h-0 p-3 sm:p-4 space-y-5 sm:space-y-6">
@@ -280,9 +282,9 @@ export function ActiveRental({
             <div className="flex items-start gap-3">
               <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
               <div className="min-w-0 flex-1">
-                <p className="text-[14px] font-bold text-gray-900">Open a dispute</p>
+                <p className="text-[14px] font-bold text-gray-900">{t.rentalDetail.openDisputeTitle}</p>
                 <p className="mt-1 text-[13px] leading-relaxed text-gray-600">
-                  Upload photo evidence. A 48h countdown is visible to both sides. Deposit is frozen during evidence collection.
+                  {t.rentalDetail.openDisputeBody}
                 </p>
                 <button
                   type="button"
@@ -293,7 +295,7 @@ export function ActiveRental({
                   className="mt-3 w-full rounded-xl border py-2.5 text-[14px] font-semibold"
                   style={{ borderColor: "#FDE68A", backgroundColor: "#FFFBEB", color: "#92400E" }}
                 >
-                  {dispute ? "View dispute" : "Start dispute"}
+                  {dispute ? t.rentalDetail.viewDispute : t.rentalDetail.startDispute}
                 </button>
               </div>
             </div>
@@ -308,14 +310,15 @@ export function ActiveRental({
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
                 <h2 className="font-bold text-lg mb-1">
-                  {booking?.itemTitle ?? "Rental item"}
+                  {booking?.itemTitle ?? t.rentalDetail.rentalItemFallback}
                 </h2>
                 <p className="text-sm text-muted-foreground">
                   {booking
-                    ? `Rental period: ${new Date(booking.startDate).toLocaleDateString()} – ${new Date(
-                        booking.endDate,
-                      ).toLocaleDateString()}`
-                    : "Rental period"}
+                    ? t.rentalDetail.rentalPeriod(
+                        new Date(booking.startDate).toLocaleDateString(),
+                        new Date(booking.endDate).toLocaleDateString(),
+                      )
+                    : t.rentalDetail.rentalItemFallback}
                 </p>
               </div>
 
@@ -323,12 +326,12 @@ export function ActiveRental({
                 <Clock className="w-3.5 h-3.5" />
                 <span>
                   {booking?.status === "pending_checkin"
-                    ? "Pending check-in"
+                    ? t.rentalDetail.statusPendingCheckin
                     : booking?.status === "active"
-                      ? "Active"
+                      ? t.rentalDetail.statusActive
                       : booking?.status === "overdue"
-                        ? "Overdue"
-                        : booking?.status ?? "Booking"}
+                        ? t.rentalDetail.statusOverdue
+                        : booking?.status ?? t.rentalDetail.statusBooking}
                 </span>
               </div>
             </div>
@@ -342,13 +345,13 @@ export function ActiveRental({
             </div>
 
             <h3 className="font-bold text-lg mb-2">
-              {mode === "pickup" ? "Scan to check in" : "Scan to return"}
+              {mode === "pickup" ? t.rentalDetail.scanCheckIn : t.rentalDetail.scanReturn}
             </h3>
 
             <p className="text-sm text-muted-foreground mb-6 leading-relaxed max-w-xs">
               {mode === "pickup"
-                ? "Find the QR code on the item and scan it to confirm pickup. You’ll also need the 6‑digit pickup PIN."
-                : "Scan the item QR to confirm return. You’ll also need the 6‑digit return PIN."}
+                ? t.rentalDetail.scanCheckInBody
+                : t.rentalDetail.scanReturnBody}
             </p>
 
             <button
@@ -356,7 +359,7 @@ export function ActiveRental({
               onClick={openScanner}
               className="w-full bg-primary hover:bg-primary/90 text-white py-3.5 rounded-xl transition-colors font-medium flex items-center justify-center gap-2"
             >
-              📷 Scan QR Code
+              {t.rentalDetail.scanQrCode}
             </button>
           </div>
         </div>
@@ -365,12 +368,12 @@ export function ActiveRental({
           <div className="bg-card rounded-xl border border-border p-4">
             <div className="flex items-center gap-2 mb-2">
               <MapPin className="w-4 h-4 text-primary" />
-              <h3 className="font-semibold">Pickup location</h3>
+              <h3 className="font-semibold">{t.rentalDetail.pickupLocation}</h3>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {booking?.role === "host"
-                ? "Exact address is shared only with your confirmed renter — not on the public listing."
-                : "This address is only for you as the confirmed renter — it is not shown on the public listing."}
+                ? t.rentalDetail.pickupLocationHostHint
+                : t.rentalDetail.pickupLocationRenterHint}
             </p>
             <p className="mt-3 text-sm font-medium leading-relaxed">{renterPickupLocation}</p>
             {pickupMapsUrl ? (
@@ -380,7 +383,7 @@ export function ActiveRental({
                 rel="noopener noreferrer"
                 className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
               >
-                Open in Maps
+                {t.rentalDetail.openInMaps}
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             ) : null}
@@ -391,22 +394,18 @@ export function ActiveRental({
           <div className="bg-card rounded-xl border border-border p-4">
             <div className="flex items-center gap-2 mb-2">
               <Lock className="w-4 h-4 text-primary" />
-              <h3 className="font-semibold">Contactless access</h3>
+              <h3 className="font-semibold">{t.rentalDetail.contactlessAccess}</h3>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Step-by-step access instructions and codes unlock at check-in with PIN — not
-              before. Use the pickup address above to get here; scan the item QR when you
-              arrive.
+              {t.rentalDetail.contactlessBody}
             </p>
             {booking.role === "renter" ? (
               <p className="mt-2 text-sm text-muted-foreground">
-                Tap <span className="font-medium">Scan QR Code</span>, then enter the pickup PIN
-                to view lockbox codes and access steps.
+                {t.rentalDetail.contactlessRenterHint}
               </p>
             ) : (
               <p className="mt-2 text-sm text-muted-foreground">
-                Share the pickup PIN only with this renter. They unlock access details during
-                check-in — the address is already visible on their rental screen.
+                {t.rentalDetail.contactlessHostHint}
               </p>
             )}
           </div>
@@ -418,19 +417,18 @@ export function ActiveRental({
 
         {booking?.fulfillmentMethod === "delivery" ? (
           <div className="bg-card rounded-xl border border-border p-4">
-            <h3 className="font-semibold mb-2">Round-trip delivery</h3>
+            <h3 className="font-semibold mb-2">{t.rentalDetail.roundTripDelivery}</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              One delivery fee covers bringing the item before the rental starts and picking it
-              up after it ends — not split 50/50 and not one-way host delivery with renter return.
+              {t.rentalDetail.roundTripDeliveryBody}
             </p>
             {booking.deliveryFee ? (
               <p className="mt-2 text-sm font-medium">
-                Round-trip delivery: ${formatUsd(booking.deliveryFee)}
+                {t.rentalDetail.roundTripDeliveryFee(formatUsd(booking.deliveryFee))}
               </p>
             ) : null}
             {booking.deliveryAddress ? (
               <p className="mt-2 text-sm">
-                <span className="font-medium">Drop-off:</span> {booking.deliveryAddress}
+                <span className="font-medium">{t.rentalDetail.dropOff}</span> {booking.deliveryAddress}
               </p>
             ) : null}
           </div>
@@ -438,27 +436,27 @@ export function ActiveRental({
 
         {booking ? (
           <div className="bg-card rounded-xl border border-border p-4">
-            <h3 className="font-semibold mb-2">Security</h3>
+            <h3 className="font-semibold mb-2">{t.rentalDetail.security}</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              QR is tied to the physical item. Confirmation requires a stage-specific PIN to prevent random scans.
+              {t.rentalDetail.securityBody}
             </p>
             {booking.role === "host" ? (
               <div className="mt-3 rounded-lg bg-muted p-3 text-sm">
                 <div className="font-medium">
-                  {mode === "pickup" ? "Pickup PIN" : "Return PIN"}:{" "}
+                  {mode === "pickup" ? t.rentalDetail.pickupPin : t.rentalDetail.returnPin}:{" "}
                   <span className="font-mono tracking-widest">
                     {mode === "pickup" ? booking.pickupPin ?? "—" : booking.returnPin ?? "—"}
                   </span>
                 </div>
                 <div className="text-muted-foreground text-xs mt-1">
-                  Share this PIN only with the renter on this booking.
+                  {t.rentalDetail.pinShareHint}
                 </div>
               </div>
             ) : (
               <div className="mt-3 rounded-lg bg-muted p-3 text-sm">
-                Ask the host for the{" "}
-                <span className="font-medium">{mode === "pickup" ? "pickup" : "return"}</span>{" "}
-                PIN, then enter it after scanning.
+                {t.rentalDetail.askHostForPin(
+                  mode === "pickup" ? t.rentalDetail.pinStagePickup : t.rentalDetail.pinStageReturn,
+                )}
               </div>
             )}
           </div>
@@ -467,12 +465,11 @@ export function ActiveRental({
         <div className="bg-card rounded-xl border border-border p-4">
           <div className="flex items-center gap-3 mb-3">
             <Shield className="w-5 h-5 text-muted-foreground" />
-            <h3 className="font-semibold flex-1">Deposit protection</h3>
+            <h3 className="font-semibold flex-1">{t.rentalDetail.depositProtection}</h3>
           </div>
 
           <p className="text-sm text-muted-foreground leading-relaxed">
-            A card hold may cover the security deposit. It is released when the
-            host confirms the item was returned in good condition.
+            {t.rentalDetail.depositProtectionBody}
           </p>
         </div>
 
@@ -501,7 +498,7 @@ export function ActiveRental({
                     {contactVerified ? <CheckCircle2 className="w-4 h-4 text-primary" /> : null}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {contactVerified ? "Verified on Evorios" : "Tap to view public profile"}
+                    {contactVerified ? t.rentalDetail.verifiedOnEvorios : t.rentalDetail.tapToViewProfile}
                   </p>
                 </div>
               </button>
@@ -514,17 +511,17 @@ export function ActiveRental({
                 className="flex items-center justify-center gap-2 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors"
               >
                 <MessageCircle className="w-4 h-4" />
-                <span className="text-sm font-medium">Message</span>
+                <span className="text-sm font-medium">{t.rentalDetail.message}</span>
               </button>
 
               <button
                 type="button"
                 disabled
-                title="Phone numbers are shared in chat after check-in"
+                title={t.rentalDetail.phoneSharedAfterCheckin}
                 className="flex items-center justify-center gap-2 py-2.5 border border-border rounded-lg opacity-50 cursor-not-allowed"
               >
                 <Phone className="w-4 h-4" />
-                <span className="text-sm font-medium">Call</span>
+                <span className="text-sm font-medium">{t.rentalDetail.call}</span>
               </button>
             </div>
           </div>
@@ -537,7 +534,7 @@ export function ActiveRental({
               onClick={() => setChatOpen(false)}
               className="absolute right-3 top-3 z-10 text-sm text-muted-foreground"
             >
-              Close
+              {t.rentalDetail.close}
             </button>
             <PeerChatPanel
               rentalId={booking.id}
@@ -549,24 +546,24 @@ export function ActiveRental({
         ) : null}
 
         <div className="bg-muted/50 rounded-xl p-4">
-          <h3 className="font-semibold mb-2">Before you check in</h3>
+          <h3 className="font-semibold mb-2">{t.rentalDetail.beforeCheckIn}</h3>
 
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex gap-2">
               <span className="text-primary">•</span>
-              <span>Inspect the item for any existing damage</span>
+              <span>{t.rentalDetail.inspectItem}</span>
             </li>
             <li className="flex gap-2">
               <span className="text-primary">•</span>
-              <span>Take photos if needed for your records</span>
+              <span>{t.rentalDetail.takePhotos}</span>
             </li>
             <li className="flex gap-2">
               <span className="text-primary">•</span>
-              <span>Review the return date and location</span>
+              <span>{t.rentalDetail.reviewReturnDate}</span>
             </li>
             <li className="flex gap-2">
               <span className="text-primary">•</span>
-              <span>Ask the owner any questions you have</span>
+              <span>{t.rentalDetail.askOwner}</span>
             </li>
           </ul>
         </div>
@@ -631,10 +628,12 @@ export function ActiveRental({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-[18px] font-extrabold" style={{ color: "#0D5C3A" }}>
-                  Dispute evidence
+                  {t.rentalDetail.disputeEvidence}
                 </h2>
                 <p className="mt-0.5 text-[13px] text-gray-500">
-                  48h window · {timeLeftLabel ? `${timeLeftLabel} left` : "countdown running"}
+                  {timeLeftLabel
+                    ? t.rentalDetail.disputeWindowLeft(timeLeftLabel)
+                    : t.rentalDetail.countdownRunning}
                 </p>
               </div>
               <button type="button" onClick={() => setDisputeOpen(false)} className="text-gray-500">
@@ -647,7 +646,7 @@ export function ActiveRental({
             </div>
 
             <div className="mt-3 rounded-2xl border bg-[#FFFBEB] p-3 text-[12px] text-amber-900" style={{ borderColor: "#FDE68A" }}>
-              <strong>Deposit frozen</strong> while evidence is collected.
+              <strong>{t.rentalDetail.depositFrozen}</strong>
             </div>
 
             <div className="mt-4 flex gap-2">
@@ -665,14 +664,14 @@ export function ActiveRental({
                 style={{ backgroundColor: "#0D5C3A" }}
                 disabled={Boolean(dispute)}
               >
-                {dispute ? "Dispute opened" : "Start dispute"}
+                {dispute ? t.rentalDetail.disputeOpened : t.rentalDetail.startDispute}
               </button>
               <label
                 className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border bg-white px-4 py-3 text-[13px] font-semibold text-gray-700"
                 style={{ borderColor: "#E8E6E0" }}
               >
                 <Upload className="h-4 w-4" />
-                Add photo
+                {t.rentalDetail.addPhoto}
                 <input
                   type="file"
                   accept="image/*"
@@ -696,13 +695,13 @@ export function ActiveRental({
 
             {dispute ? (
               <div className="mt-4">
-                <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">Evidence</p>
+                <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">{t.rentalDetail.evidence}</p>
                 <div className="mt-2 grid grid-cols-3 gap-2">
                   {[...(dispute.renterEvidence ?? []), ...(dispute.ownerEvidence ?? [])].slice(0, 6).map((src, idx) => (
                     <img key={idx} src={src} alt="" className="h-20 w-full rounded-xl object-cover" />
                   ))}
                 </div>
-                <p className="mt-2 text-[11px] text-gray-400">Visible to both sides</p>
+                <p className="mt-2 text-[11px] text-gray-400">{t.rentalDetail.visibleToBoth}</p>
               </div>
             ) : null}
           </div>

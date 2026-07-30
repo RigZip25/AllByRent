@@ -15,16 +15,9 @@ import { processPhotoWithPhotoRoom } from "../photoroomApi";
 import { MAX_LISTING_PHOTOS, MAX_LISTING_VIDEOS } from "../photoUtils";
 import { putMediaBlob, deleteMedia, type MediaRef } from "../../../lib/mediaStore";
 import { useMediaUrl } from "../../../lib/useMediaUrl";
+import { useMessages } from "../../../lib/i18n/react";
 
 const PRIMARY_GREEN = "#0D5C3A";
-const AI_TIP = "I analyzed your photos — check Step 2, I filled in the details for you.";
-
-function photoStepTip(): string {
-  if (isYardSaleListingActive()) {
-    return `Add a photo of what's on your sale table — ${MASCOT_NAME} fills title & price next.`;
-  }
-  return `Add at least one photo, then tap Continue — ${MASCOT_NAME} fills in title, category, and price on the next step.`;
-}
 
 function reorderArray<T>(items: T[], from: number, to: number): T[] {
   if (from === to || from < 0 || to < 0 || from >= items.length || to >= items.length) {
@@ -41,6 +34,8 @@ export function Step1Photos({
   setDraft,
   onAnalyzePhotos,
 }: StepProps & { onAnalyzePhotos?: () => void }) {
+  const { listing } = useMessages();
+  const photosCopy = listing.photos;
   const libraryInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -60,7 +55,11 @@ export function Step1Photos({
 
   const atMax = draft.photos.length >= MAX_LISTING_PHOTOS;
   const atMaxVideos = draft.videos.length >= MAX_LISTING_VIDEOS;
-  const rentanoMessage = draft.aiSuggestions ? AI_TIP : photoStepTip();
+  const rentanoMessage = draft.aiSuggestions
+    ? photosCopy.tipAnalyzed
+    : isYardSaleListingActive()
+      ? photosCopy.tipYardSale(MASCOT_NAME)
+      : photosCopy.tipDefault(MASCOT_NAME);
 
   const clampToMaxSlots = (value: number) => Math.max(5, Math.min(MAX_LISTING_PHOTOS, value));
 
@@ -219,7 +218,7 @@ export function Step1Photos({
           // or the image format can't be processed.
           blob = sourceBlob;
           setPhotoWarning(
-            `Photo enhancement unavailable. Saved original photo. (${formatUnknownError(error)})`,
+            photosCopy.enhancementUnavailable(formatUnknownError(error)),
           );
         }
 
@@ -227,7 +226,7 @@ export function Step1Photos({
         nextIndex += 1;
       } catch (error) {
         setPhotoWarning(
-          `Couldn’t add this photo. (${formatUnknownError(error)})`,
+          photosCopy.couldntAddPhoto(formatUnknownError(error)),
         );
         setErrorIndex(targetIndex);
         break;
@@ -409,7 +408,7 @@ export function Step1Photos({
               ? "border-red-400"
               : "border-gray-300 enabled:hover:border-[#0D5C3A]"
           } disabled:cursor-default disabled:opacity-50`}
-          aria-label={isError ? "Tap to retry" : "Add photo"}
+          aria-label={isError ? photosCopy.retryAria : photosCopy.addPhotoAria}
         >
           {isLoading ? (
             <>
@@ -418,10 +417,10 @@ export function Step1Photos({
                 transition={{ duration: 1.2, repeat: Infinity }}
                 className="mb-2 h-10 w-10 rounded-xl bg-gray-200"
               />
-              <span className="text-xs text-gray-400">Enhancing...</span>
+              <span className="text-xs text-gray-400">{photosCopy.enhancing}</span>
             </>
           ) : isError ? (
-            <span className="text-xs text-red-500">Tap to retry</span>
+            <span className="text-xs text-red-500">{photosCopy.tapToRetry}</span>
           ) : (
             <Plus className="h-5 w-5 text-gray-400" strokeWidth={1.75} />
           )}
@@ -450,7 +449,7 @@ export function Step1Photos({
       <div
         className="h-full w-full bg-gray-100"
         role="img"
-        aria-label="Listing photo"
+        aria-label={photosCopy.listingPhotoAria}
       >
         {url && !failed ? (
           <img
@@ -462,7 +461,7 @@ export function Step1Photos({
           />
         ) : failed ? (
           <div className="flex h-full w-full items-center justify-center px-3 text-center text-xs font-semibold text-gray-500">
-            Couldn’t display this photo on your device.
+            {photosCopy.displayFailed}
           </div>
         ) : null}
       </div>
@@ -513,7 +512,7 @@ export function Step1Photos({
             setPreviewIndex(index);
           }}
           className="h-full w-full text-left"
-          aria-label={isCover ? "View cover photo" : "View photo"}
+          aria-label={isCover ? photosCopy.viewCoverAria : photosCopy.viewPhotoAria}
         >
           <PhotoTile media={media} fit={fit} preferFull={isCover} />
         </button>
@@ -522,7 +521,7 @@ export function Step1Photos({
             className="absolute bottom-2 left-2 rounded-full px-2.5 py-1 text-xs font-semibold text-white"
             style={{ backgroundColor: PRIMARY_GREEN }}
           >
-            Cover
+            {photosCopy.cover}
           </span>
         )}
         <button
@@ -532,7 +531,7 @@ export function Step1Photos({
             removePhoto(index);
           }}
           className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm"
-          aria-label="Remove photo"
+          aria-label={photosCopy.removePhotoAria}
         >
           <X className="h-3 w-3 text-gray-500" strokeWidth={2.5} />
         </button>
@@ -601,11 +600,10 @@ export function Step1Photos({
 
       <div className="mb-4">
         <h2 className="text-xl font-bold" style={{ color: PRIMARY_GREEN }}>
-          Add photos
+          {photosCopy.title}
         </h2>
         <p className="mt-1 text-sm text-gray-500">
-          Up to {MAX_LISTING_PHOTOS} photos and {MAX_LISTING_VIDEOS} videos. Tap any photo to
-          view it. Long-press to reorder.
+          {photosCopy.subtitle(MAX_LISTING_PHOTOS, MAX_LISTING_VIDEOS)}
         </p>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <button
@@ -615,7 +613,7 @@ export function Step1Photos({
             className="w-full rounded-xl border-2 py-2.5 text-sm font-semibold disabled:opacity-50"
             style={{ borderColor: PRIMARY_GREEN, color: PRIMARY_GREEN }}
           >
-            Choose from library
+            {photosCopy.chooseLibrary}
           </button>
           <button
             type="button"
@@ -624,7 +622,7 @@ export function Step1Photos({
             className="w-full rounded-xl py-2.5 text-sm font-semibold text-white disabled:opacity-50"
             style={{ backgroundColor: PRIMARY_GREEN }}
           >
-            Take photo
+            {photosCopy.takePhoto}
           </button>
         </div>
         <div className="mt-2">
@@ -635,7 +633,7 @@ export function Step1Photos({
             className="w-full rounded-xl border-2 py-2.5 text-sm font-semibold disabled:opacity-50"
             style={{ borderColor: PRIMARY_GREEN, color: PRIMARY_GREEN }}
           >
-            Add video
+            {photosCopy.addVideo}
           </button>
           {storageWarning ? (
             <p className="mt-2 text-xs font-semibold text-amber-700">{storageWarning}</p>
@@ -666,13 +664,13 @@ export function Step1Photos({
             className="w-full rounded-xl border-2 py-2.5 text-sm font-semibold"
             style={{ borderColor: PRIMARY_GREEN, color: PRIMARY_GREEN }}
           >
-            Add more photo slots (+4)
+            {photosCopy.addMoreSlots}
           </button>
         ) : null}
         {draft.videos.length > 0 ? (
           <div className="rounded-2xl bg-white p-3 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-              Videos ({draft.videos.length}/{MAX_LISTING_VIDEOS})
+              {photosCopy.videosHeading(draft.videos.length, MAX_LISTING_VIDEOS)}
             </p>
             <div className="mt-2 grid grid-cols-1 gap-3">
               {draft.videos.map((video) => (
@@ -708,10 +706,9 @@ export function Step1Photos({
 
       {onAnalyzePhotos ? (
         <div className="mt-5 rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-sm font-semibold text-gray-900">AI fills the next step</p>
+          <p className="text-sm font-semibold text-gray-900">{photosCopy.aiFillsTitle}</p>
           <p className="mt-1 text-xs text-gray-500">
-            Tap Continue — {MASCOT_NAME} suggests title, category, description, and price from
-            your photos (about 10–30 seconds).
+            {photosCopy.aiFillsBody(MASCOT_NAME)}
           </p>
           {draft.aiSuggestions ? (
             <button
@@ -723,7 +720,7 @@ export function Step1Photos({
               className="mt-3 text-xs font-semibold underline disabled:opacity-50"
               style={{ color: PRIMARY_GREEN }}
             >
-              {draft.aiAnalysisPending ? "Re-analyzing…" : "Re-analyze photos"}
+              {draft.aiAnalysisPending ? photosCopy.reanalyzing : photosCopy.reanalyze}
             </button>
           ) : null}
         </div>
@@ -747,6 +744,8 @@ function PhotoPreviewOverlay({
   onSetCover: (index: number) => void;
   onNavigate: (index: number) => void;
 }) {
+  const { listing, common } = useMessages();
+  const photosCopy = listing.photos;
   const media = photos[index];
   const { url } = useMediaUrl(media);
   const hasPrev = index > 0;
@@ -757,14 +756,14 @@ function PhotoPreviewOverlay({
       className="fixed inset-0 z-[100] flex flex-col bg-black/90"
       role="dialog"
       aria-modal="true"
-      aria-label="Photo preview"
+      aria-label={photosCopy.previewAria}
     >
       <div className="flex shrink-0 items-center justify-between px-4 py-3 text-white">
         <button
           type="button"
           onClick={onClose}
           className="rounded-full p-2 hover:bg-white/10"
-          aria-label="Close preview"
+          aria-label={photosCopy.closePreviewAria}
         >
           <X className="h-6 w-6" />
         </button>
@@ -778,7 +777,7 @@ function PhotoPreviewOverlay({
             className="rounded-full px-3 py-1.5 text-xs font-semibold text-white"
             style={{ backgroundColor: PRIMARY_GREEN }}
           >
-            Set as cover
+            {photosCopy.setAsCover}
           </button>
         ) : (
           <span className="w-[88px]" aria-hidden />
@@ -791,7 +790,7 @@ function PhotoPreviewOverlay({
             type="button"
             onClick={() => onNavigate(index - 1)}
             className="absolute left-2 z-10 rounded-full bg-white/15 p-2 text-white"
-            aria-label="Previous photo"
+            aria-label={photosCopy.previousPhotoAria}
           >
             <ChevronLeft className="h-7 w-7" />
           </button>
@@ -803,14 +802,14 @@ function PhotoPreviewOverlay({
             className="max-h-full max-w-full object-contain"
           />
         ) : (
-          <p className="text-sm text-white/70">Loading…</p>
+          <p className="text-sm text-white/70">{common.loading}</p>
         )}
         {hasNext ? (
           <button
             type="button"
             onClick={() => onNavigate(index + 1)}
             className="absolute right-2 z-10 rounded-full bg-white/15 p-2 text-white"
-            aria-label="Next photo"
+            aria-label={photosCopy.nextPhotoAria}
           >
             <ChevronRight className="h-7 w-7" />
           </button>
@@ -821,6 +820,8 @@ function PhotoPreviewOverlay({
 }
 
 function VideoPreview({ video, onRemove }: { video: MediaRef; onRemove: () => void }) {
+  const { listing } = useMessages();
+  const photosCopy = listing.photos;
   const { url, status } = useMediaUrl(video);
   return (
     <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50">
@@ -828,14 +829,14 @@ function VideoPreview({ video, onRemove }: { video: MediaRef; onRemove: () => vo
         <video src={url} controls className="h-[180px] w-full object-cover" />
       ) : (
         <div className="flex h-[180px] w-full items-center justify-center text-sm text-gray-400">
-          Loading video…
+          {photosCopy.loadingVideo}
         </div>
       )}
       <button
         type="button"
         onClick={onRemove}
         className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm"
-        aria-label="Remove video"
+        aria-label={photosCopy.removeVideoAria}
       >
         <X className="h-4 w-4 text-gray-600" strokeWidth={2.5} />
       </button>

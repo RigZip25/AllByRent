@@ -16,6 +16,7 @@ import { getGarageSaleSchedule } from "../lib/garageSaleStorage";
 import { resolveHostAccountId } from "../lib/hostIdentity";
 import { useAuth } from "../hooks/AuthProvider";
 import type { GarageSaleSchedule } from "../lib/garageSaleStorage";
+import { localizeCategoryLabel } from "../lib/i18n/categoryLabels";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
@@ -37,7 +38,9 @@ function YardSaleCard({
   onSelect: () => void;
 }) {
   const categoryLine =
-    event.categories.length > 0 ? event.categories.join(" · ") : "Mixed yard sale";
+    event.categories.length > 0
+      ? event.categories.map((c) => localizeCategoryLabel(c)).join(" · ")
+      : "Mixed yard sale";
 
   return (
     <button

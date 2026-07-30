@@ -1,3 +1,5 @@
+import { getMessages } from "./i18n";
+
 /** Product default — see docs/CLUSTER_POLICY.md */
 export const CLUSTER_RADIUS_DEFAULT_MI = 25;
 
@@ -55,6 +57,6 @@ export function expandClusterRadius(): number {
 }
 
 export function clusterLabelForCity(city: string, radiusMi = getClusterRadiusMi()): string {
-  if (!city.trim()) return "Set your block";
+  if (!city.trim()) return getMessages().home.setBlock;
   return `${city} · within ${radiusMi} mi`;
 }

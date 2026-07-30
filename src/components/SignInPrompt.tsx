@@ -1,5 +1,6 @@
 import { useRequireAuth } from "../hooks/RequireAuth";
 import type { AuthIntent } from "../lib/authReturn";
+import { useMessages } from "../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 
@@ -14,6 +15,7 @@ export function SignInPrompt({
   className?: string;
 }) {
   const requireAuth = useRequireAuth();
+  const { signInPrompt } = useMessages();
   return (
     <div
       className={`rounded-xl border border-red-200 bg-red-50 px-3 py-3 ${className}`}
@@ -26,7 +28,7 @@ export function SignInPrompt({
         className="mt-3 w-full rounded-xl py-3 text-base font-bold text-white"
         style={{ backgroundColor: GREEN }}
       >
-        Sign in / Create account
+        {signInPrompt.cta}
       </button>
     </div>
   );

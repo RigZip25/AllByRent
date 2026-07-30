@@ -11,11 +11,11 @@ import {
   formatPoundsOverLabel,
   MAX_DELIVERY_RADIUS_MILES,
   parseDeliveryFee,
-  ROUND_TRIP_DELIVERY_POLICY_NOTE,
   sanitizeDeliveryMiles,
   suggestDeliveryFeeMiles,
 } from "../../../lib/deliveryPricing";
 import type { ListingDraft, StepProps } from "../types";
+import { useMessages } from "../../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 
@@ -54,6 +54,7 @@ function ToggleRow({
 }
 
 function ContactlessPrivacyNotice({ compact }: { compact?: boolean }) {
+  const pickup = useMessages().listing.pickup;
   return (
     <div
       className={`flex gap-2 rounded-xl border border-amber-200 bg-amber-50 ${
@@ -65,16 +66,10 @@ function ContactlessPrivacyNotice({ compact }: { compact?: boolean }) {
         aria-hidden
       />
       <div className={compact ? "text-xs text-amber-950" : "text-sm text-amber-950"}>
-        <p className="font-semibold">Two layers of privacy</p>
+        <p className="font-semibold">{pickup.privacyTitle}</p>
         <ul className="mt-1 list-disc space-y-1 pl-4 leading-relaxed text-amber-900/90">
-          <li>
-            Exact address is shared only with your confirmed renter — not on the public
-            listing.
-          </li>
-          <li>
-            Step-by-step access instructions and codes unlock at check-in with PIN — not
-            before.
-          </li>
+          <li>{pickup.privacyAddress}</li>
+          <li>{pickup.privacyInstructions}</li>
         </ul>
       </div>
     </div>
@@ -128,6 +123,8 @@ function resolveRoundTripFee(handoff: ListingDraft["handoff"]): string {
 }
 
 export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
+  const t = useMessages();
+  const pickup = t.listing.pickup;
   const handoff = normalizeHandoff(draft.handoff);
   const maxMiles = resolveMaxMiles(handoff);
   const roundTripFee = resolveRoundTripFee(handoff);
@@ -170,25 +167,25 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
     >
       <div className="mb-6">
         <h2 className="text-2xl font-bold" style={{ color: GREEN }}>
-          Pickup &amp; delivery
+          {pickup.title}
         </h2>
         <p className="mt-1 text-base text-gray-500">
-          How renters get the item. Set your usual availability in the next step.
+          {pickup.subtitle}
         </p>
       </div>
 
       <div className="space-y-3">
         <ToggleRow
-          label="In-person pickup"
-          description="Meet renter at your location"
+          label={pickup.inPerson}
+          description={pickup.inPersonDesc}
           checked={handoff.inPerson}
           onChange={(inPerson) =>
             setDraft((c) => ({ ...c, handoff: { ...c.handoff, inPerson } }))
           }
         />
         <ToggleRow
-          label="Contactless pickup"
-          description="Lockbox, porch, garage code, etc."
+          label={pickup.contactless}
+          description={pickup.contactlessDesc}
           checked={handoff.contactless}
           onChange={(contactless) =>
             setDraft((c) => ({ ...c, handoff: { ...c.handoff, contactless } }))
@@ -205,20 +202,18 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
                   handoff: { ...c.handoff, contactlessInstructions: e.target.value },
                 }))
               }
-              placeholder="Access details: lockbox code, gate code, unit #, key location…"
+              placeholder={pickup.contactlessPlaceholder}
               rows={3}
               className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-green-700"
             />
             <p className="flex items-start gap-1.5 text-xs text-gray-500">
               <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
-              These access details are not on your public listing. They unlock for your
-              confirmed renter at check-in with the pickup PIN — after they already have the
-              pickup address.
+              {pickup.contactlessUnlockHint}
             </p>
           </div>
         ) : null}
         <ToggleRow
-          label="Heavy item (over 50 lb)"
+          label={pickup.heavyItem}
           checked={handoff.itemHeavy}
           onChange={(itemHeavy) =>
             setDraft((c) => ({
@@ -230,9 +225,9 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
         {handoff.itemHeavy ? (
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
             <label className="mb-1 block text-sm font-medium text-gray-800">
-              Weight (lbs)
+              {pickup.weightLbs}
               {handoff.delivery ? (
-                <span className="font-normal text-gray-500"> — required for delivery</span>
+                <span className="font-normal text-gray-500">{pickup.weightRequired}</span>
               ) : null}
             </label>
             <input
@@ -252,14 +247,14 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
                   handoff: { ...normalizeHandoff(c.handoff), itemWeightLbs },
                 }));
               }}
-              placeholder="e.g. 85"
+              placeholder={pickup.weightPlaceholder}
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-green-700"
             />
           </div>
         ) : null}
         <ToggleRow
-          label="I can deliver"
-          description="Round-trip delivery before start & after end"
+          label={pickup.iCanDeliver}
+          description={pickup.iCanDeliverDesc}
           checked={handoff.delivery}
           onChange={(delivery) => {
             if (!delivery) {
@@ -282,13 +277,13 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
 
       {handoff.delivery ? (
         <div className="mt-4 space-y-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-          <p className="text-sm font-semibold text-gray-800">Delivery</p>
+          <p className="text-sm font-semibold text-gray-800">{pickup.deliveryHeading}</p>
           <p className="text-xs leading-relaxed text-gray-500">
-            {ROUND_TRIP_DELIVERY_POLICY_NOTE}
+            {pickup.deliveryPolicy}
           </p>
 
           <label className="flex flex-wrap items-center gap-2 text-sm text-gray-700">
-            <span>Max distance</span>
+            <span>{pickup.maxDistance}</span>
             <input
               type="number"
               min={1}
@@ -301,13 +296,13 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
               }}
               className="w-16 rounded-lg border border-gray-200 px-2 py-1.5 text-center text-sm font-semibold outline-none focus:border-green-700"
             />
-            <span>miles (round trip)</span>
+            <span>{pickup.milesRoundTrip}</span>
           </label>
 
           <div>
             <div className="mb-1 flex items-center justify-between gap-2">
               <label className="block text-sm font-medium text-gray-800">
-                Round-trip delivery fee
+                {pickup.roundTripFee}
               </label>
               <button
                 type="button"
@@ -315,7 +310,7 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
                 className="text-xs font-semibold underline"
                 style={{ color: GREEN }}
               >
-                Estimate
+                {pickup.estimate}
               </button>
             </div>
             <div className="flex items-center gap-2">
@@ -331,7 +326,7 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
             </div>
             {parsedFee !== null && parsedFee > 0 ? (
               <p className="mt-1 text-[11px] text-gray-400">
-                Using your entered fee (estimate is optional).
+                {pickup.usingEnteredFee}
               </p>
             ) : null}
           </div>
@@ -350,22 +345,22 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-base font-bold" style={{ color: GREEN }}>
-              Delivery estimate (optional)
+              {pickup.estimateTitle}
             </h3>
             <p className="mt-1 text-xs leading-relaxed text-gray-500">
-              This is a demo calculator. Only use it if it matches what you want to charge.
+              {pickup.estimateBody}
             </p>
 
             <div className="mt-4 space-y-2 rounded-xl border border-gray-100 bg-[#F9FAFB] p-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Base</span>
+                <span className="text-gray-600">{pickup.estimateBase}</span>
                 <span className="font-semibold text-gray-900">
                   ${formatDeliveryFee(DELIVERY_FEE_BASE_USD)}
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">
-                  Per-mile (round trip){" "}
+                  {pickup.estimatePerMile}{" "}
                   <span className="text-gray-400">
                     ${formatDeliveryFee(DELIVERY_FEE_PER_MILE_ROUND_TRIP_USD)} × {maxMiles} mi
                   </span>
@@ -377,13 +372,13 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
               {handoff.itemHeavy ? (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">
-                    Heavy item surcharge{" "}
+                    {pickup.estimateHeavy}{" "}
                     {estimate.poundsOverThreshold > 0 ? (
                       <span className="text-gray-400">
                         ({formatPoundsOverLabel(estimate.poundsOverThreshold)})
                       </span>
                     ) : (
-                      <span className="text-gray-400">(no surcharge)</span>
+                      <span className="text-gray-400">{pickup.estimateNoSurcharge}</span>
                     )}
                   </span>
                   <span className="font-semibold text-gray-900">
@@ -392,7 +387,7 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
                 </div>
               ) : null}
               <div className="mt-1 flex items-center justify-between border-t border-gray-200 pt-2 text-sm">
-                <span className="text-gray-700">Suggested total</span>
+                <span className="text-gray-700">{pickup.suggestedTotal}</span>
                 <span className="text-lg font-extrabold" style={{ color: GREEN }}>
                   ${formatDeliveryFee(estimate.suggested)}
                 </span>
@@ -406,7 +401,7 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
                 onClick={() => setEstimateOpen(false)}
                 className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-700"
               >
-                Cancel
+                {t.common.cancel}
               </button>
               <button
                 type="button"
@@ -417,14 +412,14 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
                 className="flex-1 rounded-xl py-3 text-sm font-bold text-white"
                 style={{ backgroundColor: GREEN }}
               >
-                Use this price
+                {pickup.useThisPrice}
               </button>
             </div>
           </div>
         </div>
       ) : null}
 
-      <RentanoHint className="mt-5" hint="Pick at least one handoff option." showTapLabel />
+      <RentanoHint className="mt-5" hint={pickup.pickHandoffHint} showTapLabel />
     </motion.div>
   );
 }

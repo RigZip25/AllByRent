@@ -120,16 +120,28 @@ export type Step7ReviewProps = StepProps & {
 /** @deprecated Use Step7ReviewProps */
 export type Step6ReviewProps = Step7ReviewProps;
 
-/** Fast-path listing wizard (pickup, hours, QR deferred to post-publish). */
-export const STEPS = [
-  { id: 1, name: "Photos" },
-  { id: 2, name: "Details & pricing" },
-  { id: 3, name: "Review & publish" },
-] as const;
+/** Fast-path listing wizard step ids (labels via listing.steps.* / getSteps). */
+export const STEPS = [{ id: 1 }, { id: 2 }, { id: 3 }] as const;
 
 export const TOTAL_LISTING_STEPS = STEPS.length;
 
-export const LISTING_STEP_LABELS = STEPS.map((step) => step.name);
+/** Resolve wizard step labels from the i18n catalog. */
+export function getSteps(listing: {
+  steps: { photos: string; detailsPricing: string; reviewPublish: string };
+}) {
+  return [
+    { id: 1 as const, name: listing.steps.photos },
+    { id: 2 as const, name: listing.steps.detailsPricing },
+    { id: 3 as const, name: listing.steps.reviewPublish },
+  ];
+}
+
+/** English fallback for non-React helpers; prefer getSteps(messages.listing). */
+export const LISTING_STEP_LABELS = [
+  "Photos",
+  "Details & pricing",
+  "Review & publish",
+] as const;
 
 export const DELIVERY_DISTANCE_TIERS = [5, 10, 15, 25, 50] as const;
 

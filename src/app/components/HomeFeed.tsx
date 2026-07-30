@@ -32,6 +32,7 @@ import {
   setClusterRadiusMi,
 } from "../../lib/clusterConfig";
 import { fetchRemoteProfileNamesByIds } from "../../lib/supabaseProfile";
+import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMessages } from "../../lib/i18n/react";
 import { MrRentano } from "./MrRentano";
 
@@ -330,7 +331,7 @@ export function HomeFeed({
                 }}
               >
                 <span aria-hidden>{cat.icon}</span>
-                {cat.name}
+                {localizeCategoryLabel(cat.name)}
               </button>
             );
           })}
@@ -354,7 +355,9 @@ export function HomeFeed({
             </p>
             <p className="mt-2 text-[14px] leading-relaxed text-gray-600">
               {mascotSays(
-                category ? home.emptyFilteredBody(category) : home.emptyBlockBody,
+                category
+                  ? home.emptyFilteredBody(localizeCategoryLabel(category))
+                  : home.emptyBlockBody,
               )}
             </p>
             <button
@@ -480,7 +483,7 @@ export function HomeFeed({
                       }}
                     >
                       <span aria-hidden>{cat.icon}</span>
-                      {cat.name}
+                      {localizeCategoryLabel(cat.name)}
                     </button>
                   );
                 })}

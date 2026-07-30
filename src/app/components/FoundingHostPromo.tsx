@@ -5,6 +5,7 @@ import {
   isFoundingHostPromoSeen,
   markFoundingHostPromoSeen,
 } from "../../lib/foundingHostPromoStorage";
+import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 
 const GREEN_DARK = "#0D5C3A";
 const GREEN = "#1A9E6E";
@@ -82,13 +83,19 @@ export function FoundingHostPromo({
           {isEarn ? (
             <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
               Launch offer for early hosts in{" "}
-              <span className="font-semibold text-foreground">{subcategoryLabel}</span> — low
+              <span className="font-semibold text-foreground">
+                {localizeCategoryLabel(subcategoryLabel)}
+              </span>{" "}
+              — low
               competition, priority placement while we grow.
             </p>
           ) : (
             <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
               Post what you need in{" "}
-              <span className="font-semibold text-foreground">{subcategoryLabel}</span>. Your
+              <span className="font-semibold text-foreground">
+                {localizeCategoryLabel(subcategoryLabel)}
+              </span>
+              . Your
               request signals demand — the first hosts list where neighbors ask.
             </p>
           )}

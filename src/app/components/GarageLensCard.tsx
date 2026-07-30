@@ -1,6 +1,7 @@
 import { Star } from "lucide-react";
 import type { GarageSummary } from "../../lib/garageDisplay";
 import { formatListingPriceLine } from "../../lib/garageDisplay";
+import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 
 const GREEN_DARK = "#0D5C3A";
@@ -28,7 +29,9 @@ export function GarageLensCard({
   onSelect: () => void;
 }) {
   const categoryLine =
-    garage.categories.length > 0 ? garage.categories.join(" · ") : "Mixed shelf";
+    garage.categories.length > 0
+      ? garage.categories.map((c) => localizeCategoryLabel(c)).join(" · ")
+      : "Mixed shelf";
   const preview = garage.listings.slice(0, 2);
 
   return (

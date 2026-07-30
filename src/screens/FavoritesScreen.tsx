@@ -10,6 +10,8 @@ import { loadPublishedListings } from "../lib/listingStorage";
 import { getListingDisplayTitle } from "../lib/listingQr";
 import type { ListingDraft } from "./listing/types";
 import { useMediaUrl } from "../lib/useMediaUrl";
+import { localizeCategoryLabel } from "../lib/i18n/categoryLabels";
+import { useMessages } from "../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -19,10 +21,16 @@ function FavoriteCard({
   listing,
   onRemove,
   onOpen,
+  listingFallback,
+  ratePerDay,
+  removeAria,
 }: {
   listing: ListingDraft;
   onRemove: () => void;
   onOpen: () => void;
+  listingFallback: string;
+  ratePerDay: (rate: string) => string;
+  removeAria: (title: string) => string;
 }) {
   const title = getListingDisplayTitle(listing.title);
   const rate = listing.pricing.dailyRate?.trim();
@@ -51,8 +59,8 @@ function FavoriteCard({
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold text-gray-900">{title}</p>
           <p className="text-sm text-gray-500">
-            {listing.category || "Listing"}
-            {rate ? ` · $${rate}/day` : ""}
+            {listing.category ? localizeCategoryLabel(listing.category) : listingFallback}
+            {rate ? ` · ${ratePerDay(rate)}` : ""}
           </p>
         </div>
       </button>
@@ -61,7 +69,7 @@ function FavoriteCard({
         onClick={onRemove}
         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border"
         style={{ borderColor: BORDER }}
-        aria-label={`Remove ${title} from favorites`}
+        aria-label={removeAria(title)}
       >
         <Heart className="h-5 w-5 fill-[#E11D48] text-[#E11D48]" />
       </button>
@@ -77,6 +85,7 @@ export function FavoritesScreen({
   onOpenListing: (listingId: string) => void;
 }) {
   const auth = useAuth();
+  const { favorites: copy } = useMessages();
   const [favoriteIds, setFavoriteIds] = useState(() => loadFavoriteListingIds());
 
   useEffect(() => {
@@ -108,9 +117,9 @@ export function FavoritesScreen({
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <div className="shrink-0 px-4 pb-3 pt-4">
         <h1 className="text-[22px] font-extrabold" style={{ color: GREEN }}>
-          Favorites
+          {copy.title}
         </h1>
-        <p className="mt-1 text-[14px] text-gray-500">Saved for later — rent or buy</p>
+        <p className="mt-1 text-[14px] text-gray-500">{copy.subtitle}</p>
       </div>
 
       <div className="screen-scroll flex-1 px-4 pb-4">
@@ -121,10 +130,10 @@ export function FavoritesScreen({
           >
             <Heart className="mx-auto mb-4 h-10 w-10" style={{ color: GREEN_LIGHT }} />
             <h2 className="text-[18px] font-bold" style={{ color: GREEN }}>
-              No favorites yet
+              {copy.emptyTitle}
             </h2>
             <p className="mt-2 text-[14px] leading-relaxed text-gray-500">
-              Tap the heart on a listing to save it here.
+              {copy.emptyBody}
             </p>
             <button
               type="button"
@@ -132,7 +141,7 @@ export function FavoritesScreen({
               className="mt-5 w-full rounded-xl py-3 text-[15px] font-bold text-white"
               style={{ backgroundColor: GREEN_LIGHT }}
             >
-              Browse nearby
+              {copy.browseCta}
             </button>
           </div>
         ) : (
@@ -141,6 +150,9 @@ export function FavoritesScreen({
               <FavoriteCard
                 key={listing.id}
                 listing={listing}
+                listingFallback={copy.listingFallback}
+                ratePerDay={copy.ratePerDay}
+                removeAria={copy.removeAria}
                 onRemove={() => handleRemove(listing.id)}
                 onOpen={() => onOpenListing(listing.id)}
               />

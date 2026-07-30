@@ -8,6 +8,8 @@ import {
 import { syncAgentPrefsRemote } from "../../lib/agentPrefs";
 import { loadGarageFollows } from "../../lib/garageFollowStorage";
 import { persistFollowPatch } from "../../lib/repositories/garageRepository";
+import { MASCOT_NAME } from "../../lib/brand";
+import { useMessages } from "../../lib/i18n/react";
 
 const BORDER = "#E8E6E0";
 
@@ -40,6 +42,7 @@ function PrefToggle({
 
 export function NotificationPreferencesPanel() {
   const auth = useAuth();
+  const { prefs: p } = useMessages().notifications;
   const [prefs, setPrefs] = useState<NotificationPreferences>(() => loadNotificationPreferences());
   const follows = loadGarageFollows();
 
@@ -51,45 +54,43 @@ export function NotificationPreferencesPanel() {
 
   return (
     <div className="rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
-      <p className="text-sm font-semibold text-gray-900">Notification settings</p>
-      <p className="mt-0.5 text-xs text-gray-500">
-        Choose what reaches you — push when enabled above, in-app always.
-      </p>
+      <p className="text-sm font-semibold text-gray-900">{p.title}</p>
+      <p className="mt-0.5 text-xs text-gray-500">{p.hint}</p>
 
       <div className="mt-3 divide-y" style={{ borderColor: BORDER }}>
         <PrefToggle
-          label="Booking updates"
-          hint="Requests, approvals, pickup and return reminders."
+          label={p.bookings}
+          hint={p.bookingsHint}
           checked={prefs.bookings}
           onChange={(bookings) => update({ bookings })}
         />
         <PrefToggle
-          label="Messages"
-          hint="Chat from renters or owners about an item."
+          label={p.messages}
+          hint={p.messagesHint}
           checked={prefs.messages}
           onChange={(messages) => update({ messages })}
         />
         <PrefToggle
-          label="New garages nearby"
-          hint="When a neighbor opens a garage showcase on your block."
+          label={p.newGaragesNearby}
+          hint={p.newGaragesNearbyHint}
           checked={prefs.newGaragesNearby}
           onChange={(newGaragesNearby) => update({ newGaragesNearby })}
         />
         <PrefToggle
-          label="Open garage days"
-          hint="Yard-sale style events from garages you follow."
+          label={p.openGarageDays}
+          hint={p.openGarageDaysHint}
           checked={prefs.openHouseEvents}
           onChange={(openHouseEvents) => update({ openHouseEvents })}
         />
         <PrefToggle
-          label="Saved listings"
-          hint="Price changes or availability on favorites."
+          label={p.savedListings}
+          hint={p.savedListingsHint}
           checked={prefs.listingUpdates}
           onChange={(listingUpdates) => update({ listingUpdates })}
         />
         <PrefToggle
-          label={`Tips from Mr. Evorios`}
-          hint="Share prompts and next-step nudges after you list."
+          label={p.agentTips(MASCOT_NAME)}
+          hint={p.agentTipsHint}
           checked={prefs.agentTips}
           onChange={(agentTips) => update({ agentTips })}
         />
@@ -98,7 +99,7 @@ export function NotificationPreferencesPanel() {
       {follows.length > 0 ? (
         <div className="mt-4 border-t pt-3" style={{ borderColor: BORDER }}>
           <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-            Garages you follow
+            {p.garagesYouFollow}
           </p>
           <ul className="mt-2 space-y-2">
             {follows.slice(0, 5).map((f) => (
@@ -118,7 +119,7 @@ export function NotificationPreferencesPanel() {
                     }}
                     className="accent-[#0D5C3A]"
                   />
-                  New listings
+                  {p.newListings}
                 </label>
                 <label className="mt-1 flex items-center gap-2 text-[12px] text-gray-600">
                   <input
@@ -134,7 +135,7 @@ export function NotificationPreferencesPanel() {
                     }}
                     className="accent-[#0D5C3A]"
                   />
-                  Open garage day
+                  {p.openGarageDay}
                 </label>
               </li>
             ))}
@@ -142,10 +143,7 @@ export function NotificationPreferencesPanel() {
         </div>
       ) : null}
 
-      <p className="mt-3 text-[11px] leading-snug text-gray-400">
-        Push works after you tap Enable above and allow browser permission. On iPhone, open the
-        installed Home Screen app first.
-      </p>
+      <p className="mt-3 text-[11px] leading-snug text-gray-400">{p.pushFooter}</p>
     </div>
   );
 }

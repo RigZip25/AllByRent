@@ -58,7 +58,7 @@ export function GarageScreen({
             style={{ borderColor: "#E8E6E0", color: GREEN_DARK }}
           >
             <Store className="h-4 w-4" />
-            Shop
+            {t.garageUi.shop}
           </button>
           <button
             type="button"
@@ -67,7 +67,7 @@ export function GarageScreen({
             style={{ borderColor: "#E8E6E0" }}
           >
             <Share2 className="h-4 w-4" />
-            Share
+            {t.garageUi.share}
           </button>
         </div>
       </div>
@@ -75,9 +75,11 @@ export function GarageScreen({
       {shareOpen ? (
         <div className="shrink-0 px-4 pb-3">
           <div className="rounded-2xl border bg-white p-4" style={{ borderColor: "#E8E6E0" }}>
-            <p className="mb-2 text-[13px] font-semibold text-gray-800">Share your garage showcase</p>
+            <p className="mb-2 text-[13px] font-semibold text-gray-800">
+              {t.garageUi.shareShowcaseTitle}
+            </p>
             <p className="mb-3 text-[12px] text-gray-500">
-              Story format for TikTok &amp; Instagram · landscape for Facebook &amp; Nextdoor.
+              {t.garageUi.shareShowcaseBody}
             </p>
             <SocialShareButtons
               payload={sharePayload}

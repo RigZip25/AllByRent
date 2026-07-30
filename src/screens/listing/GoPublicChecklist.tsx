@@ -4,6 +4,7 @@ import { RentanoHint } from "../../components/RentanoHint";
 import { ConnectSetupError } from "../../components/payments/ConnectSetupError";
 import { MASCOT_NAME } from "../../lib/brand";
 import type { SellerGoPublicStatus, SellerGoPublicStep } from "../../lib/sellerGoPublic";
+import { useMessages } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
@@ -74,6 +75,9 @@ export function GoPublicChecklist({
   onBack,
   isPublishing,
 }: Props) {
+  const { listing } = useMessages();
+  const gp = listing.goPublic;
+
   const signedIn = Boolean(status?.signedIn);
   const stripeDone = Boolean(status?.payoutsEnabled || status?.onboardingComplete);
   const next = status?.nextStep ?? "sign_in";
@@ -82,30 +86,28 @@ export function GoPublicChecklist({
   const rows: Row[] = [
     {
       id: "sign_in",
-      title: "Sign in",
-      detail: signedIn
-        ? "Account ready — your draft stays with you."
-        : "Save your draft to your account before going live.",
+      title: gp.signInTitle,
+      detail: signedIn ? gp.signInDone : gp.signInPending,
       done: signedIn,
-      actionLabel: "Sign in",
+      actionLabel: gp.signInCta,
       onAction: onSignIn,
       actionBusy: false,
       disabled: signedIn || loading,
     },
     {
       id: "stripe",
-      title: "Verify & connect bank",
+      title: gp.stripeTitle,
       detail: stripeDone
         ? status?.bankLast4
-          ? `Stripe connected · **** ${status.bankLast4}`
+          ? gp.stripeConnectedBank(status.bankLast4)
           : status?.payoutsEnabled
-            ? "Stripe connected — payouts enabled."
-            : "Stripe onboarding complete — you can go live."
+            ? gp.stripePayoutsEnabled
+            : gp.stripeOnboardingComplete
         : status?.connected
-          ? "Stripe started — finish ID + bank in the Stripe form, then tap refresh."
-          : "Stripe checks your ID and links your bank so neighbors can pay you.",
+          ? gp.stripeFinishForm
+          : gp.stripePending,
       done: stripeDone,
-      actionLabel: busy === "stripe" ? "Opening Stripe…" : "Continue with Stripe",
+      actionLabel: busy === "stripe" ? gp.openingStripe : gp.continueStripe,
       onAction: onConnectBank,
       actionBusy: busy === "stripe",
       disabled: !signedIn || stripeDone || loading || busy !== null,
@@ -124,20 +126,20 @@ export function GoPublicChecklist({
         onClick={onBack}
         className="mb-3 self-start text-sm font-semibold text-gray-600"
       >
-        ← Back to review
+        {gp.backToReview}
       </button>
 
       <h2 className="text-2xl font-bold" style={{ color: GREEN }}>
-        Finish to go public
+        {gp.title}
       </h2>
       <p className="mt-1 text-base text-gray-500">
-        Two steps — in order. Your listing stays a private draft until both are done.
+        {gp.subtitle}
       </p>
 
       {loading && !status ? (
         <div className="mt-8 flex items-center justify-center gap-2 text-sm text-gray-500">
           <Loader2 className="h-5 w-5 animate-spin" style={{ color: GREEN }} />
-          Checking your seller setup…
+          {gp.checkingSetup}
         </div>
       ) : (
         <ol className="mt-6 space-y-3">
@@ -192,12 +194,12 @@ export function GoPublicChecklist({
         className="mt-4 text-sm font-semibold underline disabled:opacity-50"
         style={{ color: GREEN }}
       >
-        {busy === "refresh" || loading ? "Refreshing…" : "I finished Stripe — refresh status"}
+        {busy === "refresh" || loading ? gp.refreshing : gp.refreshStatus}
       </button>
 
       <RentanoHint
         className="mt-5"
-        hint={`${MASCOT_NAME}: Sign in, then Stripe verifies your ID and bank in one flow. No separate Identity menu.`}
+        hint={gp.tip(MASCOT_NAME)}
         showTapLabel
       />
 
@@ -208,7 +210,7 @@ export function GoPublicChecklist({
         className="btn-primary mt-6 flex h-14 w-full items-center justify-center text-lg font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
         style={{ backgroundColor: ready ? GREEN : "#9CA3AF" }}
       >
-        {isPublishing ? "Going live…" : ready ? "Go live 🚀" : "Complete steps above"}
+        {isPublishing ? gp.goingLive : ready ? gp.goLive : gp.completeSteps}
       </button>
     </motion.div>
   );
