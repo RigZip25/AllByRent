@@ -6,6 +6,7 @@ import {
   ClipboardList,
   Heart,
   HelpCircle,
+  MessageCircle,
   TrendingUp,
   User,
   Warehouse,
@@ -66,6 +67,7 @@ function MenuRow({
 export function MoreScreen({
   onProfile,
   onRentals,
+  onMessages,
   onFavorites,
   onNotifications,
   onEarnBusiness,
@@ -75,6 +77,7 @@ export function MoreScreen({
 }: {
   onProfile: () => void;
   onRentals: () => void;
+  onMessages?: () => void;
   onFavorites: () => void;
   onNotifications: () => void;
   onEarnBusiness: () => void;
@@ -127,6 +130,16 @@ export function MoreScreen({
               onClick={onRentals}
             />
           </li>
+          {onMessages ? (
+            <li>
+              <MenuRow
+                icon={<MessageCircle className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+                label="Messages"
+                hint="In-app chat for rentals and purchases"
+                onClick={onMessages}
+              />
+            </li>
+          ) : null}
           <li>
             <MenuRow
               icon={<Heart className="h-5 w-5" style={{ color: "#E11D48" }} />}

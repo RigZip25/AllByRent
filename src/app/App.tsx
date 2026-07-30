@@ -41,6 +41,8 @@ import { GarageCartScreen } from "../screens/GarageCartScreen";
 import { GarageWinnerCheckoutScreen } from "../screens/GarageWinnerCheckoutScreen";
 import { MoreScreen } from "../screens/MoreScreen";
 import { HowEvoriosWorksScreen } from "../screens/HowEvoriosWorksScreen";
+import { MessagesInboxScreen } from "../screens/MessagesInboxScreen";
+import { ListingChatScreen } from "../screens/ListingChatScreen";
 import { MrEvoriosScreen } from "../screens/MrEvoriosScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
@@ -149,6 +151,8 @@ type Screen =
   | "garage"
   | "more"
   | "howEvoriosWorks"
+  | "messages"
+  | "listingChat"
   | "neighborGarage"
   | "garageShop"
   | "garageCart"
@@ -220,6 +224,7 @@ const TAB_BOOT_SCREENS: Partial<Record<string, Screen>> = {
   rentals: "rentals",
   favorites: "favorites",
   notifications: "notifications",
+  messages: "messages",
   login: "browseHub",
   signup: "browseHub",
 };
@@ -231,6 +236,9 @@ const BOOT_SCREEN_ALIASES: Partial<Record<string, Screen>> = {
   identity: "identity",
   coHosts: "coHosts",
   postRequest: "postRequest",
+  activeRental: "activeRental",
+  listingChat: "listingChat",
+  messages: "messages",
   "verification-phone": "browseHub",
   "verification-code": "browseHub",
   "reset-password": "browseHub",
@@ -257,7 +265,9 @@ function bottomNavTabForScreen(screen: Screen): BottomNavTab {
     screen === "rentals" ||
     screen === "profile" ||
     screen === "favorites" ||
-    screen === "earnBusiness"
+    screen === "earnBusiness" ||
+    screen === "messages" ||
+    screen === "howEvoriosWorks"
   ) {
     return "more";
   }
@@ -340,7 +350,18 @@ function readBootDeepLink() {
 
 function readBootQuery() {
   if (typeof window === "undefined") {
-    return { skipSplash: false, openNotifications: false, simulateUpdate: false, screen: null as string | null, splashArtOnly: false, splashDynamicPreview: false };
+    return {
+      skipSplash: false,
+      openNotifications: false,
+      simulateUpdate: false,
+      screen: null as string | null,
+      splashArtOnly: false,
+      splashDynamicPreview: false,
+      rentalId: null as string | null,
+      chat: false,
+      listingChatListingId: null as string | null,
+      listingChatPeerId: null as string | null,
+    };
   }
   const params = new URLSearchParams(window.location.search);
   const screen = params.get("screen");
@@ -366,6 +387,10 @@ function readBootQuery() {
     screen,
     splashArtOnly: screen === "splash" && params.get("art") === "1",
     splashDynamicPreview: screen === "splash" && params.get("dynamic") === "1",
+    rentalId: params.get("rentalId")?.trim() || null,
+    chat: params.get("chat") === "1",
+    listingChatListingId: params.get("listingId")?.trim() || null,
+    listingChatPeerId: params.get("peerId")?.trim() || null,
   };
 }
 
@@ -479,7 +504,14 @@ function AppRoutes() {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
     bootDeepLink.target?.kind === "listing" ? bootDeepLink.target.listingId : null,
   );
-  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(() => boot.rentalId);
+  const [activeRentalChatOpen, setActiveRentalChatOpen] = useState(() => Boolean(boot.rentalId && boot.chat));
+  const [listingChatListingId, setListingChatListingId] = useState<string | null>(() =>
+    boot.screen === "listingChat" ? boot.listingChatListingId : null,
+  );
+  const [listingChatPeerId, setListingChatPeerId] = useState<string | null>(() =>
+    boot.screen === "listingChat" ? boot.listingChatPeerId : null,
+  );
   const [personalInfoInitialEdit, setPersonalInfoInitialEdit] = useState<"name" | "phone" | undefined>(
     undefined,
   );
@@ -591,7 +623,7 @@ function AppRoutes() {
       completeOnboarding();
       setNavStack([]);
       setCurrentScreen(resolved);
-      clearBootQuery(["screen", "skipSplash", "connect", "listingId"]);
+      clearBootQuery(["screen", "skipSplash", "connect", "listingId", "rentalId", "chat", "peerId"]);
     }
   }, [boot.screen]);
 
@@ -633,6 +665,7 @@ function AppRoutes() {
       screen === "postRequest" ||
       screen === "hostListingDetail" ||
       screen === "activeRental" ||
+      screen === "listingChat" ||
       screen === "identity" ||
       screen === "agentActivity" ||
       screen === "personalInfo" ||
@@ -760,6 +793,23 @@ function AppRoutes() {
   const handleOpenGarage = useCallback(() => goToTab("garage"), [goToTab]);
   const handleOpenMore = useCallback(() => goToTab("more"), [goToTab]);
   const handleOpenRentals = useCallback(() => goToTab("rentals"), [goToTab]);
+  const handleOpenMessages = useCallback(() => navigateTo("messages"), [navigateTo]);
+  const handleOpenRentalChat = useCallback(
+    (bookingId: string) => {
+      setSelectedBookingId(bookingId);
+      setActiveRentalChatOpen(true);
+      navigateTo("activeRental");
+    },
+    [navigateTo],
+  );
+  const handleOpenListingChat = useCallback(
+    (listingId: string, peerId: string) => {
+      setListingChatListingId(listingId);
+      setListingChatPeerId(peerId);
+      navigateTo("listingChat");
+    },
+    [navigateTo],
+  );
   const handleOpenProfile = useCallback(() => {
     if (auth.configured && !auth.loading && !auth.session) {
       showAuthGate("profile");
@@ -1573,10 +1623,28 @@ function AppRoutes() {
             onGarage={handleOpenGarage}
             onProfile={handleOpenProfile}
             onRentals={handleOpenRentals}
+            onMessages={handleOpenMessages}
             onFavorites={handleOpenFavorites}
             onNotifications={handleOpenNotifications}
             onEarnBusiness={handleOpenBusiness}
             onHowItWorks={() => navigateTo("howEvoriosWorks")}
+          />
+        )}
+
+        {currentScreen === "messages" && (
+          <MessagesInboxScreen
+            onBack={handleBack}
+            onOpenRentalChat={handleOpenRentalChat}
+            onOpenListingChat={handleOpenListingChat}
+          />
+        )}
+
+        {currentScreen === "listingChat" && listingChatListingId && listingChatPeerId && (
+          <ListingChatScreen
+            listingId={listingChatListingId}
+            peerId={listingChatPeerId}
+            onBack={handleBack}
+            onRequireAuth={() => showAuthGate("listingChat", "message")}
           />
         )}
 
@@ -1773,6 +1841,7 @@ function AppRoutes() {
             onOpenGarageShop={handleOpenGarageShopForListing}
             onOpenAttachment={handleOpenAttachment}
             onViewHostProfile={handleViewPublicProfile}
+            onOpenListingChat={handleOpenListingChat}
           />
         )}
 
@@ -1809,7 +1878,11 @@ function AppRoutes() {
         {currentScreen === "activeRental" && (
           <ActiveRental
             bookingId={selectedBookingId}
-            onBack={handleBack}
+            initialChatOpen={activeRentalChatOpen}
+            onBack={() => {
+              setActiveRentalChatOpen(false);
+              handleBack();
+            }}
             onViewProfile={handleViewPublicProfile}
           />
         )}

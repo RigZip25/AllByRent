@@ -7,6 +7,7 @@ async function trySendWebPush(input: {
   title: string;
   body: string;
   notificationId: string;
+  url?: string;
 }): Promise<void> {
   try {
     if (!isSupabaseConfigured()) return;
@@ -26,7 +27,7 @@ async function trySendWebPush(input: {
         notificationId: input.notificationId,
         title: input.title,
         body: input.body,
-        url: "/?screen=notifications",
+        url: input.url ?? "/?screen=notifications&skipSplash=1",
       }),
     });
   } catch {
@@ -95,6 +96,8 @@ export async function createNotificationRemote(params: {
   body: string;
   rentalId?: string;
   listingId?: string;
+  /** Deep link opened when the push notification is tapped. */
+  url?: string;
   /** When true, skip local in-app toast (use for notifying another user). */
   skipLocal?: boolean;
 }): Promise<void> {
@@ -127,11 +130,19 @@ export async function createNotificationRemote(params: {
   if (error) {
     // ignore; local notification already pushed when applicable
   } else {
+    const url =
+      params.url ??
+      (params.rentalId
+        ? `/?screen=activeRental&rentalId=${encodeURIComponent(params.rentalId)}&chat=1&skipSplash=1`
+        : params.listingId
+          ? `/?screen=listingChat&listingId=${encodeURIComponent(params.listingId)}&skipSplash=1`
+          : "/?screen=notifications&skipSplash=1");
     void trySendWebPush({
       recipientId: params.recipientId,
       notificationId: row.id,
       title: params.title,
       body: params.body,
+      url,
     });
   }
 }
