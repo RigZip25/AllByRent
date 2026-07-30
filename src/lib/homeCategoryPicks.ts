@@ -1,4 +1,4 @@
-import { CATEGORIES, CATEGORY_NAMES } from "../screens/listing/listingItemCategories";
+import { CATEGORIES, CATEGORY_NAMES, type SubcategoryItem } from "../screens/listing/listingItemCategories";
 
 /** Featured browse categories — compact strips when space is tight. */
 export const HOME_CATEGORY_PICKS = [
@@ -14,7 +14,14 @@ export const HOME_CATEGORY_PICKS = [
 
 export type HomeCategoryPick = (typeof HOME_CATEGORY_PICKS)[number];
 
-export function getHomeCategoryChips(): { name: string; icon: string }[] {
+export type CategoryChip = { name: string; icon: string };
+
+export type CategoryCatalogEntry = CategoryChip & {
+  personal: SubcategoryItem[];
+  professional: SubcategoryItem[];
+};
+
+export function getHomeCategoryChips(): CategoryChip[] {
   return HOME_CATEGORY_PICKS.filter((name) => name in CATEGORIES).map((name) => ({
     name,
     icon: CATEGORIES[name]?.icon ?? "📦",
@@ -22,9 +29,22 @@ export function getHomeCategoryChips(): { name: string; icon: string }[] {
 }
 
 /** Full catalog chips — intro, guide, and browse hub. */
-export function getAllCategoryChips(): { name: string; icon: string }[] {
+export function getAllCategoryChips(): CategoryChip[] {
   return CATEGORY_NAMES.map((name) => ({
     name,
     icon: CATEGORIES[name]?.icon ?? "📦",
   }));
+}
+
+/** Categories with personal + pro subcategories for intro / guide explorers. */
+export function getCategoryCatalog(): CategoryCatalogEntry[] {
+  return CATEGORY_NAMES.map((name) => {
+    const data = CATEGORIES[name];
+    return {
+      name,
+      icon: data?.icon ?? "📦",
+      personal: (data?.personal ?? []).filter((s) => s.label !== "Other"),
+      professional: (data?.professional ?? []).filter((s) => s.label !== "Other"),
+    };
+  });
 }

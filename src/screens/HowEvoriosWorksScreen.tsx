@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, ChevronRight } from "lucide-react";
+import { CategoryCatalogExplorer } from "../components/CategoryCatalogExplorer";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../lib/brand";
-import { getAllCategoryChips } from "../lib/homeCategoryPicks";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
@@ -13,7 +13,7 @@ const STEPS: { id: StepId; title: string; subtitle: string }[] = [
   { id: "idea", title: "The idea", subtitle: "Households as storefronts" },
   { id: "modes", title: "Rent · Sell · Gift", subtitle: "Three ways to share" },
   { id: "navigate", title: "Where to tap", subtitle: "Home, +, Garage, More" },
-  { id: "categories", title: "Categories", subtitle: "What’s on the block" },
+  { id: "categories", title: "Categories & subcategories", subtitle: "What’s on the block" },
 ];
 
 type Props = {
@@ -31,7 +31,6 @@ export function HowEvoriosWorksScreen({
 }: Props) {
   const [step, setStep] = useState(0);
   const current = STEPS[step]!;
-  const categories = getAllCategoryChips();
   const isLast = step >= STEPS.length - 1;
 
   return (
@@ -161,24 +160,10 @@ export function HowEvoriosWorksScreen({
 
         {current.id === "categories" ? (
           <div className="mt-3">
-            <p className="mb-3 text-[14px] leading-relaxed text-gray-600">
-              Open Home → pick a category chip, or start browsing and filter on the feed. When you
-              list with +, choose the same categories in the wizard.
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {categories.map((cat) => (
-                <div
-                  key={cat.name}
-                  className="flex items-center gap-2 rounded-xl border bg-white px-2.5 py-2"
-                  style={{ borderColor: BORDER }}
-                >
-                  <span aria-hidden>{cat.icon}</span>
-                  <span className="min-w-0 truncate text-[12px] font-semibold text-gray-800">
-                    {cat.name}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <CategoryCatalogExplorer
+              hint="Tap a category to see household and pro subcategories — the same list you use when browsing or stocking with +."
+              defaultOpenFirst
+            />
           </div>
         ) : null}
       </div>

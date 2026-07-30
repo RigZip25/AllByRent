@@ -30,7 +30,7 @@ export const RENTANO_FAQ: FaqItem[] = [
     category: "Navigation",
     question: "How do I browse by category?",
     answer:
-      "Open Home → use the category chips on the browse hub, or on the feed strip under Rent/Buy. When listing with +, pick the same categories in the wizard. More → How Evorios works also shows the full list. There is no magnifying-glass search in the footer.",
+      "Open Home → use the category chips on the browse hub, or on the feed strip under Rent/Buy. Tap a category in More → How Evorios works (or the intro screen) to expand household and pro subcategories. When listing with +, pick the same categories in the wizard. There is no magnifying-glass search in the footer.",
     keywords: [
       "category",
       "categories",

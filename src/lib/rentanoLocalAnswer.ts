@@ -45,9 +45,9 @@ const NAV_HINTS: Array<{ patterns: RegExp[]; answer: string; answerRu?: string }
       /search\s+icon/i,
     ],
     answer:
-      "Categories are on Home: chips on the browse hub and on the feed under Rent/Buy (Tools, Garden & Yard, Party…). There is no magnifying-glass search in the footer. Full list: More → How Evorios works. When you list with +, pick a category in the wizard.",
+      "Categories are on Home: chips on the browse hub and on the feed under Rent/Buy (Tools, Garden & Yard, Party…). Tap a category in More → How Evorios works to expand household and pro subcategories. There is no magnifying-glass search in the footer. When you list with +, pick a category in the wizard.",
     answerRu:
-      "Категории на Home: чипы на browse hub и в ленте под Rent/Buy (Tools, Garden & Yard, Party…). Лупы (поиска) в футере нет. Полный список: More → How Evorios works. При листинге через + категория выбирается в мастере.",
+      "Категории на Home: чипы на browse hub и в ленте под Rent/Buy (Tools, Garden & Yard, Party…). В More → How Evorios works можно раскрыть категорию и увидеть подкатегории (household / pro). Лупы (поиска) в футере нет. При листинге через + категория выбирается в мастере.",
   },
   {
     patterns: [
