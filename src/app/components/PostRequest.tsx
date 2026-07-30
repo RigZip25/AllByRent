@@ -1,16 +1,7 @@
 import { useMemo, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { hasPostRequestContext, type ShelfPrefill } from "../../lib/shelfListings";
-import {
-  ArrowLeft,
-  Wrench,
-  Bike,
-  Camera,
-  Gamepad2,
-  Music,
-  Home,
-  Calendar,
-  Share2,
-} from "lucide-react";
+import { ArrowLeft, Calendar, Share2 } from "lucide-react";
 import { MrRentano } from "./MrRentano";
 import { useAuth } from "../../hooks/AuthProvider";
 import { SignInPrompt } from "../../components/SignInPrompt";
@@ -21,58 +12,15 @@ import { APP_NAME, MARKETING_URL } from "../../lib/brand";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMessages } from "../../lib/i18n/react";
 import type { AppMessages } from "../../lib/i18n/types";
+import {
+  getCategoryCatalog,
+  type CategoryCatalogEntry,
+} from "../../lib/homeCategoryPicks";
+import type { SubcategoryItem } from "../../screens/listing/listingItemCategories";
 
-const categoryDefs = [
-  { id: "tools", storageLabel: "Tools", icon: <Wrench className="w-6 h-6" /> },
-  { id: "sports", storageLabel: "Sports", icon: <Bike className="w-6 h-6" /> },
-  { id: "photo", storageLabel: "Photo", icon: <Camera className="w-6 h-6" /> },
-  { id: "gaming", storageLabel: "Gaming", icon: <Gamepad2 className="w-6 h-6" /> },
-  { id: "music", storageLabel: "Music", icon: <Music className="w-6 h-6" /> },
-  { id: "home", storageLabel: "Home", icon: <Home className="w-6 h-6" /> },
-] as const;
-
+const GREEN = "#0D5C3A";
+const BORDER = "#E8E6E0";
 const radiusOptions = ["5mi", "10mi", "25mi", "50mi"];
-
-function categoryDisplayLabel(
-  id: (typeof categoryDefs)[number]["id"],
-  copy: AppMessages["postRequest"],
-): string {
-  switch (id) {
-    case "tools":
-      return copy.catTools;
-    case "sports":
-      return copy.catSports;
-    case "photo":
-      return copy.catPhoto;
-    case "gaming":
-      return copy.catGaming;
-    case "music":
-      return copy.catMusic;
-    case "home":
-      return copy.catHome;
-  }
-}
-
-function categoryLabelFromSelection(selectedCategory: string | null): string {
-  if (!selectedCategory) return "";
-  const chip = categoryDefs.find((c) => c.id === selectedCategory);
-  return chip?.storageLabel ?? selectedCategory;
-}
-
-function resolveRequestCategory(
-  lockedContext: boolean,
-  prefill: ShelfPrefill | null | undefined,
-  selectedCategory: string | null,
-): string {
-  if (lockedContext) return (prefill?.category ?? "").trim();
-  const fromChip = categoryLabelFromSelection(selectedCategory);
-  if (fromChip) return fromChip;
-  const fromPrefill = (prefill?.category ?? "").trim();
-  if (fromPrefill) return fromPrefill;
-  const query = (prefill?.query ?? "").trim();
-  if (query) return "General";
-  return "";
-}
 
 function buildPrefillDescription(
   prefill: ShelfPrefill | null | undefined,
@@ -88,14 +36,158 @@ function buildPrefillDescription(
   }
   const parts: string[] = [];
   if (prefill.subcategory) {
-    parts.push(`Looking for ${prefill.subcategory}`);
-    if (prefill.category) parts[0] += ` (${prefill.category})`;
+    parts.push(
+      copy.lookingForSubInCat(
+        localizeCategoryLabel(prefill.subcategory),
+        localizeCategoryLabel(prefill.category ?? ""),
+      ),
+    );
   } else if (prefill.category) {
-    parts.push(`Looking for items in ${prefill.category}`);
+    parts.push(copy.lookingForItemsInCat(localizeCategoryLabel(prefill.category)));
   }
-  if (query) parts.push(`matching "${query}"`);
-  if (prefill.city) parts.push(`near ${prefill.city}`);
+  if (query) parts.push(`“${query}”`);
+  if (prefill.city) parts.push(copy.nearCity(prefill.city));
   return `${parts.join(" ")}.`;
+}
+
+function SubPickList({
+  items,
+  selected,
+  onPick,
+}: {
+  items: SubcategoryItem[];
+  selected: string | null;
+  onPick: (label: string) => void;
+}) {
+  return (
+    <ul className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+      {items.map((item) => {
+        const active = selected === item.label;
+        return (
+          <li key={item.label}>
+            <button
+              type="button"
+              onClick={() => onPick(item.label)}
+              className={`flex w-full min-w-0 items-start gap-1.5 rounded-lg px-2 py-1.5 text-left text-[12.5px] leading-snug transition-colors ${
+                active ? "bg-primary/10 font-semibold text-primary" : "text-gray-700 hover:bg-muted/60"
+              }`}
+            >
+              <span className="mt-px w-4 shrink-0 text-center text-[13px]" aria-hidden>
+                {item.emoji}
+              </span>
+              <span className="min-w-0 [overflow-wrap:anywhere]">
+                {localizeCategoryLabel(item.label)}
+              </span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function CategoryPicker({
+  catalog,
+  openCategory,
+  selectedCategory,
+  selectedSubcategory,
+  onToggleCategory,
+  onSelectSubcategory,
+  householdLabel,
+  proLabel,
+  selectCategoryLabel,
+  selectSubcategoryLabel,
+  hint,
+}: {
+  catalog: CategoryCatalogEntry[];
+  openCategory: string | null;
+  selectedCategory: string | null;
+  selectedSubcategory: string | null;
+  onToggleCategory: (name: string) => void;
+  onSelectSubcategory: (label: string) => void;
+  householdLabel: string;
+  proLabel: string;
+  selectCategoryLabel: string;
+  selectSubcategoryLabel: string;
+  hint: string;
+}) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-medium">{selectCategoryLabel}</label>
+      <p className="mb-3 text-[12px] leading-snug text-muted-foreground">{hint}</p>
+      <div className="flex flex-col gap-2">
+        {catalog.map((entry) => {
+          const open = openCategory === entry.name;
+          const picked =
+            selectedCategory === entry.name && Boolean(selectedSubcategory);
+          return (
+            <div
+              key={entry.name}
+              className="overflow-hidden rounded-2xl border bg-card"
+              style={{ borderColor: open || picked ? GREEN : BORDER }}
+            >
+              <button
+                type="button"
+                onClick={() => onToggleCategory(entry.name)}
+                aria-expanded={open}
+                className="flex w-full items-center gap-2 px-3 py-2.5 text-left active:bg-[#F7FBF8]"
+              >
+                <span className="text-[18px]" aria-hidden>
+                  {entry.icon}
+                </span>
+                <span className="min-w-0 flex-1 text-[13px] font-bold text-gray-900">
+                  {localizeCategoryLabel(entry.name)}
+                  {picked ? (
+                    <span className="mt-0.5 block text-[11px] font-medium text-primary">
+                      {localizeCategoryLabel(selectedSubcategory!)}
+                    </span>
+                  ) : null}
+                </span>
+                <span className="shrink-0 text-[11px] font-medium text-gray-400">
+                  {entry.personal.length + entry.professional.length}
+                </span>
+                <ChevronDown
+                  className={`h-4 w-4 shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                  style={{ color: GREEN }}
+                />
+              </button>
+              {open ? (
+                <div className="space-y-3 border-t px-3 pb-3 pt-2.5" style={{ borderColor: BORDER }}>
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                    {selectSubcategoryLabel}
+                  </p>
+                  {entry.personal.length > 0 ? (
+                    <div>
+                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                        {householdLabel}
+                      </p>
+                      <SubPickList
+                        items={entry.personal}
+                        selected={selectedSubcategory}
+                        onPick={onSelectSubcategory}
+                      />
+                    </div>
+                  ) : null}
+                  {entry.professional.length > 0 ? (
+                    <div>
+                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                        {proLabel}
+                      </p>
+                      <SubPickList
+                        items={entry.professional}
+                        selected={selectedSubcategory}
+                        onPick={onSelectSubcategory}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 export function PostRequest({
@@ -109,12 +201,21 @@ export function PostRequest({
 }) {
   const auth = useAuth();
   const t = useMessages();
+  const catalog = useMemo(() => getCategoryCatalog(), []);
   const prefillDescription = useMemo(
     () => buildPrefillDescription(prefill, t.postRequest),
     [prefill, t.postRequest],
   );
   const lockedContext = hasPostRequestContext(prefill);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    () => prefill?.category?.trim() || null,
+  );
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(
+    () => prefill?.subcategory?.trim() || null,
+  );
+  const [openCategory, setOpenCategory] = useState<string | null>(
+    () => prefill?.category?.trim() || null,
+  );
   const [description, setDescription] = useState(prefillDescription);
   const [selectedRadius, setSelectedRadius] = useState("10mi");
   const [budget, setBudget] = useState(25);
@@ -129,7 +230,7 @@ export function PostRequest({
     const city = (prefill?.city ?? getActiveRentLocationLabel()).trim();
     const text =
       description.trim() ||
-      t.postRequest.shareDefaultText(APP_NAME, city || "my block");
+      t.postRequest.shareDefaultText(APP_NAME, city || t.postRequest.yourArea);
     return {
       title: t.postRequest.shareTitleApp(APP_NAME),
       text,
@@ -143,6 +244,30 @@ export function PostRequest({
     return `${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`;
   };
 
+  const handleToggleCategory = (name: string) => {
+    if (openCategory === name) {
+      setOpenCategory(null);
+      return;
+    }
+    setOpenCategory(name);
+    if (selectedCategory !== name) {
+      setSelectedCategory(name);
+      setSelectedSubcategory(null);
+    }
+  };
+
+  const handlePickSubcategory = (label: string) => {
+    setSelectedSubcategory(label);
+    if (selectedCategory) {
+      setDescription(
+        `${t.postRequest.lookingForSubInCat(
+          localizeCategoryLabel(label),
+          localizeCategoryLabel(selectedCategory),
+        )}.`,
+      );
+    }
+  };
+
   if (posted) {
     return (
       <div className="screen bg-background flex flex-col">
@@ -154,9 +279,7 @@ export function PostRequest({
             <MrRentano size={48} className="flex-shrink-0" />
             <div>
               <h2 className="font-semibold text-lg mb-1">{t.postRequest.shareNowTitle}</h2>
-              <p className="text-sm text-muted-foreground">
-                {t.postRequest.shareNowBody}
-              </p>
+              <p className="text-sm text-muted-foreground">{t.postRequest.shareNowBody}</p>
             </div>
           </div>
           <div className="bg-muted/50 rounded-xl p-4">
@@ -189,11 +312,11 @@ export function PostRequest({
         <h1 className="font-semibold flex-1">{t.postRequest.title}</h1>
       </div>
 
-      <div className="screen-scroll flex-1 min-h-0 p-3 sm:p-4 space-y-5 sm:space-y-6 pb-24">
+      <div className="screen-scroll flex-1 min-h-0 space-y-5 p-3 pb-24 sm:space-y-6 sm:p-4">
         <div className="flex items-start gap-3">
           <MrRentano size={40} className="flex-shrink-0" />
           <div className="flex-1">
-            <h2 className="font-semibold text-lg mb-1">
+            <h2 className="mb-1 text-lg font-semibold">
               {lockedContext ? t.postRequest.headlineLocked : t.postRequest.headline}
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -211,7 +334,7 @@ export function PostRequest({
               {t.postRequest.requestFor}
             </p>
             <p className="mt-1 font-semibold text-foreground">
-              {localizeCategoryLabel(prefill.subcategory ?? "")} in{" "}
+              {localizeCategoryLabel(prefill.subcategory ?? "")} ·{" "}
               {localizeCategoryLabel(prefill.category ?? "")}
               {prefill.city ? (
                 <>
@@ -224,61 +347,41 @@ export function PostRequest({
         ) : null}
 
         {!lockedContext ? (
-          <div>
-            <label className="block text-sm font-medium mb-3">{t.postRequest.selectCategory}</label>
-
-            <div className="grid grid-cols-3 gap-3">
-              {categoryDefs.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                    selectedCategory === cat.id
-                      ? "border-primary bg-primary/5"
-                      : "border-border bg-card hover:border-primary/50"
-                  }`}
-                >
-                  <div
-                    className={`${
-                      selectedCategory === cat.id ? "text-primary" : "text-muted-foreground"
-                    }`}
-                  >
-                    {cat.icon}
-                  </div>
-                  <span className="text-xs font-medium">
-                    {categoryDisplayLabel(cat.id, t.postRequest)}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
+          <CategoryPicker
+            catalog={catalog}
+            openCategory={openCategory}
+            selectedCategory={selectedCategory}
+            selectedSubcategory={selectedSubcategory}
+            onToggleCategory={handleToggleCategory}
+            onSelectSubcategory={handlePickSubcategory}
+            householdLabel={t.catalog.household}
+            proLabel={t.catalog.pro}
+            selectCategoryLabel={t.postRequest.selectCategory}
+            selectSubcategoryLabel={t.postRequest.selectSubcategory}
+            hint={t.postRequest.pickSubcategoryHint}
+          />
         ) : null}
 
         <div>
-          <label className="block text-sm font-medium mb-3">
-            {t.postRequest.describeLabel}
-          </label>
-
+          <label className="mb-3 block text-sm font-medium">{t.postRequest.describeLabel}</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t.postRequest.describePlaceholder}
             rows={4}
-            className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+            className="w-full resize-none rounded-xl border border-border bg-card px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-3">
-            {t.postRequest.locationRadius}
-          </label>
-
+          <label className="mb-3 block text-sm font-medium">{t.postRequest.locationRadius}</label>
           <div className="flex gap-2">
             {radiusOptions.map((radius) => (
               <button
                 key={radius}
+                type="button"
                 onClick={() => setSelectedRadius(radius)}
-                className={`flex-1 py-2 px-3 rounded-lg border-2 transition-all text-sm font-medium ${
+                className={`flex-1 rounded-lg border-2 px-3 py-2 text-sm font-medium transition-all ${
                   selectedRadius === radius
                     ? "border-primary bg-primary/5 text-primary"
                     : "border-border bg-card hover:border-primary/50"
@@ -291,82 +394,75 @@ export function PostRequest({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-3">
-            {t.postRequest.dateRange}
-          </label>
-
+          <label className="mb-3 block text-sm font-medium">{t.postRequest.dateRange}</label>
           <button
+            type="button"
             onClick={() => setShowDatePicker(true)}
-            className="w-full flex items-center gap-3 px-4 py-3 bg-card border border-border rounded-xl hover:border-primary/50 transition-colors"
+            className="flex w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:border-primary/50"
           >
-            <Calendar className="w-5 h-5 text-muted-foreground" />
+            <Calendar className="h-5 w-5 text-muted-foreground" />
             <span className={`text-sm ${startDate ? "text-foreground" : "text-muted-foreground"}`}>
               {formatDateRange()}
             </span>
           </button>
         </div>
 
-        {showDatePicker && (
+        {showDatePicker ? (
           <div
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
             onClick={() => setShowDatePicker(false)}
           >
             <div
-              className="bg-card rounded-2xl p-6 max-w-sm w-full space-y-4"
+              className="w-full max-w-sm space-y-4 rounded-2xl bg-card p-6"
               onClick={(event) => event.stopPropagation()}
             >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-lg">{t.postRequest.selectDateRange}</h3>
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">{t.postRequest.selectDateRange}</h3>
                 <button
+                  type="button"
                   onClick={() => setShowDatePicker(false)}
-                  className="p-2 hover:bg-muted rounded-full transition-colors"
+                  className="rounded-full p-2 transition-colors hover:bg-muted"
                 >
                   <span className="text-xl">✕</span>
                 </button>
               </div>
-
               <div>
-                <label className="block text-sm font-medium mb-2">{t.postRequest.startDate}</label>
+                <label className="mb-2 block text-sm font-medium">{t.postRequest.startDate}</label>
                 <input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium mb-2">{t.postRequest.endDate}</label>
+                <label className="mb-2 block text-sm font-medium">{t.postRequest.endDate}</label>
                 <input
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
                   min={startDate}
-                  className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
-
               <button
+                type="button"
                 onClick={() => setShowDatePicker(false)}
-                className="w-full bg-primary hover:bg-primary/90 text-white py-3 rounded-xl transition-colors font-medium"
+                className="w-full rounded-xl bg-primary py-3 font-medium text-white transition-colors hover:bg-primary/90"
               >
                 {t.postRequest.confirm}
               </button>
             </div>
           </div>
-        )}
+        ) : null}
 
         <div>
-          <label className="block text-sm font-medium mb-3">
-            {t.postRequest.budgetPerDay}
-          </label>
-
+          <label className="mb-3 block text-sm font-medium">{t.postRequest.budgetPerDay}</label>
           <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm mb-2">
+            <div className="mb-2 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">{t.postRequest.idPayUpTo}</span>
               <span className="text-xl font-bold text-primary">${budget}</span>
             </div>
-
             <input
               type="range"
               min="5"
@@ -374,9 +470,8 @@ export function PostRequest({
               step="5"
               value={budget}
               onChange={(e) => setBudget(Number(e.target.value))}
-              className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-muted accent-primary"
             />
-
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>$5</span>
               <span>$100+</span>
@@ -384,30 +479,31 @@ export function PostRequest({
           </div>
         </div>
 
-        <div className="bg-muted/50 rounded-xl p-4">
-          <h3 className="font-semibold mb-2 flex items-center gap-2">
-            <Share2 className="w-4 h-4" />
+        <div className="rounded-xl bg-muted/50 p-4">
+          <h3 className="mb-2 flex items-center gap-2 font-semibold">
+            <Share2 className="h-4 w-4" />
             {t.postRequest.shareTitle}
           </h3>
-
-          <p className="text-sm text-muted-foreground mb-4">
-            {t.postRequest.shareBody}
-          </p>
-
+          <p className="mb-4 text-sm text-muted-foreground">{t.postRequest.shareBody}</p>
           <SocialShareButtons payload={sharePayload} shareKind="request" compact />
         </div>
       </div>
 
-      <div className="screen-footer bg-card/95 backdrop-blur-sm border-t border-border p-3 sm:p-4">
+      <div className="screen-footer border-t border-border bg-card/95 p-3 backdrop-blur-sm sm:p-4">
         <button
+          type="button"
           disabled={busy}
           onClick={() => {
             if (busy) return;
-            const category = resolveRequestCategory(lockedContext, prefill, selectedCategory);
-            const subcategory = lockedContext ? (prefill?.subcategory ?? "") : "";
+            const category = lockedContext
+              ? (prefill?.category ?? "").trim()
+              : (selectedCategory ?? "").trim();
+            const subcategory = lockedContext
+              ? (prefill?.subcategory ?? "").trim()
+              : (selectedSubcategory ?? "").trim();
             const locationLabel = (prefill?.city ?? getActiveRentLocationLabel()).trim();
             const desc = description.trim();
-            if (!category.trim()) {
+            if (!category) {
               setSubmitError(
                 lockedContext
                   ? t.postRequest.errorMissingCategoryLocked
@@ -415,7 +511,7 @@ export function PostRequest({
               );
               return;
             }
-            if (lockedContext && !subcategory.trim()) {
+            if (!subcategory) {
               setSubmitError(t.postRequest.errorMissingSubcategory);
               return;
             }
@@ -427,7 +523,7 @@ export function PostRequest({
               setSubmitError(t.postRequest.errorSignIn);
               return;
             }
-            const budgetNote = `Budget up to $${budget}/day · within ${selectedRadius}`;
+            const budgetNote = t.postRequest.budgetNote(budget, selectedRadius);
             const fullDescription = desc.includes("$") ? desc : `${desc}\n\n${budgetNote}`;
             setSubmitError(null);
             setBusy(true);
@@ -436,19 +532,19 @@ export function PostRequest({
               category,
               subcategory,
               description: fullDescription,
-              locationLabel: locationLabel || "your area",
+              locationLabel: locationLabel || t.postRequest.yourArea,
               startDate: startDate || undefined,
               endDate: endDate || undefined,
             })
               .then(() => setPosted(true))
               .finally(() => setBusy(false));
           }}
-          className="w-full bg-primary hover:bg-primary/90 text-white py-3.5 rounded-xl transition-colors font-medium disabled:opacity-60"
+          className="w-full rounded-xl bg-primary py-3.5 font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
           {busy ? t.postRequest.posting : t.postRequest.postCta}
         </button>
         {submitError ? (
-          /sign in/i.test(submitError) ? (
+          /sign in|přihlaste/i.test(submitError) ? (
             <div className="mt-3">
               <SignInPrompt message={submitError} intent="generic" />
             </div>
