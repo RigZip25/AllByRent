@@ -14,6 +14,7 @@ import { StripePaymentForm } from "../../components/payments/StripePaymentForm";
 import { isPaymentsReady, getStripeRequiredMessage, getSignInRequiredMessage } from "../../lib/config/production";
 import { createListingBoostIntent } from "../../lib/stripePayments";
 import { boostListingRemote } from "../../lib/listingStorage";
+import { useMessages } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const CTA = "#F59E0B";
@@ -52,13 +53,14 @@ export function ListingShareScreen({
   draft: ListingDraft;
   onDone: () => void;
 }) {
+  const { listingShare: t } = useMessages();
   const auth = useAuth();
   const url = useMemo(() => listingUrl(draft), [draft]);
-  const title = getListingDisplayTitle(draft.title) || draft.title || "My listing";
-  const price = draft.pricing.dailyRate ? `$${draft.pricing.dailyRate}/day` : "Available now";
+  const title = getListingDisplayTitle(draft.title) || draft.title || t.myListingFallback;
+  const price = draft.pricing.dailyRate ? `$${draft.pricing.dailyRate}/day` : t.availableNow;
   const language = typeof navigator !== "undefined" ? navigator.language : "English";
 
-  const [caption, setCaption] = useState<string>(`${title} on ${APP_NAME}.\n${url}`);
+  const [caption, setCaption] = useState<string>(() => t.defaultCaption(title, APP_NAME, url));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cards, setCards] = useState<GeneratedShareCard[]>([]);
@@ -101,7 +103,7 @@ export function ListingShareScreen({
       })
       .catch((e) => {
         if (!mounted) return;
-        setError(e instanceof Error ? e.message : "Caption generation failed");
+        setError(e instanceof Error ? e.message : t.captionFailed);
       })
       .finally(() => {
         if (!mounted) return;
@@ -110,7 +112,7 @@ export function ListingShareScreen({
     return () => {
       mounted = false;
     };
-  }, [draft.category, language, price, title, url]);
+  }, [draft.category, language, price, t.captionFailed, title, url]);
 
   useEffect(() => {
     let mounted = true;
@@ -132,7 +134,7 @@ export function ListingShareScreen({
       })
       .catch((e) => {
         if (!mounted) return;
-        setCardsError(e instanceof Error ? e.message : "Share image generation failed");
+        setCardsError(e instanceof Error ? e.message : t.shareImageFailed);
       })
       .finally(() => {
         if (!mounted) return;
@@ -141,7 +143,7 @@ export function ListingShareScreen({
     return () => {
       mounted = false;
     };
-  }, [draft.photos, draft.pricing.dailyRate, title]);
+  }, [draft.photos, draft.pricing.dailyRate, t.shareImageFailed, title]);
 
   useEffect(() => {
     return () => {
@@ -179,8 +181,8 @@ export function ListingShareScreen({
     if (!untilRaw) return null;
     const until = new Date(untilRaw).getTime();
     if (Number.isNaN(until) || until <= Date.now()) return null;
-    return `Boost active until ${new Date(untilRaw).toLocaleString()}`;
-  }, [boostUntil, draft.boostedUntil]);
+    return t.boostActiveUntil(new Date(untilRaw).toLocaleString());
+  }, [boostUntil, draft.boostedUntil, t]);
 
   const beginBoost = (opt: { label: string; cents: number; hours: number }) => {
     if (!auth.userId) {
@@ -208,7 +210,7 @@ export function ListingShareScreen({
         setBoostPayLabel(opt.label.split(" · ")[0] ?? opt.label);
       })
       .catch(() => {
-        setBoostError("Boost checkout failed. Check Stripe configuration.");
+        setBoostError(t.boostFailed);
       })
       .finally(() => setBoostBusy(false));
   };
@@ -231,12 +233,12 @@ export function ListingShareScreen({
   return (
     <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-[#F9FAFB]">
       <div className="shrink-0 border-b bg-white px-5 pb-4 pt-4" style={{ borderColor: BORDER }}>
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Optional next step</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">{t.optionalNextStep}</p>
         <h2 className="mt-1 text-[18px] font-extrabold" style={{ color: GREEN }}>
-          Your listing is live — share it?
+          {t.title}
         </h2>
         <p className="mt-1 text-[13px] text-gray-500">
-          {title} is already on your garage. Sharing is optional — caption ready in your language.
+          {t.subtitle(title)}
         </p>
       </div>
 
@@ -246,9 +248,9 @@ export function ListingShareScreen({
             step={{
               id: "share-listing",
               dismissKey: `share-listing-${draft.id}`,
-              title: "Share while it's fresh",
-              body: "Neighbors who see your listing in the first hour are 3× more likely to book. Pick Story for TikTok and Instagram.",
-              cta: "Scroll to share buttons",
+              title: t.agentTitle,
+              body: t.agentBody,
+              cta: t.agentCta,
               onAction: () => {
                 document.getElementById("listing-social-share")?.scrollIntoView({ behavior: "smooth" });
               },
@@ -258,20 +260,20 @@ export function ListingShareScreen({
 
         <div className="rounded-3xl border bg-white p-4" style={{ borderColor: BORDER }}>
           <div className="flex items-center justify-between gap-3">
-            <p className="text-[13px] font-semibold text-gray-700">Share image</p>
+            <p className="text-[13px] font-semibold text-gray-700">{t.shareImage}</p>
             {cardsBusy ? (
               <span className="inline-flex items-center gap-2 text-[12px] text-gray-500">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                Rendering…
+                {t.rendering}
               </span>
             ) : null}
           </div>
 
           <div className="mt-3 flex gap-2">
             {([
-              { id: "story" as const, label: "Story 9:16" },
-              { id: "square" as const, label: "Square 1:1" },
-              { id: "landscape" as const, label: "Card 1200×628" },
+              { id: "story" as const, label: t.formatStory },
+              { id: "square" as const, label: t.formatSquare },
+              { id: "landscape" as const, label: t.formatLandscape },
             ]).map((opt) => {
               const active = selectedFormat === opt.id;
               return (
@@ -296,13 +298,13 @@ export function ListingShareScreen({
             {selectedCard ? (
               <img
                 src={selectedCard.objectUrl}
-                alt="Share card preview"
+                alt={t.shareCardAlt}
                 className="w-full rounded-2xl border"
                 style={{ borderColor: BORDER }}
               />
             ) : (
               <div className="w-full rounded-2xl border bg-[#F9FAFB] p-6 text-center text-[13px] text-gray-500" style={{ borderColor: BORDER }}>
-                {cardsError ? cardsError : "Preparing image…"}
+                {cardsError ? cardsError : t.preparingImage}
               </div>
             )}
           </div>
@@ -315,7 +317,7 @@ export function ListingShareScreen({
               style={{ backgroundColor: CTA }}
             >
               <Share2 className="h-4 w-4" />
-              Share image
+              {t.shareImageCta}
             </button>
             <a
               href={selectedCard?.objectUrl ?? "#"}
@@ -323,18 +325,18 @@ export function ListingShareScreen({
               className={`flex items-center justify-center gap-2 rounded-xl border bg-white px-3 py-2.5 text-[13px] font-semibold ${selectedCard ? "text-gray-700" : "text-gray-400 pointer-events-none"}`}
               style={{ borderColor: BORDER }}
             >
-              ⬇️ Download PNG
+              {t.downloadPng}
             </a>
           </div>
         </div>
 
         <div className="rounded-3xl border bg-white p-4" style={{ borderColor: BORDER }}>
           <div className="flex items-center justify-between gap-3">
-            <p className="text-[13px] font-semibold text-gray-700">Caption</p>
+            <p className="text-[13px] font-semibold text-gray-700">{t.caption}</p>
             {busy ? (
               <span className="inline-flex items-center gap-2 text-[12px] text-gray-500">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                Generating…
+                {t.generating}
               </span>
             ) : null}
           </div>
@@ -358,7 +360,7 @@ export function ListingShareScreen({
               style={{ backgroundColor: GREEN }}
             >
               <Share2 className="h-4 w-4" />
-              Share
+              {t.share}
             </button>
             <button
               type="button"
@@ -367,13 +369,13 @@ export function ListingShareScreen({
               style={{ borderColor: BORDER }}
             >
               <Copy className="h-4 w-4" />
-              Copy
+              {t.copy}
             </button>
           </div>
         </div>
 
         <div id="listing-social-share" className="rounded-3xl border bg-white p-4" style={{ borderColor: BORDER }}>
-          <p className="mb-3 text-[13px] font-semibold text-gray-700">Share to your networks</p>
+          <p className="mb-3 text-[13px] font-semibold text-gray-700">{t.shareNetworks}</p>
           <SocialShareButtons
             payload={sharePayload}
             imageBlob={selectedCard?.blob}
@@ -385,9 +387,9 @@ export function ListingShareScreen({
         </div>
 
         <div className="rounded-3xl border bg-white p-4" style={{ borderColor: BORDER }}>
-          <p className="text-[13px] font-semibold text-gray-700">Boost this listing</p>
+          <p className="text-[13px] font-semibold text-gray-700">{t.boostTitle}</p>
           <p className="mt-1 text-[12px] text-gray-500">
-            Boosted listings show up near the top of the feed with a max of 1 boost per 5 organic.
+            {t.boostBody}
           </p>
           {activeBoostLabel ? (
             <p className="mt-2 text-[12px] font-semibold text-emerald-700">{activeBoostLabel}</p>
@@ -407,9 +409,9 @@ export function ListingShareScreen({
           ) : (
           <div className="mt-3 grid grid-cols-3 gap-2">
             {[
-              { label: "$2 · 24h", cents: 200, hours: 24 },
-              { label: "$5 · 7d", cents: 500, hours: 24 * 7 },
-              { label: "$10 · 30d", cents: 1000, hours: 24 * 30 },
+              { label: t.boostOpt24h, cents: 200, hours: 24 },
+              { label: t.boostOpt7d, cents: 500, hours: 24 * 7 },
+              { label: t.boostOpt30d, cents: 1000, hours: 24 * 30 },
             ].map((opt) => (
               <button
                 key={opt.label}
@@ -432,10 +434,9 @@ export function ListingShareScreen({
           className="w-full rounded-2xl border bg-white px-4 py-3 text-[14px] font-semibold text-gray-700"
           style={{ borderColor: BORDER }}
         >
-          Back to my listings
+          {t.backToListings}
         </button>
       </div>
     </div>
   );
 }
-

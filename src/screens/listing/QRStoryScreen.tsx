@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import qrStory1 from "../../imports/qr_story_1.png";
@@ -6,26 +6,9 @@ import qrStory2 from "../../imports/qr_story_2.png";
 import qrStory3 from "../../imports/qr_story_3.png";
 import { MASCOT_NAME } from "../../lib/brand";
 import { RentanoHint } from "../../components/RentanoHint";
+import { useMessages } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
-
-const STORY_STEPS = [
-  {
-    image: qrStory1,
-    title: "Your item is now a smart asset",
-    tip: "This QR links the physical item to a single listing. Scans create a timestamped trail: pickup, return, and any issues.",
-  },
-  {
-    image: qrStory2,
-    title: "Renter scans on pickup",
-    tip: "The scan confirms they received the item. The rental timer starts and both sides see the same record.",
-  },
-  {
-    image: qrStory3,
-    title: "Renter scans on return",
-    tip: "The scan confirms the item is returned. It closes out the rental and keeps everyone protected.",
-  },
-] as const;
 
 type QRStoryScreenProps = {
   onGotIt: () => void;
@@ -58,8 +41,18 @@ function StoryBlock({
 
 /** Educational slides only — printable PDF is on the next QR sticker screen. */
 export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
+  const { listingQr: t } = useMessages();
   const [step, setStep] = useState(0);
-  const active = STORY_STEPS[step]!;
+  const storySteps = useMemo(
+    () =>
+      [
+        { image: qrStory1, title: t.stepSmartTitle, tip: t.stepSmartTip },
+        { image: qrStory2, title: t.stepPickupTitle, tip: t.stepPickupTip },
+        { image: qrStory3, title: t.stepReturnTitle, tip: t.stepReturnTip },
+      ] as const,
+    [t],
+  );
+  const active = storySteps[step]!;
 
   return (
     <motion.div
@@ -69,11 +62,10 @@ export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
     >
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-5">
         <h2 className="mb-2 text-center text-2xl font-bold" style={{ color: GREEN }}>
-          How your QR works
+          {t.storyTitle}
         </h2>
         <p className="mb-5 text-center text-[13px] text-gray-500">
-          For rentals — {MASCOT_NAME} explains pickup and return scans. Your printable sticker comes
-          on the next step.
+          {t.storySubtitle(MASCOT_NAME)}
         </p>
 
         <StoryBlock image={active.image} title={active.title} tip={active.tip} />
@@ -81,8 +73,8 @@ export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
 
       <footer className="shrink-0 border-t border-gray-100 bg-white px-4 pb-6 pt-4">
         <div className="mb-3 flex items-center justify-between text-xs font-semibold text-gray-400">
-          <span>Slide {step + 1} of 3</span>
-          <span className="rounded-full bg-gray-100 px-2 py-1">{MASCOT_NAME} guided</span>
+          <span>{t.slideOf(step + 1, 3)}</span>
+          <span className="rounded-full bg-gray-100 px-2 py-1">{t.mascotGuided(MASCOT_NAME)}</span>
         </div>
         <div className="flex gap-2">
           <button
@@ -91,7 +83,7 @@ export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
             disabled={step === 0}
             className="flex min-h-[48px] w-12 items-center justify-center rounded-2xl border bg-white disabled:opacity-50"
             style={{ borderColor: "#E8E6E0" }}
-            aria-label="Previous slide"
+            aria-label={t.prevSlideAria}
           >
             <ChevronLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
@@ -102,7 +94,7 @@ export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
               className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-2xl px-4 text-base font-bold text-white"
               style={{ backgroundColor: GREEN }}
             >
-              Next
+              {t.next}
               <ChevronRight className="h-5 w-5" />
             </button>
           ) : (
@@ -112,7 +104,7 @@ export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
               className="flex min-h-[48px] flex-1 items-center justify-center rounded-2xl px-4 text-base font-bold text-white"
               style={{ backgroundColor: GREEN }}
             >
-              Continue to sticker
+              {t.continueToSticker}
             </button>
           )}
         </div>

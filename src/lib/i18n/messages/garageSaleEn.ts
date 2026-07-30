@@ -1,0 +1,353 @@
+import type { AppMessages } from "../types";
+
+export const garageSale: AppMessages["garageSale"] = {
+  yardSaleHub: {
+    title: "Garage sales (Beta)",
+    subtitle: "Experimental — browse who's open or set up your own sale.",
+    browse: {
+      title: "Browse open garages",
+      subtitle: "See who's open today on your block",
+      cta: "See open sales →",
+    },
+    host: {
+      title: "Open my garage",
+      subtitle: "Hours first · snap photo + price onto the shelf",
+      cta: "Set up my sale →",
+    },
+    footer: "Sale items go on your garage shelf — photo first.",
+    openBadge: "OPEN",
+  },
+  openGarageSale: {
+    title: "Open your garage",
+    subtitle: "Set your hours, then snap items straight onto the sale shelf.",
+    hoursTitle: "When are you open?",
+    hoursHint:
+      "Pick your day(s) and hours — auction items bid until you close. Followers get a heads-up when you're open.",
+    daysLabel: "Day of week",
+    timeLabel: "Open hours",
+    timeFrom: "From",
+    timeTo: "Until",
+    presetsLabel: "Quick fill",
+    neighborsSee: "Neighbors will see:",
+    shelfTitle: "Stock the shelf",
+    shelfHint:
+      "Garage-sale snap — photo first, optional tag, price or auction. Not the full listing form.",
+    shelfNote: "Each snap lands on your open shop · neighbors buy or bid",
+    addItemsCta: "Snap onto shelf →",
+    myGarageCta: "My active garage →",
+    shareGarageCta: "Share open garage",
+    rulesViewCta: "How selling works — pictures →",
+    mascotHint: "can help price odd items once they're on the shelf.",
+    scheduleInvalid: "Pick at least one day and make sure end time is after start.",
+    dayLabels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    presetToday: "Today",
+    presetSaturday: "Saturday",
+    presetWeekend: "Weekend",
+  },
+  snapSale: {
+    eyebrow: "Garage sale shelf",
+    title: "Snap a sale item",
+    subtitle:
+      "Photo on the table first — tag it if you want, set your price. On the shelf in seconds.",
+    stepPhoto: "1 · Snap photo",
+    stepTag: "2 · Tag & price",
+    photoCta: "Tap to snap",
+    photoHint: "One photo per item — like a tag on the table",
+    cameraBtn: "Camera",
+    libraryBtn: "Photos",
+    noteLabel: "Quick tag (optional)",
+    notePlaceholder: "e.g. Kids bike, works great",
+    pricingLabel: "How neighbors buy",
+    modeQuick: "Quick sale",
+    modeOpen: "Open to offers",
+    quickHint:
+      "Sticker price only — neighbors buy now, pay, then message you for pickup. No offers.",
+    openHint:
+      "Buy now or make an offer — you get a push on every offer to accept, counter, or pass.",
+    priceLabel: "Asking price",
+    buyNowLabel: "Asking price",
+    auctionWindowLabel: "Garage hours",
+    auctionWindowHint:
+      "Two or more offers → auction between them at close. You won't counter each one.",
+    auctionTermsTitle: "How offers work",
+    auctionTermsBody:
+      "One neighbor → push to accept, counter, or decline. Two or more → auction between them. Winner pays within 30 minutes.",
+    publishCta: "Put on shelf →",
+    publishing: "Adding to shelf…",
+    defaultTitle: "Garage sale find",
+    publishedTitle: "On your shelf!",
+    publishedHintFirst: "Your garage shop is live — snap more or preview the shop.",
+    publishedHintMore: "Another item tagged — keep snapping while you're open.",
+    snapAnotherCta: "Snap another item",
+    viewShopCta: "Preview my shop",
+    mascotHint: "skips categories and long forms — this is garage-sale speed.",
+  },
+  garageAuction: {
+    bidTerms:
+      "By bidding you agree: auction ends when the garage closes. The high bidder pays at checkout within 30 minutes. If they don't pay, the lot goes to the next-highest bidder.",
+    checkoutTerms:
+      "Pay at checkout now. You have 30 minutes after the auction ends — if payment isn't completed, the lot automatically goes to the next-highest bidder.",
+    runnerUpTitle: "You're the next bidder",
+    runnerUpSubtitle:
+      "The previous winner didn't pay in time — pay your bid within 30 minutes.",
+    shopBanner:
+      "Buy now at sticker price — or Offer when allowed. Paid → message seller for pickup.",
+    winBannerSuffix: "now (30 min)",
+  },
+  garageSaleRules: {
+    eyebrow: "How selling works",
+    title: "Rules in plain sight",
+    subtitle: "Four pictures — how neighbors buy from your garage shelf.",
+    step1Title: "Buy now",
+    step1Body:
+      "Sticker price. Neighbor taps Buy, pays, then messages you to set a pickup time — no offers or counters on that path.",
+    step2Title: "One neighbor interested",
+    step2Body:
+      "They make an offer. You get a push every time — accept, counter your price, or pass until you agree.",
+    step3Title: "Several neighbors interested",
+    step3Body:
+      "You don't negotiate with each one. An auction runs between them before you close — highest bid wins.",
+    step4Title: "Winner pays fast",
+    step4Body:
+      "Auction winner pays within 30 minutes or the lot goes to the next bidder. Then you arrange pickup.",
+    cta: "Got it — snap my first item →",
+  },
+  garageOffers: {
+    sheetEyebrow: "Make an offer",
+    sheetHint: "one-on-one with the host until two neighbors want it",
+    sheetTerms:
+      "The seller is notified on every offer. If another neighbor offers too, this becomes an auction — the host stops countering individually.",
+    sheetSubmit: "Send offer",
+    myOfferTitle: "Your offer",
+    waitingHost: "Waiting — your offer",
+    hostWants: "Host wants",
+    acceptCounter: "Accept",
+    newOfferLabel: "Or offer more",
+    sendNewOffer: "Send new offer",
+    pendingHostBody:
+      "Host is reviewing your offer — we'll push you when they accept, counter, or pass.",
+    inboxTitle: "Neighbor offers",
+    inboxSubtitle: "One-on-one — accept, counter, or decline (push on every offer)",
+    inboxEmptyTitle: "No offers yet",
+    inboxEmptyBody:
+      "When one neighbor makes an offer, it shows here. Two or more → auction instead.",
+    inboxFootnote:
+      "When two neighbors offer on the same item, offers close here and an auction starts between them automatically.",
+    oneOnOneBadge: "1-on-1 offer",
+    offerFrom: "Offer",
+    accept: "Accept",
+    counter: "Counter",
+    counterLabel: "Your counter",
+    makeOffer: "Offer",
+    interestedLabel: "interested",
+    auctionAuto: "Auction — interested neighbors only",
+  },
+  garageShare: {
+    openGarageTitle: "Share open garage",
+    itemTitle: "Share this item",
+    afterSnapTitle: "Spread the word",
+    afterSnapHint:
+      "Story, Nextdoor, WhatsApp — link opens your shelf, not the app home page.",
+    shopBannerHost: "Tap Edit on any item — or share your shelf to pull buyers in.",
+  },
+  garageShelfEdit: {
+    eyebrow: "Your shelf",
+    title: "Edit sale item",
+    changePhoto: "New photo",
+    tagLabel: "Tag",
+    noteLabel: "Note",
+    priceLabel: "Asking price",
+    noStartingBidHint:
+      "No starting bid — neighbors offer their price, or an auction starts if several want it.",
+    modeQuick: "Quick sale",
+    modeOpen: "Open to offers",
+    save: "Save changes",
+    remove: "Remove from shelf",
+    removeConfirm: "Remove this item from your garage shelf?",
+    removeConfirmActive: "Active offers or bids will be cleared. Remove from shelf?",
+  },
+  garageWorkflow: {
+    eyebrow: "Your household garage",
+    title: "How an open garage works",
+    subtitle: "Three steps — not the normal listing form. This is your sale shelf on the block.",
+    step1Title: "Set open hours",
+    step1Body: "Pick day(s) and times so neighbors know when to stop by.",
+    step2Title: "Snap onto the shelf",
+    step2Body: "One photo, optional tag, asking price — quick sale or open to offers.",
+    step3Title: "See the rules",
+    step3Body:
+      "Next screen shows pictures — buy now, one-on-one offers, group auction, fast payment.",
+    cta: "Next — how selling works →",
+    skip: "Skip intro",
+  },
+};
+
+export const yardSales: AppMessages["yardSales"] = {
+  backAria: "Back to garage sales",
+  title: "Yard sales & open garages",
+  subtitle: "Saturday-drive mode — who's open near you",
+  openNow: "OPEN NOW",
+  today: "TODAY",
+  weekend: "WEEKEND",
+  scheduled: "SCHEDULED",
+  hoursTbd: "HOURS TBD",
+  mixedSale: "Mixed yard sale",
+  forSale: (n) => `${n} for sale`,
+  openCount: (n) => `${n} open sale${n === 1 ? "" : "s"} near you today`,
+  noneOpenHint: "Weekend sales in your cluster — tap a garage to peek inside",
+  loading: "Loading open sales near you…",
+  emptyTitle: "No yard sales on the map yet",
+  emptyBody: "Check back on weekends, or browse neighbor items for buy deals.",
+  browseCta: "Browse the block →",
+};
+
+export const garageCart: AppMessages["garageCart"] = {
+  backAria: "Back",
+  title: "Cart",
+  paidTitle: "Paid",
+  garageFallback: "Garage",
+  paymentComplete: (total) => `Payment complete · ${total}`,
+  paymentCompleteBody:
+    "Direct buy — no offers needed. Message the seller to pick a convenient pickup time.",
+  sellerNotified: "The seller was notified that you paid.",
+  backToGarage: "Back to garage →",
+  emptyTitle: "Cart is empty",
+  emptyBody: "Buy now items from an open garage shelf.",
+  removeAria: "Remove from cart",
+  cardPayment: "Card payment",
+  total: "Total",
+  buyNowHint:
+    "You pay the listed price. After payment, message the seller to arrange pickup — no offer negotiation on Buy now.",
+  signInCta: "Sign in / Create account",
+  continueGuest: "Continue as guest",
+  emailLabel: "Email for receipt",
+  emailPlaceholder: "you@example.com",
+  guestHint: "One-time purchase — no account required.",
+  preparing: "Preparing checkout…",
+  chooseHowToPay: "Choose how to pay",
+  payAmount: (total) => `Pay ${total}`,
+  signInOrGuest: "Sign in, or continue as guest with your email.",
+  validEmail: "Enter a valid email for your receipt.",
+};
+
+export const earnBusiness: AppMessages["earnBusiness"] = {
+  earnedThisMonth: "Earned this month",
+  allTime: "All time",
+  projectedByMonthEnd: (amount) => `Projected ${amount} by month end`,
+  kpiThisMonth: "This month",
+  kpiLastMonth: "Last month",
+  kpiActiveNow: "Active earning now",
+  growingTitle: "How you're growing",
+  byListing: "By listing",
+  emptyTitle: "No listings yet",
+  emptyBody: "Publish from My Garage (or the + button) to track earnings here.",
+  backToBrowse: "Back to browse",
+  colItem: "Item",
+  colMonth: "Month",
+  colAllTime: "All time",
+  trendAria: (trend) => `Trend ${trend}`,
+  sparklineHint: "Last 7 days · completed payouts",
+  growthNew: "New this month",
+  growthVsLast: (signedPercent) => `${signedPercent}% vs last month`,
+  activeListings: (n) => (n === 1 ? "1 active listing" : `${n} active listings`),
+  tipExpandTitle: "Expand your catalog",
+  tipExpandBody: (amount) =>
+    `List 1 more item to unlock ~$${amount}/mo based on your current per-listing pace.`,
+  tipMomentumTitle: "Momentum is building",
+  tipMomentumBody: (pct, last, current) =>
+    `You're up ${pct}% vs last month ($${last} → $${current}). Keep pricing aligned with your top earner.`,
+  tipRecoverTitle: "Recover last month's pace",
+  tipRecoverBody: (last) =>
+    `You earned $${last} last month. Refresh photos and availability on listings that were active then.`,
+  tipTargetTitle: "Set a monthly target",
+  tipTargetBody: (amount) =>
+    `Aim for $${amount}/mo by keeping 2+ items available on weekends.`,
+  tipFieldTitle: "Money out in the field",
+  tipFieldBody: (amount, count) =>
+    `$${amount} is tied up in ${count} active rental${count === 1 ? "" : "s"} right now — fast responses protect those payouts.`,
+};
+
+export const qrScan: AppMessages["qrScan"] = {
+  closeAria: "Close",
+  confirmPickup: "Confirm pickup",
+  confirmReturn: "Confirm return",
+  scanPickup: "Scan QR — pickup",
+  scanReturn: "Scan QR — return",
+  qrVerified: "QR scan verified · PIN required",
+  tipPickup: "Item received! Your rental starts now.",
+  tipPickupReturnBy: (label) => ` Return by ${label}.`,
+  tipReturn: "All done! We'll notify the owner.",
+  contactlessTitle: "Contactless access details",
+  contactlessBody:
+    "Step-by-step access instructions and codes unlock at check-in with PIN — not before. Your pickup address is on the rental screen so you can travel here first.",
+  contactlessLocked:
+    "Enter the correct 6-digit pickup PIN below to view access codes and instructions.",
+  enterPinPickup: "Enter the pickup PIN",
+  enterPinReturn: "Enter the return PIN",
+  pinBody:
+    "This scan only works inside the app for the renter/host on this booking. The PIN prevents random scans.",
+  pinBodyContactless:
+    "This scan only works inside the app for the renter/host on this booking. The PIN prevents random scans and unlocks contactless access details (codes and steps).",
+  pinPlaceholder: "000000",
+  pinAria: "6-digit PIN",
+  pinMismatch: (mode) =>
+    `PIN doesn’t match. Ask your counterparty for the ${mode} PIN.`,
+  alreadyConfirmed: "Already confirmed.",
+  scanHint: "Point the camera at the item QR sticker…",
+  scanHintMissing: "QR target missing for this booking — use manual code or host confirm.",
+  scanHintMatched: "QR matched — continue with PIN",
+  cameraUnavailable: "Camera is not available in this browser. Use manual code entry.",
+  cameraAccessNeeded: "Camera access is needed to scan the QR code on the item.",
+  stickerMustMatch:
+    "The sticker must match this booking. You’ll still need the 6‑digit PIN after a successful scan.",
+  enterCodeManually: "Enter code manually",
+  ownerConfirms: "Owner confirms manually",
+  manualTitle: "Item QR / check-in code",
+  manualPlaceholder: "Paste listing code",
+  verifyCode: "Verify code",
+  codeMismatch: "Code doesn't match this item. Try again or scan the QR.",
+};
+
+export const bookingRequest: AppMessages["bookingRequest"] = {
+  autoCancelledSoon: "Auto-cancelled soon",
+  autoCancelledIn: (countdown) => `Auto-cancelled in ${countdown}`,
+  inclDelivery: (fee) => ` (incl. $${fee} delivery)`,
+  paymentOnHold:
+    "Renter payment is authorized — it is not captured until you approve.",
+  somethingWrong: "Something went wrong.",
+  approving: "Approving…",
+  approve: "Approve",
+  declining: "Declining…",
+  decline: "Decline",
+};
+
+export const rentalPrice: AppMessages["rentalPrice"] = {
+  title: "Price breakdown",
+  rentalMonthly: (days, months, rate) =>
+    `Rental (${days} days ≈ ${months} months × $${rate}/mo)`,
+  rentalDaily: (days, rate) =>
+    `Rental (${days} day${days === 1 ? "" : "s"} × $${rate})`,
+  roundTripDelivery: "Round-trip delivery",
+  heavySurcharge: "Heavy item surcharge",
+  heavySurchargeWithOver: (over) => `Heavy item surcharge (${over})`,
+  depositProtection: "Deposit protection",
+  platformFee: "Platform fee",
+  total: "Total",
+};
+
+export const paymentsUi: AppMessages["paymentsUi"] = {
+  agreePrefix: "By paying you agree to the",
+  terms: "Terms",
+  privacy: "Privacy Policy",
+  and: "and",
+  refund: "Refund Policy",
+  agreeSuffix:
+    "Card charges are processed by Stripe; hosts are paid through Stripe Connect.",
+  secureCheckout: "Secure card checkout enabled",
+  bookingWithoutPayment:
+    "Card checkout is not configured yet. Your request will be sent to the host — payment can be arranged after approval.",
+  stripeRequired:
+    "Card payments are temporarily unavailable. You can still send a request to the host.",
+  garageStripeRequired:
+    "Card checkout is temporarily unavailable. You can still browse and save items — try again shortly.",
+};
