@@ -13,6 +13,7 @@ import { APP_NAME, MARKETING_URL, MASCOT_NAME } from "../../lib/brand";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMessages } from "../../lib/i18n/react";
 import type { AppMessages } from "../../lib/i18n/types";
+import { formatMoney } from "../../lib/regionalDisplay";
 import {
   getCategoryCatalog,
   type CategoryCatalogEntry,
@@ -81,9 +82,10 @@ function budgetLine(
   radius: string,
   copy: AppMessages["postRequest"],
 ): string {
-  if (intent === "buy") return copy.budgetNoteBuy(budget, radius);
-  if (intent === "either") return copy.budgetNoteEither(budget, radius);
-  return copy.budgetNote(budget, radius);
+  const label = formatMoney(budget);
+  if (intent === "buy") return copy.budgetNoteBuy(label, radius);
+  if (intent === "either") return copy.budgetNoteEither(label, radius);
+  return copy.budgetNote(label, radius);
 }
 
 function whenLine(

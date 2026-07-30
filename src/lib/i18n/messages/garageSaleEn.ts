@@ -428,9 +428,9 @@ export const bookingRequest: AppMessages["bookingRequest"] = {
 export const rentalPrice: AppMessages["rentalPrice"] = {
   title: "Price breakdown",
   rentalMonthly: (days, months, rate) =>
-    `Rental (${days} days ≈ ${months} months × $${rate}/mo)`,
+    `Rental (${days} days ≈ ${months} months × ${rate}/mo)`,
   rentalDaily: (days, rate) =>
-    `Rental (${days} day${days === 1 ? "" : "s"} × $${rate})`,
+    `Rental (${days} day${days === 1 ? "" : "s"} × ${rate})`,
   roundTripDelivery: "Round-trip delivery",
   heavySurcharge: "Heavy item surcharge",
   heavySurchargeWithOver: (over) => `Heavy item surcharge (${over})`,

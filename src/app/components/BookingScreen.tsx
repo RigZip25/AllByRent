@@ -34,6 +34,7 @@ import {
   isPaymentsReady,
 } from "../../lib/config/production";
 import { removeStripeControllerIframes } from "../../lib/stripeCleanup";
+import { formatMoney } from "../../lib/regionalDisplay";
 import {
   createDepositPaymentIntent,
   createRentalPaymentIntent,
@@ -591,7 +592,7 @@ function BookingScreenLoaded({
             <p>
               {t.booking.depositHoldNote(
                 t.item.depositProtection,
-                `$${(depositAmountCents / 100).toFixed(2)}`,
+                formatMoney(depositAmountCents / 100),
               )}
             </p>
           </div>
@@ -619,7 +620,7 @@ function BookingScreenLoaded({
               {t.booking.depositHoldTitle(t.item.depositProtection)}
             </p>
             <p className="text-xs text-muted-foreground mb-3">
-              {t.booking.depositHoldBody(`$${(pendingDepositCents / 100).toFixed(2)}`)}
+              {t.booking.depositHoldBody(formatMoney(pendingDepositCents / 100))}
             </p>
             {paymentError ? (
               <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
@@ -628,7 +629,7 @@ function BookingScreenLoaded({
             ) : null}
             <StripePaymentForm
               clientSecret={depositClientSecret}
-              totalLabel={`$${(pendingDepositCents / 100).toFixed(2)} hold`}
+              totalLabel={`${formatMoney(pendingDepositCents / 100)} hold`}
               onSuccess={handleDepositSuccess}
               onError={setPaymentError}
             />
@@ -645,7 +646,7 @@ function BookingScreenLoaded({
             ) : null}
             <StripePaymentForm
               clientSecret={paymentClientSecret}
-              totalLabel={`$${breakdown.totalUsd.toFixed(2)}`}
+              totalLabel={formatMoney(breakdown.totalUsd)}
               onSuccess={handlePaymentSuccess}
               onError={setPaymentError}
             />

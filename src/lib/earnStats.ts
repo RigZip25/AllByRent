@@ -8,6 +8,7 @@ import {
   loadUserProfile,
   refreshProfileStats,
 } from "./userProfileStorage";
+import { formatMoney } from "./regionalDisplay";
 
 function formatActiveListingsCount(count: number): string {
   if (count === 1) return "1 active listing";
@@ -188,7 +189,8 @@ function buildGrowthTips(stats: {
 }
 
 export function formatUsd(amount: number): string {
-  return `$${Math.round(amount).toLocaleString()}`;
+  // Name kept for call sites; formats in the active country currency.
+  return formatMoney(Math.round(amount));
 }
 
 export function formatGrowthBadge(percent: number | null): string {

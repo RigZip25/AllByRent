@@ -577,6 +577,13 @@ export type AppMessages = {
     chatListingSubtitle: (step: number, total: number) => string;
     chatSubtitle: string;
     needHelpSeed: (mascot: string) => string;
+    tapForTips: (mascot: string) => string;
+    tapAgainToClose: (mascot: string) => string;
+    showHintAria: (mascot: string) => string;
+    hideHintAria: (mascot: string) => string;
+    closeHintAria: (mascot: string) => string;
+    quickPromptsRent: string[];
+    quickPromptsEarn: string[];
   };
   listing: {
     stepOf: (step: number, total: number) => string;
@@ -935,9 +942,9 @@ export type AppMessages = {
     budgetPerDay: string;
     budgetTotal: string;
     idPayUpTo: string;
-    budgetNote: (budget: number, radius: string) => string;
-    budgetNoteBuy: (budget: number, radius: string) => string;
-    budgetNoteEither: (budget: number, radius: string) => string;
+    budgetNote: (budgetLabel: string, radius: string) => string;
+    budgetNoteBuy: (budgetLabel: string, radius: string) => string;
+    budgetNoteEither: (budgetLabel: string, radius: string) => string;
     shareTitle: string;
     shareBody: string;
     posting: string;
@@ -1563,8 +1570,10 @@ export type AppMessages = {
     pdfReadyBody: string;
     download: string;
     print: string;
+    openPdf: string;
     sharePdfFile: string;
     close: string;
+    backToSticker: string;
     errorPdfGenerate: string;
     errorNoBulkItems: string;
     errorPdfPrepare: string;

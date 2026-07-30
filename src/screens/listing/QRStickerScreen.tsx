@@ -473,15 +473,18 @@ export function QRStickerScreen({
           onClick={() => setActionsOpen(false)}
         >
           <div
-            className="w-full max-w-[390px] rounded-2xl bg-white p-5 shadow-xl"
+            className="flex max-h-[85vh] w-full max-w-[390px] flex-col rounded-2xl bg-white p-5 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-base font-bold" style={{ color: GREEN }}>
               {t.pdfReady}
             </h3>
-            <p className="mt-1 text-xs text-gray-500">
-              {t.pdfReadyBody}
-            </p>
+            <p className="mt-1 text-xs text-gray-500">{t.pdfReadyBody}</p>
+            <iframe
+              title={t.pdfReady}
+              src={pdfUrl}
+              className="mt-3 min-h-[180px] w-full flex-1 rounded-xl border border-gray-200 bg-gray-50"
+            />
             <div className="mt-4 grid grid-cols-2 gap-2">
               <a
                 href={pdfUrl}
@@ -491,14 +494,14 @@ export function QRStickerScreen({
               >
                 {t.download}
               </a>
-              <button
-                type="button"
-                onClick={() => window.open(pdfUrl, "_blank", "noopener,noreferrer")}
-                className="w-full rounded-xl py-3 text-sm font-bold text-white"
+              <a
+                href={pdfUrl}
+                download={pdfFilename}
+                className="w-full rounded-xl py-3 text-center text-sm font-bold text-white"
                 style={{ backgroundColor: GREEN }}
               >
                 {t.print}
-              </button>
+              </a>
               <button
                 type="button"
                 onClick={() => void handleSharePdf()}
@@ -512,7 +515,15 @@ export function QRStickerScreen({
             <button
               type="button"
               onClick={() => setActionsOpen(false)}
-              className="mt-3 w-full text-center text-xs font-semibold underline"
+              className="mt-3 w-full text-center text-sm font-semibold"
+              style={{ color: GREEN }}
+            >
+              {t.backToSticker}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActionsOpen(false)}
+              className="mt-2 w-full text-center text-xs font-semibold underline"
               style={{ color: "#6B7280" }}
             >
               {t.close}

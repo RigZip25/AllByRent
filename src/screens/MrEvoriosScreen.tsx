@@ -15,22 +15,6 @@ const BORDER = "#E8E6E0";
 
 type AssistantView = "chat" | "faq" | "install";
 
-const QUICK_PROMPTS_RENT = [
-  "How do I browse by category?",
-  "Menu buttons — what does each tab do?",
-  "What is Evorios — household marketplace?",
-  "Profile vs Garage — what's the difference?",
-  "How do I list my first item?",
-];
-
-const QUICK_PROMPTS_EARN = [
-  "How do I stock my garage?",
-  "Which categories can I list?",
-  "What is Evorios — household marketplace?",
-  "Profile vs Garage — what's the difference?",
-  "How do I switch to Browse?",
-];
-
 export function MrEvoriosScreen() {
   const auth = useAuth();
   const pwa = usePwaInstallPrompt();
@@ -52,7 +36,8 @@ export function MrEvoriosScreen() {
     };
   }, []);
 
-  const quickPrompts = appMode === "earn" ? QUICK_PROMPTS_EARN : QUICK_PROMPTS_RENT;
+  const quickPrompts =
+    appMode === "earn" ? t.mrEvorios.quickPromptsEarn : t.mrEvorios.quickPromptsRent;
 
   const apiContext = useMemo(
     () => ({
