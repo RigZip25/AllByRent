@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { APP_NAME } from "../../lib/brand";
+import { getListingQrUrl } from "../../lib/listingQr";
+import { decodeListingQrFromVideoFrame } from "../../lib/verifyListingQrPhoto";
 import { RentanoTip } from "../RentanoTip";
 
 const GREEN = "#0D5C3A";
@@ -15,6 +17,7 @@ export function QrScanPanel({
   itemTitle,
   itemEmoji,
   expectedCode,
+  expectedListingId,
   expectedPin,
   contactlessInstructions,
   alreadyConfirmed,
@@ -32,6 +35,7 @@ export function QrScanPanel({
   itemTitle: string;
   itemEmoji: string;
   expectedCode?: string;
+  expectedListingId?: string;
   expectedPin?: string;
   contactlessInstructions?: string;
   alreadyConfirmed?: boolean;
@@ -45,10 +49,12 @@ export function QrScanPanel({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const scannedRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [manualOpen, setManualOpen] = useState(false);
   const [codeInput, setCodeInput] = useState("");
   const [pinInput, setPinInput] = useState("");
+  const [scanHint, setScanHint] = useState("Point the camera at the item QR sticker…");
 
   const stopStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -58,7 +64,9 @@ export function QrScanPanel({
   useEffect(() => {
     if (!open || phase !== "camera") return;
     let cancelled = false;
+    scannedRef.current = false;
     setError(null);
+    setScanHint("Point the camera at the item QR sticker…");
     (async () => {
       try {
         if (!navigator.mediaDevices?.getUserMedia) {
@@ -66,7 +74,7 @@ export function QrScanPanel({
           return;
         }
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
+          video: { facingMode: { ideal: "environment" } },
         });
         if (cancelled) {
           stream.getTracks().forEach((t) => t.stop());
@@ -88,10 +96,47 @@ export function QrScanPanel({
   }, [open, phase, stopStream]);
 
   useEffect(() => {
+    if (!open || phase !== "camera" || error) return;
+    const listingId = (expectedListingId || expectedCode || "").trim();
+    if (!listingId) {
+      setScanHint("QR target missing for this booking — use manual code or host confirm.");
+      return;
+    }
+
+    let cancelled = false;
+    let raf = 0;
+    const tick = () => {
+      if (cancelled || scannedRef.current) return;
+      const video = videoRef.current;
+      if (video) {
+        const match = decodeListingQrFromVideoFrame(video, {
+          listingId,
+          qrToken: expectedCode,
+          publicUrl: getListingQrUrl(listingId),
+        });
+        if (match) {
+          scannedRef.current = true;
+          setScanHint("QR matched — continue with PIN");
+          stopStream();
+          onScanned();
+          return;
+        }
+      }
+      raf = window.requestAnimationFrame(tick);
+    };
+    raf = window.requestAnimationFrame(tick);
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(raf);
+    };
+  }, [open, phase, error, expectedListingId, expectedCode, onScanned, stopStream]);
+
+  useEffect(() => {
     if (!open) {
       setManualOpen(false);
       setCodeInput("");
       setPinInput("");
+      scannedRef.current = false;
     }
   }, [open]);
 
@@ -125,9 +170,7 @@ export function QrScanPanel({
           <h2 className="text-[18px] font-bold" style={{ color: GREEN }}>
             {itemTitle}
           </h2>
-          <p className="mt-1 text-[14px] text-gray-600">
-            QR scan verified · PIN required
-          </p>
+          <p className="mt-1 text-[14px] text-gray-600">QR scan verified · PIN required</p>
 
           <div className="mt-4">
             <RentanoTip
@@ -148,9 +191,8 @@ export function QrScanPanel({
             <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50 p-4">
               <p className="text-[13px] font-bold text-amber-950">Contactless access details</p>
               <p className="mt-1 text-[12px] text-amber-900/90">
-                Step-by-step access instructions and codes unlock at check-in with PIN — not
-                before. Your pickup address is on the rental screen so you can travel here
-                first.
+                Step-by-step access instructions and codes unlock at check-in with PIN — not before.
+                Your pickup address is on the rental screen so you can travel here first.
               </p>
               {pinUnlocksContactless ? (
                 <p className="mt-3 whitespace-pre-wrap text-[14px] leading-relaxed text-gray-800">
@@ -158,8 +200,7 @@ export function QrScanPanel({
                 </p>
               ) : (
                 <p className="mt-3 text-[13px] italic text-gray-600">
-                  Enter the correct 6-digit pickup PIN below to view access codes and
-                  instructions.
+                  Enter the correct 6-digit pickup PIN below to view access codes and instructions.
                 </p>
               )}
             </div>
@@ -170,8 +211,8 @@ export function QrScanPanel({
               Enter the {mode === "pickup" ? "pickup" : "return"} PIN
             </p>
             <p className="mt-1 text-[12px] text-gray-500">
-              This scan only works inside the {APP_NAME} app for the renter/host on this booking.
-              The PIN prevents random scans
+              This scan only works inside the {APP_NAME} app for the renter/host on this booking. The
+              PIN prevents random scans
               {mode === "pickup" && contactlessInstructions?.trim()
                 ? " and unlocks contactless access details (codes and steps)."
                 : "."}
@@ -189,42 +230,30 @@ export function QrScanPanel({
               placeholder="000000"
               aria-label="6-digit PIN"
             />
-            {error ? (
-              <p className="mt-2 text-[12px] font-semibold text-red-700">{error}</p>
-            ) : null}
+            {error ? <p className="mt-2 text-[12px] font-semibold text-red-700">{error}</p> : null}
           </div>
-
-          {mode === "pickup" ? (
-            <button
-              type="button"
-              className="mt-4 w-full rounded-xl border py-3 text-[14px] font-semibold"
-              style={{ borderColor: GREEN, color: GREEN }}
-            >
-              Take a photo of the item condition now
-            </button>
-          ) : null}
 
           <button
             type="button"
-            disabled={alreadyConfirmed || pinInput.length !== 6}
+            disabled={pinInput.length !== 6 || (Boolean(expectedPin) && pinInput !== expectedPin)}
             onClick={() => {
-              if (alreadyConfirmed) {
-                setError("Already confirmed.");
-                return;
-              }
               if (expectedPin && pinInput !== expectedPin) {
-                setError("PIN doesn't match. Ask your counterparty for the correct PIN.");
+                setError(
+                  `PIN doesn’t match. Ask your counterparty for the ${mode === "pickup" ? "pickup" : "return"} PIN.`,
+                );
                 return;
               }
               onConfirm();
             }}
-            className="mt-4 w-full rounded-2xl py-4 text-[16px] font-bold text-white"
+            className="mt-4 w-full rounded-2xl py-3.5 text-[15px] font-bold text-white disabled:opacity-40"
             style={{ backgroundColor: CTA }}
           >
-            {alreadyConfirmed
-              ? "Already confirmed"
-              : `Confirm ${mode === "pickup" ? "pickup" : "return"}`}
+            Confirm {mode === "pickup" ? "pickup" : "return"}
           </button>
+
+          {alreadyConfirmed ? (
+            <p className="mt-3 text-center text-[12px] text-gray-500">Already confirmed.</p>
+          ) : null}
         </div>
       </div>
     );
@@ -232,11 +261,11 @@ export function QrScanPanel({
 
   return (
     <div className="fixed inset-0 z-[90] flex flex-col bg-black">
-      <div className="flex items-center justify-between px-4 py-3 text-white">
+      <div className="flex items-center justify-between px-4 py-3">
         <button type="button" onClick={onClose} aria-label="Close">
-          <X className="h-6 w-6" />
+          <X className="h-6 w-6 text-white" />
         </button>
-        <p className="text-[15px] font-semibold">
+        <p className="text-[16px] font-bold text-white">
           Scan QR — {mode === "pickup" ? "pickup" : "return"}
         </p>
         <span className="w-6" />
@@ -251,20 +280,10 @@ export function QrScanPanel({
       </div>
 
       <div className="shrink-0 space-y-2 px-4 pb-8 pt-4">
-        <button
-          type="button"
-          disabled={Boolean(error)}
-          onClick={() => {
-            stopStream();
-            onScanned();
-          }}
-          className="w-full rounded-2xl py-3.5 text-[15px] font-bold text-white disabled:opacity-50"
-          style={{ backgroundColor: CTA }}
-        >
-          {error ? "Camera unavailable" : "Scan item QR code"}
-        </button>
+        <p className="text-center text-[14px] font-semibold text-white">{scanHint}</p>
         <p className="text-center text-[12px] text-white/80">
-          Tip: scanning is not enough — you’ll still need the 6‑digit PIN from your counterparty.
+          The sticker must match this booking. You’ll still need the 6‑digit PIN after a successful
+          scan.
         </p>
         <button
           type="button"
@@ -288,23 +307,27 @@ export function QrScanPanel({
         <div className="absolute inset-0 flex items-end bg-black/60 p-4">
           <div className="w-full rounded-2xl bg-white p-4">
             <p className="mb-2 text-[15px] font-bold" style={{ color: GREEN }}>
-              6-digit check-in code
+              Item QR / check-in code
             </p>
             <input
               type="text"
-              inputMode="numeric"
-              maxLength={6}
+              inputMode="text"
               value={codeInput}
-              onChange={(e) => setCodeInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              className="mb-3 w-full rounded-xl border px-4 py-3 text-center text-[20px] tracking-widest"
-              placeholder="000000"
+              onChange={(e) => setCodeInput(e.target.value.trim())}
+              className="mb-3 w-full rounded-xl border px-4 py-3 text-center text-[16px]"
+              placeholder="Paste listing code"
             />
             <button
               type="button"
-              disabled={codeInput.length !== 6}
+              disabled={codeInput.length < 4}
               onClick={() => {
-                if (expectedCode && codeInput !== expectedCode) {
-                  setError("Code doesn't match. Try again or scan the QR.");
+                const expected = (expectedCode || expectedListingId || "").trim();
+                if (
+                  expected &&
+                  codeInput !== expected &&
+                  codeInput !== (expectedListingId || "").trim()
+                ) {
+                  setError("Code doesn't match this item. Try again or scan the QR.");
                   setManualOpen(false);
                   return;
                 }
