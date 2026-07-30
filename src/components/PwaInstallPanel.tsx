@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ExternalLink, Share } from "lucide-react";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN, PWA_SHORT_NAME } from "../lib/brand";
+import { useMessages } from "../lib/i18n/react";
 import { PWA_INSTALL_DISMISS_DAYS } from "../lib/pwaInstall";
 
 type Platform = "ios" | "android";
@@ -16,16 +17,18 @@ type PwaInstallPanelProps = {
 function PlatformToggle({
   value,
   onChange,
+  ariaLabel,
 }: {
   value: Platform;
   onChange: (value: Platform) => void;
+  ariaLabel: string;
 }) {
   return (
     <div
       className="inline-flex overflow-hidden rounded-full border bg-white"
       style={{ borderColor: `${BRAND_GREEN}33` }}
       role="tablist"
-      aria-label="Platform"
+      aria-label={ariaLabel}
     >
       {(["ios", "android"] as const).map((tab) => {
         const active = value === tab;
@@ -57,7 +60,11 @@ export function PwaInstallPanel({
   onDismiss,
   showDismissActions = false,
 }: PwaInstallPanelProps) {
+  const { pwa: t } = useMessages();
   const [platform, setPlatform] = useState<Platform>(() => (manualIos ? "ios" : "android"));
+  const ios = t.iosShareSteps;
+  const notSafari = t.iosNotSafari;
+  const android = t.androidManual;
 
   return (
     <div
@@ -65,10 +72,7 @@ export function PwaInstallPanel({
       style={{ backgroundColor: "#F0FDF4", borderColor: BRAND_GREEN }}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <PlatformToggle
-          value={platform}
-          onChange={setPlatform}
-        />
+        <PlatformToggle value={platform} onChange={setPlatform} ariaLabel={t.platformAria} />
         {showDismissActions && onDismiss ? (
           <div className="flex flex-wrap items-center gap-3">
             <button
@@ -76,17 +80,19 @@ export function PwaInstallPanel({
               onClick={onDismiss}
               className="text-sm font-medium text-gray-500 underline"
             >
-              Remind in {PWA_INSTALL_DISMISS_DAYS} days
+              {t.remindInDays(PWA_INSTALL_DISMISS_DAYS)}
             </button>
           </div>
         ) : null}
       </div>
 
       <p className="mt-3 text-[13px] font-semibold leading-snug" style={{ color: BRAND_GREEN }}>
-        {APP_NAME} — your neighborhood marketplace
+        {t.tagline(APP_NAME)}
       </p>
       <p className="mt-1 text-[12px] leading-snug text-gray-500">
-        Home Screen label: <strong>{PWA_SHORT_NAME}</strong> (so it stands out among icons).
+        {t.homeScreenBefore}
+        <strong>{PWA_SHORT_NAME}</strong>
+        {t.homeScreenAfter}
       </p>
 
       {platform === "ios" ? (
@@ -94,15 +100,22 @@ export function PwaInstallPanel({
           <div className="flex items-start gap-2">
             <Share className="mt-0.5 h-4 w-4 shrink-0" style={{ color: BRAND_GREEN }} />
             <div>
-              Safari (bottom center): square with arrow → <strong>View More</strong> →{" "}
-              <strong>Add to Home Screen</strong>. Keep the name{" "}
-              <strong>{PWA_SHORT_NAME}</strong> (or edit it) → <strong>Add</strong>.
+              {ios.beforeViewMore}
+              <strong>{ios.viewMore}</strong>
+              {ios.mid}
+              <strong>{ios.addToHome}</strong>
+              {ios.keepName}
+              <strong>{PWA_SHORT_NAME}</strong>
+              {ios.orEdit}
+              <strong>{ios.add}</strong>.
             </div>
           </div>
           <div className="mt-2 flex items-start gap-2">
             <ExternalLink className="mt-0.5 h-4 w-4 shrink-0" style={{ color: BRAND_GREEN }} />
             <div>
-              Not in Safari? Use <strong>Open in Safari</strong> first.
+              {notSafari.before}
+              <strong>{notSafari.openInSafari}</strong>
+              {notSafari.after}
             </div>
           </div>
         </div>
@@ -110,24 +123,25 @@ export function PwaInstallPanel({
         <div className="mt-3 text-sm leading-relaxed text-[#374151]">
           {nativeInstallReady ? (
             <>
-              <p>
-                One tap install — shows as <strong>{PWA_SHORT_NAME}</strong>, full screen, no
-                browser bar.
-              </p>
+              <p>{t.androidReady(PWA_SHORT_NAME)}</p>
               <button
                 type="button"
                 onClick={onInstall}
                 className="mt-2.5 inline-flex w-full items-center justify-center rounded-full px-4 py-2.5 text-sm font-bold shadow-md transition-opacity active:opacity-90"
                 style={{ backgroundColor: BRAND_AMBER, color: BRAND_GREEN }}
               >
-                Install {PWA_SHORT_NAME}
+                {t.installShort(PWA_SHORT_NAME)}
               </button>
             </>
           ) : (
             <p>
-              In Chrome: menu <strong>⋮</strong> → <strong>Install app</strong> or{" "}
-              <strong>Add to Home screen</strong> — look for{" "}
-              <strong>Neighborhood Marketplace</strong> in the prompt.
+              {android.beforeMenu}
+              <strong>⋮</strong> → <strong>{android.installApp}</strong>
+              {android.or}
+              <strong>{android.addToHome}</strong>
+              {android.lookFor}
+              <strong>{android.promptName}</strong>
+              {android.after}
             </p>
           )}
         </div>

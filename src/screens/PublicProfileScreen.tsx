@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { BadgeCheck, Shield, Star as StarIcon } from "lucide-react";
 import type { PublicUserProfile } from "../lib/demoUserProfiles";
+import { useMessages } from "../lib/i18n/react";
 import { fetchRemoteProfile, type RemoteProfile } from "../lib/supabaseProfile";
 import { loadUserProfile, type UserProfile } from "../lib/userProfileStorage";
 import { fetchListingsByOwnerIdsRemote, loadPublishedListings } from "../lib/listingStorage";
@@ -30,10 +31,10 @@ function mapDraftsToPublicListings(drafts: ListingDraft[]): PublicUserProfile["l
     }));
 }
 
-function publicFromRemote(profile: RemoteProfile): PublicUserProfile {
+function publicFromRemote(profile: RemoteProfile, neighborLabel: string): PublicUserProfile {
   return {
     id: profile.id,
-    displayName: profile.display_name?.trim() || "Neighbor",
+    displayName: profile.display_name?.trim() || neighborLabel,
     memberSince: profile.created_at,
     avatarUrl: null,
     identityVerified: Boolean(profile.identity_verified),
@@ -82,6 +83,8 @@ export function PublicProfileScreen({
   onOpenProfileSettings?: () => void;
 }) {
   const auth = useAuth();
+  const { common, profileDeep } = useMessages();
+  const t = profileDeep.publicProfile;
   const own = loadUserProfile();
   const ownUserId = (auth.userId ?? own.id).trim();
   const isSelf = Boolean(ownUserId) && userId.trim() === ownUserId;
@@ -97,7 +100,7 @@ export function PublicProfileScreen({
     !isSelf && !remoteProfile && hostListings.length > 0
       ? {
           id: userId,
-          displayName: "Neighbor",
+          displayName: t.neighbor,
           memberSince: new Date().toISOString(),
           avatarUrl: null,
           identityVerified: false,
@@ -134,9 +137,9 @@ export function PublicProfileScreen({
       setFetchedReviews(
         rows.map((r) => ({
           id: r.id,
-          authorName: r.role === "host" ? "Host" : "Renter",
+          authorName: r.role === "host" ? t.host : t.renter,
           rating: r.rating,
-          text: r.comment || "No comment",
+          text: r.comment || t.noComment,
           date: r.createdAt,
         })),
       );
@@ -144,7 +147,7 @@ export function PublicProfileScreen({
     return () => {
       mounted = false;
     };
-  }, [userId]);
+  }, [userId, t.host, t.renter, t.noComment]);
 
   useEffect(() => {
     if (isSelf || !looksLikeUuid(userId)) {
@@ -158,7 +161,7 @@ export function PublicProfileScreen({
     void Promise.all([fetchRemoteProfile(userId), fetchListingsByOwnerIdsRemote([userId])])
       .then(([remote, drafts]) => {
         if (!mounted) return;
-        setRemoteProfile(remote ? publicFromRemote(remote) : null);
+        setRemoteProfile(remote ? publicFromRemote(remote, t.neighbor) : null);
         setRemoteListings(
           mapDraftsToPublicListings(drafts.filter((listing) => listing.hostId === userId)),
         );
@@ -169,15 +172,15 @@ export function PublicProfileScreen({
     return () => {
       mounted = false;
     };
-  }, [userId, isSelf]);
+  }, [userId, isSelf, t.neighbor]);
 
   if (remoteLoading && !profile) {
     return (
       <div className="screen flex flex-col bg-[#F0F4F2] p-4">
         <button type="button" onClick={onBack} className="text-[15px] font-semibold" style={{ color: GREEN }}>
-          Back
+          {common.back}
         </button>
-        <p className="mt-8 text-center text-gray-500">Loading profile…</p>
+        <p className="mt-8 text-center text-gray-500">{t.loading}</p>
       </div>
     );
   }
@@ -186,9 +189,9 @@ export function PublicProfileScreen({
     return (
       <div className="screen flex flex-col bg-[#F0F4F2] p-4">
         <button type="button" onClick={onBack} className="text-[15px] font-semibold" style={{ color: GREEN }}>
-          Back
+          {common.back}
         </button>
-        <p className="mt-8 text-center text-gray-500">Profile not found.</p>
+        <p className="mt-8 text-center text-gray-500">{t.notFound}</p>
       </div>
     );
   }
@@ -199,10 +202,10 @@ export function PublicProfileScreen({
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <header className="shrink-0 flex items-center gap-3 px-4 py-3">
         <button type="button" onClick={onBack} className="text-[15px] font-semibold" style={{ color: GREEN }}>
-          Back
+          {common.back}
         </button>
         <h1 className="text-[18px] font-bold" style={{ color: GREEN }}>
-          {isSelf ? "Your public profile" : profile.displayName}
+          {isSelf ? t.yourPublicProfile : profile.displayName}
         </h1>
       </header>
 
@@ -212,17 +215,14 @@ export function PublicProfileScreen({
             className="mb-4 rounded-2xl border bg-white p-4"
             style={{ borderColor: BORDER }}
           >
-            <p className="text-[13px] leading-relaxed text-gray-600">
-              Add your photo, email, and name in Profile settings — neighbors only see what you
-              choose to share publicly.
-            </p>
+            <p className="text-[13px] leading-relaxed text-gray-600">{t.settingsHint}</p>
             <button
               type="button"
               onClick={onOpenProfileSettings}
               className="mt-3 w-full rounded-xl py-3 text-[14px] font-bold text-white"
               style={{ backgroundColor: GREEN }}
             >
-              Open Profile settings
+              {t.openSettings}
             </button>
           </div>
         ) : null}
@@ -234,7 +234,7 @@ export function PublicProfileScreen({
               <h2 className="text-[20px] font-bold" style={{ color: GREEN }}>
                 {profile.displayName}
               </h2>
-              <p className="text-[14px] text-gray-500">Member since {memberYear}</p>
+              <p className="text-[14px] text-gray-500">{t.memberSince(memberYear)}</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {profile.phoneVerified ? (
                   <span
@@ -242,7 +242,7 @@ export function PublicProfileScreen({
                     style={{ backgroundColor: `${GREEN}14`, color: GREEN }}
                   >
                     <BadgeCheck className="h-3 w-3" />
-                    Phone ✓
+                    {t.phoneVerified}
                   </span>
                 ) : null}
                 {profile.identityVerified ? (
@@ -251,7 +251,7 @@ export function PublicProfileScreen({
                     style={{ backgroundColor: `${GREEN}14`, color: GREEN }}
                   >
                     <Shield className="h-3 w-3" />
-                    ID Verified ✓
+                    {t.idVerified}
                   </span>
                 ) : null}
               </div>
@@ -262,7 +262,7 @@ export function PublicProfileScreen({
         {profile.reviews.length > 0 ? (
           <>
             <h3 className="mb-2 mt-5 text-[13px] font-semibold uppercase tracking-wide text-gray-400">
-              Reviews
+              {t.reviews}
             </h3>
             <ul className="flex flex-col gap-2">
               {(showAllReviews ? profile.reviews : profile.reviews.slice(0, 3)).map((r) => (
@@ -285,7 +285,7 @@ export function PublicProfileScreen({
                 className="mt-2 text-[14px] font-semibold"
                 style={{ color: GREEN }}
               >
-                See all {profile.reviews.length} reviews
+                {t.seeAllReviews(profile.reviews.length)}
               </button>
             ) : null}
           </>
@@ -294,7 +294,7 @@ export function PublicProfileScreen({
         {profile.listings.length > 0 ? (
           <>
             <h3 className="mb-2 mt-5 text-[13px] font-semibold uppercase tracking-wide text-gray-400">
-              Listings
+              {t.listings}
             </h3>
             <ul className="flex flex-col gap-2">
               {profile.listings.map((l) => (
@@ -311,7 +311,7 @@ export function PublicProfileScreen({
                       <p className="font-semibold" style={{ color: GREEN }}>
                         {l.title}
                       </p>
-                      <p className="text-[13px] text-gray-500">${l.pricePerDay}/day</p>
+                      <p className="text-[13px] text-gray-500">{t.ratePerDay(String(l.pricePerDay))}</p>
                     </div>
                   </button>
                 </li>
@@ -321,9 +321,7 @@ export function PublicProfileScreen({
         ) : null}
 
         {!isSelf ? (
-          <p className="mt-6 text-[12px] leading-relaxed text-gray-400">
-            Email, phone, address, and payment details are never shown on public profiles.
-          </p>
+          <p className="mt-6 text-[12px] leading-relaxed text-gray-400">{t.privacyNote}</p>
         ) : null}
       </div>
     </div>

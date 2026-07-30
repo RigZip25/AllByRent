@@ -1139,4 +1139,221 @@ export const en: AppMessages = {
       continueCta: "Continue →",
     },
   },
+  profileDeep: {
+    personalInfo: {
+      title: "Personal info",
+      subtitle:
+        "Email is your sign-in address. Name and phone appear on your profile and rentals.",
+      email: "Email",
+      emailChangeHint:
+        "To use a different email, sign out and sign in again with that address. Changing email here is not supported yet.",
+      displayName: "Display name",
+      phone: "Phone",
+      loadingEmail: "Loading sign-in email…",
+      notSignedIn: "Not signed in",
+      addName: "Add your name",
+      addPhone: "Add phone",
+      nameLabel: "Name",
+      namePlaceholder: "Your name",
+      phoneLabel: "Phone number",
+      phonePlaceholder: "(555) 555-5555",
+    },
+    coHosts: {
+      title: "Co-hosts",
+      subtitle:
+        "Invite people to help manage all of your listings and rental requests. Co-hosts get the same host tools you use in Earn mode (v1: account-wide access, not per listing).",
+      invitationsForYou: "Invitations for you",
+      inviteCardTitle: "Co-host for a host account",
+      inviteCardBody: (email) => `You were invited as a co-host (${email}).`,
+      accept: "Accept",
+      decline: "Decline",
+      inviteSection: "Invite co-host",
+      emailLabel: "Email address",
+      emailPlaceholder: "helper@example.com",
+      saving: "Saving…",
+      saveInvite: "Save invite",
+      shareInviteLink: "Share invite link",
+      copyLink: "Copy link",
+      inviteHint:
+        "Copy the invite link and send it yourself. They sign in with the invited email, then accept under Invitations for you.",
+      pendingInvites: "Pending invites",
+      activeCoHosts: (count) => `Active co-hosts (${count})`,
+      emptyTitle: "No co-hosts yet",
+      emptyBody:
+        "Add someone who helps with many rentals — they can manage listings and requests with you.",
+      statusActive: "Active",
+      statusPending: "Pending invite",
+      markActive: "Mark active",
+      remove: "Remove",
+      removeAria: (email) => `Remove ${email}`,
+      copySuccess: "Invite link copied — they should sign in with the invited email.",
+      copyFailed: "Could not copy link. Long-press the link below to copy manually.",
+      inviteSaved: "Invite saved. Copy the link below and send it to your co-host.",
+      errInvalidEmail: "Enter a valid email address.",
+      errSelfInvite: "You cannot invite yourself.",
+      errInvitePending: "An invite is already pending for this email.",
+      errAlreadyCoHost: "This person is already a co-host.",
+      errInviteNotFound: "Invite not found.",
+      errInviteNotPending: "This invite is no longer pending.",
+    },
+    deleteAccount: {
+      title: "Delete account",
+      body: "This permanently deletes your Supabase auth account and clears local app data on this device. Active rentals and listings may still need manual review on the server.",
+      reauthBusy: "Opening passkey…",
+      reauthCta: "Re-auth with Passkey",
+      deleteBusy: "Deleting…",
+      deleteCta: "Delete account permanently",
+      supportHint:
+        "If deletion fails, email support@evorios.com and we’ll finish removing your account.",
+      somethingWrong: "Something went wrong.",
+      reauthSuccess: "Re-authenticated with passkey. You can continue.",
+    },
+    identity: {
+      title: "Identity verification",
+      subtitle: "One quick step before you go live.",
+      verifyOnceTitle: "Verify once",
+      verifyOnceBody:
+        "Optional extra badge. Going public uses Stripe Connect (ID + bank in one flow).",
+      signInHint: "Sign in to start identity verification.",
+      starting: "Starting…",
+      startCta: "Start verification",
+      failed: "Verification failed.",
+    },
+    publicProfile: {
+      loading: "Loading profile…",
+      notFound: "Profile not found.",
+      yourPublicProfile: "Your public profile",
+      settingsHint:
+        "Add your photo, email, and name in Profile settings — neighbors only see what you choose to share publicly.",
+      openSettings: "Open Profile settings",
+      memberSince: (year) => `Member since ${year}`,
+      phoneVerified: "Phone ✓",
+      idVerified: "ID Verified ✓",
+      reviews: "Reviews",
+      seeAllReviews: (n) => `See all ${n} reviews`,
+      listings: "Listings",
+      ratePerDay: (price) => `$${price}/day`,
+      privacyNote:
+        "Email, phone, address, and payment details are never shown on public profiles.",
+      neighbor: "Neighbor",
+      host: "Host",
+      renter: "Renter",
+      noComment: "No comment",
+    },
+    photoOnboarding: {
+      hint: "People trust you with their things. A real photo builds that trust — let’s take one now.",
+      title: "Add your profile photo",
+      body: (appName) =>
+        `A clear photo of your face is required on ${appName}. No emoji or random avatars — this is a trust platform.`,
+      takePhoto: "Take photo",
+      chooseLibrary: "Choose from library",
+      libraryWarning:
+        "Use a recent photo where your face is clearly visible. Library photos that don’t look like you at pickup may delay rentals.",
+      settingsCardBody:
+        "Need to add email, your name, or preview how neighbors see you? Open full profile settings — you can return to your photo anytime.",
+      openFullProfile: "Open full profile",
+      personalInfoEmail: "Personal info & email",
+      previewPublic: "Preview public profile",
+      remindLater: "Remind me later",
+    },
+  },
+  whereAreYouManual: {
+    title: "Your area",
+    defaultHint:
+      "Enter your postal code or city — we show rentals near you. Street address is optional.",
+    locating: "Finding your location…",
+    useMyLocation: "Use my current location",
+    placeholder: "Postal code or city",
+    pickHint: "Pick a postal code or city above, or tap Skip to browse first.",
+    browseNear: (place) => `Browse rentals near ${place} →`,
+    continueCta: "Continue →",
+  },
+  pwa: {
+    platformAria: "Platform",
+    remindInDays: (days) => `Remind in ${days} days`,
+    tagline: (appName) => `${appName} — your neighborhood marketplace`,
+    homeScreenBefore: "Home Screen label: ",
+    homeScreenAfter: " (so it stands out among icons).",
+    iosShareSteps: {
+      beforeViewMore: "Safari (bottom center): square with arrow → ",
+      viewMore: "View More",
+      mid: " → ",
+      addToHome: "Add to Home Screen",
+      keepName: ". Keep the name ",
+      orEdit: " (or edit it) → ",
+      add: "Add",
+    },
+    iosNotSafari: {
+      before: "Not in Safari? Use ",
+      openInSafari: "Open in Safari",
+      after: " first.",
+    },
+    androidReady: (shortName) =>
+      `One tap install — shows as ${shortName}, full screen, no browser bar.`,
+    installShort: (shortName) => `Install ${shortName}`,
+    androidManual: {
+      beforeMenu: "In Chrome: menu ",
+      installApp: "Install app",
+      or: " or ",
+      addToHome: "Add to Home screen",
+      lookFor: " — look for ",
+      promptName: "Neighborhood Marketplace",
+      after: " in the prompt.",
+    },
+    updateReadyTitle: "App update ready",
+    updateReadyBody: "A new version is available. Tap to install and restart.",
+    tapToUpdate: "Tap to update →",
+    versionUpdatedTitle: "Version updated",
+    versionUpdatedBody: (appName) => `You’re on the latest ${appName}. Have a great day!`,
+    gotIt: "Got it",
+    installUpdateTitle: "Install update?",
+    installUpdateBody:
+      "The app will restart once to load the latest version with new fixes and improvements.",
+    updating: "Updating…",
+    updateNow: "Update now",
+    notNow: "Not now",
+  },
+  passkey: {
+    title: "Enable Face ID for faster login?",
+    body: "Use Face ID, Touch ID, or your device passcode next time — no email code needed.",
+    enableBusy: "Opening Face ID…",
+    enablePreparing: "Preparing Face ID…",
+    enableCta: "Enable Face ID",
+    maybeLater: "Maybe later",
+    hintIosPwa:
+      "Using the app from your Home Screen. Face ID must have been enabled on this same app icon.",
+    hintIosSafari:
+      "Using Safari. To use the installed app later, enable Face ID again from that icon.",
+    hintPwa: "Using the installed app. Face ID is tied to this app icon, not a browser tab.",
+    hintPreview: (origin) =>
+      `Passkeys work best at ${origin} — preview URLs may not match Face ID.`,
+    errors: {
+      generic: "Face ID could not be completed. Try again or sign in with email.",
+      cancelled: "Face ID was cancelled. Try again when you’re ready.",
+      hostNote: (origin) => ` Use ${origin} (not a preview link).`,
+      domainIosPwa:
+        "Face ID does not match this installed app. Sign in with email once, then tap Enable Face ID again from this Home Screen icon.",
+      domainIosSafari:
+        "Face ID was set up in a different place (Safari tab vs Home Screen app). Sign in with email, then enable Face ID from the same place you use daily.",
+      domainGeneric:
+        "Face ID is not set up for this address. Open the same app icon or Safari tab you used when you enabled Face ID.",
+      serverUnavailable:
+        "Sign-in service is temporarily unavailable. Use email sign-in, or try again in a few minutes.",
+      challengeExpired: "This Face ID attempt expired. Please try again.",
+      noPasskey:
+        "No Face ID passkey for this account. Sign in with email, then enable Face ID when prompted.",
+      alreadyEnabled:
+        "Face ID is already enabled on this device. Try signing in with Face ID, or sign in with email.",
+      blockedPwa:
+        "Face ID was blocked for the installed app. Check Settings → Face ID & Passcodes, then try again.",
+      blockedBrowser:
+        "Face ID was blocked. Use Safari on iPhone (not a private tab), or sign in with email.",
+      unsupported:
+        "This browser does not support Face ID passkeys. Use Safari on iPhone, or sign in with email.",
+      notConfigured: "Face ID is not available right now. Sign in with email instead.",
+      verificationFailed:
+        "Face ID verification failed. Sign in with email once, then enable Face ID again (especially if you changed devices or reinstalled the app).",
+      network: "Cannot reach the sign-in service. Check your connection and try again.",
+    },
+  },
 };

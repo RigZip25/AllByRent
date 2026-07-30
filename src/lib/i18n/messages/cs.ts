@@ -1149,4 +1149,221 @@ export const cs: AppMessages = {
       continueCta: "Pokračovat →",
     },
   },
+  profileDeep: {
+    personalInfo: {
+      title: "Osobní údaje",
+      subtitle:
+        "E-mail je vaše přihlašovací adresa. Jméno a telefon se zobrazují na profilu a u půjček.",
+      email: "E-mail",
+      emailChangeHint:
+        "Chcete-li použít jiný e-mail, odhlaste se a přihlaste se znovu s tou adresou. Změna e-mailu zde zatím není podporována.",
+      displayName: "Zobrazované jméno",
+      phone: "Telefon",
+      loadingEmail: "Načítám přihlašovací e-mail…",
+      notSignedIn: "Nejste přihlášeni",
+      addName: "Přidejte jméno",
+      addPhone: "Přidat telefon",
+      nameLabel: "Jméno",
+      namePlaceholder: "Vaše jméno",
+      phoneLabel: "Telefonní číslo",
+      phonePlaceholder: "(555) 555-5555",
+    },
+    coHosts: {
+      title: "Spoluhostitelé",
+      subtitle:
+        "Pozvěte lidi, kteří vám pomohou spravovat všechny nabídky a žádosti o půjčení. Spoluhostitelé mají stejné nástroje jako vy v režimu Vydělávat (v1: přístup na celý účet, ne po nabídkách).",
+      invitationsForYou: "Pozvánky pro vás",
+      inviteCardTitle: "Spoluhostitel u účtu hostitele",
+      inviteCardBody: (email) => `Byli jste pozváni jako spoluhostitel (${email}).`,
+      accept: "Přijmout",
+      decline: "Odmítnout",
+      inviteSection: "Pozvat spoluhostitele",
+      emailLabel: "E-mailová adresa",
+      emailPlaceholder: "pomocnik@example.com",
+      saving: "Ukládám…",
+      saveInvite: "Uložit pozvánku",
+      shareInviteLink: "Sdílet odkaz na pozvánku",
+      copyLink: "Kopírovat odkaz",
+      inviteHint:
+        "Zkopírujte odkaz a pošlete ho sami. Přihlásí se pozvaným e-mailem a přijmou pozvánku v sekci Pozvánky pro vás.",
+      pendingInvites: "Čekající pozvánky",
+      activeCoHosts: (count) => `Aktivní spoluhostitelé (${count})`,
+      emptyTitle: "Zatím žádní spoluhostitelé",
+      emptyBody:
+        "Přidejte někoho, kdo vám pomáhá s půjčkami — může s vámi spravovat nabídky a žádosti.",
+      statusActive: "Aktivní",
+      statusPending: "Čekající pozvánka",
+      markActive: "Označit jako aktivní",
+      remove: "Odebrat",
+      removeAria: (email) => `Odebrat ${email}`,
+      copySuccess: "Odkaz zkopírován — mají se přihlásit pozvaným e-mailem.",
+      copyFailed: "Odkaz se nepodařilo zkopírovat. Dlouhým stiskem níže ho zkopírujte ručně.",
+      inviteSaved: "Pozvánka uložena. Zkopírujte odkaz níže a pošlete ho spoluhostiteli.",
+      errInvalidEmail: "Zadejte platnou e-mailovou adresu.",
+      errSelfInvite: "Nemůžete pozvat sami sebe.",
+      errInvitePending: "Pro tento e-mail už čeká pozvánka.",
+      errAlreadyCoHost: "Tato osoba už je spoluhostitel.",
+      errInviteNotFound: "Pozvánka nenalezena.",
+      errInviteNotPending: "Tato pozvánka už není čekající.",
+    },
+    deleteAccount: {
+      title: "Smazat účet",
+      body: "Trvale smaže váš účet v Supabase Auth a vymaže místní data aplikace na tomto zařízení. Aktivní půjčky a nabídky mohou na serveru ještě vyžadovat ruční kontrolu.",
+      reauthBusy: "Otevírám passkey…",
+      reauthCta: "Znovu ověřit passkey",
+      deleteBusy: "Mažu…",
+      deleteCta: "Trvale smazat účet",
+      supportHint:
+        "Pokud smazání selže, napište na support@evorios.com a účet vám dořešíme.",
+      somethingWrong: "Něco se pokazilo.",
+      reauthSuccess: "Znovu ověřeno passkey. Můžete pokračovat.",
+    },
+    identity: {
+      title: "Ověření identity",
+      subtitle: "Jeden rychlý krok, než půjdete naživo.",
+      verifyOnceTitle: "Ověřit jednou",
+      verifyOnceBody:
+        "Volitelný odznak navíc. Zveřejnění nabídek používá Stripe Connect (doklad + banka v jednom toku).",
+      signInHint: "Přihlaste se a spusťte ověření identity.",
+      starting: "Spouštím…",
+      startCta: "Spustit ověření",
+      failed: "Ověření selhalo.",
+    },
+    publicProfile: {
+      loading: "Načítám profil…",
+      notFound: "Profil nenalezen.",
+      yourPublicProfile: "Váš veřejný profil",
+      settingsHint:
+        "Fotku, e-mail a jméno doplníte v nastavení Profilu — sousedé uvidí jen to, co zveřejníte.",
+      openSettings: "Otevřít nastavení profilu",
+      memberSince: (year) => `Člen od ${year}`,
+      phoneVerified: "Telefon ✓",
+      idVerified: "Doklad ověřen ✓",
+      reviews: "Recenze",
+      seeAllReviews: (n) => `Zobrazit všech ${n} recenzí`,
+      listings: "Nabídky",
+      ratePerDay: (price) => `${price} $/den`,
+      privacyNote:
+        "E-mail, telefon, adresa ani platební údaje se na veřejném profilu nikdy nezobrazují.",
+      neighbor: "Soused",
+      host: "Hostitel",
+      renter: "Nájemce",
+      noComment: "Bez komentáře",
+    },
+    photoOnboarding: {
+      hint: "Lidé vám svěřují své věci. Skutečná fotka buduje důvěru — pořiďme ji teď.",
+      title: "Přidejte profilovou fotku",
+      body: (appName) =>
+        `Na ${appName} je potřeba jasná fotka vaší tváře. Žádná emoji ani náhodní avataři — jde o platformu důvěry.`,
+      takePhoto: "Vyfotit",
+      chooseLibrary: "Vybrat z galerie",
+      libraryWarning:
+        "Použijte nedávnou fotku, kde je tvář jasně vidět. Fotky z galerie, které na předání nevypadají jako vy, mohou půjčky zdržet.",
+      settingsCardBody:
+        "Potřebujete doplnit e-mail, jméno, nebo náhled, jak vás sousedé vidí? Otevřete celé nastavení profilu — k fotce se můžete kdykoli vrátit.",
+      openFullProfile: "Otevřít celý profil",
+      personalInfoEmail: "Osobní údaje a e-mail",
+      previewPublic: "Náhled veřejného profilu",
+      remindLater: "Připomenout později",
+    },
+  },
+  whereAreYouManual: {
+    title: "Vaše oblast",
+    defaultHint:
+      "Zadejte PSČ nebo město — ukážeme půjčky poblíž. Ulice je volitelná.",
+    locating: "Hledám vaši polohu…",
+    useMyLocation: "Použít aktuální polohu",
+    placeholder: "PSČ nebo město",
+    pickHint: "Vyberte PSČ nebo město výše, nebo klepněte na Přeskočit a nejdřív prohlížejte.",
+    browseNear: (place) => `Procházet půjčky poblíž ${place} →`,
+    continueCta: "Pokračovat →",
+  },
+  pwa: {
+    platformAria: "Platforma",
+    remindInDays: (days) => `Připomenout za ${days} dní`,
+    tagline: (appName) => `${appName} — váš sousedský trh`,
+    homeScreenBefore: "Název na ploše: ",
+    homeScreenAfter: " (ať vynikne mezi ikonami).",
+    iosShareSteps: {
+      beforeViewMore: "Safari (uprostřed dole): čtverec se šipkou → ",
+      viewMore: "Zobrazit více",
+      mid: " → ",
+      addToHome: "Přidat na plochu",
+      keepName: ". Ponechte název ",
+      orEdit: " (nebo upravte) → ",
+      add: "Přidat",
+    },
+    iosNotSafari: {
+      before: "Nejste v Safari? Nejdřív použijte ",
+      openInSafari: "Otevřít v Safari",
+      after: ".",
+    },
+    androidReady: (shortName) =>
+      `Instalace jedním klepnutím — jako ${shortName}, na celou obrazovku, bez lišty prohlížeče.`,
+    installShort: (shortName) => `Nainstalovat ${shortName}`,
+    androidManual: {
+      beforeMenu: "V Chrome: menu ",
+      installApp: "Nainstalovat aplikaci",
+      or: " nebo ",
+      addToHome: "Přidat na plochu",
+      lookFor: " — hledejte ",
+      promptName: "Neighborhood Marketplace",
+      after: " v dialogu.",
+    },
+    updateReadyTitle: "Aktualizace připravena",
+    updateReadyBody: "Je k dispozici nová verze. Klepněte pro instalaci a restart.",
+    tapToUpdate: "Klepnutím aktualizovat →",
+    versionUpdatedTitle: "Verze aktualizována",
+    versionUpdatedBody: (appName) => `Máte nejnovější ${appName}. Hezký den!`,
+    gotIt: "Rozumím",
+    installUpdateTitle: "Nainstalovat aktualizaci?",
+    installUpdateBody:
+      "Aplikace se jednou restartuje a načte nejnovější verzi s opravami a vylepšeními.",
+    updating: "Aktualizuji…",
+    updateNow: "Aktualizovat teď",
+    notNow: "Teď ne",
+  },
+  passkey: {
+    title: "Zapnout Face ID pro rychlejší přihlášení?",
+    body: "Příště použijte Face ID, Touch ID nebo kód zařízení — bez e-mailového kódu.",
+    enableBusy: "Otevírám Face ID…",
+    enablePreparing: "Připravuji Face ID…",
+    enableCta: "Zapnout Face ID",
+    maybeLater: "Možná později",
+    hintIosPwa:
+      "Používáte aplikaci z plochy. Face ID muselo být zapnuto u stejné ikony.",
+    hintIosSafari:
+      "Používáte Safari. Pro nainstalovanou aplikaci později zapněte Face ID znovu z té ikony.",
+    hintPwa: "Používáte nainstalovanou aplikaci. Face ID je vázané na tuto ikonu, ne na záložku prohlížeče.",
+    hintPreview: (origin) =>
+      `Passkey fungují nejlépe na ${origin} — náhledové URL nemusí odpovídat Face ID.`,
+    errors: {
+      generic: "Face ID se nepodařilo dokončit. Zkuste to znovu nebo se přihlaste e-mailem.",
+      cancelled: "Face ID bylo zrušeno. Zkuste to znovu, až budete připraveni.",
+      hostNote: (origin) => ` Použijte ${origin} (ne náhledový odkaz).`,
+      domainIosPwa:
+        "Face ID neodpovídá této nainstalované aplikaci. Jednou se přihlaste e-mailem a znovu klepněte na Zapnout Face ID z této ikony na ploše.",
+      domainIosSafari:
+        "Face ID bylo nastaveno jinde (záložka Safari vs. aplikace na ploše). Přihlaste se e-mailem a zapněte Face ID na stejném místě, které používáte denně.",
+      domainGeneric:
+        "Face ID není pro tuto adresu nastaveno. Otevřete stejnou ikonu aplikace nebo záložku Safari jako při zapnutí Face ID.",
+      serverUnavailable:
+        "Přihlašovací služba je dočasně nedostupná. Použijte e-mail, nebo to zkuste za pár minut.",
+      challengeExpired: "Tento pokus o Face ID vypršel. Zkuste to znovu.",
+      noPasskey:
+        "Pro tento účet není Face ID passkey. Přihlaste se e-mailem a zapněte Face ID, až budete vyzváni.",
+      alreadyEnabled:
+        "Face ID je na tomto zařízení už zapnuté. Zkuste se přihlásit Face ID, nebo e-mailem.",
+      blockedPwa:
+        "Face ID bylo pro nainstalovanou aplikaci zablokováno. Zkontrolujte Nastavení → Face ID a kódy a zkuste znovu.",
+      blockedBrowser:
+        "Face ID bylo zablokováno. Použijte Safari na iPhonu (ne soukromou záložku), nebo se přihlaste e-mailem.",
+      unsupported:
+        "Tento prohlížeč nepodporuje Face ID passkey. Použijte Safari na iPhonu, nebo se přihlaste e-mailem.",
+      notConfigured: "Face ID teď není k dispozici. Přihlaste se e-mailem.",
+      verificationFailed:
+        "Ověření Face ID selhalo. Jednou se přihlaste e-mailem a znovu zapněte Face ID (zejména po změně zařízení nebo přeinstalaci).",
+      network: "Nelze se spojit s přihlašovací službou. Zkontrolujte připojení a zkuste znovu.",
+    },
+  },
 };

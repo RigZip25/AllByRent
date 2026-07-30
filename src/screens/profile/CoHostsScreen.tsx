@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Copy, Mail, Trash2, UserPlus, Users } from "lucide-react";
 import { useAuth } from "../../hooks/AuthProvider";
 import { buildCoHostInviteUrl } from "../../lib/coHostStorage";
+import { useMessages } from "../../lib/i18n/react";
 import {
   acceptCoHostInviteWithSync,
   activateCoHostInviteWithSync,
@@ -20,21 +21,53 @@ const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
 const SURFACE = "#F0F4F2";
 
+function localizeCoHostError(
+  error: string,
+  t: ReturnType<typeof useMessages>["profileDeep"]["coHosts"],
+): string {
+  switch (error) {
+    case "Enter a valid email address.":
+      return t.errInvalidEmail;
+    case "You cannot invite yourself.":
+      return t.errSelfInvite;
+    case "An invite is already pending for this email.":
+      return t.errInvitePending;
+    case "This person is already a co-host.":
+      return t.errAlreadyCoHost;
+    case "Invite not found.":
+      return t.errInviteNotFound;
+    case "This invite is no longer pending.":
+      return t.errInviteNotPending;
+    default:
+      return error;
+  }
+}
+
 function CoHostRow({
   record,
   onRemove,
   onActivate,
+  statusActive,
+  statusPending,
+  markActive,
+  remove,
+  removeAria,
 }: {
   record: CoHostRecord;
   onRemove: () => void;
   onActivate?: () => void;
+  statusActive: string;
+  statusPending: string;
+  markActive: string;
+  remove: string;
+  removeAria: (email: string) => string;
 }) {
   const statusLabel =
     record.status === "active"
-      ? "Active"
+      ? statusActive
       : record.acceptedAt
-        ? "Active"
-        : "Pending invite";
+        ? statusActive
+        : statusPending;
 
   return (
     <li
@@ -59,17 +92,17 @@ function CoHostRow({
             className="rounded-lg px-2 py-1 text-[12px] font-semibold text-white"
             style={{ backgroundColor: GREEN }}
           >
-            Mark active
+            {markActive}
           </button>
         ) : null}
         <button
           type="button"
           onClick={onRemove}
           className="inline-flex items-center justify-center gap-1 rounded-lg px-2 py-1 text-[12px] font-semibold text-red-600"
-          aria-label={`Remove ${record.email}`}
+          aria-label={removeAria(record.email)}
         >
           <Trash2 className="h-3.5 w-3.5" />
-          Remove
+          {remove}
         </button>
       </div>
     </li>
@@ -78,6 +111,8 @@ function CoHostRow({
 
 export function CoHostsScreen({ onBack }: { onBack: () => void }) {
   const auth = useAuth();
+  const { common, profileDeep } = useMessages();
+  const t = profileDeep.coHosts;
   const hostId = resolveHostAccountId(auth.userId);
   const hostEmail = resolveHostAccountEmail(auth.userEmail);
   const acceptorId = auth.userId ?? hostId;
@@ -93,13 +128,13 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
   const copyInviteLink = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(inviteUrl);
-      setCopyHint("Invite link copied — they should sign in with the invited email.");
+      setCopyHint(t.copySuccess);
       setError(null);
     } catch {
       setCopyHint(null);
-      setError("Could not copy link. Long-press the link below to copy manually.");
+      setError(t.copyFailed);
     }
-  }, [inviteUrl]);
+  }, [inviteUrl, t.copyFailed, t.copySuccess]);
 
   const refresh = useCallback(() => setVersion((v) => v + 1), []);
 
@@ -122,11 +157,11 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
     void inviteCoHostWithSync(hostId, inviteEmail, hostEmail)
       .then((result) => {
         if (!result.ok) {
-          setError(result.error);
+          setError(localizeCoHostError(result.error, t));
           return;
         }
         setInviteEmail("");
-        setCopyHint("Invite saved. Copy the link below and send it to your co-host.");
+        setCopyHint(t.inviteSaved);
         refresh();
       })
       .finally(() => setBusy(false));
@@ -135,7 +170,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
   const handleAccept = (inviteId: string) => {
     void acceptCoHostInviteWithSync(inviteId, acceptorId).then((result) => {
       if (!result.ok) {
-        setError(result.error);
+        setError(localizeCoHostError(result.error, t));
         return;
       }
       setError(null);
@@ -153,23 +188,20 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
           style={{ borderColor: BORDER }}
         >
           <ArrowLeft className="h-4 w-4" />
-          Back
+          {common.back}
         </button>
         <h1 className="text-[20px] font-bold" style={{ color: GREEN }}>
-          Co-hosts
+          {t.title}
         </h1>
       </header>
 
       <div className="screen-scroll flex-1 px-4 pb-6">
-        <p className="mb-4 text-[14px] leading-relaxed text-gray-600">
-          Invite people to help manage all of your listings and rental requests. Co-hosts get the
-          same host tools you use in Earn mode (v1: account-wide access, not per listing).
-        </p>
+        <p className="mb-4 text-[14px] leading-relaxed text-gray-600">{t.subtitle}</p>
 
         {pendingForYou.length > 0 ? (
           <section className="mb-5">
             <p className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-              Invitations for you
+              {t.invitationsForYou}
             </p>
             <ul className="flex flex-col gap-2">
               {pendingForYou.map((invite) => (
@@ -178,12 +210,8 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
                   className="rounded-2xl border bg-white p-4"
                   style={{ borderColor: BORDER }}
                 >
-                  <p className="text-[15px] font-semibold text-gray-900">
-                    Co-host for a host account
-                  </p>
-                  <p className="mt-1 text-[13px] text-gray-500">
-                    You were invited as a co-host ({invite.email}).
-                  </p>
+                  <p className="text-[15px] font-semibold text-gray-900">{t.inviteCardTitle}</p>
+                  <p className="mt-1 text-[13px] text-gray-500">{t.inviteCardBody(invite.email)}</p>
                   <div className="mt-3 flex gap-2">
                     <button
                       type="button"
@@ -191,7 +219,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
                       className="flex-1 rounded-xl py-2.5 text-[14px] font-bold text-white"
                       style={{ backgroundColor: GREEN }}
                     >
-                      Accept
+                      {t.accept}
                     </button>
                     <button
                       type="button"
@@ -201,7 +229,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
                       className="flex-1 rounded-xl border py-2.5 text-[14px] font-semibold text-gray-600"
                       style={{ borderColor: BORDER }}
                     >
-                      Decline
+                      {t.decline}
                     </button>
                   </div>
                 </li>
@@ -212,14 +240,14 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
 
         <section className="mb-5">
           <p className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-            Invite co-host
+            {t.inviteSection}
           </p>
           <div
             className="rounded-2xl border bg-white p-4"
             style={{ borderColor: BORDER }}
           >
             <label className="mb-2 block text-[13px] font-semibold text-gray-700" htmlFor="cohost-email">
-              Email address
+              {t.emailLabel}
             </label>
             <input
               id="cohost-email"
@@ -227,7 +255,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
               autoComplete="email"
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
-              placeholder="helper@example.com"
+              placeholder={t.emailPlaceholder}
               className="mb-3 w-full rounded-xl border px-3 py-2.5 text-[15px] outline-none focus:ring-2"
               style={{ borderColor: BORDER }}
             />
@@ -244,10 +272,10 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
               style={{ backgroundColor: GREEN }}
             >
               <UserPlus className="h-4 w-4" />
-              {busy ? "Saving…" : "Save invite"}
+              {busy ? t.saving : t.saveInvite}
             </button>
             <div className="mt-3 rounded-xl border px-3 py-3" style={{ borderColor: BORDER }}>
-              <p className="text-[12px] font-semibold text-gray-700">Share invite link</p>
+              <p className="text-[12px] font-semibold text-gray-700">{t.shareInviteLink}</p>
               <p className="mt-1 break-all text-[12px] text-gray-500">{inviteUrl}</p>
               <button
                 type="button"
@@ -256,7 +284,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
                 style={{ backgroundColor: GREEN_LIGHT }}
               >
                 <Copy className="h-3.5 w-3.5" />
-                Copy link
+                {t.copyLink}
               </button>
             </div>
             {copyHint ? (
@@ -264,23 +292,25 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
                 {copyHint}
               </p>
             ) : null}
-            <p className="mt-3 text-[12px] leading-snug text-gray-500">
-              Copy the invite link and send it yourself. They sign in with the invited email, then
-              accept under Invitations for you.
-            </p>
+            <p className="mt-3 text-[12px] leading-snug text-gray-500">{t.inviteHint}</p>
           </div>
         </section>
 
         {pendingCoHosts.length > 0 ? (
           <section className="mb-5">
             <p className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-              Pending invites
+              {t.pendingInvites}
             </p>
             <ul className="flex flex-col gap-2">
               {pendingCoHosts.map((record) => (
                 <CoHostRow
                   key={record.id}
                   record={record}
+                  statusActive={t.statusActive}
+                  statusPending={t.statusPending}
+                  markActive={t.markActive}
+                  remove={t.remove}
+                  removeAria={t.removeAria}
                   onActivate={() => {
                     void activateCoHostInviteWithSync(hostId, record.id).then(() => refresh());
                   }}
@@ -296,18 +326,15 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
         <section>
           <p className="mb-2 flex items-center gap-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
             <Users className="h-3.5 w-3.5" />
-            Active co-hosts ({activeCoHosts.length})
+            {t.activeCoHosts(activeCoHosts.length)}
           </p>
           {activeCoHosts.length === 0 ? (
             <div
               className="rounded-2xl border bg-white px-4 py-8 text-center"
               style={{ borderColor: BORDER }}
             >
-              <p className="text-[15px] font-semibold text-gray-800">No co-hosts yet</p>
-              <p className="mt-1 text-[13px] text-gray-500">
-                Add someone who helps with many rentals — they can manage listings and requests with
-                you.
-              </p>
+              <p className="text-[15px] font-semibold text-gray-800">{t.emptyTitle}</p>
+              <p className="mt-1 text-[13px] text-gray-500">{t.emptyBody}</p>
             </div>
           ) : (
             <ul className="flex flex-col gap-2">
@@ -315,6 +342,11 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
                 <CoHostRow
                   key={record.id}
                   record={record}
+                  statusActive={t.statusActive}
+                  statusPending={t.statusPending}
+                  markActive={t.markActive}
+                  remove={t.remove}
+                  removeAria={t.removeAria}
                   onRemove={() => {
                     void removeCoHostWithSync(hostId, record.id).then(() => refresh());
                   }}
