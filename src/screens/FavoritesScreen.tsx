@@ -10,6 +10,7 @@ import { loadPublishedListings } from "../lib/listingStorage";
 import { getListingDisplayTitle } from "../lib/listingQr";
 import type { ListingDraft } from "./listing/types";
 import { useMediaUrl } from "../lib/useMediaUrl";
+import { localizeCategoryLabel } from "../lib/i18n/categoryLabels";
 import { useMessages } from "../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
@@ -58,7 +59,7 @@ function FavoriteCard({
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold text-gray-900">{title}</p>
           <p className="text-sm text-gray-500">
-            {listing.category || listingFallback}
+            {listing.category ? localizeCategoryLabel(listing.category) : listingFallback}
             {rate ? ` · ${ratePerDay(rate)}` : ""}
           </p>
         </div>

@@ -129,6 +129,7 @@ export const cs: AppMessages = {
     price25to75: "$25–$75",
     price75plus: "$75+",
     backToBrowseAria: "Zpět na volby prohlížení",
+    setBlock: "Nastavte svůj blok",
     setBlockAria: "Nastavit váš blok",
     changeBlockAria: "Změnit cluster bloku",
     filtersAria: "Filtry ceny a vzdálenosti",

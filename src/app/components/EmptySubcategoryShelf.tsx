@@ -2,6 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 import { MrRentanoAnimated } from "./MrRentanoAnimated";
 import type { AppMode } from "../../lib/appMode";
+import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 
 const GREEN = "#1A9E6E";
 const GREEN_DARK = "#0D5C3A";
@@ -39,9 +40,11 @@ export function EmptySubcategoryShelf({
 }: EmptySubcategoryShelfProps) {
   const isEarn = appMode === "earn";
   const cityDisplay = cityName.trim() || "your area";
+  const categoryDisplay = localizeCategoryLabel(categoryName);
+  const subcategoryDisplay = localizeCategoryLabel(subcategoryName);
 
   const rentanoLine = isEarn
-    ? `Zero competition in ${categoryName} in ${cityDisplay}. First host takes all the demand.`
+    ? `Zero competition in ${categoryDisplay} in ${cityDisplay}. First host takes all the demand.`
     : "Someone nearby might have exactly what you need";
 
   const badge = isEarn ? "🏆 Pioneer spot available" : "📣 High demand signal";
@@ -115,7 +118,7 @@ export function EmptySubcategoryShelf({
 
         {!isEarn && subcategoryName ? (
           <p className="mx-auto mt-2 text-xs text-muted-foreground">
-            {subcategoryName} · {categoryName}
+            {subcategoryDisplay} · {categoryDisplay}
           </p>
         ) : null}
       </div>

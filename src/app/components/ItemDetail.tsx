@@ -47,6 +47,7 @@ import { APP_NAME, DEPOSIT_PROTECTION_LABEL, MASCOT_NAME } from "../../lib/brand
 import { parseUsdToCents } from "../../lib/insurance";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
 import { buildListingSharePayload, listingShareUrl } from "../../lib/socialShare";
+import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMessages } from "../../lib/i18n/react";
 import type { ListingDraft } from "../../screens/listing/types";
 
@@ -395,7 +396,10 @@ export function ItemDetail({
               <div>
                 <h2 className="text-2xl font-bold">{title}</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {[listing.category, listing.subcategory].filter(Boolean).join(" · ")}
+                  {[listing.category, listing.subcategory]
+                    .filter(Boolean)
+                    .map((label) => localizeCategoryLabel(label!))
+                    .join(" · ")}
                 </p>
               </div>
               <div className="text-right shrink-0">

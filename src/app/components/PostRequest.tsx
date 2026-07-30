@@ -18,6 +18,7 @@ import { getActiveRentLocationLabel } from "../../lib/listingStorage";
 import { createRequestRemote } from "../../lib/requestsStorage";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
 import { APP_NAME, MARKETING_URL } from "../../lib/brand";
+import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMessages } from "../../lib/i18n/react";
 import type { AppMessages } from "../../lib/i18n/types";
 
@@ -210,7 +211,8 @@ export function PostRequest({
               {t.postRequest.requestFor}
             </p>
             <p className="mt-1 font-semibold text-foreground">
-              {prefill.subcategory} in {prefill.category}
+              {localizeCategoryLabel(prefill.subcategory ?? "")} in{" "}
+              {localizeCategoryLabel(prefill.category ?? "")}
               {prefill.city ? (
                 <>
                   {" "}

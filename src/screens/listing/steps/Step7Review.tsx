@@ -3,6 +3,7 @@ import { MapPin } from "lucide-react";
 import { RentanoHint } from "../../../components/RentanoHint";
 import { ListingFeedCard, offerTypeFromModes } from "../../../app/components/ListingFeedCard";
 import type { Step7ReviewProps } from "../types";
+import { localizeCategoryLabel } from "../../../lib/i18n/categoryLabels";
 import { useMessages } from "../../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
@@ -185,7 +186,7 @@ export function Step7Review({
                   className="rounded-full px-2.5 py-0.5 text-xs font-semibold text-white"
                   style={{ backgroundColor: GREEN }}
                 >
-                  {draft.category}
+                  {localizeCategoryLabel(draft.category)}
                 </span>
               ) : null}
               {gradeLabel ? (

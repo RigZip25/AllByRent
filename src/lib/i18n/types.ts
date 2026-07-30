@@ -231,6 +231,7 @@ export type AppMessages = {
     price25to75: string;
     price75plus: string;
     backToBrowseAria: string;
+    setBlock: string;
     setBlockAria: string;
     changeBlockAria: string;
     filtersAria: string;

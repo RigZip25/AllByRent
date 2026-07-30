@@ -123,6 +123,7 @@ export const en: AppMessages = {
     price25to75: "$25–$75",
     price75plus: "$75+",
     backToBrowseAria: "Back to browse choices",
+    setBlock: "Set your block",
     setBlockAria: "Set your block",
     changeBlockAria: "Change block cluster",
     filtersAria: "Price and distance filters",

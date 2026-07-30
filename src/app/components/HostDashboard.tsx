@@ -13,6 +13,7 @@ import { loadNotificationPreferences } from "../../lib/notificationPreferences";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 import type { ListingDraft } from "../../screens/listing/types";
+import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMessages } from "../../lib/i18n/react";
 import type { AppMessages } from "../../lib/i18n/types";
 
@@ -351,7 +352,7 @@ export function HostDashboard({
                         : listing.listingStatus === "pending_qr"
                           ? t.garageUi.statusNeedsQr
                           : listing.listingStatus}
-                      {listing.category ? ` · ${listing.category}` : ""}
+                      {listing.category ? ` · ${localizeCategoryLabel(listing.category)}` : ""}
                     </p>
                   </div>
                 </button>

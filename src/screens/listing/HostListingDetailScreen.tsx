@@ -27,6 +27,7 @@ import {
   listingOffersDelivery,
 } from "../../lib/rentalPricing";
 import type { MinimumRentalPeriod } from "./types";
+import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -514,7 +515,12 @@ export function HostListingDetailScreen({
                 }
               />
             ) : null}
-            <DetailRow label="Category" value={`${listing.category || "—"}${listing.subcategory ? ` · ${listing.subcategory}` : ""}`} />
+            <DetailRow
+              label="Category"
+              value={`${listing.category ? localizeCategoryLabel(listing.category) : "—"}${
+                listing.subcategory ? ` · ${localizeCategoryLabel(listing.subcategory)}` : ""
+              }`}
+            />
             <DetailRow label="City" value={city || "—"} />
             <DetailRow label="Availability days" value={availabilityDays} />
             <DetailRow

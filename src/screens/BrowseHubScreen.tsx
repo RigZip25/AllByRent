@@ -5,7 +5,8 @@ import { clusterLabelForCity, getClusterRadiusMi } from "../lib/clusterConfig";
 import { getAllCategoryChips } from "../lib/homeCategoryPicks";
 import { getActiveRentLocationLabel, hasRentLocationSetup } from "../lib/listingStorage";
 import { onboardingAssets } from "../lib/onboardingAssets";
-import { useOnboardingCopy } from "../lib/i18n/react";
+import { localizeCategoryLabel } from "../lib/i18n/categoryLabels";
+import { useMessages, useOnboardingCopy } from "../lib/i18n/react";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
@@ -25,6 +26,7 @@ export function BrowseHubScreen({
   onEditLocation,
 }: BrowseHubScreenProps) {
   const { browseHub: copy } = useOnboardingCopy();
+  const { home } = useMessages();
   const city = getActiveRentLocationLabel().trim();
   const clusterLabel = clusterLabelForCity(city, getClusterRadiusMi());
   const needsLocation = !hasRentLocationSetup();
@@ -37,7 +39,7 @@ export function BrowseHubScreen({
           type="button"
           onClick={onEditLocation}
           className="mb-3 flex min-w-0 items-start gap-1.5 text-left"
-          aria-label={needsLocation ? "Set your block" : "Change block cluster"}
+          aria-label={needsLocation ? home.setBlockAria : home.changeBlockAria}
         >
           <MapPin
             className="mt-0.5 h-5 w-5 shrink-0"
@@ -100,7 +102,7 @@ export function BrowseHubScreen({
               style={{ borderColor: BORDER, color: GREEN }}
             >
               <span aria-hidden>{cat.icon}</span>
-              {cat.name}
+              {localizeCategoryLabel(cat.name)}
             </button>
           ))}
         </div>

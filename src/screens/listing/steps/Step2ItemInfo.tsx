@@ -6,6 +6,7 @@ import { RentanoHint } from "../../../components/RentanoHint";
 import { MASCOT_NAME } from "../../../lib/brand";
 import { improveListingDescription } from "../listingDescriptionImprove";
 import { isYardSaleListingActive } from "../../../lib/yardSaleListing";
+import { localizeCategoryLabel } from "../../../lib/i18n/categoryLabels";
 import { useMessages } from "../../../lib/i18n/react";
 import {
   CATEGORIES,
@@ -295,9 +296,9 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
             }}
           >
             <option value="">{item.selectCategory}</option>
-            {CATEGORY_NAMES.map((item) => (
-              <option key={item} value={item}>
-                {item}
+            {CATEGORY_NAMES.map((name) => (
+              <option key={name} value={name}>
+                {localizeCategoryLabel(name)}
               </option>
             ))}
           </select>
@@ -357,9 +358,9 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
             <option value="">
               {canPickSubcategory ? item.selectSubcategory : item.selectGradeFirst}
             </option>
-            {subcategoryOptions.map((item) => (
-              <option key={item.label} value={item.label}>
-                {item.emoji} {item.label}
+            {subcategoryOptions.map((sub) => (
+              <option key={sub.label} value={sub.label}>
+                {sub.emoji} {localizeCategoryLabel(sub.label)}
               </option>
             ))}
           </select>

@@ -28,6 +28,7 @@ import { fetchRequestsForShelfRemote, type WantedRequest } from "../../lib/reque
 
 import { categoryIdFromName } from "../../screens/listing/listingItemCategories";
 import type { ListingDraft } from "../../screens/listing/types";
+import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { listingCardMeta } from "../../lib/listingCardMeta";
@@ -425,7 +426,9 @@ export function Subcategory({
 
           </button>
 
-          <h1 className="text-[17px] font-bold flex-1 truncate" style={{ color: GREEN_DARK }}>{category}</h1>
+          <h1 className="text-[17px] font-bold flex-1 truncate" style={{ color: GREEN_DARK }}>
+            {localizeCategoryLabel(category)}
+          </h1>
 
         </div>
 
@@ -453,7 +456,7 @@ export function Subcategory({
 
                     emoji={sub.emoji}
 
-                    label={sub.label}
+                    label={localizeCategoryLabel(sub.label)}
 
                     onClick={() => handleSelectSubcategory(sub.id)}
 
@@ -481,7 +484,7 @@ export function Subcategory({
 
                     emoji={sub.emoji}
 
-                    label={sub.label}
+                    label={localizeCategoryLabel(sub.label)}
 
                     onClick={() => handleSelectSubcategory(sub.id)}
 
@@ -650,7 +653,7 @@ export function Subcategory({
 
                       {filteredShelfListings.length} match{filteredShelfListings.length === 1 ? "" : "es"} in{" "}
 
-                      {subcategoryLabel}
+                      {localizeCategoryLabel(subcategoryLabel)}
 
                     </span>
 
