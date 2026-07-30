@@ -1,15 +1,15 @@
 import { CATEGORIES, CATEGORY_NAMES, type SubcategoryItem } from "../screens/listing/listingItemCategories";
 
-/** Featured browse categories — compact strips when space is tight. */
+/** Featured browse strip — same priority as CATEGORY_DISPLAY_ORDER head. */
 export const HOME_CATEGORY_PICKS = [
   "Tools & DIY",
   "Garden & Yard",
-  "Photo & Video",
-  "Electronics & Tech",
+  "Home & Kitchen",
+  "Baby & Kids",
   "Party & Events",
   "Sports & Recreation",
-  "Baby & Kids",
-  "Home & Kitchen",
+  "Outdoor & Camping",
+  "Electronics & Tech",
 ] as const;
 
 export type HomeCategoryPick = (typeof HOME_CATEGORY_PICKS)[number];
