@@ -22,7 +22,7 @@ export const faq: AppMessages["faq"] = {
   items: {
     "what-is": {
       q: "Co je Evorios?",
-      a: "Evorios je sousedský trh: každá domácnost je obchodní buňka — garážová výloha na bloku. Sousedé půjčují, prodávají nebo darují (Prodat za 0 $). Procházejte kategorie na Domů, nebo naplňte garáž zeleným tlačítkem +.",
+      a: "Evorios je sousedský trh: každá domácnost je obchodní buňka — garážová výloha na bloku. Sousedé půjčují, prodávají nebo darují (Prodat za 0 Kč). Procházejte kategorie na Domů, nebo naplňte garáž zeleným tlačítkem +.",
     },
     "home-feed": {
       q: "Jak funguje Domů?",
@@ -38,7 +38,7 @@ export const faq: AppMessages["faq"] = {
     },
     "location-rent": {
       q: "Proč musím nastavit svůj blok?",
-      a: "Ukazujeme garáže a věci ve vašem clusteru (ve výchozím nastavení 25 mi). Blok nastavíte při onboarding nebo klepnutím na lokalitu na Domů. Málo nabídek? Klepněte Hledat šířeji pro 50+ mi.",
+      a: "Ukazujeme garáže a věci ve vašem okolí (ve výchozím nastavení asi 40 km). Blok nastavíte při onboarding nebo klepnutím na lokalitu na Domů. Málo nabídek? Klepněte Hledat šířeji pro cca 80+ km.",
     },
     "install-pwa": {
       q: "Jak nainstaluji aplikaci do telefonu?",
@@ -46,7 +46,7 @@ export const faq: AppMessages["faq"] = {
     },
     "list-first": {
       q: "Jak vystavím první věc?",
-      a: "Klepněte na zelené + v patičce (nebo Garáž → Nové), pak rychlý wizard: 1) fotky, 2) detaily a cena (Půjčit / Prodat), 3) kontrola a publikace. U půjčování můžete po publikaci nastavit QR samolepku. Chcete něco darovat? Použijte Prodat s cenou 0 $. Mr. Evorios pomáhá v každém kroku.",
+      a: "Klepněte na zelené + v patičce (nebo Garáž → Nové), pak rychlý wizard: 1) fotky, 2) detaily a cena (Půjčit / Prodat), 3) kontrola a publikace. U půjčování můžete po publikaci nastavit QR samolepku. Chcete něco darovat? Použijte Prodat s cenou 0 Kč. Mr. Evorios pomáhá v každém kroku.",
     },
     "photos-ai": {
       q: "Co se stane po přidání fotek?",
@@ -54,7 +54,7 @@ export const faq: AppMessages["faq"] = {
     },
     "pricing-modes": {
       q: "Jaké režimy ceny mám zvolit?",
-      a: "V kroku 2 (Detaily a cena) zapněte Půjčit a/nebo Prodat. Povinná jsou jen pole pro zapnuté režimy. Nabídky jen na prodej přeskočí QR samolepku. Cena 0 $ u Prodat = darování zdarma (samostatný režim Darovat zatím není).",
+      a: "V kroku 2 (Detaily a cena) zapněte Půjčit a/nebo Prodat. Povinná jsou jen pole pro zapnuté režimy. Nabídky jen na prodej přeskočí QR samolepku. Cena 0 Kč u Prodat = darování zdarma (samostatný režim Darovat zatím není).",
     },
     "replacement-value": {
       q: "Co je náhradní hodnota?",
@@ -62,7 +62,7 @@ export const faq: AppMessages["faq"] = {
     },
     "qr-sticker": {
       q: "Proč potřebuji QR samolepku?",
-      a: "U půjčování fyzické QR na věci pomáhá ověřit předání. Po publikaci můžete vytisknout samolepku nebo použít QR na obrazovce. Nabídky jen na koupi nebo zdarma (prodej za 0 $) mohou samolepku přeskočit.",
+      a: "U půjčování fyzické QR na věci pomáhá ověřit předání. Po publikaci můžete vytisknout samolepku nebo použít QR na obrazovce. Nabídky jen na koupi nebo zdarma (prodej za 0 Kč) mohou samolepku přeskočit.",
     },
     "pickup-delivery": {
       q: "Jak funguje vyzvednutí a doručení?",
@@ -82,7 +82,7 @@ export const faq: AppMessages["faq"] = {
     },
     "payments": {
       q: "Jak fungují platby?",
-      a: "Půjčky: zaplatíte celkovou cenu půjčení, pak samostatnou zálohu (ochrana vkladu), pokud ji hostitel nastavil. Platby jdou přes Stripe — Evorios neukládá kartu. Hostitelé připojí Stripe pro výplaty.",
+      a: "Půjčky: zaplatíte celkovou cenu půjčení, pak samostatnou zálohu (ochrana vkladu), pokud ji hostitel nastavil. Platby jdou přes Stripe — Evorios neukládá kartu. Hostitelé připojí Stripe pro výplaty. Měna odpovídá zemi, kde máte nastavený blok.",
     },
     "dispute": {
       q: "S půjčkou se něco pokazilo — co teď?",
@@ -118,11 +118,11 @@ export const faq: AppMessages["faq"] = {
     },
     "zip-only": {
       q: "Potřebuji přesnou uliční adresu?",
-      a: "Ne. Město + PSČ (např. Hot Springs Village, AR 71909) stačí k procházení blízkých garáží. Přesná adresa se sdílí jen s potvrzeným nájemcem při předání, když zvolíte ten režim vyzvednutí.",
+      a: "Ne. Město + PSČ (např. Praha 1, 110 00) stačí k procházení blízkých garáží. Přesná adresa se sdílí jen s potvrzeným nájemcem při předání, když zvolíte ten režim vyzvednutí.",
     },
     "arkansas-rural": {
-      q: "Jsem na venkově v Arkansasu — proč je tak málo nabídek?",
-      a: "Nové bloky se plní, jak sousedé plní garáže. Použijte Hledat šířeji na Domů (50+ mi), pošlete poptávku, nebo vystavte vlastní věci — raní hostitelé mají větší viditelnost.",
+      q: "Jsem na venkově — proč je tak málo nabídek?",
+      a: "Nové bloky se plní, jak sousedé plní garáže. Použijte Hledat šířeji na Domů (cca 80+ km), pošlete poptávku, nebo vystavte vlastní věci — raní hostitelé mají větší viditelnost.",
     },
     "traveling-mode": {
       q: "Cestuji — jak prohlížím jinou oblast?",

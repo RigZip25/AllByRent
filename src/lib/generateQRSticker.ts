@@ -1,6 +1,7 @@
 import QRCode from "qrcode";
 import { jsPDF } from "jspdf";
 import { APP_NAME, MASCOT_NAME } from "./brand";
+import { getLocale } from "./i18n";
 
 export type QRStickerListing = {
   id: string;
@@ -40,11 +41,12 @@ async function renderStickerAt(doc: jsPDF, listing: QRStickerListing, x: number,
   doc.setFontSize(8);
   doc.text("R", x + w - 0.39, y + 0.38);
 
-  // Instruction
+  // Instruction (keep short — sticker real estate is tiny)
   doc.setTextColor(30, 30, 30);
   doc.setFontSize(7);
   doc.setFont("helvetica", "bold");
-  doc.text("Scan to rent this item", x + 0.15, y + qrSize + 0.35);
+  const scanLine = getLocale() === "cs" ? "Naskenujte pro půjčení" : "Scan to rent this item";
+  doc.text(scanLine, x + 0.15, y + qrSize + 0.35);
 
   // Item title + branding
   doc.setFontSize(7.5);
@@ -134,24 +136,31 @@ function triggerAnchorDownload(generated: GeneratedQrPdf): void {
   anchor.remove();
 }
 
+function isMobileLikeBrowser(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+}
+
 /**
  * Present a generated PDF on mobile + desktop.
- * Prefers Web Share (files) on phones/PWAs where window.open(blob) is often blocked.
+ * Prefer share/download. Never navigate the SPA tab to a blob PDF on mobile
+ * (iOS Safari often replaces the app with a dead-end print view).
  */
 export async function presentGeneratedPdf(
   generated: GeneratedQrPdf,
   options?: { preferOpen?: boolean },
-): Promise<"shared" | "downloaded" | "opened"> {
+): Promise<"shared" | "downloaded" | "opened" | "inline"> {
   const file = new File([generated.blob], generated.filename, {
     type: "application/pdf",
   });
   const nav = navigator as Navigator & {
     canShare?: (data: ShareData) => boolean;
   };
+  const mobile = isMobileLikeBrowser();
 
-  if (!options?.preferOpen && typeof nav.share === "function" && typeof nav.canShare === "function") {
+  // On phones, share/download first so the app stays on screen.
+  if (mobile && typeof nav.share === "function" && typeof nav.canShare === "function") {
     try {
-      // Share the PDF file only — never attach a page URL (recipients would open the app, not a PDF).
       if (nav.canShare({ files: [file] })) {
         await nav.share({
           files: [file],
@@ -160,20 +169,37 @@ export async function presentGeneratedPdf(
         return "shared";
       }
     } catch (error) {
-      // User cancelled share sheet — treat as handled.
       if (error instanceof Error && error.name === "AbortError") {
         return "shared";
       }
     }
   }
 
-  if (options?.preferOpen) {
+  if (!options?.preferOpen && typeof nav.share === "function" && typeof nav.canShare === "function") {
+    try {
+      if (nav.canShare({ files: [file] })) {
+        await nav.share({
+          files: [file],
+          title: generated.filename,
+        });
+        return "shared";
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return "shared";
+      }
+    }
+  }
+
+  // Desktop only: open a real new tab. On mobile, opening a blob URL often
+  // hijacks the current WebView with no in-app back button.
+  if (options?.preferOpen && !mobile) {
     const opened = window.open(generated.objectUrl, "_blank", "noopener,noreferrer");
     if (opened) return "opened";
   }
 
   triggerAnchorDownload(generated);
-  return "downloaded";
+  return mobile ? "inline" : "downloaded";
 }
 
 export async function generateQRStickerSheet(listings: QRStickerListing[]): Promise<void> {

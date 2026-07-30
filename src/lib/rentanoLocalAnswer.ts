@@ -1,5 +1,7 @@
 import { MASCOT_NAME, APP_NAME } from "./brand";
 import { getRentanoFaq, searchFaq, type FaqItem } from "../data/rentanoFaq";
+import { getLocale } from "./i18n";
+import { formatDistanceFromMiles } from "./regionalDisplay";
 
 export type LocalAnswerSource = "faq" | "hint";
 
@@ -32,7 +34,12 @@ const STOP_WORDS = new Set([
   "need",
 ]);
 
-const NAV_HINTS: Array<{ patterns: RegExp[]; answer: string; answerRu?: string }> = [
+const NAV_HINTS: Array<{
+  patterns: RegExp[];
+  answer: string;
+  answerRu?: string;
+  answerCs?: string;
+}> = [
   {
     patterns: [
       /категор/i,
@@ -82,14 +89,33 @@ const NAV_HINTS: Array<{ patterns: RegExp[]; answer: string; answerRu?: string }
       "Garage = your listings, requests, and earnings. Profile = your name, photo, phone, payouts, and sign-out. Open More → profile card, or Garage → gear for settings. Browse vs My Garage is a preference in Profile — same account.",
   },
   {
-    patterns: [/71909/i, /hot\s*springs/i, /arkansas/i, /rural/i, /zip\s*code/i],
+    patterns: [
+      /71909/i,
+      /hot\s*springs/i,
+      /arkansas/i,
+      /rural/i,
+      /zip\s*code/i,
+      /venkov/i,
+      /ps[cč]/i,
+    ],
     answer:
-      "For Hot Springs Village / 71909 we show nearby garages in your cluster (about 25 mi). You do not need an exact street address — city + ZIP is enough. If results are thin, expand the distance filter on Home.",
+      "City + postal code is enough — we show nearby garages in your cluster. You do not need an exact street address. If results are thin, expand the distance filter on Home or post a request.",
+    answerCs:
+      "Stačí město + PSČ — ukazujeme blízké garáže ve vašem okolí. Přesnou ulici nepotřebujete. Málo nabídek? Rozšiřte vzdálenost na Domů nebo pošlete poptávku.",
   },
   {
-    patterns: [/search\s*wider/i, /expand.*radius/i, /nothing\s+near/i, /no\s+results/i],
+    patterns: [
+      /search\s*wider/i,
+      /expand.*radius/i,
+      /nothing\s+near/i,
+      /no\s+results/i,
+      /hledat\s*šířeji/i,
+      /málo\s+nabídek/i,
+    ],
     answer:
       "On Home, open Filters to expand distance if the cluster is sparse. You can also post a request so neighbors with the item get notified. Browse by category chips first.",
+    answerCs:
+      "Na Domů otevřete filtry a rozšiřte vzdálenost, když je okolí prázdné. Můžete taky poslat poptávku — sousedé s věcí dostanou upozornění. Nejdřív zkuste kategorie.",
   },
   {
     patterns: [/deposit/i, /hold/i, /authorization/i],
@@ -185,22 +211,27 @@ function pickNavHint(query: string): string | null {
   const trimmed = query.trim();
   if (!trimmed) return null;
   const preferRu = /\p{Script=Cyrillic}/u.test(trimmed);
+  const locale = getLocale();
   for (const hint of NAV_HINTS) {
     if (hint.patterns.some((pattern) => pattern.test(trimmed))) {
       if (preferRu && hint.answerRu) return hint.answerRu;
-      return hint.answer;
+      if (locale === "cs" && hint.answerCs) {
+        return hint.answerCs.replace("{{cluster}}", formatDistanceFromMiles(25));
+      }
+      return hint.answer.replace("{{cluster}}", formatDistanceFromMiles(25));
     }
   }
   return null;
 }
 
 /**
- * Local FAQ/hints are English-only. When the user writes in another language,
- * skip them so AI can answer in that language instead of pasting English copy.
+ * When UI locale is English but the user wrote another language, skip English
+ * canned FAQ so AI can answer in-language. Czech UI already has localized FAQ.
  */
 export function queryLooksNonEnglish(query: string): boolean {
   const trimmed = query.trim();
   if (!trimmed) return false;
+  if (getLocale() === "cs") return false;
 
   if (
     /\p{Script=Cyrillic}|\p{Script=Arabic}|\p{Script=Han}|\p{Script=Hangul}|\p{Script=Hiragana}|\p{Script=Katakana}|\p{Script=Thai}|\p{Script=Hebrew}/u.test(

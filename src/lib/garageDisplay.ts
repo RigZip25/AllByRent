@@ -1,6 +1,7 @@
 import type { ListingDraft } from "../screens/listing/types";
 import { getActiveRentLocationLabel, getProfileCity } from "./listingStorage";
 import { loadUserProfile } from "./userProfileStorage";
+import { formatMoney } from "./regionalDisplay";
 
 export function garageNameFromDisplayName(displayName: string | undefined | null): string {
   const name = displayName?.trim();
@@ -92,21 +93,32 @@ export function listingMatchesCategory(draft: ListingDraft, category: string | n
   return draft.category.trim().toLowerCase() === category.trim().toLowerCase();
 }
 
+function parsePriceAmount(raw: string): number | null {
+  const n = Number.parseFloat(raw.replace(/[^0-9.]/g, ""));
+  return Number.isFinite(n) ? n : null;
+}
+
 export function formatListingPriceLine(draft: ListingDraft): string {
   if (draft.modes.sell && draft.pricing.salePrice.trim()) {
-    const sale = Number.parseFloat(draft.pricing.salePrice.replace(/[^0-9.]/g, ""));
-    if (Number.isFinite(sale) && sale <= 0) return "Free";
-    return `$${draft.pricing.salePrice}`;
+    const sale = parsePriceAmount(draft.pricing.salePrice);
+    if (sale !== null && sale <= 0) return "Free";
+    if (sale !== null) return formatMoney(sale);
+    return draft.pricing.salePrice;
   }
   if (draft.modes.gift) return "Free";
   if (draft.modes.rent && draft.pricing.dailyRate.trim()) {
-    return `$${draft.pricing.dailyRate}/day`;
+    const rate = parsePriceAmount(draft.pricing.dailyRate);
+    return rate !== null ? `${formatMoney(rate)}/day` : `${draft.pricing.dailyRate}/day`;
   }
-  if (draft.pricing.dailyRate.trim()) return `$${draft.pricing.dailyRate}/day`;
+  if (draft.pricing.dailyRate.trim()) {
+    const rate = parsePriceAmount(draft.pricing.dailyRate);
+    return rate !== null ? `${formatMoney(rate)}/day` : `${draft.pricing.dailyRate}/day`;
+  }
   if (draft.pricing.salePrice.trim()) {
-    const sale = Number.parseFloat(draft.pricing.salePrice.replace(/[^0-9.]/g, ""));
-    if (Number.isFinite(sale) && sale <= 0) return "Free";
-    return `$${draft.pricing.salePrice}`;
+    const sale = parsePriceAmount(draft.pricing.salePrice);
+    if (sale !== null && sale <= 0) return "Free";
+    if (sale !== null) return formatMoney(sale);
+    return draft.pricing.salePrice;
   }
   return "Ask";
 }

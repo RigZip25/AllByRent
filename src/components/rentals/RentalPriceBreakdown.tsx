@@ -1,6 +1,7 @@
-import { formatUsd, type RentalPriceBreakdown } from "../../lib/rentalPricing";
+import { type RentalPriceBreakdown } from "../../lib/rentalPricing";
 import { formatPoundsOverLabel } from "../../lib/deliveryPricing";
 import { useMessages } from "../../lib/i18n/react";
+import { formatMoney } from "../../lib/regionalDisplay";
 
 const GREEN = "#0D5C3A";
 
@@ -16,7 +17,7 @@ function Line({
   return (
     <div className={`flex justify-between gap-3 text-sm ${muted ? "text-gray-500" : "text-gray-800"}`}>
       <span>{label}</span>
-      <span className="font-medium tabular-nums">${formatUsd(amount)}</span>
+      <span className="font-medium tabular-nums">{formatMoney(amount)}</span>
     </div>
   );
 }
@@ -45,9 +46,9 @@ export function RentalPriceBreakdownView({
             ? copy.rentalMonthly(
                 breakdown.rentalDays,
                 (breakdown.monthsEquivalent ?? breakdown.rentalDays / 30).toFixed(1),
-                formatUsd(breakdown.monthlyRateUsd),
+                formatMoney(breakdown.monthlyRateUsd),
               )
-            : copy.rentalDaily(breakdown.rentalDays, formatUsd(breakdown.dailyRateUsd))
+            : copy.rentalDaily(breakdown.rentalDays, formatMoney(breakdown.dailyRateUsd))
         }
         amount={breakdown.rentalSubtotalUsd}
       />
@@ -66,7 +67,7 @@ export function RentalPriceBreakdownView({
         style={{ color: GREEN }}
       >
         <span>{copy.total}</span>
-        <span className="tabular-nums">${formatUsd(breakdown.totalUsd)}</span>
+        <span className="tabular-nums">{formatMoney(breakdown.totalUsd)}</span>
       </div>
     </div>
   );

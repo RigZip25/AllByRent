@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
 import { MASCOT_NAME } from "../lib/brand";
+import { useMessages } from "../lib/i18n/react";
 import rentanoImg from "../imports/No_back_rentano.png";
 
 const PRIMARY_GREEN = "#0D5C3A";
@@ -22,6 +23,7 @@ export function RentanoHint({
   /** When true, shows “Tap Mr. Evorios for a hint” beside the avatar while collapsed. */
   showTapLabel?: boolean;
 }) {
+  const t = useMessages();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const pointerDownRef = useRef<{ x: number; y: number; target: EventTarget | null } | null>(null);
@@ -99,7 +101,9 @@ export function RentanoHint({
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
           aria-controls={hintId}
-          aria-label={open ? `Hide ${MASCOT_NAME} hint (currently open)` : `Show ${MASCOT_NAME} hint (currently closed)`}
+          aria-label={
+            open ? t.mrEvorios.hideHintAria(MASCOT_NAME) : t.mrEvorios.showHintAria(MASCOT_NAME)
+          }
           className="rentano-hint-button shrink-0 overflow-hidden rounded-full transition-transform active:scale-95"
           style={{
             ["--rentano-hint-size" as string]: `${size}px`,
@@ -114,7 +118,7 @@ export function RentanoHint({
           />
         </button>
         {(showTapLabel || !open) && !open ? (
-          <p className="text-xs italic text-gray-500">Tap {MASCOT_NAME} for tips</p>
+          <p className="text-xs italic text-gray-500">{t.mrEvorios.tapForTips(MASCOT_NAME)}</p>
         ) : null}
       </div>
 
@@ -135,13 +139,13 @@ export function RentanoHint({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                aria-label={`Close ${MASCOT_NAME} hint`}
+                aria-label={t.mrEvorios.closeHintAria(MASCOT_NAME)}
                 className="shrink-0 rounded px-1 text-lg leading-none text-[#4B5563] transition-colors hover:text-[#111827]"
               >
                 ×
               </button>
             </div>
-            <p className="text-xs italic text-gray-500">Tap {MASCOT_NAME} again to close</p>
+            <p className="text-xs italic text-gray-500">{t.mrEvorios.tapAgainToClose(MASCOT_NAME)}</p>
             {linkText && linkUrl ? (
               <button
                 type="button"

@@ -432,9 +432,9 @@ export const bookingRequest: AppMessages["bookingRequest"] = {
 export const rentalPrice: AppMessages["rentalPrice"] = {
   title: "Rozpis ceny",
   rentalMonthly: (days, months, rate) =>
-    `Výpůjčka (${days} dní ≈ ${months} měs. × $${rate}/měs.)`,
+    `Výpůjčka (${days} dní ≈ ${months} měs. × ${rate}/měs.)`,
   rentalDaily: (days, rate) =>
-    `Výpůjčka (${days} ${days === 1 ? "den" : "dní"} × $${rate})`,
+    `Výpůjčka (${days} ${days === 1 ? "den" : "dní"} × ${rate})`,
   roundTripDelivery: "Doprava tam i zpět",
   heavySurcharge: "Příplatek za těžkou věc",
   heavySurchargeWithOver: (over) => `Příplatek za těžkou věc (${over})`,

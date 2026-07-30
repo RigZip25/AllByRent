@@ -12,6 +12,7 @@ import {
 import { getInterestedCount, getNegotiationPhase, isEligibleAuctionBidder } from "./garageOfferStorage";
 import { defaultAuctionWindow, formatAuctionTiming, inferAuctionStartsAt } from "./garageAuctionWindow";
 import { getGarageSaleSchedule } from "./garageSaleStorage";
+import { formatMoney } from "./regionalDisplay";
 
 const CART_KEY = "evorios_garage_cart";
 const BIDS_KEY = "evorios_garage_bids";
@@ -114,7 +115,8 @@ export function getShopOffer(listing: ListingDraft): ShopOffer | null {
 }
 
 export function formatShopUsd(amount: number): string {
-  return amount % 1 === 0 ? `$${amount}` : `$${amount.toFixed(2)}`;
+  // Name kept for call sites; formats in the active country currency.
+  return formatMoney(amount);
 }
 
 export function getCartLines(): GarageCartLine[] {
