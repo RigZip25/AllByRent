@@ -4,6 +4,7 @@ import rentanoImg from "../../imports/No_back_rentano.png";
 import { MASCOT_NAME } from "../../lib/brand";
 import { useSpeechRecognition } from "../../hooks/useSpeechRecognition";
 import { useRequireAuth } from "../../hooks/RequireAuth";
+import { resolveSpeechRecognitionLang } from "../../lib/i18n";
 import { useLocale, useMessages } from "../../lib/i18n/react";
 import { isAnthropicConfigured } from "../../lib/anthropicClient";
 import { findLocalRentanoAnswer, queryLooksNonEnglish } from "../../lib/rentanoLocalAnswer";
@@ -43,13 +44,8 @@ export function RentanoChatPanel({
   const initialSentRef = useRef(false);
   const locale = useLocale();
   const t = useMessages();
-  // Prefer device language so RU/ES speech works even when UI locale is EN.
-  const speechLang =
-    locale === "cs"
-      ? "cs-CZ"
-      : typeof navigator !== "undefined" && navigator.language
-        ? navigator.language
-        : "en-US";
+  // Device + UI locale → Web Speech lang (cs-CZ, ru-RU, …), not English-only.
+  const speechLang = resolveSpeechRecognitionLang(locale);
   const speech = useSpeechRecognition(speechLang);
 
   useEffect(() => {
