@@ -135,7 +135,7 @@ export function HowEvoriosWorksScreen({
 
         {current.id === "categories" ? (
           <div className="mt-3">
-            <CategoryCatalogExplorer hint={hw.catalogHint} defaultOpenFirst />
+            <CategoryCatalogExplorer hint={hw.catalogHint} />
           </div>
         ) : null}
       </div>

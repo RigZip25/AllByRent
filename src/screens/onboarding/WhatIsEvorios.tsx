@@ -64,7 +64,7 @@ export function WhatIsEvorios({ onContinue, onSkip, onBack }: Props) {
             {intro.catalogTitle}
           </p>
           <div className="mt-2">
-            <CategoryCatalogExplorer hint={intro.catalogHint} defaultOpenFirst />
+            <CategoryCatalogExplorer hint={intro.catalogHint} />
           </div>
         </div>
 
