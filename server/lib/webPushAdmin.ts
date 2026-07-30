@@ -1,16 +1,7 @@
 import webpush from "web-push";
 import { SUPPORT_EMAIL } from "./brand";
 import { getAdminClient } from "./passkey/supabaseAdmin";
-
-function getVapidPublicKey(): string | undefined {
-  const key = process.env.VAPID_PUBLIC_KEY || process.env.VITE_VAPID_PUBLIC_KEY;
-  return key?.trim() ? key.trim() : undefined;
-}
-
-function getVapidPrivateKey(): string | undefined {
-  const key = process.env.VAPID_PRIVATE_KEY;
-  return key?.trim() ? key.trim() : undefined;
-}
+import { getVapidPrivateKey, getVapidPublicKey } from "./vapidKeys";
 
 export type AdminPushResult = {
   ok: boolean;

@@ -22,7 +22,11 @@ import { isStandalonePwa } from "../lib/pwaInstall";
 import { useAuth } from "../hooks/AuthProvider";
 import { loadInAppNotifications, markInAppNotificationRead, type InAppNotification } from "../lib/inAppNotifications";
 import { fetchNotificationsRemote, markNotificationReadRemote, mergeWithLocalNotifications, type Notification } from "../lib/notificationsStorage";
-import { savePushSubscriptionRemote, subscribeToPush } from "../lib/pushNotifications";
+import {
+  canOfferWebPush,
+  savePushSubscriptionRemote,
+  subscribeToPush,
+} from "../lib/pushNotifications";
 import { NotificationPreferencesPanel } from "../components/notifications/NotificationPreferencesPanel";
 import { MrRentano } from "../app/components/MrRentano";
 
@@ -210,8 +214,9 @@ export function NotificationsScreen({
   const [tab, setTab] = useState<NotificationTab>("all");
   const [pushBusy, setPushBusy] = useState(false);
   const [pushError, setPushError] = useState<string | null>(null);
-  const canOfferPush =
-    typeof window !== "undefined" && "serviceWorker" in navigator && "Notification" in window;
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushSendHint, setPushSendHint] = useState<string | null>(null);
+  const canOfferPush = canOfferWebPush();
   const [updateSheetOpen, setUpdateSheetOpen] = useState(false);
   const {
     updateAvailable,
@@ -400,16 +405,25 @@ export function NotificationsScreen({
               </div>
               <button
                 type="button"
-                disabled={pushBusy}
+                disabled={pushBusy || pushEnabled}
                 onClick={() => {
                   const userId = auth.userId;
                   if (!userId) return;
                   setPushBusy(true);
                   setPushError(null);
+                  setPushSendHint(null);
                   void subscribeToPush()
-                    .then((sub) => {
-                      if (!sub) throw new Error("Push not available or permission denied.");
-                      return savePushSubscriptionRemote(userId, sub);
+                    .then(async (result) => {
+                      if (!result.ok) {
+                        throw new Error(result.message);
+                      }
+                      await savePushSubscriptionRemote(userId, result.subscription);
+                      setPushEnabled(true);
+                      if (!result.sendConfigured) {
+                        setPushSendHint(
+                          "This device is subscribed. Server delivery still needs VAPID_PRIVATE_KEY on Vercel.",
+                        );
+                      }
                     })
                     .catch((e) => {
                       const msg = e instanceof Error ? e.message : "Push setup failed.";
@@ -418,12 +432,13 @@ export function NotificationsScreen({
                     .finally(() => setPushBusy(false));
                 }}
                 className="shrink-0 rounded-xl px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
-                style={{ backgroundColor: GREEN }}
+                style={{ backgroundColor: pushEnabled ? GREEN_LIGHT : GREEN }}
               >
-                {pushBusy ? "Enabling…" : "Enable"}
+                {pushBusy ? "Enabling…" : pushEnabled ? "Enabled" : "Enable"}
               </button>
             </div>
             {pushError ? <p className="mt-2 text-xs text-red-600">{pushError}</p> : null}
+            {pushSendHint ? <p className="mt-2 text-xs text-amber-700">{pushSendHint}</p> : null}
           </div>
         ) : null}
 

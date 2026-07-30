@@ -1,11 +1,13 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import pushSend from "@allbyrent/server/routes/push/send";
+import pushVapidPublic from "@allbyrent/server/routes/push/vapidPublic";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 
 const ROUTES: Record<string, Handler> = {
   send: pushSend,
+  "vapid-public": pushVapidPublic,
 };
 
 function routeKey(req: VercelRequest): string {
