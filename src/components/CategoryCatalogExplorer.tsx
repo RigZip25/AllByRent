@@ -9,15 +9,23 @@ import type { SubcategoryItem } from "../screens/listing/listingItemCategories";
 const GREEN = BRAND_GREEN;
 const BORDER = "#E8E6E0";
 
-function SubChip({ item }: { item: SubcategoryItem }) {
+function SubList({ items }: { items: SubcategoryItem[] }) {
   return (
-    <span
-      className="inline-flex items-center gap-1 rounded-full border bg-white px-2 py-1 text-[11px] font-medium text-gray-700"
-      style={{ borderColor: BORDER }}
-    >
-      <span aria-hidden>{item.emoji}</span>
-      <span className="max-w-[9.5rem] truncate">{localizeCategoryLabel(item.label)}</span>
-    </span>
+    <ul className="grid grid-cols-2 gap-x-3 gap-y-0.5">
+      {items.map((item) => (
+        <li
+          key={item.label}
+          className="flex min-w-0 items-start gap-1.5 py-1 text-[12.5px] leading-snug text-gray-700"
+        >
+          <span className="mt-px w-4 shrink-0 text-center text-[13px]" aria-hidden>
+            {item.emoji}
+          </span>
+          <span className="min-w-0 [overflow-wrap:anywhere]">
+            {localizeCategoryLabel(item.label)}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -52,23 +60,19 @@ function CategoryExpandRow({
           {entry.personal.length + entry.professional.length}
         </span>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`h-4 w-4 shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
           style={{ color: GREEN }}
         />
       </button>
 
       {open ? (
-        <div className="space-y-3 border-t px-3 pb-3 pt-2.5" style={{ borderColor: BORDER }}>
+        <div className="space-y-3.5 border-t px-3 pb-3.5 pt-3" style={{ borderColor: BORDER }}>
           {entry.personal.length > 0 ? (
             <div>
               <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
                 {householdLabel}
               </p>
-              <div className="flex flex-wrap gap-1.5">
-                {entry.personal.map((item) => (
-                  <SubChip key={`p-${item.label}`} item={item} />
-                ))}
-              </div>
+              <SubList items={entry.personal} />
             </div>
           ) : null}
           {entry.professional.length > 0 ? (
@@ -76,11 +80,7 @@ function CategoryExpandRow({
               <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
                 {proLabel}
               </p>
-              <div className="flex flex-wrap gap-1.5">
-                {entry.professional.map((item) => (
-                  <SubChip key={`pro-${item.label}`} item={item} />
-                ))}
-              </div>
+              <SubList items={entry.professional} />
             </div>
           ) : null}
         </div>
@@ -91,10 +91,11 @@ function CategoryExpandRow({
 
 type Props = {
   hint?: string;
+  /** When true, opens the first category on mount. Default off so the full list stays visible. */
   defaultOpenFirst?: boolean;
 };
 
-export function CategoryCatalogExplorer({ hint, defaultOpenFirst = true }: Props) {
+export function CategoryCatalogExplorer({ hint, defaultOpenFirst = false }: Props) {
   const t = useMessages();
   const catalog = getCategoryCatalog();
   const [openName, setOpenName] = useState<string | null>(() =>
