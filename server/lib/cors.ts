@@ -1,6 +1,6 @@
 import type { VercelResponse } from "@vercel/node";
 
-const ALLOWED_METHODS = "POST, OPTIONS";
+const ALLOWED_METHODS = "GET, POST, OPTIONS";
 
 export function applyCors(res: VercelResponse, origin?: string) {
   if (origin) {

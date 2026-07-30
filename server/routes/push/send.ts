@@ -4,6 +4,7 @@ import { applyCors, handleOptions } from "../../lib/cors";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { SUPPORT_EMAIL } from "../../lib/brand";
+import { getVapidPrivateKey, getVapidPublicKey } from "../../lib/vapidKeys";
 
 type SendBody = {
   toUserId: string;
@@ -12,16 +13,6 @@ type SendBody = {
   url?: string;
   notificationId?: string;
 };
-
-function getVapidPublicKey(): string | undefined {
-  const key = process.env.VAPID_PUBLIC_KEY || process.env.VITE_VAPID_PUBLIC_KEY;
-  return key?.trim() ? key.trim() : undefined;
-}
-
-function getVapidPrivateKey(): string | undefined {
-  const key = process.env.VAPID_PRIVATE_KEY;
-  return key?.trim() ? key.trim() : undefined;
-}
 
 async function callerMayNotifyRecipient(
   admin: NonNullable<ReturnType<typeof getAdminClient>>,

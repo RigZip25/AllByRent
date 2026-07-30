@@ -143,8 +143,8 @@ export function NotificationPreferencesPanel() {
       ) : null}
 
       <p className="mt-3 text-[11px] leading-snug text-gray-400">
-        Server push delivery requires VAPID keys on Vercel. Followers get alerts when hosts publish
-        — full fan-out ships with Supabase triggers (see LAUNCH_READINESS.md).
+        Push works after you tap Enable above and allow browser permission. On iPhone, open the
+        installed Home Screen app first.
       </p>
     </div>
   );
