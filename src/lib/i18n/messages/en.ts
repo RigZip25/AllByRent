@@ -12,8 +12,8 @@ import {
 } from "./garageSaleEn";
 
 export const en: AppMessages = {
-  tagline: "The evolution of ownership.",
-  taglineShort: "Your garage, online.",
+  tagline: "Neighborly marketplace — the evolution of household living.",
+  taglineShort: "Neighborly marketplace.",
   modes: {
     earn: "My Garage",
     rent: "Browse",
@@ -1338,7 +1338,7 @@ export const en: AppMessages = {
     },
     allSet: {
       title: "You're all set!",
-      subtitle: "Welcome to Evorios — the evolution of ownership.",
+      subtitle: "Welcome to Evorios — neighborly marketplace, the evolution of household living.",
       exploreCta: "Choose how to browse →",
       stockGarageCta: "Stock my garage →",
     },
@@ -1362,16 +1362,16 @@ export const en: AppMessages = {
     firstHello: {
       bubbles: [
         "Hi — I'm {mascot}. Welcome to the block.",
-        "Every household garage can rent, sell, or gift nearby.",
-        "I'll help you browse the block or stock your showcase.",
+        "Every home is a business cell — rent, sell, or gift from your garage storefront.",
+        "I'll help you browse neighbors or open your cell on the block.",
       ],
       cta: "Let's go →",
       skipHint: "Tap to skip intro",
     },
     productIntro: {
       eyebrow: "Evorios",
-      title: "Your neighborhood marketplace",
-      body: "Every household is a business cell on the block — a garage storefront that can rent, sell, or gift what it owns.",
+      title: "Neighborly marketplace",
+      body: "Each home is a business cell — the evolution of household living. Your garage becomes a storefront that rents, sells, or gifts what you own.",
       rent: "Rent",
       rentHint: "Borrow & earn",
       sell: "Sell",

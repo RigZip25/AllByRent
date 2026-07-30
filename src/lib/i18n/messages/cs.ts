@@ -12,8 +12,8 @@ import {
 } from "./garageSaleCs";
 
 export const cs: AppMessages = {
-  tagline: "Evoluce vlastnictví.",
-  taglineShort: "Vaše garáž online.",
+  tagline: "Sousedský trh — evoluce vedení domácnosti.",
+  taglineShort: "Sousedský trh.",
   modes: {
     earn: "Moje garáž",
     rent: "Procházet",
@@ -1352,7 +1352,7 @@ export const cs: AppMessages = {
     },
     allSet: {
       title: "Hotovo!",
-      subtitle: "Vítejte v Evorios — evoluce vlastnictví.",
+      subtitle: "Vítejte v Evorios — sousedský trh, evoluce vedení domácnosti.",
       exploreCta: "Jak chcete procházet →",
       stockGarageCta: "Naplnit garáž →",
     },
@@ -1376,16 +1376,16 @@ export const cs: AppMessages = {
     firstHello: {
       bubbles: [
         "Ahoj — jsem {mascot}. Vítejte na bloku.",
-        "Každá domácí garáž může půjčovat, prodávat nebo darovat poblíž.",
-        "Pomůžu vám procházet blok nebo naplnit vitrínu.",
+        "Každý dům je obchodní buňka — půjčujte, prodávejte nebo darujte z garážové výlohy.",
+        "Pomůžu vám procházet sousedy nebo otevřít vaši buňku na bloku.",
       ],
       cta: "Jdeme na to →",
       skipHint: "Klepnutím přeskočíte úvod",
     },
     productIntro: {
       eyebrow: "Evorios",
-      title: "Váš sousedský trh",
-      body: "Každá domácnost je obchodní buňka na bloku — garážová výloha, která může půjčovat, prodávat nebo darovat, co vlastní.",
+      title: "Sousedský trh",
+      body: "Každý dům je obchodní buňka — evoluce vedení domácnosti. Garáž se stává výlohou, která půjčuje, prodává nebo daruje, co vlastníte.",
       rent: "Půjčit",
       rentHint: "Půjčit i vydělat",
       sell: "Prodat",

@@ -19,10 +19,10 @@ function pwaPlugin() {
       includeAssets: ['pwa-192.png', 'pwa-512.png'],
       manifest: {
         // Keep in sync with public/manifest.webmanifest + src/lib/brand.ts PWA_* constants.
-        name: 'Evorios — Neighborhood Marketplace',
+        name: 'Evorios — Neighborly Marketplace',
         short_name: 'Evorios Market',
         description:
-          'Your neighborhood marketplace — every household garage can rent, sell, or gift on the block.',
+          'Neighborly marketplace — every home is a business cell that can rent, sell, or gift on the block.',
         theme_color: '#0D5C3A',
         background_color: '#062a1c',
         display: 'standalone',
