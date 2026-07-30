@@ -28,7 +28,42 @@ function primaryLanguage(tag: string): string {
   return (tag || "").trim().toLowerCase().split(/[-_]/)[0] || "";
 }
 
-function collectDeviceLanguageTags(): string[] {
+/** Common BCP-47 defaults — Web Speech API often needs a region, not just `cs`. */
+const SPEECH_LANG_DEFAULTS: Record<string, string> = {
+  ar: "ar-SA",
+  cs: "cs-CZ",
+  da: "da-DK",
+  de: "de-DE",
+  el: "el-GR",
+  en: "en-US",
+  es: "es-ES",
+  fi: "fi-FI",
+  fr: "fr-FR",
+  he: "he-IL",
+  hi: "hi-IN",
+  hu: "hu-HU",
+  id: "id-ID",
+  it: "it-IT",
+  ja: "ja-JP",
+  ko: "ko-KR",
+  ms: "ms-MY",
+  nb: "nb-NO",
+  nl: "nl-NL",
+  no: "nb-NO",
+  pl: "pl-PL",
+  pt: "pt-BR",
+  ro: "ro-RO",
+  ru: "ru-RU",
+  sk: "sk-SK",
+  sv: "sv-SE",
+  th: "th-TH",
+  tr: "tr-TR",
+  uk: "uk-UA",
+  vi: "vi-VN",
+  zh: "zh-CN",
+};
+
+export function collectDeviceLanguageTags(): string[] {
   const tags: string[] = [];
   const push = (raw: string | undefined | null) => {
     const t = (raw || "").trim();
@@ -51,6 +86,48 @@ function collectDeviceLanguageTags(): string[] {
   }
 
   return tags;
+}
+
+/** Normalize a language tag for SpeechRecognition.lang (e.g. cs → cs-CZ). */
+export function normalizeSpeechRecognitionLang(tag: string): string {
+  const raw = (tag || "").trim().replace(/_/g, "-");
+  if (!raw) return "en-US";
+  const parts = raw.split("-").filter(Boolean);
+  const primary = (parts[0] || "").toLowerCase();
+  if (!primary) return "en-US";
+  if (parts.length === 1) return SPEECH_LANG_DEFAULTS[primary] ?? primary;
+
+  const rest = parts.slice(1).map((part) => {
+    if (part.length === 2) return part.toUpperCase();
+    if (part.length === 4) return part[0]!.toUpperCase() + part.slice(1).toLowerCase();
+    return part;
+  });
+  return `${primary}-${rest.join("-")}`;
+}
+
+/**
+ * Language for Web Speech API.
+ * Prefers the app UI locale when non-English, then the first non-English
+ * device language (so RU/ES/CS mic works even if Safari lists English first).
+ */
+export function resolveSpeechRecognitionLang(
+  uiLocale: AppLocale = getLocale(),
+  languages: readonly string[] = collectDeviceLanguageTags(),
+): string {
+  const ordered: string[] = [];
+  if (uiLocale === "cs") ordered.push("cs-CZ");
+
+  for (const tag of languages) {
+    if (tag && !ordered.includes(tag)) ordered.push(tag);
+  }
+
+  for (const tag of ordered) {
+    const normalized = normalizeSpeechRecognitionLang(tag);
+    if (primaryLanguage(normalized) !== "en") return normalized;
+  }
+
+  if (ordered[0]) return normalizeSpeechRecognitionLang(ordered[0]);
+  return "en-US";
 }
 
 function localeFromTimezone(): AppLocale | null {

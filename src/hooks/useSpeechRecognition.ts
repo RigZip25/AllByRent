@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { resolveSpeechRecognitionLang } from "../lib/i18n";
 
 type SpeechRecognitionCtor = new () => SpeechRecognition;
 
@@ -77,6 +78,8 @@ export function useSpeechRecognition(lang?: string) {
   const intentionalStopRef = useRef(false);
   const lastInterimRef = useRef("");
   const deliveredFinalRef = useRef(false);
+  const langRef = useRef(lang);
+  langRef.current = lang;
 
   const supported =
     typeof window !== "undefined" &&
@@ -132,7 +135,12 @@ export function useSpeechRecognition(lang?: string) {
 
       const recognition = new Ctor();
       recognitionRef.current = recognition;
-      recognition.lang = lang?.trim() || navigator.language || "en-US";
+      // Resolve at start time so device language changes apply immediately.
+      const resolved =
+        langRef.current?.trim() ||
+        resolveSpeechRecognitionLang() ||
+        "en-US";
+      recognition.lang = resolved;
       recognition.interimResults = true;
       recognition.continuous = false;
       recognition.maxAlternatives = 1;
@@ -221,7 +229,7 @@ export function useSpeechRecognition(lang?: string) {
       }
       begin();
     },
-    [lang],
+    [],
   );
 
   useEffect(() => {
