@@ -43,7 +43,13 @@ export function RentanoChatPanel({
   const scrollRef = useRef<HTMLDivElement>(null);
   const initialSentRef = useRef(false);
   const locale = useLocale();
-  const speechLang = locale === "cs" ? "cs-CZ" : "en-US";
+  // Prefer device language so RU/ES speech works even when UI locale is EN.
+  const speechLang =
+    locale === "cs"
+      ? "cs-CZ"
+      : typeof navigator !== "undefined" && navigator.language
+        ? navigator.language
+        : "en-US";
   const speech = useSpeechRecognition(speechLang);
 
   const configured = isAnthropicConfigured();
@@ -138,12 +144,17 @@ export function RentanoChatPanel({
       speech.stop();
       return;
     }
-    void speech.start((text) => {
-      const trimmed = text.trim();
-      if (!trimmed) return;
-      // Keep the transcript visible even if send is blocked (e.g. auth gate).
-      setInput(trimmed);
-      void submitText(trimmed);
+    setError(null);
+    // Fresh dictation into the composer — user can edit before Send.
+    setInput("");
+    void speech.start({
+      onInterim: (text) => {
+        setInput(text);
+      },
+      onDraft: (text) => {
+        const trimmed = text.trim();
+        if (trimmed) setInput(trimmed);
+      },
     });
   };
 
@@ -224,13 +235,22 @@ export function RentanoChatPanel({
       {speech.error ? (
         <p className="mb-2 text-center text-[12px] text-amber-700">{speech.error}</p>
       ) : null}
-      {speech.interim ? (
-        <p className="mb-2 text-center text-[12px] italic text-gray-500">"{speech.interim}"</p>
+      {speech.listening ? (
+        <p className="mb-2 text-center text-[12px] font-medium text-red-600">
+          Listening… text appears in the box — stop the mic, edit if needed, then Send.
+        </p>
+      ) : input.trim() && !loading ? (
+        <p className="mb-2 text-center text-[11px] text-gray-400">
+          Edit the text if needed, then tap Send.
+        </p>
       ) : null}
 
       <div
         className="flex items-end gap-2 rounded-2xl border bg-white p-2"
-        style={{ borderColor: BORDER }}
+        style={{
+          borderColor: speech.listening ? "#DC2626" : BORDER,
+          boxShadow: speech.listening ? "0 0 0 2px rgba(220,38,38,0.15)" : undefined,
+        }}
       >
         <button
           type="button"
@@ -244,8 +264,8 @@ export function RentanoChatPanel({
           title={
             speech.supported
               ? speech.listening
-                ? "Stop"
-                : "Voice input"
+                ? "Stop — then edit & send"
+                : "Voice input (review before send)"
               : "Voice not supported in this browser"
           }
         >
@@ -261,22 +281,25 @@ export function RentanoChatPanel({
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              handleSend();
+              if (!speech.listening) handleSend();
             }
           }}
-          rows={1}
-          placeholder="Type or tap mic…"
-          className="max-h-24 min-h-[40px] min-w-0 flex-1 resize-none bg-transparent py-2 text-[15px] outline-none placeholder:text-gray-400"
+          rows={2}
+          placeholder={
+            speech.listening ? "Listening — your words show up here…" : "Type or tap mic…"
+          }
+          className="max-h-28 min-h-[48px] min-w-0 flex-1 resize-none bg-transparent py-2 text-[15px] outline-none placeholder:text-gray-400"
           disabled={loading}
           aria-label={`Message to ${MASCOT_NAME}`}
         />
         <button
           type="button"
           onClick={handleSend}
-          disabled={loading || !input.trim()}
+          disabled={loading || !input.trim() || speech.listening}
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white transition-opacity disabled:opacity-40"
           style={{ backgroundColor: PRIMARY_GREEN }}
           aria-label="Send message"
+          title={speech.listening ? "Stop the mic first" : "Send"}
         >
           <Send className="h-5 w-5" />
         </button>

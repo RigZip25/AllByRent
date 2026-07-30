@@ -61,13 +61,22 @@ async function ensureMicrophonePermission(): Promise<"granted" | "denied" | "una
   }
 }
 
+export type SpeechDraftHandlers = {
+  /** Live partial transcript while the user is speaking. */
+  onInterim?: (text: string) => void;
+  /** Final (or best-effort) transcript — put in the input for edit, do not auto-send. */
+  onDraft: (text: string) => void;
+};
+
 export function useSpeechRecognition(lang?: string) {
   const [listening, setListening] = useState(false);
   const [interim, setInterim] = useState("");
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const onFinalRef = useRef<(text: string) => void>(() => undefined);
+  const handlersRef = useRef<SpeechDraftHandlers>({ onDraft: () => undefined });
   const intentionalStopRef = useRef(false);
+  const lastInterimRef = useRef("");
+  const deliveredFinalRef = useRef(false);
 
   const supported =
     typeof window !== "undefined" &&
@@ -89,10 +98,14 @@ export function useSpeechRecognition(lang?: string) {
   }, []);
 
   const start = useCallback(
-    async (onFinal: (text: string) => void) => {
-      onFinalRef.current = onFinal;
+    async (handlers: SpeechDraftHandlers | ((text: string) => void)) => {
+      // Back-compat: older callers passed only onFinal(text).
+      handlersRef.current =
+        typeof handlers === "function" ? { onDraft: handlers } : handlers;
       setError(null);
       setInterim("");
+      lastInterimRef.current = "";
+      deliveredFinalRef.current = false;
 
       if (typeof window === "undefined" || !window.isSecureContext) {
         setError("Voice needs HTTPS. Open app.evorios.com (or localhost in dev).");
@@ -109,7 +122,6 @@ export function useSpeechRecognition(lang?: string) {
         return;
       }
 
-      // Stop any prior session cleanly.
       intentionalStopRef.current = true;
       try {
         recognitionRef.current?.abort();
@@ -136,11 +148,20 @@ export function useSpeechRecognition(lang?: string) {
             interimText += chunk;
           }
         }
-        if (interimText) setInterim(interimText.trim());
-        const trimmed = finalText.trim();
-        if (trimmed) {
+
+        if (interimText) {
+          const trimmed = interimText.trim();
+          lastInterimRef.current = trimmed;
+          setInterim(trimmed);
+          handlersRef.current.onInterim?.(trimmed);
+        }
+
+        const trimmedFinal = finalText.trim();
+        if (trimmedFinal) {
+          deliveredFinalRef.current = true;
+          lastInterimRef.current = "";
           setInterim("");
-          onFinalRef.current(trimmed);
+          handlersRef.current.onDraft(trimmedFinal);
         }
       };
 
@@ -156,6 +177,12 @@ export function useSpeechRecognition(lang?: string) {
 
       recognition.onend = () => {
         setListening(false);
+        // User stopped early, or engine ended without a final chunk — keep best draft.
+        if (!deliveredFinalRef.current) {
+          const leftover = lastInterimRef.current.trim();
+          if (leftover) handlersRef.current.onDraft(leftover);
+        }
+        lastInterimRef.current = "";
         setInterim("");
         intentionalStopRef.current = false;
       };
@@ -170,8 +197,6 @@ export function useSpeechRecognition(lang?: string) {
         }
       };
 
-      // Safari: keep start() inside the user-gesture turn (no await before it).
-      // Chromium: request mic permission first so SpeechRecognition is not blocked silently.
       if (isLikelySafari()) {
         begin();
         void ensureMicrophonePermission().then((status) => {
