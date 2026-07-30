@@ -1,5 +1,5 @@
 import { Share, Smartphone, X } from "lucide-react";
-import { APP_NAME, BRAND_AMBER, BRAND_GREEN } from "../lib/brand";
+import { APP_NAME, BRAND_AMBER, BRAND_GREEN, PWA_SHORT_NAME } from "../lib/brand";
 
 type PwaInstallBannerProps = {
   onInstall: () => void;
@@ -44,7 +44,7 @@ export function PwaInstallBanner({
 
         <div className="min-w-0 flex-1 text-left">
           <p className="text-sm font-bold leading-snug text-white">
-            Add {APP_NAME} to your Home Screen
+            Add your neighborhood marketplace
           </p>
           {manualIos ? (
             <p className="mt-1 text-xs leading-relaxed text-white/85">
@@ -52,16 +52,18 @@ export function PwaInstallBanner({
               <span className="inline-flex items-center gap-0.5 font-semibold text-white">
                 Share <Share className="inline h-3.5 w-3.5" />
               </span>{" "}
-              in Safari, then <strong>Add to Home Screen</strong> — works like a real app.
+              in Safari → <strong>Add to Home Screen</strong> as{" "}
+              <strong>{PWA_SHORT_NAME}</strong>.
             </p>
           ) : nativeInstallReady ? (
             <p className="mt-1 text-xs leading-relaxed text-white/85">
-              One tap — faster open, full screen, no browser bar.
+              Installs as <strong>{PWA_SHORT_NAME}</strong> — {APP_NAME}, rent · sell · gift on
+              your block.
             </p>
           ) : (
             <p className="mt-1 text-xs leading-relaxed text-white/85">
-              In Chrome: menu <strong>⋮</strong> → <strong>Install app</strong> or{" "}
-              <strong>Add to Home screen</strong>.
+              In Chrome: menu <strong>⋮</strong> → <strong>Install app</strong> — look for{" "}
+              <strong>Neighborhood Marketplace</strong>.
             </p>
           )}
 
@@ -72,7 +74,7 @@ export function PwaInstallBanner({
               className="mt-2.5 rounded-full px-4 py-2 text-xs font-bold shadow-md transition-opacity hover:opacity-95"
               style={{ backgroundColor: BRAND_AMBER, color: BRAND_GREEN }}
             >
-              Install app
+              Install {PWA_SHORT_NAME}
             </button>
           ) : null}
         </div>
