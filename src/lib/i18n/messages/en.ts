@@ -329,7 +329,7 @@ export const en: AppMessages = {
     languageAuto: "Auto (follows phone)",
     languageValue: (label) => label,
     languageHint:
-      "Auto uses your phone language when we support it (English, Čeština). Other languages fall back to English until we add them.",
+      "Auto uses your phone language when we support it (English, Čeština) — including the install screen. Other languages fall back to English until we add them.",
     defaultExperience: "Default experience",
     defaultExperienceHint:
       "Browse opens your block hub; My Garage opens your storefront. List items anytime with +.",

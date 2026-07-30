@@ -5,6 +5,7 @@ import { APP_NAME, BRAND_GREEN, PWA_SHORT_NAME } from "../lib/brand";
 import { markInstallGateDone } from "../lib/pwaInstallGate";
 import { isAndroid, isIos, isStandalonePwa } from "../lib/pwaInstall";
 import { usePwaInstallPrompt } from "../hooks/PwaInstallProvider";
+import { applyDocumentLang } from "../lib/i18n";
 import { useMessages } from "../lib/i18n/react";
 
 type InstallGateScreenProps = {
@@ -110,6 +111,10 @@ export function InstallGateScreen({
   const ios = isIos();
   const android = isAndroid();
   const showIosSteps = ios || (!android && pwa.manualIos);
+
+  useEffect(() => {
+    applyDocumentLang();
+  }, []);
 
   // iOS has no “continue” CTA (Safari closes after Add). Remember this browser
   // saw the gate so “Open Evorios” from the marketing site doesn’t loop forever.
