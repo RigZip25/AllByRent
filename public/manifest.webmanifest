@@ -1,12 +1,14 @@
 {
-  "name": "Evorios",
-  "short_name": "Evorios",
-  "description": "Garage Showcase — evolve how your home shares.",
+  "name": "Evorios — Neighborhood Marketplace",
+  "short_name": "Evorios Market",
+  "description": "Your neighborhood marketplace — every household garage can rent, sell, or gift on the block.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#062a1c",
   "theme_color": "#0D5C3A",
+  "lang": "en",
+  "categories": ["shopping", "lifestyle", "social"],
   "icons": [
     {
       "src": "/pwa-icon.svg",

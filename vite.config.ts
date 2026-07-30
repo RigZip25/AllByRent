@@ -18,15 +18,19 @@ function pwaPlugin() {
       registerType: 'autoUpdate',
       includeAssets: ['pwa-192.png', 'pwa-512.png'],
       manifest: {
-        name: 'Evorios',
-        short_name: 'Evorios',
-        description: 'Garage Showcase — evolve how your home shares.',
+        // Keep in sync with public/manifest.webmanifest + src/lib/brand.ts PWA_* constants.
+        name: 'Evorios — Neighborhood Marketplace',
+        short_name: 'Evorios Market',
+        description:
+          'Your neighborhood marketplace — every household garage can rent, sell, or gift on the block.',
         theme_color: '#0D5C3A',
         background_color: '#062a1c',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
         scope: '/',
+        categories: ['shopping', 'lifestyle', 'social'],
+        lang: 'en',
         icons: [
           { src: 'pwa-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512.png', sizes: '512x512', type: 'image/png' },

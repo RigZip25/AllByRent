@@ -10,8 +10,21 @@ export const PRODUCT_METAPHOR = "Garage Showcase";
 export const APP_TAGLINE = "The evolution of ownership.";
 export const APP_TAGLINE_SHORT = "Your garage, online.";
 
+/**
+ * PWA install / home-screen labels.
+ * `name` + `description` show on the install sheet; `short_name` / apple title sit under the icon.
+ * Keep short_name ≤ ~12–14 chars so phones don’t clip to “Evorios…” with no meaning.
+ */
+export const PWA_APP_NAME = "Evorios — Neighborhood Marketplace";
+export const PWA_SHORT_NAME = "Evorios Market";
+export const PWA_DESCRIPTION =
+  "Your neighborhood marketplace — every household garage can rent, sell, or gift on the block.";
+
 /** Russian reference copy for docs / future i18n. */
 export const APP_TAGLINE_RU = "Эволюция владения.";
+export const PWA_APP_NAME_RU = "Evorios — соседский маркетплейс";
+export const PWA_DESCRIPTION_RU =
+  "Соседский маркетплейс: каждое домохозяйство сдаёт в аренду, продаёт или дарит из своего гаража.";
 
 export const BRAND_GREEN = "#0D5C3A";
 export const BRAND_AMBER = "#F59E0B";

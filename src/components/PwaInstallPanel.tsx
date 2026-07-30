@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ExternalLink, Share } from "lucide-react";
-import { BRAND_AMBER, BRAND_GREEN } from "../lib/brand";
+import { APP_NAME, BRAND_AMBER, BRAND_GREEN, PWA_SHORT_NAME } from "../lib/brand";
 import { PWA_INSTALL_DISMISS_DAYS } from "../lib/pwaInstall";
 
 type Platform = "ios" | "android";
@@ -82,13 +82,21 @@ export function PwaInstallPanel({
         ) : null}
       </div>
 
+      <p className="mt-3 text-[13px] font-semibold leading-snug" style={{ color: BRAND_GREEN }}>
+        {APP_NAME} — your neighborhood marketplace
+      </p>
+      <p className="mt-1 text-[12px] leading-snug text-gray-500">
+        Home Screen label: <strong>{PWA_SHORT_NAME}</strong> (so it stands out among icons).
+      </p>
+
       {platform === "ios" ? (
         <div className="mt-3 text-sm leading-relaxed text-[#374151]">
           <div className="flex items-start gap-2">
             <Share className="mt-0.5 h-4 w-4 shrink-0" style={{ color: BRAND_GREEN }} />
             <div>
               Safari (bottom center): square with arrow → <strong>View More</strong> →{" "}
-              <strong>Add to Home Screen</strong> → <strong>Add</strong>. Updates are automatic.
+              <strong>Add to Home Screen</strong>. Keep the name{" "}
+              <strong>{PWA_SHORT_NAME}</strong> (or edit it) → <strong>Add</strong>.
             </div>
           </div>
           <div className="mt-2 flex items-start gap-2">
@@ -102,20 +110,24 @@ export function PwaInstallPanel({
         <div className="mt-3 text-sm leading-relaxed text-[#374151]">
           {nativeInstallReady ? (
             <>
-              <p>One tap install — faster open, full screen, no browser bar.</p>
+              <p>
+                One tap install — shows as <strong>{PWA_SHORT_NAME}</strong>, full screen, no
+                browser bar.
+              </p>
               <button
                 type="button"
                 onClick={onInstall}
                 className="mt-2.5 inline-flex w-full items-center justify-center rounded-full px-4 py-2.5 text-sm font-bold shadow-md transition-opacity active:opacity-90"
                 style={{ backgroundColor: BRAND_AMBER, color: BRAND_GREEN }}
               >
-                Install app
+                Install {PWA_SHORT_NAME}
               </button>
             </>
           ) : (
             <p>
               In Chrome: menu <strong>⋮</strong> → <strong>Install app</strong> or{" "}
-              <strong>Add to Home screen</strong>.
+              <strong>Add to Home screen</strong> — look for{" "}
+              <strong>Neighborhood Marketplace</strong> in the prompt.
             </p>
           )}
         </div>

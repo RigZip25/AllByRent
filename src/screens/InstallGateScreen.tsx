@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { Smartphone } from "lucide-react";
-import { APP_NAME, BRAND_GREEN } from "../lib/brand";
+import { APP_NAME, BRAND_GREEN, PWA_SHORT_NAME } from "../lib/brand";
 import { markInstallGateDone } from "../lib/pwaInstallGate";
 import { isAndroid, isIos, isStandalonePwa } from "../lib/pwaInstall";
 import { usePwaInstallPrompt } from "../hooks/PwaInstallProvider";
@@ -122,7 +122,7 @@ export function InstallGateScreen({
       return;
     }
     window.alert(
-      `Almost there!\n\nOpen the ${APP_NAME} icon on your Home Screen (not this browser tab).`,
+      `Almost there!\n\nOpen the ${PWA_SHORT_NAME} icon on your Home Screen (not this browser tab).`,
     );
   };
 
@@ -145,13 +145,13 @@ export function InstallGateScreen({
           className="mt-3 text-[30px] font-extrabold leading-[1.12] tracking-tight"
           style={{ color: BRAND_GREEN }}
         >
-          Install {APP_NAME}
+          Install your
           <br />
-          in seconds
+          neighborhood marketplace
         </h1>
         <p className="mt-3.5 text-[17px] leading-relaxed text-gray-600">
-          Simplified install — the modern method. Four quick taps, then open your icon and go.
-          Updates download in the background and install overnight (~2 AM on your phone).
+          {APP_NAME} goes on your Home Screen as <strong>{PWA_SHORT_NAME}</strong> — so you
+          remember it among other icons. Four quick taps; updates install overnight.
         </p>
 
         <div className="mt-6">
@@ -179,7 +179,7 @@ export function InstallGateScreen({
                 n={4}
                 icon={<IosAddButtonIcon />}
                 title="Add"
-                hint="Blue button at the top right"
+                hint={`Keep “${PWA_SHORT_NAME}” as the name (or edit it)`}
               />
             </ol>
           ) : (
