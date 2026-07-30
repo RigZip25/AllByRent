@@ -342,7 +342,7 @@ export const cs: AppMessages = {
     languageAuto: "Automaticky (podle telefonu)",
     languageValue: (label) => label,
     languageHint:
-      "Automaticky použije jazyk telefonu, pokud ho podporujeme (angličtina, čeština). Ostatní jazyky zatím padají na angličtinu.",
+      "Automaticky použije jazyk telefonu, pokud ho podporujeme (angličtina, čeština). Stejné nastavení platí i pro obrazovku instalace. Ostatní jazyky zatím padají na angličtinu.",
     defaultExperience: "Výchozí režim",
     defaultExperienceHint:
       "Procházet otevře hub bloku; Moje garáž otevře výlohu. Položky přidáte kdykoli přes +.",

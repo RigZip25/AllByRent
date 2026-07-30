@@ -24,20 +24,69 @@ export function isAppLocale(value: string): value is AppLocale {
   return (SUPPORTED_LOCALES as readonly string[]).includes(value);
 }
 
-/** Map BCP-47 tags like cs-CZ / pt-BR → supported app locale. */
-export function resolveDeviceLocale(
-  languages: readonly string[] = typeof navigator !== "undefined"
-    ? navigator.languages?.length
-      ? navigator.languages
-      : [navigator.language]
-    : [DEFAULT_LOCALE],
-): AppLocale {
-  for (const raw of languages) {
-    const tag = (raw || "").trim().toLowerCase();
-    if (!tag) continue;
-    const primary = tag.split("-")[0] || "";
-    if (isAppLocale(primary)) return primary;
+function primaryLanguage(tag: string): string {
+  return (tag || "").trim().toLowerCase().split(/[-_]/)[0] || "";
+}
+
+function collectDeviceLanguageTags(): string[] {
+  const tags: string[] = [];
+  const push = (raw: string | undefined | null) => {
+    const t = (raw || "").trim();
+    if (t && !tags.includes(t)) tags.push(t);
+  };
+
+  if (typeof navigator !== "undefined") {
+    if (navigator.languages?.length) {
+      for (const lang of navigator.languages) push(lang);
+    }
+    push(navigator.language);
   }
+
+  // iOS/Android often expose system locale here even when Safari’s
+  // preferred-language list leads with English.
+  try {
+    push(Intl.DateTimeFormat().resolvedOptions().locale);
+  } catch {
+    /* ignore */
+  }
+
+  return tags;
+}
+
+function localeFromTimezone(): AppLocale | null {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz === "Europe/Prague" || tz === "Europe/Bratislava") return "cs";
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+/**
+ * Map BCP-47 tags like cs-CZ / pt-BR → supported app locale.
+ * Prefers Czech when the device is clearly CZ/SK (timezone/region) even if
+ * Safari lists English first — install gate and first paint follow the phone.
+ */
+export function resolveDeviceLocale(
+  languages: readonly string[] = collectDeviceLanguageTags(),
+): AppLocale {
+  const matched: AppLocale[] = [];
+  for (const raw of languages) {
+    const primary = primaryLanguage(raw);
+    if (isAppLocale(primary) && !matched.includes(primary)) matched.push(primary);
+  }
+
+  const prefersCzechRegion =
+    localeFromTimezone() === "cs" ||
+    languages.some((t) => /[-_](CZ|SK)\b/i.test(t || ""));
+
+  if (prefersCzechRegion && matched.includes("cs")) return "cs";
+  if (matched[0]) return matched[0];
+
+  const fromTz = localeFromTimezone();
+  if (fromTz) return fromTz;
+
   return DEFAULT_LOCALE;
 }
 
@@ -107,4 +156,16 @@ export function applyDocumentLang(locale: AppLocale = getLocale()) {
   if (typeof document !== "undefined") {
     document.documentElement.lang = locale;
   }
+}
+
+/** Keep Auto locale in sync when the OS/browser language changes (iOS/Android). */
+export function startLocaleChangeListener(): () => void {
+  if (typeof window === "undefined") return () => undefined;
+  const onChange = () => {
+    if (!isLocaleAuto()) return;
+    applyDocumentLang();
+    notify();
+  };
+  window.addEventListener("languagechange", onChange);
+  return () => window.removeEventListener("languagechange", onChange);
 }
