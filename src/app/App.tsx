@@ -871,17 +871,6 @@ function AppRoutes() {
     [navigateTo],
   );
 
-  const handleBrowseHubCategory = useCallback(
-    (category: string) => {
-      saveHomeFeedLens("feed");
-      saveHomeFeedMode("all");
-      saveHomeFeedQuery("");
-      saveHomeFeedCategory(category);
-      navigateTo("home");
-    },
-    [navigateTo],
-  );
-
   const handleYardSaleHubChoice = useCallback(
     (choice: YardSaleHubChoice) => {
       if (choice === "browse") {
@@ -1531,7 +1520,6 @@ function AppRoutes() {
         {currentScreen === "browseHub" && (
           <BrowseHubScreen
             onChoose={handleBrowseHubChoice}
-            onChooseCategory={handleBrowseHubCategory}
             onEditLocation={openRentLocationSetup}
           />
         )}

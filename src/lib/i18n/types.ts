@@ -262,6 +262,7 @@ export type AppMessages = {
     closerMiles: (milesLabel: string) => string;
     fartherMiles: (milesLabel: string) => string;
     miles: (n: number) => string;
+    withinMiles: (n: number) => string;
     done: string;
     cantFind: string;
     cantFindBody: string;

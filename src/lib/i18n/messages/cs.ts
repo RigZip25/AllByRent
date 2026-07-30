@@ -172,6 +172,7 @@ export const cs: AppMessages = {
     closerMiles: (milesLabel) => `Blíž · ${milesLabel}`,
     fartherMiles: (milesLabel) => `Dál · ${milesLabel}`,
     miles: (n) => `${n} mi`,
+    withinMiles: (n) => `do ${n} mi`,
     done: "Zobrazit garáže",
     cantFind: "Nemůžete najít, co potřebujete?",
     cantFindBody: "Pošlete žádost, případně se přihlaste, a pak ji sdílejte jako nabídku.",
@@ -1315,8 +1316,8 @@ export const cs: AppMessages = {
       },
       yardSales: {
         title: "Garážové výprodeje",
-        subtitle: "Beta — výprodeje a aukce ve vašem bloku",
-        cta: "Výprodeje (Beta) →",
+        subtitle: "Výprodeje a aukce ve vašem bloku",
+        cta: "Výprodeje →",
       },
       categoriesTitle: "Podle kategorie",
       categoriesHint: "Nářadí, zahrada, párty a další — rovnou do nabídky.",

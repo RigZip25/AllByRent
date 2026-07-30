@@ -2,8 +2,8 @@ import type { AppMessages } from "../types";
 
 export const garageSale: AppMessages["garageSale"] = {
   yardSaleHub: {
-    title: "Garážové výprodeje (Beta)",
-    subtitle: "Experimentální — prohlédněte otevřené nebo nastavte vlastní výprodej.",
+    title: "Garážové výprodeje",
+    subtitle: "Prohlédněte otevřené nebo nastavte vlastní výprodej.",
     browse: {
       title: "Procházet otevřené garáže",
       subtitle: "Kdo má dnes otevřeno ve vašem bloku",

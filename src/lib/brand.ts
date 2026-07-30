@@ -104,8 +104,8 @@ export const ONBOARDING = {
       },
       yardSales: {
         title: "Yard & garage sales",
-        subtitle: "Beta — snap sales & auctions on your block",
-        cta: "Garage sales (Beta) →",
+        subtitle: "Snap sales & auctions on your block",
+        cta: "Garage sales →",
       },
       categoriesTitle: "Browse by category",
       categoriesHint: "Jump straight into tools, garden plants, party gear, and more.",

@@ -2,8 +2,8 @@ import type { AppMessages } from "../types";
 
 export const garageSale: AppMessages["garageSale"] = {
   yardSaleHub: {
-    title: "Garage sales (Beta)",
-    subtitle: "Experimental — browse who's open or set up your own sale.",
+    title: "Garage sales",
+    subtitle: "Browse who's open or set up your own sale.",
     browse: {
       title: "Browse open garages",
       subtitle: "See who's open today on your block",
