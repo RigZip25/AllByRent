@@ -165,6 +165,7 @@ export const en: AppMessages = {
     closerMiles: (milesLabel) => `Closer · ${milesLabel}`,
     fartherMiles: (milesLabel) => `Farther · ${milesLabel}`,
     miles: (n) => `${n} mi`,
+    withinMiles: (n) => `within ${n} mi`,
     done: "Show garages",
     cantFind: "Can't find what you need?",
     cantFindBody: "Post a request, sign in if asked, then share it like a listing.",
@@ -1301,8 +1302,8 @@ export const en: AppMessages = {
       },
       yardSales: {
         title: "Yard & garage sales",
-        subtitle: "Beta — snap sales & auctions on your block",
-        cta: "Garage sales (Beta) →",
+        subtitle: "Snap sales & auctions on your block",
+        cta: "Garage sales →",
       },
       categoriesTitle: "Browse by category",
       categoriesHint: "Jump straight into tools, garden plants, party gear, and more.",

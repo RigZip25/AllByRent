@@ -157,10 +157,11 @@ export function HomeFeed({
 
   const browseCategories = useMemo(() => getAllCategoryChips(), []);
 
-  // Price + radius only — categories live on the main strip now.
+  // Price, radius, and category (selected in Filters sheet).
   const activeFilterCount =
     (pricePresetId !== "any" ? 1 : 0) +
-    (clusterRadiusMi !== CLUSTER_RADIUS_DEFAULT_MI ? 1 : 0);
+    (clusterRadiusMi !== CLUSTER_RADIUS_DEFAULT_MI ? 1 : 0) +
+    (category ? 1 : 0);
 
   const modeChips: { id: ModeChip; label: string }[] = [
     { id: "all", label: home.modeAny },
@@ -181,6 +182,9 @@ export function HomeFeed({
   };
 
   const emptyIsFiltered = Boolean(category || pricePresetId !== "any");
+  const activeCategoryChip = category
+    ? browseCategories.find((c) => c.name === category)
+    : null;
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -188,12 +192,12 @@ export function HomeFeed({
         className="shrink-0 bg-[#F0F4F2] px-4 pb-2"
         style={{ paddingTop: "max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))" }}
       >
-        <div className="mb-2.5 flex items-start gap-2">
+        <div className="mb-2 flex items-center gap-2">
           {onBackToHub ? (
             <button
               type="button"
               onClick={onBackToHub}
-              className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
               style={{ borderColor: BORDER }}
               aria-label={home.backToBrowseAria}
             >
@@ -207,28 +211,30 @@ export function HomeFeed({
             className="min-w-0 flex-1 py-0.5 text-left"
             aria-label={needsLocation ? home.setBlockAria : home.changeBlockAria}
           >
-            <span className="flex items-start gap-1.5">
+            <span className="flex items-center gap-1.5">
               <MapPin
-                className="mt-0.5 h-4 w-4 shrink-0"
+                className="h-4 w-4 shrink-0"
                 style={{ color: needsLocation ? "#F59E0B" : GREEN }}
                 fill={needsLocation ? "#F59E0B" : GREEN}
                 stroke={GREEN_DARK}
                 strokeWidth={1.5}
               />
               <span
-                className="min-w-0 flex-1 text-base font-bold leading-snug [overflow-wrap:anywhere]"
+                className="min-w-0 flex-1 text-base font-bold leading-snug line-clamp-2 break-words"
                 style={{ color: needsLocation ? "#B45309" : GREEN_DARK }}
               >
                 {clusterLabel}
               </span>
-              <ChevronRight className="mt-1 h-4 w-4 shrink-0" style={{ color: GREEN }} />
+              <ChevronRight className="h-4 w-4 shrink-0" style={{ color: GREEN }} />
             </span>
           </button>
+        </div>
 
+        <div className="mb-2 flex items-center gap-2">
           <button
             type="button"
             onClick={() => setFiltersOpen(true)}
-            className="relative mt-0.5 inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border bg-white px-3 active:bg-gray-50"
+            className="relative inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border bg-white px-3 active:bg-gray-50"
             style={{ borderColor: activeFilterCount ? GREEN_DARK : BORDER }}
             aria-label={home.filtersAria}
           >
@@ -245,30 +251,32 @@ export function HomeFeed({
               </span>
             ) : null}
           </button>
-          <button
-            type="button"
-            onClick={onRentals}
-            className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
-            style={{ borderColor: BORDER }}
-            aria-label={home.bookingsAria}
-          >
-            <ClipboardList className="h-5 w-5" style={{ color: GREEN_DARK }} />
-          </button>
-          <button
-            type="button"
-            onClick={handleBellPress}
-            className="relative mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
-            style={{ borderColor: BORDER }}
-            aria-label={showBellBadge ? home.notificationsUpdateAria : home.notificationsAria}
-          >
-            <Bell className="h-5 w-5" style={{ color: GREEN_DARK }} />
-            {showBellBadge ? (
-              <span
-                className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#F0B429]"
-                aria-hidden
-              />
-            ) : null}
-          </button>
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onRentals}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
+              style={{ borderColor: BORDER }}
+              aria-label={home.bookingsAria}
+            >
+              <ClipboardList className="h-5 w-5" style={{ color: GREEN_DARK }} />
+            </button>
+            <button
+              type="button"
+              onClick={handleBellPress}
+              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
+              style={{ borderColor: BORDER }}
+              aria-label={showBellBadge ? home.notificationsUpdateAria : home.notificationsAria}
+            >
+              <Bell className="h-5 w-5" style={{ color: GREEN_DARK }} />
+              {showBellBadge ? (
+                <span
+                  className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#F0B429]"
+                  aria-hidden
+                />
+              ) : null}
+            </button>
+          </div>
         </div>
 
         <div className="flex gap-1.5 overflow-x-auto pb-0.5">
@@ -290,6 +298,18 @@ export function HomeFeed({
               </button>
             );
           })}
+          {activeCategoryChip ? (
+            <button
+              type="button"
+              onClick={() => setCategory(null)}
+              className="inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-bold text-white"
+              style={{ backgroundColor: GREEN }}
+            >
+              <span aria-hidden>{activeCategoryChip.icon}</span>
+              {localizeCategoryLabel(activeCategoryChip.name)}
+              <X className="h-3.5 w-3.5" />
+            </button>
+          ) : null}
           {pricePresetId !== "any" ? (
             <button
               type="button"
@@ -301,40 +321,6 @@ export function HomeFeed({
               <X className="h-3.5 w-3.5" />
             </button>
           ) : null}
-        </div>
-
-        <div className="mt-1.5 flex gap-1.5 overflow-x-auto pb-0.5">
-          <button
-            type="button"
-            onClick={() => setCategory(null)}
-            className="shrink-0 rounded-full px-3 py-1.5 text-[12px] font-bold"
-            style={{
-              backgroundColor: !category ? GREEN_DARK : "white",
-              color: !category ? "white" : "#555",
-              border: `1px solid ${!category ? GREEN_DARK : BORDER}`,
-            }}
-          >
-            {home.modeAny}
-          </button>
-          {browseCategories.map((cat) => {
-            const active = category === cat.name;
-            return (
-              <button
-                key={cat.name}
-                type="button"
-                onClick={() => setCategory(active ? null : cat.name)}
-                className="inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-bold"
-                style={{
-                  backgroundColor: active ? GREEN_DARK : "white",
-                  color: active ? "white" : "#444",
-                  border: `1px solid ${active ? GREEN_DARK : BORDER}`,
-                }}
-              >
-                <span aria-hidden>{cat.icon}</span>
-                {localizeCategoryLabel(cat.name)}
-              </button>
-            );
-          })}
         </div>
       </div>
 

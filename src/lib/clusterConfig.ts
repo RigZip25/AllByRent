@@ -58,5 +58,5 @@ export function expandClusterRadius(): number {
 
 export function clusterLabelForCity(city: string, radiusMi = getClusterRadiusMi()): string {
   if (!city.trim()) return getMessages().home.setBlock;
-  return `${city} · within ${radiusMi} mi`;
+  return `${city} · ${getMessages().home.withinMiles(radiusMi)}`;
 }
