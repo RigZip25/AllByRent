@@ -11,15 +11,59 @@ const INITIAL_DELAY_MS = 400;
 const BUBBLE_GAP_MS = 900;
 const TYPING_CHAR_MS = 18;
 
-function FirstHelloRolesScene() {
+function SplashPlant({ side }: { side: "left" | "right" }) {
   return (
-    <div className="first-hello-scene" aria-label={`${APP_NAME} — neighborhood garage platform`}>
-      <img
-        src={onboardingAssets.garageRoles}
-        alt=""
-        className="first-hello-scene-hero"
-        draggable={false}
+    <svg
+      className={`first-hello-plant first-hello-plant-${side}`}
+      viewBox="0 0 64 96"
+      aria-hidden
+    >
+      <ellipse cx="32" cy="88" rx="18" ry="6" fill="#0D5C3A" opacity="0.12" />
+      <path
+        d="M32 86 V28"
+        stroke="#0D5C3A"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        fill="none"
       />
+      <path
+        d="M32 70 C18 62 12 48 16 36 C24 42 30 52 32 62"
+        fill="#1A9E6E"
+        opacity="0.9"
+      />
+      <path
+        d="M32 62 C46 54 52 40 48 28 C40 34 34 46 32 56"
+        fill="#0D5C3A"
+        opacity="0.85"
+      />
+      <path
+        d="M32 48 C22 40 18 28 22 18 C28 24 31 34 32 44"
+        fill="#34D399"
+        opacity="0.95"
+      />
+      <path
+        d="M32 42 C42 34 46 22 42 12 C36 18 33 28 32 38"
+        fill="#1A9E6E"
+      />
+      <circle cx="32" cy="22" r="3.5" fill="#F59E0B" opacity="0.85" />
+    </svg>
+  );
+}
+
+function FirstHelloRolesScene({ caption }: { caption: string }) {
+  return (
+    <div className="first-hello-scene" aria-label={`${APP_NAME} — ${caption}`}>
+      <SplashPlant side="left" />
+      <div className="first-hello-scene-stage">
+        <img
+          src={onboardingAssets.garageRoles}
+          alt=""
+          className="first-hello-scene-hero"
+          draggable={false}
+        />
+        <p className="first-hello-scene-caption">{caption}</p>
+      </div>
+      <SplashPlant side="right" />
     </div>
   );
 }
@@ -233,7 +277,7 @@ export function FirstHello({
         </div>
 
         <div className="first-hello-scene-dock">
-          <FirstHelloRolesScene />
+          <FirstHelloRolesScene caption={t.tagline} />
         </div>
       </div>
 

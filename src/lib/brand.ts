@@ -7,24 +7,24 @@ export const APP_NAME_PRONUNCIATION = "eh-VOR-ee-ohs";
 export const PRODUCT_METAPHOR = "Garage Showcase";
 
 /** Ties the name to the evolution narrative (EN UI). */
-export const APP_TAGLINE = "The evolution of ownership.";
-export const APP_TAGLINE_SHORT = "Your garage, online.";
+export const APP_TAGLINE = "Neighborly marketplace — the evolution of household living.";
+export const APP_TAGLINE_SHORT = "Neighborly marketplace.";
 
 /**
  * PWA install / home-screen labels.
  * `name` + `description` show on the install sheet; `short_name` / apple title sit under the icon.
  * Keep short_name ≤ ~12–14 chars so phones don’t clip to “Evorios…” with no meaning.
  */
-export const PWA_APP_NAME = "Evorios — Neighborhood Marketplace";
+export const PWA_APP_NAME = "Evorios — Neighborly Marketplace";
 export const PWA_SHORT_NAME = "Evorios Market";
 export const PWA_DESCRIPTION =
-  "Your neighborhood marketplace — every household garage can rent, sell, or gift on the block.";
+  "Neighborly marketplace — every home is a business cell that can rent, sell, or gift on the block.";
 
 /** Russian reference copy for docs / future i18n. */
-export const APP_TAGLINE_RU = "Эволюция владения.";
+export const APP_TAGLINE_RU = "Соседский маркетплейс — эволюция ведения домашнего хозяйства.";
 export const PWA_APP_NAME_RU = "Evorios — соседский маркетплейс";
 export const PWA_DESCRIPTION_RU =
-  "Соседский маркетплейс: каждое домохозяйство сдаёт в аренду, продаёт или дарит из своего гаража.";
+  "Соседский маркетплейс: каждый дом — бизнес-ячейка, которая сдаёт в аренду, продаёт или дарит из своей гаражной витрины.";
 
 export const BRAND_GREEN = "#0D5C3A";
 export const BRAND_AMBER = "#F59E0B";
@@ -47,8 +47,8 @@ export const APP_MODE_LABELS = {
 } as const;
 
 export const APP_MODE_DESCRIPTIONS = {
-  earn: "Your household garage showcase — list, price, and share what you own.",
-  rent: "Browse neighborhood garages — borrow, buy, or pick up nearby.",
+  earn: "Your home business cell — list, price, and share from your garage storefront.",
+  rent: "Browse neighbor cells — borrow, buy, or pick up nearby.",
 } as const;
 
 /** Onboarding card copy — single source for garage showcase narrative */
@@ -90,7 +90,7 @@ export const ONBOARDING = {
   },
   allSet: {
     title: "You're all set!",
-    subtitle: "Welcome to Evorios — the evolution of ownership.",
+    subtitle: "Welcome to Evorios — neighborly marketplace, the evolution of household living.",
     exploreCta: "Choose how to browse →",
     stockGarageCta: "Stock my garage →",
   },
@@ -114,10 +114,9 @@ export const ONBOARDING = {
   firstHello: {
     mascotRole: "Your guide here",
     bubbles: [
-      (mascot: string) =>
-        `Hey! I'm ${mascot} — I'll show you around and help when you're stuck.`,
-      "I'll help you work out what to do with things you own — or borrow nearby.",
-      "Put your garage online: rent, sell, borrow. Tap me anytime.",
+      (mascot: string) => `Hi — I'm ${mascot}. Welcome to the block.`,
+      "Every home is a business cell — rent, sell, or gift from your garage storefront.",
+      "I'll help you browse neighbors or open your cell on the block.",
     ],
   },
 } as const;
