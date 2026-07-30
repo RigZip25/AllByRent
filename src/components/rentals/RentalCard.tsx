@@ -17,8 +17,8 @@ import {
 } from "../../lib/rentalTiming";
 import {
   formatRentalDateRange,
+  getRentalStatusLabel,
   isNoShowHistory,
-  RENTAL_STATUS_LABEL,
   updateBooking,
   type RentalBooking,
 } from "../../lib/rentalsStorage";
@@ -41,7 +41,7 @@ function StatusBadge({ booking }: { booking: RentalBooking }) {
 
   let bg = "#F3F4F6";
   let color = "#666";
-  let label = RENTAL_STATUS_LABEL[status];
+  let label = getRentalStatusLabel(status);
 
   if (historyNoShow) {
     bg = "#FFEDD5";

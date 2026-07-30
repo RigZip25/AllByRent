@@ -24,7 +24,6 @@ import {
   saveAvatarPhoto,
   setPhotoPromptDeferred,
 } from "../lib/avatarStorage";
-import { APP_MODE_LABELS } from "../lib/brand";
 import { getAppMode, type AppMode } from "../lib/appMode";
 import {
   getProfileDisplayLabel,
@@ -46,7 +45,7 @@ import { signOut } from "../lib/auth";
 import { fetchRemoteProfile } from "../lib/supabaseProfile";
 import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
 import { loadConnectStatus, startConnectOnboarding } from "../lib/repositories/connectRepository";
-import { useLocaleControls, useMessages } from "../lib/i18n/react";
+import { useAppModeLabels, useLocaleControls, useMessages } from "../lib/i18n/react";
 import type { AppLocale } from "../lib/i18n/types";
 
 const GREEN = "#0D5C3A";
@@ -113,12 +112,14 @@ function StatTile({ label, value }: { label: string; value: string }) {
 }
 
 function ModeToggle({ mode, onChange }: { mode: AppMode; onChange: (m: AppMode) => void }) {
+  const { profile: profileCopy } = useMessages();
+  const modeLabels = useAppModeLabels();
   return (
     <div
       className="flex rounded-full border bg-white p-0.5"
       style={{ borderColor: BORDER }}
       role="tablist"
-      aria-label="Preferred mode"
+      aria-label={profileCopy.preferredModeAria}
     >
       {(["rent", "earn"] as const).map((tab) => {
         const active = mode === tab;
@@ -135,7 +136,7 @@ function ModeToggle({ mode, onChange }: { mode: AppMode; onChange: (m: AppMode) 
               color: active ? "white" : "#888",
             }}
           >
-            {APP_MODE_LABELS[tab]}
+            {modeLabels[tab]}
           </button>
         );
       })}
@@ -303,7 +304,7 @@ export function ProfileScreen({
     if (auth.loading) return;
 
     if (!onViewPublicProfile) {
-      setPublicProfileError("Public profile preview is unavailable right now.");
+      setPublicProfileError(profileCopy.publicPreviewUnavailable);
       return;
     }
 
@@ -313,7 +314,7 @@ export function ProfileScreen({
         onRequireAuth?.();
         return;
       }
-      setPublicProfileError("Could not load your account. Try signing out and back in.");
+      setPublicProfileError(profileCopy.couldNotLoadAccount);
       return;
     }
 
@@ -351,10 +352,10 @@ export function ProfileScreen({
             style={{ borderColor: BORDER }}
           >
             <p className="text-[14px] font-semibold" style={{ color: GREEN }}>
-              What should we call you?
+              {profileCopy.whatShouldWeCallYou}
             </p>
             <p className="mt-1 text-[13px] text-gray-500">
-              Add a display name so hosts and renters know who they are meeting.
+              {profileCopy.displayNameHint}
             </p>
             <button
               type="button"
@@ -362,7 +363,7 @@ export function ProfileScreen({
               className="mt-3 w-full rounded-xl py-2.5 text-[14px] font-bold text-white"
               style={{ backgroundColor: "#F59E0B" }}
             >
-              Add your name
+              {profileCopy.addYourName}
             </button>
           </div>
         ) : null}
@@ -384,7 +385,9 @@ export function ProfileScreen({
                   {displayNameLabel}
                 </h1>
               </div>
-              <p className="mt-0.5 text-[14px] text-gray-500">Member since {memberYear}</p>
+              <p className="mt-0.5 text-[14px] text-gray-500">
+                {profileCopy.memberSince(memberYear)}
+              </p>
               <ProfileTrustBadges profile={profile} />
               {onViewPublicProfile ? (
                 <button
@@ -393,7 +396,7 @@ export function ProfileScreen({
                   className="mt-2 text-[13px] font-semibold underline"
                   style={{ color: GREEN }}
                 >
-                  Preview public profile
+                  {profileCopy.previewPublicProfile}
                 </button>
               ) : null}
               {publicProfileError ? (
@@ -683,12 +686,14 @@ export function ProfileScreen({
         {auth.configured ? (
           <div className="mt-3 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
             <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-              Auth
+              {profileCopy.authSection}
             </p>
             <p className="mt-1 text-[13px] text-gray-600">
               {auth.session
-                ? `Signed in as ${auth.userEmail ?? auth.userId ?? "user"}`
-                : "Not signed in"}
+                ? profileCopy.signedInAs(
+                    auth.userEmail ?? auth.userId ?? profileCopy.userFallback,
+                  )
+                : profileCopy.notSignedIn}
             </p>
             <button
               type="button"
@@ -696,7 +701,7 @@ export function ProfileScreen({
               className="mt-3 w-full min-h-[44px] touch-manipulation rounded-xl border py-2 text-center text-[13px] font-semibold text-red-600/80 active:text-red-700"
               style={{ borderColor: BORDER }}
             >
-              Delete account
+              {profileCopy.deleteAccount}
             </button>
           </div>
         ) : null}
@@ -706,7 +711,7 @@ export function ProfileScreen({
           onClick={() => confirmAndResetAppData()}
           className="mt-3 w-full min-h-[44px] touch-manipulation py-2 text-center text-[12px] font-medium text-red-600/70 active:text-red-700"
         >
-          Reset app
+          {profileCopy.resetApp}
         </button>
 
         <p

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useMessages } from "../../lib/i18n/react";
 import { pushInAppNotification } from "../../lib/inAppNotifications";
 import { updateBooking } from "../../lib/rentalsStorage";
 
@@ -18,7 +19,12 @@ export function RunningLateSheet({
   onClose: () => void;
   onSent: () => void;
 }) {
-  const [message, setMessage] = useState("I'm running a bit late, be there soon.");
+  const { rentalCard: t, common } = useMessages();
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (open) setMessage(t.runningLateDefault);
+  }, [open, t.runningLateDefault]);
 
   if (!open) return null;
 
@@ -30,8 +36,8 @@ export function RunningLateSheet({
     });
     pushInAppNotification({
       type: "running_late",
-      title: "Renter running late",
-      body: `${message} — tap to acknowledge and pause no-show timer.`,
+      title: t.runningLateNotifTitle,
+      body: t.runningLateNotifBody(message),
     });
     onSent();
     onClose();
@@ -47,11 +53,9 @@ export function RunningLateSheet({
         onClick={(event) => event.stopPropagation()}
       >
         <h2 className="text-[17px] font-bold" style={{ color: GREEN }}>
-          Send a message to {ownerName}?
+          {t.runningLateTitle(ownerName)}
         </h2>
-        <p className="mt-1 text-[13px] text-gray-500">
-          They&apos;ll get a push and in-app message. If they reply OK, the no-show timer resets.
-        </p>
+        <p className="mt-1 text-[13px] text-gray-500">{t.runningLateBody}</p>
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
@@ -65,7 +69,7 @@ export function RunningLateSheet({
             onClick={onClose}
             className="flex-1 rounded-xl border py-2.5 text-[14px] font-semibold text-gray-500"
           >
-            Cancel
+            {common.cancel}
           </button>
           <button
             type="button"
@@ -73,7 +77,7 @@ export function RunningLateSheet({
             className="flex-1 rounded-xl py-2.5 text-[14px] font-bold text-white"
             style={{ backgroundColor: CTA }}
           >
-            Send
+            {common.send}
           </button>
         </div>
       </div>

@@ -20,6 +20,7 @@ import {
 } from "../lib/rentanoPrompt";
 import { usePwaInstallPrompt } from "../hooks/PwaInstallProvider";
 import { isStandalonePwa } from "../lib/pwaInstall";
+import { useMessages } from "../lib/i18n/react";
 import { PwaInstallPanel } from "./PwaInstallPanel";
 import { RentanoFaqPanel } from "./rentano/RentanoFaqPanel";
 import { RentanoChatPanel } from "./rentano/RentanoChatPanel";
@@ -99,6 +100,7 @@ function MenuRow({
 }
 
 export function RentanoChatFab({ onClick }: { onClick: () => void }) {
+  const { mrEvorios: t } = useMessages();
   return (
     <button
       type="button"
@@ -108,7 +110,7 @@ export function RentanoChatFab({ onClick }: { onClick: () => void }) {
         border: `2px solid ${PRIMARY_GREEN}`,
         boxShadow: "0 4px 14px rgba(13, 92, 58, 0.25)",
       }}
-      aria-label={`Open ${MASCOT_NAME} menu`}
+      aria-label={t.openMenuAria(MASCOT_NAME)}
     >
       <img
         src={rentanoImg}
@@ -131,6 +133,7 @@ export function RentanoChatSheet({
   context?: RentanoChatContext;
   defaultView?: "chat" | "menu";
 }) {
+  const { mrEvorios: t, common } = useMessages();
   const pwa = usePwaInstallPrompt();
   const [view, setView] = useState<SheetView>("menu");
   const [chatSeed, setChatSeed] = useState<string | null>(null);
@@ -146,9 +149,9 @@ export function RentanoChatSheet({
     }
     if (defaultView === "chat") {
       setView("chat");
-      if (!chatSeed) setChatSeed(`Hi ${MASCOT_NAME} — I need help on this screen.`);
+      setChatSeed((prev) => prev ?? t.needHelpSeed(MASCOT_NAME));
     }
-  }, [defaultView, open]);
+  }, [defaultView, open]); // eslint-disable-line react-hooks/exhaustive-deps -- seed once per open
 
   const openChat = (prefill?: string) => {
     setChatSeed(prefill?.trim() || null);
@@ -163,13 +166,13 @@ export function RentanoChatSheet({
 
   const title =
     view === "install"
-      ? "Install app"
+      ? t.installAppTitle
       : view === "faq"
-        ? "Help & FAQ"
+        ? t.helpFaqTitle
         : view === "chat"
           ? isListingHelp
-            ? "Listing help"
-            : `Chat with ${MASCOT_NAME}`
+            ? t.listingHelpTitle
+            : t.chatWith(MASCOT_NAME)
           : MASCOT_NAME;
 
   return (
@@ -178,7 +181,7 @@ export function RentanoChatSheet({
         <>
           <motion.button
             type="button"
-            aria-label={`Close ${MASCOT_NAME} menu`}
+            aria-label={t.closeMenuAria(MASCOT_NAME)}
             className="fixed inset-0 z-[70] bg-black/40"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -206,7 +209,7 @@ export function RentanoChatSheet({
                       setView("menu");
                     }}
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F3F4F6]"
-                    aria-label="Back to menu"
+                    aria-label={t.backToMenuAria}
                   >
                     <ArrowLeft className="h-5 w-5" style={{ color: PRIMARY_GREEN }} />
                   </button>
@@ -230,9 +233,9 @@ export function RentanoChatSheet({
                   >
                     {title}
                   </h2>
-                  {isListingHelp && view === "menu" ? (
+                  {isListingHelp && view === "menu" && context.step != null && context.totalSteps != null ? (
                     <p className="text-xs text-[#9CA3AF]">
-                      Listing · Step {context.step} of {context.totalSteps}
+                      {t.listingStepOf(context.step, context.totalSteps)}
                       {context.step != null
                         ? ` · ${LISTING_STEP_LABELS[context.step - 1]}`
                         : ""}
@@ -242,14 +245,14 @@ export function RentanoChatSheet({
                       {buildRentanoUserContext(apiContext).split("\n").slice(1).join(" · ")}
                     </p>
                   ) : (
-                    <p className="text-xs text-[#9CA3AF]">Your AI companion</p>
+                    <p className="text-xs text-[#9CA3AF]">{t.companionSubtitle}</p>
                   )}
                 </div>
                 <button
                   type="button"
                   onClick={handleClose}
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F3F4F6] text-[#374151]"
-                  aria-label="Close"
+                  aria-label={common.close}
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -269,8 +272,8 @@ export function RentanoChatSheet({
                             strokeWidth={1.75}
                           />
                         }
-                        title="Add to Home Screen"
-                        subtitle="Works like an app — faster, full screen"
+                        title={t.addToHomeTitle}
+                        subtitle={t.addToHomeSubtitle}
                         onClick={() => setView("install")}
                       />
                     </li>
@@ -284,8 +287,8 @@ export function RentanoChatSheet({
                           strokeWidth={1.75}
                         />
                       }
-                      title="Help & FAQ"
-                      subtitle={`Common questions — or ask ${MASCOT_NAME}`}
+                      title={t.helpFaqTitle}
+                      subtitle={t.helpFaqSubtitle(MASCOT_NAME)}
                       onClick={() => setView("faq")}
                     />
                   </li>
@@ -298,11 +301,13 @@ export function RentanoChatSheet({
                           strokeWidth={1.75}
                         />
                       }
-                      title={isListingHelp ? "Help with this listing" : `Chat with ${MASCOT_NAME}`}
+                      title={
+                        isListingHelp ? t.helpWithListing : t.chatWith(MASCOT_NAME)
+                      }
                       subtitle={
-                        isListingHelp
-                          ? `Voice or text · step ${context.step} of ${context.totalSteps}`
-                          : "Voice or text — I know where you are in the app"
+                        isListingHelp && context.step != null && context.totalSteps != null
+                          ? t.chatListingSubtitle(context.step, context.totalSteps)
+                          : t.chatSubtitle
                       }
                       onClick={() => openChat()}
                     />
@@ -337,4 +342,3 @@ export function RentanoChatSheet({
     </AnimatePresence>
   );
 }
-

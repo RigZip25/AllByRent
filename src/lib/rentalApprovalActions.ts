@@ -1,4 +1,5 @@
 import { recordManualBookingResponse } from "./bookingRequestsStorage";
+import { getMessages } from "./i18n";
 import { createNotificationRemote } from "./notificationsStorage";
 import { updateBooking, type RentalBooking } from "./rentalsStorage";
 import { cancelRentalPayment, captureRentalPayment } from "./stripePayments";
@@ -75,8 +76,9 @@ export async function cancelRentalRequest(
 }
 
 export function cancelRefundLabel(booking: RentalBooking): string {
+  const t = getMessages().rentalCard;
   if (booking.stripePayment || booking.paymentOnHold) {
-    return "Cancel request (release payment)";
+    return t.cancelRequestRelease;
   }
-  return "Cancel request";
+  return t.cancelRequest;
 }

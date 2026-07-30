@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { APP_NAME } from "../../lib/brand";
+import { getMessages } from "../../lib/i18n";
 
 type Props = { children: ReactNode };
 type State = { error: Error | null };
@@ -17,12 +18,11 @@ export class AppErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.error) {
+      const t = getMessages().systemUi;
       return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-[#F0F4F2] p-6 text-center">
-          <h1 className="mb-2 text-[20px] font-bold text-[#0D5C3A]">Something went wrong</h1>
-          <p className="mb-4 max-w-[320px] text-[14px] text-gray-600">
-            Please reload. If it keeps happening, email support@evorios.com.
-          </p>
+          <h1 className="mb-2 text-[20px] font-bold text-[#0D5C3A]">{t.errorTitle}</h1>
+          <p className="mb-4 max-w-[320px] text-[14px] text-gray-600">{t.errorBody}</p>
           <button
             type="button"
             className="mb-3 rounded-xl bg-[#0D5C3A] px-6 py-3 text-[15px] font-bold text-white"
@@ -31,7 +31,7 @@ export class AppErrorBoundary extends Component<Props, State> {
               window.location.reload();
             }}
           >
-            Reload app
+            {t.reloadApp}
           </button>
           <button
             type="button"
@@ -47,7 +47,7 @@ export class AppErrorBoundary extends Component<Props, State> {
               window.location.reload();
             }}
           >
-            Reset local data &amp; reload
+            {t.resetLocalData}
           </button>
         </div>
       );
