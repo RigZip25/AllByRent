@@ -6,11 +6,13 @@
   "type": "module",
   "packageManager": "npm@10.9.3",
   "scripts": {
+    "prebuild": "node ./scripts/generate-rent-sitemap.mjs",
     "build": "tsc -b --pretty false && vite build",
     "typecheck": "tsc -b --pretty false",
     "dev": "vite",
     "dev:https": "set VITE_DEV_HTTPS=true&& vite",
     "lint": "node ./node_modules/eslint/bin/eslint.js src",
+    "seo:sitemap": "node ./scripts/generate-rent-sitemap.mjs",
     "start": "vite",
     "preview": "vite preview"
   },

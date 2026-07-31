@@ -23,7 +23,7 @@
   "rewrites": [
     { "source": "/link", "destination": "/link.html" },
     { "source": "/item/:id", "destination": "/link.html?listingId=:id&skipSplash=1" },
-    { "source": "/((?!api/|legal/).*)", "destination": "/index.html" }
+    { "source": "/((?!api/|legal/|sitemap\\.xml|robots\\.txt).*)", "destination": "/index.html" }
   ],
   "headers": [
     {

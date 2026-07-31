@@ -47,6 +47,10 @@ import { MrEvoriosScreen } from "../screens/MrEvoriosScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
 import { SetupRequiredScreen } from "../screens/SetupRequiredScreen";
+import { RentLandingScreen } from "../screens/RentLandingScreen";
+import { parseRentPath } from "../lib/seo/parseRentPath";
+import type { SeoCategory } from "../lib/seo/rentCategories";
+import { formatSeoLocationLabel, type SeoLocation } from "../lib/seo/seoLocations";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
 import { useBrowserBackTrap } from "../hooks/useBrowserBackTrap";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
@@ -75,7 +79,13 @@ import {
   markRoleChosen,
   resolveOnboardingResumeScreen,
 } from "../lib/onboardingStorage";
-import { getPublishedListingById, getActiveRentLocationLabel, hasRentLocationSetup, loadPublishedListings } from "../lib/listingStorage";
+import {
+  getPublishedListingById,
+  getActiveRentLocationLabel,
+  hasRentLocationSetup,
+  loadPublishedListings,
+  setTripDestination,
+} from "../lib/listingStorage";
 import { getListingDisplayTitle } from "../lib/listingQr";
 import type { RentalBooking } from "../lib/rentalsStorage";
 import { canManageListing } from "../lib/hostAccess";
@@ -115,7 +125,6 @@ import { hasSeenGarageWorkflow } from "../lib/garageWorkflowStorage";
 import { hasSeenGarageSaleRules } from "../lib/garageSaleRulesStorage";
 import { resolveHostAccountId } from "../lib/hostIdentity";
 import { loadUserProfile, syncUserProfileFromAuth } from "../lib/userProfileStorage";
-
 import {
   saveHomeFeedLens,
   saveHomeFeedMode,
@@ -175,7 +184,8 @@ type Screen =
   | "deleteAccount"
   | "coHosts"
   | "personalInfo"
-  | "publicProfile";
+  | "publicProfile"
+  | "rentLanding";
 
 const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
   "browseHub",
@@ -188,6 +198,7 @@ const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
   "garageShop",
   "garageCart",
   "garageWinnerCheckout",
+  "rentLanding",
 ]);
 
 const BOTTOM_NAV_SCREENS = new Set<Screen>([
@@ -346,6 +357,25 @@ function readBootDeepLink() {
   };
 }
 
+function readBootRentLanding(): {
+  active: boolean;
+  category: SeoCategory | null;
+  location: SeoLocation | null;
+} {
+  if (typeof window === "undefined") {
+    return { active: false, category: null, location: null };
+  }
+  const parsed = parseRentPath(window.location.pathname);
+  if (!parsed || parsed.kind === "invalid") {
+    return { active: Boolean(parsed), category: null, location: null };
+  }
+  return {
+    active: true,
+    category: parsed.category,
+    location: parsed.location,
+  };
+}
+
 function readBootQuery() {
   if (typeof window === "undefined") {
     return {
@@ -473,8 +503,15 @@ function AppRoutes() {
   const auth = useAuth();
   const boot = readBootQuery();
   const bootDeepLink = useRef(readBootDeepLink()).current;
+  const bootRent = useRef(readBootRentLanding()).current;
   const handledSessionTokenRef = useRef<string | null>(null);
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
+    if (bootRent.active && bootRent.category) {
+      markIntroDone();
+      completeOnboarding();
+      return "rentLanding";
+    }
+    // Invalid /rent/... path — fall through to normal app rather than trapping.
     if (boot.screen === "splash") return "splash";
     const bootScreen = resolveBootScreenParam(boot.screen);
     // Explicit screen= wins over listingId deep links (Stripe Connect return URLs).
@@ -499,6 +536,12 @@ function AppRoutes() {
     }
     return "splash";
   });
+  const [rentLandingCategory, setRentLandingCategory] = useState<SeoCategory | null>(
+    () => bootRent.category,
+  );
+  const [rentLandingLocation, setRentLandingLocation] = useState<SeoLocation | null>(
+    () => bootRent.location,
+  );
   const [navStack, setNavStack] = useState<Screen[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
     bootDeepLink.target?.kind === "listing" ? bootDeepLink.target.listingId : null,
@@ -1391,6 +1434,36 @@ function AppRoutes() {
     navigateTo("listingIntro");
   };
 
+  const handleRentLandingNavigate = useCallback((path: string) => {
+    const parsed = parseRentPath(path);
+    if (!parsed || parsed.kind === "invalid" || !parsed.category) return;
+    window.history.pushState({}, "", path);
+    setRentLandingCategory(parsed.category);
+    setRentLandingLocation(parsed.location);
+    setCurrentScreen("rentLanding");
+    setNavStack([]);
+  }, []);
+
+  useEffect(() => {
+    const onPopState = () => {
+      const parsed = parseRentPath(window.location.pathname);
+      if (parsed && parsed.kind !== "invalid" && parsed.category) {
+        setRentLandingCategory(parsed.category);
+        setRentLandingLocation(parsed.location);
+        setCurrentScreen("rentLanding");
+        setNavStack([]);
+        return;
+      }
+      if (currentScreen === "rentLanding") {
+        setRentLandingCategory(null);
+        setRentLandingLocation(null);
+        setCurrentScreen("home");
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [currentScreen]);
+
   const handleResumeDraft = useCallback(
     (listingId: string) => {
       clearYardSaleListingActive();
@@ -1437,6 +1510,32 @@ function AppRoutes() {
             preview={splashPreview || splashDynamicPreview}
             artOnly={splashArtOnly}
             dynamicPreview={splashDynamicPreview}
+          />
+        )}
+
+        {currentScreen === "rentLanding" && rentLandingCategory && (
+          <RentLandingScreen
+            category={rentLandingCategory}
+            location={rentLandingLocation}
+            onOpenListing={(listingId) => {
+              window.history.pushState({}, "", "/");
+              setSelectedItemId(listingId);
+              navigateTo("itemDetail");
+            }}
+            onStockGarage={({ category, city }) => {
+              if (city) setTripDestination(city);
+              window.history.pushState({}, "", "/");
+              handleStartListing({ category, city });
+            }}
+            onOpenApp={() => {
+              if (rentLandingLocation) {
+                setTripDestination(formatSeoLocationLabel(rentLandingLocation));
+              }
+              window.history.pushState({}, "", "/");
+              setNavStack([]);
+              setCurrentScreen("home");
+            }}
+            onNavigateRentPath={handleRentLandingNavigate}
           />
         )}
 
