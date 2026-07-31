@@ -82,7 +82,7 @@ export type OnboardingResumeScreen =
   | "whatIsEvorios"
   | "whatDoYouWant"
   | "whereAreYou"
-  | "browseHub";
+  | "home";
 
 /** Next screen after splash (or when skipping splash after auth callback). */
 export function resolveOnboardingResumeScreen(): OnboardingResumeScreen {
@@ -90,7 +90,7 @@ export function resolveOnboardingResumeScreen(): OnboardingResumeScreen {
   if (!hasProductIntro()) return "whatIsEvorios";
   if (!hasRoleChoice()) return "whatDoYouWant";
   if (!isOnboardingComplete()) return "whereAreYou";
-  return "browseHub";
+  return "home";
 }
 
 /** Dev: run in console to see full onboarding again */
@@ -105,8 +105,8 @@ export function clearOnboardingComplete(): void {
   }
 }
 
-export type InitialRoute = "splash" | "browseHub";
+export type InitialRoute = "splash" | "home";
 
 export function getInitialRoute(): InitialRoute {
-  return isIntroDone() ? "browseHub" : "splash";
+  return isIntroDone() ? "home" : "splash";
 }

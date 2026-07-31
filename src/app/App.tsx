@@ -207,7 +207,7 @@ const BOTTOM_NAV_SCREENS = new Set<Screen>([
 ]);
 
 const TAB_BOOT_SCREENS: Partial<Record<string, Screen>> = {
-  home: "browseHub",
+  home: "home",
   browseHub: "browseHub",
   yardSaleHub: "yardSaleHub",
   yardSales: "yardSales",
@@ -223,8 +223,8 @@ const TAB_BOOT_SCREENS: Partial<Record<string, Screen>> = {
   favorites: "favorites",
   notifications: "notifications",
   messages: "messages",
-  login: "browseHub",
-  signup: "browseHub",
+  login: "home",
+  signup: "home",
 };
 
 /** Explicit ?screen= deep links for QA and return URLs (skips unfinished onboarding). */
@@ -237,12 +237,12 @@ const BOOT_SCREEN_ALIASES: Partial<Record<string, Screen>> = {
   activeRental: "activeRental",
   listingChat: "listingChat",
   messages: "messages",
-  "verification-phone": "browseHub",
-  "verification-code": "browseHub",
-  "reset-password": "browseHub",
-  "create-new-password": "browseHub",
-  "like-to-do-rent": "browseHub",
-  "like-to-do-list": "browseHub",
+  "verification-phone": "home",
+  "verification-code": "home",
+  "reset-password": "home",
+  "create-new-password": "home",
+  "like-to-do-rent": "home",
+  "like-to-do-list": "home",
   rental: "rentals",
   "earning-your-stuff": "earnBusiness",
   earnBusiness: "earnBusiness",
@@ -302,7 +302,7 @@ const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
 const LISTING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
   // Hosts who opened the wizard should land in My Garage, not listing intro / role pick.
   listItem: "garage",
-  listingIntro: "browseHub",
+  listingIntro: "home",
 };
 
 /** Screens we must not rewind into after leaving the listing wizard. */
@@ -415,7 +415,7 @@ function cleanupSplashGlobals() {
 function resolvePostSplashScreen(): Screen {
   if (shouldShowInstallGate()) return "installGate";
   const resume = resolveOnboardingResumeScreen();
-  if (resume === "browseHub") return "browseHub";
+  if (resume === "home") return "home";
   return resume;
 }
 
@@ -442,12 +442,12 @@ function resolveScreenAfterAuth(storedTarget: Screen | null): Screen {
   }
   if (!isOnboardingComplete()) {
     const resume = resolveOnboardingResumeScreen();
-    if (resume !== "browseHub") return resume;
+    if (resume !== "home") return resume;
     if (getAppMode() === "rent" && !hasRentLocationSetup()) {
       return "whereAreYou";
     }
   }
-  return storedTarget ?? "browseHub";
+  return storedTarget ?? "home";
 }
 
 function bootScreenForDeepLink(target: DeepLinkTarget | null): Screen | null {
@@ -493,7 +493,7 @@ function AppRoutes() {
       if (boot.openNotifications || boot.simulateUpdate) {
         markIntroDone();
         completeOnboarding();
-        return "browseHub";
+        return "home";
       }
       return resolvePostSplashScreen();
     }
@@ -637,7 +637,7 @@ function AppRoutes() {
   const finishOnboardingToHome = useCallback(() => {
     completeOnboarding();
     setNavStack([]);
-    setCurrentScreen("browseHub");
+    setCurrentScreen("home");
   }, []);
 
   /** Push the screen we are leaving, then open the next screen (avoids stale currentScreen in the stack). */
@@ -689,7 +689,7 @@ function AppRoutes() {
         return [];
       }
       completeOnboarding();
-      setCurrentScreen("browseHub");
+      setCurrentScreen("home");
       return [];
     });
   }, []);
@@ -740,7 +740,7 @@ function AppRoutes() {
     const storedTarget =
       candidate && validScreens.includes(candidate)
         ? candidate
-        : "browseHub";
+        : "home";
     return resolveScreenAfterAuth(storedTarget);
   }, [postAuthTarget]);
 
@@ -760,12 +760,12 @@ function AppRoutes() {
 
   const resetToHome = () => {
     setNavStack([]);
-    setCurrentScreen("browseHub");
+    setCurrentScreen("home");
   };
 
-  const openBrowseHub = useCallback(() => {
+  const openHomeFeed = useCallback(() => {
     setNavStack([]);
-    setCurrentScreen("browseHub");
+    setCurrentScreen("home");
   }, []);
 
   const goToTab = useCallback((screen: Screen) => {
@@ -780,7 +780,7 @@ function AppRoutes() {
     });
   }, []);
 
-  const handleOpenHome = useCallback(() => goToTab("browseHub"), [goToTab]);
+  const handleOpenHome = useCallback(() => goToTab("home"), [goToTab]);
   const handleOpenMrE = useCallback(() => goToTab("mre"), [goToTab]);
   const handleOpenGarage = useCallback(() => goToTab("garage"), [goToTab]);
   const handleOpenMore = useCallback(() => goToTab("more"), [goToTab]);
@@ -970,7 +970,7 @@ function AppRoutes() {
       setNavStack([]);
       setCurrentScreen(
         isOnboardingComplete()
-          ? "browseHub"
+          ? "home"
           : hasProductIntro()
             ? hasRoleChoice()
               ? "whereAreYou"
@@ -983,7 +983,7 @@ function AppRoutes() {
     if (currentScreen === "whatIsEvorios") {
       markProductIntroDone();
       setNavStack([]);
-      setCurrentScreen(isOnboardingComplete() ? "browseHub" : hasRoleChoice() ? "whereAreYou" : "whatDoYouWant");
+      setCurrentScreen(isOnboardingComplete() ? "home" : hasRoleChoice() ? "whereAreYou" : "whatDoYouWant");
       return;
     }
 
@@ -992,7 +992,7 @@ function AppRoutes() {
       markProductIntroDone();
       markRoleChosen();
       setNavStack([]);
-      setCurrentScreen(isOnboardingComplete() ? "browseHub" : "whereAreYou");
+      setCurrentScreen(isOnboardingComplete() ? "home" : "whereAreYou");
       return;
     }
 
@@ -1005,13 +1005,13 @@ function AppRoutes() {
     ) {
       completeOnboarding();
       setNavStack([]);
-      setCurrentScreen("browseHub");
+      setCurrentScreen("home");
       return;
     }
 
     setAppMode("rent");
     setNavStack([]);
-    setCurrentScreen("browseHub");
+    setCurrentScreen("home");
   }, [currentScreen, navigateTo]);
 
   const handleSplashContinue = useCallback(() => {
@@ -1031,7 +1031,7 @@ function AppRoutes() {
     markIntroDone();
     if (isOnboardingComplete()) {
       setNavStack([]);
-      setCurrentScreen("browseHub");
+      setCurrentScreen("home");
       return;
     }
     if (!hasProductIntro()) {
@@ -1049,7 +1049,7 @@ function AppRoutes() {
     markProductIntroDone();
     if (isOnboardingComplete()) {
       setNavStack([]);
-      setCurrentScreen("browseHub");
+      setCurrentScreen("home");
       return;
     }
     if (!hasRoleChoice()) {
@@ -1081,7 +1081,7 @@ function AppRoutes() {
         goToTab("garage");
         return;
       }
-      goToTab("browseHub");
+      goToTab("home");
     },
     [goToTab],
   );
@@ -1187,7 +1187,7 @@ function AppRoutes() {
       return;
     }
     setNavStack([]);
-    setCurrentScreen("browseHub");
+    setCurrentScreen("home");
   };
 
   const handleOpenAttachment = (url: string, title?: string) => {
@@ -1258,11 +1258,11 @@ function AppRoutes() {
         return stack;
       }
       if (currentScreen === "yardSaleHub") {
-        setCurrentScreen("browseHub");
+        setCurrentScreen("home");
         return stack;
       }
       if (currentScreen === "home") {
-        setCurrentScreen("browseHub");
+        // Home feed is the root — stay put (don’t bounce to the old chooser hub).
         return stack;
       }
       if (currentScreen === "listItem" || currentScreen === "listingIntro") {
@@ -1272,7 +1272,7 @@ function AppRoutes() {
         if (listingFallback) {
           setCurrentScreen(listingFallback);
         } else {
-          setCurrentScreen("browseHub");
+          setCurrentScreen("home");
         }
         return stack;
       }
@@ -1281,11 +1281,11 @@ function AppRoutes() {
         if (fallback) {
           setCurrentScreen(fallback);
         } else {
-          setCurrentScreen("browseHub");
+          setCurrentScreen("home");
         }
         return stack;
       }
-      setCurrentScreen("browseHub");
+      setCurrentScreen("home");
       return stack;
     });
   }, [currentScreen]);
@@ -1521,13 +1521,13 @@ function AppRoutes() {
             }
             onStockGarage={handleStartListing}
             onRentals={handleOpenRentals}
-            onBackToHub={openBrowseHub}
+            onYardSales={openYardSaleHub}
           />
         )}
 
         {currentScreen === "yardSaleHub" && (
           <YardSaleHubScreen
-            onBack={openBrowseHub}
+            onBack={openHomeFeed}
             onChoose={handleYardSaleHubChoice}
             onEditLocation={openRentLocationSetup}
           />
@@ -1582,7 +1582,7 @@ function AppRoutes() {
         {currentScreen === "howEvoriosWorks" && (
           <HowEvoriosWorksScreen
             onBack={handleBack}
-            onOpenBrowse={openBrowseHub}
+            onOpenBrowse={openHomeFeed}
             onOpenStock={handleStartListing}
             onAskEvorios={handleOpenMrE}
           />

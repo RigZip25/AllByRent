@@ -255,6 +255,9 @@ export type AppMessages = {
     notificationsAria: string;
     notificationsUpdateAria: string;
     closeFiltersAria: string;
+    yardSalesEntry: string;
+    yardSalesEntryHint: string;
+    yardSalesEntryAria: string;
     garagesNearYou: string;
     loadingGarages: string;
     emptyFilteredTitle: string;
