@@ -129,7 +129,6 @@ export const cs: AppMessages = {
       `Otevřete ikonu ${appName} z plochy. Aktualizace se nainstalují přes noc.`,
     installApp: (appName) => `Nainstalovat ${appName}`,
     addedContinue: "Přidal(a) jsem — pokračovat",
-    continueBrowser: "Pokračovat v prohlížeči",
     almostThereAlert: (shortName) =>
       `Skoro hotovo!\n\nOtevřete ikonu ${shortName} na ploše (ne tuto záložku prohlížeče).`,
     stepsGuideLabel: "Návod (ne tlačítka) — pak to udělejte v Safari",

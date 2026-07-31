@@ -123,7 +123,6 @@ export const en: AppMessages = {
       `Open the ${appName} icon from your Home Screen. Updates install overnight.`,
     installApp: (appName) => `Install ${appName}`,
     addedContinue: "I’ve added it — continue",
-    continueBrowser: "Continue in browser",
     almostThereAlert: (shortName) =>
       `Almost there!\n\nOpen the ${shortName} icon on your Home Screen (not this browser tab).`,
     stepsGuideLabel: "Guide (not buttons) — then do this in Safari",

@@ -222,7 +222,6 @@ export type AppMessages = {
     androidAfter: (appName: string) => string;
     installApp: (appName: string) => string;
     addedContinue: string;
-    continueBrowser: string;
     almostThereAlert: (shortName: string) => string;
     stepsGuideLabel: string;
     stepTapAria: (n: number) => string;
