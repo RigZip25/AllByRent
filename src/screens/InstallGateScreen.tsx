@@ -137,14 +137,7 @@ function LiveInstallGuide({
     if (!playing) return;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      setIndex((cur) => {
-        // After the last step, pause on it — don't loop forever (felt like “skipping”).
-        if (cur >= steps.length - 1) {
-          setPlaying(false);
-          return cur;
-        }
-        return cur + 1;
-      });
+      setIndex((cur) => (cur + 1) % steps.length);
     }, STEP_HOLD_MS[index] ?? 2400);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
