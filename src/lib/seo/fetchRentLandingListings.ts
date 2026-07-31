@@ -32,6 +32,20 @@ function deviceCityMatchesLocation(location: SeoLocation): boolean {
   );
 }
 
+async function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((resolve) => {
+        timer = setTimeout(() => resolve(fallback), ms);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 /**
  * Load active listings for a SEO rent landing.
  * Never fabricates rows — empty means empty (UI shows founding-host CTA).
@@ -44,12 +58,20 @@ export async function fetchRentLandingListings(params: {
   const { category, location } = params;
 
   if (!location) {
-    const remote = await searchActiveListingsRemote({
-      query: "",
-      city: "",
-      category: category.name,
-    });
-    return remote.filter(
+    const remote = await withTimeout(
+      searchActiveListingsRemote({
+        query: "",
+        city: "",
+        category: category.name,
+      }),
+      2500,
+      [],
+    );
+    const filtered = remote.filter(
+      (l) => isListingBrowsable(l) && listingMatchesCategory(l, category) && l.modes.rent,
+    );
+    if (filtered.length > 0) return filtered;
+    return loadPublishedListings().filter(
       (l) => isListingBrowsable(l) && listingMatchesCategory(l, category) && l.modes.rent,
     );
   }
@@ -63,16 +85,24 @@ export async function fetchRentLandingListings(params: {
     );
   }
 
-  const terms = cityQueryTermsForLocation(location);
+  const terms = [location.name, ...cityQueryTermsForLocation(location)].filter(
+    (term, index, arr) => arr.findIndex((t) => normalize(t) === normalize(term)) === index,
+  );
+  // Prefer a single scoped query; only try one alias fallback if the primary misses.
+  const queryTerms = terms.slice(0, 2);
   const seen = new Set<string>();
   const merged: ListingDraft[] = [];
 
-  for (const term of terms) {
-    const batch = await searchActiveListingsRemote({
-      query: "",
-      city: term,
-      category: category.name,
-    });
+  for (const term of queryTerms) {
+    const batch = await withTimeout(
+      searchActiveListingsRemote({
+        query: "",
+        city: term,
+        category: category.name,
+      }),
+      2500,
+      [],
+    );
     for (const listing of batch) {
       if (!isListingBrowsable(listing)) continue;
       if (!listingMatchesCategory(listing, category)) continue;
@@ -81,6 +111,7 @@ export async function fetchRentLandingListings(params: {
       seen.add(listing.id);
       merged.push(listing);
     }
+    if (merged.length > 0) break;
   }
 
   return merged;
