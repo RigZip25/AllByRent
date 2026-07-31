@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Smartphone } from "lucide-react";
 import { APP_NAME, BRAND_GREEN, PWA_SHORT_NAME } from "../lib/brand";
-import { markInstallGateDone } from "../lib/pwaInstallGate";
 import { isAndroid, isIos, isStandalonePwa } from "../lib/pwaInstall";
 import { usePwaInstallPrompt } from "../hooks/PwaInstallProvider";
 import { applyDocumentLang } from "../lib/i18n";
@@ -13,7 +12,7 @@ type InstallGateScreenProps = {
   onContinueInBrowser: () => void;
 };
 
-const STEP_HOLD_MS = [3200, 2400, 2400, 2600] as const;
+const STEP_HOLD_MS = [4500, 2800, 2800, 3200] as const;
 
 /** iOS Share — square with upward arrow (bottom-center Safari bar). */
 function IosShareIcon({ className = "h-12 w-12" }: { className?: string }) {
@@ -139,7 +138,14 @@ function LiveInstallGuide({
     if (!playing) return;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      setIndex((cur) => (cur + 1) % steps.length);
+      setIndex((cur) => {
+        // After the last step, pause on it — don't loop forever (felt like “skipping”).
+        if (cur >= steps.length - 1) {
+          setPlaying(false);
+          return cur;
+        }
+        return cur + 1;
+      });
     }, STEP_HOLD_MS[index] ?? 2400);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -298,10 +304,8 @@ export function InstallGateScreen({
     applyDocumentLang();
   }, []);
 
-  useEffect(() => {
-    if (!showIosSteps) return;
-    markInstallGateDone();
-  }, [showIosSteps]);
+  // Do NOT mark the gate done on mount — that made Back/refresh skip the
+  // instructions and jump straight into the app after a reset.
 
   useEffect(() => {
     return () => {

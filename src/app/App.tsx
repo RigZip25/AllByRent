@@ -87,7 +87,6 @@ import {
 } from "../lib/deepLinks";
 import type { ShelfPrefill } from "../lib/shelfListings";
 import { isSimulateUpdateRequested } from "../lib/pwaUpdateStorage";
-import { isResetAppQueryParam, resetAllAppData } from "../lib/resetAppStorage";
 import {
   markBrowserContinue,
   markInstallGateDone,
@@ -415,6 +414,7 @@ function cleanupSplashGlobals() {
 }
 
 function resolvePostSplashScreen(): Screen {
+  if (shouldShowInstallGate()) return "installGate";
   const resume = resolveOnboardingResumeScreen();
   if (resume === "browseHub") return "browseHub";
   return resume;
@@ -626,13 +626,6 @@ function AppRoutes() {
       clearBootQuery(["screen", "skipSplash", "connect", "listingId", "rentalId", "chat", "peerId"]);
     }
   }, [boot.screen]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (!isResetAppQueryParam(params)) return;
-    clearBootQuery(["reset", "resetApp"]);
-    void resetAllAppData();
-  }, []);
 
   useEffect(() => {
     if (!boot.openNotifications) return;
@@ -1022,27 +1015,24 @@ function AppRoutes() {
     setCurrentScreen("browseHub");
   }, [currentScreen, navigateTo]);
 
-  const handleSplashContinue = () => {
+  const handleSplashContinue = useCallback(() => {
     cleanupSplashGlobals();
     setNavStack([]);
-    if (shouldShowInstallGate()) {
-      setCurrentScreen("installGate");
-      return;
-    }
     setCurrentScreen(resolvePostSplashScreen());
-  };
+  }, []);
 
-  const handleInstallGateInstalled = () => {
+  const handleInstallGateInstalled = useCallback(() => {
     markInstallGateDone();
     setNavStack([]);
-    setCurrentScreen(resolvePostSplashScreen());
-  };
+    // Gate is done — resolve again without re-entering installGate.
+    setCurrentScreen(resolveOnboardingResumeScreen());
+  }, []);
 
-  const handleInstallGateBrowser = () => {
+  const handleInstallGateBrowser = useCallback(() => {
     markBrowserContinue();
     setNavStack([]);
-    setCurrentScreen(resolvePostSplashScreen());
-  };
+    setCurrentScreen(resolveOnboardingResumeScreen());
+  }, []);
 
   const handleContinueFromHello = () => {
     markIntroDone();
@@ -1242,7 +1232,8 @@ function AppRoutes() {
         return stack.slice(0, -1);
       }
       if (currentScreen === "installGate") {
-        setCurrentScreen("splash");
+        // Stay on the install coach — going back to splash auto-advances and
+        // used to skip the instructions after the gate was marked done.
         return stack;
       }
       if (currentScreen === "garageWinnerCheckout") {
