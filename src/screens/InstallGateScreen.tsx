@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Smartphone } from "lucide-react";
 import { APP_NAME, BRAND_GREEN, PWA_SHORT_NAME } from "../lib/brand";
 import { markInstallGateDone } from "../lib/pwaInstallGate";
@@ -12,6 +12,8 @@ type InstallGateScreenProps = {
   onInstalledContinue: () => void;
   onContinueInBrowser: () => void;
 };
+
+const STEP_HOLD_MS = [3200, 2400, 2400, 2600] as const;
 
 /** iOS Share — square with upward arrow (bottom-center Safari bar). */
 function IosShareIcon({ className = "h-12 w-12" }: { className?: string }) {
@@ -60,63 +62,12 @@ function IosAddHomeIcon({ className = "h-12 w-12" }: { className?: string }) {
 function IosAddButtonIcon({ label }: { label: string }) {
   return (
     <span
-      className="inline-flex h-12 min-w-[84px] items-center justify-center rounded-full px-6 text-[18px] font-semibold tracking-tight text-white shadow-sm"
+      className="inline-flex h-14 min-w-[96px] items-center justify-center rounded-full px-7 text-[20px] font-semibold tracking-tight text-white shadow-sm"
       style={{ backgroundColor: "#007AFF" }}
       aria-hidden
     >
       {label}
     </span>
-  );
-}
-
-function StepRow({
-  n,
-  icon,
-  title,
-  hint,
-  active,
-  ariaLabel,
-  onTap,
-}: {
-  n: number;
-  icon: ReactNode;
-  title: string;
-  hint?: string;
-  active?: boolean;
-  ariaLabel: string;
-  onTap: () => void;
-}) {
-  return (
-    <li>
-      <button
-        type="button"
-        onClick={onTap}
-        aria-label={ariaLabel}
-        className={`flex w-full items-center gap-3.5 rounded-2xl bg-white px-3.5 py-3.5 text-left shadow-sm ring-1 transition-all active:scale-[0.99] ${
-          active
-            ? "ring-2 ring-[#0D5C3A]/45 bg-[#F0FDF4]"
-            : "ring-black/[0.04] hover:bg-[#F9FAFB]"
-        }`}
-      >
-        <span
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[16px] font-extrabold text-white"
-          style={{ backgroundColor: BRAND_GREEN }}
-        >
-          {n}
-        </span>
-        <span className="flex h-14 w-[4.25rem] shrink-0 items-center justify-center opacity-90">
-          {icon}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[18px] font-bold leading-snug tracking-tight text-gray-900">
-            {title}
-          </span>
-          {hint ? (
-            <span className="mt-1 block text-[15px] leading-snug text-gray-500">{hint}</span>
-          ) : null}
-        </span>
-      </button>
-    </li>
   );
 }
 
@@ -154,6 +105,155 @@ function SafariShareNudge({
   );
 }
 
+type GuideStep = {
+  n: number;
+  icon: ReactNode;
+  title: string;
+  hint: string;
+};
+
+function LiveInstallGuide({
+  steps,
+  copy,
+  onCoachShare,
+}: {
+  steps: GuideStep[];
+  copy: {
+    liveNow: string;
+    liveThen: string;
+    livePlaying: string;
+    livePaused: string;
+    liveTapReplay: string;
+    stepCoachShare: string;
+    stepCoachLater: string;
+    stepTapAria: (n: number) => string;
+  };
+  onCoachShare: () => void;
+}) {
+  const [index, setIndex] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  const [coach, setCoach] = useState<string | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const coachTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const step = steps[index] ?? steps[0]!;
+
+  useEffect(() => {
+    if (!playing) return;
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setIndex((cur) => (cur + 1) % steps.length);
+    }, STEP_HOLD_MS[index] ?? 2400);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [index, playing, steps.length]);
+
+  // Keep the Safari Share nudge alive whenever step 1 is showing.
+  useEffect(() => {
+    if (step.n === 1) onCoachShare();
+    // Intentionally only when the visible step changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid re-firing on parent identity churn
+  }, [step.n]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (coachTimer.current) clearTimeout(coachTimer.current);
+    };
+  }, []);
+
+  const showCoach = (message: string, alsoShare: boolean) => {
+    setCoach(message);
+    if (alsoShare) onCoachShare();
+    if (coachTimer.current) clearTimeout(coachTimer.current);
+    coachTimer.current = setTimeout(() => setCoach(null), 3800);
+  };
+
+  const handleStageTap = () => {
+    if (step.n === 1) {
+      showCoach(copy.stepCoachShare, true);
+      return;
+    }
+    showCoach(copy.stepCoachLater, false);
+  };
+
+  const handleDotTap = (i: number) => {
+    setPlaying(false);
+    setIndex(i);
+    const next = steps[i];
+    if (next?.n === 1) showCoach(copy.stepCoachShare, true);
+    else showCoach(copy.stepCoachLater, false);
+  };
+
+  return (
+    <div className="install-live-guide">
+      <div className="mb-2.5 flex items-center justify-between gap-2">
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+          {playing ? copy.livePlaying : copy.livePaused}
+        </p>
+        <button
+          type="button"
+          onClick={() => setPlaying((p) => !p)}
+          className="rounded-full px-2.5 py-1 text-[12px] font-bold"
+          style={{ color: BRAND_GREEN, backgroundColor: `${BRAND_GREEN}14` }}
+        >
+          {playing ? "❚❚" : "▶"}
+        </button>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleStageTap}
+        aria-label={copy.stepTapAria(step.n)}
+        className="install-live-stage"
+      >
+        <span className="install-live-badge">
+          {step.n === 1 ? copy.liveNow : copy.liveThen} · {step.n}/{steps.length}
+        </span>
+        <span key={step.n} className="install-live-icon" aria-hidden>
+          {step.icon}
+        </span>
+        <span className="install-live-title">{step.title}</span>
+        <span className="install-live-hint">{step.hint}</span>
+        <span className="install-live-replay">{copy.liveTapReplay}</span>
+      </button>
+
+      <div className="install-live-dots" role="tablist" aria-label="Install steps">
+        {steps.map((s, i) => (
+          <button
+            key={s.n}
+            type="button"
+            role="tab"
+            aria-selected={i === index}
+            aria-label={copy.stepTapAria(s.n)}
+            onClick={() => handleDotTap(i)}
+            className={`install-live-dot ${i === index ? "is-active" : ""} ${i < index ? "is-done" : ""}`}
+          />
+        ))}
+      </div>
+
+      <ol className="install-live-rail" aria-hidden>
+        {steps.map((s, i) => (
+          <li
+            key={s.n}
+            className={`install-live-rail-item ${i === index ? "is-active" : ""}`}
+          >
+            <span className="install-live-rail-num">{s.n}</span>
+            <span className="install-live-rail-label">{s.title}</span>
+          </li>
+        ))}
+      </ol>
+
+      {coach ? (
+        <p className="install-live-coach" role="status">
+          {coach}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export function InstallGateScreen({
   onInstalledContinue,
   onContinueInBrowser,
@@ -164,19 +264,43 @@ export function InstallGateScreen({
   const ios = isIos();
   const android = isAndroid();
   const showIosSteps = ios || (!android && pwa.manualIos);
-  const [activeStep, setActiveStep] = useState<number | null>(null);
-  const [coachOpen, setCoachOpen] = useState(false);
   const [nudgeFlash, setNudgeFlash] = useState(false);
-  const coachTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const guideSteps = useMemo<GuideStep[]>(
+    () => [
+      {
+        n: 1,
+        icon: <IosShareIcon className="h-16 w-16" />,
+        title: i.iosStep1Title,
+        hint: i.iosStep1Hint,
+      },
+      {
+        n: 2,
+        icon: <IosViewMoreIcon className="h-16 w-16" />,
+        title: i.iosStep2Title,
+        hint: i.iosStep2Hint,
+      },
+      {
+        n: 3,
+        icon: <IosAddHomeIcon className="h-16 w-16" />,
+        title: i.iosStep3Title,
+        hint: i.iosStep3Hint,
+      },
+      {
+        n: 4,
+        icon: <IosAddButtonIcon label={i.iosAddButton} />,
+        title: i.iosStep4Title,
+        hint: i.iosStep4Hint(PWA_SHORT_NAME),
+      },
+    ],
+    [i],
+  );
 
   useEffect(() => {
     applyDocumentLang();
   }, []);
 
-  // iOS has no “continue” CTA (Safari closes after Add). Remember this browser
-  // saw the gate so “Open Evorios” from the marketing site doesn’t loop forever.
-  // Note: iOS still cannot deep-link https → the Home Screen PWA; only the icon can.
   useEffect(() => {
     if (!showIosSteps) return;
     markInstallGateDone();
@@ -184,24 +308,15 @@ export function InstallGateScreen({
 
   useEffect(() => {
     return () => {
-      if (coachTimer.current) clearTimeout(coachTimer.current);
       if (flashTimer.current) clearTimeout(flashTimer.current);
     };
   }, []);
 
-  const pulseNudge = () => {
+  const pulseNudge = useCallback(() => {
     setNudgeFlash(true);
     if (flashTimer.current) clearTimeout(flashTimer.current);
     flashTimer.current = setTimeout(() => setNudgeFlash(false), 1600);
-  };
-
-  const handleStepTap = (n: number) => {
-    setActiveStep(n);
-    setCoachOpen(true);
-    pulseNudge();
-    if (coachTimer.current) clearTimeout(coachTimer.current);
-    coachTimer.current = setTimeout(() => setCoachOpen(false), 4200);
-  };
+  }, []);
 
   const handleInstalled = () => {
     if (isStandalonePwa()) {
@@ -248,58 +363,20 @@ export function InstallGateScreen({
               <p className="mb-2.5 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
                 {i.stepsGuideLabel}
               </p>
-              <ol className="space-y-2.5">
-                <StepRow
-                  n={1}
-                  icon={<IosShareIcon />}
-                  title={i.iosStep1Title}
-                  hint={i.iosStep1Hint}
-                  active={activeStep === 1}
-                  ariaLabel={i.stepTapAria(1)}
-                  onTap={() => handleStepTap(1)}
-                />
-                <StepRow
-                  n={2}
-                  icon={<IosViewMoreIcon />}
-                  title={i.iosStep2Title}
-                  hint={i.iosStep2Hint}
-                  active={activeStep === 2}
-                  ariaLabel={i.stepTapAria(2)}
-                  onTap={() => handleStepTap(2)}
-                />
-                <StepRow
-                  n={3}
-                  icon={<IosAddHomeIcon />}
-                  title={i.iosStep3Title}
-                  hint={i.iosStep3Hint}
-                  active={activeStep === 3}
-                  ariaLabel={i.stepTapAria(3)}
-                  onTap={() => handleStepTap(3)}
-                />
-                <StepRow
-                  n={4}
-                  icon={<IosAddButtonIcon label={i.iosAddButton} />}
-                  title={i.iosStep4Title}
-                  hint={i.iosStep4Hint(PWA_SHORT_NAME)}
-                  active={activeStep === 4}
-                  ariaLabel={i.stepTapAria(4)}
-                  onTap={() => handleStepTap(4)}
-                />
-              </ol>
-
-              {coachOpen ? (
-                <p
-                  className="mt-3 rounded-2xl border px-3.5 py-3 text-[15px] font-semibold leading-snug"
-                  style={{
-                    borderColor: `${BRAND_GREEN}55`,
-                    backgroundColor: "#ECFDF5",
-                    color: BRAND_GREEN,
-                  }}
-                  role="status"
-                >
-                  {i.tapStepCoach}
-                </p>
-              ) : null}
+              <LiveInstallGuide
+                steps={guideSteps}
+                copy={{
+                  liveNow: i.liveNow,
+                  liveThen: i.liveThen,
+                  livePlaying: i.livePlaying,
+                  livePaused: i.livePaused,
+                  liveTapReplay: i.liveTapReplay,
+                  stepCoachShare: i.stepCoachShare,
+                  stepCoachLater: i.stepCoachLater,
+                  stepTapAria: i.stepTapAria,
+                }}
+                onCoachShare={pulseNudge}
+              />
 
               <p className="mt-5 text-[15px] leading-relaxed text-gray-600">
                 {i.iosAfterAdd(APP_NAME)}
@@ -391,7 +468,7 @@ export function InstallGateScreen({
           title={i.nudgeTitle}
           body={i.nudgeBody}
           shareLabel={i.nudgeShareLabel}
-          emphasized={nudgeFlash || coachOpen}
+          emphasized={nudgeFlash}
         />
       ) : null}
     </div>

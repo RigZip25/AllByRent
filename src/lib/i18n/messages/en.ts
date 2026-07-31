@@ -132,6 +132,13 @@ export const en: AppMessages = {
     nudgeTitle: "Do this now",
     nudgeBody: "Tap Share in Safari — center of the bottom bar",
     nudgeShareLabel: "Share",
+    liveNow: "Now",
+    liveThen: "Then",
+    livePlaying: "Playing guide…",
+    livePaused: "Paused — tap to play",
+    liveTapReplay: "Tap to replay this step",
+    stepCoachShare: "Start with Safari Share below ↓ — this card is only a preview",
+    stepCoachLater: "After Share opens, look for this next",
   },
   home: {
     priceAny: "Any price",

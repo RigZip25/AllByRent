@@ -1612,6 +1612,178 @@
     }
   }
 
+  /* Live install guide — one animated step instead of a static wall */
+  .install-live-guide {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .install-live-stage {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 1.35rem;
+    border: 2px solid rgb(13 92 58 / 0.28);
+    background: linear-gradient(165deg, #ffffff 0%, #f0fdf4 55%, #ffffff 100%);
+    padding: 1.1rem 1rem 0.95rem;
+    text-align: center;
+    box-shadow: 0 8px 22px rgb(13 92 58 / 0.08);
+    transition: transform 0.15s ease;
+  }
+
+  .install-live-stage:active {
+    transform: scale(0.99);
+  }
+
+  .install-live-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    background: #0d5c3a;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.28rem 0.7rem;
+  }
+
+  .install-live-icon {
+    display: flex;
+    min-height: 4.5rem;
+    align-items: center;
+    justify-content: center;
+    animation: install-live-pop 0.45s ease-out;
+  }
+
+  .install-live-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #111827;
+  }
+
+  .install-live-hint {
+    font-size: 0.95rem;
+    line-height: 1.35;
+    color: #6b7280;
+  }
+
+  .install-live-replay {
+    margin-top: 0.15rem;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0d5c3a;
+  }
+
+  .install-live-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.45rem;
+    padding-block: 0.15rem;
+  }
+
+  .install-live-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 9999px;
+    background: #d1d5db;
+    transition: width 0.25s ease, background-color 0.25s ease;
+  }
+
+  .install-live-dot.is-active {
+    width: 1.35rem;
+    background: #0d5c3a;
+  }
+
+  .install-live-dot.is-done {
+    background: #86efac;
+  }
+
+  .install-live-rail {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .install-live-rail-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    opacity: 0.42;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .install-live-rail-item.is-active {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  .install-live-rail-num {
+    display: inline-flex;
+    width: 1.35rem;
+    height: 1.35rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: #e5e7eb;
+    color: #374151;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .install-live-rail-item.is-active .install-live-rail-num {
+    background: #0d5c3a;
+    color: #fff;
+  }
+
+  .install-live-rail-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #6b7280;
+    text-align: center;
+  }
+
+  .install-live-rail-item.is-active .install-live-rail-label {
+    color: #0d5c3a;
+  }
+
+  .install-live-coach {
+    margin: 0;
+    border-radius: 1rem;
+    border: 1px solid rgb(13 92 58 / 0.35);
+    background: #ecfdf5;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #0d5c3a;
+    animation: install-live-pop 0.3s ease-out;
+  }
+
+  @keyframes install-live-pop {
+    0% {
+      opacity: 0;
+      transform: translateY(8px) scale(0.96);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
   @media (max-height: 720px) {
     .destination-globe {
       display: none;

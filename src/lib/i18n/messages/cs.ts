@@ -138,6 +138,13 @@ export const cs: AppMessages = {
     nudgeTitle: "Udělejte teď",
     nudgeBody: "Klepněte na Sdílet v Safari — uprostřed spodní lišty",
     nudgeShareLabel: "Sdílet",
+    liveNow: "Teď",
+    liveThen: "Pak",
+    livePlaying: "Přehrávám návod…",
+    livePaused: "Pozastaveno — klepněte pro přehrání",
+    liveTapReplay: "Klepněte pro zopakování kroku",
+    stepCoachShare: "Začněte tlačítkem Sdílet v Safari níže ↓ — tato karta je jen náhled",
+    stepCoachLater: "Až se otevře Sdílet, hledejte toto",
   },
   home: {
     priceAny: "Jakákoli cena",
