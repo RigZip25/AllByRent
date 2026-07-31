@@ -13,51 +13,66 @@ const SPLASH_CANVAS_BG = "#FFFFFF";
 const SPLASH_SURFACE =
   "radial-gradient(ellipse 100% 80% at 50% 40%, #ffffff 0%, #f7fbf8 55%, #eef5f1 100%)";
 
-/** Dynamic splash: fly-in → title → tagline (~2.6s) — same timing as before */
-const T_FLYIN_END = 700;
-const T_TITLE_END = 1400;
-const T_AUTO_ADVANCE = 2600;
+/** Dynamic splash: orbit around mascot → row → title/tagline */
+const T_ORBIT_END = 1100;
+const T_TITLE_END = 1750;
+const T_AUTO_ADVANCE = 3000;
 
 const S = 0.85;
 const ICON_ROW_GAP = Math.round(52 * S);
-/** Icons sit under the mascot (was under empty center). */
+/** Icons settle under the mascot after orbiting. */
 const ICON_ROW_Y = Math.round(168 * S);
 const ICON_BOX = `${5 * S}rem`;
 const ICON_OFFSET = `${-2.5 * S}rem`;
-const FLY_OFFSET = Math.round(520 * S);
+/** Orbit ring centered near Mr. Evorios (mascot sits slightly above mid). */
+const ORBIT_CY = -36;
+const ORBIT_R = Math.round(118 * S);
 
-type DynamicPhase = "flyIn" | "title" | "ready";
+type DynamicPhase = "orbit" | "title" | "ready";
 
-const flyItems: {
+const splashIcons: {
   Icon: typeof Camera;
   delay: number;
-  from: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  angleDeg: number;
 }[] = [
-  { Icon: Camera, delay: 0, from: "top-left" },
-  { Icon: Bike, delay: 0.04, from: "top-right" },
-  { Icon: Tent, delay: 0.08, from: "bottom-left" },
-  { Icon: Car, delay: 0.11, from: "bottom-right" },
-  { Icon: Guitar, delay: 0.14, from: "top-left" },
-  { Icon: Home, delay: 0.17, from: "top-right" },
+  { Icon: Camera, delay: 0, angleDeg: -120 },
+  { Icon: Bike, delay: 0.04, angleDeg: -60 },
+  { Icon: Tent, delay: 0.08, angleDeg: 0 },
+  { Icon: Car, delay: 0.11, angleDeg: 60 },
+  { Icon: Guitar, delay: 0.15, angleDeg: 120 },
+  { Icon: Home, delay: 0.18, angleDeg: 180 },
 ];
 
-function getCornerStart(from: string) {
-  switch (from) {
-    case "top-left":
-      return { x: -FLY_OFFSET, y: -FLY_OFFSET, opacity: 0, scale: 0.35 };
-    case "top-right":
-      return { x: FLY_OFFSET, y: -FLY_OFFSET, opacity: 0, scale: 0.35 };
-    case "bottom-left":
-      return { x: -FLY_OFFSET, y: FLY_OFFSET, opacity: 0, scale: 0.35 };
-    case "bottom-right":
-      return { x: FLY_OFFSET, y: FLY_OFFSET, opacity: 0, scale: 0.35 };
-    default:
-      return { x: 0, y: 0, opacity: 0, scale: 0.35 };
+function orbitPos(angleDeg: number) {
+  const rad = (angleDeg * Math.PI) / 180;
+  return {
+    x: Math.cos(rad) * ORBIT_R,
+    y: ORBIT_CY + Math.sin(rad) * ORBIT_R,
+  };
+}
+
+/** Arc keyframes: rise from center, sweep around Mr. Evorios, land on orbit slot. */
+function orbitArc(angleDeg: number, sweepDeg = 200) {
+  const steps = 5;
+  const xs: number[] = [0];
+  const ys: number[] = [ORBIT_CY];
+  for (let i = 1; i <= steps; i++) {
+    const t = i / steps;
+    const a = angleDeg - sweepDeg * (1 - t);
+    const p = orbitPos(a);
+    // Ease radius out from ~35% → full so they clear the mascot.
+    const rScale = 0.35 + 0.65 * t;
+    xs.push(p.x * rScale + (1 - rScale) * 0);
+    ys.push(ORBIT_CY + (p.y - ORBIT_CY) * rScale);
   }
+  const end = orbitPos(angleDeg);
+  xs[xs.length - 1] = end.x;
+  ys[ys.length - 1] = end.y;
+  return { x: xs, y: ys };
 }
 
 function getRowPos(index: number) {
-  const totalSpan = (flyItems.length - 1) * ICON_ROW_GAP;
+  const totalSpan = (splashIcons.length - 1) * ICON_ROW_GAP;
   return {
     x: -totalSpan / 2 + index * ICON_ROW_GAP,
     y: ICON_ROW_Y,
@@ -164,10 +179,10 @@ function SplashStaticPreview() {
 
 function SplashDynamic({ onDone, preview }: { onDone: () => void; preview: boolean }) {
   const messages = useMessages();
-  const [phase, setPhase] = useState<DynamicPhase>("flyIn");
+  const [phase, setPhase] = useState<DynamicPhase>("orbit");
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("title"), T_FLYIN_END);
+    const t1 = setTimeout(() => setPhase("title"), T_ORBIT_END);
     const t2 = setTimeout(() => setPhase("ready"), T_TITLE_END);
     const t3 = setTimeout(() => {
       if (!preview) onDone();
@@ -179,10 +194,10 @@ function SplashDynamic({ onDone, preview }: { onDone: () => void; preview: boole
     };
   }, [onDone, preview]);
 
-  const showIcons = phase === "flyIn" || phase === "title" || phase === "ready";
+  const showIcons = true;
   const showTitle = phase === "title" || phase === "ready";
   const showTagline = phase === "ready";
-  const flyDuration = T_FLYIN_END / 1000;
+  const orbiting = phase === "orbit";
 
   return (
     <div
@@ -192,11 +207,11 @@ function SplashDynamic({ onDone, preview }: { onDone: () => void; preview: boole
       <div className="splash-v2-safe relative flex min-h-0 flex-1 flex-col">
         <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-5 pb-2">
           <div className="relative flex h-[clamp(19rem,52dvh,30rem)] w-full max-w-[390px] items-center justify-center">
-            {/* Same corner → row fly-in as before; green icons on white cards */}
+            {/* Orbit around Mr. Evorios, then settle into the row below */}
             <AnimatePresence>
               {showIcons &&
-                flyItems.map(({ Icon, delay, from }, index) => {
-                  const start = getCornerStart(from);
+                splashIcons.map(({ Icon, delay, angleDeg }, index) => {
+                  const arc = orbitArc(angleDeg);
                   const row = getRowPos(index);
                   return (
                     <motion.div
@@ -208,15 +223,37 @@ function SplashDynamic({ onDone, preview }: { onDone: () => void; preview: boole
                         marginLeft: ICON_OFFSET,
                         marginTop: ICON_OFFSET,
                       }}
-                      initial={{ x: start.x, y: start.y, opacity: 0, scale: start.scale }}
-                      animate={{ x: row.x, y: row.y, opacity: row.opacity, scale: row.scale }}
-                      transition={{
-                        delay,
-                        duration: flyDuration,
-                        type: "spring",
-                        stiffness: 95,
-                        damping: 16,
-                      }}
+                      initial={{ x: 0, y: ORBIT_CY, opacity: 0, scale: 0.25 }}
+                      animate={
+                        orbiting
+                          ? {
+                              x: arc.x,
+                              y: arc.y,
+                              opacity: 1,
+                              scale: 1,
+                            }
+                          : {
+                              x: row.x,
+                              y: row.y,
+                              opacity: row.opacity,
+                              scale: row.scale,
+                            }
+                      }
+                      transition={
+                        orbiting
+                          ? {
+                              delay,
+                              duration: 0.95,
+                              times: [0, 0.22, 0.45, 0.7, 0.88, 1],
+                              ease: "easeInOut",
+                            }
+                          : {
+                              type: "spring",
+                              stiffness: 95,
+                              damping: 16,
+                              delay: index * 0.03,
+                            }
+                      }
                     >
                       <Icon className="h-8 w-8" style={{ color: BRAND_GREEN }} strokeWidth={1.75} aria-hidden />
                     </motion.div>
@@ -224,7 +261,7 @@ function SplashDynamic({ onDone, preview }: { onDone: () => void; preview: boole
                 })}
             </AnimatePresence>
 
-            {/* Mascot between title and icon row */}
+            {/* Mascot — orbit center */}
             <motion.div
               className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-[58%]"
               initial={{ opacity: 0, scale: 0.85 }}
