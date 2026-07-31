@@ -58,11 +58,12 @@ function resolvePostResetUrl(): string | null {
     const before = url.searchParams.toString();
 
     // If the user was deep-linking into a screen or skipping splash, a reset should
-    // still return to the true "fresh launch" experience (splash + onboarding).
+    // still return to the true "fresh launch" experience (splash → install → onboarding).
     for (const key of [
       "reset",
       "resetApp",
       "skipSplash",
+      "skipInstall",
       "openNotifications",
       "simulateUpdate",
       "screen",
@@ -98,6 +99,20 @@ export async function resetAllAppData(): Promise<void> {
   } else {
     window.location.reload();
   }
+}
+
+/**
+ * Handle `?resetApp=1` / `?reset=1` before React mounts so we never paint the
+ * previous session (browse hub) and then wipe — that looked like “skipping”
+ * the install instructions.
+ * @returns true when a reset is in progress (caller must not mount the app).
+ */
+export function consumeResetAppBeforeBoot(): boolean {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  if (!isResetAppQueryParam(params)) return false;
+  void resetAllAppData();
+  return true;
 }
 
 export function confirmAndResetAppData(): void {

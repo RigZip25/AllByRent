@@ -10,6 +10,7 @@ export function hasCompletedInstallGate(): boolean {
   try {
     if (localStorage.getItem(GATE_DONE_KEY) === "1") return true;
     // Returning users who already used the app in this browser — don't block again.
+    // (Cleared by reset, so a fresh reset still shows the install coach.)
     if (isOnboardingComplete() || isIntroDone()) return true;
     return false;
   } catch {
