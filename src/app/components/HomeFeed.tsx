@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, ClipboardList, MapPin, ChevronRight, ArrowLeft, SlidersHorizontal, X } from "lucide-react";
+import { Bell, ClipboardList, MapPin, ChevronRight, SlidersHorizontal, X } from "lucide-react";
 import { GarageLensCard } from "./GarageLensCard";
 import { usePwaUpdate } from "../../hooks/PwaUpdateProvider";
 import { mascotSays } from "../../lib/brand";
@@ -53,7 +53,7 @@ type HomeFeedProps = {
   onPostRequest: (opts?: { category?: string; query?: string }) => void;
   onStockGarage: () => void;
   onRentals: () => void;
-  onBackToHub?: () => void;
+  onYardSales: () => void;
 };
 
 export function HomeFeed({
@@ -63,7 +63,7 @@ export function HomeFeed({
   onPostRequest,
   onStockGarage,
   onRentals,
-  onBackToHub,
+  onYardSales,
 }: HomeFeedProps) {
   const messages = useMessages();
   const { home, common } = messages;
@@ -193,18 +193,6 @@ export function HomeFeed({
         style={{ paddingTop: "max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))" }}
       >
         <div className="mb-2 flex items-center gap-2">
-          {onBackToHub ? (
-            <button
-              type="button"
-              onClick={onBackToHub}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border bg-white active:bg-gray-50"
-              style={{ borderColor: BORDER }}
-              aria-label={home.backToBrowseAria}
-            >
-              <ArrowLeft className="h-5 w-5" style={{ color: GREEN_DARK }} />
-            </button>
-          ) : null}
-
           <button
             type="button"
             onClick={onEditLocation}
@@ -325,6 +313,22 @@ export function HomeFeed({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3">
+        <button
+          type="button"
+          onClick={onYardSales}
+          className="mb-3 flex w-full items-center justify-between gap-2 rounded-2xl border bg-white px-3.5 py-3 text-left active:bg-gray-50"
+          style={{ borderColor: BORDER }}
+          aria-label={home.yardSalesEntryAria}
+        >
+          <span>
+            <span className="block text-[14px] font-bold" style={{ color: GREEN_DARK }}>
+              {home.yardSalesEntry}
+            </span>
+            <span className="mt-0.5 block text-[12px] text-gray-500">{home.yardSalesEntryHint}</span>
+          </span>
+          <ChevronRight className="h-4 w-4 shrink-0" style={{ color: GREEN }} />
+        </button>
+
         <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
           {home.garagesNearYou}
         </p>
