@@ -88,7 +88,6 @@ import {
 import type { ShelfPrefill } from "../lib/shelfListings";
 import { isSimulateUpdateRequested } from "../lib/pwaUpdateStorage";
 import {
-  markBrowserContinue,
   markInstallGateDone,
   shouldShowInstallGate,
 } from "../lib/pwaInstallGate";
@@ -1028,12 +1027,6 @@ function AppRoutes() {
     setCurrentScreen(resolveOnboardingResumeScreen());
   }, []);
 
-  const handleInstallGateBrowser = useCallback(() => {
-    markBrowserContinue();
-    setNavStack([]);
-    setCurrentScreen(resolveOnboardingResumeScreen());
-  }, []);
-
   const handleContinueFromHello = () => {
     markIntroDone();
     if (isOnboardingComplete()) {
@@ -1444,7 +1437,6 @@ function AppRoutes() {
         {currentScreen === "installGate" && (
           <InstallGateScreen
             onInstalledContinue={handleInstallGateInstalled}
-            onContinueInBrowser={handleInstallGateBrowser}
           />
         )}
 

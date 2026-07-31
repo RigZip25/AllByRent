@@ -2,7 +2,6 @@ import { isIntroDone, isOnboardingComplete } from "./onboardingStorage";
 import { isStandalonePwa } from "./pwaInstall";
 
 const GATE_DONE_KEY = "evorios_install_gate_done";
-const BROWSER_CONTINUE_KEY = "evorios_install_gate_browser";
 
 export function hasCompletedInstallGate(): boolean {
   if (typeof window === "undefined") return true;
@@ -18,27 +17,9 @@ export function hasCompletedInstallGate(): boolean {
   }
 }
 
-export function hasChosenBrowserContinue(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return localStorage.getItem(BROWSER_CONTINUE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
 export function markInstallGateDone(): void {
   try {
     localStorage.setItem(GATE_DONE_KEY, "1");
-  } catch {
-    /* ignore */
-  }
-}
-
-export function markBrowserContinue(): void {
-  try {
-    localStorage.setItem(GATE_DONE_KEY, "1");
-    localStorage.setItem(BROWSER_CONTINUE_KEY, "1");
   } catch {
     /* ignore */
   }

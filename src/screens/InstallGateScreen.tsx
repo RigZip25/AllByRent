@@ -9,7 +9,6 @@ import { useMessages } from "../lib/i18n/react";
 
 type InstallGateScreenProps = {
   onInstalledContinue: () => void;
-  onContinueInBrowser: () => void;
 };
 
 const STEP_HOLD_MS = [4500, 2800, 2800, 3200] as const;
@@ -259,7 +258,6 @@ function LiveInstallGuide({
 
 export function InstallGateScreen({
   onInstalledContinue,
-  onContinueInBrowser,
 }: InstallGateScreenProps) {
   const t = useMessages();
   const i = t.install;
@@ -382,14 +380,6 @@ export function InstallGateScreen({
               <p className="mt-5 text-[15px] leading-relaxed text-gray-600">
                 {i.iosAfterAdd(APP_NAME)}
               </p>
-
-              <button
-                type="button"
-                onClick={onContinueInBrowser}
-                className="mt-5 min-h-[44px] w-full text-[14px] font-semibold text-gray-500 underline"
-              >
-                {i.continueBrowser}
-              </button>
             </>
           ) : (
             <div
@@ -450,14 +440,6 @@ export function InstallGateScreen({
                 style={{ backgroundColor: BRAND_GREEN }}
               >
                 {i.addedContinue}
-              </button>
-
-              <button
-                type="button"
-                onClick={onContinueInBrowser}
-                className="min-h-[44px] w-full text-[14px] font-semibold text-gray-500 underline"
-              >
-                {i.continueBrowser}
               </button>
             </div>
           </>
