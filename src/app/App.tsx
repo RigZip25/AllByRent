@@ -780,9 +780,15 @@ function AppRoutes() {
     });
   }, []);
 
-  const handleOpenHome = useCallback(() => goToTab("home"), [goToTab]);
+  const handleOpenHome = useCallback(() => {
+    setAppMode("rent");
+    goToTab("home");
+  }, [goToTab]);
   const handleOpenMrE = useCallback(() => goToTab("mre"), [goToTab]);
-  const handleOpenGarage = useCallback(() => goToTab("garage"), [goToTab]);
+  const handleOpenGarage = useCallback(() => {
+    setAppMode("earn");
+    goToTab("garage");
+  }, [goToTab]);
   const handleOpenMore = useCallback(() => goToTab("more"), [goToTab]);
   const handleOpenRentals = useCallback(() => goToTab("rentals"), [goToTab]);
   const handleOpenMessages = useCallback(() => navigateTo("messages"), [navigateTo]);
@@ -1522,6 +1528,7 @@ function AppRoutes() {
             onStockGarage={handleStartListing}
             onRentals={handleOpenRentals}
             onYardSales={openYardSaleHub}
+            onRoleModeChange={handlePreferredModeChange}
           />
         )}
 
@@ -1626,6 +1633,7 @@ function AppRoutes() {
             onResumeDraft={handleResumeDraft}
             onViewShop={handleOpenMyGarageShop}
             onViewProfile={handleViewPublicProfile}
+            onRoleModeChange={handlePreferredModeChange}
             onOpenRental={(bookingId) => {
               setSelectedBookingId(bookingId);
               navigateTo("activeRental");

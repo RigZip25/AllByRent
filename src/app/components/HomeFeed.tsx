@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Bell, ClipboardList, MapPin, ChevronRight, SlidersHorizontal, X } from "lucide-react";
 import { GarageLensCard } from "./GarageLensCard";
+import { RoleModeSwitcher } from "../../components/RoleModeSwitcher";
 import { usePwaUpdate } from "../../hooks/PwaUpdateProvider";
+import type { AppMode } from "../../lib/appMode";
 import { mascotSays } from "../../lib/brand";
 import {
   loadHomeFeedMode,
@@ -54,6 +56,7 @@ type HomeFeedProps = {
   onStockGarage: () => void;
   onRentals: () => void;
   onYardSales: () => void;
+  onRoleModeChange: (mode: AppMode) => void;
 };
 
 export function HomeFeed({
@@ -64,6 +67,7 @@ export function HomeFeed({
   onStockGarage,
   onRentals,
   onYardSales,
+  onRoleModeChange,
 }: HomeFeedProps) {
   const messages = useMessages();
   const { home, common } = messages;
@@ -217,6 +221,8 @@ export function HomeFeed({
             </span>
           </button>
         </div>
+
+        <RoleModeSwitcher active="rent" onChange={onRoleModeChange} className="mb-2.5" />
 
         <div className="mb-2 flex items-center gap-2">
           <button

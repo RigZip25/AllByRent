@@ -346,9 +346,9 @@ export const en: AppMessages = {
     languageValue: (label) => label,
     languageHint:
       "Auto uses your phone language when we support it (English, Čeština) — including the install screen. Other languages fall back to English until we add them.",
-    defaultExperience: "Default experience",
+    defaultExperience: "Browse or My Garage",
     defaultExperienceHint:
-      "Browse opens your block hub; My Garage opens your storefront. List items anytime with +.",
+      "Browse is the block feed; My Garage is your storefront. Switch anytime on Home or Garage — or list with +.",
     yourStats: "Your stats",
     asRenter: "As renter",
     asHost: "As host",
