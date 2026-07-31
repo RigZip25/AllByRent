@@ -1491,6 +1491,127 @@
     padding: clamp(0.5rem, 2.5vw, 1rem) clamp(0.75rem, 3vw, 1.25rem);
   }
 
+  /* iOS install gate — persistent nudge toward Safari Share (bottom chrome) */
+  .install-share-nudge {
+    position: fixed;
+    left: 50%;
+    bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+    width: min(100%, 390px);
+    transform: translateX(-50%);
+    padding: 0 1rem;
+    pointer-events: none;
+  }
+
+  .install-share-nudge-card {
+    border-radius: 1.1rem;
+    border: 2px solid #0d5c3a;
+    background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 70%);
+    box-shadow: 0 10px 28px rgb(13 92 58 / 0.18);
+    padding: 0.7rem 0.9rem 0.55rem;
+    text-align: center;
+  }
+
+  .install-share-nudge-kicker {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #0d5c3a;
+  }
+
+  .install-share-nudge-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    margin-top: 0.35rem;
+  }
+
+  .install-share-nudge-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.85rem;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.06);
+  }
+
+  .install-share-nudge-body {
+    margin: 0;
+    max-width: 15rem;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #111827;
+  }
+
+  .install-share-nudge-share {
+    margin: 0.35rem 0 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+  }
+
+  .install-share-nudge-arrow {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.15rem;
+  }
+
+  .install-share-nudge-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    background: #0d5c3a;
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1;
+    animation: install-share-bounce 1.15s ease-in-out infinite;
+  }
+
+  .install-share-nudge-flash .install-share-nudge-card {
+    animation: install-share-pulse 0.9s ease-out 1;
+  }
+
+  .install-share-nudge-flash .install-share-nudge-chevron {
+    animation-duration: 0.55s;
+  }
+
+  @keyframes install-share-bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(7px);
+    }
+  }
+
+  @keyframes install-share-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgb(13 92 58 / 0.35);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 0 10px rgb(13 92 58 / 0);
+      transform: scale(1.02);
+    }
+    100% {
+      box-shadow: 0 10px 28px rgb(13 92 58 / 0.18);
+      transform: scale(1);
+    }
+  }
+
   @media (max-height: 720px) {
     .destination-globe {
       display: none;

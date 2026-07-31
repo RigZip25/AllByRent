@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Smartphone } from "lucide-react";
 import { APP_NAME, BRAND_GREEN, PWA_SHORT_NAME } from "../lib/brand";
 import { markInstallGateDone } from "../lib/pwaInstallGate";
@@ -74,30 +74,83 @@ function StepRow({
   icon,
   title,
   hint,
+  active,
+  ariaLabel,
+  onTap,
 }: {
   n: number;
   icon: ReactNode;
   title: string;
   hint?: string;
+  active?: boolean;
+  ariaLabel: string;
+  onTap: () => void;
 }) {
   return (
-    <li className="flex items-center gap-3.5 rounded-2xl bg-white px-3.5 py-3.5 shadow-sm ring-1 ring-black/[0.04]">
-      <span
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[16px] font-extrabold text-white"
-        style={{ backgroundColor: BRAND_GREEN }}
+    <li>
+      <button
+        type="button"
+        onClick={onTap}
+        aria-label={ariaLabel}
+        className={`flex w-full items-center gap-3.5 rounded-2xl bg-white px-3.5 py-3.5 text-left shadow-sm ring-1 transition-all active:scale-[0.99] ${
+          active
+            ? "ring-2 ring-[#0D5C3A]/45 bg-[#F0FDF4]"
+            : "ring-black/[0.04] hover:bg-[#F9FAFB]"
+        }`}
       >
-        {n}
-      </span>
-      <span className="flex h-14 w-[4.25rem] shrink-0 items-center justify-center">{icon}</span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-[18px] font-bold leading-snug tracking-tight text-gray-900">
-          {title}
+        <span
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[16px] font-extrabold text-white"
+          style={{ backgroundColor: BRAND_GREEN }}
+        >
+          {n}
         </span>
-        {hint ? (
-          <span className="mt-1 block text-[15px] leading-snug text-gray-500">{hint}</span>
-        ) : null}
-      </span>
+        <span className="flex h-14 w-[4.25rem] shrink-0 items-center justify-center opacity-90">
+          {icon}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[18px] font-bold leading-snug tracking-tight text-gray-900">
+            {title}
+          </span>
+          {hint ? (
+            <span className="mt-1 block text-[15px] leading-snug text-gray-500">{hint}</span>
+          ) : null}
+        </span>
+      </button>
     </li>
+  );
+}
+
+function SafariShareNudge({
+  title,
+  body,
+  shareLabel,
+  emphasized,
+}: {
+  title: string;
+  body: string;
+  shareLabel: string;
+  emphasized?: boolean;
+}) {
+  return (
+    <div
+      className={`install-share-nudge ${emphasized ? "install-share-nudge-flash" : ""}`}
+      role="status"
+      aria-live="polite"
+    >
+      <div className="install-share-nudge-card">
+        <p className="install-share-nudge-kicker">{title}</p>
+        <div className="install-share-nudge-row">
+          <span className="install-share-nudge-icon" aria-hidden>
+            <IosShareIcon className="h-9 w-9" />
+          </span>
+          <p className="install-share-nudge-body">{body}</p>
+        </div>
+        <p className="install-share-nudge-share">{shareLabel}</p>
+      </div>
+      <div className="install-share-nudge-arrow" aria-hidden>
+        <span className="install-share-nudge-chevron">↓</span>
+      </div>
+    </div>
   );
 }
 
@@ -111,6 +164,11 @@ export function InstallGateScreen({
   const ios = isIos();
   const android = isAndroid();
   const showIosSteps = ios || (!android && pwa.manualIos);
+  const [activeStep, setActiveStep] = useState<number | null>(null);
+  const [coachOpen, setCoachOpen] = useState(false);
+  const [nudgeFlash, setNudgeFlash] = useState(false);
+  const coachTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     applyDocumentLang();
@@ -123,6 +181,27 @@ export function InstallGateScreen({
     if (!showIosSteps) return;
     markInstallGateDone();
   }, [showIosSteps]);
+
+  useEffect(() => {
+    return () => {
+      if (coachTimer.current) clearTimeout(coachTimer.current);
+      if (flashTimer.current) clearTimeout(flashTimer.current);
+    };
+  }, []);
+
+  const pulseNudge = () => {
+    setNudgeFlash(true);
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+    flashTimer.current = setTimeout(() => setNudgeFlash(false), 1600);
+  };
+
+  const handleStepTap = (n: number) => {
+    setActiveStep(n);
+    setCoachOpen(true);
+    pulseNudge();
+    if (coachTimer.current) clearTimeout(coachTimer.current);
+    coachTimer.current = setTimeout(() => setCoachOpen(false), 4200);
+  };
 
   const handleInstalled = () => {
     if (isStandalonePwa()) {
@@ -140,7 +219,11 @@ export function InstallGateScreen({
           "linear-gradient(180deg, #F7FBF8 0%, #EEF7F1 42%, #FFFFFF 100%)",
       }}
     >
-      <div className="flex flex-1 flex-col px-5 pb-8 pt-[max(1.5rem,env(safe-area-inset-top,0px))]">
+      <div
+        className={`flex flex-1 flex-col px-5 pt-[max(1.5rem,env(safe-area-inset-top,0px))] ${
+          showIosSteps ? "pb-[7.5rem]" : "pb-8"
+        }`}
+      >
         <p
           className="text-[12px] font-bold uppercase tracking-[0.14em]"
           style={{ color: `${BRAND_GREEN}B3` }}
@@ -159,34 +242,77 @@ export function InstallGateScreen({
           {i.body(APP_NAME, PWA_SHORT_NAME)}
         </p>
 
-        <div className="mt-6">
+        <div className="mt-5">
           {showIosSteps ? (
-            <ol className="space-y-3">
-              <StepRow
-                n={1}
-                icon={<IosShareIcon />}
-                title={i.iosStep1Title}
-                hint={i.iosStep1Hint}
-              />
-              <StepRow
-                n={2}
-                icon={<IosViewMoreIcon />}
-                title={i.iosStep2Title}
-                hint={i.iosStep2Hint}
-              />
-              <StepRow
-                n={3}
-                icon={<IosAddHomeIcon />}
-                title={i.iosStep3Title}
-                hint={i.iosStep3Hint}
-              />
-              <StepRow
-                n={4}
-                icon={<IosAddButtonIcon label={i.iosAddButton} />}
-                title={i.iosStep4Title}
-                hint={i.iosStep4Hint(PWA_SHORT_NAME)}
-              />
-            </ol>
+            <>
+              <p className="mb-2.5 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+                {i.stepsGuideLabel}
+              </p>
+              <ol className="space-y-2.5">
+                <StepRow
+                  n={1}
+                  icon={<IosShareIcon />}
+                  title={i.iosStep1Title}
+                  hint={i.iosStep1Hint}
+                  active={activeStep === 1}
+                  ariaLabel={i.stepTapAria(1)}
+                  onTap={() => handleStepTap(1)}
+                />
+                <StepRow
+                  n={2}
+                  icon={<IosViewMoreIcon />}
+                  title={i.iosStep2Title}
+                  hint={i.iosStep2Hint}
+                  active={activeStep === 2}
+                  ariaLabel={i.stepTapAria(2)}
+                  onTap={() => handleStepTap(2)}
+                />
+                <StepRow
+                  n={3}
+                  icon={<IosAddHomeIcon />}
+                  title={i.iosStep3Title}
+                  hint={i.iosStep3Hint}
+                  active={activeStep === 3}
+                  ariaLabel={i.stepTapAria(3)}
+                  onTap={() => handleStepTap(3)}
+                />
+                <StepRow
+                  n={4}
+                  icon={<IosAddButtonIcon label={i.iosAddButton} />}
+                  title={i.iosStep4Title}
+                  hint={i.iosStep4Hint(PWA_SHORT_NAME)}
+                  active={activeStep === 4}
+                  ariaLabel={i.stepTapAria(4)}
+                  onTap={() => handleStepTap(4)}
+                />
+              </ol>
+
+              {coachOpen ? (
+                <p
+                  className="mt-3 rounded-2xl border px-3.5 py-3 text-[15px] font-semibold leading-snug"
+                  style={{
+                    borderColor: `${BRAND_GREEN}55`,
+                    backgroundColor: "#ECFDF5",
+                    color: BRAND_GREEN,
+                  }}
+                  role="status"
+                >
+                  {i.tapStepCoach}
+                </p>
+              ) : null}
+
+              <p className="mt-5 text-[15px] leading-relaxed text-gray-600">
+                {i.iosAfterAdd(APP_NAME)}
+              </p>
+
+              <button
+                type="button"
+                onClick={onContinueInBrowser}
+                className="mt-5 min-h-[44px] w-full text-[14px] font-semibold text-gray-500 underline"
+              >
+                {i.continueBrowser}
+              </button>
+            </>
           ) : (
             <div
               className="rounded-2xl border px-4 py-4 text-[16px] leading-snug text-gray-700"
@@ -220,11 +346,7 @@ export function InstallGateScreen({
           )}
         </div>
 
-        {showIosSteps ? (
-          <p className="mt-6 text-[16px] leading-relaxed text-gray-600">
-            {i.iosAfterAdd(APP_NAME)}
-          </p>
-        ) : (
+        {!showIosSteps ? (
           <>
             <p className="mt-5 text-[16px] leading-relaxed text-gray-600">
               {i.androidAfter(APP_NAME)}
@@ -261,8 +383,17 @@ export function InstallGateScreen({
               </button>
             </div>
           </>
-        )}
+        ) : null}
       </div>
+
+      {showIosSteps ? (
+        <SafariShareNudge
+          title={i.nudgeTitle}
+          body={i.nudgeBody}
+          shareLabel={i.nudgeShareLabel}
+          emphasized={nudgeFlash || coachOpen}
+        />
+      ) : null}
     </div>
   );
 }

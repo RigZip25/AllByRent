@@ -110,7 +110,7 @@ export const cs: AppMessages = {
     titleLine1: "Nainstalujte si",
     titleLine2: "sousedský trh",
     body: (appName, shortName) =>
-      `${appName} se umístí na plochu jako ${shortName} — abyste ho poznali mezi ostatními ikonami. Čtyři rychlá klepnutí; aktualizace se nainstalují přes noc.`,
+      `${appName} se na ploše zobrazí jako ${shortName}. Použijte tlačítko Sdílet v Safari níže — karty jsou jen návod.`,
     iosStep1Title: "Čtverec se šipkou",
     iosStep1Hint: "Uprostřed spodní lišty",
     iosStep2Title: "Zobrazit více",
@@ -124,14 +124,20 @@ export const cs: AppMessages = {
     androidMenuStep: "Otevřete nabídku prohlížeče ⋮",
     androidInstallStep: "Klepněte na Instalovat aplikaci nebo Přidat na plochu",
     iosAfterAdd: (appName) =>
-      `Po Přidat Safari zavře a na ploše se objeví ikona ${appName}. Otevřete ji kdykoli — aktualizace se stáhnou tiše a nainstalují přes noc (~2:00 místního času), ne uprostřed klepnutí.`,
+      `Po Přidat Safari zavře a na ploše se objeví ikona ${appName}. Otevřete ji kdykoli — aktualizace se nainstalují přes noc.`,
     androidAfter: (appName) =>
-      `Otevřete ikonu ${appName} z plochy. Aktualizace se stáhnou tiše a nainstalují přes noc (~2:00 místního času), ne uprostřed klepnutí.`,
+      `Otevřete ikonu ${appName} z plochy. Aktualizace se nainstalují přes noc.`,
     installApp: (appName) => `Nainstalovat ${appName}`,
     addedContinue: "Přidal(a) jsem — pokračovat",
     continueBrowser: "Pokračovat v prohlížeči",
     almostThereAlert: (shortName) =>
       `Skoro hotovo!\n\nOtevřete ikonu ${shortName} na ploše (ne tuto záložku prohlížeče).`,
+    stepsGuideLabel: "Návod (ne tlačítka) — pak to udělejte v Safari",
+    stepTapAria: (n) => `Krok návodu ${n}. Tip: použijte Sdílet v Safari níže.`,
+    tapStepCoach: "Tyto karty jsou jen návod — klepněte na Sdílet ve spodní liště Safari ↓",
+    nudgeTitle: "Udělejte teď",
+    nudgeBody: "Klepněte na Sdílet v Safari — uprostřed spodní lišty",
+    nudgeShareLabel: "Sdílet",
   },
   home: {
     priceAny: "Jakákoli cena",

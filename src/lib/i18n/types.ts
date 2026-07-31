@@ -224,6 +224,12 @@ export type AppMessages = {
     addedContinue: string;
     continueBrowser: string;
     almostThereAlert: (shortName: string) => string;
+    stepsGuideLabel: string;
+    stepTapAria: (n: number) => string;
+    tapStepCoach: string;
+    nudgeTitle: string;
+    nudgeBody: string;
+    nudgeShareLabel: string;
   };
   home: {
     priceAny: string;
