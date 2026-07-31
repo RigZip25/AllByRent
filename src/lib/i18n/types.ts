@@ -230,6 +230,13 @@ export type AppMessages = {
     nudgeTitle: string;
     nudgeBody: string;
     nudgeShareLabel: string;
+    liveNow: string;
+    liveThen: string;
+    livePlaying: string;
+    livePaused: string;
+    liveTapReplay: string;
+    stepCoachShare: string;
+    stepCoachLater: string;
   };
   home: {
     priceAny: string;
