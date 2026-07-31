@@ -92,6 +92,9 @@ export type OnboardingMessages = {
   browseHub: {
     title: string;
     subtitle: string;
+    trustModes: string;
+    trustDeposit: string;
+    trustVerified: string;
     findGear: { title: string; subtitle: string; cta: string };
     yardSales: { title: string; subtitle: string; cta: string };
     categoriesTitle: string;

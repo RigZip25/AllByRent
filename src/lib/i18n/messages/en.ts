@@ -12,7 +12,7 @@ import {
 } from "./garageSaleEn";
 
 export const en: AppMessages = {
-  tagline: "Neighborly marketplace — the evolution of household living.",
+  tagline: "Neighborly marketplace — every home is a business cell.",
   taglineShort: "Neighborly marketplace.",
   modes: {
     earn: "My Garage",
@@ -38,7 +38,7 @@ export const en: AppMessages = {
     more: "Account",
   },
   splash: {
-    chipGarage: "Your garage",
+    chipGarage: "Your storefront",
     chipBlock: "On the block",
   },
   auth: {
@@ -449,9 +449,9 @@ export const en: AppMessages = {
       categories: { title: "Categories & subcategories", subtitle: "What’s on the block" },
     },
     ideaBody1: (appName) =>
-      `${appName} is a neighborhood marketplace. Each household is a business cell — your garage becomes an online storefront for the block.`,
+      `${appName} is a neighborhood marketplace. Each household is a business cell — your garage is the storefront for the block.`,
     ideaBody2:
-      "Neighbors browse nearby shelves. You stock tools, plants, cameras, party gear, and more — without building a separate shop for every item.",
+      "Neighbors browse nearby shelves. You stock tools, plants, cameras, party gear, and more — one garage toolkit, not a separate shop for every item.",
     rememberTitle: "Remember",
     rememberBody:
       "Same profile for browsing and hosting. Switch anytime between Browse and My Garage in Profile.",
@@ -1314,19 +1314,19 @@ export const en: AppMessages = {
   },
   onboarding: {
     roleChoice: {
-      title: "What brings you here?",
-      subtitle: "We'll set up your block or your garage.",
+      title: "How do you want to start?",
+      subtitle: "Open your storefront, or browse the block.",
       stockGarage: {
-        title: "Stock my garage",
-        subtitle: "List what you own — borrow, sell, or pass along from your showcase.",
-        cta: "Open my garage →",
+        title: "Open my business",
+        subtitle: "List, price, and share from your garage storefront.",
+        cta: "Open My Garage →",
       },
       browseBlock: {
         title: "Browse the block",
-        subtitle: "Find gear, tools, and deals in neighborhood garages.",
+        subtitle: "Find gear, tools, and deals in neighbor garages.",
         cta: "Choose where to browse →",
       },
-      footer: "You can switch between My Garage and Browse anytime.",
+      footer: "Switch between My Garage and Browse anytime.",
     },
     location: {
       title: "Where's your block?",
@@ -1350,40 +1350,43 @@ export const en: AppMessages = {
     },
     allSet: {
       title: "You're all set!",
-      subtitle: "Welcome to Evorios — neighborly marketplace, the evolution of household living.",
-      exploreCta: "Choose how to browse →",
-      stockGarageCta: "Stock my garage →",
+      subtitle: "My Garage is your storefront toolkit. Home is how you browse the block.",
+      exploreCta: "Go to Home →",
+      stockGarageCta: "Open My Garage →",
     },
     browseHub: {
-      title: "What brings you here?",
-      subtitle: "Everyday browse or a yard-sale run.",
+      title: "Your block",
+      subtitle: "Browse neighbors or run a sale.",
+      trustModes: "Rent · Sell · Gift",
+      trustDeposit: "Deposit held",
+      trustVerified: "Verified hosts",
       findGear: {
         title: "Browse the block",
-        subtitle: "Search items · Feed or Garages",
-        cta: "Start browsing →",
+        subtitle: "Items and garages near you",
+        cta: "Open feed →",
       },
       yardSales: {
         title: "Yard & garage sales",
-        subtitle: "Snap sales & auctions on your block",
-        cta: "Garage sales →",
+        subtitle: "Snap sales and auctions on your block",
+        cta: "Open sales →",
       },
       categoriesTitle: "Browse by category",
-      categoriesHint: "Jump straight into tools, garden plants, party gear, and more.",
-      footer: "Rent & list anytime from Stock (+) or My Garage.",
+      categoriesHint: "Tools, garden plants, party gear, and more.",
+      footer: "Stock and manage from + or My Garage.",
     },
     firstHello: {
       bubbles: [
         "Hi — I'm {mascot}. Welcome to the block.",
-        "Every home is a business cell — rent, sell, or gift from your garage storefront.",
-        "I'll help you browse neighbors or open your cell on the block.",
+        "Every home is a business cell — your garage is the storefront.",
+        "Browse neighbors on Home, or run your cell from My Garage.",
       ],
       cta: "Let's go →",
       skipHint: "Tap to skip intro",
     },
     productIntro: {
       eyebrow: "Evorios",
-      title: "Neighborly marketplace",
-      body: "Each home is a business cell — the evolution of household living. Your garage becomes a storefront that rents, sells, or gifts what you own.",
+      title: "Your garage storefront",
+      body: "Each home is a business cell. Rent, sell, or gift from one garage storefront — no separate shop for every item.",
       rent: "Rent",
       rentHint: "Borrow & earn",
       sell: "Sell",
@@ -1393,7 +1396,7 @@ export const en: AppMessages = {
       catalogTitle: "What neighbors share",
       catalogHint:
         "Tap any category to open subcategories — tools, garden plants, cameras, party gear, and more.",
-      nextHint: "Next you’ll choose: stock your garage, or browse the block.",
+      nextHint: "Next: open your storefront, or browse the block.",
       continueCta: "Continue →",
     },
   },

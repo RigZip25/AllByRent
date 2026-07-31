@@ -12,7 +12,7 @@ import {
 } from "./garageSaleCs";
 
 export const cs: AppMessages = {
-  tagline: "Sousedský trh — evoluce vedení domácnosti.",
+  tagline: "Sousedský trh — každý dům je obchodní buňka.",
   taglineShort: "Sousedský trh.",
   modes: {
     earn: "Moje garáž",
@@ -38,7 +38,7 @@ export const cs: AppMessages = {
     more: "Účet",
   },
   splash: {
-    chipGarage: "Vaše garáž",
+    chipGarage: "Vaše výloha",
     chipBlock: "Na bloku",
   },
   auth: {
@@ -462,9 +462,9 @@ export const cs: AppMessages = {
       categories: { title: "Kategorie a podkategorie", subtitle: "Co je na bloku" },
     },
     ideaBody1: (appName) =>
-      `${appName} je sousedský trh. Každá domácnost je obchodní buňka — vaše garáž se stane online výlohou pro blok.`,
+      `${appName} je sousedský trh. Každá domácnost je obchodní buňka — garáž je výloha pro blok.`,
     ideaBody2:
-      "Sousedé procházejí police poblíž. Vy vystavíte nářadí, rostliny, foťáky, párty vybavení a další — bez samostatného obchodu pro každou věc.",
+      "Sousedé procházejí police poblíž. Vy vystavíte nářadí, rostliny, foťáky, párty — jeden toolkit garáže, ne samostatný obchod pro každou věc.",
     rememberTitle: "Pamatujte",
     rememberBody:
       "Stejný profil pro prohlížení i hostování. Mezi Procházet a Moje garáž přepnete v Profilu.",
@@ -1328,16 +1328,16 @@ export const cs: AppMessages = {
   },
   onboarding: {
     roleChoice: {
-      title: "Co vás sem přivádí?",
-      subtitle: "Nastavíme váš blok nebo garáž.",
+      title: "Jak chcete začít?",
+      subtitle: "Otevřete výlohu, nebo procházejte blok.",
       stockGarage: {
-        title: "Naplnit garáž",
-        subtitle: "Vystavte, co máte — půjčit, prodat nebo předat ze své vitríny.",
-        cta: "Otevřít moji garáž →",
+        title: "Otevřít můj byznys",
+        subtitle: "Vystavujte, oceňujte a sdílejte z garážové výlohy.",
+        cta: "Otevřít Moji garáž →",
       },
       browseBlock: {
         title: "Procházet blok",
-        subtitle: "Najděte vybavení, nářadí a nabídky v sousedských garážích.",
+        subtitle: "Najděte vybavení, nářadí a nabídky u sousedů.",
         cta: "Vybrat, kde hledat →",
       },
       footer: "Mezi Moje garáž a Procházet můžete přepínat kdykoli.",
@@ -1364,40 +1364,43 @@ export const cs: AppMessages = {
     },
     allSet: {
       title: "Hotovo!",
-      subtitle: "Vítejte v Evorios — sousedský trh, evoluce vedení domácnosti.",
-      exploreCta: "Jak chcete procházet →",
-      stockGarageCta: "Naplnit garáž →",
+      subtitle: "Moje garáž je toolkit výlohy. Domů je procházení bloku.",
+      exploreCta: "Přejít Domů →",
+      stockGarageCta: "Otevřít Moji garáž →",
     },
     browseHub: {
-      title: "Co vás sem přivádí?",
-      subtitle: "Běžné hledání nebo garážový výprodej.",
+      title: "Váš blok",
+      subtitle: "Procházejte sousedy nebo spusťte výprodej.",
+      trustModes: "Půjčit · Prodat · Darovat",
+      trustDeposit: "Záloha držena",
+      trustVerified: "Ověření hostitelé",
       findGear: {
         title: "Procházet blok",
-        subtitle: "Hledat věci · Feed nebo Garáže",
-        cta: "Začít procházet →",
+        subtitle: "Věci a garáže poblíž vás",
+        cta: "Otevřít feed →",
       },
       yardSales: {
         title: "Garážové výprodeje",
-        subtitle: "Výprodeje a aukce ve vašem bloku",
-        cta: "Výprodeje →",
+        subtitle: "Výprodeje a aukce na vašem bloku",
+        cta: "Otevřít výprodeje →",
       },
       categoriesTitle: "Podle kategorie",
-      categoriesHint: "Nářadí, zahrada, párty a další — rovnou do nabídky.",
-      footer: "Půjčit a vystavit můžete kdykoli přes Přidat (+) nebo Moje garáž.",
+      categoriesHint: "Nářadí, zahrada, párty a další.",
+      footer: "Vystavujte a spravujte přes + nebo Moje garáž.",
     },
     firstHello: {
       bubbles: [
         "Ahoj — jsem {mascot}. Vítejte na bloku.",
-        "Každý dům je obchodní buňka — půjčujte, prodávejte nebo darujte z garážové výlohy.",
-        "Pomůžu vám procházet sousedy nebo otevřít vaši buňku na bloku.",
+        "Každý dům je obchodní buňka — garáž je výloha.",
+        "Sousedy procházejte Domů, buňku veďte z Moje garáž.",
       ],
       cta: "Jdeme na to →",
       skipHint: "Klepnutím přeskočíte úvod",
     },
     productIntro: {
       eyebrow: "Evorios",
-      title: "Sousedský trh",
-      body: "Každý dům je obchodní buňka — evoluce vedení domácnosti. Garáž se stává výlohou, která půjčuje, prodává nebo daruje, co vlastníte.",
+      title: "Vaše garážová výloha",
+      body: "Každý dům je obchodní buňka. Půjčujte, prodávejte nebo darujte z jedné garážové výlohy — bez samostatného obchodu pro každou věc.",
       rent: "Půjčit",
       rentHint: "Půjčit i vydělat",
       sell: "Prodat",
@@ -1407,7 +1410,7 @@ export const cs: AppMessages = {
       catalogTitle: "Co sousedé sdílejí",
       catalogHint:
         "Klepněte na kategorii a otevřete podkategorie — nářadí, rostliny, foťáky, párty a další.",
-      nextHint: "Pak zvolíte: naplnit garáž, nebo procházet blok.",
+      nextHint: "Pak: otevřít výlohu, nebo procházet blok.",
       continueCta: "Pokračovat →",
     },
   },

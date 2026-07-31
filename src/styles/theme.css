@@ -822,6 +822,25 @@
     padding-inline: 0.25rem;
   }
 
+  .browse-hub-trust {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem 0.15rem;
+    font-size: clamp(0.68rem, 2.8vw, 0.75rem);
+    font-weight: 650;
+    letter-spacing: 0.01em;
+    color: #0d5c3a;
+    opacity: 0.78;
+  }
+
+  .browse-hub-trust-dot {
+    margin-inline: 0.2rem;
+    opacity: 0.45;
+    font-weight: 500;
+  }
+
   .browse-hub-cards {
     flex: 1;
     min-height: 0;

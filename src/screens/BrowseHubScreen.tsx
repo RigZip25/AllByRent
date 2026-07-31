@@ -52,6 +52,17 @@ export function BrowseHubScreen({ onChoose, onEditLocation }: BrowseHubScreenPro
             {copy.title}
           </h1>
           <p className="browse-hub-page-subtitle mt-1 text-gray-500">{copy.subtitle}</p>
+          <p className="browse-hub-trust mt-2.5" aria-label="Trust">
+            <span>{copy.trustModes}</span>
+            <span className="browse-hub-trust-dot" aria-hidden>
+              ·
+            </span>
+            <span>{copy.trustDeposit}</span>
+            <span className="browse-hub-trust-dot" aria-hidden>
+              ·
+            </span>
+            <span>{copy.trustVerified}</span>
+          </p>
         </div>
       </div>
 
