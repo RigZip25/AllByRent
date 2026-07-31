@@ -1,0 +1,6 @@
+# Evorios — https://app.evorios.com
+User-agent: *
+Allow: /
+Allow: /rent/
+
+Sitemap: https://app.evorios.com/sitemap.xml
