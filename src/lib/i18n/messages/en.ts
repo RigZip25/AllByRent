@@ -104,7 +104,7 @@ export const en: AppMessages = {
     titleLine1: "Install your",
     titleLine2: "neighborhood marketplace",
     body: (appName, shortName) =>
-      `${appName} goes on your Home Screen as ${shortName} — so you remember it among other icons. Four quick taps; updates install overnight.`,
+      `${appName} becomes ${shortName} on your Home Screen. Use Safari’s Share button below — the cards are only a guide.`,
     iosStep1Title: "Square with arrow",
     iosStep1Hint: "Center of the bottom bar",
     iosStep2Title: "View More",
@@ -118,14 +118,20 @@ export const en: AppMessages = {
     androidMenuStep: "Open the browser menu ⋮",
     androidInstallStep: "Tap Install app or Add to Home screen",
     iosAfterAdd: (appName) =>
-      `After Add, Safari closes and the ${appName} icon appears on your Home Screen. Open it anytime — updates download quietly and install overnight (~2 AM local), not while you're mid-tap.`,
+      `After Add, Safari closes and the ${appName} icon appears on your Home Screen. Open it anytime — updates install overnight.`,
     androidAfter: (appName) =>
-      `Open the ${appName} icon from your Home Screen. Updates download quietly and install overnight (~2 AM local), not while you're mid-tap.`,
+      `Open the ${appName} icon from your Home Screen. Updates install overnight.`,
     installApp: (appName) => `Install ${appName}`,
     addedContinue: "I’ve added it — continue",
     continueBrowser: "Continue in browser",
     almostThereAlert: (shortName) =>
       `Almost there!\n\nOpen the ${shortName} icon on your Home Screen (not this browser tab).`,
+    stepsGuideLabel: "Guide (not buttons) — then do this in Safari",
+    stepTapAria: (n) => `Guide step ${n}. Tip: use Safari Share below.`,
+    tapStepCoach: "These cards are a guide — tap Share in Safari’s bottom bar ↓",
+    nudgeTitle: "Do this now",
+    nudgeBody: "Tap Share in Safari — center of the bottom bar",
+    nudgeShareLabel: "Share",
   },
   home: {
     priceAny: "Any price",
