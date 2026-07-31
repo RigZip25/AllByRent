@@ -74,12 +74,10 @@ function IosAddButtonIcon({ label }: { label: string }) {
 function SafariShareNudge({
   title,
   body,
-  shareLabel,
   emphasized,
 }: {
   title: string;
   body: string;
-  shareLabel: string;
   emphasized?: boolean;
 }) {
   return (
@@ -89,14 +87,13 @@ function SafariShareNudge({
       aria-live="polite"
     >
       <div className="install-share-nudge-card">
-        <p className="install-share-nudge-kicker">{title}</p>
-        <div className="install-share-nudge-row">
-          <span className="install-share-nudge-icon" aria-hidden>
-            <IosShareIcon className="h-9 w-9" />
-          </span>
+        <span className="install-share-nudge-icon" aria-hidden>
+          <IosShareIcon className="h-5 w-5" />
+        </span>
+        <div className="install-share-nudge-text">
+          <p className="install-share-nudge-kicker">{title}</p>
           <p className="install-share-nudge-body">{body}</p>
         </div>
-        <p className="install-share-nudge-share">{shareLabel}</p>
       </div>
       <div className="install-share-nudge-arrow" aria-hidden>
         <span className="install-share-nudge-chevron">↓</span>
@@ -335,8 +332,8 @@ export function InstallGateScreen({
       }}
     >
       <div
-        className={`flex flex-1 flex-col px-5 pt-[max(1.5rem,env(safe-area-inset-top,0px))] ${
-          showIosSteps ? "pb-[7.5rem]" : "pb-8"
+        className={`flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pt-[max(1.5rem,env(safe-area-inset-top,0px))] ${
+          showIosSteps ? "pb-4" : "pb-8"
         }`}
       >
         <p
@@ -467,7 +464,6 @@ export function InstallGateScreen({
         <SafariShareNudge
           title={i.nudgeTitle}
           body={i.nudgeBody}
-          shareLabel={i.nudgeShareLabel}
           emphasized={nudgeFlash}
         />
       ) : null}
