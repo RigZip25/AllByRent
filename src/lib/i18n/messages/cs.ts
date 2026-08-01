@@ -1008,10 +1008,18 @@ export const cs: AppMessages = {
         `💡 ${label} přes Stripe hold — uvolní se, když se věc vrátí.`,
       salePrice: "Prodejní cena",
       sellNote:
-        "💡 Nastavte $0 a darujte zdarma (samostatný režim Darovat zatím není). U placených prodejů platí provize platformy.",
+        "💡 Nastavte 0 a darujte zdarma (samostatný režim Darovat zatím není). U placených prodejů platí provize platformy.",
       pricingTipRoi: (count) =>
-        `Ceny podle trhu — o 15 % pod půjčovnami. Po ${count} půjčkách se splatí.`,
-      pricingTipDefault: "Ceny podle trhu — o 15 % pod půjčovnami.",
+        `Dobrá cena — při této sazbě se to splatí zhruba po ${count} půjčkách. Kdykoli upravíte.`,
+      pricingTipDefault:
+        "Nechte pole prázdná a napište, co vám přijde férové. Po fotkách můžu navrhnout start — políčka za vás nevyplním.",
+      pricingTipSuggestRent: (daily) =>
+        `Z fotek bych začal kolem ${daily}/den na půjčení. Jen tip — políčko zůstane prázdné, dokud si nevyberete.`,
+      pricingTipSuggestSell: (sale) =>
+        `Z fotek je férové začít prodej kolem ${sale}. Jen tip — napište vlastní, nebo použijte moji.`,
+      pricingTipSuggestBoth: (daily, sale) =>
+        `Z fotek bych začal kolem ${daily}/den na půjčení, nebo asi ${sale} na prodej. Jen tip — políčka zůstanou prázdná, dokud si nevyberete.`,
+      useSuggestedPrices: "Použít můj tip",
       restrictedModesNote: "Některé režimy transakcí pro tuto kategorii nejsou k dispozici.",
     },
     pickup: {

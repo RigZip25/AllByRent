@@ -11,6 +11,7 @@ import {
 } from "../listingItemCategories";
 import { isYardSaleListingActive } from "../../../lib/yardSaleListing";
 import { useMessages } from "../../../lib/i18n/react";
+import { currencySymbol, formatMoney } from "../../../lib/regionalDisplay";
 
 const GREEN = "#0D5C3A";
 
@@ -90,22 +91,22 @@ function FieldLabel({
 function MoneyInput({
   value,
   onChange,
-  placeholder,
 }: {
   value: string;
   onChange: (value: string) => void;
-  placeholder?: string;
 }) {
+  const symbol = currencySymbol();
   return (
     <motion.div className="relative" layout="position">
       <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
-        $
+        {symbol}
       </span>
       <input
         type="number"
         min={0}
         value={value}
-        placeholder={placeholder}
+        placeholder=""
+        inputMode="decimal"
         onChange={(event) => onChange(event.target.value)}
         className="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-8 pr-4 text-gray-800 outline-none transition-colors focus:border-green-700"
       />
@@ -326,34 +327,19 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
     }));
   }, [draft.category, setDraft]);
 
-  useEffect(() => {
-    if (!draft.modes.rent) return;
+  /** Suggestions only — never auto-write into the price fields. */
+  const priceSuggestion = useMemo(() => {
     const value = parseFloat(draft.replacementValue);
-    if (!draft.category || Number.isNaN(value) || value <= 0) return;
-
-    const prices = calculateRentalPrices(
+    if (!draft.category || !Number.isFinite(value) || value <= 0) return null;
+    const rental = calculateRentalPrices(
       draft.category,
       value,
       draft.pricing.minimumPeriod,
     );
-
-    setDraft((current) => ({
-      ...current,
-      pricing: {
-        ...current.pricing,
-        dailyRate: prices.daily.toString(),
-        weeklyRate: prices.weekly.toString(),
-        monthlyRate: prices.monthly.toString(),
-        securityDeposit: prices.deposit.toString(),
-      },
-    }));
-  }, [
-    draft.category,
-    draft.modes.rent,
-    draft.replacementValue,
-    draft.pricing.minimumPeriod,
-    setDraft,
-  ]);
+    // Used-sale starting ask ~45% of replace-new estimate (host can ignore).
+    const sale = Math.max(1, Math.round(value * 0.45));
+    return { rental, sale };
+  }, [draft.category, draft.replacementValue, draft.pricing.minimumPeriod]);
 
   const toggleMode = (key: CategoryModeKey) => {
     setDraft((current) => {
@@ -381,10 +367,43 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
     ? Math.ceil(replacementValue / revenuePerRental)
     : 0;
 
-  const pricingTipMessage = showRoiTip
-    ? modesCopy.pricingTipRoi(rentalsToBreakEven)
-    : modesCopy.pricingTipDefault;
+  const wantRent = draft.modes.rent;
+  const wantSell = draft.modes.sell;
+  const canSuggestRent = Boolean(priceSuggestion && wantRent && priceSuggestion.rental.daily > 0);
+  const canSuggestSell = Boolean(priceSuggestion && wantSell && priceSuggestion.sale > 0);
+  const showApplySuggestion = canSuggestRent || canSuggestSell;
 
+  const pricingTipMessage = (() => {
+    if (showRoiTip) return modesCopy.pricingTipRoi(rentalsToBreakEven);
+    if (priceSuggestion && (canSuggestRent || canSuggestSell)) {
+      const dailyLabel = formatMoney(priceSuggestion.rental.daily);
+      const saleLabel = formatMoney(priceSuggestion.sale);
+      if (canSuggestRent && canSuggestSell) {
+        return modesCopy.pricingTipSuggestBoth(dailyLabel, saleLabel);
+      }
+      if (canSuggestRent) return modesCopy.pricingTipSuggestRent(dailyLabel);
+      return modesCopy.pricingTipSuggestSell(saleLabel);
+    }
+    return modesCopy.pricingTipDefault;
+  })();
+
+  const applySuggestedPrices = () => {
+    if (!priceSuggestion) return;
+    setDraft((current) => {
+      const next = { ...current.pricing };
+      if (current.modes.rent) {
+        const { daily, weekly, monthly, deposit } = priceSuggestion.rental;
+        if (daily > 0) next.dailyRate = String(daily);
+        if (weekly > 0) next.weeklyRate = String(weekly);
+        if (monthly > 0) next.monthlyRate = String(monthly);
+        if (deposit > 0) next.securityDeposit = String(deposit);
+      }
+      if (current.modes.sell && priceSuggestion.sale > 0) {
+        next.salePrice = String(priceSuggestion.sale);
+      }
+      return { ...current, pricing: next };
+    });
+  };
 
   const periodLabels: Record<MinimumRentalPeriod, string> = {
     "1 day": modesCopy.period1Day,
@@ -456,7 +475,6 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                         <MoneyInput
                           value={draft.pricing.dailyRate}
                           onChange={(value) => updatePricing("dailyRate", value)}
-                          placeholder="25"
                         />
                       </motion.div>
                     ) : null}
@@ -471,7 +489,6 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                         <MoneyInput
                           value={draft.pricing.weeklyRate}
                           onChange={(value) => updatePricing("weeklyRate", value)}
-                          placeholder="100"
                         />
                       </motion.div>
                     ) : null}
@@ -489,9 +506,6 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                         <MoneyInput
                           value={draft.pricing.monthlyRate}
                           onChange={(value) => updatePricing("monthlyRate", value)}
-                          placeholder={
-                            draft.category === "Real Estate" ? "800" : "350"
-                          }
                         />
                       </motion.div>
                     ) : null}
@@ -545,7 +559,6 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                             <MoneyInput
                               value={draft.pricing.longTermMonthlyRate ?? ""}
                               onChange={(value) => updatePricing("longTermMonthlyRate", value)}
-                              placeholder="450"
                             />
                             <div className="mt-2 flex items-center justify-between gap-2">
                               <p className="text-xs text-gray-500">
@@ -565,7 +578,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                               <div className="mt-2 rounded-xl bg-[#F0FDF4] px-3 py-2 text-xs text-gray-700">
                                 {modesCopy.longTermHelp(
                                   suggestedLongTermMonthly
-                                    ? `$${suggestedLongTermMonthly}/mo`
+                                    ? `${formatMoney(suggestedLongTermMonthly)}/mo`
                                     : "daily × 30 × 0.65",
                                 )}
                               </div>
@@ -581,7 +594,6 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                     <MoneyInput
                       value={draft.pricing.securityDeposit}
                       onChange={(value) => updatePricing("securityDeposit", value)}
-                      placeholder="200"
                     />
                     <p className="mt-1.5 text-xs text-gray-500">
                       {modesCopy.securityDepositHint}
@@ -610,7 +622,6 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                   <MoneyInput
                     value={draft.pricing.salePrice}
                     onChange={(value) => updatePricing("salePrice", value)}
-                    placeholder="500"
                   />
                 </motion.div>
                 <ModeNote>
@@ -624,7 +635,25 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
         })}
       </div>
 
-      <RentanoHint className="mt-6" hint={pricingTipMessage} showTapLabel />
+      <RentanoHint
+        className="mt-6"
+        showTapLabel
+        hint={
+          <span className="block space-y-2">
+            <span className="block">{pricingTipMessage}</span>
+            {showApplySuggestion ? (
+              <button
+                type="button"
+                onClick={applySuggestedPrices}
+                className="rounded-lg px-3 py-1.5 text-[12px] font-bold text-white"
+                style={{ backgroundColor: GREEN }}
+              >
+                {modesCopy.useSuggestedPrices}
+              </button>
+            ) : null}
+          </span>
+        }
+      />
 
       {showRestrictedModesNote ? (
         <p className="mt-4 text-center text-xs italic text-gray-400">

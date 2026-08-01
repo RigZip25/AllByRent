@@ -994,10 +994,18 @@ export const en: AppMessages = {
         `💡 ${label} via Stripe hold — released when the item is returned.`,
       salePrice: "Sale price",
       sellNote:
-        "💡 Set $0 to give it away free (no separate Gift mode for now). Platform commission applies on paid sales.",
+        "💡 Set 0 to give it away free (no separate Gift mode for now). Platform commission applies on paid sales.",
       pricingTipRoi: (count) =>
-        `Prices based on current market — 15% below rental stores. Rent it ${count} times and it pays for itself.`,
-      pricingTipDefault: "Prices based on current market — 15% below rental stores.",
+        `Nice — at that rate it pays for itself in about ${count} rentals. Adjust anytime.`,
+      pricingTipDefault:
+        "Leave prices blank and type what feels fair. After photos, I can suggest a starting point — I won’t fill the boxes for you.",
+      pricingTipSuggestRent: (daily) =>
+        `From the photos I’d start around ${daily}/day to rent. Suggestion only — your box stays empty until you choose.`,
+      pricingTipSuggestSell: (sale) =>
+        `From the photos a fair sale ask is around ${sale}. Suggestion only — type your own or use mine.`,
+      pricingTipSuggestBoth: (daily, sale) =>
+        `From the photos I’d start around ${daily}/day to rent, or about ${sale} to sell. Suggestion only — boxes stay empty until you choose.`,
+      useSuggestedPrices: "Use my suggestion",
       restrictedModesNote: "Some transaction modes are not available for this category.",
     },
     pickup: {

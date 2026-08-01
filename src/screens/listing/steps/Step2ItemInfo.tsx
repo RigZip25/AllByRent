@@ -470,7 +470,7 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
               type="number"
               min={0}
               value={draft.replacementValue}
-              placeholder="1200"
+              placeholder=""
               className={inputClassName("pl-8")}
               onChange={(event) => {
                 setDraft((current) => ({
