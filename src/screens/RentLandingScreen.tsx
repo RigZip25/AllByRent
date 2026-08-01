@@ -99,9 +99,9 @@ export function RentLandingScreen({
   const empty = !loading && listings.length === 0;
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col bg-white text-foreground">
+    <div className="rent-landing screen screen-adaptive mx-auto flex w-full max-w-3xl flex-col bg-white text-foreground">
       <header
-        className="border-b px-5 py-4"
+        className="shrink-0 border-b px-5 py-4"
         style={{ borderColor: "#E8E6E0", background: "linear-gradient(180deg, #F3F8F5 0%, #fff 100%)" }}
       >
         <a
