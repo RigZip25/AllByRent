@@ -49,9 +49,15 @@ const CATEGORY_NAMES = [
 /**
  * Keep in sync with src/lib/seo/seoLocations.ts
  * Flip indexable when a region launches.
+ * Current launch: Praha + Bratislava (CZ/SK).
  */
 const SEO_LOCATIONS = [
-  { slug: "hot-springs-village-ar", indexable: true },
+  { slug: "praha", indexable: true },
+  { slug: "bratislava", indexable: true },
+  { slug: "brno", indexable: false },
+  { slug: "ostrava", indexable: false },
+  { slug: "kosice", indexable: false },
+  { slug: "hot-springs-village-ar", indexable: false },
   { slug: "austin-tx", indexable: false },
   { slug: "dallas-tx", indexable: false },
   { slug: "little-rock-ar", indexable: false },

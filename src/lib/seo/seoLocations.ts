@@ -4,14 +4,16 @@
  * `indexable` is a manual launch flag — never auto-enable for every city.
  * Only indexable locations appear in sitemap.xml and get robots index,follow.
  * Non-indexable pages are still routable (campaign / preview) but stay noindex.
+ *
+ * Launch order (current): Czechia + Slovakia first, then paid social / unknown geos.
  */
 
 export type SeoLocation = {
-  /** URL segment, e.g. "hot-springs-village-ar" */
+  /** URL segment, e.g. "praha" */
   slug: string;
-  /** Display name used in H1 / titles, e.g. "Hot Springs Village" */
+  /** Display name used in H1 / titles, e.g. "Praha" */
   name: string;
-  /** Optional region/state for display, e.g. "AR" */
+  /** Optional region/state for display, e.g. "CZ" */
   region?: string;
   /** ISO country code */
   country: string;
@@ -29,12 +31,54 @@ export type SeoLocation = {
  * Flip `indexable` when a region goes live with supply or an active campaign.
  */
 export const SEO_LOCATIONS: readonly SeoLocation[] = [
+  // --- Launch: Czechia & Slovakia ---
+  {
+    slug: "praha",
+    name: "Praha",
+    region: "CZ",
+    country: "CZ",
+    indexable: true,
+    cityAliases: ["Prague", "Praha, Czechia", "Prague, Czechia", "Praha, CZ", "Prague, CZ"],
+  },
+  {
+    slug: "bratislava",
+    name: "Bratislava",
+    region: "SK",
+    country: "SK",
+    indexable: true,
+    cityAliases: ["Bratislava, Slovakia", "Bratislava, SK", "Bratislava, Slovensko"],
+  },
+  {
+    slug: "brno",
+    name: "Brno",
+    region: "CZ",
+    country: "CZ",
+    indexable: false,
+    cityAliases: ["Brno, Czechia", "Brno, CZ"],
+  },
+  {
+    slug: "ostrava",
+    name: "Ostrava",
+    region: "CZ",
+    country: "CZ",
+    indexable: false,
+    cityAliases: ["Ostrava, Czechia", "Ostrava, CZ"],
+  },
+  {
+    slug: "kosice",
+    name: "Košice",
+    region: "SK",
+    country: "SK",
+    indexable: false,
+    cityAliases: ["Kosice", "Košice, Slovakia", "Kosice, SK"],
+  },
+  // --- Pipeline / later campaigns (US kept for ads & unknown geo) ---
   {
     slug: "hot-springs-village-ar",
     name: "Hot Springs Village",
     region: "AR",
     country: "US",
-    indexable: true,
+    indexable: false,
     cityAliases: ["Hot Springs Village, AR", "Hot Springs Village AR", "71909"],
   },
   {
