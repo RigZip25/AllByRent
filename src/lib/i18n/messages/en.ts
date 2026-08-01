@@ -343,9 +343,10 @@ export const en: AppMessages = {
   profile: {
     language: "Language",
     languageAuto: "Auto (follows phone)",
+    languageAutoTranslated: (lang) => `Auto · ${lang} (instant translate)`,
     languageValue: (label) => label,
     languageHint:
-      "Auto uses your phone language when we support it (English, Čeština) — including the install screen. Other languages fall back to English until we add them.",
+      "Auto follows your phone. English and Čeština use our built-in UI; other languages (Polish, Spanish, French…) translate instantly — like Google Translate.",
     defaultExperience: "Browse or My Garage",
     defaultExperienceHint:
       "Browse is the block feed; My Garage is your storefront. Switch anytime on Home or Garage — or list with +.",

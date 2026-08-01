@@ -1800,4 +1800,23 @@
       display: none;
     }
   }
+
+  /* Google Website Translator — hide chrome, keep in-page translation */
+  .goog-te-banner-frame,
+  .goog-te-balloon-frame,
+  #goog-gt-tt,
+  .goog-tooltip,
+  .goog-tooltip:hover {
+    display: none !important;
+  }
+  .goog-text-highlight {
+    background: none !important;
+    box-shadow: none !important;
+  }
+  body {
+    top: 0 !important;
+  }
+  .skiptranslate iframe.skiptranslate {
+    display: none !important;
+  }
 }

@@ -356,9 +356,10 @@ export const cs: AppMessages = {
   profile: {
     language: "Jazyk",
     languageAuto: "Automaticky (podle telefonu)",
+    languageAutoTranslated: (lang) => `Auto · ${lang} (okamžitý překlad)`,
     languageValue: (label) => label,
     languageHint:
-      "Automaticky použije jazyk telefonu, pokud ho podporujeme (angličtina, čeština). Stejné nastavení platí i pro obrazovku instalace. Ostatní jazyky zatím padají na angličtinu.",
+      "Automaticky podle telefonu. Angličtina a čeština jsou vestavěné; ostatní jazyky (polština, španělština, francouzština…) se přeloží ihned — jako Google Translate.",
     defaultExperience: "Procházet nebo Moje garáž",
     defaultExperienceHint:
       "Procházet je feed bloku; Moje garáž je výloha. Přepínejte Domů nebo Garáž — nebo vystavte přes +.",
