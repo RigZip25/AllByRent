@@ -23,7 +23,17 @@
     {
       "source": "/pwa-:path*",
       "destination": "https://app.evorios.com/pwa-:path*"
-    }
+    },
+    { "source": "/cs", "destination": "/index-cs.html" },
+    { "source": "/cs/", "destination": "/index-cs.html" },
+    { "source": "/pl", "destination": "/index-pl.html" },
+    { "source": "/pl/", "destination": "/index-pl.html" },
+    { "source": "/sk", "destination": "/index-sk.html" },
+    { "source": "/sk/", "destination": "/index-sk.html" },
+    { "source": "/pt", "destination": "/index-pt.html" },
+    { "source": "/pt/", "destination": "/index-pt.html" },
+    { "source": "/es-mx", "destination": "/index-es-mx.html" },
+    { "source": "/es-mx/", "destination": "/index-es-mx.html" }
   ],
   "headers": [
     {
