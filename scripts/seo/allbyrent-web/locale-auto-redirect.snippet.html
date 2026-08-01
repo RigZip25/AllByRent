@@ -1,0 +1,62 @@
+<!--
+  Paste into AllByRent-Web root index.html immediately after <head>
+  (English homepage only). Locale folders /cs /sk /pl /pt /es-mx stay as-is.
+
+  Behavior:
+  - Phone language cs/sk/pl/pt/es → redirect to matching /{locale}/
+  - English (or unknown) → stay on /
+  - Escape hatch: https://evorios.com/?lang=en  (locks EN for the tab)
+-->
+<script>
+(function () {
+  try {
+    var path = location.pathname || "/";
+    if (path !== "/" && path !== "") return;
+
+    var q = new URLSearchParams(location.search);
+    if (q.get("lang") === "en" || q.get("nolang") === "1") {
+      try { sessionStorage.setItem("evorios_apex_lang", "en"); } catch (e) {}
+      return;
+    }
+    try {
+      if (sessionStorage.getItem("evorios_apex_lang") === "en") return;
+    } catch (e) {}
+
+    var destByPrimary = {
+      cs: "/cs/",
+      sk: "/sk/",
+      pl: "/pl/",
+      pt: "/pt/",
+      es: "/es-mx/"
+    };
+
+    var tags = (navigator.languages && navigator.languages.length)
+      ? Array.prototype.slice.call(navigator.languages)
+      : [];
+    if (navigator.language) tags.push(navigator.language);
+
+    for (var i = 0; i < tags.length; i++) {
+      var raw = String(tags[i] || "").trim().toLowerCase().replace(/_/g, "-");
+      if (!raw) continue;
+      if (raw.indexOf("es-mx") === 0 || raw.indexOf("es-419") === 0) {
+        location.replace("/es-mx/");
+        return;
+      }
+      var primary = raw.split("-")[0];
+      if (primary === "en") return;
+      var dest = destByPrimary[primary];
+      if (dest) {
+        location.replace(dest);
+        return;
+      }
+    }
+  } catch (e) {}
+})();
+</script>
+<link rel="alternate" hreflang="en" href="https://evorios.com/">
+<link rel="alternate" hreflang="cs" href="https://evorios.com/cs/">
+<link rel="alternate" hreflang="sk" href="https://evorios.com/sk/">
+<link rel="alternate" hreflang="pl" href="https://evorios.com/pl/">
+<link rel="alternate" hreflang="pt-BR" href="https://evorios.com/pt/">
+<link rel="alternate" hreflang="es-MX" href="https://evorios.com/es-mx/">
+<link rel="alternate" hreflang="x-default" href="https://evorios.com/">
