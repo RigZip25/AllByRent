@@ -743,6 +743,10 @@ export type AppMessages = {
       sellNote: string;
       pricingTipRoi: (count: number) => string;
       pricingTipDefault: string;
+      pricingTipSuggestRent: (daily: string) => string;
+      pricingTipSuggestSell: (sale: string) => string;
+      pricingTipSuggestBoth: (daily: string, sale: string) => string;
+      useSuggestedPrices: string;
       restrictedModesNote: string;
     };
     pickup: {

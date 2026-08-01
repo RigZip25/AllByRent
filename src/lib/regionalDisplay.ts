@@ -57,6 +57,21 @@ export function usesImperialDistance(country: CountryCode = getSearchCountryCode
   return IMPERIAL_DISTANCE.has(country);
 }
 
+/** Narrow currency symbol/code for input prefixes (e.g. Kč, $, €). */
+export function currencySymbol(country: CountryCode = getSearchCountryCode()): string {
+  const { code, locale } = currencyForCountry(country);
+  try {
+    const parts = new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: code,
+      currencyDisplay: "narrowSymbol",
+    }).formatToParts(0);
+    return parts.find((part) => part.type === "currency")?.value ?? code;
+  } catch {
+    return code;
+  }
+}
+
 /** Format a money amount for the active (or given) country. */
 export function formatMoney(
   amount: number,
