@@ -51,6 +51,7 @@ import { RentLandingScreen } from "../screens/RentLandingScreen";
 import { parseRentPath } from "../lib/seo/parseRentPath";
 import type { SeoCategory } from "../lib/seo/rentCategories";
 import { formatSeoLocationLabel, type SeoLocation } from "../lib/seo/seoLocations";
+import { APP_ORIGIN, isSeoApexHost } from "../lib/brand";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
 import { useBrowserBackTrap } from "../hooks/useBrowserBackTrap";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
@@ -644,9 +645,12 @@ function AppRoutes() {
     if (screen === "listItem") {
       const params = new URLSearchParams(window.location.search);
       const listingId = params.get("listingId")?.trim() || "";
+      const seoCategory = params.get("seoCategory")?.trim() || "";
+      const seoCity = params.get("seoCity")?.trim() || "";
       markIntroDone();
       completeOnboarding();
-      setListingPrefill(null);
+      if (seoCity) setTripDestination(seoCity);
+      setListingPrefill(seoCategory ? { category: seoCategory, city: seoCity || undefined } : null);
       if (listingId) {
         setEditingListingId(listingId);
         setEditingListingReturn(listingId);
@@ -655,8 +659,17 @@ function AppRoutes() {
         setEditingListingReturn(null);
       }
       setNavStack([]);
-      setCurrentScreen("listItem");
-      clearBootQuery(["screen", "listingId", "skipSplash", "connect"]);
+      // SEO apex CTAs land on listing intro when starting a new garage stock.
+      setCurrentScreen(listingId ? "listItem" : "listingIntro");
+      clearBootQuery([
+        "screen",
+        "listingId",
+        "skipSplash",
+        "connect",
+        "seoCategory",
+        "seoCity",
+        "skipInstall",
+      ]);
       return;
     }
     const resolved = resolveBootScreenParam(screen);
@@ -1518,16 +1531,38 @@ function AppRoutes() {
             category={rentLandingCategory}
             location={rentLandingLocation}
             onOpenListing={(listingId) => {
+              // Apex SEO host → deep-link into the PWA (keep authority on evorios.com for /rent only).
+              if (isSeoApexHost()) {
+                window.location.assign(
+                  `${APP_ORIGIN}/item/${encodeURIComponent(listingId)}?skipSplash=1`,
+                );
+                return;
+              }
               window.history.pushState({}, "", "/");
               setSelectedItemId(listingId);
               navigateTo("itemDetail");
             }}
             onStockGarage={({ category, city }) => {
+              if (isSeoApexHost()) {
+                const params = new URLSearchParams({
+                  screen: "listItem",
+                  skipSplash: "1",
+                  skipInstall: "1",
+                });
+                if (category) params.set("seoCategory", category);
+                if (city) params.set("seoCity", city);
+                window.location.assign(`${APP_ORIGIN}/?${params.toString()}`);
+                return;
+              }
               if (city) setTripDestination(city);
               window.history.pushState({}, "", "/");
               handleStartListing({ category, city });
             }}
             onOpenApp={() => {
+              if (isSeoApexHost()) {
+                window.location.assign(`${APP_ORIGIN}/?skipSplash=1&skipInstall=1`);
+                return;
+              }
               if (rentLandingLocation) {
                 setTripDestination(formatSeoLocationLabel(rentLandingLocation));
               }

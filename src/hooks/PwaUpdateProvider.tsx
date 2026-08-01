@@ -35,6 +35,7 @@ import {
   readPwaUpdatePendingAt,
   shouldAutoApplyDeferredUpdate,
 } from "../lib/pwaQuietUpdate";
+import { isSeoApexHost } from "../lib/brand";
 
 type UpdateSWFn = (reloadPage?: boolean) => Promise<void>;
 
@@ -167,6 +168,13 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
     }
 
     const cleanups: (() => void)[] = [];
+
+    // Apex SEO host proxies the SPA for /rent only — never install the PWA SW there.
+    if (isSeoApexHost()) {
+      return () => {
+        for (const fn of cleanups) fn();
+      };
+    }
 
     const updateSW = registerSW({
       immediate: true,

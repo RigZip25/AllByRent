@@ -1,0 +1,39 @@
+{
+  "rewrites": [
+    {
+      "source": "/rent",
+      "destination": "https://app.evorios.com/__seo/rent"
+    },
+    {
+      "source": "/rent/:path*",
+      "destination": "https://app.evorios.com/__seo/rent/:path*"
+    },
+    {
+      "source": "/assets/:path*",
+      "destination": "https://app.evorios.com/assets/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://app.evorios.com/api/:path*"
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "destination": "https://app.evorios.com/manifest.webmanifest"
+    },
+    {
+      "source": "/pwa-:path*",
+      "destination": "https://app.evorios.com/pwa-:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/rent/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
+  ]
+}

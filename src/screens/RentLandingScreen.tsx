@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { APP_NAME, MARKETING_URL, BRAND_GREEN, BRAND_AMBER } from "../lib/brand";
+import { APP_NAME, SEO_ORIGIN, BRAND_GREEN, BRAND_AMBER } from "../lib/brand";
 import type { ListingDraft } from "./listing/types";
 import { ListingFeedCard, offerTypeFromModes } from "../app/components/ListingFeedCard";
 import { getRelatedSeoCategories, type SeoCategory } from "../lib/seo/rentCategories";
@@ -13,6 +13,7 @@ import {
   buildRentLandingMeta,
   rentCategoryCityPath,
   rentCategoryPath,
+  rentLandingAbsoluteUrl,
 } from "../lib/seo/rentLandingMeta";
 import { buildRentLandingJsonLd } from "../lib/seo/rentLandingSchema";
 import { fetchRentLandingListings } from "../lib/seo/fetchRentLandingListings";
@@ -104,7 +105,7 @@ export function RentLandingScreen({
         style={{ borderColor: "#E8E6E0", background: "linear-gradient(180deg, #F3F8F5 0%, #fff 100%)" }}
       >
         <a
-          href={MARKETING_URL}
+          href={SEO_ORIGIN}
           className="text-xs font-semibold uppercase tracking-wide"
           style={{ color: BRAND_GREEN }}
         >
@@ -241,30 +242,37 @@ export function RentLandingScreen({
             </h2>
             <ul className="flex flex-wrap gap-2">
               <li>
-                <button
-                  type="button"
-                  className="rounded-lg border px-3 py-1.5 text-sm"
+                <a
+                  href={rentLandingAbsoluteUrl(rentCategoryPath(category.slug))}
+                  className="inline-block rounded-lg border px-3 py-1.5 text-sm"
                   style={{ borderColor: "#E8E6E0" }}
-                  onClick={() => onNavigateRentPath(rentCategoryPath(category.slug))}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onNavigateRentPath(rentCategoryPath(category.slug));
+                  }}
                 >
                   All areas
-                </button>
+                </a>
               </li>
-              {cityLinks.map((city) => (
-                <li key={city.slug}>
-                  <button
-                    type="button"
-                    className="rounded-lg border px-3 py-1.5 text-sm"
-                    style={{ borderColor: "#E8E6E0" }}
-                    onClick={() =>
-                      onNavigateRentPath(rentCategoryCityPath(category.slug, city.slug))
-                    }
-                  >
-                    {formatSeoLocationLabel(city)}
-                    {!city.indexable ? " · soon" : ""}
-                  </button>
-                </li>
-              ))}
+              {cityLinks.map((city) => {
+                const path = rentCategoryCityPath(category.slug, city.slug);
+                return (
+                  <li key={city.slug}>
+                    <a
+                      href={rentLandingAbsoluteUrl(path)}
+                      className="inline-block rounded-lg border px-3 py-1.5 text-sm"
+                      style={{ borderColor: "#E8E6E0" }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onNavigateRentPath(path);
+                      }}
+                    >
+                      {formatSeoLocationLabel(city)}
+                      {!city.indexable ? " · soon" : ""}
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           </section>
         ) : (
@@ -273,21 +281,25 @@ export function RentLandingScreen({
               Cities we are launching
             </h2>
             <ul className="flex flex-wrap gap-2">
-              {SEO_LOCATIONS.map((city) => (
-                <li key={city.slug}>
-                  <button
-                    type="button"
-                    className="rounded-lg border px-3 py-1.5 text-sm"
-                    style={{ borderColor: "#E8E6E0" }}
-                    onClick={() =>
-                      onNavigateRentPath(rentCategoryCityPath(category.slug, city.slug))
-                    }
-                  >
-                    {formatSeoLocationLabel(city)}
-                    {city.indexable ? "" : " · soon"}
-                  </button>
-                </li>
-              ))}
+              {SEO_LOCATIONS.map((city) => {
+                const path = rentCategoryCityPath(category.slug, city.slug);
+                return (
+                  <li key={city.slug}>
+                    <a
+                      href={rentLandingAbsoluteUrl(path)}
+                      className="inline-block rounded-lg border px-3 py-1.5 text-sm"
+                      style={{ borderColor: "#E8E6E0" }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onNavigateRentPath(path);
+                      }}
+                    >
+                      {formatSeoLocationLabel(city)}
+                      {city.indexable ? "" : " · soon"}
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
             {indexableCities.length === 0 ? (
               <p className="text-xs text-muted-foreground">
@@ -302,31 +314,33 @@ export function RentLandingScreen({
             Related categories
           </h2>
           <ul className="flex flex-wrap gap-2">
-            {related.map((cat) => (
-              <li key={cat.slug}>
-                <button
-                  type="button"
-                  className="rounded-lg border px-3 py-1.5 text-sm"
-                  style={{ borderColor: "#E8E6E0" }}
-                  onClick={() =>
-                    onNavigateRentPath(
-                      location
-                        ? rentCategoryCityPath(cat.slug, location.slug)
-                        : rentCategoryPath(cat.slug),
-                    )
-                  }
-                >
-                  {cat.icon} {cat.name}
-                </button>
-              </li>
-            ))}
+            {related.map((cat) => {
+              const path = location
+                ? rentCategoryCityPath(cat.slug, location.slug)
+                : rentCategoryPath(cat.slug);
+              return (
+                <li key={cat.slug}>
+                  <a
+                    href={rentLandingAbsoluteUrl(path)}
+                    className="inline-block rounded-lg border px-3 py-1.5 text-sm"
+                    style={{ borderColor: "#E8E6E0" }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onNavigateRentPath(path);
+                    }}
+                  >
+                    {cat.icon} {cat.name}
+                  </a>
+                </li>
+              );
+            })}
           </ul>
         </section>
 
         <nav className="border-t pt-4 text-sm" style={{ borderColor: "#E8E6E0" }} aria-label="Site">
           <ul className="flex flex-wrap gap-4 text-muted-foreground">
             <li>
-              <a href={MARKETING_URL} className="underline hover:text-foreground">
+              <a href={SEO_ORIGIN} className="underline hover:text-foreground">
                 evorios.com
               </a>
             </li>
@@ -336,12 +350,12 @@ export function RentLandingScreen({
               </button>
             </li>
             <li>
-              <a href={`${MARKETING_URL}/terms.html`} className="underline hover:text-foreground">
+              <a href={`${SEO_ORIGIN}/terms.html`} className="underline hover:text-foreground">
                 Terms
               </a>
             </li>
             <li>
-              <a href={`${MARKETING_URL}/privacy.html`} className="underline hover:text-foreground">
+              <a href={`${SEO_ORIGIN}/privacy.html`} className="underline hover:text-foreground">
                 Privacy
               </a>
             </li>

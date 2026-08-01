@@ -18,12 +18,33 @@
       "source": "/legal/refunds.html",
       "destination": "https://evorios.com/refunds.html",
       "permanent": false
+    },
+    {
+      "source": "/rent",
+      "destination": "https://evorios.com/rent",
+      "permanent": true
+    },
+    {
+      "source": "/rent/:path*",
+      "destination": "https://evorios.com/rent/:path*",
+      "permanent": true
     }
   ],
   "rewrites": [
     { "source": "/link", "destination": "/link.html" },
     { "source": "/item/:id", "destination": "/link.html?listingId=:id&skipSplash=1" },
-    { "source": "/((?!api/|legal/|sitemap\\.xml|robots\\.txt).*)", "destination": "/index.html" }
+    {
+      "source": "/__seo/rent",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/__seo/rent/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/((?!api/|legal/|__seo/|sitemap\\.xml|robots\\.txt).*)",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {
@@ -59,6 +80,15 @@
         {
           "key": "Cache-Control",
           "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/__seo/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
         }
       ]
     },
