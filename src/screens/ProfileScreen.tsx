@@ -609,7 +609,11 @@ export function ProfileScreen({
               label={profileCopy.language}
               value={
                 localeControls.auto
-                  ? profileCopy.languageAuto
+                  ? localeControls.pageTranslateLang
+                    ? profileCopy.languageAutoTranslated(
+                        localeControls.pageTranslateLabel || localeControls.pageTranslateLang,
+                      )
+                    : profileCopy.languageAuto
                   : profileCopy.languageValue(localeControls.labels[localeControls.locale])
               }
               onClick={() => {

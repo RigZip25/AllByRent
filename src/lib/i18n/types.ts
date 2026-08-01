@@ -433,6 +433,8 @@ export type AppMessages = {
   profile: {
     language: string;
     languageAuto: string;
+    /** Auto mode when Google page-translate is active, e.g. "Auto · Polish (instant translate)". */
+    languageAutoTranslated: (lang: string) => string;
     languageValue: (label: string) => string;
     languageHint: string;
     defaultExperience: string;

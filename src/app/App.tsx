@@ -57,6 +57,7 @@ import { useBrowserBackTrap } from "../hooks/useBrowserBackTrap";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
 import { AuthProvider, useAuth } from "../hooks/AuthProvider";
 import { RequireAuthProvider } from "../hooks/RequireAuth";
+import { PageTranslateBridge } from "../components/PageTranslateBridge";
 import {
   consumeAuthReturn,
   clearPendingAuthEmail,
@@ -2100,6 +2101,7 @@ export default function App() {
     <PwaUpdateProvider>
       <PwaInstallProvider>
         <AuthProvider>
+          <PageTranslateBridge />
           <AppRoutes />
         </AuthProvider>
       </PwaInstallProvider>

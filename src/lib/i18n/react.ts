@@ -11,6 +11,10 @@ import {
 } from "./index";
 import type { AppLocale } from "./types";
 import { LOCALE_LABELS, SUPPORTED_LOCALES } from "./types";
+import {
+  getActivePageTranslateTarget,
+  languageDisplayName,
+} from "./pageTranslate";
 
 export function useLocale(): AppLocale {
   return useSyncExternalStore(subscribeLocale, getLocale, getLocale);
@@ -34,6 +38,7 @@ export function useAppModeLabels() {
 export function useLocaleControls() {
   const locale = useLocale();
   const auto = useSyncExternalStore(subscribeLocale, isLocaleAuto, isLocaleAuto);
+  const pageTranslateLang = auto ? getActivePageTranslateTarget() : null;
   return {
     locale,
     auto,
@@ -41,5 +46,9 @@ export function useLocaleControls() {
     supported: SUPPORTED_LOCALES,
     setLocale,
     setLocaleAuto,
+    pageTranslateLang,
+    pageTranslateLabel: pageTranslateLang
+      ? languageDisplayName(pageTranslateLang, locale)
+      : null,
   };
 }
