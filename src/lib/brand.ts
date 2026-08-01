@@ -123,11 +123,24 @@ export const ONBOARDING = {
 
 export const SUPPORT_EMAIL = "support@evorios.com";
 export const MARKETING_URL = "https://evorios.com";
+export const MARKETING_HOST = "evorios.com";
 /** Production PWA origin (deep links, passkeys, Stripe return URLs). */
 export const APP_ORIGIN = "https://app.evorios.com";
 export const APP_HOST = "app.evorios.com";
+/**
+ * Public origin for programmatic /rent SEO landings (canonical, sitemap).
+ * Served on the apex via marketing-site proxy; app keeps the generator + live data.
+ */
+export const SEO_ORIGIN = MARKETING_URL;
+export const SEO_HOST = MARKETING_HOST;
 /** Public marketing site — QR codes and outbound links to the web. */
 export const LISTING_QR_BASE_URL = `${APP_ORIGIN}/item`;
+
+/** True when the page is on the apex marketing host (proxied /rent landings). */
+export function isSeoApexHost(hostname = typeof window !== "undefined" ? window.location.hostname : ""): boolean {
+  const host = hostname.trim().toLowerCase();
+  return host === SEO_HOST || host === `www.${SEO_HOST}`;
+}
 
 /** Public legal pages on the marketing site. */
 export const TERMS_URL = `${MARKETING_URL}/terms.html`;

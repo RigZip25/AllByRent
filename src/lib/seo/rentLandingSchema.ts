@@ -1,4 +1,4 @@
-import { APP_NAME, APP_ORIGIN } from "../brand";
+import { APP_NAME, APP_ORIGIN, SEO_ORIGIN } from "../brand";
 import type { ListingDraft } from "../../screens/listing/types";
 import type { SeoCategory } from "./rentCategories";
 import type { SeoLocation } from "./seoLocations";
@@ -50,7 +50,7 @@ export function buildRentLandingJsonLd(params: {
     isPartOf: {
       "@type": "WebSite",
       name: APP_NAME,
-      url: APP_ORIGIN,
+      url: SEO_ORIGIN,
     },
     about: {
       "@type": "Thing",

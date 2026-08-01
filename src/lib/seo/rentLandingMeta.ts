@@ -1,4 +1,4 @@
-import { APP_NAME, APP_ORIGIN, MARKETING_URL } from "../brand";
+import { APP_NAME, APP_ORIGIN, SEO_ORIGIN } from "../brand";
 import { formatSeoLocationLabel, type SeoLocation, SEO_CATEGORY_HUBS_INDEXABLE } from "./seoLocations";
 import type { SeoCategory } from "./rentCategories";
 
@@ -20,6 +20,12 @@ export function rentCategoryCityPath(categorySlug: string, citySlug: string): st
   return `/rent/${categorySlug}/${citySlug}`;
 }
 
+/** Absolute public URL on the apex SEO domain. */
+export function rentLandingAbsoluteUrl(path: string): string {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `${SEO_ORIGIN}${normalized}`;
+}
+
 export function buildRentLandingMeta(params: {
   category: SeoCategory;
   location: SeoLocation | null;
@@ -34,7 +40,7 @@ export function buildRentLandingMeta(params: {
       title: `Rent ${noun} from neighbors in ${place} | ${APP_NAME}`,
       description: `Rent ${noun} from neighbors in ${place} on ${APP_NAME}. Browse local garage storefronts — or be the first to list ${noun} on your block.`,
       canonicalPath: path,
-      canonicalUrl: `${APP_ORIGIN}${path}`,
+      canonicalUrl: rentLandingAbsoluteUrl(path),
       robots: location.indexable ? "index,follow" : "noindex,follow",
       h1: `Rent ${noun} in ${place}`,
       intro: `${APP_NAME} connects neighbors so you can borrow ${noun} nearby instead of buying new. Meetups stay local — usually a short walk or drive on your block.`,
@@ -46,7 +52,7 @@ export function buildRentLandingMeta(params: {
     title: `Rent ${noun} from neighbors | ${APP_NAME}`,
     description: `Rent ${noun} from neighbors on ${APP_NAME}. Find garage storefronts near you — or open yours and be first in your category.`,
     canonicalPath: path,
-    canonicalUrl: `${APP_ORIGIN}${path}`,
+    canonicalUrl: rentLandingAbsoluteUrl(path),
     robots: SEO_CATEGORY_HUBS_INDEXABLE ? "index,follow" : "noindex,follow",
     h1: `Rent ${noun} from neighbors`,
     intro: `${APP_NAME} is a neighborhood marketplace: every home is a business cell with a garage storefront. Browse ${noun} near you, or stock your garage and earn when neighbors need them.`,
@@ -54,7 +60,7 @@ export function buildRentLandingMeta(params: {
 }
 
 export function marketingHomeUrl(): string {
-  return MARKETING_URL;
+  return SEO_ORIGIN;
 }
 
 export function appHomeUrl(): string {

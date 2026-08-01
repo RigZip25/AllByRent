@@ -1,6 +1,8 @@
-# Evorios — https://app.evorios.com
+# Evorios app — https://app.evorios.com
+# Programmatic /rent SEO landings are indexed on the apex domain only.
 User-agent: *
 Allow: /
-Allow: /rent/
+Disallow: /rent/
+Disallow: /__seo/
 
-Sitemap: https://app.evorios.com/sitemap.xml
+Sitemap: https://evorios.com/sitemap.xml
