@@ -16,11 +16,22 @@ import type { ListingDraft } from "../screens/listing/types";
 
 
 
-/** Platform service fee (12% of rental + delivery + heavy surcharge). */
+import { getEffectiveRentalFeeRate } from "./ops/opsSettings";
+
+/** Default platform service fee (12%). Runtime value may come from Ops console. */
 export const PLATFORM_SERVICE_FEE_RATE = 0.12;
 
 /** @deprecated Use PLATFORM_SERVICE_FEE_RATE */
 export const DEMO_SERVICE_FEE_RATE = PLATFORM_SERVICE_FEE_RATE;
+
+/** Effective rental fee rate (Ops promo / override when set). */
+export function getPlatformServiceFeeRate(): number {
+  try {
+    return getEffectiveRentalFeeRate();
+  } catch {
+    return PLATFORM_SERVICE_FEE_RATE;
+  }
+}
 
 
 
@@ -205,7 +216,7 @@ export function computeRentalPriceBreakdown(input: {
 
   const taxable = rentalSubtotalUsd + deliveryFeeUsd + insuranceFeeUsd;
 
-  const serviceFeeUsd = roundUsd(taxable * PLATFORM_SERVICE_FEE_RATE);
+  const serviceFeeUsd = roundUsd(taxable * getPlatformServiceFeeRate());
 
   const totalUsd = roundUsd(taxable + serviceFeeUsd);
 

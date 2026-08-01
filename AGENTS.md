@@ -23,7 +23,8 @@ Useful query params (wired in `App.tsx` / `deepLinks.ts`):
 - `?listingId=` / `/item/:id` — item detail (or garage shop for sell listings)
 - `?garage=` — neighbor garage shop
 - `/rent/{category}` / `/rent/{category}/{city}` — SEO rent landings on **evorios.com** (proxied; see `docs/RENT_SEO_LANDINGS.md`). `app.evorios.com/rent/*` 301s to the apex.
-- `?reset` / `?resetApp=1` — wipe local data
+- `/ops` or `?screen=ops` — owner ops console (login + password; fee %, promos, geo). Not linked in the consumer UI.
+- `?reset` / `?resetApp=1` — wipe local data (ops settings under `evorios_ops_*` are kept)
 - Auth is modal `AuthGate` (email OTP) — there is no `?screen=login` / signup stack
 - `?step=` is **not** wired (listing wizard is in-app steps, not URL steps)
 

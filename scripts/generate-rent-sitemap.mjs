@@ -137,6 +137,7 @@ User-agent: *
 Allow: /
 Disallow: /rent/
 Disallow: /__seo/
+Disallow: /ops
 
 Sitemap: ${SEO_ORIGIN}/sitemap.xml
 `;
@@ -154,7 +155,7 @@ console.log(
   `[seo] Apex sitemap: ${apexUrls.length} URLs → scripts/seo/evorios-apex-sitemap.xml`,
 );
 console.log(
-  `[seo] App robots disallow /rent + /__seo; sitemap points to ${SEO_ORIGIN}/sitemap.xml`,
+  `[seo] App robots disallow /rent + /__seo + /ops; sitemap points to ${SEO_ORIGIN}/sitemap.xml`,
 );
 console.log(
   `[seo] Indexable cities: ${indexableLocations.length}; categories: ${categorySlugs.length}`,
