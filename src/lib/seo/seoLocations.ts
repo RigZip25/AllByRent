@@ -1,3 +1,5 @@
+import { isOpsLocationIndexable } from "../ops/opsSettings";
+
 /**
  * SEO / programmatic landing locations.
  *
@@ -227,7 +229,7 @@ export function getSeoLocationBySlug(slug: string): SeoLocation | null {
 }
 
 export function getIndexableSeoLocations(): SeoLocation[] {
-  return SEO_LOCATIONS.filter((loc) => loc.indexable);
+  return SEO_LOCATIONS.filter((loc) => isOpsLocationIndexable(loc.slug, loc.indexable));
 }
 
 export function formatSeoLocationLabel(loc: SeoLocation): string {

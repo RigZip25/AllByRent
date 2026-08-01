@@ -19,11 +19,11 @@ import {
   startAuctionCheckout,
   type AuctionCheckoutInput,
 } from "../lib/repositories/paymentsRepository";
+import { getSellFeeRate } from "../lib/ops/opsSettings";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 const BORDER = "#E8E6E0";
-const PLATFORM_FEE_RATE = 0.1;
 
 type GarageWinnerCheckoutScreenProps = {
   listingId: string;
@@ -55,7 +55,7 @@ export function GarageWinnerCheckoutScreen({
   const totals = useMemo(() => {
     const winningBidUsd = checkout?.winningBidUsd ?? 0;
     // Seller absorbs platform fee; winner pays the bid only.
-    const platformFeeUsd = Math.round(winningBidUsd * PLATFORM_FEE_RATE * 100) / 100;
+    const platformFeeUsd = Math.round(winningBidUsd * getSellFeeRate() * 100) / 100;
     const totalUsd = winningBidUsd;
     return { winningBidUsd, platformFeeUsd, totalUsd };
   }, [checkout]);

@@ -48,10 +48,12 @@ import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
 import { SetupRequiredScreen } from "../screens/SetupRequiredScreen";
 import { RentLandingScreen } from "../screens/RentLandingScreen";
+import { OpsConsoleScreen } from "../screens/ops/OpsConsoleScreen";
 import { parseRentPath } from "../lib/seo/parseRentPath";
 import type { SeoCategory } from "../lib/seo/rentCategories";
 import { formatSeoLocationLabel, type SeoLocation } from "../lib/seo/seoLocations";
 import { APP_ORIGIN, isSeoApexHost } from "../lib/brand";
+import { isOpsPath } from "../lib/ops/opsAuth";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
 import { useBrowserBackTrap } from "../hooks/useBrowserBackTrap";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
@@ -187,7 +189,8 @@ type Screen =
   | "coHosts"
   | "personalInfo"
   | "publicProfile"
-  | "rentLanding";
+  | "rentLanding"
+  | "ops";
 
 const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
   "browseHub",
@@ -201,6 +204,7 @@ const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
   "garageCart",
   "garageWinnerCheckout",
   "rentLanding",
+  "ops",
 ]);
 
 const BOTTOM_NAV_SCREENS = new Set<Screen>([
@@ -259,6 +263,8 @@ const BOOT_SCREEN_ALIASES: Partial<Record<string, Screen>> = {
   rental: "rentals",
   "earning-your-stuff": "earnBusiness",
   earnBusiness: "earnBusiness",
+  ops: "ops",
+  admin: "ops",
 };
 
 function resolveBootScreenParam(raw: string | null): Screen | null {
@@ -376,6 +382,13 @@ function readBootRentLanding(): {
     category: parsed.category,
     location: parsed.location,
   };
+}
+
+function readBootOps(): boolean {
+  if (typeof window === "undefined") return false;
+  if (isOpsPath(window.location.pathname)) return true;
+  const screen = new URLSearchParams(window.location.search).get("screen");
+  return screen === "ops" || screen === "admin";
 }
 
 function readBootQuery() {
@@ -506,8 +519,14 @@ function AppRoutes() {
   const boot = readBootQuery();
   const bootDeepLink = useRef(readBootDeepLink()).current;
   const bootRent = useRef(readBootRentLanding()).current;
+  const bootOps = useRef(readBootOps()).current;
   const handledSessionTokenRef = useRef<string | null>(null);
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
+    if (bootOps) {
+      markIntroDone();
+      completeOnboarding();
+      return "ops";
+    }
     if (bootRent.active && bootRent.category) {
       markIntroDone();
       completeOnboarding();
@@ -1460,12 +1479,21 @@ function AppRoutes() {
 
   useEffect(() => {
     const onPopState = () => {
+      if (isOpsPath(window.location.pathname) || readBootOps()) {
+        setCurrentScreen("ops");
+        setNavStack([]);
+        return;
+      }
       const parsed = parseRentPath(window.location.pathname);
       if (parsed && parsed.kind !== "invalid" && parsed.category) {
         setRentLandingCategory(parsed.category);
         setRentLandingLocation(parsed.location);
         setCurrentScreen("rentLanding");
         setNavStack([]);
+        return;
+      }
+      if (currentScreen === "ops") {
+        setCurrentScreen("home");
         return;
       }
       if (currentScreen === "rentLanding") {
@@ -1494,6 +1522,25 @@ function AppRoutes() {
     !isOnboardingScreen(currentScreen) &&
     !HIDE_BRAND_HEADER_SCREENS.has(currentScreen);
   const showBottomNav = BOTTOM_NAV_SCREENS.has(currentScreen);
+
+  // Owner ops console works even when consumer integrations are missing.
+  if (currentScreen === "ops") {
+    return (
+      <div className="app-shell">
+        <div className="app-container bg-background">
+          <div className="app-screen-host">
+            <OpsConsoleScreen
+              onExitToApp={() => {
+                window.history.pushState({}, "", "/?skipSplash=1&skipInstall=1");
+                setNavStack([]);
+                setCurrentScreen(isOnboardingComplete() ? "home" : resolvePostSplashScreen());
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!auth.configured) {
     return <SetupRequiredScreen />;

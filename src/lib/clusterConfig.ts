@@ -1,4 +1,5 @@
 import { getMessages } from "./i18n";
+import { getOpsClusterDefaultMi } from "./ops/opsSettings";
 
 /** Product default — see docs/CLUSTER_POLICY.md */
 export const CLUSTER_RADIUS_DEFAULT_MI = 25;
@@ -30,7 +31,11 @@ export function getClusterRadiusMi(): number {
   } catch {
     /* private mode */
   }
-  return CLUSTER_RADIUS_DEFAULT_MI;
+  try {
+    return getOpsClusterDefaultMi();
+  } catch {
+    return CLUSTER_RADIUS_DEFAULT_MI;
+  }
 }
 
 export function setClusterRadiusMi(miles: number): void {

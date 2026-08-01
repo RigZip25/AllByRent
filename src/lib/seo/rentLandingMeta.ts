@@ -1,4 +1,5 @@
 import { APP_NAME, APP_ORIGIN, SEO_ORIGIN } from "../brand";
+import { isOpsLocationIndexable } from "../ops/opsSettings";
 import { formatSeoLocationLabel, type SeoLocation, SEO_CATEGORY_HUBS_INDEXABLE } from "./seoLocations";
 import type { SeoCategory } from "./rentCategories";
 
@@ -41,7 +42,9 @@ export function buildRentLandingMeta(params: {
       description: `Rent ${noun} from neighbors in ${place} on ${APP_NAME}. Browse local garage storefronts — or be the first to list ${noun} on your block.`,
       canonicalPath: path,
       canonicalUrl: rentLandingAbsoluteUrl(path),
-      robots: location.indexable ? "index,follow" : "noindex,follow",
+      robots: isOpsLocationIndexable(location.slug, location.indexable)
+        ? "index,follow"
+        : "noindex,follow",
       h1: `Rent ${noun} in ${place}`,
       intro: `${APP_NAME} connects neighbors so you can borrow ${noun} nearby instead of buying new. Meetups stay local — usually a short walk or drive on your block.`,
     };

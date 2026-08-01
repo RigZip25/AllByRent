@@ -4,5 +4,6 @@ User-agent: *
 Allow: /
 Disallow: /rent/
 Disallow: /__seo/
+Disallow: /ops
 
 Sitemap: https://evorios.com/sitemap.xml

@@ -13,6 +13,7 @@ import { getInterestedCount, getNegotiationPhase, isEligibleAuctionBidder } from
 import { defaultAuctionWindow, formatAuctionTiming, inferAuctionStartsAt } from "./garageAuctionWindow";
 import { getGarageSaleSchedule } from "./garageSaleStorage";
 import { formatMoney } from "./regionalDisplay";
+import { getSellFeeRate } from "./ops/opsSettings";
 
 const CART_KEY = "evorios_garage_cart";
 const BIDS_KEY = "evorios_garage_bids";
@@ -50,8 +51,6 @@ export type ShopOffer = {
   interestedCount: number;
   allowsOffers: boolean;
 };
-
-const PLATFORM_FEE_RATE = 0.1;
 
 function readJson<T>(key: string, fallback: T): T {
   try {
@@ -162,7 +161,7 @@ export function getCartTotals() {
   const lines = getCartLines();
   const subtotalUsd = Math.round(lines.reduce((sum, line) => sum + line.priceUsd, 0) * 100) / 100;
   // Seller absorbs platform fee via Connect; buyer pays listed item prices only.
-  const platformFeeUsd = Math.round(subtotalUsd * PLATFORM_FEE_RATE * 100) / 100;
+  const platformFeeUsd = Math.round(subtotalUsd * getSellFeeRate() * 100) / 100;
   const totalUsd = subtotalUsd;
   return { subtotalUsd, platformFeeUsd, totalUsd, lineCount: lines.length };
 }

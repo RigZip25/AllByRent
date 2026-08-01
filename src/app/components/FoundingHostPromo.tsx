@@ -7,6 +7,7 @@ import {
 } from "../../lib/foundingHostPromoStorage";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMessages } from "../../lib/i18n/react";
+import { loadOpsSettings } from "../../lib/ops/opsSettings";
 
 const GREEN_DARK = "#0D5C3A";
 const GREEN = "#1A9E6E";
@@ -30,11 +31,14 @@ export function FoundingHostPromo({
   const founding = t.shelf.founding;
   const isEarn = appMode === "earn";
   const seen = isFoundingHostPromoSeen();
+  const enabled = loadOpsSettings().foundingPromoEnabled;
   const subcategoryDisplay = localizeCategoryLabel(subcategoryLabel);
 
   useEffect(() => {
-    if (!seen) markFoundingHostPromoSeen();
-  }, [seen]);
+    if (enabled && !seen) markFoundingHostPromoSeen();
+  }, [enabled, seen]);
+
+  if (!enabled) return null;
 
   const primaryLabel = isEarn ? founding.listFirstCta : founding.postRequestCta;
   const primaryHint = isEarn ? founding.hintEarn : founding.hintRent;
