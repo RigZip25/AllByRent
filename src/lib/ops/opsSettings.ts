@@ -10,6 +10,20 @@ const DEFAULT_RENTAL_FEE = 0.12;
 const DEFAULT_SELL_FEE = 0.1;
 const DEFAULT_CLUSTER_MI = 25;
 
+export type OpsMarketingLocation = {
+  id: string;
+  /** City or area name, e.g. "Kladno" / "Vinohrady" */
+  name: string;
+  /** Optional district / neighborhood */
+  district: string;
+  /** ISO country, e.g. CZ */
+  country: string;
+  /** Campaign notes */
+  notes: string;
+  active: boolean;
+  createdAt: string;
+};
+
 export type OpsSettings = {
   rentalFeeRate: number;
   sellFeeRate: number;
@@ -25,6 +39,8 @@ export type OpsSettings = {
   indexableOverrides: Record<string, boolean>;
   /** Cities to highlight as launch focus */
   geoFocusSlugs: string[];
+  /** Manually entered marketing cities / districts */
+  marketingLocations: OpsMarketingLocation[];
   updatedAt: string | null;
 };
 
@@ -38,8 +54,22 @@ const DEFAULTS: OpsSettings = {
   clusterDefaultMi: DEFAULT_CLUSTER_MI,
   indexableOverrides: {},
   geoFocusSlugs: ["praha", "brno", "bratislava"],
+  marketingLocations: [],
   updatedAt: null,
 };
+
+export function slugifyMarketingLocation(name: string, district = ""): string {
+  const base = [name, district].filter(Boolean).join(" ");
+  return base
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 64);
+}
 
 function clampRate(n: number, fallback: number): number {
   if (!Number.isFinite(n)) return fallback;
@@ -64,6 +94,21 @@ function normalize(raw: Partial<OpsSettings> | null | undefined): OpsSettings {
   const focus = Array.isArray(raw.geoFocusSlugs)
     ? raw.geoFocusSlugs.filter((s): s is string => typeof s === "string" && s.trim().length > 0)
     : DEFAULTS.geoFocusSlugs;
+  const marketingLocations = Array.isArray(raw.marketingLocations)
+    ? raw.marketingLocations
+        .filter((row): row is OpsMarketingLocation => Boolean(row && typeof row.name === "string"))
+        .map((row) => ({
+          id: typeof row.id === "string" && row.id ? row.id : `ml_${Date.now()}`,
+          name: String(row.name).trim().slice(0, 80),
+          district: typeof row.district === "string" ? row.district.trim().slice(0, 80) : "",
+          country: typeof row.country === "string" ? row.country.trim().toUpperCase().slice(0, 8) : "CZ",
+          notes: typeof row.notes === "string" ? row.notes.trim().slice(0, 500) : "",
+          active: row.active !== false,
+          createdAt:
+            typeof row.createdAt === "string" ? row.createdAt : new Date().toISOString(),
+        }))
+        .filter((row) => row.name.length > 0)
+    : [];
   return {
     rentalFeeRate: clampRate(Number(raw.rentalFeeRate), DEFAULT_RENTAL_FEE),
     sellFeeRate: clampRate(Number(raw.sellFeeRate), DEFAULT_SELL_FEE),
@@ -77,6 +122,7 @@ function normalize(raw: Partial<OpsSettings> | null | undefined): OpsSettings {
     clusterDefaultMi: clampMiles(Number(raw.clusterDefaultMi ?? DEFAULT_CLUSTER_MI)),
     indexableOverrides: overrides,
     geoFocusSlugs: focus,
+    marketingLocations,
     updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : null,
   };
 }
