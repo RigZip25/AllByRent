@@ -9,7 +9,9 @@
 #   - Browser URL / Google: apex domain via marketing-site Vercel rewrite
 #     (AllByRent-Web) → proxies to app `__seo/rent/*` (200, not a redirect)
 #   - app.evorios.com/rent/* → 301 to https://evorios.com/rent/*
-#   - app `__seo/rent/*` is noindex (X-Robots-Tag) — proxy-only path
+#   - app `__seo/rent/*` is the proxy-only path (disallowed in app robots.txt;
+#     do NOT send X-Robots-Tag noindex — Vercel forwards it to the apex and
+#     would block indexing of evorios.com/rent/*)
 #
 # Source of truth:
 #   - Categories: listingItemCategories CATEGORY_DISPLAY_ORDER (20)
