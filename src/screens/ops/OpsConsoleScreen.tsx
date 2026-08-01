@@ -57,9 +57,22 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
   const [pulse, setPulse] = useState<OpsPulse>(() => computeOpsPulse());
   const [savedFlash, setSavedFlash] = useState<string | null>(null);
   const [promoPercent, setPromoPercent] = useState("");
+  const [rentalFeeInput, setRentalFeeInput] = useState(() =>
+    percentInputValue(loadOpsSettings().rentalFeeRate),
+  );
+  const [sellFeeInput, setSellFeeInput] = useState(() =>
+    percentInputValue(loadOpsSettings().sellFeeRate),
+  );
+  const [clusterInput, setClusterInput] = useState(() =>
+    String(loadOpsSettings().clusterDefaultMi),
+  );
 
   const refresh = () => {
-    setSettings(loadOpsSettings());
+    const next = loadOpsSettings();
+    setSettings(next);
+    setRentalFeeInput(percentInputValue(next.rentalFeeRate));
+    setSellFeeInput(percentInputValue(next.sellFeeRate));
+    setClusterInput(String(next.clusterDefaultMi));
     setPulse(computeOpsPulse());
   };
 
@@ -88,11 +101,12 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
     window.setTimeout(() => setSavedFlash(null), 2200);
   };
 
-  const persist = (patch: Partial<OpsSettings>, msg = "Saved") => {
+  const persist = (patch: Partial<OpsSettings>, msg = "Saved"): OpsSettings => {
     const next = saveOpsSettings(patch);
     setSettings(next);
     setPulse(computeOpsPulse());
     flash(msg);
+    return next;
   };
 
   const citiesByCountry = useMemo(() => {
@@ -224,7 +238,11 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
           </div>
         </div>
         {savedFlash ? (
-          <p className="mt-2 text-[12px] font-semibold" style={{ color: BRAND_GREEN }}>
+          <p
+            className="mt-2 rounded-lg px-3 py-2 text-[13px] font-bold text-white"
+            style={{ backgroundColor: BRAND_GREEN }}
+            role="status"
+          >
             {savedFlash}
           </p>
         ) : null}
@@ -298,13 +316,8 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
                 inputMode="decimal"
                 className="w-full rounded-xl border px-3 py-2.5 text-[15px]"
                 style={{ borderColor: BORDER }}
-                value={percentInputValue(settings.rentalFeeRate)}
-                onChange={(e) =>
-                  setSettings((s) => ({
-                    ...s,
-                    rentalFeeRate: rateFromPercentInput(e.target.value, s.rentalFeeRate),
-                  }))
-                }
+                value={rentalFeeInput}
+                onChange={(e) => setRentalFeeInput(e.target.value)}
               />
             </label>
             <label className="block space-y-1">
@@ -315,13 +328,8 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
                 inputMode="decimal"
                 className="w-full rounded-xl border px-3 py-2.5 text-[15px]"
                 style={{ borderColor: BORDER }}
-                value={percentInputValue(settings.sellFeeRate)}
-                onChange={(e) =>
-                  setSettings((s) => ({
-                    ...s,
-                    sellFeeRate: rateFromPercentInput(e.target.value, s.sellFeeRate),
-                  }))
-                }
+                value={sellFeeInput}
+                onChange={(e) => setSellFeeInput(e.target.value)}
               />
             </label>
           </div>
@@ -329,15 +337,13 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
             type="button"
             className="mt-3 rounded-xl px-4 py-2.5 text-[13px] font-bold text-white"
             style={{ backgroundColor: BRAND_GREEN }}
-            onClick={() =>
-              persist(
-                {
-                  rentalFeeRate: settings.rentalFeeRate,
-                  sellFeeRate: settings.sellFeeRate,
-                },
-                "Fees saved",
-              )
-            }
+            onClick={() => {
+              const rentalFeeRate = rateFromPercentInput(rentalFeeInput, settings.rentalFeeRate);
+              const sellFeeRate = rateFromPercentInput(sellFeeInput, settings.sellFeeRate);
+              const next = persist({ rentalFeeRate, sellFeeRate }, "Fees saved");
+              setRentalFeeInput(percentInputValue(next.rentalFeeRate));
+              setSellFeeInput(percentInputValue(next.sellFeeRate));
+            }}
           >
             Save fees
           </button>
@@ -475,24 +481,21 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
                 inputMode="numeric"
                 className="w-28 rounded-xl border px-3 py-2.5 text-[15px]"
                 style={{ borderColor: BORDER }}
-                value={String(settings.clusterDefaultMi)}
-                onChange={(e) =>
-                  setSettings((s) => ({
-                    ...s,
-                    clusterDefaultMi: Math.min(
-                      100,
-                      Math.max(5, Number.parseInt(e.target.value || "25", 10) || 25),
-                    ),
-                  }))
-                }
+                value={clusterInput}
+                onChange={(e) => setClusterInput(e.target.value)}
               />
               <button
                 type="button"
                 className="rounded-xl px-4 py-2.5 text-[13px] font-bold text-white"
                 style={{ backgroundColor: BRAND_GREEN }}
                 onClick={() => {
-                  persist({ clusterDefaultMi: settings.clusterDefaultMi }, "Cluster default saved");
-                  setClusterRadiusMi(settings.clusterDefaultMi);
+                  const clusterDefaultMi = Math.min(
+                    100,
+                    Math.max(5, Number.parseInt(clusterInput || "25", 10) || 25),
+                  );
+                  persist({ clusterDefaultMi }, "Cluster default saved");
+                  setClusterInput(String(clusterDefaultMi));
+                  setClusterRadiusMi(clusterDefaultMi);
                   setPulse(computeOpsPulse());
                 }}
               >
