@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { APP_NAME, BRAND_AMBER, BRAND_GREEN } from "../../lib/brand";
+import { APP_NAME, BRAND_AMBER, BRAND_GREEN, SEO_ORIGIN, SUPPORT_EMAIL } from "../../lib/brand";
 import {
   attemptOpsLogin,
+  getOpsCredentials,
   isOpsSessionActive,
   opsLogout,
 } from "../../lib/ops/opsAuth";
@@ -11,6 +12,8 @@ import {
   OPS_SETTINGS_CHANGED_EVENT,
   resetOpsSettings,
   saveOpsSettings,
+  slugifyMarketingLocation,
+  type OpsMarketingLocation,
   type OpsSettings,
 } from "../../lib/ops/opsSettings";
 import { computeOpsPulse, type OpsPulse } from "../../lib/ops/opsPulse";
@@ -25,6 +28,17 @@ import {
   type SeoLocation,
 } from "../../lib/seo/seoLocations";
 import { setClusterRadiusMi } from "../../lib/clusterConfig";
+import {
+  fetchRemoteFeedback,
+  loadLocalFeedback,
+  mergeFeedbackInbox,
+  patchRemoteFeedbackStatus,
+  PLATFORM_FEEDBACK_CHANGED_EVENT,
+  updateLocalFeedbackStatus,
+  type FeedbackKind,
+  type FeedbackStatus,
+  type PlatformFeedback,
+} from "../../lib/platformFeedbackStorage";
 
 const BORDER = "#E8E6E0";
 const MUTED = "#6B7280";
@@ -42,6 +56,30 @@ function rateFromPercentInput(raw: string, fallback: number): number {
 function percentInputValue(rate: number): string {
   const pct = Math.round(rate * 1000) / 10;
   return Number.isInteger(pct) ? String(pct) : String(pct);
+}
+
+function kindLabel(kind: FeedbackKind): string {
+  switch (kind) {
+    case "help":
+      return "Помощь";
+    case "complaint":
+      return "Жалоба";
+    case "idea":
+      return "Идея";
+    default:
+      return "Другое";
+  }
+}
+
+function statusLabel(status: FeedbackStatus): string {
+  switch (status) {
+    case "seen":
+      return "Просмотрено";
+    case "done":
+      return "Закрыто";
+    default:
+      return "Новое";
+  }
 }
 
 type OpsConsoleScreenProps = {
@@ -66,6 +104,13 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
   const [clusterInput, setClusterInput] = useState(() =>
     String(loadOpsSettings().clusterDefaultMi),
   );
+  const [locName, setLocName] = useState("");
+  const [locDistrict, setLocDistrict] = useState("");
+  const [locCountry, setLocCountry] = useState("CZ");
+  const [locNotes, setLocNotes] = useState("");
+  const [inbox, setInbox] = useState<PlatformFeedback[]>(() => loadLocalFeedback());
+  const [inboxLoading, setInboxLoading] = useState(false);
+  const [inboxWarning, setInboxWarning] = useState<string | null>(null);
 
   const refresh = () => {
     const next = loadOpsSettings();
@@ -76,6 +121,20 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
     setPulse(computeOpsPulse());
   };
 
+  const refreshInbox = async () => {
+    setInboxLoading(true);
+    const local = loadLocalFeedback();
+    const opsPass = getOpsCredentials().password;
+    const remote = await fetchRemoteFeedback(opsPass);
+    setInbox(mergeFeedbackInbox(local, remote));
+    setInboxWarning(
+      remote.length === 0
+        ? "Удалённая очередь пуста или таблица ещё не создана в Supabase. Локальные заявки ниже всё равно видны."
+        : null,
+    );
+    setInboxLoading(false);
+  };
+
   useEffect(() => {
     const onChange = () => refresh();
     window.addEventListener(OPS_SETTINGS_CHANGED_EVENT, onChange);
@@ -84,7 +143,17 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
 
   useEffect(() => {
     if (!authed) return;
-    document.title = `${APP_NAME} Ops`;
+    const onFb = () => {
+      void refreshInbox();
+    };
+    window.addEventListener(PLATFORM_FEEDBACK_CHANGED_EVENT, onFb);
+    void refreshInbox();
+    return () => window.removeEventListener(PLATFORM_FEEDBACK_CHANGED_EVENT, onFb);
+  }, [authed]);
+
+  useEffect(() => {
+    if (!authed) return;
+    document.title = `${APP_NAME} · Ops`;
     const robots = document.querySelector('meta[name="robots"]');
     if (robots) {
       robots.setAttribute("content", "noindex,nofollow");
@@ -101,7 +170,7 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
     window.setTimeout(() => setSavedFlash(null), 2200);
   };
 
-  const persist = (patch: Partial<OpsSettings>, msg = "Saved"): OpsSettings => {
+  const persist = (patch: Partial<OpsSettings>, msg = "Сохранено"): OpsSettings => {
     const next = saveOpsSettings(patch);
     setSettings(next);
     setPulse(computeOpsPulse());
@@ -119,6 +188,40 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
     return [...map.entries()];
   }, []);
 
+  const newCount = inbox.filter((r) => r.status === "new").length;
+
+  const addMarketingLocation = () => {
+    const name = locName.trim();
+    if (!name) {
+      flash("Укажите город или район");
+      return;
+    }
+    const row: OpsMarketingLocation = {
+      id:
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `ml_${Date.now()}`,
+      name,
+      district: locDistrict.trim(),
+      country: locCountry.trim().toUpperCase() || "CZ",
+      notes: locNotes.trim(),
+      active: true,
+      createdAt: new Date().toISOString(),
+    };
+    const next = [row, ...settings.marketingLocations];
+    persist({ marketingLocations: next }, "Локация добавлена");
+    setLocName("");
+    setLocDistrict("");
+    setLocNotes("");
+  };
+
+  const setFeedbackStatus = async (row: PlatformFeedback, status: FeedbackStatus) => {
+    updateLocalFeedbackStatus(row.id, status);
+    await patchRemoteFeedbackStatus(getOpsCredentials().password, row.id, status);
+    await refreshInbox();
+    flash(statusLabel(status));
+  };
+
   if (!authed) {
     return (
       <div className="screen screen-adaptive flex flex-col bg-[#F0F4F2] text-foreground">
@@ -130,10 +233,10 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
             {APP_NAME} · Ops
           </p>
           <h1 className="mt-2 text-[28px] font-extrabold tracking-tight" style={{ color: BRAND_GREEN }}>
-            Owner console
+            Консоль владельца
           </h1>
           <p className="mt-2 text-[14px] leading-relaxed" style={{ color: MUTED }}>
-            Fee %, promos, and geo signals — light controls, not a CRM.
+            Комиссии, промо, гео для маркетинга и входящие просьбы о помощи — без тяжёлой CRM.
           </p>
 
           <form
@@ -146,13 +249,13 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
                 setAuthed(true);
                 refresh();
               } else {
-                setLoginError("Wrong login or password.");
+                setLoginError("Неверный логин или пароль.");
               }
             }}
           >
             <label className="block space-y-1.5">
               <span className="text-[12px] font-semibold" style={{ color: MUTED }}>
-                Login
+                Логин
               </span>
               <input
                 autoComplete="username"
@@ -164,7 +267,7 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
             </label>
             <label className="block space-y-1.5">
               <span className="text-[12px] font-semibold" style={{ color: MUTED }}>
-                Password
+                Пароль
               </span>
               <input
                 type="password"
@@ -183,7 +286,7 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
               className="w-full rounded-xl py-3.5 text-[15px] font-bold text-white"
               style={{ backgroundColor: BRAND_GREEN }}
             >
-              Enter console
+              Войти
             </button>
           </form>
 
@@ -193,7 +296,7 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
             className="mt-6 text-[13px] font-semibold underline"
             style={{ color: MUTED }}
           >
-            Back to app
+            Вернуться в приложение
           </button>
         </div>
       </div>
@@ -202,17 +305,14 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
 
   return (
     <div className="screen screen-adaptive flex flex-col bg-[#F0F4F2] text-foreground">
-      <header
-        className="shrink-0 border-b bg-white px-4 py-3"
-        style={{ borderColor: BORDER }}
-      >
+      <header className="shrink-0 border-b bg-white px-4 py-3" style={{ borderColor: BORDER }}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: BRAND_GREEN }}>
               {APP_NAME} Ops
             </p>
             <h1 className="mt-1 text-[20px] font-extrabold" style={{ color: BRAND_GREEN }}>
-              Owner console
+              Консоль владельца
             </h1>
           </div>
           <div className="flex shrink-0 gap-2">
@@ -225,7 +325,7 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
                 setAuthed(false);
               }}
             >
-              Log out
+              Выйти
             </button>
             <button
               type="button"
@@ -233,7 +333,7 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
               style={{ backgroundColor: BRAND_GREEN }}
               onClick={onExitToApp}
             >
-              App
+              В приложение
             </button>
           </div>
         </div>
@@ -249,24 +349,131 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
       </header>
 
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-5 pb-16">
+        {/* Inbox */}
+        <section
+          className="rounded-2xl border bg-white px-4 py-4"
+          style={{ borderColor: BORDER }}
+          aria-label="Входящие"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-[15px] font-bold" style={{ color: BRAND_GREEN }}>
+                Запросы о помощи и отзывы
+                {newCount > 0 ? (
+                  <span
+                    className="ml-2 rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
+                    style={{ backgroundColor: BRAND_AMBER, color: "#1a1a1a" }}
+                  >
+                    {newCount} новых
+                  </span>
+                ) : null}
+              </h2>
+              <p className="mt-1 text-[12px]" style={{ color: MUTED }}>
+                Из приложения: Ещё → «Помощь и отзыв». Письма также на {SUPPORT_EMAIL}.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="shrink-0 rounded-lg border px-3 py-1.5 text-[12px] font-semibold"
+              style={{ borderColor: BORDER }}
+              onClick={() => void refreshInbox()}
+              disabled={inboxLoading}
+            >
+              {inboxLoading ? "…" : "Обновить"}
+            </button>
+          </div>
+          {inboxWarning ? (
+            <p className="mt-2 text-[11px] leading-relaxed" style={{ color: MUTED }}>
+              {inboxWarning}
+            </p>
+          ) : null}
+          <ul className="mt-3 space-y-2">
+            {inbox.length === 0 ? (
+              <li className="rounded-xl border px-3 py-3 text-[13px]" style={{ borderColor: BORDER, color: MUTED }}>
+                Пока пусто — как только кто-то напишет из приложения, заявка появится здесь.
+              </li>
+            ) : (
+              inbox.map((row) => (
+                <li
+                  key={row.id}
+                  className="rounded-xl border px-3 py-3"
+                  style={{
+                    borderColor: row.status === "new" ? `${BRAND_GREEN}66` : BORDER,
+                    background: row.status === "new" ? "rgba(13,92,58,0.04)" : "#fff",
+                  }}
+                >
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wide" style={{ color: MUTED }}>
+                    <span>{kindLabel(row.kind)}</span>
+                    <span>·</span>
+                    <span>{statusLabel(row.status)}</span>
+                    <span>·</span>
+                    <span>{new Date(row.createdAt).toLocaleString()}</span>
+                    {row.source === "remote" ? <span>· облако</span> : <span>· локально</span>}
+                  </div>
+                  <p className="mt-1.5 whitespace-pre-wrap text-[14px] leading-relaxed text-gray-800">
+                    {row.message}
+                  </p>
+                  {(row.contactEmail || row.userEmail) && (
+                    <p className="mt-1 text-[12px]" style={{ color: MUTED }}>
+                      Контакт: {row.contactEmail || row.userEmail}
+                    </p>
+                  )}
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {row.status !== "seen" ? (
+                      <button
+                        type="button"
+                        className="rounded-lg border px-2.5 py-1 text-[11px] font-semibold"
+                        style={{ borderColor: BORDER }}
+                        onClick={() => void setFeedbackStatus(row, "seen")}
+                      >
+                        Просмотрено
+                      </button>
+                    ) : null}
+                    {row.status !== "done" ? (
+                      <button
+                        type="button"
+                        className="rounded-lg px-2.5 py-1 text-[11px] font-bold text-white"
+                        style={{ backgroundColor: BRAND_GREEN }}
+                        onClick={() => void setFeedbackStatus(row, "done")}
+                      >
+                        Закрыть
+                      </button>
+                    ) : null}
+                    {row.status === "done" ? (
+                      <button
+                        type="button"
+                        className="rounded-lg border px-2.5 py-1 text-[11px] font-semibold"
+                        style={{ borderColor: BORDER }}
+                        onClick={() => void setFeedbackStatus(row, "new")}
+                      >
+                        Вернуть в новые
+                      </button>
+                    ) : null}
+                  </div>
+                </li>
+              ))
+            )}
+          </ul>
+        </section>
+
         {/* Pulse */}
-        <section aria-label="Pulse">
+        <section aria-label="Пульс">
           <h2 className="text-[15px] font-bold" style={{ color: BRAND_GREEN }}>
-            Pulse (this browser)
+            Пульс (этот браузер)
           </h2>
           <p className="mt-1 text-[12px]" style={{ color: MUTED }}>
-            Local demo data until backend admin lands. Fees below still apply to checkout math here.
+            Локальные демо-данные, пока нет полного бэкенд-админа. Комиссии ниже уже влияют на расчёт здесь.
           </p>
           <dl className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
-              ["Listings", String(pulse.listingsTotal)],
-              ["Live", String(pulse.listingsActive)],
-              ["Bookings", String(pulse.bookingsTotal)],
-              ["Pending", String(pulse.bookingsPending)],
-              ["Out now", String(pulse.bookingsActive)],
-              ["Done", String(pulse.bookingsCompleted)],
-              ["Fees captured", `$${pulse.serviceFeesCapturedUsd.toFixed(2)}`],
-              ["Cluster", `${pulse.clusterRadiusMi} mi`],
+              ["Объявления", String(pulse.listingsTotal)],
+              ["В эфире", String(pulse.listingsActive)],
+              ["Брони", String(pulse.bookingsTotal)],
+              ["Ожидают", String(pulse.bookingsPending)],
+              ["Сейчас вне", String(pulse.bookingsActive)],
+              ["Завершено", String(pulse.bookingsCompleted)],
+              ["Собрано комиссий", `$${pulse.serviceFeesCapturedUsd.toFixed(2)}`],
+              ["Кластер", `${pulse.clusterRadiusMi} mi`],
             ].map(([label, value]) => (
               <div
                 key={label}
@@ -288,8 +495,151 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
             <StatusChip ok={pulse.agentKeyConfigured} label="Agent key" />
             <StatusChip
               ok={pulse.indexableCities > 0}
-              label={`${pulse.indexableCities}/${pulse.citiesTotal} cities indexable`}
+              label={`${pulse.indexableCities}/${pulse.citiesTotal} городов в индексе`}
             />
+          </ul>
+        </section>
+
+        {/* Marketing locations */}
+        <section
+          className="rounded-2xl border bg-white px-4 py-4"
+          style={{ borderColor: BORDER }}
+          aria-label="Маркетинг-локации"
+        >
+          <h2 className="text-[15px] font-bold" style={{ color: BRAND_GREEN }}>
+            Маркетинг: город / район
+          </h2>
+          <p className="mt-1 text-[12px]" style={{ color: MUTED }}>
+            Когда запускаете FB/TikTok в новом месте — добавьте сюда город или район. Сохранится ссылка-шаблон
+            на лендинг аренды.
+          </p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <label className="block space-y-1">
+              <span className="text-[12px] font-semibold" style={{ color: MUTED }}>
+                Город / место
+              </span>
+              <input
+                className="w-full rounded-xl border px-3 py-2.5 text-[15px]"
+                style={{ borderColor: BORDER }}
+                value={locName}
+                onChange={(e) => setLocName(e.target.value)}
+                placeholder="например Kladno или Vinohrady"
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-[12px] font-semibold" style={{ color: MUTED }}>
+                Район (необязательно)
+              </span>
+              <input
+                className="w-full rounded-xl border px-3 py-2.5 text-[15px]"
+                style={{ borderColor: BORDER }}
+                value={locDistrict}
+                onChange={(e) => setLocDistrict(e.target.value)}
+                placeholder="район / микрорайон"
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-[12px] font-semibold" style={{ color: MUTED }}>
+                Страна
+              </span>
+              <select
+                className="w-full rounded-xl border px-3 py-2.5 text-[15px] bg-white"
+                style={{ borderColor: BORDER }}
+                value={locCountry}
+                onChange={(e) => setLocCountry(e.target.value)}
+              >
+                {["CZ", "SK", "PL", "US", "DE", "AT"].map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block space-y-1">
+              <span className="text-[12px] font-semibold" style={{ color: MUTED }}>
+                Заметка к кампании
+              </span>
+              <input
+                className="w-full rounded-xl border px-3 py-2.5 text-[15px]"
+                style={{ borderColor: BORDER }}
+                value={locNotes}
+                onChange={(e) => setLocNotes(e.target.value)}
+                placeholder="FB ads · сын-блогер · запуск"
+              />
+            </label>
+          </div>
+          <button
+            type="button"
+            className="mt-3 rounded-xl px-4 py-2.5 text-[13px] font-bold text-white"
+            style={{ backgroundColor: BRAND_GREEN }}
+            onClick={addMarketingLocation}
+          >
+            Добавить локацию
+          </button>
+
+          <ul className="mt-4 space-y-2">
+            {settings.marketingLocations.length === 0 ? (
+              <li className="text-[13px]" style={{ color: MUTED }}>
+                Пока нет своих локаций — добавьте первый город кампании.
+              </li>
+            ) : (
+              settings.marketingLocations.map((row) => {
+                const slug = slugifyMarketingLocation(row.name, row.district);
+                const sampleUrl = `${SEO_ORIGIN}/rent/tools-and-diy/${slug || "city"}`;
+                return (
+                  <li
+                    key={row.id}
+                    className="rounded-xl border px-3 py-3"
+                    style={{ borderColor: BORDER }}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-[14px] font-bold" style={{ color: BRAND_GREEN }}>
+                          {row.name}
+                          {row.district ? ` · ${row.district}` : ""}{" "}
+                          <span className="font-semibold text-gray-400">({row.country})</span>
+                        </p>
+                        {row.notes ? (
+                          <p className="mt-0.5 text-[12px]" style={{ color: MUTED }}>
+                            {row.notes}
+                          </p>
+                        ) : null}
+                        <a
+                          href={sampleUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-1 block truncate text-[12px] font-semibold underline"
+                          style={{ color: BRAND_GREEN }}
+                        >
+                          {sampleUrl}
+                        </a>
+                        <p className="mt-1 text-[11px]" style={{ color: MUTED }}>
+                          Шаблон URL. Чтобы страница была в sitemap как канонический город — добавьте slug в
+                          код SEO_LOCATIONS (или напишите агенту).
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        className="shrink-0 rounded-lg border px-2.5 py-1 text-[11px] font-semibold text-red-700"
+                        style={{ borderColor: "#FECACA" }}
+                        onClick={() =>
+                          persist(
+                            {
+                              marketingLocations: settings.marketingLocations.filter(
+                                (x) => x.id !== row.id,
+                              ),
+                            },
+                            "Локация удалена",
+                          )
+                        }
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                  </li>
+                );
+              })
+            )}
           </ul>
         </section>
 
@@ -297,20 +647,20 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
         <section
           className="rounded-2xl border bg-white px-4 py-4"
           style={{ borderColor: BORDER }}
-          aria-label="Platform fees"
+          aria-label="Комиссии"
         >
           <h2 className="text-[15px] font-bold" style={{ color: BRAND_GREEN }}>
-            Platform fees
+            Комиссии платформы
           </h2>
           <p className="mt-1 text-[12px]" style={{ color: MUTED }}>
-            Effective rental fee now: <strong>{pctLabel(pulse.rentalFeeRate)}</strong>
-            {pulse.promoActive ? " (promo)" : ""} · Sell fee:{" "}
+            Сейчас аренда: <strong>{pctLabel(pulse.rentalFeeRate)}</strong>
+            {pulse.promoActive ? " (промо)" : ""} · Продажа:{" "}
             <strong>{pctLabel(pulse.sellFeeRate)}</strong>
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="block space-y-1">
               <span className="text-[12px] font-semibold" style={{ color: MUTED }}>
-                Rental fee %
+                Комиссия за аренду %
               </span>
               <input
                 inputMode="decimal"
@@ -322,7 +672,7 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
             </label>
             <label className="block space-y-1">
               <span className="text-[12px] font-semibold" style={{ color: MUTED }}>
-                Sell fee %
+                Комиссия за продажу %
               </span>
               <input
                 inputMode="decimal"
@@ -340,12 +690,12 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
             onClick={() => {
               const rentalFeeRate = rateFromPercentInput(rentalFeeInput, settings.rentalFeeRate);
               const sellFeeRate = rateFromPercentInput(sellFeeInput, settings.sellFeeRate);
-              const next = persist({ rentalFeeRate, sellFeeRate }, "Fees saved");
+              const next = persist({ rentalFeeRate, sellFeeRate }, "Комиссии сохранены");
               setRentalFeeInput(percentInputValue(next.rentalFeeRate));
               setSellFeeInput(percentInputValue(next.sellFeeRate));
             }}
           >
-            Save fees
+            Сохранить комиссии
           </button>
         </section>
 
@@ -353,21 +703,23 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
         <section
           className="rounded-2xl border bg-white px-4 py-4"
           style={{ borderColor: BORDER }}
-          aria-label="Promos"
+          aria-label="Промо"
         >
           <h2 className="text-[15px] font-bold" style={{ color: BRAND_GREEN }}>
-            Promos
+            Промо
           </h2>
           <label className="mt-3 flex items-center gap-2 text-[13px]">
             <input
               type="checkbox"
               checked={settings.foundingPromoEnabled}
-              onChange={(e) => persist({ foundingPromoEnabled: e.target.checked }, "Promo flag updated")}
+              onChange={(e) =>
+                persist({ foundingPromoEnabled: e.target.checked }, "Флаг промо обновлён")
+              }
             />
-            Founding-host promo enabled
+            Промо «первый хост в районе» включено
           </label>
           <p className="mt-2 text-[12px]" style={{ color: MUTED }}>
-            Seen in this browser: {isFoundingHostPromoSeen() ? "yes" : "no"}
+            Уже показано в этом браузере: {isFoundingHostPromoSeen() ? "да" : "нет"}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <button
@@ -377,10 +729,10 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
               onClick={() => {
                 clearFoundingHostPromoSeen();
                 setPulse(computeOpsPulse());
-                flash("Founding promo reset — will show again");
+                flash("Промо сброшено — покажется снова");
               }}
             >
-              Reset “seen”
+              Сбросить «уже видел»
             </button>
             <button
               type="button"
@@ -389,21 +741,21 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
               onClick={() => {
                 markFoundingHostPromoSeen();
                 setPulse(computeOpsPulse());
-                flash("Marked founding promo as seen");
+                flash("Отмечено как просмотренное");
               }}
             >
-              Mark seen
+              Отметить как видел
             </button>
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="block space-y-1">
               <span className="text-[12px] font-semibold" style={{ color: MUTED }}>
-                Promo rental fee % (optional)
+                Промо-комиссия аренды % (опционально)
               </span>
               <input
                 inputMode="decimal"
-                placeholder="e.g. 8 — leave empty to clear"
+                placeholder="напр. 8 — пусто = сброс"
                 className="w-full rounded-xl border px-3 py-2.5 text-[15px]"
                 style={{ borderColor: BORDER }}
                 value={
@@ -418,63 +770,66 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
             </label>
             <label className="block space-y-1">
               <span className="text-[12px] font-semibold" style={{ color: MUTED }}>
-                Promo label
+                Название промо
               </span>
               <input
                 className="w-full rounded-xl border px-3 py-2.5 text-[15px]"
                 style={{ borderColor: BORDER }}
                 value={settings.promoLabel}
                 onChange={(e) => setSettings((s) => ({ ...s, promoLabel: e.target.value }))}
-                placeholder="Launch week"
+                placeholder="Неделя запуска"
               />
             </label>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               type="button"
-              className="rounded-xl px-4 py-2.5 text-[13px] font-bold text-white"
+              className="rounded-xl px-4 py-2.5 text-[13px] font-bold"
               style={{ backgroundColor: BRAND_AMBER, color: "#1a1a1a" }}
               onClick={() => {
                 const raw = promoPercent.trim();
                 const promoRentalFeeRate =
                   raw === "" ? null : rateFromPercentInput(raw, settings.rentalFeeRate);
-                persist({ promoRentalFeeRate, promoLabel: settings.promoLabel }, "Promo fee updated");
+                persist(
+                  { promoRentalFeeRate, promoLabel: settings.promoLabel },
+                  "Промо-комиссия обновлена",
+                );
                 setPromoPercent("");
               }}
             >
-              Apply promo fee
+              Применить промо
             </button>
             <button
               type="button"
               className="rounded-xl border px-4 py-2.5 text-[13px] font-semibold"
               style={{ borderColor: BORDER }}
               onClick={() => {
-                persist({ promoRentalFeeRate: null, promoLabel: "" }, "Promo cleared");
+                persist({ promoRentalFeeRate: null, promoLabel: "" }, "Промо снято");
                 setPromoPercent("");
               }}
             >
-              Clear promo
+              Снять промо
             </button>
           </div>
         </section>
 
-        {/* Geo */}
+        {/* Geo built-in */}
         <section
           className="rounded-2xl border bg-white px-4 py-4"
           style={{ borderColor: BORDER }}
-          aria-label="Geo signals"
+          aria-label="Гео SEO"
         >
           <h2 className="text-[15px] font-bold" style={{ color: BRAND_GREEN }}>
-            Geo signals
+            Гео SEO-городов
           </h2>
           <p className="mt-1 text-[12px]" style={{ color: MUTED }}>
-            Index toggles change robots on rent pages in this app. Sitemap still needs a deploy to
-            match crawl lists.
+            Клик — вкл/выкл index. Shift+клик — фокус запуска (янтарная линия). Sitemap меняется только после
+            деплоя кода.
           </p>
 
           <label className="mt-3 block space-y-1">
             <span className="text-[12px] font-semibold" style={{ color: MUTED }}>
-              Default browse radius (mi)
+              Радиус поиска по умолчанию (мили)
             </span>
             <div className="flex flex-wrap items-center gap-2">
               <input
@@ -493,13 +848,13 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
                     100,
                     Math.max(5, Number.parseInt(clusterInput || "25", 10) || 25),
                   );
-                  persist({ clusterDefaultMi }, "Cluster default saved");
+                  persist({ clusterDefaultMi }, "Радиус сохранён");
                   setClusterInput(String(clusterDefaultMi));
                   setClusterRadiusMi(clusterDefaultMi);
                   setPulse(computeOpsPulse());
                 }}
               >
-                Save & apply
+                Сохранить и применить
               </button>
             </div>
           </label>
@@ -518,11 +873,6 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
                       <li key={city.slug}>
                         <button
                           type="button"
-                          title={
-                            focused
-                              ? "Focus city · click to toggle index"
-                              : "Click to toggle indexable"
-                          }
                           className="rounded-lg border px-2.5 py-1.5 text-[12px] font-semibold"
                           style={{
                             borderColor: live ? `${BRAND_GREEN}66` : BORDER,
@@ -535,18 +885,24 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
                               const next = focused
                                 ? settings.geoFocusSlugs.filter((s) => s !== city.slug)
                                 : [...settings.geoFocusSlugs, city.slug];
-                              persist({ geoFocusSlugs: next }, focused ? "Focus removed" : "Focus added");
+                              persist(
+                                { geoFocusSlugs: next },
+                                focused ? "Фокус снят" : "Фокус добавлен",
+                              );
                               return;
                             }
                             const next = {
                               ...settings.indexableOverrides,
                               [city.slug]: !live,
                             };
-                            persist({ indexableOverrides: next }, `${formatSeoLocationLabel(city)} → ${!live ? "index" : "noindex"}`);
+                            persist(
+                              { indexableOverrides: next },
+                              `${formatSeoLocationLabel(city)} → ${!live ? "index" : "noindex"}`,
+                            );
                           }}
                         >
                           {formatSeoLocationLabel(city)}
-                          {live ? "" : " · off"}
+                          {live ? "" : " · выкл"}
                         </button>
                       </li>
                     );
@@ -555,61 +911,57 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
               </div>
             ))}
           </div>
-          <p className="mt-2 text-[11px]" style={{ color: MUTED }}>
-            Click = toggle index · Shift+click = launch focus (amber underline)
-          </p>
         </section>
 
         {/* Notes */}
         <section
           className="rounded-2xl border bg-white px-4 py-4"
           style={{ borderColor: BORDER }}
-          aria-label="Owner notes"
+          aria-label="Заметки"
         >
           <h2 className="text-[15px] font-bold" style={{ color: BRAND_GREEN }}>
-            Scratch pad
+            Блокнот
           </h2>
           <textarea
             className="mt-2 min-h-[120px] w-full rounded-xl border px-3 py-2.5 text-[14px] leading-relaxed"
             style={{ borderColor: BORDER }}
             value={settings.ownerNotes}
             onChange={(e) => setSettings((s) => ({ ...s, ownerNotes: e.target.value }))}
-            placeholder="FB/TikTok ideas, fee experiments, CZ/SK launch notes…"
+            placeholder="Идеи FB/TikTok, эксперименты с комиссией, заметки по CZ/SK…"
           />
           <button
             type="button"
             className="mt-2 rounded-xl px-4 py-2.5 text-[13px] font-bold text-white"
             style={{ backgroundColor: BRAND_GREEN }}
-            onClick={() => persist({ ownerNotes: settings.ownerNotes }, "Notes saved")}
+            onClick={() => persist({ ownerNotes: settings.ownerNotes }, "Заметки сохранены")}
           >
-            Save notes
+            Сохранить заметки
           </button>
         </section>
 
         <section className="pb-4 text-[12px]" style={{ color: MUTED }}>
           <p>
-            Entry: <code className="rounded bg-white px-1">/ops</code> or{" "}
-            <code className="rounded bg-white px-1">?screen=ops</code>
+            Вход: <code className="rounded bg-white px-1">/ops</code>
           </p>
           <p className="mt-1">
-            Override login via <code className="rounded bg-white px-1">VITE_OPS_USER</code> /{" "}
-            <code className="rounded bg-white px-1">VITE_OPS_PASSWORD</code>.
+            Пароль можно сменить через <code className="rounded bg-white px-1">VITE_OPS_USER</code> /{" "}
+            <code className="rounded bg-white px-1">VITE_OPS_PASSWORD</code> в Vercel.
           </p>
           <button
             type="button"
             className="mt-3 text-[12px] font-semibold underline"
             onClick={() => {
-              if (window.confirm("Reset all ops settings to defaults?")) {
+              if (window.confirm("Сбросить все настройки ops к значениям по умолчанию?")) {
                 setSettings(resetOpsSettings());
                 setPulse(computeOpsPulse());
-                flash("Ops settings reset");
+                flash("Настройки ops сброшены");
               }
             }}
           >
-            Reset ops settings
+            Сбросить настройки ops
           </button>
           {settings.updatedAt ? (
-            <p className="mt-2">Last saved: {new Date(settings.updatedAt).toLocaleString()}</p>
+            <p className="mt-2">Последнее сохранение: {new Date(settings.updatedAt).toLocaleString()}</p>
           ) : null}
         </section>
       </div>

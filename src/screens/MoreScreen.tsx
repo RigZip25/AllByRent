@@ -7,6 +7,7 @@ import {
   Heart,
   HelpCircle,
   MessageCircle,
+  MessageSquareWarning,
   TrendingUp,
   User,
   Warehouse,
@@ -75,6 +76,7 @@ export function MoreScreen({
   onGarage,
   onMrE,
   onHowItWorks,
+  onFeedback,
 }: {
   onProfile: () => void;
   onRentals: () => void;
@@ -85,6 +87,7 @@ export function MoreScreen({
   onGarage: () => void;
   onMrE: () => void;
   onHowItWorks?: () => void;
+  onFeedback?: () => void;
 }) {
   const auth = useAuth();
   const t = useMessages();
@@ -200,6 +203,16 @@ export function MoreScreen({
               onClick={onMrE}
             />
           </li>
+          {onFeedback ? (
+            <li>
+              <MenuRow
+                icon={<MessageSquareWarning className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+                label={t.more.sendFeedback}
+                hint={t.more.sendFeedbackHint}
+                onClick={onFeedback}
+              />
+            </li>
+          ) : null}
           <li>
             <MenuRow
               icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}

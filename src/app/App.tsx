@@ -49,6 +49,7 @@ import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
 import { SetupRequiredScreen } from "../screens/SetupRequiredScreen";
 import { RentLandingScreen } from "../screens/RentLandingScreen";
 import { OpsConsoleScreen } from "../screens/ops/OpsConsoleScreen";
+import { FeedbackScreen } from "../screens/FeedbackScreen";
 import { parseRentPath } from "../lib/seo/parseRentPath";
 import type { SeoCategory } from "../lib/seo/rentCategories";
 import { formatSeoLocationLabel, type SeoLocation } from "../lib/seo/seoLocations";
@@ -190,7 +191,8 @@ type Screen =
   | "personalInfo"
   | "publicProfile"
   | "rentLanding"
-  | "ops";
+  | "ops"
+  | "feedback";
 
 const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
   "browseHub",
@@ -265,6 +267,7 @@ const BOOT_SCREEN_ALIASES: Partial<Record<string, Screen>> = {
   earnBusiness: "earnBusiness",
   ops: "ops",
   admin: "ops",
+  feedback: "feedback",
 };
 
 function resolveBootScreenParam(raw: string | null): Screen | null {
@@ -1788,7 +1791,12 @@ function AppRoutes() {
             onNotifications={handleOpenNotifications}
             onEarnBusiness={handleOpenBusiness}
             onHowItWorks={() => navigateTo("howEvoriosWorks")}
+            onFeedback={() => navigateTo("feedback")}
           />
+        )}
+
+        {currentScreen === "feedback" && (
+          <FeedbackScreen onBack={handleBack} />
         )}
 
         {currentScreen === "messages" && (

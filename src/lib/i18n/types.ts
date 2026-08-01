@@ -517,8 +517,30 @@ export type AppMessages = {
     howItWorksHint: string;
     chatWith: (mascot: string) => string;
     chatWithHint: string;
+    sendFeedback: string;
+    sendFeedbackHint: string;
     accountSettings: string;
     accountSettingsHint: string;
+  };
+  feedback: {
+    title: string;
+    subtitle: string;
+    kindHelp: string;
+    kindComplaint: string;
+    kindIdea: string;
+    kindOther: string;
+    messageLabel: string;
+    messagePlaceholder: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    submit: string;
+    sending: string;
+    tooShort: string;
+    sendFailed: string;
+    thanksTitle: string;
+    thanksBody: string;
+    sendAnother: string;
+    emailFallback: (email: string) => string;
   };
   messages: {
     title: string;

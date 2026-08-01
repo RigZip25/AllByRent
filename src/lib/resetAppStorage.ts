@@ -17,8 +17,9 @@ export function isResetAppQueryParam(params: URLSearchParams): boolean {
 }
 
 function shouldClearStorageKey(key: string): boolean {
-  // Owner ops settings survive wipe so fee/geo experiments are not lost.
+  // Owner ops settings + feedback inbox survive wipe.
   if (key.startsWith("evorios_ops_")) return false;
+  if (key.startsWith("evorios_platform_feedback")) return false;
   return (
     key.startsWith("allbyrent_") ||
     key.startsWith("abr_") ||
