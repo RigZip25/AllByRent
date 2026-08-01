@@ -19,11 +19,13 @@
 #     → app robots.txt Disallow: /rent/ and /__seo/
 #
 # Indexing discipline:
-#   - Flip `indexable: true` only for regions with real supply or an active campaign.
-#   - Current launch indexable: Praha (CZ), Bratislava (SK). Brno/Ostrava/Košice + US = noindex pipeline.
-#   - Non-indexable city pages still render (campaign / preview) with robots noindex.
+#   - Empty city page = founding CTA (business cell / open garage), not a dead end.
+#   - Index a wide CEE net (CZ/SK/PL majors) so organic + social can cold-start anywhere
+#     in the launch region — including Poznań, Brno, Košice, etc.
+#   - Do NOT sitemap every city on Earth (doorway risk). Add a city to seoLocations when
+#     you want it crawlable; listed pages always render with real empty-state content.
+#   - `indexable: false` = built but out of sitemap (US pipeline / preview).
 #   - ONE sitemap on the apex: https://evorios.com/sitemap.xml
-#   - Paid social (FB/TikTok) can land anywhere — add/flip cities when a geo gets traction.
 #
 # Empty state rule:
 #   Never show an empty listing grid. If supply is zero, show the founding-host CTA
