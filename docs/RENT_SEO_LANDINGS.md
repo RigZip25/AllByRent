@@ -20,8 +20,10 @@
 #
 # Indexing discipline:
 #   - Flip `indexable: true` only for regions with real supply or an active campaign.
+#   - Current launch indexable: Praha (CZ), Bratislava (SK). Brno/Ostrava/Košice + US = noindex pipeline.
 #   - Non-indexable city pages still render (campaign / preview) with robots noindex.
 #   - ONE sitemap on the apex: https://evorios.com/sitemap.xml
+#   - Paid social (FB/TikTok) can land anywhere — add/flip cities when a geo gets traction.
 #
 # Empty state rule:
 #   Never show an empty listing grid. If supply is zero, show the founding-host CTA
