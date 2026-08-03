@@ -99,9 +99,34 @@ function urlEntry(loc, changefreq = "weekly", priority = "0.7") {
   </url>`;
 }
 
+/**
+ * Marketing locale homepages on the apex (folder URLs).
+ * Keep in sync with AllByRent-Web locale folders + hreflang.
+ */
+const MARKETING_LOCALES = [
+  "cs",
+  "sk",
+  "pl",
+  "de",
+  "fr",
+  "it",
+  "pt",
+  "pt-pt",
+  "es",
+  "es-mx",
+  "es-cl",
+  "es-ar",
+  "es-co",
+  "ru",
+  "uk",
+];
+
 /** Full apex sitemap: marketing pages + indexable /rent pages. */
 const apexUrls = [];
 apexUrls.push(urlEntry(`${SEO_ORIGIN}/`, "weekly", "1.0"));
+for (const loc of MARKETING_LOCALES) {
+  apexUrls.push(urlEntry(`${SEO_ORIGIN}/${loc}/`, "weekly", "0.9"));
+}
 apexUrls.push(urlEntry(`${SEO_ORIGIN}/privacy.html`, "yearly", "0.3"));
 apexUrls.push(urlEntry(`${SEO_ORIGIN}/terms.html`, "yearly", "0.3"));
 apexUrls.push(urlEntry(`${SEO_ORIGIN}/refunds.html`, "yearly", "0.3"));
@@ -148,15 +173,21 @@ writeFileSync(join(publicDir, "robots.txt"), appRobots, "utf8");
 
 /** Artifact for AllByRent-Web (marketing) — copy into that repo's sitemap.xml */
 const seoOutDir = join(root, "scripts", "seo");
+const webMirrorDir = join(seoOutDir, "allbyrent-web");
 mkdirSync(seoOutDir, { recursive: true });
+mkdirSync(webMirrorDir, { recursive: true });
 writeFileSync(join(seoOutDir, "evorios-apex-sitemap.xml"), apexSitemap, "utf8");
+writeFileSync(join(webMirrorDir, "sitemap.xml"), apexSitemap, "utf8");
 
 console.log(
   `[seo] Apex sitemap: ${apexUrls.length} URLs → scripts/seo/evorios-apex-sitemap.xml`,
 );
 console.log(
-  `[seo] App robots disallow /rent + /__seo + /ops; sitemap points to ${SEO_ORIGIN}/sitemap.xml`,
+  `[seo] Mirrored → scripts/seo/allbyrent-web/sitemap.xml (copy to AllByRent-Web root)`,
 );
 console.log(
-  `[seo] Indexable cities: ${indexableLocations.length}; categories: ${categorySlugs.length}`,
+  `[seo] Locales: ${MARKETING_LOCALES.length}; cities: ${indexableLocations.length}; categories: ${categorySlugs.length}`,
+);
+console.log(
+  `[seo] App robots disallow /rent + /__seo + /ops; sitemap points to ${SEO_ORIGIN}/sitemap.xml`,
 );
