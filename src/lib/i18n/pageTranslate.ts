@@ -6,6 +6,7 @@
  * Auto + phone in pl/es/fr/sk/… → English UI source + live Google translate.
  */
 
+import { isNativeApp } from "../nativeShell";
 import { collectDeviceLanguageTags, getLocale, isLocaleAuto } from "./index";
 
 const GOOG_SCRIPT_ID = "evorios-google-translate";
@@ -55,6 +56,9 @@ export function languageDisplayName(code: string, ofLocale = "en"): string {
 export function resolvePageTranslateTarget(
   languages: readonly string[] = collectDeviceLanguageTags(),
 ): string | null {
+  // Store builds should not use Google Website Translator — it mangles chat
+  // copy and leaves half the UI in English. Prefer English (or real i18n packs).
+  if (isNativeApp()) return null;
   if (!isLocaleAuto()) return null;
   const ui = getLocale();
   if (ui !== "en") return null; // native cs (or future packs) — do not double-translate
