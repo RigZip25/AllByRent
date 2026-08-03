@@ -11,6 +11,7 @@ import {
 } from "./passkey";
 import { isNetworkFetchError } from "./authErrors";
 import { emailOtpEntryError, isCompleteEmailOtpLength, normalizeEmailOtpInput } from "./authOtp";
+import { getRuntimeAppOrigin } from "./appOrigin";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 export type AuthProvider = "google" | "apple";
@@ -84,7 +85,7 @@ export function onAuthStateChange(
 
 export function getAuthRedirectUrl(): string {
   if (typeof window === "undefined") return "";
-  return window.location.origin;
+  return getRuntimeAppOrigin();
 }
 
 async function ensureProfileRow(userId: string, email: string): Promise<void> {
@@ -266,7 +267,7 @@ export async function signInWithProvider(provider: AuthProvider): Promise<void> 
   } catch {
     // ignore
   }
-  const redirectTo = typeof window === "undefined" ? undefined : window.location.origin;
+  const redirectTo = typeof window === "undefined" ? undefined : getRuntimeAppOrigin();
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
     options: { redirectTo },

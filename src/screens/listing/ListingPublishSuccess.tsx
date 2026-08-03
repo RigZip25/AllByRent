@@ -1,7 +1,9 @@
 import { motion } from "motion/react";
+import { useEffect } from "react";
 import { Check, Share2 } from "lucide-react";
 import { AppBrandMark } from "../../components/AppBrandHeader";
 import { useMessages } from "../../lib/i18n/react";
+import { requestStoreReview } from "../../lib/storeReview";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
@@ -22,6 +24,13 @@ export function ListingPublishSuccess({
 }: ListingPublishSuccessProps) {
   const { listing } = useMessages();
   const success = listing.success;
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void requestStoreReview();
+    }, 1200);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   return (
     <motion.div

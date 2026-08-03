@@ -4,3 +4,22 @@ dev-dist
 .env.local
 .env*.local
 .env
+
+# Capacitor / native build artifacts
+.capacitor
+icons
+*.ipa
+*.apk
+*.aab
+*.mobileprovision
+android/.gradle
+android/app/build
+android/build
+android/captures
+android/local.properties
+android/.idea
+android/app/src/main/assets/public
+ios/App/Pods
+ios/App/Podfile.lock
+ios/DerivedData
+ios/App/App/public

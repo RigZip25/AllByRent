@@ -10,6 +10,10 @@ const require = createRequire(import.meta.url)
 let pwaEnabled = false
 
 function pwaPlugin() {
+  // Native store binaries should not ship a service worker (Capacitor owns the shell).
+  if (process.env.CAPACITOR_BUILD === '1') {
+    return null
+  }
   try {
     const { VitePWA } = require('vite-plugin-pwa') as typeof import('vite-plugin-pwa')
     pwaEnabled = true

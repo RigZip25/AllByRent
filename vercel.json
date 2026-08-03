@@ -42,11 +42,37 @@
       "destination": "/index.html"
     },
     {
-      "source": "/((?!api/|legal/|__seo/|sitemap\\.xml|robots\\.txt).*)",
+      "source": "/((?!api/|legal/|__seo/|\\.well-known/|sitemap\\.xml|robots\\.txt|manifest\\.webmanifest).*)",
       "destination": "/index.html"
     }
   ],
   "headers": [
+    {
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/.well-known/assetlinks.json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
     {
       "source": "/",
       "headers": [

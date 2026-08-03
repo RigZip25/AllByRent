@@ -1,4 +1,5 @@
 import { getPublishedListingById } from "./listingStorage";
+import { getRuntimeAppOrigin } from "./appOrigin";
 
 export type DeepLinkTarget =
   | { kind: "garage"; hostId: string; itemId?: string }
@@ -9,8 +10,6 @@ export type ParsedDeepLink = {
   skipSplash: boolean;
   target: DeepLinkTarget;
 };
-
-import { APP_ORIGIN } from "./brand";
 
 function listingIdFromPath(pathname: string): string | null {
   const match = pathname.match(/^\/item\/([^/]+)\/?$/i);
@@ -91,8 +90,5 @@ export function deepLinkQueryKeys(): string[] {
 }
 
 export function shareAppOrigin(): string {
-  if (typeof window !== "undefined" && window.location.origin) {
-    return window.location.origin;
-  }
-  return APP_ORIGIN;
+  return getRuntimeAppOrigin();
 }

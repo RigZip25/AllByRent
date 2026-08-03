@@ -3,6 +3,7 @@ import { isSupabaseConfigured } from "./supabaseClient";
 import { loadConnectStatus, startConnectOnboarding } from "./repositories/connectRepository";
 import { loadUserProfile } from "./userProfileStorage";
 import { getAccessToken } from "./stripePayments";
+import { getRuntimeAppOrigin } from "./appOrigin";
 import {
   getSignInRequiredMessage,
   getStripeRequiredMessage,
@@ -164,7 +165,7 @@ export async function startIdentityVerificationForListing(
   const absoluteReturn =
     returnPath.startsWith("http://") || returnPath.startsWith("https://")
       ? returnPath
-      : `${window.location.origin}${returnPath.startsWith("/") ? "" : "/"}${returnPath}`;
+      : `${getRuntimeAppOrigin()}${returnPath.startsWith("/") ? "" : "/"}${returnPath}`;
 
   try {
     const res = await fetch("/api/stripe/identity_session", {

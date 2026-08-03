@@ -36,6 +36,7 @@ import {
   shouldAutoApplyDeferredUpdate,
 } from "../lib/pwaQuietUpdate";
 import { isSeoApexHost } from "../lib/brand";
+import { isNativeApp } from "../lib/nativeShell";
 
 type UpdateSWFn = (reloadPage?: boolean) => Promise<void>;
 
@@ -170,7 +171,8 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
     const cleanups: (() => void)[] = [];
 
     // Apex SEO host proxies the SPA for /rent only — never install the PWA SW there.
-    if (isSeoApexHost()) {
+    // Native store builds ship a fresh binary; service workers fight Capacitor caching.
+    if (isSeoApexHost() || isNativeApp()) {
       return () => {
         for (const fn of cleanups) fn();
       };

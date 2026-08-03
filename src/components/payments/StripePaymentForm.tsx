@@ -3,6 +3,7 @@ import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-
 import type { StripeElementsOptions } from "@stripe/stripe-js";
 import { getStripePromise } from "../../lib/stripeLoader";
 import { removeStripeControllerIframes } from "../../lib/stripeCleanup";
+import { getRuntimeAppOrigin } from "../../lib/appOrigin";
 
 const GREEN = "#0D5C3A";
 
@@ -26,7 +27,7 @@ function PaymentFormInner({
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: window.location.href,
+          return_url: `${getRuntimeAppOrigin()}${window.location.pathname}${window.location.search}${window.location.hash}`,
         },
         redirect: "if_required",
       });

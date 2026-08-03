@@ -1,13 +1,15 @@
 {
   "name": "evorios",
   "private": true,
-  "version": "0.0.1",
-  "description": "Evorios — Garage Showcase PWA (evorios.com)",
+  "version": "1.0.0",
+  "description": "Evorios — Garage Showcase (PWA + Capacitor store apps)",
   "type": "module",
   "packageManager": "npm@10.9.3",
   "scripts": {
     "prebuild": "node ./scripts/generate-rent-sitemap.mjs",
     "build": "tsc -b --pretty false && vite build",
+    "build:native": "CAPACITOR_BUILD=1 npm run build && npx cap sync",
+    "assets:generate": "capacitor-assets generate --ios --android --iconBackgroundColor '#062a1c' --iconBackgroundColorDark '#062a1c' --splashBackgroundColor '#062a1c' --splashBackgroundColorDark '#062a1c'",
     "typecheck": "tsc -b --pretty false",
     "dev": "vite",
     "dev:https": "set VITE_DEV_HTTPS=true&& vite",
@@ -15,13 +17,23 @@
     "seo:sitemap": "node ./scripts/generate-rent-sitemap.mjs",
     "seo:indexnow": "node ./scripts/seo/submit-indexnow.mjs",
     "start": "vite",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cap:sync": "npx cap sync",
+    "cap:ios": "npx cap open ios",
+    "cap:android": "npx cap open android"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
     "@allbyrent/server": "file:./server",
+    "@capacitor-community/in-app-review": "^8.0.0",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.3",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
     "@mui/icons-material": "7.3.5",
@@ -95,6 +107,10 @@
     "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/ios": "^8.5.0",
     "@eslint/js": "^9.33.0",
     "@tailwindcss/vite": "4.1.12",
     "@types/canvas-confetti": "^1.9.0",
