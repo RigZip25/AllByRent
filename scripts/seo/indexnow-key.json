@@ -1,0 +1,6 @@
+{
+  "key": "cc7fe5b481b3f86045692de807516ca6",
+  "keyLocation": "https://evorios.com/cc7fe5b481b3f86045692de807516ca6.txt",
+  "host": "evorios.com",
+  "note": "Host the key file at the apex (AllByRent-Web root). Then run: npm run seo:indexnow"
+}

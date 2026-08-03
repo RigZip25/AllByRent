@@ -13,6 +13,7 @@
     "dev:https": "set VITE_DEV_HTTPS=true&& vite",
     "lint": "node ./node_modules/eslint/bin/eslint.js src",
     "seo:sitemap": "node ./scripts/generate-rent-sitemap.mjs",
+    "seo:indexnow": "node ./scripts/seo/submit-indexnow.mjs",
     "start": "vite",
     "preview": "vite preview"
   },
