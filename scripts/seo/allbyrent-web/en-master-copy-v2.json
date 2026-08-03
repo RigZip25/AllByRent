@@ -1,0 +1,212 @@
+{
+  "_meta": {
+    "file": "index.html (English root only)",
+    "note": "Apply exact string replacements in listed order (already longest-first safe). Preserve HTML tags/spans/classes. Do not edit locale folders."
+  },
+  "replacements": [
+    {
+      "old": "Rent, sell, or gift idle stuff to neighbors nearby. Deposit-protected, verified, QR-tracked. Every household is a business cell.",
+      "new": "Rent, sell, or gift things you're not using to neighbors nearby. Deposit-protected, identity-verified, QR-tracked. Every home can open a shop on the block."
+    },
+    {
+      "old": "Rent, sell, or gift idle stuff to neighbors nearby. Deposit-protected, verified, QR-tracked.",
+      "new": "Rent, sell, or gift things you're not using to neighbors nearby. Deposit-protected, identity-verified, QR-tracked."
+    },
+    {
+      "old": "Open your garage to the block — rent, buy, or gift idle stuff to neighbors nearby.",
+      "new": "Open your garage to the block — rent, sell, or gift what you're not using to neighbors nearby."
+    },
+    {
+      "old": "You already own a <span class=\"hl\">business</span>.",
+      "new": "Your home is already a <span class=\"hl\">business</span>."
+    },
+    {
+      "old": "Everything in your household can earn — the tools, the gear, the spare room, your skills. A few steps turns your garage into a storefront. Be the first business on your block.",
+      "new": "Everything in your home can earn — the tools, the gear, the spare room, your skills. A few steps turn your garage into a storefront. Be the first shop on your block."
+    },
+    {
+      "old": "Every household is a business cell.",
+      "new": "Every home can open a shop on the block."
+    },
+    {
+      "old": "Every household is a business cell",
+      "new": "Every home can open a shop on the block"
+    },
+    {
+      "old": "Evorios isn't a listing app — it's your storefront's back office. See what you earn, aim at a monthly target, and bring your own neighbors in with a single link.",
+      "new": "Evorios isn't just a listings app — it's the back office for your storefront. See what you earn, set a monthly target, and invite neighbors in with one link."
+    },
+    {
+      "old": "Keep 2+ items available on weekends, when neighbors need them most.",
+      "new": "Keep two or more items available on weekends — that's when neighbors need them most."
+    },
+    {
+      "old": "Earn dashboard",
+      "new": "Earnings dashboard"
+    },
+    {
+      "old": "See what you've earned, your best listings, and a monthly target to grow toward.",
+      "new": "See what you've earned, which listings perform best, and a monthly target to grow toward."
+    },
+    {
+      "old": "One link drops neighbors straight onto your shelf — post it to TikTok, Instagram, Nextdoor, or WhatsApp, or copy a ready-made caption.",
+      "new": "One link drops neighbors straight onto your shelf — share it on TikTok, Instagram, WhatsApp, or Facebook, or copy a ready-made caption."
+    },
+    {
+      "old": "Not sure what to charge? Your concierge suggests a fair price the moment an item hits the shelf.",
+      "new": "Not sure what to charge? Mr. Evorios suggests a fair price the moment an item hits the shelf."
+    },
+    {
+      "old": "Two sides of one economy: the more you list, the more you earn — and the more you rent instead of buy, the less you spend. Drag the sliders and watch.",
+      "new": "Two sides of one neighborhood economy: the more you list, the more you earn — and the more you rent instead of buy, the less you spend. Drag the sliders and watch."
+    },
+    {
+      "old": "Every category runs two shelves — <b>Household</b> for the everyday neighbor, <b>Pro / Business</b> for the contractors and crews on your block. Your garage can stock any of it.",
+      "new": "Every category has two shelves — <b>Household</b> for everyday neighbors, and <b>Pro / Business</b> for contractors and crews on your block. Your garage can stock either."
+    },
+    {
+      "old": "Your hobby isn't just a hobby — it can be a little income, and the reason you finally meet the neighbors who love the same things. Sell what you rarely use, rent out the rest, and put your talent on the block.",
+      "new": "Your hobby isn't only a hobby — it can be a little income, and a way to meet neighbors who love the same things. Sell what you rarely use, rent out the rest, and put your talent on the block."
+    },
+    {
+      "old": "List your seedlings, seeds, houseplants, and seasonal flowers — your garden already grows more than you can keep.",
+      "new": "List seedlings, seeds, houseplants, and seasonal flowers — your garden already grows more than you can keep."
+    },
+    {
+      "old": "Rent it from a neighbor before you buy — chances are it's already sitting on your block.",
+      "new": "Rent it from a neighbor before you buy — chances are it's already on your block."
+    },
+    {
+      "old": "Everyone opens their garage the same way — then grows into whatever the block needs most.",
+      "new": "Everyone opens a garage the same way — then grows into whatever the block needs most."
+    },
+    {
+      "old": "Photograph anything idle and put it on your shelf in about 30 seconds.",
+      "new": "Photograph anything you're not using and put it on your shelf in about 30 seconds."
+    },
+    {
+      "old": "Hobbyists and working pros both build their own niche here.",
+      "new": "Hobbyists and working pros both build a niche here."
+    },
+    {
+      "old": "Got tools, gear, or equipment sitting idle? List them in 3 minutes. Every rental puts money in your pocket — deposit-protected and tracked.",
+      "new": "Got tools, gear, or equipment sitting unused? List them in minutes. Every rental puts money in your pocket — deposit-protected and tracked."
+    },
+    {
+      "old": "Need a pressure washer for one weekend? A camera kit for a trip? Rent from a verified neighbor. Fraction of the cost, zero storage.",
+      "new": "Need a pressure washer for one weekend? A camera kit for a trip? Rent from a verified neighbor — a fraction of the cost, zero storage."
+    },
+    {
+      "old": "One account — switch between Earn and Save anytime",
+      "new": "One account — switch between earning and saving anytime"
+    },
+    {
+      "old": "Camera gear, power tools, camping equipment — someone nearby needs it today. List in 3 minutes, earn while you sleep.",
+      "new": "Camera gear, power tools, camping kit — someone nearby needs it today. List it in minutes and earn while you sleep."
+    },
+    {
+      "old": "Why buy when your neighbor has it? Browse verified listings, pay with Stripe, pick up the same day.",
+      "new": "Why buy when your neighbor already has it? Browse verified listings, pay with Stripe, pick up the same day."
+    },
+    {
+      "old": "Photo → AI fills title, category, and suggests price. Under 3 minutes from photo to live listing.",
+      "new": "Take a photo — AI fills the title and category, and suggests a price. Live in under three minutes."
+    },
+    {
+      "old": "Stripe payment, a refundable deposit hold, identity verified on both sides. You get notified instantly.",
+      "new": "Stripe payment, a refundable deposit hold, identity verified on both sides. You get notified right away."
+    },
+    {
+      "old": "Renter scans QR on pickup, scans again on return. Every timestamp is legal evidence. Payout hits your account.",
+      "new": "The renter scans a QR code on pickup and again on return. Every timestamp is a clear record. Payout lands in your account."
+    },
+    {
+      "old": ">Daily income</",
+      "new": ">Rent it out</"
+    },
+    {
+      "old": "Daily, weekly, monthly. Deposit-protected.",
+      "new": "Daily, weekly, or monthly — deposit-protected."
+    },
+    {
+      "old": ">One-time sale</",
+      "new": ">Sell it</"
+    },
+    {
+      "old": ">Give freely</",
+      "new": ">Give it away</"
+    },
+    {
+      "old": "Built so strangers can <span class=\"hl\">trust each other</span>",
+      "new": "Built so neighbors can <span class=\"hl\">trust each other</span>"
+    },
+    {
+      "old": "Stripe Identity — government ID + selfie. One-time per account.",
+      "new": "Stripe Identity — government ID and a selfie. Once per account."
+    },
+    {
+      "old": "A refundable hold on the renter's card — released on return, claimable if there's damage.",
+      "new": "A refundable hold on the renter's card — released on return, and claimable if there's damage."
+    },
+    {
+      "old": "Scan in, scan out. Every timestamp is legal evidence.",
+      "new": "Scan in, scan out. Every timestamp is a clear record."
+    },
+    {
+      "old": "Both sides review independently. Published only when both submit.",
+      "new": "Both sides review independently. Reviews go public only when both are in."
+    },
+    {
+      "old": "Don't pack it all. Search by city, find verified owners, deposit-protected rentals wherever you land.",
+      "new": "Don't pack everything. Search by city, find verified owners, and rent deposit-protected gear wherever you land."
+    },
+    {
+      "old": "Speaks any language — Arabic, Chinese, French, Hindi and more",
+      "new": "Speaks your language — Arabic, Chinese, French, Hindi, and more"
+    },
+    {
+      "old": "Good to know before you start.",
+      "new": "Good to know before you start"
+    },
+    {
+      "old": "Evorios is a neighborhood marketplace where neighbors rent and sell household things to each other — tools, sports gear, appliances, baby equipment, and more. Everything is local, so pickup is usually a short walk or drive away.",
+      "new": "Evorios is a neighborhood marketplace where people rent and sell household things to each other — tools, sports gear, appliances, baby equipment, and more. Everything is local, so pickup is usually a short walk or drive away."
+    },
+    {
+      "old": "It depends on what you list and how often it's rented, but idle things add up fast — a pressure washer, a kayak, the drill in the corner. Your Garage dashboard shows what you've earned, your best listings, and a monthly target to grow toward. You start at zero and build from there.",
+      "new": "It depends on what you list and how often it rents, but unused things add up — a pressure washer, a kayak, the drill in the corner. Your Garage dashboard shows what you've earned, your best listings, and a monthly target to grow toward. You start at zero and build from there."
+    },
+    {
+      "old": "Create a free account, tap List, and follow the steps — photos, title, category, price, availability. In about 30 seconds your first item is live. Then print or save its QR sticker so handoffs check in and out cleanly.",
+      "new": "Create a free account, tap List, and follow the steps — photos, title, category, price, availability. In about 30 seconds your first item is live. Then print or save its QR sticker so pickup and return stay clear."
+    },
+    {
+      "old": "Not at all — being first is the advantage. If no one on your block has opened a garage yet, the whole neighborhood's demand is yours. Open early, list what you have, and you become the local go-to before anyone else shows up.",
+      "new": "Not at all — being first is an advantage. If no one on your block has opened a garage yet, neighborhood demand is yours to win. Open early, list what you have, and become the local go-to before anyone else shows up."
+    },
+    {
+      "old": "Renting means a neighbor borrows your item for a set period and returns it. Selling means they buy it and keep it. You choose the type when you create a listing, and you can offer the same kind of item either way over time.",
+      "new": "Renting means a neighbor borrows your item for a set period and returns it. Selling means they buy it and keep it. You choose when you create a listing — and you can offer either over time."
+    },
+    {
+      "old": "Every rentable item gets a QR code. Scanning it at pickup and again at return confirms the handoff — who had the item, and when. It protects both sides and keeps the rental timeline clear.",
+      "new": "Every rentable item gets a QR code. Scanning at pickup and again at return confirms the handoff — who had the item, and when. It protects both sides and keeps the rental timeline clear."
+    },
+    {
+      "old": "Many rentals include a refundable deposit — a hold placed on the renter's card, not a charge. It's released automatically after a clean return. If there's documented damage or loss, the host can claim within the window shown in the app. Evorios isn't an insurer; the deposit is simply a hold.",
+      "new": "Many rentals include a refundable deposit — a hold on the renter's card, not a charge. It's released automatically after a clean return. If there's documented damage or loss, the host can claim within the window shown in the app. Evorios isn't an insurer; the deposit is simply a hold."
+    },
+    {
+      "old": "Message the other person first — most things sort out there. If not, open a dispute from the rental and add photos or notes. Evorios is a neutral platform: we give both sides the records, QR timestamps, and messages, and hold the deposit while things are reviewed.",
+      "new": "Message the other person first — most things sort out there. If not, open a dispute from the rental and add photos or notes. Evorios is a neutral platform: both sides get the records, QR timestamps, and messages, and the deposit stays held while things are reviewed."
+    },
+    {
+      "old": "Yes. Card details are handled by our payment provider, Stripe — Evorios never stores full card numbers. Sign-in uses a one-time code sent to your email, so there's no password to steal. Only ever enter card details in the official app, never in chat.",
+      "new": "Yes. Card details are handled by Stripe — Evorios never stores full card numbers. Sign-in uses a one-time code sent to your email, so there's no password to steal. Only enter card details in the official app — never in chat."
+    },
+    {
+      "old": "No Apple tax. No Google cut. Add to home screen in one tap.",
+      "new": "No Apple tax. No Google cut. Add Evorios to your home screen in one tap."
+    }
+  ]
+}
