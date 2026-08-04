@@ -14,6 +14,7 @@ type Props = {
   onBack?: () => void;
 };
 
+/** Product intro — Material/HIG-scale type + illustration, catalog first. */
 export function WhatIsEvorios({ onContinue, onSkip, onBack }: Props) {
   const t = useMessages();
   const intro = t.onboarding.productIntro;
@@ -23,40 +24,42 @@ export function WhatIsEvorios({ onContinue, onSkip, onBack }: Props) {
       <OnboardingTopBar onBack={onBack} onSkip={onSkip} />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
-        <div className="mx-auto mb-2 max-w-[200px]">
+        <div className="mx-auto mb-3 max-w-[280px]">
           <img
             src={onboardingAssets.garageRoles}
             alt=""
-            className="h-auto w-full object-contain"
+            className="h-auto max-h-[200px] w-full object-contain"
             draggable={false}
+            width={560}
+            height={400}
           />
         </div>
 
-        <p className="text-center text-[13px] font-semibold uppercase tracking-wide text-gray-400">
+        <p className="text-center text-[12px] font-semibold uppercase tracking-wide text-gray-400">
           {APP_NAME}
         </p>
-        <h1 className="mt-1 text-center text-[24px] font-extrabold leading-tight" style={{ color: GREEN }}>
+        <h1 className="mt-1 text-center text-[22px] font-extrabold leading-tight" style={{ color: GREEN }}>
           {intro.title}
         </h1>
-        <p className="mt-2 text-center text-[16px] leading-relaxed text-gray-600">{intro.body}</p>
+        <p className="mt-2 text-center text-[15px] leading-relaxed text-gray-600">{intro.body}</p>
 
         <div className="mt-5">
-          <p className="text-[14px] font-semibold uppercase tracking-wide text-gray-500">
+          <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
             {intro.catalogTitle}
           </p>
-          <div className="mt-2.5">
+          <div className="mt-2">
             <CategoryCatalogExplorer hint={intro.catalogHint} />
           </div>
         </div>
 
-        <p className="mt-4 text-center text-[14px] leading-snug text-gray-500">{intro.nextHint}</p>
+        <p className="mt-4 text-center text-[13px] leading-snug text-gray-500">{intro.nextHint}</p>
       </div>
 
       <div className="shrink-0 border-t px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-3" style={{ borderColor: BORDER }}>
         <button
           type="button"
           onClick={onContinue}
-          className="w-full rounded-xl py-3.5 text-[17px] font-bold"
+          className="w-full rounded-xl py-3.5 text-[16px] font-bold"
           style={{ backgroundColor: AMBER, color: GREEN }}
         >
           {intro.continueCta}

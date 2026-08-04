@@ -1,7 +1,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-size: 18px;
+  --font-size: 16px;
   --background: #ffffff;
   --foreground: #1a1a1a;
   --card: #ffffff;
@@ -47,7 +47,7 @@
  */
 @media (min-width: 420px) and (max-width: 520px) {
   :root {
-    --font-size: 19px;
+    --font-size: 17px;
   }
 
   /**
@@ -232,85 +232,20 @@
 
 @layer utilities {
   /**
-   * Readable type for phones: rem-based overrides so arbitrary text-[Npx]
-   * classes scale with --font-size (not frozen CSS pixels).
+   * Microtext is a bit too small on large phones; gently upsize.
+   * This intentionally overrides Tailwind's defaults for common utilities.
+   * Target: readable chrome for older / low-vision neighbors (≥13px).
    */
   .text-xs {
     font-size: 0.8125rem;
-    line-height: 1.25rem;
-  }
-
-  .text-sm {
-    font-size: 0.9375rem;
-    line-height: 1.35rem;
-  }
-
-  .text-base {
-    font-size: 1.0625rem;
-    line-height: 1.5rem;
+    line-height: 1.2rem;
   }
 
   .text-\[10px\],
   .text-\[11px\],
   .text-\[12px\] {
-    font-size: 0.8125rem; /* ~14.5–15.5px at 18–19 root */
-    line-height: 1.25rem;
-  }
-
-  .text-\[13px\] {
-    font-size: 0.875rem;
-    line-height: 1.3rem;
-  }
-
-  .text-\[14px\] {
-    font-size: 0.9375rem;
-    line-height: 1.35rem;
-  }
-
-  .text-\[15px\] {
-    font-size: 1rem;
-    line-height: 1.4rem;
-  }
-
-  .text-\[16px\] {
-    font-size: 1.0625rem;
-    line-height: 1.45rem;
-  }
-
-  .text-\[17px\] {
-    font-size: 1.125rem;
-    line-height: 1.5rem;
-  }
-
-  .text-\[18px\] {
-    font-size: 1.1875rem;
-    line-height: 1.55rem;
-  }
-
-  .text-\[20px\] {
-    font-size: 1.3125rem;
-    line-height: 1.6rem;
-  }
-
-  .text-\[22px\] {
-    font-size: 1.375rem;
-    line-height: 1.65rem;
-  }
-
-  .text-\[24px\] {
-    font-size: 1.5rem;
-    line-height: 1.7rem;
-  }
-
-  .text-\[26px\],
-  .text-\[28px\] {
-    font-size: 1.625rem;
-    line-height: 1.85rem;
-  }
-
-  .text-\[30px\] {
-    font-size: 1.75rem;
-    line-height: 2rem;
+    font-size: 0.8125rem; /* 13px */
+    line-height: 1.2rem;
   }
 
   .app-shell {
