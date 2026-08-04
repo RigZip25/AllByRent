@@ -105,7 +105,9 @@ import type { ShelfPrefill } from "../lib/shelfListings";
 import { isSimulateUpdateRequested } from "../lib/pwaUpdateStorage";
 import {
   markInstallGateDone,
+  markInstallHintSeen,
   shouldShowInstallGate,
+  shouldShowInstallHint,
 } from "../lib/pwaInstallGate";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import {
@@ -144,6 +146,7 @@ type YardSaleHubChoice = "browse" | "host";
 type Screen =
   | "splash"
   | "installGate"
+  | "installHint"
   | "firstHello"
   | "whatIsEvorios"
   | "whatDoYouWant"
@@ -312,6 +315,7 @@ function screenToAuthIntent(screen: Screen): AuthIntent {
 /** When nav stack is empty, in-app Back still returns to the prior onboarding step. */
 const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
   firstHello: "splash",
+  installHint: "firstHello",
   whatIsEvorios: "firstHello",
   whatDoYouWant: "whatIsEvorios",
   whereAreYou: "whatDoYouWant",
@@ -347,6 +351,7 @@ function isOnboardingScreen(screen: Screen): boolean {
   return (
     screen in ONBOARDING_BACK_FALLBACK ||
     screen === "firstHello" ||
+    screen === "installHint" ||
     screen === "onboardingAllSet" ||
     screen === "installGate"
   );
@@ -1054,6 +1059,25 @@ function AppRoutes() {
     if (currentScreen === "firstHello") {
       markIntroDone();
       setNavStack([]);
+      if (shouldShowInstallHint()) {
+        setCurrentScreen("installHint");
+        return;
+      }
+      setCurrentScreen(
+        isOnboardingComplete()
+          ? "home"
+          : hasProductIntro()
+            ? hasRoleChoice()
+              ? "whereAreYou"
+              : "whatDoYouWant"
+            : "whatIsEvorios",
+      );
+      return;
+    }
+
+    if (currentScreen === "installHint") {
+      markInstallHintSeen();
+      setNavStack([]);
       setCurrentScreen(
         isOnboardingComplete()
           ? "home"
@@ -1113,8 +1137,7 @@ function AppRoutes() {
     setCurrentScreen(resolveOnboardingResumeScreen());
   }, []);
 
-  const handleContinueFromHello = () => {
-    markIntroDone();
+  const continueAfterHello = useCallback(() => {
     if (isOnboardingComplete()) {
       setNavStack([]);
       setCurrentScreen("home");
@@ -1129,7 +1152,20 @@ function AppRoutes() {
       return;
     }
     navigateTo("whereAreYou");
+  }, [navigateTo]);
+
+  const handleContinueFromHello = () => {
+    markIntroDone();
+    if (shouldShowInstallHint()) {
+      navigateTo("installHint");
+      return;
+    }
+    continueAfterHello();
   };
+
+  const handleInstallHintDone = useCallback(() => {
+    continueAfterHello();
+  }, [continueAfterHello]);
 
   const handleContinueFromProductIntro = () => {
     markProductIntroDone();
@@ -1637,6 +1673,14 @@ function AppRoutes() {
             onNext={handleContinueFromHello}
             onSkip={skipOnboarding}
             onBack={handleBack}
+          />
+        )}
+
+        {currentScreen === "installHint" && (
+          <InstallHintToast
+            mode="step"
+            enabled
+            onDone={handleInstallHintDone}
           />
         )}
 
@@ -2149,9 +2193,11 @@ function AppRoutes() {
       <PasskeySetup open={passkeySetupOpen} onDone={() => setPasskeySetupOpen(false)} />
 
       <InstallHintToast
+        mode="overlay"
         enabled={
           currentScreen !== "splash" &&
           currentScreen !== "installGate" &&
+          currentScreen !== "installHint" &&
           !isOnboardingScreen(currentScreen)
         }
       />
