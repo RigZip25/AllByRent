@@ -23,3 +23,4 @@ ios/App/Pods
 ios/App/Podfile.lock
 ios/DerivedData
 ios/App/App/public
+.vercel

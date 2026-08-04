@@ -1,0 +1,22 @@
+# Native / Capacitor — not needed for web deploy
+android
+ios
+.capacitor
+icons
+
+# Local / heavy artifacts
+node_modules
+dist
+dev-dist
+docs/store/play-promo
+docs/store/.DS_Store
+*.ipa
+*.apk
+*.aab
+*.mobileprovision
+
+# Env & IDE
+.env*.local
+.DS_Store
+.idea
+.vscode
