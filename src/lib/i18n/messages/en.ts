@@ -1625,8 +1625,8 @@ export const en: AppMessages = {
     tipInstallAfter: " on the Home Screen.",
     tipShow: "Show",
     tipHide: "Hide",
-    hintToastTitle: "Install tip",
-    hintCountdown: (seconds) => `${seconds}s`,
+    hintToastTitle: "Add to Home Screen",
+    hintCountdown: (seconds) => `Closes in ${seconds}s`,
     hintStepLabel: (step, total) => `Step ${step} of ${total}`,
   },
   passkey: {

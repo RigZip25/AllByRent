@@ -2149,7 +2149,11 @@ function AppRoutes() {
       <PasskeySetup open={passkeySetupOpen} onDone={() => setPasskeySetupOpen(false)} />
 
       <InstallHintToast
-        enabled={currentScreen !== "splash" && currentScreen !== "installGate"}
+        enabled={
+          currentScreen !== "splash" &&
+          currentScreen !== "installGate" &&
+          !isOnboardingScreen(currentScreen)
+        }
       />
     </div>
     </RequireAuthProvider>

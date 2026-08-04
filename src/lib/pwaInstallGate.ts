@@ -9,7 +9,7 @@ const HINT_SEEN_KEY = "evorios_install_hint_seen";
 const INSTALL_GATE_ENABLED = false;
 
 /** Soft toast duration (seconds) when the hard gate is off. */
-export const INSTALL_HINT_SECONDS = 10;
+export const INSTALL_HINT_SECONDS = 12;
 
 export function hasCompletedInstallGate(): boolean {
   if (typeof window === "undefined") return true;

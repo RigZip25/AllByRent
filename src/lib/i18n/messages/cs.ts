@@ -1639,8 +1639,8 @@ export const cs: AppMessages = {
     tipInstallAfter: " na plochu.",
     tipShow: "Zobrazit",
     tipHide: "Skrýt",
-    hintToastTitle: "Tip k instalaci",
-    hintCountdown: (seconds) => `${seconds}s`,
+    hintToastTitle: "Přidat na plochu",
+    hintCountdown: (seconds) => `Zavře se za ${seconds}s`,
     hintStepLabel: (step, total) => `Krok ${step} z ${total}`,
   },
   passkey: {
