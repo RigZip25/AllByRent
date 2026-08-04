@@ -1639,6 +1639,9 @@ export const cs: AppMessages = {
     tipInstallAfter: " na plochu.",
     tipShow: "Zobrazit",
     tipHide: "Skrýt",
+    hintToastTitle: "Tip k instalaci",
+    hintCountdown: (seconds) => `${seconds}s`,
+    hintStepLabel: (step, total) => `Krok ${step} z ${total}`,
   },
   passkey: {
     title: "Zapnout Face ID pro rychlejší přihlášení?",

@@ -1489,6 +1489,9 @@ export type AppMessages = {
     tipInstallAfter: string;
     tipShow: string;
     tipHide: string;
+    hintToastTitle: string;
+    hintCountdown: (seconds: number) => string;
+    hintStepLabel: (step: number, total: number) => string;
   };
   passkey: {
     title: string;

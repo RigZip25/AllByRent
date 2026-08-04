@@ -5,6 +5,7 @@ import { OfflineScreen } from "./components/OfflineScreen";
 import { GarageShopMissingScreen } from "./components/GarageShopMissingScreen";
 import { SplashScreen } from "./components/SplashScreen";
 import { InstallGateScreen } from "../screens/InstallGateScreen";
+import { InstallHintToast } from "../components/InstallHintToast";
 import { FirstHello } from "../screens/onboarding/FirstHello";
 import { WhatIsEvorios } from "../screens/onboarding/WhatIsEvorios";
 import { WhatDoYouWant } from "../screens/onboarding/WhatDoYouWant";
@@ -2146,6 +2147,10 @@ function AppRoutes() {
       />
 
       <PasskeySetup open={passkeySetupOpen} onDone={() => setPasskeySetupOpen(false)} />
+
+      <InstallHintToast
+        enabled={currentScreen !== "splash" && currentScreen !== "installGate"}
+      />
     </div>
     </RequireAuthProvider>
   );
