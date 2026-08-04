@@ -1681,6 +1681,7 @@ function AppRoutes() {
             mode="step"
             enabled
             onDone={handleInstallHintDone}
+            onBack={handleBack}
           />
         )}
 

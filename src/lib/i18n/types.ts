@@ -1492,6 +1492,8 @@ export type AppMessages = {
     hintToastTitle: string;
     hintCountdown: (seconds: number) => string;
     hintStepLabel: (step: number, total: number) => string;
+    hintCoachLine: (appName: string, shortName: string) => string;
+    hintContinue: string;
   };
   passkey: {
     title: string;

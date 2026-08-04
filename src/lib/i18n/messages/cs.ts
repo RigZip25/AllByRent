@@ -1639,9 +1639,12 @@ export const cs: AppMessages = {
     tipInstallAfter: " na plochu.",
     tipShow: "Zobrazit",
     tipHide: "Skrýt",
-    hintToastTitle: "Přidat na plochu",
-    hintCountdown: (seconds) => `Zavře se za ${seconds}s`,
-    hintStepLabel: (step, total) => `Krok ${step} z ${total}`,
+    hintToastTitle: "Jeden tip, než půjdeme dál",
+    hintCountdown: (seconds) => `Pokračuje za ${seconds}s`,
+    hintStepLabel: (step, total) => `${step} / ${total}`,
+    hintCoachLine: (appName, shortName) =>
+      `Chcete ${appName} na ploše? Přidejte jako ${shortName} — volitelné, pár klepnutí.`,
+    hintContinue: "Pokračovat →",
   },
   passkey: {
     title: "Zapnout Face ID pro rychlejší přihlášení?",

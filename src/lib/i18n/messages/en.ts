@@ -1625,9 +1625,12 @@ export const en: AppMessages = {
     tipInstallAfter: " on the Home Screen.",
     tipShow: "Show",
     tipHide: "Hide",
-    hintToastTitle: "Add to Home Screen",
-    hintCountdown: (seconds) => `Closes in ${seconds}s`,
-    hintStepLabel: (step, total) => `Step ${step} of ${total}`,
+    hintToastTitle: "One quiet tip before we continue",
+    hintCountdown: (seconds) => `Continues in ${seconds}s`,
+    hintStepLabel: (step, total) => `${step} / ${total}`,
+    hintCoachLine: (appName, shortName) =>
+      `Want ${appName} on your Home Screen? Add it as ${shortName} — optional, takes a few taps.`,
+    hintContinue: "Continue →",
   },
   passkey: {
     title: "Enable Face ID for faster login?",
