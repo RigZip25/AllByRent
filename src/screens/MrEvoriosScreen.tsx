@@ -8,7 +8,6 @@ import { useAppModeLabels, useMessages } from "../lib/i18n/react";
 import { usePwaInstallPrompt } from "../hooks/PwaInstallProvider";
 import { getAppMode } from "../lib/appMode";
 import { useAuth } from "../hooks/AuthProvider";
-import { findLocalRentanoAnswer } from "../lib/rentanoLocalAnswer";
 import rentanoImg from "../imports/No_back_rentano.png";
 
 const GREEN = "#0D5C3A";
@@ -16,18 +15,9 @@ const BORDER = "#E8E6E0";
 
 type AssistantView = "chat" | "faq" | "install";
 
-function QuickTipsAccordion({ prompts }: { prompts: string[] }) {
+function QuickTipsAccordion({ tips }: { tips: { q: string; a: string }[] }) {
   const t = useMessages();
   const [expanded, setExpanded] = useState<string | null>(null);
-
-  const items = useMemo(
-    () =>
-      prompts.map((question) => ({
-        question,
-        answer: findLocalRentanoAnswer(question)?.answer ?? null,
-      })),
-    [prompts],
-  );
 
   return (
     <div className="mb-4">
@@ -36,20 +26,23 @@ function QuickTipsAccordion({ prompts }: { prompts: string[] }) {
       </p>
       <p className="mt-0.5 text-[13px] text-gray-500">{t.mrEvorios.quickTipsHint}</p>
       <ul className="mt-2.5 flex flex-col gap-2">
-        {items.map(({ question, answer }) => {
-          const open = expanded === question;
+        {tips.map(({ q, a }) => {
+          const open = expanded === q;
           return (
-            <li key={question}>
+            <li key={q}>
               <button
                 type="button"
-                onClick={() => setExpanded(open ? null : question)}
+                onClick={() => setExpanded(open ? null : q)}
                 aria-expanded={open}
                 className="flex w-full flex-col rounded-2xl border bg-white px-3.5 py-3 text-left transition-colors active:bg-[#F7FBF8]"
                 style={{ borderColor: open ? GREEN : BORDER }}
               >
                 <span className="flex items-start gap-2">
-                  <span className="min-w-0 flex-1 text-[15px] font-semibold leading-snug" style={{ color: GREEN }}>
-                    {question}
+                  <span
+                    className="min-w-0 flex-1 text-[15px] font-semibold leading-snug"
+                    style={{ color: GREEN }}
+                  >
+                    {q}
                   </span>
                   <ChevronDown
                     className={`mt-0.5 h-4 w-4 shrink-0 transition-transform duration-200 ${
@@ -60,8 +53,11 @@ function QuickTipsAccordion({ prompts }: { prompts: string[] }) {
                   />
                 </span>
                 {open ? (
-                  <p className="mt-2.5 border-t pt-2.5 text-[14px] leading-relaxed text-gray-600" style={{ borderColor: BORDER }}>
-                    {answer ?? t.mrEvorios.askInChatBelow}
+                  <p
+                    className="mt-2.5 border-t pt-2.5 text-[14px] leading-relaxed text-gray-600"
+                    style={{ borderColor: BORDER }}
+                  >
+                    {a}
                   </p>
                 ) : null}
               </button>
@@ -94,8 +90,8 @@ export function MrEvoriosScreen() {
     };
   }, []);
 
-  const quickPrompts =
-    appMode === "earn" ? t.mrEvorios.quickPromptsEarn : t.mrEvorios.quickPromptsRent;
+  const quickTips =
+    appMode === "earn" ? t.mrEvorios.quickTipsEarn : t.mrEvorios.quickTipsRent;
 
   const apiContext = useMemo(
     () => ({
@@ -165,7 +161,7 @@ export function MrEvoriosScreen() {
       <div className="screen-scroll min-h-0 flex-1 px-4 pb-4 pt-3">
         {view === "chat" ? (
           <>
-            <QuickTipsAccordion prompts={quickPrompts} />
+            <QuickTipsAccordion tips={quickTips} />
             <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
               {t.mrEvorios.askInChatBelow}
             </p>

@@ -557,19 +557,49 @@ export const cs: AppMessages = {
     showHintAria: (mascot) => `Zobrazit tip od ${mascot}`,
     hideHintAria: (mascot) => `Skrýt tip od ${mascot}`,
     closeHintAria: (mascot) => `Zavřít tip od ${mascot}`,
-    quickPromptsRent: [
-      "Jak procházím podle kategorie?",
-      "Co dělají tlačítka dolního menu?",
-      "Co je Evorios — sousedský trh?",
-      "Profil vs Garáž — jaký je rozdíl?",
-      "Jak vystavím první věc?",
+    quickTipsRent: [
+      {
+        q: "Jak procházím podle kategorie?",
+        a: "Na Domů klepněte na chip kategorie (Nářadí, Zahrada, Párty…) nebo v More otevřete How Evorios works. Pak filtrujte All · Rent · Buy ve feedu.",
+      },
+      {
+        q: "Co dělají tlačítka dolního menu?",
+        a: "Domů = procházení. Mr. Evorios = tipy + chat. Zelené + = nová položka. Garáž = výloha a výdělky. More = profil, půjčky, oblíbené a How Evorios works.",
+      },
+      {
+        q: "Co je Evorios — sousedský trh?",
+        a: "Evorios je sousedský trh: každý dům může půjčovat, prodávat nebo darovat z garážové výlohy. Procházejte blízké garáže, nebo naplňte vlastní polici.",
+      },
+      {
+        q: "Profil vs Garáž — jaký je rozdíl?",
+        a: "Garáž = nabídky, žádosti a výdělky. Profil (v More) = jméno, foto, telefon, výplaty a odhlášení. Mezi Procházet a Moje garáž přepínáte kdykoli.",
+      },
+      {
+        q: "Jak vystavím první věc?",
+        a: "Klepněte na zelené + dole. Průvodce: fotky → detaily → cena → vyzvednutí → dostupnost → QR → publikovat. Pak v Garáži spravujte nabídky.",
+      },
     ],
-    quickPromptsEarn: [
-      "Jak naplním garáž?",
-      "Jaké kategorie můžu vystavit?",
-      "Co je Evorios — sousedský trh?",
-      "Profil vs Garáž — jaký je rozdíl?",
-      "Jak přepnu na Procházet?",
+    quickTipsEarn: [
+      {
+        q: "Jak naplním garáž?",
+        a: "Klepněte na zelené + dole a projděte průvodce nabídkou. Publikované věci uvidí sousedé ve vaší výloze.",
+      },
+      {
+        q: "Jaké kategorie můžu vystavit?",
+        a: "Nářadí, zahrada, domácnost, párty, sport, kemp, elektronika, foto, kola, fitness a další. V More → How Evorios works rozbalíte každou kategorii.",
+      },
+      {
+        q: "Co je Evorios — sousedský trh?",
+        a: "Evorios je sousedský trh: každý dům může půjčovat, prodávat nebo darovat z garážové výlohy. Procházejte blízké garáže, nebo naplňte vlastní polici.",
+      },
+      {
+        q: "Profil vs Garáž — jaký je rozdíl?",
+        a: "Garáž = nabídky, žádosti a výdělky. Profil (v More) = jméno, foto, telefon, výplaty a odhlášení. Mezi Procházet a Moje garáž přepínáte kdykoli.",
+      },
+      {
+        q: "Jak přepnu na Procházet?",
+        a: "Záložka Domů je procházení bloku a kategorií. Garáž zůstává prodejní toolkit — mezi nimi přepínáte kdykoli.",
+      },
     ],
     quickTipsTitle: "Populární otázky",
     quickTipsHint: "Klepněte na otázku — odpověď se rozbalí",

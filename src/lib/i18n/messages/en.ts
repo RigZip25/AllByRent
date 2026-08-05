@@ -544,19 +544,49 @@ export const en: AppMessages = {
     showHintAria: (mascot) => `Show ${mascot} hint`,
     hideHintAria: (mascot) => `Hide ${mascot} hint`,
     closeHintAria: (mascot) => `Close ${mascot} hint`,
-    quickPromptsRent: [
-      "How do I browse by category?",
-      "Menu buttons — what does each tab do?",
-      "What is Evorios — household marketplace?",
-      "Profile vs Garage — what's the difference?",
-      "How do I list my first item?",
+    quickTipsRent: [
+      {
+        q: "How do I browse by category?",
+        a: "On Home, tap a category chip (Tools, Garden, Party…) or open How Evorios works in More to see household and pro shelves. Then filter All · Rent · Buy on the feed.",
+      },
+      {
+        q: "Menu buttons — what does each tab do?",
+        a: "Home = browse. Mr. Evorios = help tips + chat. Green + = list a new item. Garage = your storefront & earnings. More = profile, rentals, favorites, and How Evorios works.",
+      },
+      {
+        q: "What is Evorios — household marketplace?",
+        a: "Evorios is a neighbor marketplace: every home can rent, sell, or gift from a garage storefront. Browse nearby garages, or stock your own shelf for the block.",
+      },
+      {
+        q: "Profile vs Garage — what's the difference?",
+        a: "Garage = your listings, requests, and earnings. Profile (under More) = name, photo, phone, payouts, and sign-out. Switch Browse vs My Garage anytime from the footer.",
+      },
+      {
+        q: "How do I list my first item?",
+        a: "Tap the green + in the footer. Follow the wizard: photos → details → pricing → pickup → availability → QR → publish. Then open Garage to manage what you listed.",
+      },
     ],
-    quickPromptsEarn: [
-      "How do I stock my garage?",
-      "Which categories can I list?",
-      "What is Evorios — household marketplace?",
-      "Profile vs Garage — what's the difference?",
-      "How do I switch to Browse?",
+    quickTipsEarn: [
+      {
+        q: "How do I stock my garage?",
+        a: "Tap the green + in the footer and walk through the listing wizard. Published items appear in My Garage for neighbors to find.",
+      },
+      {
+        q: "Which categories can I list?",
+        a: "Tools, garden, home, party, sports, camping, electronics, photo, bikes, fitness, and more. Open How Evorios works in More to expand each category.",
+      },
+      {
+        q: "What is Evorios — household marketplace?",
+        a: "Evorios is a neighbor marketplace: every home can rent, sell, or gift from a garage storefront. Browse nearby garages, or stock your own shelf for the block.",
+      },
+      {
+        q: "Profile vs Garage — what's the difference?",
+        a: "Garage = your listings, requests, and earnings. Profile (under More) = name, photo, phone, payouts, and sign-out. Switch Browse vs My Garage anytime from the footer.",
+      },
+      {
+        q: "How do I switch to Browse?",
+        a: "Use the Home tab to browse the block and categories. Garage stays your seller toolkit — you can switch between them anytime.",
+      },
     ],
     quickTipsTitle: "Popular questions",
     quickTipsHint: "Tap a question to expand the answer",

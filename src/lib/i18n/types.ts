@@ -624,8 +624,8 @@ export type AppMessages = {
     showHintAria: (mascot: string) => string;
     hideHintAria: (mascot: string) => string;
     closeHintAria: (mascot: string) => string;
-    quickPromptsRent: string[];
-    quickPromptsEarn: string[];
+    quickTipsRent: { q: string; a: string }[];
+    quickTipsEarn: { q: string; a: string }[];
     quickTipsTitle: string;
     quickTipsHint: string;
     askInChatBelow: string;
