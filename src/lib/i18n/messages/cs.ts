@@ -103,6 +103,12 @@ export const cs: AppMessages = {
     newCodeIn: (seconds) => `Nový kód za ${seconds}s`,
     editDetails: "Upravit údaje",
     spamHint: "Pokud kód nedorazí do minuty, zkontrolujte spam nebo propagaci.",
+    codeWaitTitle: (seconds) => `Kód je na cestě — ${seconds}s`,
+    codeMissingTitle: "Kód ještě nedorazil?",
+    codeWaitBody:
+      "Zkontrolujte Spam / Propagaci a správnost e-mailu (např. gmail, ne gmal). Pak pošlete znovu nebo upravte údaje.",
+    didYouMeanEmail: (email) => `Mysleli jste ${email}?`,
+    useSuggestedEmail: "Použít tuto adresu",
     freeToJoin: "Zdarma · Bez kreditní karty",
   },
   install: {

@@ -202,6 +202,11 @@ export type AppMessages = {
     newCodeIn: (seconds: number) => string;
     editDetails: string;
     spamHint: string;
+    codeWaitTitle: (seconds: number) => string;
+    codeMissingTitle: string;
+    codeWaitBody: string;
+    didYouMeanEmail: (email: string) => string;
+    useSuggestedEmail: string;
     freeToJoin: string;
   };
   install: {

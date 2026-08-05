@@ -97,6 +97,12 @@ export const en: AppMessages = {
     newCodeIn: (seconds) => `New code in ${seconds}s`,
     editDetails: "Edit details",
     spamHint: "Check spam or promotions if the code doesn't arrive within a minute.",
+    codeWaitTitle: (seconds) => `Code on the way — ${seconds}s`,
+    codeMissingTitle: "No code yet?",
+    codeWaitBody:
+      "Check Spam / Promotions, and double-check your email spelling (e.g. gmail, not gmal). Then resend or edit details.",
+    didYouMeanEmail: (email) => `Did you mean ${email}?`,
+    useSuggestedEmail: "Use this address",
     freeToJoin: "Free to join · No credit card",
   },
   install: {

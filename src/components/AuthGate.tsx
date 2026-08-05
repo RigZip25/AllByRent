@@ -6,6 +6,7 @@ import type { AuthIntent } from "../lib/authReturn";
 import { peekPendingAuthEmail, setPendingAuthEmail } from "../lib/authReturn";
 import { signInWithEmailOtp, verifyEmailOtp } from "../lib/auth";
 import { formatAuthError } from "../lib/authErrors";
+import { suggestCorrectedEmail } from "../lib/emailDomainSuggest";
 import { detectCurrentLocation, formatGeolocationErrorMessage } from "../lib/geolocation";
 import { setHomeLocation } from "../lib/listingStorage";
 import { peekPendingAuthProfile, savePendingAuthProfile } from "../lib/pendingAuthProfile";
@@ -205,17 +206,42 @@ export function AuthGate({
     return true;
   };
 
-  const handleSendConfirmationCode = () => {
-    if (!validateAccountForm() || !canRequestEmail || !location) return;
+  const suggestedEmail = suggestCorrectedEmail(email);
+
+  const sendConfirmationCode = (emailOverride?: string) => {
+    const nextEmail = (emailOverride ?? email).trim();
+    const correctingAddress =
+      emailOverride != null && nextEmail.toLowerCase() !== email.trim().toLowerCase();
+
+    if (step === "account") {
+      if (!fullName.trim()) {
+        setError(a.nameRequired);
+        return;
+      }
+      if (!location) {
+        setError(a.locationRequired);
+        return;
+      }
+    }
+    if (!isValidEmail(nextEmail)) {
+      setError(a.emailInvalid);
+      return;
+    }
+    if (!correctingAddress && !canRequestEmail) return;
+
+    if (emailOverride) setEmail(nextEmail);
+
     void run("email", async () => {
-      setPendingAuthEmail(email);
-      persistPendingProfile();
-      await signInWithEmailOtp(email);
+      setPendingAuthEmail(nextEmail);
+      if (location) persistPendingProfile();
+      await signInWithEmailOtp(nextEmail);
       setEmailCooldownUntil(Date.now() + EMAIL_COOLDOWN_SECONDS * 1000);
       setOtpCode("");
       setStep("confirm");
     });
   };
+
+  const handleSendConfirmationCode = () => sendConfirmationCode();
 
   const handleVerifyCode = () => {
     const digits = normalizeEmailOtpInput(otpCode);
@@ -227,6 +253,28 @@ export function AuthGate({
       await verifyEmailOtp(email, digits);
     });
   };
+
+  const emailSuggestionBanner =
+    suggestedEmail && suggestedEmail.toLowerCase() !== email.trim().toLowerCase() ? (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3">
+        <p className="text-[13px] font-semibold text-amber-950">{a.didYouMeanEmail(suggestedEmail)}</p>
+        <button
+          type="button"
+          disabled={busy !== null}
+          onClick={() => {
+            setError(null);
+            if (step === "confirm") {
+              sendConfirmationCode(suggestedEmail);
+            } else {
+              setEmail(suggestedEmail);
+            }
+          }}
+          className="mt-2 text-[13px] font-bold text-[#0D5C3A] underline disabled:opacity-60"
+        >
+          {a.useSuggestedEmail}
+        </button>
+      </div>
+    ) : null;
 
   const handleAutoDetectLocation = () => {
     void run("locate", async () => {
@@ -335,6 +383,7 @@ export function AuthGate({
               className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
               style={{ borderColor: BORDER }}
             />
+            {emailSuggestionBanner ? <div className="mt-3">{emailSuggestionBanner}</div> : null}
 
             <label className="mt-3 block text-[13px] font-semibold text-gray-600" htmlFor="auth-phone">
               {a.phoneLabel} <span className="font-normal text-gray-400">{a.phoneOptional}</span>
@@ -420,6 +469,34 @@ export function AuthGate({
               ) : null}
             </div>
 
+            {emailSuggestionBanner}
+
+            <div
+              className="rounded-2xl border border-amber-200 bg-amber-50 p-3.5"
+              role="status"
+              aria-live="polite"
+            >
+              <p className="text-[14px] font-bold text-amber-950">
+                {emailCooldownRemaining > 0
+                  ? a.codeWaitTitle(emailCooldownRemaining)
+                  : a.codeMissingTitle}
+              </p>
+              <p className="mt-1.5 text-[12.5px] leading-relaxed text-amber-900/90">{a.codeWaitBody}</p>
+              <button
+                type="button"
+                disabled={busy !== null || emailCooldownRemaining > 0}
+                onClick={handleSendConfirmationCode}
+                className="mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border border-amber-300 bg-white px-4 text-[14px] font-semibold text-amber-950 disabled:opacity-60"
+              >
+                <Mail className="h-4 w-4" />
+                {busy === "email"
+                  ? a.sending
+                  : emailCooldownRemaining > 0
+                    ? a.newCodeIn(emailCooldownRemaining)
+                    : a.sendNewCode}
+              </button>
+            </div>
+
             <label className="text-[13px] font-semibold text-gray-600" htmlFor="auth-otp">
               {a.otpLabel}
             </label>
@@ -453,24 +530,7 @@ export function AuthGate({
               {busy === "verify" ? a.checking : a.verify}
             </button>
 
-            <p className="text-[13px] leading-relaxed text-gray-500">
-              {a.wrongDetailsHint}
-            </p>
-
-            <button
-              type="button"
-              disabled={busy !== null || emailCooldownRemaining > 0}
-              onClick={handleSendConfirmationCode}
-              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border bg-white px-4 text-[14px] font-semibold text-gray-700 disabled:opacity-60"
-              style={{ borderColor: BORDER }}
-            >
-              <Mail className="h-4 w-4" />
-              {busy === "email"
-                ? a.sending
-                : emailCooldownRemaining > 0
-                  ? a.newCodeIn(emailCooldownRemaining)
-                  : a.sendNewCode}
-            </button>
+            <p className="text-[13px] leading-relaxed text-gray-500">{a.wrongDetailsHint}</p>
 
             <button
               type="button"
@@ -483,10 +543,6 @@ export function AuthGate({
             >
               {a.editDetails}
             </button>
-
-            <p className="text-center text-[12px] leading-relaxed text-gray-400">
-              {a.spamHint}
-            </p>
           </div>
         ) : null}
 
