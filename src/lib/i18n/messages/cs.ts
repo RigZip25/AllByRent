@@ -531,7 +531,7 @@ export const cs: AppMessages = {
     faq: "FAQ",
     install: "Instalace",
     welcome: (mascot) =>
-      `Ahoj! Jsem ${mascot}. Nejdřív zkuste záložku FAQ — většina odpovědí je hned. V chatu nejdřív hledám ty odpovědi, AI až potom. Ptejte se hlasem nebo textem.`,
+      `Ahoj! Jsem ${mascot}. Klepněte na populární otázku nahoře — odpověď se rozbalí. Nebo pište / mluvte níže — nejdřív FAQ, AI až když je potřeba.`,
     listeningHint: "Poslouchám… text se objeví v poli — zastavte mikrofon, upravte a pak Odeslat.",
     editThenSend: "Upravte text, pokud je potřeba, a klepněte na Odeslat.",
     placeholderListening: "Poslouchám — vaše slova se objeví tady…",
@@ -571,6 +571,9 @@ export const cs: AppMessages = {
       "Profil vs Garáž — jaký je rozdíl?",
       "Jak přepnu na Procházet?",
     ],
+    quickTipsTitle: "Populární otázky",
+    quickTipsHint: "Klepněte na otázku — odpověď se rozbalí",
+    askInChatBelow: "Pořád nejasné? Zeptejte se níže",
   },
   garageUi: {
     shop: "Obchod",

@@ -518,7 +518,7 @@ export const en: AppMessages = {
     faq: "FAQ",
     install: "Install",
     welcome: (mascot) =>
-      `Hi! I'm ${mascot}. Check the FAQ tab first — most answers are instant. Here in Chat I try those answers before any AI. Ask by voice or text.`,
+      `Hi! I'm ${mascot}. Tap a popular question above to expand the answer. Or type / speak below — I check FAQ first, then AI if needed.`,
     listeningHint: "Listening… text appears in the box — stop the mic, edit if needed, then Send.",
     editThenSend: "Edit the text if needed, then tap Send.",
     placeholderListening: "Listening — your words show up here…",
@@ -558,6 +558,9 @@ export const en: AppMessages = {
       "Profile vs Garage — what's the difference?",
       "How do I switch to Browse?",
     ],
+    quickTipsTitle: "Popular questions",
+    quickTipsHint: "Tap a question to expand the answer",
+    askInChatBelow: "Still stuck? Ask below",
   },
   garageUi: {
     shop: "Shop",

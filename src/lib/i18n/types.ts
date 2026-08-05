@@ -626,6 +626,9 @@ export type AppMessages = {
     closeHintAria: (mascot: string) => string;
     quickPromptsRent: string[];
     quickPromptsEarn: string[];
+    quickTipsTitle: string;
+    quickTipsHint: string;
+    askInChatBelow: string;
   };
   listing: {
     stepOf: (step: number, total: number) => string;
