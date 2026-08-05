@@ -61,7 +61,9 @@ export function resolvePageTranslateTarget(
   if (isNativeApp()) return null;
   if (!isLocaleAuto()) return null;
   const ui = getLocale();
-  if (ui !== "en") return null; // native cs (or future packs) — do not double-translate
+  // Native packs (en source for Google, and always cs.ts for Czechia) — never
+  // Google-translate into Czech; resolveDeviceLocale already picks cs for CZ/SK.
+  if (ui !== "en") return null;
 
   for (const tag of languages) {
     const primary = primaryLanguage(tag);

@@ -71,6 +71,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
   const customerId = await getOrCreateStripeCustomer(stripe, admin, user.id, user.email);
 
+  // Platform boosts settle on the platform Stripe account (USD), not Connect.
   const paymentIntent = await stripe.paymentIntents.create({
     amount: amountCents,
     currency: "usd",

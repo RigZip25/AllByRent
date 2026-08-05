@@ -1,5 +1,6 @@
 import { getSupabaseClient } from "./supabaseClient";
 import { isStripePaymentsEnabled } from "./stripeConfig";
+import { getSearchCountryCode } from "./locationCountry";
 
 export type CreateRentalPaymentIntentResult =
   | {
@@ -401,7 +402,10 @@ export async function createConnectAccountLink(returnPath: string): Promise<Conn
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ returnPath }),
+      body: JSON.stringify({
+        returnPath,
+        country: getSearchCountryCode(),
+      }),
     });
   } catch (error) {
     return {

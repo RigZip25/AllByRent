@@ -9,6 +9,7 @@ import {
   destinationChargeFields,
   platformFeeFromGrossTotal,
   requireHostPayoutAccount,
+  resolveHostStripeCurrency,
 } from "../../lib/stripe/connectPayout";
 
 type Body = {
@@ -91,6 +92,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const customerId = await getOrCreateStripeCustomer(stripe, admin, user.id, user.email);
   const applicationFeeCents = platformFeeFromGrossTotal(amountCents, RENTAL_PLATFORM_FEE_RATE);
   const destination = destinationChargeFields(hostPayout.account.accountId, applicationFeeCents);
+  const currency = await resolveHostStripeCurrency(admin, ownerId);
 
   const metadata = {
     rental_id: rentalId,
@@ -103,7 +105,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   const createParams: Stripe.PaymentIntentCreateParams = {
     amount: amountCents,
-    currency: "usd",
+    currency,
     customer: customerId,
     capture_method: "manual",
     automatic_payment_methods: { enabled: true },
@@ -119,7 +121,8 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       if (
         existing.status !== "canceled" &&
         existing.status !== "succeeded" &&
-        existing.amount === amountCents
+        existing.amount === amountCents &&
+        existing.currency === currency
       ) {
         paymentIntent = existing;
       } else {

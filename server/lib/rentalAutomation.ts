@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 import { isStripeServerConfigured } from "./keys";
 import { getOrCreateStripeCustomer } from "./stripe/customer";
+import { resolveHostStripeCurrency } from "./stripe/connectPayout";
 
 const MS_MIN = 60_000;
 
@@ -143,7 +144,7 @@ export async function runNoShowAutomation(admin: SupabaseClient): Promise<{
 
           await stripe.paymentIntents.create({
             amount: feeCents,
-            currency: "usd",
+            currency: await resolveHostStripeCurrency(admin, rental.owner_id),
             customer: customerId,
             confirm: true,
             off_session: true,

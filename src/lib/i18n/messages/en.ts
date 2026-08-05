@@ -1550,7 +1550,7 @@ export const en: AppMessages = {
       subtitle: "One quick step before you go live.",
       verifyOnceTitle: "Verify once",
       verifyOnceBody:
-        "Optional extra badge. Going public uses Stripe Connect (ID + bank in one flow).",
+        "Optional extra badge. Payouts use Stripe Connect (ID + bank) when you want to receive money.",
       signInHint: "Sign in to start identity verification.",
       starting: "Starting…",
       startCta: "Start verification",

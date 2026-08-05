@@ -5,9 +5,12 @@ import { isStripeServerConfigured } from "../../lib/keys";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { resolveConfiguredAppOrigin } from "../../lib/brand";
+import { resolveConnectCountry } from "../../lib/stripe/marketCurrency";
 
 type Body = {
   returnPath?: string;
+  /** ISO country hint from the client (search/home country). */
+  country?: string;
 };
 
 function resolveOrigin(req: VercelRequest): string {
@@ -46,10 +49,11 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const returnPath = typeof body.returnPath === "string" && body.returnPath.startsWith("/")
     ? body.returnPath
     : "/?screen=profile";
+  const requestedCountry = typeof body.country === "string" ? body.country : null;
 
   const { data: profile, error: profileError } = await admin
     .from("profiles")
-    .select("stripe_connect_account_id, display_name")
+    .select("stripe_connect_account_id, display_name, location_country_code")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -77,9 +81,22 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   try {
     if (!accountId) {
+      const countryResolved = resolveConnectCountry({
+        profileCountry:
+          typeof profile?.location_country_code === "string"
+            ? profile.location_country_code
+            : null,
+        requestedCountry,
+        fallback: "US",
+      });
+      if (!countryResolved.ok) {
+        res.status(200).json({ ok: false, reason: countryResolved.reason });
+        return;
+      }
+
       const account = await stripe.accounts.create({
         type: "express",
-        country: "US",
+        country: countryResolved.country,
         email: user.email ?? undefined,
         metadata: { supabase_user_id: user.id },
         capabilities: {

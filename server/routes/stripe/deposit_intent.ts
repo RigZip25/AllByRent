@@ -5,6 +5,7 @@ import { isStripeServerConfigured } from "../../lib/keys";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
+import { resolveHostStripeCurrency } from "../../lib/stripe/connectPayout";
 import { fetchRentalForPayments } from "../../lib/stripe/rentalAccess";
 
 type Body = { rentalId?: string };
@@ -88,6 +89,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const secret = process.env.STRIPE_SECRET_KEY!;
   const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
   const customerId = await getOrCreateStripeCustomer(stripe, admin, user.id, user.email);
+  const currency = await resolveHostStripeCurrency(admin, rental.owner_id);
 
   const metadata = {
     rental_id: rentalId,
@@ -95,6 +97,15 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     owner_id: rental.owner_id,
     renter_id: user.id,
     payment_type: "deposit",
+  };
+
+  const createDepositParams: Stripe.PaymentIntentCreateParams = {
+    amount: amountCents,
+    currency,
+    customer: customerId,
+    capture_method: "manual",
+    automatic_payment_methods: { enabled: true },
+    metadata,
   };
 
   let paymentIntent: Stripe.PaymentIntent;
@@ -106,38 +117,18 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
         existing.capture_method === "manual" &&
         existing.status !== "canceled" &&
         existing.status !== "succeeded" &&
-        existing.amount === amountCents
+        existing.amount === amountCents &&
+        existing.currency === currency
       ) {
         paymentIntent = existing;
       } else {
-        paymentIntent = await stripe.paymentIntents.create({
-          amount: amountCents,
-          currency: "usd",
-          customer: customerId,
-          capture_method: "manual",
-          automatic_payment_methods: { enabled: true },
-          metadata,
-        });
+        paymentIntent = await stripe.paymentIntents.create(createDepositParams);
       }
     } catch {
-      paymentIntent = await stripe.paymentIntents.create({
-        amount: amountCents,
-        currency: "usd",
-        customer: customerId,
-        capture_method: "manual",
-        automatic_payment_methods: { enabled: true },
-        metadata,
-      });
+      paymentIntent = await stripe.paymentIntents.create(createDepositParams);
     }
   } else {
-    paymentIntent = await stripe.paymentIntents.create({
-      amount: amountCents,
-      currency: "usd",
-      customer: customerId,
-      capture_method: "manual",
-      automatic_payment_methods: { enabled: true },
-      metadata,
-    });
+    paymentIntent = await stripe.paymentIntents.create(createDepositParams);
   }
 
   const { error: updateError } = await admin

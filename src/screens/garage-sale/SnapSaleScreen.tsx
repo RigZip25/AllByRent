@@ -28,6 +28,7 @@ import {
 import type { GarageListingSaleMode } from "../../lib/garageSaleOfferStorage";
 import { formatAuctionWindowLabel } from "../../lib/garageAuctionWindow";
 import { garageSaleOpenLabel, getGarageSaleSchedule } from "../../lib/garageSaleStorage";
+import { currencySymbol } from "../../lib/regionalDisplay";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
@@ -505,7 +506,9 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
           <label className="mt-3 block">
             <span className="text-xs font-medium text-gray-500">{copy.priceLabel}</span>
             <div className="relative mt-1">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                {currencySymbol()}
+              </span>
               <input
                 type="text"
                 inputMode="decimal"

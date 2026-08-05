@@ -1565,7 +1565,7 @@ export const cs: AppMessages = {
       subtitle: "Jeden rychlý krok, než půjdete naživo.",
       verifyOnceTitle: "Ověřit jednou",
       verifyOnceBody:
-        "Volitelný odznak navíc. Zveřejnění nabídek používá Stripe Connect (doklad + banka v jednom toku).",
+        "Volitelný odznak navíc. Výplaty jdou přes Stripe Connect (doklad + banka), až budete chtít přijímat peníze.",
       signInHint: "Přihlaste se a spusťte ověření identity.",
       starting: "Spouštím…",
       startCta: "Spustit ověření",

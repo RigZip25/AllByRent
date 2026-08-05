@@ -330,6 +330,12 @@ export function saveSearchCountry(code: CountryCode): void {
   } catch {
     /* ignore */
   }
+  // Auto locale may flip to native cs when marketplace country is CZ/SK.
+  try {
+    window.dispatchEvent(new Event("evorios:search-country-change"));
+  } catch {
+    /* ignore */
+  }
 }
 
 function detectCountryFromTimeZone(): CountryCode | null {

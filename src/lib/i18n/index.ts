@@ -2,9 +2,11 @@ import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type AppLocale } from "./types";
 import type { AppMessages } from "./types";
 import { en } from "./messages/en";
 import { cs } from "./messages/cs";
+import { getSearchCountryCode } from "../locationCountry";
 
 const STORAGE_KEY = "evorios_locale";
 const AUTO_KEY = "evorios_locale_auto";
+const SEARCH_COUNTRY_EVENT = "evorios:search-country-change";
 
 const CATALOG: Record<AppLocale, AppMessages> = { en, cs };
 
@@ -142,8 +144,8 @@ function localeFromTimezone(): AppLocale | null {
 
 /**
  * Map BCP-47 tags like cs-CZ / pt-BR → supported app locale.
- * Prefers Czech when the device is clearly CZ/SK (timezone/region) even if
- * Safari lists English first — install gate and first paint follow the phone.
+ * Prefers the native Czech pack in CZ/SK (timezone, region tag, or search country)
+ * even when Safari lists English first — never route Czechia through Google Translate.
  */
 export function resolveDeviceLocale(
   languages: readonly string[] = collectDeviceLanguageTags(),
@@ -156,13 +158,19 @@ export function resolveDeviceLocale(
 
   const prefersCzechRegion =
     localeFromTimezone() === "cs" ||
-    languages.some((t) => /[-_](CZ|SK)\b/i.test(t || ""));
+    languages.some((t) => /[-_](CZ|SK)\b/i.test(t || "")) ||
+    (() => {
+      try {
+        const country = getSearchCountryCode();
+        return country === "CZ" || country === "SK";
+      } catch {
+        return false;
+      }
+    })();
 
-  if (prefersCzechRegion && matched.includes("cs")) return "cs";
+  // Native cs.ts wins for Czechia/Slovakia — do not fall through to English-first lists.
+  if (prefersCzechRegion) return "cs";
   if (matched[0]) return matched[0];
-
-  const fromTz = localeFromTimezone();
-  if (fromTz) return fromTz;
 
   return DEFAULT_LOCALE;
 }
@@ -197,9 +205,7 @@ export function setLocale(locale: AppLocale) {
   } catch {
     /* ignore */
   }
-  if (typeof document !== "undefined") {
-    document.documentElement.lang = locale;
-  }
+  applyDocumentLang(locale);
   notify();
 }
 
@@ -211,9 +217,7 @@ export function setLocaleAuto() {
   } catch {
     /* ignore */
   }
-  if (typeof document !== "undefined") {
-    document.documentElement.lang = getLocale();
-  }
+  applyDocumentLang();
   notify();
 }
 
@@ -230,12 +234,20 @@ export function getAppModeLabels(locale?: AppLocale) {
 }
 
 export function applyDocumentLang(locale: AppLocale = getLocale()) {
-  if (typeof document !== "undefined") {
-    document.documentElement.lang = locale;
+  if (typeof document === "undefined") return;
+  document.documentElement.lang = locale;
+  // Native packs (en UI without Google target, and always cs) — discourage
+  // Chrome/Safari “Translate this page” so Czechia uses messages/cs.ts, not Google.
+  if (locale === "cs") {
+    document.documentElement.setAttribute("translate", "no");
+    document.documentElement.classList.add("notranslate");
+  } else {
+    document.documentElement.removeAttribute("translate");
+    document.documentElement.classList.remove("notranslate");
   }
 }
 
-/** Keep Auto locale in sync when the OS/browser language changes (iOS/Android). */
+/** Keep Auto locale in sync when the OS/browser language or marketplace country changes. */
 export function startLocaleChangeListener(): () => void {
   if (typeof window === "undefined") return () => undefined;
   const onChange = () => {
@@ -244,5 +256,14 @@ export function startLocaleChangeListener(): () => void {
     notify();
   };
   window.addEventListener("languagechange", onChange);
-  return () => window.removeEventListener("languagechange", onChange);
+  window.addEventListener(SEARCH_COUNTRY_EVENT, onChange);
+  return () => {
+    window.removeEventListener("languagechange", onChange);
+    window.removeEventListener(SEARCH_COUNTRY_EVENT, onChange);
+  };
+}
+
+export function emitSearchCountryLocaleRefresh(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(SEARCH_COUNTRY_EVENT));
 }

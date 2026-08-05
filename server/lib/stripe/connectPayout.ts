@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type Stripe from "stripe";
+import { stripeCurrencyForCountry } from "./marketCurrency";
 
 export type HostPayoutAccount = {
   accountId: string;
@@ -26,6 +27,21 @@ export async function fetchHostPayoutAccount(
     accountId,
     payoutsEnabled: Boolean(data.stripe_payouts_enabled),
   };
+}
+
+/** Charge currency from the host’s profile country (CZ → czk, US → usd, …). */
+export async function resolveHostStripeCurrency(
+  admin: SupabaseClient,
+  hostId: string,
+): Promise<string> {
+  const { data } = await admin
+    .from("profiles")
+    .select("location_country_code")
+    .eq("id", hostId)
+    .maybeSingle();
+  const code =
+    typeof data?.location_country_code === "string" ? data.location_country_code : null;
+  return stripeCurrencyForCountry(code);
 }
 
 export const HOST_PAYOUTS_REQUIRED_MESSAGE =

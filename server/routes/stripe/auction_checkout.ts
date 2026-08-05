@@ -6,7 +6,7 @@ import { isStripeServerConfigured } from "../../lib/keys";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
-import { destinationChargeFields, requireHostPayoutAccount } from "../../lib/stripe/connectPayout";
+import { destinationChargeFields, requireHostPayoutAccount, resolveHostStripeCurrency } from "../../lib/stripe/connectPayout";
 import {
   buyerChargeFromSubtotalCents,
   platformFeeFromSubtotalCents,
@@ -111,10 +111,11 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
   const customerId = await getOrCreateStripeCustomer(stripe, admin, user.id, user.email);
   const destination = destinationChargeFields(hostPayout.account.accountId, platformFeeCents);
+  const currency = await resolveHostStripeCurrency(admin, hostId);
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount: amountCents,
-    currency: "usd",
+    currency,
     customer: customerId,
     automatic_payment_methods: { enabled: true },
     metadata: {
