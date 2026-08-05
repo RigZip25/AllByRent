@@ -121,7 +121,7 @@ export function MrEvoriosScreen() {
               ))}
             </div>
             <RentanoChatPanel
-              key={`${chatSeed ?? "chat-default"}-${appMode}`}
+              key={appMode}
               apiContext={apiContext}
               initialMessage={chatSeed}
               onInitialMessageConsumed={() => setChatSeed(null)}

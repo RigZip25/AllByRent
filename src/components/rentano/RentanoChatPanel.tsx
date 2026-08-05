@@ -41,7 +41,6 @@ export function RentanoChatPanel({
   const [error, setError] = useState<string | null>(null);
   const [pendingAiQuestion, setPendingAiQuestion] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const initialSentRef = useRef(false);
   const locale = useLocale();
   const t = useMessages();
   // Device + UI locale → Web Speech lang (cs-CZ, ru-RU, …), not English-only.
@@ -77,6 +76,22 @@ export function RentanoChatPanel({
       const text = raw.trim();
       if (!text || loading) return;
 
+      // Instant FAQ / hints — no sign-in required (help should work for guests).
+      if (!options?.forceAi) {
+        const local = findLocalRentanoAnswer(text);
+        if (local) {
+          setError(null);
+          setPendingAiQuestion(null);
+          setInput("");
+          setMessages((prev) => [
+            ...prev,
+            { id: nextId(), role: "user", content: text },
+            { id: nextId(), role: "assistant", content: local.answer },
+          ]);
+          return;
+        }
+      }
+
       if (!requireAuth("message")) return;
 
       setError(null);
@@ -95,17 +110,6 @@ export function RentanoChatPanel({
       setMessages((prev) => [...prev, userMsg]);
 
       try {
-        if (!options?.forceAi) {
-          const local = findLocalRentanoAnswer(text);
-          if (local) {
-            setMessages((prev) => [
-              ...prev,
-              { id: nextId(), role: "assistant", content: local.answer },
-            ]);
-            return;
-          }
-        }
-
         if (!configured) {
           setPendingAiQuestion(text);
           setError(
@@ -136,11 +140,13 @@ export function RentanoChatPanel({
   };
 
   useEffect(() => {
-    if (!initialMessage?.trim() || initialSentRef.current) return;
-    initialSentRef.current = true;
-    void submitText(initialMessage);
+    const text = initialMessage?.trim();
+    if (!text) return;
+    // New seed from a quick-prompt tap — always handle (do not remount the panel).
+    void submitText(text);
     onInitialMessageConsumed?.();
-  }, [initialMessage, onInitialMessageConsumed, submitText]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to new seeds, not submitText identity
+  }, [initialMessage]);
 
   const handleSend = () => {
     void submitText(input);
