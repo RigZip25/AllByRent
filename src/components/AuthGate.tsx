@@ -190,22 +190,6 @@ export function AuthGate({
     });
   };
 
-  const validateAccountForm = (): boolean => {
-    if (!fullName.trim()) {
-      setError(a.nameRequired);
-      return false;
-    }
-    if (!isValidEmail(email)) {
-      setError(a.emailInvalid);
-      return false;
-    }
-    if (!location) {
-      setError(a.locationRequired);
-      return false;
-    }
-    return true;
-  };
-
   const suggestedEmail = suggestCorrectedEmail(email);
 
   const sendConfirmationCode = (emailOverride?: string) => {
