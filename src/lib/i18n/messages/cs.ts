@@ -1639,12 +1639,18 @@ export const cs: AppMessages = {
     tipInstallAfter: " na plochu.",
     tipShow: "Zobrazit",
     tipHide: "Skrýt",
-    hintToastTitle: "Jeden tip, než půjdeme dál",
-    hintCountdown: (seconds) => `Pokračuje za ${seconds}s`,
+    hintToastTitle: "Přidejte Evorios na plochu",
+    hintCountdown: (seconds) => `${seconds}s`,
     hintStepLabel: (step, total) => `${step} / ${total}`,
     hintCoachLine: (appName, shortName) =>
-      `Chcete ${appName} na ploše? Přidejte jako ${shortName} — volitelné, pár klepnutí.`,
+      `Než bude výpis v App Store / Play Store, nainstalujte ${appName} z prohlížeče jako ${shortName}. Přečtěte kroky a klepněte na Rozumím.`,
     hintContinue: "Pokračovat →",
+    hintUnderstood: "Rozumím",
+    hintUnderstoodNote:
+      "Webovou aplikaci můžete používat i tak — ikona na ploše ji jen víc přiblíží běžné aplikaci.",
+    hintRequiredLabel: "Přečtěte si",
+    hintSafariRequired: "Na iPhonu / iPadu použijte Safari (ne Chrome ani prohlížeč Instagramu).",
+    hintAndroidRequired: "Na Androidu použijte Chrome (nebo výchozí prohlížeč) k instalaci.",
   },
   passkey: {
     title: "Zapnout Face ID pro rychlejší přihlášení?",

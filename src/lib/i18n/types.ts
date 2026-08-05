@@ -1494,6 +1494,11 @@ export type AppMessages = {
     hintStepLabel: (step: number, total: number) => string;
     hintCoachLine: (appName: string, shortName: string) => string;
     hintContinue: string;
+    hintUnderstood: string;
+    hintUnderstoodNote: string;
+    hintRequiredLabel: string;
+    hintSafariRequired: string;
+    hintAndroidRequired: string;
   };
   passkey: {
     title: string;

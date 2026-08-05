@@ -1625,12 +1625,18 @@ export const en: AppMessages = {
     tipInstallAfter: " on the Home Screen.",
     tipShow: "Show",
     tipHide: "Hide",
-    hintToastTitle: "One quiet tip before we continue",
-    hintCountdown: (seconds) => `Continues in ${seconds}s`,
+    hintToastTitle: "Add Evorios to your Home Screen",
+    hintCountdown: (seconds) => `${seconds}s`,
     hintStepLabel: (step, total) => `${step} / ${total}`,
     hintCoachLine: (appName, shortName) =>
-      `Want ${appName} on your Home Screen? Add it as ${shortName} — optional, takes a few taps.`,
+      `Until the App Store / Play Store listing is ready, install ${appName} from your browser as ${shortName}. Read the steps, then tap Understood.`,
     hintContinue: "Continue →",
+    hintUnderstood: "Understood",
+    hintUnderstoodNote:
+      "You can keep using the web app either way — Home Screen just makes it feel like a real app.",
+    hintRequiredLabel: "Please read",
+    hintSafariRequired: "On iPhone / iPad you must use Safari (not Chrome or Instagram’s browser).",
+    hintAndroidRequired: "On Android use Chrome (or your default browser) to install.",
   },
   passkey: {
     title: "Enable Face ID for faster login?",

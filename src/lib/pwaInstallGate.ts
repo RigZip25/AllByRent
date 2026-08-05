@@ -8,9 +8,6 @@ const HINT_SEEN_KEY = "evorios_install_hint_seen";
 /** Flip to true to require Add to Home Screen / store install before using the web app. */
 const INSTALL_GATE_ENABLED = false;
 
-/** Soft toast duration (seconds) when the hard gate is off. */
-export const INSTALL_HINT_SECONDS = 12;
-
 export function hasCompletedInstallGate(): boolean {
   if (typeof window === "undefined") return true;
   if (isNativeApp() || isStandalonePwa()) return true;
