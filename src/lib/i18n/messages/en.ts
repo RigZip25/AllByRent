@@ -44,8 +44,8 @@ export const en: AppMessages = {
   auth: {
     intentTitle: "Sign in or create account",
     intentListSubtitle:
-      "Add your details — we'll email a sign-in code. Next: Stripe verifies your ID and bank to go public.",
-    intentListRentano: "Draft saved. Sign in first — then one Stripe step for ID + bank.",
+      "Add your details — we'll email a sign-in code so your draft stays with you.",
+    intentListRentano: "Draft saved. Sign in first — you can connect payouts later when you're ready.",
     intentBookSubtitle: "Add your details — we'll email a sign-in code so hosts can reach you.",
     intentBookRentano: (mascot) =>
       `${mascot}: Booking needs an account. Enter the code from your email and you're in.`,
@@ -1182,7 +1182,7 @@ export const en: AppMessages = {
       tipEditing:
         "Review your changes, then save — your QR and listing status stay as they are.",
       tipNew:
-        "Next: sign in, then Stripe verifies your ID and bank — then your listing goes public.",
+        "Next: sign in to publish. Connecting a bank (via Stripe) is optional — do it when you want to receive card payments.",
       saving: "Saving...",
       opening: "Opening…",
       saveChanges: "Save changes",
@@ -1191,30 +1191,33 @@ export const en: AppMessages = {
     },
     goPublic: {
       backToReview: "← Back to review",
-      title: "Finish to go public",
-      subtitle: "Two steps — in order. Your listing stays a private draft until both are done.",
+      title: "Ready to go public?",
+      subtitle: "Sign in to publish. Bank verification is optional — only needed to receive money.",
       checkingSetup: "Checking your seller setup…",
       signInTitle: "Sign in",
       signInDone: "Account ready — your draft stays with you.",
       signInPending: "Save your draft to your account before going live.",
       signInCta: "Sign in",
-      stripeTitle: "Verify & connect bank",
-      stripeConnectedBank: (last4) => `Stripe connected · **** ${last4}`,
-      stripePayoutsEnabled: "Stripe connected — payouts enabled.",
-      stripeOnboardingComplete: "Stripe onboarding complete — you can go live.",
+      stripeTitle: "Get paid (bank + ID)",
+      optionalBadge: "Optional",
+      stripeConnectedBank: (last4) => `Bank connected · **** ${last4}`,
+      stripePayoutsEnabled: "Payouts enabled — neighbors can pay you by card.",
+      stripeOnboardingComplete: "Payout setup complete — you're ready to receive money.",
       stripeFinishForm:
-        "Stripe started — finish ID + bank in the Stripe form, then tap refresh.",
+        "Almost there — finish ID + bank in the secure form, then tap refresh.",
       stripePending:
-        "Stripe checks your ID and links your bank so neighbors can pay you.",
-      openingStripe: "Opening Stripe…",
-      continueStripe: "Continue with Stripe",
+        "To receive money from neighbors, verify your ID and connect a bank (powered by Stripe). You can publish now and do this later.",
+      openingStripe: "Opening…",
+      continueStripe: "Set up payouts",
       refreshing: "Refreshing…",
-      refreshStatus: "I finished Stripe — refresh status",
+      refreshStatus: "I finished setup — refresh status",
       tip: (mascot) =>
-        `${mascot}: Sign in, then Stripe verifies your ID and bank in one flow. No separate Identity menu.`,
+        `${mascot}: Publish first if you like. When you want card payouts, connect your bank — Stripe handles the secure ID check.`,
       goingLive: "Going live…",
       goLive: "Go live 🚀",
-      completeSteps: "Complete steps above",
+      completeSteps: "Sign in above to go live",
+      goLivePayoutHint:
+        "You can go live now. Set up payouts above whenever you want to receive card payments.",
     },
     success: {
       title: "You're live!",

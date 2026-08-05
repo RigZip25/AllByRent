@@ -55,7 +55,13 @@ export type SellerGoPublicStatus = {
   /** Express onboarding finished even if payouts are still enabling. */
   onboardingComplete: boolean;
   bankLast4: string | null;
+  /**
+   * Can publish / go live. Sign-in only — Stripe Connect is optional until
+   * the host wants to receive card payouts.
+   */
   ready: boolean;
+  /** Host finished Connect enough to receive payouts. */
+  payoutsReady: boolean;
   nextStep: SellerGoPublicStep;
 };
 
@@ -74,9 +80,15 @@ export function resolveSellerGoPublicNextStep(
   status: Pick<SellerGoPublicStatus, "signedIn" | "payoutsEnabled" | "onboardingComplete">,
 ): SellerGoPublicStep {
   if (!status.signedIn) return "sign_in";
-  // Allow go-public after Express form is done — don't wait only on payouts_enabled webhook.
+  // Highlight optional Connect until done — go-live does not require it.
   if (!status.payoutsEnabled && !status.onboardingComplete) return "stripe";
   return "ready";
+}
+
+function isPayoutsReady(
+  status: Pick<SellerGoPublicStatus, "payoutsEnabled" | "onboardingComplete">,
+): boolean {
+  return Boolean(status.payoutsEnabled || status.onboardingComplete);
 }
 
 export async function loadSellerGoPublicStatus(
@@ -98,7 +110,8 @@ export async function loadSellerGoPublicStatus(
       payoutsEnabled: false,
       onboardingComplete: false,
       bankLast4: null,
-      ready: next === "ready",
+      ready: signedIn,
+      payoutsReady: false,
       nextStep: next,
     };
   }
@@ -120,6 +133,7 @@ export async function loadSellerGoPublicStatus(
     payoutsEnabled: connect.payoutsEnabled,
     onboardingComplete: connect.onboardingComplete,
   });
+  const payoutsReady = isPayoutsReady(connect);
 
   return {
     signedIn: true,
@@ -128,7 +142,8 @@ export async function loadSellerGoPublicStatus(
     payoutsEnabled: connect.payoutsEnabled,
     onboardingComplete: connect.onboardingComplete,
     bankLast4: connect.last4,
-    ready: next === "ready",
+    ready: true,
+    payoutsReady,
     nextStep: next,
   };
 }

@@ -30,6 +30,7 @@ type Row = {
   title: string;
   detail: string;
   done: boolean;
+  optional?: boolean;
   actionLabel: string;
   onAction: () => void;
   actionBusy: boolean;
@@ -79,9 +80,9 @@ export function GoPublicChecklist({
   const gp = listing.goPublic;
 
   const signedIn = Boolean(status?.signedIn);
-  const stripeDone = Boolean(status?.payoutsEnabled || status?.onboardingComplete);
+  const stripeDone = Boolean(status?.payoutsReady);
   const next = status?.nextStep ?? "sign_in";
-  const ready = Boolean(status?.ready);
+  const canGoLive = Boolean(status?.ready);
 
   const rows: Row[] = [
     {
@@ -97,6 +98,7 @@ export function GoPublicChecklist({
     {
       id: "stripe",
       title: gp.stripeTitle,
+      optional: true,
       detail: stripeDone
         ? status?.bankLast4
           ? gp.stripeConnectedBank(status.bankLast4)
@@ -132,9 +134,7 @@ export function GoPublicChecklist({
       <h2 className="text-2xl font-bold" style={{ color: GREEN }}>
         {gp.title}
       </h2>
-      <p className="mt-1 text-base text-gray-500">
-        {gp.subtitle}
-      </p>
+      <p className="mt-1 text-base text-gray-500">{gp.subtitle}</p>
 
       {loading && !status ? (
         <div className="mt-8 flex items-center justify-center gap-2 text-sm text-gray-500">
@@ -157,6 +157,11 @@ export function GoPublicChecklist({
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-gray-900">
                       {index + 1}. {row.title}
+                      {row.optional ? (
+                        <span className="ml-2 text-[11px] font-semibold uppercase tracking-wide text-amber-700">
+                          {gp.optionalBadge}
+                        </span>
+                      ) : null}
                     </p>
                     <p className="mt-0.5 text-[13px] leading-snug text-gray-500">{row.detail}</p>
                     {!row.done ? (
@@ -197,21 +202,21 @@ export function GoPublicChecklist({
         {busy === "refresh" || loading ? gp.refreshing : gp.refreshStatus}
       </button>
 
-      <RentanoHint
-        className="mt-5"
-        hint={gp.tip(MASCOT_NAME)}
-        showTapLabel
-      />
+      <RentanoHint className="mt-5" hint={gp.tip(MASCOT_NAME)} showTapLabel />
 
       <button
         type="button"
         onClick={onGoLive}
-        disabled={!ready || isPublishing || loading}
+        disabled={!canGoLive || isPublishing || loading}
         className="btn-primary mt-6 flex h-14 w-full items-center justify-center text-lg font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
-        style={{ backgroundColor: ready ? GREEN : "#9CA3AF" }}
+        style={{ backgroundColor: canGoLive ? GREEN : "#9CA3AF" }}
       >
-        {isPublishing ? gp.goingLive : ready ? gp.goLive : gp.completeSteps}
+        {isPublishing ? gp.goingLive : canGoLive ? gp.goLive : gp.completeSteps}
       </button>
+
+      {canGoLive && !stripeDone ? (
+        <p className="mt-2 text-center text-[12px] leading-relaxed text-gray-500">{gp.goLivePayoutHint}</p>
+      ) : null}
     </motion.div>
   );
 }

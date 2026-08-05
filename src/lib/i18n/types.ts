@@ -897,6 +897,7 @@ export type AppMessages = {
       signInPending: string;
       signInCta: string;
       stripeTitle: string;
+      optionalBadge: string;
       stripeConnectedBank: (last4: string) => string;
       stripePayoutsEnabled: string;
       stripeOnboardingComplete: string;
@@ -910,6 +911,7 @@ export type AppMessages = {
       goingLive: string;
       goLive: string;
       completeSteps: string;
+      goLivePayoutHint: string;
     };
     success: {
       title: string;
@@ -1833,12 +1835,14 @@ export type GarageSaleMessages = {
     connectFailed: string;
     setupTitle: string;
     setupSignInBody: string;
+    setupStripeTitle: string;
     setupStripeBody: string;
     signInContinue: string;
     openingStripe: string;
     continueStripe: string;
     refreshStripe: string;
     finishSetupFirst: string;
+    publishPayoutHint: string;
     onShelfActive: string;
     shareWithNeighbors: string;
   };

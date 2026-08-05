@@ -415,7 +415,9 @@ export function ListingWizard({
         const saved = await persistDraftForGoPublic();
         const status = await loadSellerGoPublicStatus(auth.userId);
         setGoPublicStatus(status);
-        if (status.ready) {
+        // Signed in + payouts ready → publish immediately. Otherwise open checklist
+        // (sign-in required; Stripe is optional soft step for receiving money).
+        if (status.ready && status.payoutsReady) {
           finalizePublish(saved);
           return;
         }
@@ -436,7 +438,7 @@ export function ListingWizard({
       setGoPublicBusy("refresh");
       const status = await refreshGoPublicStatus();
       if (!status?.ready) {
-        setGoPublicError("Finish sign-in and Stripe (ID + bank) before going live.");
+        setGoPublicError("Sign in to publish your listing.");
         return;
       }
       const saved = await persistDraftForGoPublic();

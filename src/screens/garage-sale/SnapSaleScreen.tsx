@@ -214,10 +214,8 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
     setError(null);
 
     void refreshSellerStatus().then((status) => {
-      if (!status?.ready) {
-        setError(
-          !status?.signedIn ? copy.publishNeedSignIn : copy.publishNeedStripe,
-        );
+      if (!status?.signedIn) {
+        setError(copy.publishNeedSignIn);
         setBusy(false);
         return;
       }
@@ -271,11 +269,9 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
     });
   };
 
-  const sellerReady = Boolean(sellerStatus?.ready);
+  const canPublishLive = Boolean(sellerStatus?.ready);
   const needsSignIn = !sellerStatus?.signedIn;
-  const needsStripe = Boolean(
-    sellerStatus?.signedIn && !sellerStatus.payoutsEnabled && !sellerStatus.onboardingComplete,
-  );
+  const needsStripe = Boolean(sellerStatus?.signedIn && !sellerStatus.payoutsReady);
 
   const snapAnother = () => {
     setJustPublished(false);
@@ -547,47 +543,49 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
           ) : null}
         </section>
 
-        {!sellerReady && !sellerLoading ? (
+        {needsSignIn && !sellerLoading ? (
           <div
             className="mt-4 rounded-2xl border px-4 py-3"
             style={{ borderColor: "#FECACA", backgroundColor: "#FEF2F2" }}
           >
             <p className="text-sm font-bold text-red-800">{copy.setupTitle}</p>
-            <p className="mt-1 text-xs leading-relaxed text-red-700">
-              {needsSignIn ? copy.setupSignInBody : copy.setupStripeBody}
-            </p>
+            <p className="mt-1 text-xs leading-relaxed text-red-700">{copy.setupSignInBody}</p>
+            <button
+              type="button"
+              onClick={() => onRequireAuth?.()}
+              className="mt-3 w-full rounded-xl py-3 text-sm font-bold text-white"
+              style={{ backgroundColor: GREEN }}
+            >
+              {copy.signInContinue}
+            </button>
+          </div>
+        ) : null}
+
+        {needsStripe && !sellerLoading ? (
+          <div
+            className="mt-4 rounded-2xl border px-4 py-3"
+            style={{ borderColor: "#FDE68A", backgroundColor: "#FFFBEB" }}
+          >
+            <p className="text-sm font-bold text-amber-950">{copy.setupStripeTitle}</p>
+            <p className="mt-1 text-xs leading-relaxed text-amber-900/90">{copy.setupStripeBody}</p>
             <div className="mt-3 flex flex-col gap-2">
-              {needsSignIn ? (
-                <button
-                  type="button"
-                  onClick={() => onRequireAuth?.()}
-                  className="w-full rounded-xl py-3 text-sm font-bold text-white"
-                  style={{ backgroundColor: GREEN }}
-                >
-                  {copy.signInContinue}
-                </button>
-              ) : null}
-              {needsStripe ? (
-                <button
-                  type="button"
-                  onClick={handleConnectStripe}
-                  disabled={connectBusy}
-                  className="w-full rounded-xl py-3 text-sm font-bold text-white disabled:opacity-50"
-                  style={{ backgroundColor: GREEN }}
-                >
-                  {connectBusy ? copy.openingStripe : copy.continueStripe}
-                </button>
-              ) : null}
-              {needsStripe ? (
-                <button
-                  type="button"
-                  onClick={() => void refreshSellerStatus()}
-                  className="text-xs font-semibold underline"
-                  style={{ color: GREEN }}
-                >
-                  {copy.refreshStripe}
-                </button>
-              ) : null}
+              <button
+                type="button"
+                onClick={handleConnectStripe}
+                disabled={connectBusy}
+                className="w-full rounded-xl py-3 text-sm font-bold text-white disabled:opacity-50"
+                style={{ backgroundColor: GREEN }}
+              >
+                {connectBusy ? copy.openingStripe : copy.continueStripe}
+              </button>
+              <button
+                type="button"
+                onClick={() => void refreshSellerStatus()}
+                className="text-xs font-semibold underline"
+                style={{ color: GREEN }}
+              >
+                {copy.refreshStripe}
+              </button>
             </div>
           </div>
         ) : null}
@@ -596,17 +594,23 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
 
         <button
           type="button"
-          disabled={!canPublish || (!sellerReady && !sellerLoading)}
+          disabled={!canPublish || (!canPublishLive && !sellerLoading)}
           onClick={publishToShelf}
           className="mt-5 w-full rounded-xl py-3.5 text-base font-bold disabled:opacity-50"
           style={{ backgroundColor: AMBER, color: GREEN }}
         >
           {busy
             ? copy.publishing
-            : sellerReady || sellerLoading
+            : canPublishLive || sellerLoading
               ? copy.publishCta
               : copy.finishSetupFirst}
         </button>
+
+        {canPublishLive && needsStripe ? (
+          <p className="mt-2 text-center text-[12px] leading-relaxed text-gray-500">
+            {copy.publishPayoutHint}
+          </p>
+        ) : null}
 
         <p className="mt-3 text-center text-xs text-gray-500">
           {MASCOT_NAME} {copy.mascotHint}

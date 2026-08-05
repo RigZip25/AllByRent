@@ -44,9 +44,9 @@ export const cs: AppMessages = {
   auth: {
     intentTitle: "Přihlásit se nebo vytvořit účet",
     intentListSubtitle:
-      "Doplňte údaje — pošleme e-mailem přihlašovací kód. Pak Stripe ověří doklad a účet, abyste mohli jít veřejně.",
+      "Doplňte údaje — pošleme e-mailem přihlašovací kód, ať koncept zůstane u vás.",
     intentListRentano:
-      "Koncept uložen. Nejdřív se přihlaste — pak jeden krok Stripe pro doklad a účet.",
+      "Koncept uložen. Nejdřív se přihlaste — výplaty můžete nastavit později, až budete chtít.",
     intentBookSubtitle:
       "Doplňte údaje — pošleme e-mailem přihlašovací kód, aby vás hostitelé mohli kontaktovat.",
     intentBookRentano: (mascot) =>
@@ -1196,7 +1196,7 @@ export const cs: AppMessages = {
       tipEditing:
         "Zkontrolujte změny a uložte — QR a stav nabídky zůstanou jak jsou.",
       tipNew:
-        "Další: přihlášení, pak Stripe ověří doklad a účet — a nabídka půjde veřejně.",
+        "Další: přihlášení a publikace. Připojení banky (přes Stripe) je volitelné — až budete chtít přijímat platby kartou.",
       saving: "Ukládám...",
       opening: "Otevírám…",
       saveChanges: "Uložit změny",
@@ -1205,30 +1205,34 @@ export const cs: AppMessages = {
     },
     goPublic: {
       backToReview: "← Zpět na kontrolu",
-      title: "Dokončete a jděte veřejně",
-      subtitle: "Dva kroky — v pořadí. Nabídka zůstane soukromým konceptem, dokud oba neskončí.",
+      title: "Připraveni jít veřejně?",
+      subtitle:
+        "Přihlaste se a publikujte. Ověření banky je volitelné — potřeba jen pro příjem peněz.",
       checkingSetup: "Kontroluji nastavení prodejce…",
       signInTitle: "Přihlásit se",
       signInDone: "Účet připraven — koncept zůstane u vás.",
       signInPending: "Uložte koncept na účet, než půjdete živě.",
       signInCta: "Přihlásit se",
-      stripeTitle: "Ověřit a připojit banku",
-      stripeConnectedBank: (last4) => `Stripe připojen · **** ${last4}`,
-      stripePayoutsEnabled: "Stripe připojen — výplaty povoleny.",
-      stripeOnboardingComplete: "Stripe onboarding hotový — můžete jít živě.",
+      stripeTitle: "Dostat zaplaceno (banka + doklad)",
+      optionalBadge: "Volitelné",
+      stripeConnectedBank: (last4) => `Banka připojena · **** ${last4}`,
+      stripePayoutsEnabled: "Výplaty povoleny — sousedé vám můžou platit kartou.",
+      stripeOnboardingComplete: "Nastavení výplat hotové — můžete přijímat peníze.",
       stripeFinishForm:
-        "Stripe zahájen — dokončete doklad a účet ve formuláři Stripe a klepněte na obnovit.",
+        "Skoro hotovo — dokončete doklad a účet v zabezpečeném formuláři a klepněte na obnovit.",
       stripePending:
-        "Stripe ověří váš doklad a propojí banku, aby vám sousedé mohli platit.",
-      openingStripe: "Otevírám Stripe…",
-      continueStripe: "Pokračovat se Stripe",
+        "Aby vám sousedé mohli poslat peníze, ověřte doklad a připojte banku (přes Stripe). Můžete publikovat teď a toto udělat později.",
+      openingStripe: "Otevírám…",
+      continueStripe: "Nastavit výplaty",
       refreshing: "Obnovuji…",
-      refreshStatus: "Dokončil(a) jsem Stripe — obnovit stav",
+      refreshStatus: "Dokončil(a) jsem nastavení — obnovit stav",
       tip: (mascot) =>
-        `${mascot}: Přihlaste se, pak Stripe ověří doklad a účet v jednom toku. Žádné samostatné menu Identity.`,
+        `${mascot}: Klidně nejdřív publikujte. Až budete chtít platby kartou, připojte banku — Stripe bezpečně ověří doklad.`,
       goingLive: "Jdu živě…",
       goLive: "Jít živě 🚀",
-      completeSteps: "Dokončete kroky výše",
+      completeSteps: "Výše se přihlaste, abyste mohli jít živě",
+      goLivePayoutHint:
+        "Teď můžete jít živě. Výplaty nastavte výše, až budete chtít přijímat platby kartou.",
     },
     success: {
       title: "Jste živě!",
