@@ -1363,11 +1363,11 @@ export const cs: AppMessages = {
   onboarding: {
     roleChoice: {
       title: "Jak chcete začít?",
-      subtitle: "Otevřete výlohu, nebo procházejte blok.",
+      subtitle: "Provozujte výlohu, nebo procházejte blok.",
       stockGarage: {
         title: "Otevřít můj byznys",
         subtitle: "Vystavujte, oceňujte a sdílejte z garážové výlohy.",
-        cta: "Otevřít Moji garáž →",
+        cta: "Začít teď →",
       },
       browseBlock: {
         title: "Procházet blok",

@@ -1349,11 +1349,11 @@ export const en: AppMessages = {
   onboarding: {
     roleChoice: {
       title: "How do you want to start?",
-      subtitle: "Open your storefront, or browse the block.",
+      subtitle: "Run a storefront, or browse the block.",
       stockGarage: {
         title: "Open my business",
         subtitle: "List, price, and share from your garage storefront.",
-        cta: "Open My Garage →",
+        cta: "Start now →",
       },
       browseBlock: {
         title: "Browse the block",
