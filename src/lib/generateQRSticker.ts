@@ -45,7 +45,12 @@ async function renderStickerAt(doc: jsPDF, listing: QRStickerListing, x: number,
   doc.setTextColor(30, 30, 30);
   doc.setFontSize(7);
   doc.setFont("helvetica", "bold");
-  const scanLine = getLocale() === "cs" ? "Naskenujte pro půjčení" : "Scan to rent this item";
+  const scanLine =
+    getLocale() === "cs"
+      ? "Naskenujte pro půjčení"
+      : getLocale() === "es"
+        ? "Escanea para alquilar"
+        : "Scan to rent this item";
   doc.text(scanLine, x + 0.15, y + qrSize + 0.35);
 
   // Item title + branding

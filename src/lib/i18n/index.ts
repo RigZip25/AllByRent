@@ -2,13 +2,14 @@ import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type AppLocale } from "./types";
 import type { AppMessages } from "./types";
 import { en } from "./messages/en";
 import { cs } from "./messages/cs";
+import { es } from "./messages/es";
 import { getSearchCountryCode } from "../locationCountry";
 
 const STORAGE_KEY = "evorios_locale";
 const AUTO_KEY = "evorios_locale_auto";
 const SEARCH_COUNTRY_EVENT = "evorios:search-country-change";
 
-const CATALOG: Record<AppLocale, AppMessages> = { en, cs };
+const CATALOG: Record<AppLocale, AppMessages> = { en, cs, es };
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
@@ -118,6 +119,7 @@ export function resolveSpeechRecognitionLang(
 ): string {
   const ordered: string[] = [];
   if (uiLocale === "cs") ordered.push("cs-CZ");
+  if (uiLocale === "es") ordered.push("es-ES");
 
   for (const tag of languages) {
     if (tag && !ordered.includes(tag)) ordered.push(tag);
@@ -136,6 +138,18 @@ function localeFromTimezone(): AppLocale | null {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if (tz === "Europe/Prague" || tz === "Europe/Bratislava") return "cs";
+    if (tz === "Europe/Madrid" || tz === "Atlantic/Canary") return "es";
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function searchCountryLocale(): AppLocale | null {
+  try {
+    const country = getSearchCountryCode();
+    if (country === "CZ" || country === "SK") return "cs";
+    if (country === "ES") return "es";
   } catch {
     /* ignore */
   }
@@ -143,9 +157,9 @@ function localeFromTimezone(): AppLocale | null {
 }
 
 /**
- * Map BCP-47 tags like cs-CZ / pt-BR → supported app locale.
- * Prefers the native Czech pack in CZ/SK (timezone, region tag, or search country)
- * even when Safari lists English first — never route Czechia through Google Translate.
+ * Map BCP-47 tags like cs-CZ / es-ES → supported app locale.
+ * Native packs win in CZ/SK/ES even when Safari lists English first —
+ * never route those markets through Google Translate.
  */
 export function resolveDeviceLocale(
   languages: readonly string[] = collectDeviceLanguageTags(),
@@ -156,20 +170,21 @@ export function resolveDeviceLocale(
     if (isAppLocale(primary) && !matched.includes(primary)) matched.push(primary);
   }
 
-  const prefersCzechRegion =
-    localeFromTimezone() === "cs" ||
-    languages.some((t) => /[-_](CZ|SK)\b/i.test(t || "")) ||
-    (() => {
-      try {
-        const country = getSearchCountryCode();
-        return country === "CZ" || country === "SK";
-      } catch {
-        return false;
-      }
-    })();
+  const fromTz = localeFromTimezone();
+  const fromCountry = searchCountryLocale();
 
-  // Native cs.ts wins for Czechia/Slovakia — do not fall through to English-first lists.
+  const prefersCzechRegion =
+    fromTz === "cs" ||
+    fromCountry === "cs" ||
+    languages.some((t) => /[-_](CZ|SK)\b/i.test(t || ""));
+
+  const prefersSpainRegion =
+    fromTz === "es" ||
+    fromCountry === "es" ||
+    languages.some((t) => /[-_]ES\b/i.test(t || ""));
+
   if (prefersCzechRegion) return "cs";
+  if (prefersSpainRegion) return "es";
   if (matched[0]) return matched[0];
 
   return DEFAULT_LOCALE;
@@ -236,9 +251,8 @@ export function getAppModeLabels(locale?: AppLocale) {
 export function applyDocumentLang(locale: AppLocale = getLocale()) {
   if (typeof document === "undefined") return;
   document.documentElement.lang = locale;
-  // Native packs (en UI without Google target, and always cs) — discourage
-  // Chrome/Safari “Translate this page” so Czechia uses messages/cs.ts, not Google.
-  if (locale === "cs") {
+  // Native packs — discourage Chrome/Safari “Translate this page”.
+  if (locale === "cs" || locale === "es") {
     document.documentElement.setAttribute("translate", "no");
     document.documentElement.classList.add("notranslate");
   } else {

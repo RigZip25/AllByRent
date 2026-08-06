@@ -4,6 +4,7 @@ import type { AppLocale } from "./i18n/types";
 const TIME_LOCALE_TAGS: Record<AppLocale, string> = {
   en: "en-US",
   cs: "cs-CZ",
+  es: "es-ES",
 };
 
 const SCHEDULE_KEY = "abr_garage_sale_schedule";

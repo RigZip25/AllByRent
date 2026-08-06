@@ -2,8 +2,8 @@
  * Instant page translation for languages without a native message pack.
  * Uses Google Website Translator (same engine as Chrome’s “Translate this page”).
  *
- * Native packs (en, cs) stay authoritative — no Google layer.
- * Auto + phone in pl/es/fr/sk/… → English UI source + live Google translate.
+ * Native packs (en, cs, es) stay authoritative — no Google layer.
+ * Auto + phone in pl/fr/sk/… → English UI source + live Google translate.
  */
 
 import { isNativeApp } from "../nativeShell";
@@ -13,7 +13,7 @@ const GOOG_SCRIPT_ID = "evorios-google-translate";
 const HIDDEN_HOST_ID = "evorios_google_translate_element";
 
 /** Languages we never send through Google (native UI packs). */
-const NATIVE_UI = new Set(["en", "cs"]);
+const NATIVE_UI = new Set(["en", "cs", "es"]);
 
 declare global {
   interface Window {

@@ -1,10 +1,11 @@
-export const SUPPORTED_LOCALES = ["en", "cs"] as const;
+export const SUPPORTED_LOCALES = ["en", "cs", "es"] as const;
 
 export type AppLocale = (typeof SUPPORTED_LOCALES)[number];
 
 export const LOCALE_LABELS: Record<AppLocale, string> = {
   en: "English",
   cs: "Čeština",
+  es: "Español",
 };
 
 export const DEFAULT_LOCALE: AppLocale = "en";

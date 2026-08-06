@@ -231,7 +231,7 @@ function pickNavHint(query: string): string | null {
 export function queryLooksNonEnglish(query: string): boolean {
   const trimmed = query.trim();
   if (!trimmed) return false;
-  if (getLocale() === "cs") return false;
+  if (getLocale() === "cs" || getLocale() === "es") return false;
 
   if (
     /\p{Script=Cyrillic}|\p{Script=Arabic}|\p{Script=Han}|\p{Script=Hangul}|\p{Script=Hiragana}|\p{Script=Katakana}|\p{Script=Thai}|\p{Script=Hebrew}/u.test(
