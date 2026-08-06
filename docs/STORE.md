@@ -82,3 +82,4 @@ npm run build:native
 - **Passkeys** on native need Associated Domains + Team ID filled in; OTP / magic link work via the API bridge.
 - UI changes in the WebView need `npm run build:native` + a new store binary. Pure `/api` Vercel hotfixes do not.
 - Universal Links activate only after Team ID / SHA-256 are real and files are live on `app.evorios.com`.
+
