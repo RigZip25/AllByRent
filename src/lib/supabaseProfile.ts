@@ -34,23 +34,24 @@ export async function fetchRemoteProfile(userId: string): Promise<RemoteProfile 
 /** Batch-load display names for garage cards / trust lines. */
 export async function fetchRemoteProfileNamesByIds(
   userIds: string[],
-): Promise<Record<string, { displayName: string; rating: number }>> {
+): Promise<Record<string, { displayName: string; rating: number; createdAt: string | null }>> {
   const ids = [...new Set(userIds.map((id) => id.trim()).filter(Boolean))];
   if (ids.length === 0 || !isSupabaseConfigured()) return {};
   const supabase = getSupabaseClient();
   if (!supabase) return {};
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, display_name, rating")
+    .select("id, display_name, rating, created_at")
     .in("id", ids);
   if (error || !data) return {};
-  const out: Record<string, { displayName: string; rating: number }> = {};
+  const out: Record<string, { displayName: string; rating: number; createdAt: string | null }> = {};
   for (const row of data) {
     const id = typeof row.id === "string" ? row.id : "";
     if (!id) continue;
     out[id] = {
       displayName: (row.display_name as string | null)?.trim() || "Neighbor",
       rating: typeof row.rating === "number" ? row.rating : 0,
+      createdAt: typeof row.created_at === "string" ? row.created_at : null,
     };
   }
   return out;

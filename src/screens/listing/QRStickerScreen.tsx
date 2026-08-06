@@ -213,7 +213,7 @@ export function QRStickerScreen({
         return;
       }
 
-      // Camera photo must contain this listing's QR sticker before going live.
+      // Optional: confirm the sticker is attached. Listing is already live.
       if (auth.userId) {
         await uploadQrVerificationPhotoRemote({
           listingId: draft.id,
@@ -281,6 +281,9 @@ export function QRStickerScreen({
         <p className="mt-1 text-center text-base text-gray-500">
           {t.stickerReadySubtitle}
         </p>
+        <p className="mt-2 text-center text-sm font-medium" style={{ color: GREEN }}>
+          {t.listingAlreadyLive}
+        </p>
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-5">
@@ -310,10 +313,19 @@ export function QRStickerScreen({
         <div className="mt-6 space-y-3">
           <button
             type="button"
+            onClick={onComplete}
+            className="w-full rounded-xl py-3.5 text-base font-bold text-white"
+            style={{ backgroundColor: GREEN }}
+          >
+            {t.donePrintLater}
+          </button>
+
+          <button
+            type="button"
             onClick={() => void handlePrintNow()}
             disabled={pdfLoading}
-            className="w-full rounded-xl py-3.5 text-base font-bold text-white disabled:opacity-60"
-            style={{ backgroundColor: GREEN }}
+            className="w-full rounded-xl border-2 py-3.5 text-base font-bold disabled:opacity-60"
+            style={{ borderColor: GREEN, color: GREEN }}
           >
             {pdfLoading ? t.preparingPdf : t.printThisQr}
           </button>
@@ -440,12 +452,15 @@ export function QRStickerScreen({
         ) : null}
 
         <div className="mt-8 border-t border-gray-100 pt-6">
+          <p className="mb-3 text-center text-sm font-semibold text-gray-700">
+            {t.optionalVerifyTitle}
+          </p>
           <div>
             <button
               type="button"
               onClick={() => cameraInputRef.current?.click()}
-              className="w-full rounded-xl py-3 text-sm font-bold text-white"
-              style={{ backgroundColor: GREEN }}
+              className="w-full rounded-xl border-2 py-3 text-sm font-bold"
+              style={{ borderColor: GREEN, color: GREEN }}
             >
             {pdfLoading ? t.verifyingQr : t.takeVerificationPhoto}
             </button>
@@ -458,7 +473,6 @@ export function QRStickerScreen({
             className="hidden"
             onChange={handleVerificationPhoto}
           />
-          {/* Camera-only to ensure sticker is attached to the physical item. */}
           <p className="mt-3 text-center text-xs text-gray-500">
             {t.verificationHint}
           </p>

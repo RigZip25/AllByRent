@@ -77,7 +77,9 @@ export function HomeFeed({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState<Awaited<ReturnType<typeof fetchActiveListingsForCityRemote>>>([]);
-  const [hostMeta, setHostMeta] = useState<Record<string, { displayName: string; rating: number }>>({});
+  const [hostMeta, setHostMeta] = useState<
+    Record<string, { displayName: string; rating: number; createdAt: string | null }>
+  >({});
   const [clusterRadiusMi, setClusterRadiusState] = useState(() => getClusterRadiusMi());
   const { updateAvailable, updateJustCompleted, simulateUpdateNotification } = usePwaUpdate();
   const showBellBadge = updateAvailable || updateJustCompleted;
@@ -157,6 +159,11 @@ export function HomeFeed({
   const garages = useMemo(
     () => groupListingsByGarage(filteredListings, hostMeta).filter((g) => g.itemCount > 0),
     [filteredListings, hostMeta],
+  );
+
+  const newGarages = useMemo(
+    () => garages.filter((g) => g.isNew).slice(0, 8),
+    [garages],
   );
 
   const browseCategories = useMemo(() => getAllCategoryChips(), []);
@@ -338,6 +345,25 @@ export function HomeFeed({
         <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
           {home.garagesNearYou}
         </p>
+
+        {newGarages.length > 0 ? (
+          <div className="mb-4">
+            <p className="mb-2 text-[13px] font-bold" style={{ color: GREEN_DARK }}>
+              {home.newGaragesTitle}
+            </p>
+            <p className="mb-2.5 text-[12px] text-gray-500">{home.newGaragesHint}</p>
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+              {newGarages.map((garage) => (
+                <GarageLensCard
+                  key={`new-${garage.hostId || garage.name}`}
+                  garage={garage}
+                  compact
+                  onSelect={() => onNavigate(`neighborGarage:${garage.hostId}`)}
+                />
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         {loading && garages.length === 0 ? (
           <p className="py-10 text-center text-[14px] text-gray-500">{home.loadingGarages}</p>

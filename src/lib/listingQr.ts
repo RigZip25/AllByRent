@@ -10,6 +10,25 @@ export function listingRequiresQrSticker(modes: {
   return Boolean(modes.rent || modes.rentToOwn);
 }
 
+/** Soft garage nudge: sticker not confirmed yet (listing can still be live). */
+export function listingNeedsStickerReminder(listing: {
+  modes: {
+    rent?: boolean;
+    rentToOwn?: boolean;
+    sell?: boolean;
+    gift?: boolean;
+  };
+  listingStatus?: string;
+  qrReady?: boolean;
+  paused?: boolean;
+}): boolean {
+  if (listing.paused) return false;
+  if (!listingRequiresQrSticker(listing.modes)) return false;
+  if (listing.listingStatus === "pending_qr") return true;
+  if (listing.listingStatus !== "active" && listing.listingStatus !== "pending_qr") return false;
+  return listing.qrReady !== true;
+}
+
 export function getListingQrUrl(qrTokenOrListingId: string): string {
   return `${LISTING_QR_BASE_URL}/${encodeURIComponent(qrTokenOrListingId.trim())}`;
 }

@@ -42,7 +42,7 @@ export function QrScanPanel({
   returnByLabel?: string;
   onClose: () => void;
   onScanned: () => void;
-  onConfirm: () => void;
+  onConfirm: (pin: string) => void;
   onManualCode: (code: string) => void;
   onOwnerManualConfirm?: () => void;
   isHost?: boolean;
@@ -239,7 +239,7 @@ export function QrScanPanel({
                 setError(copy.pinMismatch(mode === "pickup" ? "pickup" : "return"));
                 return;
               }
-              onConfirm();
+              onConfirm(pinInput);
             }}
             className="mt-4 w-full rounded-2xl py-3.5 text-[15px] font-bold text-white disabled:opacity-40"
             style={{ backgroundColor: CTA }}

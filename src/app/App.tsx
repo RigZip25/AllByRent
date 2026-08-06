@@ -1019,6 +1019,14 @@ function AppRoutes() {
     navigateTo("garageShop");
   }, [auth.userId, navigateTo]);
 
+  const handlePreviewMyGarageShop = useCallback(() => {
+    const hostId = resolveHostAccountId(auth.userId);
+    setSelectedNeighborGarageHostId(hostId);
+    setFocusGarageItemId(null);
+    setGarageShopPreview(true);
+    navigateTo("garageShop");
+  }, [auth.userId, navigateTo]);
+
   const handleOpenGarageCart = useCallback(() => {
     navigateTo("garageCart");
   }, [navigateTo]);
@@ -1801,7 +1809,7 @@ function AppRoutes() {
         {currentScreen === "snapSale" && (
           <SnapSaleScreen
             onBack={handleBack}
-            onViewShop={handleOpenMyGarageShop}
+            onViewShop={handlePreviewMyGarageShop}
             onRequireAuth={() => showAuthGate("snapSale", "list")}
           />
         )}
@@ -1815,7 +1823,15 @@ function AppRoutes() {
           />
         )}
 
-        {currentScreen === "mre" && <MrEvoriosScreen />}
+        {currentScreen === "mre" && (
+          <MrEvoriosScreen
+            onHowItWorks={() => navigateTo("howEvoriosWorks")}
+            onListItem={() => handleStartListing()}
+            onBrowse={openHomeFeed}
+            onGarage={handleOpenGarage}
+            onProfile={handleOpenProfile}
+          />
+        )}
 
         {currentScreen === "howEvoriosWorks" && (
           <HowEvoriosWorksScreen
@@ -1868,6 +1884,7 @@ function AppRoutes() {
             onStockGarage={handleStartListing}
             onResumeDraft={handleResumeDraft}
             onViewShop={handleOpenMyGarageShop}
+            onPreviewAsNeighbor={handlePreviewMyGarageShop}
             onViewProfile={handleViewPublicProfile}
             onRoleModeChange={handlePreferredModeChange}
             onOpenRental={(bookingId) => {
@@ -2121,6 +2138,7 @@ function AppRoutes() {
               showAuthGate("listItem", "list");
             }}
             onExit={handleListingWizardExit}
+            onPreviewShop={handlePreviewMyGarageShop}
           />
         )}
 

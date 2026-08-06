@@ -62,7 +62,7 @@ export const faq: AppMessages["faq"] = {
     },
     "qr-sticker": {
       q: "Why do I need a QR sticker?",
-      a: "For rentals, a physical QR on the item helps verify handoff. After publish you may print a sticker or use the on-screen QR story. Buy-only or free ($0 sell) listings may skip the sticker.",
+      a: "For rentals, a QR links the physical item to your listing. Your listing goes live as soon as you publish — print stickers now, later, or in bulk from My Garage. At handoff, you confirm with the code first; the neighbor’s scan fully activates the rental.",
     },
     "pickup-delivery": {
       q: "How do pickup and delivery work?",

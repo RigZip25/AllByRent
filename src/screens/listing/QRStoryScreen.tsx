@@ -12,6 +12,8 @@ const GREEN = "#0D5C3A";
 
 type QRStoryScreenProps = {
   onGotIt: () => void;
+  /** Leave without opening the sticker screen — listing is already live. */
+  onSkip?: () => void;
 };
 
 function StoryBlock({
@@ -40,7 +42,7 @@ function StoryBlock({
 }
 
 /** Educational slides only — printable PDF is on the next QR sticker screen. */
-export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
+export function QRStoryScreen({ onGotIt, onSkip }: QRStoryScreenProps) {
   const { listingQr: t } = useMessages();
   const [step, setStep] = useState(0);
   const storySteps = useMemo(
@@ -108,6 +110,16 @@ export function QRStoryScreen({ onGotIt }: QRStoryScreenProps) {
             </button>
           )}
         </div>
+        {onSkip ? (
+          <button
+            type="button"
+            onClick={onSkip}
+            className="mt-3 w-full text-center text-sm font-semibold underline"
+            style={{ color: "#6B7280" }}
+          >
+            {t.skipForNow}
+          </button>
+        ) : null}
       </footer>
     </motion.div>
   );

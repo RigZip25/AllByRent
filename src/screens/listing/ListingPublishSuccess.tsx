@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useEffect } from "react";
-import { Check, Share2 } from "lucide-react";
+import { Check, Eye, Loader2, Share2 } from "lucide-react";
 import { AppBrandMark } from "../../components/AppBrandHeader";
 import { useMessages } from "../../lib/i18n/react";
 import { requestStoreReview } from "../../lib/storeReview";
@@ -10,8 +10,11 @@ const AMBER = "#F59E0B";
 
 type ListingPublishSuccessProps = {
   title: string;
-  /** Status line under the title — e.g. active vs pending QR. */
   statusLine?: string;
+  payoutNudge?: boolean;
+  payoutBusy?: boolean;
+  onSetupPayouts?: () => void;
+  onPreviewShop?: () => void;
   onShare?: () => void;
   onDone: () => void;
 };
@@ -19,6 +22,10 @@ type ListingPublishSuccessProps = {
 export function ListingPublishSuccess({
   title,
   statusLine,
+  payoutNudge,
+  payoutBusy,
+  onSetupPayouts,
+  onPreviewShop,
   onShare,
   onDone,
 }: ListingPublishSuccessProps) {
@@ -55,7 +62,48 @@ export function ListingPublishSuccess({
         {statusLine ?? listing.listingActive}
       </p>
 
+      {payoutNudge ? (
+        <div
+          className="mt-5 w-full max-w-sm rounded-2xl border px-4 py-3.5 text-left"
+          style={{ borderColor: "#FDE68A", backgroundColor: "#FFFBEB" }}
+        >
+          <p className="text-sm font-bold text-amber-950">{success.payoutNudgeTitle}</p>
+          <p className="mt-1 text-[13px] leading-relaxed text-amber-900/90">
+            {success.payoutNudgeBody}
+          </p>
+          {onSetupPayouts ? (
+            <button
+              type="button"
+              onClick={onSetupPayouts}
+              disabled={payoutBusy}
+              className="mt-3 w-full rounded-xl py-2.5 text-sm font-bold text-white disabled:opacity-60"
+              style={{ backgroundColor: GREEN }}
+            >
+              {payoutBusy ? (
+                <span className="inline-flex items-center justify-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {listing.goPublic.openingStripe}
+                </span>
+              ) : (
+                success.payoutNudgeCta
+              )}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="mt-8 flex w-full max-w-sm flex-col gap-3">
+        {onPreviewShop ? (
+          <button
+            type="button"
+            onClick={onPreviewShop}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border-2 py-3.5 text-base font-bold"
+            style={{ borderColor: GREEN, color: GREEN }}
+          >
+            <Eye className="h-5 w-5" strokeWidth={2.25} />
+            {success.previewAsNeighbor}
+          </button>
+        ) : null}
         {onShare ? (
           <button
             type="button"
@@ -71,12 +119,12 @@ export function ListingPublishSuccess({
           type="button"
           onClick={onDone}
           className={
-            onShare
+            onShare || onPreviewShop
               ? "w-full rounded-xl border-2 py-3.5 text-base font-bold"
               : "btn-primary w-full text-white"
           }
           style={
-            onShare
+            onShare || onPreviewShop
               ? { borderColor: GREEN, color: GREEN }
               : { backgroundColor: GREEN }
           }

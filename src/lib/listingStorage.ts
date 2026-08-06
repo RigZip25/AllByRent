@@ -565,6 +565,7 @@ function draftToRow(draft: ListingDraft, ownerId: string): Partial<SupabaseListi
       wizard_step: draft.wizardStep ?? null,
       nudge_count: draft.nudgeCount ?? 0,
       last_nudged_at: draft.lastNudgedAt ?? null,
+      qr_ready: draft.qrReady ?? false,
     },
     handoff: draft.handoff ?? {},
     qr_code: draft.qrToken ?? null,
@@ -629,7 +630,10 @@ function rowToDraft(row: SupabaseListingRow): ListingDraft {
         : createInitialHandoffFallback(),
     generateQR: true,
     qrToken: row.qr_code ?? createQrTokenFallback(),
-    qrReady: row.listing_status === "active",
+    qrReady:
+      typeof availability.qr_ready === "boolean"
+        ? Boolean(availability.qr_ready)
+        : row.listing_status === "active",
     qrPrintedConfirmed: false,
     verificationPhoto: null,
     qrQueuedForBulk: false,
@@ -892,9 +896,12 @@ export async function fetchListingsByOwnerIdsRemote(ownerIds: string[]): Promise
   return drafts;
 }
 
-/** Active + not paused — what neighbors should see in browse. */
+/** Live shelf + not paused — what neighbors should see in browse. */
 export function isListingBrowsable(listing: ListingDraft): boolean {
-  return listing.listingStatus === "active" && !listing.paused;
+  // Legacy pending_qr was a hard gate; those listings are browsable now too.
+  const live =
+    listing.listingStatus === "active" || listing.listingStatus === "pending_qr";
+  return live && !listing.paused;
 }
 
 export async function fetchActiveListingsForCityRemote(city: string): Promise<ListingDraft[]> {

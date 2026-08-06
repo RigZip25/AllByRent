@@ -1,11 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, HelpCircle, MessageCircle, Smartphone } from "lucide-react";
+import {
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
+  HelpCircle,
+  MessageCircle,
+  PlusCircle,
+  Store,
+  UserRound,
+  Home,
+} from "lucide-react";
 import { RentanoChatPanel } from "../components/rentano/RentanoChatPanel";
 import { RentanoFaqPanel } from "../components/rentano/RentanoFaqPanel";
-import { PwaInstallPanel } from "../components/PwaInstallPanel";
 import { APP_NAME, MASCOT_NAME } from "../lib/brand";
 import { useAppModeLabels, useMessages } from "../lib/i18n/react";
-import { usePwaInstallPrompt } from "../hooks/PwaInstallProvider";
 import { getAppMode } from "../lib/appMode";
 import { useAuth } from "../hooks/AuthProvider";
 import rentanoImg from "../imports/No_back_rentano.png";
@@ -13,7 +21,7 @@ import rentanoImg from "../imports/No_back_rentano.png";
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
 
-type AssistantView = "chat" | "faq" | "install";
+type AssistantView = "faq" | "chat" | "guides";
 
 function QuickTipsAccordion({ tips }: { tips: { q: string; a: string }[] }) {
   const t = useMessages();
@@ -69,12 +77,126 @@ function QuickTipsAccordion({ tips }: { tips: { q: string; a: string }[] }) {
   );
 }
 
-export function MrEvoriosScreen() {
+function GuidesPanel({
+  appMode,
+  onHowItWorks,
+  onListItem,
+  onBrowse,
+  onGarage,
+  onProfile,
+}: {
+  appMode: "rent" | "earn";
+  onHowItWorks: () => void;
+  onListItem: () => void;
+  onBrowse: () => void;
+  onGarage: () => void;
+  onProfile: () => void;
+}) {
+  const t = useMessages();
+
+  const rentFirst = [
+    {
+      id: "browse",
+      title: t.mrEvorios.guidesBrowseTitle,
+      body: t.mrEvorios.guidesBrowseBody,
+      Icon: Home,
+      onClick: onBrowse,
+    },
+    {
+      id: "how",
+      title: t.mrEvorios.guidesHowTitle(APP_NAME),
+      body: t.mrEvorios.guidesHowBody,
+      Icon: BookOpen,
+      onClick: onHowItWorks,
+    },
+    {
+      id: "list",
+      title: t.mrEvorios.guidesListTitle,
+      body: t.mrEvorios.guidesListBody,
+      Icon: PlusCircle,
+      onClick: onListItem,
+    },
+    {
+      id: "garage",
+      title: t.mrEvorios.guidesGarageTitle,
+      body: t.mrEvorios.guidesGarageBody,
+      Icon: Store,
+      onClick: onGarage,
+    },
+    {
+      id: "profile",
+      title: t.mrEvorios.guidesProfileTitle,
+      body: t.mrEvorios.guidesProfileBody,
+      Icon: UserRound,
+      onClick: onProfile,
+    },
+  ];
+
+  const earnFirst = [
+    rentFirst[2]!,
+    rentFirst[3]!,
+    rentFirst[1]!,
+    rentFirst[0]!,
+    rentFirst[4]!,
+  ];
+
+  const cards = appMode === "earn" ? earnFirst : rentFirst;
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div>
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+          {t.mrEvorios.guidesTitle}
+        </p>
+        <p className="mt-0.5 text-[13px] text-gray-500">{t.mrEvorios.guidesHint}</p>
+      </div>
+      <ul className="flex flex-col gap-2">
+        {cards.map(({ id, title, body, Icon, onClick }) => (
+          <li key={id}>
+            <button
+              type="button"
+              onClick={onClick}
+              className="flex w-full items-center gap-3 rounded-2xl border bg-white px-3.5 py-3.5 text-left transition-colors active:bg-[#F7FBF8]"
+              style={{ borderColor: BORDER }}
+            >
+              <span
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                style={{ backgroundColor: "#E8F5EE", color: GREEN }}
+              >
+                <Icon className="h-5 w-5" strokeWidth={2} aria-hidden />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-semibold" style={{ color: GREEN }}>
+                  {title}
+                </span>
+                <span className="mt-0.5 block text-[13px] leading-snug text-gray-500">{body}</span>
+              </span>
+              <ChevronRight className="h-4 w-4 shrink-0 text-gray-300" aria-hidden />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export function MrEvoriosScreen({
+  onHowItWorks,
+  onListItem,
+  onBrowse,
+  onGarage,
+  onProfile,
+}: {
+  onHowItWorks: () => void;
+  onListItem: () => void;
+  onBrowse: () => void;
+  onGarage: () => void;
+  onProfile: () => void;
+}) {
   const auth = useAuth();
-  const pwa = usePwaInstallPrompt();
   const t = useMessages();
   const modeLabels = useAppModeLabels();
-  const [view, setView] = useState<AssistantView>("chat");
+  const [view, setView] = useState<AssistantView>("faq");
   const [chatSeed, setChatSeed] = useState<string | null>(null);
   const [appMode, setAppModeState] = useState(() => getAppMode());
 
@@ -131,9 +253,9 @@ export function MrEvoriosScreen() {
         <div className="mt-3 flex gap-2">
           {(
             [
-              { id: "chat" as const, label: t.mrEvorios.chat, Icon: MessageCircle },
               { id: "faq" as const, label: t.mrEvorios.faq, Icon: HelpCircle },
-              { id: "install" as const, label: t.mrEvorios.install, Icon: Smartphone },
+              { id: "chat" as const, label: t.mrEvorios.chat, Icon: MessageCircle },
+              { id: "guides" as const, label: t.mrEvorios.guides, Icon: BookOpen },
             ] as const
           ).map((tab) => {
             const active = view === tab.id;
@@ -159,11 +281,17 @@ export function MrEvoriosScreen() {
       </div>
 
       <div className="screen-scroll min-h-0 flex-1 px-4 pb-4 pt-3">
-        {view === "chat" ? (
+        {view === "faq" ? (
           <>
             <QuickTipsAccordion tips={quickTips} />
-            <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-              {t.mrEvorios.askInChatBelow}
+            <RentanoFaqPanel onAskRentano={openChat} />
+          </>
+        ) : null}
+
+        {view === "chat" ? (
+          <>
+            <p className="mb-3 text-[13px] leading-snug text-gray-500">
+              {t.mrEvorios.chatPrompt(MASCOT_NAME)}
             </p>
             <RentanoChatPanel
               key={appMode}
@@ -174,15 +302,14 @@ export function MrEvoriosScreen() {
           </>
         ) : null}
 
-        {view === "faq" ? <RentanoFaqPanel onAskRentano={openChat} /> : null}
-
-        {view === "install" ? (
-          <PwaInstallPanel
-            nativeInstallReady={pwa.nativeInstallReady}
-            manualIos={pwa.manualIos}
-            onInstall={() => void pwa.install()}
-            onDismiss={pwa.dismiss}
-            showDismissActions
+        {view === "guides" ? (
+          <GuidesPanel
+            appMode={appMode}
+            onHowItWorks={onHowItWorks}
+            onListItem={onListItem}
+            onBrowse={onBrowse}
+            onGarage={onGarage}
+            onProfile={onProfile}
           />
         ) : null}
       </div>

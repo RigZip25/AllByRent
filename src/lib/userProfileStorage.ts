@@ -8,6 +8,11 @@ import {
 } from "./listingStorage";
 import { hasAvatarPhoto, loadAvatarDataUrl } from "./avatarStorage";
 import { readLastKnownFullName } from "./pendingAuthProfile";
+import {
+  DEFAULT_GARAGE_IDENTITY,
+  normalizeGarageIdentity,
+  type GarageIdentity,
+} from "./garageIdentity";
 
 const PROFILE_KEY = "allbyrent_user_profile";
 
@@ -82,6 +87,8 @@ export type UserProfile = {
   };
   payoutConnected: boolean;
   notificationsEnabled: boolean;
+  /** How the host's garage storefront looks to neighbors (local for now). */
+  garageIdentity: GarageIdentity;
 };
 
 function createDefaultProfile(authUserId?: string | null): UserProfile {
@@ -118,6 +125,7 @@ function createDefaultProfile(authUserId?: string | null): UserProfile {
     },
     payoutConnected: false,
     notificationsEnabled: true,
+    garageIdentity: { ...DEFAULT_GARAGE_IDENTITY },
   };
 }
 
@@ -154,6 +162,7 @@ export function loadUserProfile(): UserProfile {
       ...migrated,
       host: { ...base.host, ...parsedHost },
       renter: { ...base.renter, ...parsedRenter },
+      garageIdentity: normalizeGarageIdentity(parsed.garageIdentity),
     } as UserProfile;
     if (merged.host.usesManualBooking === undefined) {
       merged.host.usesManualBooking = true;
@@ -219,6 +228,17 @@ export function updatePreferredMode(mode: AppMode): void {
   saveUserProfile(profile);
 }
 
+export function updateGarageIdentity(patch: Partial<GarageIdentity>): UserProfile {
+  const profile = loadUserProfile();
+  const nextIdentity = normalizeGarageIdentity({
+    ...profile.garageIdentity,
+    ...patch,
+  });
+  const next = { ...profile, garageIdentity: nextIdentity };
+  saveUserProfile(next);
+  return next;
+}
+
 export function updateProfileFields(
   patch: Partial<
     Pick<
@@ -230,11 +250,18 @@ export function updateProfileFields(
       | "phone"
       | "bio"
       | "avatarUrl"
+      | "garageIdentity"
     >
   >,
 ): UserProfile {
   const profile = loadUserProfile();
-  const next = { ...profile, ...patch };
+  const next = {
+    ...profile,
+    ...patch,
+    garageIdentity: patch.garageIdentity
+      ? normalizeGarageIdentity(patch.garageIdentity)
+      : profile.garageIdentity,
+  };
   if (patch.firstName !== undefined || patch.lastName !== undefined) {
     const name = `${next.firstName} ${next.lastName}`.trim();
     if (name) next.displayName = name;

@@ -11,8 +11,10 @@ import { getHostPendingOffers, ensureAcceptedOffersInCart } from "../lib/garageO
 import { garageDisplayName, garageNameFromDisplayName } from "../lib/garageDisplay";
 import { fetchRemoteProfile } from "../lib/supabaseProfile";
 import { loadUserProfile } from "../lib/userProfileStorage";
+import { resolveGarageAccent } from "../lib/garageIdentity";
 import {
   getMyPendingWinnerCheckouts,
+  getLotState,
   resolveEndedAuctions,
   resolveExpiredWinnerCheckouts,
 } from "../lib/garageAuctionState";
@@ -86,6 +88,13 @@ export function ActiveGarageShopScreen({
   const seenPendingWinIdsRef = useRef<Set<string>>(new Set());
   const city = getActiveRentLocationLabel().trim();
   const [garageName, setGarageName] = useState(() => garageDisplayName(hostId));
+  const shopAccent = useMemo(() => {
+    if (!isOwnGarage) return { color: GREEN, soft: `${GREEN}14` };
+    return {
+      color: resolveGarageAccent(loadUserProfile().garageIdentity).color,
+      soft: resolveGarageAccent(loadUserProfile().garageIdentity).soft,
+    };
+  }, [isOwnGarage, garageName]);
   const [openLabel, setOpenLabel] = useState(() => garageSaleOpenLabel(getGarageSaleSchedule()));
 
   useEffect(() => {
@@ -137,12 +146,13 @@ export function ActiveGarageShopScreen({
       (listing) =>
         listing.listingStatus === "active" &&
         (listing.hostId ?? "") === hostId &&
-        listing.modes.sell,
+        (listing.modes.sell || listing.modes.rent),
     );
     let remoteOwned: ListingDraft[] = [];
     try {
       remoteOwned = (await fetchListingsByOwnerIdsRemote([hostId])).filter(
-        (listing) => listing.listingStatus === "active" && listing.modes.sell,
+        (listing) =>
+          listing.listingStatus === "active" && (listing.modes.sell || listing.modes.rent),
       );
     } catch {
       remoteOwned = [];
@@ -156,9 +166,16 @@ export function ActiveGarageShopScreen({
       await syncGarageFromRemote({ hostId, userId: auth.userId, listingIds });
       resolveEndedAuctions(listingIds);
       resolveExpiredWinnerCheckouts(listingIds);
-      const shelf = candidates.filter((listing) => getShopOffer(listing));
+      // Keep sold lots + rent items (no shop offer) + sell items with offers.
+      const shelf = candidates.filter((listing) => {
+        if (getShopOffer(listing)) return true;
+        if (listing.modes.rent) return true;
+        if (getLotState(listing.id).status === "sold") return true;
+        return false;
+      });
       if (!preview) {
-        const added = ensureAcceptedOffersInCart(shelf);
+        const sellShelf = shelf.filter((listing) => getShopOffer(listing));
+        const added = ensureAcceptedOffersInCart(sellShelf);
         if (added) refreshCartCount();
       }
       setListings(shelf);
@@ -177,7 +194,7 @@ export function ActiveGarageShopScreen({
         (listing) =>
           listing.listingStatus === "active" &&
           (listing.hostId ?? "") === hostId &&
-          listing.modes.sell,
+          (listing.modes.sell || listing.modes.rent),
       );
       await applyCandidates(candidates);
     });
@@ -312,8 +329,8 @@ export function ActiveGarageShopScreen({
           </button>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="truncate text-xl font-bold sm:text-2xl" style={{ color: GREEN }}>
-                {isOwnGarage ? shopCopy.myActiveGarage : garageName}
+              <h1 className="truncate text-xl font-bold sm:text-2xl" style={{ color: shopAccent.color }}>
+                {isOwnGarage && !preview ? shopCopy.myActiveGarage : garageName}
               </h1>
               <span
                 className="rounded-full px-2.5 py-1 text-[12px] font-bold uppercase tracking-wide text-white"

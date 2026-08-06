@@ -62,7 +62,7 @@ export const faq: AppMessages["faq"] = {
     },
     "qr-sticker": {
       q: "Proč potřebuji QR samolepku?",
-      a: "U půjčování fyzické QR na věci pomáhá ověřit předání. Po publikaci můžete vytisknout samolepku nebo použít QR na obrazovce. Nabídky jen na koupi nebo zdarma (prodej za 0 Kč) mohou samolepku přeskočit.",
+      a: "U půjček QR propojí fyzickou věc s nabídkou. Nabídka jde živě hned po publikaci — nálepky vytisknete teď, později nebo hromadně z Garáže. Při předání nejdřív potvrdíte kódem vy; sken souseda půjčku plně aktivuje.",
     },
     "pickup-delivery": {
       q: "Jak funguje vyzvednutí a doručení?",

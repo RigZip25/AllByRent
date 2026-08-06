@@ -20,6 +20,7 @@ import {
   getRenterPickupLocation,
   type RentalBooking,
 } from "../../lib/rentalsStorage";
+import { confirmHandoffSide, handoffTimelineState } from "../../lib/rentalHandoff";
 import { hasLocalReview, submitReviewRemote } from "../../lib/reviewsStorage";
 import { ReviewPromptModal } from "../../components/reviews/ReviewPromptModal";
 import { mascotSays } from "../../lib/brand";
@@ -162,9 +163,19 @@ export function ActiveRental({
 
   const alreadyConfirmed = useMemo(() => {
     if (!booking) return false;
-    if (mode === "pickup") return booking.status !== "pending_checkin";
-    return booking.status === "completed" || Boolean(booking.returnConfirmedAt);
+    const tl = handoffTimelineState(booking);
+    if (mode === "pickup") {
+      if (booking.role === "host") return Boolean(booking.hostHandedOverAt) || tl.pickupComplete;
+      return Boolean(booking.renterReceivedAt) || tl.pickupComplete;
+    }
+    if (booking.role === "renter") return Boolean(booking.renterReturnedAt) || tl.returnComplete;
+    return Boolean(booking.hostAcceptedReturnAt) || tl.returnComplete;
   }, [booking, mode]);
+
+  const handoffTimeline = useMemo(
+    () => (booking ? handoffTimelineState(booking) : null),
+    [booking],
+  );
 
   const openScanner = () => {
     setNotice(null);
@@ -177,44 +188,60 @@ export function ActiveRental({
     setScanPhase("camera");
   };
 
-  const confirm = useCallback(() => {
-    if (!booking) return;
-    const latest = loadRentalBookings().find((b) => b.id === booking.id);
-    if (!latest) return;
-
-    if (mode === "pickup") {
-      if (latest.status !== "pending_checkin") {
-        setNotice(t.rentalDetail.alreadyConfirmedPickup);
+  const confirm = useCallback(
+    (pin: string) => {
+      if (!booking) return;
+      void (async () => {
+        const result = await confirmHandoffSide({
+          bookingId: booking.id,
+          role: booking.role,
+          stage: mode,
+          pin,
+        });
+        setBookings(loadRentalBookings());
+        if (!result.ok) {
+          setNotice(result.reason);
+          return;
+        }
+        if (result.alreadyDone && result.waitingOther) {
+          setNotice(
+            mode === "pickup"
+              ? t.rentalDetail.handoffWaitingOtherPickup
+              : t.rentalDetail.handoffWaitingOtherReturn,
+          );
+          closeScanner();
+          return;
+        }
+        if (result.waitingOther) {
+          setNotice(
+            mode === "pickup"
+              ? booking.role === "host"
+                ? t.rentalDetail.handoffHostDoneWaitingRenter
+                : t.rentalDetail.handoffRenterDoneWaitingHost
+              : booking.role === "renter"
+                ? t.rentalDetail.handoffRenterReturnedWaitingHost
+                : t.rentalDetail.handoffHostAcceptedWaitingRenter,
+          );
+          closeScanner();
+          return;
+        }
+        setNotice(
+          mode === "pickup" ? t.rentalDetail.pickupConfirmed : t.rentalDetail.returnConfirmed,
+        );
         closeScanner();
-        return;
-      }
-      updateBooking(latest.id, {
-        status: "active",
-        pickupConfirmedAt: new Date().toISOString(),
-      });
-      setBookings(loadRentalBookings());
-      setNotice(t.rentalDetail.pickupConfirmed);
-      closeScanner();
-      return;
-    }
-
-    if (latest.status === "completed" || latest.returnConfirmedAt) {
-      setNotice(t.rentalDetail.alreadyConfirmedReturn);
-      closeScanner();
-      return;
-    }
-    updateBooking(latest.id, {
-      status: "completed",
-      completedAt: new Date().toISOString(),
-      returnConfirmedAt: new Date().toISOString(),
-    });
-    setBookings(loadRentalBookings());
-    setNotice(t.rentalDetail.returnConfirmed);
-    closeScanner();
-    if (auth.userId && latest.counterpartyId && !hasLocalReview(latest.id, auth.userId)) {
-      setReviewOpen(true);
-    }
-  }, [booking, mode, t.rentalDetail]);
+        if (
+          mode === "return" &&
+          result.completedStage &&
+          auth.userId &&
+          result.booking.counterpartyId &&
+          !hasLocalReview(result.booking.id, auth.userId)
+        ) {
+          setReviewOpen(true);
+        }
+      })();
+    },
+    [booking, mode, t.rentalDetail, auth.userId],
+  );
 
   const timeLeftLabel = useMemo(() => {
     if (!dispute?.evidenceDeadline) return null;
@@ -326,17 +353,111 @@ export function ActiveRental({
                 <Clock className="w-3.5 h-3.5" />
                 <span>
                   {booking?.status === "pending_checkin"
-                    ? t.rentalDetail.statusPendingCheckin
+                    ? handoffTimeline?.hostHanded && !handoffTimeline.renterReceived
+                      ? t.rentalDetail.statusHandedOver
+                      : handoffTimeline?.renterReceived && !handoffTimeline.hostHanded
+                        ? t.rentalDetail.statusReceivedPendingHost
+                        : t.rentalDetail.statusPendingCheckin
                     : booking?.status === "active"
-                      ? t.rentalDetail.statusActive
+                      ? handoffTimeline?.renterReturned && !handoffTimeline.hostAcceptedReturn
+                        ? t.rentalDetail.statusReturnPendingHost
+                        : handoffTimeline?.hostAcceptedReturn && !handoffTimeline.renterReturned
+                          ? t.rentalDetail.statusReturnPendingRenter
+                          : t.rentalDetail.statusActive
                       : booking?.status === "overdue"
                         ? t.rentalDetail.statusOverdue
-                        : booking?.status ?? t.rentalDetail.statusBooking}
+                        : booking?.status === "completed"
+                          ? t.rentalDetail.statusCompleted
+                          : booking?.status ?? t.rentalDetail.statusBooking}
                 </span>
               </div>
             </div>
           </div>
         </div>
+
+        {handoffTimeline &&
+        (booking.status === "pending_checkin" ||
+          booking.status === "active" ||
+          booking.status === "overdue" ||
+          booking.status === "completed") ? (
+          <div className="bg-card rounded-xl border border-border p-4">
+            <p className="text-[13px] font-bold text-gray-900">{t.rentalDetail.handoffTitle}</p>
+            <p className="mt-1 text-[12px] text-gray-500">{t.rentalDetail.handoffHint}</p>
+            <ol className="mt-3 space-y-2">
+              <li className="flex items-start gap-2 text-[13px]">
+                <CheckCircle2
+                  className={`mt-0.5 h-4 w-4 shrink-0 ${
+                    handoffTimeline.hostHanded ? "text-emerald-600" : "text-gray-300"
+                  }`}
+                />
+                <span className={handoffTimeline.hostHanded ? "text-gray-900" : "text-gray-500"}>
+                  {t.rentalDetail.handoffHostHanded}
+                  {booking.role === "host" && !handoffTimeline.hostHanded
+                    ? ` — ${t.rentalDetail.handoffYourTurn}`
+                    : ""}
+                </span>
+              </li>
+              <li className="flex items-start gap-2 text-[13px]">
+                <CheckCircle2
+                  className={`mt-0.5 h-4 w-4 shrink-0 ${
+                    handoffTimeline.renterReceived ? "text-emerald-600" : "text-gray-300"
+                  }`}
+                />
+                <span className={handoffTimeline.renterReceived ? "text-gray-900" : "text-gray-500"}>
+                  {t.rentalDetail.handoffRenterReceived}
+                  {booking.role === "renter" &&
+                  !handoffTimeline.renterReceived &&
+                  booking.status === "pending_checkin"
+                    ? ` — ${t.rentalDetail.handoffYourTurn}`
+                    : ""}
+                </span>
+              </li>
+              {(booking.status === "active" ||
+                booking.status === "overdue" ||
+                booking.status === "completed" ||
+                handoffTimeline.pickupComplete) && (
+                <>
+                  <li className="flex items-start gap-2 text-[13px]">
+                    <CheckCircle2
+                      className={`mt-0.5 h-4 w-4 shrink-0 ${
+                        handoffTimeline.renterReturned ? "text-emerald-600" : "text-gray-300"
+                      }`}
+                    />
+                    <span
+                      className={handoffTimeline.renterReturned ? "text-gray-900" : "text-gray-500"}
+                    >
+                      {t.rentalDetail.handoffRenterReturned}
+                      {booking.role === "renter" &&
+                      !handoffTimeline.renterReturned &&
+                      (booking.status === "active" || booking.status === "overdue")
+                        ? ` — ${t.rentalDetail.handoffYourTurn}`
+                        : ""}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2 text-[13px]">
+                    <CheckCircle2
+                      className={`mt-0.5 h-4 w-4 shrink-0 ${
+                        handoffTimeline.hostAcceptedReturn ? "text-emerald-600" : "text-gray-300"
+                      }`}
+                    />
+                    <span
+                      className={
+                        handoffTimeline.hostAcceptedReturn ? "text-gray-900" : "text-gray-500"
+                      }
+                    >
+                      {t.rentalDetail.handoffHostAccepted}
+                      {booking.role === "host" &&
+                      !handoffTimeline.hostAcceptedReturn &&
+                      (booking.status === "active" || booking.status === "overdue")
+                        ? ` — ${t.rentalDetail.handoffYourTurn}`
+                        : ""}
+                    </span>
+                  </li>
+                </>
+              )}
+            </ol>
+          </div>
+        ) : null}
 
         <div className="bg-gradient-to-br from-primary/5 to-accent/5 border-2 border-primary/20 rounded-xl p-6">
           <div className="flex flex-col items-center text-center">
@@ -345,21 +466,34 @@ export function ActiveRental({
             </div>
 
             <h3 className="font-bold text-lg mb-2">
-              {mode === "pickup" ? t.rentalDetail.scanCheckIn : t.rentalDetail.scanReturn}
+              {mode === "pickup"
+                ? booking.role === "host"
+                  ? t.rentalDetail.scanHandOver
+                  : t.rentalDetail.scanReceive
+                : booking.role === "renter"
+                  ? t.rentalDetail.scanReturnItem
+                  : t.rentalDetail.scanAcceptReturn}
             </h3>
 
             <p className="text-sm text-muted-foreground mb-6 leading-relaxed max-w-xs">
               {mode === "pickup"
-                ? t.rentalDetail.scanCheckInBody
-                : t.rentalDetail.scanReturnBody}
+                ? booking.role === "host"
+                  ? t.rentalDetail.scanHandOverBody
+                  : t.rentalDetail.scanReceiveBody
+                : booking.role === "renter"
+                  ? t.rentalDetail.scanReturnItemBody
+                  : t.rentalDetail.scanAcceptReturnBody}
             </p>
 
             <button
               type="button"
               onClick={openScanner}
-              className="w-full bg-primary hover:bg-primary/90 text-white py-3.5 rounded-xl transition-colors font-medium flex items-center justify-center gap-2"
+              disabled={alreadyConfirmed}
+              className="w-full bg-primary hover:bg-primary/90 text-white py-3.5 rounded-xl transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {t.rentalDetail.scanQrCode}
+              {alreadyConfirmed
+                ? t.rentalDetail.waitingOtherSide
+                : t.rentalDetail.scanQrCode}
             </button>
           </div>
         </div>

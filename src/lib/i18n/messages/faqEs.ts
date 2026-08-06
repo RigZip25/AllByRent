@@ -62,7 +62,7 @@ export const faq: AppMessages["faq"] = {
     },
     "qr-sticker": {
       q: "¿Por qué necesito una pegatina QR?",
-      a: "Para alquileres, un QR físico en el artículo ayuda a verificar la entrega. Después de publicar puedes imprimir una pegatina o usar el QR en pantalla. Los anuncios solo de compra o gratis (venta a 0 €) pueden saltarse este paso.",
+      a: "Para alquileres, el QR vincula el artículo físico con tu anuncio. El anuncio se publica en cuanto lo publicas — imprime pegatinas ahora, después o en lote desde Mi garaje. En la entrega confirmas tú primero con el código; el escaneo del vecino activa el alquiler por completo.",
     },
     "pickup-delivery": {
       q: "¿Cómo funcionan la recogida y la entrega?",

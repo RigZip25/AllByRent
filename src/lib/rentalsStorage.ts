@@ -95,6 +95,14 @@ export type RentalBooking = {
   returnPin?: string;
   pickupConfirmedAt?: string;
   returnConfirmedAt?: string;
+  /** Host confirmed they handed the item over at pickup. */
+  hostHandedOverAt?: string;
+  /** Renter confirmed they received the item at pickup. */
+  renterReceivedAt?: string;
+  /** Renter confirmed they returned the item. */
+  renterReturnedAt?: string;
+  /** Host confirmed they accepted the return. */
+  hostAcceptedReturnAt?: string;
   qrCheckInCode?: string;
   runningLateMessage?: string;
   runningLateSentAt?: string;
@@ -127,13 +135,19 @@ type SupabaseRentalRow = {
   rental_total_cents?: number;
   pickup_at?: string | null;
   due_at?: string | null;
+  picked_up_at?: string | null;
+  returned_at?: string | null;
+  host_handed_over_at?: string | null;
+  renter_received_at?: string | null;
+  renter_returned_at?: string | null;
+  host_accepted_return_at?: string | null;
   created_at: string;
   updated_at: string;
 };
 
 const RENTALS_KEY = "allbyrent_rental_bookings";
 const RENTALS_VERSION_KEY = "allbyrent_rental_bookings_version";
-const RENTALS_VERSION = "10-production";
+const RENTALS_VERSION = "11-handoff-sides";
 
 export function generatePin(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
@@ -238,6 +252,14 @@ export function rentalBookingFromRemoteRow(
     deliveryAddress: row.delivery_address ?? undefined,
     pickupPin: row.pickup_pin ?? undefined,
     returnPin: row.return_pin ?? undefined,
+    pickupConfirmedAt: row.picked_up_at ?? undefined,
+    returnConfirmedAt: row.returned_at ?? undefined,
+    returnDueAt: row.due_at ?? undefined,
+    pickupScheduledAt: row.pickup_at ?? undefined,
+    hostHandedOverAt: row.host_handed_over_at ?? undefined,
+    renterReceivedAt: row.renter_received_at ?? undefined,
+    renterReturnedAt: row.renter_returned_at ?? undefined,
+    hostAcceptedReturnAt: row.host_accepted_return_at ?? undefined,
     depositAmountCents: row.deposit_amount_cents ?? undefined,
     stripePayment: Boolean(row.stripe_payment_intent_id),
     paymentOnHold:
@@ -318,6 +340,12 @@ function mergeRentalBooking(local: RentalBooking, remote: RentalBooking): Rental
     status,
     pickupPin: remote.pickupPin ?? local.pickupPin,
     returnPin: remote.returnPin ?? local.returnPin,
+    hostHandedOverAt: remote.hostHandedOverAt ?? local.hostHandedOverAt,
+    renterReceivedAt: remote.renterReceivedAt ?? local.renterReceivedAt,
+    renterReturnedAt: remote.renterReturnedAt ?? local.renterReturnedAt,
+    hostAcceptedReturnAt: remote.hostAcceptedReturnAt ?? local.hostAcceptedReturnAt,
+    pickupConfirmedAt: remote.pickupConfirmedAt ?? local.pickupConfirmedAt,
+    returnConfirmedAt: remote.returnConfirmedAt ?? local.returnConfirmedAt,
     review: local.review ?? remote.review,
     runningLateMessage: local.runningLateMessage ?? remote.runningLateMessage,
     runningLateSentAt: local.runningLateSentAt ?? remote.runningLateSentAt,
@@ -337,6 +365,10 @@ export async function updateRentalRemote(
     pickedUpAt?: string | null;
     returnedAt?: string | null;
     noShowMarkedAt?: string | null;
+    hostHandedOverAt?: string | null;
+    renterReceivedAt?: string | null;
+    renterReturnedAt?: string | null;
+    hostAcceptedReturnAt?: string | null;
   },
 ): Promise<void> {
   if (!isSupabaseConfigured()) return;
@@ -352,6 +384,12 @@ export async function updateRentalRemote(
   if (patch.pickedUpAt !== undefined) row.picked_up_at = patch.pickedUpAt;
   if (patch.returnedAt !== undefined) row.returned_at = patch.returnedAt;
   if (patch.noShowMarkedAt !== undefined) row.no_show_marked_at = patch.noShowMarkedAt;
+  if (patch.hostHandedOverAt !== undefined) row.host_handed_over_at = patch.hostHandedOverAt;
+  if (patch.renterReceivedAt !== undefined) row.renter_received_at = patch.renterReceivedAt;
+  if (patch.renterReturnedAt !== undefined) row.renter_returned_at = patch.renterReturnedAt;
+  if (patch.hostAcceptedReturnAt !== undefined) {
+    row.host_accepted_return_at = patch.hostAcceptedReturnAt;
+  }
   if (Object.keys(row).length === 0) return;
 
   const { error } = await supabase.from("rentals").update(row).eq("id", rentalId);
@@ -370,6 +408,12 @@ function remotePatchFromBooking(patch: Partial<RentalBooking>): Parameters<typeo
   if (patch.pickupConfirmedAt !== undefined) remote.pickedUpAt = patch.pickupConfirmedAt ?? null;
   if (patch.returnConfirmedAt !== undefined) remote.returnedAt = patch.returnConfirmedAt ?? null;
   if (patch.noShowMarkedAt !== undefined) remote.noShowMarkedAt = patch.noShowMarkedAt ?? null;
+  if (patch.hostHandedOverAt !== undefined) remote.hostHandedOverAt = patch.hostHandedOverAt ?? null;
+  if (patch.renterReceivedAt !== undefined) remote.renterReceivedAt = patch.renterReceivedAt ?? null;
+  if (patch.renterReturnedAt !== undefined) remote.renterReturnedAt = patch.renterReturnedAt ?? null;
+  if (patch.hostAcceptedReturnAt !== undefined) {
+    remote.hostAcceptedReturnAt = patch.hostAcceptedReturnAt ?? null;
+  }
   return remote;
 }
 

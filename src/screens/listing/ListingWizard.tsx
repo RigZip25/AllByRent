@@ -112,6 +112,7 @@ export function ListingWizard({
   editingListingId,
   onExit,
   onRequireAuth,
+  onPreviewShop,
 }: {
   initialPrefill?: ShelfPrefill | null;
   initialDraft?: ListingDraft | null;
@@ -120,6 +121,8 @@ export function ListingWizard({
   onExit: (reason?: "finished" | "discarded") => void;
   /** Open AuthGate and resume this listing after sign-in. */
   onRequireAuth?: (listingId: string) => void;
+  /** Open own garage in neighbor-preview mode. */
+  onPreviewShop?: () => void;
 }) {
   const auth = useAuth();
   const t = useMessages();
@@ -359,12 +362,14 @@ export function ListingWizard({
       }
 
       const needsQr = listingRequiresQrSticker(normalizedDraft.modes);
+      // Rent listings go live immediately with a generated QR token. Print / verify
+      // are optional — hosts can dismiss and come back from My Garage anytime.
       const publishedDraft: ListingDraft = {
         ...normalizedDraft,
         hostId,
         generateQR: needsQr,
         qrReady: !needsQr,
-        listingStatus: needsQr ? "pending_qr" : "active",
+        listingStatus: "active",
         nudgeCount: 0,
         lastNudgedAt: null,
         updatedAt: new Date().toISOString(),
@@ -386,7 +391,7 @@ export function ListingWizard({
       firePublishConfetti();
       setIsPublishing(false);
 
-      // QR stickers are rental handoff only — sell/gift go straight to live success.
+      // Optional QR intro + sticker — never a publish wall.
       if (needsQr) {
         setPhase("qrStory");
       } else {
@@ -651,7 +656,10 @@ export function ListingWizard({
         className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden"
         style={{ backgroundColor: BACKGROUND }}
       >
-        <QRStoryScreen onGotIt={() => setPhase("qrSticker")} />
+        <QRStoryScreen
+          onGotIt={() => setPhase("qrSticker")}
+          onSkip={() => setPhase("success")}
+        />
       </div>
     );
   }
@@ -682,6 +690,10 @@ export function ListingWizard({
         <ListingPublishSuccess
           title={getListingDisplayTitle(draft.title)}
           statusLine={publishStatusLine}
+          payoutNudge={Boolean(goPublicStatus && !goPublicStatus.payoutsReady)}
+          payoutBusy={goPublicBusy === "stripe"}
+          onSetupPayouts={handleChecklistConnect}
+          onPreviewShop={onPreviewShop}
           onShare={() => setPhase("share")}
           onDone={() => onExit("finished")}
         />

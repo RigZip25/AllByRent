@@ -30,7 +30,7 @@ type Row = {
   title: string;
   detail: string;
   done: boolean;
-  optional?: boolean;
+  recommended?: boolean;
   actionLabel: string;
   onAction: () => void;
   actionBusy: boolean;
@@ -83,6 +83,7 @@ export function GoPublicChecklist({
   const stripeDone = Boolean(status?.payoutsReady);
   const next = status?.nextStep ?? "sign_in";
   const canGoLive = Boolean(status?.ready);
+  const softPayoutNudge = canGoLive && !stripeDone;
 
   const rows: Row[] = [
     {
@@ -98,7 +99,7 @@ export function GoPublicChecklist({
     {
       id: "stripe",
       title: gp.stripeTitle,
-      optional: true,
+      recommended: true,
       detail: stripeDone
         ? status?.bankLast4
           ? gp.stripeConnectedBank(status.bankLast4)
@@ -149,37 +150,35 @@ export function GoPublicChecklist({
               <li
                 key={row.id}
                 className={`rounded-2xl border bg-white p-4 ${
-                  active ? "border-amber-300 shadow-sm" : "border-gray-200"
+                  active || (softPayoutNudge && row.id === "stripe")
+                    ? "border-amber-300 shadow-sm"
+                    : "border-gray-200"
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <StepIcon done={row.done} active={active} />
+                  <StepIcon
+                    done={row.done}
+                    active={active || Boolean(softPayoutNudge && row.id === "stripe")}
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-gray-900">
                       {index + 1}. {row.title}
-                      {row.optional ? (
+                      {row.recommended && !row.done ? (
                         <span className="ml-2 text-[11px] font-semibold uppercase tracking-wide text-amber-700">
-                          {gp.optionalBadge}
+                          {gp.recommendedBadge}
                         </span>
                       ) : null}
                     </p>
                     <p className="mt-0.5 text-[13px] leading-snug text-gray-500">{row.detail}</p>
-                    {!row.done ? (
+                    {!row.done && row.id === "sign_in" ? (
                       <button
                         type="button"
                         onClick={row.onAction}
                         disabled={row.disabled}
                         className="mt-3 w-full rounded-xl px-3 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
-                        style={{ backgroundColor: active ? GREEN : "#9CA3AF" }}
+                        style={{ backgroundColor: GREEN }}
                       >
-                        {row.actionBusy ? (
-                          <span className="inline-flex items-center justify-center gap-2">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            {row.actionLabel}
-                          </span>
-                        ) : (
-                          row.actionLabel
-                        )}
+                        {row.actionLabel}
                       </button>
                     ) : null}
                   </div>
@@ -204,19 +203,58 @@ export function GoPublicChecklist({
 
       <RentanoHint className="mt-5" hint={gp.tip(MASCOT_NAME)} showTapLabel />
 
-      <button
-        type="button"
-        onClick={onGoLive}
-        disabled={!canGoLive || isPublishing || loading}
-        className="btn-primary mt-6 flex h-14 w-full items-center justify-center text-lg font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
-        style={{ backgroundColor: canGoLive ? GREEN : "#9CA3AF" }}
-      >
-        {isPublishing ? gp.goingLive : canGoLive ? gp.goLive : gp.completeSteps}
-      </button>
-
-      {canGoLive && !stripeDone ? (
-        <p className="mt-2 text-center text-[12px] leading-relaxed text-gray-500">{gp.goLivePayoutHint}</p>
+      {softPayoutNudge ? (
+        <div
+          className="mt-5 rounded-2xl border px-4 py-3.5"
+          style={{ borderColor: "#FDE68A", backgroundColor: "#FFFBEB" }}
+        >
+          <p className="text-sm font-bold text-amber-950">{gp.lastStepTitle}</p>
+          <p className="mt-1 text-[13px] leading-relaxed text-amber-900/90">{gp.lastStepBody}</p>
+        </div>
       ) : null}
+
+      {softPayoutNudge ? (
+        <>
+          <button
+            type="button"
+            onClick={onConnectBank}
+            disabled={loading || busy === "stripe" || isPublishing}
+            className="btn-primary mt-4 flex h-14 w-full items-center justify-center gap-2 text-lg font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
+            style={{ backgroundColor: GREEN }}
+          >
+            {busy === "stripe" ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                {gp.openingStripe}
+              </span>
+            ) : (
+              gp.connectThenLive
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={onGoLive}
+            disabled={!canGoLive || isPublishing || loading}
+            className="mt-3 w-full py-3 text-center text-[14px] font-semibold underline disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ color: GREEN }}
+          >
+            {isPublishing ? gp.goingLive : gp.goLiveWithoutPayouts}
+          </button>
+          <p className="mt-2 text-center text-[12px] leading-relaxed text-gray-500">
+            {gp.goLivePayoutHint}
+          </p>
+        </>
+      ) : (
+        <button
+          type="button"
+          onClick={onGoLive}
+          disabled={!canGoLive || isPublishing || loading}
+          className="btn-primary mt-6 flex h-14 w-full items-center justify-center text-lg font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          style={{ backgroundColor: canGoLive ? GREEN : "#9CA3AF" }}
+        >
+          {isPublishing ? gp.goingLive : canGoLive ? gp.goLive : gp.completeSteps}
+        </button>
+      )}
     </motion.div>
   );
 }

@@ -3,8 +3,9 @@ import { DollarSign, Package, Plus, Share2 } from "lucide-react";
 import { useAuth } from "../../hooks/AuthProvider";
 import { fetchManageableListings, getManageableHostIds, loadManageableListings } from "../../lib/hostAccess";
 import { getAbandonedListingDrafts } from "../../lib/listingStorage";
-import { getListingDisplayTitle } from "../../lib/listingQr";
+import { getListingDisplayTitle, listingNeedsStickerReminder } from "../../lib/listingQr";
 import { loadRentalBookings, type RentalBooking } from "../../lib/rentalsStorage";
+import { deriveGarageShelfStatus } from "../../lib/garageShelfStatus";
 import { BookingRequestCard } from "../../components/rentals/BookingRequestCard";
 import { ProactiveAgentCard, wasAgentStepDismissed } from "../../components/agent/ProactiveAgentCard";
 import { hasRecentShare } from "../../lib/socialShare";
@@ -18,23 +19,25 @@ import { useMessages } from "../../lib/i18n/react";
 import type { AppMessages } from "../../lib/i18n/types";
 
 function formatHostBookingStatus(
-  status: RentalBooking["status"],
+  booking: RentalBooking,
   copy: AppMessages["garageUi"],
 ): string {
-  switch (status) {
-    case "pending_approval":
-      return copy.statusAwaitingOk;
-    case "pending_checkin":
-      return copy.statusReadyPickup;
-    case "active":
-      return copy.statusOutWithNeighbor;
-    case "overdue":
-      return copy.statusOverdue;
-    case "completed":
-      return copy.statusCompleted;
-    default:
-      return status.replace(/_/g, " ");
+  const status = booking.status;
+  if (status === "pending_approval") return copy.statusAwaitingOk;
+  if (status === "pending_checkin") {
+    if (booking.hostHandedOverAt && !booking.renterReceivedAt) return copy.statusHandedOver;
+    if (booking.renterReceivedAt && !booking.hostHandedOverAt) return copy.statusWaitingYourHandover;
+    return copy.statusReadyPickup;
   }
+  if (status === "active") {
+    if (booking.renterReturnedAt && !booking.hostAcceptedReturnAt) {
+      return copy.statusReturnPendingYou;
+    }
+    return copy.statusOutWithNeighbor;
+  }
+  if (status === "overdue") return copy.statusOverdue;
+  if (status === "completed") return copy.statusCompleted;
+  return status.replace(/_/g, " ");
 }
 
 function ListingThumb({ listing }: { listing: ListingDraft }) {
@@ -154,7 +157,7 @@ export function HostDashboard({
   const activeCount = listings.filter(
     (item) => item.listingStatus === "active" && !item.paused,
   ).length;
-  const needsQrCount = listings.filter((item) => item.listingStatus === "pending_qr").length;
+  const needsQrCount = listings.filter((item) => listingNeedsStickerReminder(item)).length;
   const pendingRequests = bookings.filter((b) => b.role === "host" && b.status === "pending_approval");
   const activeRentals = bookings.filter((b) => b.role === "host" && (b.status === "active" || b.status === "pending_checkin" || b.status === "overdue"));
   const totalEarned = bookings
@@ -280,7 +283,7 @@ export function HostDashboard({
                   >
                     <p className="text-[14px] font-semibold text-gray-900">{b.itemTitle}</p>
                     <p className="mt-0.5 text-[12px] text-gray-500">
-                      {b.counterpartyName} · {formatHostBookingStatus(b.status, t.garageUi)}
+                      {b.counterpartyName} · {formatHostBookingStatus(b, t.garageUi)}
                     </p>
                   </button>
                 </li>
@@ -347,11 +350,16 @@ export function HostDashboard({
                       {getListingDisplayTitle(listing.title)}
                     </p>
                     <p className="text-sm capitalize text-gray-500">
-                      {listing.paused
-                        ? t.garageUi.statusPaused
-                        : listing.listingStatus === "pending_qr"
-                          ? t.garageUi.statusNeedsQr
-                          : listing.listingStatus}
+                      {(() => {
+                        const shelf = deriveGarageShelfStatus(listing);
+                        if (shelf.kind === "rented") return t.garageUi.statusOutWithNeighbor;
+                        if (shelf.kind === "reserved") return t.garageUi.statusReserved;
+                        if (shelf.kind === "sold") return t.garageUi.statusSold;
+                        if (shelf.kind === "pending_payment") return t.garageUi.statusPendingPayment;
+                        if (shelf.kind === "paused" || listing.paused) return t.garageUi.statusPaused;
+                        if (listingNeedsStickerReminder(listing)) return t.garageUi.statusNeedsQr;
+                        return t.garageUi.statusAvailable;
+                      })()}
                       {listing.category ? ` · ${localizeCategoryLabel(listing.category)}` : ""}
                     </p>
                   </div>

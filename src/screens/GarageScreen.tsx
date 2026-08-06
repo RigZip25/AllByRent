@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { Share2, Store } from "lucide-react";
+import { Eye, Share2, Store } from "lucide-react";
 import { HostDashboard } from "../app/components/HostDashboard";
 import { RoleModeSwitcher } from "../components/RoleModeSwitcher";
+import { GarageLookEditor } from "../components/GarageLookEditor";
 import { useAuth } from "../hooks/AuthProvider";
 import type { AppMode } from "../lib/appMode";
 import { resolveHostAccountId } from "../lib/hostIdentity";
@@ -17,6 +18,7 @@ type GarageScreenProps = {
   onStockGarage: () => void;
   onResumeDraft?: (listingId: string) => void;
   onViewShop: () => void;
+  onPreviewAsNeighbor?: () => void;
   onViewProfile?: (userId: string) => void;
   onOpenRental?: (bookingId: string) => void;
   onRoleModeChange: (mode: AppMode) => void;
@@ -27,6 +29,7 @@ export function GarageScreen({
   onStockGarage,
   onResumeDraft,
   onViewShop,
+  onPreviewAsNeighbor,
   onViewProfile,
   onOpenRental,
   onRoleModeChange,
@@ -34,6 +37,7 @@ export function GarageScreen({
   const auth = useAuth();
   const t = useMessages();
   const [shareOpen, setShareOpen] = useState(false);
+  const [lookOpen, setLookOpen] = useState(false);
   const hostId = resolveHostAccountId(auth.userId);
 
   const sharePayload = useMemo(
@@ -55,7 +59,7 @@ export function GarageScreen({
             </h1>
             <p className="text-[13px] text-gray-500">{t.garage.subtitle}</p>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
             <button
               type="button"
               onClick={onViewShop}
@@ -65,6 +69,17 @@ export function GarageScreen({
               <Store className="h-4 w-4" />
               {t.garageUi.shop}
             </button>
+            {onPreviewAsNeighbor ? (
+              <button
+                type="button"
+                onClick={onPreviewAsNeighbor}
+                className="flex items-center gap-1.5 rounded-xl border bg-white px-3 py-2 text-[13px] font-semibold text-gray-700"
+                style={{ borderColor: "#E8E6E0" }}
+              >
+                <Eye className="h-4 w-4" />
+                {t.garageUi.previewNeighbor}
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => setShareOpen((v) => !v)}
@@ -78,6 +93,20 @@ export function GarageScreen({
         </div>
 
         <RoleModeSwitcher active="earn" onChange={onRoleModeChange} />
+
+        <button
+          type="button"
+          onClick={() => setLookOpen((v) => !v)}
+          className="mt-2.5 w-full rounded-xl border bg-white px-3 py-2 text-left text-[13px] font-semibold"
+          style={{ borderColor: "#E8E6E0", color: GREEN_DARK }}
+        >
+          {lookOpen ? t.garageUi.lookHide : t.garageUi.lookShow}
+        </button>
+        {lookOpen ? (
+          <div className="mt-2">
+            <GarageLookEditor />
+          </div>
+        ) : null}
       </div>
 
       {shareOpen ? (

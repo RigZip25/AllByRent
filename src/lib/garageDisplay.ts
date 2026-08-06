@@ -2,6 +2,13 @@ import type { ListingDraft } from "../screens/listing/types";
 import { getActiveRentLocationLabel, getProfileCity } from "./listingStorage";
 import { loadUserProfile } from "./userProfileStorage";
 import { formatMoney } from "./regionalDisplay";
+import {
+  isNewGarageHost,
+  resolveGarageAccent,
+  type GarageAccentId,
+  type GarageShopKind,
+} from "./garageIdentity";
+import { noteGarageFirstSeen } from "./garageFirstSeen";
 
 export function garageNameFromDisplayName(displayName: string | undefined | null): string {
   const name = displayName?.trim();
@@ -15,22 +22,26 @@ export function garageDisplayName(
   hostNames?: Record<string, string>,
 ): string {
   if (!hostId) return "Host's Garage";
-  const fromMap = hostNames?.[hostId]?.trim();
-  if (fromMap) return garageNameFromDisplayName(fromMap);
   try {
     const self = loadUserProfile();
-    if (self.id && self.id === hostId && self.displayName?.trim()) {
-      return garageNameFromDisplayName(self.displayName);
+    if (self.id && self.id === hostId) {
+      const custom = self.garageIdentity?.shopName?.trim();
+      if (custom) return custom;
+      if (self.displayName?.trim()) {
+        return garageNameFromDisplayName(self.displayName);
+      }
     }
   } catch {
     /* ignore */
   }
+  const fromMap = hostNames?.[hostId]?.trim();
+  if (fromMap) return garageNameFromDisplayName(fromMap);
   return "Neighbor's Garage";
 }
 
 export function garageTrustLine(
   hostId: string | undefined,
-  hostMeta?: Record<string, { displayName: string; rating: number }>,
+  hostMeta?: Record<string, HostGarageMeta | { displayName: string; rating: number }>,
 ): {
   name: string;
   rating: number;
@@ -143,11 +154,22 @@ export type GarageSummary = {
   itemCount: number;
   categories: string[];
   listings: ListingDraft[];
+  isNew?: boolean;
+  shopKind?: GarageShopKind;
+  accentId?: GarageAccentId;
+  accentColor?: string;
+  accentSoft?: string;
+};
+
+export type HostGarageMeta = {
+  displayName: string;
+  rating: number;
+  createdAt?: string | null;
 };
 
 export function groupListingsByGarage(
   listings: ListingDraft[],
-  hostMeta?: Record<string, { displayName: string; rating: number }>,
+  hostMeta?: Record<string, HostGarageMeta>,
 ): GarageSummary[] {
   const byHost = new Map<string, ListingDraft[]>();
   for (const listing of listings) {
@@ -160,6 +182,30 @@ export function groupListingsByGarage(
   return [...byHost.entries()].map(([hostId, items]) => {
     const trust = garageTrustLine(hostId || undefined, hostMeta);
     const categories = [...new Set(items.map((l) => l.category).filter(Boolean))].slice(0, 3);
+    if (hostId) noteGarageFirstSeen(hostId);
+
+    const meta = hostId ? hostMeta?.[hostId] : undefined;
+    // "New" = host joined within NEW_GARAGE_DAYS (14) — never longer.
+    const isNew = isNewGarageHost(meta?.createdAt);
+
+    let shopKind: GarageShopKind | undefined;
+    let accentId: GarageAccentId | undefined;
+    let accentColor: string | undefined;
+    let accentSoft: string | undefined;
+    try {
+      const self = loadUserProfile();
+      if (self.id && hostId && self.id === hostId) {
+        const identity = self.garageIdentity;
+        const accent = resolveGarageAccent(identity);
+        shopKind = identity.shopKind;
+        accentId = identity.accentId;
+        accentColor = accent.color;
+        accentSoft = accent.soft;
+      }
+    } catch {
+      /* ignore */
+    }
+
     return {
       hostId,
       name: trust.name,
@@ -168,6 +214,11 @@ export function groupListingsByGarage(
       itemCount: items.length,
       categories,
       listings: items,
+      isNew,
+      shopKind,
+      accentId,
+      accentColor,
+      accentSoft,
     };
   });
 }
