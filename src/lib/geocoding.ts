@@ -14,6 +14,8 @@ import {
 } from "./usStates";
 import {
   isUsZipQuery,
+  normalizePostcodeDigits,
+  postalQueryVariants,
   queryLooksLikeStreet,
   type LocationSearchGranularity,
 } from "./locationQuery";
@@ -189,6 +191,29 @@ function parsePhotonFeature(feature: PhotonFeature): LocationSuggestion | null {
       region: stateLabel,
       countryCode: "US",
       flag: countryCodeToFlag("US"),
+      lat,
+      lng,
+      precision: "postcode",
+    };
+  }
+
+  // European (and other) OSM postcode nodes — prefer city over the bare code.
+  if (props.osm_value === "postcode" && zipName) {
+    const place =
+      props.city || props.town || props.village || props.county || props.district || "";
+    const region = props.state || "";
+    const country = props.country || "";
+    const primaryLine = place ? `${zipName} — ${place}` : zipName;
+    const secondaryLine = dedupeParts([region, country]).join(", ");
+    return {
+      label: dedupeParts([primaryLine, secondaryLine]).join(", "),
+      primaryLine,
+      secondaryLine,
+      city: place || zipName,
+      country,
+      region,
+      countryCode,
+      flag: countryCodeToFlag(countryCode),
       lat,
       lng,
       precision: "postcode",
@@ -415,6 +440,15 @@ function rankSuggestion(
   if (item.label.toLowerCase().includes(q)) score -= 2;
   if (/\d/.test(query) && /\d/.test(item.primaryLine)) score -= 2;
 
+  // Exact postcode digit match (26901 ↔ "269 01") beats fuzzy street names.
+  const qDigits = normalizePostcodeDigits(query);
+  if (qDigits.length >= 4 && /^\d/.test(qDigits)) {
+    const labelDigits = normalizePostcodeDigits(`${item.primaryLine} ${item.secondaryLine} ${item.label}`);
+    if (labelDigits.startsWith(qDigits) || labelDigits.includes(qDigits)) {
+      score -= item.precision === "postcode" ? 30 : 12;
+    }
+  }
+
   return score;
 }
 
@@ -548,11 +582,19 @@ export async function searchPlaces(
           ? appendCountryToQuery(cityAugmented, countryCode)
           : null;
 
+    // CZ "26901" → also query "269 01" (OSM/Photon postcode form).
+    const postalForms = postalQueryVariants(trimmed, countryCode);
     const photonQueries = [
+      ...postalForms.map((form) =>
+        countryCode === "US" && usState
+          ? appendUsStateToQuery(appendCountryToQuery(form, countryCode), usState)
+          : appendCountryToQuery(form, countryCode),
+      ),
+      ...postalForms.filter((form) => form !== trimmed),
       biasedQuery,
       cityAugmentedBiased,
       countryQuery !== biasedQuery ? countryQuery : null,
-    ].filter((q): q is string => Boolean(q && q.trim()));
+    ].filter((q, index, all): q is string => Boolean(q && q.trim()) && all.indexOf(q) === index);
 
     const [photonBatches, meteoResults] = await Promise.all([
       Promise.all(

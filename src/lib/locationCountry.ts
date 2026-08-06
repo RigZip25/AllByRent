@@ -82,7 +82,7 @@ const COUNTRY_DEFS: CountryDef[] = [
   { code: "BG", label: "Bulgaria", flag: "🇧🇬", bbox: [22.3, 41.2, 28.7, 44.3], querySuffix: "Bulgaria", example: "Sofia" },
   { code: "HR", label: "Croatia", flag: "🇭🇷", bbox: [13.4, 42.3, 19.5, 46.6], querySuffix: "Croatia", example: "Zagreb", aliases: ["hrvatska"] },
   { code: "CY", label: "Cyprus", flag: "🇨🇾", bbox: [32.2, 34.5, 34.7, 35.8], querySuffix: "Cyprus", example: "Nicosia" },
-  { code: "CZ", label: "Czechia", flag: "🇨🇿", bbox: [12, 48.5, 19, 51.1], querySuffix: "Czechia", example: "110 00 or Praha", aliases: ["czechia", "czech republic", "česko", "cesko"] },
+  { code: "CZ", label: "Czechia", flag: "🇨🇿", bbox: [12, 48.5, 19, 51.1], querySuffix: "Czechia", example: "269 01 / 26901 or Praha", aliases: ["czechia", "czech republic", "česko", "cesko"] },
   { code: "DK", label: "Denmark", flag: "🇩🇰", bbox: [8, 54.5, 15.3, 58], querySuffix: "Denmark", example: "København", aliases: ["danmark"] },
   { code: "EE", label: "Estonia", flag: "🇪🇪", bbox: [21.7, 57.5, 28.3, 59.8], querySuffix: "Estonia", example: "Tallinn" },
   { code: "FI", label: "Finland", flag: "🇫🇮", bbox: [20.5, 59.7, 31.6, 70.1], querySuffix: "Finland", example: "Helsinki", aliases: ["suomi"] },

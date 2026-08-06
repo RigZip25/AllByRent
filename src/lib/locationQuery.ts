@@ -13,3 +13,40 @@ export function queryLooksLikeStreet(query: string): boolean {
 }
 
 export type LocationSearchGranularity = "area" | "any";
+
+/**
+ * Extra Photon/Open-Meteo query forms for local postal formats.
+ * Czech/Slovak OSM stores postcodes as "269 01", not "26901" — without the
+ * space Photon fuzzy-matches street names like "26.10.1918".
+ */
+export function postalQueryVariants(query: string, countryCode: string): string[] {
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+
+  const variants: string[] = [trimmed];
+  const digits = trimmed.replace(/\s+/g, "");
+  const cc = countryCode.toUpperCase();
+
+  // CZ / SK: NNNNN → "NNN NN"
+  if ((cc === "CZ" || cc === "SK") && /^\d{5}$/.test(digits)) {
+    variants.unshift(`${digits.slice(0, 3)} ${digits.slice(3)}`);
+  }
+
+  // PL: NNNNN → "NN-NNN"
+  if (cc === "PL" && /^\d{5}$/.test(digits)) {
+    variants.unshift(`${digits.slice(0, 2)}-${digits.slice(2)}`);
+  }
+
+  // NL: 4 digits + 2 letters, optional space
+  const nl = digits.toUpperCase();
+  if (cc === "NL" && /^\d{4}[A-Z]{2}$/.test(nl)) {
+    variants.unshift(`${nl.slice(0, 4)} ${nl.slice(4)}`);
+  }
+
+  return [...new Set(variants)];
+}
+
+/** Digits-only postcode for match scoring (ignores spaces/hyphens). */
+export function normalizePostcodeDigits(value: string): string {
+  return value.replace(/[\s-]/g, "").toUpperCase();
+}
