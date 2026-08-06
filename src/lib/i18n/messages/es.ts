@@ -1908,11 +1908,11 @@ export const es: AppMessages = {
     moreItemsBody:
       "Añade cada artículo a la cola del lote desde su pantalla de QR, y luego usa «Imprimir lote» cuando estés listo.",
     addAnotherItem: "+ Añadir otro artículo",
-    comeBackHint: "Podrás volver aquí directamente para enviar por email / imprimir / verificar este QR.",
+    comeBackHint: "Puedes reabrir este QR cuando quieras desde Mi garaje para imprimir o verificar.",
     verifyingQr: "Verificando QR…",
     takeVerificationPhoto: "📸 Hacer foto de verificación",
     verificationHint:
-      "Apunta la cámara al QR impreso en el artículo. Una foto al azar no pasará — comprobamos que el código de este anuncio esté en el encuadre. Los anuncios de venta (y de venta gratis a $0) se saltan este paso.",
+      "Opcional. Apunta la cámara al QR impreso en el artículo para confirmar que la pegatina está puesta. En la entrega al inicio del alquiler se usa este código de todos modos.",
     pdfReady: "PDF listo",
     pdfReadyBody:
       "Quédate en la app — descarga, comparte o abre el PDF desde aquí. Usa Cerrar para volver a tu pegatina.",
