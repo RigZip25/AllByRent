@@ -22,6 +22,7 @@ export type FaqSectionId =
 
 export type FaqItemId =
   | "what-is"
+  | "why-name"
   | "home-feed"
   | "categories-nav"
   | "garage-tab"
@@ -141,6 +142,22 @@ export type AppMessages = {
     loading: string;
     signIn: string;
   };
+  /** Public occupancy calendar (listing + booking + host). */
+  availabilityCalendar: {
+    legendAvailable: string;
+    legendUnavailable: string;
+    /** Short visible marker for available days (not color-only). */
+    markAvailable: string;
+    /** Short visible marker for unavailable days (not color-only). */
+    markUnavailable: string;
+    dayAvailableAria: (day: number) => string;
+    dayUnavailableAria: (day: number) => string;
+    loading: string;
+    publicHint: string;
+    selectDates: string;
+    occupancyTitle: string;
+    occupancyHint: string;
+  };
   nav: {
     home: string;
     stock: string;
@@ -178,6 +195,7 @@ export type AppMessages = {
     phonePlaceholder: string;
     areaLabel: string;
     useMyLocation: string;
+    useMyLocationHint: string;
     detecting: string;
     areaPlaceholder: string;
     areaEmptyHint: string;
@@ -272,10 +290,14 @@ export type AppMessages = {
     loadingGarages: string;
     emptyFilteredTitle: string;
     emptyBlockTitle: string;
-    emptyFilteredBody: (category: string) => string;
+    emptyFilteredBody: (labels: string) => string;
     emptyBlockBody: string;
     postRequest: string;
     postRequestShare: string;
+    shareNeighbors: string;
+    shareLookingFor: (labels: string, city: string, appName: string) => string;
+    shareStatusCopied: string;
+    shareStatusShared: string;
     stockGarage: string;
     clearFilters: string;
     modeAny: string;
@@ -283,12 +305,33 @@ export type AppMessages = {
     modeBuy: string;
     filtersTitle: string;
     categoryTitle: string;
+    subcategoryTitle: string;
+    subcategoryHint: string;
+    wholeCategory: string;
+    yourPicks: string;
     allCategories: string;
     priceTitle: string;
     distanceTitle: string;
     distanceHint: string;
-    closerMiles: (milesLabel: string) => string;
-    fartherMiles: (milesLabel: string) => string;
+    locationSheetTitle: string;
+    locationSheetHint: string;
+    setBlockSheetTitle: string;
+    setBlockSheetHint: string;
+    changeLocationCta: string;
+    changeDistanceCta: string;
+    changeAreaCta: string;
+    useMyLocation: string;
+    useMyLocationHint: string;
+    locating: string;
+    saveLocation: string;
+    confirmLocation: string;
+    changePickedLocation: string;
+    detectedLocationTitle: string;
+    pickLocationHint: string;
+    backToRadius: string;
+    closerMiles: (distanceLabel: string) => string;
+    fartherMiles: (distanceLabel: string) => string;
+    /** @param n distance in miles (storage); label auto mi/km by country */
     miles: (n: number) => string;
     withinMiles: (n: number) => string;
     done: string;
@@ -456,11 +499,16 @@ export type AppMessages = {
     noRentalsYet: string;
     noListingsYet: string;
     listingsCount: (n: number) => string;
+    reviewsCount: (n: number) => string;
+    newHost: string;
+    responseNotTracked: string;
     account: string;
     location: string;
     name: string;
     phone: string;
     addPhone: string;
+    phoneVerifiedShort: string;
+    phoneVerifyNeeded: string;
     personalInfo: string;
     coHosts: string;
     coHostsHint: string;
@@ -527,6 +575,8 @@ export type AppMessages = {
     howItWorksHint: string;
     chatWith: (mascot: string) => string;
     chatWithHint: string;
+    contactSupport: string;
+    contactSupportHint: string;
     sendFeedback: string;
     sendFeedbackHint: string;
     accountSettings: string;
@@ -666,9 +716,16 @@ export type AppMessages = {
     goBackAria: string;
     returnToPreviousQr: string;
     analyzingPhotos: (mascot: string) => string;
+    moderationCooldownWait: (seconds: number) => string;
+    moderationSoftNudgeListing: string;
+    moderationSoftNudgeChat: string;
     discardTitle: string;
     discardBody: string;
     discard: string;
+    deleteListing: string;
+    deleteTitle: string;
+    deleteBody: string;
+    deleteConfirmCta: string;
     listingActive: string;
     savedFinishQr: string;
     intro: {
@@ -681,8 +738,9 @@ export type AppMessages = {
       goToSlideAria: (n: number) => string;
     };
     steps: {
-      photos: string;
+      category: string;
       detailsPricing: string;
+      photos: string;
       reviewPublish: string;
     };
     photos: {
@@ -703,6 +761,7 @@ export type AppMessages = {
       viewPhotoAria: string;
       removePhotoAria: string;
       removeVideoAria: string;
+      deleteLabel: string;
       videosHeading: (count: number, max: number) => string;
       loadingVideo: string;
       aiFillsTitle: string;
@@ -712,6 +771,8 @@ export type AppMessages = {
       tipDefault: (mascot: string) => string;
       tipYardSale: (mascot: string) => string;
       tipAnalyzed: string;
+      /** Shown when host skipped category — AI will suggest shelf too. */
+      tipDecideShelf: (mascot: string) => string;
       previewAria: string;
       closePreviewAria: string;
       setAsCover: string;
@@ -719,6 +780,18 @@ export type AppMessages = {
       nextPhotoAria: string;
       enhancementUnavailable: (detail: string) => string;
       couldntAddPhoto: (detail: string) => string;
+      /** NSFW / not a listable item — calm, non-graphic. */
+      moderationNotListable: string;
+      /** Weapons, drugs, and other banned goods. */
+      moderationProhibitedItem: string;
+      moderationCategoryMismatch: string;
+      /** Bad angle / unusable photo. */
+      moderationBadAngle: string;
+      /** Fail-closed when vision API errors. */
+      moderationVerifyFailed: string;
+      verifyingPhotos: (mascot: string) => string;
+      moderationVideoNotListable: string;
+      moderationBadVideo: string;
     };
     itemInfo: {
       title: string;
@@ -727,7 +800,26 @@ export type AppMessages = {
       subtitleYardSale: string;
       yardSaleBadge: string;
       fieldTitle: string;
-      titlePlaceholder: string;
+      titlePlaceholder: (example: string) => string;
+      categoryStepTitle: string;
+      categoryStepSubtitle: string;
+      /** Escape hatch — skip shelf pick; AI fills from photos. */
+      letAiDecideFromPhotos: (mascot: string) => string;
+      categoryAiHint: (mascot: string) => string;
+      gradeStepTitle: string;
+      gradeStepSubtitle: string;
+      subcategoryStepTitle: string;
+      subcategoryStepSubtitle: string;
+      confirmCategoryTitle: string;
+      confirmCategorySubtitle: string;
+      selectionConfirmed: string;
+      changeCategory: string;
+      changeGrade: string;
+      changeSubcategory: string;
+      personalGradeHint: string;
+      professionalGradeHint: string;
+      bothGrades: string;
+      bothGradesHint: string;
       category: string;
       selectCategory: string;
       grade: string;
@@ -749,11 +841,47 @@ export type AppMessages = {
       askImprove: (mascot: string) => string;
       replacementValue: string;
       replacementValueHelper: string;
+      replacementValueHelperLocal: (currency: string) => string;
       notSureValue: string;
       searchPriceLink: (title: string) => string;
+      searchPriceLinkLocal: (title: string, currency: string, country: string) => string;
       instructionsUrl: string;
       instructionsPlaceholder: string;
       instructionsHelper: string;
+      assetIdentityHint: string;
+      vin: string;
+      vinPlaceholder: string;
+      vinHelper: string;
+      vinChecking: string;
+      vinErrorLength: string;
+      vinErrorChars: string;
+      vinErrorCheck: string;
+      vinVerified: (summary: string) => string;
+      vinVerifiedFallback: string;
+      vinLookupWarn: string;
+      serialNumber: string;
+      serialNumberPlaceholder: string;
+      serialNumberHelper: string;
+      /** Title/description NSFW, spam, or not about an item. */
+      moderationTextNotSuitable: string;
+      moderationTextCategoryMismatch: string;
+      moderationTextVerifyFailed: string;
+      verifyingText: (mascot: string) => string;
+      moderationManualUrlNotSuitable: string;
+      moderationManualUrlInvalid: string;
+      moderationManualUrlHttpsOnly: string;
+      moderationManualUrlVerifyFailed: string;
+    };
+    specs: {
+      sectionTitle: string;
+      sectionHint: string;
+      selectPlaceholder: string;
+      recommendedBadge: string;
+      requiredBadge: string;
+      brandOtherPlaceholder: string;
+      unbrandedLabel: string;
+      fields: Record<string, { label: string; placeholder?: string; hint?: string }>;
+      options: Record<string, string>;
     };
     modes: {
       title: string;
@@ -818,6 +946,7 @@ export type AppMessages = {
       deliveryPolicy: string;
       maxDistance: string;
       milesRoundTrip: string;
+      kmRoundTrip: string;
       roundTripFee: string;
       estimate: string;
       usingEnteredFee: string;
@@ -889,8 +1018,8 @@ export type AppMessages = {
       handoffInPerson: string;
       handoffContactless: string;
       handoffHeavy: string;
-      handoffDelivery: (miles: number, fee: string, weight: string) => string;
-      handoffDeliveryNoFee: (miles: number, weight: string) => string;
+      handoffDelivery: (distanceLabel: string, fee: string, weight: string) => string;
+      handoffDeliveryNoFee: (distanceLabel: string, weight: string) => string;
       handoffNotSet: string;
       handoffAdjustHint: string;
       paused: string;
@@ -915,6 +1044,7 @@ export type AppMessages = {
       signInCta: string;
       stripeTitle: string;
       recommendedBadge: string;
+      requiredBadge: string;
       stripeConnectedBank: (last4: string) => string;
       stripePayoutsEnabled: string;
       stripeOnboardingComplete: string;
@@ -933,6 +1063,12 @@ export type AppMessages = {
       connectThenLive: string;
       goLiveWithoutPayouts: string;
       goLivePayoutHint: string;
+      phoneTitle: string;
+      phoneDone: string;
+      phonePending: string;
+      phoneCta: string;
+      phoneRequiredPaid: string;
+      phoneBlockPayouts: string;
     };
     success: {
       title: string;
@@ -957,6 +1093,7 @@ export type AppMessages = {
     longTermTip: string;
     pickupStartDate: string;
     datesBlocked: string;
+    selectRentalDates: string;
     howWantItem: string;
     pickupInPerson: string;
     pickupInPersonDesc: string;
@@ -964,13 +1101,16 @@ export type AppMessages = {
     pickupContactlessDesc: string;
     deliveryRoundTrip: string;
     deliveryRoundTripDesc: string;
-    deliveryMiles: (miles: number) => string;
+    deliveryMiles: (distanceLabel: string) => string;
     deliveryAddress: string;
     deliveryAddressPlaceholder: string;
     deliveryFeeNote: string;
     depositHoldNote: (label: string, amount: string) => string;
     depositHoldTitle: (label: string) => string;
     depositHoldBody: (amount: string) => string;
+    /** Minimal cancellation policy shown before submit (store / trust). */
+    cancellationPolicyTitle: string;
+    cancellationPolicyBody: string;
     cardPayment: string;
     backToDetails: string;
     preparing: string;
@@ -988,6 +1128,18 @@ export type AppMessages = {
     backToHome: string;
     hostFallback: string;
     itemFallback: string;
+    insuranceTitle: string;
+    insuranceBody: string;
+    insuranceHostRequires: (details: string) => string;
+    insuranceActiveUntil: string;
+    insuranceMustCoverRental: string;
+    insuranceUpload: string;
+    insuranceReplace: string;
+    insuranceUploading: string;
+    insuranceUploadFailed: string;
+    insuranceSignInFirst: string;
+    insurancePreviewAlt: string;
+    insuranceViewUploaded: string;
     newRequestTitle: string;
     newRequestBody: (title: string) => string;
     approvedTitle: string;
@@ -1097,17 +1249,23 @@ export type AppMessages = {
     openShareSheet: string;
     shareGarage: string;
     live: string;
+    draftsStat: string;
     needsQr: string;
     earnings: string;
     noneYet: string;
     pendingBookingRequests: string;
     activeRentals: string;
     yourListings: string;
+    draftsSection: string;
+    liveSection: string;
     newListing: string;
     loading: string;
     noListingsYet: string;
     noListingsBodyBefore: string;
     noListingsBodyAfter: string;
+    signInForDrafts: string;
+    draftBadge: string;
+    statusDraft: (step: number) => string;
     statusPaused: string;
     statusNeedsQr: string;
     statusAwaitingOk: string;
@@ -1123,7 +1281,16 @@ export type AppMessages = {
     statusWaitingYourHandover: string;
     statusReturnPendingYou: string;
     openListingAria: (title: string) => string;
+    resumeDraftAria: (title: string) => string;
     itemFallback: string;
+    emptyLiveTitle: string;
+    emptyLiveBody: string;
+    emptyDraftsTitle: string;
+    emptyDraftsBody: string;
+    deleteDraftTitle: string;
+    deleteDraftBody: string;
+    deleteDraftConfirm: string;
+    deleteDraftAria: (title: string) => string;
   };
   rentalDetail: {
     title: string;
@@ -1134,6 +1301,44 @@ export type AppMessages = {
     openDisputeBody: string;
     viewDispute: string;
     startDispute: string;
+    continueDispute: string;
+    disputeStatusOpen: string;
+    disputeStatusUnderReview: string;
+    disputeStatusResolved: string;
+    disputeReasonLabel: string;
+    disputeReasonDamage: string;
+    disputeReasonMissing: string;
+    disputeReasonCondition: string;
+    disputeReasonDeposit: string;
+    disputeReasonOther: string;
+    disputeNotesLabel: string;
+    disputeNotesPlaceholder: string;
+    disputeNotesBlocked: string;
+    disputeNotesOffPlatform: string;
+    requestReview: string;
+    requestReviewHint: string;
+    proposeResolution: string;
+    proposeResolutionHint: string;
+    outcomeFavorRenter: string;
+    outcomeFavorHost: string;
+    outcomeSplit: string;
+    outcomeWithdrawn: string;
+    waitingCounterpartyAck: string;
+    acceptResolution: string;
+    withdrawDispute: string;
+    emailSupport: string;
+    emailSupportHint: string;
+    depositNextRelease: string;
+    depositNextClaim: string;
+    depositNextSupport: string;
+    depositHeldDuringDispute: string;
+    depositReleaseBtn: string;
+    depositClaimBtn: string;
+    depositStatusReleased: string;
+    depositStatusClaimed: string;
+    depositHoldActiveBody: string;
+    resolvedCalm: (outcome: string) => string;
+    underReviewCalm: string;
     rentalItemFallback: string;
     rentalPeriod: (start: string, end: string) => string;
     statusPendingCheckin: string;
@@ -1158,9 +1363,13 @@ export type AppMessages = {
     scanReturnItemBody: string;
     scanAcceptReturnBody: string;
     scanQrCode: string;
+    showItemQr: string;
+    showItemQrHint: string;
     waitingOtherSide: string;
     handoffTitle: string;
     handoffHint: string;
+    /** Soft mark: renter cannot re-list the borrowed item. */
+    cannotRelistBorrowed: string;
     handoffHostHanded: string;
     handoffRenterReceived: string;
     handoffRenterReturned: string;
@@ -1192,6 +1401,13 @@ export type AppMessages = {
     askHostForPin: (stage: string) => string;
     pinStagePickup: string;
     pinStageReturn: string;
+    insuranceProofTitle: string;
+    insuranceProofHostBody: string;
+    insuranceProofRenterBody: string;
+    insuranceActiveUntil: (date: string) => string;
+    insuranceProofAlt: string;
+    insuranceOpenFull: string;
+    insuranceProofMissing: string;
     depositProtection: string;
     depositProtectionBody: string;
     ownerContact: string;
@@ -1221,6 +1437,25 @@ export type AppMessages = {
     addPhoto: string;
     evidence: string;
     visibleToBoth: string;
+    cancelBooking: string;
+    cancelBookingConfirmTitle: string;
+    cancelBookingConfirmBody: (refundNote: string) => string;
+    cancelBookingConfirmCta: string;
+    cancelNotAllowed: string;
+    cancelRefundPreviewFull: string;
+    cancelRefundPreviewPartial: (percent: number) => string;
+    cancelRefundPreviewNone: string;
+    cancelRefundPreviewHostFull: string;
+    cancelRefundReleased: string;
+    cancelRefundFullProcessing: string;
+    cancelRefundPartialProcessing: (percent: number) => string;
+    cancelRefundNone: string;
+    cancelRefundContactSupport: string;
+    cancelDoneTitle: string;
+    cancelNotifHostTitle: string;
+    cancelNotifRenterTitle: string;
+    cancelNotifBody: (title: string, refundNote: string) => string;
+    cancelContactSupport: string;
   };
   rentalCard: {
     noShow: string;
@@ -1241,6 +1476,9 @@ export type AppMessages = {
     markNoShow: string;
     markNoShowHint: string;
     submitEvidence: string;
+    continueDispute: string;
+    openDispute: string;
+    underReview: string;
     leaveReview: string;
     reviewHelpsTrust: string;
     seeReview: string;
@@ -1254,6 +1492,7 @@ export type AppMessages = {
     cancelling: string;
     cancelRequest: string;
     cancelRequestRelease: string;
+    cancelBooking: string;
     runningLateTitle: (ownerName: string) => string;
     runningLateBody: string;
     runningLateDefault: string;
@@ -1392,6 +1631,9 @@ export type AppMessages = {
     placeholder: string;
     listingChatFallback: string;
     listingChatSubtitle: string;
+    moderationBlocked: string;
+    moderationOffPlatform: string;
+    moderationVerifyFailed: string;
   };
   onboarding: OnboardingMessages;
   profileDeep: {
@@ -1410,6 +1652,27 @@ export type AppMessages = {
       namePlaceholder: string;
       phoneLabel: string;
       phonePlaceholder: string;
+      phonePlaceholderE164: string;
+      phoneE164Hint: string;
+      phoneKycHint: string;
+      phoneVerifyTitle: string;
+      phoneVerifySubtitle: string;
+      phoneVerifiedBadge: string;
+      phoneNotVerified: string;
+      phoneCodeLabel: string;
+      phoneCodePlaceholder: string;
+      phoneCodeSentTo: (phone: string) => string;
+      phoneSendCode: string;
+      phoneSending: string;
+      phoneVerifyCode: string;
+      phoneVerifying: string;
+      phoneResendCode: string;
+      phoneChangeNumber: string;
+      phoneVerifyCancel: string;
+      phoneVerifyClose: string;
+      phoneVerifyDone: string;
+      phoneRequiredForPayouts: string;
+      phoneVerifyCta: string;
     };
     coHosts: {
       title: string;
@@ -1678,6 +1941,11 @@ export type AppMessages = {
     stickerReadySubtitle: string;
     listingAlreadyLive: string;
     donePrintLater: string;
+    showOnScreen: string;
+    showOnScreenHint: string;
+    showOnScreenClose: string;
+    multiItemHint: string;
+    printLaterOptional: string;
     optionalVerifyTitle: string;
     qrAlt: string;
     preparingPdf: string;
@@ -1728,6 +1996,8 @@ export type AppMessages = {
     statusPaused: string;
     qrForListing: string;
     qrAlt: string;
+    showOnScreen: string;
+    showOnScreenHint: string;
     printThisQr: string;
     removeFromBulk: string;
     addToBulk: string;
@@ -1783,6 +2053,8 @@ export type AppMessages = {
     dailyPriceRequired: string;
     timesFormatError: string;
     timesHhMmError: string;
+    bookingCalendarTitle: string;
+    bookingCalendarHint: string;
   };
   garageSale: GarageSaleMessages;
   yardSales: YardSalesMessages;
@@ -2145,19 +2417,56 @@ export type EarnBusinessMessages = {
   colAllTime: string;
   trendAria: (trend: string) => string;
   sparklineHint: string;
+  sparklineEmpty: string;
   growthNew: string;
   growthVsLast: (signedPercent: string) => string;
   activeListings: (n: number) => string;
+  kpiLive: string;
+  kpiDrafts: string;
+  kpiOut: string;
+  tipFirstBookingTitle: string;
+  tipFirstBookingBody: string;
+  tipFinishDraftTitle: string;
+  tipFinishDraftBody: string;
+  tipBookableTitle: string;
+  tipBookableBody: string;
+  tipStockFirstTitle: string;
+  tipStockFirstBody: string;
   tipExpandTitle: string;
   tipExpandBody: (amount: string) => string;
   tipMomentumTitle: string;
   tipMomentumBody: (pct: number, last: string, current: string) => string;
   tipRecoverTitle: string;
   tipRecoverBody: (last: string) => string;
-  tipTargetTitle: string;
-  tipTargetBody: (amount: string) => string;
   tipFieldTitle: string;
   tipFieldBody: (amount: string, count: number) => string;
+  ctaStock: string;
+  ctaGarage: string;
+  /** Earnings / tax statement (host ledger) */
+  statementTitle: string;
+  statementSubtitle: string;
+  periodLabel: string;
+  yearOption: (year: number) => string;
+  colDate: string;
+  colListing: string;
+  colBookingId: string;
+  colGross: string;
+  colPlatformFee: string;
+  colStripeFee: string;
+  colRefunds: string;
+  colDelivery: string;
+  colNet: string;
+  totalsLabel: string;
+  emptyStatementTitle: string;
+  emptyStatementBody: string;
+  downloadCsv: string;
+  stripePayoutsLink: string;
+  disclaimer: string;
+  countryTaxNote: string;
+  usTaxFormsNote: string;
+  notAvailable: string;
+  feesEstimatedNote: string;
+  ledgerGapNote: string;
 };
 
 export type QrScanMessages = {

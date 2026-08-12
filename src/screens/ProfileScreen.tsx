@@ -29,8 +29,10 @@ import {
   getProfileDisplayLabel,
   getProfileEmailLabel,
   getProfileLocationSummary,
+  applyReviewStatsToProfile,
   loadUserProfile,
   refreshProfileStats,
+  saveUserProfile,
   setProfileAvatarUrl,
   syncUserProfileFromAuth,
   updateProfileFields,
@@ -265,7 +267,18 @@ export function ProfileScreen({
     let mounted = true;
     void fetchReviewsForUserRemote(auth.userId).then((rows) => {
       if (!mounted) return;
-      setRecentReviews(rows.slice(0, 3).map((r) => ({ rating: r.rating, comment: r.comment, createdAt: r.createdAt })));
+      setRecentReviews(
+        rows.slice(0, 3).map((r) => ({
+          rating: r.rating,
+          comment: r.comment,
+          createdAt: r.createdAt,
+        })),
+      );
+      setProfile((prev) => {
+        const next = applyReviewStatsToProfile(prev, rows);
+        saveUserProfile(next);
+        return next;
+      });
     });
     return () => {
       mounted = false;
@@ -275,7 +288,13 @@ export function ProfileScreen({
   const hasPhoto = hasAvatarPhoto((auth.userId ?? profile.id).trim() || profile.id);
   const showOnboarding = !hasPhoto && !isPhotoPromptDeferred();
 
-  const responseDisplay = getHostResponseDisplay(profile.id, profile.host.usesManualBooking);
+  const responseKind = getHostResponseDisplay(profile.id, profile.host.usesManualBooking);
+  const responseLabel =
+    responseKind.kind === "rate"
+      ? `${responseKind.percent}%`
+      : responseKind.kind === "new_host"
+        ? profileCopy.newHost
+        : profileCopy.responseNotTracked;
 
   const memberYear = useMemo(() => {
     try {
@@ -455,11 +474,13 @@ export function ProfileScreen({
             label={profileCopy.asHost}
             value={
               profile.host.listingsCount > 0
-                ? `${profile.host.rating}★ · ${profileCopy.listingsCount(profile.host.listingsCount)}`
+                ? profile.host.reviewCount > 0 && profile.host.rating > 0
+                  ? `${profile.host.rating}★ · ${profileCopy.listingsCount(profile.host.listingsCount)}`
+                  : profileCopy.listingsCount(profile.host.listingsCount)
                 : profileCopy.noListingsYet
             }
           />
-          <StatTile label={profileCopy.response} value={responseDisplay.label} />
+          <StatTile label={profileCopy.response} value={responseLabel} />
         </div>
 
         <SectionTitle>{profileCopy.account}</SectionTitle>
@@ -484,7 +505,13 @@ export function ProfileScreen({
             <RowButton
               icon={<Sparkles className="h-5 w-5" style={{ color: "#F59E0B" }} />}
               label={profileCopy.phone}
-              value={profile.phone?.trim() ? formatUsPhoneDisplay(profile.phone) : profileCopy.addPhone}
+              value={
+                profile.phone?.trim()
+                  ? `${formatUsPhoneDisplay(profile.phone)}${
+                      profile.verification.phone ? ` · ${profileCopy.phoneVerifiedShort}` : ` · ${profileCopy.phoneVerifyNeeded}`
+                    }`
+                  : profileCopy.addPhone
+              }
               onClick={handleEditPhone}
             />
           </li>
@@ -529,7 +556,11 @@ export function ProfileScreen({
                 void startConnectOnboarding("/?screen=profile")
                   .then((result) => {
                     if (!result.ok) {
-                      setConnectError(result.reason);
+                      setConnectError(
+                        result.code === "phone_unverified"
+                          ? profileCopy.phoneVerifyNeeded
+                          : result.reason,
+                      );
                       return;
                     }
                     window.location.href = result.url;
@@ -687,26 +718,30 @@ export function ProfileScreen({
           </button>
         )}
 
-        {auth.configured ? (
-          <div className="mt-3 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
-            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+        {auth.configured && auth.session && onDeleteAccount ? (
+          <div className="mt-3 rounded-2xl border border-red-200 bg-white p-4" style={{ borderColor: "#FECACA" }}>
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-red-500/80">
               {profileCopy.authSection}
             </p>
             <p className="mt-1 text-[13px] text-gray-600">
-              {auth.session
-                ? profileCopy.signedInAs(
-                    auth.userEmail ?? auth.userId ?? profileCopy.userFallback,
-                  )
-                : profileCopy.notSignedIn}
+              {profileCopy.signedInAs(
+                auth.userEmail ?? auth.userId ?? profileCopy.userFallback,
+              )}
             </p>
             <button
               type="button"
               onClick={onDeleteAccount}
-              className="mt-3 w-full min-h-[44px] touch-manipulation rounded-xl border py-2 text-center text-[13px] font-semibold text-red-600/80 active:text-red-700"
-              style={{ borderColor: BORDER }}
+              className="mt-3 w-full min-h-[48px] touch-manipulation rounded-xl border border-red-300 bg-red-50 py-2.5 text-center text-[14px] font-bold text-red-700 active:bg-red-100"
             >
               {profileCopy.deleteAccount}
             </button>
+          </div>
+        ) : auth.configured ? (
+          <div className="mt-3 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+              {profileCopy.authSection}
+            </p>
+            <p className="mt-1 text-[13px] text-gray-600">{profileCopy.notSignedIn}</p>
           </div>
         ) : null}
 

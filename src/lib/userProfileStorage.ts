@@ -170,6 +170,7 @@ export function loadUserProfile(): UserProfile {
     if (merged.renter.noShowCount === undefined) {
       merged.renter.noShowCount = 0;
     }
+    merged.host = stripLegacyDemoHostStats(merged.host);
     merged.avatarUrl = hasAvatarPhoto(merged.id)
       ? loadAvatarDataUrl(merged.id)
       : null;
@@ -189,21 +190,60 @@ export function saveUserProfile(profile: UserProfile): void {
   }
 }
 
+/** Legacy demo seed invented 4.9★ / 12 reviews for any host with listings. */
+function stripLegacyDemoHostStats(host: UserProfile["host"]): UserProfile["host"] {
+  const rating = Number(host.rating) || 0;
+  const reviewCount = Number(host.reviewCount) || 0;
+  if (reviewCount === 12 && Math.abs(rating - 4.9) < 0.001) {
+    return { ...host, rating: 0, reviewCount: 0 };
+  }
+  return {
+    ...host,
+    rating,
+    reviewCount,
+  };
+}
+
 export function refreshProfileStats(
   profile: UserProfile,
   authUserId: string | null = null,
 ): UserProfile {
   const listingsCount = countOwnListings(authUserId ?? profile.id);
+  const host = stripLegacyDemoHostStats({
+    ...profile.host,
+    listingsCount,
+  });
   return {
     ...profile,
     avatarUrl: hasAvatarPhoto(profile.id) ? loadAvatarDataUrl(profile.id) : null,
+    host,
+    preferredMode: getAppMode(),
+  };
+}
+
+/** Apply real review rows (reviewee = this user) to host/renter stats. */
+export function applyReviewStatsToProfile(
+  profile: UserProfile,
+  reviews: Array<{ role: "renter" | "host"; rating: number }>,
+): UserProfile {
+  const asHost = reviews.filter((r) => r.role === "renter");
+  const asRenter = reviews.filter((r) => r.role === "host");
+  const avg = (rows: Array<{ rating: number }>) => {
+    if (rows.length === 0) return 0;
+    return Math.round((rows.reduce((sum, r) => sum + r.rating, 0) / rows.length) * 10) / 10;
+  };
+  return {
+    ...profile,
     host: {
       ...profile.host,
-      listingsCount,
-      rating: listingsCount > 0 ? profile.host.rating || 4.9 : 0,
-      reviewCount: listingsCount > 0 ? profile.host.reviewCount || 12 : 0,
+      reviewCount: asHost.length,
+      rating: avg(asHost),
     },
-    preferredMode: getAppMode(),
+    renter: {
+      ...profile.renter,
+      reviewCount: asRenter.length,
+      rating: avg(asRenter),
+    },
   };
 }
 

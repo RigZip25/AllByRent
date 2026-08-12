@@ -1,4 +1,5 @@
 import { BadgeCheck, Shield, Star } from "lucide-react";
+import { useMessages } from "../../lib/i18n/react";
 import type { UserProfile } from "../../lib/userProfileStorage";
 
 const GREEN = "#0D5C3A";
@@ -22,6 +23,7 @@ function Badge({
 }
 
 export function ProfileTrustBadges({ profile }: { profile: UserProfile }) {
+  const { profile: t } = useMessages();
   const totalReviews = profile.host.reviewCount + profile.renter.reviewCount;
 
   return (
@@ -33,7 +35,10 @@ export function ProfileTrustBadges({ profile }: { profile: UserProfile }) {
         <Badge icon={<Shield className="h-3 w-3" />} label="ID Verified ✓" />
       ) : null}
       {totalReviews > 0 ? (
-        <Badge icon={<Star className="h-3 w-3" />} label={`${totalReviews} reviews`} />
+        <Badge
+          icon={<Star className="h-3 w-3" />}
+          label={t.reviewsCount(totalReviews)}
+        />
       ) : null}
     </div>
   );
