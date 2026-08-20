@@ -3217,17 +3217,17 @@ export const en: AppMessages = {
       "Party & Events": {
         title: "Party & event rentals",
         summary:
-          "Pro AV / stage / lighting shelves capture setup/teardown fee and power needs. Guest capacity and footprint help venues plan.",
+          "Pro AV / stage / lighting shelves capture setup/teardown fee and power needs. Outdoor canopies and tents add a weather-cancel policy with a full-refund window.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Set a setup/teardown fee when you provide labor. State power requirements clearly for sound and lighting.",
-        whyGeoTitle: "Why setup fee + power?",
+          "Set setup/teardown fee and power clearly. For outdoor gear, pick a weather-cancel policy (24h / 12h / host discretion) so renters know the refund rules.",
+        whyGeoTitle: "Why fee, power, and weather cancel?",
         whyGeo:
-          "Surprise labor and dead outlets ruin events. Fee + power at listing freeze on the agreement.",
+          "Surprise labor, dead outlets, and storms ruin events. Fees and outdoor weather cancel freeze on the agreement at booking.",
         flowTitle: "End to end",
-        flow: "List with fee / power when relevant → book (fee on total) → setup → teardown return.",
+        flow: "List fee / power / weather policy → book (gates + fee) → handoff → weather cancel if outdoor policy applies → return.",
         layersTitle: "Safety layers",
-        layers: "Setup/teardown fee · power requirement · capacity · deposit · rental terms.",
+        layers: "Setup/teardown fee · power · outdoor weather cancel · capacity · deposit · rental terms.",
         claimsTitle: "If something goes wrong",
         claims: "Fee and power are frozen on the agreement; deposit covers damage beyond normal event wear.",
       },
