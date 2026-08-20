@@ -562,11 +562,7 @@ export function HostListingDetailScreen({
         listing.category.trim() === "Construction" ? (
           <CategoryFactCard
             category={listing.category.trim()}
-            subcategory={
-              listing.category.trim() === "Construction"
-                ? listing.subcategory
-                : undefined
-            }
+            subcategory={listing.subcategory}
             className="mb-4"
           />
         ) : null}

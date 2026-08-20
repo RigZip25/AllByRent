@@ -1650,7 +1650,10 @@ function BookingScreenLoaded({
         {(listing.category.trim() === "Heavy Equipment" ||
           listing.category.trim() === "Construction") &&
         listing.modes.rent ? (
-          <CategoryFactCard category={listing.category.trim()} />
+          <CategoryFactCard
+            category={listing.category.trim()}
+            subcategory={listing.subcategory}
+          />
         ) : null}
         {listing.category.trim() === "Boats & Water" && listing.modes.rent ? (
           <CategoryFactCard category="Boats & Water" />

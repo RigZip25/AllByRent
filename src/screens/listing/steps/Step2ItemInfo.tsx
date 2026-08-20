@@ -392,7 +392,6 @@ export function Step2ItemInfo({
               <CategoryFactCard
                 category={draft.category.trim()}
                 subcategory={draft.subcategory}
-                defaultExpanded
               />
             ) : draft.category.trim() === "Boats & Water" ? (
               <CategoryFactCard category="Boats & Water" defaultExpanded />

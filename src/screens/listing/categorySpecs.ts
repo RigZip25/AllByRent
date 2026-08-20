@@ -3177,8 +3177,387 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         requiredIf: "rent",
         options: ["deductible_500", "deductible_1000", "deductible_2500", "full_coverage_required"],
       },
+      {
+        key: "kitInventoryChecklist",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: [
+          "Generators",
+          "Air Compressors",
+          "Pressure Washers",
+          "Winches",
+          "Pumps",
+          "Industrial Generators",
+          "Industrial Compressors",
+          "Hydraulic Equipment",
+          "Heavy Pumps",
+          "Other",
+        ],
+      },
+      {
+        key: "generatorPhaseBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Generators", "Industrial Generators"],
+        options: ["single_phase", "split_phase", "three_phase", "inverter_portable"],
+      },
+      {
+        key: "generatorStartingMethod",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Generators", "Industrial Generators"],
+        options: ["pull_recoil", "electric_start", "remote_start", "auto_transfer"],
+      },
+      {
+        key: "generatorRuntimeHoursBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Generators", "Industrial Generators"],
+        options: ["under_4h", "4_8h", "8_12h", "12h_plus", "continuous_standby", "unknown_runtime"],
+      },
+      {
+        key: "transferSwitchIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Generators", "Industrial Generators"],
+        options: ["included", "not_included", "renter_provides", "n_a_portable"],
+      },
+      {
+        key: "generatorNoiseDbBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Generators", "Industrial Generators"],
+        options: ["under_60db", "60_70db", "70_80db", "80db_plus", "unknown_noise"],
+      },
+      {
+        key: "generatorDutyClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Industrial Generators"],
+        options: ["standby", "prime", "continuous", "rental_fleet"],
+      },
+      {
+        key: "generatorMountForm",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Industrial Generators"],
+        options: ["skid", "trailer_mounted", "containerized", "pad_stationary", "portable_frame"],
+      },
+      {
+        key: "groundingBondingNotes",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Industrial Generators"],
+      },
+      {
+        key: "compressorCfmBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Air Compressors", "Industrial Compressors"],
+        options: ["under_5cfm", "5_10cfm", "10_20cfm", "20_50cfm", "50cfm_plus", "unknown_cfm"],
+      },
+      {
+        key: "tankSizeGalBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Air Compressors", "Industrial Compressors"],
+        options: ["tankless", "under_10gal", "10_30gal", "30_60gal", "60_120gal", "120gal_plus"],
+      },
+      {
+        key: "maxPsiBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Air Compressors", "Industrial Compressors"],
+        options: ["under_100psi", "100_150psi", "150_200psi", "200psi_plus", "unknown_psi"],
+      },
+      {
+        key: "compressorDriveType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Air Compressors", "Industrial Compressors"],
+        options: ["electric_portable", "gas_wheelbarrow", "diesel", "tractor_pto", "electric_stationary", "unknown_drive"],
+      },
+      {
+        key: "hoseCouplerKitIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Air Compressors", "Industrial Compressors"],
+        options: ["full_hose_kit", "partial_kit", "couplers_only", "none_renter_provides"],
+      },
+      {
+        key: "compressorDutyClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Industrial Compressors"],
+        options: ["intermittent", "continuous", "industrial_plant"],
+      },
+      {
+        key: "airDryerIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Industrial Compressors"],
+        options: ["included", "not_included", "n_a"],
+      },
+      {
+        key: "washerPsiBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pressure Washers"],
+        options: ["under_1500psi", "1500_2500psi", "2500_3500psi", "3500psi_plus", "unknown_psi"],
+      },
+      {
+        key: "washerGpmBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pressure Washers"],
+        options: ["under_2gpm", "2_3gpm", "3_4gpm", "4gpm_plus", "unknown_gpm"],
+      },
+      {
+        key: "washerPowerSource",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pressure Washers"],
+        options: ["electric", "gas", "hot_water_diesel", "unknown_power"],
+      },
+      {
+        key: "wandNozzleKitIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pressure Washers"],
+        options: ["full_kit", "partial_kit", "wand_only", "none"],
+      },
+      {
+        key: "surfaceUsePolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pressure Washers"],
+        options: ["soft_siding_ok", "hardscape_only", "vehicles_ok", "no_delicate_surfaces", "host_rules_in_notes"],
+      },
+      {
+        key: "winchCapacityLbsBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Winches"],
+        options: ["under_2000lb", "2000_5000lb", "5000_10000lb", "10000lb_plus", "unknown_capacity"],
+      },
+      {
+        key: "winchMountType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Winches"],
+        options: ["portable", "bumper_mounted", "trailer_mounted", "recovery_kit", "other_mount"],
+      },
+      {
+        key: "winchLineType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Winches"],
+        options: ["steel_cable", "synthetic_rope", "mixed_line", "unknown_line"],
+      },
+      {
+        key: "winchRemoteIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Winches"],
+        options: ["wired_remote", "wireless_remote", "none"],
+      },
+      {
+        key: "snatchBlockIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Winches"],
+        options: ["included", "not_included", "n_a"],
+      },
+      {
+        key: "pumpTypeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pumps", "Heavy Pumps"],
+        options: ["trash", "transfer", "submersible", "diaphragm", "centrifugal", "other_pump"],
+      },
+      {
+        key: "pumpFlowGpmBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pumps", "Heavy Pumps"],
+        options: ["under_50gpm", "50_150gpm", "150_500gpm", "500gpm_plus", "unknown_flow"],
+      },
+      {
+        key: "inletOutletSizeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pumps", "Heavy Pumps"],
+        options: ["under_2in", "2in", "3in", "4in_plus", "mixed_sizes"],
+      },
+      {
+        key: "solidsHandlingBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pumps", "Heavy Pumps"],
+        options: ["clean_water", "semi_solids", "trash_solids", "chemicals_disclosed", "unknown_solids"],
+      },
+      {
+        key: "hoseKitIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pumps", "Heavy Pumps"],
+        options: ["suction_and_discharge", "suction_only", "discharge_only", "partial", "none"],
+      },
+      {
+        key: "pumpPrimingMethod",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Heavy Pumps"],
+        options: ["self_prime", "manual_prime", "submersible_n_a", "unknown_prime"],
+      },
+      {
+        key: "forkliftClassBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Forklifts"],
+        options: ["class_1_electric", "class_2_narrow", "class_3_pallet", "class_4_cushion", "class_5_pneumatic", "other_class"],
+      },
+      {
+        key: "liftCapacityLbsBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Forklifts"],
+        options: ["under_3000lb", "3000_5000lb", "5000_8000lb", "8000lb_plus", "unknown_capacity"],
+      },
+      {
+        key: "mastHeightBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Forklifts"],
+        options: ["under_10ft", "10_15ft", "15_20ft", "20ft_plus", "unknown_mast"],
+      },
+      {
+        key: "forkliftTireType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Forklifts"],
+        options: ["cushion", "pneumatic", "solid", "dual"],
+      },
+      {
+        key: "forkliftFuelOrBattery",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Forklifts"],
+        options: ["lpg", "diesel", "electric_lead_acid", "electric_lithium", "dual_fuel", "other_power"],
+      },
+      {
+        key: "operatorManualIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Forklifts"],
+        options: ["included", "digital_only", "not_included"],
+      },
+      {
+        key: "hydraulicFunctionBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Hydraulic Equipment"],
+        options: ["power_unit", "cylinder_kit", "breaker", "spreader", "other_hydraulic"],
+      },
+      {
+        key: "hydraulicPressurePsiBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Hydraulic Equipment"],
+        options: ["under_2000psi", "2000_3000psi", "3000_5000psi", "5000psi_plus", "unknown_pressure"],
+      },
+      {
+        key: "hydraulicFlowGpmBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Hydraulic Equipment"],
+        options: ["under_5gpm", "5_15gpm", "15_30gpm", "30gpm_plus", "unknown_flow"],
+      },
+      {
+        key: "hydraulicCouplerType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Hydraulic Equipment"],
+        options: ["iso_a", "iso_b", "flat_face", "mixed_couplers", "unknown_coupler"],
+      },
+      {
+        key: "hoseWhipKitIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Hydraulic Equipment"],
+        options: ["included", "partial", "none"],
+      },
+      {
+        key: "heavyOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["generator", "compressor", "washer", "winch", "pump", "forklift", "hydraulic", "mixed"],
+      },
+      {
+        key: "heavyPieceBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["single_piece", "multi_piece"],
+      },
+      {
+        key: "photoConditionChecklist",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["overall_photos", "overall_plus_flaws", "all_pieces_and_flaws"],
+      },
     ],
   },
+
   {
     category: "Construction",
     fields: [
@@ -4502,6 +4881,492 @@ export function areCategorySpecsValid(
   ) {
     if (!(values.kitInventoryChecklist ?? "").trim()) return false;
   }
+
+
+  // Heavy Equipment P0 gates by shelf.
+  if (category.trim() === "Heavy Equipment" && modes?.rent) {
+    const sub = subcategory.trim();
+    const reqSelect = (key: string, allowed: string[]) =>
+      allowed.includes((values[key] ?? "").trim());
+    const reqText = (key: string, min = 3) =>
+      (values[key] ?? "").trim().length >= min;
+
+    if (
+      !reqSelect("powerBand", [
+        "under_2kw",
+        "2_5kw",
+        "5_15kw",
+        "15_50kw",
+        "50kw_plus",
+        "not_motorized",
+      ])
+    )
+      return false;
+    if (
+      !reqSelect("fuelType", [
+        "gasoline",
+        "diesel",
+        "electric",
+        "propane",
+        "other",
+      ])
+    )
+      return false;
+    if (
+      !reqSelect("insuranceMinLiability", [
+        "liability_25_50",
+        "liability_50_100",
+        "liability_100_300",
+        "liability_250_500",
+      ])
+    )
+      return false;
+    if (
+      !reqSelect("insuranceMaxDeductible", [
+        "deductible_500",
+        "deductible_1000",
+        "deductible_2500",
+        "full_coverage_required",
+      ])
+    )
+      return false;
+
+    if (sub === "Generators" || sub === "Industrial Generators") {
+      if (
+        !reqSelect("generatorPhaseBand", [
+          "single_phase",
+          "split_phase",
+          "three_phase",
+          "inverter_portable",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("generatorStartingMethod", [
+          "pull_recoil",
+          "electric_start",
+          "remote_start",
+          "auto_transfer",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("generatorRuntimeHoursBand", [
+          "under_4h",
+          "4_8h",
+          "8_12h",
+          "12h_plus",
+          "continuous_standby",
+          "unknown_runtime",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("transferSwitchIncluded", [
+          "included",
+          "not_included",
+          "renter_provides",
+          "n_a_portable",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("generatorNoiseDbBand", [
+          "under_60db",
+          "60_70db",
+          "70_80db",
+          "80db_plus",
+          "unknown_noise",
+        ])
+      )
+        return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Industrial Generators") {
+      if (
+        !reqSelect("generatorDutyClass", [
+          "standby",
+          "prime",
+          "continuous",
+          "rental_fleet",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("generatorMountForm", [
+          "skid",
+          "trailer_mounted",
+          "containerized",
+          "pad_stationary",
+          "portable_frame",
+        ])
+      )
+        return false;
+      if (!reqText("groundingBondingNotes", 8)) return false;
+    }
+    if (sub === "Air Compressors" || sub === "Industrial Compressors") {
+      if (
+        !reqSelect("compressorCfmBand", [
+          "under_5cfm",
+          "5_10cfm",
+          "10_20cfm",
+          "20_50cfm",
+          "50cfm_plus",
+          "unknown_cfm",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("tankSizeGalBand", [
+          "tankless",
+          "under_10gal",
+          "10_30gal",
+          "30_60gal",
+          "60_120gal",
+          "120gal_plus",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("maxPsiBand", [
+          "under_100psi",
+          "100_150psi",
+          "150_200psi",
+          "200psi_plus",
+          "unknown_psi",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("compressorDriveType", [
+          "electric_portable",
+          "gas_wheelbarrow",
+          "diesel",
+          "tractor_pto",
+          "electric_stationary",
+          "unknown_drive",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("hoseCouplerKitIncluded", [
+          "full_hose_kit",
+          "partial_kit",
+          "couplers_only",
+          "none_renter_provides",
+        ])
+      )
+        return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Industrial Compressors") {
+      if (
+        !reqSelect("compressorDutyClass", [
+          "intermittent",
+          "continuous",
+          "industrial_plant",
+        ])
+      )
+        return false;
+      if (!reqSelect("airDryerIncluded", ["included", "not_included", "n_a"]))
+        return false;
+    }
+    if (sub === "Pressure Washers") {
+      if (
+        !reqSelect("washerPsiBand", [
+          "under_1500psi",
+          "1500_2500psi",
+          "2500_3500psi",
+          "3500psi_plus",
+          "unknown_psi",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("washerGpmBand", [
+          "under_2gpm",
+          "2_3gpm",
+          "3_4gpm",
+          "4gpm_plus",
+          "unknown_gpm",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("washerPowerSource", [
+          "electric",
+          "gas",
+          "hot_water_diesel",
+          "unknown_power",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("wandNozzleKitIncluded", [
+          "full_kit",
+          "partial_kit",
+          "wand_only",
+          "none",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("surfaceUsePolicy", [
+          "soft_siding_ok",
+          "hardscape_only",
+          "vehicles_ok",
+          "no_delicate_surfaces",
+          "host_rules_in_notes",
+        ])
+      )
+        return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Winches") {
+      if (
+        !reqSelect("winchCapacityLbsBand", [
+          "under_2000lb",
+          "2000_5000lb",
+          "5000_10000lb",
+          "10000lb_plus",
+          "unknown_capacity",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("winchMountType", [
+          "portable",
+          "bumper_mounted",
+          "trailer_mounted",
+          "recovery_kit",
+          "other_mount",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("winchLineType", [
+          "steel_cable",
+          "synthetic_rope",
+          "mixed_line",
+          "unknown_line",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("winchRemoteIncluded", [
+          "wired_remote",
+          "wireless_remote",
+          "none",
+        ])
+      )
+        return false;
+      if (!reqSelect("snatchBlockIncluded", ["included", "not_included", "n_a"]))
+        return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Pumps" || sub === "Heavy Pumps") {
+      if (
+        !reqSelect("pumpTypeBand", [
+          "trash",
+          "transfer",
+          "submersible",
+          "diaphragm",
+          "centrifugal",
+          "other_pump",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("pumpFlowGpmBand", [
+          "under_50gpm",
+          "50_150gpm",
+          "150_500gpm",
+          "500gpm_plus",
+          "unknown_flow",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("inletOutletSizeBand", [
+          "under_2in",
+          "2in",
+          "3in",
+          "4in_plus",
+          "mixed_sizes",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("solidsHandlingBand", [
+          "clean_water",
+          "semi_solids",
+          "trash_solids",
+          "chemicals_disclosed",
+          "unknown_solids",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("hoseKitIncluded", [
+          "suction_and_discharge",
+          "suction_only",
+          "discharge_only",
+          "partial",
+          "none",
+        ])
+      )
+        return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Heavy Pumps") {
+      if (
+        !reqSelect("pumpPrimingMethod", [
+          "self_prime",
+          "manual_prime",
+          "submersible_n_a",
+          "unknown_prime",
+        ])
+      )
+        return false;
+    }
+    if (sub === "Forklifts") {
+      if (
+        !reqSelect("forkliftClassBand", [
+          "class_1_electric",
+          "class_2_narrow",
+          "class_3_pallet",
+          "class_4_cushion",
+          "class_5_pneumatic",
+          "other_class",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("liftCapacityLbsBand", [
+          "under_3000lb",
+          "3000_5000lb",
+          "5000_8000lb",
+          "8000lb_plus",
+          "unknown_capacity",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("mastHeightBand", [
+          "under_10ft",
+          "10_15ft",
+          "15_20ft",
+          "20ft_plus",
+          "unknown_mast",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("forkliftTireType", [
+          "cushion",
+          "pneumatic",
+          "solid",
+          "dual",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("forkliftFuelOrBattery", [
+          "lpg",
+          "diesel",
+          "electric_lead_acid",
+          "electric_lithium",
+          "dual_fuel",
+          "other_power",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("operatorManualIncluded", [
+          "included",
+          "digital_only",
+          "not_included",
+        ])
+      )
+        return false;
+    }
+    if (sub === "Hydraulic Equipment") {
+      if (
+        !reqSelect("hydraulicFunctionBand", [
+          "power_unit",
+          "cylinder_kit",
+          "breaker",
+          "spreader",
+          "other_hydraulic",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("hydraulicPressurePsiBand", [
+          "under_2000psi",
+          "2000_3000psi",
+          "3000_5000psi",
+          "5000psi_plus",
+          "unknown_pressure",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("hydraulicFlowGpmBand", [
+          "under_5gpm",
+          "5_15gpm",
+          "15_30gpm",
+          "30gpm_plus",
+          "unknown_flow",
+        ])
+      )
+        return false;
+      if (
+        !reqSelect("hydraulicCouplerType", [
+          "iso_a",
+          "iso_b",
+          "flat_face",
+          "mixed_couplers",
+          "unknown_coupler",
+        ])
+      )
+        return false;
+      if (!reqSelect("hoseWhipKitIncluded", ["included", "partial", "none"]))
+        return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Other") {
+      if (
+        !reqSelect("heavyOtherKind", [
+          "generator",
+          "compressor",
+          "washer",
+          "winch",
+          "pump",
+          "forklift",
+          "hydraulic",
+          "mixed",
+        ])
+      )
+        return false;
+      if (!reqSelect("heavyPieceBand", ["single_piece", "multi_piece"]))
+        return false;
+      if (
+        !reqSelect("photoConditionChecklist", [
+          "overall_photos",
+          "overall_plus_flaws",
+          "all_pieces_and_flaws",
+        ])
+      )
+        return false;
+      if (
+        (values.heavyPieceBand ?? "").trim() === "multi_piece" &&
+        !reqText("kitInventoryChecklist", 6)
+      )
+        return false;
+    }
+  }
+
 
   return true;
 }
