@@ -162,10 +162,14 @@ Profile + per-sub FactCards + subcategory wiring already shipped (`bfb116d`). Ge
 
 | Layer | Pattern |
 |-------|---------|
-| All | `useCase` + `uniqueItemForm` + `uniqueFragilityBand` (+ transport recommended) |
-| Authenticity | Collectibles / art / rare instruments / custom / Other |
-| Kits | Checklist on hobby / specialty / props / custom / Other |
-| Boundary | Prefer named categories when they fit |
+| All | `useCase` + `transportSize` + `uniqueFragilityBand` |
+| Collectibles / Art | Authenticity or medium |
+| Hobby / Props / Specialty / Custom / Other | Class + kit checklist |
+| Unusual / Seasonal / Oddities / Rare instruments | Class gates |
+| Boundary | Prefer named categories when they fit (Music for standard instruments, Party for party kits) |
+| Deposit | Damage/missing — not collectible/art/instrument insurance |
 | FactCards | Per-sub Q→A; wire `subcategory` |
+
+**Option scoping:** prefix `unique_*` on new option ids.
 
 See also: [EVORIOS.md](./EVORIOS.md) (brand / product source of truth).
