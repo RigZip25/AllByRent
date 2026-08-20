@@ -596,7 +596,11 @@ export function HostListingDetailScreen({
           />
         ) : null}
         {listing.category.trim() === "Gym & Fitness" ? (
-          <CategoryFactCard category="Gym & Fitness" className="mb-4" />
+          <CategoryFactCard
+            category="Gym & Fitness"
+            subcategory={listing.subcategory}
+            className="mb-4"
+          />
         ) : null}
         {listing.category.trim() === "Sports & Recreation" ? (
           <CategoryFactCard category="Sports & Recreation" className="mb-4" />

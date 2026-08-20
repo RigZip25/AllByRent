@@ -752,7 +752,8 @@ export function Step2ItemInfo({
               subcategory={
                 draft.category.trim() === "Garden & Yard" ||
                 draft.category.trim() === "Electronics & Tech" ||
-                draft.category.trim() === "Costume & Cosplay"
+                draft.category.trim() === "Costume & Cosplay" ||
+                draft.category.trim() === "Gym & Fitness"
                   ? draft.subcategory
                   : undefined
               }

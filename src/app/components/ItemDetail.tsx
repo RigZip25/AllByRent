@@ -587,7 +587,11 @@ export function ItemDetail({
               />
             ) : null}
             {listing.modes.rent && listing.category.trim() === "Gym & Fitness" ? (
-              <CategoryFactCard category="Gym & Fitness" className="mt-3" />
+              <CategoryFactCard
+                category="Gym & Fitness"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
             ) : null}
             {listing.modes.rent && listing.category.trim() === "Sports & Recreation" ? (
               <CategoryFactCard category="Sports & Recreation" className="mt-3" />

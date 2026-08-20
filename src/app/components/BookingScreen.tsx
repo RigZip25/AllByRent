@@ -1691,7 +1691,10 @@ function BookingScreenLoaded({
           />
         ) : null}
         {listing.category.trim() === "Gym & Fitness" && listing.modes.rent ? (
-          <CategoryFactCard category="Gym & Fitness" />
+          <CategoryFactCard
+            category="Gym & Fitness"
+            subcategory={listing.subcategory}
+          />
         ) : null}
         {listing.category.trim() === "Sports & Recreation" && listing.modes.rent ? (
           <CategoryFactCard category="Sports & Recreation" />

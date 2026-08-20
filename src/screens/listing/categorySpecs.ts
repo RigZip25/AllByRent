@@ -2394,26 +2394,14 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         key: "weightBand",
         type: "select",
         required: true,
-        options: [
-          "under_10lb",
-          "10_25lb",
-          "25_50lb",
-          "50_100lb",
-          "100lb_plus",
-          "bodyweight_only",
-          "adjustable",
-        ],
+        options: ["under_10lb", "10_25lb", "25_50lb", "50_100lb", "100lb_plus", "bodyweight_only", "adjustable"],
       },
       {
         key: "maxUserWeightBand",
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: [
-          "Cardio Equipment",
-          "Commercial Treadmills",
-          "Weight Machines",
-        ],
+        subcategories: ["Cardio Equipment", "Commercial Treadmills", "Weight Machines"],
         options: ["up_to_200lb", "up_to_250lb", "up_to_300lb", "300lb_plus", "not_rated"],
       },
       {
@@ -2422,6 +2410,531 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         required: true,
         requiredIf: "rent",
         options: ["required", "not_required"],
+      },
+      {
+        key: "brand",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cardio Equipment", "Commercial Treadmills", "Weight Machines"],
+      },
+      {
+        key: "model",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cardio Equipment", "Commercial Treadmills", "Weight Machines"],
+      },
+      {
+        key: "kitInventoryChecklist",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Yoga & Pilates", "Resistance Bands", "Free Weights", "Boxing Equipment", "Competition Gear", "Training Systems", "Other", "Recovery Tools"],
+      },
+      {
+        key: "sanitizationAttested",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Treadmills", "Weight Machines", "Recovery Tools"],
+        options: ["attested", "not_yet"],
+      },
+      {
+        key: "yogaMatThicknessBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Yoga & Pilates"],
+        options: ["thin_under_3mm", "standard_3_5mm", "thick_6mm_plus", "travel_foldable", "not_a_mat"],
+      },
+      {
+        key: "yogaMatSurfaceType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Yoga & Pilates"],
+        options: ["pvc", "tpe", "natural_rubber", "cork", "cotton_jute", "other_surface", "accessories_only"],
+      },
+      {
+        key: "yogaKitBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Yoga & Pilates"],
+        options: ["mat_only", "mat_plus_blocks", "mat_blocks_strap", "pilates_ring_kit", "full_yoga_pilates_kit", "accessories_only"],
+      },
+      {
+        key: "yogaMatLengthSize",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Yoga & Pilates"],
+        options: ["short_travel", "standard_68in", "long_72in_plus", "extra_wide", "size_mixed_kit", "not_applicable"],
+      },
+      {
+        key: "yogaHygieneWipePolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Yoga & Pilates"],
+        options: ["wipe_before_and_after", "wipe_after_only", "host_sanitized_at_handoff", "towel_cover_required"],
+      },
+      {
+        key: "resistanceLevelBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Resistance Bands"],
+        options: ["light", "light_medium", "medium", "heavy", "extra_heavy", "mixed_set", "unknown_level"],
+      },
+      {
+        key: "bandKitPieceCountBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Resistance Bands"],
+        options: ["single", "pair", "set_3_5", "set_6_plus"],
+      },
+      {
+        key: "bandMaterialType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Resistance Bands"],
+        options: ["latex_loop", "latex_tube", "fabric_loop", "mixed_material", "unknown_material"],
+      },
+      {
+        key: "anchorIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Resistance Bands"],
+        options: ["door_anchor_included", "wall_anchor_included", "no_anchor", "anchor_not_needed"],
+      },
+      {
+        key: "bandSnapWearGrade",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Resistance Bands"],
+        options: ["new_unused", "light_wear", "visible_wear_ok", "replace_soon_disclosed"],
+      },
+      {
+        key: "recoveryToolType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Recovery Tools"],
+        options: ["foam_roller", "massage_gun", "percussion_other", "ice_heat_pack", "massage_ball_set", "mixed_recovery", "other_recovery"],
+      },
+      {
+        key: "recoveryBatteryRuntimeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Recovery Tools"],
+        options: ["under_30m", "30_60m", "60m_plus", "corded_ac", "not_powered", "unknown_runtime"],
+      },
+      {
+        key: "recoveryIntensitySpeedBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Recovery Tools"],
+        options: ["low", "medium", "high", "multi_speed", "not_a_gun", "unknown_intensity"],
+      },
+      {
+        key: "recoveryNoiseNotes",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Recovery Tools"],
+      },
+      {
+        key: "cardioType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cardio Equipment"],
+        options: ["upright_bike", "spin_bike", "recumbent_bike", "elliptical", "rower", "stair_climber", "other_home_cardio"],
+      },
+      {
+        key: "foldableStatus",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cardio Equipment"],
+        options: ["folds", "does_not_fold", "partial_fold", "unknown_fold"],
+      },
+      {
+        key: "cardioPowerNeeds",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cardio Equipment"],
+        options: ["wall_outlet_110", "wall_outlet_220", "battery_assisted", "self_powered_no_plug", "unknown_power"],
+      },
+      {
+        key: "floorProtectionNotes",
+        type: "text",
+        required: false,
+        recommended: true,
+        subcategories: ["Cardio Equipment"],
+      },
+      {
+        key: "footprintNotes",
+        type: "text",
+        required: false,
+        recommended: true,
+        subcategories: ["Cardio Equipment"],
+      },
+      {
+        key: "moveInStairsDisclosure",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cardio Equipment"],
+        options: ["ground_floor_easy", "stairs_two_person", "elevator_ok", "curbside_only", "host_delivers"],
+      },
+      {
+        key: "cardioHygieneWipePolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cardio Equipment"],
+        options: ["wipe_before_and_after", "wipe_after_only", "host_sanitized_at_handoff", "towel_cover_required"],
+      },
+      {
+        key: "warrantyNotIncludedNote",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cardio Equipment"],
+        options: ["no_mfr_warranty_transfer", "host_covers_mechanical_only", "as_is_no_repair", "unknown_warranty"],
+      },
+      {
+        key: "freeWeightForm",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Free Weights"],
+        options: ["dumbbell_pair", "kettlebell", "barbell", "plates_only", "set_kit", "other_free_weight"],
+      },
+      {
+        key: "freeWeightPieceBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Free Weights"],
+        options: ["single", "pair", "set_3_to_8", "set_9_plus"],
+      },
+      {
+        key: "rackStandIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Free Weights"],
+        options: ["rack_included", "stand_included", "rack_and_stand", "none_floor_only"],
+      },
+      {
+        key: "weightCoatingType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Free Weights"],
+        options: ["rubber_coated", "urethane", "bare_iron", "hex_dumbbell", "mixed_coating", "unknown_coating"],
+      },
+      {
+        key: "floorProtectionRequired",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Free Weights"],
+        options: ["mat_required", "mat_recommended", "garage_floor_ok", "outdoor_ok_disclosed"],
+      },
+      {
+        key: "dropPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Free Weights"],
+        options: ["no_dropping", "controlled_drop_ok", "bumper_plates_only", "host_rules_in_notes"],
+      },
+      {
+        key: "motorHPBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Treadmills"],
+        options: ["under_2hp", "2_3hp", "3_4hp", "4hp_plus", "unknown_hp"],
+      },
+      {
+        key: "commercialUseClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Treadmills"],
+        options: ["commercial_rated", "light_commercial", "home_use_disclosed", "unknown_class"],
+      },
+      {
+        key: "deckLengthBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Treadmills"],
+        options: ["under_55in", "55_60in", "60in_plus", "unknown_deck"],
+      },
+      {
+        key: "inclineCapable",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Treadmills"],
+        options: ["incline_yes", "incline_no", "incline_unknown"],
+      },
+      {
+        key: "powerVoltage",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Treadmills"],
+        options: ["110v", "220v", "dedicated_circuit_required", "unknown_voltage"],
+      },
+      {
+        key: "plugAmpBand",
+        type: "select",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Commercial Treadmills"],
+        options: ["15a", "20a", "30a_plus", "unknown_amps"],
+      },
+      {
+        key: "deliveryAccessNotes",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Treadmills"],
+      },
+      {
+        key: "hoursBand",
+        type: "select",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Commercial Treadmills"],
+        options: ["under_100h", "100_500h", "500_2000h", "2000h_plus", "unknown_hours"],
+      },
+      {
+        key: "moveInstallResponsibility",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Treadmills"],
+        options: ["host_moves_and_installs", "renter_moves", "third_party_mover", "curbside_pickup_only"],
+      },
+      {
+        key: "machineType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Weight Machines"],
+        options: ["selectorized", "cable_crossover", "smith_machine", "plate_loaded", "functional_trainer", "other_machine"],
+      },
+      {
+        key: "resistanceLoadBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Weight Machines"],
+        options: ["under_100lb_stack", "100_200lb_stack", "200lb_plus_stack", "plate_loaded_user_plates", "bodyweight_assist", "unknown_load"],
+      },
+      {
+        key: "footprintBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Weight Machines"],
+        options: ["compact", "standard_home", "commercial_bay", "unknown_footprint"],
+      },
+      {
+        key: "pinSelectorIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Weight Machines"],
+        options: ["pin_included", "pin_missing_disclosed", "plate_loaded_no_pin", "not_applicable"],
+      },
+      {
+        key: "assemblyInstallStatus",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Weight Machines"],
+        options: ["assembled_ready", "partial_assembly", "renter_assembles", "host_installs"],
+      },
+      {
+        key: "cableWearDisclosure",
+        type: "select",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Weight Machines"],
+        options: ["cables_good", "cables_worn_ok", "cables_replace_soon", "not_cable_machine"],
+      },
+      {
+        key: "boxingGearType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Boxing Equipment"],
+        options: ["bag", "gloves", "pads", "ring_corner", "mix"],
+      },
+      {
+        key: "gloveSizeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Boxing Equipment"],
+        options: ["oz_8_10", "oz_12", "oz_14", "oz_16", "mixed_sizes", "not_gloves"],
+      },
+      {
+        key: "boxingHygienePolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Boxing Equipment"],
+        options: ["wipe_before_return", "liner_or_wraps_required", "host_sanitizes_between", "renter_supplies_own_gloves", "not_skin_contact"],
+      },
+      {
+        key: "boxingHygieneNotes",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Boxing Equipment"],
+      },
+      {
+        key: "standOrMountIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Boxing Equipment"],
+        options: ["stand_included", "ceiling_mount_included", "wall_mount_included", "none_bag_only", "not_applicable"],
+      },
+      {
+        key: "boxingUsePolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Boxing Equipment"],
+        options: ["bag_only", "pads_drill_only", "sparring_allowed_host_rules", "demo_display_only"],
+      },
+      {
+        key: "sportDisciplineBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Competition Gear"],
+        options: ["powerlifting", "olympic_weightlifting", "crossfit_style", "strongman", "other_discipline"],
+      },
+      {
+        key: "federationRuleNotes",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Competition Gear"],
+      },
+      {
+        key: "plateGradeDisclosure",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Competition Gear"],
+        options: ["calibrated", "training_plates", "mixed_plates", "bars_only", "unknown_grade"],
+      },
+      {
+        key: "barCertificationSoft",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Competition Gear"],
+      },
+      {
+        key: "trainingSystemType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Training Systems"],
+        options: ["suspension_trainer", "functional_trainer", "rack_with_attachments", "smart_mirror_style", "mixed_system", "other_system"],
+      },
+      {
+        key: "anchorInstallRequirements",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Training Systems"],
+        options: ["door_anchor", "ceiling_anchor", "wall_mount", "freestanding", "host_installs", "no_anchor_needed"],
+      },
+      {
+        key: "anchorInstallNotes",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Training Systems"],
+      },
+      {
+        key: "maxUsersBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Training Systems"],
+        options: ["solo", "duo", "small_group_3_5", "group_6_plus"],
+      },
+      {
+        key: "ceilingClearanceNotes",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Training Systems"],
+      },
+      {
+        key: "trainingWipeHygienePolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Training Systems"],
+        options: ["wipe_before_and_after", "wipe_after_only", "host_sanitized_at_handoff", "towel_cover_required"],
+      },
+      {
+        key: "gymOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["cardio", "weights", "yoga", "recovery", "boxing", "competition", "training", "mixed"],
+      },
+      {
+        key: "gymPieceBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["single_piece", "multi_piece"],
+      },
+      {
+        key: "photoConditionChecklist",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["overall_photos", "overall_plus_flaws", "all_pieces_and_flaws"],
       },
     ],
   },
@@ -3495,6 +4008,115 @@ export function areCategorySpecsValid(
       if (!reqSelect("indoorOutdoorRating", ["indoor_only","covered_outdoor_ok","outdoor_rated","unknown_rating"])) return false;
       if (!reqSelect("powerCircuitBand", ["standard_120v_15a","120v_20a_dedicated","208_240v","led_multi_circuit","battery_or_inverter","ask_host_or_multi"])) return false;
       if (!reqSelect("transportFragilityBand", ["glass_panel_fragile","led_cabinet_modular","flight_cased_rugged","desktop_monitor_ok","mixed_fragile"])) return false;
+    }
+  }
+
+
+  // Gym & Fitness P0 gates by shelf.
+  if (category.trim() === "Gym & Fitness" && modes?.rent) {
+    const sub = subcategory.trim();
+    const reqSelect = (key: string, allowed: string[]) => allowed.includes((values[key] ?? "").trim());
+    const reqText = (key: string, min = 3) => (values[key] ?? "").trim().length >= min;
+    const waiver = (values.liabilityWaiverRequired ?? "").trim();
+    if (waiver !== "required" && waiver !== "not_required") return false;
+    if (!reqSelect("weightBand", [
+      "under_10lb", "10_25lb", "25_50lb", "50_100lb", "100lb_plus", "bodyweight_only", "adjustable",
+    ])) return false;
+
+    if (sub === "Yoga & Pilates") {
+      if (!reqSelect("yogaMatThicknessBand", ["thin_under_3mm", "standard_3_5mm", "thick_6mm_plus", "travel_foldable", "not_a_mat"])) return false;
+      if (!reqSelect("yogaMatSurfaceType", ["pvc", "tpe", "natural_rubber", "cork", "cotton_jute", "other_surface", "accessories_only"])) return false;
+      if (!reqSelect("yogaKitBand", ["mat_only", "mat_plus_blocks", "mat_blocks_strap", "pilates_ring_kit", "full_yoga_pilates_kit", "accessories_only"])) return false;
+      if (!reqSelect("yogaMatLengthSize", ["short_travel", "standard_68in", "long_72in_plus", "extra_wide", "size_mixed_kit", "not_applicable"])) return false;
+      if (!reqSelect("yogaHygieneWipePolicy", ["wipe_before_and_after", "wipe_after_only", "host_sanitized_at_handoff", "towel_cover_required"])) return false;
+      const kit = (values.yogaKitBand ?? "").trim();
+      if (kit !== "mat_only" && kit !== "accessories_only" && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Resistance Bands") {
+      if (!reqSelect("resistanceLevelBand", ["light", "light_medium", "medium", "heavy", "extra_heavy", "mixed_set", "unknown_level"])) return false;
+      if (!reqSelect("bandKitPieceCountBand", ["single", "pair", "set_3_5", "set_6_plus"])) return false;
+      if (!reqSelect("bandMaterialType", ["latex_loop", "latex_tube", "fabric_loop", "mixed_material", "unknown_material"])) return false;
+      if (!reqSelect("anchorIncluded", ["door_anchor_included", "wall_anchor_included", "no_anchor", "anchor_not_needed"])) return false;
+      if (!reqSelect("bandSnapWearGrade", ["new_unused", "light_wear", "visible_wear_ok", "replace_soon_disclosed"])) return false;
+      const pieces = (values.bandKitPieceCountBand ?? "").trim();
+      if ((pieces === "set_3_5" || pieces === "set_6_plus" || pieces === "pair") && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Recovery Tools") {
+      if (!reqSelect("recoveryToolType", ["foam_roller", "massage_gun", "percussion_other", "ice_heat_pack", "massage_ball_set", "mixed_recovery", "other_recovery"])) return false;
+      if (!reqSelect("recoveryBatteryRuntimeBand", ["under_30m", "30_60m", "60m_plus", "corded_ac", "not_powered", "unknown_runtime"])) return false;
+      if (!reqSelect("recoveryIntensitySpeedBand", ["low", "medium", "high", "multi_speed", "not_a_gun", "unknown_intensity"])) return false;
+      if ((values.sanitizationAttested ?? "").trim() !== "attested") return false;
+    }
+    if (sub === "Cardio Equipment") {
+      if (!reqText("brand") || !reqText("model")) return false;
+      if (!reqSelect("maxUserWeightBand", ["up_to_200lb", "up_to_250lb", "up_to_300lb", "300lb_plus", "not_rated"])) return false;
+      if (!reqSelect("cardioType", ["upright_bike", "spin_bike", "recumbent_bike", "elliptical", "rower", "stair_climber", "other_home_cardio"])) return false;
+      if (!reqSelect("foldableStatus", ["folds", "does_not_fold", "partial_fold", "unknown_fold"])) return false;
+      if (!reqSelect("cardioPowerNeeds", ["wall_outlet_110", "wall_outlet_220", "battery_assisted", "self_powered_no_plug", "unknown_power"])) return false;
+      if (!reqSelect("moveInStairsDisclosure", ["ground_floor_easy", "stairs_two_person", "elevator_ok", "curbside_only", "host_delivers"])) return false;
+      if (!reqSelect("cardioHygieneWipePolicy", ["wipe_before_and_after", "wipe_after_only", "host_sanitized_at_handoff", "towel_cover_required"])) return false;
+      if (!reqSelect("warrantyNotIncludedNote", ["no_mfr_warranty_transfer", "host_covers_mechanical_only", "as_is_no_repair", "unknown_warranty"])) return false;
+    }
+    if (sub === "Free Weights") {
+      if (!reqSelect("freeWeightForm", ["dumbbell_pair", "kettlebell", "barbell", "plates_only", "set_kit", "other_free_weight"])) return false;
+      if (!reqSelect("freeWeightPieceBand", ["single", "pair", "set_3_to_8", "set_9_plus"])) return false;
+      if (!reqSelect("rackStandIncluded", ["rack_included", "stand_included", "rack_and_stand", "none_floor_only"])) return false;
+      if (!reqSelect("weightCoatingType", ["rubber_coated", "urethane", "bare_iron", "hex_dumbbell", "mixed_coating", "unknown_coating"])) return false;
+      if (!reqSelect("floorProtectionRequired", ["mat_required", "mat_recommended", "garage_floor_ok", "outdoor_ok_disclosed"])) return false;
+      if (!reqSelect("dropPolicy", ["no_dropping", "controlled_drop_ok", "bumper_plates_only", "host_rules_in_notes"])) return false;
+      const form = (values.freeWeightForm ?? "").trim();
+      const pieces = (values.freeWeightPieceBand ?? "").trim();
+      if ((form === "set_kit" || pieces === "set_3_to_8" || pieces === "set_9_plus") && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Commercial Treadmills") {
+      if (!reqText("brand") || !reqText("model")) return false;
+      if (!reqSelect("maxUserWeightBand", ["up_to_200lb", "up_to_250lb", "up_to_300lb", "300lb_plus", "not_rated"])) return false;
+      if (!reqSelect("motorHPBand", ["under_2hp", "2_3hp", "3_4hp", "4hp_plus", "unknown_hp"])) return false;
+      if (!reqSelect("commercialUseClass", ["commercial_rated", "light_commercial", "home_use_disclosed", "unknown_class"])) return false;
+      if (!reqSelect("deckLengthBand", ["under_55in", "55_60in", "60in_plus", "unknown_deck"])) return false;
+      if (!reqSelect("inclineCapable", ["incline_yes", "incline_no", "incline_unknown"])) return false;
+      if (!reqSelect("powerVoltage", ["110v", "220v", "dedicated_circuit_required", "unknown_voltage"])) return false;
+      if (!reqText("deliveryAccessNotes", 6)) return false;
+      if ((values.sanitizationAttested ?? "").trim() !== "attested") return false;
+      if (!reqSelect("moveInstallResponsibility", ["host_moves_and_installs", "renter_moves", "third_party_mover", "curbside_pickup_only"])) return false;
+    }
+    if (sub === "Weight Machines") {
+      if (!reqText("brand") || !reqText("model")) return false;
+      if (!reqSelect("maxUserWeightBand", ["up_to_200lb", "up_to_250lb", "up_to_300lb", "300lb_plus", "not_rated"])) return false;
+      if (!reqSelect("machineType", ["selectorized", "cable_crossover", "smith_machine", "plate_loaded", "functional_trainer", "other_machine"])) return false;
+      if (!reqSelect("resistanceLoadBand", ["under_100lb_stack", "100_200lb_stack", "200lb_plus_stack", "plate_loaded_user_plates", "bodyweight_assist", "unknown_load"])) return false;
+      if (!reqSelect("footprintBand", ["compact", "standard_home", "commercial_bay", "unknown_footprint"])) return false;
+      if (!reqSelect("pinSelectorIncluded", ["pin_included", "pin_missing_disclosed", "plate_loaded_no_pin", "not_applicable"])) return false;
+      if (!reqSelect("assemblyInstallStatus", ["assembled_ready", "partial_assembly", "renter_assembles", "host_installs"])) return false;
+      if ((values.sanitizationAttested ?? "").trim() !== "attested") return false;
+    }
+    if (sub === "Boxing Equipment") {
+      if (!reqSelect("boxingGearType", ["bag", "gloves", "pads", "ring_corner", "mix"])) return false;
+      if (!reqSelect("gloveSizeBand", ["oz_8_10", "oz_12", "oz_14", "oz_16", "mixed_sizes", "not_gloves"])) return false;
+      if (!reqSelect("boxingHygienePolicy", ["wipe_before_return", "liner_or_wraps_required", "host_sanitizes_between", "renter_supplies_own_gloves", "not_skin_contact"])) return false;
+      if (!reqSelect("standOrMountIncluded", ["stand_included", "ceiling_mount_included", "wall_mount_included", "none_bag_only", "not_applicable"])) return false;
+      if (!reqSelect("boxingUsePolicy", ["bag_only", "pads_drill_only", "sparring_allowed_host_rules", "demo_display_only"])) return false;
+      const gear = (values.boxingGearType ?? "").trim();
+      if ((gear === "mix" || gear === "gloves" || gear === "pads") && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Competition Gear") {
+      if (!reqSelect("sportDisciplineBand", ["powerlifting", "olympic_weightlifting", "crossfit_style", "strongman", "other_discipline"])) return false;
+      if (!reqSelect("plateGradeDisclosure", ["calibrated", "training_plates", "mixed_plates", "bars_only", "unknown_grade"])) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Training Systems") {
+      if (!reqSelect("trainingSystemType", ["suspension_trainer", "functional_trainer", "rack_with_attachments", "smart_mirror_style", "mixed_system", "other_system"])) return false;
+      if (!reqSelect("anchorInstallRequirements", ["door_anchor", "ceiling_anchor", "wall_mount", "freestanding", "host_installs", "no_anchor_needed"])) return false;
+      if (!reqSelect("maxUsersBand", ["solo", "duo", "small_group_3_5", "group_6_plus"])) return false;
+      if (!reqText("ceilingClearanceNotes", 4)) return false;
+      if (!reqSelect("trainingWipeHygienePolicy", ["wipe_before_and_after", "wipe_after_only", "host_sanitized_at_handoff", "towel_cover_required"])) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Other") {
+      if (!reqSelect("gymOtherKind", ["cardio", "weights", "yoga", "recovery", "boxing", "competition", "training", "mixed"])) return false;
+      if (!reqSelect("gymPieceBand", ["single_piece", "multi_piece"])) return false;
+      if (!reqSelect("photoConditionChecklist", ["overall_photos", "overall_plus_flaws", "all_pieces_and_flaws"])) return false;
+      if ((values.gymPieceBand ?? "").trim() === "multi_piece" && !reqText("kitInventoryChecklist", 6)) return false;
     }
   }
 
