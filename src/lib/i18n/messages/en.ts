@@ -3196,24 +3196,24 @@ export const en: AppMessages = {
           "Renter’s physical damage / equipment coverage is primary. Use uploaded proof with their insurer; the card hold matches your max deductible. No-show frees the calendar; dispute if needed.",
       },
       Construction: {
-        title: "Construction gear rentals",
+        title: "Neighbor job-site construction rentals",
         summary:
-          "Construction shelves default to professionals only and require physical damage insurance on the rent path. Insurance-backed deposit (deductible-sized card hold) applies — not full tool replacement. Crane-class / heavy powered gear also requires an operator credential. Mandatory pre-trip photo inspection applies before start.",
-        hostTipTitle: "For hosts",
+          "Evorios is peer job-site gear — not United Rentals’ national fleet. Pros-only + structured COI + deductible-sized hold are the industry trust floor for powered / crane-class shelves. Soft PPE (hard hats, vests) can stay neighbor-simple. Operator credentials fire where the shelf needs them. Fuel full-to-full when fuel type is set. Monthly rates supported for longer jobs.",
+        hostTipTitle: "For hosts (vs United Rentals / EquipmentShare)",
         hostTip:
-          "Pros-only is on by default. Set max deductible so the hold is insurance-backed. Require operator credentials for crane-class and powered commercial shelves. Capture pre-trip condition photos.",
-        whyGeoTitle: "Why pro + PD + operator cert?",
+          "Beat big-box rental on local pickup speed, QR handoff, and photo-locked claims — not on SKU depth. Set fuel type on mixers, light towers, concrete pumps, cranes, and excavation machines so fuel handoff works. Use monthly pricing for multi-week jobs. Split Safety Equipment into soft PPE vs fall protection. List formwork with a piece inventory. Crane: tonnage + bare vs operated. Prefer Tools & DIY for consumer hand tools — this shelf is job-site grade.",
+        whyGeoTitle: "Why pro + COI + operator cert (when required)?",
         whyGeo:
-          "Job-site tools see hard use. Limiting to professionals, requiring physical damage, operator credentials where needed, and locking handoff on pre-trip photos reduces uninsured loss.",
+          "Job-site gear sees hard use and high loss. Limiting to professionals, requiring structured COI (not photo-only), operator credentials for crane/excavator/heavy shelves, and locking handoff on pre-trip photos reduces uninsured loss — while soft PPE skips that crane-class friction.",
         flowTitle: "End to end",
         flow:
-          "List → pro-only + PD + operator cert when required → renter attests and uploads proof → pre-trip both confirm → handoff → return.",
+          "List (duty/job + powered fuel/hours when relevant + shelf specs) → pro + PD/COI for commercial shelves (soft PPE optional) → renter attests + uploads → host COI confirm when required → pre-trip → handoff (fuel if set) → return / piece-count for formwork.",
         layersTitle: "Safety layers",
         layers:
-          "Operator credential · pro attestation · physical damage insurance · deductible hold · pre-trip inspection · optional no-show · rental terms · QR handoff.",
+          "Pro attestation · structured COI · operator credential (crane/excavator/heavy) · fuel handoff · deductible hold · pre-trip photos · formwork inventory · soft-PPE vs fall-protection tier · QR / PIN.",
         claimsTitle: "If something goes wrong",
         claims:
-          "Insurance first (physical damage), then deductible hold with photos. No-show cancels and frees dates; fee only if you configured one.",
+          "Insurance first on commercial shelves; deductible hold with photos. Formwork incomplete returns use the piece checklist. Soft PPE disputes stay deposit-first. No-show frees dates if configured.",
       },
       "Boats & Water": {
         title: "Boats & watercraft rentals",
