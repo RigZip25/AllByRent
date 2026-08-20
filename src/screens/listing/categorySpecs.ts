@@ -321,7 +321,136 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         requiredIf: "rent",
         subcategories: ["Welding Equipment", "Scaffolding Systems", "Power Saws"],
       },
-    ],
+    
+      {
+        key: "handToolClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Hand Tools"],
+        options: [
+          "tools_hand_socket",
+          "tools_hand_wrench",
+          "tools_hand_hammer",
+          "tools_hand_set",
+          "tools_hand_other",
+        ],
+      },
+      {
+        key: "drillToolClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Power Drills", "Industrial Drills"],
+        options: [
+          "tools_drill_driver",
+          "tools_drill_hammer",
+          "tools_drill_impact",
+          "tools_drill_rotary",
+          "tools_drill_other",
+        ],
+      },
+      {
+        key: "measureToolClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Measuring Tools"],
+        options: [
+          "tools_measure_tape",
+          "tools_measure_level",
+          "tools_measure_square",
+          "tools_measure_mixed",
+          "tools_measure_other",
+        ],
+      },
+      {
+        key: "paintToolClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Painting Tools"],
+        options: [
+          "tools_paint_sprayer",
+          "tools_paint_roller",
+          "tools_paint_brush_set",
+          "tools_paint_other",
+        ],
+      },
+      {
+        key: "laserMeasureClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Laser Measuring"],
+        options: [
+          "tools_laser_distance",
+          "tools_laser_level",
+          "tools_laser_rotary",
+          "tools_laser_other",
+        ],
+      },
+      {
+        key: "powerSawClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Power Saws"],
+        options: [
+          "tools_saw_circular",
+          "tools_saw_miter",
+          "tools_saw_recip",
+          "tools_saw_table",
+          "tools_saw_other",
+        ],
+      },
+      {
+        key: "toolSetBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Hand Tools", "Painting Tools", "Other"],
+        options: ["single_tool", "tool_set"],
+      },
+      {
+        key: "toolsOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: [
+          "tools_kind_hand",
+          "tools_kind_drill",
+          "tools_kind_measure",
+          "tools_kind_ladder",
+          "tools_kind_paint",
+          "tools_kind_weld",
+          "tools_kind_scaffold",
+          "tools_kind_saw",
+          "tools_kind_mixed",
+        ],
+      },
+      {
+        key: "kitInventoryChecklist",
+        type: "text",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Hand Tools",
+          "Power Drills",
+          "Measuring Tools",
+          "Ladders",
+          "Painting Tools",
+          "Industrial Drills",
+          "Welding Equipment",
+          "Scaffolding Systems",
+          "Laser Measuring",
+          "Power Saws",
+          "Other",
+        ],
+      },
+],
   },
   {
     category: "Photo & Video",
@@ -6144,15 +6273,63 @@ export function areCategorySpecsValid(
     }
   }
 
-  // Tools safety briefing: host must mark briefing ready for saws/welders/scaffolding.
+  // Tools & DIY P0 gates by shelf.
   if (category.trim() === "Tools & DIY" && modes?.rent) {
-    const sub = subcategory.trim().toLowerCase();
+    const sub = subcategory.trim();
+    const subLc = sub.toLowerCase();
+    const reqSelect = (key: string, allowed: string[]) => allowed.includes((values[key] ?? "").trim());
+    const reqText = (key: string, min = 3) => (values[key] ?? "").trim().length >= min;
+
+    if (!reqSelect("powerSource", ["cordless", "corded", "gas", "manual", "pneumatic"])) return false;
+
+    if (sub === "Hand Tools") {
+      if (!reqSelect("handToolClass", ["tools_hand_socket", "tools_hand_wrench", "tools_hand_hammer", "tools_hand_set", "tools_hand_other"])) return false;
+      if (!reqSelect("toolSetBand", ["single_tool", "tool_set"])) return false;
+      if ((values.toolSetBand ?? "").trim() === "tool_set" && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Power Drills" || sub === "Industrial Drills") {
+      if (!reqSelect("drillToolClass", ["tools_drill_driver", "tools_drill_hammer", "tools_drill_impact", "tools_drill_rotary", "tools_drill_other"])) return false;
+    }
+    if (sub === "Measuring Tools") {
+      if (!reqSelect("measureToolClass", ["tools_measure_tape", "tools_measure_level", "tools_measure_square", "tools_measure_mixed", "tools_measure_other"])) return false;
+    }
+    if (sub === "Ladders") {
+      if (!reqSelect("ladderHeightBand", ["under_6ft", "6_8ft", "8_12ft", "12_16ft", "16_24ft", "24_40ft", "over_40ft"])) return false;
+      if (!reqSelect("ladderDutyRating", ["type_iaa", "type_ia", "type_i", "type_ii", "type_iii"])) return false;
+    }
+    if (sub === "Painting Tools") {
+      if (!reqSelect("paintToolClass", ["tools_paint_sprayer", "tools_paint_roller", "tools_paint_brush_set", "tools_paint_other"])) return false;
+      if (!reqSelect("toolSetBand", ["single_tool", "tool_set"])) return false;
+      if ((values.toolSetBand ?? "").trim() === "tool_set" && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Welding Equipment") {
+      if (!reqSelect("weldProcess", ["mig", "tig", "stick", "flux_core", "multi_process", "other_weld"])) return false;
+      if (!reqSelect("weldAmpBand", ["under_140a", "140_200a", "200_300a", "300a_plus"])) return false;
+      if (!reqSelect("ppeIncluded", ["helmet_gloves_included", "helmet_only", "renter_provides_ppe", "ppe_not_applicable"])) return false;
+    }
+    if (sub === "Scaffolding Systems") {
+      if (!reqSelect("scaffoldHeightBand", ["under_10ft", "10_20ft", "20_40ft", "40ft_plus"])) return false;
+      if (!reqSelect("scaffoldLoadBand", ["light_duty", "medium_duty", "heavy_duty", "special_duty"])) return false;
+    }
+    if (sub === "Laser Measuring") {
+      if (!reqSelect("laserMeasureClass", ["tools_laser_distance", "tools_laser_level", "tools_laser_rotary", "tools_laser_other"])) return false;
+    }
+    if (sub === "Power Saws") {
+      if (!reqSelect("powerSawClass", ["tools_saw_circular", "tools_saw_miter", "tools_saw_recip", "tools_saw_table", "tools_saw_other"])) return false;
+    }
+    if (sub === "Other") {
+      if (!reqSelect("toolsOtherKind", ["tools_kind_hand", "tools_kind_drill", "tools_kind_measure", "tools_kind_ladder", "tools_kind_paint", "tools_kind_weld", "tools_kind_scaffold", "tools_kind_saw", "tools_kind_mixed"])) return false;
+      if (!reqSelect("toolSetBand", ["single_tool", "tool_set"])) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+
     const needsBrief =
-      sub === "welding equipment" ||
-      sub === "scaffolding systems" ||
-      sub === "power saws" ||
+      subLc === "welding equipment" ||
+      subLc === "scaffolding systems" ||
+      subLc === "power saws" ||
       (values.safetyBriefingRequired ?? "").trim() === "required";
     if (needsBrief && (values.safetyBriefingRequired ?? "").trim() !== "not_required") {
+      if (!reqSelect("safetyBriefingRequired", ["required", "not_required"])) return false;
       if ((values.safetyBriefingConfirmed ?? "").trim() !== "briefing_ready") return false;
     }
   }

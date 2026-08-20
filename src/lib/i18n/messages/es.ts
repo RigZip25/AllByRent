@@ -5885,27 +5885,27 @@ export const es: AppMessages = {
         },
       "Sports & Recreation": {
           title: "FAQ de deportes y recreación",
-          summary: "Respuestas cortas sobre estantes de riesgo, casco, PFD y DIN.",
+          summary: "Respuestas cortas sobre waiver, PFD, DIN/casco, inventario y depósito.",
           qa: [
             {
-              q: "¿Cuándo hay exención?",
-              a: "En estantes de alto riesgo (nieve, agua, escalada) al reservar.",
+              q: "¿Qué se exige en alquileres Sports?",
+              a: "Talla/longitud y skill en cada anuncio. Nieve congela forma, DIN, casco y waiver. Agua/pro agua congela clase, PFD y waiver. Otros estantes tienen un campo de tipo.",
             },
             {
-              q: "¿Nieve?",
-              a: "DIN publicado y política de casco (incluido/requerido).",
+              q: "¿Cuándo hay waiver?",
+              a: "Snow Sports, Water Sports y Pro Water Sports publican el campo de waiver.",
             },
             {
-              q: "¿Agua?",
-              a: "Acuse de PFD cuando aplique.",
-            },
-            {
-              q: "¿Pelotas y blandos?",
-              a: "Sin exención—solo vecino + depósito.",
+              q: "¿El PFD viene incluido?",
+              a: "El anuncio congela incluido / lo aporta el arrendatario / N/A — no asumas chaleco.",
             },
             {
               q: "¿Qué cubre el depósito?",
-              a: "Daños al equipo—no lesiones.",
+              a: "Daños y piezas faltantes según inventario — no seguro de lesiones.",
+            },
+            {
+              q: "¿Qué no incluye?",
+              a: "Sin clases de estación, guía ni cobertura médica de Evorios.",
             },
           ],
         },

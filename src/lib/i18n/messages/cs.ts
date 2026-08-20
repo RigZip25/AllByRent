@@ -5894,27 +5894,27 @@ export const cs: AppMessages = {
         },
       "Sports & Recreation": {
           title: "FAQ sportu a rekreace",
-          summary: "Krátké odpovědi k rizikovým policím, helmě, PFD a DIN.",
+          summary: "Krátké odpovědi k waiveru, PFD, DIN/helmě, inventáři a kauci.",
           qa: [
             {
-              q: "Kdy je vzdání se nároků?",
-              a: "U rizikových polic (sníh, voda, lezení) při rezervaci.",
+              q: "Co je povinné u Sports pronájmů?",
+              a: "Velikost/délka a skill na každém inzerátu. Sníh zmrazí formu, DIN, helmu a waiver. Voda/pro voda zmrazí třídu, PFD a waiver. Ostatní police mají typové pole.",
             },
             {
-              q: "Sníh?",
-              a: "Publikované DIN a politika helmy (včetně/povinná).",
+              q: "Kdy je povinný waiver?",
+              a: "Snow Sports, Water Sports a Pro Water Sports publikují pole liability waiver.",
             },
             {
-              q: "Voda?",
-              a: "Potvrzení PFD, pokud brána platí.",
-            },
-            {
-              q: "Míče a měkké zboží?",
-              a: "Bez vzdání—jen soused + kauce.",
+              q: "Je PFD v ceně u vody?",
+              a: "Inzerát zmrazí v ceně / nájemce / N/A — nepředpokládejte záchrannou vestu.",
             },
             {
               q: "Co kryje kauce?",
-              a: "Poškození vybavení—ne zranění.",
+              a: "Poškození a chybějící kusy podle inventáře — ne úrazové pojištění.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádné lekce, guide ani zdravotní krytí od Evorios.",
             },
           ],
         },
