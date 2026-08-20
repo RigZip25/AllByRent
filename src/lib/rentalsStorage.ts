@@ -255,6 +255,12 @@ export type RentalBooking = {
   helmetLockAck?: boolean;
   helmetPolicySnapshot?: string;
   lockPolicySnapshot?: string;
+  /** Bikes: overnight outdoor storage rule frozen at booking. */
+  overnightStorageRuleSnapshot?: string;
+  /** Kids bike: adult guardian attestation at booking. */
+  kidsGuardianAttested?: boolean;
+  /** Optional e-bike / e-scooter charge band captured at handoff. */
+  batteryChargeBandAtHandoff?: string;
   /** Vehicles / Boats P2: ATV terrain, motorcycle endorsement, captain mode, paddle PFD. */
   ohvTerrainWaiverAttested?: boolean;
   motorcycleEndorsementAttested?: boolean;

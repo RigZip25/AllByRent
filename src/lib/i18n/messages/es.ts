@@ -978,6 +978,10 @@ export const es: AppMessages = {
     safetyBriefingUnlockBlocked:
       "Se requiere el acuse del briefing de seguridad de la reserva antes de la entrega.",
     cribUnlockBlocked: "Completa la seguridad de cuna antes de desbloquear.",
+    carSeatUnlockBlocked: "Completa la seguridad de la silla infantil antes de desbloquear.",
+    babyHygieneUnlockBlocked: "Completa el reconocimiento de higiene del artículo infantil antes de desbloquear.",
+    babyInstallUnlockBlocked: "Completa el reconocimiento de instalación del sistema de seguridad antes de desbloquear.",
+    toyHazardUnlockBlocked: "Reconoce la franja de edad / piezas pequeñas del juguete antes de desbloquear.",
     paCableStandUnlockBlocked: "Se requiere el reconocimiento del inventario de cables / stands de PA antes de la entrega.",
     ppeAckUnlockBlocked: "Se requiere EPP antes de desbloquear.",
     hygieneUnlockBlocked:
@@ -2870,6 +2874,29 @@ export const es: AppMessages = {
     cribDropSideAttest: "Entiendo que las cunas drop-side están prohibidas.",
     cribSanitizationAttest: "Reconozco la higiene de la superficie de sueño.",
     cribSafetyBadge: "Puerta de seguridad de cuna",
+    babyHygieneBlockedTitle: "Higiene incompleta en este anuncio",
+    babyHygieneBlockedBody:
+      "El anfitrión aún debe atestar sanitización y revisión de recall de este artículo infantil antes de reservar.",
+    babyHygieneTitle: "Higiene Baby & Kids",
+    babyHygieneBody:
+      "Cochecitos, portabebés, juguetes y equipo compartido necesitan superficies limpias entre inquilinos. Confirma higiene responsable.",
+    babyHygieneAttest:
+      "Reconozco las expectativas de higiene / sanitización y devolveré el artículo razonablemente limpio.",
+    babyHygieneBadge: "Puerta de higiene",
+    babyInstallBlockedTitle: "Instalación de seguridad no documentada",
+    babyInstallBlockedBody:
+      "El anfitrión debe declarar cómo se instala este sistema (documentado, inquilino con guía, o profesional) antes de reservar.",
+    babyInstallTitle: "Instalación del sistema de seguridad",
+    babyInstallBody: (status) => `Ruta de instalación del anfitrión: ${status}.`,
+    babyInstallAttest:
+      "Entiendo la ruta de instalación y seguiré la guía del anfitrión / fabricante.",
+    toyHazardBlockedTitle: "Falta la franja de edad / peligro del juguete",
+    toyHazardBlockedBody:
+      "El anfitrión debe declarar la franja de edad / piezas pequeñas (0+/3+/8+ o no es un juguete) antes de reservar.",
+    toyHazardTitle: "Edad del juguete y piezas pequeñas",
+    toyHazardBody: (band) => `Franja de peligro en este anuncio: ${band}.`,
+    toyHazardAttest:
+      "Revisé la franja de edad / piezas pequeñas y usaré el juguete solo según la etiqueta.",
     ppeAckTitle: "Reconocimiento de EPP",
     ppeAckBody: "Se requiere protección ocular, auditiva y de manos.",
     ppeAckAttest: "Usaré el EPP adecuado.",

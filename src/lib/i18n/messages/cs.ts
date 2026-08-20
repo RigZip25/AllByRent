@@ -992,6 +992,10 @@ export const cs: AppMessages = {
     safetyBriefingUnlockBlocked:
       "Před předáním je potřeba potvrzení bezpečnostní instruktáže z rezervace.",
     cribUnlockBlocked: "Před odemčením dokončete potvrzení postýlky.",
+    carSeatUnlockBlocked: "Před odemčením dokončete potvrzení bezpečnosti autosedačky.",
+    babyHygieneUnlockBlocked: "Před odemčením dokončete potvrzení hygieny dětského vybavení.",
+    babyInstallUnlockBlocked: "Před odemčením dokončete potvrzení instalace bezpečnostního systému.",
+    toyHazardUnlockBlocked: "Před odemčením potvrďte věkové / hazard pásmo hračky.",
     paCableStandUnlockBlocked: "Před předáním je nutné potvrzení inventáře kabelů / stojanů PA.",
     ppeAckUnlockBlocked: "Před odemčením je nutné potvrzení OOP.",
     hygieneUnlockBlocked:
@@ -2883,6 +2887,29 @@ export const cs: AppMessages = {
     cribDropSideAttest: "Rozumím zákazu drop-side postýlek.",
     cribSanitizationAttest: "Beru na vědomí hygienu spací plochy.",
     cribSafetyBadge: "Bezpečnostní brána postýlky",
+    babyHygieneBlockedTitle: "Hygiena na inzerátu není hotová",
+    babyHygieneBlockedBody:
+      "Hostitel ještě musí potvrdit sanitizaci a kontrolu stažení pro tuto dětskou položku.",
+    babyHygieneTitle: "Hygiena Baby & Kids",
+    babyHygieneBody:
+      "Sdílené kočárky, nosítka, hračky a vybavení potřebují čisté povrchy mezi nájemci. Potvrď odpovědnou hygienu.",
+    babyHygieneAttest:
+      "Beru na vědomí hygienu / sanitizaci a vrátím položku přiměřeně čistou.",
+    babyHygieneBadge: "Hygienická brána",
+    babyInstallBlockedTitle: "Instalace bezpečnostního systému chybí",
+    babyInstallBlockedBody:
+      "Hostitel musí uvést způsob instalace (zdokumentováno, nájemce s návodem, nebo profesionálně) před rezervací.",
+    babyInstallTitle: "Instalace bezpečnostního systému",
+    babyInstallBody: (status) => `Cesta instalace u hostitele: ${status}.`,
+    babyInstallAttest:
+      "Rozumím cestě instalace a budu se řídit pokyny hostitele / výrobce.",
+    toyHazardBlockedTitle: "Chybí věkové / hazard pásmo hračky",
+    toyHazardBlockedBody:
+      "Hostitel musí uvést pásmo věku / malých dílů (0+/3+/8+ nebo není hračka) před rezervací.",
+    toyHazardTitle: "Věk hračky a malé díly",
+    toyHazardBody: (band) => `Hazard pásmo na inzerátu: ${band}.`,
+    toyHazardAttest:
+      "Prohlédl(a) jsem věkové / hazard pásmo a použiji hračku jen dle štítku.",
     ppeAckTitle: "Potvrzení OOP",
     ppeAckBody: "Ochrana očí, sluchu a rukou je nutná.",
     ppeAckAttest: "Použiji vhodné OOP.",

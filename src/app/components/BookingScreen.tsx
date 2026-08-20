@@ -1962,6 +1962,22 @@ function BookingScreenLoaded({
           </div>
         ) : null}
 
+        {needsKidsGuardian ? (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-emerald-950">{t.booking.kidsGuardianTitle}</p>
+            <p className="text-[12px] text-emerald-900/90">{t.booking.kidsGuardianBody}</p>
+            <label className="flex items-start gap-2 text-xs text-emerald-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={kidsGuardianAttested}
+                onChange={(e) => setKidsGuardianAttested(e.target.checked)}
+              />
+              <span>{t.booking.kidsGuardianAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
         {needsOhvTerrainWaiver ? (
           <div className="rounded-xl border border-lime-200 bg-lime-50/70 p-4 space-y-3">
             <p className="text-sm font-semibold text-lime-950">{t.booking.ohvTerrainTitle}</p>

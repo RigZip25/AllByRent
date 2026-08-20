@@ -578,6 +578,7 @@ export function HostListingDetailScreen({
         {listing.category.trim() === "Baby & Kids" ? (
           <CategoryFactCard
             category="Baby & Kids"
+            subcategory={listing.subcategory}
             className="mb-4"
           />
         ) : null}
