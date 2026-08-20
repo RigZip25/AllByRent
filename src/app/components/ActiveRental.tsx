@@ -100,6 +100,8 @@ import {
   listingRequiresPfdPolicy,
   listingRequiresCateringSanitize,
   listingRequiresHelmetLockPolicy,
+  listingRequiresKidsGuardianAttest,
+  listingIsElectricMicromobility,
   listingRequiresOhvTerrainWaiver,
   listingRequiresMotorcycleEndorsement,
   listingRequiresPfdAttestation,
@@ -198,6 +200,7 @@ export function ActiveRental({
   const [pendingOdometerMiles, setPendingOdometerMiles] = useState<number | null>(null);
   const [pendingConfirmPin, setPendingConfirmPin] = useState<string | null>(null);
   const [pendingConditionPhoto, setPendingConditionPhoto] = useState<MediaRef | null>(null);
+  const [batteryChargeBand, setBatteryChargeBand] = useState("");
   const [startIdOpen, setStartIdOpen] = useState(false);
 
   const booking = useMemo<RentalBooking | null>(() => {
@@ -274,6 +277,10 @@ export function ActiveRental({
     publishedListing != null && listingRequiresLiabilityWaiver(publishedListing);
   const needsHelmetLock =
     publishedListing != null && listingRequiresHelmetLockPolicy(publishedListing);
+  const needsKidsGuardian =
+    publishedListing != null && listingRequiresKidsGuardianAttest(publishedListing);
+  const needsMicromobilityCharge =
+    publishedListing != null && listingIsElectricMicromobility(publishedListing);
   const needsOhvTerrainWaiver =
     publishedListing != null && listingRequiresOhvTerrainWaiver(publishedListing);
   const needsMotorcycleEndorsement =
@@ -685,6 +692,15 @@ export function ActiveRental({
       booking?.role === "renter"
     ) {
       setNotice(t.rentalDetail.helmetLockUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsKidsGuardian &&
+      !booking?.kidsGuardianAttested &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.kidsGuardianUnlockBlocked);
       return;
     }
     if (
@@ -2226,7 +2242,31 @@ export function ActiveRental({
           />
         ) : null}
 
-        {booking &&
+                {needsMicromobilityCharge && booking ? (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 space-y-2">
+            <p className="text-sm font-semibold text-emerald-950">{t.rentalDetail.batteryChargeTitle}</p>
+            <p className="text-[12px] text-emerald-900/90">{t.rentalDetail.batteryChargeHint}</p>
+            <select
+              className="w-full rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm"
+              value={batteryChargeBand || booking.batteryChargeBandAtHandoff || ""}
+              onChange={(e) => {
+                const next = e.target.value;
+                setBatteryChargeBand(next);
+                if (next) {
+                  updateBooking(booking.id, { batteryChargeBandAtHandoff: next });
+                  setBookings(loadRentalBookings());
+                }
+              }}
+            >
+              <option value="">{t.rentalDetail.batteryChargeOptional}</option>
+              {(["full_90_100","high_70_89","mid_40_69","low_under_40","unknown_charge"] as const).map((band) => (
+                <option key={band} value={band}>{t.listing.specs.options[band] ?? band}</option>
+              ))}
+            </select>
+          </div>
+        ) : null}
+
+{booking &&
         (booking.pickupConditionPhoto ||
           booking.returnConditionPhoto ||
           booking.status === "active" ||

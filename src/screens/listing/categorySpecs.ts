@@ -1813,7 +1813,6 @@ export function areCategorySpecsValid(
   }
 
 
-<<<<<<< HEAD
   // Bikes & Scooters P0/P1 gates
   if (category.trim() === "Bikes & Scooters" && modes?.rent) {
     const overnight = (values.overnightStorageRule ?? "").trim();
@@ -1858,10 +1857,7 @@ export function areCategorySpecsValid(
     }
   }
 
-
-=======
-
-  // Boats: hull ID required for powered craft only (kayak/SUP/non-motor inflatable optional).
+// Boats: hull ID required for powered craft only (kayak/SUP/non-motor inflatable optional).
   if (category.trim() === "Boats & Water" && modes?.rent) {
     const motor = (values.motorIncluded ?? "").trim().toLowerCase();
     const sub = subcategory.trim().toLowerCase();
@@ -1873,7 +1869,6 @@ export function areCategorySpecsValid(
     if (powered && !(values.hinNumber ?? "").trim()) return false;
   }
 
->>>>>>> 3012fb2 (Complete Boats & Water P0 gates: age 18 captained, soft HIN, inflatable PFD, hull UI i18n.)
 
   // Construction Safety Equipment soft vs fall-protection publish rules.
   if (

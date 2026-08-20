@@ -965,6 +965,12 @@ export const en: AppMessages = {
       "Liability waiver acknowledgment from booking is required before handoff can start.",
     helmetLockUnlockBlocked:
       "Helmet and lock policy acknowledgment from booking is required before handoff can start.",
+    kidsGuardianUnlockBlocked:
+      "Kids bike guardian attestation from booking is required before handoff can start.",
+    batteryChargeTitle: "Battery charge at handoff",
+    batteryChargeHint:
+      "Optional — note the charge band for e-bike / e-scooter handoff disputes.",
+    batteryChargeOptional: "Optional — skip if unknown",
     safetyBriefingUnlockBlocked:
       "Safety briefing acknowledgment from booking is required before handoff can start.",
     cribUnlockBlocked:
@@ -1828,13 +1834,25 @@ export const en: AppMessages = {
         },
         helmetPolicy: { label: "Helmet policy" },
         lockPolicy: { label: "Lock / theft policy" },
+        overnightStorageRule: {
+          label: "Overnight / outdoor storage",
+          hint: "Where the bike may stay overnight — outdoor overnight locks are a common claim void.",
+        },
         minRiderAge: {
           label: "Minimum rider age",
           placeholder: "16",
-          hint: "E-scooters often require 16+ — set your local rule.",
+          hint: "E-scooters and e-bikes often require 16+ — also when Electric = yes.",
         },
-        eBikeClass: { label: "E-bike class" },
+        eBikeClass: {
+          label: "E-bike class",
+          hint: "US Class 1–3. Required for E-Bikes shelves and Electric = yes bikes.",
+        },
         batteryRangeBand: { label: "Battery range" },
+        chargerIncluded: { label: "Charger included?" },
+        batteryChargeBand: { label: "Expected charge at handoff" },
+        cargoPayloadBand: { label: "Cargo payload" },
+        childPassengerPolicy: { label: "Child passenger policy" },
+        adaptiveBikeType: { label: "Adaptive bike type" },
         setupTeardownFeeUsd: {
           label: "Setup / teardown fee (USD)",
           placeholder: "50",
@@ -2881,9 +2899,17 @@ export const en: AppMessages = {
     liabilityWaiverAttest:
       "I understand the risks, will use the gear as intended, and waive ordinary-use injury claims against the host and Evorios to the extent allowed by law.",
     helmetLockTitle: "Helmet & lock policy",
-    helmetLockBody: (helmet, lock) => `Helmet: ${helmet}. Lock: ${lock}.`,
+    helmetLockBody: (helmet, lock, overnight) =>
+      overnight
+        ? `Helmet: ${helmet}. Lock: ${lock}. Overnight storage: ${overnight}.`
+        : `Helmet: ${helmet}. Lock: ${lock}.`,
     helmetLockAttest:
-      "I agree to follow the helmet and lock policy for this bike or scooter rental.",
+      "I agree to follow the helmet, lock, and overnight storage policy for this bike or scooter rental.",
+    kidsGuardianTitle: "Kids bike — guardian required",
+    kidsGuardianBody:
+      "An adult guardian must supervise the rider. Helmets are required for kids rentals (not_required is not allowed).",
+    kidsGuardianAttest:
+      "I am the adult guardian (or will ensure one is present) and will supervise safe use of this kids bike.",
     helmetPolicyFallback: "follow local law / host note",
     lockPolicyFallback: "secure when unattended",
     ohvTerrainTitle: "ATV / OHV terrain waiver",
@@ -3325,19 +3351,22 @@ export const en: AppMessages = {
       "Bikes & Scooters": {
         title: "Bikes & scooter rentals",
         summary:
-          "Helmet and lock policies are required on rent. E-scooters and E-Bikes Pro require a minimum rider age (default 16); E-Bikes Pro also capture class and optional battery range.",
+          "Helmet, lock, and overnight storage are required on rent. Personal E-Bikes (or Electric = yes on any bike shelf) and e-scooters require min age + e-bike class. Mountain and Racing default to a liability waiver. Kids need a guardian attest (helmet not_required blocked). Cargo and Adaptive add payload / passenger / subtype.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Say whether a helmet and lock are included. For e-scooters and E-Bikes Pro, set min age; for E-Bikes Pro also set class (and range when known).",
-        whyGeoTitle: "Why helmet, lock, and age?",
+          "Set helmet, lock, and overnight storage. For e-power (E-Bikes shelf or Electric = yes), set min age and class; add range / charger when known. MTB / Racing: keep the waiver on unless you intentionally turn it off. Kids: require a helmet. Cargo: payload + child policy. Adaptive: pick the subtype.",
+        whyGeoTitle: "Why helmet, lock, overnight, age, and class?",
         whyGeo:
-          "Head injury, theft, and underage riders are the biggest micromobility loss modes. Clear policy + age (+ class) cut disputes.",
+          "Head injury, overnight outdoor theft, and underage / misclassified e-power are the biggest micromobility loss modes. Clear policy + age + class cut disputes before PIN unlock.",
         flowTitle: "End to end",
-        flow: "List with helmet/lock (+ age for e-scooter / E-Bike Pro, class for E-Bike Pro) → renter acknowledges → handoff → return.",
+        flow:
+          "List helmet/lock/overnight (+ age/class when electric, waiver on MTB/racing, guardian on kids) → renter acknowledges → optional charge band at handoff → return.",
         layersTitle: "Safety layers",
-        layers: "Helmet policy · lock policy · e-scooter / E-Bike Pro age · e-bike class · deposit · rental terms.",
+        layers:
+          "Helmet · lock · overnight storage · e-age/class · kids guardian · MTB/racing waiver · cargo/adaptive specs · deposit · rental terms.",
         claimsTitle: "If something goes wrong",
-        claims: "Lock policy and handoff photos support theft claims; deposit covers damage.",
+        claims:
+          "Overnight + lock policy and handoff photos (plus optional charge band) support theft / power disputes; deposit covers damage; waivers cover ordinary-use injury on high-risk shelves.",
       },
       "Party & Events": {
         title: "Party & event rentals",

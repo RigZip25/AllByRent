@@ -971,6 +971,10 @@ export const es: AppMessages = {
       "Se requiere la renuncia de responsabilidad de la reserva antes de la entrega.",
     helmetLockUnlockBlocked:
       "Se requiere el reconocimiento de casco y candado de la reserva antes de la entrega.",
+    kidsGuardianUnlockBlocked: "Se requiere la declaración de tutor de bici infantil antes de la entrega.",
+    batteryChargeTitle: "Carga de batería en la entrega",
+    batteryChargeHint: "Opcional — anota la banda de carga.",
+    batteryChargeOptional: "Opcional — omitir si no se sabe",
     safetyBriefingUnlockBlocked:
       "Se requiere el acuse del briefing de seguridad de la reserva antes de la entrega.",
     cribUnlockBlocked: "Completa la seguridad de cuna antes de desbloquear.",
@@ -1843,6 +1847,12 @@ export const es: AppMessages = {
         },
         helmetPolicy: { label: "Política de casco" },
         lockPolicy: { label: "Política de candado / robo" },
+        overnightStorageRule: { label: "Almacenamiento nocturno / exterior" },
+        chargerIncluded: { label: "¿Cargador incluido?" },
+        batteryChargeBand: { label: "Carga esperada en la entrega" },
+        cargoPayloadBand: { label: "Carga útil" },
+        childPassengerPolicy: { label: "Política de pasajeros infantiles" },
+        adaptiveBikeType: { label: "Tipo de bici adaptativa" },
         minRiderAge: {
           label: "Edad mínima del rider",
           placeholder: "16",
@@ -2890,9 +2900,13 @@ export const es: AppMessages = {
     liabilityWaiverAttest:
       "Entiendo los riesgos, usaré el equipo según su propósito y renuncio a reclamaciones por lesiones de uso ordinario contra el anfitrión y Evorios en la medida que permita la ley.",
     helmetLockTitle: "Política de casco y candado",
-    helmetLockBody: (helmet, lock) => `Casco: ${helmet}. Candado: ${lock}.`,
+    helmetLockBody: (helmet, lock, overnight) =>
+      overnight ? `Casco: ${helmet}. Candado: ${lock}. Overnight: ${overnight}.` : `Casco: ${helmet}. Candado: ${lock}.`,
     helmetLockAttest:
-      "Acepto la política de casco y candado para este alquiler de bici o patinete.",
+      "Acepto la política de casco, candado y overnight para este alquiler de bici o patinete.",
+    kidsGuardianTitle: "Bici infantil — tutor obligatorio",
+    kidsGuardianBody: "Un adulto tutor debe supervisar. Casco obligatorio (not_required no permitido).",
+    kidsGuardianAttest: "Soy el tutor adulto (o garantizaré uno) y supervisaré el uso seguro.",
     helmetPolicyFallback: "seguir ley local / nota del anfitrión",
     lockPolicyFallback: "asegurar sin vigilancia",
     ohvTerrainTitle: "Exención de terreno ATV / OHV",
@@ -3323,19 +3337,17 @@ export const es: AppMessages = {
       "Bikes & Scooters": {
         title: "Alquiler de bicis y patinetes",
         summary:
-          "Políticas de casco y candado son obligatorias. E-patinetes y E-Bikes Pro requieren edad mínima (16 por defecto); E-Bikes Pro también capturan clase y autonomía opcional.",
+          "Casco, candado y overnight son obligatorios. E-Bikes personales (o Eléctrico = sí) y e-patinetes requieren edad + clase. Mountain/Racing: renuncia. Niños: tutor. Cargo/Adaptive: payload / pasajeros / subtipo.",
         hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Di si casco y candado van incluidos. En e-patinetes y E-Bikes Pro, pon edad mínima; en E-Bikes Pro también la clase (y autonomía si la conoces).",
-        whyGeoTitle: "¿Por qué casco, candado y edad?",
-        whyGeo:
-          "Lesión de cabeza, robo y conductores menores son los mayores riesgos. Política clara + edad (+ clase) reducen disputas.",
+        hostTip: "Define casco, candado y overnight; e-power edad+clase; kids casco; cargo payload; adaptive subtipo.",
+        whyGeoTitle: "¿Por qué casco, candado, overnight, edad y clase?",
+        whyGeo: "Lesión de cabeza, robo overnight y e-power mal clasificado son los mayores riesgos.",
         flowTitle: "De punta a punta",
-        flow: "Anuncio con casco/candado (+ edad e-patinete / E-Bike Pro, clase E-Bike Pro) → acuse → entrega → devolución.",
+        flow: "Anuncio → acuse → carga opcional → devolución.",
         layersTitle: "Capas de seguridad",
-        layers: "Casco · candado · edad e-patinete · fianza · términos.",
+        layers: "Casco · candado · overnight · edad/clase · tutor · renuncia · cargo/adaptive · fianza.",
         claimsTitle: "Si algo sale mal",
-        claims: "Política de candado y fotos apoyan robos; fianza el daño.",
+        claims: "Overnight + candado y fotos; fianza el daño.",
       },
       "Party & Events": {
         title: "Alquiler para fiestas y eventos",

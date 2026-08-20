@@ -44,6 +44,8 @@ import {
   listingRequiresDriverRecordAttestation,
   listingRequiresEScooterAgeGate,
   listingRequiresHelmetLockPolicy,
+  listingOvernightStorageRule,
+  listingRequiresKidsGuardianAttest,
   listingDroneRemoteIdBlocksBooking,
   listingDroneWeightClass,
   listingRemoteIdStatus,
@@ -380,6 +382,7 @@ function BookingScreenLoaded({
   const [kitInventoryAck, setKitInventoryAck] = useState(false);
   const [liabilityWaiverAttested, setLiabilityWaiverAttested] = useState(false);
   const [helmetLockAck, setHelmetLockAck] = useState(false);
+  const [kidsGuardianAttested, setKidsGuardianAttested] = useState(false);
   const [dataWipeAttested, setDataWipeAttested] = useState(false);
   const [paCableStandAck, setPaCableStandAck] = useState(false);
   const [weatherCancelAck, setWeatherCancelAck] = useState(false);
@@ -448,6 +451,8 @@ function BookingScreenLoaded({
   const needsHelmetLock = listingRequiresHelmetLockPolicy(listing);
   const helmetPolicy = listingHelmetPolicy(listing);
   const lockPolicy = listingLockPolicy(listing);
+  const overnightStorageRule = listingOvernightStorageRule(listing);
+  const needsKidsGuardian = listingRequiresKidsGuardianAttest(listing);
   const needsEScooterAge = listingRequiresEScooterAgeGate(listing);
   const eScooterMinAge = listingEScooterMinAge(listing);
   const isPartyListing = listingIsPartyCategory(listing) && listing.modes.rent;
@@ -676,6 +681,7 @@ function BookingScreenLoaded({
   const kitInventoryOk = !needsKitInventory || kitInventoryAck;
   const liabilityWaiverOk = !needsLiabilityWaiver || liabilityWaiverAttested;
   const helmetLockOk = !needsHelmetLock || helmetLockAck;
+  const kidsGuardianOk = !needsKidsGuardian || kidsGuardianAttested;
   const dataWipeOk =
     !needsDataWipe || (!dataWipeListingBlocked && dataWipeAttested);
   const paCableStandOk = !needsPaCableStand || paCableStandAck;
@@ -754,6 +760,7 @@ function BookingScreenLoaded({
     kitInventoryOk &&
     liabilityWaiverOk &&
     helmetLockOk &&
+    kidsGuardianOk &&
     dataWipeOk &&
     paCableStandOk &&
     weatherCancelOk &&
@@ -851,6 +858,9 @@ function BookingScreenLoaded({
         liabilityWaiverRequired: needsLiabilityWaiver,
         helmetPolicy: helmetPolicy || undefined,
         lockPolicy: lockPolicy || undefined,
+        overnightStorageRule: overnightStorageRule || undefined,
+        kidsGuardianRequired: needsKidsGuardian,
+        eBikeClass: listing.categorySpecs?.eBikeClass || undefined,
         ohvTerrainWaiverRequired: needsOhvTerrainWaiver,
         motorcycleEndorsementRequired: needsMotorcycleEndorsement,
         captainMode: showCaptainModeCopy ? captainMode || "unset" : undefined,
@@ -1066,6 +1076,9 @@ function BookingScreenLoaded({
           liabilityWaiverRequired: needsLiabilityWaiver,
           helmetPolicy: helmetPolicy || undefined,
           lockPolicy: lockPolicy || undefined,
+          overnightStorageRule: overnightStorageRule || undefined,
+          kidsGuardianRequired: needsKidsGuardian,
+          eBikeClass: listing.categorySpecs?.eBikeClass || undefined,
           ohvTerrainWaiverRequired: needsOhvTerrainWaiver,
           motorcycleEndorsementRequired: needsMotorcycleEndorsement,
           captainMode: showCaptainModeCopy ? captainMode || "unset" : undefined,
@@ -1253,6 +1266,8 @@ function BookingScreenLoaded({
       helmetLockAck: needsHelmetLock ? helmetLockAck : undefined,
       helmetPolicySnapshot: helmetPolicy || undefined,
       lockPolicySnapshot: lockPolicy || undefined,
+      overnightStorageRuleSnapshot: overnightStorageRule || undefined,
+      kidsGuardianAttested: needsKidsGuardian ? kidsGuardianAttested : undefined,
       ohvTerrainWaiverAttested: needsOhvTerrainWaiver
         ? ohvTerrainWaiverAttested
         : undefined,
@@ -1930,6 +1945,9 @@ function BookingScreenLoaded({
                 lockPolicy
                   ? t.listing.specs.options[lockPolicy] ?? lockPolicy
                   : t.booking.lockPolicyFallback,
+                overnightStorageRule
+                  ? t.listing.specs.options[overnightStorageRule] ?? overnightStorageRule
+                  : undefined,
               )}
             </p>
             <label className="flex items-start gap-2 text-xs text-emerald-950">

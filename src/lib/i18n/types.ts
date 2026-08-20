@@ -1405,10 +1405,13 @@ export type AppMessages = {
     liabilityWaiverBody: string;
     liabilityWaiverAttest: string;
     helmetLockTitle: string;
-    helmetLockBody: (helmet: string, lock: string) => string;
+    helmetLockBody: (helmet: string, lock: string, overnight?: string) => string;
     helmetLockAttest: string;
     helmetPolicyFallback: string;
     lockPolicyFallback: string;
+    kidsGuardianTitle: string;
+    kidsGuardianBody: string;
+    kidsGuardianAttest: string;
     ohvTerrainTitle: string;
     ohvTerrainBody: string;
     ohvTerrainAttest: string;
@@ -1845,6 +1848,10 @@ export type AppMessages = {
     kitInventoryUnlockBlocked: string;
     liabilityWaiverUnlockBlocked: string;
     helmetLockUnlockBlocked: string;
+    kidsGuardianUnlockBlocked: string;
+    batteryChargeTitle: string;
+    batteryChargeHint: string;
+    batteryChargeOptional: string;
     safetyBriefingUnlockBlocked: string;
     cribUnlockBlocked: string;
     carSeatUnlockBlocked: string;

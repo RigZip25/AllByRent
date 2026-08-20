@@ -985,6 +985,10 @@ export const cs: AppMessages = {
       "Před předáním je povinné potvrzení vzdání se nároků z rezervace.",
     helmetLockUnlockBlocked:
       "Před předáním je povinné potvrzení politiky helmy a zámku z rezervace.",
+    kidsGuardianUnlockBlocked: "Před předáním je povinné potvrzení opatrovníka dětského kola.",
+    batteryChargeTitle: "Nabití baterie při předání",
+    batteryChargeHint: "Volitelné — zaznamenej pásmo nabití.",
+    batteryChargeOptional: "Volitelné — přeskočit pokud neznámé",
     safetyBriefingUnlockBlocked:
       "Před předáním je potřeba potvrzení bezpečnostní instruktáže z rezervace.",
     cribUnlockBlocked: "Před odemčením dokončete potvrzení postýlky.",
@@ -1855,6 +1859,12 @@ export const cs: AppMessages = {
         },
         helmetPolicy: { label: "Politika helmy" },
         lockPolicy: { label: "Politika zámku / krádeže" },
+        overnightStorageRule: { label: "Noční / venkovní uskladnění" },
+        chargerIncluded: { label: "Nabíječka v ceně?" },
+        batteryChargeBand: { label: "Očekávané nabití při předání" },
+        cargoPayloadBand: { label: "Nosnost cargo" },
+        childPassengerPolicy: { label: "Politika dětských pasažérů" },
+        adaptiveBikeType: { label: "Typ adaptivního kola" },
         minRiderAge: {
           label: "Minimální věk jezdce",
           placeholder: "16",
@@ -2903,9 +2913,13 @@ export const cs: AppMessages = {
     liabilityWaiverAttest:
       "Rozumím rizikům, budu vybavení používat podle účelu a vzdávám se nároků za běžná zranění vůči hostiteli a Evorios v rozsahu dovoleném právem.",
     helmetLockTitle: "Politika helmy a zámku",
-    helmetLockBody: (helmet, lock) => `Helma: ${helmet}. Zámek: ${lock}.`,
+    helmetLockBody: (helmet, lock, overnight) =>
+      overnight ? `Helma: ${helmet}. Zámek: ${lock}. Overnight: ${overnight}.` : `Helma: ${helmet}. Zámek: ${lock}.`,
     helmetLockAttest:
-      "Souhlasím s politikou helmy a zámku pro tento pronájem kola nebo koloběžky.",
+      "Souhlasím s politikou helmy, zámku a overnight pro tento pronájem kola nebo koloběžky.",
+    kidsGuardianTitle: "Dětské kolo — nutný opatrovník",
+    kidsGuardianBody: "Dospělý opatrovník musí dozorovat. Helma je povinná.",
+    kidsGuardianAttest: "Jsem dospělý opatrovník (nebo zajistím jednoho) a dozoruji bezpečné použití.",
     helmetPolicyFallback: "podle místních pravidel / poznámky hostitele",
     lockPolicyFallback: "zabezpečit bez dozoru",
     ohvTerrainTitle: "ATV / OHV terénní vzdání",
@@ -3332,19 +3346,17 @@ export const cs: AppMessages = {
       "Bikes & Scooters": {
         title: "Pronájem kol a koloběžek",
         summary:
-          "Politika helmy a zámku je povinná. E-koloběžky a E-Bikes Pro vyžadují min. věk (výchozí 16); u E-Bikes Pro i třídu a volitelný dojezd baterie.",
+          "Helma, zámek a overnight jsou povinné. Osobní E-Bikes (nebo Elektrické = ano) a e-koloběžky vyžadují věk + třídu. Mountain/Racing: vzdání. Děti: opatrovník. Cargo/Adaptive: nosnost / pasažéři / subtyp.",
         hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Uveď, zda je helma a zámek v ceně. U e-koloběžek a E-Bikes Pro nastav min. věk; u E-Bikes Pro i třídu (a dojezd, pokud znáš).",
-        whyGeoTitle: "Proč helma, zámek a věk?",
-        whyGeo:
-          "Zranění hlavy, krádež a příliš mladí jezdci jsou hlavní rizika. Jasná politika + věk (+ třída) snižují spory.",
+        hostTip: "Nastav helmu, zámek a overnight; e-power věk+třídu; kids helmu; cargo nosnost; adaptive subtyp.",
+        whyGeoTitle: "Proč helma, zámek, overnight, věk a třída?",
+        whyGeo: "Zranění hlavy, overnight krádež a špatně klasifikovaný e-power jsou hlavní rizika.",
         flowTitle: "Od začátku do konce",
-        flow: "Inzerát s helmou/zámkem (+ věk u e-koloběžky / E-Bike Pro, třída u E-Bike Pro) → potvrzení → předání → návrat.",
+        flow: "Inzerát → potvrzení → volitelné nabití → návrat.",
         layersTitle: "Bezpečnostní vrstvy",
-        layers: "Helma · zámek · věk e-koloběžky · kauce · podmínky.",
+        layers: "Helma · zámek · overnight · věk/třída · opatrovník · vzdání · cargo/adaptive · kauce.",
         claimsTitle: "Když se něco pokazí",
-        claims: "Politika zámku a fotky podporují krádežní spory; kauce poškození.",
+        claims: "Overnight + zámek a fotky; kauce poškození.",
       },
       "Party & Events": {
         title: "Pronájem na párty a eventy",
