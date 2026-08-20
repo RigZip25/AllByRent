@@ -2154,6 +2154,15 @@ export const en: AppMessages = {
         survivalKitClass: { label: "Survival kit class" },
         baseCampKitBand: { label: "Base-camp kit band" },
         outdoorOtherKind: { label: "What kind of item", hint: "Re-shelf to a named Outdoor shelf when one fits." },
+        cameraSensorOrMount: { label: "Sensor / mount class" },
+        tripodPayloadBand: { label: "Payload capacity" },
+        tripodHeadType: { label: "Head type" },
+        lightingKitClass: { label: "Lighting kit class" },
+        lightingPowerSource: { label: "Lighting power source" },
+        lensMountType: { label: "Lens mount" },
+        lensFocalBand: { label: "Focal class" },
+        stabilizerType: { label: "Stabilizer type" },
+        photoOtherKind: { label: "What kind of item", hint: "Re-shelf to a named Photo shelf when one fits." },
         nsfCertified: { label: "NSF / food-service listing" },
         installNeeds: { label: "Install / hookup needs" },
         dropSideAcknowledged: { label: "Drop-side status", hint: "US drop-side cribs are banned — confirm this unit is not drop-side." },
@@ -4624,17 +4633,17 @@ export const en: AppMessages = {
         wireless_mic_set: "Wireless mic set",
 
         // Outdoor & Camping ~8.0 options
-        "0_15f": "0 15f",
-        "15_32f": "15 32f",
+        "0_15f": "0–15°F",
+        "15_32f": "15–32°F",
         "30_50l": "30\u201350 L",
-        "32_50f": "32 50f",
+        "32_50f": "32–50°F",
         "50_70l": "50\u201370 L",
         "70l_plus": "70 L+",
-        above_50f: "above 50f",
-        alcohol: "alcohol",
+        above_50f: "Above 50°F",
+        alcohol: "Alcohol",
         aluminum_poles: "Aluminum poles",
         batteries_included: "Batteries included",
-        below_0f: "below 0f",
+        below_0f: "Below 0°F",
         compass_map_kit: "Compass + map kit",
         daypack_unknown: "Daypack / unknown",
         external_frame: "External frame",
@@ -4650,7 +4659,7 @@ export const en: AppMessages = {
         inflatable_beam: "Inflatable beam",
         inreach_style: "inReach-style",
         internal_frame: "Internal frame",
-        isobutane: "isobutane",
+        isobutane: "Isobutane",
         kind_cook: "Cook-related",
         kind_mixed_outdoor: "Mixed outdoor",
         kind_nav: "Navigation-related",
@@ -4659,7 +4668,7 @@ export const en: AppMessages = {
         kind_survival_base: "Survival / base camp",
         kind_tent: "Tent-related",
         kitchen_module: "Kitchen module",
-        multi_fuel: "multi fuel",
+        multi_fuel: "Multi-fuel",
         not_battery_nav: "Not battery-powered",
         other_base_camp: "Other base camp",
         other_nav: "Other navigation",
@@ -4674,8 +4683,79 @@ export const en: AppMessages = {
         unknown_frame: "Frame unknown",
         unknown_poles: "Poles unknown",
         watch_gps: "GPS watch",
-        white_gas: "white gas",
-        wood: "wood",
+        white_gas: "White gas",
+        wood: "Wood",
+
+        // Photo & Video ~8.0 options
+        "15_30lb": "15\u201330 lb",
+        "250g_to_55lb": "250g to 55lb",
+        "30lb_plus": "30 lb+",
+        "5_15lb": "5\u201315 lb",
+        ac_and_battery_light: "AC + battery",
+        ac_only_light: "AC only",
+        action_fixed: "Action fixed lens",
+        aps_c: "APS-C",
+        ball_head: "Ball head",
+        battery_light: "Battery",
+        broadcast_add_on: "broadcast add on",
+        broadcast_builtin: "broadcast builtin",
+        cinema_ff: "Cinema full frame",
+        cinema_super35: "Cinema Super 35",
+        continuous_led: "Continuous LED",
+        e_mount: "E-mount",
+        ef_mount: "EF",
+        encoder_streamer: "Encoder / streamer",
+        fluid_video: "Fluid video",
+        full_frame: "Full frame",
+        gimbal_head: "Gimbal head",
+        hmi_or_fresnel: "HMI / Fresnel",
+        internal_only: "Internal only",
+        kind_broadcast: "Broadcast-related",
+        kind_camera: "Camera-related",
+        kind_drone: "Drone-related",
+        kind_lens: "Lens-related",
+        kind_light: "Lighting-related",
+        kind_mixed_photo: "Mixed photo",
+        kind_support: "Support-related",
+        l_mount: "L-mount",
+        macro_specialty: "Macro / specialty",
+        media_included: "Media included",
+        media_partial: "Media partial",
+        medium_format: "Medium format",
+        mft: "MFT",
+        motorized_gimbal: "Motorized gimbal",
+        no_head_legs_only: "Legs only \u2014 no head",
+        not_equipped: "not equipped",
+        other_head: "Other head",
+        other_lighting: "Other lighting",
+        other_stabilizer: "Other stabilizer",
+        over_55lb: "over 55lb",
+        pan_tilt: "Pan/tilt",
+        passive_modifier_only: "Passive modifier only",
+        pl_mount: "PL",
+        recorder_monitor: "Recorder / monitor",
+        renter_brings_media: "Renter brings media",
+        rf_mount: "RF",
+        rgb_creative: "RGB creative",
+        rid_exempt_under_250g: "rid exempt under 250g",
+        shoulder_rig: "Shoulder rig",
+        slider_only: "Slider only",
+        softbox_kit: "Softbox kit",
+        standard: "Standard",
+        steadicam_style: "Steadicam-style",
+        strobe_flash: "Strobe / flash",
+        super_tele: "Super tele",
+        switcher: "Switcher",
+        tele: "Tele",
+        ultra_wide: "Ultra wide",
+        under_250g: "under 250g",
+        under_5lb: "Under 5 lb",
+        unknown_mount: "Mount unknown",
+        unknown_payload: "Payload unknown",
+        unknown_sensor: "Sensor unknown",
+        wide: "Wide",
+        z_mount: "Z-mount",
+        zoom_variable: "Zoom / variable",
       },
     },
     modes: {
@@ -5691,28 +5771,28 @@ export const en: AppMessages = {
           ],
         },
       "Photo & Video": {
-          title: "Camera, cinema & drone rental FAQ",
-          summary: "Short answers for kits, serials, and drone compliance.",
+          title: "Photo & video rental FAQ",
+          summary: "Short answers for kits, drones Remote ID, media, and deposit claims \u2014 no gear-insurance promo.",
           qa: [
             {
-              q: "Is a serial number required?",
-              a: "Yes for rent—plus a structured kit inventory (bodies, lenses, batteries, bags).",
+              q: "What is required on Photo & Video rentals?",
+              a: "Brand, model, kit class, and a kit inventory. Drones also freeze weight class and Remote ID status.",
             },
             {
-              q: "What do drone listings need?",
-              a: "Weight class + Remote ID hardware status at publish; Part 107 + Remote ID acknowledgment at booking.",
+              q: "Who brings memory cards?",
+              a: "Capture-media field freezes included, partial, renter brings, or internal-only.",
             },
             {
-              q: "What do I confirm at handoff?",
-              a: "Count the kit against the inventory before you leave.",
+              q: "Do drones need Remote ID?",
+              a: "Yes unless under-250g exempt \u2014 host marks built-in, add-on, or valid exempt. Mismatch blocks publish.",
             },
             {
               q: "What does the deposit cover?",
-              a: "Missing parts and damage. Evorios does not sell camera insurance.",
+              a: "Body damage and missing kit pieces against the frozen list \u2014 not a production insurance policy.",
             },
             {
-              q: "What if a piece is missing?",
-              a: "Use the frozen inventory and handoff photos for the claim.",
+              q: "Partner promo?",
+              a: "No camera-shop affiliate or lens-insurance hard-sell.",
             },
           ],
         },
@@ -6065,6 +6145,251 @@ export const en: AppMessages = {
     },
 
     bySubcategory: {
+      "Photo & Video": {
+        "Camera Kits": {
+          title: "Camera kits \u2014 sensor, media, kit list",
+          summary: "Bodies and kits freeze sensor/mount, media policy, and inventory.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Model, kit class, sensor/mount, media include, and kit inventory items/checklist.",
+            },
+            {
+              q: "Body only vs full kit?",
+              a: "kitIncludes freezes body-only, kit lens, full kit, or accessories-only.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers drops and missing batteries/chargers/cards against the list.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No retailer affiliate hard-sell.",
+            },
+          ],
+        },
+        "Action Cameras": {
+          title: "Action cameras \u2014 mount, media, sensor",
+          summary: "Action cams freeze sensor class, media, and mounts in the kit list.",
+          qa: [
+            {
+              q: "What must be listed?",
+              a: "Model, kit class, sensor/mount band, media policy, and inventory for mounts/batteries.",
+            },
+            {
+              q: "Waterproof housing?",
+              a: "Disclose in kit checklist \u2014 assume not included unless listed.",
+            },
+            {
+              q: "Media?",
+              a: "Hosts mark cards included, partial, renter brings, or internal-only.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers cracked housings and missing mounts.",
+            },
+          ],
+        },
+        "Tripods & Mounts": {
+          title: "Tripods \u2014 payload, head type",
+          summary: "Supports freeze payload band and head type before rent.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Payload band, head type, kit class, and inventory for plates/spreaders.",
+            },
+            {
+              q: "Will it hold my camera?",
+              a: "Payload band is the host\u2019s rated class \u2014 not a lab certification.",
+            },
+            {
+              q: "Head included?",
+              a: "Hosts mark ball, pan-tilt, fluid, gimbal head, legs-only, or other.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers bent legs and missing plates.",
+            },
+          ],
+        },
+        "Basic Lighting": {
+          title: "Basic lighting \u2014 class, power",
+          summary: "LED/flash kits freeze lighting class and power source.",
+          qa: [
+            {
+              q: "What must be listed?",
+              a: "Lighting class, power source, kit class, and stands/modifiers in inventory.",
+            },
+            {
+              q: "Battery or AC?",
+              a: "Power source freezes AC, battery, both, or passive modifiers only.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers broken mounts and missing softboxes \u2014 not lamp life insurance.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No lighting-vendor affiliate hard-sell.",
+            },
+          ],
+        },
+        "Drones": {
+          title: "Drones \u2014 weight class, Remote ID",
+          summary: "Drone rentals freeze FAA-style weight class and Remote ID hardware status.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Weight class and Remote ID (built-in, add-on, or under-250g exempt). Exempt requires under-250g weight.",
+            },
+            {
+              q: "Pilot license?",
+              a: "Follow local law \u2014 Evorios freezes Remote ID facts; it does not issue certificates.",
+            },
+            {
+              q: "Kit?",
+              a: "Batteries, props, and controllers belong on the kit inventory.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No drone-insurance affiliate hard-sell.",
+            },
+          ],
+        },
+        "Cinema Cameras": {
+          title: "Cinema cameras \u2014 sensor, media",
+          summary: "Cinema bodies freeze sensor class and media policy plus kit inventory.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Sensor/mount class, media include, kit class, and full inventory for cages/batteries.",
+            },
+            {
+              q: "Who brings media?",
+              a: "Media field freezes included vs renter-provided cinema media.",
+            },
+            {
+              q: "Deposit?",
+              a: "High-value deposit covers body and missing modules \u2014 not production insurance.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No cinema-rental-house affiliate hard-sell.",
+            },
+          ],
+        },
+        "Professional Lenses": {
+          title: "Lenses \u2014 mount, focal band",
+          summary: "Lenses freeze mount and focal class before rent.",
+          qa: [
+            {
+              q: "What must be listed?",
+              a: "Mount type, focal band, model, and caps/hoods in kit inventory.",
+            },
+            {
+              q: "Will it fit my body?",
+              a: "Mount field is the gate \u2014 adapters only if listed in the kit.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers glass damage and missing caps \u2014 fungus disclosure belongs in notes.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No lens-subscription affiliate hard-sell.",
+            },
+          ],
+        },
+        "Studio Lighting": {
+          title: "Studio lighting \u2014 class, power",
+          summary: "Studio lights freeze class and power like basic lighting with heavier kits.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Lighting class, power source, kit class, and inventory for stands/c-stands.",
+            },
+            {
+              q: "HMI / Fresnel?",
+              a: "Class field includes HMI/Fresnel \u2014 confirm power needs before pickup.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers heads and modifiers; bulbs disclosed separately in notes.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No studio-expendables affiliate hard-sell.",
+            },
+          ],
+        },
+        "Stabilizers & Rigs": {
+          title: "Stabilizers \u2014 type, payload",
+          summary: "Gimbals and rigs freeze type and payload band.",
+          qa: [
+            {
+              q: "What must be listed?",
+              a: "Stabilizer type, payload band, kit class, and batteries/cages in inventory.",
+            },
+            {
+              q: "Payload?",
+              a: "Payload band is host-rated \u2014 balance and tune at handoff.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers motors and missing batteries/chargers.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No gimbal-brand affiliate hard-sell.",
+            },
+          ],
+        },
+        "Broadcast Gear": {
+          title: "Broadcast \u2014 subtype, media",
+          summary: "Switchers and encoders freeze subtype and media/capture policy.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Broadcast subtype, media include, kit class, and I/O cables in inventory.",
+            },
+            {
+              q: "Switcher vs encoder?",
+              a: "Subtype stops wrong-box bookings for livestream days.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers ports and missing SDI/HDMI kits.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No broadcast-integrator affiliate hard-sell.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Photo other \u2014 re-shelf when named fits",
+          summary: "Catch-all still publishes kind and kit inventory.",
+          qa: [
+            {
+              q: "When use Other?",
+              a: "Only when no named Photo shelf fits.",
+            },
+            {
+              q: "What gates publish?",
+              a: "Kind, model, kit class, and kit inventory checklist.",
+            },
+            {
+              q: "Re-shelf?",
+              a: "Move to Camera Kits, Action, Tripods, Lighting, Drones, Cinema, Lenses, Stabilizers, or Broadcast when those gates fit.",
+            },
+            {
+              q: "Essays or promo?",
+              a: "No vague essays and no gear-affiliate hard-sell.",
+            },
+          ],
+        },
+      },
+
       "Office & Business": {
         "Printers": {
           title: "Printers \u2014 tech, paper, ink, storage wipe",

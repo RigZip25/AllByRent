@@ -560,7 +560,11 @@ export function ItemDetail({
               />
             ) : null}
             {listingIsDrone(listing) && listing.modes.rent ? (
-              <CategoryFactCard category="Photo & Video" className="mt-3" />
+              <CategoryFactCard
+                category="Photo & Video"
+                subcategory={listing.subcategory || "Drones"}
+                className="mt-3"
+              />
             ) : null}
             {listing.modes.rent && listing.category.trim() === "Baby & Kids" ? (
               <CategoryFactCard
@@ -579,7 +583,8 @@ export function ItemDetail({
                     : "Photo & Video"
                 }
                 subcategory={
-                  listing.category.trim() === "Electronics & Tech"
+                  listing.category.trim() === "Electronics & Tech" ||
+                  listing.category.trim() === "Photo & Video"
                     ? listing.subcategory
                     : undefined
                 }

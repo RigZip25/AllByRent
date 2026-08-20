@@ -1665,7 +1665,10 @@ function BookingScreenLoaded({
           />
         ) : null}
         {listingIsDrone(listing) && listing.modes.rent ? (
-          <CategoryFactCard category="Photo & Video" />
+          <CategoryFactCard
+            category="Photo & Video"
+            subcategory={listing.subcategory || "Drones"}
+          />
         ) : null}
         {isBabyListing ? (
           <CategoryFactCard category="Baby & Kids" subcategory={listing.subcategory} />
@@ -1693,7 +1696,8 @@ function BookingScreenLoaded({
                 : "Photo & Video"
             }
             subcategory={
-              listing.category.trim() === "Electronics & Tech"
+              listing.category.trim() === "Electronics & Tech" ||
+              listing.category.trim() === "Photo & Video"
                 ? listing.subcategory
                 : undefined
             }

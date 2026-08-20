@@ -579,7 +579,15 @@ export function HostListingDetailScreen({
         {listing.category.trim() === "Photo & Video" ||
         listing.category.trim() === "Drones" ||
         listing.subcategory.trim() === "Drones" ? (
-          <CategoryFactCard category="Photo & Video" className="mb-4" />
+          <CategoryFactCard
+            category="Photo & Video"
+            subcategory={
+              listing.subcategory.trim() === "Drones" || listing.category.trim() === "Drones"
+                ? "Drones"
+                : listing.subcategory
+            }
+            className="mb-4"
+          />
         ) : null}
         {listing.category.trim() === "Baby & Kids" ? (
           <CategoryFactCard

@@ -299,7 +299,10 @@ export function listingUscgSafetyKitComplete(
   return (listing.categorySpecs?.uscgSafetyKitConfirmed ?? "").trim() === "kit_complete";
 }
 
-/** Photo & Video or Electronics & Tech — serial + kit inventory for rent. */
+/** Photo & Video or Electronics & Tech — serial + kit inventory for rent.
+ * Photo (~8.0): sensor/media, tripod head/payload, lighting class/power, lens mount/focal,
+ * stabilizer type, broadcast subtype; drones keep weight+RID P0. Publish: Photo P0 in areCategorySpecsValid.
+ */
 export function listingIsHighValueGearCategory(
   listing: Pick<ListingDraft, "category">,
 ): boolean {

@@ -349,6 +349,54 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         requiredIf: "rent",
       },
       {
+        key: "cameraSensorOrMount",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Camera Kits", "Action Cameras", "Cinema Cameras"],
+        options: ["full_frame", "aps_c", "mft", "medium_format", "action_fixed", "cinema_super35", "cinema_ff", "unknown_sensor"],
+      },
+      {
+        key: "captureMediaIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Camera Kits", "Action Cameras", "Cinema Cameras", "Broadcast Gear"],
+        options: ["media_included", "media_partial", "renter_brings_media", "internal_only"],
+      },
+      {
+        key: "tripodPayloadBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Tripods & Mounts", "Stabilizers & Rigs"],
+        options: ["under_5lb", "5_15lb", "15_30lb", "30lb_plus", "unknown_payload"],
+      },
+      {
+        key: "tripodHeadType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Tripods & Mounts"],
+        options: ["ball_head", "pan_tilt", "fluid_video", "gimbal_head", "no_head_legs_only", "other_head"],
+      },
+      {
+        key: "lightingKitClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Basic Lighting", "Studio Lighting"],
+        options: ["continuous_led", "strobe_flash", "softbox_kit", "rgb_creative", "hmi_or_fresnel", "other_lighting"],
+      },
+      {
+        key: "lightingPowerSource",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Basic Lighting", "Studio Lighting"],
+        options: ["ac_only_light", "battery_light", "ac_and_battery_light", "passive_modifier_only"],
+      },
+      {
         key: "droneWeightClass",
         type: "select",
         required: true,
@@ -363,6 +411,46 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         requiredIf: "rent",
         subcategories: ["Drones"],
         options: ["broadcast_builtin", "broadcast_add_on", "rid_exempt_under_250g", "not_equipped"],
+      },
+      {
+        key: "lensMountType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Professional Lenses"],
+        options: ["ef_mount", "rf_mount", "e_mount", "z_mount", "l_mount", "pl_mount", "other_mount", "unknown_mount"],
+      },
+      {
+        key: "lensFocalBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Professional Lenses"],
+        options: ["ultra_wide", "wide", "standard", "tele", "super_tele", "zoom_variable", "macro_specialty"],
+      },
+      {
+        key: "stabilizerType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stabilizers & Rigs"],
+        options: ["motorized_gimbal", "steadicam_style", "shoulder_rig", "slider_only", "other_stabilizer"],
+      },
+      {
+        key: "broadcastDeviceSubtype",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Broadcast Gear"],
+        options: ["switcher", "encoder_streamer", "recorder_monitor", "teleprompter", "other_broadcast"],
+      },
+      {
+        key: "photoOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["kind_camera", "kind_lens", "kind_light", "kind_support", "kind_drone", "kind_broadcast", "kind_mixed_photo"],
       },
     ],
   },
@@ -6095,6 +6183,45 @@ export function areCategorySpecsValid(
     }
   }
 
+
+
+  // Photo & Video P0 gates by shelf.
+  if (category.trim() === "Photo & Video" && modes?.rent) {
+    const sub = subcategory.trim();
+    const reqSelect = (key: string, allowed: string[]) => allowed.includes((values[key] ?? "").trim());
+    const reqText = (key: string, min = 3) => (values[key] ?? "").trim().length >= min;
+    if (!reqText("model", 1)) return false;
+    if (!reqSelect("kitIncludes", ["body_only","kit_lens","full_kit","accessories_only"])) return false;
+
+    if (sub === "Camera Kits" || sub === "Action Cameras" || sub === "Cinema Cameras") {
+      if (!reqSelect("cameraSensorOrMount", ["full_frame","aps_c","mft","medium_format","action_fixed","cinema_super35","cinema_ff","unknown_sensor"])) return false;
+      if (!reqSelect("captureMediaIncluded", ["media_included","media_partial","renter_brings_media","internal_only"])) return false;
+    }
+    if (sub === "Tripods & Mounts") {
+      if (!reqSelect("tripodPayloadBand", ["under_5lb","5_15lb","15_30lb","30lb_plus","unknown_payload"])) return false;
+      if (!reqSelect("tripodHeadType", ["ball_head","pan_tilt","fluid_video","gimbal_head","no_head_legs_only","other_head"])) return false;
+    }
+    if (sub === "Basic Lighting" || sub === "Studio Lighting") {
+      if (!reqSelect("lightingKitClass", ["continuous_led","strobe_flash","softbox_kit","rgb_creative","hmi_or_fresnel","other_lighting"])) return false;
+      if (!reqSelect("lightingPowerSource", ["ac_only_light","battery_light","ac_and_battery_light","passive_modifier_only"])) return false;
+    }
+    if (sub === "Professional Lenses") {
+      if (!reqSelect("lensMountType", ["ef_mount","rf_mount","e_mount","z_mount","l_mount","pl_mount","other_mount","unknown_mount"])) return false;
+      if (!reqSelect("lensFocalBand", ["ultra_wide","wide","standard","tele","super_tele","zoom_variable","macro_specialty"])) return false;
+    }
+    if (sub === "Stabilizers & Rigs") {
+      if (!reqSelect("stabilizerType", ["motorized_gimbal","steadicam_style","shoulder_rig","slider_only","other_stabilizer"])) return false;
+      if (!reqSelect("tripodPayloadBand", ["under_5lb","5_15lb","15_30lb","30lb_plus","unknown_payload"])) return false;
+    }
+    if (sub === "Broadcast Gear") {
+      if (!reqSelect("broadcastDeviceSubtype", ["switcher","encoder_streamer","recorder_monitor","teleprompter","other_broadcast"])) return false;
+      if (!reqSelect("captureMediaIncluded", ["media_included","media_partial","renter_brings_media","internal_only"])) return false;
+    }
+    if (sub === "Other") {
+      if (!reqSelect("photoOtherKind", ["kind_camera","kind_lens","kind_light","kind_support","kind_drone","kind_broadcast","kind_mixed_photo"])) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+  }
 
   // Drones: weight class + Remote ID hardware (equipped or valid under-250g exempt).
   if (

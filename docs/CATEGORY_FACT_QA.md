@@ -109,4 +109,18 @@ All listing `categorySpecs` select **values** share **one flat** `listing.catego
 | Survival/base | Kit class + waiver; base-camp band |
 | FactCards | Already per-sub Q→A — wire `subcategory` on listing/booking |
 
+
+### Photo & Video (~8.0) — shipped pattern
+
+| Layer | Pattern |
+|-------|---------|
+| All | Brand+model, kitIncludes, kit inventory multiselect; serial required category-wide |
+| Bodies | Sensor/mount class + capture media include (Camera/Action/Cinema) |
+| Support | Tripod payload + head; stabilizer type + payload |
+| Light | Kit class + power source (Basic + Studio) |
+| Lenses | Mount + focal band |
+| Broadcast | Device subtype + media include |
+| Drones | Weight class + Remote ID (existing P0) |
+| FactCards | Per-sub Q→A EN/CS/ES; wire subcategory on listing/booking |
+
 See also: [EVORIOS.md](./EVORIOS.md) (brand / product source of truth).

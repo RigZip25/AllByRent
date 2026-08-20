@@ -403,7 +403,15 @@ export function Step2ItemInfo({
             ) : draft.category.trim() === "Photo & Video" ||
               draft.category.trim() === "Drones" ||
               draft.subcategory.trim() === "Drones" ? (
-              <CategoryFactCard category="Photo & Video" defaultExpanded />
+              <CategoryFactCard
+                category="Photo & Video"
+                subcategory={
+                  draft.subcategory.trim() === "Drones" || draft.category.trim() === "Drones"
+                    ? "Drones"
+                    : draft.subcategory
+                }
+                defaultExpanded
+              />
             ) : draft.category.trim() === "Baby & Kids" ? (
               <CategoryFactCard
                 category="Baby & Kids"
