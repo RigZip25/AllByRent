@@ -243,6 +243,10 @@ export type RentalBooking = {
   cribRecallAckAttested?: boolean;
   cribDropSideAckAttested?: boolean;
   cribSanitizationAttested?: boolean;
+  /** Baby contact hygiene / safety-install / toy hazard attestations. */
+  babyHygieneAttested?: boolean;
+  babyInstallAttested?: boolean;
+  toyHazardAttested?: boolean;
   ppeAckAttested?: boolean;
   /** Frozen house rules / cleaning fee at booking (Real Estate). */
   houseRulesSnapshot?: string;
@@ -658,6 +662,9 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
     cribRecallAckAttested: Boolean(raw.cribRecallAckAttested),
     cribDropSideAckAttested: Boolean(raw.cribDropSideAckAttested),
     cribSanitizationAttested: Boolean(raw.cribSanitizationAttested),
+    babyHygieneAttested: Boolean(raw.babyHygieneAttested),
+    babyInstallAttested: Boolean(raw.babyInstallAttested),
+    toyHazardAttested: Boolean(raw.toyHazardAttested),
     houseRulesSnapshot:
       typeof raw.houseRulesSnapshot === "string" ? raw.houseRulesSnapshot : undefined,
     cleaningFeeUsd:
@@ -674,6 +681,15 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
       typeof raw.helmetPolicySnapshot === "string" ? raw.helmetPolicySnapshot : undefined,
     lockPolicySnapshot:
       typeof raw.lockPolicySnapshot === "string" ? raw.lockPolicySnapshot : undefined,
+    overnightStorageRuleSnapshot:
+      typeof raw.overnightStorageRuleSnapshot === "string"
+        ? raw.overnightStorageRuleSnapshot
+        : undefined,
+    kidsGuardianAttested: Boolean(raw.kidsGuardianAttested),
+    batteryChargeBandAtHandoff:
+      typeof raw.batteryChargeBandAtHandoff === "string"
+        ? raw.batteryChargeBandAtHandoff
+        : undefined,
     ohvTerrainWaiverAttested: Boolean(raw.ohvTerrainWaiverAttested),
     motorcycleEndorsementAttested: Boolean(raw.motorcycleEndorsementAttested),
     captainModeSnapshot:

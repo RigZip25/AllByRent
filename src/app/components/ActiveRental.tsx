@@ -102,6 +102,11 @@ import {
   listingRequiresHelmetLockPolicy,
   listingRequiresKidsGuardianAttest,
   listingIsElectricMicromobility,
+  listingIsCarSeat,
+  listingIsCrib,
+  listingRequiresBabyContactHygiene,
+  listingRequiresBabySafetyInstall,
+  listingIsToysGames,
   listingRequiresOhvTerrainWaiver,
   listingRequiresMotorcycleEndorsement,
   listingRequiresPfdAttestation,
@@ -279,6 +284,16 @@ export function ActiveRental({
     publishedListing != null && listingRequiresHelmetLockPolicy(publishedListing);
   const needsKidsGuardian =
     publishedListing != null && listingRequiresKidsGuardianAttest(publishedListing);
+  const needsCarSeatGates =
+    publishedListing != null && listingIsCarSeat(publishedListing);
+  const needsCribGates =
+    publishedListing != null && listingIsCrib(publishedListing);
+  const needsBabyHygiene =
+    publishedListing != null && listingRequiresBabyContactHygiene(publishedListing);
+  const needsBabyInstall =
+    publishedListing != null && listingRequiresBabySafetyInstall(publishedListing);
+  const needsToyHazard =
+    publishedListing != null && listingIsToysGames(publishedListing);
   const needsMicromobilityCharge =
     publishedListing != null && listingIsElectricMicromobility(publishedListing);
   const needsOhvTerrainWaiver =
@@ -701,6 +716,53 @@ export function ActiveRental({
       booking?.role === "renter"
     ) {
       setNotice(t.rentalDetail.kidsGuardianUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsCarSeatGates &&
+      (!booking?.carSeatSanitizationAttested || !booking?.carSeatRecallAckAttested) &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.carSeatUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsCribGates &&
+      (!booking?.cribRecallAckAttested ||
+        !booking?.cribDropSideAckAttested ||
+        !booking?.cribSanitizationAttested) &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.cribUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsBabyHygiene &&
+      !booking?.babyHygieneAttested &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.babyHygieneUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsBabyInstall &&
+      !booking?.babyInstallAttested &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.babyInstallUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsToyHazard &&
+      !booking?.toyHazardAttested &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.toyHazardUnlockBlocked);
       return;
     }
     if (

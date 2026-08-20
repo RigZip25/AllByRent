@@ -34,6 +34,12 @@ import {
   listingIsCommercialCoffee,
   listingIsCommercialPlay,
   listingCribBlocksBooking,
+  listingRequiresBabyContactHygiene,
+  listingBabyContactHygieneBlocksBooking,
+  listingRequiresBabySafetyInstall,
+  listingBabySafetyInstallBlocksBooking,
+  listingToyHazardBlocksBooking,
+  listingIsToysGames,
   listingIsDrone,
   listingKitInventoryText,
   listingLockPolicy,
@@ -377,6 +383,9 @@ function BookingScreenLoaded({
   const [cribRecallAckAttested, setCribRecallAckAttested] = useState(false);
   const [cribDropSideAckAttested, setCribDropSideAckAttested] = useState(false);
   const [cribSanitizationAttested, setCribSanitizationAttested] = useState(false);
+  const [babyHygieneAttested, setBabyHygieneAttested] = useState(false);
+  const [babyInstallAttested, setBabyInstallAttested] = useState(false);
+  const [toyHazardAttested, setToyHazardAttested] = useState(false);
   const [ppeAckAttested, setPpeAckAttested] = useState(false);
   const [uscgSafetyAck, setUscgSafetyAck] = useState(false);
   const [kitInventoryAck, setKitInventoryAck] = useState(false);
@@ -436,7 +445,14 @@ function BookingScreenLoaded({
   const carSeatListingBlocked = listingCarSeatBlocksBooking(listing);
   const needsCribGates = listingIsCrib(listing) && listing.modes.rent;
   const cribListingBlocked = listingCribBlocksBooking(listing);
+  const needsBabyHygiene = listingRequiresBabyContactHygiene(listing);
+  const babyHygieneListingBlocked = listingBabyContactHygieneBlocksBooking(listing);
+  const needsBabyInstall = listingRequiresBabySafetyInstall(listing);
+  const babyInstallListingBlocked = listingBabySafetyInstallBlocksBooking(listing);
+  const needsToyHazard = listingIsToysGames(listing) && listing.modes.rent;
+  const toyHazardListingBlocked = listingToyHazardBlocksBooking(listing);
   const needsCommercialPlay = listingIsCommercialPlay(listing) && listing.modes.rent;
+  const isBabyListing = listing.category.trim() === "Baby & Kids" && listing.modes.rent;
   const needsCommercialCoffee = listingIsCommercialCoffee(listing) && listing.modes.rent;
   const needsPpeAck = listingRequiresPpeAck(listing);
   const houseRulesText = listingHouseRulesText(listing);
@@ -671,6 +687,12 @@ function BookingScreenLoaded({
       cribRecallAckAttested &&
       cribDropSideAckAttested &&
       cribSanitizationAttested);
+  const babyHygieneOk =
+    !needsBabyHygiene || (!babyHygieneListingBlocked && babyHygieneAttested);
+  const babyInstallOk =
+    !needsBabyInstall || (!babyInstallListingBlocked && babyInstallAttested);
+  const toyHazardOk =
+    !needsToyHazard || (!toyHazardListingBlocked && toyHazardAttested);
   const ppeAckOk = !needsPpeAck || ppeAckAttested;
   const realEstateHouseRulesOk =
     listing.category.trim() !== "Real Estate" ||
@@ -754,6 +776,9 @@ function BookingScreenLoaded({
     cateringSanitizeOk &&
     carSeatOk &&
     cribOk &&
+    babyHygieneOk &&
+    babyInstallOk &&
+    toyHazardOk &&
     ppeAckOk &&
     realEstateHouseRulesOk &&
     uscgSafetyOk &&
@@ -1256,6 +1281,9 @@ function BookingScreenLoaded({
       cribRecallAckAttested: needsCribGates ? cribRecallAckAttested : undefined,
       cribDropSideAckAttested: needsCribGates ? cribDropSideAckAttested : undefined,
       cribSanitizationAttested: needsCribGates ? cribSanitizationAttested : undefined,
+      babyHygieneAttested: needsBabyHygiene ? babyHygieneAttested : undefined,
+      babyInstallAttested: needsBabyInstall ? babyInstallAttested : undefined,
+      toyHazardAttested: needsToyHazard ? toyHazardAttested : undefined,
       ppeAckAttested: needsPpeAck ? ppeAckAttested : undefined,
       houseRulesSnapshot: houseRulesText || undefined,
       cleaningFeeUsd: cleaningFeeUsd > 0 ? cleaningFeeUsd : undefined,
@@ -1624,7 +1652,7 @@ function BookingScreenLoaded({
         {listingIsDrone(listing) && listing.modes.rent ? (
           <CategoryFactCard category="Photo & Video" />
         ) : null}
-        {needsCarSeatGates || needsCribGates || needsCommercialPlay ? (
+        {isBabyListing ? (
           <CategoryFactCard category="Baby & Kids" subcategory={listing.subcategory} />
         ) : null}
         {listing.category.trim() === "Tools & DIY" && listing.modes.rent ? (
@@ -1825,6 +1853,85 @@ function BookingScreenLoaded({
             </label>
           </div>
         ) : null}
+
+        {needsBabyHygiene && babyHygieneListingBlocked ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <p className="font-semibold">{t.booking.babyHygieneBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.babyHygieneBlockedBody}</p>
+          </div>
+        ) : null}
+        {needsBabyHygiene && !babyHygieneListingBlocked ? (
+          <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-rose-950">{t.booking.babyHygieneTitle}</p>
+            <p className="text-[12px] text-rose-900/90">{t.booking.babyHygieneBody}</p>
+            <label className="flex items-start gap-2 text-xs text-rose-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={babyHygieneAttested}
+                onChange={(e) => setBabyHygieneAttested(e.target.checked)}
+              />
+              <span>{t.booking.babyHygieneAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {needsBabyInstall && babyInstallListingBlocked ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <p className="font-semibold">{t.booking.babyInstallBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.babyInstallBlockedBody}</p>
+          </div>
+        ) : null}
+        {needsBabyInstall && !babyInstallListingBlocked ? (
+          <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-rose-950">{t.booking.babyInstallTitle}</p>
+            <p className="text-[12px] text-rose-900/90">
+              {t.booking.babyInstallBody(
+                t.listing.specs.options[listing.categorySpecs?.safetyInstallAttested ?? ""] ??
+                  listing.categorySpecs?.safetyInstallAttested ??
+                  "",
+              )}
+            </p>
+            <label className="flex items-start gap-2 text-xs text-rose-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={babyInstallAttested}
+                onChange={(e) => setBabyInstallAttested(e.target.checked)}
+              />
+              <span>{t.booking.babyInstallAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {needsToyHazard && toyHazardListingBlocked ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <p className="font-semibold">{t.booking.toyHazardBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.toyHazardBlockedBody}</p>
+          </div>
+        ) : null}
+        {needsToyHazard && !toyHazardListingBlocked ? (
+          <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-rose-950">{t.booking.toyHazardTitle}</p>
+            <p className="text-[12px] text-rose-900/90">
+              {t.booking.toyHazardBody(
+                t.listing.specs.options[listing.categorySpecs?.toyHazardBand ?? ""] ??
+                  listing.categorySpecs?.toyHazardBand ??
+                  "",
+              )}
+            </p>
+            <label className="flex items-start gap-2 text-xs text-rose-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={toyHazardAttested}
+                onChange={(e) => setToyHazardAttested(e.target.checked)}
+              />
+              <span>{t.booking.toyHazardAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
         {needsPpeAck ? (
           <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 space-y-3">
             <p className="text-sm font-semibold text-amber-950">{t.booking.ppeAckTitle}</p>

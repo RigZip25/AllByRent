@@ -1714,6 +1714,13 @@ export function areCategorySpecsValid(
     if ((values.recallAcknowledged ?? "").trim() !== "acknowledged") return false;
     if ((values.sanitizationAttested ?? "").trim() !== "attested") return false;
     if ((values.labelPhotoConfirmed ?? "").trim() !== "photo_on_listing") return false;
+    if (
+      !["fmvss_us", "ece_r129", "ece_r44", "other_regional"].includes(
+        (values.carSeatStandardRegion ?? "").trim(),
+      )
+    ) {
+      return false;
+    }
   }
 
   // Real Estate: house rules required for rent.
@@ -1816,7 +1823,7 @@ export function areCategorySpecsValid(
   }
 
 
-  // Cribs & Beds: CPSC / recall / drop-side / mattress / sanitization hard gate.
+  // Cribs & Beds: portable sleep standard / recall / drop-side / mattress / sanitization.
   if (
     category.trim() === "Baby & Kids" &&
     subcategory.trim() === "Cribs & Beds" &&
@@ -1824,7 +1831,13 @@ export function areCategorySpecsValid(
   ) {
     if ((values.recallAcknowledged ?? "").trim() !== "acknowledged") return false;
     if ((values.dropSideAcknowledged ?? "").trim() !== "no_drop_side") return false;
-    if ((values.cpscCompliant ?? "").trim() !== "cpsc_compliant") return false;
+    if (
+      !["cpsc_compliant", "en_716_eu", "other_regional_standard"].includes(
+        (values.cpscCompliant ?? "").trim(),
+      )
+    ) {
+      return false;
+    }
     const mattress = (values.mattressIncluded ?? "").trim();
     if (
       mattress !== "firm_mattress_included" &&
@@ -1834,6 +1847,36 @@ export function areCategorySpecsValid(
       return false;
     }
     if ((values.sanitizationAttested ?? "").trim() !== "attested") return false;
+  }
+
+  // Baby contact hygiene shelves + toys age band + safety-system install.
+  if (category.trim() === "Baby & Kids" && modes?.rent) {
+    const sub = subcategory.trim();
+    const contactHygiene = new Set(BABY_CONTACT_HYGIENE_SUBS);
+    if (contactHygiene.has(sub as (typeof BABY_CONTACT_HYGIENE_SUBS)[number])) {
+      if ((values.sanitizationAttested ?? "").trim() !== "attested") return false;
+      if ((values.recallAcknowledged ?? "").trim() !== "acknowledged") return false;
+    }
+    if (sub === "Toys & Games") {
+      if (
+        !["ages_0_plus_no_small_parts", "ages_3_plus", "ages_8_plus", "not_a_toy"].includes(
+          (values.toyHazardBand ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
+    }
+    if (sub === "Safety Systems") {
+      if (
+        ![
+          "install_documented",
+          "renter_installs_with_guide",
+          "professionally_installed",
+        ].includes((values.safetyInstallAttested ?? "").trim())
+      ) {
+        return false;
+      }
+    }
   }
 
 

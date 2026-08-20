@@ -4,6 +4,7 @@
  */
 
 import type { ListingDraft } from "../screens/listing/types";
+import { listingIsCommercialPlay } from "./babyKidsTrustRules";
 
 export type OperatorCertKind = "forklift" | "crane" | "excavator" | "general_heavy";
 
@@ -32,8 +33,6 @@ const MOTOR_BOAT_SUBS = new Set([
 ]);
 
 const PWC_SUBS = new Set(["jet skis"]);
-
-const CAR_SEAT_SUBS = new Set(["car seats"]);
 
 function subKey(listing: Pick<ListingDraft, "subcategory">): string {
   return listing.subcategory.trim().toLowerCase();
@@ -131,123 +130,33 @@ export function listingRequiresDroneCert(
   return rentOn(listing) && listingIsDrone(listing);
 }
 
-export function listingIsCarSeat(
-  listing: Pick<ListingDraft, "category" | "subcategory">,
-): boolean {
-  return (
-    listing.category.trim() === "Baby & Kids" &&
-    CAR_SEAT_SUBS.has(subKey(listing))
-  );
-}
-
-/** Parse host-entered expiry (YYYY-MM-DD preferred; also Exp 2028-06 / Mfr…). */
-export function parseCarSeatExpiryDate(raw: string | null | undefined): Date | null {
-  if (!raw || typeof raw !== "string") return null;
-  const trimmed = raw.trim();
-  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
-  if (iso) {
-    const d = new Date(Date.UTC(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3])));
-    return Number.isNaN(d.getTime()) ? null : d;
-  }
-  const ym = /(?:exp(?:iry)?|expires?)[^\d]*(\d{4})[-/](\d{1,2})/i.exec(trimmed);
-  if (ym) {
-    const y = Number(ym[1]);
-    const m = Number(ym[2]);
-    if (y >= 1990 && m >= 1 && m <= 12) {
-      // End of that month
-      const d = new Date(Date.UTC(y, m, 0));
-      return Number.isNaN(d.getTime()) ? null : d;
-    }
-  }
-  const bare = /^(\d{4})[-/](\d{1,2})$/.exec(trimmed);
-  if (bare) {
-    const y = Number(bare[1]);
-    const m = Number(bare[2]);
-    if (y >= 1990 && m >= 1 && m <= 12) {
-      return new Date(Date.UTC(y, m, 0));
-    }
-  }
-  return null;
-}
-
-export function carSeatExpiryIsValid(
-  raw: string | null | undefined,
-  now = new Date(),
-): boolean {
-  const d = parseCarSeatExpiryDate(raw);
-  if (!d) return false;
-  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-  return d.getTime() >= today;
-}
-
-export function listingCarSeatSafetyBlocksPublish(
-  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
-  now = new Date(),
-): boolean {
-  if (!rentOn(listing) || !listingIsCarSeat(listing)) return false;
-  const specs = listing.categorySpecs ?? {};
-  const expiry =
-    (specs.carSeatExpiryDate ?? specs.expiresOrRecallCheck ?? "").trim();
-  if (!carSeatExpiryIsValid(expiry, now)) return true;
-  if ((specs.recallAcknowledged ?? "").trim() !== "acknowledged") return true;
-  if ((specs.sanitizationAttested ?? "").trim() !== "attested") return true;
-  if ((specs.labelPhotoConfirmed ?? "").trim() !== "photo_on_listing") return true;
-  return false;
-}
-
-/** Renter cannot book an expired / unacknowledged car seat listing. */
-export function listingCarSeatBlocksBooking(
-  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
-  now = new Date(),
-): boolean {
-  return listingCarSeatSafetyBlocksPublish(listing, now);
-}
+/* ─── Baby & Kids (canonical rules in babyKidsTrustRules) ─────────────── */
+export {
+  listingIsCarSeat,
+  parseCarSeatExpiryDate,
+  carSeatExpiryIsValid,
+  listingCarSeatSafetyBlocksPublish,
+  listingCarSeatBlocksBooking,
+  listingIsCrib,
+  listingCribSafetyBlocksPublish,
+  listingCribBlocksBooking,
+  listingIsCommercialPlay,
+  listingIsToysGames,
+  listingRequiresBabyContactHygiene,
+  listingBabyContactHygieneBlocksPublish,
+  listingBabyContactHygieneBlocksBooking,
+  listingRequiresBabySafetyInstall,
+  listingBabySafetyInstallBlocksPublish,
+  listingBabySafetyInstallBlocksBooking,
+  listingToyHazardBlocksPublish,
+  listingToyHazardBlocksBooking,
+} from "./babyKidsTrustRules";
 
 /* ─── Tools / Garden / Home / Baby P0 ─────────────────────────────────── */
 
-const CRIB_SUBS = new Set(["cribs & beds"]);
-const COMMERCIAL_PLAY_SUBS = new Set(["commercial play equipment"]);
 const WELDING_SUBS = new Set(["welding equipment"]);
 const STUMP_GRINDER_SUBS = new Set(["stump grinders"]);
 const COMMERCIAL_COFFEE_SUBS = new Set(["commercial coffee"]);
-
-export function listingIsCrib(
-  listing: Pick<ListingDraft, "category" | "subcategory">,
-): boolean {
-  return listing.category.trim() === "Baby & Kids" && CRIB_SUBS.has(subKey(listing));
-}
-
-export function listingCribSafetyBlocksPublish(
-  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
-): boolean {
-  if (!rentOn(listing) || !listingIsCrib(listing)) return false;
-  const specs = listing.categorySpecs ?? {};
-  if ((specs.recallAcknowledged ?? "").trim() !== "acknowledged") return true;
-  if ((specs.dropSideAcknowledged ?? "").trim() !== "no_drop_side") return true;
-  if ((specs.cpscCompliant ?? "").trim() !== "cpsc_compliant") return true;
-  const mattress = (specs.mattressIncluded ?? "").trim();
-  if (
-    mattress !== "firm_mattress_included" &&
-    mattress !== "pack_n_play_pad" &&
-    mattress !== "mattress_not_included"
-  ) {
-    return true;
-  }
-  if ((specs.sanitizationAttested ?? "").trim() !== "attested") return true;
-  return false;
-}
-
-export function listingCribBlocksBooking(
-  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
-): boolean {
-  return listingCribSafetyBlocksPublish(listing);
-}
-
-export function listingIsCommercialPlay(
-  listing: Pick<ListingDraft, "category" | "subcategory">,
-): boolean {
-  return listing.category.trim() === "Baby & Kids" && COMMERCIAL_PLAY_SUBS.has(subKey(listing));
-}
 
 export function listingIsWeldingEquipment(
   listing: Pick<ListingDraft, "category" | "subcategory">,
