@@ -969,6 +969,14 @@ export const en: AppMessages = {
       "Safety briefing acknowledgment from booking is required before handoff can start.",
     cribUnlockBlocked:
       "Complete crib safety acknowledgments at booking before pickup unlock.",
+    carSeatUnlockBlocked:
+      "Complete car-seat safety acknowledgments at booking before pickup unlock.",
+    babyHygieneUnlockBlocked:
+      "Acknowledge baby-gear hygiene at booking before pickup unlock.",
+    babyInstallUnlockBlocked:
+      "Acknowledge safety-system install guidance at booking before pickup unlock.",
+    toyHazardUnlockBlocked:
+      "Acknowledge the toy age / small-parts label at booking before pickup unlock.",
     paCableStandUnlockBlocked: "PA cable / stand inventory acknowledgment is required before handoff can start.",
     ppeAckUnlockBlocked: "PPE acknowledgment is required before pickup unlock.",
     hygieneUnlockBlocked:
@@ -2849,6 +2857,28 @@ export const en: AppMessages = {
     cribSanitizationAttest:
       "I acknowledge sanitization / clean sleep-surface expectations for this rental.",
     cribSafetyBadge: "Crib safety gate",
+    babyHygieneBlockedTitle: "Baby gear hygiene incomplete",
+    babyHygieneBlockedBody:
+      "The host must attest sanitization and a recall check before this item can be booked.",
+    babyHygieneTitle: "Baby gear hygiene",
+    babyHygieneBody:
+      "Strollers, carriers, toys, childcare, and play gear should be cleaned between renters.",
+    babyHygieneAttest: "I acknowledge sanitization / hygiene for this baby item.",
+    babyHygieneBadge: "Baby hygiene gate",
+    babyInstallBlockedTitle: "Safety-system install incomplete",
+    babyInstallBlockedBody:
+      "The host must document how gates / monitors / locks are installed before booking.",
+    babyInstallTitle: "Safety system install",
+    babyInstallBody: (status) =>
+      `Host install path: ${status || "documented"}. Follow manufacturer guidance for your home.`,
+    babyInstallAttest: "I will follow the install guidance for this safety system.",
+    toyHazardBlockedTitle: "Toy age / small-parts label missing",
+    toyHazardBlockedBody:
+      "The host must declare the small-parts / age band before this toy can be booked.",
+    toyHazardTitle: "Toy age / small-parts",
+    toyHazardBody: (band) =>
+      `Host label: ${band || "see listing"}. Match the child’s age and keep small parts away from under-3s when marked.`,
+    toyHazardAttest: "I acknowledge the age / small-parts label for this toy.",
     ppeAckTitle: "PPE acknowledgment",
     ppeAckBody:
       "Eye, ear, and hand protection (plus welding PPE when applicable) are required for safe use.",
@@ -3510,16 +3540,6 @@ export const en: AppMessages = {
       `Same photo set as pickup — including all ${tireCount} tires — so swaps or new damage are visible for disputes.`,
     tireSwapHint:
       "Tire photos protect against expensive tire swaps (e.g. premium tires replaced with cheap ones). Clear shots of brand and tread when possible.",
-    hullPickupBody:
-      "Photograph bow, stern, port, starboard, and deck before handoff. Note gelcoat chips, scratches, dents, and soft spots. Both sides must confirm before start unlocks.",
-    hullReturnBody:
-      "Same hull walkaround as pickup — bow, stern, port, starboard, and deck — so new damage is visible for disputes.",
-    hullGelcoatHint:
-      "Hull and deck photos protect against gelcoat and fixture disputes. Clear shots of each side beat a single overview.",
-    hullSection: "Hull walkaround",
-    hullPhotoHint: "One clear photo of this area. Flag damage and add a short comment.",
-    hullCommentPlaceholder: "Gelcoat chips, scratches, dents, soft spots, fittings...",
-    hullIncomplete: "Finish all five hull photos (bow, stern, port, starboard, deck) before submitting.",
     bodySection: "Exterior & interior",
     tiresSection: (tireCount) =>
       tireCount === 4
@@ -3571,11 +3591,6 @@ export const en: AppMessages = {
       exterior_left: "Exterior — left side",
       exterior_right: "Exterior — right side",
       interior: "Interior",
-      hull_bow: "Hull — bow",
-      hull_stern: "Hull — stern",
-      hull_port: "Hull — port (left)",
-      hull_starboard: "Hull — starboard (right)",
-      hull_deck: "Deck / cockpit",
       tire_fl: "Tire — front left",
       tire_fr: "Tire — front right",
       tire_rl: "Tire — rear left",

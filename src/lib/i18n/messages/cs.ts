@@ -3482,16 +3482,6 @@ export const cs: AppMessages = {
       `Stejná sada fotek jako při vyzvednutí — včetně všech ${tireCount} pneumatik — aby byla výměna nebo nové poškození vidět ve sporu.`,
     tireSwapHint:
       "Fotky pneumatik chrání před drahou výměnou (např. prémiové za levné čínské). Když to jde, ať je vidět značka a dezén.",
-    hullPickupBody:
-      "Vyfoť příď, záď, levý bok (port), pravý bok (starboard) a palubu před předáním. Poznamenej oděrky gelcoatu, škrábance a promáčkliny. Obě strany musí potvrdit před odemčením.",
-    hullReturnBody:
-      "Stejná prohlídka trupu jako při vyzvednutí — příď, záď, port, starboard a paluba — aby bylo vidět nové poškození.",
-    hullGelcoatHint:
-      "Fotky trupu a paluby chrání před spory o gelcoat a výbavu. Každá strana zvlášť je lepší než jeden celek.",
-    hullSection: "Prohlídka trupu",
-    hullPhotoHint: "Jedna jasná fotka této oblasti. Označ poškození a krátký komentář.",
-    hullCommentPlaceholder: "Oděrky gelcoatu, škrábance, promáčkliny, měkká místa, kování...",
-    hullIncomplete: "Doplň všech pět fotek trupu (příď, záď, port, starboard, paluba) před odesláním.",
     bodySection: "Exteriér a interiér",
     tiresSection: (tireCount) =>
       tireCount === 4
@@ -3543,11 +3533,6 @@ export const cs: AppMessages = {
       exterior_left: "Exteriér — levá strana",
       exterior_right: "Exteriér — pravá strana",
       interior: "Interiér",
-      hull_bow: "Trup — příď",
-      hull_stern: "Trup — záď",
-      hull_port: "Trup — levý bok (port)",
-      hull_starboard: "Trup — pravý bok (starboard)",
-      hull_deck: "Paluba / kokpit",
       tire_fl: "Pneumatika — přední levá",
       tire_fr: "Pneumatika — přední pravá",
       tire_rl: "Pneumatika — zadní levá",

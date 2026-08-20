@@ -3473,16 +3473,6 @@ export const es: AppMessages = {
       `El mismo juego de fotos que en la recogida — incluidas las ${tireCount} llantas — para que un cambio o daño nuevo sea visible en una disputa.`,
     tireSwapHint:
       "Las fotos de llantas protegen contra cambios caros (p. ej. premium por chinas baratas). Cuando sea posible, que se vea marca y dibujo.",
-    hullPickupBody:
-      "Fotografía proa, popa, babor, estribor y cubierta antes de la entrega. Anota golpes de gelcoat, rayones y abolladuras. Ambas partes deben confirmar antes de desbloquear.",
-    hullReturnBody:
-      "El mismo recorrido del casco que en la recogida — proa, popa, babor, estribor y cubierta — para ver daños nuevos.",
-    hullGelcoatHint:
-      "Las fotos del casco y cubierta protegen disputas de gelcoat y herrajes. Una toma por lado supera una sola panorámica.",
-    hullSection: "Recorrido del casco",
-    hullPhotoHint: "Una foto clara de esta zona. Marca daños y añade un comentario breve.",
-    hullCommentPlaceholder: "Gelcoat, rayones, abolladuras, puntos blandos, herrajes...",
-    hullIncomplete: "Completa las cinco fotos del casco (proa, popa, babor, estribor, cubierta) antes de enviar.",
     bodySection: "Exterior e interior",
     tiresSection: (tireCount) =>
       tireCount === 4
@@ -3534,11 +3524,6 @@ export const es: AppMessages = {
       exterior_left: "Exterior — lado izquierdo",
       exterior_right: "Exterior — lado derecho",
       interior: "Interior",
-      hull_bow: "Casco — proa",
-      hull_stern: "Casco — popa",
-      hull_port: "Casco — babor (izquierda)",
-      hull_starboard: "Casco — estribor (derecha)",
-      hull_deck: "Cubierta / cockpit",
       tire_fl: "Llanta — delantera izquierda",
       tire_fr: "Llanta — delantera derecha",
       tire_rl: "Llanta — trasera izquierda",
