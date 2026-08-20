@@ -59,7 +59,23 @@ export type RentalAgreementCommercialSnapshot = {
     operatorCertRequired?: boolean;
     boaterLicenseRequired?: boolean;
     droneCertRequired?: boolean;
+    droneWeightClass?: string;
+    remoteIdStatus?: string;
+    dinSettingBand?: string;
+    pfdIncluded?: string;
+    setPieceCountBand?: string;
+    tentSizeBand?: string;
+    sleepingBagTempBand?: string;
+    stoveFuelType?: string;
+    cateringSanitizeRequired?: boolean;
     carSeatSanitizationRequired?: boolean;
+    cribSafetyRequired?: boolean;
+    ppeAckRequired?: boolean;
+    commercialCoffeeTrust?: boolean;
+    commercialCoffeeVoltage?: string;
+    commercialCoffeeNsf?: string;
+    commercialCoffeeInstall?: string;
+    commercialPlayCert?: string;
     houseRules?: string;
     cleaningFeeUsd?: number;
     minAgeRequired?: number;
@@ -99,6 +115,7 @@ export type RentalAgreementCommercialSnapshot = {
     hygieneChecklistNotes?: string;
     returnConditionPolicy?: string;
     dryCleanReturnFeeUsd?: number;
+    costumeHygieneRequired?: boolean;
   };
 };
 
@@ -273,6 +290,25 @@ export function buildEnrichedSummaryLines(input: {
       "Car seat: host confirmed non-expired / recall-checked unit; renter sanitization acknowledgment required.",
     );
   }
+  if (trust?.cribSafetyRequired) {
+    lines.push(
+      "Crib / bed: host attested CPSC compliance, no drop-side, recall-checked unit, and mattress status; renter re-acknowledged at booking.",
+    );
+  }
+  if (trust?.ppeAckRequired) {
+    lines.push("PPE acknowledgment: renter confirmed PPE duties before use.");
+  }
+  if (trust?.commercialCoffeeTrust) {
+    const bits = [
+      trust.commercialCoffeeVoltage?.trim() ? `voltage ${trust.commercialCoffeeVoltage.trim()}` : null,
+      trust.commercialCoffeeNsf?.trim() ? `NSF ${trust.commercialCoffeeNsf.trim()}` : null,
+      trust.commercialCoffeeInstall?.trim() ? `install ${trust.commercialCoffeeInstall.trim()}` : null,
+    ].filter(Boolean);
+    lines.push(bits.length ? `Commercial coffee equipment: ${bits.join("; ")}.` : "Commercial coffee equipment disclosed at listing.");
+  }
+  if (trust?.commercialPlayCert?.trim()) {
+    lines.push(`Commercial play equipment certification: ${trust.commercialPlayCert.trim()}; liability waiver required.`);
+  }
   if (trust?.houseRules?.trim()) {
     lines.push(`House rules: ${trust.houseRules.trim()}`);
   }
@@ -379,6 +415,12 @@ export function buildEnrichedSummaryLines(input: {
         : `Costume return condition: ${trust.returnConditionPolicy.trim()}.`,
     );
   }
+  if (trust?.costumeHygieneRequired) {
+    lines.push(
+      "Costume hygiene: host attested sanitization for makeup / wigs / masks; renter acknowledged at booking.",
+    );
+  }
+
   if (trust?.hitchClass || trust?.brakeController) {
     lines.push(
       `Trailer hitch: ${trust.hitchClass || "n/a"}; brake controller: ${trust.brakeController || "n/a"}.`,

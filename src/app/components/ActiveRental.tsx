@@ -105,6 +105,7 @@ import {
   listingRequiresSafetyBriefing,
   listingRequiresHygieneChecklist,
   listingRequiresCostumeReturnCondition,
+  listingRequiresCostumeHygiene,
   listingRequiresSafetyBriefing,
   listingRequiresHygieneChecklist,
   listingRequiresCostumeReturnCondition,
@@ -260,20 +261,20 @@ export function ActiveRental({
     publishedListing != null && listingRequiresHygieneChecklist(publishedListing);
   const needsCostumeReturn =
     publishedListing != null && listingRequiresCostumeReturnCondition(publishedListing);
+  const needsCostumeHygiene =
+    publishedListing != null && listingRequiresCostumeHygiene(publishedListing);
   const needsDataWipe =
     publishedListing != null && listingRequiresDataWipe(publishedListing);
   const needsPaCableStand =
     publishedListing != null && listingRequiresPaCableStandInventory(publishedListing);
-      return;
-    }
-    if (
-      mode === "pickup" &&
-  const needsSafetyBriefing =
-    publishedListing != null && listingRequiresSafetyBriefing(publishedListing);
-  const needsHygiene =
-    publishedListing != null && listingRequiresHygieneChecklist(publishedListing);
-  const needsCostumeReturn =
-    publishedListing != null && listingRequiresCostumeReturnCondition(publishedListing);
+  const needsCoiHostConfirm =
+    publishedListing != null && listingRequiresCoiHostConfirm(publishedListing);
+  const needsOhvTerrainWaiver =
+    publishedListing != null && listingRequiresOhvTerrainWaiver(publishedListing);
+  const needsMotorcycleEndorsement =
+    publishedListing != null && listingRequiresMotorcycleEndorsement(publishedListing);
+  const needsPfdAttestation =
+    publishedListing != null && listingRequiresPfdAttestation(publishedListing);
   const contactlessMode = booking?.fulfillmentMethod === "contactless";
   const qrTarget = useMemo(
     () => (booking ? resolveBookingQrTarget(booking) : { listingId: undefined, qrToken: undefined }),
@@ -685,6 +686,15 @@ export function ActiveRental({
       booking?.role === "renter"
     ) {
       setNotice(t.rentalDetail.costumeReturnUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsCostumeHygiene &&
+      !booking?.costumeHygieneAttested &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.costumeHygieneUnlockBlocked);
       return;
     }
     if (

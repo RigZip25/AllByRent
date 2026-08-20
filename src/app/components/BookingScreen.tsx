@@ -30,6 +30,10 @@ import {
   listingHelmetPolicy,
   listingHouseRulesText,
   listingIsCarSeat,
+  listingIsCrib,
+  listingIsCommercialCoffee,
+  listingIsCommercialPlay,
+  listingCribBlocksBooking,
   listingIsDrone,
   listingKitInventoryText,
   listingLockPolicy,
@@ -42,6 +46,7 @@ import {
   listingRequiresHelmetLockPolicy,
   listingRequiresKitInventory,
   listingRequiresLiabilityWaiver,
+  listingRequiresPpeAck,
   listingRequiresOperatorCredential,
   listingRequiresPaCableStandInventory,
   listingRequiresUscgSafetyKit,
@@ -68,6 +73,8 @@ import {
   listingHygieneBlocksBooking,
   listingHygieneChecklistNotes,
   listingRequiresCostumeReturnCondition,
+  listingRequiresCostumeHygiene,
+  listingCostumeHygieneBlocksBooking,
   listingDryCleanReturnFeeUsd,
   listingReturnConditionPolicy,
 } from "../../lib/categoryTrustRules";
@@ -338,16 +345,20 @@ function BookingScreenLoaded({
   const [droneCertBusy, setDroneCertBusy] = useState(false);
   const [carSeatSanitizationAttested, setCarSeatSanitizationAttested] = useState(false);
   const [carSeatRecallAckAttested, setCarSeatRecallAckAttested] = useState(false);
+  const [cribRecallAckAttested, setCribRecallAckAttested] = useState(false);
+  const [cribDropSideAckAttested, setCribDropSideAckAttested] = useState(false);
+  const [cribSanitizationAttested, setCribSanitizationAttested] = useState(false);
+  const [ppeAckAttested, setPpeAckAttested] = useState(false);
   const [uscgSafetyAck, setUscgSafetyAck] = useState(false);
   const [kitInventoryAck, setKitInventoryAck] = useState(false);
   const [liabilityWaiverAttested, setLiabilityWaiverAttested] = useState(false);
   const [helmetLockAck, setHelmetLockAck] = useState(false);
   const [dataWipeAttested, setDataWipeAttested] = useState(false);
-  const [paCableStandAck, setPaCableStandAck] = useState(false);
   const [weatherCancelAck, setWeatherCancelAck] = useState(false);
   const [safetyBriefingAck, setSafetyBriefingAck] = useState(false);
   const [hygieneAck, setHygieneAck] = useState(false);
   const [costumeReturnConditionAck, setCostumeReturnConditionAck] = useState(false);
+  const [costumeHygieneAttested, setCostumeHygieneAttested] = useState(false);
   const [driverLicenseValidAttested, setDriverLicenseValidAttested] = useState(false);
   const [driverRecordSoftAttested, setDriverRecordSoftAttested] = useState(false);
   const [driverLicenseState, setDriverLicenseState] = useState("");
@@ -370,6 +381,11 @@ function BookingScreenLoaded({
   const needsDroneCert = listingRequiresDroneCert(listing);
   const needsCarSeatGates = listingIsCarSeat(listing) && listing.modes.rent;
   const carSeatListingBlocked = listingCarSeatBlocksBooking(listing);
+  const needsCribGates = listingIsCrib(listing) && listing.modes.rent;
+  const cribListingBlocked = listingCribBlocksBooking(listing);
+  const needsCommercialPlay = listingIsCommercialPlay(listing) && listing.modes.rent;
+  const needsCommercialCoffee = listingIsCommercialCoffee(listing) && listing.modes.rent;
+  const needsPpeAck = listingRequiresPpeAck(listing);
   const houseRulesText = listingHouseRulesText(listing);
   const cleaningFeeUsd = listingCleaningFeeUsd(listing);
   const setupTeardownFeeUsd = listingSetupTeardownFeeUsd(listing);
@@ -404,6 +420,8 @@ function BookingScreenLoaded({
   const hygieneBlocked = listingHygieneBlocksBooking(listing);
   const hygieneNotes = listingHygieneChecklistNotes(listing);
   const needsCostumeReturn = listingRequiresCostumeReturnCondition(listing);
+  const needsCostumeHygiene = listingRequiresCostumeHygiene(listing);
+  const costumeHygieneBlocked = listingCostumeHygieneBlocksBooking(listing);
   const dryCleanReturnFeeUsd = listingDryCleanReturnFeeUsd(listing);
   const returnConditionPolicy = listingReturnConditionPolicy(listing);
   const isCostumeListing = listingIsCostumeCategory(listing) && listing.modes.rent;
@@ -583,6 +601,13 @@ function BookingScreenLoaded({
     (!carSeatListingBlocked &&
       carSeatSanitizationAttested &&
       carSeatRecallAckAttested);
+  const cribOk =
+    !needsCribGates ||
+    (!cribListingBlocked &&
+      cribRecallAckAttested &&
+      cribDropSideAckAttested &&
+      cribSanitizationAttested);
+  const ppeAckOk = !needsPpeAck || ppeAckAttested;
   const realEstateHouseRulesOk =
     listing.category.trim() !== "Real Estate" ||
     !listing.modes.rent ||
@@ -600,6 +625,8 @@ function BookingScreenLoaded({
     !needsSafetyBriefing || (!safetyBriefingBlocked && safetyBriefingAck);
   const hygieneOk = !needsHygiene || (!hygieneBlocked && hygieneAck);
   const costumeReturnOk = !needsCostumeReturn || costumeReturnConditionAck;
+  const costumeHygieneOk =
+    !needsCostumeHygiene || (!costumeHygieneBlocked && costumeHygieneAttested);
 
   const eScooterAgeOk = useMemo(() => {
     if (!needsEScooterAge) return true;
@@ -656,6 +683,8 @@ function BookingScreenLoaded({
     driverRecordOk &&
     droneCertOk &&
     carSeatOk &&
+    cribOk &&
+    ppeAckOk &&
     realEstateHouseRulesOk &&
     uscgSafetyOk &&
     kitInventoryOk &&
@@ -667,6 +696,7 @@ function BookingScreenLoaded({
     safetyBriefingOk &&
     hygieneOk &&
     costumeReturnOk &&
+    costumeHygieneOk &&
     eScooterAgeOk &&
     !insuranceUploadBusy &&
     !proCredentialBusy &&
@@ -720,6 +750,21 @@ function BookingScreenLoaded({
         boaterLicenseRequired: needsBoaterLicense,
         droneCertRequired: needsDroneCert,
         carSeatSanitizationRequired: needsCarSeatGates,
+        cribSafetyRequired: needsCribGates,
+        ppeAckRequired: needsPpeAck,
+        commercialCoffeeTrust: needsCommercialCoffee,
+        commercialCoffeeVoltage: needsCommercialCoffee
+          ? listing.categorySpecs?.voltageBand || undefined
+          : undefined,
+        commercialCoffeeNsf: needsCommercialCoffee
+          ? listing.categorySpecs?.nsfCertified || undefined
+          : undefined,
+        commercialCoffeeInstall: needsCommercialCoffee
+          ? listing.categorySpecs?.installNeeds || undefined
+          : undefined,
+        commercialPlayCert: needsCommercialPlay
+          ? listing.categorySpecs?.playCertStandard || undefined
+          : undefined,
         houseRules: houseRulesText || undefined,
         cleaningFeeUsd: cleaningFeeUsd > 0 ? cleaningFeeUsd : undefined,
         minAgeRequired: needsAgeGate
@@ -763,6 +808,7 @@ function BookingScreenLoaded({
         safetyBriefingNotes: safetyBriefingNotes || undefined,
         hygieneChecklistRequired: needsHygiene,
         hygieneChecklistNotes: hygieneNotes || undefined,
+        costumeHygieneRequired: needsCostumeHygiene,
         returnConditionPolicy: needsCostumeReturn
           ? returnConditionPolicy || undefined
           : undefined,
@@ -904,6 +950,21 @@ function BookingScreenLoaded({
           boaterLicenseRequired: needsBoaterLicense,
           droneCertRequired: needsDroneCert,
           carSeatSanitizationRequired: needsCarSeatGates,
+        cribSafetyRequired: needsCribGates,
+        ppeAckRequired: needsPpeAck,
+        commercialCoffeeTrust: needsCommercialCoffee,
+        commercialCoffeeVoltage: needsCommercialCoffee
+          ? listing.categorySpecs?.voltageBand || undefined
+          : undefined,
+        commercialCoffeeNsf: needsCommercialCoffee
+          ? listing.categorySpecs?.nsfCertified || undefined
+          : undefined,
+        commercialCoffeeInstall: needsCommercialCoffee
+          ? listing.categorySpecs?.installNeeds || undefined
+          : undefined,
+        commercialPlayCert: needsCommercialPlay
+          ? listing.categorySpecs?.playCertStandard || undefined
+          : undefined,
           houseRules: houseRulesText || undefined,
           cleaningFeeUsd: cleaningFeeUsd > 0 ? cleaningFeeUsd : undefined,
           minAgeRequired: needsAgeGate
@@ -947,7 +1008,8 @@ function BookingScreenLoaded({
           safetyBriefingNotes: safetyBriefingNotes || undefined,
           hygieneChecklistRequired: needsHygiene,
           hygieneChecklistNotes: hygieneNotes || undefined,
-          returnConditionPolicy: needsCostumeReturn
+          costumeHygieneRequired: needsCostumeHygiene,
+        returnConditionPolicy: needsCostumeReturn
             ? returnConditionPolicy || undefined
             : undefined,
           dryCleanReturnFeeUsd: dryCleanReturnFeeUsd > 0 ? dryCleanReturnFeeUsd : undefined,
@@ -1077,6 +1139,10 @@ function BookingScreenLoaded({
       droneCertMedia: needsDroneCert ? droneCertMedia : undefined,
       carSeatSanitizationAttested: needsCarSeatGates ? carSeatSanitizationAttested : undefined,
       carSeatRecallAckAttested: needsCarSeatGates ? carSeatRecallAckAttested : undefined,
+      cribRecallAckAttested: needsCribGates ? cribRecallAckAttested : undefined,
+      cribDropSideAckAttested: needsCribGates ? cribDropSideAckAttested : undefined,
+      cribSanitizationAttested: needsCribGates ? cribSanitizationAttested : undefined,
+      ppeAckAttested: needsPpeAck ? ppeAckAttested : undefined,
       houseRulesSnapshot: houseRulesText || undefined,
       cleaningFeeUsd: cleaningFeeUsd > 0 ? cleaningFeeUsd : undefined,
       uscgSafetyAck: needsUscgSafety ? uscgSafetyAck : undefined,
@@ -1097,6 +1163,7 @@ function BookingScreenLoaded({
       hygieneAck: needsHygiene ? hygieneAck : undefined,
       hygieneNotesSnapshot: hygieneNotes || undefined,
       costumeReturnConditionAck: needsCostumeReturn ? costumeReturnConditionAck : undefined,
+      costumeHygieneAttested: needsCostumeHygiene ? costumeHygieneAttested : undefined,
       returnConditionPolicySnapshot: returnConditionPolicy || undefined,
       dryCleanReturnFeeUsd: dryCleanReturnFeeUsd > 0 ? dryCleanReturnFeeUsd : undefined,
       dataWipeAttested: needsDataWipe ? dataWipeAttested : undefined,
@@ -1431,7 +1498,18 @@ function BookingScreenLoaded({
         {listingIsDrone(listing) && listing.modes.rent ? (
           <CategoryFactCard category="Photo & Video" />
         ) : null}
-        {needsCarSeatGates ? <CategoryFactCard category="Baby & Kids" /> : null}
+        {needsCarSeatGates || needsCribGates || needsCommercialPlay ? (
+          <CategoryFactCard category="Baby & Kids" />
+        ) : null}
+        {listing.category.trim() === "Tools & DIY" && listing.modes.rent ? (
+          <CategoryFactCard category="Tools & DIY" />
+        ) : null}
+        {listing.category.trim() === "Garden & Yard" && listing.modes.rent ? (
+          <CategoryFactCard category="Garden & Yard" />
+        ) : null}
+        {listing.category.trim() === "Home & Kitchen" && listing.modes.rent ? (
+          <CategoryFactCard category="Home & Kitchen" />
+        ) : null}
         {isHighValueGear && !listingIsDrone(listing) ? (
           <CategoryFactCard
             category={
@@ -1499,6 +1577,57 @@ function BookingScreenLoaded({
           </div>
         ) : null}
 
+        
+        {needsDataWipe && dataWipeListingBlocked ? (
+          <div className="rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-950">
+            <p className="font-semibold">{t.booking.dataWipeBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.dataWipeBlockedBody}</p>
+          </div>
+        ) : null}
+
+        {needsDataWipe && !dataWipeListingBlocked ? (
+          <div className="rounded-xl border border-slate-300 bg-slate-50/80 p-4 space-y-3">
+            <p className="text-sm font-semibold text-slate-950">{t.booking.dataWipeTitle}</p>
+            <p className="text-[12px] text-slate-800/90">{t.booking.dataWipeBody}</p>
+            {hostDataWipeStatus ? (
+              <p className="text-[12px] text-slate-800">
+                {t.booking.dataWipeHostStatusLine(
+                  t.listing.specs.options[hostDataWipeStatus] ?? hostDataWipeStatus,
+                )}
+              </p>
+            ) : null}
+            <label className="flex items-start gap-2 text-xs text-slate-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={dataWipeAttested}
+                onChange={(e) => setDataWipeAttested(e.target.checked)}
+              />
+              <span>{t.booking.dataWipeAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {needsPaCableStand ? (
+          <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-indigo-950">{t.booking.paCableStandTitle}</p>
+            {paCableStandText ? (
+              <p className="text-[13px] whitespace-pre-wrap text-indigo-900/90">{paCableStandText}</p>
+            ) : (
+              <p className="text-[12px] text-indigo-900/80">{t.booking.paCableStandEmpty}</p>
+            )}
+            <label className="flex items-start gap-2 text-xs text-indigo-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={paCableStandAck}
+                onChange={(e) => setPaCableStandAck(e.target.checked)}
+              />
+              <span>{t.booking.paCableStandAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
         {needsCostumeReturn ? (
           <div className="rounded-xl border border-border bg-card p-4 space-y-1">
             <p className="text-sm font-semibold text-gray-900">
@@ -1544,6 +1673,65 @@ function BookingScreenLoaded({
               />
               <span>{t.booking.carSeatSanitizationAttest}</span>
             </label>
+          </div>
+        ) : null}
+
+        {needsCribGates && cribListingBlocked ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <p className="font-semibold">{t.booking.cribBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.cribBlockedBody}</p>
+          </div>
+        ) : null}
+        {needsCribGates && !cribListingBlocked ? (
+          <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-rose-950">{t.booking.cribSafetyTitle}</p>
+            <label className="flex items-start gap-2 text-xs text-rose-950">
+              <input type="checkbox" className="mt-0.5" checked={cribRecallAckAttested} onChange={(e) => setCribRecallAckAttested(e.target.checked)} />
+              <span>{t.booking.cribRecallAttest}</span>
+            </label>
+            <label className="flex items-start gap-2 text-xs text-rose-950">
+              <input type="checkbox" className="mt-0.5" checked={cribDropSideAckAttested} onChange={(e) => setCribDropSideAckAttested(e.target.checked)} />
+              <span>{t.booking.cribDropSideAttest}</span>
+            </label>
+            <label className="flex items-start gap-2 text-xs text-rose-950">
+              <input type="checkbox" className="mt-0.5" checked={cribSanitizationAttested} onChange={(e) => setCribSanitizationAttested(e.target.checked)} />
+              <span>{t.booking.cribSanitizationAttest}</span>
+            </label>
+          </div>
+        ) : null}
+        {needsPpeAck ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-amber-950">{t.booking.ppeAckTitle}</p>
+            <p className="text-[12px] text-amber-900/90">{t.booking.ppeAckBody}</p>
+            <label className="flex items-start gap-2 text-xs text-amber-950">
+              <input type="checkbox" className="mt-0.5" checked={ppeAckAttested} onChange={(e) => setPpeAckAttested(e.target.checked)} />
+              <span>{t.booking.ppeAckAttest}</span>
+            </label>
+          </div>
+        ) : null}
+        {needsCommercialCoffee ? (
+          <div className="rounded-xl border border-border bg-card p-4 space-y-1">
+            <p className="text-sm font-semibold text-gray-900">{t.booking.commercialCoffeeTitle}</p>
+            <p className="text-[12px] text-muted-foreground">{t.booking.commercialCoffeeBody}</p>
+            {[
+              listing.categorySpecs?.voltageBand
+                ? t.booking.commercialCoffeeVoltageLine(
+                    t.listing.specs.options[listing.categorySpecs.voltageBand] ?? listing.categorySpecs.voltageBand,
+                  )
+                : null,
+              listing.categorySpecs?.nsfCertified
+                ? t.booking.commercialCoffeeNsfLine(
+                    t.listing.specs.options[listing.categorySpecs.nsfCertified] ?? listing.categorySpecs.nsfCertified,
+                  )
+                : null,
+              listing.categorySpecs?.installNeeds
+                ? t.booking.commercialCoffeeInstallLine(
+                    t.listing.specs.options[listing.categorySpecs.installNeeds] ?? listing.categorySpecs.installNeeds,
+                  )
+                : null,
+            ].filter(Boolean).map((line) => (
+              <p key={String(line)} className="text-[13px] text-gray-800">{line}</p>
+            ))}
           </div>
         ) : null}
 

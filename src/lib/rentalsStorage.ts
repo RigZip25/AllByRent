@@ -256,6 +256,7 @@ export type RentalBooking = {
   hygieneAck?: boolean;
   hygieneNotesSnapshot?: string;
   costumeReturnConditionAck?: boolean;
+  costumeHygieneAttested?: boolean;
   returnConditionPolicySnapshot?: string;
   dryCleanReturnFeeUsd?: number;
   /**

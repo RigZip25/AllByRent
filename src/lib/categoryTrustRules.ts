@@ -397,7 +397,10 @@ export function listingRequiresKitInventory(
 export function listingKitInventoryText(
   listing: Pick<ListingDraft, "categorySpecs">,
 ): string {
-  return (listing.categorySpecs?.kitInventoryChecklist ?? "").trim();
+  const structured = (listing.categorySpecs?.kitInventoryItems ?? "")
+    .split(",").map((s) => s.trim()).filter(Boolean);
+  const free = (listing.categorySpecs?.kitInventoryChecklist ?? "").trim();
+  return [...structured, ...(free ? [free] : [])].join(", ");
 }
 
 export function listingIsTrailer(
@@ -610,8 +613,15 @@ export function listingIsOfficeStorageCapableSub(
 export function listingRequiresDataWipe(
   listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
 ): boolean {
-  if (!rentOn(listing) || !listingIsOfficeStorageCapableSub(listing)) return false;
-  return listingDeviceHasStorage(listing);
+  if (!rentOn(listing)) return false;
+  if (listing.category.trim() === "Electronics & Tech") {
+    const sub = subKey(listing);
+    if (["laptops","smart home devices","network gear","servers & workstations"].includes(sub)) return true;
+  }
+  if (typeof listingIsOfficeStorageCapableSub === "function" && listingIsOfficeStorageCapableSub(listing)) {
+    return listingDeviceHasStorage(listing);
+  }
+  return false;
 }
 
 export function listingHostDataWipeStatus(
@@ -629,6 +639,7 @@ export function listingDataWipeBlocksPublish(
   return (
     status !== "wiped_before_list" &&
     status !== "wipe_at_handoff" &&
+    status !== "account_unlinked" &&
     status !== "renter_responsible"
   );
 }
@@ -998,4 +1009,77 @@ export function listingPfdCount(
   const n = Number.parseInt(raw, 10);
   if (Number.isFinite(n) && n > 0 && n <= 24) return n;
   return null;
+}
+
+
+/* Party/Sports/Outdoor/Electronics/Photo P0 helpers */
+export function listingDroneWeightClass(listing: Pick<ListingDraft, "categorySpecs">): string {
+  return (listing.categorySpecs?.droneWeightClass ?? "").trim();
+}
+export function listingRemoteIdStatus(listing: Pick<ListingDraft, "categorySpecs">): string {
+  return (listing.categorySpecs?.remoteIdStatus ?? "").trim();
+}
+export function listingDroneRemoteIdBlocksBooking(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!listingRequiresDroneCert(listing)) return false;
+  const weight = listingDroneWeightClass(listing);
+  const rid = listingRemoteIdStatus(listing);
+  if (!["under_250g", "250g_to_55lb", "over_55lb"].includes(weight)) return true;
+  if (rid !== "broadcast_builtin" && rid !== "broadcast_add_on" && rid !== "rid_exempt_under_250g") return true;
+  if (rid === "rid_exempt_under_250g" && weight !== "under_250g") return true;
+  return false;
+}
+export function listingIsSnowSports(listing: Pick<ListingDraft, "category" | "subcategory">): boolean {
+  return listing.category.trim() === "Sports & Recreation" && subKey(listing) === "snow sports";
+}
+export function listingRequiresSnowSportsGates(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  return rentOn(listing) && listingIsSnowSports(listing);
+}
+export function listingDinSettingBand(listing: Pick<ListingDraft, "categorySpecs">): string {
+  return (listing.categorySpecs?.dinSettingBand ?? "").trim();
+}
+export function listingIsWaterSportsShelf(listing: Pick<ListingDraft, "category" | "subcategory">): boolean {
+  const sub = subKey(listing);
+  return listing.category.trim() === "Sports & Recreation" && (sub === "water sports" || sub === "pro water sports");
+}
+export function listingRequiresPfdPolicy(listing: Pick<ListingDraft, "category" | "subcategory" | "modes">): boolean {
+  return rentOn(listing) && listingIsWaterSportsShelf(listing);
+}
+export function listingPfdIncluded(listing: Pick<ListingDraft, "categorySpecs">): string {
+  return (listing.categorySpecs?.pfdIncluded ?? "").trim();
+}
+export function listingPfdBlocksBooking(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!listingRequiresPfdPolicy(listing)) return false;
+  const pfd = listingPfdIncluded(listing);
+  return pfd !== "included" && pfd !== "renter_provides" && pfd !== "not_applicable";
+}
+export function listingRequiresCateringSanitize(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes">,
+): boolean {
+  if (!rentOn(listing) || listing.category.trim() !== "Party & Events") return false;
+  const sub = subKey(listing);
+  return sub === "serving equipment" || sub === "catering equipment";
+}
+export function listingCateringSanitizeBlocksBooking(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!listingRequiresCateringSanitize(listing)) return false;
+  return (listing.categorySpecs?.cateringSanitizeAttested ?? "").trim() !== "attested";
+}
+export function listingSetPieceCountBand(listing: Pick<ListingDraft, "categorySpecs">): string {
+  return (listing.categorySpecs?.setPieceCountBand ?? "").trim();
+}
+export function listingTentSizeBand(listing: Pick<ListingDraft, "categorySpecs">): string {
+  return (listing.categorySpecs?.tentSizeBand ?? "").trim();
+}
+export function listingSleepingBagTempBand(listing: Pick<ListingDraft, "categorySpecs">): string {
+  return (listing.categorySpecs?.sleepingBagTempBand ?? "").trim();
+}
+export function listingStoveFuelType(listing: Pick<ListingDraft, "categorySpecs">): string {
+  return (listing.categorySpecs?.stoveFuelType ?? "").trim();
 }
