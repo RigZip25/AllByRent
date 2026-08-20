@@ -625,7 +625,11 @@ export function HostListingDetailScreen({
           />
         ) : null}
         {listing.category.trim() === "Bikes & Scooters" ? (
-          <CategoryFactCard category="Bikes & Scooters" className="mb-4" />
+          <CategoryFactCard
+            category="Bikes & Scooters"
+            subcategory={listing.subcategory}
+            className="mb-4"
+          />
         ) : null}
         {listing.category.trim() === "Party & Events" ? (
           <CategoryFactCard

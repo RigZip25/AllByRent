@@ -187,4 +187,21 @@ Profile + per-sub FactCards + subcategory wiring already shipped (`bfb116d`). Ge
 
 **Option scoping:** prefix `veh_*` on new option ids.
 
+### Bikes & Scooters (~8.0) — shipped pattern
+
+| Layer | Pattern |
+|-------|---------|
+| All | Frame/wheel, electric, helmet, lock, overnight storage |
+| E-power | Min age + `eBikeClass` when E-Bikes / Electric = yes; battery/charger recommended |
+| Mountain / Racing | `liabilityWaiverRequired` |
+| Kids | Guardian at booking; helmet cannot be `not_required` |
+| Cargo | Payload + child passenger policy |
+| Adaptive | `adaptiveBikeType` |
+| Scooters | `scooterClass` on Electric + Professional Scooters |
+| Other | `bikesOtherKind` — prefer named shelf |
+| Deposit | Damage + missing lock/helmet/charger — not injury insurance |
+| FactCards | Per-sub Q→A EN/CS/ES; wire `subcategory` |
+
+**Option scoping:** prefix `bikes_*` on new option ids; keep existing e-bike `class_1`–`class_3` labels.
+
 See also: [EVORIOS.md](./EVORIOS.md) (brand / product source of truth).

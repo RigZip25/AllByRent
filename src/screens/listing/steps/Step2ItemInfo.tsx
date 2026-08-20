@@ -791,7 +791,8 @@ export function Step2ItemInfo({
                 draft.category.trim() === "Office & Business" ||
                 draft.category.trim() === "Sports & Recreation" ||
                 draft.category.trim() === "Tools & DIY" ||
-                draft.category.trim() === "Unique & Other"
+                draft.category.trim() === "Unique & Other" ||
+                draft.category.trim() === "Bikes & Scooters"
                   ? draft.subcategory
                   : undefined
               }

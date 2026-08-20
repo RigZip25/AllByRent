@@ -1723,7 +1723,12 @@ function BookingScreenLoaded({
             subcategory={listing.subcategory}
           />
         ) : null}
-        {isBikesListing ? <CategoryFactCard category="Bikes & Scooters" /> : null}
+        {isBikesListing ? (
+          <CategoryFactCard
+            category="Bikes & Scooters"
+            subcategory={listing.subcategory}
+          />
+        ) : null}
         {isPartyListing ? (
           <CategoryFactCard
             category="Party & Events"

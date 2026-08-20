@@ -613,7 +613,11 @@ export function ItemDetail({
               />
             ) : null}
             {listing.modes.rent && listing.category.trim() === "Bikes & Scooters" ? (
-              <CategoryFactCard category="Bikes & Scooters" className="mt-3" />
+              <CategoryFactCard
+                category="Bikes & Scooters"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
             ) : null}
             {listing.modes.rent && listing.category.trim() === "Party & Events" ? (
               <CategoryFactCard

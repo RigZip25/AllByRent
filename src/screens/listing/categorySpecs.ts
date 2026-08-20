@@ -2453,6 +2453,38 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
           "other_adaptive",
         ],
       },
+      {
+        key: "scooterClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Electric Scooters", "Professional Scooters"],
+        options: [
+          "bikes_scooter_kick",
+          "bikes_scooter_standup_e",
+          "bikes_scooter_seated_e",
+          "bikes_scooter_other",
+        ],
+      },
+      {
+        key: "bikesOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: [
+          "bikes_kind_mtb",
+          "bikes_kind_road",
+          "bikes_kind_ebike",
+          "bikes_kind_kids",
+          "bikes_kind_scooter",
+          "bikes_kind_cruiser",
+          "bikes_kind_racing",
+          "bikes_kind_cargo",
+          "bikes_kind_adaptive",
+          "bikes_kind_mixed",
+        ],
+      },
     ],
   },
   {
@@ -7445,6 +7477,28 @@ export function areCategorySpecsValid(
       if (![
         "handcycle", "tandem", "trike", "recumbent", "wheelchair_attach", "other_adaptive",
       ].includes((values.adaptiveBikeType ?? "").trim())) return false;
+    }
+    if (sub === "electric scooters" || sub === "professional scooters") {
+      if (![
+        "bikes_scooter_kick",
+        "bikes_scooter_standup_e",
+        "bikes_scooter_seated_e",
+        "bikes_scooter_other",
+      ].includes((values.scooterClass ?? "").trim())) return false;
+    }
+    if (sub === "other") {
+      if (![
+        "bikes_kind_mtb",
+        "bikes_kind_road",
+        "bikes_kind_ebike",
+        "bikes_kind_kids",
+        "bikes_kind_scooter",
+        "bikes_kind_cruiser",
+        "bikes_kind_racing",
+        "bikes_kind_cargo",
+        "bikes_kind_adaptive",
+        "bikes_kind_mixed",
+      ].includes((values.bikesOtherKind ?? "").trim())) return false;
     }
   }
 
