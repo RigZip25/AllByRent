@@ -567,6 +567,13 @@ export function listingIsMusicCategory(
   return listing.category.trim() === "Music & Audio";
 }
 
+/**
+ * Music & Audio (~8.0): brand+model always; powered shelves freeze powerBand;
+ * PA requires cable/stand inventory; mics freeze hygiene wipe; instruments freeze
+ * case/strings/cable. Scoped option ids (e.g. instrument_wireless_only) — never
+ * reuse bare wireless_only (network gear). Publish: Music P0 in areCategorySpecsValid.
+ */
+
 /** Host marked the device as having onboard storage (HDD/SSD/NVRAM/jobs). */
 export function listingDeviceHasStorage(
   listing: Pick<ListingDraft, "categorySpecs">,

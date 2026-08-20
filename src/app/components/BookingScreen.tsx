@@ -1723,7 +1723,12 @@ function BookingScreenLoaded({
           <CategoryFactCard category="Costume & Cosplay" subcategory={listing.subcategory} />
         ) : null}
         {isOfficeListing ? <CategoryFactCard category="Office & Business" /> : null}
-        {isMusicListing ? <CategoryFactCard category="Music & Audio" /> : null}
+        {isMusicListing ? (
+          <CategoryFactCard
+            category="Music & Audio"
+            subcategory={listing.subcategory}
+          />
+        ) : null}
 
         {listing.category.trim() === "Real Estate" && houseRulesText ? (
           <div className="rounded-xl border border-border bg-card p-4 space-y-2">

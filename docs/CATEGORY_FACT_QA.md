@@ -76,4 +76,16 @@ All listing `categorySpecs` select **values** share **one flat** `listing.catego
 
 **Bottleneck learned:** injecting new field labels that already exist (even with different hints) breaks `tsc -b`. Prefer extending the existing label’s hint only when truly category-agnostic, or reuse as-is.
 
+### Music & Audio (~8.0) — shipped pattern
+
+| Layer | Pattern |
+|-------|---------|
+| Personal | Instrument form/case/strings/cable; keyboard type/keys/stand; drums pieces+hardware; speaker splash+battery return; mic type+phantom+hygiene wipe |
+| Pro | Amp tube/SS + cab; mixer channels+powered; monitors pair+stands; PA inventory+speaker count+outdoor policy; recording I/O |
+| Deposit | Scuffs + missing accessories vs frozen inventory — not backline insurance |
+| Boundary | Live stacks/instruments here; Electronics **Pro Audio** stays studio capture |
+| FactCards | Per-sub Q→A EN/CS/ES; wire `subcategory` |
+
+**Option scoping:** `instrument_wireless_only` (not bare `wireless_only`, which means network gear).
+
 See also: [EVORIOS.md](./EVORIOS.md) (brand / product source of truth).

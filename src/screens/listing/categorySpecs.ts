@@ -3002,9 +3002,311 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
       {
         key: "powerBand",
         type: "select",
-        required: false,
-        recommended: true,
+        required: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Keyboards",
+          "Portable Speakers",
+          "Amplifiers",
+          "Mixing Consoles",
+          "Studio Monitors",
+          "PA Systems",
+          "Recording Gear",
+        ],
         options: ["under_50w", "50_200w", "200_1000w", "1000w_plus", "passive_unpowered"],
+      },
+      {
+        key: "kitInventoryChecklist",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: [
+          "Guitars & Bass",
+          "Keyboards",
+          "Drums",
+          "Portable Speakers",
+          "Microphones",
+          "Amplifiers",
+          "Mixing Consoles",
+          "Studio Monitors",
+          "PA Systems",
+          "Recording Gear",
+          "Other",
+        ],
+      },
+      {
+        key: "caseIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Guitars & Bass", "Keyboards", "Microphones", "Recording Gear"],
+        options: ["hard_case", "soft_gig_bag", "flight_case", "no_case", "case_optional_add_on"],
+      },
+      {
+        key: "guitarInstrumentForm",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Guitars & Bass"],
+        options: [
+          "acoustic_steel",
+          "classical_nylon",
+          "solid_body_electric",
+          "hollow_semi",
+          "bass_4_string",
+          "bass_5_plus",
+          "acoustic_electric",
+          "other_guitar_bass",
+        ],
+      },
+      {
+        key: "guitarCableIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Guitars & Bass"],
+        options: ["cable_included", "cable_not_included", "instrument_wireless_only", "ask_at_handoff"],
+      },
+      {
+        key: "stringConditionBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Guitars & Bass"],
+        options: ["fresh_new", "good_playable", "worn_replace_soon", "unknown_ask_host"],
+      },
+      {
+        key: "keyboardType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Keyboards"],
+        options: [
+          "digital_piano",
+          "synth",
+          "midi_controller",
+          "organ_stage",
+          "workstation",
+          "arranger",
+          "other_keyboard",
+        ],
+      },
+      {
+        key: "keyCountBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Keyboards"],
+        options: ["keys_25", "keys_49", "keys_61", "keys_76", "keys_88", "keys_other"],
+      },
+      {
+        key: "standPedalIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Keyboards"],
+        options: [
+          "stand_and_pedals",
+          "stand_only",
+          "pedals_only",
+          "neither_renter_provides",
+          "built_in_console",
+        ],
+      },
+      {
+        key: "drumKitForm",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Drums"],
+        options: [
+          "acoustic_full_kit",
+          "e_kit",
+          "snare_only",
+          "cymbal_pack",
+          "hardware_only",
+          "percussion_hand",
+          "other_drums",
+        ],
+      },
+      {
+        key: "drumPieceBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Drums"],
+        options: ["single_piece", "pieces_2_4", "pieces_5_8", "pieces_9_plus", "full_kit_unknown_count"],
+      },
+      {
+        key: "drumHardwareIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Drums"],
+        options: [
+          "full_hardware_throne_pedals",
+          "stands_only",
+          "pedals_only",
+          "no_hardware",
+          "e_kit_module_rack",
+        ],
+      },
+      {
+        key: "portableSpeakerForm",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Portable Speakers"],
+        options: [
+          "bluetooth_party",
+          "battery_bluetooth",
+          "wired_bookshelf",
+          "soundbar",
+          "pa_lite_portable",
+          "other_portable_speaker",
+        ],
+      },
+      {
+        key: "speakerPowerSource",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Portable Speakers"],
+        options: ["battery_only", "ac_only", "battery_and_ac", "passive_needs_amp"],
+      },
+      {
+        key: "outdoorSplashBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Portable Speakers"],
+        options: ["indoor_only", "covered_patio_ok", "splash_resistant", "unknown_keep_dry"],
+      },
+      {
+        key: "batteryReturnChargeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Portable Speakers"],
+        options: [
+          "return_full",
+          "return_as_received",
+          "return_above_50",
+          "ac_powered_na",
+          "host_sets_at_handoff",
+        ],
+      },
+      {
+        key: "micType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Microphones"],
+        options: [
+          "dynamic_handheld",
+          "condenser",
+          "wireless_handheld",
+          "lavalier",
+          "usb_podcast",
+          "ribbon",
+          "shotgun",
+          "other_mic",
+        ],
+      },
+      {
+        key: "phantomPowerNeeded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Microphones", "Recording Gear", "Mixing Consoles"],
+        options: ["needs_48v", "no_phantom", "optional_48v", "battery_powered_mic", "ask_host"],
+      },
+      {
+        key: "micClipCableIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Microphones"],
+        options: ["xlr_and_clip", "cable_only", "clip_only", "wireless_receiver_kit", "none_renter_provides"],
+      },
+      {
+        key: "micHygieneWipePolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Microphones"],
+        options: [
+          "wipe_grille_before_return",
+          "host_sanitizes_grille",
+          "disposable_cover_required",
+          "not_mouth_contact",
+        ],
+      },
+      {
+        key: "ampForm",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Amplifiers"],
+        options: [
+          "guitar_combo",
+          "guitar_head",
+          "guitar_cab",
+          "bass_combo",
+          "bass_head_cab",
+          "keyboard_amp",
+          "power_amp_only",
+          "other_amp",
+        ],
+      },
+      {
+        key: "ampTubeSolidState",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Amplifiers"],
+        options: ["solid_state", "tube", "hybrid", "modeling_digital", "unknown_ask_host"],
+      },
+      {
+        key: "cabIncludedBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Amplifiers"],
+        options: ["combo_built_in", "matching_cab_included", "cab_not_included", "head_only", "cab_only_listing"],
+      },
+      {
+        key: "mixerChannelBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Mixing Consoles"],
+        options: ["ch_under_8", "ch_8_16", "ch_16_24", "ch_24_32", "ch_32_plus", "digital_scene_mixer"],
+      },
+      {
+        key: "mixerPoweredBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Mixing Consoles"],
+        options: ["powered_mixer", "unpowered_needs_speakers", "digital_mixer_stagebox", "ask_host"],
+      },
+      {
+        key: "monitorPairBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Studio Monitors"],
+        options: ["single_monitor", "matched_pair", "2_1_with_sub", "surround_set", "ask_host"],
+      },
+      {
+        key: "monitorStandsIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Studio Monitors"],
+        options: ["stands_included", "isolation_pads_only", "stands_not_included", "desktop_nearfield_na"],
       },
       {
         key: "paCableStandInventory",
@@ -3012,6 +3314,74 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         required: true,
         requiredIf: "rent",
         subcategories: ["PA Systems"],
+      },
+      {
+        key: "paSpeakerCountBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["PA Systems"],
+        options: ["pa_1_2", "pa_3_4", "pa_5_8", "pa_9_plus", "line_array_ask_host"],
+      },
+      {
+        key: "paMixerIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["PA Systems"],
+        options: ["mixer_included", "mixer_not_included", "powered_speakers_only", "ask_at_handoff"],
+      },
+      {
+        key: "outdoorPaUsePolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["PA Systems"],
+        options: [
+          "indoor_only",
+          "covered_outdoor_ok",
+          "full_outdoor_weather_risk",
+          "host_sets_at_handoff",
+        ],
+      },
+      {
+        key: "recordingGearType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Recording Gear"],
+        options: [
+          "audio_interface",
+          "preamp",
+          "field_recorder",
+          "midi_controller_daw",
+          "mic_pre_bundle",
+          "outboard_fx",
+          "other_recording",
+        ],
+      },
+      {
+        key: "recordingIoBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Recording Gear"],
+        options: ["io_2in_2out", "io_4_8", "io_8_plus", "usb_simple", "not_an_interface", "ask_host"],
+      },
+      {
+        key: "musicOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: [
+          "instrument_other",
+          "live_sound_other",
+          "studio_other",
+          "cable_stand_accessory",
+          "mixed_music_kit",
+          "prefer_named_shelf",
+        ],
       },
     ],
   },
@@ -6551,6 +6921,81 @@ export function areCategorySpecsValid(
       if (!reqSelect("homeKitchenPieceBand", ["single_piece", "multi_piece"])) return false;
       if (!reqSelect("photoConditionChecklist", ["overall_photos", "overall_plus_flaws", "all_pieces_and_flaws"])) return false;
       if ((values.homeKitchenPieceBand ?? "").trim() === "multi_piece" && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+  }
+
+
+  // Music & Audio P0 gates by shelf.
+  if (category.trim() === "Music & Audio" && modes?.rent) {
+    const sub = subcategory.trim();
+    const reqSelect = (key: string, allowed: string[]) => allowed.includes((values[key] ?? "").trim());
+    const reqText = (key: string, min = 3) => (values[key] ?? "").trim().length >= min;
+
+    if (!reqText("model", 1)) return false;
+
+    const powered = new Set(["Keyboards","Portable Speakers","Amplifiers","Mixing Consoles","Studio Monitors","PA Systems","Recording Gear"]);
+    if (powered.has(sub) && !reqSelect("powerBand", ["under_50w","50_200w","200_1000w","1000w_plus","passive_unpowered"])) return false;
+
+    if (sub === "Guitars & Bass") {
+      if (!reqSelect("caseIncluded", ["hard_case","soft_gig_bag","flight_case","no_case","case_optional_add_on"])) return false;
+      if (!reqSelect("guitarInstrumentForm", ["acoustic_steel","classical_nylon","solid_body_electric","hollow_semi","bass_4_string","bass_5_plus","acoustic_electric","other_guitar_bass"])) return false;
+      if (!reqSelect("guitarCableIncluded", ["cable_included","cable_not_included","instrument_wireless_only","ask_at_handoff"])) return false;
+      if (!reqSelect("stringConditionBand", ["fresh_new","good_playable","worn_replace_soon","unknown_ask_host"])) return false;
+    }
+    if (sub === "Keyboards") {
+      if (!reqSelect("caseIncluded", ["hard_case","soft_gig_bag","flight_case","no_case","case_optional_add_on"])) return false;
+      if (!reqSelect("keyboardType", ["digital_piano","synth","midi_controller","organ_stage","workstation","arranger","other_keyboard"])) return false;
+      if (!reqSelect("keyCountBand", ["keys_25","keys_49","keys_61","keys_76","keys_88","keys_other"])) return false;
+      if (!reqSelect("standPedalIncluded", ["stand_and_pedals","stand_only","pedals_only","neither_renter_provides","built_in_console"])) return false;
+    }
+    if (sub === "Drums") {
+      if (!reqSelect("drumKitForm", ["acoustic_full_kit","e_kit","snare_only","cymbal_pack","hardware_only","percussion_hand","other_drums"])) return false;
+      if (!reqSelect("drumPieceBand", ["single_piece","pieces_2_4","pieces_5_8","pieces_9_plus","full_kit_unknown_count"])) return false;
+      if (!reqSelect("drumHardwareIncluded", ["full_hardware_throne_pedals","stands_only","pedals_only","no_hardware","e_kit_module_rack"])) return false;
+      if ((values.drumPieceBand ?? "").trim() !== "single_piece" && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Portable Speakers") {
+      if (!reqSelect("portableSpeakerForm", ["bluetooth_party","battery_bluetooth","wired_bookshelf","soundbar","pa_lite_portable","other_portable_speaker"])) return false;
+      if (!reqSelect("speakerPowerSource", ["battery_only","ac_only","battery_and_ac","passive_needs_amp"])) return false;
+      if (!reqSelect("outdoorSplashBand", ["indoor_only","covered_patio_ok","splash_resistant","unknown_keep_dry"])) return false;
+      if (!reqSelect("batteryReturnChargeBand", ["return_full","return_as_received","return_above_50","ac_powered_na","host_sets_at_handoff"])) return false;
+    }
+    if (sub === "Microphones") {
+      if (!reqSelect("caseIncluded", ["hard_case","soft_gig_bag","flight_case","no_case","case_optional_add_on"])) return false;
+      if (!reqSelect("micType", ["dynamic_handheld","condenser","wireless_handheld","lavalier","usb_podcast","ribbon","shotgun","other_mic"])) return false;
+      if (!reqSelect("phantomPowerNeeded", ["needs_48v","no_phantom","optional_48v","battery_powered_mic","ask_host"])) return false;
+      if (!reqSelect("micClipCableIncluded", ["xlr_and_clip","cable_only","clip_only","wireless_receiver_kit","none_renter_provides"])) return false;
+      if (!reqSelect("micHygieneWipePolicy", ["wipe_grille_before_return","host_sanitizes_grille","disposable_cover_required","not_mouth_contact"])) return false;
+    }
+    if (sub === "Amplifiers") {
+      if (!reqSelect("ampForm", ["guitar_combo","guitar_head","guitar_cab","bass_combo","bass_head_cab","keyboard_amp","power_amp_only","other_amp"])) return false;
+      if (!reqSelect("ampTubeSolidState", ["solid_state","tube","hybrid","modeling_digital","unknown_ask_host"])) return false;
+      if (!reqSelect("cabIncludedBand", ["combo_built_in","matching_cab_included","cab_not_included","head_only","cab_only_listing"])) return false;
+    }
+    if (sub === "Mixing Consoles") {
+      if (!reqSelect("mixerChannelBand", ["ch_under_8","ch_8_16","ch_16_24","ch_24_32","ch_32_plus","digital_scene_mixer"])) return false;
+      if (!reqSelect("mixerPoweredBand", ["powered_mixer","unpowered_needs_speakers","digital_mixer_stagebox","ask_host"])) return false;
+      if (!reqSelect("phantomPowerNeeded", ["needs_48v","no_phantom","optional_48v","battery_powered_mic","ask_host"])) return false;
+    }
+    if (sub === "Studio Monitors") {
+      if (!reqSelect("monitorPairBand", ["single_monitor","matched_pair","2_1_with_sub","surround_set","ask_host"])) return false;
+      if (!reqSelect("monitorStandsIncluded", ["stands_included","isolation_pads_only","stands_not_included","desktop_nearfield_na"])) return false;
+    }
+    if (sub === "PA Systems") {
+      if (!reqText("paCableStandInventory", 6)) return false;
+      if (!reqSelect("paSpeakerCountBand", ["pa_1_2","pa_3_4","pa_5_8","pa_9_plus","line_array_ask_host"])) return false;
+      if (!reqSelect("paMixerIncluded", ["mixer_included","mixer_not_included","powered_speakers_only","ask_at_handoff"])) return false;
+      if (!reqSelect("outdoorPaUsePolicy", ["indoor_only","covered_outdoor_ok","full_outdoor_weather_risk","host_sets_at_handoff"])) return false;
+    }
+    if (sub === "Recording Gear") {
+      if (!reqSelect("caseIncluded", ["hard_case","soft_gig_bag","flight_case","no_case","case_optional_add_on"])) return false;
+      if (!reqSelect("recordingGearType", ["audio_interface","preamp","field_recorder","midi_controller_daw","mic_pre_bundle","outboard_fx","other_recording"])) return false;
+      if (!reqSelect("recordingIoBand", ["io_2in_2out","io_4_8","io_8_plus","usb_simple","not_an_interface","ask_host"])) return false;
+      if (!reqSelect("phantomPowerNeeded", ["needs_48v","no_phantom","optional_48v","battery_powered_mic","ask_host"])) return false;
+    }
+    if (sub === "Other") {
+      if (!reqSelect("musicOtherKind", ["instrument_other","live_sound_other","studio_other","cable_stand_accessory","mixed_music_kit","prefer_named_shelf"])) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
     }
   }
 

@@ -622,7 +622,11 @@ export function HostListingDetailScreen({
           <CategoryFactCard category="Office & Business" className="mb-4" />
         ) : null}
         {listing.category.trim() === "Music & Audio" ? (
-          <CategoryFactCard category="Music & Audio" className="mb-4" />
+          <CategoryFactCard
+            category="Music & Audio"
+            subcategory={listing.subcategory}
+            className="mb-4"
+          />
         ) : null}
         {listing.category.trim() === "Tools & DIY" ? (
           <CategoryFactCard category="Tools & DIY" className="mb-4" />
