@@ -424,7 +424,11 @@ export function Step2ItemInfo({
                 defaultExpanded
               />
             ) : draft.category.trim() === "Tools & DIY" ? (
-              <CategoryFactCard category="Tools & DIY" defaultExpanded />
+              <CategoryFactCard
+                category="Tools & DIY"
+                subcategory={draft.subcategory}
+                defaultExpanded
+              />
             ) : draft.category.trim() === "Garden & Yard" ? (
               <CategoryFactCard
                 category="Garden & Yard"
@@ -778,7 +782,8 @@ export function Step2ItemInfo({
                 draft.category.trim() === "Home & Kitchen" ||
                 draft.category.trim() === "Music & Audio" ||
                 draft.category.trim() === "Office & Business" ||
-                draft.category.trim() === "Sports & Recreation"
+                draft.category.trim() === "Sports & Recreation" ||
+                draft.category.trim() === "Tools & DIY"
                   ? draft.subcategory
                   : undefined
               }

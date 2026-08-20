@@ -1910,7 +1910,7 @@ export const en: AppMessages = {
         },
         toolSetBand: {
           label: "Single tool or set",
-          hint: "One listed item vs a multi-piece garden kit — sets require a full inventory checklist for rent.",
+          hint: "One listed item vs a multi-piece kit — sets require a full inventory checklist for rent.",
           placeholder: "Choose...",
         },
         transplantOrReturnPolicy: {
@@ -2563,7 +2563,14 @@ export const en: AppMessages = {
         vrHeadsetHygieneNotes: { label: "VR headset hygiene notes", hint: "Face foam, wipe rules, shared-skin care. Soft care card — not a café or cleaner partner promo.", placeholder: "Wipe face foam with alcohol-free wipe before return; no makeup on seal; replaceable cover included..." },
         useCase: { label: "Primary use" },
         transportSize: { label: "How it moves" },
-      },
+              handToolClass: { label: "Hand tool class" },
+        drillToolClass: { label: "Drill class" },
+        measureToolClass: { label: "Measuring tool class" },
+        paintToolClass: { label: "Painting tool class" },
+        laserMeasureClass: { label: "Laser measure class" },
+        powerSawClass: { label: "Power saw class" },
+        toolsOtherKind: { label: "What kind of item", hint: "Re-shelf to a named Tools shelf when one fits." },
+},
       options: {
         cordless: "Cordless / battery",
         corded: "Corded electric",
@@ -4813,7 +4820,46 @@ export const en: AppMessages = {
         wide: "Wide",
         z_mount: "Z-mount",
         zoom_variable: "Zoom / variable",
-      },
+      
+        // Tools & DIY ~8.0 options
+        tools_drill_driver: "Drill / driver",
+        tools_drill_hammer: "Hammer drill",
+        tools_drill_impact: "Impact driver",
+        tools_drill_other: "Other drill",
+        tools_drill_rotary: "Rotary hammer",
+        tools_hand_hammer: "Hammer / striking",
+        tools_hand_other: "Other hand tools",
+        tools_hand_set: "Hand tool set",
+        tools_hand_socket: "Socket / ratchet",
+        tools_hand_wrench: "Wrenches",
+        tools_kind_drill: "Drill-related",
+        tools_kind_hand: "Hand-tool-related",
+        tools_kind_ladder: "Ladder-related",
+        tools_kind_measure: "Measuring-related",
+        tools_kind_mixed: "Mixed tools kit",
+        tools_kind_paint: "Painting-related",
+        tools_kind_saw: "Saw-related",
+        tools_kind_scaffold: "Scaffold-related",
+        tools_kind_weld: "Welding-related",
+        tools_laser_distance: "Distance meter",
+        tools_laser_level: "Laser level",
+        tools_laser_other: "Other laser",
+        tools_laser_rotary: "Rotary laser",
+        tools_measure_level: "Level",
+        tools_measure_mixed: "Mixed measuring",
+        tools_measure_other: "Other measuring",
+        tools_measure_square: "Square / angle",
+        tools_measure_tape: "Tape measure",
+        tools_paint_brush_set: "Brush set",
+        tools_paint_other: "Other painting",
+        tools_paint_roller: "Roller kit",
+        tools_paint_sprayer: "Sprayer",
+        tools_saw_circular: "Circular saw",
+        tools_saw_miter: "Miter / chop saw",
+        tools_saw_other: "Other power saw",
+        tools_saw_recip: "Reciprocating saw",
+        tools_saw_table: "Table saw",
+},
     },
     modes: {
       title: "How do you want to offer it?",
@@ -6202,7 +6248,252 @@ export const en: AppMessages = {
     },
 
     bySubcategory: {
-            "Sports & Recreation": {
+                  "Tools & DIY": {
+        "Hand Tools": {
+          title: "Hand tools — class + set band",
+          summary: "Socket sets and wrenches freeze class and single vs set.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Hand tool class, power source, and single-tool vs set. Sets need a kit checklist.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers missing sockets and damaged handles against the list.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No tool-store affiliate hard-sell.",
+            },
+            {
+              q: "Manual power?",
+              a: "Power source can be manual for non-powered hand tools.",
+            },
+          ],
+        },
+        "Power Drills": {
+          title: "Power drills — class + power",
+          summary: "Drivers and hammers freeze drill class and power source.",
+          qa: [
+            {
+              q: "What must be listed?",
+              a: "Drill class, power source, and voltage when cordless.",
+            },
+            {
+              q: "Batteries?",
+              a: "List batteries and chargers in the kit checklist.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers chuck damage and missing batteries.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No battery-platform affiliate hard-sell.",
+            },
+          ],
+        },
+        "Measuring Tools": {
+          title: "Measuring — tool class",
+          summary: "Tapes, levels, and squares freeze measuring class.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Measuring tool class and power source (manual for tapes).",
+            },
+            {
+              q: "Accuracy?",
+              a: "Host-declared class — not a calibration certificate.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers bent squares and missing cases.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No metrology-vendor affiliate hard-sell.",
+            },
+          ],
+        },
+        "Ladders": {
+          title: "Ladders — height + duty",
+          summary: "Height band and duty rating freeze before rent.",
+          qa: [
+            {
+              q: "What must be listed?",
+              a: "Ladder height band, duty rating, and power source (manual).",
+            },
+            {
+              q: "Duty rating?",
+              a: "Type IAA–III style bands — match load to the label.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers bent rails and missing feet — not fall insurance.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No ladder-insurance affiliate hard-sell.",
+            },
+          ],
+        },
+        "Painting Tools": {
+          title: "Painting — class + set band",
+          summary: "Sprayers and rollers freeze class and single vs set.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Paint tool class, power source, and set band. Sets need inventory.",
+            },
+            {
+              q: "Cleanup?",
+              a: "Note return-clean expectations in the listing.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers clogged sprayers and missing tips.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No paint-brand affiliate hard-sell.",
+            },
+          ],
+        },
+        "Industrial Drills": {
+          title: "Industrial drills — class + power",
+          summary: "Pro drills use the same class gate with industrial kits.",
+          qa: [
+            {
+              q: "What must be listed?",
+              a: "Drill class, power source, and voltage when cordless/corded.",
+            },
+            {
+              q: "PPE?",
+              a: "Disclose bits and PPE in the checklist.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers motor damage and missing batteries.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No industrial-distributor affiliate hard-sell.",
+            },
+          ],
+        },
+        "Welding Equipment": {
+          title: "Welding — process, amps, PPE, briefing",
+          summary: "Process, amp band, PPE include, and safety briefing freeze.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Weld process, amp band, PPE include, and briefing ready when required.",
+            },
+            {
+              q: "Who brings PPE?",
+              a: "PPE field freezes helmet/gloves included vs renter provides.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers torch tips and missing leads — not burn-injury insurance.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No welding-gas affiliate hard-sell.",
+            },
+          ],
+        },
+        "Scaffolding Systems": {
+          title: "Scaffolding — height, load, briefing",
+          summary: "Height, load band, and safety briefing freeze.",
+          qa: [
+            {
+              q: "What must be listed?",
+              a: "Height band, load band, and briefing ready when required.",
+            },
+            {
+              q: "Assembly?",
+              a: "Host briefing covers assembly/inspection expectations.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers bent frames and missing pins — not fall insurance.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No scaffold-rental-house affiliate hard-sell.",
+            },
+          ],
+        },
+        "Laser Measuring": {
+          title: "Laser measure — class",
+          summary: "Distance, level, and rotary lasers freeze class.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Laser measure class and power source.",
+            },
+            {
+              q: "Accuracy?",
+              a: "Host-declared class — not a survey certification.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers cracked windows and missing tripods.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No laser-vendor affiliate hard-sell.",
+            },
+          ],
+        },
+        "Power Saws": {
+          title: "Power saws — class + briefing",
+          summary: "Saw class and safety briefing freeze before rent.",
+          qa: [
+            {
+              q: "What must be listed?",
+              a: "Power saw class, power source, and briefing ready when required.",
+            },
+            {
+              q: "Blades?",
+              a: "List spare blades in the kit checklist.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers damaged fences and missing guards — not injury insurance.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No saw-brand affiliate hard-sell.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Tools other — re-shelf when named fits",
+          summary: "Catch-all still publishes kind, set band, and inventory.",
+          qa: [
+            {
+              q: "When use Other?",
+              a: "Only when no named Tools shelf fits.",
+            },
+            {
+              q: "What gates apply?",
+              a: "toolsOtherKind, set band, power source, and kit checklist.",
+            },
+            {
+              q: "Re-shelf?",
+              a: "Move to Hand, Drill, Measure, Ladder, Paint, Weld, Scaffold, Saw, or Laser when those gates fit.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers missing pieces against the checklist.",
+            },
+          ],
+        },
+      },
+
+"Sports & Recreation": {
         "Snow Sports": {
           title: "Snow sports — form, DIN, helmet",
           summary: "Ski/board form, DIN band, helmet policy, and waiver freeze before rent.",

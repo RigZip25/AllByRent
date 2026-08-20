@@ -499,7 +499,6 @@ function BookingScreenLoaded({
   const dryCleanReturnFeeUsd = listingDryCleanReturnFeeUsd(listing);
   const returnConditionPolicy = listingReturnConditionPolicy(listing);
   const isCostumeListing = listingIsCostumeCategory(listing) && listing.modes.rent;
-  const isToolsListing = listing.category.trim() === "Tools & DIY" && listing.modes.rent;
   const usesAgentInsurance = listingUsesAgentToOwnerInsuranceProof(listing);
   const usesStructuredCoi = listingUsesStructuredCoi(listing);
   const needsCoiHostConfirm = listingRequiresCoiHostConfirm(listing);
@@ -1674,7 +1673,10 @@ function BookingScreenLoaded({
           <CategoryFactCard category="Baby & Kids" subcategory={listing.subcategory} />
         ) : null}
         {listing.category.trim() === "Tools & DIY" && listing.modes.rent ? (
-          <CategoryFactCard category="Tools & DIY" />
+          <CategoryFactCard
+            category="Tools & DIY"
+            subcategory={listing.subcategory}
+          />
         ) : null}
         {listing.category.trim() === "Garden & Yard" && listing.modes.rent ? (
           <CategoryFactCard
@@ -1728,7 +1730,6 @@ function BookingScreenLoaded({
             subcategory={listing.subcategory}
           />
         ) : null}
-        {isToolsListing ? <CategoryFactCard category="Tools & DIY" /> : null}
         {isCostumeListing ? (
           <CategoryFactCard category="Costume & Cosplay" subcategory={listing.subcategory} />
         ) : null}

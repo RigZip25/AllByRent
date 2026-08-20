@@ -2568,7 +2568,14 @@ export const es: AppMessages = {
         transportFragilityBand: { label: "Fragilidad de transporte", hint: "Paneles de cristal vs LED modular vs flight-case rugged — define embalaje y reclamaciones." },
         videoIoInventory: { label: "Inventario SDI / HDMI I/O", hint: "Puertos del equipo más cables/convertidores incluidos. Ficha de patch suave.", placeholder: "4× HDMI in, 1× HDMI out, 1× SDI out; 3× HDMI + convertidor SDI↔HDMI…" },
         vrHeadsetHygieneNotes: { label: "Notas de higiene del headset VR", hint: "Foam facial, reglas de limpieza, contacto con piel. Ficha suave — no promo de café.", placeholder: "Limpiar foam con toallita sin alcohol antes de devolver; sin maquillaje en el sello..." },
-      },
+              handToolClass: { label: "Clase de herramienta manual" },
+        drillToolClass: { label: "Clase de taladro" },
+        measureToolClass: { label: "Clase de medición" },
+        paintToolClass: { label: "Clase de pintura" },
+        laserMeasureClass: { label: "Clase de medición láser" },
+        powerSawClass: { label: "Clase de sierra" },
+        toolsOtherKind: { label: "Qué tipo de artículo", hint: "Reubica a un estante Tools con nombre cuando quepa." },
+},
       options: {
         cordless: "Inalámbrico / batería",
         corded: "Con cable",
@@ -4818,7 +4825,46 @@ export const es: AppMessages = {
         wide: "Wide",
         z_mount: "Z-mount",
         zoom_variable: "Zoom / variable",
-      },
+      
+        // Tools & DIY ~8.0 options
+        tools_drill_driver: "Taladro / atornillador",
+        tools_drill_hammer: "Taladro percutor",
+        tools_drill_impact: "Atornillador de impacto",
+        tools_drill_other: "Otro taladro",
+        tools_drill_rotary: "Martillo rotativo",
+        tools_hand_hammer: "Martillo / golpe",
+        tools_hand_other: "Otras herramientas manuales",
+        tools_hand_set: "Juego de herramientas manuales",
+        tools_hand_socket: "Dados / trinquete",
+        tools_hand_wrench: "Llaves",
+        tools_kind_drill: "Relacionado con taladro",
+        tools_kind_hand: "Relacionado con manual",
+        tools_kind_ladder: "Relacionado con escalera",
+        tools_kind_measure: "Relacionado con medición",
+        tools_kind_mixed: "Kit mixto de herramientas",
+        tools_kind_paint: "Relacionado con pintura",
+        tools_kind_saw: "Relacionado con sierra",
+        tools_kind_scaffold: "Relacionado con andamio",
+        tools_kind_weld: "Relacionado con soldadura",
+        tools_laser_distance: "Medidor de distancia",
+        tools_laser_level: "Nivel láser",
+        tools_laser_other: "Otro láser",
+        tools_laser_rotary: "Láser rotativo",
+        tools_measure_level: "Nivel",
+        tools_measure_mixed: "Medición mixta",
+        tools_measure_other: "Otra medición",
+        tools_measure_square: "Escuadra / ángulo",
+        tools_measure_tape: "Cinta métrica",
+        tools_paint_brush_set: "Juego de brochas",
+        tools_paint_other: "Otra pintura",
+        tools_paint_roller: "Kit de rodillo",
+        tools_paint_sprayer: "Pulverizador",
+        tools_saw_circular: "Sierra circular",
+        tools_saw_miter: "Ingletadora",
+        tools_saw_other: "Otra sierra",
+        tools_saw_recip: "Sierra sable",
+        tools_saw_table: "Sierra de mesa",
+},
     },
     modes: {
       title: "¿Cómo quieres ofrecerlo?",
@@ -6180,7 +6226,252 @@ export const es: AppMessages = {
     },
 
     bySubcategory: {
-            "Sports & Recreation": {
+                  "Tools & DIY": {
+        "Hand Tools": {
+          title: "Manuales — clase + set",
+          summary: "Dados y llaves congelan clase y single vs set.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Clase manual, fuente de energía y single vs set. Sets necesitan checklist.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre dados faltantes y mangos dañados según la lista.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de tool store.",
+            },
+            {
+              q: "¿Manual?",
+              a: "Power source puede ser manual para no eléctricas.",
+            },
+          ],
+        },
+        "Power Drills": {
+          title: "Taladros — clase + energía",
+          summary: "Atornilladores y percutores congelan clase y energía.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Clase de taladro, energía y voltaje si es inalámbrico.",
+            },
+            {
+              q: "¿Baterías?",
+              a: "Lista baterías y cargadores en el checklist.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre mandril dañado y baterías faltantes.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de plataformas de batería.",
+            },
+          ],
+        },
+        "Measuring Tools": {
+          title: "Medición — clase",
+          summary: "Cintas, niveles y escuadras congelan la clase.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Clase de medición y energía (manual para cintas).",
+            },
+            {
+              q: "¿Precisión?",
+              a: "Clase declarada por el anfitrión — no certificado de calibración.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre escuadras torcidas y estuches faltantes.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de metrología.",
+            },
+          ],
+        },
+        "Ladders": {
+          title: "Escaleras — altura + duty",
+          summary: "Altura y duty rating antes del alquiler.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Banda de altura, duty rating y energía (manual).",
+            },
+            {
+              q: "¿Duty rating?",
+              a: "Bandas tipo IAA–III — respeta la etiqueta.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre rieles torcidos — no seguro de caídas.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de seguro de escaleras.",
+            },
+          ],
+        },
+        "Painting Tools": {
+          title: "Pintura — clase + set",
+          summary: "Pulverizadores y rodillos congelan clase y single vs set.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Clase de pintura, energía y set. Sets necesitan inventario.",
+            },
+            {
+              q: "¿Limpieza?",
+              a: "Declara expectativas de devolución limpia.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre pulverizadores tapados y boquillas faltantes.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de marcas de pintura.",
+            },
+          ],
+        },
+        "Industrial Drills": {
+          title: "Taladros industriales — clase + energía",
+          summary: "Pro usan la misma puerta de clase.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Clase de taladro, energía y voltaje.",
+            },
+            {
+              q: "¿PPE?",
+              a: "Declara brocas y PPE en el checklist.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre motor y baterías faltantes.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de distribuidores.",
+            },
+          ],
+        },
+        "Welding Equipment": {
+          title: "Soldadura — proceso, amperios, PPE, briefing",
+          summary: "Proceso, amperios, PPE y briefing de seguridad.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Proceso, banda de amperios, PPE y briefing listo.",
+            },
+            {
+              q: "¿Quién trae PPE?",
+              a: "El campo PPE fija casco/guantes incluidos vs renter.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre puntas y cables — no seguro de quemaduras.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de gases de soldadura.",
+            },
+          ],
+        },
+        "Scaffolding Systems": {
+          title: "Andamios — altura, carga, briefing",
+          summary: "Altura, carga y briefing.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Altura, carga y briefing listo.",
+            },
+            {
+              q: "¿Montaje?",
+              a: "El briefing cubre montaje/inspección.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre marcos torcidos — no seguro de caídas.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de casas de andamios.",
+            },
+          ],
+        },
+        "Laser Measuring": {
+          title: "Láser — clase",
+          summary: "Distancia, nivel y rotativos congelan la clase.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Clase láser y energía.",
+            },
+            {
+              q: "¿Precisión?",
+              a: "Clase del anfitrión — no certificación topográfica.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre ventanas rotas y trípodes faltantes.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de vendors láser.",
+            },
+          ],
+        },
+        "Power Saws": {
+          title: "Sierras — clase + briefing",
+          summary: "Clase de sierra y briefing de seguridad.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Clase de sierra, energía y briefing listo.",
+            },
+            {
+              q: "¿Hojas?",
+              a: "Lista hojas de repuesto en el checklist.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre protectores dañados — no seguro de lesiones.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de marcas de sierra.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Tools other — reubica si cabe un estante",
+          summary: "Catch-all publica tipo, set e inventario.",
+          qa: [
+            {
+              q: "¿Cuándo Other?",
+              a: "Solo si no cabe un estante Tools con nombre.",
+            },
+            {
+              q: "¿Qué puertas?",
+              a: "toolsOtherKind, set, energía y checklist.",
+            },
+            {
+              q: "¿Reubicar?",
+              a: "A Hand, Drill, Measure, Ladder, Paint, Weld, Scaffold, Saw o Laser.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre piezas faltantes según el checklist.",
+            },
+          ],
+        },
+      },
+
+"Sports & Recreation": {
         "Snow Sports": {
           title: "Nieve — forma, DIN, casco",
           summary: "Forma de esquí/tabla, banda DIN, casco y waiver antes del alquiler.",

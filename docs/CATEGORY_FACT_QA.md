@@ -138,6 +138,21 @@ All listing `categorySpecs` select **values** share **one flat** `listing.catego
 
 **Option scoping:** prefix `sports_*` on all new option ids.
 
+### Tools & DIY (~8.0) — shipped pattern
+
+| Layer | Pattern |
+|-------|---------|
+| All | `powerSource` (+ voltage when relevant); kit checklist recommended |
+| Hand / Paint / Other | Class + `toolSetBand`; sets require checklist |
+| Drills | `drillToolClass` (personal + industrial) |
+| Measure / Laser | Class gates |
+| Ladders | Height + duty rating |
+| Weld / Scaffold / Saws | Existing PPE/height/load + safety briefing ready |
+| Deposit | Missing bits/guards — not injury insurance |
+| FactCards | Per-sub Q→A; wire `subcategory` |
+
+**Option scoping:** prefix `tools_*` on new option ids. Reused `toolSetBand` with category-agnostic hint.
+
 ### Real Estate (~8.0) — verified
 
 Profile + per-sub FactCards + subcategory wiring already shipped (`bfb116d`). Generic required-field validation + `houseRules` gate.

@@ -637,7 +637,11 @@ export function ItemDetail({
               />
             ) : null}
             {listing.modes.rent && listing.category.trim() === "Tools & DIY" ? (
-              <CategoryFactCard category="Tools & DIY" className="mt-3" />
+              <CategoryFactCard
+                category="Tools & DIY"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
             ) : null}
             {listing.modes.rent && listing.category.trim() === "Garden & Yard" ? (
               <CategoryFactCard

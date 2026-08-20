@@ -649,7 +649,11 @@ export function HostListingDetailScreen({
           />
         ) : null}
         {listing.category.trim() === "Tools & DIY" ? (
-          <CategoryFactCard category="Tools & DIY" className="mb-4" />
+          <CategoryFactCard
+            category="Tools & DIY"
+            subcategory={listing.subcategory}
+            className="mb-4"
+          />
         ) : null}
         {listing.category.trim() === "Garden & Yard" ? (
           <CategoryFactCard

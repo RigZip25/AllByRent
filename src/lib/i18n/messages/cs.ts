@@ -2580,7 +2580,14 @@ export const cs: AppMessages = {
         transportFragilityBand: { label: "Křehkost při přepravě", hint: "Skleněné panely vs modulární LED vs rugged flight-case — nastaví balení a reklamace." },
         videoIoInventory: { label: "Inventář SDI / HDMI I/O", hint: "Porty na zařízení plus přiložené kabely/konvertory. Měkká patch karta.", placeholder: "4× HDMI in, 1× HDMI out, 1× SDI out; 3× HDMI + SDI↔HDMI konvertor…" },
         vrHeadsetHygieneNotes: { label: "Hygiena VR headsetu", hint: "Face foam, pravidla otírání, sdílený kontakt s pokožkou. Měkká karta — ne promo kavárny.", placeholder: "Otřít face foam bezalkoholovým ubrouskem před vrácením; bez makeupu na těsnění..." },        whatMakesItUnique: { label: "Čím je unikátní", placeholder: "Proč si to půjčit" },
-      },
+              handToolClass: { label: "Třída ručního nářadí" },
+        drillToolClass: { label: "Třída vrtačky" },
+        measureToolClass: { label: "Třída měřidel" },
+        paintToolClass: { label: "Třída malířského nářadí" },
+        laserMeasureClass: { label: "Třída laserového měření" },
+        powerSawClass: { label: "Třída elektrické pily" },
+        toolsOtherKind: { label: "Jaký druh položky", hint: "Přesuňte na pojmenovanou Tools polici, když sedí." },
+},
       options: {
         cordless: "Aku / baterie",
         corded: "Síťové",
@@ -4830,7 +4837,46 @@ export const cs: AppMessages = {
         wide: "Wide",
         z_mount: "Z-mount",
         zoom_variable: "Zoom / variable",
-      },
+      
+        // Tools & DIY ~8.0 options
+        tools_drill_driver: "Vrtačka / šroubovák",
+        tools_drill_hammer: "Příklepová vrtačka",
+        tools_drill_impact: "Rázový utahovák",
+        tools_drill_other: "Jiná vrtačka",
+        tools_drill_rotary: "Vrtací kladivo",
+        tools_hand_hammer: "Kladivo / úderové",
+        tools_hand_other: "Jiné ruční nářadí",
+        tools_hand_set: "Sada ručního nářadí",
+        tools_hand_socket: "Gola / ráčna",
+        tools_hand_wrench: "Klíče",
+        tools_kind_drill: "Související s vrtačkou",
+        tools_kind_hand: "Související s ručním nářadím",
+        tools_kind_ladder: "Související s žebříkem",
+        tools_kind_measure: "Související s měřením",
+        tools_kind_mixed: "Smíšená sada nářadí",
+        tools_kind_paint: "Související s malováním",
+        tools_kind_saw: "Související s pilou",
+        tools_kind_scaffold: "Související s lešením",
+        tools_kind_weld: "Související se svařováním",
+        tools_laser_distance: "Dálkoměr",
+        tools_laser_level: "Laserová vodováha",
+        tools_laser_other: "Jiný laser",
+        tools_laser_rotary: "Rotační laser",
+        tools_measure_level: "Vodováha",
+        tools_measure_mixed: "Smíšené měření",
+        tools_measure_other: "Jiné měření",
+        tools_measure_square: "Úhelník",
+        tools_measure_tape: "Metr",
+        tools_paint_brush_set: "Sada štětců",
+        tools_paint_other: "Jiné malování",
+        tools_paint_roller: "Váleček",
+        tools_paint_sprayer: "Stříkací pistole",
+        tools_saw_circular: "Kotoučová pila",
+        tools_saw_miter: "Pokosová pila",
+        tools_saw_other: "Jiná elektrická pila",
+        tools_saw_recip: "Ocasní pila",
+        tools_saw_table: "Stolní pila",
+},
     },
     modes: {
       title: "Jak to chceš nabídnout?",
@@ -6189,7 +6235,252 @@ export const cs: AppMessages = {
     },
 
     bySubcategory: {
-            "Sports & Recreation": {
+                  "Tools & DIY": {
+        "Hand Tools": {
+          title: "Ruční — třída + sada",
+          summary: "Gola a klíče zamrazí třídu a single vs sada.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Třída ručního nářadí, zdroj energie a single vs sada. Sady potřebují checklist.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje chybějící hlavice a poškozené rukojeti podle seznamu.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell tool store.",
+            },
+            {
+              q: "Ruční pohon?",
+              a: "Power source může být manual u neelektrických nástrojů.",
+            },
+          ],
+        },
+        "Power Drills": {
+          title: "Vrtačky — třída + pohon",
+          summary: "Šroubováky a příklepy zamrazí třídu a pohon.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Třída vrtačky, pohon a napětí u AKU.",
+            },
+            {
+              q: "Baterie?",
+              a: "Baterie a nabíječky do checklistu.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje poškození sklíčidla a chybějící baterie.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell bateriových platforem.",
+            },
+          ],
+        },
+        "Measuring Tools": {
+          title: "Měření — třída",
+          summary: "Metry, vodováhy a úhelníky zamrazí třídu.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Třída měřidel a pohon (manual u metrů).",
+            },
+            {
+              q: "Přesnost?",
+              a: "Hostem deklarovaná třída — ne kalibrační certifikát.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje ohnuté úhelníky a chybějící pouzdra.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell metrologie.",
+            },
+          ],
+        },
+        "Ladders": {
+          title: "Žebříky — výška + duty",
+          summary: "Výška a duty rating před pronájmem.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Výška, duty rating a pohon (manual).",
+            },
+            {
+              q: "Duty rating?",
+              a: "Pásma typu IAA–III — držte se štítku.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje ohnuté bočnice — ne pojištění pádu.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell pojištění žebříků.",
+            },
+          ],
+        },
+        "Painting Tools": {
+          title: "Malování — třída + sada",
+          summary: "Stříkačky a válečky zamrazí třídu a single vs sada.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Třída malířského nářadí, pohon a sada. Sady potřebují inventář.",
+            },
+            {
+              q: "Úklid?",
+              a: "Uveďte očekávání vrácení čisté.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje ucpané stříkačky a chybějící trysky.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell paint značek.",
+            },
+          ],
+        },
+        "Industrial Drills": {
+          title: "Průmyslové vrtačky — třída + pohon",
+          summary: "Pro vrtačky stejná brána třídy.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Třída vrtačky, pohon a napětí.",
+            },
+            {
+              q: "PPE?",
+              a: "Bitý a PPE do checklistu.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje motor a chybějící baterie.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell distributorů.",
+            },
+          ],
+        },
+        "Welding Equipment": {
+          title: "Sváření — proces, ampéry, PPE, briefing",
+          summary: "Proces, amp, PPE a bezpečnostní briefing.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Proces, amp pásmo, PPE a briefing ready.",
+            },
+            {
+              q: "Kdo nese PPE?",
+              a: "Pole PPE: helma/rukavice v ceně vs renter donese.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje špičky a kabely — ne pojištění popálenin.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell svářecích plynů.",
+            },
+          ],
+        },
+        "Scaffolding Systems": {
+          title: "Lešení — výška, zátěž, briefing",
+          summary: "Výška, zátěž a briefing.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Výška, zátěž a briefing ready.",
+            },
+            {
+              q: "Montáž?",
+              a: "Briefing pokrývá montáž/inspekci.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje ohnuté rámy — ne pojištění pádu.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell půjčoven lešení.",
+            },
+          ],
+        },
+        "Laser Measuring": {
+          title: "Laser — třída",
+          summary: "Dálkoměry a lasery zamrazí třídu.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Třída laseru a pohon.",
+            },
+            {
+              q: "Přesnost?",
+              a: "Hostem deklarovaná třída — ne geodetický certifikát.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje prasklá skla a chybějící stativy.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell laser vendorů.",
+            },
+          ],
+        },
+        "Power Saws": {
+          title: "Pily — třída + briefing",
+          summary: "Třída pily a bezpečnostní briefing.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Třída pily, pohon a briefing ready.",
+            },
+            {
+              q: "Kotouče?",
+              a: "Náhradní kotouče do checklistu.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje poškozené kryty — ne pojištění úrazu.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell značek pil.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Tools other — přesuňte na pojmenovanou polici",
+          summary: "Catch-all publikuje druh, sadu a inventář.",
+          qa: [
+            {
+              q: "Kdy Other?",
+              a: "Jen když nepasuje pojmenovaná Tools police.",
+            },
+            {
+              q: "Jaké brány?",
+              a: "toolsOtherKind, sada, pohon a checklist.",
+            },
+            {
+              q: "Přesun?",
+              a: "Na Hand, Drill, Measure, Ladder, Paint, Weld, Scaffold, Saw nebo Laser.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje chybějící kusy podle checklistu.",
+            },
+          ],
+        },
+      },
+
+"Sports & Recreation": {
         "Snow Sports": {
           title: "Zima — forma, DIN, helma",
           summary: "Forma lyží/boardu, pásmo DIN, helma a waiver před pronájmem.",
