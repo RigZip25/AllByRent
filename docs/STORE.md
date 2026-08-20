@@ -9,9 +9,10 @@ The web app at **app.evorios.com** is wrapped as a native shell with [Capacitor]
 
 | Item | Value |
 |------|--------|
-| Bundle / application id | `com.evorios.app` |
+| Android application id | `com.evorios.app` (Capacitor `appId`) |
+| iOS bundle id | `com.elflogistics.evorios` (Xcode `PRODUCT_BUNDLE_IDENTIFIER` only — Capacitor `appId` stays Android) |
 | Display name | Evorios |
-| Version | 1.0 (versionCode 1) |
+| Version | iOS 1.0.1 (build 4) · Android 1.0.4 (versionCode 5) |
 | Web assets | Bundled from `dist/` |
 | API calls | `/api/*` → `https://app.evorios.com` on device |
 | Deep links | `evorios://…` + `https://app.evorios.com/…` |
@@ -28,7 +29,7 @@ Web PWA continues to work. Store builds skip the service worker (`CAPACITOR_BUIL
 3. **Android:** **Android Studio** + SDK 35+
 4. Apple Developer + Google Play Console (you have accounts)
 5. Create listings:
-   - App Store Connect → Bundle ID `com.evorios.app`
+   - App Store Connect → Bundle ID `com.elflogistics.evorios` (ELF Logistics LLC)
    - Play Console → package `com.evorios.app`
 
 ## Build & open native projects
@@ -79,6 +80,7 @@ npm run build:native
 
 ## Important
 
+- **iOS vs Android ids:** Capacitor `appId` remains `com.evorios.app` for Android. iOS uses `com.elflogistics.evorios` only in Xcode (`PRODUCT_BUNDLE_IDENTIFIER`). Do not change Capacitor `appId` to the iOS value or Android will break / desync.
 - **Passkeys** on native need Associated Domains + Team ID filled in; OTP / magic link work via the API bridge.
 - UI changes in the WebView need `npm run build:native` + a new store binary. Pure `/api` Vercel hotfixes do not.
 - Universal Links activate only after Team ID / SHA-256 are real and files are live on `app.evorios.com`.

@@ -10,7 +10,7 @@ export function listingRequiresQrSticker(modes: {
   return Boolean(modes.rent || modes.rentToOwn);
 }
 
-/** Soft garage nudge: sticker not confirmed yet (listing can still be live). */
+/** Soft garage nudge for legacy listings that never left the print-gate status. */
 export function listingNeedsStickerReminder(listing: {
   modes: {
     rent?: boolean;
@@ -24,9 +24,8 @@ export function listingNeedsStickerReminder(listing: {
 }): boolean {
   if (listing.paused) return false;
   if (!listingRequiresQrSticker(listing.modes)) return false;
-  if (listing.listingStatus === "pending_qr") return true;
-  if (listing.listingStatus !== "active" && listing.listingStatus !== "pending_qr") return false;
-  return listing.qrReady !== true;
+  // New listings go live with screen QR — no print/sticker photo gate.
+  return listing.listingStatus === "pending_qr";
 }
 
 export function getListingQrUrl(qrTokenOrListingId: string): string {

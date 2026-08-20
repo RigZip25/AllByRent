@@ -1,8 +1,13 @@
+import type { CategoryGlyphId } from "../../components/categoryGlyphs";
+import { finalizeRentalPriceSuggestion } from "../../lib/listingPricingAdvice";
+
 export type CategoryGrade = "personal" | "professional";
 
 export type SubcategoryItem = {
   label: string;
   emoji: string;
+  /** Custom SVG when Unicode emoji is a poor match. */
+  glyph?: CategoryGlyphId;
 };
 
 export type CategoryData = {
@@ -12,8 +17,8 @@ export type CategoryData = {
 };
 
 /** Shorthand for subcategory rows — last slot is always Other (➕). */
-function sub(label: string, emoji: string): SubcategoryItem {
-  return { label, emoji };
+function sub(label: string, emoji: string, glyph?: CategoryGlyphId): SubcategoryItem {
+  return glyph ? { label, emoji, glyph } : { label, emoji };
 }
 
 export const CATEGORIES: Record<string, CategoryData> = {
@@ -21,18 +26,18 @@ export const CATEGORIES: Record<string, CategoryData> = {
     icon: "🔧",
     personal: [
       sub("Hand Tools", "🛠️"),
-      sub("Power Drills", "🔩"),
+      sub("Power Drills", "🔩", "power-drill"),
       sub("Measuring Tools", "📏"),
       sub("Ladders", "🪜"),
       sub("Painting Tools", "🖌️"),
       sub("Other", "➕"),
     ],
     professional: [
-      sub("Industrial Drills", "⚙️"),
-      sub("Welding Equipment", "🔥"),
-      sub("Scaffolding Systems", "🏗️"),
-      sub("Laser Measuring", "📐"),
-      sub("Power Saws", "🪚"),
+      sub("Industrial Drills", "⚙️", "industrial-drill"),
+      sub("Welding Equipment", "🔥", "welding"),
+      sub("Scaffolding Systems", "🧱", "scaffolding"),
+      sub("Laser Measuring", "🔦", "laser-measure"),
+      sub("Power Saws", "🪚", "power-saw"),
       sub("Other", "➕"),
     ],
   },
@@ -40,17 +45,17 @@ export const CATEGORIES: Record<string, CategoryData> = {
     icon: "📷",
     personal: [
       sub("Camera Kits", "📷"),
-      sub("Action Cameras", "🎥"),
-      sub("Tripods & Mounts", "🎬"),
+      sub("Action Cameras", "📹"),
+      sub("Tripods & Mounts", "📷", "tripod"),
       sub("Basic Lighting", "💡"),
-      sub("Drones", "🛸"),
+      sub("Drones", "🚁", "drone"),
       sub("Other", "➕"),
     ],
     professional: [
       sub("Cinema Cameras", "🎞️"),
       sub("Professional Lenses", "🔭"),
-      sub("Studio Lighting", "✨"),
-      sub("Stabilizers & Rigs", "🎬"),
+      sub("Studio Lighting", "🔦"),
+      sub("Stabilizers & Rigs", "🎥"),
       sub("Broadcast Gear", "📡"),
       sub("Other", "➕"),
     ],
@@ -60,7 +65,7 @@ export const CATEGORIES: Record<string, CategoryData> = {
     personal: [
       sub("Laptops", "💻"),
       sub("Projectors", "📽️"),
-      sub("Smart Home Devices", "🏠"),
+      sub("Smart Home Devices", "🏡"),
       sub("Gaming Gear", "🎮"),
       sub("Speakers", "🔊"),
       sub("Other", "➕"),
@@ -69,8 +74,8 @@ export const CATEGORIES: Record<string, CategoryData> = {
       sub("Servers & Workstations", "🖥️"),
       sub("Pro Audio", "🎧"),
       sub("Broadcast Equipment", "📺"),
-      sub("Network Gear", "🌐"),
-      sub("Display Systems", "🖼️"),
+      sub("Network Gear", "🔌"),
+      sub("Display Systems", "📺"),
       sub("Other", "➕"),
     ],
   },
@@ -79,16 +84,16 @@ export const CATEGORIES: Record<string, CategoryData> = {
     personal: [
       sub("Coffee Makers", "☕"),
       sub("Baking Equipment", "🧁"),
-      sub("Stand Mixers", "🥣"),
-      sub("Blenders & Juicers", "🥤"),
+      sub("Stand Mixers", "🥣", "stand-mixer"),
+      sub("Blenders & Juicers", "🍹"),
       sub("Cleaning Appliances", "🧹"),
       sub("Other", "➕"),
     ],
     professional: [
       sub("Commercial Coffee", "☕"),
       sub("Catering Equipment", "🍽️"),
-      sub("Industrial Mixers", "⚙️"),
-      sub("Food Processors Pro", "🔪"),
+      sub("Industrial Mixers", "🏭"),
+      sub("Food Processors Pro", "🥗"),
       sub("Beverage Systems", "🧃"),
       sub("Other", "➕"),
     ],
@@ -97,7 +102,7 @@ export const CATEGORIES: Record<string, CategoryData> = {
     icon: "⛺",
     personal: [
       sub("Tents", "⛺"),
-      sub("Sleeping Bags", "🛏️"),
+      sub("Sleeping Bags", "🛌"),
       sub("Backpacks", "🎒"),
       sub("Camp Cooking", "🍳"),
       sub("Navigation & GPS", "🧭"),
@@ -105,7 +110,7 @@ export const CATEGORIES: Record<string, CategoryData> = {
     ],
     professional: [
       sub("Expedition Tents", "🏔️"),
-      sub("Survival Gear", "🆘"),
+      sub("Survival Gear", "🩹"),
       sub("Group Shelters", "🏕️"),
       sub("Professional Navigation", "🛰️"),
       sub("Base Camp Equipment", "⛺"),
@@ -118,13 +123,13 @@ export const CATEGORIES: Record<string, CategoryData> = {
       sub("Snow Sports", "⛷️"),
       sub("Water Sports", "🏄"),
       sub("Racket Sports", "🎾"),
-      sub("Skating", "⛸️"),
+      sub("Skating", "🛼"),
       sub("Fishing Gear", "🎣"),
       sub("Other", "➕"),
     ],
     professional: [
       sub("Competition Gear", "🏆"),
-      sub("Coaching Equipment", "📋"),
+      sub("Coaching Equipment", "📣"),
       sub("Timing Systems", "⏱️"),
       sub("Pro Water Sports", "🚤"),
       sub("Team Sports Gear", "⚽"),
@@ -136,9 +141,10 @@ export const CATEGORIES: Record<string, CategoryData> = {
     personal: [
       sub("Mountain Bikes", "🚵"),
       sub("Road Bikes", "🚴"),
-      sub("Kids Bikes", "🧒"),
+      sub("E-Bikes", "⚡"),
+      sub("Kids Bikes", "🚲"),
       sub("Electric Scooters", "🛴"),
-      sub("Cruisers", "🚲"),
+      sub("Cruisers", "🏖️"),
       sub("Other", "➕"),
     ],
     professional: [
@@ -153,19 +159,19 @@ export const CATEGORIES: Record<string, CategoryData> = {
   Vehicles: {
     icon: "🚗",
     personal: [
-      sub("Cars & Trucks", "🚗"),
+      sub("Cars & Trucks", "🛻"),
       sub("Motorcycles", "🏍️"),
       sub("Trailers", "🛞"),
-      sub("ATVs", "🏜️"),
+      sub("ATVs", "🏔️"),
       sub("RVs & Campers", "🚐"),
       sub("Other", "➕"),
     ],
     professional: [
       sub("Commercial Trucks", "🚛"),
       sub("Cargo Vans", "🚐"),
-      sub("Equipment Trailers", "🔗"),
-      sub("Special Vehicles", "🚙"),
-      sub("Tow Vehicles", "🪝"),
+      sub("Equipment Trailers", "📦"),
+      sub("Special Vehicles", "🚨"),
+      sub("Tow Vehicles", "🚛"),
       sub("Other", "➕"),
     ],
   },
@@ -174,28 +180,28 @@ export const CATEGORIES: Record<string, CategoryData> = {
     personal: [
       sub("Kayaks & Canoes", "🛶"),
       sub("SUP Boards", "🏄"),
-      sub("Fishing Boats", "🎣"),
+      sub("Fishing Boats", "⚓"),
       sub("Inflatable Boats", "🛟"),
-      sub("Jet Skis", "🌊"),
+      sub("Jet Skis", "🚤"),
       sub("Other", "➕"),
     ],
     professional: [
-      sub("Motorboats", "🚤"),
-      sub("Pontoon Boats", "🛥️"),
+      sub("Motorboats", "🛥️"),
+      sub("Pontoon Boats", "⛴️"),
       sub("Commercial Fishing", "🐟"),
       sub("Dive Boats", "🤿"),
-      sub("Charter Vessels", "⛴️"),
+      sub("Charter Vessels", "🛳️"),
       sub("Other", "➕"),
     ],
   },
   "Garden & Yard": {
     icon: "🌿",
     personal: [
-      sub("Lawn Mowers", "🌱"),
+      sub("Lawn Mowers", "🌿", "lawn-mower"),
       sub("Trimmers", "✂️"),
       sub("Leaf Blowers", "🍃"),
-      sub("Garden Tools", "🛠️"),
-      sub("Sprinklers", "💧"),
+      sub("Garden Tools", "🧰"),
+      sub("Sprinklers", "💦"),
       sub("Trees", "🌳"),
       sub("Shrubs & Bushes", "🌲"),
       sub("Perennials", "🌺"),
@@ -205,11 +211,11 @@ export const CATEGORIES: Record<string, CategoryData> = {
     ],
     professional: [
       sub("Ride-On Mowers", "🚜"),
-      sub("Tillers & Cultivators", "🌾"),
+      sub("Tillers & Cultivators", "⚙️"),
       sub("Stump Grinders", "🪵"),
-      sub("Irrigation Systems", "🚿"),
-      sub("Landscape Equipment", "🏡"),
-      sub("Nursery Stock", "🌳"),
+      sub("Irrigation Systems", "🚰"),
+      sub("Landscape Equipment", "🌳"),
+      sub("Nursery Stock", "🌱"),
       sub("Other", "➕"),
     ],
   },
@@ -224,9 +230,9 @@ export const CATEGORIES: Record<string, CategoryData> = {
       sub("Other", "➕"),
     ],
     professional: [
-      sub("Stage & Risers", "🎭"),
+      sub("Stage & Risers", "🪜"),
       sub("Sound Systems", "🔊"),
-      sub("Event Lighting", "💡"),
+      sub("Event Lighting", "✨"),
       sub("Photo Booths", "📸"),
       sub("Catering Equipment", "🍽️"),
       sub("Other", "➕"),
@@ -243,7 +249,7 @@ export const CATEGORIES: Record<string, CategoryData> = {
       sub("Other", "➕"),
     ],
     professional: [
-      sub("Amplifiers", "📢"),
+      sub("Amplifiers", "🔊"),
       sub("Mixing Consoles", "🎛️"),
       sub("Studio Monitors", "🔈"),
       sub("PA Systems", "📣"),
@@ -257,35 +263,35 @@ export const CATEGORIES: Record<string, CategoryData> = {
       sub("Yoga & Pilates", "🧘"),
       sub("Cardio Equipment", "🏃"),
       sub("Free Weights", "🏋️"),
-      sub("Resistance Bands", "🎯"),
-      sub("Recovery Tools", "💆"),
+      sub("Resistance Bands", "🪢"),
+      sub("Recovery Tools", "🧊"),
       sub("Other", "➕"),
     ],
     professional: [
-      sub("Commercial Treadmills", "🏃"),
-      sub("Weight Machines", "🏋️"),
+      sub("Commercial Treadmills", "👟"),
+      sub("Weight Machines", "🔩"),
       sub("Boxing Equipment", "🥊"),
       sub("Competition Gear", "🥇"),
-      sub("Training Systems", "📊"),
+      sub("Training Systems", "📋"),
       sub("Other", "➕"),
     ],
   },
   "Baby & Kids": {
     icon: "🍼",
     personal: [
-      sub("Strollers", "👶"),
+      sub("Strollers", "🚼"),
       sub("Car Seats", "🚗"),
       sub("Cribs & Beds", "🛏️"),
-      sub("Baby Carriers", "🎒"),
+      sub("Baby Carriers", "👶"),
       sub("Toys & Games", "🧸"),
       sub("Other", "➕"),
     ],
     professional: [
       sub("Commercial Play Equipment", "🛝"),
-      sub("Group Activity Gear", "👥"),
+      sub("Group Activity Gear", "🎨"),
       sub("Educational Tools", "📚"),
-      sub("Safety Systems", "🛡️"),
-      sub("Childcare Equipment", "🏫"),
+      sub("Safety Systems", "🔒"),
+      sub("Childcare Equipment", "🍼"),
       sub("Other", "➕"),
     ],
   },
@@ -300,49 +306,49 @@ export const CATEGORIES: Record<string, CategoryData> = {
       sub("Other", "➕"),
     ],
     professional: [
-      sub("Large Format Printers", "🖨️"),
+      sub("Large Format Printers", "🖼️"),
       sub("POS Systems", "💳"),
-      sub("Commercial Copiers", "📄"),
-      sub("Conference Systems", "📞"),
+      sub("Commercial Copiers", "📑"),
+      sub("Conference Systems", "🎙️"),
       sub("Server Equipment", "🗄️"),
       sub("Other", "➕"),
     ],
   },
   "Heavy Equipment": {
-    icon: "⚙️",
+    icon: "🏭",
     personal: [
-      sub("Generators", "🔋"),
+      sub("Generators", "⚡"),
       sub("Air Compressors", "💨"),
-      sub("Pressure Washers", "🚿"),
-      sub("Winches", "⚓"),
-      sub("Pumps", "🔧"),
+      sub("Pressure Washers", "💦"),
+      sub("Winches", "🪝"),
+      sub("Pumps", "💧"),
       sub("Other", "➕"),
     ],
     professional: [
-      sub("Industrial Generators", "⚡"),
-      sub("Forklifts", "🏗️"),
+      sub("Industrial Generators", "🔋"),
+      sub("Forklifts", "📦", "forklift"),
       sub("Industrial Compressors", "💨"),
-      sub("Hydraulic Equipment", "🔩"),
-      sub("Heavy Pumps", "🚰"),
+      sub("Hydraulic Equipment", "🛢️"),
+      sub("Heavy Pumps", "💧"),
       sub("Other", "➕"),
     ],
   },
   Construction: {
     icon: "🏗️",
     personal: [
-      sub("Concrete Mixers", "🧱"),
+      sub("Concrete Mixers", "🧱", "concrete-mixer"),
       sub("Safety Equipment", "🦺"),
-      sub("Site Lighting", "💡"),
+      sub("Site Lighting", "🔦"),
       sub("Hand Tools Pro", "🔨"),
-      sub("Formwork Basic", "📐"),
+      sub("Formwork Basic", "🪵"),
       sub("Other", "➕"),
     ],
     professional: [
-      sub("Large Concrete Equipment", "🏗️"),
+      sub("Large Concrete Equipment", "🚧"),
       sub("Crane & Lifting", "🏗️"),
-      sub("Professional Formwork", "📏"),
+      sub("Professional Formwork", "🪵"),
       sub("Excavation Tools", "⛏️"),
-      sub("Structural Equipment", "🔩"),
+      sub("Structural Equipment", "🧱"),
       sub("Other", "➕"),
     ],
   },
@@ -390,13 +396,13 @@ export const CATEGORIES: Record<string, CategoryData> = {
       sub("Collectibles", "🏺"),
       sub("Art & Sculpture", "🎨"),
       sub("Hobby Equipment", "🧩"),
-      sub("Unusual Items", "❓"),
+      sub("Unusual Items", "🎲"),
       sub("Seasonal Items", "🎄"),
       sub("Other", "➕"),
     ],
     professional: [
-      sub("Specialty Equipment", "🔬"),
-      sub("Industrial Oddities", "⚗️"),
+      sub("Specialty Equipment", "🧰"),
+      sub("Industrial Oddities", "⚙️"),
       sub("Professional Props", "🎬"),
       sub("Rare Instruments", "🎻"),
       sub("Custom Builds", "🛠️"),
@@ -462,6 +468,36 @@ export function getSubcategories(
   const data = CATEGORIES[category];
   if (!data) return [];
   return data[grade];
+}
+
+/** All subcategories for a category — personal + professional, de-duplicated by label. */
+export function getMergedSubcategories(category: string): SubcategoryItem[] {
+  if (!category.trim()) return [];
+  const data = CATEGORIES[category];
+  if (!data) return [];
+  const seen = new Set<string>();
+  const merged: SubcategoryItem[] = [];
+  for (const sub of [...data.personal, ...data.professional]) {
+    if (seen.has(sub.label)) continue;
+    seen.add(sub.label);
+    merged.push(sub);
+  }
+  return merged;
+}
+
+/** Infer grade from which shelf the subcategory lives on; empty if it appears on both. */
+export function gradeForSubcategory(
+  category: string,
+  subcategoryLabel: string,
+): CategoryGrade | "" {
+  const data = CATEGORIES[category];
+  if (!data || !subcategoryLabel.trim()) return "";
+  const inPersonal = data.personal.some((sub) => sub.label === subcategoryLabel);
+  const inProfessional = data.professional.some((sub) => sub.label === subcategoryLabel);
+  if (inPersonal && inProfessional) return "";
+  if (inProfessional) return "professional";
+  if (inPersonal) return "personal";
+  return "";
 }
 
 export function getSubcategoryLabels(
@@ -707,9 +743,9 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   },
   Vehicles: {
     rent: true,
-    sell: false,
+    sell: true,
     rentToOwn: false,
-    gift: false,
+    gift: true,
     replacementValueLabel: "Market Value",
     replacementValueHelper: "Current market value of this vehicle",
     showDailyRate: true,
@@ -717,9 +753,9 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   },
   "Boats & Water": {
     rent: true,
-    sell: false,
+    sell: true,
     rentToOwn: false,
-    gift: false,
+    gift: true,
     replacementValueLabel: "Market Value",
     replacementValueHelper: "Current market value",
     showDailyRate: true,
@@ -727,9 +763,9 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   },
   "Heavy Equipment": {
     rent: true,
-    sell: false,
+    sell: true,
     rentToOwn: false,
-    gift: false,
+    gift: true,
     replacementValueLabel: "Replacement Cost",
     replacementValueHelper: "Cost to replace if damaged or lost",
     showDailyRate: true,
@@ -737,13 +773,13 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   },
   Construction: {
     rent: true,
-    sell: false,
+    sell: true,
     rentToOwn: false,
-    gift: false,
+    gift: true,
     replacementValueLabel: "Replacement Cost",
     replacementValueHelper: "Cost to replace if damaged or lost",
     showDailyRate: true,
-    showMonthlyRate: false,
+    showMonthlyRate: true,
   },
   "Real Estate": {
     rent: true,
@@ -757,16 +793,22 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
   },
 };
 
-export function getCategoryModeRules(category: string): CategoryModeRules {
+export function getCategoryModeRules(
+  category: string,
+  _subcategory = "",
+): CategoryModeRules {
   return CATEGORY_MODES[category] ?? DEFAULT_CATEGORY_MODES;
 }
 
-export function categoryHasRestrictedModes(category: string): boolean {
-  const rules = getCategoryModeRules(category);
+export function categoryHasRestrictedModes(
+  category: string,
+  subcategory = "",
+): boolean {
+  const rules = getCategoryModeRules(category, subcategory);
   return !rules.rent || !rules.sell || !rules.gift;
 }
 
-/** Period-tier rental pricing: event (1 day), short-term (3 days / 1 week), long-term (2 weeks / 1 month). */
+/** Period-tier rental pricing — always prefer a daily rate (checkout is daily × days). */
 function calculateTieredRentalPrices(
   v: number,
   d: number,
@@ -780,13 +822,14 @@ function calculateTieredRentalPrices(
   let weekly = 0;
   let monthly = 0;
 
-  if (minimumPeriod === "1 day") {
-    daily = Math.round(v * dailyPct * d);
-  } else if (minimumPeriod === "1 week" || minimumPeriod === "3 days") {
-    weekly = Math.round(v * weeklyPct * d);
-    monthly = Math.round(weekly * 3.5);
-  } else {
+  if (minimumPeriod === "1 month") {
     monthly = Math.round(v * monthlyPct * d);
+    daily = Math.round(monthly / 30);
+    weekly = Math.round(daily * 5);
+  } else {
+    daily = Math.round(v * dailyPct * d);
+    weekly = Math.round(v * weeklyPct * d) || Math.round(daily * 5);
+    monthly = Math.round(v * monthlyPct * d) || Math.round(weekly * 3.5);
   }
 
   return { daily, weekly, monthly, deposit: Math.round(v * depositPct) };
@@ -796,6 +839,7 @@ export function calculateRentalPrices(
   category: string,
   value: number,
   minimumPeriod: string = "1 week",
+  options?: { insuranceMaxDeductible?: string | null },
 ): { daily: number; weekly: number; monthly: number; deposit: number } {
   const v = value;
   const d = 0.85;
@@ -825,7 +869,7 @@ export function calculateRentalPrices(
       const pct = v < 1000 ? 0.12 : v < 5000 ? 0.09 : 0.06;
       daily = Math.round(v * pct * d);
       weekly = Math.round(daily * 4.0);
-      monthly = 0;
+      monthly = Math.round(daily * 12);
       deposit = Math.round(v * 0.25);
       break;
     }
@@ -869,11 +913,12 @@ export function calculateRentalPrices(
       deposit = Math.round(v * 0.3);
       break;
     }
-    case "Outdoor & Camping": {
+      case "Outdoor & Camping": {
       const pct = v < 200 ? 0.12 : v < 600 ? 0.09 : v < 1500 ? 0.07 : 0.05;
       daily = Math.round(v * pct * d);
       weekly = Math.round(daily * 4.5);
-      monthly = Math.round(daily * 14);
+      // Long stays for camping gear: stay well under buying new
+      monthly = Math.round(Math.min(daily * 10, v * 0.45));
       deposit = Math.round(v * 0.2);
       break;
     }
@@ -909,13 +954,11 @@ export function calculateRentalPrices(
       break;
     }
     case "Electronics & Tech": {
-      if (minimumPeriod === "1 day") {
-        daily = Math.round(v * 0.25 * d);
-      } else if (minimumPeriod === "1 week" || minimumPeriod === "3 days") {
-        weekly = Math.round(v * 0.045 * d);
-        monthly = Math.round(weekly * 3.5);
-      } else {
-        monthly = Math.round(v * 0.13 * d);
+      daily = Math.round(v * 0.25 * d);
+      weekly = Math.round(v * 0.045 * d) || Math.round(daily * 5);
+      monthly = Math.round(v * 0.13 * d) || Math.round(weekly * 3.5);
+      if (minimumPeriod === "1 month") {
+        daily = Math.round(monthly / 30);
       }
       deposit = Math.round(v * 0.25);
       break;
@@ -1003,5 +1046,34 @@ export function calculateRentalPrices(
   weekly = Math.max(weekly, weekly > 0 ? 5 : 0);
   monthly = Math.max(monthly, monthly > 0 ? 15 : 0);
 
-  return { daily, weekly, monthly, deposit };
+  return finalizeRentalPriceSuggestion(v, { daily, weekly, monthly, deposit }, category, {
+    insuranceMaxDeductible: options?.insuranceMaxDeductible,
+  });
+}
+
+/**
+ * Manufacturer serial / equipment ID — required for heavy machines, construction,
+ * and high-value Photo / Electronics (claims + kit inventory).
+ * Vehicles use VIN instead (serial would be redundant / wrongly block Continue).
+ */
+const SERIAL_REQUIRED_CATEGORIES = new Set([
+  "Heavy Equipment",
+  "Construction",
+  "Photo & Video",
+  "Electronics & Tech",
+  "Drones",
+]);
+
+/** Heavy equipment / construction / high-value gear that needs a manufacturer serial. */
+export function requiresAssetSerialNumber(category: string): boolean {
+  return SERIAL_REQUIRED_CATEGORIES.has(category.trim());
+}
+
+/** VIN required for all Vehicles subcategories (cars, trucks, trailers, ATVs, RVs…). */
+export function requiresAssetVin(category: string): boolean {
+  return category.trim() === "Vehicles";
+}
+
+export function requiresAssetIdentity(category: string): boolean {
+  return requiresAssetSerialNumber(category) || requiresAssetVin(category);
 }

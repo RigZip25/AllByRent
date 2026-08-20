@@ -4,6 +4,7 @@ import { getRuntimeAppOrigin } from "./appOrigin";
 export type DeepLinkTarget =
   | { kind: "garage"; hostId: string; itemId?: string }
   | { kind: "listing"; listingId: string }
+  | { kind: "request"; requestId: string }
   | null;
 
 export type ParsedDeepLink = {
@@ -13,6 +14,16 @@ export type ParsedDeepLink = {
 
 function listingIdFromPath(pathname: string): string | null {
   const match = pathname.match(/^\/item\/([^/]+)\/?$/i);
+  if (!match?.[1]) return null;
+  try {
+    return decodeURIComponent(match[1]).trim() || null;
+  } catch {
+    return match[1].trim() || null;
+  }
+}
+
+function requestIdFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/r\/([^/]+)\/?$/i);
   if (!match?.[1]) return null;
   try {
     return decodeURIComponent(match[1]).trim() || null;
@@ -44,17 +55,23 @@ export function parseDeepLink(search = "", pathname = ""): ParsedDeepLink {
     };
   }
 
+  const pathRequestId = requestIdFromPath(pathname);
+  const pathListingId = listingIdFromPath(pathname);
+
   const skipSplash =
     params.get("skipSplash") === "1" ||
     params.has("garage") ||
     params.has("item") ||
     params.has("listingId") ||
+    params.has("request") ||
     params.has("connect") ||
-    Boolean(listingIdFromPath(pathname));
+    Boolean(pathListingId) ||
+    Boolean(pathRequestId);
 
   const garage = params.get("garage")?.trim() || "";
   const item = params.get("item")?.trim() || "";
-  const listingId = params.get("listingId")?.trim() || listingIdFromPath(pathname) || "";
+  const listingId = params.get("listingId")?.trim() || pathListingId || "";
+  const requestId = params.get("request")?.trim() || pathRequestId || "";
 
   if (garage) {
     return {
@@ -65,6 +82,10 @@ export function parseDeepLink(search = "", pathname = ""): ParsedDeepLink {
 
   if (listingId) {
     return { skipSplash, target: { kind: "listing", listingId } };
+  }
+
+  if (requestId) {
+    return { skipSplash, target: { kind: "request", requestId } };
   }
 
   return { skipSplash, target: null };
@@ -86,7 +107,7 @@ export function resolveListingDeepLink(listingId: string): DeepLinkTarget {
 }
 
 export function deepLinkQueryKeys(): string[] {
-  return ["garage", "item", "listingId", "skipSplash", "screen", "connect"];
+  return ["garage", "item", "listingId", "request", "skipSplash", "screen", "connect"];
 }
 
 export function shareAppOrigin(): string {

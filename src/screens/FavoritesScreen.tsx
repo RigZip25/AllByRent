@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Heart } from "lucide-react";
+import { ArrowLeft, Heart } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
 import {
   loadFavoriteListingIds,
@@ -78,14 +78,16 @@ function FavoriteCard({
 }
 
 export function FavoritesScreen({
+  onBack,
   onHome,
   onOpenListing,
 }: {
+  onBack: () => void;
   onHome: () => void;
   onOpenListing: (listingId: string) => void;
 }) {
   const auth = useAuth();
-  const { favorites: copy } = useMessages();
+  const { favorites: copy, common } = useMessages();
   const [favoriteIds, setFavoriteIds] = useState(() => loadFavoriteListingIds());
 
   useEffect(() => {
@@ -115,17 +117,35 @@ export function FavoritesScreen({
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
-      <div className="shrink-0 px-4 pb-3 pt-4">
-        <h1 className="text-[22px] font-extrabold" style={{ color: GREEN }}>
-          {copy.title}
-        </h1>
-        <p className="mt-1 text-[14px] text-gray-500">{copy.subtitle}</p>
-      </div>
+      <header
+        className="shrink-0 border-b bg-white px-4 pb-3"
+        style={{
+          borderColor: BORDER,
+          paddingTop: "max(0.75rem, calc(env(safe-area-inset-top, 0px) + 0.5rem))",
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="flex h-10 w-10 items-center justify-center rounded-full"
+            aria-label={common.back}
+          >
+            <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
+          </button>
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-[18px] font-extrabold" style={{ color: GREEN }}>
+              {copy.title}
+            </h1>
+            <p className="text-[12px] text-gray-500">{copy.subtitle}</p>
+          </div>
+        </div>
+      </header>
 
-      <div className="screen-scroll flex-1 px-4 pb-4">
+      <div className="screen-scroll flex-1 px-4 pb-4 pt-4">
         {favorites.length === 0 ? (
           <div
-            className="mx-auto mt-8 max-w-[300px] rounded-2xl border bg-white px-5 py-10 text-center"
+            className="mx-auto mt-4 max-w-[300px] rounded-2xl border bg-white px-5 py-10 text-center"
             style={{ borderColor: BORDER }}
           >
             <Heart className="mx-auto mb-4 h-10 w-10" style={{ color: GREEN_LIGHT }} />

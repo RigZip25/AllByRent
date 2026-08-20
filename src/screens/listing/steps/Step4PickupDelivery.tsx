@@ -14,6 +14,14 @@ import {
   sanitizeDeliveryMiles,
   suggestDeliveryFeeMiles,
 } from "../../../lib/deliveryPricing";
+import {
+  distanceInputFromMiles,
+  formatDistanceFromMiles,
+  formatWeightFromLbs,
+  maxDistanceInput,
+  milesFromDistanceInput,
+  usesImperialDistance,
+} from "../../../lib/regionalDisplay";
 import type { ListingDraft, StepProps } from "../types";
 import { useMessages } from "../../../lib/i18n/react";
 
@@ -250,6 +258,11 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
               placeholder={pickup.weightPlaceholder}
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-green-700"
             />
+            <p className="mt-1.5 text-xs text-gray-500">
+              {typeof handoff.itemWeightLbs === "number" && handoff.itemWeightLbs > 0
+                ? formatWeightFromLbs(handoff.itemWeightLbs)
+                : pickup.weightDualHint}
+            </p>
           </div>
         ) : null}
         <ToggleRow
@@ -287,16 +300,18 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
             <input
               type="number"
               min={1}
-              max={MAX_DELIVERY_RADIUS_MILES}
-              value={maxMiles}
+              max={maxDistanceInput(MAX_DELIVERY_RADIUS_MILES)}
+              value={distanceInputFromMiles(maxMiles)}
               onChange={(e) => {
-                const miles = Number(e.target.value);
-                if (!Number.isFinite(miles)) return;
-                applyDeliveryHandoff(miles, roundTripFee, true);
+                const entered = Number(e.target.value);
+                if (!Number.isFinite(entered)) return;
+                applyDeliveryHandoff(milesFromDistanceInput(entered), roundTripFee, true);
               }}
               className="w-16 rounded-lg border border-gray-200 px-2 py-1.5 text-center text-sm font-semibold outline-none focus:border-green-700"
             />
-            <span>{pickup.milesRoundTrip}</span>
+            <span>
+              {usesImperialDistance() ? pickup.milesRoundTrip : pickup.kmRoundTrip}
+            </span>
           </label>
 
           <div>
@@ -362,7 +377,8 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
                 <span className="text-gray-600">
                   {pickup.estimatePerMile}{" "}
                   <span className="text-gray-400">
-                    ${formatDeliveryFee(DELIVERY_FEE_PER_MILE_ROUND_TRIP_USD)} × {maxMiles} mi
+                    ${formatDeliveryFee(DELIVERY_FEE_PER_MILE_ROUND_TRIP_USD)} ×{" "}
+                    {formatDistanceFromMiles(maxMiles, undefined, { plus: false })}
                   </span>
                 </span>
                 <span className="font-semibold text-gray-900">

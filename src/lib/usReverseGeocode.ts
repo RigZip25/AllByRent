@@ -169,6 +169,8 @@ export async function resolveAreaLabelAtCoordinates(
     const data = (await response.json()) as {
       features?: Array<{
         properties?: {
+          name?: string;
+          osm_value?: string;
           city?: string;
           town?: string;
           village?: string;
@@ -184,14 +186,25 @@ export async function resolveAreaLabelAtCoordinates(
     const props = data.features?.[0]?.properties;
     if (!props) return null;
 
-    const city =
+    const osmValue = props.osm_value ?? "";
+    const fromFields =
       props.city ||
       props.town ||
       props.village ||
       props.suburb ||
       props.locality ||
       "";
-    const state = props.state?.trim() ?? "";
+    const cityFromName =
+      !fromFields &&
+      ["city", "town", "village", "hamlet", "municipality", "suburb", "neighbourhood", "locality"].includes(
+        osmValue,
+      )
+        ? props.name?.trim() ?? ""
+        : "";
+    const city = fromFields || cityFromName;
+    const state =
+      props.state?.trim() ||
+      (osmValue === "state" ? props.name?.trim() ?? "" : "");
     const zip = props.postcode?.trim() ?? "";
 
     if (city && state) {
@@ -200,8 +213,10 @@ export async function resolveAreaLabelAtCoordinates(
     }
     if (city && props.country) return `${city}, ${props.country}`;
     if (city) return city;
-    if (state && props.country) {
-      return `${abbreviateUsState(state) || state}, ${props.country}`;
+    // Soft fallback: state only when no city/locality is available.
+    if (state) {
+      const stateAbbr = abbreviateUsState(state) || state;
+      return props.country ? `${stateAbbr}, ${props.country}` : stateAbbr;
     }
 
     return null;
@@ -231,7 +246,7 @@ export async function refineUsReverseGeocode(
   lng: number,
   parts: UsReverseParts,
 ): Promise<string | null> {
-  const street = parts.street?.trim() ?? "";
+  let street = parts.street?.trim() ?? "";
   let city = parts.city?.trim() ?? "";
   let state = parts.state?.trim() ?? "";
 
@@ -244,6 +259,15 @@ export async function refineUsReverseGeocode(
 
   state = state ? abbreviateUsState(state) : "";
   if (!state) return null;
+
+  // Drop accidental "street" that is really the state name (Photon place=state).
+  if (street && abbreviateUsState(street) === state) {
+    street = "";
+  }
+  // Drop street that duplicates the city (Photon place=city puts name in both).
+  if (street && city && street.toLowerCase() === city.toLowerCase()) {
+    street = "";
+  }
 
   if (street) {
     const query = [street, city, state].filter(Boolean).join(", ");
@@ -262,5 +286,6 @@ export async function refineUsReverseGeocode(
   });
 
   if (formatted.label.trim()) return formatted.label;
-  return null;
+  // Soft fallback when Census/Photon have no locality — state only.
+  return state;
 }

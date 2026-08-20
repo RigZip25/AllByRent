@@ -5,6 +5,7 @@ import {
   getHomeLocation,
   getRentContext,
   hasRentLocationSetup,
+  setHomeLocation,
 } from "./listingStorage";
 import { hasAvatarPhoto, loadAvatarDataUrl } from "./avatarStorage";
 import { readLastKnownFullName } from "./pendingAuthProfile";
@@ -64,6 +65,8 @@ export type UserProfile = {
   email: string;
   phone: string;
   bio: string;
+  /** ISO date YYYY-MM-DD — required for Vehicles booking age gate. */
+  dateOfBirth: string;
   memberSince: string;
   preferredMode: AppMode;
   avatarUrl: string | null;
@@ -103,6 +106,7 @@ function createDefaultProfile(authUserId?: string | null): UserProfile {
     email: "",
     phone: "",
     bio: "",
+    dateOfBirth: "",
     memberSince: new Date().toISOString().slice(0, 10),
     preferredMode: getAppMode(),
     avatarUrl: id ? loadAvatarDataUrl(id) : null,
@@ -170,6 +174,7 @@ export function loadUserProfile(): UserProfile {
     if (merged.renter.noShowCount === undefined) {
       merged.renter.noShowCount = 0;
     }
+    merged.host = stripLegacyDemoHostStats(merged.host);
     merged.avatarUrl = hasAvatarPhoto(merged.id)
       ? loadAvatarDataUrl(merged.id)
       : null;
@@ -189,21 +194,60 @@ export function saveUserProfile(profile: UserProfile): void {
   }
 }
 
+/** Legacy demo seed invented 4.9★ / 12 reviews for any host with listings. */
+function stripLegacyDemoHostStats(host: UserProfile["host"]): UserProfile["host"] {
+  const rating = Number(host.rating) || 0;
+  const reviewCount = Number(host.reviewCount) || 0;
+  if (reviewCount === 12 && Math.abs(rating - 4.9) < 0.001) {
+    return { ...host, rating: 0, reviewCount: 0 };
+  }
+  return {
+    ...host,
+    rating,
+    reviewCount,
+  };
+}
+
 export function refreshProfileStats(
   profile: UserProfile,
   authUserId: string | null = null,
 ): UserProfile {
   const listingsCount = countOwnListings(authUserId ?? profile.id);
+  const host = stripLegacyDemoHostStats({
+    ...profile.host,
+    listingsCount,
+  });
   return {
     ...profile,
     avatarUrl: hasAvatarPhoto(profile.id) ? loadAvatarDataUrl(profile.id) : null,
+    host,
+    preferredMode: getAppMode(),
+  };
+}
+
+/** Apply real review rows (reviewee = this user) to host/renter stats. */
+export function applyReviewStatsToProfile(
+  profile: UserProfile,
+  reviews: Array<{ role: "renter" | "host"; rating: number }>,
+): UserProfile {
+  const asHost = reviews.filter((r) => r.role === "renter");
+  const asRenter = reviews.filter((r) => r.role === "host");
+  const avg = (rows: Array<{ rating: number }>) => {
+    if (rows.length === 0) return 0;
+    return Math.round((rows.reduce((sum, r) => sum + r.rating, 0) / rows.length) * 10) / 10;
+  };
+  return {
+    ...profile,
     host: {
       ...profile.host,
-      listingsCount,
-      rating: listingsCount > 0 ? profile.host.rating || 4.9 : 0,
-      reviewCount: listingsCount > 0 ? profile.host.reviewCount || 12 : 0,
+      reviewCount: asHost.length,
+      rating: avg(asHost),
     },
-    preferredMode: getAppMode(),
+    renter: {
+      ...profile.renter,
+      reviewCount: asRenter.length,
+      rating: avg(asRenter),
+    },
   };
 }
 
@@ -251,6 +295,7 @@ export function updateProfileFields(
       | "bio"
       | "avatarUrl"
       | "garageIdentity"
+      | "dateOfBirth"
     >
   >,
 ): UserProfile {
@@ -320,6 +365,9 @@ export type ProfileAuthSyncInput = {
   userEmail?: string | null;
   remoteDisplayName?: string | null;
   remoteEmail?: string | null;
+  remotePhone?: string | null;
+  remoteLocationLabel?: string | null;
+  remotePhoneVerified?: boolean | null;
 };
 
 /** Bind local profile to the signed-in account and replace stale demo fields. */
@@ -348,6 +396,22 @@ export function syncUserProfileFromAuth(input: ProfileAuthSyncInput): UserProfil
   } else if (input.remoteEmail?.trim()) {
     next.email = input.remoteEmail.trim();
     next.verification = { ...next.verification, email: true };
+  }
+
+  const remotePhone = input.remotePhone?.trim() ?? "";
+  if (remotePhone) {
+    next.phone = remotePhone;
+    if (input.remotePhoneVerified) {
+      next.verification = { ...next.verification, phone: true };
+    }
+  }
+
+  const remoteArea = input.remoteLocationLabel?.trim() ?? "";
+  if (remoteArea) {
+    const home = getHomeLocation();
+    if (!home?.displayName?.trim()) {
+      setHomeLocation({ displayName: remoteArea, lat: 0, lng: 0 });
+    }
   }
 
   next.avatarUrl = hasAvatarPhoto(userId) ? loadAvatarDataUrl(userId) : null;

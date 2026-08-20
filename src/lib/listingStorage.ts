@@ -1,11 +1,19 @@
 import type { ListingDraft } from "../screens/listing/types";
+import { WIZARD_FLOW_VERSION } from "../screens/listing/types";
 import type { MediaRef } from "./mediaStore";
+import { applyGiftAsZeroSell } from "./listingGift";
 import {
   collectListingPhotoStoragePaths,
   deleteListingPhotosFromRemote,
   uploadListingPhotosToRemote,
 } from "./listingPhotoStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
+import { emptyVehicleExtras, normalizeVehicleExtras } from "./vehicleExtras";
+import {
+  categorySupportsTravelOutsideRule,
+  normalizeHomeTerritory,
+  normalizeTravelOutsideHomeArea,
+} from "./vehicleHomeTerritory";
 
 const LISTINGS_STORAGE_KEY = "allbyrent_published_listings";
 const PROFILE_CITY_KEY = "allbyrent_profile_city";
@@ -163,7 +171,24 @@ export function savePublishedListing(
   }
 }
 
+const recentlyRemovedListingIds = new Set<string>();
+
+/** Listings removed locally that should not be resurrected by a stale remote merge. */
+export function noteListingRemovedLocally(id: string): void {
+  const trimmed = id.trim();
+  if (!trimmed) return;
+  recentlyRemovedListingIds.add(trimmed);
+  if (typeof window !== "undefined") {
+    window.setTimeout(() => recentlyRemovedListingIds.delete(trimmed), 60_000);
+  }
+}
+
+export function isListingRecentlyRemoved(id: string): boolean {
+  return recentlyRemovedListingIds.has(id.trim());
+}
+
 export function removePublishedListing(id: string): void {
+  noteListingRemovedLocally(id);
   try {
     const existing = loadPublishedListings();
     const victim = existing.find((item) => item.id === id) ?? null;
@@ -191,7 +216,14 @@ export async function removePublishedListingRemote(id: string, ownerId: string):
   if (!isSupabaseConfigured()) return;
   const supabase = getSupabaseClient();
   if (!supabase) return;
-  await supabase.from("listings").delete().eq("id", id).eq("owner_id", ownerId);
+  // RLS scopes deletes to the signed-in owner. Prefer id-only so a mismatched
+  // owner_id filter cannot silently no-op and let fetch merge resurrect the row.
+  const byId = await supabase.from("listings").delete().eq("id", id);
+  if (!byId.error) return;
+  const oid = ownerId.trim();
+  if (oid) {
+    await supabase.from("listings").delete().eq("id", id).eq("owner_id", oid);
+  }
 }
 
 /** Persist an in-progress wizard draft (local always; remote when signed in). */
@@ -200,11 +232,13 @@ export function stampListingDraftProgress(
   ownerId: string | null | undefined,
   wizardStep: number,
 ): ListingDraft {
+  const normalized = applyGiftAsZeroSell(draft);
   return {
-    ...draft,
-    hostId: draft.hostId || ownerId || draft.hostId,
+    ...normalized,
+    hostId: normalized.hostId || ownerId || normalized.hostId,
     listingStatus: "draft",
     wizardStep,
+    wizardFlowVersion: WIZARD_FLOW_VERSION,
     updatedAt: new Date().toISOString(),
   };
 }
@@ -232,14 +266,27 @@ export async function saveListingDraftProgress(
   return stamped;
 }
 
+/** Unfinished wizard drafts for these host ids (local cache; hydrate via fetchManageableListings). */
+export function getHostDraftListings(hostIds: string[]): ListingDraft[] {
+  return loadPublishedListings()
+    .filter((listing) => {
+      if (listing.listingStatus !== "draft") return false;
+      const host = listing.hostId?.trim() ?? "";
+      if (host) return hostIds.includes(host);
+      // Legacy local rows without hostId: visible once we have a signed-in host id.
+      return hostIds.length > 0;
+    })
+    .sort((a, b) => {
+      const aMs = a.updatedAt ? Date.parse(a.updatedAt) : 0;
+      const bMs = b.updatedAt ? Date.parse(b.updatedAt) : 0;
+      return (Number.isFinite(bMs) ? bMs : 0) - (Number.isFinite(aMs) ? aMs : 0);
+    });
+}
+
 export function getAbandonedListingDrafts(hostIds: string[]): ListingDraft[] {
   const idleMs = 30 * 60 * 1000;
   const now = Date.now();
-  return loadPublishedListings().filter((listing) => {
-    if (listing.listingStatus !== "draft") return false;
-    const host = listing.hostId?.trim() ?? "";
-    if (host && !hostIds.includes(host)) return false;
-    if (!host && hostIds.length === 0) return false;
+  return getHostDraftListings(hostIds).filter((listing) => {
     const updated = listing.updatedAt ? Date.parse(listing.updatedAt) : 0;
     if (!Number.isFinite(updated) || updated <= 0) return true;
     return now - updated >= idleMs;
@@ -263,13 +310,17 @@ function normalizeListingDraft(raw: ListingDraft): ListingDraft {
   const hostId =
     typeof raw.hostId === "string" && raw.hostId.trim() ? raw.hostId.trim() : "";
 
-  return {
+  const base: ListingDraft = {
     ...raw,
     hostId,
     listingStatus: status,
     wizardStep:
-      typeof raw.wizardStep === "number" && raw.wizardStep >= 1 && raw.wizardStep <= 3
+      typeof raw.wizardStep === "number" && raw.wizardStep >= 1 && raw.wizardStep <= 4
         ? Math.floor(raw.wizardStep)
+        : undefined,
+    wizardFlowVersion:
+      typeof (raw as { wizardFlowVersion?: unknown }).wizardFlowVersion === "number"
+        ? Math.floor((raw as { wizardFlowVersion: number }).wizardFlowVersion)
         : undefined,
     updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : undefined,
     nudgeCount: typeof raw.nudgeCount === "number" ? raw.nudgeCount : undefined,
@@ -304,6 +355,53 @@ function normalizeListingDraft(raw: ListingDraft): ListingDraft {
       deliveryMaxMiles: raw.handoff.deliveryMaxMiles ?? 20,
       deliveryRoundTripFee: raw.handoff.deliveryRoundTripFee ?? "",
       deliveryPrices: raw.handoff.deliveryPrices ?? [],
+      tollHoldEnabled: Boolean(raw.handoff.tollHoldEnabled),
+      tollHoldAmountUsd:
+        typeof raw.handoff.tollHoldAmountUsd === "string" && raw.handoff.tollHoldAmountUsd.trim()
+          ? raw.handoff.tollHoldAmountUsd
+          : "50",
+      travelOutsideHomeArea: categorySupportsTravelOutsideRule(raw.category ?? "")
+        ? normalizeTravelOutsideHomeArea(raw.handoff.travelOutsideHomeArea)
+        : undefined,
+      homeTerritory: categorySupportsTravelOutsideRule(raw.category ?? "")
+        ? normalizeHomeTerritory(raw.handoff.homeTerritory)
+        : undefined,
+      lateReturnFeeEnabled:
+        raw.handoff.lateReturnFeeEnabled != null
+          ? Boolean(raw.handoff.lateReturnFeeEnabled)
+          : undefined,
+      lateReturnGraceMinutes:
+        typeof raw.handoff.lateReturnGraceMinutes === "number" &&
+        Number.isFinite(raw.handoff.lateReturnGraceMinutes)
+          ? Math.max(0, Math.min(1440, Math.round(raw.handoff.lateReturnGraceMinutes)))
+          : undefined,
+      lateReturnFlatFeeUsd:
+        typeof raw.handoff.lateReturnFlatFeeUsd === "string"
+          ? raw.handoff.lateReturnFlatFeeUsd
+          : undefined,
+      lateReturnPerHourFeeUsd:
+        typeof raw.handoff.lateReturnPerHourFeeUsd === "string"
+          ? raw.handoff.lateReturnPerHourFeeUsd
+          : undefined,
+      fuelPolicy:
+        raw.handoff.fuelPolicy === "prepaid_full_tank" ? "prepaid_full_tank" : raw.handoff.fuelPolicy === "full_to_full" ? "full_to_full" : undefined,
+      fuelMissingFeeUsd:
+        typeof raw.handoff.fuelMissingFeeUsd === "string"
+          ? raw.handoff.fuelMissingFeeUsd
+          : undefined,
+      fuelTankGallons:
+        typeof raw.handoff.fuelTankGallons === "string"
+          ? raw.handoff.fuelTankGallons
+          : undefined,
+      allowYoungDrivers:
+        raw.handoff.allowYoungDrivers != null
+          ? Boolean(raw.handoff.allowYoungDrivers)
+          : undefined,
+      youngDriverHoldMultiplier:
+        typeof raw.handoff.youngDriverHoldMultiplier === "number" &&
+        Number.isFinite(raw.handoff.youngDriverHoldMultiplier)
+          ? Math.max(1, Math.min(3, raw.handoff.youngDriverHoldMultiplier))
+          : undefined,
     },
     // QR is required for traceability; preserve stored value but default to true.
     generateQR: raw.generateQR ?? true,
@@ -311,7 +409,26 @@ function normalizeListingDraft(raw: ListingDraft): ListingDraft {
     qrReady: raw.qrReady ?? false,
     qrPrintedConfirmed: raw.qrPrintedConfirmed ?? false,
     qrQueuedForBulk: raw.qrQueuedForBulk ?? false,
+    serialNumber: typeof raw.serialNumber === "string" ? raw.serialNumber : "",
+    vin: typeof raw.vin === "string" ? raw.vin : "",
+    licensePlate: typeof raw.licensePlate === "string" ? raw.licensePlate : "",
+    licensePlateState: typeof raw.licensePlateState === "string" ? raw.licensePlateState : "",
+    vehicleExtras:
+      raw.vehicleExtras && typeof raw.vehicleExtras === "object"
+        ? normalizeVehicleExtras(raw.vehicleExtras)
+        : emptyVehicleExtras(),
+    categorySpecs:
+      raw.categorySpecs &&
+      typeof raw.categorySpecs === "object" &&
+      !Array.isArray(raw.categorySpecs)
+        ? Object.fromEntries(
+            Object.entries(raw.categorySpecs as Record<string, unknown>).filter(
+              (entry): entry is [string, string] => typeof entry[1] === "string",
+            ),
+          )
+        : {},
   };
+  return applyGiftAsZeroSell(base);
 }
 
 export function loadPublishedListings(): ListingDraft[] {
@@ -566,6 +683,12 @@ function draftToRow(draft: ListingDraft, ownerId: string): Partial<SupabaseListi
       nudge_count: draft.nudgeCount ?? 0,
       last_nudged_at: draft.lastNudgedAt ?? null,
       qr_ready: draft.qrReady ?? false,
+      serial_number: draft.serialNumber?.trim() || null,
+      vin: draft.vin?.trim() || null,
+      license_plate: draft.licensePlate?.trim() || null,
+      license_plate_state: draft.licensePlateState?.trim() || null,
+      vehicle_extras: draft.vehicleExtras ?? emptyVehicleExtras(),
+      category_specs: draft.categorySpecs ?? {},
     },
     handoff: draft.handoff ?? {},
     qr_code: draft.qrToken ?? null,
@@ -616,6 +739,25 @@ function rowToDraft(row: SupabaseListingRow): ListingDraft {
     condition: (row.condition as ListingDraft["condition"]) ?? "",
     description: row.description ?? "",
     replacementValue: row.replacement_value != null ? String(row.replacement_value) : "",
+    serialNumber: typeof availability.serial_number === "string" ? availability.serial_number : "",
+    vin: typeof availability.vin === "string" ? availability.vin : "",
+    licensePlate:
+      typeof availability.license_plate === "string" ? availability.license_plate : "",
+    licensePlateState:
+      typeof availability.license_plate_state === "string"
+        ? availability.license_plate_state
+        : "",
+    vehicleExtras: normalizeVehicleExtras(availability.vehicle_extras),
+    categorySpecs:
+      availability.category_specs &&
+      typeof availability.category_specs === "object" &&
+      !Array.isArray(availability.category_specs)
+        ? Object.fromEntries(
+            Object.entries(availability.category_specs as Record<string, unknown>).filter(
+              (entry): entry is [string, string] => typeof entry[1] === "string",
+            ),
+          )
+        : {},
     instructionsUrl: "",
     modes,
     pricing:
@@ -889,7 +1031,7 @@ export async function fetchListingsByOwnerIdsRemote(ownerIds: string[]): Promise
     return loadPublishedListings().filter((l) => ids.includes(l.hostId ?? ""));
   }
   const drafts = (data as SupabaseListingRow[]).map(rowToDraft);
-  // Cache remote rows quietly — HostDashboard merges local+remote for inventory.
+  // Cache remote rows (including drafts) so Garage can resume after reinstall / new device.
   for (const draft of drafts) {
     savePublishedListing(draft, { emitChange: false });
   }

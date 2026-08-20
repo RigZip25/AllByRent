@@ -18,6 +18,28 @@ type FaqMeta = {
 /** Structural FAQ index — copy lives in i18n catalogs. */
 export const FAQ_META: FaqMeta[] = [
   {
+    id: "why-name",
+    section: "gettingStarted",
+    keywords: [
+      "name",
+      "naming",
+      "etymology",
+      "meaning",
+      "brand",
+      "pronounce",
+      "pronunciation",
+      "why evorios",
+      "название",
+      "этимологи",
+      "почему",
+      "запомни",
+      "weak",
+      "evo",
+      "evolve",
+      "evolution",
+    ],
+  },
+  {
     id: "what-is",
     section: "gettingStarted",
     keywords: ["about", "platform", "garage", "marketplace", "household", "бизнес", "сосед"],

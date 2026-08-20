@@ -54,6 +54,32 @@ export async function probeServiceWorkerUpdate(): Promise<UpdateProbeResult> {
   return "current";
 }
 
+/** Ask a waiting service worker to activate, then resolve (or time out). */
+export async function activateWaitingServiceWorker(timeoutMs = 1500): Promise<boolean> {
+  if (!("serviceWorker" in navigator)) return false;
+  const registration = await navigator.serviceWorker.getRegistration();
+  const waiting = registration?.waiting;
+  if (!waiting) return false;
+
+  await new Promise<void>((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
+      window.clearTimeout(timer);
+      resolve();
+    };
+    const onControllerChange = () => finish();
+    navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
+    // Workbox and vite-plugin-pwa listen for this message.
+    waiting.postMessage({ type: "SKIP_WAITING" });
+    const timer = window.setTimeout(finish, timeoutMs);
+  });
+
+  return true;
+}
+
 export function watchServiceWorkerUpdates(onUpdateAvailable: () => void): () => void {
   if (!("serviceWorker" in navigator)) return () => undefined;
 

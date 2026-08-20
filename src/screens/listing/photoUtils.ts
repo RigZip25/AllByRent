@@ -46,5 +46,5 @@ export async function compressImageFiles(files: File[]): Promise<File[]> {
   return Promise.all(files.map((file) => compressImageFile(file)));
 }
 
-export const MAX_LISTING_PHOTOS = 30;
-export const MAX_LISTING_VIDEOS = 3;
+export const MAX_LISTING_PHOTOS = 12;
+export const MAX_LISTING_VIDEOS = 2;

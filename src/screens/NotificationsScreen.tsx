@@ -1,16 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { LucideIcon } from "lucide-react";
-import {
-  ArrowLeft,
-  Bell,
-  CalendarClock,
-  ClipboardList,
-  MapPin,
-  MessageCircle,
-  PackageCheck,
-  Search,
-  Wallet,
-} from "lucide-react";
+import { ArrowLeft, Bell, MessageCircle } from "lucide-react";
 import {
   PwaUpdateConfirmSheet,
   PwaUpdateNotificationCard,
@@ -38,21 +27,6 @@ const BORDER = "#E8E6E0";
 const SURFACE = "#F0F4F2";
 
 type NotificationTab = "all" | "bookings" | "messages";
-type PreviewCategory = "bookings" | "messages" | "updates";
-
-type PreviewItem = {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  category: PreviewCategory;
-  key: string;
-};
-
-function filterPreviews(items: PreviewItem[], tab: NotificationTab): PreviewItem[] {
-  if (tab === "all") return items;
-  if (tab === "bookings") return items.filter((i) => i.category === "bookings");
-  return items.filter((i) => i.category === "messages");
-}
 
 function NotificationTabs({
   active,
@@ -133,74 +107,8 @@ export function NotificationsScreen({
   const [checkMessage, setCheckMessage] = useState<string | null>(null);
   const isPwa = isStandalonePwa();
 
-  const rentPreviews: PreviewItem[] = [
-    {
-      key: "yourBookings",
-      icon: PackageCheck,
-      title: n.previews.rent.yourBookings.title,
-      description: n.previews.rent.yourBookings.description,
-      category: "bookings",
-    },
-    {
-      key: "pickupReturn",
-      icon: CalendarClock,
-      title: n.previews.rent.pickupReturn.title,
-      description: n.previews.rent.pickupReturn.description,
-      category: "bookings",
-    },
-    {
-      key: "ownerMessages",
-      icon: MessageCircle,
-      title: n.previews.rent.ownerMessages.title,
-      description: n.previews.rent.ownerMessages.description,
-      category: "messages",
-    },
-    {
-      key: "yourRequests",
-      icon: Search,
-      title: n.previews.rent.yourRequests.title,
-      description: n.previews.rent.yourRequests.description,
-      category: "bookings",
-    },
-  ];
-
-  const earnPreviews: PreviewItem[] = [
-    {
-      key: "bookingRequests",
-      icon: ClipboardList,
-      title: n.previews.earn.bookingRequests.title,
-      description: n.previews.earn.bookingRequests.description,
-      category: "bookings",
-    },
-    {
-      key: "pickupReturn",
-      icon: MapPin,
-      title: n.previews.earn.pickupReturn.title,
-      description: n.previews.earn.pickupReturn.description,
-      category: "bookings",
-    },
-    {
-      key: "renterMessages",
-      icon: MessageCircle,
-      title: n.previews.earn.renterMessages.title,
-      description: n.previews.earn.renterMessages.description,
-      category: "messages",
-    },
-    {
-      key: "listingEarnings",
-      icon: Wallet,
-      title: n.previews.earn.listingEarnings.title,
-      description: n.previews.earn.listingEarnings.description,
-      category: "updates",
-    },
-  ];
-
   const modeBadge = mode === "earn" ? n.modeHosting : n.modeRenting;
-  const allPreviews = mode === "earn" ? earnPreviews : rentPreviews;
-  const visiblePreviews = filterPreviews(allPreviews, tab);
   const empty = n.empty[mode][tab];
-  const sectionLabel =
-    tab === "all" ? n.sectionAll : tab === "bookings" ? n.sectionBookings : n.sectionMessages;
   const showUpdateInTab = tab === "all";
   const [items, setItems] = useState<Notification[]>([]);
   const [localMessages, setLocalMessages] = useState<InAppNotification[]>(() => loadInAppNotifications());
@@ -280,9 +188,8 @@ export function NotificationsScreen({
   const hasInboxItems =
     filteredItems.length > 0 ||
     messageItems.length > 0 ||
-    (showUpdateInTab && (updateAvailable || updateJustCompleted)) ||
-    visiblePreviews.length > 0;
-  const showEmptyState = !hasInboxItems;
+    (showUpdateInTab && (updateAvailable || updateJustCompleted));
+  const showEmptyState = !loading && !hasInboxItems;
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -520,7 +427,7 @@ export function NotificationsScreen({
         ) : null}
 
         {showEmptyState ? (
-          <div className="mx-auto flex max-w-[340px] flex-col items-center text-center">
+          <div className="mx-auto flex max-w-[340px] flex-col items-center py-8 text-center">
             <div
               className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 bg-white"
               style={{ borderColor: `${GREEN_LIGHT}55` }}
@@ -537,34 +444,8 @@ export function NotificationsScreen({
           </div>
         ) : null}
 
-        {visiblePreviews.length > 0 ? (
-          <div className="mx-auto max-w-[390px]">
-            <p className="mb-3 px-1 text-[13px] font-semibold uppercase tracking-wide text-gray-400">
-              {sectionLabel}
-            </p>
-            <ul className="flex flex-col gap-3">
-              {visiblePreviews.map(({ icon: Icon, title, description, key }) => (
-                <li
-                  key={key}
-                  className="flex gap-3 rounded-2xl border bg-white p-4"
-                  style={{ borderColor: BORDER }}
-                >
-                  <div
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
-                    style={{ backgroundColor: SURFACE }}
-                  >
-                    <Icon className="h-5 w-5" style={{ color: GREEN }} strokeWidth={1.75} />
-                  </div>
-                  <div className="min-w-0 text-left">
-                    <p className="text-[15px] font-bold" style={{ color: GREEN }}>
-                      {title}
-                    </p>
-                    <p className="mt-0.5 text-[14px] leading-snug text-gray-500">{description}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+        {loading && !hasInboxItems ? (
+          <p className="mx-auto mt-6 max-w-[320px] text-center text-[13px] text-gray-500">{n.loading}</p>
         ) : null}
 
         {tab === "all" && !updateAvailable && !updateJustCompleted ? (

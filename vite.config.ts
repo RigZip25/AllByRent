@@ -50,6 +50,8 @@ function pwaPlugin() {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         importScripts: ['push-sw.js'],
         navigateFallback: '/index.html',
+        // Main bundle can exceed the default 2 MiB precache cap after feature growth.
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         // Activate new SW quickly; BUILD_ID mismatch still forces a shell refresh in-app.
         skipWaiting: true,
         clientsClaim: true,
@@ -209,6 +211,12 @@ export default defineConfig(({ mode }) => {
         changeOrigin: true,
         secure: true,
         rewrite: (path) => path.replace(/^\/us-geocode/, '/geocoder'),
+      },
+      '/api/proxy/llm': {
+        // Local Vite cannot run Vercel serverless — point at deployed API when set.
+        target: env.VITE_DEV_API_ORIGIN || 'http://127.0.0.1:3000',
+        changeOrigin: true,
+        secure: false,
       },
       '/api/proxy/anthropic': {
         target: 'https://api.anthropic.com',

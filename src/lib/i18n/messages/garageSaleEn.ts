@@ -121,7 +121,7 @@ export const garageSale: AppMessages["garageSale"] = {
   garageShop: {
     myActiveGarage: "My active garage",
     openBadge: "Open",
-    neighborViewBanner: "Neighbor view — photo, price, buy now or bid.",
+    neighborViewBanner: "Browse by category — tap a listing for photos and details.",
     youWonPrefix: "You won —",
     nextBidderPrefix: "Next bidder —",
     winPayLine: (prefix, amount, suffix) => `${prefix} pay $${amount} ${suffix}`,
@@ -151,6 +151,7 @@ export const garageSale: AppMessages["garageSale"] = {
     statusPendingPayment: "Pending payment",
     modeRent: "Rent",
     modeSell: "Sale",
+    modeFree: "Free",
     saleItemFallback: "Sale item",
     badgeSoon: "Soon",
     badgeBid: "Bid",
@@ -159,6 +160,8 @@ export const garageSale: AppMessages["garageSale"] = {
     bidCta: "Bid",
     buyCta: "Buy",
     editCta: "Edit",
+    viewCta: "View",
+    previewOpenCta: "Open listing",
     shareCta: "Share",
     yourOfferLine: (amount) => `Your offer · ${amount}`,
     editShelfAria: "Edit shelf item",
@@ -166,6 +169,8 @@ export const garageSale: AppMessages["garageSale"] = {
     buyNowPaused: "Buy now paused — auction among interested neighbors",
     dealPendingPayment: "Deal pending payment — another neighbor’s offer was accepted",
     cartOneGarage: "Cart is for one garage at a time — checkout or clear first.",
+    categoryOther: "Other",
+    categoryItemCount: (count) => (count === 1 ? "1 item" : `${count} items`),
   },
   garageAuction: {
     bidTerms:
@@ -275,9 +280,9 @@ export const garageSale: AppMessages["garageSale"] = {
     modeQuick: "Quick sale",
     modeOpen: "Open to offers",
     save: "Save changes",
-    remove: "Remove from shelf",
-    removeConfirm: "Remove this item from your garage shelf?",
-    removeConfirmActive: "Active offers or bids will be cleared. Remove from shelf?",
+    remove: "Delete from shelf",
+    removeConfirm: "Delete this item from your garage permanently?",
+    removeConfirmActive: "Active offers or bids will be cleared. Delete this item permanently?",
     photoLoadFailed: "Could not load photo",
     validPrice: "Enter a valid price",
   },
@@ -351,8 +356,8 @@ export const earnBusiness: AppMessages["earnBusiness"] = {
   projectedByMonthEnd: (amount) => `Projected ${amount} by month end`,
   kpiThisMonth: "This month",
   kpiLastMonth: "Last month",
-  kpiActiveNow: "Active earning now",
-  growingTitle: "How you're growing",
+  kpiActiveNow: "Out now",
+  growingTitle: "Next moves",
   byListing: "By listing",
   emptyTitle: "No listings yet",
   emptyBody: "Publish from My Garage (or the + button) to track earnings here.",
@@ -362,24 +367,67 @@ export const earnBusiness: AppMessages["earnBusiness"] = {
   colAllTime: "All time",
   trendAria: (trend) => `Trend ${trend}`,
   sparklineHint: "Last 7 days · completed payouts",
-  growthNew: "New this month",
+  sparklineEmpty: "No completed payouts in the last 7 days yet.",
+  growthNew: "Getting started",
   growthVsLast: (signedPercent) => `${signedPercent}% vs last month`,
-  activeListings: (n) => (n === 1 ? "1 active listing" : `${n} active listings`),
+  activeListings: (n) => (n === 1 ? "1 live listing" : `${n} live listings`),
+  kpiLive: "Live",
+  kpiDrafts: "Drafts",
+  kpiOut: "Out now",
+  tipFirstBookingTitle: "Get your first booking",
+  tipFirstBookingBody:
+    "Share your garage with neighbors nearby — real eyes beat made-up monthly targets.",
+  tipFinishDraftTitle: "Finish a draft",
+  tipFinishDraftBody: "Drafts don't earn. Publish one clear photo and a price today.",
+  tipBookableTitle: "Make listings easy to book",
+  tipBookableBody:
+    "Fresh cover photo, weekend availability, and a fair day rate — that's what neighbors book.",
+  tipStockFirstTitle: "Stock your first item",
+  tipStockFirstBody: "One solid listing on the block beats empty projections.",
   tipExpandTitle: "Expand your catalog",
   tipExpandBody: (amount) =>
-    `List 1 more item to unlock ~$${amount}/mo based on your current per-listing pace.`,
+    `Your live items averaged ${amount}/mo this month. Another similar listing can compound that pace.`,
   tipMomentumTitle: "Momentum is building",
   tipMomentumBody: (pct, last, current) =>
-    `You're up ${pct}% vs last month ($${last} → $${current}). Keep pricing aligned with your top earner.`,
+    `You're up ${pct}% vs last month (${last} → ${current}). Keep pricing aligned with your top earner.`,
   tipRecoverTitle: "Recover last month's pace",
   tipRecoverBody: (last) =>
-    `You earned $${last} last month. Refresh photos and availability on listings that were active then.`,
-  tipTargetTitle: "Set a monthly target",
-  tipTargetBody: (amount) =>
-    `Aim for $${amount}/mo by keeping 2+ items available on weekends.`,
+    `You earned ${last} last month. Refresh photos and availability on listings that were active then.`,
   tipFieldTitle: "Money out in the field",
   tipFieldBody: (amount, count) =>
-    `$${amount} is tied up in ${count} active rental${count === 1 ? "" : "s"} right now — fast responses protect those payouts.`,
+    `${amount} is tied up in ${count} active rental${count === 1 ? "" : "s"} right now — fast responses protect those payouts.`,
+  ctaStock: "Stock an item →",
+  ctaGarage: "Open my garage →",
+  statementTitle: "Earnings statement",
+  statementSubtitle: "A period ledger of completed bookings for your records.",
+  periodLabel: "Period",
+  yearOption: (year) => `${year}`,
+  colDate: "Date",
+  colListing: "Listing / booking",
+  colBookingId: "Booking ID",
+  colGross: "Gross",
+  colPlatformFee: "Platform fee",
+  colStripeFee: "Stripe fee",
+  colRefunds: "Refunds",
+  colDelivery: "Delivery",
+  colNet: "Net",
+  totalsLabel: "Period totals",
+  emptyStatementTitle: "No transactions in this period",
+  emptyStatementBody:
+    "Completed host bookings appear here once rentals finish. Export stays available for empty periods.",
+  downloadCsv: "Download CSV",
+  stripePayoutsLink: "Open Stripe payouts & Dashboard",
+  disclaimer:
+    "This statement is not tax advice. Figures are for your records and your accountant. Confirm deposits in Stripe.",
+  countryTaxNote:
+    "Tax rules vary by country — consult a local advisor for filing requirements.",
+  usTaxFormsNote:
+    "US tax forms may be available via Stripe for eligible Connect accounts.",
+  notAvailable: "—",
+  feesEstimatedNote:
+    "Some platform fees were estimated from the current rate when not stored on the booking.",
+  ledgerGapNote:
+    "Built from Evorios booking records. Stripe processing fees and exact payout batches are not line-itemed here — use Stripe Dashboard as a supplement.",
 };
 
 export const qrScan: AppMessages["qrScan"] = {
@@ -388,39 +436,66 @@ export const qrScan: AppMessages["qrScan"] = {
   confirmReturn: "Confirm return",
   scanPickup: "Scan QR — pickup",
   scanReturn: "Scan QR — return",
-  qrVerified: "QR scan verified · PIN required",
+  qrVerified: "QR scan verified · you’re here · PIN required",
+  geoVerified: "You’re at the pickup spot · PIN required",
   tipPickup: "Item received! Your rental starts now.",
+  tipPickupContactless:
+    "Unlock starts the clock. Lockbox codes appear after PIN — only when you’re at the spot.",
   tipPickupReturnBy: (label) => ` Return by ${label}.`,
   tipReturn: "All done! We'll notify the owner.",
+  tipReturnContactless:
+    "Mark returned when the item is back. The host confirms — or it auto-completes in 24 hours.",
   contactlessTitle: "Contactless access details",
   contactlessBody:
-    "Step-by-step access instructions and codes unlock at check-in with PIN — not before. Your pickup address is on the rental screen so you can travel here first.",
+    "Codes unlock only after you’re at the pickup spot (GPS or item QR) and enter the PIN — never from the couch.",
   contactlessLocked:
-    "Enter the correct 6-digit pickup PIN below to view access codes and instructions.",
+    "Prove you’re here, then enter the 6-digit pickup PIN to reveal access codes.",
   enterPinPickup: "Enter the pickup PIN",
   enterPinReturn: "Enter the return PIN",
   pinBody:
-    "This scan only works inside the app for the renter/host on this booking. The PIN prevents random scans.",
+    "PIN works only after presence (item QR or GPS at the handoff spot). That stops remote sharing tricks.",
   pinBodyContactless:
-    "This scan only works inside the app for the renter/host on this booking. The PIN prevents random scans and unlocks contactless access details (codes and steps).",
+    "PIN unlocks lockbox steps only after you’re at the spot. Presence + PIN starts the rental.",
   pinPlaceholder: "000000",
   pinAria: "6-digit PIN",
   pinMismatch: (mode) =>
     `PIN doesn’t match. Ask your counterparty for the ${mode} PIN.`,
   alreadyConfirmed: "Already confirmed.",
   scanHint: "Point the camera at the item QR sticker…",
-  scanHintMissing: "QR target missing for this booking — use manual code or host confirm.",
+  scanHintMissing: "QR target missing for this booking — use GPS unlock or host confirm.",
   scanHintMatched: "QR matched — continue with PIN",
-  cameraUnavailable: "Camera is not available in this browser. Use manual code entry.",
+  cameraUnavailable: "Camera is not available in this browser. Use GPS unlock or ask the host.",
   cameraAccessNeeded: "Camera access is needed to scan the QR code on the item.",
   stickerMustMatch:
     "The sticker must match this booking. You’ll still need the 6‑digit PIN after a successful scan.",
+  stickerOrGeo:
+    "Scan the item QR here — or tap “I’m at the pickup spot” so GPS unlocks PIN. Either proves you’re not booking from afar.",
   enterCodeManually: "Enter code manually",
   ownerConfirms: "Owner confirms manually",
   manualTitle: "Item QR / check-in code",
   manualPlaceholder: "Paste listing code",
+  manualNeedsPresence:
+    "A listing code alone isn’t enough. Stand at pickup and unlock with GPS, or scan the sticker on the item.",
   verifyCode: "Verify code",
   codeMismatch: "Code doesn't match this item. Try again or scan the QR.",
+  presenceTitle: "Prove you’re at pickup",
+  presenceBody:
+    "Come to the handoff spot, then unlock. Shared PINs from across town won’t open the deal.",
+  presenceRequired: "Arrive at the pickup spot (GPS) or scan the item QR first.",
+  geoUnlockCta: "I’m at the pickup spot — unlock PIN",
+  geoChecking: "Checking your location…",
+  geoNoTarget:
+    "Pickup coordinates aren’t set yet. Scan the physical item QR, or ask the host to re-approve so GPS can lock to their spot.",
+  geoNoTargetScanQr: "No GPS target yet — scan the sticker on the item instead.",
+  geoTooFar: (distanceM, radiusM) =>
+    `You’re about ${distanceM}m away (need within ~${radiusM}m). Come closer to the pickup spot, then try again.`,
+  geoDenied: "Location permission is needed to unlock PIN at the pickup spot.",
+  geoUnavailable: "Couldn’t read your location. Try again outdoors, or scan the item QR.",
+  conditionPhotoTitle: "Condition photo (optional)",
+  conditionPhotoBody: "Snap the item as you found it — peace of mind for both of you.",
+  conditionPhotoAdd: "Add photo",
+  conditionPhotoAdded: "Photo added ✓",
+  conditionPhotoSaving: "Saving…",
 };
 
 export const bookingRequest: AppMessages["bookingRequest"] = {

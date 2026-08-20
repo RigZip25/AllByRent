@@ -9,6 +9,10 @@ import {
   type ShopOffer,
 } from "../../lib/garageShopStorage";
 import { formatAuctionWindowLabel } from "../../lib/garageAuctionWindow";
+import {
+  getOpenSaleForListing,
+  placeOpenSaleBidAuthoritative,
+} from "../../lib/openSale";
 
 const GREEN = "#0D5C3A";
 const BLUE = "#2563EB";
@@ -26,6 +30,7 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
   const auctionCopy = garageSale.garageAuction;
   const offerCopy = garageSale.garageOffers;
   const shopCopy = garageSale.garageShop;
+  const openSale = getOpenSaleForListing(listing.id);
   const highBid = getHighBid(listing.id);
   const minBidUsd = useMemo(() => {
     const base = highBid?.amountUsd ?? offer.startingBidUsd - offer.minIncrementUsd;
@@ -50,6 +55,30 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
       setError(offerCopy.validAmount);
       return;
     }
+
+    if (openSale) {
+      const cover = listing.photos[0];
+      void placeOpenSaleBidAuthoritative({
+        eventId: openSale.id,
+        listingId: listing.id,
+        hostId: listing.hostId ?? openSale.hostId,
+        title: listing.title || shopCopy.saleItemFallback,
+        amountUsd: value,
+        photoId: cover?.id,
+        photoThumbId: cover?.thumbId,
+        photoThumbStoragePath: cover?.thumbStoragePath,
+        photoStoragePath: cover?.storagePath,
+      }).then((result) => {
+        if (!result.ok) {
+          setError(result.reason);
+          return;
+        }
+        onBidPlaced();
+        onClose();
+      });
+      return;
+    }
+
     void placeBidWithSync({
       listingId: listing.id,
       hostId: listing.hostId ?? "",
@@ -72,13 +101,13 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
     <div className="garage-bid-sheet fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0">
       <button type="button" className="absolute inset-0" aria-label={common.close} onClick={onClose} />
       <div
-        className="relative w-full max-w-[390px] rounded-t-3xl border bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-4"
+        className="relative w-full max-w-[390px] max-h-[90dvh] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] rounded-t-3xl border bg-white px-4 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] pt-4"
         style={{ borderColor: BORDER }}
       >
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: BLUE }}>
-              {offerCopy.placeBidTitle}
+              {openSale ? "Open Sale bid" : offerCopy.placeBidTitle}
             </p>
             <h2 className="text-lg font-bold text-gray-900">
               {listing.title || shopCopy.saleItemFallback}
@@ -92,6 +121,11 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
             <p className="mt-1 text-[12px] font-medium text-gray-600">
               {formatAuctionWindowLabel({ startsAt: offer.startsAt, endsAt: offer.endsAt })}
             </p>
+            {openSale?.status === "presale" ? (
+              <p className="mt-2 text-[12px] leading-snug text-amber-900">
+                Presale — bid goes in your cart now (green if leading). Live window starts soon.
+              </p>
+            ) : null}
           </div>
           <button
             type="button"
@@ -100,7 +134,7 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
             style={{ borderColor: BORDER }}
             aria-label={offerCopy.closeBidAria}
           >
-            <X className="h-4 w-4 text-gray-600" />
+            <X className="h-4 w-4 text-red-600" />
           </button>
         </div>
 
@@ -157,6 +191,7 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
           style={{ backgroundColor: GREEN }}
         >
           {offerCopy.confirmBid}
+          {openSale ? " → cart" : ""}
         </button>
       </div>
     </div>

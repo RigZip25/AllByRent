@@ -3,6 +3,11 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "installCommand": "npm ci",
+  "functions": {
+    "api/og/image.ts": {
+      "includeFiles": "api/og/{fonts,assets}/**"
+    }
+  },
   "redirects": [
     {
       "source": "/legal/terms.html",
@@ -31,8 +36,10 @@
     }
   ],
   "rewrites": [
-    { "source": "/link", "destination": "/link.html" },
-    { "source": "/item/:id", "destination": "/link.html?listingId=:id&skipSplash=1" },
+    { "source": "/link", "destination": "/api/link" },
+    { "source": "/item/:id", "destination": "/api/link?listingId=:id&skipSplash=1" },
+    { "source": "/g/:id", "destination": "/api/link?garage=:id&skipSplash=1" },
+    { "source": "/r/:id", "destination": "/api/link?request=:id" },
     {
       "source": "/__seo/rent",
       "destination": "/index.html"

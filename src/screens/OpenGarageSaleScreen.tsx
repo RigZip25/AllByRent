@@ -29,6 +29,7 @@ type OpenGarageSaleScreenProps = {
   onAddSaleItems: () => void;
   onOpenMyGarage: () => void;
   onViewSaleRules: () => void;
+  onPlanOpenSale?: () => void;
 };
 
 export function OpenGarageSaleScreen({
@@ -36,6 +37,7 @@ export function OpenGarageSaleScreen({
   onAddSaleItems,
   onOpenMyGarage,
   onViewSaleRules,
+  onPlanOpenSale,
 }: OpenGarageSaleScreenProps) {
   const { garageSale, common } = useMessages();
   const copy = garageSale.openGarageSale;
@@ -204,6 +206,16 @@ export function OpenGarageSaleScreen({
           >
             {copy.addItemsCta}
           </button>
+          {onPlanOpenSale ? (
+            <button
+              type="button"
+              onClick={onPlanOpenSale}
+              className="mt-2 w-full rounded-xl py-3.5 text-base font-bold text-white active:opacity-90"
+              style={{ backgroundColor: GREEN }}
+            >
+              Plan Open Sale (30–60 min) →
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={onOpenMyGarage}

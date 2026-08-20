@@ -217,15 +217,25 @@ export async function processPhotoWithPhotoRoom(
     formData.append("padding", opts.padding);
 
     const response = await requestWithRetry(
-      () =>
-        fetchWithTimeout(
+      async () => {
+        let authHeader: Record<string, string> = {};
+        try {
+          const { getAccessToken } = await import("../../lib/stripePayments");
+          const token = await getAccessToken();
+          if (token) authHeader = { Authorization: `Bearer ${token}` };
+        } catch {
+          // unsigned drafts fall back to original photo when proxy requires auth
+        }
+        return fetchWithTimeout(
           API_URL,
           {
             method: "POST",
             body: formData,
+            headers: authHeader,
           },
           12_000,
-        ),
+        );
+      },
       2,
     );
 

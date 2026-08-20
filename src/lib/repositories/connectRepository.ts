@@ -6,6 +6,9 @@ import {
   isPaymentsReady,
 } from "../config/production";
 import { createConnectAccountLink, getAccessToken, syncConnectAccountStatus } from "../stripePayments";
+import { isPhoneOtpClientEnabled } from "../phoneE164";
+import { isLocalPhoneVerified, refreshPhoneVerifiedFromRemote } from "../phoneKyc";
+import { getSupabaseClient } from "../supabaseClient";
 
 export type ConnectStatus = {
   connected: boolean;
@@ -17,7 +20,7 @@ export type ConnectStatus = {
 
 export type ConnectOnboardingResult =
   | { ok: true; url: string }
-  | { ok: false; reason: string };
+  | { ok: false; reason: string; code?: string };
 
 export async function loadConnectStatus(userId: string | null): Promise<ConnectStatus> {
   if (!userId || !isSupabaseConfigured()) {
@@ -58,9 +61,38 @@ export async function startConnectOnboarding(returnPath = "/?screen=profile"): P
     return { ok: false, reason: getSignInRequiredMessage() };
   }
 
+  const supabase = getSupabaseClient();
+  const userId = supabase ? (await supabase.auth.getUser()).data.user?.id ?? null : null;
+
+  // Already linked — don't open Stripe again or scare the seller with a false platform error.
+  const existing = await loadConnectStatus(userId);
+  if (existing.payoutsEnabled || existing.onboardingComplete) {
+    return {
+      ok: false,
+      code: "already_connected",
+      reason: existing.payoutsEnabled
+        ? "Bank already connected — payouts are enabled. Tap refresh status or Go live."
+        : "Stripe onboarding already finished. Tap refresh status or Go live.",
+    };
+  }
+
+  // Phone KYC only when SMS OTP is actually enabled (same gate as Go Public checklist).
+  if (isPhoneOtpClientEnabled()) {
+    let phoneOk = isLocalPhoneVerified();
+    if (!phoneOk && userId) phoneOk = await refreshPhoneVerifiedFromRemote(userId);
+    if (!phoneOk) {
+      return {
+        ok: false,
+        reason:
+          "Verify your phone by SMS before connecting payouts. Open Profile → Personal info → Phone.",
+        code: "phone_unverified",
+      };
+    }
+  }
+
   const result = await createConnectAccountLink(returnPath);
   if (!result.ok) {
-    return { ok: false, reason: result.reason };
+    return { ok: false, reason: result.reason, ...(result.code ? { code: result.code } : {}) };
   }
 
   return { ok: true, url: result.url };

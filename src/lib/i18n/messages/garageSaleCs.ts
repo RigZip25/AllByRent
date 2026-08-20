@@ -121,10 +121,10 @@ export const garageSale: AppMessages["garageSale"] = {
   garageShop: {
     myActiveGarage: "Moje aktivní garáž",
     openBadge: "Otevřeno",
-    neighborViewBanner: "Pohled souseda — fotka, cena, koupit hned nebo přihodit.",
+    neighborViewBanner: "Pohled souseda — klepni na nabídku a otevři fotky a detaily.",
     youWonPrefix: "Vyhráli jste —",
     nextBidderPrefix: "Další přihazující —",
-    winPayLine: (prefix, amount, suffix) => `${prefix} zaplaťte $${amount} ${suffix}`,
+    winPayLine: (prefix, amount, suffix) => `${prefix} zaplaťte ${amount} Kč ${suffix}`,
     loadingShelf: "Načítám polici…",
     emptyTitle: "Police je prázdná",
     emptyOwnBody: "Vyfoťte výprodejové věci z Otevřít moji garáž — jedna fotka a cena.",
@@ -151,6 +151,7 @@ export const garageSale: AppMessages["garageSale"] = {
     statusPendingPayment: "Čeká na platbu",
     modeRent: "Půjčka",
     modeSell: "Prodej",
+    modeFree: "Zdarma",
     saleItemFallback: "Výprodejová věc",
     badgeSoon: "Brzy",
     badgeBid: "Příhoz",
@@ -159,6 +160,8 @@ export const garageSale: AppMessages["garageSale"] = {
     bidCta: "Přihodit",
     buyCta: "Koupit",
     editCta: "Upravit",
+    viewCta: "Zobrazit",
+    previewOpenCta: "Otevřít nabídku",
     shareCta: "Sdílet",
     yourOfferLine: (amount) => `Vaše nabídka · ${amount}`,
     editShelfAria: "Upravit věc na polici",
@@ -166,6 +169,8 @@ export const garageSale: AppMessages["garageSale"] = {
     buyNowPaused: "Koupit hned pozastaveno — aukce mezi zájemci",
     dealPendingPayment: "Čeká se na platbu — nabídka jiného souseda byla přijata",
     cartOneGarage: "Košík je jen pro jednu garáž najednou — nejdřív zaplaťte nebo vyprázdněte.",
+    categoryOther: "Ostatní",
+    categoryItemCount: (count) => (count === 1 ? "1 položka" : count < 5 ? `${count} položky` : `${count} položek`),
   },
   garageAuction: {
     bidTerms:
@@ -275,9 +280,9 @@ export const garageSale: AppMessages["garageSale"] = {
     modeQuick: "Rychlý prodej",
     modeOpen: "Otevřeno nabídkám",
     save: "Uložit změny",
-    remove: "Odebrat z police",
-    removeConfirm: "Odebrat tuto věc z police v garáži?",
-    removeConfirmActive: "Aktivní nabídky nebo příhozy se smažou. Odebrat z police?",
+    remove: "Smazat z police",
+    removeConfirm: "Trvale smazat tuto věc z garáže?",
+    removeConfirmActive: "Aktivní nabídky nebo příhozy se smažou. Smazat trvale?",
     photoLoadFailed: "Fotku se nepodařilo načíst",
     validPrice: "Zadejte platnou cenu",
   },
@@ -354,8 +359,8 @@ export const earnBusiness: AppMessages["earnBusiness"] = {
   projectedByMonthEnd: (amount) => `Odhad ${amount} do konce měsíce`,
   kpiThisMonth: "Tento měsíc",
   kpiLastMonth: "Minulý měsíc",
-  kpiActiveNow: "Teď vydělává",
-  growingTitle: "Jak rostete",
+  kpiActiveNow: "Venku",
+  growingTitle: "Další kroky",
   byListing: "Podle nabídky",
   emptyTitle: "Zatím žádné nabídky",
   emptyBody: "Publikujte z Moje garáž (nebo +) a sledujte výdělky tady.",
@@ -365,25 +370,68 @@ export const earnBusiness: AppMessages["earnBusiness"] = {
   colAllTime: "Celkem",
   trendAria: (trend) => `Trend ${trend}`,
   sparklineHint: "Posledních 7 dní · dokončené výplaty",
-  growthNew: "Nové tento měsíc",
+  sparklineEmpty: "Za posledních 7 dní zatím žádné dokončené výplaty.",
+  growthNew: "Začínáte",
   growthVsLast: (signedPercent) => `${signedPercent} % oproti minulému měsíci`,
   activeListings: (n) =>
-    n === 1 ? "1 aktivní nabídka" : `${n} aktivních nabídek`,
+    n === 1 ? "1 živá nabídka" : `${n} živých nabídek`,
+  kpiLive: "Živé",
+  kpiDrafts: "Koncepty",
+  kpiOut: "Venku",
+  tipFirstBookingTitle: "Získejte první rezervaci",
+  tipFirstBookingBody:
+    "Sdílejte garáž se sousedy v okolí — reálné oči jsou lepší než vymyšlené cíle.",
+  tipFinishDraftTitle: "Dokončete koncept",
+  tipFinishDraftBody: "Koncepty nevydělávají. Dnes zveřejněte jednu jasnou fotku a cenu.",
+  tipBookableTitle: "Udělejte nabídky snadno rezervovatelné",
+  tipBookableBody:
+    "Čerstvá fotka, dostupnost o víkendu a férová denní sazba — to si sousedé rezervují.",
+  tipStockFirstTitle: "Naskladněte první věc",
+  tipStockFirstBody: "Jedna solidní nabídka ve čtvrti je lepší než prázdné projekce.",
   tipExpandTitle: "Rozšiřte katalog",
   tipExpandBody: (amount) =>
-    `Přidejte 1 další věc a odemkněte ~$${amount}/měs. podle vašeho tempa na nabídku.`,
+    `Vaše živé nabídky měly průměr ${amount}/měs. tento měsíc. Podobná další nabídka to může znásobit.`,
   tipMomentumTitle: "Tempo roste",
   tipMomentumBody: (pct, last, current) =>
-    `Jste o ${pct} % výš než minulý měsíc ($${last} → $${current}). Držte ceny u nejlepší nabídky.`,
+    `Jste o ${pct} % výš než minulý měsíc (${last} → ${current}). Držte ceny u nejlepší nabídky.`,
   tipRecoverTitle: "Vraťte tempo z minulého měsíce",
   tipRecoverBody: (last) =>
-    `Minulý měsíc jste vydělali $${last}. Obnovte fotky a dostupnost tehdy aktivních nabídek.`,
-  tipTargetTitle: "Nastavte měsíční cíl",
-  tipTargetBody: (amount) =>
-    `Cíl $${amount}/měs. — držte 2+ věci dostupné o víkendech.`,
+    `Minulý měsíc jste vydělali ${last}. Obnovte fotky a dostupnost tehdy aktivních nabídek.`,
   tipFieldTitle: "Peníze venku v terénu",
   tipFieldBody: (amount, count) =>
-    `$${amount} je vázáno v ${count} aktivní${count === 1 ? " výpůjčce" : "ch výpůjčkách"} — rychlé odpovědi chrání výplaty.`,
+    `${amount} je vázáno v ${count} aktivní${count === 1 ? " výpůjčce" : "ch výpůjčkách"} — rychlé odpovědi chrání výplaty.`,
+  ctaStock: "Naskladnit věc →",
+  ctaGarage: "Otevřít moji garáž →",
+  statementTitle: "Přehled výdělků",
+  statementSubtitle: "Obdobový přehled dokončených rezervací pro vaši evidenci.",
+  periodLabel: "Období",
+  yearOption: (year) => `${year}`,
+  colDate: "Datum",
+  colListing: "Nabídka / rezervace",
+  colBookingId: "ID rezervace",
+  colGross: "Hrubá částka",
+  colPlatformFee: "Poplatek platformy",
+  colStripeFee: "Poplatek Stripe",
+  colRefunds: "Vrácení",
+  colDelivery: "Doručení",
+  colNet: "Čistá částka",
+  totalsLabel: "Součty za období",
+  emptyStatementTitle: "V tomto období nejsou žádné transakce",
+  emptyStatementBody:
+    "Dokončené rezervace hostitele se zde zobrazí po skončení výpůjčky. Export CSV je k dispozici i pro prázdné období.",
+  downloadCsv: "Stáhnout CSV",
+  stripePayoutsLink: "Otevřít výplaty a Dashboard Stripe",
+  disclaimer:
+    "Tento přehled není daňové poradenství. Částky slouží pro vaši evidenci a účetního. Vklady ověřte ve Stripe.",
+  countryTaxNote:
+    "Daňová pravidla se liší podle země — konzultujte místního poradce ohledně povinností.",
+  usTaxFormsNote:
+    "Daňové formuláře USA mohou být u způsobilých účtů Connect dostupné přes Stripe.",
+  notAvailable: "—",
+  feesEstimatedNote:
+    "Některé poplatky platformy byly odhadnuty podle aktuální sazby, pokud nebyly uloženy u rezervace.",
+  ledgerGapNote:
+    "Sestaveno z rezervací v Evorios. Poplatky za zpracování Stripe a přesné dávky výplat zde nejsou po řádcích — jako doplněk použijte Stripe Dashboard.",
 };
 
 export const qrScan: AppMessages["qrScan"] = {
@@ -392,45 +440,72 @@ export const qrScan: AppMessages["qrScan"] = {
   confirmReturn: "Potvrdit vrácení",
   scanPickup: "Sken QR — vyzvednutí",
   scanReturn: "Sken QR — vrácení",
-  qrVerified: "QR ověřen · vyžaduje PIN",
+  qrVerified: "QR ověřen · jste na místě · vyžaduje PIN",
+  geoVerified: "Jste u místa vyzvednutí · vyžaduje PIN",
   tipPickup: "Věc převzata! Výpůjčka právě začíná.",
+  tipPickupContactless:
+    "Odemčení spouští hodiny. Kódy schránky se ukážou po PIN — jen když jste na místě.",
   tipPickupReturnBy: (label) => ` Vraťte do ${label}.`,
   tipReturn: "Hotovo! Upozorníme majitele.",
+  tipReturnContactless:
+    "Označte vrácení, až je věc zpět. Hostitel potvrdí — nebo se po 24 hodinách dokončí samo.",
   contactlessTitle: "Bezdotykový přístup",
   contactlessBody:
-    "Pokyny a kódy se odemknou při check-inu s PIN — ne dřív. Adresa vyzvednutí je na obrazovce výpůjčky, ať sem můžete dojet.",
+    "Kódy se odemknou až když jste u vyzvednutí (GPS nebo QR věci) a zadáte PIN — ne z gauče.",
   contactlessLocked:
-    "Zadejte správný 6místný PIN vyzvednutí níže pro kódy a pokyny.",
+    "Nejdřív dokažte, že jste tady, pak zadejte 6místný PIN vyzvednutí pro kódy.",
   enterPinPickup: "Zadejte PIN vyzvednutí",
   enterPinReturn: "Zadejte PIN vrácení",
   pinBody:
-    "Tento sken funguje jen v aplikaci pro nájemce/hostitele této rezervace. PIN brání náhodným skenům.",
+    "PIN funguje až po přítomnosti (QR věci nebo GPS u místa předání). To brání vzdálenému sdílení.",
   pinBodyContactless:
-    "Tento sken funguje jen v aplikaci pro nájemce/hostitele této rezervace. PIN brání náhodným skenům a odemyká bezdotykové detaily (kódy a kroky).",
+    "PIN odemkne kroky ke schránce až když jste na místě. Přítomnost + PIN spouští výpůjčku.",
   pinPlaceholder: "000000",
   pinAria: "6místný PIN",
   pinMismatch: (mode) =>
     `PIN nesedí. Zeptejte se protistrany na PIN ${mode}.`,
   alreadyConfirmed: "Už potvrzeno.",
   scanHint: "Namiřte foťák na QR nálepku na věci…",
-  scanHintMissing: "Chybí QR cíl této rezervace — zadejte kód ručně nebo potvrďte jako hostitel.",
+  scanHintMissing: "Chybí QR cíl této rezervace — použijte GPS odemčení nebo potvrzení hostitele.",
   scanHintMatched: "QR sedí — pokračujte PIN",
-  cameraUnavailable: "Foťák v tomto prohlížeči není k dispozici. Zadejte kód ručně.",
+  cameraUnavailable: "Foťák v tomto prohlížeči není k dispozici. Použijte GPS nebo hostitele.",
   cameraAccessNeeded: "Pro sken QR na věci je potřeba přístup k foťáku.",
   stickerMustMatch:
     "Nálepka musí sedět s touto rezervací. Po úspěšném skenu ještě budete potřebovat 6místný PIN.",
+  stickerOrGeo:
+    "Naskenujte QR na věci — nebo klepněte „Jsem u vyzvednutí“, aby GPS odemklo PIN. Obě cesty dokážou, že nejste daleko.",
   enterCodeManually: "Zadat kód ručně",
   ownerConfirms: "Majitel potvrdí ručně",
   manualTitle: "QR věci / check-in kód",
   manualPlaceholder: "Vložte kód nabídky",
+  manualNeedsPresence:
+    "Samotný kód nabídky nestačí. Stůjte u vyzvednutí a odemkněte GPS, nebo naskenujte nálepku na věci.",
   verifyCode: "Ověřit kód",
   codeMismatch: "Kód nesedí s touto věcí. Zkuste znovu nebo naskenujte QR.",
+  presenceTitle: "Dokažte, že jste u vyzvednutí",
+  presenceBody:
+    "Přijďte na místo předání a teprve pak odemkněte. Sdílený PIN z druhého konce města obchod neotevře.",
+  presenceRequired: "Nejdřív dorazte na místo (GPS) nebo naskenujte QR na věci.",
+  geoUnlockCta: "Jsem u vyzvednutí — odemknout PIN",
+  geoChecking: "Kontroluji polohu…",
+  geoNoTarget:
+    "Souřadnice vyzvednutí ještě nejsou. Naskenujte fyzické QR na věci, nebo požádejte hostitele o znovuschválení.",
+  geoNoTargetScanQr: "Zatím není GPS cíl — místo toho naskenujte nálepku na věci.",
+  geoTooFar: (distanceM, radiusM) =>
+    `Jste asi ${distanceM} m daleko (potřeba do ~${radiusM} m). Přibližte se k místu vyzvednutí a zkuste znovu.`,
+  geoDenied: "Pro odemčení PIN u místa vyzvednutí je potřeba oprávnění k poloze.",
+  geoUnavailable: "Polohu se nepodařilo načíst. Zkuste venku, nebo naskenujte QR na věci.",
+  conditionPhotoTitle: "Foto stavu (volitelné)",
+  conditionPhotoBody: "Vyfoťte věc, jak ji nacházíte — klid pro obě strany.",
+  conditionPhotoAdd: "Přidat foto",
+  conditionPhotoAdded: "Foto přidáno ✓",
+  conditionPhotoSaving: "Ukládám…",
 };
 
 export const bookingRequest: AppMessages["bookingRequest"] = {
   autoCancelledSoon: "Brzy automaticky zrušeno",
   autoCancelledIn: (countdown) => `Automaticky zrušeno za ${countdown}`,
-  inclDelivery: (fee) => ` (vč. $${fee} doprava)`,
+  inclDelivery: (fee) => ` (vč. ${fee} Kč doprava)`,
   paymentOnHold:
     "Platba nájemce je autorizovaná — strhne se až po vašem schválení.",
   somethingWrong: "Něco se pokazilo.",

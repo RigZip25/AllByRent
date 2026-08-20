@@ -3,6 +3,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import auctionCheckout from "@allbyrent/server/routes/stripe/auction_checkout";
 import boost from "@allbyrent/server/routes/stripe/boost";
 import connectAccountLink from "@allbyrent/server/routes/stripe/connect_account_link";
+import connectDiag from "@allbyrent/server/routes/stripe/connect_diag";
 import connectSync from "@allbyrent/server/routes/stripe/connect_sync";
 import depositClaim from "@allbyrent/server/routes/stripe/deposit_claim";
 import depositIntent from "@allbyrent/server/routes/stripe/deposit_intent";
@@ -13,6 +14,8 @@ import paymentCancel from "@allbyrent/server/routes/stripe/payment_cancel";
 import paymentCapture from "@allbyrent/server/routes/stripe/payment_capture";
 import paymentConfirm from "@allbyrent/server/routes/stripe/payment_confirm";
 import paymentIntent from "@allbyrent/server/routes/stripe/payment_intent";
+import paymentRefund from "@allbyrent/server/routes/stripe/payment_refund";
+import rentalInvoice from "@allbyrent/server/routes/stripe/rental_invoice";
 import webhook from "@allbyrent/server/routes/stripe/webhook";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
@@ -21,6 +24,7 @@ const ROUTES: Record<string, Handler> = {
   auction_checkout: auctionCheckout,
   boost,
   connect_account_link: connectAccountLink,
+  connect_diag: connectDiag,
   connect_sync: connectSync,
   deposit_claim: depositClaim,
   deposit_intent: depositIntent,
@@ -31,6 +35,8 @@ const ROUTES: Record<string, Handler> = {
   payment_capture: paymentCapture,
   payment_confirm: paymentConfirm,
   payment_intent: paymentIntent,
+  payment_refund: paymentRefund,
+  rental_invoice: rentalInvoice,
   webhook,
 };
 

@@ -63,7 +63,7 @@ export function GarageMakeOfferSheet({
     <div className="garage-offer-sheet fixed inset-0 z-50 flex items-end justify-center bg-black/40">
       <button type="button" className="absolute inset-0" aria-label={common.close} onClick={onClose} />
       <div
-        className="relative w-full max-w-[390px] rounded-t-3xl border bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-4"
+        className="relative w-full max-w-[390px] max-h-[90dvh] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] rounded-t-3xl border bg-white px-4 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] pt-4"
         style={{ borderColor: BORDER }}
       >
         <div className="mb-3 flex items-start justify-between gap-3">
@@ -85,7 +85,7 @@ export function GarageMakeOfferSheet({
             style={{ borderColor: BORDER }}
             aria-label={common.close}
           >
-            <X className="h-5 w-5 text-gray-600" />
+            <X className="h-5 w-5 text-red-600" />
           </button>
         </div>
 

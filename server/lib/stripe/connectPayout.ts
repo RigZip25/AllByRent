@@ -45,7 +45,7 @@ export async function resolveHostStripeCurrency(
 }
 
 export const HOST_PAYOUTS_REQUIRED_MESSAGE =
-  "This garage can’t receive card payments yet. The host must finish Stripe Connect payouts in Profile.";
+  "This seller hasn’t finished Connect finances yet — card checkout is locked until they link a bank in Profile → Connect finances.";
 
 /** Require a Connect account that can receive destination charges. */
 export async function requireHostPayoutAccount(

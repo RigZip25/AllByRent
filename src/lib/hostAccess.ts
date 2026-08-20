@@ -1,6 +1,11 @@
 import type { ListingDraft } from "../screens/listing/types";
 import { getActiveCoHostHostIds } from "./coHostStorage";
-import { countPublishedListingsForHost, fetchListingsByOwnerIdsRemote, loadPublishedListings } from "./listingStorage";
+import {
+  countPublishedListingsForHost,
+  fetchListingsByOwnerIdsRemote,
+  isListingRecentlyRemoved,
+  loadPublishedListings,
+} from "./listingStorage";
 import { resolveHostAccountEmail, resolveHostAccountId } from "./hostIdentity";
 
 const LEGACY_HOST_ID = "";
@@ -57,6 +62,7 @@ export function mergeManageableListings(
   }
   for (const listing of remote) {
     if (!listing.id) continue;
+    if (isListingRecentlyRemoved(listing.id)) continue;
     const prev = byId.get(listing.id);
     if (!prev || listingUpdatedAtMs(listing) >= listingUpdatedAtMs(prev)) {
       byId.set(listing.id, listing);

@@ -122,13 +122,18 @@ export function GarageShelfEditSheet({
 
   const remove = () => {
     if (!window.confirm(hasActivity ? copy.removeConfirmActive : copy.removeConfirm)) return;
-    const result = removeGarageShelfItem(listing.id);
-    if (!result.ok) {
-      setError(result.reason);
-      return;
-    }
-    onRemoved();
-    onClose();
+    setBusy(true);
+    setError(null);
+    void removeGarageShelfItem(listing.id)
+      .then((result) => {
+        if (!result.ok) {
+          setError(result.reason);
+          return;
+        }
+        onRemoved();
+        onClose();
+      })
+      .finally(() => setBusy(false));
   };
 
   const readOnly = Boolean(blockReason);
@@ -137,7 +142,7 @@ export function GarageShelfEditSheet({
     <div className="garage-shelf-edit fixed inset-0 z-50 flex items-end justify-center bg-black/40">
       <button type="button" className="absolute inset-0" aria-label="Close" onClick={onClose} />
       <div
-        className="relative max-h-[90dvh] w-full max-w-[390px] overflow-y-auto rounded-t-3xl border bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-4"
+        className="relative max-h-[90dvh] w-full max-w-[390px] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] rounded-t-3xl border bg-white px-4 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] pt-4"
         style={{ borderColor: BORDER }}
       >
         <div className="mb-3 flex items-start justify-between gap-3">
@@ -148,7 +153,7 @@ export function GarageShelfEditSheet({
             <h2 className="text-lg font-bold text-gray-900">{copy.title}</h2>
           </div>
           <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-full border" style={{ borderColor: BORDER }}>
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4 text-red-600" />
           </button>
         </div>
 

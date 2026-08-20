@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
+import { createPortal } from "react-dom";
 import {
   ArrowLeft,
   Star,
@@ -27,6 +28,7 @@ import {
   getActiveRentLocationLabel,
   getPublishedListingById,
 } from "../../lib/listingStorage";
+import { isBorrowedByViewer } from "../../lib/borrowedItemGuard";
 import { getListingDisplayTitle, listingRequiresQrSticker } from "../../lib/listingQr";
 import {
   deliverySummaryForListing,
@@ -35,13 +37,16 @@ import {
 } from "../../lib/rentalPricing";
 import { canBuyNowLot, getLotState, isAuctionTimeActive } from "../../lib/garageAuctionState";
 import { isAuctionNotStarted } from "../../lib/garageAuctionWindow";
+import { isListingOnOpenSale } from "../../lib/openSale";
 import { formatListingPriceLine } from "../../lib/garageDisplay";
+import { isFreeGiveaway as isListingFreeGiveaway } from "../../lib/listingGift";
 import {
   buyNowGarageItem,
   formatShopUsd,
   getShopOffer,
   type ShopOffer,
 } from "../../lib/garageShopStorage";
+import { ListingPhotoGallery } from "../../components/listings/ListingPhotoGallery";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 import { APP_NAME, MASCOT_NAME } from "../../lib/brand";
 import { parseUsdToCents } from "../../lib/insurance";
@@ -49,7 +54,37 @@ import { SocialShareButtons } from "../../components/share/SocialShareButtons";
 import { buildListingSharePayload, listingShareUrl } from "../../lib/socialShare";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMessages } from "../../lib/i18n/react";
+import { CategoryFactCard } from "../../components/CategoryFactCard";
+import {
+  listingIsCommercialTransport,
+  listingIsCommercialTransportShelf,
+  listingProRentersOnly,
+  listingRequiresCdl,
+  listingRequiresPhysicalDamage,
+} from "../../lib/listingRentRules";
+import {
+  listingIsCarSeat,
+  listingIsDrone,
+  listingRequiresBoaterLicense,
+  listingRequiresGuestStartId,
+  listingRequiresOperatorCredential,
+  listingRequiresDroneCert,
+  listingRequiresDriverRecordAttestation,
+} from "../../lib/categoryTrustRules";
+import { listingRequiresCoiHostConfirm } from "../../lib/listingInsurance";
 import type { ListingDraft } from "../../screens/listing/types";
+import { AvailabilityCalendar } from "../../components/availability/AvailabilityCalendar";
+import {
+  fetchListingBusyIntervals,
+  type BusyInterval,
+} from "../../lib/availabilityBusy";
+import {
+  categorySupportsTravelOutsideRule,
+  formatHomeTerritoryPhrase,
+  normalizeTravelOutsideHomeArea,
+  resolveHomeTerritory,
+} from "../../lib/vehicleHomeTerritory";
+import { getSearchCountryCode } from "../../lib/locationCountry";
 
 interface ItemDetailProps {
   itemId: string;
@@ -63,22 +98,6 @@ interface ItemDetailProps {
   onOpenListingChat?: (listingId: string, hostId: string) => void;
 }
 
-function formatBlockedDates(listing: ListingDraft): string[] {
-  return (listing.blockedDates ?? [])
-    .map((entry) => {
-      if (typeof entry === "string") return entry;
-      if (entry && typeof entry === "object" && "start" in entry) {
-        const row = entry as { start?: string; end?: string };
-        if (row.start && row.end && row.start !== row.end) {
-          return `${row.start} – ${row.end}`;
-        }
-        return row.start ?? row.end ?? "";
-      }
-      return "";
-    })
-    .filter(Boolean);
-}
-
 function AvailabilityPanel({
   listing,
   onClose,
@@ -87,7 +106,9 @@ function AvailabilityPanel({
   onClose: () => void;
 }) {
   const t = useMessages();
-  const blocked = formatBlockedDates(listing);
+  const [busy, setBusy] = useState<BusyInterval[]>([]);
+  const [busyLoading, setBusyLoading] = useState(true);
+  const dragStartY = useRef<number | null>(null);
   const weekday =
     listing.handoff.inPersonTimeStart && listing.handoff.inPersonTimeEnd
       ? `${listing.handoff.inPersonTimeStart}–${listing.handoff.inPersonTimeEnd}`
@@ -97,69 +118,124 @@ function AvailabilityPanel({
       ? `${listing.handoff.inPersonWeekendTimeStart}–${listing.handoff.inPersonWeekendTimeEnd}`
       : null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4">
-      <div className="w-full max-w-[390px] rounded-2xl border border-border bg-card p-4 shadow-xl">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">{t.item.availability}</h2>
+  useEffect(() => {
+    let mounted = true;
+    setBusyLoading(true);
+    void fetchListingBusyIntervals(listing.id, listing.blockedDates).then((result) => {
+      if (!mounted) return;
+      setBusy(result.intervals);
+      setBusyLoading(false);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [listing.id, listing.blockedDates]);
+
+  // Escape + lock background scroll so iOS overscroll doesn't trap the user.
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose]);
+
+  const onDragHandleTouchStart = (event: TouchEvent) => {
+    dragStartY.current = event.touches[0]?.clientY ?? null;
+  };
+
+  const onDragHandleTouchEnd = (event: TouchEvent) => {
+    const startY = dragStartY.current;
+    dragStartY.current = null;
+    if (startY == null) return;
+    const endY = event.changedTouches[0]?.clientY;
+    if (endY == null) return;
+    // Swipe down on the sheet chrome closes; body scroll stays independent.
+    if (endY - startY > 72) onClose();
+  };
+
+  const panel = (
+    <div
+      className="fixed inset-0 z-[120] flex flex-col justify-end bg-black/45"
+      role="presentation"
+    >
+      <button
+        type="button"
+        className="min-h-0 flex-1 w-full cursor-default"
+        aria-label={t.item.closeAvailabilityAria}
+        onClick={onClose}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t.item.availability}
+        className="relative mx-auto flex max-h-[min(92dvh,720px)] w-full max-w-[430px] flex-col rounded-t-3xl border border-border bg-card shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div
+          className="shrink-0 border-b border-border bg-card px-4 pb-3 pt-2"
+          onTouchStart={onDragHandleTouchStart}
+          onTouchEnd={onDragHandleTouchEnd}
+        >
+          <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-muted-foreground/35" aria-hidden />
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold">{t.item.availability}</h2>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted"
+              aria-label={t.item.closeAvailabilityAria}
+            >
+              <X className="h-5 w-5 text-red-600" />
+            </button>
+          </div>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] px-4 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] pt-3">
+          {listing.paused ? (
+            <p className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              {t.item.pausedAvailabilityBanner}
+            </p>
+          ) : (
+            <p className="mb-3 text-sm text-muted-foreground">{t.item.pickupWindowsHint}</p>
+          )}
+
+          <AvailabilityCalendar busyIntervals={busy} readOnly loading={busyLoading} />
+
+          <dl className="mt-4 space-y-2 text-sm">
+            {weekday ? (
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">{t.item.weekdays}</dt>
+                <dd className="font-medium">{weekday}</dd>
+              </div>
+            ) : null}
+            {weekend ? (
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">{t.item.weekends}</dt>
+                <dd className="font-medium">{weekend}</dd>
+              </div>
+            ) : null}
+          </dl>
+
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 hover:bg-muted"
-            aria-label={t.item.closeAvailabilityAria}
+            className="btn-primary mt-4 w-full rounded-xl py-3 font-semibold text-white"
           >
-            <X className="h-5 w-5" />
+            {t.common.close}
           </button>
         </div>
-
-        {listing.paused ? (
-          <p className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-            {t.item.pausedAvailabilityBanner}
-          </p>
-        ) : (
-          <p className="mb-3 text-sm text-muted-foreground">
-            {t.item.pickupWindowsHint}
-          </p>
-        )}
-
-        <dl className="space-y-2 text-sm">
-          {weekday ? (
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">{t.item.weekdays}</dt>
-              <dd className="font-medium">{weekday}</dd>
-            </div>
-          ) : null}
-          {weekend ? (
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">{t.item.weekends}</dt>
-              <dd className="font-medium">{weekend}</dd>
-            </div>
-          ) : null}
-        </dl>
-
-        {blocked.length > 0 ? (
-          <div className="mt-4">
-            <p className="text-sm font-semibold">{t.item.blockedDates}</p>
-            <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-sm text-muted-foreground">
-              {blocked.map((line) => (
-                <li key={line}>• {line}</li>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          <p className="mt-4 text-sm text-muted-foreground">{t.item.noBlockedDates}</p>
-        )}
-
-        <button
-          type="button"
-          onClick={onClose}
-          className="btn-primary mt-4 w-full rounded-xl py-3 font-semibold text-white"
-        >
-          {t.common.close}
-        </button>
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(panel, document.body);
 }
 
 export function ItemDetail({
@@ -179,6 +255,7 @@ export function ItemDetail({
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
   const [messageHint, setMessageHint] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
+  const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
   const [listing, setListing] = useState<ListingDraft | null>(() => getPublishedListingById(itemId));
   const [loading, setLoading] = useState(() => !getPublishedListingById(itemId));
 
@@ -196,6 +273,7 @@ export function ItemDetail({
 
   const cover = listing?.photos?.[0] ?? null;
   const coverUrl = useCoverMediaUrl(cover).url;
+  const photoCount = listing?.photos?.length ?? 0;
 
   const title = listing
     ? getListingDisplayTitle(listing.title) || listing.title || t.item.listingFallback
@@ -225,15 +303,28 @@ export function ItemDetail({
   const buyBlockedByAuction = Boolean(multiAuction && (auctionLive || auctionEnded));
 
   const canRent = Boolean(canTransact && listing && (listing.modes.rent || listing.modes.rentToOwn));
-  const saleCents = listing ? parseUsdToCents(listing.pricing.salePrice ?? "") : -1;
   const isFreeGiveaway = Boolean(
-    canTransact && listing?.modes.sell && saleCents === 0 && !isSold && !buyBlockedByAuction,
+    canTransact &&
+      listing &&
+      isListingFreeGiveaway(listing) &&
+      !isSold &&
+      !buyBlockedByAuction,
   );
+  const onOpenSale = Boolean(listing && isListingOnOpenSale(listing.id));
   const canBuy = Boolean(
-    canTransact && listing?.modes.sell && shopOffer && shopOffer.buyNowUsd > 0 && !buyBlockedByAuction && !isSold,
+    canTransact &&
+      listing?.modes.sell &&
+      shopOffer &&
+      shopOffer.buyNowUsd > 0 &&
+      !buyBlockedByAuction &&
+      !isSold &&
+      !onOpenSale,
   );
   const showGarageForAuction = Boolean(
-    listing?.modes.sell && shopOffer && buyBlockedByAuction && !isSold && listing.hostId,
+    listing?.modes.sell &&
+      ((shopOffer && buyBlockedByAuction) || onOpenSale) &&
+      !isSold &&
+      listing.hostId,
   );
 
   const sharePayload = useMemo(() => {
@@ -366,13 +457,30 @@ export function ItemDetail({
       <div className="screen-scroll flex-1 min-h-0 pb-24">
         <div className="relative aspect-square bg-[#F0F4F2] flex flex-col items-center justify-center gap-3 overflow-hidden">
           {coverUrl ? (
-            <img src={coverUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            <button
+              type="button"
+              onClick={() => setGalleryIndex(0)}
+              className="absolute inset-0"
+              aria-label={
+                photoCount > 1
+                  ? t.item.openPhotoGalleryAria(photoCount)
+                  : t.item.openPhotoAria
+              }
+            >
+              <img src={coverUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            </button>
           ) : (
             <>
               <Camera className="w-16 h-16 text-primary" />
               <span className="text-sm text-muted-foreground">{t.item.photoByOwner}</span>
             </>
           )}
+
+          {photoCount > 1 ? (
+            <div className="pointer-events-none absolute bottom-3 right-3 rounded-full bg-black/60 px-2.5 py-1 text-xs font-semibold text-white">
+              {t.item.photoCountBadge(photoCount)}
+            </div>
+          ) : null}
 
           {(listing.modes.rent || listing.modes.rentToOwn) &&
           parseUsdToCents(listing.pricing.securityDeposit ?? "") >= 50 ? (
@@ -389,6 +497,15 @@ export function ItemDetail({
             </div>
           ) : null}
         </div>
+
+        {galleryIndex !== null && listing.photos.length > 0 ? (
+          <ListingPhotoGallery
+            photos={listing.photos}
+            index={galleryIndex}
+            onClose={() => setGalleryIndex(null)}
+            onIndexChange={setGalleryIndex}
+          />
+        ) : null}
 
         <div className="p-4 space-y-4">
           <div>
@@ -415,6 +532,248 @@ export function ItemDetail({
                 )}
               </div>
             </div>
+            {listing.category.trim() === "Vehicles" && listing.modes.rent ? (
+              <CategoryFactCard
+                category="Vehicles"
+                subcategory={listing.subcategory}
+                commercialTransport={listingIsCommercialTransportShelf(listing)}
+                className="mt-3"
+              />
+            ) : null}
+            {(listing.category.trim() === "Heavy Equipment" ||
+              listing.category.trim() === "Construction") &&
+            listing.modes.rent ? (
+              <CategoryFactCard
+                category={listing.category.trim()}
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.category.trim() === "Boats & Water" && listing.modes.rent ? (
+              <CategoryFactCard
+                category="Boats & Water"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.category.trim() === "Real Estate" && listing.modes.rent ? (
+              <CategoryFactCard
+                category="Real Estate"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listingIsDrone(listing) && listing.modes.rent ? (
+              <CategoryFactCard
+                category="Photo & Video"
+                subcategory={listing.subcategory || "Drones"}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Baby & Kids" ? (
+              <CategoryFactCard
+                category="Baby & Kids"
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent &&
+            (listing.category.trim() === "Photo & Video" ||
+              listing.category.trim() === "Electronics & Tech") &&
+            !listingIsDrone(listing) ? (
+              <CategoryFactCard
+                category={
+                  listing.category.trim() === "Electronics & Tech"
+                    ? "Electronics & Tech"
+                    : "Photo & Video"
+                }
+                subcategory={
+                  listing.category.trim() === "Electronics & Tech" ||
+                  listing.category.trim() === "Photo & Video"
+                    ? listing.subcategory
+                    : undefined
+                }
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Gym & Fitness" ? (
+              <CategoryFactCard
+                category="Gym & Fitness"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Sports & Recreation" ? (
+              <CategoryFactCard
+                category="Sports & Recreation"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Outdoor & Camping" ? (
+              <CategoryFactCard
+                category="Outdoor & Camping"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Bikes & Scooters" ? (
+              <CategoryFactCard
+                category="Bikes & Scooters"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Party & Events" ? (
+              <CategoryFactCard
+                category="Party & Events"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Office & Business" ? (
+              <CategoryFactCard
+                category="Office & Business"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Music & Audio" ? (
+              <CategoryFactCard
+                category="Music & Audio"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Tools & DIY" ? (
+              <CategoryFactCard
+                category="Tools & DIY"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Garden & Yard" ? (
+              <CategoryFactCard
+                category="Garden & Yard"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Home & Kitchen" ? (
+              <CategoryFactCard
+                category="Home & Kitchen"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Costume & Cosplay" ? (
+              <CategoryFactCard
+                category="Costume & Cosplay"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Unique & Other" ? (
+              <CategoryFactCard
+                category="Unique & Other"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent &&
+            (listingProRentersOnly(listing) ||
+              listingRequiresPhysicalDamage(listing) ||
+              listingRequiresCdl(listing) ||
+              listingRequiresOperatorCredential(listing) ||
+              listingRequiresBoaterLicense(listing) ||
+              listingRequiresDroneCert(listing) ||
+              listingIsCarSeat(listing) ||
+              listingRequiresGuestStartId(listing) ||
+              listingIsCommercialTransport(listing) ||
+              listingRequiresDriverRecordAttestation(listing) ||
+              listingRequiresCoiHostConfirm(listing)) ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {listingProRentersOnly(listing) ? (
+                  <span className="rounded-md border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] font-semibold text-sky-950">
+                    {t.booking.proBadge}
+                  </span>
+                ) : null}
+                {listingRequiresPhysicalDamage(listing) ? (
+                  <span className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-950">
+                    {t.booking.physicalDamageBadge}
+                  </span>
+                ) : null}
+                {listingRequiresCdl(listing) ? (
+                  <span className="rounded-md border border-indigo-200 bg-indigo-50 px-2 py-1 text-[11px] font-semibold text-indigo-950">
+                    {t.booking.cdlBadge}
+                  </span>
+                ) : null}
+                {listingRequiresOperatorCredential(listing) ? (
+                  <span className="rounded-md border border-orange-200 bg-orange-50 px-2 py-1 text-[11px] font-semibold text-orange-950">
+                    {t.booking.operatorCertBadge}
+                  </span>
+                ) : null}
+                {listingRequiresBoaterLicense(listing) ? (
+                  <span className="rounded-md border border-cyan-200 bg-cyan-50 px-2 py-1 text-[11px] font-semibold text-cyan-950">
+                    {t.booking.boaterLicenseBadge}
+                  </span>
+                ) : null}
+                {listingRequiresDroneCert(listing) ? (
+                  <span className="rounded-md border border-violet-200 bg-violet-50 px-2 py-1 text-[11px] font-semibold text-violet-950">
+                    {t.booking.droneCertBadge}
+                  </span>
+                ) : null}
+                {listingIsCarSeat(listing) ? (
+                  <span className="rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-950">
+                    {t.booking.carSeatSafetyBadge}
+                  </span>
+                ) : null}
+                {listingRequiresGuestStartId(listing) ? (
+                  <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-950">
+                    {t.booking.guestIdBadge}
+                  </span>
+                ) : null}
+                {listingIsCommercialTransport(listing) ? (
+                  <span className="rounded-md border border-violet-200 bg-violet-50 px-2 py-1 text-[11px] font-semibold text-violet-950">
+                    {t.booking.commercialTransportBadge}
+                  </span>
+                ) : null}
+                {listingRequiresDriverRecordAttestation(listing) ? (
+                  <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-950">
+                    {t.booking.driverRecordBadge}
+                  </span>
+                ) : null}
+                {listingRequiresCoiHostConfirm(listing) ? (
+                  <span className="rounded-md border border-orange-200 bg-orange-50 px-2 py-1 text-[11px] font-semibold text-orange-950">
+                    {t.booking.coiStructuredBadge}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+            {listing.modes.rent && categorySupportsTravelOutsideRule(listing.category) ? (
+              <div className="mt-3 rounded-xl border border-border bg-card p-3 text-sm text-gray-800">
+                <p className="font-semibold">{t.rentalDetail.travelOutsideListingTitle}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {normalizeTravelOutsideHomeArea(listing.handoff.travelOutsideHomeArea) ===
+                  "forbidden"
+                    ? t.rentalDetail.travelOutsideListingForbidden(
+                        formatHomeTerritoryPhrase(
+                          listing.handoff.homeTerritory ??
+                            resolveHomeTerritory({
+                              countryHint: getSearchCountryCode(),
+                            }),
+                        ),
+                      )
+                    : t.rentalDetail.travelOutsideListingAllowed(
+                        formatHomeTerritoryPhrase(
+                          listing.handoff.homeTerritory ??
+                            resolveHomeTerritory({
+                              countryHint: getSearchCountryCode(),
+                            }),
+                        ),
+                      )}
+                </p>
+              </div>
+            ) : null}
 
             <div className="flex items-center gap-2 mt-3">
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
@@ -431,6 +790,19 @@ export function ItemDetail({
           {isSold ? (
             <p className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
               {t.item.soldBanner}
+            </p>
+          ) : null}
+
+          {onOpenSale && !isSold ? (
+            <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+              On Open Sale — buy from the sale cart while the auction window is open. Not for sale in
+              the main garage right now.
+            </p>
+          ) : null}
+
+          {isBorrowedByViewer({ listingId: listing.id, viewerId: auth.userId }) ? (
+            <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              {t.rentalDetail.cannotRelistBorrowed}
             </p>
           ) : null}
 

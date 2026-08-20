@@ -20,6 +20,10 @@ export const faq: AppMessages["faq"] = {
     account: "Cuenta",
   },
   items: {
+    "why-name": {
+      q: "¿Por qué se llama Evorios?",
+      a: "Evorios es un nombre acuñado de evo- (evolve / evolution — evolucionar) más -rios, un final corto de sonido latino/romance que sugiere muchos hogares — varios en español. Se dice eh-VOR-ee-ohs (acento en VOR).\n\nLo elegimos porque el producto trata de evolución, no de meter “rent” o “sale” en la marca: (1) cómo piensan los hogares — lo del garaje se vuelve escaparate; (2) cómo consumen las personas — pedir prestado, comprar de segunda, o pasar cosas; (3) cómo se relacionan los vecinos — confianza en el porche en lugar de comercio anónimo. En una línea: evolve how your home shares.\n\nAl principio puede sonar poco familiar — es normal en marcas inventadas. Los nombres descriptivos son más fáciles el primer día, pero difíciles de poseer en todo el mundo y te encierran en un solo modo. Evorios es único al buscarlo, tenemos evorios.com, y con la historia y el acento en VOR se queda en la memoria.",
+    },
     "what-is": {
       q: "¿Qué es Evorios?",
       a: "Evorios es un mercado de vecinos: cada casa es una célula de negocio — un escaparate en el garaje de tu calle. Los vecinos alquilan, venden o regalan (Vender a 0 €). Explora categorías en Inicio, o llena tu garaje con el botón verde +.",
@@ -58,15 +62,15 @@ export const faq: AppMessages["faq"] = {
     },
     "replacement-value": {
       q: "¿Qué es el valor de reposición?",
-      a: "Es el coste de comprar el artículo nuevo hoy — se usa para la protección del depósito y la elegibilidad de alquiler. Usa el precio actual de venta al público, no el de segunda mano. La IA sugiere un valor a partir de tus fotos.",
+      a: "Es el coste de comprar el artículo nuevo hoy en la moneda de tu mercado — contexto para fijar la fianza. La IA sugiere un valor desde tus fotos. El importe de la fianza lo pone siempre el anfitrión; el seguro para artículos caros llega después.",
     },
     "qr-sticker": {
       q: "¿Por qué necesito una pegatina QR?",
-      a: "Para alquileres, el QR vincula el artículo físico con tu anuncio. El anuncio se publica en cuanto lo publicas — imprime pegatinas ahora, después o en lote desde Mi garaje. En la entrega confirmas tú primero con el código; el escaneo del vecino activa el alquiler por completo.",
+      a: "Para alquileres, el QR vincula el artículo físico con tu anuncio. No hace falta impresora para empezar — muestra el código desde el teléfono en la entrega. Imprime una pegatina después (o en lote desde Mi garaje) si quieres. No pedimos foto de la pegatina impresa.",
     },
     "pickup-delivery": {
       q: "¿Cómo funcionan la recogida y la entrega?",
-      a: "Los anuncios nuevos empiezan con valores por defecto razonables para el vecindario (horario entre semana en el porche). Después de publicar, abre el anuncio desde Mi garaje → Edición completa (o ediciones rápidas en la pantalla de detalle) para configurar recogida en persona / sin contacto y kilómetros y tarifas de entrega. La dirección exacta se comparte con el inquilino confirmado tras la reserva.",
+      a: "Los anuncios nuevos empiezan con valores por defecto razonables para el barrio (horario entre semana en el porche). Después de publicar, abre el anuncio desde Mi garaje → Edición completa (o ediciones rápidas en la pantalla de detalle) para configurar recogida en persona / sin contacto y kilómetros y tarifas de entrega. La dirección exacta se comparte con el inquilino confirmado tras la reserva.",
     },
     "book-item": {
       q: "¿Cómo alquilo un artículo?",
@@ -138,7 +142,7 @@ export const faq: AppMessages["faq"] = {
     },
     "active-rental": {
       q: "¿Dónde está mi alquiler activo?",
-      a: "Más → Alquileres, o el icono de portapapeles en Inicio. Abre la reserva para ver la ventana de recogida, mensajes, check-in por QR y los pasos de devolución.",
+      a: "Más → Alquileres, o el icono de portapapeles en Inicio. Abre la reserva para ver la ventana de recogida, mensajes, confirmación de recogida con QR y los pasos de devolución.",
     },
     "extend-rental": {
       q: "¿Puedo alargar un alquiler?",
@@ -146,7 +150,7 @@ export const faq: AppMessages["faq"] = {
     },
     "cancel-booking": {
       q: "¿Cómo cancelo una reserva?",
-      a: "Abre el alquiler en Alquileres y elige Cancelar si todavía es antes de la recogida. Las reglas de reembolso dependen de la política del anfitrión y del momento — consulta el resumen de la reserva.",
+      a: "Abre el alquiler en Alquileres y elige Cancelar antes de la recogida. Solicitudes pendientes: cancela cuando quieras (se libera la autorización). Tras aceptar: 48+ h antes del inicio → reembolso completo; 24–48 h → 50%; menos de 24 h → sin reembolso del alquiler. Si cancela el anfitrión antes de la recogida, el inquilino recupera el 100%.",
     },
     "host-payouts": {
       q: "¿Cómo cobran los anfitriones?",

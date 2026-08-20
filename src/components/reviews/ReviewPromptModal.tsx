@@ -45,7 +45,7 @@ export function ReviewPromptModal({
             <p className="mt-0.5 text-[13px] text-gray-500">{title}</p>
           </div>
           <button type="button" onClick={onClose} aria-label={common.close}>
-            <X className="h-5 w-5 text-gray-500" />
+            <X className="h-5 w-5 text-red-600" />
           </button>
         </div>
 

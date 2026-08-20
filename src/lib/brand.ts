@@ -7,8 +7,8 @@ export const APP_NAME_PRONUNCIATION = "eh-VOR-ee-ohs";
 export const PRODUCT_METAPHOR = "Garage Showcase";
 
 /** Ties the name to neighbor storefronts (EN UI). */
-export const APP_TAGLINE = "Neighborly marketplace — every home is a business cell.";
-export const APP_TAGLINE_SHORT = "Neighborly marketplace.";
+export const APP_TAGLINE = "Neighbors share what you need — borrow nearby, or list what you own.";
+export const APP_TAGLINE_SHORT = "Borrow nearby. Share what you own.";
 
 /**
  * PWA install / home-screen labels.
@@ -18,13 +18,13 @@ export const APP_TAGLINE_SHORT = "Neighborly marketplace.";
 export const PWA_APP_NAME = "Evorios — Neighborly Marketplace";
 export const PWA_SHORT_NAME = "Evorios Market";
 export const PWA_DESCRIPTION =
-  "Neighborly marketplace — every home is a business cell that can rent, sell, or gift on the block.";
+  "Borrow cameras, furniture, bags, and more from neighbors — or share yours. New flat, work trip, or local block.";
 
 /** Russian reference copy for docs / future i18n. */
-export const APP_TAGLINE_RU = "Соседский маркетплейс — каждый дом это бизнес-ячейка.";
+export const APP_TAGLINE_RU = "Соседи делятся тем, что нужно — бери рядом или выставляй своё.";
 export const PWA_APP_NAME_RU = "Evorios — соседский маркетплейс";
 export const PWA_DESCRIPTION_RU =
-  "Соседский маркетплейс: каждый дом — бизнес-ячейка, которая сдаёт в аренду, продаёт или дарит из своей гаражной витрины.";
+  "Камера, мебель, рюкзак у соседей рядом — или выставь своё. Новоселье, командировка или свой блок.";
 
 export const BRAND_GREEN = "#0D5C3A";
 export const BRAND_AMBER = "#F59E0B";
@@ -114,9 +114,9 @@ export const ONBOARDING = {
   firstHello: {
     mascotRole: "Your guide here",
     bubbles: [
-      (mascot: string) => `Hi — I'm ${mascot}. Welcome to the block.`,
-      "Every home is a business cell — your garage is the storefront.",
-      "Browse neighbors on Home, or run your cell from My Garage.",
+      "Hi, I'm Evorios — your home business assistant.",
+      "Built so your household can earn from things that sit idle or rarely get used.",
+      "Earn or save — skip buying extras, with tools built right into the platform.",
     ],
   },
 } as const;

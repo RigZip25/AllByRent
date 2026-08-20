@@ -87,6 +87,18 @@ export function PasskeySetup({
       }
     }
 
+    const challenge =
+      activeBundle.options &&
+      typeof activeBundle.options === "object" &&
+      "challenge" in activeBundle.options
+        ? (activeBundle.options as { challenge?: unknown }).challenge
+        : undefined;
+    if (typeof challenge !== "string" || !challenge || !activeBundle.challengeToken) {
+      setError(formatPasskeyError(new Error("Invalid or expired challenge — missing registration options.")));
+      void refreshBundle().catch(() => undefined);
+      return;
+    }
+
     setBusy(true);
     try {
       const attestationResponse = await startRegistration({ optionsJSON: activeBundle.options });

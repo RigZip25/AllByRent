@@ -122,10 +122,7 @@ export function PublicProfileScreen({
           baseProfile.reviews.length > 0
             ? baseProfile.reviews
             : (fetchedReviews ?? baseProfile.reviews),
-        reviewCount:
-          baseProfile.reviews.length > 0
-            ? baseProfile.reviewCount
-            : Math.max(baseProfile.reviewCount, fetchedReviews?.length ?? 0),
+        reviewCount: fetchedReviews !== null ? fetchedReviews.length : baseProfile.reviewCount,
       }
     : null;
 

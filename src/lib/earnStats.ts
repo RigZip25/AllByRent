@@ -9,6 +9,7 @@ import {
   refreshProfileStats,
 } from "./userProfileStorage";
 import { formatMoney } from "./regionalDisplay";
+import { bookingGross, bookingHostNet, bookingPlatformFee } from "./earnStatement";
 
 function formatActiveListingsCount(count: number): string {
   if (count === 1) return "1 active listing";
@@ -48,6 +49,8 @@ export type EarnBusinessStats = {
   activeEarningNowUsd: number;
   activeItemsOut: number;
   listingsCount: number;
+  liveCount: number;
+  draftCount: number;
   completedRentals: number;
   planUsageLabel: string;
   perListing: ListingEarnBreakdown[];
@@ -85,10 +88,15 @@ function isInCalendarMonth(date: Date, year: number, month: number): boolean {
   return date.getFullYear() === year && date.getMonth() === month;
 }
 
+/** Expected host net for in-progress bookings (same fee model as completed). */
+function expectedHostNet(booking: RentalBooking): number {
+  return Math.max(0, bookingGross(booking) - bookingPlatformFee(booking));
+}
+
 function sumEarningsInMonth(bookings: RentalBooking[], year: number, month: number): number {
   return hostCompleted(bookings)
     .filter((b) => isInCalendarMonth(bookingEarnedAt(b), year, month))
-    .reduce((sum, b) => sum + b.totalUsd, 0);
+    .reduce((sum, b) => sum + bookingHostNet(b), 0);
 }
 
 function matchListingTitle(bookingTitle: string, listingTitle: string): boolean {
@@ -112,7 +120,7 @@ function buildLast7Days(completed: RentalBooking[], now: Date): DailyEarningPoin
     const date = day.toISOString().slice(0, 10);
     const amountUsd = completed
       .filter((b) => bookingEarnedAt(b).toISOString().slice(0, 10) === date)
-      .reduce((sum, b) => sum + b.totalUsd, 0);
+      .reduce((sum, b) => sum + bookingHostNet(b), 0);
     points.push({
       date,
       label: day.toLocaleDateString(undefined, { weekday: "narrow" }),
@@ -140,24 +148,47 @@ function buildGrowthTips(stats: {
   earnedLastMonth: number;
   growthPercentMonthOverMonth: number | null;
   listingsCount: number;
+  liveCount: number;
+  draftCount: number;
   activeEarningNowUsd: number;
   activeItemsOut: number;
   perListing: ListingEarnBreakdown[];
 }): GrowthTip[] {
   const tips: GrowthTip[] = [];
-  const earningListings = stats.perListing.filter((row) => row.earnedTotal > 0);
-  const avgMonthlyPerListing =
-    earningListings.length > 0
-      ? Math.round(
-          earningListings.reduce((sum, row) => sum + row.earnedThisMonth, 0) /
-            Math.max(earningListings.filter((row) => row.earnedThisMonth > 0).length, 1),
-        )
-      : 40;
+  const hasRealPace = stats.perListing.some((row) => row.earnedThisMonth > 0);
 
-  if (stats.listingsCount > 0) {
+  if (stats.earnedThisMonth === 0 && stats.earnedLastMonth === 0) {
+    tips.push({
+      title: "Get your first booking",
+      body: "Share your garage with neighbors nearby — visibility beats guessing a monthly dollar target.",
+    });
+    if (stats.draftCount > 0) {
+      tips.push({
+        title: "Finish a draft",
+        body: "Unfinished drafts never earn. Publish one clear photo + price today.",
+      });
+    } else if (stats.liveCount > 0) {
+      tips.push({
+        title: "Make listings easy to book",
+        body: "Fresh cover photo, weekend availability, and a fair day rate beat inventing a $80 goal.",
+      });
+    } else {
+      tips.push({
+        title: "Stock your first item",
+        body: "One solid listing on the block beats ten empty projections.",
+      });
+    }
+    return tips.slice(0, 2);
+  }
+
+  if (hasRealPace && stats.liveCount > 0) {
+    const earners = stats.perListing.filter((row) => row.earnedThisMonth > 0);
+    const avg = Math.round(
+      earners.reduce((sum, row) => sum + row.earnedThisMonth, 0) / earners.length,
+    );
     tips.push({
       title: "Expand your catalog",
-      body: `List 1 more item to unlock ~$${Math.max(avgMonthlyPerListing, 35)}/mo based on your current per-listing pace.`,
+      body: `Your live items averaged ~$${avg}/mo this month. Another similar listing can compound that pace.`,
     });
   }
 
@@ -171,17 +202,19 @@ function buildGrowthTips(stats: {
       title: "Recover last month's pace",
       body: `You earned $${stats.earnedLastMonth} last month. Refresh photos and availability on listings that were active then.`,
     });
-  } else {
-    tips.push({
-      title: "Set a monthly target",
-      body: `Aim for $${Math.max(stats.earnedThisMonth + 40, 80)}/mo by keeping 2+ items available on weekends.`,
-    });
   }
 
   if (stats.activeItemsOut > 0) {
     tips.push({
       title: "Money out in the field",
       body: `$${stats.activeEarningNowUsd} is tied up in ${stats.activeItemsOut} active rental${stats.activeItemsOut === 1 ? "" : "s"} right now — fast responses protect those payouts.`,
+    });
+  }
+
+  if (tips.length === 0 && stats.draftCount > 0) {
+    tips.push({
+      title: "Finish a draft",
+      body: "Unfinished drafts never earn. Publish one clear photo + price today.",
     });
   }
 
@@ -208,7 +241,7 @@ export function computeEarnBusinessStats(now = new Date()): EarnBusinessStats {
     ITEMS_OUT_STATUSES.includes(b.status as (typeof ITEMS_OUT_STATUSES)[number]),
   );
 
-  const totalEarnedAllTime = completed.reduce((sum, b) => sum + b.totalUsd, 0);
+  const totalEarnedAllTime = completed.reduce((sum, b) => sum + bookingHostNet(b), 0);
   const earnedThisMonth = sumEarningsInMonth(
     loadRentalBookings(),
     now.getFullYear(),
@@ -226,10 +259,16 @@ export function computeEarnBusinessStats(now = new Date()): EarnBusinessStats {
   );
   const earnedLast7Days = buildLast7Days(completed, now);
   const projectedThisMonth = computeProjectedThisMonth(earnedThisMonth, now);
-  const activeEarningNowUsd = itemsOut.reduce((sum, b) => sum + b.totalUsd, 0);
+  const activeEarningNowUsd = itemsOut.reduce((sum, b) => sum + expectedHostNet(b), 0);
   const activeItemsOut = itemsOut.length;
 
+  const liveCount = listings.filter(
+    (l) => l.listingStatus === "active" && !l.paused,
+  ).length;
+  const draftCount = listings.filter((l) => l.listingStatus === "draft").length;
+
   const perListing: ListingEarnBreakdown[] = listings
+    .filter((l) => l.listingStatus !== "draft")
     .map((listing) => {
       const title = getListingDisplayTitle(listing.title);
       const related = bookings.filter((b) =>
@@ -240,15 +279,15 @@ export function computeEarnBusinessStats(now = new Date()): EarnBusinessStats {
         ["active", "pending_checkin", "upcoming", "overdue"].includes(b.status),
       );
 
-      const earnedTotal = listingCompleted.reduce((sum, b) => sum + b.totalUsd, 0);
+      const earnedTotal = listingCompleted.reduce((sum, b) => sum + bookingHostNet(b), 0);
       const earnedThisMonthForListing = listingCompleted
         .filter((b) => sameCalendarMonth(bookingEarnedAt(b), now))
-        .reduce((sum, b) => sum + b.totalUsd, 0);
+        .reduce((sum, b) => sum + bookingHostNet(b), 0);
       const earnedLastMonthForListing = listingCompleted
         .filter((b) =>
           isInCalendarMonth(bookingEarnedAt(b), prev.year, prev.month),
         )
-        .reduce((sum, b) => sum + b.totalUsd, 0);
+        .reduce((sum, b) => sum + bookingHostNet(b), 0);
 
       return {
         listingId: listing.id,
@@ -267,6 +306,8 @@ export function computeEarnBusinessStats(now = new Date()): EarnBusinessStats {
     earnedLastMonth,
     growthPercentMonthOverMonth,
     listingsCount: listings.length,
+    liveCount,
+    draftCount,
     activeEarningNowUsd,
     activeItemsOut,
     perListing,
@@ -281,7 +322,9 @@ export function computeEarnBusinessStats(now = new Date()): EarnBusinessStats {
     projectedThisMonth,
     activeEarningNowUsd,
     activeItemsOut,
-    listingsCount: listings.length,
+    listingsCount: liveCount,
+    liveCount,
+    draftCount,
     completedRentals: completed.length,
     planUsageLabel: formatActiveListingsCount(profile.host.listingsCount),
     perListing,

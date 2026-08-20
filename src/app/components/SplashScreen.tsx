@@ -7,6 +7,8 @@ import evoriosSplashImg from "../../imports/evorios_splash_garage.png";
 import { EvoriosWordmark } from "../../components/EvoriosWordmark";
 import { BRAND_GREEN, MASCOT_NAME } from "../../lib/brand";
 import { useMessages } from "../../lib/i18n/react";
+import { dismissNativeKeyboard } from "../../lib/dismissKeyboard";
+import { hideNativeSplash } from "../../lib/nativeShell";
 
 /** Light splash — white field so the mascot artwork reads cleanly */
 const SPLASH_CANVAS_BG = "#FFFFFF";
@@ -16,7 +18,7 @@ const SPLASH_SURFACE =
 /** Dynamic splash: orbit around mascot → row → title/tagline */
 const T_ORBIT_END = 1100;
 const T_TITLE_END = 1750;
-const T_AUTO_ADVANCE = 3000;
+const T_AUTO_ADVANCE = 2400;
 
 const S = 0.85;
 const ICON_ROW_GAP = Math.round(52 * S);
@@ -338,6 +340,10 @@ export function SplashScreen({
     document.body.style.backgroundColor = SPLASH_CANVAS_BG;
     document.body.style.overflow = "hidden";
     if (appRoot) appRoot.style.backgroundColor = SPLASH_CANVAS_BG;
+
+    // Handoff: drop native launch splash once branded React splash is on screen.
+    void hideNativeSplash();
+    void dismissNativeKeyboard();
 
     return () => {
       root.classList.remove("splash-v2-active", "splash-v2-light");

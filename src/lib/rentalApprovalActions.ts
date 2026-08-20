@@ -1,8 +1,10 @@
 import { recordManualBookingResponse } from "./bookingRequestsStorage";
 import { getMessages } from "./i18n";
+import { getHomeLocation } from "./listingStorage";
 import { createNotificationRemote } from "./notificationsStorage";
 import { updateBooking, type RentalBooking } from "./rentalsStorage";
 import { cancelRentalPayment, captureRentalPayment } from "./stripePayments";
+import type { RentalAgreementRecord } from "./rentalAgreement";
 
 function refundNote(booking: RentalBooking): string {
   const t = getMessages().booking;
@@ -15,6 +17,7 @@ function refundNote(booking: RentalBooking): string {
 export async function approveRentalBooking(
   booking: RentalBooking,
   hostUserId: string,
+  options?: { rentalAgreement?: RentalAgreementRecord | null },
 ): Promise<void> {
   const t = getMessages().booking;
   if (booking.stripePayment || booking.paymentOnHold) {
@@ -24,12 +27,30 @@ export async function approveRentalBooking(
     }
   }
 
-  updateBooking(booking.id, {
+  const home = getHomeLocation();
+  const handoffPatch: Partial<RentalBooking> = {
     status: "pending_checkin",
     pickupWindowStart: new Date().toISOString(),
     approvalDeadline: undefined,
     paymentOnHold: false,
-  });
+  };
+  if (options?.rentalAgreement) {
+    handoffPatch.rentalAgreement = options.rentalAgreement;
+  }
+  // Stamp host home as handoff point so renter PIN unlock can be geo-gated (Turo-safe).
+  if (
+    home &&
+    Number.isFinite(home.lat) &&
+    Number.isFinite(home.lng) &&
+    !(home.lat === 0 && home.lng === 0)
+  ) {
+    handoffPatch.handoffLat = home.lat;
+    handoffPatch.handoffLng = home.lng;
+    if (!booking.pickupAddress?.trim() && home.displayName?.trim()) {
+      handoffPatch.pickupAddress = home.displayName.trim();
+    }
+  }
+  updateBooking(booking.id, handoffPatch);
   recordManualBookingResponse(booking.id, hostUserId, "approved");
   await createNotificationRemote({
     recipientId: booking.counterpartyId,

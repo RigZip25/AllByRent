@@ -34,7 +34,8 @@ Useful query params (wired in `App.tsx` / `deepLinks.ts`):
 - No automated test framework is configured. Validate changes via lint, build, and manual testing.
 - Node.js 22 is the expected runtime (per CI config).
 - The app uses vanilla CSS (no CSS framework).
-- **i18n (EN + CS):** UI locale follows `navigator.language` by default; manual override in Profile → Preferences → Language. Dictionaries live in `src/lib/i18n/`. Category keys stay English for storage/matching.
+- **i18n (EN + CS + ES):** UI locale follows `navigator.language` by default; manual override in Profile → Preferences → Language. Dictionaries live in `src/lib/i18n/`. Category keys stay English for storage/matching.
+- **Category FactCards:** always **Question → short answer** (`qa: [{q,a}]` in `categoryFacts`). No essay bodies. See `docs/CATEGORY_FACT_QA.md`.
 - **Garden plants:** Trees, shrubs, perennials, seasonal flowers, and houseplants/seedlings are personal subcategories under **Garden & Yard** (plus Nursery Stock for professional).
 
 ### Deploy (required for agents)

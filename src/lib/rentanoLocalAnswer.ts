@@ -224,6 +224,36 @@ function pickNavHint(query: string): string | null {
   return null;
 }
 
+/** Strong signals the question is about ${APP_NAME} / marketplace use. */
+const PLATFORM_QUERY_SIGNAL =
+  /\b(evorios|listing|listings|garage|garáž|garaje|rent(al|als)?|renter|host|book(ing)?|deposit|kauce|fianza|stripe|payout|qr|sticker|handoff|pickup|delivery|dispute|claim|refund|sell|gift|browse|stock|wizard|publish|pause|profile|pwa|install|faq|кауц|депозит|гараж|листинг|объявлен|аренд|бронь|спор|выплат|наклейк|предъявл|alquiler|anuncio|dep[oó]sito|pago|disputa|publicar|reserva)\b/i;
+
+/** Clear off-platform intents — refuse before calling the LLM. */
+const OFF_TOPIC_QUERY_SIGNAL =
+  /\b(vacation|holiday|resort|hotel|flight|acne|прыщ|прыщей|отпуск|куда\s+поехать|лечит|диагноз|симптом|рецепт|recipe|cook(ing)?|погод[аыуе]|weather|forecast|bitcoin|crypto|nft|homework|essay|poem|joke|шутк|анекдот|гороскоп|horoscope|dating|свидан|политик|election|news\s+today|chatgpt\s+write|write\s+(me\s+)?(a\s+)?(poem|essay|code)|как\s+похудеть|skincare|moisturizer|viaje\s+a|vacaciones|receta|tiempo\s+mañana|dovolen[aá]|počasí|recept)\b/i;
+
+export function looksLikeOffTopicQuery(query: string): boolean {
+  const trimmed = query.trim();
+  if (!trimmed || trimmed.length < 4) return false;
+  if (PLATFORM_QUERY_SIGNAL.test(trimmed)) return false;
+  return OFF_TOPIC_QUERY_SIGNAL.test(trimmed);
+}
+
+export function offTopicRedirectAnswer(query: string): string {
+  const preferRu = /\p{Script=Cyrillic}/u.test(query);
+  const locale = getLocale();
+  if (preferRu) {
+    return `${MASCOT_NAME}: с удовольствием помогу с листингом, продвижением, бронированием, депозитом, спорами или гаражом в ${APP_NAME}. По темам вне платформы у меня, к сожалению, недостаточно надёжных данных — лучше спросить обычный LLM (ChatGPT, Gemini, Claude и т.п.). А здесь я рядом, если нужно разобраться с приложением.`;
+  }
+  if (locale === "cs") {
+    return `${MASCOT_NAME}: rád pomohu s nabídkou, propagací, rezervací, kaucí, spory nebo garáží v ${APP_NAME}. Na témata mimo platformu bohužel nemám dost spolehlivých dat — zkuste obecný LLM (ChatGPT, Gemini, Claude…). Tady jsem, až budete chtít řešit aplikaci.`;
+  }
+  if (locale === "es") {
+    return `${MASCOT_NAME}: Encantado de ayudarte con anuncios, promoción, reservas, fianza, disputas o el garaje en ${APP_NAME}. Fuera de la plataforma, por desgracia no tengo datos suficientes — prueba un LLM general (ChatGPT, Gemini, Claude…). Aquí estoy cuando quieras usar la app.`;
+  }
+  return `${MASCOT_NAME}: Happy to help with listing, promotion, bookings, deposits, disputes, or your garage in ${APP_NAME}. Outside the platform I don’t have enough reliable data — try a general LLM (ChatGPT, Gemini, Claude, etc.). I’m right here when you want help with the app.`;
+}
+
 /**
  * When UI locale is English but the user wrote another language, skip English
  * canned FAQ so AI can answer in-language. Czech UI already has localized FAQ.
@@ -264,6 +294,11 @@ export function findLocalRentanoAnswer(query: string): LocalAnswerResult | null 
   // Navigation truth (categories, no footer lupa, marketplace) — even for RU/ES.
   const nav = pickNavHint(trimmed);
   if (nav) return { answer: nav, source: "hint" };
+
+  // Soft redirect for clear off-platform topics before FAQ/AI.
+  if (looksLikeOffTopicQuery(trimmed)) {
+    return { answer: offTopicRedirectAnswer(trimmed), source: "hint" };
+  }
 
   // Don't serve English canned FAQ to RU/ES/… questions — let AI reply in-language.
   if (queryLooksNonEnglish(trimmed)) return null;

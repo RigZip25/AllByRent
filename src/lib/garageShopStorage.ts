@@ -14,6 +14,7 @@ import { defaultAuctionWindow, formatAuctionTiming, inferAuctionStartsAt } from 
 import { getGarageSaleSchedule } from "./garageSaleStorage";
 import { formatMoney } from "./regionalDisplay";
 import { getSellFeeRate } from "./ops/opsSettings";
+import { getOpenSaleForListing, getOpenSaleLot } from "./openSale/eventStorage";
 
 const CART_KEY = "evorios_garage_cart";
 const BIDS_KEY = "evorios_garage_bids";
@@ -78,20 +79,31 @@ export function parseSalePrice(listing: ListingDraft): number {
 
 export function getShopOffer(listing: ListingDraft): ShopOffer | null {
   if (!listing.modes.sell) return null;
-  if (!isLotOnShelf(listing.id)) return null;
+  // Free giveaways are shelf-visible without a paid shop offer.
   const buyNowUsd = parseSalePrice(listing);
   if (buyNowUsd <= 0) return null;
+  // Sold / checkout lots stay visible via other shelf paths — no buy-now offer.
+  if (!isLotOnShelf(listing.id)) return null;
+
+  const openSale = getOpenSaleForListing(listing.id);
+  const openLot = openSale ? getOpenSaleLot(openSale, listing.id) : null;
 
   const stored = getGarageSaleOfferPrefs(listing.id);
-  const startingBidUsd = stored?.startingBidUsd ?? Math.max(1, Math.round(buyNowUsd * 0.55 * 100) / 100);
+  const startingBidUsd =
+    openLot?.minBidUsd ??
+    stored?.startingBidUsd ??
+    Math.max(1, Math.round(buyNowUsd * 0.55 * 100) / 100);
   const fallbackWindow = defaultAuctionWindow(getGarageSaleSchedule());
-  const endsAt = stored?.endsAt ?? fallbackWindow.endsAt;
+  const endsAt = openSale?.endsAt ?? stored?.endsAt ?? fallbackWindow.endsAt;
   const startsAt =
-    stored?.startsAt ?? inferAuctionStartsAt(endsAt, getGarageSaleSchedule());
-  const negotiationPhase = getNegotiationPhase(listing.id);
-  const saleMode = stored?.saleMode ?? "open";
+    openSale?.startsAt ??
+    stored?.startsAt ??
+    inferAuctionStartsAt(endsAt, getGarageSaleSchedule());
+  const negotiationPhase =
+    openSale != null ? "multi_auction" : getNegotiationPhase(listing.id);
+  const saleMode = openSale != null ? "open" : (stored?.saleMode ?? "open");
   const kind: ShopOfferKind =
-    negotiationPhase === "multi_auction"
+    openSale != null || negotiationPhase === "multi_auction"
       ? "auction"
       : saleMode === "quick"
         ? "buy_now"
@@ -99,17 +111,21 @@ export function getShopOffer(listing: ListingDraft): ShopOffer | null {
           ? "auction"
           : "open";
 
+  const minIncrementUsd =
+    openLot?.bidStepUsd ?? (buyNowUsd >= 50 ? 5 : 1);
+
   return {
     kind,
     saleMode,
     buyNowUsd,
     startingBidUsd,
-    minIncrementUsd: buyNowUsd >= 50 ? 5 : 1,
+    minIncrementUsd,
     startsAt,
     endsAt,
     negotiationPhase,
     interestedCount: getInterestedCount(listing.id),
-    allowsOffers: saleMode === "open" && negotiationPhase !== "multi_auction",
+    // Open Sale = bids only; no parallel offers / buy-now on that lot.
+    allowsOffers: openSale == null && saleMode === "open" && negotiationPhase !== "multi_auction",
   };
 }
 

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ChevronRight, MapPin, Star } from "lucide-react";
+import { ArrowLeft, ChevronRight, Star } from "lucide-react";
+import { LocationAreaControls } from "../components/LocationAreaControls";
 import { BRAND_AMBER, BRAND_GREEN } from "../lib/brand";
-import { clusterLabelForCity, getClusterRadiusMi } from "../lib/clusterConfig";
 import {
   fetchActiveListingsForCityRemote,
   getActiveRentLocationLabel,
@@ -87,19 +87,18 @@ function YardSaleCard({
 
 type YardSalesScreenProps = {
   onBack: () => void;
-  onEditLocation: () => void;
   onOpenGarage: (hostId: string) => void;
   onBrowseGear?: () => void;
 };
 
-export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage, onBrowseGear }: YardSalesScreenProps) {
+export function YardSalesScreen({ onBack, onOpenGarage, onBrowseGear }: YardSalesScreenProps) {
   const { yardSales: copy } = useMessages();
   const auth = useAuth();
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<YardSaleEvent[]>([]);
+  const [locationEpoch, setLocationEpoch] = useState(0);
 
   const city = getActiveRentLocationLabel().trim();
-  const clusterLabel = clusterLabelForCity(city, getClusterRadiusMi());
 
   useEffect(() => {
     let mounted = true;
@@ -131,7 +130,7 @@ export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage, onBrowse
     return () => {
       mounted = false;
     };
-  }, [auth.userId, city]);
+  }, [auth.userId, city, locationEpoch]);
 
   const openNowCount = useMemo(
     () => events.filter((event) => event.openStatus === "now" || event.openStatus === "today").length,
@@ -162,16 +161,11 @@ export function YardSalesScreen({ onBack, onEditLocation, onOpenGarage, onBrowse
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={onEditLocation}
-          className="flex min-w-0 items-start gap-1.5 text-left"
-        >
-          <MapPin className="mt-0.5 h-4 w-4 shrink-0" style={{ color: AMBER }} fill={AMBER} />
-          <span className="min-w-0 flex-1 text-[14px] font-semibold" style={{ color: GREEN }}>
-            {clusterLabel}
-          </span>
-        </button>
+        <LocationAreaControls
+          className="mb-1"
+          variant="compact"
+          onChanged={() => setLocationEpoch((n) => n + 1)}
+        />
 
         <div
           className="mt-3 rounded-xl px-3 py-2 text-[13px] font-medium"

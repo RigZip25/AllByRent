@@ -6,8 +6,10 @@ export type RemoteProfile = {
   display_name: string | null;
   phone: string | null;
   location_label: string | null;
+  date_of_birth?: string | null;
   created_at: string;
   phone_verified: boolean | null;
+  phone_verified_at?: string | null;
   identity_verified: boolean | null;
   rating: number | null;
   stripe_connect_account_id?: string | null;
@@ -23,7 +25,7 @@ export async function fetchRemoteProfile(userId: string): Promise<RemoteProfile 
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "id, email, display_name, phone, location_label, created_at, phone_verified, identity_verified, rating, stripe_connect_account_id, stripe_payouts_enabled, stripe_bank_last4, stripe_customer_id",
+      "id, email, display_name, phone, location_label, date_of_birth, created_at, phone_verified, phone_verified_at, identity_verified, rating, stripe_connect_account_id, stripe_payouts_enabled, stripe_bank_last4, stripe_customer_id",
     )
     .eq("id", userId)
     .maybeSingle();
@@ -59,7 +61,7 @@ export async function fetchRemoteProfileNamesByIds(
 
 export async function updateRemoteProfile(
   userId: string,
-  patch: Partial<Pick<RemoteProfile, "display_name" | "phone" | "location_label">>,
+  patch: Partial<Pick<RemoteProfile, "display_name" | "phone" | "location_label" | "date_of_birth">>,
 ): Promise<void> {
   if (!isSupabaseConfigured()) return;
   const supabase = getSupabaseClient();

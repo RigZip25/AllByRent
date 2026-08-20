@@ -1,69 +1,45 @@
 import { useMessages } from "../lib/i18n/react";
-import { ArrowLeft, MapPin } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { HubChoiceCard } from "../components/HubChoiceCard";
-import { BRAND_AMBER, BRAND_GREEN } from "../lib/brand";
-import { clusterLabelForCity, getClusterRadiusMi } from "../lib/clusterConfig";
-import { getActiveRentLocationLabel, hasRentLocationSetup } from "../lib/listingStorage";
+import { LocationAreaControls } from "../components/LocationAreaControls";
+import { BRAND_GREEN } from "../lib/brand";
 import { onboardingAssets } from "../lib/onboardingAssets";
 
 const GREEN = BRAND_GREEN;
-const AMBER = BRAND_AMBER;
 const BORDER = "#E8E6E0";
-
 
 export type YardSaleHubChoice = "browse" | "host";
 
 type YardSaleHubScreenProps = {
   onBack: () => void;
   onChoose: (choice: YardSaleHubChoice) => void;
-  onEditLocation: () => void;
 };
 
-export function YardSaleHubScreen({ onBack, onChoose, onEditLocation }: YardSaleHubScreenProps) {
+export function YardSaleHubScreen({ onBack, onChoose }: YardSaleHubScreenProps) {
   const { garageSale, common } = useMessages();
   const copy = garageSale.yardSaleHub;
-  const city = getActiveRentLocationLabel().trim();
-  const clusterLabel = clusterLabelForCity(city, getClusterRadiusMi());
-  const needsLocation = !hasRentLocationSetup();
 
   return (
     <div className="screen onboarding-step mx-auto w-full max-w-[390px] bg-[#FFF9F0]">
-      <div className="browse-hub-header shrink-0 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top,0px))]">
-        <div className="mb-3 flex items-center gap-2">
+      <div className="browse-hub-header shrink-0 px-4 pb-3 pt-[max(1rem,calc(env(safe-area-inset-top,0px)+0.5rem))]">
+        <div className="relative mb-3 flex min-h-10 items-center justify-center">
           <button
             type="button"
             onClick={onBack}
-            className="flex h-10 w-10 items-center justify-center rounded-full border bg-white active:bg-gray-50"
+            className="absolute left-0 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border bg-white active:bg-gray-50"
             style={{ borderColor: BORDER }}
             aria-label={common.back}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
-          <button
-            type="button"
-            onClick={onEditLocation}
-            className="flex min-w-0 flex-1 items-start gap-1.5 text-left"
-          >
-            <MapPin
-              className="mt-0.5 h-4 w-4 shrink-0"
-              style={{ color: needsLocation ? AMBER : GREEN }}
-              fill={needsLocation ? AMBER : GREEN}
-            />
-            <span
-              className="min-w-0 flex-1 text-[14px] font-semibold leading-snug [overflow-wrap:anywhere]"
-              style={{ color: needsLocation ? "#B45309" : GREEN }}
-            >
-              {clusterLabel}
-            </span>
-          </button>
-        </div>
-
-        <div className="text-center">
-          <h1 className="browse-hub-page-title font-bold tracking-tight" style={{ color: GREEN }}>
+          <h1 className="browse-hub-page-title px-12 text-center font-bold tracking-tight" style={{ color: GREEN }}>
             {copy.title}
           </h1>
-          <p className="browse-hub-page-subtitle mt-1 text-gray-600">{copy.subtitle}</p>
         </div>
+
+        <p className="browse-hub-page-subtitle mb-3 text-center text-gray-600">{copy.subtitle}</p>
+
+        <LocationAreaControls variant="compact" />
       </div>
 
       <div className="browse-hub-cards browse-hub-cards--duo">

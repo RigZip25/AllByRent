@@ -19,13 +19,20 @@ export type PasskeyAuthenticationBundle = {
   challengeToken: string;
 };
 
+/**
+ * Always use a relative `/api` base.
+ * Absolute `window.location.origin + /api` breaks Capacitor: the native API bridge
+ * only rewrites paths that start with `/api/`, so Face ID options never reach
+ * app.evorios.com and the WebView serves the SPA HTML (empty JSON → missing challenge).
+ */
 function apiBase(): string {
-  if (typeof window === "undefined") return "/api";
-  return `${window.location.origin}/api`;
+  return "/api";
 }
 
 function mapApiStatus(status: number, serverError?: string): string {
-  if (serverError) return serverError;
+  if (serverError?.trim()) {
+    return formatPasskeyError(new Error(serverError.trim()));
+  }
   if (status === 401) return "Sign in with email before using Face ID.";
   if (status === 404) {
     return "Face ID sign-in is not available on this server. Use email sign-in for now.";
@@ -34,7 +41,7 @@ function mapApiStatus(status: number, serverError?: string): string {
   if (status >= 500) {
     return "Sign-in service is temporarily unavailable. Use email sign-in, or try again shortly.";
   }
-  return `Request failed (${status})`;
+  return "Face ID could not be completed. Try again or sign in with email.";
 }
 
 async function postJson<T>(path: string, body: unknown, accessToken?: string): Promise<T> {
@@ -63,6 +70,48 @@ function wrapWebAuthn<T>(fn: () => Promise<T>): Promise<T> {
   return fn().catch((err) => {
     throw new Error(formatPasskeyError(err));
   });
+}
+
+function assertRegistrationBundle(data: Partial<PasskeyRegistrationBundle>): PasskeyRegistrationBundle {
+  const options = data?.options;
+  const challengeToken = data?.challengeToken;
+  const challenge =
+    options && typeof options === "object" && "challenge" in options
+      ? (options as { challenge?: unknown }).challenge
+      : undefined;
+  if (
+    !options ||
+    typeof options !== "object" ||
+    typeof challenge !== "string" ||
+    !challenge ||
+    typeof challengeToken !== "string" ||
+    !challengeToken
+  ) {
+    throw new Error("Invalid or expired challenge — missing registration options.");
+  }
+  return { options, challengeToken };
+}
+
+function assertAuthenticationBundle(
+  data: Partial<PasskeyAuthenticationBundle>,
+): PasskeyAuthenticationBundle {
+  const options = data?.options;
+  const challengeToken = data?.challengeToken;
+  const challenge =
+    options && typeof options === "object" && "challenge" in options
+      ? (options as { challenge?: unknown }).challenge
+      : undefined;
+  if (
+    !options ||
+    typeof options !== "object" ||
+    typeof challenge !== "string" ||
+    !challenge ||
+    typeof challengeToken !== "string" ||
+    !challengeToken
+  ) {
+    throw new Error("Invalid or expired challenge — missing authentication options.");
+  }
+  return { options, challengeToken };
 }
 
 async function requireAccessToken(): Promise<string> {
@@ -120,7 +169,12 @@ function assertPasskeyEnvironment(): void {
 export async function fetchPasskeyRegistrationBundle(): Promise<PasskeyRegistrationBundle> {
   assertPasskeyEnvironment();
   const token = await requireAccessToken();
-  return postJson<PasskeyRegistrationBundle>("/auth/passkey-register-options", {}, token);
+  const data = await postJson<Partial<PasskeyRegistrationBundle>>(
+    "/auth/passkey-register-options",
+    {},
+    token,
+  );
+  return assertRegistrationBundle(data);
 }
 
 export async function verifyPasskeyRegistration(
@@ -149,9 +203,10 @@ export async function fetchPasskeyAuthenticationBundle(
   email?: string,
 ): Promise<PasskeyAuthenticationBundle> {
   assertPasskeyEnvironment();
-  return postJson<PasskeyAuthenticationBundle>("/auth/passkey-auth-options", {
+  const data = await postJson<Partial<PasskeyAuthenticationBundle>>("/auth/passkey-auth-options", {
     email: email?.trim().toLowerCase() || undefined,
   });
+  return assertAuthenticationBundle(data);
 }
 
 export async function verifyPasskeyAuthentication(

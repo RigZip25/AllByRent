@@ -9,8 +9,12 @@ import {
   buildListingStepGuidance,
   type RentanoRequestContext,
 } from "./rentanoPrompt";
-import { EVORIOS_SYSTEM_PROMPT } from "./evoriosPrompt";
-import { queryLooksNonEnglish } from "./rentanoLocalAnswer";
+import { buildEvoriosFaqKnowledge, EVORIOS_SYSTEM_PROMPT } from "./evoriosPrompt";
+import {
+  looksLikeOffTopicQuery,
+  offTopicRedirectAnswer,
+  queryLooksNonEnglish,
+} from "./rentanoLocalAnswer";
 
 export type RentanoChatTurn = {
   role: "user" | "assistant";
@@ -18,12 +22,17 @@ export type RentanoChatTurn = {
 };
 
 function buildSystemPrompt(context: RentanoRequestContext, lastUserText?: string): string {
-  const parts = [EVORIOS_SYSTEM_PROMPT, buildRentanoUserContext(context)];
+  const parts = [
+    EVORIOS_SYSTEM_PROMPT,
+    buildEvoriosFaqKnowledge(),
+    buildRentanoUserContext(context),
+  ];
   const stepGuide = buildListingStepGuidance(context.step);
   if (stepGuide) parts.push(stepGuide);
   parts.push(
     "Keep replies short (2–4 sentences unless the user asks for detail). Use bullet lists only when listing options.",
     "Mirror the language of the latest user message exactly (do not default to English).",
+    "If the user goes off-topic: soft redirect only — glad to help with listing/promotion/platform; not enough data outside the app; suggest a general LLM; do not answer the off-topic request.",
   );
   if (lastUserText && queryLooksNonEnglish(lastUserText)) {
     parts.push(
@@ -38,6 +47,10 @@ export async function sendRentanoMessage(
   context: RentanoRequestContext,
 ): Promise<string> {
   const lastUser = [...history].reverse().find((turn) => turn.role === "user");
+  if (lastUser && looksLikeOffTopicQuery(lastUser.content)) {
+    return offTopicRedirectAnswer(lastUser.content);
+  }
+
   const cacheKey = lastUser
     ? buildRentanoCacheKey(lastUser.content, context.screen)
     : null;

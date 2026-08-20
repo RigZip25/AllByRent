@@ -4,7 +4,8 @@
 **Privacy:** https://evorios.com/privacy.html  
 **Terms:** https://evorios.com/terms.html  
 **Support / Marketing:** https://evorios.com · support@evorios.com  
-**Bundle ID / package:** `com.evorios.app`
+**iOS Bundle ID:** `com.elflogistics.evorios`  
+**Android package:** `com.evorios.app`
 
 ## App name
 

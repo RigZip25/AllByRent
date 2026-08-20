@@ -3,6 +3,7 @@ import { applyCors, handleOptions } from "../lib/cors";
 import { withApiErrorHandling } from "../lib/safeHandler";
 import { completeLlmChat } from "../lib/llm/complete";
 import type { LlmChatRequest, LlmMessage } from "../lib/llm/types";
+import { enforceProxyGuard } from "../lib/proxyGuard";
 
 function readParsedBody(req: VercelRequest): unknown {
   if (typeof req.body === "string") {
@@ -45,6 +46,16 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader("Allow", "POST, OPTIONS");
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  // Auth preferred (keyed limits); anonymous still allowed with stricter IP cap for draft moderation.
+  const guard = await enforceProxyGuard(req, res, {
+    route: "llm",
+    maxAuthed: 60,
+    maxAnon: 20,
+    windowMs: 60_000,
+    requireAuth: false,
+  });
+  if (!guard) return;
 
   let parsed: unknown;
   try {

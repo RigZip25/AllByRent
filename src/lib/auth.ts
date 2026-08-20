@@ -3,7 +3,6 @@ import { resolveSessionUserEmail } from "./authEmail";
 import { clearPendingAuthEmail } from "./authReturn";
 import { consumePendingAuthProfile, peekPendingAuthProfile } from "./pendingAuthProfile";
 import {
-  deviceHasPasskeyHint,
   isPasskeySupported,
   registerPasskey,
   signInWithPasskey as passkeySignIn,
@@ -12,6 +11,7 @@ import {
 import { isNetworkFetchError } from "./authErrors";
 import { emailOtpEntryError, isCompleteEmailOtpLength, normalizeEmailOtpInput } from "./authOtp";
 import { getRuntimeAppOrigin } from "./appOrigin";
+import { isOnboardingComplete } from "./onboardingStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 export type AuthProvider = "google" | "apple";
@@ -281,10 +281,12 @@ export async function userHasPasskey(): Promise<boolean> {
 }
 
 export function shouldShowPasskeyLogin(): boolean {
-  return isPasskeySupported() && deviceHasPasskeyHint();
+  return isPasskeySupported();
 }
 
 export function shouldPromptEnablePasskey(): boolean {
+  // Guests / incomplete primary registration must not see Face ID upsell.
+  if (!isOnboardingComplete()) return false;
   try {
     const raw = localStorage.getItem(PASSKEY_SETUP_DISMISS_KEY);
     if (!raw) return true;
@@ -327,7 +329,11 @@ export async function signOut(): Promise<void> {
   if (error) throw error;
 }
 
-export async function requestAccountDeletion(): Promise<{ ok: boolean; message: string }> {
+export async function requestAccountDeletion(): Promise<{
+  ok: boolean;
+  message: string;
+  reason?: string;
+}> {
   const supabase = getSupabaseClient();
   if (!supabase) {
     return { ok: false, message: "Account deletion requires Supabase auth configuration." };
@@ -349,13 +355,13 @@ export async function requestAccountDeletion(): Promise<{ ok: boolean; message: 
     const payload = (await res.json()) as { ok?: boolean; message?: string; reason?: string };
     if (!res.ok || !payload.ok) {
       const reason = payload.reason ?? payload.message ?? `Deletion failed (${res.status})`;
-      return { ok: false, message: reason };
+      return { ok: false, message: reason, reason: payload.reason };
     }
 
     await supabase.auth.signOut();
     return {
       ok: true,
-      message: payload.message ?? "Your account was permanently deleted.",
+      message: payload.message ?? "Account deleted",
     };
   } catch (error) {
     return {

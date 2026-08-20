@@ -163,6 +163,22 @@ export async function fetchRequestsForShelfRemote(filter: {
   return (data as SupabaseRequestRow[]).map(rowToRequest);
 }
 
+
+export async function fetchRequestByIdRemote(requestId: string): Promise<WantedRequest | null> {
+  const id = requestId.trim();
+  if (!id) return null;
+
+  const local = loadLocalRequests().find((r) => r.id === id) ?? null;
+
+  if (!isSupabaseConfigured()) return local;
+  const supabase = getSupabaseClient();
+  if (!supabase) return local;
+
+  const { data, error } = await supabase.from("requests").select("*").eq("id", id).maybeSingle();
+  if (error || !data) return local;
+  return rowToRequest(data as SupabaseRequestRow);
+}
+
 export function requestTitleFromPrefill(prefill?: ShelfPrefill | null): string {
   if (!prefill) return "Wanted";
   const parts = [prefill.subcategory?.trim(), prefill.category?.trim()].filter(Boolean);

@@ -9,21 +9,38 @@ import { SignInPrompt } from "../../components/SignInPrompt";
 import { getActiveRentLocationLabel } from "../../lib/listingStorage";
 import { createRequestRemote } from "../../lib/requestsStorage";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
-import { APP_NAME, MARKETING_URL, MASCOT_NAME } from "../../lib/brand";
+import { MASCOT_NAME } from "../../lib/brand";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMessages } from "../../lib/i18n/react";
 import type { AppMessages } from "../../lib/i18n/types";
-import { formatMoney } from "../../lib/regionalDisplay";
+import { formatMoney, formatDistanceFromMiles } from "../../lib/regionalDisplay";
 import {
   getCategoryCatalog,
   type CategoryCatalogEntry,
 } from "../../lib/homeCategoryPicks";
 import type { SubcategoryItem } from "../../screens/listing/listingItemCategories";
+import { ShelfIcon } from "../../components/ShelfIcon";
+import { buildRequestSharePayload, requestShareUrl } from "../../lib/socialShare";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
 const BORDER = "#E8E6E0";
-const radiusOptions = ["5mi", "10mi", "25mi", "50mi"] as const;
+const RADIUS_OPTIONS_MI = [5, 10, 25, 50] as const;
+const BUDGET_MIN = 1;
+const BUDGET_MAX = 99_999;
+const BUDGET_PRESETS_RENT = [25, 50, 75, 100, 150, 250, 500] as const;
+const BUDGET_PRESETS_BUY = [100, 250, 500, 1_000, 2_500, 5_000, 10_000] as const;
+
+function clampBudget(value: number): number {
+  if (!Number.isFinite(value)) return BUDGET_MIN;
+  return Math.min(BUDGET_MAX, Math.max(BUDGET_MIN, Math.round(value)));
+}
+
+function parseBudgetInput(raw: string): number | null {
+  const digits = raw.replace(/[^\d]/g, "");
+  if (!digits) return null;
+  return clampBudget(Number(digits));
+}
 
 type RequestIntent = "rent" | "buy" | "either";
 type StepId = "category" | "need" | "timing" | "review";
@@ -79,13 +96,25 @@ function intentLabel(intent: RequestIntent, copy: AppMessages["postRequest"]): s
 function budgetLine(
   intent: RequestIntent,
   budget: number,
-  radius: string,
+  radiusMi: number,
   copy: AppMessages["postRequest"],
 ): string {
   const label = formatMoney(budget);
+  const radius = formatDistanceFromMiles(radiusMi, undefined, { plus: false });
   if (intent === "buy") return copy.budgetNoteBuy(label, radius);
   if (intent === "either") return copy.budgetNoteEither(label, radius);
   return copy.budgetNote(label, radius);
+}
+
+function formatRequestDate(isoDate: string): string {
+  // Avoid UTC midnight shifting the calendar day in western timezones.
+  const d = new Date(`${isoDate}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return isoDate;
+  return d.toLocaleDateString(undefined, {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function whenLine(
@@ -96,12 +125,9 @@ function whenLine(
 ): string {
   if (flexible || (!startDate && !endDate)) return copy.whenFlexible;
   if (startDate && endDate) {
-    return copy.whenRange(
-      new Date(startDate).toLocaleDateString(),
-      new Date(endDate).toLocaleDateString(),
-    );
+    return copy.whenRange(formatRequestDate(startDate), formatRequestDate(endDate));
   }
-  if (startDate) return copy.whenFrom(new Date(startDate).toLocaleDateString());
+  if (startDate) return copy.whenFrom(formatRequestDate(startDate));
   return copy.whenFlexible;
 }
 
@@ -127,8 +153,8 @@ function SubPickList({
                 active ? "bg-primary/10 font-semibold text-primary" : "text-gray-700 hover:bg-muted/60"
               }`}
             >
-              <span className="mt-px w-4 shrink-0 text-center text-[13px]" aria-hidden>
-                {item.emoji}
+              <span className="mt-px w-4 shrink-0 text-center" aria-hidden>
+                <ShelfIcon source={item} size={17} />
               </span>
               <span className="min-w-0 [overflow-wrap:anywhere]">
                 {localizeCategoryLabel(item.label)}
@@ -291,18 +317,18 @@ function RequestPreviewCard({
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span
-            className="rounded-full px-3 py-1 text-[12px] font-semibold text-white"
+            className="inline-flex shrink-0 items-center rounded-full px-3 py-1.5 text-[12px] font-semibold leading-none text-white"
             style={{ backgroundColor: GREEN }}
           >
             {intentLabel(intent, copy)}
           </span>
           <span
-            className="rounded-full border bg-white/80 px-3 py-1 text-[12px] font-medium"
+            className="inline-flex max-w-full items-center rounded-full border bg-white/80 px-3 py-1.5 text-[12px] font-medium leading-none"
             style={{ borderColor: BORDER, color: GREEN }}
           >
-            {when}
+            <span className="min-w-0 [overflow-wrap:anywhere]">{when}</span>
           </span>
         </div>
 
@@ -352,8 +378,9 @@ export function PostRequest({
   );
   const [description, setDescription] = useState(prefillDescription);
   const [intent, setIntent] = useState<RequestIntent | null>(null);
-  const [selectedRadius, setSelectedRadius] = useState<string>("10mi");
+  const [selectedRadiusMi, setSelectedRadiusMi] = useState(10);
   const [budget, setBudget] = useState(25);
+  const [budgetInput, setBudgetInput] = useState("25");
   const [datesFlexible, setDatesFlexible] = useState(true);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -361,6 +388,7 @@ export function PostRequest({
   const [busy, setBusy] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [posted, setPosted] = useState(false);
+  const [postedRequestId, setPostedRequestId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const stepId = steps[stepIndex] ?? "category";
@@ -374,18 +402,34 @@ export function PostRequest({
 
   const whenText = whenLine(datesFlexible, startDate, endDate, copy);
   const activeIntent: RequestIntent = intent ?? "rent";
-  const budgetMeta = budgetLine(activeIntent, budget, selectedRadius, copy);
+  const budgetMeta = budgetLine(activeIntent, budget, selectedRadiusMi, copy);
 
   const sharePayload = useMemo(() => {
     const city = locationLabel || copy.yourArea;
-    const text =
-      description.trim() || copy.shareDefaultText(APP_NAME, city);
-    return {
-      title: copy.shareTitleApp(APP_NAME),
-      text,
-      url: MARKETING_URL,
-    };
-  }, [copy, description, locationLabel]);
+    const shortBudget = `up to ${formatMoney(budget)}${
+      activeIntent === "buy" ? "" : "/day"
+    }`;
+    return buildRequestSharePayload({
+      need: description.trim() || undefined,
+      url: requestShareUrl(postedRequestId),
+      subcategory: subcategory ? localizeCategoryLabel(subcategory) : undefined,
+      category: category ? localizeCategoryLabel(category) : undefined,
+      locationLabel: city,
+      intentLabel: intentLabel(activeIntent, copy),
+      budgetLabel: shortBudget,
+      timingLabel: whenText,
+    });
+  }, [
+    activeIntent,
+    budget,
+    category,
+    copy,
+    description,
+    locationLabel,
+    postedRequestId,
+    subcategory,
+    whenText,
+  ]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
@@ -490,7 +534,7 @@ export function PostRequest({
 
     const meta = [
       intentLabel(intent, copy),
-      budgetLine(intent, budget, selectedRadius, copy),
+      budgetLine(intent, budget, selectedRadiusMi, copy),
       whenText,
     ].join(" · ");
     const fullDescription = `${description.trim()}\n\n${meta}`;
@@ -506,7 +550,10 @@ export function PostRequest({
       startDate: datesFlexible ? undefined : startDate || undefined,
       endDate: datesFlexible ? undefined : endDate || undefined,
     })
-      .then(() => setPosted(true))
+      .then((created) => {
+        setPostedRequestId(created.id);
+        setPosted(true);
+      })
       .finally(() => setBusy(false));
   };
 
@@ -551,7 +598,11 @@ export function PostRequest({
               <Share2 className="h-4 w-4" />
               {copy.shareNowTitle}
             </h3>
-            <SocialShareButtons payload={sharePayload} shareKind="request" />
+            <SocialShareButtons
+              payload={sharePayload}
+              shareKind="request"
+              targetId={postedRequestId ?? undefined}
+            />
           </div>
         </div>
         <div className="screen-footer border-t border-border bg-card/95 p-3 backdrop-blur-sm sm:p-4">
@@ -787,18 +838,18 @@ export function PostRequest({
                 <div>
                   <label className="mb-3 block text-sm font-medium">{copy.locationRadius}</label>
                   <div className="flex gap-2">
-                    {radiusOptions.map((radius) => (
+                    {RADIUS_OPTIONS_MI.map((miles) => (
                       <button
-                        key={radius}
+                        key={miles}
                         type="button"
-                        onClick={() => setSelectedRadius(radius)}
+                        onClick={() => setSelectedRadiusMi(miles)}
                         className={`flex-1 rounded-lg border-2 px-3 py-2 text-sm font-medium transition-all ${
-                          selectedRadius === radius
+                          selectedRadiusMi === miles
                             ? "border-primary bg-primary/5 text-primary"
                             : "border-border bg-card hover:border-primary/50"
                         }`}
                       >
-                        {radius}
+                        {formatDistanceFromMiles(miles, undefined, { plus: false })}
                       </button>
                     ))}
                   </div>
@@ -809,22 +860,59 @@ export function PostRequest({
                     {intent === "buy" ? copy.budgetTotal : copy.budgetPerDay}
                   </label>
                   <div className="space-y-3">
-                    <div className="mb-2 flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">{copy.idPayUpTo}</span>
-                      <span className="text-xl font-bold text-primary">${budget}</span>
+                    <p className="text-sm text-muted-foreground">{copy.idPayUpTo}</p>
+                    <div
+                      className="flex items-center gap-2 rounded-2xl border-2 bg-card px-4 py-3"
+                      style={{ borderColor: BORDER }}
+                    >
+                      <span className="text-xl font-bold text-muted-foreground" aria-hidden>
+                        $
+                      </span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        enterKeyHint="done"
+                        value={budgetInput}
+                        onChange={(e) => {
+                          const next = e.target.value.replace(/[^\d]/g, "");
+                          setBudgetInput(next);
+                          const parsed = parseBudgetInput(next);
+                          if (parsed != null) setBudget(parsed);
+                        }}
+                        onBlur={() => {
+                          const parsed = parseBudgetInput(budgetInput) ?? budget;
+                          const next = clampBudget(parsed);
+                          setBudget(next);
+                          setBudgetInput(String(next));
+                        }}
+                        className="min-w-0 flex-1 bg-transparent text-2xl font-bold text-primary outline-none"
+                        aria-label={intent === "buy" ? copy.budgetTotal : copy.budgetPerDay}
+                      />
                     </div>
-                    <input
-                      type="range"
-                      min="5"
-                      max="100"
-                      step="5"
-                      value={budget}
-                      onChange={(e) => setBudget(Number(e.target.value))}
-                      className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-muted accent-primary"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>$5</span>
-                      <span>$100+</span>
+                    <div className="flex flex-wrap gap-2">
+                      {(intent === "buy" ? BUDGET_PRESETS_BUY : BUDGET_PRESETS_RENT).map(
+                        (amount) => {
+                          const active = budget === amount;
+                          return (
+                            <button
+                              key={amount}
+                              type="button"
+                              onClick={() => {
+                                setBudget(amount);
+                                setBudgetInput(String(amount));
+                              }}
+                              className={`rounded-full border-2 px-3 py-1.5 text-sm font-semibold transition-all ${
+                                active
+                                  ? "border-primary bg-primary/10 text-primary"
+                                  : "border-border bg-card text-gray-700 hover:border-primary/50"
+                              }`}
+                            >
+                              {formatMoney(amount)}
+                            </button>
+                          );
+                        },
+                      )}
                     </div>
                   </div>
                 </div>
@@ -851,8 +939,7 @@ export function PostRequest({
                     <Share2 className="h-4 w-4" />
                     {copy.shareTitle}
                   </h3>
-                  <p className="mb-4 text-sm text-muted-foreground">{copy.shareBody}</p>
-                  <SocialShareButtons payload={sharePayload} shareKind="request" compact />
+                  <p className="text-sm text-muted-foreground">{copy.shareBody}</p>
                 </div>
               </div>
             ) : null}
@@ -866,36 +953,36 @@ export function PostRequest({
           onClick={() => setShowDatePicker(false)}
         >
           <div
-            className="w-full max-w-sm space-y-4 rounded-2xl bg-card p-6"
+            className="box-border w-full max-w-[min(24rem,calc(100vw-2rem))] space-y-4 overflow-x-hidden rounded-2xl bg-card p-5 sm:p-6"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold">{copy.selectDateRange}</h3>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <h3 className="min-w-0 text-lg font-semibold">{copy.selectDateRange}</h3>
               <button
                 type="button"
                 onClick={() => setShowDatePicker(false)}
-                className="rounded-full p-2 transition-colors hover:bg-muted"
+                className="shrink-0 rounded-full p-2 transition-colors hover:bg-muted"
               >
                 <span className="text-xl">✕</span>
               </button>
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="mb-2 block text-sm font-medium">{copy.startDate}</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full rounded-xl border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="box-border w-full max-w-full min-w-0 rounded-xl border border-border bg-background px-3 py-3 text-[16px] focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="mb-2 block text-sm font-medium">{copy.endDate}</label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 min={startDate}
-                className="w-full rounded-xl border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="box-border w-full max-w-full min-w-0 rounded-xl border border-border bg-background px-3 py-3 text-[16px] focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <button
@@ -904,7 +991,7 @@ export function PostRequest({
                 setDatesFlexible(false);
                 setShowDatePicker(false);
               }}
-              className="w-full rounded-xl bg-primary py-3 font-medium text-white transition-colors hover:bg-primary/90"
+              className="box-border w-full max-w-full rounded-xl bg-primary py-3 font-medium text-white transition-colors hover:bg-primary/90"
             >
               {copy.confirm}
             </button>

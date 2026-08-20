@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { EmptySubcategoryShelf } from "./EmptySubcategoryShelf";
 
-import { Emoji } from "./Emoji";
+import { ShelfIcon } from "../../components/ShelfIcon";
+import { CategoryFactCard } from "../../components/CategoryFactCard";
 
 import { RentanoChatSheet } from "../../components/RentanoChat";
 import { MrRentano } from "./MrRentano";
@@ -93,7 +94,7 @@ function findSubcategoryLabel(category: string, subId: string): string {
 
 function SubcategoryCard({
 
-  emoji,
+  icon,
 
   label,
 
@@ -101,7 +102,7 @@ function SubcategoryCard({
 
 }: {
 
-  emoji: string;
+  icon: { emoji: string; glyph?: import("../../components/categoryGlyphs").CategoryGlyphId };
 
   label: string;
 
@@ -133,7 +134,7 @@ function SubcategoryCard({
 
     >
 
-      <Emoji emoji={emoji} size={52} />
+      <ShelfIcon source={icon} size={52} />
 
       <span
 
@@ -444,6 +445,8 @@ export function Subcategory({
 
           <div className="p-4 space-y-6">
 
+            <CategoryFactCard category={category} />
+
             <div>
 
               <h2 className="font-bold text-[15px] mb-3" style={{ color: GREEN }}>{t.shelf.personalUse}</h2>
@@ -456,7 +459,7 @@ export function Subcategory({
 
                     key={sub.id}
 
-                    emoji={sub.emoji}
+                    icon={sub}
 
                     label={localizeCategoryLabel(sub.label)}
 
@@ -484,7 +487,7 @@ export function Subcategory({
 
                     key={sub.id}
 
-                    emoji={sub.emoji}
+                    icon={sub}
 
                     label={localizeCategoryLabel(sub.label)}
 
@@ -567,6 +570,8 @@ export function Subcategory({
         ) : hasItemsInSubcategory ? (
 
           <div className="p-4 space-y-4">
+
+            <CategoryFactCard category={category} />
 
             <FoundingHostPromo
               appMode={appMode}

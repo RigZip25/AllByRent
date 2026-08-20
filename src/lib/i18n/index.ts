@@ -4,6 +4,7 @@ import { en } from "./messages/en";
 import { cs } from "./messages/cs";
 import { es } from "./messages/es";
 import { getSearchCountryCode } from "../locationCountry";
+import { isNativeApp } from "../nativeShell";
 
 const STORAGE_KEY = "evorios_locale";
 const AUTO_KEY = "evorios_locale_auto";
@@ -251,8 +252,9 @@ export function getAppModeLabels(locale?: AppLocale) {
 export function applyDocumentLang(locale: AppLocale = getLocale()) {
   if (typeof document === "undefined") return;
   document.documentElement.lang = locale;
-  // Native packs — discourage Chrome/Safari “Translate this page”.
-  if (locale === "cs" || locale === "es") {
+  // Native store shell: never invite Google Translate overlays.
+  // Native i18n packs (cs/es): also block browser translate on web.
+  if (isNativeApp() || locale === "cs" || locale === "es") {
     document.documentElement.setAttribute("translate", "no");
     document.documentElement.classList.add("notranslate");
   } else {

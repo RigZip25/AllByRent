@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import confetti from "canvas-confetti";
 import { MASCOT_NAME } from "../../lib/brand";
@@ -8,19 +8,52 @@ import { resolveHostAccountId } from "../../lib/hostIdentity";
 import { getProfileCity, savePublishedListingRemote, savePublishedListing, saveListingDraftProgress, stampListingDraftProgress, removePublishedListing, removePublishedListingRemote, fetchListingByIdRemote, getPublishedListingById } from "../../lib/listingStorage";
 import { syncAgentPrefsRemote, ensureBrowserTimeZoneCaptured } from "../../lib/agentPrefs";
 import { notifyGarageFollowersOfNewListing } from "../../lib/garageFollowNotify";
-import { loadUserProfile } from "../../lib/userProfileStorage";
+import { loadUserProfile, saveUserProfile } from "../../lib/userProfileStorage";
 import { getListingDisplayTitle, listingRequiresQrSticker } from "../../lib/listingQr";
 import {
   clearGoPublicPending,
+  listingRequiresPhoneKyc,
   listingWizardReturnPath,
   loadSellerGoPublicStatus,
   markGoPublicPending,
-  peekGoPublicPending,
+  shouldResumeGoPublicChecklist,
   startConnectForListing,
   startIdentityVerificationForListing,
   type SellerGoPublicStatus,
 } from "../../lib/sellerGoPublic";
+import { isFreeGiveaway, listingChargesMoney } from "../../lib/listingGift";
+import { PhoneVerifySheet } from "../../components/profile/PhoneVerifySheet";
 import { analyzeListingMediaPhotos } from "./listingAnalysis";
+import {
+  messageForPhotoModeration,
+  moderateListingMediaPhotos,
+} from "./listingPhotoModeration";
+import {
+  messageForTextModeration,
+  moderateListingText,
+} from "./listingTextModeration";
+import {
+  messageForManualUrlModeration,
+  moderateListingManualUrl,
+} from "./listingManualUrlModeration";
+import {
+  messageForVideoModeration,
+  moderateListingMediaVideos,
+} from "./listingVideoModeration";
+import { sanitizeUserText } from "../../lib/textSanitize";
+import { setEditingListingReturn } from "../../lib/authReturn";
+import {
+  formatCooldownHours,
+  getModerationCooldownRemaining,
+  isInModerationCooldown,
+  recordModerationStrike,
+} from "../../lib/softModerationStrikes";
+import {
+  checkNewAccountPublishFriction,
+  recordDevicePublish,
+} from "../../lib/newAccountPublishFriction";
+import { assertOwnerOnlyPublish } from "../../lib/borrowedItemGuard";
+import { checkPublishLocationCoherence } from "../../lib/publishLocationCoherence";
 import { ListingPublishSuccess } from "./ListingPublishSuccess";
 import { ListingShareScreen } from "./ListingShareScreen";
 import { QRStoryScreen } from "./QRStoryScreen";
@@ -28,35 +61,29 @@ import { QRStickerScreen } from "./QRStickerScreen";
 import { GoPublicChecklist } from "./GoPublicChecklist";
 import { applyFrictionlessDefaults } from "./frictionlessDefaults";
 import {
+  StepCategories,
   Step1Photos,
   Step2Details,
   Step7Review,
 } from "./steps";
-import { subcategoriesData } from "../../app/data/subcategories";
+import { gradeForSubcategory } from "./listingItemCategories";
 import type { ShelfPrefill } from "../../lib/shelfListings";
 import {
   createInitialListingDraft,
   getSteps,
+  initialListingWizardStep,
+  LISTING_STEP,
   TOTAL_LISTING_STEPS,
+  normalizeWizardResumeStep,
   type ListingDraft,
 } from "./types";
 import {
   applyYardSaleListingDefaults,
   isYardSaleListingActive,
 } from "../../lib/yardSaleListing";
+import { applyAiSuggestionsToDraft } from "./applyAiSuggestions";
 import { isListingStepValid } from "./validation";
 import { useMessages } from "../../lib/i18n/react";
-
-function gradeForSubcategory(
-  category: string,
-  subcategoryLabel: string,
-): ListingDraft["grade"] {
-  const data = subcategoriesData[category];
-  if (!data) return "";
-  if (data.personal.some((sub) => sub.label === subcategoryLabel)) return "personal";
-  if (data.professional.some((sub) => sub.label === subcategoryLabel)) return "professional";
-  return "";
-}
 
 function createPrefilledListingDraft(prefill?: ShelfPrefill | null): ListingDraft {
   const draft = createInitialListingDraft();
@@ -75,7 +102,7 @@ const BACKGROUND = "#F9FAFB";
 
 type SlideDirection = 1 | -1;
 type WizardPhase = "steps" | "goPublic" | "qrStory" | "qrSticker" | "share" | "success";
-type GoPublicBusy = null | "identity" | "stripe" | "refresh";
+type GoPublicBusy = null | "identity" | "stripe" | "refresh" | "phone";
 
 const slideVariants = {
   enter: (direction: SlideDirection) => ({
@@ -113,6 +140,7 @@ export function ListingWizard({
   onExit,
   onRequireAuth,
   onPreviewShop,
+  onPlanOpenSale,
 }: {
   initialPrefill?: ShelfPrefill | null;
   initialDraft?: ListingDraft | null;
@@ -121,8 +149,10 @@ export function ListingWizard({
   onExit: (reason?: "finished" | "discarded") => void;
   /** Open AuthGate and resume this listing after sign-in. */
   onRequireAuth?: (listingId: string) => void;
-  /** Open own garage in neighbor-preview mode. */
-  onPreviewShop?: () => void;
+  /** Open own garage in neighbor-preview mode (optionally focus a listing). */
+  onPreviewShop?: (listingId?: string) => void;
+  /** After sell publish — jump into Open Sale path choice. */
+  onPlanOpenSale?: (listingId: string) => void;
 }) {
   const auth = useAuth();
   const t = useMessages();
@@ -137,10 +167,10 @@ export function ListingWizard({
     const cached =
       initialDraft ??
       (editingListingId ? getPublishedListingById(editingListingId) : null);
-    const resume = cached?.wizardStep;
-    return typeof resume === "number" && resume >= 1 && resume <= TOTAL_LISTING_STEPS
-      ? resume
-      : 1;
+    if (cached && typeof cached.wizardStep === "number") {
+      return normalizeWizardResumeStep(cached.wizardStep, cached.wizardFlowVersion);
+    }
+    return initialListingWizardStep(initialPrefill);
   });
   const [direction, setDirection] = useState<SlideDirection>(1);
   const [draft, setDraft] = useState<ListingDraft>(() => {
@@ -154,16 +184,19 @@ export function ListingWizard({
     () => Boolean(editingListingId && !initialDraft && !getPublishedListingById(editingListingId)),
   );
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [photoGateMessage, setPhotoGateMessage] = useState<string | null>(null);
+  const [photoModerationPending, setPhotoModerationPending] = useState(false);
+  const [textGateMessage, setTextGateMessage] = useState<string | null>(null);
+  const [textModerationPending, setTextModerationPending] = useState(false);
   const [phase, setPhase] = useState<WizardPhase>(() => {
     const cached =
       initialDraft ??
       (editingListingId ? getPublishedListingById(editingListingId) : null);
-    const pending = peekGoPublicPending();
     if (
       cached &&
       cached.listingStatus === "draft" &&
-      pending &&
-      pending === cached.id
+      shouldResumeGoPublicChecklist(cached.id)
     ) {
       return "goPublic";
     }
@@ -174,18 +207,62 @@ export function ListingWizard({
   const [goPublicLoading, setGoPublicLoading] = useState(false);
   const [goPublicBusy, setGoPublicBusy] = useState<GoPublicBusy>(null);
   const [goPublicError, setGoPublicError] = useState<string | null>(null);
+  const [goPublicErrorCode, setGoPublicErrorCode] = useState<string | null>(null);
+  const [phoneSheetOpen, setPhoneSheetOpen] = useState(false);
   const profileCity = getProfileCity();
   const [wizardStack, setWizardStack] = useState<
     { step: number; draft: ListingDraft; phase: WizardPhase }[]
   >([]);
+  /** Category step internal back (grade → category, etc.). Returns true if handled. */
+  const categoryPhaseBackRef = useRef<(() => boolean) | null>(null);
+  /** Ignore backdrop dismiss from the same tap that opened the dialog (iOS ghost click). */
+  const deleteDialogOpenedAtRef = useRef(0);
+  const discardDialogOpenedAtRef = useRef(0);
+  const deleteInFlightRef = useRef(false);
+
+  const openDeleteDialog = () => {
+    deleteDialogOpenedAtRef.current = Date.now();
+    deleteInFlightRef.current = false;
+    setShowDeleteDialog(true);
+  };
+
+  const closeDeleteDialog = () => {
+    // Opening tap can hit the newly-mounted backdrop on mobile — ignore briefly.
+    if (Date.now() - deleteDialogOpenedAtRef.current < 450) return;
+    setShowDeleteDialog(false);
+  };
 
   useEffect(() => {
-    if (!editingListingId || initialDraft) return;
+    if (!editingListingId) return;
+    const local = initialDraft ?? getPublishedListingById(editingListingId);
+    if (local) {
+      const next = isYardSaleListingActive() ? applyYardSaleListingDefaults(local) : local;
+      setDraft(next);
+      if (typeof next.wizardStep === "number") {
+        setStep(normalizeWizardResumeStep(next.wizardStep, next.wizardFlowVersion));
+      }
+      if (next.listingStatus === "draft" && shouldResumeGoPublicChecklist(next.id)) {
+        setPhase("goPublic");
+        markGoPublicPending(next.id);
+      }
+      setLoadingEdit(false);
+      if (initialDraft) return;
+    }
+
     let mounted = true;
     void fetchListingByIdRemote(editingListingId).then((remote) => {
-      if (!mounted) return;
-      if (remote) {
-        setDraft(isYardSaleListingActive() ? applyYardSaleListingDefaults(remote) : remote);
+      if (!mounted || !remote) {
+        if (mounted) setLoadingEdit(false);
+        return;
+      }
+      const next = isYardSaleListingActive() ? applyYardSaleListingDefaults(remote) : remote;
+      setDraft(next);
+      if (typeof next.wizardStep === "number") {
+        setStep(normalizeWizardResumeStep(next.wizardStep, next.wizardFlowVersion));
+      }
+      if (next.listingStatus === "draft" && shouldResumeGoPublicChecklist(next.id)) {
+        setPhase("goPublic");
+        markGoPublicPending(next.id);
       }
       setLoadingEdit(false);
     });
@@ -205,15 +282,17 @@ export function ListingWizard({
 
     ensureBrowserTimeZoneCaptured();
     const timer = window.setTimeout(() => {
+      const ownerId = resolveHostAccountId(auth.userId) || auth.userId;
       void saveListingDraftProgress(
         {
           ...draft,
-          hostId: draft.hostId ?? resolveHostAccountId(auth.userId),
+          // Prefer signed-in id so guest drafts reclaim when the host signs in mid-wizard.
+          hostId: ownerId || draft.hostId || undefined,
         },
-        auth.userId,
+        ownerId,
         step,
       ).then(() => {
-        if (auth.userId) void syncAgentPrefsRemote(auth.userId);
+        if (ownerId) void syncAgentPrefsRemote(ownerId);
       });
     }, 1200);
     return () => window.clearTimeout(timer);
@@ -222,9 +301,16 @@ export function ListingWizard({
   const refreshGoPublicStatus = useCallback(async () => {
     setGoPublicLoading(true);
     setGoPublicError(null);
+    setGoPublicErrorCode(null);
     try {
-      const status = await loadSellerGoPublicStatus(auth.userId);
+      const requiresPhone = listingRequiresPhoneKyc(draft.modes, draft.pricing);
+      const status = await loadSellerGoPublicStatus(auth.userId, { requiresPhone });
       setGoPublicStatus(status);
+      // Bank already linked — never keep a stale Connect failure banner.
+      if (status.payoutsReady) {
+        setGoPublicError(null);
+        setGoPublicErrorCode(null);
+      }
       return status;
     } catch (error) {
       setGoPublicError(
@@ -235,7 +321,7 @@ export function ListingWizard({
       setGoPublicLoading(false);
       setGoPublicBusy(null);
     }
-  }, [auth.userId]);
+  }, [auth.userId, draft.modes, draft.pricing]);
 
   useEffect(() => {
     if (phase !== "goPublic") return;
@@ -244,16 +330,19 @@ export function ListingWizard({
 
   const persistDraftForGoPublic = useCallback(
     async (opts?: { syncRemote?: boolean }) => {
+      // Prefer signed-in auth id so drafts started as guest/local reclaim correctly.
+      const hostId = resolveHostAccountId(auth.userId) || draft.hostId;
       const nextDraft = stampListingDraftProgress(
         {
           ...draft,
-          hostId: draft.hostId ?? resolveHostAccountId(auth.userId),
+          hostId,
         },
         auth.userId,
         TOTAL_LISTING_STEPS,
       );
       setDraft(nextDraft);
       markGoPublicPending(nextDraft.id);
+      setEditingListingReturn(nextDraft.id);
       // Never block Stripe redirect on photo upload to Supabase.
       const syncRemote = opts?.syncRemote === true;
       if (syncRemote) {
@@ -322,6 +411,8 @@ export function ListingWizard({
     }
 
     if (step === 1) {
+      if (categoryPhaseBackRef.current?.()) return;
+      discardDialogOpenedAtRef.current = Date.now();
       setShowDiscardDialog(true);
       return;
     }
@@ -333,8 +424,29 @@ export function ListingWizard({
     setIsPublishing(true);
 
     window.setTimeout(() => {
+      // Signed-in auth id wins so guest/local draft hostIds do not block publish.
       const hostId = resolveHostAccountId(auth.userId) || sourceDraft.hostId || "";
-      const normalizedDraft = applyFrictionlessDefaults(sourceDraft);
+      const ownerGate = assertOwnerOnlyPublish({
+        userId: auth.userId ?? hostId,
+        listingHostId: hostId,
+        listingId: sourceDraft.id,
+      });
+      if (!ownerGate.ok) {
+        setGoPublicError(ownerGate.reason);
+        setTextGateMessage(ownerGate.reason);
+        setIsPublishing(false);
+        setGoPublicBusy(null);
+        setPhase("goPublic");
+        return;
+      }
+
+      const cleaned: ListingDraft = {
+        ...sourceDraft,
+        title: sanitizeUserText(sourceDraft.title).trim(),
+        description: sanitizeUserText(sourceDraft.description).trim(),
+        instructionsUrl: sourceDraft.instructionsUrl.trim(),
+      };
+      const normalizedDraft = applyFrictionlessDefaults(cleaned);
 
       if (isEditing && sourceDraft.id) {
         const savedDraft: ListingDraft = {
@@ -362,13 +474,12 @@ export function ListingWizard({
       }
 
       const needsQr = listingRequiresQrSticker(normalizedDraft.modes);
-      // Rent listings go live immediately with a generated QR token. Print / verify
-      // are optional — hosts can dismiss and come back from My Garage anytime.
+      // Screen QR is enough to go live — print is optional, no sticker photo gate.
       const publishedDraft: ListingDraft = {
         ...normalizedDraft,
         hostId,
         generateQR: needsQr,
-        qrReady: !needsQr,
+        qrReady: true,
         listingStatus: "active",
         nudgeCount: 0,
         lastNudgedAt: null,
@@ -381,6 +492,7 @@ export function ListingWizard({
       savePublishedListing(publishedDraft);
       if (hostId) {
         void savePublishedListingRemote(publishedDraft, hostId);
+        recordDevicePublish(hostId);
       }
       const profile = loadUserProfile();
       notifyGarageFollowersOfNewListing({
@@ -409,21 +521,193 @@ export function ListingWizard({
   const handlePublish = () => {
     // Edits to already-live listings skip the first-time seller checklist.
     if (isEditing) {
-      finalizePublish();
+      void (async () => {
+        setIsPublishing(true);
+        setTextGateMessage(null);
+        try {
+          if (isInModerationCooldown(auth.userId)) {
+            setTextGateMessage(
+              listing.moderationCooldownWait(
+                formatCooldownHours(getModerationCooldownRemaining(auth.userId)),
+              ),
+            );
+            goToStep(LISTING_STEP.details, -1);
+            setIsPublishing(false);
+            return;
+          }
+
+          const ownerGate = assertOwnerOnlyPublish({
+            userId: auth.userId ?? "",
+            listingHostId: draft.hostId,
+            listingId: draft.id,
+          });
+          if (!ownerGate.ok) {
+            setTextGateMessage(ownerGate.reason);
+            setIsPublishing(false);
+            return;
+          }
+
+          const cleanedTitle = sanitizeUserText(draft.title).trim();
+          const cleanedDescription = sanitizeUserText(draft.description).trim();
+          if (cleanedTitle !== draft.title || cleanedDescription !== draft.description) {
+            setDraft((current) => ({
+              ...current,
+              title: cleanedTitle,
+              description: cleanedDescription,
+            }));
+          }
+
+          const moderation = await moderateListingText({
+            title: cleanedTitle,
+            description: cleanedDescription,
+            category: draft.category,
+            subcategory: draft.subcategory,
+          });
+          if (!moderation.ok) {
+            const strike = recordModerationStrike({
+              userId: auth.userId,
+              severe: moderation.reasonCode === "unsafe",
+            });
+            setTextGateMessage(
+              strike.hasCooldown
+                ? listing.moderationCooldownWait(formatCooldownHours(strike.cooldownMs))
+                : messageForTextModeration(moderation.reasonCode, listing.itemInfo),
+            );
+            goToStep(LISTING_STEP.details, -1);
+            setIsPublishing(false);
+            return;
+          }
+
+          const urlModeration = await moderateListingManualUrl(draft.instructionsUrl, {
+            title: cleanedTitle,
+            category: draft.category,
+            subcategory: draft.subcategory,
+          });
+          if (!urlModeration.ok) {
+            setTextGateMessage(
+              messageForManualUrlModeration(urlModeration.reasonCode, listing.itemInfo),
+            );
+            goToStep(LISTING_STEP.details, -1);
+            setIsPublishing(false);
+            return;
+          }
+
+          finalizePublish({
+            ...draft,
+            title: cleanedTitle,
+            description: cleanedDescription,
+          });
+        } catch {
+          setTextGateMessage(listing.itemInfo.moderationTextVerifyFailed);
+          goToStep(LISTING_STEP.details, -1);
+          setIsPublishing(false);
+        }
+      })();
       return;
     }
 
     void (async () => {
       setIsPublishing(true);
       setGoPublicError(null);
+      setTextGateMessage(null);
       try {
+        if (isInModerationCooldown(auth.userId)) {
+          setTextGateMessage(
+            listing.moderationCooldownWait(
+              formatCooldownHours(getModerationCooldownRemaining(auth.userId)),
+            ),
+          );
+          goToStep(LISTING_STEP.details, -1);
+          setIsPublishing(false);
+          return;
+        }
+
+        const locationGate = checkPublishLocationCoherence();
+        if (!locationGate.ok) {
+          setGoPublicError(locationGate.reason);
+          setTextGateMessage(locationGate.reason);
+          setIsPublishing(false);
+          setPhase("goPublic");
+          return;
+        }
+
+        if (auth.userId) {
+          const friction = await checkNewAccountPublishFriction({
+            userId: auth.userId,
+            isEdit: false,
+          });
+          if (!friction.ok) {
+            setGoPublicError(friction.reason);
+            setIsPublishing(false);
+            setPhase("goPublic");
+            return;
+          }
+        }
+
+        const ownerGate = assertOwnerOnlyPublish({
+          userId: auth.userId ?? "",
+          listingHostId: resolveHostAccountId(auth.userId) || draft.hostId,
+          listingId: draft.id,
+        });
+        if (!ownerGate.ok) {
+          setGoPublicError(ownerGate.reason);
+          setIsPublishing(false);
+          setPhase("goPublic");
+          return;
+        }
+
+        const cleanedTitle = sanitizeUserText(draft.title).trim();
+        const cleanedDescription = sanitizeUserText(draft.description).trim();
+
+        const moderation = await moderateListingText({
+          title: cleanedTitle,
+          description: cleanedDescription,
+          category: draft.category,
+          subcategory: draft.subcategory,
+        });
+        if (!moderation.ok) {
+          const strike = recordModerationStrike({
+            userId: auth.userId,
+            severe: moderation.reasonCode === "unsafe",
+          });
+          setTextGateMessage(
+            strike.hasCooldown
+              ? listing.moderationCooldownWait(formatCooldownHours(strike.cooldownMs))
+              : `${messageForTextModeration(moderation.reasonCode, listing.itemInfo)} ${listing.moderationSoftNudgeListing}`,
+          );
+          goToStep(LISTING_STEP.details, -1);
+          setIsPublishing(false);
+          return;
+        }
+
+        const urlModeration = await moderateListingManualUrl(draft.instructionsUrl, {
+          title: cleanedTitle,
+          category: draft.category,
+          subcategory: draft.subcategory,
+        });
+        if (!urlModeration.ok) {
+          setTextGateMessage(
+            messageForManualUrlModeration(urlModeration.reasonCode, listing.itemInfo),
+          );
+          goToStep(LISTING_STEP.details, -1);
+          setIsPublishing(false);
+          return;
+        }
+
         const saved = await persistDraftForGoPublic();
-        const status = await loadSellerGoPublicStatus(auth.userId);
+        const withCleanText = {
+          ...saved,
+          title: cleanedTitle,
+          description: cleanedDescription,
+        };
+        setDraft(withCleanText);
+        const requiresPhone = listingRequiresPhoneKyc(withCleanText.modes, withCleanText.pricing);
+        const status = await loadSellerGoPublicStatus(auth.userId, { requiresPhone });
         setGoPublicStatus(status);
-        // Signed in + payouts ready → publish immediately. Otherwise open checklist
-        // (sign-in required; Stripe is optional soft step for receiving money).
-        if (status.ready && status.payoutsReady) {
-          finalizePublish(saved);
+        // Signed in (+ phone if paid). Open checklist for soft Connect nudge on paid listings.
+        const needsPayouts = listingChargesMoney(withCleanText);
+        if (status.ready && (!needsPayouts || status.payoutsReady)) {
+          finalizePublish(withCleanText);
           return;
         }
         setIsPublishing(false);
@@ -440,14 +724,66 @@ export function ListingWizard({
 
   const handleGoLiveFromChecklist = () => {
     void (async () => {
-      setGoPublicBusy("refresh");
-      const status = await refreshGoPublicStatus();
-      if (!status?.ready) {
-        setGoPublicError("Sign in to publish your listing.");
-        return;
+      // Never reuse busy="refresh" here — that makes the secondary refresh link
+      // look like a modal/blocker ("Refreshing…") while Go live appears dead.
+      setGoPublicError(null);
+      setGoPublicErrorCode(null);
+      setIsPublishing(true);
+      try {
+        const requiresPhone = listingRequiresPhoneKyc(draft.modes, draft.pricing);
+        const status = await loadSellerGoPublicStatus(auth.userId, { requiresPhone });
+        setGoPublicStatus(status);
+        if (!status.ready) {
+          setGoPublicError(
+            status.requiresPhone && !status.phoneVerified
+              ? t.listing.goPublic.phoneRequiredPaid
+              : "Sign in to publish your listing.",
+          );
+          setIsPublishing(false);
+          return;
+        }
+
+        const locationGate = checkPublishLocationCoherence();
+        if (!locationGate.ok) {
+          setGoPublicError(locationGate.reason);
+          setIsPublishing(false);
+          return;
+        }
+
+        if (auth.userId) {
+          const friction = await checkNewAccountPublishFriction({
+            userId: auth.userId,
+            isEdit: isEditing,
+          });
+          if (!friction.ok) {
+            setGoPublicError(friction.reason);
+            setIsPublishing(false);
+            return;
+          }
+        }
+
+        const claimedHostId = resolveHostAccountId(auth.userId) || auth.userId || "";
+        const ownerGate = assertOwnerOnlyPublish({
+          userId: claimedHostId,
+          // Claim draft under the signed-in host before ownership check.
+          listingHostId: claimedHostId,
+          listingId: draft.id,
+        });
+        if (!ownerGate.ok) {
+          setGoPublicError(ownerGate.reason);
+          setIsPublishing(false);
+          return;
+        }
+
+        const saved = await persistDraftForGoPublic();
+        finalizePublish({ ...saved, hostId: claimedHostId || saved.hostId });
+      } catch (error) {
+        setIsPublishing(false);
+        setGoPublicBusy(null);
+        setGoPublicError(
+          error instanceof Error ? error.message : "Could not publish your listing.",
+        );
       }
-      const saved = await persistDraftForGoPublic();
-      finalizePublish(saved);
     })();
   };
 
@@ -460,6 +796,11 @@ export function ListingWizard({
       }
       setGoPublicError("Sign in from More → Profile, then return here.");
     })();
+  };
+
+  const handleChecklistPhone = () => {
+    setGoPublicError(null);
+    setPhoneSheetOpen(true);
   };
 
   const handleChecklistIdentity = () => {
@@ -488,17 +829,33 @@ export function ListingWizard({
     void (async () => {
       setGoPublicBusy("stripe");
       setGoPublicError(null);
+      setGoPublicErrorCode(null);
       try {
         // Local draft only — awaiting remote photo upload was blocking Stripe redirect.
         const saved = await persistDraftForGoPublic({ syncRemote: false });
         const result = await startConnectForListing(listingWizardReturnPath(saved.id));
         if (!result.ok) {
-          setGoPublicError(result.reason);
+          if (result.code === "already_connected") {
+            await refreshGoPublicStatus();
+            return;
+          }
+          setGoPublicError(result.reason || null);
+          setGoPublicErrorCode(result.code ?? null);
+          // If status already shows bank linked, drop the scary banner.
+          const status = await loadSellerGoPublicStatus(auth.userId, {
+            requiresPhone: listingRequiresPhoneKyc(draft.modes, draft.pricing),
+          });
+          setGoPublicStatus(status);
+          if (status.payoutsReady) {
+            setGoPublicError(null);
+            setGoPublicErrorCode(null);
+          }
           return;
         }
         window.location.assign(result.url);
       } catch (error) {
         setGoPublicError(error instanceof Error ? error.message : "Stripe Connect failed.");
+        setGoPublicErrorCode(null);
       } finally {
         setGoPublicBusy(null);
       }
@@ -506,14 +863,143 @@ export function ListingWizard({
   };
 
   const handleContinue = async () => {
-    if (step === 1) {
-      if (draft.photos.length === 0 || draft.aiAnalysisPending || draft.photoEnhancementPending) {
+    if (step === LISTING_STEP.photos) {
+      if (
+        draft.photos.length === 0 ||
+        draft.aiAnalysisPending ||
+        draft.photoEnhancementPending ||
+        photoModerationPending
+      ) {
         return;
       }
-      if (!draft.aiSuggestions) {
-        await handleAnalyzePhotos();
+
+      setPhotoGateMessage(null);
+      if (isInModerationCooldown(auth.userId)) {
+        setPhotoGateMessage(
+          listing.moderationCooldownWait(
+            formatCooldownHours(getModerationCooldownRemaining(auth.userId)),
+          ),
+        );
+        return;
       }
-      goToStep(2, 1);
+
+      setPhotoModerationPending(true);
+      try {
+        // Always re-moderate on Continue (including already-enhanced photos).
+        const moderation = await moderateListingMediaPhotos(draft.photos, {
+          category: draft.category,
+          subcategory: draft.subcategory,
+        });
+        if (!moderation.ok) {
+          const strike = recordModerationStrike({
+            userId: auth.userId,
+            severe:
+              moderation.reasonCode === "nsfw" ||
+              moderation.reasonCode === "prohibited_item",
+          });
+              setPhotoGateMessage(
+            strike.hasCooldown
+              ? listing.moderationCooldownWait(formatCooldownHours(strike.cooldownMs))
+              : `${messageForPhotoModeration(moderation.reasonCode, listing.photos)} ${listing.moderationSoftNudgeListing}`,
+          );
+          return;
+        }
+
+        if (draft.videos.length > 0) {
+          const videoModeration = await moderateListingMediaVideos(draft.videos, {
+            category: draft.category,
+            subcategory: draft.subcategory,
+          });
+          if (!videoModeration.ok) {
+            const strike = recordModerationStrike({
+              userId: auth.userId,
+              severe:
+                videoModeration.reasonCode === "nsfw" ||
+                videoModeration.reasonCode === "prohibited_item",
+            });
+            setPhotoGateMessage(
+              strike.hasCooldown
+                ? listing.moderationCooldownWait(formatCooldownHours(strike.cooldownMs))
+                : messageForVideoModeration(videoModeration.reasonCode, {
+                    ...listing.photos,
+                    moderationBadVideo: listing.photos.moderationBadVideo,
+                    moderationVideoNotListable: listing.photos.moderationVideoNotListable,
+                  }),
+            );
+            return;
+          }
+        }
+
+        if (!draft.aiSuggestions) {
+          await runListingPhotoAnalysis();
+        }
+        goToStep(LISTING_STEP.details, 1);
+      } finally {
+        setPhotoModerationPending(false);
+      }
+      return;
+    }
+
+    if (step === LISTING_STEP.details) {
+      if (!canContinue || textModerationPending) return;
+
+      setTextGateMessage(null);
+      if (isInModerationCooldown(auth.userId)) {
+        setTextGateMessage(
+          listing.moderationCooldownWait(
+            formatCooldownHours(getModerationCooldownRemaining(auth.userId)),
+          ),
+        );
+        return;
+      }
+
+      setTextModerationPending(true);
+      try {
+        const cleanedTitle = sanitizeUserText(draft.title).trim();
+        const cleanedDescription = sanitizeUserText(draft.description).trim();
+        if (cleanedTitle !== draft.title || cleanedDescription !== draft.description) {
+          setDraft((current) => ({
+            ...current,
+            title: cleanedTitle,
+            description: cleanedDescription,
+          }));
+        }
+
+        const moderation = await moderateListingText({
+          title: cleanedTitle,
+          description: cleanedDescription,
+          category: draft.category,
+          subcategory: draft.subcategory,
+        });
+        if (!moderation.ok) {
+          const strike = recordModerationStrike({
+            userId: auth.userId,
+            severe: moderation.reasonCode === "unsafe",
+          });
+          setTextGateMessage(
+            strike.hasCooldown
+              ? listing.moderationCooldownWait(formatCooldownHours(strike.cooldownMs))
+              : `${messageForTextModeration(moderation.reasonCode, listing.itemInfo)} ${listing.moderationSoftNudgeListing}`,
+          );
+          return;
+        }
+
+        const urlModeration = await moderateListingManualUrl(draft.instructionsUrl, {
+          title: cleanedTitle,
+          category: draft.category,
+          subcategory: draft.subcategory,
+        });
+        if (!urlModeration.ok) {
+          setTextGateMessage(
+            messageForManualUrlModeration(urlModeration.reasonCode, listing.itemInfo),
+          );
+          return;
+        }
+
+        goToStep(step + 1, 1);
+      } finally {
+        setTextModerationPending(false);
+      }
       return;
     }
 
@@ -522,20 +1008,23 @@ export function ListingWizard({
     goToStep(step + 1, 1);
   };
 
-  const handleAnalyzePhotos = async () => {
-    if (draft.photos.length === 0 || draft.aiAnalysisPending || draft.photoEnhancementPending) {
-      return;
-    }
+  const handleLetAiDecideCategory = () => {
+    setDraft((current) => ({
+      ...current,
+      category: "",
+      subcategory: "",
+      grade: "",
+      categorySpecs: {},
+    }));
+    goToStep(LISTING_STEP.photos, 1);
+  };
 
+  /** Soft-fill details from photos — call only after moderation passed. */
+  const runListingPhotoAnalysis = async () => {
     setDraft((current) => ({ ...current, aiAnalysisPending: true }));
-
     try {
       const suggestions = await analyzeListingMediaPhotos(draft.photos);
-      setDraft((current) => ({
-        ...current,
-        aiSuggestions: suggestions,
-        aiAnalysisPending: false,
-      }));
+      setDraft((current) => applyAiSuggestionsToDraft(current, suggestions));
     } catch (error) {
       setDraft((current) => ({ ...current, aiAnalysisPending: false }));
       if (import.meta.env.DEV) {
@@ -544,22 +1033,98 @@ export function ListingWizard({
     }
   };
 
+  const handleAnalyzePhotos = async () => {
+    if (
+      draft.photos.length === 0 ||
+      draft.aiAnalysisPending ||
+      draft.photoEnhancementPending ||
+      photoModerationPending
+    ) {
+      return;
+    }
+
+    setPhotoGateMessage(null);
+    if (isInModerationCooldown(auth.userId)) {
+      setPhotoGateMessage(
+        listing.moderationCooldownWait(
+          formatCooldownHours(getModerationCooldownRemaining(auth.userId)),
+        ),
+      );
+      return;
+    }
+
+    setPhotoModerationPending(true);
+    let allowed = false;
+    try {
+      const moderation = await moderateListingMediaPhotos(draft.photos, {
+        category: draft.category,
+        subcategory: draft.subcategory,
+      });
+      if (!moderation.ok) {
+        const strike = recordModerationStrike({
+          userId: auth.userId,
+          severe:
+            moderation.reasonCode === "nsfw" ||
+            moderation.reasonCode === "prohibited_item",
+        });
+        setPhotoGateMessage(
+          strike.hasCooldown
+            ? listing.moderationCooldownWait(formatCooldownHours(strike.cooldownMs))
+            : messageForPhotoModeration(moderation.reasonCode, listing.photos),
+        );
+        return;
+      }
+      if (draft.videos.length > 0) {
+        const videoModeration = await moderateListingMediaVideos(draft.videos, {
+          category: draft.category,
+          subcategory: draft.subcategory,
+        });
+        if (!videoModeration.ok) {
+          setPhotoGateMessage(
+            messageForVideoModeration(videoModeration.reasonCode, {
+              ...listing.photos,
+              moderationBadVideo: listing.photos.moderationBadVideo,
+              moderationVideoNotListable: listing.photos.moderationVideoNotListable,
+            }),
+          );
+          return;
+        }
+      }
+      allowed = true;
+    } finally {
+      setPhotoModerationPending(false);
+    }
+
+    if (!allowed) return;
+    await runListingPhotoAnalysis();
+  };
+
   const continueLabel =
-    step === 1 && draft.aiAnalysisPending ? (
+    step === LISTING_STEP.photos && (draft.aiAnalysisPending || photoModerationPending) ? (
       <span className="flex items-center justify-center gap-2">
         <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-        {listing.analyzingPhotos(MASCOT_NAME)}
+        {photoModerationPending && !draft.aiAnalysisPending
+          ? listing.photos.verifyingPhotos(MASCOT_NAME)
+          : listing.analyzingPhotos(MASCOT_NAME)}
+      </span>
+    ) : step === LISTING_STEP.details && textModerationPending ? (
+      <span className="flex items-center justify-center gap-2">
+        <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+        {listing.itemInfo.verifyingText(MASCOT_NAME)}
       </span>
     ) : (
       listing.continue
     );
 
   const continueDisabled =
-    step === 1
+    step === LISTING_STEP.photos
       ? draft.photos.length === 0 ||
         draft.aiAnalysisPending ||
-        draft.photoEnhancementPending
-      : !canContinue;
+        draft.photoEnhancementPending ||
+        photoModerationPending
+      : step === LISTING_STEP.details
+        ? !canContinue || textModerationPending
+        : !canContinue;
 
   const handleDiscard = () => {
     setShowDiscardDialog(false);
@@ -575,8 +1140,9 @@ export function ListingWizard({
     }
 
     if (draft.listingStatus === "draft" && draft.id) {
-      if (auth.userId) {
-        void removePublishedListingRemote(draft.id, auth.userId);
+      const ownerId = resolveHostAccountId(auth.userId) || auth.userId;
+      if (ownerId) {
+        void removePublishedListingRemote(draft.id, ownerId);
       } else {
         removePublishedListing(draft.id);
       }
@@ -584,6 +1150,28 @@ export function ListingWizard({
 
     onExit("discarded");
   };
+
+  const handleDeleteListing = () => {
+    if (deleteInFlightRef.current) return;
+    deleteInFlightRef.current = true;
+    setShowDeleteDialog(false);
+    setShowDiscardDialog(false);
+    setWizardStack([]);
+
+    if (draft.id) {
+      const ownerId = resolveHostAccountId(auth.userId) || auth.userId;
+      if (ownerId) {
+        void removePublishedListingRemote(draft.id, ownerId);
+      } else {
+        removePublishedListing(draft.id);
+      }
+    }
+
+    onExit("discarded");
+  };
+
+  /** Trash is available on every create/edit step — not only after a draft id exists. */
+  const canDeleteListing = isEditing || draft.listingStatus === "draft" || phase === "steps";
 
   const handleStartAnotherListing = () => {
     setWizardStack((stack) => [...stack, { step, draft, phase }]);
@@ -626,6 +1214,14 @@ export function ListingWizard({
               <p className="text-xs font-medium text-[#9CA3AF]">{headerTitle}</p>
               <p className="text-sm font-semibold text-[#374151]">{stepLabel}</p>
             </div>
+            <button
+              type="button"
+              onClick={openDeleteDialog}
+              className="absolute right-0 rounded-full p-2 text-red-700 transition-colors hover:bg-red-50"
+              aria-label={listing.deleteListing}
+            >
+              <Trash2 className="h-5 w-5" />
+            </button>
           </div>
         </header>
         <main className="min-h-0 flex-1 overflow-y-auto">
@@ -634,8 +1230,11 @@ export function ListingWizard({
             loading={goPublicLoading}
             busy={goPublicBusy}
             error={goPublicError}
+            errorCode={goPublicErrorCode}
+            showPayouts={listingChargesMoney(draft)}
             onSignIn={handleChecklistSignIn}
             onVerifyIdentity={handleChecklistIdentity}
+            onVerifyPhone={handleChecklistPhone}
             onConnectBank={handleChecklistConnect}
             onRefresh={() => {
               setGoPublicBusy("refresh");
@@ -645,7 +1244,68 @@ export function ListingWizard({
             onBack={handleBack}
             isPublishing={isPublishing}
           />
+          <PhoneVerifySheet
+            open={phoneSheetOpen}
+            initialPhone={loadUserProfile().phone}
+            alreadyVerified={Boolean(goPublicStatus?.phoneVerified)}
+            onClose={() => {
+              setPhoneSheetOpen(false);
+              setGoPublicBusy("refresh");
+              void refreshGoPublicStatus();
+            }}
+            onVerified={(nextPhone) => {
+              const current = loadUserProfile();
+              saveUserProfile({
+                ...current,
+                phone: nextPhone,
+                verification: { ...current.verification, phone: true },
+              });
+              setPhoneSheetOpen(false);
+              setGoPublicBusy("refresh");
+              void refreshGoPublicStatus();
+            }}
+          />
         </main>
+        {showDeleteDialog ? (
+          <div
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 px-6"
+            onPointerDown={(event) => {
+              if (event.target === event.currentTarget) closeDeleteDialog();
+            }}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="delete-listing-title-gopublic"
+              className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+              onPointerDown={(event) => event.stopPropagation()}
+            >
+              <h2
+                id="delete-listing-title-gopublic"
+                className="text-lg font-semibold text-[#111827]"
+              >
+                {listing.deleteTitle}
+              </h2>
+              <p className="mt-2 text-sm text-[#6B7280]">{listing.deleteBody}</p>
+              <div className="mt-6 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteDialog(false)}
+                  className="flex-1 rounded-xl border border-[#E5E7EB] py-3 text-sm font-semibold text-[#374151]"
+                >
+                  {t.common.cancel}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteListing}
+                  className="flex-1 rounded-xl bg-red-600 py-3 text-sm font-semibold text-white"
+                >
+                  {listing.deleteConfirmCta}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -690,11 +1350,20 @@ export function ListingWizard({
         <ListingPublishSuccess
           title={getListingDisplayTitle(draft.title)}
           statusLine={publishStatusLine}
-          payoutNudge={Boolean(goPublicStatus && !goPublicStatus.payoutsReady)}
+          payoutNudge={Boolean(
+            goPublicStatus &&
+              !goPublicStatus.payoutsReady &&
+              listingChargesMoney(draft),
+          )}
           payoutBusy={goPublicBusy === "stripe"}
           onSetupPayouts={handleChecklistConnect}
-          onPreviewShop={onPreviewShop}
+          onPreviewShop={onPreviewShop ? () => onPreviewShop(draft.id) : undefined}
           onShare={() => setPhase("share")}
+          onPlanOpenSale={
+            draft.modes.sell && !isFreeGiveaway(draft) && onPlanOpenSale
+              ? () => onPlanOpenSale(draft.id)
+              : undefined
+          }
           onDone={() => onExit("finished")}
         />
       </div>
@@ -739,6 +1408,16 @@ export function ListingWizard({
               </p>
             ) : null}
           </div>
+          {canDeleteListing ? (
+            <button
+              type="button"
+              onClick={openDeleteDialog}
+              className="absolute right-0 rounded-full p-2 text-red-700 transition-colors hover:bg-red-50"
+              aria-label={listing.deleteListing}
+            >
+              <Trash2 className="h-5 w-5" />
+            </button>
+          ) : null}
         </div>
 
         <div className="h-1 w-full overflow-hidden rounded-full bg-[#E5E7EB]">
@@ -761,7 +1440,7 @@ export function ListingWizard({
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0 flex flex-col overflow-y-auto"
           >
-            {step === 3 ? (
+            {step === LISTING_STEP.review ? (
               <Step7Review
                 draft={draft}
                 setDraft={setDraft}
@@ -771,21 +1450,38 @@ export function ListingWizard({
                 onPublish={handlePublish}
                 onGoToStep={(target) => goToStep(target, -1)}
               />
-            ) : step === 1 ? (
+            ) : step === LISTING_STEP.photos ? (
               <Step1Photos
                 draft={draft}
                 setDraft={setDraft}
                 onAnalyzePhotos={() => void handleAnalyzePhotos()}
+                gateMessage={photoGateMessage}
+                onDismissGateMessage={() => setPhotoGateMessage(null)}
+              />
+            ) : step === LISTING_STEP.category ? (
+              <StepCategories
+                key={draft.id || "new-listing"}
+                draft={draft}
+                setDraft={setDraft}
+                onLetAiDecide={handleLetAiDecideCategory}
+                registerPhaseBack={(fn) => {
+                  categoryPhaseBackRef.current = fn;
+                }}
               />
             ) : (
-              <Step2Details draft={draft} setDraft={setDraft} />
+              <Step2Details
+                draft={draft}
+                setDraft={setDraft}
+                gateMessage={textGateMessage}
+                onDismissGateMessage={() => setTextGateMessage(null)}
+              />
             )}
           </motion.div>
         </AnimatePresence>
       </main>
 
       {!isLastStep ? (
-        <footer className="shrink-0 border-t border-[#E5E7EB] bg-white px-4 pb-6 pt-4">
+        <footer className="shrink-0 border-t border-[#E5E7EB] bg-white px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-4">
           <button
             type="button"
             onClick={() => void handleContinue()}
@@ -807,7 +1503,11 @@ export function ListingWizard({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowDiscardDialog(false)}
+            onPointerDown={(event) => {
+              if (event.target !== event.currentTarget) return;
+              if (Date.now() - discardDialogOpenedAtRef.current < 450) return;
+              setShowDiscardDialog(false);
+            }}
           >
             <motion.div
               role="dialog"
@@ -817,7 +1517,7 @@ export function ListingWizard({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              onClick={(event) => event.stopPropagation()}
+              onPointerDown={(event) => event.stopPropagation()}
             >
               <h2
                 id="discard-listing-title"
@@ -843,6 +1543,55 @@ export function ListingWizard({
                   style={{ backgroundColor: PRIMARY_GREEN }}
                 >
                   {listing.discard}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showDeleteDialog && (
+          <motion.div
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 px-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onPointerDown={(event) => {
+              if (event.target === event.currentTarget) closeDeleteDialog();
+            }}
+          >
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="delete-listing-title"
+              className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onPointerDown={(event) => event.stopPropagation()}
+            >
+              <h2
+                id="delete-listing-title"
+                className="text-lg font-semibold text-[#111827]"
+              >
+                {listing.deleteTitle}
+              </h2>
+              <p className="mt-2 text-sm text-[#6B7280]">{listing.deleteBody}</p>
+              <div className="mt-6 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteDialog(false)}
+                  className="flex-1 rounded-xl border border-[#E5E7EB] py-3 text-sm font-semibold text-[#374151]"
+                >
+                  {t.common.cancel}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteListing}
+                  className="flex-1 rounded-xl bg-red-600 py-3 text-sm font-semibold text-white"
+                >
+                  {listing.deleteConfirmCta}
                 </button>
               </div>
             </motion.div>

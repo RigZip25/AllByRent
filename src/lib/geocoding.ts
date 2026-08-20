@@ -77,10 +77,66 @@ const PHOTON_NOT_STREET = new Set([
   "bus_stop",
 ]);
 
+/** OSM place types whose `name` is a locality — not a street. */
+const PHOTON_LOCALITY_VALUES = new Set([
+  "city",
+  "town",
+  "village",
+  "hamlet",
+  "municipality",
+  "suburb",
+  "neighbourhood",
+  "neighborhood",
+  "locality",
+  "quarter",
+  "borough",
+]);
+
+/** Admin / place features — never treat `name` as a street line. */
+const PHOTON_NOT_STREET_NAME = new Set([
+  ...PHOTON_NOT_STREET,
+  ...PHOTON_LOCALITY_VALUES,
+  "state",
+  "county",
+  "country",
+  "region",
+  "province",
+  "postcode",
+]);
+
 type PhotonFeature = {
   geometry: { coordinates: [number, number] };
   properties: PhotonProperties;
 };
+
+/** Prefer city/town fields; Photon often only sets `name` for place=* features. */
+function localityFromPhoton(properties: PhotonProperties): string {
+  const fromFields =
+    properties.city ||
+    properties.town ||
+    properties.village ||
+    properties.locality ||
+    properties.district ||
+    properties.suburb ||
+    properties.neighbourhood ||
+    "";
+  if (fromFields) return fromFields;
+
+  const osm = properties.osm_value ?? "";
+  if (PHOTON_LOCALITY_VALUES.has(osm) && properties.name?.trim()) {
+    return properties.name.trim();
+  }
+  return "";
+}
+
+function regionFromPhoton(properties: PhotonProperties): string {
+  if (properties.state?.trim()) return properties.state.trim();
+  // State-level reverse/search features often have name=Arkansas and empty `state`.
+  if (properties.osm_value === "state" && properties.name?.trim()) {
+    return properties.name.trim();
+  }
+  return "";
+}
 
 export function countryCodeToFlag(countryCode: string): string {
   if (!countryCode || countryCode.length !== 2) return "🌍";
@@ -111,29 +167,22 @@ function formatPhotonAddress(properties: PhotonProperties): {
 } {
   const countryCode = (properties.countrycode ?? "").toUpperCase();
   const streetLine = [properties.housenumber, properties.street].filter(Boolean).join(" ");
-  const locality =
-    properties.locality ||
-    properties.district ||
-    properties.suburb ||
-    properties.neighbourhood ||
-    "";
-  const city =
-    properties.city || properties.town || properties.village || locality || "";
-  const region = properties.state || "";
+  const city = localityFromPhoton(properties);
+  const region = regionFromPhoton(properties);
   const country = properties.country || "";
   const postcode = properties.postcode || "";
 
   if (countryCode === "US") {
     const useNameAsStreet =
       !streetLine &&
-      properties.name &&
-      !PHOTON_NOT_STREET.has(properties.osm_value ?? "");
+      Boolean(properties.name) &&
+      !PHOTON_NOT_STREET_NAME.has(properties.osm_value ?? "");
     return {
       ...formatUsAddressLines({
         street: streetLine || (useNameAsStreet ? properties.name : ""),
-        city,
-        state: region,
-        zip: postcode,
+        city: city || undefined,
+        state: region || undefined,
+        zip: postcode || undefined,
       }),
       country,
     };
@@ -143,18 +192,22 @@ function formatPhotonAddress(properties: PhotonProperties): {
     properties.name &&
     properties.osm_value !== "postcode" &&
     properties.name !== properties.postcode &&
-    !PHOTON_NOT_STREET.has(properties.osm_value ?? "")
+    !PHOTON_NOT_STREET_NAME.has(properties.osm_value ?? "")
       ? properties.name
       : "";
 
   const primaryLine =
-    dedupeParts([streetLine || placeName, locality])
+    dedupeParts([streetLine || placeName, city])
       .filter(Boolean)
-      .join(", ") || city || postcode || country;
+      .join(", ") ||
+    city ||
+    postcode ||
+    region ||
+    country;
 
   const secondaryLine = dedupeParts([
     city && city !== primaryLine ? city : "",
-    region,
+    region && region !== city && region !== primaryLine ? region : "",
     postcode && !primaryLine.includes(postcode) ? postcode : "",
     country,
   ])
@@ -220,6 +273,17 @@ function parsePhotonFeature(feature: PhotonFeature): LocationSuggestion | null {
     };
   }
 
+  // State / county / country — not useful as a search hit (and name ≠ city).
+  if (
+    countryCode === "US" &&
+    (props.osm_value === "state" ||
+      props.osm_value === "county" ||
+      props.osm_value === "country" ||
+      props.osm_value === "region")
+  ) {
+    return null;
+  }
+
   const hasStreet = Boolean(props.street || props.housenumber);
   if (
     countryCode === "US" &&
@@ -229,11 +293,17 @@ function parsePhotonFeature(feature: PhotonFeature): LocationSuggestion | null {
     return null;
   }
 
+  const realCity = localityFromPhoton(props);
   const { label, primaryLine, secondaryLine, city, region, country } =
     formatPhotonAddress(props);
   if (!label) return null;
 
-  if (countryCode === "US" && !city && !props.postcode && props.osm_value !== "postcode") {
+  if (
+    countryCode === "US" &&
+    !realCity &&
+    !props.postcode &&
+    props.osm_value !== "postcode"
+  ) {
     return null;
   }
 
@@ -243,7 +313,7 @@ function parsePhotonFeature(feature: PhotonFeature): LocationSuggestion | null {
     label,
     primaryLine,
     secondaryLine,
-    city,
+    city: realCity || city,
     country,
     region: stateLabel,
     countryCode,
@@ -631,22 +701,15 @@ function photonToUsParts(properties: PhotonProperties): {
   const streetLine = [properties.housenumber, properties.street].filter(Boolean).join(" ");
   const useNameAsStreet =
     !streetLine &&
-    properties.name &&
-    !PHOTON_NOT_STREET.has(properties.osm_value ?? "");
-  const city =
-    properties.city ||
-    properties.town ||
-    properties.village ||
-    properties.locality ||
-    properties.district ||
-    properties.suburb ||
-    properties.neighbourhood ||
-    "";
+    Boolean(properties.name) &&
+    !PHOTON_NOT_STREET_NAME.has(properties.osm_value ?? "");
+  const city = localityFromPhoton(properties);
+  const state = regionFromPhoton(properties);
 
   return {
     street: streetLine || (useNameAsStreet ? properties.name! : ""),
     city,
-    state: properties.state || "",
+    state,
     zip: properties.postcode || "",
   };
 }

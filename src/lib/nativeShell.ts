@@ -1,5 +1,6 @@
 import { App as CapApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
+import { CapacitorPasskey } from "@capgo/capacitor-passkey";
 import { SplashScreen } from "@capacitor/splash-screen";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { APP_HOST, APP_ORIGIN } from "./brand";
@@ -16,6 +17,18 @@ function resolveApiRequest(
   if (typeof input === "string") {
     if (input.startsWith("/api/") || input === "/api") {
       return `${origin}${input}`;
+    }
+    // Absolute same-origin /api (legacy callers using window.location.origin)
+    try {
+      const abs = new URL(input, window.location.href);
+      if (
+        abs.origin === window.location.origin &&
+        abs.pathname.startsWith("/api")
+      ) {
+        return `${origin}${abs.pathname}${abs.search}${abs.hash}`;
+      }
+    } catch {
+      /* ignore */
     }
     return input;
   }
@@ -78,23 +91,46 @@ function applyExternalAppUrl(rawUrl: string): void {
   }
 }
 
-/** Status bar, splash, Android back button, deep links — safe no-ops on web. */
+/** Hide the native launch splash (call when React splash mounts or when intentionally skipping). */
+export async function hideNativeSplash(): Promise<void> {
+  if (!isNativeApp()) return;
+  try {
+    await SplashScreen.hide({ fadeOutDuration: 200 });
+  } catch {
+    /* already hidden */
+  }
+}
+
+/**
+ * Bridge WebAuthn (Face ID) to native APIs so @simplewebauthn/browser works
+ * inside the Capacitor shell (RP origin = https://app.evorios.com).
+ */
+async function installNativePasskeyShim(): Promise<void> {
+  try {
+    await CapacitorPasskey.autoShimWebAuthn({
+      origin: APP_ORIGIN,
+      // WebView often exposes a non-functional navigator.credentials — force native.
+      force: true,
+    });
+  } catch (err) {
+    console.warn("[native] passkey shim failed", err);
+  }
+}
+
+/** Status bar, Android back button, deep links — safe no-ops on web.
+ *  Native splash stays until hideNativeSplash() (launchAutoHide: false). */
 export async function initNativeShell(): Promise<void> {
   if (!isNativeApp()) return;
 
-  try {
-    await StatusBar.setStyle({ style: Style.Dark });
-    if (Capacitor.getPlatform() === "android") {
-      await StatusBar.setBackgroundColor({ color: "#0D5C3A" });
-    }
-  } catch {
-    /* plugin unavailable in some simulators */
-  }
+  await installNativePasskeyShim();
 
   try {
-    await SplashScreen.hide();
+    // Edge-to-edge: one safe-area pad from CSS (same as PWA). Do not let the
+    // status bar reserve layout space on Android — that stacks with env(safe-area-inset-top).
+    await StatusBar.setOverlaysWebView({ overlay: true });
+    await StatusBar.setStyle({ style: Style.Light });
   } catch {
-    /* already auto-hidden */
+    /* plugin unavailable in some simulators */
   }
 
   await CapApp.addListener("backButton", ({ canGoBack }) => {

@@ -33,8 +33,9 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const garage = typeof req.query.garage === "string" ? req.query.garage : undefined;
   const item = typeof req.query.item === "string" ? req.query.item : undefined;
   const listingId = typeof req.query.listingId === "string" ? req.query.listingId : undefined;
+  const request = typeof req.query.request === "string" ? req.query.request : undefined;
 
-  const context = await resolveOgShareContext({ garage, item, listingId });
+  const context = await resolveOgShareContext({ garage, item, listingId, request });
   const appUrl = buildAppDeepLink(origin, context.appQuery);
   const shareUrl = buildShareLink(origin, context.appQuery);
   const imageUrl = buildOgImageUrl(origin, context.imageParams);
@@ -60,12 +61,16 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     <meta property="og:description" content="${escapeHtml(context.description)}" />
     <meta property="og:url" content="${escapeHtml(shareUrl)}" />
     <meta property="og:image" content="${escapeHtml(imageUrl)}" />
+    <meta property="og:image:secure_url" content="${escapeHtml(imageUrl)}" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="${escapeHtml(context.title)}" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(context.title)}" />
     <meta name="twitter:description" content="${escapeHtml(context.description)}" />
     <meta name="twitter:image" content="${escapeHtml(imageUrl)}" />
+    <link rel="image_src" href="${escapeHtml(imageUrl)}" />
     <meta http-equiv="refresh" content="0;url=${escapeHtml(appUrl)}" />
     <script>window.location.replace(${JSON.stringify(appUrl)});</script>
   </head>
@@ -73,7 +78,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     <div>
       <p style="font-size:18px;font-weight:700;margin:0 0 8px">${escapeHtml(context.title)}</p>
       <p style="margin:0 0 16px;color:#4B5563">${escapeHtml(context.description)}</p>
-      <a href="${escapeHtml(appUrl)}" style="color:#0D5C3A;font-weight:700">Open shelf →</a>
+      <a href="${escapeHtml(appUrl)}" style="color:#0D5C3A;font-weight:700">${request ? "Open request →" : "Open shelf →"}</a>
     </div>
   </body>
 </html>`;

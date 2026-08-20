@@ -53,7 +53,7 @@ export function ProfileFieldEditSheet({
             {title}
           </h2>
           <button type="button" onClick={onClose} aria-label="Close">
-            <X className="h-5 w-5 text-gray-500" />
+            <X className="h-5 w-5 text-red-600" />
           </button>
         </div>
 

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  ArrowLeft,
   CalendarClock,
   ChevronRight,
   History,
@@ -13,6 +14,7 @@ import { PendingApprovalCard } from "../components/rentals/PendingApprovalCard";
 import { RentalCard } from "../components/rentals/RentalCard";
 import { getAppMode } from "../lib/appMode";
 import { expireStalePendingApprovals } from "../lib/expirePendingApprovals";
+import { applySoftNoShowSuggestions } from "../lib/rentalNoShowActions";
 import {
   getActiveBookings,
   getHistoryBookings,
@@ -171,10 +173,12 @@ function sortHistory(list: RentalBooking[], sort: HistorySort): RentalBooking[] 
 }
 
 export function RentalsScreen({
+  onBack,
   onOpenRental,
   onViewProfile,
   onReRent,
 }: {
+  onBack: () => void;
   onOpenRental: (bookingId: string) => void;
   onViewProfile: (userId: string) => void;
   onReRent?: (booking: RentalBooking) => void;
@@ -205,12 +209,14 @@ export function RentalsScreen({
     }
     void expireStalePendingApprovals(userId)
       .then(() =>
-        syncRentalsFromRemote(userId).then(setBookings).catch(() => setBookings(loadRentalBookings())),
+        syncRentalsFromRemote(userId)
+          .then((remote) => setBookings(applySoftNoShowSuggestions(remote)))
+          .catch(() => setBookings(applySoftNoShowSuggestions(loadRentalBookings()))),
       )
       .catch(() => {
         void syncRentalsFromRemote(userId)
-          .then(setBookings)
-          .catch(() => setBookings(loadRentalBookings()));
+          .then((remote) => setBookings(applySoftNoShowSuggestions(remote)))
+          .catch(() => setBookings(applySoftNoShowSuggestions(loadRentalBookings())));
       });
   }, [auth.userId]);
 
@@ -256,9 +262,19 @@ export function RentalsScreen({
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <header className="shrink-0 px-4 pb-3 pt-3">
-        <h1 className="mb-1 text-[22px] font-bold" style={{ color: GREEN }}>
-          {t.rentals.title}
-        </h1>
+        <div className="mb-2 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="flex h-10 w-10 items-center justify-center rounded-full"
+            aria-label={t.common.back}
+          >
+            <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
+          </button>
+          <h1 className="text-[22px] font-bold" style={{ color: GREEN }}>
+            {t.rentals.title}
+          </h1>
+        </div>
         <p className="mb-3 text-[14px] text-gray-500">
           {mode === "earn" ? t.rentals.subtitleHost : t.rentals.subtitleGuest}
         </p>

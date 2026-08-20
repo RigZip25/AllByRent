@@ -2,6 +2,8 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import authOtp from "@allbyrent/server/routes/auth/otp";
 import deleteAccount from "@allbyrent/server/routes/auth/delete_account";
+import phoneOtpSend from "@allbyrent/server/routes/auth/phone_otp_send";
+import phoneOtpVerify from "@allbyrent/server/routes/auth/phone_otp_verify";
 import passkeyAuthOptions from "@allbyrent/server/routes/passkey/auth/options";
 import passkeyAuthVerify from "@allbyrent/server/routes/passkey/auth/verify";
 import passkeyRegisterOptions from "@allbyrent/server/routes/passkey/register/options";
@@ -11,6 +13,8 @@ type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 
 const ROUTES: Record<string, Handler> = {
   otp: authOtp,
+  phone_otp_send: phoneOtpSend,
+  phone_otp_verify: phoneOtpVerify,
   delete_account: deleteAccount,
   "passkey-register-options": passkeyRegisterOptions,
   "passkey-register-verify": passkeyRegisterVerify,

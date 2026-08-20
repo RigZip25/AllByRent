@@ -144,6 +144,38 @@ export async function detectCurrentLocation(): Promise<DetectedLocationResult> {
   };
 }
 
+/**
+ * High-accuracy fix for handoff presence (PIN / lockbox unlock).
+ * Skips stale network caches so a couch across town cannot reuse an old reading.
+ */
+export async function detectPreciseLocation(): Promise<DetectedLocationResult> {
+  if (typeof navigator === "undefined" || !navigator.geolocation) {
+    return { ok: false, reason: "unsupported" };
+  }
+  if (typeof window !== "undefined" && !window.isSecureContext) {
+    return { ok: false, reason: "unsupported" };
+  }
+
+  const precise = await getCurrentPositionWithOptions({
+    enableHighAccuracy: true,
+    timeout: 20_000,
+    maximumAge: 15_000,
+  });
+  if (!precise.ok) {
+    return { ok: false, reason: precise.reason };
+  }
+
+  const { latitude, longitude } = precise.position.coords;
+  return {
+    ok: true,
+    location: {
+      displayName: getMessages().geo.yourArea,
+      lat: latitude,
+      lng: longitude,
+    },
+  };
+}
+
 /** Browser geolocation + reverse geocode for "at home" onboarding. */
 export async function resolveHomeLocation(): Promise<HomeLocationResult> {
   const detected = await detectCurrentLocation();

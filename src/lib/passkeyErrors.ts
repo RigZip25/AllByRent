@@ -13,8 +13,18 @@ function withHostNote(base: string, hostNote: string): string {
   return base.slice(0, i + 1) + hostNote + base.slice(i + 1);
 }
 
+function looksLikeRawEngineError(msg: string, name: string): boolean {
+  if (name === "TypeError" || name === "ReferenceError" || name === "SyntaxError") return true;
+  return (
+    /undefined is not an object|null is not an object|Cannot read propert|is not a function|evaluating ['`].*challenge/i.test(
+      msg,
+    ) || /\[object Object\]|at Object\.|@https?:\/\//i.test(msg)
+  );
+}
+
 /**
  * User-facing messages for WebAuthn / passkey (Face ID) failures.
+ * Never surfaces raw JS engine / stack strings in the UI.
  */
 export function formatPasskeyError(err: unknown): string {
   const e = getMessages().passkey.errors;
@@ -51,7 +61,11 @@ export function formatPasskeyError(err: unknown): string {
     return e.serverUnavailable;
   }
 
-  if (/Invalid or expired challenge/i.test(msg)) {
+  if (
+    /Invalid or expired challenge|missing (passkey )?challenge|registration options|authentication options/i.test(
+      msg,
+    )
+  ) {
     return e.challengeExpired;
   }
 
@@ -71,7 +85,7 @@ export function formatPasskeyError(err: unknown): string {
     return e.unsupported;
   }
 
-  if (/Passkeys require Supabase|not configured on the server/i.test(msg)) {
+  if (/Passkeys require Supabase|not configured on the server|Face ID is not available/i.test(msg)) {
     return e.notConfigured;
   }
 
@@ -91,5 +105,21 @@ export function formatPasskeyError(err: unknown): string {
     return msg;
   }
 
-  return msg || e.generic;
+  // Safari/WebKit often throws TypeError on bad optionsJSON ("t.challenge") — never show raw.
+  if (looksLikeRawEngineError(msg, name) || /\.challenge\b/i.test(msg)) {
+    if (typeof console !== "undefined") {
+      console.warn("[passkey]", name || "Error", msg);
+    }
+    return e.generic;
+  }
+
+  // Allowlist: only known soft API strings; everything else → generic.
+  if (/Face ID|passkey|email sign-in|Sign-in service/i.test(msg) && msg.length < 180) {
+    return msg;
+  }
+
+  if (typeof console !== "undefined") {
+    console.warn("[passkey] sanitized unknown error:", name || "Error", msg);
+  }
+  return e.generic;
 }

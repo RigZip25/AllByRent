@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useMessages } from "../../lib/i18n/react";
 import { Gavel, Pencil, Share2, ShoppingBag, Tag } from "lucide-react";
 import type { ListingDraft } from "../../screens/listing/types";
@@ -13,7 +14,10 @@ import {
   getShopOffer,
   type ShopOffer,
 } from "../../lib/garageShopStorage";
+import { isFreeGiveaway } from "../../lib/listingGift";
+import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMediaUrl } from "../../lib/useMediaUrl";
+import { isListingOnOpenSale } from "../../lib/openSale";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
@@ -33,6 +37,7 @@ type GarageShopItemCardProps = {
   listing: ListingDraft;
   preview?: boolean;
   hostManage?: boolean;
+  onOpenListing?: (listing: ListingDraft) => void;
   onBuyNow: (listing: ListingDraft, offer: ShopOffer) => void;
   onBid: (listing: ListingDraft, offer: ShopOffer) => void;
   onMakeOffer: (listing: ListingDraft, offer: ShopOffer) => void;
@@ -41,10 +46,47 @@ type GarageShopItemCardProps = {
   onShare?: (listing: ListingDraft) => void;
 };
 
+function CoverThumb({
+  url,
+  unavailable,
+  statusLabel,
+  statusColor,
+  badges,
+}: {
+  url: string | null;
+  unavailable: boolean;
+  statusLabel: string;
+  statusColor: string;
+  badges?: ReactNode;
+}) {
+  return (
+    <div className="relative h-[5.75rem] w-[5.75rem] shrink-0 overflow-hidden rounded-xl bg-[#F3F4F6] sm:h-[6.5rem] sm:w-[6.5rem]">
+      {url ? (
+        <img
+          src={url}
+          alt=""
+          className={`h-full w-full object-contain ${unavailable ? "grayscale" : ""}`}
+          draggable={false}
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center text-2xl text-gray-300">📷</div>
+      )}
+      <span
+        className="absolute left-1 top-1 max-w-[calc(100%-0.5rem)] truncate rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white"
+        style={{ backgroundColor: statusColor }}
+      >
+        {statusLabel}
+      </span>
+      {badges}
+    </div>
+  );
+}
+
 export function GarageShopItemCard({
   listing,
   preview = false,
   hostManage = false,
+  onOpenListing,
   onBuyNow,
   onBid,
   onMakeOffer,
@@ -64,13 +106,21 @@ export function GarageShopItemCard({
   const myBid = offer ? getMyBid(listing.id) : null;
   const currentBidUsd = highBid?.amountUsd ?? offer?.startingBidUsd ?? 0;
   const multiAuction = offer?.negotiationPhase === "multi_auction";
+  const onOpenSale = isListingOnOpenSale(listing.id);
   const showAuction = multiAuction;
   const auctionLive = offer && showAuction ? isAuctionTimeActive(offer.startsAt, offer.endsAt) : false;
   const auctionPending = offer && showAuction ? isAuctionNotStarted({ startsAt: offer.startsAt, endsAt: offer.endsAt }) : false;
   const auctionEnded = offer && showAuction ? !auctionLive && !auctionPending : false;
+  /** Open Sale: bid in presale + live. Classic multi_auction: live only. */
+  const canPlaceBid = Boolean(
+    showAuction && !auctionEnded && (auctionLive || (onOpenSale && auctionPending) || (onOpenSale && auctionLive)),
+  );
   const isLeading =
     Boolean(myBid && highBid && myBid.bidderId === highBid.bidderId && myBid.amountUsd === highBid.amountUsd);
   const title = listing.title || shopCopy.saleItemFallback;
+  const categoryLabel = listing.category.trim()
+    ? localizeCategoryLabel(listing.category)
+    : null;
   const statusLabel =
     shelf.kind === "sold"
       ? shopCopy.soldBadge
@@ -84,93 +134,91 @@ export function GarageShopItemCard({
               ? shopCopy.statusPendingPayment
               : shopCopy.statusAvailable;
   const unavailable = !shelf.actionable;
+  const freeGiveaway = isFreeGiveaway(listing);
   const rentOnly = Boolean(listing.modes.rent && !listing.modes.sell && !offer);
 
-  if (!offer && lotState.status !== "sold" && !listing.modes.rent && !listing.modes.sell) {
+  if (!offer && lotState.status !== "sold" && !listing.modes.rent && !listing.modes.sell && !listing.modes.gift) {
     return null;
   }
 
+  const shellClass = `garage-shop-card flex overflow-hidden rounded-2xl border ${
+    unavailable || (!offer && shelf.kind === "sold") ? "bg-gray-50" : "bg-white"
+  }`;
+
   if (!offer && shelf.kind === "sold") {
     return (
-      <article
-        className="garage-shop-card flex flex-col overflow-hidden rounded-2xl border bg-gray-50 opacity-60"
-        style={{ borderColor: BORDER }}
-      >
-        <div className="relative aspect-square w-full bg-[#F3F4F6]">
-          {url ? <img src={url} alt="" className="h-full w-full object-cover grayscale" /> : null}
-          <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-sm font-bold uppercase text-white">
-            {shopCopy.soldBadge}
-          </span>
-        </div>
-        <div className="p-2.5">
+      <article className={`${shellClass} opacity-70`} style={{ borderColor: BORDER }}>
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 p-3 pr-2">
           <p className="line-clamp-2 text-[15px] font-semibold text-gray-500">{title}</p>
+          <p className="text-[12px] font-bold uppercase text-gray-500">{shopCopy.soldBadge}</p>
+        </div>
+        <div className="p-2 pl-0">
+          <CoverThumb
+            url={url}
+            unavailable
+            statusLabel={shopCopy.soldBadge}
+            statusColor={STATUS_COLORS.sold}
+          />
         </div>
       </article>
     );
   }
 
-  if (!offer && (rentOnly || listing.modes.rent || listing.modes.sell)) {
+  if (!offer && (rentOnly || listing.modes.rent || listing.modes.sell || listing.modes.gift)) {
     return (
-      <article
-        className={`garage-shop-card flex flex-col overflow-hidden rounded-2xl border ${
-          unavailable ? "bg-gray-50" : "bg-white"
-        }`}
-        style={{ borderColor: BORDER }}
-      >
-        <div className="relative aspect-square w-full bg-[#F3F4F6]">
-          {url ? (
-            <img
-              src={url}
-              alt=""
-              className={`h-full w-full object-cover ${unavailable ? "grayscale" : ""}`}
-              draggable={false}
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-3xl text-gray-300">📷</div>
-          )}
-          <span
-            className="absolute left-2 top-2 rounded-full px-2 py-1 text-[11px] font-bold uppercase text-white"
-            style={{ backgroundColor: STATUS_COLORS[shelf.kind] }}
-          >
-            {statusLabel}
-          </span>
-          {unavailable ? (
-            <span className="absolute inset-0 flex items-center justify-center bg-black/35 text-sm font-bold uppercase text-white">
+      <article className={shellClass} style={{ borderColor: BORDER }}>
+        <div className="flex min-w-0 flex-1 flex-col p-3 pr-2">
+          <button type="button" onClick={() => onOpenListing?.(listing)} className="min-w-0 text-left">
+            <p className="line-clamp-2 text-[15px] font-semibold leading-snug text-gray-900">{title}</p>
+            {categoryLabel ? (
+              <p className="mt-0.5 truncate text-[11px] font-medium text-gray-500">{categoryLabel}</p>
+            ) : null}
+            <p className="mt-1 text-[13px] font-semibold" style={{ color: STATUS_COLORS[shelf.kind] }}>
               {statusLabel}
-            </span>
-          ) : null}
-          {hostManage && onEdit ? (
-            <button
-              type="button"
-              onClick={() => onEdit(listing)}
-              className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 shadow"
-              aria-label={shopCopy.editShelfAria}
-            >
-              <Pencil className="h-3.5 w-3.5" style={{ color: GREEN }} />
-            </button>
-          ) : null}
+              {listing.modes.rent ? ` · ${shopCopy.modeRent}` : ""}
+              {freeGiveaway
+                ? ` · ${shopCopy.modeFree}`
+                : listing.modes.sell
+                  ? ` · ${shopCopy.modeSell}`
+                  : ""}
+            </p>
+          </button>
+          <div className="mt-auto pt-2">
+            {hostManage && onEdit ? (
+              <button
+                type="button"
+                onClick={() => onEdit(listing)}
+                className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-[13px] font-bold"
+                style={{ borderColor: GREEN, color: GREEN }}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                {shopCopy.editCta}
+              </button>
+            ) : onOpenListing ? (
+              <button
+                type="button"
+                onClick={() => onOpenListing(listing)}
+                className="inline-flex rounded-xl border px-3 py-2 text-[13px] font-bold"
+                style={{ borderColor: GREEN, color: GREEN }}
+              >
+                {preview ? shopCopy.previewOpenCta : shopCopy.viewCta}
+              </button>
+            ) : null}
+          </div>
         </div>
-        <div className="flex flex-1 flex-col p-2.5">
-          <p className="line-clamp-2 min-h-[2.75rem] text-[15px] font-semibold leading-snug text-gray-900">
-            {title}
-          </p>
-          <p className="mt-1 text-[13px] font-semibold" style={{ color: STATUS_COLORS[shelf.kind] }}>
-            {statusLabel}
-            {listing.modes.rent ? ` · ${shopCopy.modeRent}` : ""}
-            {listing.modes.sell ? ` · ${shopCopy.modeSell}` : ""}
-          </p>
-          {hostManage && onEdit ? (
-            <button
-              type="button"
-              onClick={() => onEdit(listing)}
-              className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl border py-2.5 text-[14px] font-bold"
-              style={{ borderColor: GREEN, color: GREEN }}
-            >
-              <Pencil className="h-4 w-4" />
-              {shopCopy.editCta}
-            </button>
-          ) : null}
-        </div>
+        <button
+          type="button"
+          onClick={() => onOpenListing?.(listing)}
+          className="shrink-0 p-2 pl-0"
+          aria-label={title}
+        >
+          <CoverThumb
+            url={url}
+            unavailable={unavailable}
+            statusLabel={statusLabel}
+            statusColor={STATUS_COLORS[shelf.kind]}
+          />
+        </button>
       </article>
     );
   }
@@ -178,94 +226,24 @@ export function GarageShopItemCard({
   if (!offer) return null;
 
   return (
-    <article
-      className={`garage-shop-card flex flex-col overflow-hidden rounded-2xl border ${
-        unavailable ? "bg-gray-50" : "bg-white"
-      }`}
-      style={{ borderColor: BORDER }}
-    >
-      <div className="relative aspect-square w-full bg-[#F3F4F6]">
-        {url ? (
-          <img
-            src={url}
-            alt=""
-            className={`h-full w-full object-cover ${unavailable ? "grayscale" : ""}`}
-            draggable={false}
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-3xl text-gray-300">📷</div>
-        )}
-        <span
-          className="absolute left-2 top-2 rounded-full px-2 py-1 text-[11px] font-bold uppercase text-white"
-          style={{ backgroundColor: STATUS_COLORS[shelf.kind] }}
-        >
-          {statusLabel}
-        </span>
-        {shelf.kind === "available" && multiAuction && auctionPending ? (
-          <span className="absolute left-2 top-10 rounded-full bg-gray-600 px-2 py-1 text-[11px] font-bold uppercase text-white">
-            {shopCopy.badgeSoon}
-          </span>
-        ) : null}
-        {shelf.kind === "available" && multiAuction && auctionLive ? (
-          <span
-            className="absolute left-2 top-10 rounded-full px-2 py-1 text-[11px] font-bold uppercase text-white"
-            style={{ backgroundColor: BLUE }}
-          >
-            {shopCopy.badgeBid}
-          </span>
-        ) : null}
-        {shelf.kind === "available" && offer.interestedCount === 1 && !multiAuction ? (
-          <span
-            className="absolute left-2 top-10 rounded-full px-2 py-1 text-[11px] font-bold uppercase text-white"
-            style={{ backgroundColor: AMBER, color: GREEN }}
-          >
-            {shopCopy.badgeOffer}
-          </span>
-        ) : null}
-        {shelf.kind === "available" && offer.interestedCount >= 2 && !multiAuction ? (
-          <span className="absolute left-2 top-10 rounded-full bg-orange-600 px-2 py-1 text-[11px] font-bold uppercase text-white">
-            {offer.interestedCount} {offerCopy.interestedLabel}
-          </span>
-        ) : null}
-        {isLeading && auctionLive && shelf.kind === "available" ? (
-          <span
-            className="absolute right-2 top-2 rounded-full px-2 py-1 text-[11px] font-bold text-white"
-            style={{ backgroundColor: GREEN }}
-          >
-            {shopCopy.badgeLeading}
-          </span>
-        ) : null}
-        {unavailable ? (
-          <span className="pointer-events-none absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/50 to-transparent pb-3 text-[12px] font-bold uppercase tracking-wide text-white">
-            {statusLabel}
-          </span>
-        ) : null}
-        {hostManage && onEdit ? (
-          <button
-            type="button"
-            onClick={() => onEdit(listing)}
-            className="absolute right-2 bottom-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 shadow"
-            aria-label={shopCopy.editShelfAria}
-          >
-            <Pencil className="h-3.5 w-3.5" style={{ color: GREEN }} />
-          </button>
-        ) : null}
-      </div>
-
-      <div className="flex flex-1 flex-col p-2.5">
-        <p className="line-clamp-2 min-h-[2.75rem] text-[15px] font-semibold leading-snug text-gray-900">
-          {title}
-        </p>
+    <article className={shellClass} style={{ borderColor: BORDER }}>
+      <div className="flex min-w-0 flex-1 flex-col p-3 pr-2">
+        <button type="button" onClick={() => onOpenListing?.(listing)} className="min-w-0 text-left">
+          <p className="line-clamp-2 text-[15px] font-semibold leading-snug text-gray-900">{title}</p>
+          {categoryLabel ? (
+            <p className="mt-0.5 truncate text-[11px] font-medium text-gray-500">{categoryLabel}</p>
+          ) : null}
+        </button>
 
         <div className="mt-1.5">
           {showAuction ? (
-            <div className="text-[13px] text-gray-600">
+            <div className="text-[12px] text-gray-600">
               <span className="font-semibold text-gray-800">{formatShopUsd(currentBidUsd)}</span>
               <span className="mx-1">·</span>
               <span>{formatAuctionEnds(offer.startsAt, offer.endsAt)}</span>
             </div>
           ) : offer.interestedCount > 0 ? (
-            <p className="text-[13px] font-medium text-amber-800">
+            <p className="text-[12px] font-medium text-amber-800">
               {offer.interestedCount} {offerCopy.interestedLabel}
               {offer.interestedCount >= 2 ? ` · ${offerCopy.auctionAuto}` : ""}
             </p>
@@ -275,17 +253,27 @@ export function GarageShopItemCard({
           </p>
         </div>
 
-        <div className="mt-auto flex flex-col gap-1.5 pt-2.5">
-          {!hostManage && showAuction && auctionLive ? (
+        <div className="mt-auto flex flex-wrap gap-1.5 pt-2">
+          {preview && onOpenListing ? (
             <button
               type="button"
-              disabled={preview || unavailable}
+              onClick={() => onOpenListing(listing)}
+              className="inline-flex rounded-xl border px-3 py-2 text-[13px] font-bold"
+              style={{ borderColor: GREEN, color: GREEN }}
+            >
+              {shopCopy.previewOpenCta}
+            </button>
+          ) : null}
+          {!hostManage && !preview && canPlaceBid ? (
+            <button
+              type="button"
+              disabled={unavailable}
               onClick={() => onBid(listing, offer)}
-              className="flex w-full items-center justify-center gap-1 rounded-xl border py-2.5 text-[14px] font-bold disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-[13px] font-bold disabled:opacity-50"
               style={{ borderColor: BLUE, color: BLUE }}
             >
-              <Gavel className="h-4 w-4" aria-hidden />
-              {shopCopy.bidCta}
+              <Gavel className="h-3.5 w-3.5" aria-hidden />
+              {auctionPending && onOpenSale ? "Cart bid" : shopCopy.bidCta}
             </button>
           ) : null}
 
@@ -294,62 +282,111 @@ export function GarageShopItemCard({
               <button
                 type="button"
                 onClick={() => onViewMyOffer(listing, offer)}
-                className="flex w-full items-center justify-center gap-1 rounded-xl border py-2.5 text-[14px] font-bold"
+                className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-[13px] font-bold"
                 style={{ borderColor: AMBER, color: "#92400E", backgroundColor: `${AMBER}15` }}
               >
-                <Tag className="h-4 w-4" />
+                <Tag className="h-3.5 w-3.5" />
                 {shopCopy.yourOfferLine(formatShopUsd(myOffer.amountUsd))}
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => onMakeOffer(listing, offer)}
-                className="flex w-full items-center justify-center gap-1 rounded-xl border py-2.5 text-[14px] font-bold"
+                className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-[13px] font-bold"
                 style={{ borderColor: GREEN, color: GREEN }}
               >
-                <Tag className="h-4 w-4" />
+                <Tag className="h-3.5 w-3.5" />
                 {offerCopy.makeOffer}
               </button>
             )
           ) : null}
 
-          {!hostManage ? (
+          {!hostManage && !preview && !onOpenSale ? (
             <button
               type="button"
-              disabled={preview || unavailable || (multiAuction && auctionEnded) || (multiAuction && auctionLive)}
+              disabled={unavailable || (multiAuction && auctionEnded) || (multiAuction && auctionLive)}
               onClick={() => onBuyNow(listing, offer)}
-              className="flex w-full items-center justify-center gap-1 rounded-xl py-2.5 text-[14px] font-bold text-white disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-xl px-3 py-2 text-[13px] font-bold text-white disabled:opacity-50"
               style={{ backgroundColor: AMBER, color: GREEN }}
             >
-              <ShoppingBag className="h-4 w-4" aria-hidden />
+              <ShoppingBag className="h-3.5 w-3.5" aria-hidden />
               {unavailable ? statusLabel : shopCopy.buyCta}
             </button>
-          ) : (
-            <div className="flex flex-col gap-1.5">
+          ) : null}
+
+          {hostManage && !preview ? (
+            <>
               <button
                 type="button"
                 onClick={() => onEdit?.(listing)}
-                className="flex w-full items-center justify-center gap-1 rounded-xl border py-2.5 text-[14px] font-bold"
+                className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-[13px] font-bold"
                 style={{ borderColor: GREEN, color: GREEN }}
               >
-                <Pencil className="h-4 w-4" />
+                <Pencil className="h-3.5 w-3.5" />
                 {shopCopy.editCta}
               </button>
               {onShare ? (
                 <button
                   type="button"
                   onClick={() => onShare(listing)}
-                  className="flex w-full items-center justify-center gap-1 rounded-xl border py-2.5 text-[14px] font-bold"
+                  className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-[13px] font-bold"
                   style={{ borderColor: AMBER, color: "#92400E", backgroundColor: `${AMBER}12` }}
                 >
-                  <Share2 className="h-4 w-4" />
+                  <Share2 className="h-3.5 w-3.5" />
                   {shopCopy.shareCta}
                 </button>
               ) : null}
-            </div>
-          )}
+            </>
+          ) : null}
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={() => onOpenListing?.(listing)}
+        className="shrink-0 p-2 pl-0"
+        aria-label={title}
+      >
+        <CoverThumb
+          url={url}
+          unavailable={unavailable}
+          statusLabel={statusLabel}
+          statusColor={STATUS_COLORS[shelf.kind]}
+          badges={
+            <>
+              {shelf.kind === "available" && multiAuction && auctionPending ? (
+                <span className="absolute bottom-1 left-1 rounded-md bg-gray-600 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">
+                  {shopCopy.badgeSoon}
+                </span>
+              ) : null}
+              {shelf.kind === "available" && multiAuction && auctionLive ? (
+                <span
+                  className="absolute bottom-1 left-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase text-white"
+                  style={{ backgroundColor: BLUE }}
+                >
+                  {shopCopy.badgeBid}
+                </span>
+              ) : null}
+              {shelf.kind === "available" && offer.interestedCount === 1 && !multiAuction ? (
+                <span
+                  className="absolute bottom-1 left-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase"
+                  style={{ backgroundColor: AMBER, color: GREEN }}
+                >
+                  {shopCopy.badgeOffer}
+                </span>
+              ) : null}
+              {isLeading && auctionLive && shelf.kind === "available" ? (
+                <span
+                  className="absolute right-1 top-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold text-white"
+                  style={{ backgroundColor: GREEN }}
+                >
+                  {shopCopy.badgeLeading}
+                </span>
+              ) : null}
+            </>
+          }
+        />
+      </button>
     </article>
   );
 }

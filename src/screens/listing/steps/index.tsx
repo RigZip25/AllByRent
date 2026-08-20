@@ -1,3 +1,4 @@
+export { StepCategories } from "./StepCategories";
 export { Step1Photos } from "./Step1Photos";
 export { Step2ItemInfo } from "./Step2ItemInfo";
 export { Step2Details } from "./Step2Details";

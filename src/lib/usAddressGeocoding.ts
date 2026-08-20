@@ -86,9 +86,10 @@ export function formatUsAddressLines(parts: {
 
   return {
     label,
-    primaryLine: street || city,
+    primaryLine: street || city || primaryLine,
     secondaryLine,
-    city: city || primaryLine,
+    // Keep city as locality only — never fall back to state abbr / street.
+    city,
     region: state,
   };
 }

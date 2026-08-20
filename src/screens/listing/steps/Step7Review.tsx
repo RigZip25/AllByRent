@@ -3,8 +3,11 @@ import { MapPin } from "lucide-react";
 import { RentanoHint } from "../../../components/RentanoHint";
 import { ListingFeedCard, offerTypeFromModes } from "../../../app/components/ListingFeedCard";
 import type { Step7ReviewProps } from "../types";
+import { LISTING_STEP } from "../types";
 import { localizeCategoryLabel } from "../../../lib/i18n/categoryLabels";
 import { useMessages } from "../../../lib/i18n/react";
+import { formatDistanceFromMiles, formatWeightFromLbs } from "../../../lib/regionalDisplay";
+import { isPlantListingSubcategory } from "../categorySpecs";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F0B429";
@@ -59,7 +62,9 @@ export function Step7Review({
   const itemInfo = t.listing.itemInfo;
 
   const conditionLabel =
-    draft.condition === "new"
+    isPlantListingSubcategory(draft.subcategory)
+      ? null
+      : draft.condition === "new"
       ? itemInfo.conditionNew
       : draft.condition === "like_new"
         ? itemInfo.conditionLikeNew
@@ -68,7 +73,8 @@ export function Step7Review({
           : draft.condition === "fair"
             ? itemInfo.conditionFair
             : null;
-  const conditionClassName = draft.condition
+  const conditionClassName =
+    !isPlantListingSubcategory(draft.subcategory) && draft.condition
     ? CONDITION_STYLE_CLASSES[draft.condition]
     : null;
 
@@ -78,6 +84,14 @@ export function Step7Review({
       : draft.grade === "personal"
         ? itemInfo.personal
         : null;
+
+  // Show subcategory + grade when both are set.
+  const categoryDetail = [
+    draft.subcategory ? localizeCategoryLabel(draft.subcategory) : null,
+    gradeLabel,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   const handoffSummary = (() => {
     const parts: string[] = [];
@@ -90,12 +104,12 @@ export function Step7Review({
       const weight =
         typeof draft.handoff.itemWeightLbs === "number" &&
         draft.handoff.itemWeightLbs > 0
-          ? ` · ${draft.handoff.itemWeightLbs} lbs`
+          ? ` · ${formatWeightFromLbs(draft.handoff.itemWeightLbs)}`
           : "";
       parts.push(
         fee
-          ? review.handoffDelivery(miles, fee, weight)
-          : review.handoffDeliveryNoFee(miles, weight),
+          ? review.handoffDelivery(formatDistanceFromMiles(miles, undefined, { plus: false }), fee, weight)
+          : review.handoffDeliveryNoFee(formatDistanceFromMiles(miles, undefined, { plus: false }), weight),
       );
     }
     return parts.length > 0 ? parts.join(" · ") : review.handoffNotSet;
@@ -146,11 +160,11 @@ export function Step7Review({
       <div className="overflow-hidden rounded-2xl bg-white shadow-md">
         <button
           type="button"
-          onClick={() => onGoToStep(1)}
+          onClick={() => onGoToStep(LISTING_STEP.photos)}
           className="relative block w-full text-left"
         >
           <span className="absolute right-3 top-3 z-10">
-            <EditLink label={t.common.edit} onClick={() => onGoToStep(1)} />
+            <EditLink label={t.common.edit} onClick={() => onGoToStep(LISTING_STEP.photos)} />
           </span>
           <div className="p-3">
             <ListingFeedCard
@@ -162,7 +176,7 @@ export function Step7Review({
               cover={draft.photos?.[0] ?? null}
               offerType={previewOfferType}
               itemHeavy={draft.handoff.itemHeavy}
-              onSelect={() => onGoToStep(1)}
+              onSelect={() => onGoToStep(LISTING_STEP.photos)}
               showFavoriteAction={false}
             />
           </div>
@@ -171,49 +185,57 @@ export function Step7Review({
         <div className="p-4">
           <button
             type="button"
-            onClick={() => onGoToStep(2)}
+            onClick={() => onGoToStep(LISTING_STEP.details)}
             className="w-full text-left"
           >
             <div className="mb-1 flex items-start justify-between gap-2">
               <h3 className="flex-1 text-lg font-bold text-gray-900">
                 {previewTitle}
               </h3>
-              <EditLink label={t.common.edit} onClick={() => onGoToStep(2)} />
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {draft.category ? (
-                <span
-                  className="rounded-full px-2.5 py-0.5 text-xs font-semibold text-white"
-                  style={{ backgroundColor: GREEN }}
-                >
-                  {localizeCategoryLabel(draft.category)}
-                </span>
-              ) : null}
-              {gradeLabel ? (
-                <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600">
-                  {gradeLabel}
-                </span>
-              ) : null}
-              {conditionLabel && conditionClassName ? (
-                <span
-                  className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${conditionClassName}`}
-                >
-                  {conditionLabel}
-                </span>
-              ) : null}
+              <EditLink label={t.common.edit} onClick={() => onGoToStep(LISTING_STEP.details)} />
             </div>
           </button>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {draft.category ? (
+              <button
+                type="button"
+                onClick={() => onGoToStep(LISTING_STEP.category)}
+                className="rounded-full px-2.5 py-0.5 text-xs font-semibold text-white"
+                style={{ backgroundColor: GREEN }}
+              >
+                {localizeCategoryLabel(draft.category)}
+              </button>
+            ) : null}
+            {categoryDetail ? (
+              <button
+                type="button"
+                onClick={() => onGoToStep(LISTING_STEP.category)}
+                className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600"
+              >
+                {categoryDetail}
+              </button>
+            ) : null}
+            {conditionLabel && conditionClassName ? (
+              <button
+                type="button"
+                onClick={() => onGoToStep(LISTING_STEP.details)}
+                className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${conditionClassName}`}
+              >
+                {conditionLabel}
+              </button>
+            ) : null}
+          </div>
 
           <button
             type="button"
-            onClick={() => onGoToStep(2)}
+            onClick={() => onGoToStep(LISTING_STEP.details)}
             className="mt-4 w-full border-t border-gray-100 pt-4 text-left"
           >
             <div className="mb-2 flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
                 {review.modes}
               </p>
-              <EditLink label={t.common.edit} onClick={() => onGoToStep(2)} />
+              <EditLink label={t.common.edit} onClick={() => onGoToStep(LISTING_STEP.details)} />
             </div>
             <ul className="space-y-2">
               {modeRows.map((row) => (

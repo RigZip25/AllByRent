@@ -152,10 +152,9 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     ...destination,
   });
 
-  const { error: orderError } = await admin.from("garage_orders").insert({
+  const orderRow: Record<string, unknown> = {
     id: orderId,
     buyer_id: buyerId,
-    guest_email: buyerId ? null : guestEmail,
     host_id: hostId,
     stripe_payment_intent_id: paymentIntent.id,
     stripe_payment_status: paymentIntent.status,
@@ -163,10 +162,24 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     platform_fee_cents: platformFeeCents,
     total_cents: amountCents,
     status: "pending",
-  });
+  };
+  // Only set guest_email for guest checkout (column added in migration 030).
+  if (!buyerId && guestEmail) {
+    orderRow.guest_email = guestEmail;
+  }
+
+  const { error: orderError } = await admin.from("garage_orders").insert(orderRow);
 
   if (orderError) {
-    res.status(500).json({ error: "Failed to create garage order" });
+    console.error("[garage_checkout] garage_orders insert", orderError.message, orderError.code);
+    const missingGuestCol =
+      /guest_email/i.test(orderError.message) || orderError.code === "PGRST204";
+    res.status(500).json({
+      error: missingGuestCol
+        ? "Garage checkout needs a DB update (guest_email). Run migration 030_garage_guest_checkout.sql, then retry."
+        : "Failed to create garage order",
+      detail: orderError.message.slice(0, 200),
+    });
     return;
   }
 

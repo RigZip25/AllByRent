@@ -7,6 +7,7 @@ import {
   HelpCircle,
   LogOut,
   MapPin,
+  Settings,
   Shield,
   Sparkles,
   Star,
@@ -17,6 +18,7 @@ import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { ProfilePhotoCapture } from "../components/profile/ProfilePhotoCapture";
 import { ProfilePhotoOnboarding } from "../components/profile/ProfilePhotoOnboarding";
 import { ProfileTrustBadges } from "../components/profile/ProfileTrustBadges";
+import { ConnectSetupError } from "../components/payments/ConnectSetupError";
 import { getHostResponseDisplay } from "../lib/hostResponseRate";
 import {
   hasAvatarPhoto,
@@ -27,10 +29,11 @@ import {
 import { getAppMode, type AppMode } from "../lib/appMode";
 import {
   getProfileDisplayLabel,
-  getProfileEmailLabel,
   getProfileLocationSummary,
+  applyReviewStatsToProfile,
   loadUserProfile,
   refreshProfileStats,
+  saveUserProfile,
   setProfileAvatarUrl,
   syncUserProfileFromAuth,
   updateProfileFields,
@@ -153,7 +156,6 @@ export function ProfileScreen({
   onOpenPersonalInfo,
   onOpenIdentity,
   onOpenAgentActivity: _onOpenAgentActivity,
-  onDeleteAccount,
   onViewPublicProfile,
   onRequireAuth,
   onPreferredModeChange,
@@ -166,7 +168,6 @@ export function ProfileScreen({
   onOpenPersonalInfo?: (field?: "name" | "phone") => void;
   onOpenIdentity?: () => void;
   onOpenAgentActivity?: () => void;
-  onDeleteAccount?: () => void;
   onViewPublicProfile?: (userId?: string) => void;
   onRequireAuth?: () => void;
   onPreferredModeChange?: (mode: AppMode) => void;
@@ -189,11 +190,11 @@ export function ProfileScreen({
   });
   const [connectBusy, setConnectBusy] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
+  const [connectErrorCode, setConnectErrorCode] = useState<string | null>(null);
   const [publicProfileError, setPublicProfileError] = useState<string | null>(null);
   const authPromptedRef = useRef(false);
 
   const displayNameLabel = getProfileDisplayLabel(profile.displayName);
-  const emailLabel = getProfileEmailLabel(profile.email, auth.userEmail);
 
   useEffect(() => {
     if (!auth.userId) return;
@@ -265,7 +266,18 @@ export function ProfileScreen({
     let mounted = true;
     void fetchReviewsForUserRemote(auth.userId).then((rows) => {
       if (!mounted) return;
-      setRecentReviews(rows.slice(0, 3).map((r) => ({ rating: r.rating, comment: r.comment, createdAt: r.createdAt })));
+      setRecentReviews(
+        rows.slice(0, 3).map((r) => ({
+          rating: r.rating,
+          comment: r.comment,
+          createdAt: r.createdAt,
+        })),
+      );
+      setProfile((prev) => {
+        const next = applyReviewStatsToProfile(prev, rows);
+        saveUserProfile(next);
+        return next;
+      });
     });
     return () => {
       mounted = false;
@@ -275,7 +287,13 @@ export function ProfileScreen({
   const hasPhoto = hasAvatarPhoto((auth.userId ?? profile.id).trim() || profile.id);
   const showOnboarding = !hasPhoto && !isPhotoPromptDeferred();
 
-  const responseDisplay = getHostResponseDisplay(profile.id, profile.host.usesManualBooking);
+  const responseKind = getHostResponseDisplay(profile.id, profile.host.usesManualBooking);
+  const responseLabel =
+    responseKind.kind === "rate"
+      ? `${responseKind.percent}%`
+      : responseKind.kind === "new_host"
+        ? profileCopy.newHost
+        : profileCopy.responseNotTracked;
 
   const memberYear = useMemo(() => {
     try {
@@ -455,11 +473,13 @@ export function ProfileScreen({
             label={profileCopy.asHost}
             value={
               profile.host.listingsCount > 0
-                ? `${profile.host.rating}★ · ${profileCopy.listingsCount(profile.host.listingsCount)}`
+                ? profile.host.reviewCount > 0 && profile.host.rating > 0
+                  ? `${profile.host.rating}★ · ${profileCopy.listingsCount(profile.host.listingsCount)}`
+                  : profileCopy.listingsCount(profile.host.listingsCount)
                 : profileCopy.noListingsYet
             }
           />
-          <StatTile label={profileCopy.response} value={responseDisplay.label} />
+          <StatTile label={profileCopy.response} value={responseLabel} />
         </div>
 
         <SectionTitle>{profileCopy.account}</SectionTitle>
@@ -480,20 +500,28 @@ export function ProfileScreen({
               onClick={handleEditName}
             />
           </li>
+          {onOpenPersonalInfo ? (
+            <li>
+              <RowButton
+                icon={<Settings className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+                label={profileCopy.settings}
+                value={profileCopy.settingsHint}
+                onClick={() => onOpenPersonalInfo()}
+              />
+            </li>
+          ) : null}
           <li>
             <RowButton
               icon={<Sparkles className="h-5 w-5" style={{ color: "#F59E0B" }} />}
               label={profileCopy.phone}
-              value={profile.phone?.trim() ? formatUsPhoneDisplay(profile.phone) : profileCopy.addPhone}
+              value={
+                profile.phone?.trim()
+                  ? `${formatUsPhoneDisplay(profile.phone)}${
+                      profile.verification.phone ? ` · ${profileCopy.phoneVerifiedShort}` : ` · ${profileCopy.phoneVerifyNeeded}`
+                    }`
+                  : profileCopy.addPhone
+              }
               onClick={handleEditPhone}
-            />
-          </li>
-          <li>
-            <RowButton
-              icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label={profileCopy.personalInfo}
-              value={emailLabel}
-              onClick={() => onOpenPersonalInfo?.()}
             />
           </li>
           {onOpenCoHosts ? (
@@ -526,10 +554,16 @@ export function ProfileScreen({
               onClick={() => {
                 setConnectBusy(true);
                 setConnectError(null);
+                setConnectErrorCode(null);
                 void startConnectOnboarding("/?screen=profile")
                   .then((result) => {
                     if (!result.ok) {
-                      setConnectError(result.reason);
+                      setConnectError(
+                        result.code === "phone_unverified"
+                          ? profileCopy.phoneVerifyNeeded
+                          : result.reason,
+                      );
+                      setConnectErrorCode(result.code ?? null);
                       return;
                     }
                     window.location.href = result.url;
@@ -539,8 +573,8 @@ export function ProfileScreen({
             />
           </li>
           {connectError ? (
-            <li className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[12px] text-red-800">
-              {connectError}
+            <li className="list-none">
+              <ConnectSetupError message={connectError} code={connectErrorCode} />
             </li>
           ) : null}
         </ul>
@@ -687,26 +721,23 @@ export function ProfileScreen({
           </button>
         )}
 
-        {auth.configured ? (
+        {auth.configured && auth.session ? (
           <div className="mt-3 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
             <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
               {profileCopy.authSection}
             </p>
             <p className="mt-1 text-[13px] text-gray-600">
-              {auth.session
-                ? profileCopy.signedInAs(
-                    auth.userEmail ?? auth.userId ?? profileCopy.userFallback,
-                  )
-                : profileCopy.notSignedIn}
+              {profileCopy.signedInAs(
+                auth.userEmail ?? auth.userId ?? profileCopy.userFallback,
+              )}
             </p>
-            <button
-              type="button"
-              onClick={onDeleteAccount}
-              className="mt-3 w-full min-h-[44px] touch-manipulation rounded-xl border py-2 text-center text-[13px] font-semibold text-red-600/80 active:text-red-700"
-              style={{ borderColor: BORDER }}
-            >
-              {profileCopy.deleteAccount}
-            </button>
+          </div>
+        ) : auth.configured ? (
+          <div className="mt-3 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+              {profileCopy.authSection}
+            </p>
+            <p className="mt-1 text-[13px] text-gray-600">{profileCopy.notSignedIn}</p>
           </div>
         ) : null}
 

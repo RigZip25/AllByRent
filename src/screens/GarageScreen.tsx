@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { Eye, Share2, Store } from "lucide-react";
+import { ArrowLeft, Eye, Share2, Store } from "lucide-react";
 import { HostDashboard } from "../app/components/HostDashboard";
+import { HostGarageListSection, type HostGarageListMode } from "../app/components/HostGarageListSection";
 import { RoleModeSwitcher } from "../components/RoleModeSwitcher";
 import { GarageLookEditor } from "../components/GarageLookEditor";
 import { useAuth } from "../hooks/AuthProvider";
@@ -12,8 +13,10 @@ import { garageSaleOpenLabel, getGarageSaleSchedule } from "../lib/garageSaleSto
 import { useMessages } from "../lib/i18n/react";
 
 const GREEN_DARK = "#0D5C3A";
+const BORDER = "#E8E6E0";
 
 type GarageScreenProps = {
+  onBack?: () => void;
   onNavigate: (screen: string) => void;
   onStockGarage: () => void;
   onResumeDraft?: (listingId: string) => void;
@@ -21,10 +24,12 @@ type GarageScreenProps = {
   onPreviewAsNeighbor?: () => void;
   onViewProfile?: (userId: string) => void;
   onOpenRental?: (bookingId: string) => void;
+  onOpenEarnings?: () => void;
   onRoleModeChange: (mode: AppMode) => void;
 };
 
 export function GarageScreen({
+  onBack,
   onNavigate,
   onStockGarage,
   onResumeDraft,
@@ -32,12 +37,14 @@ export function GarageScreen({
   onPreviewAsNeighbor,
   onViewProfile,
   onOpenRental,
+  onOpenEarnings,
   onRoleModeChange,
 }: GarageScreenProps) {
   const auth = useAuth();
   const t = useMessages();
   const [shareOpen, setShareOpen] = useState(false);
   const [lookOpen, setLookOpen] = useState(false);
+  const [listMode, setListMode] = useState<HostGarageListMode | null>(null);
   const hostId = resolveHostAccountId(auth.userId);
 
   const sharePayload = useMemo(
@@ -49,47 +56,86 @@ export function GarageScreen({
     [hostId],
   );
 
+  const openHostListing = (listingId: string) => onNavigate(`hostListingDetail:${listingId}`);
+
+  if (listMode) {
+    return (
+      <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
+        <div className="screen-scroll flex-1 px-4 pb-8 pt-3">
+          <HostGarageListSection
+            mode={listMode}
+            onBack={() => setListMode(null)}
+            onOpenListing={openHostListing}
+            onResumeDraft={onResumeDraft}
+            onListItem={onStockGarage}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
-      <div className="shrink-0 px-4 pb-2 pt-3">
-        <div className="mb-2.5 flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h1 className="text-[22px] font-extrabold" style={{ color: GREEN_DARK }}>
-              {t.garage.title}
-            </h1>
-            <p className="text-[13px] text-gray-500">{t.garage.subtitle}</p>
-          </div>
-          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={onViewShop}
-              className="flex items-center gap-1.5 rounded-xl border bg-white px-3 py-2 text-[13px] font-semibold"
-              style={{ borderColor: "#E8E6E0", color: GREEN_DARK }}
-            >
-              <Store className="h-4 w-4" />
-              {t.garageUi.shop}
-            </button>
-            {onPreviewAsNeighbor ? (
+      <div className="screen-scroll flex-1 px-4 pb-8 pt-3">
+        <div className="mb-3">
+          {onBack ? (
+            <div className="mb-1 flex items-center gap-2">
               <button
                 type="button"
-                onClick={onPreviewAsNeighbor}
-                className="flex items-center gap-1.5 rounded-xl border bg-white px-3 py-2 text-[13px] font-semibold text-gray-700"
-                style={{ borderColor: "#E8E6E0" }}
+                onClick={onBack}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors active:bg-white/80"
+                aria-label={t.common.back}
               >
-                <Eye className="h-4 w-4" />
-                {t.garageUi.previewNeighbor}
+                <ArrowLeft className="h-5 w-5" style={{ color: GREEN_DARK }} />
               </button>
-            ) : null}
+              <h1
+                className="text-[22px] font-extrabold leading-tight tracking-tight"
+                style={{ color: GREEN_DARK }}
+              >
+                {t.garage.title}
+              </h1>
+            </div>
+          ) : (
+            <h1
+              className="text-[22px] font-extrabold leading-tight tracking-tight"
+              style={{ color: GREEN_DARK }}
+            >
+              {t.garage.title}
+            </h1>
+          )}
+          <p className="mt-0.5 text-[13px] text-gray-500">{t.garage.subtitle}</p>
+        </div>
+
+        <div className="mb-3 flex gap-2">
+          <button
+            type="button"
+            onClick={onViewShop}
+            className="flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border bg-white px-2 py-2 text-[12px] font-semibold"
+            style={{ borderColor: BORDER, color: GREEN_DARK }}
+          >
+            <Store className="h-4 w-4 shrink-0" />
+            <span className="truncate">{t.garageUi.shop}</span>
+          </button>
+          {onPreviewAsNeighbor ? (
             <button
               type="button"
-              onClick={() => setShareOpen((v) => !v)}
-              className="flex items-center gap-1.5 rounded-xl border bg-white px-3 py-2 text-[13px] font-semibold text-gray-700"
-              style={{ borderColor: "#E8E6E0" }}
+              onClick={onPreviewAsNeighbor}
+              className="flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border bg-white px-2 py-2 text-[12px] font-semibold text-gray-700"
+              style={{ borderColor: BORDER }}
             >
-              <Share2 className="h-4 w-4" />
-              {t.garageUi.share}
+              <Eye className="h-4 w-4 shrink-0" />
+              <span className="truncate">{t.garageUi.previewNeighbor}</span>
             </button>
-          </div>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setShareOpen((v) => !v)}
+            className="flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border bg-white px-2 py-2 text-[12px] font-semibold text-gray-700"
+            style={{ borderColor: BORDER }}
+          >
+            <Share2 className="h-4 w-4 shrink-0" />
+            <span className="truncate">{t.garageUi.share}</span>
+          </button>
         </div>
 
         <RoleModeSwitcher active="earn" onChange={onRoleModeChange} />
@@ -98,7 +144,7 @@ export function GarageScreen({
           type="button"
           onClick={() => setLookOpen((v) => !v)}
           className="mt-2.5 w-full rounded-xl border bg-white px-3 py-2 text-left text-[13px] font-semibold"
-          style={{ borderColor: "#E8E6E0", color: GREEN_DARK }}
+          style={{ borderColor: BORDER, color: GREEN_DARK }}
         >
           {lookOpen ? t.garageUi.lookHide : t.garageUi.lookShow}
         </button>
@@ -107,17 +153,13 @@ export function GarageScreen({
             <GarageLookEditor />
           </div>
         ) : null}
-      </div>
 
-      {shareOpen ? (
-        <div className="shrink-0 px-4 pb-3">
-          <div className="rounded-2xl border bg-white p-4" style={{ borderColor: "#E8E6E0" }}>
+        {shareOpen ? (
+          <div className="mt-3 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
             <p className="mb-2 text-[13px] font-semibold text-gray-800">
               {t.garageUi.shareShowcaseTitle}
             </p>
-            <p className="mb-3 text-[12px] text-gray-500">
-              {t.garageUi.shareShowcaseBody}
-            </p>
+            <p className="mb-3 text-[12px] text-gray-500">{t.garageUi.shareShowcaseBody}</p>
             <SocialShareButtons
               payload={sharePayload}
               shareKind="garage"
@@ -125,18 +167,21 @@ export function GarageScreen({
               compact
             />
           </div>
-        </div>
-      ) : null}
+        ) : null}
 
-      <div className="min-h-0 flex-1 overflow-hidden px-4">
-        <HostDashboard
-          onListItem={onStockGarage}
-          onOpenListing={(listingId) => onNavigate(`hostListingDetail:${listingId}`)}
-          onResumeDraft={onResumeDraft}
-          onShareGarage={() => setShareOpen(true)}
-          onViewProfile={onViewProfile}
-          onOpenRental={onOpenRental}
-        />
+        <div className="mt-4">
+          <HostDashboard
+            onListItem={onStockGarage}
+            onOpenListing={openHostListing}
+            onResumeDraft={onResumeDraft}
+            onShareGarage={() => setShareOpen(true)}
+            onViewProfile={onViewProfile}
+            onOpenRental={onOpenRental}
+            onOpenLive={() => setListMode("live")}
+            onOpenDrafts={() => setListMode("drafts")}
+            onOpenEarnings={onOpenEarnings}
+          />
+        </div>
       </div>
     </div>
   );

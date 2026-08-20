@@ -6,6 +6,7 @@ import {
   ClipboardList,
   Heart,
   HelpCircle,
+  Mail,
   MessageCircle,
   MessageSquareWarning,
   TrendingUp,
@@ -14,7 +15,7 @@ import {
 } from "lucide-react";
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { useAuth } from "../hooks/AuthProvider";
-import { MASCOT_NAME, APP_NAME } from "../lib/brand";
+import { MASCOT_NAME, APP_NAME, SUPPORT_EMAIL } from "../lib/brand";
 import { useMessages } from "../lib/i18n/react";
 import { loadUserProfile, refreshProfileStats, getProfileDisplayLabel } from "../lib/userProfileStorage";
 
@@ -98,6 +99,11 @@ export function MoreScreen({
   useEffect(() => {
     setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
   }, [auth.userId, auth.userEmail]);
+
+  const openSupportEmail = () => {
+    const subject = encodeURIComponent(`${APP_NAME} support`);
+    window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${subject}`;
+  };
 
   const displayNameLabel = getProfileDisplayLabel(profile.displayName);
 
@@ -201,6 +207,14 @@ export function MoreScreen({
               label={t.more.chatWith(MASCOT_NAME)}
               hint={t.more.chatWithHint}
               onClick={onMrE}
+            />
+          </li>
+          <li>
+            <MenuRow
+              icon={<Mail className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+              label={t.more.contactSupport}
+              hint={t.more.contactSupportHint}
+              onClick={openSupportEmail}
             />
           </li>
           {onFeedback ? (
