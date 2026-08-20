@@ -445,6 +445,12 @@ export function Step2ItemInfo({
                 subcategory={draft.subcategory}
                 defaultExpanded
               />
+            ) : draft.category.trim() === "Unique & Other" ? (
+              <CategoryFactCard
+                category="Unique & Other"
+                subcategory={draft.subcategory}
+                defaultExpanded
+              />
             ) : draft.category.trim() === "Party & Events" ? (
               <CategoryFactCard
                 category="Party & Events"
@@ -768,6 +774,7 @@ export function Step2ItemInfo({
           draft.category.trim() === "Home & Kitchen" ||
           draft.category.trim() === "Tools & DIY" ||
           draft.category.trim() === "Costume & Cosplay" ||
+          draft.category.trim() === "Unique & Other" ||
           draft.category.trim() === "Electronics & Tech") ? (
           <div className="mb-4">
             <CategoryFactCard
@@ -783,7 +790,8 @@ export function Step2ItemInfo({
                 draft.category.trim() === "Music & Audio" ||
                 draft.category.trim() === "Office & Business" ||
                 draft.category.trim() === "Sports & Recreation" ||
-                draft.category.trim() === "Tools & DIY"
+                draft.category.trim() === "Tools & DIY" ||
+                draft.category.trim() === "Unique & Other"
                   ? draft.subcategory
                   : undefined
               }

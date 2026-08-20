@@ -1733,6 +1733,12 @@ function BookingScreenLoaded({
         {isCostumeListing ? (
           <CategoryFactCard category="Costume & Cosplay" subcategory={listing.subcategory} />
         ) : null}
+        {listing.category.trim() === "Unique & Other" && listing.modes.rent ? (
+          <CategoryFactCard
+            category="Unique & Other"
+            subcategory={listing.subcategory}
+          />
+        ) : null}
         {isOfficeListing ? (
           <CategoryFactCard
             category="Office & Business"

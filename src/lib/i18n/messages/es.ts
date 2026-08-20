@@ -2575,6 +2575,18 @@ export const es: AppMessages = {
         laserMeasureClass: { label: "Clase de medición láser" },
         powerSawClass: { label: "Clase de sierra" },
         toolsOtherKind: { label: "Qué tipo de artículo", hint: "Reubica a un estante Tools con nombre cuando quepa." },
+        uniqueFragilityBand: { label: "Fragilidad / manejo", hint: "Frágil de exhibición vs uso robusto vs mixto." },
+        collectibleAuthenticity: { label: "Estado de autenticidad" },
+        artMediumBand: { label: "Medio artístico" },
+        hobbyEquipmentClass: { label: "Clase de hobby" },
+        unusualItemClass: { label: "Clase de artículo inusual" },
+        seasonalItemClass: { label: "Clase estacional" },
+        specialtyEquipmentClass: { label: "Clase de equipo especial" },
+        industrialOddityClass: { label: "Clase de rareza industrial" },
+        proPropClass: { label: "Clase de utilería" },
+        rareInstrumentClass: { label: "Clase de instrumento" },
+        customBuildClass: { label: "Clase de custom build" },
+        uniqueOtherKind: { label: "Qué tipo de artículo", hint: "Reubica a un estante Unique con nombre cuando quepa." },
 },
       options: {
         cordless: "Inalámbrico / batería",
@@ -4578,6 +4590,12 @@ export const es: AppMessages = {
         sports_timing_photo: "Photo finish",
         sports_wake: "Wake / remolque",
         sports_water_other: "Otro acuático",
+        unique_auth_unknown: "Autenticidad desconocida",
+        unique_kind_art: "Arte",
+        unique_kind_custom: "Custom",
+        unique_kind_hobby: "Hobby",
+        unique_kind_mixed: "Mix unique",
+        unique_kind_prop: "Prop",
         xlr_and_clip: "XLR + clip",
 
         // Office & Business ~8.0 options
@@ -4864,6 +4882,50 @@ export const es: AppMessages = {
         tools_saw_other: "Otra sierra",
         tools_saw_recip: "Sierra sable",
         tools_saw_table: "Sierra de mesa",
+
+        // Unique & Other ~8.0 options
+        unique_art_canvas: "Lienzo / 2D",
+        unique_art_mixed: "Medios mixtos",
+        unique_art_other: "Otro arte",
+        unique_art_sculpture: "Escultura / 3D",
+        unique_auth_documented: "Autenticidad documentada",
+        unique_custom_art_object: "Objeto de arte custom",
+        unique_custom_device: "Dispositivo custom",
+        unique_custom_furniture: "Mueble custom",
+        unique_custom_other: "Otro custom build",
+        unique_fragile_display: "Frágil — exhibición / cuidado",
+        unique_hobby_maker: "Maker / craft",
+        unique_hobby_optics: "Óptica",
+        unique_hobby_other: "Otro hobby",
+        unique_hobby_tabletop: "Mesa / juegos",
+        unique_instr_keyboard: "Teclado",
+        unique_instr_other: "Otro instrumento raro",
+        unique_instr_string: "Instrumento de cuerda",
+        unique_instr_wind: "Instrumento de viento",
+        unique_kind_collectible: "Relacionado con coleccionable",
+        unique_kind_seasonal: "Relacionado con estacional",
+        unique_kind_specialty: "Relacionado con specialty",
+        unique_kind_unusual: "Relacionado con inusual",
+        unique_mixed_care: "Cuidado mixto",
+        unique_oddity_fixture: "Rareza de fixture",
+        unique_oddity_machine: "Rareza de máquina",
+        unique_oddity_other: "Otra rareza industrial",
+        unique_prop_film: "Utilería film / video",
+        unique_prop_other: "Otra utilería",
+        unique_prop_photo: "Utilería foto",
+        unique_prop_stage: "Utilería de escenario",
+        unique_replica_ok: "Réplica / decorativo ok",
+        unique_rugged_use: "Robusto — uso normal ok",
+        unique_season_event: "Evento estacional",
+        unique_season_holiday: "Decoración festiva",
+        unique_season_other: "Otro estacional",
+        unique_season_weather: "Temporada / clima",
+        unique_specialty_lab: "Lab / test specialty",
+        unique_specialty_other: "Otra specialty",
+        unique_specialty_trade: "Trade specialty",
+        unique_unusual_experience: "Pieza de experiencia",
+        unique_unusual_mixed: "Inusual mixto",
+        unique_unusual_novelty: "Novedad",
 },
     },
     modes: {
@@ -6063,6 +6125,32 @@ export const es: AppMessages = {
             },
           ],
         },
+      "Unique & Other": {
+          title: "Unique & other FAQ",
+          summary: "Respuestas cortas para one-off, fragilidad y depósito — sin promo de seguro specialty.",
+          qa: [
+            {
+              q: "¿Qué es siempre obligatorio?",
+              a: "Use case, tamaño de transporte y banda de fragilidad en alquileres Unique.",
+            },
+            {
+              q: "¿Cuándo hace falta checklist?",
+              a: "Hobby, Specialty, Props, Custom y Other congelan inventario.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Daño y piezas faltantes — no seguro de colección, arte o instrumento.",
+            },
+            {
+              q: "¿Debo reubicar?",
+              a: "Sí cuando cabe mejor una categoría con nombre (Music para instrumentos estándar, Party para kits de fiesta).",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de subastas, galerías o seguro specialty.",
+            },
+          ],
+        },
       "Garden & Yard": {
           title: "FAQ de jardín y patio",
           summary: "Respuestas cortas sobre herramientas, plantas, riego y trituradoras de tocones.",
@@ -6226,7 +6314,252 @@ export const es: AppMessages = {
     },
 
     bySubcategory: {
-                  "Tools & DIY": {
+      "Unique & Other": {
+        "Collectibles": {
+          title: "Coleccionables — autenticidad + cuidado",
+          summary: "Autenticidad, use case, transporte y fragilidad.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Autenticidad, use case, tamaño de transporte y fragilidad.",
+            },
+            {
+              q: "¿Es real?",
+              a: "El anfitrión marca documentado, desconocido o réplica ok — no es tasación.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre golpes y soportes faltantes — no seguro de colección.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de casas de subastas.",
+            },
+          ],
+        },
+        "Art & Sculpture": {
+          title: "Arte — medio + cuidado",
+          summary: "Medio, transporte y fragilidad para arte.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Medio, use case, transporte y fragilidad.",
+            },
+            {
+              q: "¿Colgado?",
+              a: "Declara soportes en las notas.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre daño superficial — no seguro de mercado de arte.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de galerías.",
+            },
+          ],
+        },
+        "Hobby Equipment": {
+          title: "Hobby — clase + inventario",
+          summary: "Clase hobby más checklist para sets.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Clase hobby, use case, transporte, fragilidad y checklist.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre piezas faltantes según la lista.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de hobby store.",
+            },
+            {
+              q: "¿Reubicar?",
+              a: "Kits de fiesta pueden ir a Party — Unique es hobby one-off.",
+            },
+          ],
+        },
+        "Unusual Items": {
+          title: "Inusual — clase + cuidado",
+          summary: "Novedades y experiencias congelan la clase.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Clase inusual, use case, transporte y fragilidad.",
+            },
+            {
+              q: "¿Qué tan raro está ok?",
+              a: "Describe uso seguro — sin riesgos ocultos.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre daño y piezas faltantes.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de novelty shop.",
+            },
+          ],
+        },
+        "Seasonal Items": {
+          title: "Estacional — clase + cuidado",
+          summary: "Decoración y gear de temporada congelan la clase.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Clase estacional, use case, transporte y fragilidad.",
+            },
+            {
+              q: "¿Embalaje al devolver?",
+              a: "Declara expectativas de empaque.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre decoración rota y luces faltantes.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de holiday store.",
+            },
+          ],
+        },
+        "Specialty Equipment": {
+          title: "Specialty — clase + inventario",
+          summary: "Lab/trade specialty congela clase y checklist.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Clase specialty, use case, transporte, fragilidad y checklist.",
+            },
+            {
+              q: "¿Entrenamiento?",
+              a: "El anfitrión anota skill del operador.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre módulos faltantes — no seguro de responsabilidad profesional.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de vendors specialty.",
+            },
+          ],
+        },
+        "Industrial Oddities": {
+          title: "Rarezas industriales — clase + cuidado",
+          summary: "Máquinas/fixtures congelan clase y manejo.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Clase de rareza, use case, transporte y fragilidad.",
+            },
+            {
+              q: "¿Energía / instalación?",
+              a: "Declara en las notas.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre daño en tránsito — no seguro de obra.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de surplus dealers.",
+            },
+          ],
+        },
+        "Professional Props": {
+          title: "Utilería — clase + inventario",
+          summary: "Film/escenario/foto congelan clase y checklist.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Clase de utilería, use case, transporte, fragilidad y checklist.",
+            },
+            {
+              q: "¿Reglas en set?",
+              a: "Declara no-food / no-weather.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre rozaduras y piezas faltantes según la lista.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de prop house.",
+            },
+          ],
+        },
+        "Rare Instruments": {
+          title: "Instrumentos raros — clase + cuidado",
+          summary: "Congelan clase; lo estándar va a Music.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Clase de instrumento, use case, transporte y fragilidad.",
+            },
+            {
+              q: "¿Por qué Unique?",
+              a: "Cuando es raro/one-off — guitarras estándar a Music.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre estuche y arcos faltantes — no seguro de instrumento.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de seguro de instrumentos.",
+            },
+          ],
+        },
+        "Custom Builds": {
+          title: "Custom builds — clase + inventario",
+          summary: "Muebles/dispositivos custom congelan clase y checklist.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Clase custom, use case, transporte, fragilidad y checklist.",
+            },
+            {
+              q: "¿Notas del maker?",
+              a: "Declara tolerancias y ensamblaje.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre acabado y hardware faltante.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de maker marketplace.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Unique other — reubica si cabe un estante",
+          summary: "Catch-all publica tipo y checklist.",
+          qa: [
+            {
+              q: "¿Cuándo Other?",
+              a: "Solo si no cabe un estante Unique con nombre.",
+            },
+            {
+              q: "¿Qué puertas?",
+              a: "uniqueOtherKind, use case, transporte, fragilidad y checklist.",
+            },
+            {
+              q: "¿Reubicar?",
+              a: "A Collectibles, Art, Hobby, Unusual, Seasonal, Specialty, Props, Instruments o Custom.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre piezas faltantes según el checklist.",
+            },
+          ],
+        },
+      },
+
+      "Tools & DIY": {
         "Hand Tools": {
           title: "Manuales — clase + set",
           summary: "Dados y llaves congelan clase y single vs set.",
@@ -6471,7 +6804,7 @@ export const es: AppMessages = {
         },
       },
 
-"Sports & Recreation": {
+      "Sports & Recreation": {
         "Snow Sports": {
           title: "Nieve — forma, DIN, casco",
           summary: "Forma de esquí/tabla, banda DIN, casco y waiver antes del alquiler.",
@@ -6716,7 +7049,7 @@ export const es: AppMessages = {
         },
       },
 
-"Photo & Video": {
+      "Photo & Video": {
         "Camera Kits": {
           title: "Camera kits \u2014 sensor, media, kit list",
           summary: "Bodies and kits freeze sensor/mount, media policy, and inventory.",

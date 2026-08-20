@@ -6050,9 +6050,127 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
       {
         key: "transportSize",
         type: "select",
+        required: true,
+        requiredIf: "rent",
+        options: ["pocket", "backpack", "car_trunk", "needs_truck", "needs_crew"],
+      },
+      {
+        key: "uniqueFragilityBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        options: ["unique_fragile_display", "unique_rugged_use", "unique_mixed_care"],
+      },
+      {
+        key: "collectibleAuthenticity",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Collectibles"],
+        options: ["unique_auth_documented", "unique_auth_unknown", "unique_replica_ok"],
+      },
+      {
+        key: "artMediumBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Art & Sculpture"],
+        options: ["unique_art_canvas", "unique_art_sculpture", "unique_art_mixed", "unique_art_other"],
+      },
+      {
+        key: "hobbyEquipmentClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Hobby Equipment"],
+        options: ["unique_hobby_tabletop", "unique_hobby_maker", "unique_hobby_optics", "unique_hobby_other"],
+      },
+      {
+        key: "unusualItemClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Unusual Items"],
+        options: ["unique_unusual_novelty", "unique_unusual_experience", "unique_unusual_mixed"],
+      },
+      {
+        key: "seasonalItemClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Seasonal Items"],
+        options: ["unique_season_holiday", "unique_season_weather", "unique_season_event", "unique_season_other"],
+      },
+      {
+        key: "specialtyEquipmentClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Specialty Equipment"],
+        options: ["unique_specialty_lab", "unique_specialty_trade", "unique_specialty_other"],
+      },
+      {
+        key: "industrialOddityClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Industrial Oddities"],
+        options: ["unique_oddity_machine", "unique_oddity_fixture", "unique_oddity_other"],
+      },
+      {
+        key: "proPropClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Professional Props"],
+        options: ["unique_prop_film", "unique_prop_stage", "unique_prop_photo", "unique_prop_other"],
+      },
+      {
+        key: "rareInstrumentClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Rare Instruments"],
+        options: ["unique_instr_string", "unique_instr_wind", "unique_instr_keyboard", "unique_instr_other"],
+      },
+      {
+        key: "customBuildClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Custom Builds"],
+        options: ["unique_custom_furniture", "unique_custom_device", "unique_custom_art_object", "unique_custom_other"],
+      },
+      {
+        key: "uniqueOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: [
+          "unique_kind_collectible",
+          "unique_kind_art",
+          "unique_kind_hobby",
+          "unique_kind_unusual",
+          "unique_kind_seasonal",
+          "unique_kind_specialty",
+          "unique_kind_prop",
+          "unique_kind_mixed",
+        ],
+      },
+      {
+        key: "kitInventoryChecklist",
+        type: "text",
         required: false,
         recommended: true,
-        options: ["pocket", "backpack", "car_trunk", "needs_truck", "needs_crew"],
+        requiredIf: "rent",
+        subcategories: [
+          "Hobby Equipment",
+          "Professional Props",
+          "Specialty Equipment",
+          "Custom Builds",
+          "Other",
+        ],
       },
     ],
   },
@@ -6333,6 +6451,58 @@ export function areCategorySpecsValid(
       if ((values.safetyBriefingConfirmed ?? "").trim() !== "briefing_ready") return false;
     }
   }
+
+
+  // Unique & Other P0 gates by shelf.
+  if (category.trim() === "Unique & Other" && modes?.rent) {
+    const sub = subcategory.trim();
+    const reqSelect = (key: string, allowed: string[]) => allowed.includes((values[key] ?? "").trim());
+    const reqText = (key: string, min = 3) => (values[key] ?? "").trim().length >= min;
+
+    if (!reqSelect("useCase", ["event_prop", "photo_set", "collectible_display", "hobby_tool", "one_off_experience", "other_use"])) return false;
+    if (!reqSelect("transportSize", ["pocket", "backpack", "car_trunk", "needs_truck", "needs_crew"])) return false;
+    if (!reqSelect("uniqueFragilityBand", ["unique_fragile_display", "unique_rugged_use", "unique_mixed_care"])) return false;
+
+    if (sub === "Collectibles") {
+      if (!reqSelect("collectibleAuthenticity", ["unique_auth_documented", "unique_auth_unknown", "unique_replica_ok"])) return false;
+    }
+    if (sub === "Art & Sculpture") {
+      if (!reqSelect("artMediumBand", ["unique_art_canvas", "unique_art_sculpture", "unique_art_mixed", "unique_art_other"])) return false;
+    }
+    if (sub === "Hobby Equipment") {
+      if (!reqSelect("hobbyEquipmentClass", ["unique_hobby_tabletop", "unique_hobby_maker", "unique_hobby_optics", "unique_hobby_other"])) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Unusual Items") {
+      if (!reqSelect("unusualItemClass", ["unique_unusual_novelty", "unique_unusual_experience", "unique_unusual_mixed"])) return false;
+    }
+    if (sub === "Seasonal Items") {
+      if (!reqSelect("seasonalItemClass", ["unique_season_holiday", "unique_season_weather", "unique_season_event", "unique_season_other"])) return false;
+    }
+    if (sub === "Specialty Equipment") {
+      if (!reqSelect("specialtyEquipmentClass", ["unique_specialty_lab", "unique_specialty_trade", "unique_specialty_other"])) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Industrial Oddities") {
+      if (!reqSelect("industrialOddityClass", ["unique_oddity_machine", "unique_oddity_fixture", "unique_oddity_other"])) return false;
+    }
+    if (sub === "Professional Props") {
+      if (!reqSelect("proPropClass", ["unique_prop_film", "unique_prop_stage", "unique_prop_photo", "unique_prop_other"])) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Rare Instruments") {
+      if (!reqSelect("rareInstrumentClass", ["unique_instr_string", "unique_instr_wind", "unique_instr_keyboard", "unique_instr_other"])) return false;
+    }
+    if (sub === "Custom Builds") {
+      if (!reqSelect("customBuildClass", ["unique_custom_furniture", "unique_custom_device", "unique_custom_art_object", "unique_custom_other"])) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Other") {
+      if (!reqSelect("uniqueOtherKind", ["unique_kind_collectible", "unique_kind_art", "unique_kind_hobby", "unique_kind_unusual", "unique_kind_seasonal", "unique_kind_specialty", "unique_kind_prop", "unique_kind_mixed"])) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+  }
+
 
 
   // Garden & Yard P0 gates by shelf.

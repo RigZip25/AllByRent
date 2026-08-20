@@ -2587,6 +2587,18 @@ export const cs: AppMessages = {
         laserMeasureClass: { label: "Třída laserového měření" },
         powerSawClass: { label: "Třída elektrické pily" },
         toolsOtherKind: { label: "Jaký druh položky", hint: "Přesuňte na pojmenovanou Tools polici, když sedí." },
+        uniqueFragilityBand: { label: "Křehkost / zacházení", hint: "Křehké na display vs odolné použití vs smíšené." },
+        collectibleAuthenticity: { label: "Stav autenticita" },
+        artMediumBand: { label: "Médium umění" },
+        hobbyEquipmentClass: { label: "Třída hobby vybavení" },
+        unusualItemClass: { label: "Třída neobvyklé položky" },
+        seasonalItemClass: { label: "Třída sezónní položky" },
+        specialtyEquipmentClass: { label: "Třída specializovaného vybavení" },
+        industrialOddityClass: { label: "Třída průmyslové kuriozity" },
+        proPropClass: { label: "Třída rekvizity" },
+        rareInstrumentClass: { label: "Třída nástroje" },
+        customBuildClass: { label: "Třída custom build" },
+        uniqueOtherKind: { label: "Jaký druh položky", hint: "Přesuňte na pojmenovanou Unique polici, když sedí." },
 },
       options: {
         cordless: "Aku / baterie",
@@ -4590,6 +4602,12 @@ export const cs: AppMessages = {
         sports_timing_photo: "Photo finish",
         sports_wake: "Wake / vlek",
         sports_water_other: "Jiné vodní",
+        unique_auth_unknown: "Autenticita neznámá",
+        unique_kind_art: "Umění",
+        unique_kind_custom: "Custom",
+        unique_kind_hobby: "Hobby",
+        unique_kind_mixed: "Mix unique",
+        unique_kind_prop: "Rekvizita",
         xlr_and_clip: "XLR + clip",
 
         // Office & Business ~8.0 options
@@ -4876,6 +4894,50 @@ export const cs: AppMessages = {
         tools_saw_other: "Jiná elektrická pila",
         tools_saw_recip: "Ocasní pila",
         tools_saw_table: "Stolní pila",
+
+        // Unique & Other ~8.0 options
+        unique_art_canvas: "Plátno / 2D",
+        unique_art_mixed: "Smíšená média",
+        unique_art_other: "Jiné umění",
+        unique_art_sculpture: "Socha / 3D",
+        unique_auth_documented: "Autenticita doložená",
+        unique_custom_art_object: "Custom art objekt",
+        unique_custom_device: "Custom zařízení",
+        unique_custom_furniture: "Custom nábytek",
+        unique_custom_other: "Jiný custom build",
+        unique_fragile_display: "Křehké — display / opatrně",
+        unique_hobby_maker: "Maker / craft",
+        unique_hobby_optics: "Optika",
+        unique_hobby_other: "Jiné hobby",
+        unique_hobby_tabletop: "Stolní / hry",
+        unique_instr_keyboard: "Klávesový",
+        unique_instr_other: "Jiný vzácný nástroj",
+        unique_instr_string: "Smyčcový / strunný",
+        unique_instr_wind: "Dechový",
+        unique_kind_collectible: "Související se sběratelským",
+        unique_kind_seasonal: "Související se sezónním",
+        unique_kind_specialty: "Související se specialty",
+        unique_kind_unusual: "Související s unusual",
+        unique_mixed_care: "Smíšená péče",
+        unique_oddity_fixture: "Fixture kuriozita",
+        unique_oddity_machine: "Strojní kuriozita",
+        unique_oddity_other: "Jiná průmyslová kuriozita",
+        unique_prop_film: "Filmová / video rekvizita",
+        unique_prop_other: "Jiná rekvizita",
+        unique_prop_photo: "Foto rekvizita",
+        unique_prop_stage: "Jevištní rekvizita",
+        unique_replica_ok: "Replika / dekor ok",
+        unique_rugged_use: "Odolné — běžné použití ok",
+        unique_season_event: "Sezónní event",
+        unique_season_holiday: "Sváteční dekor",
+        unique_season_other: "Jiné sezónní",
+        unique_season_weather: "Sezónní / počasí",
+        unique_specialty_lab: "Lab / test specialty",
+        unique_specialty_other: "Jiné specialty",
+        unique_specialty_trade: "Trade specialty",
+        unique_unusual_experience: "Zážitkový kus",
+        unique_unusual_mixed: "Smíšené unusual",
+        unique_unusual_novelty: "Novinka",
 },
     },
     modes: {
@@ -6072,6 +6134,32 @@ export const cs: AppMessages = {
             },
           ],
         },
+      "Unique & Other": {
+          title: "Unique & other FAQ",
+          summary: "Krátké odpovědi pro one-off věci, křehkost a kauci — bez promo pojištění.",
+          qa: [
+            {
+              q: "Co je vždy povinné?",
+              a: "Use case, transport a pásmo křehkosti u Unique pronájmů.",
+            },
+            {
+              q: "Kdy je checklist povinný?",
+              a: "Hobby, Specialty, Props, Custom a Other zamrazí inventář.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Poškození a chybějící kusy — ne pojištění sbírky, umění nebo nástroje.",
+            },
+            {
+              q: "Mám přesunout?",
+              a: "Ano, když sedí pojmenovaná kategorie (Music pro běžné nástroje, Party pro párty sady).",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell aukcí, galerií nebo specialty pojištění.",
+            },
+          ],
+        },
       "Garden & Yard": {
           title: "Zahrada a dvůr — FAQ",
           summary: "Krátké odpovědi k nářadí, rostlinám, závlaze a pařezovým frézám.",
@@ -6235,7 +6323,252 @@ export const cs: AppMessages = {
     },
 
     bySubcategory: {
-                  "Tools & DIY": {
+      "Unique & Other": {
+        "Collectibles": {
+          title: "Sběratelské — autenticita + péče",
+          summary: "Autenticita, use case, transport a křehkost.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Autenticita, use case, transport a pásmo křehkosti.",
+            },
+            {
+              q: "Je to pravé?",
+              a: "Host označí doložené, neznámé nebo replika ok — ne znalecký posudek.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje oděrky a chybějící stojany — ne pojištění sbírky.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell aukčních domů.",
+            },
+          ],
+        },
+        "Art & Sculpture": {
+          title: "Umění — médium + křehkost",
+          summary: "Médium, transport a křehkost pro pronájem umění.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Médium, use case, transport a křehkost.",
+            },
+            {
+              q: "Zavěšení?",
+              a: "Uveďte úchyty/stojany v poznámkách.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje poškození povrchu — ne pojištění trhu umění.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell galerií.",
+            },
+          ],
+        },
+        "Hobby Equipment": {
+          title: "Hobby — třída + inventář",
+          summary: "Hobby třída plus checklist pro sady.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Hobby třída, use case, transport, křehkost a checklist.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje chybějící kusy podle seznamu.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell hobby store.",
+            },
+            {
+              q: "Přesun?",
+              a: "Párty sady mohou patřit do Party — Unique je one-off hobby.",
+            },
+          ],
+        },
+        "Unusual Items": {
+          title: "Unusual — třída + péče",
+          summary: "Novinky a zážitky zamrazí třídu.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Unusual třída, use case, transport a křehkost.",
+            },
+            {
+              q: "Jak divné je ok?",
+              a: "Popište bezpečné použití — bez skrytých rizik.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje poškození a chybějící kusy.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell novelty shop.",
+            },
+          ],
+        },
+        "Seasonal Items": {
+          title: "Sezónní — třída + péče",
+          summary: "Sváteční a sezónní vybavení zamrazí třídu.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Sezónní třída, use case, transport a křehkost.",
+            },
+            {
+              q: "Vrácení balení?",
+              a: "Uveďte očekávání balení.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje rozbité dekory a chybějící světla.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell holiday store.",
+            },
+          ],
+        },
+        "Specialty Equipment": {
+          title: "Specialty — třída + inventář",
+          summary: "Lab/trade specialty zamrazí třídu a checklist.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Specialty třída, use case, transport, křehkost a checklist.",
+            },
+            {
+              q: "Školení?",
+              a: "Host poznamená skill operátora.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje chybějící moduly — ne pojištění odpovědnosti.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell specialty vendorů.",
+            },
+          ],
+        },
+        "Industrial Oddities": {
+          title: "Průmyslové kuriozity — třída + péče",
+          summary: "Stroje/fixture zamrazí třídu a zacházení.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Třída kuriozity, use case, transport a křehkost.",
+            },
+            {
+              q: "Napájení / instalace?",
+              a: "Uveďte v poznámkách.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje poškození při transportu — ne pojištění stavby.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell surplus dealerů.",
+            },
+          ],
+        },
+        "Professional Props": {
+          title: "Rekvizity — třída + inventář",
+          summary: "Film/jeviště/foto zamrazí třídu a checklist.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Třída rekvizity, use case, transport, křehkost a checklist.",
+            },
+            {
+              q: "Pravidla na place?",
+              a: "Uveďte no-food / no-weather.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje oděrky a chybějící kusy podle seznamu.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell prop house.",
+            },
+          ],
+        },
+        "Rare Instruments": {
+          title: "Vzácné nástroje — třída + péče",
+          summary: "Vzácné nástroje zamrazí třídu; standard patří do Music.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Třída nástroje, use case, transport a křehkost.",
+            },
+            {
+              q: "Proč Unique?",
+              a: "Když je kus rare/one-off — běžné kytary do Music.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje pouzdro a chybějící smyčce — ne pojištění nástroje.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell pojištění nástrojů.",
+            },
+          ],
+        },
+        "Custom Builds": {
+          title: "Custom builds — třída + inventář",
+          summary: "Custom nábytek/zařízení zamrazí třídu a checklist.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Custom třída, use case, transport, křehkost a checklist.",
+            },
+            {
+              q: "Poznámky maker?",
+              a: "Uveďte tolerance a montáž.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje poškození povrchu a chybějící hardware.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell maker marketplace.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Unique other — přesuňte na pojmenovanou polici",
+          summary: "Catch-all publikuje druh a checklist.",
+          qa: [
+            {
+              q: "Kdy Other?",
+              a: "Jen když nepasuje pojmenovaná Unique police.",
+            },
+            {
+              q: "Jaké brány?",
+              a: "uniqueOtherKind, use case, transport, křehkost a checklist.",
+            },
+            {
+              q: "Přesun?",
+              a: "Na Collectibles, Art, Hobby, Unusual, Seasonal, Specialty, Props, Instruments nebo Custom.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje chybějící kusy podle checklistu.",
+            },
+          ],
+        },
+      },
+
+      "Tools & DIY": {
         "Hand Tools": {
           title: "Ruční — třída + sada",
           summary: "Gola a klíče zamrazí třídu a single vs sada.",
@@ -6480,7 +6813,7 @@ export const cs: AppMessages = {
         },
       },
 
-"Sports & Recreation": {
+      "Sports & Recreation": {
         "Snow Sports": {
           title: "Zima — forma, DIN, helma",
           summary: "Forma lyží/boardu, pásmo DIN, helma a waiver před pronájmem.",
@@ -6725,7 +7058,7 @@ export const cs: AppMessages = {
         },
       },
 
-"Photo & Video": {
+      "Photo & Video": {
         "Camera Kits": {
           title: "Camera kits \u2014 sensor, media, kit list",
           summary: "Bodies and kits freeze sensor/mount, media policy, and inventory.",

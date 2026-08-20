@@ -157,4 +157,15 @@ All listing `categorySpecs` select **values** share **one flat** `listing.catego
 
 Profile + per-sub FactCards + subcategory wiring already shipped (`bfb116d`). Generic required-field validation + `houseRules` gate.
 
+
+### Unique & Other (~8.0) — shipped pattern
+
+| Layer | Pattern |
+|-------|---------|
+| All | `useCase` + `uniqueItemForm` + `uniqueFragilityBand` (+ transport recommended) |
+| Authenticity | Collectibles / art / rare instruments / custom / Other |
+| Kits | Checklist on hobby / specialty / props / custom / Other |
+| Boundary | Prefer named categories when they fit |
+| FactCards | Per-sub Q→A; wire `subcategory` |
+
 See also: [EVORIOS.md](./EVORIOS.md) (brand / product source of truth).

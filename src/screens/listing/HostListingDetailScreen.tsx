@@ -676,6 +676,13 @@ export function HostListingDetailScreen({
             className="mb-4"
           />
         ) : null}
+        {listing.category.trim() === "Unique & Other" ? (
+          <CategoryFactCard
+            category="Unique & Other"
+            subcategory={listing.subcategory}
+            className="mb-4"
+          />
+        ) : null}
         {listing.modes.rent &&
         (listingProRentersOnly(listing) ||
           listingRequiresPhysicalDamage(listing) ||

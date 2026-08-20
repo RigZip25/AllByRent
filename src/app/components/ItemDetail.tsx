@@ -664,6 +664,13 @@ export function ItemDetail({
                 className="mt-3"
               />
             ) : null}
+            {listing.modes.rent && listing.category.trim() === "Unique & Other" ? (
+              <CategoryFactCard
+                category="Unique & Other"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
             {listing.modes.rent &&
             (listingProRentersOnly(listing) ||
               listingRequiresPhysicalDamage(listing) ||
