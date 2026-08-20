@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
   getCategorySpecFields,
@@ -10,6 +10,20 @@ import { softFillEmptyCategorySpecs } from "../applyAiSuggestions";
 import { BRAND_OTHER, BRAND_UNBRANDED } from "../listingBrands";
 import type { ListingDraft } from "../types";
 import { useMessages } from "../../../lib/i18n/react";
+import { listingRequiresBoatIdentity } from "../../../lib/categoryTrustRules";
+import {
+  listingIsElectricBike,
+  listingIsElectricMicromobility,
+  listingIsKidsBike,
+} from "../../../lib/categoryTrustRules";
+
+const MICROMOBILITY_ONLY_KEYS = new Set([
+  "minRiderAge",
+  "batteryRangeBand",
+  "chargerIncluded",
+  "batteryChargeBand",
+]);
+const EBIKE_CLASS_KEYS = new Set(["eBikeClass"]);
 
 const GREEN = "#0D5C3A";
 const AMBER = "#B45309";
@@ -340,7 +354,30 @@ export function CategorySpecsFields({
   const { listing } = useMessages();
   const specsCopy = listing.specs;
   const modes = draft.modes;
-  const fields = getCategorySpecFields(draft.category, draft.subcategory, modes);
+  const rawFields = getCategorySpecFields(draft.category, draft.subcategory, modes);
+  const needsMicromobility = listingIsElectricMicromobility(draft);
+  const needsEBikeClass = listingIsElectricBike(draft);
+  const isKidsBike = listingIsKidsBike(draft);
+  const fields = useMemo(() => {
+    return rawFields
+      .filter((field) => {
+        if (MICROMOBILITY_ONLY_KEYS.has(field.key) && !needsMicromobility) return false;
+        if (EBIKE_CLASS_KEYS.has(field.key) && !needsEBikeClass) return false;
+        return true;
+      })
+      .map((field) => {
+        if (
+          (field.key === "minRiderAge" && needsMicromobility) ||
+          (field.key === "eBikeClass" && needsEBikeClass)
+        ) {
+          return { ...field, required: true };
+        }
+        if (field.key === "helmetPolicy" && isKidsBike && field.options) {
+          return { ...field, options: field.options.filter((o) => o !== "not_required") };
+        }
+        return field;
+      });
+  }, [rawFields, needsMicromobility, needsEBikeClass, isKidsBike]);
 
   // Drop values that don’t belong on this shelf (e.g. 30 ft+ on a houseplant).
   // Also soft-fill empty required specs from title / AI (e.g. "4-Person" → Sleeps).
@@ -404,7 +441,10 @@ export function CategorySpecsFields({
       </div>
       {fields.map((field) => {
         const labels = specsCopy.fields[field.key];
-        const required = isSpecFieldRequired(field, modes);
+        const required =
+          isSpecFieldRequired(field, modes) ||
+          (field.key === "minRiderAge" && needsMicromobility) ||
+          (field.key === "eBikeClass" && needsEBikeClass);
         const mileageRentHint =
           field.key === "mileage" && modes.rent && !modes.sell
             ? specsCopy.fields.mileage?.rentOptionalHint

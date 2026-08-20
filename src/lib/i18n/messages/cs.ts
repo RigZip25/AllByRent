@@ -1928,7 +1928,6 @@ export const cs: AppMessages = {
         transportSize: { label: "Jak se přepravuje" },
         dimensionsOrWeight: { label: "Rozměry / váha", placeholder: "Pro transport" },
         whatMakesItUnique: { label: "Čím je unikátní", placeholder: "Proč si to půjčit" },
-        jobScale: { label: "Škála" },
       },
       options: {
         cordless: "Aku / baterie",
@@ -3508,6 +3507,23 @@ export const cs: AppMessages = {
           "Prohlášení vytváří jasnou stopu. Nepoužívej sedačky, které bránou neprojdou.",
       },
     },
+
+    bySubcategory: {
+      "Baby & Kids": {
+        "Car Seats": { title: "Autosedačky — expiry & standard region", summary: "Never rent expired/recalled seats. Declare FMVSS (US) or ECE R129/R44 (EU). Sanitize between renters. Host attests — Evorios does not certify.", hostTipTitle: "Host standard", hostTip: "Expiry YYYY-MM-DD, label photo, recall check, standard region declare. Never after a crash.", whyGeoTitle: "Why strict", whyGeo: "Standards differ by market; expiry/recall/sanitize travel everywhere.", flowTitle: "Flow", flow: "List gates → booking ack → unlock → install per vehicle manual → return.", layersTitle: "Layers", layers: "Expiry · FMVSS/ECE · recall · sanitize · label photo · booking · unlock · agreement.", claimsTitle: "Claims", claims: "Do not hand off if expiry/recall fails. Document condition at pickup." },
+        "Cribs & Beds": { title: "Postýlky — portable sleep standards", summary: "No drop-side. Attest CPSC, EN 716, or other regional sleep standard. Firm mattress/pad. Sanitize sleep surface.", hostTipTitle: "Host standard", hostTip: "Portable sleep standard from the label — not platform certification. Recall + sanitize.", whyGeoTitle: "Why gated", whyGeo: "Unsafe sleep is a leading infant hazard worldwide.", flowTitle: "Flow", flow: "Sleep standard + drop-side + recall + mattress + sanitize → ack → handoff → return.", layersTitle: "Layers", layers: "Sleep standard · no drop-side · recall · mattress · sanitize · unlock.", claimsTitle: "Claims", claims: "No bumpers/loose blankets. Document stains at handoff." },
+        "Strollers": { title: "Kočárky — type, weight, hygiene", summary: "Industry: clean between renters, brakes/wheels, age/weight, travel vs jogger vs double. Recall-check.", hostTipTitle: "Host standard", hostTip: "Stroller type + age/weight + sanitize + recall. Note car-seat adapters.", whyGeoTitle: "Why hygiene", whyGeo: "Shared strollers are high-touch — sanitize is the baseline.", flowTitle: "Flow", flow: "Type + limits + hygiene → booking ack → brake check → return.", layersTitle: "Layers", layers: "Type · age/weight · sanitize · recall · unlock · deposit.", claimsTitle: "Claims", claims: "Photo wear; missing adapters are inventory claims." },
+        "Baby Carriers": { title: "Nosítka — weight & hygiene", summary: "Age/weight, fabric sanitize, recall. Point to manufacturer fit — no medical claims.", hostTipTitle: "Host standard", hostTip: "Age/weight + sanitize + recall. Note newborn vs toddler mode.", whyGeoTitle: "Why gated", whyGeo: "Contact fabric + wrong fit can harm — hygiene + limits are the floor.", flowTitle: "Flow", flow: "Limits + hygiene → ack → fit check → return.", layersTitle: "Layers", layers: "Age/weight · sanitize · recall · unlock.", claimsTitle: "Claims", claims: "Damaged buckles = do-not-rent." },
+        "Toys & Games": { title: "Hračky — age label & hygiene", summary: "Keep age/small-parts labels (0+/3+/8+). Sanitize. Portable across ASTM/EN 71 messaging.", hostTipTitle: "Host standard", hostTip: "Declare toyHazardBand, sanitize, recall. Do not remove labels.", whyGeoTitle: "Why age", whyGeo: "Choking is the main toy failure mode.", flowTitle: "Flow", flow: "Age/hazard + hygiene → ack → piece count → return.", layersTitle: "Layers", layers: "Age/small-parts · sanitize · recall · deposit for missing pieces.", claimsTitle: "Claims", claims: "Count pieces at both ends." },
+        "Other": { title: "Ostatní dětské gear", summary: "Prefer a specific shelf for seats/cribs/strollers/carriers. Age/weight + hygiene when it touches a child.", hostTipTitle: "Host standard", hostTip: "Re-shelf safety-critical gear to get the right gates.", whyGeoTitle: "Why", whyGeo: "Other skips specialized gates.", flowTitle: "Flow", flow: "Basics → book → photos → return.", layersTitle: "Layers", layers: "Age/weight · deposit · terms.", claimsTitle: "Claims", claims: "Document condition; prefer specific shelves." },
+        "Commercial Play Equipment": { title: "Komerční hra — cert, capacity, waiver", summary: "ASTM F1487 / CPSC / EN 1176 declare, capacity, liability waiver, sanitize between groups.", hostTipTitle: "Host standard", hostTip: "Declare cert honestly, capacity, waiver, sanitize, recall.", whyGeoTitle: "Why", whyGeo: "Group injuries and overload drive claims.", flowTitle: "Flow", flow: "Cert + capacity + waiver + hygiene → booking → setup → return.", layersTitle: "Layers", layers: "Cert · capacity · waiver · sanitize · deposit.", claimsTitle: "Claims", claims: "Photo setup; over-capacity is shared risk." },
+        "Group Activity Gear": { title: "Skupinové aktivity — shared hygiene", summary: "Sanitize and recall between groups; age band and piece inventory.", hostTipTitle: "Host standard", hostTip: "Sanitize, recall, age, inventory pieces.", whyGeoTitle: "Why", whyGeo: "Shared kid gear = germs and missing pieces.", flowTitle: "Flow", flow: "Hygiene → ack → count → return.", layersTitle: "Layers", layers: "Age · sanitize · recall · deposit.", claimsTitle: "Claims", claims: "Missing pieces hit deposit." },
+        "Educational Tools": { title: "Vzdělávací tools — age & clean", summary: "Age band, sanitize touch surfaces, recall electronics with batteries.", hostTipTitle: "Host standard", hostTip: "Age, sanitize, recall, note chargers.", whyGeoTitle: "Why", whyGeo: "Schools expect clean age-appropriate tools.", flowTitle: "Flow", flow: "Hygiene → ack → power check → return.", layersTitle: "Layers", layers: "Age · sanitize · inventory · deposit.", claimsTitle: "Claims", claims: "Missing chargers = inventory." },
+        "Safety Systems": { title: "Bezpečnostní systémy — install first", summary: "Gates/monitors/locks: document install path. Pressure vs hardware-mount matters on stairs.", hostTipTitle: "Host standard", hostTip: "Install documented / renter with guide / pro. Include hardware.", whyGeoTitle: "Why", whyGeo: "A bad install is worse than no gate on stairs.", flowTitle: "Flow", flow: "Install path → ack → install on site → return hardware.", layersTitle: "Layers", layers: "Install · unlock · hardware inventory · deposit.", claimsTitle: "Claims", claims: "Missing mounts = claims. No pressure gates at stair tops." },
+        "Childcare Equipment": { title: "Péče o děti — sanitize & recall", summary: "High chairs/swings/bouncers: age/weight, sanitize trays/harnesses, recall.", hostTipTitle: "Host standard", hostTip: "Sanitize food-contact and harnesses; recall; age/weight.", whyGeoTitle: "Why", whyGeo: "Trays and straps are high-touch infant surfaces.", flowTitle: "Flow", flow: "Hygiene/recall → ack → handoff → return.", layersTitle: "Layers", layers: "Age/weight · sanitize · recall · unlock.", claimsTitle: "Claims", claims: "Broken harnesses = do-not-rent." },
+      },
+    },
+
   },
   preTripInspection: {
     pickupTitle: "Předprohlídka (povinná)",
@@ -3518,6 +3534,16 @@ export const cs: AppMessages = {
       `Stejná sada fotek jako při vyzvednutí — včetně všech ${tireCount} pneumatik — aby byla výměna nebo nové poškození vidět ve sporu.`,
     tireSwapHint:
       "Fotky pneumatik chrání před drahou výměnou (např. prémiové za levné čínské). Když to jde, ať je vidět značka a dezén.",
+    hullPickupBody:
+      "Vyfoť příď, záď, levý bok (port), pravý bok (starboard) a palubu před předáním. Poznamenej oděrky gelcoatu, škrábance a promáčkliny. Obě strany musí potvrdit před odemčením.",
+    hullReturnBody:
+      "Stejná prohlídka trupu jako při vyzvednutí — příď, záď, port, starboard a paluba — aby bylo vidět nové poškození.",
+    hullGelcoatHint:
+      "Fotky trupu a paluby chrání před spory o gelcoat a výbavu. Každá strana zvlášť je lepší než jeden celek.",
+    hullSection: "Prohlídka trupu",
+    hullPhotoHint: "Jedna jasná fotka této oblasti. Označ poškození a krátký komentář.",
+    hullCommentPlaceholder: "Oděrky gelcoatu, škrábance, promáčkliny, měkká místa, kování...",
+    hullIncomplete: "Doplň všech pět fotek trupu (příď, záď, port, starboard, paluba) před odesláním.",
     bodySection: "Exteriér a interiér",
     tiresSection: (tireCount) =>
       tireCount === 4
@@ -3569,6 +3595,11 @@ export const cs: AppMessages = {
       exterior_left: "Exteriér — levá strana",
       exterior_right: "Exteriér — pravá strana",
       interior: "Interiér",
+      hull_bow: "Trup — příď",
+      hull_stern: "Trup — záď",
+      hull_port: "Trup — levý bok (port)",
+      hull_starboard: "Trup — pravý bok (starboard)",
+      hull_deck: "Paluba / kokpit",
       tire_fl: "Pneumatika — přední levá",
       tire_fr: "Pneumatika — přední pravá",
       tire_rl: "Pneumatika — zadní levá",

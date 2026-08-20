@@ -4,7 +4,7 @@
  */
 
 import type { ListingDraft } from "../screens/listing/types";
-import { listingRequiresAgeGate } from "./categoryTrustRules";
+import { listingCaptainMode, listingRequiresAgeGate } from "./categoryTrustRules";
 import { loadUserProfile } from "./userProfileStorage";
 
 export const DEFAULT_VEHICLE_MIN_AGE = 25;
@@ -137,8 +137,14 @@ export function assessVehicleAgeGate(input: {
     };
   }
 
-  const allowsYoung = listingAllowsYoungDrivers(input.listing);
-  const minAgeRequired = allowsYoung ? YOUNG_DRIVER_MIN_AGE : DEFAULT_VEHICLE_MIN_AGE;
+  const captainIncluded =
+    input.listing != null && listingCaptainMode(input.listing) === "captain_included";
+  const allowsYoung = captainIncluded || listingAllowsYoungDrivers(input.listing);
+  const minAgeRequired = captainIncluded
+    ? YOUNG_DRIVER_MIN_AGE
+    : allowsYoung
+      ? YOUNG_DRIVER_MIN_AGE
+      : DEFAULT_VEHICLE_MIN_AGE;
   const dobStr = (input.dateOfBirth ?? resolveRenterDateOfBirth())?.trim() || null;
   const dob = parseDob(dobStr);
   if (!dob) {
@@ -159,6 +165,17 @@ export function assessVehicleAgeGate(input: {
       ageYears,
       minAgeRequired: YOUNG_DRIVER_MIN_AGE,
       messageKey: "underage",
+    };
+  }
+
+  if (captainIncluded) {
+    return {
+      ok: true,
+      ageYears,
+      youngDriver: false,
+      youngDriverHoldAddOnCents: 0,
+      adjustedDepositAmountCents: input.baseDepositAmountCents,
+      minAgeRequired: YOUNG_DRIVER_MIN_AGE,
     };
   }
 

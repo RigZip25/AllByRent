@@ -935,6 +935,7 @@ const ATV_SUBS = new Set(["atvs"]);
 const MOTORCYCLE_SUBS = new Set(["motorcycles"]);
 const CAPTAIN_OPT_SUBS = new Set(["motorboats", "pontoon boats", "charter vessels"]);
 const PADDLE_PFD_SUBS = new Set(["kayaks & canoes", "sup boards"]);
+const INFLATABLE_BOAT_SUBS = new Set(["inflatable boats"]);
 
 export function listingIsAtv(
   listing: Pick<ListingDraft, "category" | "subcategory">,
@@ -1023,11 +1024,23 @@ export function listingIsPaddleCraft(
   );
 }
 
-/** Kayak / SUP: PFD included + count soft-to-required attestation (lighter than HIN copy). */
+export function listingIsInflatableBoat(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  if (listing.category.trim() !== "Boats & Water") return false;
+  const sub = subKey(listing);
+  return INFLATABLE_BOAT_SUBS.has(sub) || sub.includes("inflatable");
+}
+
+/** Kayak / SUP / non-motor inflatable: PFD attestation (powered inflatables use USCG kit). */
 export function listingRequiresPfdAttestation(
   listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
 ): boolean {
-  if (!rentOn(listing) || !listingIsPaddleCraft(listing)) return false;
+  if (!rentOn(listing)) return false;
+  const paddle = listingIsPaddleCraft(listing);
+  const nonMotorInflatable =
+    listingIsInflatableBoat(listing) && !listingIsPoweredWatercraft(listing);
+  if (!paddle && !nonMotorInflatable) return false;
   const flag = (listing.categorySpecs?.pfdIncluded ?? "").trim();
   if (flag === "not_required") return false;
   return true;

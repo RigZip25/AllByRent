@@ -1,5 +1,6 @@
 import type { MediaRef } from "./mediaStore";
 import type { ListingDraft } from "../screens/listing/types";
+import { listingIsConstructionSoftPpe } from "./categoryTrustRules";
 import {
   listingIsCommercialTransport,
   listingIsSemiOrCommercialTrailer,
@@ -214,9 +215,10 @@ export function isPreTripInspectionCategory(category: string): boolean {
 }
 
 export function listingRequiresPreTripInspection(
-  listing: Pick<ListingDraft, "category" | "modes">,
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
 ): boolean {
   if (!listing.modes?.rent) return false;
+  if (listingIsConstructionSoftPpe(listing)) return false;
   return isPreTripInspectionCategory(listing.category);
 }
 

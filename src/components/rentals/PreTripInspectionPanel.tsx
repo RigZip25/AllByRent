@@ -5,6 +5,7 @@ import { useMediaUrl } from "../../lib/useMediaUrl";
 import { useMessages } from "../../lib/i18n/react";
 import {
   BODY_AREA_IDS,
+  HULL_AREA_IDS,
   SPARE_TIRE_SLOT_ID,
   allTireSlotIds,
   createEmptyInspection,
@@ -12,10 +13,12 @@ import {
   inspectionTiresComplete,
   isTireSlot,
   mergeInspectionAreas,
+  resolveInspectionLayout,
   resolveInspectionWheelCount,
   type DamageKind,
   type InspectionAreaEntry,
   type InspectionAreaId,
+  type InspectionLayout,
   type InspectionStage,
   type PreTripInspectionRecord,
 } from "../../lib/preTripInspection";
@@ -41,6 +44,7 @@ type Props = {
   onChange: (next: PreTripInspectionRecord) => void;
   /** Required tire positions from listing (4 light / host-set for heavy). */
   wheelCount?: number;
+  layout?: InspectionLayout;
   /** When true, hide edit controls (read-only summary). */
   readOnly?: boolean;
 };
@@ -206,12 +210,16 @@ export function PreTripInspectionPanel({
   value,
   onChange,
   wheelCount: wheelCountProp,
+  layout: layoutProp,
   readOnly,
 }: Props) {
   const t = useMessages();
   const copy = t.preTripInspection;
-  const wheelCount = resolveInspectionWheelCount(value, wheelCountProp ?? 4);
-  const tireSlotIds = useMemo(() => allTireSlotIds(wheelCount), [wheelCount]);
+  const layout = resolveInspectionLayout(value, layoutProp ?? "vehicle");
+  const isHull = layout === "hull";
+  const wheelCount = isHull ? 0 : resolveInspectionWheelCount(value, wheelCountProp ?? 4);
+  const tireSlotIds = useMemo(() => (isHull ? [] : allTireSlotIds(wheelCount)), [isHull, wheelCount]);
+  const bodyIds = isHull ? HULL_AREA_IDS : BODY_AREA_IDS;
 
   const draft = useMemo(() => {
     if (value) {
@@ -219,21 +227,22 @@ export function PreTripInspectionPanel({
         ...value,
         stage,
         requiredWheelCount: wheelCount,
-        areas: mergeInspectionAreas(value.areas, wheelCount),
+        layout,
+        areas: mergeInspectionAreas(value.areas, wheelCount, layout),
       };
     }
-    return createEmptyInspection(stage, wheelCount);
-  }, [value, stage, wheelCount]);
+    return createEmptyInspection(stage, wheelCount, layout);
+  }, [value, stage, wheelCount, layout]);
 
-  const checklistOk = inspectionChecklistComplete(draft, wheelCount);
-  const tiresOk = inspectionTiresComplete(draft, wheelCount);
+  const checklistOk = inspectionChecklistComplete(draft, wheelCount, layout);
+  const tiresOk = isHull || inspectionTiresComplete(draft, wheelCount, layout);
   const locked =
     readOnly ||
     (role === "renter" && Boolean(draft.renterSubmittedAt)) ||
     (role === "host" && Boolean(draft.hostConfirmedAt) && Boolean(draft.renterSubmittedAt));
 
   const patchArea = (areaId: InspectionAreaId, patch: Partial<InspectionAreaEntry>) => {
-    const areas = mergeInspectionAreas(draft.areas, wheelCount).map((a) =>
+    const areas = mergeInspectionAreas(draft.areas, wheelCount, layout).map((a) =>
       a.areaId === areaId ? { ...a, ...patch } : a,
     );
     onChange({
@@ -267,26 +276,36 @@ export function PreTripInspectionPanel({
             {stage === "pickup" ? copy.pickupTitle : copy.returnTitle}
           </p>
           <p className="mt-1 text-xs leading-relaxed text-amber-900/90">
-            {stage === "pickup" ? copy.pickupBody : copy.returnBody(wheelCount)}
+            {isHull
+              ? stage === "pickup"
+                ? copy.hullPickupBody
+                : copy.hullReturnBody
+              : stage === "pickup"
+                ? copy.pickupBody
+                : copy.returnBody(wheelCount)}
           </p>
-          <p className="mt-2 text-xs font-semibold text-amber-950">{copy.tireSwapHint}</p>
+          {!isHull ? (
+            <p className="mt-2 text-xs font-semibold text-amber-950">{copy.tireSwapHint}</p>
+          ) : (
+            <p className="mt-2 text-xs font-semibold text-amber-950">{copy.hullGelcoatHint}</p>
+          )}
         </div>
       </div>
 
       <div className="mt-4 space-y-3">
         <p className="text-[12px] font-semibold uppercase tracking-wide text-amber-950/80">
-          {copy.bodySection}
+          {isHull ? copy.hullSection : copy.bodySection}
         </p>
-        {BODY_AREA_IDS.map((id) => {
+        {bodyIds.map((id) => {
           const entry = draft.areas.find((a) => a.areaId === id)!;
           return (
             <AreaEditor
               key={id}
               entry={entry}
               label={areaLabel(id)}
-              hint={copy.bodyPhotoHint}
+              hint={isHull ? copy.hullPhotoHint : copy.bodyPhotoHint}
               commentLabel={copy.commentLabel}
-              commentPlaceholder={copy.commentPlaceholder}
+              commentPlaceholder={isHull ? copy.hullCommentPlaceholder : copy.commentPlaceholder}
               damageLabel={copy.damageLabel}
               damageLabels={copy.damage}
               photoAdd={copy.photoAdd}
@@ -299,6 +318,7 @@ export function PreTripInspectionPanel({
         })}
       </div>
 
+      {!isHull ? (
       <div className="mt-5 space-y-3">
         <p className="text-[12px] font-semibold uppercase tracking-wide text-amber-950/80">
           {copy.tiresSection(wheelCount)}
@@ -342,11 +362,12 @@ export function PreTripInspectionPanel({
           );
         })}
       </div>
+      ) : null}
 
       <div className="mt-4 space-y-2 border-t border-amber-200/80 pt-3">
         {!checklistOk ? (
           <p className="text-[12px] font-semibold text-red-700">
-            {copy.incomplete(wheelCount)}
+            {isHull ? copy.hullIncomplete : copy.incomplete(wheelCount)}
           </p>
         ) : null}
 
@@ -357,8 +378,9 @@ export function PreTripInspectionPanel({
             onClick={() =>
               onChange({
                 ...draft,
+                layout,
                 requiredWheelCount: wheelCount,
-                areas: mergeInspectionAreas(draft.areas, wheelCount),
+                areas: mergeInspectionAreas(draft.areas, wheelCount, layout),
                 renterSubmittedAt: new Date().toISOString(),
               })
             }
@@ -382,8 +404,9 @@ export function PreTripInspectionPanel({
             onClick={() =>
               onChange({
                 ...draft,
+                layout,
                 requiredWheelCount: wheelCount,
-                areas: mergeInspectionAreas(draft.areas, wheelCount),
+                areas: mergeInspectionAreas(draft.areas, wheelCount, layout),
                 hostConfirmedAt: new Date().toISOString(),
               })
             }

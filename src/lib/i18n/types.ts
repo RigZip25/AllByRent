@@ -1365,6 +1365,22 @@ export type AppMessages = {
     cribDropSideAttest: string;
     cribSanitizationAttest: string;
     cribSafetyBadge: string;
+    babyHygieneBlockedTitle: string;
+    babyHygieneBlockedBody: string;
+    babyHygieneTitle: string;
+    babyHygieneBody: string;
+    babyHygieneAttest: string;
+    babyHygieneBadge: string;
+    babyInstallBlockedTitle: string;
+    babyInstallBlockedBody: string;
+    babyInstallTitle: string;
+    babyInstallBody: (status: string) => string;
+    babyInstallAttest: string;
+    toyHazardBlockedTitle: string;
+    toyHazardBlockedBody: string;
+    toyHazardTitle: string;
+    toyHazardBody: (band: string) => string;
+    toyHazardAttest: string;
     ppeAckTitle: string;
     ppeAckBody: string;
     ppeAckAttest: string;
@@ -1831,6 +1847,10 @@ export type AppMessages = {
     helmetLockUnlockBlocked: string;
     safetyBriefingUnlockBlocked: string;
     cribUnlockBlocked: string;
+    carSeatUnlockBlocked: string;
+    babyHygieneUnlockBlocked: string;
+    babyInstallUnlockBlocked: string;
+    toyHazardUnlockBlocked: string;
     ppeAckUnlockBlocked: string;
     hygieneUnlockBlocked: string;
     costumeReturnUnlockBlocked: string;
@@ -2157,6 +2177,12 @@ export type AppMessages = {
         }
       >
     >;
+    bySubcategory?: Partial<Record<string, Partial<Record<string, {
+      title: string; summary: string; hostTipTitle?: string; hostTip?: string;
+      hostTipLinkLabel?: string; hostTipLinkHref?: string; whyGeoTitle: string; whyGeo: string;
+      contactlessTitle?: string; contactless?: string; flowTitle: string; flow: string;
+      layersTitle: string; layers: string; claimsTitle: string; claims: string;
+    }>>>>;
   };
   /** Mandatory pre-trip / return photo inspection for vehicles & heavy. */
   preTripInspection: {
@@ -2165,6 +2191,13 @@ export type AppMessages = {
     returnTitle: string;
     returnBody: (tireCount: number) => string;
     tireSwapHint: string;
+    hullPickupBody: string;
+    hullReturnBody: string;
+    hullGelcoatHint: string;
+    hullSection: string;
+    hullPhotoHint: string;
+    hullCommentPlaceholder: string;
+    hullIncomplete: string;
     bodySection: string;
     tiresSection: (tireCount: number) => string;
     bodyPhotoHint: string;
@@ -2200,6 +2233,11 @@ export type AppMessages = {
       exterior_left: string;
       exterior_right: string;
       interior: string;
+      hull_bow: string;
+      hull_stern: string;
+      hull_port: string;
+      hull_starboard: string;
+      hull_deck: string;
       tire_fl: string;
       tire_fr: string;
       tire_rl: string;

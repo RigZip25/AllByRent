@@ -43,23 +43,6 @@ export function isSpecFieldVisible(
   modes?: SpecModeContext | null,
 ): boolean {
   if (field.requiredIf === "rent" && !modes?.rent) return false;
-  if (category.trim() === "Construction" && subcategory.trim() === "Safety Equipment" && modes?.rent) {
-    const tier = (values.ppeRiskTier ?? "").trim();
-    if (tier === "fall_protection" || tier === "mixed_kit") {
-      const std = (values.ppeStandardRegion ?? "").trim();
-      if (!["ansi_z89_hard_hat","en_397_hard_hat","ansi_z359_fall","en_361_harness","other_ppe_standard"].includes(std)) return false;
-      const insp = (values.ppeInspectionStatus ?? "").trim();
-      if (insp !== "inspected_current" && insp !== "tag_visible") return false;
-    }
-    if (tier === "soft_ppe") {
-      const insp = (values.ppeInspectionStatus ?? "").trim();
-      if (!["not_required_soft_ppe","inspected_current","tag_visible"].includes(insp)) return false;
-    }
-  }
-  if (category.trim() === "Construction" && modes?.rent && (subcategory.trim() === "Formwork Basic" || subcategory.trim() === "Professional Formwork")) {
-    if (!(values.kitInventoryChecklist ?? "").trim()) return false;
-  }
-
   return true;
 }
 
@@ -869,7 +852,8 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
       {
         key: "hinNumber",
         type: "text",
-        required: true,
+        required: false,
+        recommended: true,
         requiredIf: "rent",
       },
       {
@@ -909,7 +893,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: ["Kayaks & Canoes", "SUP Boards"],
+        subcategories: ["Kayaks & Canoes", "SUP Boards", "Inflatable Boats"],
         options: ["included", "renter_provides", "not_required"],
       },
       {
@@ -918,7 +902,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         required: false,
         recommended: true,
         requiredIf: "rent",
-        subcategories: ["Kayaks & Canoes", "SUP Boards"],
+        subcategories: ["Kayaks & Canoes", "SUP Boards", "Inflatable Boats"],
       },
       {
         key: "insuranceMinLiability",
@@ -1829,6 +1813,7 @@ export function areCategorySpecsValid(
   }
 
 
+<<<<<<< HEAD
   // Bikes & Scooters P0/P1 gates
   if (category.trim() === "Bikes & Scooters" && modes?.rent) {
     const overnight = (values.overnightStorageRule ?? "").trim();
@@ -1873,6 +1858,60 @@ export function areCategorySpecsValid(
     }
   }
 
+
+=======
+
+  // Boats: hull ID required for powered craft only (kayak/SUP/non-motor inflatable optional).
+  if (category.trim() === "Boats & Water" && modes?.rent) {
+    const motor = (values.motorIncluded ?? "").trim().toLowerCase();
+    const sub = subcategory.trim().toLowerCase();
+    const motorSubs = new Set([
+      "jet skis", "motorboats", "pontoon boats", "commercial fishing",
+      "dive boats", "charter vessels", "fishing boats",
+    ]);
+    const powered = motorSubs.has(sub) || motor === "yes" || motor === "electric_only";
+    if (powered && !(values.hinNumber ?? "").trim()) return false;
+  }
+
+>>>>>>> 3012fb2 (Complete Boats & Water P0 gates: age 18 captained, soft HIN, inflatable PFD, hull UI i18n.)
+
+  // Construction Safety Equipment soft vs fall-protection publish rules.
+  if (
+    category.trim() === "Construction" &&
+    subcategory.trim() === "Safety Equipment" &&
+    modes?.rent
+  ) {
+    const tier = (values.ppeRiskTier ?? "").trim();
+    if (tier === "fall_protection" || tier === "mixed_kit") {
+      const std = (values.ppeStandardRegion ?? "").trim();
+      if (
+        !["ansi_z89_hard_hat", "en_397_hard_hat", "ansi_z359_fall", "en_361_harness", "other_ppe_standard"].includes(
+          std,
+        )
+      ) {
+        return false;
+      }
+      const insp = (values.ppeInspectionStatus ?? "").trim();
+      if (insp !== "inspected_current" && insp !== "tag_visible") return false;
+    }
+    if (tier === "soft_ppe") {
+      const insp = (values.ppeInspectionStatus ?? "").trim();
+      if (
+        !["not_required_soft_ppe", "inspected_current", "tag_visible"].includes(insp)
+      ) {
+        return false;
+      }
+    }
+  }
+
+  if (
+    category.trim() === "Construction" &&
+    modes?.rent &&
+    (subcategory.trim() === "Formwork Basic" ||
+      subcategory.trim() === "Professional Formwork")
+  ) {
+    if (!(values.kitInventoryChecklist ?? "").trim()) return false;
+  }
 
   return true;
 }

@@ -85,6 +85,9 @@ export type RentalAgreementCommercialSnapshot = {
     liabilityWaiverRequired?: boolean;
     helmetPolicy?: string;
     lockPolicy?: string;
+    overnightStorageRule?: string;
+    kidsGuardianRequired?: boolean;
+    eBikeClass?: string;
     setupTeardownFeeUsd?: number;
     powerRequirement?: string;
     hitchClass?: string;
@@ -372,7 +375,7 @@ export function buildEnrichedSummaryLines(input: {
     lines.push(`Minimum operator / driver age: ${trust.minAgeRequired}.`);
   }
   if (trust?.hinNumber?.trim()) {
-    lines.push(`Hull Identification Number (HIN): ${trust.hinNumber.trim()}.`);
+    lines.push(`Hull ID (HIN / CIN / local reg): ${trust.hinNumber.trim()}.`);
   }
   if (trust?.boatRegistration?.trim()) {
     lines.push(`Vessel registration: ${trust.boatRegistration.trim()}.`);
@@ -394,10 +397,19 @@ export function buildEnrichedSummaryLines(input: {
       "Liability waiver: renter assumes risk of injury from gym / high-risk sports or outdoor gear use; Evorios is not the equipment owner.",
     );
   }
-  if (trust?.helmetPolicy || trust?.lockPolicy) {
+  if (trust?.helmetPolicy || trust?.lockPolicy || trust?.overnightStorageRule) {
+    const overnight = trust.overnightStorageRule
+      ? `; overnight storage: ${trust.overnightStorageRule}`
+      : "";
     lines.push(
-      `Helmet policy: ${trust.helmetPolicy || "n/a"}; lock policy: ${trust.lockPolicy || "n/a"}.`,
+      `Helmet policy: ${trust.helmetPolicy || "n/a"}; lock policy: ${trust.lockPolicy || "n/a"}${overnight}.`,
     );
+  }
+  if (trust?.kidsGuardianRequired) {
+    lines.push("Kids bike: adult guardian attested at booking; helmet required.");
+  }
+  if (trust?.eBikeClass?.trim()) {
+    lines.push(`E-bike class: ${trust.eBikeClass.trim()}.`);
   }
   if (trust?.dataWipeRequired) {
     const wipeStatus = trust.hostDataWipeStatus?.trim();

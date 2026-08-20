@@ -7,19 +7,28 @@ const BORDER = "#E8E6E0";
 
 type Props = {
   category: string;
+  /** When set, prefers subcategory industry tip over the category-level card. */
+  subcategory?: string;
   /** When true, expand details by default (e.g. listing wizard). */
   defaultExpanded?: boolean;
   className?: string;
 };
 
-/** Category-scoped how-it-works / safety fact (Vehicles, etc.) — not global FAQ. */
+/** Category-scoped how-it-works / safety fact — not global FAQ. */
 export function CategoryFactCard({
   category,
+  subcategory,
   defaultExpanded = false,
   className = "",
 }: Props) {
   const t = useMessages();
-  const fact = t.categoryFacts.byCategory[category.trim()];
+  const catKey = category.trim();
+  const subKey = subcategory?.trim() ?? "";
+  const subFact =
+    subKey && t.categoryFacts.bySubcategory?.[catKey]
+      ? t.categoryFacts.bySubcategory[catKey]?.[subKey]
+      : undefined;
+  const fact = subFact ?? t.categoryFacts.byCategory[catKey];
   const [open, setOpen] = useState(defaultExpanded);
 
   if (!fact) return null;
@@ -27,7 +36,8 @@ export function CategoryFactCard({
   return (
     <div
       className={`rounded-2xl border border-amber-200 bg-amber-50/80 px-3.5 py-3 ${className}`}
-      data-category-fact={category.trim()}
+      data-category-fact={catKey}
+      data-subcategory-fact={subKey || undefined}
     >
       <div className="flex items-start gap-2">
         <Shield className="mt-0.5 h-4 w-4 shrink-0 text-amber-900" aria-hidden />

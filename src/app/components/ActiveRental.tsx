@@ -118,6 +118,7 @@ import {
 import {
   isPreTripInspectionReady,
   isReturnInspectionReady,
+  listingInspectionLayout,
   listingRequiredWheelCount,
   listingRequiresPreTripInspection,
 } from "../../lib/preTripInspection";
@@ -226,6 +227,10 @@ export function ActiveRental({
       publishedListing != null
         ? listingRequiredWheelCount(publishedListing)
         : 4,
+    [publishedListing],
+  );
+  const preTripLayout = useMemo(
+    () => listingInspectionLayout(publishedListing),
     [publishedListing],
   );
   const chatWindow = useMemo(
@@ -766,7 +771,7 @@ export function ActiveRental({
     if (
       mode === "pickup" &&
       needsPreTrip &&
-      !isPreTripInspectionReady(booking?.preTripInspection, preTripWheelCount)
+      !isPreTripInspectionReady(booking?.preTripInspection, preTripWheelCount, preTripLayout)
     ) {
       setNotice(t.rentalDetail.preTripUnlockBlocked);
       return;
@@ -774,7 +779,7 @@ export function ActiveRental({
     if (
       mode === "return" &&
       needsPreTrip &&
-      !isReturnInspectionReady(booking?.returnInspection, preTripWheelCount)
+      !isReturnInspectionReady(booking?.returnInspection, preTripWheelCount, preTripLayout)
     ) {
       setNotice(t.rentalDetail.preTripUnlockBlocked);
       return;
@@ -2196,6 +2201,7 @@ export function ActiveRental({
             stage="pickup"
             role={booking.role}
             wheelCount={preTripWheelCount}
+            layout={preTripLayout}
             value={booking.preTripInspection}
             onChange={(next) => {
               updateBooking(booking.id, { preTripInspection: next });
@@ -2211,6 +2217,7 @@ export function ActiveRental({
             stage="return"
             role={booking.role}
             wheelCount={preTripWheelCount}
+            layout={preTripLayout}
             value={booking.returnInspection}
             onChange={(next) => {
               updateBooking(booking.id, { returnInspection: next });
