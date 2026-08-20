@@ -578,6 +578,11 @@ export function ItemDetail({
                     ? "Electronics & Tech"
                     : "Photo & Video"
                 }
+                subcategory={
+                  listing.category.trim() === "Electronics & Tech"
+                    ? listing.subcategory
+                    : undefined
+                }
                 className="mt-3"
               />
             ) : null}

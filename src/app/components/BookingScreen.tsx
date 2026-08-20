@@ -1680,6 +1680,11 @@ function BookingScreenLoaded({
                 ? "Electronics & Tech"
                 : "Photo & Video"
             }
+            subcategory={
+              listing.category.trim() === "Electronics & Tech"
+                ? listing.subcategory
+                : undefined
+            }
           />
         ) : null}
         {listing.category.trim() === "Gym & Fitness" && listing.modes.rent ? (

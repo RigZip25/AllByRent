@@ -376,40 +376,737 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: false,
         recommended: true,
-        options: [
-          "under_13",
-          "13_15",
-          "15_17",
-          "17_32",
-          "32_55",
-          "55_plus",
-          "no_screen",
-        ],
+        options: ["under_13", "13_15", "15_17", "17_32", "32_55", "55_plus", "55_65", "65_75", "75_98", "98_plus", "led_cabinet_row", "no_screen"],
       },
       {
         key: "kitInventoryItems",
         type: "multiselect",
         required: true,
         requiredIf: "rent",
-        options: ELECTRONICS_KIT_ITEMS,
+        options: ["main_device", "charger_psu", "power_cable", "data_cables", "case_sleeve", "peripherals", "adapters", "remote", "stand_mount", "manuals", "other_accessories"],
       },
-      {
-        key: "kitInventoryChecklist",
-        type: "text",
-        required: false,
-        recommended: true,
-        requiredIf: "rent",
-      },
+      { key: "kitInventoryChecklist", type: "text", required: true, requiredIf: "rent" },
       {
         key: "hostDataWipeStatus",
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: [...ELECTRONICS_WIPE_SUBS],
+        subcategories: ["Laptops", "Smart Home Devices", "Network Gear", "Servers & Workstations"],
         options: ["wiped_before_list", "wipe_at_handoff", "account_unlinked", "renter_responsible"],
+      },
+      {
+        key: "hostDataWipeStatus",
+        type: "select",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        subcategories: ["Gaming Gear", "Other"],
+        options: ["wiped_before_list", "wipe_at_handoff", "account_unlinked", "renter_responsible"],
+      },
+      {
+        key: "deviceHasStorage",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["has_storage", "no_storage", "unknown"],
+      },
+      {
+        key: "gamingHasInternalStorage",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Gaming Gear"],
+        options: ["has_internal_storage", "cloud_or_thin_client", "accessories_no_storage"],
+      },
+      {
+        key: "osAdminUnlockPlan",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Laptops"],
+        options: ["unlocked_ready", "guest_demo_account", "password_shared_at_handoff", "renter_brings_own_os", "firmware_lock_disclosed"],
+      },
+      {
+        key: "chargerWattageBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Laptops"],
+        options: ["under_45w", "45_65w", "65_100w", "100w_plus", "usb_c_pd_shared", "no_charger_included"],
+      },
+      {
+        key: "batteryHealthBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Laptops"],
+        options: ["excellent_90_plus", "good_80_89", "fair_60_79", "replace_soon_under_60", "unknown_untested"],
+      },
+      {
+        key: "loginDemoAccountNotes",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Laptops"],
+      },
+      {
+        key: "laptopConditionGrade",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Laptops"],
+        options: ["like_new", "light_wear", "visible_wear_screen_kb", "functional_imperfections"],
+      },
+      {
+        key: "antivirusAccountUnlinkNotes",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Laptops"],
+      },
+      {
+        key: "returnWipeAckDepth",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Laptops"],
+        options: ["host_wipes_on_return", "renter_factory_reset_required", "renter_logout_only", "no_wipe_needed_loaner_image"],
+      },
+      {
+        key: "projectorLumenBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Projectors"],
+        options: ["under_500", "500_1500", "1500_3000", "3000_5000", "5000_plus"],
+      },
+      {
+        key: "projectorThrowNotes",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Projectors"],
+      },
+      {
+        key: "projectorInputInventory",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Projectors"],
+      },
+      {
+        key: "projectorScreenStandIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Projectors"],
+        options: ["projector_only", "screen_included", "stand_tripod_included", "screen_and_stand", "renter_provides_screen"],
+      },
+      {
+        key: "projectorLightSource",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Projectors"],
+        options: ["lamp", "laser", "led", "hybrid_unknown"],
+      },
+      {
+        key: "projectorNativeResBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Projectors"],
+        options: ["svga_or_lower", "720p", "1080p", "wuxga_1440p", "4k_uhd", "other_res"],
+      },
+      {
+        key: "projectorUseEnv",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Projectors"],
+        options: ["indoor_only", "covered_outdoor_ok", "outdoor_ok_dry", "outdoor_not_allowed"],
+      },
+      {
+        key: "projectorLampHoursNotes",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Projectors"],
+      },
+      {
+        key: "projectorPowerCableLengthBand",
+        type: "select",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Projectors"],
+        options: ["under_3ft", "3_6ft", "6_10ft", "10_25ft", "25ft_plus_ext", "unknown_length"],
+      },
+      {
+        key: "smartDeviceClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Smart Home Devices"],
+        options: ["smart_speaker_display", "security_camera", "video_doorbell", "thermostat", "smart_lock", "lighting_kit", "hub_bridge", "sensor_kit", "multi_device_kit", "other_smart_home"],
+      },
+      {
+        key: "hubBridgeStatus",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Smart Home Devices"],
+        options: ["hub_included", "bridge_included", "renter_must_have_hub", "wifi_only_no_hub", "not_applicable"],
+      },
+      {
+        key: "smartProtocolBand",
+        type: "multiselect",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Smart Home Devices"],
+        options: ["wifi", "thread", "zigbee", "matter", "bluetooth", "zwave", "proprietary_cloud"],
+      },
+      {
+        key: "smartPowerType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Smart Home Devices"],
+        options: ["plug_in_ac", "battery", "hardwired", "usb_powered", "poe", "mixed_kit"],
+      },
+      {
+        key: "factoryResetNotes",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Smart Home Devices"],
+      },
+      {
+        key: "accountReturnPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Smart Home Devices"],
+        options: ["must_unlink_before_return", "factory_reset_before_return", "host_resets_at_return"],
+      },
+      {
+        key: "cameraPrivacyCover",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Smart Home Devices"],
+        options: ["cover_included", "no_cover", "no_camera"],
+      },
+      {
+        key: "installRemovalNotes",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Smart Home Devices"],
+      },
+      {
+        key: "gamingGearSubtype",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Gaming Gear"],
+        options: ["console", "pc_gaming", "vr_headset", "handheld", "controllers_accessories"],
+      },
+      {
+        key: "gamingAccountLoginPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Gaming Gear"],
+        options: ["guest_or_offline", "host_account_temporary", "renter_own_account", "no_login_needed"],
+      },
+      {
+        key: "controllerCountBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Gaming Gear"],
+        options: ["none_0", "one_1", "two_2", "three_to_four", "five_plus", "not_applicable"],
+      },
+      {
+        key: "gameLibraryIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Gaming Gear"],
+        options: ["none_empty", "digital_on_device", "physical_discs_carts", "mixed_digital_physical", "not_applicable"],
+      },
+      {
+        key: "vrHeadsetHygieneNotes",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Gaming Gear"],
+      },
+      {
+        key: "gamingCableHdmiPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Gaming Gear"],
+        options: ["hdmi_and_power_included", "hdmi_only_renter_power", "power_only_renter_hdmi", "displayport_included", "renter_provides_all_cables", "not_applicable_wireless"],
+      },
+      {
+        key: "contentAgeRatingNote",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Gaming Gear"],
+      },
+      {
+        key: "speakerFormBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Speakers"],
+        options: ["bluetooth_portable", "wired_bookshelf", "party_boombox", "soundbar_home", "smart_speaker", "other_consumer_speaker"],
+      },
+      {
+        key: "speakerPowerBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Speakers"],
+        options: ["battery_only", "ac_mains", "battery_and_ac", "usb_powered"],
+      },
+      {
+        key: "speakerWeatherBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Speakers"],
+        options: ["indoor_only", "splash_ok", "outdoor_rated", "unknown_weather"],
+      },
+      {
+        key: "neighborVolumeNotes",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Speakers"],
+      },
+      {
+        key: "standMountIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Speakers"],
+        options: ["stand_included", "mount_bracket_included", "stand_and_mount", "not_included", "not_applicable"],
+      },
+      {
+        key: "batteryChargeBand",
+        type: "select",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Speakers"],
+        options: ["full_90_100", "high_70_89", "mid_40_69", "low_under_40", "unknown_charge"],
+      },
+      {
+        key: "chargerIncluded",
+        type: "select",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Speakers"],
+        options: ["included", "renter_provides", "not_applicable"],
+      },
+      {
+        key: "stereoPairNotes",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Speakers"],
+      },
+      {
+        key: "electronicsKitBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["single_device", "multi_piece_kit"],
+      },
+      {
+        key: "devicePowerBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["battery_internal", "usb_powered", "wall_ac_included", "wall_ac_renter", "poe", "passive_no_power"],
+      },
+      {
+        key: "photoConditionChecklist",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["front_ports", "front_ports_flaws", "all_pieces_and_flaws"],
+      },
+      {
+        key: "serverFormFactor",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Servers & Workstations"],
+        options: ["tower_workstation", "tower_server", "rack_1u", "rack_2u", "rack_4u_plus", "blade_chassis", "laptop_workstation", "all_in_one_workstation"],
+      },
+      {
+        key: "serverPowerConfig",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Servers & Workstations"],
+        options: ["single_psu_120v", "single_psu_240v", "dual_redundant_psu", "pdu_c13_c14_required", "renter_provides_power", "host_confirm_power"],
+      },
+      {
+        key: "ramCapacityBand",
+        type: "select",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Servers & Workstations"],
+        options: ["under_32gb", "32_64gb", "64_128gb", "128_256gb", "256gb_plus", "host_confirm_ram"],
+      },
+      {
+        key: "cpuClassBand",
+        type: "select",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Servers & Workstations"],
+        options: ["entry_office", "creator_render", "workstation_pro", "server_xeon_epyc", "gpu_accelerated", "host_confirm_cpu"],
+      },
+      {
+        key: "rackMountKitIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Servers & Workstations"],
+        options: ["rails_included", "rails_not_included", "cage_nuts_only", "sliding_rails_plus_cable_arm", "not_rack_form"],
+      },
+      {
+        key: "networkPortsInventory",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Servers & Workstations"],
+      },
+      {
+        key: "remoteMgmtAccessPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Servers & Workstations"],
+        options: ["no_bmc_access", "ipmi_idrac_creds_on_handoff", "idrac_ilo_read_only", "bmc_disabled_before_rent", "renter_must_not_use_bmc"],
+      },
+      {
+        key: "dataWipeDepthBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Servers & Workstations"],
+        options: ["secure_erase_done", "crypto_erase_done", "os_reinstall_only", "drives_removed", "wipe_at_return_renter"],
+      },
+      {
+        key: "shippingWeightNotes",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Servers & Workstations"],
+      },
+      {
+        key: "noiseHeatEnvironmentNotes",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Servers & Workstations"],
+      },
+      {
+        key: "proAudioGearType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pro Audio"],
+        options: ["audio_interface", "analog_mixer", "digital_mixer", "studio_microphone", "studio_monitor_pair", "headphone_amp_dac", "di_box_kit", "field_recorder", "other_pro_audio"],
+      },
+      {
+        key: "phantomPowerSupport",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pro Audio"],
+        options: ["phantom_48v_builtin", "phantom_external_needed", "no_phantom", "phantom_not_applicable"],
+      },
+      {
+        key: "proAudioCableLoom",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pro Audio"],
+      },
+      {
+        key: "caseIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pro Audio"],
+        options: ["hard_case", "soft_case", "flight_case", "no_case"],
+      },
+      {
+        key: "diBoxIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pro Audio"],
+        options: ["di_included", "di_not_included", "di_not_needed"],
+      },
+      {
+        key: "sampleRateBitDepthBand",
+        type: "select",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Pro Audio"],
+        options: ["up_to_48k_24", "up_to_96k_24", "up_to_192k_24", "analog_only", "unknown_soft"],
+      },
+      {
+        key: "returnFunctionTestAttest",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Pro Audio"],
+        options: ["host_function_tested", "test_at_handoff", "renter_return_test_required"],
+      },
+      {
+        key: "broadcastDeviceSubtype",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Broadcast Equipment"],
+        options: ["video_switcher", "stream_encoder", "recorder_iso", "teleprompter", "capture_card", "confidence_monitor", "control_surface", "other_broadcast"],
+      },
+      {
+        key: "broadcastKitCompleteness",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Broadcast Equipment"],
+        options: ["device_only", "device_plus_io_cables", "full_stream_kit", "accessory_only"],
+      },
+      {
+        key: "videoIoInventory",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Broadcast Equipment"],
+      },
+      {
+        key: "powerBatteryPlateBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Broadcast Equipment"],
+        options: ["ac_mains_only", "vmount_plate", "gold_mount_plate", "npf_sony_plate", "internal_battery", "mixed_ac_battery", "poe_or_usb_c_pd", "renter_provides_power"],
+      },
+      {
+        key: "captureMediaIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Broadcast Equipment"],
+        options: ["no_media_needed", "sd_cf_included", "ssd_included", "renter_provides_media", "mixed_some_included"],
+      },
+      {
+        key: "returnFunctionTestPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Broadcast Equipment"],
+        options: ["ports_power_on_test", "loopback_or_preview_ok", "host_tests_at_return", "renter_self_attest_ok", "no_live_test_visual_only"],
+      },
+      {
+        key: "firmwareNotes",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Broadcast Equipment"],
+      },
+      {
+        key: "livestreamPlatformNotes",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Broadcast Equipment"],
+      },
+      {
+        key: "networkGearSubtype",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Network Gear"],
+        options: ["router", "switch", "access_point", "firewall", "mesh_system", "modem", "network_other"],
+      },
+      {
+        key: "managedBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Network Gear"],
+        options: ["unmanaged", "smart_cloud", "fully_managed", "not_applicable"],
+      },
+      {
+        key: "poeBudgetBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Network Gear"],
+        options: ["no_poe", "under_60w", "60_150w", "150_300w", "300w_plus", "poe_not_applicable"],
+      },
+      {
+        key: "configWipeDepth",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Network Gear"],
+        options: ["factory_reset_full", "config_cleared_keep_os", "controller_unlinked", "host_reimages", "renter_resets_at_start"],
+      },
+      {
+        key: "credentialsHandoffPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Network Gear"],
+        options: ["temp_creds_at_handoff", "factory_defaults_only", "host_configures_remote", "renter_brings_own_creds", "no_creds_needed"],
+      },
+      {
+        key: "rackMountIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Network Gear"],
+        options: ["rack_ears_included", "wall_mount_kit", "desktop_only", "pole_mount_kit", "mount_not_applicable"],
+      },
+      {
+        key: "portCountBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Network Gear"],
+        options: ["wireless_only", "under_8", "8_16", "16_24", "24_48", "48_plus"],
+      },
+      {
+        key: "outdoorApRating",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Network Gear"],
+        options: ["indoor_only", "outdoor_iprated", "outdoor_not_applicable"],
+      },
+      {
+        key: "renterFactoryRestorePolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Network Gear"],
+        options: ["renter_restores_factory", "host_restores_after", "leave_config_ok_host_wipes"],
+      },
+      {
+        key: "displayTypeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Display Systems"],
+        options: ["flat_panel_lcd", "flat_panel_oled", "led_cabinet_wall", "portable_monitor", "interactive_touch", "other_display"],
+      },
+      {
+        key: "resolutionHdrBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Display Systems"],
+        options: ["hd_1080_sdr", "qhd_1440_sdr", "uhd_4k_sdr", "uhd_4k_hdr10", "uhd_4k_hlg", "uhd_8k_or_hdr_mixed", "led_native_map", "other_resolution"],
+      },
+      {
+        key: "brightnessNitBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Display Systems"],
+        options: ["under_400_nit", "400_700_nit", "700_1500_nit", "1500_3500_nit", "3500_nit_plus", "not_specified_lcd"],
+      },
+      {
+        key: "mountStandCaseBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Display Systems"],
+        options: ["stand_included", "wall_mount_included", "stand_and_mount", "rolling_cart_included", "flight_case_included", "stand_mount_and_case", "none_renter_provides"],
+      },
+      {
+        key: "displayInputInventory",
+        type: "multiselect",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Display Systems"],
+        options: ["hdmi", "displayport", "sdi", "dvi", "vga", "usb_c_alt", "network_av_nd_i_or_hdbaset", "wireless_cast", "other_input"],
+      },
+      {
+        key: "indoorOutdoorRating",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Display Systems"],
+        options: ["indoor_only", "covered_outdoor_ok", "outdoor_rated", "unknown_rating"],
+      },
+      {
+        key: "powerCircuitBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Display Systems"],
+        options: ["standard_120v_15a", "120v_20a_dedicated", "208_240v", "led_multi_circuit", "battery_or_inverter", "ask_host_or_multi"],
+      },
+      {
+        key: "powerCircuitNotes",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Display Systems"],
+      },
+      {
+        key: "pixelPitchMmBand",
+        type: "select",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Display Systems"],
+        options: ["under_1_5_mm", "1_5_2_5_mm", "2_5_4_mm", "4_mm_plus", "not_led_n_a"],
+      },
+      {
+        key: "transportFragilityBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Display Systems"],
+        options: ["glass_panel_fragile", "led_cabinet_modular", "flight_cased_rugged", "desktop_monitor_ok", "mixed_fragile"],
       },
     ],
   },
+
   {
     category: "Home & Kitchen",
     fields: [
@@ -2026,12 +2723,133 @@ export function areCategorySpecsValid(
     if (rid === "rid_exempt_under_250g" && weight !== "under_250g") return false;
   }
 
-  // Electronics wipe / unlink for privacy-sensitive shelves.
+  // Electronics wipe / unlink + subcategory P0 gates.
   if (category.trim() === "Electronics & Tech" && modes?.rent) {
-    const wipeSubs = new Set(ELECTRONICS_WIPE_SUBS.map((s) => s.toLowerCase()));
-    if (wipeSubs.has(subcategory.trim().toLowerCase())) {
+    const sub = subcategory.trim();
+    const subLc = sub.toLowerCase();
+    const wipeAlways = new Set(ELECTRONICS_WIPE_SUBS.map((s) => s.toLowerCase()));
+    const needsWipe =
+      wipeAlways.has(subLc) ||
+      (subLc === "gaming gear" &&
+        (values.gamingHasInternalStorage ?? "").trim() === "has_internal_storage") ||
+      (subLc === "other" && (values.deviceHasStorage ?? "").trim() === "has_storage");
+    if (needsWipe) {
       const wipe = (values.hostDataWipeStatus ?? "").trim();
-      if (!["wiped_before_list","wipe_at_handoff","account_unlinked","renter_responsible"].includes(wipe)) return false;
+      if (
+        ![
+          "wiped_before_list",
+          "wipe_at_handoff",
+          "account_unlinked",
+          "renter_responsible",
+        ].includes(wipe)
+      ) {
+        return false;
+      }
+    }
+    // Kit checklist required on all Electronics rent shelves.
+    if (!(values.kitInventoryItems ?? "").trim()) return false;
+    if (!(values.kitInventoryChecklist ?? "").trim()) return false;
+
+    const reqSelect = (key: string, allowed: string[]) => {
+      const v = (values[key] ?? "").trim();
+      return allowed.includes(v);
+    };
+    const reqText = (key: string, min = 3) => (values[key] ?? "").trim().length >= min;
+
+    if (sub === "Laptops") {
+      if (!reqSelect("osAdminUnlockPlan", ["unlocked_ready","guest_demo_account","password_shared_at_handoff","renter_brings_own_os","firmware_lock_disclosed"])) return false;
+      if (!reqSelect("chargerWattageBand", ["under_45w","45_65w","65_100w","100w_plus","usb_c_pd_shared","no_charger_included"])) return false;
+      if (!reqSelect("batteryHealthBand", ["excellent_90_plus","good_80_89","fair_60_79","replace_soon_under_60","unknown_untested"])) return false;
+      if (!reqText("loginDemoAccountNotes")) return false;
+      if (!reqSelect("laptopConditionGrade", ["like_new","light_wear","visible_wear_screen_kb","functional_imperfections"])) return false;
+      if (!reqText("antivirusAccountUnlinkNotes")) return false;
+      if (!reqSelect("returnWipeAckDepth", ["host_wipes_on_return","renter_factory_reset_required","renter_logout_only","no_wipe_needed_loaner_image"])) return false;
+    }
+    if (sub === "Projectors") {
+      if (!reqSelect("projectorLumenBand", ["under_500","500_1500","1500_3000","3000_5000","5000_plus"])) return false;
+      if (!reqText("projectorThrowNotes")) return false;
+      if (!reqText("projectorInputInventory")) return false;
+      if (!reqSelect("projectorScreenStandIncluded", ["projector_only","screen_included","stand_tripod_included","screen_and_stand","renter_provides_screen"])) return false;
+      if (!reqSelect("projectorLightSource", ["lamp","laser","led","hybrid_unknown"])) return false;
+      if (!reqSelect("projectorNativeResBand", ["svga_or_lower","720p","1080p","wuxga_1440p","4k_uhd","other_res"])) return false;
+      if (!reqSelect("projectorUseEnv", ["indoor_only","covered_outdoor_ok","outdoor_ok_dry","outdoor_not_allowed"])) return false;
+    }
+    if (sub === "Smart Home Devices") {
+      if (!reqSelect("smartDeviceClass", ["smart_speaker_display","security_camera","video_doorbell","thermostat","smart_lock","lighting_kit","hub_bridge","sensor_kit","multi_device_kit","other_smart_home"])) return false;
+      if (!reqSelect("hubBridgeStatus", ["hub_included","bridge_included","renter_must_have_hub","wifi_only_no_hub","not_applicable"])) return false;
+      if (!(values.smartProtocolBand ?? "").trim()) return false;
+      if (!reqSelect("smartPowerType", ["plug_in_ac","battery","hardwired","usb_powered","poe","mixed_kit"])) return false;
+      if (!reqText("factoryResetNotes")) return false;
+      if (!reqSelect("accountReturnPolicy", ["must_unlink_before_return","factory_reset_before_return","host_resets_at_return"])) return false;
+      if (!reqSelect("cameraPrivacyCover", ["cover_included","no_cover","no_camera"])) return false;
+    }
+    if (sub === "Gaming Gear") {
+      if (!reqSelect("gamingGearSubtype", ["console","pc_gaming","vr_headset","handheld","controllers_accessories"])) return false;
+      if (!reqSelect("gamingAccountLoginPolicy", ["guest_or_offline","host_account_temporary","renter_own_account","no_login_needed"])) return false;
+      if (!reqSelect("controllerCountBand", ["none_0","one_1","two_2","three_to_four","five_plus","not_applicable"])) return false;
+      if (!reqSelect("gameLibraryIncluded", ["none_empty","digital_on_device","physical_discs_carts","mixed_digital_physical","not_applicable"])) return false;
+      if (!reqSelect("gamingHasInternalStorage", ["has_internal_storage","cloud_or_thin_client","accessories_no_storage"])) return false;
+      if (!reqSelect("gamingCableHdmiPolicy", ["hdmi_and_power_included","hdmi_only_renter_power","power_only_renter_hdmi","displayport_included","renter_provides_all_cables","not_applicable_wireless"])) return false;
+      if ((values.gamingGearSubtype ?? "").trim() === "vr_headset" && !reqText("vrHeadsetHygieneNotes")) return false;
+    }
+    if (sub === "Speakers") {
+      if (!reqSelect("speakerFormBand", ["bluetooth_portable","wired_bookshelf","party_boombox","soundbar_home","smart_speaker","other_consumer_speaker"])) return false;
+      if (!reqSelect("speakerPowerBand", ["battery_only","ac_mains","battery_and_ac","usb_powered"])) return false;
+      if (!reqSelect("speakerWeatherBand", ["indoor_only","splash_ok","outdoor_rated","unknown_weather"])) return false;
+      if (!reqText("neighborVolumeNotes")) return false;
+      if (!reqSelect("standMountIncluded", ["stand_included","mount_bracket_included","stand_and_mount","not_included","not_applicable"])) return false;
+    }
+    if (sub === "Other") {
+      if (!reqSelect("electronicsKitBand", ["single_device","multi_piece_kit"])) return false;
+      if (!reqSelect("deviceHasStorage", ["has_storage","no_storage","unknown"])) return false;
+      if (!reqSelect("devicePowerBand", ["battery_internal","usb_powered","wall_ac_included","wall_ac_renter","poe","passive_no_power"])) return false;
+      if (!reqSelect("photoConditionChecklist", ["front_ports","front_ports_flaws","all_pieces_and_flaws"])) return false;
+      if ((values.electronicsKitBand ?? "").trim() === "multi_piece_kit" && !reqText("kitInventoryChecklist", 8)) return false;
+    }
+    if (sub === "Servers & Workstations") {
+      if (!reqSelect("serverFormFactor", ["tower_workstation","tower_server","rack_1u","rack_2u","rack_4u_plus","blade_chassis","laptop_workstation","all_in_one_workstation"])) return false;
+      if (!reqSelect("serverPowerConfig", ["single_psu_120v","single_psu_240v","dual_redundant_psu","pdu_c13_c14_required","renter_provides_power","host_confirm_power"])) return false;
+      if (!reqSelect("rackMountKitIncluded", ["rails_included","rails_not_included","cage_nuts_only","sliding_rails_plus_cable_arm","not_rack_form"])) return false;
+      if (!reqText("networkPortsInventory")) return false;
+      if (!reqSelect("remoteMgmtAccessPolicy", ["no_bmc_access","ipmi_idrac_creds_on_handoff","idrac_ilo_read_only","bmc_disabled_before_rent","renter_must_not_use_bmc"])) return false;
+      if (!reqSelect("dataWipeDepthBand", ["secure_erase_done","crypto_erase_done","os_reinstall_only","drives_removed","wipe_at_return_renter"])) return false;
+    }
+    if (sub === "Pro Audio") {
+      if (!reqSelect("proAudioGearType", ["audio_interface","analog_mixer","digital_mixer","studio_microphone","studio_monitor_pair","headphone_amp_dac","di_box_kit","field_recorder","other_pro_audio"])) return false;
+      if (!reqSelect("phantomPowerSupport", ["phantom_48v_builtin","phantom_external_needed","no_phantom","phantom_not_applicable"])) return false;
+      if (!reqText("proAudioCableLoom")) return false;
+      if (!reqSelect("caseIncluded", ["hard_case","soft_case","flight_case","no_case"])) return false;
+      if (!reqSelect("diBoxIncluded", ["di_included","di_not_included","di_not_needed"])) return false;
+      if (!reqSelect("returnFunctionTestAttest", ["host_function_tested","test_at_handoff","renter_return_test_required"])) return false;
+    }
+    if (sub === "Broadcast Equipment") {
+      if (!reqSelect("broadcastDeviceSubtype", ["video_switcher","stream_encoder","recorder_iso","teleprompter","capture_card","confidence_monitor","control_surface","other_broadcast"])) return false;
+      if (!reqSelect("broadcastKitCompleteness", ["device_only","device_plus_io_cables","full_stream_kit","accessory_only"])) return false;
+      if (!reqText("videoIoInventory")) return false;
+      if (!reqSelect("powerBatteryPlateBand", ["ac_mains_only","vmount_plate","gold_mount_plate","npf_sony_plate","internal_battery","mixed_ac_battery","poe_or_usb_c_pd","renter_provides_power"])) return false;
+      if (!reqSelect("captureMediaIncluded", ["no_media_needed","sd_cf_included","ssd_included","renter_provides_media","mixed_some_included"])) return false;
+      if (!reqSelect("returnFunctionTestPolicy", ["ports_power_on_test","loopback_or_preview_ok","host_tests_at_return","renter_self_attest_ok","no_live_test_visual_only"])) return false;
+    }
+    if (sub === "Network Gear") {
+      if (!reqSelect("networkGearSubtype", ["router","switch","access_point","firewall","mesh_system","modem","network_other"])) return false;
+      if (!reqSelect("managedBand", ["unmanaged","smart_cloud","fully_managed","not_applicable"])) return false;
+      if (!reqSelect("poeBudgetBand", ["no_poe","under_60w","60_150w","150_300w","300w_plus","poe_not_applicable"])) return false;
+      if (!reqSelect("configWipeDepth", ["factory_reset_full","config_cleared_keep_os","controller_unlinked","host_reimages","renter_resets_at_start"])) return false;
+      if (!reqSelect("credentialsHandoffPolicy", ["temp_creds_at_handoff","factory_defaults_only","host_configures_remote","renter_brings_own_creds","no_creds_needed"])) return false;
+      if (!reqSelect("rackMountIncluded", ["rack_ears_included","wall_mount_kit","desktop_only","pole_mount_kit","mount_not_applicable"])) return false;
+      if (!reqSelect("portCountBand", ["wireless_only","under_8","8_16","16_24","24_48","48_plus"])) return false;
+      if (!reqSelect("outdoorApRating", ["indoor_only","outdoor_iprated","outdoor_not_applicable"])) return false;
+      if (!reqSelect("renterFactoryRestorePolicy", ["renter_restores_factory","host_restores_after","leave_config_ok_host_wipes"])) return false;
+    }
+    if (sub === "Display Systems") {
+      if (!reqSelect("displayTypeBand", ["flat_panel_lcd","flat_panel_oled","led_cabinet_wall","portable_monitor","interactive_touch","other_display"])) return false;
+      if (!reqSelect("resolutionHdrBand", ["hd_1080_sdr","qhd_1440_sdr","uhd_4k_sdr","uhd_4k_hdr10","uhd_4k_hlg","uhd_8k_or_hdr_mixed","led_native_map","other_resolution"])) return false;
+      if (!reqSelect("brightnessNitBand", ["under_400_nit","400_700_nit","700_1500_nit","1500_3500_nit","3500_nit_plus","not_specified_lcd"])) return false;
+      if (!reqSelect("mountStandCaseBand", ["stand_included","wall_mount_included","stand_and_mount","rolling_cart_included","flight_case_included","stand_mount_and_case","none_renter_provides"])) return false;
+      if (!(values.displayInputInventory ?? "").trim()) return false;
+      if (!reqSelect("indoorOutdoorRating", ["indoor_only","covered_outdoor_ok","outdoor_rated","unknown_rating"])) return false;
+      if (!reqSelect("powerCircuitBand", ["standard_120v_15a","120v_20a_dedicated","208_240v","led_multi_circuit","battery_or_inverter","ask_host_or_multi"])) return false;
+      if (!reqSelect("transportFragilityBand", ["glass_panel_fragile","led_cabinet_modular","flight_cased_rugged","desktop_monitor_ok","mixed_fragile"])) return false;
     }
   }
 

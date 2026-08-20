@@ -585,6 +585,12 @@ export function listingRequiresDataWipe(
   if (listing.category.trim() === "Electronics & Tech") {
     const sub = subKey(listing);
     if (["laptops","smart home devices","network gear","servers & workstations"].includes(sub)) return true;
+    if (sub === "gaming gear") {
+      return (listing.categorySpecs?.gamingHasInternalStorage ?? "").trim() === "has_internal_storage";
+    }
+    if (sub === "other") {
+      return (listing.categorySpecs?.deviceHasStorage ?? "").trim() === "has_storage";
+    }
   }
   if (typeof listingIsOfficeStorageCapableSub === "function" && listingIsOfficeStorageCapableSub(listing)) {
     return listingDeviceHasStorage(listing);

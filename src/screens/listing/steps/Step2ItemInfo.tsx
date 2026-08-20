@@ -408,7 +408,11 @@ export function Step2ItemInfo({
                 defaultExpanded
               />
             ) : draft.category.trim() === "Electronics & Tech" ? (
-              <CategoryFactCard category="Electronics & Tech" defaultExpanded />
+              <CategoryFactCard
+                category="Electronics & Tech"
+                subcategory={draft.subcategory}
+                defaultExpanded
+              />
             ) : draft.category.trim() === "Tools & DIY" ? (
               <CategoryFactCard category="Tools & DIY" defaultExpanded />
             ) : draft.category.trim() === "Garden & Yard" ? (
