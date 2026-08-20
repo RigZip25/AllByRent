@@ -3753,357 +3753,473 @@ export const es: AppMessages = {
         ],
       },
       "Heavy Equipment": {
-        title: "Alquiler de equipo comercial",
-        summary:
-          "Heavy Equipment por defecto solo a profesionales. Credencial de operador (montacargas / grúa / excavadora / general) obligatoria según subcategoría. Seguro PD obligatorio. Depósito respaldado por seguro (retención del deducible), no valor de reposición. Inspección previa bloquea el inicio.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Mantén «solo profesionales». Exige credencial de operador en equipo motorizado. PD obligatorio; configura el deducible máximo para alinear la retención.",
-        whyGeoTitle: "¿Por qué el comprobante antes de las llaves?",
-        whyGeo:
-          "El equipo comercial es caro sin seguro o sin operador cualificado. Credencial + PD + inspección dan tiempo a revisar.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Publicar → solo pro + PD + credencial si aplica → comprobante → inspección previa → entrega → devolución.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Credencial de operador · declaración pro · PD · retención del deducible · inspección previa · no-show opcional · términos · QR/PIN.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Primero el seguro PD; la retención cubre el deducible. El no-show libera fechas.",
-      },
+          title: "FAQ de equipo pesado",
+          summary: "Respuestas cortas para montacargas, excavadoras, grúas y equipo similar.",
+          qa: [
+            {
+              q: "¿Quién puede alquilar?",
+              a: "Profesionales por defecto. DIY solo si el anfitrión desactiva esa regla.",
+            },
+            {
+              q: "¿Necesito credencial de operador?",
+              a: "Sí cuando la subcategoría lo exige (montacargas/grúa/excavadora/general)—súbela antes de la entrega.",
+            },
+            {
+              q: "¿Se requiere seguro?",
+              a: "Sí—comprobante de daño físico antes del PIN/llaves. El depósito iguala el deducible.",
+            },
+            {
+              q: "¿Qué inspección se exige?",
+              a: "Fotos pre-viaje obligatorias; ambas partes confirman antes del inicio y al devolver.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Una retención del deducible—no el reemplazo total. El seguro es primario.",
+            },
+          ],
+        },
       Construction: {
-        title: "Alquiler vecinal de equipo de obra",
-        summary:
-          "Evorios es peer job-site — no la flota de United Rentals. Solo pro + COI estructurado + retención del deducible para estanterías motorizadas / grúa. EPI blando puede quedarse simple. Combustible full-to-full si hay fuelType. Tarifas mensuales para obras largas.",
-        hostTipTitle: "Para anfitriones (vs United Rentals / EquipmentShare)",
-        hostTip:
-          "Pon fuelType en hormigoneras, torres, bombas, grúas y excavación. Precios mensuales. Separa EPI blando vs anticaídas. Encofrado con inventario. Grúa: tonelaje + bare vs operador. Consumo → Tools & DIY.",
-        whyGeoTitle: "¿Por qué pro + COI + credencial (cuando aplica)?",
-        whyGeo:
-          "Pro + COI + credencial + inspección reduce pérdidas — el EPI blando evita fricción tipo grúa.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Publicar → pro + COI (EPI blando opcional) → comprobantes → inspección → entrega (combustible) → devolución / conteo de encofrado.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Pro · COI · credencial · combustible · retención · inspección · inventario · EPI blando vs anticaídas · QR/PIN.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Seguro primero; retención con fotos. Encofrado: checklist. EPI blando: depósito.",
-      },
+          title: "FAQ de construcción",
+          summary: "Respuestas cortas para equipo de obra entre vecinos (no flota nacional).",
+          qa: [
+            {
+              q: "¿Solo profesionales?",
+              a: "Estantes motorizados/grúa requieren pro + COI estructurado. EPI blando puede ser más simple.",
+            },
+            {
+              q: "¿Credencial de operador?",
+              a: "Sí en grúa, excavadora y estantes pesados que lo pidan.",
+            },
+            {
+              q: "¿Cómo funciona el combustible?",
+              a: "Si el anfitrión define el tipo: devolución lleno a lleno.",
+            },
+            {
+              q: "¿Tarifa mensual?",
+              a: "Sí—se pueden publicar tarifas mensuales para trabajos largos.",
+            },
+            {
+              q: "¿Qué fotos se exigen?",
+              a: "La inspección previa bloquea el inicio; encofrado usa checklist de piezas al devolver.",
+            },
+          ],
+        },
       "Boats & Water": {
-        title: "Alquiler de barcos y embarcaciones",
-        summary:
-          "Alquiler vecinal de embarcaciones con identidad portable (HIN / CIN / matrícula local). Motorizados necesitan kit de seguridad (estilo USCG o equivalente local), credencial cuando el inquilino opera, y edad 25 bareboat / 18 con capitán incluido. Kayak, SUP e inflable sin motor no exigen ID de casco pero sí política PFD. Fotos del casco reemplazan la checklist de neumáticos. Depósito respaldado por seguro.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Indica ID de casco en motorizados (HIN, CIN/CE o número local) y matrícula si la tienes. Confirma PFD + kit en motor; declara PFD en paddle e inflables sin motor. Elige bareboat vs capitán incluido para alinear edad y licencia. Exige seguro y deducible máximo.",
-        whyGeoTitle: "¿Por qué licencia + edad + kit / PFD antes de la entrega?",
-        whyGeo:
-          "Operadores bareboat sin licencia o menores y flotación/señales faltantes impulsan pérdidas. Con capitán, la edad del huésped baja a 18 y no hace falta licencia del inquilino. El paddle queda ligero: acuse PFD sin forzar HIN.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Anuncio (ID de casco si motorizado · PFD / kit) → seguro + capitán/edad → inquilino declara licencia, edad, kit o PFD → reserva → prueba → fotos del casco → devolución.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "ID de casco (HIN|CIN|local) si motorizado · matrícula · kit USCG / local · PFD en paddle / inflable sin motor · licencia (bareboat) · edad 25 bareboat / 18 con capitán · seguro · fianza · inspección de casco · QR / PIN.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "El seguro del inquilino es primario. Licencia, edad, kit/PFD y fotos del casco apoyan disputas. Evorios no vende pólizas marítimas de viaje.",
-      },
+          title: "FAQ de barcos y agua",
+          summary: "Respuestas cortas para embarcaciones a motor, paddle y viajes con capitán.",
+          qa: [
+            {
+              q: "¿Necesito ID del casco?",
+              a: "Sí en motorizadas (HIN/CIN/registro local). Kayak/SUP/inflable sin motor no.",
+            },
+            {
+              q: "¿Edad / licencia?",
+              a: "Sin capitán: 25 + licencia si aplica. Con capitán: edad 18, sin licencia del huésped.",
+            },
+            {
+              q: "¿Equipo de seguridad?",
+              a: "A motor: kit USCG/local. Paddle: acuse de política PFD.",
+            },
+            {
+              q: "¿Qué fotos?",
+              a: "Recorrido del casco (proa, popa, babor, estribor, cubierta) al inicio y al devolver.",
+            },
+            {
+              q: "¿Seguro?",
+              a: "Sí—comprobante antes de la entrega. Depósito según deducible.",
+            },
+          ],
+        },
       "Real Estate": {
-        title: "Estancias y alquiler de vivienda",
-        summary:
-          "Reglas de la casa obligatorias en alquiler. Tarifa de limpieza opcional en la reserva y el acuerdo. ID del huésped en el check-in (mismo patrón que vehículos). Depósito orientado a un mes.",
-        hostTipTitle: "Para anfitriones / propietarios",
-        hostTip:
-          "Escribe reglas claras. Configura tarifa de limpieza si cobras. El ID al inicio protege frente a fiestas y no-shows.",
-        whyGeoTitle: "¿Por qué ID en el check-in?",
-        whyGeo:
-          "Una confirmación se puede reenviar. El ID de inicio vincula al huésped presente con la reserva.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Publicar → reglas + limpieza → reserva → ID al check-in → estancia → checkout.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Reglas de la casa · tarifa de limpieza · ID de inicio · depósito tipo mensual · términos · QR/PIN.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Reglas e ID apoyan disputas. El depósito cubre daños / limpieza excesiva.",
-      },
+          title: "FAQ de estancias y casas",
+          summary: "Respuestas cortas sobre reglas de la casa, limpieza e ID en el check-in.",
+          qa: [
+            {
+              q: "¿Reglas de la casa obligatorias?",
+              a: "Sí en alquiler—horario, visitas, humo, mascotas, checkout.",
+            },
+            {
+              q: "¿Tarifa de limpieza?",
+              a: "Opcional—si existe, se muestra al reservar y queda en el acuerdo.",
+            },
+            {
+              q: "¿Qué ID en el check-in?",
+              a: "Selfie / subida de ID al inicio—mismo patrón que vehículos.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Por defecto hacia un mes de renta, salvo que el anfitrión indique otra cosa.",
+            },
+            {
+              q: "¿Cuándo se desbloquea el acceso?",
+              a: "Tras el ID de inicio en el sitio—no solo con una confirmación reenviada.",
+            },
+          ],
+        },
       "Photo & Video": {
-        title: "Alquiler de cámaras, cine y drones",
-        summary:
-          "Número de serie e inventario del kit son obligatorios al alquilar. Los drones también requieren declaración FAA Part 107 y/o Remote ID (subida de certificado opcional). Depósito / seguro protegen kits de alto valor.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Introduce el serie y un inventario claro (cuerpos, lentes, baterías, bolsas). Marca drones con claridad — Part 107 es obligatorio.",
-        whyGeoTitle: "¿Por qué serie + inventario + Part 107?",
-        whyGeo:
-          "Los kits caros pierden accesorios uno a uno. Serie + inventario en la entrega y cumplimiento del drone reducen disputas.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Anuncio con serie + inventario → drones: Part 107 / Remote ID → reserva → chequeo del kit → devolución.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Serie · inventario · Part 107 / Remote ID si drone · fianza · términos · QR.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Inventario y serie ayudan en robos / piezas faltantes. Primero cobertura del inquilino y fianza.",
-      },
+          title: "FAQ de foto, cine y drones",
+          summary: "Respuestas cortas sobre kits, series y cumplimiento de drones.",
+          qa: [
+            {
+              q: "¿Serie obligatoria?",
+              a: "Sí en alquiler—más inventario estructurado del kit.",
+            },
+            {
+              q: "¿Qué necesitan los drones?",
+              a: "Clase de peso + Remote ID al publicar; Part 107 + Remote ID al reservar.",
+            },
+            {
+              q: "¿Qué confirmo en la entrega?",
+              a: "Cuenta el kit contra el inventario.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Piezas faltantes y daños. Evorios no vende seguro de cámaras.",
+            },
+            {
+              q: "¿Falta una pieza?",
+              a: "Usa el inventario congelado y las fotos de entrega.",
+            },
+          ],
+        },
       "Electronics & Tech": {
-        title: "Alquiler de electrónica y tech",
-        summary:
-          "Confianza de vecinos + fianza (no un falso partner de seguros) cubre la mayoría de kits. Serie e inventario son obligatorios. Portátiles, smart home, red y servidores necesitan plan de borrado / desvinculación antes de publicar y acuse del arrendatario al reservar.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Captura el serie y lista cada accesorio. Declara el borrado con honestidad si hay datos. Dimensiona la fianza al riesgo real — Evorios no es aseguradora ni partner de ninguna compañía; la fianza es tu recurso principal.",
-        whyGeoTitle: "¿Por qué serie + inventario + borrado?",
-        whyGeo:
-          "Portátiles y pantallas vuelven incompletos. Serie + checklist congelan la entrega; borrado / desvinculación reduce disputas de privacidad.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Anuncio con serie + inventario (+ borrado) → acuse → conteo en entrega → devolución según acuerdo → liberar fianza o reclamar con fotos.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Serie · inventario · borrado / desvinculación · fianza · términos · QR.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Inventario y serie para piezas faltantes; la fianza cubre el resto. No vendemos seguro de electrónica.",
-      },
+          title: "FAQ de electrónica y tech",
+          summary: "Respuestas cortas sobre series, kits, borrado y depósito.",
+          qa: [
+            {
+              q: "¿Serie + inventario?",
+              a: "Sí en alquiler—lista cargadores, dongles, fundas y mandos.",
+            },
+            {
+              q: "¿Wipe si hay almacenamiento?",
+              a: "Sí—el anfitrión borra/desvincula antes de publicar; el huésped lo confirma al reservar.",
+            },
+            {
+              q: "¿Seguro de socio?",
+              a: "No. Confianza vecinal + depósito.",
+            },
+            {
+              q: "¿Qué reviso en la entrega?",
+              a: "Cuenta cada pieza del inventario.",
+            },
+            {
+              q: "¿Falta algo?",
+              a: "Inventario + serie sostienen el reclamo; el depósito cubre la diferencia.",
+            },
+          ],
+        },
       "Gym & Fitness": {
-        title: "Alquiler de gym y fitness",
-        summary:
-          "Los inquilinos firman asunción de riesgo / renuncia al reservar. Indica peso máximo de usuario cuando aplique.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Mantén el equipo en buen estado. Exige la renuncia (activa por defecto). Anota peso máximo en máquinas.",
-        whyGeoTitle: "¿Por qué una renuncia?",
-        whyGeo:
-          "Pesas y máquinas pueden lesionar. Una renuncia clara fija expectativas sin fingir que Evorios opera un gimnasio.",
-        flowTitle: "De punta a punta",
-        flow: "Anuncio → renuncia al reservar → entrega → devolución.",
-        layersTitle: "Capas de seguridad",
-        layers: "Renuncia · peso máximo · fianza · términos.",
-        claimsTitle: "Si algo sale mal",
-        claims: "Documenta estado en la entrega. Renuncia cubre lesión de uso ordinario; fianza el daño.",
-      },
+          title: "FAQ de gimnasio y fitness",
+          summary: "Respuestas cortas sobre exención, peso máximo y devolución.",
+          qa: [
+            {
+              q: "¿Necesito exención?",
+              a: "Sí—al reservar.",
+            },
+            {
+              q: "¿Peso máximo?",
+              a: "Si está publicado, respétalo.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Daños al equipo. La exención cubre riesgo ordinario de lesión.",
+            },
+            {
+              q: "¿Qué prepara el anfitrión?",
+              a: "Equipo en buen estado y peso máximo claro.",
+            },
+            {
+              q: "¿Cómo es la entrega?",
+              a: "Confirma condición al recoger; devuelve igual.",
+            },
+          ],
+        },
       "Sports & Recreation": {
-        title: "Alquiler de deporte y recreación",
-        summary:
-          "Pelotas y soft goods: vecino + fianza. Alto riesgo (nieve, agua, escalada): renuncia al reservar. Nieve: DIN + casco; agua: PFD.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Mantén la renuncia en agua / nieve / escalada. En nieve, DIN y si el casco va incluido. La fianza cubre daño — Evorios no opera pistas ni es aseguradora.",
-        whyGeoTitle: "¿Por qué renuncia + casco / PFD / DIN?",
-        whyGeo:
-          "Esquí, agua y escalada conllevan lesión más allá de una fianza. Specs claras fijan deber de cuidado sin fingir que la plataforma entrena atletas.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Anuncio → renuncia / casco·PFD·DIN → fotos en entrega → devolución.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Renuncia (alto riesgo) · casco / PFD / DIN · nivel / talla · fianza · términos.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Fotos + renuncia; fianza por daño. Lesiones siguen la renuncia y coberturas de las partes — no una póliza Evorios.",
-      },
+          title: "FAQ de deportes y recreación",
+          summary: "Respuestas cortas sobre estantes de riesgo, casco, PFD y DIN.",
+          qa: [
+            {
+              q: "¿Cuándo hay exención?",
+              a: "En estantes de alto riesgo (nieve, agua, escalada) al reservar.",
+            },
+            {
+              q: "¿Nieve?",
+              a: "DIN publicado y política de casco (incluido/requerido).",
+            },
+            {
+              q: "¿Agua?",
+              a: "Acuse de PFD cuando aplique.",
+            },
+            {
+              q: "¿Pelotas y blandos?",
+              a: "Sin exención—solo vecino + depósito.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Daños al equipo—no lesiones.",
+            },
+          ],
+        },
       "Outdoor & Camping": {
-        title: "Alquiler outdoor y camping",
-        summary:
-          "Día de senderismo: vecino + fianza. Expedición / supervivencia: renuncia. Tiendas y sacos: checklist de higiene.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Exige renuncia en survival / expedición. En tiendas y sacos, atesta limpio / aireado y capacidad / temporada. Fianza para postes y piezas de cocina — no somos aseguradora de expediciones.",
-        whyGeoTitle: "¿Por qué renuncia + higiene?",
-        whyGeo:
-          "Fallos remotos dejan gente sin recursos; equipo de sueño sucio propaga olores y alérgenos.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Anuncio → renuncia / higiene → entrega → devolución limpia y seca → fianza.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Renuncia · checklist de higiene · capacidad / temporada · fianza · términos · QR.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Fotos, renuncia e higiene; fianza por daño. No vendemos seguro de viaje.",
-      },
+          title: "FAQ de outdoor y camping",
+          summary: "Respuestas cortas sobre exención, higiene y piezas faltantes.",
+          qa: [
+            {
+              q: "¿Cuándo hay exención?",
+              a: "En estantes de expedición/supervivencia al reservar.",
+            },
+            {
+              q: "¿Tiendas y sacos?",
+              a: "El anfitrión atestigua limpieza/aireo; el huésped el checklist de higiene.",
+            },
+            {
+              q: "¿Qué specs revisar?",
+              a: "Capacidad y rating de temporada en el anuncio.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Varillas, doble techo, piezas de cocina y faltantes.",
+            },
+            {
+              q: "¿Seguro de viaje?",
+              a: "No—solo depósito + exención/higiene.",
+            },
+          ],
+        },
       "Bikes & Scooters": {
-        title: "Alquiler de bicis y patinetes",
-        summary:
-          "Casco, candado y overnight son obligatorios. E-Bikes personales (o Eléctrico = sí) y e-patinetes requieren edad + clase. Mountain/Racing: renuncia. Niños: tutor. Cargo/Adaptive: payload / pasajeros / subtipo.",
-        hostTipTitle: "Para anfitriones",
-        hostTip: "Define casco, candado y overnight; e-power edad+clase; kids casco; cargo payload; adaptive subtipo.",
-        whyGeoTitle: "¿Por qué casco, candado, overnight, edad y clase?",
-        whyGeo: "Lesión de cabeza, robo overnight y e-power mal clasificado son los mayores riesgos.",
-        flowTitle: "De punta a punta",
-        flow: "Anuncio → acuse → carga opcional → devolución.",
-        layersTitle: "Capas de seguridad",
-        layers: "Casco · candado · overnight · edad/clase · tutor · renuncia · cargo/adaptive · fianza.",
-        claimsTitle: "Si algo sale mal",
-        claims: "Overnight + candado y fotos; fianza el daño.",
-      },
+          title: "FAQ de bicis y scooters",
+          summary: "Respuestas cortas sobre casco, candado, e-power y niños.",
+          qa: [
+            {
+              q: "¿Casco, candado y guardado nocturno?",
+              a: "Sí—el anfitrión debe publicar los tres.",
+            },
+            {
+              q: "¿E-bikes / e-scooters?",
+              a: "Edad mínima + clase e-bike si el estante es E-Bikes o Electric = sí.",
+            },
+            {
+              q: "¿Exención MTB / racing?",
+              a: "Sí por defecto.",
+            },
+            {
+              q: "¿Bicis infantiles?",
+              a: "Atestación del tutor; el casco no puede ser «no requerido».",
+            },
+            {
+              q: "¿Cargo / adaptive?",
+              a: "Cargo: carga útil + política de niño. Adaptive: subtipo declarado.",
+            },
+          ],
+        },
       "Party & Events": {
-        title: "Alquiler para fiestas y eventos",
-        summary:
-          "Mesas y decoración suave: vecino + fianza. AV / escenario / luces: tarifa de montaje/desmontaje y energía. Carpas outdoor: cancelación por clima (24h / 12h / criterio del anfitrión).",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Pon tarifa y energía. En outdoor, elige ventana de cancelación por clima. Fianza para manchas y piezas faltantes — Evorios no es aseguradora de eventos.",
-        whyGeoTitle: "¿Por qué tarifa, energía y cancelación por clima?",
-        whyGeo:
-          "Mano de obra sorpresa, enchufes muertos y tormentas arruinan eventos más que el robo. Tarifas y clima se congelan en el acuerdo.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Anuncio con tarifa / energía / clima → reserva → entrega → cancelación si aplica → devolución.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Tarifa montaje · energía · cancelación outdoor · capacidad · fianza · términos.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Tarifa, energía y clima van en el acuerdo; fianza por daño. Reembolsos por clima siguen la ventana — no un producto partner.",
-      },
+          title: "FAQ de fiestas y eventos",
+          summary: "Respuestas cortas sobre setup, energía y cancelación por clima.",
+          qa: [
+            {
+              q: "¿Tarifa de montaje/desmontaje?",
+              a: "AV/escenario/luces pro a menudo sí—queda en el acuerdo.",
+            },
+            {
+              q: "¿Info de energía?",
+              a: "Amperios/circuitos si el anfitrión los publica—revisa antes de reservar.",
+            },
+            {
+              q: "¿Cancelación por clima?",
+              a: "Carpas exteriores publican ventana (24h / 12h / criterio del anfitrión).",
+            },
+            {
+              q: "¿Mesas y decoración?",
+              a: "Sin cancelación por clima—solo vecino + depósito.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Manchas, roturas y piezas faltantes más allá del uso normal.",
+            },
+          ],
+        },
       "Tools & DIY": {
-        title: "Alquiler de herramientas y DIY",
-        summary:
-          "Vecino + fianza cubre la mayoría de taladros. Sierras, soldadoras y andamios requieren acuse de briefing PPE / seguridad antes de la entrega. La fianza no es seguro de herramientas.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Marca briefing listo y anota PPE para sierras, soldadura y andamios. Dimensiona la fianza a hojas y baterías — no somos partner de ninguna aseguradora de herramientas.",
-        whyGeoTitle: "¿Por qué un briefing de seguridad?",
-        whyGeo:
-          "Estas herramientas hieren más rápido de lo que una fianza repara. Un briefing corto fija deber de cuidado sin fingir que Evorios forma operadores.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Anuncio con briefing → acuse PPE → briefing en entrega → devolución con fotos → fianza.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Briefing de seguridad · PPE · potencia / voltaje · fianza · términos · QR.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Acuse de briefing y fotos; fianza por daño. Lesiones quedan con las partes — no una póliza Evorios.",
-      },
+          title: "FAQ de herramientas y DIY",
+          summary: "Respuestas cortas sobre EPI, briefing y depósito.",
+          qa: [
+            {
+              q: "¿Cuándo hay briefing?",
+              a: "Sierras, soldadoras y andamios—confirma EPI/briefing antes de la entrega.",
+            },
+            {
+              q: "¿Qué EPI?",
+              a: "Ojos, oídos y manos; EPI de soldadura si aplica.",
+            },
+            {
+              q: "¿Taladros?",
+              a: "La mayoría de herramientas de mano solo vecino + depósito.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Discos, baterías y accesorios—no seguro total de herramientas.",
+            },
+            {
+              q: "¿Qué ayuda en reclamos?",
+              a: "Fotos de entrega + acuse del briefing.",
+            },
+          ],
+        },
       "Garden & Yard": {
-        title: "Alquiler de jardín y patio",
-        summary:
-          "Sopladores y herramientas cotidianas: vecino + fianza. Trituradoras de tocones son casi construcción: capacidad, EPP, renuncia y bandas de seguro con prueba al reservar.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "En trituradoras, define diámetro, EPP, renuncia y bandas de seguro antes de publicar. En herramientas ligeras, fotos y fianza para cuchillas. Evorios no asegura jardinería — prueba de seguro (cuando aplica) y fianza son las capas principales.",
-        whyGeoTitle: "¿Por qué las trituradoras están gated?",
-        whyGeo:
-          "Escombros voladores y alto torque las acercan a construcción ligera más que a un soplador. Capacidad + EPP + renuncia + seguro bloquean hasta limpiar.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Anuncio (capacidad + EPP + seguro si tocón) → renuncia / EPP / seguro → entrega → devolución → fianza o seguro primero.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Capacidad · EPP · renuncia · seguro (tocón) · fianza · términos · QR.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Seguro y renuncia dejan rastro en gear gated; fianza en herramientas ligeras. No somos aseguradora de landscaping.",
-      },
+          title: "FAQ de jardín y patio",
+          summary: "Respuestas cortas para herramientas de patio y trituradoras de tocón.",
+          qa: [
+            {
+              q: "¿Sopladoras necesitan seguro?",
+              a: "No—herramientas cotidianas = vecino + depósito.",
+            },
+            {
+              q: "¿Trituradoras de tocón?",
+              a: "Capacidad, EPI, exención y prueba de seguro antes de la entrega.",
+            },
+            {
+              q: "¿Qué fotografiar?",
+              a: "Condición en la entrega—barras, cuchillas y bidones suelen faltar.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Daño ordinario en herramientas ligeras; en equipo restringido, seguro primero.",
+            },
+            {
+              q: "¿Evorios asegura el trabajo de jardín?",
+              a: "No—prueba del huésped (si aplica) y el depósito.",
+            },
+          ],
+        },
       "Home & Kitchen": {
-        title: "Alquiler de hogar y cocina",
-        summary:
-          "Electrodomésticos cotidianos: vecino + fianza. Café / brew comercial: voltaje, NSF e instalación / conexión para que el venue no descubra 240V o fontanería a mitad del evento.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "En espresso comercial, declara voltaje, NSF y si necesita agua o cableado fijo. En electrodomésticos, capacidad y limpieza al devolver. Fianza por daño — Evorios no es NSF ni aseguradora de venues.",
-        whyGeoTitle: "¿Por qué campos de café comercial?",
-        whyGeo:
-          "Voltaje o agua incorrectos son riesgo del venue y evento fallido. Los datos se congelan en el acuerdo.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Anuncio con voltaje / NSF / instalación → reserva (en el acuerdo) → entrega/setup → devolución limpia → fianza.",
-        layersTitle: "Capas de confianza",
-        layers:
-          "Voltaje · NSF · instalación · capacidad · fianza · términos · QR.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Instalación y energía quedan en el acuerdo. Fianza por daño; no vendemos seguro de avería.",
-      },
+          title: "FAQ de hogar y cocina",
+          summary: "Respuestas cortas sobre electrodomésticos y sistemas de café comerciales.",
+          qa: [
+            {
+              q: "¿Electrodomésticos cotidianos?",
+              a: "Vecino + depósito, más capacidad y devolución limpia.",
+            },
+            {
+              q: "¿Café comercial?",
+              a: "Voltaje, estado NSF e instalación (agua/cableado) en el anuncio.",
+            },
+            {
+              q: "¿Por qué el voltaje?",
+              a: "Voltaje incorrecto o falta de agua arruina el evento—queda en el acuerdo.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Daños y accesorios faltantes.",
+            },
+            {
+              q: "¿Evorios certifica NSF?",
+              a: "No—el anfitrión declara el estado.",
+            },
+          ],
+        },
       "Office & Business": {
-        title: "Alquiler de oficina y negocio",
-        summary:
-          "Muebles: vecino + fianza. Dispositivos con almacenamiento (POS, servidores, impresoras, fotocopiadoras): plan de borrado del anfitrión y acuse del arrendatario en la reserva.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Marca almacenamiento y borrado con honestidad — POS y servidores deberían borrarse antes de publicar si es posible. Fianza para pantallas y bandejas. Evorios no es partner de datos ni vende ciberseguro; el acuse de borrado es la capa de privacidad.",
-        whyGeoTitle: "¿Por qué una puerta de borrado?",
-        whyGeo:
-          "POS y servidores guardan datos de clientes. Un acuse en reserva y entrega reduce disputas de privacidad que una fianza sola no resuelve.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Anuncio con almacenamiento + borrado → acuse → entrega → devolución según acuerdo → fianza por daño físico.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Almacenamiento · estado de borrado · acuse del arrendatario · fianza · términos · QR.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Estado de borrado y acuse dejan rastro; fianza cubre daño físico — no una póliza de filtración de datos.",
-      },
+          title: "FAQ de oficina y negocio",
+          summary: "Respuestas cortas sobre muebles vs dispositivos con almacenamiento.",
+          qa: [
+            {
+              q: "¿Escritorios necesitan wipe?",
+              a: "No—muebles y periféricos simples = vecino + depósito.",
+            },
+            {
+              q: "¿Cuándo hay wipe?",
+              a: "POS, servidores, impresoras y copiadoras con almacenamiento—plan + acuse del huésped.",
+            },
+            {
+              q: "¿Seguro cibernético?",
+              a: "La plataforma no lo vende—el wipe es la capa de privacidad.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Daño físico y bandejas/cables faltantes.",
+            },
+            {
+              q: "¿Quedan datos?",
+              a: "Sigue el estado de wipe publicado y el acuse de la reserva.",
+            },
+          ],
+        },
       "Music & Audio": {
-        title: "Alquiler de música y audio",
-        summary:
-          "Guitarras y amps pequeños: vecino + fianza. Sistemas PA requieren inventario de cables y soportes — congelado en la reserva y contado en la entrega.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "En PA, lista cada cable, soporte y clip. Anota potencia. El arrendatario acusa el inventario y cuenta en recogida/devolución. Fianza por rayones y accesorios faltantes — no somos aseguradora de backline.",
-        whyGeoTitle: "¿Por qué inventario PA?",
-        whyGeo:
-          "Los reclamos de PA suelen ser accesorios faltantes. Una lista congelada corta disputas sin puertas pesadas en cada instrumento.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Anuncio con inventario → acuse → contar en recogida → contar en devolución → fianza.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Inventario de cables/soportes PA · potencia · fianza · términos · QR.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Usa el inventario para cables/soportes faltantes; fianza cubre la diferencia. No vendemos seguro de equipo.",
-      },
+          title: "FAQ de música y audio",
+          summary: "Respuestas cortas sobre instrumentos e inventario de PA.",
+          qa: [
+            {
+              q: "¿Guitarras necesitan inventario de cables?",
+              a: "No—instrumentos pequeños = vecino + depósito.",
+            },
+            {
+              q: "¿Sistemas PA?",
+              a: "Inventario de cables y soportes se congela al reservar y se cuenta en entrega/devolución.",
+            },
+            {
+              q: "¿Potencia / vatios?",
+              a: "Publícalos si son relevantes.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Rozaduras y accesorios faltantes—no seguro de backline.",
+            },
+            {
+              q: "¿Falta un XLR?",
+              a: "Usa la instantánea del inventario.",
+            },
+          ],
+        },
       "Costume & Cosplay": {
-        title: "Alquiler de disfraces y cosplay",
-        summary:
-          "Vecino + fianza, reglas de devolución, tarifa opcional de tintorería y sanitización de maquillaje / pelucas / máscaras — congeladas en el acuerdo para que la limpieza no sea sorpresa.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Define solo tintorería / manchas OK / como recibido, más tarifa opcional. En kits de maquillaje, pelucas y máscaras, atestigua sanitización. Fianza por roturas — no somos partner de tintorería.",
-        whyGeoTitle: "¿Por qué condición de devolución + tarifa?",
-        whyGeo:
-          "Maquillaje, sudor y glitter arruinan disfraces. Reglas claras vencen facturas sorpresa.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Anuncio con política (+ tarifa) → acuse → uso → devolución según política → fianza o tarifa.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Condición de devolución · tintorería · sanitización · talla · fianza · términos.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Tarifa y política van en el acuerdo; fianza cubre roturas o piezas faltantes más allá de la tarifa.",
-      },
+          title: "FAQ de disfraces y cosplay",
+          summary: "Respuestas cortas sobre devolución, limpieza e higiene.",
+          qa: [
+            {
+              q: "¿Condición de devolución obligatoria?",
+              a: "Sí—reglas (+ tarifa de limpieza opcional) quedan en el acuerdo.",
+            },
+            {
+              q: "¿Sanitizar piezas de contacto?",
+              a: "Sí en máscaras, maquillaje, pelucas e interiores de trajes cuando aplique.",
+            },
+            {
+              q: "¿Cuándo hay inventario?",
+              a: "Teatro, props de cine, maquillaje pro y trajes completos.",
+            },
+            {
+              q: "¿Exención en trajes completos?",
+              a: "Sí—más guía de calor/visibilidad. Animatrónicos también con exención.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Roturas y piezas faltantes más allá de la tarifa de limpieza publicada.",
+            },
+          ],
+        },
       "Baby & Kids": {
-        title: "Alquiler seguro de sillas infantiles",
-        summary:
-          "Puerta dura: caducidad válida, recall, sanitización y foto de etiqueta. Sillas caducadas o incompletas no se publican ni se reservan. El arrendatario reconfirma en la reserva.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Introduce caducidad (AAAA-MM-DD o Exp AAAA-MM). Revisa recalls. Incluye foto clara de la etiqueta. Nunca publiques una silla caducada.",
-        whyGeoTitle: "¿Por qué una puerta dura?",
-        whyGeo:
-          "Sillas caducadas o con recall son un fallo de seguridad infantil — los campos blandos no bastan.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Publicar con controles → arrendatario confirma en reserva → entrega → devolución.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Caducidad · recall · sanitización · foto de etiqueta · confirmaciones en reserva · términos.",
-        claimsTitle: "Si algo sale mal",
-        claims:
-          "Las declaraciones crean un rastro claro. No uses sillas que fallen la puerta.",
-      }
+          title: "FAQ de seguridad infantil",
+          summary: "Respuestas cortas sobre sillas, cunas y juego comercial.",
+          qa: [
+            {
+              q: "¿Silla vencida?",
+              a: "No—caducidad y recall bloquean publicar y reservar.",
+            },
+            {
+              q: "¿Cunas?",
+              a: "Sin drop-side; estándar de sueño; colchón firme; sanitización.",
+            },
+            {
+              q: "¿Juego comercial?",
+              a: "Certificación, capacidad y exención de responsabilidad.",
+            },
+            {
+              q: "¿Qué debe mostrar el anfitrión?",
+              a: "Foto de etiqueta, recall y sanitización cuando aplique.",
+            },
+            {
+              q: "¿Qué confirma el huésped?",
+              a: "Atestaciones de seguridad al reservar antes del desbloqueo.",
+            },
+          ],
+        }
     },
 
     bySubcategory: {
@@ -4296,43 +4412,868 @@ export const es: AppMessages = {
         },
       },
       "Electronics & Tech": {
-        "Broadcast Equipment": { title: "Broadcast — subtipo, I/O, test de función", summary: "Las casas AV y kits tipo Lensrentals ganan con hojas de patch claras. Ganamos con inventario entre vecinos más subtipo (switcher/encoder/recorder/teleprompter), lista SDI/HDMI, alimentación/placa de batería, ¿medios incluidos?, firmware, notas suaves de plataformas de livestream, completitud del kit y test de función al devolver — congelado en el acuerdo. Depósito — no Geek Squad, Fat Llama ni afiliado de seguro.", hostTipTitle: "Estándar del anfitrión", hostTip: "Elige subtipo y marca/modelo. Lista cada puerto SDI/HDMI y cables/convertidores incluidos. Define alimentación/placa de batería y si SD/CF/SSD viajan con el kit. Anota versión de firmware (y no actualizar durante el alquiler). Añade notas suaves de livestream (OBS/RTMP/YouTube/Twitch/Zoom) sin enlaces de afiliado. Marca completitud y la política de test de función al devolver. Marca ítems estructurados + checklist; foto de puertos antes de la entrega.", whyGeoTitle: "¿Por qué estas puertas?", whyGeo: "Subtipo equivocado, BNCs faltantes, medios vacíos y puertos sin probar generan más disputas de livestream que el robo. Una ficha de patch breve en el anuncio supera el silencio al aire y reclamaciones sorpresa del depósito.", flowTitle: "De punta a punta", flow: "Publica subtipo + I/O + alimentación + medios + firmware + plataformas + completitud + test → el inquilino confirma → stream o rodaje → devolución con test de función → liberación del depósito o reclamo con fotos.", layersTitle: "Capas de confianza", layers: "Serie · subtipo · inventario SDI/HDMI · alimentación/placa · medios · firmware · notas de plataforma · completitud · accesorios · test de función · depósito · términos.", claimsTitle: "Si algo sale mal", claims: "Inventario + serie respaldan reclamos de cables/medios faltantes; test de función fallido y daño más allá del uso normal van al depósito. Evorios no vende seguro de electrónica ni se asocia con retailers AV para reparaciones." },
-        "Display Systems": { title: "Pantallas — tamaño, entradas, energía, fragilidad", summary: "Las casas AV alquilan muros LED y paneles comerciales con pitch, nits, montaje y notas de circuito. Ganamos con inventario entre vecinos más tamaño claro, resolución/HDR, pie/montaje/flight-case, entradas HDMI/DP/SDI, brillo, indoor vs outdoor, energía/circuito, pitch LED y fragilidad de transporte — congelado en el acuerdo. Sin Geek Squad, Fat Llama ni hard-sell de seguro.", hostTipTitle: "Estándar del anfitrión", hostTip: "Define marca + modelo + franja de tamaño (usa fila de cabinets LED si es modular). Marca tipo de pantalla, resolución/HDR, inclusión de pie/montaje/case, cada entrada, franja de nits, indoor/outdoor, energía/circuito y fragilidad. En muros LED añade pixel pitch y lista módulos de repuesto / power distro en el checklist. Foto de esquinas y estado del flight-case antes de la entrega.", whyGeoTitle: "¿Por qué estas puertas?", whyGeo: "Cables incorrectos, circuitos insuficientes, uso outdoor en paneles indoor y cristal roto en tránsito generan más disputas que el robo. Una ficha AV breve en el anuncio supera fallos de señal y energía el día del evento.", flowTitle: "De punta a punta", flow: "Publica tamaño + tipo + HDR + montaje + entradas + nits + indoor/outdoor + energía + pitch + fragilidad → el inquilino confirma kit / outdoor / energía / fragilidad → conteo en entrega → devolución en case → liberación de depósito o reclamo con fotos.", layersTitle: "Capas de confianza", layers: "Serie · tamaño · tipo · resolución/HDR · montaje/case · inventario de entradas · nits · indoor/outdoor · energía/circuito · pitch LED · fragilidad · checklist · depósito · términos.", claimsTitle: "Si algo sale mal", claims: "Cables/mandos/módulos faltantes usan inventario + fotos; cristal roto o cabinets LED doblados más allá del desgaste van al depósito. Evorios no vende seguro de electrónica ni se asocia con Geek Squad / Fat Llama." },
-        "Gaming Gear": { title: "Gaming — tipo, login, wipe, higiene", summary: "Los cafés y el alquiler peer de consolas ganan con perfiles guest y kits claros. Ganamos cuando tipo (consola/PC/VR), login guest/offline, nº de mandos, librería de juegos, HDMI/cables, wipe suave de almacenamiento e higiene VR quedan congelados en el acuerdo — más una nota suave de edad. Serie + inventario y depósito se mantienen. Sin Fat Llama, GameStop ni seguro afiliado.", hostTipTitle: "Estándar del anfitrión", hostTip: "Elige tipo y política de login (preferible guest/offline). Define mandos, librería (vacía vs digital vs discos) y HDMI/alimentación. Si la consola/PC/handheld tiene almacenamiento interno, declara wipe / unlink con honestidad. En VR, escribe higiene del foam. Nota suave opcional de clasificación por edad. Foto del serie y cuenta mandos/cables en la entrega.", whyGeoTitle: "¿Por qué estas puertas?", whyGeo: "Cuentas vinculadas, mandos faltantes y foam VR sucio generan más disputas que el robo. Una ficha breve supera un ban o factura de limpieza sorpresa tras el fin de semana.", flowTitle: "De punta a punta", flow: "Publica tipo + login + mandos + librería + cables (+ wipe si hay almacenamiento, + higiene VR) → el inquilino confirma → juega → devolución wipe/unlink según acuerdo → depósito o reclamación con fotos.", layersTitle: "Capas de confianza", layers: "Serie · inventario · tipo · login · mandos · librería · HDMI/cables · wipe suave · higiene VR · nota de edad · depósito · términos.", claimsTitle: "Si algo sale mal", claims: "Inventario + serie cubren mandos/cables faltantes; notas de wipe/login cubren privacidad; higiene VR fuera de notas y daños más allá de la tarifa van al depósito. Evorios no vende seguro gaming ni es socio de tiendas de consolas." },
-        "Laptops": { title: "Portátiles — desbloqueo, cargador, wipe", summary: "Geek Squad y Fat Llama alquilan máquinas listas para arrancar con vataje de cargador y franja de batería. Ganamos con inventario entre vecinos más serie, kit, estado de wipe del anfitrión, plan de desbloqueo OS/admin, vataje del cargador, salud de batería, notas de login/demo, grado de pantalla/teclado, claridad antivirus/desvínculo y profundidad de wipe al devolver — congelado en el acuerdo. Sin afiliado de alquiler retail ni hard-sell de seguro de terceros.", hostTipTitle: "Estándar del anfitrión", hostTip: "Define marca + modelo + tamaño de pantalla + serie. Lista el kit (franja de vataje del cargador, cables, funda). Declara el estado de wipe y la profundidad de wipe al devolver. Elige el plan de desbloqueo OS/admin y escribe notas de cuenta login/demo. Indica franja de salud de batería y grado de condición de pantalla/teclado. Anota restos de antivirus y pasos para desvincular iCloud/Google/Microsoft. Foto de serie + ladrillo del cargador antes de la entrega.", whyGeoTitle: "¿Por qué estas puertas?", whyGeo: "Bloqueos de firmware, cargadores incorrectos, baterías débiles y cuentas residuales generan más disputas de portátiles que el robo. Una ficha breve de desbloqueo + wipe en el anuncio supera bloqueos sorpresa y fotos de reclamación al devolver.", flowTitle: "De punta a punta", flow: "Publica desbloqueo + vataje + batería + login + condición + wipe → el inquilino confirma wipe + return wipe + desbloqueo → uso → devolución según profundidad de wipe → depósito.", layersTitle: "Capas de confianza", layers: "Serie · inventario del kit · vataje del cargador · salud de batería · plan de desbloqueo · login/demo · grado de condición · antivirus/desvínculo · wipe del anfitrión · profundidad de wipe al devolver · depósito · términos.", claimsTitle: "Si algo sale mal", claims: "Cargador/piezas de kit faltantes usan inventario + fotos; batería bajo la franja publicada y daño de pantalla/teclado más allá del grado van al depósito. Disputas de wipe y desbloqueo siguen el estado y las notas publicadas. Evorios no vende seguro de portátiles ni servicios Geek Squad." },
-        "Network Gear": { title: "Equipo de red — tipo, PoE, wipe, restore", summary: "Tiendas IT y AV enterprise alquilan switches, APs y firewalls con subtipo, banda managed, presupuesto PoE, puertos, kit rack, rating exterior, profundidad de factory wipe y reglas de credenciales. Ganamos con inventario entre vecinos más esas specs y una política clara de restaurar fábrica al devolver — congelado en el acuerdo. Sin Geek Squad, MSP ni afiliado de operadora.", hostTipTitle: "Estándar del anfitrión", hostTip: "Define subtipo (router/switch/AP/firewall/mesh/módem), managed vs unmanaged, presupuesto PoE, banda de puertos, kit rack/mount y rating exterior del AP. Declara wipe status más profundidad de config wipe (factory completo vs unlink de controlador). Define entrega de credenciales y si el inquilino debe restaurar fábrica al devolver. Lista injectores, antenas, SFP y orejas en el inventario. Foto de serie y puertos antes de la entrega.", whyGeoTitle: "¿Por qué estas puertas?", whyGeo: "PoE insuficiente, SSIDs/credenciales admin residuales y APs indoor dejados afuera generan más disputas que el robo. Una ficha breve supera facturas sorpresa de reconfiguración tras el evento.", flowTitle: "De punta a punta", flow: "Publica tipo + PoE + puertos + wipe + credenciales + restore → el inquilino confirma → despliegue → restore de fábrica si aplica → devolución del kit → depósito o reclamo.", layersTitle: "Capas de confianza", layers: "Serie · inventario · subtipo · managed · PoE · puertos · rack/mount · rating exterior · wipe · profundidad config · credenciales · factory restore · depósito · términos.", claimsTitle: "Si algo sale mal", claims: "Injectores/orejas/SFP faltantes usan inventario + fotos; config contra la política de restore y mal uso outdoor van al depósito. Evorios no vende seguro de red, servicios MSP ni activación de operadora." },
-        "Other": { title: "Otros — primero la estantería correcta", summary: "Prefiera una estantería con nombre de Electronics & Tech (portátiles, proyectores, gaming, altavoces, hogar inteligente, servidores y workstations, pro audio, broadcast, red, pantallas) para que apliquen las puertas correctas. Si se queda en Otros, declare alimentación, si el dispositivo tiene almacenamiento (wipe cuando sí), cobertura de fotos de estado y lista de piezas si el kit es multipieza.", hostTipTitle: "Estándar del anfitrión", hostTip: "Reclasifique siempre que encaje una estantería específica. En Otros: marca/modelo, ítems estructurados del kit, una vs varias piezas (+ inventario libre si es multipieza), alimentación, almacenamiento sí/no, wipe/unlink si hay almacenamiento y checklist de fotos de estado (equipo, puertos, defectos, accesorios). Lenguaje suave — no vendemos seguro de electrónica de terceros ni planes de reparación asociados.", whyGeoTitle: "¿Por qué reclasificar + fotos + wipe?", whyGeo: "Otros omite puertas especializadas (portátiles, pantallas, gaming, AV pro). Alimentación, almacenamiento/wipe, fotos de estado e inventario multipieza son el mínimo para disputas justas de cargadores y privacidad.", flowTitle: "Flujo", flow: "Prefiera estantería con nombre → si no, alimentación + almacenamiento (+ wipe si hay) + checklist de fotos (+ inventario si multipieza) → ack en reserva → conteo en entrega → devolución según wipe/acuerdo.", layersTitle: "Capas", layers: "Guía de reclasificación · marca/modelo · ítems del kit · banda de piezas · inventario (multi) · alimentación · almacenamiento/wipe · fotos de estado · serial · depósito · términos.", claimsTitle: "Reclamaciones", claims: "Use fotos, serial e inventario para piezas faltantes o cambios; wipe para disputas de privacidad; el depósito cubre el resto. Prefiera estanterías específicas la próxima vez." },
-        "Pro Audio": { title: "Pro audio — tipo, phantom, loom, prueba funcional", summary: "Casas AV y alquiler peer de interfaces ganan con tipo de equipo (interface vs mixer vs mic vs monitor), claridad de phantom 48V / DI, loom XLR/TRS contado, estuche, sample-rate/bit-depth suave y prueba funcional al devolver — congelado con serial e inventario. Es equipo de estudio/captura en Electronics & Tech, no stacks PA de Music & Audio. Sin hard-sell de mostrador retail ni socio de seguros.", hostTipTitle: "Estándar del anfitrión", hostTip: "Elige el tipo de equipo. Declara phantom 48V y DI (incluido / no / no necesario). Cuenta cada XLR, TRS, USB-C/Thunderbolt y ADAT del loom. Marca estuche (rígido/blando/flight/ninguno). Define en suave el sample-rate/bit-depth máx. en cajas digitales. Atestigua power-on / prueba I/O al listar o en la entrega y exige lo mismo al devolver. Lista shock mounts, pop filters, auriculares en el checklist. Prefiere screenSizeBand = sin pantalla si no hay.", whyGeoTitle: "¿Por qué estas puertas?", whyGeo: "Las disputas de pro audio casi nunca son el chasis — faltan XLR, no hay phantom para condensador, no hay DI para bajo, no hay estuche y ‘funcionaba’ sin smoke-test de devolución. Tipo + phantom/DI + loom + estuche + prueba funcional supera claims sorpresa tras la sesión.", flowTitle: "De punta a punta", flow: "Publica tipo + phantom/DI + loom + estuche + sample-rate + prueba funcional + serial/kit → el inquilino confirma → cuenta cables en la recogida → sesión → prueba + conteo al devolver → depósito o claim.", layersTitle: "Capas de confianza", layers: "Tipo · phantom · DI · loom de cables · estuche · sample-rate/bit-depth suave · prueba funcional de devolución · serial · inventario · depósito · términos.", claimsTitle: "Si algo sale mal", claims: "Loom + checklist + serial congelados sostienen claims de cables faltantes; el depósito cubre daños. Prueba funcional fallida usa fotos + atestación. Evorios no vende seguro de equipo ni se asocia con mostradores de alquiler retail." },
-        "Projectors": { title: "Proyectores — lúmenes, throw, entradas", summary: "Las casas AV alquilan con fichas de lúmenes/throw y listas de entradas. Ganamos con serial + inventario entre vecinos más franja de brillo, resolución nativa, lámpara vs láser/LED, notas de throw, inventario HDMI/entradas, inclusión de pantalla/soporte, largo del cable de corriente, control remoto en el kit y uso interior/exterior — congelado en el acuerdo. Sin afiliado retail ni alquiler corto promocionado.", hostTipTitle: "Estándar del anfitrión", hostTip: "Define marca/modelo/serial. Elige franja de lúmenes, resolución nativa y fuente de luz; en lámpara añade horas. Escribe throw/distancia y lista cada entrada (HDMI, adaptadores). Marca pantalla/soporte y largo del cable. Marca remoto + cable de corriente en el inventario. Elige política indoor vs outdoor. Foto de la unidad y puertos antes de la entrega.", whyGeoTitle: "¿Por qué estas puertas?", whyGeo: "Brillo incorrecto, adaptadores HDMI faltantes y polvo/lluvia exterior generan más disputas de proyector que el robo. Una ficha AV breve en el anuncio supera fallos de sala tras el montaje.", flowTitle: "De punta a punta", flow: "Publica lúmenes + res + fuente + throw + entradas + pantalla/soporte + entorno → el inquilino confirma kit (+ outdoor) → montaje → devolución con cables/remoto → liberación de depósito o reclamo con fotos.", layersTitle: "Capas de confianza", layers: "Serial · inventario · lúmenes · res nativa · fuente / horas de lámpara · throw · entradas · pantalla/soporte · largo de cable · indoor/outdoor · depósito · términos.", claimsTitle: "Si algo sale mal", claims: "Remoto/cables/adaptadores faltantes usan inventario + fotos; fallo de lámpara fuera de las horas declaradas y uso outdoor fuera de política van al depósito. Evorios no vende seguro de proyectores ni planes de protección retail." },
-        "Servers & Workstations": { title: "Servidores y WS — forma, energía, profundidad de wipe", summary: "El alquiler IT y colo corto ganan con specs claras. Nosotros con inventario entre vecinos más factor de forma, PSU/energía, banda suave RAM/CPU, rieles de rack, lista NIC/puertos, política IPMI/iDRAC, estado de wipe más profundidad, envío/peso y notas de ruido/calor — congelado en el acuerdo. Sin Geek Squad, afiliado Fat Llama ni hard-sell de seguro cibernético.", hostTipTitle: "Estándar del anfitrión", hostTip: "Define factor de forma (tower / rack U / laptop WS) y config PSU/energía. Banda suave de RAM y CPU. Indica si van rieles. Lista cada NIC/SFP/DAC y pieza del kit (PDU, KVM, bezel). Define política IPMI/iDRAC y profundidad de wipe (secure erase vs reinstalar OS vs discos extraídos) más el momento del wipe. Anota peso/envío y aptitud ruido/calor. Foto de serie y puertos antes de la entrega.", whyGeoTitle: "¿Por qué estas puertas?", whyGeo: "Rieles faltantes, energía incorrecta, credenciales BMC abiertas y wipes superficiales generan más disputas que el robo. Una ficha IT breve supera fallos sorpresa en colo y reclamos de privacidad tras la devolución.", flowTitle: "De punta a punta", flow: "Publica forma + energía + rieles + puertos + BMC + profundidad wipe → el inquilino confirma kit / wipe / BMC → chequeo de encendido en entrega → uso en entorno permitido → devolución wipe según profundidad → liberación de depósito o reclamo con fotos.", layersTitle: "Capas de confianza", layers: "Serie · inventario · factor de forma · PSU/energía · rieles · inventario NIC · IPMI/iDRAC · estado wipe · profundidad wipe · envío/peso · ruido/calor · depósito · términos.", claimsTitle: "Si algo sale mal", claims: "Inventario + serie respaldan reclamos de rieles/NIC/SFP faltantes; desajustes de energía y forma son disputas del anuncio; huecos de profundidad wipe usan fotos + acuerdo. El depósito cubre pérdida de hardware; Evorios no vende seguro cibernético ni servicios de wipe de terceros." },
-        "Smart Home Devices": { title: "Domótica — desvincular, hub, protocolo", summary: "Fat Llama y alquileres peer Nest/Ring/Echo compiten en estancias cortas; las tiendas ganan con fichas de setup. Ganamos cuando wipe/unlink + notas de factory reset, necesidad de hub/bridge, banda Wi-Fi–Thread–Zigbee–Matter, tipo de alimentación, notas de instalación/retirada, tapa de privacidad de cámara e inventario multi-dispositivo quedan congelados en el acuerdo — y el inquilino no debe dejar cuentas vinculadas. Sin afiliado retail ni seguro.", hostTipTitle: "Estándar del anfitrión", hostTip: "Declara wipe/unlink y escribe pasos de factory reset / desvincular app. Marca clase de dispositivo, protocolos, hub/bridge y alimentación. Lista cada pieza (hub, bombillas, sensores, soportes, mandos). Anota instalación/retirada en termostatos, timbres y cámaras hardwired. Define tapa de privacidad si hay lente. Elige política de devolución de cuentas para que el siguiente huésped no herede un hogar vinculado.", whyGeoTitle: "¿Por qué estas puertas?", whyGeo: "Las disputas de domótica rara vez son el plástico — son cuentas dejadas, hubs faltantes, radio incorrecta y daño de pared al instalar. Una ficha breve supera un Ring bloqueado o bombillas Zigbee huérfanas tras la devolución.", flowTitle: "De punta a punta", flow: "Publica wipe + reset + protocolo + hub + alimentación + privacidad + kit → el inquilino confirma wipe + devolución de cuentas (+ hub) → instala según notas → usa → desvincula/resetea antes de devolver → liberación de depósito o reclamo con fotos de inventario.", layersTitle: "Capas de confianza", layers: "Serie · inventario · wipe/unlink · factory reset · política de cuentas · protocolo · hub/bridge · alimentación · instalación · tapa de privacidad · depósito · términos.", claimsTitle: "Si algo sale mal", claims: "Hub/bombillas/sensores faltantes usan inventario + fotos; daño de pared/placa más allá de notas suaves va al depósito; cuentas dejadas siguen la política de devolución + wipe ack. Evorios no vende seguro de electrónica ni es socio de Fat Llama / Best Buy Geek Squad." },
-        "Speakers": { title: "Altavoces — forma, energía, cables, volumen", summary: "Fat Llama y tiendas PA-lite locales alquilan altavoces Bluetooth y de fiesta; Best Buy los vende. Ganamos con inventario entre vecinos más forma clara (cable / Bluetooth / fiesta), batería vs AC, franja exterior/splash, notas suaves de volumen para vecinos, soporte/montaje, checklist de cables, notas de emparejamiento estéreo y carga al devolver — congelado en el acuerdo. Solo consumer/portable — el PA de escenario sigue en Music & Audio. Sin afiliado retail ni hard-sell de Geek Squad.", hostTipTitle: "Estándar del anfitrión", hostTip: "Define marca + modelo + forma (Bluetooth portable, wired bookshelf, party boombox, soundbar, smart). Marca batería vs AC vs híbrido y franja exterior/splash. Di si incluye soporte o montaje. Lista cada cable y fuente en el checklist. Escribe una nota breve de volumen (apartamentos / horas de silencio). Añade notas de emparejamiento / TWS si hay una segunda unidad. En unidades a batería, indica carga esperada al devolver y si el cargador está incluido. Foto del estado antes de la entrega.", whyGeoTitle: "¿Por qué estas puertas?", whyGeo: "Las disputas de altavoces suelen ser batería muerta, cables AUX/USB perdidos, uso junto a la piscina y ruido a vecinos — no el robo del gabinete. Una ficha breve supera peleas de depósito tras el fin de semana.", flowTitle: "De punta a punta", flow: "Publica forma + energía + clima + soporte + cables + volumen (+ carga si batería) → el inquilino confirma kit + volumen → uso → devolución cargada según acuerdo → liberación de depósito o reclamo con fotos.", layersTitle: "Capas de confianza", layers: "Serie · marca/modelo · forma · energía · clima · soporte/montaje · inventario de cables · notas de volumen · emparejamiento · carga al devolver · depósito · términos.", claimsTitle: "Si algo sale mal", claims: "El inventario cubre cables/soportes faltantes; las notas de clima cubren agua fuera del rating splash; las notas de volumen son solo expectativas suaves. El depósito cubre el hueco. Evorios no vende seguro de altavoces ni se asocia con Best Buy / Geek Squad / Fat Llama." },
+        "Broadcast Equipment": {
+            title: "FAQ de equipo de broadcast",
+            summary: "Respuestas cortas para switchers, encoders y kits de livestream.",
+            qa: [
+              {
+                q: "¿Qué subtipo listar?",
+                a: "Switcher, encoder, recorder, teleprompter u similar—más marca/modelo.",
+              },
+              {
+                q: "¿Qué I/O y energía?",
+                a: "Cada ruta SDI/HDMI, cables/convertidores y power/battery plate.",
+              },
+              {
+                q: "¿Incluye media?",
+                a: "El anuncio dice si SD/CF/SSD va con el kit.",
+              },
+              {
+                q: "¿Test de retorno?",
+                a: "Sí si el anfitrión lo define—encendido/I/O al devolver.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Cables/media faltantes y test de retorno fallido más allá del uso.",
+              },
+            ],
+          },
+        "Display Systems": {
+            title: "FAQ de sistemas de display",
+            summary: "Respuestas cortas para paneles, LED walls, soportes y energía.",
+            qa: [
+              {
+                q: "¿Tamaño y entradas?",
+                a: "Banda de tamaño, resolución/HDR y cada entrada HDMI/DP/SDI.",
+              },
+              {
+                q: "¿Interior o exterior?",
+                a: "Sigue la calificación del anuncio—no uses paneles indoor afuera.",
+              },
+              {
+                q: "¿Energía?",
+                a: "Revisa amperios/circuitos publicados antes del montaje.",
+              },
+              {
+                q: "¿Soportes / case?",
+                a: "El anuncio indica stand/mount/flight-case.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Cristal roto, gabinetes doblados y cables/mandos/módulos faltantes.",
+              },
+            ],
+          },
+        "Gaming Gear": {
+            title: "FAQ de gaming",
+            summary: "Respuestas cortas sobre consolas, PC, VR, login y wipe.",
+            qa: [
+              {
+                q: "¿Qué login?",
+                a: "Prefiere guest/offline según el anuncio—no dejes cuentas personales.",
+              },
+              {
+                q: "¿Cuántos mandos?",
+                a: "El conteo y HDMI/cables están en el inventario.",
+              },
+              {
+                q: "¿Wipe?",
+                a: "Si hay almacenamiento—sigue wipe/unlink del anfitrión y el de retorno.",
+              },
+              {
+                q: "¿Higiene VR?",
+                a: "Limpia la espuma facial según las notas antes de devolver.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Mandos/cables faltantes y daños más allá de las notas de higiene.",
+              },
+            ],
+          },
+        "Laptops": {
+            title: "FAQ de laptops",
+            summary: "Respuestas cortas sobre desbloqueo, cargador, batería y wipe.",
+            qa: [
+              {
+                q: "¿Incluye cargador?",
+                a: "Sí si está listado—banda de vatios en el inventario.",
+              },
+              {
+                q: "¿Cómo desbloqueo?",
+                a: "Sigue las notas de OS/admin unlock y login demo.",
+              },
+              {
+                q: "¿Qué wipe?",
+                a: "Wipe del anfitrión al listar; profundidad al devolver; acuse al reservar.",
+              },
+              {
+                q: "¿Batería?",
+                a: "Respeta la banda publicada; foto del brick en la entrega.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Cargador/kit faltante y daño de pantalla/teclado más allá del grado.",
+              },
+            ],
+          },
+        "Network Gear": {
+            title: "FAQ de red",
+            summary: "Respuestas cortas sobre switches, AP, PoE y factory restore.",
+            qa: [
+              {
+                q: "¿Subtipo y PoE?",
+                a: "Router/switch/AP/firewall/mesh más presupuesto PoE y banda de puertos.",
+              },
+              {
+                q: "¿Factory restore al devolver?",
+                a: "Sí si el anuncio lo exige—limpia SSIDs y credenciales admin.",
+              },
+              {
+                q: "¿Uso exterior?",
+                a: "Solo si el rating outdoor lo permite.",
+              },
+              {
+                q: "¿Qué piezas contar?",
+                a: "Inyectores, antenas, SFP, rieles/orejas según inventario.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Piezas faltantes y config contraria a la política de restore.",
+              },
+            ],
+          },
+        "Other": {
+            title: "FAQ de otra electrónica",
+            summary: "Respuestas cortas cuando no cabe un estante con nombre.",
+            qa: [
+              {
+                q: "¿Usar Other?",
+                a: "Prefiere un estante con nombre para que apliquen las reglas correctas.",
+              },
+              {
+                q: "¿Qué debe declarar Other?",
+                a: "Energía, almacenamiento sí/no, wipe si hay storage y fotos de condición.",
+              },
+              {
+                q: "¿Kit multipieza?",
+                a: "Lista cada pieza en el inventario.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Piezas faltantes y daños con fotos + serie.",
+              },
+              {
+                q: "¿Seguro de socio?",
+                a: "No—solo depósito.",
+              },
+            ],
+          },
+        "Pro Audio": {
+            title: "FAQ de pro audio",
+            summary: "Respuestas cortas sobre interfaces, mics, phantom y loom.",
+            qa: [
+              {
+                q: "¿Qué tipo de equipo?",
+                a: "Interface, mixer, mic, monitor u similar—en el anuncio.",
+              },
+              {
+                q: "¿Phantom 48V / DI?",
+                a: "Revisa el anuncio—necesario para muchos condensadores y bajo.",
+              },
+              {
+                q: "¿Cómo se cuentan cables?",
+                a: "Cada XLR/TRS/USB/ADAT del loom—cuenta en la entrega.",
+              },
+              {
+                q: "¿Test de retorno?",
+                a: "Sí si está definido—encendido/I/O al devolver.",
+              },
+              {
+                q: "¿Es PA de Music?",
+                a: "No—estudio/captura bajo Electronics & Tech.",
+              },
+            ],
+          },
+        "Projectors": {
+            title: "FAQ de proyectores",
+            summary: "Respuestas cortas sobre lúmenes, throw, entradas y kit.",
+            qa: [
+              {
+                q: "¿Qué brillo?",
+                a: "Banda de lúmenes y resolución nativa publicadas.",
+              },
+              {
+                q: "¿Qué distancia throw?",
+                a: "Sigue las notas de throw/distancia.",
+              },
+              {
+                q: "¿Qué entradas?",
+                a: "Conteo HDMI y adaptadores en el inventario.",
+              },
+              {
+                q: "¿Interior/exterior?",
+                a: "Sigue el entorno publicado.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Mando/cables faltantes y abuso de lámpara/exterior más allá del anuncio.",
+              },
+            ],
+          },
+        "Servers & Workstations": {
+            title: "FAQ de servidores y WS",
+            summary: "Respuestas cortas sobre factor de forma, energía, BMC y wipe.",
+            qa: [
+              {
+                q: "¿Forma y energía?",
+                a: "Tower / rack U / laptop WS más PSU en el anuncio.",
+              },
+              {
+                q: "¿Rieles incluidos?",
+                a: "Solo si el anuncio lo dice—cuéntalos en la entrega.",
+              },
+              {
+                q: "¿Profundidad de wipe?",
+                a: "Secure erase, reinstalar OS o discos extraídos—según lo publicado.",
+              },
+              {
+                q: "¿IPMI/iDRAC?",
+                a: "Sigue la política BMC; no dejes credenciales abiertas.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Rieles/NIC faltantes y hardware—no seguro cibernético.",
+              },
+            ],
+          },
+        "Smart Home Devices": {
+            title: "FAQ de smart home",
+            summary: "Respuestas cortas sobre desvincular, hub y protocolo.",
+            qa: [
+              {
+                q: "¿Debo desvincular la cuenta?",
+                a: "Sí—según la política de retorno; no dejes al siguiente huésped vinculado.",
+              },
+              {
+                q: "¿Se necesita hub?",
+                a: "Solo si el protocolo del anuncio lo requiere.",
+              },
+              {
+                q: "¿Qué protocolo?",
+                a: "Banda Wi-Fi / Thread / Zigbee / Matter en el anuncio.",
+              },
+              {
+                q: "¿Cámaras?",
+                a: "Usa la cubierta de privacidad; sigue notas de instalación/retiro.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Hubs/sensores faltantes y daño de pared más allá de las notas.",
+              },
+            ],
+          },
+        "Speakers": {
+            title: "FAQ de altavoces",
+            summary: "Respuestas cortas para altavoces portátiles/fiesta (no PA de escenario).",
+            qa: [
+              {
+                q: "¿Batería o AC?",
+                a: "Según el tipo; con batería respeta la banda de carga al devolver.",
+              },
+              {
+                q: "¿Exterior / splash?",
+                a: "Solo dentro de la banda de clima publicada.",
+              },
+              {
+                q: "¿Cables incluidos?",
+                a: "Checklist con nombre—cuéntalos en la entrega.",
+              },
+              {
+                q: "¿Volumen?",
+                a: "Sigue las notas de vecinos / horas de silencio.",
+              },
+              {
+                q: "¿Es PA de Music?",
+                a: "No—consumo/portátil; el PA de escenario está en Music & Audio.",
+              },
+            ],
+          },
       },
       "Costume & Cosplay": {
-        "Halloween Costumes": { title: "Halloween — talla, piezas, glitter", summary: "Spirit vende; las tiendas locales alquilan con fichas de cuidado. Ganamos con inventario entre vecinos más talla/ajuste, completitud del set, lista de piezas, tarifa de devolución/limpieza, notas de glitter/maquillaje, franja niños vs adultos y política de humo/niebla + uso en evento — congelado en el acuerdo. Sin afiliado retail ni socio de tintorería.", hostTipTitle: "Estándar del anfitrión", hostTip: "Define talla + ajuste + audiencia (niños/teen/adulto/familia). Marca completitud y lista cada pieza (máscara, guantes, prop). Escribe notas de glitter/maquillaje/sangre falsa y la política de humo/niebla. Tarifa opcional de limpieza (tú o el inquilino la gestionáis — no somos socio de tintorería). Foto de manchas antes de la entrega; anota uso exterior/desfile si aplica.", whyGeoTitle: "¿Por qué estas puertas?", whyGeo: "El glitter, el maquillaje y los accesorios perdidos generan más disputas de Halloween que el robo. Una ficha breve en el anuncio supera facturas sorpresa tras la fiesta.", flowTitle: "De punta a punta", flow: "Publica audiencia + piezas + devolución + glitter + humo/niebla → el inquilino confirma → uso en el evento → devolución según política → tarifa o depósito.", layersTitle: "Capas de confianza", layers: "Talla/ajuste · audiencia · completitud · inventario · glitter/maquillaje · humo/niebla · uso en evento · condición de devolución · tarifa opcional · depósito · términos.", claimsTitle: "Si algo sale mal", claims: "La tarifa publicada cubre la limpieza listada; glitter/maquillaje fuera de las notas y piezas faltantes usan inventario + fotos; roturas más allá de la tarifa van al depósito. Evorios no vende seguro de disfraces ni servicios de limpieza." },
-        "Character Costumes": { title: "Personaje — etiqueta, piezas, ajuste", summary: "El mercado cosplay necesita etiqueta clara del personaje, set completo vs parcial, inventario de piezas con fotos y notas de prueba/ajuste. Siguen las reglas de devolución/limpieza. El anfitrión gestiona el uso IP-safe — no validamos licencias.", hostTipTitle: "Estándar del anfitrión", hostTip: "Nombra el personaje, marca completitud, lista cada pieza, foto de cada pieza, añade notas de prueba/ajuste, define devolución + tarifa opcional y reconoce la nota suave IP-safe. Sin promo de terceros.", whyGeoTitle: "Por qué etiqueta + inventario", whyGeo: "Personaje incorrecto o guanteletes faltantes arruinan fotos del con — inventario y fotos por pieza evitan sorpresas.", flowTitle: "Flujo", flow: "Etiqueta + set + inventario + fotos + ajuste + devolución → ack de reserva → uso → contar piezas → devolución.", layersTitle: "Capas", layers: "Etiqueta de personaje · completitud · inventario · fotos por pieza · prueba/ajuste · nota IP suave · devolución · tarifa · depósito.", claimsTitle: "Reclamaciones", claims: "Piezas faltantes usan checklist + fotos. La tarifa publicada cubre limpieza; daños más allá van al depósito. Evorios no vende seguro de disfraces ni valida IP." },
-        "Wigs & Accessories": { title: "Pelucas — higiene, fibra, talla", summary: "El contacto compartido con el cuero cabelludo requiere atestación de sanitización entre inquilinos. El tipo de fibra y la talla del casquete fijan calor y ajuste; las reglas de devolución y reinicio de peinado cubren daños de styling. Solo orientación suave — no es un certificado de salón.", hostTipTitle: "Estándar del anfitrión", hostTip: "Atestigua la sanitización y su intensidad, indica fibra y banda de casquete, elige reinicio/devolución del peinado y una tarifa de limpieza si reestilizas. Foto del lace y el color antes de la entrega.", whyGeoTitle: "Por qué estos campos", whyGeo: "El calor derrite la fibra equivocada; un casquete justo falla en el evento; las disputas de peinado son el reclamo habitual del depósito — más claro que solo etiquetas de venta.", flowTitle: "Flujo", flow: "Sanitizar + intensidad → fibra + casquete → reinicio/devolución → acuse de higiene → uso cuidadoso → devolución según política.", layersTitle: "Capas", layers: "Atestación de sanitización · intensidad · fibra · talla de casquete · reinicio de peinado · devolución/tarifa · depósito.", claimsTitle: "Reclamos", claims: "Fibras derretidas, lace cortado o clips faltantes siguen fotos + depósito. La tarifa de limpieza/reestilizado publicada cubre solo lo indicado en el anuncio." },
-        "Period Costumes": { title: "Época — periodo, tela delicada, sin alteraciones", summary: "Teatro y eventos temáticos necesitan banda de época, devolución apta para tintorería, inventario de piezas y reglas claras de no alterar. Las casas de vestuario ganan en profundidad; el peer gana cuando tarifas, capas interiores y cuidado quedan congelados en el acuerdo.", hostTipTitle: "Estándar del anfitrión", hostTip: "Define época, talla, material, completitud, devolución (+ tarifa) y política de alteraciones. Lista cada pieza en sets multipieza. Anota cuidado de telas delicadas y qué capas interiores se incluyen.", whyGeoTitle: "Por qué época + cuidado", whyGeo: "El siglo equivocado falla la reserva; bajos, cortes y enaguas faltantes generan más disputas que el robo.", flowTitle: "Flujo", flow: "Época + completitud + inventario + devolución + sin alteraciones → acuse al reservar → uso cuidadoso → contar piezas → limpiar según política.", layersTitle: "Capas", layers: "Época · talla · material · completitud · inventario · devolución · tarifa · alteraciones · interiores · depósito.", claimsTitle: "Reclamaciones", claims: "Roturas delicadas, manchas, piezas faltantes y alteraciones no autorizadas siguen tarifa + inventario + depósito. Los hechos van colapsados por defecto." },
-        "Masks & Makeup": { title: "Máscaras y maquillaje — sanitizar, sello, contacto cutáneo", summary: "El equipo en contacto con la piel requiere atestación de sanitización del anfitrión y acuse de higiene del arrendatario. Declara cosméticos sellados vs abiertos, tipo de contacto (máscara / espuma / pintura), inventario del kit y una nota suave de alergia — prioriza sellados cuando sea posible.", hostTipTitle: "Estándar del anfitrión", hostTip: "Sanitiza entre arrendatarios; marca sellado vs abierto; tipo de contacto cutáneo; inventario de piezas; nota suave de alérgenos; política de devolución por manchas. Sin afirmaciones médicas.", whyGeoTitle: "Por qué sello y tipo de contacto", whyGeo: "El maquillaje abierto compartido es un fallo de higiene que el retail tipo Spirit no alquila; espuma vs máscara rígida cambia la limpieza y el contacto con la piel.", flowTitle: "Flujo", flow: "Sanitizar + sello + tipo de contacto + inventario → acuse de higiene → uso → devolver sellados no abiertos si aplica → limpiar según política.", layersTitle: "Capas", layers: "Sanitizar · sellado/abierto · contacto cutáneo · inventario · alergia soft · higiene · devolución · depósito.", claimsTitle: "Reclamaciones", claims: "Contaminación de cosméticos abiertos = no relistar hasta reemplazar; piezas faltantes según inventario; manchas siguen tarifa + depósito." },
-        "Other": { title: "Otros — primero la estantería correcta", summary: "Prefiera una estantería con nombre de Costume & Cosplay (Halloween, personaje, pelucas, de época, máscaras, teatro, props de cine, maquillaje, animatrónicos, trajes completos) para que apliquen las puertas correctas. Si se queda en Otros, declare material, política de devolución/limpieza, cobertura de fotos de estado y lista de piezas si el set es multipieza.", hostTipTitle: "Estándar del anfitrión", hostTip: "Reclasifique siempre que encaje una estantería específica. En Otros: material, condición de devolución (+ tarifa de limpieza opcional), una vs varias piezas, inventario si es multipieza y checklist de fotos de estado (frente/espalda, defectos, cierres). Lenguaje suave — no somos socio de tintorería.", whyGeoTitle: "¿Por qué reclasificar + fotos?", whyGeo: "Otros omite puertas especializadas (higiene, calor, personaje, época). Material, devolución, fotos de estado e inventario multipieza son el mínimo para disputas justas de limpieza y piezas faltantes.", flowTitle: "Flujo", flow: "Prefiera estantería con nombre → si no, material + devolución + checklist de fotos (+ inventario si multipieza) → ack en reserva → fotos en entrega → devolución según política.", layersTitle: "Capas", layers: "Guía de reclasificación · material · devolución/tarifa · banda de piezas · inventario (multi) · fotos de estado · talla · depósito · términos.", claimsTitle: "Reclamaciones", claims: "Use fotos e inventario para manchas, roturas y piezas faltantes; primero la tarifa de limpieza publicada, luego el depósito. Prefiera estanterías específicas la próxima vez." },
-        "Theater Costumes": { title: "Teatro — inventario, temporada, sin alteraciones", summary: "Los vestuarios profesionales listan cada pieza y prohíben alteraciones sin aviso. Exige inventario del kit, completitud, devolución/tarifa de limpieza, política sin alteraciones, notas de ventana de ensayos/funciones, etiquetado y medidas para el elenco.", hostTipTitle: "Estándar del anfitrión", hostTip: "Inventaría cada pieza, marca completitud, fija devolución + tarifa, sin alteraciones, ventana de funciones, foto de etiquetas y notas de talla.", whyGeoTitle: "Por qué inventario y temporada", whyGeo: "Puños y cuellos faltantes son la disputa #1; alquileres sin fechas chocan con ensayos técnicos y el cierre.", flowTitle: "Flujo", flow: "Inventario + sin alterar + notas de temporada → acuse en reserva → conteo en entrega → uso sin cortar → conteo al devolver + limpieza según política.", layersTitle: "Capas", layers: "Inventario · completitud · sin alterar · ventana de funciones · etiquetas · medidas · devolución · tarifa · depósito.", claimsTitle: "Reclamaciones", claims: "Usa el inventario para piezas faltantes; cortes/dobladillos no autorizados siguen la política + depósito." },
-        "Film & TV Props": { title: "Atrezo de cine — inventario, rol, frágil", summary: "Las casas de atrezo rastrean cada pieza, marcan hero vs fondo y anotan manejo frágil. Exige inventario del kit, condición de devolución, banda hero/fondo, banda frágil, etiquetas de continuidad opcionales y una política looksafe suave. No somos aseguradora de estudio; armas reales no están permitidas.", hostTipTitle: "Estándar del anfitrión", hostTip: "Lista cada pieza, marca hero vs fondo, define manejo frágil y devolución. Añade etiquetas de continuidad si viajan entre setups. En atrezo con forma de arma, elige solo réplicas looksafe — sin armas de fuego reales ni hojas vivas.", whyGeoTitle: "Por qué inventario + rol", whyGeo: "Perder un prop hero para el rodaje; los packs de fondo también necesitan conteo. El rol y lo frágil reducen disputas antes del call time.", flowTitle: "Flujo", flow: "Inventario + rol + frágil + looksafe → acuse → conteo en entrega → uso cuidadoso → conteo al devolver.", layersTitle: "Capas", layers: "Inventario · hero/fondo · frágil · etiquetas de continuidad · devolución · looksafe · depósito.", claimsTitle: "Reclamaciones", claims: "Piezas hero faltantes o rotas van primero al depósito. La banda frágil + fotos resuelven daños de superficie. Looksafe es regla de uso, no seguro de armas." },
-        "Professional Makeup Kits": { title: "Maquillaje pro — sanitizar, inventario, recargas", summary: "Los kits profesionales se sanitizan entre artistas y listan cada brocha y paleta. Exige atestación de sanitización, inventario del kit, política de recargas selladas y banda de brochas. Una atestación suave skin-safe y un valor de kit opcional fijan expectativas — no es un reclamo médico ni promo de marca.", hostTipTitle: "Estándar del anfitrión", hostTip: "Atestigua sanitización, lista el kit completo, define política de recargas selladas y banda de brochas. Atestigua con suavidad uso cosmético según etiqueta cuando puedas. El valor opcional del kit ayuda al contexto del depósito. Foto de paletas abiertas antes de la entrega.", whyGeoTitle: "Por qué sanitizar + inventario", whyGeo: "Brochas compartidas sin sanitizar son un no rotundo para profesionales; piezas faltantes y recargas abiertas impulsan reclamos — más claro que solo la venta retail.", flowTitle: "Flujo", flow: "Sanitizar + inventario → sellado/recargas + banda de brochas → acuse de higiene/inventario → uso cuidadoso → devolución según política.", layersTitle: "Capas", layers: "Sanitización · inventario · sellado/recargas · conteo de brochas · skin-safe suave · devolución/tarifa · depósito.", claimsTitle: "Reclamos", claims: "Brochas faltantes siguen inventario + fotos. Contaminación de productos abiertos = reemplazar antes de relistar. La política de recargas y la tarifa publicada resuelven disputas — no es garantía de partner de belleza." },
-        "Animatronic Props": { title: "Animatrónicos — energía, autonomía, renuncia", summary: "Los props con movimiento necesitan energía y autonomía declaradas, notas de pellizco/operador, límites indoor/outdoor, renuncia de responsabilidad al reservar y una demo corta en la entrega. Los talleres locales ganan en reparación; nosotros en un rastro claro antes del movimiento.", hostTipTitle: "Estándar del anfitrión", hostTip: "Define energía (batería / CA / aire / estático), banda de autonomía, entorno de uso y notas de pellizco/operador. Mantén la renuncia obligatoria. Confirma que demostrarás arranque/parada y zonas de distancia en la entrega. Foto del estado antes y después.", whyGeoTitle: "Por qué estas puertas", whyGeo: "Puntos de pellizco, movimiento inesperado y baterías agotadas a mitad del evento generan reclamaciones. Notas suaves evitan sorpresas; la renuncia congela la asunción de riesgo.", flowTitle: "Flujo", flow: "Energía + autonomía + entorno + notas + renuncia → ack en reserva → demo en entrega → uso → devolución + fotos.", layersTitle: "Capas", layers: "Energía · autonomía/batería · notas pellizco/operador · indoor/outdoor · demo atestiguada · renuncia · depósito · términos.", claimsTitle: "Reclamaciones", claims: "Rastro de renuncia + fotos en entrega; depósito por daño mecánico o mandos faltantes. Evorios no vende seguros ni certifica seguridad animatrónica." },
-        "Full Character Suits": { title: "Trajes completos — calor, higiene, ciclos de uso", summary: "Alquiler tipo mascota: atestación calor/visión, sanitización interior, inventario de piezas, exención, más franja de minutos de uso continuo, política de handler/spotter, notas de ventilación y recordatorio suave de hidratación en pausas. Sin afirmaciones médicas.", hostTipTitle: "Estándar del anfitrión", hostTip: "Atestigua calor/visión, sanitiza el interior, inventaria cabeza/manos/cuerpo, mantén la exención. Define franja de ciclo y spotter; describe ventilación; añade nota suave de agua en pausas.", whyGeoTitle: "Por qué se filtra", whyGeo: "Visión limitada y trajes cerrados son el riesgo principal — ciclos cortos y un spotter exterior son práctica del sector. La venta retail no alquila estos trajes.", flowTitle: "Flujo", flow: "Calor + higiene + inventario + exención + franja + spotter + ventilación → acuses → ciclos cortos con pausas → contar piezas → devolución.", layersTitle: "Capas", layers: "Calor/visión · sanitización · inventario · exención · completitud · franja de uso · spotter · ventilación/hidratación · fianza.", claimsTitle: "Reclamaciones", claims: "No entregar si faltan calor/higiene. Fianza por rasgaduras o piezas faltantes. Las notas de uso son orientación, no consejo médico." },
+        "Halloween Costumes": {
+            title: "FAQ de disfraces de Halloween",
+            summary: "Respuestas cortas sobre talla, piezas, glitter y limpieza.",
+            qa: [
+              {
+                q: "¿Talla / audiencia?",
+                a: "Según size/fits y banda kids/teen/adult/family.",
+              },
+              {
+                q: "¿Qué piezas?",
+                a: "Lista completa (máscara, guantes, props)—cuenta en la entrega.",
+              },
+              {
+                q: "¿Glitter/maquillaje al devolver?",
+                a: "Según notas; puede aplicar tarifa de limpieza.",
+              },
+              {
+                q: "¿Humo/fog?",
+                a: "Solo si la política lo permite.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Roturas y piezas faltantes más allá de la tarifa.",
+              },
+            ],
+          },
+        "Character Costumes": {
+            title: "FAQ de disfraces de personaje",
+            summary: "Respuestas cortas sobre personaje, set y ajuste.",
+            qa: [
+              {
+                q: "¿Qué personaje?",
+                a: "El anuncio nombra el personaje y set completo/parcial.",
+              },
+              {
+                q: "¿Qué piezas?",
+                a: "Cada pieza inventariada—revisa fotos al recoger.",
+              },
+              {
+                q: "¿Prueba de talla?",
+                a: "Sigue las notas de try-on/fit.",
+              },
+              {
+                q: "¿IP / licencias?",
+                a: "El anfitrión maneja uso IP-safe; Evorios no limpia licencias.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Piezas faltantes y roturas más allá de la tarifa de limpieza.",
+              },
+            ],
+          },
+        "Wigs & Accessories": {
+            title: "FAQ de pelucas y accesorios",
+            summary: "Respuestas cortas sobre sanitización, fibra y reset de estilo.",
+            qa: [
+              {
+                q: "¿Está sanitizada?",
+                a: "El anfitrión lo atestigua entre huéspedes—higiene al reservar.",
+              },
+              {
+                q: "¿Fibra y talla de gorra?",
+                a: "Tipo de fibra y banda de gorra en el anuncio—calor según fibra.",
+              },
+              {
+                q: "¿Puedo peinar de nuevo?",
+                a: "Solo dentro de la política de style-reset/return.",
+              },
+              {
+                q: "¿Tarifa de limpieza?",
+                a: "Solo si está publicada.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Fibra derretida, encaje cortado y clips faltantes.",
+              },
+            ],
+          },
+        "Period Costumes": {
+            title: "FAQ de trajes de época",
+            summary: "Respuestas cortas sobre era, devolución delicada y sin alteraciones.",
+            qa: [
+              {
+                q: "¿Qué era?",
+                a: "La banda de era está en el anuncio—confirma antes de reservar.",
+              },
+              {
+                q: "¿Puedo alterar o doblar?",
+                a: "No—política de no alteraciones.",
+              },
+              {
+                q: "¿Cómo devolver?",
+                a: "Dry-clean-friendly / devolución publicada + tarifa opcional.",
+              },
+              {
+                q: "¿Qué piezas?",
+                a: "Inventario multipieza incluyendo capas inferiores si están listadas.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Roturas delicadas, manchas, piezas faltantes y alteraciones no autorizadas.",
+              },
+            ],
+          },
+        "Masks & Makeup": {
+            title: "FAQ de máscaras y maquillaje",
+            summary: "Respuestas cortas sobre sanitización, sellado y contacto con la piel.",
+            qa: [
+              {
+                q: "¿Está sanitizado?",
+                a: "Sí entre huéspedes—higiene al reservar.",
+              },
+              {
+                q: "¿Sellado o abierto?",
+                a: "El anuncio lo declara; prefiere sellado.",
+              },
+              {
+                q: "¿Qué toca la piel?",
+                a: "Tipo máscara/espuma/pintura publicado.",
+              },
+              {
+                q: "¿Alergias?",
+                a: "Solo notas suaves—no consejo médico.",
+              },
+              {
+                q: "¿Cosméticos contaminados?",
+                a: "No relistes—reemplaza primero.",
+              },
+            ],
+          },
+        "Other": {
+            title: "FAQ de otros disfraces",
+            summary: "Respuestas cortas cuando no cabe un estante con nombre.",
+            qa: [
+              {
+                q: "¿Usar Other?",
+                a: "Prefiere un estante con nombre para las reglas correctas.",
+              },
+              {
+                q: "¿Qué declarar?",
+                a: "Material, devolución/limpieza, fotos de condición e inventario si es multipieza.",
+              },
+              {
+                q: "¿Tarifa de limpieza?",
+                a: "Solo si el anfitrión la publica.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Manchas, roturas y piezas faltantes tras la tarifa.",
+              },
+              {
+                q: "¿Tintorería socia?",
+                a: "No—tú o el huésped organizan la limpieza.",
+              },
+            ],
+          },
+        "Theater Costumes": {
+            title: "FAQ de vestuario teatral",
+            summary: "Respuestas cortas sobre inventario, ventana de función y sin alteraciones.",
+            qa: [
+              {
+                q: "¿Qué piezas?",
+                a: "Cada pieza de vestuario—cuenta en entrega y devolución.",
+              },
+              {
+                q: "¿Puedo alterar?",
+                a: "No—sin alteraciones salvo que el anuncio diga lo contrario.",
+              },
+              {
+                q: "¿Ventana de función?",
+                a: "Fechas de show/run en el anuncio.",
+              },
+              {
+                q: "¿Tarifa de limpieza?",
+                a: "Si existe, queda en el acuerdo.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Piezas faltantes y cortes/dobladillos no autorizados.",
+              },
+            ],
+          },
+        "Film & TV Props": {
+            title: "FAQ de props de cine/TV",
+            summary: "Respuestas cortas sobre hero vs background, frágil y looksafe.",
+            qa: [
+              {
+                q: "¿Hero o background?",
+                a: "El grado de rol está en el anuncio—hero requiere más cuidado.",
+              },
+              {
+                q: "¿Cómo se rastrean?",
+                a: "Inventario completo en entrega y devolución.",
+              },
+              {
+                q: "¿Armas reales?",
+                a: "No—solo réplicas looksafe.",
+              },
+              {
+                q: "¿Manejo frágil?",
+                a: "Sigue la banda frágil y tags de continuidad.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Piezas hero faltantes/rotas y daño superficial.",
+              },
+            ],
+          },
+        "Professional Makeup Kits": {
+            title: "FAQ de kits de maquillaje pro",
+            summary: "Respuestas cortas sobre sanitización, refill sellado e inventario de brochas.",
+            qa: [
+              {
+                q: "¿Kit sanitizado?",
+                a: "Sí entre artistas.",
+              },
+              {
+                q: "¿Sellado vs abierto?",
+                a: "Según la política sealed/refill.",
+              },
+              {
+                q: "¿Cuántas brochas?",
+                a: "Banda de brochas + inventario—cuenta al devolver.",
+              },
+              {
+                q: "¿Claims médicos?",
+                a: "Solo notas skin-safe suaves.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Brochas/paletas faltantes; reemplaza productos abiertos contaminados.",
+              },
+            ],
+          },
+        "Animatronic Props": {
+            title: "FAQ de animatrónicos",
+            summary: "Respuestas cortas sobre energía, runtime, exención y demo.",
+            qa: [
+              {
+                q: "¿Energía y runtime?",
+                a: "Battery/AC/air/static y banda de runtime en el anuncio.",
+              },
+              {
+                q: "¿Exención?",
+                a: "Sí al reservar.",
+              },
+              {
+                q: "¿Demo?",
+                a: "El anfitrión muestra start/stop y zonas keep-clear en la entrega.",
+              },
+              {
+                q: "¿Interior/exterior?",
+                a: "Sigue los límites del entorno.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Daño mecánico y mandos faltantes.",
+              },
+            ],
+          },
+        "Full Character Suits": {
+            title: "FAQ de trajes completos",
+            summary: "Respuestas cortas sobre calor, higiene, ciclos de uso y spotter.",
+            qa: [
+              {
+                q: "¿Calor y visibilidad?",
+                a: "El anfitrión atestigua la guía—confirma antes de reservar.",
+              },
+              {
+                q: "¿Interior sanitizado?",
+                a: "Sí entre huéspedes.",
+              },
+              {
+                q: "¿Cuánto tiempo continuo?",
+                a: "Respeta el máximo de minutos continuos; toma pausas.",
+              },
+              {
+                q: "¿Spotter?",
+                a: "Según la política de handler/spotter.",
+              },
+              {
+                q: "¿Exención?",
+                a: "Sí. Las notas de uso no son consejo médico.",
+              },
+            ],
+          },
       },
       "Baby & Kids": {
-        "Car Seats": { title: "Sillas infantiles — expiry & standard region", summary: "Never rent expired/recalled seats. Declare FMVSS (US) or ECE R129/R44 (EU). Sanitize between renters. Host attests — Evorios does not certify.", hostTipTitle: "Host standard", hostTip: "Expiry YYYY-MM-DD, label photo, recall check, standard region declare. Never after a crash.", whyGeoTitle: "Why strict", whyGeo: "Standards differ by market; expiry/recall/sanitize travel everywhere.", flowTitle: "Flow", flow: "List gates → booking ack → unlock → install per vehicle manual → return.", layersTitle: "Layers", layers: "Expiry · FMVSS/ECE · recall · sanitize · label photo · booking · unlock · agreement.", claimsTitle: "Claims", claims: "Do not hand off if expiry/recall fails. Document condition at pickup." },
-        "Cribs & Beds": { title: "Cunas — portable sleep standards", summary: "No drop-side. Attest CPSC, EN 716, or other regional sleep standard. Firm mattress/pad. Sanitize sleep surface.", hostTipTitle: "Host standard", hostTip: "Portable sleep standard from the label — not platform certification. Recall + sanitize.", whyGeoTitle: "Why gated", whyGeo: "Unsafe sleep is a leading infant hazard worldwide.", flowTitle: "Flow", flow: "Sleep standard + drop-side + recall + mattress + sanitize → ack → handoff → return.", layersTitle: "Layers", layers: "Sleep standard · no drop-side · recall · mattress · sanitize · unlock.", claimsTitle: "Claims", claims: "No bumpers/loose blankets. Document stains at handoff." },
-        "Strollers": { title: "Cochecitos — type, weight, hygiene", summary: "Industry: clean between renters, brakes/wheels, age/weight, travel vs jogger vs double. Recall-check.", hostTipTitle: "Host standard", hostTip: "Stroller type + age/weight + sanitize + recall. Note car-seat adapters.", whyGeoTitle: "Why hygiene", whyGeo: "Shared strollers are high-touch — sanitize is the baseline.", flowTitle: "Flow", flow: "Type + limits + hygiene → booking ack → brake check → return.", layersTitle: "Layers", layers: "Type · age/weight · sanitize · recall · unlock · deposit.", claimsTitle: "Claims", claims: "Photo wear; missing adapters are inventory claims." },
-        "Baby Carriers": { title: "Portabebés — weight & hygiene", summary: "Age/weight, fabric sanitize, recall. Point to manufacturer fit — no medical claims.", hostTipTitle: "Host standard", hostTip: "Age/weight + sanitize + recall. Note newborn vs toddler mode.", whyGeoTitle: "Why gated", whyGeo: "Contact fabric + wrong fit can harm — hygiene + limits are the floor.", flowTitle: "Flow", flow: "Limits + hygiene → ack → fit check → return.", layersTitle: "Layers", layers: "Age/weight · sanitize · recall · unlock.", claimsTitle: "Claims", claims: "Damaged buckles = do-not-rent." },
-        "Toys & Games": { title: "Juguetes — age label & hygiene", summary: "Keep age/small-parts labels (0+/3+/8+). Sanitize. Portable across ASTM/EN 71 messaging.", hostTipTitle: "Host standard", hostTip: "Declare toyHazardBand, sanitize, recall. Do not remove labels.", whyGeoTitle: "Why age", whyGeo: "Choking is the main toy failure mode.", flowTitle: "Flow", flow: "Age/hazard + hygiene → ack → piece count → return.", layersTitle: "Layers", layers: "Age/small-parts · sanitize · recall · deposit for missing pieces.", claimsTitle: "Claims", claims: "Count pieces at both ends." },
-        "Other": { title: "Otros infantiles gear", summary: "Prefer a specific shelf for seats/cribs/strollers/carriers. Age/weight + hygiene when it touches a child.", hostTipTitle: "Host standard", hostTip: "Re-shelf safety-critical gear to get the right gates.", whyGeoTitle: "Why", whyGeo: "Other skips specialized gates.", flowTitle: "Flow", flow: "Basics → book → photos → return.", layersTitle: "Layers", layers: "Age/weight · deposit · terms.", claimsTitle: "Claims", claims: "Document condition; prefer specific shelves." },
-        "Commercial Play Equipment": { title: "Juego comercial — cert, capacity, waiver", summary: "ASTM F1487 / CPSC / EN 1176 declare, capacity, liability waiver, sanitize between groups.", hostTipTitle: "Host standard", hostTip: "Declare cert honestly, capacity, waiver, sanitize, recall.", whyGeoTitle: "Why", whyGeo: "Group injuries and overload drive claims.", flowTitle: "Flow", flow: "Cert + capacity + waiver + hygiene → booking → setup → return.", layersTitle: "Layers", layers: "Cert · capacity · waiver · sanitize · deposit.", claimsTitle: "Claims", claims: "Photo setup; over-capacity is shared risk." },
-        "Group Activity Gear": { title: "Actividad en grupo — shared hygiene", summary: "Sanitize and recall between groups; age band and piece inventory.", hostTipTitle: "Host standard", hostTip: "Sanitize, recall, age, inventory pieces.", whyGeoTitle: "Why", whyGeo: "Shared kid gear = germs and missing pieces.", flowTitle: "Flow", flow: "Hygiene → ack → count → return.", layersTitle: "Layers", layers: "Age · sanitize · recall · deposit.", claimsTitle: "Claims", claims: "Missing pieces hit deposit." },
-        "Educational Tools": { title: "Educativos tools — age & clean", summary: "Age band, sanitize touch surfaces, recall electronics with batteries.", hostTipTitle: "Host standard", hostTip: "Age, sanitize, recall, note chargers.", whyGeoTitle: "Why", whyGeo: "Schools expect clean age-appropriate tools.", flowTitle: "Flow", flow: "Hygiene → ack → power check → return.", layersTitle: "Layers", layers: "Age · sanitize · inventory · deposit.", claimsTitle: "Claims", claims: "Missing chargers = inventory." },
-        "Safety Systems": { title: "Sistemas de seguridad — install first", summary: "Gates/monitors/locks: document install path. Pressure vs hardware-mount matters on stairs.", hostTipTitle: "Host standard", hostTip: "Install documented / renter with guide / pro. Include hardware.", whyGeoTitle: "Why", whyGeo: "A bad install is worse than no gate on stairs.", flowTitle: "Flow", flow: "Install path → ack → install on site → return hardware.", layersTitle: "Layers", layers: "Install · unlock · hardware inventory · deposit.", claimsTitle: "Claims", claims: "Missing mounts = claims. No pressure gates at stair tops." },
-        "Childcare Equipment": { title: "Cuidado infantil — sanitize & recall", summary: "High chairs/swings/bouncers: age/weight, sanitize trays/harnesses, recall.", hostTipTitle: "Host standard", hostTip: "Sanitize food-contact and harnesses; recall; age/weight.", whyGeoTitle: "Why", whyGeo: "Trays and straps are high-touch infant surfaces.", flowTitle: "Flow", flow: "Hygiene/recall → ack → handoff → return.", layersTitle: "Layers", layers: "Age/weight · sanitize · recall · unlock.", claimsTitle: "Claims", claims: "Broken harnesses = do-not-rent." },
+        "Car Seats": {
+            title: "FAQ de sillas de auto",
+            summary: "Respuestas cortas sobre caducidad, estándar y sanitización.",
+            qa: [
+              {
+                q: "¿Vencida / recall?",
+                a: "No—publicar y reservar se bloquean.",
+              },
+              {
+                q: "¿Qué estándar?",
+                a: "El anfitrión declara FMVSS (US) o ECE R129/R44 (EU) de la etiqueta.",
+              },
+              {
+                q: "¿Sanitización?",
+                a: "Sí entre huéspedes—confirma al reservar.",
+              },
+              {
+                q: "¿Qué foto?",
+                a: "Foto clara de la etiqueta en el anuncio.",
+              },
+              {
+                q: "¿Tras un choque?",
+                a: "Nunca relistar—no entregues.",
+              },
+            ],
+          },
+        "Cribs & Beds": {
+            title: "FAQ de cunas",
+            summary: "Respuestas cortas sobre estándar de sueño, drop-side y colchón.",
+            qa: [
+              {
+                q: "¿Drop-side?",
+                a: "No.",
+              },
+              {
+                q: "¿Qué estándar de sueño?",
+                a: "CPSC, EN 716 u otro regional de la etiqueta.",
+              },
+              {
+                q: "¿Colchón?",
+                a: "Firme según el anuncio; sanitiza la superficie de sueño.",
+              },
+              {
+                q: "¿Protectores / mantas sueltas?",
+                a: "No las uses.",
+              },
+              {
+                q: "¿Qué confirma el huésped?",
+                a: "Estándar de sueño, recall, colchón y sanitización al reservar.",
+              },
+            ],
+          },
+        "Strollers": {
+            title: "FAQ de cochecitos",
+            summary: "Respuestas cortas sobre tipo, peso e higiene.",
+            qa: [
+              {
+                q: "¿Qué tipo?",
+                a: "Travel, jogger, double u otro—en el anuncio.",
+              },
+              {
+                q: "¿Edad/peso?",
+                a: "Respeta los límites.",
+              },
+              {
+                q: "¿Sanitización?",
+                a: "Sí entre huéspedes.",
+              },
+              {
+                q: "¿Adaptadores de silla?",
+                a: "Solo si están listados—faltantes = inventario.",
+              },
+              {
+                q: "¿Qué revisar al recoger?",
+                a: "Frenos/ruedas y recall.",
+              },
+            ],
+          },
+        "Baby Carriers": {
+            title: "FAQ de portabebés",
+            summary: "Respuestas cortas sobre peso, higiene y ajuste.",
+            qa: [
+              {
+                q: "¿Edad/peso?",
+                a: "Respeta la banda (newborn vs toddler si aplica).",
+              },
+              {
+                q: "¿Tela sanitizada?",
+                a: "Sí entre huéspedes.",
+              },
+              {
+                q: "¿Recall?",
+                a: "Obligatorio antes de alquilar.",
+              },
+              {
+                q: "¿Ajuste?",
+                a: "Según la guía del fabricante—sin claims médicos de Evorios.",
+              },
+              {
+                q: "¿Hebillas dañadas?",
+                a: "No alquiles—detén la entrega.",
+              },
+            ],
+          },
+        "Toys & Games": {
+            title: "FAQ de juguetes",
+            summary: "Respuestas cortas sobre edad, piezas pequeñas y conteo.",
+            qa: [
+              {
+                q: "¿Edad / hazard?",
+                a: "Mantén etiquetas 0+/3+/8+ (o las listadas)—no las quites.",
+              },
+              {
+                q: "¿Sanitización?",
+                a: "Sí entre huéspedes.",
+              },
+              {
+                q: "¿Piezas pequeñas?",
+                a: "Sigue la banda de hazard para evitar atragantamiento.",
+              },
+              {
+                q: "¿Cómo rastrear piezas?",
+                a: "Cuenta al recoger y al devolver.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Piezas faltantes.",
+              },
+            ],
+          },
+        "Other": {
+            title: "FAQ de otro baby gear",
+            summary: "Respuestas cortas cuando no cabe un estante con nombre.",
+            qa: [
+              {
+                q: "¿Usar Other?",
+                a: "Prefiere Car Seats, Cribs, Strollers o Carriers en lo crítico.",
+              },
+              {
+                q: "¿Básicos?",
+                a: "Edad/peso si toca al niño + depósito y términos.",
+              },
+              {
+                q: "¿Higiene?",
+                a: "Sanitiza superficies de alto contacto también en Other.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Condición documentada en la entrega.",
+              },
+              {
+                q: "¿Faltan reglas especializadas?",
+                a: "Reubica al estante correcto.",
+              },
+            ],
+          },
+        "Commercial Play Equipment": {
+            title: "FAQ de juego comercial",
+            summary: "Respuestas cortas sobre certificación, capacidad y exención.",
+            qa: [
+              {
+                q: "¿Qué certificación?",
+                a: "ASTM F1487 / CPSC / EN 1176 (o listada)—el anfitrión declara.",
+              },
+              {
+                q: "¿Capacidad?",
+                a: "No excedas la publicada.",
+              },
+              {
+                q: "¿Exención?",
+                a: "Sí al reservar.",
+              },
+              {
+                q: "¿Sanitizar entre grupos?",
+                a: "Sí.",
+              },
+              {
+                q: "¿Qué fotografiar?",
+                a: "Montaje en la entrega; sobrecapacidad es riesgo compartido.",
+              },
+            ],
+          },
+        "Group Activity Gear": {
+            title: "FAQ de actividad grupal",
+            summary: "Respuestas cortas sobre higiene compartida e inventario.",
+            qa: [
+              {
+                q: "¿Sanitizar entre grupos?",
+                a: "Sí—más recall.",
+              },
+              {
+                q: "¿Banda de edad?",
+                a: "Respeta la publicada.",
+              },
+              {
+                q: "¿Inventario?",
+                a: "Cuenta al recoger y al devolver.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Piezas faltantes.",
+              },
+              {
+                q: "¿Por qué higiene?",
+                a: "Equipo infantil compartido = gérmenes y piezas perdidas.",
+              },
+            ],
+          },
+        "Educational Tools": {
+            title: "FAQ de herramientas educativas",
+            summary: "Respuestas cortas sobre edad, limpieza y cargadores.",
+            qa: [
+              {
+                q: "¿Banda de edad?",
+                a: "Solo dentro del rango publicado.",
+              },
+              {
+                q: "¿Sanitización?",
+                a: "Sí—superficies de contacto entre huéspedes.",
+              },
+              {
+                q: "¿Electrónica con baterías?",
+                a: "Recall-check; cargadores en inventario.",
+              },
+              {
+                q: "¿Qué revisar en la entrega?",
+                a: "Encendido y presencia del cargador.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Cargadores faltantes y piezas dañadas.",
+              },
+            ],
+          },
+        "Safety Systems": {
+            title: "FAQ de sistemas de seguridad",
+            summary: "Respuestas cortas sobre barreras, monitores e instalación.",
+            qa: [
+              {
+                q: "¿Cómo se instala?",
+                a: "Según la ruta: documented / renter with guide / pro.",
+              },
+              {
+                q: "¿Barreras a presión en escaleras?",
+                a: "No en la cima—solo montaje con hardware si se requiere.",
+              },
+              {
+                q: "¿Hardware incluido?",
+                a: "Cuenta soportes en entrega y devolución.",
+              },
+              {
+                q: "¿Qué confirma el huésped?",
+                a: "Ruta de instalación antes del desbloqueo.",
+              },
+              {
+                q: "¿Soportes faltantes?",
+                a: "Reclamo de inventario contra el depósito.",
+              },
+            ],
+          },
+        "Childcare Equipment": {
+            title: "FAQ de equipo de childcare",
+            summary: "Respuestas cortas sobre tronas, columpios y bouncers.",
+            qa: [
+              {
+                q: "¿Edad/peso?",
+                a: "Respeta los límites.",
+              },
+              {
+                q: "¿Qué sanitizar?",
+                a: "Bandejas, arneses y superficies de alto contacto.",
+              },
+              {
+                q: "¿Recall?",
+                a: "Obligatorio antes de alquilar.",
+              },
+              {
+                q: "¿Arnés roto?",
+                a: "No alquiles—detén la entrega.",
+              },
+              {
+                q: "¿Qué confirma el huésped?",
+                a: "Higiene y recall al reservar.",
+              },
+            ],
+          },
       },
     },
 

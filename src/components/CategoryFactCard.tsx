@@ -1,3 +1,9 @@
+/**
+ * Category / subcategory rental FAQ card.
+ *
+ * Evorios standard: Question → short answer only (`qa: [{ q, a }]`).
+ * Collapsed by default. See docs/CATEGORY_FACT_QA.md.
+ */
 import { useState } from "react";
 import { ChevronDown, Shield } from "lucide-react";
 import { useMessages } from "../lib/i18n/react";
@@ -18,8 +24,9 @@ type FactQa = { q: string; a: string };
 type FactBlock = {
   title: string;
   summary: string;
-  /** Short Q&A pairs — preferred over essay section bodies when present. */
+  /** Canonical FAQ: one clear question + 1–2 sentence answer each. */
   qa?: FactQa[];
+  /** @deprecated Prefer `qa`. Legacy essay fallback only. */
   hostTipTitle?: string;
   hostTip?: string;
   hostTipLinkLabel?: string;

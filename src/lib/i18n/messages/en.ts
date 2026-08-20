@@ -3771,362 +3771,473 @@ export const en: AppMessages = {
         ],
       },
       "Heavy Equipment": {
-        title: "Commercial equipment rentals",
-        summary:
-          "Heavy Equipment shelves rent to professionals by default. Forklift / crane / excavator / general operator credentials are required where the subcategory calls for them (attestation + document). Physical damage insurance proof is required before handoff. Deposit is insurance-backed (deductible-sized hold), not full replacement. Mandatory pre-trip inspection blocks start until both sides confirm.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Keep “professionals only” on unless you truly want DIY renters. Require operator credentials for powered commercial gear. Require insurance proof with physical damage; set max deductible so the card hold matches. Pre-trip photos protect both sides.",
-        whyGeoTitle: "Why proof before keys?",
-        whyGeo:
-          "Commercial gear is high-loss if an uninsured or unqualified renter damages it. Operator credential + PD proof + pre-trip photos give you a review window before PIN, lockbox, or keys unlock.",
-        flowTitle: "End to end",
-        flow:
-          "List equipment → pro-only + PD + operator cert when required → renter attests, uploads credential + insurance → pre-trip both confirm → handoff → return inspection → claims via insurance first.",
-        layersTitle: "Safety layers",
-        layers:
-          "Operator credential · pro attestation · physical damage insurance · deductible-sized hold · pre-trip & return photos · optional no-show fee · rental terms · QR / PIN handoff.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Renter’s physical damage / equipment coverage is primary. Use uploaded proof with their insurer; the card hold matches your max deductible. No-show frees the calendar; dispute if needed.",
-      },
+          title: "Heavy equipment rental FAQ",
+          summary: "Short answers for forklifts, excavators, cranes, and similar commercial gear.",
+          qa: [
+            {
+              q: "Who can rent this?",
+              a: "Professionals by default. DIY is only allowed if the host turns that gate off.",
+            },
+            {
+              q: "Do I need an operator credential?",
+              a: "Yes when the subcategory requires forklift, crane, excavator, or general operator proof—upload before handoff.",
+            },
+            {
+              q: "Is insurance required?",
+              a: "Yes—physical damage proof before PIN or keys. The deposit hold matches the published deductible.",
+            },
+            {
+              q: "What inspection is required?",
+              a: "Mandatory pre-trip photos both sides must confirm before start; same on return.",
+            },
+            {
+              q: "What does the deposit cover?",
+              a: "A deductible-sized card hold—not full replacement. Insurance is primary for damage.",
+            },
+          ],
+        },
       Construction: {
-        title: "Neighbor job-site construction rentals",
-        summary:
-          "Evorios is peer job-site gear — not United Rentals’ national fleet. Pros-only + structured COI + deductible-sized hold are the industry trust floor for powered / crane-class shelves. Soft PPE (hard hats, vests) can stay neighbor-simple. Operator credentials fire where the shelf needs them. Fuel full-to-full when fuel type is set. Monthly rates supported for longer jobs.",
-        hostTipTitle: "For hosts (vs United Rentals / EquipmentShare)",
-        hostTip:
-          "Beat big-box rental on local pickup speed, QR handoff, and photo-locked claims — not on SKU depth. Set fuel type on mixers, light towers, concrete pumps, cranes, and excavation machines so fuel handoff works. Use monthly pricing for multi-week jobs. Split Safety Equipment into soft PPE vs fall protection. List formwork with a piece inventory. Crane: tonnage + bare vs operated. Prefer Tools & DIY for consumer hand tools — this shelf is job-site grade.",
-        whyGeoTitle: "Why pro + COI + operator cert (when required)?",
-        whyGeo:
-          "Job-site gear sees hard use and high loss. Limiting to professionals, requiring structured COI (not photo-only), operator credentials for crane/excavator/heavy shelves, and locking handoff on pre-trip photos reduces uninsured loss — while soft PPE skips that crane-class friction.",
-        flowTitle: "End to end",
-        flow:
-          "List (duty/job + powered fuel/hours when relevant + shelf specs) → pro + PD/COI for commercial shelves (soft PPE optional) → renter attests + uploads → host COI confirm when required → pre-trip → handoff (fuel if set) → return / piece-count for formwork.",
-        layersTitle: "Safety layers",
-        layers:
-          "Pro attestation · structured COI · operator credential (crane/excavator/heavy) · fuel handoff · deductible hold · pre-trip photos · formwork inventory · soft-PPE vs fall-protection tier · QR / PIN.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Insurance first on commercial shelves; deductible hold with photos. Formwork incomplete returns use the piece checklist. Soft PPE disputes stay deposit-first. No-show frees dates if configured.",
-      },
+          title: "Construction rental FAQ",
+          summary: "Short answers for neighbor job-site gear (not national fleet rental).",
+          qa: [
+            {
+              q: "Is this pros-only?",
+              a: "Powered and crane-class shelves require a pro attestation and structured COI. Soft PPE (hard hats, vests) can stay lighter.",
+            },
+            {
+              q: "Do I need an operator credential?",
+              a: "Yes for crane, excavator, and other heavy shelves that ask for it—upload before handoff.",
+            },
+            {
+              q: "How does fuel work?",
+              a: "When the host sets a fuel type: return full-to-full.",
+            },
+            {
+              q: "Can I book by the month?",
+              a: "Yes—hosts can publish monthly rates for longer jobs.",
+            },
+            {
+              q: "What photos are required?",
+              a: "Pre-trip inspection blocks start until both sides confirm; formwork uses a piece checklist on return.",
+            },
+          ],
+        },
       "Boats & Water": {
-        title: "Boats & watercraft rentals",
-        summary:
-          "Neighbor watercraft rentals with portable identity language (HIN / CIN / local reg). Powered craft need a safety kit (USCG-style or local equivalent), boater / captain / PWC credential where the operator drives, and age 25 bareboat / 18 when captain is included. Non-motor kayak, SUP, and inflatable skip hull-ID mandate but gate on PFD policy. Hull walkaround photos replace vehicle tire checklists. Insurance-backed deposit applies.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Enter hull ID when powered (HIN, CIN/CE, or local number) plus registration if you have it. Confirm PFDs + kit for motor vessels; declare PFD policy for paddle and non-motor inflatables. Set bareboat vs captain-included so age and license gates match. Require insurance and max deductible.",
-        whyGeoTitle: "Why license + age + kit / PFD before handoff?",
-        whyGeo:
-          "Unlicensed or underage bareboat operators and missing flotation or signals drive watercraft losses. Captained trips drop the guest age floor to 18 and skip renter license. Paddle craft stay light: PFD ack without forcing a hull ID.",
-        flowTitle: "End to end",
-        flow:
-          "List vessel (hull ID when powered · PFD / kit) → insurance + captain/age policy → renter attests license, age, kit or PFD → book → proof cleared → hull photo handoff → return.",
-        layersTitle: "Safety layers",
-        layers:
-          "Hull ID (HIN|CIN|local) when powered · registration · USCG-style / local kit · PFD for paddle / non-motor inflatable · boater / PWC license (bareboat) · age 25 bareboat / 18 captained · insurance · deductible hold · hull pre-trip · QR / PIN handoff.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Renter insurance is primary. License, age, kit/PFD, and hull photos support disputes; the card hold matches your deductible band. Evorios does not sell trip marine policies.",
-      },
+          title: "Boats & watercraft rental FAQ",
+          summary: "Short answers for powered craft, paddle craft, and captained trips.",
+          qa: [
+            {
+              q: "Do I need a hull ID?",
+              a: "Yes for powered craft (HIN, CIN/CE, or local reg). Non-motor kayak, SUP, and inflatable skip that mandate.",
+            },
+            {
+              q: "What age / license applies?",
+              a: "Bareboat: age 25 + boater/PWC credential when required. Captain included: guest age 18 and no renter license gate.",
+            },
+            {
+              q: "What safety gear is required?",
+              a: "Powered: USCG-style (or local) kit. Paddle / non-motor inflatable: PFD policy acknowledgment.",
+            },
+            {
+              q: "What photos are required?",
+              a: "Hull walkaround (bow, stern, port, starboard, deck) before start and on return.",
+            },
+            {
+              q: "Is insurance required?",
+              a: "Yes—proof before handoff. Deposit matches the deductible band.",
+            },
+          ],
+        },
       "Real Estate": {
-        title: "Short stays & house rentals",
-        summary:
-          "Hosts must publish house rules (required on rent). Optional cleaning fee shows at booking and freezes on the agreement. Guests complete ID (selfie / ID upload) at check-in — same start-ID pattern as vehicles. Deposit defaults toward one month of rent.",
-        hostTipTitle: "For hosts / landlords",
-        hostTip:
-          "Write clear house rules (quiet hours, guests, smoking, pets, checkout). Set cleaning fee if you charge one. Guest ID at start protects against no-shows and party bookings.",
-        whyGeoTitle: "Why ID at check-in?",
-        whyGeo:
-          "A booking confirmation alone can be forwarded. Start ID ties the guest on-site to the booking before access unlocks.",
-        flowTitle: "End to end",
-        flow:
-          "List stay → house rules + cleaning fee → guest books → sees rules / fee on agreement → start ID at check-in → stay → checkout.",
-        layersTitle: "Safety layers",
-        layers:
-          "House rules · cleaning fee · guest start ID · monthly-style deposit · rental terms · QR / PIN access when used.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "House rules and start ID support disputes. Deposit covers damage / excessive cleaning beyond the listed fee.",
-      },
+          title: "Short stay & house rental FAQ",
+          summary: "Short answers for house rules, cleaning fees, and check-in ID.",
+          qa: [
+            {
+              q: "Are house rules required?",
+              a: "Yes on rent—quiet hours, guests, smoking, pets, and checkout must be published.",
+            },
+            {
+              q: "Is there a cleaning fee?",
+              a: "Optional. When set, it shows at booking and freezes on the agreement.",
+            },
+            {
+              q: "What ID is needed at check-in?",
+              a: "Guest selfie / ID upload at start—same pattern as vehicle start ID.",
+            },
+            {
+              q: "How big is the deposit?",
+              a: "Defaults toward about one month of rent unless the host sets otherwise.",
+            },
+            {
+              q: "When does access unlock?",
+              a: "After start ID is completed on-site—not from a forwarded confirmation alone.",
+            },
+          ],
+        },
       "Photo & Video": {
-        title: "Camera, cinema & drone rentals",
-        summary:
-          "Serial number and structured kit inventory lines are required for rent. Drone listings need weight class + Remote ID hardware status (publish gate) and Part 107 + Remote ID acknowledgment at booking. Deposit / insurance rules protect high-value kits.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Enter serial and a clear kit inventory (bodies, lenses, batteries, bags). Mark drones clearly — Part 107 attestation is required for renters.",
-        whyGeoTitle: "Why serial + inventory + Part 107?",
-        whyGeo:
-          "High-value kits go missing one accessory at a time. Serial + inventory at handoff, plus drone compliance attestation, cut claims disputes.",
-        flowTitle: "End to end",
-        flow:
-          "List with serial + inventory → drone renters attest Part 107 / Remote ID → book → confirm kit at handoff → return checklist.",
-        layersTitle: "Safety layers",
-        layers:
-          "Serial · kit inventory · Part 107 / Remote ID when drone · deposit hold · rental terms · QR handoff.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Inventory photos and serial support theft / missing-part claims. Renter coverage and deposit hold first.",
-      },
+          title: "Camera, cinema & drone rental FAQ",
+          summary: "Short answers for kits, serials, and drone compliance.",
+          qa: [
+            {
+              q: "Is a serial number required?",
+              a: "Yes for rent—plus a structured kit inventory (bodies, lenses, batteries, bags).",
+            },
+            {
+              q: "What do drone listings need?",
+              a: "Weight class + Remote ID hardware status at publish; Part 107 + Remote ID acknowledgment at booking.",
+            },
+            {
+              q: "What do I confirm at handoff?",
+              a: "Count the kit against the inventory before you leave.",
+            },
+            {
+              q: "What does the deposit cover?",
+              a: "Missing parts and damage. Evorios does not sell camera insurance.",
+            },
+            {
+              q: "What if a piece is missing?",
+              a: "Use the frozen inventory and handoff photos for the claim.",
+            },
+          ],
+        },
       "Electronics & Tech": {
-        title: "Electronics & tech rentals",
-        summary:
-          "Neighbor trust + a deposit hold (not a fake insurance partnership) covers most kits. Serial + structured inventory are required on rent. Each shelf adds P0 gates (lumen/throw, gaming login, phantom/loom, PoE/wipe, display power, etc.). Laptops, smart home, network, servers — and storage-capable Gaming/Other — need wipe / unlink before publish and a renter wipe ack at booking.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Capture serial and list every accessory (chargers, dongles, cases, remotes). Declare wipe status honestly when the device stores data. Size the deposit hold to realistic replacement risk — Evorios is not an insurer and is not partnered with any carrier; the hold is your primary recourse for missing parts or damage.",
-        whyGeoTitle: "Why serial + inventory + wipe?",
-        whyGeo:
-          "Laptops and pro displays are theft-prone and often return incomplete. Serial + checklist freeze what was handed over; wipe / unlink cuts privacy disputes when accounts or customer data could remain.",
-        flowTitle: "End to end",
-        flow:
-          "List with serial + inventory (+ wipe when storage) → renter acks kit / wipe → count at handoff → return wiped or as agreed → deposit release or claim with photos.",
-        layersTitle: "Safety layers",
-        layers:
-          "Serial · kit inventory · wipe / unlink when storage · deposit hold · rental terms · QR handoff.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Inventory snapshot and serial support missing-part or swap claims. Deposit hold covers the gap; we do not sell third-party electronics insurance.",
-      },
+          title: "Electronics & tech rental FAQ",
+          summary: "Short answers for serials, kits, wipe rules, and deposit holds.",
+          qa: [
+            {
+              q: "Is a serial + kit list required?",
+              a: "Yes on rent—list chargers, dongles, cases, and remotes.",
+            },
+            {
+              q: "Do storage devices need a wipe?",
+              a: "Yes—host wipe/unlink before publish when the device stores data; renter acknowledges wipe at booking.",
+            },
+            {
+              q: "Is there partner insurance?",
+              a: "No. Neighbor trust + a deposit hold cover missing parts and damage.",
+            },
+            {
+              q: "What do I check at handoff?",
+              a: "Count every kit piece against the listing inventory.",
+            },
+            {
+              q: "What if something is missing?",
+              a: "Inventory snapshot + serial support the claim; deposit covers the gap.",
+            },
+          ],
+        },
       "Gym & Fitness": {
-        title: "Gym & fitness rentals",
-        summary:
-          "Renters sign an assumption-of-risk / liability waiver at booking. Set max user weight when relevant. Neighbor trust + deposit still apply.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Keep equipment in safe working order. Require the waiver (default on). Note max user weight for machines.",
-        whyGeoTitle: "Why a waiver?",
-        whyGeo:
-          "Weights and machines can injure. A clear waiver at booking sets expectations without pretending Evorios is a gym operator.",
-        flowTitle: "End to end",
-        flow: "List gear → renter signs waiver at book → handoff → return.",
-        layersTitle: "Safety layers",
-        layers: "Liability waiver · max user weight · deposit · rental terms.",
-        claimsTitle: "If something goes wrong",
-        claims: "Document condition at handoff. Waiver covers ordinary-use injury risk; deposit covers damage.",
-      },
+          title: "Gym & fitness rental FAQ",
+          summary: "Short answers for waivers, weight limits, and returns.",
+          qa: [
+            {
+              q: "Do I need a waiver?",
+              a: "Yes—assumption-of-risk / liability waiver at booking.",
+            },
+            {
+              q: "Is there a max user weight?",
+              a: "When the host sets one, stay within it.",
+            },
+            {
+              q: "What does the deposit cover?",
+              a: "Damage to the equipment. The waiver covers ordinary-use injury risk.",
+            },
+            {
+              q: "What should hosts prepare?",
+              a: "Safe working order and clear max-weight notes on machines.",
+            },
+            {
+              q: "How does handoff work?",
+              a: "Confirm condition at pickup; return in the same condition.",
+            },
+          ],
+        },
       "Sports & Recreation": {
-        title: "Sports & recreation rentals",
-        summary:
-          "Everyday balls and soft goods stay lightweight: neighbor trust + deposit. High-risk shelves (snow, water, climb-style) require a liability waiver at booking. Snow sports add DIN + helmet policy; water / pro water add a PFD-included gate.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Keep the waiver on for water / snow / climb risk. Publish honest skill level, size, and condition. For snow, set DIN and whether a helmet is included or required. Deposit hold covers damage / missing parts — Evorios is not a ski-area operator and does not partner with any insurer.",
-        whyGeoTitle: "Why waivers + helmet / PFD / DIN?",
-        whyGeo:
-          "Ski, water, and climb gear carry injury risk a deposit cannot fix. Waiver + clear specs (DIN, helmet, PFD) set duty of care without pretending the platform trains athletes.",
-        flowTitle: "End to end",
-        flow:
-          "List specs + risk gates → renter signs waiver / acks helmet·PFD·DIN when required → handoff photos → return.",
-        layersTitle: "Safety layers",
-        layers:
-          "Liability waiver (high-risk) · helmet / PFD / DIN when applicable · skill / size · deposit hold · rental terms.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Handoff photos plus waiver trail support disputes. Deposit covers gear damage; injury claims follow the signed waiver and the parties’ own coverage — not an Evorios policy.",
-      },
+          title: "Sports & recreation rental FAQ",
+          summary: "Short answers for high-risk shelves, helmets, PFDs, and DIN.",
+          qa: [
+            {
+              q: "When is a waiver required?",
+              a: "On high-risk shelves (snow, water, climb-style) at booking.",
+            },
+            {
+              q: "What do snow sports need?",
+              a: "Published DIN and helmet included/required policy.",
+            },
+            {
+              q: "What do water shelves need?",
+              a: "PFD-included acknowledgment when the gate applies.",
+            },
+            {
+              q: "Do everyday balls need a waiver?",
+              a: "No—soft goods stay neighbor + deposit only.",
+            },
+            {
+              q: "What does the deposit cover?",
+              a: "Gear damage and missing parts—not injury. Follow the signed waiver for injury risk.",
+            },
+          ],
+        },
       "Outdoor & Camping": {
-        title: "Outdoor & camping rentals",
-        summary:
-          "Day-hike kits use neighbor + deposit. Expedition / survival shelves add a liability waiver. Tents and sleeping bags require a hygiene / sanitation checklist so shared sleep gear stays clean and dry.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Require waiver for survival / expedition. For tents and bags, attest cleaned / aired before rent and note capacity / season rating. Size deposit to poles, fly, and stove parts that commonly go missing — we are not an outfitter insurer.",
-        whyGeoTitle: "Why waiver + hygiene?",
-        whyGeo:
-          "Remote failures strand people; dirty sleep gear spreads odor and allergens. Waiver + hygiene set honest expectations before PIN / handoff.",
-        flowTitle: "End to end",
-        flow:
-          "List → waiver / hygiene when required → handoff count → return clean and dry → deposit release or claim.",
-        layersTitle: "Safety layers",
-        layers:
-          "Liability waiver · hygiene checklist · capacity / season · deposit hold · rental terms · QR handoff.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Condition photos, waiver, and hygiene ack support disputes. Deposit covers damage or missing parts; Evorios does not sell trip insurance.",
-      },
+          title: "Outdoor & camping rental FAQ",
+          summary: "Short answers for waivers, hygiene, and missing parts.",
+          qa: [
+            {
+              q: "When is a waiver required?",
+              a: "On expedition / survival shelves at booking.",
+            },
+            {
+              q: "Do tents and sleeping bags need hygiene checks?",
+              a: "Yes—host attests cleaned/aired; renter acknowledges the hygiene checklist.",
+            },
+            {
+              q: "What specs should I check?",
+              a: "Capacity and season rating on the listing.",
+            },
+            {
+              q: "What does the deposit cover?",
+              a: "Poles, fly, stove parts, and other missing or damaged pieces.",
+            },
+            {
+              q: "Is trip insurance included?",
+              a: "No. Deposit + waiver/hygiene trail only.",
+            },
+          ],
+        },
       "Bikes & Scooters": {
-        title: "Bikes & scooter rentals",
-        summary:
-          "Helmet, lock, and overnight storage are required on rent. Personal E-Bikes (or Electric = yes on any bike shelf) and e-scooters require min age + e-bike class. Mountain and Racing default to a liability waiver. Kids need a guardian attest (helmet not_required blocked). Cargo and Adaptive add payload / passenger / subtype.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Set helmet, lock, and overnight storage. For e-power (E-Bikes shelf or Electric = yes), set min age and class; add range / charger when known. MTB / Racing: keep the waiver on unless you intentionally turn it off. Kids: require a helmet. Cargo: payload + child policy. Adaptive: pick the subtype.",
-        whyGeoTitle: "Why helmet, lock, overnight, age, and class?",
-        whyGeo:
-          "Head injury, overnight outdoor theft, and underage / misclassified e-power are the biggest micromobility loss modes. Clear policy + age + class cut disputes before PIN unlock.",
-        flowTitle: "End to end",
-        flow:
-          "List helmet/lock/overnight (+ age/class when electric, waiver on MTB/racing, guardian on kids) → renter acknowledges → optional charge band at handoff → return.",
-        layersTitle: "Safety layers",
-        layers:
-          "Helmet · lock · overnight storage · e-age/class · kids guardian · MTB/racing waiver · cargo/adaptive specs · deposit · rental terms.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Overnight + lock policy and handoff photos (plus optional charge band) support theft / power disputes; deposit covers damage; waivers cover ordinary-use injury on high-risk shelves.",
-      },
+          title: "Bikes & scooter rental FAQ",
+          summary: "Short answers for helmets, locks, e-power, and kids.",
+          qa: [
+            {
+              q: "Are helmet, lock, and overnight storage required?",
+              a: "Yes—hosts must publish all three on rent.",
+            },
+            {
+              q: "What do e-bikes / e-scooters need?",
+              a: "Min age + e-bike class when the shelf is E-Bikes or Electric = yes.",
+            },
+            {
+              q: "Is there a waiver for MTB / racing?",
+              a: "Yes by default on Mountain and Racing shelves.",
+            },
+            {
+              q: "What about kids bikes?",
+              a: "Guardian attestation required; helmet cannot be marked not_required.",
+            },
+            {
+              q: "What do cargo / adaptive need?",
+              a: "Cargo: payload + child policy. Adaptive: subtype declared.",
+            },
+          ],
+        },
       "Party & Events": {
-        title: "Party & event rentals",
-        summary:
-          "Tables and soft décor stay neighbor + deposit. Pro AV / stage / lighting capture setup/teardown fee and power needs. Outdoor canopies and tents add a weather-cancel policy with a published full-refund window (24h / 12h / host discretion).",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Set setup/teardown fee and power (amps / circuits) clearly. For outdoor gear, pick a weather-cancel policy so renters know refund rules before they book. Deposit covers stains, tears, and missing pieces — Evorios is not an event insurer.",
-        whyGeoTitle: "Why fee, power, and weather cancel?",
-        whyGeo:
-          "Surprise labor, dead outlets, and storms ruin events more often than theft. Fees and outdoor weather cancel freeze on the agreement at booking so both sides share one script.",
-        flowTitle: "End to end",
-        flow:
-          "List fee / power / weather policy → book (gates + fee) → handoff → weather cancel if outdoor policy applies → return → deposit release or claim.",
-        layersTitle: "Safety layers",
-        layers:
-          "Setup/teardown fee · power · outdoor weather cancel · capacity · deposit hold · rental terms.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Fee, power, and weather policy are frozen on the agreement. Deposit covers damage beyond normal event wear; weather refunds follow the published window — not a partner weather product.",
-      },
+          title: "Party & event rental FAQ",
+          summary: "Short answers for setup fees, power, and weather cancel.",
+          qa: [
+            {
+              q: "Is there a setup/teardown fee?",
+              a: "Pro AV / stage / lighting often publish one—frozen on the agreement at booking.",
+            },
+            {
+              q: "What power info is shown?",
+              a: "Amps / circuits when the host sets them—check before you book.",
+            },
+            {
+              q: "How does weather cancel work?",
+              a: "Outdoor canopies/tents publish a window (24h / 12h / host discretion) for full refund rules.",
+            },
+            {
+              q: "Do tables and décor need weather cancel?",
+              a: "No—soft décor stays neighbor + deposit.",
+            },
+            {
+              q: "What does the deposit cover?",
+              a: "Stains, tears, and missing pieces beyond normal event wear.",
+            },
+          ],
+        },
       "Tools & DIY": {
-        title: "Tools & DIY rentals",
-        summary:
-          "Neighbor trust + a deposit hold covers most drills and hand tools. Power saws, welders, and scaffolding-like shelves require a PPE / safety briefing acknowledgment before handoff. Deposit is not full tool replacement insurance.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Mark briefing ready and note PPE / safe-use bullets for saws, welding, and scaffolding. Require eye, ear, and hand protection (plus welding PPE when applicable). Size the deposit to blades, batteries, and accessories that commonly go missing — we are not partnered with any tool insurer; confirm your own coverage before listing high-value gear.",
-        whyGeoTitle: "Why a safety briefing?",
-        whyGeo:
-          "These tools injure faster than a deposit can fix. A short briefing + PPE ack sets duty of care without pretending Evorios trains operators or sells liability cover.",
-        flowTitle: "End to end",
-        flow:
-          "List with briefing ready + power specs → renter acknowledges PPE / briefing → briefing at handoff → return with photos → deposit release or claim.",
-        layersTitle: "Safety layers",
-        layers:
-          "Safety briefing · PPE ack · power / voltage specs · deposit hold · rental terms · QR handoff.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Briefing ack and handoff photos support disputes. Deposit covers damage or missing blades/parts; injury risk stays with the signed briefing — not an Evorios policy.",
-      },
+          title: "Tools & DIY rental FAQ",
+          summary: "Short answers for PPE, briefings, and deposits.",
+          qa: [
+            {
+              q: "When is a safety briefing required?",
+              a: "Power saws, welders, and scaffolding-like shelves—acknowledge PPE / briefing before handoff.",
+            },
+            {
+              q: "What PPE is expected?",
+              a: "Eye, ear, and hand protection; welding PPE when applicable.",
+            },
+            {
+              q: "Do drills need a briefing?",
+              a: "Most hand tools stay neighbor + deposit only.",
+            },
+            {
+              q: "What does the deposit cover?",
+              a: "Blades, batteries, and accessories that go missing—not full tool replacement insurance.",
+            },
+            {
+              q: "What photos help claims?",
+              a: "Handoff condition photos plus the briefing acknowledgment.",
+            },
+          ],
+        },
       "Garden & Yard": {
-        title: "Garden & yard rentals",
-        summary:
-          "Leaf blowers and everyday yard tools use neighbor trust + deposit. Stump grinders are Construction-adjacent: capacity, PPE, liability waiver, and insurance bands with proof at booking before handoff unlocks.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "For stump grinders, set stump-diameter capacity, PPE expectation, waiver, and liability/deductible bands before publish. For lighter tools, still photograph condition and size deposit to bars, blades, and fuel cans. Evorios does not underwrite yard work — renters’ proof (when required) and your deposit hold are the primary layers.",
-        whyGeoTitle: "Why stump grinders are gated?",
-        whyGeo:
-          "Flying debris and high torque make stump grinders closer to light construction risk than a leaf blower. Capacity + PPE + waiver + insurance proof lock the rent path until cleared.",
-        flowTitle: "End to end",
-        flow:
-          "List (capacity + PPE + insurance bands when stump) → renter waiver / PPE / insurance → handoff → return → deposit or insurance-first claim.",
-        layersTitle: "Safety layers",
-        layers:
-          "Capacity · PPE · liability waiver · insurance proof (stump) · deposit hold · rental terms · QR.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Insurance proof and waiver create a clear trail on gated gear; deposit covers ordinary damage on lighter tools. We are not a landscaping insurer.",
-      },
+          title: "Garden & yard rental FAQ",
+          summary: "Short answers for everyday yard tools and stump grinders.",
+          qa: [
+            {
+              q: "Do leaf blowers need insurance?",
+              a: "No—everyday yard tools use neighbor trust + deposit.",
+            },
+            {
+              q: "What do stump grinders require?",
+              a: "Capacity, PPE, liability waiver, and insurance proof at booking before handoff.",
+            },
+            {
+              q: "What should I photograph?",
+              a: "Condition at handoff—bars, blades, and fuel cans often go missing.",
+            },
+            {
+              q: "What does the deposit cover?",
+              a: "Ordinary damage on light tools; gated gear uses insurance-first when required.",
+            },
+            {
+              q: "Does Evorios insure yard work?",
+              a: "No—renter proof (when required) and the deposit hold are the layers.",
+            },
+          ],
+        },
       "Home & Kitchen": {
-        title: "Home & kitchen rentals",
-        summary:
-          "Everyday appliances stay lightweight: neighbor + deposit. Commercial coffee / brew systems capture voltage, NSF listing, and install/hookup needs so venues do not discover 240V or plumbing mid-event.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "For commercial espresso / brew systems, declare voltage, NSF status, and whether the unit needs plumbing or hardwiring. For consumer appliances, note capacity and return-clean expectations. Deposit covers damage and missing accessories — Evorios is not NSF or a venue insurer.",
-        whyGeoTitle: "Why commercial coffee fields?",
-        whyGeo:
-          "Wrong voltage or missing water hookup is a venue liability and a failed event. Disclosing at listing freezes power and install facts on the agreement.",
-        flowTitle: "End to end",
-        flow:
-          "List voltage / NSF / install when commercial → book (shown on agreement) → delivery/setup → return clean → deposit release or claim.",
-        layersTitle: "Trust layers",
-        layers:
-          "Voltage · NSF · install needs · capacity · deposit hold · rental terms · QR handoff.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Install and power disclosures are frozen on the agreement for disputes. Deposit covers appliance damage; we do not sell equipment breakdown cover.",
-      },
+          title: "Home & kitchen rental FAQ",
+          summary: "Short answers for appliances and commercial brew systems.",
+          qa: [
+            {
+              q: "Do everyday appliances need special fields?",
+              a: "No—neighbor + deposit, plus capacity and return-clean notes.",
+            },
+            {
+              q: "What do commercial coffee systems need?",
+              a: "Voltage, NSF listing status, and install/hookup (plumbing or hardwire) on the listing.",
+            },
+            {
+              q: "Why does voltage matter?",
+              a: "Wrong voltage or missing water hookup fails the event—facts freeze on the agreement.",
+            },
+            {
+              q: "What does the deposit cover?",
+              a: "Damage and missing accessories.",
+            },
+            {
+              q: "Is NSF certification from Evorios?",
+              a: "No—the host declares NSF status; we do not certify.",
+            },
+          ],
+        },
       "Office & Business": {
-        title: "Office & business rentals",
-        summary:
-          "Furniture and simple peripherals use neighbor + deposit. Devices with storage (POS, servers, printers, copiers) require a host wipe plan and renter data-wipe acknowledgment at booking before handoff.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Mark storage and wipe status honestly — wipe POS and servers before list when possible, or set wipe-at-handoff. Size deposit to screens and trays that chip easily. Evorios is not a data-processor partner and does not sell cyber insurance; wipe attestation is the privacy layer.",
-        whyGeoTitle: "Why a data wipe gate?",
-        whyGeo:
-          "POS and servers hold customer data. A wipe ack at booking and handoff cuts privacy disputes that a deposit alone cannot fix.",
-        flowTitle: "End to end",
-        flow:
-          "List with storage + wipe → renter acks → handoff (wipe if required) → return wiped or as agreed → deposit for physical damage.",
-        layersTitle: "Safety layers",
-        layers:
-          "Storage flag · wipe status · renter wipe ack · deposit hold · rental terms · QR.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Wipe status and booking ack create a privacy trail; deposit covers physical damage or missing trays/cables — not a third-party data breach policy.",
-      },
+          title: "Office & business rental FAQ",
+          summary: "Short answers for furniture vs storage devices.",
+          qa: [
+            {
+              q: "Do desks need a data wipe?",
+              a: "No—furniture and simple peripherals stay neighbor + deposit.",
+            },
+            {
+              q: "When is a wipe required?",
+              a: "POS, servers, printers, and copiers with storage—host wipe plan + renter wipe ack at booking.",
+            },
+            {
+              q: "Who handles cyber insurance?",
+              a: "Neither party gets platform cyber cover—wipe attestation is the privacy layer.",
+            },
+            {
+              q: "What does the deposit cover?",
+              a: "Physical damage and missing trays/cables.",
+            },
+            {
+              q: "What if data is left on the device?",
+              a: "Follow the published wipe status and booking acknowledgment.",
+            },
+          ],
+        },
       "Music & Audio": {
-        title: "Music & audio rentals",
-        summary:
-          "Guitars and small amps stay neighbor + deposit. PA Systems require a cable and stand inventory so missing XLRs and stands do not become claim fights — frozen at booking and counted at handoff.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "For PA Systems, list every cable, stand, and mic clip. Note power band / wattage when relevant. Renters acknowledge inventory at booking and count at pickup/return. Deposit covers scuffs and missing accessories — we are not a backline insurer.",
-        whyGeoTitle: "Why PA inventory?",
-        whyGeo:
-          "PA claims are usually missing accessories, not the speaker cabinet. A frozen checklist at booking and handoff cuts disputes without new heavy gates on every instrument.",
-        flowTitle: "End to end",
-        flow:
-          "List PA inventory + power → renter acks → count at pickup → gig → count at return → deposit release or claim.",
-        layersTitle: "Safety layers",
-        layers:
-          "PA cable/stand inventory · power band · deposit hold · rental terms · QR handoff.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Use the inventory snapshot for missing cables/stands; deposit covers the gap. Evorios does not sell gear insurance.",
-      },
+          title: "Music & audio rental FAQ",
+          summary: "Short answers for instruments and PA inventories.",
+          qa: [
+            {
+              q: "Do guitars need a cable inventory?",
+              a: "No—small instruments stay neighbor + deposit.",
+            },
+            {
+              q: "What do PA Systems require?",
+              a: "Cable and stand inventory frozen at booking and counted at handoff/return.",
+            },
+            {
+              q: "Should power/wattage be listed?",
+              a: "Yes when relevant for the PA.",
+            },
+            {
+              q: "What does the deposit cover?",
+              a: "Scuffs and missing accessories—not a backline insurance policy.",
+            },
+            {
+              q: "What if an XLR is missing?",
+              a: "Use the inventory snapshot for the claim.",
+            },
+          ],
+        },
       "Costume & Cosplay": {
-        title: "Costume & cosplay rentals",
-        summary:
-          "Neighbor trust + deposit, return-condition rules, optional cleaning fees, sanitization for contact gear, piece inventory on pro shelves, and heat/waiver gates on full suits and animatronics — frozen on the agreement so cleaning and missing pieces are never a surprise.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Set return condition and an optional cleaning fee (renter or you arrange cleaning — we are not a dry-cleaner partner). Label character / era when relevant. List every piece on theater, film, makeup, and full-suit shelves. Full suits: attest heat + visibility guidance and sanitize interiors. Animatronics: declare power and keep the liability waiver on.",
-        whyGeoTitle: "Why return condition + fee?",
-        whyGeo:
-          "Makeup, sweat, and glitter ruin costumes. Clear return rules and an optional fee beat surprise cleaning bills after the party.",
-        flowTitle: "End to end",
-        flow:
-          "List with return policy (+ fee) + hygiene / inventory / heat when required → renter acknowledges → wear → return per policy → deposit or fee claim.",
-        layersTitle: "Safety layers",
-        layers:
-          "Return condition · cleaning fee · sanitization · size / fits · piece inventory · heat/visibility · waiver (suits / animatronics) · deposit · rental terms.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Fee and policy are on the agreement; deposit covers tears or missing pieces beyond the published fee. Evorios does not sell costume insurance.",
-      },
+          title: "Costume & cosplay rental FAQ",
+          summary: "Short answers for return condition, cleaning fees, and hygiene.",
+          qa: [
+            {
+              q: "Is return condition required?",
+              a: "Yes—published rules (and optional cleaning fee) freeze on the agreement.",
+            },
+            {
+              q: "Do contact pieces need sanitization?",
+              a: "Yes for masks, makeup, wigs, and suit interiors when the shelf requires it.",
+            },
+            {
+              q: "When is a piece inventory required?",
+              a: "Theater, film props, pro makeup, and full-suit shelves.",
+            },
+            {
+              q: "Do full suits need a waiver?",
+              a: "Yes—plus heat/visibility guidance. Animatronics also keep the liability waiver on.",
+            },
+            {
+              q: "What does the deposit cover?",
+              a: "Tears and missing pieces beyond the published cleaning fee.",
+            },
+          ],
+        },
       "Baby & Kids": {
-        title: "Baby safety rentals",
-        summary:
-          "Car seats and cribs use hard safety gates (expiry/recall/CPSC/drop-side/mattress/sanitization). Commercial play equipment requires certification, capacity, and a liability waiver. Incomplete units cannot publish or book.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Enter expiry as YYYY-MM-DD (or Exp YYYY-MM). Check recalls before listing. Put a clear label photo on the listing. Never list an expired seat.",
-        whyGeoTitle: "Why a hard gate?",
-        whyGeo:
-          "Expired or recalled car seats are a child-safety failure mode — soft text fields are not enough. Publish and book both block until checks pass.",
-        flowTitle: "End to end",
-        flow:
-          "List seat with expiry + recall + sanitization + label photo → renter acknowledges at booking → handoff → return.",
-        layersTitle: "Safety layers",
-        layers:
-          "Expiry hard gate · recall ack · sanitization · label photo · renter booking attestations · rental terms.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Host and renter attestations create a clear safety trail. Do not use seats that fail the gate.",
-      }
+          title: "Baby safety rental FAQ",
+          summary: "Short answers for car seats, cribs, and commercial play.",
+          qa: [
+            {
+              q: "Can I rent an expired car seat?",
+              a: "No—expiry and recall gates block publish and book.",
+            },
+            {
+              q: "What do cribs require?",
+              a: "No drop-side; portable sleep standard; firm mattress; sanitization.",
+            },
+            {
+              q: "What does commercial play need?",
+              a: "Certification, capacity, and a liability waiver.",
+            },
+            {
+              q: "What must hosts show?",
+              a: "Label photo, recall check, and sanitization attest where required.",
+            },
+            {
+              q: "What does the renter acknowledge?",
+              a: "Safety attestations at booking before unlock.",
+            },
+          ],
+        }
     },
 
     bySubcategory: {
@@ -4319,43 +4430,868 @@ export const en: AppMessages = {
         },
       },
       "Electronics & Tech": {
-        "Broadcast Equipment": { title: "Broadcast — subtype, I/O, return test", summary: "AV houses and Lensrentals-class kits win on patch clarity. We win on peer inventory plus device subtype (switcher/encoder/recorder/teleprompter), SDI/HDMI I/O list, power/battery plate, capture media included?, firmware notes, soft livestream platform notes, kit completeness, and a return function test — frozen on the agreement. Deposit hold — not Geek Squad, Fat Llama, or insurance affiliate hard-sell.", hostTipTitle: "Host standard", hostTip: "Pick subtype and brand/model. List every SDI/HDMI port and included cable/converter. Set power/battery plate and whether SD/CF/SSD media ships with the kit. Note firmware version (and do-not-update during rental). Add soft livestream notes (OBS/RTMP/YouTube/Twitch/Zoom) without affiliate links. Mark kit completeness and a return function-test policy. Check structured kit items + free-text checklist; photo ports before handoff.", whyGeoTitle: "Why these gates?", whyGeo: "Wrong subtype, missing BNCs, empty media slots, and untested ports drive more livestream disputes than theft. A short patch card on the listing beats dead air and surprise deposit claims after the show.", flowTitle: "End to end", flow: "List subtype + I/O + power + media + firmware + platform notes + completeness + return test → renter acks kit / return test → stream or shoot → return with function test → deposit release or claim with photos.", layersTitle: "Safety layers", layers: "Serial · subtype · SDI/HDMI inventory · power/plate · capture media · firmware · soft platform notes · kit completeness · structured accessories · return function test · deposit hold · rental terms.", claimsTitle: "If something goes wrong", claims: "Inventory + serial support missing cable/media claims; failed return function test and damage beyond wear hit deposit. Evorios does not sell electronics insurance or partner with AV retailers for repair." },
-        "Display Systems": { title: "Displays — size, inputs, power, fragility", summary: "AV houses rent LED walls and commercial panels with pitch, nits, mounts, and circuit notes. We win on peer inventory plus clear size, resolution/HDR, stand/mount/flight-case, HDMI/DP/SDI inputs, brightness, indoor vs outdoor, power/circuit expectations, LED pitch, and transport fragility — frozen on the agreement. No Geek Squad, Fat Llama, or third-party insurance hard-sell.", hostTipTitle: "Host standard", hostTip: "Set brand + model + size band (use LED cabinet row when modular). Mark display type, resolution/HDR, mount/stand/case include, every input, nit band, indoor/outdoor rating, power/circuit band, and fragility. For LED walls add pixel pitch and list spare modules / power distro in the checklist. Photo corners and flight-case condition before handoff.", whyGeoTitle: "Why these gates?", whyGeo: "Wrong cables, undersized circuits, outdoor use on indoor panels, and cracked glass in transit drive more display disputes than theft. A short AV care card on the listing beats day-of signal and power failures.", flowTitle: "End to end", flow: "List size + type + HDR + mount kit + inputs + nits + indoor/outdoor + power + pitch + fragility → renter acks kit / outdoor / power / fragility → handoff count → return cased → deposit release or claim with photos.", layersTitle: "Safety layers", layers: "Serial · size · type · resolution/HDR · mount/case · input inventory · nits · indoor/outdoor · power/circuit · LED pitch · fragility · kit checklist · deposit · rental terms.", claimsTitle: "If something goes wrong", claims: "Missing cables/remotes/modules use inventory + photos; cracked glass or bent LED cabinets beyond wear hit deposit. Evorios does not sell electronics insurance or partner with Geek Squad / Fat Llama." },
-        "Gaming Gear": { title: "Gaming — subtype, login, wipe, hygiene", summary: "Cafés and peer console rentals win on guest profiles and clear kits. We win when subtype (console/PC/VR), guest or offline login, controller count, game library, HDMI/cables, soft storage wipe, and VR hygiene are frozen on the agreement — plus a soft kids content note. Serial + kit inventory and deposit hold stay. No Fat Llama, GameStop, or insurer hard-sell.", hostTipTitle: "Host standard", hostTip: "Pick subtype and login policy (prefer guest/offline). Set controller count, library (empty vs digital vs discs), and HDMI/power cable policy. If the console/PC/handheld has internal storage, declare wipe / unlink honestly. For VR, write face-foam / wipe hygiene notes. Optional soft age-rating note for kids titles. Photo serial + count pads/cables at handoff.", whyGeoTitle: "Why these gates?", whyGeo: "Linked accounts, missing controllers, and dirty VR foam drive more gaming disputes than theft. A short care card beats surprise ban or cleaning claims after the weekend.", flowTitle: "End to end", flow: "List subtype + login + controllers + library + cables (+ wipe when storage, + VR hygiene) → renter acks → play → return wiped/unlinked as agreed → deposit release or claim with photos.", layersTitle: "Safety layers", layers: "Serial · kit inventory · subtype · login policy · controllers · game library · HDMI/cables · soft wipe when storage · VR hygiene · soft age note · deposit · rental terms.", claimsTitle: "If something goes wrong", claims: "Inventory + serial support missing-pad or cable claims; wipe/login notes cover privacy disputes; VR hygiene beyond notes and damage beyond fee hit deposit. Evorios does not sell gaming insurance or partner with console retailers." },
-        "Laptops": { title: "Laptops — unlock, charger, wipe", summary: "Geek Squad and Fat Llama rent ready-to-boot machines with charger wattage and battery bands. We win on peer inventory plus serial, kit list, host wipe status, OS/admin unlock plan, charger wattage, battery health, login/demo notes, screen/keyboard grade, antivirus/unlink clarity, and return-wipe depth — frozen on the agreement. No retail rental affiliate or third-party insurance hard-sell.", hostTipTitle: "Host standard", hostTip: "Set brand + model + screen size + serial. List kit (charger wattage band, cables, sleeve). Declare wipe status and return-wipe depth. Pick OS/admin unlock plan and write login/demo account notes. State battery health band and screen/keyboard condition grade. Note antivirus leftovers and iCloud/Google/Microsoft unlink steps. Photo serial + charger brick before handoff.", whyGeoTitle: "Why these gates?", whyGeo: "Firmware locks, wrong chargers, weak batteries, and leftover accounts drive more laptop disputes than theft. A short unlock + wipe card on the listing beats surprise lockouts and claim photos after return.", flowTitle: "End to end", flow: "List unlock + wattage + battery + login + condition + wipe → renter acks wipe + return wipe + unlock when needed → use for the trip → return per wipe depth → deposit.", layersTitle: "Safety layers", layers: "Serial · kit inventory · charger wattage · battery health · unlock plan · login/demo notes · condition grade · antivirus/unlink · host wipe · return wipe depth · deposit · rental terms.", claimsTitle: "If something goes wrong", claims: "Missing charger/kit pieces use inventory + photos; battery below published band and screen/keyboard damage beyond grade hit deposit. Wipe and unlock disputes follow published status and notes. Evorios does not sell laptop insurance or Geek Squad services." },
-        "Network Gear": { title: "Network gear — subtype, PoE, wipe, restore", summary: "IT shops and enterprise AV rent switches, APs, and firewalls with typed subtype, managed band, PoE budget, ports, rack kit, outdoor rating, factory-wipe depth, and credentials rules. We win on peer inventory plus those specs and a clear renter factory-restore-on-return policy — frozen on the agreement. No Geek Squad, MSP, or carrier affiliate hard-sell.", hostTipTitle: "Host standard", hostTip: "Set subtype (router/switch/AP/firewall/mesh/modem), managed vs unmanaged, PoE budget, port band, rack/mount kit, and outdoor AP rating. Declare wipe status plus config-wipe depth (full factory vs controller unlink). Set credentials handoff and whether the renter must restore factory defaults on return. List injectors, antennas, SFPs, and ears in kit inventory. Photo serial and ports before handoff.", whyGeoTitle: "Why these gates?", whyGeo: "Wrong PoE budget, leftover SSIDs/admin creds, and indoor APs left outdoors drive more network-gear disputes than theft. A short care card beats surprise reconfig bills after the event.", flowTitle: "End to end", flow: "List subtype + PoE + ports + wipe depth + creds + restore → renter acks kit/wipe/creds/restore → deploy for the job → restore factory if required → return kit → deposit release or claim.", layersTitle: "Safety layers", layers: "Serial · kit inventory · subtype · managed · PoE · ports · rack/mount · outdoor rating · wipe status · config depth · credentials · factory restore · deposit · rental terms.", claimsTitle: "If something goes wrong", claims: "Missing injectors/ears/SFPs use inventory + photos; config left contrary to restore policy and outdoor misuse beyond listing hit deposit. Evorios does not sell network insurance, MSP services, or carrier activation." },
-        "Other": { title: "Other — re-shelf first, then trust floor", summary: "Prefer a named Electronics & Tech shelf (Laptops, Projectors, Gaming Gear, Speakers, Smart Home Devices, Servers & Workstations, Pro Audio, Broadcast Equipment, Network Gear, Display Systems) so the right gates apply. If you stay on Other, declare power delivery, whether the device has storage (wipe when it does), condition-photo coverage, and a piece list when the kit is multi-piece.", hostTipTitle: "Host standard", hostTip: "Re-shelf whenever a specific shelf fits. On Other: set brand/model, structured kit items, single vs multi-piece (+ free-text inventory if multi), power delivery, storage yes/no, wipe/unlink when storage is present, and attest condition photos (device, ports, flaws, accessories). Soft language only — we do not sell third-party electronics insurance or partner repair plans.", whyGeoTitle: "Why re-shelf + photos + wipe?", whyGeo: "Other skips specialist laptop, display, gaming, and pro-AV gates. Clear power, storage/wipe, condition photos, and multi-piece inventory are the minimum so missing-charger and privacy disputes stay fair.", flowTitle: "Flow", flow: "Prefer named shelf → else list power + storage (+ wipe if storage) + photo checklist (+ inventory if multi) → booking ack → count at handoff → return wiped or as agreed.", layersTitle: "Layers", layers: "Re-shelf guidance · brand/model · kit items · piece band · inventory (multi) · power · storage/wipe · condition photos · serial · deposit · terms.", claimsTitle: "Claims", claims: "Use condition photos, serial, and inventory for missing parts or swaps; wipe status for privacy disputes; deposit hold covers the gap. Prefer specific shelves next time." },
-        "Pro Audio": { title: "Pro Audio — subtype, phantom, loom, function-test", summary: "AV desks and peer interface rentals win on gear-type (interface vs mixer vs mic vs monitor), 48V phantom / DI clarity, counted XLR/TRS looms, case included, soft sample-rate/bit-depth, and a return function-test — frozen with serial and kit inventory. This is studio/capture gear under Electronics & Tech, not Music & Audio PA stacks. No retail-rental or insurance-partner hard-sell.", hostTipTitle: "Host standard", hostTip: "Pick gear type. State 48V phantom and DI included/not/needed. Count every XLR, TRS, USB-C/Thunderbolt, and ADAT in the loom. Mark case (hard/soft/flight/none). Soft-set max sample-rate/bit-depth for digital boxes. Attest a power-on / I/O function-test at list or handoff and require the same at return. List shock mounts, pop filters, headphones in the checklist. Prefer screenSizeBand = no screen when there is none. Photo the loom before handoff.", whyGeoTitle: "Why these gates?", whyGeo: "Pro-audio disputes are almost never the interface chassis — they are missing XLRs, no phantom for a condenser, no DI for a bass, no case in transit, and ‘it worked when I got it’ without a return smoke-test. Subtype + phantom/DI + loom + case + function-test beat surprise claims after the session.", flowTitle: "End to end", flow: "List subtype + phantom/DI + loom + case + soft sample-rate + function-test + serial/kit → renter acks → count cables at pickup → session → return function-test + count → deposit release or claim.", layersTitle: "Safety layers", layers: "Gear type · phantom · DI · cable loom · case · soft sample-rate/bit-depth · return function-test · serial · kit inventory · deposit · rental terms.", claimsTitle: "If something goes wrong", claims: "Frozen loom + checklist + serial support missing-cable and swap claims; deposit covers damage gaps. Failed return function-test uses photos + attest. Evorios does not sell gear insurance or partner with retail rental desks." },
-        "Projectors": { title: "Projectors — lumens, throw, inputs", summary: "AV houses rent with lumen/throw cards and input lists. We win on peer serial + kit inventory plus brightness band, native resolution, lamp vs laser/LED, throw notes, HDMI/input inventory, screen/stand inclusion, power-cable length, remote in the kit, and indoor/outdoor use — frozen on the agreement. No retailer or short-term rental affiliate hard-sell.", hostTipTitle: "Host standard", hostTip: "Set brand/model/serial. Pick lumen band, native res, and light source; add lamp-hour notes for lamp units. Write throw/distance and list every input (HDMI count, adapters). Mark screen/stand inclusion and power-cable length. Check remote + power cable in kit inventory. Choose indoor vs outdoor policy. Photo the unit and ports before handoff.", whyGeoTitle: "Why these gates?", whyGeo: "Wrong brightness, missing HDMI adapters, and outdoor dust/rain damage drive more projector disputes than theft. A short AV card on the listing beats surprise room-fit failures after setup.", flowTitle: "End to end", flow: "List lumens + res + light source + throw + inputs + screen/stand + use env → renter acks kit (+ outdoor when needed) → set up → return with all cables/remote → deposit release or claim with photos.", layersTitle: "Safety layers", layers: "Serial · kit inventory · lumens · native res · light source / lamp hours · throw · inputs · screen/stand · power-cable length · indoor/outdoor · deposit · rental terms.", claimsTitle: "If something goes wrong", claims: "Missing remote/cables/adapters use inventory + photos; lamp failure beyond disclosed hours and outdoor use beyond policy hit deposit. Evorios does not sell projector insurance or partner with retail protection plans." },
-        "Servers & Workstations": { title: "Servers & WS — form, power, wipe depth", summary: "IT rental and colo short-term win on clear specs. We win on peer inventory plus form factor, PSU/power, soft RAM/CPU class, rack rails, NIC/port list, IPMI/iDRAC policy, wipe status plus wipe depth, shipping/weight, and noise/heat notes — frozen on the agreement. No Geek Squad, Fat Llama affiliate, or cyber-insurance hard-sell.", hostTipTitle: "Host standard", hostTip: "Set form factor (tower / rack U / laptop WS) and power/PSU config. Soft-band RAM and CPU class. Say if rails ship. List every NIC/SFP/DAC and kit piece (PDU, KVM, bezel). Set IPMI/iDRAC access policy and wipe depth (secure erase vs OS reinstall vs drives pulled) plus wipe timing. Note weight/shipping and noise/heat fit. Photo serial and ports before handoff.", whyGeoTitle: "Why these gates?", whyGeo: "Missing rails, wrong power, open BMC credentials, and shallow wipes drive more server disputes than theft. A short IT care card beats surprise colo failures and privacy claims after return.", flowTitle: "End to end", flow: "List form + power + rails + ports + BMC + wipe depth → renter acks kit / wipe / BMC → power-on check at handoff → use in allowed environment → return wiped per depth → deposit release or claim with photos.", layersTitle: "Safety layers", layers: "Serial · kit inventory · form factor · power/PSU · rails · NIC inventory · IPMI/iDRAC policy · wipe status · wipe depth · shipping/weight · noise/heat · deposit · rental terms.", claimsTitle: "If something goes wrong", claims: "Inventory + serial support missing rails/NIC/SFP claims; power and form mismatches are listing disputes; wipe-depth gaps use photos + agreement. Deposit hold covers hardware loss; Evorios does not sell cyber insurance or third-party wipe services." },
-        "Smart Home Devices": { title: "Smart home — unlink, hub, protocol", summary: "Fat Llama and peer Nest/Ring/Echo rentals compete on short stays; shops win on setup cards. We win when wipe/unlink + factory-reset notes, hub/bridge needs, Wi-Fi–Thread–Zigbee–Matter band, power type, install/removal notes, camera privacy cover, and multi-device kit inventory are frozen on the agreement — and renters must not leave accounts linked. No retail or insurance affiliate hard-sell.", hostTipTitle: "Host standard", hostTip: "Declare wipe/unlink status and write factory-reset / app-unlink steps. Mark device class, protocol band, hub/bridge status, and power type. List every piece (hub, bulbs, sensors, mounts, remotes). Note install/removal for thermostats, doorbells, and hardwired cams. Set camera privacy cover when a lens exists. Choose an account-return policy so the next guest never inherits a linked home.", whyGeoTitle: "Why these gates?", whyGeo: "Smart-home disputes are rarely about the plastic — they are about leftover accounts, missing hubs, wrong radio protocol, and wall damage from installs. A short setup card beats a surprise locked Ring or orphaned Zigbee bulbs after return.", flowTitle: "End to end", flow: "List wipe + reset notes + protocol + hub + power + privacy cover + kit → renter acks wipe + account return (+ hub if needed) → install per notes → use → unlink/reset before return → deposit release or claim with inventory photos.", layersTitle: "Safety layers", layers: "Serial · kit inventory · wipe/unlink · factory-reset notes · account-return policy · protocol · hub/bridge · power · install/removal · privacy cover · deposit · rental terms.", claimsTitle: "If something goes wrong", claims: "Missing hub/bulbs/sensors use inventory + photos; wall/plate damage beyond soft install notes hits deposit; accounts left linked follow account-return policy + wipe ack. Evorios does not sell electronics insurance or partner with Fat Llama / Best Buy Geek Squad." },
-        "Speakers": { title: "Speakers — form, power, cables, volume", summary: "Fat Llama and local PA-lite shops rent Bluetooth and party speakers; Best Buy sells them. We win on peer inventory plus clear form (wired / Bluetooth / party), battery vs AC, outdoor/splash band, neighbor-volume soft notes, stand/mount include, named cable checklist, stereo-pair notes, and return charge — frozen on the agreement. Consumer/portable only — stage PA stays under Music & Audio. No retail affiliate or Geek Squad hard-sell.", hostTipTitle: "Host standard", hostTip: "Set brand + model + form (Bluetooth portable, wired bookshelf, party boombox, soundbar, or smart). Mark battery vs AC vs hybrid and outdoor/splash band. Say whether a stand or mount is included. List every cable and brick in the kit checklist. Write a short neighbor-volume note (apartments / quiet hours). Add stereo-pair / TWS notes if a second unit links. For battery units, set expected return charge and whether the charger is included. Photo condition before handoff.", whyGeoTitle: "Why these gates?", whyGeo: "Speaker disputes are usually dead batteries, missing AUX/USB cables, wet pool-side use, and neighbor noise — not theft of the cabinet. A short care card beats surprise deposit fights after the weekend.", flowTitle: "End to end", flow: "List form + power + weather + stand + cables + volume notes (+ charge when battery) → renter acks kit + volume → picnic/party use → return charged as agreed → deposit release or claim with photos.", layersTitle: "Safety layers", layers: "Serial · brand/model · form · power · weather · stand/mount · cable inventory · neighbor-volume notes · stereo-pair notes · return charge · deposit · rental terms.", claimsTitle: "If something goes wrong", claims: "Inventory snapshot covers missing cables/stands; weather notes cover water damage beyond splash rating; volume notes set soft expectations only. Deposit hold covers the gap. Evorios does not sell speaker insurance or partner with Best Buy / Geek Squad / Fat Llama." },
+        "Broadcast Equipment": {
+            title: "Broadcast equipment FAQ",
+            summary: "Short answers for switchers, encoders, and livestream kits.",
+            qa: [
+              {
+                q: "What subtype should be listed?",
+                a: "Switcher, encoder, recorder, teleprompter, or similar—plus brand/model.",
+              },
+              {
+                q: "What I/O and power are shown?",
+                a: "Every SDI/HDMI path, cables/converters, and power/battery plate.",
+              },
+              {
+                q: "Is capture media included?",
+                a: "The listing says whether SD/CF/SSD ships with the kit.",
+              },
+              {
+                q: "Is a return function test required?",
+                a: "Yes when the host sets it—power-on / I/O check at return.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing cables/media and failed return tests beyond wear.",
+              },
+            ],
+          },
+        "Display Systems": {
+            title: "Display systems FAQ",
+            summary: "Short answers for panels, LED walls, mounts, and power.",
+            qa: [
+              {
+                q: "What size and inputs are published?",
+                a: "Size band, resolution/HDR, and every HDMI/DP/SDI input.",
+              },
+              {
+                q: "Indoor or outdoor?",
+                a: "Follow the listing rating—do not use indoor panels outdoors.",
+              },
+              {
+                q: "What about power?",
+                a: "Check the published circuit/amps band before setup.",
+              },
+              {
+                q: "Are mounts or cases included?",
+                a: "The listing states stand/mount/flight-case inclusion.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Cracked glass, bent cabinets, and missing cables/remotes/modules.",
+              },
+            ],
+          },
+        "Gaming Gear": {
+            title: "Gaming gear FAQ",
+            summary: "Short answers for consoles, PCs, VR, login, and wipe.",
+            qa: [
+              {
+                q: "What login is allowed?",
+                a: "Prefer guest/offline as published—do not leave personal accounts linked.",
+              },
+              {
+                q: "How many controllers ship?",
+                a: "Controller count and HDMI/cables are on the listing inventory.",
+              },
+              {
+                q: "Is a wipe required?",
+                a: "When the device has storage—follow host wipe/unlink and return wipe rules.",
+              },
+              {
+                q: "What about VR hygiene?",
+                a: "Clean face foam per the listing notes before return.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing pads/cables and damage beyond published hygiene notes.",
+              },
+            ],
+          },
+        "Laptops": {
+            title: "Laptop rental FAQ",
+            summary: "Short answers for unlock, charger, battery, and wipe.",
+            qa: [
+              {
+                q: "Is the charger included?",
+                a: "Yes when listed—note wattage band on the kit inventory.",
+              },
+              {
+                q: "How do I unlock it?",
+                a: "Follow the published OS/admin unlock and demo-login notes.",
+              },
+              {
+                q: "What wipe is required?",
+                a: "Host wipe status at list; return wipe depth as published; acknowledge at booking.",
+              },
+              {
+                q: "What battery health is claimed?",
+                a: "Stay within the published battery band; photo the brick at handoff.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing charger/kit pieces and screen/keyboard damage beyond grade.",
+              },
+            ],
+          },
+        "Network Gear": {
+            title: "Network gear FAQ",
+            summary: "Short answers for switches, APs, PoE, and factory restore.",
+            qa: [
+              {
+                q: "What subtype and PoE are listed?",
+                a: "Router/switch/AP/firewall/mesh plus PoE budget and port band.",
+              },
+              {
+                q: "Must I factory-restore on return?",
+                a: "Yes when the listing requires it—clear leftover SSIDs and admin creds.",
+              },
+              {
+                q: "Is outdoor use allowed?",
+                a: "Only if the AP/outdoor rating allows it.",
+              },
+              {
+                q: "What kit pieces are counted?",
+                a: "Injectors, antennas, SFPs, rails/ears—per inventory.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing parts and config left contrary to restore policy.",
+              },
+            ],
+          },
+        "Other": {
+            title: "Other electronics FAQ",
+            summary: "Short answers when no named electronics shelf fits.",
+            qa: [
+              {
+                q: "Should I use Other?",
+                a: "Prefer a named shelf (Laptops, Projectors, Gaming, etc.) so the right gates apply.",
+              },
+              {
+                q: "What must Other listings declare?",
+                a: "Power delivery, storage yes/no, wipe when storage exists, and condition photos.",
+              },
+              {
+                q: "Multi-piece kits?",
+                a: "List every piece in the inventory.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing parts and damage with photos + serial.",
+              },
+              {
+                q: "Is partner insurance included?",
+                a: "No—deposit hold only.",
+              },
+            ],
+          },
+        "Pro Audio": {
+            title: "Pro audio FAQ",
+            summary: "Short answers for interfaces, mics, phantom, and looms.",
+            qa: [
+              {
+                q: "What gear type is this?",
+                a: "Interface, mixer, mic, monitor, or similar—stated on the listing.",
+              },
+              {
+                q: "Is 48V phantom / DI included?",
+                a: "Check the listing—required for many condensers and bass DI needs.",
+              },
+              {
+                q: "How are cables counted?",
+                a: "Every XLR/TRS/USB/ADAT in the loom is inventoried and counted at handoff.",
+              },
+              {
+                q: "Is a return function test required?",
+                a: "Yes when set—power-on / I/O check at return.",
+              },
+              {
+                q: "Is this the same as Music PA?",
+                a: "No—this shelf is studio/capture under Electronics & Tech.",
+              },
+            ],
+          },
+        "Projectors": {
+            title: "Projector rental FAQ",
+            summary: "Short answers for lumens, throw, inputs, and kits.",
+            qa: [
+              {
+                q: "How bright is it?",
+                a: "Use the published lumen band and native resolution.",
+              },
+              {
+                q: "What throw distance works?",
+                a: "Follow throw/distance notes on the listing.",
+              },
+              {
+                q: "Which inputs are included?",
+                a: "HDMI count and adapters are on the inventory.",
+              },
+              {
+                q: "Indoor or outdoor?",
+                a: "Follow the published use environment.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing remote/cables and lamp/outdoor misuse beyond the listing.",
+              },
+            ],
+          },
+        "Servers & Workstations": {
+            title: "Servers & workstations FAQ",
+            summary: "Short answers for form factor, power, BMC, and wipe depth.",
+            qa: [
+              {
+                q: "What form factor and power?",
+                a: "Tower / rack U / laptop WS plus PSU/power config on the listing.",
+              },
+              {
+                q: "Are rack rails included?",
+                a: "Only if the listing says so—count them at handoff.",
+              },
+              {
+                q: "What wipe depth is required?",
+                a: "Secure erase, OS reinstall, or drives pulled—as published.",
+              },
+              {
+                q: "How does IPMI/iDRAC access work?",
+                a: "Follow the host BMC access policy; do not leave open credentials.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing rails/NICs and hardware loss—not cyber insurance.",
+              },
+            ],
+          },
+        "Smart Home Devices": {
+            title: "Smart home devices FAQ",
+            summary: "Short answers for unlink, hubs, and protocols.",
+            qa: [
+              {
+                q: "Must I unlink my account?",
+                a: "Yes—return per account-return policy; do not leave the next guest linked.",
+              },
+              {
+                q: "Is a hub/bridge required?",
+                a: "Only if the listing says the protocol needs one.",
+              },
+              {
+                q: "Which protocol is supported?",
+                a: "Wi-Fi / Thread / Zigbee / Matter band is on the listing.",
+              },
+              {
+                q: "Cameras?",
+                a: "Use the privacy cover when provided; follow install/removal notes.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing hubs/sensors and wall damage beyond install notes.",
+              },
+            ],
+          },
+        "Speakers": {
+            title: "Speakers FAQ",
+            summary: "Short answers for portable/party speakers (not stage PA).",
+            qa: [
+              {
+                q: "Battery or AC?",
+                a: "Follow the published power type; return charge band when battery.",
+              },
+              {
+                q: "Outdoor / splash OK?",
+                a: "Only within the published weather band.",
+              },
+              {
+                q: "Are cables included?",
+                a: "Named cable checklist on the listing—count at handoff.",
+              },
+              {
+                q: "Volume rules?",
+                a: "Follow neighbor-volume / quiet-hours notes on the listing.",
+              },
+              {
+                q: "Is this Music & Audio PA?",
+                a: "No—consumer/portable only; stage PA stays under Music & Audio.",
+              },
+            ],
+          },
       },
       "Costume & Cosplay": {
-        "Halloween Costumes": { title: "Halloween — size, pieces, glitter return", summary: "Spirit sells; local shops rent with care cards. We win on peer inventory plus clear size/fits, set completeness, piece list, return/cleaning fee, glitter-makeup notes, kids-vs-adult band, and smoke/fog + event-use expectations — frozen on the agreement. No retail affiliate or dry-cleaner partner hard-sell.", hostTipTitle: "Host standard", hostTip: "Set size + fits + audience (kids/teen/adult/family). Mark completeness and list every piece (mask, gloves, prop). Write glitter/makeup/fake-blood return notes and a smoke/fog policy. Add optional cleaning fee (you or the renter arrange cleaning — we are not a dry-cleaner partner). Photo stains before handoff; note outdoor/parade use if relevant.", whyGeoTitle: "Why these gates?", whyGeo: "Seasonal glitter, makeup, and missing accessories drive more Halloween disputes than theft. A short care card on the listing beats surprise cleaning bills after the party.", flowTitle: "End to end", flow: "List audience + pieces + return + glitter notes + smoke/fog → renter acks → wear for the event → return per policy → fee or deposit.", layersTitle: "Safety layers", layers: "Size/fits · audience · completeness · piece inventory · glitter/makeup notes · smoke/fog · event-use · return condition · optional fee · deposit · rental terms.", claimsTitle: "If something goes wrong", claims: "Published fee covers listed cleaning; glitter/makeup beyond notes and missing pieces use inventory + photos; tears beyond fee hit deposit. Evorios does not sell costume insurance or cleaning services." },
-        "Character Costumes": { title: "Character — label, pieces, fit", summary: "Cosplay peer market needs a clear character label, full vs partial set, a piece inventory with photos, and try-on/fit notes. Return/cleaning rules still apply. Hosts handle IP-safe use — we do not clear licenses.", hostTipTitle: "Host standard", hostTip: "Name the character, mark completeness, list every piece, photo each piece, add try-on/fit notes, set return + optional fee, and acknowledge the soft IP-safe reminder. No third-party promo needed.", whyGeoTitle: "Why label + inventory", whyGeo: "Wrong character or missing gauntlets ruin con photos — inventory and per-piece photos beat surprise claims.", flowTitle: "Flow", flow: "Label + set + inventory + photos + fit notes + return → booking ack → wear → count pieces → return.", layersTitle: "Layers", layers: "Character label · completeness · piece inventory · piece photos · try-on/fit · soft IP host note · return · fee · deposit.", claimsTitle: "Claims", claims: "Missing pieces use checklist + photos. Listed cleaning fee covers policy; tears beyond fee hit deposit. Evorios does not sell costume insurance or clear IP." },
-        "Wigs & Accessories": { title: "Wigs — hygiene, fiber, fit", summary: "Shared scalp contact needs a sanitization attest between renters. Fiber type and cap size set heat and fit expectations; return and style-reset rules cover restyling damage. Soft guidance only — not a salon certificate.", hostTipTitle: "Host standard", hostTip: "Attest sanitize and its strength, set fiber type and cap band, pick style-reset/return, and a cleaning fee if you restyle. Photo lace and color before handoff.", whyGeoTitle: "Why these fields", whyGeo: "Heat tools melt the wrong fiber; tight caps fail at events; restyle disputes are the usual deposit claim — clearer than retail sell tags alone.", flowTitle: "Flow", flow: "Sanitize + strength → fiber + cap → style-reset/return → hygiene ack → wear carefully → return per policy.", layersTitle: "Layers", layers: "Sanitize attest · sanitize strength · fiber · cap size · style reset · return/fee · deposit.", claimsTitle: "Claims", claims: "Melted fibers, cut lace, or missing clips follow photos + deposit. Listed cleaning/restyle fee covers only what the listing says." },
-        "Period Costumes": { title: "Period — era, delicate return, no alterations", summary: "Theater and themed events need an era band, dry-clean-friendly return, piece inventory, and clear no-alteration rules. Local costume houses win on rail depth; peer listings win when fees, underlayers, and handling notes are frozen on the agreement.", hostTipTitle: "Host standard", hostTip: "Set era, size, material, completeness, return (+ fee), alteration policy. List every multi-piece item. Note delicate fabric care and which underlayers are included.", whyGeoTitle: "Why era + care", whyGeo: "Wrong century fails the booking; hems, cuts, and missing petticoats drive most period disputes—more than theft.", flowTitle: "Flow", flow: "Era + completeness + inventory + return + no-alterations → booking ack → wear carefully → count pieces → clean per policy.", layersTitle: "Layers", layers: "Era · size · material · completeness · inventory · return · fee · alterations · underlayers · deposit.", claimsTitle: "Claims", claims: "Delicate tears, stains, missing pieces, and unauthorized alterations follow fee + inventory + deposit. Facts stay collapsed by default." },
-        "Masks & Makeup": { title: "Masks & makeup — sanitize, seal, skin contact", summary: "Skin-contact gear needs host sanitization attest and renter hygiene ack. Declare sealed vs open cosmetics, skin-contact type (mask / foam / paint), list kit pieces, and add a soft allergy note — prefer sealed products when possible.", hostTipTitle: "Host standard", hostTip: "Sanitize between renters; mark sealed vs open; set skin-contact type; inventory kit pieces; note common allergens softly; set return policy for stains. No medical claims.", whyGeoTitle: "Why seal + contact type", whyGeo: "Shared open cosmetics are a hygiene failure mode Spirit does not rent around; foam vs hard mask changes how you clean and what touches skin.", flowTitle: "Flow", flow: "Sanitize + seal status + contact type + inventory → hygiene ack → use → return unused sealed items when required → clean per policy.", layersTitle: "Layers", layers: "Sanitize · sealed/open · skin-contact · kit inventory · allergy soft · hygiene ack · return · deposit.", claimsTitle: "Claims", claims: "Open cosmetics contamination = do-not-relist until replaced; missing kit pieces use inventory; stains follow return fee + deposit." },
-        "Other": { title: "Other — re-shelf first, then trust floor", summary: "Prefer a named Costume & Cosplay shelf (Halloween, Character, Wigs, Period, Masks, Theater, Film props, Makeup, Animatronics, Full suits) so the right gates apply. If you stay on Other, declare material, return/cleaning policy, photo condition coverage, and a piece list when the set is multi-piece.", hostTipTitle: "Host standard", hostTip: "Re-shelf whenever a specific shelf fits. On Other: set material, return condition (+ optional cleaning fee), mark single vs multi-piece, list every piece if multi-piece, and attest condition photos (front/back, flaws, fasteners). Soft language only — we are not a dry-cleaner partner.", whyGeoTitle: "Why re-shelf + photos?", whyGeo: "Other skips specialist hygiene, heat, character, and era gates. Clear material, return rules, condition photos, and multi-piece inventory are the minimum so cleaning and missing-piece disputes stay fair.", flowTitle: "Flow", flow: "Prefer named shelf → else list material + return + photo checklist (+ inventory if multi) → booking ack → photos at handoff → return per policy.", layersTitle: "Layers", layers: "Re-shelf guidance · material · return/fee · piece band · inventory (multi) · condition photos · size/fits · deposit · terms.", claimsTitle: "Claims", claims: "Use condition photos and inventory for stains, tears, and missing pieces; listed cleaning fee first, then deposit. Prefer specific shelves next time." },
-        "Theater Costumes": { title: "Theater — inventory, run window, no-alter", summary: "Wardrobe houses list every piece and forbid silent alterations. Require a kit inventory checklist, set completeness, return/cleaning fee, no-alterations policy, show/run window notes, labeled-piece status, and size-chart notes for cast fit.", hostTipTitle: "Host standard", hostTip: "Inventory every piece, mark completeness, set return + fee, state no-alterations, note the show/run window, photo tags if labeled, add measurement notes.", whyGeoTitle: "Why inventory + run window", whyGeo: "Missing cuffs and collars are the #1 wardrobe dispute; undated run rentals clash with tech and closing nights.", flowTitle: "Flow", flow: "Inventory + no-alter + run notes → booking ack → count at handoff → wear without cutting → return count + clean per policy.", layersTitle: "Layers", layers: "Inventory · completeness · no-alter · run window · labels · size notes · return · fee · deposit.", claimsTitle: "Claims", claims: "Use checklist for missing pieces; unauthorized cuts/hems follow no-alter policy + deposit." },
-        "Film & TV Props": { title: "Film props — inventory, role, fragile", summary: "Prop houses track every piece, grade hero vs background, and note fragile handling. Require a kit inventory checklist, return condition, hero/background band, fragile band, optional continuity tags, and a soft looksafe weapons policy. Not a studio insurer; real weapons are not allowed.", hostTipTitle: "Host standard", hostTip: "List every prop piece, mark hero vs background, set fragile handling and return. Add continuity tags when pieces travel across setups. For weapon-shaped props, choose looksafe replicas only — no real firearms or live blades.", whyGeoTitle: "Why inventory + role", whyGeo: "Lost hero props stop a shoot; background packs still need a count. Role grade and fragile notes cut disputes before call time.", flowTitle: "Flow", flow: "Inventory + role + fragile + looksafe → booking ack → count at handoff → careful use → return count.", layersTitle: "Layers", layers: "Inventory · hero/background · fragile · continuity tags · return · looksafe · deposit.", claimsTitle: "Claims", claims: "Missing or broken hero pieces hit deposit first. Fragile band + photos settle surface damage. Looksafe policy is a use rule, not weapon insurance." },
-        "Professional Makeup Kits": { title: "Pro makeup — sanitize, inventory, refills", summary: "Industry kits sanitize between artists and list every brush and palette. Require sanitization attest, kit inventory, sealed/refill policy, and a brush-count band. Soft skin-safe host attest and optional kit value help set expectations — not a medical claim or brand promo.", hostTipTitle: "Host standard", hostTip: "Attest sanitize, list the full kit, set sealed/refill policy and brush-count band. Soft-attest skin-safe cosmetic use per label when you can. Optional kit value helps deposit context. Photo open palettes before handoff.", whyGeoTitle: "Why sanitize + inventory", whyGeo: "Shared brushes without sanitize are a hard no for pros; missing pieces and open refills drive the usual claims — clearer than retail sell alone.", flowTitle: "Flow", flow: "Sanitize + inventory → sealed/refill + brush band → hygiene/inventory ack → use carefully → return per policy.", layersTitle: "Layers", layers: "Sanitize · inventory · sealed/refill · brush count · soft skin-safe · return/fee · deposit.", claimsTitle: "Claims", claims: "Missing brushes follow inventory + photos. Contamination of open products = replace before relist. Sealed-refill policy and listed fee settle disputes — not a beauty-partner warranty." },
-        "Animatronic Props": { title: "Animatronics — power, runtime, waiver", summary: "Moving props need power and runtime declared, pinch/operator notes, indoor/outdoor limits, a liability waiver at booking, and a short demo at handoff. Local shops win on repair; we win on a clear trail before motion starts.", hostTipTitle: "Host standard", hostTip: "Set power (battery / AC / air / static), runtime band, use environment, and pinch/operator notes. Keep the waiver required. Attest you will demo start/stop and keep-clear zones at handoff. Photo condition before and after.", whyGeoTitle: "Why these gates", whyGeo: "Pinch points, unexpected motion, and dead batteries mid-event drive claims. Soft notes beat surprise; the waiver freezes assumption of risk.", flowTitle: "Flow", flow: "Power + runtime + environment + pinch notes + waiver → booking waiver → demo at handoff → supervised or briefed use → return + photos.", layersTitle: "Layers", layers: "Power · runtime/battery · pinch/operator notes · indoor/outdoor · demo attest · waiver · deposit · terms.", claimsTitle: "Claims", claims: "Waiver trail + handoff photos; deposit for mechanical damage or missing controllers. Evorios does not sell gear insurance or certify animatronic safety." },
-        "Full Character Suits": { title: "Full suits — heat, hygiene, wear cycles", summary: "Mascot-style rentals: heat/visibility attest, interior sanitize, piece inventory, waiver, plus a max continuous-wear minutes band, handler/spotter policy, ventilation notes, and soft hydrate reminders on breaks. No medical claims.", hostTipTitle: "Host standard", hostTip: "Attest heat/visibility, sanitize interior, inventory head/hands/body, keep waiver on. Set wear-cycle band and spotter policy; describe vents; add a soft hydrate-on-breaks note.", whyGeoTitle: "Why gated", whyGeo: "Limited vision and enclosed suits are the main rental risks — short cycles and an outside spotter are industry practice. Retail sell does not rent these.", flowTitle: "Flow", flow: "Heat + hygiene + inventory + waiver + wear band + spotter + vent notes → booking acks → short wear cycles with breaks → count pieces → return.", layersTitle: "Layers", layers: "Heat/visibility · sanitize · inventory · waiver · completeness · wear-cycle band · spotter · vent/hydrate notes · deposit.", claimsTitle: "Claims", claims: "Do not hand off if heat/hygiene incomplete. Deposit for tears or missing pieces. Wear notes are guidance, not medical advice." },
+        "Halloween Costumes": {
+            title: "Halloween costume FAQ",
+            summary: "Short answers for size, pieces, glitter, and cleaning.",
+            qa: [
+              {
+                q: "What size / audience fits?",
+                a: "Use published size/fits and kids/teen/adult/family band.",
+              },
+              {
+                q: "What pieces are included?",
+                a: "Full piece list (mask, gloves, props)—count at handoff.",
+              },
+              {
+                q: "How should glitter/makeup return?",
+                a: "Follow glitter/fake-blood notes; optional cleaning fee may apply.",
+              },
+              {
+                q: "Is smoke/fog allowed?",
+                a: "Only if the listing policy allows it.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Tears and missing pieces beyond the published fee.",
+              },
+            ],
+          },
+        "Character Costumes": {
+            title: "Character costume FAQ",
+            summary: "Short answers for character label, set completeness, and fit.",
+            qa: [
+              {
+                q: "Which character is this?",
+                a: "The listing names the character and full vs partial set.",
+              },
+              {
+                q: "What pieces ship?",
+                a: "Every piece is inventoried—photo-check at pickup.",
+              },
+              {
+                q: "Can I try it on?",
+                a: "Follow try-on/fit notes on the listing.",
+              },
+              {
+                q: "Who handles IP/licensing?",
+                a: "Hosts handle IP-safe use; Evorios does not clear licenses.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing pieces and tears beyond any listed cleaning fee.",
+              },
+            ],
+          },
+        "Wigs & Accessories": {
+            title: "Wigs & accessories FAQ",
+            summary: "Short answers for sanitize, fiber, and style reset.",
+            qa: [
+              {
+                q: "Is it sanitized?",
+                a: "Host attests sanitization between renters—acknowledge hygiene at booking.",
+              },
+              {
+                q: "What fiber and cap size?",
+                a: "Fiber type and cap band are on the listing—match heat tools to fiber.",
+              },
+              {
+                q: "Can I restyle it?",
+                a: "Only within the style-reset/return policy.",
+              },
+              {
+                q: "Is there a cleaning fee?",
+                a: "Only if published for restyle/clean.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Melted fiber, cut lace, and missing clips.",
+              },
+            ],
+          },
+        "Period Costumes": {
+            title: "Period costume FAQ",
+            summary: "Short answers for era, delicate return, and no alterations.",
+            qa: [
+              {
+                q: "Which era is this?",
+                a: "Era band is on the listing—confirm before you book.",
+              },
+              {
+                q: "Can I alter or hem it?",
+                a: "No—follow the no-alterations policy.",
+              },
+              {
+                q: "How should I return it?",
+                a: "Dry-clean-friendly / published return + optional fee.",
+              },
+              {
+                q: "What pieces are included?",
+                a: "Multi-piece inventory including underlayers when listed.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Delicate tears, stains, missing pieces, and unauthorized alterations.",
+              },
+            ],
+          },
+        "Masks & Makeup": {
+            title: "Masks & makeup FAQ",
+            summary: "Short answers for sanitize, sealed cosmetics, and skin contact.",
+            qa: [
+              {
+                q: "Is it sanitized?",
+                a: "Yes between renters—hygiene ack required at booking.",
+              },
+              {
+                q: "Sealed or open cosmetics?",
+                a: "Listing declares sealed vs open; prefer sealed when possible.",
+              },
+              {
+                q: "What touches skin?",
+                a: "Mask / foam / paint type is published—follow clean/return rules.",
+              },
+              {
+                q: "Allergy notes?",
+                a: "Soft allergen notes only—not medical advice.",
+              },
+              {
+                q: "What if cosmetics are contaminated?",
+                a: "Do not relist open contaminated products; replace first.",
+              },
+            ],
+          },
+        "Other": {
+            title: "Other costume FAQ",
+            summary: "Short answers when no named costume shelf fits.",
+            qa: [
+              {
+                q: "Should I use Other?",
+                a: "Prefer a named shelf so hygiene/heat/era gates apply.",
+              },
+              {
+                q: "What must Other declare?",
+                a: "Material, return/cleaning policy, condition photos, and piece list if multi-piece.",
+              },
+              {
+                q: "Is there a cleaning fee?",
+                a: "Only when the host publishes one.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Stains, tears, and missing pieces after any listed fee.",
+              },
+              {
+                q: "Dry-cleaner partner?",
+                a: "No—you or the renter arrange cleaning.",
+              },
+            ],
+          },
+        "Theater Costumes": {
+            title: "Theater costume FAQ",
+            summary: "Short answers for inventory, run window, and no alterations.",
+            qa: [
+              {
+                q: "What pieces are inventoried?",
+                a: "Every wardrobe piece—count at handoff and return.",
+              },
+              {
+                q: "Can I alter the costume?",
+                a: "No—no-alterations policy unless the listing says otherwise.",
+              },
+              {
+                q: "What is the run window?",
+                a: "Show/run dates on the listing—plan tech and closing nights.",
+              },
+              {
+                q: "Is there a cleaning fee?",
+                a: "When published, it freezes on the agreement.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing pieces and unauthorized cuts/hems.",
+              },
+            ],
+          },
+        "Film & TV Props": {
+            title: "Film & TV props FAQ",
+            summary: "Short answers for hero vs background, fragile handling, and looksafe props.",
+            qa: [
+              {
+                q: "Hero or background?",
+                a: "Role grade is on the listing—hero pieces need extra care.",
+              },
+              {
+                q: "How are pieces tracked?",
+                a: "Full kit inventory counted at handoff and return.",
+              },
+              {
+                q: "Are real weapons allowed?",
+                a: "No—looksafe replicas only; no real firearms or live blades.",
+              },
+              {
+                q: "Fragile handling?",
+                a: "Follow the fragile band and continuity tags when present.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing/broken hero pieces and surface damage beyond wear.",
+              },
+            ],
+          },
+        "Professional Makeup Kits": {
+            title: "Professional makeup kit FAQ",
+            summary: "Short answers for sanitize, sealed refills, and brush inventory.",
+            qa: [
+              {
+                q: "Is the kit sanitized?",
+                a: "Host sanitization attest required between artists.",
+              },
+              {
+                q: "Sealed vs open products?",
+                a: "Follow sealed/refill policy on the listing.",
+              },
+              {
+                q: "How many brushes?",
+                a: "Brush-count band + full kit inventory—count at return.",
+              },
+              {
+                q: "Medical / skin claims?",
+                a: "Soft skin-safe notes only—not a medical claim.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing brushes/palettes; replace contaminated open products before relist.",
+              },
+            ],
+          },
+        "Animatronic Props": {
+            title: "Animatronic props FAQ",
+            summary: "Short answers for power, runtime, waiver, and demo.",
+            qa: [
+              {
+                q: "What power and runtime?",
+                a: "Battery/AC/air/static and runtime band are on the listing.",
+              },
+              {
+                q: "Is a waiver required?",
+                a: "Yes—liability waiver at booking.",
+              },
+              {
+                q: "Is there a demo?",
+                a: "Host demos start/stop and keep-clear zones at handoff.",
+              },
+              {
+                q: "Indoor or outdoor?",
+                a: "Follow the published environment limits.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Mechanical damage and missing controllers.",
+              },
+            ],
+          },
+        "Full Character Suits": {
+            title: "Full character suit FAQ",
+            summary: "Short answers for heat, hygiene, wear cycles, and spotters.",
+            qa: [
+              {
+                q: "Heat and visibility?",
+                a: "Host attests guidance—acknowledge before booking.",
+              },
+              {
+                q: "Is the interior sanitized?",
+                a: "Yes between renters.",
+              },
+              {
+                q: "How long can I wear it continuously?",
+                a: "Stay within the max continuous-wear minutes band; take breaks.",
+              },
+              {
+                q: "Do I need a spotter?",
+                a: "Follow the handler/spotter policy on the listing.",
+              },
+              {
+                q: "Is a waiver required?",
+                a: "Yes. Wear notes are guidance, not medical advice.",
+              },
+            ],
+          },
       },
       "Baby & Kids": {
-        "Car Seats": { title: "Car seats — expiry & standard region", summary: "Never rent expired/recalled seats. Declare FMVSS (US) or ECE R129/R44 (EU). Sanitize between renters. Host attests — Evorios does not certify.", hostTipTitle: "Host standard", hostTip: "Expiry YYYY-MM-DD, label photo, recall check, standard region declare. Never after a crash.", whyGeoTitle: "Why strict", whyGeo: "Standards differ by market; expiry/recall/sanitize travel everywhere.", flowTitle: "Flow", flow: "List gates → booking ack → unlock → install per vehicle manual → return.", layersTitle: "Layers", layers: "Expiry · FMVSS/ECE · recall · sanitize · label photo · booking · unlock · agreement.", claimsTitle: "Claims", claims: "Do not hand off if expiry/recall fails. Document condition at pickup." },
-        "Cribs & Beds": { title: "Cribs — portable sleep standards", summary: "No drop-side. Attest CPSC, EN 716, or other regional sleep standard. Firm mattress/pad. Sanitize sleep surface.", hostTipTitle: "Host standard", hostTip: "Portable sleep standard from the label — not platform certification. Recall + sanitize.", whyGeoTitle: "Why gated", whyGeo: "Unsafe sleep is a leading infant hazard worldwide.", flowTitle: "Flow", flow: "Sleep standard + drop-side + recall + mattress + sanitize → ack → handoff → return.", layersTitle: "Layers", layers: "Sleep standard · no drop-side · recall · mattress · sanitize · unlock.", claimsTitle: "Claims", claims: "No bumpers/loose blankets. Document stains at handoff." },
-        "Strollers": { title: "Strollers — type, weight, hygiene", summary: "Industry: clean between renters, brakes/wheels, age/weight, travel vs jogger vs double. Recall-check.", hostTipTitle: "Host standard", hostTip: "Stroller type + age/weight + sanitize + recall. Note car-seat adapters.", whyGeoTitle: "Why hygiene", whyGeo: "Shared strollers are high-touch — sanitize is the baseline.", flowTitle: "Flow", flow: "Type + limits + hygiene → booking ack → brake check → return.", layersTitle: "Layers", layers: "Type · age/weight · sanitize · recall · unlock · deposit.", claimsTitle: "Claims", claims: "Photo wear; missing adapters are inventory claims." },
-        "Baby Carriers": { title: "Carriers — weight & hygiene", summary: "Age/weight, fabric sanitize, recall. Point to manufacturer fit — no medical claims.", hostTipTitle: "Host standard", hostTip: "Age/weight + sanitize + recall. Note newborn vs toddler mode.", whyGeoTitle: "Why gated", whyGeo: "Contact fabric + wrong fit can harm — hygiene + limits are the floor.", flowTitle: "Flow", flow: "Limits + hygiene → ack → fit check → return.", layersTitle: "Layers", layers: "Age/weight · sanitize · recall · unlock.", claimsTitle: "Claims", claims: "Damaged buckles = do-not-rent." },
-        "Toys & Games": { title: "Toys — age label & hygiene", summary: "Keep age/small-parts labels (0+/3+/8+). Sanitize. Portable across ASTM/EN 71 messaging.", hostTipTitle: "Host standard", hostTip: "Declare toyHazardBand, sanitize, recall. Do not remove labels.", whyGeoTitle: "Why age", whyGeo: "Choking is the main toy failure mode.", flowTitle: "Flow", flow: "Age/hazard + hygiene → ack → piece count → return.", layersTitle: "Layers", layers: "Age/small-parts · sanitize · recall · deposit for missing pieces.", claimsTitle: "Claims", claims: "Count pieces at both ends." },
-        "Other": { title: "Other baby gear", summary: "Prefer a specific shelf for seats/cribs/strollers/carriers. Age/weight + hygiene when it touches a child.", hostTipTitle: "Host standard", hostTip: "Re-shelf safety-critical gear to get the right gates.", whyGeoTitle: "Why", whyGeo: "Other skips specialized gates.", flowTitle: "Flow", flow: "Basics → book → photos → return.", layersTitle: "Layers", layers: "Age/weight · deposit · terms.", claimsTitle: "Claims", claims: "Document condition; prefer specific shelves." },
-        "Commercial Play Equipment": { title: "Commercial play — cert, capacity, waiver", summary: "ASTM F1487 / CPSC / EN 1176 declare, capacity, liability waiver, sanitize between groups.", hostTipTitle: "Host standard", hostTip: "Declare cert honestly, capacity, waiver, sanitize, recall.", whyGeoTitle: "Why", whyGeo: "Group injuries and overload drive claims.", flowTitle: "Flow", flow: "Cert + capacity + waiver + hygiene → booking → setup → return.", layersTitle: "Layers", layers: "Cert · capacity · waiver · sanitize · deposit.", claimsTitle: "Claims", claims: "Photo setup; over-capacity is shared risk." },
-        "Group Activity Gear": { title: "Group activity — shared hygiene", summary: "Sanitize and recall between groups; age band and piece inventory.", hostTipTitle: "Host standard", hostTip: "Sanitize, recall, age, inventory pieces.", whyGeoTitle: "Why", whyGeo: "Shared kid gear = germs and missing pieces.", flowTitle: "Flow", flow: "Hygiene → ack → count → return.", layersTitle: "Layers", layers: "Age · sanitize · recall · deposit.", claimsTitle: "Claims", claims: "Missing pieces hit deposit." },
-        "Educational Tools": { title: "Educational tools — age & clean", summary: "Age band, sanitize touch surfaces, recall electronics with batteries.", hostTipTitle: "Host standard", hostTip: "Age, sanitize, recall, note chargers.", whyGeoTitle: "Why", whyGeo: "Schools expect clean age-appropriate tools.", flowTitle: "Flow", flow: "Hygiene → ack → power check → return.", layersTitle: "Layers", layers: "Age · sanitize · inventory · deposit.", claimsTitle: "Claims", claims: "Missing chargers = inventory." },
-        "Safety Systems": { title: "Safety systems — install first", summary: "Gates/monitors/locks: document install path. Pressure vs hardware-mount matters on stairs.", hostTipTitle: "Host standard", hostTip: "Install documented / renter with guide / pro. Include hardware.", whyGeoTitle: "Why", whyGeo: "A bad install is worse than no gate on stairs.", flowTitle: "Flow", flow: "Install path → ack → install on site → return hardware.", layersTitle: "Layers", layers: "Install · unlock · hardware inventory · deposit.", claimsTitle: "Claims", claims: "Missing mounts = claims. No pressure gates at stair tops." },
-        "Childcare Equipment": { title: "Childcare — sanitize & recall", summary: "High chairs/swings/bouncers: age/weight, sanitize trays/harnesses, recall.", hostTipTitle: "Host standard", hostTip: "Sanitize food-contact and harnesses; recall; age/weight.", whyGeoTitle: "Why", whyGeo: "Trays and straps are high-touch infant surfaces.", flowTitle: "Flow", flow: "Hygiene/recall → ack → handoff → return.", layersTitle: "Layers", layers: "Age/weight · sanitize · recall · unlock.", claimsTitle: "Claims", claims: "Broken harnesses = do-not-rent." },
+        "Car Seats": {
+            title: "Car seat rental FAQ",
+            summary: "Short answers for expiry, standards, and sanitization.",
+            qa: [
+              {
+                q: "Can I rent an expired or recalled seat?",
+                a: "No—publish and book both block until expiry and recall checks pass.",
+              },
+              {
+                q: "Which standard applies?",
+                a: "Host declares FMVSS (US) or ECE R129/R44 (EU) from the label.",
+              },
+              {
+                q: "Is it sanitized?",
+                a: "Yes between renters—acknowledge at booking.",
+              },
+              {
+                q: "What photo is required?",
+                a: "Clear label photo on the listing.",
+              },
+              {
+                q: "After a crash?",
+                a: "Never relist—do not hand off.",
+              },
+            ],
+          },
+        "Cribs & Beds": {
+            title: "Crib & portable sleep FAQ",
+            summary: "Short answers for sleep standards, drop-sides, and mattress.",
+            qa: [
+              {
+                q: "Are drop-sides allowed?",
+                a: "No.",
+              },
+              {
+                q: "What sleep standard is declared?",
+                a: "CPSC, EN 716, or other regional standard from the label.",
+              },
+              {
+                q: "Mattress requirements?",
+                a: "Firm mattress/pad as published; sanitize the sleep surface.",
+              },
+              {
+                q: "Bumpers or loose blankets?",
+                a: "Do not use them.",
+              },
+              {
+                q: "What does the renter acknowledge?",
+                a: "Sleep standard, recall, mattress, and sanitize gates at booking.",
+              },
+            ],
+          },
+        "Strollers": {
+            title: "Stroller rental FAQ",
+            summary: "Short answers for type, weight limits, and hygiene.",
+            qa: [
+              {
+                q: "What type is it?",
+                a: "Travel, jogger, double, or other—stated on the listing.",
+              },
+              {
+                q: "Age/weight limits?",
+                a: "Stay within published limits.",
+              },
+              {
+                q: "Is it sanitized?",
+                a: "Yes between renters—high-touch baseline.",
+              },
+              {
+                q: "Car-seat adapters?",
+                a: "Only if listed—missing adapters are inventory claims.",
+              },
+              {
+                q: "What to check at pickup?",
+                a: "Brakes/wheels and recall status.",
+              },
+            ],
+          },
+        "Baby Carriers": {
+            title: "Baby carrier FAQ",
+            summary: "Short answers for weight limits, hygiene, and fit.",
+            qa: [
+              {
+                q: "Age/weight limits?",
+                a: "Stay within the published band (newborn vs toddler mode when noted).",
+              },
+              {
+                q: "Is fabric sanitized?",
+                a: "Yes between renters.",
+              },
+              {
+                q: "Recall check?",
+                a: "Required before rent.",
+              },
+              {
+                q: "Fit guidance?",
+                a: "Follow the manufacturer fit guide—no medical claims from Evorios.",
+              },
+              {
+                q: "Damaged buckles?",
+                a: "Do not rent—flag and stop handoff.",
+              },
+            ],
+          },
+        "Toys & Games": {
+            title: "Toys & games FAQ",
+            summary: "Short answers for age labels, small parts, and piece counts.",
+            qa: [
+              {
+                q: "What age / hazard band?",
+                a: "Keep 0+/3+/8+ (or listed) labels—do not remove them.",
+              },
+              {
+                q: "Is it sanitized?",
+                a: "Yes between renters.",
+              },
+              {
+                q: "Small parts?",
+                a: "Follow the published hazard band to avoid choking risk.",
+              },
+              {
+                q: "How are pieces tracked?",
+                a: "Count at pickup and return.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing pieces.",
+              },
+            ],
+          },
+        "Other": {
+            title: "Other baby gear FAQ",
+            summary: "Short answers when no named baby shelf fits.",
+            qa: [
+              {
+                q: "Should I use Other?",
+                a: "Prefer Car Seats, Cribs, Strollers, or Carriers for safety-critical gear.",
+              },
+              {
+                q: "What basics apply?",
+                a: "Age/weight when it touches a child, plus deposit and terms.",
+              },
+              {
+                q: "Hygiene?",
+                a: "Sanitize high-touch surfaces even on Other.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Condition documented at handoff.",
+              },
+              {
+                q: "Missing specialized gates?",
+                a: "Re-shelf to get expiry/sleep/install gates.",
+              },
+            ],
+          },
+        "Commercial Play Equipment": {
+            title: "Commercial play equipment FAQ",
+            summary: "Short answers for certification, capacity, and waiver.",
+            qa: [
+              {
+                q: "What certification is declared?",
+                a: "ASTM F1487 / CPSC / EN 1176 (or listed)—host declares honestly.",
+              },
+              {
+                q: "Capacity?",
+                a: "Do not exceed published capacity.",
+              },
+              {
+                q: "Is a waiver required?",
+                a: "Yes at booking.",
+              },
+              {
+                q: "Sanitize between groups?",
+                a: "Yes.",
+              },
+              {
+                q: "What should be photographed?",
+                a: "Setup at handoff; over-capacity is shared risk.",
+              },
+            ],
+          },
+        "Group Activity Gear": {
+            title: "Group activity gear FAQ",
+            summary: "Short answers for shared hygiene and piece inventory.",
+            qa: [
+              {
+                q: "Sanitize between groups?",
+                a: "Yes—plus recall check.",
+              },
+              {
+                q: "Age band?",
+                a: "Stay within the published age band.",
+              },
+              {
+                q: "Piece inventory?",
+                a: "Count pieces at pickup and return.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing pieces.",
+              },
+              {
+                q: "Why the hygiene gate?",
+                a: "Shared kid gear spreads germs and loses pieces quickly.",
+              },
+            ],
+          },
+        "Educational Tools": {
+            title: "Educational tools FAQ",
+            summary: "Short answers for age bands, cleaning, and chargers.",
+            qa: [
+              {
+                q: "Age band?",
+                a: "Use only within the published age range.",
+              },
+              {
+                q: "Sanitize?",
+                a: "Yes—clean touch surfaces between renters.",
+              },
+              {
+                q: "Electronics with batteries?",
+                a: "Recall-check; note chargers on inventory.",
+              },
+              {
+                q: "What to check at handoff?",
+                a: "Power-on and charger presence.",
+              },
+              {
+                q: "What does the deposit cover?",
+                a: "Missing chargers and damaged pieces.",
+              },
+            ],
+          },
+        "Safety Systems": {
+            title: "Safety systems FAQ",
+            summary: "Short answers for gates, monitors, and install paths.",
+            qa: [
+              {
+                q: "How is it installed?",
+                a: "Follow the published path: documented / renter with guide / pro.",
+              },
+              {
+                q: "Pressure gates on stairs?",
+                a: "Do not use pressure mounts at stair tops—hardware-mount only when required.",
+              },
+              {
+                q: "Is hardware included?",
+                a: "Count mounts/hardware at handoff and return.",
+              },
+              {
+                q: "What does the renter acknowledge?",
+                a: "Install path before unlock.",
+              },
+              {
+                q: "Missing mounts?",
+                a: "Inventory claim against deposit.",
+              },
+            ],
+          },
+        "Childcare Equipment": {
+            title: "Childcare equipment FAQ",
+            summary: "Short answers for high chairs, swings, and bouncers.",
+            qa: [
+              {
+                q: "Age/weight limits?",
+                a: "Stay within published limits.",
+              },
+              {
+                q: "Sanitize what?",
+                a: "Trays, harnesses, and other high-touch infant surfaces.",
+              },
+              {
+                q: "Recall check?",
+                a: "Required before rent.",
+              },
+              {
+                q: "Broken harness?",
+                a: "Do not rent—stop handoff.",
+              },
+              {
+                q: "What does the renter acknowledge?",
+                a: "Hygiene and recall gates at booking.",
+              },
+            ],
+          },
       },
     },
 

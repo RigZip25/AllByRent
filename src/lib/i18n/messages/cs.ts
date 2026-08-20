@@ -3762,357 +3762,473 @@ export const cs: AppMessages = {
         ],
       },
       "Heavy Equipment": {
-        title: "Půjčování komerční techniky",
-        summary:
-          "Heavy Equipment defaultně jen pro profesionály. Kvalifikace obsluhy (vysokozdvižný vozík / jeřáb / bagr / obecná) dle podkategorie. Strukturované COI (pole + fotka) — ne jen fotka — a hostitel musí označit přijetí dokladu před předáním. Depozit pojištěním (hold na spoluúčast), ne plná náhrada. Předprohlídka blokuje start.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Nech „jen profi“ zapnuté. Vyžaduj kvalifikaci u motorové techniky. Sbírej strukturované COI (pojistitel, číslo, limity, data) a volitelně additional insured; označ doklad jako přijatý před odemčením. Nastav max. spoluúčast kvůli holdu.",
-        whyGeoTitle: "Proč doklad před klíči?",
-        whyGeo:
-          "Komerční technika je drahá při nepojištěném nebo nekvalifikovaném poškození. Kvalifikace + strukturované COI + potvrzení hostitele + předprohlídka dávají čas na kontrolu.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Nabídnout → jen profi + strukturované COI + kvalifikace dle potřeby → doklad + pole COI → hostitel označí přijetí → předprohlídka → předání → prohlídka při vrácení.",
-        layersTitle: "Vrstvy ochrany",
-        layers:
-          "Kvalifikace obsluhy · pro prohlášení · strukturované COI + potvrzení hostitele · hold na spoluúčast · předprohlídka · volitelný no-show · podmínky · QR/PIN.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Primární je PD pojištění nájemce; hold kryje spoluúčast. No-show uvolní termíny.",
-      },
+          title: "FAQ pronájmu těžké techniky",
+          summary: "Krátké odpovědi pro vysokozdvižné vozíky, bagry, jeřáby a podobnou techniku.",
+          qa: [
+            {
+              q: "Kdo může půjčit?",
+              a: "Ve výchozím stavu profesionálové. DIY jen pokud hostitel bránu vypne.",
+            },
+            {
+              q: "Potřebuji oprávnění obsluhy?",
+              a: "Ano, pokud podkategorie vyžaduje doklad (vozík/jeřáb/bagr/obecné)—nahrajte před předáním.",
+            },
+            {
+              q: "Je pojištění povinné?",
+              a: "Ano—doklad o poškození před PIN/klíči. Kauce odpovídá spoluúčasti.",
+            },
+            {
+              q: "Jaká prohlídka je povinná?",
+              a: "Povinné foto před výjezdem; obě strany potvrdí před startem i při vrácení.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Držení ve výši spoluúčasti—ne plnou náhradu. Primární je pojištění.",
+            },
+          ],
+        },
       Construction: {
-        title: "Sousedské půjčování staveništní techniky",
-        summary:
-          "Evorios je peer job-site gear — ne flotila United Rentals. Profi + strukturované COI + hold na spoluúčast je standard u motorových / jeřábových polic. Měkké OOP může zůstat sousedsky jednoduché. Palivo full-to-full když je fuelType. Měsíční sazby pro delší zakázky.",
-        hostTipTitle: "Pro hostitele (vs United Rentals / EquipmentShare)",
-        hostTip:
-          "Nastavte fuelType u míchaček, osvětlení, čerpadel, jeřábů a bagrů. Měsíční ceny. Rozdělte Safety Equipment na měkké OOP vs zachycení pádu. Bednění s inventářem. Jeřáb: nosnost + bare vs s obsluhou. Spotřební nářadí raději Tools & DIY.",
-        whyGeoTitle: "Proč profi + COI + kvalifikace (když je potřeba)?",
-        whyGeo:
-          "Profi + strukturované COI + kvalifikace + předprohlídka snižují nepojištěnou ztrátu — měkké OOP crane-class tření vynechá.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Nabídka → profi + COI (měkké OOP volitelně) → doklady → předprohlídka → předání (palivo) → vrácení / počet kusů u bednění.",
-        layersTitle: "Vrstvy ochrany",
-        layers:
-          "Profi · COI · kvalifikace · palivo · hold · předprohlídka · inventář bednění · měkké OOP vs zachycení pádu · QR/PIN.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Nejdřív pojištění; hold s fotkami. Bednění: checklist kusů. Měkké OOP: depozit.",
-      },
+          title: "FAQ pronájmu stavebnin",
+          summary: "Krátké odpovědi pro sousedskou stavbu (ne národní autopůjčovnu techniky).",
+          qa: [
+            {
+              q: "Jen pro profesionály?",
+              a: "Poháněné a jeřábové police vyžadují pro + strukturované COI. Měkké PPE může být lehčí.",
+            },
+            {
+              q: "Potřebuji oprávnění obsluhy?",
+              a: "Ano u jeřábu, bagru a dalších těžkých polic, které to žádají.",
+            },
+            {
+              q: "Jak funguje palivo?",
+              a: "Když hostitel nastaví typ paliva: vraťte plná-plná.",
+            },
+            {
+              q: "Lze měsíční sazba?",
+              a: "Ano—hostitelé mohou nabídnout měsíční ceny na delší zakázky.",
+            },
+            {
+              q: "Jaká foto jsou povinná?",
+              a: "Předvýjezdová prohlídka blokuje start; bednění má checklist kusů při vrácení.",
+            },
+          ],
+        },
       "Boats & Water": {
-        title: "Pronájem lodí a plavidel",
-        summary:
-          "Sousedský pronájem plavidel s přenositelným ID (HIN / CIN / místní registrace). Motorová plavidla potřebují bezpečnostní sadu (USCG styl nebo místní ekvivalent), licenci kde řídí nájemce, a věk 25 bareboat / 18 se zapojeným kapitánem. Nemotorové kajaky, SUP a nafukovací nevyžadují ID trupu, ale brání PFD. Prohlídka trupu nahrazuje pneumatiky. Kauce krytá pojištěním.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Zadej ID trupu u motorových (HIN, CIN/CE nebo místní číslo) a registraci pokud máš. Potvrď PFD + sadu u motorových; deklaruj PFD u paddle a nemotorových nafukovacích. Nastav bareboat vs kapitán — věk a licence se tomu přizpůsobí.",
-        whyGeoTitle: "Proč licence + věk + sada / PFD před předáním?",
-        whyGeo:
-          "Nelegální nebo mladí bareboat provozovatelé a chybějící vesty/signály jsou hlavní rizika. U kapitánovaných výletů klesá věk hosta na 18 a licence nájemce odpadá. Paddle zůstává lehké: PFD bez nuceného HIN.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Inzerát (ID trupu u motorových · PFD / sada) → pojištění + kapitán/věk → nájemce potvrdí licenci, věk, sadu nebo PFD → rezervace → důkaz → fotky trupu → návrat.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers:
-          "ID trupu (HIN|CIN|místní) u motorových · registrace · sada USCG / místní · PFD u paddle / nemotorových nafukovacích · licence (bareboat) · věk 25 bareboat / 18 kapitán · pojištění · kauce · prohlídka trupu · QR / PIN.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Primární je pojištění nájemce. Licence, věk, sada/PFD a fotky trupu pomáhají ve sporech. Evorios neprodává trip marine pojistky.",
-      },
+          title: "FAQ lodí a vodní techniky",
+          summary: "Krátké odpovědi pro motorové lodě, paddle a plavby s kapitánem.",
+          qa: [
+            {
+              q: "Potřebuji ID trupu?",
+              a: "Ano u motorových (HIN/CIN/místní registrace). Kajaky/SUP/nafukovací bez motoru ne.",
+            },
+            {
+              q: "Věk / licence?",
+              a: "Bez kapitána: 25 + licence dle potřeby. S kapitánem: věk 18, bez licence nájemce.",
+            },
+            {
+              q: "Jaké bezpečnostní vybavení?",
+              a: "Motorové: sada USCG/místní. Paddle: potvrzení PFD politiky.",
+            },
+            {
+              q: "Jaká foto?",
+              a: "Obchůzka trupu (příď, záď, levý/pravý bok, paluba) před startem i při vrácení.",
+            },
+            {
+              q: "Pojištění?",
+              a: "Ano—doklad před předáním. Kauce dle spoluúčasti.",
+            },
+          ],
+        },
       "Real Estate": {
-        title: "Krátkodobé pobyty a bydlení",
-        summary:
-          "Domácí pravidla jsou u půjčky povinná. Volitelný poplatek za úklid se zobrazí při rezervaci a ve smlouvě. ID hosta při check-inu (stejný vzor jako u vozidel). Depozit kolem jednoho měsíce.",
-        hostTipTitle: "Pro hostitele / majitele",
-        hostTip:
-          "Napiš jasná pravidla. Nastav poplatek za úklid, pokud ho účtuješ. ID na startu chrání před party a no-show.",
-        whyGeoTitle: "Proč ID při check-inu?",
-        whyGeo:
-          "Potvrzení rezervace lze přeposlat. Start ID váže přítomného hosta k rezervaci.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Nabídnout → pravidla + úklid → rezervace → ID při check-inu → pobyt → checkout.",
-        layersTitle: "Vrstvy ochrany",
-        layers:
-          "Domácí pravidla · poplatek za úklid · start ID · měsíční depozit · podmínky · QR/PIN.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Pravidla a ID pomáhají ve sporech. Depozit kryje škody / nadměrný úklid.",
-      },
+          title: "FAQ krátkodobého ubytování",
+          summary: "Krátké odpovědi k pravidlům domu, úklidu a ID při check-inu.",
+          qa: [
+            {
+              q: "Jsou pravidla domu povinná?",
+              a: "Ano u pronájmu—hluk, hosté, kouření, mazlíčci, checkout.",
+            },
+            {
+              q: "Úklidový poplatek?",
+              a: "Volitelný—pokud je, zobrazí se při rezervaci a zamrzne ve smlouvě.",
+            },
+            {
+              q: "Jaké ID při check-inu?",
+              a: "Selfie / nahrání dokladu na začátku—stejný vzor jako u vozidel.",
+            },
+            {
+              q: "Jaká kauce?",
+              a: "Obvykle kolem jednoho měsíčního nájmu, pokud hostitel nenastaví jinak.",
+            },
+            {
+              q: "Kdy se odemkne přístup?",
+              a: "Až po startovním ID na místě—ne jen z přeposlaného potvrzení.",
+            },
+          ],
+        },
       "Photo & Video": {
-        title: "Pronájem kamer, kina a dronů",
-        summary:
-          "Pro pronájem je povinné sériové číslo a inventář sady. Drony navíc vyžadují prohlášení FAA Part 107 a/nebo Remote ID (upload certifikátu volitelný). Kauce / pojištění chrání drahé sady.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Zadej sériové číslo a jasný inventář (těla, objektivy, baterie, tašky). Drony označ jasně — Part 107 je povinné.",
-        whyGeoTitle: "Proč sériové číslo + inventář + Part 107?",
-        whyGeo:
-          "Drahé sady mizí po jednom příslušenství. Sériové číslo + inventář při předání a compliance dronu snižují spory.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Inzerát se sériovým číslem + inventářem → drony: Part 107 / Remote ID → rezervace → kontrola sady → návrat.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers:
-          "Sériové číslo · inventář · Part 107 / Remote ID u dronu · kauce · podmínky · QR.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Inventář a sériové číslo pomáhají u krádeže / chybějících dílů. Nejdřív pojištění nájemce a kauce.",
-      },
+          title: "FAQ foto, cinema a dronů",
+          summary: "Krátké odpovědi k sadám, sériovým číslům a dronům.",
+          qa: [
+            {
+              q: "Je sériové číslo povinné?",
+              a: "Ano u pronájmu—plus strukturovaný inventář sady.",
+            },
+            {
+              q: "Co potřebují drony?",
+              a: "Hmotnostní třída + Remote ID při publikaci; Part 107 + Remote ID při rezervaci.",
+            },
+            {
+              q: "Co kontrolovat při předání?",
+              a: "Spočítejte sadu podle inventáře.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Chybějící díly a poškození. Evorios neprodává pojištění kamer.",
+            },
+            {
+              q: "Chybí díl?",
+              a: "Použijte zamrzlý inventář a fotky z předání.",
+            },
+          ],
+        },
       "Electronics & Tech": {
-        title: "Pronájem elektroniky a tech",
-        summary:
-          "Sousedská důvěra + kauce (ne falešné pojišťovací partnerství) kryje většinu sad. Sériové číslo a inventář jsou povinné. Notebooky, smart home, síť a servery potřebují plán výmazu / odpojení účtů před zveřejněním a potvrzení nájemce při rezervaci.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Zachyť sériové číslo a vypiš každé příslušenství. U zařízení s daty uveď stav výmazu pravdivě. Velikost kauce podle reálného rizika — Evorios není pojistitel a nemá partnerství s pojišťovnou; kauce je primární ochrana.",
-        whyGeoTitle: "Proč sériové číslo + inventář + výmaz?",
-        whyGeo:
-          "Notebooky a monitory se snadno vrátí neúplné. Sériové číslo + checklist zmrazí předání; výmaz / odpojení snižuje spory o soukromí.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Inzerát se sériovým číslem + inventářem (+ výmaz) → potvrzení → počet při předání → návrat dle dohody → uvolnění kauce nebo reklamace s fotkami.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers:
-          "Sériové číslo · inventář · výmaz / odpojení · kauce · podmínky · QR.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Inventář a sériové číslo pro chybějící díly; kauce pokryje zbytek. Neprodáváme pojištění elektroniky.",
-      },
+          title: "FAQ elektroniky a tech",
+          summary: "Krátké odpovědi k sériím, sadám, wipe a kauci.",
+          qa: [
+            {
+              q: "Sériové číslo + inventář?",
+              a: "Ano u pronájmu—uvedte nabíječky, dongly, pouzdra, ovladače.",
+            },
+            {
+              q: "Wipe u zařízení s úložištěm?",
+              a: "Ano—host wipe/unlink před publikací; nájemce potvrdí při rezervaci.",
+            },
+            {
+              q: "Partnerské pojištění?",
+              a: "Ne. Důvěra sousedů + kauce.",
+            },
+            {
+              q: "Kontrola při předání?",
+              a: "Spočítejte každou položku inventáře.",
+            },
+            {
+              q: "Něco chybí?",
+              a: "Inventář + série podpoří reklamaci; kauce pokryje mezeru.",
+            },
+          ],
+        },
       "Gym & Fitness": {
-        title: "Pronájem fitness vybavení",
-        summary:
-          "Nájemci při rezervaci podepisují převzetí rizika / vzdání se nároků. Nastav max. váhu uživatele, pokud dává smysl.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Udržuj vybavení bezpečné. Vyžaduj vzdání se nároků (výchozí zapnuto). U strojů uveď max. váhu.",
-        whyGeoTitle: "Proč vzdání se nároků?",
-        whyGeo:
-          "Činky a stroje mohou zranit. Jasné vzdání se nároků nastaví očekávání bez předstírání, že Evorios provozuje posilovnu.",
-        flowTitle: "Od začátku do konce",
-        flow: "Inzerát → vzdání se nároků při rezervaci → předání → návrat.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers: "Vzdání se nároků · max. váha · kauce · podmínky.",
-        claimsTitle: "Když se něco pokazí",
-        claims: "Stav při předání. Vzdání se nároků kryje běžná zranění; kauce poškození.",
-      },
+          title: "FAQ fitness pronájmu",
+          summary: "Krátké odpovědi k vzdání se nároků, hmotnosti a vrácení.",
+          qa: [
+            {
+              q: "Potřebuji vzdání se nároků?",
+              a: "Ano—při rezervaci.",
+            },
+            {
+              q: "Max. hmotnost uživatele?",
+              a: "Pokud je uvedená, dodržte ji.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Poškození vybavení. Vzdání se nároků kryje běžné riziko zranění.",
+            },
+            {
+              q: "Co připravit hostitel?",
+              a: "Bezpečný stav a jasné limity hmotnosti.",
+            },
+            {
+              q: "Předání?",
+              a: "Potvrďte stav při vyzvednutí; vraťte ve stejném stavu.",
+            },
+          ],
+        },
       "Sports & Recreation": {
-        title: "Pronájem sportovního vybavení",
-        summary:
-          "Míče a měkké zboží: soused + kauce. Rizikové police (sníh, voda, lezení) vyžadují vzdání se nároků. Sníh: DIN + helma; voda: PFD.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Nech vzdání se nároků u vody / sněhu / lezení. U sněhu uveď DIN a helmu. Kauce kryje poškození — Evorios není provozovatel areálu ani pojistitel.",
-        whyGeoTitle: "Proč vzdání se nároků + helma / PFD / DIN?",
-        whyGeo:
-          "Lyže, voda a lezení nesou riziko zranění nad rámec kauce. Jasné specifikace nastaví péči bez školení sportovců platformou.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Inzerát → vzdání se nároků / helma·PFD·DIN → fotky při předání → návrat.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers:
-          "Vzdání se nároků (riziko) · helma / PFD / DIN · úroveň / velikost · kauce · podmínky.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Fotky + vzdání se nároků; kauce na poškození. Zranění řeší strany a jejich pojištění — ne pojistka Evorios.",
-      },
+          title: "FAQ sportu a rekreace",
+          summary: "Krátké odpovědi k rizikovým policím, helmě, PFD a DIN.",
+          qa: [
+            {
+              q: "Kdy je vzdání se nároků?",
+              a: "U rizikových polic (sníh, voda, lezení) při rezervaci.",
+            },
+            {
+              q: "Sníh?",
+              a: "Publikované DIN a politika helmy (včetně/povinná).",
+            },
+            {
+              q: "Voda?",
+              a: "Potvrzení PFD, pokud brána platí.",
+            },
+            {
+              q: "Míče a měkké zboží?",
+              a: "Bez vzdání—jen soused + kauce.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Poškození vybavení—ne zranění.",
+            },
+          ],
+        },
       "Outdoor & Camping": {
-        title: "Pronájem outdoor a kempu",
-        summary:
-          "Denní výlety: soused + kauce. Expedice / survival: vzdání se nároků. Stany a spací pytle: hygienický checklist.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Vyžaduj vzdání se nároků u survival / expedice. U stanů a pytlů potvrď vyčištění / vyvětrání a kapacitu / sezónu. Kauce na tyčky, tropiko a díly vařiče — nejsme pojišťovna výprav.",
-        whyGeoTitle: "Proč vzdání se nároků + hygiena?",
-        whyGeo:
-          "Selhání v terénu ohrozí lidi; špinavé spaní šíří pachy a alergeny. Očekávání před předáním.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Inzerát → vzdání se nároků / hygiena → předání → návrat čisté a suché → kauce.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers:
-          "Vzdání se nároků · hygienický checklist · kapacita / sezóna · kauce · podmínky · QR.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Fotky, vzdání se nároků a hygiena; kauce na poškození. Neprodáváme cestovní pojištění.",
-      },
+          title: "FAQ outdoor a kempování",
+          summary: "Krátké odpovědi k vzdání se nároků, hygieně a chybějícím dílům.",
+          qa: [
+            {
+              q: "Kdy vzdání se nároků?",
+              a: "U expedičních / survival polic při rezervaci.",
+            },
+            {
+              q: "Stany a spacáky?",
+              a: "Host potvrdí vyčištění/vyvětrání; nájemce hygienický checklist.",
+            },
+            {
+              q: "Jaké specifikace?",
+              a: "Kapacita a sezonní rating na inzerátu.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Tyčky, tropiko, díly vařiče a další chybějící/poškozené kusy.",
+            },
+            {
+              q: "Cestovní pojištění?",
+              a: "Ne—jen kauce + vzdání/hygiena.",
+            },
+          ],
+        },
       "Bikes & Scooters": {
-        title: "Pronájem kol a koloběžek",
-        summary:
-          "Helma, zámek a overnight jsou povinné. Osobní E-Bikes (nebo Elektrické = ano) a e-koloběžky vyžadují věk + třídu. Mountain/Racing: vzdání. Děti: opatrovník. Cargo/Adaptive: nosnost / pasažéři / subtyp.",
-        hostTipTitle: "Pro hostitele",
-        hostTip: "Nastav helmu, zámek a overnight; e-power věk+třídu; kids helmu; cargo nosnost; adaptive subtyp.",
-        whyGeoTitle: "Proč helma, zámek, overnight, věk a třída?",
-        whyGeo: "Zranění hlavy, overnight krádež a špatně klasifikovaný e-power jsou hlavní rizika.",
-        flowTitle: "Od začátku do konce",
-        flow: "Inzerát → potvrzení → volitelné nabití → návrat.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers: "Helma · zámek · overnight · věk/třída · opatrovník · vzdání · cargo/adaptive · kauce.",
-        claimsTitle: "Když se něco pokazí",
-        claims: "Overnight + zámek a fotky; kauce poškození.",
-      },
+          title: "FAQ kol a koloběžek",
+          summary: "Krátké odpovědi k helmě, zámku, e-pohonu a dětem.",
+          qa: [
+            {
+              q: "Helma, zámek, noční uložení?",
+              a: "Ano—hostitel musí vše tři uvést u pronájmu.",
+            },
+            {
+              q: "E-kola / e-koloběžky?",
+              a: "Min. věk + třída e-kola, pokud je police E-Bikes nebo Electric = ano.",
+            },
+            {
+              q: "Vzdání u MTB / racing?",
+              a: "Ano ve výchozím stavu.",
+            },
+            {
+              q: "Dětská kola?",
+              a: "Potvrzení zákonného zástupce; helma nesmí být „nevyžadována“.",
+            },
+            {
+              q: "Cargo / adaptive?",
+              a: "Cargo: nosnost + politika dítěte. Adaptive: uvedený subtype.",
+            },
+          ],
+        },
       "Party & Events": {
-        title: "Pronájem na párty a eventy",
-        summary:
-          "Stoly a měkká výzdoba: soused + kauce. Pro AV / stage / světla: poplatek stavba/demontáž a napájení. Outdoor stany: storno kvůli počasí (24 h / 12 h / dle hostitele).",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Nastav poplatek a napájení. U outdoor zvol okno storna kvůli počasí. Kauce na skvrny a chybějící díly — Evorios není eventová pojišťovna.",
-        whyGeoTitle: "Proč poplatek, napájení a storno kvůli počasí?",
-        whyGeo:
-          "Překvapivá práce, mrtvé zásuvky a bouřky kazí eventy častěji než krádež. Poplatky a politika počasí se zmrazí ve smlouvě.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Inzerát s poplatkem / napájením / politikou počasí → rezervace → předání → storno dle politiky → návrat.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers:
-          "Poplatek stavba/demontáž · napájení · outdoor storno · kapacita · kauce · podmínky.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Poplatek, napájení a počasí jsou ve smlouvě; kauce na poškození. Refundace počasí dle okna — ne partnerský produkt.",
-      },
+          title: "FAQ párty a eventů",
+          summary: "Krátké odpovědi k poplatku za stavbu, proudu a zrušení kvůli počasí.",
+          qa: [
+            {
+              q: "Poplatek setup/teardown?",
+              a: "Pro AV / stage / světla často ano—zamrzne ve smlouvě.",
+            },
+            {
+              q: "Jaké info o proudu?",
+              a: "Ampéry / okruhy, pokud hostitel nastaví—zkontrolujte před rezervací.",
+            },
+            {
+              q: "Zrušení kvůli počasí?",
+              a: "Venkovní stany mají okno (24h / 12h / dle hostitele) pro pravidla refundace.",
+            },
+            {
+              q: "Stoly a dekorace?",
+              a: "Bez weather cancel—jen soused + kauce.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Skvrny, trhliny a chybějící kusy nad běžné opotřebení.",
+            },
+          ],
+        },
       "Tools & DIY": {
-        title: "Pronájem nářadí a DIY",
-        summary:
-          "Soused + kauce stačí u většiny vrtaček. Pily, svářečky a lešení vyžadují potvrzení PPE / bezpečnostní instruktáže před předáním. Kauce není pojištění nářadí.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Označ instruktáž připravenou a uveď PPE body u pil, sváření a lešení. Velikost kauce na čepele a baterie — nejsme partner žádné pojišťovny nářadí.",
-        whyGeoTitle: "Proč bezpečnostní instruktáž?",
-        whyGeo:
-          "Tyto nástroje zraní rychleji, než kauce spraví. Krátká brána nastaví péči bez školení operátorů platformou.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Inzerát s instruktáží → potvrzení PPE → instruktáž při předání → návrat s fotkami → kauce.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers:
-          "Bezpečnostní instruktáž · PPE · napájení / napětí · kauce · podmínky · QR.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Potvrzení instruktáže a fotky; kauce na poškození. Zranění řeší strany — ne pojistka Evorios.",
-      },
+          title: "FAQ nářadí a DIY",
+          summary: "Krátké odpovědi k PPE, školení a kauci.",
+          qa: [
+            {
+              q: "Kdy bezpečnostní briefing?",
+              a: "Pily, svářečky a lešení—potvrďte PPE/briefing před předáním.",
+            },
+            {
+              q: "Jaké PPE?",
+              a: "Oči, uši, ruce; svařovací PPE dle potřeby.",
+            },
+            {
+              q: "Vrtačky?",
+              a: "Většina ručního nářadí jen soused + kauce.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Kotouče, baterie a příslušenství—ne plné pojištění nářadí.",
+            },
+            {
+              q: "Co pomůže u reklamace?",
+              a: "Fotky při předání + potvrzení briefingu.",
+            },
+          ],
+        },
       "Garden & Yard": {
-        title: "Pronájem zahrady a dvora",
-        summary:
-          "Foukače a běžné nářadí: soused + kauce. Pařezové frézy jsou blízko stavebnictví: kapacita, OOP, zřeknutí a pojištění s důkazem při rezervaci.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "U pařezových fréz nastav kapacitu průměru, OOP, zřeknutí a pásma pojištění před zveřejněním. U lehčího nářadí fotky stavu a kauce na čepele. Evorios nezajišťuje zahradnické práce — důkaz pojištění (když je potřeba) a kauce jsou hlavní vrstvy.",
-        whyGeoTitle: "Proč jsou pařezové frézy gated?",
-        whyGeo:
-          "Odletující třísky a vysoký točivý moment je blíží lehkému stavebnictví spíš než foukači listí. Kapacita + OOP + zřeknutí + pojištění zamknou cestu do předání.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Inzerát (kapacita + OOP + pojištění u pařezu) → zřeknutí / OOP / pojištění → předání → návrat → kauce nebo pojištění první.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers:
-          "Kapacita · OOP · zřeknutí · pojištění (pařez) · kauce · podmínky · QR.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Pojištění a zřeknutí tvoří stopu u gated gear; kauce u běžného nářadí. Nejsme pojišťovna landscapingu.",
-      },
+          title: "FAQ zahrady a pozemku",
+          summary: "Krátké odpovědi k běžnému nářadí a pařezovým frézám.",
+          qa: [
+            {
+              q: "Foukače potřebují pojištění?",
+              a: "Ne—běžné nářadí = soused + kauce.",
+            },
+            {
+              q: "Pařezové frézy?",
+              a: "Kapacita, PPE, vzdání se nároků a doklad pojištění před předáním.",
+            },
+            {
+              q: "Co fotit?",
+              a: "Stav při předání—lišty, ostří a kanystry často chybí.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Běžné poškození lehkého nářadí; u gated gear pojištění první.",
+            },
+            {
+              q: "Pojišťuje Evorios práci na zahradě?",
+              a: "Ne—doklad nájemce (když je) a kauce.",
+            },
+          ],
+        },
       "Home & Kitchen": {
-        title: "Pronájem domácnosti a kuchyně",
-        summary:
-          "Běžné spotřebiče: soused + kauce. Komerční káva / brew: napětí, NSF a instalace / přípojka, aby venue neobjevilo 240 V nebo vodu uprostřed eventu.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "U komerčního espressa uveď napětí, NSF a zda je potřeba voda / pevné zapojení. U spotřebičů kapacitu a čistotu při vrácení. Kauce na poškození — Evorios není NSF ani pojišťovna venue.",
-        whyGeoTitle: "Proč pole komerční kávy?",
-        whyGeo:
-          "Špatné napětí nebo chybějící voda je riziko provozu a propadlý event. Údaje se zmrazí ve smlouvě.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Inzerát s napětím / NSF / instalací → rezervace (ve smlouvě) → dovoz/setup → návrat čisté → kauce.",
-        layersTitle: "Vrstvy důvěry",
-        layers:
-          "Napětí · NSF · instalace · kapacita · kauce · podmínky · QR.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Instalace a napájení jsou ve smlouvě. Kauce na poškození; neprodáváme pojištění poruchy.",
-      },
+          title: "FAQ domácnosti a kuchyně",
+          summary: "Krátké odpovědi ke spotřebičům a komerčním kávovarům.",
+          qa: [
+            {
+              q: "Běžné spotřebiče?",
+              a: "Soused + kauce, plus kapacita a vrácení v čistotě.",
+            },
+            {
+              q: "Komerční espresso / brew?",
+              a: "Napětí, NSF status a instalace (voda/pevná montáž) na inzerátu.",
+            },
+            {
+              q: "Proč napětí?",
+              a: "Špatné napětí nebo chybějící přívod vody pokazí event—fakta zamrznou ve smlouvě.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Poškození a chybějící příslušenství.",
+            },
+            {
+              q: "Certifikuje Evorios NSF?",
+              a: "Ne—hostitel uvádí status.",
+            },
+          ],
+        },
       "Office & Business": {
-        title: "Pronájem kanceláře a business",
-        summary:
-          "Nábytek: soused + kauce. Zařízení s úložištěm (POS, servery, tiskárny, kopírky): plán výmazu u hostitele a potvrzení nájemce při rezervaci.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Označ úložiště a výmaz pravdivě — POS a servery ideálně vymaž před zveřejněním. Kauce na monitory a zásobníky. Evorios není partner pro data ani kyber pojištění; výmaz je vrstva soukromí.",
-        whyGeoTitle: "Proč brána výmazu dat?",
-        whyGeo:
-          "POS a servery drží zákaznická data. Potvrzení při rezervaci a předání snižuje spory o soukromí, které kauce sama nevyřeší.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Inzerát s úložištěm + výmazem → potvrzení → předání → návrat dle dohody → kauce na fyzické poškození.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers:
-          "Úložiště · stav výmazu · potvrzení nájemce · kauce · podmínky · QR.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Stav výmazu a potvrzení tvoří stopu; kauce na fyzické poškození — ne pojistka úniku dat.",
-      },
+          title: "FAQ kanceláře a byznysu",
+          summary: "Krátké odpovědi k nábytku vs zařízením s úložištěm.",
+          qa: [
+            {
+              q: "Stoly potřebují wipe?",
+              a: "Ne—nábytek a jednoduché periferie = soused + kauce.",
+            },
+            {
+              q: "Kdy wipe?",
+              a: "POS, servery, tiskárny, kopírky s úložištěm—plán wipe + potvrzení nájemce.",
+            },
+            {
+              q: "Kyber pojištění?",
+              a: "Platforma ho neprodává—wipe je vrstva soukromí.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Fyzické poškození a chybějící zásobníky/kabely.",
+            },
+            {
+              q: "Zůstanou data?",
+              a: "Dodržte publikovaný wipe status a potvrzení rezervace.",
+            },
+          ],
+        },
       "Music & Audio": {
-        title: "Pronájem hudby a audia",
-        summary:
-          "Kytary a malé ampíky: soused + kauce. PA systémy vyžadují inventář kabelů a stojanů — zmrazený při rezervaci a spočítaný při předání.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "U PA uveď každý kabel, stojan a klip. Uveď napájení / výkon. Nájemce potvrdí inventář a spočítá při vyzvednutí/vrácení. Kauce na škrábance a chybějící příslušenství — nejsme pojišťovna backline.",
-        whyGeoTitle: "Proč inventář PA?",
-        whyGeo:
-          "Spory u PA jsou obvykle chybějící příslušenství. Zmrazený checklist řeší spory bez těžkých bran na každý nástroj.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Inzerát s inventářem → potvrzení → počet při vyzvednutí → počet při vrácení → kauce.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers:
-          "Inventář kabelů/stojanů PA · napájení · kauce · podmínky · QR.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Inventář jako důkaz chybějících kabelů/stojanů; kauce na rozdíl. Neprodáváme pojištění vybavení.",
-      },
+          title: "FAQ hudby a audia",
+          summary: "Krátké odpovědi k nástrojům a inventáři PA.",
+          qa: [
+            {
+              q: "Kytary potřebují inventář kabelů?",
+              a: "Ne—malé nástroje = soused + kauce.",
+            },
+            {
+              q: "PA systémy?",
+              a: "Inventář kabelů a stojanů zamrzne při rezervaci a počítá se při předání/vrácení.",
+            },
+            {
+              q: "Výkon / wattáž?",
+              a: "Uveďte, pokud je relevantní.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Škrábance a chybějící příslušenství—ne pojištění backline.",
+            },
+            {
+              q: "Chybí XLR?",
+              a: "Použijte snímek inventáře.",
+            },
+          ],
+        },
       "Costume & Cosplay": {
-        title: "Pronájem kostýmů a cosplay",
-        summary:
-          "Soused + kauce, pravidla vrácení, volitelný poplatek za čištění a sanitizace make-upu / paruk / masek — zmrazené ve smlouvě, aby účet za čištění nebyl překvapením.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Nastav jen chemické / skvrny OK / jak při převzetí a volitelný poplatek. U make-up sad, paruk a masek potvrď sanitizaci. Kauce na trhliny — nejsme partnerská čistírna.",
-        whyGeoTitle: "Proč stav při vrácení + poplatek?",
-        whyGeo:
-          "Makeup, pot a glitter kazí kostýmy. Jasná pravidla jsou lepší než překvapivý účet za čištění.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Inzerát s politikou (+ poplatek) → potvrzení → nošení → návrat dle politiky → kauce nebo poplatek.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers:
-          "Stav při vrácení · poplatek za čištění · sanitizace · velikost · kauce · podmínky.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Poplatek a politika jsou ve smlouvě; kauce na trhliny nebo chybějící díly nad rámec poplatku.",
-      },
+          title: "FAQ kostýmů a cosplay",
+          summary: "Krátké odpovědi k vrácení, poplatku za čištění a hygieně.",
+          qa: [
+            {
+              q: "Je stav při vrácení povinný?",
+              a: "Ano—pravidla (+ volitelný poplatek za čištění) zamrznou ve smlouvě.",
+            },
+            {
+              q: "Kontaktní kusy sanitizace?",
+              a: "Ano u masek, makeupu, paruk a interiérů kostýmů dle police.",
+            },
+            {
+              q: "Kdy inventář kusů?",
+              a: "Divadlo, filmové rekvizity, pro makeup a full suit.",
+            },
+            {
+              q: "Full suit vzdání?",
+              a: "Ano—plus vedení k teplu/viditelnosti. Animatronika také se vzdáním.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Trhliny a chybějící kusy nad publikovaný poplatek za čištění.",
+            },
+          ],
+        },
       "Baby & Kids": {
-        title: "Bezpečné půjčování autosedaček",
-        summary:
-          "Tvrdá brána: platná expirace, recall, sanitizace a foto štítku. Prošlé nebo neúplné sedačky nelze zveřejnit ani rezervovat. Nájemce znovu potvrdí při rezervaci.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Zadej expiraci (RRRR-MM-DD nebo Exp RRRR-MM). Zkontroluj recall. Dej čitelnou fotku štítku. Nikdy nenabízej prošlou sedačku.",
-        whyGeoTitle: "Proč tvrdá brána?",
-        whyGeo:
-          "Prošlé nebo recallované sedačky jsou bezpečnostní selhání — měkká textová pole nestačí.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Nabídnout s kontrolami → nájemce potvrdí při rezervaci → předání → vrácení.",
-        layersTitle: "Vrstvy ochrany",
-        layers:
-          "Expirace · recall · sanitizace · foto štítku · potvrzení při rezervaci · podmínky.",
-        claimsTitle: "Když se něco pokazí",
-        claims:
-          "Prohlášení vytváří jasnou stopu. Nepoužívej sedačky, které bránou neprojdou.",
-      },
+          title: "FAQ dětské bezpečnosti",
+          summary: "Krátké odpovědi k sedačkám, postýlkám a komerčnímu hraní.",
+          qa: [
+            {
+              q: "Expirovaná sedačka?",
+              a: "Ne—expirace a recall blokují publikaci i rezervaci.",
+            },
+            {
+              q: "Postýlky?",
+              a: "Bez drop-side; standard spánku; pevná matrace; sanitizace.",
+            },
+            {
+              q: "Komerční herní prvky?",
+              a: "Certifikace, kapacita a vzdání se nároků.",
+            },
+            {
+              q: "Co musí hostitel ukázat?",
+              a: "Foto štítku, recall check a sanitizaci dle potřeby.",
+            },
+            {
+              q: "Co potvrzuje nájemce?",
+              a: "Bezpečnostní potvrzení při rezervaci před odemčením.",
+            },
+          ],
+        },
     },
 
     bySubcategory: {
@@ -4305,43 +4421,868 @@ export const cs: AppMessages = {
         },
       },
       "Electronics & Tech": {
-        "Broadcast Equipment": { title: "Broadcast — subtyp, I/O, funkční test", summary: "AV půjčovny a Lensrentals-třída vyhrávají přehledným patch listem. My peer inventářem plus subtyp (switcher/encoder/recorder/teleprompter), SDI/HDMI I/O, napájení/battery plate, média v ceně?, firmware, měkké poznámky k livestream platforem, kompletnost sady a funkční test při vrácení — zmrazené ve smlouvě. Kauce — ne Geek Squad, Fat Llama ani affiliate pojištění.", hostTipTitle: "Standard hostitele", hostTip: "Zvolte subtyp a značku/model. Vypište každý SDI/HDMI port a přiložený kabel/konvertor. Nastavte napájení/battery plate a zda SD/CF/SSD média jedou se sadou. Uveďte verzi firmware (a zákaz update během pronájmu). Přidejte měkké livestream poznámky (OBS/RTMP/YouTube/Twitch/Zoom) bez affiliate odkazů. Označte kompletnost a politiku funkčního testu při vrácení. Zaškrtněte strukturované položky + checklist; vyfoťte porty před předáním.", whyGeoTitle: "Proč tyto brány?", whyGeo: "Špatný subtyp, chybějící BNC, prázdná média a netestované porty způsobují víc sporů u livestreamů než krádež. Krátká patch karta na inzerátu je lepší než výpadek vysílání a překvapivá reklamace kauce.", flowTitle: "Od začátku do konce", flow: "Inzerát: subtyp + I/O + napájení + média + firmware + platformy + kompletnost + test → nájemce potvrdí → stream/natáčení → vrácení s funkčním testem → uvolnění kauce nebo reklamace s fotkami.", layersTitle: "Vrstvy jistoty", layers: "Sériové číslo · subtyp · SDI/HDMI inventář · napájení/plate · média · firmware · měkké platformy · kompletnost · příslušenství · funkční test · kauce · podmínky.", claimsTitle: "Když se něco pokazí", claims: "Inventář + sériové číslo podpoří reklamace chybějících kabelů/médií; neúspěšný funkční test a škoda nad běžné opotřebení jdou z kauce. Evorios neprodává pojištění elektroniky ani nepartneruje s AV retailery na opravy." },
-        "Display Systems": { title: "Displeje — velikost, vstupy, napájení, křehkost", summary: "AV půjčovny pronajímají LED stěny a komerční panely s pitch, nity, montáží a poznámkami k okruhu. Vyhráváme peer inventářem plus jasná velikost, rozlišení/HDR, stojan/montáž/flight-case, HDMI/DP/SDI vstupy, jas, indoor vs outdoor, napájení/okruh, LED pitch a přepravní křehkost — zmrazené ve smlouvě. Bez Geek Squad, Fat Llama nebo hard-sell pojištění.", hostTipTitle: "Standard hostitele", hostTip: "Nastavte značku + model + pásmo velikosti (u modulárních LED použijte řadu cabinetů). Označte typ displeje, rozlišení/HDR, zahrnutí stojanu/montáže/case, každý vstup, pásmo nitů, indoor/outdoor, napájení/okruh a křehkost. U LED stěn doplňte pixel pitch a vypište náhradní moduly / power distro v checklistu. Před předáním vyfoťte rohy a stav flight-case.", whyGeoTitle: "Proč tyto brány?", whyGeo: "Špatné kabely, slabý okruh, venkovní použití indoor panelů a prasklé sklo při přepravě způsobují víc sporů než krádež. Krátká AV pečovatelská karta na inzerátu je lepší než výpadek signálu a napájení v den akce.", flowTitle: "Od začátku do konce", flow: "Inzerát: velikost + typ + HDR + montáž + vstupy + nity + indoor/outdoor + napájení + pitch + křehkost → nájemce potvrdí kit / outdoor / napájení / křehkost → předání → návrat v case → uvolnění kauce nebo reklamace s fotkami.", layersTitle: "Vrstvy jistoty", layers: "Sériové číslo · velikost · typ · rozlišení/HDR · montáž/case · inventář vstupů · nity · indoor/outdoor · napájení · LED pitch · křehkost · checklist · kauce · podmínky.", claimsTitle: "Když se něco pokazí", claims: "Chybějící kabely/dálkové ovladače/moduly řeší inventář + fotky; prasklé sklo nebo ohnuté LED cabinetty nad běžné opotřebení jdou z kauce. Evorios neprodává pojištění elektroniky ani nenabízí partnerství Geek Squad / Fat Llama." },
-        "Gaming Gear": { title: "Gaming — typ, login, wipe, hygiena", summary: "Herní kavárny a peer půjčovny konzolí vyhrávají hostovskými profily a jasným kitem. My vyhráváme, když je typ (konzole/PC/VR), host/offline login, počet ovladačů, knihovna her, HDMI/kabely, měkký wipe úložiště a VR hygiena zmrazené ve smlouvě — plus měkká poznámka k věkovému hodnocení. Sériové číslo + inventář a kauce zůstávají. Bez Fat Llama, GameStop nebo pojišťovny.", hostTipTitle: "Standard hostitele", hostTip: "Zvolte typ a politiku loginu (preferujte guest/offline). Nastavte počet ovladačů, knihovnu (prázdná vs digitální vs disky) a HDMI/napájení. Má-li konzole/PC/handheld interní úložiště, uveďte wipe / unlink upřímně. U VR napište hygienu face-foam. Volitelná měkká poznámka k věkovému hodnocení. Vyfoťte sériové číslo a spočítejte pady/kabely při předání.", whyGeoTitle: "Proč tyto brány?", whyGeo: "Propojené účty, chybějící ovladače a špinavá VR pěna způsobují víc sporů než krádež. Krátká pečovatelská karta je lepší než překvapivý ban nebo účet za čištění po víkendu.", flowTitle: "Od začátku do konce", flow: "Inzerát: typ + login + ovladače + knihovna + kabely (+ wipe při úložišti, + VR hygiena) → nájemce potvrdí → hraní → vrácení dle wipe/unlink → kauce nebo reklamace s fotkami.", layersTitle: "Vrstvy jistoty", layers: "Sériové číslo · inventář · typ · login · ovladače · knihovna · HDMI/kabely · měkký wipe · VR hygiena · věková poznámka · kauce · podmínky.", claimsTitle: "Když se něco pokazí", claims: "Inventář + sériové číslo řeší chybějící pady/kabely; wipe/login poznámky řeší soukromí; VR hygiena mimo poznámky a škody nad poplatek jdou z kauce. Evorios neprodává herní pojištění ani není partner retailu konzolí." },
-        "Laptops": { title: "Notebooky — odemčení, nabíječka, wipe", summary: "Geek Squad a Fat Llama půjčují ready-to-boot stroje s wattáží nabíječky a pásmem baterie. Vyhráváme peer inventářem plus sériové číslo, kit, stav wipe hostitele, plán OS/admin odemčení, wattáž nabíječky, zdraví baterie, poznámky k login/demo, stupeň obrazovky/klávesnice, antivirus/odpojení účtů a hloubku wipe při vrácení — zmrazené ve smlouvě. Bez affiliate retail půjčovny a bez hard-sell pojištění třetí strany.", hostTipTitle: "Standard hostitele", hostTip: "Nastavte značku + model + velikost displeje + sériové číslo. Vypište kit (pásmo wattáže nabíječky, kabely, pouzdro). Uveďte stav wipe a hloubku wipe při vrácení. Zvolte plán OS/admin odemčení a napište poznámky k login/demo účtu. Uveďte pásmo zdraví baterie a stupeň stavu obrazovky/klávesnice. Poznamenejte zbytky antiviru a kroky odpojení iCloud/Google/Microsoft. Vyfoťte sériové číslo + nabíječku před předáním.", whyGeoTitle: "Proč tyto brány?", whyGeo: "Firmware zámky, špatné nabíječky, slabé baterie a zanechané účty způsobují víc sporů u notebooků než krádež. Krátká karta odemčení + wipe na inzerátu je lepší než překvapivé zámky a fotky při reklamaci.", flowTitle: "Od začátku do konce", flow: "Inzerát: odemčení + wattáž + baterie + login + stav + wipe → nájemce potvrdí wipe + return wipe + odemčení → použití → vrácení dle hloubky wipe → kauce.", layersTitle: "Vrstvy jistoty", layers: "Sériové číslo · inventář kitu · wattáž nabíječky · zdraví baterie · plán odemčení · login/demo · stupeň stavu · antivirus/odpojení · wipe hostitele · hloubka wipe při vrácení · kauce · podmínky.", claimsTitle: "Když se něco pokazí", claims: "Chybějící nabíječka/kusy kitu řeší inventář + fotky; baterie pod zveřejněným pásmem a poškození obrazovky/klávesnice nad stupeň jdou z kauce. Spory o wipe a odemčení podle zveřejněného stavu a poznámek. Evorios neprodává pojištění notebooků ani služby Geek Squad." },
-        "Network Gear": { title: "Síťová technika — typ, PoE, wipe, restore", summary: "IT půjčovny a enterprise AV půjčují switche, AP a firewally s typem zařízení, managed pásmem, PoE rozpočtem, porty, rack sadou, venkovní třídou, hloubkou factory wipe a pravidly přihlašovacích údajů. Vyhráváme peer inventářem plus těmito specifikacemi a jasnou politikou obnovení továrního nastavení při vrácení — zmrazené ve smlouvě. Bez Geek Squad, MSP ani affiliate operátora.", hostTipTitle: "Standard hostitele", hostTip: "Nastavte typ (router/switch/AP/firewall/mesh/modem), managed vs unmanaged, PoE rozpočet, pásmo portů, rack/mount a venkovní rating AP. Vyhlaste wipe status plus hloubku config wipe (plný factory vs odpojení controlleru). Nastavte předání credentials a zda musí nájemce obnovit tovární nastavení při vrácení. Vypište injektory, antény, SFP a uši v inventáři. Vyfoťte sériové číslo a porty před předáním.", whyGeoTitle: "Proč tyto brány?", whyGeo: "Špatný PoE rozpočet, zbylé SSID/admin hesla a indoor AP venku způsobují víc sporů než krádež. Krátká pečovatelská karta je lepší než překvapivý účet za rekonfiguraci po akci.", flowTitle: "Od začátku do konce", flow: "Inzerát: typ + PoE + porty + wipe + credentials + restore → nájemce potvrdí → nasazení → factory restore pokud vyžadováno → vrácení sady → kauce nebo reklamace.", layersTitle: "Vrstvy jistoty", layers: "Sériové číslo · inventář · typ · managed · PoE · porty · rack/mount · venkovní rating · wipe · hloubka config · credentials · factory restore · kauce · podmínky.", claimsTitle: "Když se něco pokazí", claims: "Chybějící injektory/uši/SFP řeší inventář + fotky; config proti politice restore a venkovní zneužití nad inzerát jdou z kauce. Evorios neprodává síťové pojištění, MSP služby ani aktivaci u operátora." },
-        "Other": { title: "Ostatní — nejdřív správná police, pak důvěra", summary: "Preferujte pojmenovanou polici Electronics & Tech (notebooky, projektory, herní výbava, reproduktory, chytrá domácnost, servery a workstations, pro audio, broadcast, síť, displeje), aby platily správné brány. Pokud zůstanete u Ostatní, uveďte napájení, zda zařízení má úložiště (wipe, když ano), pokrytí fotek stavu a seznam kusů u vícedílné sady.", hostTipTitle: "Standard hostitele", hostTip: "Přesuňte inzerát na konkrétní polici, kdykoli to dává smysl. U Ostatní: značka/model, strukturované položky kitu, jeden vs více kusů (+ volný inventář u více kusů), napájení, úložiště ano/ne, wipe/unlink při úložišti a potvrzení fotek stavu (zařízení, porty, vady, příslušenství). Jen měkký jazyk — neprodáváme pojištění elektroniky třetích stran ani partnerské servisní plány.", whyGeoTitle: "Proč přesun + fotky + wipe?", whyGeo: "Ostatní vynechává specializované brány (notebooky, displeje, gaming, pro AV). Napájení, úložiště/wipe, fotky stavu a inventář u více kusů jsou minimum, aby spory o nabíječky a soukromí byly férové.", flowTitle: "Průběh", flow: "Preferujte pojmenovanou polici → jinak napájení + úložiště (+ wipe při úložišti) + checklist fotek (+ inventář u více kusů) → potvrzení při rezervaci → počítání při předání → vrácení dle wipe/dohody.", layersTitle: "Vrstvy", layers: "Přesun na polici · značka/model · položky kitu · pás kusů · inventář (více) · napájení · úložiště/wipe · fotky stavu · sériové číslo · kauce · podmínky.", claimsTitle: "Reklamace", claims: "Fotky stavu, sériové číslo a inventář pro chybějící díly nebo záměny; wipe pro spory o soukromí; kauce kryje zbytek. Příště preferujte konkrétní polici." },
-        "Pro Audio": { title: "Pro audio — typ, phantom, loom, funkční test", summary: "AV půjčovny a peer pronájem interface vyhrávají typem zařízení (interface vs mixer vs mikrofon vs monitor), jasností 48V phantom / DI, spočítaným XLR/TRS loomem, kufrem, měkkým sample-rate/bit-depth a funkčním testem při vrácení — zmrazené se sériovým číslem a inventářem. Jde o studio/záznam pod Electronics & Tech, ne o Music & Audio PA sestavy. Bez hard-sell retail půjčovny nebo pojišťovacího partnera.", hostTipTitle: "Standard hostitele", hostTip: "Zvolte typ zařízení. Uveďte 48V phantom a DI (včetně / ne / není potřeba). Spočítejte každý XLR, TRS, USB-C/Thunderbolt a ADAT v loomu. Označte kufr (tvrdý/měkký/flight/žádný). Měkce nastavte max sample-rate/bit-depth u digitálních boxů. Potvrďte power-on / I/O funkční test při inzerátu nebo předání a stejný při vrácení. Do checklistu uveďte shock mount, pop filtr, sluchátka. Preferujte screenSizeBand = bez obrazovky, pokud žádná není.", whyGeoTitle: "Proč tyto brány?", whyGeo: "Spory u pro audio skoro nikdy nejsou o šasi interface — chybí XLR, není phantom pro kondenzátor, chybí DI pro baskytaru, není kufr a „fungovalo to“ bez návratového smoke-testu. Typ + phantom/DI + loom + kufr + funkční test je lepší než překvapivý claim po session.", flowTitle: "Od začátku do konce", flow: "Inzerát: typ + phantom/DI + loom + kufr + sample-rate + funkční test + sériové/kit → nájemce potvrdí → spočítat kabely při vyzvednutí → session → funkční test + spočet při vrácení → kauce nebo claim.", layersTitle: "Vrstvy jistoty", layers: "Typ zařízení · phantom · DI · kabelový loom · kufr · měkký sample-rate/bit-depth · funkční test při vrácení · sériové číslo · inventář · kauce · podmínky.", claimsTitle: "Když se něco pokazí", claims: "Zmrazený loom + checklist + sériové číslo podpoří claimy za chybějící kabely; kauce kryje škody. Neúspěšný funkční test při vrácení řeší fotky + potvrzení. Evorios neprodává pojištění techniky ani není partner retail půjčoven." },
-        "Projectors": { title: "Projektory — lumeny, throw, vstupy", summary: "AV půjčovny mají karty s lumeny/throw a seznamy vstupů. Vyhráváme peer seriálem + inventářem plus pásmem jasu, nativním rozlišením, lampa vs laser/LED, poznámkami k throw, inventářem HDMI/vstupů, zahrnutím plátna/stojanu, délkou napájecího kabelu, dálkovým ovladačem v sadě a použitím indoor/outdoor — zmrazené ve smlouvě. Bez affiliate retailu a short-term půjčoven.", hostTipTitle: "Standard hostitele", hostTip: "Nastavte značku/model/sériové číslo. Zvolte pásmo lumenů, nativní rozlišení a zdroj světla; u lampy uveďte hodiny. Napište throw/vzdálenost a vypište vstupy (počet HDMI, adaptéry). Označte plátno/stojan a délku napájecího kabelu. Zaškrtněte remote + napájecí kabel v inventáři. Zvolte indoor vs outdoor politiku. Vyfoťte jednotku a porty před předáním.", whyGeoTitle: "Proč tyto brány?", whyGeo: "Špatný jas, chybějící HDMI adaptéry a venkovní prach/déšť způsobují víc sporů u projektorů než krádež. Krátká AV karta na inzerátu je lepší než překvapení při instalaci v místnosti.", flowTitle: "Od začátku do konce", flow: "Inzerát: lumeny + res + zdroj světla + throw + vstupy + plátno/stojan + prostředí → nájemce potvrdí inventář (+ outdoor) → instalace → vrácení se kabely/ovladačem → uvolnění kauce nebo reklamace s fotkami.", layersTitle: "Vrstvy jistoty", layers: "Sériové číslo · inventář · lumeny · nativní res · zdroj světla / hodiny lampy · throw · vstupy · plátno/stojan · délka kabelu · indoor/outdoor · kauce · podmínky.", claimsTitle: "Když se něco pokazí", claims: "Chybějící ovladač/kabely/adaptéry řeší inventář + fotky; selhání lampy mimo uvedené hodiny a outdoor mimo politiku jdou z kauce. Evorios neprodává pojištění projektorů ani retailové ochrany." },
-        "Servers & Workstations": { title: "Servery a WS — forma, napájení, hloubka wipe", summary: "IT půjčovny a krátký colo vyhrávají jasnými specifikacemi. My peer inventářem plus form factor, PSU/napájení, měkké pásmo RAM/CPU, rack ližiny, seznam NIC/portů, politika IPMI/iDRAC, wipe status plus hloubka wipe, doprava/hmotnost a hluk/teplo — zmrazené ve smlouvě. Bez Geek Squad, Fat Llama affiliate a bez hard-sellu kyber pojištění.", hostTipTitle: "Standard hostitele", hostTip: "Nastavte form factor (tower / rack U / laptop WS) a konfiguraci PSU/napájení. Měkké pásmo RAM a CPU. Uveďte, zda jdou ližiny s jednotkou. Vypište každý NIC/SFP/DAC a kus kitu (PDU, KVM, bezel). Nastavte politiku IPMI/iDRAC a hloubku wipe (secure erase vs přeinstalace OS vs vyjmuté disky) plus načasování wipe. Poznamenejte hmotnost/dopravu a vhodnost hluku/tepla. Vyfoťte sériové číslo a porty před předáním.", whyGeoTitle: "Proč tyto brány?", whyGeo: "Chybějící ližiny, špatné napájení, otevřené BMC údaje a mělký wipe způsobují víc sporů než krádež. Krátká IT pečovatelská karta je lepší než překvapení v colo a nároky na soukromí po vrácení.", flowTitle: "Od začátku do konce", flow: "Inzerát: forma + napájení + ližiny + porty + BMC + hloubka wipe → nájemce potvrdí kit / wipe / BMC → kontrola zapnutí při předání → použití v povoleném prostředí → vrácení wipe dle hloubky → uvolnění kauce nebo reklamace s fotkami.", layersTitle: "Vrstvy jistoty", layers: "Sériové číslo · inventář · form factor · PSU/napájení · ližiny · NIC inventář · IPMI/iDRAC · wipe status · hloubka wipe · doprava/hmotnost · hluk/teplo · kauce · podmínky.", claimsTitle: "Když se něco pokazí", claims: "Inventář + sériové číslo podpoří reklamace chybějících ližin/NIC/SFP; neshody napájení a formy jsou spory inzerátu; mezery v hloubce wipe řeší fotky + smlouva. Kauce kryje hardwarovou ztrátu; Evorios neprodává kyber pojištění ani wipe služby třetích stran." },
-        "Smart Home Devices": { title: "Chytrá domácnost — odpojení, hub, protokol", summary: "Fat Llama a peer Nest/Ring/Echo půjčky soutěží o krátké pobyty; obchody vyhrávají setup kartami. My vyhráváme, když wipe/unlink + poznámky k factory resetu, potřeba hubu/bridge, pásmo Wi-Fi–Thread–Zigbee–Matter, typ napájení, poznámky k instalaci/demontáži, privacy kryt kamery a inventář multi-device sady jsou zmrazené ve smlouvě — a nájemce nesmí nechat účty propojené. Bez affiliate retailu a pojištění.", hostTipTitle: "Standard hostitele", hostTip: "Deklarujte wipe/unlink a napište kroky factory reset / odpojení appky. Označte třídu zařízení, protokoly, hub/bridge a napájení. Vypište každý kus (hub, žárovky, senzory, držáky, dálkové). Uveďte instalaci/demontáž u termostatů, zvonků a hardwired kamer. Nastavte privacy kryt, pokud je objektiv. Zvolte politiku vrácení účtů, aby další host nezdědil propojenou domácnost.", whyGeoTitle: "Proč tyto brány?", whyGeo: "Spory o chytrou domácnost málokdy řeší plast — řeší zbylé účty, chybějící hub, špatný rádio protokol a poškození stěny při instalaci. Krátká setup karta je lepší než zamčený Ring nebo osiřelé Zigbee žárovky po vrácení.", flowTitle: "Od začátku do konce", flow: "Inzerát: wipe + reset + protokol + hub + napájení + privacy + kit → nájemce potvrdí wipe + vrácení účtů (+ hub) → instalace dle poznámek → použití → unlink/reset před vrácením → uvolnění kauce nebo reklamace s fotkami inventáře.", layersTitle: "Vrstvy jistoty", layers: "Sériové číslo · inventář · wipe/unlink · factory reset · politika účtů · protokol · hub/bridge · napájení · instalace · privacy kryt · kauce · podmínky.", claimsTitle: "Když se něco pokazí", claims: "Chybějící hub/žárovky/senzory řeší inventář + fotky; poškození stěny/lišty nad měkkými poznámkami jde z kauce; ponechané účty dle politiky vrácení + wipe ack. Evorios neprodává pojištění elektroniky ani není partner Fat Llama / Best Buy Geek Squad." },
-        "Speakers": { title: "Reproduktory — typ, napájení, kabely, hlasitost", summary: "Fat Llama a místní PA-lite půjčovny půjčují Bluetooth a party reproduktory; Best Buy je prodává. Vyhráváme peer inventářem plus jasný typ (kabel / Bluetooth / party), baterie vs AC, venkovní/splash pásmo, měkké poznámky k hlasitosti vůči sousedům, stojan/držák, pojmenovaný checklist kabelů, stereo-pair poznámky a nabití při vrácení — zmrazené ve smlouvě. Jen consumer/portable — jevištní PA patří do Music & Audio. Bez affiliate retailu a bez Geek Squad hard-sell.", hostTipTitle: "Standard hostitele", hostTip: "Nastavte značku + model + typ (Bluetooth portable, wired bookshelf, party boombox, soundbar, smart). Označte baterii vs AC vs hybrid a venkovní/splash pásmo. Uveďte, zda je stojan nebo držák v sadě. Vypište každý kabel a zdroj v checklistu. Napište krátkou poznámku k hlasitosti (byty / quiet hours). Přidejte stereo-pair / TWS poznámky, pokud se páruje druhá jednotka. U bateriových jednotek nastavte očekávané nabití při vrácení a zda je nabíječka v sadě. Vyfoťte stav před předáním.", whyGeoTitle: "Proč tyto brány?", whyGeo: "Spory o reproduktory jsou obvykle vybitá baterie, chybějící AUX/USB kabely, mokré použití u bazénu a hluk sousedů — ne krádež skříně. Krátká pečovatelská karta je lepší než překvapivý spor o kauci po víkendu.", flowTitle: "Od začátku do konce", flow: "Inzerát: typ + napájení + počasí + stojan + kabely + hlasitost (+ nabití u baterie) → nájemce potvrdí inventář + hlasitost → použití → vrácení nabité dle dohody → uvolnění kauce nebo reklamace s fotkami.", layersTitle: "Vrstvy jistoty", layers: "Sériové číslo · značka/model · typ · napájení · počasí · stojan/držák · inventář kabelů · poznámky k hlasitosti · stereo-pair · nabití při vrácení · kauce · podmínky.", claimsTitle: "Když se něco pokazí", claims: "Inventář kryje chybějící kabely/stojany; poznámky k počasí kryjí vodu mimo splash rating; poznámky k hlasitosti jsou jen měkká očekávání. Kauce kryje mezeru. Evorios neprodává pojištění reproduktorů ani nepartneruje s Best Buy / Geek Squad / Fat Llama." },
+        "Broadcast Equipment": {
+            title: "FAQ broadcast vybavení",
+            summary: "Krátké odpovědi k switcherům, encoderům a livestream sadám.",
+            qa: [
+              {
+                q: "Jaký subtype uvést?",
+                a: "Switcher, encoder, recorder, teleprompter apod.—plus značka/model.",
+              },
+              {
+                q: "Jaké I/O a napájení?",
+                a: "Každá SDI/HDMI cesta, kabely/konvertory a power/battery plate.",
+              },
+              {
+                q: "Je media v sadě?",
+                a: "Inzerát uvádí, zda SD/CF/SSD jde se sadou.",
+              },
+              {
+                q: "Return function test?",
+                a: "Ano, pokud hostitel nastaví—kontrola zapnutí/I/O při vrácení.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící kabely/media a neúspěšný return test nad opotřebení.",
+              },
+            ],
+          },
+        "Display Systems": {
+            title: "FAQ display systémů",
+            summary: "Krátké odpovědi k panelům, LED stěnám, držákům a proudu.",
+            qa: [
+              {
+                q: "Jaká velikost a vstupy?",
+                a: "Velikostní pásmo, rozlišení/HDR a každý HDMI/DP/SDI vstup.",
+              },
+              {
+                q: "Indoor nebo outdoor?",
+                a: "Dodržte rating na inzerátu—indoor panely ne ven.",
+              },
+              {
+                q: "Proud?",
+                a: "Zkontrolujte publikované ampéry/okruhy před instalací.",
+              },
+              {
+                q: "Držáky / case?",
+                a: "Inzerát uvádí stand/mount/flight-case.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Prasklé sklo, ohnuté kabinety a chybějící kabely/ovladače/moduly.",
+              },
+            ],
+          },
+        "Gaming Gear": {
+            title: "FAQ herního vybavení",
+            summary: "Krátké odpovědi ke konzolím, PC, VR, loginu a wipe.",
+            qa: [
+              {
+                q: "Jaký login?",
+                a: "Preferujte guest/offline dle inzerátu—nenechávejte osobní účty.",
+              },
+              {
+                q: "Kolik ovladačů?",
+                a: "Počet ovladačů a HDMI/kabely jsou v inventáři.",
+              },
+              {
+                q: "Wipe?",
+                a: "Pokud má úložiště—dodržte host wipe/unlink a return wipe.",
+              },
+              {
+                q: "VR hygiena?",
+                a: "Vyčistěte face foam dle poznámek před vrácením.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící pady/kabely a poškození nad hygienické poznámky.",
+              },
+            ],
+          },
+        "Laptops": {
+            title: "FAQ notebooků",
+            summary: "Krátké odpovědi k odemčení, nabíječce, baterii a wipe.",
+            qa: [
+              {
+                q: "Je nabíječka v sadě?",
+                a: "Ano, pokud je uvedena—wattáž v inventáři.",
+              },
+              {
+                q: "Jak odemknout?",
+                a: "Podle OS/admin unlock a demo-login poznámek.",
+              },
+              {
+                q: "Jaký wipe?",
+                a: "Host wipe při listingu; hloubka wipe při vrácení; potvrďte při rezervaci.",
+              },
+              {
+                q: "Baterie?",
+                a: "Dodržte publikované pásmo; vyfoťte brick při předání.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící nabíječka/sada a poškození displeje/klávesnice nad grade.",
+              },
+            ],
+          },
+        "Network Gear": {
+            title: "FAQ síťových zařízení",
+            summary: "Krátké odpovědi k switchům, AP, PoE a factory restore.",
+            qa: [
+              {
+                q: "Subtype a PoE?",
+                a: "Router/switch/AP/firewall/mesh plus PoE budget a port band.",
+              },
+              {
+                q: "Factory restore při vrácení?",
+                a: "Ano, pokud to inzerát vyžaduje—smažte SSID a admin hesla.",
+              },
+              {
+                q: "Venkovní použití?",
+                a: "Jen pokud outdoor rating dovolí.",
+              },
+              {
+                q: "Jaké kusy počítat?",
+                a: "Injectory, antény, SFP, rails/ears dle inventáře.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící díly a konfigurace proti restore politice.",
+              },
+            ],
+          },
+        "Other": {
+            title: "FAQ ostatní elektroniky",
+            summary: "Krátké odpovědi, když nesedí pojmenovaná police.",
+            qa: [
+              {
+                q: "Použít Other?",
+                a: "Raději pojmenovanou polici (Laptops, Projectors, Gaming…), ať platí správné brány.",
+              },
+              {
+                q: "Co musí Other deklarovat?",
+                a: "Napájení, úložiště ano/ne, wipe při úložišti a foto stavu.",
+              },
+              {
+                q: "Vícedílná sada?",
+                a: "Vypište každý kus v inventáři.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící díly a poškození s fotkami + sérií.",
+              },
+              {
+                q: "Partnerské pojištění?",
+                a: "Ne—jen kauce.",
+              },
+            ],
+          },
+        "Pro Audio": {
+            title: "FAQ pro audio",
+            summary: "Krátké odpovědi k interface, mic, phantom a loom.",
+            qa: [
+              {
+                q: "Jaký typ zařízení?",
+                a: "Interface, mixer, mic, monitor apod.—na inzerátu.",
+              },
+              {
+                q: "48V phantom / DI?",
+                a: "Zkontrolujte inzerát—nutné u mnoha kondenzátorů a baskytary.",
+              },
+              {
+                q: "Jak se počítají kabely?",
+                a: "Každý XLR/TRS/USB/ADAT v loom—počítat při předání.",
+              },
+              {
+                q: "Return function test?",
+                a: "Ano, pokud je nastaven—zapnutí/I/O při vrácení.",
+              },
+              {
+                q: "Je to Music PA?",
+                a: "Ne—studio/capture pod Electronics & Tech.",
+              },
+            ],
+          },
+        "Projectors": {
+            title: "FAQ projektorů",
+            summary: "Krátké odpovědi k lumenům, throw, vstupům a sadě.",
+            qa: [
+              {
+                q: "Jak jasný?",
+                a: "Publikované lumen pásmo a nativní rozlišení.",
+              },
+              {
+                q: "Jaká throw vzdálenost?",
+                a: "Podle throw/distance poznámek.",
+              },
+              {
+                q: "Jaké vstupy?",
+                a: "Počet HDMI a adaptéry v inventáři.",
+              },
+              {
+                q: "Indoor/outdoor?",
+                a: "Dodržte publikované prostředí.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící ovladač/kabely a lamp/outdoor misuse nad inzerát.",
+              },
+            ],
+          },
+        "Servers & Workstations": {
+            title: "FAQ serverů a WS",
+            summary: "Krátké odpovědi k form factoru, napájení, BMC a hloubce wipe.",
+            qa: [
+              {
+                q: "Form factor a napájení?",
+                a: "Tower / rack U / laptop WS plus PSU na inzerátu.",
+              },
+              {
+                q: "Rack rails v sadě?",
+                a: "Jen pokud inzerát říká—počítejte při předání.",
+              },
+              {
+                q: "Hloubka wipe?",
+                a: "Secure erase, reinstall OS, nebo vyjmuté disky—dle publikace.",
+              },
+              {
+                q: "IPMI/iDRAC?",
+                a: "Dodržte politiku přístupu BMC; nenechávejte otevřené credentials.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící rails/NIC a hardware—ne kyber pojištění.",
+              },
+            ],
+          },
+        "Smart Home Devices": {
+            title: "FAQ smart home",
+            summary: "Krátké odpovědi k odpojení účtu, hubu a protokolu.",
+            qa: [
+              {
+                q: "Musím odpojit účet?",
+                a: "Ano—dle account-return politiky; nenechte dalšího hosta napojeného.",
+              },
+              {
+                q: "Je potřeba hub?",
+                a: "Jen pokud protokol na inzerátu hub vyžaduje.",
+              },
+              {
+                q: "Jaký protokol?",
+                a: "Wi-Fi / Thread / Zigbee / Matter pásmo na inzerátu.",
+              },
+              {
+                q: "Kamery?",
+                a: "Použijte privacy cover; dodržte poznámky k instalaci/demontáži.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící huby/senzory a poškození stěny nad install notes.",
+              },
+            ],
+          },
+        "Speakers": {
+            title: "FAQ reproduktorů",
+            summary: "Krátké odpovědi k přenosným/party reproduktorům (ne stage PA).",
+            qa: [
+              {
+                q: "Baterie nebo AC?",
+                a: "Dle typu napájení; u baterie dodržte pásmo nabití při vrácení.",
+              },
+              {
+                q: "Venku / splash?",
+                a: "Jen v publikovaném weather pásmu.",
+              },
+              {
+                q: "Kabely v sadě?",
+                a: "Pojmenovaný checklist—počítejte při předání.",
+              },
+              {
+                q: "Hlasitost?",
+                a: "Dodržte neighbor-volume / quiet hours poznámky.",
+              },
+              {
+                q: "Je to Music PA?",
+                a: "Ne—spotřebitelské/přenosné; stage PA je pod Music & Audio.",
+              },
+            ],
+          },
       },
       "Costume & Cosplay": {
-        "Halloween Costumes": { title: "Halloween — velikost, kusy, glitter", summary: "Spirit prodává; půjčovny mají pečovatelské karty. Vyhráváme peer inventářem plus velikost/střih, kompletnost sady, seznam kusů, poplatek za vrácení/čištění, poznámky k glitteru/makeupu, pásmo děti vs dospělí a pravidla kouře/mlhy + použití na akci — zmrazené ve smlouvě. Bez affiliate retailu a bez partnera čistírny.", hostTipTitle: "Standard hostitele", hostTip: "Nastavte velikost + střih + publikum (děti/teen/dospělí/rodina). Označte kompletnost a vypište každý kus (maska, rukavice, rekvizita). Napište poznámky k glitteru/makeupu/falešné krvi a politiku kouře/mlhy. Volitelný poplatek za čištění (čištění zajistíte vy nebo nájemce — nejsme partner čistírny). Vyfoťte skvrny před předáním; uveďte venkovní/průvodové použití.", whyGeoTitle: "Proč tyto brány?", whyGeo: "Sezónní glitter, makeup a chybějící doplňky způsobují víc halloweenových sporů než krádež. Krátká pečovatelská karta na inzerátu je lepší než překvapivý účet po večírku.", flowTitle: "Od začátku do konce", flow: "Inzerát: publikum + kusy + vrácení + glitter + kouř/mlha → nájemce potvrdí → použití na akci → vrácení dle politiky → poplatek nebo kauce.", layersTitle: "Vrstvy jistoty", layers: "Velikost/střih · publikum · kompletnost · inventář · glitter/makeup · kouř/mlha · použití na akci · stav při vrácení · volitelný poplatek · kauce · podmínky.", claimsTitle: "Když se něco pokazí", claims: "Zveřejněný poplatek kryje uvedené čištění; glitter/makeup mimo poznámky a chybějící kusy řeší inventář + fotky; trhliny nad poplatek jdou z kauce. Evorios neprodává pojištění kostýmů ani čisticí služby." },
-        "Character Costumes": { title: "Postava — štítek, kusy, střih", summary: "Cosplay trh potřebuje jasný název postavy, celou vs částečnou sadu, inventář kusů s fotkami a poznámky ke zkoušce/střihu. Pravidla vrácení/čištění platí. Za IP-safe použití odpovídá hostitel — licence neověřujeme.", hostTipTitle: "Standard hostitele", hostTip: "Pojmenuj postavu, označ kompletnost, vypiš každý kus, vyfoť každý kus, přidej poznámky ke zkoušce/střihu, nastav vrácení + volitelný poplatek a potvrď měkkou IP-safe poznámku. Bez promo třetích stran.", whyGeoTitle: "Proč štítek + inventář", whyGeo: "Špatná postava nebo chybějící rukavice zkazí fotky z conu — inventář a fotky kusů předcházejí sporům.", flowTitle: "Průběh", flow: "Štítek + sada + inventář + fotky + střih + vrácení → potvrzení rezervace → nošení → počet kusů → vrácení.", layersTitle: "Vrstvy", layers: "Štítek postavy · kompletnost · inventář kusů · fotky kusů · zkouška/střih · měkká IP poznámka · vrácení · poplatek · kauce.", claimsTitle: "Reklamace", claims: "Chybějící kusy = checklist + fotky. Uvedený poplatek kryje čištění; poškození nad poplatek jde z kauce. Evorios neprodává pojištění kostýmů ani neověřuje IP." },
-        "Wigs & Accessories": { title: "Paruky — hygiena, vlákno, velikost", summary: "Sdílený kontakt s pokožkou hlavy vyžaduje potvrzení sanitace mezi nájemci. Typ vlákna a velikost čepice nastaví očekávání pro teplo a střih; pravidla vrácení a resetu účesu pokrývají poškození stylingem. Jen měkké pokyny — není to certifikát salonu.", hostTipTitle: "Standard hostitele", hostTip: "Potvrďte sanitaci a její intenzitu, nastavte typ vlákna a pás velikosti čepice, zvolte reset/vrácení účesu a případný poplatek za čištění. Před předáním vyfoťte krajku a barvu.", whyGeoTitle: "Proč tato pole", whyGeo: "Teplo roztaví špatné vlákno; těsná čepice selže na akci; spory o restyling jsou častý nárok na kauci — jasnější než samotné retail štítky.", flowTitle: "Průběh", flow: "Sanitace + síla → vlákno + čepice → reset/vrácení → hygienické potvrzení → opatrné nošení → vrácení dle pravidel.", layersTitle: "Vrstvy", layers: "Sanitace · síla sanitace · vlákno · velikost čepice · reset účesu · vrácení/poplatek · kauce.", claimsTitle: "Nároky", claims: "Roztavená vlákna, ustřižená krajka nebo chybějící sponky řeší fotky + kauce. Uvedený poplatek za čištění/restyling kryje jen to, co je v inzerátu." },
-        "Period Costumes": { title: "Historické — éra, jemné tkaniny, bez úprav", summary: "Divadlo a tematické akce potřebují pásmo éry, pravidla vrácení (často chemické čištění), inventář kusů a jasný zákaz úprav. Kostýmní půjčovny vyhrávají šířkou skladu; peer nabídky vyhrávají, když jsou poplatky, spodní vrstvy a péče zmrazené ve smlouvě.", hostTipTitle: "Standard hostitele", hostTip: "Nastavte éru, velikost, materiál, kompletnost, vrácení (+ poplatek) a politiku úprav. U vícekusových sad vypište každý kus. Poznamenejte péči o jemné tkaniny a které spodní vrstvy jsou v sadě.", whyGeoTitle: "Proč éra + péče", whyGeo: "Špatné století = neúspěšná rezervace; lemy, střihy a chybějící spodničky způsobují spory častěji než krádež.", flowTitle: "Průběh", flow: "Éra + kompletnost + inventář + vrácení + bez úprav → potvrzení při rezervaci → opatrné nošení → spočítat kusy → vyčistit dle politiky.", layersTitle: "Vrstvy", layers: "Éra · velikost · materiál · kompletnost · inventář · vrácení · poplatek · úpravy · spodní vrstvy · kauce.", claimsTitle: "Reklamace", claims: "Jemné trhliny, skvrny, chybějící kusy a neoprávněné úpravy jdou přes poplatek + inventář + kauci. Karty faktů jsou ve výchozím stavu sbalené." },
-        "Masks & Makeup": { title: "Masky a makeup — sanitace, pečeť, kontakt s kůží", summary: "Výbava v kontaktu s kůží vyžaduje potvrzení sanitace hostitelem a hygienické potvrzení nájemce. Uveďte zapečetěný vs otevřený makeup, typ kontaktu (maska / pěna / barva), inventář sady a měkkou alergickou poznámku — kde jde, preferujte zapečetěné produkty.", hostTipTitle: "Standard hostitele", hostTip: "Sanitujte mezi nájemci; označte pečeť vs otevřené; typ kontaktu s kůží; inventář kusů; měkká poznámka k alergenům; pravidla vrácení u skvrn. Bez lékařských tvrzení.", whyGeoTitle: "Proč pečeť a typ kontaktu", whyGeo: "Sdílený otevřený makeup je hygienické riziko, které retail jako Spirit nepronajímá; pěna vs tvrdá maska mění čištění i kontakt s kůží.", flowTitle: "Postup", flow: "Sanitace + pečeť + typ kontaktu + inventář → hygienické potvrzení → použití → vrácení neotevřených položek dle pravidel → čištění dle politiky.", layersTitle: "Vrstvy", layers: "Sanitace · pečeť/otevřené · kontakt s kůží · inventář · alergie soft · hygiena · vrácení · kauce.", claimsTitle: "Reklamace", claims: "Kontaminace otevřené kosmetiky = nevracet do nabídky, dokud není nahrazena; chybějící kusy dle inventáře; skvrny dle poplatku + kauce." },
-        "Other": { title: "Ostatní — nejdřív správná police, pak důvěra", summary: "Preferujte pojmenovanou polici Costume & Cosplay (Halloween, postava, paruky, dobové, masky, divadlo, filmové rekvizity, makeup, animatronika, celý kostým), aby platily správné brány. Pokud zůstanete u Ostatní, uveďte materiál, pravidla vrácení/čištění, pokrytí fotek stavu a seznam kusů u vícedílné sady.", hostTipTitle: "Standard hostitele", hostTip: "Přesuňte inzerát na konkrétní polici, kdykoli to dává smysl. U Ostatní: materiál, stav při vrácení (+ volitelný poplatek za čištění), jeden vs více kusů, inventář při více kusech a potvrzení fotek stavu (předek/zadek, vady, zapínání). Jen měkký jazyk — nejsme partner čistírny.", whyGeoTitle: "Proč přesun + fotky?", whyGeo: "Ostatní vynechává specializované brány (hygiena, teplo, postava, éra). Materiál, vrácení, fotky stavu a inventář u více kusů jsou minimum, aby spory o čištění a chybějící díly byly férové.", flowTitle: "Průběh", flow: "Preferujte pojmenovanou polici → jinak materiál + vrácení + checklist fotek (+ inventář u více kusů) → potvrzení při rezervaci → fotky při předání → vrácení dle pravidel.", layersTitle: "Vrstvy", layers: "Přesun na polici · materiál · vrácení/poplatek · pás kusů · inventář (více) · fotky stavu · velikost · kauce · podmínky.", claimsTitle: "Reklamace", claims: "Fotky stavu a inventář pro skvrny, trhliny a chybějící kusy; nejdřív uvedený poplatek za čištění, pak kauce. Příště preferujte konkrétní polici." },
-        "Theater Costumes": { title: "Divadlo — inventář, běh představení, bez úprav", summary: "Kostýmní dílny evidují každý kus a zakazují tiché úpravy. Vyžadujte inventář sady, kompletnost, vrácení/poplatek za čištění, zákaz úprav, poznámky k oknu zkoušek/představení, stav štítků a míry pro obsazení.", hostTipTitle: "Standard hostitele", hostTip: "Inventarizujte každý kus, označte kompletnost, nastavte vrácení + poplatek, zákaz úprav, okno představení, foťte štítky a doplňte míry.", whyGeoTitle: "Proč inventář a běh", whyGeo: "Chybějící manžety a límce jsou spor č. 1; nedatovaný pronájem naráží na tech a derniéru.", flowTitle: "Postup", flow: "Inventář + zákaz úprav + poznámky k běhu → potvrzení při rezervaci → počet při předání → nošení bez střihů → počet při vrácení + čištění dle pravidel.", layersTitle: "Vrstvy", layers: "Inventář · kompletnost · zákaz úprav · okno představení · štítky · míry · vrácení · poplatek · kauce.", claimsTitle: "Reklamace", claims: "Chybějící kusy dle inventáře; neoprávněné střihy/lemování dle zákazu úprav + kauce." },
-        "Film & TV Props": { title: "Filmové rekvizity — inventář, role, křehkost", summary: "Prop houses evidují každý kus, rozlišují hero vs pozadí a poznamenají křehké zacházení. Vyžadujte inventář sady, stav při vrácení, pásmo hero/pozadí, křehkost, volitelné continuity štítky a měkkou looksafe politiku zbraní. Nejsme pojišťovna studia; skutečné zbraně nejsou povoleny.", hostTipTitle: "Pro hostitele", hostTip: "Vypište každý kus, označte hero vs pozadí, nastavte křehké zacházení a vrácení. Přidejte continuity štítky, pokud kusy putují mezi setupy. U rekvizit tvaru zbraně volte jen looksafe repliky — žádné ostré zbraně ani ostré čepele.", whyGeoTitle: "Proč inventář + role", whyGeo: "Ztracené hero rekvizity zastaví natáčení; i background balíky potřebují počet. Role a křehkost sníží spory před call time.", flowTitle: "Průběh", flow: "Inventář + role + křehkost + looksafe → potvrzení → počet při předání → opatrné použití → počet při vrácení.", layersTitle: "Vrstvy", layers: "Inventář · hero/pozadí · křehkost · continuity štítky · vrácení · looksafe · kauce.", claimsTitle: "Reklamace", claims: "Chybějící nebo rozbité hero kusy jdou nejdřív z kauce. Pásmo křehkosti + fotky řeší poškození povrchu. Looksafe je pravidlo použití, ne pojištění zbraní." },
-        "Professional Makeup Kits": { title: "Pro makeup — sanitace, inventář, náplně", summary: "Profesionální sady sanitizují mezi umělci a vypíší každý štětec i paletu. Vyžadujte potvrzení sanitace, inventář sady, politiku pečetěných náplní a pásmo počtu štětců. Měkké potvrzení skin-safe a volitelná hodnota sady nastaví očekávání — není to lékařský nárok ani promo značky.", hostTipTitle: "Standard hostitele", hostTip: "Potvrďte sanitaci, vypište celou sadu, nastavte politiku pečetěných náplní a pásmo štětců. Měkce potvrďte kosmetické použití dle etikety, pokud můžete. Volitelná hodnota sady pomůže kontextu kauce. Před předáním vyfoťte otevřené palety.", whyGeoTitle: "Proč sanitace + inventář", whyGeo: "Sdílené štětce bez sanitace jsou pro profesionály nepřijatelné; chybějící kusy a otevřené náplně jsou časté spory — jasnější než samotný retail prodej.", flowTitle: "Průběh", flow: "Sanitace + inventář → pečeť/náplně + pásmo štětců → hygienické/inventární potvrzení → opatrné použití → vrácení dle pravidel.", layersTitle: "Vrstvy", layers: "Sanitace · inventář · pečeť/náplně · počet štětců · měkké skin-safe · vrácení/poplatek · kauce.", claimsTitle: "Nároky", claims: "Chybějící štětce řeší inventář + fotky. Kontaminace otevřených produktů = výměna před opětovným inzerátem. Politika náplní a uvedený poplatek řeší spory — není to záruka beauty partnera." },
-        "Animatronic Props": { title: "Animatronika — napájení, výdrž, vzdání se nároků", summary: "Pohyblivé rekvizity potřebují uvedené napájení a výdrž, poznámky k sevření/obsluze, limit indoor/outdoor, vzdání se nároků při rezervaci a krátkou ukázku při předání. Místní dílny vyhrávají opravou; my jasnou stopou před spuštěním pohybu.", hostTipTitle: "Standard hostitele", hostTip: "Nastavte napájení (baterie / síť / vzduch / statické), pásmo výdrže, prostředí použití a poznámky k sevření/obsluze. Nechte vzdání se nároků povinné. Potvrďte, že při předání ukážete start/stop a zóny bezpečné vzdálenosti. Vyfoťte stav před a po.", whyGeoTitle: "Proč tyto brány", whyGeo: "Sevření, neočekávaný pohyb a vybitá baterie uprostřed akce vedou k reklamacím. Měkké poznámky jsou lepší než překvapení; vzdání se nároků zmrazí převzetí rizika.", flowTitle: "Průběh", flow: "Napájení + výdrž + prostředí + poznámky + vzdání se nároků → potvrzení při rezervaci → ukázka při předání → použití → vrácení + fotky.", layersTitle: "Vrstvy", layers: "Napájení · výdrž/baterie · poznámky k sevření/obsluze · indoor/outdoor · potvrzení ukázky · vzdání se nároků · kauce · podmínky.", claimsTitle: "Reklamace", claims: "Stopa vzdání se nároků + fotky při předání; kauce za mechanické poškození nebo chybějící ovladače. Evorios neprodává pojištění ani necertifikuje bezpečnost animatroniky." },
-        "Full Character Suits": { title: "Celé postavy — teplo, hygiena, cykly nošení", summary: "Pronájem maskotů: potvrzení tepla/výhledu, sanitizace vnitřku, inventář dílů, vzdání se nároků, plus pás max. souvislého nošení, handler/spotter, poznámky k ventilaci a měkké připomenutí hydratace o přestávkách. Bez lékařských tvrzení.", hostTipTitle: "Standard hostitele", hostTip: "Potvrď teplo/výhled, vyčisti vnitřek, inventář hlava/ruce/tělo, drž waiver. Nastav pás cyklu nošení a spottera; popiš ventily; přidej měkkou poznámku o vodě o přestávkách.", whyGeoTitle: "Proč brány", whyGeo: "Omezený výhled a uzavřené kostýmy jsou hlavní rizika — krátké cykly a spotter venku jsou běžná praxe. Maloobchod tyto kostýmy nepůjčuje.", flowTitle: "Tok", flow: "Teplo + hygiena + inventář + waiver + pás nošení + spotter + vent → potvrzení → krátké cykly s přestávkami → spočítat díly → vrácení.", layersTitle: "Vrstvy", layers: "Teplo/výhled · sanitizace · inventář · waiver · úplnost · pás nošení · spotter · vent/hydratace · kauce.", claimsTitle: "Reklamace", claims: "Nepředávej bez tepla/hygieny. Kauce za trhliny nebo chybějící díly. Poznámky k nošení jsou doporučení, ne lékařská rada." },
+        "Halloween Costumes": {
+            title: "FAQ halloweenských kostýmů",
+            summary: "Krátké odpovědi k velikosti, kusům, glitteru a čištění.",
+            qa: [
+              {
+                q: "Jaká velikost / publikum?",
+                a: "Dle size/fits a kids/teen/adult/family pásma.",
+              },
+              {
+                q: "Jaké kusy?",
+                a: "Celý seznam (maska, rukavice, rekvizity)—počítat při předání.",
+              },
+              {
+                q: "Glitter/makeup při vrácení?",
+                a: "Dle poznámek; může platit poplatek za čištění.",
+              },
+              {
+                q: "Smoke/fog?",
+                a: "Jen pokud politika dovolí.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Trhliny a chybějící kusy nad poplatek.",
+              },
+            ],
+          },
+        "Character Costumes": {
+            title: "FAQ character kostýmů",
+            summary: "Krátké odpovědi k postavě, kompletnosti a fit.",
+            qa: [
+              {
+                q: "Jaká postava?",
+                a: "Inzerát jmenuje postavu a full vs partial set.",
+              },
+              {
+                q: "Jaké kusy?",
+                a: "Každý kus v inventáři—zkontrolujte fotky při vyzvednutí.",
+              },
+              {
+                q: "Zkouška?",
+                a: "Dle try-on/fit poznámek.",
+              },
+              {
+                q: "IP / licence?",
+                a: "Hostitel řeší IP-safe použití; Evorios licence nečistí.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící kusy a trhliny nad poplatek za čištění.",
+              },
+            ],
+          },
+        "Wigs & Accessories": {
+            title: "FAQ paruk a doplňků",
+            summary: "Krátké odpovědi k sanitizaci, vláknu a reset stylu.",
+            qa: [
+              {
+                q: "Je sanitizovaná?",
+                a: "Host potvrzuje mezi nájemci—hygiena při rezervaci.",
+              },
+              {
+                q: "Vlákno a velikost čepice?",
+                a: "Typ vlákna a cap band na inzerátu—teplo podle vlákna.",
+              },
+              {
+                q: "Mohu přečesat?",
+                a: "Jen v rámci style-reset/return politiky.",
+              },
+              {
+                q: "Poplatek za čištění?",
+                a: "Jen pokud je publikovaný.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Roztavené vlákno, ustřižená krajka a chybějící spony.",
+              },
+            ],
+          },
+        "Period Costumes": {
+            title: "FAQ dobových kostýmů",
+            summary: "Krátké odpovědi k éře, jemnému vrácení a zákazu úprav.",
+            qa: [
+              {
+                q: "Jaká éra?",
+                a: "Éra na inzerátu—ověřte před rezervací.",
+              },
+              {
+                q: "Mohu upravit / zkrátit?",
+                a: "Ne—platí no-alterations.",
+              },
+              {
+                q: "Jak vracet?",
+                a: "Dry-clean-friendly / publikované vrácení + volitelný poplatek.",
+              },
+              {
+                q: "Jaké kusy?",
+                a: "Vícedílný inventář včetně spodních vrstev, pokud jsou uvedené.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Jemné trhliny, skvrny, chybějící kusy a nepovolené úpravy.",
+              },
+            ],
+          },
+        "Masks & Makeup": {
+            title: "FAQ masek a makeupu",
+            summary: "Krátké odpovědi k sanitizaci, sealed kosmetice a kontaktu s kůží.",
+            qa: [
+              {
+                q: "Je sanitizované?",
+                a: "Ano mezi nájemci—hygiena při rezervaci.",
+              },
+              {
+                q: "Sealed nebo open?",
+                a: "Inzerát uvádí; preferujte sealed.",
+              },
+              {
+                q: "Co se dotýká kůže?",
+                a: "Typ mask/foam/paint je publikovaný.",
+              },
+              {
+                q: "Alergie?",
+                a: "Jen měkké poznámky—ne lékařská rada.",
+              },
+              {
+                q: "Kontaminovaná kosmetika?",
+                a: "Nezařazujte znovu—nejprve vyměňte.",
+              },
+            ],
+          },
+        "Other": {
+            title: "FAQ ostatních kostýmů",
+            summary: "Krátké odpovědi, když nesedí pojmenovaná police.",
+            qa: [
+              {
+                q: "Použít Other?",
+                a: "Raději pojmenovanou polici kvůli správným branám.",
+              },
+              {
+                q: "Co deklarovat?",
+                a: "Materiál, vrácení/čištění, foto stavu a seznam kusů u multi-piece.",
+              },
+              {
+                q: "Poplatek za čištění?",
+                a: "Jen pokud hostitel publikuje.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Skvrny, trhliny a chybějící kusy po poplatku.",
+              },
+              {
+                q: "Partner čistírna?",
+                a: "Ne—čištění řešíte vy nebo nájemce.",
+              },
+            ],
+          },
+        "Theater Costumes": {
+            title: "FAQ divadelních kostýmů",
+            summary: "Krátké odpovědi k inventáři, run oknu a zákazu úprav.",
+            qa: [
+              {
+                q: "Jaké kusy v inventáři?",
+                a: "Každý wardrobe kus—počítat při předání i vrácení.",
+              },
+              {
+                q: "Mohu upravit?",
+                a: "Ne—no-alterations, pokud inzerát neříká jinak.",
+              },
+              {
+                q: "Jaké run okno?",
+                a: "Data show/run na inzerátu.",
+              },
+              {
+                q: "Poplatek za čištění?",
+                a: "Pokud je, zamrzne ve smlouvě.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící kusy a nepovolené střihy/záložky.",
+              },
+            ],
+          },
+        "Film & TV Props": {
+            title: "FAQ filmových rekvizit",
+            summary: "Krátké odpovědi k hero vs background, fragile a looksafe.",
+            qa: [
+              {
+                q: "Hero nebo background?",
+                a: "Role grade na inzerátu—hero vyžaduje větší péči.",
+              },
+              {
+                q: "Jak se sledují kusy?",
+                a: "Plný inventář při předání i vrácení.",
+              },
+              {
+                q: "Skutečné zbraně?",
+                a: "Ne—jen looksafe repliky.",
+              },
+              {
+                q: "Fragile handling?",
+                a: "Dodržte fragile pásmo a continuity tagy.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící/rozbité hero kusy a poškození povrchu.",
+              },
+            ],
+          },
+        "Professional Makeup Kits": {
+            title: "FAQ pro makeup sad",
+            summary: "Krátké odpovědi k sanitizaci, sealed refill a inventáři štětců.",
+            qa: [
+              {
+                q: "Je sada sanitizovaná?",
+                a: "Ano mezi umělci.",
+              },
+              {
+                q: "Sealed vs open?",
+                a: "Dle sealed/refill politiky.",
+              },
+              {
+                q: "Kolik štětců?",
+                a: "Brush-count + inventář—počítat při vrácení.",
+              },
+              {
+                q: "Lékařské claimy?",
+                a: "Jen měkké skin-safe poznámky.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící štětce/palety; kontaminované open produkty vyměňte.",
+              },
+            ],
+          },
+        "Animatronic Props": {
+            title: "FAQ animatroniky",
+            summary: "Krátké odpovědi k napájení, runtime, vzdání a demu.",
+            qa: [
+              {
+                q: "Napájení a runtime?",
+                a: "Battery/AC/air/static a runtime pásmo na inzerátu.",
+              },
+              {
+                q: "Vzdání se nároků?",
+                a: "Ano při rezervaci.",
+              },
+              {
+                q: "Demo?",
+                a: "Host ukáže start/stop a keep-clear zóny při předání.",
+              },
+              {
+                q: "Indoor/outdoor?",
+                a: "Dodržte limity prostředí.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Mechanické poškození a chybějící ovladače.",
+              },
+            ],
+          },
+        "Full Character Suits": {
+            title: "FAQ full suitů",
+            summary: "Krátké odpovědi k teplu, hygieně, cyklům nošení a spotterovi.",
+            qa: [
+              {
+                q: "Teplo a viditelnost?",
+                a: "Host potvrzuje vedení—potvrďte před rezervací.",
+              },
+              {
+                q: "Interiér sanitizovaný?",
+                a: "Ano mezi nájemci.",
+              },
+              {
+                q: "Jak dlouho nepřetržitě?",
+                a: "Dodržte max. minuty souvislého nošení; dělejte pauzy.",
+              },
+              {
+                q: "Spotter?",
+                a: "Dle handler/spotter politiky.",
+              },
+              {
+                q: "Vzdání?",
+                a: "Ano. Poznámky k nošení nejsou lékařská rada.",
+              },
+            ],
+          },
       },
       "Baby & Kids": {
-        "Car Seats": { title: "Autosedačky — expiry & standard region", summary: "Never rent expired/recalled seats. Declare FMVSS (US) or ECE R129/R44 (EU). Sanitize between renters. Host attests — Evorios does not certify.", hostTipTitle: "Host standard", hostTip: "Expiry YYYY-MM-DD, label photo, recall check, standard region declare. Never after a crash.", whyGeoTitle: "Why strict", whyGeo: "Standards differ by market; expiry/recall/sanitize travel everywhere.", flowTitle: "Flow", flow: "List gates → booking ack → unlock → install per vehicle manual → return.", layersTitle: "Layers", layers: "Expiry · FMVSS/ECE · recall · sanitize · label photo · booking · unlock · agreement.", claimsTitle: "Claims", claims: "Do not hand off if expiry/recall fails. Document condition at pickup." },
-        "Cribs & Beds": { title: "Postýlky — portable sleep standards", summary: "No drop-side. Attest CPSC, EN 716, or other regional sleep standard. Firm mattress/pad. Sanitize sleep surface.", hostTipTitle: "Host standard", hostTip: "Portable sleep standard from the label — not platform certification. Recall + sanitize.", whyGeoTitle: "Why gated", whyGeo: "Unsafe sleep is a leading infant hazard worldwide.", flowTitle: "Flow", flow: "Sleep standard + drop-side + recall + mattress + sanitize → ack → handoff → return.", layersTitle: "Layers", layers: "Sleep standard · no drop-side · recall · mattress · sanitize · unlock.", claimsTitle: "Claims", claims: "No bumpers/loose blankets. Document stains at handoff." },
-        "Strollers": { title: "Kočárky — type, weight, hygiene", summary: "Industry: clean between renters, brakes/wheels, age/weight, travel vs jogger vs double. Recall-check.", hostTipTitle: "Host standard", hostTip: "Stroller type + age/weight + sanitize + recall. Note car-seat adapters.", whyGeoTitle: "Why hygiene", whyGeo: "Shared strollers are high-touch — sanitize is the baseline.", flowTitle: "Flow", flow: "Type + limits + hygiene → booking ack → brake check → return.", layersTitle: "Layers", layers: "Type · age/weight · sanitize · recall · unlock · deposit.", claimsTitle: "Claims", claims: "Photo wear; missing adapters are inventory claims." },
-        "Baby Carriers": { title: "Nosítka — weight & hygiene", summary: "Age/weight, fabric sanitize, recall. Point to manufacturer fit — no medical claims.", hostTipTitle: "Host standard", hostTip: "Age/weight + sanitize + recall. Note newborn vs toddler mode.", whyGeoTitle: "Why gated", whyGeo: "Contact fabric + wrong fit can harm — hygiene + limits are the floor.", flowTitle: "Flow", flow: "Limits + hygiene → ack → fit check → return.", layersTitle: "Layers", layers: "Age/weight · sanitize · recall · unlock.", claimsTitle: "Claims", claims: "Damaged buckles = do-not-rent." },
-        "Toys & Games": { title: "Hračky — age label & hygiene", summary: "Keep age/small-parts labels (0+/3+/8+). Sanitize. Portable across ASTM/EN 71 messaging.", hostTipTitle: "Host standard", hostTip: "Declare toyHazardBand, sanitize, recall. Do not remove labels.", whyGeoTitle: "Why age", whyGeo: "Choking is the main toy failure mode.", flowTitle: "Flow", flow: "Age/hazard + hygiene → ack → piece count → return.", layersTitle: "Layers", layers: "Age/small-parts · sanitize · recall · deposit for missing pieces.", claimsTitle: "Claims", claims: "Count pieces at both ends." },
-        "Other": { title: "Ostatní dětské gear", summary: "Prefer a specific shelf for seats/cribs/strollers/carriers. Age/weight + hygiene when it touches a child.", hostTipTitle: "Host standard", hostTip: "Re-shelf safety-critical gear to get the right gates.", whyGeoTitle: "Why", whyGeo: "Other skips specialized gates.", flowTitle: "Flow", flow: "Basics → book → photos → return.", layersTitle: "Layers", layers: "Age/weight · deposit · terms.", claimsTitle: "Claims", claims: "Document condition; prefer specific shelves." },
-        "Commercial Play Equipment": { title: "Komerční hra — cert, capacity, waiver", summary: "ASTM F1487 / CPSC / EN 1176 declare, capacity, liability waiver, sanitize between groups.", hostTipTitle: "Host standard", hostTip: "Declare cert honestly, capacity, waiver, sanitize, recall.", whyGeoTitle: "Why", whyGeo: "Group injuries and overload drive claims.", flowTitle: "Flow", flow: "Cert + capacity + waiver + hygiene → booking → setup → return.", layersTitle: "Layers", layers: "Cert · capacity · waiver · sanitize · deposit.", claimsTitle: "Claims", claims: "Photo setup; over-capacity is shared risk." },
-        "Group Activity Gear": { title: "Skupinové aktivity — shared hygiene", summary: "Sanitize and recall between groups; age band and piece inventory.", hostTipTitle: "Host standard", hostTip: "Sanitize, recall, age, inventory pieces.", whyGeoTitle: "Why", whyGeo: "Shared kid gear = germs and missing pieces.", flowTitle: "Flow", flow: "Hygiene → ack → count → return.", layersTitle: "Layers", layers: "Age · sanitize · recall · deposit.", claimsTitle: "Claims", claims: "Missing pieces hit deposit." },
-        "Educational Tools": { title: "Vzdělávací tools — age & clean", summary: "Age band, sanitize touch surfaces, recall electronics with batteries.", hostTipTitle: "Host standard", hostTip: "Age, sanitize, recall, note chargers.", whyGeoTitle: "Why", whyGeo: "Schools expect clean age-appropriate tools.", flowTitle: "Flow", flow: "Hygiene → ack → power check → return.", layersTitle: "Layers", layers: "Age · sanitize · inventory · deposit.", claimsTitle: "Claims", claims: "Missing chargers = inventory." },
-        "Safety Systems": { title: "Bezpečnostní systémy — install first", summary: "Gates/monitors/locks: document install path. Pressure vs hardware-mount matters on stairs.", hostTipTitle: "Host standard", hostTip: "Install documented / renter with guide / pro. Include hardware.", whyGeoTitle: "Why", whyGeo: "A bad install is worse than no gate on stairs.", flowTitle: "Flow", flow: "Install path → ack → install on site → return hardware.", layersTitle: "Layers", layers: "Install · unlock · hardware inventory · deposit.", claimsTitle: "Claims", claims: "Missing mounts = claims. No pressure gates at stair tops." },
-        "Childcare Equipment": { title: "Péče o děti — sanitize & recall", summary: "High chairs/swings/bouncers: age/weight, sanitize trays/harnesses, recall.", hostTipTitle: "Host standard", hostTip: "Sanitize food-contact and harnesses; recall; age/weight.", whyGeoTitle: "Why", whyGeo: "Trays and straps are high-touch infant surfaces.", flowTitle: "Flow", flow: "Hygiene/recall → ack → handoff → return.", layersTitle: "Layers", layers: "Age/weight · sanitize · recall · unlock.", claimsTitle: "Claims", claims: "Broken harnesses = do-not-rent." },
+        "Car Seats": {
+            title: "FAQ autosedaček",
+            summary: "Krátké odpovědi k expiraci, standardu a sanitizaci.",
+            qa: [
+              {
+                q: "Expirovaná / recall?",
+                a: "Ne—publikace i rezervace se blokují.",
+              },
+              {
+                q: "Jaký standard?",
+                a: "Host deklaruje FMVSS (US) nebo ECE R129/R44 (EU) ze štítku.",
+              },
+              {
+                q: "Sanitizace?",
+                a: "Ano mezi nájemci—potvrďte při rezervaci.",
+              },
+              {
+                q: "Jaké foto?",
+                a: "Čitelné foto štítku na inzerátu.",
+              },
+              {
+                q: "Po nehodě?",
+                a: "Nikdy znovu nezařazujte—nepředávejte.",
+              },
+            ],
+          },
+        "Cribs & Beds": {
+            title: "FAQ postýlek",
+            summary: "Krátké odpovědi ke spánkovým standardům, drop-side a matraci.",
+            qa: [
+              {
+                q: "Drop-side?",
+                a: "Ne.",
+              },
+              {
+                q: "Jaký sleep standard?",
+                a: "CPSC, EN 716 nebo jiný regionální ze štítku.",
+              },
+              {
+                q: "Matrace?",
+                a: "Pevná dle inzerátu; sanitizujte spací plochu.",
+              },
+              {
+                q: "Mantinely / volné deky?",
+                a: "Nepoužívejte.",
+              },
+              {
+                q: "Co potvrzuje nájemce?",
+                a: "Sleep standard, recall, matraci a sanitizaci při rezervaci.",
+              },
+            ],
+          },
+        "Strollers": {
+            title: "FAQ kočárků",
+            summary: "Krátké odpovědi k typu, hmotnosti a hygieně.",
+            qa: [
+              {
+                q: "Jaký typ?",
+                a: "Travel, jogger, double aj.—na inzerátu.",
+              },
+              {
+                q: "Věk/hmotnost?",
+                a: "Dodržte limity.",
+              },
+              {
+                q: "Sanitizace?",
+                a: "Ano mezi nájemci.",
+              },
+              {
+                q: "Adaptéry na sedačku?",
+                a: "Jen pokud jsou uvedené—chybějící = inventář.",
+              },
+              {
+                q: "Kontrola při vyzvednutí?",
+                a: "Brzdy/kola a recall.",
+              },
+            ],
+          },
+        "Baby Carriers": {
+            title: "FAQ nosítek",
+            summary: "Krátké odpovědi k hmotnosti, hygieně a fit.",
+            qa: [
+              {
+                q: "Věk/hmotnost?",
+                a: "Dodržte pásmo (newborn vs toddler, pokud je).",
+              },
+              {
+                q: "Sanitizace látky?",
+                a: "Ano mezi nájemci.",
+              },
+              {
+                q: "Recall?",
+                a: "Povinný před pronájmem.",
+              },
+              {
+                q: "Fit?",
+                a: "Podle návodu výrobce—žádné lékařské claimy Evorios.",
+              },
+              {
+                q: "Poškozené přezky?",
+                a: "Nepůjčujte—zastavte předání.",
+              },
+            ],
+          },
+        "Toys & Games": {
+            title: "FAQ hraček",
+            summary: "Krátké odpovědi k věku, small parts a počtu kusů.",
+            qa: [
+              {
+                q: "Věk / hazard?",
+                a: "Zachovejte štítky 0+/3+/8+ (nebo uvedené)—nesnímejte je.",
+              },
+              {
+                q: "Sanitizace?",
+                a: "Ano mezi nájemci.",
+              },
+              {
+                q: "Small parts?",
+                a: "Dodržte hazard pásmo kvůli dušení.",
+              },
+              {
+                q: "Jak sledovat kusy?",
+                a: "Počítejte při vyzvednutí i vrácení.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící kusy.",
+              },
+            ],
+          },
+        "Other": {
+            title: "FAQ ostatního baby gear",
+            summary: "Krátké odpovědi, když nesedí pojmenovaná police.",
+            qa: [
+              {
+                q: "Použít Other?",
+                a: "Raději Car Seats, Cribs, Strollers nebo Carriers u safety-critical.",
+              },
+              {
+                q: "Základy?",
+                a: "Věk/hmotnost při kontaktu s dítětem + kauce a podmínky.",
+              },
+              {
+                q: "Hygiena?",
+                a: "Sanitizujte high-touch i na Other.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Stav zdokumentovaný při předání.",
+              },
+              {
+                q: "Chybí specializované brány?",
+                a: "Přeřaďte na správnou polici.",
+              },
+            ],
+          },
+        "Commercial Play Equipment": {
+            title: "FAQ komerčního herního vybavení",
+            summary: "Krátké odpovědi k certifikaci, kapacitě a vzdání.",
+            qa: [
+              {
+                q: "Jaká certifikace?",
+                a: "ASTM F1487 / CPSC / EN 1176 (nebo uvedené)—host deklaruje.",
+              },
+              {
+                q: "Kapacita?",
+                a: "Nepřekračujte publikovanou.",
+              },
+              {
+                q: "Vzdání?",
+                a: "Ano při rezervaci.",
+              },
+              {
+                q: "Sanitizace mezi skupinami?",
+                a: "Ano.",
+              },
+              {
+                q: "Co fotit?",
+                a: "Setup při předání; přeplnění = sdílené riziko.",
+              },
+            ],
+          },
+        "Group Activity Gear": {
+            title: "FAQ skupinových aktivit",
+            summary: "Krátké odpovědi ke sdílené hygieně a inventáři.",
+            qa: [
+              {
+                q: "Sanitizace mezi skupinami?",
+                a: "Ano—plus recall.",
+              },
+              {
+                q: "Věkové pásmo?",
+                a: "Dodržte publikované.",
+              },
+              {
+                q: "Inventář kusů?",
+                a: "Počítejte při vyzvednutí i vrácení.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící kusy.",
+              },
+              {
+                q: "Proč hygiena?",
+                a: "Sdílené dětské věci = bacily a ztráty kusů.",
+              },
+            ],
+          },
+        "Educational Tools": {
+            title: "FAQ vzdělávacích pomůcek",
+            summary: "Krátké odpovědi k věku, čištění a nabíječkám.",
+            qa: [
+              {
+                q: "Věkové pásmo?",
+                a: "Jen v publikovaném rozsahu.",
+              },
+              {
+                q: "Sanitizace?",
+                a: "Ano—touch surfaces mezi nájemci.",
+              },
+              {
+                q: "Elektronika s bateriemi?",
+                a: "Recall-check; nabíječky v inventáři.",
+              },
+              {
+                q: "Kontrola při předání?",
+                a: "Zapnutí a přítomnost nabíječky.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící nabíječky a poškozené kusy.",
+              },
+            ],
+          },
+        "Safety Systems": {
+            title: "FAQ bezpečnostních systémů",
+            summary: "Krátké odpovědi k branám, monitorům a instalaci.",
+            qa: [
+              {
+                q: "Jak se instaluje?",
+                a: "Dle cesty: documented / renter with guide / pro.",
+              },
+              {
+                q: "Tlakové brány na schodech?",
+                a: "Ne nahoře na schodech—jen hardware-mount, pokud je potřeba.",
+              },
+              {
+                q: "Hardware v sadě?",
+                a: "Počítejte úchyty při předání i vrácení.",
+              },
+              {
+                q: "Co potvrzuje nájemce?",
+                a: "Install path před odemčením.",
+              },
+              {
+                q: "Chybějící úchyty?",
+                a: "Inventární reklamace proti kauci.",
+              },
+            ],
+          },
+        "Childcare Equipment": {
+            title: "FAQ childcare vybavení",
+            summary: "Krátké odpovědi k jídelním židlím, houpačkám a bouncerům.",
+            qa: [
+              {
+                q: "Věk/hmotnost?",
+                a: "Dodržte limity.",
+              },
+              {
+                q: "Co sanitizovat?",
+                a: "Tácy, popruhy a high-touch povrchy.",
+              },
+              {
+                q: "Recall?",
+                a: "Povinný před pronájmem.",
+              },
+              {
+                q: "Poškozený popruh?",
+                a: "Nepůjčujte—zastavte předání.",
+              },
+              {
+                q: "Co potvrzuje nájemce?",
+                a: "Hygienu a recall při rezervaci.",
+              },
+            ],
+          },
       },
     },
 
