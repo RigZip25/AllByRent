@@ -1659,7 +1659,10 @@ function BookingScreenLoaded({
           <CategoryFactCard category="Boats & Water" />
         ) : null}
         {listing.category.trim() === "Real Estate" && listing.modes.rent ? (
-          <CategoryFactCard category="Real Estate" />
+          <CategoryFactCard
+            category="Real Estate"
+            subcategory={listing.subcategory}
+          />
         ) : null}
         {listingIsDrone(listing) && listing.modes.rent ? (
           <CategoryFactCard category="Photo & Video" />

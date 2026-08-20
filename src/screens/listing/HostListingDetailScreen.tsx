@@ -570,7 +570,11 @@ export function HostListingDetailScreen({
           <CategoryFactCard category="Boats & Water" className="mb-4" />
         ) : null}
         {listing.category.trim() === "Real Estate" ? (
-          <CategoryFactCard category="Real Estate" className="mb-4" />
+          <CategoryFactCard
+            category="Real Estate"
+            subcategory={listing.subcategory}
+            className="mb-4"
+          />
         ) : null}
         {listing.category.trim() === "Photo & Video" ||
         listing.category.trim() === "Drones" ||

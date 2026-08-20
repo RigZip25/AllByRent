@@ -553,7 +553,11 @@ export function ItemDetail({
               <CategoryFactCard category="Boats & Water" className="mt-3" />
             ) : null}
             {listing.category.trim() === "Real Estate" && listing.modes.rent ? (
-              <CategoryFactCard category="Real Estate" className="mt-3" />
+              <CategoryFactCard
+                category="Real Estate"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
             ) : null}
             {listingIsDrone(listing) && listing.modes.rent ? (
               <CategoryFactCard category="Photo & Video" className="mt-3" />

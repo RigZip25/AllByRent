@@ -2190,6 +2190,39 @@ export const es: AppMessages = {
           placeholder: "75",
           hint: "Tarifa plana opcional mostrada al reservar y en el acuerdo.",
         },
+        checkInWindowBand: { label: "Ventana de check-in", hint: "Cuándo pueden llegar — día flexible, tarde, noche, ventana estricta, o con cita." },
+        overnightAllowed: { label: "Pernocta", hint: "Noche OK, solo uso diurno, o aprobación del anfitrión." },
+        bathroomAccess: { label: "Acceso al baño", hint: "Privado, compartido, medio baño, ninguno en sitio, o portátil cerca." },
+        quietHoursBand: { label: "Horas de silencio", hint: "Franja publicada o normas del edificio — detalle en house rules." },
+        clearanceHeightBand: { label: "Altura libre", hint: "Altura interior libre para vehículos, estanterías o elevadores." },
+        doorWidthBand: { label: "Ancho de puerta / bahía", hint: "Ancho de puerta de garaje o bahía — o solo puerta peatonal." },
+        climateControl: { label: "Control climático", hint: "Climatizado, solo calor, solo frío, ambiente, o desconocido." },
+        accessHoursBand: { label: "Horario de acceso", hint: "24/7, horario laboral, extendido, solo cita, o agenda del anfitrión." },
+        storageUsePolicy: { label: "Política de almacenamiento", hint: "Qué se puede guardar — menaje, solo vehículo, sin hazmat, sin perecederos, o lista del anfitrión." },
+        parkingSpotType: { label: "Tipo de plaza", hint: "Lote abierto, cochera cubierta, plaza de garaje, entrada, o zona con permiso." },
+        vehicleSizeFit: { label: "Tamaño de vehículo", hint: "Compacto hasta Sprinter / oversized — oversized necesita confirmación." },
+        evCharging: { label: "Carga EV", hint: "Level 2 incluido, enchufe compartido, ninguno, o cable del inquilino." },
+        overnightParking: { label: "Parking nocturno", hint: "Noche OK, solo día, o aprobación del anfitrión." },
+        deskSeatCountBand: { label: "Escritorios / plazas", hint: "Cuántos escritorios o plazas incluye esta oficina compartida." },
+        meetingRoomAccess: { label: "Sala de reuniones", hint: "Incluida, reservable con extra, ninguna, o solo colaboración abierta." },
+        monitorKitIncluded: { label: "Kit monitor / dock", hint: "Recomendado — monitor+dock, solo monitor, gear del inquilino, o ninguno." },
+        outdoorPowerWater: { label: "Luz / agua exterior", hint: "Luz y agua, solo luz, solo agua, ninguno, o preguntar." },
+        noiseCurfewBand: { label: "Toque de ruido / música", hint: "Música hasta toque, sin amplificación, solo quieto, HOA, o toque del anfitrión." },
+        weatherPolicy: { label: "Política de clima", hint: "Llueva o truene, backup cubierto, cancelar/reprogramar, o decisión del anfitrión el mismo día." },
+        spaceKindBand: { label: "Tipo de espacio", hint: "Habitación, parking/trastero, oficina, exterior, venue/estudio, almacén/retail, o mixto — prefiera estantería con nombre." },
+        permittedUseBand: { label: "Uso permitido", hint: "Oficina/admin, producción ligera, reuniones, pop-up suave, o usos listados. El zoning queda en las partes." },
+        loadInAccess: { label: "Acceso de carga", hint: "Planta baja fácil, ascensor de carga, solo escaleras, muelle, o curbside." },
+        eventTypeAllowed: { label: "Tipos de evento permitidos", hint: "Solo reuniones, fiestas, bodas/formal, film/foto, o mixto según reglas." },
+        alcoholPolicy: { label: "Política de alcohol", hint: "BYOB OK, solo caterer con licencia, sin alcohol, o aprobación. La ley local aplica." },
+        avKitchenIncluded: { label: "AV / cocina incluidos", hint: "Ambos, solo AV, solo cocina, sala vacía, o parcial." },
+        studioTypeBand: { label: "Tipo de estudio", hint: "Foto, video/cine, podcast/audio, ensayo/baile, o contenido mixto." },
+        powerAmpBand: { label: "Potencia / amperaje", hint: "Circuitos domésticos, 20A+ dedicados, trifásica, solo batería/generador, o preguntar carga." },
+        soundTreatment: { label: "Tratamiento de sonido", hint: "Tratado/silencioso, parcial, sala live/eco, o no insonorizado." },
+        cycGridIncluded: { label: "Cyc / grid incluido", hint: "Cyc y grid, solo cyc, solo pipes/grid, sala vacía, o fondo parcial." },
+        dockAccess: { label: "Acceso a muelle", hint: "Muelle alto, bajo, drive-in, solo suelo, o muelle compartido." },
+        forkliftPolicy: { label: "Política de montacargas", hint: "Con operador, solo con certificación del inquilino, ninguno, o solo traspaleta." },
+        storefrontType: { label: "Tipo de escaparate", hint: "Calle, mall inline, kiosk/pop-up, suite interior, o puesto de mercado." },
+        fixtureIncluded: { label: "Fixtures incluidos", hint: "Fixtures incluidos, solo estantería, vacío vanilla, o parcial." },
 
         kitInventoryChecklist: {
           label: "Inventario del kit",
@@ -2871,6 +2904,158 @@ export const es: AppMessages = {
         self_checkin: "Acceso autónomo",
         key_lockbox: "Llave / caja de seguridad",
         staffed: "Con personal",
+        flexible_day: "Día flexible",
+        afternoon_3_6: "Tarde ~15–18",
+        evening_6_9: "Noche ~18–21",
+        strict_window: "Ventana estricta publicada",
+        by_appointment: "Con cita",
+        overnight_ok: "Noche OK",
+        day_use_only: "Solo uso diurno",
+        host_approval: "Aprobación del anfitrión",
+        private_bath: "Baño privado",
+        shared_bath: "Baño compartido",
+        half_bath_only: "Solo medio baño",
+        no_bath_on_site: "Sin baño en sitio",
+        portable_nearby: "Portátil / cerca",
+        quiet_10pm: "Silencio tras 22:00",
+        quiet_11pm: "Silencio tras 23:00",
+        quiet_midnight: "Silencio tras medianoche",
+        no_formal_quiet: "Sin horas formales",
+        building_rules: "Normas del edificio",
+        under_7ft: "Menos de 7 ft",
+        "7_8ft": "7–8 ft",
+        "8_10ft": "8–10 ft",
+        "10_14ft": "10–14 ft",
+        "14ft_plus": "14 ft+",
+        unknown_clearance: "Altura desconocida",
+        under_8ft: "Menos de 8 ft ancho",
+        "8_9ft": "8–9 ft ancho",
+        "9_10ft": "9–10 ft ancho",
+        "10_12ft": "10–12 ft ancho",
+        "12ft_plus": "12 ft+ ancho",
+        personnel_door_only: "Solo puerta peatonal",
+        climate_controlled: "Climatizado",
+        heated_only: "Solo calefacción",
+        cooled_only: "Solo frío",
+        ambient_unconditioned: "Ambiente / sin clima",
+        unknown_climate: "Clima desconocido",
+        "24_7_access": "Acceso 24/7",
+        business_hours: "Horario laboral",
+        extended_early_late: "Extendido temprano/tarde",
+        by_appointment_only: "Solo con cita",
+        host_schedule: "Agenda del anfitrión",
+        household_goods_ok: "Menaje OK",
+        vehicle_only: "Solo vehículo",
+        no_hazmat: "Sin hazmat",
+        no_food_perishables: "Sin comida / perecederos",
+        host_sets_list: "Lista del anfitrión",
+        open_lot: "Lote abierto",
+        covered_carport: "Cochera cubierta",
+        garage_stall: "Plaza de garaje",
+        driveway: "Entrada",
+        street_permit_zone: "Calle / zona con permiso",
+        compact_only: "Solo compacto",
+        sedan_suv: "Sedán / SUV",
+        fullsize_truck: "Pickup completo",
+        van_sprinter: "Van / Sprinter",
+        oversized_ask: "Oversized — preguntar",
+        ev_level2_included: "Cargador Level 2 incluido",
+        ev_outlet_shared: "Enchufe compartido",
+        no_ev: "Sin carga EV",
+        renter_brings_cord: "Cable del inquilino",
+        "1_desk": "1 escritorio",
+        "2_4_desks": "2–4 escritorios",
+        "5_10_desks": "5–10 escritorios",
+        "11_plus_desks": "11+ escritorios",
+        hot_desk_flex: "Hot-desk / flex",
+        meeting_included: "Sala incluida",
+        bookable_extra: "Reservable (extra)",
+        none_on_site: "Ninguna en sitio",
+        open_collaboration_only: "Solo colaboración abierta",
+        monitor_dock_included: "Monitor + dock incluidos",
+        monitor_only: "Solo monitor",
+        renter_brings_gear: "Gear del inquilino",
+        none: "Ninguno",
+        power_and_water: "Luz y agua",
+        power_only: "Solo luz",
+        water_only: "Solo agua",
+        neither: "Ninguno",
+        ask_host: "Preguntar al anfitrión",
+        music_ok_to_curfew: "Música OK hasta toque",
+        amplified_banned: "Sin sonido amplificado",
+        quiet_gathering_only: "Solo reunión tranquila",
+        building_hoa_rules: "Normas edificio / HOA",
+        host_sets_curfew: "Toque del anfitrión",
+        rain_or_shine: "Llueva o truene",
+        covered_area_backup: "Backup cubierto",
+        cancel_reschedule_weather: "Cancelar / reprogramar por clima",
+        host_decision_day_of: "Decisión del anfitrión el mismo día",
+        room_like: "Tipo habitación",
+        parking_or_storage: "Parking / trastero",
+        office_like: "Tipo oficina",
+        outdoor_yard: "Exterior / patio",
+        venue_or_studio: "Venue / estudio",
+        warehouse_retail: "Almacén / retail",
+        mixed_other: "Mixto / otro",
+        office_admin: "Oficina / admin",
+        light_production: "Producción ligera",
+        client_meetings: "Reuniones con clientes",
+        pop_up_soft: "Pop-up suave",
+        host_listed_uses: "Solo usos listados",
+        ground_floor_easy: "Planta baja / fácil",
+        freight_elevator: "Ascensor de carga",
+        stairs_only: "Solo escaleras",
+        loading_dock: "Muelle de carga",
+        curbside_carry: "Curbside / a pie",
+        meetings_only: "Solo reuniones",
+        social_parties: "Social / fiestas",
+        weddings_formal: "Bodas / formal",
+        film_photo: "Film / foto",
+        mixed_host_rules: "Mixto — reglas del anfitrión",
+        alcohol_ok_byob: "Alcohol OK (BYOB)",
+        alcohol_ok_licensed_caterer: "Solo caterer con licencia",
+        no_alcohol: "Sin alcohol",
+        av_and_kitchen: "AV y cocina",
+        av_only: "Solo AV",
+        kitchen_only: "Solo cocina",
+        neither_empty_room: "Ninguno — sala vacía",
+        partial_ask: "Parcial — preguntar",
+        photo_studio: "Estudio foto",
+        video_cinema: "Video / cine",
+        podcast_audio: "Podcast / audio",
+        rehearsal_dance: "Ensayo / baile",
+        mixed_content: "Contenido mixto",
+        household_circuits: "Circuitos domésticos",
+        "20a_plus_dedicated": "20A+ dedicado",
+        three_phase_available: "Trifásica disponible",
+        battery_or_generator_only: "Solo batería / generador",
+        ask_host_load: "Preguntar carga",
+        treated_quiet: "Tratado / silencioso",
+        partial_treatment: "Tratamiento parcial",
+        live_room_echo: "Sala live / eco",
+        not_soundproof: "No insonorizado",
+        cyc_and_grid: "Cyc y grid",
+        cyc_only: "Solo cyc",
+        grid_pipe_only: "Solo grid / pipes",
+        empty_room: "Sala vacía",
+        partial_backdrop: "Fondo parcial",
+        dock_high: "Muelle alto",
+        dock_low: "Muelle bajo",
+        drive_in_bay: "Bahía drive-in",
+        no_dock_ground: "Sin muelle — suelo",
+        shared_dock_schedule: "Muelle compartido",
+        forklift_included_op: "Montacargas + operador",
+        forklift_renter_certified: "Montacargas con certificación",
+        no_forklift: "Sin montacargas",
+        pallet_jack_only: "Solo traspaleta",
+        street_storefront: "Escaparate de calle",
+        mall_inline: "Mall inline",
+        kiosk_popup: "Kiosk / pop-up",
+        interior_suite: "Suite interior",
+        shared_market_stall: "Puesto de mercado",
+        fixtures_included: "Fixtures incluidos",
+        shelving_only: "Solo estantería",
+        empty_vanilla: "Vacío vanilla",
         event_prop: "Atrezo para eventos",
         photo_set: "Foto / decorado",
         collectible_display: "Coleccionable / exposición",
@@ -5247,6 +5432,334 @@ export const es: AppMessages = {
     },
 
     bySubcategory: {
+      "Real Estate": {
+        "Rooms & Spaces": {
+          title: "Habitaciones y espacios — check-in, noche, baño, silencio",
+          summary: "Habitaciones de corta estancia funcionan cuando check-in, pernocta, baño, horas de silencio, tamaño, ocupación, acceso y normas están congelados.",
+          qa: [
+            {
+              q: "¿Qué requisitos hay antes de alquilar?",
+              a: "El anuncio congela tamaño, ocupación máx., parking, Wi‑Fi, tipo de acceso, ventana de check-in, pernocta, baño, silencio, normas de la casa y limpieza opcional. Se exige selfie/ID al check-in.",
+            },
+            {
+              q: "¿Se puede dormir la noche?",
+              a: "El anfitrión marca noche OK, solo uso diurno, o con su aprobación. Uso diurno = sin dormir salvo acuerdo escrito.",
+            },
+            {
+              q: "¿Hay baño incluido?",
+              a: "Privado, compartido, solo medio baño, ninguno en sitio, o portátil cerca — aclara expectativas antes de reservar.",
+            },
+            {
+              q: "¿Cuáles son las horas de silencio?",
+              a: "Franja publicada (p. ej. 22:00 / 23:00 / medianoche) o normas del edificio. Las house rules añaden visitas, humo, mascotas y salida.",
+            },
+            {
+              q: "¿Cuánto es el depósito?",
+              a: "Por defecto hacia ~un mes de renta salvo que el anfitrión fije otro. La limpieza, si existe, se congela en el acuerdo.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin franquicia Airbnb Instant Book, sin producto hotelero de limpieza y sin seguro de alojamiento de Evorios.",
+            },
+          ],
+        },
+        "Garages & Storage": {
+          title: "Garajes y trasteros — altura, puerta, clima, uso",
+          summary: "Trasteros necesitan altura libre, ancho de puerta, clima, horario de acceso y política de uso más tamaño y normas.",
+          qa: [
+            {
+              q: "¿Qué requisitos hay?",
+              a: "El alquiler congela altura libre, ancho de puerta, clima, horario, política de almacenamiento, tamaño, ocupación, acceso y normas.",
+            },
+            {
+              q: "¿Cabe mi vehículo o estanterías?",
+              a: "Usa las franjas de altura y puerta. Furgones altos necesitan más altura — pregunta si es desconocida.",
+            },
+            {
+              q: "¿Hay control climático?",
+              a: "Climatizado, solo calefacción, solo frío, ambiente o desconocido. Bienes sensibles en ambiente son riesgo del inquilino.",
+            },
+            {
+              q: "¿Qué puedo guardar?",
+              a: "Puede permitir menaje, solo vehículo, sin hazmat, sin perecederos, o lista del anfitrión. Bienes prohibidos anulan reclamaciones.",
+            },
+            {
+              q: "¿Depósito y acceso?",
+              a: "Depósito ≈ un mes salvo otra cifra. El acceso se abre tras el ID de inicio — no solo con un reenvío.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin promo Neighbor/StorageMart, sin seguro de inventario de Evorios y sin vigilancia 24/7 salvo que se indique.",
+            },
+          ],
+        },
+        "Parking Spots": {
+          title: "Plazas de parking — tipo, tamaño, EV, noche",
+          summary: "Las plazas funcionan cuando tipo, tamaño de vehículo, carga EV, pernocta y horario se publican con las normas.",
+          qa: [
+            {
+              q: "¿Qué requisitos hay?",
+              a: "El alquiler congela tipo de plaza, tamaño de vehículo, EV, pernocta, horario, tamaño, tipo de acceso y normas.",
+            },
+            {
+              q: "¿Cabe mi camioneta o van?",
+              a: "Franjas: compacto → sedán/SUV → pickup → Sprinter → oversized (preguntar). Oversized necesita confirmación del anfitrión.",
+            },
+            {
+              q: "¿Hay carga EV?",
+              a: "Level 2 incluido, enchufe compartido, ninguno, o cable del inquilino. Los enchufes compartidos pueden tener normas del edificio.",
+            },
+            {
+              q: "¿Pernocta?",
+              a: "Noche OK, solo día, o aprobación del anfitrión. Las plazas diurnas deben liberarse según las normas.",
+            },
+            {
+              q: "¿Depósito e ID?",
+              a: "El depósito tiende a ~un mes de renta. Selfie/ID al inicio abre el acceso.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin affiliate SpotHero/ParkWhiz, sin defensa de multas y sin producto de facturación EV de Evorios.",
+            },
+          ],
+        },
+        "Shared Offices": {
+          title: "Oficinas compartidas — escritorios, reuniones, horario, baño",
+          summary: "Escritorios necesitan plazas, sala de reuniones, horario, baño y kit monitor/dock opcional con normas.",
+          qa: [
+            {
+              q: "¿Qué requisitos hay?",
+              a: "El alquiler congela plazas de escritorio, acceso a reuniones, horario, baño, Wi‑Fi, tamaño, ocupación, acceso, normas y kit monitor/dock recomendado.",
+            },
+            {
+              q: "¿Cuántos escritorios?",
+              a: "1, 2–4, 5–10, 11+ o hot-desk. La ocupación debe respetar el máximo publicado.",
+            },
+            {
+              q: "¿Hay salas de reuniones?",
+              a: "Incluidas, reservables con extra, ninguna, o solo open space — no asumas sala privada.",
+            },
+            {
+              q: "¿Horario laboral vs 24/7?",
+              a: "La franja fija 24/7, horario laboral, extendido, solo cita, o agenda del anfitrión.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Suele ser ~un mes de renta. Puede haber limpieza en suites privadas.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin membresía WeWork, sin SLA de IT y sin asesoría de arrendamiento comercial de Evorios.",
+            },
+          ],
+        },
+        "Backyard & Outdoor": {
+          title: "Patio y exterior — luz/agua, ruido, clima, baño",
+          summary: "Patios necesitan luz/agua, toque de queda de ruido, política de clima, baño, ocupación y horas de silencio con normas.",
+          qa: [
+            {
+              q: "¿Qué requisitos hay?",
+              a: "El alquiler congela luz/agua exterior, toque de queda, clima, baño, silencio, tamaño, ocupación, parking, acceso y normas.",
+            },
+            {
+              q: "¿Hay luz o agua en sitio?",
+              a: "Ambos, solo luz, solo agua, ninguno, o preguntar. Generador propio solo si las normas lo permiten.",
+            },
+            {
+              q: "¿Se puede poner música?",
+              a: "Puede permitir música hasta el toque, prohibir amplificación, solo reunión tranquila, normas HOA, o toque del anfitrión. Incumplir puede usar el depósito.",
+            },
+            {
+              q: "¿Y si llueve?",
+              a: "Llueva o truene, backup cubierto, cancelar/reprogramar, o decisión del anfitrión el mismo día.",
+            },
+            {
+              q: "¿Depósito e ID?",
+              a: "Depósito ≈ un mes. ID de inicio del huésped antes de desbloquear.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin upsell de seguro Peerspace, sin promo de catering y sin trámites de permiso de ruido por Evorios.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Inmuebles otros — declara el tipo de espacio",
+          summary: "El catch-all debe declarar tipo, tamaño, ocupación, acceso y normas — usa una estantería con nombre cuando encaje.",
+          qa: [
+            {
+              q: "¿Qué requisitos hay?",
+              a: "El alquiler congela tipo de espacio, tamaño, ocupación máx., parking, Wi‑Fi, acceso y normas. Prefiere una estantería con nombre.",
+            },
+            {
+              q: "¿Por qué el tipo de espacio?",
+              a: "Indica si es habitación, parking/trastero, oficina, exterior, venue/estudio, almacén/retail o mixto — para no reservar el producto equivocado.",
+            },
+            {
+              q: "¿Depósito y check-in?",
+              a: "El depósito tiende a un mes. Selfie/ID al inicio antes de desbloquear.",
+            },
+            {
+              q: "¿Tarifa de limpieza?",
+              a: "Opcional; si se fija, aparece al reservar y se congela en el acuerdo.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin promo genérica tipo Airbnb y sin seguro de alojamiento de plataforma.",
+            },
+          ],
+        },
+        "Commercial Space": {
+          title: "Espacio comercial — uso permitido, load-in, horario",
+          summary: "Suites pro congelan uso permitido, load-in, horario, acceso a reuniones y normas con tamaño y ocupación.",
+          qa: [
+            {
+              q: "¿Qué requisitos hay?",
+              a: "El alquiler congela uso permitido, load-in, horario, reuniones, tamaño, ocupación, parking, Wi‑Fi, acceso y normas.",
+            },
+            {
+              q: "¿Qué usos están permitidos?",
+              a: "Oficina/admin, producción ligera, reuniones con clientes, pop-up suave, o usos listados por el anfitrión. El zoning queda en anfitrión e inquilino.",
+            },
+            {
+              q: "¿Cómo se carga el equipo?",
+              a: "Planta baja fácil, ascensor de carga, solo escaleras, muelle, o curbside — planifica el equipo antes.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Unos un mes de renta por defecto salvo otra cifra del anfitrión.",
+            },
+            {
+              q: "¿ID del huésped?",
+              a: "Sí — ID/selfie de inicio antes de desbloquear, igual que el resto de Real Estate.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin corretaje de arrendamiento comercial, sin partner de COI y sin franquicia Instant Book de oficinas.",
+            },
+          ],
+        },
+        "Event Venues": {
+          title: "Venues — tipo de evento, alcohol, AV/cocina, ruido",
+          summary: "Los venues necesitan tipo de evento, alcohol, AV/cocina, toque de ruido, silencio, load-in y ocupación con normas.",
+          qa: [
+            {
+              q: "¿Qué requisitos hay?",
+              a: "El alquiler congela tipo de evento, alcohol, AV/cocina, toque de ruido, silencio, load-in, tamaño, ocupación, parking, acceso y normas.",
+            },
+            {
+              q: "¿Qué eventos se permiten?",
+              a: "Solo reuniones, fiestas sociales, bodas/formal, film/foto, o mixto según reglas del anfitrión.",
+            },
+            {
+              q: "¿Se permite alcohol?",
+              a: "BYOB OK, solo caterer con licencia, sin alcohol, o aprobación del anfitrión. La ley local sigue aplicando.",
+            },
+            {
+              q: "¿AV y cocina?",
+              a: "Ambos, solo AV, solo cocina, sala vacía, o parcial — trae lo que falte.",
+            },
+            {
+              q: "¿Depósito y limpieza?",
+              a: "Depósito ≈ un mes. La limpieza suele aplicar tras eventos.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin affiliate Peerspace/The Knot, sin seguro de evento de Evorios y sin seguridad salvo que se liste.",
+            },
+          ],
+        },
+        "Studio Space": {
+          title: "Estudio — tipo, potencia, sonido, cyc/grid",
+          summary: "Estudios de contenido congelan tipo, franja de potencia, tratamiento de sonido y cyc/grid con acceso y normas.",
+          qa: [
+            {
+              q: "¿Qué requisitos hay?",
+              a: "El alquiler congela tipo de estudio, potencia, sonido, cyc/grid, tamaño, ocupación, Wi‑Fi, parking, acceso y normas.",
+            },
+            {
+              q: "¿Foto, video, podcast o ensayo?",
+              a: "El tipo fija expectativas. Las salas mixtas pueden no ser muy silenciosas — revisa el tratamiento de sonido.",
+            },
+            {
+              q: "¿Qué potencia hay?",
+              a: "Circuitos domésticos, 20A+ dedicados, trifásica, solo batería/generador, o pregunta la carga. Sobrecargar es riesgo del inquilino.",
+            },
+            {
+              q: "¿Hay cyc o grid?",
+              a: "Cyc y grid, solo cyc, solo pipes/grid, sala vacía, o fondo parcial.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Hacia ~un mes de renta. ID de inicio antes de desbloquear.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin promo Giggster/Peerspace, sin kit de gear salvo que se liste, y sin seguro de producción de Evorios.",
+            },
+          ],
+        },
+        "Warehouse & Storage": {
+          title: "Almacén — altura, muelle, montacargas, clima",
+          summary: "Los almacenes añaden muelle y política de montacargas sobre altura, puerta, clima, horario y load-in.",
+          qa: [
+            {
+              q: "¿Qué requisitos hay?",
+              a: "El alquiler congela altura, puerta, clima, muelle, montacargas, load-in, horario, tamaño, ocupación, acceso y normas.",
+            },
+            {
+              q: "¿Muelle y montacargas?",
+              a: "Muelle alto/bajo, drive-in, solo suelo, o muelle compartido. Montacargas puede ir con operador, solo con certificación del inquilino, ninguno, o solo traspaleta.",
+            },
+            {
+              q: "¿Altura y puertas?",
+              a: "Usa las franjas publicadas antes de traer box trucks o estanterías.",
+            },
+            {
+              q: "¿Clima?",
+              a: "Climatizado vs ambiente — protege inventario sensible.",
+            },
+            {
+              q: "¿Depósito e ID?",
+              a: "Depósito ≈ un mes. ID de inicio antes del acceso.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin affiliate Flexe, sin seguro de carga de Evorios y sin montacargas con personal salvo que se indique.",
+            },
+          ],
+        },
+        "Retail Space": {
+          title: "Retail — escaparate, fixtures, load-in, horario",
+          summary: "Suites retail congelan tipo de escaparate, fixtures, load-in, horario y normas con tamaño y ocupación.",
+          qa: [
+            {
+              q: "¿Qué requisitos hay?",
+              a: "El alquiler congela tipo de escaparate, fixtures, load-in, horario, tamaño, ocupación, parking, Wi‑Fi, acceso y normas.",
+            },
+            {
+              q: "¿Qué tipo de escaparate?",
+              a: "Calle, mall inline, kiosk/pop-up, suite interior, o puesto de mercado — el tráfico peatonal no está garantizado.",
+            },
+            {
+              q: "¿Hay fixtures incluidos?",
+              a: "Fixtures incluidos, solo estantería, vacío vanilla, o parcial. Cuenta lo que necesitas antes de mudarte.",
+            },
+            {
+              q: "¿Horario?",
+              a: "La franja fija cuándo puedes ocupar. Las normas del mall/edificio pueden prevalecer.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Unos un mes de renta por defecto salvo otra cifra.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin affiliate Storefront.com/Appear Here, sin promo POS y sin registro fiscal de Evorios.",
+            },
+          ],
+        },
+      },
       Vehicles: {
         "Cars & Trucks": {
           title: "FAQ alquiler de coche ligero / turismo",
@@ -7998,6 +8511,350 @@ export const es: AppMessages = {
           ],
         },
       },
+      "Outdoor & Camping": {
+          Tents: {
+            title: "Tiendas — capacidad, temporada, higiene",
+            summary: "El alquiler peer de tiendas funciona cuando capacidad, temporada, peso empaquetado y atestación limpia/aireada quedan congelados.",
+            qa: [
+              {
+                q: "¿Qué puertas aplican antes de alquilar una tienda?",
+                a: "El alquiler congela capacidad, temporada y checklist de higiene. El anfitrión debe atestar sanitizado/aireado; tú reconoces devolverla limpia y seca.",
+              },
+              {
+                q: "¿Qué significan capacidad y temporada?",
+                a: "Capacidad es para cuántas personas. Temporada (1–4) fija la exposición esperada — no garantiza tormentas.",
+              },
+              {
+                q: "¿Por qué el peso empaquetado?",
+                a: "Ayuda a decidir mochila vs camping en auto. Recomendación suave — confírmalo antes de cargarla.",
+              },
+              {
+                q: "¿Cuál es la regla de higiene?",
+                a: "Refugios de sueño compartidos necesitan atestación del anfitrión. La reserva se bloquea hasta attested; tú confirmas devolución limpia y seca.",
+              },
+              {
+                q: "¿Qué fotografiar?",
+                a: "Varillas, fly, estacas y tela en entrega y devolución — varillas faltantes y fly rasgado impulsan reclamos.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Varillas, estacas, guías faltantes y daño más allá del uso normal — no seguro de clima ni cancelación.",
+              },
+              {
+                q: "¿Qué no está incluido?",
+                a: "Sin membresía REI, sin montaje de tienda ni seguro outdoor de Evorios.",
+              },
+            ],
+          },
+          "Sleeping Bags": {
+            title: "Sacos de dormir — temperatura, higiene",
+            summary: "Los sacos se alquilan limpios cuando banda de temperatura y atestación sanitaria están en el acuerdo.",
+            qa: [
+              {
+                q: "¿Qué puertas aplican?",
+                a: "Sacos requieren banda de temperatura más el checklist de higiene Outdoor. El anfitrión atesta limpio/aireado; la reserva queda bloqueada hasta entonces.",
+              },
+              {
+                q: "¿Cómo leer la banda de temperatura?",
+                a: "Es la clase de confort publicada (sobre 50°F hasta bajo 0°F). Mantente dentro — el riesgo de frío es del arrendatario, no del depósito.",
+              },
+              {
+                q: "¿Sigue siendo obligatoria la capacidad?",
+                a: "Sí — capacidad y temporada Outdoor dan contexto de tamaño/temporada del saco.",
+              },
+              {
+                q: "¿Regla de higiene?",
+                a: "Equipo de sueño compartido: atestación del anfitrión y tu ack al reservar de devolver el saco limpio y seco.",
+              },
+              {
+                q: "¿Qué fotografiar?",
+                a: "Cremalleras, baffles y manchas en recogida y devolución. Fundas faltantes o daño de forro pueden usar el depósito.",
+              },
+              {
+                q: "¿Waiver vs depósito?",
+                a: "La higiene es la capa de confianza. El depósito cubre piezas faltantes y suciedad fuera de política — no hipotermia ni seguro de viaje.",
+              },
+              {
+                q: "¿Qué no está incluido?",
+                a: "Sin promo de lavandería de sacos ni seguro médico outdoor de Evorios.",
+              },
+            ],
+          },
+          Backpacks: {
+            title: "Mochilas — capacidad, peso, ajuste",
+            summary: "Las mochilas se alquilan cuando capacidad, temporada y peso empaquetado son honestos para el ajuste y la carga.",
+            qa: [
+              {
+                q: "¿Qué puertas aplican?",
+                a: "El alquiler Outdoor sigue exigiendo capacidad y temporada. El peso empaquetado se recomienda en packs overnight.",
+              },
+              {
+                q: "¿Cómo leer la capacidad en una mochila?",
+                a: "La banda como clase de carga (día vs varios días). Confirma torso/ajuste en la descripción antes de reservar.",
+              },
+              {
+                q: "¿Hay checklist de higiene?",
+                a: "No por defecto en Mochilas. Notas suaves de devolución limpia igual ayudan.",
+              },
+              {
+                q: "¿Qué fotografiar?",
+                a: "Cinturón, correas, cremalleras y funda de lluvia. Fundas faltantes y cinturones rotos son reclamos comunes.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Tapas, fundas faltantes y daño de armazón más allá del uso normal — no objetos personales dentro.",
+              },
+              {
+                q: "¿Qué no está incluido?",
+                a: "Sin guía outfitter, sin membresía REI ni seguro outdoor de Evorios.",
+              },
+            ],
+          },
+          "Camp Cooking": {
+            title: "Cocina de campamento — combustible, piezas, fuego",
+            summary: "Las estufas necesitan tipo de combustible congelado con contexto de capacidad/temporada para llevar cartuchos correctos y devolver cada pieza.",
+            qa: [
+              {
+                q: "¿Qué puertas aplican?",
+                a: "Camp Cooking exige tipo de combustible (isobutano, white gas, propano, alcohol, madera, eléctrico o multi-fuel) más capacidad/temporada Outdoor.",
+              },
+              {
+                q: "¿Por qué importa el combustible?",
+                a: "El combustible incorrecto puede destruir la estufa y es reclamo de depósito. Iguala cartuchos/botellas al tipo publicado.",
+              },
+              {
+                q: "¿Ollas y combustible incluidos?",
+                a: "Solo lo que diga el inventario. Cuenta quemadores, pantallas, bombas y ollas en la entrega.",
+              },
+              {
+                q: "¿Fuego y leave-no-trace?",
+                a: "Sigue prohibiciones locales y notas suaves del anfitrión. Prohibiciones y riesgo de incendio quedan fuera del depósito.",
+              },
+              {
+                q: "¿Qué fotografiar?",
+                a: "Patas, adaptador, bomba y menaje. Bombas faltantes y pantallas rotas impulsan reclamos.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Piezas de estufa faltantes y daño de menaje — no el combustible consumido ni comida quemada.",
+              },
+              {
+                q: "¿Qué no está incluido?",
+                a: "Sin suscripción de cartuchos ni seguro de cocina de campamento de Evorios.",
+              },
+            ],
+          },
+          "Navigation & GPS": {
+            title: "Navegación y GPS — energía, mapas, devolución",
+            summary: "GPS de mano se alquilan cuando hay contexto de capacidad/temporada y expectativas claras de energía y mapas.",
+            qa: [
+              {
+                q: "¿Qué puertas aplican?",
+                a: "Siguen publicándose capacidad y temporada Outdoor. Confirma batería y notas de mapas antes de usarlo off-grid.",
+              },
+              {
+                q: "¿Mapas y suscripciones incluidos?",
+                a: "Solo si están listados. Mapas offline y satélite los declara el anfitrión — no es afiliado Garmin/onX.",
+              },
+              {
+                q: "¿Energía y carga al devolver?",
+                a: "Devuelve según notas (normalmente carga similar). Cargadores faltantes van al depósito.",
+              },
+              {
+                q: "¿Hace falta waiver?",
+                a: "No por defecto en Navegación & GPS personal. Survival / expedición tienen puertas de waiver aparte.",
+              },
+              {
+                q: "¿Qué fotografiar?",
+                a: "Unidad, antena/soporte y cargador. Pantallas rotas y cunas faltantes son reclamos comunes.",
+              },
+              {
+                q: "¿Qué no está incluido?",
+                a: "Sin suscripción de rescate, sin promo de mapas ni seguro de navegación de Evorios.",
+              },
+            ],
+          },
+          Other: {
+            title: "Outdoor otros — reubica si puedes",
+            summary: "Prefiere un estante Outdoor con nombre para higiene, combustible o waiver. Other igual congela capacidad y temporada.",
+            qa: [
+              {
+                q: "¿Debo quedarme en Other?",
+                a: "Reubica a Tiendas, Sacos, Mochilas, Camp Cooking, Navegación, Expedición, Survival, Group Shelters, Navegación pro o Base Camp cuando encaje.",
+              },
+              {
+                q: "¿Qué aplica igual en Other?",
+                a: "Capacidad y temporada siguen obligatorias. El peso empaquetado se recomienda al cargar.",
+              },
+              {
+                q: "¿Aplican higiene o waiver?",
+                a: "Solo si el anfitrión marca required, o el ítem es claramente tienda/sueño o survival/expedición. Los estantes con nombre lo exigen solos.",
+              },
+              {
+                q: "¿Qué fotografiar?",
+                a: "Estado general y cada accesorio. Kits Other vagos sin fotos de piezas generan peleas de depósito.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Accesorios faltantes y daño más allá del uso outdoor normal según el anuncio.",
+              },
+              {
+                q: "¿Qué no está incluido?",
+                a: "Sin seguro outdoor genérico ni promo de big-box de Evorios.",
+              },
+            ],
+          },
+          "Expedition Tents": {
+            title: "Tiendas de expedición — temporada, higiene, waiver",
+            summary: "Refugios alpinos/expedición congelan capacidad, temporada, atestación de higiene y waiver de responsabilidad antes de reservar.",
+            qa: [
+              {
+                q: "¿Qué puertas aplican?",
+                a: "Expedition Tents exigen capacidad, temporada, checklist de higiene con atestación y estado del waiver de responsabilidad.",
+              },
+              {
+                q: "¿Por qué un waiver?",
+                a: "Uso de refugio de montaña de alto riesgo. Reconoces riesgo de lesión de uso ordinario al reservar salvo que el anfitrión marque not required — alquilas a un vecino, no a un servicio de guías.",
+              },
+              {
+                q: "¿Higiene vs tiendas base?",
+                a: "Misma regla de refugio de sueño: el anfitrión atesta limpio/aireado; tú devuelves razonablemente limpia y seca.",
+              },
+              {
+                q: "¿Qué fotografiar?",
+                a: "Varillas, fly, estacas de nieve y kits de guías. El hardware de expedición desaparece tras fines de semana.",
+              },
+              {
+                q: "¿Depósito vs waiver?",
+                a: "El waiver cubre riesgo ordinario de lesión entre pares; el depósito cubre varillas/estacas faltantes y daño de tela.",
+              },
+              {
+                q: "¿Qué no está incluido?",
+                a: "Sin expedición guiada, sin cobertura de rescate alpino ni afiliado de seguro outdoor de Evorios.",
+              },
+            ],
+          },
+          "Survival Gear": {
+            title: "Survival gear — waiver, capacidad, reclamos",
+            summary: "Kits de supervivencia congelan capacidad/temporada y waiver de responsabilidad para que el riesgo quede en el uso ordinario entre pares.",
+            qa: [
+              {
+                q: "¿Qué puertas aplican?",
+                a: "Survival Gear exige estado del waiver de responsabilidad más capacidad y temporada Outdoor.",
+              },
+              {
+                q: "¿Por qué un waiver?",
+                a: "El entrenamiento survival y el uso remoto conllevan riesgo de lesión. Reconoce asunción de riesgo al reservar salvo not required.",
+              },
+              {
+                q: "¿Hace falta higiene?",
+                a: "No por defecto salvo que el kit incluya sueño compartido — entonces el anfitrión puede marcar higiene. Prefiere Sacos / Tiendas para sueño.",
+              },
+              {
+                q: "¿Qué inventariar?",
+                a: "Cuchillos, iniciadores de fuego, señales y botiquín. Cuenta cada pieza en la entrega.",
+              },
+              {
+                q: "¿Depósito vs waiver?",
+                a: "El waiver cubre riesgo ordinario de lesión; el depósito cubre piezas faltantes o dañadas — no costos médicos ni de rescate.",
+              },
+              {
+                q: "¿Qué no está incluido?",
+                a: "Sin certificado de curso, sin suscripción SAR ni seguro médico outdoor de Evorios.",
+              },
+            ],
+          },
+          "Group Shelters": {
+            title: "Refugios grupales — capacidad, temporada, piezas",
+            summary: "Refugios grupales se alquilan cuando capacidad (a menudo group_shelter) y temporada coinciden con el evento.",
+            qa: [
+              {
+                q: "¿Qué puertas aplican?",
+                a: "Capacidad y temporada son obligatorias. Usa group_shelter cuando el tamaño es de evento, no de tienda de mochila.",
+              },
+              {
+                q: "¿Hace falta higiene?",
+                a: "No por defecto salvo que el anfitrión lo marque. Notas suaves de devolución limpia/seca igual reducen reclamos de moho.",
+              },
+              {
+                q: "¿Clima y estacas?",
+                a: "La temporada no garantiza viento. Confirma kit de estacas/pesos y el clima local antes de montar.",
+              },
+              {
+                q: "¿Qué fotografiar?",
+                a: "Marco, tela, estacas y pesos. Pesos faltantes tras viento son reclamos comunes.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Varillas, estacas, pesos faltantes y roturas más allá del uso normal — no seguro de cancelación por clima.",
+              },
+              {
+                q: "¿Qué no está incluido?",
+                a: "Sin personal de evento, sin seguro weather-cancel ni promo de rentals de fiesta de Evorios.",
+              },
+            ],
+          },
+          "Professional Navigation": {
+            title: "Navegación pro — kit, energía, mapas",
+            summary: "Kits GPS / survey pro necesitan contexto de capacidad/temporada y energía, soportes y mapas claros antes del campo.",
+            qa: [
+              {
+                q: "¿Qué puertas aplican?",
+                a: "Siguen publicándose capacidad y temporada Outdoor. Confirma batería, soporte y antena en el anuncio antes del trabajo remoto.",
+              },
+              {
+                q: "¿Mapas y software?",
+                a: "Solo paquetes o licencias declarados por el anfitrión. Evorios no revende Garmin, Trimble u onX.",
+              },
+              {
+                q: "¿Hace falta waiver?",
+                a: "No por defecto en este estante. Survival y Expedition Tents tienen puertas duras de waiver.",
+              },
+              {
+                q: "¿Qué fotografiar?",
+                a: "Receptor, antena, postes/soportes y cargadores. Postes y cunas faltantes impulsan el depósito.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Accesorios faltantes y daño de hardware — no datos de campo perdidos ni renovaciones de suscripción.",
+              },
+              {
+                q: "¿Qué no está incluido?",
+                a: "Sin cuadrilla de survey, sin promo de seats de software ni seguro de navegación de Evorios.",
+              },
+            ],
+          },
+          "Base Camp Equipment": {
+            title: "Base camp — capacidad, temporada, inventario",
+            summary: "Mesas, cocinas y kits de base camp se alquilan cuando capacidad/temporada coinciden y cada pieza está listada.",
+            qa: [
+              {
+                q: "¿Qué puertas aplican?",
+                a: "Capacidad y temporada son obligatorias. El peso empaquetado ayuda cuando el gear se carga al campamento.",
+              },
+              {
+                q: "¿Higiene o waiver?",
+                a: "No por defecto. Si el kit incluye tiendas o sueño, reubica esas piezas para que apliquen higiene/waiver.",
+              },
+              {
+                q: "¿Por qué el inventario?",
+                a: "Los kits de base camp pierden sillas, linternas y mesas. Publica lista y cuenta en entrega/devolución.",
+              },
+              {
+                q: "¿Qué fotografiar?",
+                a: "El kit completo en recogida y devolución. Taburetes y linternas faltantes son reclamos típicos.",
+              },
+              {
+                q: "¿Qué cubre el depósito?",
+                a: "Piezas faltantes y daño más allá del uso normal — no comida, combustible ni seguro de viaje.",
+              },
+              {
+                q: "¿Qué no está incluido?",
+                a: "Sin personal de campamento, sin seguro outfitter ni promo REI / flota de Evorios.",
+              },
+            ],
+          },
+        },
 },
 
   },

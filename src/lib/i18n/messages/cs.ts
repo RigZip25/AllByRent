@@ -2202,6 +2202,39 @@ export const cs: AppMessages = {
           placeholder: "75",
           hint: "Volitelný paušál zobrazený při rezervaci a ve smlouvě.",
         },
+        checkInWindowBand: { label: "Okno check-inu", hint: "Kdy mohou hosté přijet — flexibilní den, odpoledne, večer, striktní okno, nebo po domluvě." },
+        overnightAllowed: { label: "Nocleh", hint: "Noc OK, jen denní použití, nebo schválení hostitelem." },
+        bathroomAccess: { label: "Přístup ke koupelně", hint: "Soukromá, sdílená, jen WC, žádná na místě, nebo mobilní blízko." },
+        quietHoursBand: { label: "Noční klid", hint: "Publikované pásmo nebo pravidla budovy — detaily v domácích pravidlech." },
+        clearanceHeightBand: { label: "Světlá výška", hint: "Vnitřní světlá výška pro vozidla, regály nebo zdvihy." },
+        doorWidthBand: { label: "Šířka vrat / bay", hint: "Šířka garážových vrat nebo bay — nebo jen personální dveře." },
+        climateControl: { label: "Klimatizace", hint: "Klimatizováno, jen topení, jen chlazení, okolní, nebo neznámé." },
+        accessHoursBand: { label: "Hodiny přístupu", hint: "24/7, pracovní doba, extended, jen po domluvě, nebo rozvrh hostitele." },
+        storageUsePolicy: { label: "Politika skladování", hint: "Co smí být skladováno — domácí věci, jen vozidlo, bez hazmat, bez potravin, nebo seznam hostitele." },
+        parkingSpotType: { label: "Typ parkovacího místa", hint: "Otevřené, přístřešek, garážový stání, příjezd, nebo zóna s povolením." },
+        vehicleSizeFit: { label: "Velikost vozu", hint: "Kompakt až Sprinter / nadrozměr — nadrozměr potřebuje potvrzení hostitele." },
+        evCharging: { label: "EV nabíjení", hint: "Level 2 v ceně, sdílená zásuvka, žádné, nebo kabel nájemce." },
+        overnightParking: { label: "Noční stání", hint: "Noc OK, jen den, nebo schválení hostitele." },
+        deskSeatCountBand: { label: "Stoly / místa", hint: "Kolik stolů nebo míst je v tomto office share." },
+        meetingRoomAccess: { label: "Meeting místnost", hint: "V ceně, za příplatek, žádná, nebo jen open collaboration." },
+        monitorKitIncluded: { label: "Monitor / dock kit", hint: "Doporučeno — monitor+dock, jen monitor, gear nájemce, nebo nic." },
+        outdoorPowerWater: { label: "Outdoor proud / voda", hint: "Proud i voda, jen proud, jen voda, nic, nebo se zeptejte." },
+        noiseCurfewBand: { label: "Hluk / zákaz hudby", hint: "Hudba do zákazu, bez zesílení, jen tiché, HOA, nebo zákaz hostitele." },
+        weatherPolicy: { label: "Politika počasí", hint: "Za každého počasí, krytý backup, zrušení/přeplanování, nebo rozhodnutí hostitele v den." },
+        spaceKindBand: { label: "Typ prostoru", hint: "Pokoj, parkování/sklad, kancelář, outdoor, venue/studio, sklad/retail, nebo mix — preferujte pojmenovanou polici." },
+        permittedUseBand: { label: "Povolené užití", hint: "Kancelář/admin, lehká produkce, schůzky, soft pop-up, nebo seznam hostitele. Zoning zůstává na stranách." },
+        loadInAccess: { label: "Load-in přístup", hint: "Přízemí snadno, nákladní výtah, jen schody, dock, nebo curbside." },
+        eventTypeAllowed: { label: "Povolené typy akcí", hint: "Jen meetingy, party, svatby/formální, film/foto, nebo mix dle pravidel." },
+        alcoholPolicy: { label: "Politika alkoholu", hint: "BYOB OK, jen licencovaný caterer, bez alkoholu, nebo schválení. Místní zákon platí." },
+        avKitchenIncluded: { label: "AV / kuchyň v ceně", hint: "Obojí, jen AV, jen kuchyň, prázdný sál, nebo částečně." },
+        studioTypeBand: { label: "Typ studia", hint: "Foto, video/kino, podcast/audio, zkouška/tanec, nebo mix." },
+        powerAmpBand: { label: "Proud / ampéry", hint: "Domácí okruhy, 20A+ dedicated, třífáz, jen baterie/generátor, nebo se zeptejte na zátěž." },
+        soundTreatment: { label: "Úprava zvuku", hint: "Upraveno/tiché, částečně, live/echo, nebo ne zvukotěsné." },
+        cycGridIncluded: { label: "Cyc / grid v ceně", hint: "Cyc i grid, jen cyc, jen trubky/grid, prázdná místnost, nebo částečné pozadí." },
+        dockAccess: { label: "Dock přístup", hint: "Vysoký dock, nízký, drive-in, jen zem, nebo sdílený rozvrh." },
+        forkliftPolicy: { label: "Politika VZV", hint: "S operátorem, jen s certifikací nájemce, žádný, nebo jen paletový vozík." },
+        storefrontType: { label: "Typ výlohy", hint: "Ulice, mall inline, kiosk/pop-up, interiérová suite, nebo sdílený trh." },
+        fixtureIncluded: { label: "Fixtures v ceně", hint: "Fixtures v ceně, jen regály, prázdný vanilla, nebo částečně." },
 
         kitInventoryChecklist: {
           label: "Inventář sady",
@@ -2883,6 +2916,158 @@ export const cs: AppMessages = {
         self_checkin: "Samoobslužný check-in",
         key_lockbox: "Klíč / schránka",
         staffed: "S obsluhou",
+        flexible_day: "Flexibilní den",
+        afternoon_3_6: "Odpoledne ~15–18",
+        evening_6_9: "Večer ~18–21",
+        strict_window: "Striktní publikované okno",
+        by_appointment: "Po domluvě",
+        overnight_ok: "Nocleh OK",
+        day_use_only: "Jen denní použití",
+        host_approval: "Schválení hostitelem",
+        private_bath: "Soukromá koupelna",
+        shared_bath: "Sdílená koupelna",
+        half_bath_only: "Jen WC",
+        no_bath_on_site: "Bez koupelny na místě",
+        portable_nearby: "Mobilní / blízko",
+        quiet_10pm: "Klid po 22:00",
+        quiet_11pm: "Klid po 23:00",
+        quiet_midnight: "Klid po půlnoci",
+        no_formal_quiet: "Bez formálního klidu",
+        building_rules: "Pravidla budovy",
+        under_7ft: "Pod 7 ft",
+        "7_8ft": "7–8 ft",
+        "8_10ft": "8–10 ft",
+        "10_14ft": "10–14 ft",
+        "14ft_plus": "14 ft+",
+        unknown_clearance: "Výška neznámá",
+        under_8ft: "Pod 8 ft šířka",
+        "8_9ft": "8–9 ft šířka",
+        "9_10ft": "9–10 ft šířka",
+        "10_12ft": "10–12 ft šířka",
+        "12ft_plus": "12 ft+ šířka",
+        personnel_door_only: "Jen personální dveře",
+        climate_controlled: "Klimatizováno",
+        heated_only: "Jen topení",
+        cooled_only: "Jen chlazení",
+        ambient_unconditioned: "Okolní / bez klimatu",
+        unknown_climate: "Klima neznámé",
+        "24_7_access": "Přístup 24/7",
+        business_hours: "Pracovní doba",
+        extended_early_late: "Extended brzy/pozdě",
+        by_appointment_only: "Jen po domluvě",
+        host_schedule: "Rozvrh hostitele",
+        household_goods_ok: "Domácí věci OK",
+        vehicle_only: "Jen vozidlo",
+        no_hazmat: "Bez hazmat",
+        no_food_perishables: "Bez potravin / rychle se kazících",
+        host_sets_list: "Seznam určí hostitel",
+        open_lot: "Otevřené parkoviště",
+        covered_carport: "Krytý přístřešek",
+        garage_stall: "Garážové stání",
+        driveway: "Příjezd",
+        street_permit_zone: "Ulice / zóna s povolením",
+        compact_only: "Jen kompakt",
+        sedan_suv: "Sedan / SUV",
+        fullsize_truck: "Plný pickup",
+        van_sprinter: "Dodávka / Sprinter",
+        oversized_ask: "Nadrozměr — zeptejte se",
+        ev_level2_included: "Nabíječka Level 2 v ceně",
+        ev_outlet_shared: "Sdílená zásuvka",
+        no_ev: "Bez EV nabíjení",
+        renter_brings_cord: "Kabel přinese nájemce",
+        "1_desk": "1 stůl",
+        "2_4_desks": "2–4 stoly",
+        "5_10_desks": "5–10 stolů",
+        "11_plus_desks": "11+ stolů",
+        hot_desk_flex: "Hot-desk / flex",
+        meeting_included: "Meeting v ceně",
+        bookable_extra: "Rezervovatelné (příplatek)",
+        none_on_site: "Žádné na místě",
+        open_collaboration_only: "Jen open collaboration",
+        monitor_dock_included: "Monitor + dock v ceně",
+        monitor_only: "Jen monitor",
+        renter_brings_gear: "Gear přinese nájemce",
+        none: "Nic",
+        power_and_water: "Proud i voda",
+        power_only: "Jen proud",
+        water_only: "Jen voda",
+        neither: "Nic z toho",
+        ask_host: "Zeptejte se hostitele",
+        music_ok_to_curfew: "Hudba OK do zákazu",
+        amplified_banned: "Bez zesíleného zvuku",
+        quiet_gathering_only: "Jen tiché setkání",
+        building_hoa_rules: "Pravidla budovy / HOA",
+        host_sets_curfew: "Zákaz nastaví hostitel",
+        rain_or_shine: "Za každého počasí",
+        covered_area_backup: "Krytý backup",
+        cancel_reschedule_weather: "Zrušit / přeplánovat kvůli počasí",
+        host_decision_day_of: "Rozhodnutí hostitele v den",
+        room_like: "Jako pokoj",
+        parking_or_storage: "Parkování / sklad",
+        office_like: "Jako kancelář",
+        outdoor_yard: "Outdoor / dvůr",
+        venue_or_studio: "Venue / studio",
+        warehouse_retail: "Sklad / retail",
+        mixed_other: "Mix / jiné",
+        office_admin: "Kancelář / admin",
+        light_production: "Lehká produkce",
+        client_meetings: "Schůzky s klienty",
+        pop_up_soft: "Soft pop-up",
+        host_listed_uses: "Jen užití dle hostitele",
+        ground_floor_easy: "Přízemí / snadné",
+        freight_elevator: "Nákladní výtah",
+        stairs_only: "Jen schody",
+        loading_dock: "Nakládací dock",
+        curbside_carry: "Curbside / nošení",
+        meetings_only: "Jen meetingy",
+        social_parties: "Sociální / party",
+        weddings_formal: "Svatby / formální",
+        film_photo: "Film / foto",
+        mixed_host_rules: "Mix — pravidla hostitele",
+        alcohol_ok_byob: "Alkohol OK (BYOB)",
+        alcohol_ok_licensed_caterer: "Jen licencovaný caterer",
+        no_alcohol: "Bez alkoholu",
+        av_and_kitchen: "AV i kuchyň",
+        av_only: "Jen AV",
+        kitchen_only: "Jen kuchyň",
+        neither_empty_room: "Nic — prázdný sál",
+        partial_ask: "Částečně — zeptejte se",
+        photo_studio: "Foto studio",
+        video_cinema: "Video / kino",
+        podcast_audio: "Podcast / audio",
+        rehearsal_dance: "Zkouška / tanec",
+        mixed_content: "Mix obsahu",
+        household_circuits: "Domácí okruhy",
+        "20a_plus_dedicated": "20A+ dedicated",
+        three_phase_available: "Třífáz k dispozici",
+        battery_or_generator_only: "Jen baterie / generátor",
+        ask_host_load: "Zeptejte se na zátěž",
+        treated_quiet: "Upraveno / tiché",
+        partial_treatment: "Částečná úprava",
+        live_room_echo: "Live / echo místnost",
+        not_soundproof: "Ne zvukotěsné",
+        cyc_and_grid: "Cyc i grid",
+        cyc_only: "Jen cyc",
+        grid_pipe_only: "Jen grid / trubky",
+        empty_room: "Prázdná místnost",
+        partial_backdrop: "Částečné pozadí",
+        dock_high: "Vysoký dock",
+        dock_low: "Nízký dock",
+        drive_in_bay: "Drive-in bay",
+        no_dock_ground: "Bez docku — zem",
+        shared_dock_schedule: "Sdílený dock rozvrh",
+        forklift_included_op: "VZV + operátor",
+        forklift_renter_certified: "VZV jen s certifikací nájemce",
+        no_forklift: "Bez VZV",
+        pallet_jack_only: "Jen paletový vozík",
+        street_storefront: "Ulice / výloha",
+        mall_inline: "Mall inline",
+        kiosk_popup: "Kiosk / pop-up",
+        interior_suite: "Interiérová suite",
+        shared_market_stall: "Sdílený trh",
+        fixtures_included: "Fixtures v ceně",
+        shelving_only: "Jen regály",
+        empty_vanilla: "Prázdný vanilla",
         event_prop: "Rekvizita na akci",
         photo_set: "Foto / scéna",
         collectible_display: "Sbírka / vystavení",
@@ -5256,6 +5441,334 @@ export const cs: AppMessages = {
     },
 
     bySubcategory: {
+      "Real Estate": {
+        "Rooms & Spaces": {
+          title: "Pokoje a prostory — check-in, nocleh, koupelna, noční klid",
+          summary: "Krátkodobé pokoje fungují, když jsou zmrazené check-in okno, nocleh, koupelna, noční klid, velikost, kapacita, přístup a domácí pravidla.",
+          qa: [
+            {
+              q: "Jaké brány platí před pronájmem?",
+              a: "Inzerát zmrazí velikost, max. kapacitu, parkování, Wi‑Fi, typ přístupu, check-in okno, nocleh, koupelnu, noční klid, domácí pravidla a volitelný úklid. Při check-inu je povinné selfie/OP.",
+            },
+            {
+              q: "Mohou hosté zůstat přes noc?",
+              a: "Hostitel označí nocleh OK, jen denní použití, nebo schválení hostitelem. Denní použití = bez spánku přes noc bez písemného souhlasu.",
+            },
+            {
+              q: "Je koupelna součástí?",
+              a: "Soukromá, sdílená, jen WC, žádná na místě, nebo mobilní blízko — nastavte očekávání před rezervací.",
+            },
+            {
+              q: "Jaký je noční klid?",
+              a: "Publikované pásmo (např. 22:00 / 23:00 / půlnoc) nebo pravidla budovy. Domácí pravidla doplní hosty, kouření, mazlíčky a checkout.",
+            },
+            {
+              q: "Jaká je výše kauce?",
+              a: "Obvykle kolem jednoho měsíčního nájmu, pokud hostitel nenastaví jinak. Úklidový poplatek se při nastavení zmrazí ve smlouvě.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádná Airbnb Instant Book franšíza, žádný hotelový housekeeping produkt a žádné pojištění ubytování od Evorios.",
+            },
+          ],
+        },
+        "Garages & Storage": {
+          title: "Garáže a sklady — světlá výška, vrata, klima, pravidla použití",
+          summary: "Skladovací boxy potřebují světlou výšku, šířku vrat, klima, hodiny přístupu a pravidla povoleného použití plus velikost a domácí pravidla.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Pronájem zmrazí světlou výšku, šířku vrat, klima, hodiny přístupu, politiku skladování, velikost, kapacitu, přístup a domácí pravidla.",
+            },
+            {
+              q: "Vejde se auto nebo regály?",
+              a: "Použijte publikovanou světlou výšku a šířku vrat. Větší dodávky potřebují vyšší box — při neznámé výšce se zeptejte před rezervací.",
+            },
+            {
+              q: "Je prostor klimatizovaný?",
+              a: "Hostitel označí klimatizaci, jen topení, jen chlazení, okolní teplotu, nebo neznámé. Citlivé zboží v okolním boxu je riziko nájemce.",
+            },
+            {
+              q: "Co smím skladovat?",
+              a: "Politika může povolit domácí věci, jen vozidlo, bez nebezpečných látek, bez potravin, nebo hostitelův seznam. Zakázané zboží ruší nároky.",
+            },
+            {
+              q: "Kauce a přístup?",
+              a: "Kauce ≈ jeden měsíc, pokud není jinak. Přístup se odemkne po startovním ID hosta — ne jen z přeposlaného potvrzení.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádné promo Neighbor/StorageMart, žádné pojištění inventáře od Evorios a žádná 24/7 ostraha, pokud to hostitel neuvede.",
+            },
+          ],
+        },
+        "Parking Spots": {
+          title: "Parkovací místa — typ, velikost vozu, EV, nocleh",
+          summary: "Místa fungují, když jsou zveřejněny typ, velikost vozu, EV nabíjení, noční stání a hodiny přístupu s domácími pravidly.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Pronájem zmrazí typ místa, velikost vozu, EV, noční stání, hodiny přístupu, velikost, typ přístupu a domácí pravidla.",
+            },
+            {
+              q: "Vejde se pickup nebo dodávka?",
+              a: "Pásma: kompakt → sedan/SUV → plný pickup → Sprinter → nadrozměr (zeptejte se). Nadrozměr potřebuje potvrzení hostitele.",
+            },
+            {
+              q: "Je EV nabíjení součástí?",
+              a: "Level 2 v ceně, sdílená zásuvka, žádné, nebo kabel nájemce. Sdílené zásuvky mohou mít pravidla budovy.",
+            },
+            {
+              q: "Noční stání?",
+              a: "Noc OK, jen den, nebo schválení hostitele. Denní místa musí být uvolněna podle pravidel.",
+            },
+            {
+              q: "Kauce a ID?",
+              a: "Kauce směřuje k ~jednomu měsíci nájmu. Selfie/OP při startu odemkne přístup.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádné affiliate SpotHero/ParkWhiz, žádná obrana parkovacích pokut a žádný EV billing produkt od Evorios.",
+            },
+          ],
+        },
+        "Shared Offices": {
+          title: "Sdílené kanceláře — stoly, meetingy, hodiny, koupelna",
+          summary: "Pronájem stolů potřebuje počet míst, meeting místnost, pracovní hodiny, koupelnu a volitelný monitor/dock kit s domácími pravidly.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Pronájem zmrazí počet stolů, meeting přístup, hodiny, koupelnu, Wi‑Fi, velikost, kapacitu, přístup, domácí pravidla a doporučený monitor/dock.",
+            },
+            {
+              q: "Kolik stolů?",
+              a: "1 stůl, 2–4, 5–10, 11+, nebo hot-desk. Kapacita musí zůstat v publikovaném maximu.",
+            },
+            {
+              q: "Jsou meeting místnosti v ceně?",
+              a: "V ceně, za příplatek, žádné na místě, nebo jen open space — nepočítejte se soukromou místností.",
+            },
+            {
+              q: "Pracovní doba vs 24/7?",
+              a: "Pásmo hodin: 24/7, pracovní doba, extended, jen po domluvě, nebo rozvrh hostitele.",
+            },
+            {
+              q: "Kauce?",
+              a: "Typicky kolem jednoho měsíce nájmu. Úklid může platit u privátních suites.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádné WeWork členství, žádné IT helpdesk SLA a žádné právní poradenství ke komerčnímu nájmu od Evorios.",
+            },
+          ],
+        },
+        "Backyard & Outdoor": {
+          title: "Zahrada a outdoor — proud/voda, hluk, počasí, koupelna",
+          summary: "Dvorky potřebují proud/vodu, hlukový zákaz, politiku počasí, koupelnu, kapacitu a noční klid s domácími pravidly.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Pronájem zmrazí outdoor proud/vodu, hlukový zákaz, počasí, koupelnu, noční klid, velikost, kapacitu, parkování, přístup a domácí pravidla.",
+            },
+            {
+              q: "Je na místě proud nebo voda?",
+              a: "Hostitel označí obojí, jen proud, jen vodu, nic, nebo se zeptejte. Vlastní generátor jen pokud pravidla dovolí.",
+            },
+            {
+              q: "Můžeme pouštět hudbu?",
+              a: "Hluková politika může dovolit hudbu do zákazu, zakázat zesílení, jen tiché setkání, HOA pravidla, nebo zákaz hostitele. Porušení může jít z kauce.",
+            },
+            {
+              q: "Co když prší?",
+              a: "Za každého počasí, krytý backup, zrušení/přeplanování, nebo rozhodnutí hostitele v den akce.",
+            },
+            {
+              q: "Kauce a ID?",
+              a: "Kauce ≈ jeden měsíc. Startovní ID hosta před odemčením.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádný Peerspace insurance upsell, žádné catering promo a žádné vyřizování hlukových povolení od Evorios.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Nemovitosti jiné — uveďte typ prostoru",
+          summary: "Catch-all musí deklarovat typ, velikost, kapacitu, přístup a domácí pravidla — přesuňte na pojmenovanou polici, když sedí.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Pronájem zmrazí typ prostoru, velikost, max. kapacitu, parkování, Wi‑Fi, přístup a domácí pravidla. Preferujte pojmenovanou polici.",
+            },
+            {
+              q: "Proč typ prostoru?",
+              a: "Říká, zda jde o pokoj, parkování/sklad, kancelář, outdoor, venue/studio, sklad/retail, nebo mix — ať si nájemce neplete produkt.",
+            },
+            {
+              q: "Kauce a check-in?",
+              a: "Kauce směřuje k jednomu měsíci. Selfie/OP při startu před odemčením.",
+            },
+            {
+              q: "Úklidový poplatek?",
+              a: "Volitelný; když je nastaven, ukáže se při rezervaci a zmrazí se ve smlouvě.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádné generické Airbnb promo a žádné platformové pojištění ubytování.",
+            },
+          ],
+        },
+        "Commercial Space": {
+          title: "Komerční prostor — povolené užití, load-in, hodiny",
+          summary: "Pro suites zmrazí povolené užití, load-in, hodiny přístupu, meeting přístup a domácí pravidla s velikostí a kapacitou.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Pronájem zmrazí povolené užití, load-in, hodiny, meeting přístup, velikost, kapacitu, parkování, Wi‑Fi, přístup a domácí pravidla.",
+            },
+            {
+              q: "Jaké užití je povoleno?",
+              a: "Kancelář/admin, lehká produkce, schůzky s klienty, soft pop-up, nebo jen hostitelův seznam. Zoning zůstává na hostiteli a nájemci.",
+            },
+            {
+              q: "Jak naložíme techniku?",
+              a: "Přízemí snadno, nákladní výtah, jen schody, rampa/dock, nebo curbside — naplánujte posádku předem.",
+            },
+            {
+              q: "Kauce?",
+              a: "Obvykle jeden měsíc nájmu, pokud hostitel nenastaví jinak.",
+            },
+            {
+              q: "ID hosta?",
+              a: "Ano — startovní ID/selfie před odemčením, stejně jako u ostatních Real Estate.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádné zprostředkování komerčního nájmu, žádný COI marketplace partner a žádná Instant Book office franšíza.",
+            },
+          ],
+        },
+        "Event Venues": {
+          title: "Event venues — typ akce, alkohol, AV/kuchyň, hluk",
+          summary: "Venues potřebují povolený typ akce, alkohol, AV/kuchyň, hlukový zákaz, noční klid, load-in a kapacitu s domácími pravidly.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Pronájem zmrazí typ akce, alkohol, AV/kuchyň, hlukový zákaz, noční klid, load-in, velikost, kapacitu, parkování, přístup a domácí pravidla.",
+            },
+            {
+              q: "Jaké akce jsou povoleny?",
+              a: "Jen meetingy, sociální party, svatby/formální, film/foto, nebo mix dle pravidel hostitele.",
+            },
+            {
+              q: "Je alkohol povolen?",
+              a: "BYOB OK, jen licencovaný caterer, bez alkoholu, nebo schválení hostitele. Místní zákon stále platí.",
+            },
+            {
+              q: "AV a kuchyň?",
+              a: "Obojí, jen AV, jen kuchyň, prázdný sál, nebo částečně — chybějící techniku si přivezte.",
+            },
+            {
+              q: "Kauce a úklid?",
+              a: "Kauce ≈ jeden měsíc. Úklidový poplatek často po eventech.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádné Peerspace/The Knot affiliate, žádné pojištění akce od Evorios a žádná ostraha, pokud není uvedena.",
+            },
+          ],
+        },
+        "Studio Space": {
+          title: "Studio — typ, proud, zvuk, cyc/grid",
+          summary: "Content studia zmrazí typ studia, pásmo proudu, úpravu zvuku a cyc/grid s přístupem a domácími pravidly.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Pronájem zmrazí typ studia, pásmo proudu, úpravu zvuku, cyc/grid, velikost, kapacitu, Wi‑Fi, parkování, přístup a domácí pravidla.",
+            },
+            {
+              q: "Foto, video, podcast, nebo zkouška?",
+              a: "Typ studia nastaví očekávání. Mix místnosti nemusí být šeptavě tiché — zkontrolujte úpravu zvuku.",
+            },
+            {
+              q: "Jaký proud je k dispozici?",
+              a: "Domácí okruhy, 20A+ dedicated, třífáz, jen baterie/generátor, nebo se zeptejte na zátěž. Přetížení jističů je riziko nájemce.",
+            },
+            {
+              q: "Je cyc nebo grid?",
+              a: "Cyc i grid, jen cyc, jen trubky/grid, prázdná místnost, nebo částečné pozadí.",
+            },
+            {
+              q: "Kauce?",
+              a: "Směřuje k jednomu měsíci nájmu. Startovní ID před odemčením.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádné Giggster/Peerspace promo, žádný gear kit pokud není uveden, a žádné produkční pojištění od Evorios.",
+            },
+          ],
+        },
+        "Warehouse & Storage": {
+          title: "Sklad — světlá výška, dock, VZV, klima",
+          summary: "Sklady přidávají dock a politiku VZV navíc ke světlé výšce, vratům, klimatu, hodinám a load-in.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Pronájem zmrazí světlou výšku, šířku vrat, klima, dock, VZV politiku, load-in, hodiny, velikost, kapacitu, přístup a domácí pravidla.",
+            },
+            {
+              q: "Dock a VZV?",
+              a: "Dock high/low, drive-in, jen zem, nebo sdílený dock. VZV může být s operátorem, jen s certifikací nájemce, žádný, nebo jen paletový vozík.",
+            },
+            {
+              q: "Světlá výška a vrata?",
+              a: "Použijte publikovaná pásma před příjezdem box trucků nebo regálů.",
+            },
+            {
+              q: "Klima?",
+              a: "Klimatizováno vs okolní — chraňte citlivý inventář.",
+            },
+            {
+              q: "Kauce a ID?",
+              a: "Kauce ≈ jeden měsíc. Startovní ID před přístupem.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádné Flexe affiliate, žádné cargo pojištění od Evorios a žádný staffovaný VZV, pokud není uveden.",
+            },
+          ],
+        },
+        "Retail Space": {
+          title: "Retail — výloha, vybavení, load-in, hodiny",
+          summary: "Retail suites zmrazí typ výlohy, fixtures, load-in, hodiny přístupu a domácí pravidla s velikostí a kapacitou.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Pronájem zmrazí typ výlohy, fixtures, load-in, hodiny, velikost, kapacitu, parkování, Wi‑Fi, přístup a domácí pravidla.",
+            },
+            {
+              q: "Jaký typ výlohy?",
+              a: "Ulice, mall inline, kiosk/pop-up, interiérová suite, nebo sdílený trh — návštěvnost není zaručena.",
+            },
+            {
+              q: "Jsou fixtures v ceně?",
+              a: "Fixtures v ceně, jen regály, prázdný vanilla, nebo částečně. Spočítejte, co potřebujete před nastěhováním.",
+            },
+            {
+              q: "Hodiny?",
+              a: "Pásmo hodin určuje, kdy smíte prostor užívat. Pravidla mallu/budovy mohou mít přednost.",
+            },
+            {
+              q: "Kauce?",
+              a: "Obvykle jeden měsíc nájmu, pokud hostitel nenastaví jinak.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádné Storefront.com/Appear Here affiliate, žádné POS promo a žádná registrace DPH od Evorios.",
+            },
+          ],
+        },
+      },
       Vehicles: {
         "Cars & Trucks": {
           title: "FAQ půjčení osobního / lehkého auta",
@@ -8007,6 +8520,350 @@ export const cs: AppMessages = {
           ],
         },
       },
+      "Outdoor & Camping": {
+          Tents: {
+            title: "Stany — kapacita, sezóna, hygiena",
+            summary: "Peer půjčky stanů fungují, když jsou zmrazené pásmo spánku, sezóna, balená hmotnost a potvrzení o vyčištění/vyvětrání.",
+            qa: [
+              {
+                q: "Jaké brány platí před půjčkou stanu?",
+                a: "Nájem zmrazí kapacitu osob, sezónní rating a hygienický checklist. Hostitel musí potvrdit sanitizaci/vyvětrání; při rezervaci potvrdíte vrácení čisté a suché.",
+              },
+              {
+                q: "Co znamená kapacita a sezóna?",
+                a: "Kapacita je počet osob. Sezóna (1–4) nastavuje očekávané počasí — není zárukou proti bouři.",
+              },
+              {
+                q: "Proč balená hmotnost?",
+                a: "Pomáhá rozhodnout batoh vs auto-camping. Soft doporučení — ověřte před nošením.",
+              },
+              {
+                q: "Jaká je hygienická pravidla?",
+                a: "Sdílené spací přístřešky potřebují potvrzení hostitele. Rezervace je blokovaná, dokud není attested; vy potvrdíte čisté a suché vrácení.",
+              },
+              {
+                q: "Co fotit?",
+                a: "Tyče, fly, kolíky a stav látky při předání a vrácení — chybějící tyče a protržený fly často spouští kauci.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící tyče, kolíky, šňůry a škody nad běžné opotřebení — ne pojištění počasí nebo storna výletu.",
+              },
+              {
+                q: "Co není v ceně?",
+                a: "Žádné členství REI, žádná montáž stanu ani outdoor pojištění od Evorios.",
+              },
+            ],
+          },
+          "Sleeping Bags": {
+            title: "Spací pytle — teplota, hygiena",
+            summary: "Pytle se půjčují čistě, když je na smlouvě teplotní pásmo a potvrzení sanitizace.",
+            qa: [
+              {
+                q: "Jaké brány platí?",
+                a: "Spací pytle vyžadují teplotní pásmo a Outdoor hygienický checklist. Hostitel potvrdí vyčištění; rezervace je blokovaná do attestation.",
+              },
+              {
+                q: "Jak číst teplotní pásmo?",
+                a: "Je to zveřejněná comfort třída (nad 50 °F až pod 0 °F). Zůstaňte v ní — riziko chladu nese nájemce, ne kauce.",
+              },
+              {
+                q: "Platí stále kapacita?",
+                a: "Ano — Outdoor kapacita a sezóna dávají kontext velikosti/sezóny pytle.",
+              },
+              {
+                q: "Hygienické pravidlo?",
+                a: "Sdílený spací gear: attestation hostitele a váš ack při rezervaci vrátit pytel čistý a suchý.",
+              },
+              {
+                q: "Co fotit?",
+                a: "Zipy, baffly a skvrny při vyzvednutí a vrácení. Chybějící vak nebo poškození vložky může jít z kauce.",
+              },
+              {
+                q: "Waiver vs kauce?",
+                a: "Hygiena je vrstva důvěry. Kauce kryje chybějící kusy a znečištění nad politikou — ne hypotermii ani pojištění výletu.",
+              },
+              {
+                q: "Co není v ceně?",
+                a: "Žádné promo prádelny spacáků ani outdoor zdravotní pojištění od Evorios.",
+              },
+            ],
+          },
+          Backpacks: {
+            title: "Batohy — kapacita, hmotnost, fit",
+            summary: "Batohy se půjčují, když jsou kapacita, sezóna a balená hmotnost upřímné pro fit a nošení.",
+            qa: [
+              {
+                q: "Jaké brány platí?",
+                a: "Outdoor nájem stále vyžaduje kapacitu a sezónu. Balená hmotnost je doporučená u overnight batohů.",
+              },
+              {
+                q: "Jak číst kapacitu u batohu?",
+                a: "Pásmo jako třída zátěže (den vs více dní). Fit/torso ověřte v popisu před rezervací.",
+              },
+              {
+                q: "Je hygienický checklist?",
+                a: "U Batohů ne ve výchozím stavu. Soft poznámky k čistému vrácení stejně pomáhají.",
+              },
+              {
+                q: "Co fotit?",
+                a: "Bederní pás, popruhy, zipy a pláštěnku. Chybějící pláštěnky a protržené pásy jsou časté reklamace.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící víka, pláštěnky a poškození rámu nad běžné opotřebení — ne ztracené osobní věci uvnitř.",
+              },
+              {
+                q: "Co není v ceně?",
+                a: "Žádný průvodce, žádné REI členství ani outdoor pojištění od Evorios.",
+              },
+            ],
+          },
+          "Camp Cooking": {
+            title: "Camp cooking — palivo, díly, oheň",
+            summary: "Vařiče potřebují zmrazený typ paliva s kontextem kapacity/sezóny, aby nájemce vezl správné kartuše a vrátil všechny díly.",
+            qa: [
+              {
+                q: "Jaké brány platí?",
+                a: "Camp Cooking vyžaduje typ paliva (isobutan, white gas, propan, alkohol, dřevo, elektřina nebo multi-fuel) plus Outdoor kapacitu/sezónu.",
+              },
+              {
+                q: "Proč typ paliva?",
+                a: "Špatné palivo může zničit vařič a jde z kauce. Před odjezdem sladťe kartuše/lahve se zveřejněným typem.",
+              },
+              {
+                q: "Jsou hrnce a palivo v ceně?",
+                a: "Jen co uvádí inventář. Při předání spočítejte hořáky, zástěny, pumpy a hrnce.",
+              },
+              {
+                q: "Oheň a leave-no-trace?",
+                a: "Dodržujte místní zákazy ohňů a soft poznámky hostitele. Zákazy a požární riziko jsou mimo kauci.",
+              },
+              {
+                q: "Co fotit?",
+                a: "Nohy vařiče, adaptér, pumpu a nádobí. Chybějící pumpy a prasklé zástěny spouští reklamace.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící díly vařiče a poškození nádobí — ne spotřebované palivo ani spálené jídlo.",
+              },
+              {
+                q: "Co není v ceně?",
+                a: "Žádné předplatné kartuší ani pojištění camp cooking od Evorios.",
+              },
+            ],
+          },
+          "Navigation & GPS": {
+            title: "Navigace a GPS — napájení, mapy, vrácení",
+            summary: "Ruční GPS se půjčí, když je kontext kapacity/sezóny a jasné očekávání napájení a map před vzdálenými výlety.",
+            qa: [
+              {
+                q: "Jaké brány platí?",
+                a: "Stále se zveřejňuje Outdoor kapacita a sezóna. Před off-grid použitím ověřte baterii a mapové poznámky.",
+              },
+              {
+                q: "Jsou mapy a předplatné v ceně?",
+                a: "Jen pokud je uvedeno. Offline mapy a satelitní předplatné deklaruje hostitel — není to affiliate Garmin/onX.",
+              },
+              {
+                q: "Napájení a nabití při vrácení?",
+                a: "Vraťte dle poznámek (obvykle podobné nabití). Chybějící nabíječky jdou z kauce.",
+              },
+              {
+                q: "Je povinný waiver?",
+                a: "U osobní Navigace & GPS ne ve výchozím stavu. Survival / expedition mají samostatné waiver brány.",
+              },
+              {
+                q: "Co fotit?",
+                a: "Jednotku, anténu/držák a nabíječku. Prasklé displeje a chybějící kolébky jsou časté reklamace.",
+              },
+              {
+                q: "Co není v ceně?",
+                a: "Žádné rescue předplatné, žádné promo map a žádné navigační pojištění od Evorios.",
+              },
+            ],
+          },
+          Other: {
+            title: "Outdoor ostatní — raději přeraďte",
+            summary: "Preferujte pojmenovanou Outdoor polici kvůli hygieně, palivu nebo waiveru. Other stále zmrazí kapacitu a sezónu.",
+            qa: [
+              {
+                q: "Mám zůstat na Other?",
+                a: "Přeraďte na Stany, Spací pytle, Batohy, Camp Cooking, Navigaci, Expediční stany, Survival, Group Shelters, Pro navigaci nebo Base Camp, když to sedí.",
+              },
+              {
+                q: "Co platí i na Other?",
+                a: "Kapacita osob a sezóna zůstávají povinné. Balená hmotnost je doporučená při nošení.",
+              },
+              {
+                q: "Platí hygiena nebo waiver?",
+                a: "Jen když hostitel označí required, nebo jde jasně o stan/spánek či survival/expedition. Pojmenované police to vymáhají automaticky.",
+              },
+              {
+                q: "Co fotit?",
+                a: "Celkový stav a každý doplněk. Vague sady bez fotek kusů vedou ke sporům o kauci.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící doplňky a škody nad běžné outdoor opotřebení dle inzerátu.",
+              },
+              {
+                q: "Co není v ceně?",
+                a: "Žádné catch-all outdoor pojištění ani promo big-box půjčoven od Evorios.",
+              },
+            ],
+          },
+          "Expedition Tents": {
+            title: "Expediční stany — sezóna, hygiena, waiver",
+            summary: "Alpské/expediční přístřešky zmrazí kapacitu, sezónu, hygienickou attestation a liability waiver před rezervací.",
+            qa: [
+              {
+                q: "Jaké brány platí?",
+                a: "Expediční stany vyžadují kapacitu, sezónu, hygienický checklist se sanitizací a stav liability waiveru.",
+              },
+              {
+                q: "Proč waiver?",
+                a: "Vysoké riziko horského přístřešku. Při rezervaci potvrdíte riziko běžného použití, pokud hostitel neoznačí not required — půjčujete od souseda, ne od guide služby.",
+              },
+              {
+                q: "Hygiena vs běžné stany?",
+                a: "Stejné pravidlo spacího přístřešku: hostitel potvrdí vyčištění; vy vrátíte přiměřeně čisté a suché.",
+              },
+              {
+                q: "Co fotit?",
+                a: "Tyče, fly, sněhové kolíky a guyline sady. Expediční hardware mizí po víkendech.",
+              },
+              {
+                q: "Kauce vs waiver?",
+                a: "Waiver kryje běžné riziko zranění mezi peer; kauce kryje chybějící tyče/kolíky a poškození látky.",
+              },
+              {
+                q: "Co není v ceně?",
+                a: "Žádná guided expedice, žádné alpine rescue cover ani outdoor pojištění od Evorios.",
+              },
+            ],
+          },
+          "Survival Gear": {
+            title: "Survival gear — waiver, kapacita, reklamace",
+            summary: "Survival sady zmrazí kapacitu/sezónu a liability waiver, aby riziko zůstalo u běžného použití mezi peer.",
+            qa: [
+              {
+                q: "Jaké brány platí?",
+                a: "Survival Gear vyžaduje stav liability waiveru plus Outdoor kapacitu a sezónu.",
+              },
+              {
+                q: "Proč waiver?",
+                a: "Survival trénink a vzdálené použití nesou riziko zranění. Potvrďte assumption of risk při rezervaci, pokud hostitel neoznačí not required.",
+              },
+              {
+                q: "Je povinná hygiena?",
+                a: "Ne ve výchozím stavu, pokud sada nemá sdílený spací gear — pak může hostitel označit hygienu. Spací věci raději na Spací pytle / Stany.",
+              },
+              {
+                q: "Co inventarizovat?",
+                a: "Nože, křesadla, signalizaci a lékárničku. Spočítejte každý kus při předání.",
+              },
+              {
+                q: "Kauce vs waiver?",
+                a: "Waiver řeší běžné riziko zranění; kauce kryje chybějící nebo poškozené kusy — ne zdravotní ani záchranné náklady.",
+              },
+              {
+                q: "Co není v ceně?",
+                a: "Žádný certifikát kurzu, žádné SAR předplatné ani outdoor zdravotní pojištění od Evorios.",
+              },
+            ],
+          },
+          "Group Shelters": {
+            title: "Skupinové přístřešky — kapacita, sezóna, díly",
+            summary: "Skupinové přístřešky se půjčují, když kapacita (často group_shelter) a sezóna sedí na stopu akce.",
+            qa: [
+              {
+                q: "Jaké brány platí?",
+                a: "Kapacita a sezóna jsou povinné. Použijte group_shelter, když jde o eventovou velikost, ne batohový stan.",
+              },
+              {
+                q: "Je povinná hygiena?",
+                a: "Ne ve výchozím stavu, pokud hostitel neoznačí. Soft čisté/suché vrácení stejně snižuje spory o plíseň.",
+              },
+              {
+                q: "Počasí a kolíky?",
+                a: "Sezóna není záruka větru. Ověřte sadu kolíků/zátěží a místní počasí před stavbou.",
+              },
+              {
+                q: "Co fotit?",
+                a: "Rám, látku, kolíky a zátěže. Chybějící zátěže po větru jsou časté reklamace.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící tyče, kolíky, zátěže a trhliny nad běžné opotřebení — ne pojištění storna kvůli počasí.",
+              },
+              {
+                q: "Co není v ceně?",
+                a: "Žádný personál akce, žádné weather-cancel pojištění ani promo party půjčoven od Evorios.",
+              },
+            ],
+          },
+          "Professional Navigation": {
+            title: "Pro navigace — inventář, napájení, mapy",
+            summary: "Pro GPS / survey navigace potřebují kontext kapacity/sezóny a jasné napájení, držáky a mapy před terénem.",
+            qa: [
+              {
+                q: "Jaké brány platí?",
+                a: "Stále se zveřejňuje Outdoor kapacita a sezóna. Před vzdálenou prací ověřte baterii, držák a anténu v inzerátu.",
+              },
+              {
+                q: "Mapy a software?",
+                a: "Jen hostitelem deklarované balíčky nebo licence. Evorios neprodává Garmin, Trimble ani onX.",
+              },
+              {
+                q: "Je povinný waiver?",
+                a: "Na této polici ne ve výchozím stavu. Survival a Expediční stany mají tvrdé waiver brány.",
+              },
+              {
+                q: "Co fotit?",
+                a: "Přijímač, anténu, tyče/držáky a nabíječky. Chybějící tyče a kolébky jdou z kauce.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící doplňky a poškození hardware — ne ztracená data ani obnovu předplatného.",
+              },
+              {
+                q: "Co není v ceně?",
+                a: "Žádná survey posádka, žádné promo softwarových seatů ani navigační pojištění od Evorios.",
+              },
+            ],
+          },
+          "Base Camp Equipment": {
+            title: "Base camp — kapacita, sezóna, inventář",
+            summary: "Stoly, kuchyně a basecamp sady se půjčí, když kapacita/sezóna sedí a každý kus je v inventáři.",
+            qa: [
+              {
+                q: "Jaké brány platí?",
+                a: "Kapacita a sezóna jsou povinné. Balená hmotnost pomáhá, když se gear nosí do tábora.",
+              },
+              {
+                q: "Hygiena nebo waiver?",
+                a: "Ne ve výchozím stavu. Pokud sada obsahuje stany nebo spací gear, přeraďte tyto kusy, aby platily hygiena/waiver.",
+              },
+              {
+                q: "Proč inventář?",
+                a: "Basecamp sady ztrácejí židle, lucerny a stoly. Zveřejněte seznam a spočítejte při předání/vrácení.",
+              },
+              {
+                q: "Co fotit?",
+                a: "Celou sadu při vyzvednutí a vrácení. Chybějící stoličky a lucerny jsou typické reklamace.",
+              },
+              {
+                q: "Co kryje kauce?",
+                a: "Chybějící kusy a škody nad běžné opotřebení — ne jídlo, palivo ani pojištění výletu.",
+              },
+              {
+                q: "Co není v ceně?",
+                a: "Žádný táborový personál, žádné outfitter pojištění ani REI / fleet promo od Evorios.",
+              },
+            ],
+          },
+        },
 },
 
   },
