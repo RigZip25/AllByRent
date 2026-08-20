@@ -244,6 +244,56 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         options: VOLTAGE_OPTS,
       },
       {
+        key: "ladderHeightBand",
+        type: "select",
+        required: true,
+        subcategories: ["Ladders"],
+        options: ["under_6ft", "6_8ft", "8_12ft", "12_16ft", "16_24ft", "24_40ft", "over_40ft"],
+      },
+      {
+        key: "ladderDutyRating",
+        type: "select",
+        required: true,
+        subcategories: ["Ladders"],
+        options: ["type_iaa", "type_ia", "type_i", "type_ii", "type_iii"],
+      },
+      {
+        key: "weldProcess",
+        type: "select",
+        required: true,
+        subcategories: ["Welding Equipment"],
+        options: ["mig", "tig", "stick", "flux_core", "multi_process", "other_weld"],
+      },
+      {
+        key: "weldAmpBand",
+        type: "select",
+        required: true,
+        subcategories: ["Welding Equipment"],
+        options: ["under_140a", "140_200a", "200_300a", "300a_plus"],
+      },
+      {
+        key: "ppeIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Welding Equipment"],
+        options: ["helmet_gloves_included", "helmet_only", "renter_provides_ppe", "ppe_not_applicable"],
+      },
+      {
+        key: "scaffoldHeightBand",
+        type: "select",
+        required: true,
+        subcategories: ["Scaffolding Systems"],
+        options: ["under_10ft", "10_20ft", "20_40ft", "40ft_plus"],
+      },
+      {
+        key: "scaffoldLoadBand",
+        type: "select",
+        required: true,
+        subcategories: ["Scaffolding Systems"],
+        options: ["light_duty", "medium_duty", "heavy_duty", "special_duty"],
+      },
+      {
         key: "safetyBriefingRequired",
         type: "select",
         required: true,
@@ -372,6 +422,27 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
           "commercial_batch",
           "not_applicable",
         ],
+      },
+      {
+        key: "voltageBand",
+        type: "select",
+        required: true,
+        subcategories: ["Commercial Coffee"],
+        options: ["120v_corded", "240v", "not_electric"],
+      },
+      {
+        key: "nsfCertified",
+        type: "select",
+        required: true,
+        subcategories: ["Commercial Coffee"],
+        options: ["nsf_listed", "not_nsf", "unknown"],
+      },
+      {
+        key: "installNeeds",
+        type: "select",
+        required: true,
+        subcategories: ["Commercial Coffee"],
+        options: ["countertop_plug", "plumbed_water", "hardwired_240v", "mobile_cart", "other_install"],
       },
     ],
   },
@@ -824,6 +895,45 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         subcategories: ["Lawn Mowers", "Ride-On Mowers", "Trimmers"],
         options: ["under_16in", "16_21in", "21_30in", "30in_plus", "not_applicable"],
       },
+      {
+        key: "stumpCapacityBand",
+        type: "select",
+        required: true,
+        subcategories: ["Stump Grinders"],
+        options: ["under_8in", "8_16in", "16_24in", "24in_plus"],
+      },
+      {
+        key: "ppeIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stump Grinders"],
+        options: ["eye_ear_gloves", "partial_ppe", "renter_provides_ppe"],
+      },
+      {
+        key: "liabilityWaiverRequired",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stump Grinders"],
+        options: ["required", "not_required"],
+      },
+      {
+        key: "insuranceMinLiability",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stump Grinders"],
+        options: ["liability_25_50", "liability_50_100", "liability_100_300", "liability_250_500"],
+      },
+      {
+        key: "insuranceMaxDeductible",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stump Grinders"],
+        options: ["deductible_500", "deductible_1000", "deductible_2500", "full_coverage_required"],
+      },
     ],
   },
   {
@@ -1023,7 +1133,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: CAR_SEAT_SAFETY_SUBS,
+        subcategories: [...CAR_SEAT_SAFETY_SUBS, ...CRIB_SAFETY_SUBS],
         options: ["acknowledged", "not_checked"],
       },
       {
@@ -1031,7 +1141,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: CAR_SEAT_SAFETY_SUBS,
+        subcategories: [...CAR_SEAT_SAFETY_SUBS, ...CRIB_SAFETY_SUBS],
         options: ["attested", "not_yet"],
       },
       {
@@ -1041,6 +1151,53 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         requiredIf: "rent",
         subcategories: CAR_SEAT_SAFETY_SUBS,
         options: ["photo_on_listing", "will_add"],
+      },
+      {
+        key: "dropSideAcknowledged",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: CRIB_SAFETY_SUBS,
+        options: ["no_drop_side", "not_verified"],
+      },
+      {
+        key: "cpscCompliant",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: CRIB_SAFETY_SUBS,
+        options: ["cpsc_compliant", "need_to_verify"],
+      },
+      {
+        key: "mattressIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: CRIB_SAFETY_SUBS,
+        options: ["firm_mattress_included", "pack_n_play_pad", "mattress_not_included"],
+      },
+      {
+        key: "playCertStandard",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Play Equipment"],
+        options: ["astm_f1487", "cpsc_playground", "jpma", "other_cert", "not_certified"],
+      },
+      {
+        key: "playCapacityBand",
+        type: "select",
+        required: true,
+        subcategories: ["Commercial Play Equipment"],
+        options: ["kids_1_4", "kids_5_10", "kids_11_25", "kids_26_plus"],
+      },
+      {
+        key: "liabilityWaiverRequired",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Play Equipment"],
+        options: ["required", "not_required"],
       },
     ],
   },
@@ -1494,6 +1651,26 @@ export function areCategorySpecsValid(
     }
   }
 
+
+  // Cribs & Beds: CPSC / recall / drop-side / mattress / sanitization hard gate.
+  if (
+    category.trim() === "Baby & Kids" &&
+    subcategory.trim() === "Cribs & Beds" &&
+    modes?.rent
+  ) {
+    if ((values.recallAcknowledged ?? "").trim() !== "acknowledged") return false;
+    if ((values.dropSideAcknowledged ?? "").trim() !== "no_drop_side") return false;
+    if ((values.cpscCompliant ?? "").trim() !== "cpsc_compliant") return false;
+    const mattress = (values.mattressIncluded ?? "").trim();
+    if (
+      mattress !== "firm_mattress_included" &&
+      mattress !== "pack_n_play_pad" &&
+      mattress !== "mattress_not_included"
+    ) {
+      return false;
+    }
+    if ((values.sanitizationAttested ?? "").trim() !== "attested") return false;
+  }
 
   return true;
 }
