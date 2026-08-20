@@ -83,8 +83,10 @@ import {
 import { addDaysIso, todayIsoLocal } from "../../lib/availabilityBusy";
 import { getHomeLocation, getPublishedListingById } from "../../lib/listingStorage";
 import {
+  listingRequiresCoiHostConfirm,
   listingRequiresInsuranceProof,
   listingUsesAgentToOwnerInsuranceProof,
+  listingUsesStructuredCoi,
 } from "../../lib/listingInsurance";
 import {
   listingProRentersOnly,
@@ -94,7 +96,13 @@ import {
 import {
   listingRequiresBoaterLicense,
   listingRequiresDroneCert,
+  listingRequiresDriverRecordAttestation,
+  listingRequiresPfdPolicy,
+  listingRequiresCateringSanitize,
   listingRequiresHelmetLockPolicy,
+  listingRequiresOhvTerrainWaiver,
+  listingRequiresMotorcycleEndorsement,
+  listingRequiresPfdAttestation,
   listingRequiresKitInventory,
   listingRequiresLiabilityWaiver,
   listingRequiresOperatorCredential,
@@ -105,6 +113,7 @@ import {
   listingRequiresSafetyBriefing,
   listingRequiresHygieneChecklist,
   listingRequiresCostumeReturnCondition,
+  listingRequiresCostumeHygiene,
 } from "../../lib/categoryTrustRules";
 import {
   isPreTripInspectionReady,
@@ -235,6 +244,12 @@ export function ActiveRental({
   const fuelPolicyLabel = formatFuelPolicySummary(fuelPolicy);
   const usesAgentInsurance =
     publishedListing != null && listingUsesAgentToOwnerInsuranceProof(publishedListing);
+  const usesStructuredCoi =
+    publishedListing != null && listingUsesStructuredCoi(publishedListing);
+  const needsCoiHostConfirm =
+    publishedListing != null && listingRequiresCoiHostConfirm(publishedListing);
+  const needsDriverRecordAttestation =
+    publishedListing != null && listingRequiresDriverRecordAttestation(publishedListing);
   const needsCdl = publishedListing != null && listingRequiresCdl(publishedListing);
   const needsOperatorCert =
     publishedListing != null && listingRequiresOperatorCredential(publishedListing);
@@ -242,6 +257,10 @@ export function ActiveRental({
     publishedListing != null && listingRequiresBoaterLicense(publishedListing);
   const needsDroneCert =
     publishedListing != null && listingRequiresDroneCert(publishedListing);
+  const needsSportsPfd =
+    publishedListing != null && listingRequiresPfdPolicy(publishedListing);
+  const needsCateringSanitize =
+    publishedListing != null && listingRequiresCateringSanitize(publishedListing);
   const needsUscgSafety =
     publishedListing != null && listingRequiresUscgSafetyKit(publishedListing);
   const needsKitInventory =
@@ -250,12 +269,20 @@ export function ActiveRental({
     publishedListing != null && listingRequiresLiabilityWaiver(publishedListing);
   const needsHelmetLock =
     publishedListing != null && listingRequiresHelmetLockPolicy(publishedListing);
+  const needsOhvTerrainWaiver =
+    publishedListing != null && listingRequiresOhvTerrainWaiver(publishedListing);
+  const needsMotorcycleEndorsement =
+    publishedListing != null && listingRequiresMotorcycleEndorsement(publishedListing);
+  const needsPaddlePfd =
+    publishedListing != null && listingRequiresPfdAttestation(publishedListing);
   const needsSafetyBriefing =
     publishedListing != null && listingRequiresSafetyBriefing(publishedListing);
   const needsHygiene =
     publishedListing != null && listingRequiresHygieneChecklist(publishedListing);
   const needsCostumeReturn =
     publishedListing != null && listingRequiresCostumeReturnCondition(publishedListing);
+  const needsCostumeHygiene =
+    publishedListing != null && listingRequiresCostumeHygiene(publishedListing);
   const needsDataWipe =
     publishedListing != null && listingRequiresDataWipe(publishedListing);
   const needsPaCableStand =
@@ -520,6 +547,28 @@ export function ActiveRental({
     }
     if (
       mode === "pickup" &&
+      needsCoiHostConfirm &&
+      !usesAgentInsurance &&
+      !booking?.insuranceProofReceivedByHost
+    ) {
+      setNotice(
+        booking?.role === "host"
+          ? t.rentalDetail.coiProofPendingHost
+          : t.rentalDetail.coiProofPending,
+      );
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsDriverRecordAttestation &&
+      (!booking?.driverLicenseValidAttested || !booking?.driverRecordSoftAttested) &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.driverRecordUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
       publishedListing != null &&
       listingRequiresPhysicalDamage(publishedListing) &&
       !usesAgentInsurance &&
@@ -569,10 +618,32 @@ export function ActiveRental({
     if (
       mode === "pickup" &&
       needsDroneCert &&
-      !booking?.droneCertAttested &&
+      (!booking?.droneCertAttested || !booking?.droneRemoteIdAck) &&
       booking?.role === "renter"
     ) {
-      setNotice(t.rentalDetail.droneCertUnlockBlocked);
+      setNotice(
+        !booking?.droneCertAttested
+          ? t.rentalDetail.droneCertUnlockBlocked
+          : t.rentalDetail.droneRemoteIdUnlockBlocked,
+      );
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsSportsPfd &&
+      !booking?.sportsPfdAck &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.pfdUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsCateringSanitize &&
+      !booking?.cateringSanitizeAck &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.cateringSanitizeUnlockBlocked);
       return;
     }
     if (
@@ -613,6 +684,33 @@ export function ActiveRental({
     }
     if (
       mode === "pickup" &&
+      needsOhvTerrainWaiver &&
+      !booking?.ohvTerrainWaiverAttested &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.ohvTerrainUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsMotorcycleEndorsement &&
+      !booking?.motorcycleEndorsementAttested &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.motorcycleEndorsementUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsPaddlePfd &&
+      !booking?.paddlePfdAck &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.paddlePfdUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
       needsSafetyBriefing &&
       !booking?.safetyBriefingAck &&
       booking?.role === "renter"
@@ -636,6 +734,15 @@ export function ActiveRental({
       booking?.role === "renter"
     ) {
       setNotice(t.rentalDetail.costumeReturnUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsCostumeHygiene &&
+      !booking?.costumeHygieneAttested &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.costumeHygieneUnlockBlocked);
       return;
     }
     if (
@@ -1991,6 +2098,96 @@ export function ActiveRental({
             ) : (
               <p className="text-sm text-violet-900/90">{t.rentalDetail.agentProofPending}</p>
             )}
+          </div>
+        ) : null}
+
+        {usesStructuredCoi && booking ? (
+          <div className="bg-card rounded-xl border border-orange-200 p-4 space-y-2">
+            <h3 className="font-semibold text-orange-950">{t.rentalDetail.coiProofTitle}</h3>
+            <div className="space-y-1 text-sm text-orange-950/90">
+              {booking.coiCarrierName ? (
+                <p>
+                  <span className="font-semibold">{t.booking.coiCarrierName}: </span>
+                  {booking.coiCarrierName}
+                </p>
+              ) : null}
+              {booking.coiPolicyNumber ? (
+                <p>
+                  <span className="font-semibold">{t.booking.coiPolicyNumber}: </span>
+                  {booking.coiPolicyNumber}
+                </p>
+              ) : null}
+              {booking.coiNamedInsured ? (
+                <p>
+                  <span className="font-semibold">{t.booking.coiNamedInsured}: </span>
+                  {booking.coiNamedInsured}
+                </p>
+              ) : null}
+              {booking.coiLiabilityLimitUsd ? (
+                <p>
+                  <span className="font-semibold">{t.booking.coiLiabilityLimitUsd}: </span>
+                  ${booking.coiLiabilityLimitUsd}
+                </p>
+              ) : null}
+              {booking.coiEffectiveDate || booking.coiExpirationDate ? (
+                <p>
+                  <span className="font-semibold">
+                    {t.booking.coiEffectiveDate} → {t.booking.coiExpirationDate}:{" "}
+                  </span>
+                  {booking.coiEffectiveDate || "—"} → {booking.coiExpirationDate || "—"}
+                </p>
+              ) : null}
+              {booking.coiAdditionalInsuredAttested ? (
+                <p className="text-xs text-orange-900/80">{t.booking.coiAdditionalInsuredAttest}</p>
+              ) : null}
+            </div>
+            {booking.insuranceProofReceivedByHost ? (
+              <p className="text-sm font-semibold text-green-800">
+                {t.rentalDetail.coiProofReceivedDone}
+              </p>
+            ) : !usesAgentInsurance && booking.role === "host" ? (
+              <button
+                type="button"
+                className="w-full rounded-xl border border-orange-300 bg-white py-2.5 text-sm font-semibold text-orange-950"
+                onClick={() => {
+                  updateBooking(booking.id, {
+                    insuranceProofReceivedByHost: true,
+                    insuranceProofReceivedAt: new Date().toISOString(),
+                  });
+                  setBookings(loadRentalBookings());
+                }}
+              >
+                {t.rentalDetail.coiProofReceivedMark}
+              </button>
+            ) : !usesAgentInsurance ? (
+              <p className="text-sm text-orange-900/90">{t.rentalDetail.coiProofPending}</p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {needsDriverRecordAttestation &&
+        booking &&
+        booking.driverLicenseValidAttested &&
+        booking.driverRecordSoftAttested ? (
+          <div className="bg-card rounded-xl border border-slate-200 p-4 space-y-1">
+            <h3 className="font-semibold text-slate-950">
+              {t.rentalDetail.driverRecordAttestedTitle}
+            </h3>
+            <p className="text-sm text-slate-800/90">{t.rentalDetail.driverRecordAttestedBody}</p>
+            {booking.driverLicenseState || booking.driverLicenseLast4 ? (
+              <p className="text-xs text-slate-700/80">
+                {[
+                  booking.driverLicenseState
+                    ? `${t.booking.driverLicenseState}: ${booking.driverLicenseState}`
+                    : null,
+                  booking.driverLicenseLast4
+                    ? `${t.booking.driverLicenseLast4}: ••••${booking.driverLicenseLast4}`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            ) : null}
           </div>
         ) : null}
 

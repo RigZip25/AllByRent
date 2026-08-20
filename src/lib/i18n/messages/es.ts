@@ -983,6 +983,25 @@ export const es: AppMessages = {
     costumeHygieneUnlockBlocked:
       "Se requiere el reconocimiento de higiene del disfraz antes de la entrega.",
 
+    ohvTerrainUnlockBlocked:
+      "Completa la exención de terreno ATV/OHV en la reserva antes del desbloqueo.",
+    motorcycleEndorsementUnlockBlocked:
+      "Completa el endoso de motocicleta en la reserva antes del desbloqueo.",
+    paddlePfdUnlockBlocked:
+      "Confirma la política PFD de paddle en la reserva antes del desbloqueo.",
+    driverRecordUnlockBlocked:
+      "Completa la declaración de licencia e historial en la reserva antes del desbloqueo de recogida. (No es un MVR de pago.)",
+    coiProofTitle: "Certificate of Insurance (COI)",
+    coiProofPending:
+      "Esperando que el anfitrión confirme que recibió tu COI / prueba de seguro.",
+    coiProofPendingHost:
+      "Revisa el COI estructurado del arrendatario (y foto) y marca recibido antes del desbloqueo.",
+    coiProofReceivedMark: "Recibí el COI / prueba de seguro del arrendatario",
+    coiProofReceivedDone: "El anfitrión confirmó recepción del COI / seguro",
+    driverRecordAttestedTitle: "Declaración de licencia e historial",
+    driverRecordAttestedBody:
+      "El arrendatario declaró licencia válida e historial suficiente. No es un MVR de pago — verifica la licencia física en la entrega.",
+
     weatherCancelRefundPreview:
       "Cancelación por clima seleccionada — reembolso total del alquiler según la política outdoor del anuncio.",
     weatherCancelToggle: "Cancelar por clima (política de fiesta outdoor)",
@@ -1797,6 +1816,23 @@ export const es: AppMessages = {
           label: "Renuncia en la reserva",
           hint: "Obligatoria por defecto en gym y deporte/outdoor de alto riesgo.",
         },
+        ohvTerrainWaiverRequired: {
+          label: "Exención de terreno OHV / ATV",
+          hint: "Por defecto en ATV — el arrendatario acepta el riesgo en la reserva.",
+        },
+        motorcycleEndorsementRequired: {
+          label: "Endoso de motocicleta",
+          hint: "Por defecto en motos — el arrendatario declara el endoso.",
+        },
+        captainMode: {
+          label: "Modo capitán",
+          hint: "Bareboat vs capitán incluido para lanchas / pontón / charter.",
+        },
+        pfdCount: {
+          label: "Cantidad de PFD",
+          placeholder: "2",
+          hint: "Cuántos chalecos incluyes en kayak / SUP.",
+        },
         helmetPolicy: { label: "Política de casco" },
         lockPolicy: { label: "Política de candado / robo" },
         minRiderAge: {
@@ -2177,6 +2213,8 @@ export const es: AppMessages = {
         shore_power_only: "Solo shore power",
         required: "Obligatorio al reservar",
         not_required: "No obligatorio",
+        bareboat: "Bareboat (sin capitán del anfitrión)",
+        captain_included: "Capitán incluido",
         renter_provides: "Lo aporta el inquilino",
         included: "Incluido en el alquiler",
         deposit_for_lock: "Candado con fianza / dejar cerrado",
@@ -2822,6 +2860,31 @@ export const es: AppMessages = {
       "Acepto la política de casco y candado para este alquiler de bici o patinete.",
     helmetPolicyFallback: "seguir ley local / nota del anfitrión",
     lockPolicyFallback: "asegurar sin vigilancia",
+    ohvTerrainTitle: "Exención de terreno ATV / OHV",
+    ohvTerrainBody:
+      "Los vehículos todoterreno implican riesgo de vuelco. Alquilas a un vecino — acepta la exención antes de reservar.",
+    ohvTerrainAttest:
+      "Entiendo los riesgos OHV/ATV y acepto la exención de terreno del anfitrión.",
+    atvAgeNote: (age) => `Edad mínima del conductor según el anfitrión: ${age}.`,
+    motorcycleEndorsementTitle: "Endoso de motocicleta",
+    motorcycleEndorsementBody:
+      "Este alquiler de moto requiere un endoso de motocicleta válido (o equivalente) para el conductor nombrado.",
+    motorcycleEndorsementAttest:
+      "Tengo un endoso de motocicleta válido (o equivalente legal) para esta clase y seré el conductor nombrado.",
+    captainModeTitle: "Modo capitán / bareboat",
+    captainIncludedBody:
+      "Se incluye capitán con esta embarcación. Sigue las instrucciones del capitán del anfitrión.",
+    bareboatBody:
+      "Bareboat — operas sin capitán del anfitrión. Confirma que estás cualificado.",
+    captainModeUnsetBody:
+      "El modo capitán vs bareboat no está claro. Confirma con el anfitrión antes de zarpar.",
+    paddlePfdTitle: "PFD / chaleco salvavidas",
+    paddlePfdBody: (included, count) =>
+      count != null
+        ? `Política PFD: ${included}. El anfitrión listó ~${count} PFD. Confirma antes de reservar.`
+        : `Política PFD: ${included}. Confirma antes de reservar.`,
+    paddlePfdAttest: "Entiendo la política PFD y usaré / llevaré chalecos según se requiera.",
+    pfdIncludedFallback: "ver anuncio del anfitrión",
     eScooterAgeTitle: "Edad mínima para e-patinete",
     eScooterAgeBody: (minAge) =>
       `Este anuncio de e-patinete requiere al menos ${minAge} años. Añade tu fecha de nacimiento en el perfil, u elige otro anuncio.`,
@@ -3216,15 +3279,15 @@ export const es: AppMessages = {
       "Bikes & Scooters": {
         title: "Alquiler de bicis y patinetes",
         summary:
-          "Políticas de casco y candado son obligatorias. Los e-patinetes pueden fijar edad mínima (16 por defecto). Cuadro / eléctrico ayudan al ajuste.",
+          "Políticas de casco y candado son obligatorias. E-patinetes y E-Bikes Pro requieren edad mínima (16 por defecto); E-Bikes Pro también capturan clase y autonomía opcional.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Di si casco y candado van incluidos. En e-patinetes, pon edad mínima según normas locales.",
+          "Di si casco y candado van incluidos. En e-patinetes y E-Bikes Pro, pon edad mínima; en E-Bikes Pro también la clase (y autonomía si la conoces).",
         whyGeoTitle: "¿Por qué casco, candado y edad?",
         whyGeo:
-          "Lesión de cabeza y robo son los mayores riesgos. Política clara + edad reducen disputas.",
+          "Lesión de cabeza, robo y conductores menores son los mayores riesgos. Política clara + edad (+ clase) reducen disputas.",
         flowTitle: "De punta a punta",
-        flow: "Anuncio con casco/candado (+ edad e-patinete) → reconocimiento → entrega → devolución.",
+        flow: "Anuncio con casco/candado (+ edad e-patinete / E-Bike Pro, clase E-Bike Pro) → acuse → entrega → devolución.",
         layersTitle: "Capas de seguridad",
         layers: "Casco · candado · edad e-patinete · fianza · términos.",
         claimsTitle: "Si algo sale mal",
@@ -3292,13 +3355,47 @@ export const es: AppMessages = {
         claimsTitle: "Reclamos",
         claims: "Datos quedan en el acuerdo.",
       },
+      "Office & Business": {
+        title: "Alquiler de oficina y negocio",
+        summary:
+          "Dispositivos con almacenamiento (POS, servidores, impresoras, fotocopiadoras) requieren plan de borrado del anfitrión y acuse del arrendatario en la reserva.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Marca almacenamiento y estado de borrado con honestidad — POS y servidores deberían borrarse antes de publicar si es posible.",
+        whyGeoTitle: "¿Por qué una puerta de borrado?",
+        whyGeo:
+          "POS y servidores guardan datos de clientes. Un acuse en reserva y entrega reduce disputas de privacidad.",
+        flowTitle: "De punta a punta",
+        flow: "Anuncio con almacenamiento + borrado → acuse → entrega → devolución según acuerdo.",
+        layersTitle: "Capas de seguridad",
+        layers: "Almacenamiento · estado de borrado · acuse del arrendatario · fianza · términos.",
+        claimsTitle: "Si algo sale mal",
+        claims: "Estado de borrado y acuse dejan rastro; fianza cubre daño físico.",
+      },
+      "Music & Audio": {
+        title: "Alquiler de música y audio",
+        summary:
+          "Los sistemas PA requieren inventario de cables y soportes para que XLR o stands faltantes no sean una pelea de reclamos.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "En PA, lista cada cable y soporte. El arrendatario acusa en la reserva y cuenta en la entrega.",
+        whyGeoTitle: "¿Por qué inventario PA?",
+        whyGeo:
+          "Los reclamos de PA suelen ser accesorios faltantes. Una lista congelada en reserva y entrega corta disputas.",
+        flowTitle: "De punta a punta",
+        flow: "Anuncio con inventario → acuse → contar en recogida → contar en devolución.",
+        layersTitle: "Capas de seguridad",
+        layers: "Inventario de cables/soportes PA · potencia · fianza · términos.",
+        claimsTitle: "Si algo sale mal",
+        claims: "Usa el inventario para cables/soportes faltantes; fianza cubre la diferencia.",
+      },
       "Costume & Cosplay": {
         title: "Alquiler de disfraces y cosplay",
         summary:
-          "Reglas de devolución y tarifa opcional de tintorería mantienen el alquiler justo — congeladas en el acuerdo.",
+          "Reglas de devolución, tarifa opcional de tintorería y sanitización de maquillaje / pelucas / máscaras mantienen el alquiler justo — congeladas en el acuerdo.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Define solo tintorería / manchas OK / como recibido, más tarifa opcional de limpieza.",
+          "Define solo tintorería / manchas OK / como recibido, más tarifa opcional. En kits de maquillaje, pelucas y máscaras, atestigua sanitización entre arrendatarios.",
         whyGeoTitle: "¿Por qué condición de devolución + tarifa?",
         whyGeo:
           "Maquillaje, sudor y glitter arruinan disfraces. Reglas claras vencen facturas sorpresa.",

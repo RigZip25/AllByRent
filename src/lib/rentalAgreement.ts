@@ -116,6 +116,12 @@ export type RentalAgreementCommercialSnapshot = {
     returnConditionPolicy?: string;
     dryCleanReturnFeeUsd?: number;
     costumeHygieneRequired?: boolean;
+    ohvTerrainWaiverRequired?: boolean;
+    motorcycleEndorsementRequired?: boolean;
+    captainMode?: string;
+    paddlePfdRequired?: boolean;
+    paddlePfdCount?: number | null;
+    atvMinAgeNote?: number | null;
   };
 };
 
@@ -283,6 +289,53 @@ export function buildEnrichedSummaryLines(input: {
   if (trust?.droneCertRequired) {
     lines.push(
       "FAA Part 107 and/or Remote ID attestation required (optional certificate upload).",
+    );
+  }
+  if (trust?.droneWeightClass?.trim() || trust?.remoteIdStatus?.trim()) {
+    lines.push(
+      `Drone weight class: ${trust.droneWeightClass?.trim() || "n/a"}; Remote ID: ${trust.remoteIdStatus?.trim() || "n/a"}.`,
+    );
+  }
+  if (trust?.dinSettingBand?.trim()) {
+    lines.push(`Snow DIN / binding band: ${trust.dinSettingBand.trim()}.`);
+  }
+  if (trust?.pfdIncluded?.trim()) {
+    lines.push(`PFD policy: ${trust.pfdIncluded.trim()}.`);
+  }
+  if (trust?.cateringSanitizeRequired) {
+    lines.push("Serving / catering sanitization attested by host; acknowledged at booking.");
+  }
+  if (trust?.setPieceCountBand?.trim()) {
+    lines.push(`Tables & chairs set size: ${trust.setPieceCountBand.trim()}.`);
+  }
+  if (trust?.tentSizeBand?.trim()) {
+    lines.push(`Tent / canopy size band: ${trust.tentSizeBand.trim()}.`);
+  }
+  if (trust?.sleepingBagTempBand?.trim()) {
+    lines.push(`Sleeping bag temp rating: ${trust.sleepingBagTempBand.trim()}.`);
+  }
+  if (trust?.stoveFuelType?.trim()) {
+    lines.push(`Camp stove fuel: ${trust.stoveFuelType.trim()}.`);
+  }
+
+  if (trust?.ohvTerrainWaiverRequired) {
+    lines.push(
+      trust?.atvMinAgeNote != null
+        ? `OHV / ATV terrain waiver required (min age note: ${trust.atvMinAgeNote}).`
+        : "OHV / ATV terrain waiver required.",
+    );
+  }
+  if (trust?.motorcycleEndorsementRequired) {
+    lines.push("Motorcycle endorsement self-attestation required.");
+  }
+  if (trust?.captainMode?.trim()) {
+    lines.push(`Captain mode: ${trust.captainMode.trim()}.`);
+  }
+  if (trust?.paddlePfdRequired) {
+    lines.push(
+      trust?.paddlePfdCount != null
+        ? `Paddle-craft PFD attestation required (count: ${trust.paddlePfdCount}).`
+        : "Paddle-craft PFD attestation required.",
     );
   }
   if (trust?.carSeatSanitizationRequired) {

@@ -68,7 +68,9 @@ import {
   listingRequiresGuestStartId,
   listingRequiresOperatorCredential,
   listingRequiresDroneCert,
+  listingRequiresDriverRecordAttestation,
 } from "../../lib/categoryTrustRules";
+import { listingRequiresCoiHostConfirm } from "../../lib/listingInsurance";
 import type { ListingDraft } from "../../screens/listing/types";
 import { AvailabilityCalendar } from "../../components/availability/AvailabilityCalendar";
 import {
@@ -598,7 +600,9 @@ export function ItemDetail({
               listingRequiresDroneCert(listing) ||
               listingIsCarSeat(listing) ||
               listingRequiresGuestStartId(listing) ||
-              listingIsCommercialTransport(listing)) ? (
+              listingIsCommercialTransport(listing) ||
+              listingRequiresDriverRecordAttestation(listing) ||
+              listingRequiresCoiHostConfirm(listing)) ? (
               <div className="mt-3 flex flex-wrap gap-2">
                 {listingProRentersOnly(listing) ? (
                   <span className="rounded-md border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] font-semibold text-sky-950">
@@ -643,6 +647,16 @@ export function ItemDetail({
                 {listingIsCommercialTransport(listing) ? (
                   <span className="rounded-md border border-violet-200 bg-violet-50 px-2 py-1 text-[11px] font-semibold text-violet-950">
                     {t.booking.commercialTransportBadge}
+                  </span>
+                ) : null}
+                {listingRequiresDriverRecordAttestation(listing) ? (
+                  <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-950">
+                    {t.booking.driverRecordBadge}
+                  </span>
+                ) : null}
+                {listingRequiresCoiHostConfirm(listing) ? (
+                  <span className="rounded-md border border-orange-200 bg-orange-50 px-2 py-1 text-[11px] font-semibold text-orange-950">
+                    {t.booking.coiStructuredBadge}
                   </span>
                 ) : null}
               </div>

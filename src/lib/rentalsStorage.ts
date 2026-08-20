@@ -255,6 +255,13 @@ export type RentalBooking = {
   helmetLockAck?: boolean;
   helmetPolicySnapshot?: string;
   lockPolicySnapshot?: string;
+  /** Vehicles / Boats P2: ATV terrain, motorcycle endorsement, captain mode, paddle PFD. */
+  ohvTerrainWaiverAttested?: boolean;
+  motorcycleEndorsementAttested?: boolean;
+  captainModeSnapshot?: string;
+  paddlePfdAck?: boolean;
+  paddlePfdIncludedSnapshot?: string;
+  paddlePfdCountSnapshot?: number | null;
   setupTeardownFeeUsd?: number;
   /** P2: Office data wipe (devices with storage) + Music PA cable/stand inventory. */
   dataWipeAttested?: boolean;
@@ -661,6 +668,17 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
       typeof raw.helmetPolicySnapshot === "string" ? raw.helmetPolicySnapshot : undefined,
     lockPolicySnapshot:
       typeof raw.lockPolicySnapshot === "string" ? raw.lockPolicySnapshot : undefined,
+    ohvTerrainWaiverAttested: Boolean(raw.ohvTerrainWaiverAttested),
+    motorcycleEndorsementAttested: Boolean(raw.motorcycleEndorsementAttested),
+    captainModeSnapshot:
+      typeof raw.captainModeSnapshot === "string" ? raw.captainModeSnapshot : undefined,
+    paddlePfdAck: Boolean(raw.paddlePfdAck),
+    paddlePfdIncludedSnapshot:
+      typeof raw.paddlePfdIncludedSnapshot === "string" ? raw.paddlePfdIncludedSnapshot : undefined,
+    paddlePfdCountSnapshot:
+      typeof raw.paddlePfdCountSnapshot === "number" && Number.isFinite(raw.paddlePfdCountSnapshot)
+        ? raw.paddlePfdCountSnapshot
+        : null,
     setupTeardownFeeUsd:
       typeof raw.setupTeardownFeeUsd === "number" && Number.isFinite(raw.setupTeardownFeeUsd)
         ? raw.setupTeardownFeeUsd

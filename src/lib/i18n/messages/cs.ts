@@ -997,6 +997,24 @@ export const cs: AppMessages = {
     costumeHygieneUnlockBlocked:
       "Před předáním je potřeba potvrzení hygieny kostýmu z rezervace.",
 
+    ohvTerrainUnlockBlocked:
+      "Před odemčením vyzvednutí dokončete ATV/OHV terénní vzdání.",
+    motorcycleEndorsementUnlockBlocked:
+      "Před odemčením vyzvednutí dokončete prohlášení o motocyklové doložce.",
+    paddlePfdUnlockBlocked:
+      "Před odemčením vyzvednutí potvrďte politiku PFD pro paddle craft.",
+    driverRecordUnlockBlocked:
+      "Před odemčením vyzvednutí dokončete prohlášení o řidičáku a záznamu. (Nejde o placené MVR.)",
+    coiProofTitle: "Certificate of Insurance (COI)",
+    coiProofPending: "Čeká se, až hostitel potvrdí přijetí COI / pojistky.",
+    coiProofPendingHost:
+      "Zkontrolujte strukturované COI nájemce (a foto) a označte přijetí před odemčením.",
+    coiProofReceivedMark: "Přijal(a) jsem COI / pojistku nájemce",
+    coiProofReceivedDone: "Hostitel potvrdil přijetí COI / pojistky",
+    driverRecordAttestedTitle: "Prohlášení o řidičáku a záznamu",
+    driverRecordAttestedBody:
+      "Nájemce prohlásil platný řidičák a dostatečně čistý záznam. Nejde o placené MVR — ověřte doklad při předání.",
+
     weatherCancelRefundPreview:
       "Zvoleno storno kvůli počasí — plná refundace nájmu dle outdoor politiky inzerátu.",
     weatherCancelToggle: "Zrušit kvůli počasí (outdoor párty politika)",
@@ -1810,6 +1828,23 @@ export const cs: AppMessages = {
           label: "Vzdání se nároků při rezervaci",
           hint: "Ve výchozím stavu povinné pro posilovnu a rizikový sport/outdoor.",
         },
+        ohvTerrainWaiverRequired: {
+          label: "OHV / ATV terénní vzdání",
+          hint: "Výchozí pro ATV — nájemce potvrdí riziko terénu při rezervaci.",
+        },
+        motorcycleEndorsementRequired: {
+          label: "Motocyklová doložka",
+          hint: "Výchozí pro motocykly — nájemce prohlásí doložku.",
+        },
+        captainMode: {
+          label: "Režim kapitán",
+          hint: "Bareboat vs kapitán v ceně pro motorové / ponton / charter.",
+        },
+        pfdCount: {
+          label: "Počet PFD",
+          placeholder: "2",
+          hint: "Kolik vest přikládáte u kajaku / SUP.",
+        },
         helmetPolicy: { label: "Politika helmy" },
         lockPolicy: { label: "Politika zámku / krádeže" },
         minRiderAge: {
@@ -2190,6 +2225,8 @@ export const cs: AppMessages = {
         shore_power_only: "Jen shore power",
         required: "Povinné při rezervaci",
         not_required: "Není povinné",
+        bareboat: "Bareboat (bez kapitána hostitele)",
+        captain_included: "Kapitán v ceně",
         renter_provides: "Zajistí nájemce",
         included: "V ceně pronájmu",
         deposit_for_lock: "Zámek na kauci / nechat zamčeno",
@@ -2836,6 +2873,27 @@ export const cs: AppMessages = {
       "Souhlasím s politikou helmy a zámku pro tento pronájem kola nebo koloběžky.",
     helmetPolicyFallback: "podle místních pravidel / poznámky hostitele",
     lockPolicyFallback: "zabezpečit bez dozoru",
+    ohvTerrainTitle: "ATV / OHV terénní vzdání",
+    ohvTerrainBody:
+      "Terénní vozidla mají riziko převrácení. Pronajímáte od souseda — potvrďte terénní vzdání před rezervací.",
+    ohvTerrainAttest: "Rozumím rizikům OHV/ATV a souhlasím s terénním vzdáním hostitele.",
+    atvAgeNote: (age) => `Minimální věk jezdce dle hostitele: ${age}.`,
+    motorcycleEndorsementTitle: "Motocyklová doložka",
+    motorcycleEndorsementBody:
+      "Tento pronájem motocyklu vyžaduje platnou motocyklovou doložku (nebo ekvivalent) pro jmenovaného jezdce.",
+    motorcycleEndorsementAttest:
+      "Mám platnou motocyklovou doložku (nebo právní ekvivalent) pro tuto třídu a budu jmenovaný jezdec.",
+    captainModeTitle: "Režim kapitán / bareboat",
+    captainIncludedBody: "Kapitán je součástí plavidla. Řiďte se pokyny kapitána hostitele.",
+    bareboatBody: "Bareboat — provozujete bez kapitána hostitele. Ověřte kvalifikaci.",
+    captainModeUnsetBody: "Režim kapitán vs bareboat není jasný. Potvrďte s hostitelem před odjezdem.",
+    paddlePfdTitle: "PFD / záchranná vesta",
+    paddlePfdBody: (included, count) =>
+      count != null
+        ? `Politika PFD: ${included}. Host uvedl cca ${count} PFD. Potvrďte před rezervací.`
+        : `Politika PFD: ${included}. Potvrďte před rezervací.`,
+    paddlePfdAttest: "Rozumím politice PFD a budu je nosit / přinášet dle požadavku.",
+    pfdIncludedFallback: "viz inzerát hostitele",
     eScooterAgeTitle: "Vyžadovaný věk pro e-koloběžku",
     eScooterAgeBody: (minAge) =>
       `Tento inzerát e-koloběžky vyžaduje věk alespoň ${minAge}. Doplň datum narození v profilu, nebo zvol jiný inzerát.`,
@@ -3230,15 +3288,15 @@ export const cs: AppMessages = {
       "Bikes & Scooters": {
         title: "Pronájem kol a koloběžek",
         summary:
-          "Politika helmy a zámku je povinná. U e-koloběžek lze nastavit min. věk (výchozí 16). Velikost / elektřina pomáhají výběru.",
+          "Politika helmy a zámku je povinná. E-koloběžky a E-Bikes Pro vyžadují min. věk (výchozí 16); u E-Bikes Pro i třídu a volitelný dojezd baterie.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Uveď, zda je helma a zámek v ceně. U e-koloběžek nastav min. věk podle místních pravidel.",
+          "Uveď, zda je helma a zámek v ceně. U e-koloběžek a E-Bikes Pro nastav min. věk; u E-Bikes Pro i třídu (a dojezd, pokud znáš).",
         whyGeoTitle: "Proč helma, zámek a věk?",
         whyGeo:
-          "Zranění hlavy a krádež jsou hlavní rizika. Jasná politika + věk snižují spory.",
+          "Zranění hlavy, krádež a příliš mladí jezdci jsou hlavní rizika. Jasná politika + věk (+ třída) snižují spory.",
         flowTitle: "Od začátku do konce",
-        flow: "Inzerát s helmou/zámkem (+ věk u e-koloběžky) → potvrzení → předání → návrat.",
+        flow: "Inzerát s helmou/zámkem (+ věk u e-koloběžky / E-Bike Pro, třída u E-Bike Pro) → potvrzení → předání → návrat.",
         layersTitle: "Bezpečnostní vrstvy",
         layers: "Helma · zámek · věk e-koloběžky · kauce · podmínky.",
         claimsTitle: "Když se něco pokazí",
@@ -3306,20 +3364,54 @@ export const cs: AppMessages = {
         claimsTitle: "Spory",
         claims: "Údaje jsou ve smlouvě.",
       },
+      "Office & Business": {
+        title: "Pronájem kanceláře a business",
+        summary:
+          "Zařízení s úložištěm (POS, servery, tiskárny, kopírky) vyžadují plán výmazu u hostitele a potvrzení nájemce při rezervaci.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Označ úložiště a stav výmazu pravdivě — POS a servery ideálně vymaž před zveřejněním.",
+        whyGeoTitle: "Proč brána výmazu dat?",
+        whyGeo:
+          "POS a servery drží zákaznická data. Potvrzení při rezervaci a předání snižuje spory o soukromí.",
+        flowTitle: "Od začátku do konce",
+        flow: "Inzerát s úložištěm + výmazem → potvrzení → předání → návrat dle dohody.",
+        layersTitle: "Bezpečnostní vrstvy",
+        layers: "Úložiště · stav výmazu · potvrzení nájemce · kauce · podmínky.",
+        claimsTitle: "Když se něco pokazí",
+        claims: "Stav výmazu a potvrzení tvoří stopu; kauce na fyzické poškození.",
+      },
+      "Music & Audio": {
+        title: "Pronájem hudby a audia",
+        summary:
+          "PA systémy vyžadují inventář kabelů a stojanů, aby chybějící XLR a stojany nebyly sporem.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "U PA uveď každý kabel a stojan. Nájemce potvrdí při rezervaci a spočítá při předání.",
+        whyGeoTitle: "Proč inventář PA?",
+        whyGeo:
+          "Spory u PA jsou obvykle chybějící příslušenství. Zmrazený checklist při rezervaci a předání to řeší.",
+        flowTitle: "Od začátku do konce",
+        flow: "Inzerát s inventářem → potvrzení → počet při vyzvednutí → počet při vrácení.",
+        layersTitle: "Bezpečnostní vrstvy",
+        layers: "Inventář kabelů/stojanů PA · napájení · kauce · podmínky.",
+        claimsTitle: "Když se něco pokazí",
+        claims: "Inventář jako důkaz chybějících kabelů/stojanů; kauce na rozdíl.",
+      },
       "Costume & Cosplay": {
         title: "Pronájem kostýmů a cosplay",
         summary:
-          "Pravidla vrácení a volitelný poplatek za čištění drží půjčování kostýmů fér — zmrazené ve smlouvě.",
+          "Pravidla vrácení, volitelný poplatek za čištění a sanitizace make-upu / paruk / masek drží půjčování fér — zmrazené ve smlouvě.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Nastav jen chemické / skvrny OK / jak při převzetí a volitelný poplatek za čištění.",
+          "Nastav jen chemické / skvrny OK / jak při převzetí a volitelný poplatek. U make-up sad, paruk a masek potvrď sanitizaci mezi nájemci.",
         whyGeoTitle: "Proč stav při vrácení + poplatek?",
         whyGeo:
           "Makeup, pot a glitter kazí kostýmy. Jasná pravidla jsou lepší než překvapivý účet za čištění.",
         flowTitle: "Od začátku do konce",
         flow: "Inzerát s politikou (+ poplatek) → potvrzení → nošení → návrat dle politiky.",
         layersTitle: "Bezpečnostní vrstvy",
-        layers: "Stav při vrácení · poplatek za čištění · velikost · kauce · podmínky.",
+        layers: "Stav při vrácení · poplatek za čištění · sanitizace (makeup / paruky / masky) · velikost · kauce · podmínky.",
         claimsTitle: "Když se něco pokazí",
         claims: "Poplatek a politika jsou ve smlouvě; kauce na trhliny nebo chybějící díly.",
       },

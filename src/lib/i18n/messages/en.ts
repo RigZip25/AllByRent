@@ -978,6 +978,25 @@ export const en: AppMessages = {
     costumeHygieneUnlockBlocked:
       "Costume hygiene acknowledgment from booking is required before handoff can start.",
 
+    ohvTerrainUnlockBlocked:
+      "Complete the ATV / OHV terrain waiver at booking before pickup unlock.",
+    motorcycleEndorsementUnlockBlocked:
+      "Complete motorcycle endorsement attestation at booking before pickup unlock.",
+    paddlePfdUnlockBlocked:
+      "Acknowledge the paddle-craft PFD policy at booking before pickup unlock.",
+    driverRecordUnlockBlocked:
+      "Complete license and driving-record self-attestation at booking before pickup unlock. (Not a paid MVR pull.)",
+    coiProofTitle: "Certificate of Insurance (COI)",
+    coiProofPending:
+      "Waiting for the host to confirm they received your Certificate of Insurance / insurance proof.",
+    coiProofPendingHost:
+      "Review the renter’s structured COI details (and photo), then mark proof received before handoff unlock.",
+    coiProofReceivedMark: "I received the renter’s COI / insurance proof",
+    coiProofReceivedDone: "Host confirmed COI / insurance proof received",
+    driverRecordAttestedTitle: "License & driving-record attestation",
+    driverRecordAttestedBody:
+      "Renter self-attested a valid license and a clean-enough recent record. This is not a paid MVR / DMV pull — verify the physical license at handoff if needed.",
+
     weatherCancelRefundPreview:
       "Weather cancel selected — full rental refund under this listing’s outdoor weather policy.",
     weatherCancelToggle: "Cancel due to weather (outdoor party policy)",
@@ -1765,6 +1784,23 @@ export const en: AppMessages = {
           label: "Liability waiver at booking",
           hint: "Required for gym and high-risk sports/outdoor shelves by default.",
         },
+        ohvTerrainWaiverRequired: {
+          label: "OHV / ATV terrain waiver",
+          hint: "Required by default for ATV rent — renter acknowledges terrain risk at booking.",
+        },
+        motorcycleEndorsementRequired: {
+          label: "Motorcycle endorsement",
+          hint: "Required by default for motorcycle rent — renter self-attests endorsement.",
+        },
+        captainMode: {
+          label: "Captain mode",
+          hint: "Bareboat vs captain included for motorboats / pontoons / charters.",
+        },
+        pfdCount: {
+          label: "PFD count",
+          placeholder: "2",
+          hint: "How many life jackets you include for kayak / SUP rentals.",
+        },
         helmetPolicy: { label: "Helmet policy" },
         lockPolicy: { label: "Lock / theft policy" },
         minRiderAge: {
@@ -2120,6 +2156,8 @@ export const en: AppMessages = {
         shore_power_only: "Shore power only",
         required: "Required at booking",
         not_required: "Not required",
+        bareboat: "Bareboat (no host captain)",
+        captain_included: "Captain included",
         renter_provides: "Renter provides",
         included: "Included with rental",
         deposit_for_lock: "Lock on deposit / leave locked",
@@ -2795,6 +2833,31 @@ export const en: AppMessages = {
       "I agree to follow the helmet and lock policy for this bike or scooter rental.",
     helmetPolicyFallback: "follow local law / host note",
     lockPolicyFallback: "secure when unattended",
+    ohvTerrainTitle: "ATV / OHV terrain waiver",
+    ohvTerrainBody:
+      "Off-highway vehicles involve terrain and tip-over risk. You rent from a neighbor — acknowledge the terrain waiver before booking.",
+    ohvTerrainAttest:
+      "I understand OHV / ATV terrain risks and agree to the host terrain waiver for this rental.",
+    atvAgeNote: (age) => `Host minimum rider age note: ${age}.`,
+    motorcycleEndorsementTitle: "Motorcycle endorsement",
+    motorcycleEndorsementBody:
+      "This motorcycle rental requires a valid motorcycle endorsement (or equivalent) for the named rider.",
+    motorcycleEndorsementAttest:
+      "I hold a valid motorcycle endorsement (or legal equivalent) for the class of this bike and will be the named rider.",
+    captainModeTitle: "Captain / bareboat mode",
+    captainIncludedBody:
+      "A captain is included with this vessel. Follow the host captain’s instructions for the trip.",
+    bareboatBody:
+      "Bareboat charter — you operate without a host captain. Confirm you are qualified for this vessel.",
+    captainModeUnsetBody:
+      "Captain vs bareboat mode is not set clearly. Confirm details with the host before departure.",
+    paddlePfdTitle: "PFD / life jacket",
+    paddlePfdBody: (included, count) =>
+      count != null
+        ? `PFD policy: ${included}. Host listed about ${count} PFD(s). Acknowledge before booking.`
+        : `PFD policy: ${included}. Acknowledge before booking.`,
+    paddlePfdAttest: "I understand the PFD policy and will wear / bring PFDs as required.",
+    pfdIncludedFallback: "see host listing",
     eScooterAgeTitle: "E-scooter / e-bike age required",
     eScooterAgeBody: (minAge) =>
       `This e-scooter listing requires riders to be at least ${minAge}. Add your date of birth in profile, or choose another listing.`,
@@ -3200,17 +3263,17 @@ export const en: AppMessages = {
       "Bikes & Scooters": {
         title: "Bikes & scooter rentals",
         summary:
-          "Helmet and lock policies are required on rent. E-scooters can set a minimum rider age (default 16). Frame / electric specs help fit.",
+          "Helmet and lock policies are required on rent. E-scooters and E-Bikes Pro require a minimum rider age (default 16); E-Bikes Pro also capture class and optional battery range.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Say whether a helmet and lock are included. For e-scooters, set min age to match local rules.",
+          "Say whether a helmet and lock are included. For e-scooters and E-Bikes Pro, set min age; for E-Bikes Pro also set class (and range when known).",
         whyGeoTitle: "Why helmet, lock, and age?",
         whyGeo:
-          "Head injury and theft are the two biggest bike/scooter loss modes. Clear policy + age gate cut disputes.",
+          "Head injury, theft, and underage riders are the biggest micromobility loss modes. Clear policy + age (+ class) cut disputes.",
         flowTitle: "End to end",
-        flow: "List with helmet/lock (+ age for e-scooter) → renter acknowledges → handoff → return.",
+        flow: "List with helmet/lock (+ age for e-scooter / E-Bike Pro, class for E-Bike Pro) → renter acknowledges → handoff → return.",
         layersTitle: "Safety layers",
-        layers: "Helmet policy · lock policy · e-scooter age · deposit · rental terms.",
+        layers: "Helmet policy · lock policy · e-scooter / E-Bike Pro age · e-bike class · deposit · rental terms.",
         claimsTitle: "If something goes wrong",
         claims: "Lock policy and handoff photos support theft claims; deposit covers damage.",
       },
@@ -3278,20 +3341,54 @@ export const en: AppMessages = {
         claimsTitle: "If something goes wrong",
         claims: "Install and power disclosures are frozen on the agreement for disputes.",
       },
+      "Office & Business": {
+        title: "Office & business rentals",
+        summary:
+          "Devices with storage (POS, servers, printers, copiers) require a host wipe plan and renter data-wipe acknowledgment at booking.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Mark storage and wipe status honestly — POS and servers should wipe before list when possible.",
+        whyGeoTitle: "Why a data wipe gate?",
+        whyGeo:
+          "POS and servers hold customer data. A wipe ack at booking and handoff cuts privacy disputes.",
+        flowTitle: "End to end",
+        flow: "List with storage + wipe → renter acks → handoff → return wiped or as agreed.",
+        layersTitle: "Safety layers",
+        layers: "Storage flag · wipe status · renter wipe ack · deposit · rental terms.",
+        claimsTitle: "If something goes wrong",
+        claims: "Wipe status and booking ack create a trail; deposit covers physical damage.",
+      },
+      "Music & Audio": {
+        title: "Music & audio rentals",
+        summary:
+          "PA Systems require a cable and stand inventory so missing XLRs and stands do not become claim fights.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "For PA Systems, list every cable and stand. Renters acknowledge at booking and count at handoff.",
+        whyGeoTitle: "Why PA inventory?",
+        whyGeo:
+          "PA claims are usually missing accessories. A frozen checklist at booking and handoff cuts disputes.",
+        flowTitle: "End to end",
+        flow: "List PA inventory → renter acks → count at pickup → count at return.",
+        layersTitle: "Safety layers",
+        layers: "PA cable/stand inventory · power band · deposit · rental terms.",
+        claimsTitle: "If something goes wrong",
+        claims: "Use the inventory snapshot for missing cables/stands; deposit covers the gap.",
+      },
       "Costume & Cosplay": {
         title: "Costume & cosplay rentals",
         summary:
-          "Return-condition rules and optional dry-clean fees keep costume rentals fair — frozen on the agreement at booking.",
+          "Return-condition rules, optional dry-clean fees, and sanitization for makeup kits / wigs / masks keep costume rentals fair — frozen on the agreement at booking.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Set dry-clean only / spot-clean / as-received, plus an optional dry-clean fee when you handle cleaning.",
+          "Set dry-clean only / spot-clean / as-received, plus an optional dry-clean fee. For makeup kits, wigs, and masks, attest sanitization between renters.",
         whyGeoTitle: "Why return condition + fee?",
         whyGeo:
           "Makeup, sweat, and glitter ruin costumes. Clear return rules beat surprise cleaning bills after the party.",
         flowTitle: "End to end",
         flow: "List with return policy (+ fee) → renter acknowledges → wear → return per policy.",
         layersTitle: "Safety layers",
-        layers: "Return condition · dry-clean fee · size / fits · deposit · rental terms.",
+        layers: "Return condition · dry-clean fee · sanitization (makeup / wigs / masks) · size / fits · deposit · rental terms.",
         claimsTitle: "If something goes wrong",
         claims: "Fee and policy are on the agreement; deposit covers tears or missing pieces beyond the fee.",
       },

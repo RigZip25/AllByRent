@@ -44,6 +44,27 @@ import {
   listingRequiresDriverRecordAttestation,
   listingRequiresEScooterAgeGate,
   listingRequiresHelmetLockPolicy,
+  listingDroneRemoteIdBlocksBooking,
+  listingDroneWeightClass,
+  listingRemoteIdStatus,
+  listingRequiresSnowSportsGates,
+  listingDinSettingBand,
+  listingRequiresPfdPolicy,
+  listingPfdBlocksBooking,
+  listingPfdIncluded,
+  listingRequiresOhvTerrainWaiver,
+  listingAtvMinAgeNote,
+  listingRequiresMotorcycleEndorsement,
+  listingCaptainMode,
+  listingIsCaptainOptionVessel,
+  listingRequiresPfdAttestation,
+  listingPfdCount,
+  listingRequiresCateringSanitize,
+  listingCateringSanitizeBlocksBooking,
+  listingSetPieceCountBand,
+  listingTentSizeBand,
+  listingSleepingBagTempBand,
+  listingStoveFuelType,
   listingRequiresKitInventory,
   listingRequiresLiabilityWaiver,
   listingRequiresPpeAck,
@@ -343,6 +364,12 @@ function BookingScreenLoaded({
   const [droneCertAttested, setDroneCertAttested] = useState(false);
   const [droneCertMedia, setDroneCertMedia] = useState<MediaRef | null>(null);
   const [droneCertBusy, setDroneCertBusy] = useState(false);
+  const [droneRemoteIdAck, setDroneRemoteIdAck] = useState(false);
+  const [sportsPfdAck, setSportsPfdAck] = useState(false);
+  const [cateringSanitizeAck, setCateringSanitizeAck] = useState(false);
+  const [ohvTerrainWaiverAttested, setOhvTerrainWaiverAttested] = useState(false);
+  const [motorcycleEndorsementAttested, setMotorcycleEndorsementAttested] = useState(false);
+  const [paddlePfdAck, setPaddlePfdAck] = useState(false);
   const [carSeatSanitizationAttested, setCarSeatSanitizationAttested] = useState(false);
   const [carSeatRecallAckAttested, setCarSeatRecallAckAttested] = useState(false);
   const [cribRecallAckAttested, setCribRecallAckAttested] = useState(false);
@@ -380,6 +407,28 @@ function BookingScreenLoaded({
   const needsOperatorCert = listingRequiresOperatorCredential(listing);
   const needsBoaterLicense = listingRequiresBoaterLicense(listing);
   const needsDroneCert = listingRequiresDroneCert(listing);
+  const droneRidBlocked = listingDroneRemoteIdBlocksBooking(listing);
+  const droneWeightClass = listingDroneWeightClass(listing);
+  const remoteIdStatus = listingRemoteIdStatus(listing);
+  const needsSnowSports = listingRequiresSnowSportsGates(listing);
+  const dinSettingBand = listingDinSettingBand(listing);
+  const needsSportsPfd = listingRequiresPfdPolicy(listing);
+  const sportsPfdBlocked = listingPfdBlocksBooking(listing);
+  const sportsPfdIncluded = listingPfdIncluded(listing);
+  const needsOhvTerrainWaiver = listingRequiresOhvTerrainWaiver(listing);
+  const atvMinAgeNote = listingAtvMinAgeNote(listing);
+  const needsMotorcycleEndorsement = listingRequiresMotorcycleEndorsement(listing);
+  const captainMode = listingCaptainMode(listing);
+  const showCaptainModeCopy = listingIsCaptainOptionVessel(listing) && listing.modes.rent;
+  const needsPaddlePfd = listingRequiresPfdAttestation(listing);
+  const paddlePfdIncluded = needsPaddlePfd ? listingPfdIncluded(listing) : "";
+  const paddlePfdCount = needsPaddlePfd ? listingPfdCount(listing) : null;
+  const needsCateringSanitize = listingRequiresCateringSanitize(listing);
+  const cateringSanitizeBlocked = listingCateringSanitizeBlocksBooking(listing);
+  const setPieceCountBand = listingSetPieceCountBand(listing);
+  const tentSizeBand = listingTentSizeBand(listing);
+  const sleepingBagTempBand = listingSleepingBagTempBand(listing);
+  const stoveFuelType = listingStoveFuelType(listing);
   const needsCarSeatGates = listingIsCarSeat(listing) && listing.modes.rent;
   const carSeatListingBlocked = listingCarSeatBlocksBooking(listing);
   const needsCribGates = listingIsCrib(listing) && listing.modes.rent;
@@ -596,7 +645,16 @@ function BookingScreenLoaded({
   const driverRecordOk =
     !needsDriverRecordAttestation ||
     (driverLicenseValidAttested && driverRecordSoftAttested);
-  const droneCertOk = !needsDroneCert || droneCertAttested;
+  const droneCertOk =
+    !needsDroneCert || (!droneRidBlocked && droneCertAttested && droneRemoteIdAck);
+  const sportsPfdOk =
+    !needsSportsPfd || (!sportsPfdBlocked && sportsPfdAck);
+  const ohvTerrainOk = !needsOhvTerrainWaiver || ohvTerrainWaiverAttested;
+  const motorcycleEndorsementOk =
+    !needsMotorcycleEndorsement || motorcycleEndorsementAttested;
+  const paddlePfdOk = !needsPaddlePfd || paddlePfdAck;
+  const cateringSanitizeOk =
+    !needsCateringSanitize || (!cateringSanitizeBlocked && cateringSanitizeAck);
   const carSeatOk =
     !needsCarSeatGates ||
     (!carSeatListingBlocked &&
@@ -683,6 +741,11 @@ function BookingScreenLoaded({
     boaterLicenseOk &&
     driverRecordOk &&
     droneCertOk &&
+    sportsPfdOk &&
+    ohvTerrainOk &&
+    motorcycleEndorsementOk &&
+    paddlePfdOk &&
+    cateringSanitizeOk &&
     carSeatOk &&
     cribOk &&
     ppeAckOk &&
@@ -750,6 +813,15 @@ function BookingScreenLoaded({
         operatorCertRequired: needsOperatorCert,
         boaterLicenseRequired: needsBoaterLicense,
         droneCertRequired: needsDroneCert,
+        droneWeightClass: droneWeightClass || undefined,
+        remoteIdStatus: remoteIdStatus || undefined,
+        dinSettingBand: dinSettingBand || undefined,
+        pfdIncluded: sportsPfdIncluded || undefined,
+        setPieceCountBand: setPieceCountBand || undefined,
+        tentSizeBand: tentSizeBand || undefined,
+        sleepingBagTempBand: sleepingBagTempBand || undefined,
+        stoveFuelType: stoveFuelType || undefined,
+        cateringSanitizeRequired: needsCateringSanitize,
         carSeatSanitizationRequired: needsCarSeatGates,
         cribSafetyRequired: needsCribGates,
         ppeAckRequired: needsPpeAck,
@@ -779,6 +851,12 @@ function BookingScreenLoaded({
         liabilityWaiverRequired: needsLiabilityWaiver,
         helmetPolicy: helmetPolicy || undefined,
         lockPolicy: lockPolicy || undefined,
+        ohvTerrainWaiverRequired: needsOhvTerrainWaiver,
+        motorcycleEndorsementRequired: needsMotorcycleEndorsement,
+        captainMode: showCaptainModeCopy ? captainMode || "unset" : undefined,
+        paddlePfdRequired: needsPaddlePfd,
+        paddlePfdCount: paddlePfdCount ?? undefined,
+        atvMinAgeNote: needsOhvTerrainWaiver ? atvMinAgeNote ?? undefined : undefined,
         setupTeardownFeeUsd: setupTeardownFeeUsd > 0 ? setupTeardownFeeUsd : undefined,
         powerRequirement: listing.categorySpecs?.powerRequirement || undefined,
         hitchClass: listing.categorySpecs?.hitchClass || undefined,
@@ -950,6 +1028,15 @@ function BookingScreenLoaded({
           operatorCertRequired: needsOperatorCert,
           boaterLicenseRequired: needsBoaterLicense,
           droneCertRequired: needsDroneCert,
+          droneWeightClass: droneWeightClass || undefined,
+          remoteIdStatus: remoteIdStatus || undefined,
+          dinSettingBand: dinSettingBand || undefined,
+          pfdIncluded: sportsPfdIncluded || undefined,
+          setPieceCountBand: setPieceCountBand || undefined,
+          tentSizeBand: tentSizeBand || undefined,
+          sleepingBagTempBand: sleepingBagTempBand || undefined,
+          stoveFuelType: stoveFuelType || undefined,
+          cateringSanitizeRequired: needsCateringSanitize,
           carSeatSanitizationRequired: needsCarSeatGates,
         cribSafetyRequired: needsCribGates,
         ppeAckRequired: needsPpeAck,
@@ -979,6 +1066,12 @@ function BookingScreenLoaded({
           liabilityWaiverRequired: needsLiabilityWaiver,
           helmetPolicy: helmetPolicy || undefined,
           lockPolicy: lockPolicy || undefined,
+          ohvTerrainWaiverRequired: needsOhvTerrainWaiver,
+          motorcycleEndorsementRequired: needsMotorcycleEndorsement,
+          captainMode: showCaptainModeCopy ? captainMode || "unset" : undefined,
+          paddlePfdRequired: needsPaddlePfd,
+          paddlePfdCount: paddlePfdCount ?? undefined,
+          atvMinAgeNote: needsOhvTerrainWaiver ? atvMinAgeNote ?? undefined : undefined,
           setupTeardownFeeUsd: setupTeardownFeeUsd > 0 ? setupTeardownFeeUsd : undefined,
           powerRequirement: listing.categorySpecs?.powerRequirement || undefined,
           hitchClass: listing.categorySpecs?.hitchClass || undefined,
@@ -1138,6 +1231,13 @@ function BookingScreenLoaded({
         : undefined,
       droneCertAttested: needsDroneCert ? droneCertAttested : undefined,
       droneCertMedia: needsDroneCert ? droneCertMedia : undefined,
+      droneRemoteIdAck: needsDroneCert ? droneRemoteIdAck : undefined,
+      droneWeightClassSnapshot: needsDroneCert ? droneWeightClass || undefined : undefined,
+      remoteIdStatusSnapshot: needsDroneCert ? remoteIdStatus || undefined : undefined,
+      sportsPfdAck: needsSportsPfd ? sportsPfdAck : undefined,
+      sportsPfdIncludedSnapshot: needsSportsPfd ? sportsPfdIncluded || undefined : undefined,
+      dinSettingBandSnapshot: needsSnowSports ? dinSettingBand || undefined : undefined,
+      cateringSanitizeAck: needsCateringSanitize ? cateringSanitizeAck : undefined,
       carSeatSanitizationAttested: needsCarSeatGates ? carSeatSanitizationAttested : undefined,
       carSeatRecallAckAttested: needsCarSeatGates ? carSeatRecallAckAttested : undefined,
       cribRecallAckAttested: needsCribGates ? cribRecallAckAttested : undefined,
@@ -1153,6 +1253,16 @@ function BookingScreenLoaded({
       helmetLockAck: needsHelmetLock ? helmetLockAck : undefined,
       helmetPolicySnapshot: helmetPolicy || undefined,
       lockPolicySnapshot: lockPolicy || undefined,
+      ohvTerrainWaiverAttested: needsOhvTerrainWaiver
+        ? ohvTerrainWaiverAttested
+        : undefined,
+      motorcycleEndorsementAttested: needsMotorcycleEndorsement
+        ? motorcycleEndorsementAttested
+        : undefined,
+      captainModeSnapshot: showCaptainModeCopy ? captainMode || "unset" : undefined,
+      paddlePfdAck: needsPaddlePfd ? paddlePfdAck : undefined,
+      paddlePfdIncludedSnapshot: needsPaddlePfd ? paddlePfdIncluded || undefined : undefined,
+      paddlePfdCountSnapshot: needsPaddlePfd ? paddlePfdCount ?? undefined : undefined,
       setupTeardownFeeUsd: setupTeardownFeeUsd > 0 ? setupTeardownFeeUsd : undefined,
       weatherCancelPolicySnapshot: needsWeatherCancel
         ? weatherCancelPolicy || undefined
@@ -1834,6 +1944,81 @@ function BookingScreenLoaded({
           </div>
         ) : null}
 
+        {needsOhvTerrainWaiver ? (
+          <div className="rounded-xl border border-lime-200 bg-lime-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-lime-950">{t.booking.ohvTerrainTitle}</p>
+            <p className="text-[12px] text-lime-900/90">{t.booking.ohvTerrainBody}</p>
+            {atvMinAgeNote != null ? (
+              <p className="text-[12px] font-medium text-lime-950/90">
+                {t.booking.atvAgeNote(atvMinAgeNote)}
+              </p>
+            ) : null}
+            <label className="flex items-start gap-2 text-xs text-lime-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={ohvTerrainWaiverAttested}
+                onChange={(e) => setOhvTerrainWaiverAttested(e.target.checked)}
+              />
+              <span>{t.booking.ohvTerrainAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {needsMotorcycleEndorsement ? (
+          <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-rose-950">
+              {t.booking.motorcycleEndorsementTitle}
+            </p>
+            <p className="text-[12px] text-rose-900/90">{t.booking.motorcycleEndorsementBody}</p>
+            <label className="flex items-start gap-2 text-xs text-rose-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={motorcycleEndorsementAttested}
+                onChange={(e) => setMotorcycleEndorsementAttested(e.target.checked)}
+              />
+              <span>{t.booking.motorcycleEndorsementAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {showCaptainModeCopy ? (
+          <div className="rounded-xl border border-cyan-200 bg-cyan-50/70 p-4 space-y-2">
+            <p className="text-sm font-semibold text-cyan-950">{t.booking.captainModeTitle}</p>
+            <p className="text-[12px] text-cyan-900/90">
+              {captainMode === "captain_included"
+                ? t.booking.captainIncludedBody
+                : captainMode === "bareboat"
+                  ? t.booking.bareboatBody
+                  : t.booking.captainModeUnsetBody}
+            </p>
+          </div>
+        ) : null}
+
+        {needsPaddlePfd ? (
+          <div className="rounded-xl border border-teal-200 bg-teal-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-teal-950">{t.booking.paddlePfdTitle}</p>
+            <p className="text-[12px] text-teal-900/90">
+              {t.booking.paddlePfdBody(
+                paddlePfdIncluded
+                  ? t.listing.specs.options[paddlePfdIncluded] ?? paddlePfdIncluded
+                  : t.booking.pfdIncludedFallback,
+                paddlePfdCount,
+              )}
+            </p>
+            <label className="flex items-start gap-2 text-xs text-teal-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={paddlePfdAck}
+                onChange={(e) => setPaddlePfdAck(e.target.checked)}
+              />
+              <span>{t.booking.paddlePfdAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
         {needsWeatherCancel ? (
           <div className="rounded-xl border border-sky-200 bg-sky-50/70 p-4 space-y-3">
             <p className="text-sm font-semibold text-sky-950">{t.booking.weatherCancelTitle}</p>
@@ -2283,6 +2468,95 @@ function BookingScreenLoaded({
               />
             </label>
             <p className="text-xs text-violet-900/80">{t.booking.droneCertHint}</p>
+            {droneRidBlocked ? (
+              <p className="text-[13px] font-semibold text-red-800">{t.booking.droneRemoteIdBlocked}</p>
+            ) : (
+              <>
+                <p className="text-[12px] text-violet-900/90">
+                  {t.booking.droneHostRidLine(
+                    droneWeightClass
+                      ? t.listing.specs.options[droneWeightClass] ?? droneWeightClass
+                      : "—",
+                    remoteIdStatus
+                      ? t.listing.specs.options[remoteIdStatus] ?? remoteIdStatus
+                      : "—",
+                  )}
+                </p>
+                <label className="flex items-start gap-2 text-xs text-violet-950">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5"
+                    checked={droneRemoteIdAck}
+                    onChange={(e) => setDroneRemoteIdAck(e.target.checked)}
+                  />
+                  <span>{t.booking.droneRemoteIdAttest}</span>
+                </label>
+              </>
+            )}
+          </div>
+        ) : null}
+
+        {needsSnowSports ? (
+          <div className="rounded-xl border border-sky-200 bg-sky-50/70 p-4 space-y-2">
+            <p className="text-sm font-semibold text-sky-950">{t.booking.dinTitle}</p>
+            <p className="text-[12px] text-sky-900/90">
+              {t.booking.dinBody(
+                dinSettingBand
+                  ? t.listing.specs.options[dinSettingBand] ?? dinSettingBand
+                  : "—",
+              )}
+            </p>
+          </div>
+        ) : null}
+
+        {needsSportsPfd && sportsPfdBlocked ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <p className="font-semibold">{t.booking.pfdBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.pfdBlockedBody}</p>
+          </div>
+        ) : null}
+
+        {needsSportsPfd && !sportsPfdBlocked ? (
+          <div className="rounded-xl border border-sky-200 bg-sky-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-sky-950">{t.booking.pfdTitle}</p>
+            <p className="text-[12px] text-sky-900/90">
+              {t.booking.pfdBody(
+                sportsPfdIncluded
+                  ? t.listing.specs.options[sportsPfdIncluded] ?? sportsPfdIncluded
+                  : "—",
+              )}
+            </p>
+            <label className="flex items-start gap-2 text-xs text-sky-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={sportsPfdAck}
+                onChange={(e) => setSportsPfdAck(e.target.checked)}
+              />
+              <span>{t.booking.pfdAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {needsCateringSanitize && cateringSanitizeBlocked ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <p className="font-semibold">{t.booking.cateringSanitizeBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.cateringSanitizeBlockedBody}</p>
+          </div>
+        ) : null}
+
+        {needsCateringSanitize && !cateringSanitizeBlocked ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-amber-950">{t.booking.cateringSanitizeTitle}</p>
+            <label className="flex items-start gap-2 text-xs text-amber-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={cateringSanitizeAck}
+                onChange={(e) => setCateringSanitizeAck(e.target.checked)}
+              />
+              <span>{t.booking.cateringSanitizeAttest}</span>
+            </label>
           </div>
         ) : null}
 
