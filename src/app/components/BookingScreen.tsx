@@ -6,12 +6,16 @@ import { getListingDisplayTitle } from "../../lib/listingQr";
 import { useAuth } from "../../hooks/AuthProvider";
 import { parseUsdToCents } from "../../lib/insurance";
 import {
+  coiStructuredFieldsComplete,
   insuranceMustBeActiveByIso,
+  listingCoiAdditionalInsuredRequired,
   listingInsuranceCoverageLeadDays,
   listingInsuranceOwnerProofEmail,
   listingInsuranceRequirementsSummary,
+  listingRequiresCoiHostConfirm,
   listingRequiresInsuranceProof,
   listingUsesAgentToOwnerInsuranceProof,
+  listingUsesStructuredCoi,
 } from "../../lib/listingInsurance";
 import {
   listingProRentersOnly,
@@ -33,6 +37,7 @@ import {
   listingRequiresAgeGate,
   listingRequiresBoaterLicense,
   listingRequiresDroneCert,
+  listingRequiresDriverRecordAttestation,
   listingRequiresEScooterAgeGate,
   listingRequiresHelmetLockPolicy,
   listingRequiresKitInventory,
@@ -48,10 +53,23 @@ import {
   listingIsHighValueGearCategory,
   listingIsOfficeCategory,
   listingIsMusicCategory,
+  listingIsCostumeCategory,
   listingRequiresDataWipe,
   listingDataWipeBlocksBooking,
   listingHostDataWipeStatus,
   listingPaCableStandInventoryText,
+  listingRequiresWeatherCancelPolicy,
+  listingWeatherCancelPolicy,
+  listingWeatherCancelFullRefundHours,
+  listingRequiresSafetyBriefing,
+  listingSafetyBriefingBlocksBooking,
+  listingSafetyBriefingNotes,
+  listingRequiresHygieneChecklist,
+  listingHygieneBlocksBooking,
+  listingHygieneChecklistNotes,
+  listingRequiresCostumeReturnCondition,
+  listingDryCleanReturnFeeUsd,
+  listingReturnConditionPolicy,
 } from "../../lib/categoryTrustRules";
 import { uploadRentalInsuranceProof } from "../../lib/rentalInsuranceStorage";
 import {
@@ -326,6 +344,21 @@ function BookingScreenLoaded({
   const [helmetLockAck, setHelmetLockAck] = useState(false);
   const [dataWipeAttested, setDataWipeAttested] = useState(false);
   const [paCableStandAck, setPaCableStandAck] = useState(false);
+  const [weatherCancelAck, setWeatherCancelAck] = useState(false);
+  const [safetyBriefingAck, setSafetyBriefingAck] = useState(false);
+  const [hygieneAck, setHygieneAck] = useState(false);
+  const [costumeReturnConditionAck, setCostumeReturnConditionAck] = useState(false);
+  const [driverLicenseValidAttested, setDriverLicenseValidAttested] = useState(false);
+  const [driverRecordSoftAttested, setDriverRecordSoftAttested] = useState(false);
+  const [driverLicenseState, setDriverLicenseState] = useState("");
+  const [driverLicenseLast4, setDriverLicenseLast4] = useState("");
+  const [coiCarrierName, setCoiCarrierName] = useState("");
+  const [coiPolicyNumber, setCoiPolicyNumber] = useState("");
+  const [coiLiabilityLimitUsd, setCoiLiabilityLimitUsd] = useState("");
+  const [coiEffectiveDate, setCoiEffectiveDate] = useState("");
+  const [coiExpirationDate, setCoiExpirationDate] = useState("");
+  const [coiNamedInsured, setCoiNamedInsured] = useState("");
+  const [coiAdditionalInsuredAttested, setCoiAdditionalInsuredAttested] = useState(false);
 
   const needsInsuranceProof = listingRequiresInsuranceProof(listing);
   const needsPhysicalDamage = listingRequiresPhysicalDamage(listing);
@@ -361,7 +394,25 @@ function BookingScreenLoaded({
   const hostDataWipeStatus = listingHostDataWipeStatus(listing);
   const needsPaCableStand = listingRequiresPaCableStandInventory(listing);
   const paCableStandText = listingPaCableStandInventoryText(listing);
+  const needsWeatherCancel = listingRequiresWeatherCancelPolicy(listing);
+  const weatherCancelPolicy = listingWeatherCancelPolicy(listing);
+  const weatherCancelHours = listingWeatherCancelFullRefundHours(listing);
+  const needsSafetyBriefing = listingRequiresSafetyBriefing(listing);
+  const safetyBriefingBlocked = listingSafetyBriefingBlocksBooking(listing);
+  const safetyBriefingNotes = listingSafetyBriefingNotes(listing);
+  const needsHygiene = listingRequiresHygieneChecklist(listing);
+  const hygieneBlocked = listingHygieneBlocksBooking(listing);
+  const hygieneNotes = listingHygieneChecklistNotes(listing);
+  const needsCostumeReturn = listingRequiresCostumeReturnCondition(listing);
+  const dryCleanReturnFeeUsd = listingDryCleanReturnFeeUsd(listing);
+  const returnConditionPolicy = listingReturnConditionPolicy(listing);
+  const isCostumeListing = listingIsCostumeCategory(listing) && listing.modes.rent;
+  const isToolsListing = listing.category.trim() === "Tools & DIY" && listing.modes.rent;
   const usesAgentInsurance = listingUsesAgentToOwnerInsuranceProof(listing);
+  const usesStructuredCoi = listingUsesStructuredCoi(listing);
+  const needsCoiHostConfirm = listingRequiresCoiHostConfirm(listing);
+  const coiAdditionalInsuredRequired = listingCoiAdditionalInsuredRequired(listing);
+  const needsDriverRecordAttestation = listingRequiresDriverRecordAttestation(listing);
   const isCommercialTransport = listingIsCommercialTransport(listing);
   const ownerProofEmail = listingInsuranceOwnerProofEmail(listing);
   const insuranceReqs = listingInsuranceRequirementsSummary(listing);
@@ -498,11 +549,24 @@ function BookingScreenLoaded({
     !needsInsuranceProof ||
     usesAgentInsurance ||
     (Boolean(insuranceActiveUntil) && insuranceActiveUntil >= endDate);
+  const coiFieldsOk =
+    !usesStructuredCoi ||
+    (coiStructuredFieldsComplete({
+      carrierName: coiCarrierName,
+      policyNumber: coiPolicyNumber,
+      liabilityLimitUsd: coiLiabilityLimitUsd,
+      effectiveDate: coiEffectiveDate,
+      expirationDate: coiExpirationDate,
+      namedInsured: coiNamedInsured,
+    }) &&
+      (!coiAdditionalInsuredRequired || coiAdditionalInsuredAttested));
   const insuranceProofOk =
     !needsInsuranceProof ||
     (usesAgentInsurance
       ? agentProofAck && Boolean(ownerProofEmail)
-      : Boolean(insuranceProof));
+      : usesStructuredCoi
+        ? Boolean(insuranceProof) && coiFieldsOk
+        : Boolean(insuranceProof));
   const physicalDamageOk = !needsPhysicalDamage || physicalDamageAttested || usesAgentInsurance;
   const proRenterOk = !needsProRenter || proRenterAttested;
   const cdlOk = !needsCdl || (cdlAttested && Boolean(cdlMedia));
@@ -510,6 +574,9 @@ function BookingScreenLoaded({
     !needsOperatorCert || (operatorCertAttested && Boolean(operatorCertMedia));
   const boaterLicenseOk =
     !needsBoaterLicense || (boaterLicenseAttested && Boolean(boaterLicenseMedia));
+  const driverRecordOk =
+    !needsDriverRecordAttestation ||
+    (driverLicenseValidAttested && driverRecordSoftAttested);
   const droneCertOk = !needsDroneCert || droneCertAttested;
   const carSeatOk =
     !needsCarSeatGates ||
@@ -528,6 +595,11 @@ function BookingScreenLoaded({
   const dataWipeOk =
     !needsDataWipe || (!dataWipeListingBlocked && dataWipeAttested);
   const paCableStandOk = !needsPaCableStand || paCableStandAck;
+  const weatherCancelOk = !needsWeatherCancel || weatherCancelAck;
+  const safetyBriefingOk =
+    !needsSafetyBriefing || (!safetyBriefingBlocked && safetyBriefingAck);
+  const hygieneOk = !needsHygiene || (!hygieneBlocked && hygieneAck);
+  const costumeReturnOk = !needsCostumeReturn || costumeReturnConditionAck;
 
   const eScooterAgeOk = useMemo(() => {
     if (!needsEScooterAge) return true;
@@ -563,7 +635,12 @@ function BookingScreenLoaded({
 
   const totalWithExtras =
     Math.round(
-      (breakdown.totalUsd + extrasFeeUsd + cleaningFeeUsd + setupTeardownFeeUsd) * 100,
+      (breakdown.totalUsd +
+        extrasFeeUsd +
+        cleaningFeeUsd +
+        setupTeardownFeeUsd +
+        dryCleanReturnFeeUsd) *
+        100,
     ) / 100;
 
   const canConfirm =
@@ -576,6 +653,7 @@ function BookingScreenLoaded({
     cdlOk &&
     operatorCertOk &&
     boaterLicenseOk &&
+    driverRecordOk &&
     droneCertOk &&
     carSeatOk &&
     realEstateHouseRulesOk &&
@@ -585,6 +663,10 @@ function BookingScreenLoaded({
     helmetLockOk &&
     dataWipeOk &&
     paCableStandOk &&
+    weatherCancelOk &&
+    safetyBriefingOk &&
+    hygieneOk &&
+    costumeReturnOk &&
     eScooterAgeOk &&
     !insuranceUploadBusy &&
     !proCredentialBusy &&
@@ -660,10 +742,31 @@ function BookingScreenLoaded({
         rvDumpStation: listing.categorySpecs?.dumpStationAccess || undefined,
         rvPropane: listing.categorySpecs?.propaneStatus || undefined,
         rvOccupancy: listing.categorySpecs?.rvOccupancyBand || undefined,
+        driverRecordAttestationRequired: needsDriverRecordAttestation,
+        structuredCoiRequired: usesStructuredCoi,
+        coiAdditionalInsuredRequired: usesStructuredCoi
+          ? coiAdditionalInsuredRequired
+          : undefined,
+        coiMinLiabilityUsd: usesStructuredCoi
+          ? insuranceReqs.liabilityMinUsd || undefined
+          : undefined,
+        coiMinPdUsd: usesStructuredCoi ? insuranceReqs.pdMinUsd || undefined : undefined,
         dataWipeRequired: needsDataWipe,
         hostDataWipeStatus: hostDataWipeStatus || undefined,
         paCableStandInventoryRequired: needsPaCableStand,
         paCableStandInventory: paCableStandText || undefined,
+        weatherCancelPolicy: needsWeatherCancel
+          ? weatherCancelPolicy || undefined
+          : undefined,
+        weatherCancelHours: needsWeatherCancel ? weatherCancelHours : undefined,
+        safetyBriefingRequired: needsSafetyBriefing,
+        safetyBriefingNotes: safetyBriefingNotes || undefined,
+        hygieneChecklistRequired: needsHygiene,
+        hygieneChecklistNotes: hygieneNotes || undefined,
+        returnConditionPolicy: needsCostumeReturn
+          ? returnConditionPolicy || undefined
+          : undefined,
+        dryCleanReturnFeeUsd: dryCleanReturnFeeUsd > 0 ? dryCleanReturnFeeUsd : undefined,
       },
       vehicle:
         isVehicleListing ||
@@ -823,10 +926,31 @@ function BookingScreenLoaded({
           rvDumpStation: listing.categorySpecs?.dumpStationAccess || undefined,
           rvPropane: listing.categorySpecs?.propaneStatus || undefined,
           rvOccupancy: listing.categorySpecs?.rvOccupancyBand || undefined,
+          driverRecordAttestationRequired: needsDriverRecordAttestation,
+          structuredCoiRequired: usesStructuredCoi,
+          coiAdditionalInsuredRequired: usesStructuredCoi
+            ? coiAdditionalInsuredRequired
+            : undefined,
+          coiMinLiabilityUsd: usesStructuredCoi
+            ? insuranceReqs.liabilityMinUsd || undefined
+            : undefined,
+          coiMinPdUsd: usesStructuredCoi ? insuranceReqs.pdMinUsd || undefined : undefined,
           dataWipeRequired: needsDataWipe,
           hostDataWipeStatus: hostDataWipeStatus || undefined,
           paCableStandInventoryRequired: needsPaCableStand,
           paCableStandInventory: paCableStandText || undefined,
+          weatherCancelPolicy: needsWeatherCancel
+            ? weatherCancelPolicy || undefined
+            : undefined,
+          weatherCancelHours: needsWeatherCancel ? weatherCancelHours : undefined,
+          safetyBriefingRequired: needsSafetyBriefing,
+          safetyBriefingNotes: safetyBriefingNotes || undefined,
+          hygieneChecklistRequired: needsHygiene,
+          hygieneChecklistNotes: hygieneNotes || undefined,
+          returnConditionPolicy: needsCostumeReturn
+            ? returnConditionPolicy || undefined
+            : undefined,
+          dryCleanReturnFeeUsd: dryCleanReturnFeeUsd > 0 ? dryCleanReturnFeeUsd : undefined,
         },
         vehicle:
           isVehicleListing ||
@@ -924,6 +1048,31 @@ function BookingScreenLoaded({
       operatorCertMedia: needsOperatorCert ? operatorCertMedia : undefined,
       boaterLicenseAttested: needsBoaterLicense ? boaterLicenseAttested : undefined,
       boaterLicenseMedia: needsBoaterLicense ? boaterLicenseMedia : undefined,
+      driverLicenseValidAttested: needsDriverRecordAttestation
+        ? driverLicenseValidAttested
+        : undefined,
+      driverRecordSoftAttested: needsDriverRecordAttestation
+        ? driverRecordSoftAttested
+        : undefined,
+      driverLicenseState: needsDriverRecordAttestation
+        ? driverLicenseState.trim().toUpperCase() || undefined
+        : undefined,
+      driverLicenseLast4: needsDriverRecordAttestation
+        ? driverLicenseLast4.replace(/\D/g, "").slice(-4) || undefined
+        : undefined,
+      coiCarrierName: usesStructuredCoi ? coiCarrierName.trim() || undefined : undefined,
+      coiPolicyNumber: usesStructuredCoi ? coiPolicyNumber.trim() || undefined : undefined,
+      coiLiabilityLimitUsd: usesStructuredCoi
+        ? coiLiabilityLimitUsd.trim() || undefined
+        : undefined,
+      coiEffectiveDate: usesStructuredCoi ? coiEffectiveDate.trim() || undefined : undefined,
+      coiExpirationDate: usesStructuredCoi ? coiExpirationDate.trim() || undefined : undefined,
+      coiNamedInsured: usesStructuredCoi ? coiNamedInsured.trim() || undefined : undefined,
+      coiAdditionalInsuredAttested: usesStructuredCoi
+        ? coiAdditionalInsuredRequired
+          ? coiAdditionalInsuredAttested
+          : undefined
+        : undefined,
       droneCertAttested: needsDroneCert ? droneCertAttested : undefined,
       droneCertMedia: needsDroneCert ? droneCertMedia : undefined,
       carSeatSanitizationAttested: needsCarSeatGates ? carSeatSanitizationAttested : undefined,
@@ -938,6 +1087,18 @@ function BookingScreenLoaded({
       helmetPolicySnapshot: helmetPolicy || undefined,
       lockPolicySnapshot: lockPolicy || undefined,
       setupTeardownFeeUsd: setupTeardownFeeUsd > 0 ? setupTeardownFeeUsd : undefined,
+      weatherCancelPolicySnapshot: needsWeatherCancel
+        ? weatherCancelPolicy || undefined
+        : undefined,
+      weatherCancelHours: needsWeatherCancel ? weatherCancelHours : undefined,
+      weatherCancelAck: needsWeatherCancel ? weatherCancelAck : undefined,
+      safetyBriefingAck: needsSafetyBriefing ? safetyBriefingAck : undefined,
+      safetyBriefingNotesSnapshot: safetyBriefingNotes || undefined,
+      hygieneAck: needsHygiene ? hygieneAck : undefined,
+      hygieneNotesSnapshot: hygieneNotes || undefined,
+      costumeReturnConditionAck: needsCostumeReturn ? costumeReturnConditionAck : undefined,
+      returnConditionPolicySnapshot: returnConditionPolicy || undefined,
+      dryCleanReturnFeeUsd: dryCleanReturnFeeUsd > 0 ? dryCleanReturnFeeUsd : undefined,
       dataWipeAttested: needsDataWipe ? dataWipeAttested : undefined,
       hostDataWipeStatusSnapshot: needsDataWipe ? hostDataWipeStatus || undefined : undefined,
       paCableStandAck: needsPaCableStand ? paCableStandAck : undefined,
@@ -1291,6 +1452,8 @@ function BookingScreenLoaded({
         ) : null}
         {isBikesListing ? <CategoryFactCard category="Bikes & Scooters" /> : null}
         {isPartyListing ? <CategoryFactCard category="Party & Events" /> : null}
+        {isToolsListing ? <CategoryFactCard category="Tools & DIY" /> : null}
+        {isCostumeListing ? <CategoryFactCard category="Costume & Cosplay" /> : null}
         {isOfficeListing ? <CategoryFactCard category="Office & Business" /> : null}
         {isMusicListing ? <CategoryFactCard category="Music & Audio" /> : null}
 
@@ -1309,7 +1472,9 @@ function BookingScreenLoaded({
         ) : null}
 
         {isPartyListing &&
-        (setupTeardownFeeUsd > 0 || listing.categorySpecs?.powerRequirement) ? (
+        (setupTeardownFeeUsd > 0 ||
+          listing.categorySpecs?.powerRequirement ||
+          needsWeatherCancel) ? (
           <div className="rounded-xl border border-border bg-card p-4 space-y-1">
             {setupTeardownFeeUsd > 0 ? (
               <p className="text-sm font-semibold text-gray-900">
@@ -1322,6 +1487,30 @@ function BookingScreenLoaded({
                   t.listing.specs.options[listing.categorySpecs.powerRequirement] ??
                     listing.categorySpecs.powerRequirement,
                 )}
+              </p>
+            ) : null}
+            {needsWeatherCancel && weatherCancelPolicy ? (
+              <p className="text-[13px] text-muted-foreground">
+                {t.booking.weatherCancelPolicyLine(
+                  t.listing.specs.options[weatherCancelPolicy] ?? weatherCancelPolicy,
+                )}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {needsCostumeReturn ? (
+          <div className="rounded-xl border border-border bg-card p-4 space-y-1">
+            <p className="text-sm font-semibold text-gray-900">
+              {t.booking.returnConditionPolicyLine(
+                returnConditionPolicy
+                  ? t.listing.specs.options[returnConditionPolicy] ?? returnConditionPolicy
+                  : t.booking.returnConditionFallback,
+              )}
+            </p>
+            {dryCleanReturnFeeUsd > 0 ? (
+              <p className="text-[13px] text-muted-foreground">
+                {t.booking.dryCleanReturnFeeLine(formatMoney(dryCleanReturnFeeUsd))}
               </p>
             ) : null}
           </div>
@@ -1482,6 +1671,76 @@ function BookingScreenLoaded({
                 onChange={(e) => setDataWipeAttested(e.target.checked)}
               />
               <span>{t.booking.dataWipeAttest}</span>
+        {needsWeatherCancel ? (
+          <div className="rounded-xl border border-sky-200 bg-sky-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-sky-950">{t.booking.weatherCancelTitle}</p>
+            <p className="text-[12px] text-sky-900/90">
+              {t.booking.weatherCancelBody(
+                weatherCancelPolicy
+                  ? t.listing.specs.options[weatherCancelPolicy] ?? weatherCancelPolicy
+                  : t.booking.weatherCancelFallback,
+              )}
+            </p>
+            <label className="flex items-start gap-2 text-xs text-sky-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={weatherCancelAck}
+                onChange={(e) => setWeatherCancelAck(e.target.checked)}
+              />
+              <span>{t.booking.weatherCancelAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {needsSafetyBriefing && safetyBriefingBlocked ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <p className="font-semibold">{t.booking.safetyBriefingBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.safetyBriefingBlockedBody}</p>
+          </div>
+        ) : null}
+
+        {needsSafetyBriefing && !safetyBriefingBlocked ? (
+          <div className="rounded-xl border border-orange-200 bg-orange-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-orange-950">{t.booking.safetyBriefingTitle}</p>
+            <p className="text-[12px] text-orange-900/90">{t.booking.safetyBriefingBody}</p>
+            {safetyBriefingNotes ? (
+              <p className="text-[13px] whitespace-pre-wrap text-orange-950/90">{safetyBriefingNotes}</p>
+            ) : null}
+            <label className="flex items-start gap-2 text-xs text-orange-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={safetyBriefingAck}
+                onChange={(e) => setSafetyBriefingAck(e.target.checked)}
+              />
+              <span>{t.booking.safetyBriefingAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {needsHygiene && hygieneBlocked ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <p className="font-semibold">{t.booking.hygieneBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.hygieneBlockedBody}</p>
+          </div>
+        ) : null}
+
+        {needsHygiene && !hygieneBlocked ? (
+          <div className="rounded-xl border border-teal-200 bg-teal-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-teal-950">{t.booking.hygieneTitle}</p>
+            <p className="text-[12px] text-teal-900/90">{t.booking.hygieneBody}</p>
+            {hygieneNotes ? (
+              <p className="text-[13px] whitespace-pre-wrap text-teal-950/90">{hygieneNotes}</p>
+            ) : null}
+            <label className="flex items-start gap-2 text-xs text-teal-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={hygieneAck}
+                onChange={(e) => setHygieneAck(e.target.checked)}
+              />
+              <span>{t.booking.hygieneAttest}</span>
             </label>
           </div>
         ) : null}
@@ -1496,6 +1755,13 @@ function BookingScreenLoaded({
             ) : (
               <p className="text-[12px] text-fuchsia-900/80">{t.booking.paCableStandEmpty}</p>
             )}
+
+            ) : null}
+
+                {needsCostumeReturn ? (
+          <div className="rounded-xl border border-fuchsia-200 bg-fuchsia-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-fuchsia-950">{t.booking.costumeReturnTitle}</p>
+            <p className="text-[12px] text-fuchsia-900/90">{t.booking.costumeReturnBody}</p>
             <label className="flex items-start gap-2 text-xs text-fuchsia-950">
               <input
                 type="checkbox"
@@ -1504,6 +1770,22 @@ function BookingScreenLoaded({
                 onChange={(e) => setPaCableStandAck(e.target.checked)}
               />
               <span>{t.booking.paCableStandAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {needsCostumeReturn ? (
+          <div className="rounded-xl border border-fuchsia-200 bg-fuchsia-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-fuchsia-950">{t.booking.costumeReturnTitle}</p>
+            <p className="text-[12px] text-fuchsia-900/90">{t.booking.costumeReturnBody}</p>
+            <label className="flex items-start gap-2 text-xs text-fuchsia-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={costumeReturnConditionAck}
+                onChange={(e) => setCostumeReturnConditionAck(e.target.checked)}
+              />
+              <span>{t.booking.costumeReturnAttest}</span>
             </label>
           </div>
         ) : null}
@@ -1618,6 +1900,61 @@ function BookingScreenLoaded({
               />
             </label>
             <p className="text-xs text-indigo-900/80">{t.booking.cdlHint}</p>
+          </div>
+        ) : null}
+
+        {needsDriverRecordAttestation ? (
+          <div className="rounded-xl border border-slate-300 bg-slate-50/80 p-4 space-y-3">
+            <p className="text-sm font-semibold text-slate-950">{t.booking.driverRecordTitle}</p>
+            <p className="text-xs leading-snug text-slate-800/90">{t.booking.driverRecordBody}</p>
+            <label className="flex items-start gap-2 text-xs text-slate-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={driverLicenseValidAttested}
+                onChange={(e) => setDriverLicenseValidAttested(e.target.checked)}
+              />
+              <span>{t.booking.driverLicenseValidAttest}</span>
+            </label>
+            <label className="flex items-start gap-2 text-xs text-slate-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={driverRecordSoftAttested}
+                onChange={(e) => setDriverRecordSoftAttested(e.target.checked)}
+              />
+              <span>{t.booking.driverRecordSoftAttest}</span>
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="block text-[11px] font-semibold uppercase tracking-wide text-slate-800">
+                {t.booking.driverLicenseState}
+                <input
+                  type="text"
+                  maxLength={2}
+                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm font-medium normal-case tracking-normal text-slate-950"
+                  value={driverLicenseState}
+                  onChange={(e) => setDriverLicenseState(e.target.value.toUpperCase())}
+                  placeholder="CA"
+                  autoComplete="address-level1"
+                />
+              </label>
+              <label className="block text-[11px] font-semibold uppercase tracking-wide text-slate-800">
+                {t.booking.driverLicenseLast4}
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={4}
+                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm font-medium normal-case tracking-normal text-slate-950"
+                  value={driverLicenseLast4}
+                  onChange={(e) =>
+                    setDriverLicenseLast4(e.target.value.replace(/\D/g, "").slice(0, 4))
+                  }
+                  placeholder="1234"
+                  autoComplete="off"
+                />
+              </label>
+            </div>
+            <p className="text-xs text-slate-700/90">{t.booking.driverRecordHonestNote}</p>
           </div>
         ) : null}
 
@@ -1877,8 +2214,103 @@ function BookingScreenLoaded({
                     insuranceLeadDays,
                   )}
                 </p>
+                {usesStructuredCoi ? (
+                  <p className="mt-2 text-xs font-semibold text-amber-950">
+                    {t.booking.coiStructuredRequired}
+                  </p>
+                ) : null}
+                {needsCoiHostConfirm ? (
+                  <p className="mt-1 text-xs text-amber-900/90">{t.booking.coiHostConfirmHint}</p>
+                ) : null}
               </div>
             </div>
+
+            {usesStructuredCoi ? (
+              <div className="space-y-2.5 rounded-xl border border-amber-300/80 bg-white/80 p-3">
+                <p className="text-xs font-semibold text-amber-950">{t.booking.coiFieldsTitle}</p>
+                <label className="block text-[11px] font-semibold uppercase tracking-wide text-amber-900">
+                  {t.booking.coiCarrierName}
+                  <input
+                    type="text"
+                    className="mt-1 w-full rounded-lg border border-amber-300 bg-white px-2.5 py-2 text-sm font-medium normal-case tracking-normal text-amber-950"
+                    value={coiCarrierName}
+                    onChange={(e) => setCoiCarrierName(e.target.value)}
+                  />
+                </label>
+                <label className="block text-[11px] font-semibold uppercase tracking-wide text-amber-900">
+                  {t.booking.coiPolicyNumber}
+                  <input
+                    type="text"
+                    className="mt-1 w-full rounded-lg border border-amber-300 bg-white px-2.5 py-2 text-sm font-medium normal-case tracking-normal text-amber-950"
+                    value={coiPolicyNumber}
+                    onChange={(e) => setCoiPolicyNumber(e.target.value)}
+                  />
+                </label>
+                <label className="block text-[11px] font-semibold uppercase tracking-wide text-amber-900">
+                  {t.booking.coiNamedInsured}
+                  <input
+                    type="text"
+                    className="mt-1 w-full rounded-lg border border-amber-300 bg-white px-2.5 py-2 text-sm font-medium normal-case tracking-normal text-amber-950"
+                    value={coiNamedInsured}
+                    onChange={(e) => setCoiNamedInsured(e.target.value)}
+                  />
+                </label>
+                <label className="block text-[11px] font-semibold uppercase tracking-wide text-amber-900">
+                  {t.booking.coiLiabilityLimitUsd}
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    className="mt-1 w-full rounded-lg border border-amber-300 bg-white px-2.5 py-2 text-sm font-medium normal-case tracking-normal text-amber-950"
+                    value={coiLiabilityLimitUsd}
+                    onChange={(e) => setCoiLiabilityLimitUsd(e.target.value)}
+                    placeholder={insuranceReqs.liabilityMinUsd || "1000000"}
+                  />
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wide text-amber-900">
+                    {t.booking.coiEffectiveDate}
+                    <input
+                      type="date"
+                      className="mt-1 w-full rounded-lg border border-amber-300 bg-white px-2.5 py-2 text-sm font-medium normal-case tracking-normal text-amber-950"
+                      value={coiEffectiveDate}
+                      onChange={(e) => setCoiEffectiveDate(e.target.value)}
+                    />
+                  </label>
+                  <label className="block text-[11px] font-semibold uppercase tracking-wide text-amber-900">
+                    {t.booking.coiExpirationDate}
+                    <input
+                      type="date"
+                      className="mt-1 w-full rounded-lg border border-amber-300 bg-white px-2.5 py-2 text-sm font-medium normal-case tracking-normal text-amber-950"
+                      value={coiExpirationDate}
+                      onChange={(e) => setCoiExpirationDate(e.target.value)}
+                    />
+                  </label>
+                </div>
+                {(insuranceReqs.pdMinUsd || insuranceReqs.liabilityMinUsd || insuranceReqs.notes) && (
+                  <div className="text-xs text-amber-950 space-y-1">
+                    <p className="font-semibold">{t.booking.coiHostRequirements}</p>
+                    {insuranceReqs.liabilityMinUsd ? (
+                      <p>Liability min: ${insuranceReqs.liabilityMinUsd}</p>
+                    ) : null}
+                    {insuranceReqs.pdMinUsd ? <p>PD min: ${insuranceReqs.pdMinUsd}</p> : null}
+                    {insuranceReqs.notes ? (
+                      <p className="whitespace-pre-wrap">{insuranceReqs.notes}</p>
+                    ) : null}
+                  </div>
+                )}
+                {coiAdditionalInsuredRequired ? (
+                  <label className="flex items-start gap-2 text-xs text-amber-950">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5"
+                      checked={coiAdditionalInsuredAttested}
+                      onChange={(e) => setCoiAdditionalInsuredAttested(e.target.checked)}
+                    />
+                    <span>{t.booking.coiAdditionalInsuredAttest}</span>
+                  </label>
+                ) : null}
+              </div>
+            ) : null}
 
             <label className="block text-xs font-medium text-amber-950">
               {t.booking.insuranceActiveUntil}

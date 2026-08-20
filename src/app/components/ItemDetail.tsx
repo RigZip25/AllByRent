@@ -582,6 +582,11 @@ export function ItemDetail({
             ) : null}
             {listing.modes.rent && listing.category.trim() === "Music & Audio" ? (
               <CategoryFactCard category="Music & Audio" className="mt-3" />
+            {listing.modes.rent && listing.category.trim() === "Tools & DIY" ? (
+              <CategoryFactCard category="Tools & DIY" className="mt-3" />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Costume & Cosplay" ? (
+              <CategoryFactCard category="Costume & Cosplay" className="mt-3" />
             ) : null}
             {listing.modes.rent &&
             (listingProRentersOnly(listing) ||

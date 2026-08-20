@@ -124,6 +124,10 @@ export type CancelableBookingShape = {
   hostHandedOverAt?: string;
   renterReceivedAt?: string;
   pickupConfirmedAt?: string;
+  /** P2 outdoor party weather cancel snapshot. */
+  weatherCancelPolicySnapshot?: string;
+  weatherCancelHours?: number | null;
+  weatherCancelAck?: boolean;
 };
 
 /** Post-accept cancel is allowed before either side confirms pickup handoff. */
@@ -141,6 +145,8 @@ export function assessCancelRefund(params: {
   booking: CancelableBookingShape;
   role: "host" | "renter";
   nowMs?: number;
+  /** Renter selected outdoor weather cancel under listing policy. */
+  weatherCancel?: boolean;
 }): CancelRefundAssessment {
   const nowMs = params.nowMs ?? Date.now();
   const allowed = canCancelAcceptedBooking(params.booking);
@@ -156,6 +162,27 @@ export function assessCancelRefund(params: {
       allowed,
       releaseDeposit: true,
     };
+  }
+  // Outdoor party weather cancel: full rental refund when inside policy window.
+  if (
+    params.weatherCancel &&
+    params.booking.weatherCancelAck &&
+    params.booking.weatherCancelPolicySnapshot &&
+    params.booking.weatherCancelPolicySnapshot !== "not_outdoor" &&
+    params.booking.weatherCancelPolicySnapshot !== "host_discretion"
+  ) {
+    const hoursNeeded =
+      params.booking.weatherCancelHours ??
+      (params.booking.weatherCancelPolicySnapshot === "full_refund_12h" ? 12 : 24);
+    if (base.hoursUntilStart >= hoursNeeded) {
+      return {
+        ...base,
+        tier: "full",
+        refundPercent: 100,
+        allowed,
+        releaseDeposit: true,
+      };
+    }
   }
   return { ...base, allowed, releaseDeposit: true };
 }

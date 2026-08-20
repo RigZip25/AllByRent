@@ -962,6 +962,15 @@ export const en: AppMessages = {
       "Data wipe acknowledgment from booking is required before handoff can start.",
     paCableStandUnlockBlocked:
       "PA cable / stand inventory acknowledgment from booking is required before handoff can start.",
+    safetyBriefingUnlockBlocked:
+      "Safety briefing acknowledgment from booking is required before handoff can start.",
+    hygieneUnlockBlocked:
+      "Hygiene checklist acknowledgment from booking is required before handoff can start.",
+    costumeReturnUnlockBlocked:
+      "Costume return-condition acknowledgment from booking is required before handoff can start.",
+    weatherCancelRefundPreview:
+      "Weather cancel selected — full rental refund under this listing’s outdoor weather policy.",
+    weatherCancelToggle: "Cancel due to weather (outdoor party policy)",
     agentProofPending:
       "Waiting for the host to confirm they received insurance proof from your agent.",
     agentProofReceivedMark: "I received insurance proof from the renter’s agent",
@@ -1747,6 +1756,44 @@ export const en: AppMessages = {
           label: "Power requirement",
           hint: "Tell venues what circuits / generators you need.",
         },
+        weatherCancelPolicy: {
+          label: "Outdoor weather cancel",
+          hint: "Required for outdoor footprints / tents — full refund window if weather kills the event.",
+        },
+        safetyBriefingRequired: {
+          label: "Safety briefing required",
+          hint: "Saws, welders, scaffolding-like tools — renter must acknowledge briefing at booking.",
+        },
+        safetyBriefingConfirmed: {
+          label: "Briefing readiness",
+          hint: "Mark ready when you can give PPE / safe-use instructions at handoff.",
+        },
+        safetyBriefingNotes: {
+          label: "Safety briefing notes",
+          placeholder: "PPE required, no wet blades, scaffold base plates…",
+          hint: "Optional bullets shown to the renter at booking.",
+        },
+        hygieneChecklistRequired: {
+          label: "Hygiene checklist",
+          hint: "Tents / sleeping bags — require sanitation attestation for rent.",
+        },
+        hygieneSanitizedAttested: {
+          label: "Sanitized / aired",
+          hint: "Confirm cleaned before listing — blocks book until attested.",
+        },
+        hygieneChecklistNotes: {
+          label: "Hygiene notes",
+          placeholder: "Washed liner, aired 24h, spot-clean stains…",
+        },
+        returnConditionPolicy: {
+          label: "Return condition",
+          hint: "How costumes must come back — dry-clean only, spot clean, or as received.",
+        },
+        dryCleanReturnFeeUsd: {
+          label: "Dry-clean / return-condition fee (USD)",
+          placeholder: "35",
+          hint: "Optional flat fee shown at booking and frozen on the agreement.",
+        },
         useCase: { label: "Primary use" },
         transportSize: { label: "How it moves" },
         deviceHasStorage: {
@@ -1999,6 +2046,16 @@ export const en: AppMessages = {
         dedicated_20a: "Dedicated 20A circuit",
         "240v_or_generator": "240V or generator",
         host_provides: "Host provides power on site",
+        full_refund_24h: "Full refund if cancel ≥24h before start (weather)",
+        full_refund_12h: "Full refund if cancel ≥12h before start (weather)",
+        host_discretion: "Weather cancel — host discretion / case-by-case",
+        not_outdoor: "Not an outdoor event setup",
+        briefing_ready: "Briefing ready at handoff",
+        need_to_prepare: "Still preparing briefing",
+        need_to_clean: "Still need to clean / air out",
+        dry_clean_only: "Dry-clean only before return",
+        spot_clean_ok: "Spot clean OK; dry-clean if stained",
+        return_as_received: "Return as received (no wash required)",
         under_2kw: "Under 2 kW",
         "2_5kw": "2–5 kW",
         "5_15kw": "5–15 kW",
@@ -2603,6 +2660,60 @@ export const en: AppMessages = {
       `This e-scooter listing requires riders to be at least ${minAge}. Add your date of birth in profile, or choose another listing.`,
     setupTeardownFeeLine: (amount) => `Setup / teardown fee: ${amount}`,
     powerRequirementLine: (power) => `Power needed: ${power}`,
+    weatherCancelTitle: "Outdoor weather cancel",
+    weatherCancelBody: (policy) =>
+      `This outdoor party listing uses weather cancel: ${policy}. If weather makes the event unsafe or impossible, cancel under this policy for a full rental refund when the window applies.`,
+    weatherCancelAttest: "I understand the outdoor weather cancel policy for this booking.",
+    weatherCancelFallback: "host weather policy",
+    weatherCancelPolicyLine: (policy) => `Weather cancel: ${policy}`,
+    safetyBriefingBlockedTitle: "Safety briefing not ready",
+    safetyBriefingBlockedBody:
+      "The host still needs to mark a PPE / safety briefing ready for this saw, welder, or scaffolding-like tool before you can book.",
+    safetyBriefingTitle: "Safety briefing",
+    safetyBriefingBody:
+      "Saws, welders, and scaffolding-like gear need a short PPE / safe-use briefing before handoff. Confirm you will complete it with the host.",
+    safetyBriefingAttest: "I will complete the safety briefing before using this tool.",
+    hygieneBlockedTitle: "Hygiene checklist incomplete",
+    hygieneBlockedBody:
+      "The host still needs to attest that this tent or sleeping bag was cleaned / aired before you can book.",
+    hygieneTitle: "Hygiene / sanitation",
+    hygieneBody:
+      "Tents and sleeping bags are shared sleep gear. Host attested cleaning; acknowledge you’ll return them reasonably clean and dry.",
+    hygieneAttest: "I acknowledge the hygiene checklist and will return gear clean and dry.",
+    costumeReturnTitle: "Return condition / dry-clean",
+    costumeReturnBody:
+      "Costume rentals set a return-condition rule and optional dry-clean fee. Confirm you will follow it.",
+    costumeReturnAttest: "I agree to the return-condition / dry-clean terms for this costume.",
+    returnConditionPolicyLine: (policy) => `Return condition: ${policy}`,
+    returnConditionFallback: "as listed",
+    dryCleanReturnFeeLine: (amount) => `Dry-clean / return-condition fee: ${amount}`,
+    driverRecordTitle: "License & driving-record attestation",
+    driverRecordBody:
+      "Confirm you hold a valid license for this vehicle and that your recent record is clean enough to drive. This is a self-attestation for the host — not a paid MVR / DMV pull.",
+    driverLicenseValidAttest:
+      "I hold a valid driver’s license for the class of this vehicle and will be the named driver (or an authorized driver attested at start ID).",
+    driverRecordSoftAttest:
+      "I attest that in the last 36 months I have not had a license suspension, DUI/DWI, or at-fault major collision that would make me unfit to rent this vehicle. (Self-attestation only.)",
+    driverLicenseState: "License state (optional)",
+    driverLicenseLast4: "License last 4 (optional)",
+    driverRecordHonestNote:
+      "Evorios does not purchase MVR reports in this version. False attestation can lead to cancel / dispute / ban — hosts may still ask to see your physical license at handoff.",
+    driverRecordBadge: "License / record attest",
+    coiStructuredRequired:
+      "This Heavy / Construction listing needs a structured Certificate of Insurance (COI) — not photo-only.",
+    coiHostConfirmHint:
+      "After you book, the host must mark COI / insurance proof received before PIN or keys unlock.",
+    coiFieldsTitle: "Certificate of Insurance details",
+    coiCarrierName: "Insurance carrier",
+    coiPolicyNumber: "Policy number",
+    coiNamedInsured: "Named insured",
+    coiLiabilityLimitUsd: "Liability limit (USD)",
+    coiEffectiveDate: "Effective date",
+    coiExpirationDate: "Expiration date",
+    coiHostRequirements: "Host COI requirements",
+    coiAdditionalInsuredAttest:
+      "I attest this COI lists the host (or their property / job site) as additional insured as required.",
+    coiStructuredBadge: "Structured COI",
     dataWipeBlockedTitle: "Data wipe status incomplete",
     dataWipeBlockedBody:
       "The host marked this device as having storage but has not set a wipe status. Ask them to update the listing before booking.",
@@ -2757,7 +2868,7 @@ export const en: AppMessages = {
       Vehicles: {
         title: "How neighbor car rental works",
         summary:
-          "Neighbors are higher-trust than anonymous rentals — signed terms, insurance proof, and pre-trip photos still required before PIN/keys. Cancel ≥24h before start: full refund; inside 24h: 50%. No-show: host marks after ~2h; trip price kept. Late return: 30m grace + $20 + $15/hr defaults. Fuel full-to-full (+$20 if short). ≥26k lb / semi: CDL + agent→owner insurance.",
+          "Neighbors are higher-trust than anonymous rentals — signed terms, insurance proof, license / soft driving-record self-attestation (not a paid MVR), and pre-trip photos still required before PIN/keys. Cancel ≥24h before start: full refund; inside 24h: 50%. No-show: host marks after ~2h; trip price kept. Late return: 30m grace + $20 + $15/hr defaults. Fuel full-to-full (+$20 if short). ≥26k lb / semi: CDL + agent→owner insurance.",
         hostTipTitle: "For hosts / landlords",
         hostTip:
           "Paid peer-to-peer sharing may fall outside a personal auto policy. Enter GVWR / vehicle weight in pounds (lb). At ≥ 26,000 lb or for semis / equipment trailers, require CDL and set the email where the renter’s agent must send proof. For lighter cars, renters add the vehicle to their personal policy and upload proof in-app. Pre-trip tire photos protect against expensive tire swaps. Fuel is full-to-full by default (levels at handoff only — not a listing field). Optional no-show fee is a soft deposit flag — not airline-style. We are not partners with any insurer; confirm with your agent before you list.",
@@ -2774,7 +2885,7 @@ export const en: AppMessages = {
           "List the car → set weight (lb) + insurance rules (personal upload or agent→owner email for ≥26k/semi) + max deductible + optional no-show fee → renter books (CDL if commercial transport) → insurance cleared → mandatory pre-trip photos (body + tires) both sides confirm → handoff with fuel/DEF + odometer → return inspection with the same tire photo set → host confirms. Booking can exist earlier; codes stay locked until proof + pre-trip are done.",
         layersTitle: "Safety layers",
         layers:
-          "Signed rental terms · insurance · CDL when required · pre-trip photos · fuel/DEF · cancel ≥24h free · no-show ~2h · late 30m+$20+$15/hr · deposit hold · geo PIN · macropoints.",
+          "Signed rental terms · insurance · license / soft driving-record attest · CDL when required · pre-trip photos · fuel/DEF · cancel ≥24h free · no-show ~2h · late 30m+$20+$15/hr · deposit hold · geo PIN · macropoints.",
         claimsTitle: "If something goes wrong (claims)",
         claims:
           "Renter insurance is primary. Pre-trip vs return photos help prove damage or tire swaps. Cancel ≥24h: full refund; inside 24h: 50%. No-show after ~2h: trip price kept; optional deposit fee if configured. Late return: grace then flat + hourly per listing policy.",
@@ -2782,7 +2893,7 @@ export const en: AppMessages = {
       "Heavy Equipment": {
         title: "Commercial equipment rentals",
         summary:
-          "Heavy Equipment shelves rent to professionals by default. Forklift / crane / excavator / general operator credentials are required where the subcategory calls for them (attestation + document). Physical damage insurance proof is required before handoff. Deposit is insurance-backed (deductible-sized hold), not full replacement. Mandatory pre-trip inspection blocks start until both sides confirm.",
+          "Heavy Equipment shelves rent to professionals by default. Forklift / crane / excavator / general operator credentials are required where the subcategory calls for them (attestation + document). Structured Certificate of Insurance (COI) fields plus certificate photo — host marks “proof received” before handoff. Physical damage coverage required. Deposit is insurance-backed (deductible-sized hold), not full replacement. Mandatory pre-trip inspection blocks start until both sides confirm.",
         hostTipTitle: "For hosts",
         hostTip:
           "Keep “professionals only” on unless you truly want DIY renters. Require operator credentials for powered commercial gear. Require insurance proof with physical damage; set max deductible so the card hold matches. Pre-trip photos protect both sides.",
@@ -2794,7 +2905,7 @@ export const en: AppMessages = {
           "List equipment → pro-only + PD + operator cert when required → renter attests, uploads credential + insurance → pre-trip both confirm → handoff → return inspection → claims via insurance first.",
         layersTitle: "Safety layers",
         layers:
-          "Operator credential · pro attestation · physical damage insurance · deductible-sized hold · pre-trip & return photos · optional no-show fee · rental terms · QR / PIN handoff.",
+          "Operator credential · pro attestation · structured COI + host confirm · physical damage insurance · deductible-sized hold · pre-trip & return photos · optional no-show fee · rental terms · QR / PIN handoff.",
         claimsTitle: "If something goes wrong",
         claims:
           "Renter’s physical damage / equipment coverage is primary. Use uploaded proof with their insurer; the card hold matches your max deductible. No-show frees the calendar; dispute if needed.",
@@ -2802,7 +2913,7 @@ export const en: AppMessages = {
       Construction: {
         title: "Construction gear rentals",
         summary:
-          "Construction shelves default to professionals only and require physical damage insurance on the rent path. Insurance-backed deposit (deductible-sized card hold) applies — not full tool replacement. Crane-class / heavy powered gear also requires an operator credential. Mandatory pre-trip photo inspection applies before start.",
+          "Construction shelves default to professionals only and require physical damage insurance on the rent path. Structured COI (carrier, policy #, limits, dates) plus host “proof received” — not photo-only. Insurance-backed deposit (deductible-sized card hold) applies — not full tool replacement. Crane-class / heavy powered gear also requires an operator credential. Mandatory pre-trip photo inspection applies before start.",
         hostTipTitle: "For hosts",
         hostTip:
           "Pros-only is on by default. Set max deductible so the hold is insurance-backed. Require operator credentials for crane-class and powered commercial shelves. Capture pre-trip condition photos.",
@@ -2814,7 +2925,7 @@ export const en: AppMessages = {
           "List → pro-only + PD + operator cert when required → renter attests and uploads proof → pre-trip both confirm → handoff → return.",
         layersTitle: "Safety layers",
         layers:
-          "Operator credential · pro attestation · physical damage insurance · deductible hold · pre-trip inspection · optional no-show · rental terms · QR handoff.",
+          "Operator credential · pro attestation · structured COI + host confirm · physical damage insurance · deductible hold · pre-trip inspection · optional no-show · rental terms · QR handoff.",
         claimsTitle: "If something goes wrong",
         claims:
           "Insurance first (physical damage), then deductible hold with photos. No-show cancels and frees dates; fee only if you configured one.",
@@ -2933,19 +3044,19 @@ export const en: AppMessages = {
       "Outdoor & Camping": {
         title: "Outdoor & camping rentals",
         summary:
-          "Expedition / survival shelves use a liability waiver at booking. Capacity and season rating help match trips.",
+          "Expedition / survival shelves use a liability waiver. Tents and sleeping bags add a hygiene / sanitation checklist so shared sleep gear stays clean.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Require waiver for survival / expedition gear. Keep tents dry and note season rating honestly.",
-        whyGeoTitle: "Why waiver on survival / expedition?",
+          "Require waiver for survival / expedition. For tents and bags, attest cleaned / aired before rent.",
+        whyGeoTitle: "Why waiver + hygiene?",
         whyGeo:
-          "Remote gear failures can strand people. Waiver + clear season / capacity specs set honest expectations.",
+          "Remote failures strand people; dirty sleep gear spreads odor and allergens. Waiver + hygiene set honest expectations.",
         flowTitle: "End to end",
-        flow: "List → waiver when required → handoff → return.",
+        flow: "List → waiver / hygiene when required → handoff → return clean and dry.",
         layersTitle: "Safety layers",
-        layers: "Liability waiver (high-risk) · capacity / season · deposit · rental terms.",
+        layers: "Liability waiver · hygiene checklist · capacity / season · deposit · rental terms.",
         claimsTitle: "If something goes wrong",
-        claims: "Condition photos and waiver support disputes; deposit for damage or missing parts.",
+        claims: "Condition photos, waiver, and hygiene ack support disputes; deposit for damage or missing parts.",
       },
       "Bikes & Scooters": {
         title: "Bikes & scooter rentals",
@@ -3016,6 +3127,39 @@ export const en: AppMessages = {
         layers: "Cable / stand inventory · power class · deposit · rental terms · QR handoff.",
         claimsTitle: "If something goes wrong",
         claims: "Inventory snapshot and return photos support missing-part claims; deposit covers the gap.",
+      "Tools & DIY": {
+        title: "Tools & DIY rentals",
+        summary:
+          "Neighbor + deposit covers most drills. Saws, welders, and scaffolding-like shelves require a PPE / safety briefing acknowledgment before handoff.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Mark briefing ready and note PPE / safe-use bullets for power saws, welding, and scaffolding systems.",
+        whyGeoTitle: "Why a safety briefing?",
+        whyGeo:
+          "These tools injure faster than a deposit can fix. A short briefing gate sets duty of care without pretending Evorios trains operators.",
+        flowTitle: "End to end",
+        flow: "List with briefing ready → renter acknowledges → briefing at handoff → return.",
+        layersTitle: "Safety layers",
+        layers: "Safety briefing · power / voltage specs · deposit · rental terms · QR.",
+        claimsTitle: "If something goes wrong",
+        claims: "Briefing ack and handoff photos support disputes; deposit for damage or missing blades/parts.",
+      },
+      "Costume & Cosplay": {
+        title: "Costume & cosplay rentals",
+        summary:
+          "Return-condition rules and optional dry-clean fees keep costume rentals fair — frozen on the agreement at booking.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Set dry-clean only / spot-clean / as-received, plus an optional dry-clean fee when you handle cleaning.",
+        whyGeoTitle: "Why return condition + fee?",
+        whyGeo:
+          "Makeup, sweat, and glitter ruin costumes. Clear return rules beat surprise cleaning bills after the party.",
+        flowTitle: "End to end",
+        flow: "List with return policy (+ fee) → renter acknowledges → wear → return per policy.",
+        layersTitle: "Safety layers",
+        layers: "Return condition · dry-clean fee · size / fits · deposit · rental terms.",
+        claimsTitle: "If something goes wrong",
+        claims: "Fee and policy are on the agreement; deposit covers tears or missing pieces beyond the fee.",
       },
       "Baby & Kids": {
         title: "Car seat safety rentals",

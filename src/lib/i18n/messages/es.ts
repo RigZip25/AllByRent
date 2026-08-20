@@ -968,6 +968,15 @@ export const es: AppMessages = {
       "Se requiere el reconocimiento de borrado de datos de la reserva antes de la entrega.",
     paCableStandUnlockBlocked:
       "Se requiere el reconocimiento del inventario de cables / stands PA de la reserva antes de la entrega.",
+    safetyBriefingUnlockBlocked:
+      "Se requiere el acuse del briefing de seguridad de la reserva antes de la entrega.",
+    hygieneUnlockBlocked:
+      "Se requiere el acuse del checklist de higiene de la reserva antes de la entrega.",
+    costumeReturnUnlockBlocked:
+      "Se requiere el acuse de condición de devolución del disfraz antes de la entrega.",
+    weatherCancelRefundPreview:
+      "Cancelación por clima seleccionada — reembolso total del alquiler según la política outdoor del anuncio.",
+    weatherCancelToggle: "Cancelar por clima (política de fiesta outdoor)",
     agentProofPending:
       "Esperando que el anfitrión confirme que recibió la prueba de seguro de tu agente.",
     agentProofReceivedMark: "Recibí la prueba de seguro del agente del arrendatario",
@@ -1780,6 +1789,44 @@ export const es: AppMessages = {
           label: "Requisito de energía",
           hint: "Indica al venue qué circuitos / generadores necesitas.",
         },
+        weatherCancelPolicy: {
+          label: "Cancelación por clima (exterior)",
+          hint: "Obligatorio en huella outdoor / carpas — ventana de reembolso total si el clima cancela el evento.",
+        },
+        safetyBriefingRequired: {
+          label: "Briefing de seguridad obligatorio",
+          hint: "Sierras, soldadoras, andamios — el inquilino acusa al reservar.",
+        },
+        safetyBriefingConfirmed: {
+          label: "Listo para briefing",
+          hint: "Marca listo cuando puedas dar PPE / instrucciones seguras en la entrega.",
+        },
+        safetyBriefingNotes: {
+          label: "Notas del briefing",
+          placeholder: "PPE, no discos húmedos, bases de andamio…",
+          hint: "Viñetas opcionales mostradas al inquilino al reservar.",
+        },
+        hygieneChecklistRequired: {
+          label: "Checklist de higiene",
+          hint: "Tiendas / sacos — requiere atestación de sanitización para alquilar.",
+        },
+        hygieneSanitizedAttested: {
+          label: "Sanitizado / aireado",
+          hint: "Confirma limpieza antes del anuncio — bloquea reserva hasta atestar.",
+        },
+        hygieneChecklistNotes: {
+          label: "Notas de higiene",
+          placeholder: "Forro lavado, 24h aireado…",
+        },
+        returnConditionPolicy: {
+          label: "Condición de devolución",
+          hint: "Cómo deben volver los disfraces — solo tintorería, manchas OK, o como recibido.",
+        },
+        dryCleanReturnFeeUsd: {
+          label: "Tarifa tintorería / devolución (USD)",
+          placeholder: "35",
+          hint: "Tarifa plana opcional en reserva y acuerdo.",
+        },
         useCase: { label: "Uso principal" },
         transportSize: { label: "Cómo se mueve" },
         deviceHasStorage: {
@@ -2057,6 +2104,16 @@ export const es: AppMessages = {
         dedicated_20a: "Circuito dedicado 20A",
         "240v_or_generator": "240V o generador",
         host_provides: "El anfitrión aporta energía in situ",
+        full_refund_24h: "Reembolso total si cancela ≥24h antes del inicio (clima)",
+        full_refund_12h: "Reembolso total si cancela ≥12h antes del inicio (clima)",
+        host_discretion: "Cancelación por clima — criterio del anfitrión",
+        not_outdoor: "No es montaje outdoor",
+        briefing_ready: "Briefing listo en la entrega",
+        need_to_prepare: "Aún preparando el briefing",
+        need_to_clean: "Aún limpiar / airear",
+        dry_clean_only: "Solo tintorería antes de devolver",
+        spot_clean_ok: "Limpieza puntual OK; tintorería si hay manchas",
+        return_as_received: "Devolver como recibido (sin lavar)",
         under_2kw: "Menos de 2 kW",
         "2_5kw": "2–5 kW",
         "5_15kw": "5–15 kW",
@@ -2653,6 +2710,33 @@ export const es: AppMessages = {
       "El anfitrión confirmará cables y stands en la entrega — reconoce para continuar.",
     paCableStandAttest:
       "Revisé el inventario de cables / stands y comprobaré cada ítem en recogida y devolución.",
+    weatherCancelTitle: "Cancelación por clima (exterior)",
+    weatherCancelBody: (policy) =>
+      `Este anuncio de fiesta outdoor usa cancelación por clima: ${policy}. Si el clima hace imposible el evento, cancela bajo esta política para reembolso total del alquiler en la ventana aplicable.`,
+    weatherCancelAttest: "Entiendo la política de cancelación por clima de esta reserva.",
+    weatherCancelFallback: "política climática del anfitrión",
+    weatherCancelPolicyLine: (policy) => `Cancelación por clima: ${policy}`,
+    safetyBriefingBlockedTitle: "Briefing de seguridad no listo",
+    safetyBriefingBlockedBody:
+      "El anfitrión aún debe marcar listo el briefing PPE / seguridad para esta sierra, soldadora o andamio antes de reservar.",
+    safetyBriefingTitle: "Briefing de seguridad",
+    safetyBriefingBody:
+      "Sierras, soldadoras y andamios requieren un briefing corto de PPE / uso seguro antes de la entrega. Confirma que lo completarás con el anfitrión.",
+    safetyBriefingAttest: "Completaré el briefing de seguridad antes de usar esta herramienta.",
+    hygieneBlockedTitle: "Checklist de higiene incompleto",
+    hygieneBlockedBody:
+      "El anfitrión aún debe atestar que esta tienda o saco de dormir fue limpio / aireado antes de reservar.",
+    hygieneTitle: "Higiene / sanitización",
+    hygieneBody:
+      "Tiendas y sacos son equipo de sueño compartido. El anfitrión atestó limpieza; reconoce que lo devolverás razonablemente limpio y seco.",
+    hygieneAttest: "Reconozco el checklist de higiene y devolveré el equipo limpio y seco.",
+    costumeReturnTitle: "Condición de devolución / tintorería",
+    costumeReturnBody:
+      "Los disfraces fijan una regla de devolución y tarifa opcional de tintorería. Confirma que la cumplirás.",
+    costumeReturnAttest: "Acepto los términos de devolución / tintorería de este disfraz.",
+    returnConditionPolicyLine: (policy) => `Condición de devolución: ${policy}`,
+    returnConditionFallback: "según el anuncio",
+    dryCleanReturnFeeLine: (amount) => `Tarifa de tintorería / devolución: ${amount}`,
     agentInsuranceTitle: "Seguro vía agente → propietario",
     agentInsuranceBody:
       "Para transporte comercial pesado / semi, contrata cobertura con tu agente de seguros. El agente debe enviar la prueba por correo directamente al dueño del vehículo — no es el flujo ligero de «añadir al auto personal + subir».",
@@ -2793,7 +2877,7 @@ export const es: AppMessages = {
       Vehicles: {
         title: "Cómo funciona el alquiler de coche entre vecinos",
         summary:
-          "Los vecinos generan más confianza que un marketplace anónimo — pero términos, seguro e inspección previa obligatoria (exterior, interior y todas las llantas) son requeridos antes del PIN/llaves. Combustible (y DEF en diésel) se registra al inicio y al devolver — por defecto lleno a lleno, faltante + $20. Desde 26 000 lb o semi / remolques comerciales también exigen CDL y prueba agente→dueño (no subida personal). El anfitrión puede marcar no-show tras la ventana y liberar el calendario.",
+          "Los vecinos generan más confianza que un marketplace anónimo — términos, seguro, auto-declaración de licencia / historial (no un MVR de pago) e inspección previa obligatoria antes de PIN/llaves. Cancelación ≥24h: reembolso total; dentro de 24h: 50%. No-show ~2h. Retraso: 30m + $20 + $15/h. Combustible full-to-full. ≥26k lb / semi: CDL + seguro agent→owner.",
         hostTipTitle: "Para anfitriones / propietarios",
         hostTip:
           "Introduce el GVWR en lb. Desde ≥ 26 000 lb o semi, configura el correo para la prueba del agente y exige CDL. En coches ligeros, el arrendatario añade el auto a su póliza personal y sube el comprobante. Las fotos de llantas protegen contra cambios. Combustible: lleno a lleno (niveles solo en la entrega, no en el anuncio). La tarifa de no-show es un flag suave del depósito.",
@@ -2818,7 +2902,7 @@ export const es: AppMessages = {
       "Heavy Equipment": {
         title: "Alquiler de equipo comercial",
         summary:
-          "Heavy Equipment por defecto solo a profesionales. Credencial de operador (montacargas / grúa / excavadora / general) obligatoria según subcategoría. Seguro PD obligatorio. Depósito respaldado por seguro (retención del deducible), no valor de reposición. Inspección previa bloquea el inicio.",
+          "Heavy Equipment por defecto solo a profesionales. Credencial de operador según subcategoría. COI estructurado (aseguradora, póliza, límites, fechas) + foto — el anfitrión marca “prueba recibida” antes de la entrega. Seguro PD obligatorio. Depósito respaldado por seguro. Inspección previa obligatoria.",
         hostTipTitle: "Para anfitriones",
         hostTip:
           "Mantén «solo profesionales». Exige credencial de operador en equipo motorizado. PD obligatorio; configura el deducible máximo para alinear la retención.",
@@ -2838,7 +2922,7 @@ export const es: AppMessages = {
       Construction: {
         title: "Alquiler de equipo de construcción",
         summary:
-          "Construction por defecto solo pro y seguro PD. Depósito respaldado por seguro (retención del deducible). Equipo tipo grúa / pesado exige credencial de operador. Inspección previa obligatoria.",
+          "Construction por defecto solo pro y seguro PD. COI estructurado + “prueba recibida” del anfitrión — no solo foto. Depósito respaldado por seguro (retención del deducible). Equipo tipo grúa / pesado exige credencial de operador. Inspección previa obligatoria.",
         hostTipTitle: "Para anfitriones",
         hostTip:
           "Solo pro + PD antes de las llaves. Configura el deducible. Exige credencial en estanterías crane-class / motorizadas.",
@@ -2969,19 +3053,19 @@ export const es: AppMessages = {
       "Outdoor & Camping": {
         title: "Alquiler outdoor y camping",
         summary:
-          "Estantes de expedición / supervivencia usan renuncia al reservar. Capacidad y temporada ayudan a elegir.",
+          "Estantes de expedición / supervivencia usan renuncia. Tiendas y sacos añaden checklist de higiene.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Exige renuncia en survival / expedición. Mantén tiendas secas y sé honesto con la temporada.",
-        whyGeoTitle: "¿Por qué renuncia en survival?",
+          "Exige renuncia en survival / expedición. En tiendas y sacos, atesta limpio / aireado.",
+        whyGeoTitle: "¿Por qué renuncia + higiene?",
         whyGeo:
-          "Fallos remotos pueden dejar gente sin recursos. Renuncia + temporada / capacidad claras fijan expectativas.",
+          "Fallos remotos dejan gente sin recursos; equipo de sueño sucio propaga olores y alérgenos.",
         flowTitle: "De punta a punta",
-        flow: "Anuncio → renuncia cuando aplique → entrega → devolución.",
+        flow: "Anuncio → renuncia / higiene → entrega → devolución limpia y seca.",
         layersTitle: "Capas de seguridad",
-        layers: "Renuncia (alto riesgo) · capacidad / temporada · fianza · términos.",
+        layers: "Renuncia · checklist de higiene · capacidad / temporada · fianza · términos.",
         claimsTitle: "Si algo sale mal",
-        claims: "Fotos y renuncia en disputas; fianza por daño o piezas faltantes.",
+        claims: "Fotos, renuncia e higiene en disputas; fianza por daño o piezas faltantes.",
       },
       "Bikes & Scooters": {
         title: "Alquiler de bicis y patinetes",
@@ -3003,19 +3087,53 @@ export const es: AppMessages = {
       "Party & Events": {
         title: "Alquiler para fiestas y eventos",
         summary:
-          "Estantes pro AV / escenario / luces capturan tarifa de montaje/desmontaje y energía. Capacidad y huella ayudan a planificar.",
+          "AV / escenario / luces capturan tarifa de montaje/desmontaje y energía. Huellas outdoor y carpas añaden cancelación por clima.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Pon tarifa de montaje/desmontaje si aportas mano de obra. Indica energía con claridad para sonido y luces.",
-        whyGeoTitle: "¿Por qué tarifa + energía?",
+          "Pon tarifa y energía. En jardín / outdoor / carpas, elige ventana de cancelación por clima (24h, 12h o criterio).",
+        whyGeoTitle: "¿Por qué cancelación por clima + tarifa?",
         whyGeo:
-          "Mano de obra sorpresa y enchufes muertos arruinan eventos. Tarifa + energía quedan en el acuerdo.",
+          "Los eventos outdoor fallan más por clima que por fianza. Ventana clara + tarifa/energía en el acuerdo reducen sorpresas.",
         flowTitle: "De punta a punta",
-        flow: "Anuncio con tarifa / energía → reserva → montaje → desmontaje y devolución.",
+        flow: "Anuncio con tarifa / energía / clima → reserva → montaje → desmontaje.",
         layersTitle: "Capas de seguridad",
-        layers: "Tarifa montaje/desmontaje · energía · capacidad · fianza · términos.",
+        layers: "Cancelación por clima · tarifa montaje · energía · capacidad · fianza · términos.",
         claimsTitle: "Si algo sale mal",
-        claims: "Tarifa y energía van en el acuerdo; fianza cubre daño más allá del uso normal.",
+        claims: "Reembolsos siguen la política climática; fianza cubre daño más allá del uso normal.",
+      },
+      "Tools & DIY": {
+        title: "Alquiler de herramientas y DIY",
+        summary:
+          "Vecino + fianza cubre la mayoría de taladros. Sierras, soldadoras y andamios requieren acuse de briefing PPE / seguridad antes de la entrega.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Marca briefing listo y anota PPE / uso seguro para sierras, soldadura y andamios.",
+        whyGeoTitle: "¿Por qué un briefing de seguridad?",
+        whyGeo:
+          "Estas herramientas hieren más rápido de lo que una fianza repara. Un briefing corto fija deber de cuidado sin fingir que Evorios forma operadores.",
+        flowTitle: "De punta a punta",
+        flow: "Anuncio con briefing listo → acuse → briefing en entrega → devolución.",
+        layersTitle: "Capas de seguridad",
+        layers: "Briefing de seguridad · potencia / voltaje · fianza · términos · QR.",
+        claimsTitle: "Si algo sale mal",
+        claims: "Acuse de briefing y fotos; fianza por daño o piezas faltantes.",
+      },
+      "Costume & Cosplay": {
+        title: "Alquiler de disfraces y cosplay",
+        summary:
+          "Reglas de devolución y tarifa opcional de tintorería mantienen el alquiler justo — congeladas en el acuerdo.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Define solo tintorería / manchas OK / como recibido, más tarifa opcional de limpieza.",
+        whyGeoTitle: "¿Por qué condición de devolución + tarifa?",
+        whyGeo:
+          "Maquillaje, sudor y glitter arruinan disfraces. Reglas claras vencen facturas sorpresa.",
+        flowTitle: "De punta a punta",
+        flow: "Anuncio con política (+ tarifa) → acuse → uso → devolución según política.",
+        layersTitle: "Capas de seguridad",
+        layers: "Condición de devolución · tintorería · talla · fianza · términos.",
+        claimsTitle: "Si algo sale mal",
+        claims: "Tarifa y política van en el acuerdo; fianza cubre roturas o piezas faltantes.",
       },
       "Office & Business": {
         title: "Alquiler de oficina y negocio",

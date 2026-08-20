@@ -180,6 +180,12 @@ export type ListingDraft = {
     insuranceLiabilityMinUsd?: string;
     /** Optional fee the renter must cover for insurance / compliance (USD string). */
     insuranceRenterFeeUsd?: string;
+    /**
+     * Heavy / Construction: require the renter’s COI to list the host (or
+     * property) as additional insured. Soft host preference — enforced as
+     * renter attestation at booking, not carrier API verification.
+     */
+    coiAdditionalInsuredRequired?: boolean;
     /** Forced for commercial transport; CDL attestation + document at booking. */
     requireCdl?: boolean;
   /** Optional no-show fee (USD) host may flag from deposit after start window. */

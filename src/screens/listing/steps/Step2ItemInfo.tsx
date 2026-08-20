@@ -398,6 +398,14 @@ export function Step2ItemInfo({
               <CategoryFactCard category="Baby & Kids" defaultExpanded />
             ) : draft.category.trim() === "Electronics & Tech" ? (
               <CategoryFactCard category="Electronics & Tech" defaultExpanded />
+            ) : draft.category.trim() === "Tools & DIY" ? (
+              <CategoryFactCard category="Tools & DIY" defaultExpanded />
+            ) : draft.category.trim() === "Costume & Cosplay" ? (
+              <CategoryFactCard category="Costume & Cosplay" defaultExpanded />
+            ) : draft.category.trim() === "Party & Events" ? (
+              <CategoryFactCard category="Party & Events" defaultExpanded />
+            ) : draft.category.trim() === "Outdoor & Camping" ? (
+              <CategoryFactCard category="Outdoor & Camping" defaultExpanded />
             ) : null}
             <p className="text-[13px] leading-snug text-gray-600">
               {vinRequired ? item.assetIdentityHint : item.serialNumberHelper}

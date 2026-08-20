@@ -1,4 +1,5 @@
 import type { ListingDraft } from "../screens/listing/types";
+import { listingRequiresStumpGrinderInsurance } from "./categoryTrustRules";
 import {
   isCommercialEquipmentCategory,
   listingIsCommercialTransport,
@@ -28,6 +29,7 @@ export function listingRequiresInsuranceProof(
   // Physical damage mandate always requires insurance proof (cannot opt out).
   if (listingRequiresPhysicalDamage(listing)) return true;
   if (isCommercialEquipmentCategory(listing.category)) return true;
+  if (listingRequiresStumpGrinderInsurance(listing)) return true;
   if (listing.handoff.requireInsuranceProof === false) return false;
   if (listing.handoff.requireInsuranceProof === true) return true;
   return categoryRequiresInsuranceProof(listing.category);
@@ -107,4 +109,53 @@ export function insuranceMustBeActiveByIso(startDate: string, leadDays: number):
   const mo = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${mo}-${day}`;
+}
+
+/* ─── P2: Heavy / Construction structured COI ───────────────────────── */
+
+/** Heavy Equipment & Construction rent path with insurance — COI beyond photo-only. */
+export function listingUsesStructuredCoi(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "handoff" | "modes" | "categorySpecs">,
+): boolean {
+  if (!listing.modes?.rent) return false;
+  const cat = listing.category.trim();
+  if (cat !== "Heavy Equipment" && cat !== "Construction") return false;
+  return listingRequiresInsuranceProof(listing);
+}
+
+/** Host must mark COI / insurance proof received before handoff unlock. */
+export function listingRequiresCoiHostConfirm(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "handoff" | "modes" | "categorySpecs">,
+): boolean {
+  return listingUsesStructuredCoi(listing);
+}
+
+/** Host requires renter’s certificate to list them as additional insured. */
+export function listingCoiAdditionalInsuredRequired(
+  listing: Pick<ListingDraft, "handoff">,
+): boolean {
+  return listing.handoff?.coiAdditionalInsuredRequired === true;
+}
+
+export type CoiStructuredFields = {
+  carrierName: string;
+  policyNumber: string;
+  liabilityLimitUsd: string;
+  effectiveDate: string;
+  expirationDate: string;
+  namedInsured: string;
+};
+
+export function coiStructuredFieldsComplete(
+  fields: Partial<CoiStructuredFields> | null | undefined,
+): boolean {
+  if (!fields) return false;
+  return Boolean(
+    fields.carrierName?.trim() &&
+      fields.policyNumber?.trim() &&
+      fields.liabilityLimitUsd?.trim() &&
+      fields.effectiveDate?.trim() &&
+      fields.expirationDate?.trim() &&
+      fields.namedInsured?.trim(),
+  );
 }

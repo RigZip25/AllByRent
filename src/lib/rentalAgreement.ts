@@ -78,11 +78,27 @@ export type RentalAgreementCommercialSnapshot = {
     rvDumpStation?: string;
     rvPropane?: string;
     rvOccupancy?: string;
+    /** Vehicles P2: soft license / driving-record self-attestation (not paid MVR). */
+    driverRecordAttestationRequired?: boolean;
+    /** Heavy / Construction P2: structured COI + host proof-received. */
+    structuredCoiRequired?: boolean;
+    coiAdditionalInsuredRequired?: boolean;
+    coiMinLiabilityUsd?: string;
+    coiMinPdUsd?: string;
     /** P2 Office / Music */
     dataWipeRequired?: boolean;
     hostDataWipeStatus?: string;
     paCableStandInventoryRequired?: boolean;
     paCableStandInventory?: string;
+    /** P2 Party / Tools / Outdoor / Costume */
+    weatherCancelPolicy?: string;
+    weatherCancelHours?: number | null;
+    safetyBriefingRequired?: boolean;
+    safetyBriefingNotes?: string;
+    hygieneChecklistRequired?: boolean;
+    hygieneChecklistNotes?: string;
+    returnConditionPolicy?: string;
+    dryCleanReturnFeeUsd?: number;
   };
 };
 
@@ -196,6 +212,8 @@ export function buildEnrichedSummaryLines(input: {
     cat === "Party & Events" ||
     cat === "Office & Business" ||
     cat === "Music & Audio" ||
+    cat === "Tools & DIY" ||
+    cat === "Costume & Cosplay" ||
     Boolean(trust?.operatorCertRequired) ||
     Boolean(trust?.boaterLicenseRequired) ||
     Boolean(trust?.droneCertRequired) ||
@@ -204,6 +222,10 @@ export function buildEnrichedSummaryLines(input: {
     Boolean(trust?.uscgSafetyKitRequired) ||
     Boolean(trust?.dataWipeRequired) ||
     Boolean(trust?.paCableStandInventoryRequired) ||
+    Boolean(trust?.safetyBriefingRequired) ||
+    Boolean(trust?.hygieneChecklistRequired) ||
+    Boolean(trust?.weatherCancelPolicy) ||
+    Boolean(trust?.returnConditionPolicy) ||
     /high.?value|boat|heavy|drone/i.test(cat);
 
   if (!isRich && !input.vehicle) {
@@ -303,11 +325,59 @@ export function buildEnrichedSummaryLines(input: {
         : "PA cable / stand inventory acknowledged at booking.",
     );
   }
+  if (trust?.driverRecordAttestationRequired) {
+    lines.push(
+      "Driver license + soft driving-record self-attestation required (not a paid MVR / DMV pull — host reviews attestation).",
+    );
+  }
+  if (trust?.structuredCoiRequired) {
+    const liab = trust.coiMinLiabilityUsd?.trim();
+    const pd = trust.coiMinPdUsd?.trim();
+    const mins = [liab ? `liability ≥ $${liab}` : null, pd ? `PD ≥ $${pd}` : null]
+      .filter(Boolean)
+      .join("; ");
+    lines.push(
+      mins
+        ? `Structured Certificate of Insurance (COI) required (${mins}). Host confirms proof received before handoff.`
+        : "Structured Certificate of Insurance (COI) required — carrier, policy #, limits, and dates. Host confirms proof received before handoff.",
+    );
+    if (trust.coiAdditionalInsuredRequired) {
+      lines.push(
+        "COI must list the host (or property) as additional insured — renter attests at booking.",
+      );
+    }
+  }
   if (trust?.setupTeardownFeeUsd != null && trust.setupTeardownFeeUsd > 0) {
     lines.push(`Setup / teardown fee: $${trust.setupTeardownFeeUsd.toFixed(2)}.`);
   }
   if (trust?.powerRequirement?.trim()) {
     lines.push(`Power requirement: ${trust.powerRequirement.trim()}.`);
+  }
+  if (trust?.weatherCancelPolicy?.trim()) {
+    const hours =
+      trust.weatherCancelHours != null ? ` (${trust.weatherCancelHours}h full-refund window)` : "";
+    lines.push(`Outdoor weather cancel policy: ${trust.weatherCancelPolicy.trim()}${hours}.`);
+  }
+  if (trust?.safetyBriefingRequired) {
+    lines.push(
+      trust.safetyBriefingNotes?.trim()
+        ? `Safety briefing required before use: ${trust.safetyBriefingNotes.trim()}`
+        : "Safety briefing required before using saws / welders / scaffolding-like tools.",
+    );
+  }
+  if (trust?.hygieneChecklistRequired) {
+    lines.push(
+      trust.hygieneChecklistNotes?.trim()
+        ? `Hygiene / sanitation: ${trust.hygieneChecklistNotes.trim()}`
+        : "Host attested tent / sleeping-bag hygiene; renter acknowledged at booking.",
+    );
+  }
+  if (trust?.returnConditionPolicy?.trim()) {
+    lines.push(
+      trust.dryCleanReturnFeeUsd != null && trust.dryCleanReturnFeeUsd > 0
+        ? `Costume return condition: ${trust.returnConditionPolicy.trim()}; dry-clean / return fee $${trust.dryCleanReturnFeeUsd.toFixed(2)}.`
+        : `Costume return condition: ${trust.returnConditionPolicy.trim()}.`,
+    );
   }
   if (trust?.hitchClass || trust?.brakeController) {
     lines.push(

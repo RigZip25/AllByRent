@@ -70,11 +70,13 @@ export async function cancelAcceptedBooking(params: {
   actorUserId: string;
   role: "host" | "renter";
   cancelReason?: string;
+  weatherCancel?: boolean;
 }): Promise<CancelAcceptedResult> {
   const t = getMessages();
   const assessment = assessCancelRefund({
     booking: params.booking,
     role: params.role,
+    weatherCancel: params.weatherCancel,
   });
 
   if (!assessment.allowed) {

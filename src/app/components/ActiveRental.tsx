@@ -102,6 +102,9 @@ import {
   listingRequiresStartIdGate,
   listingRequiresUscgSafetyKit,
   listingRequiresDataWipe,
+  listingRequiresSafetyBriefing,
+  listingRequiresHygieneChecklist,
+  listingRequiresCostumeReturnCondition,
 } from "../../lib/categoryTrustRules";
 import {
   isPreTripInspectionReady,
@@ -162,6 +165,7 @@ export function ActiveRental({
   const [chatOpen, setChatOpen] = useState(initialChatOpen);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [weatherCancelSelected, setWeatherCancelSelected] = useState(false);
   const [cancelBusy, setCancelBusy] = useState(false);
   const [policySheetOpen, setPolicySheetOpen] = useState(false);
   const [noShowBusy, setNoShowBusy] = useState(false);
@@ -250,6 +254,16 @@ export function ActiveRental({
     publishedListing != null && listingRequiresDataWipe(publishedListing);
   const needsPaCableStand =
     publishedListing != null && listingRequiresPaCableStandInventory(publishedListing);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+  const needsSafetyBriefing =
+    publishedListing != null && listingRequiresSafetyBriefing(publishedListing);
+  const needsHygiene =
+    publishedListing != null && listingRequiresHygieneChecklist(publishedListing);
+  const needsCostumeReturn =
+    publishedListing != null && listingRequiresCostumeReturnCondition(publishedListing);
   const contactlessMode = booking?.fulfillmentMethod === "contactless";
   const qrTarget = useMemo(
     () => (booking ? resolveBookingQrTarget(booking) : { listingId: undefined, qrToken: undefined }),
@@ -612,11 +626,38 @@ export function ActiveRental({
     }
     if (
       mode === "pickup" &&
+      needsSafetyBriefing &&
+      !booking?.safetyBriefingAck &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.safetyBriefingUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
       needsPaCableStand &&
       !booking?.paCableStandAck &&
       booking?.role === "renter"
     ) {
       setNotice(t.rentalDetail.paCableStandUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsHygiene &&
+      !booking?.hygieneAck &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.hygieneUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsCostumeReturn &&
+      !booking?.costumeReturnConditionAck &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.costumeReturnUnlockBlocked);
       return;
     }
     if (
@@ -934,8 +975,12 @@ export function ActiveRental({
 
   const cancelAssessment = useMemo(() => {
     if (!booking) return null;
-    return assessCancelRefund({ booking, role: booking.role });
-  }, [booking]);
+    return assessCancelRefund({
+      booking,
+      role: booking.role,
+      weatherCancel: weatherCancelSelected,
+    });
+  }, [booking, weatherCancelSelected]);
 
   const canCancelHere = Boolean(booking && canCancelAcceptedBooking(booking));
   const showExtend =
@@ -946,12 +991,19 @@ export function ActiveRental({
   const cancelRefundPreview = useMemo(() => {
     if (!booking || !cancelAssessment) return "";
     if (booking.role === "host") return t.rentalDetail.cancelRefundPreviewHostFull;
+    if (
+      weatherCancelSelected &&
+      booking.weatherCancelAck &&
+      cancelAssessment.tier === "full"
+    ) {
+      return t.rentalDetail.weatherCancelRefundPreview;
+    }
     if (cancelAssessment.tier === "full") return t.rentalDetail.cancelRefundPreviewFull;
     if (cancelAssessment.tier === "partial") {
       return t.rentalDetail.cancelRefundPreviewPartial(cancelAssessment.refundPercent);
     }
     return t.rentalDetail.cancelRefundPreviewNone;
-  }, [booking, cancelAssessment, t.rentalDetail]);
+  }, [booking, cancelAssessment, t.rentalDetail, weatherCancelSelected]);
 
   useEffect(() => {
     if (!booking) return;
@@ -1031,6 +1083,7 @@ export function ActiveRental({
         actorUserId: auth.userId,
         role: booking.role,
         cancelReason: cancelReason.trim() || undefined,
+        weatherCancel: weatherCancelSelected,
       });
       setBookings(loadRentalBookings());
       setCancelConfirmOpen(false);
@@ -1342,6 +1395,20 @@ export function ActiveRental({
                 <p className="text-[12px] leading-relaxed text-red-900/80">
                   {t.rentalDetail.cancelBookingConfirmBody(cancelRefundPreview)}
                 </p>
+                {booking?.weatherCancelAck &&
+                booking.weatherCancelPolicySnapshot &&
+                booking.weatherCancelPolicySnapshot !== "not_outdoor" &&
+                booking.role === "renter" ? (
+                  <label className="flex items-start gap-2 text-[12px] font-semibold text-red-900">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5"
+                      checked={weatherCancelSelected}
+                      onChange={(e) => setWeatherCancelSelected(e.target.checked)}
+                    />
+                    <span>{t.rentalDetail.weatherCancelToggle}</span>
+                  </label>
+                ) : null}
                 <label className="block text-[12px] font-semibold text-red-900">
                   {t.rentalDetail.cancelReasonLabel}
                   <textarea

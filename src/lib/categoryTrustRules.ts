@@ -94,7 +94,10 @@ export function listingIsPwc(
 export function listingRequiresBoaterLicense(
   listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
 ): boolean {
-  return listingIsPoweredWatercraft(listing);
+  if (!listingIsPoweredWatercraft(listing)) return false;
+  // Captain-included charters: host/crew operates — renter license not required.
+  if (listingCaptainMode(listing) === "captain_included") return false;
+  return true;
 }
 
 /** Age gate applies to Vehicles and powered watercraft (default 25). */
@@ -197,6 +200,85 @@ export function listingCarSeatBlocksBooking(
   now = new Date(),
 ): boolean {
   return listingCarSeatSafetyBlocksPublish(listing, now);
+}
+
+/* ─── Tools / Garden / Home / Baby P0 ─────────────────────────────────── */
+
+const CRIB_SUBS = new Set(["cribs & beds"]);
+const COMMERCIAL_PLAY_SUBS = new Set(["commercial play equipment"]);
+const WELDING_SUBS = new Set(["welding equipment"]);
+const STUMP_GRINDER_SUBS = new Set(["stump grinders"]);
+const COMMERCIAL_COFFEE_SUBS = new Set(["commercial coffee"]);
+
+export function listingIsCrib(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  return listing.category.trim() === "Baby & Kids" && CRIB_SUBS.has(subKey(listing));
+}
+
+export function listingCribSafetyBlocksPublish(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!rentOn(listing) || !listingIsCrib(listing)) return false;
+  const specs = listing.categorySpecs ?? {};
+  if ((specs.recallAcknowledged ?? "").trim() !== "acknowledged") return true;
+  if ((specs.dropSideAcknowledged ?? "").trim() !== "no_drop_side") return true;
+  if ((specs.cpscCompliant ?? "").trim() !== "cpsc_compliant") return true;
+  const mattress = (specs.mattressIncluded ?? "").trim();
+  if (
+    mattress !== "firm_mattress_included" &&
+    mattress !== "pack_n_play_pad" &&
+    mattress !== "mattress_not_included"
+  ) {
+    return true;
+  }
+  if ((specs.sanitizationAttested ?? "").trim() !== "attested") return true;
+  return false;
+}
+
+export function listingCribBlocksBooking(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  return listingCribSafetyBlocksPublish(listing);
+}
+
+export function listingIsCommercialPlay(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  return listing.category.trim() === "Baby & Kids" && COMMERCIAL_PLAY_SUBS.has(subKey(listing));
+}
+
+export function listingIsWeldingEquipment(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  return listing.category.trim() === "Tools & DIY" && WELDING_SUBS.has(subKey(listing));
+}
+
+export function listingIsStumpGrinder(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  return listing.category.trim() === "Garden & Yard" && STUMP_GRINDER_SUBS.has(subKey(listing));
+}
+
+export function listingIsCommercialCoffee(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  return (
+    listing.category.trim() === "Home & Kitchen" && COMMERCIAL_COFFEE_SUBS.has(subKey(listing))
+  );
+}
+
+export function listingRequiresPpeAck(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes">,
+): boolean {
+  if (!rentOn(listing)) return false;
+  return listingIsWeldingEquipment(listing) || listingIsStumpGrinder(listing);
+}
+
+export function listingRequiresStumpGrinderInsurance(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  return rentOn(listing) && listingIsStumpGrinder(listing);
 }
 
 export function listingIsRealEstate(
@@ -356,6 +438,7 @@ export function listingRequiresLiabilityWaiver(
   if (flag === "required") return true;
   const cat = listing.category.trim();
   if (cat === "Gym & Fitness") return true;
+  if (listingIsStumpGrinder(listing) || listingIsCommercialPlay(listing)) return true;
   const sub = subKey(listing);
   if (cat === "Sports & Recreation") {
     if (HIGH_RISK_SPORTS_SUBS.has(sub)) return true;
@@ -383,9 +466,11 @@ export function listingIsBikesScooters(
 }
 
 export function listingRequiresHelmetLockPolicy(
-  listing: Pick<ListingDraft, "category" | "modes">,
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes">,
 ): boolean {
-  return rentOn(listing) && listingIsBikesScooters(listing);
+  if (!rentOn(listing)) return false;
+  if (listingIsBikesScooters(listing)) return true;
+  return listingIsAtv(listing) || listingIsMotorcycle(listing);
 }
 
 export function listingIsElectricScooter(
@@ -403,10 +488,29 @@ export function listingIsElectricScooter(
   return electric === "yes" && sub.includes("scooter");
 }
 
+/** E-Bikes Pro shelf — age + class/battery parity with e-scooters. */
+export function listingIsEBikePro(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "categorySpecs">,
+): boolean {
+  if (listing.category.trim() !== "Bikes & Scooters") return false;
+  const sub = subKey(listing);
+  if (sub !== "e-bikes pro" && sub !== "e-bikes" && !sub.includes("e-bike")) return false;
+  const electric = (listing.categorySpecs?.electric ?? "").trim().toLowerCase();
+  if (electric === "no") return false;
+  return true;
+}
+
+/** Micromobility age gate: e-scooters + E-Bikes Pro. */
+export function listingIsElectricMicromobility(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "categorySpecs">,
+): boolean {
+  return listingIsElectricScooter(listing) || listingIsEBikePro(listing);
+}
+
 export function listingEScooterMinAge(
   listing: Pick<ListingDraft, "category" | "subcategory" | "categorySpecs">,
 ): number {
-  if (!listingIsElectricScooter(listing)) return 0;
+  if (!listingIsElectricMicromobility(listing)) return 0;
   const raw = (listing.categorySpecs?.minRiderAge ?? "").trim();
   const n = Number.parseInt(raw, 10);
   if (Number.isFinite(n) && n >= 12 && n <= 21) return n;
@@ -416,7 +520,7 @@ export function listingEScooterMinAge(
 export function listingRequiresEScooterAgeGate(
   listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
 ): boolean {
-  return rentOn(listing) && listingIsElectricScooter(listing);
+  return rentOn(listing) && listingIsElectricMicromobility(listing);
 }
 
 /** Party pro AV / stage shelves — setup fee + power when relevant. */
@@ -558,9 +662,340 @@ export function listingPaCableStandInventoryText(
 }
 
 /** Host left PA cable/stand inventory blank — blocks publish via required field. */
+/** Host left PA cable/stand inventory blank — soft block at book (still allow ack). */
 export function listingPaCableStandBlocksPublish(
   listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
 ): boolean {
   if (!listingRequiresPaCableStandInventory(listing)) return false;
   return !listingPaCableStandInventoryText(listing);
+}
+
+/* ─── P2 category trust ─────────────────────────────────────────────── */
+
+const OUTDOOR_PARTY_FOOTPRINTS = new Set(["backyard", "outdoor_large"]);
+const OUTDOOR_PARTY_SUBS = new Set(["tents & canopies"]);
+
+/** Tools that need a PPE / safety briefing before handoff. */
+const SAFETY_BRIEF_TOOL_SUBS = new Set([
+  "welding equipment",
+  "scaffolding systems",
+  "power saws",
+]);
+
+const HYGIENE_OUTDOOR_SUBS = new Set([
+  "tents",
+  "sleeping bags",
+  "expedition tents",
+]);
+
+export type WeatherCancelPolicy =
+  | "full_refund_24h"
+  | "full_refund_12h"
+  | "host_discretion"
+  | "not_outdoor";
+
+/** Outdoor party / event gear where weather cancel matters. */
+export function listingIsOutdoorParty(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "categorySpecs">,
+): boolean {
+  if (listing.category.trim() !== "Party & Events") return false;
+  const policy = (listing.categorySpecs?.weatherCancelPolicy ?? "").trim();
+  if (policy === "not_outdoor") return false;
+  if (
+    policy === "full_refund_24h" ||
+    policy === "full_refund_12h" ||
+    policy === "host_discretion"
+  ) {
+    return true;
+  }
+  const footprint = (listing.categorySpecs?.setupFootprint ?? "").trim().toLowerCase();
+  if (OUTDOOR_PARTY_FOOTPRINTS.has(footprint)) return true;
+  const sub = subKey(listing);
+  return OUTDOOR_PARTY_SUBS.has(sub) || sub.includes("canopy") || sub.includes("tent");
+}
+
+export function listingRequiresWeatherCancelPolicy(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  return rentOn(listing) && listingIsOutdoorParty(listing);
+}
+
+export function listingWeatherCancelPolicy(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): WeatherCancelPolicy | "" {
+  const raw = (listing.categorySpecs?.weatherCancelPolicy ?? "").trim();
+  if (
+    raw === "full_refund_24h" ||
+    raw === "full_refund_12h" ||
+    raw === "host_discretion" ||
+    raw === "not_outdoor"
+  ) {
+    return raw;
+  }
+  return "";
+}
+
+/** Hours before start for weather full-refund; null = no automatic weather full refund. */
+export function listingWeatherCancelFullRefundHours(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): number | null {
+  const policy = listingWeatherCancelPolicy(listing);
+  if (policy === "full_refund_24h") return 24;
+  if (policy === "full_refund_12h") return 12;
+  return null;
+}
+
+export function listingRequiresSafetyBriefing(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!rentOn(listing)) return false;
+  if (listing.category.trim() !== "Tools & DIY") return false;
+  const flag = (listing.categorySpecs?.safetyBriefingRequired ?? "").trim();
+  if (flag === "not_required") return false;
+  if (flag === "required") return true;
+  const sub = subKey(listing);
+  if (SAFETY_BRIEF_TOOL_SUBS.has(sub)) return true;
+  return (
+    sub.includes("weld") ||
+    sub.includes("scaffold") ||
+    sub.includes("saw") ||
+    /\b(plasma|torch|angle grinder)\b/i.test(sub)
+  );
+}
+
+export function listingSafetyBriefingHostReady(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): boolean {
+  return (listing.categorySpecs?.safetyBriefingConfirmed ?? "").trim() === "briefing_ready";
+}
+
+export function listingSafetyBriefingBlocksBooking(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!listingRequiresSafetyBriefing(listing)) return false;
+  return !listingSafetyBriefingHostReady(listing);
+}
+
+export function listingSafetyBriefingNotes(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): string {
+  return (listing.categorySpecs?.safetyBriefingNotes ?? "").trim();
+}
+
+export function listingRequiresHygieneChecklist(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!rentOn(listing)) return false;
+  if (listing.category.trim() !== "Outdoor & Camping") return false;
+  const flag = (listing.categorySpecs?.hygieneChecklistRequired ?? "").trim();
+  if (flag === "not_required") return false;
+  if (flag === "required") return true;
+  const sub = subKey(listing);
+  return HYGIENE_OUTDOOR_SUBS.has(sub) || sub.includes("sleeping") || sub.includes("tent");
+}
+
+export function listingHygieneHostAttested(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): boolean {
+  return (listing.categorySpecs?.hygieneSanitizedAttested ?? "").trim() === "attested";
+}
+
+export function listingHygieneBlocksBooking(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!listingRequiresHygieneChecklist(listing)) return false;
+  return !listingHygieneHostAttested(listing);
+}
+
+export function listingHygieneChecklistNotes(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): string {
+  return (listing.categorySpecs?.hygieneChecklistNotes ?? "").trim();
+}
+
+export function listingIsCostumeCategory(
+  listing: Pick<ListingDraft, "category">,
+): boolean {
+  return listing.category.trim() === "Costume & Cosplay";
+}
+
+export function listingRequiresCostumeReturnCondition(
+  listing: Pick<ListingDraft, "category" | "modes">,
+): boolean {
+  return rentOn(listing) && listingIsCostumeCategory(listing);
+}
+
+export function listingDryCleanReturnFeeUsd(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): number {
+  const raw = listing.categorySpecs?.dryCleanReturnFeeUsd ?? "";
+  const n = Number.parseFloat(String(raw).replace(/[^0-9.]/g, ""));
+  return Number.isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : 0;
+}
+
+export function listingReturnConditionPolicy(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): string {
+  return (listing.categorySpecs?.returnConditionPolicy ?? "").trim();
+}
+
+const COSTUME_HYGIENE_SUBS = new Set([
+  "professional makeup kits",
+  "wigs & accessories",
+  "masks & makeup",
+]);
+
+/** Makeup kits / wigs / masks — hygiene / sanitization between renters. */
+export function listingRequiresCostumeHygiene(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes">,
+): boolean {
+  if (!rentOn(listing) || !listingIsCostumeCategory(listing)) return false;
+  return COSTUME_HYGIENE_SUBS.has(subKey(listing));
+}
+
+export function listingCostumeHygieneAttested(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): boolean {
+  return (listing.categorySpecs?.sanitizationAttested ?? "").trim() === "attested";
+}
+
+export function listingCostumeHygieneBlocksBooking(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!listingRequiresCostumeHygiene(listing)) return false;
+  return !listingCostumeHygieneAttested(listing);
+}
+
+
+
+/* ─── P2: Vehicles soft driving-record attestation ──────────────────── */
+
+/**
+ * Vehicles rent: soft self-attestation that the renter holds a valid license
+ * and has no major recent driving-record issues. Honest scaffold — not a paid
+ * MVR / DMV vendor pull.
+ */
+export function listingRequiresDriverRecordAttestation(
+  listing: Pick<ListingDraft, "category" | "modes">,
+): boolean {
+  return rentOn(listing) && listing.category.trim() === "Vehicles";
+}
+
+/* ─── Vehicles / Boats P2: ATV · motorcycle · captain · PFD ──────────── */
+
+const ATV_SUBS = new Set(["atvs"]);
+const MOTORCYCLE_SUBS = new Set(["motorcycles"]);
+const CAPTAIN_OPT_SUBS = new Set(["motorboats", "pontoon boats", "charter vessels"]);
+const PADDLE_PFD_SUBS = new Set(["kayaks & canoes", "sup boards"]);
+
+export function listingIsAtv(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  if (listing.category.trim() !== "Vehicles") return false;
+  const sub = subKey(listing);
+  return ATV_SUBS.has(sub) || sub.includes("atv") || sub.includes("utv") || sub.includes("side-by-side");
+}
+
+export function listingIsMotorcycle(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  if (listing.category.trim() !== "Vehicles") return false;
+  const sub = subKey(listing);
+  return MOTORCYCLE_SUBS.has(sub) || sub.includes("motorcycle") || sub.includes("motorbike");
+}
+
+/** ATV: OHV / terrain liability waiver at booking (default on). */
+export function listingRequiresOhvTerrainWaiver(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!rentOn(listing) || !listingIsAtv(listing)) return false;
+  const flag = (listing.categorySpecs?.ohvTerrainWaiverRequired ?? "").trim();
+  if (flag === "not_required") return false;
+  return true;
+}
+
+/** Soft age note for ATV (often 16+ in market) — informational, not hard age gate. */
+export function listingAtvMinAgeNote(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "categorySpecs">,
+): number | null {
+  if (!listingIsAtv(listing)) return null;
+  const raw = (listing.categorySpecs?.minRiderAge ?? "").trim();
+  const n = Number.parseInt(raw, 10);
+  if (Number.isFinite(n) && n >= 12 && n <= 21) return n;
+  return 16;
+}
+
+/** Motorcycle endorsement self-attestation (default required for motorcycle rent). */
+export function listingRequiresMotorcycleEndorsement(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!rentOn(listing) || !listingIsMotorcycle(listing)) return false;
+  const flag = (listing.categorySpecs?.motorcycleEndorsementRequired ?? "").trim();
+  if (flag === "not_required") return false;
+  return true;
+}
+
+export type CaptainMode = "bareboat" | "captain_included" | "";
+
+export function listingIsCaptainOptionVessel(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  if (listing.category.trim() !== "Boats & Water") return false;
+  const sub = subKey(listing);
+  return CAPTAIN_OPT_SUBS.has(sub) || sub.includes("charter") || sub.includes("pontoon");
+}
+
+export function listingCaptainMode(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "categorySpecs">,
+): CaptainMode {
+  if (!listingIsCaptainOptionVessel(listing)) return "";
+  const raw = (listing.categorySpecs?.captainMode ?? "").trim();
+  if (raw === "bareboat" || raw === "captain_included") return raw;
+  return "";
+}
+
+/** Host offers captain-included vs bareboat on motorboat / pontoon / charter. */
+export function listingRequiresCaptainModeField(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes">,
+): boolean {
+  return rentOn(listing) && listingIsCaptainOptionVessel(listing);
+}
+
+export function listingIsPaddleCraft(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  if (listing.category.trim() !== "Boats & Water") return false;
+  const sub = subKey(listing);
+  return (
+    PADDLE_PFD_SUBS.has(sub) ||
+    sub.includes("kayak") ||
+    sub.includes("canoe") ||
+    sub.includes("sup") ||
+    sub.includes("paddle")
+  );
+}
+
+/** Kayak / SUP: PFD included + count soft-to-required attestation (lighter than HIN copy). */
+export function listingRequiresPfdAttestation(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!rentOn(listing) || !listingIsPaddleCraft(listing)) return false;
+  const flag = (listing.categorySpecs?.pfdIncluded ?? "").trim();
+  if (flag === "not_required") return false;
+  return true;
+}
+
+export function listingPfdIncluded(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): string {
+  return (listing.categorySpecs?.pfdIncluded ?? "").trim();
+}
+
+export function listingPfdCount(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): number | null {
+  const raw = (listing.categorySpecs?.pfdCount ?? "").trim();
+  const n = Number.parseInt(raw, 10);
+  if (Number.isFinite(n) && n > 0 && n <= 24) return n;
+  return null;
 }

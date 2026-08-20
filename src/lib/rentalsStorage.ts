@@ -230,6 +230,14 @@ export type RentalBooking = {
   /** Car seat: renter sanitization / safety acknowledgment at booking. */
   carSeatSanitizationAttested?: boolean;
   carSeatRecallAckAttested?: boolean;
+  /** Cribs & Beds P0 hard safety gate attestations. */
+  cribRecallAckAttested?: boolean;
+  cribDropSideAckAttested?: boolean;
+  cribSanitizationAttested?: boolean;
+  /** Tools welding/scaffolding safety briefing + PPE. */
+  safetyBriefingAck?: boolean;
+  safetyBriefingNotesSnapshot?: string;
+  ppeAckAttested?: boolean;
   /** Frozen house rules / cleaning fee at booking (Real Estate). */
   houseRulesSnapshot?: string;
   cleaningFeeUsd?: number;
@@ -247,6 +255,28 @@ export type RentalBooking = {
   hostDataWipeStatusSnapshot?: string;
   paCableStandAck?: boolean;
   paCableStandSnapshot?: string;
+  /** P2: party weather cancel / tools safety / outdoor hygiene / costume return. */
+  weatherCancelPolicySnapshot?: string;
+  weatherCancelHours?: number | null;
+  weatherCancelAck?: boolean;
+  safetyBriefingAck?: boolean;
+  safetyBriefingNotesSnapshot?: string;
+  hygieneAck?: boolean;
+  hygieneNotesSnapshot?: string;
+  costumeReturnConditionAck?: boolean;
+  returnConditionPolicySnapshot?: string;
+  dryCleanReturnFeeUsd?: number;
+  /** ATV OHV / terrain waiver attestation. */
+  ohvTerrainWaiverAttested?: boolean;
+  atvMinAgeNote?: number;
+  /** Motorcycle endorsement self-attestation. */
+  motorcycleEndorsementAttested?: boolean;
+  /** Boats: captain-included vs bareboat snapshot. */
+  captainModeSnapshot?: string;
+  /** Kayak / SUP PFD attestation. */
+  pfdAck?: boolean;
+  pfdIncludedSnapshot?: string;
+  pfdCountSnapshot?: number | null;
   /**
    * Renter acknowledged agent→owner insurance proof path and saw owner email.
    */
@@ -256,6 +286,25 @@ export type RentalBooking = {
   /** Host confirms agent emailed insurance proof (commercial transport path). */
   insuranceProofReceivedByHost?: boolean;
   insuranceProofReceivedAt?: string;
+  /**
+   * Vehicles P2: soft license + driving-record self-attestation.
+   * Not a paid MVR / DMV pull — honest scaffold for host review.
+   */
+  driverLicenseValidAttested?: boolean;
+  driverRecordSoftAttested?: boolean;
+  driverLicenseState?: string;
+  driverLicenseLast4?: string;
+  /**
+   * Heavy / Construction P2: structured Certificate of Insurance fields
+   * (beyond photo-only). Host still confirms proof received before unlock.
+   */
+  coiCarrierName?: string;
+  coiPolicyNumber?: string;
+  coiLiabilityLimitUsd?: string;
+  coiEffectiveDate?: string;
+  coiExpirationDate?: string;
+  coiNamedInsured?: string;
+  coiAdditionalInsuredAttested?: boolean;
   /** Mandatory pre-trip photo checklist (vehicles / heavy / boats). */
   preTripInspection?: PreTripInspectionRecord | null;
   /** Return photo checklist (same tire set for swap disputes). */
@@ -586,6 +635,15 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
     droneCertMedia: raw.droneCertMedia ?? null,
     carSeatSanitizationAttested: Boolean(raw.carSeatSanitizationAttested),
     carSeatRecallAckAttested: Boolean(raw.carSeatRecallAckAttested),
+    cribRecallAckAttested: Boolean(raw.cribRecallAckAttested),
+    cribDropSideAckAttested: Boolean(raw.cribDropSideAckAttested),
+    cribSanitizationAttested: Boolean(raw.cribSanitizationAttested),
+    safetyBriefingAck: Boolean(raw.safetyBriefingAck),
+    safetyBriefingNotesSnapshot:
+      typeof raw.safetyBriefingNotesSnapshot === "string"
+        ? raw.safetyBriefingNotesSnapshot
+        : undefined,
+    ppeAckAttested: Boolean(raw.ppeAckAttested),
     houseRulesSnapshot:
       typeof raw.houseRulesSnapshot === "string" ? raw.houseRulesSnapshot : undefined,
     cleaningFeeUsd:
@@ -606,6 +664,32 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
       typeof raw.setupTeardownFeeUsd === "number" && Number.isFinite(raw.setupTeardownFeeUsd)
         ? raw.setupTeardownFeeUsd
         : undefined,
+    ohvTerrainWaiverAttested: Boolean(raw.ohvTerrainWaiverAttested),
+    atvMinAgeNote:
+      typeof raw.atvMinAgeNote === "number" && Number.isFinite(raw.atvMinAgeNote)
+        ? raw.atvMinAgeNote
+        : undefined,
+    motorcycleEndorsementAttested: Boolean(raw.motorcycleEndorsementAttested),
+    captainModeSnapshot:
+      typeof raw.captainModeSnapshot === "string" ? raw.captainModeSnapshot : undefined,
+    pfdAck: Boolean(raw.pfdAck),
+    pfdIncludedSnapshot:
+      typeof raw.pfdIncludedSnapshot === "string" ? raw.pfdIncludedSnapshot : undefined,
+    pfdCountSnapshot:
+      typeof raw.pfdCountSnapshot === "number" && Number.isFinite(raw.pfdCountSnapshot)
+        ? raw.pfdCountSnapshot
+        : raw.pfdCountSnapshot === null
+          ? null
+          : undefined,
+    coiCarrierName: typeof raw.coiCarrierName === "string" ? raw.coiCarrierName : undefined,
+    coiPolicyNumber: typeof raw.coiPolicyNumber === "string" ? raw.coiPolicyNumber : undefined,
+    coiLiabilityLimitUsd:
+      typeof raw.coiLiabilityLimitUsd === "string" ? raw.coiLiabilityLimitUsd : undefined,
+    coiEffectiveDate: typeof raw.coiEffectiveDate === "string" ? raw.coiEffectiveDate : undefined,
+    coiExpirationDate:
+      typeof raw.coiExpirationDate === "string" ? raw.coiExpirationDate : undefined,
+    coiNamedInsured: typeof raw.coiNamedInsured === "string" ? raw.coiNamedInsured : undefined,
+    coiAdditionalInsuredAttested: Boolean(raw.coiAdditionalInsuredAttested),
     insuranceAgentProofAcknowledged: Boolean(raw.insuranceAgentProofAcknowledged),
     insuranceOwnerProofEmail:
       typeof raw.insuranceOwnerProofEmail === "string"
@@ -616,6 +700,12 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
       typeof raw.insuranceProofReceivedAt === "string"
         ? raw.insuranceProofReceivedAt
         : undefined,
+    driverLicenseValidAttested: Boolean(raw.driverLicenseValidAttested),
+    driverRecordSoftAttested: Boolean(raw.driverRecordSoftAttested),
+    driverLicenseState:
+      typeof raw.driverLicenseState === "string" ? raw.driverLicenseState : undefined,
+    driverLicenseLast4:
+      typeof raw.driverLicenseLast4 === "string" ? raw.driverLicenseLast4 : undefined,
     preTripInspection: normalizeInspectionRecord(raw.preTripInspection, "pickup"),
     returnInspection: normalizeInspectionRecord(raw.returnInspection, "return"),
     fuelPolicy: normalizeFuelPolicySnapshot(raw.fuelPolicy),

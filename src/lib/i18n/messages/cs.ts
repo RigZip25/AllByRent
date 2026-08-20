@@ -982,6 +982,15 @@ export const cs: AppMessages = {
       "Před předáním je nutné potvrzení mazání dat z rezervace.",
     paCableStandUnlockBlocked:
       "Před předáním je nutné potvrzení inventáře kabelů / stojanů PA z rezervace.",
+    safetyBriefingUnlockBlocked:
+      "Před předáním je potřeba potvrzení bezpečnostní instruktáže z rezervace.",
+    hygieneUnlockBlocked:
+      "Před předáním je potřeba potvrzení hygienického checklistu z rezervace.",
+    costumeReturnUnlockBlocked:
+      "Před předáním je potřeba potvrzení podmínek vrácení kostýmu z rezervace.",
+    weatherCancelRefundPreview:
+      "Zvoleno storno kvůli počasí — plná refundace nájmu dle outdoor politiky inzerátu.",
+    weatherCancelToggle: "Zrušit kvůli počasí (outdoor párty politika)",
     agentProofPending:
       "Čeká se, až hostitel potvrdí, že dostal doklad pojištění od tvého agenta.",
     agentProofReceivedMark: "Obdržel(a) jsem doklad pojištění od agenta nájemce",
@@ -1793,6 +1802,44 @@ export const cs: AppMessages = {
           label: "Požadavek na napájení",
           hint: "Řekni místu, jaké okruhy / generátory potřebuješ.",
         },
+        weatherCancelPolicy: {
+          label: "Storno kvůli počasí (outdoor)",
+          hint: "Povinné u outdoor půdorysu / stanů — okno plné refundace, když počasí akci zruší.",
+        },
+        safetyBriefingRequired: {
+          label: "Bezpečnostní instruktáž povinná",
+          hint: "Pily, svářečky, lešení — nájemce potvrdí při rezervaci.",
+        },
+        safetyBriefingConfirmed: {
+          label: "Připravenost instruktáže",
+          hint: "Označte připraveno, až můžete dát PPE / bezpečné pokyny při předání.",
+        },
+        safetyBriefingNotes: {
+          label: "Poznámky k instruktáži",
+          placeholder: "PPE, mokré kotouče ne, patky lešení…",
+          hint: "Volitelné body zobrazené nájemci při rezervaci.",
+        },
+        hygieneChecklistRequired: {
+          label: "Hygienický checklist",
+          hint: "Stany / spací pytle — vyžaduje sanitaci pro pronájem.",
+        },
+        hygieneSanitizedAttested: {
+          label: "Vyčištěno / vyvětráno",
+          hint: "Potvrďte úklid před inzerátem — blokuje rezervaci, dokud není potvrzeno.",
+        },
+        hygieneChecklistNotes: {
+          label: "Hygienické poznámky",
+          placeholder: "Vypraný potah, 24h větrání…",
+        },
+        returnConditionPolicy: {
+          label: "Stav při vrácení",
+          hint: "Jak mají kostýmy přijít zpět — jen chemické, skvrny OK, nebo jak při převzetí.",
+        },
+        dryCleanReturnFeeUsd: {
+          label: "Poplatek za čištění / vrácení (USD)",
+          placeholder: "35",
+          hint: "Volitelný paušál zobrazený při rezervaci a ve smlouvě.",
+        },
         useCase: { label: "Hlavní použití" },
         transportSize: { label: "Jak se přepravuje" },
         deviceHasStorage: {
@@ -2070,6 +2117,16 @@ export const cs: AppMessages = {
         dedicated_20a: "Vyhrazený okruh 20A",
         "240v_or_generator": "240V nebo generátor",
         host_provides: "Napájení zajistí hostitel na místě",
+        full_refund_24h: "Plná refundace při zrušení ≥24 h před startem (počasí)",
+        full_refund_12h: "Plná refundace při zrušení ≥12 h před startem (počasí)",
+        host_discretion: "Storno kvůli počasí — dle dohody hostitele",
+        not_outdoor: "Není outdoor setup",
+        briefing_ready: "Instruktáž připravena při předání",
+        need_to_prepare: "Instruktáž se ještě připravuje",
+        need_to_clean: "Ještě vyčistit / vyvětrat",
+        dry_clean_only: "Jen chemické čištění před vrácením",
+        spot_clean_ok: "Lokální čištění OK; chemické při skvrnách",
+        return_as_received: "Vrátit jak při převzetí (bez praní)",
         under_2kw: "Do 2 kW",
         "2_5kw": "2–5 kW",
         "5_15kw": "5–15 kW",
@@ -2667,6 +2724,33 @@ export const cs: AppMessages = {
       "Hostitel potvrdí kabely a stojany při předání — pro pokračování potvrď.",
     paCableStandAttest:
       "Zkontroloval(a) jsem inventář kabelů / stojanů a ověřím každou položku při vyzvednutí i vrácení.",
+    weatherCancelTitle: "Storno kvůli počasí (outdoor)",
+    weatherCancelBody: (policy) =>
+      `Tento outdoor párty inzerát používá storno kvůli počasí: ${policy}. Pokud počasí akci znemožní, zrušte podle této politiky — plná refundace nájmu v daném okně.`,
+    weatherCancelAttest: "Rozumím politice storna kvůli počasí u této rezervace.",
+    weatherCancelFallback: "politika počasí hostitele",
+    weatherCancelPolicyLine: (policy) => `Storno kvůli počasí: ${policy}`,
+    safetyBriefingBlockedTitle: "Bezpečnostní instruktáž není připravená",
+    safetyBriefingBlockedBody:
+      "Hostitel ještě musí označit, že je připravená PPE / bezpečnostní instruktáž pro pilu, svářečku nebo lešení, než půjde rezervovat.",
+    safetyBriefingTitle: "Bezpečnostní instruktáž",
+    safetyBriefingBody:
+      "Pily, svářečky a lešení vyžadují krátkou PPE / bezpečnou instruktáž před předáním. Potvrďte, že ji absolvujete s hostitelem.",
+    safetyBriefingAttest: "Absolvuji bezpečnostní instruktáž před použitím nástroje.",
+    hygieneBlockedTitle: "Hygienický checklist není hotový",
+    hygieneBlockedBody:
+      "Hostitel ještě musí potvrdit, že stan nebo spací pytel byl vyčištěn / vyvětrán, než půjde rezervovat.",
+    hygieneTitle: "Hygiena / sanitace",
+    hygieneBody:
+      "Stany a spací pytle jsou sdílené spaní. Hostitel potvrdil úklid; potvrďte, že je vrátíte přiměřeně čisté a suché.",
+    hygieneAttest: "Beru na vědomí hygienický checklist a vrátím vybavení čisté a suché.",
+    costumeReturnTitle: "Stav při vrácení / chemické čištění",
+    costumeReturnBody:
+      "Kostýmy mají pravidlo vrácení a volitelný poplatek za čištění. Potvrďte, že ho dodržíte.",
+    costumeReturnAttest: "Souhlasím s podmínkami vrácení / chemického čištění tohoto kostýmu.",
+    returnConditionPolicyLine: (policy) => `Stav při vrácení: ${policy}`,
+    returnConditionFallback: "dle inzerátu",
+    dryCleanReturnFeeLine: (amount) => `Poplatek za čištění / vrácení: ${amount}`,
     agentInsuranceTitle: "Pojištění přes agenta → majitel",
     agentInsuranceBody:
       "U těžké / semi komerční dopravy sjednej krytí u pojišťovacího agenta. Agent musí poslat doklad e-mailem přímo majiteli vozidla — nejde o lehčí cestu „přidat do osobního autopojištění + nahrát“.",
@@ -2807,7 +2891,7 @@ export const cs: AppMessages = {
       Vehicles: {
         title: "Jak funguje sousedské půjčení auta",
         summary:
-          "Sousedé jsou důvěryhodnější než anonymní marketplace — ale podmínky, pojištění a povinná předprohlídka (exteriér, interiér a všechny pneumatiky) jsou povinné před PIN/klíči. Palivo (a DEF u nafty) se zapisuje na začátku a při vrácení — výchozí plná→plná, chybějící palivo + $20. Od 26 000 lb nebo u semi / komerčních přívěsů navíc CDL a doklad agent→majitel (ne osobní nahrání). Hostitel může po okně vyzvednutí označit no-show a uvolnit kalendář.",
+          "Sousedé jsou důvěryhodnější než anonymní marketplace — podmínky, pojištění, soft prohlášení o řidičáku/záznamu (ne placený MVR) a povinná předprohlídka jsou povinné před PIN/klíči. Storno ≥24h: plná refundace; do 24h: 50%. No-show ~2h. Pozdní návrat: 30m grace + $20 + $15/hod. Palivo full-to-full. ≥26k lb / semi: CDL + agent→owner pojištění.",
         hostTipTitle: "Pro hostitele / majitele",
         hostTip:
           "Zadej GVWR v lb. Od ≥ 26 000 lb nebo u semi nastav e-mail pro doklad od agenta a vyžaduj CDL. U lehčích aut nájemce přidá auto do osobní pojistky a nahraje doklad. Fotky pneumatik chrání před výměnou. Palivo: plná→plná (hladiny jen při předání, ne v inzerátu). Volitelný no-show poplatek je měkký flag depozitu.",
@@ -2832,7 +2916,7 @@ export const cs: AppMessages = {
       "Heavy Equipment": {
         title: "Půjčování komerční techniky",
         summary:
-          "Heavy Equipment defaultně jen pro profesionály. Kvalifikace obsluhy (vysokozdvižný vozík / jeřáb / bagr / obecná) dle podkategorie. PD pojištění povinné. Depozit pojištěním (hold na spoluúčast), ne plná náhrada. Předprohlídka blokuje start.",
+          "Heavy Equipment defaultně jen pro profesionály. Kvalifikace obsluhy dle podkategorie. Strukturovaný COI (pojišťovna, pojistka, limity, data) + fotka — hostitel označí „doklad přijat“ před předáním. PD pojištění povinné. Depozit pojištěním (hold na spoluúčast). Povinná předprohlídka.",
         hostTipTitle: "Pro hostitele",
         hostTip:
           "Nech „jen profi“ zapnuté. Vyžaduj kvalifikaci u motorové techniky. PD je povinné; nastav max. spoluúčast kvůli holdu.",
@@ -2852,7 +2936,7 @@ export const cs: AppMessages = {
       Construction: {
         title: "Půjčování stavební techniky",
         summary:
-          "Construction defaultně jen profi a PD pojištění. Depozit pojištěním (hold na spoluúčast). Jeřábová / těžká motorová technika vyžaduje kvalifikaci obsluhy. Povinná předprohlídka.",
+          "Construction defaultně jen profi a PD pojištění. Strukturovaný COI + potvrzení hostitele „doklad přijat“ — ne jen fotka. Depozit pojištěním (hold na spoluúčast). Jeřábová / těžká motorová technika vyžaduje kvalifikaci obsluhy. Povinná předprohlídka.",
         hostTipTitle: "Pro hostitele",
         hostTip:
           "Jen profi + PD před klíči. Nastav spoluúčast. Vyžaduj kvalifikaci u crane-class / motorových polic.",
@@ -2983,19 +3067,19 @@ export const cs: AppMessages = {
       "Outdoor & Camping": {
         title: "Pronájem outdoor a kempu",
         summary:
-          "Expediční / survival police používají vzdání se nároků při rezervaci. Kapacita a sezóna pomáhají výběru.",
+          "Expediční / survival police používají vzdání se nároků. Stany a spací pytle přidávají hygienický checklist.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Vyžaduj vzdání se nároků u survival / expedice. Stany udržuj suché a sezónu uváděj pravdivě.",
-        whyGeoTitle: "Proč vzdání se nároků u survival?",
+          "Vyžaduj vzdání se nároků u survival / expedice. U stanů a pytlů potvrď vyčištění / vyvětrání.",
+        whyGeoTitle: "Proč vzdání se nároků + hygiena?",
         whyGeo:
-          "Selhání vybavení v terénu může lidi ohrozit. Vzdání se nároků + jasná sezóna / kapacita nastaví očekávání.",
+          "Selhání v terénu ohrozí lidi; špinavé spaní šíří pachy a alergeny. Vzdání se nároků + hygiena nastaví očekávání.",
         flowTitle: "Od začátku do konce",
-        flow: "Inzerát → vzdání se nároků když je potřeba → předání → návrat.",
+        flow: "Inzerát → vzdání se nároků / hygiena → předání → návrat čisté a suché.",
         layersTitle: "Bezpečnostní vrstvy",
-        layers: "Vzdání se nároků (riziko) · kapacita / sezóna · kauce · podmínky.",
+        layers: "Vzdání se nároků · hygienický checklist · kapacita / sezóna · kauce · podmínky.",
         claimsTitle: "Když se něco pokazí",
-        claims: "Fotky a vzdání se nároků ve sporech; kauce na poškození nebo chybějící díly.",
+        claims: "Fotky, vzdání se nároků a hygiena ve sporech; kauce na poškození.",
       },
       "Bikes & Scooters": {
         title: "Pronájem kol a koloběžek",
@@ -3017,19 +3101,53 @@ export const cs: AppMessages = {
       "Party & Events": {
         title: "Pronájem na párty a eventy",
         summary:
-          "Pro AV / stage / světla zachyť poplatek za stavbu/demontáž a napájení. Kapacita hostů a půdorys pomáhají plánovat.",
+          "Pro AV / stage / světla zachyť poplatek stavba/demontáž a napájení. Outdoor půdorys a stany přidávají storno kvůli počasí.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Nastav poplatek za stavbu/demontáž, když zajišťuješ práci. U zvuku a světel jasně uveď napájení.",
-        whyGeoTitle: "Proč poplatek + napájení?",
+          "Nastav poplatek a napájení. U zahrady / outdoor / stanů zvol okno storna kvůli počasí (24 h, 12 h nebo dle dohody).",
+        whyGeoTitle: "Proč storno kvůli počasí + poplatek?",
         whyGeo:
-          "Překvapivá práce a mrtvé zásuvky kazí eventy. Poplatek + napájení se zmrazí ve smlouvě.",
+          "Outdoor eventy padají na počasí častěji než na kauci. Jasné okno + poplatek/napájení ve smlouvě snižuje překvapení.",
         flowTitle: "Od začátku do konce",
-        flow: "Inzerát s poplatkem / napájením → rezervace → stavba → demontáž a návrat.",
+        flow: "Inzerát s poplatkem / napájením / politikou počasí → rezervace → stavba → demontáž.",
         layersTitle: "Bezpečnostní vrstvy",
-        layers: "Poplatek stavba/demontáž · napájení · kapacita · kauce · podmínky.",
+        layers: "Storno kvůli počasí · poplatek stavba/demontáž · napájení · kapacita · kauce · podmínky.",
         claimsTitle: "Když se něco pokazí",
-        claims: "Poplatek a napájení jsou ve smlouvě; kauce na poškození nad běžné opotřebení.",
+        claims: "Refundace dle politiky počasí; kauce na poškození nad běžné opotřebení.",
+      },
+      "Tools & DIY": {
+        title: "Pronájem nářadí a DIY",
+        summary:
+          "Soused + kauce stačí u většiny vrtaček. Pily, svářečky a lešení vyžadují potvrzení PPE / bezpečnostní instruktáže před předáním.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Označ instruktáž připravenou a uveď PPE / bezpečné body u pil, sváření a lešení.",
+        whyGeoTitle: "Proč bezpečnostní instruktáž?",
+        whyGeo:
+          "Tyto nástroje zraní rychleji, než kauce spraví. Krátká brána nastaví péči bez školení operátorů platformou.",
+        flowTitle: "Od začátku do konce",
+        flow: "Inzerát s připravenou instruktáží → potvrzení → instruktáž při předání → návrat.",
+        layersTitle: "Bezpečnostní vrstvy",
+        layers: "Bezpečnostní instruktáž · napájení / napětí · kauce · podmínky · QR.",
+        claimsTitle: "Když se něco pokazí",
+        claims: "Potvrzení instruktáže a fotky; kauce na poškození nebo chybějící díly.",
+      },
+      "Costume & Cosplay": {
+        title: "Pronájem kostýmů a cosplay",
+        summary:
+          "Pravidla vrácení a volitelný poplatek za čištění drží půjčování kostýmů fér — zmrazené ve smlouvě.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Nastav jen chemické / skvrny OK / jak při převzetí a volitelný poplatek za čištění.",
+        whyGeoTitle: "Proč stav při vrácení + poplatek?",
+        whyGeo:
+          "Makeup, pot a glitter kazí kostýmy. Jasná pravidla jsou lepší než překvapivý účet za čištění.",
+        flowTitle: "Od začátku do konce",
+        flow: "Inzerát s politikou (+ poplatek) → potvrzení → nošení → návrat dle politiky.",
+        layersTitle: "Bezpečnostní vrstvy",
+        layers: "Stav při vrácení · poplatek za čištění · velikost · kauce · podmínky.",
+        claimsTitle: "Když se něco pokazí",
+        claims: "Poplatek a politika jsou ve smlouvě; kauce na trhliny nebo chybějící díly.",
       },
       "Office & Business": {
         title: "Pronájem kanceláře a byznysu",
