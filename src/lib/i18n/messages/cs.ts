@@ -8641,7 +8641,52 @@ export const cs: AppMessages = {
             },
           ],
         },
-      },
+      
+        "Cargo Vans": {
+          title: "FAQ nákladních dodávek",
+          summary: "Krátké odpovědi k cargo a pracovním dodávkám.",
+          qa: [
+            { q: "Potřebuji CDL?", a: "Obvykle ne pod 26 001 lb GVWR—ověřte místní zákon a váhovou třídu inzerátu." },
+            { q: "Jaké pojištění?", a: "Krytí této dodávky dle inzerátu; nahrajte doklad před odemčením PIN/klíčů." },
+            { q: "Nákladové limity?", a: "Dodržujte publikovaný payload a zajištění nákladu." },
+            { q: "Jaké fotky?", a: "Karoserie, nákladový prostor a pneumatiky při pre-trip; stejné při vrácení." },
+            { q: "Proč GPS pro PIN?", a: "PIN/lockbox jen na místě vyzvednutí nebo přes QR—ne přeposlaný kód." },
+          ],
+        },
+        "RVs & Campers": {
+          title: "FAQ obytných vozů",
+          summary: "Krátké odpovědi k RV, karavanům a campers.",
+          qa: [
+            { q: "Speciální řidičák?", a: "Dodržujte místní RV/komerční pravidla a poznámku v inzerátu." },
+            { q: "Jaké pojištění?", a: "Krytí tohoto RV dle inzerátu; nahrajte doklad před odemčením." },
+            { q: "Přípojky a dump?", a: "Ověřte elektřinu/vodu/kanalizaci v inzerátu—kauce nejsou poplatky kempu." },
+            { q: "Jaké fotky?", a: "Exteriér, pneumatiky a obytný prostor při pre-trip; stejné při vrácení." },
+            { q: "Co kryje kauce?", a: "Interiér a chybějící příslušenství—ne pojištění storna výletu." },
+          ],
+        },
+        "Special Vehicles": {
+          title: "FAQ speciálních vozidel",
+          summary: "Krátké odpovědi k nestandardním vozovým policím.",
+          qa: [
+            { q: "Jaké oprávnění?", a: "Podle inzerátu—CDL, endorsement nebo speciální povolení." },
+            { q: "Jaké pojištění?", a: "Doklad kryjící tuto třídu vozidla před PIN/klíči." },
+            { q: "Komerční police?", a: "U komerční třídy platí agent→owner pojištění a PD pravidla." },
+            { q: "Jaké fotky?", a: "Karoserie a pneumatiky při pre-trip; stejné při vrácení." },
+            { q: "Pojmenovaná police?", a: "Přesuňte na Cars, Trucks, Trailers, ATVs, RVs nebo Tow, pokud sedí." },
+          ],
+        },
+        Other: {
+          title: "Ostatní vozidla — nejdřív pojmenovaná police",
+          summary: "Preferujte Cars, Motorcycles, Trailers, ATVs, RVs, Commercial, Cargo, Equipment, Tow nebo Special.",
+          qa: [
+            { q: "Použít Other?", a: "Přesuňte na pojmenovanou Vehicles polici, kdykoli sedí." },
+            { q: "Co stále platí?", a: "VIN, pojištění a foto kontrola u Vehicles pronájmů." },
+            { q: "Komerční vs lehké?", a: "Při komerčním GVWR/použití preferujte Commercial / Equipment / Tow." },
+            { q: "Jaké fotky?", a: "Pre-trip karoserie a pneumatiky; stejné při vrácení." },
+            { q: "Co není v ceně?", a: "Žádné partner pojištění ani CDL školení od Evorios." },
+          ],
+        },
+},
       "Electronics & Tech": {
         "Broadcast Equipment": {
             title: "FAQ broadcast vybavení",

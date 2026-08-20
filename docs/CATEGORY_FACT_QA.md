@@ -172,4 +172,15 @@ Profile + per-sub FactCards + subcategory wiring already shipped (`bfb116d`). Ge
 
 **Option scoping:** prefix `unique_*` on new option ids.
 
+
+### Vehicles (~8.0) — shipped pattern
+
+| Layer | Pattern |
+|-------|---------|
+| All | VIN + insurance + photo inspection; FactCards per shelf |
+| Light | Cars, Motorcycles, Trailers, ATVs, RVs, Cargo Vans |
+| Commercial | Trucks, Equipment Trailers, Tow — CDL/PD/agent proof when gated |
+| Special / Other | Prefer named shelves; still Vehicles VIN/insurance gates |
+| FactCards | Per-sub Q→A EN/CS/ES; `subcategory` + commercial transport flag |
+
 See also: [EVORIOS.md](./EVORIOS.md) (brand / product source of truth).

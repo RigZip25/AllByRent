@@ -8632,7 +8632,52 @@ export const es: AppMessages = {
             },
           ],
         },
-      },
+      
+        "Cargo Vans": {
+          title: "FAQ de furgonetas de carga",
+          summary: "Respuestas cortas para furgones de carga y trabajo.",
+          qa: [
+            { q: "¿Necesito CDL?", a: "Normalmente no bajo 26,001 lb GVWR—confirma la ley local y la clase de peso del anuncio." },
+            { q: "¿Qué seguro?", a: "Cobertura de esta furgoneta según el anuncio; sube el comprobante antes del PIN o llaves." },
+            { q: "¿Límites de carga?", a: "Respeta el payload publicado y las reglas de sujeción." },
+            { q: "¿Qué fotos?", a: "Carrocería, zona de carga y neumáticos en pre-trip; las mismas al devolver." },
+            { q: "¿Por qué GPS para el PIN?", a: "PIN/lockbox solo en recogida o vía QR—no un código reenviado." },
+          ],
+        },
+        "RVs & Campers": {
+          title: "FAQ de autocaravanas",
+          summary: "Respuestas cortas para RV, campers y sleepers.",
+          qa: [
+            { q: "¿Licencia especial?", a: "Sigue las reglas locales de RV/comercial y la nota del anuncio." },
+            { q: "¿Qué seguro?", a: "Cobertura de este RV según el anuncio; sube el comprobante antes del desbloqueo." },
+            { q: "¿Conexiones y dump?", a: "Confirma luz/agua/alcantarillado en el anuncio—el depósito no son tarifas de camping." },
+            { q: "¿Qué fotos?", a: "Exterior, neumáticos y zona habitable en pre-trip; el mismo set al devolver." },
+            { q: "¿Qué cubre el depósito?", a: "Daño interior y accesorios faltantes—no seguro de cancelación del viaje." },
+          ],
+        },
+        "Special Vehicles": {
+          title: "FAQ de vehículos especiales",
+          summary: "Respuestas cortas para estanterías de vehículos poco comunes.",
+          qa: [
+            { q: "¿Qué credenciales?", a: "Sigue el anuncio—CDL, endorsement o permiso especial." },
+            { q: "¿Qué seguro?", a: "Comprobante que cubra esta clase antes del PIN o llaves." },
+            { q: "¿Estante comercial?", a: "Si es clase comercial, aplican seguro agent→owner y reglas PD." },
+            { q: "¿Qué fotos?", a: "Carrocería y neumáticos en pre-trip; las mismas al devolver." },
+            { q: "¿Estante con nombre?", a: "Reubica a Cars, Trucks, Trailers, ATVs, RVs o Tow cuando encaje." },
+          ],
+        },
+        Other: {
+          title: "Otros vehículos — elige un estante con nombre",
+          summary: "Prefiere Cars, Motorcycles, Trailers, ATVs, RVs, Commercial, Cargo, Equipment, Tow o Special.",
+          qa: [
+            { q: "¿Usar Other?", a: "Reubica a un estante Vehicles con nombre cuando encaje." },
+            { q: "¿Qué sigue aplicando?", a: "VIN, seguro e inspección fotográfica en alquileres Vehicles." },
+            { q: "¿Comercial vs ligero?", a: "Si el GVWR o uso es comercial, prefiere Commercial / Equipment / Tow." },
+            { q: "¿Qué fotos?", a: "Pre-trip de carrocería y neumáticos; las mismas al devolver." },
+            { q: "¿Qué no incluye?", a: "Sin promo de seguro partner ni curso CDL de Evorios." },
+          ],
+        },
+},
       "Electronics & Tech": {
         "Broadcast Equipment": {
             title: "FAQ de equipo de broadcast",

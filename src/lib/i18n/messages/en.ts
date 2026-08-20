@@ -8654,6 +8654,110 @@ export const en: AppMessages = {
             },
           ],
         },
+        "Cargo Vans": {
+          title: "Cargo van rental FAQ",
+          summary: "Short answers for cargo and work vans.",
+          qa: [
+            {
+              q: "Do I need a CDL?",
+              a: "Usually no under 26,001 lb GVWR—confirm local law and the listing weight class.",
+            },
+            {
+              q: "What insurance do I need?",
+              a: "Coverage for this van as required on the listing; upload proof before PIN or keys unlock.",
+            },
+            {
+              q: "Cargo limits?",
+              a: "Stay within published payload and cargo securement rules on the listing.",
+            },
+            {
+              q: "What photos are required?",
+              a: "Body, cargo area, and tires at pre-trip; matching return photos before close.",
+            },
+            {
+              q: "Why GPS for the PIN?",
+              a: "PIN or lockbox unlocks only at pickup or via vehicle QR—not a forwarded code.",
+            },
+          ],
+        },
+        "RVs & Campers": {
+          title: "RV & camper rental FAQ",
+          summary: "Short answers for RVs, campers, and sleepers.",
+          qa: [
+            {
+              q: "Do I need a special license?",
+              a: "Follow local RV / commercial rules and any license note on the listing.",
+            },
+            {
+              q: "What insurance do I need?",
+              a: "Coverage for this RV as required on the listing; upload proof before handoff unlock.",
+            },
+            {
+              q: "Hookups and dump?",
+              a: "Confirm power/water/sewer expectations in the listing—deposit is not campsite fees.",
+            },
+            {
+              q: "What photos are required?",
+              a: "Exterior body, tires, and living-area condition at pre-trip; matching return set.",
+            },
+            {
+              q: "What does the deposit cover?",
+              a: "Interior damage and missing accessories against the listing—not trip cancellation insurance.",
+            },
+          ],
+        },
+        "Special Vehicles": {
+          title: "Special vehicle rental FAQ",
+          summary: "Short answers for specialty and uncommon vehicle shelves.",
+          qa: [
+            {
+              q: "What credentials apply?",
+              a: "Follow the listing—CDL, endorsement, or specialty permit when marked.",
+            },
+            {
+              q: "What insurance do I need?",
+              a: "Proof covering this vehicle class before PIN or keys unlock.",
+            },
+            {
+              q: "Is this a commercial shelf?",
+              a: "When the listing is commercial-class, agent→owner insurance and PD rules apply.",
+            },
+            {
+              q: "What photos are required?",
+              a: "Body and tire pre-trip before start; matching return photos before close.",
+            },
+            {
+              q: "Prefer a named shelf?",
+              a: "Re-shelf to Cars, Trucks, Trailers, ATVs, RVs, or Tow when those gates fit better.",
+            },
+          ],
+        },
+        Other: {
+          title: "Other vehicles — pick a named shelf first",
+          summary: "Prefer Cars, Motorcycles, Trailers, ATVs, RVs, Commercial, Cargo, Equipment, Tow, or Special.",
+          qa: [
+            {
+              q: "Should I use Other?",
+              a: "Re-shelf whenever a named Vehicles shelf fits so CDL, insurance, and inspection gates apply.",
+            },
+            {
+              q: "What still applies?",
+              a: "VIN, insurance proof, and photo inspection rules for Vehicles rentals still apply.",
+            },
+            {
+              q: "Commercial vs light?",
+              a: "If GVWR or use is commercial, prefer Commercial Trucks / Equipment Trailers / Tow Vehicles.",
+            },
+            {
+              q: "What photos are required?",
+              a: "Pre-trip body and tires before start; matching return photos before close.",
+            },
+            {
+              q: "What is not included?",
+              a: "No partner insurance promo and no CDL training from Evorios.",
+            },
+          ],
+        },
       },
       "Electronics & Tech": {
         "Broadcast Equipment": {
