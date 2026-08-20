@@ -4,9 +4,11 @@
 
 **Purpose:** Single source of truth when continuing work from any machine (Windows, Mac, Cloud Agent). Track the evolution of **Evorios** here; update this file when brand or product decisions change.
 
-**Category FactCards:** every shelf FAQ is **Question → short answer** only — see [CATEGORY_FACT_QA.md](CATEGORY_FACT_QA.md).
+**Category FactCards:** every shelf FAQ is **Question → short answer** only — see [CATEGORY_FACT_QA.md](CATEGORY_FACT_QA.md). Canonical KB + locale fallback: [I18N_KNOWLEDGE.md](I18N_KNOWLEDGE.md). Spike → deepen ops: [EVORIOS_CATEGORY_OPS.md](EVORIOS_CATEGORY_OPS.md).
 
-**Category ~8.0 encode:** one category at a time; never parallel-edit `en.ts` / `cs.ts` / `es.ts`. Shared `listing.categorySpecs.options` **and** `fields` keys must stay unique (`TS1117` blocks prod). Prefer scoped option ids — see CATEGORY_FACT_QA. **Shipped ~8.0:** Home & Kitchen, Music & Audio, Office & Business, Outdoor & Camping, Photo & Video, Sports & Recreation, Tools & DIY, Unique & Other, Vehicles, Bikes & Scooters, Boats & Water, Construction. **Verified earlier:** Real Estate (`bfb116d`).
+**Product strategy:** household neighborhood marketplace — **breadth first**; deepen one category when demand spikes (not mass P1 on every shelf).
+
+**Category ~8.0 encode:** one category at a time; never parallel-edit shared `options` / `fields` in `messages/*.ts`. Shared `listing.categorySpecs.options` **and** `fields` keys must stay unique (`TS1117` blocks prod) — CI: `npm run check:i18n-keys`. Prefer scoped option ids — see CATEGORY_FACT_QA. **Shipped ~8.0:** Home & Kitchen, Music & Audio, Office & Business, Outdoor & Camping, Photo & Video, Sports & Recreation, Tools & DIY, Unique & Other, Vehicles, Bikes & Scooters, Boats & Water, Construction. **Verified earlier:** Real Estate (`bfb116d`).
 
 **Walk the app screen-by-screen:** [FLOW_AUDIT.md](FLOW_AUDIT.md) — what to change at each step (✅ / 🟡 / 🟠 / 🔴).
 
@@ -214,6 +216,7 @@ Add a row when something meaningful ships or brand decisions change.
 
 | Date | Change |
 |------|--------|
+| 2026-08-20 | **Canonical i18n knowledge base** — FactCards in `src/lib/i18n/knowledge/` with EN→locale fallback; unique-key CI; ops playbook [EVORIOS_CATEGORY_OPS.md](EVORIOS_CATEGORY_OPS.md) / [I18N_KNOWLEDGE.md](I18N_KNOWLEDGE.md). |
 | 2026-08-20 | **CategoryFactCard Q&A standard** — all category/subcategory facts are Question → short answer (`qa[]`); see [CATEGORY_FACT_QA.md](CATEGORY_FACT_QA.md). |
 | 2026-06-15 | **Garage Showcase** direction; P1 rebrand + garage-door splash merged to `main`. |
 | 2026-05-28 | Brand: **Evorios** = site + mascot; evolution narrative. Wyoming company. This doc added. |

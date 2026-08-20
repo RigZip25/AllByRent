@@ -2,7 +2,9 @@
 
 **Last updated:** 2026-08-20
 
-Every category and subcategory **FactCard** (`categoryFacts` in EN / CS / ES) must be **Question → short answer**. No essays, no meta commentary, no partner promo.
+Every category and subcategory **FactCard** must be **Question → short answer**. No essays, no meta commentary, no partner promo.
+
+**Canonical KB:** English FactCards live under `src/lib/i18n/knowledge/` (per-category modules). CS/ES are **overlays** that fall back to EN for missing shelves — see [I18N_KNOWLEDGE.md](I18N_KNOWLEDGE.md). Spike deepen ops: [EVORIOS_CATEGORY_OPS.md](EVORIOS_CATEGORY_OPS.md).
 
 ## Canonical shape
 
@@ -30,16 +32,19 @@ Rendered by `src/components/CategoryFactCard.tsx`:
 | One clear question per item | Meta (“why this FAQ”, “unlike…”, “we discussed…”) |
 | 1–2 sentence answers | Multi-paragraph essays |
 | Actionable gates (CDL, wipe, expiry, PPE…) | Marketing / partner hard-sell |
-| EN + CS + ES in the same change | EN-only FactCard updates |
+| Update canonical EN; overlay CS/ES for changed shelves | Hand-duplicate the entire KB per locale forever |
+| Prefer EN-first when a new shelf ships | Block ship waiting on full CS/ES parity |
 
 ## Where data lives
 
 | Locale | File |
 |--------|------|
-| EN | `src/lib/i18n/messages/en.ts` → `categoryFacts` |
-| CS | `src/lib/i18n/messages/cs.ts` → `categoryFacts` |
-| ES | `src/lib/i18n/messages/es.ts` → `categoryFacts` |
-| Types | `src/lib/i18n/types.ts` → `categoryFacts.byCategory` / `bySubcategory` (`qa?: { q, a }[]`) |
+| EN (canonical) | `src/lib/i18n/knowledge/categories/*.ts` + `subcategories/*.ts` → assembled in `categoryFacts.en.ts` |
+| CS overlay | `src/lib/i18n/knowledge/overlays/cs.ts` → `resolveCategoryFacts(...)` in `messages/cs.ts` |
+| ES overlay | `src/lib/i18n/knowledge/overlays/es.ts` → `resolveCategoryFacts(...)` in `messages/es.ts` |
+| Types | `src/lib/i18n/knowledge/types.ts` + `AppMessages.categoryFacts` in `src/lib/i18n/types.ts` |
+
+Wire-up: `messages/en.ts` uses `categoryFactsEn`; CS/ES merge overlays onto EN so **new languages inherit the KB** without re-copying every shelf.
 
 Resolution order in the component: **subcategory** FactCard → commercial Vehicles shelf → category FactCard.
 
@@ -47,8 +52,9 @@ Resolution order in the component: **subcategory** FactCard → commercial Vehic
 
 1. Discover personal + pro subcategories for the shelf.
 2. Encode gates in listing/booking code as needed.
-3. Ship FactCards as **`qa` only** (this doc) — never essay `whyGeo` / `flow` / `layers` / `claims` blocks.
-4. Typecheck with `npm run typecheck` (`tsc -b`); commit i18n carefully (**one encode agent at a time** on `en.ts` / `cs.ts` / `es.ts`).
+3. Ship FactCards as **`qa` only** in the **canonical EN** modules — never essay `whyGeo` / `flow` / `layers` / `claims` blocks.
+4. Override CS/ES overlays only for shelves you translate; missing keys keep EN.
+5. Typecheck with `npm run typecheck` (runs unique-key CI + `tsc -b`); **one encode agent at a time** on shared `options` / `fields` maps in `messages/*.ts`.
 
 ## Spec option + field-label keys (shared maps — deploy blocker)
 
@@ -60,6 +66,7 @@ All listing `categorySpecs` select **values** share **one flat** `listing.catego
 | **Field-label keys must be globally unique** | Same `TS1117` in the `fields` object |
 | Prefer **scoped values** (`none_on_site`, `mixed_bag_tank`, `kind_coffee`, `glass_jar`) over bare `none` / `mixed` / `single` / `glass` / `coffee` when meanings differ | Bare `none` = trailer brakes; bare `mixed` = “Mixed yard”; bare `single` = “Single piece” |
 | Before adding keys, **grep both maps** in `en.ts` | Parallel category writers thrash these maps |
+| Run `npm run check:i18n-keys` (also in `typecheck` / `prebuild`) | Rely on Vercel alone to catch `TS1117` |
 | `bySubcategory` FactCards are nested **`bySubcategory[category][sub]`** | `"Other"` / `"Catering Equipment"` can differ per category |
 
 **2026-08-20:** Real Estate clearance/`none`/Gym `ground_floor_easy` option collisions fixed (`e9f787a`). Home inject dropped colliding field labels (`kitInventoryChecklist`, `photoConditionChecklist`, `cateringSanitizeAttested`) — reuse existing global labels.
