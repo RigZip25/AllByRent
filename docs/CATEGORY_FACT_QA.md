@@ -177,10 +177,14 @@ Profile + per-sub FactCards + subcategory wiring already shipped (`bfb116d`). Ge
 
 | Layer | Pattern |
 |-------|---------|
-| All | VIN + insurance + photo inspection; FactCards per shelf |
-| Light | Cars, Motorcycles, Trailers, ATVs, RVs, Cargo Vans |
-| Commercial | Trucks, Equipment Trailers, Tow — CDL/PD/agent proof when gated |
-| Special / Other | Prefer named shelves; still Vehicles VIN/insurance gates |
-| FactCards | Per-sub Q→A EN/CS/ES; `subcategory` + commercial transport flag |
+| All | Make/model/year, weight, insurance bands; VIN + photo inspection trust path |
+| Trailers | Hitch class + brake controller |
+| RV | Occupancy, dump, propane (+ generator recommended) |
+| Moto / ATV | Helmet; endorsement (moto) / OHV waiver (ATV) |
+| Cargo / Special / Tow / Other | `cargoVanClass`, `specialVehicleClass`, `towCapacityBand`, `vehiclesOtherKind` |
+| Commercial | Existing CDL/PD/agent proof FactCards — no Tint promo |
+| FactCards | Per-sub Q→A EN/CS/ES; wire `subcategory` + `commercialTransport` |
+
+**Option scoping:** prefix `veh_*` on new option ids.
 
 See also: [EVORIOS.md](./EVORIOS.md) (brand / product source of truth).

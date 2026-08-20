@@ -2605,6 +2605,46 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         subcategories: ["Motorcycles"],
         options: ["required", "not_required"],
       },
+      {
+        key: "cargoVanClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cargo Vans"],
+        options: ["veh_cargo_small", "veh_cargo_mid", "veh_cargo_large", "veh_cargo_other"],
+      },
+      {
+        key: "specialVehicleClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Special Vehicles"],
+        options: ["veh_special_emergency", "veh_special_utility", "veh_special_show", "veh_special_other"],
+      },
+      {
+        key: "towCapacityBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Tow Vehicles"],
+        options: ["veh_tow_light", "veh_tow_medium", "veh_tow_heavy", "veh_tow_unknown"],
+      },
+      {
+        key: "vehiclesOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: [
+          "veh_kind_car",
+          "veh_kind_moto",
+          "veh_kind_trailer",
+          "veh_kind_atv",
+          "veh_kind_rv",
+          "veh_kind_commercial",
+          "veh_kind_mixed",
+        ],
+      },
     ],
   },
   {
@@ -6452,6 +6492,55 @@ export function areCategorySpecsValid(
     }
   }
 
+
+
+  // Vehicles P0 gates by shelf.
+  if (category.trim() === "Vehicles" && modes?.rent) {
+    const sub = subcategory.trim();
+    const reqSelect = (key: string, allowed: string[]) => allowed.includes((values[key] ?? "").trim());
+    const reqText = (key: string, min = 1) => (values[key] ?? "").trim().length >= min;
+    const reqNum = (key: string) => {
+      const n = Number((values[key] ?? "").trim());
+      return Number.isFinite(n) && n >= 0;
+    };
+
+    if (!reqText("make") || !reqText("model") || !reqNum("year")) return false;
+    if (!reqSelect("transmission", ["automatic", "manual", "cvt", "other"])) return false;
+    if (!reqSelect("fuelType", ["gasoline", "diesel", "hybrid", "electric", "other"])) return false;
+    if (!reqNum("vehicleWeightLbs")) return false;
+    if (!reqSelect("insuranceMinLiability", ["liability_25_50", "liability_50_100", "liability_100_300", "liability_250_500"])) return false;
+    if (!reqSelect("insuranceMaxDeductible", ["deductible_500", "deductible_1000", "deductible_2500", "full_coverage_required"])) return false;
+
+    if (sub === "Trailers" || sub === "Equipment Trailers") {
+      if (!reqSelect("hitchClass", ["class_i", "class_ii", "class_iii", "class_iv", "class_v", "gooseneck_fifth", "not_applicable"])) return false;
+      if (!reqSelect("brakeController", ["electric_brakes", "surge", "electric_over_hydraulic", "none", "not_applicable"])) return false;
+    }
+    if (sub === "RVs & Campers") {
+      if (!reqSelect("rvOccupancyBand", ["1_2", "3_4", "5_6", "7_8", "9_plus"])) return false;
+      if (!reqSelect("dumpStationAccess", ["included_host_site", "renter_public", "not_needed", "black_tank_none"])) return false;
+      if (!reqSelect("propaneStatus", ["full_tanks", "partial", "empty_renter_fills", "no_propane"])) return false;
+    }
+    if (sub === "ATVs") {
+      if (!reqSelect("helmetPolicy", ["renter_provides", "included", "not_required"])) return false;
+      if (!reqSelect("ohvTerrainWaiverRequired", ["required", "not_required"])) return false;
+    }
+    if (sub === "Motorcycles") {
+      if (!reqSelect("helmetPolicy", ["renter_provides", "included", "not_required"])) return false;
+      if (!reqSelect("motorcycleEndorsementRequired", ["required", "not_required"])) return false;
+    }
+    if (sub === "Cargo Vans") {
+      if (!reqSelect("cargoVanClass", ["veh_cargo_small", "veh_cargo_mid", "veh_cargo_large", "veh_cargo_other"])) return false;
+    }
+    if (sub === "Special Vehicles") {
+      if (!reqSelect("specialVehicleClass", ["veh_special_emergency", "veh_special_utility", "veh_special_show", "veh_special_other"])) return false;
+    }
+    if (sub === "Tow Vehicles") {
+      if (!reqSelect("towCapacityBand", ["veh_tow_light", "veh_tow_medium", "veh_tow_heavy", "veh_tow_unknown"])) return false;
+    }
+    if (sub === "Other") {
+      if (!reqSelect("vehiclesOtherKind", ["veh_kind_car", "veh_kind_moto", "veh_kind_trailer", "veh_kind_atv", "veh_kind_rv", "veh_kind_commercial", "veh_kind_mixed"])) return false;
+    }
+  }
 
   // Unique & Other P0 gates by shelf.
   if (category.trim() === "Unique & Other" && modes?.rent) {
