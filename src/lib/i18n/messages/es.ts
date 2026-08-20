@@ -1700,6 +1700,270 @@ export const es: AppMessages = {
         containerClass: { label: "Formato / maceta", hint: "Tamaño de contenedor o formato de raíz." },
         bloomSeason: { label: "Época de floración", placeholder: "p. ej. primavera" },
         waterNeeds: { label: "Necesidad de agua" },
+        airflowBand: {
+          label: "Franja de flujo (CFM)",
+          hint: "Clase CFM suave del fabricante — no lectura certificada de laboratorio.",
+        },
+        baggerMulchKitStatus: {
+          label: "Bolsa / kit mulching incluido",
+          hint: "Bolsa, marco, tapón mulching, ambos o ninguno — lista lo que recibe el inquilino.",
+        },
+        batteryIncluded: {
+          label: "Batería y cargador",
+          hint: "Obligatorio si es inalámbrico — cuente baterías y si incluye cargador.",
+        },
+        batteryVoltageBand: {
+          label: "Plataforma de voltaje",
+          hint: "Para inalámbrico — 18–20V, 40V, 60V+ u otro. Las baterías no son intercambiables entre marcas.",
+        },
+        bladeCondition: {
+          label: "Estado de cuchillas",
+          hint: "Filoso al entregar — cuchillas desafiladas rasgan el césped y generan reclamos.",
+        },
+        bladeConditionBand: {
+          label: "Estado de cuchilla",
+          hint: "Filosa lista, afilada reciente, desafilada (declarada) o desconocida — expectativa congelada.",
+        },
+        blowerFormFactor: {
+          label: "Formato del sopladora",
+          hint: "Mano vs mochila vs walk-behind — peso y tamaño del jardín.",
+        },
+        chipDischargeNotes: {
+          label: "Descarga de viruta y limpieza",
+          hint: "Dónde puede proyectarse la viruta, lona / barrera, profundidad de limpieza, servicios y vecinos.",
+          placeholder: "Viruta hacia adelante ~15 ft — lona en valla; arrendatario retira o esparce...",
+        },
+        commonNameOrCultivar: {
+          label: "Nombre común / cultivar",
+          hint: "p. ej. Monstera deliciosa, Sansevieria, plántulas de tomate.",
+          placeholder: "Monstera deliciosa / sansevieria Laurentii...",
+        },
+        connectionType: {
+          label: "Tipo de conexión",
+          hint: "Rosca de manguera, cuerpo de timer, tubería de goteo o acoples rápidos — fija expectativas de adaptadores en la entrega.",
+        },
+        controllerIncluded: {
+          label: "Controlador incluido",
+          hint: "Si un temporizador básico o controlador Wi‑Fi smart viene con el alquiler.",
+          placeholder: "Elegir...",
+        },
+        coverageAreaBand: {
+          label: "Banda de área de cobertura",
+          hint: "Pies cuadrados aproximados que el kit puede regar — no necesariamente todo el jardín.",
+          placeholder: "Elegir...",
+        },
+        deckDischargeMode: {
+          label: "Modo de descarga",
+          hint: "Lateral, bolsa, mulching, 3-en-1 o anfitrión define en entrega — principal desajuste peer.",
+        },
+        deckDischargeType: {
+          label: "Configuración de cubierta / descarga",
+          hint: "Descarga lateral, mulching, bolsa o combo — fotografía tubo/recolector.",
+        },
+        eyeEarPpeExpectation: {
+          label: "Protección ocular / auditiva (suave)",
+          hint: "Expectativa de seguridad opcional — gafas y protección auditiva por desechos y ruido. No seguro de fresadora de tocón.",
+        },
+        gardenOtherKind: {
+          label: "Tipo de anuncio",
+          hint: "Equipo, planta viva o paquete mixto — define alimentación vs cuidado.",
+        },
+        gardenPieceBand: {
+          label: "Cantidad de piezas",
+          hint: "Un artículo vs set multipieza. Multipieza exige inventario breve.",
+        },
+        gardenToolConditionGrade: {
+          label: "Grado de condición",
+          hint: "Desgaste honesto de mangos, cabezas, púas, bandeja y ruedas — incluido óxido ligero funcional.",
+          placeholder: "Elegir...",
+        },
+        grindFormFactor: {
+          label: "Factor de forma",
+          hint: "A pie, remolcable en trailer o autopropulsada / oruga.",
+          placeholder: "Elegir...",
+        },
+        hardinessZoneBand: {
+          label: "Franja zona rusticidad",
+          hint: "Recomendada — indoor_only para interior.",
+        },
+        harnessIncluded: {
+          label: "Arnés / correa de soporte",
+          hint: "Ejes rectos pesados y desbrozadoras con cuchilla suelen necesitar arnés.",
+        },
+        hopperCapacityBand: {
+          label: "Capacidad de tolva",
+          hint: "Tamaño de tolva del spreader en libras — no aplica a otros equipos.",
+          placeholder: "Elegir...",
+        },
+        hourMeterBand: {
+          label: "Franja del horómetro",
+          hint: "Horas aproximadas del motor — indicador suave de desgaste, no garantía.",
+        },
+        indoorCareNotes: {
+          label: "Notas cuidado indoor",
+          hint: "Humedad, luz, no replantar, aclimatación.",
+          placeholder: "Luz indirecta brillante; nebulizar 2x/semana; no replantar durante alquiler...",
+        },
+        installComplexity: {
+          label: "Complejidad de instalación",
+          hint: "Quién instala: DIY del arrendatario, montaje del anfitrión, o aviso suave pro-only para línea principal.",
+          placeholder: "Elegir...",
+        },
+        intendedSurface: {
+          label: "Superficie prevista",
+          hint: "Dónde deben usarse — camas/tierra, césped, pavimento duro, o trabajos mixtos de patio.",
+          placeholder: "Elegir...",
+        },
+        irrigationSystemType: {
+          label: "Tipo de sistema de riego",
+          hint: "Clase principal: goteo, aspersores por zonas, hub smart controller o sistema centrado en bomba.",
+          placeholder: "Elegir...",
+        },
+        landscapeEquipSubtype: {
+          label: "Tipo de equipo",
+          hint: "Aireador, desespolvador, cortadora de sod, spreader, carretilla, rodillo, borde o otra máquina.",
+          placeholder: "Elegir...",
+        },
+        minOperatorAgeBand: {
+          label: "Edad mínima del operador (suave)",
+          hint: "Piso de edad entre vecinos — no puerta CDL ni alquiler de vehículo.",
+        },
+        mowerFuelReturnPolicy: {
+          label: "Política de combustible (gas)",
+          hint: "Lleno a lleno, tanque inicial anfitrión, o gas del inquilino — texto hasta captura de medidor.",
+        },
+        mowerPpeTipNotes: {
+          label: "Tip EPP (opcional)",
+          hint: "Tip suave entre vecinos — ojos, oídos, calzado cerrado. No seguro ni puertas tipo tocón.",
+          placeholder: "Gafas y protección auditiva recomendadas; calzado cerrado resistente...",
+        },
+        mowerReturnCleanPolicy: {
+          label: "Política de devolución limpia",
+          hint: "Raspar/enjuagar cubierta, tarifa fija anfitrión, o hierba ligera OK — ack suave al reservar.",
+        },
+        mulchVacKitIncluded: {
+          label: "Kit mulch / vac",
+          hint: "Solo sopladora vs bolsa de vacío o kit mulch completo.",
+        },
+        noiseNeighborNotes: {
+          label: "Ruido / horario vecinos (suave)",
+          hint: "Horas silenciosas opcionales, nota HOA, tip auditivo — cortesía, no asesoría legal.",
+          placeholder: "No antes de las 8 h sáb; protección auditiva recomendada; evitar linde al mediodía...",
+        },
+        pestDiseaseNotes: {
+          label: "Notas plaga / enfermedad",
+          hint: "Ácaros, mosquitos, cochinilla.",
+          placeholder: "Sin plagas activas...",
+        },
+        petToxicity: {
+          label: "Toxicidad para mascotas",
+          hint: "Soft obligatoria — reglas de gatos/perros.",
+        },
+        plantHealthGrade: {
+          label: "Grado de salud",
+          hint: "Vigor de raíces y hojas.",
+        },
+        returnCleanNotes: {
+          label: "Notas de devolución limpia",
+          hint: "Cómo debe volver — sacudir hojas, vaciar bolsa, limpiar carcasa, cuidado del filtro.",
+          placeholder: "Vaciar bolsa vac; sacudir hojas húmedas; limpiar carcasa; no devolver filtro obstruido...",
+        },
+        returnCleanPolicy: {
+          label: "Devolución limpia (suave)",
+          hint: "Regla suave de barro y tierra al devolver — enjuague, barro ligero OK, desgaste por uso, o tarifa opcional (sin promo de partner).",
+          placeholder: "Elegir...",
+        },
+        returnFuelPolicy: {
+          label: "Política de combustible al devolver",
+          hint: "Con gasolina — tanque lleno, mismo nivel o repone el arrendatario. Congelado en acuerdo.",
+          placeholder: "Elegir...",
+        },
+        rideOnBriefingConfirmed: {
+          label: "Briefing listo en la entrega",
+          hint: "Marca listo antes de publicar si el briefing es obligatorio — bloquea reserva.",
+        },
+        rideOnBriefingNotes: {
+          label: "Notas de briefing / seguridad",
+          hint: "EPP, límites de pendiente, distancia con espectadores, tapa de combustible, bolsa.",
+          placeholder: "EPP ojos/oídos; evitar pendientes >15°; desacoplar PTO antes de bajar; tanque lleno al devolver...",
+        },
+        rideOnBriefingRequired: {
+          label: "Briefing de operador requerido",
+          hint: "Entrega corta de mandos, PTO, pendientes y combustible — ligero, no certificación.",
+        },
+        soilDrainageNotes: {
+          label: "Notas sustrato / drenaje",
+          hint: "Mix aroid, grit suculenta.",
+          placeholder: "Mix aroid con chunks...",
+        },
+        sprinklerHeadCountBand: {
+          label: "Franja de cabezas / líneas",
+          hint: "Una cabeza, 2–3 cabezas, 4+ en manifold, kit de goteo o N/A — activa inventario en multi-cabeza o goteo.",
+        },
+        tillDepthBand: {
+          label: "Profundidad máxima",
+          hint: "Banda de profundidad real — suelo nuevo vs cultivo ligero.",
+        },
+        tillingWidthBand: {
+          label: "Ancho de labranza",
+          hint: "Surco de trabajo por pasada — congelar para camas vs senderos estrechos.",
+        },
+        timerIncluded: {
+          label: "¿Timer incluido?",
+          hint: "Indica si un timer de manguera viene con las cabezas, no incluido, anuncio solo timer, o N/A en aspersores pasivos.",
+        },
+        tineCondition: {
+          label: "Estado de los tines",
+          hint: "Filo y curvatura — fotografíe daños; depósito acorde al costo de tines.",
+        },
+        toolSetBand: {
+          label: "Herramienta suelta o set",
+          hint: "Un artículo vs kit de jardín de varias piezas — los sets exigen inventario completo para alquiler.",
+          placeholder: "Elegir...",
+        },
+        transplantOrReturnPolicy: {
+          label: "Política trasplante / devolución",
+          hint: "Quedarse planta vs devolver maceta.",
+        },
+        transportNotes: {
+          label: "Transporte y carga",
+          hint: "Recogida vs entrega, peso, remolque/rampa, amarres, dos personas.",
+          placeholder: "Solo recogida; ~130 kg; cabe en pickup con rampa; levantar en dos; trae amarres...",
+        },
+        trimmerFuelMixNotes: {
+          label: "Notas de combustible / mezcla",
+          hint: "Proporción, quién aporta aceite, expectativa al devolver — ficha suave, no promo de seguro.",
+          placeholder: "Mezcla 50:1; inquilino aporta gasolina, anfitrión incluye aceite 2T; devolver tanque como recibido...",
+        },
+        trimmerHeadType: {
+          label: "Tipo de cabeza",
+          hint: "Hilo vs cuchilla metálica vs dual — congela seguridad y tipo de trabajo en el acuerdo.",
+        },
+        trimmerKitChecklist: {
+          label: "Checklist de inventario del kit",
+          hint: "Bobina, guarda, cargador, baterías, aceite de mezcla, llave de cuchilla — el inquilino confirma en reserva y entrega.",
+          placeholder: "Unidad, correa, bobina 0.080, guarda, batería 40V 4Ah, cargador, aceite 2T...",
+        },
+        trimmerLineBladeCondition: {
+          label: "Estado de línea / cuchilla",
+          hint: "Desgaste de bobina y cuchilla en la entrega — fija expectativas de recarga al devolver.",
+        },
+        winterizeDrainReturnNotes: {
+          label: "Notas de drenaje / invernalización",
+          hint: "Ficha de cuidado suave — vaciar timer y mangueras, enrollar goteo. No promo de servicio de tienda.",
+          placeholder: "Quitar timer del grifo; abrir válvula para drenar; enrollar líneas de goteo secas; estacas en bolsa...",
+        },
+        winterizeNotesSoft: {
+          label: "Notas de invernado (suave)",
+          hint: "Nota estacional opcional de drenaje / almacenamiento — no es seguro contra heladas ni promo de partner.",
+          placeholder: "Drena y enrolla tubería; guarda controlador en interior bajo 0 °C...",
+        },
+        workingWidthBand: {
+          label: "Ancho de trabajo",
+          hint: "Ancho de pasada del aireador, desespolvador o sod cutter — no aplica a carretillas.",
+          placeholder: "Elegir...",
+        },
+
         cuttingWidthBand: { label: "Ancho de corte" },
         cuttingWidthOrSpec: { label: "Ancho de corte", placeholder: "p. ej. 53 cm" },
         guestCapacityBand: { label: "Capacidad de invitados" },
@@ -2869,7 +3133,162 @@ export const es: AppMessages = {
         wuxga_1440p: "WUXGA / clase 1440p",
         zigbee: "Zigbee",
         zwave: "Z-Wave",
-      },
+      
+        "100_175lb": "100–175 lb",
+        "10in_plus": "10 in+",
+        "12_18in": "12–18 in",
+        "1500_plus": "1500+ h",
+        "175lb_plus": "175 lb+",
+        "18_24in": "18–24 in",
+        "24_30in": "24–30 in",
+        "2_3_heads": "2–3 cabezas",
+        "300_450_cfm": "300–450 CFM",
+        "450_600_cfm": "450–600 CFM",
+        "4_plus_heads": "4+ cabezas",
+        "500_1500h": "500–1500 h",
+        "600_800_cfm": "600–800 CFM",
+        "6_8in": "6–8 in",
+        "800_cfm_plus": "800+ CFM",
+        "8_10in": "8–10 in",
+        adjustable_unknown: "Ajustable / desconocido",
+        age_16_plus: "16+",
+        age_18_plus: "18+",
+        age_21_plus: "21+",
+        as_received_light_grass_ok: "Como recibido — hierba ligera OK",
+        as_used_fair_wear: "Como usado — desgaste justo",
+        bag_and_mulch_plug: "Bolsa + tapón",
+        bag_included: "Bolsa incluida",
+        bagging: "Con bolsa",
+        basic_timer_included: "Temporizador básico incluido",
+        blade_use_eye_ear_required: "Con cuchilla — EPP ojos/oídos obligatorio",
+        blower_only: "Solo soplador",
+        briefing_only_no_age_floor: "Solo briefing — sin edad mínima",
+        broadcast_spreader: "Esparcidor broadcast",
+        controller_renter_supplies: "El inquilino aporta el controlador",
+        convertible_3in1: "Convertible 3 en 1",
+        core_aerator: "Aireador de núcleos",
+        damaged_note_required: "Dañado (notas requeridas)",
+        drip: "Goteo",
+        drip_lines_kit: "Kit de líneas de goteo",
+        drop_spreader: "Esparcidor de caída",
+        dual_string_and_blade: "Hilo + cuchilla",
+        dull_disclosed: "Desafilada (declarado)",
+        dump_cart: "Carro volquete",
+        equipment: "Tipo equipo",
+        event_rental_return_pot: "Evento — devolver maceta/planta",
+        excellent: "Excelente",
+        fair: "Aceptable",
+        full_harness_included: "Arnés completo incluido",
+        full_mulch_vac_kit: "Kit mulch-vac completo",
+        full_to_full: "Lleno a lleno",
+        good: "Bueno",
+        good_slight_wear: "Buen desgaste leve",
+        good_usable_wear: "Buen desgaste usable",
+        hardscape: "Pavimento",
+        hose_thread: "Rosca de manguera",
+        host_cleaning_fee: "Tarifa de limpieza del anfitrión",
+        host_cleans_flat_fee: "Anfitrión limpia (tarifa fija)",
+        host_installs: "El anfitrión instala",
+        host_provides_basic_glasses: "Anfitrión da protección ocular básica",
+        host_provides_starting_tank: "Anfitrión da combustible inicial",
+        host_sets_at_handoff: "El anfitrión configura en la entrega",
+        host_sharpens_at_handoff: "Anfitrión afila en la entrega",
+        interchangeable_heads: "Cabezales intercambiables",
+        keep_planted_no_return: "Queda plantada — sin devolución",
+        landscape_edger: "Bordeadora",
+        landscape_rake: "Rastrillo de paisaje",
+        large_lawn: "Césped grande",
+        lawn: "Césped",
+        lawn_roller: "Rodillo de césped",
+        light_mud_ok: "Barro ligero OK",
+        medium_lawn: "Césped medio",
+        metal_blade_only: "Solo cuchilla metálica",
+        mildly_toxic: "Ligeramente tóxico si se mastica",
+        mixed: "Patio mixto",
+        mulch_bagger_combo: "Mulch + bolsa",
+        mulch_plug_included: "Tapón mulch incluido",
+        mulching: "Mulching",
+        multi_piece: "Varias piezas",
+        multi_zone: "Multizona",
+        neither_disclosed: "Ninguno — declarado",
+        new_line_fresh_blade: "Hilo nuevo / cuchilla fresca",
+        new_sharp: "Nuevo / afilado",
+        no_controller: "Sin controlador",
+        no_harness_renter_provides: "Sin arnés — lo aporta el inquilino",
+        non_toxic: "No tóxico para mascotas",
+        not_applicable_electric: "N/A — eléctrico / manual",
+        not_applicable_manual: "N/A — manual",
+        not_applicable_side_discharge: "N/A — solo descarga lateral",
+        not_needed_light_curved_shaft: "No necesario (eje curvo ligero)",
+        not_required_light_duty: "No requerido (uso ligero)",
+        one_battery_and_charger: "1 batería + cargador",
+        one_battery_no_charger: "1 batería sin cargador",
+        other_landscape: "Otro equipo de paisaje",
+        overall_photos: "Fotos generales",
+        overall_plus_flaws: "Generales + defectos",
+        plant: "Tipo planta",
+        platform_only_no_battery: "Solo plataforma — sin batería",
+        power_dethatcher: "Desbrozador motorizado",
+        premix_2stroke: "Mezcla 2 tiempos",
+        pro_only: "Solo instalación profesional",
+        pump: "Bomba",
+        quick_connect: "Conexión rápida",
+        rear_bag: "Bolsa trasera",
+        recently_sharpened: "Recién afilada",
+        renter_brings_eye_ear: "Inquilino aporta EPP ojos/oídos",
+        renter_buys_own_gas: "Inquilino compra combustible",
+        renter_diy: "Instalación DIY del inquilino",
+        renter_provides_compatible_battery: "Inquilino aporta batería compatible",
+        renter_refills_or_fee: "Inquilino rellena o tarifa",
+        return_clean_deck: "Devolver con cubierta limpia",
+        return_full_tank: "Devolver tanque lleno",
+        return_in_container: "Devolver en el mismo recipiente",
+        return_same_level: "Devolver al mismo nivel",
+        rinse_brush_dry: "Enjuagar, cepillar, secar",
+        rinse_deck_ok: "Enjuague ligero OK",
+        self_propelled: "Autopropulsado",
+        sharp_ready: "Afilada / lista",
+        shoulder_strap_only: "Solo correa al hombro",
+        side_and_mulch: "Lateral + mulch",
+        side_discharge: "Descarga lateral",
+        single_head: "1 cabeza",
+        single_piece: "Una pieza",
+        single_tool: "Herramienta suelta",
+        small_patch: "Parche pequeño",
+        smart_controller: "Controlador inteligente",
+        smart_controller_included: "Controlador inteligente incluido",
+        sod_cutter: "Cortacésped de tepes",
+        soil: "Tierra / bancales",
+        spike_aerator: "Aireador de púas",
+        sprinkler_zones: "Zonas de aspersores",
+        stressed_disclosed: "Estresada (declarado)",
+        string_line_only: "Solo hilo",
+        timer: "Temporizador",
+        timer_included: "Temporizador incluido",
+        timer_not_included: "Sin temporizador",
+        timer_only: "Solo temporizador",
+        tool_set: "Juego",
+        tow_spreader: "Esparcidor de remolque",
+        towable: "Remolcable",
+        toxic_to_pets: "Tóxico para mascotas",
+        two_batteries_and_charger: "2 baterías + cargador",
+        under_12in: "Menos de 12 in",
+        under_18in: "Menos de 18 in",
+        under_300_cfm: "Menos de 300 CFM",
+        under_50lb: "Menos de 50 lb",
+        under_6in: "Menos de 6 in",
+        unknown_check_before_rent: "Desconocido — verificar antes",
+        unknown_no_meter: "Desconocido / sin horómetro",
+        usable_worn: "Usable con desgaste",
+        vac_attachment_optional: "Accesorio vac opcional",
+        vac_bag_included: "Bolsa de aspiración incluida",
+        visible_wear_rust: "Desgaste / óxido visible",
+        walk_behind: "De empuje",
+        wheelbarrow_cart: "Carretilla / carro",
+        worn_host_refills_before_rent: "Gastado — anfitrión rellena",
+        worn_renter_must_refill: "Gastado — inquilino debe rellenar",
+        worn_replace_soon: "Gastado — reemplazar pronto",
+},
     },
     modes: {
       title: "¿Cómo quieres ofrecerlo?",
@@ -4066,27 +4485,27 @@ export const es: AppMessages = {
         },
       "Garden & Yard": {
           title: "FAQ de jardín y patio",
-          summary: "Respuestas cortas para herramientas de patio y trituradoras de tocón.",
+          summary: "Respuestas cortas sobre herramientas, plantas, riego y trituradoras de tocones.",
           qa: [
             {
-              q: "¿Sopladoras necesitan seguro?",
-              a: "No—herramientas cotidianas = vecino + depósito.",
+              q: "¿Los sopladores necesitan seguro?",
+              a: "No—las herramientas cotidianas usan confianza vecinal, especificaciones de estantería y depósito.",
             },
             {
-              q: "¿Trituradoras de tocón?",
-              a: "Capacidad, EPI, exención y prueba de seguro antes de la entrega.",
+              q: "¿Qué requieren las trituradoras de tocones?",
+              a: "Capacidad, EPP, renuncia, prueba de seguro y briefing de seguridad antes de la entrega.",
             },
             {
-              q: "¿Qué fotografiar?",
-              a: "Condición en la entrega—barras, cuchillas y bidones suelen faltar.",
+              q: "¿Qué campos importan en plantas?",
+              a: "Nombre común, altura, sol, contenedor, grado de salud, riego y política de trasplante/devolución en alquiler.",
             },
             {
-              q: "¿Qué cubre el depósito?",
-              a: "Daño ordinario en herramientas ligeras; en equipo restringido, seguro primero.",
+              q: "¿Qué debo fotografiar?",
+              a: "El estado en la entrega—cuchillas, bolsas, baterías, bidones y macetas suelen causar disputas.",
             },
             {
-              q: "¿Evorios asegura el trabajo de jardín?",
-              a: "No—prueba del huésped (si aplica) y el depósito.",
+              q: "¿Evorios asegura trabajos de jardinería?",
+              a: "No—la prueba del inquilino cuando aplica y el depósito son las capas.",
             },
           ],
         },
@@ -4698,6 +5117,630 @@ export const es: AppMessages = {
               },
             ],
           },
+      },
+      "Garden & Yard": {
+        "Garden Tools": {
+          title: "Herramientas de jardín — set, superficie, desgaste, devolución limpia",
+          summary: "Mostradores de alquiler y sets entre vecinos ganan cuando queda claro pieza única vs set, superficie, grado de desgaste y reglas de barro al devolver. El baseline ya exige marca y energía (manual es lo habitual).",
+          qa: [
+            {
+              q: "¿Qué significa herramienta suelta vs set?",
+              a: "Herramienta suelta es un solo artículo (una pala o un carretilla). Set es un kit de varias piezas — cada pieza debe figurar en el inventario y contarse en la entrega.",
+            },
+            {
+              q: "¿Por qué listar cada pieza en un set?",
+              a: "Rastrillos, horcas o piezas de carretilla faltantes impulsan la mayoría de reclamos de depósito. Un checklist numerado al publicar y al devolver evita discusiones tras un fin de semana de trabajo.",
+            },
+            {
+              q: "¿Qué es la superficie prevista?",
+              a: "Tierra es para cavar y camas; césped para rastrillos y bordes aptos al turf; pavimento para patio, piedra y grava; mixto para trabajos generales de fin de semana. Elige según el trabajo para que las herramientas del anfitrión encajen.",
+            },
+            {
+              q: "¿Por qué fuente de energía en herramientas de mano?",
+              a: "La mayoría son manuales. Inalámbrico aparece en cultivadores, tijeras o pequeñas herramientas a batería — decláralo para carga y uso seguro.",
+            },
+            {
+              q: "¿Qué cubre el grado de condición?",
+              a: "Desgaste honesto en mangos, cabezas, púas y bandejas o ruedas de carretilla — incluido óxido ligero que aún funciona. Congela la base para no confundir desgaste normal de tierra con daño nuevo al devolver.",
+            },
+            {
+              q: "¿Qué tan limpias deben volver las herramientas?",
+              a: "El anfitrión elige una regla suave: enjuagar y secar, barro seco ligero OK, desgaste justo por uso, o tarifa opcional de limpieza si queda mucha tierra. Sigue la política publicada — no es promo de un servicio de limpieza externo.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "No hay cuadrilla de paisajismo, entrega de tierra ni retiro de escombros salvo que el anfitrión lo indique. Evorios no vende seguro de patio ni cobertura afiliada Home Depot / Sunbelt / United Rentals — depósito y términos cubren daños y piezas faltantes.",
+            },
+          ],
+        },
+        "Houseplants & Seedlings": {
+          title: "Plantas de interior — cuidado, mascotas",
+          summary: "El alquiler indoor falla por luz, agua y sorpresas con mascotas. Cultivar, salud y devolución en maceta obligatorios; notas de cuidado indoor y toxicidad para mascotas recomendadas como en banco de vivero.",
+          qa: [
+            {
+              q: "¿Por qué notas de cuidado indoor?",
+              a: "Bandejas de humedad, nebulización, 'no replantar durante alquiler' y aclimatación del invernadero evitan caída de hojas y pudrición.",
+            },
+            {
+              q: "¿Qué significa toxicidad para mascotas?",
+              a: "Select soft-obligatorio. Inquilinos con gatos, perros o reglas de venue confirman si no es non_toxic.",
+            },
+            {
+              q: "¿Cómo funciona devolver maceta en eventos?",
+              a: "Event_rental_return_pot devuelve la planta en maceta original tras la fiesta — como alquiler profesional de plantas.",
+            },
+            {
+              q: "¿Las plántulas difieren de plantas maduras?",
+              a: "Mismo estante — anote heat mat y grow light en indoorCareNotes. Las plántulas se estresan más rápido.",
+            },
+            {
+              q: "¿Qué plagas importan indoor?",
+              a: "Ácaros, mosquitos de hongos, cochinilla — declare tratamiento o problema activo.",
+            },
+            {
+              q: "¿Por qué zona en plantas indoor?",
+              a: "Recomendada — indoor_only para interior. Tropicales de patio necesitan banda real.",
+            },
+            {
+              q: "¿Qué NO está incluido?",
+              a: "Evorios no vende seguro, entrega ni riego semanal.",
+            },
+            {
+              q: "¿Cómo funciona el depósito?",
+              a: "Salud y maceta son la base. Cerámica rota o plaga más allá de notas declaradas puede usar depósito.",
+            },
+          ],
+        },
+        "Irrigation Systems": {
+          title: "Riego — tipo, cobertura, instalación",
+          summary: "El alquiler profesional de riego debe declarar tipo de sistema, banda de cobertura, controlador incluido, nivel de instalación, inventario completo y notas suaves de invernado antes de la entrega.",
+          qa: [
+            {
+              q: "¿Qué significa el tipo de sistema de riego?",
+              a: "Elige drip para kits de goteo/tubería, sprinkler_zones para manifolds de aspersores pop-up o rotores, smart_controller cuando el alquiler principal es un hub Wi‑Fi/temporizador, o pump cuando el kit gira en torno a una bomba de refuerzo o transferencia. En kits combinados elige el tipo más cercano y lista el resto en el inventario.",
+            },
+            {
+              q: "¿Cómo usar la banda de área de cobertura?",
+              a: "Elige los pies cuadrados aproximados que el kit puede regar — no toda la propiedad salvo que el anuncio lo diga. Variable/custom layout significa camas o hileras sin un rectángulo simple; revisa el checklist para conteo de cabezas y longitud de tubería.",
+            },
+            {
+              q: "¿Qué cubre controller included?",
+              a: "Basic timer included significa que un temporizador de manguera o zona viene en el kit. Smart controller included significa que un temporizador Wi‑Fi/app forma parte del alquiler.",
+            },
+            {
+              q: "¿Qué significan las opciones de install complexity?",
+              a: "Renter DIY espera que coloques tubería, cabezas y conexión a una boca de manguera existente — sin garantía de zanja. Host installs significa que el anfitrión monta antes o en la entrega dentro del área listada.",
+            },
+            {
+              q: "¿Qué va en el inventario del kit?",
+              a: "Lista cada cabeza, emisor, válvula, backflow o regulador, rollo de tubería, estacas, accesorios, herramientas, controlador, bomba y carretes. Arrendatario y anfitrión confirman conteos en reserva y devolución — piezas faltantes siguen inventario y fotos, no garantía retail.",
+            },
+            {
+              q: "¿Para qué sirven las notas de invernado?",
+              a: "Solo guía estacional suave: drenar líneas, soplar si se ofrece, guardar en interior antes de heladas. No son seguro contra congelación ni prometen servicio de invernado salvo que el anuncio lo diga explícitamente.",
+            },
+            {
+              q: "¿Cómo suelen funcionar depósito y reclamos?",
+              a: "Tubería cortada, cabezas perdidas, manifold agrietado o controlador inteligente faltante suelen salir del depósito cuando inventario y fotos de entrega lo respaldan. Desgaste normal de estacas puede ser aceptable si el anuncio lo indica — disputas según checklist y términos del alquiler.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Factura de agua, permisos de fontanería permanente, acceso garantizado a línea principal, certificación de prueba de backflow y mano de obra pro salvo que install complexity diga host installs. Evorios no vende seguro de jardín ni servicios de alquiler de herramientas asociados — consíguelos aparte si los necesitas.",
+            },
+          ],
+        },
+        "Landscape Equipment": {
+          title: "Maquinaria de jardinería — tipo, kit, transporte",
+          summary: "Las pistas pro etiquetan aireadores, desespolvadores, cortadoras de césped en rollo, spreaders y carretillas con marca, modelo, energía, combustible si es gasolina, inventario completo y notas de carga — congelado en el acuerdo.",
+          qa: [
+            {
+              q: "¿Qué va en Maquinaria de jardinería vs otras subcategorías?",
+              a: "Usa esta estantería para aireadores, desespolvadores eléctricos, cortadoras de sod, spreaders, carretillas pesadas, rodillos y bordes de paisaje — no cortadoras, cultivadores, trituradoras de tocón ni rastrillos manuales. Elige el subtipo más cercano para que el arrendatario sepa qué reserva.",
+            },
+            {
+              q: "¿Por qué importan marca, modelo y subtipo?",
+              a: "El subtipo define el trabajo (airear vs desespolvilar vs sod vs esparcir). Marca y modelo congelan la máquina exacta — unidades Ryan, BlueBird y Husqvarna difieren en peso, púas y tolva.",
+            },
+            {
+              q: "¿Qué va en el checklist de inventario?",
+              a: "Lista cada pieza incluida: tambores o cassettes de púas, tolva, aceite, rampa, llaves, repuestos y cables o baterías. Semilla, fertilizante y sal no van incluidos salvo que lo indiques.",
+            },
+            {
+              q: "¿Qué deben cubrir las notas de transporte?",
+              a: "Indica recogida vs entrega, peso aproximado, si hace falta remolque o rampa, puntos de amarre y si se necesitan dos personas. Las cortadoras de sod y aireadores de núcleo son pesadas — notas de carga poco claras causan la mayoría de disputas el día de recogida.",
+            },
+            {
+              q: "¿Tipo de combustible y devolución de gasolina?",
+              a: "Con motor a gasolina declara el tipo (gasolina, diésel, propano). Indica si el arrendatario devuelve tanque lleno, mismo nivel o repone — la política del anfitrión queda congelada.",
+            },
+            {
+              q: "¿EPP en equipos motorizados?",
+              a: "En gasolina, cable o batería usa protección ocular y auditiva y guantes resistentes; botas con punta ayudan en walk-behinds pesados. El anfitrión puede indicar EPP incluido; si no, trae el tuyo — es orientación, no certificación OSHA.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Material (semilla, sod, fertilizante), preparación del sitio, eliminación, capacitación más allá del anuncio y productos de alquiler o seguro de terceros no están incluidos. El depósito cubre daños o piezas faltantes según el checklist congelado y fotos.",
+            },
+          ],
+        },
+        "Lawn Mowers": {
+          title: "Cortacéspedes — cubierta, cuchilla, devolución",
+          summary: "Mostradores de alquiler congelan ancho de corte, combustible y reglas de devolución limpia. Los anuncios entre vecinos ganan cuando modelo, ancho, modo de descarga, bolsa/kit mulching, estado de cuchilla, voltaje o combustible y políticas de devolución están en el acuerdo — solo un tip suave de EPP.",
+          qa: [
+            {
+              q: "¿Por qué son obligatorios ancho de corte, modelo y fuente de energía?",
+              a: "El ancho de la cubierta (menos de 16″ hasta 30″+) indica si encaja en tu jardín. Modelo más marca separa empuje manual vs autopropulsado y clase de año — marca y \"gasolina\" solos no bastan.",
+            },
+            {
+              q: "¿Qué significan modo de descarga y bolsa/kit mulching?",
+              a: "Descarga lateral, bolsa trasera, mulching o convertible 3-en-1 define cómo sale el césped. El campo bolsa/mulching indica si incluye bolsa, marco o tapón mulching — piezas faltantes son la disputa #1 en préstamos entre vecinos.",
+            },
+            {
+              q: "¿Cómo se maneja el estado de la cuchilla?",
+              a: "El anfitrión elige filosa lista, afilada reciente, desafilada (declarada) o desconocida. El inquilino espera la calidad de corte publicada; daño por piedras o bordillos no es desgaste normal y puede usar depósito según términos.",
+            },
+            {
+              q: "¿Cuáles son las reglas de combustible y devolución limpia en gasolina?",
+              a: "Anuncios a gas requieren tipo de combustible y regla de devolución: lleno a lleno, tanque inicial del anfitrión, o gas comprado por inquilino. La política de devolución limpia indica si debes raspar/enjuagar la cubierta, pagar tarifa fija del anfitrión, o devolver con hierba ligera — confirma ambas al reservar.",
+            },
+            {
+              q: "¿Qué pasa con el voltaje de batería inalámbrica?",
+              a: "Cortacéspedes inalámbricos requieren banda de voltaje (18–20 V, 40 V, 60 V+) para autonomía y compatibilidad del cargador. Confirma cuántas baterías y si hay cargador en fotos o mensajes — inventario estructurado de baterías es mejora futura.",
+            },
+            {
+              q: "¿Se exige EPP o seguro como en trituradoras de tocón?",
+              a: "No. Cortacéspedes usa solo un tip suave de EPP — protección ocular, auditiva y calzado cerrado resistente.",
+            },
+            {
+              q: "¿Si algo sale mal después del alquiler?",
+              a: "Políticas publicadas de devolución y combustible más specs de cuchilla/descarga quedan congeladas en el acuerdo. Cubiertas empapadas fuera de política, tanque vacío contra lleno a lleno, o daño de cuchilla por mal uso se resuelven con depósito y mensajes — Evorios no vende seguro de cortacésped ni servicios de alquiler de herramientas asociados.",
+            },
+          ],
+        },
+        "Leaf Blowers": {
+          title: "Sopladores — forma, flujo, devolución",
+          summary: "Los mostradores de alquiler indican forma, franja CFM y kit vac/mulch en la ficha. Añadimos modelo, tipo de combustible o voltaje a batería, notas suaves de ruido/horario y reglas de devolución limpia — congeladas en el acuerdo. Confianza entre vecinos + depósito; no somos aseguradora de jardinería.",
+          qa: [
+            {
+              q: "¿Por qué importan la forma y la franja de flujo?",
+              a: "Los de mano sirven para patios pequeños; mochila y walk-behind mueven más volumen en parcelas grandes. La franja CFM es una clase de potencia suave para que no reserves un a batería ligero para una hectárea de robles.",
+            },
+            {
+              q: "¿Qué significa el kit mulch/vac?",
+              a: "Muchos son solo sopladores; otros incluyen bolsa de vacío, tubos o kit mulch completo. El anuncio declara qué va incluido para que no asumas modo aspirador o bolsa que el anfitrión no entrega.",
+            },
+            {
+              q: "Tipo de combustible — ¿qué debo saber?",
+              a: "Con fuente gas, el anfitrión declara gasolina 4 tiempos, premix 2 tiempos u otro. Respeta la mezcla y la regla del tanque en la entrega; devuelve según lo acordado (a menudo mismo nivel o lleno).",
+            },
+            {
+              q: "Sin cable — ¿por qué la franja de voltaje?",
+              a: "Las plataformas 18–20V, 40V y 60V+ no son intercambiables. La franja ayuda a emparejar baterías de repuesto y expectativas de autonomía.",
+            },
+            {
+              q: "¿Ruido y horarios con vecinos?",
+              a: "El anfitrión puede anotar horas silenciosas de la comunidad, límites de fin de semana o protección auditiva. Son notas de cortesía, no asesoría legal — revisa las normas locales antes de usar temprano o en domingo.",
+            },
+            {
+              q: "¿Cómo debe volver el sopladora?",
+              a: "Sigue las notas de devolución limpia: sacudir hojas húmedas, vaciar la bolsa, limpiar la carcasa y no devolver filtro obstruido. Empaste fuerte por encima del uso normal puede afectar el depósito.",
+            },
+            {
+              q: "¿Protección ocular y auditiva?",
+              a: "Los sopladores lanzan debris y son ruidosos. Gafas y protección auditiva se recomiendan.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Combustible, aceite premix, extensiones, baterías extra y bolsas de residuo verde suelen ser del inquilino salvo que el inventario diga lo contrario. El depósito cubre daños y accesorios listados faltantes — no seguro de equipo de terceros.",
+            },
+          ],
+        },
+        "Nursery Stock": {
+          title: "Material de vivero — ficha técnica, B&B",
+          summary: "Las etiquetas mayoristas guían trabajos pro. Cultivar, clase ANSI, zona, salud y política de trasplante/devolución obligatorios congelan expectativas para B&B y material de campo.",
+          qa: [
+            {
+              q: "¿Para quién es el estante profesional de vivero?",
+              a: "Cuadrillas paisajistas y diseñadores que alquilan liners, árboles B&B o material temporal de obra — no plantas de interior de consumo.",
+            },
+            {
+              q: "¿Por qué cultivar obligatorio?",
+              a: "Los planos exigen variedades exactas. 'Arce rojo' no basta cuando el spec dice October Glory.",
+            },
+            {
+              q: "¿Cómo funciona la clase de contenedor B&B?",
+              a: "Formatos ANSI — ball_burlap y field_grown fijan peso, pala e riego. Tamaño mal etiquetado causa disputas de grúa y remolque.",
+            },
+            {
+              q: "¿Qué política de trasplante en obra?",
+              a: "Keep_planted_no_return para instalar. Return_in_container cuando el material vuelve al yard.",
+            },
+            {
+              q: "¿Qué divulgar sobre plagas?",
+              a: "Tratamiento reciente o 'material limpio'. Anote phyto cuando apliquen reglas interestatales — Evorios no tramita certificados.",
+            },
+            {
+              q: "¿Por qué zona en material mayorista?",
+              a: "Obligatoria — los pros plantan a escala; una zona incorrecta mata márgenes.",
+            },
+            {
+              q: "¿Qué NO está incluido?",
+              a: "Sin equipo yard Sunbelt/United Rentals, plantadoras ni seguro de vivero de Evorios.",
+            },
+            {
+              q: "¿Cómo funcionan depósitos y reclamos?",
+              a: "Salud e integridad del bola de raíz son la base. B&B roto o raíces secas usan fotos vs depósito.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Otros — primero la estantería correcta",
+          summary: "Prefiera una estantería con nombre de Garden & Yard para que apliquen las puertas correctas. Si se queda en Otros, indique equipo vs planta vs mixto, alimentación en motorizado, checklist de fotos de estado e inventario de piezas si el set es multipieza.",
+          qa: [
+            {
+              q: "¿Debo usar Otros o una estantería con nombre?",
+              a: "Reclasifique siempre que encaje una estantería específica — cortadoras, desbrozadoras, sopladores, herramientas de jardín, aspersores, cortadoras ride-on, cultivadores, trituradoras de tocón, riego, equipo paisajístico, árboles, arbustos, perennes, flores de temporada, plantas de interior y plántulas, o stock de vivero. Las estanterías con nombre traen las puertas de alimentación, planta o seguridad correctas; Otros solo cuando el artículo no encaja en ninguna.",
+            },
+            {
+              q: "¿Qué significa equipo vs planta vs mixto?",
+              a: "Equipo son herramientas y motorizado (cortadoras, sopladores, carros, bombas). Planta es material vivo en maceta.",
+            },
+            {
+              q: "¿Cuándo es obligatoria la fuente de energía?",
+              a: "En listados de equipo o mixto, indique fuente de energía (inalámbrico, cable, gasolina, manual, ride-on) y marca cuando aplique. Los anuncios solo de planta omiten alimentación — si el artículo necesita combustible o batería, probablemente pertenece a una estantería de equipo con nombre.",
+            },
+            {
+              q: "¿Qué pasa con plantas en Otros?",
+              a: "Prefiera una estantería de planta con nombre para altura, sol, maceta y riego. Si se queda en Otros solo planta, añada sol, tamaño de maceta y riego cuando pueda — los renters necesitan lo básico del cuidado antes de reservar.",
+            },
+            {
+              q: "¿Necesito inventario de piezas?",
+              a: "Un solo artículo basta con los campos estructurados. Sets multipieza — kits de herramientas, grupos de patio, lotes de macetas — exigen un inventario breve en texto con cada pieza incluida para entrega y devolución.",
+            },
+            {
+              q: "¿Qué fotos de estado debo confirmar?",
+              a: "Confirme que las fotos del anuncio muestran el artículo en general, cables/cuchillas/macetas según corresponda, desgaste o daño visible y todas las piezas si es multipieza. Es un attest suave — no verificamos la subida — pero las fotos son la primera capa en disputas por piezas faltantes o daños.",
+            },
+            {
+              q: "¿Qué no está incluido ni prometido?",
+              a: "Evorios no vende seguro de jardín de terceros, planes tipo Home Depot ni garantías de entrega de vivero. Combustible, sustrato, estacas y EPP los declara usted en el anuncio; waiver y prueba de seguro de trituradora de tocón aplican solo en la estantería Stump Grinders.",
+            },
+            {
+              q: "¿Cómo funcionan las reclamaciones en Otros?",
+              a: "Use fotos de estado, inventario, fuente de energía y depósito para baterías faltantes, cuchillas rotas o macetas dañadas. Prefiera una estantería con nombre la próxima vez para que las puertas especializadas queden congeladas en el acuerdo desde el inicio.",
+            },
+          ],
+        },
+        "Perennials": {
+          title: "Perennes — floración, agua, zona",
+          summary: "Las etiquetas de vivero listan cultivar, ventana de flor y banda de agua. El alquiler entre vecinos gana cuando esos campos más salud, zona, devolución y notas de plaga/suelo son obligatorios en el acuerdo.",
+          qa: [
+            {
+              q: "¿Por qué son obligatorias floración y agua?",
+              a: "Las perennes viven años — mal timing arruina bordes de evento y la banda de agua incorrecta mata plantas. Son básicos de etiqueta de vivero.",
+            },
+            {
+              q: "¿Qué detalle de cultivar incluir?",
+              a: "Nombre y variedad — p. ej.",
+            },
+            {
+              q: "¿Cómo funciona la devolución de evento?",
+              a: "Event_rental_return_pot devuelve plantas de borde en macetas de vivero. Keep_planted_no_return es instalación estilo venta.",
+            },
+            {
+              q: "¿Por qué zona de rusticidad?",
+              a: "Las perennes deben sobrevivir el invierno. La banda USDA filtra antes de plantar.",
+            },
+            {
+              q: "¿Qué va en notas de plaga?",
+              a: "Babosas, oídio o 'tratado y limpio'. En repeat_bloom indique si se espera deadheading al devolver.",
+            },
+            {
+              q: "¿Qué NO está incluido?",
+              a: "Evorios no entrega mulch, fertilizante ni diseño paisajístico.",
+            },
+            {
+              q: "¿Cómo funciona el depósito?",
+              a: "Contenedor y salud son la base. Coronas aplastadas o plugs secos usan fotos vs depósito.",
+            },
+          ],
+        },
+        "Ride-On Mowers": {
+          title: "Cortadoras ride-on — cubierta, combustible, transporte",
+          summary: "Las cortadoras grandes necesitan ancho de corte, combustible, horas, cuchillas/descarga y transporte congelados antes de reservar — más un briefing ligero, no ruta CDL.",
+          qa: [
+            {
+              q: "¿Qué debe publicar el anfitrión antes de activar el alquiler?",
+              a: "Marca, modelo, banda de ancho de corte, tipo de combustible, banda del horómetro, estado de cuchillas, configuración de descarga/recogida y notas de transporte (remolque, pickup o entrega). Indica si se requiere briefing en la entrega.",
+            },
+            {
+              q: "¿Por qué ancho de corte y horómetro?",
+              a: "Las pistas de alquiler indican ambos para que el inquilino acierte tamaño de césped y desgaste. Una banda congelada en el anuncio evita sorpresas de cubierta pequeña o motor cansado a mitad del trabajo.",
+            },
+            {
+              q: "¿Cómo funciona el transporte?",
+              a: "La mayoría necesitan remolque o camioneta — dilo en las notas. Indica si entregas, si el inquilino trae rampas y el peso/ancho aproximado para planificar la recogida.",
+            },
+            {
+              q: "¿Y el combustible?",
+              a: "Trátalo como equipo de obra: lleno a lleno cuando aplique gasolina o diésel. En las notas del briefing indica la tapa del depósito y si incluyes bidón.",
+            },
+            {
+              q: "¿Es un alquiler de vehículo con CDL?",
+              a: "No. Es equipo de jardín — banda de edad del operador suave y briefing opcional en la entrega, no puerta de licencia de conducir ni CDL.",
+            },
+            {
+              q: "¿Consejo de seguridad antes del primer corte?",
+              a: "Retira piedras y restos, mantén niños y mascotas alejados, usa protección ocular y auditiva y evita pendientes pronunciadas o césped mojado. Para las cuchillas antes de bajarte — el briefing cubre los mandos de tu unidad.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Evorios no vende seguro de jardín ni es afiliado de mostradores de alquiler retail. El depósito cubre daño de cuchillas, cubierta y piezas faltantes del recolector — no una póliza de reemplazo.",
+            },
+            {
+              q: "¿Si algo sale mal?",
+              a: "Fotos en la entrega de cubierta, cuchillas y horómetro apoyan reclamaciones. Cuchillas desafiladas o dañadas más allá de la banda publicada, golpes en la cubierta o piezas faltantes del recolector pueden ir al depósito según los términos.",
+            },
+          ],
+        },
+        "Seasonal Flowers": {
+          title: "Flores estacionales — color, devolver macetas",
+          summary: "El alquiler para eventos depende del pico de color y reglas de devolución en maceta. Cultivar, floración, agua, salud, zona y política de trasplante obligatorios congelan expectativas de banco de vivero.",
+          qa: [
+            {
+              q: "¿Por qué floración y agua obligatorias?",
+              a: "Ventana corta — crisantemos en otoño, pensamientos en primavera. La estación y la banda de agua fijan el pico de color y riego durante el alquiler.",
+            },
+            {
+              q: "¿Qué es event_rental_return_pot?",
+              a: "Estándar para bodas y mercados: el inquilino devuelve cada maceta tras el evento. Macetas faltantes o rotas son el reclamo #1.",
+            },
+            {
+              q: "¿Cómo nombrar anuncios estacionales?",
+              a: "Cultivar y color — p. ej.",
+            },
+            {
+              q: "¿Por qué zona en flores estacionales?",
+              a: "Flores de temporada fría toleran heladas; bowls tropicales no. La banda evita heladas en plantas tiernas.",
+            },
+            {
+              q: "¿Qué notas de plaga importan?",
+              a: "Pulgones, botrytis en crisantemos densos, mosquitas — declare tratamiento o 'limpio en entrega'.",
+            },
+            {
+              q: "¿Qué NO está incluido?",
+              a: "Sin riego diario, entrega ni manta antihielo de Evorios salvo que su anuncio lo añada.",
+            },
+            {
+              q: "¿Cómo funciona el depósito?",
+              a: "Salud y conteo de macetas son la base. Flats marchitos vs muertos y macetas faltantes usan fotos vs depósito.",
+            },
+            {
+              q: "¿Puede el inquilino plantar y quedarse las flores?",
+              a: "Solo con keep_planted_no_return; si no, espere macetas de vuelta en la fecha acordada.",
+            },
+          ],
+        },
+        "Shrubs & Bushes": {
+          title: "Arbustos — cultivar, floración, devolución",
+          summary: "Viveros y alquileres para eventos etiquetan cultivar, ventana de floración y maceta. Los anuncios entre vecinos ganan con nombre, altura, sol, perennifolio/caducifolio, estación de flor, salud, zona, reglas de devolución y notas de plaga/suelo.",
+          qa: [
+            {
+              q: "¿Por qué nombrar el cultivar del arbusto?",
+              a: "Hortensia, boj y altea difieren en tamaño y floración. El cultivar permite al inquilino acertar color y altura antes de reservar.",
+            },
+            {
+              q: "¿Qué tan importante es la estación de floración?",
+              a: "Recomendada siempre y soft-obligatoria en alquiler — el pico de flor marca bodas y terrazas. Foliage_only vale para verdes de fondo.",
+            },
+            {
+              q: "¿Qué significa la política de trasplante para setos?",
+              a: "Keep_planted_no_return para instalación estilo venta. Event_rental_return_pot exige devolver cada arbusto en su maceta de vivero.",
+            },
+            {
+              q: "¿Qué incluir en notas de plaga?",
+              a: "Pulgones, manchas, roedores u tratamiento reciente. En perennifolios declare quemadura invernal en grado de salud.",
+            },
+            {
+              q: "¿Por qué zona y notas de suelo?",
+              a: "Arbustos fuera de zona o en agua estancada declinan rápido. Banda de zona más drenaje evita el arrepentimiento más común.",
+            },
+            {
+              q: "¿Qué NO está incluido?",
+              a: "Evorios no ofrece seguro de vivero, poda profesional ni programas de herbicidas.",
+            },
+            {
+              q: "¿Cómo funcionan los reclamos?",
+              a: "Grado de salud y contenedor son la base. Ramas rotas, raíces secas o piezas faltantes en sets de evento usan fotos + inventario vs depósito.",
+            },
+          ],
+        },
+        "Sprinklers": {
+          title: "Aspersores — cobertura, conexión, piezas",
+          summary: "Los alquileres entre vecinos ganan cuando la franja de cobertura, tipo de conexión, timer incluido, inventario multi-cabeza y notas de drenaje quedan congelados en el acuerdo.",
+          qa: [
+            {
+              q: "¿Qué significa la franja de área de cobertura?",
+              a: "Indica cuánto césped o cantero debe regar el equipo — parche pequeño, césped mediano, césped grande o kit multizona. Elige la franja que coincida con las cabezas o el goteo en las fotos, no solo el tamaño total del jardín.",
+            },
+            {
+              q: "¿Qué es el tipo de conexión y por qué importa?",
+              a: "Indica cómo se conecta al agua: rosca de manguera estándar, a través de un timer de manguera, tubería de goteo o acoples rápidos. Un tipo incorrecto significa que el inquilino llega sin el adaptador o cuerpo de timer adecuado.",
+            },
+            {
+              q: "¿Cómo funcionan juntos timer incluido y fuente de energía?",
+              a: "Timer incluido dice si un timer de manguera viene con las cabezas o si el anuncio es solo el timer. La fuente de energía es manual en aspersores pasivos y normalmente inalámbrica (batería) en timers — ambos quedan congelados en el acuerdo para que el inquilino sepa qué traer.",
+            },
+            {
+              q: "¿Cuándo es obligatorio el inventario de piezas?",
+              a: "Los sets multi-cabeza (dos o más), manifolds de cuatro o más cabezas y kits de líneas de goteo deben listar cada estaca, cabeza, splitter, acople rápido y adaptador de timer. El inquilino confirma la lista al reservar y cuenta piezas en la entrega y devolución.",
+            },
+            {
+              q: "¿Qué son las notas de drenaje e invernalización?",
+              a: "Indicaciones suaves — no un servicio de tienda — sobre vaciar el timer, drenar mangueras y enrollar líneas de goteo antes de devolver. Reducen disputas por manifolds agrietados y agua estancada en devoluciones de otoño.",
+            },
+            {
+              q: "¿Qué no está incluido en un alquiler de aspersor?",
+              a: "Salvo que el anfitrión lo indique: manguera de jardín, grifo exterior, factura de agua, hardware antirreflux, riego enterrado y seguro de jardín de terceros. Evorios no vende seguro de paisajismo ni es socio de mostradores de alquiler de grandes tiendas.",
+            },
+            {
+              q: "¿Cómo funcionan depósito y reclamaciones?",
+              a: "Cabezas, estacas, cuerpos de timer o manifolds de acople rápido faltantes o agrietados se revisan contra el inventario congelado y fotos de entrega. El desgaste normal del patrón de riego es esperado; daños más allá de las notas publicadas pueden usar el depósito según los términos.",
+            },
+            {
+              q: "¿Qué se bloquea al reservar?",
+              a: "Franja de cobertura, tipo de conexión, flag de timer, fuente de energía, franja de conteo de cabezas, checklist de piezas cuando aplica y notas de drenaje — más tu confirmación de inventario en kits multi-cabeza. Esos campos permanecen en el acuerdo hasta la devolución.",
+            },
+          ],
+        },
+        "Stump Grinders": {
+          title: "Trituradoras de tocones — capacidad, EPP, briefing",
+          summary: "Equipo de jardín cercano a construcción: diámetro de tocón, EPP, exención, prueba de seguro, factor de forma, combustible, viruta y briefing operativo antes de la entrega.",
+          qa: [
+            {
+              q: "¿Por qué las trituradoras de tocones están restringidas?",
+              a: "Los escombros voladores y el alto torque las acercan al riesgo de construcción ligera más que a un soplador. Capacidad, EPP, exención, prueba de seguro y briefing de seguridad bloquean la reserva hasta completarse.",
+            },
+            {
+              q: "¿Qué significa la banda de capacidad de tocón?",
+              a: "Es el diámetro máximo de tocón para el que está calificada la máquina — menos de 8 in, 8–16, 16–24 o 24 in+. No exceda la banda; molienda más profunda o madera dura puede requerir una unidad mayor.",
+            },
+            {
+              q: "¿Qué EPP se espera?",
+              a: "El anfitrión declara si incluye guía de ojos / oídos / guantes, EPP parcial, o si el arrendatario aporta todo el EPP. El arrendatario debe confirmar EPP al reservar y usarlo durante el uso.",
+            },
+            {
+              q: "¿Qué prueba de seguro se requiere?",
+              a: "El anfitrión fija bandas mínimas de responsabilidad y máximas de deducible. El arrendatario sube prueba que cumpla esas bandas antes de desbloquear la recogida.",
+            },
+            {
+              q: "¿Qué es el briefing de seguridad?",
+              a: "Cuando es obligatorio, el anfitrión marca el briefing listo y cubre arranque seguro, proyección de viruta, servicios públicos y transporte. El arrendatario confirma que completará el briefing en la entrega antes de operar.",
+            },
+            {
+              q: "¿Qué cubren factor de forma, transporte y notas de viruta?",
+              a: "El factor de forma es a pie, remolcable o autopropulsada. Las notas de transporte cubren remolque, peso y acceso por portón.",
+            },
+            {
+              q: "¿Cómo funciona el combustible?",
+              a: "Indique gasolina, diésel, eléctrico, propano u otro según aplique. En unidades de gasolina o diésel, espere full-to-full salvo que el anfitrión indique lo contrario en la entrega.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Evorios no asegura trabajo de jardín, no vende seguros ni asocia promos de Home Depot, Sunbelt, United Rentals o seguros de jardín tipo Progressive. La retención del depósito y la prueba del arrendatario son las capas principales.",
+            },
+          ],
+        },
+        "Tillers & Cultivators": {
+          title: "Motocultores y cultivadores — ancho, profundidad, tines, transporte",
+          summary: "Los motocultores pro necesitan ancho de trabajo, banda de profundidad, estado de tines, modelo, combustible si es gasolina o batería si es inalámbrico, y notas de transporte congeladas antes de la entrega.",
+          qa: [
+            {
+              q: "¿Qué significan las bandas de ancho y profundidad?",
+              a: "El ancho es el surco por pasada — mini cultivadores suelen ser bajo 12 in; motocultores traseros 18–24 in+. La profundidad es el corte real; suelo nuevo pide 8–10 in+, preparación ligera puede ser bajo 6 in.",
+            },
+            {
+              q: "¿Por qué declarar el estado de los tines?",
+              a: "Tines desafilados o doblados se atascan en arcilla y generan disputas de depósito. Marque nuevos/afilados, buen desgaste, desgastados o dañados — y fotografíe daños antes de la entrega.",
+            },
+            {
+              q: "¿Qué pasa con el tipo de combustible?",
+              a: "Si es gasolina, indique 4 tiempos vs mezcla 2 tiempos — combustible incorrecto puede gripan el motor. La devolución suele ser full-to-full en la entrega cuando hay fuelType; faltar combustible puede seguir la tarifa estándar del acuerdo.",
+            },
+            {
+              q: "¿Y si el motocultor es inalámbrico?",
+              a: "Diga cuántas baterías incluye, si hay cargador y si el arrendatario debe traer pack compatible. Cuente baterías y cargador al recoger y devolver — packs faltantes son la disputa de kit más común.",
+            },
+            {
+              q: "¿Qué va en las notas de transporte?",
+              a: "Motocultores traseros pueden superar 200 lb — indique si hace falta remolque, rampa o segunda persona, si los mangos se pliegan y si se necesita pickup. Sorpresas al recoger arruinan la ventana de siembra.",
+            },
+            {
+              q: "¿Necesito EPI especial?",
+              a: "Consejo suave: protección ocular, botas resistentes y guantes — los tines lanzan piedras y terrones. Evorios no suministra EPI ni seguro de trabajo de jardín; el anfitrión puede añadir detalles en el anuncio.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin operador, sin análisis de suelo, sin producto de seguro de jardín de terceros y sin garantía de calidad del labrado — el arrendatario opera según manual y normas locales (llame antes de cavar).",
+            },
+            {
+              q: "¿Cómo funcionan depósito y reclamaciones?",
+              a: "Dimensione el depósito al motor, tines y baterías. Tines doblados, cajas agrietadas o baterías faltantes siguen los términos y fotos de entrega — no un upsell de seguro afiliado.",
+            },
+          ],
+        },
+        "Trees": {
+          title: "Árboles — nombre, salud, política de trasplante",
+          summary: "Los viveros locales etiquetan especie, zona y formato de raíz. Ganamos con anuncios entre vecinos cuando nombre común/cultivar, altura, sol, perennifolio/caducifolio, clase de contenedor, zona de rusticidad, grado de salud, reglas de trasplante/devolución y notas de plaga/suelo quedan congelados en el acuerdo.",
+          qa: [
+            {
+              q: "¿Por qué es obligatorio el nombre común o cultivar?",
+              a: "Especie y cultivar fijan tamaño, color e interés otoñal — un 'árbol de sombra' genérico genera desajustes. Nombra la planta como en la etiqueta del vivero.",
+            },
+            {
+              q: "¿Qué significa el grado de salud de la planta?",
+              a: "Excellent/good/fair/stressed_disclosed refleja bandas de vivero. Stressed_disclosed significa problemas visibles (muerte regresiva, plagas, B&B suelto) declarados de antemano.",
+            },
+            {
+              q: "¿Cómo funciona la política de trasplante/devolución en alquiler?",
+              a: "Keep_planted_no_return implica plantación estilo venta. Return_in_container y event_rental_return_pot exigen devolver el árbol en la maceta o B&B original — elige según tu modo de anuncio y tarifa.",
+            },
+            {
+              q: "¿Por qué listar zona de rusticidad y notas de suelo/drenaje?",
+              a: "Los árboles exteriores fallan fuera de zona o en arcilla húmeda. Bandas USDA y una nota breve de drenaje evitan el arrepentimiento #1 post-alquiler.",
+            },
+            {
+              q: "¿Qué deben cubrir las notas de plaga y enfermedad?",
+              a: "Declara cochinilla, barrenadores, manchas fúngicas o tratamiento reciente. 'Nada observado esta temporada' es válido.",
+            },
+            {
+              q: "¿Qué NO incluye el alquiler de un árbol?",
+              a: "Evorios no vende seguro de vivero, servicios de plantación ni trámites municipales. Entrega, tutorado e riego post-entrega son entre anfitrión e inquilino salvo que el anuncio diga lo contrario.",
+            },
+            {
+              q: "¿Cómo funcionan depósitos y reclamos?",
+              a: "El grado de salud y la clase de contenedor publicados son la línea base. Daño más allá del estrés declarado ( líderes rotos, bola de raíz rasgada, sequía) puede usar depósito según términos.",
+            },
+          ],
+        },
+        "Trimmers": {
+          title: "Desbrozadoras — cabeza, combustible, línea",
+          summary: "Mostradores de alquiler congelan ancho de corte, hilo vs cuchilla, arnés, mezcla o plataforma de batería y desgaste de bobina en el ticket. En anuncios entre vecinos igual — depósito y ack del kit, sin promo de seguro de jardín.",
+          qa: [
+            {
+              q: "¿Qué significan las puertas del anuncio?",
+              a: "Marca, modelo, fuente de energía, ancho de corte, tipo de cabeza, arnés, combustible o franja de batería, estado de línea/cuchilla y checklist del kit quedan congelados en el acuerdo antes de reservar. Reflejan la entrega de mostrador para evitar sorpresas con bobina, cuchilla o cargador faltante.",
+            },
+            {
+              q: "¿Por qué importa hilo vs cuchilla metálica?",
+              a: "Las cabezas de hilo recortan césped y maleza ligera; las cuchillas en desbrozadoras cortan matorral denso y arrojan desechos más lejos. La reserva muestra el tipo de cabeza para acertar el trabajo y saber cuándo aplican reglas de seguridad con cuchilla.",
+            },
+            {
+              q: "¿Necesito protección ocular y auditiva?",
+              a: "Los desechos voladores y el ruido del motor hacen estándar gafas y protección auditiva en desbrozadoras. El anuncio puede indicar si las traes tú o el anfitrión incluye gafas básicas — consejo suave de seguridad, no seguro ni waiver de fresadora de tocón.",
+            },
+            {
+              q: "¿Gasolina — tipo de combustible y mezcla?",
+              a: "La mayoría usa mezcla 2 tiempos; algunas solo gasolina 4 tiempos. El anuncio indica tipo de combustible y notas de mezcla opcionales (proporción, quién aporta aceite).",
+            },
+            {
+              q: "¿Inalámbrica — plataforma de batería y cargador?",
+              a: "La familia de voltaje (18V/20V, 40V, 60V+) debe coincidir con la batería y cargador del checklist. La plataforma equivocada impide terminar el trabajo — confirma número de baterías y cargador en la entrega.",
+            },
+            {
+              q: "¿Arnés en unidades pesadas?",
+              a: "Ejes rectos y desbrozadoras con cuchilla suelen necesitar arnés de hombro para trabajar con seguridad más de unos minutos. El anuncio indica si hay arnés completo, solo correa o ninguno — para no sostener solo una unidad pesada.",
+            },
+            {
+              q: "¿Estado de línea, bobina y cuchilla al devolver?",
+              a: "El desgaste normal de línea se espera; bobina vacía o cuchilla mellada más allá de la franja publicada puede generar tarifa de recarga o afilado del depósito. Fotografía cabeza y bobina al recoger y devolver si el estado es límite.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Evorios no vende seguro de trabajo de jardín, planes de alquiler de mostrador ni waivers de terceros. El depósito cubre bobinas, cuchillas, cargadores faltantes o daño más allá del desgaste normal; el riesgo de lesión queda en uso seguro y tu EPI.",
+            },
+          ],
+        },
       },
       "Costume & Cosplay": {
         "Halloween Costumes": {

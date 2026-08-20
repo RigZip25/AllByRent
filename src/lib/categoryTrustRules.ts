@@ -734,9 +734,15 @@ export function listingRequiresSafetyBriefing(
   listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
 ): boolean {
   if (!rentOn(listing)) return false;
-  if (listing.category.trim() !== "Tools & DIY") return false;
+  const cat = listing.category.trim();
   const flag = (listing.categorySpecs?.safetyBriefingRequired ?? "").trim();
   if (flag === "not_required") return false;
+  if (cat === "Garden & Yard") {
+    if (flag === "required") return true;
+    // Stump grinders default to briefing; ride-ons only when host marks required.
+    return listingIsStumpGrinder(listing);
+  }
+  if (cat !== "Tools & DIY") return false;
   if (flag === "required") return true;
   const sub = subKey(listing);
   if (SAFETY_BRIEF_TOOL_SUBS.has(sub)) return true;

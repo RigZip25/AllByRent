@@ -1712,6 +1712,270 @@ export const cs: AppMessages = {
         containerClass: { label: "Formát / květináč", hint: "Velikost kontejneru nebo formát kořenů." },
         bloomSeason: { label: "Doba květu", placeholder: "např. pozdní jaro" },
         waterNeeds: { label: "Zálivka" },
+        airflowBand: {
+          label: "Pásmo průtoku (CFM)",
+          hint: "Měkká CFM třída z výrobce — ne certifikované měření.",
+        },
+        baggerMulchKitStatus: {
+          label: "Koš / mulčovací sada",
+          hint: "Trávní koš, rám, mulčovací insert, obojí nebo nic — uveďte, co nájemce dostane.",
+        },
+        batteryIncluded: {
+          label: "Baterie a nabíječka",
+          hint: "Povinné u akku — počet baterií a zda je nabíječka v sadě.",
+        },
+        batteryVoltageBand: {
+          label: "Platforma napětí baterie",
+          hint: "U aku — 18–20V, 40V, 60V+ nebo jiné. Baterie nejsou zaměnitelné mezi značkami.",
+        },
+        bladeCondition: {
+          label: "Stav nožů",
+          hint: "Ostrlost při předání — tupé nože trhají trávu a vedou k reklamacím z kauce.",
+        },
+        bladeConditionBand: {
+          label: "Stav nože",
+          hint: "Ostrý, nedávno nabroušený, tupý (uvedený) nebo neznámý — zmrazené očekávání sečení.",
+        },
+        blowerFormFactor: {
+          label: "Typ foukače",
+          hint: "Ruční vs batoh vs pojízdný — váha a velikost pozemku.",
+        },
+        chipDischargeNotes: {
+          label: "Výhoz třísek a úklid",
+          hint: "Kam třísky letí, potřeba plachty / bariéry, hloubka úklidu, sítě a sousedé.",
+          placeholder: "Třísky dopředu ~4 m — plachta podél plotu; nájemce odveze nebo rozhodí...",
+        },
+        commonNameOrCultivar: {
+          label: "Běžný název / kultivar",
+          hint: "např. Monstera deliciosa, sansevierie, sazenice rajčat.",
+          placeholder: "Monstera deliciosa / sansevierie Laurentii...",
+        },
+        connectionType: {
+          label: "Typ připojení",
+          hint: "Hadicový závit, tělo časovače, kapkové potrubí nebo rychlospojky — nastaví očekávání adaptérů při předání.",
+        },
+        controllerIncluded: {
+          label: "Controller v sadě",
+          hint: "Zda je součástí pronájmu základní časovač nebo smart Wi‑Fi controller.",
+          placeholder: "Vyberte...",
+        },
+        coverageAreaBand: {
+          label: "Pásmo pokrytí",
+          hint: "Přibližná plocha v m²/ft², pro kterou je sada dimenzovaná — ne nutně celý pozemek.",
+          placeholder: "Vyberte...",
+        },
+        deckDischargeMode: {
+          label: "Režim výhozu decku",
+          hint: "Boční, koš, mulč, 3v1 nebo host nastaví při předání — hlavní nesoulad u peer sekaček.",
+        },
+        deckDischargeType: {
+          label: "Výhoz / sběr z kapoty",
+          hint: "Boční výhoz, mulčování, sběr nebo kombinace — vyfoťte výhoz/sběrač.",
+        },
+        eyeEarPpeExpectation: {
+          label: "Ochrana očí / uší (měkká)",
+          hint: "Volitelné bezpečnostní očekávání — brýle a chrániče sluchu proti úlomkům a hluku. Ne pojištění jako u frézovače pařezů.",
+        },
+        gardenOtherKind: {
+          label: "Typ inzerátu",
+          hint: "Vybavení, živá rostlina nebo mix — určuje očekávání napájení vs péče.",
+        },
+        gardenPieceBand: {
+          label: "Počet kusů",
+          hint: "Jeden kus vs vícedílná sada. U více kusů je povinný krátký inventář.",
+        },
+        gardenToolConditionGrade: {
+          label: "Stupeň stavu",
+          hint: "Upřímné opotřebení rukojetí, čepelí, hrotů, vany a pneu — včetně lehké rzi, která stále funguje.",
+          placeholder: "Vyberte...",
+        },
+        grindFormFactor: {
+          label: "Typ frézy",
+          hint: "Ruční, tažná na přívěsu nebo samojízdná / pásová.",
+          placeholder: "Vyberte...",
+        },
+        hardinessZoneBand: {
+          label: "Pásmo mrazuvzdornosti",
+          hint: "Doporučeno — indoor_only pro pokojovky.",
+        },
+        harnessIncluded: {
+          label: "Postroj / ramenní popruh",
+          hint: "Těžké rovné hřídele a brushcutter často potřebují postroj.",
+        },
+        hopperCapacityBand: {
+          label: "Objem hopperu",
+          hint: "Kapacita secího hopperu v librách — u ostatních neplatí.",
+          placeholder: "Vyberte...",
+        },
+        hourMeterBand: {
+          label: "Pásmo hodinometru",
+          hint: "Přibližné motohodiny z přístroje — měkký ukazatel opotřebení, ne záruka.",
+        },
+        indoorCareNotes: {
+          label: "Poznámky k indoor péči",
+          hint: "Vlhkost, světlo, zákaz přesazení, aklimatizace.",
+          placeholder: "Jasné nepřímé světlo; mlžit 2x týdně; během pronájmu nepřesazovat...",
+        },
+        installComplexity: {
+          label: "Složitost montáže",
+          hint: "Kdo montuje: DIY nájemce, nastavení hostitele, nebo měkký tip pro práci na hlavní lince.",
+          placeholder: "Vyberte...",
+        },
+        intendedSurface: {
+          label: "Zamýšlený povrch",
+          hint: "Kde má nářadí pracovat — záhony/půda, trávník, tvrdý povrch, nebo smíšené zahradní práce.",
+          placeholder: "Vyberte...",
+        },
+        irrigationSystemType: {
+          label: "Typ zavlažovacího systému",
+          hint: "Hlavní třída sady: drip, zónové postřikovače, smart controller hub nebo systém kolem čerpadla.",
+          placeholder: "Vyberte...",
+        },
+        landscapeEquipSubtype: {
+          label: "Typ zařízení",
+          hint: "Aerátor, vertikutátor, sod cutter, secí stroj, vozík, válec, edger nebo jiný stroj.",
+          placeholder: "Vyberte...",
+        },
+        minOperatorAgeBand: {
+          label: "Minimální věk obsluhy (měkké)",
+          hint: "Věková hranice vhodná pro peer pronájem — ne brána CDL ani pronájmu vozidla.",
+        },
+        mowerFuelReturnPolicy: {
+          label: "Pravidlo vrácení paliva (benzín)",
+          hint: "Plná→plná, startovací nádrž hostitele, nebo palivo nájemce — zatím jen text ve smlouvě.",
+        },
+        mowerPpeTipNotes: {
+          label: "Tip OOP (volitelné)",
+          hint: "Měkký sousedský tip — oči, sluch, pevná obuv. Ne pojištění ani stump-tier brány.",
+          placeholder: "Doporučeny brýle a chrániče sluchu; povinná pevná obuv...",
+        },
+        mowerReturnCleanPolicy: {
+          label: "Politika čistého vrácení",
+          hint: "Očistit deck, paušál hostitele, nebo lehká tráva OK — měkké potvrzení při rezervaci.",
+        },
+        mulchVacKitIncluded: {
+          label: "Mulch / vac sada",
+          hint: "Jen foukač vs vysávací sáček nebo celá mulch sada.",
+        },
+        noiseNeighborNotes: {
+          label: "Hluk / hodiny pro sousedy (měkké)",
+          hint: "Volitelné klidové hodiny, poznámka SVJ, tip na chrániče sluchu — zdvořilost, ne právní rada.",
+          placeholder: "Ne před 8:00 v sobotu; doporučeny chrániče sluchu; v poledni ne u plotu...",
+        },
+        pestDiseaseNotes: {
+          label: "Poznámky k škůdcům",
+          hint: "Roztoči, octomilky, vlnovníci.",
+          placeholder: "Bez aktivních škůdců...",
+        },
+        petToxicity: {
+          label: "Toxicita pro domácí mazlíčky",
+          hint: "Soft povinné — kočky/psí pravidla.",
+        },
+        plantHealthGrade: {
+          label: "Stupeň zdraví",
+          hint: "Vitalita kořenů a listů.",
+        },
+        returnCleanNotes: {
+          label: "Poznámky k vrácení",
+          hint: "Jak jednotku vrátit — vyklepat listí, vyprázdnit sáček, otřít, péče o filtr.",
+          placeholder: "Vyprázdnit vysávací sáček; vyklepat mokré listí; otřít skříň; nevracet ucpaný filtr...",
+        },
+        returnCleanPolicy: {
+          label: "Vrácení čisté (měkké)",
+          hint: "Měkké pravidlo pro bláto a půdu při vrácení — oplach, lehké bláto OK, opotřebení z použití, nebo volitelný poplatek (ne promo partnera).",
+          placeholder: "Vyberte...",
+        },
+        returnFuelPolicy: {
+          label: "Politika vrácení paliva",
+          hint: "U benzínu — plná nádrž, stejná hladina nebo doplnění nájemcem. Zmrazeno ve smlouvě.",
+          placeholder: "Vyberte...",
+        },
+        rideOnBriefingConfirmed: {
+          label: "Instruktáž připravena při předání",
+          hint: "Označte připraveno před publikací, pokud je instruktáž povinná — blokuje rezervaci.",
+        },
+        rideOnBriefingNotes: {
+          label: "Poznámky k instruktáži / bezpečnosti",
+          hint: "OOP, limity svahů, bezpečná vzdálenost, víčko nádrže, montáž sběrače.",
+          placeholder: "OOP oči/uši; vyhnout se svahům >15°; vypnout PTO před slezením; plná nádrž při vrácení...",
+        },
+        rideOnBriefingRequired: {
+          label: "Instruktáž obsluhy povinná",
+          hint: "Krátké předání ovládání, PTO, svahy a palivo — lehká povinnost, ne certifikace.",
+        },
+        soilDrainageNotes: {
+          label: "Poznámky k substrátu",
+          hint: "Aroid mix, sukulentský grit.",
+          placeholder: "Hrudkovitý aroid mix...",
+        },
+        sprinklerHeadCountBand: {
+          label: "Počet hlavic / linek",
+          hint: "Jedna hlavice, 2–3 hlavice, 4+ na rozdělovači, kapková sada nebo N/A — spouští inventář u multi-head a kapky.",
+        },
+        tillDepthBand: {
+          label: "Max. hloubka orbání",
+          hint: "Reálné pásmo hloubky — nová půda vs lehká kultivace.",
+        },
+        tillingWidthBand: {
+          label: "Pracovní šířka",
+          hint: "Pracovní pruh na průjezd — zmrazte, aby nájemce věděl šířku záhonu vs úzké cesty.",
+        },
+        timerIncluded: {
+          label: "Časovač v sadě?",
+          hint: "Uveďte, zda hadicový časovač jde s hlavicemi, není v sadě, jde jen o časovač, nebo N/A u pasivních zavlažovačů.",
+        },
+        tineCondition: {
+          label: "Stav nožů",
+          hint: "Ostrost a ohnutí — foťte poškození; velikost kauce k náhradě nožů.",
+        },
+        toolSetBand: {
+          label: "Jeden kus nebo sada",
+          hint: "Jedna položka vs vícekusový zahradní kit — u sad je pro pronájem povinný plný inventární checklist.",
+          placeholder: "Vyberte...",
+        },
+        transplantOrReturnPolicy: {
+          label: "Politika výsadby / vrácení",
+          hint: "Ponechat rostlinu vs vrátit květináč.",
+        },
+        transportNotes: {
+          label: "Doprava a nakládka",
+          hint: "Vyzvednutí vs rozvoz, hmotnost, potřeba přívěsu/rampy, upínání, dva lidé.",
+          placeholder: "Jen vyzvednutí; cca 130 kg; do pickupu s rampou; zvednutí ve dvou; přiveďte upínací pásy...",
+        },
+        trimmerFuelMixNotes: {
+          label: "Poznámky k palivu / mixu",
+          hint: "Poměr mixu, kdo dodá olej, očekávání paliva při vrácení — měkká karta, ne promo pojištění.",
+          placeholder: "Mix 50:1; benzín dodá nájemce, hostitel dá olej do 2t; nádrž vrátit jak převzato...",
+        },
+        trimmerHeadType: {
+          label: "Typ hlavy křovinořezu",
+          hint: "Struna vs kovový nůž vs obojí — zmrazí bezpečnost a vhodnost práce ve smlouvě.",
+        },
+        trimmerKitChecklist: {
+          label: "Checklist inventáře sady",
+          hint: "Cívka, kryt, nabíječka, baterie, olej do mixu, klíč na nůž — nájemce potvrdí při rezervaci a předání.",
+          placeholder: "Stroj, ramenní popruh, cívka 2,0 mm, kryt nože, baterie 40V 4Ah, nabíječka, olej 2t...",
+        },
+        trimmerLineBladeCondition: {
+          label: "Stav struny / nože",
+          hint: "Opotřebení cívky a nože při předání — nastaví očekávání doplnění při vrácení.",
+        },
+        winterizeDrainReturnNotes: {
+          label: "Poznámky k vypuštění / zazimnění",
+          hint: "Měkká pečovatelská karta — vypustit časovač a hadice, svinout kapky. Ne promo servisu dílny.",
+          placeholder: "Sejmout časovač z kohoutku; otevřít ventil a vypustit; svinout suché kapkové linky; kolíky v sáčku...",
+        },
+        winterizeNotesSoft: {
+          label: "Zimní poznámky (měkké)",
+          hint: "Volitelná sezónní poznámka k vypuštění / skladování — není pojištění proti mrazu ani partnerská promo.",
+          placeholder: "Vypusťte a sviňte hadice; controller skladujte v interiéru pod 0 °C...",
+        },
+        workingWidthBand: {
+          label: "Pracovní šířka",
+          hint: "Šířka dráhy aerátoru, vertikutátoru, sod cutteru — u vozíků neplatí.",
+          placeholder: "Vyberte...",
+        },
+
         cuttingWidthBand: { label: "Záběr sečení" },
         cuttingWidthOrSpec: { label: "Záběr sečení", placeholder: "např. 53 cm" },
         guestCapacityBand: { label: "Kapacita hostů / míst" },
@@ -2881,7 +3145,162 @@ export const cs: AppMessages = {
         wuxga_1440p: "WUXGA / třída 1440p",
         zigbee: "Zigbee",
         zwave: "Z-Wave",
-      },
+      
+        "100_175lb": "100–175 lb",
+        "10in_plus": "10 in+",
+        "12_18in": "12–18 in",
+        "1500_plus": "1500+ h",
+        "175lb_plus": "175 lb+",
+        "18_24in": "18–24 in",
+        "24_30in": "24–30 in",
+        "2_3_heads": "2–3 hlavy",
+        "300_450_cfm": "300–450 CFM",
+        "450_600_cfm": "450–600 CFM",
+        "4_plus_heads": "4+ hlavy",
+        "500_1500h": "500–1500 h",
+        "600_800_cfm": "600–800 CFM",
+        "6_8in": "6–8 in",
+        "800_cfm_plus": "800+ CFM",
+        "8_10in": "8–10 in",
+        adjustable_unknown: "Nastavitelné / neznámé",
+        age_16_plus: "16+",
+        age_18_plus: "18+",
+        age_21_plus: "21+",
+        as_received_light_grass_ok: "Jak přijato — lehká tráva OK",
+        as_used_fair_wear: "Jak použito — běžné opotřebení",
+        bag_and_mulch_plug: "Vak + zátka",
+        bag_included: "Sběrný vak v sadě",
+        bagging: "Sběr do vaku",
+        basic_timer_included: "Základní timer v sadě",
+        blade_use_eye_ear_required: "S nožem — OOP očí/sluchu povinné",
+        blower_only: "Jen foukač",
+        briefing_only_no_age_floor: "Jen instruktáž — bez věkové hranice",
+        broadcast_spreader: "Rozmetadlo",
+        controller_renter_supplies: "Ovladač dodá nájemce",
+        convertible_3in1: "Konvertibilní 3v1",
+        core_aerator: "Dutý aerátor",
+        damaged_note_required: "Poškozené (nutné poznámky)",
+        drip: "Kapková",
+        drip_lines_kit: "Sada kapkových hadic",
+        drop_spreader: "Kapací rozmetadlo",
+        dual_string_and_blade: "Struna + nůž",
+        dull_disclosed: "Tupý (uvedeno)",
+        dump_cart: "Sklápěcí vozík",
+        equipment: "Spíš nářadí",
+        event_rental_return_pot: "Event — vrátit květináč/rostlinu",
+        excellent: "Výborný",
+        fair: "Uspokojivý",
+        full_harness_included: "Kompletní postroj",
+        full_mulch_vac_kit: "Kompletní mulč-vac sada",
+        full_to_full: "Plná→plná",
+        good: "Dobrý",
+        good_slight_wear: "Dobré lehké opotřebení",
+        good_usable_wear: "Dobré použitelné opotřebení",
+        hardscape: "Zpevněné plochy",
+        hose_thread: "Závit hadice",
+        host_cleaning_fee: "Poplatek za čištění hostitele",
+        host_cleans_flat_fee: "Host čistí (paušál)",
+        host_installs: "Host instaluje",
+        host_provides_basic_glasses: "Host dá základní ochranu očí",
+        host_provides_starting_tank: "Host dodá startovací palivo",
+        host_sets_at_handoff: "Host nastaví při předání",
+        host_sharpens_at_handoff: "Host nabrousí při předání",
+        interchangeable_heads: "Výměnné hlavy",
+        keep_planted_no_return: "Zůstává zasazeno — bez vrácení",
+        landscape_edger: "Obrubovač",
+        landscape_rake: "Zahradní hrábě",
+        large_lawn: "Velký trávník",
+        lawn: "Trávník",
+        lawn_roller: "Válec na trávník",
+        light_mud_ok: "Lehké bláto OK",
+        medium_lawn: "Střední trávník",
+        metal_blade_only: "Jen kovový nůž",
+        mildly_toxic: "Mírně toxické při okusu",
+        mixed: "Smíšený dvůr",
+        mulch_bagger_combo: "Mulč + sběr",
+        mulch_plug_included: "Mulčovací zátka v sadě",
+        mulching: "Mulčování",
+        multi_piece: "Více kusů",
+        multi_zone: "Více zón",
+        neither_disclosed: "Ani jedno — uvedeno",
+        new_line_fresh_blade: "Nová struna / ostrý nůž",
+        new_sharp: "Nové / ostré",
+        no_controller: "Bez ovladače",
+        no_harness_renter_provides: "Bez postroje — nájemce",
+        non_toxic: "Netoxické pro mazlíčky",
+        not_applicable_electric: "N/A — elektro / ruční",
+        not_applicable_manual: "N/A — ruční",
+        not_applicable_side_discharge: "N/A — jen boční výhoz",
+        not_needed_light_curved_shaft: "Není třeba (lehké zakřivené)",
+        not_required_light_duty: "Není nutné (lehké)",
+        one_battery_and_charger: "1 baterie + nabíječka",
+        one_battery_no_charger: "1 baterie bez nabíječky",
+        other_landscape: "Jiné landscaping",
+        overall_photos: "Celkové fotky",
+        overall_plus_flaws: "Celkové + vady",
+        plant: "Spíš rostlina",
+        platform_only_no_battery: "Jen platforma — bez baterie",
+        power_dethatcher: "Motorový vertikutátor",
+        premix_2stroke: "2-taktní směs",
+        pro_only: "Jen profesionální montáž",
+        pump: "Čerpadlo",
+        quick_connect: "Rychlospojka",
+        rear_bag: "Zadní sběr",
+        recently_sharpened: "Nedávno broušeno",
+        renter_brings_eye_ear: "Nájemce přinese OOP očí/sluchu",
+        renter_buys_own_gas: "Nájemce kupuje palivo",
+        renter_diy: "Nájemce DIY montáž",
+        renter_provides_compatible_battery: "Nájemce dodá kompatibilní baterii",
+        renter_refills_or_fee: "Nájemce dolije nebo poplatek",
+        return_clean_deck: "Vrátit s čistým deckem",
+        return_full_tank: "Vrátit plnou nádrž",
+        return_in_container: "Vrátit ve stejné nádobě",
+        return_same_level: "Vrátit stejnou hladinu",
+        rinse_brush_dry: "Opláchnout, vykartáčovat, vysušit",
+        rinse_deck_ok: "Lehké opláchnutí OK",
+        self_propelled: "Samojízdné",
+        sharp_ready: "Ostrý / připravený",
+        shoulder_strap_only: "Jen ramenní popruh",
+        side_and_mulch: "Boční + mulč",
+        side_discharge: "Boční výhoz",
+        single_head: "1 hlava",
+        single_piece: "Jeden kus",
+        single_tool: "Jeden nástroj",
+        small_patch: "Malá plocha",
+        smart_controller: "Chytrý ovladač",
+        smart_controller_included: "Chytrý ovladač v sadě",
+        sod_cutter: "Řezač drnu",
+        soil: "Půda / záhony",
+        spike_aerator: "Hrotový aerátor",
+        sprinkler_zones: "Zavlažovací zóny",
+        stressed_disclosed: "Stresovaný (uvedeno)",
+        string_line_only: "Jen struna",
+        timer: "Timer",
+        timer_included: "Timer v sadě",
+        timer_not_included: "Bez timeru",
+        timer_only: "Jen timer",
+        tool_set: "Sada",
+        tow_spreader: "Tažené rozmetadlo",
+        towable: "Tažné",
+        toxic_to_pets: "Toxické pro mazlíčky",
+        two_batteries_and_charger: "2 baterie + nabíječka",
+        under_12in: "Pod 12 in",
+        under_18in: "Pod 18 in",
+        under_300_cfm: "Pod 300 CFM",
+        under_50lb: "Pod 50 lb",
+        under_6in: "Pod 6 in",
+        unknown_check_before_rent: "Neznámé — ověřte před půjčením",
+        unknown_no_meter: "Neznámé / bez hodin",
+        usable_worn: "Použitelný s opotřebením",
+        vac_attachment_optional: "Vac nástavec volitelně",
+        vac_bag_included: "Včetně vysávacího vaku",
+        visible_wear_rust: "Viditelné opotřebení / rez",
+        walk_behind: "Pochozí",
+        wheelbarrow_cart: "Kolečko / vozík",
+        worn_host_refills_before_rent: "Opotřebené — host doplní",
+        worn_renter_must_refill: "Opotřebené — nájemce doplní",
+        worn_replace_soon: "Opotřebené — brzy vyměnit",
+},
     },
     modes: {
       title: "Jak to chceš nabídnout?",
@@ -4074,28 +4493,28 @@ export const cs: AppMessages = {
           ],
         },
       "Garden & Yard": {
-          title: "FAQ zahrady a pozemku",
-          summary: "Krátké odpovědi k běžnému nářadí a pařezovým frézám.",
+          title: "Zahrada a dvůr — FAQ",
+          summary: "Krátké odpovědi k nářadí, rostlinám, závlaze a pařezovým frézám.",
           qa: [
             {
-              q: "Foukače potřebují pojištění?",
-              a: "Ne—běžné nářadí = soused + kauce.",
+              q: "Potřebují foukače listí pojištění?",
+              a: "Ne—běžné nářadí používá důvěru sousedů, specifikace police a kauci.",
             },
             {
-              q: "Pařezové frézy?",
-              a: "Kapacita, PPE, vzdání se nároků a doklad pojištění před předáním.",
+              q: "Co vyžadují pařezové frézy?",
+              a: "Kapacitu, OOP, vzdání se odpovědnosti, důkaz pojištění a bezpečnostní instruktáž před předáním.",
             },
             {
-              q: "Co fotit?",
-              a: "Stav při předání—lišty, ostří a kanystry často chybí.",
+              q: "Jaká pole u rostlin jsou důležitá?",
+              a: "Obecný název, výška, slunce, nádoba, zdravotní stupeň, zálivka a politika přesazení/vrácení při pronájmu.",
             },
             {
-              q: "Co kryje kauce?",
-              a: "Běžné poškození lehkého nářadí; u gated gear pojištění první.",
+              q: "Co mám vyfotit?",
+              a: "Stav při předání—nože, vaky, baterie, kanystry a květináče často způsobují spory.",
             },
             {
-              q: "Pojišťuje Evorios práci na zahradě?",
-              a: "Ne—doklad nájemce (když je) a kauce.",
+              q: "Pojišťuje Evorios zahradní práce?",
+              a: "Ne—důkaz nájemce (když je vyžadován) a kauce jsou hlavní vrstvy.",
             },
           ],
         },
@@ -4707,6 +5126,630 @@ export const cs: AppMessages = {
               },
             ],
           },
+      },
+      "Garden & Yard": {
+        "Garden Tools": {
+          title: "Zahradní nářadí — sada, povrch, opotřebení, čisté vrácení",
+          summary: "Půjčovny a sousedské sady vyhrávají, když je jasné single vs sada, vhodný povrch, stupeň opotřebení a pravidlo vrácení s blátem. Baseline už vyžaduje značku a pohon (ruční je běžné).",
+          qa: [
+            {
+              q: "Co znamená jeden kus vs sada nářadí?",
+              a: "Jeden kus je jedna položka (jedna lopata nebo jedno kolečko). Sada je vícekusový kit — každý kus musí být v inventárním checklistu a spočítán při předání.",
+            },
+            {
+              q: "Proč vypsat každý kus u sady?",
+              a: "Chybějící hrábě, vidle nebo díly kolečka jsou nejčastější spory o kauci. Číslovaný checklist při inzerci i vrácení je lepší než dohad po víkendové práci.",
+            },
+            {
+              q: "Co je zamýšlený povrch?",
+              a: "Půda je pro kopání a záhony; trávník pro šetrné hrábě a okrajovače; tvrdý povrch pro dlažbu, kámen a štěrk; smíšené pro obecné zahradní víkendy. Zvolte podle práce, aby nářadí hostitele sedělo k úkolu.",
+            },
+            {
+              q: "Proč pohon u ručního nářadí?",
+              a: "Většina zahradního nářadí je ruční. Akumulátor je u kultivátorů, nůžek nebo malých motorových ručních nástrojů — uveďte ho kvůli nabíjení a bezpečnosti.",
+            },
+            {
+              q: "Co pokrývá stupeň stavu?",
+              a: "Upřímné opotřebení rukojetí, čepelí, hrotů a van/kol kolečka — včetně lehké rzi, která stále funguje. Zmrazí základ, aby běžné opotřebení od půdy nebylo zaměněno za nové poškození po vrácení.",
+            },
+            {
+              q: "Jak čisté má být nářadí při vrácení?",
+              a: "Hostitel zvolí měkké pravidlo: oplach a osušení, lehké suché bláto OK, férové opotřebení z použití, nebo volitelný poplatek za čištění při silné půdě. Dodržte uvedené pravidlo — není to promo externí čistírny.",
+            },
+            {
+              q: "Co není součástí?",
+              a: "Profesionální údržba zahrady, dovoz zeminy ani odvoz odpadu, pokud to hostitel neuvádí. Evorios neprodává pojištění zahrady ani affiliate Home Depot / Sunbelt / United Rentals — kauce a podmínky pronájmu řeší škody a chybějící kusy.",
+            },
+          ],
+        },
+        "Houseplants & Seedlings": {
+          title: "Pokojovky — péče, bezpečí pro domácí mazlíčky",
+          summary: "Indoor pronájem selhává na světle, vodě a překvapeních pro mazlíčky. Povinný kultivar, zdraví, vrácení květináče plus doporučené indoor poznámky a toxicita pro zvířata odpovídají školkové poctivosti.",
+          qa: [
+            {
+              q: "Proč uvádět indoor care poznámky?",
+              a: "Vlhkost, mlžení, zákaz přesazení a aklimatizace ze skleníku brání opadu listů a hnilobě kořenů během krátkého pronájmu.",
+            },
+            {
+              q: "Co znamená toxicita pro mazlíčky?",
+              a: "Soft-povinný select. Nájemci s kočkami, psy nebo pravidly místa potvrdí před rezervací, pokud není non_toxic.",
+            },
+            {
+              q: "Jak funguje vrácení květináče u event dekoru?",
+              a: "Event_rental_return_pot = rostlina zpět v původním květináči po akci — jako u profesionálního pronájmu rostlin.",
+            },
+            {
+              q: "Liší se sazenice od dospělých pokojovek?",
+              a: "Stejná polička — uveďte heat mat a grow light v indoorCareNotes. Sazenice stresují rychleji.",
+            },
+            {
+              q: "Jaké škůdce uvádět?",
+              a: "Roztoči, octomilky, vlnovníci — sdělte ošetření nebo aktivní problém.",
+            },
+            {
+              q: "Proč zóna u indoor rostlin?",
+              a: "Doporučeno — indoor_only pro pokojovky. Patio tropické potřebují reálné pásmo.",
+            },
+            {
+              q: "Co pronájem nezahrnuje?",
+              a: "Evorios neprodává pojištění, dopravu ani týdenní zálivku.",
+            },
+            {
+              q: "Jak funguje kauce?",
+              a: "Zdraví a květináč jsou baseline. Prasklá keramika nebo škůdce mimo sdělené poznámky mohou jít z kauce.",
+            },
+          ],
+        },
+        "Irrigation Systems": {
+          title: "Zavlažování — typ, plocha, montáž",
+          summary: "Profesionální pronájem zavlažování má uvést typ systému, pásmo pokrytí, controller, úroveň montáže, inventář sady a měkké zimní poznámky před předáním.",
+          qa: [
+            {
+              q: "Co znamená typ zavlažovacího systému?",
+              a: "Zvolte drip pro kapkové/trubkové sady, sprinkler_zones pro pop-up nebo rotační zóny, smart_controller když je hlavní pronájem Wi‑Fi/časovač, nebo pump pro sady kolem booster/přenosného čerpadla. U kombinací zvolte nejbližší typ a zbytek uveďte v inventáři.",
+            },
+            {
+              q: "Jak použít pásmo pokrytí?",
+              a: "Zvolte přibližnou plochu, pro kterou je sada dimenzovaná — ne celý pozemek, pokud inzerát neříká jinak. Variable/custom layout znamená záhony nebo řady bez jednoduchého obdélníku; počet hlavic a délku hadic hledejte v checklistu.",
+            },
+            {
+              q: "Co zahrnuje controller included?",
+              a: "Basic timer included = hadicový nebo zónový časovač je v sadě. Smart controller included = Wi‑Fi/app časovač je součástí pronájmu.",
+            },
+            {
+              q: "Co znamenají úrovně install complexity?",
+              a: "Renter DIY = pokládáte hadice, hlavice a napojení na existující kohoutek — bez garance výkopů. Host installs = host nastaví před nebo při předání v uvedené oblasti.",
+            },
+            {
+              q: "Co patří do inventáře sady?",
+              a: "Uveďte každou hlavici, kapku, ventil, backflow/regulátor, délku hadice, kolíky, fitinky, nářadí, controller, čerpadlo a navijáky. Nájemce a host potvrdí počty při rezervaci a vrácení — chybějící kusy řeší inventář a fotky, ne retail záruka.",
+            },
+            {
+              q: "K čemu jsou zimní poznámky?",
+              a: "Jen měkké sezónní doporučení: vypustit linky, případně vyfouknout, skladovat v interiéru před mrazem. Nejsou pojištění proti mrazu a nezaručují zimní servis, pokud to host výslovně neuvádí.",
+            },
+            {
+              q: "Jak obvykle funguje kauce a reklamace?",
+              a: "Přestřihané hadice, chybějící hlavice, prasklý rozvod nebo chybějící smart controller obvykle jdou z kauce, když to podporuje inventář a fotky z předání. Běžné opotřebení kolíků může být OK, pokud to inzerát říká — spory podle checklistu a podmínek pronájmu.",
+            },
+            {
+              q: "Co není zahrnuto?",
+              a: "Vodné, stálá povolení, garantovaný přístup k hlavní lince, certifikace backflow testu a práce certifikovaného zavaděče, pokud install complexity neříká host installs. Evorios neprodává pojištění pozemku ani partnerské služby půjčoven nářadí — zařiďte si je sami, pokud je potřebujete.",
+            },
+          ],
+        },
+        "Landscape Equipment": {
+          title: "Zahradní technika — typ, inventář, doprava",
+          summary: "Profesionální půjčovny označují aerátory, vertikutátory, sod cutters, secí stroje a vozíky značkou, modelem, pohonem, palivem u benzínu, plným inventářem a poznámkami k nakládce — zmrazené ve smlouvě.",
+          qa: [
+            {
+              q: "Co patří do Zahradní techniky vs jiných podkategorií?",
+              a: "Tato polička je pro tažené aerátory, power vertikutátory, sod cutters, secí stroje, těžké vozíky, válce a okrajové edgery — ne sekačky, kultivátory, frézy na pařezy ani ruční hrábě. Vyberte nejbližší typ, aby nájemce věděl, co rezervuje.",
+            },
+            {
+              q: "Proč záleží na značce, modelu a typu?",
+              a: "Typ určuje úkol (aerace vs vertikutace vs sod vs secí). Značka a model zmrazí konkrétní stroj — Ryan, BlueBird a Husqvarna se liší hmotností, trny a hopperem.",
+            },
+            {
+              q: "Co patří do inventárního checklistu?",
+              a: "Vypište každý díl: bubny/trny, hopper, olej, rampa, klíče, náhradní díly, kabely nebo baterie. Semeno, hnojivo a posyp nejsou v ceně, pokud to výslovně neuvedete.",
+            },
+            {
+              q: "Co mají obsahovat poznámky k dopravě?",
+              a: "Uveďte vyzvednutí vs rozvoz, přibližnou hmotnost, zda je potřeba přívěs nebo rampa, body upínání a zda jsou potřeba dva lidé. Sod cutters a core aerátory jsou těžké — nejasná nakládka způsobuje nejvíc sporů v den vyzvednutí.",
+            },
+            {
+              q: "Typ paliva a vrácení benzínu — co se očekává?",
+              a: "U benzínového pohonu uveďte typ paliva (benzín, nafta, propan). Napište, zda nájemce vrací plnou nádrž, stejnou hladinu, nebo doplní — politika hostitele je zmrazená v inzerátu.",
+            },
+            {
+              q: "OOP u motorizovaných strojů?",
+              a: "U benzínu, síťových nebo akumulátorových strojů noste ochranu očí a sluchu a pevné rukavice; u těžkých tažených strojů pomohou pevné boty. Hostitel může uvést dodané OOP; pokud ne, vezměte si vlastní — jde o doporučení, ne certifikaci OSHA.",
+            },
+            {
+              q: "Co není součástí?",
+              a: "Materiál (semeno, sod, hnojivo), příprava pozemku, likvidace, školení nad rámec inzerátu a produkty půjčoven nebo pojištění třetích stran nejsou součástí. Kauce kryje poškození nebo chybějící díly dle zmrazeného checklistu a fotek.",
+            },
+          ],
+        },
+        "Lawn Mowers": {
+          title: "Sekačky — deck, nůž, vrácení",
+          summary: "Půjčovny nářadí zmrazí šířku sečení, palivo a pravidla čistého vrácení. Peer inzeráty vyhrávají, když model, šířka, režim decku, koš/mulčovací insert, stav nože, napětí nebo palivo a politika vrácení jsou ve smlouvě — jen měkký tip OOP.",
+          qa: [
+            {
+              q: "Proč jsou povinné šířka sečení, model a zdroj energie?",
+              a: "Šířka decku (pod 16″ až 30″+) říká, zda sekačka sedí na váš pozemek. Model u značky oddělí tlačenou vs samohybnou a třídu roku — samotná značka a „benzín“ nestačí.",
+            },
+            {
+              q: "Co znamená režim výhozu a koš/mulčovací sada?",
+              a: "Boční výhoz, zadní koš, mulčování nebo 3v1 určuje, kam jde tráva. Pole koše/mulče uvádí, zda je v ceně trávní koš, rám nebo mulčovací insert — chybějící díly jsou nejčastější spor při předání.",
+            },
+            {
+              q: "Jak se řeší stav nože?",
+              a: "Hostitel zvolí ostrý připravený, nedávno nabroušený, tupý (uvedený) nebo neznámý. Nájemce očekává uvedenou kvalitu sečení; poškození od kamenů nebo obrubníků není běžné opotřebení a může jít z kauce dle podmínek.",
+            },
+            {
+              q: "Jaká jsou pravidla paliva a čistého vrácení u benzínu?",
+              a: "Benzínové inzeráty vyžadují typ paliva a pravidlo vrácení: plná→plná, host dá startovací nádrž, nebo palivo kupuje nájemce. Politika čistého vrácení říká, zda musíte očistit deck, zaplatit paušál hostitele, nebo stačí lehká tráva — obojí potvrďte při rezervaci.",
+            },
+            {
+              q: "A co akumulátorové napětí?",
+              a: "Bezdrátové sekačky vyžadují pásmo napětí (18–20 V, 40 V, 60 V+), aby bylo jasné runtime a kompatibilita nabíječky. Počet baterií a nabíječku ověřte z fotek nebo zpráv — strukturovaný inventář baterií je budoucí vylepšení.",
+            },
+            {
+              q: "Je OOP nebo pojištění jako u stump grinderů?",
+              a: "Ne. U sekaček jen měkký tip OOP — ochrana očí, sluchu a pevná obuv.",
+            },
+            {
+              q: "Když se po půjčení něco pokazí?",
+              a: "Zveřejněná pravidla vrácení a paliva plus specifikace nože/výhozu jsou zmrazené ve smlouvě. Deck zalepený trávou mimo politiku, prázdná nádrž proti plná→plná nebo poškození nože zneužitím řeší kauce a zprávy — Evorios neprodává pojištění sekaček ani partnerské půjčovny nářadí.",
+            },
+          ],
+        },
+        "Leaf Blowers": {
+          title: "Foukače listí — typ, průtok, vrácení",
+          summary: "Půjčovny uvádějí typ (ruční/batoh), pásmo CFM a vac sadu na kartě. Přidáváme model, palivo u benzínu nebo napětí u aku, měkké poznámky k hluku/hodinám a pravidla vrácení — zmrazené ve smlouvě. Sousedská důvěra + kauce; nejsme pojišťovna zahradní techniky.",
+          qa: [
+            {
+              q: "Proč záleží na typu a pásmu průtoku?",
+              a: "Ruční foukače jsou pro menší plochy; batohové a pojízdné zvládnou větší objem listí. Pásmo CFM je měkká třída výkonu, aby si nájemce nebral lehký aku model na velkou zahradu s dubem.",
+            },
+            {
+              q: "Co znamená pole mulch/vac sady?",
+              a: "Některé jsou jen foukač; jiné mají vysávací sáček, trubky nebo celou mulch sadu. Inzerát říká, co je v ceně, aby nájemce nepočítal s vysáváním bez příslušenství.",
+            },
+            {
+              q: "Typ paliva u benzínu — na co si dát pozor?",
+              a: "U benzínového zdroje host uvede 4taktní benzin, 2taktní premix nebo jiné. Dodržte poměr směsi a pravidlo nádrže při předání; vraťte dle dohody (často stejná hladina nebo plná).",
+            },
+            {
+              q: "Aku — proč pásmo napětí baterie?",
+              a: "Platformy 18–20V, 40V a 60V+ nejsou zaměnitelné. Pásmo pomůže sladit náhradní baterie a očekávání výdrže.",
+            },
+            {
+              q: "Hluk a hodiny pro sousedy?",
+              a: "Host může uvést klidové hodiny SVJ, víkendová omezení nebo doporučení chráničů sluchu. Jde o zdvořilostní poznámky, ne právní radu — místní pravidla si ověřte sami.",
+            },
+            {
+              q: "Jak foukač vrátit?",
+              a: "Podle poznámek hostitele: obvykle vyklepat listí, vyprázdnit vysávací sáček, otřít skříň a nevracet ucpaný filtr. Silné znečištění nad běžné opotřebení může jít do kauce.",
+            },
+            {
+              q: "Ochrana očí a uší?",
+              a: "Foukače vrhají nečistoty a jsou hlasité. Brýle a chrániče sluchu doporučujeme.",
+            },
+            {
+              q: "Co není součástí?",
+              a: "Palivo, olej do premixu, prodlužovačky, extra baterie a pytle na bio odpad obvykle dodává nájemce, pokud inventář neříká jinak. Kauce kryje poškození a chybějící uvedené příslušenství — ne pojištění od třetí strany.",
+            },
+          ],
+        },
+        "Nursery Stock": {
+          title: "Školkový materiál — specifikace, B&B předání",
+          summary: "Velkoobchodní visačky řídí profi zakázky. Povinný kultivar, ANSI třída kontejneru, zóna, zdraví a politika výsadby/vrácení zmrazí očekávání pro B&B a field-grown materiál.",
+          qa: [
+            {
+              q: "Pro koho je profi polička školkového materiálu?",
+              a: "Pro zahradnické firmy a designéry půjčující linery, B&B stromy nebo dočasný materiál na stavbu — ne běžné pokojovky.",
+            },
+            {
+              q: "Proč povinný kultivar?",
+              a: "Výkresy vyžadují přesné odrůdy. 'Javor' nestačí, když specifikace říká October Glory.",
+            },
+            {
+              q: "Jak funguje třída kontejneru u B&B?",
+              a: "ANSI formáty — ball_burlap a field_grown určují váhu, rýč a zálivku. Špatná velikost vede ke sporům o jeřáb a návěs.",
+            },
+            {
+              q: "Jaká politika výsadby pro staveniště?",
+              a: "Keep_planted_no_return pro instalaci. Return_in_container když materiál musí zpět na dvůr.",
+            },
+            {
+              q: "Co sdělit o škůdcích?",
+              a: "Nedávné ošetření nebo 'čistý materiál'. Phyto poznámky když platí mezistátní pravidla — Evorios nevyřizuje certifikáty.",
+            },
+            {
+              q: "Proč zóna u velkoobchodního materiálu?",
+              a: "Povinné — profi sázejí ve velkém; chybná zóna zabíjí marži.",
+            },
+            {
+              q: "Co pronájem nezahrnuje?",
+              a: "Bez yard techniky Sunbelt/United Rentals, sázečů ani pojištění školek od Evorios.",
+            },
+            {
+              q: "Jak fungují kauce a reklamace?",
+              a: "Zdraví a integrita kořenového balu jsou baseline. Roztržené B&B nebo vyschnuté kořeny řeší fotky vs kauce.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Ostatní — nejdřív správná police",
+          summary: "Preferujte pojmenovanou polici Garden & Yard, aby platily správné brány. Pokud zůstanete u Ostatní, uveďte vybavení vs rostlina vs mix, napájení u motorizovaného gearu, potvrzení fotek stavu a seznam kusů u vícedílné sady.",
+          qa: [
+            {
+              q: "Mám použít Ostatní nebo pojmenovanou polici?",
+              a: "Přesuňte inzerát na konkrétní polici, kdykoli to dává smysl — sekačky, trimery, fukary, zahradní nářadí, postřikovače, ride-on sekačky, kultivátory, frézy na pařezy, závlahy, landscape equipment, stromy, keře, trvalky, sezónní květiny, pokojovky a sazenice nebo nursery stock. Pojmenované police nesou správné brány pro napájení, rostliny nebo bezpečnost; Ostatní jen když položka opravdu nepatří jinam.",
+            },
+            {
+              q: "Co znamená vybavení vs rostlina vs mix?",
+              a: "Vybavení jsou nástroje a motorizovaný gear (sekačky, fukary, vozíky, čerpadla). Rostlina je živý materiál v květináči.",
+            },
+            {
+              q: "Kdy je povinné napájení?",
+              a: "U vybavení nebo mixu nastavte zdroj energie (akumulátor, síť, benzín, manuální, ride-on) a značku, pokud platí. Čistě rostlinné inzeráty napájení nepotřebují — pokud položka chce palivo nebo baterii, patří spíš na pojmenovanou polici vybavení.",
+            },
+            {
+              q: "Co když inzeruji rostliny v Ostatní?",
+              a: "Preferujte pojmenovanou rostlinnou polici kvůli výšce, slunci, květináči a závlaze. Pokud zůstanete u rostlin-only Ostatní, doplňte slunce, velikost květináče a zálivku, když můžete — nájemci potřebují základy péče před rezervací.",
+            },
+            {
+              q: "Potřebuji inventář kusů?",
+              a: "U jednoho kusu stačí strukturovaná pole. U vícedílných sad — sady nářadí, patio sety, více květináčů — je povinný krátký volný seznam každého kusu pro předání a vrácení.",
+            },
+            {
+              q: "Jaké fotky stavu mám potvrdit?",
+              a: "Potvrďte, že fotky na inzerátu ukazují položku celkově, kabely/čepele/květináče dle typu, viditelné opotřebení nebo poškození a všechny kusy u vícedílné sady. Jde o měkké potvrzení — neověřujeme upload — ale fotky jsou první vrstva u sporů o chybějící díly a poškození.",
+            },
+            {
+              q: "Co není součástí ani slib?",
+              a: "Evorios neprodává pojištění zahrad třetích stran, partnerské půjčovní plány ani garance doručení ze školky. Palivo, substrát, kolíky a OOP uvádíte v inzerátu; waiver a důkaz pojištění u fréz na pařezy platí jen na polici Stump Grinders.",
+            },
+            {
+              q: "Jak fungují reklamace u Ostatní?",
+              a: "Využijte fotky stavu, inventář, napájení a kauci u chybějících baterií, zlomených čepelí nebo poškozených květináčů. Příště preferujte pojmenovanou polici, aby specializované brány byly zmrazeny v dohodě od začátku.",
+            },
+          ],
+        },
+        "Perennials": {
+          title: "Trvalky — kvetení, voda, zóna",
+          summary: "Školkové visačky uvádějí kultivar, kvetení a pásmo vody. Peer pronájem trvalek vyhrává, když jsou tato pole plus zdraví, zóna, vrácení a poznámky k škůdcům/půdě povinné ve smlouvě.",
+          qa: [
+            {
+              q: "Proč jsou sezóna kvetení a voda povinné?",
+              a: "Trvalky žijí roky — špatné načasování kvetení kazí event okraje a špatná voda zabíjí rostliny. To jsou základy školkové visačky.",
+            },
+            {
+              q: "Jaký detail kultivaru uvést?",
+              a: "Název a odrůda — např. šalvěj 'May Night' nebo hosta 'Patriot'.",
+            },
+            {
+              q: "Jak funguje event vrácení?",
+              a: "Event_rental_return_pot = okrajové rostliny zpět v školkových květináčích. Keep_planted_no_return = prodejní výsadba v zemi.",
+            },
+            {
+              q: "Proč zóna mrazuvzdornosti?",
+              a: "Trvalky musí přežít zimu. USDA pásmo umožní nájemci filtrovat před výsadbou.",
+            },
+            {
+              q: "Co do poznámek o škůdcích?",
+              a: "Slimáci, padlí nebo 'ošetřeno a v pořádku'. U opakovaně kvetoucích uveďte, zda se očekává odstraňování květů při vrácení.",
+            },
+            {
+              q: "Co pronájem nezahrnuje?",
+              a: "Evorios neposkytuje mulč, hnojiva ani návrh záhonu.",
+            },
+            {
+              q: "Jak funguje kauce?",
+              a: "Kontejner a zdraví jsou baseline. Zlomené růstové body nebo vyschnuté plugy řeší fotky vs kauce.",
+            },
+          ],
+        },
+        "Ride-On Mowers": {
+          title: "Zahradní traktory — záběr, palivo, doprava",
+          summary: "Velké sekačky potřebují před rezervací zmrazený záběr, palivo, hodiny, stav nože/výhozu a dopravu — plus lehkou instruktáž, ne CDL.",
+          qa: [
+            {
+              q: "Co musí hostitel uvést před aktivním pronájmem?",
+              a: "Značku, model, pásmo záběru, typ paliva, pásmo hodinometru, stav nožů, typ výhozu/sběru a poznámky k dopravě (přívěs, pickup, rozvoz). Uveďte, zda je potřeba instruktáž při předání.",
+            },
+            {
+              q: "Proč záběr a hodinometr?",
+              a: "Půjčovny uvádějí obojí, aby nájemce sladil velikost trávníku a opotřebení. Zmrazené pásmo na inzerátu je lepší než překvapení malého záběru nebo unaveného motoru uprostřed práce.",
+            },
+            {
+              q: "Jak funguje doprava?",
+              a: "Většina ride-onů potřebuje přívěs nebo pickup — uveďte to v poznámkách. Napište, zda rozvážíte vy, zda nájemce přiveze rampy a přibližnou hmotnost/šířku.",
+            },
+            {
+              q: "A co palivo?",
+              a: "Palivo jako u staveništní techniky: full-to-full u benzínu nebo nafty. V poznámkách k instruktáži uveďte víčko nádrže a zda je v kitu kanystr.",
+            },
+            {
+              q: "Je to pronájem vozidla s CDL?",
+              a: "Ne. Jde o zahradní techniku — měkké minimální věkové pásmo a volitelná instruktáž, ne brána řidičského průkazu ani CDL.",
+            },
+            {
+              q: "Bezpečnostní tip před prvním sečením?",
+              a: "Odstraňte kamínky a nečistoty, držte děti a domácí mazlíčky mimo dosah, noste ochranu očí a uší a vyhněte se prudkým svahům a mokré trávě. Před slezením zastavte nože — instruktáž pokryje ovládání vašeho stroje.",
+            },
+            {
+              q: "Co není součástí?",
+              a: "Evorios neprodává pojištění zahrady ani není partnerem retail půjčoven. Kauce kryje poškození nožů, kapoty a chybějící díly sběru — ne náhradní pojistku.",
+            },
+            {
+              q: "Když se něco pokazí?",
+              a: "Fotky při předání kapoty, nožů a hodinometru podporují reklamace. Otupené nebo poškozené nože nad uvedeným pásmem, poškození kapoty nebo chybějící sběrný koš mohou jít z kauce dle podmínek.",
+            },
+          ],
+        },
+        "Seasonal Flowers": {
+          title: "Sezónní květiny — barva, vrácení květináčů",
+          summary: "Event pronájem stojí na vrcholu barvy a pravidlech vrácení květináčů. Povinný kultivar, kvetení, voda, zdraví, zóna a politika výsadby zmrazí očekávání školkového pultu ve smlouvě.",
+          qa: [
+            {
+              q: "Proč povinné kvetení a voda?",
+              a: "Krátké okno — chryzantémy na podzim, violky na jaro. Sezóna a voda říkají, kdy vrcholí barva a jak často zalévat během pronájmu.",
+            },
+            {
+              q: "Co je event_rental_return_pot?",
+              a: "Standard pro svatby a stánky: nájemce vrátí každý květináč po akci. Chybějící nebo rozbité květináče jsou top reklamace.",
+            },
+            {
+              q: "Jak pojmenovat sezónní inzerát?",
+              a: "Kultivar a barva — např. 'Violka Matrix Mix'.",
+            },
+            {
+              q: "Proč zóna u sezónních květin?",
+              a: "Jarní květiny snášejí mráz, tropické mísy ne. Pásmo zóny brání mrazu na jemných rostlinách.",
+            },
+            {
+              q: "Jaké poznámky o škůdcích?",
+              a: "Mšice, botrytis u chryzantém, octomilky — uveďte ošetření nebo 'čisté při předání'.",
+            },
+            {
+              q: "Co pronájem nezahrnuje?",
+              a: "Bez denního zalévání, dopravy nebo frost cloth od Evorios, pokud to inzerát nepřidá.",
+            },
+            {
+              q: "Jak funguje kauce?",
+              a: "Zdraví a počet květináčů jsou baseline. Uschnuté vs mrtvé flaty a chybějící květináče řeší fotky vs kauce.",
+            },
+            {
+              q: "Může nájemce nechat zasazené květiny?",
+              a: "Jen u keep_planted_no_return — jinak očekávejte květináče zpět v dohodnutý den.",
+            },
+          ],
+        },
+        "Shrubs & Bushes": {
+          title: "Keře — kultivar, kvetení, vrácení",
+          summary: "Školky a event pronájmy tagují kultivar, okno kvetení a velikost květináče. Peer inzeráty vyhrávají s názvem, výškou, sluncem, stálezeleností, sezónou kvetení, zdravím, zónou, pravidly vrácení a poznámkami k škůdcům/půdě.",
+          qa: [
+            {
+              q: "Proč uvádět kultivar keře?",
+              a: "Hortenzie, zimostráz a ibišek mají různou velikost a kvetení. Kultivar umožní nájemci sladit barvu a výšku před rezervací.",
+            },
+            {
+              q: "Jak důležitá je sezóna kvetení?",
+              a: "Doporučeno vždy a soft-povinné u pronájmu — vrchol kvetení řídí svatby a terasy. Foliage_only platí pro stálezelené pozadí.",
+            },
+            {
+              q: "Co znamená politika výsadby u živých plotů?",
+              a: "Keep_planted_no_return = prodejní instalace. Event_rental_return_pot = každý keř zpět v školkovém květináči u event dekoru.",
+            },
+            {
+              q: "Co patří do poznámek o škůdcích?",
+              a: "Mšice, skvrny, okus jelenů nebo nedávné ošetření. U stálezelených uvádějte zimní popálení ve stupni zdraví.",
+            },
+            {
+              q: "Proč zóna a poznámky k půdě?",
+              a: "Keře mimo zónu nebo ve stojící vodě rychle chřadnou. Pásmo zóny a drenáž snižují nejčastější zklamání.",
+            },
+            {
+              q: "Co pronájem nezahrnuje?",
+              a: "Evorios neposkytuje pojištění školek, profesionální řez ani herbicidní programy.",
+            },
+            {
+              q: "Jak fungují reklamace?",
+              a: "Stupeň zdraví a kontejner jsou baseline. Zlomené větve, vyschnuté kořeny nebo chybějící kusy u setů řeší fotky + inventář vs kauce.",
+            },
+          ],
+        },
+        "Sprinklers": {
+          title: "Zavlažovače — pokrytí, připojení, kusy",
+          summary: "Krátké letní půjčky vyhrávají, když jsou ve smlouvě zmrazené pásmo pokrytí, typ připojení, timer, inventář více hlav a poznámky k vypuštění.",
+          qa: [
+            {
+              q: "Co znamená pásmo pokrytí?",
+              a: "Říká nájemci, kolik trávníku nebo záhonu má sada zavlažovat — malá plocha, střední trávník, velký trávník nebo multi-zónová sada. Volte pásmo podle hlavic nebo kapkové soustavy na fotkách, ne jen podle velikosti celé zahrady.",
+            },
+            {
+              q: "Co je typ připojení a proč je důležitý?",
+              a: "Udává, jak se výbava napojí na vodu: standardní hadicové závit, přes časovač, kapkové potrubí nebo rychlospojky. Špatný typ znamená, že nájemce přijede bez správného adaptéru nebo těla časovače.",
+            },
+            {
+              q: "Jak spolu souvisí timer v sadě a zdroj energie?",
+              a: "Timer v sadě říká, zda hadicový časovač jde s hlavicemi, nebo jde jen o časovač. Zdroj energie je manual u pasivních zavlažovačů a obvykle cordless u bateriových časovačů — obojí je zmrazené ve smlouvě, aby nájemce věděl, co přinést.",
+            },
+            {
+              q: "Kdy je povinný inventář kusů?",
+              a: "U sad s více hlavicemi (dvě a víc), u čtyř a více hlav nebo u kapkových sad musí hostitel vypsat každý kolík, hlavici, rozbočku, rychlospojku a adaptér časovače. Nájemce inventář potvrdí při rezervaci a spočítá kusy při předání a vrácení.",
+            },
+            {
+              q: "Co jsou poznámky k vypuštění a zazimnění?",
+              a: "Měkké pokyny — ne servis dílny — jak vypustit časovač, vody z hadic a svinout kapkové linky před vrácením. Snižují spory o prasklé rozdělovače a stojící vodu na podzim.",
+            },
+            {
+              q: "Co není součástí půjčky zavlažovače?",
+              a: "Pokud hostitel neuvede jinak: zahradní hadice, venkovní kohoutek, účet za vodu, zpětná klapka, in-ground závlaha a pojištění zahrady třetí strany. Evorios neprodává pojištění na landscaping ani není partner velkých půjčoven.",
+            },
+            {
+              q: "Jak fungují kauce a reklamace?",
+              a: "Chybějící hlavice, kolíky, těla časovače nebo prasklé rozdělovače se kontrolují proti zmrazenému inventáři a fotkám z předání. Běžné opotřebení rozstřiku se očekává; škoda mimo zveřejněné poznámky k vrácení může jít z kauce dle podmínek.",
+            },
+            {
+              q: "Co se uzamkne při rezervaci?",
+              a: "Pásmo pokrytí, typ připojení, timer, zdroj energie, pásmo počtu hlavic, seznam kusů kde je povinný a případné poznámky k vypuštění — plus vaše potvrzení inventáře u multi-head sad. Pole zůstanou ve smlouvě až do vrácení.",
+            },
+          ],
+        },
+        "Stump Grinders": {
+          title: "Pařezové frézy — kapacita, OOP, briefing",
+          summary: "Stavebně blízké zahradní vybavení: průměr pařezu, OOP, waiver, doklad pojištění, typ stroje, palivo, čipy a provozní briefing před předáním.",
+          qa: [
+            {
+              q: "Proč jsou pařezové frézy gated?",
+              a: "Letící třísky a vysoký krouticí moment je řadí blíže k lehké stavební riziko než k foukači listí. Kapacita, OOP, waiver, doklad pojištění a bezpečnostní briefing uzamknou rezervaci, dokud nejsou splněny.",
+            },
+            {
+              q: "Co znamená pásmo kapacity pařezu?",
+              a: "Je to maximální průměr pařezu, pro který je fréza určena — pod 8 palců, 8–16, 16–24 nebo 24+. Nepřekračujte pásmo; hlubší broušení nebo tvrdé dřevo může vyžadovat větší stroj.",
+            },
+            {
+              q: "Jaké OOP se očekává?",
+              a: "Hostitel uvádí, zda je součástí pokyn pro oči / uši / rukavice, částečné OOP, nebo zda OOP dodá nájemce. Nájemce potvrdí OOP při rezervaci a musí ho používat.",
+            },
+            {
+              q: "Jaký doklad pojištění je potřeba?",
+              a: "Hostitel nastaví minimální limit odpovědnosti a maximální spoluúčast. Nájemce nahraje doklad splňující pásma před odemčením vyzvednutí.",
+            },
+            {
+              q: "Co je bezpečnostní briefing?",
+              a: "Pokud je vyžadován, hostitel označí briefing jako připravený a projde bezpečný start, házení třísek, inženýrské sítě a přepravu. Nájemce potvrdí, že briefing absolvuje při předání před provozem.",
+            },
+            {
+              q: "Co pokrývá typ stroje, přeprava a poznámky k třískám?",
+              a: "Typ je ruční, tažná nebo samojízdná fréza. Přeprava popisuje přívěs, hmotnost a průjezd branou.",
+            },
+            {
+              q: "Jak funguje palivo?",
+              a: "Uveďte benzín, naftu, elektřinu, propan nebo jiné. U benzínových a naftových strojů platí full-to-full, pokud hostitel v poznámkách k předání nestanoví jinak.",
+            },
+            {
+              q: "Co není součástí?",
+              a: "Evorios neunderwrituje zahradní práci, neprodává pojištění a nespolupracuje s promo Home Depot, Sunbelt, United Rentals ani yard pojištěním typu Progressive. Primární vrstvy jsou kauce a doklad nájemce.",
+            },
+          ],
+        },
+        "Tillers & Cultivators": {
+          title: "Rotavátory a kultivátory — šířka, hloubka, nože, transport",
+          summary: "U profi rotavátorů zmrazte pracovní šířku, pásmo hloubky, stav nožů, model, palivo u benzínu nebo baterii u akku a poznámky k transportu ještě před předáním.",
+          qa: [
+            {
+              q: "Co znamenají pásma šířky a hloubky?",
+              a: "Šířka je pracovní pruh na jeden průjezd — mini kultivátory často pod 12 palců; záhonné rotavátory 18–24 palce+. Hloubka je reálný řez — nová půda potřebuje 8–10 palců+, lehká příprava může být pod 6 palci.",
+            },
+            {
+              q: "Proč uvádět stav nožů?",
+              a: "Otupělé nebo ohnuté nože v hlíně selhávají a vedou ke sporům o kauci. Označte nové/ostré, dobré opotřebení, opotřebované nebo poškozené — a foťte poškození před předáním.",
+            },
+            {
+              q: "A co typ paliva u benzínu?",
+              a: "U benzínového pohonu uveďte 4taktní benzin vs 2taktní směs s olejem — špatné palivo může zadřít motor. Vrácení paliva bývá full-to-full při předání, když je fuelType nastaven; nedostatek paliva může nést standardní poplatek ve smlouvě.",
+            },
+            {
+              q: "Co když je rotavátor akumulátorový?",
+              a: "Uveďte počet baterií, zda je nabíječka v sadě a zda nájemce musí dodat kompatibilní pack. Počítejte baterie a nabíječku při vyzvednutí i vrácení — chybějící pack je nejčastější spor o příslušenství.",
+            },
+            {
+              q: "Co patří do poznámek k transportu?",
+              a: "Zadní rotavátory mohou vážit přes 200 lb — uveďte trailer, rampu nebo druhou osobu, skládací rukojeti a zda stačí SUV nebo pickup. Překvapení při vyzvednutí zabíjí okno pro výsadbu.",
+            },
+            {
+              q: "Potřebuji speciální OOP?",
+              a: "Měkký tip: ochrana očí, pevná obuv a rukavice — nože házejí kamínky a hrudy. Evorios nedodává OOP ani pojištění zahradní práce; host může doplnit v inzerátu.",
+            },
+            {
+              q: "Co není součástí?",
+              a: "Bez obsluhy, bez testu půdy, bez produktu třetí strany na pojištění práce na zahradě a bez garance kvality orbání — nájemce stroj obsluhuje dle manuálu a pravidel sítí (volejte před kopáním).",
+            },
+            {
+              q: "Jak fungují kauce a reklamace?",
+              a: "Velikost kauce k motoru, nožům a bateriím. Ohnuté nože, prasklé převody nebo chybějící baterie řeší podmínky pronájmu a fotky při předání — ne affiliate pojištění.",
+            },
+          ],
+        },
+        "Trees": {
+          title: "Stromy — název, zdraví, politika výsadby",
+          summary: "Místní školky tagují druh, zónu a formát kořenů. Vyhráváme peer inzeráty s běžným názvem/kultivarem, výškou, sluncem, stálezeleností, třídou kontejneru, zónou mrazuvzdornosti, stupněm zdraví, pravidly výsadby/vrácení a poznámkami k škůdcům/půdě — zmrazené ve smlouvě.",
+          qa: [
+            {
+              q: "Proč je povinný běžný název nebo kultivar?",
+              a: "Druh a kultivar určují velikost, barvu a podzimní efekt — generický ' stínový strom' vede k neshodám. Pojmenujte rostlinu jako na školkové visačce.",
+            },
+            {
+              q: "Co znamená stupeň zdraví rostliny?",
+              a: "Excellent/good/fair/stressed_disclosed odpovídá školkovým pásmům. Stressed_disclosed znamená viditelné problémy (usychání, škůdci, uvolněný B&B obal) pojmenované předem.",
+            },
+            {
+              q: "Jak funguje politika výsadby / vrácení u pronájmu?",
+              a: "Keep_planted_no_return = výsadba a prodejní styl. Return_in_container a event_rental_return_pot = strom se vrací v původním květináči nebo B&B — zvolte podle režimu inzerátu a poplatku.",
+            },
+            {
+              q: "Proč uvádět zónu mrazuvzdornosti a poznámky k půdě?",
+              a: "Venkovní stromy umírají mimo zónu nebo v mokrém jílu. USDA pásma a krátká poznámka k drenáži snižují nejčastější post-rent zklamání.",
+            },
+            {
+              q: "Co patří do poznámek o škůdcích a nemocech?",
+              a: "Uveďte šupinkovce, kůrovce, houbové skvrny nebo nedávnou léčbu. 'Tuto sezónu nic pozorováno' je v pořádku.",
+            },
+            {
+              q: "Co pronájem stromu nezahrnuje?",
+              a: "Evorios neprodává pojištění školek, výsadbové služby ani podání povolení. Doprava, vázání a zálivka po předání jsou mezi hostitelem a nájemcem, pokud inzerát nestanoví jinak.",
+            },
+            {
+              q: "Jak fungují kauce a reklamace?",
+              a: "Zveřejněný stupeň zdraví a třída kontejneru jsou baseline. Poškození nad zveřejněný stres (zlomené větve, roztržený bal kořenů, vyschnutí) může jít z kauce dle podmínek.",
+            },
+          ],
+        },
+        "Trimmers": {
+          title: "Křovinořezy — typ hlavy, palivo, stav struny",
+          summary: "Půjčovny nářadí zmrazí záběr, struna vs nůž, postroj, palivo nebo bateriovou platformu a opotřebení cívky na tiketu. U peer inzerátů totéž — kauce a potvrzení kitu, ne promo pojištění na zahradu.",
+          qa: [
+            {
+              q: "Co znamenají brány na inzerátu?",
+              a: "Značka, model, zdroj energie, záběr, typ hlavy, postroj, palivo nebo pásmo baterie, stav struny/nože a checklist kitu se zmrazí ve smlouvě před rezervací. Kopírují předání u půjčovny — bez překvapení k typu cívky, noži nebo chybějící nabíječce.",
+            },
+            {
+              q: "Struna vs kovový nůž — proč na tom záleží?",
+              a: "Hlava se strunou stříhá trávu a lehké plevele; kovový nůž u brushcutteru řeže husté křoviny a vrhá úlomky dál. Rezervace ukáže typ hlavy, abyste sladili práci a věděli, kdy platí přísnější bezpečnost.",
+            },
+            {
+              q: "Potřebuji ochranu očí a uší?",
+              a: "Letící úlomky a hluk motoru dělají brýle a chrániče sluchu standardem u křovinořezů. Inzerát může uvést, zda si je vezmete vy, nebo je dá hostitel — měkká bezpečnostní rada, ne pojištění ani waiver jako u frézovače pařezů.",
+            },
+            {
+              q: "Benzínové — typ paliva a mix?",
+              a: "Většina benzínových používá 2t mix; některé jen 4t benzin. Inzerát uvádí typ paliva a volitelně poznámky k mixu (poměr, kdo dodá olej).",
+            },
+            {
+              q: "Akumulátorové — platforma a nabíječka?",
+              a: "Rodina napětí (18V/20V, 40V, 60V+) musí sedět k baterii a nabíječce v checklistu kitu. Špatná platforma znamená, že stroj na zahradu nepojede — počet baterií a nabíječku potvrďte při předání.",
+            },
+            {
+              q: "Postroj u těžkých strojů?",
+              a: "Rovné hřídele a brushcutter s nožem často potřebují ramenní postroj pro delší práci. Inzerát říká, zda jde o plný postroj, jen popruh, nebo nic — abyste ne drželi těžký stroj sami.",
+            },
+            {
+              q: "Stav struny, cívky a nože při vrácení?",
+              a: "Běžné opotřebení struny se počítá; vyprázdněná cívka nebo poškozený nůž mimo zveřejněné pásmo může znamenat poplatek za doplnění nebo broušení z kauce. Vyfoťte hlavu a cívku při převzetí a vrácení, pokud je stav na hraně.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Evorios neprodává pojištění zahradní práce, plány půjčoven nářadí ani waiver třetích stran. Kauce kryje chybějící cívky, nože, nabíječky nebo škody nad běžné opotřebení; riziko zranění zůstává u bezpečné obsluhy a vašeho OOP.",
+            },
+          ],
+        },
       },
       "Costume & Cosplay": {
         "Halloween Costumes": {

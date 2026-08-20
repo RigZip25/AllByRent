@@ -1668,7 +1668,10 @@ function BookingScreenLoaded({
           <CategoryFactCard category="Tools & DIY" />
         ) : null}
         {listing.category.trim() === "Garden & Yard" && listing.modes.rent ? (
-          <CategoryFactCard category="Garden & Yard" />
+          <CategoryFactCard
+            category="Garden & Yard"
+            subcategory={listing.subcategory}
+          />
         ) : null}
         {listing.category.trim() === "Home & Kitchen" && listing.modes.rent ? (
           <CategoryFactCard category="Home & Kitchen" />

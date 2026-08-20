@@ -1626,6 +1626,13 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
   {
     category: "Garden & Yard",
     fields: [
+      // ——— Plants ———
+      {
+        key: "commonNameOrCultivar",
+        type: "text",
+        required: true,
+        subcategories: PLANT_SUBS,
+      },
       {
         key: "matureHeightBand",
         type: "select",
@@ -1690,22 +1697,104 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         options: CONTAINER_SIZES,
       },
       {
+        key: "plantHealthGrade",
+        type: "select",
+        required: true,
+        subcategories: PLANT_SUBS,
+        options: ["excellent", "good", "fair", "stressed_disclosed"],
+      },
+      {
+        key: "transplantOrReturnPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: PLANT_SUBS,
+        options: ["keep_planted_no_return", "return_in_container", "event_rental_return_pot"],
+      },
+      {
+        key: "hardinessZoneBand",
+        type: "select",
+        required: false,
+        recommended: true,
+        subcategories: ["Trees", "Shrubs & Bushes", "Perennials", "Seasonal Flowers", "Nursery Stock"],
+        options: ["zone_3_5", "zone_5_7", "zone_6_8", "zone_7_9", "zone_8_10", "zone_9_11", "zone_10_13", "indoor_only", "unsure"],
+      },
+      {
+        key: "hardinessZoneBand",
+        type: "select",
+        required: false,
+        recommended: true,
+        subcategories: ["Houseplants & Seedlings"],
+        options: ["indoor_only", "zone_9_11", "zone_10_13", "unsure"],
+      },
+      {
+        key: "bloomSeason",
+        type: "select",
+        required: true,
+        subcategories: ["Perennials", "Seasonal Flowers"],
+        options: BLOOM_SEASONS,
+      },
+      {
         key: "bloomSeason",
         type: "select",
         required: false,
         recommended: true,
-        subcategories: ["Perennials", "Seasonal Flowers", "Shrubs & Bushes"],
+        subcategories: ["Shrubs & Bushes"],
         options: BLOOM_SEASONS,
       },
       {
         key: "waterNeeds",
         type: "select",
-        required: false,
-        recommended: true,
+        required: true,
         subcategories: PLANT_SUBS,
         options: ["low_water", "medium_water", "high_water"],
       },
+      {
+        key: "pestDiseaseNotes",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: PLANT_SUBS,
+      },
+      {
+        key: "soilDrainageNotes",
+        type: "text",
+        required: false,
+        recommended: true,
+        subcategories: PLANT_SUBS,
+      },
+      {
+        key: "indoorCareNotes",
+        type: "text",
+        required: false,
+        recommended: true,
+        subcategories: ["Houseplants & Seedlings"],
+      },
+      {
+        key: "petToxicity",
+        type: "select",
+        required: false,
+        recommended: true,
+        subcategories: ["Houseplants & Seedlings"],
+        options: ["non_toxic", "mildly_toxic", "toxic_to_pets", "unknown_check_before_rent"],
+      },
+      // ——— Equipment shared ———
       brandField("gardenEquip", { subcategories: GARDEN_EQUIP_SUBS }),
+      {
+        key: "model",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Lawn Mowers",
+          "Trimmers",
+          "Leaf Blowers",
+          "Ride-On Mowers",
+          "Tillers & Cultivators",
+          "Stump Grinders",
+          "Landscape Equipment",
+        ],
+      },
       {
         key: "powerSource",
         type: "select",
@@ -1714,19 +1803,339 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         options: ["cordless", "corded", "gas", "manual", "ride_on"],
       },
       {
-        key: "cuttingWidthBand",
+        key: "fuelType",
         type: "select",
         required: false,
         recommended: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Lawn Mowers",
+          "Trimmers",
+          "Leaf Blowers",
+          "Ride-On Mowers",
+          "Tillers & Cultivators",
+          "Stump Grinders",
+          "Landscape Equipment",
+        ],
+        options: ["gasoline", "premix_2stroke", "propane", "diesel", "not_applicable_electric", "other"],
+      },
+      {
+        key: "voltageBand",
+        type: "select",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        subcategories: ["Lawn Mowers", "Trimmers", "Leaf Blowers", "Tillers & Cultivators"],
+        options: VOLTAGE_OPTS,
+      },
+      // ——— Lawn Mowers ———
+      {
+        key: "cuttingWidthBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
         subcategories: ["Lawn Mowers", "Ride-On Mowers", "Trimmers"],
         options: ["under_16in", "16_21in", "21_30in", "30in_plus", "not_applicable"],
       },
+      {
+        key: "deckDischargeMode",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Lawn Mowers", "Ride-On Mowers"],
+        options: ["side_discharge", "rear_bag", "mulching", "convertible_3in1", "bagging", "side_and_mulch", "mulch_bagger_combo", "host_sets_at_handoff"],
+      },
+      {
+        key: "baggerMulchKitStatus",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Lawn Mowers"],
+        options: ["bag_included", "mulch_plug_included", "bag_and_mulch_plug", "neither_disclosed", "not_applicable_side_discharge"],
+      },
+      {
+        key: "bladeConditionBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Lawn Mowers", "Ride-On Mowers"],
+        options: ["sharp_ready", "recently_sharpened", "usable_worn", "dull_disclosed", "host_sharpens_at_handoff", "unknown_untested"],
+      },
+      {
+        key: "mowerReturnCleanPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Lawn Mowers"],
+        options: ["return_clean_deck", "rinse_deck_ok", "host_cleans_flat_fee", "as_received_light_grass_ok"],
+      },
+      {
+        key: "mowerFuelReturnPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Lawn Mowers", "Ride-On Mowers"],
+        options: ["full_to_full", "host_provides_starting_tank", "renter_buys_own_gas", "return_same_level", "not_applicable_electric"],
+      },
+      // ——— Trimmers ———
+      {
+        key: "trimmerHeadType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Trimmers"],
+        options: ["string_line_only", "metal_blade_only", "dual_string_and_blade", "interchangeable_heads"],
+      },
+      {
+        key: "harnessIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Trimmers"],
+        options: ["full_harness_included", "shoulder_strap_only", "no_harness_renter_provides", "not_needed_light_curved_shaft"],
+      },
+      {
+        key: "trimmerLineBladeCondition",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Trimmers"],
+        options: ["new_line_fresh_blade", "good_usable_wear", "worn_host_refills_before_rent", "worn_renter_must_refill"],
+      },
+      {
+        key: "eyeEarPpeExpectation",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Trimmers"],
+        options: ["renter_brings_eye_ear", "host_provides_basic_glasses", "not_required_light_duty", "blade_use_eye_ear_required"],
+      },
+      // ——— Leaf Blowers ———
+      {
+        key: "blowerFormFactor",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Leaf Blowers"],
+        options: ["handheld", "backpack", "walk_behind"],
+      },
+      {
+        key: "airflowBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Leaf Blowers"],
+        options: ["under_300_cfm", "300_450_cfm", "450_600_cfm", "600_800_cfm", "800_cfm_plus"],
+      },
+      {
+        key: "mulchVacKitIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Leaf Blowers"],
+        options: ["blower_only", "vac_bag_included", "full_mulch_vac_kit", "vac_attachment_optional"],
+      },
+      {
+        key: "noiseNeighborNotes",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Leaf Blowers"],
+      },
+      {
+        key: "returnCleanNotes",
+        type: "text",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        subcategories: ["Leaf Blowers"],
+      },
+      // ——— Garden Tools ———
+      {
+        key: "toolSetBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Garden Tools"],
+        options: ["single_tool", "tool_set"],
+      },
+      {
+        key: "intendedSurface",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Garden Tools"],
+        options: ["soil", "lawn", "hardscape", "mixed"],
+      },
+      {
+        key: "gardenToolConditionGrade",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Garden Tools"],
+        options: ["like_new", "light_wear", "visible_wear_rust", "functional_imperfections"],
+      },
+      {
+        key: "returnCleanPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Garden Tools"],
+        options: ["rinse_brush_dry", "light_mud_ok", "as_used_fair_wear", "host_cleaning_fee"],
+      },
+      {
+        key: "kitInventoryChecklist",
+        type: "text",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        subcategories: ["Garden Tools", "Sprinklers", "Irrigation Systems", "Landscape Equipment", "Other"],
+      },
+      // ——— Sprinklers ———
+      {
+        key: "coverageAreaBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Sprinklers", "Irrigation Systems"],
+        options: ["small_patch", "medium_lawn", "large_lawn", "multi_zone"],
+      },
+      {
+        key: "connectionType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Sprinklers"],
+        options: ["hose_thread", "timer", "drip", "quick_connect"],
+      },
+      {
+        key: "timerIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Sprinklers"],
+        options: ["timer_included", "timer_not_included", "timer_only", "not_applicable"],
+      },
+      {
+        key: "sprinklerHeadCountBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Sprinklers"],
+        options: ["single_head", "2_3_heads", "4_plus_heads", "drip_lines_kit", "not_applicable"],
+      },
+      {
+        key: "winterizeDrainReturnNotes",
+        type: "text",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        subcategories: ["Sprinklers"],
+      },
+      // ——— Ride-On ———
+      {
+        key: "hourMeterBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Ride-On Mowers"],
+        options: ["under_100h", "100_500h", "500_1500h", "1500_plus", "unknown_no_meter"],
+      },
+      {
+        key: "minOperatorAgeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Ride-On Mowers"],
+        options: ["age_16_plus", "age_18_plus", "age_21_plus", "briefing_only_no_age_floor"],
+      },
+      {
+        key: "transportNotes",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Ride-On Mowers", "Tillers & Cultivators", "Stump Grinders", "Landscape Equipment"],
+      },
+      {
+        key: "safetyBriefingRequired",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Ride-On Mowers", "Stump Grinders"],
+        options: ["required", "not_required"],
+      },
+      {
+        key: "safetyBriefingConfirmed",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Ride-On Mowers", "Stump Grinders"],
+        options: ["briefing_ready", "need_to_prepare"],
+      },
+      {
+        key: "safetyBriefingNotes",
+        type: "text",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        subcategories: ["Ride-On Mowers", "Stump Grinders"],
+      },
+      // ——— Tillers ———
+      {
+        key: "tillingWidthBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Tillers & Cultivators"],
+        options: ["under_12in", "12_18in", "18_24in", "24in_plus", "not_applicable"],
+      },
+      {
+        key: "tillDepthBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Tillers & Cultivators"],
+        options: ["under_6in", "6_8in", "8_10in", "10in_plus", "adjustable_unknown"],
+      },
+      {
+        key: "tineCondition",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Tillers & Cultivators"],
+        options: ["new_sharp", "good_slight_wear", "worn_replace_soon", "damaged_note_required", "not_applicable_manual"],
+      },
+      {
+        key: "batteryIncluded",
+        type: "select",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        subcategories: ["Tillers & Cultivators"],
+        options: ["one_battery_and_charger", "two_batteries_and_charger", "one_battery_no_charger", "platform_only_no_battery", "renter_provides_compatible_battery"],
+      },
+      // ——— Stump Grinders (P0 + tighten) ———
       {
         key: "stumpCapacityBand",
         type: "select",
         required: true,
         subcategories: ["Stump Grinders"],
         options: ["under_8in", "8_16in", "16_24in", "24in_plus"],
+      },
+      {
+        key: "grindFormFactor",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stump Grinders"],
+        options: ["walk_behind", "towable", "self_propelled"],
+      },
+      {
+        key: "chipDischargeNotes",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stump Grinders"],
       },
       {
         key: "ppeIncluded",
@@ -1760,6 +2169,114 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         subcategories: ["Stump Grinders"],
         options: ["deductible_500", "deductible_1000", "deductible_2500", "full_coverage_required"],
       },
+      // ——— Irrigation ———
+      {
+        key: "irrigationSystemType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Irrigation Systems"],
+        options: ["drip", "sprinkler_zones", "smart_controller", "pump"],
+      },
+      {
+        key: "controllerIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Irrigation Systems"],
+        options: ["no_controller", "basic_timer_included", "smart_controller_included", "controller_renter_supplies"],
+      },
+      {
+        key: "installComplexity",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Irrigation Systems"],
+        options: ["renter_diy", "host_installs", "pro_only"],
+      },
+      {
+        key: "winterizeNotesSoft",
+        type: "text",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        subcategories: ["Irrigation Systems"],
+      },
+      // ——— Landscape Equipment ———
+      {
+        key: "landscapeEquipSubtype",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Landscape Equipment"],
+        options: [
+          "core_aerator",
+          "spike_aerator",
+          "power_dethatcher",
+          "sod_cutter",
+          "broadcast_spreader",
+          "drop_spreader",
+          "tow_spreader",
+          "wheelbarrow_cart",
+          "dump_cart",
+          "landscape_rake",
+          "lawn_roller",
+          "landscape_edger",
+          "other_landscape",
+        ],
+      },
+      {
+        key: "workingWidthBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Landscape Equipment"],
+        options: ["under_18in", "18_24in", "24_30in", "30in_plus", "not_applicable"],
+      },
+      {
+        key: "hopperCapacityBand",
+        type: "select",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        subcategories: ["Landscape Equipment"],
+        options: ["under_50lb", "50_100lb", "100_175lb", "175lb_plus", "not_applicable"],
+      },
+      {
+        key: "returnFuelPolicy",
+        type: "select",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        subcategories: ["Landscape Equipment"],
+        options: ["return_full_tank", "return_same_level", "renter_refills_or_fee", "not_applicable"],
+      },
+      // ——— Other ———
+      {
+        key: "gardenOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["equipment", "plant", "mixed"],
+      },
+      {
+        key: "gardenPieceBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["single_piece", "multi_piece"],
+      },
+      {
+        key: "photoConditionChecklist",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["overall_photos", "overall_plus_flaws", "all_pieces_and_flaws"],
+      },
+
     ],
   },
   {
@@ -2693,6 +3210,134 @@ export function areCategorySpecsValid(
       (values.safetyBriefingRequired ?? "").trim() === "required";
     if (needsBrief && (values.safetyBriefingRequired ?? "").trim() !== "not_required") {
       if ((values.safetyBriefingConfirmed ?? "").trim() !== "briefing_ready") return false;
+    }
+  }
+
+
+  // Garden & Yard P0 gates by shelf.
+  if (category.trim() === "Garden & Yard" && modes?.rent) {
+    const sub = subcategory.trim();
+    const power = (values.powerSource ?? "").trim();
+    const reqSelect = (key: string, allowed: string[]) => allowed.includes((values[key] ?? "").trim());
+    const reqText = (key: string, min = 3) => (values[key] ?? "").trim().length >= min;
+    const plantSubs = new Set([
+      "Trees",
+      "Shrubs & Bushes",
+      "Perennials",
+      "Seasonal Flowers",
+      "Houseplants & Seedlings",
+      "Nursery Stock",
+    ]);
+    if (plantSubs.has(sub)) {
+      if (!reqText("commonNameOrCultivar")) return false;
+      if (!reqSelect("plantHealthGrade", ["excellent", "good", "fair", "stressed_disclosed"])) return false;
+      if (!reqSelect("transplantOrReturnPolicy", ["keep_planted_no_return", "return_in_container", "event_rental_return_pot"])) return false;
+      if (!reqText("pestDiseaseNotes")) return false;
+      if (!reqSelect("waterNeeds", ["low_water", "medium_water", "high_water"])) return false;
+      if ((sub === "Perennials" || sub === "Seasonal Flowers") && !(values.bloomSeason ?? "").trim()) return false;
+    }
+    if (sub === "Lawn Mowers") {
+      if (!reqText("model")) return false;
+      if (!reqSelect("cuttingWidthBand", ["under_16in", "16_21in", "21_30in", "30in_plus", "not_applicable"])) return false;
+      if (!reqSelect("deckDischargeMode", ["side_discharge", "rear_bag", "mulching", "convertible_3in1", "bagging", "side_and_mulch", "mulch_bagger_combo", "host_sets_at_handoff"])) return false;
+      if (!reqSelect("baggerMulchKitStatus", ["bag_included", "mulch_plug_included", "bag_and_mulch_plug", "neither_disclosed", "not_applicable_side_discharge"])) return false;
+      if (!reqSelect("bladeConditionBand", ["sharp_ready", "recently_sharpened", "usable_worn", "dull_disclosed", "host_sharpens_at_handoff", "unknown_untested"])) return false;
+      if (!reqSelect("mowerReturnCleanPolicy", ["return_clean_deck", "rinse_deck_ok", "host_cleans_flat_fee", "as_received_light_grass_ok"])) return false;
+      if (power === "gas") {
+        if (!reqSelect("fuelType", ["gasoline", "premix_2stroke", "propane", "diesel", "other"])) return false;
+        if (!reqSelect("mowerFuelReturnPolicy", ["full_to_full", "host_provides_starting_tank", "renter_buys_own_gas", "return_same_level"])) return false;
+      }
+      if (power === "cordless" && !reqSelect("voltageBand", ["12v", "18v_20v", "40v", "60v_plus", "120v_corded", "240v", "not_electric"])) return false;
+    }
+    if (sub === "Trimmers") {
+      if (!reqText("model")) return false;
+      if (!reqSelect("cuttingWidthBand", ["under_16in", "16_21in", "21_30in", "30in_plus", "not_applicable"])) return false;
+      if (!reqSelect("trimmerHeadType", ["string_line_only", "metal_blade_only", "dual_string_and_blade", "interchangeable_heads"])) return false;
+      if (!reqSelect("harnessIncluded", ["full_harness_included", "shoulder_strap_only", "no_harness_renter_provides", "not_needed_light_curved_shaft"])) return false;
+      if (!reqSelect("trimmerLineBladeCondition", ["new_line_fresh_blade", "good_usable_wear", "worn_host_refills_before_rent", "worn_renter_must_refill"])) return false;
+      if (!reqSelect("eyeEarPpeExpectation", ["renter_brings_eye_ear", "host_provides_basic_glasses", "not_required_light_duty", "blade_use_eye_ear_required"])) return false;
+      if (power === "gas" && !reqSelect("fuelType", ["gasoline", "premix_2stroke", "propane", "diesel", "other"])) return false;
+      if (power === "cordless" && !reqSelect("voltageBand", ["12v", "18v_20v", "40v", "60v_plus", "120v_corded", "240v", "not_electric"])) return false;
+    }
+    if (sub === "Leaf Blowers") {
+      if (!reqText("model")) return false;
+      if (!reqSelect("blowerFormFactor", ["handheld", "backpack", "walk_behind"])) return false;
+      if (!reqSelect("airflowBand", ["under_300_cfm", "300_450_cfm", "450_600_cfm", "600_800_cfm", "800_cfm_plus"])) return false;
+      if (!reqSelect("mulchVacKitIncluded", ["blower_only", "vac_bag_included", "full_mulch_vac_kit", "vac_attachment_optional"])) return false;
+      if (!reqText("noiseNeighborNotes")) return false;
+      if (power === "gas" && !reqSelect("fuelType", ["gasoline", "premix_2stroke", "propane", "diesel", "other"])) return false;
+      if (power === "cordless" && !reqSelect("voltageBand", ["12v", "18v_20v", "40v", "60v_plus", "120v_corded", "240v", "not_electric"])) return false;
+    }
+    if (sub === "Garden Tools") {
+      if (!reqSelect("toolSetBand", ["single_tool", "tool_set"])) return false;
+      if (!reqSelect("intendedSurface", ["soil", "lawn", "hardscape", "mixed"])) return false;
+      if (!reqSelect("gardenToolConditionGrade", ["like_new", "light_wear", "visible_wear_rust", "functional_imperfections"])) return false;
+      if (!reqSelect("returnCleanPolicy", ["rinse_brush_dry", "light_mud_ok", "as_used_fair_wear", "host_cleaning_fee"])) return false;
+      if ((values.toolSetBand ?? "").trim() === "tool_set" && !reqText("kitInventoryChecklist", 8)) return false;
+    }
+    if (sub === "Sprinklers") {
+      if (!reqSelect("coverageAreaBand", ["small_patch", "medium_lawn", "large_lawn", "multi_zone"])) return false;
+      if (!reqSelect("connectionType", ["hose_thread", "timer", "drip", "quick_connect"])) return false;
+      if (!reqSelect("timerIncluded", ["timer_included", "timer_not_included", "timer_only", "not_applicable"])) return false;
+      if (!reqSelect("sprinklerHeadCountBand", ["single_head", "2_3_heads", "4_plus_heads", "drip_lines_kit", "not_applicable"])) return false;
+      const heads = (values.sprinklerHeadCountBand ?? "").trim();
+      if ((heads === "2_3_heads" || heads === "4_plus_heads" || heads === "drip_lines_kit") && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Ride-On Mowers") {
+      if (!reqText("model")) return false;
+      if (!reqSelect("cuttingWidthBand", ["under_16in", "16_21in", "21_30in", "30in_plus", "not_applicable"])) return false;
+      if (!reqSelect("deckDischargeMode", ["side_discharge", "rear_bag", "mulching", "convertible_3in1", "bagging", "side_and_mulch", "mulch_bagger_combo", "host_sets_at_handoff"])) return false;
+      if (!reqSelect("bladeConditionBand", ["sharp_ready", "recently_sharpened", "usable_worn", "dull_disclosed", "host_sharpens_at_handoff", "unknown_untested"])) return false;
+      if (!reqSelect("hourMeterBand", ["under_100h", "100_500h", "500_1500h", "1500_plus", "unknown_no_meter"])) return false;
+      if (!reqSelect("minOperatorAgeBand", ["age_16_plus", "age_18_plus", "age_21_plus", "briefing_only_no_age_floor"])) return false;
+      if (!reqText("transportNotes")) return false;
+      if (power === "gas" || power === "ride_on") {
+        if (!reqSelect("fuelType", ["gasoline", "premix_2stroke", "propane", "diesel", "other"])) return false;
+        if (!reqSelect("mowerFuelReturnPolicy", ["full_to_full", "host_provides_starting_tank", "renter_buys_own_gas", "return_same_level", "not_applicable_electric"])) return false;
+      }
+      if ((values.safetyBriefingRequired ?? "").trim() !== "not_required") {
+        if ((values.safetyBriefingConfirmed ?? "").trim() !== "briefing_ready") return false;
+      }
+    }
+    if (sub === "Tillers & Cultivators") {
+      if (!reqText("model")) return false;
+      if (!reqSelect("tillingWidthBand", ["under_12in", "12_18in", "18_24in", "24in_plus", "not_applicable"])) return false;
+      if (!reqSelect("tillDepthBand", ["under_6in", "6_8in", "8_10in", "10in_plus", "adjustable_unknown"])) return false;
+      if (!reqSelect("tineCondition", ["new_sharp", "good_slight_wear", "worn_replace_soon", "damaged_note_required", "not_applicable_manual"])) return false;
+      if (!reqText("transportNotes")) return false;
+      if (power === "gas" && !reqSelect("fuelType", ["gasoline", "premix_2stroke", "propane", "diesel", "other"])) return false;
+      if (power === "cordless" && !reqSelect("voltageBand", ["12v", "18v_20v", "40v", "60v_plus", "120v_corded", "240v", "not_electric"])) return false;
+    }
+    if (sub === "Stump Grinders") {
+      if (!reqText("model")) return false;
+      if (!reqSelect("grindFormFactor", ["walk_behind", "towable", "self_propelled"])) return false;
+      if (!reqText("chipDischargeNotes")) return false;
+      if (!reqText("transportNotes")) return false;
+      if (power === "gas" && !reqSelect("fuelType", ["gasoline", "premix_2stroke", "propane", "diesel", "other"])) return false;
+      if ((values.safetyBriefingRequired ?? "").trim() !== "not_required") {
+        if ((values.safetyBriefingConfirmed ?? "").trim() !== "briefing_ready") return false;
+      }
+    }
+    if (sub === "Irrigation Systems") {
+      if (!reqSelect("irrigationSystemType", ["drip", "sprinkler_zones", "smart_controller", "pump"])) return false;
+      if (!reqSelect("coverageAreaBand", ["small_patch", "medium_lawn", "large_lawn", "multi_zone"])) return false;
+      if (!reqSelect("controllerIncluded", ["no_controller", "basic_timer_included", "smart_controller_included", "controller_renter_supplies"])) return false;
+      if (!reqSelect("installComplexity", ["renter_diy", "host_installs", "pro_only"])) return false;
+      if (!reqText("kitInventoryChecklist", 8)) return false;
+    }
+    if (sub === "Landscape Equipment") {
+      if (!reqText("model")) return false;
+      if (!reqSelect("landscapeEquipSubtype", ["core_aerator","spike_aerator","power_dethatcher","sod_cutter","broadcast_spreader","drop_spreader","tow_spreader","wheelbarrow_cart","dump_cart","landscape_rake","lawn_roller","landscape_edger","other_landscape"])) return false;
+      if (!reqSelect("workingWidthBand", ["under_18in", "18_24in", "24_30in", "30in_plus", "not_applicable"])) return false;
+      if (!reqText("transportNotes")) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+      if (power === "gas" && !reqSelect("fuelType", ["gasoline", "premix_2stroke", "propane", "diesel", "other"])) return false;
+    }
+    if (sub === "Other") {
+      if (!reqSelect("gardenOtherKind", ["equipment", "plant", "mixed"])) return false;
+      if (!reqSelect("gardenPieceBand", ["single_piece", "multi_piece"])) return false;
+      if (!reqSelect("photoConditionChecklist", ["overall_photos", "overall_plus_flaws", "all_pieces_and_flaws"])) return false;
+      if ((values.gardenPieceBand ?? "").trim() === "multi_piece" && !reqText("kitInventoryChecklist", 6)) return false;
     }
   }
 
