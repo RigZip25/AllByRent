@@ -6,7 +6,7 @@
 
 **Category FactCards:** every shelf FAQ is **Question → short answer** only — see [CATEGORY_FACT_QA.md](CATEGORY_FACT_QA.md).
 
-**Category ~8.0 encode:** one category at a time; never parallel-edit `en.ts` / `cs.ts` / `es.ts`. Shared `listing.categorySpecs.options` **and** `fields` keys must stay unique (`TS1117` blocks prod). Prefer scoped option ids (`mixed_bag_tank`, `kind_coffee`, `none_on_site`, `instrument_wireless_only`) over bare `none` / `mixed` / `single` / `wireless_only` — see CATEGORY_FACT_QA. **Home & Kitchen** and **Music & Audio ~8.0** shipped.
+**Category ~8.0 encode:** one category at a time; never parallel-edit `en.ts` / `cs.ts` / `es.ts`. Shared `listing.categorySpecs.options` **and** `fields` keys must stay unique (`TS1117` blocks prod). Prefer scoped option ids — see CATEGORY_FACT_QA. **Shipped ~8.0:** Home & Kitchen, Music & Audio, Office & Business.
 
 **Walk the app screen-by-screen:** [FLOW_AUDIT.md](FLOW_AUDIT.md) — what to change at each step (✅ / 🟡 / 🟠 / 🔴).
 

@@ -88,4 +88,14 @@ All listing `categorySpecs` select **values** share **one flat** `listing.catego
 
 **Option scoping:** `instrument_wireless_only` (not bare `wireless_only`, which means network gear).
 
+### Office & Business (~8.0) — shipped pattern
+
+| Layer | Pattern |
+|-------|---------|
+| Furniture | Type, size/seats, condition — **no** device wipe |
+| Devices | `deviceHasStorage` + wipe when `has_storage`; POS unknown/storage and Servers always wipe |
+| Pro | Large-format width/ink; POS payment readiness; copier duty/finishers; conference seats; server form + rack notes |
+| Deposit | Physical damage + missing kit — not cyber insurance |
+| FactCards | Per-sub Q→A; subcategory already wired on listing/booking |
+
 See also: [EVORIOS.md](./EVORIOS.md) (brand / product source of truth).

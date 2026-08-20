@@ -1722,7 +1722,12 @@ function BookingScreenLoaded({
         {isCostumeListing ? (
           <CategoryFactCard category="Costume & Cosplay" subcategory={listing.subcategory} />
         ) : null}
-        {isOfficeListing ? <CategoryFactCard category="Office & Business" /> : null}
+        {isOfficeListing ? (
+          <CategoryFactCard
+            category="Office & Business"
+            subcategory={listing.subcategory}
+          />
+        ) : null}
         {isMusicListing ? (
           <CategoryFactCard
             category="Music & Audio"

@@ -619,7 +619,11 @@ export function HostListingDetailScreen({
           />
         ) : null}
         {listing.category.trim() === "Office & Business" ? (
-          <CategoryFactCard category="Office & Business" className="mb-4" />
+          <CategoryFactCard
+            category="Office & Business"
+            subcategory={listing.subcategory}
+            className="mb-4"
+          />
         ) : null}
         {listing.category.trim() === "Music & Audio" ? (
           <CategoryFactCard

@@ -768,7 +768,8 @@ export function Step2ItemInfo({
                 draft.category.trim() === "Outdoor & Camping" ||
                 draft.category.trim() === "Party & Events" ||
                 draft.category.trim() === "Home & Kitchen" ||
-                draft.category.trim() === "Music & Audio"
+                draft.category.trim() === "Music & Audio" ||
+                draft.category.trim() === "Office & Business"
                   ? draft.subcategory
                   : undefined
               }

@@ -4098,6 +4098,25 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
       brandField("office"),
       { key: "model", type: "text", required: true },
       {
+        key: "kitInventoryChecklist",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: [
+          "Printers",
+          "Monitors & Displays",
+          "Webcams & Streaming",
+          "Presentation Gear",
+          "Large Format Printers",
+          "POS Systems",
+          "Commercial Copiers",
+          "Conference Systems",
+          "Server Equipment",
+          "Other",
+        ],
+      },
+      {
         key: "deviceHasStorage",
         type: "select",
         required: true,
@@ -4135,6 +4154,207 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
           "Other",
         ],
         options: ["wiped_before_list", "wipe_at_handoff", "renter_responsible"],
+      },
+      {
+        key: "printerTechType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Printers"],
+        options: ["inkjet", "laser_mono", "laser_color", "all_in_one", "label_receipt", "other_office_printer"],
+      },
+      {
+        key: "printerPaperSizeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Printers"],
+        options: ["letter_a4", "legal_tabloid", "photo_only", "label_roll", "mixed_office_paper"],
+      },
+      {
+        key: "inkTonerIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Printers", "Large Format Printers", "Commercial Copiers"],
+        options: ["ink_toner_included", "partial_ink_toner", "renter_provides_ink", "unknown_ink"],
+      },
+      {
+        key: "monitorSizeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Monitors & Displays"],
+        options: ["under_24in", "24_27in", "28_32in", "33_43in", "43in_plus", "unknown_monitor_size"],
+      },
+      {
+        key: "monitorPanelType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Monitors & Displays"],
+        options: ["ips_panel", "va_panel", "tn_panel", "oled_panel", "unknown_panel"],
+      },
+      {
+        key: "monitorInputsIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Monitors & Displays"],
+        options: ["hdmi_only", "hdmi_dp", "usb_c_dock", "legacy_vga_dvi", "multi_input_kit"],
+      },
+      {
+        key: "webcamResBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Webcams & Streaming"],
+        options: ["720p", "1080p", "1440p_plus", "unknown_webcam_res"],
+      },
+      {
+        key: "webcamMicIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Webcams & Streaming"],
+        options: ["built_in_mic", "no_mic", "external_mic_kit"],
+      },
+      {
+        key: "officeFurnitureType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Office Furniture"],
+        options: ["desk", "chair", "standing_desk", "filing_cabinet", "bookshelf_storage", "conference_table", "other_office_furniture"],
+      },
+      {
+        key: "furnitureSeatOrSizeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Office Furniture"],
+        options: ["single_seat", "desk_compact", "desk_standard", "table_4_6", "table_7_plus", "cabinet_drawer_unit", "not_sized"],
+      },
+      {
+        key: "furnitureConditionGrade",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Office Furniture"],
+        options: ["like_new_office", "light_wear_office", "visible_wear_office", "functional_imperfections_office"],
+      },
+      {
+        key: "presentationDeviceType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Presentation Gear"],
+        options: ["projector", "portable_screen", "presenter_clicker", "flipchart", "conference_display", "other_presentation"],
+      },
+      {
+        key: "presentationLumensOrSize",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Presentation Gear"],
+        options: ["under_2000_lumens", "2000_3500_lumens", "3500_lumens_plus", "screen_under_80in", "screen_80_120in", "screen_120_plus", "not_applicable_presentation"],
+      },
+      {
+        key: "largeFormatMaxWidthBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Large Format Printers"],
+        options: ["up_to_24in", "24_36in", "36_44in", "44in_plus", "unknown_width"],
+      },
+      {
+        key: "largeFormatInkClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Large Format Printers"],
+        options: ["aqueous_ink", "eco_solvent", "uv_ink", "latex_ink", "toner_plotter", "unknown_ink_class"],
+      },
+      {
+        key: "posSystemType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["POS Systems"],
+        options: ["tablet_pos", "countertop_terminal", "mobile_handheld_pos", "register_drawer_kit", "other_pos"],
+      },
+      {
+        key: "posPaymentReady",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["POS Systems"],
+        options: ["reader_included", "software_only", "renter_brings_reader", "cash_only_kit"],
+      },
+      {
+        key: "copierDutyBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Copiers"],
+        options: ["light_office_copier", "mid_volume", "high_volume", "production_floor", "unknown_copier_duty"],
+      },
+      {
+        key: "copierFinishersIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Copiers"],
+        options: ["finisher_stapler", "booklet_finisher", "no_finisher", "unknown_finisher"],
+      },
+      {
+        key: "conferenceSystemType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Conference Systems"],
+        options: ["speakerphone", "usb_conference_cam", "room_kit", "wireless_mic_set", "other_conference"],
+      },
+      {
+        key: "conferenceSeatBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Conference Systems"],
+        options: ["huddle_2_4", "room_5_8", "room_9_16", "hall_16_plus", "not_room_sized"],
+      },
+      {
+        key: "serverFormFactor",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Server Equipment"],
+        options: ["tower_server", "rack_1u_2u", "rack_3u_plus", "nas_appliance", "network_switch_router", "other_server_gear"],
+      },
+      {
+        key: "serverRackMountNotes",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Server Equipment"],
+      },
+      {
+        key: "officeOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: [
+          "kind_printer",
+          "kind_monitor",
+          "kind_webcam",
+          "kind_furniture",
+          "kind_presentation",
+          "kind_pos_copier",
+          "kind_conference_server",
+          "kind_mixed_office",
+        ],
       },
     ],
   },
@@ -5501,18 +5721,85 @@ export function areCategorySpecsValid(
     if (!(values.houseRules ?? "").trim()) return false;
   }
 
-  // Office: when device has storage, host must declare wipe status before publish.
+  // Office & Business P0 gates by shelf.
   if (category.trim() === "Office & Business" && modes?.rent) {
-    const storage = (values.deviceHasStorage ?? "").trim();
-    if (storage === "has_storage") {
-      const wipe = (values.hostDataWipeStatus ?? "").trim();
-      if (
-        wipe !== "wiped_before_list" &&
-        wipe !== "wipe_at_handoff" &&
-        wipe !== "renter_responsible"
-      ) {
-        return false;
+    const sub = subcategory.trim();
+    const reqSelect = (key: string, allowed: string[]) => allowed.includes((values[key] ?? "").trim());
+    const reqText = (key: string, min = 3) => (values[key] ?? "").trim().length >= min;
+    if (!reqText("model", 1)) return false;
+
+    const storageSubs = new Set([
+      "Printers",
+      "Monitors & Displays",
+      "Webcams & Streaming",
+      "Presentation Gear",
+      "Large Format Printers",
+      "POS Systems",
+      "Commercial Copiers",
+      "Conference Systems",
+      "Server Equipment",
+      "Other",
+    ]);
+    if (storageSubs.has(sub)) {
+      if (!reqSelect("deviceHasStorage", ["has_storage", "no_storage", "unknown"])) return false;
+      if ((values.deviceHasStorage ?? "").trim() === "has_storage") {
+        if (!reqSelect("hostDataWipeStatus", ["wiped_before_list", "wipe_at_handoff", "renter_responsible"])) return false;
       }
+    }
+
+    if (sub === "Printers") {
+      if (!reqSelect("printerTechType", ["inkjet", "laser_mono", "laser_color", "all_in_one", "label_receipt", "other_office_printer"])) return false;
+      if (!reqSelect("printerPaperSizeBand", ["letter_a4", "legal_tabloid", "photo_only", "label_roll", "mixed_office_paper"])) return false;
+      if (!reqSelect("inkTonerIncluded", ["ink_toner_included", "partial_ink_toner", "renter_provides_ink", "unknown_ink"])) return false;
+    }
+    if (sub === "Monitors & Displays") {
+      if (!reqSelect("monitorSizeBand", ["under_24in", "24_27in", "28_32in", "33_43in", "43in_plus", "unknown_monitor_size"])) return false;
+      if (!reqSelect("monitorPanelType", ["ips_panel", "va_panel", "tn_panel", "oled_panel", "unknown_panel"])) return false;
+      if (!reqSelect("monitorInputsIncluded", ["hdmi_only", "hdmi_dp", "usb_c_dock", "legacy_vga_dvi", "multi_input_kit"])) return false;
+    }
+    if (sub === "Webcams & Streaming") {
+      if (!reqSelect("webcamResBand", ["720p", "1080p", "1440p_plus", "unknown_webcam_res"])) return false;
+      if (!reqSelect("webcamMicIncluded", ["built_in_mic", "no_mic", "external_mic_kit"])) return false;
+    }
+    if (sub === "Office Furniture") {
+      if (!reqSelect("officeFurnitureType", ["desk", "chair", "standing_desk", "filing_cabinet", "bookshelf_storage", "conference_table", "other_office_furniture"])) return false;
+      if (!reqSelect("furnitureSeatOrSizeBand", ["single_seat", "desk_compact", "desk_standard", "table_4_6", "table_7_plus", "cabinet_drawer_unit", "not_sized"])) return false;
+      if (!reqSelect("furnitureConditionGrade", ["like_new_office", "light_wear_office", "visible_wear_office", "functional_imperfections_office"])) return false;
+    }
+    if (sub === "Presentation Gear") {
+      if (!reqSelect("presentationDeviceType", ["projector", "portable_screen", "presenter_clicker", "flipchart", "conference_display", "other_presentation"])) return false;
+      if (!reqSelect("presentationLumensOrSize", ["under_2000_lumens", "2000_3500_lumens", "3500_lumens_plus", "screen_under_80in", "screen_80_120in", "screen_120_plus", "not_applicable_presentation"])) return false;
+    }
+    if (sub === "Large Format Printers") {
+      if (!reqSelect("largeFormatMaxWidthBand", ["up_to_24in", "24_36in", "36_44in", "44in_plus", "unknown_width"])) return false;
+      if (!reqSelect("largeFormatInkClass", ["aqueous_ink", "eco_solvent", "uv_ink", "latex_ink", "toner_plotter", "unknown_ink_class"])) return false;
+      if (!reqSelect("inkTonerIncluded", ["ink_toner_included", "partial_ink_toner", "renter_provides_ink", "unknown_ink"])) return false;
+    }
+    if (sub === "POS Systems") {
+      if (!reqSelect("posSystemType", ["tablet_pos", "countertop_terminal", "mobile_handheld_pos", "register_drawer_kit", "other_pos"])) return false;
+      if (!reqSelect("posPaymentReady", ["reader_included", "software_only", "renter_brings_reader", "cash_only_kit"])) return false;
+      // POS defaults to storage risk — wipe required when has_storage or unknown
+      const st = (values.deviceHasStorage ?? "").trim();
+      if (st === "has_storage" || st === "unknown") {
+        if (!reqSelect("hostDataWipeStatus", ["wiped_before_list", "wipe_at_handoff", "renter_responsible"])) return false;
+      }
+    }
+    if (sub === "Commercial Copiers") {
+      if (!reqSelect("copierDutyBand", ["light_office_copier", "mid_volume", "high_volume", "production_floor", "unknown_copier_duty"])) return false;
+      if (!reqSelect("copierFinishersIncluded", ["finisher_stapler", "booklet_finisher", "no_finisher", "unknown_finisher"])) return false;
+      if (!reqSelect("inkTonerIncluded", ["ink_toner_included", "partial_ink_toner", "renter_provides_ink", "unknown_ink"])) return false;
+    }
+    if (sub === "Conference Systems") {
+      if (!reqSelect("conferenceSystemType", ["speakerphone", "usb_conference_cam", "room_kit", "wireless_mic_set", "other_conference"])) return false;
+      if (!reqSelect("conferenceSeatBand", ["huddle_2_4", "room_5_8", "room_9_16", "hall_16_plus", "not_room_sized"])) return false;
+    }
+    if (sub === "Server Equipment") {
+      if (!reqSelect("serverFormFactor", ["tower_server", "rack_1u_2u", "rack_3u_plus", "nas_appliance", "network_switch_router", "other_server_gear"])) return false;
+      if (!reqSelect("hostDataWipeStatus", ["wiped_before_list", "wipe_at_handoff", "renter_responsible"])) return false;
+    }
+    if (sub === "Other") {
+      if (!reqSelect("officeOtherKind", ["kind_printer", "kind_monitor", "kind_webcam", "kind_furniture", "kind_presentation", "kind_pos_copier", "kind_conference_server", "kind_mixed_office"])) return false;
+      if ((values.officeOtherKind ?? "").trim() !== "kind_furniture" && !reqText("kitInventoryChecklist", 6)) return false;
     }
   }
 

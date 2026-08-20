@@ -539,6 +539,14 @@ export function listingLockPolicy(
 
 /* ─── P2 category trust (Office / Music) ─────────────────────────────── */
 
+/**
+ * Office & Business (~8.0): furniture skips wipe; device shelves freeze
+ * deviceHasStorage + wipe when has_storage; POS/unknown and Servers always need
+ * wipe plan; per-shelf tech/size/duty gates in areCategorySpecsValid.
+ * Field/option keys are GLOBAL — reuse has_storage / wipe statuses; scope new
+ * kinds (kind_printer, light_wear_office, …).
+ */
+
 /** Office shelves that commonly store documents, jobs, or credentials. */
 const OFFICE_STORAGE_SUBS = new Set([
   "printers",
@@ -568,6 +576,11 @@ export function listingIsMusicCategory(
 }
 
 /**
+ * Office & Business (~8.0): brand+model always; furniture skips wipe; device
+ * shelves freeze storage + wipe when has_storage; printers/copiers/wide freeze
+ * tech+consumables; POS/conference kits freeze inventory; servers reuse
+ * Electronics form/power/rails keys. Publish: Office P0 in areCategorySpecsValid.
+ *
  * Music & Audio (~8.0): brand+model always; powered shelves freeze powerBand;
  * PA requires cable/stand inventory; mics freeze hygiene wipe; instruments freeze
  * case/strings/cable. Scoped option ids (e.g. instrument_wireless_only) — never
