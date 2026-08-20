@@ -1680,7 +1680,10 @@ function BookingScreenLoaded({
           />
         ) : null}
         {listing.category.trim() === "Home & Kitchen" && listing.modes.rent ? (
-          <CategoryFactCard category="Home & Kitchen" />
+          <CategoryFactCard
+            category="Home & Kitchen"
+            subcategory={listing.subcategory}
+          />
         ) : null}
         {isHighValueGear && !listingIsDrone(listing) ? (
           <CategoryFactCard

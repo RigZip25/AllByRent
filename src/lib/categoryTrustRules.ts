@@ -158,6 +158,14 @@ const WELDING_SUBS = new Set(["welding equipment"]);
 const STUMP_GRINDER_SUBS = new Set(["stump grinders"]);
 const COMMERCIAL_COFFEE_SUBS = new Set(["commercial coffee"]);
 
+/**
+ * Home & Kitchen (~8.0): personal appliances gate on capacity + return-clean;
+ * food-contact shelves attest sanitize; commercial coffee / catering / processors
+ * add voltage, NSF, install, kit inventory. Spec option + field-label keys are
+ * GLOBAL in i18n — never reuse bare `mixed` / `single` / `none` with new meanings.
+ * Publish gates: `areCategorySpecsValid` Home & Kitchen P0 block in categorySpecs.ts.
+ */
+
 export function listingIsWeldingEquipment(
   listing: Pick<ListingDraft, "category" | "subcategory">,
 ): boolean {

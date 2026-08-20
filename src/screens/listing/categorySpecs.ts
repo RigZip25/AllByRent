@@ -1112,6 +1112,23 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
     fields: [
       brandField("kitchen", { required: false, recommended: true }),
       {
+        key: "model",
+        type: "text",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Coffee Makers",
+          "Stand Mixers",
+          "Blenders & Juicers",
+          "Cleaning Appliances",
+          "Commercial Coffee",
+          "Industrial Mixers",
+          "Food Processors Pro",
+          "Beverage Systems",
+        ],
+      },
+      {
         key: "capacityBand",
         type: "select",
         required: true,
@@ -1125,25 +1142,636 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         ],
       },
       {
+        key: "kitInventoryChecklist",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: [
+          "Coffee Makers",
+          "Baking Equipment",
+          "Stand Mixers",
+          "Blenders & Juicers",
+          "Cleaning Appliances",
+          "Commercial Coffee",
+          "Catering Equipment",
+          "Industrial Mixers",
+          "Food Processors Pro",
+          "Beverage Systems",
+          "Other",
+        ],
+      },
+      {
+        key: "kitchenReturnCleanPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        options: [
+          "wash_dry_return",
+          "rinse_return",
+          "host_sanitizes",
+          "empty_tank_only",
+          "as_received_ok",
+        ],
+      },
+      {
+        key: "foodContactSanitizeAttested",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Baking Equipment",
+          "Stand Mixers",
+          "Blenders & Juicers",
+          "Catering Equipment",
+          "Industrial Mixers",
+          "Food Processors Pro",
+          "Beverage Systems",
+        ],
+        options: ["attested", "not_yet"],
+      },
+      {
+        key: "coffeeMakerType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Coffee Makers"],
+        options: [
+          "drip",
+          "espresso_manual",
+          "espresso_semi",
+          "pod_capsule",
+          "pour_over_kit",
+          "cold_brew",
+          "combo",
+          "other_coffee",
+        ],
+      },
+      {
+        key: "waterReservoirBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Coffee Makers"],
+        options: [
+          "single_cup",
+          "under_1l",
+          "1_2l",
+          "over_2l",
+          "plumbed_no_tank",
+          "not_applicable",
+        ],
+      },
+      {
+        key: "carafeOrBasketType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Coffee Makers"],
+        options: [
+          "glass_carafe",
+          "thermal_carafe",
+          "portafilter",
+          "pod_only",
+          "pour_over_cone",
+          "mixed_kit",
+          "not_applicable",
+        ],
+      },
+      {
+        key: "coffeeFilterPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Coffee Makers"],
+        options: [
+          "filters_included",
+          "reusable_filter",
+          "renter_provides_filters",
+          "pod_capsules_extra",
+          "not_needed",
+        ],
+      },
+      {
+        key: "bakingKitType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Baking Equipment"],
+        options: [
+          "pans_sheets",
+          "specialty_mold",
+          "decorating_kit",
+          "proofing_kit",
+          "full_baking_kit",
+          "other_baking",
+        ],
+      },
+      {
+        key: "bakingPieceBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Baking Equipment"],
+        options: ["single_piece", "set_2_5", "set_6_12", "set_13_plus"],
+      },
+      {
+        key: "ovenSafeTempBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Baking Equipment"],
+        options: [
+          "up_to_350f",
+          "up_to_450f",
+          "up_to_500f",
+          "broiler_safe",
+          "not_oven_safe",
+          "mixed_kit",
+        ],
+      },
+      {
+        key: "bakewareMaterial",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Baking Equipment"],
+        options: [
+          "aluminized_steel",
+          "aluminum",
+          "silicone",
+          "glass_ceramic",
+          "nonstick",
+          "mixed_material",
+          "other_material",
+        ],
+      },
+      {
+        key: "mixerBowlCapacityQt",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stand Mixers"],
+        options: [
+          "under_4qt",
+          "4_5qt",
+          "5_6qt",
+          "6_7qt",
+          "7qt_plus",
+          "unknown_bowl",
+        ],
+      },
+      {
+        key: "mixerAttachmentKitBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stand Mixers"],
+        options: [
+          "beater_only",
+          "beater_whisk",
+          "beater_whisk_dough",
+          "full_attachment_kit",
+          "bowl_only",
+        ],
+      },
+      {
+        key: "mixerPowerWattBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stand Mixers"],
+        options: [
+          "under_250w",
+          "250_400w",
+          "400_600w",
+          "600w_plus",
+          "unknown_watt",
+        ],
+      },
+      {
+        key: "mixerTiltOrBowlLift",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stand Mixers"],
+        options: ["tilt_head", "bowl_lift", "handheld_stand", "unknown_form"],
+      },
+      {
+        key: "blenderOrJuicerType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Blenders & Juicers"],
+        options: [
+          "countertop_blender",
+          "immersion_blender",
+          "personal_blender",
+          "centrifugal_juicer",
+          "masticating_juicer",
+          "combo",
+          "other_blend_juice",
+        ],
+      },
+      {
+        key: "jarOrPitcherMaterial",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Blenders & Juicers"],
+        options: [
+          "tritan_plastic",
+          "glass_jar",
+          "stainless",
+          "mixed_material",
+          "no_jar_immersion",
+          "unknown_material",
+        ],
+      },
+      {
+        key: "bladeDiscKitIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Blenders & Juicers"],
+        options: [
+          "blade_included",
+          "blade_plus_discs",
+          "renter_provides",
+          "sealed_unit",
+          "not_applicable",
+        ],
+      },
+      {
+        key: "blendPowerWattBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Blenders & Juicers"],
+        options: [
+          "under_500w",
+          "500_1000w",
+          "1000_1500w",
+          "1500w_plus",
+          "manual_no_motor",
+          "unknown_watt",
+        ],
+      },
+      {
+        key: "cleaningApplianceType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cleaning Appliances"],
+        options: [
+          "upright_vac",
+          "canister_vac",
+          "stick_vac",
+          "robot_vac",
+          "carpet_cleaner",
+          "steam_mop",
+          "floor_scrubber",
+          "other_cleaning",
+        ],
+      },
+      {
+        key: "cleaningPowerSource",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cleaning Appliances"],
+        options: ["corded_120v", "cordless_battery", "manual", "robot_dock", "unknown_power"],
+      },
+      {
+        key: "bagOrTankSystem",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cleaning Appliances"],
+        options: [
+          "bagged",
+          "bagless_bin",
+          "water_tank",
+          "steam_only",
+          "mixed_bag_tank",
+          "not_applicable",
+        ],
+      },
+      {
+        key: "filterIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cleaning Appliances"],
+        options: [
+          "hepa_included",
+          "standard_filter_included",
+          "filter_not_included",
+          "washable_filter",
+          "not_applicable",
+        ],
+      },
+      {
+        key: "emptyReturnAttested",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cleaning Appliances"],
+        options: ["empty_required", "host_empties", "not_applicable"],
+      },
+      {
         key: "voltageBand",
         type: "select",
         required: true,
-        subcategories: ["Commercial Coffee"],
+        subcategories: ["Commercial Coffee", "Industrial Mixers", "Food Processors Pro", "Beverage Systems"],
         options: ["120v_corded", "240v", "not_electric"],
       },
       {
         key: "nsfCertified",
         type: "select",
         required: true,
-        subcategories: ["Commercial Coffee"],
+        subcategories: ["Commercial Coffee", "Industrial Mixers", "Food Processors Pro", "Beverage Systems", "Catering Equipment"],
         options: ["nsf_listed", "not_nsf", "unknown"],
       },
       {
         key: "installNeeds",
         type: "select",
         required: true,
-        subcategories: ["Commercial Coffee"],
+        subcategories: ["Commercial Coffee", "Beverage Systems"],
         options: ["countertop_plug", "plumbed_water", "hardwired_240v", "mobile_cart", "other_install"],
+      },
+      {
+        key: "commercialBrewType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Coffee"],
+        options: [
+          "espresso_1_group",
+          "espresso_2_group",
+          "espresso_3_plus",
+          "batch_brewer",
+          "urn",
+          "superauto",
+          "grinder_only",
+          "other_commercial_coffee",
+        ],
+      },
+      {
+        key: "waterSoftenerRequired",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Coffee"],
+        options: ["required_on_site", "included_inline", "not_required", "unknown"],
+      },
+      {
+        key: "commercialCoffeeServiceClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Coffee"],
+        options: [
+          "event_day_rental",
+          "cafe_weekend",
+          "catering_support",
+          "demo_display",
+          "unknown_class",
+        ],
+      },
+      {
+        key: "cateringEquipType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Catering Equipment"],
+        options: [
+          "chafing_dishes",
+          "cambro_insulated",
+          "hot_box",
+          "prep_tables",
+          "serving_ware_kit",
+          "full_catering_kit",
+          "other_catering",
+        ],
+      },
+      {
+        key: "guestServeCapacityBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Catering Equipment"],
+        options: [
+          "under_25",
+          "25_50",
+          "50_100",
+          "100_200",
+          "200_plus",
+          "not_rated",
+        ],
+      },
+      {
+        key: "heatHoldMethod",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Catering Equipment"],
+        options: [
+          "sterno_fuel",
+          "electric_heat",
+          "insulated_passive",
+          "cold_hold_only",
+          "mixed_heat_hold",
+          "not_applicable",
+        ],
+      },
+      {
+        key: "cateringPowerNeeds",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Catering Equipment"],
+        options: [
+          "no_power",
+          "120v_outlets",
+          "240v_needed",
+          "generator_friendly",
+          "unknown_power",
+        ],
+      },
+      {
+        key: "cateringSanitizeAttested",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Catering Equipment"],
+        options: ["attested", "not_yet"],
+      },
+      {
+        key: "industrialMixerBowlQt",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Industrial Mixers"],
+        options: [
+          "under_20qt",
+          "20_40qt",
+          "40_60qt",
+          "60_80qt",
+          "80qt_plus",
+          "unknown_bowl",
+        ],
+      },
+      {
+        key: "industrialMixerStyle",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Industrial Mixers"],
+        options: [
+          "planetary",
+          "spiral",
+          "vertical_cutter",
+          "dough_divider",
+          "other_industrial_mixer",
+        ],
+      },
+      {
+        key: "industrialPhaseBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Industrial Mixers"],
+        options: ["single_phase", "three_phase", "not_electric", "unknown_phase"],
+      },
+      {
+        key: "industrialMixerMoveNotes",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Industrial Mixers"],
+      },
+      {
+        key: "processorBowlCapacityBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Food Processors Pro"],
+        options: [
+          "under_3qt",
+          "3_5qt",
+          "5_8qt",
+          "8qt_plus",
+          "continuous_feed",
+          "unknown_bowl",
+        ],
+      },
+      {
+        key: "processorFeedType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Food Processors Pro"],
+        options: [
+          "batch_bowl",
+          "continuous_feed",
+          "combo",
+          "vegetable_cutter",
+          "other_processor",
+        ],
+      },
+      {
+        key: "discBladeKitBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Food Processors Pro"],
+        options: [
+          "basic_blade",
+          "disc_set_3_5",
+          "disc_set_6_plus",
+          "renter_provides_discs",
+          "not_applicable",
+        ],
+      },
+      {
+        key: "beverageSystemType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Beverage Systems"],
+        options: [
+          "kegerator",
+          "soda_fountain",
+          "juice_dispenser",
+          "cold_brew_tower",
+          "slushie",
+          "water_hydration",
+          "other_beverage",
+        ],
+      },
+      {
+        key: "beverageGasOrSyrupKit",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Beverage Systems"],
+        options: [
+          "co2_included",
+          "syrup_lines_included",
+          "co2_and_syrup",
+          "renter_provides",
+          "not_needed",
+        ],
+      },
+      {
+        key: "beveragePlumbStatus",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Beverage Systems"],
+        options: [
+          "self_contained",
+          "needs_water_line",
+          "needs_drain",
+          "water_and_drain",
+          "unknown_plumb",
+        ],
+      },
+      {
+        key: "homeKitchenOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: [
+          "kind_coffee",
+          "kind_baking",
+          "kind_mixer",
+          "kind_blender_juicer",
+          "kind_cleaning",
+          "kind_catering",
+          "kind_beverage",
+          "kind_commercial_foodservice",
+          "kind_mixed",
+        ],
+      },
+      {
+        key: "homeKitchenPieceBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["single_piece", "multi_piece"],
+      },
+      {
+        key: "photoConditionChecklist",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["overall_photos", "overall_plus_flaws", "all_pieces_and_flaws"],
       },
     ],
   },
@@ -5815,6 +6443,116 @@ export function areCategorySpecsValid(
     }
   }
 
+
+// Home & Kitchen P0 gates by shelf.
+  if (category.trim() === "Home & Kitchen" && modes?.rent) {
+    const sub = subcategory.trim();
+    const reqSelect = (key: string, allowed: string[]) => allowed.includes((values[key] ?? "").trim());
+    const reqText = (key: string, min = 3) => (values[key] ?? "").trim().length >= min;
+
+    if (!reqSelect("capacityBand", [
+      "single_serve", "small_2_4", "family_4_8", "large_8_plus", "commercial_batch", "not_applicable",
+    ])) return false;
+    if (!reqSelect("kitchenReturnCleanPolicy", [
+      "wash_dry_return", "rinse_return", "host_sanitizes", "empty_tank_only", "as_received_ok",
+    ])) return false;
+
+    if (sub === "Coffee Makers") {
+      if (!reqSelect("coffeeMakerType", ["drip", "espresso_manual", "espresso_semi", "pod_capsule", "pour_over_kit", "cold_brew", "combo", "other_coffee"])) return false;
+      if (!reqSelect("waterReservoirBand", ["single_cup", "under_1l", "1_2l", "over_2l", "plumbed_no_tank", "not_applicable"])) return false;
+      if (!reqSelect("carafeOrBasketType", ["glass_carafe", "thermal_carafe", "portafilter", "pod_only", "pour_over_cone", "mixed_kit", "not_applicable"])) return false;
+      if (!reqSelect("coffeeFilterPolicy", ["filters_included", "reusable_filter", "renter_provides_filters", "pod_capsules_extra", "not_needed"])) return false;
+      const ctype = (values.coffeeMakerType ?? "").trim();
+      if ((ctype === "combo" || ctype === "pour_over_kit") && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Baking Equipment") {
+      if (!reqSelect("bakingKitType", ["pans_sheets", "specialty_mold", "decorating_kit", "proofing_kit", "full_baking_kit", "other_baking"])) return false;
+      if (!reqSelect("bakingPieceBand", ["single", "set_2_5", "set_6_12", "set_13_plus"])) return false;
+      if (!reqSelect("ovenSafeTempBand", ["up_to_350f", "up_to_450f", "up_to_500f", "broiler_safe", "not_oven_safe", "mixed_kit"])) return false;
+      if (!reqSelect("bakewareMaterial", ["aluminized_steel", "aluminum", "silicone", "glass_ceramic", "nonstick", "mixed_material", "other_material"])) return false;
+      if ((values.foodContactSanitizeAttested ?? "").trim() !== "attested") return false;
+      const pieces = (values.bakingPieceBand ?? "").trim();
+      if ((pieces === "set_2_5" || pieces === "set_6_12" || pieces === "set_13_plus" || (values.bakingKitType ?? "").trim() === "full_baking_kit") && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Stand Mixers") {
+      if (!reqSelect("mixerBowlCapacityQt", ["under_4qt", "4_5qt", "5_6qt", "6_7qt", "7qt_plus", "unknown_bowl"])) return false;
+      if (!reqSelect("mixerAttachmentKitBand", ["beater_only", "beater_whisk", "beater_whisk_dough", "full_attachment_kit", "bowl_only"])) return false;
+      if (!reqSelect("mixerPowerWattBand", ["under_250w", "250_400w", "400_600w", "600w_plus", "unknown_watt"])) return false;
+      if (!reqSelect("mixerTiltOrBowlLift", ["tilt_head", "bowl_lift", "handheld_stand", "unknown_form"])) return false;
+      if ((values.foodContactSanitizeAttested ?? "").trim() !== "attested") return false;
+      const kit = (values.mixerAttachmentKitBand ?? "").trim();
+      if ((kit === "beater_whisk_dough" || kit === "full_attachment_kit") && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Blenders & Juicers") {
+      if (!reqSelect("blenderOrJuicerType", ["countertop_blender", "immersion_blender", "personal_blender", "centrifugal_juicer", "masticating_juicer", "combo", "other_blend_juice"])) return false;
+      if (!reqSelect("jarOrPitcherMaterial", ["tritan_plastic", "glass", "stainless", "mixed", "no_jar_immersion", "unknown_material"])) return false;
+      if (!reqSelect("bladeDiscKitIncluded", ["blade_included", "blade_plus_discs", "renter_provides", "sealed_unit", "not_applicable"])) return false;
+      if (!reqSelect("blendPowerWattBand", ["under_500w", "500_1000w", "1000_1500w", "1500w_plus", "manual_no_motor", "unknown_watt"])) return false;
+      if ((values.foodContactSanitizeAttested ?? "").trim() !== "attested") return false;
+      if ((values.bladeDiscKitIncluded ?? "").trim() === "blade_plus_discs" && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Cleaning Appliances") {
+      if (!reqSelect("cleaningApplianceType", ["upright_vac", "canister_vac", "stick_vac", "robot_vac", "carpet_cleaner", "steam_mop", "floor_scrubber", "other_cleaning"])) return false;
+      if (!reqSelect("cleaningPowerSource", ["corded_120v", "cordless_battery", "manual", "robot_dock", "unknown_power"])) return false;
+      if (!reqSelect("bagOrTankSystem", ["bagged", "bagless_bin", "water_tank", "steam_only", "mixed", "not_applicable"])) return false;
+      if (!reqSelect("filterIncluded", ["hepa_included", "standard_filter_included", "filter_not_included", "washable_filter", "not_applicable"])) return false;
+      if (!reqSelect("emptyReturnAttested", ["empty_required", "host_empties", "not_applicable"])) return false;
+    }
+    if (sub === "Commercial Coffee") {
+      if (!reqSelect("voltageBand", ["120v_corded", "240v", "not_electric"])) return false;
+      if (!reqSelect("nsfCertified", ["nsf_listed", "not_nsf", "unknown"])) return false;
+      if (!reqSelect("installNeeds", ["countertop_plug", "plumbed_water", "hardwired_240v", "mobile_cart", "other_install"])) return false;
+      if (!reqSelect("commercialBrewType", ["espresso_1_group", "espresso_2_group", "espresso_3_plus", "batch_brewer", "urn", "superauto", "grinder_only", "other_commercial_coffee"])) return false;
+      if (!reqSelect("waterSoftenerRequired", ["required_on_site", "included_inline", "not_required", "unknown"])) return false;
+      if (!reqSelect("commercialCoffeeServiceClass", ["event_day_rental", "cafe_weekend", "catering_support", "demo_display", "unknown_class"])) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Catering Equipment") {
+      if (!reqSelect("cateringEquipType", ["chafing_dishes", "cambro_insulated", "hot_box", "prep_tables", "serving_ware_kit", "full_catering_kit", "other_catering"])) return false;
+      if (!reqSelect("guestServeCapacityBand", ["under_25", "25_50", "50_100", "100_200", "200_plus", "not_rated"])) return false;
+      if (!reqSelect("heatHoldMethod", ["sterno_fuel", "electric_heat", "insulated_passive", "cold_hold_only", "mixed", "not_applicable"])) return false;
+      if (!reqSelect("cateringPowerNeeds", ["no_power", "120v_outlets", "240v_needed", "generator_friendly", "unknown_power"])) return false;
+      if (!reqSelect("nsfCertified", ["nsf_listed", "not_nsf", "unknown"])) return false;
+      if ((values.cateringSanitizeAttested ?? "").trim() !== "attested") return false;
+      if ((values.foodContactSanitizeAttested ?? "").trim() !== "attested") return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Industrial Mixers") {
+      if (!reqSelect("industrialMixerBowlQt", ["under_20qt", "20_40qt", "40_60qt", "60_80qt", "80qt_plus", "unknown_bowl"])) return false;
+      if (!reqSelect("industrialMixerStyle", ["planetary", "spiral", "vertical_cutter", "dough_divider", "other_industrial_mixer"])) return false;
+      if (!reqSelect("industrialPhaseBand", ["single_phase", "three_phase", "not_electric", "unknown_phase"])) return false;
+      if (!reqSelect("voltageBand", ["120v_corded", "240v", "not_electric"])) return false;
+      if (!reqSelect("nsfCertified", ["nsf_listed", "not_nsf", "unknown"])) return false;
+      if ((values.foodContactSanitizeAttested ?? "").trim() !== "attested") return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Food Processors Pro") {
+      if (!reqSelect("processorBowlCapacityBand", ["under_3qt", "3_5qt", "5_8qt", "8qt_plus", "continuous_feed", "unknown_bowl"])) return false;
+      if (!reqSelect("processorFeedType", ["batch_bowl", "continuous_feed", "combo", "vegetable_cutter", "other_processor"])) return false;
+      if (!reqSelect("discBladeKitBand", ["basic_blade", "disc_set_3_5", "disc_set_6_plus", "renter_provides_discs", "not_applicable"])) return false;
+      if (!reqSelect("voltageBand", ["120v_corded", "240v", "not_electric"])) return false;
+      if (!reqSelect("nsfCertified", ["nsf_listed", "not_nsf", "unknown"])) return false;
+      if ((values.foodContactSanitizeAttested ?? "").trim() !== "attested") return false;
+      const discs = (values.discBladeKitBand ?? "").trim();
+      if ((discs === "disc_set_3_5" || discs === "disc_set_6_plus") && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Beverage Systems") {
+      if (!reqSelect("beverageSystemType", ["kegerator", "soda_fountain", "juice_dispenser", "cold_brew_tower", "slushie", "water_hydration", "other_beverage"])) return false;
+      if (!reqSelect("beverageGasOrSyrupKit", ["co2_included", "syrup_lines_included", "co2_and_syrup", "renter_provides", "not_needed"])) return false;
+      if (!reqSelect("beveragePlumbStatus", ["self_contained", "needs_water_line", "needs_drain", "water_and_drain", "unknown_plumb"])) return false;
+      if (!reqSelect("voltageBand", ["120v_corded", "240v", "not_electric"])) return false;
+      if (!reqSelect("nsfCertified", ["nsf_listed", "not_nsf", "unknown"])) return false;
+      if (!reqSelect("installNeeds", ["countertop_plug", "plumbed_water", "hardwired_240v", "mobile_cart", "other_install"])) return false;
+      if ((values.foodContactSanitizeAttested ?? "").trim() !== "attested") return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Other") {
+      if (!reqSelect("homeKitchenOtherKind", ["coffee", "baking", "mixer", "blender_juicer", "cleaning", "catering", "beverage", "commercial_foodservice", "mixed"])) return false;
+      if (!reqSelect("homeKitchenPieceBand", ["single_piece", "multi_piece"])) return false;
+      if (!reqSelect("photoConditionChecklist", ["overall_photos", "overall_plus_flaws", "all_pieces_and_flaws"])) return false;
+      if ((values.homeKitchenPieceBand ?? "").trim() === "multi_piece" && !reqText("kitInventoryChecklist", 6)) return false;
+    }
+  }
 
   return true;
 }

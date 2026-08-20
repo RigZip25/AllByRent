@@ -6,7 +6,7 @@
 
 **Category FactCards:** every shelf FAQ is **Question → short answer** only — see [CATEGORY_FACT_QA.md](CATEGORY_FACT_QA.md).
 
-**Category ~8.0 encode:** one category at a time; never parallel-edit `en.ts` / `cs.ts` / `es.ts`. Shared `listing.categorySpecs.options` keys must stay unique (`TS1117` blocks prod). Prefer scoped option ids over bare `none` when meanings collide — see CATEGORY_FACT_QA “Spec option labels”.
+**Category ~8.0 encode:** one category at a time; never parallel-edit `en.ts` / `cs.ts` / `es.ts`. Shared `listing.categorySpecs.options` **and** `fields` keys must stay unique (`TS1117` blocks prod). Prefer scoped option ids (`mixed_bag_tank`, `kind_coffee`, `none_on_site`) over bare `none` / `mixed` / `single` — see CATEGORY_FACT_QA. **Home & Kitchen ~8.0** shipped: return-clean + food-contact sanitize + commercial NSF/voltage gates; per-sub Q&A.
 
 **Walk the app screen-by-screen:** [FLOW_AUDIT.md](FLOW_AUDIT.md) — what to change at each step (✅ / 🟡 / 🟠 / 🔴).
 

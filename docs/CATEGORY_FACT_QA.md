@@ -50,16 +50,30 @@ Resolution order in the component: **subcategory** FactCard → commercial Vehic
 3. Ship FactCards as **`qa` only** (this doc) — never essay `whyGeo` / `flow` / `layers` / `claims` blocks.
 4. Typecheck with `npm run typecheck` (`tsc -b`); commit i18n carefully (**one encode agent at a time** on `en.ts` / `cs.ts` / `es.ts`).
 
-## Spec option labels (shared map — deploy blocker)
+## Spec option + field-label keys (shared maps — deploy blocker)
 
-All listing `categorySpecs` select values share **one flat** `listing.categorySpecs.options` map per locale (`en.ts` / `cs.ts` / `es.ts`).
+All listing `categorySpecs` select **values** share **one flat** `listing.categorySpecs.options` map per locale. Field **labels** share **one flat** `listing.categorySpecs.fields` map. Both are **global across every category**.
 
 | Rule | Why |
 |------|-----|
-| **Option keys must be globally unique** in that map | Duplicate keys → `TS1117` → Vercel `tsc -b` fails |
-| Prefer **scoped values** (`none_on_site`, `monitor_none`) over bare `none` / `other` when meanings differ | Bare `none` already means trailer brakes (“No trailer brakes”) |
-| Before adding RE/Party/Home keys, **grep the options map** for the same key | Parallel category writers thrash this map |
+| **Option keys must be globally unique** | Duplicate keys → `TS1117` → Vercel `tsc -b` fails |
+| **Field-label keys must be globally unique** | Same `TS1117` in the `fields` object |
+| Prefer **scoped values** (`none_on_site`, `mixed_bag_tank`, `kind_coffee`, `glass_jar`) over bare `none` / `mixed` / `single` / `glass` / `coffee` when meanings differ | Bare `none` = trailer brakes; bare `mixed` = “Mixed yard”; bare `single` = “Single piece” |
+| Before adding keys, **grep both maps** in `en.ts` | Parallel category writers thrash these maps |
+| `bySubcategory` FactCards are nested **`bySubcategory[category][sub]`** | `"Other"` / `"Catering Equipment"` can differ per category |
 
-**2026-08-20 fix:** Real Estate clearance/`none`/Gym `ground_floor_easy` collisions removed; Shared Offices monitor kit uses `none_on_site`.
+**2026-08-20:** Real Estate clearance/`none`/Gym `ground_floor_easy` option collisions fixed (`e9f787a`). Home inject dropped colliding field labels (`kitInventoryChecklist`, `photoConditionChecklist`, `cateringSanitizeAttested`) — reuse existing global labels.
+
+### Home & Kitchen (~8.0) — shipped pattern
+
+| Layer | Pattern |
+|-------|---------|
+| Personal | Capacity + `kitchenReturnCleanPolicy`; food-contact shelves require `foodContactSanitizeAttested`; rich kits need `kitInventoryChecklist` |
+| Pro | Voltage / NSF / install; commercial brew type + softener; catering heat/hold + dual sanitize; industrial phase; beverage plumb/CO₂ |
+| Deposit | Damage + missing accessories — not food-safety insurance; NSF is host-declared |
+| FactCards | Per-sub Q→A, collapsed; wire `subcategory` on listing/booking |
+| Trust | `listingIsCommercialCoffee` in `categoryTrustRules.ts`; publish P0 in `areCategorySpecsValid` |
+
+**Bottleneck learned:** injecting new field labels that already exist (even with different hints) breaks `tsc -b`. Prefer extending the existing label’s hint only when truly category-agnostic, or reuse as-is.
 
 See also: [EVORIOS.md](./EVORIOS.md) (brand / product source of truth).
