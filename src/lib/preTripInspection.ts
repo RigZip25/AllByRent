@@ -1,6 +1,5 @@
 import type { MediaRef } from "./mediaStore";
 import type { ListingDraft } from "../screens/listing/types";
-import { listingIsConstructionSoftPpe } from "./categoryTrustRules";
 import {
   listingIsCommercialTransport,
   listingIsSemiOrCommercialTrailer,
@@ -17,12 +16,23 @@ export const PRE_TRIP_INSPECTION_CATEGORIES = new Set([
 export type InspectionStage = "pickup" | "return";
 
 /** Exterior / interior damage checklist areas (one photo each). */
-export type InspectionBodyAreaId =
+export type InspectionVehicleBodyAreaId =
   | "exterior_front"
   | "exterior_rear"
   | "exterior_left"
   | "exterior_right"
   | "interior";
+
+export type InspectionHullAreaId =
+  | "hull_bow"
+  | "hull_stern"
+  | "hull_port"
+  | "hull_starboard"
+  | "hull_deck";
+
+export type InspectionBodyAreaId = InspectionVehicleBodyAreaId | InspectionHullAreaId;
+
+export type InspectionLayout = "vehicle" | "hull";
 
 /**
  * Per-wheel tire slots — photos are mandatory (brand/tread visible when possible).
@@ -56,20 +66,31 @@ export type PreTripInspectionRecord = {
   /**
    * Tire positions required for this checklist (from listing wheel count).
    * Stamped when the inspection is created so pickup/return stay consistent.
+   * Hull layout stamps 0 (no tires).
    */
   requiredWheelCount?: number;
+  /** vehicle = body + tires; hull = bow/stern/port/starboard/deck (boats). */
+  layout?: InspectionLayout;
   /** Renter submitted the checklist. */
   renterSubmittedAt?: string;
   /** Host confirmed / co-acknowledged the checklist. */
   hostConfirmedAt?: string;
 };
 
-export const BODY_AREA_IDS: readonly InspectionBodyAreaId[] = [
+export const BODY_AREA_IDS: readonly InspectionVehicleBodyAreaId[] = [
   "exterior_front",
   "exterior_rear",
   "exterior_left",
   "exterior_right",
   "interior",
+] as const;
+
+export const HULL_AREA_IDS: readonly InspectionHullAreaId[] = [
+  "hull_bow",
+  "hull_stern",
+  "hull_port",
+  "hull_starboard",
+  "hull_deck",
 ] as const;
 
 /** Classic passenger / light-vehicle corner set (default when count === 4). */
@@ -136,6 +157,7 @@ export function listingRequiredWheelCount(
   listing: Pick<ListingDraft, "category" | "subcategory" | "handoff" | "modes" | "categorySpecs"> | null | undefined,
 ): number {
   if (!listing) return DEFAULT_LIGHT_WHEEL_COUNT;
+  if (listingInspectionLayout(listing) === "hull") return 0;
   const specs = listing.categorySpecs ?? {};
   const fromHost =
     parseWheelCountRaw(specs.wheelCount) ??
@@ -152,6 +174,13 @@ export function listingRequiresHostWheelCount(
   return listingIsCommercialTransport(listing);
 }
 
+export function listingInspectionLayout(
+  listing: Pick<ListingDraft, "category"> | null | undefined,
+): InspectionLayout {
+  if ((listing?.category ?? "").trim() === "Boats & Water") return "hull";
+  return "vehicle";
+}
+
 export function requiredTireSlotIds(wheelCount: number): InspectionTireSlotId[] {
   const n = clampWheelCount(wheelCount);
   if (n === 4) return [...CORNER_TIRE_SLOT_IDS];
@@ -162,7 +191,11 @@ export function allTireSlotIds(wheelCount: number): InspectionTireSlotId[] {
   return [...requiredTireSlotIds(wheelCount), SPARE_TIRE_SLOT_ID];
 }
 
-export function allInspectionAreaIds(wheelCount: number): InspectionAreaId[] {
+export function allInspectionAreaIds(
+  wheelCount: number,
+  layout: InspectionLayout = "vehicle",
+): InspectionAreaId[] {
+  if (layout === "hull") return [...HULL_AREA_IDS];
   return [...BODY_AREA_IDS, ...allTireSlotIds(wheelCount)];
 }
 
@@ -181,15 +214,27 @@ export function isPreTripInspectionCategory(category: string): boolean {
 }
 
 export function listingRequiresPreTripInspection(
-  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+  listing: Pick<ListingDraft, "category" | "modes">,
 ): boolean {
   if (!listing.modes?.rent) return false;
-  if (listingIsConstructionSoftPpe(listing)) return false;
   return isPreTripInspectionCategory(listing.category);
 }
 
 export function isTireSlot(areaId: InspectionAreaId): areaId is InspectionTireSlotId {
   return areaId.startsWith("tire_");
+}
+
+export function isHullArea(areaId: InspectionAreaId): boolean {
+  return areaId.startsWith("hull_");
+}
+
+export function resolveInspectionLayout(
+  record: Pick<PreTripInspectionRecord, "layout" | "areas"> | null | undefined,
+  fallback: InspectionLayout = "vehicle",
+): InspectionLayout {
+  if (record?.layout === "hull" || record?.layout === "vehicle") return record.layout;
+  if (record?.areas?.some((a) => isHullArea(a.areaId))) return "hull";
+  return fallback;
 }
 
 export function emptyInspectionArea(areaId: InspectionAreaId): InspectionAreaEntry {
@@ -203,9 +248,11 @@ export function emptyInspectionArea(areaId: InspectionAreaId): InspectionAreaEnt
 }
 
 export function resolveInspectionWheelCount(
-  record: Pick<PreTripInspectionRecord, "requiredWheelCount"> | null | undefined,
+  record: Pick<PreTripInspectionRecord, "requiredWheelCount" | "layout" | "areas"> | null | undefined,
   fallbackWheelCount: number = DEFAULT_LIGHT_WHEEL_COUNT,
 ): number {
+  const layout = resolveInspectionLayout(record);
+  if (layout === "hull") return 0;
   const stamped = record?.requiredWheelCount;
   if (typeof stamped === "number" && Number.isFinite(stamped) && stamped > 0) {
     return clampWheelCount(stamped);
@@ -216,22 +263,33 @@ export function resolveInspectionWheelCount(
 export function createEmptyInspection(
   stage: InspectionStage,
   wheelCount: number = DEFAULT_LIGHT_WHEEL_COUNT,
+  layout: InspectionLayout = "vehicle",
 ): PreTripInspectionRecord {
+  if (layout === "hull") {
+    return {
+      stage,
+      layout: "hull",
+      requiredWheelCount: 0,
+      areas: HULL_AREA_IDS.map((id) => emptyInspectionArea(id)),
+    };
+  }
   const n = clampWheelCount(wheelCount);
   return {
     stage,
+    layout: "vehicle",
     requiredWheelCount: n,
-    areas: allInspectionAreaIds(n).map((id) => emptyInspectionArea(id)),
+    areas: allInspectionAreaIds(n, "vehicle").map((id) => emptyInspectionArea(id)),
   };
 }
 
 export function mergeInspectionAreas(
   existing: InspectionAreaEntry[] | undefined,
   wheelCount: number = DEFAULT_LIGHT_WHEEL_COUNT,
+  layout: InspectionLayout = "vehicle",
 ): InspectionAreaEntry[] {
-  const n = clampWheelCount(wheelCount);
+  const ids = allInspectionAreaIds(wheelCount, layout);
   const byId = new Map((existing ?? []).map((a) => [a.areaId, a]));
-  return allInspectionAreaIds(n).map((id) => {
+  return ids.map((id) => {
     const prev = byId.get(id);
     if (!prev) return emptyInspectionArea(id);
     return {
@@ -262,11 +320,16 @@ function requiredTireComplete(entry: InspectionAreaEntry): boolean {
   return areaHasPhoto(entry);
 }
 
-export function inspectionBodyComplete(record: PreTripInspectionRecord | null | undefined): boolean {
+export function inspectionBodyComplete(
+  record: PreTripInspectionRecord | null | undefined,
+  fallbackLayout: InspectionLayout = "vehicle",
+): boolean {
   if (!record) return false;
+  const layout = resolveInspectionLayout(record, fallbackLayout);
   const wheelCount = resolveInspectionWheelCount(record);
-  const areas = mergeInspectionAreas(record.areas, wheelCount);
-  return BODY_AREA_IDS.every((id) => {
+  const areas = mergeInspectionAreas(record.areas, wheelCount, layout);
+  const ids = layout === "hull" ? HULL_AREA_IDS : BODY_AREA_IDS;
+  return ids.every((id) => {
     const entry = areas.find((a) => a.areaId === id);
     return entry ? bodyAreaComplete(entry) : false;
   });
@@ -275,10 +338,13 @@ export function inspectionBodyComplete(record: PreTripInspectionRecord | null | 
 export function inspectionTiresComplete(
   record: PreTripInspectionRecord | null | undefined,
   fallbackWheelCount: number = DEFAULT_LIGHT_WHEEL_COUNT,
+  fallbackLayout: InspectionLayout = "vehicle",
 ): boolean {
   if (!record) return false;
+  const layout = resolveInspectionLayout(record, fallbackLayout);
+  if (layout === "hull") return true;
   const wheelCount = resolveInspectionWheelCount(record, fallbackWheelCount);
-  const areas = mergeInspectionAreas(record.areas, wheelCount);
+  const areas = mergeInspectionAreas(record.areas, wheelCount, layout);
   return requiredTireSlotIds(wheelCount).every((id) => {
     const entry = areas.find((a) => a.areaId === id);
     return entry ? requiredTireComplete(entry) : false;
@@ -289,10 +355,11 @@ export function inspectionTiresComplete(
 export function inspectionChecklistComplete(
   record: PreTripInspectionRecord | null | undefined,
   fallbackWheelCount: number = DEFAULT_LIGHT_WHEEL_COUNT,
+  fallbackLayout: InspectionLayout = "vehicle",
 ): boolean {
   return (
-    inspectionBodyComplete(record) &&
-    inspectionTiresComplete(record, fallbackWheelCount)
+    inspectionBodyComplete(record, fallbackLayout) &&
+    inspectionTiresComplete(record, fallbackWheelCount, fallbackLayout)
   );
 }
 
@@ -303,32 +370,41 @@ export function inspectionChecklistComplete(
 export function isPreTripInspectionReady(
   record: PreTripInspectionRecord | null | undefined,
   fallbackWheelCount: number = DEFAULT_LIGHT_WHEEL_COUNT,
+  fallbackLayout: InspectionLayout = "vehicle",
 ): boolean {
   if (!record) return false;
-  if (!inspectionChecklistComplete(record, fallbackWheelCount)) return false;
+  if (!inspectionChecklistComplete(record, fallbackWheelCount, fallbackLayout)) return false;
   return Boolean(record.renterSubmittedAt && record.hostConfirmedAt);
 }
 
 export function isReturnInspectionReady(
   record: PreTripInspectionRecord | null | undefined,
   fallbackWheelCount: number = DEFAULT_LIGHT_WHEEL_COUNT,
+  fallbackLayout: InspectionLayout = "vehicle",
 ): boolean {
-  // Same bar as pickup: full photo set incl. every required tire + host confirm.
-  return isPreTripInspectionReady(record, fallbackWheelCount);
+  return isPreTripInspectionReady(record, fallbackWheelCount, fallbackLayout);
 }
 
 export function normalizeInspectionRecord(
   raw: unknown,
   stage: InspectionStage,
   fallbackWheelCount: number = DEFAULT_LIGHT_WHEEL_COUNT,
+  fallbackLayout: InspectionLayout = "vehicle",
 ): PreTripInspectionRecord | null {
   if (!raw || typeof raw !== "object") return null;
   const row = raw as Partial<PreTripInspectionRecord>;
-  const wheelCount = resolveInspectionWheelCount(row, fallbackWheelCount);
+  const layout = resolveInspectionLayout(row, fallbackLayout);
+  const wheelCount =
+    layout === "hull" ? 0 : resolveInspectionWheelCount(row, fallbackWheelCount);
   return {
     stage: row.stage === "return" || row.stage === "pickup" ? row.stage : stage,
+    layout,
     requiredWheelCount: wheelCount,
-    areas: mergeInspectionAreas(Array.isArray(row.areas) ? row.areas : [], wheelCount),
+    areas: mergeInspectionAreas(
+      Array.isArray(row.areas) ? row.areas : [],
+      wheelCount,
+      layout,
+    ),
     renterSubmittedAt:
       typeof row.renterSubmittedAt === "string" ? row.renterSubmittedAt : undefined,
     hostConfirmedAt:
