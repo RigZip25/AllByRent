@@ -1706,7 +1706,12 @@ function BookingScreenLoaded({
           <CategoryFactCard category="Outdoor & Camping" />
         ) : null}
         {isBikesListing ? <CategoryFactCard category="Bikes & Scooters" /> : null}
-        {isPartyListing ? <CategoryFactCard category="Party & Events" /> : null}
+        {isPartyListing ? (
+          <CategoryFactCard
+            category="Party & Events"
+            subcategory={listing.subcategory}
+          />
+        ) : null}
         {isToolsListing ? <CategoryFactCard category="Tools & DIY" /> : null}
         {isCostumeListing ? (
           <CategoryFactCard category="Costume & Cosplay" subcategory={listing.subcategory} />

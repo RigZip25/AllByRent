@@ -428,9 +428,15 @@ export function Step2ItemInfo({
                 defaultExpanded
               />
             ) : draft.category.trim() === "Party & Events" ? (
-              <CategoryFactCard category="Party & Events" defaultExpanded />
+              <CategoryFactCard
+                category="Party & Events"
+                subcategory={draft.subcategory}
+              />
             ) : draft.category.trim() === "Outdoor & Camping" ? (
-              <CategoryFactCard category="Outdoor & Camping" defaultExpanded />
+              <CategoryFactCard
+                category="Outdoor & Camping"
+                subcategory={draft.subcategory}
+              />
             ) : null}
             <p className="text-[13px] leading-snug text-gray-600">
               {vinRequired ? item.assetIdentityHint : item.serialNumberHelper}
@@ -752,7 +758,9 @@ export function Step2ItemInfo({
                 draft.category.trim() === "Garden & Yard" ||
                 draft.category.trim() === "Electronics & Tech" ||
                 draft.category.trim() === "Costume & Cosplay" ||
-                draft.category.trim() === "Gym & Fitness"
+                draft.category.trim() === "Gym & Fitness" ||
+                draft.category.trim() === "Outdoor & Camping" ||
+                draft.category.trim() === "Party & Events"
                   ? draft.subcategory
                   : undefined
               }

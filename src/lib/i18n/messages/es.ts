@@ -2321,8 +2321,8 @@ export const es: AppMessages = {
         setPieceCountBand: { label: "Set / piece count" },
         tentSizeBand: { label: "Tent / canopy size" },
         cateringSanitizeAttested: { label: "Sanitized for food service?", hint: "Required before publish on serving / catering shelves." },
-        sleepingBagTempBand: { label: "Sleeping-bag temp rating" },
-        stoveFuelType: { label: "Camp-stove fuel type" },
+        sleepingBagTempBand: { label: "Temperatura del saco de dormir", hint: "Clase de confort desde sobre 50°F hasta bajo 0°F — obligatorio en Sacos de dormir." },
+        stoveFuelType: { label: "Combustible de cocina de campamento", hint: "Isobutano, white gas, propano, alcohol, madera, eléctrico o multi-fuel — obligatorio en Camp Cooking." },
         useCase: { label: "Uso principal" },
         transportSize: { label: "Cómo se mueve" },
         dimensionsOrWeight: { label: "Dimensiones / peso", placeholder: "Para transporte" },
@@ -5032,29 +5032,33 @@ export const es: AppMessages = {
             },
           ],
         },
-      "Party & Events": {
-          title: "FAQ de fiestas y eventos",
-          summary: "Respuestas cortas sobre setup, energía y cancelación por clima.",
+            "Party & Events": {
+          title: "FAQ de alquiler para fiestas y eventos",
+          summary: "Respuestas cortas sobre capacidad, tarifa de montaje, potencia, cancelación por clima y sanitización de catering.",
           qa: [
             {
-              q: "¿Tarifa de montaje/desmontaje?",
-              a: "AV/escenario/luces pro a menudo sí—queda en el acuerdo.",
+              q: "¿Hay tarifa de montaje/desmontaje?",
+              a: "AV / escenario / luces pro suelen publicarla—queda fijada en el acuerdo al reservar.",
             },
             {
-              q: "¿Info de energía?",
-              a: "Amperios/circuitos si el anfitrión los publica—revisa antes de reservar.",
+              q: "¿Qué info de potencia se muestra?",
+              a: "Amperios / circuitos en Escenario, Sonido, Luces, Photo Booths y Catering cuando el anfitrión los fija—revisa antes de reservar.",
             },
             {
-              q: "¿Cancelación por clima?",
-              a: "Carpas exteriores publican ventana (24h / 12h / criterio del anfitrión).",
+              q: "¿Cómo funciona la cancelación por clima?",
+              a: "Toldos/carpas outdoor y huellas outdoor publican una ventana (24 h / 12 h / discreción del anfitrión) para reembolso total.",
             },
             {
-              q: "¿Mesas y decoración?",
-              a: "Sin cancelación por clima—solo vecino + depósito.",
+              q: "¿Mesas y decor necesitan cancelación por clima?",
+              a: "No para decor suave indoor—las huellas outdoor sí publican ventana cuando aplica.",
+            },
+            {
+              q: "¿Cuándo se exige sanitización de catering?",
+              a: "Serving Equipment y Catering Equipment en alquiler requieren atestación de sanitización del anfitrión antes de la entrega.",
             },
             {
               q: "¿Qué cubre el depósito?",
-              a: "Manchas, roturas y piezas faltantes más allá del uso normal.",
+              a: "Manchas, roturas, piezas faltantes y mal uso de potencia más allá del desgaste normal—no un seguro de fiesta.",
             },
           ],
         },
@@ -7662,6 +7666,334 @@ export const es: AppMessages = {
             {
               q: "¿Qué no está incluido?",
               a: "Sin ensayos “como hablamos”, sin promo de flota.",
+            },
+          ],
+        },
+      },
+      "Party & Events": {
+        "Tables & Chairs": {
+          title: "Mesas y sillas — cantidad, capacidad, montaje",
+          summary: "Los sets se alquilan bien cuando cantidad, capacidad de invitados, huella y tarifa opcional de montaje quedan fijados en el acuerdo.",
+          qa: [
+            {
+              q: "¿Qué banda de cantidad es obligatoria?",
+              a: "El anfitrión publica cuántas mesas/sillas hay (1–4 hasta 50+). Confirma el conteo en entrega y devolución — las sillas faltantes van contra el depósito.",
+            },
+            {
+              q: "¿Qué significa la capacidad de invitados?",
+              a: "La banda de asientos que el set soporta (1–4 hasta 100+). Es guía de planificación, no certificado de aforo del local.",
+            },
+            {
+              q: "¿El montaje / desmontaje está incluido?",
+              a: "La tarifa opcional aparece si el anfitrión la publica. Si no, asume que monta el arrendatario.",
+            },
+            {
+              q: "¿Las mesas necesitan cancelación por clima?",
+              a: "Solo con huella exterior (patio / outdoor grande). Sets de salón suelen marcar not_outdoor.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Manchas, patas rotas y piezas faltantes más allá del uso normal — no un seguro de fiesta.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Salvo listado: manteles, centros, entrega extra y promociones de seguros o alquileres de grandes cadenas.",
+            },
+          ],
+        },
+        "Tents & Canopies": {
+          title: "Carpas y toldos — tamaño, clima, anclaje",
+          summary: "Las carpas outdoor necesitan banda de tamaño, ventana de cancelación por clima y notas claras de estacas/pesos.",
+          qa: [
+            {
+              q: "¿Qué bandas de tamaño hay?",
+              a: "El anfitrión elige 10×10, 10×20, 20×20, 20×40, mayor u otro pop-up. Ajusta la banda a invitados y reglas del venue.",
+            },
+            {
+              q: "¿Es obligatoria la cancelación por clima?",
+              a: "Sí en carpas/toldos outdoor — reembolso total 24 h, 12 h, discreción del anfitrión, o not_outdoor. La ventana se congela en el acuerdo.",
+            },
+            {
+              q: "¿Quién clava y lastra el toldo?",
+              a: "Según huella y tarifa de montaje. Suele aportar estacas/pesos el arrendatario salvo que el anfitrión instale.",
+            },
+            {
+              q: "¿Y la electricidad bajo la carpa?",
+              a: "Las carpas personales no exigen banda de potencia; añade notas si hay luces. Iluminación/sonido pro llevan sus puertas de potencia.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Paneles rotos, marcos torcidos, postes/estacas faltantes — no un seguro de viento de Evorios.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Permisos, electricista y afiliados tipo Party City / Sunbelt no forman parte de la reserva.",
+            },
+          ],
+        },
+        "Party Decor": {
+          title: "Decoración de fiesta — capacidad, color, cuidado",
+          summary: "Globos, backdrops y decor suave quedan en vecino + depósito cuando capacidad, color y limpieza de devolución están claros.",
+          qa: [
+            {
+              q: "¿Qué campos importan más?",
+              a: "Capacidad de invitados, color recomendado y huella. La decor suave no exige sanitización de catering ni potencia pro.",
+            },
+            {
+              q: "¿Necesito cancelación por clima?",
+              a: "Solo si la decor es solo exterior y el anfitrión publica ventana. La decor interior suele omitirla.",
+            },
+            {
+              q: "¿Glitter, humo o llama abierta?",
+              a: "Sigue reglas del venue y notas del anfitrión. Daño por glitter/humo no declarado puede usar el depósito.",
+            },
+            {
+              q: "¿Y la tarifa de montaje?",
+              a: "Opcional — se publica si el anfitrión instala arcos/backdrops. Si no, monta el arrendatario.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Tela rota, piezas de backdrop faltantes y manchas más allá del uso normal.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin floristería, sin garantía de helio, sin promo de seguro de decoración.",
+            },
+          ],
+        },
+        "Games & Activities": {
+          title: "Juegos y actividades — capacidad, huella, piezas",
+          summary: "Juegos de jardín necesitan capacidad, huella y checklist de piezas para que vuelvan bolsas y paletas.",
+          qa: [
+            {
+              q: "¿Qué debe publicar el anfitrión?",
+              a: "Capacidad de invitados, huella (sobremesa a outdoor grande) y tarifa opcional si instala el anfitrión.",
+            },
+            {
+              q: "¿Cómo evitar piezas faltantes?",
+              a: "Cuenta bolsas, paletas y pelotas en la entrega. Foto del kit — el depósito cubre piezas de juego faltantes.",
+            },
+            {
+              q: "¿Interior vs exterior?",
+              a: "Huella más cancelación por clima si la actividad es solo outdoor. Noches de juegos indoor suelen omitir clima.",
+            },
+            {
+              q: "¿Se requiere potencia?",
+              a: "No en este estante personal. Arcade electrónico puede ir a Electronics o Sound Systems.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Piezas perdidas y tableros rotos más allá del juego normal — no seguro de lesiones.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Operarios de feria, inventario de premios y afiliados de seguro de juegos de fiesta.",
+            },
+          ],
+        },
+        "Serving Equipment": {
+          title: "Equipo de servicio — sanitizar, capacidad, devolución",
+          summary: "Chafers, dispensadores y kits de servicio exigen atestación de sanitización en alquiler más capacidad de invitados.",
+          qa: [
+            {
+              q: "¿Por qué se atestigua la sanitización?",
+              a: "Piezas en contacto con comida deben estar limpias según el anfitrión antes del anuncio/entrega. El arrendatario confirma devolución limpia al reservar.",
+            },
+            {
+              q: "¿Qué significa la banda de capacidad?",
+              a: "Guía de cuántos invitados cubre el set — no un certificado sanitario de Evorios.",
+            },
+            {
+              q: "¿Necesito cancelación por clima?",
+              a: "Solo en servicio outdoor. Buffets indoor suelen marcar not_outdoor.",
+            },
+            {
+              q: "¿Combustible / sterno?",
+              a: "Sigue notas del anfitrión. El gel suele aportarlo el arrendatario; mal uso puede usar el depósito.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Abolladuras, tapas/cucharones faltantes y devolución sucia más allá de la política.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin personal de catering, sin certificación NSF de Evorios, sin promo de suministros de restaurante.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Party otros — reubica si cabe un estante con nombre",
+          summary: "El catch-all aún publica capacidad y huella; mueve a Mesas, Carpas, Decor, Juegos, Servicio, Escenario, Sonido, Luces, Photo Booth o Catering cuando aplican esas puertas.",
+          qa: [
+            {
+              q: "¿Cuándo usar Other?",
+              a: "Solo si ningún estante Party con nombre encaja. Esos llevan tamaño de carpa, conteo, potencia o sanitización.",
+            },
+            {
+              q: "¿Qué sigue aplicando?",
+              a: "Capacidad de invitados, huella/color recomendados, tarifa opcional de montaje y cancelación por clima outdoor.",
+            },
+            {
+              q: "¿AV pro vs decor suave?",
+              a: "Escenario, sonido, luces, photo booths y catering van a estantes profesionales por potencia y sanitización.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Daño y accesorios faltantes según fotos y checklist.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin ensayos vagos “como hablamos”, sin promo Party City / seguros afiliados.",
+            },
+          ],
+        },
+        "Stage & Risers": {
+          title: "Escenario y risers — potencia, capacidad, montaje",
+          summary: "Escenarios pro publican capacidad, potencia, huella y tarifa opcional de montaje/desmontaje antes de la entrega.",
+          qa: [
+            {
+              q: "¿Qué opciones de potencia hay?",
+              a: "Ninguna/batería, 120 V estándar, 20 A dedicados, 240 V/generador, o aporta el anfitrión. Circuito incorrecto falla el load-in.",
+            },
+            {
+              q: "¿Es común la tarifa de montaje?",
+              a: "Sí en escenarios pro — si se publica, se congela en el acuerdo con quién instala.",
+            },
+            {
+              q: "¿Escenarios outdoor y clima?",
+              a: "Huellas outdoor exigen ventana de cancelación (24 h / 12 h / discreción / not_outdoor).",
+            },
+            {
+              q: "¿Y la carga estructural?",
+              a: "La capacidad de invitados es planificación. Carga de baile/banda según notas del anfitrión — Evorios no certifica ingeniería.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Marcos torcidos, faldones/patas faltantes y daño de superficie más allá del uso de evento.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin stagehands salvo listado, sin permisos de venue, sin promo de seguro de producción.",
+            },
+          ],
+        },
+        "Sound Systems": {
+          title: "Sonido de evento — potencia, capacidad, montaje",
+          summary: "PA de evento necesita potencia, capacidad, huella y tarifa opcional — no estantes de boombox de consumo.",
+          qa: [
+            {
+              q: "¿Qué puerta de potencia aplica?",
+              a: "El anfitrión fija batería, 120 V, 20 A, 240 V/generador o aporta el anfitrión. Los amperios importan con subwoofers.",
+            },
+            {
+              q: "¿Es lo mismo que Music & Audio?",
+              a: "Event Sound Systems es AV Party pro. Altavoces portátiles van a Music & Audio → Portable Speakers.",
+            },
+            {
+              q: "¿Cables y trípodes?",
+              a: "Cuenta micros, trípodes y mangueras en la entrega. Accesorios faltantes van al depósito.",
+            },
+            {
+              q: "¿Ruido / vecinos?",
+              a: "Sigue venue y horarios locales. Notas soft pueden fijar volumen máx — no un permiso municipal.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Altavoces quemados por mal uso, amps/cables faltantes y daño cosmético.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin DJ salvo listado, sin afiliado Sweetwater, sin upsell de seguro de evento.",
+            },
+          ],
+        },
+        "Event Lighting": {
+          title: "Iluminación de evento — potencia, huella, montaje",
+          summary: "Uplights y wash se alquilan limpio cuando potencia, capacidad, huella y tarifa de montaje están en el acuerdo.",
+          qa: [
+            {
+              q: "¿Qué potencia se requiere?",
+              a: "Misma banda pro que otro AV Party — 120 V, 20 A, 240 V/generador, batería o aporta el anfitrión.",
+            },
+            {
+              q: "¿Quién cuelga y enfoca?",
+              a: "Tarifa opcional si instala el anfitrión. Si no, cuelga el arrendatario según reglas del venue.",
+            },
+            {
+              q: "¿Clima en torres outdoor?",
+              a: "Huellas outdoor necesitan política de cancelación. Salones indoor suelen not_outdoor.",
+            },
+            {
+              q: "¿DMX / consola incluida?",
+              a: "Solo si está listado. Cuenta controladores, cables y clamps en la entrega.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Fixtures quemados por voltaje incorrecto, clamps/geles faltantes y daño por caída.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin diseñador de luces salvo listado, sin afiliado ADJ/Chauvet, sin promo de seguro de producción.",
+            },
+          ],
+        },
+        "Photo Booths": {
+          title: "Photo booths — potencia, capacidad, props",
+          summary: "Los booths congelan potencia, capacidad, huella y tarifa opcional; cuenta props e impresora en la entrega.",
+          qa: [
+            {
+              q: "¿Qué potencia necesita un booth?",
+              a: "El anfitrión publica la banda pro. La mayoría quiere un circuito indoor dedicado — confirma antes del evento.",
+            },
+            {
+              q: "¿El montaje está incluido?",
+              a: "Si hay tarifa de montaje/desmontaje, la instalación del anfitrión se congela en el acuerdo. Si no, arma el arrendatario.",
+            },
+            {
+              q: "¿Props, álbum, impresiones?",
+              a: "Cuenta backdrop, props, papel e impresora en la entrega. Kits faltantes usan el depósito.",
+            },
+            {
+              q: "¿Booths outdoor?",
+              a: "Huellas outdoor exigen cancelación por clima. Muchos marcan not_outdoor por la electrónica.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Impresoras dañadas, iPads/cámaras listadas faltantes y backdrops rotos.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin azafato salvo listado, sin promo Smilebooth, sin afiliado de seguro de evento.",
+            },
+          ],
+        },
+        "Catering Equipment": {
+          title: "Equipo de catering — sanitizar, potencia, capacidad",
+          summary: "El catering pro exige atestación de sanitización, banda de potencia y capacidad de invitados antes de la entrega.",
+          qa: [
+            {
+              q: "¿Por qué sanitizar + potencia juntos?",
+              a: "Superficies en contacto con comida necesitan atestación; calentadores y pozos fríos el circuito correcto (120 V / 20 A / 240 V / anfitrión).",
+            },
+            {
+              q: "¿En qué difiere de Serving Equipment?",
+              a: "Catering Equipment es el estante pro — potencia más sanitización. Serving personal se centra en sanitizar y capacidad sin potencia pro.",
+            },
+            {
+              q: "¿NSF o permisos sanitarios?",
+              a: "El anfitrión puede notar NSF en soft. Evorios no certifica permisos — siguen venue y ley local.",
+            },
+            {
+              q: "¿Clima en catering outdoor?",
+              a: "Huellas outdoor necesitan ventana de cancelación por clima.",
+            },
+            {
+              q: "¿Qué cubre el depósito?",
+              a: "Devolución sucia, bandejas/tapas faltantes y daño más allá del servicio normal.",
+            },
+            {
+              q: "¿Qué no está incluido?",
+              a: "Sin personal de chef, sin afiliados de suministros, sin producto de seguro alimentario de Evorios.",
             },
           ],
         },

@@ -2333,8 +2333,8 @@ export const cs: AppMessages = {
         setPieceCountBand: { label: "Set / piece count" },
         tentSizeBand: { label: "Tent / canopy size" },
         cateringSanitizeAttested: { label: "Sanitized for food service?", hint: "Required before publish on serving / catering shelves." },
-        sleepingBagTempBand: { label: "Sleeping-bag temp rating" },
-        stoveFuelType: { label: "Camp-stove fuel type" },
+        sleepingBagTempBand: { label: "Teplotní rating spacáku", hint: "Comfort třída od nad 50 °F po pod 0 °F — povinné u Spacích pytlů." },
+        stoveFuelType: { label: "Palivo kempingového vařiče", hint: "Isobutan, white gas, propan, alkohol, dřevo, elektřina nebo multi-fuel — povinné u Camp Cooking." },
         useCase: { label: "Hlavní použití" },
         transportSize: { label: "Jak se přepravuje" },
         dimensionsOrWeight: { label: "Rozměry / váha", placeholder: "Pro transport" },
@@ -5041,29 +5041,33 @@ export const cs: AppMessages = {
             },
           ],
         },
-      "Party & Events": {
-          title: "FAQ párty a eventů",
-          summary: "Krátké odpovědi k poplatku za stavbu, proudu a zrušení kvůli počasí.",
+            "Party & Events": {
+          title: "FAQ pronájmu párty a akcí",
+          summary: "Krátké odpovědi k kapacitě, poplatku za stavbu, napájení, zrušení kvůli počasí a sanitaci cateringu.",
           qa: [
             {
-              q: "Poplatek setup/teardown?",
-              a: "Pro AV / stage / světla často ano—zamrzne ve smlouvě.",
+              q: "Je poplatek za stavbu/demontáž?",
+              a: "Profi AV / pódium / světla ho často uvádějí — zmrazí se ve smlouvě při rezervaci.",
             },
             {
-              q: "Jaké info o proudu?",
-              a: "Ampéry / okruhy, pokud hostitel nastaví—zkontrolujte před rezervací.",
+              q: "Jaké info o napájení se zobrazí?",
+              a: "Ampéry / okruhy u Pódia, Zvuku, Světel, Photoboothu a Cateringu, když je host nastaví — zkontrolujte před rezervací.",
             },
             {
-              q: "Zrušení kvůli počasí?",
-              a: "Venkovní stany mají okno (24h / 12h / dle hostitele) pro pravidla refundace.",
+              q: "Jak funguje zrušení kvůli počasí?",
+              a: "Venkovní markýzy/stany a venkovní půdorysy uvádějí okno (24 h / 12 h / uvážení hostitele) pro plnou refundaci.",
             },
             {
-              q: "Stoly a dekorace?",
-              a: "Bez weather cancel—jen soused + kauce.",
+              q: "Potřebují stoly a dekorace zrušení kvůli počasí?",
+              a: "Ne u vnitřní měkké dekorace — venkovní půdorys stále vyžaduje okno, když je povinné.",
+            },
+            {
+              q: "Kdy je povinná sanitace cateringu?",
+              a: "Serving Equipment a Catering Equipment vyžadují potvrzení sanitace hostitelem před předáním.",
             },
             {
               q: "Co kryje kauce?",
-              a: "Skvrny, trhliny a chybějící kusy nad běžné opotřebení.",
+              a: "Skvrny, trhliny, chybějící kusy a zneužití napájení nad běžné opotřebení — ne pojištění akce.",
             },
           ],
         },
@@ -7671,6 +7675,334 @@ export const cs: AppMessages = {
             {
               q: "Co není v ceně?",
               a: "Žádné eseje „jak jsme se domluvili“, žádná promo půjčovny.",
+            },
+          ],
+        },
+      },
+      "Party & Events": {
+        "Tables & Chairs": {
+          title: "Stoly a židle — počet, kapacita, stavba",
+          summary: "Sady stolů a židlí jdou snadno pronajmout, když jsou na smlouvě počet kusů, kapacita hostů, půdorys a případný poplatek za stavbu.",
+          qa: [
+            {
+              q: "Jaký pás počtu kusů je povinný?",
+              a: "Host uvádí, kolik stolů/židlí je v sadě (1–4 až 50+). Počet ověřte při předání i vrácení — chybějící židle jdou z kauce.",
+            },
+            {
+              q: "Co znamená kapacita hostů?",
+              a: "Pás sezení, pro které je sada určena (1–4 až 100+). Jde o plánování, ne o certifikát požární bezpečnosti.",
+            },
+            {
+              q: "Je stavba / demontáž v ceně?",
+              a: "Volitelný poplatek za stavbu/demontáž se zobrazí, když ho host zveřejní. Jinak předpokládejte, že staví nájemce.",
+            },
+            {
+              q: "Potřebují stoly politiku zrušení kvůli počasí?",
+              a: "Jen při venkovním půdorysu (zahrada / velký outdoor). Vnitřní sály obvykle označí not_outdoor.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Skvrny, zlomené nohy, chybějící kusy nad běžné opotřebení — ne pojištění akce.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Pokud není uvedeno: ubrusy, dekorace, dovoz navíc a jakékoli promo pojištění akcí nebo velkoobchodních půjčoven.",
+            },
+          ],
+        },
+        "Tents & Canopies": {
+          title: "Stany a markýzy — rozměr, počasí, kotvení",
+          summary: "Venkovní stany potřebují pás rozměru, okno zrušení kvůli počasí a jasné poznámky ke kolíkům/zátěži.",
+          qa: [
+            {
+              q: "Jaké pásy rozměrů stanu existují?",
+              a: "Host volí 10×10, 10×20, 20×20, 20×40, větší nebo jiný pop-up. Slaďte pás s počtem hostů a pravidly místa.",
+            },
+            {
+              q: "Je zrušení kvůli počasí povinné?",
+              a: "Ano u venkovních stanů — plná refundace 24 h, 12 h, uvážení hostitele, nebo not_outdoor. Okno se zmrazí ve smlouvě.",
+            },
+            {
+              q: "Kdo kotví a zatěžuje markýzu?",
+              a: "Podle půdorysu a případného poplatku za stavbu. Kolíky/zátěž obvykle dodá nájemce, pokud host neoznačí instalaci.",
+            },
+            {
+              q: "Co s elektřinou pod stanem?",
+              a: "Osobní stany nevyžadují pás napájení; přidejte poznámku k světlům. Profi světla/zvuk mají vlastní brány napájení.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Protržené plachty, ohnuté rámy, chybějící tyče/kolíky — ne pojištění větru od Evorios.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Povolení, elektrikář a affiliate pojištění stanů od Party City / Sunbelt nejsou součástí rezervace.",
+            },
+          ],
+        },
+        "Party Decor": {
+          title: "Párty dekorace — kapacita, barva, vrácení",
+          summary: "Balónky, pozadí a měkká dekorace zůstávají u souseda + kauce, když jsou jasné kapacita, barva a očekávání čistoty.",
+          qa: [
+            {
+              q: "Která pole jsou nejdůležitější?",
+              a: "Kapacita hostů, doporučená barva a půdorys. Měkká dekorace nevyžaduje sanitaci cateringu ani profi napájení.",
+            },
+            {
+              q: "Potřebuji zrušení kvůli počasí?",
+              a: "Jen pokud je dekorace jen venku a host zveřejní okno. Vnitřní dekorace to většinou přeskočí.",
+            },
+            {
+              q: "Glitr, dým nebo otevřený oheň?",
+              a: "Dodržujte pravidla místa a poznámky hostitele. Škoda z neuvedeného glitru/dýmu může jít z kauce.",
+            },
+            {
+              q: "Co s poplatkem za stavbu?",
+              a: "Volitelný — zveřejní se, když host staví oblouky/pozadí. Jinak instaluje nájemce.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Protržená látka, chybějící díly pozadí a skvrny nad běžné opotřebení.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádná floristika, žádná záruka hélia, žádné promo pojištění dekorací.",
+            },
+          ],
+        },
+        "Games & Activities": {
+          title: "Hry a aktivity — kapacita, půdorys, kusy",
+          summary: "Zahradní hry potřebují kapacitu, půdorys a checklist kusů, aby se vrátily pytlíky a pálky.",
+          qa: [
+            {
+              q: "Co má host zveřejnit?",
+              a: "Kapacitu hostů, půdorys (stolní až velký outdoor) a případný poplatek, pokud host instaluje.",
+            },
+            {
+              q: "Jak předejít chybějícím kusům?",
+              a: "Spočítejte pytlíky, pálky a míče při předání. Vyfoťte sadu — kauce kryje chybějící herní díly.",
+            },
+            {
+              q: "Uvnitř vs venku?",
+              a: "Půdorys plus zrušení kvůli počasí u venkovních aktivit. Vnitřní herní večery obvykle počasí neřeší.",
+            },
+            {
+              q: "Je potřeba elektřina?",
+              a: "Na této osobní polici ne. Elektronické automaty patří spíš na Electronics nebo Sound Systems.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Ztracené kusy a poškozené desky nad běžné hraní — ne pojištění zranění.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Obsluha atrakcí, ceny a affiliate pojištění párty her.",
+            },
+          ],
+        },
+        "Serving Equipment": {
+          title: "Servírovací vybavení — sanitace, kapacita, vrácení",
+          summary: "Chafingy, dávkovače a servírovací sady vyžadují při pronájmu potvrzení sanitace a kapacitu hostů.",
+          qa: [
+            {
+              q: "Proč je sanitace potvrzená?",
+              a: "Kusy v kontaktu s jídlem musí host potvrdit jako čisté před inzerátem/předáním. Nájemce potvrdí čisté vrácení při rezervaci.",
+            },
+            {
+              q: "Co znamená pás kapacity?",
+              a: "Orientační počet hostů — ne hygienický certifikát od Evorios.",
+            },
+            {
+              q: "Potřebuji zrušení kvůli počasí?",
+              a: "Jen u venkovního servírování. Vnitřní bufety obvykle not_outdoor.",
+            },
+            {
+              q: "Palivo / sterno?",
+              a: "Podle poznámek hostitele. Gelové palivo obvykle dodá nájemce; zneužití může jít z kauce.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Prohnutí, chybějící pokličky/naběračky a nečisté vrácení nad politiku sanitace.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádný catering personál, žádná NSF certifikace od Evorios, žádné promo gastro dodavatelů.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Párty ostatní — přesuňte na pojmenovanou polici",
+          summary: "Catch-all stále uvádí kapacitu a půdorys; přesuňte na Stoly, Stany, Dekor, Hry, Servírování, Pódium, Zvuk, Světla, Photobooth nebo Catering, když sedí jejich brány.",
+          qa: [
+            {
+              q: "Kdy použít Other?",
+              a: "Jen když nesedí žádná pojmenovaná Party police. Pojmenované police nesou rozměr stanu, počet kusů, napájení nebo sanitaci.",
+            },
+            {
+              q: "Co stále platí?",
+              a: "Kapacita hostů, doporučený půdorys/barva, volitelný poplatek za stavbu a zrušení kvůli počasí venku.",
+            },
+            {
+              q: "Profi AV vs měkká dekorace?",
+              a: "Pódium, zvuk, světla, photobooth a catering patří na profesionální police kvůli napájení a sanitaci.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Škodu a chybějící příslušenství podle fotek a checklistu.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádné vágní „jak domluveno“, žádné Party City / affiliate pojištění.",
+            },
+          ],
+        },
+        "Stage & Risers": {
+          title: "Pódia a risery — napájení, kapacita, stavba",
+          summary: "Profi pódia uvádějí kapacitu, napájení, půdorys a případný poplatek za stavbu/demontáž před předáním.",
+          qa: [
+            {
+              q: "Jaké možnosti napájení existují?",
+              a: "Žádné/baterie, standard 120 V, vyhrazených 20 A, 240 V/generátor, nebo dodá host. Špatný okruh zkazí load-in.",
+            },
+            {
+              q: "Je poplatek za stavbu běžný?",
+              a: "Ano u profi pódií — když je zveřejněn, zmrazí se ve smlouvě včetně toho, kdo staví.",
+            },
+            {
+              q: "Venkovní pódia a počasí?",
+              a: "Venkovní půdorys vyžaduje okno zrušení (24 h / 12 h / uvážení hostitele / not_outdoor).",
+            },
+            {
+              q: "Co s nosností?",
+              a: "Kapacita hostů je plánování. Nosnost pro tanec/kapelu řešte v poznámkách — Evorios necertifikuje statiku.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Ohnuté rámy, chybějící sukně/nohy a poškození povrchu nad běžné opotřebení.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádní stagehandi, pokud nejsou uvedeni, žádná povolení, žádné promo produkčního pojištění.",
+            },
+          ],
+        },
+        "Sound Systems": {
+          title: "Zvuk na akci — napájení, kapacita, stavba",
+          summary: "PA zvuk na akci potřebuje napájení, kapacitu, půdorys a případný poplatek — ne spotřebitelské boomboxy.",
+          qa: [
+            {
+              q: "Jaká brána napájení platí?",
+              a: "Host musí nastavit baterii, 120 V, 20 A, 240 V/generátor, nebo host poskytuje. Ampéry rozhodují u subbasů.",
+            },
+            {
+              q: "Je to stejné jako Music & Audio?",
+              a: "Event Sound Systems jsou Party profi AV. Přenosné reproduktory patří na Music & Audio → Portable Speakers.",
+            },
+            {
+              q: "Kabely a stojany?",
+              a: "Spočítejte mikrofony, stojany a hadice při předání. Chybějící příslušenství jde z kauce.",
+            },
+            {
+              q: "Hluk / sousedé?",
+              a: "Dodržujte místo a noční klid. Soft poznámky mohou nastavit max hlasitost — ne obecní povolení.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Spálené reproduktory zneužitím, chybějící amp/kabely a kosmetické poškození.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádný DJ talent, pokud není uveden, žádné Sweetwater affiliate, žádné pojištění akce.",
+            },
+          ],
+        },
+        "Event Lighting": {
+          title: "Světla na akci — napájení, půdorys, stavba",
+          summary: "Uplighty a wash světla jdou dobře pronajmout, když jsou na smlouvě napájení, kapacita, půdorys a poplatek za stavbu.",
+          qa: [
+            {
+              q: "Jaké napájení je potřeba?",
+              a: "Stejný profi pás jako u ostatního Party AV — 120 V, 20 A, 240 V/generátor, baterie, nebo host poskytuje.",
+            },
+            {
+              q: "Kdo věší a ostří?",
+              a: "Volitelný poplatek, když instaluje host. Jinak věší nájemce podle pravidel místa.",
+            },
+            {
+              q: "Počasí u venkovních stožárů?",
+              a: "Venkovní půdorys potřebuje politiku zrušení. Vnitřní sály obvykle not_outdoor.",
+            },
+            {
+              q: "Je v sadě DMX / konzole?",
+              a: "Jen pokud je uvedeno. Spočítejte ovladače, kabely a svorky při předání.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Spálené reflektory ze špatného napětí, chybějící svorky/gely a pádové poškození.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádný lighting designer, pokud není uveden, žádné ADJ affiliate, žádné produkční pojištění.",
+            },
+          ],
+        },
+        "Photo Booths": {
+          title: "Photobooth — napájení, kapacita, rekvizity",
+          summary: "Photobooth zmrazí napájení, kapacitu, půdorys a případný poplatek; při předání spočítejte rekvizity a tiskárnu.",
+          qa: [
+            {
+              q: "Jaké napájení booth potřebuje?",
+              a: "Host zveřejní profi pás napájení. Většina boothů chce vyhrazený vnitřní okruh — ověřte před akcí.",
+            },
+            {
+              q: "Je stavba v ceně?",
+              a: "Když je zveřejněn poplatek za stavbu/demontáž, instalace hostitele se zmrazí ve smlouvě. Jinak skládá nájemce.",
+            },
+            {
+              q: "Rekvizity, album, tisky?",
+              a: "Spočítejte pozadí, rekvizity, papír a tiskárnu při předání. Chybějící sada jde z kauce.",
+            },
+            {
+              q: "Venkovní booth?",
+              a: "Venkovní půdorys vyžaduje zrušení kvůli počasí. Mnozí hostitelé označí not_outdoor kvůli elektronice.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Poškozené tiskárny, chybějící iPady/kamery v sadě a protržené pozadí.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádná obsluha, pokud není uvedena, žádné Smilebooth franchise promo, žádné affiliate pojištění.",
+            },
+          ],
+        },
+        "Catering Equipment": {
+          title: "Catering vybavení — sanitace, napájení, kapacita",
+          summary: "Profi catering vyžaduje potvrzení sanitace, pás napájení a kapacitu hostů před předáním.",
+          qa: [
+            {
+              q: "Proč sanitace + napájení dohromady?",
+              a: "Plochy v kontaktu s jídlem potřebují potvrzení sanitace; ohřevy a studené vany správný okruh (120 V / 20 A / 240 V / host).",
+            },
+            {
+              q: "Jak se liší od Serving Equipment?",
+              a: "Catering Equipment je profi police — napájení plus sanitace. Osobní Serving se soustředí na sanitaci a kapacitu bez profi napájení.",
+            },
+            {
+              q: "NSF nebo hygienická povolení?",
+              a: "Host může soft zmínit NSF. Evorios nepovoluje hygienu — platí místo a místní právo.",
+            },
+            {
+              q: "Počasí u venkovního cateringu?",
+              a: "Venkovní půdorys potřebuje okno zrušení kvůli počasí.",
+            },
+            {
+              q: "Co kryje kauce?",
+              a: "Nečisté vrácení, chybějící gastronádoby/pokličky a poškození nad běžný provoz.",
+            },
+            {
+              q: "Co není v ceně?",
+              a: "Žádný kuchařský personál, žádné affiliate gastro odkazy, žádné pojištění potravin od Evorios.",
             },
           ],
         },
