@@ -1710,7 +1710,10 @@ function BookingScreenLoaded({
           />
         ) : null}
         {listing.category.trim() === "Sports & Recreation" && listing.modes.rent ? (
-          <CategoryFactCard category="Sports & Recreation" />
+          <CategoryFactCard
+            category="Sports & Recreation"
+            subcategory={listing.subcategory}
+          />
         ) : null}
         {listing.category.trim() === "Outdoor & Camping" && listing.modes.rent ? (
           <CategoryFactCard

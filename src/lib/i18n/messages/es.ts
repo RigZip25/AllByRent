@@ -2183,6 +2183,16 @@ export const es: AppMessages = {
         lensFocalBand: { label: "Focal class" },
         stabilizerType: { label: "Stabilizer type" },
         photoOtherKind: { label: "What kind of item", hint: "Re-shelf to a named Photo shelf when one fits." },
+        snowGearForm: { label: "Forma de equipo de nieve" },
+        waterCraftClass: { label: "Clase de equipo acuático" },
+        racketSportType: { label: "Deporte de raqueta" },
+        skateType: { label: "Tipo de patín" },
+        fishingRodClass: { label: "Clase de caña" },
+        competitionSportClass: { label: "Clase de competición" },
+        coachingAidType: { label: "Tipo de ayuda de coaching" },
+        timingSystemType: { label: "Tipo de cronometraje" },
+        teamSportKitBand: { label: "Kit de equipo" },
+        sportsOtherKind: { label: "Qué tipo de artículo", hint: "Reubica a un estante Sports con nombre cuando encaje." },
         nsfCertified: { label: "NSF" },
         installNeeds: { label: "Instalación" },
         dropSideAcknowledged: { label: "Estado drop-side" },
@@ -4514,6 +4524,53 @@ export const es: AppMessages = {
         wireless_handheld: "Wireless handheld",
         wireless_receiver_kit: "Wireless receiver kit",
         workstation: "Workstation",
+        sports_alpine_ski: "Esquí alpino",
+        sports_badminton: "Bádminton",
+        sports_baitcasting: "Baitcasting",
+        sports_coach_agility: "Equipo de agilidad",
+        sports_coach_ball_cart: "Carro de balones",
+        sports_coach_cones: "Conos / marcas",
+        sports_coach_other: "Otro coaching",
+        sports_comp_court: "Cancha",
+        sports_comp_field: "Campo",
+        sports_comp_other: "Otra competición",
+        sports_comp_track: "Pista",
+        sports_fishing_other: "Otra pesca",
+        sports_fly: "Mosca",
+        sports_ice: "Patines de hielo",
+        sports_inline: "Patines en línea",
+        sports_kayak: "Kayak",
+        sports_kind_fish: "Pesca",
+        sports_kind_mixed: "Kit deportivo mixto",
+        sports_kind_racket: "Raqueta",
+        sports_kind_skate: "Patinaje",
+        sports_kind_snow: "Nieve",
+        sports_kind_team: "Equipo",
+        sports_kind_water: "Agua",
+        sports_nordic: "Nórdico / fondo",
+        sports_pickleball: "Pickleball",
+        sports_quad: "Cuatro ruedas",
+        sports_racket_other: "Otra raqueta",
+        sports_skate_other: "Otro patinaje",
+        sports_skateboard: "Skateboard",
+        sports_snow_other: "Otro de nieve",
+        sports_snowboard: "Snowboard",
+        sports_spinning: "Spinning",
+        sports_squash: "Squash / racquetball",
+        sports_sup: "SUP / paddleboard",
+        sports_surf: "Surf",
+        sports_surf_rod: "Caña de surf",
+        sports_team_ball_kit: "Kit de balón",
+        sports_team_goals: "Porterías / redes",
+        sports_team_mixed: "Kit de equipo mixto",
+        sports_team_protective: "Protecciones",
+        sports_tennis: "Tenis",
+        sports_timing_chips: "Chips de timing",
+        sports_timing_clock: "Reloj / marcador",
+        sports_timing_other: "Otro timing",
+        sports_timing_photo: "Photo finish",
+        sports_wake: "Wake / remolque",
+        sports_water_other: "Otro acuático",
         xlr_and_clip: "XLR + clip",
 
         // Office & Business ~8.0 options
@@ -6123,7 +6180,252 @@ export const es: AppMessages = {
     },
 
     bySubcategory: {
-      "Photo & Video": {
+            "Sports & Recreation": {
+        "Snow Sports": {
+          title: "Nieve — forma, DIN, casco",
+          summary: "Forma de esquí/tabla, banda DIN, casco y waiver antes del alquiler.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Forma de nieve, DIN, casco, talla, nivel y waiver.",
+            },
+            {
+              q: "¿Qué es DIN?",
+              a: "Banda de fijación publicada por el anfitrión — no certifica tus botas.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre cantos rotos y bastones faltantes — no lesiones. El waiver cubre riesgo ordinario.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de seguro de tienda de esquí.",
+            },
+          ],
+        },
+        "Water Sports": {
+          title: "Agua — embarcación, PFD, waiver",
+          summary: "Clase de equipo, PFD y waiver para tablas y paddle.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Clase acuática, PFD, talla, nivel y waiver.",
+            },
+            {
+              q: "¿Quién lleva PFD?",
+              a: "El campo fija incluido, lo trae el renter, o no aplica.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre abolladuras y quillas faltantes — no seguro de lesión en agua.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de seguro watersports.",
+            },
+          ],
+        },
+        "Pro Water Sports": {
+          title: "Pro agua — embarcación, PFD, waiver",
+          summary: "Estantes pro usan las mismas puertas craft/PFD/waiver.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Clase acuática, PFD, talla, nivel y waiver.",
+            },
+            {
+              q: "¿Pro vs personal?",
+              a: "Mismas puertas de seguridad — detalle el kit pro en el checklist.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre cuerdas y tablas faltantes — no seguro de evento.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de sponsor de torneo.",
+            },
+          ],
+        },
+        "Racket Sports": {
+          title: "Raquetas — tipo de deporte",
+          summary: "Tenis a pickleball congelan el tipo más talla y nivel.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Tipo de raqueta, talla/largo y nivel.",
+            },
+            {
+              q: "¿Cuerdas / tensión?",
+              a: "Anota en el checklist si importa.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre marcos rotos y fundas faltantes — no garantía de cuerda.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de suscripción de raquetas.",
+            },
+          ],
+        },
+        "Skating": {
+          title: "Patinaje — tipo, talla, nivel",
+          summary: "Inline, hielo, quad y tablas congelan el tipo.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Tipo de patín, talla y nivel.",
+            },
+            {
+              q: "¿Protecciones / casco?",
+              a: "Declara en el checklist — no asumas inclusión.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre trucks rotos y ruedas faltantes.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de skate shop.",
+            },
+          ],
+        },
+        "Fishing Gear": {
+          title: "Pesca — clase de caña",
+          summary: "Clase de caña/carrete más talla y nivel.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Clase de caña/equipo, talla y nivel.",
+            },
+            {
+              q: "¿Incluye señuelos?",
+              a: "Lista señuelos y redes en el checklist.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre cañas rotas y carretes faltantes.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de marca de pesca.",
+            },
+          ],
+        },
+        "Competition Gear": {
+          title: "Competición — clase deportiva",
+          summary: "Clase pista/campo/cancha congela la intención del estante.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Clase de competición, talla y nivel.",
+            },
+            {
+              q: "¿Legal para la prueba?",
+              a: "El anfitrión declara la clase — el renter confirma reglas aparte.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre implementos dañados y pesos faltantes.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de federación.",
+            },
+          ],
+        },
+        "Coaching Equipment": {
+          title: "Entrenamiento — tipo de ayuda",
+          summary: "Conos, carros y agility congelan el tipo.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Tipo de ayuda de coaching, conteo y nivel.",
+            },
+            {
+              q: "¿Cuántas piezas?",
+              a: "Pon conteos en el checklist.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre conos faltantes y vallas dañadas.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de vendors de coaching.",
+            },
+          ],
+        },
+        "Timing Systems": {
+          title: "Cronometraje — tipo de sistema",
+          summary: "Relojes, chips y photo-finish congelan el tipo.",
+          qa: [
+            {
+              q: "¿Qué puertas aplican?",
+              a: "Tipo de cronometraje, notas de energía y nivel.",
+            },
+            {
+              q: "¿Energía / setup?",
+              a: "Declara en el checklist.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre sensores faltantes — no seguro de resultados.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de vendors de timing.",
+            },
+          ],
+        },
+        "Team Sports Gear": {
+          title: "Equipo de equipo — banda + inventario",
+          summary: "Balones, porterías y protección congelan banda e inventario.",
+          qa: [
+            {
+              q: "¿Qué debe listarse?",
+              a: "Banda de kit, talla, nivel y checklist de inventario.",
+            },
+            {
+              q: "¿Por qué inventario?",
+              a: "Las bolsas de equipo pierden piezas — congela antes del unlock.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre balones y redes faltantes según la lista.",
+            },
+            {
+              q: "¿Promo partner?",
+              a: "Sin hard-sell de team store.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Sports other — reubica si cabe un estante",
+          summary: "Catch-all aún publica tipo e inventario.",
+          qa: [
+            {
+              q: "¿Cuándo Other?",
+              a: "Solo si no cabe un estante Sports con nombre.",
+            },
+            {
+              q: "¿Qué puertas?",
+              a: "sportsOtherKind más checklist, talla y nivel.",
+            },
+            {
+              q: "¿Reubicar?",
+              a: "A Snow, Water, Racket, Skating, Fishing, Team o estantes pro.",
+            },
+            {
+              q: "¿Depósito?",
+              a: "Cubre piezas faltantes según el checklist.",
+            },
+          ],
+        },
+      },
+
+"Photo & Video": {
         "Camera Kits": {
           title: "Camera kits \u2014 sensor, media, kit list",
           summary: "Bodies and kits freeze sensor/mount, media policy, and inventory.",

@@ -2195,6 +2195,16 @@ export const cs: AppMessages = {
         lensFocalBand: { label: "Focal class" },
         stabilizerType: { label: "Stabilizer type" },
         photoOtherKind: { label: "What kind of item", hint: "Re-shelf to a named Photo shelf when one fits." },
+        snowGearForm: { label: "Forma sněhového vybavení" },
+        waterCraftClass: { label: "Třída vodního vybavení" },
+        racketSportType: { label: "Raketový sport" },
+        skateType: { label: "Typ bruslí / skate" },
+        fishingRodClass: { label: "Třída prutu" },
+        competitionSportClass: { label: "Soutěžní třída" },
+        coachingAidType: { label: "Typ trenérské pomůcky" },
+        timingSystemType: { label: "Typ časomíry" },
+        teamSportKitBand: { label: "Týmový kit" },
+        sportsOtherKind: { label: "Jaký typ položky", hint: "Pokud sedí pojmenovaná Sports police, přerazítkujte." },
         nsfCertified: { label: "NSF / gastro" },
         installNeeds: { label: "Instalace" },
         dropSideAcknowledged: { label: "Drop-side stav" },
@@ -4526,6 +4536,53 @@ export const cs: AppMessages = {
         wireless_handheld: "Wireless handheld",
         wireless_receiver_kit: "Wireless receiver kit",
         workstation: "Workstation",
+        sports_alpine_ski: "Sjezdové lyže",
+        sports_badminton: "Badminton",
+        sports_baitcasting: "Baitcasting",
+        sports_coach_agility: "Agility vybavení",
+        sports_coach_ball_cart: "Vozík na míče",
+        sports_coach_cones: "Kužely / značky",
+        sports_coach_other: "Jiné trenérské",
+        sports_comp_court: "Kurt",
+        sports_comp_field: "Hřiště / pole",
+        sports_comp_other: "Jiná soutěž",
+        sports_comp_track: "Dráha",
+        sports_fishing_other: "Jiný rybolov",
+        sports_fly: "Muškaření",
+        sports_ice: "Lední brusle",
+        sports_inline: "Inline brusle",
+        sports_kayak: "Kajak",
+        sports_kind_fish: "Rybolov",
+        sports_kind_mixed: "Smíšený sports kit",
+        sports_kind_racket: "Rakety",
+        sports_kind_skate: "Brusle",
+        sports_kind_snow: "Sníh",
+        sports_kind_team: "Tým",
+        sports_kind_water: "Voda",
+        sports_nordic: "Běžky",
+        sports_pickleball: "Pickleball",
+        sports_quad: "Quad / kolečkové",
+        sports_racket_other: "Jiný raketový",
+        sports_skate_other: "Jiné bruslení",
+        sports_skateboard: "Skateboard",
+        sports_snow_other: "Jiné sněhové",
+        sports_snowboard: "Snowboard",
+        sports_spinning: "Spinning",
+        sports_squash: "Squash / racquetball",
+        sports_sup: "SUP / paddleboard",
+        sports_surf: "Surf",
+        sports_surf_rod: "Surfový prut",
+        sports_team_ball_kit: "Míčový kit",
+        sports_team_goals: "Branky / sítě",
+        sports_team_mixed: "Smíšený týmový kit",
+        sports_team_protective: "Ochranné vybavení",
+        sports_tennis: "Tenis",
+        sports_timing_chips: "Čipová časomíra",
+        sports_timing_clock: "Herní hodiny / tabule",
+        sports_timing_other: "Jiná časomíra",
+        sports_timing_photo: "Photo finish",
+        sports_wake: "Wake / vlek",
+        sports_water_other: "Jiné vodní",
         xlr_and_clip: "XLR + clip",
 
         // Office & Business ~8.0 options
@@ -6132,7 +6189,252 @@ export const cs: AppMessages = {
     },
 
     bySubcategory: {
-      "Photo & Video": {
+            "Sports & Recreation": {
+        "Snow Sports": {
+          title: "Zima — forma, DIN, helma",
+          summary: "Forma lyží/boardu, pásmo DIN, helma a waiver před pronájmem.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Forma sněhového vybavení, DIN, helma, velikost, skill a waiver.",
+            },
+            {
+              q: "Co znamená DIN?",
+              a: "Hostem uvedené pásmo vázání — ne certifikace vašich bot.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje poškození hran a chybějící hole — ne zranění. Waiver kryje běžné riziko úrazu.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell pojištění od ski shopu.",
+            },
+          ],
+        },
+        "Water Sports": {
+          title: "Voda — plavidlo, PFD, waiver",
+          summary: "Třída plavidla, PFD a waiver pro boardy a paddle sporty.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Třída vodního vybavení, PFD, velikost, skill a waiver.",
+            },
+            {
+              q: "Kdo nese PFD?",
+              a: "Pole PFD: v ceně, renter donese, nebo nepoužitelné.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje oděrky a chybějící ploutve — ne pojištění úrazu ve vodě.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell pojištění watersports.",
+            },
+          ],
+        },
+        "Pro Water Sports": {
+          title: "Pro voda — plavidlo, PFD, waiver",
+          summary: "Pro police používají stejné brány craft/PFD/waiver.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Třída plavidla, PFD, velikost, skill a waiver.",
+            },
+            {
+              q: "Pro vs osobní?",
+              a: "Stejné bezpečnostní brány — pro kit uveďte v checklistu.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje chybějící tow lana a boardy — ne pojištění akce.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell sponzora turnaje.",
+            },
+          ],
+        },
+        "Racket Sports": {
+          title: "Rakety — typ sportu",
+          summary: "Tenis až pickleball zamrazí typ sportu plus velikost a skill.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Typ raketového sportu, velikost a skill.",
+            },
+            {
+              q: "Struny / napětí?",
+              a: "Poznamenejte v checklistu, pokud na tom záleží.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje prasklé rámy a chybějící obaly — ne záruku strun.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell předplatného raket.",
+            },
+          ],
+        },
+        "Skating": {
+          title: "Brusle — typ, velikost, skill",
+          summary: "Inline, led, quad a boardy zamrazí typ před pronájmem.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Typ bruslí/skate, velikost a skill.",
+            },
+            {
+              q: "Chrániče / helma?",
+              a: "Uveďte v checklistu — jinak nepředpokládejte.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje zlomené trucký a chybějící kolečka.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell skate shopu.",
+            },
+          ],
+        },
+        "Fishing Gear": {
+          title: "Rybaření — třída prutu",
+          summary: "Třída prutu/navijáku plus velikost a skill.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Třída prutu/vybavení, velikost a skill.",
+            },
+            {
+              q: "Nálety v ceně?",
+              a: "Výčty nástrah a sítí do checklistu.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje zlomené pruty a chybějící navijáky.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell fishing značky.",
+            },
+          ],
+        },
+        "Competition Gear": {
+          title: "Soutěž — třída sportu",
+          summary: "Track/field/court třída zamrazí záměr police.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Soutěžní třída, velikost a skill.",
+            },
+            {
+              q: "Pravidla závodu?",
+              a: "Host uvede třídu — renter ověří pravidla zvlášť.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje poškozené náčiní a chybějící zátěže.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell federací.",
+            },
+          ],
+        },
+        "Coaching Equipment": {
+          title: "Trenink — typ pomůcky",
+          summary: "Kužely, vozíky a agility sady zamrazí typ.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Typ trenérské pomůcky, počet a skill.",
+            },
+            {
+              q: "Kolik kusů?",
+              a: "Počty do checklistu.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje chybějící kužely a poškozené překážky.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell trenérských vendorů.",
+            },
+          ],
+        },
+        "Timing Systems": {
+          title: "Časomíra — typ systému",
+          summary: "Hodiny, čipy a photo-finish zamrazí typ.",
+          qa: [
+            {
+              q: "Jaké brány platí?",
+              a: "Typ časomíry, poznámky k napájení a skill.",
+            },
+            {
+              q: "Napájení / setup?",
+              a: "Uveďte v checklistu.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje chybějící senzory — ne pojištění výsledků.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell timing vendorů.",
+            },
+          ],
+        },
+        "Team Sports Gear": {
+          title: "Týmové — pásmo + inventář",
+          summary: "Míče, branky a ochrana zamrazí pásmo a inventář.",
+          qa: [
+            {
+              q: "Co musí být uvedeno?",
+              a: "Pásmo týmové sady, velikost, skill a checklist inventáře.",
+            },
+            {
+              q: "Proč inventář?",
+              a: "Týmové tašky ztrácejí kusy — zamrazit před unlock.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje chybějící míče a sítě podle seznamu.",
+            },
+            {
+              q: "Partner promo?",
+              a: "Žádný hard-sell team store.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Sport other — přesuňte na pojmenovanou polici",
+          summary: "Catch-all stále publikuje druh a inventář.",
+          qa: [
+            {
+              q: "Kdy Other?",
+              a: "Jen když nepasuje pojmenovaná Sports police.",
+            },
+            {
+              q: "Jaké brány?",
+              a: "sportsOtherKind plus checklist, velikost a skill.",
+            },
+            {
+              q: "Přesun?",
+              a: "Na Snow, Water, Racket, Skating, Fishing, Team nebo pro police.",
+            },
+            {
+              q: "Kauce?",
+              a: "Kryje chybějící kusy podle checklistu.",
+            },
+          ],
+        },
+      },
+
+"Photo & Video": {
         "Camera Kits": {
           title: "Camera kits \u2014 sensor, media, kit list",
           summary: "Bodies and kits freeze sensor/mount, media policy, and inventory.",

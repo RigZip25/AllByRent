@@ -2163,6 +2163,16 @@ export const en: AppMessages = {
         lensFocalBand: { label: "Focal class" },
         stabilizerType: { label: "Stabilizer type" },
         photoOtherKind: { label: "What kind of item", hint: "Re-shelf to a named Photo shelf when one fits." },
+        snowGearForm: { label: "Snow gear form" },
+        waterCraftClass: { label: "Water craft class" },
+        racketSportType: { label: "Racket sport" },
+        skateType: { label: "Skate type" },
+        fishingRodClass: { label: "Rod / gear class" },
+        competitionSportClass: { label: "Competition class" },
+        coachingAidType: { label: "Coaching aid type" },
+        timingSystemType: { label: "Timing system type" },
+        teamSportKitBand: { label: "Team kit band" },
+        sportsOtherKind: { label: "What kind of item", hint: "Re-shelf to a named Sports shelf when one fits." },
         nsfCertified: { label: "NSF / food-service listing" },
         installNeeds: { label: "Install / hookup needs" },
         dropSideAcknowledged: { label: "Drop-side status", hint: "US drop-side cribs are banned — confirm this unit is not drop-side." },
@@ -4509,6 +4519,53 @@ export const en: AppMessages = {
         wireless_handheld: "Wireless handheld",
         wireless_receiver_kit: "Wireless receiver kit",
         workstation: "Workstation",
+        sports_alpine_ski: "Alpine ski",
+        sports_badminton: "Badminton",
+        sports_baitcasting: "Baitcasting",
+        sports_coach_agility: "Agility gear",
+        sports_coach_ball_cart: "Ball cart",
+        sports_coach_cones: "Cones / markers",
+        sports_coach_other: "Other coaching",
+        sports_comp_court: "Court",
+        sports_comp_field: "Field",
+        sports_comp_other: "Other competition",
+        sports_comp_track: "Track",
+        sports_fishing_other: "Other fishing",
+        sports_fly: "Fly",
+        sports_ice: "Ice skates",
+        sports_inline: "Inline skates",
+        sports_kayak: "Kayak",
+        sports_kind_fish: "Fishing-related",
+        sports_kind_mixed: "Mixed sports kit",
+        sports_kind_racket: "Racket-related",
+        sports_kind_skate: "Skating-related",
+        sports_kind_snow: "Snow-related",
+        sports_kind_team: "Team-related",
+        sports_kind_water: "Water-related",
+        sports_nordic: "Nordic / cross-country",
+        sports_pickleball: "Pickleball",
+        sports_quad: "Quad / roller",
+        sports_racket_other: "Other racket sport",
+        sports_skate_other: "Other skating",
+        sports_skateboard: "Skateboard",
+        sports_snow_other: "Other snow gear",
+        sports_snowboard: "Snowboard",
+        sports_spinning: "Spinning",
+        sports_squash: "Squash / racquetball",
+        sports_sup: "SUP / paddleboard",
+        sports_surf: "Surfboard",
+        sports_surf_rod: "Surf rod",
+        sports_team_ball_kit: "Ball kit",
+        sports_team_goals: "Goals / nets",
+        sports_team_mixed: "Mixed team kit",
+        sports_team_protective: "Protective gear",
+        sports_tennis: "Tennis",
+        sports_timing_chips: "Timing chips",
+        sports_timing_clock: "Game clock / scoreboard",
+        sports_timing_other: "Other timing",
+        sports_timing_photo: "Photo finish",
+        sports_wake: "Wake / tow sports",
+        sports_water_other: "Other water sports",
         xlr_and_clip: "XLR + clip",
 
         // Office & Business ~8.0 options
@@ -5850,27 +5907,27 @@ export const en: AppMessages = {
         },
       "Sports & Recreation": {
           title: "Sports & recreation rental FAQ",
-          summary: "Short answers for high-risk shelves, helmets, PFDs, and DIN.",
+          summary: "Short answers for snow/water waivers, PFD, DIN/helmet, kit inventory, and deposit claims.",
           qa: [
             {
+              q: "What is required on Sports rentals?",
+              a: "Size/length and skill on every listing. Snow freezes form, DIN, helmet, and waiver. Water/pro water freeze craft class, PFD, and waiver. Other shelves freeze a sport-specific type field.",
+            },
+            {
               q: "When is a waiver required?",
-              a: "On high-risk shelves (snow, water, climb-style) at booking.",
+              a: "Snow Sports, Water Sports, and Pro Water Sports publish a liability waiver field.",
             },
             {
-              q: "What do snow sports need?",
-              a: "Published DIN and helmet included/required policy.",
-            },
-            {
-              q: "What do water shelves need?",
-              a: "PFD-included acknowledgment when the gate applies.",
-            },
-            {
-              q: "Do everyday balls need a waiver?",
-              a: "No—soft goods stay neighbor + deposit only.",
+              q: "Is a PFD included on water gear?",
+              a: "The listing freezes included, renter provides, or N/A \u2014 do not assume a life jacket ships.",
             },
             {
               q: "What does the deposit cover?",
-              a: "Gear damage and missing parts—not injury. Follow the signed waiver for injury risk.",
+              a: "Broken gear and missing kit pieces against the frozen inventory \u2014 not injury or trip insurance.",
+            },
+            {
+              q: "What is not included?",
+              a: "No resort lesson affiliate, no guide service, and no medical cover from Evorios.",
             },
           ],
         },
@@ -6145,7 +6202,252 @@ export const en: AppMessages = {
     },
 
     bySubcategory: {
-      "Photo & Video": {
+            "Sports & Recreation": {
+        "Snow Sports": {
+          title: "Snow sports — form, DIN, helmet",
+          summary: "Ski/board form, DIN band, helmet policy, and waiver freeze before rent.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Snow gear form, DIN/binding band, helmet policy, size/length, skill, and waiver flag.",
+            },
+            {
+              q: "DIN meaning?",
+              a: "Host-published binding band — not a shop certification of your boots.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers broken edges and missing poles — not injury. Waiver covers ordinary-use injury risk.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No ski-shop insurance affiliate hard-sell.",
+            },
+          ],
+        },
+        "Water Sports": {
+          title: "Water sports — craft, PFD, waiver",
+          summary: "Craft class, PFD policy, and waiver freeze for boards and paddlesports.",
+          qa: [
+            {
+              q: "What must be listed?",
+              a: "Water craft class, PFD include, size/length, skill, and waiver flag.",
+            },
+            {
+              q: "Who brings a PFD?",
+              a: "PFD field freezes included, renter provides, or not applicable.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers hull dings and missing fins — not water-injury insurance.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No watersports-insurance affiliate hard-sell.",
+            },
+          ],
+        },
+        "Pro Water Sports": {
+          title: "Pro water — craft, PFD, waiver",
+          summary: "Pro water shelves use the same craft/PFD/waiver gates with pro-grade kits.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Water craft class, PFD, size/length, skill, and waiver.",
+            },
+            {
+              q: "Pro vs personal?",
+              a: "Same safety gates — disclose pro kit pieces in the checklist.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers missing tow ropes and boards — not event liability insurance.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No tournament-sponsor affiliate hard-sell.",
+            },
+          ],
+        },
+        "Racket Sports": {
+          title: "Racket sports — sport type",
+          summary: "Tennis through pickleball freeze sport type plus size and skill.",
+          qa: [
+            {
+              q: "What must be listed?",
+              a: "Racket sport type, size/length (grip or length), and skill level.",
+            },
+            {
+              q: "Strings / tension?",
+              a: "Note tension or string type in the kit checklist when it matters.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers cracked frames and missing covers — not string warranty.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No racket-subscription affiliate hard-sell.",
+            },
+          ],
+        },
+        "Skating": {
+          title: "Skating — type, size, skill",
+          summary: "Inline, ice, quad, and boards freeze skate type before rent.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Skate type, size/length, and skill level.",
+            },
+            {
+              q: "Pads / helmet?",
+              a: "Disclose protective gear in the kit checklist — assume not included unless listed.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers broken trucks and missing wheels.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No skate-shop affiliate hard-sell.",
+            },
+          ],
+        },
+        "Fishing Gear": {
+          title: "Fishing — rod class",
+          summary: "Rod/reel class plus size and skill freeze before rent.",
+          qa: [
+            {
+              q: "What must be listed?",
+              a: "Rod/gear class, size/length, and skill level.",
+            },
+            {
+              q: "Tackle included?",
+              a: "List lure packs and nets in the kit checklist.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers snapped rods and missing reels — not lost-tackle insurance for every lure.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No fishing-brand affiliate hard-sell.",
+            },
+          ],
+        },
+        "Competition Gear": {
+          title: "Competition — sport class",
+          summary: "Track/field/court class freezes competition shelf intent.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Competition sport class, size/length, and skill.",
+            },
+            {
+              q: "Rule legal?",
+              a: "Host declares class — renter confirms event rules separately.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers damaged implements and missing weights.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No federation-insurance affiliate hard-sell.",
+            },
+          ],
+        },
+        "Coaching Equipment": {
+          title: "Coaching — aid type",
+          summary: "Cones, carts, and agility kits freeze coaching aid type.",
+          qa: [
+            {
+              q: "What must be listed?",
+              a: "Coaching aid type, size/count notes, and skill.",
+            },
+            {
+              q: "How many pieces?",
+              a: "Put counts in the kit checklist.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers missing cones and damaged hurdles.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No coaching-vendor affiliate hard-sell.",
+            },
+          ],
+        },
+        "Timing Systems": {
+          title: "Timing — system type",
+          summary: "Clocks, chips, and photo-finish freeze system type.",
+          qa: [
+            {
+              q: "What gates apply?",
+              a: "Timing system type, size/ports notes, and skill.",
+            },
+            {
+              q: "Power / setup?",
+              a: "Disclose power and setup in the checklist.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers missing sensors and damaged displays — not race results insurance.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No timing-vendor affiliate hard-sell.",
+            },
+          ],
+        },
+        "Team Sports Gear": {
+          title: "Team gear — kit band + inventory",
+          summary: "Ball kits, goals, and protective sets freeze kit band and inventory text.",
+          qa: [
+            {
+              q: "What must be listed?",
+              a: "Team kit band, size/length, skill, and a kit inventory checklist.",
+            },
+            {
+              q: "Why inventory?",
+              a: "Team bags lose pieces — freeze the list before unlock.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers missing balls and torn nets against the list.",
+            },
+            {
+              q: "Partner promo?",
+              a: "No team-store affiliate hard-sell.",
+            },
+          ],
+        },
+        "Other": {
+          title: "Sports other — re-shelf when named fits",
+          summary: "Catch-all still publishes kind and kit inventory.",
+          qa: [
+            {
+              q: "When use Other?",
+              a: "Only when no named Sports shelf fits.",
+            },
+            {
+              q: "What gates apply?",
+              a: "sportsOtherKind plus kit checklist, size/length, and skill.",
+            },
+            {
+              q: "Re-shelf?",
+              a: "Move to Snow, Water, Racket, Skating, Fishing, Team, or pro shelves when those gates fit.",
+            },
+            {
+              q: "Deposit?",
+              a: "Covers missing pieces against the checklist.",
+            },
+          ],
+        },
+      },
+
+"Photo & Video": {
         "Camera Kits": {
           title: "Camera kits \u2014 sensor, media, kit list",
           summary: "Bodies and kits freeze sensor/mount, media policy, and inventory.",

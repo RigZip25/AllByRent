@@ -123,4 +123,23 @@ All listing `categorySpecs` select **values** share **one flat** `listing.catego
 | Drones | Weight class + Remote ID (existing P0) |
 | FactCards | Per-sub Q→A EN/CS/ES; wire subcategory on listing/booking |
 
+### Sports & Recreation (~8.0) — shipped pattern
+
+| Layer | Pattern |
+|-------|---------|
+| All | `sizeOrLength` + `skillLevel`; kit checklist recommended |
+| Snow | `snowGearForm` + DIN + helmet + waiver |
+| Water / Pro Water | `waterCraftClass` + PFD + waiver |
+| Racket / Skating / Fishing | Sport-specific type/class gates |
+| Pro | Competition class; coaching aid; timing system; team kit band + inventory |
+| Other | `sportsOtherKind` + checklist |
+| Deposit | Gear damage / missing pieces — not injury insurance |
+| FactCards | Per-sub Q→A; wire `subcategory` |
+
+**Option scoping:** prefix `sports_*` on all new option ids.
+
+### Real Estate (~8.0) — verified
+
+Profile + per-sub FactCards + subcategory wiring already shipped (`bfb116d`). Generic required-field validation + `houseRules` gate.
+
 See also: [EVORIOS.md](./EVORIOS.md) (brand / product source of truth).

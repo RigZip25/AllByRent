@@ -2049,6 +2049,163 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         subcategories: ["Water Sports", "Pro Water Sports"],
         options: ["included", "renter_provides", "not_applicable"],
       },
+      {
+        key: "snowGearForm",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Snow Sports"],
+        options: [
+          "sports_alpine_ski",
+          "sports_snowboard",
+          "sports_nordic",
+          "sports_snow_other",
+        ],
+      },
+      {
+        key: "waterCraftClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Water Sports", "Pro Water Sports"],
+        options: [
+          "sports_kayak",
+          "sports_sup",
+          "sports_surf",
+          "sports_wake",
+          "sports_water_other",
+        ],
+      },
+      {
+        key: "racketSportType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Racket Sports"],
+        options: [
+          "sports_tennis",
+          "sports_badminton",
+          "sports_pickleball",
+          "sports_squash",
+          "sports_racket_other",
+        ],
+      },
+      {
+        key: "skateType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Skating"],
+        options: [
+          "sports_inline",
+          "sports_ice",
+          "sports_quad",
+          "sports_skateboard",
+          "sports_skate_other",
+        ],
+      },
+      {
+        key: "fishingRodClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Fishing Gear"],
+        options: [
+          "sports_spinning",
+          "sports_baitcasting",
+          "sports_fly",
+          "sports_surf_rod",
+          "sports_fishing_other",
+        ],
+      },
+      {
+        key: "competitionSportClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Competition Gear"],
+        options: [
+          "sports_comp_track",
+          "sports_comp_field",
+          "sports_comp_court",
+          "sports_comp_other",
+        ],
+      },
+      {
+        key: "coachingAidType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Coaching Equipment"],
+        options: [
+          "sports_coach_cones",
+          "sports_coach_ball_cart",
+          "sports_coach_agility",
+          "sports_coach_other",
+        ],
+      },
+      {
+        key: "timingSystemType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Timing Systems"],
+        options: [
+          "sports_timing_clock",
+          "sports_timing_chips",
+          "sports_timing_photo",
+          "sports_timing_other",
+        ],
+      },
+      {
+        key: "teamSportKitBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Team Sports Gear"],
+        options: [
+          "sports_team_ball_kit",
+          "sports_team_goals",
+          "sports_team_protective",
+          "sports_team_mixed",
+        ],
+      },
+      {
+        key: "sportsOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: [
+          "sports_kind_snow",
+          "sports_kind_water",
+          "sports_kind_racket",
+          "sports_kind_skate",
+          "sports_kind_fish",
+          "sports_kind_team",
+          "sports_kind_mixed",
+        ],
+      },
+      {
+        key: "kitInventoryChecklist",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: [
+          "Snow Sports",
+          "Water Sports",
+          "Pro Water Sports",
+          "Racket Sports",
+          "Skating",
+          "Fishing Gear",
+          "Competition Gear",
+          "Coaching Equipment",
+          "Timing Systems",
+          "Team Sports Gear",
+          "Other",
+        ],
+      },
     ],
   },
   {
@@ -6219,6 +6376,54 @@ export function areCategorySpecsValid(
     }
     if (sub === "Other") {
       if (!reqSelect("photoOtherKind", ["kind_camera","kind_lens","kind_light","kind_support","kind_drone","kind_broadcast","kind_mixed_photo"])) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+  }
+
+  // Sports & Recreation P0 gates by shelf.
+  if (category.trim() === "Sports & Recreation" && modes?.rent) {
+    const sub = subcategory.trim();
+    const reqSelect = (key: string, allowed: string[]) => allowed.includes((values[key] ?? "").trim());
+    const reqText = (key: string, min = 3) => (values[key] ?? "").trim().length >= min;
+
+    if (!reqText("sizeOrLength", 1)) return false;
+    if (!reqSelect("skillLevel", ["beginner", "intermediate", "advanced", "all_levels"])) return false;
+
+    if (sub === "Snow Sports") {
+      if (!reqSelect("snowGearForm", ["sports_alpine_ski", "sports_snowboard", "sports_nordic", "sports_snow_other"])) return false;
+      if (!reqSelect("dinSettingBand", ["under_3", "3_5", "5_8", "8_10", "10_plus", "not_ski_bindings"])) return false;
+      if (!reqSelect("helmetPolicy", ["renter_provides", "included", "not_required"])) return false;
+      if (!reqSelect("liabilityWaiverRequired", ["required", "not_required"])) return false;
+    }
+    if (sub === "Water Sports" || sub === "Pro Water Sports") {
+      if (!reqSelect("waterCraftClass", ["sports_kayak", "sports_sup", "sports_surf", "sports_wake", "sports_water_other"])) return false;
+      if (!reqSelect("pfdIncluded", ["included", "renter_provides", "not_applicable"])) return false;
+      if (!reqSelect("liabilityWaiverRequired", ["required", "not_required"])) return false;
+    }
+    if (sub === "Racket Sports") {
+      if (!reqSelect("racketSportType", ["sports_tennis", "sports_badminton", "sports_pickleball", "sports_squash", "sports_racket_other"])) return false;
+    }
+    if (sub === "Skating") {
+      if (!reqSelect("skateType", ["sports_inline", "sports_ice", "sports_quad", "sports_skateboard", "sports_skate_other"])) return false;
+    }
+    if (sub === "Fishing Gear") {
+      if (!reqSelect("fishingRodClass", ["sports_spinning", "sports_baitcasting", "sports_fly", "sports_surf_rod", "sports_fishing_other"])) return false;
+    }
+    if (sub === "Competition Gear") {
+      if (!reqSelect("competitionSportClass", ["sports_comp_track", "sports_comp_field", "sports_comp_court", "sports_comp_other"])) return false;
+    }
+    if (sub === "Coaching Equipment") {
+      if (!reqSelect("coachingAidType", ["sports_coach_cones", "sports_coach_ball_cart", "sports_coach_agility", "sports_coach_other"])) return false;
+    }
+    if (sub === "Timing Systems") {
+      if (!reqSelect("timingSystemType", ["sports_timing_clock", "sports_timing_chips", "sports_timing_photo", "sports_timing_other"])) return false;
+    }
+    if (sub === "Team Sports Gear") {
+      if (!reqSelect("teamSportKitBand", ["sports_team_ball_kit", "sports_team_goals", "sports_team_protective", "sports_team_mixed"])) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
+    }
+    if (sub === "Other") {
+      if (!reqSelect("sportsOtherKind", ["sports_kind_snow", "sports_kind_water", "sports_kind_racket", "sports_kind_skate", "sports_kind_fish", "sports_kind_team", "sports_kind_mixed"])) return false;
       if (!reqText("kitInventoryChecklist", 6)) return false;
     }
   }
