@@ -141,6 +141,7 @@ export const CATEGORIES: Record<string, CategoryData> = {
     personal: [
       sub("Mountain Bikes", "🚵"),
       sub("Road Bikes", "🚴"),
+      sub("E-Bikes", "⚡"),
       sub("Kids Bikes", "🚲"),
       sub("Electric Scooters", "🛴"),
       sub("Cruisers", "🏖️"),
@@ -778,7 +779,7 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
     replacementValueLabel: "Replacement Cost",
     replacementValueHelper: "Cost to replace if damaged or lost",
     showDailyRate: true,
-    showMonthlyRate: false,
+    showMonthlyRate: true,
   },
   "Real Estate": {
     rent: true,
@@ -868,7 +869,7 @@ export function calculateRentalPrices(
       const pct = v < 1000 ? 0.12 : v < 5000 ? 0.09 : 0.06;
       daily = Math.round(v * pct * d);
       weekly = Math.round(daily * 4.0);
-      monthly = 0;
+      monthly = Math.round(daily * 12);
       deposit = Math.round(v * 0.25);
       break;
     }

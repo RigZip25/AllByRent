@@ -1,4 +1,5 @@
 import type { ListingDraft } from "../screens/listing/types";
+import { listingIsConstructionSoftPpe } from "./categoryTrustRules";
 
 /** Class 7+ / commercial heavy vehicle class — physical damage insurance required. */
 export const VEHICLE_PHYSICAL_DAMAGE_WEIGHT_LBS = 26_000;
@@ -111,6 +112,7 @@ export function listingRequiresPhysicalDamage(
   listing: Pick<ListingDraft, "category" | "handoff" | "modes" | "categorySpecs" | "subcategory">,
 ): boolean {
   if (!listing.modes?.rent) return false;
+  if (listingIsConstructionSoftPpe(listing)) return listing.handoff.requirePhysicalDamage === true;
   if (isCommercialEquipmentCategory(listing.category)) return true;
   if (listingIsCommercialTransport(listing)) return true;
   if (listing.category.trim() === "Vehicles") {
@@ -124,12 +126,11 @@ export function listingRequiresPhysicalDamage(
  * Other categories only when host explicitly enables the toggle.
  */
 export function listingProRentersOnly(
-  listing: Pick<ListingDraft, "category" | "handoff" | "modes">,
+  listing: Pick<ListingDraft, "category" | "subcategory" | "handoff" | "modes" | "categorySpecs">,
 ): boolean {
   if (!listing.modes?.rent) return false;
-  if (isCommercialEquipmentCategory(listing.category)) {
-    return listing.handoff.proRentersOnly !== false;
-  }
+  if (listingIsConstructionSoftPpe(listing)) return listing.handoff.proRentersOnly === true;
+  if (isCommercialEquipmentCategory(listing.category)) return listing.handoff.proRentersOnly !== false;
   return listing.handoff.proRentersOnly === true;
 }
 
@@ -151,9 +152,15 @@ export function resolveRentRuleHandoffDefaults(
   } = {};
 
   if (isCommercialEquipmentCategory(listing.category)) {
-    patch.proRentersOnly = listing.handoff.proRentersOnly ?? true;
-    patch.requirePhysicalDamage = true;
-    patch.requireInsuranceProof = true;
+    if (listingIsConstructionSoftPpe(listing)) {
+      if (listing.handoff.proRentersOnly === true) patch.proRentersOnly = true;
+      if (listing.handoff.requirePhysicalDamage === true) patch.requirePhysicalDamage = true;
+      if (listing.handoff.requireInsuranceProof === true) patch.requireInsuranceProof = true;
+    } else {
+      patch.proRentersOnly = listing.handoff.proRentersOnly ?? true;
+      patch.requirePhysicalDamage = true;
+      patch.requireInsuranceProof = true;
+    }
   }
 
   if (listingIsCommercialTransport(listing)) {
@@ -175,6 +182,7 @@ export function physicalDamageIsMandatory(
   listing: Pick<ListingDraft, "category" | "subcategory" | "handoff" | "modes" | "categorySpecs">,
 ): boolean {
   if (!listing.modes?.rent) return false;
+  if (listingIsConstructionSoftPpe(listing)) return false;
   if (isCommercialEquipmentCategory(listing.category)) return true;
   return listingIsCommercialTransport(listing);
 }

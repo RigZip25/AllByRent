@@ -969,14 +969,6 @@ export const en: AppMessages = {
       "Safety briefing acknowledgment from booking is required before handoff can start.",
     cribUnlockBlocked:
       "Complete crib safety acknowledgments at booking before pickup unlock.",
-    carSeatUnlockBlocked:
-      "Complete car-seat safety acknowledgments at booking before pickup unlock.",
-    babyHygieneUnlockBlocked:
-      "Acknowledge baby-gear hygiene at booking before pickup unlock.",
-    babyInstallUnlockBlocked:
-      "Acknowledge safety-system install guidance at booking before pickup unlock.",
-    toyHazardUnlockBlocked:
-      "Acknowledge the toy age / small-parts label at booking before pickup unlock.",
     paCableStandUnlockBlocked: "PA cable / stand inventory acknowledgment is required before handoff can start.",
     ppeAckUnlockBlocked: "PPE acknowledgment is required before pickup unlock.",
     hygieneUnlockBlocked:
@@ -2857,28 +2849,6 @@ export const en: AppMessages = {
     cribSanitizationAttest:
       "I acknowledge sanitization / clean sleep-surface expectations for this rental.",
     cribSafetyBadge: "Crib safety gate",
-    babyHygieneBlockedTitle: "Baby gear hygiene incomplete",
-    babyHygieneBlockedBody:
-      "The host must attest sanitization and a recall check before this item can be booked.",
-    babyHygieneTitle: "Baby gear hygiene",
-    babyHygieneBody:
-      "Strollers, carriers, toys, childcare, and play gear should be cleaned between renters.",
-    babyHygieneAttest: "I acknowledge sanitization / hygiene for this baby item.",
-    babyHygieneBadge: "Baby hygiene gate",
-    babyInstallBlockedTitle: "Safety-system install incomplete",
-    babyInstallBlockedBody:
-      "The host must document how gates / monitors / locks are installed before booking.",
-    babyInstallTitle: "Safety system install",
-    babyInstallBody: (status) =>
-      `Host install path: ${status || "documented"}. Follow manufacturer guidance for your home.`,
-    babyInstallAttest: "I will follow the install guidance for this safety system.",
-    toyHazardBlockedTitle: "Toy age / small-parts label missing",
-    toyHazardBlockedBody:
-      "The host must declare the small-parts / age band before this toy can be booked.",
-    toyHazardTitle: "Toy age / small-parts",
-    toyHazardBody: (band) =>
-      `Host label: ${band || "see listing"}. Match the child’s age and keep small parts away from under-3s when marked.`,
-    toyHazardAttest: "I acknowledge the age / small-parts label for this toy.",
     ppeAckTitle: "PPE acknowledgment",
     ppeAckBody:
       "Eye, ear, and hand protection (plus welding PPE when applicable) are required for safe use.",

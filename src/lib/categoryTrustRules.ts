@@ -54,11 +54,12 @@ export function listingOperatorCertKind(
   if (cat !== "Heavy Equipment" && cat !== "Construction") return null;
   const sub = subKey(listing);
   if (!sub) return null;
+  if (listingIsConstructionSoftPpe(listing)) return null;
+  if ((CRANE_SUBS.has(sub) || sub.includes("crane")) && (listing.categorySpecs?.craneOperatorMode ?? "").trim() === "operator_included") return null;
   if (FORKLIFT_SUBS.has(sub) || sub.includes("forklift")) return "forklift";
   if (CRANE_SUBS.has(sub) || sub.includes("crane")) return "crane";
   if (EXCAVATOR_SUBS.has(sub) || sub.includes("excavator")) return "excavator";
   if (GENERAL_HEAVY_SUBS.has(sub)) return "general_heavy";
-  // Construction crane_class job scale → treat as crane when sub is vague
   const jobScale = (listing.categorySpecs?.jobScale ?? "").trim().toLowerCase();
   if (cat === "Construction" && jobScale === "crane_class") return "crane";
   return null;
@@ -387,11 +388,11 @@ export function listingIsHighValueGearCategory(
 }
 
 export function listingRequiresKitInventory(
-  listing: Pick<ListingDraft, "category" | "modes" | "categorySpecs">,
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
 ): boolean {
-  if (!rentOn(listing) || !listingIsHighValueGearCategory(listing)) return false;
-  // High-value gear always needs kit inventory ack for claims / handoff parity.
-  return true;
+  if (!rentOn(listing)) return false;
+  if (listingIsHighValueGearCategory(listing)) return true;
+  return listingIsConstructionFormwork(listing);
 }
 
 export function listingKitInventoryText(
@@ -451,6 +452,9 @@ export function listingRequiresLiabilityWaiver(
     if (HIGH_RISK_OUTDOOR_SUBS.has(sub)) return true;
     if (/\b(climb|rappel|ice|alpine|survival)\b/i.test(sub)) return true;
   }
+  if (cat === "Bikes & Scooters") {
+    if (sub === "mountain bikes" || sub === "racing bikes") return true;
+  }
   return false;
 }
 
@@ -495,23 +499,28 @@ export function listingIsElectricScooter(
   return electric === "yes" && sub.includes("scooter");
 }
 
-/** E-Bikes Pro shelf — age + class/battery parity with e-scooters. */
-export function listingIsEBikePro(
+export function listingIsElectricBike(
   listing: Pick<ListingDraft, "category" | "subcategory" | "categorySpecs">,
 ): boolean {
   if (listing.category.trim() !== "Bikes & Scooters") return false;
-  const sub = subKey(listing);
-  if (sub !== "e-bikes pro" && sub !== "e-bikes" && !sub.includes("e-bike")) return false;
+  if (listingIsElectricScooter(listing)) return false;
   const electric = (listing.categorySpecs?.electric ?? "").trim().toLowerCase();
   if (electric === "no") return false;
-  return true;
+  const sub = subKey(listing);
+  if (sub === "e-bikes" || sub === "e-bikes pro" || sub.includes("e-bike")) return true;
+  return electric === "yes";
 }
 
-/** Micromobility age gate: e-scooters + E-Bikes Pro. */
+export function listingIsEBikePro(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "categorySpecs">,
+): boolean {
+  return listingIsElectricBike(listing);
+}
+
 export function listingIsElectricMicromobility(
   listing: Pick<ListingDraft, "category" | "subcategory" | "categorySpecs">,
 ): boolean {
-  return listingIsElectricScooter(listing) || listingIsEBikePro(listing);
+  return listingIsElectricScooter(listing) || listingIsElectricBike(listing);
 }
 
 export function listingEScooterMinAge(
@@ -528,6 +537,30 @@ export function listingRequiresEScooterAgeGate(
   listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
 ): boolean {
   return rentOn(listing) && listingIsElectricMicromobility(listing);
+}
+
+
+export function listingRequiresEBikeClass(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  return rentOn(listing) && listingIsElectricBike(listing);
+}
+export function listingOvernightStorageRule(listing: Pick<ListingDraft, "categorySpecs">): string {
+  return (listing.categorySpecs?.overnightStorageRule ?? "").trim();
+}
+export function listingIsKidsBike(listing: Pick<ListingDraft, "category" | "subcategory">): boolean {
+  return listing.category.trim() === "Bikes & Scooters" && subKey(listing) === "kids bikes";
+}
+export function listingRequiresKidsGuardianAttest(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes">,
+): boolean {
+  return rentOn(listing) && listingIsKidsBike(listing);
+}
+export function listingKidsHelmetBlocksPublish(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!listingRequiresKidsGuardianAttest(listing)) return false;
+  return (listing.categorySpecs?.helmetPolicy ?? "").trim() === "not_required";
 }
 
 /** Party pro AV / stage shelves — setup fee + power when relevant. */
@@ -1083,4 +1116,21 @@ export function listingSleepingBagTempBand(listing: Pick<ListingDraft, "category
 }
 export function listingStoveFuelType(listing: Pick<ListingDraft, "categorySpecs">): string {
   return (listing.categorySpecs?.stoveFuelType ?? "").trim();
+}
+
+const CONSTRUCTION_FORMWORK_SUBS = new Set(["formwork basic", "professional formwork"]);
+
+export function listingIsConstructionSoftPpe(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!rentOn(listing)) return false;
+  if (listing.category.trim() !== "Construction") return false;
+  if (subKey(listing) !== "safety equipment") return false;
+  return (listing.categorySpecs?.ppeRiskTier ?? "").trim() === "soft_ppe";
+}
+
+export function listingIsConstructionFormwork(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  return listing.category.trim() === "Construction" && CONSTRUCTION_FORMWORK_SUBS.has(subKey(listing));
 }

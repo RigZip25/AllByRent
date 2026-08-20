@@ -43,6 +43,23 @@ export function isSpecFieldVisible(
   modes?: SpecModeContext | null,
 ): boolean {
   if (field.requiredIf === "rent" && !modes?.rent) return false;
+  if (category.trim() === "Construction" && subcategory.trim() === "Safety Equipment" && modes?.rent) {
+    const tier = (values.ppeRiskTier ?? "").trim();
+    if (tier === "fall_protection" || tier === "mixed_kit") {
+      const std = (values.ppeStandardRegion ?? "").trim();
+      if (!["ansi_z89_hard_hat","en_397_hard_hat","ansi_z359_fall","en_361_harness","other_ppe_standard"].includes(std)) return false;
+      const insp = (values.ppeInspectionStatus ?? "").trim();
+      if (insp !== "inspected_current" && insp !== "tag_visible") return false;
+    }
+    if (tier === "soft_ppe") {
+      const insp = (values.ppeInspectionStatus ?? "").trim();
+      if (!["not_required_soft_ppe","inspected_current","tag_visible"].includes(insp)) return false;
+    }
+  }
+  if (category.trim() === "Construction" && modes?.rent && (subcategory.trim() === "Formwork Basic" || subcategory.trim() === "Professional Formwork")) {
+    if (!(values.kitInventoryChecklist ?? "").trim()) return false;
+  }
+
   return true;
 }
 
@@ -563,31 +580,14 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
   {
     category: "Bikes & Scooters",
     fields: [
-      {
-        key: "frameOrWheelBand",
-        type: "select",
-        required: true,
-        options: FRAME_SIZES,
-      },
-      {
-        key: "electric",
-        type: "select",
-        required: true,
-        options: ["yes", "no"],
-      },
+      { key: "frameOrWheelBand", type: "select", required: true, options: FRAME_SIZES },
+      { key: "electric", type: "select", required: true, options: ["yes", "no"] },
       {
         key: "riderHeightBand",
         type: "select",
         required: false,
         recommended: true,
-        options: [
-          "under_5ft",
-          "5_5_4",
-          "5_4_5_8",
-          "5_8_6_0",
-          "6_0_plus",
-          "kids_height",
-        ],
+        options: ["under_5ft", "5_5_4", "5_4_5_8", "5_8_6_0", "6_0_plus", "kids_height"],
       },
       {
         key: "helmetPolicy",
@@ -604,18 +604,25 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         options: ["included", "renter_provides", "deposit_for_lock"],
       },
       {
-        key: "minRiderAge",
-        type: "number",
-        required: true,
-        requiredIf: "rent",
-        subcategories: ["Electric Scooters", "Professional Scooters", "E-Bikes Pro"],
-      },
-      {
-        key: "eBikeClass",
+        key: "overnightStorageRule",
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: ["E-Bikes Pro"],
+        options: [
+          "indoor_only",
+          "covered_outdoor_ok",
+          "outdoor_locked_ok",
+          "must_return_same_day",
+          "host_holds_overnight",
+        ],
+      },
+      { key: "minRiderAge", type: "number", required: false, recommended: true, requiredIf: "rent" },
+      {
+        key: "eBikeClass",
+        type: "select",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
         options: ["class_1", "class_2", "class_3", "not_classified"],
       },
       {
@@ -624,8 +631,67 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         required: false,
         recommended: true,
         requiredIf: "rent",
-        subcategories: ["E-Bikes Pro"],
         options: ["under_20mi", "20_40mi", "40_60mi", "60mi_plus", "unknown_range"],
+      },
+      {
+        key: "chargerIncluded",
+        type: "select",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        options: ["included", "renter_provides", "not_applicable"],
+      },
+      {
+        key: "batteryChargeBand",
+        type: "select",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        options: ["full_90_100", "high_70_89", "mid_40_69", "low_under_40", "unknown_charge"],
+      },
+      {
+        key: "liabilityWaiverRequired",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Mountain Bikes", "Racing Bikes"],
+        options: ["required", "not_required"],
+      },
+      {
+        key: "cargoPayloadBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cargo Bikes"],
+        options: ["under_50lb", "50_100lb", "100_200lb", "200lb_plus", "unknown_payload"],
+      },
+      {
+        key: "childPassengerPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Cargo Bikes"],
+        options: [
+          "no_child_passengers",
+          "child_seat_included",
+          "child_ok_renter_seat",
+          "adult_cargo_only",
+        ],
+      },
+      {
+        key: "adaptiveBikeType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Adaptive Bikes"],
+        options: [
+          "handcycle",
+          "tandem",
+          "trike",
+          "recumbent",
+          "wheelchair_attach",
+          "other_adaptive",
+        ],
       },
     ],
   },
@@ -1368,33 +1434,21 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
     category: "Construction",
     fields: [
       brandField("construction"),
-      {
-        key: "dutyClass",
-        type: "select",
-        required: true,
-        options: ["light_duty", "medium_duty", "heavy_duty", "industrial"],
-      },
-      {
-        key: "jobScale",
-        type: "select",
-        required: false,
-        recommended: true,
-        options: ["handheld", "job_site", "crew_scale", "crane_class"],
-      },
-      {
-        key: "insuranceMinLiability",
-        type: "select",
-        required: true,
-        requiredIf: "rent",
-        options: ["liability_25_50", "liability_50_100", "liability_100_300", "liability_250_500"],
-      },
-      {
-        key: "insuranceMaxDeductible",
-        type: "select",
-        required: true,
-        requiredIf: "rent",
-        options: ["deductible_500", "deductible_1000", "deductible_2500", "full_coverage_required"],
-      },
+      { key: "dutyClass", type: "select", required: true, options: ["light_duty", "medium_duty", "heavy_duty", "industrial"] },
+      { key: "jobScale", type: "select", required: false, recommended: true, options: ["handheld", "job_site", "crew_scale", "crane_class"] },
+      { key: "powerBand", type: "select", required: true, subcategories: ["Concrete Mixers", "Site Lighting", "Large Concrete Equipment", "Crane & Lifting", "Excavation Tools"], options: ["under_2kw", "2_5kw", "5_15kw", "15_50kw", "50kw_plus", "not_motorized"] },
+      { key: "fuelType", type: "select", required: true, subcategories: ["Concrete Mixers", "Site Lighting", "Large Concrete Equipment", "Crane & Lifting", "Excavation Tools"], options: ["gasoline", "diesel", "electric", "propane", "other"] },
+      { key: "hoursBand", type: "select", required: false, recommended: true, subcategories: ["Concrete Mixers", "Site Lighting", "Large Concrete Equipment", "Crane & Lifting", "Excavation Tools"], options: ["under_100h", "100_500h", "500_2000h", "2000h_plus", "unknown_hours"] },
+      { key: "ppeRiskTier", type: "select", required: true, requiredIf: "rent", subcategories: ["Safety Equipment"], options: ["soft_ppe", "fall_protection", "mixed_kit"] },
+      { key: "ppeSizeBand", type: "select", required: true, requiredIf: "rent", subcategories: ["Safety Equipment"], options: ["xs", "s", "m", "l", "xl", "xxl", "one_size", "adjustable", "mixed_sizes"] },
+      { key: "ppeStandardRegion", type: "select", required: true, requiredIf: "rent", subcategories: ["Safety Equipment"], options: ["ansi_z89_hard_hat", "en_397_hard_hat", "ansi_z359_fall", "en_361_harness", "other_ppe_standard", "not_applicable_soft"] },
+      { key: "ppeInspectionStatus", type: "select", required: true, requiredIf: "rent", subcategories: ["Safety Equipment"], options: ["inspected_current", "tag_visible", "needs_inspection", "not_required_soft_ppe"] },
+      { key: "craneCapacityTonsBand", type: "select", required: true, requiredIf: "rent", subcategories: ["Crane & Lifting"], options: ["under_1t", "1_5t", "5_20t", "20_50t", "50t_plus", "not_a_crane"] },
+      { key: "craneOperatorMode", type: "select", required: true, requiredIf: "rent", subcategories: ["Crane & Lifting"], options: ["bare_rental", "operator_included", "operator_optional"] },
+      { key: "kitInventoryChecklist", type: "text", required: true, requiredIf: "rent", subcategories: ["Formwork Basic", "Professional Formwork"] },
+      { key: "formworkPieceCountBand", type: "select", required: true, requiredIf: "rent", subcategories: ["Formwork Basic", "Professional Formwork"], options: ["under_10_pieces", "10_25_pieces", "25_50_pieces", "50_100_pieces", "100_plus_pieces"] },
+      { key: "insuranceMinLiability", type: "select", required: true, requiredIf: "rent", options: ["liability_25_50", "liability_50_100", "liability_100_300", "liability_250_500"] },
+      { key: "insuranceMaxDeductible", type: "select", required: true, requiredIf: "rent", options: ["deductible_500", "deductible_1000", "deductible_2500", "full_coverage_required"] },
     ],
   },
   {
@@ -1771,6 +1825,51 @@ export function areCategorySpecsValid(
       sub === "Masks & Makeup"
     ) {
       if ((values.sanitizationAttested ?? "").trim() !== "attested") return false;
+    }
+  }
+
+
+  // Bikes & Scooters P0/P1 gates
+  if (category.trim() === "Bikes & Scooters" && modes?.rent) {
+    const overnight = (values.overnightStorageRule ?? "").trim();
+    if (![
+      "indoor_only",
+      "covered_outdoor_ok",
+      "outdoor_locked_ok",
+      "must_return_same_day",
+      "host_holds_overnight",
+    ].includes(overnight)) return false;
+    const electric = (values.electric ?? "").trim().toLowerCase();
+    const sub = subcategory.trim().toLowerCase();
+    const isScooterShelf = sub.includes("scooter");
+    const isEBikeShelf = sub === "e-bikes" || sub === "e-bikes pro" || sub.includes("e-bike");
+    const isElectricBike = !isScooterShelf && electric !== "no" && (isEBikeShelf || electric === "yes");
+    const isElectricScooter = isScooterShelf && electric !== "no";
+    if (isElectricBike || isElectricScooter) {
+      const age = Number.parseInt((values.minRiderAge ?? "").trim(), 10);
+      if (!Number.isFinite(age) || age < 12 || age > 21) return false;
+    }
+    if (isElectricBike) {
+      const klass = (values.eBikeClass ?? "").trim();
+      if (!["class_1", "class_2", "class_3", "not_classified"].includes(klass)) return false;
+    }
+    if (sub === "kids bikes" && (values.helmetPolicy ?? "").trim() === "not_required") return false;
+    if (sub === "mountain bikes" || sub === "racing bikes") {
+      const waiver = (values.liabilityWaiverRequired ?? "").trim();
+      if (waiver !== "required" && waiver !== "not_required") return false;
+    }
+    if (sub === "cargo bikes") {
+      if (![
+        "under_50lb", "50_100lb", "100_200lb", "200lb_plus", "unknown_payload",
+      ].includes((values.cargoPayloadBand ?? "").trim())) return false;
+      if (![
+        "no_child_passengers", "child_seat_included", "child_ok_renter_seat", "adult_cargo_only",
+      ].includes((values.childPassengerPolicy ?? "").trim())) return false;
+    }
+    if (sub === "adaptive bikes") {
+      if (![
+        "handcycle", "tandem", "trike", "recumbent", "wheelchair_attach", "other_adaptive",
+      ].includes((values.adaptiveBikeType ?? "").trim())) return false;
     }
   }
 

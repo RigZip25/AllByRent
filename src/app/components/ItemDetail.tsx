@@ -539,6 +539,11 @@ export function ItemDetail({
             listing.modes.rent ? (
               <CategoryFactCard
                 category={listing.category.trim()}
+                subcategory={
+                  listing.category.trim() === "Construction"
+                    ? listing.subcategory
+                    : undefined
+                }
                 className="mt-3"
               />
             ) : null}

@@ -1,5 +1,8 @@
 import type { ListingDraft } from "../screens/listing/types";
-import { listingRequiresStumpGrinderInsurance } from "./categoryTrustRules";
+import {
+  listingIsConstructionSoftPpe,
+  listingRequiresStumpGrinderInsurance,
+} from "./categoryTrustRules";
 import {
   isCommercialEquipmentCategory,
   listingIsCommercialTransport,
@@ -26,6 +29,7 @@ export function listingRequiresInsuranceProof(
   listing: Pick<ListingDraft, "category" | "subcategory" | "handoff" | "modes" | "categorySpecs">,
 ): boolean {
   if (!listing.modes?.rent) return false;
+  if (listingIsConstructionSoftPpe(listing)) return listing.handoff.requireInsuranceProof === true;
   // Physical damage mandate always requires insurance proof (cannot opt out).
   if (listingRequiresPhysicalDamage(listing)) return true;
   if (isCommercialEquipmentCategory(listing.category)) return true;
@@ -120,6 +124,7 @@ export function listingUsesStructuredCoi(
   if (!listing.modes?.rent) return false;
   const cat = listing.category.trim();
   if (cat !== "Heavy Equipment" && cat !== "Construction") return false;
+  if (listingIsConstructionSoftPpe(listing)) return false;
   return listingRequiresInsuranceProof(listing);
 }
 
