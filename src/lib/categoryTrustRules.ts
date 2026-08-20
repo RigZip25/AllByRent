@@ -359,11 +359,14 @@ const E_SCOOTER_SUBS = new Set([
 /** Default min age for e-scooters (market / municipal common floor). */
 export const DEFAULT_E_SCOOTER_MIN_AGE = 16;
 
-/** Hull ID / registration for Boats & Water rentals (US market standard). */
+/**
+ * Hull ID (HIN / CIN / local reg) for Boats & Water rentals.
+ * Required for powered craft; optional for non-motor paddle / inflatable.
+ */
 export function listingRequiresBoatIdentity(
-  listing: Pick<ListingDraft, "category" | "modes">,
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
 ): boolean {
-  return rentOn(listing) && listing.category.trim() === "Boats & Water";
+  return listingIsPoweredWatercraft(listing);
 }
 
 /** USCG-style safety kit checklist — powered watercraft. */

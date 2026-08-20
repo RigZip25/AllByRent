@@ -444,7 +444,14 @@ export function CategorySpecsFields({
         const required =
           isSpecFieldRequired(field, modes) ||
           (field.key === "minRiderAge" && needsMicromobility) ||
-          (field.key === "eBikeClass" && needsEBikeClass);
+          (field.key === "eBikeClass" && needsEBikeClass) ||
+          (field.key === "hinNumber" &&
+            listingRequiresBoatIdentity({
+              category: draft.category,
+              subcategory: draft.subcategory,
+              modes: draft.modes,
+              categorySpecs: draft.categorySpecs,
+            }));
         const mileageRentHint =
           field.key === "mileage" && modes.rent && !modes.sell
             ? specsCopy.fields.mileage?.rentOptionalHint

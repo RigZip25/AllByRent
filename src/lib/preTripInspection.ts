@@ -231,7 +231,11 @@ export function isHullArea(areaId: InspectionAreaId): boolean {
 }
 
 export function resolveInspectionLayout(
-  record: Pick<PreTripInspectionRecord, "layout" | "areas"> | null | undefined,
+  record:
+    | Pick<PreTripInspectionRecord, "layout" | "areas">
+    | Partial<Pick<PreTripInspectionRecord, "layout" | "areas">>
+    | null
+    | undefined,
   fallback: InspectionLayout = "vehicle",
 ): InspectionLayout {
   if (record?.layout === "hull" || record?.layout === "vehicle") return record.layout;
@@ -250,7 +254,11 @@ export function emptyInspectionArea(areaId: InspectionAreaId): InspectionAreaEnt
 }
 
 export function resolveInspectionWheelCount(
-  record: Pick<PreTripInspectionRecord, "requiredWheelCount" | "layout" | "areas"> | null | undefined,
+  record:
+    | Pick<PreTripInspectionRecord, "requiredWheelCount" | "layout" | "areas">
+    | Partial<Pick<PreTripInspectionRecord, "requiredWheelCount" | "layout" | "areas">>
+    | null
+    | undefined,
   fallbackWheelCount: number = DEFAULT_LIGHT_WHEEL_COUNT,
 ): number {
   const layout = resolveInspectionLayout(record);
