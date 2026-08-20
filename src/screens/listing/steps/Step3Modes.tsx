@@ -1145,6 +1145,104 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                         </div>
                       ) : null}
 
+                      {isCommercialEquipmentCategory(draft.category) &&
+                      (listingRequiresPhysicalDamage(draft) ||
+                        draft.handoff.requireInsuranceProof !== false) ? (
+                        <div className="mt-3 space-y-3 rounded-xl border border-orange-300/80 bg-white/80 p-3">
+                          <div>
+                            <p className="text-[13px] font-semibold text-orange-950">
+                              {modesCopy.coiStructuredTitle}
+                            </p>
+                            <p className="mt-1 text-[12px] text-orange-900/85">
+                              {modesCopy.coiStructuredBody}
+                            </p>
+                          </div>
+                          <label className="flex items-start gap-2 text-[13px] text-orange-950">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5"
+                              checked={draft.handoff.coiAdditionalInsuredRequired === true}
+                              onChange={(e) => {
+                                const on = e.target.checked;
+                                setDraft((c) => ({
+                                  ...c,
+                                  handoff: {
+                                    ...c.handoff,
+                                    coiAdditionalInsuredRequired: on,
+                                  },
+                                }));
+                              }}
+                            />
+                            <span>
+                              <span className="font-semibold">
+                                {modesCopy.coiAdditionalInsuredTitle}
+                              </span>
+                              <span className="mt-0.5 block text-[12px] font-normal text-orange-900/85">
+                                {modesCopy.coiAdditionalInsuredBody}
+                              </span>
+                            </span>
+                          </label>
+                          <label className="block text-xs font-semibold uppercase tracking-wide text-orange-950">
+                            {modesCopy.insuranceRequirementsNotes}
+                            <textarea
+                              className={`${selectClassName} mt-1.5`}
+                              rows={3}
+                              value={draft.handoff.insuranceRequirementsNotes ?? ""}
+                              onChange={(e) =>
+                                setDraft((c) => ({
+                                  ...c,
+                                  handoff: {
+                                    ...c.handoff,
+                                    insuranceRequirementsNotes: e.target.value,
+                                  },
+                                }))
+                              }
+                            />
+                          </label>
+                          <p className="text-[12px] text-orange-900/80">
+                            {modesCopy.insuranceRequirementsNotesHint}
+                          </p>
+                          <div className="grid grid-cols-2 gap-2">
+                            <label className="block text-xs font-semibold text-orange-950">
+                              {modesCopy.insurancePdMinUsd}
+                              <input
+                                type="text"
+                                inputMode="decimal"
+                                className={`${selectClassName} mt-1`}
+                                value={draft.handoff.insurancePdMinUsd ?? ""}
+                                onChange={(e) =>
+                                  setDraft((c) => ({
+                                    ...c,
+                                    handoff: {
+                                      ...c.handoff,
+                                      insurancePdMinUsd: e.target.value,
+                                    },
+                                  }))
+                                }
+                              />
+                            </label>
+                            <label className="block text-xs font-semibold text-orange-950">
+                              {modesCopy.insuranceLiabilityMinUsd}
+                              <input
+                                type="text"
+                                inputMode="decimal"
+                                className={`${selectClassName} mt-1`}
+                                value={draft.handoff.insuranceLiabilityMinUsd ?? ""}
+                                onChange={(e) =>
+                                  setDraft((c) => ({
+                                    ...c,
+                                    handoff: {
+                                      ...c.handoff,
+                                      insuranceLiabilityMinUsd: e.target.value,
+                                    },
+                                  }))
+                                }
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      ) : null}
+
                       {listingIsCommercialTransport(draft) ? (
                         <div className="mt-3 space-y-3 rounded-xl border border-violet-300/80 bg-white/80 p-3">
                           <div>

@@ -1645,32 +1645,6 @@ function BookingScreenLoaded({
           </div>
         ) : null}
 
-        {needsDataWipe && dataWipeListingBlocked ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
-            <p className="font-semibold">{t.booking.dataWipeBlockedTitle}</p>
-            <p className="mt-1 text-[13px] leading-snug">{t.booking.dataWipeBlockedBody}</p>
-          </div>
-        ) : null}
-
-        {needsDataWipe && !dataWipeListingBlocked ? (
-          <div className="rounded-xl border border-slate-300 bg-slate-50/80 p-4 space-y-3">
-            <p className="text-sm font-semibold text-slate-950">{t.booking.dataWipeTitle}</p>
-            <p className="text-[12px] text-slate-800/90">{t.booking.dataWipeBody}</p>
-            {hostDataWipeStatus ? (
-              <p className="text-[12px] text-slate-900">
-                {t.booking.dataWipeHostStatusLine(
-                  t.listing.specs.options[hostDataWipeStatus] ?? hostDataWipeStatus,
-                )}
-              </p>
-            ) : null}
-            <label className="flex items-start gap-2 text-xs text-slate-950">
-              <input
-                type="checkbox"
-                className="mt-0.5"
-                checked={dataWipeAttested}
-                onChange={(e) => setDataWipeAttested(e.target.checked)}
-              />
-              <span>{t.booking.dataWipeAttest}</span>
         {needsWeatherCancel ? (
           <div className="rounded-xl border border-sky-200 bg-sky-50/70 p-4 space-y-3">
             <p className="text-sm font-semibold text-sky-950">{t.booking.weatherCancelTitle}</p>
@@ -1741,35 +1715,6 @@ function BookingScreenLoaded({
                 onChange={(e) => setHygieneAck(e.target.checked)}
               />
               <span>{t.booking.hygieneAttest}</span>
-            </label>
-          </div>
-        ) : null}
-
-        {needsPaCableStand ? (
-          <div className="rounded-xl border border-fuchsia-200 bg-fuchsia-50/70 p-4 space-y-3">
-            <p className="text-sm font-semibold text-fuchsia-950">{t.booking.paCableStandTitle}</p>
-            {paCableStandText ? (
-              <p className="text-[13px] whitespace-pre-wrap text-fuchsia-900/90">
-                {paCableStandText}
-              </p>
-            ) : (
-              <p className="text-[12px] text-fuchsia-900/80">{t.booking.paCableStandEmpty}</p>
-            )}
-
-            ) : null}
-
-                {needsCostumeReturn ? (
-          <div className="rounded-xl border border-fuchsia-200 bg-fuchsia-50/70 p-4 space-y-3">
-            <p className="text-sm font-semibold text-fuchsia-950">{t.booking.costumeReturnTitle}</p>
-            <p className="text-[12px] text-fuchsia-900/90">{t.booking.costumeReturnBody}</p>
-            <label className="flex items-start gap-2 text-xs text-fuchsia-950">
-              <input
-                type="checkbox"
-                className="mt-0.5"
-                checked={paCableStandAck}
-                onChange={(e) => setPaCableStandAck(e.target.checked)}
-              />
-              <span>{t.booking.paCableStandAttest}</span>
             </label>
           </div>
         ) : null}

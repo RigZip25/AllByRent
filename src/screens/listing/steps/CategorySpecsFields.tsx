@@ -241,6 +241,47 @@ function SpecFieldControl({
     );
   }
 
+  if (field.type === "multiselect" && field.options) {
+    const selected = new Set(
+      value
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    );
+    const toggle = (opt: string) => {
+      const next = new Set(selected);
+      if (next.has(opt)) next.delete(opt);
+      else next.add(opt);
+      onChange(
+        field.options!.filter((o) => next.has(o)).join(","),
+      );
+    };
+    return (
+      <div>
+        <FieldLabel
+          label={label}
+          required={required}
+          recommended={field.recommended}
+          recommendedLabel={recommendedLabel}
+        />
+        <div className="space-y-2 rounded-2xl border border-gray-200 bg-white px-3 py-3">
+          {field.options.map((opt) => (
+            <label key={opt} className="flex items-start gap-2 text-sm text-gray-800">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={selected.has(opt)}
+                onChange={() => toggle(opt)}
+              />
+              <span>{optionLabel(opt)}</span>
+            </label>
+          ))}
+        </div>
+        {hint ? <p className="mt-1.5 text-[12px] text-gray-500">{hint}</p> : null}
+      </div>
+    );
+  }
+
   if (field.type === "select" && field.options) {
     return (
       <div>

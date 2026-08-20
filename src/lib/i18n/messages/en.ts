@@ -950,6 +950,13 @@ export const en: AppMessages = {
       "Boater / PWC license attestation and document are required before handoff can start.",
     droneCertUnlockBlocked:
       "FAA Part 107 / Remote ID attestation is required before handoff can start.",
+    droneRemoteIdUnlockBlocked:
+      "Remote ID acknowledgment from booking is required before handoff can start.",
+    pfdUnlockBlocked: "PFD policy acknowledgment from booking is required before handoff can start.",
+    cateringSanitizeUnlockBlocked:
+      "Catering sanitization acknowledgment from booking is required before handoff can start.",
+    dataWipeUnlockBlocked:
+      "Data wipe / unlink acknowledgment from booking is required before handoff can start.",
     uscgUnlockBlocked:
       "USCG-style safety kit acknowledgment from booking is required before handoff can start.",
     kitInventoryUnlockBlocked:
@@ -958,10 +965,6 @@ export const en: AppMessages = {
       "Liability waiver acknowledgment from booking is required before handoff can start.",
     helmetLockUnlockBlocked:
       "Helmet and lock policy acknowledgment from booking is required before handoff can start.",
-    dataWipeUnlockBlocked:
-      "Data wipe acknowledgment from booking is required before handoff can start.",
-    paCableStandUnlockBlocked:
-      "PA cable / stand inventory acknowledgment from booking is required before handoff can start.",
     safetyBriefingUnlockBlocked:
       "Safety briefing acknowledgment from booking is required before handoff can start.",
     hygieneUnlockBlocked:
@@ -1794,21 +1797,23 @@ export const en: AppMessages = {
           placeholder: "35",
           hint: "Optional flat fee shown at booking and frozen on the agreement.",
         },
+
+        kitInventoryItems: {
+          label: "Kit inventory (structured)",
+          hint: "Check every included accessory — free-text notes are optional extras.",
+        },
+        droneWeightClass: { label: "Drone weight class", hint: "FAA Remote ID rules depend on takeoff weight." },
+        remoteIdStatus: { label: "Remote ID hardware", hint: "Broadcast module built-in / add-on, or under-250g exempt." },
+        hostDataWipeStatus: { label: "Wipe / unlink status", hint: "Required for laptops, smart home, network gear, and servers." },
+        dinSettingBand: { label: "DIN / binding band" },
+        pfdIncluded: { label: "PFD included?" },
+        setPieceCountBand: { label: "Set / piece count" },
+        tentSizeBand: { label: "Tent / canopy size" },
+        cateringSanitizeAttested: { label: "Sanitized for food service?", hint: "Required before publish on serving / catering shelves." },
+        sleepingBagTempBand: { label: "Sleeping-bag temp rating" },
+        stoveFuelType: { label: "Camp-stove fuel type" },
         useCase: { label: "Primary use" },
         transportSize: { label: "How it moves" },
-        deviceHasStorage: {
-          label: "Device has onboard storage?",
-          hint: "Printers, POS, servers, and many monitors keep jobs or credentials — mark honestly.",
-        },
-        hostDataWipeStatus: {
-          label: "Data wipe plan",
-          hint: "Required when the device has storage — renters re-acknowledge at booking.",
-        },
-        paCableStandInventory: {
-          label: "Cable & stand inventory",
-          placeholder: "4× XLR 25′, 2× speakON, 2× speaker stands, 1× mic stand…",
-          hint: "List every cable and stand in the PA kit — renter confirms at booking and handoff.",
-        },
       },
       options: {
         cordless: "Cordless / battery",
@@ -1827,7 +1832,8 @@ export const en: AppMessages = {
         body_only: "Body / item only",
         kit_lens: "Kit with lens",
         full_kit: "Full kit (bag, batteries…)",
-        accessories_only: "Accessories only",
+        accessories_only:
+PLACEHOLDER_OPTS "Accessories only",
         under_13: "Under 13″",
         "13_15": "13–15″",
         "15_17": "15–17″",
@@ -2008,12 +2014,6 @@ export const en: AppMessages = {
         will_add: "Will add label photo",
         kit_complete: "Complete USCG-style kit on board",
         incomplete: "Incomplete — do not publish for powered craft",
-        has_storage: "Yes — has HDD / SSD / NVRAM / job memory",
-        no_storage: "No onboard storage",
-        storage_unknown: "Not sure — treat as has storage if unsure",
-        wiped_before_list: "Wiped clean before listing",
-        wipe_at_handoff: "Will wipe / factory-reset at handoff",
-        renter_responsible: "Renter must wipe any data they add",
         class_i: "Class I",
         class_ii: "Class II",
         class_iii: "Class III",
@@ -2618,6 +2618,36 @@ export const en: AppMessages = {
     droneCertHint:
       "Attestation is required. Certificate upload is optional but recommended so the host can verify.",
     droneCertBadge: "Part 107 / Remote ID",
+    droneRemoteIdBlocked:
+      "This drone listing is missing a valid Remote ID hardware declaration (or under-250g exempt). Host must update the listing before booking.",
+    droneRemoteIdAttest:
+      "I will operate this drone with Remote ID broadcast enabled as required for its weight class, and I understand Part 107 / local rules apply.",
+    droneHostRidLine: (weight, rid) => `Host declared weight ${weight}; Remote ID: ${rid}.`,
+    pfdBlockedTitle: "PFD policy missing",
+    pfdBlockedBody:
+      "The host has not declared whether a PFD is included. Booking is blocked until the listing is updated.",
+    pfdTitle: "Personal flotation device (PFD)",
+    pfdBody: (policy) => `PFD policy for this rental: ${policy}.`,
+    pfdAttest:
+      "I understand the PFD policy for this rental and will follow it for the entire rental.",
+    dinTitle: "DIN / binding setting",
+    dinBody: (din) => `Host DIN / binding band: ${din}. Confirm fit with a shop if unsure.`,
+    cateringSanitizeBlockedTitle: "Sanitization not confirmed",
+    cateringSanitizeBlockedBody:
+      "The host must attest that serving / catering equipment was sanitized before this listing can be booked.",
+    cateringSanitizeTitle: "Serving / catering hygiene",
+    cateringSanitizeAttest:
+      "I acknowledge the host attested this gear was sanitized before handoff.",
+    dataWipeBlockedTitle: "Wipe / unlink not declared",
+    dataWipeBlockedBody:
+      "The host must declare wipe / account-unlink status for this device before booking.",
+    dataWipeTitle: "Data wipe / account unlink",
+    dataWipeBody:
+      "This device can store personal data or linked accounts. Confirm you will not retain the host’s data and will return it wiped / unlinked as agreed.",
+    dataWipeHostStatusLine: (status) => `Host wipe / unlink status: ${status}`,
+    dataWipeAttest:
+      "I acknowledge the wipe / unlink policy and will not keep host data or account links after return.",
+
     houseRulesTitle: "House rules",
     cleaningFeeLine: (amount) => `Cleaning fee: ${amount}`,
     carSeatBlockedTitle: "This car seat cannot be booked",
@@ -2868,7 +2898,7 @@ export const en: AppMessages = {
       Vehicles: {
         title: "How neighbor car rental works",
         summary:
-          "Neighbors are higher-trust than anonymous rentals — signed terms, insurance proof, license / soft driving-record self-attestation (not a paid MVR), and pre-trip photos still required before PIN/keys. Cancel ≥24h before start: full refund; inside 24h: 50%. No-show: host marks after ~2h; trip price kept. Late return: 30m grace + $20 + $15/hr defaults. Fuel full-to-full (+$20 if short). ≥26k lb / semi: CDL + agent→owner insurance.",
+          "Neighbors are higher-trust than anonymous rentals — signed terms, insurance proof, and pre-trip photos still required before PIN/keys. Cancel ≥24h before start: full refund; inside 24h: 50%. No-show: host marks after ~2h; trip price kept. Late return: 30m grace + $20 + $15/hr defaults. Fuel full-to-full (+$20 if short). ≥26k lb / semi: CDL + agent→owner insurance.",
         hostTipTitle: "For hosts / landlords",
         hostTip:
           "Paid peer-to-peer sharing may fall outside a personal auto policy. Enter GVWR / vehicle weight in pounds (lb). At ≥ 26,000 lb or for semis / equipment trailers, require CDL and set the email where the renter’s agent must send proof. For lighter cars, renters add the vehicle to their personal policy and upload proof in-app. Pre-trip tire photos protect against expensive tire swaps. Fuel is full-to-full by default (levels at handoff only — not a listing field). Optional no-show fee is a soft deposit flag — not airline-style. We are not partners with any insurer; confirm with your agent before you list.",
@@ -2885,7 +2915,7 @@ export const en: AppMessages = {
           "List the car → set weight (lb) + insurance rules (personal upload or agent→owner email for ≥26k/semi) + max deductible + optional no-show fee → renter books (CDL if commercial transport) → insurance cleared → mandatory pre-trip photos (body + tires) both sides confirm → handoff with fuel/DEF + odometer → return inspection with the same tire photo set → host confirms. Booking can exist earlier; codes stay locked until proof + pre-trip are done.",
         layersTitle: "Safety layers",
         layers:
-          "Signed rental terms · insurance · license / soft driving-record attest · CDL when required · pre-trip photos · fuel/DEF · cancel ≥24h free · no-show ~2h · late 30m+$20+$15/hr · deposit hold · geo PIN · macropoints.",
+          "Signed rental terms · insurance · CDL when required · pre-trip photos · fuel/DEF · cancel ≥24h free · no-show ~2h · late 30m+$20+$15/hr · deposit hold · geo PIN · macropoints.",
         claimsTitle: "If something goes wrong (claims)",
         claims:
           "Renter insurance is primary. Pre-trip vs return photos help prove damage or tire swaps. Cancel ≥24h: full refund; inside 24h: 50%. No-show after ~2h: trip price kept; optional deposit fee if configured. Late return: grace then flat + hourly per listing policy.",
@@ -2893,7 +2923,7 @@ export const en: AppMessages = {
       "Heavy Equipment": {
         title: "Commercial equipment rentals",
         summary:
-          "Heavy Equipment shelves rent to professionals by default. Forklift / crane / excavator / general operator credentials are required where the subcategory calls for them (attestation + document). Structured Certificate of Insurance (COI) fields plus certificate photo — host marks “proof received” before handoff. Physical damage coverage required. Deposit is insurance-backed (deductible-sized hold), not full replacement. Mandatory pre-trip inspection blocks start until both sides confirm.",
+          "Heavy Equipment shelves rent to professionals by default. Forklift / crane / excavator / general operator credentials are required where the subcategory calls for them (attestation + document). Physical damage insurance proof is required before handoff. Deposit is insurance-backed (deductible-sized hold), not full replacement. Mandatory pre-trip inspection blocks start until both sides confirm.",
         hostTipTitle: "For hosts",
         hostTip:
           "Keep “professionals only” on unless you truly want DIY renters. Require operator credentials for powered commercial gear. Require insurance proof with physical damage; set max deductible so the card hold matches. Pre-trip photos protect both sides.",
@@ -2905,7 +2935,7 @@ export const en: AppMessages = {
           "List equipment → pro-only + PD + operator cert when required → renter attests, uploads credential + insurance → pre-trip both confirm → handoff → return inspection → claims via insurance first.",
         layersTitle: "Safety layers",
         layers:
-          "Operator credential · pro attestation · structured COI + host confirm · physical damage insurance · deductible-sized hold · pre-trip & return photos · optional no-show fee · rental terms · QR / PIN handoff.",
+          "Operator credential · pro attestation · physical damage insurance · deductible-sized hold · pre-trip & return photos · optional no-show fee · rental terms · QR / PIN handoff.",
         claimsTitle: "If something goes wrong",
         claims:
           "Renter’s physical damage / equipment coverage is primary. Use uploaded proof with their insurer; the card hold matches your max deductible. No-show frees the calendar; dispute if needed.",
@@ -2913,7 +2943,7 @@ export const en: AppMessages = {
       Construction: {
         title: "Construction gear rentals",
         summary:
-          "Construction shelves default to professionals only and require physical damage insurance on the rent path. Structured COI (carrier, policy #, limits, dates) plus host “proof received” — not photo-only. Insurance-backed deposit (deductible-sized card hold) applies — not full tool replacement. Crane-class / heavy powered gear also requires an operator credential. Mandatory pre-trip photo inspection applies before start.",
+          "Construction shelves default to professionals only and require physical damage insurance on the rent path. Insurance-backed deposit (deductible-sized card hold) applies — not full tool replacement. Crane-class / heavy powered gear also requires an operator credential. Mandatory pre-trip photo inspection applies before start.",
         hostTipTitle: "For hosts",
         hostTip:
           "Pros-only is on by default. Set max deductible so the hold is insurance-backed. Require operator credentials for crane-class and powered commercial shelves. Capture pre-trip condition photos.",
@@ -2925,7 +2955,7 @@ export const en: AppMessages = {
           "List → pro-only + PD + operator cert when required → renter attests and uploads proof → pre-trip both confirm → handoff → return.",
         layersTitle: "Safety layers",
         layers:
-          "Operator credential · pro attestation · structured COI + host confirm · physical damage insurance · deductible hold · pre-trip inspection · optional no-show · rental terms · QR handoff.",
+          "Operator credential · pro attestation · physical damage insurance · deductible hold · pre-trip inspection · optional no-show · rental terms · QR handoff.",
         claimsTitle: "If something goes wrong",
         claims:
           "Insurance first (physical damage), then deductible hold with photos. No-show cancels and frees dates; fee only if you configured one.",
@@ -2973,7 +3003,7 @@ export const en: AppMessages = {
       "Photo & Video": {
         title: "Camera, cinema & drone rentals",
         summary:
-          "Serial number and kit inventory are required for rent. Drone listings also need FAA Part 107 and/or Remote ID attestation before booking (certificate upload optional). Deposit / insurance rules protect high-value kits.",
+          "Serial number and structured kit inventory lines are required for rent. Drone listings need weight class + Remote ID hardware status (publish gate) and Part 107 + Remote ID acknowledgment at booking. Deposit / insurance rules protect high-value kits.",
         hostTipTitle: "For hosts",
         hostTip:
           "Enter serial and a clear kit inventory (bodies, lenses, batteries, bags). Mark drones clearly — Part 107 attestation is required for renters.",
@@ -2993,7 +3023,7 @@ export const en: AppMessages = {
       "Electronics & Tech": {
         title: "Electronics & tech rentals",
         summary:
-          "Serial number and kit inventory are required on the rent path so handoff and claims have a clear accessory list (chargers, cables, cases).",
+          "Serial number and structured kit inventory are required on rent. Laptops, smart home, network gear, and servers also need a wipe / account-unlink attestation before publish and booking.",
         hostTipTitle: "For hosts",
         hostTip:
           "Capture serial and list every included accessory. High replacement-value gear should use a strong deposit hold.",
@@ -3027,7 +3057,7 @@ export const en: AppMessages = {
       "Sports & Recreation": {
         title: "Sports & recreation rentals",
         summary:
-          "High-risk shelves (snow, water, climb-style) require a liability waiver at booking. Skill level and size help renters self-screen.",
+          "High-risk shelves (snow, water, climb-style) require a liability waiver at booking. Snow sports add DIN + helmet policy; water / pro water add a PFD included gate.",
         hostTipTitle: "For hosts",
         hostTip:
           "Keep waiver on for water / snow / climb risk. Be honest about skill level and condition.",
@@ -3092,41 +3122,6 @@ export const en: AppMessages = {
         claimsTitle: "If something goes wrong",
         claims: "Fee and power are frozen on the agreement; deposit covers damage beyond normal event wear.",
       },
-      "Office & Business": {
-        title: "Office & business rentals",
-        summary:
-          "Devices with storage need a host wipe plan and renter data-wipe acknowledgment at booking. Serial / model help match the unit at handoff.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Mark whether the device keeps jobs or credentials. If it has storage, set wipe status (before list, at handoff, or renter-responsible).",
-        whyGeoTitle: "Why a data wipe gate?",
-        whyGeo:
-          "Copiers, POS, and servers leak customer or company data when returned dirty. Attestation creates a clear trail without a forensic wipe product.",
-        flowTitle: "End to end",
-        flow:
-          "List with storage + wipe plan → renter acknowledges at book → wipe / verify at handoff → return clean.",
-        layersTitle: "Safety layers",
-        layers: "Storage flag · host wipe plan · renter booking ack · deposit · rental terms · QR handoff.",
-        claimsTitle: "If something goes wrong",
-        claims:
-          "Wipe attestations support privacy disputes; deposit still covers physical damage.",
-      },
-      "Music & Audio": {
-        title: "Music & audio rentals",
-        summary:
-          "PA kits require a cable and stand inventory so missing XLRs and stands don’t turn into claim fights. Power class helps match the venue.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "For PA Systems, list every cable and stand. Renters acknowledge the inventory at booking and check it at handoff.",
-        whyGeoTitle: "Why cable / stand inventory?",
-        whyGeo:
-          "PA claims are usually missing accessories, not the head unit. A frozen checklist at booking and handoff cuts disputes.",
-        flowTitle: "End to end",
-        flow: "List PA with cable/stand inventory → renter acks → count at pickup → count at return.",
-        layersTitle: "Safety layers",
-        layers: "Cable / stand inventory · power class · deposit · rental terms · QR handoff.",
-        claimsTitle: "If something goes wrong",
-        claims: "Inventory snapshot and return photos support missing-part claims; deposit covers the gap.",
       "Tools & DIY": {
         title: "Tools & DIY rentals",
         summary:

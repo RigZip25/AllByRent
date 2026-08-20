@@ -105,6 +105,9 @@ import {
   listingRequiresSafetyBriefing,
   listingRequiresHygieneChecklist,
   listingRequiresCostumeReturnCondition,
+  listingRequiresSafetyBriefing,
+  listingRequiresHygieneChecklist,
+  listingRequiresCostumeReturnCondition,
 } from "../../lib/categoryTrustRules";
 import {
   isPreTripInspectionReady,
@@ -165,6 +168,7 @@ export function ActiveRental({
   const [chatOpen, setChatOpen] = useState(initialChatOpen);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [weatherCancelSelected, setWeatherCancelSelected] = useState(false);
   const [weatherCancelSelected, setWeatherCancelSelected] = useState(false);
   const [cancelBusy, setCancelBusy] = useState(false);
   const [policySheetOpen, setPolicySheetOpen] = useState(false);
@@ -250,6 +254,12 @@ export function ActiveRental({
     publishedListing != null && listingRequiresLiabilityWaiver(publishedListing);
   const needsHelmetLock =
     publishedListing != null && listingRequiresHelmetLockPolicy(publishedListing);
+  const needsSafetyBriefing =
+    publishedListing != null && listingRequiresSafetyBriefing(publishedListing);
+  const needsHygiene =
+    publishedListing != null && listingRequiresHygieneChecklist(publishedListing);
+  const needsCostumeReturn =
+    publishedListing != null && listingRequiresCostumeReturnCondition(publishedListing);
   const needsDataWipe =
     publishedListing != null && listingRequiresDataWipe(publishedListing);
   const needsPaCableStand =
@@ -581,6 +591,41 @@ export function ActiveRental({
     }
     if (
       mode === "pickup" &&
+      needsDroneCert &&
+      !booking?.droneRemoteIdAck &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.droneRemoteIdUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      booking?.pfdAck === false &&
+      booking?.role === "renter" &&
+      booking?.pfdIncludedSnapshot
+    ) {
+      setNotice(t.rentalDetail.pfdUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      booking?.cateringSanitizeAck === false &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.cateringSanitizeUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      booking?.dataWipeAttested === false &&
+      booking?.role === "renter" &&
+      booking?.hostDataWipeStatusSnapshot
+    ) {
+      setNotice(t.rentalDetail.dataWipeUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
       needsUscgSafety &&
       !booking?.uscgSafetyAck &&
       booking?.role === "renter"
@@ -613,6 +658,33 @@ export function ActiveRental({
       booking?.role === "renter"
     ) {
       setNotice(t.rentalDetail.helmetLockUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsSafetyBriefing &&
+      !booking?.safetyBriefingAck &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.safetyBriefingUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsHygiene &&
+      !booking?.hygieneAck &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.hygieneUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsCostumeReturn &&
+      !booking?.costumeReturnConditionAck &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.costumeReturnUnlockBlocked);
       return;
     }
     if (
@@ -1105,7 +1177,7 @@ export function ActiveRental({
     } finally {
       setCancelBusy(false);
     }
-  }, [auth.userId, booking, cancelReason, t.rentalDetail]);
+  }, [auth.userId, booking, cancelReason, t.rentalDetail, weatherCancelSelected]);
 
   if (!booking) {
     return (
@@ -1395,6 +1467,20 @@ export function ActiveRental({
                 <p className="text-[12px] leading-relaxed text-red-900/80">
                   {t.rentalDetail.cancelBookingConfirmBody(cancelRefundPreview)}
                 </p>
+                {booking?.weatherCancelAck &&
+                booking.weatherCancelPolicySnapshot &&
+                booking.weatherCancelPolicySnapshot !== "not_outdoor" &&
+                booking.role === "renter" ? (
+                  <label className="flex items-start gap-2 text-[12px] font-semibold text-red-900">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5"
+                      checked={weatherCancelSelected}
+                      onChange={(e) => setWeatherCancelSelected(e.target.checked)}
+                    />
+                    <span>{t.rentalDetail.weatherCancelToggle}</span>
+                  </label>
+                ) : null}
                 {booking?.weatherCancelAck &&
                 booking.weatherCancelPolicySnapshot &&
                 booking.weatherCancelPolicySnapshot !== "not_outdoor" &&

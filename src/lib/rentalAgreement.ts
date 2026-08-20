@@ -314,7 +314,7 @@ export function buildEnrichedSummaryLines(input: {
     const wipeStatus = trust.hostDataWipeStatus?.trim();
     lines.push(
       wipeStatus
-        ? `Data wipe: device has storage; host status "${wipeStatus}"; renter acknowledged wipe / no-retain duties at booking.`
+        ? `Data wipe: device has storage; host status “${wipeStatus}”; renter acknowledged wipe / no-retain duties at booking.`
         : "Data wipe: device has onboard storage; renter acknowledged wipe / no-retain duties at booking.",
     );
   }

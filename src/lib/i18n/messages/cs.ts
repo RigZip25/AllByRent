@@ -970,6 +970,13 @@ export const cs: AppMessages = {
       "Před startem předání je povinné prohlášení a doklad lodní / PWC licence.",
     droneCertUnlockBlocked:
       "Před startem předání je povinné prohlášení Part 107 / Remote ID.",
+    droneRemoteIdUnlockBlocked:
+      "Před startem předání je povinné potvrzení Remote ID z rezervace.",
+    pfdUnlockBlocked: "Před startem předání je povinné potvrzení politiky PFD z rezervace.",
+    cateringSanitizeUnlockBlocked:
+      "Před startem předání je povinné potvrzení sanitace cateringu z rezervace.",
+    dataWipeUnlockBlocked:
+      "Před startem předání je povinné potvrzení výmazu / odpojení z rezervace.",
     uscgUnlockBlocked:
       "Před předáním je povinné potvrzení bezpečnostní sady USCG z rezervace.",
     kitInventoryUnlockBlocked:
@@ -978,10 +985,6 @@ export const cs: AppMessages = {
       "Před předáním je povinné potvrzení vzdání se nároků z rezervace.",
     helmetLockUnlockBlocked:
       "Před předáním je povinné potvrzení politiky helmy a zámku z rezervace.",
-    dataWipeUnlockBlocked:
-      "Před předáním je nutné potvrzení mazání dat z rezervace.",
-    paCableStandUnlockBlocked:
-      "Před předáním je nutné potvrzení inventáře kabelů / stojanů PA z rezervace.",
     safetyBriefingUnlockBlocked:
       "Před předáním je potřeba potvrzení bezpečnostní instruktáže z rezervace.",
     hygieneUnlockBlocked:
@@ -1840,21 +1843,23 @@ export const cs: AppMessages = {
           placeholder: "35",
           hint: "Volitelný paušál zobrazený při rezervaci a ve smlouvě.",
         },
+
+        kitInventoryItems: {
+          label: "Kit inventory (structured)",
+          hint: "Check every included accessory — free-text notes are optional extras.",
+        },
+        droneWeightClass: { label: "Drone weight class", hint: "FAA Remote ID rules depend on takeoff weight." },
+        remoteIdStatus: { label: "Remote ID hardware", hint: "Broadcast module built-in / add-on, or under-250g exempt." },
+        hostDataWipeStatus: { label: "Wipe / unlink status", hint: "Required for laptops, smart home, network gear, and servers." },
+        dinSettingBand: { label: "DIN / binding band" },
+        pfdIncluded: { label: "PFD included?" },
+        setPieceCountBand: { label: "Set / piece count" },
+        tentSizeBand: { label: "Tent / canopy size" },
+        cateringSanitizeAttested: { label: "Sanitized for food service?", hint: "Required before publish on serving / catering shelves." },
+        sleepingBagTempBand: { label: "Sleeping-bag temp rating" },
+        stoveFuelType: { label: "Camp-stove fuel type" },
         useCase: { label: "Hlavní použití" },
         transportSize: { label: "Jak se přepravuje" },
-        deviceHasStorage: {
-          label: "Má zařízení vlastní úložiště?",
-          hint: "Tiskárny, POS, servery a mnohé monitory drží úlohy nebo přihlášení — uveď pravdivě.",
-        },
-        hostDataWipeStatus: {
-          label: "Plán mazání dat",
-          hint: "Povinné, když má zařízení úložiště — nájemce znovu potvrdí při rezervaci.",
-        },
-        paCableStandInventory: {
-          label: "Inventář kabelů a stojanů",
-          placeholder: "4× XLR 25′, 2× speakON, 2× stojany na repro, 1× mik. stojan…",
-          hint: "Vypiš každý kabel a stojan v PA sadě — nájemce potvrdí při rezervaci a předání.",
-        },
         dimensionsOrWeight: { label: "Rozměry / váha", placeholder: "Pro transport" },
         whatMakesItUnique: { label: "Čím je unikátní", placeholder: "Proč si to půjčit" },
         jobScale: { label: "Škála" },
@@ -1917,7 +1922,8 @@ export const cs: AppMessages = {
         body_only: "Jen tělo / samotná věc",
         kit_lens: "Set s objektivem",
         full_kit: "Komplet (taška, baterie…)",
-        accessories_only: "Jen příslušenství",
+        accessories_only:
+PLACEHOLDER_OPTS "Jen příslušenství",
         under_13: "Do 13″",
         "13_15": "13–15″",
         "15_17": "15–17″",
@@ -2079,12 +2085,6 @@ export const cs: AppMessages = {
 
         kit_complete: "Kompletní sada ve stylu USCG na palubě",
         incomplete: "Nekompletní — nepublikovat u motorových",
-        has_storage: "Ano — HDD / SSD / NVRAM / paměť úloh",
-        no_storage: "Bez vlastního úložiště",
-        storage_unknown: "Nevím — při nejistotě ber jako se úložištěm",
-        wiped_before_list: "Vymazáno před inzerátem",
-        wipe_at_handoff: "Vymažu / factory reset při předání",
-        renter_responsible: "Nájemce musí smazat data, která přidá",
         class_i: "Třída I",
         class_ii: "Třída II",
         class_iii: "Třída III",
@@ -2668,6 +2668,34 @@ export const cs: AppMessages = {
     droneCertHint:
       "Prohlášení je povinné. Nahrání certifikátu je volitelné, ale doporučené pro hostitele.",
     droneCertBadge: "Part 107 / Remote ID",
+    droneRemoteIdBlocked:
+      "Tento inzerát dronu nemá platné prohlášení Remote ID (nebo výjimku do 250 g). Hostitel musí inzerát aktualizovat.",
+    droneRemoteIdAttest:
+      "Budu provozovat dron s vysíláním Remote ID podle hmotnostní třídy a dodržím Part 107 / místní pravidla.",
+    droneHostRidLine: (weight, rid) => `Hostitel uvedl hmotnost ${weight}; Remote ID: ${rid}.`,
+    pfdBlockedTitle: "Chybí politika PFD",
+    pfdBlockedBody:
+      "Hostitel neuvedl, zda je PFD v ceně. Rezervace je blokována, dokud inzerát neaktualizuje.",
+    pfdTitle: "Záchranná vesta (PFD)",
+    pfdBody: (policy) => `Politika PFD: ${policy}.`,
+    pfdAttest: "Rozumím politice PFD a budu ji dodržovat po celou dobu pronájmu.",
+    dinTitle: "DIN / nastavení vázání",
+    dinBody: (din) => `DIN / pásmo vázání: ${din}. Při nejistotě ověřte ve servisu.`,
+    cateringSanitizeBlockedTitle: "Chybí potvrzení hygieny",
+    cateringSanitizeBlockedBody:
+      "Hostitel musí potvrdit sanitaci cateringového vybavení před rezervací.",
+    cateringSanitizeTitle: "Hygiena servírování / cateringu",
+    cateringSanitizeAttest: "Beru na vědomí, že hostitel potvrdil sanitaci před předáním.",
+    dataWipeBlockedTitle: "Chybí prohlášení o výmazu",
+    dataWipeBlockedBody:
+      "Hostitel musí uvést stav výmazu / odpojení účtu před rezervací.",
+    dataWipeTitle: "Výmaz dat / odpojení účtu",
+    dataWipeBody:
+      "Zařízení může uchovávat data nebo účty. Potvrď, že hostitelova data neponecháš a vrátíš zařízení dle dohody.",
+    dataWipeHostStatusLine: (status) => `Stav výmazu u hostitele: ${status}`,
+    dataWipeAttest:
+      "Beru na vědomí politiku výmazu / odpojení a neponechám si data ani vazby na účet.",
+
     houseRulesTitle: "Domácí pravidla",
     cleaningFeeLine: (amount) => `Poplatek za úklid: ${amount}`,
     carSeatBlockedTitle: "Tuto autosedačku nelze rezervovat",
@@ -2710,20 +2738,6 @@ export const cs: AppMessages = {
       `Tento inzerát e-koloběžky vyžaduje věk alespoň ${minAge}. Doplň datum narození v profilu, nebo zvol jiný inzerát.`,
     setupTeardownFeeLine: (amount) => `Poplatek za stavbu / demontáž: ${amount}`,
     powerRequirementLine: (power) => `Požadavek na napájení: ${power}`,
-    dataWipeBlockedTitle: "Stav mazání dat není dokončen",
-    dataWipeBlockedBody:
-      "Hostitel označil zařízení jako se úložištěm, ale nenastavil plán mazání. Požádej o aktualizaci nabídky před rezervací.",
-    dataWipeTitle: "Mazání dat / bez uchování",
-    dataWipeBody:
-      "Toto kancelářské zařízení má vlastní úložiště (úlohy, dokumenty nebo přihlašovací údaje). Před vrácením data smaž nebo odstraň; neuchovávej kopie dat hostitele nebo zákazníků.",
-    dataWipeHostStatusLine: (status) => `Plán mazání hostitele: ${status}`,
-    dataWipeAttest:
-      "Smažu nebo odstraním všechna data, která přidám, neuchovám soubory hostitele ani zákazníků a budu se řídit plánem mazání hostitele při předání a vrácení.",
-    paCableStandTitle: "Inventář kabelů a stojanů PA",
-    paCableStandEmpty:
-      "Hostitel potvrdí kabely a stojany při předání — pro pokračování potvrď.",
-    paCableStandAttest:
-      "Zkontroloval(a) jsem inventář kabelů / stojanů a ověřím každou položku při vyzvednutí i vrácení.",
     weatherCancelTitle: "Storno kvůli počasí (outdoor)",
     weatherCancelBody: (policy) =>
       `Tento outdoor párty inzerát používá storno kvůli počasí: ${policy}. Pokud počasí akci znemožní, zrušte podle této politiky — plná refundace nájmu v daném okně.`,
@@ -2751,6 +2765,35 @@ export const cs: AppMessages = {
     returnConditionPolicyLine: (policy) => `Stav při vrácení: ${policy}`,
     returnConditionFallback: "dle inzerátu",
     dryCleanReturnFeeLine: (amount) => `Poplatek za čištění / vrácení: ${amount}`,
+    driverRecordTitle: "Prohlášení o řidičáku / záznamu",
+    driverRecordBody: "Potvrď platný řidičák a čistý záznam (sebeprohlášení, ne MVR).",
+    driverLicenseValidAttest: "Mám platný řidičák pro třídu tohoto vozidla.",
+    driverRecordSoftAttest: "Prohlašuji čistý záznam za 36 měsíců (sebeprohlášení).",
+    driverLicenseState: "Stát řidičáku (volitelné)",
+    driverLicenseLast4: "Poslední 4 číslice (volitelné)",
+    driverRecordHonestNote: "Evorios nekupuje MVR v této verzi.",
+    driverRecordBadge: "Řidičák / záznam",
+    coiStructuredRequired: "Tento inzerát vyžaduje strukturované COI.",
+    coiHostConfirmHint: "Hostitel musí potvrdit přijetí COI před odemčením.",
+    coiFieldsTitle: "Údaje COI",
+    coiCarrierName: "Pojišťovna",
+    coiPolicyNumber: "Číslo pojistky",
+    coiNamedInsured: "Named insured",
+    coiLiabilityLimitUsd: "Limit odpovědnosti (USD)",
+    coiEffectiveDate: "Platnost od",
+    coiExpirationDate: "Platnost do",
+    coiHostRequirements: "Požadavky hostitele na COI",
+    coiAdditionalInsuredAttest: "Prohlašuji additional insured dle požadavku.",
+    coiStructuredBadge: "Strukturované COI",
+    dataWipeBlockedTitle: "Stav mazání dat není hotový",
+    dataWipeBlockedBody: "Hostitel musí nastavit stav mazání před rezervací.",
+    dataWipeTitle: "Mazání dat / neuchovávat",
+    dataWipeBody: "Zařízení má úložiště — smaž svá data před vrácením.",
+    dataWipeHostStatusLine: (status) => `Plán mazání: ${status}`,
+    dataWipeAttest: "Smažu svá data a neuchovám soubory hostitele.",
+    paCableStandTitle: "Inventář kabelů a stojanů PA",
+    paCableStandEmpty: "Hostitel potvrdí inventář při předání.",
+    paCableStandAttest: "Potvrzuji inventář kabelů / stojanů.",
     agentInsuranceTitle: "Pojištění přes agenta → majitel",
     agentInsuranceBody:
       "U těžké / semi komerční dopravy sjednej krytí u pojišťovacího agenta. Agent musí poslat doklad e-mailem přímo majiteli vozidla — nejde o lehčí cestu „přidat do osobního autopojištění + nahrát“.",
@@ -2891,7 +2934,7 @@ export const cs: AppMessages = {
       Vehicles: {
         title: "Jak funguje sousedské půjčení auta",
         summary:
-          "Sousedé jsou důvěryhodnější než anonymní marketplace — podmínky, pojištění, soft prohlášení o řidičáku/záznamu (ne placený MVR) a povinná předprohlídka jsou povinné před PIN/klíči. Storno ≥24h: plná refundace; do 24h: 50%. No-show ~2h. Pozdní návrat: 30m grace + $20 + $15/hod. Palivo full-to-full. ≥26k lb / semi: CDL + agent→owner pojištění.",
+          "Sousedé jsou důvěryhodnější než anonymní marketplace — ale podmínky, pojištění a povinná předprohlídka (exteriér, interiér a všechny pneumatiky) jsou povinné před PIN/klíči. Palivo (a DEF u nafty) se zapisuje na začátku a při vrácení — výchozí plná→plná, chybějící palivo + $20. Od 26 000 lb nebo u semi / komerčních přívěsů navíc CDL a doklad agent→majitel (ne osobní nahrání). Hostitel může po okně vyzvednutí označit no-show a uvolnit kalendář.",
         hostTipTitle: "Pro hostitele / majitele",
         hostTip:
           "Zadej GVWR v lb. Od ≥ 26 000 lb nebo u semi nastav e-mail pro doklad od agenta a vyžaduj CDL. U lehčích aut nájemce přidá auto do osobní pojistky a nahraje doklad. Fotky pneumatik chrání před výměnou. Palivo: plná→plná (hladiny jen při předání, ne v inzerátu). Volitelný no-show poplatek je měkký flag depozitu.",
@@ -2916,7 +2959,7 @@ export const cs: AppMessages = {
       "Heavy Equipment": {
         title: "Půjčování komerční techniky",
         summary:
-          "Heavy Equipment defaultně jen pro profesionály. Kvalifikace obsluhy dle podkategorie. Strukturovaný COI (pojišťovna, pojistka, limity, data) + fotka — hostitel označí „doklad přijat“ před předáním. PD pojištění povinné. Depozit pojištěním (hold na spoluúčast). Povinná předprohlídka.",
+          "Heavy Equipment defaultně jen pro profesionály. Kvalifikace obsluhy (vysokozdvižný vozík / jeřáb / bagr / obecná) dle podkategorie. PD pojištění povinné. Depozit pojištěním (hold na spoluúčast), ne plná náhrada. Předprohlídka blokuje start.",
         hostTipTitle: "Pro hostitele",
         hostTip:
           "Nech „jen profi“ zapnuté. Vyžaduj kvalifikaci u motorové techniky. PD je povinné; nastav max. spoluúčast kvůli holdu.",
@@ -2936,7 +2979,7 @@ export const cs: AppMessages = {
       Construction: {
         title: "Půjčování stavební techniky",
         summary:
-          "Construction defaultně jen profi a PD pojištění. Strukturovaný COI + potvrzení hostitele „doklad přijat“ — ne jen fotka. Depozit pojištěním (hold na spoluúčast). Jeřábová / těžká motorová technika vyžaduje kvalifikaci obsluhy. Povinná předprohlídka.",
+          "Construction defaultně jen profi a PD pojištění. Depozit pojištěním (hold na spoluúčast). Jeřábová / těžká motorová technika vyžaduje kvalifikaci obsluhy. Povinná předprohlídka.",
         hostTipTitle: "Pro hostitele",
         hostTip:
           "Jen profi + PD před klíči. Nastav spoluúčast. Vyžaduj kvalifikaci u crane-class / motorových polic.",
@@ -3148,41 +3191,6 @@ export const cs: AppMessages = {
         layers: "Stav při vrácení · poplatek za čištění · velikost · kauce · podmínky.",
         claimsTitle: "Když se něco pokazí",
         claims: "Poplatek a politika jsou ve smlouvě; kauce na trhliny nebo chybějící díly.",
-      },
-      "Office & Business": {
-        title: "Pronájem kanceláře a byznysu",
-        summary:
-          "Zařízení s úložištěm vyžadují plán mazání u hostitele a potvrzení mazání dat nájemcem při rezervaci. Model pomůže ověřit kus při předání.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Označ, jestli zařízení uchovává úlohy nebo přihlašovací údaje. Pokud má úložiště, nastav plán mazání (před inzerátem, při předání, nebo nájemce).",
-        whyGeoTitle: "Proč brána mazání dat?",
-        whyGeo:
-          "Kopírky, POS a servery unikají data zákazníků, když se vrátí „špinavé“. Potvrzení vytvoří stopu bez forenzního produktu.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Inzerát s úložištěm + plánem → nájemce potvrdí při rezervaci → mazání / kontrola při předání → čistý návrat.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers: "Příznak úložiště · plán mazání · potvrzení při rezervaci · kauce · podmínky · QR předání.",
-        claimsTitle: "Když se něco pokazí",
-        claims: "Potvrzení mazání podporují spory o soukromí; kauce stále kryje fyzické poškození.",
-      },
-      "Music & Audio": {
-        title: "Pronájem hudby a audia",
-        summary:
-          "PA sady vyžadují inventář kabelů a stojanů, aby chybějící XLR a stojany nekončily ve sporech. Výkonová třída pomůže místu.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "U PA Systems uveď každý kabel a stojan. Nájemce potvrdí inventář při rezervaci a zkontroluje při předání.",
-        whyGeoTitle: "Proč inventář kabelů / stojanů?",
-        whyGeo:
-          "U PA jsou spory většinou o příslušenství, ne o hlavu. Zmrazený checklist při rezervaci a předání snižuje hádky.",
-        flowTitle: "Od začátku do konce",
-        flow: "PA s inventářem → potvrzení → počítání při vyzvednutí → počítání při návratu.",
-        layersTitle: "Bezpečnostní vrstvy",
-        layers: "Inventář kabelů / stojanů · výkon · kauce · podmínky · QR předání.",
-        claimsTitle: "Když se něco pokazí",
-        claims: "Snímek inventáře a fotky návratu podporují chybějící díly; kauce doplní rozdíl.",
       },
       "Baby & Kids": {
         title: "Bezpečné půjčování autosedaček",

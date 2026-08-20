@@ -956,6 +956,13 @@ export const es: AppMessages = {
       "Se requieren declaración y documento de licencia náutica / PWC antes de iniciar la entrega.",
     droneCertUnlockBlocked:
       "Se requiere declaración Part 107 / Remote ID antes de iniciar la entrega.",
+    droneRemoteIdUnlockBlocked:
+      "Se requiere el acuse de Remote ID de la reserva antes de iniciar la entrega.",
+    pfdUnlockBlocked: "Se requiere el acuse de la política PFD de la reserva antes de iniciar la entrega.",
+    cateringSanitizeUnlockBlocked:
+      "Se requiere el acuse de sanitización de catering de la reserva antes de iniciar la entrega.",
+    dataWipeUnlockBlocked:
+      "Se requiere el acuse de borrado / desvinculación de la reserva antes de iniciar la entrega.",
     uscgUnlockBlocked:
       "Se requiere el reconocimiento del kit USCG de la reserva antes de la entrega.",
     kitInventoryUnlockBlocked:
@@ -964,10 +971,6 @@ export const es: AppMessages = {
       "Se requiere la renuncia de responsabilidad de la reserva antes de la entrega.",
     helmetLockUnlockBlocked:
       "Se requiere el reconocimiento de casco y candado de la reserva antes de la entrega.",
-    dataWipeUnlockBlocked:
-      "Se requiere el reconocimiento de borrado de datos de la reserva antes de la entrega.",
-    paCableStandUnlockBlocked:
-      "Se requiere el reconocimiento del inventario de cables / stands PA de la reserva antes de la entrega.",
     safetyBriefingUnlockBlocked:
       "Se requiere el acuse del briefing de seguridad de la reserva antes de la entrega.",
     hygieneUnlockBlocked:
@@ -1827,21 +1830,23 @@ export const es: AppMessages = {
           placeholder: "35",
           hint: "Tarifa plana opcional en reserva y acuerdo.",
         },
+
+        kitInventoryItems: {
+          label: "Kit inventory (structured)",
+          hint: "Check every included accessory — free-text notes are optional extras.",
+        },
+        droneWeightClass: { label: "Drone weight class", hint: "FAA Remote ID rules depend on takeoff weight." },
+        remoteIdStatus: { label: "Remote ID hardware", hint: "Broadcast module built-in / add-on, or under-250g exempt." },
+        hostDataWipeStatus: { label: "Wipe / unlink status", hint: "Required for laptops, smart home, network gear, and servers." },
+        dinSettingBand: { label: "DIN / binding band" },
+        pfdIncluded: { label: "PFD included?" },
+        setPieceCountBand: { label: "Set / piece count" },
+        tentSizeBand: { label: "Tent / canopy size" },
+        cateringSanitizeAttested: { label: "Sanitized for food service?", hint: "Required before publish on serving / catering shelves." },
+        sleepingBagTempBand: { label: "Sleeping-bag temp rating" },
+        stoveFuelType: { label: "Camp-stove fuel type" },
         useCase: { label: "Uso principal" },
         transportSize: { label: "Cómo se mueve" },
-        deviceHasStorage: {
-          label: "¿El dispositivo tiene almacenamiento?",
-          hint: "Impresoras, POS, servidores y muchos monitores guardan trabajos o credenciales — sé honesto.",
-        },
-        hostDataWipeStatus: {
-          label: "Plan de borrado de datos",
-          hint: "Obligatorio si hay almacenamiento — el arrendatario lo reconfirma al reservar.",
-        },
-        paCableStandInventory: {
-          label: "Inventario de cables y stands",
-          placeholder: "4× XLR 25′, 2× speakON, 2× stands de altavoz, 1× pie de micro…",
-          hint: "Lista cada cable y stand del kit PA — el arrendatario confirma en reserva y entrega.",
-        },
         dimensionsOrWeight: { label: "Dimensiones / peso", placeholder: "Para transporte" },
         whatMakesItUnique: { label: "Qué lo hace único", placeholder: "Por qué alquilarlo" },
         jobScale: { label: "Escala" },
@@ -1904,7 +1909,8 @@ export const es: AppMessages = {
         body_only: "Solo cuerpo / artículo",
         kit_lens: "Kit con objetivo",
         full_kit: "Kit completo (bolsa, baterías…)",
-        accessories_only: "Solo accesorios",
+        accessories_only:
+PLACEHOLDER_OPTS "Solo accesorios",
         under_13: "Menos de 13″",
         "13_15": "13–15″",
         "15_17": "15–17″",
@@ -2066,12 +2072,6 @@ export const es: AppMessages = {
 
         kit_complete: "Kit estilo USCG completo a bordo",
         incomplete: "Incompleto — no publicar en motorizados",
-        has_storage: "Sí — tiene HDD / SSD / NVRAM / memoria de trabajos",
-        no_storage: "Sin almacenamiento interno",
-        storage_unknown: "No estoy seguro — trátelo como con almacenamiento",
-        wiped_before_list: "Borrado limpio antes del anuncio",
-        wipe_at_handoff: "Borraré / factory reset en la entrega",
-        renter_responsible: "El arrendatario debe borrar los datos que añada",
         class_i: "Clase I",
         class_ii: "Clase II",
         class_iii: "Clase III",
@@ -2654,6 +2654,34 @@ export const es: AppMessages = {
     droneCertHint:
       "La declaración es obligatoria. Subir el certificado es opcional pero recomendado para que el anfitrión verifique.",
     droneCertBadge: "Part 107 / Remote ID",
+    droneRemoteIdBlocked:
+      "Este anuncio de dron no tiene una declaración válida de Remote ID (o exención bajo 250 g). El anfitrión debe actualizarlo.",
+    droneRemoteIdAttest:
+      "Operaré este dron con Remote ID activo según su clase de peso y cumpliré Part 107 / normas locales.",
+    droneHostRidLine: (weight, rid) => `El anfitrión declaró peso ${weight}; Remote ID: ${rid}.`,
+    pfdBlockedTitle: "Falta la política de PFD",
+    pfdBlockedBody:
+      "El anfitrión no declaró si incluye PFD. La reserva está bloqueada hasta que actualice el anuncio.",
+    pfdTitle: "Dispositivo de flotación (PFD)",
+    pfdBody: (policy) => `Política de PFD: ${policy}.`,
+    pfdAttest: "Entiendo la política de PFD y la seguiré durante todo el alquiler.",
+    dinTitle: "DIN / ajuste de fijaciones",
+    dinBody: (din) => `Banda DIN / fijaciones: ${din}. Confirma el ajuste en un taller si dudas.`,
+    cateringSanitizeBlockedTitle: "Falta la sanitización",
+    cateringSanitizeBlockedBody:
+      "El anfitrión debe atestiguar la sanitización del equipo de catering antes de reservar.",
+    cateringSanitizeTitle: "Higiene de servicio / catering",
+    cateringSanitizeAttest: "Reconozco que el anfitrión atestiguó la sanitización antes de la entrega.",
+    dataWipeBlockedTitle: "Falta el borrado / desvinculación",
+    dataWipeBlockedBody:
+      "El anfitrión debe declarar el estado de borrado / desvinculación antes de reservar.",
+    dataWipeTitle: "Borrado de datos / desvinculación",
+    dataWipeBody:
+      "Este dispositivo puede guardar datos o cuentas. Confirma que no retendrás datos del anfitrión y lo devolverás según lo acordado.",
+    dataWipeHostStatusLine: (status) => `Estado de borrado del anfitrión: ${status}`,
+    dataWipeAttest:
+      "Reconozco la política de borrado / desvinculación y no conservaré datos ni vínculos de cuenta.",
+
     houseRulesTitle: "Reglas de la casa",
     cleaningFeeLine: (amount) => `Tarifa de limpieza: ${amount}`,
     carSeatBlockedTitle: "Esta silla infantil no se puede reservar",
@@ -2696,20 +2724,6 @@ export const es: AppMessages = {
       `Este anuncio de e-patinete requiere al menos ${minAge} años. Añade tu fecha de nacimiento en el perfil, u elige otro anuncio.`,
     setupTeardownFeeLine: (amount) => `Tarifa de montaje / desmontaje: ${amount}`,
     powerRequirementLine: (power) => `Requisito de energía: ${power}`,
-    dataWipeBlockedTitle: "Estado de borrado incompleto",
-    dataWipeBlockedBody:
-      "El anfitrión marcó el dispositivo con almacenamiento pero no definió el plan de borrado. Pídele actualizar el anuncio antes de reservar.",
-    dataWipeTitle: "Borrado de datos / no retención",
-    dataWipeBody:
-      "Este equipo de oficina tiene almacenamiento (trabajos, documentos o credenciales). Borra o elimina tus datos antes de devolver; no retengas copias del anfitrión o clientes.",
-    dataWipeHostStatusLine: (status) => `Plan de borrado del anfitrión: ${status}`,
-    dataWipeAttest:
-      "Borraré o eliminaré cualquier dato que añada, no retendré archivos del anfitrión ni de clientes, y seguiré el plan de borrado en la entrega y devolución.",
-    paCableStandTitle: "Inventario de cables y stands PA",
-    paCableStandEmpty:
-      "El anfitrión confirmará cables y stands en la entrega — reconoce para continuar.",
-    paCableStandAttest:
-      "Revisé el inventario de cables / stands y comprobaré cada ítem en recogida y devolución.",
     weatherCancelTitle: "Cancelación por clima (exterior)",
     weatherCancelBody: (policy) =>
       `Este anuncio de fiesta outdoor usa cancelación por clima: ${policy}. Si el clima hace imposible el evento, cancela bajo esta política para reembolso total del alquiler en la ventana aplicable.`,
@@ -2737,6 +2751,35 @@ export const es: AppMessages = {
     returnConditionPolicyLine: (policy) => `Condición de devolución: ${policy}`,
     returnConditionFallback: "según el anuncio",
     dryCleanReturnFeeLine: (amount) => `Tarifa de tintorería / devolución: ${amount}`,
+    driverRecordTitle: "Declaración de licencia / historial",
+    driverRecordBody: "Confirma licencia válida e historial limpio (auto-declaración, no MVR).",
+    driverLicenseValidAttest: "Tengo licencia válida para la clase de este vehículo.",
+    driverRecordSoftAttest: "Declaro historial limpio en 36 meses (auto-declaración).",
+    driverLicenseState: "Estado de la licencia (opcional)",
+    driverLicenseLast4: "Últimos 4 (opcional)",
+    driverRecordHonestNote: "Evorios no compra MVR en esta versión.",
+    driverRecordBadge: "Licencia / historial",
+    coiStructuredRequired: "Este anuncio requiere COI estructurado.",
+    coiHostConfirmHint: "El anfitrión debe confirmar COI antes de desbloquear.",
+    coiFieldsTitle: "Detalles COI",
+    coiCarrierName: "Aseguradora",
+    coiPolicyNumber: "Número de póliza",
+    coiNamedInsured: "Named insured",
+    coiLiabilityLimitUsd: "Límite de responsabilidad (USD)",
+    coiEffectiveDate: "Fecha de inicio",
+    coiExpirationDate: "Fecha de vencimiento",
+    coiHostRequirements: "Requisitos COI del anfitrión",
+    coiAdditionalInsuredAttest: "Declaro additional insured según se exija.",
+    coiStructuredBadge: "COI estructurado",
+    dataWipeBlockedTitle: "Estado de borrado incompleto",
+    dataWipeBlockedBody: "El anfitrión debe fijar el estado de borrado antes de reservar.",
+    dataWipeTitle: "Borrado de datos / no retener",
+    dataWipeBody: "El dispositivo tiene almacenamiento — borra tus datos antes de devolver.",
+    dataWipeHostStatusLine: (status) => `Plan de borrado: ${status}`,
+    dataWipeAttest: "Borraré mis datos y no retendré archivos del anfitrión.",
+    paCableStandTitle: "Inventario de cables y soportes PA",
+    paCableStandEmpty: "El anfitrión confirmará el inventario en la entrega.",
+    paCableStandAttest: "Reconozco el inventario de cables / soportes.",
     agentInsuranceTitle: "Seguro vía agente → propietario",
     agentInsuranceBody:
       "Para transporte comercial pesado / semi, contrata cobertura con tu agente de seguros. El agente debe enviar la prueba por correo directamente al dueño del vehículo — no es el flujo ligero de «añadir al auto personal + subir».",
@@ -2877,7 +2920,7 @@ export const es: AppMessages = {
       Vehicles: {
         title: "Cómo funciona el alquiler de coche entre vecinos",
         summary:
-          "Los vecinos generan más confianza que un marketplace anónimo — términos, seguro, auto-declaración de licencia / historial (no un MVR de pago) e inspección previa obligatoria antes de PIN/llaves. Cancelación ≥24h: reembolso total; dentro de 24h: 50%. No-show ~2h. Retraso: 30m + $20 + $15/h. Combustible full-to-full. ≥26k lb / semi: CDL + seguro agent→owner.",
+          "Los vecinos generan más confianza que un marketplace anónimo — pero términos, seguro e inspección previa obligatoria (exterior, interior y todas las llantas) son requeridos antes del PIN/llaves. Combustible (y DEF en diésel) se registra al inicio y al devolver — por defecto lleno a lleno, faltante + $20. Desde 26 000 lb o semi / remolques comerciales también exigen CDL y prueba agente→dueño (no subida personal). El anfitrión puede marcar no-show tras la ventana y liberar el calendario.",
         hostTipTitle: "Para anfitriones / propietarios",
         hostTip:
           "Introduce el GVWR en lb. Desde ≥ 26 000 lb o semi, configura el correo para la prueba del agente y exige CDL. En coches ligeros, el arrendatario añade el auto a su póliza personal y sube el comprobante. Las fotos de llantas protegen contra cambios. Combustible: lleno a lleno (niveles solo en la entrega, no en el anuncio). La tarifa de no-show es un flag suave del depósito.",
@@ -2902,7 +2945,7 @@ export const es: AppMessages = {
       "Heavy Equipment": {
         title: "Alquiler de equipo comercial",
         summary:
-          "Heavy Equipment por defecto solo a profesionales. Credencial de operador según subcategoría. COI estructurado (aseguradora, póliza, límites, fechas) + foto — el anfitrión marca “prueba recibida” antes de la entrega. Seguro PD obligatorio. Depósito respaldado por seguro. Inspección previa obligatoria.",
+          "Heavy Equipment por defecto solo a profesionales. Credencial de operador (montacargas / grúa / excavadora / general) obligatoria según subcategoría. Seguro PD obligatorio. Depósito respaldado por seguro (retención del deducible), no valor de reposición. Inspección previa bloquea el inicio.",
         hostTipTitle: "Para anfitriones",
         hostTip:
           "Mantén «solo profesionales». Exige credencial de operador en equipo motorizado. PD obligatorio; configura el deducible máximo para alinear la retención.",
@@ -2922,7 +2965,7 @@ export const es: AppMessages = {
       Construction: {
         title: "Alquiler de equipo de construcción",
         summary:
-          "Construction por defecto solo pro y seguro PD. COI estructurado + “prueba recibida” del anfitrión — no solo foto. Depósito respaldado por seguro (retención del deducible). Equipo tipo grúa / pesado exige credencial de operador. Inspección previa obligatoria.",
+          "Construction por defecto solo pro y seguro PD. Depósito respaldado por seguro (retención del deducible). Equipo tipo grúa / pesado exige credencial de operador. Inspección previa obligatoria.",
         hostTipTitle: "Para anfitriones",
         hostTip:
           "Solo pro + PD antes de las llaves. Configura el deducible. Exige credencial en estanterías crane-class / motorizadas.",
@@ -3134,41 +3177,6 @@ export const es: AppMessages = {
         layers: "Condición de devolución · tintorería · talla · fianza · términos.",
         claimsTitle: "Si algo sale mal",
         claims: "Tarifa y política van en el acuerdo; fianza cubre roturas o piezas faltantes.",
-      },
-      "Office & Business": {
-        title: "Alquiler de oficina y negocio",
-        summary:
-          "Los dispositivos con almacenamiento necesitan un plan de borrado del anfitrión y el reconocimiento del arrendatario al reservar. Modelo ayuda a identificar la unidad en la entrega.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Indica si el dispositivo guarda trabajos o credenciales. Si tiene almacenamiento, define el plan de borrado (antes del anuncio, en la entrega o a cargo del arrendatario).",
-        whyGeoTitle: "¿Por qué una puerta de borrado?",
-        whyGeo:
-          "Copiadoras, POS y servidores filtran datos si vuelven sin limpiar. La atestación crea un rastro sin un producto forense.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Anuncio con almacenamiento + plan → reconocimiento al reservar → borrado / verificación en entrega → devolución limpia.",
-        layersTitle: "Capas de seguridad",
-        layers: "Flag de almacenamiento · plan de borrado · ack en reserva · fianza · términos · entrega QR.",
-        claimsTitle: "Si algo sale mal",
-        claims: "Las atestaciones apoyan disputas de privacidad; la fianza cubre daño físico.",
-      },
-      "Music & Audio": {
-        title: "Alquiler de música y audio",
-        summary:
-          "Los kits PA requieren inventario de cables y stands para que los XLR y soportes faltantes no terminen en disputas. La potencia ayuda al venue.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "En PA Systems lista cada cable y stand. El arrendatario lo reconoce al reservar y lo revisa en la entrega.",
-        whyGeoTitle: "¿Por qué inventario de cables / stands?",
-        whyGeo:
-          "Las reclamaciones de PA suelen ser accesorios, no la cabeza. Una checklist congelada en reserva y entrega reduce disputas.",
-        flowTitle: "De punta a punta",
-        flow: "Lista PA con inventario → ack → conteo en recogida → conteo en devolución.",
-        layersTitle: "Capas de seguridad",
-        layers: "Inventario cables / stands · potencia · fianza · términos · entrega QR.",
-        claimsTitle: "Si algo sale mal",
-        claims: "El inventario y las fotos de devolución apoyan piezas faltantes; la fianza cubre el hueco.",
       },
       "Baby & Kids": {
         title: "Alquiler seguro de sillas infantiles",
