@@ -473,6 +473,10 @@ export function listingRequiresHelmetLockPolicy(
 ): boolean {
   if (!rentOn(listing)) return false;
   if (listingIsBikesScooters(listing)) return true;
+  // Snow Sports: helmet policy is required at publish; ack at booking (no bike lock).
+  if (listing.category.trim() === "Sports & Recreation" && subKey(listing) === "snow sports") {
+    return true;
+  }
   return listingIsAtv(listing) || listingIsMotorcycle(listing);
 }
 

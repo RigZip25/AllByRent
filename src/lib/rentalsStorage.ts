@@ -227,6 +227,15 @@ export type RentalBooking = {
   /** FAA Part 107 and/or Remote ID attestation (drones). Optional cert upload. */
   droneCertAttested?: boolean;
   droneCertMedia?: MediaRef | null;
+  /** Stronger Remote ID ack (weight class + hardware declaration). */
+  droneRemoteIdAck?: boolean;
+  droneWeightClassSnapshot?: string;
+  remoteIdStatusSnapshot?: string;
+  /** Sports water / Pro water PFD policy ack. */
+  sportsPfdAck?: boolean;
+  sportsPfdIncludedSnapshot?: string;
+  dinSettingBandSnapshot?: string;
+  cateringSanitizeAck?: boolean;
   /** Car seat: renter sanitization / safety acknowledgment at booking. */
   carSeatSanitizationAttested?: boolean;
   carSeatRecallAckAttested?: boolean;
@@ -620,6 +629,17 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
     boaterLicenseMedia: raw.boaterLicenseMedia ?? null,
     droneCertAttested: Boolean(raw.droneCertAttested),
     droneCertMedia: raw.droneCertMedia ?? null,
+    droneRemoteIdAck: Boolean(raw.droneRemoteIdAck),
+    droneWeightClassSnapshot:
+      typeof raw.droneWeightClassSnapshot === "string" ? raw.droneWeightClassSnapshot : undefined,
+    remoteIdStatusSnapshot:
+      typeof raw.remoteIdStatusSnapshot === "string" ? raw.remoteIdStatusSnapshot : undefined,
+    sportsPfdAck: Boolean(raw.sportsPfdAck),
+    sportsPfdIncludedSnapshot:
+      typeof raw.sportsPfdIncludedSnapshot === "string" ? raw.sportsPfdIncludedSnapshot : undefined,
+    dinSettingBandSnapshot:
+      typeof raw.dinSettingBandSnapshot === "string" ? raw.dinSettingBandSnapshot : undefined,
+    cateringSanitizeAck: Boolean(raw.cateringSanitizeAck),
     carSeatSanitizationAttested: Boolean(raw.carSeatSanitizationAttested),
     carSeatRecallAckAttested: Boolean(raw.carSeatRecallAckAttested),
     cribRecallAckAttested: Boolean(raw.cribRecallAckAttested),

@@ -3037,10 +3037,10 @@ export const cs: AppMessages = {
       Vehicles: {
         title: "Jak funguje sousedské půjčení auta",
         summary:
-          "Sousedé jsou důvěryhodnější než anonymní marketplace — ale podmínky, pojištění a povinná předprohlídka (exteriér, interiér a všechny pneumatiky) jsou povinné před PIN/klíči. Palivo (a DEF u nafty) se zapisuje na začátku a při vrácení — výchozí plná→plná, chybějící palivo + $20. Od 26 000 lb nebo u semi / komerčních přívěsů navíc CDL a doklad agent→majitel (ne osobní nahrání). Hostitel může po okně vyzvednutí označit no-show a uvolnit kalendář.",
+          "Sousedé jsou důvěryhodnější než anonymní marketplace — podmínky, pojištění, měkké sebeprohlášení o řidičáku / záznamu (ne placené MVR) a povinná předprohlídka (exteriér, interiér a všechny pneumatiky) před PIN/klíči. Palivo (a DEF u nafty) se zapisuje na začátku a při vrácení — výchozí plná→plná, chybějící palivo + $20. Od 26 000 lb nebo u semi / komerčních přívěsů navíc CDL a doklad agent→majitel (ne osobní nahrání). Hostitel může po okně vyzvednutí označit no-show a uvolnit kalendář.",
         hostTipTitle: "Pro hostitele / majitele",
         hostTip:
-          "Zadej GVWR v lb. Od ≥ 26 000 lb nebo u semi nastav e-mail pro doklad od agenta a vyžaduj CDL. U lehčích aut nájemce přidá auto do osobní pojistky a nahraje doklad. Fotky pneumatik chrání před výměnou. Palivo: plná→plná (hladiny jen při předání, ne v inzerátu). Volitelný no-show poplatek je měkký flag depozitu.",
+          "Zadej GVWR v lb. Od ≥ 26 000 lb nebo u semi nastav e-mail pro doklad od agenta a vyžaduj CDL. U lehčích aut nájemce přidá auto do osobní pojistky a nahraje doklad. Měkké prohlášení o řidičáku / záznamu je upřímný scaffold — ne placené MVR. Fotky pneumatik chrání před výměnou. Palivo: plná→plná (hladiny jen při předání, ne v inzerátu). Volitelný no-show poplatek je měkký flag depozitu.",
         hostTipLinkLabel: "Web TINT (tint.ai)",
         hostTipLinkHref: "https://www.tint.ai/",
         whyGeoTitle: "Proč GPS pro PIN?",
@@ -3051,10 +3051,10 @@ export const cs: AppMessages = {
           "Doklad pojištění musí být schválený před PIN / schránkou / klíči. Doporučeno: OBD + schránka na klíč.",
         flowTitle: "Od začátku do konce",
         flow:
-          "Nabídnout → hmotnost + pojištění (upload nebo agent→e-mail) → rezervace (CDL u komerční dopravy) → předprohlídka včetně pneumatik → předání s palivem/DEF + tachometr → stejná sada při vrácení.",
+          "Nabídnout → hmotnost + pojištění (upload nebo agent→e-mail) → rezervace (měkké prohlášení řidičáku/záznamu + CDL u komerční dopravy) → předprohlídka včetně pneumatik → předání s palivem/DEF + tachometr → stejná sada při vrácení.",
         layersTitle: "Vrstvy ochrany",
         layers:
-          "Podmínky · pojištění · CDL dle potřeby · předprohlídka a vrácení včetně pneumatik · palivo/DEF plná→plná (+$20 při nedodání) · PD od 26 000 lb · hold · volitelný no-show · geo PIN · QR.",
+          "Podmínky · pojištění · měkké prohlášení řidičáku/záznamu (ne MVR) · CDL dle potřeby · předprohlídka a vrácení včetně pneumatik · palivo/DEF plná→plná (+$20 při nedodání) · PD od 26 000 lb · hold · volitelný no-show · geo PIN · QR.",
         claimsTitle: "Když se něco pokazí (nároky)",
         claims:
           "Pojištění nájemce je primární. Fotky pneumatik před/po pomůžou prokázat výměnu. Nedodané palivo (+ $20) lze označit pro nárok hostitele. No-show uvolní kalendář; poplatek jen pokud je nastaven.",
@@ -3062,19 +3062,19 @@ export const cs: AppMessages = {
       "Heavy Equipment": {
         title: "Půjčování komerční techniky",
         summary:
-          "Heavy Equipment defaultně jen pro profesionály. Kvalifikace obsluhy (vysokozdvižný vozík / jeřáb / bagr / obecná) dle podkategorie. PD pojištění povinné. Depozit pojištěním (hold na spoluúčast), ne plná náhrada. Předprohlídka blokuje start.",
+          "Heavy Equipment defaultně jen pro profesionály. Kvalifikace obsluhy (vysokozdvižný vozík / jeřáb / bagr / obecná) dle podkategorie. Strukturované COI (pole + fotka) — ne jen fotka — a hostitel musí označit přijetí dokladu před předáním. Depozit pojištěním (hold na spoluúčast), ne plná náhrada. Předprohlídka blokuje start.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Nech „jen profi“ zapnuté. Vyžaduj kvalifikaci u motorové techniky. PD je povinné; nastav max. spoluúčast kvůli holdu.",
+          "Nech „jen profi“ zapnuté. Vyžaduj kvalifikaci u motorové techniky. Sbírej strukturované COI (pojistitel, číslo, limity, data) a volitelně additional insured; označ doklad jako přijatý před odemčením. Nastav max. spoluúčast kvůli holdu.",
         whyGeoTitle: "Proč doklad před klíči?",
         whyGeo:
-          "Komerční technika je drahá při nepojištěném nebo nekvalifikovaném poškození. Kvalifikace + PD + předprohlídka dávají čas na kontrolu.",
+          "Komerční technika je drahá při nepojištěném nebo nekvalifikovaném poškození. Kvalifikace + strukturované COI + potvrzení hostitele + předprohlídka dávají čas na kontrolu.",
         flowTitle: "Od začátku do konce",
         flow:
-          "Nabídnout → jen profi + PD + kvalifikace dle potřeby → doklad → předprohlídka → předání → prohlídka při vrácení.",
+          "Nabídnout → jen profi + strukturované COI + kvalifikace dle potřeby → doklad + pole COI → hostitel označí přijetí → předprohlídka → předání → prohlídka při vrácení.",
         layersTitle: "Vrstvy ochrany",
         layers:
-          "Kvalifikace obsluhy · pro prohlášení · PD · hold na spoluúčast · předprohlídka · volitelný no-show · podmínky · QR/PIN.",
+          "Kvalifikace obsluhy · pro prohlášení · strukturované COI + potvrzení hostitele · hold na spoluúčast · předprohlídka · volitelný no-show · podmínky · QR/PIN.",
         claimsTitle: "Když se něco pokazí",
         claims:
           "Primární je PD pojištění nájemce; hold kryje spoluúčast. No-show uvolní termíny.",
@@ -3082,19 +3082,19 @@ export const cs: AppMessages = {
       Construction: {
         title: "Půjčování stavební techniky",
         summary:
-          "Construction defaultně jen profi a PD pojištění. Depozit pojištěním (hold na spoluúčast). Jeřábová / těžká motorová technika vyžaduje kvalifikaci obsluhy. Povinná předprohlídka.",
+          "Construction defaultně jen profi a strukturované COI (pole + fotka) s potvrzením hostitele před odemčením — ne jen fotka. Depozit pojištěním (hold na spoluúčast). Jeřábová / těžká motorová technika vyžaduje kvalifikaci obsluhy. Povinná předprohlídka.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Jen profi + PD před klíči. Nastav spoluúčast. Vyžaduj kvalifikaci u crane-class / motorových polic.",
-        whyGeoTitle: "Proč profi + PD + kvalifikace?",
+          "Jen profi + strukturované COI před klíči; volitelně additional insured. Nastav spoluúčast. Vyžaduj kvalifikaci u crane-class / motorových polic. Označ COI jako přijaté před odemčením.",
+        whyGeoTitle: "Proč profi + strukturované COI + kvalifikace?",
         whyGeo:
-          "Staveništní nářadí snáší tvrdý provoz. Profi + PD + kvalifikace + fotky snižují nepojištěnou ztrátu.",
+          "Staveništní nářadí snáší tvrdý provoz. Profi + strukturované COI s potvrzením hostitele + kvalifikace + fotky snižují nepojištěnou ztrátu.",
         flowTitle: "Od začátku do konce",
         flow:
-          "Nabídnout → profi + PD + kvalifikace dle potřeby → doklad → předprohlídka → předání → vrácení.",
+          "Nabídnout → profi + strukturované COI + kvalifikace dle potřeby → doklad + pole → hostitel potvrdí přijetí → předprohlídka → předání → vrácení.",
         layersTitle: "Vrstvy ochrany",
         layers:
-          "Kvalifikace · pro prohlášení · PD · hold · předprohlídka · no-show · podmínky · QR.",
+          "Kvalifikace · pro prohlášení · strukturované COI + potvrzení hostitele · hold · předprohlídka · no-show · podmínky · QR.",
         claimsTitle: "Když se něco pokazí",
         claims:
           "Nejdřív pojištění, pak hold s fotkami. No-show zruší a uvolní data.",
