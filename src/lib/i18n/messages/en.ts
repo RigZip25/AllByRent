@@ -3711,50 +3711,64 @@ export const en: AppMessages = {
     collapse: "Hide details",
     byCategory: {
       Vehicles: {
-        title: "How neighbor car rental works",
-        summary:
-          "Light cars use a simple Turo-style neighbor flow: signed terms, personal auto proof uploaded in-app, and pre-trip photos before PIN/keys. Cancel ≥24h: full refund; inside 24h: 50%. Fuel full-to-full (+$20 if short). Late return: 30m grace + $20 + $15/hr defaults.",
-        hostTipTitle: "For hosts",
-        hostTip:
-          "Ask renters to add the car to their personal policy and upload proof in-app. Pre-trip tire photos protect against swaps. Fuel is full-to-full by default (levels at handoff only). Confirm coverage with your agent before you list — we are not an insurer.",
-        whyGeoTitle: "Why GPS for the PIN?",
-        whyGeo:
-          "A shared code can travel farther than the car. The pickup PIN opens only at the spot (or via the car QR) — presence, not a forwarded number. Codes stay locked until start.",
-        contactlessTitle: "Contactless / without co-presence",
-        contactless:
-          "Insurance proof must be approved before PIN, lockbox, or keys unlock. Optional gear: OBD tracker + key lockbox paired with geo PIN / car QR.",
-        flowTitle: "End to end",
-        flow:
-          "List → personal insurance rules + deductible → renter books → proof cleared → pre-trip photos (body + 4 tires) → handoff with fuel + odometer → return photos → host confirms.",
-        layersTitle: "Safety layers",
-        layers:
-          "Signed terms · personal insurance upload · pre-trip photos · fuel full-to-full · cancel ≥24h free · no-show ~2h · late fee · deposit hold · geo PIN.",
-        claimsTitle: "If something goes wrong (claims)",
-        claims:
-          "Renter insurance is primary. Pre-trip vs return photos help prove damage or tire swaps. Cancel ≥24h: full refund; inside 24h: 50%.",
+        title: "Passenger / light car rental FAQ",
+        summary: "Short answers for cars and light trucks under commercial weight.",
+        qa: [
+          {
+            q: "Do I need a CDL?",
+            a: "No for light passenger cars under 26,001 lb GVWR, unless local law requires one.",
+          },
+          {
+            q: "What insurance do I need?",
+            a: "Valid personal auto covering this car. Upload proof in-app before PIN or keys unlock.",
+          },
+          {
+            q: "How does cancellation work?",
+            a: "Cancel ≥24h before start: full refund. Inside 24h: 50% refund.",
+          },
+          {
+            q: "Fuel and late return?",
+            a: "Fuel is full-to-full (+$20 if short). Late return: 30 min grace, then $20 + $15/hr by default.",
+          },
+          {
+            q: "Why GPS for the PIN?",
+            a: "The PIN opens only at pickup (or via the car QR)—not a forwarded code.",
+          },
+          {
+            q: "What photos are required?",
+            a: "Pre-trip body + four tires before start; matching return photos before close.",
+          },
+        ],
       },
       VehiclesCommercial: {
-        title: "Commercial transport (≥26,000 lb / semi)",
-        summary:
-          "This is not the light-car neighbor FAQ. GVWR in lb (not dollar value) drives the physical-damage requirement. CDL required. Insurance proof usually goes agent → owner email. Multi-tire commercial inspection. Deposit hold tracks commercial deductible / PD — not personal-auto compact-car copy.",
-        hostTipTitle: "For commercial hosts",
-        hostTip:
-          "Enter GVWR in pounds. At ≥26,000 lb or on Commercial Trucks / Equipment Trailers / semis, require CDL and set the email where the renter’s insurance agent must send proof. Set wheel/tire count for dualies and multi-axle. Confirm commercial PD with your agent — we are not an insurer.",
-        whyGeoTitle: "Why GPS for the PIN?",
-        whyGeo:
-          "Commercial handoffs still need presence: PIN / lockbox only at the pickup spot or via vehicle QR — not a forwarded code.",
-        contactlessTitle: "Contactless / without co-presence",
-        contactless:
-          "Agent→owner insurance proof must be cleared before any PIN, lockbox, or keys unlock — even without co-presence.",
-        flowTitle: "End to end",
-        flow:
-          "List → GVWR (lb) + CDL + agent proof email + wheel count + PD mins → renter books with CDL → agent emails proof to owner → multi-tire pre-trip → handoff → return inspection.",
-        layersTitle: "Safety layers",
-        layers:
-          "CDL · agent→owner insurance · PD by GVWR (lb) · multi-tire photos · commercial deductible hold · geo PIN · signed terms.",
-        claimsTitle: "If something goes wrong (claims)",
-        claims:
-          "Renter commercial / physical-damage coverage is primary. Body + every-tire photos help prove damage or swaps. Keep agent email threads with the booking.",
+        title: "Commercial transport (≥26,001 lb / semi) FAQ",
+        summary: "Short answers for heavy commercial trucks and semis.",
+        qa: [
+          {
+            q: "Do I need a CDL?",
+            a: "Yes if GVWR is 26,001 lb or more (or as required by local law).",
+          },
+          {
+            q: "What weight do I enter?",
+            a: "GVWR in pounds—not dollar value.",
+          },
+          {
+            q: "How does insurance proof work?",
+            a: "The renter’s agent emails proof to the owner address on the listing before PIN or keys unlock.",
+          },
+          {
+            q: "Is physical damage (PD) required?",
+            a: "Yes. PD limits follow GVWR (lb); the deposit hold tracks the commercial deductible / PD.",
+          },
+          {
+            q: "What inspection is required?",
+            a: "Multi-tire commercial pre-trip (every wheel position) before start; same set on return.",
+          },
+          {
+            q: "Why GPS for the PIN?",
+            a: "PIN or lockbox unlocks only at pickup or via vehicle QR—not a forwarded code.",
+          },
+        ],
       },
       "Heavy Equipment": {
         title: "Commercial equipment rentals",
@@ -4116,6 +4130,194 @@ export const en: AppMessages = {
     },
 
     bySubcategory: {
+      Vehicles: {
+        "Cars & Trucks": {
+          title: "Passenger / light car rental FAQ",
+          summary: "Short answers for cars and light trucks under commercial weight.",
+          qa: [
+            {
+              q: "Do I need a CDL?",
+              a: "No for light passenger cars under 26,001 lb GVWR, unless local law requires one.",
+            },
+            {
+              q: "What insurance do I need?",
+              a: "Valid personal auto covering this car. Upload proof in-app before PIN or keys unlock.",
+            },
+            {
+              q: "How does cancellation work?",
+              a: "Cancel ≥24h before start: full refund. Inside 24h: 50% refund.",
+            },
+            {
+              q: "Fuel and late return?",
+              a: "Fuel is full-to-full (+$20 if short). Late return: 30 min grace, then $20 + $15/hr by default.",
+            },
+            {
+              q: "Why GPS for the PIN?",
+              a: "The PIN opens only at pickup (or via the car QR)—not a forwarded code.",
+            },
+            {
+              q: "What photos are required?",
+              a: "Pre-trip body + four tires before start; matching return photos before close.",
+            },
+          ],
+        },
+        Motorcycles: {
+          title: "Motorcycle rental FAQ",
+          summary: "Short answers for motorcycle rentals.",
+          qa: [
+            {
+              q: "Do I need a motorcycle endorsement?",
+              a: "Yes. Attest a valid motorcycle endorsement (or local equivalent) for the named rider.",
+            },
+            {
+              q: "Is a regular car license enough?",
+              a: "No when this listing requires a motorcycle endorsement.",
+            },
+            {
+              q: "What insurance do I need?",
+              a: "Proof covering this bike, uploaded in-app before PIN or keys unlock.",
+            },
+            {
+              q: "Helmet?",
+              a: "Follow local law and the helmet policy on the listing.",
+            },
+            {
+              q: "What photos are required?",
+              a: "Pre-trip body and tire photos before start; matching return photos before close.",
+            },
+          ],
+        },
+        ATVs: {
+          title: "ATV / OHV rental FAQ",
+          summary: "Short answers for ATV and OHV rentals.",
+          qa: [
+            {
+              q: "Is a terrain waiver required?",
+              a: "Yes by default—acknowledge OHV / ATV terrain risk at booking before pickup unlock.",
+            },
+            {
+              q: "What license do I need?",
+              a: "A valid license or permit as required by local OHV law and the listing.",
+            },
+            {
+              q: "What insurance do I need?",
+              a: "Proof covering this ATV, uploaded before PIN or keys unlock.",
+            },
+            {
+              q: "Helmet / gear?",
+              a: "Follow local law and any helmet or gear rules on the listing.",
+            },
+            {
+              q: "What photos are required?",
+              a: "Pre-trip body and tire photos before start; matching return photos before close.",
+            },
+          ],
+        },
+        "Tow Vehicles": {
+          title: "Tow vehicle rental FAQ",
+          summary: "Short answers for tow trucks and tow vehicles.",
+          qa: [
+            {
+              q: "Do I need a CDL?",
+              a: "Yes when GVWR or combo weight is 26,001 lb or more (or as required by local law).",
+            },
+            {
+              q: "What else is required?",
+              a: "Valid tow credentials as listed, plus commercial insurance proof agent→owner when this shelf requires it.",
+            },
+            {
+              q: "Tow capacity?",
+              a: "Stay within the published tow rating and hitch class on the listing.",
+            },
+            {
+              q: "What inspection is required?",
+              a: "Body and multi-tire pre-trip before start; same set on return.",
+            },
+            {
+              q: "Why GPS for the PIN?",
+              a: "PIN or lockbox unlocks only at pickup or via vehicle QR—not a forwarded code.",
+            },
+          ],
+        },
+        Trailers: {
+          title: "Trailer rental FAQ",
+          summary: "Short answers for light / equipment trailers under commercial weight.",
+          qa: [
+            {
+              q: "Do I need a CDL?",
+              a: "Usually no under 26,001 lb GVWR—check local law, hitch rating, and brake rules.",
+            },
+            {
+              q: "Hitch and lights?",
+              a: "Match hitch class; confirm lights and brakes work at handoff.",
+            },
+            {
+              q: "What insurance do I need?",
+              a: "Coverage for the trailer as required on the listing; upload proof before handoff.",
+            },
+            {
+              q: "Load limits?",
+              a: "Do not exceed published GVWR or payload.",
+            },
+            {
+              q: "What photos are required?",
+              a: "Frame, coupler, tires, and lights at pre-trip; same set on return.",
+            },
+          ],
+        },
+        "Equipment Trailers": {
+          title: "Equipment trailer rental FAQ",
+          summary: "Short answers for commercial / equipment trailers.",
+          qa: [
+            {
+              q: "Do I need a CDL?",
+              a: "Yes when GVWR or combo weight is 26,001 lb or more (or as required for commercial hauling).",
+            },
+            {
+              q: "How does insurance proof work?",
+              a: "Agent emails commercial / PD proof to the owner address on the listing before PIN or keys unlock.",
+            },
+            {
+              q: "Load limits?",
+              a: "Do not exceed published GVWR or payload.",
+            },
+            {
+              q: "What inspection is required?",
+              a: "Frame and multi-tire photos before start; same set on return.",
+            },
+            {
+              q: "Why GPS for the PIN?",
+              a: "PIN or lockbox unlocks only at pickup or via vehicle QR—not a forwarded code.",
+            },
+          ],
+        },
+        "Commercial Trucks": {
+          title: "Commercial truck rental FAQ",
+          summary: "Short answers for commercial trucks and semis.",
+          qa: [
+            {
+              q: "Do I need a CDL?",
+              a: "Yes if GVWR is 26,001 lb or more (or as required by local law).",
+            },
+            {
+              q: "What weight do I enter?",
+              a: "GVWR in pounds—not dollar value.",
+            },
+            {
+              q: "How does insurance proof work?",
+              a: "The renter’s agent emails proof to the owner address on the listing before PIN or keys unlock.",
+            },
+            {
+              q: "Is physical damage (PD) required?",
+              a: "Yes. PD limits follow GVWR (lb); the deposit hold tracks the commercial deductible / PD.",
+            },
+            {
+              q: "What inspection is required?",
+              a: "Multi-tire commercial pre-trip before start; same set on return.",
+            },
+          ],
+        },
+      },
       "Electronics & Tech": {
         "Broadcast Equipment": { title: "Broadcast — subtype, I/O, return test", summary: "AV houses and Lensrentals-class kits win on patch clarity. We win on peer inventory plus device subtype (switcher/encoder/recorder/teleprompter), SDI/HDMI I/O list, power/battery plate, capture media included?, firmware notes, soft livestream platform notes, kit completeness, and a return function test — frozen on the agreement. Deposit hold — not Geek Squad, Fat Llama, or insurance affiliate hard-sell.", hostTipTitle: "Host standard", hostTip: "Pick subtype and brand/model. List every SDI/HDMI port and included cable/converter. Set power/battery plate and whether SD/CF/SSD media ships with the kit. Note firmware version (and do-not-update during rental). Add soft livestream notes (OBS/RTMP/YouTube/Twitch/Zoom) without affiliate links. Mark kit completeness and a return function-test policy. Check structured kit items + free-text checklist; photo ports before handoff.", whyGeoTitle: "Why these gates?", whyGeo: "Wrong subtype, missing BNCs, empty media slots, and untested ports drive more livestream disputes than theft. A short patch card on the listing beats dead air and surprise deposit claims after the show.", flowTitle: "End to end", flow: "List subtype + I/O + power + media + firmware + platform notes + completeness + return test → renter acks kit / return test → stream or shoot → return with function test → deposit release or claim with photos.", layersTitle: "Safety layers", layers: "Serial · subtype · SDI/HDMI inventory · power/plate · capture media · firmware · soft platform notes · kit completeness · structured accessories · return function test · deposit hold · rental terms.", claimsTitle: "If something goes wrong", claims: "Inventory + serial support missing cable/media claims; failed return function test and damage beyond wear hit deposit. Evorios does not sell electronics insurance or partner with AV retailers for repair." },
         "Display Systems": { title: "Displays — size, inputs, power, fragility", summary: "AV houses rent LED walls and commercial panels with pitch, nits, mounts, and circuit notes. We win on peer inventory plus clear size, resolution/HDR, stand/mount/flight-case, HDMI/DP/SDI inputs, brightness, indoor vs outdoor, power/circuit expectations, LED pitch, and transport fragility — frozen on the agreement. No Geek Squad, Fat Llama, or third-party insurance hard-sell.", hostTipTitle: "Host standard", hostTip: "Set brand + model + size band (use LED cabinet row when modular). Mark display type, resolution/HDR, mount/stand/case include, every input, nit band, indoor/outdoor rating, power/circuit band, and fragility. For LED walls add pixel pitch and list spare modules / power distro in the checklist. Photo corners and flight-case condition before handoff.", whyGeoTitle: "Why these gates?", whyGeo: "Wrong cables, undersized circuits, outdoor use on indoor panels, and cracked glass in transit drive more display disputes than theft. A short AV care card on the listing beats day-of signal and power failures.", flowTitle: "End to end", flow: "List size + type + HDR + mount kit + inputs + nits + indoor/outdoor + power + pitch + fragility → renter acks kit / outdoor / power / fragility → handoff count → return cased → deposit release or claim with photos.", layersTitle: "Safety layers", layers: "Serial · size · type · resolution/HDR · mount/case · input inventory · nits · indoor/outdoor · power/circuit · LED pitch · fragility · kit checklist · deposit · rental terms.", claimsTitle: "If something goes wrong", claims: "Missing cables/remotes/modules use inventory + photos; cracked glass or bent LED cabinets beyond wear hit deposit. Evorios does not sell electronics insurance or partner with Geek Squad / Fat Llama." },

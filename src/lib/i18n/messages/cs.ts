@@ -3702,50 +3702,64 @@ export const cs: AppMessages = {
     collapse: "Skrýt detaily",
     byCategory: {
       Vehicles: {
-        title: "Jak funguje sousedské půjčení auta",
-        summary:
-          "Lehká auta mají jednoduchý Turo-sousedský tok: podmínky, osobní pojistka nahraná v aplikaci a předprohlídka před PIN/klíči. Storno ≥24h: plná refundace; do 24h: 50 %. Palivo plná→plná (+$20 při nedodání). Pozdní návrat: 30 min grace + $20 + $15/h.",
-        hostTipTitle: "Pro hostitele",
-        hostTip:
-          "Nájemce přidá auto do osobní pojistky a nahraje doklad v aplikaci. Fotky pneumatik chrání před výměnou. Palivo: plná→plná (hladiny jen při předání). Před inzerátem si ověř krytí u agenta — nejsme pojišťovna.",
-        whyGeoTitle: "Proč GPS pro PIN?",
-        whyGeo:
-          "Sdílený kód může dojít dál než auto. PIN se odemkne až na místě nebo přes QR na autě — přítomnost, ne přeposlané číslo.",
-        contactlessTitle: "Bezkontaktně / bez přítomnosti",
-        contactless:
-          "Doklad pojištění musí být schválený před PIN / schránkou / klíči. Volitelně: OBD + schránka na klíč s geo PIN / QR.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Nabídnout → osobní pojištění + spoluúčast → rezervace → doklad → předprohlídka (karoserie + 4 pneumatiky) → předání s palivem + tachometr → fotky při vrácení → potvrzení hostitele.",
-        layersTitle: "Vrstvy ochrany",
-        layers:
-          "Podmínky · osobní pojistka (upload) · předprohlídka · palivo plná→plná · storno ≥24h zdarma · no-show ~2h · late fee · hold · geo PIN.",
-        claimsTitle: "Když se něco pokazí (nároky)",
-        claims:
-          "Pojištění nájemce je primární. Fotky před/po pomůžou prokázat poškození nebo výměnu pneumatik. Storno ≥24h: plná refundace; do 24h: 50 %.",
+        title: "FAQ půjčení osobního / lehkého auta",
+        summary: "Krátké odpovědi pro auta a lehké náklaďáky pod komerční hmotností.",
+        qa: [
+          {
+            q: "Potřebuji CDL?",
+            a: "Ne u lehkých osobních aut pod 26 001 lb GVWR, pokud místní zákon nestanoví jinak.",
+          },
+          {
+            q: "Jaké pojištění potřebuji?",
+            a: "Platné osobní auto pojištění na toto auto. Nahrajte doklad v aplikaci před odemčením PIN nebo klíčů.",
+          },
+          {
+            q: "Jak funguje storno?",
+            a: "Storno ≥24 h před startem: plná refundace. Do 24 h: 50 %.",
+          },
+          {
+            q: "Palivo a pozdní návrat?",
+            a: "Palivo plná→plná (+$20 při nedodání). Pozdní návrat: 30 min grace, pak $20 + $15/h.",
+          },
+          {
+            q: "Proč GPS pro PIN?",
+            a: "PIN se odemkne jen na místě vyzvednutí (nebo přes QR na autě)—ne přeposlaný kód.",
+          },
+          {
+            q: "Jaké fotky jsou povinné?",
+            a: "Předprohlídka karoserie + čtyři pneumatiky před startem; stejná sada při vrácení.",
+          },
+        ],
       },
       VehiclesCommercial: {
-        title: "Komerční doprava (≥26 000 lb / semi)",
-        summary:
-          "Toto není FAQ pro lehká auta. GVWR v lb (ne v dolarech) určuje povinné PD. CDL povinné. Doklad pojištění obvykle agent → e-mail majitele. Komerční prohlídka více pneumatik. Hold depozitu = komerční spoluúčast / PD — ne copy osobního auta.",
-        hostTipTitle: "Pro komerční hostitele",
-        hostTip:
-          "Zadej GVWR v librách. Od ≥26 000 lb nebo u Commercial Trucks / Equipment Trailers / semi vyžaduj CDL a nastav e-mail, kam agent nájemce pošle doklad. Nastav počet kol pro dualies a vícenápravové. Ověř komerční PD u agenta — nejsme pojišťovna.",
-        whyGeoTitle: "Proč GPS pro PIN?",
-        whyGeo:
-          "I u komerčního předání platí přítomnost: PIN / schránka jen na místě vyzvednutí nebo přes QR vozidla — ne přeposlaný kód.",
-        contactlessTitle: "Bezkontaktně / bez přítomnosti",
-        contactless:
-          "Doklad agent→majitel musí být schválený před jakýmkoli PIN, schránkou nebo klíči — i bez přítomnosti.",
-        flowTitle: "Od začátku do konce",
-        flow:
-          "Nabídnout → GVWR (lb) + CDL + e-mail agenta + počet kol + PD limity → rezervace s CDL → agent pošle doklad majiteli → předprohlídka více pneumatik → předání → prohlídka při vrácení.",
-        layersTitle: "Vrstvy ochrany",
-        layers:
-          "CDL · pojištění agent→majitel · PD dle GVWR (lb) · fotky více pneumatik · hold na komerční spoluúčast · geo PIN · podmínky.",
-        claimsTitle: "Když se něco pokazí (nároky)",
-        claims:
-          "Komerční / PD pojištění nájemce je primární. Fotky karoserie a každé pneumatiky pomáhají prokázat poškození nebo výměnu. Uchovej e-maily agenta u rezervace.",
+        title: "FAQ komerční dopravy (≥26 001 lb / semi)",
+        summary: "Krátké odpovědi pro těžké komerční náklaďáky a semi.",
+        qa: [
+          {
+            q: "Potřebuji CDL?",
+            a: "Ano, pokud je GVWR 26 001 lb nebo více (nebo jak vyžaduje místní zákon).",
+          },
+          {
+            q: "Jakou hmotnost zadávám?",
+            a: "GVWR v librách—ne hodnotu v dolarech.",
+          },
+          {
+            q: "Jak funguje doklad pojištění?",
+            a: "Agent nájemce pošle doklad e-mailem na adresu majitele v inzerátu před odemčením PIN nebo klíčů.",
+          },
+          {
+            q: "Je povinné physical damage (PD)?",
+            a: "Ano. Limity PD vycházejí z GVWR (lb); hold depozitu sleduje komerční spoluúčast / PD.",
+          },
+          {
+            q: "Jaká prohlídka je povinná?",
+            a: "Komerční předprohlídka všech kol před startem; stejná sada při vrácení.",
+          },
+          {
+            q: "Proč GPS pro PIN?",
+            a: "PIN nebo schránka se odemkne jen na místě vyzvednutí nebo přes QR vozidla—ne přeposlaný kód.",
+          },
+        ],
       },
       "Heavy Equipment": {
         title: "Půjčování komerční techniky",
@@ -4102,6 +4116,194 @@ export const cs: AppMessages = {
     },
 
     bySubcategory: {
+      Vehicles: {
+        "Cars & Trucks": {
+          title: "FAQ půjčení osobního / lehkého auta",
+          summary: "Krátké odpovědi pro auta a lehké náklaďáky pod komerční hmotností.",
+          qa: [
+            {
+              q: "Potřebuji CDL?",
+              a: "Ne u lehkých osobních aut pod 26 001 lb GVWR, pokud místní zákon nestanoví jinak.",
+            },
+            {
+              q: "Jaké pojištění potřebuji?",
+              a: "Platné osobní auto pojištění na toto auto. Nahrajte doklad v aplikaci před odemčením PIN nebo klíčů.",
+            },
+            {
+              q: "Jak funguje storno?",
+              a: "Storno ≥24 h před startem: plná refundace. Do 24 h: 50 %.",
+            },
+            {
+              q: "Palivo a pozdní návrat?",
+              a: "Palivo plná→plná (+$20 při nedodání). Pozdní návrat: 30 min grace, pak $20 + $15/h.",
+            },
+            {
+              q: "Proč GPS pro PIN?",
+              a: "PIN se odemkne jen na místě vyzvednutí (nebo přes QR na autě)—ne přeposlaný kód.",
+            },
+            {
+              q: "Jaké fotky jsou povinné?",
+              a: "Předprohlídka karoserie + čtyři pneumatiky před startem; stejná sada při vrácení.",
+            },
+          ],
+        },
+        Motorcycles: {
+          title: "FAQ půjčení motocyklů",
+          summary: "Krátké odpovědi pro motocykly.",
+          qa: [
+            {
+              q: "Potřebuji motocyklovou doložku / endorsement?",
+              a: "Ano. Potvrďte platnou motocyklovou doložku (nebo místní ekvivalent) pro jmenovaného jezdce.",
+            },
+            {
+              q: "Stačí běžný řidičák na auto?",
+              a: "Ne, pokud tento inzerát vyžaduje motocyklovou doložku.",
+            },
+            {
+              q: "Jaké pojištění potřebuji?",
+              a: "Doklad kryjící tuto motorku, nahraný v aplikaci před odemčením PIN nebo klíčů.",
+            },
+            {
+              q: "Helma?",
+              a: "Dodržte místní zákon a politiku helem v inzerátu.",
+            },
+            {
+              q: "Jaké fotky jsou povinné?",
+              a: "Předprohlídka karoserie a pneumatik před startem; stejná sada při vrácení.",
+            },
+          ],
+        },
+        ATVs: {
+          title: "FAQ půjčení ATV / OHV",
+          summary: "Krátké odpovědi pro ATV a OHV.",
+          qa: [
+            {
+              q: "Je povinné prohlášení o terénu?",
+              a: "Ano ve výchozím nastavení—potvrďte riziko terénu OHV / ATV při rezervaci před odemčením vyzvednutí.",
+            },
+            {
+              q: "Jaký řidičák potřebuji?",
+              a: "Platný průkaz nebo povolení dle místního OHV zákona a inzerátu.",
+            },
+            {
+              q: "Jaké pojištění potřebuji?",
+              a: "Doklad kryjící toto ATV, nahraný před odemčením PIN nebo klíčů.",
+            },
+            {
+              q: "Helma / výbava?",
+              a: "Dodržte místní zákon a pravidla helem / výbavy v inzerátu.",
+            },
+            {
+              q: "Jaké fotky jsou povinné?",
+              a: "Předprohlídka karoserie a pneumatik před startem; stejná sada při vrácení.",
+            },
+          ],
+        },
+        "Tow Vehicles": {
+          title: "FAQ půjčení odtahových vozidel",
+          summary: "Krátké odpovědi pro odtahy a tow vehicles.",
+          qa: [
+            {
+              q: "Potřebuji CDL?",
+              a: "Ano, když je GVWR nebo kombinovaná hmotnost 26 001 lb nebo více (nebo jak vyžaduje místní zákon).",
+            },
+            {
+              q: "Co dalšího je povinné?",
+              a: "Platné tow oprávnění dle inzerátu a komerční pojištění agent→majitel, pokud to tato police vyžaduje.",
+            },
+            {
+              q: "Nosnost odtahu?",
+              a: "Zůstaňte v publikovaném tow ratingu a třídě tažného zařízení v inzerátu.",
+            },
+            {
+              q: "Jaká prohlídka je povinná?",
+              a: "Karoserie a více pneumatik před startem; stejná sada při vrácení.",
+            },
+            {
+              q: "Proč GPS pro PIN?",
+              a: "PIN nebo schránka se odemkne jen na místě vyzvednutí nebo přes QR vozidla—ne přeposlaný kód.",
+            },
+          ],
+        },
+        Trailers: {
+          title: "FAQ půjčení přívěsů",
+          summary: "Krátké odpovědi pro lehké / utility přívěsy pod komerční hmotností.",
+          qa: [
+            {
+              q: "Potřebuji CDL?",
+              a: "Obvykle ne pod 26 001 lb GVWR—zkontrolujte místní zákon, třídu tažného zařízení a brzdy.",
+            },
+            {
+              q: "Tažné zařízení a světla?",
+              a: "Shoda třídy hitch; při předání ověřte světla a brzdy.",
+            },
+            {
+              q: "Jaké pojištění potřebuji?",
+              a: "Krytí přívěsu dle inzerátu; nahrajte doklad před předáním.",
+            },
+            {
+              q: "Limity nákladu?",
+              a: "Nepřekračujte publikované GVWR ani payload.",
+            },
+            {
+              q: "Jaké fotky jsou povinné?",
+              a: "Rám, spojka, pneumatiky a světla při předprohlídce; stejná sada při vrácení.",
+            },
+          ],
+        },
+        "Equipment Trailers": {
+          title: "FAQ půjčení equipment přívěsů",
+          summary: "Krátké odpovědi pro komerční / equipment přívěsy.",
+          qa: [
+            {
+              q: "Potřebuji CDL?",
+              a: "Ano, když je GVWR nebo kombinovaná hmotnost 26 001 lb nebo více (nebo jak vyžaduje komerční přeprava).",
+            },
+            {
+              q: "Jak funguje doklad pojištění?",
+              a: "Agent pošle komerční / PD doklad e-mailem na adresu majitele v inzerátu před odemčením PIN nebo klíčů.",
+            },
+            {
+              q: "Limity nákladu?",
+              a: "Nepřekračujte publikované GVWR ani payload.",
+            },
+            {
+              q: "Jaká prohlídka je povinná?",
+              a: "Fotky rámu a všech kol před startem; stejná sada při vrácení.",
+            },
+            {
+              q: "Proč GPS pro PIN?",
+              a: "PIN nebo schránka se odemkne jen na místě vyzvednutí nebo přes QR vozidla—ne přeposlaný kód.",
+            },
+          ],
+        },
+        "Commercial Trucks": {
+          title: "FAQ půjčení komerčních náklaďáků",
+          summary: "Krátké odpovědi pro komerční náklaďáky a semi.",
+          qa: [
+            {
+              q: "Potřebuji CDL?",
+              a: "Ano, pokud je GVWR 26 001 lb nebo více (nebo jak vyžaduje místní zákon).",
+            },
+            {
+              q: "Jakou hmotnost zadávám?",
+              a: "GVWR v librách—ne hodnotu v dolarech.",
+            },
+            {
+              q: "Jak funguje doklad pojištění?",
+              a: "Agent nájemce pošle doklad e-mailem na adresu majitele v inzerátu před odemčením PIN nebo klíčů.",
+            },
+            {
+              q: "Je povinné physical damage (PD)?",
+              a: "Ano. Limity PD vycházejí z GVWR (lb); hold depozitu sleduje komerční spoluúčast / PD.",
+            },
+            {
+              q: "Jaká prohlídka je povinná?",
+              a: "Komerční předprohlídka všech kol před startem; stejná sada při vrácení.",
+            },
+          ],
+        },
+      },
       "Electronics & Tech": {
         "Broadcast Equipment": { title: "Broadcast — subtyp, I/O, funkční test", summary: "AV půjčovny a Lensrentals-třída vyhrávají přehledným patch listem. My peer inventářem plus subtyp (switcher/encoder/recorder/teleprompter), SDI/HDMI I/O, napájení/battery plate, média v ceně?, firmware, měkké poznámky k livestream platforem, kompletnost sady a funkční test při vrácení — zmrazené ve smlouvě. Kauce — ne Geek Squad, Fat Llama ani affiliate pojištění.", hostTipTitle: "Standard hostitele", hostTip: "Zvolte subtyp a značku/model. Vypište každý SDI/HDMI port a přiložený kabel/konvertor. Nastavte napájení/battery plate a zda SD/CF/SSD média jedou se sadou. Uveďte verzi firmware (a zákaz update během pronájmu). Přidejte měkké livestream poznámky (OBS/RTMP/YouTube/Twitch/Zoom) bez affiliate odkazů. Označte kompletnost a politiku funkčního testu při vrácení. Zaškrtněte strukturované položky + checklist; vyfoťte porty před předáním.", whyGeoTitle: "Proč tyto brány?", whyGeo: "Špatný subtyp, chybějící BNC, prázdná média a netestované porty způsobují víc sporů u livestreamů než krádež. Krátká patch karta na inzerátu je lepší než výpadek vysílání a překvapivá reklamace kauce.", flowTitle: "Od začátku do konce", flow: "Inzerát: subtyp + I/O + napájení + média + firmware + platformy + kompletnost + test → nájemce potvrdí → stream/natáčení → vrácení s funkčním testem → uvolnění kauce nebo reklamace s fotkami.", layersTitle: "Vrstvy jistoty", layers: "Sériové číslo · subtyp · SDI/HDMI inventář · napájení/plate · média · firmware · měkké platformy · kompletnost · příslušenství · funkční test · kauce · podmínky.", claimsTitle: "Když se něco pokazí", claims: "Inventář + sériové číslo podpoří reklamace chybějících kabelů/médií; neúspěšný funkční test a škoda nad běžné opotřebení jdou z kauce. Evorios neprodává pojištění elektroniky ani nepartneruje s AV retailery na opravy." },
         "Display Systems": { title: "Displeje — velikost, vstupy, napájení, křehkost", summary: "AV půjčovny pronajímají LED stěny a komerční panely s pitch, nity, montáží a poznámkami k okruhu. Vyhráváme peer inventářem plus jasná velikost, rozlišení/HDR, stojan/montáž/flight-case, HDMI/DP/SDI vstupy, jas, indoor vs outdoor, napájení/okruh, LED pitch a přepravní křehkost — zmrazené ve smlouvě. Bez Geek Squad, Fat Llama nebo hard-sell pojištění.", hostTipTitle: "Standard hostitele", hostTip: "Nastavte značku + model + pásmo velikosti (u modulárních LED použijte řadu cabinetů). Označte typ displeje, rozlišení/HDR, zahrnutí stojanu/montáže/case, každý vstup, pásmo nitů, indoor/outdoor, napájení/okruh a křehkost. U LED stěn doplňte pixel pitch a vypište náhradní moduly / power distro v checklistu. Před předáním vyfoťte rohy a stav flight-case.", whyGeoTitle: "Proč tyto brány?", whyGeo: "Špatné kabely, slabý okruh, venkovní použití indoor panelů a prasklé sklo při přepravě způsobují víc sporů než krádež. Krátká AV pečovatelská karta na inzerátu je lepší než výpadek signálu a napájení v den akce.", flowTitle: "Od začátku do konce", flow: "Inzerát: velikost + typ + HDR + montáž + vstupy + nity + indoor/outdoor + napájení + pitch + křehkost → nájemce potvrdí kit / outdoor / napájení / křehkost → předání → návrat v case → uvolnění kauce nebo reklamace s fotkami.", layersTitle: "Vrstvy jistoty", layers: "Sériové číslo · velikost · typ · rozlišení/HDR · montáž/case · inventář vstupů · nity · indoor/outdoor · napájení · LED pitch · křehkost · checklist · kauce · podmínky.", claimsTitle: "Když se něco pokazí", claims: "Chybějící kabely/dálkové ovladače/moduly řeší inventář + fotky; prasklé sklo nebo ohnuté LED cabinetty nad běžné opotřebení jdou z kauce. Evorios neprodává pojištění elektroniky ani nenabízí partnerství Geek Squad / Fat Llama." },

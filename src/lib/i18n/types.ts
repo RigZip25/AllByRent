@@ -2167,31 +2167,34 @@ export type AppMessages = {
         {
           title: string;
           summary: string;
+          /** Preferred short FAQ: one question + 1–2 sentence answer each. */
+          qa?: { q: string; a: string }[];
           /** Host-oriented tip (e.g. commercial insurance options). Optional. */
           hostTipTitle?: string;
           hostTip?: string;
           /** Optional factual link only — avoid promotional partner push. */
           hostTipLinkLabel?: string;
           hostTipLinkHref?: string;
-          whyGeoTitle: string;
-          whyGeo: string;
+          whyGeoTitle?: string;
+          whyGeo?: string;
           /** Contactless / no co-presence gear tips (Vehicles). Optional. */
           contactlessTitle?: string;
           contactless?: string;
-          flowTitle: string;
-          flow: string;
-          layersTitle: string;
-          layers: string;
-          claimsTitle: string;
-          claims: string;
+          flowTitle?: string;
+          flow?: string;
+          layersTitle?: string;
+          layers?: string;
+          claimsTitle?: string;
+          claims?: string;
         }
       >
     >;
     bySubcategory?: Partial<Record<string, Partial<Record<string, {
-      title: string; summary: string; hostTipTitle?: string; hostTip?: string;
-      hostTipLinkLabel?: string; hostTipLinkHref?: string; whyGeoTitle: string; whyGeo: string;
-      contactlessTitle?: string; contactless?: string; flowTitle: string; flow: string;
-      layersTitle: string; layers: string; claimsTitle: string; claims: string;
+      title: string; summary: string; qa?: { q: string; a: string }[];
+      hostTipTitle?: string; hostTip?: string;
+      hostTipLinkLabel?: string; hostTipLinkHref?: string; whyGeoTitle?: string; whyGeo?: string;
+      contactlessTitle?: string; contactless?: string; flowTitle?: string; flow?: string;
+      layersTitle?: string; layers?: string; claimsTitle?: string; claims?: string;
     }>>>>;
   };
   /** Mandatory pre-trip / return photo inspection for vehicles & heavy. */

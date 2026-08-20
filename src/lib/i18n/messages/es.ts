@@ -3693,50 +3693,64 @@ export const es: AppMessages = {
     collapse: "Ocultar detalles",
     byCategory: {
       Vehicles: {
-        title: "Cómo funciona el alquiler de coche entre vecinos",
-        summary:
-          "Los coches ligeros usan un flujo vecinal tipo Turo: términos firmados, póliza personal subida en la app e inspección previa antes del PIN/llaves. Cancelación ≥24h: reembolso total; dentro de 24h: 50%. Combustible lleno a lleno (+$20 si falta). Devolución tarde: 30 min de gracia + $20 + $15/h.",
-        hostTipTitle: "Para anfitriones",
-        hostTip:
-          "Pide que el arrendatario añada el coche a su póliza personal y suba el comprobante en la app. Las fotos de llantas protegen contra cambios. Combustible: lleno a lleno (niveles solo en la entrega). Confirma la cobertura con tu agente antes de publicar — no somos aseguradora.",
-        whyGeoTitle: "¿Por qué GPS para el PIN?",
-        whyGeo:
-          "Un código compartido puede viajar más lejos que el coche. El PIN solo se abre en el punto o con el QR del coche — presencia, no un número reenviado.",
-        contactlessTitle: "Sin contacto / sin co-presencia",
-        contactless:
-          "El comprobante debe estar aprobado antes de PIN, caja o llaves. Opcional: rastreador OBD + caja de llaves con geo PIN / QR.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Publicar → seguro personal + franquicia → reserva → comprobante → inspección previa (carrocería + 4 llantas) → entrega con combustible + odómetro → fotos al devolver → confirmación del anfitrión.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "Términos · póliza personal (subida) · inspección previa · combustible lleno a lleno · cancelación ≥24h gratis · no-show ~2h · late fee · retención · geo PIN.",
-        claimsTitle: "Si algo sale mal (reclamaciones)",
-        claims:
-          "El seguro del arrendatario es primario. Fotos antes/después ayudan a probar daños o cambio de llantas. Cancelación ≥24h: reembolso total; dentro de 24h: 50%.",
+        title: "FAQ alquiler de coche ligero / turismo",
+        summary: "Respuestas cortas para coches y camionetas bajo peso comercial.",
+        qa: [
+          {
+            q: "¿Necesito CDL?",
+            a: "No para coches de turismo bajo 26 001 lb GVWR, salvo que la ley local lo exija.",
+          },
+          {
+            q: "¿Qué seguro necesito?",
+            a: "Póliza personal válida que cubra este coche. Sube el comprobante en la app antes del PIN o las llaves.",
+          },
+          {
+            q: "¿Cómo funciona la cancelación?",
+            a: "Cancelación ≥24 h antes del inicio: reembolso total. Dentro de 24 h: 50%.",
+          },
+          {
+            q: "¿Combustible y devolución tarde?",
+            a: "Combustible lleno a lleno (+$20 si falta). Devolución tarde: 30 min de gracia, luego $20 + $15/h.",
+          },
+          {
+            q: "¿Por qué GPS para el PIN?",
+            a: "El PIN solo se abre en la recogida (o con el QR del coche)—no un código reenviado.",
+          },
+          {
+            q: "¿Qué fotos son obligatorias?",
+            a: "Inspección previa: carrocería + cuatro llantas antes del inicio; el mismo set al devolver.",
+          },
+        ],
       },
       VehiclesCommercial: {
-        title: "Transporte comercial (≥26 000 lb / semi)",
-        summary:
-          "Esto no es el FAQ de coches ligeros. El GVWR en lb (no el valor en dólares) obliga el daño físico (PD). CDL obligatorio. La prueba de seguro suele ir agente → correo del dueño. Inspección comercial multi-llanta. La retención del depósito sigue el deducible / PD comercial — no el copy de auto personal.",
-        hostTipTitle: "Para anfitriones comerciales",
-        hostTip:
-          "Introduce el GVWR en libras. Desde ≥26 000 lb o en Commercial Trucks / Equipment Trailers / semis, exige CDL y configura el correo donde el agente del arrendatario debe enviar la prueba. Define el nº de llantas para dualies y multi-eje. Confirma el PD comercial con tu agente — no somos aseguradora.",
-        whyGeoTitle: "¿Por qué GPS para el PIN?",
-        whyGeo:
-          "La entrega comercial también exige presencia: PIN / caja solo en el punto de recogida o vía QR del vehículo — no un código reenviado.",
-        contactlessTitle: "Sin contacto / sin co-presencia",
-        contactless:
-          "La prueba agente→dueño debe estar aprobada antes de cualquier PIN, caja o llaves — incluso sin co-presencia.",
-        flowTitle: "De punta a punta",
-        flow:
-          "Publicar → GVWR (lb) + CDL + correo del agente + nº de llantas + mínimos PD → reserva con CDL → el agente envía la prueba al dueño → inspección multi-llanta → entrega → devolución.",
-        layersTitle: "Capas de seguridad",
-        layers:
-          "CDL · seguro agente→dueño · PD por GVWR (lb) · fotos multi-llanta · retención de deducible comercial · geo PIN · términos.",
-        claimsTitle: "Si algo sale mal (reclamaciones)",
-        claims:
-          "La cobertura comercial / PD del arrendatario es primaria. Fotos de carrocería y de cada llanta ayudan a probar daños o cambios. Conserva los correos del agente con la reserva.",
+        title: "FAQ transporte comercial (≥26 001 lb / semi)",
+        summary: "Respuestas cortas para camiones comerciales pesados y semis.",
+        qa: [
+          {
+            q: "¿Necesito CDL?",
+            a: "Sí si el GVWR es 26 001 lb o más (o según la ley local).",
+          },
+          {
+            q: "¿Qué peso debo indicar?",
+            a: "GVWR en libras—no el valor en dólares.",
+          },
+          {
+            q: "¿Cómo funciona la prueba de seguro?",
+            a: "El agente del arrendatario envía la prueba al correo del dueño del anuncio antes del PIN o las llaves.",
+          },
+          {
+            q: "¿Se exige daño físico (PD)?",
+            a: "Sí. Los límites de PD siguen el GVWR (lb); la retención del depósito sigue el deducible / PD comercial.",
+          },
+          {
+            q: "¿Qué inspección es obligatoria?",
+            a: "Inspección comercial multi-llanta antes del inicio; el mismo set al devolver.",
+          },
+          {
+            q: "¿Por qué GPS para el PIN?",
+            a: "PIN o caja solo en la recogida o vía QR del vehículo—no un código reenviado.",
+          },
+        ],
       },
       "Heavy Equipment": {
         title: "Alquiler de equipo comercial",
@@ -4093,6 +4107,194 @@ export const es: AppMessages = {
     },
 
     bySubcategory: {
+      Vehicles: {
+        "Cars & Trucks": {
+          title: "FAQ alquiler de coche ligero / turismo",
+          summary: "Respuestas cortas para coches y camionetas bajo peso comercial.",
+          qa: [
+            {
+              q: "¿Necesito CDL?",
+              a: "No para coches de turismo bajo 26 001 lb GVWR, salvo que la ley local lo exija.",
+            },
+            {
+              q: "¿Qué seguro necesito?",
+              a: "Póliza personal válida que cubra este coche. Sube el comprobante en la app antes del PIN o las llaves.",
+            },
+            {
+              q: "¿Cómo funciona la cancelación?",
+              a: "Cancelación ≥24 h antes del inicio: reembolso total. Dentro de 24 h: 50%.",
+            },
+            {
+              q: "¿Combustible y devolución tarde?",
+              a: "Combustible lleno a lleno (+$20 si falta). Devolución tarde: 30 min de gracia, luego $20 + $15/h.",
+            },
+            {
+              q: "¿Por qué GPS para el PIN?",
+              a: "El PIN solo se abre en la recogida (o con el QR del coche)—no un código reenviado.",
+            },
+            {
+              q: "¿Qué fotos son obligatorias?",
+              a: "Inspección previa: carrocería + cuatro llantas antes del inicio; el mismo set al devolver.",
+            },
+          ],
+        },
+        Motorcycles: {
+          title: "FAQ alquiler de motos",
+          summary: "Respuestas cortas para motocicletas.",
+          qa: [
+            {
+              q: "¿Necesito endorsement de moto?",
+              a: "Sí. Declara un endorsement de moto válido (o equivalente local) para el conductor nombrado.",
+            },
+            {
+              q: "¿Basta la licencia de coche?",
+              a: "No cuando este anuncio exige endorsement de moto.",
+            },
+            {
+              q: "¿Qué seguro necesito?",
+              a: "Comprobante que cubra esta moto, subido en la app antes del PIN o las llaves.",
+            },
+            {
+              q: "¿Casco?",
+              a: "Sigue la ley local y la política de casco del anuncio.",
+            },
+            {
+              q: "¿Qué fotos son obligatorias?",
+              a: "Fotos de carrocería y llantas antes del inicio; el mismo set al devolver.",
+            },
+          ],
+        },
+        ATVs: {
+          title: "FAQ alquiler de ATV / OHV",
+          summary: "Respuestas cortas para ATV y OHV.",
+          qa: [
+            {
+              q: "¿Se exige exención de terreno?",
+              a: "Sí por defecto—acepta el riesgo de terreno OHV / ATV al reservar antes del desbloqueo.",
+            },
+            {
+              q: "¿Qué licencia necesito?",
+              a: "Licencia o permiso válido según la ley OHV local y el anuncio.",
+            },
+            {
+              q: "¿Qué seguro necesito?",
+              a: "Comprobante que cubra este ATV, subido antes del PIN o las llaves.",
+            },
+            {
+              q: "¿Casco / equipo?",
+              a: "Sigue la ley local y las reglas de casco o equipo del anuncio.",
+            },
+            {
+              q: "¿Qué fotos son obligatorias?",
+              a: "Fotos de carrocería y llantas antes del inicio; el mismo set al devolver.",
+            },
+          ],
+        },
+        "Tow Vehicles": {
+          title: "FAQ alquiler de vehículos de remolque",
+          summary: "Respuestas cortas para grúas y tow vehicles.",
+          qa: [
+            {
+              q: "¿Necesito CDL?",
+              a: "Sí cuando el GVWR o el peso combinado es 26 001 lb o más (o según la ley local).",
+            },
+            {
+              q: "¿Qué más se exige?",
+              a: "Credenciales de remolque según el anuncio, más prueba de seguro comercial agente→dueño cuando este estante lo exige.",
+            },
+            {
+              q: "¿Capacidad de remolque?",
+              a: "Respeta la capacidad y clase de enganche publicadas en el anuncio.",
+            },
+            {
+              q: "¿Qué inspección es obligatoria?",
+              a: "Carrocería y multi-llanta antes del inicio; el mismo set al devolver.",
+            },
+            {
+              q: "¿Por qué GPS para el PIN?",
+              a: "PIN o caja solo en la recogida o vía QR del vehículo—no un código reenviado.",
+            },
+          ],
+        },
+        Trailers: {
+          title: "FAQ alquiler de remolques",
+          summary: "Respuestas cortas para remolques ligeros / utility bajo peso comercial.",
+          qa: [
+            {
+              q: "¿Necesito CDL?",
+              a: "Normalmente no bajo 26 001 lb GVWR—revisa la ley local, clase de enganche y frenos.",
+            },
+            {
+              q: "¿Enganche y luces?",
+              a: "Coincide la clase de hitch; confirma luces y frenos en la entrega.",
+            },
+            {
+              q: "¿Qué seguro necesito?",
+              a: "Cobertura del remolque según el anuncio; sube el comprobante antes de la entrega.",
+            },
+            {
+              q: "¿Límites de carga?",
+              a: "No superes el GVWR ni el payload publicados.",
+            },
+            {
+              q: "¿Qué fotos son obligatorias?",
+              a: "Chasis, enganche, llantas y luces en la inspección previa; el mismo set al devolver.",
+            },
+          ],
+        },
+        "Equipment Trailers": {
+          title: "FAQ alquiler de remolques de equipo",
+          summary: "Respuestas cortas para remolques comerciales / de equipo.",
+          qa: [
+            {
+              q: "¿Necesito CDL?",
+              a: "Sí cuando el GVWR o el peso combinado es 26 001 lb o más (o según el transporte comercial).",
+            },
+            {
+              q: "¿Cómo funciona la prueba de seguro?",
+              a: "El agente envía prueba comercial / PD al correo del dueño del anuncio antes del PIN o las llaves.",
+            },
+            {
+              q: "¿Límites de carga?",
+              a: "No superes el GVWR ni el payload publicados.",
+            },
+            {
+              q: "¿Qué inspección es obligatoria?",
+              a: "Fotos de chasis y multi-llanta antes del inicio; el mismo set al devolver.",
+            },
+            {
+              q: "¿Por qué GPS para el PIN?",
+              a: "PIN o caja solo en la recogida o vía QR del vehículo—no un código reenviado.",
+            },
+          ],
+        },
+        "Commercial Trucks": {
+          title: "FAQ alquiler de camiones comerciales",
+          summary: "Respuestas cortas para camiones comerciales y semis.",
+          qa: [
+            {
+              q: "¿Necesito CDL?",
+              a: "Sí si el GVWR es 26 001 lb o más (o según la ley local).",
+            },
+            {
+              q: "¿Qué peso debo indicar?",
+              a: "GVWR en libras—no el valor en dólares.",
+            },
+            {
+              q: "¿Cómo funciona la prueba de seguro?",
+              a: "El agente del arrendatario envía la prueba al correo del dueño del anuncio antes del PIN o las llaves.",
+            },
+            {
+              q: "¿Se exige daño físico (PD)?",
+              a: "Sí. Los límites de PD siguen el GVWR (lb); la retención del depósito sigue el deducible / PD comercial.",
+            },
+            {
+              q: "¿Qué inspección es obligatoria?",
+              a: "Inspección comercial multi-llanta antes del inicio; el mismo set al devolver.",
+            },
+          ],
+        },
+      },
       "Electronics & Tech": {
         "Broadcast Equipment": { title: "Broadcast — subtipo, I/O, test de función", summary: "Las casas AV y kits tipo Lensrentals ganan con hojas de patch claras. Ganamos con inventario entre vecinos más subtipo (switcher/encoder/recorder/teleprompter), lista SDI/HDMI, alimentación/placa de batería, ¿medios incluidos?, firmware, notas suaves de plataformas de livestream, completitud del kit y test de función al devolver — congelado en el acuerdo. Depósito — no Geek Squad, Fat Llama ni afiliado de seguro.", hostTipTitle: "Estándar del anfitrión", hostTip: "Elige subtipo y marca/modelo. Lista cada puerto SDI/HDMI y cables/convertidores incluidos. Define alimentación/placa de batería y si SD/CF/SSD viajan con el kit. Anota versión de firmware (y no actualizar durante el alquiler). Añade notas suaves de livestream (OBS/RTMP/YouTube/Twitch/Zoom) sin enlaces de afiliado. Marca completitud y la política de test de función al devolver. Marca ítems estructurados + checklist; foto de puertos antes de la entrega.", whyGeoTitle: "¿Por qué estas puertas?", whyGeo: "Subtipo equivocado, BNCs faltantes, medios vacíos y puertos sin probar generan más disputas de livestream que el robo. Una ficha de patch breve en el anuncio supera el silencio al aire y reclamaciones sorpresa del depósito.", flowTitle: "De punta a punta", flow: "Publica subtipo + I/O + alimentación + medios + firmware + plataformas + completitud + test → el inquilino confirma → stream o rodaje → devolución con test de función → liberación del depósito o reclamo con fotos.", layersTitle: "Capas de confianza", layers: "Serie · subtipo · inventario SDI/HDMI · alimentación/placa · medios · firmware · notas de plataforma · completitud · accesorios · test de función · depósito · términos.", claimsTitle: "Si algo sale mal", claims: "Inventario + serie respaldan reclamos de cables/medios faltantes; test de función fallido y daño más allá del uso normal van al depósito. Evorios no vende seguro de electrónica ni se asocia con retailers AV para reparaciones." },
         "Display Systems": { title: "Pantallas — tamaño, entradas, energía, fragilidad", summary: "Las casas AV alquilan muros LED y paneles comerciales con pitch, nits, montaje y notas de circuito. Ganamos con inventario entre vecinos más tamaño claro, resolución/HDR, pie/montaje/flight-case, entradas HDMI/DP/SDI, brillo, indoor vs outdoor, energía/circuito, pitch LED y fragilidad de transporte — congelado en el acuerdo. Sin Geek Squad, Fat Llama ni hard-sell de seguro.", hostTipTitle: "Estándar del anfitrión", hostTip: "Define marca + modelo + franja de tamaño (usa fila de cabinets LED si es modular). Marca tipo de pantalla, resolución/HDR, inclusión de pie/montaje/case, cada entrada, franja de nits, indoor/outdoor, energía/circuito y fragilidad. En muros LED añade pixel pitch y lista módulos de repuesto / power distro en el checklist. Foto de esquinas y estado del flight-case antes de la entrega.", whyGeoTitle: "¿Por qué estas puertas?", whyGeo: "Cables incorrectos, circuitos insuficientes, uso outdoor en paneles indoor y cristal roto en tránsito generan más disputas que el robo. Una ficha AV breve en el anuncio supera fallos de señal y energía el día del evento.", flowTitle: "De punta a punta", flow: "Publica tamaño + tipo + HDR + montaje + entradas + nits + indoor/outdoor + energía + pitch + fragilidad → el inquilino confirma kit / outdoor / energía / fragilidad → conteo en entrega → devolución en case → liberación de depósito o reclamo con fotos.", layersTitle: "Capas de confianza", layers: "Serie · tamaño · tipo · resolución/HDR · montaje/case · inventario de entradas · nits · indoor/outdoor · energía/circuito · pitch LED · fragilidad · checklist · depósito · términos.", claimsTitle: "Si algo sale mal", claims: "Cables/mandos/módulos faltantes usan inventario + fotos; cristal roto o cabinets LED doblados más allá del desgaste van al depósito. Evorios no vende seguro de electrónica ni se asocia con Geek Squad / Fat Llama." },
