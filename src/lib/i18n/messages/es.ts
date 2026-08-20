@@ -1656,14 +1656,14 @@ export const es: AppMessages = {
         },
         drivetrain: { label: "Tracción" },
         vehicleWeightLbs: {
-          label: "Peso del vehículo / GVWR (lb)",
-          placeholder: "p. ej. 8500",
-          hint: "Introduce libras (lb). Desde 26 000 lb (≈ 11 793 kg) el alquiler exige seguro de daños físicos — no solo responsabilidad.",
+          label: "Peso del vehículo (lb)",
+          placeholder: "p. ej. 3500",
+          hint: "Peso en vacío aproximado en libras. Los coches de pasajeros suelen estar muy por debajo de 10 000 lb. Pesado / semi (≥26 000 lb GVWR) abre la ruta comercial por separado.",
         },
         wheelCount: {
           label: "Número de llantas / ruedas",
-          placeholder: "p. ej. 4, 6, 10, 18",
-          hint: "Cuántas llantas necesitan foto previa (sin la de repuesto). Coches = 4. Dualies / cajas suelen 6-10. Semi + remolque suele 18. En anuncios pesados / comerciales lo define el anfitrión.",
+          placeholder: "p. ej. 6, 10, 18",
+          hint: "Solo para pesado / comercial — cuántas posiciones necesitan foto previa (sin la de repuesto). Dualies / cajas suelen 6–10; semi + remolque suele 18. Los coches ligeros usan 4 por defecto.",
         },
         lengthBand: { label: "Longitud / eslora" },
         lengthFt: { label: "Eslora (m)", placeholder: "p. ej. 4" },
@@ -2398,7 +2398,7 @@ export const es: AppMessages = {
       insuranceCoverageLeadHint: "Te da tiempo a revisar las declaraciones antes de entregar las llaves.",
       physicalDamageTitle: "Exigir cobertura de daños físicos",
       physicalDamageBody: (weightLbs, weightKg) =>
-        `No solo responsabilidad civil — colisión / integral (o daños físicos del equipo) debe estar en la póliza. Obligatorio en equipo comercial y en vehículos desde ${weightLbs.toLocaleString("es")} lb (≈ ${weightKg.toLocaleString("es")} kg).`,
+        `Obligatorio en la ruta comercial / pesada (≥ ${weightLbs.toLocaleString("es")} lb ≈ ${weightKg.toLocaleString("es")} kg, semis y equipo comercial): colisión / integral o PD de equipo — no solo responsabilidad civil.`,
       proRentersTitle: "Solo profesionales (pro)",
       proRentersBody:
         "Activado por defecto en Heavy Equipment y Construction. El arrendatario declara ser profesional / oficio y puede subir una credencial. v1 = declaración + foto — aún no hay verificación ante un colegio oficial.",
@@ -3156,33 +3156,54 @@ export const es: AppMessages = {
   },
   faq,
   categoryFacts: {
-    expand: "Cómo funciona y seguridad",
+    expand: "Saber más",
     collapse: "Ocultar detalles",
     byCategory: {
       Vehicles: {
         title: "Cómo funciona el alquiler de coche entre vecinos",
         summary:
-          "Los vecinos generan más confianza que un marketplace anónimo — pero términos, seguro e inspección previa obligatoria (exterior, interior y todas las llantas) son requeridos antes del PIN/llaves. Combustible (y DEF en diésel) se registra al inicio y al devolver — por defecto lleno a lleno, faltante + $20. Desde 26 000 lb o semi / remolques comerciales también exigen CDL y prueba agente→dueño (no subida personal). El anfitrión puede marcar no-show tras la ventana y liberar el calendario.",
-        hostTipTitle: "Para anfitriones / propietarios",
+          "Los coches ligeros usan un flujo vecinal tipo Turo: términos firmados, póliza personal subida en la app e inspección previa antes del PIN/llaves. Cancelación ≥24h: reembolso total; dentro de 24h: 50%. Combustible lleno a lleno (+$20 si falta). Devolución tarde: 30 min de gracia + $20 + $15/h.",
+        hostTipTitle: "Para anfitriones",
         hostTip:
-          "Introduce el GVWR en lb. Desde ≥ 26 000 lb o semi, configura el correo para la prueba del agente y exige CDL. En coches ligeros, el arrendatario añade el auto a su póliza personal y sube el comprobante. Las fotos de llantas protegen contra cambios. Combustible: lleno a lleno (niveles solo en la entrega, no en el anuncio). La tarifa de no-show es un flag suave del depósito.",
-        hostTipLinkLabel: "Sitio de TINT (tint.ai)",
-        hostTipLinkHref: "https://www.tint.ai/",
+          "Pide que el arrendatario añada el coche a su póliza personal y suba el comprobante en la app. Las fotos de llantas protegen contra cambios. Combustible: lleno a lleno (niveles solo en la entrega). Confirma la cobertura con tu agente antes de publicar — no somos aseguradora.",
         whyGeoTitle: "¿Por qué GPS para el PIN?",
         whyGeo:
           "Un código compartido puede viajar más lejos que el coche. El PIN solo se abre en el punto o con el QR del coche — presencia, no un número reenviado.",
         contactlessTitle: "Sin contacto / sin co-presencia",
         contactless:
-          "El comprobante debe estar aprobado antes de PIN / caja / llaves. Recomendado: OBD + caja de llaves.",
+          "El comprobante debe estar aprobado antes de PIN, caja o llaves. Opcional: rastreador OBD + caja de llaves con geo PIN / QR.",
         flowTitle: "De punta a punta",
         flow:
-          "Publicar → peso + seguro (subida o agente→correo) → reserva (CDL si transporte comercial) → inspección previa con llantas → entrega con combustible/DEF + odómetro → misma serie al devolver.",
+          "Publicar → seguro personal + franquicia → reserva → comprobante → inspección previa (carrocería + 4 llantas) → entrega con combustible + odómetro → fotos al devolver → confirmación del anfitrión.",
         layersTitle: "Capas de seguridad",
         layers:
-          "Términos · seguro · CDL si aplica · inspección previa y devolución con llantas · combustible/DEF lleno a lleno (+$20 si falta) · daños físicos desde 26 000 lb · retención · no-show opcional · geo PIN · QR.",
+          "Términos · póliza personal (subida) · inspección previa · combustible lleno a lleno · cancelación ≥24h gratis · no-show ~2h · late fee · retención · geo PIN.",
         claimsTitle: "Si algo sale mal (reclamaciones)",
         claims:
-          "El seguro del arrendatario es primario. Fotos de llantas antes/después ayudan a probar un cambio. El faltante de combustible (+ $20) puede marcarse para reclamo del anfitrión. El no-show libera el calendario; tarifa solo si la configuraste.",
+          "El seguro del arrendatario es primario. Fotos antes/después ayudan a probar daños o cambio de llantas. Cancelación ≥24h: reembolso total; dentro de 24h: 50%.",
+      },
+      VehiclesCommercial: {
+        title: "Transporte comercial (≥26 000 lb / semi)",
+        summary:
+          "Vehículos pesados y semis usan CDL + prueba agente→dueño, cobertura de daños físicos y fotos de varias llantas — no la ruta de subida personal de coches ligeros.",
+        hostTipTitle: "Para anfitriones comerciales",
+        hostTip:
+          "Introduce el GVWR en lb. Desde ≥26 000 lb o en semis / remolques de equipo, exige CDL y configura el correo donde el agente del arrendatario debe enviar la prueba. Define el número de llantas para dualies / multi-eje. Confirma la cobertura comercial con tu agente — no somos aseguradora.",
+        whyGeoTitle: "¿Por qué GPS para el PIN?",
+        whyGeo:
+          "Misma regla de presencia que en coches ligeros: PIN / caja solo en el punto de recogida o vía QR del vehículo.",
+        contactlessTitle: "Sin contacto / sin co-presencia",
+        contactless:
+          "La prueba agente→dueño debe estar aprobada antes de cualquier PIN, caja o llaves — incluso sin co-presencia.",
+        flowTitle: "De punta a punta",
+        flow:
+          "Publicar → GVWR + CDL + correo del agente + nº de llantas + mínimos PD → reserva con CDL → el agente envía la prueba → inspección multi-llanta → entrega → devolución.",
+        layersTitle: "Capas de seguridad",
+        layers:
+          "CDL · seguro agente→dueño · daños físicos · fotos de llantas según nº · retención · geo PIN · términos.",
+        claimsTitle: "Si algo sale mal (reclamaciones)",
+        claims:
+          "La cobertura comercial / PD del arrendatario es primaria. Fotos de carrocería y llantas ayudan a probar daños. Conserva los correos del agente con la reserva.",
       },
       "Heavy Equipment": {
         title: "Alquiler de equipo comercial",

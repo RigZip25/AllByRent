@@ -14,6 +14,7 @@ import {
 } from "../../../lib/regionalDisplay";
 import { CategorySpecsFields } from "./CategorySpecsFields";
 import { CategoryFactCard } from "../../../components/CategoryFactCard";
+import { listingIsCommercialTransport } from "../../../lib/listingRentRules";
 import {
   getCategoryModeRules,
   requiresAssetIdentity,
@@ -381,7 +382,11 @@ export function Step2ItemInfo({
         {showAssetIdentity ? (
           <div className="mb-6 space-y-4 rounded-2xl border bg-[#F8FAF9] p-4" style={{ borderColor: `${GREEN}33` }}>
             {vinRequired ? (
-              <CategoryFactCard category="Vehicles" defaultExpanded />
+              <CategoryFactCard
+                category="Vehicles"
+                subcategory={draft.subcategory}
+                commercialTransport={listingIsCommercialTransport(draft)}
+              />
             ) : draft.category.trim() === "Heavy Equipment" ||
               draft.category.trim() === "Construction" ? (
               <CategoryFactCard

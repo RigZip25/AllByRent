@@ -723,8 +723,9 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
       },
       /**
        * Tire/wheel positions for pre-trip photos.
-       * Recommended for all vehicle rentals (default 4 at inspection time).
-       * Commercial / ≥26k / semi must set explicitly (see validation.ts).
+       * Light cars default to 4 at inspection time — do not crowd the listing form.
+       * Commercial / ≥26k / semi set this on the commercial transport block (Step3)
+       * and optionally here for commercial shelves.
        */
       {
         key: "wheelCount",
@@ -732,6 +733,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         required: false,
         recommended: true,
         requiredIf: "rent",
+        subcategories: ["Equipment Trailers", "Commercial Trucks", "Tow Vehicles"],
       },
       {
         key: "insuranceMinLiability",

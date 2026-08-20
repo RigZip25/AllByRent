@@ -1668,14 +1668,14 @@ export const cs: AppMessages = {
         },
         drivetrain: { label: "Pohon" },
         vehicleWeightLbs: {
-          label: "Hmotnost vozidla / GVWR (lb)",
-          placeholder: "např. 8500",
-          hint: "Zadej libry (lb). Od 26 000 lb (≈ 11 793 kg) je u půjčky povinné havarijní / PD pojištění — ne jen odpovědnost.",
+          label: "Hmotnost vozidla (lb)",
+          placeholder: "např. 3500",
+          hint: "Přibližná pohotovostní hmotnost v librách. Osobní auta bývají hluboko pod 10 000 lb. Těžká / semi (≥26 000 lb GVWR) otevře komerční cestu zvlášť.",
         },
         wheelCount: {
           label: "Počet pneumatik / kol",
-          placeholder: "např. 4, 6, 10, 18",
-          hint: "Kolik pneumatik potřebuje fotku před prohlídkou (bez rezervy). Osobní auta = 4. Dualies / boxy často 6-10. Semi + přívěs často 18. U těžkých / komerčních nabídek nastavuje hostitel.",
+          placeholder: "např. 6, 10, 18",
+          hint: "Jen pro těžká / komerční — kolik pozic potřebuje fotku před prohlídkou (bez rezervy). Dualies / boxy často 6–10; semi + přívěs často 18. Lehká auta mají default 4.",
         },
         lengthBand: { label: "Délka" },
         lengthFt: { label: "Délka (ft)", placeholder: "např. 12" },
@@ -2410,7 +2410,7 @@ export const cs: AppMessages = {
       insuranceCoverageLeadHint: "Máš čas zkontrolovat list pojištění před předáním klíčů.",
       physicalDamageTitle: "Vyžadovat havarijní / fyzické poškození",
       physicalDamageBody: (weightLbs, weightKg) =>
-        `Ne jen odpovědnost — havarijní / komplexní (nebo PD techniky) musí být na pojistce nájemce. Povinné u komerční techniky a u vozidel od ${weightLbs.toLocaleString("cs-CZ")} lb (≈ ${weightKg.toLocaleString("cs-CZ")} kg).`,
+        `Povinné na komerční / těžké cestě (≥ ${weightLbs.toLocaleString("cs-CZ")} lb ≈ ${weightKg.toLocaleString("cs-CZ")} kg, semi a komerční technika): havarijní / komplexní nebo PD techniky — ne jen odpovědnost.`,
       proRentersTitle: "Jen profesionálové (pro)",
       proRentersBody:
         "Výchozí zapnuto u Heavy Equipment & Construction. Nájemce potvrdí, že je řemeslník / profesionál, a může nahrát doklad. v1 = prohlášení + fotka — ne kontrola u živnostenského úřadu.",
@@ -3165,33 +3165,54 @@ export const cs: AppMessages = {
   },
   faq,
   categoryFacts: {
-    expand: "Jak to funguje a bezpečnost",
+    expand: "Zjistit více",
     collapse: "Skrýt detaily",
     byCategory: {
       Vehicles: {
         title: "Jak funguje sousedské půjčení auta",
         summary:
-          "Sousedé jsou důvěryhodnější než anonymní marketplace — podmínky, pojištění, měkké sebeprohlášení o řidičáku / záznamu (ne placené MVR) a povinná předprohlídka (exteriér, interiér a všechny pneumatiky) před PIN/klíči. Palivo (a DEF u nafty) se zapisuje na začátku a při vrácení — výchozí plná→plná, chybějící palivo + $20. Od 26 000 lb nebo u semi / komerčních přívěsů navíc CDL a doklad agent→majitel (ne osobní nahrání). Hostitel může po okně vyzvednutí označit no-show a uvolnit kalendář.",
-        hostTipTitle: "Pro hostitele / majitele",
+          "Lehká auta mají jednoduchý Turo-sousedský tok: podmínky, osobní pojistka nahraná v aplikaci a předprohlídka před PIN/klíči. Storno ≥24h: plná refundace; do 24h: 50 %. Palivo plná→plná (+$20 při nedodání). Pozdní návrat: 30 min grace + $20 + $15/h.",
+        hostTipTitle: "Pro hostitele",
         hostTip:
-          "Zadej GVWR v lb. Od ≥ 26 000 lb nebo u semi nastav e-mail pro doklad od agenta a vyžaduj CDL. U lehčích aut nájemce přidá auto do osobní pojistky a nahraje doklad. Měkké prohlášení o řidičáku / záznamu je upřímný scaffold — ne placené MVR. Fotky pneumatik chrání před výměnou. Palivo: plná→plná (hladiny jen při předání, ne v inzerátu). Volitelný no-show poplatek je měkký flag depozitu.",
-        hostTipLinkLabel: "Web TINT (tint.ai)",
-        hostTipLinkHref: "https://www.tint.ai/",
+          "Nájemce přidá auto do osobní pojistky a nahraje doklad v aplikaci. Fotky pneumatik chrání před výměnou. Palivo: plná→plná (hladiny jen při předání). Před inzerátem si ověř krytí u agenta — nejsme pojišťovna.",
         whyGeoTitle: "Proč GPS pro PIN?",
         whyGeo:
           "Sdílený kód může dojít dál než auto. PIN se odemkne až na místě nebo přes QR na autě — přítomnost, ne přeposlané číslo.",
         contactlessTitle: "Bezkontaktně / bez přítomnosti",
         contactless:
-          "Doklad pojištění musí být schválený před PIN / schránkou / klíči. Doporučeno: OBD + schránka na klíč.",
+          "Doklad pojištění musí být schválený před PIN / schránkou / klíči. Volitelně: OBD + schránka na klíč s geo PIN / QR.",
         flowTitle: "Od začátku do konce",
         flow:
-          "Nabídnout → hmotnost + pojištění (upload nebo agent→e-mail) → rezervace (měkké prohlášení řidičáku/záznamu + CDL u komerční dopravy) → předprohlídka včetně pneumatik → předání s palivem/DEF + tachometr → stejná sada při vrácení.",
+          "Nabídnout → osobní pojištění + spoluúčast → rezervace → doklad → předprohlídka (karoserie + 4 pneumatiky) → předání s palivem + tachometr → fotky při vrácení → potvrzení hostitele.",
         layersTitle: "Vrstvy ochrany",
         layers:
-          "Podmínky · pojištění · měkké prohlášení řidičáku/záznamu (ne MVR) · CDL dle potřeby · předprohlídka a vrácení včetně pneumatik · palivo/DEF plná→plná (+$20 při nedodání) · PD od 26 000 lb · hold · volitelný no-show · geo PIN · QR.",
+          "Podmínky · osobní pojistka (upload) · předprohlídka · palivo plná→plná · storno ≥24h zdarma · no-show ~2h · late fee · hold · geo PIN.",
         claimsTitle: "Když se něco pokazí (nároky)",
         claims:
-          "Pojištění nájemce je primární. Fotky pneumatik před/po pomůžou prokázat výměnu. Nedodané palivo (+ $20) lze označit pro nárok hostitele. No-show uvolní kalendář; poplatek jen pokud je nastaven.",
+          "Pojištění nájemce je primární. Fotky před/po pomůžou prokázat poškození nebo výměnu pneumatik. Storno ≥24h: plná refundace; do 24h: 50 %.",
+      },
+      VehiclesCommercial: {
+        title: "Komerční doprava (≥26 000 lb / semi)",
+        summary:
+          "Těžká vozidla a semi používají CDL + doklad agent→majitel, havarijní / PD krytí a vícenásobné fotky pneumatik — ne osobní upload jako u lehkých aut.",
+        hostTipTitle: "Pro komerční hostitele",
+        hostTip:
+          "Zadej GVWR v lb. Od ≥26 000 lb nebo u semi / komerčních přívěsů vyžaduj CDL a nastav e-mail, kam agent nájemce pošle doklad. Nastav počet kol pro dualies / vícenápravové. Ověř komerční krytí u agenta — nejsme pojišťovna.",
+        whyGeoTitle: "Proč GPS pro PIN?",
+        whyGeo:
+          "Stejné pravidlo přítomnosti jako u lehkých aut: PIN / schránka jen na místě vyzvednutí nebo přes QR vozidla.",
+        contactlessTitle: "Bezkontaktně / bez přítomnosti",
+        contactless:
+          "Doklad agent→majitel musí být schválený před jakýmkoli PIN, schránkou nebo klíči — i bez přítomnosti.",
+        flowTitle: "Od začátku do konce",
+        flow:
+          "Nabídnout → GVWR + CDL + e-mail agenta + počet kol + PD limity → rezervace s CDL → agent pošle doklad → předprohlídka více pneumatik → předání → prohlídka při vrácení.",
+        layersTitle: "Vrstvy ochrany",
+        layers:
+          "CDL · pojištění agent→majitel · PD · fotky pneumatik dle počtu kol · hold · geo PIN · podmínky.",
+        claimsTitle: "Když se něco pokazí (nároky)",
+        claims:
+          "Komerční / PD pojištění nájemce je primární. Fotky karoserie a pneumatik pomáhají prokázat poškození. Uchovej e-mailovou komunikaci agenta u rezervace.",
       },
       "Heavy Equipment": {
         title: "Půjčování komerční techniky",

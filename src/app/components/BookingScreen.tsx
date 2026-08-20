@@ -1636,7 +1636,11 @@ function BookingScreenLoaded({
         ) : null}
 
         {listing.category.trim() === "Vehicles" && listing.modes.rent ? (
-          <CategoryFactCard category="Vehicles" />
+          <CategoryFactCard
+            category="Vehicles"
+            subcategory={listing.subcategory}
+            commercialTransport={isCommercialTransport}
+          />
         ) : null}
         {(listing.category.trim() === "Heavy Equipment" ||
           listing.category.trim() === "Construction") &&

@@ -1652,14 +1652,14 @@ export const en: AppMessages = {
         },
         drivetrain: { label: "Drivetrain" },
         vehicleWeightLbs: {
-          label: "Vehicle weight / GVWR (lb)",
-          placeholder: "e.g. 8500",
-          hint: "Enter pounds (lb). Vehicles at or above 26,000 lb (≈ 11,793 kg) require physical damage insurance for rent — not liability alone.",
+          label: "Vehicle weight (lb)",
+          placeholder: "e.g. 3500",
+          hint: "Approximate curb weight in pounds. Passenger cars are usually well under 10,000 lb. Heavy / semi (≥26,000 lb GVWR) unlocks the commercial path separately.",
         },
         wheelCount: {
           label: "Tire / wheel count",
-          placeholder: "e.g. 4, 6, 10, 18",
-          hint: "How many tires need a pre-trip photo (not including spare). Passenger cars = 4. Dualies / boxes often 6-10. Semi tractor+trailer often 18. Host sets this for heavy / commercial listings.",
+          placeholder: "e.g. 6, 10, 18",
+          hint: "For heavy / commercial only — how many tire positions need a pre-trip photo (not including spare). Dualies / boxes often 6–10; semi tractor+trailer often 18. Light cars default to 4 automatically.",
         },
         lengthBand: { label: "Length" },
         capacityPeopleBand: { label: "Passenger capacity" },
@@ -2393,7 +2393,7 @@ export const en: AppMessages = {
         "Gives you time to review the declarations page before keys change hands.",
       physicalDamageTitle: "Require physical damage coverage",
       physicalDamageBody: (weightLbs, weightKg) =>
-        `Not liability alone — collision / comprehensive (or equipment physical damage) must be on the renter’s policy. Mandatory for commercial equipment and for vehicles at or above ${weightLbs.toLocaleString("en-US")} lb (≈ ${weightKg.toLocaleString("en-US")} kg).`,
+        `Required on the commercial / heavy path (≥ ${weightLbs.toLocaleString("en-US")} lb ≈ ${weightKg.toLocaleString("en-US")} kg, semis, and commercial equipment): collision / comprehensive or equipment PD — not liability alone.`,
         proRentersTitle: "Professionals only (pro renters)",
       proRentersBody:
         "Default on for Heavy Equipment & Construction. Renters must attest they are tradespeople / professionals and may upload a credential photo. v1 is attestation + document upload — we do not run a license-board KYC check yet.",
@@ -3174,33 +3174,54 @@ export const en: AppMessages = {
   },
   faq,
   categoryFacts: {
-    expand: "How it works & safety",
+    expand: "Learn more",
     collapse: "Hide details",
     byCategory: {
       Vehicles: {
         title: "How neighbor car rental works",
         summary:
-          "Neighbors are higher-trust than anonymous rentals — signed terms, insurance proof, and pre-trip photos still required before PIN/keys. Cancel ≥24h before start: full refund; inside 24h: 50%. No-show: host marks after ~2h; trip price kept. Late return: 30m grace + $20 + $15/hr defaults. Fuel full-to-full (+$20 if short). ≥26k lb / semi: CDL + agent→owner insurance.",
-        hostTipTitle: "For hosts / landlords",
+          "Light cars use a simple Turo-style neighbor flow: signed terms, personal auto proof uploaded in-app, and pre-trip photos before PIN/keys. Cancel ≥24h: full refund; inside 24h: 50%. Fuel full-to-full (+$20 if short). Late return: 30m grace + $20 + $15/hr defaults.",
+        hostTipTitle: "For hosts",
         hostTip:
-          "Paid peer-to-peer sharing may fall outside a personal auto policy. Enter GVWR / vehicle weight in pounds (lb). At ≥ 26,000 lb or for semis / equipment trailers, require CDL and set the email where the renter’s agent must send proof. For lighter cars, renters add the vehicle to their personal policy and upload proof in-app. Pre-trip tire photos protect against expensive tire swaps. Fuel is full-to-full by default (levels at handoff only — not a listing field). Optional no-show fee is a soft deposit flag — not airline-style. We are not partners with any insurer; confirm with your agent before you list.",
-        hostTipLinkLabel: "TINT website (tint.ai)",
-        hostTipLinkHref: "https://www.tint.ai/",
+          "Ask renters to add the car to their personal policy and upload proof in-app. Pre-trip tire photos protect against swaps. Fuel is full-to-full by default (levels at handoff only). Confirm coverage with your agent before you list — we are not an insurer.",
         whyGeoTitle: "Why GPS for the PIN?",
         whyGeo:
-          "A shared code can travel farther than the car. Classic fail: someone books, then texts the PIN to another driver — maybe underage or without the right coverage. On Evorios the pickup PIN opens only when you’re at the pickup spot and tap — or you scan the physical QR sticker on the car. Presence, not a forwarded number. Codes stay locked until start. One ID check at start only.",
+          "A shared code can travel farther than the car. The pickup PIN opens only at the spot (or via the car QR) — presence, not a forwarded number. Codes stay locked until start.",
         contactlessTitle: "Contactless / without co-presence",
         contactless:
-          "Same neighbor trust, same rule: insurance proof must be approved before any PIN, lockbox code, or keys unlock — even when you’re not standing there. Recommended host gear for contactless (not required when you hand over in person): (1) an optional OBD tracker you install — a clearer signal of where the car is than phone-only macropoints; (2) a lockbox on the door or a key lockbox so the renter can get the physical key without you present — pair it with geo PIN or car QR so the lockbox code only reveals when they’re at the spot. Phone macropoints still help during the trip; OBD is the stronger location option if you offer contactless.",
+          "Insurance proof must be approved before PIN, lockbox, or keys unlock. Optional gear: OBD tracker + key lockbox paired with geo PIN / car QR.",
         flowTitle: "End to end",
         flow:
-          "List the car → set weight (lb) + insurance rules (personal upload or agent→owner email for ≥26k/semi) + max deductible + optional no-show fee → renter books (CDL if commercial transport) → insurance cleared → mandatory pre-trip photos (body + tires) both sides confirm → handoff with fuel/DEF + odometer → return inspection with the same tire photo set → host confirms. Booking can exist earlier; codes stay locked until proof + pre-trip are done.",
+          "List → personal insurance rules + deductible → renter books → proof cleared → pre-trip photos (body + 4 tires) → handoff with fuel + odometer → return photos → host confirms.",
         layersTitle: "Safety layers",
         layers:
-          "Signed rental terms · insurance · CDL when required · pre-trip photos · fuel/DEF · cancel ≥24h free · no-show ~2h · late 30m+$20+$15/hr · deposit hold · geo PIN · macropoints.",
+          "Signed terms · personal insurance upload · pre-trip photos · fuel full-to-full · cancel ≥24h free · no-show ~2h · late fee · deposit hold · geo PIN.",
         claimsTitle: "If something goes wrong (claims)",
         claims:
-          "Renter insurance is primary. Pre-trip vs return photos help prove damage or tire swaps. Cancel ≥24h: full refund; inside 24h: 50%. No-show after ~2h: trip price kept; optional deposit fee if configured. Late return: grace then flat + hourly per listing policy.",
+          "Renter insurance is primary. Pre-trip vs return photos help prove damage or tire swaps. Cancel ≥24h: full refund; inside 24h: 50%.",
+      },
+      VehiclesCommercial: {
+        title: "Commercial transport (≥26,000 lb / semi)",
+        summary:
+          "Heavy vehicles and semis use CDL + agent→owner insurance proof, physical damage coverage, and multi-tire pre-trip photos — not the light-car personal-upload path.",
+        hostTipTitle: "For commercial hosts",
+        hostTip:
+          "Enter GVWR in lb. At ≥26,000 lb or for semis / equipment trailers, require CDL and set the email where the renter’s agent must send proof. Set tire/wheel count for dualies / multi-axle. Confirm commercial coverage with your agent — we are not an insurer.",
+        whyGeoTitle: "Why GPS for the PIN?",
+        whyGeo:
+          "Same presence rule as light cars: PIN / lockbox only at the pickup spot or via vehicle QR — not a forwarded code.",
+        contactlessTitle: "Contactless / without co-presence",
+        contactless:
+          "Agent→owner insurance must be cleared before any PIN, lockbox, or keys unlock — even without co-presence.",
+        flowTitle: "End to end",
+        flow:
+          "List → GVWR + CDL + agent proof email + wheel count + PD mins → renter books with CDL → agent emails proof → multi-tire pre-trip → handoff → return inspection.",
+        layersTitle: "Safety layers",
+        layers:
+          "CDL · agent→owner insurance · physical damage · wheel-count tire photos · deposit hold · geo PIN · signed terms.",
+        claimsTitle: "If something goes wrong (claims)",
+        claims:
+          "Renter commercial / PD coverage is primary. Tire and body photos help prove damage or swaps. Keep agent email threads with the booking.",
       },
       "Heavy Equipment": {
         title: "Commercial equipment rentals",

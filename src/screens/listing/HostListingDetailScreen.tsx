@@ -550,7 +550,12 @@ export function HostListingDetailScreen({
 
       <div className="screen-scroll flex-1 min-h-0 px-4 pb-6 pt-4">
         {listing.category.trim() === "Vehicles" ? (
-          <CategoryFactCard category="Vehicles" className="mb-4" />
+          <CategoryFactCard
+            category="Vehicles"
+            subcategory={listing.subcategory}
+            commercialTransport={listingIsCommercialTransport(listing)}
+            className="mb-4"
+          />
         ) : null}
         {listing.category.trim() === "Heavy Equipment" ||
         listing.category.trim() === "Construction" ? (

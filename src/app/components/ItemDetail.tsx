@@ -532,7 +532,12 @@ export function ItemDetail({
               </div>
             </div>
             {listing.category.trim() === "Vehicles" && listing.modes.rent ? (
-              <CategoryFactCard category="Vehicles" className="mt-3" />
+              <CategoryFactCard
+                category="Vehicles"
+                subcategory={listing.subcategory}
+                commercialTransport={listingIsCommercialTransport(listing)}
+                className="mt-3"
+              />
             ) : null}
             {(listing.category.trim() === "Heavy Equipment" ||
               listing.category.trim() === "Construction") &&

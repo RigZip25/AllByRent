@@ -2168,6 +2168,7 @@ export type AppMessages = {
           /** Host-oriented tip (e.g. commercial insurance options). Optional. */
           hostTipTitle?: string;
           hostTip?: string;
+          /** Optional factual link only — avoid promotional partner push. */
           hostTipLinkLabel?: string;
           hostTipLinkHref?: string;
           whyGeoTitle: string;
