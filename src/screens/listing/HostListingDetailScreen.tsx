@@ -44,6 +44,21 @@ import {
   fetchListingBusyIntervals,
   type BusyInterval,
 } from "../../lib/availabilityBusy";
+import {
+  listingProRentersOnly,
+  listingRequiresCdl,
+  listingRequiresPhysicalDamage,
+  listingIsCommercialTransport,
+} from "../../lib/listingRentRules";
+import {
+  listingIsCarSeat,
+  listingRequiresBoaterLicense,
+  listingRequiresGuestStartId,
+  listingRequiresOperatorCredential,
+  listingRequiresDroneCert,
+  listingRequiresDriverRecordAttestation,
+} from "../../lib/categoryTrustRules";
+import { listingRequiresCoiHostConfirm } from "../../lib/listingInsurance";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -139,7 +154,7 @@ export function HostListingDetailScreen({
   /** Called after a successful delete so the host returns to My Garage. */
   onDeleted?: () => void;
 }) {
-  const { hostListing: t } = useMessages();
+  const { hostListing: t, booking } = useMessages();
   const auth = useAuth();
   const [version, setVersion] = useState(0);
   const [listing, setListing] = useState<ListingDraft | null>(() => getPublishedListingById(listingId));
@@ -585,6 +600,76 @@ export function HostListingDetailScreen({
         ) : null}
         {listing.category.trim() === "Costume & Cosplay" ? (
           <CategoryFactCard category="Costume & Cosplay" className="mb-4" />
+        ) : null}
+        {listing.modes.rent &&
+        (listingProRentersOnly(listing) ||
+          listingRequiresPhysicalDamage(listing) ||
+          listingRequiresCdl(listing) ||
+          listingRequiresOperatorCredential(listing) ||
+          listingRequiresBoaterLicense(listing) ||
+          listingRequiresDroneCert(listing) ||
+          listingIsCarSeat(listing) ||
+          listingRequiresGuestStartId(listing) ||
+          listingIsCommercialTransport(listing) ||
+          listingRequiresDriverRecordAttestation(listing) ||
+          listingRequiresCoiHostConfirm(listing)) ? (
+          <div className="mb-4 flex flex-wrap gap-2">
+            {listingProRentersOnly(listing) ? (
+              <span className="rounded-md border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] font-semibold text-sky-950">
+                {booking.proBadge}
+              </span>
+            ) : null}
+            {listingRequiresPhysicalDamage(listing) ? (
+              <span className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-950">
+                {booking.physicalDamageBadge}
+              </span>
+            ) : null}
+            {listingRequiresCdl(listing) ? (
+              <span className="rounded-md border border-indigo-200 bg-indigo-50 px-2 py-1 text-[11px] font-semibold text-indigo-950">
+                {booking.cdlBadge}
+              </span>
+            ) : null}
+            {listingRequiresOperatorCredential(listing) ? (
+              <span className="rounded-md border border-orange-200 bg-orange-50 px-2 py-1 text-[11px] font-semibold text-orange-950">
+                {booking.operatorCertBadge}
+              </span>
+            ) : null}
+            {listingRequiresBoaterLicense(listing) ? (
+              <span className="rounded-md border border-cyan-200 bg-cyan-50 px-2 py-1 text-[11px] font-semibold text-cyan-950">
+                {booking.boaterLicenseBadge}
+              </span>
+            ) : null}
+            {listingRequiresDroneCert(listing) ? (
+              <span className="rounded-md border border-violet-200 bg-violet-50 px-2 py-1 text-[11px] font-semibold text-violet-950">
+                {booking.droneCertBadge}
+              </span>
+            ) : null}
+            {listingIsCarSeat(listing) ? (
+              <span className="rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-950">
+                {booking.carSeatSafetyBadge}
+              </span>
+            ) : null}
+            {listingRequiresGuestStartId(listing) ? (
+              <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-950">
+                {booking.guestIdBadge}
+              </span>
+            ) : null}
+            {listingIsCommercialTransport(listing) ? (
+              <span className="rounded-md border border-violet-200 bg-violet-50 px-2 py-1 text-[11px] font-semibold text-violet-950">
+                {booking.commercialTransportBadge}
+              </span>
+            ) : null}
+            {listingRequiresDriverRecordAttestation(listing) ? (
+              <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-950">
+                {booking.driverRecordBadge}
+              </span>
+            ) : null}
+            {listingRequiresCoiHostConfirm(listing) ? (
+              <span className="rounded-md border border-orange-200 bg-orange-50 px-2 py-1 text-[11px] font-semibold text-orange-950">
+                {booking.coiStructuredBadge}
+              </span>
+            ) : null}
+          </div>
         ) : null}
         {listingRequiresQrSticker(listing.modes) ? (
         <section
