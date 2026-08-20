@@ -242,6 +242,11 @@ export type RentalBooking = {
   helmetPolicySnapshot?: string;
   lockPolicySnapshot?: string;
   setupTeardownFeeUsd?: number;
+  /** P2: Office data wipe (devices with storage) + Music PA cable/stand inventory. */
+  dataWipeAttested?: boolean;
+  hostDataWipeStatusSnapshot?: string;
+  paCableStandAck?: boolean;
+  paCableStandSnapshot?: string;
   /**
    * Renter acknowledged agent→owner insurance proof path and saw owner email.
    */

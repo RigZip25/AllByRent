@@ -964,6 +964,10 @@ export const es: AppMessages = {
       "Se requiere la renuncia de responsabilidad de la reserva antes de la entrega.",
     helmetLockUnlockBlocked:
       "Se requiere el reconocimiento de casco y candado de la reserva antes de la entrega.",
+    dataWipeUnlockBlocked:
+      "Se requiere el reconocimiento de borrado de datos de la reserva antes de la entrega.",
+    paCableStandUnlockBlocked:
+      "Se requiere el reconocimiento del inventario de cables / stands PA de la reserva antes de la entrega.",
     agentProofPending:
       "Esperando que el anfitrión confirme que recibió la prueba de seguro de tu agente.",
     agentProofReceivedMark: "Recibí la prueba de seguro del agente del arrendatario",
@@ -1778,6 +1782,19 @@ export const es: AppMessages = {
         },
         useCase: { label: "Uso principal" },
         transportSize: { label: "Cómo se mueve" },
+        deviceHasStorage: {
+          label: "¿El dispositivo tiene almacenamiento?",
+          hint: "Impresoras, POS, servidores y muchos monitores guardan trabajos o credenciales — sé honesto.",
+        },
+        hostDataWipeStatus: {
+          label: "Plan de borrado de datos",
+          hint: "Obligatorio si hay almacenamiento — el arrendatario lo reconfirma al reservar.",
+        },
+        paCableStandInventory: {
+          label: "Inventario de cables y stands",
+          placeholder: "4× XLR 25′, 2× speakON, 2× stands de altavoz, 1× pie de micro…",
+          hint: "Lista cada cable y stand del kit PA — el arrendatario confirma en reserva y entrega.",
+        },
         dimensionsOrWeight: { label: "Dimensiones / peso", placeholder: "Para transporte" },
         whatMakesItUnique: { label: "Qué lo hace único", placeholder: "Por qué alquilarlo" },
         jobScale: { label: "Escala" },
@@ -2002,6 +2019,12 @@ export const es: AppMessages = {
 
         kit_complete: "Kit estilo USCG completo a bordo",
         incomplete: "Incompleto — no publicar en motorizados",
+        has_storage: "Sí — tiene HDD / SSD / NVRAM / memoria de trabajos",
+        no_storage: "Sin almacenamiento interno",
+        storage_unknown: "No estoy seguro — trátelo como con almacenamiento",
+        wiped_before_list: "Borrado limpio antes del anuncio",
+        wipe_at_handoff: "Borraré / factory reset en la entrega",
+        renter_responsible: "El arrendatario debe borrar los datos que añada",
         class_i: "Clase I",
         class_ii: "Clase II",
         class_iii: "Clase III",
@@ -2616,6 +2639,20 @@ export const es: AppMessages = {
       `Este anuncio de e-patinete requiere al menos ${minAge} años. Añade tu fecha de nacimiento en el perfil, u elige otro anuncio.`,
     setupTeardownFeeLine: (amount) => `Tarifa de montaje / desmontaje: ${amount}`,
     powerRequirementLine: (power) => `Requisito de energía: ${power}`,
+    dataWipeBlockedTitle: "Estado de borrado incompleto",
+    dataWipeBlockedBody:
+      "El anfitrión marcó el dispositivo con almacenamiento pero no definió el plan de borrado. Pídele actualizar el anuncio antes de reservar.",
+    dataWipeTitle: "Borrado de datos / no retención",
+    dataWipeBody:
+      "Este equipo de oficina tiene almacenamiento (trabajos, documentos o credenciales). Borra o elimina tus datos antes de devolver; no retengas copias del anfitrión o clientes.",
+    dataWipeHostStatusLine: (status) => `Plan de borrado del anfitrión: ${status}`,
+    dataWipeAttest:
+      "Borraré o eliminaré cualquier dato que añada, no retendré archivos del anfitrión ni de clientes, y seguiré el plan de borrado en la entrega y devolución.",
+    paCableStandTitle: "Inventario de cables y stands PA",
+    paCableStandEmpty:
+      "El anfitrión confirmará cables y stands en la entrega — reconoce para continuar.",
+    paCableStandAttest:
+      "Revisé el inventario de cables / stands y comprobaré cada ítem en recogida y devolución.",
     agentInsuranceTitle: "Seguro vía agente → propietario",
     agentInsuranceBody:
       "Para transporte comercial pesado / semi, contrata cobertura con tu agente de seguros. El agente debe enviar la prueba por correo directamente al dueño del vehículo — no es el flujo ligero de «añadir al auto personal + subir».",
@@ -2979,6 +3016,41 @@ export const es: AppMessages = {
         layers: "Tarifa montaje/desmontaje · energía · capacidad · fianza · términos.",
         claimsTitle: "Si algo sale mal",
         claims: "Tarifa y energía van en el acuerdo; fianza cubre daño más allá del uso normal.",
+      },
+      "Office & Business": {
+        title: "Alquiler de oficina y negocio",
+        summary:
+          "Los dispositivos con almacenamiento necesitan un plan de borrado del anfitrión y el reconocimiento del arrendatario al reservar. Modelo ayuda a identificar la unidad en la entrega.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Indica si el dispositivo guarda trabajos o credenciales. Si tiene almacenamiento, define el plan de borrado (antes del anuncio, en la entrega o a cargo del arrendatario).",
+        whyGeoTitle: "¿Por qué una puerta de borrado?",
+        whyGeo:
+          "Copiadoras, POS y servidores filtran datos si vuelven sin limpiar. La atestación crea un rastro sin un producto forense.",
+        flowTitle: "De punta a punta",
+        flow:
+          "Anuncio con almacenamiento + plan → reconocimiento al reservar → borrado / verificación en entrega → devolución limpia.",
+        layersTitle: "Capas de seguridad",
+        layers: "Flag de almacenamiento · plan de borrado · ack en reserva · fianza · términos · entrega QR.",
+        claimsTitle: "Si algo sale mal",
+        claims: "Las atestaciones apoyan disputas de privacidad; la fianza cubre daño físico.",
+      },
+      "Music & Audio": {
+        title: "Alquiler de música y audio",
+        summary:
+          "Los kits PA requieren inventario de cables y stands para que los XLR y soportes faltantes no terminen en disputas. La potencia ayuda al venue.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "En PA Systems lista cada cable y stand. El arrendatario lo reconoce al reservar y lo revisa en la entrega.",
+        whyGeoTitle: "¿Por qué inventario de cables / stands?",
+        whyGeo:
+          "Las reclamaciones de PA suelen ser accesorios, no la cabeza. Una checklist congelada en reserva y entrega reduce disputas.",
+        flowTitle: "De punta a punta",
+        flow: "Lista PA con inventario → ack → conteo en recogida → conteo en devolución.",
+        layersTitle: "Capas de seguridad",
+        layers: "Inventario cables / stands · potencia · fianza · términos · entrega QR.",
+        claimsTitle: "Si algo sale mal",
+        claims: "El inventario y las fotos de devolución apoyan piezas faltantes; la fianza cubre el hueco.",
       },
       "Baby & Kids": {
         title: "Alquiler seguro de sillas infantiles",

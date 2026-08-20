@@ -38,6 +38,7 @@ import {
   listingRequiresKitInventory,
   listingRequiresLiabilityWaiver,
   listingRequiresOperatorCredential,
+  listingRequiresPaCableStandInventory,
   listingRequiresUscgSafetyKit,
   listingSetupTeardownFeeUsd,
   listingUscgSafetyBlocksBooking,
@@ -45,6 +46,12 @@ import {
   listingIsPartyCategory,
   listingIsBikesScooters,
   listingIsHighValueGearCategory,
+  listingIsOfficeCategory,
+  listingIsMusicCategory,
+  listingRequiresDataWipe,
+  listingDataWipeBlocksBooking,
+  listingHostDataWipeStatus,
+  listingPaCableStandInventoryText,
 } from "../../lib/categoryTrustRules";
 import { uploadRentalInsuranceProof } from "../../lib/rentalInsuranceStorage";
 import {
@@ -317,6 +324,8 @@ function BookingScreenLoaded({
   const [kitInventoryAck, setKitInventoryAck] = useState(false);
   const [liabilityWaiverAttested, setLiabilityWaiverAttested] = useState(false);
   const [helmetLockAck, setHelmetLockAck] = useState(false);
+  const [dataWipeAttested, setDataWipeAttested] = useState(false);
+  const [paCableStandAck, setPaCableStandAck] = useState(false);
 
   const needsInsuranceProof = listingRequiresInsuranceProof(listing);
   const needsPhysicalDamage = listingRequiresPhysicalDamage(listing);
@@ -345,6 +354,13 @@ function BookingScreenLoaded({
   const isPartyListing = listingIsPartyCategory(listing) && listing.modes.rent;
   const isBikesListing = listingIsBikesScooters(listing) && listing.modes.rent;
   const isHighValueGear = listingIsHighValueGearCategory(listing) && listing.modes.rent;
+  const isOfficeListing = listingIsOfficeCategory(listing) && listing.modes.rent;
+  const isMusicListing = listingIsMusicCategory(listing) && listing.modes.rent;
+  const needsDataWipe = listingRequiresDataWipe(listing);
+  const dataWipeListingBlocked = listingDataWipeBlocksBooking(listing);
+  const hostDataWipeStatus = listingHostDataWipeStatus(listing);
+  const needsPaCableStand = listingRequiresPaCableStandInventory(listing);
+  const paCableStandText = listingPaCableStandInventoryText(listing);
   const usesAgentInsurance = listingUsesAgentToOwnerInsuranceProof(listing);
   const isCommercialTransport = listingIsCommercialTransport(listing);
   const ownerProofEmail = listingInsuranceOwnerProofEmail(listing);
@@ -509,6 +525,9 @@ function BookingScreenLoaded({
   const kitInventoryOk = !needsKitInventory || kitInventoryAck;
   const liabilityWaiverOk = !needsLiabilityWaiver || liabilityWaiverAttested;
   const helmetLockOk = !needsHelmetLock || helmetLockAck;
+  const dataWipeOk =
+    !needsDataWipe || (!dataWipeListingBlocked && dataWipeAttested);
+  const paCableStandOk = !needsPaCableStand || paCableStandAck;
 
   const eScooterAgeOk = useMemo(() => {
     if (!needsEScooterAge) return true;
@@ -564,6 +583,8 @@ function BookingScreenLoaded({
     kitInventoryOk &&
     liabilityWaiverOk &&
     helmetLockOk &&
+    dataWipeOk &&
+    paCableStandOk &&
     eScooterAgeOk &&
     !insuranceUploadBusy &&
     !proCredentialBusy &&
@@ -639,6 +660,10 @@ function BookingScreenLoaded({
         rvDumpStation: listing.categorySpecs?.dumpStationAccess || undefined,
         rvPropane: listing.categorySpecs?.propaneStatus || undefined,
         rvOccupancy: listing.categorySpecs?.rvOccupancyBand || undefined,
+        dataWipeRequired: needsDataWipe,
+        hostDataWipeStatus: hostDataWipeStatus || undefined,
+        paCableStandInventoryRequired: needsPaCableStand,
+        paCableStandInventory: paCableStandText || undefined,
       },
       vehicle:
         isVehicleListing ||
@@ -798,6 +823,10 @@ function BookingScreenLoaded({
           rvDumpStation: listing.categorySpecs?.dumpStationAccess || undefined,
           rvPropane: listing.categorySpecs?.propaneStatus || undefined,
           rvOccupancy: listing.categorySpecs?.rvOccupancyBand || undefined,
+          dataWipeRequired: needsDataWipe,
+          hostDataWipeStatus: hostDataWipeStatus || undefined,
+          paCableStandInventoryRequired: needsPaCableStand,
+          paCableStandInventory: paCableStandText || undefined,
         },
         vehicle:
           isVehicleListing ||
@@ -909,6 +938,10 @@ function BookingScreenLoaded({
       helmetPolicySnapshot: helmetPolicy || undefined,
       lockPolicySnapshot: lockPolicy || undefined,
       setupTeardownFeeUsd: setupTeardownFeeUsd > 0 ? setupTeardownFeeUsd : undefined,
+      dataWipeAttested: needsDataWipe ? dataWipeAttested : undefined,
+      hostDataWipeStatusSnapshot: needsDataWipe ? hostDataWipeStatus || undefined : undefined,
+      paCableStandAck: needsPaCableStand ? paCableStandAck : undefined,
+      paCableStandSnapshot: paCableStandText || undefined,
       insuranceAgentProofAcknowledged: usesAgentInsurance ? agentProofAck : undefined,
       insuranceOwnerProofEmail: usesAgentInsurance ? ownerProofEmail || undefined : undefined,
       selectedVehicleExtras: selectedExtras,
@@ -1258,6 +1291,8 @@ function BookingScreenLoaded({
         ) : null}
         {isBikesListing ? <CategoryFactCard category="Bikes & Scooters" /> : null}
         {isPartyListing ? <CategoryFactCard category="Party & Events" /> : null}
+        {isOfficeListing ? <CategoryFactCard category="Office & Business" /> : null}
+        {isMusicListing ? <CategoryFactCard category="Music & Audio" /> : null}
 
         {listing.category.trim() === "Real Estate" && houseRulesText ? (
           <div className="rounded-xl border border-border bg-card p-4 space-y-2">
@@ -1417,6 +1452,58 @@ function BookingScreenLoaded({
                 onChange={(e) => setHelmetLockAck(e.target.checked)}
               />
               <span>{t.booking.helmetLockAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {needsDataWipe && dataWipeListingBlocked ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <p className="font-semibold">{t.booking.dataWipeBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.dataWipeBlockedBody}</p>
+          </div>
+        ) : null}
+
+        {needsDataWipe && !dataWipeListingBlocked ? (
+          <div className="rounded-xl border border-slate-300 bg-slate-50/80 p-4 space-y-3">
+            <p className="text-sm font-semibold text-slate-950">{t.booking.dataWipeTitle}</p>
+            <p className="text-[12px] text-slate-800/90">{t.booking.dataWipeBody}</p>
+            {hostDataWipeStatus ? (
+              <p className="text-[12px] text-slate-900">
+                {t.booking.dataWipeHostStatusLine(
+                  t.listing.specs.options[hostDataWipeStatus] ?? hostDataWipeStatus,
+                )}
+              </p>
+            ) : null}
+            <label className="flex items-start gap-2 text-xs text-slate-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={dataWipeAttested}
+                onChange={(e) => setDataWipeAttested(e.target.checked)}
+              />
+              <span>{t.booking.dataWipeAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {needsPaCableStand ? (
+          <div className="rounded-xl border border-fuchsia-200 bg-fuchsia-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-fuchsia-950">{t.booking.paCableStandTitle}</p>
+            {paCableStandText ? (
+              <p className="text-[13px] whitespace-pre-wrap text-fuchsia-900/90">
+                {paCableStandText}
+              </p>
+            ) : (
+              <p className="text-[12px] text-fuchsia-900/80">{t.booking.paCableStandEmpty}</p>
+            )}
+            <label className="flex items-start gap-2 text-xs text-fuchsia-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={paCableStandAck}
+                onChange={(e) => setPaCableStandAck(e.target.checked)}
+              />
+              <span>{t.booking.paCableStandAttest}</span>
             </label>
           </div>
         ) : null}

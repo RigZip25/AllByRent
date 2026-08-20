@@ -978,6 +978,10 @@ export const cs: AppMessages = {
       "Před předáním je povinné potvrzení vzdání se nároků z rezervace.",
     helmetLockUnlockBlocked:
       "Před předáním je povinné potvrzení politiky helmy a zámku z rezervace.",
+    dataWipeUnlockBlocked:
+      "Před předáním je nutné potvrzení mazání dat z rezervace.",
+    paCableStandUnlockBlocked:
+      "Před předáním je nutné potvrzení inventáře kabelů / stojanů PA z rezervace.",
     agentProofPending:
       "Čeká se, až hostitel potvrdí, že dostal doklad pojištění od tvého agenta.",
     agentProofReceivedMark: "Obdržel(a) jsem doklad pojištění od agenta nájemce",
@@ -1791,6 +1795,19 @@ export const cs: AppMessages = {
         },
         useCase: { label: "Hlavní použití" },
         transportSize: { label: "Jak se přepravuje" },
+        deviceHasStorage: {
+          label: "Má zařízení vlastní úložiště?",
+          hint: "Tiskárny, POS, servery a mnohé monitory drží úlohy nebo přihlášení — uveď pravdivě.",
+        },
+        hostDataWipeStatus: {
+          label: "Plán mazání dat",
+          hint: "Povinné, když má zařízení úložiště — nájemce znovu potvrdí při rezervaci.",
+        },
+        paCableStandInventory: {
+          label: "Inventář kabelů a stojanů",
+          placeholder: "4× XLR 25′, 2× speakON, 2× stojany na repro, 1× mik. stojan…",
+          hint: "Vypiš každý kabel a stojan v PA sadě — nájemce potvrdí při rezervaci a předání.",
+        },
         dimensionsOrWeight: { label: "Rozměry / váha", placeholder: "Pro transport" },
         whatMakesItUnique: { label: "Čím je unikátní", placeholder: "Proč si to půjčit" },
         jobScale: { label: "Škála" },
@@ -2015,6 +2032,12 @@ export const cs: AppMessages = {
 
         kit_complete: "Kompletní sada ve stylu USCG na palubě",
         incomplete: "Nekompletní — nepublikovat u motorových",
+        has_storage: "Ano — HDD / SSD / NVRAM / paměť úloh",
+        no_storage: "Bez vlastního úložiště",
+        storage_unknown: "Nevím — při nejistotě ber jako se úložištěm",
+        wiped_before_list: "Vymazáno před inzerátem",
+        wipe_at_handoff: "Vymažu / factory reset při předání",
+        renter_responsible: "Nájemce musí smazat data, která přidá",
         class_i: "Třída I",
         class_ii: "Třída II",
         class_iii: "Třída III",
@@ -2630,6 +2653,20 @@ export const cs: AppMessages = {
       `Tento inzerát e-koloběžky vyžaduje věk alespoň ${minAge}. Doplň datum narození v profilu, nebo zvol jiný inzerát.`,
     setupTeardownFeeLine: (amount) => `Poplatek za stavbu / demontáž: ${amount}`,
     powerRequirementLine: (power) => `Požadavek na napájení: ${power}`,
+    dataWipeBlockedTitle: "Stav mazání dat není dokončen",
+    dataWipeBlockedBody:
+      "Hostitel označil zařízení jako se úložištěm, ale nenastavil plán mazání. Požádej o aktualizaci nabídky před rezervací.",
+    dataWipeTitle: "Mazání dat / bez uchování",
+    dataWipeBody:
+      "Toto kancelářské zařízení má vlastní úložiště (úlohy, dokumenty nebo přihlašovací údaje). Před vrácením data smaž nebo odstraň; neuchovávej kopie dat hostitele nebo zákazníků.",
+    dataWipeHostStatusLine: (status) => `Plán mazání hostitele: ${status}`,
+    dataWipeAttest:
+      "Smažu nebo odstraním všechna data, která přidám, neuchovám soubory hostitele ani zákazníků a budu se řídit plánem mazání hostitele při předání a vrácení.",
+    paCableStandTitle: "Inventář kabelů a stojanů PA",
+    paCableStandEmpty:
+      "Hostitel potvrdí kabely a stojany při předání — pro pokračování potvrď.",
+    paCableStandAttest:
+      "Zkontroloval(a) jsem inventář kabelů / stojanů a ověřím každou položku při vyzvednutí i vrácení.",
     agentInsuranceTitle: "Pojištění přes agenta → majitel",
     agentInsuranceBody:
       "U těžké / semi komerční dopravy sjednej krytí u pojišťovacího agenta. Agent musí poslat doklad e-mailem přímo majiteli vozidla — nejde o lehčí cestu „přidat do osobního autopojištění + nahrát“.",
@@ -2993,6 +3030,41 @@ export const cs: AppMessages = {
         layers: "Poplatek stavba/demontáž · napájení · kapacita · kauce · podmínky.",
         claimsTitle: "Když se něco pokazí",
         claims: "Poplatek a napájení jsou ve smlouvě; kauce na poškození nad běžné opotřebení.",
+      },
+      "Office & Business": {
+        title: "Pronájem kanceláře a byznysu",
+        summary:
+          "Zařízení s úložištěm vyžadují plán mazání u hostitele a potvrzení mazání dat nájemcem při rezervaci. Model pomůže ověřit kus při předání.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Označ, jestli zařízení uchovává úlohy nebo přihlašovací údaje. Pokud má úložiště, nastav plán mazání (před inzerátem, při předání, nebo nájemce).",
+        whyGeoTitle: "Proč brána mazání dat?",
+        whyGeo:
+          "Kopírky, POS a servery unikají data zákazníků, když se vrátí „špinavé“. Potvrzení vytvoří stopu bez forenzního produktu.",
+        flowTitle: "Od začátku do konce",
+        flow:
+          "Inzerát s úložištěm + plánem → nájemce potvrdí při rezervaci → mazání / kontrola při předání → čistý návrat.",
+        layersTitle: "Bezpečnostní vrstvy",
+        layers: "Příznak úložiště · plán mazání · potvrzení při rezervaci · kauce · podmínky · QR předání.",
+        claimsTitle: "Když se něco pokazí",
+        claims: "Potvrzení mazání podporují spory o soukromí; kauce stále kryje fyzické poškození.",
+      },
+      "Music & Audio": {
+        title: "Pronájem hudby a audia",
+        summary:
+          "PA sady vyžadují inventář kabelů a stojanů, aby chybějící XLR a stojany nekončily ve sporech. Výkonová třída pomůže místu.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "U PA Systems uveď každý kabel a stojan. Nájemce potvrdí inventář při rezervaci a zkontroluje při předání.",
+        whyGeoTitle: "Proč inventář kabelů / stojanů?",
+        whyGeo:
+          "U PA jsou spory většinou o příslušenství, ne o hlavu. Zmrazený checklist při rezervaci a předání snižuje hádky.",
+        flowTitle: "Od začátku do konce",
+        flow: "PA s inventářem → potvrzení → počítání při vyzvednutí → počítání při návratu.",
+        layersTitle: "Bezpečnostní vrstvy",
+        layers: "Inventář kabelů / stojanů · výkon · kauce · podmínky · QR předání.",
+        claimsTitle: "Když se něco pokazí",
+        claims: "Snímek inventáře a fotky návratu podporují chybějící díly; kauce doplní rozdíl.",
       },
       "Baby & Kids": {
         title: "Bezpečné půjčování autosedaček",

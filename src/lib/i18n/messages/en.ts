@@ -958,6 +958,10 @@ export const en: AppMessages = {
       "Liability waiver acknowledgment from booking is required before handoff can start.",
     helmetLockUnlockBlocked:
       "Helmet and lock policy acknowledgment from booking is required before handoff can start.",
+    dataWipeUnlockBlocked:
+      "Data wipe acknowledgment from booking is required before handoff can start.",
+    paCableStandUnlockBlocked:
+      "PA cable / stand inventory acknowledgment from booking is required before handoff can start.",
     agentProofPending:
       "Waiting for the host to confirm they received insurance proof from your agent.",
     agentProofReceivedMark: "I received insurance proof from the renter’s agent",
@@ -1745,6 +1749,19 @@ export const en: AppMessages = {
         },
         useCase: { label: "Primary use" },
         transportSize: { label: "How it moves" },
+        deviceHasStorage: {
+          label: "Device has onboard storage?",
+          hint: "Printers, POS, servers, and many monitors keep jobs or credentials — mark honestly.",
+        },
+        hostDataWipeStatus: {
+          label: "Data wipe plan",
+          hint: "Required when the device has storage — renters re-acknowledge at booking.",
+        },
+        paCableStandInventory: {
+          label: "Cable & stand inventory",
+          placeholder: "4× XLR 25′, 2× speakON, 2× speaker stands, 1× mic stand…",
+          hint: "List every cable and stand in the PA kit — renter confirms at booking and handoff.",
+        },
       },
       options: {
         cordless: "Cordless / battery",
@@ -1944,6 +1961,12 @@ export const en: AppMessages = {
         will_add: "Will add label photo",
         kit_complete: "Complete USCG-style kit on board",
         incomplete: "Incomplete — do not publish for powered craft",
+        has_storage: "Yes — has HDD / SSD / NVRAM / job memory",
+        no_storage: "No onboard storage",
+        storage_unknown: "Not sure — treat as has storage if unsure",
+        wiped_before_list: "Wiped clean before listing",
+        wipe_at_handoff: "Will wipe / factory-reset at handoff",
+        renter_responsible: "Renter must wipe any data they add",
         class_i: "Class I",
         class_ii: "Class II",
         class_iii: "Class III",
@@ -2580,6 +2603,20 @@ export const en: AppMessages = {
       `This e-scooter listing requires riders to be at least ${minAge}. Add your date of birth in profile, or choose another listing.`,
     setupTeardownFeeLine: (amount) => `Setup / teardown fee: ${amount}`,
     powerRequirementLine: (power) => `Power needed: ${power}`,
+    dataWipeBlockedTitle: "Data wipe status incomplete",
+    dataWipeBlockedBody:
+      "The host marked this device as having storage but has not set a wipe status. Ask them to update the listing before booking.",
+    dataWipeTitle: "Data wipe / no-retain",
+    dataWipeBody:
+      "This office device has onboard storage (jobs, documents, or credentials). Wipe or remove your data before return; do not keep copies of host or customer data.",
+    dataWipeHostStatusLine: (status) => `Host wipe plan: ${status}`,
+    dataWipeAttest:
+      "I will wipe or remove any data I add, will not retain host or customer files, and will follow the host’s wipe plan at handoff and return.",
+    paCableStandTitle: "PA cable & stand inventory",
+    paCableStandEmpty:
+      "Host will confirm cables and stands at handoff — acknowledge to continue.",
+    paCableStandAttest:
+      "I reviewed the cable / stand inventory and will check each item at pickup and return.",
     agentInsuranceTitle: "Insurance via your agent → owner",
     agentInsuranceBody:
       "For heavy / semi commercial transport, add coverage with your insurance agent. Your agent must email proof directly to the vehicle owner — this is not the lighter “add to personal auto + upload” path.",
@@ -2943,6 +2980,42 @@ export const en: AppMessages = {
         layers: "Setup/teardown fee · power requirement · capacity · deposit · rental terms.",
         claimsTitle: "If something goes wrong",
         claims: "Fee and power are frozen on the agreement; deposit covers damage beyond normal event wear.",
+      },
+      "Office & Business": {
+        title: "Office & business rentals",
+        summary:
+          "Devices with storage need a host wipe plan and renter data-wipe acknowledgment at booking. Serial / model help match the unit at handoff.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Mark whether the device keeps jobs or credentials. If it has storage, set wipe status (before list, at handoff, or renter-responsible).",
+        whyGeoTitle: "Why a data wipe gate?",
+        whyGeo:
+          "Copiers, POS, and servers leak customer or company data when returned dirty. Attestation creates a clear trail without a forensic wipe product.",
+        flowTitle: "End to end",
+        flow:
+          "List with storage + wipe plan → renter acknowledges at book → wipe / verify at handoff → return clean.",
+        layersTitle: "Safety layers",
+        layers: "Storage flag · host wipe plan · renter booking ack · deposit · rental terms · QR handoff.",
+        claimsTitle: "If something goes wrong",
+        claims:
+          "Wipe attestations support privacy disputes; deposit still covers physical damage.",
+      },
+      "Music & Audio": {
+        title: "Music & audio rentals",
+        summary:
+          "PA kits require a cable and stand inventory so missing XLRs and stands don’t turn into claim fights. Power class helps match the venue.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "For PA Systems, list every cable and stand. Renters acknowledge the inventory at booking and check it at handoff.",
+        whyGeoTitle: "Why cable / stand inventory?",
+        whyGeo:
+          "PA claims are usually missing accessories, not the head unit. A frozen checklist at booking and handoff cuts disputes.",
+        flowTitle: "End to end",
+        flow: "List PA with cable/stand inventory → renter acks → count at pickup → count at return.",
+        layersTitle: "Safety layers",
+        layers: "Cable / stand inventory · power class · deposit · rental terms · QR handoff.",
+        claimsTitle: "If something goes wrong",
+        claims: "Inventory snapshot and return photos support missing-part claims; deposit covers the gap.",
       },
       "Baby & Kids": {
         title: "Car seat safety rentals",

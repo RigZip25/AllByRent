@@ -453,3 +453,114 @@ export function listingLockPolicy(
 ): string {
   return (listing.categorySpecs?.lockPolicy ?? "").trim();
 }
+
+/* ─── P2 category trust (Office / Music) ─────────────────────────────── */
+
+/** Office shelves that commonly store documents, jobs, or credentials. */
+const OFFICE_STORAGE_SUBS = new Set([
+  "printers",
+  "monitors & displays",
+  "webcams & streaming",
+  "presentation gear",
+  "large format printers",
+  "pos systems",
+  "commercial copiers",
+  "conference systems",
+  "server equipment",
+  "other",
+]);
+
+const PA_KIT_SUBS = new Set(["pa systems"]);
+
+export function listingIsOfficeCategory(
+  listing: Pick<ListingDraft, "category">,
+): boolean {
+  return listing.category.trim() === "Office & Business";
+}
+
+export function listingIsMusicCategory(
+  listing: Pick<ListingDraft, "category">,
+): boolean {
+  return listing.category.trim() === "Music & Audio";
+}
+
+/** Host marked the device as having onboard storage (HDD/SSD/NVRAM/jobs). */
+export function listingDeviceHasStorage(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): boolean {
+  return (listing.categorySpecs?.deviceHasStorage ?? "").trim() === "has_storage";
+}
+
+export function listingIsOfficeStorageCapableSub(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  if (!listingIsOfficeCategory(listing)) return false;
+  const sub = subKey(listing);
+  return OFFICE_STORAGE_SUBS.has(sub);
+}
+
+/**
+ * Rent path: devices with storage require host wipe status + renter data-wipe ack.
+ * Furniture / no-storage picks skip the gate.
+ */
+export function listingRequiresDataWipe(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!rentOn(listing) || !listingIsOfficeStorageCapableSub(listing)) return false;
+  return listingDeviceHasStorage(listing);
+}
+
+export function listingHostDataWipeStatus(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): string {
+  return (listing.categorySpecs?.hostDataWipeStatus ?? "").trim();
+}
+
+/** Host must declare wipe status when the device has storage (publish gate). */
+export function listingDataWipeBlocksPublish(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!listingRequiresDataWipe(listing)) return false;
+  const status = listingHostDataWipeStatus(listing);
+  return (
+    status !== "wiped_before_list" &&
+    status !== "wipe_at_handoff" &&
+    status !== "renter_responsible"
+  );
+}
+
+export function listingDataWipeBlocksBooking(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  return listingDataWipeBlocksPublish(listing);
+}
+
+/** PA Systems (and PA-named) kits — cables / stands inventory for claims. */
+export function listingIsPaKit(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  if (!listingIsMusicCategory(listing)) return false;
+  const sub = subKey(listing);
+  if (PA_KIT_SUBS.has(sub)) return true;
+  return /\bpa\b/i.test(listing.subcategory.trim());
+}
+
+export function listingRequiresPaCableStandInventory(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes">,
+): boolean {
+  return rentOn(listing) && listingIsPaKit(listing);
+}
+
+export function listingPaCableStandInventoryText(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): string {
+  return (listing.categorySpecs?.paCableStandInventory ?? "").trim();
+}
+
+/** Host left PA cable/stand inventory blank — blocks publish via required field. */
+export function listingPaCableStandBlocksPublish(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!listingRequiresPaCableStandInventory(listing)) return false;
+  return !listingPaCableStandInventoryText(listing);
+}

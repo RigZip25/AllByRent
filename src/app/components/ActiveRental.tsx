@@ -98,8 +98,10 @@ import {
   listingRequiresKitInventory,
   listingRequiresLiabilityWaiver,
   listingRequiresOperatorCredential,
+  listingRequiresPaCableStandInventory,
   listingRequiresStartIdGate,
   listingRequiresUscgSafetyKit,
+  listingRequiresDataWipe,
 } from "../../lib/categoryTrustRules";
 import {
   isPreTripInspectionReady,
@@ -244,6 +246,10 @@ export function ActiveRental({
     publishedListing != null && listingRequiresLiabilityWaiver(publishedListing);
   const needsHelmetLock =
     publishedListing != null && listingRequiresHelmetLockPolicy(publishedListing);
+  const needsDataWipe =
+    publishedListing != null && listingRequiresDataWipe(publishedListing);
+  const needsPaCableStand =
+    publishedListing != null && listingRequiresPaCableStandInventory(publishedListing);
   const contactlessMode = booking?.fulfillmentMethod === "contactless";
   const qrTarget = useMemo(
     () => (booking ? resolveBookingQrTarget(booking) : { listingId: undefined, qrToken: undefined }),
@@ -593,6 +599,24 @@ export function ActiveRental({
       booking?.role === "renter"
     ) {
       setNotice(t.rentalDetail.helmetLockUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsDataWipe &&
+      !booking?.dataWipeAttested &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.dataWipeUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsPaCableStand &&
+      !booking?.paCableStandAck &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.paCableStandUnlockBlocked);
       return;
     }
     if (

@@ -574,6 +574,12 @@ export function HostListingDetailScreen({
         {listing.category.trim() === "Party & Events" ? (
           <CategoryFactCard category="Party & Events" className="mb-4" />
         ) : null}
+        {listing.category.trim() === "Office & Business" ? (
+          <CategoryFactCard category="Office & Business" className="mb-4" />
+        ) : null}
+        {listing.category.trim() === "Music & Audio" ? (
+          <CategoryFactCard category="Music & Audio" className="mb-4" />
+        ) : null}
         {listingRequiresQrSticker(listing.modes) ? (
         <section
           className="mb-4 rounded-3xl border bg-white p-4 shadow-sm"

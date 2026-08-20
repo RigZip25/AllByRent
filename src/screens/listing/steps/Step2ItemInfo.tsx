@@ -704,7 +704,9 @@ export function Step2ItemInfo({
           draft.category.trim() === "Sports & Recreation" ||
           draft.category.trim() === "Outdoor & Camping" ||
           draft.category.trim() === "Bikes & Scooters" ||
-          draft.category.trim() === "Party & Events") ? (
+          draft.category.trim() === "Party & Events" ||
+          draft.category.trim() === "Office & Business" ||
+          draft.category.trim() === "Music & Audio") ? (
           <div className="mb-4">
             <CategoryFactCard category={draft.category.trim()} defaultExpanded />
           </div>

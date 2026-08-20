@@ -577,6 +577,12 @@ export function ItemDetail({
             {listing.modes.rent && listing.category.trim() === "Party & Events" ? (
               <CategoryFactCard category="Party & Events" className="mt-3" />
             ) : null}
+            {listing.modes.rent && listing.category.trim() === "Office & Business" ? (
+              <CategoryFactCard category="Office & Business" className="mt-3" />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Music & Audio" ? (
+              <CategoryFactCard category="Music & Audio" className="mt-3" />
+            ) : null}
             {listing.modes.rent &&
             (listingProRentersOnly(listing) ||
               listingRequiresPhysicalDamage(listing) ||

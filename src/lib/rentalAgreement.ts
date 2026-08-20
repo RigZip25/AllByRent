@@ -78,6 +78,11 @@ export type RentalAgreementCommercialSnapshot = {
     rvDumpStation?: string;
     rvPropane?: string;
     rvOccupancy?: string;
+    /** P2 Office / Music */
+    dataWipeRequired?: boolean;
+    hostDataWipeStatus?: string;
+    paCableStandInventoryRequired?: boolean;
+    paCableStandInventory?: string;
   };
 };
 
@@ -189,12 +194,16 @@ export function buildEnrichedSummaryLines(input: {
     cat === "Outdoor & Camping" ||
     cat === "Bikes & Scooters" ||
     cat === "Party & Events" ||
+    cat === "Office & Business" ||
+    cat === "Music & Audio" ||
     Boolean(trust?.operatorCertRequired) ||
     Boolean(trust?.boaterLicenseRequired) ||
     Boolean(trust?.droneCertRequired) ||
     Boolean(trust?.houseRules) ||
     Boolean(trust?.liabilityWaiverRequired) ||
     Boolean(trust?.uscgSafetyKitRequired) ||
+    Boolean(trust?.dataWipeRequired) ||
+    Boolean(trust?.paCableStandInventoryRequired) ||
     /high.?value|boat|heavy|drone/i.test(cat);
 
   if (!isRich && !input.vehicle) {
@@ -277,6 +286,21 @@ export function buildEnrichedSummaryLines(input: {
   if (trust?.helmetPolicy || trust?.lockPolicy) {
     lines.push(
       `Helmet policy: ${trust.helmetPolicy || "n/a"}; lock policy: ${trust.lockPolicy || "n/a"}.`,
+    );
+  }
+  if (trust?.dataWipeRequired) {
+    const wipeStatus = trust.hostDataWipeStatus?.trim();
+    lines.push(
+      wipeStatus
+        ? `Data wipe: device has storage; host status "${wipeStatus}"; renter acknowledged wipe / no-retain duties at booking.`
+        : "Data wipe: device has onboard storage; renter acknowledged wipe / no-retain duties at booking.",
+    );
+  }
+  if (trust?.paCableStandInventoryRequired) {
+    lines.push(
+      trust.paCableStandInventory?.trim()
+        ? `PA cable / stand inventory: ${trust.paCableStandInventory.trim()}`
+        : "PA cable / stand inventory acknowledged at booking.",
     );
   }
   if (trust?.setupTeardownFeeUsd != null && trust.setupTeardownFeeUsd > 0) {

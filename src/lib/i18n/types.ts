@@ -1357,6 +1357,15 @@ export type AppMessages = {
     eScooterAgeBody: (minAge: number) => string;
     setupTeardownFeeLine: (amount: string) => string;
     powerRequirementLine: (power: string) => string;
+    dataWipeBlockedTitle: string;
+    dataWipeBlockedBody: string;
+    dataWipeTitle: string;
+    dataWipeBody: string;
+    dataWipeHostStatusLine: (status: string) => string;
+    dataWipeAttest: string;
+    paCableStandTitle: string;
+    paCableStandEmpty: string;
+    paCableStandAttest: string;
     agentInsuranceTitle: string;
     agentInsuranceBody: string;
     agentInsuranceEmailLabel: string;
@@ -1720,6 +1729,8 @@ export type AppMessages = {
     kitInventoryUnlockBlocked: string;
     liabilityWaiverUnlockBlocked: string;
     helmetLockUnlockBlocked: string;
+    dataWipeUnlockBlocked: string;
+    paCableStandUnlockBlocked: string;
     agentProofPending: string;
     agentProofReceivedMark: string;
     agentProofReceivedDone: string;

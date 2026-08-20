@@ -759,6 +759,13 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         recommended: true,
         options: ["under_50w", "50_200w", "200_1000w", "1000w_plus", "passive_unpowered"],
       },
+      {
+        key: "paCableStandInventory",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["PA Systems"],
+      },
     ],
   },
   {
@@ -876,6 +883,45 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
     fields: [
       brandField("office"),
       { key: "model", type: "text", required: true },
+      {
+        key: "deviceHasStorage",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Printers",
+          "Monitors & Displays",
+          "Webcams & Streaming",
+          "Presentation Gear",
+          "Large Format Printers",
+          "POS Systems",
+          "Commercial Copiers",
+          "Conference Systems",
+          "Server Equipment",
+          "Other",
+        ],
+        options: ["has_storage", "no_storage", "storage_unknown"],
+      },
+      {
+        key: "hostDataWipeStatus",
+        type: "select",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Printers",
+          "Monitors & Displays",
+          "Webcams & Streaming",
+          "Presentation Gear",
+          "Large Format Printers",
+          "POS Systems",
+          "Commercial Copiers",
+          "Conference Systems",
+          "Server Equipment",
+          "Other",
+        ],
+        options: ["wiped_before_list", "wipe_at_handoff", "renter_responsible"],
+      },
     ],
   },
   {
@@ -1167,6 +1213,21 @@ export function areCategorySpecsValid(
   // Real Estate: house rules required for rent.
   if (category.trim() === "Real Estate" && modes?.rent) {
     if (!(values.houseRules ?? "").trim()) return false;
+  }
+
+  // Office: when device has storage, host must declare wipe status before publish.
+  if (category.trim() === "Office & Business" && modes?.rent) {
+    const storage = (values.deviceHasStorage ?? "").trim();
+    if (storage === "has_storage") {
+      const wipe = (values.hostDataWipeStatus ?? "").trim();
+      if (
+        wipe !== "wiped_before_list" &&
+        wipe !== "wipe_at_handoff" &&
+        wipe !== "renter_responsible"
+      ) {
+        return false;
+      }
+    }
   }
 
   return true;
