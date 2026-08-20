@@ -1810,7 +1810,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: ["Tents", "Sleeping Bags", "Expedition Tents"],
+        subcategories: ["Tents", "Sleeping Bags", "Expedition Tents", "Group Shelters"],
         options: ["required", "not_required"],
       },
       {
@@ -1818,7 +1818,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: ["Tents", "Sleeping Bags", "Expedition Tents"],
+        subcategories: ["Tents", "Sleeping Bags", "Expedition Tents", "Group Shelters"],
         options: ["attested", "need_to_clean"],
       },
       {
@@ -1827,7 +1827,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         required: false,
         recommended: true,
         requiredIf: "rent",
-        subcategories: ["Tents", "Sleeping Bags", "Expedition Tents"],
+        subcategories: ["Tents", "Sleeping Bags", "Expedition Tents", "Group Shelters"],
       },
       {
         key: "sleepingBagTempBand",
@@ -1843,6 +1843,80 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         subcategories: ["Camp Cooking"],
         options: ["isobutane", "white_gas", "propane", "alcohol", "wood", "electric", "multi_fuel"],
       },
+
+      {
+        key: "tentPoleType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Tents", "Expedition Tents", "Group Shelters"],
+        options: ["aluminum_poles", "fiberglass_poles", "inflatable_beam", "pole_free_tarp", "unknown_poles"],
+      },
+      {
+        key: "backpackVolumeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Backpacks"],
+        options: ["under_30l", "30_50l", "50_70l", "70l_plus", "daypack_unknown"],
+      },
+      {
+        key: "backpackFrameType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Backpacks"],
+        options: ["internal_frame", "external_frame", "frameless", "hydration_daypack", "unknown_frame"],
+      },
+      {
+        key: "navDeviceType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Navigation & GPS", "Professional Navigation"],
+        options: ["handheld_gps", "watch_gps", "satellite_messenger", "compass_map_kit", "inreach_style", "other_nav"],
+      },
+      {
+        key: "navBatteryPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Navigation & GPS", "Professional Navigation"],
+        options: ["batteries_included", "rechargeable_return_charged", "renter_provides_batteries", "not_battery_nav"],
+      },
+      {
+        key: "survivalKitClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Survival Gear"],
+        options: ["first_aid_only", "fire_water_kit", "full_survival_kit", "signaling_only", "other_survival"],
+      },
+      {
+        key: "baseCampKitBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Base Camp Equipment"],
+        options: ["shelter_only", "kitchen_module", "furniture_module", "full_base_camp", "other_base_camp"],
+      },
+      {
+        key: "outdoorOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: ["kind_tent", "kind_sleep", "kind_pack", "kind_cook", "kind_nav", "kind_survival_base", "kind_mixed_outdoor"],
+      },
+      {
+        key: "kitInventoryChecklist",
+        type: "text",
+        required: false,
+        requiredIf: "rent",
+        recommended: true,
+        subcategories: ["Backpacks", "Camp Cooking", "Navigation & GPS", "Survival Gear", "Group Shelters", "Base Camp Equipment", "Other", "Professional Navigation"],
+      },
+
     ],
   },
   {
@@ -5966,16 +6040,58 @@ export function areCategorySpecsValid(
     }
   }
 
-  // Outdoor hygiene: tents / sleeping bags must be marked sanitized.
+  // Outdoor & Camping P0 gates by shelf.
   if (category.trim() === "Outdoor & Camping" && modes?.rent) {
-    const sub = subcategory.trim().toLowerCase();
+    const sub = subcategory.trim();
+    const subLc = sub.toLowerCase();
+    const reqSelect = (key: string, allowed: string[]) => allowed.includes((values[key] ?? "").trim());
+    const reqText = (key: string, min = 3) => (values[key] ?? "").trim().length >= min;
+
+    if (!reqSelect("personCapacityBand", ["1_person","2_person","3_4_person","5_6_person","7_plus_person","group_shelter"])) return false;
+    if (!reqSelect("seasonRating", ["1_season","2_season","3_season","4_season","not_applicable"])) return false;
+
     const needsHygiene =
-      sub === "tents" ||
-      sub === "sleeping bags" ||
-      sub === "expedition tents" ||
+      subLc === "tents" ||
+      subLc === "sleeping bags" ||
+      subLc === "expedition tents" ||
+      subLc === "group shelters" ||
       (values.hygieneChecklistRequired ?? "").trim() === "required";
-    if (needsHygiene && (values.hygieneChecklistRequired ?? "").trim() !== "not_required") {
-      if ((values.hygieneSanitizedAttested ?? "").trim() !== "attested") return false;
+    if (needsHygiene) {
+      if ((values.hygieneChecklistRequired ?? "").trim() === "required" || ["tents","sleeping bags","expedition tents","group shelters"].includes(subLc)) {
+        if ((values.hygieneSanitizedAttested ?? "").trim() !== "attested") return false;
+      }
+    }
+
+    if (sub === "Tents" || sub === "Expedition Tents" || sub === "Group Shelters") {
+      if (!reqSelect("tentPoleType", ["aluminum_poles","fiberglass_poles","inflatable_beam","pole_free_tarp","unknown_poles"])) return false;
+    }
+    if (sub === "Sleeping Bags") {
+      if (!reqSelect("sleepingBagTempBand", ["above_50f","32_50f","15_32f","0_15f","below_0f"])) return false;
+    }
+    if (sub === "Backpacks") {
+      if (!reqSelect("backpackVolumeBand", ["under_30l","30_50l","50_70l","70l_plus","daypack_unknown"])) return false;
+      if (!reqSelect("backpackFrameType", ["internal_frame","external_frame","frameless","hydration_daypack","unknown_frame"])) return false;
+    }
+    if (sub === "Camp Cooking") {
+      if (!reqSelect("stoveFuelType", ["isobutane","white_gas","propane","alcohol","wood","electric","multi_fuel"])) return false;
+    }
+    if (sub === "Navigation & GPS" || sub === "Professional Navigation") {
+      if (!reqSelect("navDeviceType", ["handheld_gps","watch_gps","satellite_messenger","compass_map_kit","inreach_style","other_nav"])) return false;
+      if (!reqSelect("navBatteryPolicy", ["batteries_included","rechargeable_return_charged","renter_provides_batteries","not_battery_nav"])) return false;
+    }
+    if (sub === "Survival Gear") {
+      if (!reqSelect("survivalKitClass", ["first_aid_only","fire_water_kit","full_survival_kit","signaling_only","other_survival"])) return false;
+      if (!reqSelect("liabilityWaiverRequired", ["required","not_required"])) return false;
+    }
+    if (sub === "Expedition Tents") {
+      if (!reqSelect("liabilityWaiverRequired", ["required","not_required"])) return false;
+    }
+    if (sub === "Base Camp Equipment") {
+      if (!reqSelect("baseCampKitBand", ["shelter_only","kitchen_module","furniture_module","full_base_camp","other_base_camp"])) return false;
+    }
+    if (sub === "Other") {
+      if (!reqSelect("outdoorOtherKind", ["kind_tent","kind_sleep","kind_pack","kind_cook","kind_nav","kind_survival_base","kind_mixed_outdoor"])) return false;
+      if (!reqText("kitInventoryChecklist", 6)) return false;
     }
   }
 

@@ -98,4 +98,15 @@ All listing `categorySpecs` select **values** share **one flat** `listing.catego
 | Deposit | Physical damage + missing kit — not cyber insurance |
 | FactCards | Per-sub Q→A; subcategory already wired on listing/booking |
 
+### Outdoor & Camping (~8.0) — shipped pattern
+
+| Layer | Pattern |
+|-------|---------|
+| All | `personCapacityBand` + `seasonRating` |
+| Shelter/sleep | Hygiene attest on tents/bags/expedition/group shelters; tent pole type |
+| Packs | Volume + frame |
+| Cook/nav | Stove fuel; nav device + battery policy |
+| Survival/base | Kit class + waiver; base-camp band |
+| FactCards | Already per-sub Q→A — wire `subcategory` on listing/booking |
+
 See also: [EVORIOS.md](./EVORIOS.md) (brand / product source of truth).

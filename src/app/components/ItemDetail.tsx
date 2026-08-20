@@ -597,7 +597,11 @@ export function ItemDetail({
               <CategoryFactCard category="Sports & Recreation" className="mt-3" />
             ) : null}
             {listing.modes.rent && listing.category.trim() === "Outdoor & Camping" ? (
-              <CategoryFactCard category="Outdoor & Camping" className="mt-3" />
+              <CategoryFactCard
+                category="Outdoor & Camping"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
             ) : null}
             {listing.modes.rent && listing.category.trim() === "Bikes & Scooters" ? (
               <CategoryFactCard category="Bikes & Scooters" className="mt-3" />
