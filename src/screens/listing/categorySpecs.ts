@@ -5333,6 +5333,54 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
       { key: "craneOperatorMode", type: "select", required: true, requiredIf: "rent", subcategories: ["Crane & Lifting"], options: ["bare_rental", "operator_included", "operator_optional"] },
       { key: "kitInventoryChecklist", type: "text", required: true, requiredIf: "rent", subcategories: ["Formwork Basic", "Professional Formwork"] },
       { key: "formworkPieceCountBand", type: "select", required: true, requiredIf: "rent", subcategories: ["Formwork Basic", "Professional Formwork"], options: ["under_10_pieces", "10_25_pieces", "25_50_pieces", "50_100_pieces", "100_plus_pieces"] },
+      {
+        key: "handToolsProClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Hand Tools Pro"],
+        options: [
+          "const_hand_striking",
+          "const_hand_cutting",
+          "const_hand_measuring",
+          "const_hand_fastening",
+          "const_hand_mixed",
+          "const_hand_other",
+        ],
+      },
+      {
+        key: "structuralEquipmentClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Structural Equipment"],
+        options: [
+          "const_struct_shoring",
+          "const_struct_scaffolding_related",
+          "const_struct_beams",
+          "const_struct_mixed",
+          "const_struct_other",
+        ],
+      },
+      {
+        key: "constructionOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: [
+          "const_kind_mixer",
+          "const_kind_safety",
+          "const_kind_lighting",
+          "const_kind_hand",
+          "const_kind_formwork",
+          "const_kind_concrete",
+          "const_kind_crane",
+          "const_kind_excavation",
+          "const_kind_structural",
+          "const_kind_mixed",
+        ],
+      },
       { key: "insuranceMinLiability", type: "select", required: true, requiredIf: "rent", options: ["liability_25_50", "liability_50_100", "liability_100_300", "liability_250_500"] },
       { key: "insuranceMaxDeductible", type: "select", required: true, requiredIf: "rent", options: ["deductible_500", "deductible_1000", "deductible_2500", "full_coverage_required"] },
     ],
@@ -7586,6 +7634,43 @@ export function areCategorySpecsValid(
       subcategory.trim() === "Professional Formwork")
   ) {
     if (!(values.kitInventoryChecklist ?? "").trim()) return false;
+  }
+
+  if (category.trim() === "Construction" && modes?.rent) {
+    const sub = subcategory.trim();
+    if (sub === "Hand Tools Pro") {
+      if (![
+        "const_hand_striking",
+        "const_hand_cutting",
+        "const_hand_measuring",
+        "const_hand_fastening",
+        "const_hand_mixed",
+        "const_hand_other",
+      ].includes((values.handToolsProClass ?? "").trim())) return false;
+    }
+    if (sub === "Structural Equipment") {
+      if (![
+        "const_struct_shoring",
+        "const_struct_scaffolding_related",
+        "const_struct_beams",
+        "const_struct_mixed",
+        "const_struct_other",
+      ].includes((values.structuralEquipmentClass ?? "").trim())) return false;
+    }
+    if (sub === "Other") {
+      if (![
+        "const_kind_mixer",
+        "const_kind_safety",
+        "const_kind_lighting",
+        "const_kind_hand",
+        "const_kind_formwork",
+        "const_kind_concrete",
+        "const_kind_crane",
+        "const_kind_excavation",
+        "const_kind_structural",
+        "const_kind_mixed",
+      ].includes((values.constructionOtherKind ?? "").trim())) return false;
+    }
   }
 
 

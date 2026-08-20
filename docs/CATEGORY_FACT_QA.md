@@ -219,4 +219,21 @@ Profile + per-sub FactCards + subcategory wiring already shipped (`bfb116d`). Ge
 
 **Option scoping:** prefix `boats_*` on new option ids.
 
+### Construction (~8.0) — shipped pattern
+
+| Layer | Pattern |
+|-------|---------|
+| All | Duty class + insurance liability/deductible |
+| Powered shelves | Power + fuel (+ hours recommended) on Mixers, Lighting, Large Concrete, Crane, Excavation |
+| Safety | PPE tier/size/standard/inspection — soft vs fall rules preserved |
+| Formwork | Piece-count band + kit inventory checklist |
+| Crane | Capacity tons + operator mode |
+| Hand Tools Pro | `handToolsProClass` |
+| Structural | `structuralEquipmentClass` |
+| Other | `constructionOtherKind` — prefer named shelf |
+| Deposit | Deductible-sized hold — not job/injury insurance |
+| FactCards | Per-sub Q→A EN/CS/ES; subcategory already wired on listing/booking |
+
+**Option scoping:** prefix `const_*` on new option ids.
+
 See also: [EVORIOS.md](./EVORIOS.md) (brand / product source of truth).

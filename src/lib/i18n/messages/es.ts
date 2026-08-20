@@ -2594,6 +2594,9 @@ export const es: AppMessages = {
         scooterClass: { label: "Clase de scooter", hint: "Kick, standup e-scooter, seated u otro — obligatorio en estantes scooter." },
         bikesOtherKind: { label: "Qué tipo de bici / scooter", hint: "Reubica a un estante Bikes con nombre cuando quepa." },
         boatsOtherKind: { label: "Qué tipo de embarcación", hint: "Reubica a un estante Boats con nombre cuando quepa." },
+        handToolsProClass: { label: "Clase de herramientas pro" },
+        structuralEquipmentClass: { label: "Clase de equipo estructural" },
+        constructionOtherKind: { label: "Qué tipo de equipo de construction", hint: "Reubica a un estante Construction con nombre cuando quepa." },
 },
       options: {
         cordless: "Inalámbrico / batería",
@@ -4999,6 +5002,29 @@ export const es: AppMessages = {
         boats_kind_charter: "Relacionado charter",
         boats_kind_commercial: "Relacionado pesca comercial",
         boats_kind_mixed: "Embarcaciones mixtas",
+
+        // Construction ~8.0 options
+        const_hand_striking: "Golpeo / demo manuales",
+        const_hand_cutting: "Corte / sierra manual",
+        const_hand_measuring: "Medición / layout",
+        const_hand_fastening: "Fijación / prensas",
+        const_hand_mixed: "Kit mixto de herramientas pro",
+        const_hand_other: "Otras herramientas pro",
+        const_struct_shoring: "Apuntalamiento / arriostramiento",
+        const_struct_scaffolding_related: "Relacionado andamio",
+        const_struct_beams: "Vigas / strongbacks",
+        const_struct_mixed: "Estructural mixto",
+        const_struct_other: "Otro estructural",
+        const_kind_mixer: "Relacionado hormigonera",
+        const_kind_safety: "Relacionado safety / PPE",
+        const_kind_lighting: "Relacionado iluminación",
+        const_kind_hand: "Relacionado herramientas",
+        const_kind_formwork: "Relacionado encofrado",
+        const_kind_concrete: "Relacionado concreto grande",
+        const_kind_crane: "Relacionado grúa / izaje",
+        const_kind_excavation: "Relacionado excavación",
+        const_kind_structural: "Relacionado estructural",
+        const_kind_mixed: "Construction mixto",
         veh_special_emergency: "Emergencia / respuesta",
         veh_special_other: "Otro especial",
         veh_special_show: "Show / desfile",
@@ -8761,6 +8787,121 @@ export const es: AppMessages = {
 },
 
 
+
+      Construction: {
+        "Concrete Mixers": {
+          title: "Hormigoneras — potencia + duty",
+          summary: "Duty, potencia/combustible y seguro para hormigoneras.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Duty class, power band, fuel type y bandas de seguro." },
+            { q: "¿Horas?", a: "Hours band es recomendado para conocer el desgaste antes del handoff." },
+            { q: "¿Depósito?", a: "Coincide con el deducible — no seguro de obra de concreto." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de patio de equipos." },
+          ],
+        },
+        "Safety Equipment": {
+          title: "PPE — nivel + inspección",
+          summary: "Nivel de riesgo PPE, talla, norma y estado de inspección.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "PPE risk tier (soft / fall / mixed), talla, norma e inspection status." },
+            { q: "¿Fall protection?", a: "Kits fall o mixed exigen norma y inspected_current o tag_visible." },
+            { q: "¿Soft PPE?", a: "Soft PPE puede usar not_required_soft_ppe — aún publica talla y tier." },
+            { q: "¿Depósito?", a: "Cubre PPE faltante/dañado — no seguro de lesión." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de distribuidor PPE." },
+          ],
+        },
+        "Site Lighting": {
+          title: "Iluminación de obra — potencia + combustible",
+          summary: "Duty, potencia/combustible y seguro para luces temporales.",
+          qa: [
+            { q: "¿Qué debe listarse?", a: "Duty class, power band, fuel type y seguro." },
+            { q: "¿Depósito?", a: "Cubre daño de luces/torres — no seguro de retraso de obra." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de alquiler de iluminación." },
+            { q: "¿Horas?", a: "Hours band es recomendado para generadores / light towers." },
+          ],
+        },
+        "Hand Tools Pro": {
+          title: "Herramientas pro — class + duty",
+          summary: "Clase de herramientas de mano pro y duty con seguro.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Hand-tools pro class, duty class y seguro." },
+            { q: "¿Inventario?", a: "Lista sets multipieza en notas o checklist para reclamar faltantes." },
+            { q: "¿Depósito?", a: "Cubre herramientas faltantes y daño — no seguro de lesión." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de tool-truck." },
+          ],
+        },
+        "Formwork Basic": {
+          title: "Encofrado basic — piezas + checklist",
+          summary: "Banda de piezas y checklist de kit.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Banda de piezas, checklist, duty class y seguro." },
+            { q: "¿Devolución?", a: "Cuenta piezas contra el checklist congelado al handoff y retorno." },
+            { q: "¿Depósito?", a: "Cubre paneles/puntales faltantes — no seguro de falla de vaciado." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de proveedor de encofrado." },
+          ],
+        },
+        "Large Concrete Equipment": {
+          title: "Concreto grande — potencia + duty",
+          summary: "Potencia/combustible y duty para equipo grande de concreto.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Duty class, power band, fuel type y seguro." },
+            { q: "¿Operador?", a: "Publica si el operador está incluido en notas cuando aplique." },
+            { q: "¿Depósito?", a: "Coincide con el deducible — no seguro de retraso de proyecto." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de alquiler de concreto pesado." },
+          ],
+        },
+        "Crane & Lifting": {
+          title: "Grúa y izaje — capacidad + operador",
+          summary: "Capacidad en toneladas y modo de operador con seguro.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Banda de toneladas, operator mode, potencia/combustible, duty y seguro." },
+            { q: "¿Operador incluido?", a: "Bare rental vs operator included/optional se congela antes de publicar." },
+            { q: "¿Credenciales?", a: "Trabajos crane-class pueden exigir prueba de operador antes del handoff." },
+            { q: "¿Depósito?", a: "Coincide con el deducible — no seguro de falla de izaje." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de broker de grúas." },
+          ],
+        },
+        "Professional Formwork": {
+          title: "Encofrado pro — piezas + checklist",
+          summary: "Mismas puertas de formwork que basic a escala pro.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Banda de piezas, checklist, duty class y seguro." },
+            { q: "¿Devolución?", a: "Cuenta cada panel/puntal contra el checklist congelado." },
+            { q: "¿Depósito?", a: "Cubre piezas faltantes según la lista." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de patio de encofrado." },
+          ],
+        },
+        "Excavation Tools": {
+          title: "Excavación — potencia + duty",
+          summary: "Potencia/combustible y duty para herramientas de excavación.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Duty class, power band, fuel type y seguro." },
+            { q: "¿Depósito?", a: "Coincide con el deducible — no seguro de golpe a utilidades." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de alquiler de excavación." },
+            { q: "¿Horas?", a: "Hours band es recomendado para herramientas motorizadas." },
+          ],
+        },
+        "Structural Equipment": {
+          title: "Estructural — class + duty",
+          summary: "Clase de equipo estructural y duty con seguro.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Structural equipment class, duty class y seguro." },
+            { q: "¿Depósito?", a: "Cubre daño y piezas faltantes — no seguro de falla estructural." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de proveedor de apuntalamiento." },
+            { q: "¿Reubicar?", a: "Grúas reales van a Crane & Lifting; encofrado a Formwork." },
+          ],
+        },
+        Other: {
+          title: "Otro construction — elige estante con nombre",
+          summary: "Prefiere Mixers, Safety, Lighting, Hand Tools, Formwork, Concrete, Crane, Excavation o Structural.",
+          qa: [
+            { q: "¿Debo usar Other?", a: "Reubica cuando un estante Construction con nombre encaje para aplicar PPE, formwork o grúa." },
+            { q: "¿Qué sigue aplicando?", a: "Duty class, seguro y constructionOtherKind aún se congelan en rent." },
+            { q: "¿Depósito?", a: "Coincide con el deducible — no seguro de obra." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de patio de equipos." },
+          ],
+        },
+      },
       "Boats & Water": {
         "Kayaks & Canoes": {
           title: "Kayaks y canoas — PFD + eslora",

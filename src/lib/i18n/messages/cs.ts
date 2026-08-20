@@ -2606,6 +2606,9 @@ export const cs: AppMessages = {
         scooterClass: { label: "Třída koloběžky", hint: "Kick, standup e-scooter, seated nebo jiné — povinné u scooter polic." },
         bikesOtherKind: { label: "Jaký druh kola / koloběžky", hint: "Přesuňte na pojmenovanou Bikes polici, když sedí." },
         boatsOtherKind: { label: "Jaký druh plavidla", hint: "Přesuňte na pojmenovanou Boats polici, když sedí." },
+        handToolsProClass: { label: "Třída pro ručního nářadí" },
+        structuralEquipmentClass: { label: "Třída konstrukčního vybavení" },
+        constructionOtherKind: { label: "Jaký druh construction vybavení", hint: "Přesuňte na pojmenovanou Construction polici, když sedí." },
 },
       options: {
         cordless: "Aku / baterie",
@@ -5011,6 +5014,29 @@ export const cs: AppMessages = {
         boats_kind_charter: "Charter",
         boats_kind_commercial: "Komerční rybolov",
         boats_kind_mixed: "Smíšená plavidla",
+
+        // Construction ~8.0 options
+        const_hand_striking: "Úderové / demo ruční nářadí",
+        const_hand_cutting: "Řezací ruční nářadí",
+        const_hand_measuring: "Měření / layout",
+        const_hand_fastening: "Upevnění / svěrky",
+        const_hand_mixed: "Smíšená pro sada ručního nářadí",
+        const_hand_other: "Jiné pro ruční nářadí",
+        const_struct_shoring: "Pažení / ztužení",
+        const_struct_scaffolding_related: "Související s lešením",
+        const_struct_beams: "Nosníky / strongbacks",
+        const_struct_mixed: "Smíšené konstrukční",
+        const_struct_other: "Jiné konstrukční",
+        const_kind_mixer: "Míchačky",
+        const_kind_safety: "Safety / PPE",
+        const_kind_lighting: "Staveništní světla",
+        const_kind_hand: "Ruční nářadí",
+        const_kind_formwork: "Bednění",
+        const_kind_concrete: "Velká betonářská technika",
+        const_kind_crane: "Jeřáb / zdvih",
+        const_kind_excavation: "Výkop",
+        const_kind_structural: "Konstrukční",
+        const_kind_mixed: "Smíšené construction",
         veh_special_emergency: "Emergency / zásah",
         veh_special_other: "Jiné special",
         veh_special_show: "Show / paráda",
@@ -8770,6 +8796,121 @@ export const cs: AppMessages = {
 },
 
 
+
+      Construction: {
+        "Concrete Mixers": {
+          title: "Míchačky — výkon + duty",
+          summary: "Duty class, výkon/palivo a pojištění u míchaček.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Duty class, power band, fuel type a pojišťovací pásma." },
+            { q: "Motohodiny?", a: "Hours band je doporučený, aby nájemce znal opotřebení před předáním." },
+            { q: "Kauce?", a: "Odpovídá pásmu spoluúčasti — ne pojištění betonářské zakázky." },
+            { q: "Partner promo?", a: "Žádný hard-sell půjčovny techniky." },
+          ],
+        },
+        "Safety Equipment": {
+          title: "PPE — tier + kontrola",
+          summary: "PPE risk tier, velikost, norma a stav kontroly.",
+          qa: [
+            { q: "Jaké brány platí?", a: "PPE risk tier (soft / fall / mixed), velikost, norma a inspection status." },
+            { q: "Fall protection?", a: "Fall nebo mixed kit vyžaduje normu a inspected_current nebo tag_visible." },
+            { q: "Soft PPE?", a: "Soft PPE může mít not_required_soft_ppe — stále zveřejněte velikost a tier." },
+            { q: "Kauce?", a: "Kryje chybějící/poškozené PPE — ne pojištění úrazu." },
+            { q: "Partner promo?", a: "Žádný hard-sell distributora PPE." },
+          ],
+        },
+        "Site Lighting": {
+          title: "Staveništní světla — výkon + palivo",
+          summary: "Duty, výkon/palivo a pojištění dočasného osvětlení.",
+          qa: [
+            { q: "Co musí být uvedeno?", a: "Duty class, power band, fuel type a pojištění." },
+            { q: "Kauce?", a: "Kryje poškození světel/věží — ne pojištění zpoždění zakázky." },
+            { q: "Partner promo?", a: "Žádný hard-sell půjčovny světel." },
+            { q: "Motohodiny?", a: "Hours band je doporučený u generátorů / light towers." },
+          ],
+        },
+        "Hand Tools Pro": {
+          title: "Pro ruční nářadí — class + duty",
+          summary: "Třída pro ručního nářadí a duty s pojištěním.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Hand-tools pro class, duty class a pojištění." },
+            { q: "Inventář?", a: "U vícedílných sad uveďte checklist, aby šly uplatnit chybějící kusy." },
+            { q: "Kauce?", a: "Kryje chybějící nářadí a poškození — ne pojištění úrazu." },
+            { q: "Partner promo?", a: "Žádný hard-sell tool-trucku." },
+          ],
+        },
+        "Formwork Basic": {
+          title: "Bednění basic — počet + checklist",
+          summary: "Pásmo počtu kusů a kit inventory checklist.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Počet kusů bednění, checklist, duty class a pojištění." },
+            { q: "Vrácení?", a: "Počítejte kusy podle zamrazeného checklistu při předání i návratu." },
+            { q: "Kauce?", a: "Kryje chybějící panely/podpěry — ne pojištění neúspěšné betonáže." },
+            { q: "Partner promo?", a: "Žádný hard-sell dodavatele bednění." },
+          ],
+        },
+        "Large Concrete Equipment": {
+          title: "Velká betonářská technika — výkon + duty",
+          summary: "Výkon/palivo a duty u velké betonářské techniky.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Duty class, power band, fuel type a pojištění." },
+            { q: "Operátor?", a: "Uveďte v poznámkách, zda je operátor v ceně, pokud je to relevantní." },
+            { q: "Kauce?", a: "Odpovídá pásmu spoluúčasti — ne pojištění zpoždění projektu." },
+            { q: "Partner promo?", a: "Žádný hard-sell půjčovny těžké betonářské techniky." },
+          ],
+        },
+        "Crane & Lifting": {
+          title: "Jeřáb & zdvih — kapacita + operátor",
+          summary: "Kapacita v tunách a režim operátora s pojištěním.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Kapacita tun, operator mode, výkon/palivo, duty a pojištění." },
+            { q: "Operátor v ceně?", a: "Bare rental vs operator included/optional se zamrazí před publish." },
+            { q: "Oprávnění?", a: "Crane-class zakázky mohou vyžadovat doklad operátora před odemčením handoff." },
+            { q: "Kauce?", a: "Odpovídá pásmu spoluúčasti — ne pojištění selhání zdvihu." },
+            { q: "Partner promo?", a: "Žádný hard-sell crane brokera." },
+          ],
+        },
+        "Professional Formwork": {
+          title: "Pro bednění — počet + checklist",
+          summary: "Stejné formwork brány jako basic v pro měřítku.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Počet kusů, checklist, duty class a pojištění." },
+            { q: "Vrácení?", a: "Počítejte každý panel/podpěru podle checklistu." },
+            { q: "Kauce?", a: "Kryje chybějící kusy podle seznamu." },
+            { q: "Partner promo?", a: "Žádný hard-sell formwork yardu." },
+          ],
+        },
+        "Excavation Tools": {
+          title: "Výkopové nářadí — výkon + duty",
+          summary: "Výkon/palivo a duty u výkopového nářadí.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Duty class, power band, fuel type a pojištění." },
+            { q: "Kauce?", a: "Odpovídá pásmu spoluúčasti — ne pojištění zásahu do sítí." },
+            { q: "Partner promo?", a: "Žádný hard-sell půjčovny výkopové techniky." },
+            { q: "Motohodiny?", a: "Hours band je doporučený u motorového výkopového nářadí." },
+          ],
+        },
+        "Structural Equipment": {
+          title: "Konstrukční vybavení — class + duty",
+          summary: "Třída konstrukčního vybavení a duty s pojištěním.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Structural equipment class, duty class a pojištění." },
+            { q: "Kauce?", a: "Kryje poškození a chybějící kusy — ne pojištění selhání konstrukce." },
+            { q: "Partner promo?", a: "Žádný hard-sell dodavatele pažení." },
+            { q: "Přesun police?", a: "Skutečné jeřáby patří na Crane & Lifting; bednění na Formwork." },
+          ],
+        },
+        Other: {
+          title: "Ostatní construction — nejdřív pojmenovaná police",
+          summary: "Preferujte Mixers, Safety, Lighting, Hand Tools, Formwork, Concrete, Crane, Excavation nebo Structural.",
+          qa: [
+            { q: "Mám použít Other?", a: "Přesuňte na pojmenovanou Construction polici, kdykoli sedí, aby platily PPE, formwork nebo crane brány." },
+            { q: "Co stále platí?", a: "Duty class, pojištění a constructionOtherKind stále zamrznou u rent." },
+            { q: "Kauce?", a: "Odpovídá pásmu spoluúčasti — ne pojištění zakázky." },
+            { q: "Partner promo?", a: "Žádný hard-sell půjčovny techniky." },
+          ],
+        },
+      },
       "Boats & Water": {
         "Kayaks & Canoes": {
           title: "Kajaky a kánoe — PFD + délka",
