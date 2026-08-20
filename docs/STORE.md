@@ -46,6 +46,19 @@ npm run cap:ios      # Xcode → Product → Archive
 npm run cap:android  # Android Studio → Bundle / APK
 ```
 
+## Xcode Cloud (Apple CI)
+
+iOS uses Capacitor **SPM** (`ios/App/CapApp-SPM/Package.swift`). Plugin packages are **local path** dependencies under `node_modules/@capacitor/*` (and related plugins). Xcode Cloud clones git only — it does **not** install npm deps unless you tell it to.
+
+**Required before `xcodebuild` / SPM resolve:**
+
+1. `npm ci` at the repo root (creates those `node_modules` paths)
+2. `CAPACITOR_BUILD=1 npm run build` + `npx cap sync ios` (web assets under `ios/App/App/public` are gitignored)
+
+This is wired in [`ios/App/ci_scripts/ci_post_clone.sh`](../ios/App/ci_scripts/ci_post_clone.sh), which Xcode Cloud runs after clone and **before** resolving Swift packages. Keep that script executable (`chmod +x`).
+
+Optional: set the same `VITE_*` secrets you use on Vercel in the Xcode Cloud workflow environment so the bundled WebView has production client config.
+
 Regenerate icons after changing `resources/icon.png` / `resources/splash.png`:
 
 ```bash
