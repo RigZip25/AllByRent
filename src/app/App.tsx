@@ -2118,7 +2118,6 @@ function AppRoutes() {
             onRentals={handleOpenRentals}
             onEditLocation={openRentLocationSetup}
             onOpenNotifications={handleOpenNotifications}
-            onDeleteAccount={() => navigateTo("deleteAccount")}
             onOpenCoHosts={() => navigateTo("coHosts")}
             onOpenPersonalInfo={handleOpenPersonalInfo}
             onOpenIdentity={() => navigateTo("identity")}
@@ -2151,6 +2150,7 @@ function AppRoutes() {
         {currentScreen === "personalInfo" && (
           <PersonalInfoScreen
             initialEdit={personalInfoInitialEdit}
+            onDeleteAccount={() => navigateTo("deleteAccount")}
             onBack={() => {
               setPersonalInfoInitialEdit(undefined);
               handleBack();

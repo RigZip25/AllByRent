@@ -430,6 +430,8 @@ export const es: AppMessages = {
     phoneVerifiedShort: "Verificado",
     phoneVerifyNeeded: "Verifica para cobrar",
     personalInfo: "Datos personales",
+    settings: "Ajustes",
+    settingsHint: "Correo, teléfono y cuenta",
     coHosts: "Coanfitriones",
     coHostsHint: "Invita a ayudantes para tus anuncios",
     payouts: "Cobros",
@@ -6522,7 +6524,7 @@ export const es: AppMessages = {
   },
   profileDeep: {
     personalInfo: {
-      title: "Datos personales",
+      title: "Ajustes",
       subtitle:
         "El correo es tu dirección de acceso. El nombre y el teléfono aparecen en tu perfil y tus alquileres.",
       email: "Correo",
@@ -6606,7 +6608,15 @@ export const es: AppMessages = {
     },
     deleteAccount: {
       title: "Eliminar cuenta",
-      body: "Esto elimina permanentemente tu cuenta de autenticación de Supabase y borra los datos locales de la app en este dispositivo. Los alquileres y anuncios activos pueden necesitar revisión manual en el servidor.",
+      body: "Esto elimina permanentemente tu cuenta y borra los datos locales de la app en este dispositivo.",
+      confirmTitle: "¿Seguro que quieres eliminar la cuenta?",
+      confirmCancel: "Cancelar",
+      confirmCta: "Confirmar",
+      successTitle: "Cuenta eliminada",
+      successBody: "Tu cuenta se eliminó permanentemente en este dispositivo.",
+      successDone: "Listo",
+      activeListingsBlock:
+        "Todavía tienes anuncios activos. Elimina todos los anuncios primero y vuelve a intentarlo.",
       reauthBusy: "Abriendo passkey...",
       reauthCta: "Reautenticar con passkey",
       deleteBusy: "Eliminando...",

@@ -7,6 +7,7 @@ import {
   HelpCircle,
   LogOut,
   MapPin,
+  Settings,
   Shield,
   Sparkles,
   Star,
@@ -28,7 +29,6 @@ import {
 import { getAppMode, type AppMode } from "../lib/appMode";
 import {
   getProfileDisplayLabel,
-  getProfileEmailLabel,
   getProfileLocationSummary,
   applyReviewStatsToProfile,
   loadUserProfile,
@@ -156,7 +156,6 @@ export function ProfileScreen({
   onOpenPersonalInfo,
   onOpenIdentity,
   onOpenAgentActivity: _onOpenAgentActivity,
-  onDeleteAccount,
   onViewPublicProfile,
   onRequireAuth,
   onPreferredModeChange,
@@ -169,7 +168,6 @@ export function ProfileScreen({
   onOpenPersonalInfo?: (field?: "name" | "phone") => void;
   onOpenIdentity?: () => void;
   onOpenAgentActivity?: () => void;
-  onDeleteAccount?: () => void;
   onViewPublicProfile?: (userId?: string) => void;
   onRequireAuth?: () => void;
   onPreferredModeChange?: (mode: AppMode) => void;
@@ -197,7 +195,6 @@ export function ProfileScreen({
   const authPromptedRef = useRef(false);
 
   const displayNameLabel = getProfileDisplayLabel(profile.displayName);
-  const emailLabel = getProfileEmailLabel(profile.email, auth.userEmail);
 
   useEffect(() => {
     if (!auth.userId) return;
@@ -503,6 +500,16 @@ export function ProfileScreen({
               onClick={handleEditName}
             />
           </li>
+          {onOpenPersonalInfo ? (
+            <li>
+              <RowButton
+                icon={<Settings className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+                label={profileCopy.settings}
+                value={profileCopy.settingsHint}
+                onClick={() => onOpenPersonalInfo()}
+              />
+            </li>
+          ) : null}
           <li>
             <RowButton
               icon={<Sparkles className="h-5 w-5" style={{ color: "#F59E0B" }} />}
@@ -515,14 +522,6 @@ export function ProfileScreen({
                   : profileCopy.addPhone
               }
               onClick={handleEditPhone}
-            />
-          </li>
-          <li>
-            <RowButton
-              icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label={profileCopy.personalInfo}
-              value={emailLabel}
-              onClick={() => onOpenPersonalInfo?.()}
             />
           </li>
           {onOpenCoHosts ? (
@@ -722,9 +721,9 @@ export function ProfileScreen({
           </button>
         )}
 
-        {auth.configured && auth.session && onDeleteAccount ? (
-          <div className="mt-3 rounded-2xl border border-red-200 bg-white p-4" style={{ borderColor: "#FECACA" }}>
-            <p className="text-[12px] font-semibold uppercase tracking-wide text-red-500/80">
+        {auth.configured && auth.session ? (
+          <div className="mt-3 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
               {profileCopy.authSection}
             </p>
             <p className="mt-1 text-[13px] text-gray-600">
@@ -732,13 +731,6 @@ export function ProfileScreen({
                 auth.userEmail ?? auth.userId ?? profileCopy.userFallback,
               )}
             </p>
-            <button
-              type="button"
-              onClick={onDeleteAccount}
-              className="mt-3 w-full min-h-[48px] touch-manipulation rounded-xl border border-red-300 bg-red-50 py-2.5 text-center text-[14px] font-bold text-red-700 active:bg-red-100"
-            >
-              {profileCopy.deleteAccount}
-            </button>
           </div>
         ) : auth.configured ? (
           <div className="mt-3 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>

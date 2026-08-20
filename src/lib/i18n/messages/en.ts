@@ -430,6 +430,8 @@ export const en: AppMessages = {
     phoneVerifiedShort: "Verified",
     phoneVerifyNeeded: "Verify to receive payouts",
     personalInfo: "Personal info",
+    settings: "Settings",
+    settingsHint: "Email, phone, and account",
     coHosts: "Co-hosts",
     coHostsHint: "Invite helpers for your listings",
     payouts: "Payouts",
@@ -6540,7 +6542,7 @@ export const en: AppMessages = {
   },
   profileDeep: {
     personalInfo: {
-      title: "Personal info",
+      title: "Settings",
       subtitle:
         "Email is your sign-in address. Name and phone appear on your profile and rentals.",
       email: "Email",
@@ -6624,7 +6626,15 @@ export const en: AppMessages = {
     },
     deleteAccount: {
       title: "Delete account",
-      body: "This permanently deletes your Supabase auth account and clears local app data on this device. Active rentals and listings may still need manual review on the server.",
+      body: "This permanently deletes your account and clears local app data on this device.",
+      confirmTitle: "Are you sure you want to delete?",
+      confirmCancel: "Cancel",
+      confirmCta: "Confirm",
+      successTitle: "Account deleted",
+      successBody: "Your account has been permanently deleted on this device.",
+      successDone: "Done",
+      activeListingsBlock:
+        "You still have active listings. Delete all listings first, then try again.",
       reauthBusy: "Opening passkey...",
       reauthCta: "Re-auth with Passkey",
       deleteBusy: "Deleting...",

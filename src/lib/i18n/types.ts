@@ -517,6 +517,8 @@ export type AppMessages = {
     phoneVerifiedShort: string;
     phoneVerifyNeeded: string;
     personalInfo: string;
+    settings: string;
+    settingsHint: string;
     coHosts: string;
     coHostsHint: string;
     payouts: string;
@@ -2375,6 +2377,13 @@ export type AppMessages = {
     deleteAccount: {
       title: string;
       body: string;
+      confirmTitle: string;
+      confirmCancel: string;
+      confirmCta: string;
+      successTitle: string;
+      successBody: string;
+      successDone: string;
+      activeListingsBlock: string;
       reauthBusy: string;
       reauthCta: string;
       deleteBusy: string;

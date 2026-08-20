@@ -77,13 +77,15 @@ function Row({
 
 export function PersonalInfoScreen({
   onBack,
+  onDeleteAccount,
   initialEdit,
 }: {
   onBack: () => void;
+  onDeleteAccount?: () => void;
   initialEdit?: "name" | "phone";
 }) {
   const auth = useAuth();
-  const { common, profileDeep } = useMessages();
+  const { common, profile: profileCopy, profileDeep } = useMessages();
   const t = profileDeep.personalInfo;
   const [profile, setProfile] = useState(() => refreshProfileStats(loadUserProfile(), auth.userId));
   const [editing, setEditing] = useState<EditField>(null);
@@ -194,6 +196,26 @@ export function PersonalInfoScreen({
           onClick={() => setEditing("dob")}
         />
         <p className="px-1 text-[12px] leading-relaxed text-gray-500">{t.dateOfBirthHint}</p>
+
+        {auth.configured && auth.session && onDeleteAccount ? (
+          <div className="mt-6 rounded-2xl border bg-white p-4" style={{ borderColor: "#FECACA" }}>
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-red-500/80">
+              {profileCopy.authSection}
+            </p>
+            <p className="mt-1 text-[13px] text-gray-600">
+              {profileCopy.signedInAs(
+                auth.userEmail ?? auth.userId ?? profileCopy.userFallback,
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={onDeleteAccount}
+              className="mt-3 w-full min-h-[48px] touch-manipulation rounded-xl border border-red-300 bg-red-50 py-2.5 text-center text-[14px] font-bold text-red-700 active:bg-red-100"
+            >
+              {profileCopy.deleteAccount}
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <ProfileFieldEditSheet

@@ -27,6 +27,26 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
+  const { count: activeListingCount, error: listingsError } = await admin
+    .from("listings")
+    .select("id", { count: "exact", head: true })
+    .eq("owner_id", user.id)
+    .in("listing_status", ["active", "pending_qr"]);
+
+  if (listingsError) {
+    res.status(500).json({ ok: false, reason: listingsError.message });
+    return;
+  }
+
+  if ((activeListingCount ?? 0) > 0) {
+    res.status(409).json({
+      ok: false,
+      reason: "active_listings",
+      message: "Delete all your listings first before deleting your account.",
+    });
+    return;
+  }
+
   await admin
     .from("profiles")
     .update({
@@ -46,6 +66,6 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   res.status(200).json({
     ok: true,
-    message: "Your account was permanently deleted.",
+    message: "Account deleted",
   });
 });

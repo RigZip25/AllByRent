@@ -450,6 +450,8 @@ export const cs: AppMessages = {
     phoneVerifiedShort: "Ověřeno",
     phoneVerifyNeeded: "Ověřte pro výplaty",
     personalInfo: "Osobní údaje",
+    settings: "Nastavení",
+    settingsHint: "E-mail, telefon a účet",
     coHosts: "Spoluhostitelé",
     coHostsHint: "Pozvěte pomocníky k vašim nabídkám",
     payouts: "Výplaty",
@@ -6531,7 +6533,7 @@ export const cs: AppMessages = {
   },
   profileDeep: {
     personalInfo: {
-      title: "Osobní údaje",
+      title: "Nastavení",
       subtitle:
         "E-mail je tvoje přihlašovací adresa. Jméno a telefon se zobrazují na profilu a u půjček.",
       email: "E-mail",
@@ -6615,7 +6617,15 @@ export const cs: AppMessages = {
     },
     deleteAccount: {
       title: "Smazat účet",
-      body: "Trvale smaže tvůj účet v Supabase Auth a vymaže místní data aplikace na tomto zařízení. Aktivní půjčky a nabídky mohou na serveru ještě vyžadovat ruční kontrolu.",
+      body: "Trvale smaže tvůj účet a vymaže místní data aplikace na tomto zařízení.",
+      confirmTitle: "Opravdu chceš účet smazat?",
+      confirmCancel: "Zrušit",
+      confirmCta: "Potvrdit",
+      successTitle: "Účet smazán",
+      successBody: "Tvůj účet byl na tomto zařízení trvale smazán.",
+      successDone: "Hotovo",
+      activeListingsBlock:
+        "Ještě máš aktivní nabídky. Nejdřív smaž všechny nabídky a pak to zkus znovu.",
       reauthBusy: "Otevírám passkey...",
       reauthCta: "Znovu ověřit passkey",
       deleteBusy: "Mažu...",
