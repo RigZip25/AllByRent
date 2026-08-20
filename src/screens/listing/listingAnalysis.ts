@@ -1,14 +1,22 @@
 import { postLlmChat, type LlmImagePart } from "../../lib/llmClient";
 import type { MediaRef } from "../../lib/mediaStore";
 import { getMediaBlob } from "../../lib/mediaStore";
+import { getSearchCountryCode } from "../../lib/locationCountry";
+import {
+  buildListingValuePricingInstructions,
+  listingPricingMarket,
+  roundMoneyForSuggestion,
+} from "../../lib/regionalDisplay";
 import type { ListingAiSuggestions } from "./types";
 
-const ANALYSIS_PROMPT_VERSION = "2026-07-09-llm-v1";
+const ANALYSIS_PROMPT_VERSION = "2026-08-20-vehicle-year-color-v1";
 
 const ANALYSIS_SYSTEM_PROMPT =
-  "You are a product identification expert. Analyze product photos and return accurate item details. Always respond in the same language the user's device is set to.";
+  "You are a product identification and local-market pricing expert. Analyze product photos and return accurate item details. Always respond in the same language the user's device is set to. Replacement/estimated values MUST use the marketplace currency given in the user message — never default to USD unless that is the marketplace currency.";
 
-const ANALYSIS_USER_PROMPT = `Analyze these product photos carefully.
+function buildAnalysisUserPrompt(): string {
+  const market = listingPricingMarket();
+  return `Analyze these product photos carefully.
 READ ALL VISIBLE TEXT — brand names, model numbers, size markings, specifications, labels.
 Return ONLY valid JSON, no other text:
 {
@@ -18,17 +26,25 @@ Return ONLY valid JSON, no other text:
   "grade": "personal or professional",
   "condition": "new or like_new or good or fair",
   "description": "2-3 sentences: what it is, key features visible, what's included, ideal use case. Professional tone. Max 300 chars.",
-  "estimatedValue": <current retail price to buy this item NEW today>
+  "estimatedValue": <integer NEW retail price in ${market.currencyCode}>,
+  "estimatedValueCurrency": "${market.currencyCode}",
+  "brand": "Manufacturer brand only (e.g. HP, Sony, Nissan). Empty string if unknown.",
+  "model": "Model / product line without brand or screen size (e.g. OmniBook X, Altima). Empty string if unknown.",
+  "screenInches": <number diagonal inches if a screen is visible/labeled, else omit>,
+  "personCapacity": <integer sleeps/seats when labeled (e.g. 4 for a 4-person tent), else omit>,
+  "seasonRating": <1|2|3|4 when a season rating is labeled on tents/bags, else omit>,
+  "year": <integer model year for vehicles when body style/generation is recognizable — pick best guess or midpoint of the generation range (e.g. current-gen Altima is not 2019); omit if not a vehicle or not confident>,
+  "color": "Dominant exterior/item color key — MUST be exactly one of: black, white, gray, red, blue, green, yellow, pink, purple, orange, brown, multicolor, other_color. Omit if unsure."
 }
-estimatedValue: current retail price to buy this item NEW today. Use MSRP or current Amazon/Home Depot/Best Buy price — not used/secondhand price.
-This is replacement value — what we'd use to size a deposit hold if the item is lost or damaged.
-Always round to nearest $10.
-Examples:
-- ECHO CS-3410 chainsaw → 230 (Home Depot current price)
-- Milwaukee M18 drill kit → 299 (current retail)
-- Panasonic 75 inch TV → 598 (current retail)
-- Beach Cruiser bike → 560 (current retail)
-- REI tent 4-person → 349 (current retail)`;
+
+${buildListingValuePricingInstructions()}
+
+Examples (illustrative — always adapt to the market above):
+- Mid-range cordless drill kit → typical NEW shelf price in ${market.countryLabel} (${market.currencyCode})
+- 4-person camping tent → typical NEW outdoor-store price in ${market.countryLabel}
+- Entry DSLR/mirrorless body → typical NEW electronics price in ${market.countryLabel}
+Do not invent used marketplace prices. Prefer current NEW retail.`;
+}
 
 const CACHE_PREFIX = "allbyrent:listings:ai-analysis:";
 const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
@@ -77,7 +93,8 @@ async function blobHash(blob: Blob): Promise<string> {
 
 function cacheKeyForHashes(hashes: string[]): string {
   const stable = [...hashes].sort();
-  return `${ANALYSIS_PROMPT_VERSION}|${stable.join(",")}`;
+  const market = listingPricingMarket();
+  return `${ANALYSIS_PROMPT_VERSION}|${market.countryCode}|${market.currencyCode}|${stable.join(",")}`;
 }
 
 function getCachedSuggestions(key: string): ListingAiSuggestions | null {
@@ -181,7 +198,33 @@ function parseSuggestions(raw: string): ListingAiSuggestions {
     throw new Error("No JSON in AI response");
   }
 
-  const parsed = JSON.parse(jsonText) as Partial<ListingAiSuggestions>;
+  const parsed = JSON.parse(jsonText) as Partial<ListingAiSuggestions> & {
+    estimatedValueCurrency?: string;
+    screenInches?: number | string;
+    personCapacity?: number | string;
+    seasonRating?: number | string;
+    year?: number | string;
+    yearMin?: number | string;
+    yearMax?: number | string;
+    color?: string;
+  };
+  const market = listingPricingMarket(getSearchCountryCode());
+  const rawValue = Number(parsed.estimatedValue ?? 0);
+  const brand = String(parsed.brand ?? "").trim();
+  const model = String(parsed.model ?? "").trim();
+  const screenRaw = Number(parsed.screenInches);
+  const screenInches =
+    Number.isFinite(screenRaw) && screenRaw > 0 ? screenRaw : undefined;
+  const personRaw = Number(parsed.personCapacity);
+  const personCapacity =
+    Number.isFinite(personRaw) && personRaw > 0 ? Math.round(personRaw) : undefined;
+  const seasonRaw = Number(parsed.seasonRating);
+  const seasonRating =
+    Number.isFinite(seasonRaw) && seasonRaw >= 1 && seasonRaw <= 4
+      ? Math.round(seasonRaw)
+      : undefined;
+  const year = resolveSuggestedYear(parsed);
+  const color = normalizeSuggestedColor(String(parsed.color ?? ""));
   return {
     title: String(parsed.title ?? "").trim(),
     category: String(parsed.category ?? "").trim(),
@@ -189,8 +232,80 @@ function parseSuggestions(raw: string): ListingAiSuggestions {
     grade: normalizeGrade(String(parsed.grade ?? "personal")),
     condition: normalizeCondition(String(parsed.condition ?? "good")),
     description: String(parsed.description ?? "").trim(),
-    estimatedValue: Math.round(Number(parsed.estimatedValue ?? 0) / 10) * 10,
+    estimatedValue: roundMoneyForSuggestion(rawValue),
+    estimatedValueCurrency: market.currencyCode,
+    ...(brand ? { brand } : {}),
+    ...(model ? { model } : {}),
+    ...(screenInches != null ? { screenInches } : {}),
+    ...(personCapacity != null ? { personCapacity } : {}),
+    ...(seasonRating != null ? { seasonRating } : {}),
+    ...(year != null ? { year } : {}),
+    ...(color ? { color } : {}),
   };
+}
+
+const KNOWN_COLOR_KEYS = new Set([
+  "black",
+  "white",
+  "gray",
+  "red",
+  "blue",
+  "green",
+  "yellow",
+  "pink",
+  "purple",
+  "orange",
+  "brown",
+  "multicolor",
+  "other_color",
+]);
+
+const COLOR_ALIASES: Record<string, string> = {
+  grey: "gray",
+  silver: "gray",
+  charcoal: "gray",
+  beige: "brown",
+  tan: "brown",
+  gold: "yellow",
+  navy: "blue",
+  teal: "green",
+  maroon: "red",
+  burgundy: "red",
+  cream: "white",
+  ivory: "white",
+  multi: "multicolor",
+  multicolour: "multicolor",
+  other: "other_color",
+};
+
+function normalizeSuggestedColor(raw: string): string | undefined {
+  const key = raw.trim().toLowerCase().replace(/\s+/g, "_");
+  if (!key) return undefined;
+  const mapped = COLOR_ALIASES[key] ?? key;
+  return KNOWN_COLOR_KEYS.has(mapped) ? mapped : undefined;
+}
+
+function clampModelYear(year: number): number | undefined {
+  const max = new Date().getFullYear() + 1;
+  if (!Number.isFinite(year)) return undefined;
+  const rounded = Math.round(year);
+  if (rounded < 1950 || rounded > max) return undefined;
+  return rounded;
+}
+
+function resolveSuggestedYear(parsed: {
+  year?: number | string;
+  yearMin?: number | string;
+  yearMax?: number | string;
+}): number | undefined {
+  const direct = clampModelYear(Number(parsed.year));
+  if (direct != null) return direct;
+  const min = clampModelYear(Number(parsed.yearMin));
+  const max = clampModelYear(Number(parsed.yearMax));
+  if (min != null && max != null) {
+    return clampModelYear(Math.round((min + max) / 2));
+  }
+  return min ?? max;
 }
 
 async function requestListingAnalysis(imageBlocks: LlmImagePart[]): Promise<ListingAiSuggestions> {
@@ -210,7 +325,7 @@ async function requestListingAnalysis(imageBlocks: LlmImagePart[]): Promise<List
             ...imageBlocks,
             {
               type: "text",
-              text: ANALYSIS_USER_PROMPT,
+              text: buildAnalysisUserPrompt(),
             },
           ],
         },

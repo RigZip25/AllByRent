@@ -1,0 +1,329 @@
+flow	key	kind	english	czech_current	czech_native
+27 · Categories · subcategory	category.Action Cameras	string	Action Cameras	Akční kamery	
+27 · Categories · subcategory	category.Adaptive Bikes	string	Adaptive Bikes	Adaptivní kola	
+27 · Categories · subcategory	category.Air Compressors	string	Air Compressors	Kompresory	
+27 · Categories · subcategory	category.Amplifiers	string	Amplifiers	Zesilovače	
+27 · Categories · subcategory	category.Animatronic Props	string	Animatronic Props	Animatronické rekvizity	
+27 · Categories · subcategory	category.Art & Sculpture	string	Art & Sculpture	Umění a sochy	
+27 · Categories · subcategory	category.ATVs	string	ATVs	Čtyřkolky	
+27 · Categories · subcategory	category.Baby Carriers	string	Baby Carriers	Nosiče dětí	
+27 · Categories · subcategory	category.Backpacks	string	Backpacks	Batohy	
+27 · Categories · subcategory	category.Backyard & Outdoor	string	Backyard & Outdoor	Zahrada a outdoor	
+27 · Categories · subcategory	category.Baking Equipment	string	Baking Equipment	Pečení	
+27 · Categories · subcategory	category.Base Camp Equipment	string	Base Camp Equipment	Základnové vybavení	
+27 · Categories · subcategory	category.Basic Lighting	string	Basic Lighting	Základní osvětlení	
+27 · Categories · subcategory	category.Beverage Systems	string	Beverage Systems	Nápojové systémy	
+27 · Categories · subcategory	category.Blenders & Juicers	string	Blenders & Juicers	Mixéry a odšťavňovače	
+27 · Categories · subcategory	category.Boxing Equipment	string	Boxing Equipment	Boxerské vybavení	
+27 · Categories · subcategory	category.Broadcast Equipment	string	Broadcast Equipment	Vysílací vybavení	
+27 · Categories · subcategory	category.Broadcast Gear	string	Broadcast Gear	Vysílací technika	
+27 · Categories · subcategory	category.Camera Kits	string	Camera Kits	Foto sety	
+27 · Categories · subcategory	category.Camp Cooking	string	Camp Cooking	Kempové vaření	
+27 · Categories · subcategory	category.Car Seats	string	Car Seats	Autosedačky	
+27 · Categories · subcategory	category.Cardio Equipment	string	Cardio Equipment	Kardio vybavení	
+27 · Categories · subcategory	category.Cargo Bikes	string	Cargo Bikes	Nákladní kola	
+27 · Categories · subcategory	category.Cargo Vans	string	Cargo Vans	Dodávky	
+27 · Categories · subcategory	category.Cars & Trucks	string	Cars & Trucks	Auta a náklaďáky	
+27 · Categories · subcategory	category.Catering Equipment	string	Catering Equipment	Cateringové vybavení	
+27 · Categories · subcategory	category.Character Costumes	string	Character Costumes	Kostýmy postav	
+27 · Categories · subcategory	category.Charter Vessels	string	Charter Vessels	Charterové lodě	
+27 · Categories · subcategory	category.Childcare Equipment	string	Childcare Equipment	Vybavení pro péči o děti	
+27 · Categories · subcategory	category.Cinema Cameras	string	Cinema Cameras	Filmové kamery	
+27 · Categories · subcategory	category.Cleaning Appliances	string	Cleaning Appliances	Úklidové spotřebiče	
+27 · Categories · subcategory	category.Coaching Equipment	string	Coaching Equipment	Trenérské vybavení	
+27 · Categories · subcategory	category.Coffee Makers	string	Coffee Makers	Kávovary	
+27 · Categories · subcategory	category.Collectibles	string	Collectibles	Sbírkové předměty	
+27 · Categories · subcategory	category.Commercial Coffee	string	Commercial Coffee	Komerční kávovary	
+27 · Categories · subcategory	category.Commercial Copiers	string	Commercial Copiers	Komerční kopírky	
+27 · Categories · subcategory	category.Commercial Fishing	string	Commercial Fishing	Komerční rybolov	
+27 · Categories · subcategory	category.Commercial Play Equipment	string	Commercial Play Equipment	Komerční herní vybavení	
+27 · Categories · subcategory	category.Commercial Space	string	Commercial Space	Komerční prostor	
+27 · Categories · subcategory	category.Commercial Treadmills	string	Commercial Treadmills	Komerční běžecké pásy	
+27 · Categories · subcategory	category.Commercial Trucks	string	Commercial Trucks	Užitkové náklaďáky	
+27 · Categories · subcategory	category.Competition Gear	string	Competition Gear	Závodní vybavení	
+27 · Categories · subcategory	category.Concrete Mixers	string	Concrete Mixers	Míchačky betonu	
+27 · Categories · subcategory	category.Conference Systems	string	Conference Systems	Konferenční systémy	
+27 · Categories · subcategory	category.Crane & Lifting	string	Crane & Lifting	Jeřáby a zvedání	
+27 · Categories · subcategory	category.Cribs & Beds	string	Cribs & Beds	Postýlky a postele	
+27 · Categories · subcategory	category.Cruisers	string	Cruisers	Cruisery	
+27 · Categories · subcategory	category.Custom Builds	string	Custom Builds	Zakázkové stavby	
+27 · Categories · subcategory	category.Display Systems	string	Display Systems	Zobrazovací systémy	
+27 · Categories · subcategory	category.Dive Boats	string	Dive Boats	Potápěčské lodě	
+27 · Categories · subcategory	category.Drones	string	Drones	Drony	
+27 · Categories · subcategory	category.Drums	string	Drums	Bicí	
+27 · Categories · subcategory	category.E-Bikes Pro	string	E-Bikes Pro	Pro e-kola	
+27 · Categories · subcategory	category.Educational Tools	string	Educational Tools	Vzdělávací pomůcky	
+27 · Categories · subcategory	category.Electric Scooters	string	Electric Scooters	Elektrické koloběžky	
+27 · Categories · subcategory	category.Equipment Trailers	string	Equipment Trailers	Přívěsy na techniku	
+27 · Categories · subcategory	category.Event Lighting	string	Event Lighting	Eventové osvětlení	
+27 · Categories · subcategory	category.Event Venues	string	Event Venues	Eventové prostory	
+27 · Categories · subcategory	category.Excavation Tools	string	Excavation Tools	Výkopové nářadí	
+27 · Categories · subcategory	category.Expedition Tents	string	Expedition Tents	Expediční stany	
+27 · Categories · subcategory	category.Film & TV Props	string	Film & TV Props	Filmové a TV rekvizity	
+27 · Categories · subcategory	category.Fishing Boats	string	Fishing Boats	Rybářské lodě	
+27 · Categories · subcategory	category.Fishing Gear	string	Fishing Gear	Rybářské vybavení	
+27 · Categories · subcategory	category.Food Processors Pro	string	Food Processors Pro	Pro kuchyňské procesory	
+27 · Categories · subcategory	category.Forklifts	string	Forklifts	Vysokozdvižné vozíky	
+27 · Categories · subcategory	category.Formwork Basic	string	Formwork Basic	Základní bednění	
+27 · Categories · subcategory	category.Free Weights	string	Free Weights	Volné váhy	
+27 · Categories · subcategory	category.Full Character Suits	string	Full Character Suits	Celé kostýmy postav	
+27 · Categories · subcategory	category.Games & Activities	string	Games & Activities	Hry a aktivity	
+27 · Categories · subcategory	category.Gaming Gear	string	Gaming Gear	Herní vybavení	
+27 · Categories · subcategory	category.Garages & Storage	string	Garages & Storage	Garáže a sklady	
+27 · Categories · subcategory	category.Garden Tools	string	Garden Tools	Zahradní nářadí	
+27 · Categories · subcategory	category.Generators	string	Generators	Generátory	
+27 · Categories · subcategory	category.Group Activity Gear	string	Group Activity Gear	Skupinové aktivity	
+27 · Categories · subcategory	category.Group Shelters	string	Group Shelters	Skupinové přístřešky	
+27 · Categories · subcategory	category.Guitars & Bass	string	Guitars & Bass	Kytary a baskytary	
+27 · Categories · subcategory	category.Halloween Costumes	string	Halloween Costumes	Halloweenské kostýmy	
+27 · Categories · subcategory	category.Hand Tools	string	Hand Tools	Ruční nářadí	
+27 · Categories · subcategory	category.Hand Tools Pro	string	Hand Tools Pro	Pro ruční nářadí	
+27 · Categories · subcategory	category.Heavy Pumps	string	Heavy Pumps	Silná čerpadla	
+27 · Categories · subcategory	category.Hobby Equipment	string	Hobby Equipment	Hobby vybavení	
+27 · Categories · subcategory	category.Houseplants & Seedlings	string	Houseplants & Seedlings	Pokojovky a sazenice	
+27 · Categories · subcategory	category.Hydraulic Equipment	string	Hydraulic Equipment	Hydraulické vybavení	
+27 · Categories · subcategory	category.Industrial Compressors	string	Industrial Compressors	Průmyslové kompresory	
+27 · Categories · subcategory	category.Industrial Drills	string	Industrial Drills	Průmyslové vrtačky	
+27 · Categories · subcategory	category.Industrial Generators	string	Industrial Generators	Průmyslové generátory	
+27 · Categories · subcategory	category.Industrial Mixers	string	Industrial Mixers	Průmyslové mixéry	
+27 · Categories · subcategory	category.Industrial Oddities	string	Industrial Oddities	Průmyslové kuriozity	
+27 · Categories · subcategory	category.Inflatable Boats	string	Inflatable Boats	Nafukovací lodě	
+27 · Categories · subcategory	category.Irrigation Systems	string	Irrigation Systems	Zavlažovací systémy	
+27 · Categories · subcategory	category.Jet Skis	string	Jet Skis	Vodní skútry	
+27 · Categories · subcategory	category.Kayaks & Canoes	string	Kayaks & Canoes	Kajaky a kánoe	
+27 · Categories · subcategory	category.Keyboards	string	Keyboards	Klávesy	
+27 · Categories · subcategory	category.Kids Bikes	string	Kids Bikes	Dětská kola	
+27 · Categories · subcategory	category.Ladders	string	Ladders	Žebříky	
+27 · Categories · subcategory	category.Landscape Equipment	string	Landscape Equipment	Zahradní technika	
+27 · Categories · subcategory	category.Laptops	string	Laptops	Notebooky	
+27 · Categories · subcategory	category.Large Concrete Equipment	string	Large Concrete Equipment	Velká betonářská technika	
+27 · Categories · subcategory	category.Large Format Printers	string	Large Format Printers	Velkoformátové tiskárny	
+27 · Categories · subcategory	category.Laser Measuring	string	Laser Measuring	Laserové měření	
+27 · Categories · subcategory	category.Lawn Mowers	string	Lawn Mowers	Sekačky	
+27 · Categories · subcategory	category.Leaf Blowers	string	Leaf Blowers	Foukače listí	
+27 · Categories · subcategory	category.Masks & Makeup	string	Masks & Makeup	Masky a makeup	
+27 · Categories · subcategory	category.Measuring Tools	string	Measuring Tools	Měřicí nářadí	
+27 · Categories · subcategory	category.Microphones	string	Microphones	Mikrofony	
+27 · Categories · subcategory	category.Mixing Consoles	string	Mixing Consoles	Mixážní pulty	
+27 · Categories · subcategory	category.Monitors & Displays	string	Monitors & Displays	Monitory a displeje	
+27 · Categories · subcategory	category.Motorboats	string	Motorboats	Motorové lodě	
+27 · Categories · subcategory	category.Motorcycles	string	Motorcycles	Motorky	
+27 · Categories · subcategory	category.Mountain Bikes	string	Mountain Bikes	Horská kola	
+27 · Categories · subcategory	category.Navigation & GPS	string	Navigation & GPS	Navigace a GPS	
+27 · Categories · subcategory	category.Network Gear	string	Network Gear	Síťová technika	
+27 · Categories · subcategory	category.Nursery Stock	string	Nursery Stock	Školkařský materiál	
+27 · Categories · subcategory	category.Office Furniture	string	Office Furniture	Kancelářský nábytek	
+27 · Categories · subcategory	category.Other	string	Other	Jiné	
+27 · Categories · subcategory	category.PA Systems	string	PA Systems	PA systémy	
+27 · Categories · subcategory	category.Painting Tools	string	Painting Tools	Malířské nářadí	
+27 · Categories · subcategory	category.Parking Spots	string	Parking Spots	Parkovací místa	
+27 · Categories · subcategory	category.Party Decor	string	Party Decor	Párty dekorace	
+27 · Categories · subcategory	category.Perennials	string	Perennials	Trvalky	
+27 · Categories · subcategory	category.Period Costumes	string	Period Costumes	Historické kostýmy	
+27 · Categories · subcategory	category.Photo Booths	string	Photo Booths	Fotokoutky	
+27 · Categories · subcategory	category.Pontoon Boats	string	Pontoon Boats	Pontony	
+27 · Categories · subcategory	category.Portable Speakers	string	Portable Speakers	Přenosné reproduktory	
+27 · Categories · subcategory	category.POS Systems	string	POS Systems	Pokladní systémy	
+27 · Categories · subcategory	category.Power Drills	string	Power Drills	Aku vrtačky	
+27 · Categories · subcategory	category.Power Saws	string	Power Saws	Elektrické pily	
+27 · Categories · subcategory	category.Presentation Gear	string	Presentation Gear	Prezentační technika	
+27 · Categories · subcategory	category.Pressure Washers	string	Pressure Washers	Vysokotlaké myčky	
+27 · Categories · subcategory	category.Printers	string	Printers	Tiskárny	
+27 · Categories · subcategory	category.Pro Audio	string	Pro Audio	Pro audio	
+27 · Categories · subcategory	category.Pro Water Sports	string	Pro Water Sports	Pro vodní sporty	
+27 · Categories · subcategory	category.Professional Formwork	string	Professional Formwork	Profesionální bednění	
+27 · Categories · subcategory	category.Professional Lenses	string	Professional Lenses	Profesionální objektivy	
+27 · Categories · subcategory	category.Professional Makeup Kits	string	Professional Makeup Kits	Profesionální makeup sety	
+27 · Categories · subcategory	category.Professional Navigation	string	Professional Navigation	Profesionální navigace	
+27 · Categories · subcategory	category.Professional Props	string	Professional Props	Profesionální rekvizity	
+27 · Categories · subcategory	category.Professional Scooters	string	Professional Scooters	Profesionální koloběžky	
+27 · Categories · subcategory	category.Projectors	string	Projectors	Projektory	
+27 · Categories · subcategory	category.Pumps	string	Pumps	Čerpadla	
+27 · Categories · subcategory	category.Racing Bikes	string	Racing Bikes	Závodní kola	
+27 · Categories · subcategory	category.Racket Sports	string	Racket Sports	Raketové sporty	
+27 · Categories · subcategory	category.Rare Instruments	string	Rare Instruments	Vzácné nástroje	
+27 · Categories · subcategory	category.Recording Gear	string	Recording Gear	Nahrávací technika	
+27 · Categories · subcategory	category.Recovery Tools	string	Recovery Tools	Regenerace	
+27 · Categories · subcategory	category.Resistance Bands	string	Resistance Bands	Odporové gumy	
+27 · Categories · subcategory	category.Retail Space	string	Retail Space	Obchodní prostor	
+27 · Categories · subcategory	category.Ride-On Mowers	string	Ride-On Mowers	Zahradní traktory	
+27 · Categories · subcategory	category.Road Bikes	string	Road Bikes	Silniční kola	
+27 · Categories · subcategory	category.Rooms & Spaces	string	Rooms & Spaces	Pokoje a prostory	
+27 · Categories · subcategory	category.RVs & Campers	string	RVs & Campers	Obytňáky a karavany	
+27 · Categories · subcategory	category.Safety Equipment	string	Safety Equipment	Bezpečnostní vybavení	
+27 · Categories · subcategory	category.Safety Systems	string	Safety Systems	Bezpečnostní systémy	
+27 · Categories · subcategory	category.Scaffolding Systems	string	Scaffolding Systems	Lešení	
+27 · Categories · subcategory	category.Seasonal Flowers	string	Seasonal Flowers	Sezónní květiny	
+27 · Categories · subcategory	category.Seasonal Items	string	Seasonal Items	Sezónní věci	
+27 · Categories · subcategory	category.Server Equipment	string	Server Equipment	Serverové vybavení	
+27 · Categories · subcategory	category.Servers & Workstations	string	Servers & Workstations	Servery a pracovní stanice	
+27 · Categories · subcategory	category.Serving Equipment	string	Serving Equipment	Servírovací vybavení	
+27 · Categories · subcategory	category.Shared Offices	string	Shared Offices	Sdílené kanceláře	
+27 · Categories · subcategory	category.Shrubs & Bushes	string	Shrubs & Bushes	Keře	
+27 · Categories · subcategory	category.Site Lighting	string	Site Lighting	Staveništní osvětlení	
+27 · Categories · subcategory	category.Skating	string	Skating	Bruslení	
+27 · Categories · subcategory	category.Sleeping Bags	string	Sleeping Bags	Spacáky	
+27 · Categories · subcategory	category.Smart Home Devices	string	Smart Home Devices	Chytrá domácnost	
+27 · Categories · subcategory	category.Snow Sports	string	Snow Sports	Zimní sporty	
+27 · Categories · subcategory	category.Sound Systems	string	Sound Systems	Ozvučení	
+27 · Categories · subcategory	category.Speakers	string	Speakers	Reproduktory	
+27 · Categories · subcategory	category.Special Vehicles	string	Special Vehicles	Speciální vozidla	
+27 · Categories · subcategory	category.Specialty Equipment	string	Specialty Equipment	Specializované vybavení	
+27 · Categories · subcategory	category.Sprinklers	string	Sprinklers	Zavlažovače	
+27 · Categories · subcategory	category.Stabilizers & Rigs	string	Stabilizers & Rigs	Stabilizátory a rigy	
+27 · Categories · subcategory	category.Stage & Risers	string	Stage & Risers	Pódia a stupínky	
+27 · Categories · subcategory	category.Stand Mixers	string	Stand Mixers	Kuchyňské roboty	
+27 · Categories · subcategory	category.Strollers	string	Strollers	Kočárky	
+27 · Categories · subcategory	category.Structural Equipment	string	Structural Equipment	Konstrukční vybavení	
+27 · Categories · subcategory	category.Studio Lighting	string	Studio Lighting	Studiové osvětlení	
+27 · Categories · subcategory	category.Studio Monitors	string	Studio Monitors	Studiové monitory	
+27 · Categories · subcategory	category.Studio Space	string	Studio Space	Studiový prostor	
+27 · Categories · subcategory	category.Stump Grinders	string	Stump Grinders	Pařezové frézy	
+27 · Categories · subcategory	category.SUP Boards	string	SUP Boards	SUP prkna	
+27 · Categories · subcategory	category.Survival Gear	string	Survival Gear	Survival vybavení	
+27 · Categories · subcategory	category.Tables & Chairs	string	Tables & Chairs	Stoly a židle	
+27 · Categories · subcategory	category.Team Sports Gear	string	Team Sports Gear	Týmové sportovní vybavení	
+27 · Categories · subcategory	category.Tents	string	Tents	Stany	
+27 · Categories · subcategory	category.Tents & Canopies	string	Tents & Canopies	Stany a přístřešky	
+27 · Categories · subcategory	category.Theater Costumes	string	Theater Costumes	Divadelní kostýmy	
+27 · Categories · subcategory	category.Tillers & Cultivators	string	Tillers & Cultivators	Rotavátory a kultivátory	
+27 · Categories · subcategory	category.Timing Systems	string	Timing Systems	Časomíry	
+27 · Categories · subcategory	category.Tow Vehicles	string	Tow Vehicles	Tažná vozidla	
+27 · Categories · subcategory	category.Toys & Games	string	Toys & Games	Hračky a hry	
+27 · Categories · subcategory	category.Trailers	string	Trailers	Přívěsy	
+27 · Categories · subcategory	category.Training Systems	string	Training Systems	Tréninkové systémy	
+27 · Categories · subcategory	category.Trees	string	Trees	Stromy	
+27 · Categories · subcategory	category.Trimmers	string	Trimmers	Křovinořezy	
+27 · Categories · subcategory	category.Tripods & Mounts	string	Tripods & Mounts	Stativy a držáky	
+27 · Categories · subcategory	category.Unusual Items	string	Unusual Items	Neobvyklé věci	
+27 · Categories · subcategory	category.Warehouse & Storage	string	Warehouse & Storage	Sklad a úložný prostor	
+27 · Categories · subcategory	category.Water Sports	string	Water Sports	Vodní sporty	
+27 · Categories · subcategory	category.Webcams & Streaming	string	Webcams & Streaming	Webkamery a streaming	
+27 · Categories · subcategory	category.Weight Machines	string	Weight Machines	Posilovací stroje	
+27 · Categories · subcategory	category.Welding Equipment	string	Welding Equipment	Svářecí vybavení	
+27 · Categories · subcategory	category.Wigs & Accessories	string	Wigs & Accessories	Paruky a doplňky	
+27 · Categories · subcategory	category.Winches	string	Winches	Navijáky	
+27 · Categories · subcategory	category.Yoga & Pilates	string	Yoga & Pilates	Jóga a pilates	
+27 · Categories · top-level	category.Baby & Kids	string	Baby & Kids	Miminka a děti	
+27 · Categories · top-level	category.Bikes & Scooters	string	Bikes & Scooters	Kola a koloběžky	
+27 · Categories · top-level	category.Boats & Water	string	Boats & Water	Lodě a voda	
+27 · Categories · top-level	category.Construction	string	Construction	Stavba	
+27 · Categories · top-level	category.Costume & Cosplay	string	Costume & Cosplay	Kostýmy a cosplay	
+27 · Categories · top-level	category.Electronics & Tech	string	Electronics & Tech	Elektronika a tech	
+27 · Categories · top-level	category.Garden & Yard	string	Garden & Yard	Zahrada	
+27 · Categories · top-level	category.Gym & Fitness	string	Gym & Fitness	Posilovna a fitness	
+27 · Categories · top-level	category.Heavy Equipment	string	Heavy Equipment	Těžká technika	
+27 · Categories · top-level	category.Home & Kitchen	string	Home & Kitchen	Domov a kuchyně	
+27 · Categories · top-level	category.Music & Audio	string	Music & Audio	Hudba a audio	
+27 · Categories · top-level	category.Office & Business	string	Office & Business	Kancelář a byznys	
+27 · Categories · top-level	category.Outdoor & Camping	string	Outdoor & Camping	Outdoor a kempování	
+27 · Categories · top-level	category.Party & Events	string	Party & Events	Párty a akce	
+27 · Categories · top-level	category.Photo & Video	string	Photo & Video	Foto a video	
+27 · Categories · top-level	category.Real Estate	string	Real Estate	Nemovitosti	
+27 · Categories · top-level	category.Sports & Recreation	string	Sports & Recreation	Sport a rekreace	
+27 · Categories · top-level	category.Tools & DIY	string	Tools & DIY	Nářadí a DIY	
+27 · Categories · top-level	category.Unique & Other	string	Unique & Other	Unikátní a ostatní	
+27 · Categories · top-level	category.Vehicles	string	Vehicles	Vozidla	
+28 · SEO · rent landing meta	seo.meta.description.hub	string	Rent {{noun}} from neighbors on {{app}}. Find garage storefronts near you — or open yours and be first in your category.		
+28 · SEO · rent landing meta	seo.meta.description.withPlace	string	Rent {{noun}} from neighbors in {{place}} on {{app}}. Browse local garage storefronts — or be the first to list {{noun}} on your block.		
+28 · SEO · rent landing meta	seo.meta.h1.hub	string	Rent {{noun}} from neighbors		
+28 · SEO · rent landing meta	seo.meta.h1.withPlace	string	Rent {{noun}} in {{place}}		
+28 · SEO · rent landing meta	seo.meta.intro.hub	string	{{app}} is a neighborhood marketplace: every home is a business cell with a garage storefront. Browse {{noun}} near you, or stock your garage and earn when neighbors need them.		
+28 · SEO · rent landing meta	seo.meta.intro.withPlace	string	{{app}} connects neighbors so you can borrow {{noun}} nearby instead of buying new. Meetups stay local — usually a short walk or drive on your block.		
+28 · SEO · rent landing meta	seo.meta.title.hub	string	Rent {{noun}} from neighbors | {{app}}		
+28 · SEO · rent landing meta	seo.meta.title.withPlace	string	Rent {{noun}} from neighbors in {{place}} | {{app}}		
+28 · SEO · search nouns	seo.searchNoun.Baby & Kids	string	baby and kids gear		
+28 · SEO · search nouns	seo.searchNoun.Bikes & Scooters	string	bikes and scooters		
+28 · SEO · search nouns	seo.searchNoun.Boats & Water	string	boats and watercraft		
+28 · SEO · search nouns	seo.searchNoun.Construction	string	construction equipment		
+28 · SEO · search nouns	seo.searchNoun.Costume & Cosplay	string	costumes		
+28 · SEO · search nouns	seo.searchNoun.Electronics & Tech	string	electronics		
+28 · SEO · search nouns	seo.searchNoun.Garden & Yard	string	garden and yard gear		
+28 · SEO · search nouns	seo.searchNoun.Gym & Fitness	string	fitness equipment		
+28 · SEO · search nouns	seo.searchNoun.Heavy Equipment	string	heavy equipment		
+28 · SEO · search nouns	seo.searchNoun.Home & Kitchen	string	home and kitchen items		
+28 · SEO · search nouns	seo.searchNoun.Music & Audio	string	music and audio gear		
+28 · SEO · search nouns	seo.searchNoun.Office & Business	string	office equipment		
+28 · SEO · search nouns	seo.searchNoun.Outdoor & Camping	string	camping and outdoor gear		
+28 · SEO · search nouns	seo.searchNoun.Party & Events	string	party and event gear		
+28 · SEO · search nouns	seo.searchNoun.Photo & Video	string	cameras and video gear		
+28 · SEO · search nouns	seo.searchNoun.Real Estate	string	spaces		
+28 · SEO · search nouns	seo.searchNoun.Sports & Recreation	string	sports gear		
+28 · SEO · search nouns	seo.searchNoun.Tools & DIY	string	tools		
+28 · SEO · search nouns	seo.searchNoun.Unique & Other	string	unique items		
+28 · SEO · search nouns	seo.searchNoun.Vehicles	string	vehicles		
+29 · Hardcoded · rent landing	hard.rentLanding.allAreas	string	All areas		
+29 · Hardcoded · rent landing	hard.rentLanding.availableNear	string	Available near {{place}}		
+29 · Hardcoded · rent landing	hard.rentLanding.availableNearYou	string	Available near you		
+29 · Hardcoded · rent landing	hard.rentLanding.bulletControl	string	You control price, availability, and handoff		
+29 · Hardcoded · rent landing	hard.rentLanding.bulletPayments	string	Payments stay in-app — no cash meetups for tracked rentals		
+29 · Hardcoded · rent landing	hard.rentLanding.bulletPhotos	string	Photos + category — takes a few minutes		
+29 · Hardcoded · rent landing	hard.rentLanding.checking	string	Checking nearby garages…		
+29 · Hardcoded · rent landing	hard.rentLanding.emptyBody	string	Nobody has stocked {{noun}}{{inPlace}} on {{app}} yet. That is demand waiting — list what you already own, set a fair daily rate, and neighbors can request pickup from your garage storefront.		
+29 · Hardcoded · rent landing	hard.rentLanding.firstGaragePlace	string	Be the first to open a garage for {{noun}} in {{place}}		
+29 · Hardcoded · rent landing	hard.rentLanding.firstListBlock	string	Be the first to list {{noun}} on your block		
+29 · Hardcoded · rent landing	hard.rentLanding.how1	string	Browse a category near your block (or open your own garage).		
+29 · Hardcoded · rent landing	hard.rentLanding.how2	string	Request dates, pay in-app, and agree on a local meetup.		
+29 · Hardcoded · rent landing	hard.rentLanding.how3	string	Scan the item QR at pickup and return so both sides stay protected.		
+29 · Hardcoded · rent landing	hard.rentLanding.howTitle	string	How neighbor rental works		
+29 · Hardcoded · rent landing	hard.rentLanding.lookingToRent	string	Looking to rent instead?		
+29 · Hardcoded · rent landing	hard.rentLanding.openBrowse	string	Open {{app}} and browse nearby		
+29 · Hardcoded · rent landing	hard.rentLanding.openFullApp	string	Open the full app to book →		
+29 · Hardcoded · rent landing	hard.rentLanding.openTerritory	string	Open territory		
+29 · Hardcoded · rent landing	hard.rentLanding.soon	string	soon		
+29 · Hardcoded · rent landing	hard.rentLanding.stockCta	string	Stock your garage →		
+29 · Hardcoded · rent landing	hard.rentLanding.tagline	string	Neighborly marketplace · garage storefronts		
+30 · Hardcoded · list offer (legacy)	hard.listItem.gift	string	GIFT		
+30 · Hardcoded · list offer (legacy)	hard.listItem.giftBody	string	Free — no payment		
+30 · Hardcoded · list offer (legacy)	hard.listItem.howOffer	string	How would you like to offer this?		
+30 · Hardcoded · list offer (legacy)	hard.listItem.perDay	string	Per day		
+30 · Hardcoded · list offer (legacy)	hard.listItem.perMonth	string	Per month		
+30 · Hardcoded · list offer (legacy)	hard.listItem.perWeek	string	Per week		
+30 · Hardcoded · list offer (legacy)	hard.listItem.priceNegotiable	string	Price is negotiable		
+30 · Hardcoded · list offer (legacy)	hard.listItem.publish	string	Publish Listing		
+30 · Hardcoded · list offer (legacy)	hard.listItem.rent	string	RENT		
+30 · Hardcoded · list offer (legacy)	hard.listItem.rentBody	string	Let others rent for a daily, weekly, or monthly rate		
+30 · Hardcoded · list offer (legacy)	hard.listItem.rentToOwn	string	RENT TO OWN		
+30 · Hardcoded · list offer (legacy)	hard.listItem.rentToOwnBody	string	Monthly payments with ownership transfer		
+30 · Hardcoded · list offer (legacy)	hard.listItem.selectOptions	string	Select one or more options		
+30 · Hardcoded · list offer (legacy)	hard.listItem.sell	string	SELL		
+30 · Hardcoded · list offer (legacy)	hard.listItem.sellBody	string	Offer your item for sale at a fixed or negotiable price		
+30 · Hardcoded · list offer (legacy)	hard.listItem.shareReason	string	Share your reason...		
+30 · Hardcoded · list offer (legacy)	hard.listItem.title	string	List Your Item		
+31 · Hardcoded · payments & trust	hard.payments.claimDeposit	string	Claim deposit		
+31 · Hardcoded · payments & trust	hard.payments.couldNotRelease	string	Could not release deposit		
+31 · Hardcoded · payments & trust	hard.payments.depositReleased	string	Deposit hold released.		
+31 · Hardcoded · payments & trust	hard.payments.paymentFailed	string	Payment failed		
+31 · Hardcoded · payments & trust	hard.payments.payTotal	string	Pay {{total}}		
+31 · Hardcoded · payments & trust	hard.payments.processing	string	Processing…		
+31 · Hardcoded · payments & trust	hard.payments.releaseHold	string	Release hold		
+31 · Hardcoded · payments & trust	hard.profile.addPhoto	string	Add profile photo		
+31 · Hardcoded · payments & trust	hard.profile.cameraAccess	string	Camera access is needed to take a profile photo.		
+31 · Hardcoded · payments & trust	hard.profile.changePhoto	string	Change profile photo		
+31 · Hardcoded · payments & trust	hard.profile.takePhoto	string	Take profile photo		
+31 · Hardcoded · payments & trust	hard.profile.yourPhoto	string	Your profile photo		
+31 · Hardcoded · payments & trust	hard.trust.idVerified	string	ID Verified ✓		
+31 · Hardcoded · payments & trust	hard.trust.idVerifiedShort	string	ID verified		
+31 · Hardcoded · payments & trust	hard.trust.phoneVerified	string	Phone verified		
+32 · Hardcoded · misc UI	hard.chat.aiOff	string	AI chat is off right now.		
+32 · Hardcoded · misc UI	hard.chat.send	string	Send message		
+32 · Hardcoded · misc UI	hard.chat.speak	string	Speak your question		
+32 · Hardcoded · misc UI	hard.messages.listingChat	string	Listing chat		
+32 · Hardcoded · misc UI	hard.messages.rentalChat	string	Rental chat		
+32 · Hardcoded · misc UI	hard.nav.main	string	Main navigation		
+32 · Hardcoded · misc UI	hard.nav.stockItem	string	Stock an item		
+32 · Hardcoded · misc UI	hard.wizard.signInFromMore	string	Sign in from More → Profile, then try again.		
+32 · Hardcoded · misc UI	hard.wizard.signInPublish	string	Sign in to publish your listing.		
+33 · Hardcoded · Mr. Evorios local hints	hard.navHint[0].answer	string	Categories are on Home: chips on the browse hub and on the feed under Rent/Buy (Tools, Garden & Yard, Party…). Tap a category in More → How Evorios works to expand household and pro subcategories. There is no magnifying-glass search in the footer. When you list with +, pick a category in the wizard.		
+33 · Hardcoded · Mr. Evorios local hints	hard.navHint[1].answer	string	Tap the green + in the footer to stock your garage. Follow the wizard: photos → item info → pricing → pickup → availability → QR → publish. Then open Garage to see your listings.		
+33 · Hardcoded · Mr. Evorios local hints	hard.navHint[10].answer	string	Active and past rentals: More → Rentals, or the clipboard icon on Home. Open a rental for pickup details, messages, and return flow.		
+33 · Hardcoded · Mr. Evorios local hints	hard.navHint[11].answer	string	Tap the green + in the footer to stock your garage. Follow the wizard: photos → item info → pricing → pickup → availability → QR → publish.		
+33 · Hardcoded · Mr. Evorios local hints	hard.navHint[12].answer	string	Evorios is a neighborhood marketplace: each household is a business cell that can rent, sell, or gift from its garage. Open More → How Evorios works for the full tour, or Home for category chips.		
+33 · Hardcoded · Mr. Evorios local hints	hard.navHint[2].answer	string	If taps do nothing, pull down to refresh once. Bottom menu: Home (browse + categories), Mr. Evorios (help), green + (list an item), Garage (your storefront), More (profile, rentals, How Evorios works). No search lupa in the footer.		
+33 · Hardcoded · Mr. Evorios local hints	hard.navHint[3].answer	string	Tap Mr. Evorios in the bottom menu. Start with the FAQ tab for instant answers. Chat tries those answers first; AI is only used when nothing matches. For a guided tour open More → How Evorios works.		
+33 · Hardcoded · Mr. Evorios local hints	hard.navHint[4].answer	string	Garage = your listings, requests, and earnings. Profile = your name, photo, phone, payouts, and sign-out. Open More → profile card, or Garage → gear for settings. Browse vs My Garage is a preference in Profile — same account.		
+33 · Hardcoded · Mr. Evorios local hints	hard.navHint[5].answer	string	City + postal code is enough — we show nearby garages in your cluster. You do not need an exact street address. If results are thin, expand the distance filter on Home or post a request.	Stačí město + PSČ — ukazujeme blízké garáže ve vašem okolí. Přesnou ulici nepotřebujete. Málo nabídek? Rozšiřte vzdálenost na Domů nebo pošlete poptávku.	
+33 · Hardcoded · Mr. Evorios local hints	hard.navHint[6].answer	string	On Home, open Filters to expand distance if the cluster is sparse. You can also post a request so neighbors with the item get notified. Browse by category chips first.	Na Domů otevřete filtry a rozšiřte vzdálenost, když je okolí prázdné. Můžete taky poslat poptávku — sousedé s věcí dostanou upozornění. Nejdřív zkuste kategorie.	
+33 · Hardcoded · Mr. Evorios local hints	hard.navHint[7].answer	string	Rentals charge the rental total first, then a separate deposit hold if the host set one. The hold is released after a successful return unless damage is documented. See Payments & safety in FAQ for details.		
+33 · Hardcoded · Mr. Evorios local hints	hard.navHint[8].answer	string	Sign in when booking, messaging, or listing. Enter email → sign-in code. Check spam. After sign-in you return to the screen you started from (e.g. booking or listing wizard).		
+33 · Hardcoded · Mr. Evorios local hints	hard.navHint[9].answer	string	Open More → Favorites for saved listings. Tap a card to open the item again.		

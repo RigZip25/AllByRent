@@ -1,9 +1,13 @@
 import { createClient, type User } from "@supabase/supabase-js";
+import ws from "ws";
 import {
   getSupabaseAnonKey,
   getSupabaseServiceRoleKey,
   getSupabaseUrl,
 } from "../keys";
+
+/** supabase-js always boots RealtimeClient; Node < 22 needs the `ws` transport. */
+const realtimeOpts = { transport: ws as unknown as typeof WebSocket };
 
 export function getAdminClient() {
   const url = getSupabaseUrl();
@@ -11,6 +15,7 @@ export function getAdminClient() {
   if (!url || !key) return null;
   return createClient(url, key, {
     auth: { autoRefreshToken: false, persistSession: false },
+    realtime: realtimeOpts,
   });
 }
 
@@ -20,6 +25,7 @@ export function getAnonAuthClient() {
   if (!url || !key) return null;
   return createClient(url, key, {
     auth: { autoRefreshToken: false, persistSession: false },
+    realtime: realtimeOpts,
   });
 }
 

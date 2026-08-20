@@ -27,6 +27,14 @@ import { InsuredLabel } from "./InsuredLabel";
 import { DepositHoldActions } from "../payments/DepositHoldActions";
 import { RunningLateSheet } from "./RunningLateSheet";
 import { useMessages } from "../../lib/i18n/react";
+import {
+  cancelAcceptedBooking,
+  canCancelAcceptedBooking,
+} from "../../lib/rentalCancelActions";
+import { listingNoShowFeeUsd } from "../../lib/noShowPolicy";
+import { completeHostNoShow } from "../../lib/rentalNoShowActions";
+import { getPublishedListingById } from "../../lib/listingStorage";
+import { formatMoney } from "../../lib/regionalDisplay";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -182,16 +190,21 @@ export function RentalCard({
   const t = useMessages();
   const [runningLateOpen, setRunningLateOpen] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [cancelBusy, setCancelBusy] = useState(false);
   const now = useNow(booking.status === "active" || booking.status === "overdue" ? 1000 : 30_000);
 
   const roleLabel = booking.role === "renter" ? t.rentalCard.renting : t.rentalCard.hosting;
   const showTimer = tab === "active";
+  const showCancelAccepted =
+    (tab === "active" || tab === "upcoming") && canCancelAcceptedBooking(booking);
   const markNoShowAvailable =
-    booking.status === "no_show" &&
     booking.role === "host" &&
     !booking.noShowMarkedAt &&
     booking.pickupScheduledAt &&
-    canMarkNoShow(booking.pickupScheduledAt, now);
+    canMarkNoShow(booking.pickupScheduledAt, now) &&
+    (booking.status === "no_show" ||
+      booking.status === "pending_checkin" ||
+      booking.status === "upcoming");
 
   const reviewOpen =
     tab === "history" &&
@@ -207,9 +220,9 @@ export function RentalCard({
 
   const disputeSubtext = useMemo(() => {
     if (booking.status !== "disputed") return null;
-    if (booking.disputeEscalated) return t.rentalCard.escalated;
-    return null;
-  }, [booking, t.rentalCard.escalated]);
+    if (booking.disputeEscalated) return t.rentalCard.underReview;
+    return t.rentalCard.inDispute;
+  }, [booking, t.rentalCard.inDispute, t.rentalCard.underReview]);
 
   return (
     <article
@@ -269,6 +282,30 @@ export function RentalCard({
         </div>
       </button>
 
+      {showCancelAccepted ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <ActionButton
+            label={cancelBusy ? t.rentalCard.cancelling : t.rentalCard.cancelBooking}
+            variant="danger"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (cancelBusy || !auth.userId) return;
+              if (!window.confirm(t.rentalDetail.cancelBookingConfirmTitle)) return;
+              const cancelReason = window.prompt(t.rentalDetail.cancelReasonLabel) ?? undefined;
+              setCancelBusy(true);
+              void cancelAcceptedBooking({
+                booking,
+                actorUserId: auth.userId,
+                role: booking.role,
+                cancelReason: cancelReason?.trim() || undefined,
+              })
+                .then(() => onRefresh())
+                .finally(() => setCancelBusy(false));
+            }}
+          />
+        </div>
+      ) : null}
+
       {tab === "active" && booking.status === "overdue" ? (
         <div className="mt-3 flex flex-wrap gap-2">
           {booking.role === "renter" ? (
@@ -286,7 +323,11 @@ export function RentalCard({
         </div>
       ) : null}
 
-      {tab === "active" && booking.status === "no_show" && !booking.noShowMarkedAt ? (
+      {tab === "active" &&
+      (booking.status === "no_show" ||
+        booking.status === "pending_checkin" ||
+        booking.status === "upcoming") &&
+      !booking.noShowMarkedAt ? (
         <div className="mt-3 flex flex-wrap gap-2">
           {booking.role === "renter" ? (
             <ActionButton
@@ -301,9 +342,23 @@ export function RentalCard({
             <ActionButton
               label={t.rentalCard.markNoShow}
               variant="danger"
-              onClick={handleAction({
-                noShowMarkedAt: new Date().toISOString(),
-              })}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!auth.userId) return;
+                const listing = booking.listingId
+                  ? getPublishedListingById(booking.listingId)
+                  : null;
+                const feeUsd = listingNoShowFeeUsd(listing);
+                const confirmMsg =
+                  feeUsd != null
+                    ? `${t.rentalCard.markNoShowConfirm}\n${t.rentalCard.markNoShowFeeNote(formatMoney(feeUsd))}`
+                    : `${t.rentalCard.markNoShowConfirm}\n${t.rentalCard.markNoShowSoftNote}`;
+                if (!window.confirm(confirmMsg)) return;
+                void completeHostNoShow({
+                  booking,
+                  actorUserId: auth.userId,
+                }).then(() => onRefresh());
+              }}
             />
           ) : (
             <p className="text-[12px] text-gray-500">
@@ -315,14 +370,33 @@ export function RentalCard({
 
       {tab === "active" && booking.status === "disputed" ? (
         <div className="mt-3">
-          <ActionButton label={t.rentalCard.submitEvidence} variant="cta" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
+          <ActionButton
+            label={t.rentalCard.continueDispute}
+            variant="cta"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpen?.();
+            }}
+          />
         </div>
       ) : null}
 
       {tab === "active" &&
       (booking.status === "active" ||
         booking.status === "overdue" ||
-        booking.status === "completed") ? (
+        booking.status === "disputed") ? (
+        <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+          <DepositHoldActions
+            rentalId={booking.id}
+            role={booking.role}
+            depositStatus={booking.depositStatus}
+            depositAmountCents={booking.depositAmountCents}
+            disputeFrozen={booking.status === "disputed"}
+          />
+        </div>
+      ) : null}
+
+      {tab === "history" && booking.status === "completed" ? (
         <div className="mt-3" onClick={(e) => e.stopPropagation()}>
           <DepositHoldActions
             rentalId={booking.id}
@@ -334,7 +408,15 @@ export function RentalCard({
       ) : null}
 
       {tab === "history" && booking.status === "completed" ? (
-        <div className="mt-3 border-t pt-3" style={{ borderColor: BORDER }}>
+        <div className="mt-3 border-t pt-3 space-y-2" style={{ borderColor: BORDER }}>
+          <ActionButton
+            label={t.rentalCard.openDispute}
+            variant="secondary"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpen?.();
+            }}
+          />
           {reviewOpen ? (
             <>
               <ActionButton

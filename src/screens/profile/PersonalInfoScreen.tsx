@@ -1,32 +1,38 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { ArrowLeft, Mail, Phone, User } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Mail, Phone, User } from "lucide-react";
 import { ProfileFieldEditSheet } from "../../components/profile/ProfileFieldEditSheet";
+import { PhoneVerifySheet } from "../../components/profile/PhoneVerifySheet";
 import { useAuth } from "../../hooks/AuthProvider";
 import { useMessages } from "../../lib/i18n/react";
 import { fetchRemoteProfile, updateRemoteProfile } from "../../lib/supabaseProfile";
+import { phoneDigitsForDisplay } from "../../lib/phoneE164";
+import { refreshPhoneVerifiedFromRemote } from "../../lib/phoneKyc";
 import {
   loadUserProfile,
   refreshProfileStats,
   syncUserProfileFromAuth,
   updateProfileFields,
+  saveUserProfile,
 } from "../../lib/userProfileStorage";
 import { formatUsPhoneDisplay } from "../../lib/usPhoneFormat";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
 
-type EditField = "name" | "phone" | null;
+type EditField = "name" | "phone" | "dob" | null;
 
 function Row({
   icon,
   label,
   value,
+  badge,
   onClick,
 }: {
   icon: ReactNode;
   label: string;
   value: string;
+  badge?: string | null;
   onClick?: () => void;
 }) {
   const inner = (
@@ -39,6 +45,12 @@ function Row({
         <p className="truncate text-[15px] font-semibold" style={{ color: GREEN }}>
           {value}
         </p>
+        {badge ? (
+          <p className="mt-0.5 inline-flex items-center gap-1 text-[12px] font-semibold text-emerald-700">
+            <BadgeCheck className="h-3.5 w-3.5" />
+            {badge}
+          </p>
+        ) : null}
       </div>
     </>
   );
@@ -75,9 +87,11 @@ export function PersonalInfoScreen({
   const t = profileDeep.personalInfo;
   const [profile, setProfile] = useState(() => refreshProfileStats(loadUserProfile(), auth.userId));
   const [editing, setEditing] = useState<EditField>(null);
+  const [phoneSheetOpen, setPhoneSheetOpen] = useState(false);
 
   useEffect(() => {
-    if (initialEdit) setEditing(initialEdit);
+    if (initialEdit === "name") setEditing("name");
+    if (initialEdit === "phone") setPhoneSheetOpen(true);
   }, [initialEdit]);
 
   useEffect(() => {
@@ -96,9 +110,15 @@ export function PersonalInfoScreen({
 
     apply(auth.userEmail);
 
-    void fetchRemoteProfile(auth.userId).then((remote) => {
+    void fetchRemoteProfile(auth.userId).then(async (remote) => {
       if (!mounted || !remote) return;
       apply(auth.userEmail, remote.email);
+      if (remote.date_of_birth?.trim()) {
+        updateProfileFields({ dateOfBirth: remote.date_of_birth.trim() });
+      }
+      await refreshPhoneVerifiedFromRemote(auth.userId);
+      if (!mounted) return;
+      setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
     });
 
     return () => {
@@ -112,8 +132,10 @@ export function PersonalInfoScreen({
     (auth.userId ? t.loadingEmail : t.notSignedIn);
   const displayName = profile.displayName?.trim() || t.addName;
   const phone = profile.phone?.trim()
-    ? formatUsPhoneDisplay(profile.phone)
+    ? formatUsPhoneDisplay(profile.phone) || phoneDigitsForDisplay(profile.phone)
     : t.addPhone;
+  const phoneVerified = Boolean(profile.verification.phone);
+  const dob = profile.dateOfBirth?.trim() || t.addDateOfBirth;
 
   const saveName = (nextName: string) => {
     if (!nextName) return;
@@ -125,13 +147,14 @@ export function PersonalInfoScreen({
     }
   };
 
-  const savePhone = (nextPhone: string) => {
-    const normalized = formatUsPhoneDisplay(nextPhone);
-    const next = updateProfileFields({ phone: normalized });
+  const saveDob = (raw: string) => {
+    const value = raw.trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return;
+    const next = updateProfileFields({ dateOfBirth: value });
     setProfile(refreshProfileStats(next, auth.userId));
     setEditing(null);
     if (auth.userId) {
-      void updateRemoteProfile(auth.userId, { phone: normalized }).catch(() => undefined);
+      void updateRemoteProfile(auth.userId, { date_of_birth: value }).catch(() => undefined);
     }
   };
 
@@ -160,8 +183,17 @@ export function PersonalInfoScreen({
           icon={<Phone className="h-5 w-5" style={{ color: GREEN }} />}
           label={t.phone}
           value={phone}
-          onClick={() => setEditing("phone")}
+          badge={phoneVerified ? t.phoneVerifiedBadge : profile.phone?.trim() ? t.phoneNotVerified : null}
+          onClick={() => setPhoneSheetOpen(true)}
         />
+        <p className="px-1 text-[12px] leading-relaxed text-gray-500">{t.phoneKycHint}</p>
+        <Row
+          icon={<User className="h-5 w-5" style={{ color: GREEN }} />}
+          label={t.dateOfBirth}
+          value={dob}
+          onClick={() => setEditing("dob")}
+        />
+        <p className="px-1 text-[12px] leading-relaxed text-gray-500">{t.dateOfBirthHint}</p>
       </div>
 
       <ProfileFieldEditSheet
@@ -174,14 +206,34 @@ export function PersonalInfoScreen({
         onSave={saveName}
       />
       <ProfileFieldEditSheet
-        open={editing === "phone"}
-        title={t.phone}
-        label={t.phoneLabel}
-        value={profile.phone}
-        inputType="tel"
-        placeholder={t.phonePlaceholder}
+        open={editing === "dob"}
+        title={t.dateOfBirth}
+        label={t.dateOfBirth}
+        value={profile.dateOfBirth || ""}
+        placeholder="YYYY-MM-DD"
         onClose={() => setEditing(null)}
-        onSave={savePhone}
+        onSave={saveDob}
+      />
+      <PhoneVerifySheet
+        open={phoneSheetOpen}
+        initialPhone={profile.phone}
+        alreadyVerified={phoneVerified}
+        onClose={() => {
+          setPhoneSheetOpen(false);
+          setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
+        }}
+        onVerified={(nextPhone) => {
+          const current = loadUserProfile();
+          saveUserProfile({
+            ...current,
+            phone: nextPhone,
+            verification: { ...current.verification, phone: true },
+          });
+          setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
+          if (auth.userId) {
+            void updateRemoteProfile(auth.userId, { phone: nextPhone }).catch(() => undefined);
+          }
+        }}
       />
     </div>
   );

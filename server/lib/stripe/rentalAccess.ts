@@ -11,6 +11,7 @@ export type RentalPaymentRow = {
   stripe_payment_status: string | null;
   stripe_payment_intent_id: string | null;
   stripe_deposit_payment_intent_id: string | null;
+  rental_total_cents: number | null;
   returned_at: string | null;
   deposit_claim_deadline_at: string | null;
   end_date: string;
@@ -23,7 +24,7 @@ export async function fetchRentalForPayments(
   const { data, error } = await admin
     .from("rentals")
     .select(
-      "id, owner_id, renter_id, listing_id, status, deposit_amount_cents, deposit_status, stripe_payment_status, stripe_payment_intent_id, stripe_deposit_payment_intent_id, returned_at, deposit_claim_deadline_at, end_date",
+      "id, owner_id, renter_id, listing_id, status, deposit_amount_cents, deposit_status, stripe_payment_status, stripe_payment_intent_id, stripe_deposit_payment_intent_id, rental_total_cents, returned_at, deposit_claim_deadline_at, end_date",
     )
     .eq("id", rentalId)
     .maybeSingle();

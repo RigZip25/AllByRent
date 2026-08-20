@@ -1,9 +1,10 @@
 import type { ListingDraft } from "../screens/listing/types";
 import { getActiveRentLocationLabel, getProfileCity } from "./listingStorage";
 import { loadUserProfile } from "./userProfileStorage";
-import { formatMoney } from "./regionalDisplay";
+import { formatMoney, formatMoneyPerDay, perDaySuffix } from "./regionalDisplay";
 import {
   isNewGarageHost,
+  normalizeGarageIdentity,
   resolveGarageAccent,
   type GarageAccentId,
   type GarageShopKind,
@@ -48,7 +49,13 @@ export function garageTrustLine(
   distance: string;
 } {
   const meta = hostId ? hostMeta?.[hostId] : undefined;
-  const name = garageDisplayName(hostId, meta ? { [hostId!]: meta.displayName } : undefined);
+  const customName =
+    meta && "shopName" in meta && typeof meta.shopName === "string"
+      ? meta.shopName.trim()
+      : "";
+  const name =
+    customName ||
+    garageDisplayName(hostId, meta ? { [hostId!]: meta.displayName } : undefined);
   const city = getProfileCity().trim().toLowerCase();
   const active = getActiveRentLocationLabel().trim().toLowerCase();
   const distance = city && active && city === active ? "Near you" : "Nearby";
@@ -104,6 +111,27 @@ export function listingMatchesCategory(draft: ListingDraft, category: string | n
   return draft.category.trim().toLowerCase() === category.trim().toLowerCase();
 }
 
+export type BrowseInterestMatch = {
+  category: string;
+  subcategory?: string;
+};
+
+/** Match if any selected interest fits (category-wide or category + subcategory). */
+export function listingMatchesBrowseInterests(
+  draft: ListingDraft,
+  interests: BrowseInterestMatch[],
+): boolean {
+  if (!interests.length) return true;
+  const draftCat = draft.category.trim().toLowerCase();
+  const draftSub = (draft.subcategory ?? "").trim().toLowerCase();
+  return interests.some((interest) => {
+    if (draftCat !== interest.category.trim().toLowerCase()) return false;
+    const wantSub = interest.subcategory?.trim().toLowerCase() ?? "";
+    if (!wantSub) return true;
+    return draftSub === wantSub;
+  });
+}
+
 function parsePriceAmount(raw: string): number | null {
   const n = Number.parseFloat(raw.replace(/[^0-9.]/g, ""));
   return Number.isFinite(n) ? n : null;
@@ -119,11 +147,15 @@ export function formatListingPriceLine(draft: ListingDraft): string {
   if (draft.modes.gift) return "Free";
   if (draft.modes.rent && draft.pricing.dailyRate.trim()) {
     const rate = parsePriceAmount(draft.pricing.dailyRate);
-    return rate !== null ? `${formatMoney(rate)}/day` : `${draft.pricing.dailyRate}/day`;
+    return rate !== null
+      ? formatMoneyPerDay(rate)
+      : `${draft.pricing.dailyRate}${perDaySuffix()}`;
   }
   if (draft.pricing.dailyRate.trim()) {
     const rate = parsePriceAmount(draft.pricing.dailyRate);
-    return rate !== null ? `${formatMoney(rate)}/day` : `${draft.pricing.dailyRate}/day`;
+    return rate !== null
+      ? formatMoneyPerDay(rate)
+      : `${draft.pricing.dailyRate}${perDaySuffix()}`;
   }
   if (draft.pricing.salePrice.trim()) {
     const sale = parsePriceAmount(draft.pricing.salePrice);
@@ -165,6 +197,9 @@ export type HostGarageMeta = {
   displayName: string;
   rating: number;
   createdAt?: string | null;
+  shopKind?: GarageShopKind;
+  accentId?: GarageAccentId;
+  shopName?: string;
 };
 
 export function groupListingsByGarage(
@@ -177,6 +212,16 @@ export function groupListingsByGarage(
     const bucket = byHost.get(hostId) ?? [];
     bucket.push(listing);
     byHost.set(hostId, bucket);
+  }
+
+  let selfId = "";
+  let selfIdentity: ReturnType<typeof loadUserProfile>["garageIdentity"] | null = null;
+  try {
+    const self = loadUserProfile();
+    selfId = self.id?.trim() ?? "";
+    selfIdentity = self.garageIdentity;
+  } catch {
+    /* ignore */
   }
 
   return [...byHost.entries()].map(([hostId, items]) => {
@@ -192,18 +237,24 @@ export function groupListingsByGarage(
     let accentId: GarageAccentId | undefined;
     let accentColor: string | undefined;
     let accentSoft: string | undefined;
-    try {
-      const self = loadUserProfile();
-      if (self.id && hostId && self.id === hostId) {
-        const identity = self.garageIdentity;
-        const accent = resolveGarageAccent(identity);
-        shopKind = identity.shopKind;
-        accentId = identity.accentId;
-        accentColor = accent.color;
-        accentSoft = accent.soft;
-      }
-    } catch {
-      /* ignore */
+
+    const fromMeta =
+      meta?.accentId || meta?.shopKind
+        ? normalizeGarageIdentity({
+            shopKind: meta.shopKind,
+            accentId: meta.accentId,
+            shopName: meta.shopName,
+          })
+        : null;
+    const fromSelf =
+      selfIdentity && selfId && hostId && selfId === hostId ? selfIdentity : null;
+    const identity = fromSelf ?? fromMeta;
+    if (identity) {
+      const accent = resolveGarageAccent(identity);
+      shopKind = identity.shopKind;
+      accentId = identity.accentId;
+      accentColor = accent.color;
+      accentSoft = accent.soft;
     }
 
     return {

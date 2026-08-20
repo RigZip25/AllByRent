@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AlertTriangle, ArrowLeft, KeyRound } from "lucide-react";
 import { requestAccountDeletion, signInWithPasskey } from "../../lib/auth";
+import { dismissNativeKeyboard } from "../../lib/dismissKeyboard";
 import { useMessages } from "../../lib/i18n/react";
 import { resetAllAppData } from "../../lib/resetAppStorage";
 
@@ -46,6 +47,7 @@ export function DeleteAccountScreen({
         return;
       }
       setMessage(result.message);
+      await dismissNativeKeyboard();
       await resetAllAppData();
       onDone();
     });

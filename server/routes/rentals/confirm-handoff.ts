@@ -17,6 +17,7 @@ function generatePin(): string {
 /**
  * Dual-sided handoff confirm.
  * Host + renter each confirm their side; status flips only when both sides are done.
+ * Contactless pickup: renter PIN confirm alone starts the rental (host staged access).
  */
 export default withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
@@ -56,7 +57,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const { data: rental, error } = await admin
     .from("rentals")
     .select(
-      "id, owner_id, renter_id, status, pickup_pin, return_pin, host_handed_over_at, renter_received_at, renter_returned_at, host_accepted_return_at, picked_up_at, returned_at, due_at, end_date",
+      "id, owner_id, renter_id, status, booking_mode, pickup_pin, return_pin, host_handed_over_at, renter_received_at, renter_returned_at, host_accepted_return_at, picked_up_at, returned_at, due_at, end_date",
     )
     .eq("id", rentalId)
     .maybeSingle();
@@ -73,6 +74,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
+  const contactless = String(rental.booking_mode ?? "") === "contactless";
   const now = new Date().toISOString();
   const patch: Record<string, string | null> = {};
 
@@ -102,6 +104,10 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       if (!rental.host_handed_over_at) patch.host_handed_over_at = now;
     } else if (!rental.renter_received_at) {
       patch.renter_received_at = now;
+      // Contactless: unlocking on-site starts the deal — host already staged access + PIN.
+      if (contactless && !rental.host_handed_over_at) {
+        patch.host_handed_over_at = now;
+      }
     }
 
     const hostDone = Boolean(rental.host_handed_over_at || patch.host_handed_over_at);

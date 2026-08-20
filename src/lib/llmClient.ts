@@ -46,10 +46,22 @@ export function isLlmConfigured(): boolean {
 /** @deprecated Use isLlmConfigured */
 export const isAnthropicConfigured = isLlmConfigured;
 
+async function authHeaders(): Promise<Record<string, string>> {
+  try {
+    const { getAccessToken } = await import("./stripePayments");
+    const token = await getAccessToken();
+    if (token) return { Authorization: `Bearer ${token}` };
+  } catch {
+    // ignore — anonymous draft moderation still allowed server-side
+  }
+  return {};
+}
+
 export async function postLlmChat(request: LlmChatRequest): Promise<LlmChatResponse> {
+  const extra = await authHeaders();
   const response = await fetch(LLM_API_URL, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...extra },
     body: JSON.stringify(request),
   });
 

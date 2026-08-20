@@ -1,3 +1,5 @@
+import { Capacitor } from "@capacitor/core";
+import { dismissNativeKeyboard } from "./dismissKeyboard";
 import { getMessages } from "./i18n";
 
 const FOUNDING_HOST_PROMO_SEEN_KEY = "founding_host_promo_seen";
@@ -86,6 +88,11 @@ function resolvePostResetUrl(): string | null {
 /** Wipe Evorios local state, PWA caches/service workers, and reload. */
 export async function resetAllAppData(): Promise<void> {
   if (typeof window === "undefined") return;
+  // Dismiss soft keyboard before wipe/reload so FirstHello is not clipped by a stuck iOS keyboard.
+  await dismissNativeKeyboard();
+  if (Capacitor.isNativePlatform()) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
   try {
     clearWebStorage();
     await Promise.all([unregisterServiceWorkers(), clearCacheStorage()]);

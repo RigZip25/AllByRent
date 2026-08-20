@@ -4,6 +4,12 @@ import { AnimatePresence, motion } from "motion/react";
 import type { ListingDraft, MinimumRentalPeriod } from "./types";
 import { getPublishedListingById, updatePublishedListing } from "../../lib/listingStorage";
 import { getListingDisplayTitle } from "../../lib/listingQr";
+import {
+  distanceInputFromMiles,
+  formatDistanceFromMiles,
+  formatWeightFromLbs,
+  milesFromDistanceInput,
+} from "../../lib/regionalDisplay";
 
 const PRIMARY_GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -247,7 +253,10 @@ export function ListingSummary({
       {
         key: "weight",
         label: "Weight (lbs)",
-        value: (l) => (typeof l.handoff.itemWeightLbs === "number" ? `${l.handoff.itemWeightLbs} lbs` : "—"),
+        value: (l) =>
+          typeof l.handoff.itemWeightLbs === "number"
+            ? formatWeightFromLbs(l.handoff.itemWeightLbs)
+            : "—",
         renderEditor: ({ value, setValue }) => (
           <input
             value={value}
@@ -272,8 +281,8 @@ export function ListingSummary({
       },
       {
         key: "deliveryMaxMiles",
-        label: "Delivery max miles",
-        value: (l) => `${l.handoff.deliveryMaxMiles} miles`,
+        label: "Delivery max distance",
+        value: (l) => formatDistanceFromMiles(l.handoff.deliveryMaxMiles, undefined, { plus: false }),
         renderEditor: ({ value, setValue }) => (
           <input
             value={value}
@@ -287,7 +296,9 @@ export function ListingSummary({
         save: ({ listingId, value }) => {
           const parsed = parseNonNegativeNumber(value);
           if (!parsed.ok) return parsed.message;
-          updatePublishedListing(listingId, { handoff: { deliveryMaxMiles: Math.round(parsed.value) } });
+          updatePublishedListing(listingId, {
+            handoff: { deliveryMaxMiles: milesFromDistanceInput(parsed.value) },
+          });
           return null;
         },
       },
@@ -418,7 +429,7 @@ export function ListingSummary({
           : config.key === "weight"
             ? (typeof listing.handoff.itemWeightLbs === "number" ? String(listing.handoff.itemWeightLbs) : "")
             : config.key === "deliveryMaxMiles"
-              ? String(listing.handoff.deliveryMaxMiles)
+              ? String(distanceInputFromMiles(listing.handoff.deliveryMaxMiles))
               : config.key === "deliveryRoundTripFee"
                 ? listing.handoff.deliveryRoundTripFee
                 : config.value(listing),

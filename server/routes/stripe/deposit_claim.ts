@@ -6,7 +6,7 @@ import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { fetchRentalForPayments } from "../../lib/stripe/rentalAccess";
 
-type Body = { rentalId?: string };
+type Body = { rentalId?: string; amountCents?: number; reason?: string };
 
 const CLAIM_WINDOW_MS = 48 * 60 * 60 * 1000;
 
@@ -95,7 +95,34 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
-  const captured = await stripe.paymentIntents.capture(intent.id);
+  /**
+   * Partial capture (standard Stripe, not multicapture):
+   * - amount_to_capture < amount_capturable → capture N and auto-release remainder.
+   * - Multicapture (keep hold after partial) requires IC+ — not used here.
+   * Prefer /api/stripe/rental_invoice for toll/fuel/late so the damage hold stays.
+   * See docs/DEPOSIT_PARTIAL_CAPTURE.md.
+   */
+  const requestedRaw =
+    typeof (req.body as Body)?.amountCents === "number"
+      ? Math.round((req.body as Body).amountCents as number)
+      : null;
+  const capturable = intent.amount_capturable ?? intent.amount ?? 0;
+  const reason =
+    typeof (req.body as Body)?.reason === "string" ? (req.body as Body).reason : null;
+
+  let amountToCapture = capturable;
+  let partial = false;
+  if (requestedRaw != null && requestedRaw >= 50 && requestedRaw < capturable) {
+    amountToCapture = requestedRaw;
+    partial = true;
+  }
+
+  const captured =
+    amountToCapture === capturable
+      ? await stripe.paymentIntents.capture(intent.id)
+      : await stripe.paymentIntents.capture(intent.id, {
+          amount_to_capture: amountToCapture,
+        });
 
   await admin
     .from("rentals")
@@ -110,5 +137,13 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     status: captured.status,
     depositStatus: "claimed",
     amountCaptured: captured.amount_received,
+    amountCapturableBefore: capturable,
+    partialCapture: partial,
+    remainderReleased: partial,
+    requestedAmountCents: requestedRaw,
+    reason,
+    note: partial
+      ? "Partial capture succeeded; uncaptured hold was released. Use rental invoices for incremental toll/fuel/late charges without releasing the damage hold."
+      : null,
   });
 });

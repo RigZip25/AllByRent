@@ -1,6 +1,10 @@
 import { Heart, QrCode, Shield, Star } from "lucide-react";
 import { useMessages } from "../../lib/i18n/react";
 import type { MediaRef } from "../../lib/mediaStore";
+import {
+  formatMoneyRaw,
+  formatMoneyRawPerDay,
+} from "../../lib/regionalDisplay";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 
 type OfferType = "Rent" | "Buy" | "Free";
@@ -43,12 +47,29 @@ export function ListingFeedCard({
   onSelect?: () => void;
   showFavoriteAction?: boolean;
 }) {
-  const depositLabel = useMessages().item.depositProtection;
+  const t = useMessages();
+  const depositLabel = t.item.depositProtection;
   const offerColors: Record<string, string> = {
     Rent: "bg-primary",
     Buy: "bg-blue-500",
     Free: "bg-accent",
   };
+
+  const offerLabel =
+    offerType === "Buy"
+      ? t.home.modeBuy
+      : offerType === "Free"
+        ? t.listing.review.free
+        : t.home.modeRent;
+
+  const priceDisplay = (() => {
+    if (!price || price === "—") return "—";
+    if (offerType === "Free") return t.listing.review.free;
+    if (offerType === "Buy") {
+      return formatMoneyRaw(price) ?? price;
+    }
+    return formatMoneyRawPerDay(price) ?? price;
+  })();
 
   return (
     <button
@@ -89,9 +110,7 @@ export function ListingFeedCard({
       <div className="p-3">
         <div className="flex items-start justify-between mb-1">
           <h3 className="font-semibold text-sm line-clamp-2 flex-1">{title}</h3>
-          <span className="text-sm font-bold text-primary ml-2">
-            {price ? `$${price}/day` : "—"}
-          </span>
+          <span className="text-sm font-bold text-primary ml-2">{priceDisplay}</span>
         </div>
 
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
@@ -109,7 +128,7 @@ export function ListingFeedCard({
             offerColors[offerType] || "bg-primary"
           } text-white text-xs px-2 py-1 rounded-md inline-block`}
         >
-          {offerType}
+          {offerLabel}
         </div>
       </div>
     </button>
@@ -132,4 +151,3 @@ function CoverThumb({ cover }: { cover?: MediaRef | null }) {
     </div>
   );
 }
-

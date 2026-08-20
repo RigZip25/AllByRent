@@ -167,6 +167,62 @@ export async function cancelRentalPayment(
   return { ok: true };
 }
 
+export type RefundRentalPaymentResult = {
+  ok: boolean;
+  reason?: string;
+  refundStatus?: "none" | "released" | "refund_submitted" | "contact_support" | "processing";
+  amountCents?: number;
+  mode?: string;
+};
+
+/** Cancel uncaptured auth or refund a captured rental charge (percent / amount). */
+export async function refundRentalPayment(params: {
+  rentalId: string;
+  amountCents?: number;
+  percent?: number;
+}): Promise<RefundRentalPaymentResult> {
+  if (!isStripePaymentsEnabled()) {
+    return { ok: true, refundStatus: "none", mode: "stripe_disabled" };
+  }
+
+  const token = await getAccessToken();
+  if (!token) {
+    return { ok: false, reason: "Sign in required" };
+  }
+
+  const res = await fetch("/api/stripe/payment_refund", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      rentalId: params.rentalId,
+      amountCents: params.amountCents,
+      percent: params.percent,
+    }),
+  });
+
+  const payload = (await res.json()) as RefundRentalPaymentResult & {
+    error?: string;
+    status?: string;
+  };
+  if (!res.ok || payload.ok === false) {
+    return {
+      ok: false,
+      reason: payload.error ?? payload.reason ?? "Refund failed",
+      refundStatus: "contact_support",
+    };
+  }
+
+  return {
+    ok: true,
+    refundStatus: payload.refundStatus ?? "processing",
+    amountCents: payload.amountCents,
+    mode: payload.mode,
+  };
+}
+
 export type DepositIntentResult =
   | {
       ok: true;
@@ -230,7 +286,10 @@ export async function releaseDepositHold(rentalId: string): Promise<{ ok: boolea
   return { ok: true };
 }
 
-export async function claimDepositHold(rentalId: string): Promise<{ ok: boolean; error?: string }> {
+export async function claimDepositHold(
+  rentalId: string,
+  options?: { amountCents?: number; reason?: string },
+): Promise<{ ok: boolean; error?: string }> {
   const token = await getAccessToken();
   if (!token) return { ok: false, error: "Sign in required" };
 
@@ -240,7 +299,11 @@ export async function claimDepositHold(rentalId: string): Promise<{ ok: boolean;
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ rentalId }),
+    body: JSON.stringify({
+      rentalId,
+      amountCents: options?.amountCents,
+      reason: options?.reason,
+    }),
   });
 
   const payload = (await res.json()) as { ok?: boolean; error?: string; reason?: string };
@@ -248,6 +311,59 @@ export async function claimDepositHold(rentalId: string): Promise<{ ok: boolean;
     return { ok: false, error: payload.error ?? payload.reason ?? "Claim failed" };
   }
   return { ok: true };
+}
+
+export type RentalInvoicePaymentResult =
+  | {
+      ok: true;
+      clientSecret: string;
+      paymentIntentId: string;
+      status: string;
+      invoiceId: string;
+      amountCents: number;
+    }
+  | { ok: false; reason: string };
+
+/** Renter pays a host-issued post-rental invoice / fine via Connect. */
+export async function createRentalInvoicePaymentIntent(params: {
+  rentalId: string;
+  invoiceId: string;
+  amountCents: number;
+  note?: string;
+  lines?: Array<{ kind?: string; label?: string; amountCents?: number }>;
+}): Promise<RentalInvoicePaymentResult> {
+  if (!isStripePaymentsEnabled()) {
+    return { ok: false, reason: "Stripe not configured" };
+  }
+
+  const token = await getAccessToken();
+  if (!token) {
+    return { ok: false, reason: "Sign in required" };
+  }
+
+  const res = await fetch("/api/stripe/rental_invoice", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(params),
+  });
+
+  const payload = (await res.json()) as RentalInvoicePaymentResult & {
+    error?: string;
+    reason?: string;
+  };
+  if (!res.ok) {
+    return { ok: false, reason: payload.error ?? `Invoice payment failed (${res.status})` };
+  }
+  if (!payload.ok) {
+    return { ok: false, reason: payload.reason ?? payload.error ?? "Stripe not configured" };
+  }
+  if (!("clientSecret" in payload) || !payload.clientSecret) {
+    return { ok: false, reason: "Missing client secret" };
+  }
+  return payload;
 }
 
 export type GarageCheckoutIntentResult =
@@ -300,12 +416,15 @@ export async function createGarageCartCheckoutIntent(params: {
     }),
   });
 
-  const payload = (await res.json()) as GarageCheckoutIntentResult & { error?: string };
-  if (!res.ok) {
-    return { ok: false, reason: responseFailureReason(payload) ?? `Checkout failed (${res.status})` };
-  }
-  if (!payload.ok) {
-    return { ok: false, reason: payload.reason ?? "Stripe not configured" };
+  const payload = (await res.json()) as GarageCheckoutIntentResult & {
+    error?: string;
+    reason?: string;
+  };
+  if (!res.ok || !payload.ok) {
+    return {
+      ok: false,
+      reason: responseFailureReason(payload) ?? `Checkout failed (${res.status})`,
+    };
   }
   if (!("clientSecret" in payload) || !payload.clientSecret) {
     return { ok: false, reason: "Missing client secret" };
@@ -354,11 +473,14 @@ export async function createAuctionCheckoutIntent(params: {
   return payload;
 }
 
-export type ConnectAccountLinkResult = { ok: true; url: string } | { ok: false; reason: string };
+export type ConnectAccountLinkResult =
+  | { ok: true; url: string }
+  | { ok: false; reason: string; code?: string };
 
-function friendlyConnectError(raw: string): string {
+function friendlyConnectError(raw: string, code?: string): string {
   const lower = raw.toLowerCase();
   if (
+    code === "platform_profile" ||
     lower.includes("responsibilities") ||
     lower.includes("managing losses") ||
     lower.includes("platform-profile") ||
@@ -373,13 +495,16 @@ function friendlyConnectError(raw: string): string {
     lower.includes("signed up for connect") ||
     (lower.includes("connect") && lower.includes("not enabled"))
   ) {
-    return "Stripe Connect isn’t enabled for this platform. In Stripe Dashboard → Connect, complete platform profile / get started, then try again.";
+    return "Stripe Connect isn’t enabled for this platform. In Stripe Dashboard → Connect, complete platform profile / get started, then try again. https://dashboard.stripe.com/settings/connect/platform-profile";
   }
   if (lower.includes("responsible") || lower.includes("platform profile")) {
     return "Finish Stripe Connect platform setup in the Dashboard (responsibilities / platform profile), then try again. https://dashboard.stripe.com/settings/connect/platform-profile";
   }
   if (lower.includes("invalid api key") || lower.includes("api key")) {
     return "Stripe API key problem. Check STRIPE_SECRET_KEY on Vercel (test vs live must match the publishable key).";
+  }
+  if (/failed to fetch|networkerror|load failed|network request failed/i.test(raw)) {
+    return "Network error reaching Stripe Connect. Check your connection and try again.";
   }
   return raw;
 }
@@ -414,9 +539,12 @@ export async function createConnectAccountLink(returnPath: string): Promise<Conn
     };
   }
 
-  let payload: ConnectAccountLinkResult & { error?: string } = { ok: false, reason: "" };
+  let payload: ConnectAccountLinkResult & { error?: string; code?: string } = {
+    ok: false,
+    reason: "",
+  };
   try {
-    payload = (await res.json()) as ConnectAccountLinkResult & { error?: string };
+    payload = (await res.json()) as ConnectAccountLinkResult & { error?: string; code?: string };
   } catch {
     return { ok: false, reason: `Connect failed (HTTP ${res.status}, invalid response).` };
   }
@@ -426,13 +554,16 @@ export async function createConnectAccountLink(returnPath: string): Promise<Conn
       ok: false,
       reason: friendlyConnectError(
         responseFailureReason(payload) ?? `Connect failed (${res.status})`,
+        payload.code,
       ),
+      ...(payload.code ? { code: payload.code } : {}),
     };
   }
   if (!payload.ok) {
     return {
       ok: false,
-      reason: friendlyConnectError(payload.reason ?? "Stripe Connect not configured"),
+      reason: friendlyConnectError(payload.reason ?? "Stripe Connect not configured", payload.code),
+      ...(payload.code ? { code: payload.code } : {}),
     };
   }
   if (!("url" in payload) || !payload.url) {

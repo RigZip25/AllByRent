@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 import { MrRentanoAnimated } from "./MrRentanoAnimated";
+import { CategoryFactCard } from "../../components/CategoryFactCard";
 import type { AppMode } from "../../lib/appMode";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMessages } from "../../lib/i18n/react";
@@ -69,6 +70,8 @@ export function EmptySubcategoryShelf({
         <ArrowLeft className="h-4 w-4" />
         {t.shelf.backToSubcategories}
       </button>
+
+      <CategoryFactCard category={categoryName} />
 
       <div
         className="relative overflow-hidden rounded-3xl border px-5 pb-6 pt-8 text-center"

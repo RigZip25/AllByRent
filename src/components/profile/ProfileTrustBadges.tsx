@@ -1,5 +1,7 @@
 import { BadgeCheck, Shield, Star } from "lucide-react";
 import { useMessages } from "../../lib/i18n/react";
+import { isPhoneOtpClientEnabled } from "../../lib/phoneE164";
+import { isStripeIdentityClientEnabled } from "../../lib/stripeIdentityConfig";
 import type { UserProfile } from "../../lib/userProfileStorage";
 
 const GREEN = "#0D5C3A";
@@ -23,16 +25,28 @@ function Badge({
 }
 
 export function ProfileTrustBadges({ profile }: { profile: UserProfile }) {
-  const { profile: t } = useMessages();
+  const { profile: t, profileDeep } = useMessages();
   const totalReviews = profile.host.reviewCount + profile.renter.reviewCount;
+  // Hide deferred Phone / Identity badges entirely (no English "Phone ✓" / "ID" while OTP/Identity are off).
+  const showPhone =
+    isPhoneOtpClientEnabled() && Boolean(profile.verification.phone);
+  const showIdentity =
+    isStripeIdentityClientEnabled() && Boolean(profile.verification.identity);
+  const trustCopy = profileDeep.publicProfile;
 
   return (
     <div className="mt-2 flex flex-wrap gap-1.5">
-      {profile.verification.phone ? (
-        <Badge icon={<BadgeCheck className="h-3 w-3" />} label="Phone ✓" />
+      {showPhone ? (
+        <Badge
+          icon={<BadgeCheck className="h-3 w-3" />}
+          label={trustCopy.phoneVerified}
+        />
       ) : null}
-      {profile.verification.identity ? (
-        <Badge icon={<Shield className="h-3 w-3" />} label="ID Verified ✓" />
+      {showIdentity ? (
+        <Badge
+          icon={<Shield className="h-3 w-3" />}
+          label={trustCopy.idVerified}
+        />
       ) : null}
       {totalReviews > 0 ? (
         <Badge

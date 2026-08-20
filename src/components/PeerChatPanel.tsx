@@ -12,6 +12,13 @@ import {
 } from "../lib/messagesStorage";
 import { MASCOT_NAME } from "../lib/brand";
 import { useMessages } from "../lib/i18n/react";
+import { moderatePeerChatMessage } from "../lib/peerChatModeration";
+import {
+  formatCooldownHours,
+  getModerationCooldownRemaining,
+  isInModerationCooldown,
+  recordModerationStrike,
+} from "../lib/softModerationStrikes";
 
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
@@ -23,6 +30,10 @@ type PeerChatPanelProps = {
   itemTitle?: string;
   /** Compact embed (e.g. inside ActiveRental card). */
   embedded?: boolean;
+  /** When true, history stays visible but sending is disabled. */
+  readOnly?: boolean;
+  /** Optional status banner (e.g. post-rental tolls & fines mode). */
+  banner?: string | null;
   onRequireAuth?: () => void;
 };
 
@@ -32,10 +43,12 @@ export function PeerChatPanel({
   peerId,
   itemTitle,
   embedded = false,
+  readOnly = false,
+  banner = null,
   onRequireAuth,
 }: PeerChatPanelProps) {
   const auth = useAuth();
-  const { peerChat, common } = useMessages();
+  const { peerChat, common, listing } = useMessages();
   const mascotHandle = MASCOT_NAME.replace(/\s+/g, "").toLowerCase();
   const threadKey = rentalId
     ? rentalThreadKey(rentalId)
@@ -48,6 +61,7 @@ export function PeerChatPanel({
   const [messages, setMessages] = useState<ChatMessage[]>(() => loadChatMessagesLocal(threadKey));
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [gateMessage, setGateMessage] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -67,7 +81,6 @@ export function PeerChatPanel({
       rentalId,
       listingId,
       onInsert: (message) => {
-        // Listing realtime is listing-scoped — filter to this peer pair.
         if (listingId && auth.userId) {
           const pair = new Set([auth.userId, peerId]);
           if (!pair.has(message.senderId) || !pair.has(message.recipientId)) return;
@@ -90,41 +103,80 @@ export function PeerChatPanel({
   }, [messages.length]);
 
   const send = async () => {
-    const body = text.trim();
-    if (!body || sending) return;
+    const rawBody = text.trim();
+    if (!rawBody || sending || readOnly) return;
     if (!auth.userId) {
       onRequireAuth?.();
       return;
     }
     if (!peerId || peerId === "local") return;
 
+    setGateMessage(null);
+
+    if (isInModerationCooldown(auth.userId)) {
+      const hours = formatCooldownHours(getModerationCooldownRemaining(auth.userId));
+      setGateMessage(listing.moderationCooldownWait(hours));
+      return;
+    }
+
     setSending(true);
-    setText("");
-    const msg: ChatMessage = {
-      id:
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : `msg-${Date.now()}`,
-      rentalId: rentalId ?? null,
-      listingId: listingId ?? null,
-      senderId: auth.userId,
-      recipientId: peerId,
-      body,
-      createdAt: new Date().toISOString(),
-    };
-    appendChatMessageLocal(msg);
-    setMessages((prev) => [...prev, msg]);
     try {
-      await sendChatMessageRemote({
-        rentalId,
-        listingId,
+      const moderation = await moderatePeerChatMessage(rawBody);
+      if (!moderation.ok) {
+        if (moderation.reasonCode === "off_platform") {
+          setGateMessage(peerChat.moderationOffPlatform);
+          return;
+        }
+        const strike = recordModerationStrike({
+          userId: auth.userId,
+          severe: moderation.reasonCode === "blocked",
+        });
+        if (strike.hasCooldown) {
+          setGateMessage(
+            `${peerChat.moderationBlocked} ${listing.moderationCooldownWait(
+              formatCooldownHours(strike.cooldownMs),
+            )}`,
+          );
+        } else if (moderation.reasonCode === "verification_failed") {
+          setGateMessage(peerChat.moderationVerifyFailed);
+        } else {
+          setGateMessage(
+            `${peerChat.moderationBlocked} ${listing.moderationSoftNudgeChat}`,
+          );
+        }
+        return;
+      }
+
+      const body = moderation.cleanedBody;
+      setText("");
+      const msg: ChatMessage = {
+        id:
+          typeof crypto !== "undefined" && "randomUUID" in crypto
+            ? crypto.randomUUID()
+            : `msg-${Date.now()}`,
+        rentalId: rentalId ?? null,
+        listingId: listingId ?? null,
         senderId: auth.userId,
         recipientId: peerId,
         body,
-        itemTitle,
-      });
+        createdAt: new Date().toISOString(),
+      };
+      appendChatMessageLocal(msg);
+      setMessages((prev) => [...prev, msg]);
+      try {
+        await sendChatMessageRemote({
+          rentalId,
+          listingId,
+          senderId: auth.userId,
+          recipientId: peerId,
+          body,
+          itemTitle,
+        });
+      } catch {
+        // Local bubble already shown; peer may still get push from notify fallback.
+      }
     } catch {
-      // Local bubble already shown; peer may still get push from notify fallback.
+      setGateMessage(peerChat.moderationVerifyFailed);
     } finally {
       setSending(false);
     }
@@ -148,6 +200,26 @@ export function PeerChatPanel({
         </>
       ) : null}
 
+      {banner ? (
+        <p
+          className={`rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950 ${
+            embedded ? "mt-3" : "mb-2"
+          }`}
+        >
+          {banner}
+        </p>
+      ) : null}
+
+      {readOnly ? (
+        <p
+          className={`rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-700 ${
+            embedded && !banner ? "mt-3" : "mt-2"
+          }`}
+        >
+          {peerChat.closedReadOnly}
+        </p>
+      ) : null}
+
       <div
         ref={listRef}
         className={`space-y-2 overflow-y-auto rounded-xl border bg-[#F7FBF8] p-3 ${
@@ -156,9 +228,7 @@ export function PeerChatPanel({
         style={{ borderColor: BORDER }}
       >
         {messages.length === 0 ? (
-          <p className="text-sm text-gray-500">
-            {peerChat.empty}
-          </p>
+          <p className="text-sm text-gray-500">{peerChat.empty}</p>
         ) : (
           messages.map((m) => {
             const mine = Boolean(auth.userId && m.senderId === auth.userId);
@@ -180,7 +250,17 @@ export function PeerChatPanel({
         )}
       </div>
 
-      <div className={`flex gap-2 ${embedded ? "mt-3" : "shrink-0 border-t bg-white px-0 pt-3"}`} style={{ borderColor: BORDER }}>
+      {gateMessage ? (
+        <p className={`text-xs text-amber-800 ${embedded ? "mt-2" : "shrink-0 px-0 pt-2"}`}>
+          {gateMessage}
+        </p>
+      ) : null}
+
+      {readOnly ? null : (
+      <div
+        className={`flex gap-2 ${embedded ? "mt-3" : "shrink-0 border-t bg-white px-0 pt-3"}`}
+        style={{ borderColor: BORDER }}
+      >
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -190,6 +270,7 @@ export function PeerChatPanel({
           placeholder={peerChat.placeholder}
           className="flex-1 rounded-xl border bg-white px-3 py-2 text-sm outline-none focus:border-[#0D5C3A]"
           style={{ borderColor: BORDER }}
+          disabled={sending}
         />
         <button
           type="button"
@@ -201,6 +282,7 @@ export function PeerChatPanel({
           {common.send}
         </button>
       </div>
+      )}
     </div>
   );
 }

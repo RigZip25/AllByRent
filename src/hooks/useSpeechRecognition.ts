@@ -36,30 +36,28 @@ function messageForSpeechError(code: string): string | null {
   }
 }
 
-async function ensureMicrophonePermission(): Promise<"granted" | "denied" | "unavailable"> {
+/**
+ * Soft permission check only — do NOT open getUserMedia here.
+ * Opening (then stopping) a mic stream before SpeechRecognition often
+ * leaves Chrome/Safari “listening” with no transcripts.
+ */
+async function probeMicrophonePermission(): Promise<"granted" | "denied" | "prompt" | "unavailable"> {
   if (typeof window === "undefined") return "unavailable";
   if (!window.isSecureContext) return "denied";
-  if (!navigator.mediaDevices?.getUserMedia) return "unavailable";
 
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-      },
-    });
-    stream.getTracks().forEach((track) => track.stop());
-    return "granted";
-  } catch (err) {
-    const name = err instanceof DOMException ? err.name : "";
-    if (name === "NotAllowedError" || name === "PermissionDeniedError" || name === "SecurityError") {
-      return "denied";
+    const perms = navigator.permissions;
+    if (perms?.query) {
+      const status = await perms.query({ name: "microphone" as PermissionName });
+      if (status.state === "denied") return "denied";
+      if (status.state === "granted") return "granted";
+      return "prompt";
     }
-    if (name === "NotFoundError" || name === "DevicesNotFoundError") {
-      return "denied";
-    }
-    return "unavailable";
+  } catch {
+    /* Chromium may reject microphone PermissionName in some builds */
   }
+
+  return "prompt";
 }
 
 export type SpeechDraftHandlers = {
@@ -75,9 +73,12 @@ export function useSpeechRecognition(lang?: string) {
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const handlersRef = useRef<SpeechDraftHandlers>({ onDraft: () => undefined });
+  /** User asked us to stop (or unmount) — do not auto-restart. */
   const intentionalStopRef = useRef(false);
+  /** Session should keep listening (continuous dictation until mic tap). */
+  const wantListeningRef = useRef(false);
+  const committedRef = useRef("");
   const lastInterimRef = useRef("");
-  const deliveredFinalRef = useRef(false);
   const langRef = useRef(lang);
   langRef.current = lang;
 
@@ -86,8 +87,17 @@ export function useSpeechRecognition(lang?: string) {
     window.isSecureContext &&
     getSpeechRecognitionCtor() != null;
 
+  const deliverDraft = useCallback(() => {
+    const text = (committedRef.current || lastInterimRef.current).trim();
+    if (text) handlersRef.current.onDraft(text);
+    committedRef.current = "";
+    lastInterimRef.current = "";
+    setInterim("");
+  }, []);
+
   const stop = useCallback(() => {
     intentionalStopRef.current = true;
+    wantListeningRef.current = false;
     try {
       recognitionRef.current?.stop();
     } catch {
@@ -102,13 +112,12 @@ export function useSpeechRecognition(lang?: string) {
 
   const start = useCallback(
     async (handlers: SpeechDraftHandlers | ((text: string) => void)) => {
-      // Back-compat: older callers passed only onFinal(text).
       handlersRef.current =
         typeof handlers === "function" ? { onDraft: handlers } : handlers;
       setError(null);
       setInterim("");
+      committedRef.current = "";
       lastInterimRef.current = "";
-      deliveredFinalRef.current = false;
 
       if (typeof window === "undefined" || !window.isSecureContext) {
         setError("Voice needs HTTPS. Open app.evorios.com (or localhost in dev).");
@@ -125,51 +134,69 @@ export function useSpeechRecognition(lang?: string) {
         return;
       }
 
-      intentionalStopRef.current = true;
-      try {
-        recognitionRef.current?.abort();
-      } catch {
-        /* ignore */
+      const micStatus = await probeMicrophonePermission();
+      if (micStatus === "denied") {
+        setError("Microphone permission is blocked. Allow mic for this site, then try again.");
+        return;
       }
+
+      // Tear down any prior session before starting a new one.
+      intentionalStopRef.current = true;
+      wantListeningRef.current = false;
+      const previous = recognitionRef.current;
+      if (previous) {
+        previous.onstart = null;
+        previous.onresult = null;
+        previous.onerror = null;
+        previous.onend = null;
+        try {
+          previous.abort();
+        } catch {
+          /* ignore */
+        }
+      }
+      recognitionRef.current = null;
+
       intentionalStopRef.current = false;
+      wantListeningRef.current = true;
 
       const recognition = new Ctor();
       recognitionRef.current = recognition;
-      // Resolve at start time so device language changes apply immediately.
       const resolved =
         langRef.current?.trim() ||
         resolveSpeechRecognitionLang() ||
         "en-US";
       recognition.lang = resolved;
       recognition.interimResults = true;
-      recognition.continuous = false;
+      // Keep listening until the user taps stop — otherwise the engine often
+      // ends before any transcript arrives (looks like “mic on, nothing happens”).
+      recognition.continuous = true;
       recognition.maxAlternatives = 1;
 
+      recognition.onstart = () => {
+        if (wantListeningRef.current) setListening(true);
+      };
+
       recognition.onresult = (event: SpeechRecognitionEvent) => {
-        let finalText = "";
         let interimText = "";
         for (let i = event.resultIndex; i < event.results.length; i += 1) {
-          const chunk = event.results[i]?.[0]?.transcript ?? "";
-          if (event.results[i]?.isFinal) {
-            finalText += chunk;
+          const result = event.results[i];
+          const chunk = result?.[0]?.transcript ?? "";
+          if (!chunk) continue;
+          if (result.isFinal) {
+            committedRef.current = `${committedRef.current} ${chunk}`.trim();
           } else {
             interimText += chunk;
           }
         }
 
-        if (interimText) {
-          const trimmed = interimText.trim();
-          lastInterimRef.current = trimmed;
-          setInterim(trimmed);
-          handlersRef.current.onInterim?.(trimmed);
-        }
+        const display = `${committedRef.current} ${interimText}`.trim();
+        if (interimText) lastInterimRef.current = interimText.trim();
+        if (committedRef.current) lastInterimRef.current = committedRef.current;
 
-        const trimmedFinal = finalText.trim();
-        if (trimmedFinal) {
-          deliveredFinalRef.current = true;
-          lastInterimRef.current = "";
-          setInterim("");
-          handlersRef.current.onDraft(trimmedFinal);
+        if (display) {
+          setInterim(display);
+          handlersRef.current.onInterim?.(display);
         }
       };
 
@@ -178,63 +205,49 @@ export function useSpeechRecognition(lang?: string) {
           setListening(false);
           return;
         }
+        // With continuous mode, no-speech can fire between phrases — ignore while still active.
+        if (event.error === "no-speech" && wantListeningRef.current) {
+          return;
+        }
         const message = messageForSpeechError(event.error);
         if (message) setError(message);
+        wantListeningRef.current = false;
         setListening(false);
       };
 
       recognition.onend = () => {
-        setListening(false);
-        // User stopped early, or engine ended without a final chunk — keep best draft.
-        if (!deliveredFinalRef.current) {
-          const leftover = lastInterimRef.current.trim();
-          if (leftover) handlersRef.current.onDraft(leftover);
-        }
-        lastInterimRef.current = "";
-        setInterim("");
-        intentionalStopRef.current = false;
-      };
-
-      const begin = () => {
-        try {
-          recognition.start();
-          setListening(true);
-        } catch {
-          setError("Microphone is busy. Tap the mic once and try again.");
-          setListening(false);
-        }
-      };
-
-      if (isLikelySafari()) {
-        begin();
-        void ensureMicrophonePermission().then((status) => {
-          if (status === "denied") {
-            setError("Microphone permission is blocked. Allow mic in Settings, then try again.");
-            intentionalStopRef.current = true;
-            try {
-              recognition.abort();
-            } catch {
-              /* ignore */
-            }
-            setListening(false);
+        // Browser often ends the session mid-dictation; restart while user still wants mic.
+        if (wantListeningRef.current && !intentionalStopRef.current) {
+          try {
+            recognition.start();
+            return;
+          } catch {
+            /* fall through — deliver whatever we have */
           }
-        });
-        return;
-      }
+        }
 
-      const micStatus = await ensureMicrophonePermission();
-      if (micStatus === "denied") {
-        setError("Microphone permission is blocked. Allow mic for this site, then try again.");
-        return;
+        setListening(false);
+        deliverDraft();
+        intentionalStopRef.current = false;
+        wantListeningRef.current = false;
+      };
+
+      try {
+        recognition.start();
+        setListening(true);
+      } catch {
+        wantListeningRef.current = false;
+        setError("Microphone is busy. Tap the mic once and try again.");
+        setListening(false);
       }
-      begin();
     },
-    [],
+    [deliverDraft],
   );
 
   useEffect(() => {
     return () => {
       intentionalStopRef.current = true;
+      wantListeningRef.current = false;
       try {
         recognitionRef.current?.abort();
       } catch {

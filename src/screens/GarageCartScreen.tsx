@@ -6,6 +6,15 @@ import {
   getCartTotals,
   removeFromGarageCart,
 } from "../lib/garageShopStorage";
+import {
+  cartToneForListing,
+  cascadeUnpaidOpenSaleLots,
+  dropGrayLinesFromCart,
+  getCheckoutGreenLines,
+  getDeviceOpenSaleCart,
+  OPEN_SALE_CART_EVENT,
+  resolveEndedOpenSales,
+} from "../lib/openSale";
 import { garageDisplayName } from "../lib/garageDisplay";
 import { useMediaUrl } from "../lib/useMediaUrl";
 import { useAuth } from "../hooks/AuthProvider";
@@ -14,7 +23,9 @@ import { PaymentLegalNotice } from "../components/payments/PaymentLegalNotice";
 import { PaymentsReadyBadge, PaymentsRequiredBanner } from "../components/payments/PaymentModeBanner";
 import {
   canProcessGaragePayments,
+  buildOpenSaleWinsCheckoutInput,
   completeGarageCartCheckout,
+  completeOpenSaleWinsCheckout,
   startGarageCartCheckout,
   type GarageCartCheckoutInput,
 } from "../lib/repositories/paymentsRepository";
@@ -73,8 +84,10 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
   const auth = useAuth();
   const signedIn = Boolean(auth.session);
   const [lines, setLines] = useState(() => getCartLines());
+  const [bidLines, setBidLines] = useState(() => getDeviceOpenSaleCart());
+  const [greenLines, setGreenLines] = useState(() => getCheckoutGreenLines());
   const totals = getCartTotals();
-  const hostId = lines[0]?.hostId;
+  const hostId = lines[0]?.hostId ?? bidLines[0]?.hostId ?? greenLines[0]?.hostId;
   const garageName = hostId ? garageDisplayName(hostId) : copy.garageFallback;
   const paymentsReady = canProcessGaragePayments();
   const [busy, setBusy] = useState(false);
@@ -83,8 +96,21 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
   const [guestMode, setGuestMode] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
   const [paidSuccess, setPaidSuccess] = useState<{ garageName: string; totalLabel: string } | null>(null);
+  const [checkoutKind, setCheckoutKind] = useState<"buynow" | "opensale">("buynow");
+
+  const greenCheckoutInput = useMemo(
+    () =>
+      buildOpenSaleWinsCheckoutInput({
+        hostId: greenLines[0]?.hostId ?? hostId ?? "",
+        garageName,
+        lines: greenLines,
+        guestEmail: signedIn ? undefined : guestEmail.trim().toLowerCase(),
+      }),
+    [garageName, guestEmail, greenLines, hostId, signedIn],
+  );
 
   const checkoutInput = useMemo<GarageCartCheckoutInput | null>(() => {
+    if (checkoutKind === "opensale") return greenCheckoutInput;
     if (lines.length === 0 || !hostId) return null;
     return {
       hostId,
@@ -95,13 +121,37 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
       totalUsd: totals.totalUsd,
       guestEmail: signedIn ? undefined : guestEmail.trim().toLowerCase(),
     };
-  }, [garageName, guestEmail, hostId, lines, signedIn, totals.platformFeeUsd, totals.subtotalUsd, totals.totalUsd]);
+  }, [
+    checkoutKind,
+    garageName,
+    guestEmail,
+    greenCheckoutInput,
+    hostId,
+    lines,
+    signedIn,
+    totals.platformFeeUsd,
+    totals.subtotalUsd,
+    totals.totalUsd,
+  ]);
 
-  const refresh = () => setLines(getCartLines());
+  const refresh = () => {
+    resolveEndedOpenSales();
+    cascadeUnpaidOpenSaleLots();
+    setLines(getCartLines());
+    setBidLines(getDeviceOpenSaleCart());
+    setGreenLines(getCheckoutGreenLines());
+  };
 
   useEffect(() => {
+    refresh();
     window.addEventListener("evorios-garage-cart", refresh);
-    return () => window.removeEventListener("evorios-garage-cart", refresh);
+    window.addEventListener(OPEN_SALE_CART_EVENT, refresh);
+    window.addEventListener("evorios-garage-bids", refresh);
+    return () => {
+      window.removeEventListener("evorios-garage-cart", refresh);
+      window.removeEventListener(OPEN_SALE_CART_EVENT, refresh);
+      window.removeEventListener("evorios-garage-bids", refresh);
+    };
   }, []);
 
   useEffect(() => {
@@ -117,15 +167,33 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
       garageName: checkoutInput.garageName,
       totalLabel: formatShopUsd(checkoutInput.totalUsd),
     };
-    void completeGarageCartCheckout(checkoutInput).then(() => {
+    const complete =
+      checkoutKind === "opensale" ? completeOpenSaleWinsCheckout : completeGarageCartCheckout;
+    void complete(checkoutInput).then(() => {
       setClientSecret(null);
       setPaidSuccess(summary);
+      setCheckoutKind("buynow");
       refresh();
     });
   };
 
-  const beginCheckout = () => {
-    if (!checkoutInput || !paymentsReady) return;
+  const beginCheckout = (kind: "buynow" | "opensale" = "buynow") => {
+    setCheckoutKind(kind);
+    const input =
+      kind === "opensale"
+        ? greenCheckoutInput
+        : lines.length && hostId
+          ? {
+              hostId,
+              garageName,
+              lines,
+              subtotalUsd: totals.subtotalUsd,
+              platformFeeUsd: totals.platformFeeUsd,
+              totalUsd: totals.totalUsd,
+              guestEmail: signedIn ? undefined : guestEmail.trim().toLowerCase(),
+            }
+          : null;
+    if (!input || !paymentsReady) return;
     if (!signedIn) {
       if (!guestMode) {
         setPaymentError(copy.signInOrGuest);
@@ -138,7 +206,7 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
     }
     setBusy(true);
     setPaymentError(null);
-    void startGarageCartCheckout(checkoutInput)
+    void startGarageCartCheckout(input)
       .then((result) => {
         if (!result.ok) {
           setPaymentError(result.reason);
@@ -204,7 +272,75 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
               <PaymentsReadyBadge />
             </div>
 
-            {lines.length === 0 ? (
+            {bidLines.length > 0 ? (
+              <div className="mb-4">
+                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-500">
+                  Open Sale bids · green leading · gray outbid
+                </p>
+                <ul className="space-y-2">
+                  {bidLines.map((line) => {
+                    const tone = cartToneForListing(line.listingId);
+                    const leading = tone === "leading" || tone === "pending_pay" || tone === "won";
+                    return (
+                      <li
+                        key={`bid-${line.listingId}`}
+                        className="flex gap-3 rounded-2xl border p-3"
+                        style={{
+                          borderColor: leading ? "#86EFAC" : BORDER,
+                          backgroundColor: leading ? "#ECFDF5" : "#F3F4F6",
+                        }}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="line-clamp-2 text-sm font-semibold text-gray-900">{line.title}</p>
+                          <p className="mt-1 text-base font-extrabold" style={{ color: GREEN }}>
+                            {formatShopUsd(line.amountUsd)}
+                          </p>
+                          <p className="mt-0.5 text-[12px] font-semibold text-gray-600">
+                            {tone === "leading"
+                              ? "You're leading"
+                              : tone === "pending_pay"
+                                ? "Won — pay now"
+                                : tone === "outbid"
+                                  ? "Outbid — raise by step"
+                                  : tone}
+                          </p>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <button
+                  type="button"
+                  onClick={() => {
+                    dropGrayLinesFromCart();
+                    refresh();
+                  }}
+                  className="mt-2 w-full rounded-xl border py-2.5 text-sm font-bold"
+                  style={{ borderColor: BORDER, color: GREEN }}
+                >
+                  Drop gray (lost) from cart
+                </button>
+                {greenLines.length > 0 ? (
+                  <button
+                    type="button"
+                    disabled={busy || !canPay}
+                    onClick={() => beginCheckout("opensale")}
+                    className="mt-2 w-full rounded-xl py-3 text-sm font-bold text-white disabled:opacity-60"
+                    style={{ backgroundColor: GREEN }}
+                  >
+                    {busy
+                      ? copy.preparing
+                      : `Pay ${greenLines.length} win${greenLines.length === 1 ? "" : "s"} · ${formatShopUsd(greenCheckoutInput?.totalUsd ?? 0)}`}
+                  </button>
+                ) : (
+                  <p className="mt-2 text-center text-[12px] text-gray-500">
+                    After the sale ends, green wins unlock one checkout here.
+                  </p>
+                )}
+              </div>
+            ) : null}
+
+            {lines.length === 0 && bidLines.length === 0 ? (
               <div className="rounded-2xl border bg-white p-8 text-center" style={{ borderColor: BORDER }}>
                 <p className="text-lg font-bold text-gray-900">{copy.emptyTitle}</p>
                 <p className="mt-2 text-[15px] text-gray-600">{copy.emptyBody}</p>
@@ -217,7 +353,7 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
                   {copy.backToGarage}
                 </button>
               </div>
-            ) : (
+            ) : lines.length > 0 ? (
               <ul className="space-y-3">
                 {lines.map((line) => (
                   <li
@@ -252,6 +388,8 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
                   </li>
                 ))}
               </ul>
+            ) : (
+              <p className="text-center text-sm text-gray-500">Buy-now shelf empty — bids above.</p>
             )}
 
             {clientSecret ? (
@@ -343,7 +481,7 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
               <button
                 type="button"
                 disabled={busy || !canPay}
-                onClick={beginCheckout}
+                onClick={() => beginCheckout("buynow")}
                 className="mt-4 w-full rounded-xl py-3.5 text-base font-bold disabled:opacity-60"
                 style={{ backgroundColor: AMBER, color: GREEN }}
               >

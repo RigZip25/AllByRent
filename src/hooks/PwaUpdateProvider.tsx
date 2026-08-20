@@ -9,6 +9,7 @@ import {
 } from "react";
 import { registerSW } from "virtual:pwa-register";
 import {
+  activateWaitingServiceWorker,
   hasPendingAppUpdate,
   probeServiceWorkerUpdate,
   watchServiceWorkerUpdates,
@@ -73,6 +74,8 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
   const applyingRef = useRef(false);
   const quietTimerRef = useRef(0);
   const updateAvailableRef = useRef(false);
+  /** Blocks mid-session reload while the user is explicitly checking for updates. */
+  const suppressAutoApplyRef = useRef(false);
   const buildStamp = formatBuildStamp();
 
   useEffect(() => {
@@ -88,14 +91,14 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
     setUpdateAvailable(false);
 
     try {
-      const pending = await hasPendingAppUpdate();
-      if (pending && updateSWRef.current) {
-        await updateSWRef.current(true);
-        return;
-      }
+      // vite-plugin-pwa `registerType: 'autoUpdate'` makes updateSW() a no-op — do not await it
+      // and return early (that left the Install sheet stuck on “Updating…” forever).
+      await activateWaitingServiceWorker();
+      // Always reload so the new shell loads and consumePwaUpdateSuccess can show the banner.
       window.location.reload();
-    } finally {
+    } catch (error) {
       applyingRef.current = false;
+      throw error;
     }
   }, []);
 
@@ -105,11 +108,13 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
   }, [applyUpdate]);
 
   const tryAutoApply = useCallback(() => {
+    if (suppressAutoApplyRef.current) return;
     if (!shouldAutoApplyDeferredUpdate()) return;
     void (async () => {
+      if (suppressAutoApplyRef.current) return;
       const pendingSw = await hasPendingAppUpdate();
-      const pendingFlag = readPwaUpdatePendingAt() != null || isSimulateUpdateRequested();
-      if (!pendingSw && !pendingFlag && !updateAvailableRef.current) return;
+      // Only reload when a waiting SW (or simulate) can actually install — never on a stale pending flag alone.
+      if (!pendingSw && !isSimulateUpdateRequested()) return;
       await applyUpdateRef.current();
     })();
   }, []);
@@ -127,19 +132,23 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
     }, Math.max(capped, 1000));
   }, [tryAutoApply]);
 
-  const markUpdateAvailable = useCallback(() => {
-    setUpdateAvailable(true);
-    updateAvailableRef.current = true;
-    if (readPwaUpdatePendingAt() == null) {
-      markPwaUpdatePending();
-    }
-    // Download anytime; apply only in quiet hours or on the next launch after 2 AM local.
-    if (shouldAutoApplyDeferredUpdate()) {
-      void applyUpdateRef.current();
-      return;
-    }
-    scheduleQuietApply();
-  }, [scheduleQuietApply]);
+  const markUpdateAvailable = useCallback(
+    (opts?: { allowAutoApply?: boolean }) => {
+      setUpdateAvailable(true);
+      updateAvailableRef.current = true;
+      if (readPwaUpdatePendingAt() == null) {
+        markPwaUpdatePending();
+      }
+      const allowAutoApply = opts?.allowAutoApply !== false && !suppressAutoApplyRef.current;
+      // Download anytime; apply only in quiet hours / next launch — never during a manual check.
+      if (allowAutoApply && shouldAutoApplyDeferredUpdate()) {
+        void applyUpdateRef.current();
+        return;
+      }
+      scheduleQuietApply();
+    },
+    [scheduleQuietApply],
+  );
 
   useEffect(() => {
     if (hasBuildIdChanged()) {
@@ -240,10 +249,15 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
     };
     win.__checkPwaUpdate = async () => {
       setCheckStatus("checking");
-      const result = await probeServiceWorkerUpdate();
-      if (result === "available") markUpdateAvailable();
-      setCheckStatus(result);
-      return result;
+      suppressAutoApplyRef.current = true;
+      try {
+        const result = await probeServiceWorkerUpdate();
+        if (result === "available") markUpdateAvailable({ allowAutoApply: false });
+        setCheckStatus(result);
+        return result;
+      } finally {
+        suppressAutoApplyRef.current = false;
+      }
     };
 
     return () => {
@@ -255,12 +269,18 @@ export function PwaUpdateProvider({ children }: { children: ReactNode }) {
 
   const checkForUpdates = useCallback(async (): Promise<UpdateCheckStatus> => {
     setCheckStatus("checking");
-    const result = await probeServiceWorkerUpdate();
-    if (result === "available") {
-      markUpdateAvailable();
+    suppressAutoApplyRef.current = true;
+    try {
+      const result = await probeServiceWorkerUpdate();
+      if (result === "available") {
+        // Show the update card; stay on Notifications — user taps Update when ready.
+        markUpdateAvailable({ allowAutoApply: false });
+      }
+      setCheckStatus(result);
+      return result;
+    } finally {
+      suppressAutoApplyRef.current = false;
     }
-    setCheckStatus(result);
-    return result;
   }, [markUpdateAvailable]);
 
   const simulateUpdateNotification = useCallback(() => {

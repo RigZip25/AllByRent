@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { Mail, X } from "lucide-react";
+import { Mail, MapPin, ScanFace, X } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
 import { mascotSays, MASCOT_NAME, PRIVACY_URL, TERMS_URL } from "../lib/brand";
 import type { AuthIntent } from "../lib/authReturn";
 import { peekPendingAuthEmail, setPendingAuthEmail } from "../lib/authReturn";
-import { signInWithEmailOtp, verifyEmailOtp } from "../lib/auth";
+import { shouldShowPasskeyLogin, signInWithEmailOtp, signInWithPasskey, verifyEmailOtp } from "../lib/auth";
 import { formatAuthError } from "../lib/authErrors";
 import { suggestCorrectedEmail } from "../lib/emailDomainSuggest";
 import { detectCurrentLocation, formatGeolocationErrorMessage } from "../lib/geolocation";
-import { setHomeLocation } from "../lib/listingStorage";
+import { getHomeLocation, setHomeLocation } from "../lib/listingStorage";
 import { peekPendingAuthProfile, savePendingAuthProfile } from "../lib/pendingAuthProfile";
 import {
   emailOtpEntryError,
@@ -17,6 +17,7 @@ import {
   normalizeEmailOtpInput,
 } from "../lib/authOtp";
 import { formatUsPhoneDisplay, formatUsPhoneInput, normalizeUsPhoneForStorage } from "../lib/usPhoneFormat";
+import { loadUserProfile } from "../lib/userProfileStorage";
 import { useMessages } from "../lib/i18n/react";
 import { RentanoTip } from "./RentanoTip";
 import { AddressLocationPicker } from "./AddressLocationPicker";
@@ -34,18 +35,48 @@ function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+function locationFromHome(): LocationSuggestion | null {
+  const home = getHomeLocation();
+  if (!home?.displayName.trim()) return null;
+  return {
+    label: home.displayName,
+    primaryLine: home.displayName,
+    secondaryLine: "",
+    city: home.displayName,
+    country: "",
+    region: "",
+    countryCode: "",
+    flag: "📍",
+    lat: home.lat,
+    lng: home.lng,
+    precision: home.lat === 0 && home.lng === 0 ? "city" : "gps",
+  };
+}
+
 function hydrateAuthForm(): {
   fullName: string;
   phone: string;
   email: string;
   location: LocationSuggestion | null;
+  returning: boolean;
 } {
   const pendingProfile = peekPendingAuthProfile();
+  const local = loadUserProfile();
+  const homeLoc = locationFromHome();
+  const fullName =
+    pendingProfile?.fullName?.trim() ||
+    local.displayName.trim() ||
+    "";
+  const phoneRaw = pendingProfile?.phone || local.phone || "";
+  const email = peekPendingAuthEmail() || local.email.trim() || "";
+  const location = pendingProfile?.location ?? homeLoc;
+  const returning = Boolean(fullName && email && location);
   return {
-    fullName: pendingProfile?.fullName ?? "",
-    phone: pendingProfile?.phone ? formatUsPhoneDisplay(pendingProfile.phone) : "",
-    email: peekPendingAuthEmail() ?? "",
-    location: pendingProfile?.location ?? null,
+    fullName,
+    phone: phoneRaw ? formatUsPhoneDisplay(phoneRaw) : "",
+    email,
+    location,
+    returning,
   };
 }
 
@@ -115,13 +146,17 @@ export function AuthGate({
   const [phone, setPhone] = useState(hydrated.phone);
   const [email, setEmail] = useState(hydrated.email);
   const [location, setLocation] = useState<LocationSuggestion | null>(hydrated.location);
+  const [returning, setReturning] = useState(hydrated.returning);
+  const [editDetails, setEditDetails] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [emailCooldownUntil, setEmailCooldownUntil] = useState<number>(0);
   const [nowMs, setNowMs] = useState<number>(() => Date.now());
   const [otpCode, setOtpCode] = useState("");
+  const showPasskey = useMemo(() => shouldShowPasskeyLogin(), []);
 
   const canUseSupabase = useMemo(() => configured, [configured]);
+  const showProfileFields = !returning || editDetails;
 
   useEffect(() => {
     if (!open || !session) return;
@@ -135,10 +170,15 @@ export function AuthGate({
     setPhone(next.phone);
     setEmail(next.email);
     setLocation(next.location);
+    setReturning(next.returning);
+    setEditDetails(false);
     setOtpCode("");
     setError(null);
     if (initialStep) {
       setStep(initialStep);
+    } else if (next.returning) {
+      // Stay on account so Face ID + prefilled summary are visible.
+      setStep("account");
     } else if (next.email) {
       setStep("confirm");
     } else {
@@ -197,7 +237,7 @@ export function AuthGate({
     const correctingAddress =
       emailOverride != null && nextEmail.toLowerCase() !== email.trim().toLowerCase();
 
-    if (step === "account") {
+    if (showProfileFields) {
       if (!fullName.trim()) {
         setError(a.nameRequired);
         return;
@@ -206,6 +246,10 @@ export function AuthGate({
         setError(a.locationRequired);
         return;
       }
+    } else if (!fullName.trim() || !location) {
+      setEditDetails(true);
+      setError(a.locationRequired);
+      return;
     }
     if (!isValidEmail(nextEmail)) {
       setError(a.emailInvalid);
@@ -226,6 +270,12 @@ export function AuthGate({
   };
 
   const handleSendConfirmationCode = () => sendConfirmationCode();
+
+  const handlePasskeyLogin = () => {
+    void run("passkey", async () => {
+      await signInWithPasskey();
+    });
+  };
 
   const handleVerifyCode = () => {
     const digits = normalizeEmailOtpInput(otpCode);
@@ -308,7 +358,7 @@ export function AuthGate({
             className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#374151]"
             aria-label={a.closeAria}
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5 text-red-600" />
           </button>
         ) : null}
 
@@ -335,20 +385,69 @@ export function AuthGate({
 
         {step === "account" ? (
           <div className="mt-4">
-            <label className="text-[13px] font-semibold text-gray-600" htmlFor="auth-name">
-              {a.nameLabel}
-            </label>
-            <input
-              id="auth-name"
-              type="text"
-              autoComplete="name"
-              autoFocus
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder={a.namePlaceholder}
-              className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
-              style={{ borderColor: BORDER }}
-            />
+            {showPasskey ? (
+              <div className="mb-4">
+                <button
+                  type="button"
+                  disabled={busy !== null || !canUseSupabase}
+                  onClick={handlePasskeyLogin}
+                  className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
+                  style={{ backgroundColor: GREEN }}
+                >
+                  <ScanFace className="h-5 w-5" />
+                  {busy === "passkey" ? a.checking : a.faceIdCta}
+                </button>
+                <p className="mt-2 text-center text-[12px] text-gray-500">{a.faceIdHint}</p>
+                <div className="my-4 flex items-center gap-3">
+                  <div className="h-px flex-1 bg-gray-200" />
+                  <span className="text-[12px] font-medium text-gray-400">{a.orEmail}</span>
+                  <div className="h-px flex-1 bg-gray-200" />
+                </div>
+              </div>
+            ) : null}
+
+            {returning && !editDetails ? (
+              <div className="mb-4 space-y-3 rounded-2xl border bg-[#F9FAFB] p-4" style={{ borderColor: BORDER }}>
+                <p className="text-[13px] font-semibold text-gray-700">{a.returningHint}</p>
+                <SummaryRow label={a.summaryName} value={fullName.trim() || a.emptyValue} />
+                <SummaryRow label={a.summaryEmail} value={email || a.emptyValue} />
+                {phone.trim() ? (
+                  <SummaryRow label={a.summaryPhone} value={formatUsPhoneDisplay(phone)} />
+                ) : null}
+                {location ? (
+                  <SummaryRow
+                    label={a.summaryArea}
+                    value={location.secondaryLine ? `${location.primaryLine}, ${location.secondaryLine}` : location.primaryLine}
+                  />
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => setEditDetails(true)}
+                  className="w-full py-1 text-[13px] font-semibold text-gray-600"
+                >
+                  {a.editDetails}
+                </button>
+              </div>
+            ) : null}
+
+            {showProfileFields ? (
+              <>
+                <label className="text-[13px] font-semibold text-gray-600" htmlFor="auth-name">
+                  {a.nameLabel}
+                </label>
+                <input
+                  id="auth-name"
+                  type="text"
+                  autoComplete="name"
+                  autoFocus={!showPasskey}
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder={a.namePlaceholder}
+                  className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
+                  style={{ borderColor: BORDER }}
+                />
+              </>
+            ) : null}
 
             <label className="mt-3 block text-[13px] font-semibold text-gray-600" htmlFor="auth-email">
               {a.emailLabel}
@@ -369,44 +468,49 @@ export function AuthGate({
             />
             {emailSuggestionBanner ? <div className="mt-3">{emailSuggestionBanner}</div> : null}
 
-            <label className="mt-3 block text-[13px] font-semibold text-gray-600" htmlFor="auth-phone">
-              {a.phoneLabel} <span className="font-normal text-gray-400">{a.phoneOptional}</span>
-            </label>
-            <input
-              id="auth-phone"
-              type="tel"
-              inputMode="tel"
-              autoComplete="tel-national"
-              value={phone}
-              onChange={(e) => setPhone(formatUsPhoneInput(e.target.value))}
-              placeholder={a.phonePlaceholder}
-              className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
-              style={{ borderColor: BORDER }}
-            />
-
-            <div className="mt-4 rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-[13px] font-semibold text-gray-700">{a.areaLabel}</p>
-                <button
-                  type="button"
-                  disabled={busy !== null}
-                  onClick={handleAutoDetectLocation}
-                  className="text-[12px] font-semibold text-gray-600 disabled:opacity-60"
-                >
-                  {busy === "locate" ? a.detecting : a.useMyLocation}
-                </button>
-              </div>
-              <div className="mt-3">
-                <AddressLocationPicker
-                  variant="area"
-                  placeholder={a.areaPlaceholder}
-                  emptyHint={a.areaEmptyHint}
-                  selected={location}
-                  onSelect={setLocation}
-                  onClear={() => setLocation(null)}
+            {showProfileFields ? (
+              <>
+                <label className="mt-3 block text-[13px] font-semibold text-gray-600" htmlFor="auth-phone">
+                  {a.phoneLabel} <span className="font-normal text-gray-400">{a.phoneOptional}</span>
+                </label>
+                <input
+                  id="auth-phone"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel-national"
+                  value={phone}
+                  onChange={(e) => setPhone(formatUsPhoneInput(e.target.value))}
+                  placeholder={a.phonePlaceholder}
+                  className="mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/30"
+                  style={{ borderColor: BORDER }}
                 />
-              </div>
-            </div>
+
+                <div className="mt-4 rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
+                  <p className="text-[13px] font-semibold text-gray-700">{a.areaLabel}</p>
+                  <button
+                    type="button"
+                    disabled={busy !== null}
+                    onClick={handleAutoDetectLocation}
+                    className="mt-1.5 inline-flex items-center gap-1.5 text-[14px] font-semibold underline underline-offset-2 disabled:opacity-60"
+                    style={{ color: GREEN }}
+                  >
+                    <MapPin className="h-4 w-4 shrink-0" aria-hidden />
+                    {busy === "locate" ? a.detecting : a.useMyLocation}
+                  </button>
+                  <p className="mt-1 text-[12px] leading-snug text-gray-500">{a.useMyLocationHint}</p>
+                  <div className="mt-3">
+                    <AddressLocationPicker
+                      variant="area"
+                      placeholder={a.areaPlaceholder}
+                      emptyHint={a.areaEmptyHint}
+                      selected={location}
+                      onSelect={setLocation}
+                      onClear={() => setLocation(null)}
+                    />
+                  </div>
+                </div>
+              </>
+            ) : null}
 
             <button
               type="button"
@@ -521,6 +625,7 @@ export function AuthGate({
               onClick={() => {
                 setError(null);
                 setOtpCode("");
+                setEditDetails(true);
                 setStep("account");
               }}
               className="w-full py-2 text-[13px] font-semibold text-gray-600"

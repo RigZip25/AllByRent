@@ -14,9 +14,9 @@ import {
 
 import type { ListingDraft } from "../screens/listing/types";
 
-
-
 import { getEffectiveRentalFeeRate } from "./ops/opsSettings";
+
+import { formatDistanceFromMiles } from "./regionalDisplay";
 
 /** Default platform service fee (12%). Runtime value may come from Ops console. */
 export const PLATFORM_SERVICE_FEE_RATE = 0.12;
@@ -365,7 +365,7 @@ export function deliverySummaryForListing(listing: ListingDraft): string | null 
 
   const fee = formatDeliveryFee(resolveListingDeliveryRoundTripUsd(listing));
 
-  return `Round-trip delivery up to ${miles} mi · $${fee}`;
+  return `Round-trip delivery up to ${formatDistanceFromMiles(miles, undefined, { plus: false })} · $${fee}`;
 
 }
 

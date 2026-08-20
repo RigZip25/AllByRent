@@ -1,6 +1,6 @@
 /** Full onboarding done (location set, earn path chosen, or explicit skip on location step). */
 const ONBOARDING_COMPLETE_KEY = "allbyrent_onboarding_complete";
-/** Intro finished or skipped — no more splash / Rentano hello on launch. */
+/** Intro finished or skipped — skip firstHello; branded splash still shows on cold start. */
 const INTRO_DONE_KEY = "allbyrent_intro_done";
 /** Product “what is Evorios” marketplace intro seen. */
 const PRODUCT_INTRO_DONE_KEY = "allbyrent_product_intro_done";
@@ -107,6 +107,7 @@ export function clearOnboardingComplete(): void {
 
 export type InitialRoute = "splash" | "home";
 
+/** Cold start always prefers splash; deep links use skipSplash separately. */
 export function getInitialRoute(): InitialRoute {
-  return isIntroDone() ? "home" : "splash";
+  return "splash";
 }

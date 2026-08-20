@@ -126,6 +126,10 @@ export const cs: AppMessages = {
       "Mrkni do Spamu / Propagace a jestli je e-mail správně (např. gmail, ne gmal). Pak pošli znovu nebo uprav údaje.",
     didYouMeanEmail: (email) => `Myslel(a) jsi ${email}?`,
     useSuggestedEmail: "Použít tuto adresu",
+    faceIdCta: "Pokračovat přes Face ID",
+    faceIdHint: "Otevře tvůj existující účet — jméno, telefon i Stripe zůstanou propojené.",
+    orEmail: "nebo e-mailem",
+    returningHint: "Vítej zpět — použijeme uložené údaje.",
     freeToJoin: "Zdarma · Bez kreditní karty",
   },
   install: {
@@ -170,9 +174,9 @@ export const cs: AppMessages = {
   },
   home: {
     priceAny: "Jakákoli cena",
-    priceUnder25: "Do $25",
-    price25to75: "$25–$75",
-    price75plus: "$75+",
+    priceUnder25: "Do 25 Kč",
+    price25to75: "25–75 Kč",
+    price75plus: "75 Kč+",
     backToBrowseAria: "Zpět",
     setBlock: "Kde jsi teď?",
     setBlockAria: "Nastavit, kde jsi teď",
@@ -275,7 +279,7 @@ export const cs: AppMessages = {
     bidInGarage: "Přihodit v garáži",
     viewInGarage: "Zobrazit v garáži",
     paused: "Tato nabídka je pozastavena",
-    giftHint: "Vystav jako Prodej s cenou $0 a daruj",
+    giftHint: "Vystav jako Prodej s cenou 0 Kč a daruj",
     notAvailable: "Momentálně nedostupné",
     yourListing: "Toto je tvoje nabídka.",
     sellerMissing: "Profil prodejce chybí — zkus to později.",
@@ -294,6 +298,9 @@ export const cs: AppMessages = {
     removedBody: "Tato nabídka mohla být odstraněna nebo už není dostupná ve tvojí oblasti.",
     goBack: "Zpět",
     photoByOwner: "Fotka od majitele",
+    openPhotoAria: "Zobrazit fotku",
+    openPhotoGalleryAria: (count) => `Zobrazit ${count} fotek`,
+    photoCountBadge: (count) => `${count} fotek`,
     heavyItem: "Těžká položka",
     perDay: "za den",
     newOnTheBlock: "Novinka na bloku",
@@ -308,7 +315,7 @@ export const cs: AppMessages = {
     qrCheckIn: "QR check-in při vyzvednutí",
     viewCalendar: "Zobrazit kalendář",
     shareListing: "Sdílet tuto nabídku",
-    bookWithRate: (rate) => `Rezervovat · $${rate}/den`,
+    bookWithRate: (rate) => `Rezervovat · ${rate} Kč/den`,
     bookNow: "Rezervovat teď",
     buyWithPrice: (price) => `Koupit · ${price}`,
     freeArrangePickup: "Zdarma — domluvte vyzvednutí",
@@ -568,7 +575,7 @@ export const cs: AppMessages = {
     modeSellTitle: "Prodat",
     modeSellBody: "Kup z police souseda, nebo vyčisti garáž vlastními nabídkami.",
     modeGiftTitle: "Darovat",
-    modeGiftBody: "Předej věci zdarma — při vystavení nastav Prodej na $0.",
+    modeGiftBody: "Předej věci zdarma — při vystavení nastav Prodej na 0 Kč.",
     navHomeTitle: "Domů",
     navHomeBody:
       "Domů otevře garáže poblíž. Filtr Vše · Půjčit · Koupit, nebo Garážové výprodeje. Vystavujte přes + nebo Moje garáž.",
@@ -798,6 +805,12 @@ export const cs: AppMessages = {
     depositNextSupport: "Další krok: napište podpoře kvůli rozdělené záloze — automatické stržení zatím není.",
     depositHeldDuringDispute: "Záloha zůstává zmrazená, dokud je spor otevřený. Uplatněte nebo uvolněte po vyřešení.",
     depositReleaseBtn: "Uvolnit zadržení",
+    depositPartialHint:
+      "Pro mýtné, palivo a zpoždění raději použij faktury, ať zůstane kauce na škody. Částečné čerpání kauce uvolní zbytek (multicapture není k dispozici).",
+    depositPartialPlaceholder: "Částečná částka (USD)",
+    depositPartialClaimBtn: "Čerpat částečně",
+    depositPartialInvalid: "Zadej platnou částku (alespoň $0.50).",
+    depositPartialClaimed: "Částečná částka načerpána; zbytek holdu byl uvolněn.",
     depositClaimBtn: "Uplatnit zálohu",
     depositStatusReleased: "Záloha: uvolněna",
     depositStatusClaimed: "Záloha: uplatněna hostitelem",
@@ -853,6 +866,34 @@ export const cs: AppMessages = {
     handoffRenterDoneWaitingHost: "Označeno jako přijato. Čeká se, až hostitel potvrdí předání.",
     handoffRenterReturnedWaitingHost: "Označeno jako vráceno. Čeká se, až hostitel přijme.",
     handoffHostAcceptedWaitingRenter: "Přijali jsi vrácení. Čeká se, až soused potvrdí vrácení.",
+    odometerTitle: "Stav tachometru",
+    odometerPickupHint: "Zapiš stav na začátku cesty — ať je vše férové.",
+    odometerReturnHint: "Zapiš stav při vrácení, ať sedí kilometry s předáním.",
+    odometerLabel: "Aktuální stav (km / mi)",
+    odometerPlaceholder: "např. 48210",
+    odometerRequired: "Pro pokračování zadej stav tachometru.",
+    odometerContinue: "Uložit a pokračovat",
+    odometerStartRecorded: (miles) => `Start: ${miles}`,
+    odometerReturnRecorded: (miles) => `Vrácení: ${miles}`,
+    fuelTitle: "Hladina paliva",
+    fuelPickupHint:
+      "Zaznamenej hladinu paliva na začátku (1/8–8/8). Výchozí je plná→plná — vrať plnou, nebo doplať chybějící palivo + $20.",
+    fuelReturnHint:
+      "Zaznamenej palivo při vrácení. Pokud není plná (plná→plná), označíme chybějící palivo + $20 pro nárok hostitele.",
+    fuelLevelLabel: "Hladina paliva",
+    fuelLevelRequired: "Pro pokračování vyber hladinu paliva.",
+    defLevelLabel: "Hladina DEF (AdBlue)",
+    defLevelRequired: "Pro pokračování vyber hladinu DEF.",
+    fuelContinue: "Uložit a pokračovat",
+    fuelStartRecorded: (level) => `Start palivo: ${level}`,
+    fuelReturnRecorded: (level) => `Vrácení palivo: ${level}`,
+    defStartRecorded: (level) => `Start DEF: ${level}`,
+    defReturnRecorded: (level) => `Vrácení DEF: ${level}`,
+    prepaidFullTankToggle: "Předplacená plná nádrž (vrácení prázdné OK — hladiny se stejně zapisují)",
+    fuelPumpPriceLabel: "Cena u pumpy ($/gal) — volitelné",
+    fuelPumpPriceHint: "Jen pro odhad nákladů na dolití pro nárok hostitele.",
+    fuelShortfallFlagged: (summary) => `Označeno nedodané palivo/DEF: ${summary}`,
+    fuelPolicyActiveLabel: "Pravidla paliva",
     pickupLocation: "Místo vyzvednutí",
     pickupLocationHostHint:
       "Přesná adresa se sdílí jen s potvrzeným nájemcem — ne na veřejné nabídce.",
@@ -861,15 +902,79 @@ export const cs: AppMessages = {
     openInMaps: "Otevřít v Mapách",
     contactlessAccess: "Bezhotovostní přístup",
     contactlessBody:
-      "Pokyny a kódy se odemknou až při check-inu s PIN — ne dřív. Použij adresu výše; po příjezdu naskenujte QR položky.",
+      "Kódy zůstanou zamčené, dokud nejste u místa vyzvednutí. GPS nebo QR na věci dokáže přítomnost — pak PIN odemkne kroky a spustí výpůjčku.",
     contactlessRenterHint:
-      "Klepni na Naskenovat QR kód a zadej PIN vyzvednutí pro kódy schránky a kroky přístupu.",
+      "Nejdřív dorazte. Klepněte Naskenovat QR (nálepka) nebo „Jsem u vyzvednutí“, pak zadejte PIN. Sdílený PIN z druhého konce města nic neotevře.",
     contactlessHostHint:
-      "Sdílej PIN vyzvednutí jen s tímto nájemcem. Detaily přístupu odemknou při check-inu — adresa už na jejich obrazovce je.",
+      "Sdílej PIN vyzvednutí jen s tímto nájemcem. Musí být na místě (GPS nebo QR nálepky) — jako hostitel můžete náhled připravit z domova.",
+    contactlessFlowTitle: "Sousedsky bezpečné bezkontaktní předání",
+    contactlessFlowBody:
+      "Zaplacená rezervace → dorazte na místo → GPS nebo QR věci → PIN odemkne přístup → výpůjčka začíná. Vrácení stejně; hostitel potvrdí nebo se po 24 h dokončí samo.",
+    contactlessReturnAutoHint:
+      "Pokud hostitel nepřijme vrácení do 24 hodin, bezkontaktní vrácení se dokončí automaticky.",
+    geoPinGateHint:
+      "PIN a kódy schránky se odemknou jen když je telefon u místa předání (nebo naskenujete QR na věci). Brání tomu, aby rezervující odemkl za někoho jiného přes město.",
+    startIdTitle: "Kontrola identity na startu",
+    startIdBody:
+      "Nahraj jasnou fotku řidičského průkazu a selfie, potvrď datum narození a potvrď, že jsi rezervovaný řidič, než se odemkne PIN. Face-match zůstává best-effort, pokud existuje fotka profilu.",
+    startIdBookerFallback: "Rezervovaný řidič",
+    startIdProfileVerified: "Propojeno s ověřenou identitou na účtu",
+    startIdProfileLinked: "Propojeno s fotkou profilu",
+    startIdProfileHint: "Později přidej fotku profilu pro silnější kontroly",
+    startIdLicenseAdd: "Fotka řidičského průkazu",
+    startIdLicenseAdded: "Fotka průkazu uložena ✓",
+    startIdSelfieAdd: "Vyfoť selfie",
+    startIdSelfieAdded: "Selfie uloženo ✓",
+    startIdSaving: "Ukládám…",
+    startIdSelfieFailed: "Fotku se nepodařilo uložit. Zkus znovu.",
+    startIdDobLabel: "Datum narození (z průkazu)",
+    startIdDobHint: "Uloží se do profilu pro věkovou bránu. Musí sedět s průkazem.",
+    startIdAttest:
+      "Potvrzuji, že jsem osoba, která rezervovala, a řidič odpovídá dokladu / identitě na tomto účtu",
+    startIdOnceHint: "Toto je jediná kontrola identity na cestu — žádné náhodné výzvy během jízdy.",
+    startIdContinue: "Potvrdit a pokračovat k odemčení",
+    startIdRequired: "Před odemčením vozidla dokonči kontrolu identity na startu.",
+    macropointTitle: "Checkpointy polohy během jízdy",
+    macropointBody:
+      "Hrubá poloha telefonu asi každých 20 minut, dokud je půjčka aktivní (plus start/vrácení). Ne živá mapa.",
+    macropointLastKnown: (when) => `Poslední známá · ${when}`,
+    macropointEmpty: "Zatím žádné checkpointy.",
+    tollSuspectTitle: "Možné mýtné silnice",
+    tollSuspectBody:
+      "Best-effort shoda se známými koridory — ne finální účet. Faktury podle SPZ můžou přijít později; použij hold na mýtné, až účet dorazí.",
+    homeTerritoryBreachTitle: "Možný odjezd z domovské oblasti",
+    homeTerritoryBreachBody:
+      "Checkpoint vypadá mimo domovský stát/zemi nabídky, zatímco odjezd je zakázán. Jen měkký signál — ne zámek ani pokuta.",
+    travelOutsideListingTitle: "Cestování mimo domovskou oblast",
+    travelOutsideListingForbidden: (area) =>
+      `Opustit domovskou oblast (${area}) u této půjčky není dovoleno.`,
+    travelOutsideListingAllowed: (area) =>
+      `Opustit domovskou oblast (${area}) u této půjčky je dovoleno.`,
+    speedSoftTitle: "Úseky vysoké rychlosti (měkké)",
+    speedSoftBody:
+      "Odhad z rozestupů checkpointů — nestabilní GPS, ne pokuta. Hostitelé to vidí jen jako měkký signál.",
+    speedSoftSegment: (mph, when) => `~${mph} mph kolem ${when}`,
+    tollHoldOnBooking: (amount) =>
+      `Hold na mýtné autorizován do ${amount} (spolu s kaucí).`,
+    tollClaimCta: (amount) => `Označit mýtné k nároku (${amount})`,
+    tollFlagged:
+      "Mýtné označeno pro okno nároku. Až dorazí účet podle SPZ, použij Claim deposit (nebo podporu pro rozdělení). Částečný Stripe capture zatím není — hold na škody zůstane.",
+    tollClaimed: "Mýtné zaznamenáno u této půjčky.",
+    tollClaimFailed: "Stav nároku na mýtné se nepodařilo aktualizovat.",
+    insuranceUnlockBlocked:
+      "Před odemčením klíčů nebo polohy u tohoto vozidla nahrajte platný doklad pojištění.",
+    cdlUnlockBlocked: "Před startem předání je povinné prohlášení a doklad CDL.",
+    agentProofPending:
+      "Čeká se, až hostitel potvrdí, že dostal doklad pojištění od tvého agenta.",
+    agentProofReceivedMark: "Obdržel(a) jsem doklad pojištění od agenta nájemce",
+    agentProofReceivedDone: "Hostitel potvrdil přijetí dokladu od agenta",
+    agentProofEmailLabel: "E-mail majitele pro doklad od agenta",
+    preTripUnlockBlocked:
+      "Před předáním dokonči předprohlídku (včetně fotky každé pneumatiky) a získej potvrzení hostitele.",
     roundTripDelivery: "Doručení tam i zpět",
     roundTripDeliveryBody:
       "Jeden poplatek za doručení pokrývá dovoz před začátkem půjčky a vyzvednutí po skončení — ne půl napůl a ne jednosměrné doručení hostitelem.",
-    roundTripDeliveryFee: (amount) => `Doručení tam i zpět: $${amount}`,
+    roundTripDeliveryFee: (amount) => `Doručení tam i zpět: ${amount} Kč`,
     dropOff: "Doručení:",
     security: "Zabezpečení",
     securityBody:
@@ -900,6 +1005,47 @@ export const cs: AppMessages = {
     verifiedOnEvorios: "Ověřeno na Evorios",
     tapToViewProfile: "Klepnutím zobrazíte veřejný profil",
     message: "Zpráva",
+    messagePostRental: "Chat mýtné a pokuty",
+    messageClosed: "Historie chatu",
+    chatPostRentalBanner: (days, untilDate) =>
+      `Režim po půjčce (mýtné a pokuty): chat zůstává otevřený ~${days} dní po vrácení (do ${untilDate}), nebo dokud je faktura nezaplacená.`,
+    chatClosedBanner: "Tato půjčka skončila — chat je jen ke čtení.",
+    conditionPhotosTitle: "Fotky stavu (tato půjčka)",
+    conditionPhotosBody:
+      "Snímky z vyzvednutí a vrácení patří k této půjčce — ne do veřejné galerie inzerátu.",
+    conditionPhotoPickup: "Před / při vyzvednutí",
+    conditionPhotoReturn: "Po vrácení",
+    conditionPhotoEmpty: "Zatím bez fotky",
+    invoiceTitle: "Faktura a pokuty",
+    invoiceBody:
+      "Hostitel může vyúčtovat dolití paliva, poplatek $20 za palivo, pozdní vrácení, mýtné, pokuty, škody nebo vlastní částku. Nájemce platí v aplikaci, když je Stripe připojený.",
+    invoiceCreate: "Nová faktura",
+    invoiceAddLine: "Přidat položku",
+    invoiceRemoveLine: "Odebrat položku",
+    invoiceNotePlaceholder: "Volitelná poznámka pro nájemce…",
+    invoiceTotal: "Celkem",
+    invoiceSend: "Odeslat fakturu",
+    invoiceEmpty: "Zatím žádné faktury.",
+    invoiceNeedLine: "Přidej alespoň jednu položku za $0.50 nebo více.",
+    invoicePayCta: "Zaplatit",
+    invoicePayNow: "Zaplatit teď",
+    invoicePaying: "Zpracovávám…",
+    invoicePayFailed: "Platba neprošla. Zkus to znovu.",
+    invoiceVoid: "Zrušit",
+    invoiceStatusOpen: "Otevřená",
+    invoiceStatusPending: "Čeká na platbu",
+    invoiceStatusPaid: "Zaplaceno",
+    invoiceStatusVoid: "Zrušeno",
+    invoiceKindFuelTopup: "Dolití paliva",
+    invoiceKindFuelFee: "Poplatek za palivo ($20)",
+    invoiceKindLateFee: "Pozdní vrácení",
+    invoiceKindToll: "Mýtné",
+    invoiceKindFine: "Pokuta",
+    invoiceKindNoShow: "Nedostavení",
+    invoiceKindDamage: "Škoda",
+    invoiceKindCustom: "Vlastní",
+    invoiceStripeScaffold:
+      "Platební odkaz Stripe Connect je připravený — faktury se na půjčce uloží i když platba kartou ještě není nastavená.",
     call: "Volat",
     phoneSharedAfterCheckin: "Telefonní čísla se sdílejí v chatu po check-inu",
     close: "Zavřít",
@@ -927,14 +1073,31 @@ export const cs: AppMessages = {
     cancelBookingConfirmCta: "Ano, zrušit rezervaci",
     cancelNotAllowed:
       "Tuto rezervaci už tady nelze zrušit — vyzvednutí začalo, nebo stav to neumožňuje. Napište druhé straně nebo podpoře.",
-    cancelRefundPreviewFull: "Jste v okně plné refundace (48+ hodin před začátkem).",
+    cancelRefundPreviewFull: "Jste v okně plné refundace (24+ hodin před začátkem).",
     cancelRefundPreviewPartial: (percent) =>
-      `Jste v okně částečné refundace — může se vrátit asi ${percent}% poplatku za půjčku.`,
+      `Do 24 hodin od začátku — může se vrátit asi ${percent}% poplatku za půjčku.`,
     cancelRefundPreviewNone:
-      "Jste méně než 24 hodin před začátkem — poplatek za půjčku se obvykle nevrací.",
+      "V okně začátku bez vyzvednutí — zrušení zde nemusí platit; kontaktujte druhou stranu.",
     cancelRefundPreviewHostFull:
       "Jako hostitel při zrušení před vyzvednutím vrátíte nájemci celý poplatek za půjčku, pokud byla platba kartou.",
     cancelRefundReleased: "Autorizace karty se uvolňuje.",
+    datesAdjustTitle: "Změnit termín půjčky",
+    datesAdjustBody:
+      "Prodloužení jen když jsou další dny volné v kalendáři. Předčasný návrat je vždy možný — dokonči předání, až skončíš.",
+    extendBooking: "Prodloužit rezervaci",
+    extendNewEnd: "Nové datum konce",
+    extendConfirm: "Potvrdit prodloužení",
+    extendChecking: "Kontroluji dostupnost…",
+    extendUnavailable: "Tyto dny nejsou volné — zvol jiné datum konce.",
+    extendInvalid: "Zvol datum konce po součém konci.",
+    extendSuccess: (date) => `Prodlouženo do ${date}.`,
+    earlyReturn: "Vrátit dříve",
+    earlyReturnConfirmBody:
+      "Zkrať půjčku na dnešek. Předání při návratu s hostitelem stejně dokončíš. Úpravy ceny řešíte mezi sebou — dny v kalendáři se uvolní hned.",
+    earlyReturnConfirm: "Ano, skončit dnes",
+    earlyReturnWorking: "Ukládám…",
+    earlyReturnInvalid: "Předčasný návrat u tohoto stavu nejde.",
+    earlyReturnSuccess: (date) => `Konec půjčky nastaven na ${date}. Dokonči předání při návratu.`,
     cancelRefundFullProcessing:
       "Byla odeslána plná refundace — banky ji mohou zobrazit až za několik pracovních dní.",
     cancelRefundPartialProcessing: (percent) =>
@@ -947,6 +1110,12 @@ export const cs: AppMessages = {
     cancelNotifRenterTitle: "Nájemce zrušil rezervaci",
     cancelNotifBody: (title, refundNote) => `${title}: rezervace zrušena. ${refundNote}`,
     cancelContactSupport: "Napsat podpoře ohledně refundace",
+    cancelReasonLabel: "Důvod (volitelné)",
+    cancelReasonPlaceholder: "Krátká poznámka pro druhou stranu",
+    cancelReasonInNotif: (reason) => `Důvod: ${reason}.`,
+    lateFeeDueBanner: (amount) => `Odhadovaný poplatek za zpoždění: ${amount}.`,
+    hostReliabilityNote:
+      "Zrušení hostitelem před vyzvednutím vrací nájemci 100 %. Častá zrušení mohou ovlivnit důvěryhodnost.",
   },
   rentalCard: {
     noShow: "Nedostavení",
@@ -954,8 +1123,8 @@ export const cs: AppMessages = {
     inDispute: "Ve sporu",
     renting: "Půjčuji",
     hosting: "Hostím",
-    total: (amount) => `$${amount} celkem`,
-    inclDelivery: (fee) => `· vč. $${fee} doručení`,
+    total: (amount) => `${amount} Kč celkem`,
+    inclDelivery: (fee) => `· vč. ${fee} Kč doručení`,
     stripe: "Stripe",
     escalated: "V kontrole — dohodněte se spolu nebo napište podpoře",
     returnsIn: (countdown) => `Vrácení za: ${countdown}`,
@@ -965,7 +1134,11 @@ export const cs: AppMessages = {
     requestReturn: "Požádat o vrácení",
     runningLate: "Mám zpoždění",
     markNoShow: "Označit jako nedostavení",
-    markNoShowHint: "Označení nedostavení je k dispozici 60 min po čase vyzvednutí",
+    markNoShowHint: "Označení nedostavení je k dispozici 2 hodiny po čase vyzvednutí",
+    markNoShowConfirm:
+      "Označit nájemce jako nedostaveného? Rezervace se zruší a uvolní kalendář. Pokud máš poplatek, označí se proti depozitu (může sporovat).",
+    markNoShowFeeNote: (amount) => `Volitelný poplatek k označení: ${amount}`,
+    markNoShowSoftNote: "Poplatek není nastaven — kalendář se uvolní; při potřebě použij spor.",
     submitEvidence: "Pokračovat ve sporu",
     continueDispute: "Pokračovat ve sporu",
     openDispute: "Otevřít spor",
@@ -975,6 +1148,9 @@ export const cs: AppMessages = {
     seeReview: "Zobrazit recenzi",
     rentAgain: "Půjčit znovu",
     markedAsNoShow: "Označeno jako nedostavení",
+    noShowMarkedNotifTitle: "Označeno nedostavení",
+    noShowMarkedNotifBody: (title, feeNote) =>
+      `${title}: hostitel označil rezervaci jako nedostavení. Cena půjčky se obvykle ponechává.${feeNote ? ` ${feeNote}` : ""}`,
     awaitingApproval: "Čeká na schválení",
     expired: "Vypršelo",
     ownerRespond24h: (timeLeft) =>
@@ -1190,7 +1366,7 @@ export const cs: AppMessages = {
     photos: {
       title: "Přidat fotky",
       subtitle: (maxPhotos, maxVideos) =>
-        `Až ${maxPhotos} fotek a ${maxVideos} videí. Klepnutím zobrazíte. Červené Smazat odstraní fotku nebo video. Dlouhým stiskem přeuspořádáte.`,
+        `Až ${maxPhotos} fotek a ${maxVideos} videí. Klepnutím zobrazíte náhled nebo nastavíte titulní. Dlouhým stiskem přeuspořádáte.`,
       chooseLibrary: "Vybrat z knihovny",
       takePhoto: "Vyfotit",
       addVideo: "Přidat video",
@@ -1226,9 +1402,9 @@ export const cs: AppMessages = {
       setAsCover: "Nastavit jako titulní",
       previousPhotoAria: "Předchozí fotka",
       nextPhotoAria: "Další fotka",
-      enhancementUnavailable: (detail) =>
-        `Vylepšení fotky není k dispozici. Uložena původní fotka. (${detail})`,
-      couldntAddPhoto: (detail) => `Fotku se nepodařilo přidat. (${detail})`,
+      enhancementUnavailable:
+        "Fotka uložena tak, jak je — vylepšení pozadí teď nebylo k dispozici.",
+      couldntAddPhoto: "Fotku se nepodařilo přidat. Zkus to prosím znovu.",
       moderationNotListable:
         "Tuto fotku jsme u nabídky nemohli použít — nevypadá jako jasná fotka produktu. Zkus prosím jinou fotku samotné věci.",
       moderationProhibitedItem:
@@ -1298,24 +1474,55 @@ export const cs: AppMessages = {
       replacementValueHelperLocal: (currency) =>
         `Cena nové v ${currency} (místní trh) — pomáhá nastavit kauci; pojištění přijde později`,
       notSureValue: "Nejsi si jistý(á) hodnotou?",
-      searchPriceLink: (title) => `Hledat „${title} price new“`,
+      searchPriceLink: (title) => `Hledat „${title} nová cena“`,
       searchPriceLinkLocal: (title, currency, country) =>
         `Hledat „${title}“ nová cena ${country} (${currency})`,
       instructionsUrl: "URL návodu / manuálu",
       instructionsPlaceholder: "https://... odkaz na manuál nebo tutoriál",
       instructionsHelper: "Zobrazí se jako tlačítko Pokyny u nabídky",
       assetIdentityHint:
-        "Vozidla, přívěsy a těžká technika potřebují dohledatelné ID — povinné u osobní i profesionální třídy.",
+        "VIN je otisk vozu — naskenuj nebo zadej a Evorios doplní značku, model a rok.",
+      vehicleFlowTitle: "Sousedská auta, jak mají být",
+      vehicleFlowBody:
+        "Jedna nabídka — půjčuj nebo prodej. U půjčky: soused přidá tvé VIN do pojištění, nahraje doklad, zaplatí půjčení + kauci ve výši spoluúčasti. Kódy zůstanou do startu zamčené. Při vyzvednutí se PIN odemkne jen když jsou na místě (GPS) — nebo naskenují QR nálepku na autě. Tachometr na začátku i při vrácení; potvrdíš; kauce se uvolní.",
+      licensePlate: "SPZ / značka",
+      licensePlatePlaceholder: "např. 7ABC123",
+      licensePlateState: "Stát (US)",
+      licensePlateStatePlaceholder: "—",
+      plateLookupCta: "Doplnit VIN ze značky",
+      plateLookingUp: "Hledám podle značky…",
+      plateHelper: "Zadej značku a stát, pokud chceš.",
+      plateNeedState: "Vyber US stát spolu se značkou.",
+      plateFound: "Nalezeno — VIN a údaje vozu vyplněny. Zvol barvu.",
+      plateNotFound: "Značka nenalezena. Zadej VIN z palubní desky nebo štítku ve dveřích.",
+      plateLookupFailed: "Vyhledání značky selhalo. Zadej VIN ručně.",
+      plateLookupUnconfigured: "Zadej VIN ručně.",
+      vinScanCta: "Naskenuj VIN",
+      vinScanCamera: "Vyfotit",
+      vinScanLibrary: "Vybrat fotku",
+      vinScanning: "Čtu tvé VIN…",
+      vinScanHelper:
+        "Vyfoť VIN na palubní desce nebo štítku ve dveřích — Evorios doplní značku, model a rok.",
+      vinScanFound: "Hotovo — značka, model a rok jsou vyplněné.",
+      vinScanNoVin:
+        "Na fotce jsme VIN nenašli. Zkus ostřejší detail, nebo zadej VIN níže.",
+      vinScanFailed:
+        "Fotku se nepodařilo přečíst. Zkus lepší světlo, nebo zadej VIN níže.",
+      vinOrTypeManually: "Nebo zadej VIN ručně",
+      plateOptionalToggle: "Doplnit ze SPZ / značky",
       vin: "VIN",
       vinPlaceholder: "17místné VIN",
-      vinHelper: "Kontrolujeme formát VIN (a online vyhledání, když jsi online). Bez písmen I, O a Q.",
-      vinChecking: "Kontroluji VIN…",
+      vinHelper: "Sedmnáct znaků. Bez I, O a Q. Evorios doplní detaily.",
+      vinChecking: "Čtu tvé VIN…",
       vinErrorLength: "VIN musí mít přesně 17 znaků.",
       vinErrorChars: "VIN smí obsahovat jen písmena A–Z a číslice (bez I, O, Q).",
-      vinErrorCheck: "Kontrolní číslice VIN nesedí — zkontrolujte číslo na štítku.",
-      vinVerified: (summary) => `VIN vypadá v pořádku${summary ? ` · ${summary}` : ""}.`,
-      vinVerifiedFallback: "ověřeno",
-      vinLookupWarn: "Formát je v pořádku, ale online vyhledání VIN nic nenašlo. Můžeš pokračovat.",
+      vinErrorCheck: "VIN nesedí — zkontroluj číslo na štítku.",
+      vinVerified: (summary) => (summary ? `Super — ${summary}.` : "VIN rozpoznáno."),
+      vinVerifiedFallback: "rozpoznáno",
+      vinLookupWarn: "VIN vypadá v pořádku, ale detaily se nepodařilo doplnit. Můžeš je zadat níže.",
+      vinMismatchWarn: (decodedSummary, priorLabel) =>
+        `Tohle VIN je ${decodedSummary} — to nesedí na ${priorLabel} z tvých fotek. Zkontroluj VIN nebo fotky.`,
+      vinMismatchUseVinCta: "Použít vozidlo z VIN",
       serialNumber: "Sériové / výrobní číslo",
       serialNumberPlaceholder: "Sériové číslo výrobce nebo ID zařízení",
       serialNumberHelper: "Povinné — uloží se k nabídce pro předání a reklamace.",
@@ -1336,41 +1543,97 @@ export const cs: AppMessages = {
     },
     specs: {
       sectionTitle: "Detaily kategorie",
-      sectionHint:
-        "Vyber ze seznamů — povinná pole odemknou Pokračovat; doporučená pomáhají zájemcům rozhodnout se rychleji.",
+      sectionHint: "Povinná pole odemknou Pokračovat.",
       selectPlaceholder: "Vyberte…",
       requiredBadge: "Povinné",
       recommendedBadge: "Doporučeno",
       brandOtherPlaceholder: "Napiš značku",
       unbrandedLabel: "Bez značky / generická",
+      yearStepUp: "O rok novější",
+      yearStepDown: "O rok starší",
       fields: {
         brand: {
           label: "Značka",
           placeholder: "Vyber značku…",
-          hint: "Vyber ze seznamu — nebo Jiné, pokud chybí.",
+          hint: "",
         },
         model: { label: "Model", placeholder: "Přesný model" },
         powerSource: { label: "Zdroj energie", placeholder: "Vyberte…" },
-        voltageOrSpec: { label: "Napětí / klíčový parametr", placeholder: "např. 18V" },
+        voltageBand: {
+          label: "Třída napětí",
+          hint: "Pomáhá sladit baterie a staveniště.",
+        },
+        voltageOrSpec: { label: "Třída napětí", placeholder: "např. 18V" },
         kitIncludes: { label: "Co je v balení", placeholder: "Objektivy, baterie…" },
+        screenSizeBand: { label: "Velikost obrazovky" },
         keySpec: { label: "Klíčový parametr", placeholder: "např. 15″, 4K" },
-        capacityOrSize: { label: "Kapacita / velikost", placeholder: "např. 12 šálků" },
+        capacityBand: { label: "Kapacita" },
+        capacityOrSize: { label: "Kapacita", placeholder: "např. 12 šálků" },
+        personCapacityBand: { label: "Místa / spaní" },
         personCapacity: { label: "Kapacita osob", placeholder: "např. 4" },
         seasonRating: { label: "Sezónnost", placeholder: "Vyberte…" },
+        packedWeightBand: { label: "Váha sbaleného" },
         packedWeight: { label: "Váha sbaleného", placeholder: "např. 1,9 kg" },
         sizeOrLength: { label: "Velikost / délka", placeholder: "např. 170 cm" },
         skillLevel: { label: "Úroveň", placeholder: "Vyberte…" },
+        frameOrWheelBand: { label: "Velikost rámu / kol" },
         frameOrWheelSize: { label: "Velikost rámu / kol", placeholder: "např. 54 cm, 29″" },
         electric: { label: "Elektro?", placeholder: "Vyberte…" },
+        riderHeightBand: { label: "Vhodná výška jezdce" },
         riderHeight: { label: "Výška jezdce", placeholder: "např. 165–178 cm" },
         make: { label: "Značka vozidla", placeholder: "např. Toyota" },
-        year: { label: "Rok", placeholder: "např. 2019" },
-        mileage: { label: "Nájezd", placeholder: "Aktuální km" },
+        year: {
+          label: "Rok",
+          placeholder: "Rok",
+          hint: "Doplníme z fotek, když poznáme generaci — uprav šipkami, pokud je o rok vedle.",
+        },
+        mileage: {
+          label: "Nájezd",
+          placeholder: "Aktuální km",
+          hint: "Kupující chtějí dnešní stav na tachometru.",
+          rentOptionalHint:
+            "U půjčky volitelné — stav km zachytíte při vyzvednutí a znovu při vrácení.",
+        },
         transmission: { label: "Převodovka", placeholder: "Vyberte…" },
         fuelType: { label: "Palivo", placeholder: "Vyberte…" },
+        insuranceMinLiability: {
+          label: "Min. pojištění, které musí mít nájemce",
+          hint: "Nájemce přidá vozidlo do pojistky a při rezervaci ukáže doklad.",
+        },
+        insuranceMaxDeductible: {
+          label: "Max. spoluúčast, kterou přijmeš",
+          hint: "Nebo vyžaduj plné krytí / havarijní pojištění.",
+        },
+        drivetrain: { label: "Pohon" },
+        vehicleWeightLbs: {
+          label: "Hmotnost vozidla / GVWR (lb)",
+          placeholder: "např. 8500",
+          hint: "Zadej libry (lb). Od 26 000 lb (≈ 11 793 kg) je u půjčky povinné havarijní / PD pojištění — ne jen odpovědnost.",
+        },
+        wheelCount: {
+          label: "Počet pneumatik / kol",
+          placeholder: "např. 4, 6, 10, 18",
+          hint: "Kolik pneumatik potřebuje fotku před prohlídkou (bez rezervy). Osobní auta = 4. Dualies / boxy často 6–10. Semi + přívěs často 18. U těžkých / komerčních nabídek nastavuje hostitel.",
+        },
+        lengthBand: { label: "Délka" },
         lengthFt: { label: "Délka (ft)", placeholder: "např. 12" },
+        capacityPeopleBand: { label: "Kapacita cestujících" },
         capacityPeople: { label: "Kapacita osob", placeholder: "Max. osob" },
         motorIncluded: { label: "Motor v ceně?", placeholder: "Vyberte…" },
+        includedMilesPerDay: {
+          label: "Včetně km za den",
+          placeholder: "250",
+          hint: "Volné kilometry v denní sazbě — 250 je příjemný sousedský default.",
+        },
+        overagePerMile: {
+          label: "Cena za extra km",
+          placeholder: "0.45",
+          hint: "Účtuje se až po vyčerpání zahrnutých kilometrů.",
+        },
+        hardinessZoneRange: {
+          label: "Mrazuvzdornost / zóny",
+          hint: "Rozsah ve stylu USDA — školkařský standard, ať se kupující sami vytřídí.",
+        },
         hardinessZones: {
           label: "Mrazuvzdornost / zóny",
           placeholder: "např. USDA 5–8",
@@ -1386,31 +1649,52 @@ export const cs: AppMessages = {
         containerOrCaliper: { label: "Kontejner / obvod", placeholder: "např. #5" },
         containerClass: { label: "Formát / květináč", hint: "Velikost kontejneru nebo formát kořenů." },
         bloomSeason: { label: "Doba květu", placeholder: "např. pozdní jaro" },
-        cuttingWidthOrSpec: { label: "Záběr sečení / parametr", placeholder: "např. 53 cm" },
+        waterNeeds: { label: "Zálivka" },
+        cuttingWidthBand: { label: "Záběr sečení" },
+        cuttingWidthOrSpec: { label: "Záběr sečení", placeholder: "např. 53 cm" },
+        guestCapacityBand: { label: "Kapacita hostů / míst" },
         guestOrSeatCapacity: { label: "Kapacita hostů / míst", placeholder: "např. 8" },
+        setupFootprint: { label: "Prostor na sestavení" },
         dimensions: { label: "Rozměry", placeholder: "D × Š × V" },
         color: { label: "Barva", placeholder: "např. černá" },
+        powerBand: { label: "Třída výkonu" },
         wattageOrChannels: { label: "Výkon / kanály", placeholder: "např. 100W" },
+        weightBand: { label: "Váha / odpor" },
         weightOrResistance: { label: "Váha / odpor", placeholder: "např. 2×12 kg" },
+        maxUserWeightBand: { label: "Max. váha uživatele" },
         maxUserWeight: { label: "Max. váha uživatele", placeholder: "např. 136 kg" },
+        ageBand: { label: "Věkové rozmezí" },
+        weightLimitBand: { label: "Hmotnostní limit" },
         ageOrWeightRange: {
           label: "Věk / váhový rozsah",
           placeholder: "např. 0–12 měs., 4–18 kg",
+        },
+        safetyDateKnown: {
+          label: "Stav bezpečnostního data",
+          hint: "Autosedačky a postýlky: znát expiraci nebo datum výroby před nabídkou.",
         },
         expiresOrRecallCheck: {
           label: "Expirace / datum výroby",
           placeholder: "U autosedaček povinné ke kontrole",
         },
-        powerOutput: { label: "Výkon", placeholder: "např. 5 kW" },
+        hoursBand: { label: "Motohodiny" },
         hoursUsed: { label: "Motohodiny", placeholder: "Stav počítadla" },
+        dutyClass: { label: "Třída zátěže" },
+        powerOutput: { label: "Výkon", placeholder: "např. 5 kW" },
         clothingSize: { label: "Velikost", placeholder: "Vyberte…" },
         fits: { label: "Střih / pro koho", placeholder: "Vyberte…" },
+        materialBand: { label: "Materiál" },
         material: { label: "Materiál", placeholder: "např. polyester" },
+        sizeBand: { label: "Přibližná velikost" },
         approxSqFt: { label: "Přibližná plocha (m²)", placeholder: "např. 20" },
+        maxOccupancyBand: { label: "Max. obsazenost" },
         maxOccupancy: { label: "Max. obsazenost", placeholder: "Počet osob" },
         parkingIncluded: { label: "Parkování", placeholder: "Vyberte…" },
         wifiIncluded: { label: "Wi‑Fi", placeholder: "Vyberte…" },
+        accessType: { label: "Přístup" },
         accessNotes: { label: "Přístup", placeholder: "Kód, schody…" },
+        useCase: { label: "Hlavní použití" },
+        transportSize: { label: "Jak se přepravuje" },
         dimensionsOrWeight: { label: "Rozměry / váha", placeholder: "Pro transport" },
         whatMakesItUnique: { label: "Čím je unikátní", placeholder: "Proč si to půjčit" },
         jobScale: { label: "Škála" },
@@ -1492,11 +1776,11 @@ export const cs: AppMessages = {
         "5_6_person": "5–6 osob",
         "7_plus_person": "7+ osob",
         group_shelter: "Skupinový přístřešek",
-        under_2lb: "Do 1 kg",
-        "2_5lb": "1–2 kg",
-        "5_10lb": "2–4,5 kg",
-        "10_20lb": "4,5–9 kg",
-        over_20lb: "Nad 9 kg",
+        under_2lb: "Do 2 lb (0,9 kg)",
+        "2_5lb": "2–5 lb (0,9–2,3 kg)",
+        "5_10lb": "5–10 lb (2,3–4,5 kg)",
+        "10_20lb": "10–20 lb (4,5–9 kg)",
+        over_20lb: "Nad 20 lb (9 kg)",
         xs_frame: "Rám XS",
         s_frame: "Rám S",
         m_frame: "Rám M",
@@ -1675,13 +1959,13 @@ export const cs: AppMessages = {
         car_trunk: "Kufr auta",
         needs_truck: "Potřeba dodávka / náklaďák",
         needs_crew: "Potřeba parta",
-        liability_25_50: "Odpovědnost $25k / $50k",
-        liability_50_100: "Odpovědnost $50k / $100k",
-        liability_100_300: "Odpovědnost $100k / $300k",
-        liability_250_500: "Odpovědnost $250k / $500k",
-        deductible_500: "Spoluúčast ≤ $500",
-        deductible_1000: "Spoluúčast ≤ $1,000",
-        deductible_2500: "Spoluúčast ≤ $2,500",
+        liability_25_50: "Odpovědnost 25k / 50k Kč",
+        liability_50_100: "Odpovědnost 50k / 100k Kč",
+        liability_100_300: "Odpovědnost 100k / 300k Kč",
+        liability_250_500: "Odpovědnost 250k / 500k Kč",
+        deductible_500: "Spoluúčast ≤ 500 Kč",
+        deductible_1000: "Spoluúčast ≤ 1 000 Kč",
+        deductible_2500: "Spoluúčast ≤ 2 500 Kč",
         full_coverage_required: "Povinné havarijní pojištění",
 
       },
@@ -1689,16 +1973,23 @@ export const cs: AppMessages = {
     modes: {
       title: "Jak to chceš nabídnout?",
       subtitle:
-        "Půjč, prodej, nebo obojí. Chceš darovat? Použij Prodat s cenou $0.",
+        "Kombinuj volně: půjčka + prodej, nebo půjčka + zdarma. Zdarma = Prodat za 0 Kč (ne vedle placeného prodeje).",
       rent: "Půjčit",
       sell: "Prodat",
       gift: "Zdarma",
+      pathChoiceTitle: "Půjčit, nebo prodat?",
+      pathChoiceBody:
+        "Vyber cestu hned — Prodej zůstane krátký. Půjčka odemkne pojištění a kilometry pro sousedy.",
+      pathChoiceRent: "Půjčit",
+      pathChoiceSell: "Prodat",
+      pathChoiceBoth: "Obojí",
       rentSubtitleDailyWeeklyMonthly: "Vydělávejte denně, týdně nebo měsíčně",
       rentSubtitleWeeklyMonthly: "Vydělávejte týdně nebo měsíčně",
       rentSubtitleMonthly: "Vydělávejte měsíčně",
       rentSubtitleDailyWeekly: "Vydělávejte denně nebo týdně",
-      sellSubtitle: "Jednorázový prodej, věc odejde z tvých rukou",
-      giftSubtitle: "Darujte zdarma",
+      sellSubtitle: "Jednorázový prodej — lze spolu s Půjčit",
+      giftSubtitle: "Daruj zdarma — lze spolu s Půjčit (ne s placeným prodejem)",
+      giftBadge: "Prodat za 0 Kč",
       minimumPeriod: "MINIMÁLNÍ DOBA PŮJČKY",
       period1Day: "1 den",
       period3Days: "3 dny",
@@ -1715,25 +2006,133 @@ export const cs: AppMessages = {
       longTermRentersNote: "Nájemci uvidí měsíční cenu u dlouhých rezervací.",
       howToPrice: "Jak nacenit?",
       longTermHelp: (example) =>
-        `Jen příklad: někteří hostitelé začínají kolem ${example} u dlouhých pobytů a pak upraví podle poptávky a opotřebení.`,
-      securityDeposit: "Kauce (volitelné)",
+        `Tip experta: u rezervací 30+ dní začni kolem ${example}. Drž cenu pod koupí nové — když měsíc stojí víc než věc, sousedé radši koupí. Uprav podle poptávky a opotřebení.`,
+      securityDeposit: "Kauce",
       securityDepositHint:
-        "Výši nastavíte vy. Blokace na kartě nájemce přes Stripe — uvolní se, když potvrdíte v pořádku vrácení. Prázdné = bez holdu.",
+        "Povinné. Blokace na kartě přes Stripe — uvolní se po v pořádku vrácení. Tip: kauci = cena nové; zmizí → koupíš znovu. Zadej 0, pokud nechceš hold.",
+      securityDepositHintInsurance:
+        "U aut / techniky je základ pojištění nájemce. Hold nastav podle max. spoluúčasti (např. ≤ 2 500 → hold ~2 500) — ne celá cena auta. 0 jen pokud ti stačí jen pojištění.",
+      securityDepositHintMonthly:
+        "U nemovitostí bývá kauce asi jeden měsíční nájem. Uvolní se po v pořádku předání. 0 = bez holdu.",
+      insuranceRequirementTitle: "Doklad pojištění nájemce",
+      insuranceRequirementBody:
+        "Před předáním musí nájemce přidat toto auto/techniku do své pojistky na termín půjčky a nahrát kartu / list. Ty doklad zkontroluješ před předáním klíčů.",
+      insuranceRequirementToggle: "Vyžadovat doklad pojištění před začátkem půjčky",
+      insuranceCoverageLead: "Vozidlo musí být na pojistce od",
+      insuranceCoverageLead0: "V den začátku půjčky",
+      insuranceCoverageLead1: "1 den před začátkem",
+      insuranceCoverageLead3: "3 dny před začátkem",
+      insuranceCoverageLead7: "7 dní před začátkem",
+      insuranceCoverageLeadHint: "Máš čas zkontrolovat list pojištění před předáním klíčů.",
+      physicalDamageTitle: "Vyžadovat havarijní / fyzické poškození",
+      physicalDamageBody: (weightLbs, weightKg) =>
+        `Ne jen odpovědnost — havarijní / komplexní (nebo PD techniky) musí být na pojistce nájemce. Povinné u komerční techniky a u vozidel od ${weightLbs.toLocaleString("cs-CZ")} lb (≈ ${weightKg.toLocaleString("cs-CZ")} kg).`,
+      proRentersTitle: "Jen profesionálové (pro)",
+      proRentersBody:
+        "Výchozí zapnuto u Heavy Equipment & Construction. Nájemce potvrdí, že je řemeslník / profesionál, a může nahrát doklad. v1 = prohlášení + fotka — ne kontrola u živnostenského úřadu.",
+      commercialTransportTitle: "Komerční doprava (≥26 000 lb / semi)",
+      commercialTransportBody:
+        "Těžká vozidla a semi / přívěsy používají CDL + doklad pojištění agent→majitel. Nastav počet pneumatik pro předprohlídku, e-mail, kam má agent poslat krytí, plus požadavky a případný poplatek.",
+      wheelCountLabel: "Počet pneumatik / kol (povinné)",
+      wheelCountPlaceholder: "např. 6, 10, 18",
+      wheelCountHint:
+        "Jedna fotka na každou pozici pneumatiky při vyzvednutí i vrácení (rezerva volitelná). Dualies, boxy a vícenapravová přívěsy nejsou „čtyři rohy“. Výchozí 10 u těžkých náklaďáků nebo 18 u semi / komerčních přívěsů — uprav podle vozidla.",
+      insuranceOwnerProofEmail: "E-mail pro doklad pojištění (agent → ty)",
+      insuranceOwnerProofEmailHint:
+        "Vyhrazená schránka — nájemci ji uvidí jasně. Jejich agent posílá doklad sem (ne nahrání v aplikaci).",
+      insuranceRequirementsNotes: "Požadavky a náklady na pojištění (volný text)",
+      insuranceRequirementsNotesHint:
+        "Min. krytí, PD, odpovědnost, výluky, kdo co platí — co ti řekl pojistitel.",
+      insurancePdMinUsd: "Min. havarijní / PD krytí (USD)",
+      insuranceLiabilityMinUsd: "Min. odpovědnost (USD)",
+      insuranceRenterFeeUsd: "Poplatek, který hradí nájemce (USD, volitelné)",
+      noShowFeeTitle: "Poplatek za nedostavení (volitelné)",
+      noShowFeeBody:
+        "Když se nájemce nedostaví po okně vyzvednutí, můžeš označit no-show, uvolnit kalendář a volitelně označit částku proti depozitu. Měkká sousedská politika — může sporovat.",
+      noShowFeeToggle: "Zapnout volitelný poplatek za no-show z depozitu",
+      noShowFeeAmount: "Částka poplatku za no-show (USD)",
+      lateReturnFeeTitle: "Poplatek za pozdní vrácení",
+      lateReturnFeeBody:
+        "Po termínu vrácení: krátká lhůta, pak paušál + hodinová sazba (běžný vzor car-share).",
+      lateReturnFeeToggle: "Zapnout poplatek za pozdní vrácení",
+      lateReturnGraceMinutes: "Lhůta (minuty)",
+      lateReturnFlatFee: "Paušál (USD)",
+      lateReturnPerHourFee: "Za hodinu (USD)",
+      fuelPolicyHostTitle: "Pravidla paliva (volitelná úprava)",
+      fuelPolicyHostBody:
+        "Výchozí je plná→plná s poplatkem 20 $ za chybějící palivo. Hladiny se zapisují při předání — ne v inzerátu. Předplacená plná nádrž znamená, že nájemce platí plnou nádrž předem.",
+      fuelPolicyHostSelect: "Pravidla",
+      fuelPolicyFullToFull: "Plná→plná (vrátit plnou)",
+      fuelPolicyPrepaid: "Předplacená plná nádrž",
+      fuelPolicyMissingFee: "Poplatek za chybějící palivo (USD)",
+      fuelPolicyTankGallons: "Velikost nádrže pro odhad (galony, volitelné)",
+      youngDriverTitle: "Mladí řidiči (18–24)",
+      youngDriverBody:
+        "Výchozí minimální věk je 25 (tržní standard). Opt-in povolí 18–24 s vyšší kaucí (1,5× nebo 2×).",
+      youngDriverToggle: "Povolit nájemce 18–24 s vyšší kaucí",
+      youngDriverMultiplier: "Násobitel kauce pro mladé řidiče",
+      vehicleExtrasTitle: "Volitelné doplňky",
+      vehicleExtrasBody: "Jednoduché extras, které si nájemce může přidat při rezervaci.",
+      mileagePolicyTitle: "Kilometry u této půjčky",
+      mileagePolicyBody:
+        "Přidej denní příděl a jednoduchou cenu za extra km — nebo nabídni neomezené km jako doplněk.",
+      includedMilesPerDay: "Včetně km za den",
+      includedMilesPerDayHint: "250 km/den je přívětivý default, který sousedé očekávají.",
+      overagePerMile: "Cena za extra km",
+      overagePerMileHint: "Účtuje se až po vyčerpání zahrnutých kilometrů.",
+      extraUnlimitedMiles: "Neomezené kilometry",
+      extraUnlimitedMilesHint:
+        "Cena za den půjčky. Když je zapnuto, níže uvedené limity se přeskočí.",
+      extraChildSeat: "Dětská sedačka",
+      extraChildSeatHint: "Jednorázový poplatek za celou půjčku.",
+      extraRoofRack: "Střešní nosič",
+      extraRoofRackHint: "Jednorázový poplatek za celou půjčku.",
+      extraVehicleDelivery: "Doručení vozidla",
+      extraVehicleDeliveryHint: "Doručení v okruhu za paušál.",
+      extraPricePerDay: "Cena za den",
+      extraPriceFlat: "Paušální cena",
+      extraDeliveryRadius: "Max. okruh doručení (míle)",
+      tollHoldTitle: "Rezervace na mýtné (volitelné)",
+      tollHoldBody:
+        "Extra hold na kartě pro možné mýtné. Macropointy můžou označit známé koridory; faktury podle SPZ často dorazí až za dny — GPS jen podpírá hold.",
+      tollHoldToggle: "Autorizovat hold na mýtné do této částky",
+      tollHoldAmount: "Částka holdu na mýtné (USD)",
+      tollHoldAmountHint: "Přičte se ke kauci při rezervaci. Výchozí $50.",
+      travelOutsideTitle: "Cestování mimo domovskou oblast",
+      travelOutsideBodyState:
+        "Smí nájemce opustit americký stát, kde je nabídka založená? Výchozí je zákaz — smluvní podmínka do smlouvy o pronájmu.",
+      travelOutsideBodyCountry:
+        "Smí nájemce opustit zemi (nebo místní ekvivalent regionu), kde je nabídka založená? Výchozí je zákaz — smluvní podmínka do smlouvy o pronájmu.",
+      travelOutsideHomeLabel: (area) => `Domovská oblast této nabídky: ${area}`,
+      travelOutsideForbidden: "Zakázáno — zůstat v domovské oblasti",
+      travelOutsideAllowed: "Povoleno — nájemce smí opustit domovskou oblast",
+      travelOutsideHint:
+        "Měkké GPS checkpointy později mohou upozornit hostitele, když body opustí domovskou oblast při zákazu. Nejde o tvrdé zamykání.",
       depositProtectionNote: (label) =>
-        `💡 ${label}: výši holdu volíte vy. Pojištění drahých věcí přijde později — do té doby nastavte kauci, se kterou jsi v pohodě.`,
+        `💡 ${label}: výši blokace volíte vy. Pojištění drahých věcí přijde později — do té doby nastavte kauci, se kterou jsi v pohodě.`,
       salePrice: "Prodejní cena",
       sellNote:
-        "💡 Nastav 0 a darujte zdarma (samostatný režim Darovat zatím není). U placených prodejů platí provize aplikace.",
+        "💡 Placené prodeje jdou přes Stripe. Nastav 0 Kč (nebo klepni na Zdarma) a daruj — bez platby, jen vyzvednutí.",
+      giftNote:
+        "🎁 Zdarma = Prodat za 0 Kč. Soused ti napíše kvůli vyzvednutí — bez karty, bez provize.",
       pricingTipRoi: (count) =>
-        `Dobrá cena — při této sazbě se to splatí zhruba po ${count} půjčkách. Kdykoli upravíte.`,
+        `Dobrá denní sazba — splatí se zhruba po ${count} půjčkách. To je model půjčování: několik krátkých zápůjček porazí jeden prodej.`,
       pricingTipDefault:
-        "Nech pole prázdná a napiš, co ti přijde férové. Po fotkách můžu navrhnout start — políčka za tebe nevyplním.",
-      pricingTipSuggestRent: (daily) =>
-        `Z fotek bych začal kolem ${daily}/den na půjčení. Jen tip — políčko zůstane prázdné, dokud si nevyberete.`,
+        "Doplň cenu nové náhrady výše — pak navrhnu denní sazbu, kauci a prodejní tip, ať je to výdělečné. Políčka vyplním až po „Použít můj tip“.",
+      pricingTipSuggestRent: (daily, deposit) =>
+        `Začal bych kolem ${daily}/den. Kauci nastav na cca ${deposit} — stejně jako cena nové. Když věc zmizí, koupíš novou; když vrátí v pohodě, Stripe hold uvolní. Klid pro obě strany.`,
+      pricingTipSuggestRentInsurance: (daily, deposit) =>
+        `Začal bych kolem ${daily}/den. Vyžaduj, ať nájemce přidá majetek do pojištění a nahraje doklad před vyzvednutím. Hold ~${deposit} (spoluúčast) — ne celá hodnota. Bez dokladu klíče nepředávej.`,
+      pricingTipSuggestRentMonthlyDeposit: (daily, deposit) =>
+        `Začal bych kolem ${daily}/den (nebo měsíční). Kauce kolem ${deposit} (cca měsíc) je u nemovitostí běžná.`,
       pricingTipSuggestSell: (sale) =>
-        `Z fotek je férové začít prodej kolem ${sale}. Jen tip — napište vlastní, nebo použijte moji.`,
-      pricingTipSuggestBoth: (daily, sale) =>
-        `Z fotek bych začal kolem ${daily}/den na půjčení, nebo asi ${sale} na prodej. Jen tip — políčka zůstanou prázdná, dokud si nevyberete.`,
+        `Na prodej férové začít kolem ${sale} (použitá, pod cenou nové), ať to jde. Ceníš jako lokální inzerát, ne jako obchod.`,
+      pricingTipSuggestBoth: (daily, sale, deposit) =>
+        `Půjčka kolem ${daily}/den. Kauce = cena nové (~${deposit}): zmizí → koupíš znovu; vrátí OK → hold se uvolní. Nebo prodej kolem ${sale}. Měsíční musí zůstat pod koupí nové.`,
+      pricingTipSuggestBothInsurance: (daily, sale, deposit) =>
+        `Půjčka kolem ${daily}/den. Vyžaduj doklad pojištění. Hold ~${deposit}. Nebo prodej kolem ${sale}.`,
+      pricingTipSuggestBothMonthlyDeposit: (daily, sale, deposit) =>
+        `Půjčka kolem ${daily}/den. Kauce ~${deposit} (≈ měsíc). Nebo prodej kolem ${sale}.`,
       useSuggestedPrices: "Použít můj tip",
       restrictedModesNote: "Některé režimy transakcí pro tuto kategorii nejsou k dispozici.",
     },
@@ -1753,17 +2152,18 @@ export const cs: AppMessages = {
         "Detaily přístupu: kód schránky, brány, jednotky, místo klíče…",
       contactlessUnlockHint:
         "Tyto detaily nejsou na veřejné nabídce. Odemknou se potvrzenému nájemci při check-inu s PIN vyzvednutí — až když už má adresu.",
-      heavyItem: "Těžká položka (nad 50 lb)",
-      weightLbs: "Hmotnost (lb)",
+      heavyItem: "Těžká položka (nad 50 lb / 23 kg)",
+      weightLbs: "Hmotnost",
       weightRequired: " — povinné pro doručení",
       weightPlaceholder: "např. 85",
+      weightDualHint: "Zadej libry — ukazujeme lb (kg) pro všechny.",
       iCanDeliver: "Mohu doručit",
       iCanDeliverDesc: "Doručení tam i zpět před začátkem a po konci",
       deliveryHeading: "Doručení",
       deliveryPolicy:
         "Doručení před začátkem půjčky a vyzvednutí po konci je jeden poplatek za cestu tam i zpět — ne 50/50 a ne jednosměrné doručení hostitelem s návratem nájemcem.",
       maxDistance: "Max. vzdálenost",
-      milesRoundTrip: "mil (tam i zpět)",
+      milesRoundTrip: "km (tam i zpět)",
       kmRoundTrip: "km (tam i zpět)",
       roundTripFee: "Poplatek za doručení tam i zpět",
       estimate: "Odhad",
@@ -1841,7 +2241,7 @@ export const cs: AppMessages = {
       handoffContactless: "Bezkontaktně",
       handoffHeavy: "Těžká položka",
       handoffDelivery: (distanceLabel, fee, weight) =>
-        `Doručení ≤${distanceLabel} · $${fee} tam i zpět${weight}`,
+        `Doručení ≤${distanceLabel} · ${fee} Kč tam i zpět${weight}`,
       handoffDeliveryNoFee: (distanceLabel, weight) => `Doručení ≤${distanceLabel}${weight}`,
       handoffNotSet: "Nenastaveno",
       handoffAdjustHint: "Hodiny vyzvednutí a doručení — upravíte po zveřejnění v Moje garáž.",
@@ -1880,7 +2280,7 @@ export const cs: AppMessages = {
       openingStripe: "Otevírám…",
       continueStripe: "Připojit finance",
       refreshing: "Obnovuji…",
-      refreshStatus: "Dokončil(a) jsem nastavení — obnovit stav",
+      refreshStatus: "Obnovit stav",
       tip: (mascot) =>
         `${mascot}: Můžeš to dát ven a nechat sousedy prohlížet. Finance připoj, až budeš chtít platby kartou — Stripe bezpečně ověří doklad.`,
       goingLive: "Zveřejňuju…",
@@ -1947,12 +2347,22 @@ export const cs: AppMessages = {
       `Autorizujeme ${amount} na kartě. Blokace se uvolní, když majitel potvrdí vrácení v pořádku.`,
     cancellationPolicyTitle: "Zrušení",
     cancellationPolicyBody:
-      "Čekající žádost: zrušte kdykoli před přijetím hostitelem — autorizace karty se uvolní (banka může vrácení zobrazit až za několik dní). Po přijetí může kterákoli strana zrušit před vyzvednutím: 48+ hodin před začátkem → plná refundace; 24–48 hodin → 50 %; pod 24 hodin → bez refundace půjčky. Zrušení hostitelem před vyzvednutím vždy vrací nájemci 100 %. Blokace kauce se při zrušení uvolní.",
+      "Po přijetí může kterákoli strana zrušit před předáním: 24+ hodin před začátkem → 100 % refundace půjčky; do 24 hodin → 50 %. Rezervace na poslední chvíli (<25 h před startem): 1 h grace po rezervaci → 100 %. Zrušení hostitelem před vyzvednutím → plná refundace nájemci. Kauce se uvolní při zrušení před vyzvednutím.",
+    lateReturnPolicyTitle: "Pozdní vrácení",
+    lateReturnPolicyBody:
+      "Po termínu vrácení platí krátká lhůta, pak paušál + hodinová sazba (výchozí: 30 min, 20 USD, 15 USD/h — hostitel může upravit).",
+    noShowPolicyTitle: "Nedostavení",
+    noShowPolicyBody:
+      "Pokud se nájemce nedostaví, hostitel může po cca 2 hodinách od vyzvednutí označit no-show. Cena půjčky se obvykle ponechává; volitelný poplatek z kauce, pokud je nastaven.",
+    policyLearnMore: "Více informací",
+    policySheetTitle: "Pravidla pronájmu",
+    policyPracticeNote:
+      "Podobné běžné praxi car-share a krátkodobého pronájmu — ne kopie konkrétní značky.",
     cardPayment: "Platba kartou",
     backToDetails: "Zpět na detaily rezervace",
     preparing: "Připravuji…",
-    continueToPay: (total) => `Pokračovat k platbě · $${total}`,
-    sendRequest: (total) => `Odeslat žádost o rezervaci · $${total}`,
+    continueToPay: (total) => `Pokračovat k platbě · ${total} Kč`,
+    sendRequest: (total) => `Odeslat žádost o rezervaci · ${total} Kč`,
     authorizeDepositFooter: "Autorizujte blokaci kauce výše a dokončete žádost.",
     completePaymentFooter: "Dokonči platbu kartou výše a odešlete žádost o rezervaci.",
     failedToSave: "Rezervaci se nepodařilo uložit",
@@ -1960,7 +2370,7 @@ export const cs: AppMessages = {
     confirmedBody:
       "Majitel dostane oznámení a potvrdí dostupnost. Stav uvidíš v Půjčkách.",
     withHost: (name) => `s ${name}`,
-    total: (amount) => `Celkem $${amount}`,
+    total: (amount) => `Celkem ${amount} Kč`,
     ref: (id) => `Ref #${id}`,
     viewRentals: "Zobrazit půjčky",
     backToHome: "Zpět na Domů",
@@ -1970,6 +2380,10 @@ export const cs: AppMessages = {
     insuranceBody:
       "Přidej vozidlo nebo stroj do své pojistky na termín půjčení a nahrajte kartu nebo list s podmínkami. Hostitel musí vidět aktivní krytí před převzetím.",
     insuranceHostRequires: (details) => `Hostitel vyžaduje: ${details}`,
+    insuranceCoverageLeadNote: (date, leadDays) =>
+      leadDays <= 0
+        ? `Měj vozidlo na pojistce od začátku půjčky (${date}).`
+        : `Měj vozidlo na pojistce od ${date} (${leadDays} d${leadDays === 1 ? "en" : "ny"} před začátkem).`,
     insuranceActiveUntil: "Pojištění aktivní do",
     insuranceMustCoverRental: "Krytí musí platit až do konce půjčení.",
     insuranceUpload: "Nahrát fotku pojištění",
@@ -1979,6 +2393,49 @@ export const cs: AppMessages = {
     insuranceSignInFirst: "Nejdřív se přihlaste, ať můžeme doklad připojit k rezervaci.",
     insurancePreviewAlt: "Nahrané pojištění",
     insuranceViewUploaded: "Otevřít nahraný doklad",
+    physicalDamageRequired:
+      "Tato nabídka vyžaduje krytí fyzického poškození (havarijní / komplexní / PD techniky) — samotná odpovědnost nestačí.",
+    physicalDamageAttest:
+      "Potvrzuji, že nahraný doklad zahrnuje krytí fyzického poškození této položky (ne jen odpovědnost).",
+    proRentersRequired:
+      "Hostitel půjčuje komerční techniku jen profesionálům. Potvrď, že kvalifikuješ (řemeslo / firemní použití).",
+    proRentersAttest:
+      "Prohlašuji, že jsem profesionál / řemeslník a používám to k práci. (v1: vlastní prohlášení — ne státní kontrola licence.)",
+    proCredentialUpload: "Nahrát živnostenský / profesní doklad (volitelné, doporučeno)",
+    proCredentialReplace: "Nahradit fotku dokladu",
+    proCredentialHint:
+      "Vizitka, živnostenský list, firemní ID apod. Fotku uložíme pro hostitele — v1 neověřujeme u úřadu.",
+    proBadge: "Jen profi",
+    physicalDamageBadge: "Havarijní / PD povinné",
+    cdlRequired:
+      "Tato nabídka komerční dopravy vyžaduje platný CDL (řidičský průkaz na nákladní vozidla).",
+    cdlAttest:
+      "Prohlašuji, že mám platný CDL pro tuto třídu vozidla a předložím ho při předání.",
+    cdlUpload: "Nahrát foto / sken CDL",
+    cdlReplace: "Nahradit foto CDL",
+    cdlHint:
+      "Čitelné foto Commercial Driver’s License. Povinné před odesláním rezervace i před startem.",
+    cdlBadge: "Vyžadován CDL",
+    agentInsuranceTitle: "Pojištění přes agenta → majitel",
+    agentInsuranceBody:
+      "U těžké / semi komerční dopravy sjednej krytí u pojišťovacího agenta. Agent musí poslat doklad e-mailem přímo majiteli vozidla — nejde o lehčí cestu „přidat do osobního autopojištění + nahrát“.",
+    agentInsuranceEmailLabel: "Doklad poslat na tento e-mail majitele",
+    agentInsuranceEmailMissing:
+      "Hostitel ještě nenastavil e-mail pro doklad pojištění — zeptej se před rezervací.",
+    agentInsuranceAck:
+      "Sjednám krytí s agentem a nechám ho poslat doklad na e-mail majitele výše před začátkem zápůjčky.",
+    agentInsuranceRequirements: "Požadavky majitele na pojištění",
+    agentInsuranceFee: (amount) => `Poplatek za pojištění / splnění, který hradí nájemce: ${amount}`,
+    commercialTransportBadge: "Komerční doprava",
+    extrasTitle: "Doplňky",
+    extrasBody: "Volitelné extras od hostitele.",
+    extraUnlimitedMiles: "Neomezené kilometry",
+    extraChildSeat: "Dětská sedačka",
+    extraRoofRack: "Střešní nosič",
+    extraVehicleDelivery: (radius) => `Doručení vozidla (do ${radius})`,
+    extraPricePerDay: (amount) => `${amount}/den`,
+    extraPriceFlat: (amount) => `${amount} paušál`,
+    extrasSubtotal: (amount) => `Doplňky · ${amount}`,
     newRequestTitle: "Nová žádost o rezervaci",
     newRequestBody: (title) => `Někdo chce půjčit tvoji položku ${title}.`,
     approvedTitle: "Rezervace schválena",
@@ -1993,6 +2450,26 @@ export const cs: AppMessages = {
       "Jakákoli autorizovaná platba bude uvolněna — refundace mohou trvat několik pracovních dní.",
     refundNoteNone: "Za tuto žádost nebyla stržena žádná platba.",
     captureFailed: "Platbu se nepodařilo zachytit. Zkus to znovu nebo kontaktujte podporu.",
+    macropointConsentTitle: "Poloha během půjčky",
+    macropointConsentBody:
+      "U aut nahráváme hrubé checkpointy z telefonu asi každých 20 minut, dokud je půjčka aktivní (a na startu/vrácení) — ne živé sledování. Pro bezpečnost předání a volitelné mýtné. Po konci půjčky se zastaví.",
+    macropointConsentCheck:
+      "Souhlasím s hrubými checkpointy polohy jen po dobu aktivní půjčky vozidla",
+    ageGateTitle: "Vyžadován věk řidiče",
+    ageGateNeedDob:
+      "Před rezervací vozidla doplň datum narození v Osobních údajích (nebo potvrď při start ID z řidičáku). Výchozí min. věk je 25.",
+    ageGateUnderage: (minAge) =>
+      `Pro půjčení vozidel na Evorios musíš mít alespoň ${minAge} let.`,
+    ageGateHostBlocksYoung: (minAge) =>
+      `Tento hostitel vyžaduje řidiče ${minAge}+. Nepovolil půjčky mladým řidičům.`,
+    ageGateYoungTitle: "Platí vyšší kauce pro mladé řidiče",
+    ageGateYoungBody: (age, addOn) =>
+      `Je ti ${age}. Hostitel povoluje 18–24 s příplatkem ke kauci ${addOn}.`,
+    fuelPolicyTitle: "Pravidla paliva",
+    fuelPolicyBody:
+      "Hladina paliva (a DEF u nafty) se zapisuje na začátku a při vrácení — ne v inzerátu. Výchozí je plná→plná: vrať plnou, nebo doplať chybějící palivo + poplatek $20. Předplacená plná nádrž je alternativa po dohodě.",
+    tollHoldBookingNote: (amount) =>
+      `Zahrnuje hold na mýtné ${amount} (spolu s kaucí). Faktury podle SPZ můžou přijít později — GPS jen podpírá hold.`,
   },
   postRequest: {
     title: "Poslat žádost",
@@ -2072,6 +2549,144 @@ export const cs: AppMessages = {
     whenFrom: (start) => `Od ${start}`,
   },
   faq,
+  categoryFacts: {
+    expand: "Jak to funguje a bezpečnost",
+    collapse: "Skrýt detaily",
+    byCategory: {
+      Vehicles: {
+        title: "Jak funguje sousedské půjčení auta",
+        summary:
+          "Sousedé jsou důvěryhodnější než anonymní marketplace — ale podmínky, pojištění a povinná předprohlídka (exteriér, interiér a všechny pneumatiky) jsou povinné před PIN/klíči. Palivo (a DEF u nafty) se zapisuje na začátku a při vrácení — výchozí plná→plná, chybějící palivo + $20. Od 26 000 lb nebo u semi / komerčních přívěsů navíc CDL a doklad agent→majitel (ne osobní nahrání). Hostitel může po okně vyzvednutí označit no-show a uvolnit kalendář.",
+        hostTipTitle: "Pro hostitele / majitele",
+        hostTip:
+          "Zadej GVWR v lb. Od ≥ 26 000 lb nebo u semi nastav e-mail pro doklad od agenta a vyžaduj CDL. U lehčích aut nájemce přidá auto do osobní pojistky a nahraje doklad. Fotky pneumatik chrání před výměnou. Palivo: plná→plná (hladiny jen při předání, ne v inzerátu). Volitelný no-show poplatek je měkký flag depozitu.",
+        hostTipLinkLabel: "Web TINT (tint.ai)",
+        hostTipLinkHref: "https://www.tint.ai/",
+        whyGeoTitle: "Proč GPS pro PIN?",
+        whyGeo:
+          "Sdílený kód může dojít dál než auto. PIN se odemkne až na místě nebo přes QR na autě — přítomnost, ne přeposlané číslo.",
+        contactlessTitle: "Bezkontaktně / bez přítomnosti",
+        contactless:
+          "Doklad pojištění musí být schválený před PIN / schránkou / klíči. Doporučeno: OBD + schránka na klíč.",
+        flowTitle: "Od začátku do konce",
+        flow:
+          "Nabídnout → hmotnost + pojištění (upload nebo agent→e-mail) → rezervace (CDL u komerční dopravy) → předprohlídka včetně pneumatik → předání s palivem/DEF + tachometr → stejná sada při vrácení.",
+        layersTitle: "Vrstvy ochrany",
+        layers:
+          "Podmínky · pojištění · CDL dle potřeby · předprohlídka a vrácení včetně pneumatik · palivo/DEF plná→plná (+$20 při nedodání) · PD od 26 000 lb · hold · volitelný no-show · geo PIN · QR.",
+        claimsTitle: "Když se něco pokazí (nároky)",
+        claims:
+          "Pojištění nájemce je primární. Fotky pneumatik před/po pomůžou prokázat výměnu. Nedodané palivo (+ $20) lze označit pro nárok hostitele. No-show uvolní kalendář; poplatek jen pokud je nastaven.",
+      },
+      "Heavy Equipment": {
+        title: "Půjčování komerční techniky",
+        summary:
+          "Heavy Equipment defaultně jen pro profesionály. PD pojištění povinné. Povinná předprohlídka (včetně gumy/pneumatik u kolových strojů) blokuje start. Hostitel může označit no-show po okně vyzvednutí.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Nech „jen profi“ zapnuté. PD je povinné. Fotky před startem (včetně pneumatik) chrání obě strany. Volitelný no-show poplatek je měkký.",
+        whyGeoTitle: "Proč doklad před klíči?",
+        whyGeo:
+          "Komerční technika je drahá při nepojištěném poškození. Prohlášení + PD + předprohlídka dávají čas na kontrolu.",
+        flowTitle: "Od začátku do konce",
+        flow:
+          "Nabídnout → jen profi + PD → doklad → předprohlídka → předání → prohlídka při vrácení.",
+        layersTitle: "Vrstvy ochrany",
+        layers:
+          "Pro prohlášení · PD · předprohlídka · hold · volitelný no-show · podmínky · QR/PIN.",
+        claimsTitle: "Když se něco pokazí",
+        claims:
+          "Primární je PD pojištění nájemce; hold kryje spoluúčast. No-show uvolní termíny.",
+      },
+      Construction: {
+        title: "Půjčování stavební techniky",
+        summary:
+          "Construction defaultně jen profi a PD pojištění. Povinná předprohlídka před startem. Hostitel může označit no-show a uvolnit kalendář.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Jen profi + PD před klíči. Zachyť stav (včetně gumy). Volitelný no-show poplatek je sousedsky měkký.",
+        whyGeoTitle: "Proč profi + PD?",
+        whyGeo:
+          "Staveništní nářadí snáší tvrdý provoz. Profi + PD + fotky snižují nepojištěnou ztrátu.",
+        flowTitle: "Od začátku do konce",
+        flow:
+          "Nabídnout → profi + PD → doklad → předprohlídka → předání → vrácení.",
+        layersTitle: "Vrstvy ochrany",
+        layers:
+          "Pro prohlášení · PD · předprohlídka · hold · no-show · podmínky · QR.",
+        claimsTitle: "Když se něco pokazí",
+        claims:
+          "Nejdřív pojištění, pak hold s fotkami. No-show zruší a uvolní data.",
+      },
+    },
+  },
+  preTripInspection: {
+    pickupTitle: "Předprohlídka (povinná)",
+    pickupBody:
+      "Vyfoť exteriér, interiér a každou pneumatiku před předáním. Poznamenej oděrky, škrábance, skvrny, promáčkliny a opotřebení. Obě strany musí potvrdit před odemčením startu.",
+    returnTitle: "Prohlídka při vrácení (povinná)",
+    returnBody: (tireCount) =>
+      `Stejná sada fotek jako při vyzvednutí — včetně všech ${tireCount} pneumatik — aby byla výměna nebo nové poškození vidět ve sporu.`,
+    tireSwapHint:
+      "Fotky pneumatik chrání před drahou výměnou (např. prémiové za levné čínské). Když to jde, ať je vidět značka a dezén.",
+    bodySection: "Exteriér a interiér",
+    tiresSection: (tireCount) =>
+      tireCount === 4
+        ? "Pneumatiky / guma (všechny rohy)"
+        : `Pneumatiky / guma (${tireCount} pozic)`,
+    bodyPhotoHint: "Jedna jasná fotka této oblasti. Označ poškození a krátký komentář.",
+    tiresMandatoryHint: (tireCount) =>
+      tireCount === 4
+        ? "Fotky všech čtyř rohových pneumatik jsou povinné — samotný komentář sekci nedokončí. Rezerva je volitelná."
+        : `Fotky všech ${tireCount} pozic pneumatik jsou povinné — samotný komentář sekci nedokončí. Rezerva je volitelná.`,
+    tiresIncomplete: (tireCount) =>
+      tireCount === 4
+        ? "Přidej fotku každé rohové pneumatiky."
+        : `Přidej fotku každé z ${tireCount} pneumatik.`,
+    tiresComplete: "Všechny povinné fotky pneumatik jsou hotové",
+    tirePhotoHint:
+      "Vyfoť celý bok + dezén. Značka/model čitelně, když to jde — důkaz jsou fotky, ne poznámka.",
+    tireBrandLabel: "Značka / model (volitelné, pokud jde přečíst)",
+    tireBrandPlaceholder: "např. Michelin Pilot Sport 4",
+    tireCommentLabel: "Poznámky (opotřebení, poškození, tlak)",
+    tireCommentPlaceholder: "Opotřebení, řezy, nízký tlak, jiná pneumatika…",
+    tireNumbered: (n) => `Pneumatika ${n}`,
+    commentLabel: "Komentář",
+    commentPlaceholder: "Popiš oděrky, škrábance, skvrny, promáčkliny…",
+    damageLabel: "Zaznamenané poškození",
+    damage: {
+      none: "Žádné",
+      chip: "Oděrka",
+      scratch: "Škrábanec",
+      stain: "Skvrna",
+      dent: "Promáčklina",
+      wear: "Opotřebení",
+      other: "Jiné",
+    },
+    photoAdd: "Přidat fotku",
+    photoReplace: "Nahradit fotku",
+    photoSaving: "Ukládám…",
+    optional: "volitelné",
+    incomplete: (tireCount) =>
+      `Dokonči všechny povinné fotky (karoserie + ${tireCount} pneumatik) před odesláním.`,
+    submitRenter: "Odeslat prohlídku hostiteli",
+    confirmHost: "Potvrdit prohlídku",
+    waitingHost: "Odesláno — čeká se na potvrzení hostitele",
+    waitingRenter: "Čeká se, až nájemce odešle fotky prohlídky",
+    bothDone: "Prohlídku potvrdily obě strany",
+    areas: {
+      exterior_front: "Exteriér — předek",
+      exterior_rear: "Exteriér — zadek",
+      exterior_left: "Exteriér — levá strana",
+      exterior_right: "Exteriér — pravá strana",
+      interior: "Interiér",
+      tire_fl: "Pneumatika — přední levá",
+      tire_fr: "Pneumatika — přední pravá",
+      tire_rl: "Pneumatika — zadní levá",
+      tire_rr: "Pneumatika — zadní pravá",
+      tire_spare: "Rezervní pneumatika",
+    },
+  },
   favorites: {
     title: "Oblíbené",
     subtitle: "Uloženo na později — půjčit nebo koupit",
@@ -2080,7 +2695,7 @@ export const cs: AppMessages = {
     browseCta: "Procházet poblíž",
     listingFallback: "Nabídka",
     removeAria: (title) => `Odebrat ${title} z oblíbených`,
-    ratePerDay: (rate) => `${rate} $/den`,
+    ratePerDay: (rate) => `${rate} Kč/den`,
   },
   signInPrompt: {
     cta: "Přihlásit se / Vytvořit účet",
@@ -2091,6 +2706,7 @@ export const cs: AppMessages = {
       `Tip: zmiňte @${mascotHandle} pro rychlou pomoc. Chat a platby držte v aplikaci — WhatsApp/Telegram/platby mimo jsou blokované.`,
     empty: "Zatím žádné zprávy — pozdrav a potvrď detaily vyzvednutí.",
     placeholder: "Napsat zprávu…",
+    closedReadOnly: "Chat u této půjčky je uzavřený. Historii si stále můžeš přečíst.",
     listingChatFallback: "Chat k nabídce",
     listingChatSubtitle: "Chat o vyzvednutí · push při odpovědi",
     moderationBlocked:
@@ -2202,6 +2818,9 @@ export const cs: AppMessages = {
       notSignedIn: "Nejsi přihlášen(a)",
       addName: "Přidej jméno",
       addPhone: "Přidat telefon",
+      addDateOfBirth: "Přidat datum narození",
+      dateOfBirth: "Datum narození",
+      dateOfBirthHint: "Vyžadováno pro rezervaci vozidel (min. věk 25). Podle řidičáku.",
       nameLabel: "Jméno",
       namePlaceholder: "Tvoje jméno",
       phoneLabel: "Telefonní číslo",
@@ -2305,7 +2924,7 @@ export const cs: AppMessages = {
       reviews: "Recenze",
       seeAllReviews: (n) => `Zobrazit všech ${n} recenzí`,
       listings: "Nabídky",
-      ratePerDay: (price) => `${price} $/den`,
+      ratePerDay: (price) => `${price} Kč/den`,
       privacyNote:
         "E-mail, telefon, adresa ani platební údaje se na veřejném profilu nikdy nezobrazují.",
       neighbor: "Soused",
@@ -2492,9 +3111,9 @@ export const cs: AppMessages = {
       "Boostnuté nabídky se zobrazují nahoře ve feedu — max. 1 boost na 5 organických.",
     boostActiveUntil: (when) => `Boost aktivní do ${when}`,
     boostFailed: "Platba za boost selhala. Zkontroluj nastavení Stripe.",
-    boostOpt24h: "$2 · 24 h",
-    boostOpt7d: "$5 · 7 d",
-    boostOpt30d: "$10 · 30 d",
+    boostOpt24h: "2 Kč · 24 h",
+    boostOpt7d: "5 Kč · 7 d",
+    boostOpt30d: "10 Kč · 30 d",
     backToListings: "Zpět na moje nabídky",
     shareEllipsis: "Sdílet…",
     copyCaption: "Kopírovat popisek",
@@ -2562,7 +3181,7 @@ export const cs: AppMessages = {
     },
     fillPageHint: "Doplň list teď — jeden tisk, jedno lepení a víc věcí venku rychleji.",
     bulkTipPopular: "Oblíbené: žebříky, tlakové myčky, párty stoly, foťáky, držáky na kolo",
-    bulkTipHighValue: "Hodnotnější věci (nad $200) obvykle rychle zaujmou",
+    bulkTipHighValue: "Hodnotnější věci (nad 200 Kč) obvykle rychle zaujmou",
     bulkTipSeasonal: "Sezónní věci vystavte teď — sousedé hledají s předstihem",
     removeFromBulk: "Odebrat z hromadného",
     addToBulk: "Přidat do hromadného",
@@ -2612,18 +3231,18 @@ export const cs: AppMessages = {
     errorNoBulkItems: "Ve hromadné frontě zatím nic není.",
     details: "Podrobnosti",
     labelTitle: "Název",
-    labelTerms: "Podmínky",
+    labelDescription: "Popis",
     labelDailyPrice: "Denní cena",
     labelMinimumRental: "Minimální půjčka",
     labelLongTerm: "Dlouhodobě (30+ dní)",
     longTermEnabled: "Zapnuto",
-    longTermMonthly: (rate) => `$${rate}/měs.`,
+    longTermMonthly: (rate) => `${rate} Kč/měs.`,
     labelCategory: "Kategorie",
     labelCity: "Město",
     labelAvailabilityDays: "Dny dostupnosti",
     labelAvailabilityTimes: "Časy dostupnosti",
     availabilityTimesValue: (weekdays, weekend) => `Všední dny ${weekdays} · Víkend ${weekend}`,
-    labelWeight: "Hmotnost (lb)",
+    labelWeight: "Hmotnost",
     labelDeliveryMaxMiles: "Doručení — max. vzdálenost",
     labelDeliveryFee: "Poplatek za doručení",
     labelDeliverySummary: "Doručení (souhrn)",
@@ -2671,6 +3290,31 @@ export const cs: AppMessages = {
   bookingRequest,
   rentalPrice,
   paymentsUi,
+  rentalAgreement: {
+    title: "Smlouva o pronájmu",
+    honestCaveat:
+      "Nejde o právní radu. Podepsaný záznam je čistší než jen chat — nenahrazuje pojištění a clickwrap není magický štít proti žalobám.",
+    readTerms: "Číst podmínky pronájmu",
+    hideTerms: "Skrýt podmínky",
+    acceptCheckbox: (partyLabel, displayName) =>
+      `Jsem ${partyLabel} a souhlasím s podmínkami pronájmu této rezervace jako ${displayName}`,
+    partyRenter: "nájemce",
+    partyHost: "hostitel",
+    nameFallback: "mé jméno v účtu",
+    mustAccept: "Než budeš pokračovat, přijmi smlouvu o pronájmu.",
+    statusMissing: "Smlouva ještě nezačala.",
+    statusAwaitingHost: "Nájemce podepsal — čeká se na hostitele.",
+    statusAwaitingRenter: "Hostitel podepsal — čeká se na nájemce.",
+    statusBothSigned: "Obě strany podepsaly.",
+    signedAs: (name, when) => `${name} · ${when}`,
+    notSigned: "Zatím nepodepsáno",
+    termsVersion: (version) => `Verze podmínek ${version}`,
+    download: "Stáhnout",
+    blockHandoff: "Předání zůstane zamčené, dokud smlouvu nepodepíší obě strany.",
+    blockRenter: "Podepiš smlouvu při rezervaci před platbou / startem.",
+    blockHost: "Podepiš smlouvu při schválení této žádosti.",
+    hostMustSignToApprove: "Pro schválení rezervace přijmi smlouvu o pronájmu.",
+  },
   addressPicker: {
     country: "Země",
     changeAddress: "Změnit adresu",

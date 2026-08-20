@@ -120,6 +120,10 @@ export const es: AppMessages = {
       "Revisa Spam / Promociones y comprueba cómo escribiste el correo (p. ej. gmail, no gmal). Luego reenvía o edita los datos.",
     didYouMeanEmail: (email) => `¿Quisiste decir ${email}?`,
     useSuggestedEmail: "Usar esta dirección",
+    faceIdCta: "Continuar con Face ID",
+    faceIdHint: "Abre tu cuenta existente — nombre, teléfono y Stripe siguen vinculados.",
+    orEmail: "o usa el correo",
+    returningHint: "Bienvenido de nuevo — usaremos tus datos guardados.",
     freeToJoin: "Únete gratis · Sin tarjeta",
   },
   install: {
@@ -164,9 +168,9 @@ export const es: AppMessages = {
   },
   home: {
     priceAny: "Cualquier precio",
-    priceUnder25: "Menos de $25",
-    price25to75: "$25–$75",
-    price75plus: "$75+",
+    priceUnder25: "Menos de 25 €",
+    price25to75: "25–75 €",
+    price75plus: "75 €+",
     backToBrowseAria: "Atrás",
     setBlock: "¿Dónde estás ahora?",
     setBlockAria: "Indicar dónde estás ahora",
@@ -267,7 +271,7 @@ export const es: AppMessages = {
     bidInGarage: "Pujar en el garaje",
     viewInGarage: "Ver en el garaje",
     paused: "Este anuncio está pausado",
-    giftHint: "Publícalo como Vender con precio $0 para regalarlo",
+    giftHint: "Publícalo como Vender con precio 0 € para regalarlo",
     notAvailable: "No disponible ahora mismo",
     yourListing: "Este es tu anuncio.",
     sellerMissing: "Falta el perfil del vendedor — inténtalo de nuevo más tarde.",
@@ -286,6 +290,9 @@ export const es: AppMessages = {
     removedBody: "Este anuncio puede haber sido eliminado o ya no está disponible en tu zona.",
     goBack: "Volver",
     photoByOwner: "Foto del propietario",
+    openPhotoAria: "Ver foto",
+    openPhotoGalleryAria: (count) => `Ver ${count} fotos`,
+    photoCountBadge: (count) => `${count} fotos`,
     heavyItem: "Artículo pesado",
     perDay: "al día",
     newOnTheBlock: "Nuevo en el barrio",
@@ -299,7 +306,7 @@ export const es: AppMessages = {
     qrCheckIn: "Confirmación de recogida con QR",
     viewCalendar: "Ver calendario",
     shareListing: "Compartir este anuncio",
-    bookWithRate: (rate) => `Reservar · $${rate}/día`,
+    bookWithRate: (rate) => `Reservar · ${rate} €/día`,
     bookNow: "Reservar ahora",
     buyWithPrice: (price) => `Comprar · ${price}`,
     freeArrangePickup: "Gratis — acuerda la recogida",
@@ -548,7 +555,7 @@ export const es: AppMessages = {
     modeSellTitle: "Vender",
     modeSellBody: "Compra en la estantería de un vecino, o vacía tu propio garaje con anuncios con precio.",
     modeGiftTitle: "Regalar",
-    modeGiftBody: "Regala cosas gratis — pon el precio de Vender a $0 al publicar.",
+    modeGiftBody: "Regala cosas gratis — pon el precio de Vender a 0 € al publicar.",
     navHomeTitle: "Inicio",
     navHomeBody:
       "Inicio abre los garajes cerca de ti. Filtra Todo · Alquilar · Comprar, o abre Ventas de garaje. Publica desde + o Mi Garaje.",
@@ -778,6 +785,12 @@ export const es: AppMessages = {
     depositNextSupport: "Siguiente paso: escribe a soporte para liquidar una fianza a medias — la captura aún no es automática.",
     depositHeldDuringDispute: "La fianza permanece congelada mientras la disputa esté abierta. Reclama o libera tras resolver.",
     depositReleaseBtn: "Liberar retención",
+    depositPartialHint:
+      "Prefiere facturas para peajes, combustible y retrasos para mantener la retención por daños. Un cobro parcial captura ese monto y libera el resto (multicapture no disponible).",
+    depositPartialPlaceholder: "Monto parcial (USD)",
+    depositPartialClaimBtn: "Cobrar parcial",
+    depositPartialInvalid: "Introduce un monto válido (al menos $0.50).",
+    depositPartialClaimed: "Monto parcial cobrado; el resto de la retención se liberó.",
     depositClaimBtn: "Reclamar fianza",
     depositStatusReleased: "Fianza: liberada",
     depositStatusClaimed: "Fianza: reclamada por el anfitrión",
@@ -839,6 +852,34 @@ export const es: AppMessages = {
       "Marcado como devuelto. Esperando a que el anfitrión acepte.",
     handoffHostAcceptedWaitingRenter:
       "Aceptaste la devolución. Esperando a que el vecino confirme la devolución.",
+    odometerTitle: "Lectura del odómetro",
+    odometerPickupHint: "Anota el tablero al empezar el viaje — todos quedan tranquilos.",
+    odometerReturnHint: "Anota la lectura al devolver para que las millas cuadren con la entrega.",
+    odometerLabel: "Odómetro actual (millas)",
+    odometerPlaceholder: "p. ej. 48210",
+    odometerRequired: "Introduce la lectura del odómetro para continuar.",
+    odometerContinue: "Guardar y continuar",
+    odometerStartRecorded: (miles) => `Odómetro de inicio: ${miles} mi`,
+    odometerReturnRecorded: (miles) => `Odómetro de devolución: ${miles} mi`,
+    fuelTitle: "Nivel de combustible",
+    fuelPickupHint:
+      "Registra el combustible al inicio (1/8–8/8). Por defecto: lleno a lleno — devuelve lleno o liquida el faltante + $20.",
+    fuelReturnHint:
+      "Registra el combustible al devolver. Si no está lleno (lleno a lleno), marcamos faltante + $20 para el reclamo del anfitrión.",
+    fuelLevelLabel: "Nivel de combustible",
+    fuelLevelRequired: "Selecciona el nivel de combustible para continuar.",
+    defLevelLabel: "Nivel de DEF (AdBlue)",
+    defLevelRequired: "Selecciona el nivel de DEF para continuar.",
+    fuelContinue: "Guardar y continuar",
+    fuelStartRecorded: (level) => `Combustible inicio: ${level}`,
+    fuelReturnRecorded: (level) => `Combustible devolución: ${level}`,
+    defStartRecorded: (level) => `DEF inicio: ${level}`,
+    defReturnRecorded: (level) => `DEF devolución: ${level}`,
+    prepaidFullTankToggle: "Tanque lleno prepago (devolver vacío OK — igual se registran niveles)",
+    fuelPumpPriceLabel: "Precio de bomba ($/gal) — opcional",
+    fuelPumpPriceHint: "Solo para estimar el costo de rellenar en el reclamo del anfitrión.",
+    fuelShortfallFlagged: (summary) => `Faltante de combustible/DEF marcado: ${summary}`,
+    fuelPolicyActiveLabel: "Política de combustible",
     pickupLocation: "Lugar de recogida",
     pickupLocationHostHint:
       "La dirección exacta solo se comparte con tu inquilino confirmado — no aparece en el anuncio público.",
@@ -847,15 +888,79 @@ export const es: AppMessages = {
     openInMaps: "Abrir en Maps",
     contactlessAccess: "Acceso sin contacto",
     contactlessBody:
-      "Las instrucciones de acceso paso a paso y los códigos se desbloquean al confirmar la recogida con el PIN, no antes. Usa la dirección de recogida de arriba para llegar; escanea el QR del artículo cuando llegues.",
+      "Los códigos permanecen bloqueados hasta que estés en el punto de recogida. GPS o el QR del artículo prueban presencia — luego el PIN abre los pasos e inicia el alquiler.",
     contactlessRenterHint:
-      "Toca Escanear código QR y luego introduce el PIN de recogida para ver los códigos de la caja de seguridad y los pasos de acceso.",
+      "Llega primero. Toca Escanear QR (pegatina) o “Estoy en el punto de recogida”, luego introduce el PIN. Un PIN compartido desde otra parte de la ciudad no abre nada.",
     contactlessHostHint:
-      "Comparte el PIN de recogida solo con este inquilino. Desbloqueará los detalles de acceso al confirmar la recogida; la dirección ya es visible en su pantalla de alquiler.",
+      "Comparte el PIN de recogida solo con este inquilino. Debe estar en el sitio (GPS o QR de la pegatina) — como anfitrión puedes previsualizar desde casa.",
+    contactlessFlowTitle: "Sin contacto seguro entre vecinos",
+    contactlessFlowBody:
+      "Reserva pagada → llega al punto → GPS o QR del artículo → el PIN desbloquea acceso → empieza el alquiler. Devolución igual; el anfitrión confirma o se completa solo en 24 h.",
+    contactlessReturnAutoHint:
+      "Si el anfitrión no acepta la devolución en 24 horas, las devoluciones sin contacto se completan solas.",
+    geoPinGateHint:
+      "PIN y códigos de caja solo se desbloquean cuando tu teléfono está en el punto (o escaneas el QR del artículo). Evita que quien reserva desbloquee para otra persona al otro lado de la ciudad.",
+    startIdTitle: "Comprobación de identidad al inicio",
+    startIdBody:
+      "Sube una foto clara de tu licencia y un selfie, confirma la fecha de nacimiento y declara que eres el conductor de la reserva antes de que se desbloquee el PIN. El face-match sigue siendo best-effort si hay foto de perfil.",
+    startIdBookerFallback: "Conductor de la reserva",
+    startIdProfileVerified: "Vinculado a identidad verificada de tu cuenta",
+    startIdProfileLinked: "Vinculado a tu foto de perfil",
+    startIdProfileHint: "Añade una foto de perfil más tarde para reforzar comprobaciones",
+    startIdLicenseAdd: "Foto de la licencia de conducir",
+    startIdLicenseAdded: "Foto de licencia guardada ✓",
+    startIdSelfieAdd: "Haz un selfie",
+    startIdSelfieAdded: "Selfie capturado ✓",
+    startIdSaving: "Guardando…",
+    startIdSelfieFailed: "No se pudo guardar la foto. Inténtalo de nuevo.",
+    startIdDobLabel: "Fecha de nacimiento (de la licencia)",
+    startIdDobHint: "Se guarda en tu perfil para el filtro de edad. Debe coincidir con la licencia.",
+    startIdAttest:
+      "Confirmo que soy quien reservó y que el conductor coincide con la licencia / identidad de esta cuenta",
+    startIdOnceHint: "Esta es la única comprobación de ID del viaje — sin avisos aleatorios a mitad.",
+    startIdContinue: "Confirmar y seguir al desbloqueo",
+    startIdRequired: "Completa la comprobación de ID al inicio antes de desbloquear este vehículo.",
+    macropointTitle: "Puntos de ubicación del viaje",
+    macropointBody:
+      "Ubicación aproximada del teléfono cada ~20 min mientras el alquiler está activo (más inicio/devolución). No es un mapa en vivo.",
+    macropointLastKnown: (when) => `Última conocida · ${when}`,
+    macropointEmpty: "Aún no hay puntos registrados.",
+    tollSuspectTitle: "Posibles peajes",
+    tollSuspectBody:
+      "Coincidencia aproximada con corredores conocidos — no es factura final. Las facturas por matrícula pueden llegar días después; usa la retención de peajes cuando llegue la factura.",
+    homeTerritoryBreachTitle: "Posible salida del área de origen",
+    homeTerritoryBreachBody:
+      "Un punto parece fuera del estado/país de origen del anuncio mientras salir está prohibido. Solo una señal suave — no es bloqueo ni multa.",
+    travelOutsideListingTitle: "Viajar fuera del área de origen",
+    travelOutsideListingForbidden: (area) =>
+      `Salir del área de origen (${area}) no está permitido en este alquiler.`,
+    travelOutsideListingAllowed: (area) =>
+      `Salir del área de origen (${area}) está permitido en este alquiler.`,
+    speedSoftTitle: "Tramos a alta velocidad (suave)",
+    speedSoftBody:
+      "Estimado entre puntos — GPS inestable, no es una multa. Solo una señal suave para el anfitrión.",
+    speedSoftSegment: (mph, when) => `~${mph} mph alrededor de ${when}`,
+    tollHoldOnBooking: (amount) =>
+      `Retención de peajes autorizada hasta ${amount} (junto con el depósito).`,
+    tollClaimCta: (amount) => `Marcar peaje para reclamar (${amount})`,
+    tollFlagged:
+      "Peaje marcado para la ventana de reclamación. Cuando llegue la factura por matrícula, usa Claim deposit (o soporte para un reparto). La captura parcial de Stripe aún no está activa para no liberar el depósito por daños.",
+    tollClaimed: "Peaje anotado en esta reserva.",
+    tollClaimFailed: "No se pudo actualizar el estado del peaje.",
+    insuranceUnlockBlocked:
+      "Sube un comprobante de seguro vigente antes de desbloquear llaves o ubicación de este vehículo.",
+    cdlUnlockBlocked: "Se requiere declaración y documento CDL antes de iniciar la entrega.",
+    agentProofPending:
+      "Esperando que el anfitrión confirme que recibió la prueba de seguro de tu agente.",
+    agentProofReceivedMark: "Recibí la prueba de seguro del agente del arrendatario",
+    agentProofReceivedDone: "El anfitrión confirmó la prueba del agente",
+    agentProofEmailLabel: "Correo del dueño para prueba del agente",
+    preTripUnlockBlocked:
+      "Completa la inspección previa (incluida una foto de cada llanta) y obtén confirmación del anfitrión antes de la entrega.",
     roundTripDelivery: "Entrega de ida y vuelta",
     roundTripDeliveryBody:
       "Una sola tarifa de entrega cubre traer el artículo antes de que empiece el alquiler y recogerlo después de que termine — no se divide al 50/50 ni es una entrega de ida del anfitrión con devolución por el inquilino.",
-    roundTripDeliveryFee: (amount) => `Entrega de ida y vuelta: $${amount}`,
+    roundTripDeliveryFee: (amount) => `Entrega de ida y vuelta: ${amount} €`,
     dropOff: "Entrega:",
     security: "Seguridad",
     securityBody:
@@ -885,6 +990,47 @@ export const es: AppMessages = {
     verifiedOnEvorios: "Verificado en Evorios",
     tapToViewProfile: "Toca para ver el perfil público",
     message: "Mensaje",
+    messagePostRental: "Chat peajes y multas",
+    messageClosed: "Historial del chat",
+    chatPostRentalBanner: (days, untilDate) =>
+      `Modo post-alquiler (peajes y multas): el chat sigue abierto ~${days} días tras la devolución (hasta ${untilDate}), o mientras haya una factura sin pagar.`,
+    chatClosedBanner: "Este alquiler terminó — el chat es solo lectura.",
+    conditionPhotosTitle: "Fotos de estado (este alquiler)",
+    conditionPhotosBody:
+      "Las fotos de recogida y devolución viven en este alquiler — no en la galería pública del anuncio.",
+    conditionPhotoPickup: "Pre-alquiler / recogida",
+    conditionPhotoReturn: "Post-devolución",
+    conditionPhotoEmpty: "Aún no hay foto",
+    invoiceTitle: "Factura y multas",
+    invoiceBody:
+      "El anfitrión puede facturar combustible, la tarifa de $20, retraso, peajes, multas, daños o un importe personalizado. El inquilino paga en la app si Stripe está conectado.",
+    invoiceCreate: "Nueva factura",
+    invoiceAddLine: "Añadir línea",
+    invoiceRemoveLine: "Quitar línea",
+    invoiceNotePlaceholder: "Nota opcional para el inquilino…",
+    invoiceTotal: "Total",
+    invoiceSend: "Enviar factura",
+    invoiceEmpty: "Aún no hay facturas.",
+    invoiceNeedLine: "Añade al menos una línea de $0.50 o más.",
+    invoicePayCta: "Pagar",
+    invoicePayNow: "Pagar ahora",
+    invoicePaying: "Procesando…",
+    invoicePayFailed: "El pago no se completó. Inténtalo de nuevo.",
+    invoiceVoid: "Anular",
+    invoiceStatusOpen: "Abierta",
+    invoiceStatusPending: "Pago pendiente",
+    invoiceStatusPaid: "Pagada",
+    invoiceStatusVoid: "Anulada",
+    invoiceKindFuelTopup: "Recarga de combustible",
+    invoiceKindFuelFee: "Tarifa combustible ($20)",
+    invoiceKindLateFee: "Devolución tardía",
+    invoiceKindToll: "Peaje",
+    invoiceKindFine: "Multa / sanción",
+    invoiceKindNoShow: "No-show",
+    invoiceKindDamage: "Daños",
+    invoiceKindCustom: "Personalizado",
+    invoiceStripeScaffold:
+      "El enlace de pago Stripe Connect está preparado — las facturas se guardan en el alquiler aunque el pago con tarjeta aún no esté configurado.",
     call: "Llamar",
     phoneSharedAfterCheckin: "Los números de teléfono se comparten en el chat tras confirmar la recogida",
     close: "Cerrar",
@@ -912,14 +1058,32 @@ export const es: AppMessages = {
     cancelBookingConfirmCta: "Sí, cancelar reserva",
     cancelNotAllowed:
       "Esta reserva ya no se puede cancelar aquí: la recogida comenzó o el estado no lo permite. Escribe a la otra parte o a soporte.",
-    cancelRefundPreviewFull: "Estás en la ventana de reembolso completo (48+ horas antes del inicio).",
+    cancelRefundPreviewFull: "Estás en la ventana de reembolso completo (24+ horas antes del inicio).",
     cancelRefundPreviewPartial: (percent) =>
-      `Estás en la ventana de reembolso parcial: puede devolverse alrededor del ${percent}% del cargo del alquiler.`,
+      `Dentro de 24 horas del inicio — puede devolverse alrededor del ${percent}% del cargo del alquiler.`,
     cancelRefundPreviewNone:
-      "Estás a menos de 24 horas del inicio: el cargo del alquiler suele no ser reembolsable.",
+      "En la ventana de inicio sin recogida — cancelar aquí puede no aplicar; contacta a la otra parte.",
     cancelRefundPreviewHostFull:
       "Como anfitrión, cancelar antes de la recogida devuelve al inquilino el cargo completo cuando hay pago con tarjeta.",
     cancelRefundReleased: "Se está liberando cualquier autorización de tarjeta.",
+    datesAdjustTitle: "Cambiar fechas del alquiler",
+    datesAdjustBody:
+      "Amplía solo si los días siguientes siguen libres en el calendario. La devolución anticipada siempre es posible: completa la entrega cuando termines.",
+    extendBooking: "Prolongar reserva",
+    extendNewEnd: "Nueva fecha de fin",
+    extendConfirm: "Confirmar ampliación",
+    extendChecking: "Comprobando disponibilidad…",
+    extendUnavailable: "Esas fechas no están libres: elige otro día de fin.",
+    extendInvalid: "Elige una fecha de fin posterior a la actual.",
+    extendSuccess: (date) => `Ampliado hasta el ${date}.`,
+    earlyReturn: "Devolver antes",
+    earlyReturnConfirmBody:
+      "Acorta este alquiler a hoy. Seguirás completando la devolución con el anfitrión. Los ajustes de precio (si los hay) los resolvéis entre vosotros: el calendario se libera al momento.",
+    earlyReturnConfirm: "Sí, terminar hoy",
+    earlyReturnWorking: "Actualizando…",
+    earlyReturnInvalid: "La devolución anticipada no está disponible en este estado.",
+    earlyReturnSuccess: (date) =>
+      `Fin del alquiler fijado en ${date}. Completa la devolución cuando estés listo.`,
     cancelRefundFullProcessing:
       "Se envió un reembolso completo: los bancos pueden tardar unos días hábiles en mostrarlo.",
     cancelRefundPartialProcessing: (percent) =>
@@ -932,6 +1096,12 @@ export const es: AppMessages = {
     cancelNotifRenterTitle: "El inquilino canceló la reserva",
     cancelNotifBody: (title, refundNote) => `${title}: reserva cancelada. ${refundNote}`,
     cancelContactSupport: "Escribir a soporte sobre el reembolso",
+    cancelReasonLabel: "Motivo (opcional)",
+    cancelReasonPlaceholder: "Nota breve para la otra parte",
+    cancelReasonInNotif: (reason) => `Motivo: ${reason}.`,
+    lateFeeDueBanner: (amount) => `Tarifa por retraso estimada: ${amount}.`,
+    hostReliabilityNote:
+      "Si el anfitrión cancela antes de la recogida, el inquilino recibe reembolso completo. Cancelaciones frecuentes pueden afectar la confianza.",
   },
   rentalCard: {
     noShow: "Ausencia",
@@ -939,8 +1109,8 @@ export const es: AppMessages = {
     inDispute: "En disputa",
     renting: "Alquilando",
     hosting: "De anfitrión",
-    total: (amount) => `$${amount} en total`,
-    inclDelivery: (fee) => `· incl. $${fee} de entrega`,
+    total: (amount) => `${amount} € en total`,
+    inclDelivery: (fee) => `· incl. ${fee} € de entrega`,
     stripe: "Stripe",
     escalated: "En revisión — resuélvanlo juntos o escribid a soporte",
     returnsIn: (countdown) => `Se devuelve en: ${countdown}`,
@@ -950,7 +1120,11 @@ export const es: AppMessages = {
     requestReturn: "Solicitar devolución",
     runningLate: "Voy a llegar tarde",
     markNoShow: "Marcar como ausencia",
-    markNoShowHint: "Marcar como ausencia disponible 60 min después de la hora de recogida",
+    markNoShowHint: "Marcar como ausencia disponible 2 horas después de la hora de recogida",
+    markNoShowConfirm:
+      "¿Marcar al arrendatario como no presentado? La reserva se cancela y libera el calendario. Si configuraste tarifa, se marcará contra el depósito (pueden disputar).",
+    markNoShowFeeNote: (amount) => `Tarifa opcional a marcar: ${amount}`,
+    markNoShowSoftNote: "Sin tarifa configurada — se libera el calendario; usa disputa si hace falta.",
     submitEvidence: "Continuar disputa",
     continueDispute: "Continuar disputa",
     openDispute: "Abrir disputa",
@@ -960,6 +1134,9 @@ export const es: AppMessages = {
     seeReview: "Ver reseña",
     rentAgain: "Alquilar de nuevo",
     markedAsNoShow: "Marcado como ausencia",
+    noShowMarkedNotifTitle: "Ausencia marcada",
+    noShowMarkedNotifBody: (title, feeNote) =>
+      `${title}: el anfitrión marcó la reserva como ausencia. El precio del viaje suele mantenerse.${feeNote ? ` ${feeNote}` : ""}`,
     awaitingApproval: "Esperando aprobación",
     expired: "Caducado",
     ownerRespond24h: (timeLeft) =>
@@ -1175,7 +1352,7 @@ export const es: AppMessages = {
     photos: {
       title: "Añadir fotos",
       subtitle: (maxPhotos, maxVideos) =>
-        `Hasta ${maxPhotos} fotos y ${maxVideos} vídeos. Toca para ver. El rojo Eliminar quita una foto o un vídeo. Mantén pulsado para reordenar.`,
+        `Hasta ${maxPhotos} fotos y ${maxVideos} vídeos. Toca una foto para verla o elegir la portada. Mantén pulsado para reordenar.`,
       chooseLibrary: "Elegir de la galería",
       takePhoto: "Hacer foto",
       addVideo: "Añadir vídeo",
@@ -1211,9 +1388,9 @@ export const es: AppMessages = {
       setAsCover: "Usar como portada",
       previousPhotoAria: "Foto anterior",
       nextPhotoAria: "Foto siguiente",
-      enhancementUnavailable: (detail) =>
-        `La mejora de foto no está disponible. Se ha guardado la original. (${detail})`,
-      couldntAddPhoto: (detail) => `No se pudo añadir esta foto. (${detail})`,
+      enhancementUnavailable:
+        "Foto guardada tal cual — el retoque de fondo no estaba disponible esta vez.",
+      couldntAddPhoto: "No se pudo añadir esta foto. Inténtalo de nuevo.",
       moderationNotListable:
         "No pudimos usar esta foto en el anuncio : no parece una foto clara del producto. Prueba otra foto del artículo en sí.",
       moderationProhibitedItem:
@@ -1290,17 +1467,48 @@ export const es: AppMessages = {
       instructionsPlaceholder: "https://… enlace al manual o al vídeo tutorial",
       instructionsHelper: "Se muestra como botón de Instrucciones en tu anuncio",
       assetIdentityHint:
-        "Vehículos, remolques y maquinaria pesada necesitan un identificador rastreable: obligatorio en nivel particular y profesional.",
+        "El VIN es la huella del coche — escanéalo o escríbelo y Evorios rellena marca, modelo y año.",
+      vehicleFlowTitle: "Coches entre vecinos, bien hechos",
+      vehicleFlowBody:
+        "Un anuncio — alquila o vende. En alquiler: el vecino añade tu VIN a su seguro, sube el comprobante, paga alquiler + fianza tipo deducible. Los códigos siguen bloqueados hasta el inicio. En la recogida el PIN solo se abre cuando están en el sitio (GPS) — o escanean la pegatina QR del coche. Odómetro al salir y al volver; confirmas; se libera la fianza.",
+      licensePlate: "Matrícula",
+      licensePlatePlaceholder: "p. ej. 7ABC123",
+      licensePlateState: "Estado (EE. UU.)",
+      licensePlateStatePlaceholder: "—",
+      plateLookupCta: "Buscar VIN desde la matrícula",
+      plateLookingUp: "Buscando matrícula…",
+      plateHelper: "Introduce matrícula y estado si lo prefieres.",
+      plateNeedState: "Elige un estado de EE. UU. con la matrícula.",
+      plateFound: "Coincide — VIN y datos del vehículo rellenados. Elige el color.",
+      plateNotFound: "Sin coincidencia. Introduce el VIN del salpicadero o de la etiqueta de la puerta.",
+      plateLookupFailed: "Falló la búsqueda de matrícula. Introduce el VIN manualmente.",
+      plateLookupUnconfigured: "Introduce el VIN manualmente.",
+      vinScanCta: "Escanear el VIN",
+      vinScanCamera: "Tomar foto",
+      vinScanLibrary: "Elegir foto",
+      vinScanning: "Leyendo tu VIN…",
+      vinScanHelper:
+        "Fotografía el VIN del salpicadero o de la etiqueta de la puerta — Evorios rellena marca, modelo y año.",
+      vinScanFound: "Listo — marca, modelo y año rellenados.",
+      vinScanNoVin:
+        "No vimos un VIN en esa foto. Prueba un primer plano más nítido, o escríbelo abajo.",
+      vinScanFailed:
+        "Esa foto fue difícil de leer. Prueba con mejor luz, o escribe el VIN abajo.",
+      vinOrTypeManually: "O escribe el VIN",
+      plateOptionalToggle: "Buscar desde la matrícula",
       vin: "VIN",
       vinPlaceholder: "VIN de 17 caracteres",
-      vinHelper: "Comprobamos el formato del VIN (y lo consultamos en línea si hay conexión). Sin letras I, O ni Q.",
-      vinChecking: "Comprobando VIN…",
+      vinHelper: "Diecisiete caracteres. Sin I, O ni Q. Evorios rellena los detalles.",
+      vinChecking: "Leyendo tu VIN…",
       vinErrorLength: "El VIN debe tener exactamente 17 caracteres.",
       vinErrorChars: "El VIN solo admite letras A–Z y dígitos (sin I, O ni Q).",
-      vinErrorCheck: "El dígito de control del VIN no coincide: revisa el número de la placa.",
-      vinVerified: (summary) => `El VIN parece válido${summary ? ` · ${summary}` : ""}.`,
-      vinVerifiedFallback: "verificado",
-      vinLookupWarn: "El formato es válido, pero la consulta en línea no encontró coincidencia. Puedes continuar.",
+      vinErrorCheck: "Ese VIN no cuadra — revisa el número de la etiqueta.",
+      vinVerified: (summary) => (summary ? `Genial — ${summary}.` : "VIN reconocido."),
+      vinVerifiedFallback: "reconocido",
+      vinLookupWarn: "Ese VIN parece válido, pero no pudimos rellenar los detalles. Puedes escribirlos abajo.",
+      vinMismatchWarn: (decodedSummary, priorLabel) =>
+        `Este VIN es un ${decodedSummary} — no coincide con el ${priorLabel} de tus fotos. Revisa el VIN o las fotos.`,
+      vinMismatchUseVinCta: "Usar el vehículo del VIN",
       serialNumber: "Número de serie / equipo",
       serialNumberPlaceholder: "Número de serie del fabricante o ID del equipo",
       serialNumberHelper: "Obligatorio: se guarda con el anuncio para la entrega y las reclamaciones.",
@@ -1321,45 +1529,102 @@ export const es: AppMessages = {
     },
     specs: {
       sectionTitle: "Detalles de la categoría",
-      sectionHint:
-        "Elige de las listas : los campos obligatorios desbloquean Continuar; los recomendados ayudan a decidir más rápido.",
+      sectionHint: "Los campos obligatorios desbloquean Continuar.",
       selectPlaceholder: "Elegir…",
       requiredBadge: "Obligatorio",
       recommendedBadge: "Recomendado",
       brandOtherPlaceholder: "Escribe la marca",
       unbrandedLabel: "Sin marca / genérico",
+      yearStepUp: "Un año más nuevo",
+      yearStepDown: "Un año más antiguo",
       fields: {
         brand: {
           label: "Marca",
           placeholder: "Elige una marca…",
-          hint: "Elige de la lista, u Otro si no está.",
+          hint: "",
         },
         model: { label: "Modelo", placeholder: "Modelo exacto" },
         powerSource: { label: "Fuente de energía", placeholder: "Elegir…" },
-        voltageOrSpec: { label: "Voltaje / especificación", placeholder: "p. ej. 18V" },
+        voltageBand: {
+          label: "Clase de voltaje",
+          hint: "Ayuda a emparejar baterías y obras.",
+        },
+        // Legacy aliases (older drafts / copy)
+        voltageOrSpec: { label: "Clase de voltaje", placeholder: "p. ej. 18V" },
         kitIncludes: { label: "Qué incluye", placeholder: "Lentes, baterías…" },
+        screenSizeBand: { label: "Tamaño de pantalla" },
         keySpec: { label: "Especificación clave", placeholder: "p. ej. 15″, 4K" },
-        capacityOrSize: { label: "Capacidad / tamaño", placeholder: "p. ej. 12 tazas" },
-        personCapacity: { label: "Capacidad de personas", placeholder: "p. ej. 4" },
+        capacityBand: { label: "Capacidad" },
+        capacityOrSize: { label: "Capacidad", placeholder: "p. ej. 12 tazas" },
+        personCapacityBand: { label: "Plazas / camas" },
+        personCapacity: { label: "Plazas / camas", placeholder: "p. ej. 4" },
         seasonRating: { label: "Temporada", placeholder: "Elegir…" },
+        packedWeightBand: { label: "Peso empacado" },
         packedWeight: { label: "Peso empacado", placeholder: "p. ej. 1,9 kg" },
         sizeOrLength: { label: "Talla / longitud", placeholder: "p. ej. 170 cm" },
         skillLevel: { label: "Nivel", placeholder: "Elegir…" },
+        frameOrWheelBand: { label: "Talla de cuadro / rueda" },
         frameOrWheelSize: { label: "Talla de cuadro / rueda", placeholder: "p. ej. 54 cm" },
         electric: { label: "¿Eléctrico?", placeholder: "Elegir…" },
+        riderHeightBand: { label: "Altura del ciclista" },
         riderHeight: { label: "Altura del ciclista", placeholder: "p. ej. 165–178 cm" },
         make: { label: "Marca del vehículo", placeholder: "p. ej. Toyota" },
-        year: { label: "Año", placeholder: "p. ej. 2019" },
-        mileage: { label: "Kilometraje", placeholder: "Odómetro actual" },
+        year: {
+          label: "Año",
+          placeholder: "Año",
+          hint: "Lo rellenamos desde las fotos cuando reconocemos la generación — ajústalo si falta un año.",
+        },
+        mileage: {
+          label: "Kilometraje",
+          placeholder: "Odómetro actual",
+          hint: "Los compradores quieren la lectura de hoy en el tablero.",
+          rentOptionalHint:
+            "Opcional en alquiler — capturarás el odómetro al recoger y otra vez al devolver.",
+        },
         transmission: { label: "Transmisión", placeholder: "Elegir…" },
         fuelType: { label: "Combustible", placeholder: "Elegir…" },
+        insuranceMinLiability: {
+          label: "Responsabilidad mínima que debe tener el inquilino",
+          hint: "El inquilino añade el vehículo a su póliza y muestra el justificante al reservar.",
+        },
+        insuranceMaxDeductible: {
+          label: "Franquicia máxima que aceptas",
+          hint: "O exige cobertura total / colisión.",
+        },
+        drivetrain: { label: "Tracción" },
+        vehicleWeightLbs: {
+          label: "Peso del vehículo / GVWR (lb)",
+          placeholder: "p. ej. 8500",
+          hint: "Introduce libras (lb). Desde 26 000 lb (≈ 11 793 kg) el alquiler exige seguro de daños físicos — no solo responsabilidad.",
+        },
+        wheelCount: {
+          label: "Número de llantas / ruedas",
+          placeholder: "p. ej. 4, 6, 10, 18",
+          hint: "Cuántas llantas necesitan foto previa (sin la de repuesto). Coches = 4. Dualies / cajas suelen 6–10. Semi + remolque suele 18. En anuncios pesados / comerciales lo define el anfitrión.",
+        },
+        lengthBand: { label: "Longitud / eslora" },
         lengthFt: { label: "Eslora (m)", placeholder: "p. ej. 4" },
+        capacityPeopleBand: { label: "Capacidad de pasajeros" },
         capacityPeople: { label: "Capacidad de pasajeros", placeholder: "Máx. personas" },
         motorIncluded: { label: "¿Motor incluido?", placeholder: "Elegir…" },
+        includedMilesPerDay: {
+          label: "Millas incluidas por día",
+          placeholder: "250",
+          hint: "Millas gratis en cada día de alquiler — 250 es un buen default de vecindario.",
+        },
+        overagePerMile: {
+          label: "Precio por milla extra",
+          placeholder: "0.45",
+          hint: "Solo se cobra cuando se acaban las millas incluidas.",
+        },
+        hardinessZoneRange: {
+          label: "Zonas de rusticidad",
+          hint: "Rango tipo USDA — estándar de vivero para que el comprador se autoevalúe.",
+        },
         hardinessZones: {
           label: "Zonas de rusticidad",
           placeholder: "p. ej. USDA 5–8",
-          hint: "Dónde crece con fiabilidad  (estándar de vivero).",
+          hint: "Dónde crece con fiabilidad (estándar de vivero).",
         },
         matureHeight: { label: "Altura madura", placeholder: "p. ej. 4–6 m" },
         matureHeightBand: {
@@ -1371,31 +1636,52 @@ export const es: AppMessages = {
         containerOrCaliper: { label: "Contenedor / calibre", placeholder: "p. ej. #5" },
         containerClass: { label: "Formato / maceta", hint: "Tamaño de contenedor o formato de raíz." },
         bloomSeason: { label: "Época de floración", placeholder: "p. ej. primavera" },
-        cuttingWidthOrSpec: { label: "Ancho de corte / spec", placeholder: "p. ej. 53 cm" },
+        waterNeeds: { label: "Necesidad de agua" },
+        cuttingWidthBand: { label: "Ancho de corte" },
+        cuttingWidthOrSpec: { label: "Ancho de corte", placeholder: "p. ej. 53 cm" },
+        guestCapacityBand: { label: "Capacidad de invitados" },
         guestOrSeatCapacity: { label: "Capacidad de invitados", placeholder: "p. ej. 8" },
+        setupFootprint: { label: "Espacio de montaje" },
         dimensions: { label: "Dimensiones", placeholder: "L × An × Al" },
         color: { label: "Color", placeholder: "p. ej. negro" },
+        powerBand: { label: "Clase de potencia" },
         wattageOrChannels: { label: "Vatios / canales", placeholder: "p. ej. 100W" },
+        weightBand: { label: "Peso / resistencia" },
         weightOrResistance: { label: "Peso / resistencia", placeholder: "p. ej. 2×12 kg" },
+        maxUserWeightBand: { label: "Peso máx. usuario" },
         maxUserWeight: { label: "Peso máx. usuario", placeholder: "p. ej. 136 kg" },
+        ageBand: { label: "Rango de edad" },
+        weightLimitBand: { label: "Límite de peso" },
         ageOrWeightRange: {
           label: "Edad / rango de peso",
           placeholder: "p. ej. 0–12 meses, 4–18 kg",
+        },
+        safetyDateKnown: {
+          label: "Estado de la fecha de seguridad",
+          hint: "Sillas de coche y cunas: conoce la caducidad o fecha de fabricación antes de publicar.",
         },
         expiresOrRecallCheck: {
           label: "Caducidad / fecha de fabricación",
           placeholder: "Importante en sillas de coche",
         },
-        powerOutput: { label: "Potencia", placeholder: "p. ej. 5 kW" },
+        hoursBand: { label: "Horas de uso" },
         hoursUsed: { label: "Horas de uso", placeholder: "Horómetro" },
+        dutyClass: { label: "Clase de trabajo" },
+        powerOutput: { label: "Potencia", placeholder: "p. ej. 5 kW" },
         clothingSize: { label: "Talla", placeholder: "Elegir…" },
         fits: { label: "Para quién", placeholder: "Elegir…" },
+        materialBand: { label: "Material" },
         material: { label: "Material", placeholder: "p. ej. poliéster" },
+        sizeBand: { label: "Tamaño aprox." },
         approxSqFt: { label: "Tamaño aprox. (m²)", placeholder: "p. ej. 20" },
+        maxOccupancyBand: { label: "Ocupación máxima" },
         maxOccupancy: { label: "Ocupación máxima", placeholder: "Personas" },
         parkingIncluded: { label: "Parking", placeholder: "Elegir…" },
         wifiIncluded: { label: "Wi‑Fi", placeholder: "Elegir…" },
+        accessType: { label: "Acceso" },
         accessNotes: { label: "Acceso", placeholder: "Código, escaleras…" },
+        useCase: { label: "Uso principal" },
+        transportSize: { label: "Cómo se mueve" },
         dimensionsOrWeight: { label: "Dimensiones / peso", placeholder: "Para transporte" },
         whatMakesItUnique: { label: "Qué lo hace único", placeholder: "Por qué alquilarlo" },
         jobScale: { label: "Escala" },
@@ -1477,11 +1763,11 @@ export const es: AppMessages = {
         "5_6_person": "5–6 personas",
         "7_plus_person": "7+ personas",
         group_shelter: "Refugio grupal",
-        under_2lb: "Menos de 1 kg",
-        "2_5lb": "1–2 kg",
-        "5_10lb": "2–4,5 kg",
-        "10_20lb": "4,5–9 kg",
-        over_20lb: "Más de 9 kg",
+        under_2lb: "Menos de 2 lb (0,9 kg)",
+        "2_5lb": "2–5 lb (0,9–2,3 kg)",
+        "5_10lb": "5–10 lb (2,3–4,5 kg)",
+        "10_20lb": "10–20 lb (4,5–9 kg)",
+        over_20lb: "Más de 20 lb (9 kg)",
         xs_frame: "Cuadro XS",
         s_frame: "Cuadro S",
         m_frame: "Cuadro M",
@@ -1660,13 +1946,13 @@ export const es: AppMessages = {
         car_trunk: "Maletero",
         needs_truck: "Necesita furgoneta",
         needs_crew: "Necesita equipo",
-        liability_25_50: "RC $25k / $50k",
-        liability_50_100: "RC $50k / $100k",
-        liability_100_300: "RC $100k / $300k",
-        liability_250_500: "RC $250k / $500k",
-        deductible_500: "Franquicia ≤ $500",
-        deductible_1000: "Franquicia ≤ $1.000",
-        deductible_2500: "Franquicia ≤ $2.500",
+        liability_25_50: "RC 25k / 50k €",
+        liability_50_100: "RC 50k / 100k €",
+        liability_100_300: "RC 100k / 300k €",
+        liability_250_500: "RC 250k / 500k €",
+        deductible_500: "Franquicia ≤ 500 €",
+        deductible_1000: "Franquicia ≤ 1.000 €",
+        deductible_2500: "Franquicia ≤ 2.500 €",
         full_coverage_required: "Cobertura completa / todo riesgo obligatorio",
 
       },
@@ -1674,16 +1960,23 @@ export const es: AppMessages = {
     modes: {
       title: "¿Cómo quieres ofrecerlo?",
       subtitle:
-        "Alquílalo, véndelo o las dos cosas. ¿Quieres regalarlo? Usa Vender con precio $0.",
+        "Combínalos: alquilar y vender, o alquilar y regalar. Gratis = Vender a 0 € (no junto a una venta de pago).",
       rent: "Alquilar",
       sell: "Vender",
       gift: "Gratis",
+      pathChoiceTitle: "¿Alquilarlo o venderlo?",
+      pathChoiceBody:
+        "Elige pronto — Vender se queda corto. Alquilar abre el seguro y las millas para vecinos.",
+      pathChoiceRent: "Alquilar",
+      pathChoiceSell: "Vender",
+      pathChoiceBoth: "Ambos",
       rentSubtitleDailyWeeklyMonthly: "Gana por día, semana o mes",
       rentSubtitleWeeklyMonthly: "Gana por semana o mes",
       rentSubtitleMonthly: "Gana por mes",
       rentSubtitleDailyWeekly: "Gana por día o semana",
-      sellSubtitle: "Venta única, el artículo deja de ser tuyo",
-      giftSubtitle: "Regálalo gratis",
+      sellSubtitle: "Venta única — se puede combinar con Alquilar",
+      giftSubtitle: "Regalo gratis — se puede combinar con Alquilar (no con venta de pago)",
+      giftBadge: "Vender a 0 €",
       minimumPeriod: "PERIODO MÍNIMO DE ALQUILER",
       period1Day: "1 día",
       period3Days: "3 días",
@@ -1700,25 +1993,133 @@ export const es: AppMessages = {
       longTermRentersNote: "Quienes alquilan verán el precio mensual en las reservas largas.",
       howToPrice: "¿Cómo poner el precio?",
       longTermHelp: (example) =>
-        `Solo un ejemplo: algunos anfitriones empiezan alrededor de ${example} para estancias largas, y luego lo ajustan según la demanda y el desgaste.`,
-      securityDeposit: "Fianza (opcional)",
+        `Consejo experto: para 30+ días, empieza cerca de ${example}. Manténlo por debajo de comprar nuevo: si un mes cuesta más que el artículo, el vecino compra. Ajusta por demanda y desgaste.`,
+      securityDeposit: "Fianza",
       securityDepositHint:
-        "Tú fijas el importe. Retención en la tarjeta del inquilino vía Stripe; se libera cuando confirmas una buena devolución. Vacío = sin retención.",
+        "Obligatoria. Retención vía Stripe; se libera si vuelve bien. Consejo: fianza = reposición; si desaparece, compras otra. Pon 0 si no quieres retención.",
+      securityDepositHintInsurance:
+        "En vehículos / equipos, lo principal es el seguro del arrendatario. Alinea la retención con tu deducible máximo (p. ej. ≤ 2.500 → retención ~2.500) — no todo el coche. Pon 0 solo si te basta el seguro.",
+      securityDepositHintMonthly:
+        "En inmobiliaria suele retenerse cerca de un mes de renta. Se libera tras una buena entrega. Pon 0 si no quieres retención.",
+      insuranceRequirementTitle: "Comprobante de seguro del arrendatario",
+      insuranceRequirementBody:
+        "Antes de la entrega, el arrendatario debe añadir este vehículo o máquina a su seguro por las fechas del alquiler y subir la tarjeta / declaraciones. Tú revisas el comprobante antes de dar las llaves.",
+      insuranceRequirementToggle: "Exigir comprobante de seguro antes de empezar el alquiler",
+      insuranceCoverageLead: "El vehículo debe estar en su póliza desde",
+      insuranceCoverageLead0: "El día de inicio del alquiler",
+      insuranceCoverageLead1: "1 día antes del inicio",
+      insuranceCoverageLead3: "3 días antes del inicio",
+      insuranceCoverageLead7: "7 días antes del inicio",
+      insuranceCoverageLeadHint: "Te da tiempo a revisar las declaraciones antes de entregar las llaves.",
+      physicalDamageTitle: "Exigir cobertura de daños físicos",
+      physicalDamageBody: (weightLbs, weightKg) =>
+        `No solo responsabilidad civil — colisión / integral (o daños físicos del equipo) debe estar en la póliza. Obligatorio en equipo comercial y en vehículos desde ${weightLbs.toLocaleString("es")} lb (≈ ${weightKg.toLocaleString("es")} kg).`,
+      proRentersTitle: "Solo profesionales (pro)",
+      proRentersBody:
+        "Activado por defecto en Heavy Equipment y Construction. El arrendatario declara ser profesional / oficio y puede subir una credencial. v1 = declaración + foto — aún no hay verificación ante un colegio oficial.",
+      commercialTransportTitle: "Transporte comercial (≥26 000 lb / semi)",
+      commercialTransportBody:
+        "Vehículos pesados y semi / remolques usan CDL + prueba de seguro agente→dueño. Define el número de llantas para la inspección previa, el correo donde el agente debe enviar la cobertura, más tus requisitos y cualquier tarifa.",
+      wheelCountLabel: "Número de llantas / ruedas (obligatorio)",
+      wheelCountPlaceholder: "p. ej. 6, 10, 18",
+      wheelCountHint:
+        "Una foto por posición de llanta en recogida y devolución (repuesto opcional). Dualies, cajas y remolques multi-eje no son «cuatro esquinas». Por defecto 10 en camiones pesados o 18 en semi / remolques comerciales — edítalo al vehículo.",
+      insuranceOwnerProofEmail: "Correo para prueba de seguro (agente → tú)",
+      insuranceOwnerProofEmailHint:
+        "Bandeja dedicada — se muestra claramente al arrendatario. Su agente envía la prueba aquí (no subida en la app).",
+      insuranceRequirementsNotes: "Requisitos y costos de seguro (texto libre)",
+      insuranceRequirementsNotesHint:
+        "Cobertura mínima, PD, responsabilidad, exclusiones, quién paga qué — lo que te pidió tu agente.",
+      insurancePdMinUsd: "Cobertura mínima de daños físicos (USD)",
+      insuranceLiabilityMinUsd: "Responsabilidad mínima (USD)",
+      insuranceRenterFeeUsd: "Tarifa a cargo del arrendatario (USD, opcional)",
+      noShowFeeTitle: "Tarifa por no presentarse (opcional)",
+      noShowFeeBody:
+        "Si el arrendatario no aparece tras la ventana de recogida, puedes marcar no-show, liberar el calendario y opcionalmente marcar este monto contra el depósito. Política vecinal suave — pueden disputar.",
+      noShowFeeToggle: "Activar tarifa opcional de no-show desde el depósito",
+      noShowFeeAmount: "Monto de tarifa por no-show (USD)",
+      lateReturnFeeTitle: "Tarifa por devolución tardía",
+      lateReturnFeeBody:
+        "Tras la hora de devolución: breve gracia, luego tarifa fija + uso por hora (patrón car-share común).",
+      lateReturnFeeToggle: "Activar tarifa por devolución tardía",
+      lateReturnGraceMinutes: "Gracia (minutos)",
+      lateReturnFlatFee: "Tarifa fija (USD)",
+      lateReturnPerHourFee: "Por hora (USD)",
+      fuelPolicyHostTitle: "Política de combustible (opcional)",
+      fuelPolicyHostBody:
+        "Por defecto: lleno a lleno con tarifa de $20 por combustible faltante. Los niveles se capturan en la entrega — no en el anuncio. Tanque prepago significa que el arrendatario paga un tanque lleno por adelantado.",
+      fuelPolicyHostSelect: "Política",
+      fuelPolicyFullToFull: "Lleno a lleno (devolver lleno)",
+      fuelPolicyPrepaid: "Tanque lleno prepago",
+      fuelPolicyMissingFee: "Tarifa por combustible faltante (USD)",
+      fuelPolicyTankGallons: "Capacidad del tanque para estimados (galones, opcional)",
+      youngDriverTitle: "Conductores jóvenes (18–24)",
+      youngDriverBody:
+        "La edad mínima por defecto es 25 (estándar del mercado). Activa 18–24 con una retención más alta (1.5× o 2×).",
+      youngDriverToggle: "Permitir arrendatarios de 18–24 con retención más alta",
+      youngDriverMultiplier: "Multiplicador de retención para jóvenes",
+      vehicleExtrasTitle: "Extras opcionales",
+      vehicleExtrasBody: "Extras sencillos que el arrendatario puede añadir al reservar.",
+      mileagePolicyTitle: "Millas de este alquiler",
+      mileagePolicyBody:
+        "Incluye un cupo diario amable y un precio simple por milla extra — o ofrece ilimitadas como extra.",
+      includedMilesPerDay: "Millas incluidas por día",
+      includedMilesPerDayHint: "250 millas/día es un default cálido que los vecinos esperan.",
+      overagePerMile: "Precio por milla extra",
+      overagePerMileHint: "Solo se cobra cuando se acaban las millas incluidas.",
+      extraUnlimitedMiles: "Kilometraje ilimitado",
+      extraUnlimitedMilesHint:
+        "Precio por día de alquiler. Si está activo, se omiten los límites de abajo.",
+      extraChildSeat: "Silla infantil",
+      extraChildSeatHint: "Tarifa fija por todo el alquiler.",
+      extraRoofRack: "Baca / portaequipajes",
+      extraRoofRackHint: "Tarifa fija por todo el alquiler.",
+      extraVehicleDelivery: "Entrega del vehículo",
+      extraVehicleDeliveryHint: "Entrega dentro de un radio a tarifa fija.",
+      extraPricePerDay: "Precio por día",
+      extraPriceFlat: "Precio fijo",
+      extraDeliveryRadius: "Radio máx. de entrega (millas)",
+      tollHoldTitle: "Retención peajes (opcional)",
+      tollHoldBody:
+        "Autoriza una retención extra por posibles peajes. Los macropuntos pueden marcar corredores conocidos; las facturas por matrícula a menudo llegan días después — el GPS solo respalda la retención.",
+      tollHoldToggle: "Autorizar retención de peajes hasta este importe",
+      tollHoldAmount: "Importe de retención peajes (USD)",
+      tollHoldAmountHint: "Se suma al depósito en la reserva. Por defecto $50.",
+      travelOutsideTitle: "Viajar fuera del área de origen",
+      travelOutsideBodyState:
+        "¿Puede el inquilino salir del estado de EE. UU. donde se basa este anuncio? Por defecto no está permitido — término contractual del acuerdo de alquiler.",
+      travelOutsideBodyCountry:
+        "¿Puede el inquilino salir del país (o el equivalente regional) donde se basa este anuncio? Por defecto no está permitido — término contractual del acuerdo de alquiler.",
+      travelOutsideHomeLabel: (area) => `Área de origen de este anuncio: ${area}`,
+      travelOutsideForbidden: "No permitido — permanecer en el área de origen",
+      travelOutsideAllowed: "Permitido — el inquilino puede salir del área de origen",
+      travelOutsideHint:
+        "Los puntos GPS suaves pueden avisar después al anfitrión si salen del área de origen cuando está prohibido. No es un bloqueo duro.",
       depositProtectionNote: (label) =>
         `💡 ${label}: tú eliges el importe. El seguro para artículos caros llega después; hasta entonces, pon una fianza con la que te sientas cómodo.`,
       salePrice: "Precio de venta",
       sellNote:
-        "💡 Pon 0 para regalarlo gratis (todavía no hay un modo Regalar aparte). Se aplica comisión de la plataforma en las ventas de pago.",
+        "💡 Las ventas de pago van con Stripe. Pon 0 € (o toca Gratis) para regalarlo — sin cobro, solo recogida.",
+      giftNote:
+        "🎁 Gratis = Vender a 0 €. El vecino te escribe para recogerlo — sin tarjeta ni comisión.",
       pricingTipRoi: (count) =>
-        `Genial: a ese precio se amortiza en unos ${count} alquileres. Ajústalo cuando quieras.`,
+        `Bien: a esa tarifa diaria se amortiza en unos ${count} alquileres. Ese es el modelo: varios préstamos cortos ganan a una sola venta.`,
       pricingTipDefault:
-        "Deja los precios en blanco y escribe lo que te parezca justo. Después de las fotos puedo sugerirte un punto de partida; no rellenaré las casillas por ti.",
-      pricingTipSuggestRent: (daily) =>
-        `Según las fotos, yo empezaría alrededor de ${daily}/día para alquilar. Solo es una sugerencia: tu casilla sigue vacía hasta que decidas.`,
+        "Pon el valor de reposición arriba y te sugeriré tarifa diaria, fianza y venta para que sea rentable. Las casillas se llenan solo si tocas Usar mi sugerencia.",
+      pricingTipSuggestRent: (daily, deposit) =>
+        `Yo empezaría en ${daily}/día. Pon la fianza en unos ${deposit} — igual que reposición. Si desaparece, compras otra; si vuelve bien, Stripe libera la retención. Tranquilidad para ambos.`,
+      pricingTipSuggestRentInsurance: (daily, deposit) =>
+        `Yo empezaría en ${daily}/día. Exige que añadan el activo a su seguro y suban el comprobante antes de la recogida. Retención ~${deposit} (deducible) — no todo el vehículo. Sin prueba, no entregues llaves.`,
+      pricingTipSuggestRentMonthlyDeposit: (daily, deposit) =>
+        `Yo empezaría en ${daily}/día (o tu mensual). Fianza cerca de ${deposit} (≈ un mes) es habitual en inmobiliaria.`,
       pricingTipSuggestSell: (sale) =>
-        `Según las fotos, un precio de venta justo sería alrededor de ${sale}. Solo es una sugerencia: escribe el tuyo o usa el mío.`,
-      pricingTipSuggestBoth: (daily, sale) =>
-        `Según las fotos, yo empezaría alrededor de ${daily}/día para alquilar, o unos ${sale} para vender. Solo es una sugerencia: las casillas siguen vacías hasta que decidas.`,
+        `Para vender, empieza cerca de ${sale} (usado, bajo reposición) para que se mueva. Precio de clasificado local, no de tienda.`,
+      pricingTipSuggestBoth: (daily, sale, deposit) =>
+        `Alquila cerca de ${daily}/día. Fianza = reposición (~${deposit}): se va → lo reemplazas; vuelve OK → se libera. O vende cerca de ${sale}. El mensual largo debe quedar bajo comprar nuevo.`,
+      pricingTipSuggestBothInsurance: (daily, sale, deposit) =>
+        `Alquila cerca de ${daily}/día. Exige prueba de seguro. Retención ~${deposit}. O vende cerca de ${sale}.`,
+      pricingTipSuggestBothMonthlyDeposit: (daily, sale, deposit) =>
+        `Alquila cerca de ${daily}/día. Fianza ~${deposit} (≈ un mes). O vende cerca de ${sale}.`,
       useSuggestedPrices: "Usar mi sugerencia",
       restrictedModesNote: "Algunos modos de transacción no están disponibles para esta categoría.",
     },
@@ -1738,17 +2139,18 @@ export const es: AppMessages = {
         "Detalles de acceso: código de la caja, código de la verja, número de unidad, ubicación de la llave…",
       contactlessUnlockHint:
         "Estos detalles de acceso no aparecen en tu anuncio público. Se desbloquean para tu inquilino confirmado al confirmar la recogida con el PIN, cuando ya tiene la dirección.",
-      heavyItem: "Artículo pesado (más de 23 kg)",
-      weightLbs: "Peso (kg)",
+      heavyItem: "Artículo pesado (más de 50 lb / 23 kg)",
+      weightLbs: "Peso",
       weightRequired: " (necesario para la entrega)",
-      weightPlaceholder: "p. ej. 40",
+      weightPlaceholder: "p. ej. 85",
+      weightDualHint: "Introduce libras — mostramos lb (kg) para todos.",
       iCanDeliver: "Puedo entregarlo",
       iCanDeliverDesc: "Entrega de ida y vuelta antes del inicio y después del final",
       deliveryHeading: "Entrega",
       deliveryPolicy:
         "La entrega antes de empezar el alquiler y la recogida después de terminarlo cuentan como una sola tarifa de ida y vuelta; no se divide al 50/50, y no es una entrega de ida del anfitrión con devolución del inquilino.",
       maxDistance: "Distancia máxima",
-      milesRoundTrip: "millas (ida y vuelta)",
+      milesRoundTrip: "km (ida y vuelta)",
       kmRoundTrip: "km (ida y vuelta)",
       roundTripFee: "Tarifa de entrega de ida y vuelta",
       estimate: "Estimación",
@@ -1825,7 +2227,7 @@ export const es: AppMessages = {
       handoffContactless: "Sin contacto",
       handoffHeavy: "Artículo pesado",
       handoffDelivery: (distanceLabel, fee, weight) =>
-        `Entrega ≤${distanceLabel} · $${fee} ida y vuelta${weight}`,
+        `Entrega ≤${distanceLabel} · ${fee} € ida y vuelta${weight}`,
       handoffDeliveryNoFee: (distanceLabel, weight) => `Entrega ≤${distanceLabel}${weight}`,
       handoffNotSet: "Sin definir",
       handoffAdjustHint: "Horario de recogida y entrega: ajústalo después de publicar en Mi Garaje.",
@@ -1864,7 +2266,7 @@ export const es: AppMessages = {
       openingStripe: "Abriendo…",
       continueStripe: "Conectar finanzas",
       refreshing: "Actualizando…",
-      refreshStatus: "Terminé la configuración: actualizar estado",
+      refreshStatus: "Actualizar estado",
       tip: (mascot) =>
         `${mascot}: Puedes publicar ya para que los vecinos lo vean. Conecta finanzas cuando quieras cobrar con tarjeta. Stripe se encarga de la verificación segura de identidad.`,
       goingLive: "Publicando…",
@@ -1931,12 +2333,22 @@ export const es: AppMessages = {
       `Autorizaremos ${amount} en tu tarjeta. La retención se libera cuando el propietario confirma que el artículo se devolvió en buen estado.`,
     cancellationPolicyTitle: "Cancelación",
     cancellationPolicyBody:
-      "Solicitudes pendientes: cancela cuando quieras antes de que el anfitrión acepte — se liberan las autorizaciones de tarjeta (el banco puede tardar unos días hábiles). Tras la aceptación, cualquiera puede cancelar antes de la recogida: 48+ horas antes del inicio → reembolso completo; 24–48 horas → 50%; menos de 24 horas → sin reembolso del alquiler. Si cancela el anfitrión antes de la recogida, el inquilino recupera el 100%. Las retenciones de fianza se liberan al cancelar.",
+      "Tras la aceptación, cualquiera puede cancelar antes de la entrega: 24+ horas antes del inicio → 100 % de reembolso; dentro de 24 h → 50 %. Reservas de última hora (<25 h antes): 1 h de gracia tras reservar → 100 %. Cancelación del anfitrión antes de la recogida → reembolso completo al inquilino. Las fianzas se liberan al cancelar antes de la recogida.",
+    lateReturnPolicyTitle: "Devolución tardía",
+    lateReturnPolicyBody:
+      "Tras la hora acordada: breve gracia, luego tarifa fija + tarifa por hora (predeterminado: 30 min, $20, $15/h — el anfitrión puede personalizar).",
+    noShowPolicyTitle: "Ausencia (no-show)",
+    noShowPolicyBody:
+      "Si el inquilino no llega, el anfitrión puede marcar ausencia tras ~2 horas desde la recogida programada. El precio del viaje suele mantenerse; puede aplicarse una tarifa opcional de fianza si está configurada.",
+    policyLearnMore: "Más información",
+    policySheetTitle: "Políticas de alquiler",
+    policyPracticeNote:
+      "Similar a la práctica común de car-share y alquiler a corto plazo — no es copia de ninguna marca.",
     cardPayment: "Pago con tarjeta",
     backToDetails: "Volver a los detalles de la reserva",
     preparing: "Preparando…",
-    continueToPay: (total) => `Continuar al pago · $${total}`,
-    sendRequest: (total) => `Enviar solicitud de reserva · $${total}`,
+    continueToPay: (total) => `Continuar al pago · ${total} €`,
+    sendRequest: (total) => `Enviar solicitud de reserva · ${total} €`,
     authorizeDepositFooter: "Autoriza la retención de la fianza arriba para completar tu solicitud.",
     completePaymentFooter: "Completa el pago con tarjeta arriba para enviar tu solicitud de reserva.",
     failedToSave: "No se pudo guardar la reserva",
@@ -1944,7 +2356,7 @@ export const es: AppMessages = {
     confirmedBody:
       "El propietario recibirá un aviso y confirmará la disponibilidad. Verás las novedades en Alquileres.",
     withHost: (name) => `con ${name}`,
-    total: (amount) => `Total $${amount}`,
+    total: (amount) => `Total ${amount} €`,
     ref: (id) => `Ref #${id}`,
     viewRentals: "Ver alquileres",
     backToHome: "Volver a Inicio",
@@ -1954,6 +2366,10 @@ export const es: AppMessages = {
     insuranceBody:
       "Añade este vehículo o máquina a tu póliza para las fechas del alquiler y sube la tarjeta o la página de declaraciones. El anfitrión debe ver cobertura activa antes de la entrega.",
     insuranceHostRequires: (details) => `El anfitrión exige: ${details}`,
+    insuranceCoverageLeadNote: (date, leadDays) =>
+      leadDays <= 0
+        ? `Ten el vehículo en tu póliza desde el inicio del alquiler (${date}).`
+        : `Ten el vehículo en tu póliza desde el ${date} (${leadDays} día${leadDays === 1 ? "" : "s"} antes del inicio).`,
     insuranceActiveUntil: "Póliza activa hasta",
     insuranceMustCoverRental: "La cobertura debe seguir activa hasta el fin del alquiler.",
     insuranceUpload: "Subir foto del seguro",
@@ -1963,6 +2379,49 @@ export const es: AppMessages = {
     insuranceSignInFirst: "Inicia sesión primero para adjuntar el comprobante a tu reserva.",
     insurancePreviewAlt: "Comprobante de seguro subido",
     insuranceViewUploaded: "Abrir comprobante",
+    physicalDamageRequired:
+      "Este anuncio exige cobertura de daños físicos (colisión / integral / PD del equipo) — la responsabilidad sola no basta.",
+    physicalDamageAttest:
+      "Confirmo que el comprobante subido incluye daños físicos para este artículo (no solo responsabilidad).",
+    proRentersRequired:
+      "Este anfitrión alquila equipo comercial solo a profesionales. Confirma que calificas (oficio / uso profesional).",
+    proRentersAttest:
+      "Declaro que soy profesional / oficios y lo uso para trabajo. (v1: auto-declaración — no es verificación gubernamental de licencia.)",
+    proCredentialUpload: "Subir credencial / prueba de uso profesional (opcional, recomendado)",
+    proCredentialReplace: "Reemplazar foto de credencial",
+    proCredentialHint:
+      "Tarjeta de visita, licencia de contratista, ID de empresa, etc. Guardamos la foto para el anfitrión — en v1 no verificamos ante un colegio.",
+    proBadge: "Solo profesionales",
+    physicalDamageBadge: "Daños físicos obligatorios",
+    cdlRequired:
+      "Este anuncio de transporte comercial exige un CDL válido (licencia comercial).",
+    cdlAttest:
+      "Declaro que tengo un CDL válido para esta clase de vehículo y lo presentaré en la entrega.",
+    cdlUpload: "Subir foto / escaneo del CDL",
+    cdlReplace: "Reemplazar foto del CDL",
+    cdlHint:
+      "Foto clara de tu Commercial Driver’s License. Obligatoria antes de reservar y antes del inicio.",
+    cdlBadge: "CDL obligatorio",
+    agentInsuranceTitle: "Seguro vía agente → propietario",
+    agentInsuranceBody:
+      "Para transporte comercial pesado / semi, contrata cobertura con tu agente de seguros. El agente debe enviar la prueba por correo directamente al dueño del vehículo — no es el flujo ligero de «añadir al auto personal + subir».",
+    agentInsuranceEmailLabel: "Enviar prueba a este correo del dueño",
+    agentInsuranceEmailMissing:
+      "El anfitrión aún no configuró un correo para la prueba de seguro — pregunta antes de reservar.",
+    agentInsuranceAck:
+      "Tramitaré la cobertura con mi agente y haré que envíe la prueba al correo del dueño de arriba antes del viaje.",
+    agentInsuranceRequirements: "Requisitos de seguro del dueño",
+    agentInsuranceFee: (amount) => `Tarifa de seguro / cumplimiento a cargo del arrendatario: ${amount}`,
+    commercialTransportBadge: "Transporte comercial",
+    extrasTitle: "Extras",
+    extrasBody: "Extras opcionales de este anfitrión.",
+    extraUnlimitedMiles: "Kilometraje ilimitado",
+    extraChildSeat: "Silla infantil",
+    extraRoofRack: "Baca / portaequipajes",
+    extraVehicleDelivery: (radius) => `Entrega del vehículo (hasta ${radius})`,
+    extraPricePerDay: (amount) => `${amount}/día`,
+    extraPriceFlat: (amount) => `${amount} fijo`,
+    extrasSubtotal: (amount) => `Extras · ${amount}`,
     newRequestTitle: "Nueva solicitud de reserva",
     newRequestBody: (title) => `Alguien quiere alquilar tu ${title}.`,
     approvedTitle: "Reserva aprobada",
@@ -1977,6 +2436,26 @@ export const es: AppMessages = {
       "Cualquier pago autorizado se liberará — los reembolsos pueden tardar unos días hábiles.",
     refundNoteNone: "No se cobró ningún pago por esta solicitud.",
     captureFailed: "No se pudo capturar el pago. Inténtalo de nuevo o contacta con soporte.",
+    macropointConsentTitle: "Ubicación durante el alquiler",
+    macropointConsentBody:
+      "En vehículos registramos puntos de ubicación aproximados del teléfono cada ~20 min mientras el viaje está activo (y al inicio/devolución) — no es seguimiento en vivo. Para seguridad del traspaso y peajes opcionales. Se detiene al terminar el alquiler.",
+    macropointConsentCheck:
+      "Acepto puntos de ubicación aproximados solo mientras este alquiler de vehículo esté activo",
+    ageGateTitle: "Edad del conductor requerida",
+    ageGateNeedDob:
+      "Añade tu fecha de nacimiento en Información personal (o confírmala en el ID de inicio desde tu licencia) antes de reservar este vehículo. Edad mínima por defecto: 25.",
+    ageGateUnderage: (minAge) =>
+      `Debes tener al menos ${minAge} años para alquilar vehículos en Evorios.`,
+    ageGateHostBlocksYoung: (minAge) =>
+      `Este anfitrión exige conductores de ${minAge}+. No ha activado alquileres para conductores jóvenes.`,
+    ageGateYoungTitle: "Se aplica retención para conductores jóvenes",
+    ageGateYoungBody: (age, addOn) =>
+      `Tienes ${age} años. Este anfitrión permite 18–24 con una retención extra de ${addOn}.`,
+    fuelPolicyTitle: "Política de combustible",
+    fuelPolicyBody:
+      "El nivel de combustible (y DEF en diésel) se registra al inicio y al devolver — no en el anuncio. Por defecto: lleno a lleno; si no, liquida el faltante + $20. Tanque lleno prepago es una alternativa acordada.",
+    tollHoldBookingNote: (amount) =>
+      `Incluye una retención de peajes de ${amount} (junto con el depósito). Las facturas por matrícula pueden llegar después — el GPS solo respalda la retención.`,
   },
   postRequest: {
     title: "Publicar una solicitud",
@@ -2056,6 +2535,144 @@ export const es: AppMessages = {
     whenFrom: (start) => `Desde ${start}`,
   },
   faq,
+  categoryFacts: {
+    expand: "Cómo funciona y seguridad",
+    collapse: "Ocultar detalles",
+    byCategory: {
+      Vehicles: {
+        title: "Cómo funciona el alquiler de coche entre vecinos",
+        summary:
+          "Los vecinos generan más confianza que un marketplace anónimo — pero términos, seguro e inspección previa obligatoria (exterior, interior y todas las llantas) son requeridos antes del PIN/llaves. Combustible (y DEF en diésel) se registra al inicio y al devolver — por defecto lleno a lleno, faltante + $20. Desde 26 000 lb o semi / remolques comerciales también exigen CDL y prueba agente→dueño (no subida personal). El anfitrión puede marcar no-show tras la ventana y liberar el calendario.",
+        hostTipTitle: "Para anfitriones / propietarios",
+        hostTip:
+          "Introduce el GVWR en lb. Desde ≥ 26 000 lb o semi, configura el correo para la prueba del agente y exige CDL. En coches ligeros, el arrendatario añade el auto a su póliza personal y sube el comprobante. Las fotos de llantas protegen contra cambios. Combustible: lleno a lleno (niveles solo en la entrega, no en el anuncio). La tarifa de no-show es un flag suave del depósito.",
+        hostTipLinkLabel: "Sitio de TINT (tint.ai)",
+        hostTipLinkHref: "https://www.tint.ai/",
+        whyGeoTitle: "¿Por qué GPS para el PIN?",
+        whyGeo:
+          "Un código compartido puede viajar más lejos que el coche. El PIN solo se abre en el punto o con el QR del coche — presencia, no un número reenviado.",
+        contactlessTitle: "Sin contacto / sin co-presencia",
+        contactless:
+          "El comprobante debe estar aprobado antes de PIN / caja / llaves. Recomendado: OBD + caja de llaves.",
+        flowTitle: "De punta a punta",
+        flow:
+          "Publicar → peso + seguro (subida o agente→correo) → reserva (CDL si transporte comercial) → inspección previa con llantas → entrega con combustible/DEF + odómetro → misma serie al devolver.",
+        layersTitle: "Capas de seguridad",
+        layers:
+          "Términos · seguro · CDL si aplica · inspección previa y devolución con llantas · combustible/DEF lleno a lleno (+$20 si falta) · daños físicos desde 26 000 lb · retención · no-show opcional · geo PIN · QR.",
+        claimsTitle: "Si algo sale mal (reclamaciones)",
+        claims:
+          "El seguro del arrendatario es primario. Fotos de llantas antes/después ayudan a probar un cambio. El faltante de combustible (+ $20) puede marcarse para reclamo del anfitrión. El no-show libera el calendario; tarifa solo si la configuraste.",
+      },
+      "Heavy Equipment": {
+        title: "Alquiler de equipo comercial",
+        summary:
+          "Heavy Equipment por defecto solo a profesionales. Seguro PD obligatorio. Inspección previa obligatoria (incl. goma/llantas si aplica) bloquea el inicio. El anfitrión puede marcar no-show tras la ventana.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Mantén «solo profesionales». PD obligatorio. Fotos previas (incl. llantas) protegen a ambos. Tarifa de no-show opcional y suave.",
+        whyGeoTitle: "¿Por qué el comprobante antes de las llaves?",
+        whyGeo:
+          "El equipo comercial es caro sin seguro. Declaración + PD + inspección dan tiempo a revisar.",
+        flowTitle: "De punta a punta",
+        flow:
+          "Publicar → solo pro + PD → comprobante → inspección previa → entrega → inspección de devolución.",
+        layersTitle: "Capas de seguridad",
+        layers:
+          "Declaración pro · PD · inspección previa · retención · no-show opcional · términos · QR/PIN.",
+        claimsTitle: "Si algo sale mal",
+        claims:
+          "Primero el seguro PD; la retención cubre el deducible. El no-show libera fechas.",
+      },
+      Construction: {
+        title: "Alquiler de equipo de construcción",
+        summary:
+          "Construction por defecto solo pro y seguro PD. Inspección previa obligatoria antes del inicio. El anfitrión puede marcar no-show y liberar el calendario.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Solo pro + PD antes de las llaves. Captura el estado (incl. goma). Tarifa de no-show vecinal, no estilo aerolínea.",
+        whyGeoTitle: "¿Por qué pro + PD?",
+        whyGeo:
+          "Las herramientas de obra sufren uso duro. Pro + PD + fotos reducen pérdidas sin seguro.",
+        flowTitle: "De punta a punta",
+        flow:
+          "Publicar → pro + PD → comprobante → inspección previa → entrega → devolución.",
+        layersTitle: "Capas de seguridad",
+        layers:
+          "Declaración pro · PD · inspección previa · retención · no-show · términos · QR.",
+        claimsTitle: "Si algo sale mal",
+        claims:
+          "Seguro primero, luego retención con fotos. El no-show cancela y libera fechas.",
+      },
+    },
+  },
+  preTripInspection: {
+    pickupTitle: "Inspección previa (obligatoria)",
+    pickupBody:
+      "Fotografía exterior, interior y cada llanta antes de la entrega. Anota golpes, rayones, manchas, abolladuras y desgaste. Ambas partes deben confirmar antes de desbloquear el inicio.",
+    returnTitle: "Inspección de devolución (obligatoria)",
+    returnBody: (tireCount) =>
+      `El mismo juego de fotos que en la recogida — incluidas las ${tireCount} llantas — para que un cambio o daño nuevo sea visible en una disputa.`,
+    tireSwapHint:
+      "Las fotos de llantas protegen contra cambios caros (p. ej. premium por chinas baratas). Cuando sea posible, que se vea marca y dibujo.",
+    bodySection: "Exterior e interior",
+    tiresSection: (tireCount) =>
+      tireCount === 4
+        ? "Llantas / goma (todas las esquinas)"
+        : `Llantas / goma (${tireCount} posiciones)`,
+    bodyPhotoHint: "Una foto clara de esta zona. Marca daños y un comentario breve.",
+    tiresMandatoryHint: (tireCount) =>
+      tireCount === 4
+        ? "Las fotos de las cuatro llantas de esquina son obligatorias — un comentario solo no completa esta sección. La de repuesto es opcional."
+        : `Las fotos de las ${tireCount} posiciones de llanta son obligatorias — un comentario solo no completa esta sección. La de repuesto es opcional.`,
+    tiresIncomplete: (tireCount) =>
+      tireCount === 4
+        ? "Añade una foto de cada llanta de esquina para continuar."
+        : `Añade una foto de cada una de las ${tireCount} llantas para continuar.`,
+    tiresComplete: "Fotos de llantas requeridas completas",
+    tirePhotoHint:
+      "Captura flanco completo + dibujo. Marca/modelo legible si se puede — la evidencia son las fotos, no la nota.",
+    tireBrandLabel: "Marca / modelo (opcional, si se lee)",
+    tireBrandPlaceholder: "p. ej. Michelin Pilot Sport 4",
+    tireCommentLabel: "Notas (desgaste, daño, presión)",
+    tireCommentPlaceholder: "Desgaste, cortes, baja presión, llanta distinta…",
+    tireNumbered: (n) => `Llanta ${n}`,
+    commentLabel: "Comentario",
+    commentPlaceholder: "Describe golpes, rayones, manchas, abolladuras…",
+    damageLabel: "Daño anotado",
+    damage: {
+      none: "Ninguno",
+      chip: "Golpe",
+      scratch: "Rayón",
+      stain: "Mancha",
+      dent: "Abolladura",
+      wear: "Desgaste",
+      other: "Otro",
+    },
+    photoAdd: "Añadir foto",
+    photoReplace: "Reemplazar foto",
+    photoSaving: "Guardando…",
+    optional: "opcional",
+    incomplete: (tireCount) =>
+      `Termina todas las fotos requeridas (carrocería + ${tireCount} llantas) antes de enviar.`,
+    submitRenter: "Enviar inspección al anfitrión",
+    confirmHost: "Confirmar inspección",
+    waitingHost: "Enviado — esperando confirmación del anfitrión",
+    waitingRenter: "Esperando que el arrendatario envíe las fotos de inspección",
+    bothDone: "Inspección confirmada por ambas partes",
+    areas: {
+      exterior_front: "Exterior — frente",
+      exterior_rear: "Exterior — trasera",
+      exterior_left: "Exterior — lado izquierdo",
+      exterior_right: "Exterior — lado derecho",
+      interior: "Interior",
+      tire_fl: "Llanta — delantera izquierda",
+      tire_fr: "Llanta — delantera derecha",
+      tire_rl: "Llanta — trasera izquierda",
+      tire_rr: "Llanta — trasera derecha",
+      tire_spare: "Llanta de repuesto",
+    },
+  },
   favorites: {
     title: "Favoritos",
     subtitle: "Guardado para más tarde — alquilar o comprar",
@@ -2064,7 +2681,7 @@ export const es: AppMessages = {
     browseCta: "Explorar cerca",
     listingFallback: "Anuncio",
     removeAria: (title) => `Quitar ${title} de favoritos`,
-    ratePerDay: (rate) => `$${rate}/día`,
+    ratePerDay: (rate) => `${rate} €/día`,
   },
   signInPrompt: {
     cta: "Iniciar sesión / Crear cuenta",
@@ -2075,6 +2692,7 @@ export const es: AppMessages = {
       `Consejo: menciona a @${mascotHandle} para ayuda rápida. Mantén el chat y los pagos en la app — WhatsApp/Telegram/pagos fuera están bloqueados.`,
     empty: "Todavía no hay mensajes — saluda y confirma los detalles de la recogida.",
     placeholder: "Escribe un mensaje…",
+    closedReadOnly: "El chat de este alquiler está cerrado. Aún puedes leer el historial.",
     listingChatFallback: "Chat del anuncio",
     listingChatSubtitle: "Chat sobre la recogida · push cuando respondan",
     moderationBlocked:
@@ -2186,6 +2804,9 @@ export const es: AppMessages = {
       notSignedIn: "No estás conectado",
       addName: "Añade tu nombre",
       addPhone: "Añadir teléfono",
+      addDateOfBirth: "Añadir fecha de nacimiento",
+      dateOfBirth: "Fecha de nacimiento",
+      dateOfBirthHint: "Requerido para reservar Vehículos (edad mín. 25). Según tu licencia.",
       nameLabel: "Nombre",
       namePlaceholder: "Tu nombre",
       phoneLabel: "Número de teléfono",
@@ -2289,7 +2910,7 @@ export const es: AppMessages = {
       reviews: "Reseñas",
       seeAllReviews: (n) => `Ver las ${n} reseñas`,
       listings: "Anuncios",
-      ratePerDay: (price) => `$${price}/día`,
+      ratePerDay: (price) => `${price} €/día`,
       privacyNote:
         "El correo, el teléfono, la dirección y los datos de pago nunca se muestran en los perfiles públicos.",
       neighbor: "Vecino",
@@ -2476,9 +3097,9 @@ export const es: AppMessages = {
       "Los anuncios impulsados aparecen cerca de la parte superior del feed, con un máximo de 1 impulso por cada 5 orgánicos.",
     boostActiveUntil: (when) => `Impulso activo hasta ${when}`,
     boostFailed: "El pago del impulso falló. Revisa la configuración de Stripe.",
-    boostOpt24h: "$2 · 24 h",
-    boostOpt7d: "$5 · 7 d",
-    boostOpt30d: "$10 · 30 d",
+    boostOpt24h: "2 € · 24 h",
+    boostOpt7d: "5 € · 7 d",
+    boostOpt30d: "10 € · 30 d",
     backToListings: "Volver a mis anuncios",
     shareEllipsis: "Compartir…",
     copyCaption: "Copiar texto",
@@ -2545,7 +3166,7 @@ export const es: AppMessages = {
         : `Te quedan ${n} espacios libres en esta hoja`,
     fillPageHint: "Llena la hoja ahora para imprimir una vez, pegar una vez, y tener más artículos publicados más rápido.",
     bulkTipPopular: "Popular: escaleras, hidrolimpiadoras, mesas de fiesta, cámaras, portabicicletas",
-    bulkTipHighValue: "Los artículos de alto valor (más de $200) suelen llamar la atención rápido",
+    bulkTipHighValue: "Los artículos de alto valor (más de 200 €) suelen llamar la atención rápido",
     bulkTipSeasonal: "Si es de temporada, publícalo ya: en tu barrio se busca con antelación",
     removeFromBulk: "Quitar del lote",
     addToBulk: "Añadir al lote",
@@ -2595,18 +3216,18 @@ export const es: AppMessages = {
     errorNoBulkItems: "Todavía no hay artículos en la cola del lote.",
     details: "Detalles",
     labelTitle: "Título",
-    labelTerms: "Condiciones",
+    labelDescription: "Descripción",
     labelDailyPrice: "Precio diario",
     labelMinimumRental: "Alquiler mínimo",
     labelLongTerm: "Largo plazo (30+ días)",
     longTermEnabled: "Activado",
-    longTermMonthly: (rate) => `$${rate}/mes`,
+    longTermMonthly: (rate) => `${rate} €/mes`,
     labelCategory: "Categoría",
     labelCity: "Ciudad",
     labelAvailabilityDays: "Días de disponibilidad",
     labelAvailabilityTimes: "Horarios de disponibilidad",
     availabilityTimesValue: (weekdays, weekend) => `Días de semana ${weekdays} · Fin de semana ${weekend}`,
-    labelWeight: "Peso (kg)",
+    labelWeight: "Peso",
     labelDeliveryMaxMiles: "Distancia máx. de entrega",
     labelDeliveryFee: "Tarifa de entrega",
     labelDeliverySummary: "Entrega (resumen)",
@@ -2654,6 +3275,31 @@ export const es: AppMessages = {
   bookingRequest,
   rentalPrice,
   paymentsUi,
+  rentalAgreement: {
+    title: "Contrato de alquiler",
+    honestCaveat:
+      "No es asesoría legal. Un registro firmado es más limpio que solo el chat — no sustituye el seguro y el clickwrap no te hace a prueba de demandas.",
+    readTerms: "Leer términos de alquiler",
+    hideTerms: "Ocultar términos",
+    acceptCheckbox: (partyLabel, displayName) =>
+      `Soy el ${partyLabel} y acepto los términos de alquiler de esta reserva como ${displayName}`,
+    partyRenter: "inquilino",
+    partyHost: "anfitrión",
+    nameFallback: "mi nombre de cuenta",
+    mustAccept: "Acepta el contrato de alquiler antes de continuar.",
+    statusMissing: "El contrato aún no ha empezado.",
+    statusAwaitingHost: "El inquilino firmó — esperando al anfitrión.",
+    statusAwaitingRenter: "El anfitrión firmó — esperando al inquilino.",
+    statusBothSigned: "Ambas partes firmaron.",
+    signedAs: (name, when) => `${name} · ${when}`,
+    notSigned: "Aún sin firmar",
+    termsVersion: (version) => `Versión de términos ${version}`,
+    download: "Descargar",
+    blockHandoff: "La entrega permanece bloqueada hasta que ambas partes firmen el contrato.",
+    blockRenter: "Firma el contrato al reservar antes de pagar / empezar.",
+    blockHost: "Firma el contrato al aprobar esta solicitud.",
+    hostMustSignToApprove: "Acepta el contrato de alquiler para aprobar esta reserva.",
+  },
   addressPicker: {
     country: "País",
     changeAddress: "Cambiar dirección",

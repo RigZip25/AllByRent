@@ -1,5 +1,15 @@
+import { Capacitor } from "@capacitor/core";
 import { APP_HOST, APP_ORIGIN } from "./brand";
 import { getMessages } from "./i18n";
+
+/** True when running inside the Capacitor iOS/Android shell. */
+function isNativeStoreApp(): boolean {
+  try {
+    return Capacitor.isNativePlatform();
+  } catch {
+    return false;
+  }
+}
 
 /** True when opened from iOS home screen (standalone display mode). */
 export function isStandalonePwa(): boolean {
@@ -19,6 +29,7 @@ export function isIosDevice(): boolean {
 /** Hostnames where production passkeys are configured (see PASSKEY_RP_ID). */
 export function isPasskeyProductionHost(): boolean {
   if (typeof window === "undefined") return false;
+  if (isNativeStoreApp()) return true;
   const host = window.location.hostname;
   return host === APP_HOST || host === "localhost" || host === "127.0.0.1";
 }
@@ -26,6 +37,10 @@ export function isPasskeyProductionHost(): boolean {
 export type PasskeyEnvironment = "ios-pwa" | "ios-safari" | "pwa" | "browser";
 
 export function detectPasskeyEnvironment(): PasskeyEnvironment {
+  // Store builds are not Safari tabs — native WebAuthn shim uses app.evorios.com.
+  if (isNativeStoreApp()) {
+    return isIosDevice() ? "ios-pwa" : "pwa";
+  }
   if (isIosDevice() && isStandalonePwa()) return "ios-pwa";
   if (isIosDevice()) return "ios-safari";
   if (isStandalonePwa()) return "pwa";

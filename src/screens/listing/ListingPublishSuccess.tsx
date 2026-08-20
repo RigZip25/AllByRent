@@ -16,6 +16,8 @@ type ListingPublishSuccessProps = {
   onSetupPayouts?: () => void;
   onPreviewShop?: () => void;
   onShare?: () => void;
+  /** Sell listings: choose live vs Open Sale instead of only "done". */
+  onPlanOpenSale?: () => void;
   onDone: () => void;
 };
 
@@ -27,6 +29,7 @@ export function ListingPublishSuccess({
   onSetupPayouts,
   onPreviewShop,
   onShare,
+  onPlanOpenSale,
   onDone,
 }: ListingPublishSuccessProps) {
   const { listing } = useMessages();
@@ -93,6 +96,16 @@ export function ListingPublishSuccess({
       ) : null}
 
       <div className="mt-8 flex w-full max-w-sm flex-col gap-3">
+        {onPlanOpenSale ? (
+          <button
+            type="button"
+            onClick={onPlanOpenSale}
+            className="w-full rounded-xl py-3.5 text-base font-bold text-white"
+            style={{ backgroundColor: AMBER, color: GREEN }}
+          >
+            Open Sale / auction paths →
+          </button>
+        ) : null}
         {onPreviewShop ? (
           <button
             type="button"
@@ -119,17 +132,17 @@ export function ListingPublishSuccess({
           type="button"
           onClick={onDone}
           className={
-            onShare || onPreviewShop
+            onShare || onPreviewShop || onPlanOpenSale
               ? "w-full rounded-xl border-2 py-3.5 text-base font-bold"
               : "btn-primary w-full text-white"
           }
           style={
-            onShare || onPreviewShop
+            onShare || onPreviewShop || onPlanOpenSale
               ? { borderColor: GREEN, color: GREEN }
               : { backgroundColor: GREEN }
           }
         >
-          {success.backToListings}
+          {onPlanOpenSale ? "Just stay live in garage" : success.backToListings}
         </button>
       </div>
     </motion.div>

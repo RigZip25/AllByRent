@@ -12,6 +12,14 @@ import { RentanoHint } from "../../../components/RentanoHint";
 import { MASCOT_NAME } from "../../../lib/brand";
 import { isYardSaleListingActive } from "../../../lib/yardSaleListing";
 import { processPhotoWithPhotoRoom } from "../photoroomApi";
+import {
+  messageForPhotoModeration,
+  moderateListingPhotoBlob,
+} from "../listingPhotoModeration";
+import {
+  messageForVideoModeration,
+  moderateListingVideoBlob,
+} from "../listingVideoModeration";
 import { MAX_LISTING_PHOTOS, MAX_LISTING_VIDEOS } from "../photoUtils";
 import { putMediaBlob, deleteMedia, type MediaRef } from "../../../lib/mediaStore";
 import { useMediaUrl } from "../../../lib/useMediaUrl";
@@ -33,7 +41,14 @@ export function Step1Photos({
   draft,
   setDraft,
   onAnalyzePhotos,
-}: StepProps & { onAnalyzePhotos?: () => void }) {
+  gateMessage = null,
+  onDismissGateMessage,
+}: StepProps & {
+  onAnalyzePhotos?: () => void;
+  /** Moderation / gate message from Continue (wizard). */
+  gateMessage?: string | null;
+  onDismissGateMessage?: () => void;
+}) {
   const { listing } = useMessages();
   const photosCopy = listing.photos;
   const libraryInputRef = useRef<HTMLInputElement>(null);
@@ -59,7 +74,9 @@ export function Step1Photos({
     ? photosCopy.tipAnalyzed
     : isYardSaleListingActive()
       ? photosCopy.tipYardSale(MASCOT_NAME)
-      : photosCopy.tipDefault(MASCOT_NAME);
+      : !draft.category.trim()
+        ? photosCopy.tipDecideShelf(MASCOT_NAME)
+        : photosCopy.tipDefault(MASCOT_NAME);
 
   const clampToMaxSlots = (value: number) => Math.max(5, Math.min(MAX_LISTING_PHOTOS, value));
 
@@ -147,11 +164,6 @@ export function Step1Photos({
     }));
   };
 
-  const formatUnknownError = (error: unknown) => {
-    if (error instanceof Error && error.message) return error.message;
-    return "Unknown error.";
-  };
-
   const isHeicLike = (file: File) => {
     const type = (file.type || "").toLowerCase();
     const name = (file.name || "").toLowerCase();
@@ -189,6 +201,7 @@ export function Step1Photos({
     if (files.length === 0) return;
     setStorageWarning(null);
     setPhotoWarning(null);
+    onDismissGateMessage?.();
 
     let nextIndex = draft.photos.length;
 
@@ -209,25 +222,35 @@ export function Step1Photos({
       try {
         const sourceFile = await maybeConvertHeicToJpeg(file);
         const sourceBlob = await normalizePhotoBlob(sourceFile);
+
+        // Vision moderation BEFORE PhotoRoom — never enhance rejected images.
+        const moderation = await moderateListingPhotoBlob(sourceBlob, {
+          category: draft.category,
+          subcategory: draft.subcategory,
+        });
+        if (!moderation.ok) {
+          setPhotoWarning(messageForPhotoModeration(moderation.reasonCode, photosCopy));
+          setErrorIndex(targetIndex);
+          break;
+        }
+
         let blob: Blob = sourceBlob;
         try {
           const enhanced = await processPhotoWithPhotoRoom(sourceBlob);
           blob = await normalizePhotoBlob(enhanced);
         } catch (error) {
           // Enhancement is best-effort; still allow photo uploads if the proxy/API key is missing
-          // or the image format can't be processed.
+          // or the image format can't be processed. Never surface raw API errors to users.
+          console.warn("[listing] PhotoRoom enhancement failed", error);
           blob = sourceBlob;
-          setPhotoWarning(
-            photosCopy.enhancementUnavailable(formatUnknownError(error)),
-          );
+          // Silent fallback — don't nag; photo still saved.
         }
 
         await appendPhotoBlob(blob);
         nextIndex += 1;
       } catch (error) {
-        setPhotoWarning(
-          photosCopy.couldntAddPhoto(formatUnknownError(error)),
-        );
+        console.warn("[listing] Couldn't add photo", error);
+        setPhotoWarning(photosCopy.couldntAddPhoto);
         setErrorIndex(targetIndex);
         break;
       } finally {
@@ -249,6 +272,28 @@ export function Step1Photos({
     if (!file || !file.type.startsWith("video/")) return;
     if (draft.videos.length >= MAX_LISTING_VIDEOS) return;
     setStorageWarning(null);
+    setPhotoWarning(null);
+    onDismissGateMessage?.();
+
+    try {
+      const moderation = await moderateListingVideoBlob(file, {
+        category: draft.category,
+        subcategory: draft.subcategory,
+      });
+      if (!moderation.ok) {
+        setPhotoWarning(
+          messageForVideoModeration(moderation.reasonCode, {
+            ...photosCopy,
+            moderationBadVideo: photosCopy.moderationBadVideo,
+            moderationVideoNotListable: photosCopy.moderationVideoNotListable,
+          }),
+        );
+        return;
+      }
+    } catch {
+      setPhotoWarning(photosCopy.moderationVerifyFailed);
+      return;
+    }
 
     const put = await putMediaBlob(file, { kind: "video" });
     if (!put.ok) {
@@ -481,6 +526,7 @@ export function Step1Photos({
   ) => {
     const media = draft.photos[index];
     const isCover = index === 0;
+    const isThumb = className.includes("aspect-square");
     const isDragTarget = dragOverIndex === index && draggingIndex !== null;
     const isDragging = draggingIndex === index;
 
@@ -516,24 +562,31 @@ export function Step1Photos({
         >
           <PhotoTile media={media} fit={fit} preferFull={isCover} />
         </button>
-        {isCover && (
+        {isCover ? (
           <span
-            className="absolute bottom-2 left-2 rounded-full px-2.5 py-1 text-xs font-semibold text-white"
+            className="pointer-events-none absolute bottom-2 left-2 rounded-md px-2 py-0.5 text-[10px] font-bold text-white"
             style={{ backgroundColor: PRIMARY_GREEN }}
           >
             {photosCopy.cover}
           </span>
-        )}
+        ) : null}
         <button
           type="button"
+          onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => {
             event.stopPropagation();
             removePhoto(index);
           }}
-          className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm"
+          className="absolute right-1.5 top-1.5 z-20 flex shrink-0 items-center justify-center rounded-full bg-white text-[#DC2626] shadow-md"
+          style={{
+            width: isThumb ? 22 : 26,
+            height: isThumb ? 22 : 26,
+            minWidth: isThumb ? 22 : 26,
+            minHeight: isThumb ? 22 : 26,
+          }}
           aria-label={photosCopy.removePhotoAria}
         >
-          <X className="h-3 w-3 text-gray-500" strokeWidth={2.5} />
+          <X className={isThumb ? "h-3 w-3" : "h-3.5 w-3.5"} strokeWidth={2.75} />
         </button>
       </motion.div>
     );
@@ -638,8 +691,10 @@ export function Step1Photos({
           {storageWarning ? (
             <p className="mt-2 text-xs font-semibold text-amber-700">{storageWarning}</p>
           ) : null}
-        {photoWarning ? (
-          <p className="mt-2 text-xs font-semibold text-amber-700">{photoWarning}</p>
+        {photoWarning || gateMessage ? (
+          <p className="mt-2 text-xs font-semibold text-amber-700">
+            {photoWarning || gateMessage}
+          </p>
         ) : null}
         </div>
       </div>
@@ -652,7 +707,22 @@ export function Step1Photos({
             {[0, 1, 2, 3].map((col) => {
               const index = 1 + row * 4 + col;
               if (index >= totalSlots || index >= MAX_LISTING_PHOTOS) return null;
-              return renderSlot(index, "aspect-square w-full min-w-0", { fit: "cover" });
+              const hasPhoto = Boolean(draft.photos[index]);
+              return (
+                <div key={`thumb-wrap-${index}`} className="min-w-0">
+                  {renderSlot(index, "aspect-square w-full min-w-0", { fit: "cover" })}
+                  {hasPhoto ? (
+                    <button
+                      type="button"
+                      onClick={() => makeCover(index)}
+                      className="mt-1 w-full truncate text-[10px] font-semibold leading-tight"
+                      style={{ color: PRIMARY_GREEN }}
+                    >
+                      {photosCopy.setAsCover}
+                    </button>
+                  ) : null}
+                </div>
+              );
             })}
           </div>
         ))}
@@ -700,6 +770,15 @@ export function Step1Photos({
             makeCover(idx);
             setPreviewIndex(0);
           }}
+          onDelete={(idx) => {
+            removePhoto(idx);
+            setPreviewIndex((current) => {
+              if (current == null) return null;
+              const remaining = draft.photos.length - 1;
+              if (remaining <= 0) return null;
+              return Math.min(current, remaining - 1);
+            });
+          }}
           onNavigate={setPreviewIndex}
         />
       ) : null}
@@ -736,12 +815,14 @@ function PhotoPreviewOverlay({
   index,
   onClose,
   onSetCover,
+  onDelete,
   onNavigate,
 }: {
   photos: MediaRef[];
   index: number;
   onClose: () => void;
   onSetCover: (index: number) => void;
+  onDelete: (index: number) => void;
   onNavigate: (index: number) => void;
 }) {
   const { listing, common } = useMessages();
@@ -750,6 +831,54 @@ function PhotoPreviewOverlay({
   const { url } = useMediaUrl(media);
   const hasPrev = index > 0;
   const hasNext = index < photos.length - 1;
+  const startRef = useRef<{ x: number; y: number } | null>(null);
+  const axisRef = useRef<"x" | "y" | null>(null);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+      if (event.key === "ArrowLeft" && hasPrev) onNavigate(index - 1);
+      if (event.key === "ArrowRight" && hasNext) onNavigate(index + 1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [hasNext, hasPrev, index, onClose, onNavigate]);
+
+  const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    startRef.current = { x: event.clientX, y: event.clientY };
+    axisRef.current = null;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!startRef.current) return;
+    const dx = event.clientX - startRef.current.x;
+    const dy = event.clientY - startRef.current.y;
+    if (!axisRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+      axisRef.current = Math.abs(dy) > Math.abs(dx) ? "y" : "x";
+    }
+  };
+
+  const onPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!startRef.current) return;
+    const dx = event.clientX - startRef.current.x;
+    const dy = event.clientY - startRef.current.y;
+    const axis = axisRef.current;
+    startRef.current = null;
+    axisRef.current = null;
+
+    if (axis === "y" && dy > 90) {
+      onClose();
+      return;
+    }
+    if (axis === "x" || (axis == null && Math.abs(dx) > Math.abs(dy))) {
+      if (dx <= -56 && hasNext) {
+        onNavigate(index + 1);
+        return;
+      }
+      if (dx >= 56 && hasPrev) onNavigate(index - 1);
+    }
+  };
 
   return (
     <div
@@ -758,7 +887,7 @@ function PhotoPreviewOverlay({
       aria-modal="true"
       aria-label={photosCopy.previewAria}
     >
-      <div className="flex shrink-0 items-center justify-between px-4 py-3 text-white">
+      <div className="flex shrink-0 items-center justify-between gap-2 px-4 py-3 text-white">
         <button
           type="button"
           onClick={onClose}
@@ -770,21 +899,42 @@ function PhotoPreviewOverlay({
         <span className="text-sm font-medium">
           {index + 1} / {photos.length}
         </span>
-        {index !== 0 ? (
+        <div className="flex items-center gap-2">
+          {index !== 0 ? (
+            <button
+              type="button"
+              onClick={() => onSetCover(index)}
+              className="rounded-full px-3 py-1.5 text-xs font-semibold text-white"
+              style={{ backgroundColor: PRIMARY_GREEN }}
+            >
+              {photosCopy.setAsCover}
+            </button>
+          ) : (
+            <span className="rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white/90">
+              {photosCopy.cover}
+            </span>
+          )}
           <button
             type="button"
-            onClick={() => onSetCover(index)}
-            className="rounded-full px-3 py-1.5 text-xs font-semibold text-white"
-            style={{ backgroundColor: PRIMARY_GREEN }}
+            onClick={() => onDelete(index)}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white hover:bg-red-600"
+            aria-label={photosCopy.removePhotoAria}
           >
-            {photosCopy.setAsCover}
+            <X className="h-5 w-5" strokeWidth={2.25} />
           </button>
-        ) : (
-          <span className="w-[88px]" aria-hidden />
-        )}
+        </div>
       </div>
 
-      <div className="relative flex min-h-0 flex-1 items-center justify-center px-4 pb-6">
+      <div
+        className="relative flex min-h-0 flex-1 items-center justify-center px-4 pb-6 touch-pan-y"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={() => {
+          startRef.current = null;
+          axisRef.current = null;
+        }}
+      >
         {hasPrev ? (
           <button
             type="button"
@@ -799,7 +949,8 @@ function PhotoPreviewOverlay({
           <img
             src={url}
             alt=""
-            className="max-h-full max-w-full object-contain"
+            className="max-h-full max-w-full select-none object-contain"
+            draggable={false}
           />
         ) : (
           <p className="text-sm text-white/70">{common.loading}</p>
@@ -835,10 +986,11 @@ function VideoPreview({ video, onRemove }: { video: MediaRef; onRemove: () => vo
       <button
         type="button"
         onClick={onRemove}
-        className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm"
+        className="absolute right-2 top-2 z-20 flex shrink-0 items-center justify-center rounded-full bg-white text-[#DC2626] shadow-md"
+        style={{ width: 26, height: 26, minWidth: 26, minHeight: 26 }}
         aria-label={photosCopy.removeVideoAria}
       >
-        <X className="h-4 w-4 text-gray-600" strokeWidth={2.5} />
+        <X className="h-3.5 w-3.5" strokeWidth={2.75} />
       </button>
     </div>
   );

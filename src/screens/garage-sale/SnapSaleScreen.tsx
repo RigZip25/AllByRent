@@ -110,7 +110,10 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
   const refreshSellerStatus = useCallback(async () => {
     setSellerLoading(true);
     try {
-      const status = await loadSellerGoPublicStatus(auth.userId);
+      // Phone KYC only when SMS OTP is enabled — never hard-block publish while deferred.
+      const status = await loadSellerGoPublicStatus(auth.userId, {
+        requiresPhone: false,
+      });
       setSellerStatus(status);
       return status;
     } catch {

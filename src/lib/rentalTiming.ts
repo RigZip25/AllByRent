@@ -1,3 +1,5 @@
+import { NO_SHOW_MARK_AFTER_MS } from "./noShowPolicy";
+
 const MS_MIN = 60_000;
 const MS_HOUR = 60 * MS_MIN;
 const MS_DAY = 24 * MS_HOUR;
@@ -66,7 +68,7 @@ export function formatPickupWindow(startIso: string, endIso: string): string {
 export function canMarkNoShow(pickupScheduledAt: string, now = Date.now()): boolean {
   const pickup = new Date(pickupScheduledAt).getTime();
   if (Number.isNaN(pickup)) return false;
-  return now - pickup >= 60 * MS_MIN;
+  return now - pickup >= NO_SHOW_MARK_AFTER_MS;
 }
 
 export function isReviewWindowOpen(completedAt: string | undefined, now = Date.now()): boolean {

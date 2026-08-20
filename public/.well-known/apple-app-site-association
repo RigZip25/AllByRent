@@ -3,12 +3,12 @@
     "apps": [],
     "details": [
       {
-        "appID": "TEAM_ID.com.evorios.app",
+        "appID": "KPY8N4QWNU.com.elflogistics.evorios",
         "paths": ["*", "/"]
       }
     ]
   },
   "webcredentials": {
-    "apps": ["TEAM_ID.com.evorios.app"]
+    "apps": ["KPY8N4QWNU.com.elflogistics.evorios"]
   }
 }

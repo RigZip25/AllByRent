@@ -22,8 +22,17 @@
     <script>
       (function () {
         var params = new URLSearchParams(window.location.search);
+        var path = window.location.pathname || "";
+        var requestMatch = path.match(/^\/r\/([^/]+)\/?$/i);
+        if (requestMatch && requestMatch[1] && !params.get("request")) {
+          try {
+            params.set("request", decodeURIComponent(requestMatch[1]));
+          } catch (e) {
+            params.set("request", requestMatch[1]);
+          }
+        }
         var target = new URL("/", window.location.origin);
-        ["garage", "item", "listingId", "skipSplash"].forEach(function (key) {
+        ["garage", "item", "listingId", "request", "skipSplash"].forEach(function (key) {
           var value = params.get(key);
           if (value) target.searchParams.set(key, value);
         });

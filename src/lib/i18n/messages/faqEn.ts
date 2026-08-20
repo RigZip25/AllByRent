@@ -20,6 +20,10 @@ export const faq: AppMessages["faq"] = {
     account: "Account",
   },
   items: {
+    "why-name": {
+      q: "Why is it called Evorios?",
+      a: "Evorios is a coined name from evo- (evolve / evolution) plus -rios, a short ending that sounds Latin/Romance and suggests many homes — varios in Spanish means “various.” Say it eh-VOR-ee-ohs (stress on VOR).\n\nWe chose it because the product is about evolution, not about stuffing “rent” or “sale” into the brand: (1) how households think — garage stuff becomes a storefront; (2) how people consume — borrow, buy used, or pass things on; (3) how neighbors relate — porch trust instead of anonymous commerce. One line: evolve how your home shares.\n\nIt can feel unfamiliar at first — that is normal for an invented brand. Descriptive names are easier on day one but hard to own worldwide and lock you into one mode. Evorios is unique to search, we own evorios.com, and once you hear the story and the stress on VOR, it sticks.",
+    },
     "what-is": {
       q: "What is Evorios?",
       a: "Evorios is a neighborhood marketplace: every household is a business cell — a garage storefront on the block. Neighbors rent, sell, or gift (Sell at $0). Browse categories on Home, or stock your garage with the green + button.",
@@ -38,7 +42,7 @@ export const faq: AppMessages["faq"] = {
     },
     "location-rent": {
       q: "Why do I need to set my block?",
-      a: "We show garages and items in your cluster (25 mi by default). Set your block during onboarding or tap the location chip on Home. Rural or sparse? Tap Search wider for 50+ mi.",
+      a: "We show garages and items in your cluster (25 mi / ~40 km by default). Tap the location line on Home to widen to 50 or 100 mi (~80 / 160 km), or change your block. Rural or sparse? Use the wider radius there.",
     },
     "install-pwa": {
       q: "How do I install the app on my phone?",
@@ -58,11 +62,11 @@ export const faq: AppMessages["faq"] = {
     },
     "replacement-value": {
       q: "What is replacement value?",
-      a: "It is the cost to replace the item new today — used for deposit protection and rent eligibility. Use current retail price, not used price. AI suggests a value from your photos.",
+      a: "It is the cost to buy the item new today in your marketplace currency — context for you when setting a deposit. AI suggests a value from your photos. Deposit amount is always set by the host; insurance for expensive items comes later.",
     },
     "qr-sticker": {
       q: "Why do I need a QR sticker?",
-      a: "For rentals, a QR links the physical item to your listing. Your listing goes live as soon as you publish — print stickers now, later, or in bulk from My Garage. At handoff, you confirm with the code first; the neighbor’s scan fully activates the rental.",
+      a: "For rentals, a QR links the physical item to your listing. You don’t need a printer to start — show the code from your phone at handoff. Print a sticker later (or in bulk from My Garage) if you want it on the item. We don’t ask you to photograph a printed sticker.",
     },
     "pickup-delivery": {
       q: "How do pickup and delivery work?",
@@ -122,7 +126,7 @@ export const faq: AppMessages["faq"] = {
     },
     "arkansas-rural": {
       q: "I'm in rural Arkansas — why so few listings?",
-      a: "New blocks fill in as neighbors stock their garages. Use Search wider on Home (50+ mi), post a request, or list your own gear — early hosts get more visibility.",
+      a: "New blocks fill in as neighbors stock their garages. Use Search wider on Home (50+ mi / ~80+ km), post a request, or list your own gear — early hosts get more visibility.",
     },
     "traveling-mode": {
       q: "I'm traveling — how do I browse another area?",
@@ -146,7 +150,7 @@ export const faq: AppMessages["faq"] = {
     },
     "cancel-booking": {
       q: "How do I cancel a booking?",
-      a: "Open the rental in Rentals and choose Cancel if still before pickup. Refund rules follow the host policy and timing — see the booking summary.",
+      a: "Open the rental in Rentals and choose Cancel before pickup. Pending requests: cancel anytime (card auth released). After acceptance: 48+ hours before start → full refund; 24–48 hours → 50%; under 24 hours → no rental refund. Host cancel before pickup refunds the renter in full.",
     },
     "host-payouts": {
       q: "How do hosts get paid?",
@@ -190,3 +194,4 @@ export const faq: AppMessages["faq"] = {
     },
   },
 };
+

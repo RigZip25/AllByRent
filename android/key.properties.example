@@ -1,0 +1,5 @@
+# Copy to android/key.properties (gitignored) for CLI release builds.
+storePassword=YOUR_STORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=evorios
+storeFile=/Users/YOU/Documents/evorios-play-upload.jks

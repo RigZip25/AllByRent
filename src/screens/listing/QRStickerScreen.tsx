@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import QRCode from "qrcode";
@@ -11,16 +11,12 @@ import {
   loadQrBulkQueueListingIds,
   loadStickerEligibleListings,
   removeListingFromQrBulkQueue,
-  uploadQrVerificationPhotoRemote,
-  updateStoredListing,
 } from "../../lib/listingStorage";
 import type { ListingDraft } from "./types";
 import type { Dispatch, SetStateAction } from "react";
 import { QR_PDF_FILENAMES } from "../../lib/brand";
-import { useAuth } from "../../hooks/AuthProvider";
-import { putMediaBlob } from "../../lib/mediaStore";
-import { verifyListingQrInPhoto } from "../../lib/verifyListingQrPhoto";
 import { useMessages } from "../../lib/i18n/react";
+import { ShowListingQrOverlay } from "../../components/listings/ShowListingQrOverlay";
 
 const GREEN = "#0D5C3A";
 const QR_SHEET_CAPACITY = 12;
@@ -35,20 +31,19 @@ type QRStickerScreenProps = {
 
 export function QRStickerScreen({
   draft,
-  setDraft,
+  setDraft: _setDraft,
   onComplete,
   onListAnother,
   onBackToStory,
 }: QRStickerScreenProps) {
   const { listingQr: t } = useMessages();
-  const auth = useAuth();
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfFilename, setPdfFilename] = useState<string>(QR_PDF_FILENAMES.stickers);
   const [actionsOpen, setActionsOpen] = useState(false);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [showOnScreenOpen, setShowOnScreenOpen] = useState(false);
   const [bulkCount, setBulkCount] = useState(() => loadQrBulkQueueListingIds().length);
   const emptySpotsLeft = Math.max(0, QR_SHEET_CAPACITY - bulkCount);
 
@@ -195,71 +190,6 @@ export function QRStickerScreen({
     }
   };
 
-  const handleVerificationPhoto = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setPdfLoading(true);
-    setPdfError(null);
-
-    void (async () => {
-      const verified = await verifyListingQrInPhoto(file, {
-        listingId: draft.id,
-        qrToken: draft.qrToken,
-        publicUrl: publicQrUrl,
-      });
-      if (!verified.ok) {
-        setPdfError(verified.reason);
-        return;
-      }
-
-      // Optional: confirm the sticker is attached. Listing is already live.
-      if (auth.userId) {
-        await uploadQrVerificationPhotoRemote({
-          listingId: draft.id,
-          ownerId: auth.userId,
-          file,
-        });
-        setDraft((current) => {
-          const updated: ListingDraft = {
-            ...current,
-            qrReady: true,
-            listingStatus: "active",
-          };
-          updateStoredListing(updated);
-          return updated;
-        });
-        onComplete();
-        return;
-      }
-
-      const put = await putMediaBlob(file, { kind: "image" });
-      if (!put.ok) {
-        setPdfError(put.message);
-        return;
-      }
-
-      setDraft((current) => {
-        const updated: ListingDraft = {
-          ...current,
-          verificationPhoto: put.ref,
-          qrReady: true,
-          listingStatus: "active",
-        };
-        updateStoredListing(updated);
-        return updated;
-      });
-      onComplete();
-    })()
-      .catch(() => {
-        setPdfError(t.errorVerifyFailed);
-      })
-      .finally(() => {
-        setPdfLoading(false);
-        event.target.value = "";
-      });
-  };
-
   return (
     <motion.div
       className="mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col bg-white"
@@ -313,126 +243,134 @@ export function QRStickerScreen({
         <div className="mt-6 space-y-3">
           <button
             type="button"
-            onClick={onComplete}
+            onClick={() => setShowOnScreenOpen(true)}
             className="w-full rounded-xl py-3.5 text-base font-bold text-white"
             style={{ backgroundColor: GREEN }}
+          >
+            {t.showOnScreen}
+          </button>
+          <p className="text-center text-sm leading-relaxed text-gray-600">
+            {t.showOnScreenHint}
+          </p>
+          <p className="text-center text-xs text-gray-500">{t.multiItemHint}</p>
+
+          <button
+            type="button"
+            onClick={onComplete}
+            className="w-full rounded-xl border-2 py-3.5 text-base font-bold"
+            style={{ borderColor: GREEN, color: GREEN }}
           >
             {t.donePrintLater}
           </button>
 
-          <button
-            type="button"
-            onClick={() => void handlePrintNow()}
-            disabled={pdfLoading}
-            className="w-full rounded-xl border-2 py-3.5 text-base font-bold disabled:opacity-60"
-            style={{ borderColor: GREEN, color: GREEN }}
-          >
-            {pdfLoading ? t.preparingPdf : t.printThisQr}
-          </button>
+          <div className="rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
+            <p className="text-sm font-semibold text-gray-900">{t.printLaterOptional}</p>
+            <p className="mt-1 text-sm leading-relaxed text-gray-600">{t.printHint}</p>
 
-          <p className="text-center text-sm leading-relaxed text-gray-600">
-            {t.printHint}
-          </p>
-
-          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => void handleDownload("a4")}
+              onClick={() => void handlePrintNow()}
               disabled={pdfLoading}
-              className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
+              className="mt-3 w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-60"
               style={{ borderColor: GREEN, color: GREEN }}
             >
-              {t.a4SheetPdf}
+              {pdfLoading ? t.preparingPdf : t.printThisQr}
             </button>
-            <button
-              type="button"
-              onClick={() => void handleDownload("label")}
-              disabled={pdfLoading}
-              className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
-              style={{ borderColor: GREEN, color: GREEN }}
-            >
-              {t.label3x3Pdf}
-            </button>
-          </div>
 
-          <button
-            type="button"
-            onClick={() => void handleSharePdf()}
-            disabled={pdfLoading}
-            className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
-            style={{ borderColor: GREEN, color: GREEN }}
-          >
-            {t.shareSavePdf}
-          </button>
-          <p className="text-center text-xs text-gray-500">
-            {t.sharePdfHint}
-          </p>
-
-          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-semibold text-gray-900">{t.bulkPrinting}</p>
-              <p className="text-xs text-gray-500">{t.queuedCount(bulkCount)}</p>
-            </div>
-
-            <div className="mt-2 rounded-2xl bg-[#F0FDF4] px-4 py-3">
-              <p className="text-sm font-semibold text-gray-900">
-                {t.emptySpotsLeft(emptySpotsLeft)}
-              </p>
-              <p className="mt-1 text-xs text-gray-600">
-                {t.fillPageHint}
-              </p>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-gray-600">
-                <li>{t.bulkTipPopular}</li>
-                <li>{t.bulkTipHighValue}</li>
-                <li>{t.bulkTipSeasonal}</li>
-              </ul>
-            </div>
             <div className="mt-2 grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  const next = queuedForBulk
-                    ? removeListingFromQrBulkQueue(draft.id)
-                    : addListingToQrBulkQueue(draft.id);
-                  setBulkCount(next);
-                }}
-                className="w-full rounded-xl border-2 py-3 text-sm font-bold"
+                onClick={() => void handleDownload("a4")}
+                disabled={pdfLoading}
+                className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
                 style={{ borderColor: GREEN, color: GREEN }}
               >
-                {queuedForBulk ? t.removeFromBulk : t.addToBulk}
+                {t.a4SheetPdf}
               </button>
               <button
                 type="button"
-                onClick={() => void handleBulkPrint()}
-                disabled={pdfLoading || bulkCount === 0}
-                className="w-full rounded-xl py-3 text-sm font-bold text-white disabled:opacity-50"
-                style={{ backgroundColor: GREEN }}
+                onClick={() => void handleDownload("label")}
+                disabled={pdfLoading}
+                className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
+                style={{ borderColor: GREEN, color: GREEN }}
               >
-                {t.printBulk}
+                {t.label3x3Pdf}
               </button>
             </div>
-            {bulkCount > 0 ? (
-              <button
-                type="button"
-                onClick={() => {
-                  clearQrBulkQueue();
-                  setBulkCount(0);
-                }}
-                className="mt-2 w-full text-center text-xs font-semibold underline"
-                style={{ color: "#6B7280" }}
-              >
-                {t.clearBulkQueue}
-              </button>
-            ) : null}
+
+            <button
+              type="button"
+              onClick={() => void handleSharePdf()}
+              disabled={pdfLoading}
+              className="mt-2 w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
+              style={{ borderColor: GREEN, color: GREEN }}
+            >
+              {t.shareSavePdf}
+            </button>
+            <p className="mt-2 text-center text-xs text-gray-500">{t.sharePdfHint}</p>
+
+            <div className="mt-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-gray-900">{t.bulkPrinting}</p>
+                <p className="text-xs text-gray-500">{t.queuedCount(bulkCount)}</p>
+              </div>
+
+              <div className="mt-2 rounded-2xl bg-[#F0FDF4] px-4 py-3">
+                <p className="text-sm font-semibold text-gray-900">
+                  {t.emptySpotsLeft(emptySpotsLeft)}
+                </p>
+                <p className="mt-1 text-xs text-gray-600">{t.fillPageHint}</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-gray-600">
+                  <li>{t.bulkTipPopular}</li>
+                  <li>{t.bulkTipHighValue}</li>
+                  <li>{t.bulkTipSeasonal}</li>
+                </ul>
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = queuedForBulk
+                      ? removeListingFromQrBulkQueue(draft.id)
+                      : addListingToQrBulkQueue(draft.id);
+                    setBulkCount(next);
+                  }}
+                  className="w-full rounded-xl border-2 py-3 text-sm font-bold"
+                  style={{ borderColor: GREEN, color: GREEN }}
+                >
+                  {queuedForBulk ? t.removeFromBulk : t.addToBulk}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleBulkPrint()}
+                  disabled={pdfLoading || bulkCount === 0}
+                  className="w-full rounded-xl py-3 text-sm font-bold text-white disabled:opacity-50"
+                  style={{ backgroundColor: GREEN }}
+                >
+                  {t.printBulk}
+                </button>
+              </div>
+              {bulkCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearQrBulkQueue();
+                    setBulkCount(0);
+                  }}
+                  className="mt-2 w-full text-center text-xs font-semibold underline"
+                  style={{ color: "#6B7280" }}
+                >
+                  {t.clearBulkQueue}
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
 
         {otherListings.length > 0 ? (
           <div className="mt-6 rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
             <h3 className="text-base font-bold text-gray-900">{t.moreItems}</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {t.moreItemsBody}
-            </p>
+            <p className="mt-1 text-sm text-gray-500">{t.moreItemsBody}</p>
           </div>
         ) : null}
 
@@ -443,41 +381,18 @@ export function QRStickerScreen({
         >
           {t.addAnotherItem}
         </button>
-        <p className="mt-2 text-center text-xs text-gray-500">
-          {t.comeBackHint}
-        </p>
+        <p className="mt-2 text-center text-xs text-gray-500">{t.comeBackHint}</p>
 
         {pdfError ? (
           <p className="mt-3 text-center text-xs text-red-600">{pdfError}</p>
         ) : null}
-
-        <div className="mt-8 border-t border-gray-100 pt-6">
-          <p className="mb-3 text-center text-sm font-semibold text-gray-700">
-            {t.optionalVerifyTitle}
-          </p>
-          <div>
-            <button
-              type="button"
-              onClick={() => cameraInputRef.current?.click()}
-              className="w-full rounded-xl border-2 py-3 text-sm font-bold"
-              style={{ borderColor: GREEN, color: GREEN }}
-            >
-            {pdfLoading ? t.verifyingQr : t.takeVerificationPhoto}
-            </button>
-          </div>
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={handleVerificationPhoto}
-          />
-          <p className="mt-3 text-center text-xs text-gray-500">
-            {t.verificationHint}
-          </p>
-        </div>
       </div>
+
+      <ShowListingQrOverlay
+        open={showOnScreenOpen}
+        listing={draft}
+        onClose={() => setShowOnScreenOpen(false)}
+      />
 
       {actionsOpen && pdfUrl ? (
         <div

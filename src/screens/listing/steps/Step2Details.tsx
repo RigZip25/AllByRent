@@ -3,10 +3,23 @@ import { Step3Modes } from "./Step3Modes";
 import type { StepProps } from "../types";
 
 /** Frictionless wizard step 2 — item details + rent/sell pricing in one scroll. */
-export function Step2Details({ draft, setDraft }: StepProps) {
+export function Step2Details({
+  draft,
+  setDraft,
+  gateMessage = null,
+  onDismissGateMessage,
+}: StepProps & {
+  gateMessage?: string | null;
+  onDismissGateMessage?: () => void;
+}) {
   return (
     <div className="flex flex-col">
-      <Step2ItemInfo draft={draft} setDraft={setDraft} />
+      <Step2ItemInfo
+        draft={draft}
+        setDraft={setDraft}
+        gateMessage={gateMessage}
+        onDismissGateMessage={onDismissGateMessage}
+      />
       <Step3Modes draft={draft} setDraft={setDraft} />
     </div>
   );

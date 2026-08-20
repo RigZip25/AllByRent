@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { applyCors, handleOptions } from "../lib/cors";
 import { getPhotoRoomApiKey } from "../lib/keys";
+import { enforceProxyGuard } from "../lib/proxyGuard";
 
 const UPSTREAM_URL = "https://image-api.photoroom.com/v2/edit";
 
@@ -28,6 +29,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader("Allow", "POST, OPTIONS");
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  // Paid upstream — require sign-in + tight rate limit.
+  const guard = await enforceProxyGuard(req, res, {
+    route: "photoroom",
+    maxAuthed: 12,
+    maxAnon: 2,
+    windowMs: 60_000,
+    requireAuth: true,
+  });
+  if (!guard) return;
 
   const apiKey = getPhotoRoomApiKey();
   if (!apiKey) {

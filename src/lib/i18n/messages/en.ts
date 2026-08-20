@@ -120,6 +120,10 @@ export const en: AppMessages = {
       "Check Spam / Promotions, and double-check your email spelling (e.g. gmail, not gmal). Then resend or edit details.",
     didYouMeanEmail: (email) => `Did you mean ${email}?`,
     useSuggestedEmail: "Use this address",
+    faceIdCta: "Continue with Face ID",
+    faceIdHint: "Opens your existing account — name, phone, and Stripe stay linked.",
+    orEmail: "or use email",
+    returningHint: "Welcome back — we’ll use your saved details.",
     freeToJoin: "Free to join · No credit card",
   },
   install: {
@@ -286,6 +290,9 @@ export const en: AppMessages = {
     removedBody: "This listing may have been removed or is no longer available in your area.",
     goBack: "Go back",
     photoByOwner: "Photo by owner",
+    openPhotoAria: "View photo",
+    openPhotoGalleryAria: (count) => `View ${count} photos`,
+    photoCountBadge: (count) => `${count} photos`,
     heavyItem: "Heavy item",
     perDay: "per day",
     newOnTheBlock: "New on the block",
@@ -778,6 +785,12 @@ export const en: AppMessages = {
     depositNextSupport: "Next step: email support to settle a split deposit — capture is not automated yet.",
     depositHeldDuringDispute: "Deposit hold stays frozen while the dispute is open. Claim/release after you resolve.",
     depositReleaseBtn: "Release hold",
+    depositPartialHint:
+      "Prefer invoices for tolls, fuel, and late fees so the damage hold stays. A partial claim captures that amount and releases the rest (multicapture not available).",
+    depositPartialPlaceholder: "Partial amount (USD)",
+    depositPartialClaimBtn: "Claim partial",
+    depositPartialInvalid: "Enter a valid partial amount (at least $0.50).",
+    depositPartialClaimed: "Partial amount claimed; remainder of the hold was released.",
     depositClaimBtn: "Claim deposit",
     depositStatusReleased: "Deposit: released",
     depositStatusClaimed: "Deposit: claimed by host",
@@ -833,6 +846,34 @@ export const en: AppMessages = {
     handoffRenterDoneWaitingHost: "Marked received. Waiting for the host to confirm hand-over.",
     handoffRenterReturnedWaitingHost: "Marked returned. Waiting for the host to accept.",
     handoffHostAcceptedWaitingRenter: "You accepted return. Waiting for the neighbor to confirm return.",
+    odometerTitle: "Odometer reading",
+    odometerPickupHint: "Snap the dash reading as the trip starts — keeps everyone honest.",
+    odometerReturnHint: "Enter the return reading so miles match the handoff.",
+    odometerLabel: "Current odometer (miles)",
+    odometerPlaceholder: "e.g. 48210",
+    odometerRequired: "Enter the odometer reading to continue.",
+    odometerContinue: "Save & continue",
+    odometerStartRecorded: (miles) => `Start odometer: ${miles} mi`,
+    odometerReturnRecorded: (miles) => `Return odometer: ${miles} mi`,
+    fuelTitle: "Fuel level",
+    fuelPickupHint:
+      "Record the fuel gauge at start (1/8–8/8). Default policy is full-to-full — return full or settle missing fuel + $20.",
+    fuelReturnHint:
+      "Record return fuel. If below full (full-to-full), we’ll flag missing fuel + $20 for the host claim.",
+    fuelLevelLabel: "Fuel level",
+    fuelLevelRequired: "Select the fuel level to continue.",
+    defLevelLabel: "DEF level (Diesel Exhaust Fluid)",
+    defLevelRequired: "Select the DEF level to continue.",
+    fuelContinue: "Save & continue",
+    fuelStartRecorded: (level) => `Start fuel: ${level}`,
+    fuelReturnRecorded: (level) => `Return fuel: ${level}`,
+    defStartRecorded: (level) => `Start DEF: ${level}`,
+    defReturnRecorded: (level) => `Return DEF: ${level}`,
+    prepaidFullTankToggle: "Prepaid full tank (return empty OK — levels still recorded)",
+    fuelPumpPriceLabel: "Pump price ($/gal) — optional",
+    fuelPumpPriceHint: "Used only to estimate missing-fuel cost for the host claim.",
+    fuelShortfallFlagged: (summary) => `Fuel/DEF shortfall flagged: ${summary}`,
+    fuelPolicyActiveLabel: "Fuel policy",
     pickupLocation: "Pickup location",
     pickupLocationHostHint:
       "Exact address is shared only with your confirmed renter — not on the public listing.",
@@ -841,11 +882,75 @@ export const en: AppMessages = {
     openInMaps: "Open in Maps",
     contactlessAccess: "Contactless access",
     contactlessBody:
-      "Step-by-step access instructions and codes unlock at check-in with PIN — not before. Use the pickup address above to get here; scan the item QR when you arrive.",
+      "Codes stay locked until you’re at the pickup spot. GPS or the item QR proves presence — then PIN unlocks steps and starts the rental.",
     contactlessRenterHint:
-      "Tap Scan QR Code, then enter the pickup PIN to view lockbox codes and access steps.",
+      "Arrive first. Tap Scan QR (sticker) or “I’m at the pickup spot”, then enter the PIN. Shared PINs from across town won’t open anything.",
     contactlessHostHint:
-      "Share the pickup PIN only with this renter. They unlock access details during check-in — the address is already visible on their rental screen.",
+      "Share the pickup PIN only with this renter. They must be on-site (GPS or sticker QR) to unlock — you can preview staging from home as host.",
+    contactlessFlowTitle: "Neighbor-safe contactless",
+    contactlessFlowBody:
+      "Paid booking → arrive at the spot → GPS or item QR → PIN unlocks access → rental starts. Return the same way; host confirms or auto-completes in 24h.",
+    contactlessReturnAutoHint:
+      "If the host doesn’t accept return within 24 hours, contactless returns auto-complete.",
+    geoPinGateHint:
+      "PIN and lockbox codes unlock only when your phone is at the handoff spot (or you scan the item QR). Keeps the booker from unlocking for someone else across town.",
+    startIdTitle: "Start ID check",
+    startIdBody:
+      "Upload a clear photo of your driver's license and a selfie, confirm date of birth, and attest you're the booked driver before the PIN unlocks. Face match stays best-effort when a profile photo exists.",
+    startIdBookerFallback: "Booked driver",
+    startIdProfileVerified: "Linked to verified identity on your account",
+    startIdProfileLinked: "Linked to your profile photo",
+    startIdProfileHint: "Add a profile photo later to strengthen future checks",
+    startIdLicenseAdd: "Photo of driver's license",
+    startIdLicenseAdded: "License photo saved ✓",
+    startIdSelfieAdd: "Take a selfie",
+    startIdSelfieAdded: "Selfie captured ✓",
+    startIdSaving: "Saving…",
+    startIdSelfieFailed: "Couldn’t save that photo. Try again.",
+    startIdDobLabel: "Date of birth (from license)",
+    startIdDobHint: "Saved to your profile for the vehicle age gate. Must match your license.",
+    startIdAttest:
+      "I confirm I am the person who booked, and the driver matches the license / identity on this account",
+    startIdOnceHint: "This is the only ID check for the trip — no random mid-trip prompts.",
+    startIdContinue: "Confirm & continue to unlock",
+    startIdRequired: "Complete the start ID check before unlocking this vehicle.",
+    macropointTitle: "Trip location checkpoints",
+    macropointBody:
+      "Coarse phone location every ~20 minutes while the rental is active (plus start/return). Not a live map stalk.",
+    macropointLastKnown: (when) => `Last known · ${when}`,
+    macropointEmpty: "No checkpoints recorded yet.",
+    tollSuspectTitle: "Possible toll roads",
+    tollSuspectBody:
+      "Best-effort match to known toll corridors — not a final bill. Plate invoices can arrive days later; use the toll hold when the bill shows up.",
+    homeTerritoryBreachTitle: "Possible leave of home area",
+    homeTerritoryBreachBody:
+      "A checkpoint looks outside the listing’s home state/country while leaving that area is forbidden. Soft signal only — not a lock or fine.",
+    travelOutsideListingTitle: "Travel outside home area",
+    travelOutsideListingForbidden: (area) =>
+      `Leaving the home area (${area}) is not allowed for this rental.`,
+    travelOutsideListingAllowed: (area) =>
+      `Leaving the home area (${area}) is allowed for this rental.`,
+    speedSoftTitle: "High-speed segments (soft)",
+    speedSoftBody:
+      "Estimated from checkpoint spacing — flaky GPS, not a ticket. Hosts see this as a soft signal only.",
+    speedSoftSegment: (mph, when) => `~${mph} mph around ${when}`,
+    tollHoldOnBooking: (amount) =>
+      `Toll hold authorized up to ${amount} (combined with the security deposit).`,
+    tollClaimCta: (amount) => `Flag toll for claim (${amount})`,
+    tollFlagged:
+      "Toll flagged for the claim window. When the plate bill arrives, use Claim deposit (or support for a split). Partial Stripe capture is not enabled yet so the damage hold stays intact.",
+    tollClaimed: "Toll portion noted on this booking.",
+    tollClaimFailed: "Couldn’t update toll claim status.",
+    insuranceUnlockBlocked:
+      "Upload active insurance proof before unlocking keys or location for this vehicle.",
+    cdlUnlockBlocked: "CDL attestation and document are required before handoff can start.",
+    agentProofPending:
+      "Waiting for the host to confirm they received insurance proof from your agent.",
+    agentProofReceivedMark: "I received insurance proof from the renter’s agent",
+    agentProofReceivedDone: "Host confirmed agent insurance proof received",
+    agentProofEmailLabel: "Owner email for agent proof",
+    preTripUnlockBlocked:
+      "Complete the pre-trip inspection (including a photo of every tire) and get host confirmation before handoff.",
     roundTripDelivery: "Round-trip delivery",
     roundTripDeliveryBody:
       "One delivery fee covers bringing the item before the rental starts and picking it up after it ends — not split 50/50 and not one-way host delivery with renter return.",
@@ -853,7 +958,7 @@ export const en: AppMessages = {
     dropOff: "Drop-off:",
     security: "Security",
     securityBody:
-      "QR is tied to the physical item. Confirmation requires a stage-specific PIN to prevent random scans.",
+      "QR is tied to the physical item. PIN unlock needs presence (GPS at the spot or sticker scan) so a shared code from across town won’t start the deal.",
     pickupPin: "Pickup PIN",
     returnPin: "Return PIN",
     pinShareHint: "Share this PIN only with the renter on this booking.",
@@ -879,6 +984,47 @@ export const en: AppMessages = {
     verifiedOnEvorios: "Verified on Evorios",
     tapToViewProfile: "Tap to view public profile",
     message: "Message",
+    messagePostRental: "Tolls & fines chat",
+    messageClosed: "Chat history",
+    chatPostRentalBanner: (days, untilDate) =>
+      `Post-rental mode (tolls & fines): chat stays open ~${days} days after return (until ${untilDate}), or while an invoice is unpaid.`,
+    chatClosedBanner: "This rental ended — chat is read-only.",
+    conditionPhotosTitle: "Condition photos (this rental)",
+    conditionPhotosBody:
+      "Snaps from pickup and return live on this rental — not on the public listing gallery.",
+    conditionPhotoPickup: "Pre-rental / pickup",
+    conditionPhotoReturn: "Post-return",
+    conditionPhotoEmpty: "No photo yet",
+    invoiceTitle: "Invoice & fines",
+    invoiceBody:
+      "Host can bill fuel top-up, the $20 fuel fee, late return, tolls, fines, damage, or a custom amount. Renter pays in-app when Stripe is connected.",
+    invoiceCreate: "New invoice",
+    invoiceAddLine: "Add line item",
+    invoiceRemoveLine: "Remove line",
+    invoiceNotePlaceholder: "Optional note for the renter…",
+    invoiceTotal: "Total",
+    invoiceSend: "Send invoice",
+    invoiceEmpty: "No invoices yet.",
+    invoiceNeedLine: "Add at least one line of $0.50 or more.",
+    invoicePayCta: "Pay",
+    invoicePayNow: "Pay now",
+    invoicePaying: "Processing…",
+    invoicePayFailed: "Payment didn’t go through. Try again.",
+    invoiceVoid: "Void",
+    invoiceStatusOpen: "Open",
+    invoiceStatusPending: "Payment pending",
+    invoiceStatusPaid: "Paid",
+    invoiceStatusVoid: "Void",
+    invoiceKindFuelTopup: "Fuel top-up",
+    invoiceKindFuelFee: "Fuel fee ($20)",
+    invoiceKindLateFee: "Late return",
+    invoiceKindToll: "Toll",
+    invoiceKindFine: "Fine / penalty",
+    invoiceKindNoShow: "No-show",
+    invoiceKindDamage: "Damage",
+    invoiceKindCustom: "Custom",
+    invoiceStripeScaffold:
+      "Stripe Connect payment link is scaffolded — invoices still save on the rental when card pay isn’t configured yet.",
     call: "Call",
     phoneSharedAfterCheckin: "Phone numbers are shared in chat after check-in",
     close: "Close",
@@ -906,14 +1052,31 @@ export const en: AppMessages = {
     cancelBookingConfirmCta: "Yes, cancel booking",
     cancelNotAllowed:
       "This booking can’t be cancelled here anymore — pickup has started, or the status doesn’t allow it. Message the other party or email support.",
-    cancelRefundPreviewFull: "You’re within the full-refund window (48+ hours before start).",
+    cancelRefundPreviewFull: "You’re within the full-refund window (24+ hours before start).",
     cancelRefundPreviewPartial: (percent) =>
-      `You’re in the partial-refund window — about ${percent}% of the rental charge may be returned.`,
+      `Inside 24 hours of start — about ${percent}% of the rental charge may be returned.`,
     cancelRefundPreviewNone:
-      "You’re inside 24 hours of start — the rental charge is generally non-refundable.",
+      "At or after trip start window without pickup — cancel may not apply; contact the other party.",
     cancelRefundPreviewHostFull:
       "As the host, cancelling before pickup returns the renter’s rental charge in full when a card payment exists.",
     cancelRefundReleased: "Any card authorization is being released.",
+    datesAdjustTitle: "Change rental dates",
+    datesAdjustBody:
+      "Extend when later days are still free on the calendar. Early return is always available — finish handoff when you’re done.",
+    extendBooking: "Extend booking",
+    extendNewEnd: "New end date",
+    extendConfirm: "Confirm extension",
+    extendChecking: "Checking availability…",
+    extendUnavailable: "Those dates aren’t free — pick another end day.",
+    extendInvalid: "Choose an end date after the current one.",
+    extendSuccess: (date) => `Extended through ${date}.`,
+    earlyReturn: "Return early",
+    earlyReturnConfirmBody:
+      "Shorten this rental to today. You’ll still complete the return handoff with the host. Pricing adjustments (if any) are handled between you — calendar days free up immediately.",
+    earlyReturnConfirm: "Yes, end early today",
+    earlyReturnWorking: "Updating…",
+    earlyReturnInvalid: "Early return isn’t available for this status.",
+    earlyReturnSuccess: (date) => `Rental end set to ${date}. Complete return handoff when ready.`,
     cancelRefundFullProcessing:
       "A full refund was submitted — banks can take a few business days to show it.",
     cancelRefundPartialProcessing: (percent) =>
@@ -926,6 +1089,12 @@ export const en: AppMessages = {
     cancelNotifRenterTitle: "Renter cancelled the booking",
     cancelNotifBody: (title, refundNote) => `${title}: booking cancelled. ${refundNote}`,
     cancelContactSupport: "Email support about refund",
+    cancelReasonLabel: "Reason (optional)",
+    cancelReasonPlaceholder: "Brief note for the other party",
+    cancelReasonInNotif: (reason) => `Reason: ${reason}.`,
+    lateFeeDueBanner: (amount) => `Estimated late fee now: ${amount}.`,
+    hostReliabilityNote:
+      "Host cancel before pickup refunds the renter in full. Frequent host cancels may affect trust signals.",
   },
   rentalCard: {
     noShow: "No-show",
@@ -944,7 +1113,11 @@ export const en: AppMessages = {
     requestReturn: "Request return",
     runningLate: "I'm running late",
     markNoShow: "Mark as no-show",
-    markNoShowHint: "Mark as no-show available 60 min after pickup time",
+    markNoShowHint: "Mark as no-show available 2 hours after pickup time",
+    markNoShowConfirm:
+      "Mark this renter as no-show? The booking will cancel and free your calendar. If you set a no-show fee, it will be flagged against the deposit (they can dispute).",
+    markNoShowFeeNote: (amount) => `Optional fee to flag: ${amount}`,
+    markNoShowSoftNote: "No fee configured — calendar frees; use dispute if needed.",
     submitEvidence: "Continue dispute",
     continueDispute: "Continue dispute",
     openDispute: "Open dispute",
@@ -954,6 +1127,9 @@ export const en: AppMessages = {
     seeReview: "See review",
     rentAgain: "Rent again",
     markedAsNoShow: "Marked as no-show",
+    noShowMarkedNotifTitle: "No-show marked",
+    noShowMarkedNotifBody: (title, feeNote) =>
+      `${title}: the host marked this booking as no-show. Trip price is typically kept.${feeNote ? ` ${feeNote}` : ""}`,
     awaitingApproval: "Awaiting approval",
     expired: "Expired",
     ownerRespond24h: (timeLeft) =>
@@ -1169,7 +1345,7 @@ export const en: AppMessages = {
     photos: {
       title: "Add photos",
       subtitle: (maxPhotos, maxVideos) =>
-        `Up to ${maxPhotos} photos and ${maxVideos} videos. Tap to view. Red Delete removes a photo or video. Long-press to reorder.`,
+        `Up to ${maxPhotos} photos and ${maxVideos} videos. Tap a photo to preview or set the cover. Long-press to reorder.`,
       chooseLibrary: "Choose from library",
       takePhoto: "Take photo",
       addVideo: "Add video",
@@ -1205,9 +1381,9 @@ export const en: AppMessages = {
       setAsCover: "Set as cover",
       previousPhotoAria: "Previous photo",
       nextPhotoAria: "Next photo",
-      enhancementUnavailable: (detail) =>
-        `Photo enhancement unavailable. Saved original photo. (${detail})`,
-      couldntAddPhoto: (detail) => `Couldn't add this photo. (${detail})`,
+      enhancementUnavailable:
+        "Photo saved as-is — background polish wasn't available this time.",
+      couldntAddPhoto: "Couldn't add this photo. Please try again.",
       moderationNotListable:
         "We couldn't use this photo for a listing — it doesn't look like a clear product photo. Please try another shot of the item itself.",
       moderationProhibitedItem:
@@ -1284,17 +1460,48 @@ export const en: AppMessages = {
       instructionsPlaceholder: "https://... link to manual or tutorial video",
       instructionsHelper: "Shown as Instructions button on your listing",
       assetIdentityHint:
-        "Vehicles, trailers, and heavy equipment need a traceable ID — required for both personal and professional grade.",
+        "Your VIN is the car’s fingerprint — scan or type it, and Evorios fills make, model, and year.",
+      vehicleFlowTitle: "Neighbor cars, done right",
+      vehicleFlowBody:
+        "List once — rent or sell. For rentals: neighbor adds your VIN to their insurance, uploads proof, pays rent + a deductible-sized deposit. Codes stay locked until start. At pickup the PIN opens only when they’re at the spot (GPS) — or they scan the QR sticker on the car. Odometer at start and return; you confirm; deposit releases.",
+      licensePlate: "License plate",
+      licensePlatePlaceholder: "e.g. 7ABC123",
+      licensePlateState: "State",
+      licensePlateStatePlaceholder: "—",
+      plateLookupCta: "Look up VIN from plate",
+      plateLookingUp: "Looking up plate…",
+      plateHelper: "Enter plate and state if you prefer.",
+      plateNeedState: "Choose a US state with the plate.",
+      plateFound: "Matched — VIN and vehicle details filled. Set color next.",
+      plateNotFound: "No match for that plate. Enter the VIN from the dashboard or door sticker.",
+      plateLookupFailed: "Plate lookup failed. Enter the VIN manually.",
+      plateLookupUnconfigured: "Enter the VIN manually instead.",
+      vinScanCta: "Scan the VIN",
+      vinScanCamera: "Take photo",
+      vinScanLibrary: "Choose photo",
+      vinScanning: "Reading your VIN…",
+      vinScanHelper:
+        "Snap the VIN on the dash or door sticker — Evorios fills make, model, and year for you.",
+      vinScanFound: "Got it — make, model, and year filled in.",
+      vinScanNoVin:
+        "Couldn’t spot a VIN in that photo. Try a sharper close-up, or type it below.",
+      vinScanFailed:
+        "That photo was hard to read. Try better light, or type the VIN below.",
+      vinOrTypeManually: "Or type the VIN",
+      plateOptionalToggle: "Look up from license plate",
       vin: "VIN",
       vinPlaceholder: "17-character VIN",
-      vinHelper: "We check the VIN format (and look it up when online). No I, O, or Q letters.",
-      vinChecking: "Checking VIN…",
+      vinHelper: "Seventeen characters. No I, O, or Q. Evorios fills the details.",
+      vinChecking: "Reading your VIN…",
       vinErrorLength: "VIN must be exactly 17 characters.",
       vinErrorChars: "VIN can only use letters A–Z and digits (no I, O, or Q).",
-      vinErrorCheck: "VIN check digit doesn’t match — double-check the number on the plate.",
-      vinVerified: (summary) => `VIN looks valid${summary ? ` · ${summary}` : ""}.`,
-      vinVerifiedFallback: "decoded",
-      vinLookupWarn: "Format is valid, but the online VIN lookup didn’t return a match. You can still continue.",
+      vinErrorCheck: "That VIN doesn’t check out — double-check the number on the sticker.",
+      vinVerified: (summary) => (summary ? `Nice — ${summary}.` : "VIN recognized."),
+      vinVerifiedFallback: "recognized",
+      vinLookupWarn: "That VIN looks valid, but we couldn’t fill the details. You can enter them below.",
+      vinMismatchWarn: (decodedSummary, priorLabel) =>
+        `This VIN is a ${decodedSummary} — that doesn’t match the ${priorLabel} in your photos. Check the VIN or photos.`,
+      vinMismatchUseVinCta: "Use VIN vehicle instead",
       serialNumber: "Serial / equipment number",
       serialNumberPlaceholder: "Manufacturer serial or equipment ID",
       serialNumberHelper: "Required — saved with your listing for handoff and claims.",
@@ -1315,18 +1522,19 @@ export const en: AppMessages = {
     },
     specs: {
       sectionTitle: "Category details",
-      sectionHint:
-        "Pick from the lists — required fields unlock Continue; recommended ones help renters decide faster.",
+      sectionHint: "Required fields unlock Continue.",
       selectPlaceholder: "Select…",
       requiredBadge: "Required",
       recommendedBadge: "Recommended",
       brandOtherPlaceholder: "Type the brand name",
       unbrandedLabel: "No brand / generic",
+      yearStepUp: "One year newer",
+      yearStepDown: "One year older",
       fields: {
         brand: {
           label: "Brand",
           placeholder: "Select a brand…",
-          hint: "Pick from the list — or Other if yours isn’t there.",
+          hint: "",
         },
         model: { label: "Model", placeholder: "Exact model name or number" },
         powerSource: { label: "Power source" },
@@ -1350,8 +1558,18 @@ export const en: AppMessages = {
         electric: { label: "Electric?" },
         riderHeightBand: { label: "Best rider height" },
         make: { label: "Make", placeholder: "e.g. Toyota" },
-        year: { label: "Year", placeholder: "e.g. 2019" },
-        mileage: { label: "Mileage", placeholder: "Current odometer" },
+        year: {
+          label: "Year",
+          placeholder: "Year",
+          hint: "Filled from photos when we can tell — nudge if it’s a year off.",
+        },
+        mileage: {
+          label: "Mileage",
+          placeholder: "Current odometer",
+          hint: "Buyers want today’s reading on the dash.",
+          rentOptionalHint:
+            "Optional for rent — you’ll capture the odometer at pickup and again at return.",
+        },
         transmission: { label: "Transmission" },
         fuelType: { label: "Fuel type" },
         insuranceMinLiability: {
@@ -1363,9 +1581,29 @@ export const en: AppMessages = {
           hint: "Or require full coverage / collision.",
         },
         drivetrain: { label: "Drivetrain" },
+        vehicleWeightLbs: {
+          label: "Vehicle weight / GVWR (lb)",
+          placeholder: "e.g. 8500",
+          hint: "Enter pounds (lb). Vehicles at or above 26,000 lb (≈ 11,793 kg) require physical damage insurance for rent — not liability alone.",
+        },
+        wheelCount: {
+          label: "Tire / wheel count",
+          placeholder: "e.g. 4, 6, 10, 18",
+          hint: "How many tires need a pre-trip photo (not including spare). Passenger cars = 4. Dualies / boxes often 6–10. Semi tractor+trailer often 18. Host sets this for heavy / commercial listings.",
+        },
         lengthBand: { label: "Length" },
         capacityPeopleBand: { label: "Passenger capacity" },
         motorIncluded: { label: "Motor included?" },
+        includedMilesPerDay: {
+          label: "Included miles per day",
+          placeholder: "250",
+          hint: "Free miles bundled with each rental day — 250 is a friendly neighborhood default.",
+        },
+        overagePerMile: {
+          label: "Extra mile price",
+          placeholder: "0.45",
+          hint: "What you charge after the included miles are used up.",
+        },
         hardinessZoneRange: {
           label: "Hardiness zones",
           hint: "USDA-style range — nursery standard so buyers self-screen.",
@@ -1454,11 +1692,11 @@ export const en: AppMessages = {
         "3_season": "3-season",
         "4_season": "4-season",
         not_applicable: "N/A",
-        under_2lb: "Under 2 lb",
-        "2_5lb": "2–5 lb",
-        "5_10lb": "5–10 lb",
-        "10_20lb": "10–20 lb",
-        over_20lb: "Over 20 lb",
+        under_2lb: "Under 2 lb (0.9 kg)",
+        "2_5lb": "2–5 lb (0.9–2.3 kg)",
+        "5_10lb": "5–10 lb (2.3–4.5 kg)",
+        "10_20lb": "10–20 lb (4.5–9 kg)",
+        over_20lb: "Over 20 lb (9 kg)",
         beginner: "Beginner",
         intermediate: "Intermediate",
         advanced: "Advanced",
@@ -1687,16 +1925,23 @@ export const en: AppMessages = {
     modes: {
       title: "How do you want to offer it?",
       subtitle:
-        "Rent it out, sell it, or both. Want to give it away? Use Sell with price $0.",
+        "Combine freely: rent and sell together, or rent and give away free. Free replaces a paid sale price (sell at $0).",
       rent: "Rent",
       sell: "Sell",
       gift: "Free",
+      pathChoiceTitle: "Rent it out, or sell it?",
+      pathChoiceBody:
+        "Pick your path early — Sell stays short. Rent unlocks insurance and miles for neighbors.",
+      pathChoiceRent: "Rent",
+      pathChoiceSell: "Sell",
+      pathChoiceBoth: "Both",
       rentSubtitleDailyWeeklyMonthly: "Earn daily, weekly or monthly",
       rentSubtitleWeeklyMonthly: "Earn weekly or monthly",
       rentSubtitleMonthly: "Earn monthly",
       rentSubtitleDailyWeekly: "Earn daily or weekly",
-      sellSubtitle: "One-time sale, item leaves your hands",
-      giftSubtitle: "Give it away for free",
+      sellSubtitle: "One-time sale — can pair with Rent",
+      giftSubtitle: "Give away free — can pair with Rent (not with a paid sale)",
+      giftBadge: "Sell at $0",
       minimumPeriod: "MINIMUM RENTAL PERIOD",
       period1Day: "1 day",
       period3Days: "3 days",
@@ -1713,25 +1958,133 @@ export const en: AppMessages = {
       longTermRentersNote: "Renters will see monthly pricing for long bookings.",
       howToPrice: "How to price?",
       longTermHelp: (example) =>
-        `Example only: some hosts start around ${example} for long stays, then adjust based on demand and wear.`,
-      securityDeposit: "Security deposit (optional)",
+        `Expert tip: for 30+ day stays, start around ${example}. Keep it under buying new — if a month costs more than the item, neighbors will just buy. Adjust for demand and wear.`,
+      securityDeposit: "Security deposit",
       securityDepositHint:
-        "You set the amount. Held on the renter’s card via Stripe and released when you confirm a good return. Leave blank for no hold.",
+        "Required. Held on the renter’s card via Stripe and released when you confirm a good return. Tip: match replace-new — if it’s gone, you can buy again. Enter 0 if you don’t want a hold.",
+      securityDepositHintInsurance:
+        "For vehicles / equipment, primary protection is the renter’s insurance. Set the card hold to your max deductible (e.g. $2,500) — not the whole vehicle. Enter 0 only if you’re comfortable with insurance alone.",
+      securityDepositHintMonthly:
+        "For real estate, hosts often hold about one month’s rent. Released after a good move-out. Enter 0 if you don’t want a hold.",
+      insuranceRequirementTitle: "Renter insurance proof",
+      insuranceRequirementBody:
+        "Before pickup, the renter must add this vehicle or machine to their insurance for the rental dates and upload the card / declarations page. You review proof before handing over keys.",
+      insuranceRequirementToggle: "Require insurance proof before this rental can start",
+      insuranceCoverageLead: "Vehicle must be on their policy starting",
+      insuranceCoverageLead0: "On rental start day",
+      insuranceCoverageLead1: "1 day before start",
+      insuranceCoverageLead3: "3 days before start",
+      insuranceCoverageLead7: "7 days before start",
+      insuranceCoverageLeadHint:
+        "Gives you time to review the declarations page before keys change hands.",
+      physicalDamageTitle: "Require physical damage coverage",
+      physicalDamageBody: (weightLbs, weightKg) =>
+        `Not liability alone — collision / comprehensive (or equipment physical damage) must be on the renter’s policy. Mandatory for commercial equipment and for vehicles at or above ${weightLbs.toLocaleString("en-US")} lb (≈ ${weightKg.toLocaleString("en-US")} kg).`,
+        proRentersTitle: "Professionals only (pro renters)",
+      proRentersBody:
+        "Default on for Heavy Equipment & Construction. Renters must attest they are tradespeople / professionals and may upload a credential photo. v1 is attestation + document upload — we do not run a license-board KYC check yet.",
+      commercialTransportTitle: "Commercial transport (≥26,000 lb / semi)",
+      commercialTransportBody:
+        "Heavy vehicles and semi / equipment trailers use CDL + agent→owner insurance proof. Set tire/wheel count for pre-trip photos, the email where the renter’s agent must send coverage, plus your insurance requirements and any fee.",
+      wheelCountLabel: "Tire / wheel count (required)",
+      wheelCountPlaceholder: "e.g. 6, 10, 18",
+      wheelCountHint:
+        "One photo per tire position at pickup and return (spare optional). Dualies, boxes, and multi-axle trailers are not “four corners.” Default 10 for heavy trucks or 18 for semi / commercial trailers — edit to match the vehicle.",
+      insuranceOwnerProofEmail: "Email for insurance proof (agent → you)",
+      insuranceOwnerProofEmailHint:
+        "Dedicated inbox — show this clearly to renters. Their agent emails proof here (not in-app upload).",
+      insuranceRequirementsNotes: "Insurance requirements & costs (free text)",
+      insuranceRequirementsNotesHint:
+        "Min coverage, PD, liability, exclusions, who pays what — whatever your agent told you to require.",
+      insurancePdMinUsd: "Min. physical damage coverage (USD)",
+      insuranceLiabilityMinUsd: "Min. liability amount (USD)",
+      insuranceRenterFeeUsd: "Fee renter must cover (USD, optional)",
+      noShowFeeTitle: "No-show fee (optional)",
+      noShowFeeBody:
+        "If the renter doesn’t show after the pickup window, you can mark no-show, free the calendar, and optionally flag this amount against the deposit. Soft neighbor policy — they can dispute.",
+      noShowFeeToggle: "Enable optional no-show fee from deposit",
+      noShowFeeAmount: "No-show fee amount (USD)",
+      lateReturnFeeTitle: "Late return fee",
+      lateReturnFeeBody:
+        "Charge after the return due time: short grace, then flat fee + hourly usage (common car-share pattern).",
+      lateReturnFeeToggle: "Enable late return fee",
+      lateReturnGraceMinutes: "Grace (minutes)",
+      lateReturnFlatFee: "Flat fee (USD)",
+      lateReturnPerHourFee: "Per hour (USD)",
+      fuelPolicyHostTitle: "Fuel policy (optional override)",
+      fuelPolicyHostBody:
+        "Default is full-to-full with a $20 missing-fuel fee. Levels are captured at handoff — not on the listing. Prepaid full tank means the renter pays for a full tank up front.",
+      fuelPolicyHostSelect: "Policy",
+      fuelPolicyFullToFull: "Full-to-full (return full)",
+      fuelPolicyPrepaid: "Prepaid full tank",
+      fuelPolicyMissingFee: "Missing-fuel fee (USD)",
+      fuelPolicyTankGallons: "Tank size for estimates (gallons, optional)",
+      youngDriverTitle: "Young drivers (18–24)",
+      youngDriverBody:
+        "Default minimum age is 25 (market standard). Opt in to allow 18–24 with a higher deductible-sized hold (1.5× or 2×).",
+      youngDriverToggle: "Allow renters aged 18–24 with a higher hold",
+      youngDriverMultiplier: "Young-driver hold multiplier",
+      vehicleExtrasTitle: "Optional add-ons",
+      vehicleExtrasBody: "Neighbor-scale extras renters can add at booking — keep it simple.",
+      mileagePolicyTitle: "Miles for this rental",
+      mileagePolicyBody:
+        "Include a friendly daily allotment, then a simple price per extra mile — or offer unlimited as an add-on.",
+      includedMilesPerDay: "Included miles per day",
+      includedMilesPerDayHint: "250 miles/day is a warm default neighbors expect.",
+      overagePerMile: "Price per extra mile",
+      overagePerMileHint: "Charged only after included miles are used.",
+      extraUnlimitedMiles: "Unlimited miles",
+      extraUnlimitedMilesHint: "Priced per day of the rental. When on, included/overage below are skipped.",
+      extraChildSeat: "Child seat",
+      extraChildSeatHint: "Flat fee for the whole rental.",
+      extraRoofRack: "Roof rack",
+      extraRoofRackHint: "Flat fee for the whole rental.",
+      extraVehicleDelivery: "Vehicle delivery",
+      extraVehicleDeliveryHint: "Deliver within a radius for a flat fee.",
+      extraPricePerDay: "Price per day",
+      extraPriceFlat: "Flat price",
+      extraDeliveryRadius: "Max delivery radius (miles)",
+      tollHoldTitle: "Toll hold (optional)",
+      tollHoldBody:
+        "Authorize an extra card hold for possible tolls. Macropoints can flag known toll corridors; final plate bills may arrive days later — GPS only supports the hold.",
+      tollHoldToggle: "Authorize a toll hold up to this amount",
+      tollHoldAmount: "Toll hold amount (USD)",
+      tollHoldAmountHint: "Added to the security deposit authorization at booking. Default $50.",
+      travelOutsideTitle: "Travel outside home area",
+      travelOutsideBodyState:
+        "May the renter leave the U.S. state where this listing is based? Default is not allowed — contractual term for the rental agreement.",
+      travelOutsideBodyCountry:
+        "May the renter leave the country (or your region’s equivalent) where this listing is based? Default is not allowed — contractual term for the rental agreement.",
+      travelOutsideHomeLabel: (area) => `Home area for this listing: ${area}`,
+      travelOutsideForbidden: "Not allowed — stay inside the home area",
+      travelOutsideAllowed: "Allowed — renter may leave the home area",
+      travelOutsideHint:
+        "Soft GPS checkpoints can later flag a host when points leave the home area while forbidden. Not a hard lock.",
       depositProtectionNote: (label) =>
         `💡 ${label}: you choose the hold amount. Insurance for expensive items comes later — until then, set a deposit you’re comfortable with.`,
       salePrice: "Sale price",
       sellNote:
-        "💡 Set 0 to give it away free (no separate Gift mode for now). Platform commission applies on paid sales.",
+        "💡 Paid sales use Stripe. Set $0 (or tap Free above) to give it away — no payment, just arrange pickup.",
+      giftNote:
+        "🎁 Free wrap: we list this as Sell at $0. Neighbors message you for pickup — no card charge, no platform fee.",
       pricingTipRoi: (count) =>
-        `Nice — at that rate it pays for itself in about ${count} rentals. Adjust anytime.`,
+        `Nice — at that daily rate it pays for itself in about ${count} rentals. That’s the rental business model: many short loans beat one sale.`,
       pricingTipDefault:
-        "Leave prices blank and type what feels fair in your local currency. After photos, I suggest a starting point for your country — I won’t fill the boxes for you.",
-      pricingTipSuggestRent: (daily) =>
-        `For your market I’d start around ${daily}/day to rent. Suggestion only — your box stays empty until you choose.`,
+        "Add replace-new value above, then I’ll suggest a daily rate, deposit, and sale ask that stay profitable — boxes stay empty until you tap Use my suggestion.",
+      pricingTipSuggestRent: (daily, deposit) =>
+        `I’d start around ${daily}/day. Set the deposit to about ${deposit} — same as replace-new. If it’s gone, you can buy again; if they return it fine, Stripe releases the hold. That keeps both sides calm.`,
+      pricingTipSuggestRentInsurance: (daily, deposit) =>
+        `I’d start around ${daily}/day. Require insurance proof before pickup. Card hold ~${deposit} — match your max deductible, not the whole vehicle. Without proof, don’t hand over keys.`,
+      pricingTipSuggestRentMonthlyDeposit: (daily, deposit) =>
+        `I’d start around ${daily}/day (or your monthly). Security deposit around ${deposit} (about one month) is common for real estate.`,
       pricingTipSuggestSell: (sale) =>
-        `For your market a fair sale ask is around ${sale}. Suggestion only — type your own or use mine.`,
-      pricingTipSuggestBoth: (daily, sale) =>
-        `For your market I’d start around ${daily}/day to rent, or about ${sale} to sell. Suggestion only — boxes stay empty until you choose.`,
+        `For a fair sale ask, start around ${sale} (used, below replace-new) so it moves. Price like a local classified, not a store shelf.`,
+      pricingTipSuggestBoth: (daily, sale, deposit) =>
+        `Rent around ${daily}/day. Deposit = replace-new (~${deposit}): gone → you replace it; returned OK → hold released. Or sell around ${sale} if you want it gone. Long-term monthly must stay under buying new.`,
+      pricingTipSuggestBothInsurance: (daily, sale, deposit) =>
+        `Rent around ${daily}/day. Require insurance proof. Hold ~${deposit} (match your max deductible). Or sell around ${sale}.`,
+      pricingTipSuggestBothMonthlyDeposit: (daily, sale, deposit) =>
+        `Rent around ${daily}/day. Deposit ~${deposit} (≈ one month). Or sell around ${sale}.`,
       useSuggestedPrices: "Use my suggestion",
       restrictedModesNote: "Some transaction modes are not available for this category.",
     },
@@ -1751,10 +2104,11 @@ export const en: AppMessages = {
         "Access details: lockbox code, gate code, unit #, key location…",
       contactlessUnlockHint:
         "These access details are not on your public listing. They unlock for your confirmed renter at check-in with the pickup PIN — after they already have the pickup address.",
-      heavyItem: "Heavy item (over 50 lb)",
-      weightLbs: "Weight (lbs)",
+      heavyItem: "Heavy item (over 50 lb / 23 kg)",
+      weightLbs: "Weight",
       weightRequired: " — required for delivery",
       weightPlaceholder: "e.g. 85",
+      weightDualHint: "Enter pounds — we show lb (kg) for everyone.",
       iCanDeliver: "I can deliver",
       iCanDeliverDesc: "Round-trip delivery before start & after end",
       deliveryHeading: "Delivery",
@@ -1878,7 +2232,7 @@ export const en: AppMessages = {
       openingStripe: "Opening…",
       continueStripe: "Connect finances",
       refreshing: "Refreshing…",
-      refreshStatus: "I finished setup — refresh status",
+      refreshStatus: "Refresh status",
       tip: (mascot) =>
         `${mascot}: You can go live now to get neighbors browsing. Connect finances when you're ready for card payments — Stripe handles the secure ID check.`,
       goingLive: "Going live…",
@@ -1945,7 +2299,17 @@ export const en: AppMessages = {
       `We'll authorize ${amount} on your card. The hold is released when the owner confirms the item was returned in good condition.`,
     cancellationPolicyTitle: "Cancellation",
     cancellationPolicyBody:
-      "Pending requests: cancel anytime before the host accepts — card authorizations are released (bank refunds can take a few business days). After acceptance, either side can cancel before pickup: 48+ hours before start → full refund; 24–48 hours → 50% refund; under 24 hours → no rental refund. Host-initiated cancel before pickup always refunds the renter in full. Deposit holds are released when the booking is cancelled.",
+      "After acceptance, either side can cancel before pickup handoff: 24+ hours before start → 100% rental refund; inside 24 hours → 50% rental refund. Last-minute bookings (<25h before start): 1 hour free-cancel grace after booking. Host cancel before pickup → full rental refund to renter. Deposit holds release on cancel before pickup.",
+    lateReturnPolicyTitle: "Late return",
+    lateReturnPolicyBody:
+      "After the agreed return time, a short grace period applies, then a flat late fee plus hourly usage (defaults: 30 min grace, $20 flat, $15/hour — hosts can customize).",
+    noShowPolicyTitle: "No-show",
+    noShowPolicyBody:
+      "If the renter doesn’t arrive, the host can mark no-show after about 2 hours from scheduled pickup. Trip price is typically kept; an optional deposit fee may apply if the host configured one.",
+    policyLearnMore: "Learn more",
+    policySheetTitle: "Rental policies",
+    policyPracticeNote:
+      "Similar to common car-share and short-term rental practice — not a copy of any single brand.",
     cardPayment: "Card payment",
     backToDetails: "Back to booking details",
     preparing: "Preparing…",
@@ -1968,6 +2332,10 @@ export const en: AppMessages = {
     insuranceBody:
       "Add this vehicle or machine to your auto / equipment policy for the rental dates, then upload the card or declarations page. The host must see active coverage before pickup.",
     insuranceHostRequires: (details) => `Host requires: ${details}`,
+    insuranceCoverageLeadNote: (date, leadDays) =>
+      leadDays <= 0
+        ? `Have the vehicle on your policy by the rental start (${date}).`
+        : `Have the vehicle on your policy by ${date} (${leadDays} day${leadDays === 1 ? "" : "s"} before start).`,
     insuranceActiveUntil: "Policy active through",
     insuranceMustCoverRental: "Coverage must stay active through the rental end date.",
     insuranceUpload: "Upload insurance photo",
@@ -1977,6 +2345,49 @@ export const en: AppMessages = {
     insuranceSignInFirst: "Sign in first so we can attach the proof to your booking.",
     insurancePreviewAlt: "Uploaded insurance proof",
     insuranceViewUploaded: "Open uploaded proof",
+    physicalDamageRequired:
+      "This listing requires physical damage coverage (collision / comprehensive / equipment PD) — liability alone is not enough.",
+    physicalDamageAttest:
+      "I confirm my uploaded proof includes physical damage coverage for this item (not liability only).",
+    proRentersRequired:
+      "This host rents commercial equipment to professionals only. Confirm you qualify (trade / contractor use).",
+    proRentersAttest:
+      "I attest I am a professional / tradesperson using this for work. (v1: self-attestation — not a government license check.)",
+    proCredentialUpload: "Upload trade credential / proof of professional use (optional but recommended)",
+    proCredentialReplace: "Replace credential photo",
+    proCredentialHint:
+      "Business card, contractor license, company ID, or similar. We store the photo for the host — we do not verify with a licensing board in v1.",
+    proBadge: "Pros only",
+    physicalDamageBadge: "Physical damage required",
+    cdlRequired:
+      "This commercial transport listing requires a valid CDL (Commercial Driver’s License).",
+    cdlAttest:
+      "I attest I hold a valid CDL for this vehicle class and will present it at handoff.",
+    cdlUpload: "Upload CDL photo / scan",
+    cdlReplace: "Replace CDL photo",
+    cdlHint:
+      "Clear photo of your Commercial Driver’s License. Required before booking and before start.",
+    cdlBadge: "CDL required",
+    agentInsuranceTitle: "Insurance via your agent → owner",
+    agentInsuranceBody:
+      "For heavy / semi commercial transport, add coverage with your insurance agent. Your agent must email proof directly to the vehicle owner — this is not the lighter “add to personal auto + upload” path.",
+    agentInsuranceEmailLabel: "Send proof to this owner email",
+    agentInsuranceEmailMissing:
+      "Host has not set an insurance-proof email yet — ask them before you book.",
+    agentInsuranceAck:
+      "I will arrange coverage with my agent and have them email proof to the owner address above before the trip starts.",
+    agentInsuranceRequirements: "Owner insurance requirements",
+    agentInsuranceFee: (amount) => `Renter-covered insurance / compliance fee: ${amount}`,
+    commercialTransportBadge: "Commercial transport",
+    extrasTitle: "Add-ons",
+    extrasBody: "Optional extras from this host.",
+    extraUnlimitedMiles: "Unlimited miles",
+    extraChildSeat: "Child seat",
+    extraRoofRack: "Roof rack",
+    extraVehicleDelivery: (radius) => `Vehicle delivery (within ${radius})`,
+    extraPricePerDay: (amount) => `${amount}/day`,
+    extraPriceFlat: (amount) => `${amount} flat`,
+    extrasSubtotal: (amount) => `Add-ons · ${amount}`,
     newRequestTitle: "New booking request",
     newRequestBody: (title) => `Someone wants to rent your ${title}.`,
     approvedTitle: "Booking approved",
@@ -1991,6 +2402,26 @@ export const en: AppMessages = {
       "Any authorized payment will be released — refunds may take a few business days.",
     refundNoteNone: "No payment was charged for this request.",
     captureFailed: "Could not capture payment. Try again or contact support.",
+    macropointConsentTitle: "Location during the rental",
+    macropointConsentBody:
+      "For vehicle rentals we record coarse location checkpoints on your phone every ~20 minutes while the trip is active (and at start/return) — not live stalking. Used for handoff safety and optional toll-road flags. Stops when the rental ends.",
+    macropointConsentCheck:
+      "I agree to coarse location checkpoints only while this vehicle rental is active",
+    ageGateTitle: "Driver age required",
+    ageGateNeedDob:
+      "Add your date of birth in Personal info (or confirm it at start ID from your license) before booking this vehicle. Default minimum age is 25.",
+    ageGateUnderage: (minAge) =>
+      `You must be at least ${minAge} to rent vehicles on Evorios.`,
+    ageGateHostBlocksYoung: (minAge) =>
+      `This host requires drivers to be ${minAge}+. They have not opted in to young-driver rentals.`,
+    ageGateYoungTitle: "Young-driver hold applies",
+    ageGateYoungBody: (age, addOn) =>
+      `You're ${age}. This host allows 18–24 with an extra hold of ${addOn} on top of the deductible hold.`,
+    fuelPolicyTitle: "Fuel policy",
+    fuelPolicyBody:
+      "Fuel (and DEF on diesel) levels are recorded at rental start and return — not on the listing. Default is full-to-full: return full, or settle missing fuel plus a $20 fee. Prepaid full tank is an alternate path when agreed.",
+    tollHoldBookingNote: (amount) =>
+      `Includes a toll hold of ${amount} (combined with the security deposit). Final plate bills can arrive later — GPS only supports the hold.`,
   },
   postRequest: {
     title: "Post a Request",
@@ -2070,6 +2501,144 @@ export const en: AppMessages = {
     whenFrom: (start) => `From ${start}`,
   },
   faq,
+  categoryFacts: {
+    expand: "How it works & safety",
+    collapse: "Hide details",
+    byCategory: {
+      Vehicles: {
+        title: "How neighbor car rental works",
+        summary:
+          "Neighbors are higher-trust than anonymous rentals — signed terms, insurance proof, and pre-trip photos still required before PIN/keys. Cancel ≥24h before start: full refund; inside 24h: 50%. No-show: host marks after ~2h; trip price kept. Late return: 30m grace + $20 + $15/hr defaults. Fuel full-to-full (+$20 if short). ≥26k lb / semi: CDL + agent→owner insurance.",
+        hostTipTitle: "For hosts / landlords",
+        hostTip:
+          "Paid peer-to-peer sharing may fall outside a personal auto policy. Enter GVWR / vehicle weight in pounds (lb). At ≥ 26,000 lb or for semis / equipment trailers, require CDL and set the email where the renter’s agent must send proof. For lighter cars, renters add the vehicle to their personal policy and upload proof in-app. Pre-trip tire photos protect against expensive tire swaps. Fuel is full-to-full by default (levels at handoff only — not a listing field). Optional no-show fee is a soft deposit flag — not airline-style. We are not partners with any insurer; confirm with your agent before you list.",
+        hostTipLinkLabel: "TINT website (tint.ai)",
+        hostTipLinkHref: "https://www.tint.ai/",
+        whyGeoTitle: "Why GPS for the PIN?",
+        whyGeo:
+          "A shared code can travel farther than the car. Classic fail: someone books, then texts the PIN to another driver — maybe underage or without the right coverage. On Evorios the pickup PIN opens only when you’re at the pickup spot and tap — or you scan the physical QR sticker on the car. Presence, not a forwarded number. Codes stay locked until start. One ID check at start only.",
+        contactlessTitle: "Contactless / without co-presence",
+        contactless:
+          "Same neighbor trust, same rule: insurance proof must be approved before any PIN, lockbox code, or keys unlock — even when you’re not standing there. Recommended host gear for contactless (not required when you hand over in person): (1) an optional OBD tracker you install — a clearer signal of where the car is than phone-only macropoints; (2) a lockbox on the door or a key lockbox so the renter can get the physical key without you present — pair it with geo PIN or car QR so the lockbox code only reveals when they’re at the spot. Phone macropoints still help during the trip; OBD is the stronger location option if you offer contactless.",
+        flowTitle: "End to end",
+        flow:
+          "List the car → set weight (lb) + insurance rules (personal upload or agent→owner email for ≥26k/semi) + max deductible + optional no-show fee → renter books (CDL if commercial transport) → insurance cleared → mandatory pre-trip photos (body + tires) both sides confirm → handoff with fuel/DEF + odometer → return inspection with the same tire photo set → host confirms. Booking can exist earlier; codes stay locked until proof + pre-trip are done.",
+        layersTitle: "Safety layers",
+        layers:
+          "Signed rental terms · insurance · CDL when required · pre-trip photos · fuel/DEF · cancel ≥24h free · no-show ~2h · late 30m+$20+$15/hr · deposit hold · geo PIN · macropoints.",
+        claimsTitle: "If something goes wrong (claims)",
+        claims:
+          "Renter insurance is primary. Pre-trip vs return photos help prove damage or tire swaps. Cancel ≥24h: full refund; inside 24h: 50%. No-show after ~2h: trip price kept; optional deposit fee if configured. Late return: grace then flat + hourly per listing policy.",
+      },
+      "Heavy Equipment": {
+        title: "Commercial equipment rentals",
+        summary:
+          "Heavy Equipment shelves rent to professionals by default. Renters attest pro use and may upload a credential. Physical damage insurance proof is required before handoff. Mandatory pre-trip inspection (exterior, interior, tires/rubber when applicable) blocks start until both sides confirm. Hosts can mark no-show after the pickup window.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Keep “professionals only” on unless you truly want DIY renters. Require insurance proof with physical damage. Pre-trip photos (including tire/rubber condition when wheeled) protect both sides. Optional no-show fee is a soft deposit flag.",
+        whyGeoTitle: "Why proof before keys?",
+        whyGeo:
+          "Commercial gear is high-loss if an uninsured renter damages it. Proof + pro attestation + pre-trip photos give you a review window before PIN, lockbox, or keys unlock.",
+        flowTitle: "End to end",
+        flow:
+          "List equipment → pro-only + PD required → renter attests, uploads insurance → pre-trip inspection both confirm → handoff → return inspection → claims via insurance first.",
+        layersTitle: "Safety layers",
+        layers:
+          "Pro attestation · physical damage insurance · pre-trip & return photo checklist · deductible hold · optional no-show fee · rental terms · QR / PIN handoff.",
+        claimsTitle: "If something goes wrong",
+        claims:
+          "Renter’s physical damage / equipment coverage is primary. Use uploaded proof with their insurer; the card hold matches your max deductible. No-show frees the calendar; dispute if needed.",
+      },
+      Construction: {
+        title: "Construction gear rentals",
+        summary:
+          "Construction shelves default to professionals only and require physical damage insurance on the rent path. Mandatory pre-trip photo inspection applies before start. Hosts can mark no-show after the pickup window to free the calendar.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Pros-only is on by default. Physical damage proof is mandatory before keys. Capture pre-trip condition photos (including rubber/tires when wheeled). Optional no-show fee is neighbor-soft, not airline-style.",
+        whyGeoTitle: "Why pro + PD?",
+        whyGeo:
+          "Job-site tools see hard use. Limiting to professionals, requiring physical damage, and locking handoff on pre-trip photos reduces uninsured loss.",
+        flowTitle: "End to end",
+        flow:
+          "List → pro-only + PD → renter attests and uploads proof → pre-trip both confirm → handoff → return.",
+        layersTitle: "Safety layers",
+        layers:
+          "Pro attestation · physical damage insurance · pre-trip inspection · deductible hold · optional no-show · rental terms · QR handoff.",
+        claimsTitle: "If something goes wrong",
+        claims:
+          "Insurance first (physical damage), then deductible hold with photos. No-show cancels and frees dates; fee only if you configured one.",
+      },
+    },
+  },
+  preTripInspection: {
+    pickupTitle: "Pre-trip inspection (required)",
+    pickupBody:
+      "Photograph exterior, interior, and every tire before handoff. Note chips, scratches, stains, dents, and tire wear. Both sides must confirm before start unlocks.",
+    returnTitle: "Return inspection (required)",
+    returnBody: (tireCount) =>
+      `Same photo set as pickup — including all ${tireCount} tires — so swaps or new damage are visible for disputes.`,
+    tireSwapHint:
+      "Tire photos protect against expensive tire swaps (e.g. premium tires replaced with cheap ones). Clear shots of brand and tread when possible.",
+    bodySection: "Exterior & interior",
+    tiresSection: (tireCount) =>
+      tireCount === 4
+        ? "Tires / rubber (all corners)"
+        : `Tires / rubber (${tireCount} positions)`,
+    bodyPhotoHint: "One clear photo of this area. Flag damage and add a short comment.",
+    tiresMandatoryHint: (tireCount) =>
+      tireCount === 4
+        ? "Photos of all four corner tires are mandatory — comments alone cannot complete this section. Spare is optional."
+        : `Photos of all ${tireCount} tire positions are mandatory — comments alone cannot complete this section. Spare is optional.`,
+    tiresIncomplete: (tireCount) =>
+      tireCount === 4
+        ? "Add a photo of each corner tire to continue."
+        : `Add a photo of each of the ${tireCount} tires to continue.`,
+    tiresComplete: "All required tire photos added",
+    tirePhotoHint:
+      "Shoot the full sidewall + tread. Brand/model readable when possible — photos are the evidence, not the note.",
+    tireBrandLabel: "Brand / model (optional, if readable)",
+    tireBrandPlaceholder: "e.g. Michelin Pilot Sport 4",
+    tireCommentLabel: "Notes (wear, damage, pressure)",
+    tireCommentPlaceholder: "Wear, cuts, low pressure, mismatched tire…",
+    tireNumbered: (n) => `Tire ${n}`,
+    commentLabel: "Comment",
+    commentPlaceholder: "Describe chips, scratches, stains, dents…",
+    damageLabel: "Damage noted",
+    damage: {
+      none: "None",
+      chip: "Chip",
+      scratch: "Scratch",
+      stain: "Stain",
+      dent: "Dent",
+      wear: "Wear",
+      other: "Other",
+    },
+    photoAdd: "Add photo",
+    photoReplace: "Replace photo",
+    photoSaving: "Saving…",
+    optional: "optional",
+    incomplete: (tireCount) =>
+      `Finish all required photos (body + ${tireCount} tires) before submitting.`,
+    submitRenter: "Submit inspection to host",
+    confirmHost: "Confirm inspection",
+    waitingHost: "Submitted — waiting for host confirmation",
+    waitingRenter: "Waiting for the renter to submit the inspection photos",
+    bothDone: "Inspection confirmed by both sides",
+    areas: {
+      exterior_front: "Exterior — front",
+      exterior_rear: "Exterior — rear",
+      exterior_left: "Exterior — left side",
+      exterior_right: "Exterior — right side",
+      interior: "Interior",
+      tire_fl: "Tire — front left",
+      tire_fr: "Tire — front right",
+      tire_rl: "Tire — rear left",
+      tire_rr: "Tire — rear right",
+      tire_spare: "Spare tire",
+    },
+  },
   favorites: {
     title: "Favorites",
     subtitle: "Saved for later — rent or buy",
@@ -2089,6 +2658,7 @@ export const en: AppMessages = {
       `Tip: mention @${mascotHandle} for quick help. Keep chat and payments in the app — WhatsApp/Telegram/pay-outside links are blocked.`,
     empty: "No messages yet — say hi and confirm pickup details.",
     placeholder: "Write a message…",
+    closedReadOnly: "Chat is closed for this rental. You can still read the history.",
     listingChatFallback: "Listing chat",
     listingChatSubtitle: "Chat about pickup · push when they reply",
     moderationBlocked:
@@ -2200,6 +2770,9 @@ export const en: AppMessages = {
       notSignedIn: "Not signed in",
       addName: "Add your name",
       addPhone: "Add phone",
+      addDateOfBirth: "Add date of birth",
+      dateOfBirth: "Date of birth",
+      dateOfBirthHint: "Required to book Vehicles (default min age 25). Matches your license.",
       nameLabel: "Name",
       namePlaceholder: "Your name",
       phoneLabel: "Phone number",
@@ -2607,7 +3180,7 @@ export const en: AppMessages = {
     errorNoBulkItems: "No items in bulk queue yet.",
     details: "Details",
     labelTitle: "Title",
-    labelTerms: "Terms",
+    labelDescription: "Description",
     labelDailyPrice: "Daily price",
     labelMinimumRental: "Minimum rental",
     labelLongTerm: "Long-term (30+ days)",
@@ -2618,7 +3191,7 @@ export const en: AppMessages = {
     labelAvailabilityDays: "Availability days",
     labelAvailabilityTimes: "Availability times",
     availabilityTimesValue: (weekdays, weekend) => `Weekdays ${weekdays} · Weekend ${weekend}`,
-    labelWeight: "Weight (lbs)",
+    labelWeight: "Weight",
     labelDeliveryMaxMiles: "Delivery max distance",
     labelDeliveryFee: "Delivery fee",
     labelDeliverySummary: "Delivery (summary)",
@@ -2666,6 +3239,31 @@ export const en: AppMessages = {
   bookingRequest,
   rentalPrice,
   paymentsUi,
+  rentalAgreement: {
+    title: "Rental agreement",
+    honestCaveat:
+      "Not legal advice. A signed record is cleaner than chat-only — it doesn’t replace insurance, and clickwrap isn’t a lawsuit shield.",
+    readTerms: "Read rental terms",
+    hideTerms: "Hide terms",
+    acceptCheckbox: (partyLabel, displayName) =>
+      `I am the ${partyLabel} and I agree to the rental terms for this booking as ${displayName}`,
+    partyRenter: "renter",
+    partyHost: "host",
+    nameFallback: "my account name",
+    mustAccept: "Accept the rental agreement before continuing.",
+    statusMissing: "Agreement not started yet.",
+    statusAwaitingHost: "Renter signed — waiting for host.",
+    statusAwaitingRenter: "Host signed — waiting for renter.",
+    statusBothSigned: "Both parties signed.",
+    signedAs: (name, when) => `${name} · ${when}`,
+    notSigned: "Not signed yet",
+    termsVersion: (version) => `Terms version ${version}`,
+    download: "Download",
+    blockHandoff: "Handoff stays locked until both parties sign the rental agreement.",
+    blockRenter: "Sign the rental agreement at booking before pay / start.",
+    blockHost: "Sign the rental agreement when you approve this request.",
+    hostMustSignToApprove: "Accept the rental agreement to approve this booking.",
+  },
   addressPicker: {
     country: "Country",
     changeAddress: "Change address",

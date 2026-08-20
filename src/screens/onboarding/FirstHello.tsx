@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { APP_NAME, MASCOT_NAME } from "../../lib/brand";
+import { dismissNativeKeyboard } from "../../lib/dismissKeyboard";
 import { useMessages } from "../../lib/i18n/react";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 import { OnboardingTopBar } from "../../components/OnboardingTopBar";
@@ -150,6 +151,10 @@ export function FirstHello({
     setShowTypingDots(false);
     setChatComplete(true);
   }, [BUBBLES]);
+
+  useEffect(() => {
+    void dismissNativeKeyboard();
+  }, []);
 
   useEffect(() => {
     if (hasStarted.current) return;

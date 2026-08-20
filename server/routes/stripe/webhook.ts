@@ -161,7 +161,11 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       }
     }
 
-    if (paymentType === "rental" || paymentType === "deposit") {
+    if (
+      paymentType === "rental" ||
+      paymentType === "deposit" ||
+      paymentType === "rental_invoice"
+    ) {
       if (
         event.type === "payment_intent.succeeded" ||
         event.type === "payment_intent.payment_failed" ||

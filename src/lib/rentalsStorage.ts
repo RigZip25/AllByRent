@@ -1,6 +1,22 @@
 import { getMessages } from "./i18n";
+import { listingHasOverlappingRental } from "./availabilityBusy";
 import { fetchListingByIdRemote, getPublishedListingById } from "./listingStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
+import type { MediaRef } from "./mediaStore";
+import {
+  mergeRentalAgreementRecords,
+  type RentalAgreementRecord,
+} from "./rentalAgreement";
+import type { PreTripInspectionRecord } from "./preTripInspection";
+import { normalizeInspectionRecord } from "./preTripInspection";
+import type { FuelPolicySnapshot } from "./rentalFuelPolicy";
+import { normalizeFuelPolicySnapshot, clampFuelLevelEighths } from "./rentalFuelPolicy";
+import type { LateReturnFeeSnapshot } from "./lateReturnFee";
+import { normalizeLateReturnFeeSnapshot } from "./lateReturnFee";
+import type { RentalInvoice } from "./rentalInvoice";
+import { mergeRentalInvoices, normalizeRentalInvoices } from "./rentalInvoice";
+
+export type { RentalInvoice, RentalInvoiceLine, RentalInvoiceLineKind } from "./rentalInvoice";
 
 export type RentalStatus =
   | "pending_approval"
@@ -24,6 +40,19 @@ export type DeliveryStatus = "scheduled" | "en_route" | "delivered";
 export type RentalReview = {
   rating: number;
   leftAt: string;
+};
+
+/** Coarse location breadcrumb during an active vehicle rental (macropoint). */
+export type VehicleMacropoint = {
+  lat: number;
+  lng: number;
+  at: string;
+  /** Horizontal accuracy in meters when the browser provides it. */
+  accuracyM?: number;
+  /** Estimated mph between this point and the previous (soft speeding signal). */
+  speedMph?: number;
+  /** Why this point was recorded. */
+  source: "start" | "interval" | "return" | "manual";
 };
 
 export type RentalBooking = {
@@ -82,6 +111,10 @@ export type RentalBooking = {
   disputeEvidenceDeadline?: string;
   disputeEscalated?: boolean;
   noShowMarkedAt?: string;
+  /** Optional no-show fee flagged / claimed from deposit (cents). */
+  noShowFeeCents?: number;
+  noShowFeeStatus?: "none" | "flagged" | "claimed" | "disputed";
+  noShowNote?: string;
   completedAt?: string;
   review?: RentalReview | null;
   approvalDeadline?: string;
@@ -89,6 +122,18 @@ export type RentalBooking = {
   manualBooking?: boolean;
   /** Lockbox / gate codes and step-by-step access — revealed at check-in with pickup PIN only. */
   contactlessInstructions?: string;
+  /** Handoff point for geo-gated PIN unlock (stamped from host home / pickup at approval). */
+  handoffLat?: number;
+  handoffLng?: number;
+  /** Optional condition photo at pickup (local media) — active rental, not listing gallery. */
+  pickupConditionPhoto?: MediaRef | null;
+  /** Optional condition photo at return (local media) — active rental, not listing gallery. */
+  returnConditionPhoto?: MediaRef | null;
+  /**
+   * Host → renter invoices / fines (fuel, late, toll, damage, custom).
+   * Local + booking-scoped until a dedicated Stripe invoice table exists.
+   */
+  invoices?: RentalInvoice[];
   /** 6-digit PIN required for pickup confirmation (generated at pending_checkin). */
   pickupPin?: string;
   /** 6-digit PIN required for return confirmation (generated when active). */
@@ -103,6 +148,33 @@ export type RentalBooking = {
   renterReturnedAt?: string;
   /** Host confirmed they accepted the return. */
   hostAcceptedReturnAt?: string;
+  /** Vehicle odometer at rental start (miles). */
+  startOdometerMiles?: number;
+  /** Vehicle odometer at return (miles). */
+  returnOdometerMiles?: number;
+  /**
+   * Frozen fuel (+ DEF) policy at booking — default full-to-full + $20 fee.
+   * Levels are captured at handoff start/finish only (not on the listing).
+   */
+  fuelPolicy?: FuelPolicySnapshot | null;
+  /** Fuel gauge eighths (1–8) at rental start. */
+  startFuelLevelEighths?: number;
+  /** Fuel gauge eighths (1–8) at return. */
+  returnFuelLevelEighths?: number;
+  /** DEF gauge eighths (1–8) at start — diesel only. */
+  startDefLevelEighths?: number;
+  /** DEF gauge eighths (1–8) at return — diesel only. */
+  returnDefLevelEighths?: number;
+  /** Renter prepaid a full tank (alternate to full-to-full return). */
+  prepaidFullTank?: boolean;
+  /** Optional $/gal entered at return for top-up estimate. */
+  returnFuelPumpPriceUsd?: number;
+  /** Computed missing-fuel cost estimate (cents) at return. */
+  fuelTopUpEstimateCents?: number;
+  /** Flat missing-fuel fee (cents) when returned short of policy. */
+  fuelShortfallFeeCents?: number;
+  fuelClaimStatus?: "none" | "flagged" | "agreed" | "waived";
+  fuelClaimNote?: string;
   qrCheckInCode?: string;
   runningLateMessage?: string;
   runningLateSentAt?: string;
@@ -113,6 +185,127 @@ export type RentalBooking = {
   depositStatus?: string;
   /** Source listing id for re-book flows. */
   listingId?: string;
+  /**
+   * Renter insurance card / declaration photo (local media + optional remote path).
+   * Host opens this to verify coverage is active through the rental.
+   */
+  insuranceProofMedia?: MediaRef | null;
+  insuranceProofPath?: string;
+  insuranceProofUrl?: string;
+  /** ISO date — policy must be active through this day (usually endDate). */
+  insuranceActiveUntil?: string;
+  insurancePolicyNote?: string;
+  /**
+   * Renter attested that uploaded proof includes physical damage
+   * (collision / comprehensive / equipment PD), not liability alone.
+   */
+  physicalDamageAttested?: boolean;
+  /**
+   * Pro-renter gate (commercial equipment): attestation + optional credential photo.
+   * v1 is self-attestation + document upload — not a license-board KYC check.
+   */
+  proRenterAttested?: boolean;
+  proCredentialMedia?: MediaRef | null;
+  proCredentialNote?: string;
+  /**
+   * Commercial transport CDL gate: attestation + license photo/document.
+   * Required before booking submit and handoff start when listingRequiresCdl.
+   */
+  cdlAttested?: boolean;
+  cdlMedia?: MediaRef | null;
+  cdlNote?: string;
+  /**
+   * Renter acknowledged agent→owner insurance proof path and saw owner email.
+   */
+  insuranceAgentProofAcknowledged?: boolean;
+  /** Snapshot of owner email shown at booking (where agent must send proof). */
+  insuranceOwnerProofEmail?: string;
+  /** Host confirms agent emailed insurance proof (commercial transport path). */
+  insuranceProofReceivedByHost?: boolean;
+  insuranceProofReceivedAt?: string;
+  /** Mandatory pre-trip photo checklist (vehicles / heavy / boats). */
+  preTripInspection?: PreTripInspectionRecord | null;
+  /** Return photo checklist (same tire set for swap disputes). */
+  returnInspection?: PreTripInspectionRecord | null;
+  /** Vehicle add-ons chosen at booking (keys match listing.vehicleExtras). */
+  selectedVehicleExtras?: Partial<
+    Record<"unlimitedMiles" | "childSeat" | "roofRack" | "vehicleDelivery", boolean>
+  >;
+  /** Fee for selected vehicle extras (USD). */
+  extrasFeeUsd?: number;
+  /**
+   * Vehicle start-of-rental ID gate (renter selfie + driver-match attestation).
+   * Face-match infra is scaffolded: selfie is stored; automated match is not required in v1.
+   */
+  startIdSelfie?: MediaRef | null;
+  startIdCheckedAt?: string;
+  /** Renter attested that the driver matches the booker / license on account. */
+  startIdDriverMatchAttested?: boolean;
+  /** True when a profile/avatar photo was available to link at check time. */
+  startIdProfilePhotoLinked?: boolean;
+  /** Driver license photo required before PIN (Vehicles). */
+  startIdLicensePhoto?: MediaRef | null;
+  /** DOB confirmed at start ID (also written to profile). */
+  startIdDateOfBirth?: string;
+  /** Young-driver uplift applied at booking (cents added to deposit). */
+  youngDriverHoldAddOnCents?: number;
+  renterAgeYearsAtBooking?: number;
+  /**
+   * Coarse phone-location checkpoints during an active vehicle rental (“macropoints”).
+   * Not continuous tracking — periodic breadcrumbs for handoff safety.
+   */
+  macropoints?: VehicleMacropoint[];
+  /** ISO time when renter consented to macropoint location during the active rental. */
+  macropointConsentAt?: string;
+  /** Best-effort: macropoints fell in a known toll corridor. */
+  tollSuspect?: boolean;
+  tollCorridorIds?: string[];
+  tollSuspectAt?: string;
+  /** Host toll-hold authorization (cents) rolled into deposit at booking. */
+  tollHoldAmountCents?: number;
+  /** Host confirmed / requested toll capture from the deposit hold. */
+  tollHoldClaimedAt?: string;
+  tollHoldClaimStatus?: "none" | "flagged" | "claimed" | "released";
+  /**
+   * Rent vehicles/boats: whether leaving the listing’s home territory is allowed.
+   * Snapshotted from the listing at booking (contractual term).
+   */
+  travelOutsideHomeArea?: "allowed" | "forbidden";
+  /** Frozen home admin boundary (US state or country) for the travel rule. */
+  homeTerritory?: {
+    kind: "state" | "country";
+    countryCode: string;
+    regionCode?: string;
+    label: string;
+  };
+  /** Soft macropoint signal: a checkpoint fell outside home territory while forbidden. */
+  homeTerritoryBreachSuspect?: boolean;
+  homeTerritoryBreachAt?: string;
+  /** Set when a confirmed booking is cancelled before pickup. */
+  cancelledAt?: string;
+  cancelledBy?: "host" | "renter";
+  /** Optional free-text reason supplied at cancel time. */
+  cancelReason?: string;
+  /** Soft reliability note when host cancels before pickup. */
+  hostCancelReliabilityNote?: string;
+  /** ISO when booking record was first created. */
+  createdAt?: string;
+  /** ISO when renter submitted / payment authorized — used for last-minute cancel grace. */
+  bookedAt?: string;
+  /** Frozen late-return fee policy at booking time. */
+  lateReturnFee?: LateReturnFeeSnapshot | null;
+  cancelRefundPercent?: number;
+  cancelRefundStatus?:
+    | "none"
+    | "released"
+    | "refund_submitted"
+    | "processing"
+    | "contact_support";
+  /**
+   * Versioned rental terms snapshot + renter/host e-accept (clickwrap).
+   * Prefer local + remote jsonb sync when column exists.
+   */
+  rentalAgreement?: RentalAgreementRecord | null;
 };
 
 type SupabaseRentalRow = {
@@ -141,13 +334,19 @@ type SupabaseRentalRow = {
   renter_received_at?: string | null;
   renter_returned_at?: string | null;
   host_accepted_return_at?: string | null;
+  insurance_proof_path?: string | null;
+  insurance_proof_url?: string | null;
+  insurance_active_until?: string | null;
+  insurance_policy_note?: string | null;
+  rental_agreement?: RentalAgreementRecord | null;
+  rental_invoices?: unknown;
   created_at: string;
   updated_at: string;
 };
 
 const RENTALS_KEY = "allbyrent_rental_bookings";
 const RENTALS_VERSION_KEY = "allbyrent_rental_bookings_version";
-const RENTALS_VERSION = "11-handoff-sides";
+const RENTALS_VERSION = "13-rental-lifecycle-policies";
 
 export function generatePin(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
@@ -169,7 +368,11 @@ function seedItemQrToken(itemTitle: string): string {
 function ensurePinsAndQr(next: RentalBooking, prev?: RentalBooking | null): RentalBooking {
   const withQr: RentalBooking = {
     ...next,
-    itemQrToken: next.itemQrToken ?? seedItemQrToken(next.itemTitle),
+    // Prefer listing id so sticker/screen QR matches; title seed is last-resort only.
+    itemQrToken:
+      next.itemQrToken ??
+      next.listingId?.trim() ??
+      seedItemQrToken(next.itemTitle),
   };
 
   if (withQr.status === "pending_checkin") {
@@ -271,6 +474,22 @@ export function rentalBookingFromRemoteRow(
         ? new Date(new Date(row.created_at).getTime() + 24 * 60 * 60 * 1000).toISOString()
         : undefined,
     manualBooking: row.status === "pending_approval",
+    insuranceProofPath: row.insurance_proof_path ?? undefined,
+    insuranceProofUrl: row.insurance_proof_url ?? undefined,
+    insuranceActiveUntil: row.insurance_active_until ?? undefined,
+    insurancePolicyNote: row.insurance_policy_note ?? undefined,
+    insuranceProofMedia: row.insurance_proof_path
+      ? {
+          id: row.insurance_proof_path,
+          kind: "image" as const,
+          mimeType: "image/jpeg",
+          createdAt: Date.now(),
+          sizeBytes: 0,
+          storagePath: row.insurance_proof_path,
+        }
+      : undefined,
+    rentalAgreement: row.rental_agreement ?? null,
+    invoices: normalizeRentalInvoices(row.rental_invoices),
   });
 }
 
@@ -308,6 +527,117 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
     rentalSubtotalUsd: raw.rentalSubtotalUsd,
     serviceFeeUsd: raw.serviceFeeUsd,
     itemHeavy: raw.itemHeavy ?? false,
+    insuranceProofMedia: raw.insuranceProofMedia ?? null,
+    insuranceProofPath: raw.insuranceProofPath,
+    insuranceProofUrl: raw.insuranceProofUrl,
+    insuranceActiveUntil: raw.insuranceActiveUntil,
+    physicalDamageAttested: Boolean(raw.physicalDamageAttested),
+    proRenterAttested: Boolean(raw.proRenterAttested),
+    proCredentialMedia: raw.proCredentialMedia ?? null,
+    proCredentialNote: raw.proCredentialNote,
+    cdlAttested: Boolean(raw.cdlAttested),
+    cdlMedia: raw.cdlMedia ?? null,
+    cdlNote: raw.cdlNote,
+    insuranceAgentProofAcknowledged: Boolean(raw.insuranceAgentProofAcknowledged),
+    insuranceOwnerProofEmail:
+      typeof raw.insuranceOwnerProofEmail === "string"
+        ? raw.insuranceOwnerProofEmail
+        : undefined,
+    insuranceProofReceivedByHost: Boolean(raw.insuranceProofReceivedByHost),
+    insuranceProofReceivedAt:
+      typeof raw.insuranceProofReceivedAt === "string"
+        ? raw.insuranceProofReceivedAt
+        : undefined,
+    preTripInspection: normalizeInspectionRecord(raw.preTripInspection, "pickup"),
+    returnInspection: normalizeInspectionRecord(raw.returnInspection, "return"),
+    fuelPolicy: normalizeFuelPolicySnapshot(raw.fuelPolicy),
+    startFuelLevelEighths: clampFuelLevelEighths(raw.startFuelLevelEighths) ?? undefined,
+    returnFuelLevelEighths: clampFuelLevelEighths(raw.returnFuelLevelEighths) ?? undefined,
+    startDefLevelEighths: clampFuelLevelEighths(raw.startDefLevelEighths) ?? undefined,
+    returnDefLevelEighths: clampFuelLevelEighths(raw.returnDefLevelEighths) ?? undefined,
+    prepaidFullTank: Boolean(raw.prepaidFullTank),
+    returnFuelPumpPriceUsd:
+      typeof raw.returnFuelPumpPriceUsd === "number" &&
+      Number.isFinite(raw.returnFuelPumpPriceUsd) &&
+      raw.returnFuelPumpPriceUsd > 0
+        ? raw.returnFuelPumpPriceUsd
+        : undefined,
+    fuelTopUpEstimateCents:
+      typeof raw.fuelTopUpEstimateCents === "number" &&
+      Number.isFinite(raw.fuelTopUpEstimateCents)
+        ? Math.max(0, Math.round(raw.fuelTopUpEstimateCents))
+        : undefined,
+    fuelShortfallFeeCents:
+      typeof raw.fuelShortfallFeeCents === "number" &&
+      Number.isFinite(raw.fuelShortfallFeeCents)
+        ? Math.max(0, Math.round(raw.fuelShortfallFeeCents))
+        : undefined,
+    fuelClaimStatus: raw.fuelClaimStatus ?? "none",
+    fuelClaimNote: typeof raw.fuelClaimNote === "string" ? raw.fuelClaimNote : undefined,
+    noShowFeeCents:
+      typeof raw.noShowFeeCents === "number" && Number.isFinite(raw.noShowFeeCents)
+        ? raw.noShowFeeCents
+        : undefined,
+    noShowFeeStatus: raw.noShowFeeStatus,
+    noShowNote: typeof raw.noShowNote === "string" ? raw.noShowNote : undefined,
+    insurancePolicyNote: raw.insurancePolicyNote,
+    startIdLicensePhoto: raw.startIdLicensePhoto ?? null,
+    startIdSelfie: raw.startIdSelfie ?? null,
+    startIdCheckedAt: raw.startIdCheckedAt,
+    startIdDriverMatchAttested: raw.startIdDriverMatchAttested ?? false,
+    startIdProfilePhotoLinked: raw.startIdProfilePhotoLinked ?? false,
+    startIdDateOfBirth:
+      typeof raw.startIdDateOfBirth === "string" ? raw.startIdDateOfBirth : undefined,
+    youngDriverHoldAddOnCents:
+      typeof raw.youngDriverHoldAddOnCents === "number"
+        ? Math.max(0, Math.round(raw.youngDriverHoldAddOnCents))
+        : undefined,
+    renterAgeYearsAtBooking:
+      typeof raw.renterAgeYearsAtBooking === "number"
+        ? Math.round(raw.renterAgeYearsAtBooking)
+        : undefined,
+    macropoints: Array.isArray(raw.macropoints) ? raw.macropoints : [],
+    macropointConsentAt: raw.macropointConsentAt,
+    tollSuspect: Boolean(raw.tollSuspect),
+    tollCorridorIds: Array.isArray(raw.tollCorridorIds) ? raw.tollCorridorIds : [],
+    tollSuspectAt: raw.tollSuspectAt,
+    tollHoldAmountCents: raw.tollHoldAmountCents,
+    tollHoldClaimedAt: raw.tollHoldClaimedAt,
+    tollHoldClaimStatus: raw.tollHoldClaimStatus ?? "none",
+    travelOutsideHomeArea:
+      raw.travelOutsideHomeArea === "allowed" || raw.travelOutsideHomeArea === "forbidden"
+        ? raw.travelOutsideHomeArea
+        : undefined,
+    homeTerritory:
+      raw.homeTerritory &&
+      typeof raw.homeTerritory === "object" &&
+      (raw.homeTerritory.kind === "state" || raw.homeTerritory.kind === "country") &&
+      typeof raw.homeTerritory.countryCode === "string" &&
+      typeof raw.homeTerritory.label === "string"
+        ? {
+            kind: raw.homeTerritory.kind,
+            countryCode: raw.homeTerritory.countryCode,
+            regionCode:
+              typeof raw.homeTerritory.regionCode === "string"
+                ? raw.homeTerritory.regionCode
+                : undefined,
+            label: raw.homeTerritory.label,
+          }
+        : undefined,
+    homeTerritoryBreachSuspect: Boolean(raw.homeTerritoryBreachSuspect),
+    homeTerritoryBreachAt: raw.homeTerritoryBreachAt,
+    cancelReason: typeof raw.cancelReason === "string" ? raw.cancelReason : undefined,
+    hostCancelReliabilityNote:
+      typeof raw.hostCancelReliabilityNote === "string"
+        ? raw.hostCancelReliabilityNote
+        : undefined,
+    createdAt: typeof raw.createdAt === "string" ? raw.createdAt : undefined,
+    bookedAt: typeof raw.bookedAt === "string" ? raw.bookedAt : undefined,
+    lateReturnFee: normalizeLateReturnFeeSnapshot(raw.lateReturnFee),
+    rentalAgreement: raw.rentalAgreement ?? null,
+    pickupConditionPhoto: raw.pickupConditionPhoto ?? null,
+    returnConditionPhoto: raw.returnConditionPhoto ?? null,
+    invoices: normalizeRentalInvoices(raw.invoices),
   };
 }
 
@@ -351,6 +681,11 @@ function mergeRentalBooking(local: RentalBooking, remote: RentalBooking): Rental
     runningLateSentAt: local.runningLateSentAt ?? remote.runningLateSentAt,
     runningLateAcknowledged: local.runningLateAcknowledged ?? remote.runningLateAcknowledged,
     disputeEscalated: local.disputeEscalated ?? remote.disputeEscalated,
+    rentalAgreement: mergeRentalAgreementRecords(
+      local.rentalAgreement,
+      remote.rentalAgreement,
+    ),
+    invoices: mergeRentalInvoices(local.invoices, remote.invoices),
   });
 }
 
@@ -358,6 +693,8 @@ export async function updateRentalRemote(
   rentalId: string,
   patch: {
     status?: RentalStatus;
+    startDate?: string;
+    endDate?: string;
     pickupPin?: string | null;
     returnPin?: string | null;
     pickupAt?: string | null;
@@ -369,14 +706,18 @@ export async function updateRentalRemote(
     renterReceivedAt?: string | null;
     renterReturnedAt?: string | null;
     hostAcceptedReturnAt?: string | null;
+    rentalAgreement?: RentalAgreementRecord | null;
+    invoices?: RentalInvoice[] | null;
   },
 ): Promise<void> {
   if (!isSupabaseConfigured()) return;
   const supabase = getSupabaseClient();
   if (!supabase) return;
 
-  const row: Record<string, string | null> = {};
+  const row: Record<string, string | null | RentalAgreementRecord | RentalInvoice[]> = {};
   if (patch.status !== undefined) row.status = patch.status;
+  if (patch.startDate !== undefined) row.start_date = patch.startDate;
+  if (patch.endDate !== undefined) row.end_date = patch.endDate;
   if (patch.pickupPin !== undefined) row.pickup_pin = patch.pickupPin;
   if (patch.returnPin !== undefined) row.return_pin = patch.returnPin;
   if (patch.pickupAt !== undefined) row.pickup_at = patch.pickupAt;
@@ -390,17 +731,31 @@ export async function updateRentalRemote(
   if (patch.hostAcceptedReturnAt !== undefined) {
     row.host_accepted_return_at = patch.hostAcceptedReturnAt;
   }
+  if (patch.rentalAgreement !== undefined) {
+    row.rental_agreement = patch.rentalAgreement;
+  }
+  if (patch.invoices !== undefined) {
+    row.rental_invoices = patch.invoices ?? [];
+  }
   if (Object.keys(row).length === 0) return;
 
   const { error } = await supabase.from("rentals").update(row).eq("id", rentalId);
   if (error) {
-    // Local state remains; host/renter can retry.
+    // Local state remains; host/renter can retry. Column may be missing until migration.
+    if (patch.invoices !== undefined && (error.message ?? "").toLowerCase().includes("rental_invoices")) {
+      const { rental_invoices: _omit, ...without } = row;
+      if (Object.keys(without).length > 0) {
+        await supabase.from("rentals").update(without).eq("id", rentalId);
+      }
+    }
   }
 }
 
 function remotePatchFromBooking(patch: Partial<RentalBooking>): Parameters<typeof updateRentalRemote>[1] {
   const remote: Parameters<typeof updateRentalRemote>[1] = {};
   if (patch.status !== undefined) remote.status = patch.status;
+  if (patch.startDate !== undefined) remote.startDate = patch.startDate;
+  if (patch.endDate !== undefined) remote.endDate = patch.endDate;
   if (patch.pickupPin !== undefined) remote.pickupPin = patch.pickupPin ?? null;
   if (patch.returnPin !== undefined) remote.returnPin = patch.returnPin ?? null;
   if (patch.pickupScheduledAt !== undefined) remote.pickupAt = patch.pickupScheduledAt ?? null;
@@ -413,6 +768,12 @@ function remotePatchFromBooking(patch: Partial<RentalBooking>): Parameters<typeo
   if (patch.renterReturnedAt !== undefined) remote.renterReturnedAt = patch.renterReturnedAt ?? null;
   if (patch.hostAcceptedReturnAt !== undefined) {
     remote.hostAcceptedReturnAt = patch.hostAcceptedReturnAt ?? null;
+  }
+  if (patch.rentalAgreement !== undefined) {
+    remote.rentalAgreement = patch.rentalAgreement ?? null;
+  }
+  if (patch.invoices !== undefined) {
+    remote.invoices = patch.invoices ?? [];
   }
   return remote;
 }
@@ -441,6 +802,11 @@ export function toSupabaseRentalInsert(params: {
   rentalTotalCents?: number;
   pickupAt?: string | null;
   dueAt?: string | null;
+  insuranceProofPath?: string | null;
+  insuranceProofUrl?: string | null;
+  insuranceActiveUntil?: string | null;
+  insurancePolicyNote?: string | null;
+  rentalAgreement?: RentalAgreementRecord | null;
 }): Omit<SupabaseRentalRow, "created_at" | "updated_at"> {
   return {
     id: params.id,
@@ -462,6 +828,11 @@ export function toSupabaseRentalInsert(params: {
     rental_total_cents: Math.max(0, Math.round(params.rentalTotalCents ?? 0)),
     pickup_at: params.pickupAt ?? null,
     due_at: params.dueAt ?? null,
+    insurance_proof_path: params.insuranceProofPath ?? null,
+    insurance_proof_url: params.insuranceProofUrl ?? null,
+    insurance_active_until: params.insuranceActiveUntil ?? null,
+    insurance_policy_note: params.insurancePolicyNote ?? null,
+    rental_agreement: params.rentalAgreement ?? null,
   };
 }
 
@@ -473,8 +844,33 @@ export async function createRentalRemote(row: Omit<SupabaseRentalRow, "created_a
   if (!supabase) {
     throw new Error("Database not configured");
   }
+
+  const listing = getPublishedListingById(row.listing_id) ?? (await fetchListingByIdRemote(row.listing_id));
+  const overlaps = await listingHasOverlappingRental({
+    listingId: row.listing_id,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    fallbackBlocked: listing?.blockedDates ?? [],
+  });
+  if (overlaps) {
+    throw new Error(getMessages().booking.datesBlocked);
+  }
+
   const { error } = await supabase.from("rentals").insert(row);
-  if (error) throw error;
+  if (error) {
+    const msg = error.message?.toLowerCase() ?? "";
+    if (msg.includes("overlap") || msg.includes("blocked availability")) {
+      throw new Error(getMessages().booking.datesBlocked);
+    }
+    // Migration may not be applied yet — retry without agreement jsonb.
+    if (row.rental_agreement != null && (msg.includes("rental_agreement") || msg.includes("schema cache"))) {
+      const { rental_agreement: _omit, ...withoutAgreement } = row;
+      const retry = await supabase.from("rentals").insert(withoutAgreement);
+      if (retry.error) throw retry.error;
+      return;
+    }
+    throw error;
+  }
 }
 
 export async function fetchRentalsForUserRemote(userId: string): Promise<SupabaseRentalRow[]> {

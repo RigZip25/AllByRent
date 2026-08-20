@@ -11,7 +11,11 @@ import { getHostPendingOffers, ensureAcceptedOffersInCart } from "../lib/garageO
 import { garageDisplayName, garageNameFromDisplayName } from "../lib/garageDisplay";
 import { fetchRemoteProfile } from "../lib/supabaseProfile";
 import { loadUserProfile } from "../lib/userProfileStorage";
-import { resolveGarageAccent } from "../lib/garageIdentity";
+import { resolveGarageAccent, type GarageIdentity } from "../lib/garageIdentity";
+import {
+  fetchGarageStorefrontRemote,
+  onGarageIdentityChanged,
+} from "../lib/garageStorefrontSync";
 import {
   getMyPendingWinnerCheckouts,
   getLotState,
@@ -26,14 +30,27 @@ import {
   getShopOffer,
   type ShopOffer,
 } from "../lib/garageShopStorage";
+import {
+  OPEN_SALE_EVENTS_EVENT,
+  cascadeUnpaidOpenSaleLots,
+  formatCountdown,
+  getActiveOpenSaleForHost,
+  getDeviceOpenSaleCart,
+  resolveEndedOpenSales,
+  syncOpenSalesFromRemote,
+} from "../lib/openSale";
+import { isFreeGiveaway } from "../lib/listingGift";
+import {
+  fetchManageableListings,
+  loadManageableListings,
+  mergeManageableListings,
+} from "../lib/hostAccess";
 import { syncGarageFromRemote } from "../lib/repositories/garageRepository";
 import {
   fetchActiveListingsForCityRemote,
-  fetchListingsByOwnerIdsRemote,
   getActiveRentLocationLabel,
-  loadPublishedListings,
 } from "../lib/listingStorage";
-import { mergeManageableListings } from "../lib/hostAccess";
+import { localizeCategoryLabel } from "../lib/i18n/categoryLabels";
 import { resolveHostAccountId } from "../lib/hostIdentity";
 import { useAuth } from "../hooks/AuthProvider";
 import type { ListingDraft } from "./listing/types";
@@ -42,6 +59,38 @@ import { pushInAppNotification } from "../lib/inAppNotifications";
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 const BORDER = "#E8E6E0";
+const CATEGORY_OTHER = "__other__";
+
+type CategorySection = {
+  key: string;
+  label: string;
+  items: ListingDraft[];
+};
+
+function groupListingsByCategory(
+  listings: ListingDraft[],
+  otherLabel: string,
+): CategorySection[] {
+  const buckets = new Map<string, ListingDraft[]>();
+  for (const listing of listings) {
+    const raw = listing.category.trim();
+    const key = raw ? raw.toLowerCase() : CATEGORY_OTHER;
+    const bucket = buckets.get(key);
+    if (bucket) bucket.push(listing);
+    else buckets.set(key, [listing]);
+  }
+  return [...buckets.entries()]
+    .map(([key, items]) => ({
+      key,
+      label: key === CATEGORY_OTHER ? otherLabel : localizeCategoryLabel(items[0]?.category || key),
+      items,
+    }))
+    .sort((a, b) => {
+      if (a.key === CATEGORY_OTHER) return 1;
+      if (b.key === CATEGORY_OTHER) return -1;
+      return b.items.length - a.items.length || a.label.localeCompare(b.label);
+    });
+}
 
 type ActiveGarageShopScreenProps = {
   hostId: string;
@@ -52,6 +101,7 @@ type ActiveGarageShopScreenProps = {
   onOpenCart: () => void;
   onOpenWinnerCheckout: (listingId: string) => void;
   onOpenHostOffers?: () => void;
+  onOpenListing?: (listingId: string) => void;
   /** Own empty shelf → snap sale flow */
   onStockShelf?: () => void;
 };
@@ -65,6 +115,7 @@ export function ActiveGarageShopScreen({
   onOpenCart,
   onOpenWinnerCheckout,
   onOpenHostOffers,
+  onOpenListing,
   onStockShelf,
 }: ActiveGarageShopScreenProps) {
   const { common, garageSale } = useMessages();
@@ -88,36 +139,75 @@ export function ActiveGarageShopScreen({
   const seenPendingWinIdsRef = useRef<Set<string>>(new Set());
   const city = getActiveRentLocationLabel().trim();
   const [garageName, setGarageName] = useState(() => garageDisplayName(hostId));
-  const shopAccent = useMemo(() => {
-    if (!isOwnGarage) return { color: GREEN, soft: `${GREEN}14` };
-    return {
-      color: resolveGarageAccent(loadUserProfile().garageIdentity).color,
-      soft: resolveGarageAccent(loadUserProfile().garageIdentity).soft,
-    };
-  }, [isOwnGarage, garageName]);
+  const [shopAccent, setShopAccent] = useState(() => {
+    if (isOwnGarage) {
+      const accent = resolveGarageAccent(loadUserProfile().garageIdentity);
+      return { color: accent.color, soft: accent.soft };
+    }
+    return { color: GREEN, soft: `${GREEN}14` };
+  });
   const [openLabel, setOpenLabel] = useState(() => garageSaleOpenLabel(getGarageSaleSchedule()));
+  const [openSaleTick, setOpenSaleTick] = useState(0);
+  const openSale = useMemo(() => getActiveOpenSaleForHost(hostId), [hostId, openSaleTick, listings]);
+
+  const refreshCartCount = useCallback(
+    () => setCartCount(getCartCount() + getDeviceOpenSaleCart().length),
+    [],
+  );
+
+  const applyIdentity = useCallback(
+    (identity: GarageIdentity, displayName?: string | null) => {
+      const accent = resolveGarageAccent(identity);
+      setShopAccent({ color: accent.color, soft: accent.soft });
+      const custom = identity.shopName.trim();
+      if (custom) {
+        setGarageName(custom);
+        return;
+      }
+      if (displayName?.trim()) {
+        setGarageName(garageNameFromDisplayName(displayName));
+        return;
+      }
+      setGarageName(garageDisplayName(hostId));
+    },
+    [hostId],
+  );
 
   useEffect(() => {
     let mounted = true;
-    try {
-      const self = loadUserProfile();
-      if (self.id === hostId && self.displayName?.trim()) {
-        setGarageName(garageNameFromDisplayName(self.displayName));
-        return;
+    if (isOwnGarage) {
+      try {
+        const self = loadUserProfile();
+        applyIdentity(self.garageIdentity, self.displayName);
+      } catch {
+        /* ignore */
       }
-    } catch {
-      /* ignore */
+      const stop = onGarageIdentityChanged((identity) => {
+        if (!mounted) return;
+        applyIdentity(identity, loadUserProfile().displayName);
+      });
+      return () => {
+        mounted = false;
+        stop();
+      };
     }
-    void fetchRemoteProfile(hostId).then((remote) => {
-      if (!mounted) return;
-      if (remote?.display_name?.trim()) {
-        setGarageName(garageNameFromDisplayName(remote.display_name));
-      }
-    });
+
+    void Promise.all([fetchRemoteProfile(hostId), fetchGarageStorefrontRemote(hostId)]).then(
+      ([remote, storefront]) => {
+        if (!mounted) return;
+        if (storefront) {
+          applyIdentity(storefront, remote?.display_name);
+          return;
+        }
+        if (remote?.display_name?.trim()) {
+          setGarageName(garageNameFromDisplayName(remote.display_name));
+        }
+      },
+    );
     return () => {
       mounted = false;
     };
-  }, [hostId]);
+  }, [applyIdentity, hostId, isOwnGarage]);
 
   const garageSharePayload = useMemo(
     () =>
@@ -134,7 +224,6 @@ export function ActiveGarageShopScreen({
     [hostId, shareItemTarget],
   );
 
-  const refreshCartCount = useCallback(() => setCartCount(getCartCount()), []);
   const refreshPendingWins = useCallback(() => setPendingWins(getMyPendingWinnerCheckouts()), []);
   const refreshOfferCount = useCallback(
     () => setPendingOfferCount(getHostPendingOffers(hostId).length),
@@ -142,36 +231,39 @@ export function ActiveGarageShopScreen({
   );
 
   const loadOwnShelfCandidates = useCallback(async () => {
-    const localOwned = loadPublishedListings().filter(
-      (listing) =>
-        listing.listingStatus === "active" &&
-        (listing.hostId ?? "") === hostId &&
-        (listing.modes.sell || listing.modes.rent),
-    );
+    const onShelfModes = (listing: ListingDraft) =>
+      listing.listingStatus === "active" &&
+      (listing.modes.sell || listing.modes.rent || listing.modes.gift || isFreeGiveaway(listing));
+
+    const localOwned = loadManageableListings(auth.userId, auth.userEmail).filter(onShelfModes);
     let remoteOwned: ListingDraft[] = [];
     try {
-      remoteOwned = (await fetchListingsByOwnerIdsRemote([hostId])).filter(
-        (listing) =>
-          listing.listingStatus === "active" && (listing.modes.sell || listing.modes.rent),
-      );
+      remoteOwned = (await fetchManageableListings(auth.userId, auth.userEmail)).filter(onShelfModes);
     } catch {
       remoteOwned = [];
     }
     return mergeManageableListings(localOwned, remoteOwned);
-  }, [hostId]);
+  }, [auth.userEmail, auth.userId]);
 
   const loadShelf = useCallback(() => {
     const applyCandidates = async (candidates: ListingDraft[]) => {
       const listingIds = candidates.map((listing) => listing.id);
       await syncGarageFromRemote({ hostId, userId: auth.userId, listingIds });
+      await syncOpenSalesFromRemote(hostId);
       resolveEndedAuctions(listingIds);
       resolveExpiredWinnerCheckouts(listingIds);
-      // Keep sold lots + rent items (no shop offer) + sell items with offers.
+      resolveEndedOpenSales();
+      cascadeUnpaidOpenSaleLots();
+      setOpenSaleTick((n) => n + 1);
+      // Show every live rent / paid-sell / free listing (not only priced shop offers).
       const shelf = candidates.filter((listing) => {
-        if (getShopOffer(listing)) return true;
-        if (listing.modes.rent) return true;
         if (getLotState(listing.id).status === "sold") return true;
-        return false;
+        return (
+          listing.modes.rent ||
+          listing.modes.sell ||
+          listing.modes.gift ||
+          isFreeGiveaway(listing)
+        );
       });
       if (!preview) {
         const sellShelf = shelf.filter((listing) => getShopOffer(listing));
@@ -194,7 +286,7 @@ export function ActiveGarageShopScreen({
         (listing) =>
           listing.listingStatus === "active" &&
           (listing.hostId ?? "") === hostId &&
-          (listing.modes.sell || listing.modes.rent),
+          (listing.modes.sell || listing.modes.rent || listing.modes.gift || isFreeGiveaway(listing)),
       );
       await applyCandidates(candidates);
     });
@@ -225,11 +317,15 @@ export function ActiveGarageShopScreen({
     window.addEventListener("evorios-garage-bids", onChange);
     window.addEventListener("evorios-garage-lots", onChange);
     window.addEventListener("evorios-garage-offers-neighbor", onChange);
+    window.addEventListener("evorios-listings-changed", onChange);
+    window.addEventListener(OPEN_SALE_EVENTS_EVENT, onChange);
     return () => {
       window.removeEventListener("evorios-garage-cart", onChange);
       window.removeEventListener("evorios-garage-bids", onChange);
       window.removeEventListener("evorios-garage-lots", onChange);
       window.removeEventListener("evorios-garage-offers-neighbor", onChange);
+      window.removeEventListener("evorios-listings-changed", onChange);
+      window.removeEventListener(OPEN_SALE_EVENTS_EVENT, onChange);
     };
   }, [loadShelf, refreshCartCount]);
 
@@ -253,6 +349,12 @@ export function ActiveGarageShopScreen({
       onFocusListingHandled?.();
     });
   }, [focusListingId, loading, listings, onFocusListingHandled]);
+
+  useEffect(() => {
+    if (!openSale) return undefined;
+    const timer = window.setInterval(() => setOpenSaleTick((n) => n + 1), 1000);
+    return () => window.clearInterval(timer);
+  }, [openSale?.id, openSale?.status]);
 
   useEffect(() => {
     if (preview || pendingWins.length === 0) return;
@@ -311,11 +413,16 @@ export function ActiveGarageShopScreen({
     showToast(shopCopy.offerSentToast);
   };
 
+  const categorySections = useMemo(
+    () => groupListingsByCategory(listings, shopCopy.categoryOther),
+    [listings, shopCopy.categoryOther],
+  );
+
   return (
     <div className="screen garage-shop-screen flex flex-col overflow-hidden bg-[#FFF9F0]">
       <header
         className="shrink-0 border-b px-4 pb-3 pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))]"
-        style={{ borderColor: `${AMBER}44`, backgroundColor: "#fff" }}
+        style={{ borderColor: `${shopAccent.color}33`, backgroundColor: shopAccent.soft }}
       >
         <div className="flex items-center gap-2">
           <button
@@ -325,7 +432,7 @@ export function ActiveGarageShopScreen({
             style={{ borderColor: BORDER }}
             aria-label={common.back}
           >
-            <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
+            <ArrowLeft className="h-5 w-5" style={{ color: shopAccent.color }} />
           </button>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -334,12 +441,19 @@ export function ActiveGarageShopScreen({
               </h1>
               <span
                 className="rounded-full px-2.5 py-1 text-[12px] font-bold uppercase tracking-wide text-white"
-                style={{ backgroundColor: AMBER, color: GREEN }}
+                style={{ backgroundColor: shopAccent.color }}
               >
                 {shopCopy.openBadge}
               </span>
             </div>
             <p className="text-[15px] text-gray-700">{openLabel}</p>
+            {openSale ? (
+              <p className="mt-1 text-[13px] font-bold text-amber-900">
+                {openSale.status === "presale"
+                  ? `Open Sale · starts in ${formatCountdown(openSale.startsAt)} · ${openSale.lots.length} lots`
+                  : `Open Sale live · ends ${formatCountdown(openSale.endsAt)} · ${openSale.lots.length} lots`}
+              </p>
+            ) : null}
           </div>
           {!preview ? (
             <div className="flex items-center gap-1.5">
@@ -351,7 +465,7 @@ export function ActiveGarageShopScreen({
                   style={{ borderColor: BORDER }}
                   aria-label={shopCopy.shareGarageAria}
                 >
-                  <Share2 className="h-5 w-5" style={{ color: GREEN }} />
+                  <Share2 className="h-5 w-5" style={{ color: shopAccent.color }} />
                 </button>
               ) : null}
               {isOwnGarage && onOpenHostOffers ? (
@@ -362,11 +476,11 @@ export function ActiveGarageShopScreen({
                   style={{ borderColor: BORDER }}
                   aria-label={shopCopy.offersAria(pendingOfferCount)}
                 >
-                  <Inbox className="h-5 w-5" style={{ color: GREEN }} />
+                  <Inbox className="h-5 w-5" style={{ color: shopAccent.color }} />
                   {pendingOfferCount > 0 ? (
                     <span
                       className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold text-white"
-                      style={{ backgroundColor: AMBER, color: GREEN }}
+                      style={{ backgroundColor: shopAccent.color }}
                     >
                       {pendingOfferCount}
                     </span>
@@ -378,19 +492,19 @@ export function ActiveGarageShopScreen({
                 onClick={onOpenCart}
                 className="relative flex h-11 items-center justify-center gap-1.5 rounded-full border bg-white px-3"
                 style={{
-                  borderColor: cartCount > 0 ? GREEN : BORDER,
-                  backgroundColor: cartCount > 0 ? `${GREEN}12` : "#fff",
+                  borderColor: cartCount > 0 ? shopAccent.color : BORDER,
+                  backgroundColor: cartCount > 0 ? shopAccent.soft : "#fff",
                 }}
                 aria-label={shopCopy.cartAria(cartCount)}
               >
-                <ShoppingCart className="h-5 w-5 shrink-0" style={{ color: GREEN }} />
-                <span className="text-sm font-bold" style={{ color: GREEN }}>
+                <ShoppingCart className="h-5 w-5 shrink-0" style={{ color: shopAccent.color }} />
+                <span className="text-sm font-bold" style={{ color: shopAccent.color }}>
                   {shopCopy.cartLabel}
                 </span>
                 {cartCount > 0 ? (
                   <span
                     className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold text-white"
-                    style={{ backgroundColor: GREEN }}
+                    style={{ backgroundColor: shopAccent.color }}
                   >
                     {cartCount}
                   </span>
@@ -401,8 +515,8 @@ export function ActiveGarageShopScreen({
         </div>
 
         <div
-          className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2.5 text-[14px] font-medium leading-snug"
-          style={{ backgroundColor: `${GREEN}10`, color: GREEN }}
+          className="mt-3 flex items-center gap-2 rounded-xl border bg-white px-3 py-2.5 text-[14px] font-medium leading-snug"
+          style={{ borderColor: `${shopAccent.color}33`, color: shopAccent.color }}
         >
           <Store className="h-4 w-4 shrink-0" aria-hidden />
           {preview
@@ -450,7 +564,7 @@ export function ActiveGarageShopScreen({
                 type="button"
                 onClick={onStockShelf}
                 className="mt-4 w-full rounded-xl py-3.5 text-base font-bold"
-                style={{ backgroundColor: AMBER, color: GREEN }}
+                style={{ backgroundColor: shopAccent.color, color: "#fff" }}
               >
                 {shopCopy.snapOntoShelf}
               </button>
@@ -459,44 +573,70 @@ export function ActiveGarageShopScreen({
                 type="button"
                 onClick={onBack}
                 className="mt-4 w-full rounded-xl border py-3.5 text-base font-bold"
-                style={{ borderColor: GREEN, color: GREEN }}
+                style={{ borderColor: shopAccent.color, color: shopAccent.color }}
               >
                 {shopCopy.backToYardSales}
               </button>
             ) : null}
           </div>
         ) : (
-          <div className="garage-shop-grid grid grid-cols-2 gap-2.5">
-            {listings.map((listing) => (
-              <div
-                key={listing.id}
-                ref={(node) => {
-                  if (node) itemRefs.current.set(listing.id, node);
-                  else itemRefs.current.delete(listing.id);
-                }}
-                className={
-                  focusListingId === listing.id
-                    ? "rounded-2xl ring-2 ring-offset-2"
-                    : undefined
-                }
-                style={
-                  focusListingId === listing.id
-                    ? ({ "--tw-ring-color": AMBER } as React.CSSProperties)
-                    : undefined
-                }
-              >
-                <GarageShopItemCard
-                  listing={listing}
-                  preview={preview}
-                  hostManage={isOwnGarage && !preview}
-                  onBuyNow={handleBuyNow}
-                  onBid={(item, offer) => setBidTarget({ listing: item, offer })}
-                  onMakeOffer={(item, offer) => setOfferTarget({ listing: item, offer })}
-                  onViewMyOffer={(item, offer) => setMyOfferTarget({ listing: item, offer })}
-                  onEdit={(item) => setEditTarget(item)}
-                  onShare={isOwnGarage && !preview ? (item) => setShareItemTarget(item) : undefined}
-                />
-              </div>
+          <div className="space-y-5">
+            {categorySections.map((section) => (
+              <section key={section.key} className="space-y-2">
+                <div
+                  className="rounded-2xl border px-3.5 py-3"
+                  style={{ borderColor: BORDER, backgroundColor: "#fff" }}
+                >
+                  <div className="flex items-baseline justify-between gap-2">
+                    <h2 className="text-[17px] font-extrabold leading-tight" style={{ color: GREEN }}>
+                      {section.label}
+                    </h2>
+                    <span className="shrink-0 text-[13px] font-semibold text-gray-500">
+                      {shopCopy.categoryItemCount(section.items.length)}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {section.items.map((listing) => (
+                    <div
+                      key={listing.id}
+                      ref={(node) => {
+                        if (node) itemRefs.current.set(listing.id, node);
+                        else itemRefs.current.delete(listing.id);
+                      }}
+                      className={
+                        focusListingId === listing.id
+                          ? "rounded-2xl ring-2 ring-offset-2"
+                          : undefined
+                      }
+                      style={
+                        focusListingId === listing.id
+                          ? ({ "--tw-ring-color": AMBER } as React.CSSProperties)
+                          : undefined
+                      }
+                    >
+                      <GarageShopItemCard
+                        listing={listing}
+                        preview={preview}
+                        hostManage={isOwnGarage && !preview}
+                        onOpenListing={
+                          onOpenListing ? (item) => onOpenListing(item.id) : undefined
+                        }
+                        onBuyNow={handleBuyNow}
+                        onBid={(item, offer) => setBidTarget({ listing: item, offer })}
+                        onMakeOffer={(item, offer) => setOfferTarget({ listing: item, offer })}
+                        onViewMyOffer={(item, offer) => setMyOfferTarget({ listing: item, offer })}
+                        onEdit={(item) => setEditTarget(item)}
+                        onShare={
+                          isOwnGarage && !preview
+                            ? (item) => setShareItemTarget(item)
+                            : undefined
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
         )}
@@ -557,7 +697,7 @@ export function ActiveGarageShopScreen({
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-base font-bold text-gray-900">{shareCopy.openGarageTitle}</h2>
               <button type="button" onClick={() => setShareGarageOpen(false)} aria-label={common.close}>
-                <X className="h-5 w-5 text-gray-500" />
+                <X className="h-5 w-5 text-red-600" />
               </button>
             </div>
             <GarageSharePanel
@@ -577,7 +717,7 @@ export function ActiveGarageShopScreen({
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-base font-bold text-gray-900">{shareCopy.itemTitle}</h2>
               <button type="button" onClick={() => setShareItemTarget(null)} aria-label={common.close}>
-                <X className="h-5 w-5 text-gray-500" />
+                <X className="h-5 w-5 text-red-600" />
               </button>
             </div>
             <GarageSharePanel

@@ -226,6 +226,10 @@ export type AppMessages = {
     codeWaitBody: string;
     didYouMeanEmail: (email: string) => string;
     useSuggestedEmail: string;
+    faceIdCta: string;
+    faceIdHint: string;
+    orEmail: string;
+    returningHint: string;
     freeToJoin: string;
   };
   install: {
@@ -383,6 +387,9 @@ export type AppMessages = {
     removedBody: string;
     goBack: string;
     photoByOwner: string;
+    openPhotoAria: string;
+    openPhotoGalleryAria: (count: number) => string;
+    photoCountBadge: (count: number) => string;
     heavyItem: string;
     perDay: string;
     newOnTheBlock: string;
@@ -778,8 +785,8 @@ export type AppMessages = {
       setAsCover: string;
       previousPhotoAria: string;
       nextPhotoAria: string;
-      enhancementUnavailable: (detail: string) => string;
-      couldntAddPhoto: (detail: string) => string;
+      enhancementUnavailable: string;
+      couldntAddPhoto: string;
       /** NSFW / not a listable item — calm, non-graphic. */
       moderationNotListable: string;
       /** Weapons, drugs, and other banned goods. */
@@ -849,6 +856,30 @@ export type AppMessages = {
       instructionsPlaceholder: string;
       instructionsHelper: string;
       assetIdentityHint: string;
+      vehicleFlowTitle: string;
+      vehicleFlowBody: string;
+      licensePlate: string;
+      licensePlatePlaceholder: string;
+      licensePlateState: string;
+      licensePlateStatePlaceholder: string;
+      plateLookupCta: string;
+      plateLookingUp: string;
+      plateHelper: string;
+      plateNeedState: string;
+      plateFound: string;
+      plateNotFound: string;
+      plateLookupFailed: string;
+      plateLookupUnconfigured: string;
+      vinScanCta: string;
+      vinScanCamera: string;
+      vinScanLibrary: string;
+      vinScanning: string;
+      vinScanHelper: string;
+      vinScanFound: string;
+      vinScanNoVin: string;
+      vinScanFailed: string;
+      vinOrTypeManually: string;
+      plateOptionalToggle: string;
       vin: string;
       vinPlaceholder: string;
       vinHelper: string;
@@ -859,6 +890,9 @@ export type AppMessages = {
       vinVerified: (summary: string) => string;
       vinVerifiedFallback: string;
       vinLookupWarn: string;
+      /** VIN decode conflicts with photo AI / already-filled make-model. */
+      vinMismatchWarn: (decodedSummary: string, priorLabel: string) => string;
+      vinMismatchUseVinCta: string;
       serialNumber: string;
       serialNumberPlaceholder: string;
       serialNumberHelper: string;
@@ -880,7 +914,14 @@ export type AppMessages = {
       requiredBadge: string;
       brandOtherPlaceholder: string;
       unbrandedLabel: string;
-      fields: Record<string, { label: string; placeholder?: string; hint?: string }>;
+      /** Accessible label for year +1 stepper. */
+      yearStepUp: string;
+      /** Accessible label for year −1 stepper. */
+      yearStepDown: string;
+      fields: Record<
+        string,
+        { label: string; placeholder?: string; hint?: string; rentOptionalHint?: string }
+      >;
       options: Record<string, string>;
     };
     modes: {
@@ -889,12 +930,20 @@ export type AppMessages = {
       rent: string;
       sell: string;
       gift: string;
+      /** Compact early path picker after vehicle ID. */
+      pathChoiceTitle: string;
+      pathChoiceBody: string;
+      pathChoiceRent: string;
+      pathChoiceSell: string;
+      pathChoiceBoth: string;
       rentSubtitleDailyWeeklyMonthly: string;
       rentSubtitleWeeklyMonthly: string;
       rentSubtitleMonthly: string;
       rentSubtitleDailyWeekly: string;
       sellSubtitle: string;
       giftSubtitle: string;
+      /** Short pill on Free card, e.g. "Sell at $0". */
+      giftBadge: string;
       minimumPeriod: string;
       period1Day: string;
       period3Days: string;
@@ -913,14 +962,101 @@ export type AppMessages = {
       longTermHelp: (example: string) => string;
       securityDeposit: string;
       securityDepositHint: string;
+      securityDepositHintInsurance: string;
+      securityDepositHintMonthly: string;
+      insuranceRequirementTitle: string;
+      insuranceRequirementBody: string;
+      insuranceRequirementToggle: string;
+      insuranceCoverageLead: string;
+      insuranceCoverageLead0: string;
+      insuranceCoverageLead1: string;
+      insuranceCoverageLead3: string;
+      insuranceCoverageLead7: string;
+      insuranceCoverageLeadHint: string;
+      /** Physical damage (not liability alone) — weight threshold in lb. */
+      physicalDamageTitle: string;
+      physicalDamageBody: (weightLbs: number, weightKg: number) => string;
+    proRentersTitle: string;
+    proRentersBody: string;
+    /** Commercial transport (≥26k / semi) listing fields */
+    commercialTransportTitle: string;
+    commercialTransportBody: string;
+    wheelCountLabel: string;
+    wheelCountPlaceholder: string;
+    wheelCountHint: string;
+    insuranceOwnerProofEmail: string;
+    insuranceOwnerProofEmailHint: string;
+    insuranceRequirementsNotes: string;
+    insuranceRequirementsNotesHint: string;
+    insurancePdMinUsd: string;
+    insuranceLiabilityMinUsd: string;
+    insuranceRenterFeeUsd: string;
+    noShowFeeTitle: string;
+    noShowFeeBody: string;
+    noShowFeeToggle: string;
+    noShowFeeAmount: string;
+    lateReturnFeeTitle: string;
+    lateReturnFeeBody: string;
+    lateReturnFeeToggle: string;
+    lateReturnGraceMinutes: string;
+    lateReturnFlatFee: string;
+    lateReturnPerHourFee: string;
+    fuelPolicyHostTitle: string;
+    fuelPolicyHostBody: string;
+    fuelPolicyHostSelect: string;
+    fuelPolicyFullToFull: string;
+    fuelPolicyPrepaid: string;
+    fuelPolicyMissingFee: string;
+    fuelPolicyTankGallons: string;
+    youngDriverTitle: string;
+    youngDriverBody: string;
+    youngDriverToggle: string;
+    youngDriverMultiplier: string;
+    vehicleExtrasTitle: string;
+      vehicleExtrasBody: string;
+      mileagePolicyTitle: string;
+      mileagePolicyBody: string;
+      includedMilesPerDay: string;
+      includedMilesPerDayHint: string;
+      overagePerMile: string;
+      overagePerMileHint: string;
+      extraUnlimitedMiles: string;
+      extraUnlimitedMilesHint: string;
+      extraChildSeat: string;
+      extraChildSeatHint: string;
+      extraRoofRack: string;
+      extraRoofRackHint: string;
+      extraVehicleDelivery: string;
+      extraVehicleDeliveryHint: string;
+      extraPricePerDay: string;
+      extraPriceFlat: string;
+      extraDeliveryRadius: string;
+      tollHoldTitle: string;
+      tollHoldBody: string;
+      tollHoldToggle: string;
+      tollHoldAmount: string;
+      tollHoldAmountHint: string;
+      /** Vehicles / boats — leave home state (US) or country (intl). */
+      travelOutsideTitle: string;
+      travelOutsideBodyState: string;
+      travelOutsideBodyCountry: string;
+      travelOutsideHomeLabel: (area: string) => string;
+      travelOutsideForbidden: string;
+      travelOutsideAllowed: string;
+      travelOutsideHint: string;
       depositProtectionNote: (label: string) => string;
       salePrice: string;
       sellNote: string;
+      giftNote: string;
       pricingTipRoi: (count: number) => string;
       pricingTipDefault: string;
-      pricingTipSuggestRent: (daily: string) => string;
+      pricingTipSuggestRent: (daily: string, deposit: string) => string;
+      pricingTipSuggestRentInsurance: (daily: string, deposit: string) => string;
+      pricingTipSuggestRentMonthlyDeposit: (daily: string, deposit: string) => string;
       pricingTipSuggestSell: (sale: string) => string;
-      pricingTipSuggestBoth: (daily: string, sale: string) => string;
+      pricingTipSuggestBoth: (daily: string, sale: string, deposit: string) => string;
+      pricingTipSuggestBothInsurance: (daily: string, sale: string, deposit: string) => string;
+      pricingTipSuggestBothMonthlyDeposit: (daily: string, sale: string, deposit: string) => string;
       useSuggestedPrices: string;
       restrictedModesNote: string;
     };
@@ -940,6 +1076,7 @@ export type AppMessages = {
       weightLbs: string;
       weightRequired: string;
       weightPlaceholder: string;
+      weightDualHint: string;
       iCanDeliver: string;
       iCanDeliverDesc: string;
       deliveryHeading: string;
@@ -1111,6 +1248,13 @@ export type AppMessages = {
     /** Minimal cancellation policy shown before submit (store / trust). */
     cancellationPolicyTitle: string;
     cancellationPolicyBody: string;
+    lateReturnPolicyTitle: string;
+    lateReturnPolicyBody: string;
+    noShowPolicyTitle: string;
+    noShowPolicyBody: string;
+    policyLearnMore: string;
+    policySheetTitle: string;
+    policyPracticeNote: string;
     cardPayment: string;
     backToDetails: string;
     preparing: string;
@@ -1131,6 +1275,7 @@ export type AppMessages = {
     insuranceTitle: string;
     insuranceBody: string;
     insuranceHostRequires: (details: string) => string;
+    insuranceCoverageLeadNote: (date: string, leadDays: number) => string;
     insuranceActiveUntil: string;
     insuranceMustCoverRental: string;
     insuranceUpload: string;
@@ -1140,6 +1285,39 @@ export type AppMessages = {
     insuranceSignInFirst: string;
     insurancePreviewAlt: string;
     insuranceViewUploaded: string;
+    physicalDamageRequired: string;
+    physicalDamageAttest: string;
+    proRentersRequired: string;
+    proRentersAttest: string;
+    proCredentialUpload: string;
+    proCredentialReplace: string;
+    proCredentialHint: string;
+    proBadge: string;
+    physicalDamageBadge: string;
+    /** Commercial transport ≥26k / semi */
+    cdlRequired: string;
+    cdlAttest: string;
+    cdlUpload: string;
+    cdlReplace: string;
+    cdlHint: string;
+    cdlBadge: string;
+    agentInsuranceTitle: string;
+    agentInsuranceBody: string;
+    agentInsuranceEmailLabel: string;
+    agentInsuranceEmailMissing: string;
+    agentInsuranceAck: string;
+    agentInsuranceRequirements: string;
+    agentInsuranceFee: (amount: string) => string;
+    commercialTransportBadge: string;
+    extrasTitle: string;
+    extrasBody: string;
+    extraUnlimitedMiles: string;
+    extraChildSeat: string;
+    extraRoofRack: string;
+    extraVehicleDelivery: (radius: string) => string;
+    extraPricePerDay: (amount: string) => string;
+    extraPriceFlat: (amount: string) => string;
+    extrasSubtotal: (amount: string) => string;
     newRequestTitle: string;
     newRequestBody: (title: string) => string;
     approvedTitle: string;
@@ -1151,6 +1329,20 @@ export type AppMessages = {
     refundNotePayment: string;
     refundNoteNone: string;
     captureFailed: string;
+    macropointConsentTitle: string;
+    macropointConsentBody: string;
+    macropointConsentCheck: string;
+
+    ageGateTitle: string;
+    ageGateNeedDob: string;
+    ageGateUnderage: (minAge: number) => string;
+    ageGateHostBlocksYoung: (minAge: number) => string;
+    ageGateYoungTitle: string;
+    ageGateYoungBody: (age: number, addOn: string) => string;
+
+    fuelPolicyTitle: string;
+    fuelPolicyBody: string;
+    tollHoldBookingNote: (amount: string) => string;
   };
   postRequest: {
     title: string;
@@ -1334,6 +1526,11 @@ export type AppMessages = {
     depositHeldDuringDispute: string;
     depositReleaseBtn: string;
     depositClaimBtn: string;
+    depositPartialHint: string;
+    depositPartialPlaceholder: string;
+    depositPartialClaimBtn: string;
+    depositPartialInvalid: string;
+    depositPartialClaimed: string;
     depositStatusReleased: string;
     depositStatusClaimed: string;
     depositHoldActiveBody: string;
@@ -1381,6 +1578,34 @@ export type AppMessages = {
     handoffRenterDoneWaitingHost: string;
     handoffRenterReturnedWaitingHost: string;
     handoffHostAcceptedWaitingRenter: string;
+    /** Vehicle rentals — capture odometer at pickup / return. */
+    odometerTitle: string;
+    odometerPickupHint: string;
+    odometerReturnHint: string;
+    odometerLabel: string;
+    odometerPlaceholder: string;
+    odometerRequired: string;
+    odometerContinue: string;
+    odometerStartRecorded: (miles: string) => string;
+    odometerReturnRecorded: (miles: string) => string;
+    /** Fuel / DEF handoff capture */
+    fuelTitle: string;
+    fuelPickupHint: string;
+    fuelReturnHint: string;
+    fuelLevelLabel: string;
+    fuelLevelRequired: string;
+    defLevelLabel: string;
+    defLevelRequired: string;
+    fuelContinue: string;
+    fuelStartRecorded: (level: string) => string;
+    fuelReturnRecorded: (level: string) => string;
+    defStartRecorded: (level: string) => string;
+    defReturnRecorded: (level: string) => string;
+    prepaidFullTankToggle: string;
+    fuelPumpPriceLabel: string;
+    fuelPumpPriceHint: string;
+    fuelShortfallFlagged: (summary: string) => string;
+    fuelPolicyActiveLabel: string;
     pickupLocation: string;
     pickupLocationHostHint: string;
     pickupLocationRenterHint: string;
@@ -1389,6 +1614,54 @@ export type AppMessages = {
     contactlessBody: string;
     contactlessRenterHint: string;
     contactlessHostHint: string;
+    contactlessFlowTitle: string;
+    contactlessFlowBody: string;
+    contactlessReturnAutoHint: string;
+    geoPinGateHint: string;
+    startIdTitle: string;
+    startIdBody: string;
+    startIdBookerFallback: string;
+    startIdProfileVerified: string;
+    startIdProfileLinked: string;
+    startIdProfileHint: string;
+    startIdLicenseAdd: string;
+    startIdLicenseAdded: string;
+    startIdSelfieAdd: string;
+    startIdSelfieAdded: string;
+    startIdSaving: string;
+    startIdSelfieFailed: string;
+    startIdDobLabel: string;
+    startIdDobHint: string;
+    startIdAttest: string;
+    startIdOnceHint: string;
+    startIdContinue: string;
+    startIdRequired: string;
+    macropointTitle: string;
+    macropointBody: string;
+    macropointLastKnown: (when: string) => string;
+    macropointEmpty: string;
+    tollSuspectTitle: string;
+    tollSuspectBody: string;
+    homeTerritoryBreachTitle: string;
+    homeTerritoryBreachBody: string;
+    travelOutsideListingTitle: string;
+    travelOutsideListingForbidden: (area: string) => string;
+    travelOutsideListingAllowed: (area: string) => string;
+    speedSoftTitle: string;
+    speedSoftBody: string;
+    speedSoftSegment: (mph: number, when: string) => string;
+    tollHoldOnBooking: (amount: string) => string;
+    tollClaimCta: (amount: string) => string;
+    tollFlagged: string;
+    tollClaimed: string;
+    tollClaimFailed: string;
+    insuranceUnlockBlocked: string;
+    cdlUnlockBlocked: string;
+    agentProofPending: string;
+    agentProofReceivedMark: string;
+    agentProofReceivedDone: string;
+    agentProofEmailLabel: string;
+    preTripUnlockBlocked: string;
     roundTripDelivery: string;
     roundTripDeliveryBody: string;
     roundTripDeliveryFee: (amount: string) => string;
@@ -1417,6 +1690,43 @@ export type AppMessages = {
     verifiedOnEvorios: string;
     tapToViewProfile: string;
     message: string;
+    messagePostRental: string;
+    messageClosed: string;
+    chatPostRentalBanner: (days: number, untilDate: string) => string;
+    chatClosedBanner: string;
+    conditionPhotosTitle: string;
+    conditionPhotosBody: string;
+    conditionPhotoPickup: string;
+    conditionPhotoReturn: string;
+    conditionPhotoEmpty: string;
+    invoiceTitle: string;
+    invoiceBody: string;
+    invoiceCreate: string;
+    invoiceAddLine: string;
+    invoiceRemoveLine: string;
+    invoiceNotePlaceholder: string;
+    invoiceTotal: string;
+    invoiceSend: string;
+    invoiceEmpty: string;
+    invoiceNeedLine: string;
+    invoicePayCta: string;
+    invoicePayNow: string;
+    invoicePaying: string;
+    invoicePayFailed: string;
+    invoiceVoid: string;
+    invoiceStatusOpen: string;
+    invoiceStatusPending: string;
+    invoiceStatusPaid: string;
+    invoiceStatusVoid: string;
+    invoiceKindFuelTopup: string;
+    invoiceKindFuelFee: string;
+    invoiceKindLateFee: string;
+    invoiceKindToll: string;
+    invoiceKindFine: string;
+    invoiceKindNoShow: string;
+    invoiceKindDamage: string;
+    invoiceKindCustom: string;
+    invoiceStripeScaffold: string;
     call: string;
     phoneSharedAfterCheckin: string;
     close: string;
@@ -1447,6 +1757,21 @@ export type AppMessages = {
     cancelRefundPreviewNone: string;
     cancelRefundPreviewHostFull: string;
     cancelRefundReleased: string;
+    datesAdjustTitle: string;
+    datesAdjustBody: string;
+    extendBooking: string;
+    extendNewEnd: string;
+    extendConfirm: string;
+    extendChecking: string;
+    extendUnavailable: string;
+    extendInvalid: string;
+    extendSuccess: (date: string) => string;
+    earlyReturn: string;
+    earlyReturnConfirmBody: string;
+    earlyReturnConfirm: string;
+    earlyReturnWorking: string;
+    earlyReturnInvalid: string;
+    earlyReturnSuccess: (date: string) => string;
     cancelRefundFullProcessing: string;
     cancelRefundPartialProcessing: (percent: number) => string;
     cancelRefundNone: string;
@@ -1456,6 +1781,11 @@ export type AppMessages = {
     cancelNotifRenterTitle: string;
     cancelNotifBody: (title: string, refundNote: string) => string;
     cancelContactSupport: string;
+    cancelReasonLabel: string;
+    cancelReasonPlaceholder: string;
+    cancelReasonInNotif: (reason: string) => string;
+    lateFeeDueBanner: (amount: string) => string;
+    hostReliabilityNote: string;
   };
   rentalCard: {
     noShow: string;
@@ -1475,6 +1805,9 @@ export type AppMessages = {
     runningLate: string;
     markNoShow: string;
     markNoShowHint: string;
+    markNoShowConfirm: string;
+    markNoShowFeeNote: (amount: string) => string;
+    markNoShowSoftNote: string;
     submitEvidence: string;
     continueDispute: string;
     openDispute: string;
@@ -1484,6 +1817,8 @@ export type AppMessages = {
     seeReview: string;
     rentAgain: string;
     markedAsNoShow: string;
+    noShowMarkedNotifTitle: string;
+    noShowMarkedNotifBody: (title: string, feeNote: string) => string;
     awaitingApproval: string;
     expired: string;
     ownerRespond24h: (timeLeft: string | null) => string;
@@ -1599,6 +1934,88 @@ export type AppMessages = {
       pushFooter: string;
     };
   };
+  /**
+   * Per-category “how this works / safety” facts shown in browse, listing,
+   * item detail, booking, and host manage — not the global FAQ.
+   */
+  categoryFacts: {
+    expand: string;
+    collapse: string;
+    byCategory: Partial<
+      Record<
+        string,
+        {
+          title: string;
+          summary: string;
+          /** Host-oriented tip (e.g. commercial insurance options). Optional. */
+          hostTipTitle?: string;
+          hostTip?: string;
+          hostTipLinkLabel?: string;
+          hostTipLinkHref?: string;
+          whyGeoTitle: string;
+          whyGeo: string;
+          /** Contactless / no co-presence gear tips (Vehicles). Optional. */
+          contactlessTitle?: string;
+          contactless?: string;
+          flowTitle: string;
+          flow: string;
+          layersTitle: string;
+          layers: string;
+          claimsTitle: string;
+          claims: string;
+        }
+      >
+    >;
+  };
+  /** Mandatory pre-trip / return photo inspection for vehicles & heavy. */
+  preTripInspection: {
+    pickupTitle: string;
+    pickupBody: string;
+    returnTitle: string;
+    returnBody: (tireCount: number) => string;
+    tireSwapHint: string;
+    bodySection: string;
+    tiresSection: (tireCount: number) => string;
+    bodyPhotoHint: string;
+    tiresMandatoryHint: (tireCount: number) => string;
+    tiresIncomplete: (tireCount: number) => string;
+    tiresComplete: string;
+    tirePhotoHint: string;
+    tireBrandLabel: string;
+    tireBrandPlaceholder: string;
+    tireCommentLabel: string;
+    tireCommentPlaceholder: string;
+    tireNumbered: (n: number) => string;
+    commentLabel: string;
+    commentPlaceholder: string;
+    damageLabel: string;
+    damage: Record<
+      "none" | "chip" | "scratch" | "stain" | "dent" | "wear" | "other",
+      string
+    >;
+    photoAdd: string;
+    photoReplace: string;
+    photoSaving: string;
+    optional: string;
+    incomplete: (tireCount: number) => string;
+    submitRenter: string;
+    confirmHost: string;
+    waitingHost: string;
+    waitingRenter: string;
+    bothDone: string;
+    areas: {
+      exterior_front: string;
+      exterior_rear: string;
+      exterior_left: string;
+      exterior_right: string;
+      interior: string;
+      tire_fl: string;
+      tire_fr: string;
+      tire_rl: string;
+      tire_rr: string;
+      tire_spare: string;
+    };
+  };
   faq: {
     panel: {
       searchPlaceholder: string;
@@ -1629,6 +2046,7 @@ export type AppMessages = {
     tip: (mascotHandle: string) => string;
     empty: string;
     placeholder: string;
+    closedReadOnly: string;
     listingChatFallback: string;
     listingChatSubtitle: string;
     moderationBlocked: string;
@@ -1648,6 +2066,9 @@ export type AppMessages = {
       notSignedIn: string;
       addName: string;
       addPhone: string;
+      addDateOfBirth: string;
+      dateOfBirth: string;
+      dateOfBirthHint: string;
       nameLabel: string;
       namePlaceholder: string;
       phoneLabel: string;
@@ -2007,7 +2428,7 @@ export type AppMessages = {
     errorNoBulkItems: string;
     details: string;
     labelTitle: string;
-    labelTerms: string;
+    labelDescription: string;
     labelDailyPrice: string;
     labelMinimumRental: string;
     labelLongTerm: string;
@@ -2064,9 +2485,34 @@ export type AppMessages = {
   bookingRequest: BookingRequestMessages;
   rentalPrice: RentalPriceMessages;
   paymentsUi: PaymentsUiMessages;
+  rentalAgreement: RentalAgreementMessages;
   addressPicker: AddressPickerMessages;
   geo: GeoMessages;
   systemUi: SystemUiMessages;
+};
+
+export type RentalAgreementMessages = {
+  title: string;
+  honestCaveat: string;
+  readTerms: string;
+  hideTerms: string;
+  acceptCheckbox: (partyLabel: string, displayName: string) => string;
+  partyRenter: string;
+  partyHost: string;
+  nameFallback: string;
+  mustAccept: string;
+  statusMissing: string;
+  statusAwaitingHost: string;
+  statusAwaitingRenter: string;
+  statusBothSigned: string;
+  signedAs: (name: string, when: string) => string;
+  notSigned: string;
+  termsVersion: (version: string) => string;
+  download: string;
+  blockHandoff: string;
+  blockRenter: string;
+  blockHost: string;
+  hostMustSignToApprove: string;
 };
 
 export type AddressPickerMessages = {
@@ -2224,6 +2670,7 @@ export type GarageSaleMessages = {
     statusPendingPayment: string;
     modeRent: string;
     modeSell: string;
+    modeFree: string;
     saleItemFallback: string;
     badgeSoon: string;
     badgeBid: string;
@@ -2232,6 +2679,8 @@ export type GarageSaleMessages = {
     bidCta: string;
     buyCta: string;
     editCta: string;
+    viewCta: string;
+    previewOpenCta: string;
     shareCta: string;
     yourOfferLine: (amount: string) => string;
     editShelfAria: string;
@@ -2239,6 +2688,8 @@ export type GarageSaleMessages = {
     buyNowPaused: string;
     dealPendingPayment: string;
     cartOneGarage: string;
+    categoryOther: string;
+    categoryItemCount: (count: number) => string;
   };
   garageAuction: {
     bidTerms: string;
@@ -2476,9 +2927,12 @@ export type QrScanMessages = {
   scanPickup: string;
   scanReturn: string;
   qrVerified: string;
+  geoVerified: string;
   tipPickup: string;
+  tipPickupContactless: string;
   tipPickupReturnBy: (label: string) => string;
   tipReturn: string;
+  tipReturnContactless: string;
   contactlessTitle: string;
   contactlessBody: string;
   contactlessLocked: string;
@@ -2496,12 +2950,29 @@ export type QrScanMessages = {
   cameraUnavailable: string;
   cameraAccessNeeded: string;
   stickerMustMatch: string;
+  stickerOrGeo: string;
   enterCodeManually: string;
   ownerConfirms: string;
   manualTitle: string;
   manualPlaceholder: string;
+  manualNeedsPresence: string;
   verifyCode: string;
   codeMismatch: string;
+  presenceTitle: string;
+  presenceBody: string;
+  presenceRequired: string;
+  geoUnlockCta: string;
+  geoChecking: string;
+  geoNoTarget: string;
+  geoNoTargetScanQr: string;
+  geoTooFar: (distanceM: number, radiusM: number) => string;
+  geoDenied: string;
+  geoUnavailable: string;
+  conditionPhotoTitle: string;
+  conditionPhotoBody: string;
+  conditionPhotoAdd: string;
+  conditionPhotoAdded: string;
+  conditionPhotoSaving: string;
 };
 
 export type BookingRequestMessages = {

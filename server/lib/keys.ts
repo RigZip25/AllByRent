@@ -78,8 +78,17 @@ export function getUspsWebToolsUserId(): string | undefined {
 export function isStripeServerConfigured(): boolean {
   const key = getStripeSecretKey();
   if (!key) return false;
+  if (key.length < 20) return false;
   const lower = key.toLowerCase();
-  return !lower.includes("placeholder") && !lower.includes("changeme");
+  if (!(lower.startsWith("sk_live_") || lower.startsWith("sk_test_") || lower.startsWith("rk_live_") || lower.startsWith("rk_test_"))) {
+    return false;
+  }
+  return (
+    !lower.includes("placeholder") &&
+    !lower.includes("changeme") &&
+    !lower.includes("...") &&
+    !lower.includes("[sensitive]")
+  );
 }
 
 export function getPasskeySecret(): string {
@@ -101,7 +110,14 @@ export function getPasskeyOrigin(): string {
   return "http://localhost:5173";
 }
 
-/** All origins accepted during verify (primary + PASSKEY_ORIGINS + local dev). */
+/**
+ * Upload-keystore apk-key-hash for com.evorios.app (evorios-play-upload.jks).
+ * Play App Signing may add a second hash via PASSKEY_ORIGINS / assetlinks later.
+ */
+const ANDROID_UPLOAD_APK_KEY_HASH_ORIGIN =
+  "android:apk-key-hash:c-2afWYx1IkhZ24oABkT6uQinYQ5p5nvXD1obTTaR4c";
+
+/** All origins accepted during verify (primary + PASSKEY_ORIGINS + local/native). */
 export function getPasskeyAllowedOrigins(): string[] {
   const origins = new Set<string>([getPasskeyOrigin()]);
   const extra = trimEnv(process.env.PASSKEY_ORIGINS);
@@ -114,6 +130,10 @@ export function getPasskeyAllowedOrigins(): string[] {
   origins.add("http://localhost:5173");
   origins.add("http://127.0.0.1:5173");
   origins.add("https://localhost:5173");
+  // Capacitor / Capgo native Face ID (iOS encodes APP origin; Android uses apk-key-hash).
+  origins.add("capacitor://localhost");
+  origins.add("https://localhost");
+  origins.add(ANDROID_UPLOAD_APK_KEY_HASH_ORIGIN);
   return [...origins];
 }
 

@@ -11,6 +11,8 @@ import {
 } from "../config/production";
 import { completeAuctionPayment, completeBuyNowSale } from "./garageRepository";
 import { createAuctionCheckoutIntent, createGarageCartCheckoutIntent, getAccessToken } from "../stripePayments";
+import { clearOpenSaleCartLines, markOpenSaleLotPaid } from "../openSale";
+import { getSellFeeRate } from "../ops/opsSettings";
 
 export type GarageCartCheckoutInput = {
   hostId: string;
@@ -156,6 +158,86 @@ export async function completeGarageCartCheckout(input: GarageCartCheckoutInput)
     body: `${itemLabel} from ${input.garageName}. Message the seller to pick a convenient pickup time.`,
   });
   clearGarageCart();
+}
+
+/** Pay all green Open Sale wins in one cart checkout. */
+export async function completeOpenSaleWinsCheckout(input: GarageCartCheckoutInput): Promise<void> {
+  const buyerId = getGarageBidderId();
+  for (const line of input.lines) {
+    markOpenSaleLotPaid(line.listingId, buyerId);
+    await completeAuctionPayment({
+      listingId: line.listingId,
+      hostId: input.hostId,
+      priceUsd: line.priceUsd,
+      listingTitle: line.title,
+    }).catch(() => {
+      /* offline — local open-sale + lot state still updated where possible */
+    });
+  }
+
+  clearOpenSaleCartLines(input.lines.map((l) => l.listingId));
+
+  const itemLabel =
+    input.lines.length === 1
+      ? input.lines[0]?.title || "Sale item"
+      : `${input.lines.length} Open Sale wins`;
+
+  if (input.hostId && input.hostId !== buyerId) {
+    void createNotificationRemote({
+      recipientId: input.hostId,
+      actorId: buyerId.startsWith("bidder-") ? null : buyerId,
+      type: "general",
+      title: "Open Sale paid — arrange pickup",
+      body: `${itemLabel} · ${formatShopUsd(input.totalUsd)}. Winner will message you about pickup.`,
+      listingId: input.lines[0]?.listingId,
+      skipLocal: true,
+    });
+  }
+
+  pushInAppNotification({
+    type: "general",
+    title: "Open Sale paid — arrange pickup",
+    body: `${itemLabel} from ${input.garageName}. Message the seller for pickup time.`,
+  });
+}
+
+export function buildOpenSaleWinsCheckoutInput(params: {
+  hostId: string;
+  garageName: string;
+  lines: Array<{
+    listingId: string;
+    hostId: string;
+    title: string;
+    amountUsd: number;
+    photoThumbId?: string;
+    photoId?: string;
+    photoThumbStoragePath?: string;
+    photoStoragePath?: string;
+  }>;
+  guestEmail?: string;
+}): GarageCartCheckoutInput | null {
+  if (params.lines.length === 0) return null;
+  const cartLines: GarageCartLine[] = params.lines.map((line) => ({
+    listingId: line.listingId,
+    hostId: line.hostId,
+    title: line.title,
+    priceUsd: line.amountUsd,
+    photoThumbId: line.photoThumbId,
+    photoId: line.photoId,
+    photoThumbStoragePath: line.photoThumbStoragePath,
+    photoStoragePath: line.photoStoragePath,
+  }));
+  const subtotalUsd = Math.round(cartLines.reduce((s, l) => s + l.priceUsd, 0) * 100) / 100;
+  const platformFeeUsd = Math.round(subtotalUsd * getSellFeeRate() * 100) / 100;
+  return {
+    hostId: params.hostId,
+    garageName: params.garageName,
+    lines: cartLines,
+    subtotalUsd,
+    platformFeeUsd,
+    totalUsd: subtotalUsd,
+    guestEmail: params.guestEmail,
+  };
 }
 
 export async function completeAuctionCheckout(input: AuctionCheckoutInput): Promise<void> {

@@ -20,6 +20,10 @@ export const faq: AppMessages["faq"] = {
     account: "Účet",
   },
   items: {
+    "why-name": {
+      q: "Proč se to jmenuje Evorios?",
+      a: "Evorios je vytvořené jméno z evo- (evolve / evolution — vývoj) a -rios, krátké koncovky, která zní latinsky/románsky a naznačuje mnoho domácností — španělské varios znamená „různé“. Výslovnost: eh-VOR-ee-ohs (důraz na VOR).\n\nZvolili jsme ho, protože produkt je o vývoji, ne o tom, aby v názvu značky bylo „rent“ nebo „sale“: (1) jak domácnosti přemýšlí — věci v garáži se stávají výlohou; (2) jak lidé spotřebovávají — půjčit, koupit použité, nebo předat dál; (3) jak spolu sousedé vycházejí — důvěra na verandě místo anonymního obchodu. Jednou větou: evolve how your home shares.\n\nNejdřív může působit neznámě — u vymyšlených značek je to běžné. Popisné názvy jsou snazší hned, ale těžko se vlastní celosvětově a zamykají vás do jednoho režimu. Evorios je unikátní ve vyhledávání, máme evorios.com, a když znáte příběh a důraz na VOR, jméno se zapamatuje.",
+    },
     "what-is": {
       q: "Co je Evorios?",
       a: "Evorios je sousedský trh: každá domácnost je obchodní buňka — garážová výloha na bloku. Sousedé půjčují, prodávají nebo darují (Prodat za 0 Kč). Procházejte kategorie na Domů, nebo naplňte garáž zeleným tlačítkem +.",
@@ -58,11 +62,11 @@ export const faq: AppMessages["faq"] = {
     },
     "replacement-value": {
       q: "Co je náhradní hodnota?",
-      a: "Je to cena nové náhrady dnes — používá se pro ochranu vkladu a způsobilost k půjčení. Zadejte aktuální maloobchodní cenu, ne cenu z druhé ruky. AI navrhne hodnotu z fotek.",
+      a: "Je to cena nové náhrady dnes v měně vašeho trhu — orientace při nastavení kauce. AI navrhne hodnotu z fotek. Výši kauce vždy volí hostitel; pojištění drahých věcí přijde později.",
     },
     "qr-sticker": {
       q: "Proč potřebuji QR samolepku?",
-      a: "U půjček QR propojí fyzickou věc s nabídkou. Nabídka jde živě hned po publikaci — nálepky vytisknete teď, později nebo hromadně z Garáže. Při předání nejdřív potvrdíte kódem vy; sken souseda půjčku plně aktivuje.",
+      a: "U půjček QR propojí fyzickou věc s nabídkou. Tiskárna není nutná — při předání stačí ukázat kód z telefonu. Nálepku můžete vytisknout později (nebo hromadně z Garáže). Fotku nalepené nálepky nevyžadujeme.",
     },
     "pickup-delivery": {
       q: "Jak funguje vyzvednutí a doručení?",
@@ -146,7 +150,7 @@ export const faq: AppMessages["faq"] = {
     },
     "cancel-booking": {
       q: "Jak zruším rezervaci?",
-      a: "Otevřete půjčku v Půjčky a zvolte Zrušit, pokud je ještě před vyzvednutím. Pravidla refundace závisí na politice hostitele a načasování — viz souhrn rezervace.",
+      a: "Otevřete půjčku v Půjčky a zvolte Zrušit před vyzvednutím. Čekající žádost: kdykoli (autorizace karty se uvolní). Po přijetí: 48+ hodin před začátkem → plná refundace; 24–48 hodin → 50 %; pod 24 hodin → bez refundace půjčky. Zrušení hostitelem před vyzvednutím vrací nájemci 100 %.",
     },
     "host-payouts": {
       q: "Jak dostávají hostitelé peníze?",

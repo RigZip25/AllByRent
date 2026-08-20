@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { APP_NAME } from "../lib/brand";
 import { ArrowDownCircle, CheckCircle2, Sparkles } from "lucide-react";
 import { usePwaUpdate } from "../hooks/PwaUpdateProvider";
@@ -89,13 +89,24 @@ export function PwaUpdateConfirmSheet({
   const { applyUpdate } = usePwaUpdate();
   const [updating, setUpdating] = useState(false);
 
+  useEffect(() => {
+    if (!open) setUpdating(false);
+  }, [open]);
+
   if (!open) return null;
 
   const handleConfirm = async () => {
     setUpdating(true);
+    const watchdog = window.setTimeout(() => {
+      // Last resort if activate/reload stalls (e.g. flaky SW).
+      window.location.reload();
+    }, 8000);
     try {
       await applyUpdate();
+      // applyUpdate should navigate away; if not, force it.
+      window.location.reload();
     } catch {
+      window.clearTimeout(watchdog);
       setUpdating(false);
     }
   };
@@ -137,7 +148,6 @@ export function PwaUpdateConfirmSheet({
           </button>
           <button
             type="button"
-            disabled={updating}
             onClick={onClose}
             className="w-full rounded-2xl border py-3 text-[15px] font-semibold text-gray-600"
             style={{ borderColor: BORDER }}

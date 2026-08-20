@@ -17,6 +17,7 @@ import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { ProfilePhotoCapture } from "../components/profile/ProfilePhotoCapture";
 import { ProfilePhotoOnboarding } from "../components/profile/ProfilePhotoOnboarding";
 import { ProfileTrustBadges } from "../components/profile/ProfileTrustBadges";
+import { ConnectSetupError } from "../components/payments/ConnectSetupError";
 import { getHostResponseDisplay } from "../lib/hostResponseRate";
 import {
   hasAvatarPhoto,
@@ -191,6 +192,7 @@ export function ProfileScreen({
   });
   const [connectBusy, setConnectBusy] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
+  const [connectErrorCode, setConnectErrorCode] = useState<string | null>(null);
   const [publicProfileError, setPublicProfileError] = useState<string | null>(null);
   const authPromptedRef = useRef(false);
 
@@ -553,6 +555,7 @@ export function ProfileScreen({
               onClick={() => {
                 setConnectBusy(true);
                 setConnectError(null);
+                setConnectErrorCode(null);
                 void startConnectOnboarding("/?screen=profile")
                   .then((result) => {
                     if (!result.ok) {
@@ -561,6 +564,7 @@ export function ProfileScreen({
                           ? profileCopy.phoneVerifyNeeded
                           : result.reason,
                       );
+                      setConnectErrorCode(result.code ?? null);
                       return;
                     }
                     window.location.href = result.url;
@@ -570,8 +574,8 @@ export function ProfileScreen({
             />
           </li>
           {connectError ? (
-            <li className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[12px] text-red-800">
-              {connectError}
+            <li className="list-none">
+              <ConnectSetupError message={connectError} code={connectErrorCode} />
             </li>
           ) : null}
         </ul>

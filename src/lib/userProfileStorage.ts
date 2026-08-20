@@ -5,6 +5,7 @@ import {
   getHomeLocation,
   getRentContext,
   hasRentLocationSetup,
+  setHomeLocation,
 } from "./listingStorage";
 import { hasAvatarPhoto, loadAvatarDataUrl } from "./avatarStorage";
 import { readLastKnownFullName } from "./pendingAuthProfile";
@@ -64,6 +65,8 @@ export type UserProfile = {
   email: string;
   phone: string;
   bio: string;
+  /** ISO date YYYY-MM-DD — required for Vehicles booking age gate. */
+  dateOfBirth: string;
   memberSince: string;
   preferredMode: AppMode;
   avatarUrl: string | null;
@@ -103,6 +106,7 @@ function createDefaultProfile(authUserId?: string | null): UserProfile {
     email: "",
     phone: "",
     bio: "",
+    dateOfBirth: "",
     memberSince: new Date().toISOString().slice(0, 10),
     preferredMode: getAppMode(),
     avatarUrl: id ? loadAvatarDataUrl(id) : null,
@@ -291,6 +295,7 @@ export function updateProfileFields(
       | "bio"
       | "avatarUrl"
       | "garageIdentity"
+      | "dateOfBirth"
     >
   >,
 ): UserProfile {
@@ -360,6 +365,9 @@ export type ProfileAuthSyncInput = {
   userEmail?: string | null;
   remoteDisplayName?: string | null;
   remoteEmail?: string | null;
+  remotePhone?: string | null;
+  remoteLocationLabel?: string | null;
+  remotePhoneVerified?: boolean | null;
 };
 
 /** Bind local profile to the signed-in account and replace stale demo fields. */
@@ -388,6 +396,22 @@ export function syncUserProfileFromAuth(input: ProfileAuthSyncInput): UserProfil
   } else if (input.remoteEmail?.trim()) {
     next.email = input.remoteEmail.trim();
     next.verification = { ...next.verification, email: true };
+  }
+
+  const remotePhone = input.remotePhone?.trim() ?? "";
+  if (remotePhone) {
+    next.phone = remotePhone;
+    if (input.remotePhoneVerified) {
+      next.verification = { ...next.verification, phone: true };
+    }
+  }
+
+  const remoteArea = input.remoteLocationLabel?.trim() ?? "";
+  if (remoteArea) {
+    const home = getHomeLocation();
+    if (!home?.displayName?.trim()) {
+      setHomeLocation({ displayName: remoteArea, lat: 0, lng: 0 });
+    }
   }
 
   next.avatarUrl = hasAvatarPhoto(userId) ? loadAvatarDataUrl(userId) : null;

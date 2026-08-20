@@ -6,6 +6,46 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const MS_MIN = 60_000;
 
+type ListingHandoff = {
+  lateReturnFeeEnabled?: boolean;
+  lateReturnGraceMinutes?: number;
+  lateReturnFlatFeeUsd?: string;
+  lateReturnPerHourFeeUsd?: string;
+};
+
+function parseUsdToCents(raw: string | undefined | null): number {
+  if (!raw) return 0;
+  const n = Number.parseFloat(String(raw).replace(/^\$/, "").trim());
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return Math.round(n * 100);
+}
+
+function assessLateFeeFromHandoff(
+  handoff: ListingHandoff | null | undefined,
+  dueMs: number,
+  nowMs: number,
+): { pastGrace: boolean; feeCents: number; summary: string | null } {
+  if (!handoff?.lateReturnFeeEnabled) {
+    return { pastGrace: nowMs > dueMs, feeCents: 0, summary: null };
+  }
+  const graceMinutes =
+    typeof handoff.lateReturnGraceMinutes === "number"
+      ? Math.max(0, Math.round(handoff.lateReturnGraceMinutes))
+      : 30;
+  const flatCents = parseUsdToCents(handoff.lateReturnFlatFeeUsd ?? "20");
+  const perHourCents = parseUsdToCents(handoff.lateReturnPerHourFeeUsd ?? "15");
+  const graceEndsMs = dueMs + graceMinutes * MS_MIN;
+  const pastGrace = nowMs > graceEndsMs;
+  if (!pastGrace) return { pastGrace: false, feeCents: 0, summary: null };
+  const billableMs = Math.max(0, nowMs - graceEndsMs);
+  const billableHours = Math.max(1, Math.ceil(billableMs / (60 * MS_MIN)));
+  const feeCents = flatCents + billableHours * perHourCents;
+  const parts: string[] = [`${graceMinutes}m grace`];
+  if (flatCents > 0) parts.push(`$${(flatCents / 100).toFixed(2)} flat`);
+  if (perHourCents > 0) parts.push(`$${(perHourCents / 100).toFixed(2)}/hr`);
+  return { pastGrace: true, feeCents, summary: parts.join(" · ") };
+}
+
 Deno.serve(async (req) => {
   const cronSecret = Deno.env.get("CRON_SECRET");
   if (cronSecret) {
@@ -25,14 +65,14 @@ Deno.serve(async (req) => {
 
   const admin = createClient(url, key, { auth: { persistSession: false } });
   const now = Date.now();
-  let lateFees = 0;
+  let overdueNotices = 0;
   let recoveryNotices = 0;
   let safelyEscalations = 0;
 
   const { data: rows } = await admin
     .from("rentals")
     .select(
-      "id, owner_id, renter_id, due_at, late_fee_applied_at, overdue_hour_notified_at, owner_recovery_notified_at, safely_escalated_at, safely_policy_id, rental_total_cents, listing_id, start_date, end_date",
+      "id, owner_id, renter_id, due_at, overdue_hour_notified_at, owner_recovery_notified_at, safely_escalated_at, safely_policy_id, listing_id, status",
     )
     .in("status", ["active", "overdue"])
     .not("due_at", "is", null);
@@ -42,32 +82,45 @@ Deno.serve(async (req) => {
     if (Number.isNaN(dueMs) || now <= dueMs) continue;
     const overdueMs = now - dueMs;
 
-    if (overdueMs >= MS_MIN && !rental.late_fee_applied_at) {
-      const lateFee = Math.max(50, Math.round((rental.rental_total_cents as number) > 0 ? 1500 : 1500));
+    if (overdueMs >= MS_MIN && rental.status !== "overdue") {
+      await admin.from("rentals").update({ status: "overdue" }).eq("id", rental.id);
+    }
+
+    if (overdueMs >= MS_MIN && !rental.overdue_hour_notified_at) {
+      const { data: listingRow } = await admin
+        .from("listings")
+        .select("handoff")
+        .eq("id", rental.listing_id as string)
+        .maybeSingle();
+
+      const handoff =
+        listingRow?.handoff && typeof listingRow.handoff === "object"
+          ? (listingRow.handoff as ListingHandoff)
+          : null;
+
+      const late = assessLateFeeFromHandoff(handoff, dueMs, now);
+      let body =
+        "Your return is overdue. Check the late-return policy for this booking — message the host if you need more time.";
+      if (late.summary) {
+        body += ` Policy: ${late.summary}.`;
+        if (late.pastGrace && late.feeCents > 0) {
+          body += ` Estimated late fee so far: $${(late.feeCents / 100).toFixed(2)} (host confirms via invoice).`;
+        }
+      }
+
+      await admin.from("notifications").insert({
+        id: crypto.randomUUID(),
+        recipient_id: rental.renter_id,
+        actor_id: rental.owner_id,
+        type: "general",
+        title: "Return overdue",
+        body,
+      });
       await admin
         .from("rentals")
-        .update({
-          status: "overdue",
-          late_fee_cents: lateFee,
-          late_fee_applied_at: new Date().toISOString(),
-        })
+        .update({ overdue_hour_notified_at: new Date().toISOString() })
         .eq("id", rental.id);
-
-      if (!rental.overdue_hour_notified_at) {
-        await admin.from("notifications").insert({
-          id: crypto.randomUUID(),
-          recipient_id: rental.renter_id,
-          actor_id: rental.owner_id,
-          type: "general",
-          title: "Late return fee applied",
-          body: `Your return is overdue. A late fee of $${(lateFee / 100).toFixed(2)} has been applied.`,
-        });
-        await admin
-          .from("rentals")
-          .update({ overdue_hour_notified_at: new Date().toISOString() })
-          .eq("id", rental.id);
-      }
-      lateFees += 1;
+      overdueNotices += 1;
     }
 
     if (overdueMs >= 24 * 60 * MS_MIN && !rental.owner_recovery_notified_at) {
@@ -107,7 +160,7 @@ Deno.serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({ ok: true, lateFees, recoveryNotices, safelyEscalations }),
+    JSON.stringify({ ok: true, overdueNotices, recoveryNotices, safelyEscalations }),
     { headers: { "Content-Type": "application/json" } },
   );
 });

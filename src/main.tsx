@@ -11,20 +11,26 @@ import { consumeResetAppBeforeBoot } from "./lib/resetAppStorage.ts";
 import { redirectShareLinkToApp } from "./lib/shareLinkRedirect.ts";
 import "./styles/index.css";
 
-// Must run before React mounts so early /api fetch calls hit production.
-installNativeApiBridge();
-void initNativeShell();
+async function boot(): Promise<void> {
+  // Must run before React mounts so early /api fetch calls hit production
+  // and Face ID WebAuthn is shimmed to native APIs.
+  installNativeApiBridge();
+  await initNativeShell();
 
-applyDocumentLang();
-// Set googtrans cookie before first paint so ES/FR/PL users don't flash English.
-bootstrapPageTranslate();
-startLocaleChangeListener();
+  applyDocumentLang();
+  // Set googtrans cookie before first paint so ES/FR/PL users don't flash English.
+  bootstrapPageTranslate();
+  startLocaleChangeListener();
 
-// Reset must run before React so we don't flash the old session, then wipe.
-if (!consumeResetAppBeforeBoot() && !redirectShareLinkToApp()) {
-  createRoot(document.getElementById("root")!).render(
-    <AppErrorBoundary>
-      <App />
-    </AppErrorBoundary>,
-  );
+  // Reset must run before React so we don't flash the old session, then wipe.
+  if (!consumeResetAppBeforeBoot() && !redirectShareLinkToApp()) {
+    createRoot(document.getElementById("root")!).render(
+      <AppErrorBoundary>
+        <App />
+      </AppErrorBoundary>,
+    );
+  }
 }
+
+void boot();
+

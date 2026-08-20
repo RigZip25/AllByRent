@@ -3,7 +3,6 @@ import { resolveSessionUserEmail } from "./authEmail";
 import { clearPendingAuthEmail } from "./authReturn";
 import { consumePendingAuthProfile, peekPendingAuthProfile } from "./pendingAuthProfile";
 import {
-  deviceHasPasskeyHint,
   isPasskeySupported,
   registerPasskey,
   signInWithPasskey as passkeySignIn,
@@ -281,7 +280,7 @@ export async function userHasPasskey(): Promise<boolean> {
 }
 
 export function shouldShowPasskeyLogin(): boolean {
-  return isPasskeySupported() && deviceHasPasskeyHint();
+  return isPasskeySupported();
 }
 
 export function shouldPromptEnablePasskey(): boolean {

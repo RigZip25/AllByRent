@@ -120,6 +120,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         userEmail,
         remoteDisplayName: remote.display_name,
         remoteEmail: remote.email,
+        remotePhone: remote.phone,
+        remoteLocationLabel: remote.location_label,
+        remotePhoneVerified: remote.phone_verified,
       });
     });
   }, [session]);

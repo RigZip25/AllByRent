@@ -5,6 +5,7 @@ import { localizeCategoryLabel } from "../lib/i18n/categoryLabels";
 import { useMessages } from "../lib/i18n/react";
 import { getCategoryCatalog, type CategoryCatalogEntry } from "../lib/homeCategoryPicks";
 import type { SubcategoryItem } from "../screens/listing/listingItemCategories";
+import { ShelfIcon } from "./ShelfIcon";
 
 const GREEN = BRAND_GREEN;
 const BORDER = "#E8E6E0";
@@ -17,8 +18,8 @@ function SubList({ items }: { items: SubcategoryItem[] }) {
           key={item.label}
           className="flex min-w-0 items-start gap-1.5 py-1.5 text-[14px] leading-snug text-gray-700"
         >
-          <span className="mt-px w-4 shrink-0 text-center text-[15px]" aria-hidden>
-            {item.emoji}
+          <span className="mt-px w-4 shrink-0 text-center" aria-hidden>
+            <ShelfIcon source={item} size={18} />
           </span>
           <span className="min-w-0 [overflow-wrap:anywhere]">
             {localizeCategoryLabel(item.label)}

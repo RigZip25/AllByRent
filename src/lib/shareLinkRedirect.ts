@@ -1,6 +1,6 @@
-const SHARE_QUERY_KEYS = ["garage", "item", "listingId", "skipSplash"] as const;
+const SHARE_QUERY_KEYS = ["garage", "item", "listingId", "request", "skipSplash"] as const;
 
-/** Redirect /link and /item/:id to the SPA deep-link query before React boots. */
+/** Redirect /link, /item/:id, and /r/:id to the SPA deep-link query before React boots. */
 export function redirectShareLinkToApp(): boolean {
   if (typeof window === "undefined") return false;
 
@@ -18,6 +18,19 @@ export function redirectShareLinkToApp(): boolean {
       params.set("listingId", decodeURIComponent(itemMatch[1]));
     } catch {
       params.set("listingId", itemMatch[1]);
+    }
+    params.set("skipSplash", "1");
+    redirectToAppSearch(origin, params);
+    return true;
+  }
+
+  const requestMatch = pathname.match(/^\/r\/([^/]+)\/?$/i);
+  if (requestMatch?.[1]) {
+    const params = new URLSearchParams(search);
+    try {
+      params.set("request", decodeURIComponent(requestMatch[1]));
+    } catch {
+      params.set("request", requestMatch[1]);
     }
     params.set("skipSplash", "1");
     redirectToAppSearch(origin, params);

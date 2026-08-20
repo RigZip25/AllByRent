@@ -6,7 +6,12 @@ import {
   type GarageListingSaleMode,
 } from "./garageSaleOfferStorage";
 import { getBidsForListing } from "./garageShopStorage";
-import { updatePublishedListingRemote } from "./listingStorage";
+import {
+  getPublishedListingById,
+  removePublishedListing,
+  removePublishedListingRemote,
+  updatePublishedListingRemote,
+} from "./listingStorage";
 import type { ListingDraft } from "../screens/listing/types";
 import type { MediaRef } from "./mediaStore";
 
@@ -76,13 +81,26 @@ function clearGarageItemSideData(listingId: string): void {
   window.dispatchEvent(new Event("evorios-garage-offers"));
 }
 
-export function removeGarageShelfItem(listingId: string): { ok: true } | { ok: false; reason: string } {
+export async function removeGarageShelfItem(
+  listingId: string,
+): Promise<{ ok: true } | { ok: false; reason: string }> {
   const check = canRemoveGarageShelfItem(listingId);
   if (!check.ok) return check;
 
-  void updatePublishedListingRemote(listingId, { listingStatus: "draft" }, "");
+  const listing = getPublishedListingById(listingId);
+  const ownerId = listing?.hostId?.trim() || "";
+  // Permanent delete — previously this demoted to draft, which left Drafts counter stuck.
+  // Await remote delete so a Garage refresh cannot re-hydrate the row from Supabase.
+  if (ownerId) {
+    try {
+      await removePublishedListingRemote(listingId, ownerId);
+    } catch {
+      removePublishedListing(listingId);
+    }
+  } else {
+    removePublishedListing(listingId);
+  }
   clearGarageItemSideData(listingId);
-  window.dispatchEvent(new Event("evorios-listings"));
   return { ok: true };
 }
 
@@ -135,7 +153,7 @@ export function updateGarageShelfItem(input: {
     );
   }
 
-  window.dispatchEvent(new Event("evorios-listings"));
+  window.dispatchEvent(new CustomEvent("evorios-listings-changed"));
   window.dispatchEvent(new Event("evorios-garage-offers"));
   return { ok: true };
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { Loader2 } from "lucide-react";
+import { Camera, ImageIcon, Loader2 } from "lucide-react";
 import type { StepProps } from "../types";
 import { RentanoHint } from "../../../components/RentanoHint";
 import { MASCOT_NAME } from "../../../lib/brand";
@@ -9,51 +9,35 @@ import { isYardSaleListingActive } from "../../../lib/yardSaleListing";
 import { localizeCategoryLabel } from "../../../lib/i18n/categoryLabels";
 import { useMessages } from "../../../lib/i18n/react";
 import {
-  CATEGORIES,
-  CATEGORY_NAMES,
+  currencySymbol,
+  listingPricingMarket,
+} from "../../../lib/regionalDisplay";
+import { CategorySpecsFields } from "./CategorySpecsFields";
+import { CategoryFactCard } from "../../../components/CategoryFactCard";
+import {
   getCategoryModeRules,
-  getSubcategories,
-  matchListingCategory,
-  type CategoryGrade,
+  requiresAssetIdentity,
+  requiresAssetSerialNumber,
+  requiresAssetVin,
 } from "../listingItemCategories";
-
-function matchAiSubcategory(
-  matchedCategory: string,
-  grade: CategoryGrade,
-  aiSubcategory: string,
-): string {
-  const categoryData = CATEGORIES[matchedCategory];
-  if (!categoryData) return "Other";
-
-  const subs = categoryData[grade] ?? categoryData.personal;
-  const labels = subs.map((item) => item.label);
-  const normalizedAi = aiSubcategory.trim().toLowerCase();
-  if (!normalizedAi) return "Other";
-
-  const exact = labels.find((label) => label.toLowerCase() === normalizedAi);
-  if (exact) return exact;
-
-  const partial = labels.find(
-    (label) =>
-      label.toLowerCase().includes(normalizedAi) ||
-      normalizedAi.includes(label.toLowerCase()),
-  );
-  if (partial) return partial;
-
-  const aiWords = normalizedAi.split(/[^a-z0-9]+/).filter((word) => word.length >= 2);
-  const wordMatch = labels.find((label) => {
-    const labelLower = label.toLowerCase();
-    return aiWords.some(
-      (word) => labelLower.includes(word) || word.includes(labelLower),
-    );
-  });
-  if (wordMatch) return wordMatch;
-
-  return "Other";
-}
+import { isPlantListingSubcategory } from "../categorySpecs";
+import {
+  decodeVinRemote,
+  normalizeVinInput,
+  validateVinFormat,
+  type NhtsaVinDecode,
+} from "../../../lib/vinValidate";
+import {
+  compareVinToKnownIdentity,
+  identityFromVinDecode,
+  resolvePriorVehicleIdentity,
+  type VinIdentityComparison,
+} from "../../../lib/vinVehicleIdentity";
+import { extractVinFromImage } from "../../../lib/vinOcr";
+import { applyAiSuggestionsToDraft } from "../applyAiSuggestions";
+import { listingTitleExample } from "../listingTitlePlaceholders";
 
 const GREEN = "#0D5C3A";
-
 
 function FieldLabel({
   label,
@@ -76,13 +60,17 @@ function inputClassName(extra = "") {
   return `text-body w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-800 outline-none transition-colors focus:border-green-700 ${extra}`;
 }
 
-export function Step2ItemInfo({ draft, setDraft }: StepProps) {
+export function Step2ItemInfo({
+  draft,
+  setDraft,
+  gateMessage = null,
+  onDismissGateMessage,
+}: StepProps & {
+  gateMessage?: string | null;
+  onDismissGateMessage?: () => void;
+}) {
   const { listing } = useMessages();
   const item = listing.itemInfo;
-  const gradeOptions = [
-    { value: "personal" as const, label: item.personal },
-    { value: "professional" as const, label: item.professional },
-  ];
   const conditionOptions = [
     { value: "new" as const, label: item.conditionNew },
     { value: "like_new" as const, label: item.conditionLikeNew },
@@ -95,13 +83,26 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
   const [, setDescriptionImproveTip] = useState<string | null>(null);
   const [isAnimatingDescription, setIsAnimatingDescription] = useState(false);
   const [isDescriptionUserEdited, setIsDescriptionUserEdited] = useState(false);
+  const [vinLookup, setVinLookup] = useState<NhtsaVinDecode | null>(null);
+  const [vinLookingUp, setVinLookingUp] = useState(false);
+  const [vinScanning, setVinScanning] = useState(false);
+  const [vinScanNote, setVinScanNote] = useState<string | null>(null);
+  const [vinIdentityConflict, setVinIdentityConflict] = useState<
+    Extract<VinIdentityComparison, { kind: "mismatch" }> | null
+  >(null);
+  const vinCameraRef = useRef<HTMLInputElement | null>(null);
+  const vinLibraryRef = useRef<HTMLInputElement | null>(null);
 
   const yardSaleListing = isYardSaleListingActive();
-  const categoryModeRules = getCategoryModeRules(draft.category);
+  const plantListing = isPlantListingSubcategory(draft.subcategory);
+  const categoryModeRules = getCategoryModeRules(draft.category, draft.subcategory);
+  const pricingMarket = listingPricingMarket();
+  const moneySymbol = currencySymbol();
   const replacementValueLabel =
     categoryModeRules.replacementValueLabel ?? item.replacementValue;
   const replacementValueHelper =
-    categoryModeRules.replacementValueHelper ?? item.replacementValueHelper;
+    categoryModeRules.replacementValueHelper ??
+    item.replacementValueHelperLocal(pricingMarket.currencyCode);
 
   const clearTypewriter = useCallback(() => {
     if (typewriterRef.current) {
@@ -134,6 +135,25 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
 
   useEffect(() => () => clearTypewriter(), [clearTypewriter]);
 
+  // Plants aren't wear-graded like tools — keep a neutral default and skip the picker.
+  useEffect(() => {
+    if (!plantListing) return;
+    setDraft((current) => {
+      if (!isPlantListingSubcategory(current.subcategory)) return current;
+      const nextCondition = current.condition !== "good" ? "good" : current.condition;
+      const nextReplacement =
+        current.replacementValue.trim() !== "" ? "" : current.replacementValue;
+      if (nextCondition === current.condition && nextReplacement === current.replacementValue) {
+        return current;
+      }
+      return {
+        ...current,
+        condition: nextCondition,
+        replacementValue: nextReplacement,
+      };
+    });
+  }, [plantListing, draft.condition, draft.replacementValue, setDraft]);
+
   const handleImproveDescription = async () => {
     if (isImprovingDescription || isAnimatingDescription) return;
 
@@ -152,10 +172,116 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
   };
 
   const category = draft.category;
-  const grade = draft.grade;
-  const subcategoryOptions =
-    category && grade ? getSubcategories(category, grade) : [];
-  const canPickSubcategory = Boolean(category && grade);
+  const showAssetIdentity = !yardSaleListing && requiresAssetIdentity(category);
+  const vinRequired = requiresAssetVin(category);
+  const serialRequired = requiresAssetSerialNumber(category);
+  const showSerialField = serialRequired;
+  const vinFormat = draft.vin.trim() ? validateVinFormat(draft.vin) : null;
+
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
+
+  /**
+   * Apply VIN decode to make/model/year.
+   * On clear conflict with photo AI / already-filled specs: keep prior identity
+   * and require explicit “Use VIN vehicle instead” — never silent overwrite.
+   */
+  const applyDecodedVin = useCallback(
+    (result: NhtsaVinDecode, options?: { force?: boolean }): "applied" | "conflict" | "failed" => {
+      setVinLookup(result);
+      if (!result.ok) {
+        setVinIdentityConflict(null);
+        return "failed";
+      }
+      const decoded = identityFromVinDecode(result);
+      const prior = resolvePriorVehicleIdentity(draftRef.current);
+      const comparison = compareVinToKnownIdentity(prior, decoded);
+
+      if (!options?.force && comparison.kind === "mismatch") {
+        setVinIdentityConflict(comparison);
+        setDraft((current) => ({ ...current, vin: result.vin }));
+        return "conflict";
+      }
+
+      setVinIdentityConflict(null);
+      const make = decoded.make;
+      const model = decoded.model;
+      const year = decoded.year;
+      setDraft((current) => {
+        const specs = { ...(current.categorySpecs ?? {}) };
+        if (make) specs.make = make;
+        if (model) specs.model = model;
+        if (year) specs.year = year;
+        return {
+          ...current,
+          vin: result.vin,
+          categorySpecs: specs,
+        };
+      });
+      return "applied";
+    },
+    [setDraft],
+  );
+
+  const runVinLookup = useCallback(async () => {
+    const format = validateVinFormat(draft.vin);
+    if (!format.ok) {
+      setVinLookup(null);
+      setVinIdentityConflict(null);
+      return;
+    }
+    setVinLookingUp(true);
+    try {
+      const result = await decodeVinRemote(format.vin);
+      applyDecodedVin(result);
+    } finally {
+      setVinLookingUp(false);
+    }
+  }, [applyDecodedVin, draft.vin]);
+
+  const runVinPhotoScan = useCallback(
+    async (file: File | null | undefined) => {
+      if (!file || vinScanning) return;
+      setVinScanning(true);
+      setVinScanNote(null);
+      try {
+        const ocr = await extractVinFromImage(file);
+        if (!ocr.ok) {
+          setVinScanNote(
+            ocr.reason === "no_vin" ? item.vinScanNoVin : item.vinScanFailed,
+          );
+          return;
+        }
+        setDraft((current) => ({ ...current, vin: ocr.vin }));
+        setVinLookingUp(true);
+        try {
+          const decoded = await decodeVinRemote(ocr.vin);
+          const outcome = applyDecodedVin(decoded);
+          setVinScanNote(outcome === "conflict" ? null : item.vinScanFound);
+        } finally {
+          setVinLookingUp(false);
+        }
+      } finally {
+        setVinScanning(false);
+      }
+    },
+    [
+      applyDecodedVin,
+      item.vinScanFailed,
+      item.vinScanFound,
+      item.vinScanNoVin,
+      setDraft,
+      vinScanning,
+    ],
+  );
+
+  useEffect(() => {
+    if (!showAssetIdentity) {
+      setVinLookup(null);
+      setVinScanNote(null);
+      setVinIdentityConflict(null);
+    }
+  }, [showAssetIdentity]);
 
   useEffect(() => {
     if (!draft.aiSuggestions) {
@@ -168,60 +294,8 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
     if (appliedSuggestionsKey.current === suggestionKey) return;
     appliedSuggestionsKey.current = suggestionKey;
 
-    const matchedCategory = matchListingCategory(suggestions.category);
-    const aiGrade = suggestions.grade || "personal";
-    const matchedSubcategory = matchedCategory
-      ? matchAiSubcategory(matchedCategory, aiGrade, suggestions.subcategory)
-      : "";
-
-    const steps: (() => void)[] = [
-      () =>
-        setDraft((current) => ({ ...current, title: suggestions.title ?? current.title })),
-      () =>
-        setDraft((current) => ({
-          ...current,
-          grade: suggestions.grade || current.grade,
-        })),
-      () =>
-        setDraft((current) => ({
-          ...current,
-          ...(matchedCategory
-            ? {
-                category: matchedCategory,
-                subcategory: matchedSubcategory,
-              }
-            : {}),
-        })),
-      () => {
-        if (!matchedSubcategory) return;
-        setDraft((current) => ({
-          ...current,
-          subcategory: matchedSubcategory,
-        }));
-      },
-      () =>
-        setDraft((current) => ({
-          ...current,
-          condition: suggestions.condition || current.condition,
-        })),
-      () =>
-        setDraft((current) => ({
-          ...current,
-          description: suggestions.description || current.description,
-        })),
-      () =>
-        setDraft((current) => ({
-          ...current,
-          replacementValue:
-            suggestions.estimatedValue != null
-              ? String(suggestions.estimatedValue)
-              : current.replacementValue,
-        })),
-    ];
-
-    steps.forEach((apply, index) => {
-      setTimeout(apply, index * 150);
-    });
+    // Soft-fill only — host already chose category earlier; photos AI may still fill blanks.
+    setDraft((current) => applyAiSuggestionsToDraft(current, suggestions));
   }, [draft.aiSuggestions, setDraft]);
 
   const marketValueLinkTitle =
@@ -250,6 +324,9 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
           <p className="text-label mt-1 text-base text-gray-500">
             {yardSaleListing ? item.subtitleYardSale : item.subtitle}
           </p>
+          {gateMessage ? (
+            <p className="mt-2 text-xs font-semibold text-amber-700">{gateMessage}</p>
+          ) : null}
         </div>
 
         {yardSaleListing ? (
@@ -263,111 +340,355 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
 
         <div className="mb-6">
           <FieldLabel label={item.fieldTitle} required />
-          <div className="relative">
-            <input
-              type="text"
-              maxLength={80}
-              value={draft.title}
-              placeholder={item.titlePlaceholder}
-              className={inputClassName("pr-14")}
-              onChange={(event) => {
-                setDraft((current) => ({ ...current, title: event.target.value }));
-              }}
-            />
-            <span className="text-label pointer-events-none absolute bottom-3 right-4 text-gray-400">
+          <input
+            type="text"
+            maxLength={80}
+            value={draft.title}
+            placeholder={item.titlePlaceholder(
+              listingTitleExample(draft.category, draft.subcategory),
+            )}
+            className={inputClassName()}
+            onChange={(event) => {
+              onDismissGateMessage?.();
+              setDraft((current) => ({ ...current, title: event.target.value }));
+            }}
+          />
+          {draft.title.length >= 70 ? (
+            <p className="text-label mt-1.5 text-right text-gray-400">
               {draft.title.length}/80
-            </span>
-          </div>
+            </p>
+          ) : null}
         </div>
+
+        {!yardSaleListing && draft.category ? (
+          <div className="mb-6 flex flex-wrap gap-2">
+            <span
+              className="rounded-full px-2.5 py-0.5 text-xs font-semibold text-white"
+              style={{ backgroundColor: GREEN }}
+            >
+              {localizeCategoryLabel(draft.category)}
+            </span>
+            {draft.subcategory ? (
+              <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600">
+                {localizeCategoryLabel(draft.subcategory)}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
 
         {!yardSaleListing ? (
         <>
-        <div className="mb-6">
-          <FieldLabel label={item.category} required />
-          <select
-            value={draft.category}
-            className={inputClassName()}
-            onChange={(event) => {
-              setDraft((current) => ({
-                ...current,
-                category: event.target.value,
-                subcategory: "",
-              }));
-            }}
-          >
-            <option value="">{item.selectCategory}</option>
-            {CATEGORY_NAMES.map((name) => (
-              <option key={name} value={name}>
-                {localizeCategoryLabel(name)}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="mb-6">
-          <FieldLabel label={item.grade} required />
-          <div className="flex gap-2">
-            {gradeOptions.map((option) => {
-              const selected = draft.grade === option.value;
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => {
-                    setDraft((current) => ({
-                      ...current,
-                      grade: option.value,
-                      subcategory: "",
-                    }));
-                  }}
-                  className="btn-secondary-card flex-1 rounded-2xl border px-4 py-3 text-base font-semibold transition-colors"
-                  style={{
-                    backgroundColor: selected ? GREEN : "#FFFFFF",
-                    borderColor: GREEN,
-                    color: selected ? "#FFFFFF" : GREEN,
-                  }}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
-          <p className="text-label mt-2 text-sm text-gray-500">
-            {item.gradeHint}
-          </p>
-        </div>
-
-        <div className="mb-6">
-          <FieldLabel label={item.subcategory} required />
-          {!canPickSubcategory && category ? (
-            <p className="text-label mb-2 text-sm text-amber-700">
-              {item.selectGradeForSubs}
+        {showAssetIdentity ? (
+          <div className="mb-6 space-y-4 rounded-2xl border bg-[#F8FAF9] p-4" style={{ borderColor: `${GREEN}33` }}>
+            {vinRequired ? (
+              <CategoryFactCard category="Vehicles" defaultExpanded />
+            ) : draft.category.trim() === "Heavy Equipment" ||
+              draft.category.trim() === "Construction" ? (
+              <CategoryFactCard category={draft.category.trim()} defaultExpanded />
+            ) : null}
+            <p className="text-[13px] leading-snug text-gray-600">
+              {vinRequired ? item.assetIdentityHint : item.serialNumberHelper}
             </p>
-          ) : null}
-          <select
-            value={draft.subcategory}
-            disabled={!canPickSubcategory}
-            className={inputClassName("disabled:cursor-not-allowed disabled:opacity-50")}
-            onChange={(event) => {
-              setDraft((current) => ({
-                ...current,
-                subcategory: event.target.value,
-              }));
-            }}
-          >
-            <option value="">
-              {canPickSubcategory ? item.selectSubcategory : item.selectGradeFirst}
-            </option>
-            {subcategoryOptions.map((sub) => (
-              <option key={sub.label} value={sub.label}>
-                {sub.emoji} {localizeCategoryLabel(sub.label)}
-              </option>
-            ))}
-          </select>
-        </div>
+
+            {vinRequired ? (
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[13px] font-semibold text-gray-700">{item.vinScanCta}</p>
+                  <p className="mt-1 text-[12px] leading-snug text-gray-500">{item.vinScanHelper}</p>
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      disabled={vinScanning}
+                      onClick={() => vinCameraRef.current?.click()}
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-green-700/30 bg-white px-3 py-2.5 text-[13px] font-semibold disabled:opacity-50"
+                      style={{ color: GREEN }}
+                    >
+                      {vinScanning ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Camera className="h-4 w-4" strokeWidth={2} />
+                      )}
+                      {vinScanning ? item.vinScanning : item.vinScanCamera}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={vinScanning}
+                      onClick={() => vinLibraryRef.current?.click()}
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-green-700/30 bg-white px-3 py-2.5 text-[13px] font-semibold disabled:opacity-50"
+                      style={{ color: GREEN }}
+                    >
+                      <ImageIcon className="h-4 w-4" strokeWidth={2} />
+                      {item.vinScanLibrary}
+                    </button>
+                  </div>
+                  <input
+                    ref={vinCameraRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      event.target.value = "";
+                      void runVinPhotoScan(file);
+                    }}
+                  />
+                  <input
+                    ref={vinLibraryRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      event.target.value = "";
+                      void runVinPhotoScan(file);
+                    }}
+                  />
+                  {vinScanNote ? (
+                    <p
+                      className={`mt-2 text-[12px] ${
+                        vinScanNote === item.vinScanFound ? "font-medium" : "text-amber-800"
+                      }`}
+                      style={vinScanNote === item.vinScanFound ? { color: GREEN } : undefined}
+                    >
+                      {vinScanNote}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+
+            {vinRequired || draft.vin.trim() || showSerialField ? (
+              <div>
+                {vinRequired ? (
+                  <p className="mb-2 text-[12px] font-semibold text-gray-600">
+                    {item.vinOrTypeManually}
+                  </p>
+                ) : null}
+                {(vinRequired || draft.vin.trim()) ? (
+                  <>
+                <FieldLabel label={item.vin} required={vinRequired} />
+                <input
+                  type="text"
+                  inputMode="text"
+                  autoCapitalize="characters"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  maxLength={20}
+                  value={draft.vin}
+                  placeholder={item.vinPlaceholder}
+                  className={inputClassName(
+                    vinFormat && !vinFormat.ok
+                      ? "border-red-300 focus:border-red-500"
+                      : vinFormat?.ok
+                        ? "border-green-600 focus:border-green-700"
+                        : "",
+                  )}
+                  onChange={(event) => {
+                    const next = normalizeVinInput(event.target.value).slice(0, 17);
+                    setVinLookup(null);
+                    setVinScanNote(null);
+                    setVinIdentityConflict(null);
+                    setDraft((current) => ({ ...current, vin: next }));
+                  }}
+                  onBlur={() => {
+                    if (draft.vin.trim()) void runVinLookup();
+                  }}
+                />
+                {vinLookingUp || vinScanning ? (
+                  <p className="mt-1.5 flex items-center gap-1.5 text-[12px] text-gray-500">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    {vinScanning ? item.vinScanning : item.vinChecking}
+                  </p>
+                ) : null}
+                {!vinLookingUp && !vinScanning && vinFormat && !vinFormat.ok ? (
+                  <p className="mt-1.5 text-[12px] text-red-600">
+                    {vinFormat.reason === "length"
+                      ? item.vinErrorLength
+                      : vinFormat.reason === "chars"
+                        ? item.vinErrorChars
+                        : vinFormat.reason === "checkDigit"
+                          ? item.vinErrorCheck
+                          : item.vinErrorLength}
+                  </p>
+                ) : null}
+                {!vinLookingUp &&
+                !vinScanning &&
+                vinFormat?.ok &&
+                vinLookup?.ok &&
+                vinIdentityConflict ? (
+                  <div className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3">
+                    <p className="text-[12px] font-medium leading-snug text-amber-950">
+                      {item.vinMismatchWarn(
+                        vinIdentityConflict.decodedLabel,
+                        vinIdentityConflict.priorLabel,
+                      )}
+                    </p>
+                    <button
+                      type="button"
+                      className="mt-2.5 flex min-h-[40px] w-full items-center justify-center rounded-xl border border-amber-300 bg-white px-3 text-[13px] font-semibold text-amber-950 active:bg-amber-100"
+                      onClick={() => {
+                        if (!vinLookup?.ok) return;
+                        applyDecodedVin(vinLookup, { force: true });
+                      }}
+                    >
+                      {item.vinMismatchUseVinCta}
+                    </button>
+                  </div>
+                ) : null}
+                {!vinLookingUp &&
+                !vinScanning &&
+                vinFormat?.ok &&
+                vinLookup?.ok &&
+                !vinIdentityConflict ? (
+                  <p className="mt-1.5 text-[12px] font-medium" style={{ color: GREEN }}>
+                    {item.vinVerified(
+                      [vinLookup.modelYear, vinLookup.make, vinLookup.model]
+                        .filter(Boolean)
+                        .join(" ") || item.vinVerifiedFallback,
+                    )}
+                  </p>
+                ) : null}
+                {!vinLookingUp && !vinScanning && vinFormat?.ok && vinLookup && !vinLookup.ok ? (
+                  <p className="mt-1.5 text-[12px] text-amber-700">{item.vinLookupWarn}</p>
+                ) : null}
+                <p className="mt-1.5 text-[12px] text-gray-500">{item.vinHelper}</p>
+                  </>
+                ) : null}
+              </div>
+            ) : null}
+
+            {showSerialField ? (
+            <div>
+              <FieldLabel label={item.serialNumber} required={serialRequired} />
+              <input
+                type="text"
+                autoCorrect="off"
+                spellCheck={false}
+                maxLength={64}
+                value={draft.serialNumber}
+                placeholder={item.serialNumberPlaceholder}
+                className={inputClassName()}
+                onChange={(event) => {
+                  setDraft((current) => ({
+                    ...current,
+                    serialNumber: event.target.value.trimStart().slice(0, 64),
+                  }));
+                }}
+                onBlur={() => {
+                  setDraft((current) => ({
+                    ...current,
+                    serialNumber: current.serialNumber.trim(),
+                  }));
+                }}
+              />
+              <p className="mt-1.5 text-[12px] text-gray-500">{item.serialNumberHelper}</p>
+            </div>
+            ) : null}
+          </div>
+        ) : null}
         </>
         ) : null}
 
+        {!yardSaleListing &&
+        (draft.category.trim() === "Vehicles" ||
+          draft.category.trim() === "Boats & Water" ||
+          draft.category.trim() === "Heavy Equipment") &&
+        (draft.category.trim() !== "Vehicles" ||
+          Boolean(
+            ((draft.categorySpecs?.make ?? "").trim() &&
+              (draft.categorySpecs?.model ?? "").trim() &&
+              (draft.categorySpecs?.year ?? "").trim()) ||
+              draft.vin.trim().length >= 11,
+          )) ? (
+          <div
+            className="mb-6 rounded-2xl border bg-white p-4"
+            style={{ borderColor: `${GREEN}33` }}
+          >
+            <p className="text-[14px] font-semibold" style={{ color: GREEN }}>
+              {listing.modes.pathChoiceTitle}
+            </p>
+            <p className="mt-1 text-[13px] leading-snug text-gray-600">
+              {listing.modes.pathChoiceBody}
+            </p>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              {(
+                [
+                  {
+                    key: "rent" as const,
+                    label: listing.modes.pathChoiceRent,
+                    active: draft.modes.rent && !draft.modes.sell,
+                  },
+                  {
+                    key: "sell" as const,
+                    label: listing.modes.pathChoiceSell,
+                    active: draft.modes.sell && !draft.modes.rent && !draft.modes.gift,
+                  },
+                  {
+                    key: "both" as const,
+                    label: listing.modes.pathChoiceBoth,
+                    active: draft.modes.rent && draft.modes.sell && !draft.modes.gift,
+                  },
+                ] as const
+              ).map((chip) => (
+                <button
+                  key={chip.key}
+                  type="button"
+                  onClick={() => {
+                    setDraft((current) => {
+                      if (chip.key === "rent") {
+                        return {
+                          ...current,
+                          modes: {
+                            ...current.modes,
+                            rent: true,
+                            sell: false,
+                            gift: false,
+                            rentToOwn: false,
+                          },
+                        };
+                      }
+                      if (chip.key === "sell") {
+                        return {
+                          ...current,
+                          modes: {
+                            ...current.modes,
+                            rent: false,
+                            sell: true,
+                            gift: false,
+                            rentToOwn: false,
+                          },
+                        };
+                      }
+                      return {
+                        ...current,
+                        modes: {
+                          ...current.modes,
+                          rent: true,
+                          sell: true,
+                          gift: false,
+                          rentToOwn: false,
+                        },
+                      };
+                    });
+                  }}
+                  className={`rounded-2xl border px-2 py-2.5 text-center text-[13px] font-semibold transition-colors ${
+                    chip.active
+                      ? "border-transparent text-white"
+                      : "border-gray-200 bg-white text-gray-700"
+                  }`}
+                  style={chip.active ? { backgroundColor: GREEN } : undefined}
+                >
+                  {chip.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {!yardSaleListing ? <CategorySpecsFields draft={draft} setDraft={setDraft} /> : null}
+
+        {!plantListing ? (
         <div className="mb-6">
           <FieldLabel label={item.condition} required />
           <div className="grid grid-cols-2 gap-2">
@@ -396,6 +717,7 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
             })}
           </div>
         </div>
+        ) : null}
 
         <motion.div
           className="mb-6"
@@ -425,6 +747,7 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
               className={inputClassName("min-h-[120px] resize-none pr-16")}
               onChange={(event) => {
                 const value = event.target.value;
+                onDismissGateMessage?.();
                 setDescriptionImproveTip(null);
                 setIsDescriptionUserEdited(value.length > 0);
                 setDraft((current) => ({
@@ -460,11 +783,12 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
           ) : null}
         </motion.div>
 
+        {!plantListing ? (
         <div className="mb-6">
           <FieldLabel label={replacementValueLabel} required />
           <div className="relative">
             <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
-              $
+              {moneySymbol}
             </span>
             <input
               type="number"
@@ -485,13 +809,18 @@ export function Step2ItemInfo({ draft, setDraft }: StepProps) {
             <RentanoHint
               className="mt-3"
               hint={item.notSureValue}
-              linkText={item.searchPriceLink(marketValueLinkTitle)}
+              linkText={item.searchPriceLinkLocal(
+                marketValueLinkTitle,
+                pricingMarket.currencyCode,
+                pricingMarket.countryLabel,
+              )}
               linkUrl={`https://www.google.com/search?q=${encodeURIComponent(
-                `${draft.title} price new`,
+                `${draft.title} new price ${pricingMarket.countryLabel} ${pricingMarket.currencyCode}`,
               )}`}
             />
           ) : null}
         </div>
+        ) : null}
 
         <div className="mb-6">
           <FieldLabel label={item.instructionsUrl} />

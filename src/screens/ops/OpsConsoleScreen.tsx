@@ -28,6 +28,7 @@ import {
   type SeoLocation,
 } from "../../lib/seo/seoLocations";
 import { setClusterRadiusMi } from "../../lib/clusterConfig";
+import { formatDistanceFromMiles } from "../../lib/regionalDisplay";
 import {
   fetchRemoteFeedback,
   loadLocalFeedback,
@@ -473,7 +474,7 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
               ["Сейчас вне", String(pulse.bookingsActive)],
               ["Завершено", String(pulse.bookingsCompleted)],
               ["Собрано комиссий", `$${pulse.serviceFeesCapturedUsd.toFixed(2)}`],
-              ["Кластер", `${pulse.clusterRadiusMi} mi`],
+              ["Кластер", formatDistanceFromMiles(pulse.clusterRadiusMi)],
             ].map(([label, value]) => (
               <div
                 key={label}

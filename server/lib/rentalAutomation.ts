@@ -2,10 +2,15 @@ import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 import { isStripeServerConfigured } from "./keys";
-import { getOrCreateStripeCustomer } from "./stripe/customer";
-import { resolveHostStripeCurrency } from "./stripe/connectPayout";
 
 const MS_MIN = 60_000;
+/** Soft no-show suggest — align with client NO_SHOW_MARK_AFTER_MS (2h). */
+const NO_SHOW_SUGGEST_MS = 2 * 60 * MS_MIN;
+/**
+ * If host never confirms after soft suggest, auto-cancel & free calendar
+ * (market-like peer car-share: multi-hour window then platform cancel).
+ */
+const NO_SHOW_AUTO_CANCEL_MS = 24 * 60 * MS_MIN;
 
 type RentalRow = {
   id: string;
@@ -29,13 +34,50 @@ type RentalRow = {
   safely_policy_id: string | null;
 };
 
-function parseDailyRateCents(pricing: unknown): number {
-  if (!pricing || typeof pricing !== "object") return 0;
-  const daily = (pricing as { dailyRate?: string }).dailyRate;
-  if (typeof daily !== "string") return 0;
-  const n = Number.parseFloat(daily.replace(/^\$/, "").trim());
+type ListingHandoff = {
+  lateReturnFeeEnabled?: boolean;
+  lateReturnGraceMinutes?: number;
+  lateReturnFlatFeeUsd?: string;
+  lateReturnPerHourFeeUsd?: string;
+};
+
+function parseUsdToCents(raw: string | number | undefined | null): number {
+  if (raw == null) return 0;
+  const n =
+    typeof raw === "number"
+      ? raw
+      : Number.parseFloat(String(raw).replace(/^\$/, "").trim());
   if (!Number.isFinite(n) || n <= 0) return 0;
   return Math.round(n * 100);
+}
+
+function assessLateFeeFromHandoff(
+  handoff: ListingHandoff | null | undefined,
+  dueMs: number,
+  nowMs: number,
+): { pastGrace: boolean; feeCents: number; summary: string | null } {
+  if (!handoff?.lateReturnFeeEnabled) {
+    return { pastGrace: nowMs > dueMs, feeCents: 0, summary: null };
+  }
+  const graceMinutes =
+    typeof handoff.lateReturnGraceMinutes === "number" &&
+    Number.isFinite(handoff.lateReturnGraceMinutes)
+      ? Math.max(0, Math.round(handoff.lateReturnGraceMinutes))
+      : 30;
+  const flatCents = parseUsdToCents(handoff.lateReturnFlatFeeUsd ?? "20");
+  const perHourCents = parseUsdToCents(handoff.lateReturnPerHourFeeUsd ?? "15");
+  const graceEndsMs = dueMs + graceMinutes * MS_MIN;
+  const pastGrace = nowMs > graceEndsMs;
+  if (!pastGrace) {
+    return { pastGrace: false, feeCents: 0, summary: null };
+  }
+  const billableMs = Math.max(0, nowMs - graceEndsMs);
+  const billableHours = Math.max(1, Math.ceil(billableMs / (60 * MS_MIN)));
+  const feeCents = flatCents + billableHours * perHourCents;
+  const parts: string[] = [`${graceMinutes}m grace`];
+  if (flatCents > 0) parts.push(`$${(flatCents / 100).toFixed(2)} flat`);
+  if (perHourCents > 0) parts.push(`$${(perHourCents / 100).toFixed(2)}/hr`);
+  return { pastGrace: true, feeCents, summary: parts.join(" · ") };
 }
 
 async function insertNotification(
@@ -54,44 +96,22 @@ async function insertNotification(
   });
 }
 
-async function dailyRateForRental(
-  admin: SupabaseClient,
-  rental: RentalRow,
-): Promise<number> {
-  if (rental.rental_total_cents > 0) {
-    const days = Math.max(
-      1,
-      Math.ceil(
-        (new Date(rental.end_date).getTime() - new Date(rental.start_date).getTime()) /
-          (24 * 60 * 60 * 1000),
-      ) + 1,
-    );
-    return Math.max(50, Math.round(rental.rental_total_cents / days));
-  }
-
-  const { data: listing } = await admin
-    .from("listings")
-    .select("pricing")
-    .eq("id", rental.listing_id)
-    .maybeSingle();
-
-  return Math.max(50, parseDailyRateCents(listing?.pricing));
-}
-
 export async function runNoShowAutomation(admin: SupabaseClient): Promise<{
   reminded: number;
-  cancelled: number;
+  suggested: number;
+  autoCancelled: number;
 }> {
   const now = Date.now();
   let reminded = 0;
-  let cancelled = 0;
+  let suggested = 0;
+  let autoCancelled = 0;
 
   const { data: rows } = await admin
     .from("rentals")
     .select(
       "id, listing_id, owner_id, renter_id, status, pickup_at, due_at, start_date, end_date, no_show_renter_notified_at, no_show_automation_at, no_show_fee_cents, late_fee_cents, late_fee_applied_at, overdue_hour_notified_at, owner_recovery_notified_at, safely_escalated_at, rental_total_cents, safely_policy_id",
     )
-    .eq("status", "pending_checkin")
+    .in("status", ["pending_checkin", "upcoming", "no_show"])
     .not("pickup_at", "is", null);
 
   const rentals = (rows ?? []) as RentalRow[];
@@ -102,7 +122,11 @@ export async function runNoShowAutomation(admin: SupabaseClient): Promise<{
 
     const elapsed = now - pickupMs;
 
-    if (elapsed >= 30 * MS_MIN && !rental.no_show_renter_notified_at) {
+    if (
+      (rental.status === "pending_checkin" || rental.status === "upcoming") &&
+      elapsed >= 30 * MS_MIN &&
+      !rental.no_show_renter_notified_at
+    ) {
       await insertNotification(admin, {
         recipientId: rental.renter_id,
         actorId: rental.owner_id,
@@ -117,54 +141,17 @@ export async function runNoShowAutomation(admin: SupabaseClient): Promise<{
       reminded += 1;
     }
 
-    if (elapsed >= 60 * MS_MIN && !rental.no_show_automation_at) {
-      const feeCents = await dailyRateForRental(admin, rental);
-
-      if (isStripeServerConfigured()) {
-        try {
-          const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-            apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion,
-          });
-          const { data: profile } = await admin
-            .from("profiles")
-            .select("stripe_customer_id")
-            .eq("id", rental.renter_id)
-            .maybeSingle();
-
-          let customerId = profile?.stripe_customer_id as string | undefined;
-          if (!customerId) {
-            const { data: userData } = await admin.auth.admin.getUserById(rental.renter_id);
-            customerId = await getOrCreateStripeCustomer(
-              stripe,
-              admin,
-              rental.renter_id,
-              userData.user?.email,
-            );
-          }
-
-          await stripe.paymentIntents.create({
-            amount: feeCents,
-            currency: await resolveHostStripeCurrency(admin, rental.owner_id),
-            customer: customerId,
-            confirm: true,
-            off_session: true,
-            metadata: {
-              rental_id: rental.id,
-              payment_type: "no_show_fee",
-            },
-          });
-        } catch {
-          // Fee recorded on rental even if charge fails (e.g. no saved card).
-        }
-      }
-
+    // Soft suggest: status → no_show, calendar still busy until host confirms or auto-cancel.
+    if (
+      (rental.status === "pending_checkin" || rental.status === "upcoming") &&
+      elapsed >= NO_SHOW_SUGGEST_MS &&
+      !rental.no_show_automation_at
+    ) {
       await admin
         .from("rentals")
         .update({
-          status: "cancelled",
-          no_show_marked_at: new Date().toISOString(),
+          status: "no_show",
           no_show_automation_at: new Date().toISOString(),
-          no_show_fee_cents: feeCents,
         })
         .eq("id", rental.id);
 
@@ -172,24 +159,85 @@ export async function runNoShowAutomation(admin: SupabaseClient): Promise<{
         recipientId: rental.owner_id,
         actorId: rental.renter_id,
         type: "general",
-        title: "Booking cancelled — no-show",
-        body: "The renter did not check in within 60 minutes. The booking was cancelled and a one-day fee may apply.",
+        title: "Mark no-show to free your calendar",
+        body: "The renter has not checked in 2 hours after scheduled pickup. Mark no-show in Rentals now — trip price is typically kept. If you take no action, we auto-cancel and free the calendar after 24 hours from pickup.",
       });
 
-      cancelled += 1;
+      await insertNotification(admin, {
+        recipientId: rental.renter_id,
+        actorId: rental.owner_id,
+        type: "general",
+        title: "Pickup window closing",
+        body: "You have not checked in 2 hours after scheduled pickup. Message the host if you still intend to pick up — they may mark no-show and keep the trip price.",
+      });
+
+      suggested += 1;
+      continue;
+    }
+
+    // Auto-cancel / free calendar if host never marks after soft suggest (24h from pickup).
+    if (
+      rental.status === "no_show" &&
+      elapsed >= NO_SHOW_AUTO_CANCEL_MS &&
+      rental.no_show_automation_at
+    ) {
+      const { data: existing } = await admin
+        .from("rentals")
+        .select("no_show_marked_at, picked_up_at, host_handed_over_at, renter_received_at")
+        .eq("id", rental.id)
+        .maybeSingle();
+
+      if (
+        existing?.no_show_marked_at ||
+        existing?.picked_up_at ||
+        existing?.host_handed_over_at ||
+        existing?.renter_received_at
+      ) {
+        continue;
+      }
+
+      const nowIso = new Date().toISOString();
+      const feeCents = Math.max(0, Math.round(rental.no_show_fee_cents || 0));
+      await admin
+        .from("rentals")
+        .update({
+          status: "cancelled",
+          no_show_marked_at: nowIso,
+        })
+        .eq("id", rental.id);
+
+      await insertNotification(admin, {
+        recipientId: rental.owner_id,
+        actorId: null,
+        type: "general",
+        title: "No-show auto-cancelled — calendar freed",
+        body: feeCents > 0
+          ? "Renter never checked in. Booking cancelled 24h after pickup; calendar is free. Optional no-show fee was configured — claim from deposit if appropriate."
+          : "Renter never checked in. Booking cancelled 24h after pickup; calendar is free. Trip price is typically kept.",
+      });
+
+      await insertNotification(admin, {
+        recipientId: rental.renter_id,
+        actorId: null,
+        type: "general",
+        title: "Booking cancelled — no-show",
+        body: "This booking was cancelled because pickup never happened within 24 hours of the scheduled start. The trip price is typically kept per no-show policy.",
+      });
+
+      autoCancelled += 1;
     }
   }
 
-  return { reminded, cancelled };
+  return { reminded, suggested, autoCancelled };
 }
 
 export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
-  lateFees: number;
+  overdueNotices: number;
   recoveryNotices: number;
   safelyEscalations: number;
 }> {
   const now = Date.now();
-  let lateFees = 0;
+  let overdueNotices = 0;
   let recoveryNotices = 0;
   let safelyEscalations = 0;
 
@@ -208,34 +256,46 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
     if (Number.isNaN(dueMs) || now <= dueMs) continue;
 
     const overdueMs = now - dueMs;
-    const dailyCents = await dailyRateForRental(admin, rental);
 
-    if (overdueMs >= MS_MIN && !rental.late_fee_applied_at) {
-      const lateFee = Math.round(dailyCents * 1.5);
-      await admin
-        .from("rentals")
-        .update({
-          status: "overdue",
-          late_fee_cents: lateFee,
-          late_fee_applied_at: new Date().toISOString(),
-        })
-        .eq("id", rental.id);
+    if (overdueMs >= MS_MIN && rental.status !== "overdue") {
+      await admin.from("rentals").update({ status: "overdue" }).eq("id", rental.id);
+    }
 
-      if (!rental.overdue_hour_notified_at) {
-        await insertNotification(admin, {
-          recipientId: rental.renter_id,
-          actorId: rental.owner_id,
-          type: "general",
-          title: "Late return fee applied",
-          body: `Your return is overdue. A late fee of $${(lateFee / 100).toFixed(2)} (1.5× daily rate) has been applied.`,
-        });
-        await admin
-          .from("rentals")
-          .update({ overdue_hour_notified_at: new Date().toISOString() })
-          .eq("id", rental.id);
+    if (overdueMs >= MS_MIN && !rental.overdue_hour_notified_at) {
+      const { data: listingRow } = await admin
+        .from("listings")
+        .select("handoff")
+        .eq("id", rental.listing_id)
+        .maybeSingle();
+
+      const handoff =
+        listingRow?.handoff && typeof listingRow.handoff === "object"
+          ? (listingRow.handoff as ListingHandoff)
+          : null;
+
+      const late = assessLateFeeFromHandoff(handoff, dueMs, now);
+      let body =
+        "Your return is overdue. Check the late-return policy for this booking — message the host if you need more time.";
+      if (late.summary) {
+        body += ` Policy: ${late.summary}.`;
+        if (late.pastGrace && late.feeCents > 0) {
+          body += ` Estimated late fee so far: $${(late.feeCents / 100).toFixed(2)} (host confirms via invoice).`;
+        }
       }
 
-      lateFees += 1;
+      await insertNotification(admin, {
+        recipientId: rental.renter_id,
+        actorId: rental.owner_id,
+        type: "general",
+        title: "Return overdue",
+        body,
+      });
+      await admin
+        .from("rentals")
+        .update({ overdue_hour_notified_at: new Date().toISOString() })
+        .eq("id", rental.id);
+
+      overdueNotices += 1;
     }
 
     if (overdueMs >= 24 * 60 * MS_MIN && !rental.owner_recovery_notified_at) {
@@ -283,7 +343,7 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
     }
   }
 
-  return { lateFees, recoveryNotices, safelyEscalations };
+  return { overdueNotices, recoveryNotices, safelyEscalations };
 }
 
 type PendingApprovalRow = {

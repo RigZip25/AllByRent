@@ -13,6 +13,7 @@ import {
   isListingQueuedForBulk,
   loadQrBulkQueueListingIds,
   removeListingFromQrBulkQueue,
+  removePublishedListing,
   removePublishedListingRemote,
   updatePublishedListingRemote,
   type PublishedListingPatch,
@@ -22,17 +23,50 @@ import type { ListingDraft } from "./types";
 import { QR_PDF_FILENAMES } from "../../lib/brand";
 import { generateQRStickerPdf, presentGeneratedPdf } from "../../lib/generateQRSticker";
 import { getListingDisplayTitle, getListingPublicUrl, listingDraftToStickerRow, listingRequiresQrSticker } from "../../lib/listingQr";
+import { ShowListingQrOverlay } from "../../components/listings/ShowListingQrOverlay";
 import {
   deliverySummaryForListing,
   listingOffersDelivery,
 } from "../../lib/rentalPricing";
+import {
+  distanceInputFromMiles,
+  formatDistanceFromMiles,
+  formatWeightFromLbs,
+  milesFromDistanceInput,
+} from "../../lib/regionalDisplay";
 import type { MinimumRentalPeriod } from "./types";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMessages } from "../../lib/i18n/react";
 import type { AppMessages } from "../../lib/i18n/types";
+import { AvailabilityCalendar } from "../../components/availability/AvailabilityCalendar";
+import { CategoryFactCard } from "../../components/CategoryFactCard";
+import {
+  fetchListingBusyIntervals,
+  type BusyInterval,
+} from "../../lib/availabilityBusy";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
+
+function HostListingOccupancyCalendar({ listing }: { listing: ListingDraft }) {
+  const [busy, setBusy] = useState<BusyInterval[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    void fetchListingBusyIntervals(listing.id, listing.blockedDates).then((result) => {
+      if (!mounted) return;
+      setBusy(result.intervals);
+      setLoading(false);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [listing.id, listing.blockedDates]);
+
+  return <AvailabilityCalendar busyIntervals={busy} readOnly loading={loading} />;
+}
 
 type QuickEditKey =
   | "title"
@@ -118,6 +152,7 @@ export function HostListingDetailScreen({
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [bulkCount, setBulkCount] = useState(() => loadQrBulkQueueListingIds().length);
+  const [showOnScreenOpen, setShowOnScreenOpen] = useState(false);
   const [activeEdit, setActiveEdit] = useState<QuickEditKey | null>(null);
   const [editValue, setEditValue] = useState("");
   const [editError, setEditError] = useState<string | null>(null);
@@ -169,7 +204,8 @@ export function HostListingDetailScreen({
     else if (key === "dailyRate") setEditValue(listing.pricing.dailyRate ?? "");
     else if (key === "minimumPeriod") setEditValue(listing.pricing.minimumPeriod);
     else if (key === "weight") setEditValue(typeof listing.handoff.itemWeightLbs === "number" ? String(listing.handoff.itemWeightLbs) : "");
-    else if (key === "deliveryMaxMiles") setEditValue(String(listing.handoff.deliveryMaxMiles ?? 0));
+    else if (key === "deliveryMaxMiles")
+      setEditValue(String(distanceInputFromMiles(listing.handoff.deliveryMaxMiles ?? 0)));
     else if (key === "deliveryRoundTripFee") setEditValue(listing.handoff.deliveryRoundTripFee ?? "");
     else if (key === "availabilityTimes") {
       setEditValue(
@@ -229,7 +265,7 @@ export function HostListingDetailScreen({
         setEditError(parsed.message);
         return;
       }
-      patch = { handoff: { deliveryMaxMiles: Math.round(parsed.value) } };
+      patch = { handoff: { deliveryMaxMiles: milesFromDistanceInput(parsed.value) } };
     } else if (activeEdit === "deliveryRoundTripFee") {
       const raw = editValue.replace(/^\$/, "").trim();
       if (!raw) {
@@ -380,6 +416,30 @@ export function HostListingDetailScreen({
     );
   }
 
+  const runDelete = () => {
+    const ownerId = resolveHostAccountId(auth.userId);
+    if (saveBusy) return;
+    setSaveBusy(true);
+    setActionError(null);
+    const finish = () => {
+      onDeleted?.();
+      if (!onDeleted) onBack();
+    };
+    if (ownerId) {
+      void removePublishedListingRemote(listing!.id, ownerId)
+        .then(finish)
+        .catch(() => {
+          setActionError(t.deleteFailed);
+          setConfirmDelete(false);
+        })
+        .finally(() => setSaveBusy(false));
+      return;
+    }
+    removePublishedListing(listing!.id);
+    setSaveBusy(false);
+    finish();
+  };
+
   const availabilityDays =
     listing.handoff.inPersonDays?.length ? listing.handoff.inPersonDays.join(", ") : t.notSet;
   const availabilityHours =
@@ -396,7 +456,11 @@ export function HostListingDetailScreen({
       ? t.editDailyPrice
       : activeEdit === "minimumPeriod"
         ? t.editMinimumRental
-        : activeEdit ?? "";
+        : activeEdit === "description"
+          ? t.labelDescription
+          : activeEdit === "title"
+            ? t.labelTitle
+            : activeEdit ?? "";
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -406,16 +470,60 @@ export function HostListingDetailScreen({
             <ArrowLeft className="h-4 w-4" style={{ color: GREEN }} />
             {t.back}
           </button>
-          <button
-            type="button"
-            onClick={() => onEdit(listing.id)}
-            className="inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm font-bold"
-            style={{ borderColor: BORDER, color: GREEN }}
-          >
-            <Pencil className="h-4 w-4" />
-            {t.fullEdit}
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              disabled={saveBusy}
+              onClick={() => {
+                setActionError(null);
+                setConfirmDelete(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-bold text-red-700 disabled:opacity-50"
+              style={{ borderColor: "#FECACA", backgroundColor: "#FEF2F2" }}
+              aria-label={t.deleteListing}
+            >
+              <Trash2 className="h-4 w-4" />
+              {t.deleteListing}
+            </button>
+            <button
+              type="button"
+              onClick={() => onEdit(listing.id)}
+              className="inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm font-bold"
+              style={{ borderColor: BORDER, color: GREEN }}
+            >
+              <Pencil className="h-4 w-4" />
+              {t.fullEdit}
+            </button>
+          </div>
         </div>
+        {confirmDelete ? (
+          <div
+            className="mt-3 rounded-2xl border p-3"
+            style={{ borderColor: "#FECACA", backgroundColor: "#FEF2F2" }}
+          >
+            <p className="text-[13px] font-semibold text-red-800">{t.deleteConfirm}</p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                disabled={saveBusy}
+                onClick={() => setConfirmDelete(false)}
+                className="rounded-xl border bg-white py-2.5 text-sm font-bold text-gray-700"
+                style={{ borderColor: BORDER }}
+              >
+                {t.cancel}
+              </button>
+              <button
+                type="button"
+                disabled={saveBusy}
+                onClick={runDelete}
+                className="rounded-xl bg-red-600 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+              >
+                {saveBusy ? t.deleting : t.yesDelete}
+              </button>
+            </div>
+            {actionError ? <p className="mt-2 text-center text-xs text-red-600">{actionError}</p> : null}
+          </div>
+        ) : null}
         <h1 className="mt-3 text-[20px] font-extrabold" style={{ color: GREEN }}>
           {getListingDisplayTitle(listing.title)}
         </h1>
@@ -426,9 +534,16 @@ export function HostListingDetailScreen({
       </header>
 
       <div className="screen-scroll flex-1 min-h-0 px-4 pb-6 pt-4">
+        {listing.category.trim() === "Vehicles" ? (
+          <CategoryFactCard category="Vehicles" className="mb-4" />
+        ) : null}
+        {listing.category.trim() === "Heavy Equipment" ||
+        listing.category.trim() === "Construction" ? (
+          <CategoryFactCard category={listing.category.trim()} className="mb-4" />
+        ) : null}
         {listingRequiresQrSticker(listing.modes) ? (
         <section
-          className="sticky top-0 z-10 mb-4 rounded-3xl border bg-white p-4 shadow-sm"
+          className="mb-4 rounded-3xl border bg-white p-4 shadow-sm"
           style={{ borderColor: BORDER }}
         >
           <div className="flex items-center gap-3">
@@ -437,40 +552,50 @@ export function HostListingDetailScreen({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-gray-900">{t.qrForListing}</p>
-              <p className="mt-0.5 truncate text-xs text-gray-500">{getListingPublicUrl(listing)}</p>
+              <p className="mt-0.5 text-xs text-gray-500">{t.showOnScreenHint}</p>
             </div>
           </div>
 
-          <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="mt-3 space-y-2">
             <button
               type="button"
-              onClick={() => void runPrintSingle()}
-              disabled={pdfLoading}
-              className="w-full rounded-xl py-3 text-sm font-bold text-white disabled:opacity-50"
+              onClick={() => setShowOnScreenOpen(true)}
+              className="w-full rounded-xl py-3 text-sm font-bold text-white"
               style={{ backgroundColor: GREEN }}
             >
-              {t.printThisQr}
+              {t.showOnScreen}
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                const next = queuedForBulk ? removeListingFromQrBulkQueue(listing.id) : addListingToQrBulkQueue(listing.id);
-                setBulkCount(next);
-              }}
-              className="w-full rounded-xl border-2 py-3 text-sm font-bold"
-              style={{ borderColor: GREEN, color: GREEN }}
-            >
-              {queuedForBulk ? t.removeFromBulk : t.addToBulk}
-            </button>
-            <button
-              type="button"
-              onClick={() => void runPrintBulk()}
-              disabled={pdfLoading || bulkCount === 0}
-              className="col-span-2 w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
-              style={{ borderColor: GREEN, color: GREEN }}
-            >
-              {t.bulkPrint(bulkCount)}
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => void runPrintSingle()}
+                disabled={pdfLoading}
+                className="w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
+                style={{ borderColor: GREEN, color: GREEN }}
+              >
+                {t.printThisQr}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const next = queuedForBulk ? removeListingFromQrBulkQueue(listing.id) : addListingToQrBulkQueue(listing.id);
+                  setBulkCount(next);
+                }}
+                className="w-full rounded-xl border-2 py-3 text-sm font-bold"
+                style={{ borderColor: GREEN, color: GREEN }}
+              >
+                {queuedForBulk ? t.removeFromBulk : t.addToBulk}
+              </button>
+              <button
+                type="button"
+                onClick={() => void runPrintBulk()}
+                disabled={pdfLoading || bulkCount === 0}
+                className="col-span-2 w-full rounded-xl border-2 py-3 text-sm font-bold disabled:opacity-50"
+                style={{ borderColor: GREEN, color: GREEN }}
+              >
+                {t.bulkPrint(bulkCount)}
+              </button>
+            </div>
           </div>
 
           {bulkCount > 0 ? (
@@ -501,7 +626,7 @@ export function HostListingDetailScreen({
               editAria={t.editAria}
             />
             <DetailRow
-              label={t.labelTerms}
+              label={t.labelDescription}
               value={
                 listing.description?.trim()
                   ? listing.description.trim().length > 80
@@ -552,13 +677,19 @@ export function HostListingDetailScreen({
             />
             <DetailRow
               label={t.labelWeight}
-              value={typeof listing.handoff.itemWeightLbs === "number" ? String(listing.handoff.itemWeightLbs) : "—"}
+              value={
+                typeof listing.handoff.itemWeightLbs === "number"
+                  ? formatWeightFromLbs(listing.handoff.itemWeightLbs)
+                  : "—"
+              }
               onEdit={() => openEditor("weight")}
               editAria={t.editAria}
             />
             <DetailRow
               label={t.labelDeliveryMaxMiles}
-              value={String(listing.handoff.deliveryMaxMiles)}
+              value={formatDistanceFromMiles(listing.handoff.deliveryMaxMiles, undefined, {
+                plus: false,
+              })}
               onEdit={() => openEditor("deliveryMaxMiles")}
               editAria={t.editAria}
             />
@@ -578,6 +709,16 @@ export function HostListingDetailScreen({
               editAria={t.editAria}
             />
           </dl>
+        </section>
+
+        <section className="mt-4 rounded-3xl border bg-white p-5" style={{ borderColor: BORDER }}>
+          <h2 className="text-[13px] font-bold uppercase tracking-wide text-gray-400">
+            {t.bookingCalendarTitle}
+          </h2>
+          <p className="mt-1 text-[13px] text-gray-500">{t.bookingCalendarHint}</p>
+          <div className="mt-3">
+            <HostListingOccupancyCalendar listing={listing} />
+          </div>
         </section>
 
         <section className="mt-4 rounded-3xl border bg-white p-5" style={{ borderColor: BORDER }}>
@@ -642,21 +783,8 @@ export function HostListingDetailScreen({
                   </button>
                   <button
                     type="button"
-                    disabled={saveBusy || !auth.userId}
-                    onClick={() => {
-                      if (!auth.userId || saveBusy) return;
-                      setSaveBusy(true);
-                      setActionError(null);
-                      void removePublishedListingRemote(listing.id, auth.userId)
-                        .then(() => {
-                          onDeleted?.();
-                          if (!onDeleted) onBack();
-                        })
-                        .catch(() => {
-                          setActionError(t.deleteFailed);
-                        })
-                        .finally(() => setSaveBusy(false));
-                    }}
+                    disabled={saveBusy}
+                    onClick={runDelete}
                     className="rounded-xl bg-red-600 py-2.5 text-sm font-bold text-white disabled:opacity-50"
                   >
                     {saveBusy ? t.deleting : t.yesDelete}
@@ -664,7 +792,9 @@ export function HostListingDetailScreen({
                 </div>
               </div>
             )}
-            {actionError ? <p className="text-center text-xs text-red-600">{actionError}</p> : null}
+            {actionError && !confirmDelete ? (
+              <p className="text-center text-xs text-red-600">{actionError}</p>
+            ) : null}
           </div>
         </section>
       </div>
@@ -745,6 +875,15 @@ export function HostListingDetailScreen({
             </div>
           </div>
         </div>
+      ) : null}
+
+      {listingRequiresQrSticker(listing.modes) ? (
+        <ShowListingQrOverlay
+          open={showOnScreenOpen}
+          listing={listing}
+          onClose={() => setShowOnScreenOpen(false)}
+          hint={t.showOnScreenHint}
+        />
       ) : null}
     </div>
   );

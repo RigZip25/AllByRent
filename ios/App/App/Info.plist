@@ -78,7 +78,7 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.evorios.app</string>
+			<string>com.elflogistics.evorios</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>evorios</string>

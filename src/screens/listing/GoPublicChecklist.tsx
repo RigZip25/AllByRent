@@ -9,15 +9,20 @@ import { useMessages } from "../../lib/i18n/react";
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 
-type ChecklistBusy = null | "identity" | "stripe" | "refresh";
+type ChecklistBusy = null | "identity" | "stripe" | "refresh" | "phone";
 
 type Props = {
   status: SellerGoPublicStatus | null;
   loading: boolean;
   busy: ChecklistBusy;
   error: string | null;
+  /** Optional Connect error code (e.g. platform_profile). */
+  errorCode?: string | null;
+  /** Hide Connect when listing cannot take card money (free giveaway). */
+  showPayouts?: boolean;
   onSignIn: () => void;
   onVerifyIdentity: () => void;
+  onVerifyPhone: () => void;
   onConnectBank: () => void;
   onRefresh: () => void;
   onGoLive: () => void;
@@ -31,10 +36,12 @@ type Row = {
   detail: string;
   done: boolean;
   recommended?: boolean;
+  required?: boolean;
   actionLabel: string;
   onAction: () => void;
   actionBusy: boolean;
   disabled: boolean;
+  showAction: boolean;
 };
 
 function StepIcon({ done, active }: { done: boolean; active: boolean }) {
@@ -69,7 +76,10 @@ export function GoPublicChecklist({
   loading,
   busy,
   error,
+  errorCode = null,
+  showPayouts = true,
   onSignIn,
+  onVerifyPhone,
   onConnectBank,
   onRefresh,
   onGoLive,
@@ -80,10 +90,13 @@ export function GoPublicChecklist({
   const gp = listing.goPublic;
 
   const signedIn = Boolean(status?.signedIn);
+  const phoneDone = Boolean(status?.phoneVerified);
+  const requiresPhone = Boolean(status?.requiresPhone);
   const stripeDone = Boolean(status?.payoutsReady);
   const next = status?.nextStep ?? "sign_in";
   const canGoLive = Boolean(status?.ready);
-  const softPayoutNudge = canGoLive && !stripeDone;
+  const softPayoutNudge = canGoLive && showPayouts && !stripeDone;
+  const phoneBlocksLive = requiresPhone && !phoneDone;
 
   const rows: Row[] = [
     {
@@ -95,8 +108,27 @@ export function GoPublicChecklist({
       onAction: onSignIn,
       actionBusy: false,
       disabled: signedIn || loading,
+      showAction: !signedIn,
     },
-    {
+  ];
+
+  if (requiresPhone) {
+    rows.push({
+      id: "phone",
+      title: gp.phoneTitle,
+      required: true,
+      detail: phoneDone ? gp.phoneDone : gp.phonePending,
+      done: phoneDone,
+      actionLabel: gp.phoneCta,
+      onAction: onVerifyPhone,
+      actionBusy: busy === "phone",
+      disabled: !signedIn || phoneDone || loading || busy !== null,
+      showAction: signedIn && !phoneDone,
+    });
+  }
+
+  if (showPayouts) {
+    rows.push({
       id: "stripe",
       title: gp.stripeTitle,
       recommended: true,
@@ -108,14 +140,17 @@ export function GoPublicChecklist({
             : gp.stripeOnboardingComplete
         : status?.connected
           ? gp.stripeFinishForm
-          : gp.stripePending,
+          : !phoneDone && requiresPhone
+            ? gp.phoneBlockPayouts
+            : gp.stripePending,
       done: stripeDone,
       actionLabel: busy === "stripe" ? gp.openingStripe : gp.continueStripe,
       onAction: onConnectBank,
       actionBusy: busy === "stripe",
-      disabled: !signedIn || stripeDone || loading || busy !== null,
-    },
-  ];
+      disabled: !signedIn || (requiresPhone && !phoneDone) || stripeDone || loading || busy !== null,
+      showAction: signedIn && (!requiresPhone || phoneDone) && !stripeDone,
+    });
+  }
 
   return (
     <motion.div
@@ -150,7 +185,7 @@ export function GoPublicChecklist({
               <li
                 key={row.id}
                 className={`rounded-2xl border bg-white p-4 ${
-                  active || (softPayoutNudge && row.id === "stripe")
+                  active || (softPayoutNudge && row.id === "stripe") || (phoneBlocksLive && row.id === "phone")
                     ? "border-amber-300 shadow-sm"
                     : "border-gray-200"
                 }`}
@@ -158,11 +193,20 @@ export function GoPublicChecklist({
                 <div className="flex items-start gap-3">
                   <StepIcon
                     done={row.done}
-                    active={active || Boolean(softPayoutNudge && row.id === "stripe")}
+                    active={
+                      active ||
+                      Boolean(softPayoutNudge && row.id === "stripe") ||
+                      Boolean(phoneBlocksLive && row.id === "phone")
+                    }
                   />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-gray-900">
                       {index + 1}. {row.title}
+                      {row.required && !row.done ? (
+                        <span className="ml-2 text-[11px] font-semibold uppercase tracking-wide text-amber-700">
+                          {gp.requiredBadge}
+                        </span>
+                      ) : null}
                       {row.recommended && !row.done ? (
                         <span className="ml-2 text-[11px] font-semibold uppercase tracking-wide text-amber-700">
                           {gp.recommendedBadge}
@@ -170,7 +214,7 @@ export function GoPublicChecklist({
                       ) : null}
                     </p>
                     <p className="mt-0.5 text-[13px] leading-snug text-gray-500">{row.detail}</p>
-                    {!row.done && row.id === "sign_in" ? (
+                    {row.showAction ? (
                       <button
                         type="button"
                         onClick={row.onAction}
@@ -178,7 +222,14 @@ export function GoPublicChecklist({
                         className="mt-3 w-full rounded-xl px-3 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
                         style={{ backgroundColor: GREEN }}
                       >
-                        {row.actionLabel}
+                        {row.actionBusy ? (
+                          <span className="inline-flex items-center justify-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            {row.actionLabel}
+                          </span>
+                        ) : (
+                          row.actionLabel
+                        )}
                       </button>
                     ) : null}
                   </div>
@@ -189,16 +240,27 @@ export function GoPublicChecklist({
         </ol>
       )}
 
-      {error ? <ConnectSetupError message={error} /> : null}
+      {phoneBlocksLive ? (
+        <p className="mt-4 text-[13px] leading-relaxed text-amber-900">{gp.phoneRequiredPaid}</p>
+      ) : null}
+
+      {error ? (
+        errorCode || /stripe|payout|connect|bank|platform/i.test(error) ? (
+          <ConnectSetupError message={error} code={errorCode} />
+        ) : (
+          <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+            {error}
+          </p>
+        )
+      ) : null}
 
       <button
         type="button"
         onClick={onRefresh}
-        disabled={loading || busy === "refresh"}
-        className="mt-4 text-sm font-semibold underline disabled:opacity-50"
-        style={{ color: GREEN }}
+        disabled={loading || busy === "refresh" || isPublishing}
+        className="mt-4 text-sm font-medium text-gray-500 underline decoration-gray-300 underline-offset-2 disabled:opacity-50"
       >
-        {busy === "refresh" || loading ? gp.refreshing : gp.refreshStatus}
+        {busy === "refresh" || (loading && status) ? gp.refreshing : gp.refreshStatus}
       </button>
 
       <RentanoHint className="mt-5" hint={gp.tip(MASCOT_NAME)} showTapLabel />
@@ -218,7 +280,7 @@ export function GoPublicChecklist({
           <button
             type="button"
             onClick={onConnectBank}
-            disabled={loading || busy === "stripe" || isPublishing}
+            disabled={loading || busy === "stripe" || isPublishing || (requiresPhone && !phoneDone)}
             className="btn-primary mt-4 flex h-14 w-full items-center justify-center gap-2 text-lg font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
             style={{ backgroundColor: GREEN }}
           >
