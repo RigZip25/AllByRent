@@ -230,6 +230,11 @@ export type RentalBooking = {
   /** Car seat: renter sanitization / safety acknowledgment at booking. */
   carSeatSanitizationAttested?: boolean;
   carSeatRecallAckAttested?: boolean;
+  /** Crib / Baby P0 safety attestations at booking. */
+  cribRecallAckAttested?: boolean;
+  cribDropSideAckAttested?: boolean;
+  cribSanitizationAttested?: boolean;
+  ppeAckAttested?: boolean;
   /** Frozen house rules / cleaning fee at booking (Real Estate). */
   houseRulesSnapshot?: string;
   cleaningFeeUsd?: number;
@@ -617,6 +622,9 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
     droneCertMedia: raw.droneCertMedia ?? null,
     carSeatSanitizationAttested: Boolean(raw.carSeatSanitizationAttested),
     carSeatRecallAckAttested: Boolean(raw.carSeatRecallAckAttested),
+    cribRecallAckAttested: Boolean(raw.cribRecallAckAttested),
+    cribDropSideAckAttested: Boolean(raw.cribDropSideAckAttested),
+    cribSanitizationAttested: Boolean(raw.cribSanitizationAttested),
     houseRulesSnapshot:
       typeof raw.houseRulesSnapshot === "string" ? raw.houseRulesSnapshot : undefined,
     cleaningFeeUsd:

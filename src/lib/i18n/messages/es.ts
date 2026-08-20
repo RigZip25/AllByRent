@@ -980,6 +980,9 @@ export const es: AppMessages = {
       "Se requiere el acuse del checklist de higiene de la reserva antes de la entrega.",
     costumeReturnUnlockBlocked:
       "Se requiere el acuse de condición de devolución del disfraz antes de la entrega.",
+    costumeHygieneUnlockBlocked:
+      "Se requiere el reconocimiento de higiene del disfraz antes de la entrega.",
+
     weatherCancelRefundPreview:
       "Cancelación por clima seleccionada — reembolso total del alquiler según la política outdoor del anuncio.",
     weatherCancelToggle: "Cancelar por clima (política de fiesta outdoor)",
@@ -1801,6 +1804,8 @@ export const es: AppMessages = {
           placeholder: "16",
           hint: "Los e-patinetes suelen exigir 16+ — pon tu norma local.",
         },
+        eBikeClass: { label: "Clase de e-bike" },
+        batteryRangeBand: { label: "Autonomía de batería" },
         setupTeardownFeeUsd: {
           label: "Tarifa montaje / desmontaje (USD)",
           placeholder: "50",
@@ -2846,6 +2851,12 @@ export const es: AppMessages = {
     costumeReturnBody:
       "Los disfraces fijan una regla de devolución y tarifa opcional de tintorería. Confirma que la cumplirás.",
     costumeReturnAttest: "Acepto los términos de devolución / tintorería de este disfraz.",
+    costumeHygieneBlockedTitle: "Higiene del disfraz incompleta",
+    costumeHygieneBlockedBody:
+      "El anfitrión no confirmó la sanitización de maquillaje / peluca / máscara.",
+    costumeHygieneTitle: "Higiene / sanitización",
+    costumeHygieneBody: "El maquillaje, pelucas y máscaras compartidos deben limpiarse entre inquilinos.",
+    costumeHygieneAttest: "Entiendo las reglas de higiene de este artículo.",
     returnConditionPolicyLine: (policy) => `Condición de devolución: ${policy}`,
     returnConditionFallback: "según el anuncio",
     dryCleanReturnFeeLine: (amount) => `Tarifa de tintorería / devolución: ${amount}`,

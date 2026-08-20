@@ -354,6 +354,7 @@ function BookingScreenLoaded({
   const [liabilityWaiverAttested, setLiabilityWaiverAttested] = useState(false);
   const [helmetLockAck, setHelmetLockAck] = useState(false);
   const [dataWipeAttested, setDataWipeAttested] = useState(false);
+  const [paCableStandAck, setPaCableStandAck] = useState(false);
   const [weatherCancelAck, setWeatherCancelAck] = useState(false);
   const [safetyBriefingAck, setSafetyBriefingAck] = useState(false);
   const [hygieneAck, setHygieneAck] = useState(false);
@@ -1923,6 +1924,29 @@ function BookingScreenLoaded({
           </div>
         ) : null}
 
+
+        {needsCostumeHygiene && costumeHygieneBlocked ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <p className="font-semibold">{t.booking.hygieneBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.hygieneBlockedBody}</p>
+          </div>
+        ) : null}
+
+        {needsCostumeHygiene && !costumeHygieneBlocked ? (
+          <div className="rounded-xl border border-teal-200 bg-teal-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-teal-950">{t.booking.hygieneTitle}</p>
+            <p className="text-[12px] text-teal-900/90">{t.booking.hygieneBody}</p>
+            <label className="flex items-start gap-2 text-xs text-teal-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={costumeHygieneAttested}
+                onChange={(e) => setCostumeHygieneAttested(e.target.checked)}
+              />
+              <span>{t.booking.hygieneAttest}</span>
+            </label>
+          </div>
+        ) : null}
         {needsEScooterAge && !eScooterAgeOk ? (
           <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
             <p className="font-semibold">{t.booking.eScooterAgeTitle}</p>

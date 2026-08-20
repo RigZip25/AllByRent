@@ -994,6 +994,9 @@ export const cs: AppMessages = {
       "Před předáním je potřeba potvrzení hygienického checklistu z rezervace.",
     costumeReturnUnlockBlocked:
       "Před předáním je potřeba potvrzení podmínek vrácení kostýmu z rezervace.",
+    costumeHygieneUnlockBlocked:
+      "Před předáním je potřeba potvrzení hygieny kostýmu z rezervace.",
+
     weatherCancelRefundPreview:
       "Zvoleno storno kvůli počasí — plná refundace nájmu dle outdoor politiky inzerátu.",
     weatherCancelToggle: "Zrušit kvůli počasí (outdoor párty politika)",
@@ -1814,6 +1817,8 @@ export const cs: AppMessages = {
           placeholder: "16",
           hint: "E-koloběžky často vyžadují 16+ — nastav místní pravidlo.",
         },
+        eBikeClass: { label: "Třída e-kola" },
+        batteryRangeBand: { label: "Dojezd baterie" },
         setupTeardownFeeUsd: {
           label: "Poplatek za stavbu / demontáž (USD)",
           placeholder: "50",
@@ -2860,6 +2865,12 @@ export const cs: AppMessages = {
     costumeReturnBody:
       "Kostýmy mají pravidlo vrácení a volitelný poplatek za čištění. Potvrďte, že ho dodržíte.",
     costumeReturnAttest: "Souhlasím s podmínkami vrácení / chemického čištění tohoto kostýmu.",
+    costumeHygieneBlockedTitle: "Hygiena kostýmu není dokončená",
+    costumeHygieneBlockedBody:
+      "Hostitel nepotvrdil sanitizaci u make-upu / paruky / masky.",
+    costumeHygieneTitle: "Hygiena / sanitizace",
+    costumeHygieneBody: "Sdílený make-up, paruky a masky musí být mezi nájemci vyčištěné.",
+    costumeHygieneAttest: "Rozumím hygienickým pravidlům pro tuto položku.",
     returnConditionPolicyLine: (policy) => `Stav při vrácení: ${policy}`,
     returnConditionFallback: "dle inzerátu",
     dryCleanReturnFeeLine: (amount) => `Poplatek za čištění / vrácení: ${amount}`,

@@ -975,6 +975,9 @@ export const en: AppMessages = {
       "Hygiene checklist acknowledgment from booking is required before handoff can start.",
     costumeReturnUnlockBlocked:
       "Costume return-condition acknowledgment from booking is required before handoff can start.",
+    costumeHygieneUnlockBlocked:
+      "Costume hygiene acknowledgment from booking is required before handoff can start.",
+
     weatherCancelRefundPreview:
       "Weather cancel selected — full rental refund under this listing’s outdoor weather policy.",
     weatherCancelToggle: "Cancel due to weather (outdoor party policy)",
@@ -1769,6 +1772,8 @@ export const en: AppMessages = {
           placeholder: "16",
           hint: "E-scooters often require 16+ — set your local rule.",
         },
+        eBikeClass: { label: "E-bike class" },
+        batteryRangeBand: { label: "Battery range" },
         setupTeardownFeeUsd: {
           label: "Setup / teardown fee (USD)",
           placeholder: "50",
@@ -2790,7 +2795,7 @@ export const en: AppMessages = {
       "I agree to follow the helmet and lock policy for this bike or scooter rental.",
     helmetPolicyFallback: "follow local law / host note",
     lockPolicyFallback: "secure when unattended",
-    eScooterAgeTitle: "E-scooter age required",
+    eScooterAgeTitle: "E-scooter / e-bike age required",
     eScooterAgeBody: (minAge) =>
       `This e-scooter listing requires riders to be at least ${minAge}. Add your date of birth in profile, or choose another listing.`,
     setupTeardownFeeLine: (amount) => `Setup / teardown fee: ${amount}`,
@@ -2819,6 +2824,14 @@ export const en: AppMessages = {
     costumeReturnBody:
       "Costume rentals set a return-condition rule and optional dry-clean fee. Confirm you will follow it.",
     costumeReturnAttest: "I agree to the return-condition / dry-clean terms for this costume.",
+    costumeHygieneBlockedTitle: "Costume hygiene incomplete",
+    costumeHygieneBlockedBody:
+      "The host has not attested sanitization for this makeup / wig / mask listing. Ask them to update it before booking.",
+    costumeHygieneTitle: "Hygiene / sanitization",
+    costumeHygieneBody:
+      "Shared makeup, wigs, and masks must be cleaned between renters. Confirm you will handle hygiene responsibly.",
+    costumeHygieneAttest:
+      "I understand this item requires hygiene care; I will follow the host sanitization rules.",
     returnConditionPolicyLine: (policy) => `Return condition: ${policy}`,
     returnConditionFallback: "as listed",
     dryCleanReturnFeeLine: (amount) => `Dry-clean / return-condition fee: ${amount}`,

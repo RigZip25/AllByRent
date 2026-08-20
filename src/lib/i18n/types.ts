@@ -1438,6 +1438,11 @@ export type AppMessages = {
     costumeReturnTitle: string;
     costumeReturnBody: string;
     costumeReturnAttest: string;
+    costumeHygieneBlockedTitle: string;
+    costumeHygieneBlockedBody: string;
+    costumeHygieneTitle: string;
+    costumeHygieneBody: string;
+    costumeHygieneAttest: string;
     returnConditionPolicyLine: (policy: string) => string;
     returnConditionFallback: string;
     dryCleanReturnFeeLine: (amount: string) => string;
@@ -1814,6 +1819,7 @@ export type AppMessages = {
     ppeAckUnlockBlocked: string;
     hygieneUnlockBlocked: string;
     costumeReturnUnlockBlocked: string;
+    costumeHygieneUnlockBlocked: string;
     weatherCancelRefundPreview: string;
     weatherCancelToggle: string;
     agentProofPending: string;
