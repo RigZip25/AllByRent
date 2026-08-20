@@ -606,10 +606,26 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
       {
         key: "minRiderAge",
         type: "number",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Electric Scooters", "Professional Scooters", "E-Bikes Pro"],
+      },
+      {
+        key: "eBikeClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["E-Bikes Pro"],
+        options: ["class_1", "class_2", "class_3", "not_classified"],
+      },
+      {
+        key: "batteryRangeBand",
+        type: "select",
         required: false,
         recommended: true,
         requiredIf: "rent",
-        subcategories: ["Electric Scooters", "Professional Scooters"],
+        subcategories: ["E-Bikes Pro"],
+        options: ["under_20mi", "20_40mi", "40_60mi", "60mi_plus", "unknown_range"],
       },
     ],
   },
@@ -1064,8 +1080,13 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
       {
         key: "maxUserWeightBand",
         type: "select",
-        required: false,
-        recommended: true,
+        required: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Cardio Equipment",
+          "Commercial Treadmills",
+          "Weight Machines",
+        ],
         options: ["up_to_200lb", "up_to_250lb", "up_to_300lb", "300lb_plus", "not_rated"],
       },
       {
@@ -1367,6 +1388,18 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         required: false,
         recommended: true,
         requiredIf: "rent",
+      },
+      {
+        key: "sanitizationAttested",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Professional Makeup Kits",
+          "Wigs & Accessories",
+          "Masks & Makeup",
+        ],
+        options: ["attested", "not_yet"],
       },
     ],
   },
@@ -1671,6 +1704,19 @@ export function areCategorySpecsValid(
     }
     if ((values.sanitizationAttested ?? "").trim() !== "attested") return false;
   }
+
+
+  if (category.trim() === "Costume & Cosplay" && modes?.rent) {
+    const sub = subcategory.trim();
+    if (
+      sub === "Professional Makeup Kits" ||
+      sub === "Wigs & Accessories" ||
+      sub === "Masks & Makeup"
+    ) {
+      if ((values.sanitizationAttested ?? "").trim() !== "attested") return false;
+    }
+  }
+
 
   return true;
 }

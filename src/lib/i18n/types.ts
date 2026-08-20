@@ -991,6 +991,10 @@ export type AppMessages = {
     insurancePdMinUsd: string;
     insuranceLiabilityMinUsd: string;
     insuranceRenterFeeUsd: string;
+    coiStructuredTitle: string;
+    coiStructuredBody: string;
+    coiAdditionalInsuredTitle: string;
+    coiAdditionalInsuredBody: string;
     noShowFeeTitle: string;
     noShowFeeBody: string;
     noShowFeeToggle: string;
@@ -1413,12 +1417,6 @@ export type AppMessages = {
     coiHostRequirements: string;
     coiAdditionalInsuredAttest: string;
     coiStructuredBadge: string;
-    dataWipeBlockedTitle: string;
-    dataWipeBlockedBody: string;
-    dataWipeTitle: string;
-    dataWipeBody: string;
-    dataWipeHostStatusLine: (status: string) => string;
-    dataWipeAttest: string;
     paCableStandTitle: string;
     paCableStandEmpty: string;
     paCableStandAttest: string;
@@ -1806,6 +1804,7 @@ export type AppMessages = {
     pfdUnlockBlocked: string;
     cateringSanitizeUnlockBlocked: string;
     dataWipeUnlockBlocked: string;
+    paCableStandUnlockBlocked: string;
     uscgUnlockBlocked: string;
     kitInventoryUnlockBlocked: string;
     liabilityWaiverUnlockBlocked: string;

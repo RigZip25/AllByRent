@@ -1048,9 +1048,6 @@ export function listingIsWaterSportsShelf(listing: Pick<ListingDraft, "category"
 export function listingRequiresPfdPolicy(listing: Pick<ListingDraft, "category" | "subcategory" | "modes">): boolean {
   return rentOn(listing) && listingIsWaterSportsShelf(listing);
 }
-export function listingPfdIncluded(listing: Pick<ListingDraft, "categorySpecs">): string {
-  return (listing.categorySpecs?.pfdIncluded ?? "").trim();
-}
 export function listingPfdBlocksBooking(
   listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
 ): boolean {
