@@ -48,6 +48,18 @@ Resolution order in the component: **subcategory** FactCard → commercial Vehic
 1. Discover personal + pro subcategories for the shelf.
 2. Encode gates in listing/booking code as needed.
 3. Ship FactCards as **`qa` only** (this doc) — never essay `whyGeo` / `flow` / `layers` / `claims` blocks.
-4. Typecheck; commit i18n carefully (serialize with other agents on `en.ts` / `cs.ts` / `es.ts`).
+4. Typecheck with `npm run typecheck` (`tsc -b`); commit i18n carefully (**one encode agent at a time** on `en.ts` / `cs.ts` / `es.ts`).
+
+## Spec option labels (shared map — deploy blocker)
+
+All listing `categorySpecs` select values share **one flat** `listing.categorySpecs.options` map per locale (`en.ts` / `cs.ts` / `es.ts`).
+
+| Rule | Why |
+|------|-----|
+| **Option keys must be globally unique** in that map | Duplicate keys → `TS1117` → Vercel `tsc -b` fails |
+| Prefer **scoped values** (`none_on_site`, `monitor_none`) over bare `none` / `other` when meanings differ | Bare `none` already means trailer brakes (“No trailer brakes”) |
+| Before adding RE/Party/Home keys, **grep the options map** for the same key | Parallel category writers thrash this map |
+
+**2026-08-20 fix:** Real Estate clearance/`none`/Gym `ground_floor_easy` collisions removed; Shared Offices monitor kit uses `none_on_site`.
 
 See also: [EVORIOS.md](./EVORIOS.md) (brand / product source of truth).

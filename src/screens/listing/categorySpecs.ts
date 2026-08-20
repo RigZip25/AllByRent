@@ -4125,7 +4125,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
           "monitor_dock_included",
           "monitor_only",
           "renter_brings_gear",
-          "none",
+          "none_on_site",
         ],
       },
       {

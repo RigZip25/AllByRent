@@ -6,6 +6,8 @@
 
 **Category FactCards:** every shelf FAQ is **Question → short answer** only — see [CATEGORY_FACT_QA.md](CATEGORY_FACT_QA.md).
 
+**Category ~8.0 encode:** one category at a time; never parallel-edit `en.ts` / `cs.ts` / `es.ts`. Shared `listing.categorySpecs.options` keys must stay unique (`TS1117` blocks prod). Prefer scoped option ids over bare `none` when meanings collide — see CATEGORY_FACT_QA “Spec option labels”.
+
 **Walk the app screen-by-screen:** [FLOW_AUDIT.md](FLOW_AUDIT.md) — what to change at each step (✅ / 🟡 / 🟠 / 🔴).
 
 **Master reshape brief (10 tasks):** [EVORIOS_CURSOR_BRIEF.md](EVORIOS_CURSOR_BRIEF.md) · [status tracker](EVORIOS_RESHAPE_STATUS.md) · [task board](TASK_BOARD.md)
