@@ -383,7 +383,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "multiselect",
         required: true,
         requiredIf: "rent",
-        options: ["main_device", "charger_psu", "power_cable", "data_cables", "case_sleeve", "peripherals", "adapters", "remote", "stand_mount", "manuals", "other_accessories"],
+        options: ELECTRONICS_KIT_ITEMS,
       },
       { key: "kitInventoryChecklist", type: "text", required: true, requiredIf: "rent" },
       {
