@@ -956,6 +956,14 @@ export const es: AppMessages = {
       "Se requieren declaración y documento de licencia náutica / PWC antes de iniciar la entrega.",
     droneCertUnlockBlocked:
       "Se requiere declaración Part 107 / Remote ID antes de iniciar la entrega.",
+    uscgUnlockBlocked:
+      "Se requiere el reconocimiento del kit USCG de la reserva antes de la entrega.",
+    kitInventoryUnlockBlocked:
+      "Se requiere el reconocimiento del inventario del kit de la reserva antes de la entrega.",
+    liabilityWaiverUnlockBlocked:
+      "Se requiere la renuncia de responsabilidad de la reserva antes de la entrega.",
+    helmetLockUnlockBlocked:
+      "Se requiere el reconocimiento de casco y candado de la reserva antes de la entrega.",
     agentProofPending:
       "Esperando que el anfitrión confirme que recibió la prueba de seguro de tu agente.",
     agentProofReceivedMark: "Recibí la prueba de seguro del agente del arrendatario",
@@ -1713,6 +1721,61 @@ export const es: AppMessages = {
           placeholder: "75",
           hint: "Tarifa plana opcional mostrada al reservar y en el acuerdo.",
         },
+
+        kitInventoryChecklist: {
+          label: "Inventario del kit",
+          placeholder: "Cuerpo, 2 lentes, 3 baterías, cargador, bolsa…",
+          hint: "Lista cada accesorio — el inquilino confirma al reservar y en la entrega.",
+        },
+        hinNumber: {
+          label: "HIN (ID del casco)",
+          placeholder: "ABC12345D404",
+          hint: "Los barcos en EE. UU. tienen HIN de 12 caracteres — obligatorio al alquilar.",
+        },
+        boatRegistration: {
+          label: "Matrícula / números estatales",
+          placeholder: "Matrícula estatal o número documentado",
+          hint: "Recomendado en motorizados — ayuda a emparejar el casco en la entrega.",
+        },
+        uscgSafetyKitConfirmed: {
+          label: "Kit de seguridad estilo USCG",
+          hint: "Chalecos según capacidad, extintor, señales, sonido — obligatorio en motorizados.",
+        },
+        hitchClass: {
+          label: "Clase de enganche",
+          hint: "Empareja el enganche del vehículo remolcador con este tráiler.",
+        },
+        brakeController: {
+          label: "Controlador de frenos / frenos del tráiler",
+          hint: "¿Frenos eléctricos o de inercia? El inquilino necesita un controlador compatible.",
+        },
+        rvOccupancyBand: { label: "Duerme / ocupación" },
+        dumpStationAccess: {
+          label: "Vaciado / aguas grises-negras",
+          hint: "Quién vacía tanques y dónde.",
+        },
+        propaneStatus: { label: "Propano en la entrega" },
+        generatorIncluded: { label: "¿Generador incluido?" },
+        liabilityWaiverRequired: {
+          label: "Renuncia en la reserva",
+          hint: "Obligatoria por defecto en gym y deporte/outdoor de alto riesgo.",
+        },
+        helmetPolicy: { label: "Política de casco" },
+        lockPolicy: { label: "Política de candado / robo" },
+        minRiderAge: {
+          label: "Edad mínima del rider",
+          placeholder: "16",
+          hint: "Los e-patinetes suelen exigir 16+ — pon tu norma local.",
+        },
+        setupTeardownFeeUsd: {
+          label: "Tarifa montaje / desmontaje (USD)",
+          placeholder: "50",
+          hint: "Mano de obra fija para escenario/sonido/luces — se muestra al reservar.",
+        },
+        powerRequirement: {
+          label: "Requisito de energía",
+          hint: "Indica al venue qué circuitos / generadores necesitas.",
+        },
         useCase: { label: "Uso principal" },
         transportSize: { label: "Cómo se mueve" },
         dimensionsOrWeight: { label: "Dimensiones / peso", placeholder: "Para transporte" },
@@ -1936,6 +1999,41 @@ export const es: AppMessages = {
         not_yet: "Aún no",
         photo_on_listing: "Foto de la etiqueta en el anuncio",
         will_add: "Añadiré la foto de la etiqueta",
+
+        kit_complete: "Kit estilo USCG completo a bordo",
+        incomplete: "Incompleto — no publicar en motorizados",
+        class_i: "Clase I",
+        class_ii: "Clase II",
+        class_iii: "Clase III",
+        class_iv: "Clase IV",
+        class_v: "Clase V",
+        gooseneck_fifth: "Cuello de ganso / quinta rueda",
+        electric_brakes: "Frenos eléctricos (necesita controlador)",
+        surge: "Inercia / hidráulicos de inercia",
+        electric_over_hydraulic: "Electro-hidráulicos",
+        none: "Sin frenos de tráiler",
+        "5_6": "5–6",
+        "7_8": "7–8",
+        "9_plus": "9+",
+        included_host_site: "Vaciado en sitio del anfitrión",
+        renter_public: "Inquilino usa estación pública",
+        not_needed: "No hace falta (sin black/gray)",
+        black_tank_none: "Sin tanque negro",
+        full_tanks: "Propano lleno en la entrega",
+        partial: "Parcial — rellenar según necesidad",
+        empty_renter_fills: "Vacío — rellena el inquilino",
+        no_propane: "Sin propano",
+        shore_power_only: "Solo shore power",
+        required: "Obligatorio al reservar",
+        not_required: "No obligatorio",
+        renter_provides: "Lo aporta el inquilino",
+        included: "Incluido en el alquiler",
+        deposit_for_lock: "Candado con fianza / dejar cerrado",
+        none_battery: "Ninguno / a batería",
+        standard_120v: "Enchufe estándar 120V",
+        dedicated_20a: "Circuito dedicado 20A",
+        "240v_or_generator": "240V o generador",
+        host_provides: "El anfitrión aporta energía in situ",
         under_2kw: "Menos de 2 kW",
         "2_5kw": "2–5 kW",
         "5_15kw": "5–15 kW",
@@ -2488,6 +2586,36 @@ export const es: AppMessages = {
       "Sanitizaré / limpiaré la silla antes de usarla con mi hijo y no usaré una unidad caducada o con recall.",
     carSeatSafetyBadge: "Puerta de seguridad de silla",
     guestIdBadge: "ID del huésped en el check-in",
+    uscgBlockedTitle: "Kit de seguridad incompleto en el anuncio",
+    uscgBlockedBody:
+      "El anfitrión no confirmó un kit estilo USCG completo (chalecos, extintor, señales de emergencia, dispositivo sonoro). Pídele que actualice el anuncio.",
+    uscgSafetyTitle: "Kit de seguridad estilo USCG",
+    uscgSafetyBody:
+      "Las embarcaciones a motor deben llevar chalecos para cada persona, extintor, señales visuales de emergencia y un dispositivo sonoro según corresponda. Confirma que verificarás el kit en la entrega.",
+    uscgSafetyAttest:
+      "Verificaré el kit de seguridad en la entrega y no operaré sin los chalecos y señales requeridos.",
+    hinLine: (hin) => `HIN: ${hin}`,
+    registrationLine: (reg) => `Matrícula: ${reg}`,
+    kitInventoryTitle: "Inventario del kit",
+    kitInventoryEmpty: "El anfitrión confirmará accesorios en la entrega — reconoce para continuar.",
+    kitInventoryAttest:
+      "Revisé el inventario del kit y comprobaré cada artículo en la recogida y la devolución.",
+    liabilityWaiverTitle: "Asunción de riesgo / renuncia de responsabilidad",
+    liabilityWaiverBody:
+      "El gimnasio y el deporte/outdoor de alto riesgo pueden causar lesiones. Alquilas a un vecino, no a Evorios. Asumes el riesgo de uso ordinario; documenta el estado en la entrega.",
+    liabilityWaiverAttest:
+      "Entiendo los riesgos, usaré el equipo según su propósito y renuncio a reclamaciones por lesiones de uso ordinario contra el anfitrión y Evorios en la medida que permita la ley.",
+    helmetLockTitle: "Política de casco y candado",
+    helmetLockBody: (helmet, lock) => `Casco: ${helmet}. Candado: ${lock}.`,
+    helmetLockAttest:
+      "Acepto la política de casco y candado para este alquiler de bici o patinete.",
+    helmetPolicyFallback: "seguir ley local / nota del anfitrión",
+    lockPolicyFallback: "asegurar sin vigilancia",
+    eScooterAgeTitle: "Edad mínima para e-patinete",
+    eScooterAgeBody: (minAge) =>
+      `Este anuncio de e-patinete requiere al menos ${minAge} años. Añade tu fecha de nacimiento en el perfil, u elige otro anuncio.`,
+    setupTeardownFeeLine: (amount) => `Tarifa de montaje / desmontaje: ${amount}`,
+    powerRequirementLine: (power) => `Requisito de energía: ${power}`,
     agentInsuranceTitle: "Seguro vía agente → propietario",
     agentInsuranceBody:
       "Para transporte comercial pesado / semi, contrata cobertura con tu agente de seguros. El agente debe enviar la prueba por correo directamente al dueño del vehículo — no es el flujo ligero de «añadir al auto personal + subir».",
@@ -2691,24 +2819,24 @@ export const es: AppMessages = {
           "Seguro primero, luego retención con fotos. El no-show cancela y libera fechas.",
       },
       "Boats & Water": {
-        title: "Alquiler de barcos y náutica",
+        title: "Alquiler de barcos y embarcaciones",
         summary:
-          "Embarcaciones a motor y PWC exigen licencia náutica / capitán / PWC (declaración + documento) y la misma puerta de edad que vehículos (mín. 25; opcional 18–24 con retención mayor). Depósito respaldado por seguro.",
+          "Indica HIN + matrícula. Los motorizados y PWC requieren kit estilo USCG completo, declaración de licencia de patrón/PWC + documento, y la misma puerta de edad que vehículos (25 por defecto; el anfitrión puede permitir 18–24 con mayor fianza). Depósito respaldado por seguro.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Exige seguro y configura el deducible. En motos acuáticas y motorboats, el arrendatario debe declarar y subir licencia.",
-        whyGeoTitle: "¿Por qué licencia + edad?",
+          "Introduce HIN y matrícula. Confirma chalecos, extintor, señales y sonido en motorizados. Exige seguro y deducible máximo. Los inquilinos declaran licencia + edad.",
+        whyGeoTitle: "¿Por qué licencia + edad + kit antes de la entrega?",
         whyGeo:
-          "Operadores sin licencia o menores son un riesgo alto. Licencia + edad + seguro bloquean PIN / llaves hasta estar listos.",
+          "Operadores sin licencia o menores y kit incompleto son riesgos clave. Licencia + edad + kit USCG + seguro bloquean PIN/llaves hasta completar.",
         flowTitle: "De punta a punta",
         flow:
-          "Publicar → seguro + edad → licencia → reserva → entrega → devolución.",
+          "Anuncio (HIN / matrícula + kit) → seguro + edad → inquilino declara licencia, edad y kit → reserva → prueba → entrega → devolución.",
         layersTitle: "Capas de seguridad",
         layers:
-          "Licencia náutica / PWC · edad · seguro · retención · términos · QR/PIN.",
+          "HIN / matrícula · kit USCG · licencia · edad · seguro · fianza · términos · QR / PIN.",
         claimsTitle: "Si algo sale mal",
         claims:
-          "El seguro del arrendatario es primario. Licencia y edad apoyan disputas.",
+          "El seguro del inquilino es primario. Licencia, edad y kit apoyan disputas; la fianza iguala tu deducible.",
       },
       "Real Estate": {
         title: "Estancias y alquiler de vivienda",
@@ -2731,24 +2859,126 @@ export const es: AppMessages = {
           "Reglas e ID apoyan disputas. El depósito cubre daños / limpieza excesiva.",
       },
       "Photo & Video": {
-        title: "Alquiler de drones y cámaras",
+        title: "Alquiler de cámaras, cine y drones",
         summary:
-          "Los anuncios de dron exigen declaración FAA Part 107 y/o Remote ID antes de reservar (subida de certificado opcional).",
+          "Número de serie e inventario del kit son obligatorios al alquilar. Los drones también requieren declaración FAA Part 107 y/o Remote ID (subida de certificado opcional). Depósito / seguro protegen kits de alto valor.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Marca kits de dron con claridad. La declaración Part 107 es obligatoria; la foto del certificado ayuda a verificar.",
-        whyGeoTitle: "¿Por qué Part 107 / Remote ID?",
+          "Introduce el serie y un inventario claro (cuerpos, lentes, baterías, bolsas). Marca drones con claridad — Part 107 es obligatorio.",
+        whyGeoTitle: "¿Por qué serie + inventario + Part 107?",
         whyGeo:
-          "Vuelos sin certificación crean riesgo regulatorio y de responsabilidad. La declaración bloquea reserva y entrega.",
+          "Los kits caros pierden accesorios uno a uno. Serie + inventario en la entrega y cumplimiento del drone reducen disputas.",
         flowTitle: "De punta a punta",
         flow:
-          "Publicar kit → declaración Part 107 / Remote ID → reserva → entrega → devolución.",
+          "Anuncio con serie + inventario → drones: Part 107 / Remote ID → reserva → chequeo del kit → devolución.",
         layersTitle: "Capas de seguridad",
         layers:
-          "Declaración Part 107 / Remote ID · certificado opcional · retención · términos · QR.",
+          "Serie · inventario · Part 107 / Remote ID si drone · fianza · términos · QR.",
         claimsTitle: "Si algo sale mal",
         claims:
-          "Cobertura del arrendatario y retención primero. La declaración documenta el cumplimiento declarado.",
+          "Inventario y serie ayudan en robos / piezas faltantes. Primero cobertura del inquilino y fianza.",
+      },
+      "Electronics & Tech": {
+        title: "Alquiler de electrónica y tech",
+        summary:
+          "Serie e inventario del kit son obligatorios en el camino de alquiler para que entrega y reclamaciones tengan una lista clara de accesorios.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Captura el serie y lista cada accesorio. En equipo caro usa una fianza sólida.",
+        whyGeoTitle: "¿Por qué serie + inventario?",
+        whyGeo:
+          "Portátiles y pantallas se devuelven incompletos con facilidad. Serie + checklist protege a ambas partes.",
+        flowTitle: "De punta a punta",
+        flow: "Anuncio con serie + inventario → inquilino reconoce → entrega → devolución.",
+        layersTitle: "Capas de seguridad",
+        layers: "Serie · inventario · fianza · términos · QR.",
+        claimsTitle: "Si algo sale mal",
+        claims: "Usa inventario y serie para piezas faltantes; la fianza cubre el resto.",
+      },
+      "Gym & Fitness": {
+        title: "Alquiler de gym y fitness",
+        summary:
+          "Los inquilinos firman asunción de riesgo / renuncia al reservar. Indica peso máximo de usuario cuando aplique.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Mantén el equipo en buen estado. Exige la renuncia (activa por defecto). Anota peso máximo en máquinas.",
+        whyGeoTitle: "¿Por qué una renuncia?",
+        whyGeo:
+          "Pesas y máquinas pueden lesionar. Una renuncia clara fija expectativas sin fingir que Evorios opera un gimnasio.",
+        flowTitle: "De punta a punta",
+        flow: "Anuncio → renuncia al reservar → entrega → devolución.",
+        layersTitle: "Capas de seguridad",
+        layers: "Renuncia · peso máximo · fianza · términos.",
+        claimsTitle: "Si algo sale mal",
+        claims: "Documenta estado en la entrega. Renuncia cubre lesión de uso ordinario; fianza el daño.",
+      },
+      "Sports & Recreation": {
+        title: "Alquiler de deporte y recreación",
+        summary:
+          "Estantes de alto riesgo (nieve, agua, escalada) requieren renuncia al reservar. Nivel y talla ayudan a filtrar.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Mantén la renuncia en agua / nieve / escalada. Sé honesto con nivel y estado.",
+        whyGeoTitle: "¿Por qué renuncia en alto riesgo?",
+        whyGeo:
+          "Esquí, agua y escalada conllevan lesión más allá de una fianza. Renuncia + specs claras reducen sorpresas.",
+        flowTitle: "De punta a punta",
+        flow: "Anuncio → renuncia cuando aplique → entrega → devolución.",
+        layersTitle: "Capas de seguridad",
+        layers: "Renuncia (alto riesgo) · nivel / talla · fianza · términos.",
+        claimsTitle: "Si algo sale mal",
+        claims: "Fotos en entrega + renuncia; fianza por daño.",
+      },
+      "Outdoor & Camping": {
+        title: "Alquiler outdoor y camping",
+        summary:
+          "Estantes de expedición / supervivencia usan renuncia al reservar. Capacidad y temporada ayudan a elegir.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Exige renuncia en survival / expedición. Mantén tiendas secas y sé honesto con la temporada.",
+        whyGeoTitle: "¿Por qué renuncia en survival?",
+        whyGeo:
+          "Fallos remotos pueden dejar gente sin recursos. Renuncia + temporada / capacidad claras fijan expectativas.",
+        flowTitle: "De punta a punta",
+        flow: "Anuncio → renuncia cuando aplique → entrega → devolución.",
+        layersTitle: "Capas de seguridad",
+        layers: "Renuncia (alto riesgo) · capacidad / temporada · fianza · términos.",
+        claimsTitle: "Si algo sale mal",
+        claims: "Fotos y renuncia en disputas; fianza por daño o piezas faltantes.",
+      },
+      "Bikes & Scooters": {
+        title: "Alquiler de bicis y patinetes",
+        summary:
+          "Políticas de casco y candado son obligatorias. Los e-patinetes pueden fijar edad mínima (16 por defecto). Cuadro / eléctrico ayudan al ajuste.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Di si casco y candado van incluidos. En e-patinetes, pon edad mínima según normas locales.",
+        whyGeoTitle: "¿Por qué casco, candado y edad?",
+        whyGeo:
+          "Lesión de cabeza y robo son los mayores riesgos. Política clara + edad reducen disputas.",
+        flowTitle: "De punta a punta",
+        flow: "Anuncio con casco/candado (+ edad e-patinete) → reconocimiento → entrega → devolución.",
+        layersTitle: "Capas de seguridad",
+        layers: "Casco · candado · edad e-patinete · fianza · términos.",
+        claimsTitle: "Si algo sale mal",
+        claims: "Política de candado y fotos apoyan robos; fianza el daño.",
+      },
+      "Party & Events": {
+        title: "Alquiler para fiestas y eventos",
+        summary:
+          "Estantes pro AV / escenario / luces capturan tarifa de montaje/desmontaje y energía. Capacidad y huella ayudan a planificar.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Pon tarifa de montaje/desmontaje si aportas mano de obra. Indica energía con claridad para sonido y luces.",
+        whyGeoTitle: "¿Por qué tarifa + energía?",
+        whyGeo:
+          "Mano de obra sorpresa y enchufes muertos arruinan eventos. Tarifa + energía quedan en el acuerdo.",
+        flowTitle: "De punta a punta",
+        flow: "Anuncio con tarifa / energía → reserva → montaje → desmontaje y devolución.",
+        layersTitle: "Capas de seguridad",
+        layers: "Tarifa montaje/desmontaje · energía · capacidad · fianza · términos.",
+        claimsTitle: "Si algo sale mal",
+        claims: "Tarifa y energía van en el acuerdo; fianza cubre daño más allá del uso normal.",
       },
       "Baby & Kids": {
         title: "Alquiler seguro de sillas infantiles",

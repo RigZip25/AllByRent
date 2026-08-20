@@ -1051,15 +1051,19 @@ export function calculateRentalPrices(
 }
 
 /**
- * Manufacturer serial / equipment ID — required for heavy machines & construction.
+ * Manufacturer serial / equipment ID — required for heavy machines, construction,
+ * and high-value Photo / Electronics (claims + kit inventory).
  * Vehicles use VIN instead (serial would be redundant / wrongly block Continue).
  */
 const SERIAL_REQUIRED_CATEGORIES = new Set([
   "Heavy Equipment",
   "Construction",
+  "Photo & Video",
+  "Electronics & Tech",
+  "Drones",
 ]);
 
-/** Heavy equipment / construction gear that needs a manufacturer serial. */
+/** Heavy equipment / construction / high-value gear that needs a manufacturer serial. */
 export function requiresAssetSerialNumber(category: string): boolean {
   return SERIAL_REQUIRED_CATEGORIES.has(category.trim());
 }

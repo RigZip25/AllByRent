@@ -970,6 +970,14 @@ export const cs: AppMessages = {
       "Před startem předání je povinné prohlášení a doklad lodní / PWC licence.",
     droneCertUnlockBlocked:
       "Před startem předání je povinné prohlášení Part 107 / Remote ID.",
+    uscgUnlockBlocked:
+      "Před předáním je povinné potvrzení bezpečnostní sady USCG z rezervace.",
+    kitInventoryUnlockBlocked:
+      "Před předáním je povinné potvrzení inventáře sady z rezervace.",
+    liabilityWaiverUnlockBlocked:
+      "Před předáním je povinné potvrzení vzdání se nároků z rezervace.",
+    helmetLockUnlockBlocked:
+      "Před předáním je povinné potvrzení politiky helmy a zámku z rezervace.",
     agentProofPending:
       "Čeká se, až hostitel potvrdí, že dostal doklad pojištění od tvého agenta.",
     agentProofReceivedMark: "Obdržel(a) jsem doklad pojištění od agenta nájemce",
@@ -1726,6 +1734,61 @@ export const cs: AppMessages = {
           placeholder: "75",
           hint: "Volitelný paušál zobrazený při rezervaci a ve smlouvě.",
         },
+
+        kitInventoryChecklist: {
+          label: "Inventář sady",
+          placeholder: "Tělo, 2 objektivy, 3 baterie, nabíječka, taška…",
+          hint: "Vypiš každé příslušenství — nájemce potvrdí při rezervaci a předání.",
+        },
+        hinNumber: {
+          label: "HIN (trupové ID)",
+          placeholder: "ABC12345D404",
+          hint: "US lodě mají 12znakové HIN — povinné pro pronájem.",
+        },
+        boatRegistration: {
+          label: "Registrace / státní čísla",
+          placeholder: "Státní registrace nebo dokumentované číslo",
+          hint: "Doporučeno u motorových plavidel — pomáhá spárovat trup při předání.",
+        },
+        uscgSafetyKitConfirmed: {
+          label: "Bezpečnostní sada ve stylu USCG",
+          hint: "Vesty dle kapacity, hasicí přístroj, signály tísně, zvuk — povinné u motorových.",
+        },
+        hitchClass: {
+          label: "Třída závěsu",
+          hint: "Slaď závěs tažného vozidla nájemce s tímto přívěsem.",
+        },
+        brakeController: {
+          label: "Brzdový ovladač / brzdy přívěsu",
+          hint: "Elektrické nebo nárazové brzdy? Nájemce potřebuje kompatibilní ovladač.",
+        },
+        rvOccupancyBand: { label: "Spí / obsazenost" },
+        dumpStationAccess: {
+          label: "Výpust / šedá-černá voda",
+          hint: "Kdo vyprazdňuje nádrže a kde.",
+        },
+        propaneStatus: { label: "Propanové lahve při předání" },
+        generatorIncluded: { label: "Generátor v ceně?" },
+        liabilityWaiverRequired: {
+          label: "Vzdání se nároků při rezervaci",
+          hint: "Ve výchozím stavu povinné pro posilovnu a rizikový sport/outdoor.",
+        },
+        helmetPolicy: { label: "Politika helmy" },
+        lockPolicy: { label: "Politika zámku / krádeže" },
+        minRiderAge: {
+          label: "Minimální věk jezdce",
+          placeholder: "16",
+          hint: "E-koloběžky často vyžadují 16+ — nastav místní pravidlo.",
+        },
+        setupTeardownFeeUsd: {
+          label: "Poplatek za stavbu / demontáž (USD)",
+          placeholder: "50",
+          hint: "Paušál za práci u stage/zvuku/světel — ukáže se při rezervaci.",
+        },
+        powerRequirement: {
+          label: "Požadavek na napájení",
+          hint: "Řekni místu, jaké okruhy / generátory potřebuješ.",
+        },
         useCase: { label: "Hlavní použití" },
         transportSize: { label: "Jak se přepravuje" },
         dimensionsOrWeight: { label: "Rozměry / váha", placeholder: "Pro transport" },
@@ -1949,6 +2012,41 @@ export const cs: AppMessages = {
         not_yet: "Ještě ne",
         photo_on_listing: "Foto štítku je na nabídce",
         will_add: "Foto štítku doplním",
+
+        kit_complete: "Kompletní sada ve stylu USCG na palubě",
+        incomplete: "Nekompletní — nepublikovat u motorových",
+        class_i: "Třída I",
+        class_ii: "Třída II",
+        class_iii: "Třída III",
+        class_iv: "Třída IV",
+        class_v: "Třída V",
+        gooseneck_fifth: "Gooseneck / točnice",
+        electric_brakes: "Elektrické brzdy (nutný ovladač)",
+        surge: "Nárazové / hydraulické",
+        electric_over_hydraulic: "Elektro-hydraulické",
+        none: "Bez brzd přívěsu",
+        "5_6": "5–6",
+        "7_8": "7–8",
+        "9_plus": "9+",
+        included_host_site: "Výpust u hostitele / v ceně místa",
+        renter_public: "Nájemce veřejná výpust",
+        not_needed: "Není potřeba (bez black/gray)",
+        black_tank_none: "Bez černé nádrže",
+        full_tanks: "Plný propan při předání",
+        partial: "Částečně — doplnit dle potřeby",
+        empty_renter_fills: "Prázdné — doplní nájemce",
+        no_propane: "Bez propanu",
+        shore_power_only: "Jen shore power",
+        required: "Povinné při rezervaci",
+        not_required: "Není povinné",
+        renter_provides: "Zajistí nájemce",
+        included: "V ceně pronájmu",
+        deposit_for_lock: "Zámek na kauci / nechat zamčeno",
+        none_battery: "Žádné / na baterie",
+        standard_120v: "Běžná zásuvka 120V",
+        dedicated_20a: "Vyhrazený okruh 20A",
+        "240v_or_generator": "240V nebo generátor",
+        host_provides: "Napájení zajistí hostitel na místě",
         under_2kw: "Do 2 kW",
         "2_5kw": "2–5 kW",
         "5_15kw": "5–15 kW",
@@ -2502,6 +2600,36 @@ export const cs: AppMessages = {
       "Před použitím s dítětem sedačku vyčistím / otřu a nepoužiji prošlou nebo recallovanou jednotku.",
     carSeatSafetyBadge: "Bezpečnostní brána autosedačky",
     guestIdBadge: "ID hosta při check-inu",
+    uscgBlockedTitle: "Bezpečnostní sada na inzerátu není kompletní",
+    uscgBlockedBody:
+      "Hostitel nepotvrdil kompletní sadu ve stylu USCG (záchranné vesty, hasicí přístroj, signály tísně, zvukové zařízení). Požádej ho o aktualizaci inzerátu.",
+    uscgSafetyTitle: "Bezpečnostní sada ve stylu USCG",
+    uscgSafetyBody:
+      "Motorová plavidla musí mít záchranné vesty pro každou osobu, hasicí přístroj, vizuální signály tísně a zvukové zařízení dle situace. Potvrď, že sadu ověříš při předání.",
+    uscgSafetyAttest:
+      "Při předání ověřím bezpečnostní sadu a nebudu plout bez povinných vest a signálů.",
+    hinLine: (hin) => `HIN: ${hin}`,
+    registrationLine: (reg) => `Registrace: ${reg}`,
+    kitInventoryTitle: "Inventář sady",
+    kitInventoryEmpty: "Hostitel potvrdí příslušenství při předání — pro pokračování potvrď.",
+    kitInventoryAttest:
+      "Prošel jsem inventář sady a každou položku zkontroluji při vyzvednutí i vrácení.",
+    liabilityWaiverTitle: "Převzetí rizika / vzdání se nároků",
+    liabilityWaiverBody:
+      "Posilovna a rizikový sport/outdoor mohou způsobit zranění. Pronajímáš od souseda, ne od Evorios. Přijímáš riziko běžného použití; stav zdokumentuj při předání.",
+    liabilityWaiverAttest:
+      "Rozumím rizikům, budu vybavení používat podle účelu a vzdávám se nároků za běžná zranění vůči hostiteli a Evorios v rozsahu dovoleném právem.",
+    helmetLockTitle: "Politika helmy a zámku",
+    helmetLockBody: (helmet, lock) => `Helma: ${helmet}. Zámek: ${lock}.`,
+    helmetLockAttest:
+      "Souhlasím s politikou helmy a zámku pro tento pronájem kola nebo koloběžky.",
+    helmetPolicyFallback: "podle místních pravidel / poznámky hostitele",
+    lockPolicyFallback: "zabezpečit bez dozoru",
+    eScooterAgeTitle: "Vyžadovaný věk pro e-koloběžku",
+    eScooterAgeBody: (minAge) =>
+      `Tento inzerát e-koloběžky vyžaduje věk alespoň ${minAge}. Doplň datum narození v profilu, nebo zvol jiný inzerát.`,
+    setupTeardownFeeLine: (amount) => `Poplatek za stavbu / demontáž: ${amount}`,
+    powerRequirementLine: (power) => `Požadavek na napájení: ${power}`,
     agentInsuranceTitle: "Pojištění přes agenta → majitel",
     agentInsuranceBody:
       "U těžké / semi komerční dopravy sjednej krytí u pojišťovacího agenta. Agent musí poslat doklad e-mailem přímo majiteli vozidla — nejde o lehčí cestu „přidat do osobního autopojištění + nahrát“.",
@@ -2705,24 +2833,24 @@ export const cs: AppMessages = {
           "Nejdřív pojištění, pak hold s fotkami. No-show zruší a uvolní data.",
       },
       "Boats & Water": {
-        title: "Půjčování lodí a vodní techniky",
+        title: "Pronájem lodí a plavidel",
         summary:
-          "Motorová plavidla a PWC vyžadují lodní / kapitánskou / PWC licenci (prohlášení + doklad) a stejnou věkovou bránu jako vozidla (min. 25; hostitel může povolit 18–24 s vyšším holdem). Depozit pojištěním.",
+          "Zadej HIN + registraci. Motorové lodě a PWC vyžadují kompletní bezpečnostní sadu ve stylu USCG, prohlášení o licenci kapitána/PWC + dokument a stejnou věkovou bránu jako vozidla (výchozí 25; hostitel může povolit 18–24 s vyšší kaucí). Kauce je pojištěním krytá.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Vyžaduj pojištění a nastav spoluúčast. U motorových lodí a jet ski musí nájemce prohlásit a nahrát licenci.",
-        whyGeoTitle: "Proč licence + věk?",
+          "Zadej HIN a registraci. Potvrď vesty, hasicí přístroj, signály tísně a zvuk u motorových. Vyžaduj pojištění a max. spoluúčast. Nájemci potvrdí licenci + věk.",
+        whyGeoTitle: "Proč licence + věk + sada před předáním?",
         whyGeo:
-          "Nelegální nebo mladí operátoři jsou velké riziko. Licence + věk + pojištění blokují PIN / klíče.",
+          "Nelegální nebo mladí provozovatelé a chybějící bezpečnostní výbava jsou hlavní rizika. Licence + věk + sada USCG + pojištění drží PIN/klíče zamčené.",
         flowTitle: "Od začátku do konce",
         flow:
-          "Nabídnout → pojištění + věk → licence → rezervace → předání → vrácení.",
-        layersTitle: "Vrstvy ochrany",
+          "Inzerát (HIN / registrace + sada) → pojištění + věk → nájemce potvrdí licenci, věk a sadu → rezervace → důkaz → předání → návrat.",
+        layersTitle: "Bezpečnostní vrstvy",
         layers:
-          "Lodní / PWC licence · věková brána · pojištění · hold · podmínky · QR/PIN.",
+          "HIN / registrace · sada USCG · licence · věková brána · pojištění · kauce · podmínky · QR / PIN.",
         claimsTitle: "Když se něco pokazí",
         claims:
-          "Pojištění nájemce je primární. Licence a věk pomáhají ve sporech.",
+          "Primární je pojištění nájemce. Licence, věk a sada pomáhají ve sporech; kauce odpovídá spoluúčasti.",
       },
       "Real Estate": {
         title: "Krátkodobé pobyty a bydlení",
@@ -2745,24 +2873,126 @@ export const cs: AppMessages = {
           "Pravidla a ID pomáhají ve sporech. Depozit kryje škody / nadměrný úklid.",
       },
       "Photo & Video": {
-        title: "Půjčování dronů a kamer",
+        title: "Pronájem kamer, kina a dronů",
         summary:
-          "Nabídky dronů vyžadují prohlášení FAA Part 107 a/nebo Remote ID před rezervací (nahrání certifikátu volitelné).",
+          "Pro pronájem je povinné sériové číslo a inventář sady. Drony navíc vyžadují prohlášení FAA Part 107 a/nebo Remote ID (upload certifikátu volitelný). Kauce / pojištění chrání drahé sady.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Označ dronové sady jasně. Prohlášení Part 107 je povinné; foto certifikátu pomáhá ověřit.",
-        whyGeoTitle: "Proč Part 107 / Remote ID?",
+          "Zadej sériové číslo a jasný inventář (těla, objektivy, baterie, tašky). Drony označ jasně — Part 107 je povinné.",
+        whyGeoTitle: "Proč sériové číslo + inventář + Part 107?",
         whyGeo:
-          "Nelicencované lety dronů nesou regulační a odpovědnostní riziko. Prohlášení blokuje rezervaci i předání.",
+          "Drahé sady mizí po jednom příslušenství. Sériové číslo + inventář při předání a compliance dronu snižují spory.",
         flowTitle: "Od začátku do konce",
         flow:
-          "Nabídnout sadu → prohlášení Part 107 / Remote ID → rezervace → předání → vrácení.",
-        layersTitle: "Vrstvy ochrany",
+          "Inzerát se sériovým číslem + inventářem → drony: Part 107 / Remote ID → rezervace → kontrola sady → návrat.",
+        layersTitle: "Bezpečnostní vrstvy",
         layers:
-          "Prohlášení Part 107 / Remote ID · volitelný certifikát · hold · podmínky · QR.",
+          "Sériové číslo · inventář · Part 107 / Remote ID u dronu · kauce · podmínky · QR.",
         claimsTitle: "Když se něco pokazí",
         claims:
-          "Nejdřív krytí nájemce a hold. Prohlášení dokumentuje deklarované dodržení pravidel.",
+          "Inventář a sériové číslo pomáhají u krádeže / chybějících dílů. Nejdřív pojištění nájemce a kauce.",
+      },
+      "Electronics & Tech": {
+        title: "Pronájem elektroniky a tech",
+        summary:
+          "Sériové číslo a inventář sady jsou povinné na cestě pronájmu, aby předání a reklamace měly jasný seznam příslušenství.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Zachyť sériové číslo a vypiš každé příslušenství. U drahých věcí použij silnější kauci.",
+        whyGeoTitle: "Proč sériové číslo + inventář?",
+        whyGeo:
+          "Notebooky a monitory se snadno vrátí neúplné. Sériové číslo + checklist chrání obě strany.",
+        flowTitle: "Od začátku do konce",
+        flow: "Inzerát se sériovým číslem + inventářem → nájemce potvrdí → předání → návrat.",
+        layersTitle: "Bezpečnostní vrstvy",
+        layers: "Sériové číslo · inventář · kauce · podmínky · QR.",
+        claimsTitle: "Když se něco pokazí",
+        claims: "Inventář a sériové číslo pro chybějící díly; kauce pokryje zbytek.",
+      },
+      "Gym & Fitness": {
+        title: "Pronájem fitness vybavení",
+        summary:
+          "Nájemci při rezervaci podepisují převzetí rizika / vzdání se nároků. Nastav max. váhu uživatele, pokud dává smysl.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Udržuj vybavení bezpečné. Vyžaduj vzdání se nároků (výchozí zapnuto). U strojů uveď max. váhu.",
+        whyGeoTitle: "Proč vzdání se nároků?",
+        whyGeo:
+          "Činky a stroje mohou zranit. Jasné vzdání se nároků nastaví očekávání bez předstírání, že Evorios provozuje posilovnu.",
+        flowTitle: "Od začátku do konce",
+        flow: "Inzerát → vzdání se nároků při rezervaci → předání → návrat.",
+        layersTitle: "Bezpečnostní vrstvy",
+        layers: "Vzdání se nároků · max. váha · kauce · podmínky.",
+        claimsTitle: "Když se něco pokazí",
+        claims: "Stav při předání. Vzdání se nároků kryje běžná zranění; kauce poškození.",
+      },
+      "Sports & Recreation": {
+        title: "Pronájem sportovního vybavení",
+        summary:
+          "Rizikové police (sníh, voda, lezení) vyžadují vzdání se nároků při rezervaci. Úroveň a velikost pomáhají výběru.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Nech vzdání se nároků zapnuté u vody / sněhu / lezení. Buď upřímný ohledně úrovně a stavu.",
+        whyGeoTitle: "Proč vzdání se nároků u rizika?",
+        whyGeo:
+          "Lyže, voda a lezení nesou riziko zranění nad rámec kauce. Vzdání se nároků + jasné specifikace snižují překvapení.",
+        flowTitle: "Od začátku do konce",
+        flow: "Inzerát → vzdání se nároků když je potřeba → předání → návrat.",
+        layersTitle: "Bezpečnostní vrstvy",
+        layers: "Vzdání se nároků (riziko) · úroveň / velikost · kauce · podmínky.",
+        claimsTitle: "Když se něco pokazí",
+        claims: "Fotky při předání + vzdání se nároků; kauce na poškození.",
+      },
+      "Outdoor & Camping": {
+        title: "Pronájem outdoor a kempu",
+        summary:
+          "Expediční / survival police používají vzdání se nároků při rezervaci. Kapacita a sezóna pomáhají výběru.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Vyžaduj vzdání se nároků u survival / expedice. Stany udržuj suché a sezónu uváděj pravdivě.",
+        whyGeoTitle: "Proč vzdání se nároků u survival?",
+        whyGeo:
+          "Selhání vybavení v terénu může lidi ohrozit. Vzdání se nároků + jasná sezóna / kapacita nastaví očekávání.",
+        flowTitle: "Od začátku do konce",
+        flow: "Inzerát → vzdání se nároků když je potřeba → předání → návrat.",
+        layersTitle: "Bezpečnostní vrstvy",
+        layers: "Vzdání se nároků (riziko) · kapacita / sezóna · kauce · podmínky.",
+        claimsTitle: "Když se něco pokazí",
+        claims: "Fotky a vzdání se nároků ve sporech; kauce na poškození nebo chybějící díly.",
+      },
+      "Bikes & Scooters": {
+        title: "Pronájem kol a koloběžek",
+        summary:
+          "Politika helmy a zámku je povinná. U e-koloběžek lze nastavit min. věk (výchozí 16). Velikost / elektřina pomáhají výběru.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Uveď, zda je helma a zámek v ceně. U e-koloběžek nastav min. věk podle místních pravidel.",
+        whyGeoTitle: "Proč helma, zámek a věk?",
+        whyGeo:
+          "Zranění hlavy a krádež jsou hlavní rizika. Jasná politika + věk snižují spory.",
+        flowTitle: "Od začátku do konce",
+        flow: "Inzerát s helmou/zámkem (+ věk u e-koloběžky) → potvrzení → předání → návrat.",
+        layersTitle: "Bezpečnostní vrstvy",
+        layers: "Helma · zámek · věk e-koloběžky · kauce · podmínky.",
+        claimsTitle: "Když se něco pokazí",
+        claims: "Politika zámku a fotky podporují krádežní spory; kauce poškození.",
+      },
+      "Party & Events": {
+        title: "Pronájem na párty a eventy",
+        summary:
+          "Pro AV / stage / světla zachyť poplatek za stavbu/demontáž a napájení. Kapacita hostů a půdorys pomáhají plánovat.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Nastav poplatek za stavbu/demontáž, když zajišťuješ práci. U zvuku a světel jasně uveď napájení.",
+        whyGeoTitle: "Proč poplatek + napájení?",
+        whyGeo:
+          "Překvapivá práce a mrtvé zásuvky kazí eventy. Poplatek + napájení se zmrazí ve smlouvě.",
+        flowTitle: "Od začátku do konce",
+        flow: "Inzerát s poplatkem / napájením → rezervace → stavba → demontáž a návrat.",
+        layersTitle: "Bezpečnostní vrstvy",
+        layers: "Poplatek stavba/demontáž · napájení · kapacita · kauce · podmínky.",
+        claimsTitle: "Když se něco pokazí",
+        claims: "Poplatek a napájení jsou ve smlouvě; kauce na poškození nad běžné opotřebení.",
       },
       "Baby & Kids": {
         title: "Bezpečné půjčování autosedaček",

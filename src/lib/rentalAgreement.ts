@@ -53,7 +53,7 @@ export type RentalAgreementCommercialSnapshot = {
     tracksDef?: boolean;
     fuelMissingFeeCents?: number;
   };
-  /** Category trust snapshot (operator / boat / drone / car seat / real estate). */
+  /** Category trust snapshot (operator / boat / drone / car seat / real estate / P1). */
   trust?: {
     operatorCertKind?: "forklift" | "crane" | "excavator" | "general_heavy";
     operatorCertRequired?: boolean;
@@ -63,6 +63,21 @@ export type RentalAgreementCommercialSnapshot = {
     houseRules?: string;
     cleaningFeeUsd?: number;
     minAgeRequired?: number;
+    uscgSafetyKitRequired?: boolean;
+    kitInventoryRequired?: boolean;
+    kitInventoryChecklist?: string;
+    liabilityWaiverRequired?: boolean;
+    helmetPolicy?: string;
+    lockPolicy?: string;
+    setupTeardownFeeUsd?: number;
+    powerRequirement?: string;
+    hitchClass?: string;
+    brakeController?: string;
+    hinNumber?: string;
+    boatRegistration?: string;
+    rvDumpStation?: string;
+    rvPropane?: string;
+    rvOccupancy?: string;
   };
 };
 
@@ -168,10 +183,18 @@ export function buildEnrichedSummaryLines(input: {
     cat === "Boats & Water" ||
     cat === "Baby & Kids" ||
     cat === "Photo & Video" ||
+    cat === "Electronics & Tech" ||
+    cat === "Gym & Fitness" ||
+    cat === "Sports & Recreation" ||
+    cat === "Outdoor & Camping" ||
+    cat === "Bikes & Scooters" ||
+    cat === "Party & Events" ||
     Boolean(trust?.operatorCertRequired) ||
     Boolean(trust?.boaterLicenseRequired) ||
     Boolean(trust?.droneCertRequired) ||
     Boolean(trust?.houseRules) ||
+    Boolean(trust?.liabilityWaiverRequired) ||
+    Boolean(trust?.uscgSafetyKitRequired) ||
     /high.?value|boat|heavy|drone/i.test(cat);
 
   if (!isRich && !input.vehicle) {
@@ -227,6 +250,50 @@ export function buildEnrichedSummaryLines(input: {
   }
   if (trust?.minAgeRequired) {
     lines.push(`Minimum operator / driver age: ${trust.minAgeRequired}.`);
+  }
+  if (trust?.hinNumber?.trim()) {
+    lines.push(`Hull Identification Number (HIN): ${trust.hinNumber.trim()}.`);
+  }
+  if (trust?.boatRegistration?.trim()) {
+    lines.push(`Vessel registration: ${trust.boatRegistration.trim()}.`);
+  }
+  if (trust?.uscgSafetyKitRequired) {
+    lines.push(
+      "USCG-style safety kit required on board (PFDs, fire extinguisher, visual distress, sound signal as applicable). Renter acknowledged at booking.",
+    );
+  }
+  if (trust?.kitInventoryRequired) {
+    lines.push(
+      trust.kitInventoryChecklist?.trim()
+        ? `Kit inventory: ${trust.kitInventoryChecklist.trim()}`
+        : "Kit inventory checklist acknowledged at booking.",
+    );
+  }
+  if (trust?.liabilityWaiverRequired) {
+    lines.push(
+      "Liability waiver: renter assumes risk of injury from gym / high-risk sports or outdoor gear use; Evorios is not the equipment owner.",
+    );
+  }
+  if (trust?.helmetPolicy || trust?.lockPolicy) {
+    lines.push(
+      `Helmet policy: ${trust.helmetPolicy || "n/a"}; lock policy: ${trust.lockPolicy || "n/a"}.`,
+    );
+  }
+  if (trust?.setupTeardownFeeUsd != null && trust.setupTeardownFeeUsd > 0) {
+    lines.push(`Setup / teardown fee: $${trust.setupTeardownFeeUsd.toFixed(2)}.`);
+  }
+  if (trust?.powerRequirement?.trim()) {
+    lines.push(`Power requirement: ${trust.powerRequirement.trim()}.`);
+  }
+  if (trust?.hitchClass || trust?.brakeController) {
+    lines.push(
+      `Trailer hitch: ${trust.hitchClass || "n/a"}; brake controller: ${trust.brakeController || "n/a"}.`,
+    );
+  }
+  if (trust?.rvOccupancy || trust?.rvDumpStation || trust?.rvPropane) {
+    lines.push(
+      `RV occupancy ${trust.rvOccupancy || "n/a"}; dump: ${trust.rvDumpStation || "n/a"}; propane: ${trust.rvPropane || "n/a"}.`,
+    );
   }
   if (input.vehicle?.maxDeductible) {
     lines.push(`Host max deductible / card hold band: ${input.vehicle.maxDeductible}.`);

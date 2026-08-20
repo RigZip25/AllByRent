@@ -556,6 +556,24 @@ export function HostListingDetailScreen({
         listing.subcategory.trim() === "Car Seats" ? (
           <CategoryFactCard category="Baby & Kids" className="mb-4" />
         ) : null}
+        {listing.category.trim() === "Electronics & Tech" ? (
+          <CategoryFactCard category="Electronics & Tech" className="mb-4" />
+        ) : null}
+        {listing.category.trim() === "Gym & Fitness" ? (
+          <CategoryFactCard category="Gym & Fitness" className="mb-4" />
+        ) : null}
+        {listing.category.trim() === "Sports & Recreation" ? (
+          <CategoryFactCard category="Sports & Recreation" className="mb-4" />
+        ) : null}
+        {listing.category.trim() === "Outdoor & Camping" ? (
+          <CategoryFactCard category="Outdoor & Camping" className="mb-4" />
+        ) : null}
+        {listing.category.trim() === "Bikes & Scooters" ? (
+          <CategoryFactCard category="Bikes & Scooters" className="mb-4" />
+        ) : null}
+        {listing.category.trim() === "Party & Events" ? (
+          <CategoryFactCard category="Party & Events" className="mb-4" />
+        ) : null}
         {listingRequiresQrSticker(listing.modes) ? (
         <section
           className="mb-4 rounded-3xl border bg-white p-4 shadow-sm"

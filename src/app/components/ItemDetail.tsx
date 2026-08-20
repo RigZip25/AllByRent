@@ -550,6 +550,34 @@ export function ItemDetail({
               <CategoryFactCard category="Baby & Kids" className="mt-3" />
             ) : null}
             {listing.modes.rent &&
+            (listing.category.trim() === "Photo & Video" ||
+              listing.category.trim() === "Electronics & Tech") &&
+            !listingIsDrone(listing) ? (
+              <CategoryFactCard
+                category={
+                  listing.category.trim() === "Electronics & Tech"
+                    ? "Electronics & Tech"
+                    : "Photo & Video"
+                }
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Gym & Fitness" ? (
+              <CategoryFactCard category="Gym & Fitness" className="mt-3" />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Sports & Recreation" ? (
+              <CategoryFactCard category="Sports & Recreation" className="mt-3" />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Outdoor & Camping" ? (
+              <CategoryFactCard category="Outdoor & Camping" className="mt-3" />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Bikes & Scooters" ? (
+              <CategoryFactCard category="Bikes & Scooters" className="mt-3" />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Party & Events" ? (
+              <CategoryFactCard category="Party & Events" className="mt-3" />
+            ) : null}
+            {listing.modes.rent &&
             (listingProRentersOnly(listing) ||
               listingRequiresPhysicalDamage(listing) ||
               listingRequiresCdl(listing) ||

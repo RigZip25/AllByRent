@@ -950,6 +950,14 @@ export const en: AppMessages = {
       "Boater / PWC license attestation and document are required before handoff can start.",
     droneCertUnlockBlocked:
       "FAA Part 107 / Remote ID attestation is required before handoff can start.",
+    uscgUnlockBlocked:
+      "USCG-style safety kit acknowledgment from booking is required before handoff can start.",
+    kitInventoryUnlockBlocked:
+      "Kit inventory acknowledgment from booking is required before handoff can start.",
+    liabilityWaiverUnlockBlocked:
+      "Liability waiver acknowledgment from booking is required before handoff can start.",
+    helmetLockUnlockBlocked:
+      "Helmet and lock policy acknowledgment from booking is required before handoff can start.",
     agentProofPending:
       "Waiting for the host to confirm they received insurance proof from your agent.",
     agentProofReceivedMark: "I received insurance proof from the renter’s agent",
@@ -1681,6 +1689,60 @@ export const en: AppMessages = {
           placeholder: "75",
           hint: "Optional flat cleaning fee shown at booking and on the agreement.",
         },
+        kitInventoryChecklist: {
+          label: "Kit inventory checklist",
+          placeholder: "Body, 2 lenses, 3 batteries, charger, bag…",
+          hint: "List every included accessory — renter confirms at booking and handoff.",
+        },
+        hinNumber: {
+          label: "HIN (Hull ID)",
+          placeholder: "ABC12345D404",
+          hint: "US boats have a 12-character Hull Identification Number — required for rent.",
+        },
+        boatRegistration: {
+          label: "Registration / state numbers",
+          placeholder: "State registration or documented vessel #",
+          hint: "Recommended for motor vessels — helps match the hull at handoff.",
+        },
+        uscgSafetyKitConfirmed: {
+          label: "USCG-style safety kit",
+          hint: "PFDs for capacity, extinguisher, visual distress, sound signal — required for powered craft.",
+        },
+        hitchClass: {
+          label: "Hitch class",
+          hint: "Match the renter’s tow vehicle hitch rating to this trailer.",
+        },
+        brakeController: {
+          label: "Brake controller / trailer brakes",
+          hint: "Electric or surge brakes? Renters need a compatible controller in the tow vehicle.",
+        },
+        rvOccupancyBand: { label: "Sleeps / occupancy" },
+        dumpStationAccess: {
+          label: "Dump / gray-black water",
+          hint: "Who empties tanks and where.",
+        },
+        propaneStatus: { label: "Propane tanks at handoff" },
+        generatorIncluded: { label: "Generator included?" },
+        liabilityWaiverRequired: {
+          label: "Liability waiver at booking",
+          hint: "Required for gym and high-risk sports/outdoor shelves by default.",
+        },
+        helmetPolicy: { label: "Helmet policy" },
+        lockPolicy: { label: "Lock / theft policy" },
+        minRiderAge: {
+          label: "Minimum rider age",
+          placeholder: "16",
+          hint: "E-scooters often require 16+ — set your local rule.",
+        },
+        setupTeardownFeeUsd: {
+          label: "Setup / teardown fee (USD)",
+          placeholder: "50",
+          hint: "Flat labor fee for stage, sound, lighting, or booth setup — shown at booking.",
+        },
+        powerRequirement: {
+          label: "Power requirement",
+          hint: "Tell venues what circuits / generators you need.",
+        },
         useCase: { label: "Primary use" },
         transportSize: { label: "How it moves" },
       },
@@ -1880,6 +1942,40 @@ export const en: AppMessages = {
         not_yet: "Not yet",
         photo_on_listing: "Label photo is on the listing",
         will_add: "Will add label photo",
+        kit_complete: "Complete USCG-style kit on board",
+        incomplete: "Incomplete — do not publish for powered craft",
+        class_i: "Class I",
+        class_ii: "Class II",
+        class_iii: "Class III",
+        class_iv: "Class IV",
+        class_v: "Class V",
+        gooseneck_fifth: "Gooseneck / fifth-wheel",
+        electric_brakes: "Electric brakes (need controller)",
+        surge: "Surge / hydraulic surge",
+        electric_over_hydraulic: "Electric-over-hydraulic",
+        none: "No trailer brakes",
+        "5_6": "5–6",
+        "7_8": "7–8",
+        "9_plus": "9+",
+        included_host_site: "Dump at host / included site",
+        renter_public: "Renter uses public dump station",
+        not_needed: "Not needed (no black/gray)",
+        black_tank_none: "No black tank",
+        full_tanks: "Full propane at handoff",
+        partial: "Partial — top off as needed",
+        empty_renter_fills: "Empty — renter fills",
+        no_propane: "No propane system",
+        shore_power_only: "Shore power only",
+        required: "Required at booking",
+        not_required: "Not required",
+        renter_provides: "Renter provides",
+        included: "Included with rental",
+        deposit_for_lock: "Lock on deposit / leave locked",
+        none_battery: "None / battery powered",
+        standard_120v: "Standard 120V outlet",
+        dedicated_20a: "Dedicated 20A circuit",
+        "240v_or_generator": "240V or generator",
+        host_provides: "Host provides power on site",
         under_2kw: "Under 2 kW",
         "2_5kw": "2–5 kW",
         "5_15kw": "5–15 kW",
@@ -2454,6 +2550,36 @@ export const en: AppMessages = {
       "I will sanitize / wipe down the seat before use with my child and will not use an expired or recalled unit.",
     carSeatSafetyBadge: "Car seat safety gate",
     guestIdBadge: "Guest ID at check-in",
+    uscgBlockedTitle: "Safety kit incomplete on this listing",
+    uscgBlockedBody:
+      "The host has not confirmed a complete USCG-style safety kit (PFDs, extinguisher, distress signals, sound device). Ask them to update the listing.",
+    uscgSafetyTitle: "USCG-style safety kit",
+    uscgSafetyBody:
+      "Powered watercraft must carry life jackets for each person, a fire extinguisher, visual distress signals, and a sound-producing device as applicable. Confirm you’ll verify the kit at handoff.",
+    uscgSafetyAttest:
+      "I will verify the safety kit at handoff and will not operate without required PFDs and signals.",
+    hinLine: (hin) => `HIN: ${hin}`,
+    registrationLine: (reg) => `Registration: ${reg}`,
+    kitInventoryTitle: "Kit inventory",
+    kitInventoryEmpty: "Host will confirm included accessories at handoff — acknowledge to continue.",
+    kitInventoryAttest:
+      "I reviewed the kit inventory and will check each item at pickup and return.",
+    liabilityWaiverTitle: "Assumption of risk / liability waiver",
+    liabilityWaiverBody:
+      "Gym and high-risk sports or outdoor gear can cause injury. You rent from a neighbor, not Evorios. You assume risk of ordinary use; document condition at handoff.",
+    liabilityWaiverAttest:
+      "I understand the risks, will use the gear as intended, and waive ordinary-use injury claims against the host and Evorios to the extent allowed by law.",
+    helmetLockTitle: "Helmet & lock policy",
+    helmetLockBody: (helmet, lock) => `Helmet: ${helmet}. Lock: ${lock}.`,
+    helmetLockAttest:
+      "I agree to follow the helmet and lock policy for this bike or scooter rental.",
+    helmetPolicyFallback: "follow local law / host note",
+    lockPolicyFallback: "secure when unattended",
+    eScooterAgeTitle: "E-scooter age required",
+    eScooterAgeBody: (minAge) =>
+      `This e-scooter listing requires riders to be at least ${minAge}. Add your date of birth in profile, or choose another listing.`,
+    setupTeardownFeeLine: (amount) => `Setup / teardown fee: ${amount}`,
+    powerRequirementLine: (power) => `Power needed: ${power}`,
     agentInsuranceTitle: "Insurance via your agent → owner",
     agentInsuranceBody:
       "For heavy / semi commercial transport, add coverage with your insurance agent. Your agent must email proof directly to the vehicle owner — this is not the lighter “add to personal auto + upload” path.",
@@ -2659,22 +2785,22 @@ export const en: AppMessages = {
       "Boats & Water": {
         title: "Boats & watercraft rentals",
         summary:
-          "Powered boats and PWCs require boater / captain / PWC license attestation + document, and the same min-age gate as vehicles (default 25; hosts may opt in to 18–24 with a higher hold). Insurance-backed deposit applies. Fuel / handoff rules follow the listing.",
+          "List HIN + registration. Powered boats and PWCs require a complete USCG-style safety kit, boater / captain / PWC license attestation + document, and the same min-age gate as vehicles (default 25; hosts may opt in to 18–24 with a higher hold). Insurance-backed deposit applies.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Require insurance proof and set max deductible. For motorboats and jet skis, renters must attest and upload a license. Use young-driver opt-in only if you accept higher hold risk.",
-        whyGeoTitle: "Why license + age before handoff?",
+          "Enter HIN and registration. Confirm PFDs, extinguisher, distress signals, and sound device for powered craft. Require insurance and set max deductible. Renters attest license + age; young-driver opt-in only if you accept higher hold risk.",
+        whyGeoTitle: "Why license + age + kit before handoff?",
         whyGeo:
-          "Unlicensed or underage operators are a top watercraft loss driver. License + age gate + insurance proof lock PIN / keys until cleared.",
+          "Unlicensed or underage operators and missing safety gear are top watercraft loss drivers. License + age + USCG kit + insurance proof lock PIN / keys until cleared.",
         flowTitle: "End to end",
         flow:
-          "List vessel → insurance + age policy → renter attests license + age → book → proof cleared → handoff → return.",
+          "List vessel (HIN / registration + kit) → insurance + age policy → renter attests license, age, and kit → book → proof cleared → handoff → return.",
         layersTitle: "Safety layers",
         layers:
-          "Boater / PWC license · age gate · insurance · deductible hold · rental terms · QR / PIN handoff.",
+          "HIN / registration · USCG-style kit · boater / PWC license · age gate · insurance · deductible hold · rental terms · QR / PIN handoff.",
         claimsTitle: "If something goes wrong",
         claims:
-          "Renter insurance is primary. License and age attestations support disputes; the card hold matches your deductible band.",
+          "Renter insurance is primary. License, age, and kit attestations support disputes; the card hold matches your deductible band.",
       },
       "Real Estate": {
         title: "Short stays & house rentals",
@@ -2697,24 +2823,126 @@ export const en: AppMessages = {
           "House rules and start ID support disputes. Deposit covers damage / excessive cleaning beyond the listed fee.",
       },
       "Photo & Video": {
-        title: "Drone & camera gear rentals",
+        title: "Camera, cinema & drone rentals",
         summary:
-          "Drone listings require FAA Part 107 and/or Remote ID attestation before booking (certificate upload optional). Hosts still rely on insurance / deposit rules for high-value kits.",
+          "Serial number and kit inventory are required for rent. Drone listings also need FAA Part 107 and/or Remote ID attestation before booking (certificate upload optional). Deposit / insurance rules protect high-value kits.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Mark drone kits clearly. Part 107 attestation is required for renters; optional cert upload helps you verify. Use a deductible-sized hold for expensive bodies.",
-        whyGeoTitle: "Why Part 107 / Remote ID?",
+          "Enter serial and a clear kit inventory (bodies, lenses, batteries, bags). Mark drones clearly — Part 107 attestation is required for renters.",
+        whyGeoTitle: "Why serial + inventory + Part 107?",
         whyGeo:
-          "Uncertified drone flights create regulatory and liability risk. Attestation (and optional cert photo) gates booking and handoff.",
+          "High-value kits go missing one accessory at a time. Serial + inventory at handoff, plus drone compliance attestation, cut claims disputes.",
         flowTitle: "End to end",
         flow:
-          "List drone kit → renter attests Part 107 / Remote ID → optional cert upload → book → handoff → return.",
+          "List with serial + inventory → drone renters attest Part 107 / Remote ID → book → confirm kit at handoff → return checklist.",
         layersTitle: "Safety layers",
         layers:
-          "Part 107 / Remote ID attestation · optional cert upload · deposit hold · rental terms · QR handoff.",
+          "Serial · kit inventory · Part 107 / Remote ID when drone · deposit hold · rental terms · QR handoff.",
         claimsTitle: "If something goes wrong",
         claims:
-          "Renter coverage and deposit hold first. Attestation helps show the operator claimed compliance.",
+          "Inventory photos and serial support theft / missing-part claims. Renter coverage and deposit hold first.",
+      },
+      "Electronics & Tech": {
+        title: "Electronics & tech rentals",
+        summary:
+          "Serial number and kit inventory are required on the rent path so handoff and claims have a clear accessory list (chargers, cables, cases).",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Capture serial and list every included accessory. High replacement-value gear should use a strong deposit hold.",
+        whyGeoTitle: "Why serial + inventory?",
+        whyGeo:
+          "Laptops and pro displays are theft-prone and easy to return incomplete. Serial + checklist at booking and handoff protects both sides.",
+        flowTitle: "End to end",
+        flow: "List with serial + inventory → renter acknowledges kit → handoff check → return.",
+        layersTitle: "Safety layers",
+        layers: "Serial · kit inventory · deposit hold · rental terms · QR handoff.",
+        claimsTitle: "If something goes wrong",
+        claims: "Use inventory snapshot and serial for missing parts or swaps; deposit hold covers the gap.",
+      },
+      "Gym & Fitness": {
+        title: "Gym & fitness rentals",
+        summary:
+          "Renters sign an assumption-of-risk / liability waiver at booking. Set max user weight when relevant. Neighbor trust + deposit still apply.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Keep equipment in safe working order. Require the waiver (default on). Note max user weight for machines.",
+        whyGeoTitle: "Why a waiver?",
+        whyGeo:
+          "Weights and machines can injure. A clear waiver at booking sets expectations without pretending Evorios is a gym operator.",
+        flowTitle: "End to end",
+        flow: "List gear → renter signs waiver at book → handoff → return.",
+        layersTitle: "Safety layers",
+        layers: "Liability waiver · max user weight · deposit · rental terms.",
+        claimsTitle: "If something goes wrong",
+        claims: "Document condition at handoff. Waiver covers ordinary-use injury risk; deposit covers damage.",
+      },
+      "Sports & Recreation": {
+        title: "Sports & recreation rentals",
+        summary:
+          "High-risk shelves (snow, water, climb-style) require a liability waiver at booking. Skill level and size help renters self-screen.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Keep waiver on for water / snow / climb risk. Be honest about skill level and condition.",
+        whyGeoTitle: "Why waivers on high-risk gear?",
+        whyGeo:
+          "Ski, water, and climb gear carry injury risk beyond a simple deposit. Waiver + clear specs reduce surprise claims.",
+        flowTitle: "End to end",
+        flow: "List → waiver at book when required → handoff → return.",
+        layersTitle: "Safety layers",
+        layers: "Liability waiver (high-risk) · skill / size specs · deposit · rental terms.",
+        claimsTitle: "If something goes wrong",
+        claims: "Photos at handoff plus waiver trail support disputes; deposit for damage.",
+      },
+      "Outdoor & Camping": {
+        title: "Outdoor & camping rentals",
+        summary:
+          "Expedition / survival shelves use a liability waiver at booking. Capacity and season rating help match trips.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Require waiver for survival / expedition gear. Keep tents dry and note season rating honestly.",
+        whyGeoTitle: "Why waiver on survival / expedition?",
+        whyGeo:
+          "Remote gear failures can strand people. Waiver + clear season / capacity specs set honest expectations.",
+        flowTitle: "End to end",
+        flow: "List → waiver when required → handoff → return.",
+        layersTitle: "Safety layers",
+        layers: "Liability waiver (high-risk) · capacity / season · deposit · rental terms.",
+        claimsTitle: "If something goes wrong",
+        claims: "Condition photos and waiver support disputes; deposit for damage or missing parts.",
+      },
+      "Bikes & Scooters": {
+        title: "Bikes & scooter rentals",
+        summary:
+          "Helmet and lock policies are required on rent. E-scooters can set a minimum rider age (default 16). Frame / electric specs help fit.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Say whether a helmet and lock are included. For e-scooters, set min age to match local rules.",
+        whyGeoTitle: "Why helmet, lock, and age?",
+        whyGeo:
+          "Head injury and theft are the two biggest bike/scooter loss modes. Clear policy + age gate cut disputes.",
+        flowTitle: "End to end",
+        flow: "List with helmet/lock (+ age for e-scooter) → renter acknowledges → handoff → return.",
+        layersTitle: "Safety layers",
+        layers: "Helmet policy · lock policy · e-scooter age · deposit · rental terms.",
+        claimsTitle: "If something goes wrong",
+        claims: "Lock policy and handoff photos support theft claims; deposit covers damage.",
+      },
+      "Party & Events": {
+        title: "Party & event rentals",
+        summary:
+          "Pro AV / stage / lighting shelves capture setup/teardown fee and power needs. Guest capacity and footprint help venues plan.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Set a setup/teardown fee when you provide labor. State power requirements clearly for sound and lighting.",
+        whyGeoTitle: "Why setup fee + power?",
+        whyGeo:
+          "Surprise labor and dead outlets ruin events. Fee + power at listing freeze on the agreement.",
+        flowTitle: "End to end",
+        flow: "List with fee / power when relevant → book (fee on total) → setup → teardown return.",
+        layersTitle: "Safety layers",
+        layers: "Setup/teardown fee · power requirement · capacity · deposit · rental terms.",
+        claimsTitle: "If something goes wrong",
+        claims: "Fee and power are frozen on the agreement; deposit covers damage beyond normal event wear.",
       },
       "Baby & Kids": {
         title: "Car seat safety rentals",

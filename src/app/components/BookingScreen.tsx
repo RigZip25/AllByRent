@@ -22,15 +22,29 @@ import {
 import {
   listingCarSeatBlocksBooking,
   listingCleaningFeeUsd,
+  listingEScooterMinAge,
+  listingHelmetPolicy,
   listingHouseRulesText,
   listingIsCarSeat,
   listingIsDrone,
+  listingKitInventoryText,
+  listingLockPolicy,
   listingOperatorCertKind,
   listingRequiresAgeGate,
   listingRequiresBoaterLicense,
   listingRequiresDroneCert,
+  listingRequiresEScooterAgeGate,
+  listingRequiresHelmetLockPolicy,
+  listingRequiresKitInventory,
+  listingRequiresLiabilityWaiver,
   listingRequiresOperatorCredential,
+  listingRequiresUscgSafetyKit,
+  listingSetupTeardownFeeUsd,
+  listingUscgSafetyBlocksBooking,
   listingIsPwc,
+  listingIsPartyCategory,
+  listingIsBikesScooters,
+  listingIsHighValueGearCategory,
 } from "../../lib/categoryTrustRules";
 import { uploadRentalInsuranceProof } from "../../lib/rentalInsuranceStorage";
 import {
@@ -41,7 +55,11 @@ import {
 } from "../../lib/lateReturnFee";
 import { listingNoShowFeeUsd } from "../../lib/noShowPolicy";
 import { formatCancellationPolicySummary } from "../../lib/cancellationPolicy";
-import { assessVehicleAgeGate } from "../../lib/vehicleAgeGate";
+import {
+  ageYearsFromDob,
+  assessVehicleAgeGate,
+  resolveRenterDateOfBirth,
+} from "../../lib/vehicleAgeGate";
 import { computeVehicleExtrasFeeUsd,
   enabledVehicleExtraKeys,
   type SelectedVehicleExtras,
@@ -295,6 +313,10 @@ function BookingScreenLoaded({
   const [droneCertBusy, setDroneCertBusy] = useState(false);
   const [carSeatSanitizationAttested, setCarSeatSanitizationAttested] = useState(false);
   const [carSeatRecallAckAttested, setCarSeatRecallAckAttested] = useState(false);
+  const [uscgSafetyAck, setUscgSafetyAck] = useState(false);
+  const [kitInventoryAck, setKitInventoryAck] = useState(false);
+  const [liabilityWaiverAttested, setLiabilityWaiverAttested] = useState(false);
+  const [helmetLockAck, setHelmetLockAck] = useState(false);
 
   const needsInsuranceProof = listingRequiresInsuranceProof(listing);
   const needsPhysicalDamage = listingRequiresPhysicalDamage(listing);
@@ -308,7 +330,21 @@ function BookingScreenLoaded({
   const carSeatListingBlocked = listingCarSeatBlocksBooking(listing);
   const houseRulesText = listingHouseRulesText(listing);
   const cleaningFeeUsd = listingCleaningFeeUsd(listing);
+  const setupTeardownFeeUsd = listingSetupTeardownFeeUsd(listing);
   const needsAgeGate = listingRequiresAgeGate(listing);
+  const needsUscgSafety = listingRequiresUscgSafetyKit(listing);
+  const uscgListingBlocked = listingUscgSafetyBlocksBooking(listing);
+  const needsKitInventory = listingRequiresKitInventory(listing);
+  const kitInventoryText = listingKitInventoryText(listing);
+  const needsLiabilityWaiver = listingRequiresLiabilityWaiver(listing);
+  const needsHelmetLock = listingRequiresHelmetLockPolicy(listing);
+  const helmetPolicy = listingHelmetPolicy(listing);
+  const lockPolicy = listingLockPolicy(listing);
+  const needsEScooterAge = listingRequiresEScooterAgeGate(listing);
+  const eScooterMinAge = listingEScooterMinAge(listing);
+  const isPartyListing = listingIsPartyCategory(listing) && listing.modes.rent;
+  const isBikesListing = listingIsBikesScooters(listing) && listing.modes.rent;
+  const isHighValueGear = listingIsHighValueGearCategory(listing) && listing.modes.rent;
   const usesAgentInsurance = listingUsesAgentToOwnerInsuranceProof(listing);
   const isCommercialTransport = listingIsCommercialTransport(listing);
   const ownerProofEmail = listingInsuranceOwnerProofEmail(listing);
@@ -468,6 +504,23 @@ function BookingScreenLoaded({
     listing.category.trim() !== "Real Estate" ||
     !listing.modes.rent ||
     Boolean(houseRulesText);
+  const uscgSafetyOk =
+    !needsUscgSafety || (!uscgListingBlocked && uscgSafetyAck);
+  const kitInventoryOk = !needsKitInventory || kitInventoryAck;
+  const liabilityWaiverOk = !needsLiabilityWaiver || liabilityWaiverAttested;
+  const helmetLockOk = !needsHelmetLock || helmetLockAck;
+
+  const eScooterAgeOk = useMemo(() => {
+    if (!needsEScooterAge) return true;
+    const dobStr = resolveRenterDateOfBirth();
+    if (!dobStr) return false;
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dobStr.trim());
+    const dob = m
+      ? new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])))
+      : new Date(dobStr);
+    if (Number.isNaN(dob.getTime())) return false;
+    return ageYearsFromDob(dob) >= eScooterMinAge;
+  }, [needsEScooterAge, eScooterMinAge]);
 
   const breakdown: RentalPriceBreakdown = useMemo(
     () =>
@@ -490,7 +543,9 @@ function BookingScreenLoaded({
   );
 
   const totalWithExtras =
-    Math.round((breakdown.totalUsd + extrasFeeUsd + cleaningFeeUsd) * 100) / 100;
+    Math.round(
+      (breakdown.totalUsd + extrasFeeUsd + cleaningFeeUsd + setupTeardownFeeUsd) * 100,
+    ) / 100;
 
   const canConfirm =
     (!deliveryRequested || deliveryAddress.trim().length > 0) &&
@@ -505,6 +560,11 @@ function BookingScreenLoaded({
     droneCertOk &&
     carSeatOk &&
     realEstateHouseRulesOk &&
+    uscgSafetyOk &&
+    kitInventoryOk &&
+    liabilityWaiverOk &&
+    helmetLockOk &&
+    eScooterAgeOk &&
     !insuranceUploadBusy &&
     !proCredentialBusy &&
     !cdlBusy &&
@@ -559,7 +619,26 @@ function BookingScreenLoaded({
         carSeatSanitizationRequired: needsCarSeatGates,
         houseRules: houseRulesText || undefined,
         cleaningFeeUsd: cleaningFeeUsd > 0 ? cleaningFeeUsd : undefined,
-        minAgeRequired: needsAgeGate ? ageGate.minAgeRequired : undefined,
+        minAgeRequired: needsAgeGate
+          ? ageGate.minAgeRequired
+          : needsEScooterAge
+            ? eScooterMinAge
+            : undefined,
+        uscgSafetyKitRequired: needsUscgSafety,
+        kitInventoryRequired: needsKitInventory,
+        kitInventoryChecklist: kitInventoryText || undefined,
+        liabilityWaiverRequired: needsLiabilityWaiver,
+        helmetPolicy: helmetPolicy || undefined,
+        lockPolicy: lockPolicy || undefined,
+        setupTeardownFeeUsd: setupTeardownFeeUsd > 0 ? setupTeardownFeeUsd : undefined,
+        powerRequirement: listing.categorySpecs?.powerRequirement || undefined,
+        hitchClass: listing.categorySpecs?.hitchClass || undefined,
+        brakeController: listing.categorySpecs?.brakeController || undefined,
+        hinNumber: listing.categorySpecs?.hinNumber || undefined,
+        boatRegistration: listing.categorySpecs?.boatRegistration || undefined,
+        rvDumpStation: listing.categorySpecs?.dumpStationAccess || undefined,
+        rvPropane: listing.categorySpecs?.propaneStatus || undefined,
+        rvOccupancy: listing.categorySpecs?.rvOccupancyBand || undefined,
       },
       vehicle:
         isVehicleListing ||
@@ -594,28 +673,45 @@ function BookingScreenLoaded({
     ageGate.minAgeRequired,
     cleaningFeeUsd,
     deductibleLabel,
+    eScooterMinAge,
     fuelPolicySnapshot,
+    helmetPolicy,
     homeTerritory,
     houseRulesText,
     insuranceActiveUntil,
     isVehicleListing,
+    kitInventoryText,
     liabilityLabel,
     listing.category,
+    listing.categorySpecs?.boatRegistration,
+    listing.categorySpecs?.brakeController,
+    listing.categorySpecs?.dumpStationAccess,
+    listing.categorySpecs?.hinNumber,
+    listing.categorySpecs?.hitchClass,
     listing.categorySpecs?.includedMilesPerDay,
     listing.categorySpecs?.overagePerMile,
+    listing.categorySpecs?.powerRequirement,
+    listing.categorySpecs?.propaneStatus,
+    listing.categorySpecs?.rvOccupancyBand,
     listing.handoff.insuranceMaxDeductible,
     listing.handoff.insuranceMinLiability,
     listing.vehicleExtras?.vehicleDelivery?.maxMiles,
+    lockPolicy,
     needsAgeGate,
     needsBoaterLicense,
     needsCarSeatGates,
     needsDroneCert,
+    needsEScooterAge,
     needsFuelTracking,
     needsInsuranceProof,
+    needsKitInventory,
+    needsLiabilityWaiver,
     needsOperatorCert,
+    needsUscgSafety,
     operatorCertKind,
     offeredExtraKeys,
     selectedExtras,
+    setupTeardownFeeUsd,
     t.booking,
     tollHoldCents,
     travelOutsideHomeArea,
@@ -682,7 +778,26 @@ function BookingScreenLoaded({
           carSeatSanitizationRequired: needsCarSeatGates,
           houseRules: houseRulesText || undefined,
           cleaningFeeUsd: cleaningFeeUsd > 0 ? cleaningFeeUsd : undefined,
-          minAgeRequired: needsAgeGate ? ageGate.minAgeRequired : undefined,
+          minAgeRequired: needsAgeGate
+            ? ageGate.minAgeRequired
+            : needsEScooterAge
+              ? eScooterMinAge
+              : undefined,
+          uscgSafetyKitRequired: needsUscgSafety,
+          kitInventoryRequired: needsKitInventory,
+          kitInventoryChecklist: kitInventoryText || undefined,
+          liabilityWaiverRequired: needsLiabilityWaiver,
+          helmetPolicy: helmetPolicy || undefined,
+          lockPolicy: lockPolicy || undefined,
+          setupTeardownFeeUsd: setupTeardownFeeUsd > 0 ? setupTeardownFeeUsd : undefined,
+          powerRequirement: listing.categorySpecs?.powerRequirement || undefined,
+          hitchClass: listing.categorySpecs?.hitchClass || undefined,
+          brakeController: listing.categorySpecs?.brakeController || undefined,
+          hinNumber: listing.categorySpecs?.hinNumber || undefined,
+          boatRegistration: listing.categorySpecs?.boatRegistration || undefined,
+          rvDumpStation: listing.categorySpecs?.dumpStationAccess || undefined,
+          rvPropane: listing.categorySpecs?.propaneStatus || undefined,
+          rvOccupancy: listing.categorySpecs?.rvOccupancyBand || undefined,
         },
         vehicle:
           isVehicleListing ||
@@ -786,6 +901,14 @@ function BookingScreenLoaded({
       carSeatRecallAckAttested: needsCarSeatGates ? carSeatRecallAckAttested : undefined,
       houseRulesSnapshot: houseRulesText || undefined,
       cleaningFeeUsd: cleaningFeeUsd > 0 ? cleaningFeeUsd : undefined,
+      uscgSafetyAck: needsUscgSafety ? uscgSafetyAck : undefined,
+      kitInventoryAck: needsKitInventory ? kitInventoryAck : undefined,
+      kitInventorySnapshot: kitInventoryText || undefined,
+      liabilityWaiverAttested: needsLiabilityWaiver ? liabilityWaiverAttested : undefined,
+      helmetLockAck: needsHelmetLock ? helmetLockAck : undefined,
+      helmetPolicySnapshot: helmetPolicy || undefined,
+      lockPolicySnapshot: lockPolicy || undefined,
+      setupTeardownFeeUsd: setupTeardownFeeUsd > 0 ? setupTeardownFeeUsd : undefined,
       insuranceAgentProofAcknowledged: usesAgentInsurance ? agentProofAck : undefined,
       insuranceOwnerProofEmail: usesAgentInsurance ? ownerProofEmail || undefined : undefined,
       selectedVehicleExtras: selectedExtras,
@@ -1115,6 +1238,26 @@ function BookingScreenLoaded({
           <CategoryFactCard category="Photo & Video" />
         ) : null}
         {needsCarSeatGates ? <CategoryFactCard category="Baby & Kids" /> : null}
+        {isHighValueGear && !listingIsDrone(listing) ? (
+          <CategoryFactCard
+            category={
+              listing.category.trim() === "Electronics & Tech"
+                ? "Electronics & Tech"
+                : "Photo & Video"
+            }
+          />
+        ) : null}
+        {listing.category.trim() === "Gym & Fitness" && listing.modes.rent ? (
+          <CategoryFactCard category="Gym & Fitness" />
+        ) : null}
+        {listing.category.trim() === "Sports & Recreation" && listing.modes.rent ? (
+          <CategoryFactCard category="Sports & Recreation" />
+        ) : null}
+        {listing.category.trim() === "Outdoor & Camping" && listing.modes.rent ? (
+          <CategoryFactCard category="Outdoor & Camping" />
+        ) : null}
+        {isBikesListing ? <CategoryFactCard category="Bikes & Scooters" /> : null}
+        {isPartyListing ? <CategoryFactCard category="Party & Events" /> : null}
 
         {listing.category.trim() === "Real Estate" && houseRulesText ? (
           <div className="rounded-xl border border-border bg-card p-4 space-y-2">
@@ -1125,6 +1268,25 @@ function BookingScreenLoaded({
             {cleaningFeeUsd > 0 ? (
               <p className="text-sm font-medium text-gray-900">
                 {t.booking.cleaningFeeLine(formatMoney(cleaningFeeUsd))}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {isPartyListing &&
+        (setupTeardownFeeUsd > 0 || listing.categorySpecs?.powerRequirement) ? (
+          <div className="rounded-xl border border-border bg-card p-4 space-y-1">
+            {setupTeardownFeeUsd > 0 ? (
+              <p className="text-sm font-semibold text-gray-900">
+                {t.booking.setupTeardownFeeLine(formatMoney(setupTeardownFeeUsd))}
+              </p>
+            ) : null}
+            {listing.categorySpecs?.powerRequirement ? (
+              <p className="text-[13px] text-muted-foreground">
+                {t.booking.powerRequirementLine(
+                  t.listing.specs.options[listing.categorySpecs.powerRequirement] ??
+                    listing.categorySpecs.powerRequirement,
+                )}
               </p>
             ) : null}
           </div>
@@ -1158,6 +1320,113 @@ function BookingScreenLoaded({
               />
               <span>{t.booking.carSeatSanitizationAttest}</span>
             </label>
+          </div>
+        ) : null}
+
+        {needsUscgSafety && uscgListingBlocked ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <p className="font-semibold">{t.booking.uscgBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.uscgBlockedBody}</p>
+          </div>
+        ) : null}
+
+        {needsUscgSafety && !uscgListingBlocked ? (
+          <div className="rounded-xl border border-cyan-200 bg-cyan-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-cyan-950">{t.booking.uscgSafetyTitle}</p>
+            <p className="text-[12px] text-cyan-900/90">{t.booking.uscgSafetyBody}</p>
+            {(listing.categorySpecs?.hinNumber || listing.categorySpecs?.boatRegistration) && (
+              <p className="text-[12px] text-cyan-950">
+                {[
+                  listing.categorySpecs?.hinNumber
+                    ? t.booking.hinLine(listing.categorySpecs.hinNumber)
+                    : null,
+                  listing.categorySpecs?.boatRegistration
+                    ? t.booking.registrationLine(listing.categorySpecs.boatRegistration)
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            )}
+            <label className="flex items-start gap-2 text-xs text-cyan-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={uscgSafetyAck}
+                onChange={(e) => setUscgSafetyAck(e.target.checked)}
+              />
+              <span>{t.booking.uscgSafetyAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {needsKitInventory ? (
+          <div className="rounded-xl border border-violet-200 bg-violet-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-violet-950">{t.booking.kitInventoryTitle}</p>
+            {kitInventoryText ? (
+              <p className="text-[13px] whitespace-pre-wrap text-violet-900/90">{kitInventoryText}</p>
+            ) : (
+              <p className="text-[12px] text-violet-900/80">{t.booking.kitInventoryEmpty}</p>
+            )}
+            <label className="flex items-start gap-2 text-xs text-violet-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={kitInventoryAck}
+                onChange={(e) => setKitInventoryAck(e.target.checked)}
+              />
+              <span>{t.booking.kitInventoryAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {needsLiabilityWaiver ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-amber-950">{t.booking.liabilityWaiverTitle}</p>
+            <p className="text-[12px] text-amber-900/90">{t.booking.liabilityWaiverBody}</p>
+            <label className="flex items-start gap-2 text-xs text-amber-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={liabilityWaiverAttested}
+                onChange={(e) => setLiabilityWaiverAttested(e.target.checked)}
+              />
+              <span>{t.booking.liabilityWaiverAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {needsHelmetLock ? (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-emerald-950">{t.booking.helmetLockTitle}</p>
+            <p className="text-[12px] text-emerald-900/90">
+              {t.booking.helmetLockBody(
+                helmetPolicy
+                  ? t.listing.specs.options[helmetPolicy] ?? helmetPolicy
+                  : t.booking.helmetPolicyFallback,
+                lockPolicy
+                  ? t.listing.specs.options[lockPolicy] ?? lockPolicy
+                  : t.booking.lockPolicyFallback,
+              )}
+            </p>
+            <label className="flex items-start gap-2 text-xs text-emerald-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={helmetLockAck}
+                onChange={(e) => setHelmetLockAck(e.target.checked)}
+              />
+              <span>{t.booking.helmetLockAttest}</span>
+            </label>
+          </div>
+        ) : null}
+
+        {needsEScooterAge && !eScooterAgeOk ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <p className="font-semibold">{t.booking.eScooterAgeTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">
+              {t.booking.eScooterAgeBody(eScooterMinAge)}
+            </p>
           </div>
         ) : null}
 

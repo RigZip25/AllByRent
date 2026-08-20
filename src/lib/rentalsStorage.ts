@@ -233,6 +233,15 @@ export type RentalBooking = {
   /** Frozen house rules / cleaning fee at booking (Real Estate). */
   houseRulesSnapshot?: string;
   cleaningFeeUsd?: number;
+  /** P1: USCG safety kit / kit inventory / waiver / helmet-lock attestations. */
+  uscgSafetyAck?: boolean;
+  kitInventoryAck?: boolean;
+  kitInventorySnapshot?: string;
+  liabilityWaiverAttested?: boolean;
+  helmetLockAck?: boolean;
+  helmetPolicySnapshot?: string;
+  lockPolicySnapshot?: string;
+  setupTeardownFeeUsd?: number;
   /**
    * Renter acknowledged agent→owner insurance proof path and saw owner email.
    */
@@ -577,6 +586,20 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
     cleaningFeeUsd:
       typeof raw.cleaningFeeUsd === "number" && Number.isFinite(raw.cleaningFeeUsd)
         ? raw.cleaningFeeUsd
+        : undefined,
+    uscgSafetyAck: Boolean(raw.uscgSafetyAck),
+    kitInventoryAck: Boolean(raw.kitInventoryAck),
+    kitInventorySnapshot:
+      typeof raw.kitInventorySnapshot === "string" ? raw.kitInventorySnapshot : undefined,
+    liabilityWaiverAttested: Boolean(raw.liabilityWaiverAttested),
+    helmetLockAck: Boolean(raw.helmetLockAck),
+    helmetPolicySnapshot:
+      typeof raw.helmetPolicySnapshot === "string" ? raw.helmetPolicySnapshot : undefined,
+    lockPolicySnapshot:
+      typeof raw.lockPolicySnapshot === "string" ? raw.lockPolicySnapshot : undefined,
+    setupTeardownFeeUsd:
+      typeof raw.setupTeardownFeeUsd === "number" && Number.isFinite(raw.setupTeardownFeeUsd)
+        ? raw.setupTeardownFeeUsd
         : undefined,
     insuranceAgentProofAcknowledged: Boolean(raw.insuranceAgentProofAcknowledged),
     insuranceOwnerProofEmail:

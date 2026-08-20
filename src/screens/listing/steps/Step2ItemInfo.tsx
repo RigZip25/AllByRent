@@ -396,6 +396,8 @@ export function Step2ItemInfo({
             ) : draft.category.trim() === "Baby & Kids" &&
               draft.subcategory.trim() === "Car Seats" ? (
               <CategoryFactCard category="Baby & Kids" defaultExpanded />
+            ) : draft.category.trim() === "Electronics & Tech" ? (
+              <CategoryFactCard category="Electronics & Tech" defaultExpanded />
             ) : null}
             <p className="text-[13px] leading-snug text-gray-600">
               {vinRequired ? item.assetIdentityHint : item.serialNumberHelper}
@@ -694,6 +696,17 @@ export function Step2ItemInfo({
                 </button>
               ))}
             </div>
+          </div>
+        ) : null}
+
+        {!yardSaleListing &&
+        (draft.category.trim() === "Gym & Fitness" ||
+          draft.category.trim() === "Sports & Recreation" ||
+          draft.category.trim() === "Outdoor & Camping" ||
+          draft.category.trim() === "Bikes & Scooters" ||
+          draft.category.trim() === "Party & Events") ? (
+          <div className="mb-4">
+            <CategoryFactCard category={draft.category.trim()} defaultExpanded />
           </div>
         ) : null}
 

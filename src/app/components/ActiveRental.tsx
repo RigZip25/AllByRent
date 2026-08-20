@@ -94,8 +94,12 @@ import {
 import {
   listingRequiresBoaterLicense,
   listingRequiresDroneCert,
+  listingRequiresHelmetLockPolicy,
+  listingRequiresKitInventory,
+  listingRequiresLiabilityWaiver,
   listingRequiresOperatorCredential,
   listingRequiresStartIdGate,
+  listingRequiresUscgSafetyKit,
 } from "../../lib/categoryTrustRules";
 import {
   isPreTripInspectionReady,
@@ -232,6 +236,14 @@ export function ActiveRental({
     publishedListing != null && listingRequiresBoaterLicense(publishedListing);
   const needsDroneCert =
     publishedListing != null && listingRequiresDroneCert(publishedListing);
+  const needsUscgSafety =
+    publishedListing != null && listingRequiresUscgSafetyKit(publishedListing);
+  const needsKitInventory =
+    publishedListing != null && listingRequiresKitInventory(publishedListing);
+  const needsLiabilityWaiver =
+    publishedListing != null && listingRequiresLiabilityWaiver(publishedListing);
+  const needsHelmetLock =
+    publishedListing != null && listingRequiresHelmetLockPolicy(publishedListing);
   const contactlessMode = booking?.fulfillmentMethod === "contactless";
   const qrTarget = useMemo(
     () => (booking ? resolveBookingQrTarget(booking) : { listingId: undefined, qrToken: undefined }),
@@ -545,6 +557,42 @@ export function ActiveRental({
       booking?.role === "renter"
     ) {
       setNotice(t.rentalDetail.droneCertUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsUscgSafety &&
+      !booking?.uscgSafetyAck &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.uscgUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsKitInventory &&
+      !booking?.kitInventoryAck &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.kitInventoryUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsLiabilityWaiver &&
+      !booking?.liabilityWaiverAttested &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.liabilityWaiverUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsHelmetLock &&
+      !booking?.helmetLockAck &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.helmetLockUnlockBlocked);
       return;
     }
     if (

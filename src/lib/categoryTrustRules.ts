@@ -244,3 +244,212 @@ export function listingRequiresStartIdGate(
   if (listing.category.trim() === "Vehicles") return true;
   return listingRequiresGuestStartId(listing);
 }
+
+/* ─── P1 category trust ─────────────────────────────────────────────── */
+
+const TRAILER_SUBS = new Set(["trailers", "equipment trailers"]);
+const RV_SUBS = new Set(["rvs & campers"]);
+
+const HIGH_RISK_SPORTS_SUBS = new Set([
+  "snow sports",
+  "water sports",
+  "pro water sports",
+]);
+const HIGH_RISK_OUTDOOR_SUBS = new Set([
+  "survival gear",
+  "expedition tents",
+]);
+
+const PARTY_POWER_SUBS = new Set([
+  "stage & risers",
+  "sound systems",
+  "event lighting",
+  "photo booths",
+  "catering equipment",
+]);
+
+const E_SCOOTER_SUBS = new Set([
+  "electric scooters",
+  "professional scooters",
+]);
+
+/** Default min age for e-scooters (market / municipal common floor). */
+export const DEFAULT_E_SCOOTER_MIN_AGE = 16;
+
+/** Hull ID / registration for Boats & Water rentals (US market standard). */
+export function listingRequiresBoatIdentity(
+  listing: Pick<ListingDraft, "category" | "modes">,
+): boolean {
+  return rentOn(listing) && listing.category.trim() === "Boats & Water";
+}
+
+/** USCG-style safety kit checklist — powered watercraft. */
+export function listingRequiresUscgSafetyKit(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  return listingIsPoweredWatercraft(listing);
+}
+
+export function listingUscgSafetyKitComplete(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): boolean {
+  return (listing.categorySpecs?.uscgSafetyKitConfirmed ?? "").trim() === "kit_complete";
+}
+
+/** Photo & Video or Electronics & Tech — serial + kit inventory for rent. */
+export function listingIsHighValueGearCategory(
+  listing: Pick<ListingDraft, "category">,
+): boolean {
+  const cat = listing.category.trim();
+  return cat === "Photo & Video" || cat === "Electronics & Tech" || cat === "Drones";
+}
+
+export function listingRequiresKitInventory(
+  listing: Pick<ListingDraft, "category" | "modes" | "categorySpecs">,
+): boolean {
+  if (!rentOn(listing) || !listingIsHighValueGearCategory(listing)) return false;
+  // High-value gear always needs kit inventory ack for claims / handoff parity.
+  return true;
+}
+
+export function listingKitInventoryText(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): string {
+  return (listing.categorySpecs?.kitInventoryChecklist ?? "").trim();
+}
+
+export function listingIsTrailer(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  if (listing.category.trim() !== "Vehicles") return false;
+  const sub = subKey(listing);
+  return TRAILER_SUBS.has(sub) || sub.includes("trailer");
+}
+
+export function listingIsRv(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  if (listing.category.trim() !== "Vehicles") return false;
+  const sub = subKey(listing);
+  return RV_SUBS.has(sub) || sub.includes("rv") || sub.includes("camper");
+}
+
+export function listingRequiresTrailerSpecs(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes">,
+): boolean {
+  return rentOn(listing) && listingIsTrailer(listing);
+}
+
+export function listingRequiresRvChecklist(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes">,
+): boolean {
+  return rentOn(listing) && listingIsRv(listing);
+}
+
+/** Gym + high-risk Sports/Outdoor (water / snow / climb / survival). */
+export function listingRequiresLiabilityWaiver(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!rentOn(listing)) return false;
+  const flag = (listing.categorySpecs?.liabilityWaiverRequired ?? "").trim();
+  if (flag === "not_required") return false;
+  if (flag === "required") return true;
+  const cat = listing.category.trim();
+  if (cat === "Gym & Fitness") return true;
+  const sub = subKey(listing);
+  if (cat === "Sports & Recreation") {
+    if (HIGH_RISK_SPORTS_SUBS.has(sub)) return true;
+    if (/\b(climb|ski|snowboard|surf|kayak|wake|dive)\b/i.test(sub)) return true;
+  }
+  if (cat === "Outdoor & Camping") {
+    if (HIGH_RISK_OUTDOOR_SUBS.has(sub)) return true;
+    if (/\b(climb|rappel|ice|alpine|survival)\b/i.test(sub)) return true;
+  }
+  return false;
+}
+
+/** Host left powered-boat USCG kit incomplete — block booking. */
+export function listingUscgSafetyBlocksBooking(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!listingRequiresUscgSafetyKit(listing)) return false;
+  return !listingUscgSafetyKitComplete(listing);
+}
+
+export function listingIsBikesScooters(
+  listing: Pick<ListingDraft, "category">,
+): boolean {
+  return listing.category.trim() === "Bikes & Scooters";
+}
+
+export function listingRequiresHelmetLockPolicy(
+  listing: Pick<ListingDraft, "category" | "modes">,
+): boolean {
+  return rentOn(listing) && listingIsBikesScooters(listing);
+}
+
+export function listingIsElectricScooter(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "categorySpecs">,
+): boolean {
+  if (listing.category.trim() !== "Bikes & Scooters") return false;
+  const sub = subKey(listing);
+  if (E_SCOOTER_SUBS.has(sub) || sub.includes("scooter")) {
+    const electric = (listing.categorySpecs?.electric ?? "").trim().toLowerCase();
+    // Professional scooters and Electric Scooters are e-class by shelf; "no" can clear.
+    if (electric === "no") return false;
+    return true;
+  }
+  const electric = (listing.categorySpecs?.electric ?? "").trim().toLowerCase();
+  return electric === "yes" && sub.includes("scooter");
+}
+
+export function listingEScooterMinAge(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "categorySpecs">,
+): number {
+  if (!listingIsElectricScooter(listing)) return 0;
+  const raw = (listing.categorySpecs?.minRiderAge ?? "").trim();
+  const n = Number.parseInt(raw, 10);
+  if (Number.isFinite(n) && n >= 12 && n <= 21) return n;
+  return DEFAULT_E_SCOOTER_MIN_AGE;
+}
+
+export function listingRequiresEScooterAgeGate(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  return rentOn(listing) && listingIsElectricScooter(listing);
+}
+
+/** Party pro AV / stage shelves — setup fee + power when relevant. */
+export function listingIsPartyCategory(
+  listing: Pick<ListingDraft, "category">,
+): boolean {
+  return listing.category.trim() === "Party & Events";
+}
+
+export function listingRequiresPartyPowerSpecs(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes">,
+): boolean {
+  if (!rentOn(listing) || !listingIsPartyCategory(listing)) return false;
+  const sub = subKey(listing);
+  return PARTY_POWER_SUBS.has(sub);
+}
+
+export function listingSetupTeardownFeeUsd(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): number {
+  const raw = listing.categorySpecs?.setupTeardownFeeUsd ?? "";
+  const n = Number.parseFloat(String(raw).replace(/[^0-9.]/g, ""));
+  return Number.isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : 0;
+}
+
+export function listingHelmetPolicy(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): string {
+  return (listing.categorySpecs?.helmetPolicy ?? "").trim();
+}
+
+export function listingLockPolicy(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): string {
+  return (listing.categorySpecs?.lockPolicy ?? "").trim();
+}
