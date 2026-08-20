@@ -1625,7 +1625,7 @@ function BookingScreenLoaded({
           <CategoryFactCard category="Photo & Video" />
         ) : null}
         {needsCarSeatGates || needsCribGates || needsCommercialPlay ? (
-          <CategoryFactCard category="Baby & Kids" />
+          <CategoryFactCard category="Baby & Kids" subcategory={listing.subcategory} />
         ) : null}
         {listing.category.trim() === "Tools & DIY" && listing.modes.rent ? (
           <CategoryFactCard category="Tools & DIY" />

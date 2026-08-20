@@ -92,6 +92,10 @@ const GARDEN_EQUIP_SUBS = [
 
 const CAR_SEAT_SAFETY_SUBS = ["Car Seats"] as const;
 const CRIB_SAFETY_SUBS = ["Cribs & Beds"] as const;
+const BABY_CONTACT_HYGIENE_SUBS = ["Strollers","Baby Carriers","Toys & Games","Childcare Equipment","Commercial Play Equipment","Group Activity Gear","Educational Tools"] as const;
+const BABY_SAFETY_SYSTEM_SUBS = ["Safety Systems"] as const;
+const TOY_HAZARD_SUBS = ["Toys & Games"] as const;
+const STROLLER_TYPE_SUBS = ["Strollers"] as const;
 
 const MATURE_HEIGHT_BUCKETS = [
   "under_1ft",
@@ -1250,6 +1254,22 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
       },
       /** Car seats: hard expiry (YYYY-MM-DD or Exp YYYY-MM) — blocks publish/book when past. */
       {
+        key: "strollerType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: STROLLER_TYPE_SUBS,
+        options: ["travel_system","umbrella","jogger","double","wagon","other_stroller"],
+      },
+      {
+        key: "toyHazardBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: TOY_HAZARD_SUBS,
+        options: ["ages_0_plus_no_small_parts","ages_3_plus","ages_8_plus","not_a_toy"],
+      },
+      {
         key: "carSeatExpiryDate",
         type: "text",
         required: true,
@@ -1257,11 +1277,19 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         subcategories: CAR_SEAT_SAFETY_SUBS,
       },
       {
+        key: "carSeatStandardRegion",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: CAR_SEAT_SAFETY_SUBS,
+        options: ["fmvss_us","ece_r129","ece_r44","other_regional"],
+      },
+      {
         key: "recallAcknowledged",
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: [...CAR_SEAT_SAFETY_SUBS, ...CRIB_SAFETY_SUBS],
+        subcategories: [...CAR_SEAT_SAFETY_SUBS, ...CRIB_SAFETY_SUBS, ...BABY_CONTACT_HYGIENE_SUBS],
         options: ["acknowledged", "not_checked"],
       },
       {
@@ -1269,7 +1297,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: [...CAR_SEAT_SAFETY_SUBS, ...CRIB_SAFETY_SUBS],
+        subcategories: [...CAR_SEAT_SAFETY_SUBS, ...CRIB_SAFETY_SUBS, ...BABY_CONTACT_HYGIENE_SUBS],
         options: ["attested", "not_yet"],
       },
       {
@@ -1294,7 +1322,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         required: true,
         requiredIf: "rent",
         subcategories: CRIB_SAFETY_SUBS,
-        options: ["cpsc_compliant", "need_to_verify"],
+        options: ["cpsc_compliant", "en_716_eu", "other_regional_standard", "need_to_verify"],
       },
       {
         key: "mattressIncluded",
@@ -1326,6 +1354,14 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         requiredIf: "rent",
         subcategories: ["Commercial Play Equipment"],
         options: ["required", "not_required"],
+      },
+      {
+        key: "safetyInstallAttested",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: BABY_SAFETY_SYSTEM_SUBS,
+        options: ["install_documented","renter_installs_with_guide","professionally_installed"],
       },
     ],
   },

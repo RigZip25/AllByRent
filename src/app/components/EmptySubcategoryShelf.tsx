@@ -71,7 +71,7 @@ export function EmptySubcategoryShelf({
         {t.shelf.backToSubcategories}
       </button>
 
-      <CategoryFactCard category={categoryName} />
+      <CategoryFactCard category={categoryName} subcategory={subcategoryName} />
 
       <div
         className="relative overflow-hidden rounded-3xl border px-5 pb-6 pt-8 text-center"
