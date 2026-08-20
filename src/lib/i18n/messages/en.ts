@@ -1728,6 +1728,31 @@ export const en: AppMessages = {
         hoursBand: { label: "Hours used" },
         dutyClass: { label: "Duty class" },
         jobScale: { label: "Scale" },
+        ppeRiskTier: {
+          label: "PPE risk tier",
+          hint: "Soft PPE (hard hats / vests) skips crane-class COI. Fall protection keeps commercial gates.",
+        },
+        ppeSizeBand: { label: "PPE size" },
+        ppeStandardRegion: {
+          label: "PPE standard",
+          hint: "ANSI / EN class from the label — host declare, not platform certification.",
+        },
+        ppeInspectionStatus: {
+          label: "Inspection status",
+          hint: "Fall-arrest gear needs a current tag. Soft PPE can mark not required.",
+        },
+        craneCapacityTonsBand: {
+          label: "Capacity (tons)",
+          hint: "Rated lifting capacity band — required for Crane & Lifting rentals.",
+        },
+        craneOperatorMode: {
+          label: "Bare vs operated",
+          hint: "Operator included skips the renter’s crane credential.",
+        },
+        formworkPieceCountBand: {
+          label: "Piece count",
+          hint: "How many panels / ties / props ship with the kit.",
+        },
         clothingSize: { label: "Size" },
         fits: { label: "Fits" },
         materialBand: { label: "Material" },
@@ -1752,9 +1777,9 @@ export const en: AppMessages = {
           hint: "List every included accessory — renter confirms at booking and handoff.",
         },
         hinNumber: {
-          label: "HIN (Hull ID)",
+          label: "Hull ID (HIN / CIN / local)",
           placeholder: "ABC12345D404",
-          hint: "US boats have a 12-character Hull Identification Number — required for rent.",
+          hint: "HIN (US), CIN/CE (EU), or local registration ID — required for powered craft; optional for non-motor paddle / inflatable.",
         },
         boatRegistration: {
           label: "Registration / state numbers",
@@ -2195,6 +2220,34 @@ export const en: AppMessages = {
         job_site: "Job site",
         crew_scale: "Crew scale",
         crane_class: "Crane class",
+        soft_ppe: "Soft PPE (hard hats / vests / gloves)",
+        fall_protection: "Fall protection / harness",
+        mixed_kit: "Mixed kit (PPE + fall protection)",
+        mixed_sizes: "Mixed sizes",
+        ansi_z89_hard_hat: "ANSI Z89 hard hat",
+        en_397_hard_hat: "EN 397 hard hat",
+        ansi_z359_fall: "ANSI Z359 fall protection",
+        en_361_harness: "EN 361 harness",
+        other_ppe_standard: "Other PPE standard",
+        not_applicable_soft: "Not applicable (soft PPE)",
+        inspected_current: "Inspected — current",
+        tag_visible: "Inspection tag visible",
+        needs_inspection: "Needs inspection (do not rent yet)",
+        not_required_soft_ppe: "Not required (soft PPE)",
+        under_1t: "Under 1 ton",
+        "1_5t": "1–5 tons",
+        "5_20t": "5–20 tons",
+        "20_50t": "20–50 tons",
+        "50t_plus": "50+ tons",
+        not_a_crane: "Not a crane (hoist / accessory)",
+        bare_rental: "Bare rental (renter operates)",
+        operator_included: "Operator included",
+        operator_optional: "Operator optional",
+        under_10_pieces: "Under 10 pieces",
+        "10_25_pieces": "10–25 pieces",
+        "25_50_pieces": "25–50 pieces",
+        "50_100_pieces": "50–100 pieces",
+        "100_plus_pieces": "100+ pieces",
         xs: "XS",
         s: "S",
         m: "M",
@@ -2816,7 +2869,7 @@ export const en: AppMessages = {
       "Powered watercraft must carry life jackets for each person, a fire extinguisher, visual distress signals, and a sound-producing device as applicable. Confirm you’ll verify the kit at handoff.",
     uscgSafetyAttest:
       "I will verify the safety kit at handoff and will not operate without required PFDs and signals.",
-    hinLine: (hin) => `HIN: ${hin}`,
+    hinLine: (hin) => `Hull ID (HIN / CIN / local): ${hin}`,
     registrationLine: (reg) => `Registration: ${reg}`,
     kitInventoryTitle: "Kit inventory",
     kitInventoryEmpty: "Host will confirm included accessories at handoff — acknowledge to continue.",
@@ -3135,22 +3188,22 @@ export const en: AppMessages = {
       "Boats & Water": {
         title: "Boats & watercraft rentals",
         summary:
-          "List HIN + registration. Powered boats and PWCs require a complete USCG-style safety kit, boater / captain / PWC license attestation + document, and the same min-age gate as vehicles (default 25; hosts may opt in to 18-24 with a higher hold). Insurance-backed deposit applies.",
+          "Neighbor watercraft rentals with portable identity language (HIN / CIN / local reg). Powered craft need a safety kit (USCG-style or local equivalent), boater / captain / PWC credential where the operator drives, and age 25 bareboat / 18 when captain is included. Non-motor kayak, SUP, and inflatable skip hull-ID mandate but gate on PFD policy. Hull walkaround photos replace vehicle tire checklists. Insurance-backed deposit applies.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Enter HIN and registration. Confirm PFDs, extinguisher, distress signals, and sound device for powered craft. Require insurance and set max deductible. Renters attest license + age; young-driver opt-in only if you accept higher hold risk.",
-        whyGeoTitle: "Why license + age + kit before handoff?",
+          "Enter hull ID when powered (HIN, CIN/CE, or local number) plus registration if you have it. Confirm PFDs + kit for motor vessels; declare PFD policy for paddle and non-motor inflatables. Set bareboat vs captain-included so age and license gates match. Require insurance and max deductible.",
+        whyGeoTitle: "Why license + age + kit / PFD before handoff?",
         whyGeo:
-          "Unlicensed or underage operators and missing safety gear are top watercraft loss drivers. License + age + USCG kit + insurance proof lock PIN / keys until cleared.",
+          "Unlicensed or underage bareboat operators and missing flotation or signals drive watercraft losses. Captained trips drop the guest age floor to 18 and skip renter license. Paddle craft stay light: PFD ack without forcing a hull ID.",
         flowTitle: "End to end",
         flow:
-          "List vessel (HIN / registration + kit) → insurance + age policy → renter attests license, age, and kit → book → proof cleared → handoff → return.",
+          "List vessel (hull ID when powered · PFD / kit) → insurance + captain/age policy → renter attests license, age, kit or PFD → book → proof cleared → hull photo handoff → return.",
         layersTitle: "Safety layers",
         layers:
-          "HIN / registration · USCG-style kit · boater / PWC license · age gate · insurance · deductible hold · rental terms · QR / PIN handoff.",
+          "Hull ID (HIN|CIN|local) when powered · registration · USCG-style / local kit · PFD for paddle / non-motor inflatable · boater / PWC license (bareboat) · age 25 bareboat / 18 captained · insurance · deductible hold · hull pre-trip · QR / PIN handoff.",
         claimsTitle: "If something goes wrong",
         claims:
-          "Renter insurance is primary. License, age, and kit attestations support disputes; the card hold matches your deductible band.",
+          "Renter insurance is primary. License, age, kit/PFD, and hull photos support disputes; the card hold matches your deductible band. Evorios does not sell trip marine policies.",
       },
       "Real Estate": {
         title: "Short stays & house rentals",
@@ -3195,19 +3248,22 @@ export const en: AppMessages = {
       "Electronics & Tech": {
         title: "Electronics & tech rentals",
         summary:
-          "Serial number and structured kit inventory are required on rent. Laptops, smart home, network gear, and servers also need a wipe / account-unlink attestation before publish and booking.",
+          "Neighbor trust + a deposit hold (not a fake insurance partnership) covers most kits. Serial + structured inventory are required on rent. Laptops, smart home, network gear, and servers also need a wipe / account-unlink plan before publish and a renter wipe ack at booking.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Capture serial and list every included accessory. High replacement-value gear should use a strong deposit hold.",
-        whyGeoTitle: "Why serial + inventory?",
+          "Capture serial and list every accessory (chargers, dongles, cases, remotes). Declare wipe status honestly when the device stores data. Size the deposit hold to realistic replacement risk — Evorios is not an insurer and is not partnered with any carrier; the hold is your primary recourse for missing parts or damage.",
+        whyGeoTitle: "Why serial + inventory + wipe?",
         whyGeo:
-          "Laptops and pro displays are theft-prone and easy to return incomplete. Serial + checklist at booking and handoff protects both sides.",
+          "Laptops and pro displays are theft-prone and often return incomplete. Serial + checklist freeze what was handed over; wipe / unlink cuts privacy disputes when accounts or customer data could remain.",
         flowTitle: "End to end",
-        flow: "List with serial + inventory → renter acknowledges kit → handoff check → return.",
+        flow:
+          "List with serial + inventory (+ wipe when storage) → renter acks kit / wipe → count at handoff → return wiped or as agreed → deposit release or claim with photos.",
         layersTitle: "Safety layers",
-        layers: "Serial · kit inventory · deposit hold · rental terms · QR handoff.",
+        layers:
+          "Serial · kit inventory · wipe / unlink when storage · deposit hold · rental terms · QR handoff.",
         claimsTitle: "If something goes wrong",
-        claims: "Use inventory snapshot and serial for missing parts or swaps; deposit hold covers the gap.",
+        claims:
+          "Inventory snapshot and serial support missing-part or swap claims. Deposit hold covers the gap; we do not sell third-party electronics insurance.",
       },
       "Gym & Fitness": {
         title: "Gym & fitness rentals",
@@ -3229,36 +3285,42 @@ export const en: AppMessages = {
       "Sports & Recreation": {
         title: "Sports & recreation rentals",
         summary:
-          "High-risk shelves (snow, water, climb-style) require a liability waiver at booking. Snow sports add DIN + helmet policy; water / pro water add a PFD included gate.",
+          "Everyday balls and soft goods stay lightweight: neighbor trust + deposit. High-risk shelves (snow, water, climb-style) require a liability waiver at booking. Snow sports add DIN + helmet policy; water / pro water add a PFD-included gate.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Keep waiver on for water / snow / climb risk. Be honest about skill level and condition.",
-        whyGeoTitle: "Why waivers on high-risk gear?",
+          "Keep the waiver on for water / snow / climb risk. Publish honest skill level, size, and condition. For snow, set DIN and whether a helmet is included or required. Deposit hold covers damage / missing parts — Evorios is not a ski-area operator and does not partner with any insurer.",
+        whyGeoTitle: "Why waivers + helmet / PFD / DIN?",
         whyGeo:
-          "Ski, water, and climb gear carry injury risk beyond a simple deposit. Waiver + clear specs reduce surprise claims.",
+          "Ski, water, and climb gear carry injury risk a deposit cannot fix. Waiver + clear specs (DIN, helmet, PFD) set duty of care without pretending the platform trains athletes.",
         flowTitle: "End to end",
-        flow: "List → waiver at book when required → handoff → return.",
+        flow:
+          "List specs + risk gates → renter signs waiver / acks helmet·PFD·DIN when required → handoff photos → return.",
         layersTitle: "Safety layers",
-        layers: "Liability waiver (high-risk) · skill / size specs · deposit · rental terms.",
+        layers:
+          "Liability waiver (high-risk) · helmet / PFD / DIN when applicable · skill / size · deposit hold · rental terms.",
         claimsTitle: "If something goes wrong",
-        claims: "Photos at handoff plus waiver trail support disputes; deposit for damage.",
+        claims:
+          "Handoff photos plus waiver trail support disputes. Deposit covers gear damage; injury claims follow the signed waiver and the parties’ own coverage — not an Evorios policy.",
       },
       "Outdoor & Camping": {
         title: "Outdoor & camping rentals",
         summary:
-          "Expedition / survival shelves use a liability waiver. Tents and sleeping bags add a hygiene / sanitation checklist so shared sleep gear stays clean.",
+          "Day-hike kits use neighbor + deposit. Expedition / survival shelves add a liability waiver. Tents and sleeping bags require a hygiene / sanitation checklist so shared sleep gear stays clean and dry.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Require waiver for survival / expedition. For tents and bags, attest cleaned / aired before rent.",
+          "Require waiver for survival / expedition. For tents and bags, attest cleaned / aired before rent and note capacity / season rating. Size deposit to poles, fly, and stove parts that commonly go missing — we are not an outfitter insurer.",
         whyGeoTitle: "Why waiver + hygiene?",
         whyGeo:
-          "Remote failures strand people; dirty sleep gear spreads odor and allergens. Waiver + hygiene set honest expectations.",
+          "Remote failures strand people; dirty sleep gear spreads odor and allergens. Waiver + hygiene set honest expectations before PIN / handoff.",
         flowTitle: "End to end",
-        flow: "List → waiver / hygiene when required → handoff → return clean and dry.",
+        flow:
+          "List → waiver / hygiene when required → handoff count → return clean and dry → deposit release or claim.",
         layersTitle: "Safety layers",
-        layers: "Liability waiver · hygiene checklist · capacity / season · deposit · rental terms.",
+        layers:
+          "Liability waiver · hygiene checklist · capacity / season · deposit hold · rental terms · QR handoff.",
         claimsTitle: "If something goes wrong",
-        claims: "Condition photos, waiver, and hygiene ack support disputes; deposit for damage or missing parts.",
+        claims:
+          "Condition photos, waiver, and hygiene ack support disputes. Deposit covers damage or missing parts; Evorios does not sell trip insurance.",
       },
       "Bikes & Scooters": {
         title: "Bikes & scooter rentals",
@@ -3280,117 +3342,142 @@ export const en: AppMessages = {
       "Party & Events": {
         title: "Party & event rentals",
         summary:
-          "Pro AV / stage / lighting shelves capture setup/teardown fee and power needs. Outdoor canopies and tents add a weather-cancel policy with a full-refund window.",
+          "Tables and soft décor stay neighbor + deposit. Pro AV / stage / lighting capture setup/teardown fee and power needs. Outdoor canopies and tents add a weather-cancel policy with a published full-refund window (24h / 12h / host discretion).",
         hostTipTitle: "For hosts",
         hostTip:
-          "Set setup/teardown fee and power clearly. For outdoor gear, pick a weather-cancel policy (24h / 12h / host discretion) so renters know the refund rules.",
+          "Set setup/teardown fee and power (amps / circuits) clearly. For outdoor gear, pick a weather-cancel policy so renters know refund rules before they book. Deposit covers stains, tears, and missing pieces — Evorios is not an event insurer.",
         whyGeoTitle: "Why fee, power, and weather cancel?",
         whyGeo:
-          "Surprise labor, dead outlets, and storms ruin events. Fees and outdoor weather cancel freeze on the agreement at booking.",
+          "Surprise labor, dead outlets, and storms ruin events more often than theft. Fees and outdoor weather cancel freeze on the agreement at booking so both sides share one script.",
         flowTitle: "End to end",
-        flow: "List fee / power / weather policy → book (gates + fee) → handoff → weather cancel if outdoor policy applies → return.",
+        flow:
+          "List fee / power / weather policy → book (gates + fee) → handoff → weather cancel if outdoor policy applies → return → deposit release or claim.",
         layersTitle: "Safety layers",
-        layers: "Setup/teardown fee · power · outdoor weather cancel · capacity · deposit · rental terms.",
+        layers:
+          "Setup/teardown fee · power · outdoor weather cancel · capacity · deposit hold · rental terms.",
         claimsTitle: "If something goes wrong",
-        claims: "Fee and power are frozen on the agreement; deposit covers damage beyond normal event wear.",
+        claims:
+          "Fee, power, and weather policy are frozen on the agreement. Deposit covers damage beyond normal event wear; weather refunds follow the published window — not a partner weather product.",
       },
       "Tools & DIY": {
         title: "Tools & DIY rentals",
         summary:
-          "Neighbor + deposit covers most drills. Saws, welders, and scaffolding-like shelves require a PPE / safety briefing acknowledgment before handoff.",
+          "Neighbor trust + a deposit hold covers most drills and hand tools. Power saws, welders, and scaffolding-like shelves require a PPE / safety briefing acknowledgment before handoff. Deposit is not full tool replacement insurance.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Mark briefing ready and note PPE / safe-use bullets for power saws, welding, and scaffolding systems.",
+          "Mark briefing ready and note PPE / safe-use bullets for saws, welding, and scaffolding. Require eye, ear, and hand protection (plus welding PPE when applicable). Size the deposit to blades, batteries, and accessories that commonly go missing — we are not partnered with any tool insurer; confirm your own coverage before listing high-value gear.",
         whyGeoTitle: "Why a safety briefing?",
         whyGeo:
-          "These tools injure faster than a deposit can fix. A short briefing gate sets duty of care without pretending Evorios trains operators.",
+          "These tools injure faster than a deposit can fix. A short briefing + PPE ack sets duty of care without pretending Evorios trains operators or sells liability cover.",
         flowTitle: "End to end",
-        flow: "List with briefing ready → renter acknowledges → briefing at handoff → return.",
+        flow:
+          "List with briefing ready + power specs → renter acknowledges PPE / briefing → briefing at handoff → return with photos → deposit release or claim.",
         layersTitle: "Safety layers",
-        layers: "Safety briefing · power / voltage specs · deposit · rental terms · QR.",
+        layers:
+          "Safety briefing · PPE ack · power / voltage specs · deposit hold · rental terms · QR handoff.",
         claimsTitle: "If something goes wrong",
-        claims: "Briefing ack and handoff photos support disputes; deposit for damage or missing blades/parts.",
+        claims:
+          "Briefing ack and handoff photos support disputes. Deposit covers damage or missing blades/parts; injury risk stays with the signed briefing — not an Evorios policy.",
       },
       "Garden & Yard": {
         title: "Garden & yard rentals",
         summary:
-          "Most yard tools use neighbor + deposit. Stump grinders require capacity, PPE, liability waiver, and Construction-style insurance bands with proof at booking.",
+          "Leaf blowers and everyday yard tools use neighbor trust + deposit. Stump grinders are Construction-adjacent: capacity, PPE, liability waiver, and insurance bands with proof at booking before handoff unlocks.",
         hostTipTitle: "For hosts",
-        hostTip: "Set stump diameter capacity, PPE expectation, waiver, and liability/deductible bands before publish.",
+        hostTip:
+          "For stump grinders, set stump-diameter capacity, PPE expectation, waiver, and liability/deductible bands before publish. For lighter tools, still photograph condition and size deposit to bars, blades, and fuel cans. Evorios does not underwrite yard work — renters’ proof (when required) and your deposit hold are the primary layers.",
         whyGeoTitle: "Why stump grinders are gated?",
-        whyGeo: "Flying debris and high torque make stump grinders closer to light construction risk than a leaf blower.",
+        whyGeo:
+          "Flying debris and high torque make stump grinders closer to light construction risk than a leaf blower. Capacity + PPE + waiver + insurance proof lock the rent path until cleared.",
         flowTitle: "End to end",
-        flow: "List with capacity + PPE + insurance bands → renter waiver/PPE/insurance → handoff → return.",
+        flow:
+          "List (capacity + PPE + insurance bands when stump) → renter waiver / PPE / insurance → handoff → return → deposit or insurance-first claim.",
         layersTitle: "Safety layers",
-        layers: "Capacity · PPE · liability waiver · insurance proof · deposit · rental terms.",
+        layers:
+          "Capacity · PPE · liability waiver · insurance proof (stump) · deposit hold · rental terms · QR.",
         claimsTitle: "If something goes wrong",
-        claims: "Insurance proof and waiver create a clear trail; deposit covers ordinary damage.",
+        claims:
+          "Insurance proof and waiver create a clear trail on gated gear; deposit covers ordinary damage on lighter tools. We are not a landscaping insurer.",
       },
       "Home & Kitchen": {
         title: "Home & kitchen rentals",
         summary:
-          "Everyday appliances stay lightweight. Commercial coffee captures voltage, NSF listing, and install/hookup needs so venues do not discover 240V or plumbing mid-event.",
+          "Everyday appliances stay lightweight: neighbor + deposit. Commercial coffee / brew systems capture voltage, NSF listing, and install/hookup needs so venues do not discover 240V or plumbing mid-event.",
         hostTipTitle: "For hosts",
-        hostTip: "For commercial espresso / brew systems, declare voltage, NSF status, and whether the unit needs plumbing or hardwiring.",
+        hostTip:
+          "For commercial espresso / brew systems, declare voltage, NSF status, and whether the unit needs plumbing or hardwiring. For consumer appliances, note capacity and return-clean expectations. Deposit covers damage and missing accessories — Evorios is not NSF or a venue insurer.",
         whyGeoTitle: "Why commercial coffee fields?",
-        whyGeo: "Wrong voltage or missing water hookup is a venue liability and failed event — disclose at listing.",
+        whyGeo:
+          "Wrong voltage or missing water hookup is a venue liability and a failed event. Disclosing at listing freezes power and install facts on the agreement.",
         flowTitle: "End to end",
-        flow: "List voltage / NSF / install → book (shown) → delivery/setup → return.",
+        flow:
+          "List voltage / NSF / install when commercial → book (shown on agreement) → delivery/setup → return clean → deposit release or claim.",
         layersTitle: "Trust layers",
-        layers: "Voltage · NSF · install needs · capacity · deposit · rental terms.",
+        layers:
+          "Voltage · NSF · install needs · capacity · deposit hold · rental terms · QR handoff.",
         claimsTitle: "If something goes wrong",
-        claims: "Install and power disclosures are frozen on the agreement for disputes.",
+        claims:
+          "Install and power disclosures are frozen on the agreement for disputes. Deposit covers appliance damage; we do not sell equipment breakdown cover.",
       },
       "Office & Business": {
         title: "Office & business rentals",
         summary:
-          "Devices with storage (POS, servers, printers, copiers) require a host wipe plan and renter data-wipe acknowledgment at booking.",
+          "Furniture and simple peripherals use neighbor + deposit. Devices with storage (POS, servers, printers, copiers) require a host wipe plan and renter data-wipe acknowledgment at booking before handoff.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Mark storage and wipe status honestly — POS and servers should wipe before list when possible.",
+          "Mark storage and wipe status honestly — wipe POS and servers before list when possible, or set wipe-at-handoff. Size deposit to screens and trays that chip easily. Evorios is not a data-processor partner and does not sell cyber insurance; wipe attestation is the privacy layer.",
         whyGeoTitle: "Why a data wipe gate?",
         whyGeo:
-          "POS and servers hold customer data. A wipe ack at booking and handoff cuts privacy disputes.",
+          "POS and servers hold customer data. A wipe ack at booking and handoff cuts privacy disputes that a deposit alone cannot fix.",
         flowTitle: "End to end",
-        flow: "List with storage + wipe → renter acks → handoff → return wiped or as agreed.",
+        flow:
+          "List with storage + wipe → renter acks → handoff (wipe if required) → return wiped or as agreed → deposit for physical damage.",
         layersTitle: "Safety layers",
-        layers: "Storage flag · wipe status · renter wipe ack · deposit · rental terms.",
+        layers:
+          "Storage flag · wipe status · renter wipe ack · deposit hold · rental terms · QR.",
         claimsTitle: "If something goes wrong",
-        claims: "Wipe status and booking ack create a trail; deposit covers physical damage.",
+        claims:
+          "Wipe status and booking ack create a privacy trail; deposit covers physical damage or missing trays/cables — not a third-party data breach policy.",
       },
       "Music & Audio": {
         title: "Music & audio rentals",
         summary:
-          "PA Systems require a cable and stand inventory so missing XLRs and stands do not become claim fights.",
+          "Guitars and small amps stay neighbor + deposit. PA Systems require a cable and stand inventory so missing XLRs and stands do not become claim fights — frozen at booking and counted at handoff.",
         hostTipTitle: "For hosts",
         hostTip:
-          "For PA Systems, list every cable and stand. Renters acknowledge at booking and count at handoff.",
+          "For PA Systems, list every cable, stand, and mic clip. Note power band / wattage when relevant. Renters acknowledge inventory at booking and count at pickup/return. Deposit covers scuffs and missing accessories — we are not a backline insurer.",
         whyGeoTitle: "Why PA inventory?",
         whyGeo:
-          "PA claims are usually missing accessories. A frozen checklist at booking and handoff cuts disputes.",
+          "PA claims are usually missing accessories, not the speaker cabinet. A frozen checklist at booking and handoff cuts disputes without new heavy gates on every instrument.",
         flowTitle: "End to end",
-        flow: "List PA inventory → renter acks → count at pickup → count at return.",
+        flow:
+          "List PA inventory + power → renter acks → count at pickup → gig → count at return → deposit release or claim.",
         layersTitle: "Safety layers",
-        layers: "PA cable/stand inventory · power band · deposit · rental terms.",
+        layers:
+          "PA cable/stand inventory · power band · deposit hold · rental terms · QR handoff.",
         claimsTitle: "If something goes wrong",
-        claims: "Use the inventory snapshot for missing cables/stands; deposit covers the gap.",
+        claims:
+          "Use the inventory snapshot for missing cables/stands; deposit covers the gap. Evorios does not sell gear insurance.",
       },
       "Costume & Cosplay": {
         title: "Costume & cosplay rentals",
         summary:
-          "Return-condition rules, optional dry-clean fees, and sanitization for makeup kits / wigs / masks keep costume rentals fair — frozen on the agreement at booking.",
+          "Neighbor trust + deposit, plus return-condition rules, optional dry-clean fees, and sanitization for makeup kits / wigs / masks — frozen on the agreement at booking so cleaning bills are never a surprise.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Set dry-clean only / spot-clean / as-received, plus an optional dry-clean fee. For makeup kits, wigs, and masks, attest sanitization between renters.",
+          "Set dry-clean only / spot-clean / as-received, plus an optional dry-clean fee. For makeup kits, wigs, and masks, attest sanitization between renters. Photograph condition and note size/fits. Deposit covers tears and missing pieces beyond the fee — we are not a dry-cleaner partner.",
         whyGeoTitle: "Why return condition + fee?",
         whyGeo:
-          "Makeup, sweat, and glitter ruin costumes. Clear return rules beat surprise cleaning bills after the party.",
+          "Makeup, sweat, and glitter ruin costumes. Clear return rules and an optional fee beat surprise cleaning bills after the party.",
         flowTitle: "End to end",
-        flow: "List with return policy (+ fee) → renter acknowledges → wear → return per policy.",
+        flow:
+          "List with return policy (+ fee) + sanitization when contact gear → renter acknowledges → wear → return per policy → deposit or fee claim.",
         layersTitle: "Safety layers",
-        layers: "Return condition · dry-clean fee · sanitization (makeup / wigs / masks) · size / fits · deposit · rental terms.",
+        layers:
+          "Return condition · dry-clean fee · sanitization (makeup / wigs / masks) · size / fits · deposit hold · rental terms.",
         claimsTitle: "If something goes wrong",
-        claims: "Fee and policy are on the agreement; deposit covers tears or missing pieces beyond the fee.",
+        claims:
+          "Fee and policy are on the agreement; deposit covers tears or missing pieces beyond the published fee.",
       },
       "Baby & Kids": {
         title: "Baby safety rentals",
@@ -3411,7 +3498,7 @@ export const en: AppMessages = {
         claimsTitle: "If something goes wrong",
         claims:
           "Host and renter attestations create a clear safety trail. Do not use seats that fail the gate.",
-      },
+      }
     },
   },
   preTripInspection: {
@@ -3423,6 +3510,16 @@ export const en: AppMessages = {
       `Same photo set as pickup — including all ${tireCount} tires — so swaps or new damage are visible for disputes.`,
     tireSwapHint:
       "Tire photos protect against expensive tire swaps (e.g. premium tires replaced with cheap ones). Clear shots of brand and tread when possible.",
+    hullPickupBody:
+      "Photograph bow, stern, port, starboard, and deck before handoff. Note gelcoat chips, scratches, dents, and soft spots. Both sides must confirm before start unlocks.",
+    hullReturnBody:
+      "Same hull walkaround as pickup — bow, stern, port, starboard, and deck — so new damage is visible for disputes.",
+    hullGelcoatHint:
+      "Hull and deck photos protect against gelcoat and fixture disputes. Clear shots of each side beat a single overview.",
+    hullSection: "Hull walkaround",
+    hullPhotoHint: "One clear photo of this area. Flag damage and add a short comment.",
+    hullCommentPlaceholder: "Gelcoat chips, scratches, dents, soft spots, fittings...",
+    hullIncomplete: "Finish all five hull photos (bow, stern, port, starboard, deck) before submitting.",
     bodySection: "Exterior & interior",
     tiresSection: (tireCount) =>
       tireCount === 4
@@ -3474,6 +3571,11 @@ export const en: AppMessages = {
       exterior_left: "Exterior — left side",
       exterior_right: "Exterior — right side",
       interior: "Interior",
+      hull_bow: "Hull — bow",
+      hull_stern: "Hull — stern",
+      hull_port: "Hull — port (left)",
+      hull_starboard: "Hull — starboard (right)",
+      hull_deck: "Deck / cockpit",
       tire_fl: "Tire — front left",
       tire_fr: "Tire — front right",
       tire_rl: "Tire — rear left",

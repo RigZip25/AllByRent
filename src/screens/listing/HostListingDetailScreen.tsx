@@ -554,7 +554,10 @@ export function HostListingDetailScreen({
         ) : null}
         {listing.category.trim() === "Heavy Equipment" ||
         listing.category.trim() === "Construction" ? (
-          <CategoryFactCard category={listing.category.trim()} className="mb-4" />
+          <CategoryFactCard
+            category={listing.category.trim()}
+            className="mb-4"
+          />
         ) : null}
         {listing.category.trim() === "Boats & Water" ? (
           <CategoryFactCard category="Boats & Water" className="mb-4" />
@@ -567,9 +570,11 @@ export function HostListingDetailScreen({
         listing.subcategory.trim() === "Drones" ? (
           <CategoryFactCard category="Photo & Video" className="mb-4" />
         ) : null}
-        {listing.category.trim() === "Baby & Kids" &&
-        listing.subcategory.trim() === "Car Seats" ? (
-          <CategoryFactCard category="Baby & Kids" className="mb-4" />
+        {listing.category.trim() === "Baby & Kids" ? (
+          <CategoryFactCard
+            category="Baby & Kids"
+            className="mb-4"
+          />
         ) : null}
         {listing.category.trim() === "Electronics & Tech" ? (
           <CategoryFactCard category="Electronics & Tech" className="mb-4" />
@@ -597,6 +602,12 @@ export function HostListingDetailScreen({
         ) : null}
         {listing.category.trim() === "Tools & DIY" ? (
           <CategoryFactCard category="Tools & DIY" className="mb-4" />
+        ) : null}
+        {listing.category.trim() === "Garden & Yard" ? (
+          <CategoryFactCard category="Garden & Yard" className="mb-4" />
+        ) : null}
+        {listing.category.trim() === "Home & Kitchen" ? (
+          <CategoryFactCard category="Home & Kitchen" className="mb-4" />
         ) : null}
         {listing.category.trim() === "Costume & Cosplay" ? (
           <CategoryFactCard category="Costume & Cosplay" className="mb-4" />

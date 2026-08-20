@@ -537,7 +537,10 @@ export function ItemDetail({
             {(listing.category.trim() === "Heavy Equipment" ||
               listing.category.trim() === "Construction") &&
             listing.modes.rent ? (
-              <CategoryFactCard category={listing.category.trim()} className="mt-3" />
+              <CategoryFactCard
+                category={listing.category.trim()}
+                className="mt-3"
+              />
             ) : null}
             {listing.category.trim() === "Boats & Water" && listing.modes.rent ? (
               <CategoryFactCard category="Boats & Water" className="mt-3" />
@@ -548,8 +551,11 @@ export function ItemDetail({
             {listingIsDrone(listing) && listing.modes.rent ? (
               <CategoryFactCard category="Photo & Video" className="mt-3" />
             ) : null}
-            {listing.modes.rent && listingIsCarSeat(listing) ? (
-              <CategoryFactCard category="Baby & Kids" className="mt-3" />
+            {listing.modes.rent && listing.category.trim() === "Baby & Kids" ? (
+              <CategoryFactCard
+                category="Baby & Kids"
+                className="mt-3"
+              />
             ) : null}
             {listing.modes.rent &&
             (listing.category.trim() === "Photo & Video" ||
@@ -587,6 +593,12 @@ export function ItemDetail({
             ) : null}
             {listing.modes.rent && listing.category.trim() === "Tools & DIY" ? (
               <CategoryFactCard category="Tools & DIY" className="mt-3" />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Garden & Yard" ? (
+              <CategoryFactCard category="Garden & Yard" className="mt-3" />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Home & Kitchen" ? (
+              <CategoryFactCard category="Home & Kitchen" className="mt-3" />
             ) : null}
             {listing.modes.rent && listing.category.trim() === "Costume & Cosplay" ? (
               <CategoryFactCard category="Costume & Cosplay" className="mt-3" />

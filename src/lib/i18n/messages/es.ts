@@ -1784,9 +1784,9 @@ export const es: AppMessages = {
           hint: "Lista cada accesorio — el inquilino confirma al reservar y en la entrega.",
         },
         hinNumber: {
-          label: "HIN (ID del casco)",
+          label: "ID del casco (HIN / CIN / local)",
           placeholder: "ABC12345D404",
-          hint: "Los barcos en EE. UU. tienen HIN de 12 caracteres — obligatorio al alquilar.",
+          hint: "HIN (EE. UU.), CIN/CE (UE) o matrícula local — obligatorio en motorizados; opcional en paddle / inflable sin motor.",
         },
         boatRegistration: {
           label: "Matrícula / números estatales",
@@ -2843,7 +2843,7 @@ export const es: AppMessages = {
       "Las embarcaciones a motor deben llevar chalecos para cada persona, extintor, señales visuales de emergencia y un dispositivo sonoro según corresponda. Confirma que verificarás el kit en la entrega.",
     uscgSafetyAttest:
       "Verificaré el kit de seguridad en la entrega y no operaré sin los chalecos y señales requeridos.",
-    hinLine: (hin) => `HIN: ${hin}`,
+    hinLine: (hin) => `ID del casco (HIN / CIN / local): ${hin}`,
     registrationLine: (reg) => `Matrícula: ${reg}`,
     kitInventoryTitle: "Inventario del kit",
     kitInventoryEmpty: "El anfitrión confirmará accesorios en la entrega — reconoce para continuar.",
@@ -3151,22 +3151,22 @@ export const es: AppMessages = {
       "Boats & Water": {
         title: "Alquiler de barcos y embarcaciones",
         summary:
-          "Indica HIN + matrícula. Los motorizados y PWC requieren kit estilo USCG completo, declaración de licencia de patrón/PWC + documento, y la misma puerta de edad que vehículos (25 por defecto; el anfitrión puede permitir 18-24 con mayor fianza). Depósito respaldado por seguro.",
+          "Alquiler vecinal de embarcaciones con identidad portable (HIN / CIN / matrícula local). Motorizados necesitan kit de seguridad (estilo USCG o equivalente local), credencial cuando el inquilino opera, y edad 25 bareboat / 18 con capitán incluido. Kayak, SUP e inflable sin motor no exigen ID de casco pero sí política PFD. Fotos del casco reemplazan la checklist de neumáticos. Depósito respaldado por seguro.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Introduce HIN y matrícula. Confirma chalecos, extintor, señales y sonido en motorizados. Exige seguro y deducible máximo. Los inquilinos declaran licencia + edad.",
-        whyGeoTitle: "¿Por qué licencia + edad + kit antes de la entrega?",
+          "Indica ID de casco en motorizados (HIN, CIN/CE o número local) y matrícula si la tienes. Confirma PFD + kit en motor; declara PFD en paddle e inflables sin motor. Elige bareboat vs capitán incluido para alinear edad y licencia. Exige seguro y deducible máximo.",
+        whyGeoTitle: "¿Por qué licencia + edad + kit / PFD antes de la entrega?",
         whyGeo:
-          "Operadores sin licencia o menores y kit incompleto son riesgos clave. Licencia + edad + kit USCG + seguro bloquean PIN/llaves hasta completar.",
+          "Operadores bareboat sin licencia o menores y flotación/señales faltantes impulsan pérdidas. Con capitán, la edad del huésped baja a 18 y no hace falta licencia del inquilino. El paddle queda ligero: acuse PFD sin forzar HIN.",
         flowTitle: "De punta a punta",
         flow:
-          "Anuncio (HIN / matrícula + kit) → seguro + edad → inquilino declara licencia, edad y kit → reserva → prueba → entrega → devolución.",
+          "Anuncio (ID de casco si motorizado · PFD / kit) → seguro + capitán/edad → inquilino declara licencia, edad, kit o PFD → reserva → prueba → fotos del casco → devolución.",
         layersTitle: "Capas de seguridad",
         layers:
-          "HIN / matrícula · kit USCG · licencia · edad · seguro · fianza · términos · QR / PIN.",
+          "ID de casco (HIN|CIN|local) si motorizado · matrícula · kit USCG / local · PFD en paddle / inflable sin motor · licencia (bareboat) · edad 25 bareboat / 18 con capitán · seguro · fianza · inspección de casco · QR / PIN.",
         claimsTitle: "Si algo sale mal",
         claims:
-          "El seguro del inquilino es primario. Licencia, edad y kit apoyan disputas; la fianza iguala tu deducible.",
+          "El seguro del inquilino es primario. Licencia, edad, kit/PFD y fotos del casco apoyan disputas. Evorios no vende pólizas marítimas de viaje.",
       },
       "Real Estate": {
         title: "Estancias y alquiler de vivienda",
@@ -3211,19 +3211,22 @@ export const es: AppMessages = {
       "Electronics & Tech": {
         title: "Alquiler de electrónica y tech",
         summary:
-          "Serie e inventario del kit son obligatorios en el camino de alquiler para que entrega y reclamaciones tengan una lista clara de accesorios.",
+          "Confianza de vecinos + fianza (no un falso partner de seguros) cubre la mayoría de kits. Serie e inventario son obligatorios. Portátiles, smart home, red y servidores necesitan plan de borrado / desvinculación antes de publicar y acuse del arrendatario al reservar.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Captura el serie y lista cada accesorio. En equipo caro usa una fianza sólida.",
-        whyGeoTitle: "¿Por qué serie + inventario?",
+          "Captura el serie y lista cada accesorio. Declara el borrado con honestidad si hay datos. Dimensiona la fianza al riesgo real — Evorios no es aseguradora ni partner de ninguna compañía; la fianza es tu recurso principal.",
+        whyGeoTitle: "¿Por qué serie + inventario + borrado?",
         whyGeo:
-          "Portátiles y pantallas se devuelven incompletos con facilidad. Serie + checklist protege a ambas partes.",
+          "Portátiles y pantallas vuelven incompletos. Serie + checklist congelan la entrega; borrado / desvinculación reduce disputas de privacidad.",
         flowTitle: "De punta a punta",
-        flow: "Anuncio con serie + inventario → inquilino reconoce → entrega → devolución.",
+        flow:
+          "Anuncio con serie + inventario (+ borrado) → acuse → conteo en entrega → devolución según acuerdo → liberar fianza o reclamar con fotos.",
         layersTitle: "Capas de seguridad",
-        layers: "Serie · inventario · fianza · términos · QR.",
+        layers:
+          "Serie · inventario · borrado / desvinculación · fianza · términos · QR.",
         claimsTitle: "Si algo sale mal",
-        claims: "Usa inventario y serie para piezas faltantes; la fianza cubre el resto.",
+        claims:
+          "Inventario y serie para piezas faltantes; la fianza cubre el resto. No vendemos seguro de electrónica.",
       },
       "Gym & Fitness": {
         title: "Alquiler de gym y fitness",
@@ -3245,36 +3248,42 @@ export const es: AppMessages = {
       "Sports & Recreation": {
         title: "Alquiler de deporte y recreación",
         summary:
-          "Estantes de alto riesgo (nieve, agua, escalada) requieren renuncia al reservar. Nivel y talla ayudan a filtrar.",
+          "Pelotas y soft goods: vecino + fianza. Alto riesgo (nieve, agua, escalada): renuncia al reservar. Nieve: DIN + casco; agua: PFD.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Mantén la renuncia en agua / nieve / escalada. Sé honesto con nivel y estado.",
-        whyGeoTitle: "¿Por qué renuncia en alto riesgo?",
+          "Mantén la renuncia en agua / nieve / escalada. En nieve, DIN y si el casco va incluido. La fianza cubre daño — Evorios no opera pistas ni es aseguradora.",
+        whyGeoTitle: "¿Por qué renuncia + casco / PFD / DIN?",
         whyGeo:
-          "Esquí, agua y escalada conllevan lesión más allá de una fianza. Renuncia + specs claras reducen sorpresas.",
+          "Esquí, agua y escalada conllevan lesión más allá de una fianza. Specs claras fijan deber de cuidado sin fingir que la plataforma entrena atletas.",
         flowTitle: "De punta a punta",
-        flow: "Anuncio → renuncia cuando aplique → entrega → devolución.",
+        flow:
+          "Anuncio → renuncia / casco·PFD·DIN → fotos en entrega → devolución.",
         layersTitle: "Capas de seguridad",
-        layers: "Renuncia (alto riesgo) · nivel / talla · fianza · términos.",
+        layers:
+          "Renuncia (alto riesgo) · casco / PFD / DIN · nivel / talla · fianza · términos.",
         claimsTitle: "Si algo sale mal",
-        claims: "Fotos en entrega + renuncia; fianza por daño.",
+        claims:
+          "Fotos + renuncia; fianza por daño. Lesiones siguen la renuncia y coberturas de las partes — no una póliza Evorios.",
       },
       "Outdoor & Camping": {
         title: "Alquiler outdoor y camping",
         summary:
-          "Estantes de expedición / supervivencia usan renuncia. Tiendas y sacos añaden checklist de higiene.",
+          "Día de senderismo: vecino + fianza. Expedición / supervivencia: renuncia. Tiendas y sacos: checklist de higiene.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Exige renuncia en survival / expedición. En tiendas y sacos, atesta limpio / aireado.",
+          "Exige renuncia en survival / expedición. En tiendas y sacos, atesta limpio / aireado y capacidad / temporada. Fianza para postes y piezas de cocina — no somos aseguradora de expediciones.",
         whyGeoTitle: "¿Por qué renuncia + higiene?",
         whyGeo:
           "Fallos remotos dejan gente sin recursos; equipo de sueño sucio propaga olores y alérgenos.",
         flowTitle: "De punta a punta",
-        flow: "Anuncio → renuncia / higiene → entrega → devolución limpia y seca.",
+        flow:
+          "Anuncio → renuncia / higiene → entrega → devolución limpia y seca → fianza.",
         layersTitle: "Capas de seguridad",
-        layers: "Renuncia · checklist de higiene · capacidad / temporada · fianza · términos.",
+        layers:
+          "Renuncia · checklist de higiene · capacidad / temporada · fianza · términos · QR.",
         claimsTitle: "Si algo sale mal",
-        claims: "Fotos, renuncia e higiene en disputas; fianza por daño o piezas faltantes.",
+        claims:
+          "Fotos, renuncia e higiene; fianza por daño. No vendemos seguro de viaje.",
       },
       "Bikes & Scooters": {
         title: "Alquiler de bicis y patinetes",
@@ -3296,115 +3305,142 @@ export const es: AppMessages = {
       "Party & Events": {
         title: "Alquiler para fiestas y eventos",
         summary:
-          "AV / escenario / luces capturan tarifa de montaje/desmontaje y energía. Huellas outdoor y carpas añaden cancelación por clima.",
+          "Mesas y decoración suave: vecino + fianza. AV / escenario / luces: tarifa de montaje/desmontaje y energía. Carpas outdoor: cancelación por clima (24h / 12h / criterio del anfitrión).",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Pon tarifa y energía. En jardín / outdoor / carpas, elige ventana de cancelación por clima (24h, 12h o criterio).",
-        whyGeoTitle: "¿Por qué cancelación por clima + tarifa?",
+          "Pon tarifa y energía. En outdoor, elige ventana de cancelación por clima. Fianza para manchas y piezas faltantes — Evorios no es aseguradora de eventos.",
+        whyGeoTitle: "¿Por qué tarifa, energía y cancelación por clima?",
         whyGeo:
-          "Los eventos outdoor fallan más por clima que por fianza. Ventana clara + tarifa/energía en el acuerdo reducen sorpresas.",
+          "Mano de obra sorpresa, enchufes muertos y tormentas arruinan eventos más que el robo. Tarifas y clima se congelan en el acuerdo.",
         flowTitle: "De punta a punta",
-        flow: "Anuncio con tarifa / energía / clima → reserva → montaje → desmontaje.",
+        flow:
+          "Anuncio con tarifa / energía / clima → reserva → entrega → cancelación si aplica → devolución.",
         layersTitle: "Capas de seguridad",
-        layers: "Cancelación por clima · tarifa montaje · energía · capacidad · fianza · términos.",
+        layers:
+          "Tarifa montaje · energía · cancelación outdoor · capacidad · fianza · términos.",
         claimsTitle: "Si algo sale mal",
-        claims: "Reembolsos siguen la política climática; fianza cubre daño más allá del uso normal.",
+        claims:
+          "Tarifa, energía y clima van en el acuerdo; fianza por daño. Reembolsos por clima siguen la ventana — no un producto partner.",
       },
       "Tools & DIY": {
         title: "Alquiler de herramientas y DIY",
         summary:
-          "Vecino + fianza cubre la mayoría de taladros. Sierras, soldadoras y andamios requieren acuse de briefing PPE / seguridad antes de la entrega.",
+          "Vecino + fianza cubre la mayoría de taladros. Sierras, soldadoras y andamios requieren acuse de briefing PPE / seguridad antes de la entrega. La fianza no es seguro de herramientas.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Marca briefing listo y anota PPE / uso seguro para sierras, soldadura y andamios.",
+          "Marca briefing listo y anota PPE para sierras, soldadura y andamios. Dimensiona la fianza a hojas y baterías — no somos partner de ninguna aseguradora de herramientas.",
         whyGeoTitle: "¿Por qué un briefing de seguridad?",
         whyGeo:
           "Estas herramientas hieren más rápido de lo que una fianza repara. Un briefing corto fija deber de cuidado sin fingir que Evorios forma operadores.",
         flowTitle: "De punta a punta",
-        flow: "Anuncio con briefing listo → acuse → briefing en entrega → devolución.",
+        flow:
+          "Anuncio con briefing → acuse PPE → briefing en entrega → devolución con fotos → fianza.",
         layersTitle: "Capas de seguridad",
-        layers: "Briefing de seguridad · potencia / voltaje · fianza · términos · QR.",
+        layers:
+          "Briefing de seguridad · PPE · potencia / voltaje · fianza · términos · QR.",
         claimsTitle: "Si algo sale mal",
-        claims: "Acuse de briefing y fotos; fianza por daño o piezas faltantes.",
+        claims:
+          "Acuse de briefing y fotos; fianza por daño. Lesiones quedan con las partes — no una póliza Evorios.",
       },
       "Garden & Yard": {
-        title: "Jardín y patio",
-        summary: "Trituradoras de tocones requieren capacidad, EPP, renuncia y seguro.",
+        title: "Alquiler de jardín y patio",
+        summary:
+          "Sopladores y herramientas cotidianas: vecino + fianza. Trituradoras de tocones son casi construcción: capacidad, EPP, renuncia y bandas de seguro con prueba al reservar.",
         hostTipTitle: "Para anfitriones",
-        hostTip: "Define capacidad, EPP y seguro antes de publicar.",
-        whyGeoTitle: "¿Por qué?",
-        whyGeo: "Riesgo cercano a construcción ligera.",
-        flowTitle: "Flujo",
-        flow: "Anuncio → reserva → entrega → devolución.",
-        layersTitle: "Capas",
-        layers: "Capacidad · EPP · renuncia · seguro · fianza.",
-        claimsTitle: "Reclamos",
-        claims: "Seguro y renuncia dejan rastro.",
+        hostTip:
+          "En trituradoras, define diámetro, EPP, renuncia y bandas de seguro antes de publicar. En herramientas ligeras, fotos y fianza para cuchillas. Evorios no asegura jardinería — prueba de seguro (cuando aplica) y fianza son las capas principales.",
+        whyGeoTitle: "¿Por qué las trituradoras están gated?",
+        whyGeo:
+          "Escombros voladores y alto torque las acercan a construcción ligera más que a un soplador. Capacidad + EPP + renuncia + seguro bloquean hasta limpiar.",
+        flowTitle: "De punta a punta",
+        flow:
+          "Anuncio (capacidad + EPP + seguro si tocón) → renuncia / EPP / seguro → entrega → devolución → fianza o seguro primero.",
+        layersTitle: "Capas de seguridad",
+        layers:
+          "Capacidad · EPP · renuncia · seguro (tocón) · fianza · términos · QR.",
+        claimsTitle: "Si algo sale mal",
+        claims:
+          "Seguro y renuncia dejan rastro en gear gated; fianza en herramientas ligeras. No somos aseguradora de landscaping.",
       },
       "Home & Kitchen": {
-        title: "Hogar y cocina",
-        summary: "Café comercial captura voltaje, NSF e instalación.",
+        title: "Alquiler de hogar y cocina",
+        summary:
+          "Electrodomésticos cotidianos: vecino + fianza. Café / brew comercial: voltaje, NSF e instalación / conexión para que el venue no descubra 240V o fontanería a mitad del evento.",
         hostTipTitle: "Para anfitriones",
-        hostTip: "Declara voltaje, NSF e instalación.",
-        whyGeoTitle: "¿Por qué?",
-        whyGeo: "Voltaje o agua incorrectos arruinan el evento.",
-        flowTitle: "Flujo",
-        flow: "Anuncio → reserva → entrega → devolución.",
-        layersTitle: "Capas",
-        layers: "Voltaje · NSF · instalación · fianza.",
-        claimsTitle: "Reclamos",
-        claims: "Datos quedan en el acuerdo.",
+        hostTip:
+          "En espresso comercial, declara voltaje, NSF y si necesita agua o cableado fijo. En electrodomésticos, capacidad y limpieza al devolver. Fianza por daño — Evorios no es NSF ni aseguradora de venues.",
+        whyGeoTitle: "¿Por qué campos de café comercial?",
+        whyGeo:
+          "Voltaje o agua incorrectos son riesgo del venue y evento fallido. Los datos se congelan en el acuerdo.",
+        flowTitle: "De punta a punta",
+        flow:
+          "Anuncio con voltaje / NSF / instalación → reserva (en el acuerdo) → entrega/setup → devolución limpia → fianza.",
+        layersTitle: "Capas de confianza",
+        layers:
+          "Voltaje · NSF · instalación · capacidad · fianza · términos · QR.",
+        claimsTitle: "Si algo sale mal",
+        claims:
+          "Instalación y energía quedan en el acuerdo. Fianza por daño; no vendemos seguro de avería.",
       },
       "Office & Business": {
         title: "Alquiler de oficina y negocio",
         summary:
-          "Dispositivos con almacenamiento (POS, servidores, impresoras, fotocopiadoras) requieren plan de borrado del anfitrión y acuse del arrendatario en la reserva.",
+          "Muebles: vecino + fianza. Dispositivos con almacenamiento (POS, servidores, impresoras, fotocopiadoras): plan de borrado del anfitrión y acuse del arrendatario en la reserva.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Marca almacenamiento y estado de borrado con honestidad — POS y servidores deberían borrarse antes de publicar si es posible.",
+          "Marca almacenamiento y borrado con honestidad — POS y servidores deberían borrarse antes de publicar si es posible. Fianza para pantallas y bandejas. Evorios no es partner de datos ni vende ciberseguro; el acuse de borrado es la capa de privacidad.",
         whyGeoTitle: "¿Por qué una puerta de borrado?",
         whyGeo:
-          "POS y servidores guardan datos de clientes. Un acuse en reserva y entrega reduce disputas de privacidad.",
+          "POS y servidores guardan datos de clientes. Un acuse en reserva y entrega reduce disputas de privacidad que una fianza sola no resuelve.",
         flowTitle: "De punta a punta",
-        flow: "Anuncio con almacenamiento + borrado → acuse → entrega → devolución según acuerdo.",
+        flow:
+          "Anuncio con almacenamiento + borrado → acuse → entrega → devolución según acuerdo → fianza por daño físico.",
         layersTitle: "Capas de seguridad",
-        layers: "Almacenamiento · estado de borrado · acuse del arrendatario · fianza · términos.",
+        layers:
+          "Almacenamiento · estado de borrado · acuse del arrendatario · fianza · términos · QR.",
         claimsTitle: "Si algo sale mal",
-        claims: "Estado de borrado y acuse dejan rastro; fianza cubre daño físico.",
+        claims:
+          "Estado de borrado y acuse dejan rastro; fianza cubre daño físico — no una póliza de filtración de datos.",
       },
       "Music & Audio": {
         title: "Alquiler de música y audio",
         summary:
-          "Los sistemas PA requieren inventario de cables y soportes para que XLR o stands faltantes no sean una pelea de reclamos.",
+          "Guitarras y amps pequeños: vecino + fianza. Sistemas PA requieren inventario de cables y soportes — congelado en la reserva y contado en la entrega.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "En PA, lista cada cable y soporte. El arrendatario acusa en la reserva y cuenta en la entrega.",
+          "En PA, lista cada cable, soporte y clip. Anota potencia. El arrendatario acusa el inventario y cuenta en recogida/devolución. Fianza por rayones y accesorios faltantes — no somos aseguradora de backline.",
         whyGeoTitle: "¿Por qué inventario PA?",
         whyGeo:
-          "Los reclamos de PA suelen ser accesorios faltantes. Una lista congelada en reserva y entrega corta disputas.",
+          "Los reclamos de PA suelen ser accesorios faltantes. Una lista congelada corta disputas sin puertas pesadas en cada instrumento.",
         flowTitle: "De punta a punta",
-        flow: "Anuncio con inventario → acuse → contar en recogida → contar en devolución.",
+        flow:
+          "Anuncio con inventario → acuse → contar en recogida → contar en devolución → fianza.",
         layersTitle: "Capas de seguridad",
-        layers: "Inventario de cables/soportes PA · potencia · fianza · términos.",
+        layers:
+          "Inventario de cables/soportes PA · potencia · fianza · términos · QR.",
         claimsTitle: "Si algo sale mal",
-        claims: "Usa el inventario para cables/soportes faltantes; fianza cubre la diferencia.",
+        claims:
+          "Usa el inventario para cables/soportes faltantes; fianza cubre la diferencia. No vendemos seguro de equipo.",
       },
       "Costume & Cosplay": {
         title: "Alquiler de disfraces y cosplay",
         summary:
-          "Reglas de devolución, tarifa opcional de tintorería y sanitización de maquillaje / pelucas / máscaras mantienen el alquiler justo — congeladas en el acuerdo.",
+          "Vecino + fianza, reglas de devolución, tarifa opcional de tintorería y sanitización de maquillaje / pelucas / máscaras — congeladas en el acuerdo para que la limpieza no sea sorpresa.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Define solo tintorería / manchas OK / como recibido, más tarifa opcional. En kits de maquillaje, pelucas y máscaras, atestigua sanitización entre arrendatarios.",
+          "Define solo tintorería / manchas OK / como recibido, más tarifa opcional. En kits de maquillaje, pelucas y máscaras, atestigua sanitización. Fianza por roturas — no somos partner de tintorería.",
         whyGeoTitle: "¿Por qué condición de devolución + tarifa?",
         whyGeo:
           "Maquillaje, sudor y glitter arruinan disfraces. Reglas claras vencen facturas sorpresa.",
         flowTitle: "De punta a punta",
-        flow: "Anuncio con política (+ tarifa) → acuse → uso → devolución según política.",
+        flow:
+          "Anuncio con política (+ tarifa) → acuse → uso → devolución según política → fianza o tarifa.",
         layersTitle: "Capas de seguridad",
-        layers: "Condición de devolución · tintorería · talla · fianza · términos.",
+        layers:
+          "Condición de devolución · tintorería · sanitización · talla · fianza · términos.",
         claimsTitle: "Si algo sale mal",
-        claims: "Tarifa y política van en el acuerdo; fianza cubre roturas o piezas faltantes.",
+        claims:
+          "Tarifa y política van en el acuerdo; fianza cubre roturas o piezas faltantes más allá de la tarifa.",
       },
       "Baby & Kids": {
         title: "Alquiler seguro de sillas infantiles",
@@ -3425,7 +3461,7 @@ export const es: AppMessages = {
         claimsTitle: "Si algo sale mal",
         claims:
           "Las declaraciones crean un rastro claro. No uses sillas que fallen la puerta.",
-      },
+      }
     },
   },
   preTripInspection: {
@@ -3437,6 +3473,16 @@ export const es: AppMessages = {
       `El mismo juego de fotos que en la recogida — incluidas las ${tireCount} llantas — para que un cambio o daño nuevo sea visible en una disputa.`,
     tireSwapHint:
       "Las fotos de llantas protegen contra cambios caros (p. ej. premium por chinas baratas). Cuando sea posible, que se vea marca y dibujo.",
+    hullPickupBody:
+      "Fotografía proa, popa, babor, estribor y cubierta antes de la entrega. Anota golpes de gelcoat, rayones y abolladuras. Ambas partes deben confirmar antes de desbloquear.",
+    hullReturnBody:
+      "El mismo recorrido del casco que en la recogida — proa, popa, babor, estribor y cubierta — para ver daños nuevos.",
+    hullGelcoatHint:
+      "Las fotos del casco y cubierta protegen disputas de gelcoat y herrajes. Una toma por lado supera una sola panorámica.",
+    hullSection: "Recorrido del casco",
+    hullPhotoHint: "Una foto clara de esta zona. Marca daños y añade un comentario breve.",
+    hullCommentPlaceholder: "Gelcoat, rayones, abolladuras, puntos blandos, herrajes...",
+    hullIncomplete: "Completa las cinco fotos del casco (proa, popa, babor, estribor, cubierta) antes de enviar.",
     bodySection: "Exterior e interior",
     tiresSection: (tireCount) =>
       tireCount === 4
@@ -3488,6 +3534,11 @@ export const es: AppMessages = {
       exterior_left: "Exterior — lado izquierdo",
       exterior_right: "Exterior — lado derecho",
       interior: "Interior",
+      hull_bow: "Casco — proa",
+      hull_stern: "Casco — popa",
+      hull_port: "Casco — babor (izquierda)",
+      hull_starboard: "Casco — estribor (derecha)",
+      hull_deck: "Cubierta / cockpit",
       tire_fl: "Llanta — delantera izquierda",
       tire_fr: "Llanta — delantera derecha",
       tire_rl: "Llanta — trasera izquierda",

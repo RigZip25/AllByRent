@@ -384,7 +384,10 @@ export function Step2ItemInfo({
               <CategoryFactCard category="Vehicles" defaultExpanded />
             ) : draft.category.trim() === "Heavy Equipment" ||
               draft.category.trim() === "Construction" ? (
-              <CategoryFactCard category={draft.category.trim()} defaultExpanded />
+              <CategoryFactCard
+                category={draft.category.trim()}
+                defaultExpanded
+              />
             ) : draft.category.trim() === "Boats & Water" ? (
               <CategoryFactCard category="Boats & Water" defaultExpanded />
             ) : draft.category.trim() === "Real Estate" ? (
@@ -393,13 +396,19 @@ export function Step2ItemInfo({
               draft.category.trim() === "Drones" ||
               draft.subcategory.trim() === "Drones" ? (
               <CategoryFactCard category="Photo & Video" defaultExpanded />
-            ) : draft.category.trim() === "Baby & Kids" &&
-              draft.subcategory.trim() === "Car Seats" ? (
-              <CategoryFactCard category="Baby & Kids" defaultExpanded />
+            ) : draft.category.trim() === "Baby & Kids" ? (
+              <CategoryFactCard
+                category="Baby & Kids"
+                defaultExpanded
+              />
             ) : draft.category.trim() === "Electronics & Tech" ? (
               <CategoryFactCard category="Electronics & Tech" defaultExpanded />
             ) : draft.category.trim() === "Tools & DIY" ? (
               <CategoryFactCard category="Tools & DIY" defaultExpanded />
+            ) : draft.category.trim() === "Garden & Yard" ? (
+              <CategoryFactCard category="Garden & Yard" defaultExpanded />
+            ) : draft.category.trim() === "Home & Kitchen" ? (
+              <CategoryFactCard category="Home & Kitchen" defaultExpanded />
             ) : draft.category.trim() === "Costume & Cosplay" ? (
               <CategoryFactCard category="Costume & Cosplay" defaultExpanded />
             ) : draft.category.trim() === "Party & Events" ? (
@@ -714,7 +723,12 @@ export function Step2ItemInfo({
           draft.category.trim() === "Bikes & Scooters" ||
           draft.category.trim() === "Party & Events" ||
           draft.category.trim() === "Office & Business" ||
-          draft.category.trim() === "Music & Audio") ? (
+          draft.category.trim() === "Music & Audio" ||
+          draft.category.trim() === "Garden & Yard" ||
+          draft.category.trim() === "Home & Kitchen" ||
+          draft.category.trim() === "Tools & DIY" ||
+          draft.category.trim() === "Costume & Cosplay" ||
+          draft.category.trim() === "Electronics & Tech") ? (
           <div className="mb-4">
             <CategoryFactCard category={draft.category.trim()} defaultExpanded />
           </div>

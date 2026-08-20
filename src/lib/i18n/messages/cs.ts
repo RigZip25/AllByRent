@@ -1796,9 +1796,9 @@ export const cs: AppMessages = {
           hint: "Vypiš každé příslušenství — nájemce potvrdí při rezervaci a předání.",
         },
         hinNumber: {
-          label: "HIN (trupové ID)",
+          label: "ID trupu (HIN / CIN / místní)",
           placeholder: "ABC12345D404",
-          hint: "US lodě mají 12znakové HIN — povinné pro pronájem.",
+          hint: "HIN (US), CIN/CE (EU) nebo místní registrační ID — povinné u motorových; volitelné u nemotorových paddle / nafukovacích.",
         },
         boatRegistration: {
           label: "Registrace / státní čísla",
@@ -2856,7 +2856,7 @@ export const cs: AppMessages = {
       "Motorová plavidla musí mít záchranné vesty pro každou osobu, hasicí přístroj, vizuální signály tísně a zvukové zařízení dle situace. Potvrď, že sadu ověříš při předání.",
     uscgSafetyAttest:
       "Při předání ověřím bezpečnostní sadu a nebudu plout bez povinných vest a signálů.",
-    hinLine: (hin) => `HIN: ${hin}`,
+    hinLine: (hin) => `ID trupu (HIN / CIN / místní): ${hin}`,
     registrationLine: (reg) => `Registrace: ${reg}`,
     kitInventoryTitle: "Inventář sady",
     kitInventoryEmpty: "Hostitel potvrdí příslušenství při předání — pro pokračování potvrď.",
@@ -3160,22 +3160,22 @@ export const cs: AppMessages = {
       "Boats & Water": {
         title: "Pronájem lodí a plavidel",
         summary:
-          "Zadej HIN + registraci. Motorové lodě a PWC vyžadují kompletní bezpečnostní sadu ve stylu USCG, prohlášení o licenci kapitána/PWC + dokument a stejnou věkovou bránu jako vozidla (výchozí 25; hostitel může povolit 18-24 s vyšší kaucí). Kauce je pojištěním krytá.",
+          "Sousedský pronájem plavidel s přenositelným ID (HIN / CIN / místní registrace). Motorová plavidla potřebují bezpečnostní sadu (USCG styl nebo místní ekvivalent), licenci kde řídí nájemce, a věk 25 bareboat / 18 se zapojeným kapitánem. Nemotorové kajaky, SUP a nafukovací nevyžadují ID trupu, ale brání PFD. Prohlídka trupu nahrazuje pneumatiky. Kauce krytá pojištěním.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Zadej HIN a registraci. Potvrď vesty, hasicí přístroj, signály tísně a zvuk u motorových. Vyžaduj pojištění a max. spoluúčast. Nájemci potvrdí licenci + věk.",
-        whyGeoTitle: "Proč licence + věk + sada před předáním?",
+          "Zadej ID trupu u motorových (HIN, CIN/CE nebo místní číslo) a registraci pokud máš. Potvrď PFD + sadu u motorových; deklaruj PFD u paddle a nemotorových nafukovacích. Nastav bareboat vs kapitán — věk a licence se tomu přizpůsobí.",
+        whyGeoTitle: "Proč licence + věk + sada / PFD před předáním?",
         whyGeo:
-          "Nelegální nebo mladí provozovatelé a chybějící bezpečnostní výbava jsou hlavní rizika. Licence + věk + sada USCG + pojištění drží PIN/klíče zamčené.",
+          "Nelegální nebo mladí bareboat provozovatelé a chybějící vesty/signály jsou hlavní rizika. U kapitánovaných výletů klesá věk hosta na 18 a licence nájemce odpadá. Paddle zůstává lehké: PFD bez nuceného HIN.",
         flowTitle: "Od začátku do konce",
         flow:
-          "Inzerát (HIN / registrace + sada) → pojištění + věk → nájemce potvrdí licenci, věk a sadu → rezervace → důkaz → předání → návrat.",
+          "Inzerát (ID trupu u motorových · PFD / sada) → pojištění + kapitán/věk → nájemce potvrdí licenci, věk, sadu nebo PFD → rezervace → důkaz → fotky trupu → návrat.",
         layersTitle: "Bezpečnostní vrstvy",
         layers:
-          "HIN / registrace · sada USCG · licence · věková brána · pojištění · kauce · podmínky · QR / PIN.",
+          "ID trupu (HIN|CIN|místní) u motorových · registrace · sada USCG / místní · PFD u paddle / nemotorových nafukovacích · licence (bareboat) · věk 25 bareboat / 18 kapitán · pojištění · kauce · prohlídka trupu · QR / PIN.",
         claimsTitle: "Když se něco pokazí",
         claims:
-          "Primární je pojištění nájemce. Licence, věk a sada pomáhají ve sporech; kauce odpovídá spoluúčasti.",
+          "Primární je pojištění nájemce. Licence, věk, sada/PFD a fotky trupu pomáhají ve sporech. Evorios neprodává trip marine pojistky.",
       },
       "Real Estate": {
         title: "Krátkodobé pobyty a bydlení",
@@ -3220,19 +3220,22 @@ export const cs: AppMessages = {
       "Electronics & Tech": {
         title: "Pronájem elektroniky a tech",
         summary:
-          "Sériové číslo a inventář sady jsou povinné na cestě pronájmu, aby předání a reklamace měly jasný seznam příslušenství.",
+          "Sousedská důvěra + kauce (ne falešné pojišťovací partnerství) kryje většinu sad. Sériové číslo a inventář jsou povinné. Notebooky, smart home, síť a servery potřebují plán výmazu / odpojení účtů před zveřejněním a potvrzení nájemce při rezervaci.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Zachyť sériové číslo a vypiš každé příslušenství. U drahých věcí použij silnější kauci.",
-        whyGeoTitle: "Proč sériové číslo + inventář?",
+          "Zachyť sériové číslo a vypiš každé příslušenství. U zařízení s daty uveď stav výmazu pravdivě. Velikost kauce podle reálného rizika — Evorios není pojistitel a nemá partnerství s pojišťovnou; kauce je primární ochrana.",
+        whyGeoTitle: "Proč sériové číslo + inventář + výmaz?",
         whyGeo:
-          "Notebooky a monitory se snadno vrátí neúplné. Sériové číslo + checklist chrání obě strany.",
+          "Notebooky a monitory se snadno vrátí neúplné. Sériové číslo + checklist zmrazí předání; výmaz / odpojení snižuje spory o soukromí.",
         flowTitle: "Od začátku do konce",
-        flow: "Inzerát se sériovým číslem + inventářem → nájemce potvrdí → předání → návrat.",
+        flow:
+          "Inzerát se sériovým číslem + inventářem (+ výmaz) → potvrzení → počet při předání → návrat dle dohody → uvolnění kauce nebo reklamace s fotkami.",
         layersTitle: "Bezpečnostní vrstvy",
-        layers: "Sériové číslo · inventář · kauce · podmínky · QR.",
+        layers:
+          "Sériové číslo · inventář · výmaz / odpojení · kauce · podmínky · QR.",
         claimsTitle: "Když se něco pokazí",
-        claims: "Inventář a sériové číslo pro chybějící díly; kauce pokryje zbytek.",
+        claims:
+          "Inventář a sériové číslo pro chybějící díly; kauce pokryje zbytek. Neprodáváme pojištění elektroniky.",
       },
       "Gym & Fitness": {
         title: "Pronájem fitness vybavení",
@@ -3254,36 +3257,42 @@ export const cs: AppMessages = {
       "Sports & Recreation": {
         title: "Pronájem sportovního vybavení",
         summary:
-          "Rizikové police (sníh, voda, lezení) vyžadují vzdání se nároků při rezervaci. Úroveň a velikost pomáhají výběru.",
+          "Míče a měkké zboží: soused + kauce. Rizikové police (sníh, voda, lezení) vyžadují vzdání se nároků. Sníh: DIN + helma; voda: PFD.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Nech vzdání se nároků zapnuté u vody / sněhu / lezení. Buď upřímný ohledně úrovně a stavu.",
-        whyGeoTitle: "Proč vzdání se nároků u rizika?",
+          "Nech vzdání se nároků u vody / sněhu / lezení. U sněhu uveď DIN a helmu. Kauce kryje poškození — Evorios není provozovatel areálu ani pojistitel.",
+        whyGeoTitle: "Proč vzdání se nároků + helma / PFD / DIN?",
         whyGeo:
-          "Lyže, voda a lezení nesou riziko zranění nad rámec kauce. Vzdání se nároků + jasné specifikace snižují překvapení.",
+          "Lyže, voda a lezení nesou riziko zranění nad rámec kauce. Jasné specifikace nastaví péči bez školení sportovců platformou.",
         flowTitle: "Od začátku do konce",
-        flow: "Inzerát → vzdání se nároků když je potřeba → předání → návrat.",
+        flow:
+          "Inzerát → vzdání se nároků / helma·PFD·DIN → fotky při předání → návrat.",
         layersTitle: "Bezpečnostní vrstvy",
-        layers: "Vzdání se nároků (riziko) · úroveň / velikost · kauce · podmínky.",
+        layers:
+          "Vzdání se nároků (riziko) · helma / PFD / DIN · úroveň / velikost · kauce · podmínky.",
         claimsTitle: "Když se něco pokazí",
-        claims: "Fotky při předání + vzdání se nároků; kauce na poškození.",
+        claims:
+          "Fotky + vzdání se nároků; kauce na poškození. Zranění řeší strany a jejich pojištění — ne pojistka Evorios.",
       },
       "Outdoor & Camping": {
         title: "Pronájem outdoor a kempu",
         summary:
-          "Expediční / survival police používají vzdání se nároků. Stany a spací pytle přidávají hygienický checklist.",
+          "Denní výlety: soused + kauce. Expedice / survival: vzdání se nároků. Stany a spací pytle: hygienický checklist.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Vyžaduj vzdání se nároků u survival / expedice. U stanů a pytlů potvrď vyčištění / vyvětrání.",
+          "Vyžaduj vzdání se nároků u survival / expedice. U stanů a pytlů potvrď vyčištění / vyvětrání a kapacitu / sezónu. Kauce na tyčky, tropiko a díly vařiče — nejsme pojišťovna výprav.",
         whyGeoTitle: "Proč vzdání se nároků + hygiena?",
         whyGeo:
-          "Selhání v terénu ohrozí lidi; špinavé spaní šíří pachy a alergeny. Vzdání se nároků + hygiena nastaví očekávání.",
+          "Selhání v terénu ohrozí lidi; špinavé spaní šíří pachy a alergeny. Očekávání před předáním.",
         flowTitle: "Od začátku do konce",
-        flow: "Inzerát → vzdání se nároků / hygiena → předání → návrat čisté a suché.",
+        flow:
+          "Inzerát → vzdání se nároků / hygiena → předání → návrat čisté a suché → kauce.",
         layersTitle: "Bezpečnostní vrstvy",
-        layers: "Vzdání se nároků · hygienický checklist · kapacita / sezóna · kauce · podmínky.",
+        layers:
+          "Vzdání se nároků · hygienický checklist · kapacita / sezóna · kauce · podmínky · QR.",
         claimsTitle: "Když se něco pokazí",
-        claims: "Fotky, vzdání se nároků a hygiena ve sporech; kauce na poškození.",
+        claims:
+          "Fotky, vzdání se nároků a hygiena; kauce na poškození. Neprodáváme cestovní pojištění.",
       },
       "Bikes & Scooters": {
         title: "Pronájem kol a koloběžek",
@@ -3305,115 +3314,142 @@ export const cs: AppMessages = {
       "Party & Events": {
         title: "Pronájem na párty a eventy",
         summary:
-          "Pro AV / stage / světla zachyť poplatek stavba/demontáž a napájení. Outdoor půdorys a stany přidávají storno kvůli počasí.",
+          "Stoly a měkká výzdoba: soused + kauce. Pro AV / stage / světla: poplatek stavba/demontáž a napájení. Outdoor stany: storno kvůli počasí (24 h / 12 h / dle hostitele).",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Nastav poplatek a napájení. U zahrady / outdoor / stanů zvol okno storna kvůli počasí (24 h, 12 h nebo dle dohody).",
-        whyGeoTitle: "Proč storno kvůli počasí + poplatek?",
+          "Nastav poplatek a napájení. U outdoor zvol okno storna kvůli počasí. Kauce na skvrny a chybějící díly — Evorios není eventová pojišťovna.",
+        whyGeoTitle: "Proč poplatek, napájení a storno kvůli počasí?",
         whyGeo:
-          "Outdoor eventy padají na počasí častěji než na kauci. Jasné okno + poplatek/napájení ve smlouvě snižuje překvapení.",
+          "Překvapivá práce, mrtvé zásuvky a bouřky kazí eventy častěji než krádež. Poplatky a politika počasí se zmrazí ve smlouvě.",
         flowTitle: "Od začátku do konce",
-        flow: "Inzerát s poplatkem / napájením / politikou počasí → rezervace → stavba → demontáž.",
+        flow:
+          "Inzerát s poplatkem / napájením / politikou počasí → rezervace → předání → storno dle politiky → návrat.",
         layersTitle: "Bezpečnostní vrstvy",
-        layers: "Storno kvůli počasí · poplatek stavba/demontáž · napájení · kapacita · kauce · podmínky.",
+        layers:
+          "Poplatek stavba/demontáž · napájení · outdoor storno · kapacita · kauce · podmínky.",
         claimsTitle: "Když se něco pokazí",
-        claims: "Refundace dle politiky počasí; kauce na poškození nad běžné opotřebení.",
+        claims:
+          "Poplatek, napájení a počasí jsou ve smlouvě; kauce na poškození. Refundace počasí dle okna — ne partnerský produkt.",
       },
       "Tools & DIY": {
         title: "Pronájem nářadí a DIY",
         summary:
-          "Soused + kauce stačí u většiny vrtaček. Pily, svářečky a lešení vyžadují potvrzení PPE / bezpečnostní instruktáže před předáním.",
+          "Soused + kauce stačí u většiny vrtaček. Pily, svářečky a lešení vyžadují potvrzení PPE / bezpečnostní instruktáže před předáním. Kauce není pojištění nářadí.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Označ instruktáž připravenou a uveď PPE / bezpečné body u pil, sváření a lešení.",
+          "Označ instruktáž připravenou a uveď PPE body u pil, sváření a lešení. Velikost kauce na čepele a baterie — nejsme partner žádné pojišťovny nářadí.",
         whyGeoTitle: "Proč bezpečnostní instruktáž?",
         whyGeo:
           "Tyto nástroje zraní rychleji, než kauce spraví. Krátká brána nastaví péči bez školení operátorů platformou.",
         flowTitle: "Od začátku do konce",
-        flow: "Inzerát s připravenou instruktáží → potvrzení → instruktáž při předání → návrat.",
+        flow:
+          "Inzerát s instruktáží → potvrzení PPE → instruktáž při předání → návrat s fotkami → kauce.",
         layersTitle: "Bezpečnostní vrstvy",
-        layers: "Bezpečnostní instruktáž · napájení / napětí · kauce · podmínky · QR.",
+        layers:
+          "Bezpečnostní instruktáž · PPE · napájení / napětí · kauce · podmínky · QR.",
         claimsTitle: "Když se něco pokazí",
-        claims: "Potvrzení instruktáže a fotky; kauce na poškození nebo chybějící díly.",
+        claims:
+          "Potvrzení instruktáže a fotky; kauce na poškození. Zranění řeší strany — ne pojistka Evorios.",
       },
       "Garden & Yard": {
-        title: "Zahrada a dvůr",
-        summary: "Pařezové frézy vyžadují kapacitu, OOP, zřeknutí a pojištění.",
+        title: "Pronájem zahrady a dvora",
+        summary:
+          "Foukače a běžné nářadí: soused + kauce. Pařezové frézy jsou blízko stavebnictví: kapacita, OOP, zřeknutí a pojištění s důkazem při rezervaci.",
         hostTipTitle: "Pro hostitele",
-        hostTip: "Nastavte kapacitu, OOP a pojištění před zveřejněním.",
-        whyGeoTitle: "Proč?",
-        whyGeo: "Vyšší riziko než běžné nářadí.",
-        flowTitle: "Tok",
-        flow: "Inzerát → rezervace → předání → vrácení.",
-        layersTitle: "Vrstvy",
-        layers: "Kapacita · OOP · zřeknutí · pojištění · kauce.",
-        claimsTitle: "Spory",
-        claims: "Pojištění a zřeknutí tvoří stopu.",
+        hostTip:
+          "U pařezových fréz nastav kapacitu průměru, OOP, zřeknutí a pásma pojištění před zveřejněním. U lehčího nářadí fotky stavu a kauce na čepele. Evorios nezajišťuje zahradnické práce — důkaz pojištění (když je potřeba) a kauce jsou hlavní vrstvy.",
+        whyGeoTitle: "Proč jsou pařezové frézy gated?",
+        whyGeo:
+          "Odletující třísky a vysoký točivý moment je blíží lehkému stavebnictví spíš než foukači listí. Kapacita + OOP + zřeknutí + pojištění zamknou cestu do předání.",
+        flowTitle: "Od začátku do konce",
+        flow:
+          "Inzerát (kapacita + OOP + pojištění u pařezu) → zřeknutí / OOP / pojištění → předání → návrat → kauce nebo pojištění první.",
+        layersTitle: "Bezpečnostní vrstvy",
+        layers:
+          "Kapacita · OOP · zřeknutí · pojištění (pařez) · kauce · podmínky · QR.",
+        claimsTitle: "Když se něco pokazí",
+        claims:
+          "Pojištění a zřeknutí tvoří stopu u gated gear; kauce u běžného nářadí. Nejsme pojišťovna landscapingu.",
       },
       "Home & Kitchen": {
-        title: "Domácnost a kuchyně",
-        summary: "Komerční káva vyžaduje napětí, NSF a instalaci.",
+        title: "Pronájem domácnosti a kuchyně",
+        summary:
+          "Běžné spotřebiče: soused + kauce. Komerční káva / brew: napětí, NSF a instalace / přípojka, aby venue neobjevilo 240 V nebo vodu uprostřed eventu.",
         hostTipTitle: "Pro hostitele",
-        hostTip: "Uveďte napětí, NSF a instalaci.",
-        whyGeoTitle: "Proč?",
-        whyGeo: "Špatné napětí/voda = riziko provozu.",
-        flowTitle: "Tok",
-        flow: "Inzerát → rezervace → předání → vrácení.",
-        layersTitle: "Vrstvy",
-        layers: "Napětí · NSF · instalace · kauce.",
-        claimsTitle: "Spory",
-        claims: "Údaje jsou ve smlouvě.",
+        hostTip:
+          "U komerčního espressa uveď napětí, NSF a zda je potřeba voda / pevné zapojení. U spotřebičů kapacitu a čistotu při vrácení. Kauce na poškození — Evorios není NSF ani pojišťovna venue.",
+        whyGeoTitle: "Proč pole komerční kávy?",
+        whyGeo:
+          "Špatné napětí nebo chybějící voda je riziko provozu a propadlý event. Údaje se zmrazí ve smlouvě.",
+        flowTitle: "Od začátku do konce",
+        flow:
+          "Inzerát s napětím / NSF / instalací → rezervace (ve smlouvě) → dovoz/setup → návrat čisté → kauce.",
+        layersTitle: "Vrstvy důvěry",
+        layers:
+          "Napětí · NSF · instalace · kapacita · kauce · podmínky · QR.",
+        claimsTitle: "Když se něco pokazí",
+        claims:
+          "Instalace a napájení jsou ve smlouvě. Kauce na poškození; neprodáváme pojištění poruchy.",
       },
       "Office & Business": {
         title: "Pronájem kanceláře a business",
         summary:
-          "Zařízení s úložištěm (POS, servery, tiskárny, kopírky) vyžadují plán výmazu u hostitele a potvrzení nájemce při rezervaci.",
+          "Nábytek: soused + kauce. Zařízení s úložištěm (POS, servery, tiskárny, kopírky): plán výmazu u hostitele a potvrzení nájemce při rezervaci.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Označ úložiště a stav výmazu pravdivě — POS a servery ideálně vymaž před zveřejněním.",
+          "Označ úložiště a výmaz pravdivě — POS a servery ideálně vymaž před zveřejněním. Kauce na monitory a zásobníky. Evorios není partner pro data ani kyber pojištění; výmaz je vrstva soukromí.",
         whyGeoTitle: "Proč brána výmazu dat?",
         whyGeo:
-          "POS a servery drží zákaznická data. Potvrzení při rezervaci a předání snižuje spory o soukromí.",
+          "POS a servery drží zákaznická data. Potvrzení při rezervaci a předání snižuje spory o soukromí, které kauce sama nevyřeší.",
         flowTitle: "Od začátku do konce",
-        flow: "Inzerát s úložištěm + výmazem → potvrzení → předání → návrat dle dohody.",
+        flow:
+          "Inzerát s úložištěm + výmazem → potvrzení → předání → návrat dle dohody → kauce na fyzické poškození.",
         layersTitle: "Bezpečnostní vrstvy",
-        layers: "Úložiště · stav výmazu · potvrzení nájemce · kauce · podmínky.",
+        layers:
+          "Úložiště · stav výmazu · potvrzení nájemce · kauce · podmínky · QR.",
         claimsTitle: "Když se něco pokazí",
-        claims: "Stav výmazu a potvrzení tvoří stopu; kauce na fyzické poškození.",
+        claims:
+          "Stav výmazu a potvrzení tvoří stopu; kauce na fyzické poškození — ne pojistka úniku dat.",
       },
       "Music & Audio": {
         title: "Pronájem hudby a audia",
         summary:
-          "PA systémy vyžadují inventář kabelů a stojanů, aby chybějící XLR a stojany nebyly sporem.",
+          "Kytary a malé ampíky: soused + kauce. PA systémy vyžadují inventář kabelů a stojanů — zmrazený při rezervaci a spočítaný při předání.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "U PA uveď každý kabel a stojan. Nájemce potvrdí při rezervaci a spočítá při předání.",
+          "U PA uveď každý kabel, stojan a klip. Uveď napájení / výkon. Nájemce potvrdí inventář a spočítá při vyzvednutí/vrácení. Kauce na škrábance a chybějící příslušenství — nejsme pojišťovna backline.",
         whyGeoTitle: "Proč inventář PA?",
         whyGeo:
-          "Spory u PA jsou obvykle chybějící příslušenství. Zmrazený checklist při rezervaci a předání to řeší.",
+          "Spory u PA jsou obvykle chybějící příslušenství. Zmrazený checklist řeší spory bez těžkých bran na každý nástroj.",
         flowTitle: "Od začátku do konce",
-        flow: "Inzerát s inventářem → potvrzení → počet při vyzvednutí → počet při vrácení.",
+        flow:
+          "Inzerát s inventářem → potvrzení → počet při vyzvednutí → počet při vrácení → kauce.",
         layersTitle: "Bezpečnostní vrstvy",
-        layers: "Inventář kabelů/stojanů PA · napájení · kauce · podmínky.",
+        layers:
+          "Inventář kabelů/stojanů PA · napájení · kauce · podmínky · QR.",
         claimsTitle: "Když se něco pokazí",
-        claims: "Inventář jako důkaz chybějících kabelů/stojanů; kauce na rozdíl.",
+        claims:
+          "Inventář jako důkaz chybějících kabelů/stojanů; kauce na rozdíl. Neprodáváme pojištění vybavení.",
       },
       "Costume & Cosplay": {
         title: "Pronájem kostýmů a cosplay",
         summary:
-          "Pravidla vrácení, volitelný poplatek za čištění a sanitizace make-upu / paruk / masek drží půjčování fér — zmrazené ve smlouvě.",
+          "Soused + kauce, pravidla vrácení, volitelný poplatek za čištění a sanitizace make-upu / paruk / masek — zmrazené ve smlouvě, aby účet za čištění nebyl překvapením.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Nastav jen chemické / skvrny OK / jak při převzetí a volitelný poplatek. U make-up sad, paruk a masek potvrď sanitizaci mezi nájemci.",
+          "Nastav jen chemické / skvrny OK / jak při převzetí a volitelný poplatek. U make-up sad, paruk a masek potvrď sanitizaci. Kauce na trhliny — nejsme partnerská čistírna.",
         whyGeoTitle: "Proč stav při vrácení + poplatek?",
         whyGeo:
           "Makeup, pot a glitter kazí kostýmy. Jasná pravidla jsou lepší než překvapivý účet za čištění.",
         flowTitle: "Od začátku do konce",
-        flow: "Inzerát s politikou (+ poplatek) → potvrzení → nošení → návrat dle politiky.",
+        flow:
+          "Inzerát s politikou (+ poplatek) → potvrzení → nošení → návrat dle politiky → kauce nebo poplatek.",
         layersTitle: "Bezpečnostní vrstvy",
-        layers: "Stav při vrácení · poplatek za čištění · sanitizace (makeup / paruky / masky) · velikost · kauce · podmínky.",
+        layers:
+          "Stav při vrácení · poplatek za čištění · sanitizace · velikost · kauce · podmínky.",
         claimsTitle: "Když se něco pokazí",
-        claims: "Poplatek a politika jsou ve smlouvě; kauce na trhliny nebo chybějící díly.",
+        claims:
+          "Poplatek a politika jsou ve smlouvě; kauce na trhliny nebo chybějící díly nad rámec poplatku.",
       },
       "Baby & Kids": {
         title: "Bezpečné půjčování autosedaček",
@@ -3446,6 +3482,16 @@ export const cs: AppMessages = {
       `Stejná sada fotek jako při vyzvednutí — včetně všech ${tireCount} pneumatik — aby byla výměna nebo nové poškození vidět ve sporu.`,
     tireSwapHint:
       "Fotky pneumatik chrání před drahou výměnou (např. prémiové za levné čínské). Když to jde, ať je vidět značka a dezén.",
+    hullPickupBody:
+      "Vyfoť příď, záď, levý bok (port), pravý bok (starboard) a palubu před předáním. Poznamenej oděrky gelcoatu, škrábance a promáčkliny. Obě strany musí potvrdit před odemčením.",
+    hullReturnBody:
+      "Stejná prohlídka trupu jako při vyzvednutí — příď, záď, port, starboard a paluba — aby bylo vidět nové poškození.",
+    hullGelcoatHint:
+      "Fotky trupu a paluby chrání před spory o gelcoat a výbavu. Každá strana zvlášť je lepší než jeden celek.",
+    hullSection: "Prohlídka trupu",
+    hullPhotoHint: "Jedna jasná fotka této oblasti. Označ poškození a krátký komentář.",
+    hullCommentPlaceholder: "Oděrky gelcoatu, škrábance, promáčkliny, měkká místa, kování...",
+    hullIncomplete: "Doplň všech pět fotek trupu (příď, záď, port, starboard, paluba) před odesláním.",
     bodySection: "Exteriér a interiér",
     tiresSection: (tireCount) =>
       tireCount === 4
@@ -3497,6 +3543,11 @@ export const cs: AppMessages = {
       exterior_left: "Exteriér — levá strana",
       exterior_right: "Exteriér — pravá strana",
       interior: "Interiér",
+      hull_bow: "Trup — příď",
+      hull_stern: "Trup — záď",
+      hull_port: "Trup — levý bok (port)",
+      hull_starboard: "Trup — pravý bok (starboard)",
+      hull_deck: "Paluba / kokpit",
       tire_fl: "Pneumatika — přední levá",
       tire_fr: "Pneumatika — přední pravá",
       tire_rl: "Pneumatika — zadní levá",
