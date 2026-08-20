@@ -90,7 +90,8 @@ const GARDEN_EQUIP_SUBS = [
   "Other",
 ] as const;
 
-const CAR_SEAT_SAFETY_SUBS = ["Car Seats", "Cribs & Beds"] as const;
+const CAR_SEAT_SAFETY_SUBS = ["Car Seats"] as const;
+const CRIB_SAFETY_SUBS = ["Cribs & Beds"] as const;
 
 const MATURE_HEIGHT_BUCKETS = [
   "under_1ft",
@@ -662,7 +663,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         key: "safetyDateKnown",
         type: "select",
         required: true,
-        subcategories: CAR_SEAT_SAFETY_SUBS,
+        subcategories: [...CAR_SEAT_SAFETY_SUBS, ...CRIB_SAFETY_SUBS],
         options: ["expiry_known", "mfr_date_known", "need_to_check", "not_applicable"],
       },
       {
@@ -670,7 +671,39 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "text",
         required: false,
         recommended: true,
+        subcategories: CRIB_SAFETY_SUBS,
+      },
+      /** Car seats: hard expiry (YYYY-MM-DD or Exp YYYY-MM) — blocks publish/book when past. */
+      {
+        key: "carSeatExpiryDate",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
         subcategories: CAR_SEAT_SAFETY_SUBS,
+      },
+      {
+        key: "recallAcknowledged",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: CAR_SEAT_SAFETY_SUBS,
+        options: ["acknowledged", "not_checked"],
+      },
+      {
+        key: "sanitizationAttested",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: CAR_SEAT_SAFETY_SUBS,
+        options: ["attested", "not_yet"],
+      },
+      {
+        key: "labelPhotoConfirmed",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: CAR_SEAT_SAFETY_SUBS,
+        options: ["photo_on_listing", "will_add"],
       },
     ],
   },
@@ -831,6 +864,19 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         recommended: true,
         options: ["host_present", "self_checkin", "key_lockbox", "staffed"],
       },
+      {
+        key: "houseRules",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+      },
+      {
+        key: "cleaningFeeUsd",
+        type: "number",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+      },
     ],
   },
   {
@@ -920,5 +966,44 @@ export function areCategorySpecsValid(
       if (!(values.brandOther ?? "").trim()) return false;
     }
   }
+
+  // Car seats: hard expiry + recall + sanitization + label photo (not soft text).
+  if (
+    category.trim() === "Baby & Kids" &&
+    subcategory.trim() === "Car Seats" &&
+    modes?.rent
+  ) {
+    const expiry = (values.carSeatExpiryDate ?? values.expiresOrRecallCheck ?? "").trim();
+    if (!expiry) return false;
+    // Lazy import avoided — inline parse matching categoryTrustRules
+    const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(expiry);
+    const ym =
+      /(?:exp(?:iry)?|expires?)[^\d]*(\d{4})[-/](\d{1,2})/i.exec(expiry) ||
+      /^(\d{4})[-/](\d{1,2})$/.exec(expiry);
+    let expiryOk = false;
+    const now = new Date();
+    const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    if (iso) {
+      const d = Date.UTC(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+      expiryOk = Number.isFinite(d) && d >= today;
+    } else if (ym) {
+      const y = Number(ym[1]);
+      const m = Number(ym[2]);
+      if (y >= 1990 && m >= 1 && m <= 12) {
+        const d = Date.UTC(y, m, 0);
+        expiryOk = d >= today;
+      }
+    }
+    if (!expiryOk) return false;
+    if ((values.recallAcknowledged ?? "").trim() !== "acknowledged") return false;
+    if ((values.sanitizationAttested ?? "").trim() !== "attested") return false;
+    if ((values.labelPhotoConfirmed ?? "").trim() !== "photo_on_listing") return false;
+  }
+
+  // Real Estate: house rules required for rent.
+  if (category.trim() === "Real Estate" && modes?.rent) {
+    if (!(values.houseRules ?? "").trim()) return false;
+  }
+
   return true;
 }

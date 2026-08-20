@@ -1,9 +1,10 @@
 /**
- * Vehicle age gate — market-standard peer car-share default (min 25).
+ * Age gate for Vehicles and powered watercraft — market-standard default (min 25).
  * Hosts may opt in to 18–24 with a higher deductible-sized hold.
  */
 
 import type { ListingDraft } from "../screens/listing/types";
+import { listingRequiresAgeGate } from "./categoryTrustRules";
 import { loadUserProfile } from "./userProfileStorage";
 
 export const DEFAULT_VEHICLE_MIN_AGE = 25;
@@ -63,10 +64,23 @@ export function listingIsVehicleCategory(
   return (listing?.category ?? "").trim() === "Vehicles";
 }
 
-export function listingAllowsYoungDrivers(
-  listing: Pick<ListingDraft, "handoff" | "category"> | null | undefined,
+/** Vehicles or powered boats/PWC — same min-age policy. */
+export function listingUsesVehicleStyleAgeGate(
+  listing:
+    | Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">
+    | null
+    | undefined,
 ): boolean {
-  if (!listingIsVehicleCategory(listing)) return true;
+  return listingRequiresAgeGate(listing ?? undefined);
+}
+
+export function listingAllowsYoungDrivers(
+  listing:
+    | Pick<ListingDraft, "handoff" | "category" | "subcategory" | "modes" | "categorySpecs">
+    | null
+    | undefined,
+): boolean {
+  if (!listingUsesVehicleStyleAgeGate(listing)) return true;
   return listing?.handoff?.allowYoungDrivers === true;
 }
 
@@ -94,11 +108,17 @@ export function resolveRenterDateOfBirth(options?: {
 }
 
 /**
- * Enforce Vehicles min age at booking.
+ * Enforce Vehicles / powered-watercraft min age at booking.
  * @param baseDepositCents security + toll hold before young-driver uplift
  */
 export function assessVehicleAgeGate(input: {
-  listing: Pick<ListingDraft, "category" | "handoff" | "pricing"> | null | undefined;
+  listing:
+    | Pick<
+        ListingDraft,
+        "category" | "subcategory" | "handoff" | "pricing" | "modes" | "categorySpecs"
+      >
+    | null
+    | undefined;
   dateOfBirth?: string | null;
   /** Security deposit portion (not including toll) used for young-driver multiplier. */
   securityDepositCents: number;
@@ -106,7 +126,7 @@ export function assessVehicleAgeGate(input: {
   baseDepositAmountCents: number;
   now?: Date;
 }): VehicleAgeGateResult {
-  if (!listingIsVehicleCategory(input.listing)) {
+  if (!listingUsesVehicleStyleAgeGate(input.listing)) {
     return {
       ok: true,
       ageYears: 99,

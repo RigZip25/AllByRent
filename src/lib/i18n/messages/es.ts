@@ -950,6 +950,12 @@ export const es: AppMessages = {
     insuranceUnlockBlocked:
       "Sube un comprobante de seguro vigente antes de desbloquear llaves o ubicación de este vehículo.",
     cdlUnlockBlocked: "Se requiere declaración y documento CDL antes de iniciar la entrega.",
+    operatorCertUnlockBlocked:
+      "Se requieren declaración y documento de credencial de operador antes de iniciar la entrega.",
+    boaterLicenseUnlockBlocked:
+      "Se requieren declaración y documento de licencia náutica / PWC antes de iniciar la entrega.",
+    droneCertUnlockBlocked:
+      "Se requiere declaración Part 107 / Remote ID antes de iniciar la entrega.",
     agentProofPending:
       "Esperando que el anfitrión confirme que recibió la prueba de seguro de tu agente.",
     agentProofReceivedMark: "Recibí la prueba de seguro del agente del arrendatario",
@@ -1664,6 +1670,23 @@ export const es: AppMessages = {
           label: "Caducidad / fecha de fabricación",
           placeholder: "Importante en sillas de coche",
         },
+        carSeatExpiryDate: {
+          label: "Fecha de caducidad de la silla",
+          placeholder: "AAAA-MM-DD o Exp 2028-06",
+          hint: "Obligatoria en alquiler — fechas pasadas bloquean publicar y reservar.",
+        },
+        recallAcknowledged: {
+          label: "Control de recall",
+          hint: "Confirma que revisaste recalls NHTSA / fabricante para esta silla.",
+        },
+        sanitizationAttested: {
+          label: "Sanitización",
+          hint: "Confirma que la silla se limpió / sanitizó antes de publicar.",
+        },
+        labelPhotoConfirmed: {
+          label: "Foto de la etiqueta de caducidad",
+          hint: "Confirma que hay una foto clara de la etiqueta en el anuncio.",
+        },
         hoursBand: { label: "Horas de uso" },
         hoursUsed: { label: "Horas de uso", placeholder: "Horómetro" },
         dutyClass: { label: "Clase de trabajo" },
@@ -1680,6 +1703,16 @@ export const es: AppMessages = {
         wifiIncluded: { label: "Wi‑Fi", placeholder: "Elegir…" },
         accessType: { label: "Acceso" },
         accessNotes: { label: "Acceso", placeholder: "Código, escaleras…" },
+        houseRules: {
+          label: "Reglas de la casa",
+          placeholder: "Horario de silencio, visitas, humo, mascotas, checkout…",
+          hint: "Obligatorias en alquiler de Real Estate — se muestran al reservar y se congelan en el acuerdo.",
+        },
+        cleaningFeeUsd: {
+          label: "Tarifa de limpieza (USD)",
+          placeholder: "75",
+          hint: "Tarifa plana opcional mostrada al reservar y en el acuerdo.",
+        },
         useCase: { label: "Uso principal" },
         transportSize: { label: "Cómo se mueve" },
         dimensionsOrWeight: { label: "Dimensiones / peso", placeholder: "Para transporte" },
@@ -1897,6 +1930,12 @@ export const es: AppMessages = {
         expiry_known: "Fecha de caducidad conocida",
         mfr_date_known: "Fecha de fabricación conocida",
         need_to_check: "Comprobar antes de la entrega",
+        acknowledged: "Recall revisado / reconocido",
+        not_checked: "Aún no revisado",
+        attested: "Sanitizado / declarado",
+        not_yet: "Aún no",
+        photo_on_listing: "Foto de la etiqueta en el anuncio",
+        will_add: "Añadiré la foto de la etiqueta",
         under_2kw: "Menos de 2 kW",
         "2_5kw": "2–5 kW",
         "5_15kw": "5–15 kW",
@@ -2402,6 +2441,53 @@ export const es: AppMessages = {
     cdlHint:
       "Foto clara de tu Commercial Driver’s License. Obligatoria antes de reservar y antes del inicio.",
     cdlBadge: "CDL obligatorio",
+    operatorCertRequired: (kindLabel) =>
+      `Este anuncio exige una ${kindLabel} válida antes de reservar.`,
+    operatorCertKindForklift: "credencial de operador de montacargas",
+    operatorCertKindCrane: "credencial de operador de grúa",
+    operatorCertKindExcavator: "credencial de operador de excavadora",
+    operatorCertKindGeneral: "credencial de operador de equipo pesado",
+    operatorCertAttest:
+      "Declaro que tengo una credencial de operador válida para este equipo y la presentaré en la entrega.",
+    operatorCertUpload: "Subir foto / escaneo de la credencial de operador",
+    operatorCertReplace: "Reemplazar foto de la credencial",
+    operatorCertHint:
+      "Foto clara de tu credencial de montacargas / grúa / excavadora / equipo pesado. Obligatoria antes de reservar y antes del inicio.",
+    operatorCertBadge: "Credencial de operador obligatoria",
+    boaterLicenseRequired:
+      "Este anuncio de embarcación a motor exige una licencia de navegación / capitán válida.",
+    boaterLicenseAttest:
+      "Declaro que tengo una licencia de navegación o capitán válida para esta embarcación y la presentaré en la entrega.",
+    boaterLicenseUpload: "Subir foto de la licencia náutica / capitán",
+    boaterLicenseReplace: "Reemplazar foto de la licencia",
+    boaterLicenseHint:
+      "Foto clara de tu licencia náutica o de capitán. Obligatoria antes de reservar y antes del inicio.",
+    boaterLicenseBadge: "Licencia náutica obligatoria",
+    pwcLicenseRequired:
+      "Este anuncio de moto acuática / jet ski exige una licencia PWC o náutica cuando tu estado la requiere.",
+    pwcLicenseAttest:
+      "Declaro que tengo una licencia PWC / náutica válida (o estoy exento donde la ley lo permite) y presentaré la prueba en la entrega.",
+    droneCertRequired:
+      "Este anuncio de dron exige declaración FAA Part 107 y/o Remote ID antes de reservar.",
+    droneCertAttest:
+      "Declaro que estoy certificado Part 107 y/o cumpliré las reglas de Remote ID en este vuelo.",
+    droneCertUpload: "Subir certificado Part 107 (opcional)",
+    droneCertReplace: "Reemplazar foto del certificado",
+    droneCertHint:
+      "La declaración es obligatoria. Subir el certificado es opcional pero recomendado para que el anfitrión verifique.",
+    droneCertBadge: "Part 107 / Remote ID",
+    houseRulesTitle: "Reglas de la casa",
+    cleaningFeeLine: (amount) => `Tarifa de limpieza: ${amount}`,
+    carSeatBlockedTitle: "Esta silla infantil no se puede reservar",
+    carSeatBlockedBody:
+      "El anfitrión no completó caducidad, recall, sanitización y foto de etiqueta — o la silla está caducada. Pídele que actualice el anuncio.",
+    carSeatSafetyTitle: "Reconocimiento de seguridad de la silla",
+    carSeatRecallAttest:
+      "Reconozco que revisé el estado de recall / caducidad en el anuncio e instalaré la silla según el fabricante.",
+    carSeatSanitizationAttest:
+      "Sanitizaré / limpiaré la silla antes de usarla con mi hijo y no usaré una unidad caducada o con recall.",
+    carSeatSafetyBadge: "Puerta de seguridad de silla",
+    guestIdBadge: "ID del huésped en el check-in",
     agentInsuranceTitle: "Seguro vía agente → propietario",
     agentInsuranceBody:
       "Para transporte comercial pesado / semi, contrata cobertura con tu agente de seguros. El agente debe enviar la prueba por correo directamente al dueño del vehículo — no es el flujo ligero de «añadir al auto personal + subir».",
@@ -2567,19 +2653,19 @@ export const es: AppMessages = {
       "Heavy Equipment": {
         title: "Alquiler de equipo comercial",
         summary:
-          "Heavy Equipment por defecto solo a profesionales. Seguro PD obligatorio. Inspección previa obligatoria (incl. goma/llantas si aplica) bloquea el inicio. El anfitrión puede marcar no-show tras la ventana.",
+          "Heavy Equipment por defecto solo a profesionales. Credencial de operador (montacargas / grúa / excavadora / general) obligatoria según subcategoría. Seguro PD obligatorio. Depósito respaldado por seguro (retención del deducible), no valor de reposición. Inspección previa bloquea el inicio.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Mantén «solo profesionales». PD obligatorio. Fotos previas (incl. llantas) protegen a ambos. Tarifa de no-show opcional y suave.",
+          "Mantén «solo profesionales». Exige credencial de operador en equipo motorizado. PD obligatorio; configura el deducible máximo para alinear la retención.",
         whyGeoTitle: "¿Por qué el comprobante antes de las llaves?",
         whyGeo:
-          "El equipo comercial es caro sin seguro. Declaración + PD + inspección dan tiempo a revisar.",
+          "El equipo comercial es caro sin seguro o sin operador cualificado. Credencial + PD + inspección dan tiempo a revisar.",
         flowTitle: "De punta a punta",
         flow:
-          "Publicar → solo pro + PD → comprobante → inspección previa → entrega → inspección de devolución.",
+          "Publicar → solo pro + PD + credencial si aplica → comprobante → inspección previa → entrega → devolución.",
         layersTitle: "Capas de seguridad",
         layers:
-          "Declaración pro · PD · inspección previa · retención · no-show opcional · términos · QR/PIN.",
+          "Credencial de operador · declaración pro · PD · retención del deducible · inspección previa · no-show opcional · términos · QR/PIN.",
         claimsTitle: "Si algo sale mal",
         claims:
           "Primero el seguro PD; la retención cubre el deducible. El no-show libera fechas.",
@@ -2587,22 +2673,102 @@ export const es: AppMessages = {
       Construction: {
         title: "Alquiler de equipo de construcción",
         summary:
-          "Construction por defecto solo pro y seguro PD. Inspección previa obligatoria antes del inicio. El anfitrión puede marcar no-show y liberar el calendario.",
+          "Construction por defecto solo pro y seguro PD. Depósito respaldado por seguro (retención del deducible). Equipo tipo grúa / pesado exige credencial de operador. Inspección previa obligatoria.",
         hostTipTitle: "Para anfitriones",
         hostTip:
-          "Solo pro + PD antes de las llaves. Captura el estado (incl. goma). Tarifa de no-show vecinal, no estilo aerolínea.",
-        whyGeoTitle: "¿Por qué pro + PD?",
+          "Solo pro + PD antes de las llaves. Configura el deducible. Exige credencial en estanterías crane-class / motorizadas.",
+        whyGeoTitle: "¿Por qué pro + PD + credencial?",
         whyGeo:
-          "Las herramientas de obra sufren uso duro. Pro + PD + fotos reducen pérdidas sin seguro.",
+          "Las herramientas de obra sufren uso duro. Pro + PD + credencial + fotos reducen pérdidas sin seguro.",
         flowTitle: "De punta a punta",
         flow:
-          "Publicar → pro + PD → comprobante → inspección previa → entrega → devolución.",
+          "Publicar → pro + PD + credencial si aplica → comprobante → inspección previa → entrega → devolución.",
         layersTitle: "Capas de seguridad",
         layers:
-          "Declaración pro · PD · inspección previa · retención · no-show · términos · QR.",
+          "Credencial · declaración pro · PD · retención · inspección previa · no-show · términos · QR.",
         claimsTitle: "Si algo sale mal",
         claims:
           "Seguro primero, luego retención con fotos. El no-show cancela y libera fechas.",
+      },
+      "Boats & Water": {
+        title: "Alquiler de barcos y náutica",
+        summary:
+          "Embarcaciones a motor y PWC exigen licencia náutica / capitán / PWC (declaración + documento) y la misma puerta de edad que vehículos (mín. 25; opcional 18–24 con retención mayor). Depósito respaldado por seguro.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Exige seguro y configura el deducible. En motos acuáticas y motorboats, el arrendatario debe declarar y subir licencia.",
+        whyGeoTitle: "¿Por qué licencia + edad?",
+        whyGeo:
+          "Operadores sin licencia o menores son un riesgo alto. Licencia + edad + seguro bloquean PIN / llaves hasta estar listos.",
+        flowTitle: "De punta a punta",
+        flow:
+          "Publicar → seguro + edad → licencia → reserva → entrega → devolución.",
+        layersTitle: "Capas de seguridad",
+        layers:
+          "Licencia náutica / PWC · edad · seguro · retención · términos · QR/PIN.",
+        claimsTitle: "Si algo sale mal",
+        claims:
+          "El seguro del arrendatario es primario. Licencia y edad apoyan disputas.",
+      },
+      "Real Estate": {
+        title: "Estancias y alquiler de vivienda",
+        summary:
+          "Reglas de la casa obligatorias en alquiler. Tarifa de limpieza opcional en la reserva y el acuerdo. ID del huésped en el check-in (mismo patrón que vehículos). Depósito orientado a un mes.",
+        hostTipTitle: "Para anfitriones / propietarios",
+        hostTip:
+          "Escribe reglas claras. Configura tarifa de limpieza si cobras. El ID al inicio protege frente a fiestas y no-shows.",
+        whyGeoTitle: "¿Por qué ID en el check-in?",
+        whyGeo:
+          "Una confirmación se puede reenviar. El ID de inicio vincula al huésped presente con la reserva.",
+        flowTitle: "De punta a punta",
+        flow:
+          "Publicar → reglas + limpieza → reserva → ID al check-in → estancia → checkout.",
+        layersTitle: "Capas de seguridad",
+        layers:
+          "Reglas de la casa · tarifa de limpieza · ID de inicio · depósito tipo mensual · términos · QR/PIN.",
+        claimsTitle: "Si algo sale mal",
+        claims:
+          "Reglas e ID apoyan disputas. El depósito cubre daños / limpieza excesiva.",
+      },
+      "Photo & Video": {
+        title: "Alquiler de drones y cámaras",
+        summary:
+          "Los anuncios de dron exigen declaración FAA Part 107 y/o Remote ID antes de reservar (subida de certificado opcional).",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Marca kits de dron con claridad. La declaración Part 107 es obligatoria; la foto del certificado ayuda a verificar.",
+        whyGeoTitle: "¿Por qué Part 107 / Remote ID?",
+        whyGeo:
+          "Vuelos sin certificación crean riesgo regulatorio y de responsabilidad. La declaración bloquea reserva y entrega.",
+        flowTitle: "De punta a punta",
+        flow:
+          "Publicar kit → declaración Part 107 / Remote ID → reserva → entrega → devolución.",
+        layersTitle: "Capas de seguridad",
+        layers:
+          "Declaración Part 107 / Remote ID · certificado opcional · retención · términos · QR.",
+        claimsTitle: "Si algo sale mal",
+        claims:
+          "Cobertura del arrendatario y retención primero. La declaración documenta el cumplimiento declarado.",
+      },
+      "Baby & Kids": {
+        title: "Alquiler seguro de sillas infantiles",
+        summary:
+          "Puerta dura: caducidad válida, recall, sanitización y foto de etiqueta. Sillas caducadas o incompletas no se publican ni se reservan. El arrendatario reconfirma en la reserva.",
+        hostTipTitle: "Para anfitriones",
+        hostTip:
+          "Introduce caducidad (AAAA-MM-DD o Exp AAAA-MM). Revisa recalls. Incluye foto clara de la etiqueta. Nunca publiques una silla caducada.",
+        whyGeoTitle: "¿Por qué una puerta dura?",
+        whyGeo:
+          "Sillas caducadas o con recall son un fallo de seguridad infantil — los campos blandos no bastan.",
+        flowTitle: "De punta a punta",
+        flow:
+          "Publicar con controles → arrendatario confirma en reserva → entrega → devolución.",
+        layersTitle: "Capas de seguridad",
+        layers:
+          "Caducidad · recall · sanitización · foto de etiqueta · confirmaciones en reserva · términos.",
+        claimsTitle: "Si algo sale mal",
+        claims:
+          "Las declaraciones crean un rastro claro. No uses sillas que fallen la puerta.",
       },
     },
   },

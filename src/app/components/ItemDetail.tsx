@@ -61,6 +61,14 @@ import {
   listingRequiresCdl,
   listingRequiresPhysicalDamage,
 } from "../../lib/listingRentRules";
+import {
+  listingIsCarSeat,
+  listingIsDrone,
+  listingRequiresBoaterLicense,
+  listingRequiresGuestStartId,
+  listingRequiresOperatorCredential,
+  listingRequiresDroneCert,
+} from "../../lib/categoryTrustRules";
 import type { ListingDraft } from "../../screens/listing/types";
 import { AvailabilityCalendar } from "../../components/availability/AvailabilityCalendar";
 import {
@@ -529,10 +537,28 @@ export function ItemDetail({
             listing.modes.rent ? (
               <CategoryFactCard category={listing.category.trim()} className="mt-3" />
             ) : null}
+            {listing.category.trim() === "Boats & Water" && listing.modes.rent ? (
+              <CategoryFactCard category="Boats & Water" className="mt-3" />
+            ) : null}
+            {listing.category.trim() === "Real Estate" && listing.modes.rent ? (
+              <CategoryFactCard category="Real Estate" className="mt-3" />
+            ) : null}
+            {listingIsDrone(listing) && listing.modes.rent ? (
+              <CategoryFactCard category="Photo & Video" className="mt-3" />
+            ) : null}
+            {listing.modes.rent && listingIsCarSeat(listing) ? (
+              <CategoryFactCard category="Baby & Kids" className="mt-3" />
+            ) : null}
             {listing.modes.rent &&
             (listingProRentersOnly(listing) ||
               listingRequiresPhysicalDamage(listing) ||
-              listingRequiresCdl(listing)) ? (
+              listingRequiresCdl(listing) ||
+              listingRequiresOperatorCredential(listing) ||
+              listingRequiresBoaterLicense(listing) ||
+              listingRequiresDroneCert(listing) ||
+              listingIsCarSeat(listing) ||
+              listingRequiresGuestStartId(listing) ||
+              listingIsCommercialTransport(listing)) ? (
               <div className="mt-3 flex flex-wrap gap-2">
                 {listingProRentersOnly(listing) ? (
                   <span className="rounded-md border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] font-semibold text-sky-950">
@@ -547,6 +573,31 @@ export function ItemDetail({
                 {listingRequiresCdl(listing) ? (
                   <span className="rounded-md border border-indigo-200 bg-indigo-50 px-2 py-1 text-[11px] font-semibold text-indigo-950">
                     {t.booking.cdlBadge}
+                  </span>
+                ) : null}
+                {listingRequiresOperatorCredential(listing) ? (
+                  <span className="rounded-md border border-orange-200 bg-orange-50 px-2 py-1 text-[11px] font-semibold text-orange-950">
+                    {t.booking.operatorCertBadge}
+                  </span>
+                ) : null}
+                {listingRequiresBoaterLicense(listing) ? (
+                  <span className="rounded-md border border-cyan-200 bg-cyan-50 px-2 py-1 text-[11px] font-semibold text-cyan-950">
+                    {t.booking.boaterLicenseBadge}
+                  </span>
+                ) : null}
+                {listingRequiresDroneCert(listing) ? (
+                  <span className="rounded-md border border-violet-200 bg-violet-50 px-2 py-1 text-[11px] font-semibold text-violet-950">
+                    {t.booking.droneCertBadge}
+                  </span>
+                ) : null}
+                {listingIsCarSeat(listing) ? (
+                  <span className="rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-950">
+                    {t.booking.carSeatSafetyBadge}
+                  </span>
+                ) : null}
+                {listingRequiresGuestStartId(listing) ? (
+                  <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-950">
+                    {t.booking.guestIdBadge}
                   </span>
                 ) : null}
                 {listingIsCommercialTransport(listing) ? (

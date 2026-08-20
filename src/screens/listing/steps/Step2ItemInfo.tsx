@@ -385,6 +385,17 @@ export function Step2ItemInfo({
             ) : draft.category.trim() === "Heavy Equipment" ||
               draft.category.trim() === "Construction" ? (
               <CategoryFactCard category={draft.category.trim()} defaultExpanded />
+            ) : draft.category.trim() === "Boats & Water" ? (
+              <CategoryFactCard category="Boats & Water" defaultExpanded />
+            ) : draft.category.trim() === "Real Estate" ? (
+              <CategoryFactCard category="Real Estate" defaultExpanded />
+            ) : draft.category.trim() === "Photo & Video" ||
+              draft.category.trim() === "Drones" ||
+              draft.subcategory.trim() === "Drones" ? (
+              <CategoryFactCard category="Photo & Video" defaultExpanded />
+            ) : draft.category.trim() === "Baby & Kids" &&
+              draft.subcategory.trim() === "Car Seats" ? (
+              <CategoryFactCard category="Baby & Kids" defaultExpanded />
             ) : null}
             <p className="text-[13px] leading-snug text-gray-600">
               {vinRequired ? item.assetIdentityHint : item.serialNumberHelper}

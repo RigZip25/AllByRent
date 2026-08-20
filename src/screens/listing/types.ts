@@ -198,12 +198,19 @@ export type ListingDraft = {
     fuelMissingFeeUsd?: string;
     fuelTankGallons?: string;
     /**
-     * Vehicles: default min age 25. Opt-in allows 18–24 with higher hold
+     * Vehicles / powered boats: default min age 25. Opt-in allows 18–24 with higher hold
      * (youngDriverHoldMultiplier × security deposit).
      */
     allowYoungDrivers?: boolean;
     /** 1.5–2 typical; applied to security deposit only (not toll hold). */
     youngDriverHoldMultiplier?: number;
+    /**
+     * Real Estate: optional cleaning fee (USD string) shown at booking.
+     * House rules live in categorySpecs.houseRules (required for rent).
+     */
+    cleaningFeeUsd?: string;
+    /** Optional mirror of house rules when not stored in categorySpecs. */
+    houseRules?: string;
     /**
      * Authorize an extra card hold for possible tolls (combined with security deposit).
      * Final plate bills can arrive later — GPS macropoints only support the hold.

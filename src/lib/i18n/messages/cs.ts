@@ -964,6 +964,12 @@ export const cs: AppMessages = {
     insuranceUnlockBlocked:
       "Před odemčením klíčů nebo polohy u tohoto vozidla nahrajte platný doklad pojištění.",
     cdlUnlockBlocked: "Před startem předání je povinné prohlášení a doklad CDL.",
+    operatorCertUnlockBlocked:
+      "Před startem předání je povinné prohlášení a doklad provozovatelské kvalifikace.",
+    boaterLicenseUnlockBlocked:
+      "Před startem předání je povinné prohlášení a doklad lodní / PWC licence.",
+    droneCertUnlockBlocked:
+      "Před startem předání je povinné prohlášení Part 107 / Remote ID.",
     agentProofPending:
       "Čeká se, až hostitel potvrdí, že dostal doklad pojištění od tvého agenta.",
     agentProofReceivedMark: "Obdržel(a) jsem doklad pojištění od agenta nájemce",
@@ -1677,6 +1683,23 @@ export const cs: AppMessages = {
           label: "Expirace / datum výroby",
           placeholder: "U autosedaček povinné ke kontrole",
         },
+        carSeatExpiryDate: {
+          label: "Datum expirace autosedačky",
+          placeholder: "RRRR-MM-DD nebo Exp 2028-06",
+          hint: "Povinné u půjčky — prošlé datum blokuje zveřejnění i rezervaci.",
+        },
+        recallAcknowledged: {
+          label: "Kontrola recallu",
+          hint: "Potvrď, že jsi zkontroloval(a) recall NHTSA / výrobce u této sedačky.",
+        },
+        sanitizationAttested: {
+          label: "Sanitizace",
+          hint: "Potvrď, že sedačka byla před nabídkou vyčištěna / sanitována.",
+        },
+        labelPhotoConfirmed: {
+          label: "Foto štítku expirace",
+          hint: "Potvrď, že na nabídce je čitelná fotka štítku expirace / výroby.",
+        },
         hoursBand: { label: "Motohodiny" },
         hoursUsed: { label: "Motohodiny", placeholder: "Stav počítadla" },
         dutyClass: { label: "Třída zátěže" },
@@ -1693,6 +1716,16 @@ export const cs: AppMessages = {
         wifiIncluded: { label: "Wi‑Fi", placeholder: "Vyberte…" },
         accessType: { label: "Přístup" },
         accessNotes: { label: "Přístup", placeholder: "Kód, schody…" },
+        houseRules: {
+          label: "Domácí pravidla",
+          placeholder: "Noční klid, hosté, kouření, zvířata, checkout…",
+          hint: "Povinné u Real Estate půjčky — zobrazí se při rezervaci a zmrazí se ve smlouvě.",
+        },
+        cleaningFeeUsd: {
+          label: "Poplatek za úklid (USD)",
+          placeholder: "75",
+          hint: "Volitelný paušál zobrazený při rezervaci a ve smlouvě.",
+        },
         useCase: { label: "Hlavní použití" },
         transportSize: { label: "Jak se přepravuje" },
         dimensionsOrWeight: { label: "Rozměry / váha", placeholder: "Pro transport" },
@@ -1910,6 +1943,12 @@ export const cs: AppMessages = {
         expiry_known: "Známé datum expirace",
         mfr_date_known: "Známé datum výroby",
         need_to_check: "Před předáním zkontrolovat",
+        acknowledged: "Recall zkontrolován / potvrzen",
+        not_checked: "Ještě nezkontrolováno",
+        attested: "Sanitováno / potvrzeno",
+        not_yet: "Ještě ne",
+        photo_on_listing: "Foto štítku je na nabídce",
+        will_add: "Foto štítku doplním",
         under_2kw: "Do 2 kW",
         "2_5kw": "2–5 kW",
         "5_15kw": "5–15 kW",
@@ -2416,6 +2455,53 @@ export const cs: AppMessages = {
     cdlHint:
       "Čitelné foto Commercial Driver’s License. Povinné před odesláním rezervace i před startem.",
     cdlBadge: "Vyžadován CDL",
+    operatorCertRequired: (kindLabel) =>
+      `Tato nabídka vyžaduje platnou ${kindLabel} před rezervací.`,
+    operatorCertKindForklift: "kvalifikaci obsluhy vysokozdvižného vozíku",
+    operatorCertKindCrane: "kvalifikaci obsluhy jeřábu",
+    operatorCertKindExcavator: "kvalifikaci obsluhy bagru",
+    operatorCertKindGeneral: "kvalifikaci obsluhy těžké techniky",
+    operatorCertAttest:
+      "Prohlašuji, že mám platnou kvalifikaci obsluhy pro tuto techniku a předložím ji při předání.",
+    operatorCertUpload: "Nahrát foto / sken provozovatelské kvalifikace",
+    operatorCertReplace: "Nahradit foto kvalifikace",
+    operatorCertHint:
+      "Čitelné foto kvalifikace (vysokozdvižný vozík / jeřáb / bagr / těžká technika). Povinné před rezervací i před startem.",
+    operatorCertBadge: "Vyžadována kvalifikace obsluhy",
+    boaterLicenseRequired:
+      "Tato nabídka motorového plavidla vyžaduje platnou lodní / kapitánskou licenci.",
+    boaterLicenseAttest:
+      "Prohlašuji, že mám platnou lodní nebo kapitánskou licenci pro toto plavidlo a předložím ji při předání.",
+    boaterLicenseUpload: "Nahrát foto lodní / kapitánské licence",
+    boaterLicenseReplace: "Nahradit foto licence",
+    boaterLicenseHint:
+      "Čitelné foto lodní nebo kapitánské licence. Povinné před rezervací i před startem.",
+    boaterLicenseBadge: "Vyžadována lodní licence",
+    pwcLicenseRequired:
+      "Tato nabídka vodního skútru / jet ski vyžaduje platnou PWC nebo lodní licenci, pokud ji tvůj stát vyžaduje.",
+    pwcLicenseAttest:
+      "Prohlašuji, že mám platnou PWC / lodní licenci (nebo jsem osvobozen, kde to zákon dovoluje) a předložím doklad při předání.",
+    droneCertRequired:
+      "Tato nabídka dronu vyžaduje prohlášení FAA Part 107 a/nebo Remote ID před rezervací.",
+    droneCertAttest:
+      "Prohlašuji, že mám Part 107 a/nebo budu dodržovat pravidla Remote ID pro tento let.",
+    droneCertUpload: "Nahrát certifikát Part 107 (volitelné)",
+    droneCertReplace: "Nahradit foto certifikátu",
+    droneCertHint:
+      "Prohlášení je povinné. Nahrání certifikátu je volitelné, ale doporučené pro hostitele.",
+    droneCertBadge: "Part 107 / Remote ID",
+    houseRulesTitle: "Domácí pravidla",
+    cleaningFeeLine: (amount) => `Poplatek za úklid: ${amount}`,
+    carSeatBlockedTitle: "Tuto autosedačku nelze rezervovat",
+    carSeatBlockedBody:
+      "Hostitel nedokončil kontrolu expirace, recallu, sanitizace a fotky štítku — nebo je sedačka po expiraci. Požádej o aktualizaci nabídky.",
+    carSeatSafetyTitle: "Potvrzení bezpečnosti autosedačky",
+    carSeatRecallAttest:
+      "Potvrzuji, že jsem zkontroloval(a) stav recallu / expirace v nabídce a nainstaluji sedačku dle výrobce.",
+    carSeatSanitizationAttest:
+      "Před použitím s dítětem sedačku vyčistím / otřu a nepoužiji prošlou nebo recallovanou jednotku.",
+    carSeatSafetyBadge: "Bezpečnostní brána autosedačky",
+    guestIdBadge: "ID hosta při check-inu",
     agentInsuranceTitle: "Pojištění přes agenta → majitel",
     agentInsuranceBody:
       "U těžké / semi komerční dopravy sjednej krytí u pojišťovacího agenta. Agent musí poslat doklad e-mailem přímo majiteli vozidla — nejde o lehčí cestu „přidat do osobního autopojištění + nahrát“.",
@@ -2581,19 +2667,19 @@ export const cs: AppMessages = {
       "Heavy Equipment": {
         title: "Půjčování komerční techniky",
         summary:
-          "Heavy Equipment defaultně jen pro profesionály. PD pojištění povinné. Povinná předprohlídka (včetně gumy/pneumatik u kolových strojů) blokuje start. Hostitel může označit no-show po okně vyzvednutí.",
+          "Heavy Equipment defaultně jen pro profesionály. Kvalifikace obsluhy (vysokozdvižný vozík / jeřáb / bagr / obecná) dle podkategorie. PD pojištění povinné. Depozit pojištěním (hold na spoluúčast), ne plná náhrada. Předprohlídka blokuje start.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Nech „jen profi“ zapnuté. PD je povinné. Fotky před startem (včetně pneumatik) chrání obě strany. Volitelný no-show poplatek je měkký.",
+          "Nech „jen profi“ zapnuté. Vyžaduj kvalifikaci u motorové techniky. PD je povinné; nastav max. spoluúčast kvůli holdu.",
         whyGeoTitle: "Proč doklad před klíči?",
         whyGeo:
-          "Komerční technika je drahá při nepojištěném poškození. Prohlášení + PD + předprohlídka dávají čas na kontrolu.",
+          "Komerční technika je drahá při nepojištěném nebo nekvalifikovaném poškození. Kvalifikace + PD + předprohlídka dávají čas na kontrolu.",
         flowTitle: "Od začátku do konce",
         flow:
-          "Nabídnout → jen profi + PD → doklad → předprohlídka → předání → prohlídka při vrácení.",
+          "Nabídnout → jen profi + PD + kvalifikace dle potřeby → doklad → předprohlídka → předání → prohlídka při vrácení.",
         layersTitle: "Vrstvy ochrany",
         layers:
-          "Pro prohlášení · PD · předprohlídka · hold · volitelný no-show · podmínky · QR/PIN.",
+          "Kvalifikace obsluhy · pro prohlášení · PD · hold na spoluúčast · předprohlídka · volitelný no-show · podmínky · QR/PIN.",
         claimsTitle: "Když se něco pokazí",
         claims:
           "Primární je PD pojištění nájemce; hold kryje spoluúčast. No-show uvolní termíny.",
@@ -2601,22 +2687,102 @@ export const cs: AppMessages = {
       Construction: {
         title: "Půjčování stavební techniky",
         summary:
-          "Construction defaultně jen profi a PD pojištění. Povinná předprohlídka před startem. Hostitel může označit no-show a uvolnit kalendář.",
+          "Construction defaultně jen profi a PD pojištění. Depozit pojištěním (hold na spoluúčast). Jeřábová / těžká motorová technika vyžaduje kvalifikaci obsluhy. Povinná předprohlídka.",
         hostTipTitle: "Pro hostitele",
         hostTip:
-          "Jen profi + PD před klíči. Zachyť stav (včetně gumy). Volitelný no-show poplatek je sousedsky měkký.",
-        whyGeoTitle: "Proč profi + PD?",
+          "Jen profi + PD před klíči. Nastav spoluúčast. Vyžaduj kvalifikaci u crane-class / motorových polic.",
+        whyGeoTitle: "Proč profi + PD + kvalifikace?",
         whyGeo:
-          "Staveništní nářadí snáší tvrdý provoz. Profi + PD + fotky snižují nepojištěnou ztrátu.",
+          "Staveništní nářadí snáší tvrdý provoz. Profi + PD + kvalifikace + fotky snižují nepojištěnou ztrátu.",
         flowTitle: "Od začátku do konce",
         flow:
-          "Nabídnout → profi + PD → doklad → předprohlídka → předání → vrácení.",
+          "Nabídnout → profi + PD + kvalifikace dle potřeby → doklad → předprohlídka → předání → vrácení.",
         layersTitle: "Vrstvy ochrany",
         layers:
-          "Pro prohlášení · PD · předprohlídka · hold · no-show · podmínky · QR.",
+          "Kvalifikace · pro prohlášení · PD · hold · předprohlídka · no-show · podmínky · QR.",
         claimsTitle: "Když se něco pokazí",
         claims:
           "Nejdřív pojištění, pak hold s fotkami. No-show zruší a uvolní data.",
+      },
+      "Boats & Water": {
+        title: "Půjčování lodí a vodní techniky",
+        summary:
+          "Motorová plavidla a PWC vyžadují lodní / kapitánskou / PWC licenci (prohlášení + doklad) a stejnou věkovou bránu jako vozidla (min. 25; hostitel může povolit 18–24 s vyšším holdem). Depozit pojištěním.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Vyžaduj pojištění a nastav spoluúčast. U motorových lodí a jet ski musí nájemce prohlásit a nahrát licenci.",
+        whyGeoTitle: "Proč licence + věk?",
+        whyGeo:
+          "Nelegální nebo mladí operátoři jsou velké riziko. Licence + věk + pojištění blokují PIN / klíče.",
+        flowTitle: "Od začátku do konce",
+        flow:
+          "Nabídnout → pojištění + věk → licence → rezervace → předání → vrácení.",
+        layersTitle: "Vrstvy ochrany",
+        layers:
+          "Lodní / PWC licence · věková brána · pojištění · hold · podmínky · QR/PIN.",
+        claimsTitle: "Když se něco pokazí",
+        claims:
+          "Pojištění nájemce je primární. Licence a věk pomáhají ve sporech.",
+      },
+      "Real Estate": {
+        title: "Krátkodobé pobyty a bydlení",
+        summary:
+          "Domácí pravidla jsou u půjčky povinná. Volitelný poplatek za úklid se zobrazí při rezervaci a ve smlouvě. ID hosta při check-inu (stejný vzor jako u vozidel). Depozit kolem jednoho měsíce.",
+        hostTipTitle: "Pro hostitele / majitele",
+        hostTip:
+          "Napiš jasná pravidla. Nastav poplatek za úklid, pokud ho účtuješ. ID na startu chrání před party a no-show.",
+        whyGeoTitle: "Proč ID při check-inu?",
+        whyGeo:
+          "Potvrzení rezervace lze přeposlat. Start ID váže přítomného hosta k rezervaci.",
+        flowTitle: "Od začátku do konce",
+        flow:
+          "Nabídnout → pravidla + úklid → rezervace → ID při check-inu → pobyt → checkout.",
+        layersTitle: "Vrstvy ochrany",
+        layers:
+          "Domácí pravidla · poplatek za úklid · start ID · měsíční depozit · podmínky · QR/PIN.",
+        claimsTitle: "Když se něco pokazí",
+        claims:
+          "Pravidla a ID pomáhají ve sporech. Depozit kryje škody / nadměrný úklid.",
+      },
+      "Photo & Video": {
+        title: "Půjčování dronů a kamer",
+        summary:
+          "Nabídky dronů vyžadují prohlášení FAA Part 107 a/nebo Remote ID před rezervací (nahrání certifikátu volitelné).",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Označ dronové sady jasně. Prohlášení Part 107 je povinné; foto certifikátu pomáhá ověřit.",
+        whyGeoTitle: "Proč Part 107 / Remote ID?",
+        whyGeo:
+          "Nelicencované lety dronů nesou regulační a odpovědnostní riziko. Prohlášení blokuje rezervaci i předání.",
+        flowTitle: "Od začátku do konce",
+        flow:
+          "Nabídnout sadu → prohlášení Part 107 / Remote ID → rezervace → předání → vrácení.",
+        layersTitle: "Vrstvy ochrany",
+        layers:
+          "Prohlášení Part 107 / Remote ID · volitelný certifikát · hold · podmínky · QR.",
+        claimsTitle: "Když se něco pokazí",
+        claims:
+          "Nejdřív krytí nájemce a hold. Prohlášení dokumentuje deklarované dodržení pravidel.",
+      },
+      "Baby & Kids": {
+        title: "Bezpečné půjčování autosedaček",
+        summary:
+          "Tvrdá brána: platná expirace, recall, sanitizace a foto štítku. Prošlé nebo neúplné sedačky nelze zveřejnit ani rezervovat. Nájemce znovu potvrdí při rezervaci.",
+        hostTipTitle: "Pro hostitele",
+        hostTip:
+          "Zadej expiraci (RRRR-MM-DD nebo Exp RRRR-MM). Zkontroluj recall. Dej čitelnou fotku štítku. Nikdy nenabízej prošlou sedačku.",
+        whyGeoTitle: "Proč tvrdá brána?",
+        whyGeo:
+          "Prošlé nebo recallované sedačky jsou bezpečnostní selhání — měkká textová pole nestačí.",
+        flowTitle: "Od začátku do konce",
+        flow:
+          "Nabídnout s kontrolami → nájemce potvrdí při rezervaci → předání → vrácení.",
+        layersTitle: "Vrstvy ochrany",
+        layers:
+          "Expirace · recall · sanitizace · foto štítku · potvrzení při rezervaci · podmínky.",
+        claimsTitle: "Když se něco pokazí",
+        claims:
+          "Prohlášení vytváří jasnou stopu. Nepoužívej sedačky, které bránou neprojdou.",
       },
     },
   },

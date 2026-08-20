@@ -53,6 +53,17 @@ export type RentalAgreementCommercialSnapshot = {
     tracksDef?: boolean;
     fuelMissingFeeCents?: number;
   };
+  /** Category trust snapshot (operator / boat / drone / car seat / real estate). */
+  trust?: {
+    operatorCertKind?: "forklift" | "crane" | "excavator" | "general_heavy";
+    operatorCertRequired?: boolean;
+    boaterLicenseRequired?: boolean;
+    droneCertRequired?: boolean;
+    carSeatSanitizationRequired?: boolean;
+    houseRules?: string;
+    cleaningFeeUsd?: number;
+    minAgeRequired?: number;
+  };
 };
 
 export type RentalAgreementRecord = {
@@ -139,6 +150,7 @@ export function getRentalAgreementTermsText(locale?: string): string {
 export function buildEnrichedSummaryLines(input: {
   category?: string;
   vehicle?: RentalAgreementCommercialSnapshot["vehicle"];
+  trust?: RentalAgreementCommercialSnapshot["trust"];
   insuranceRequired?: boolean;
   insuranceActiveUntil?: string;
   cancellationSummary?: string;
@@ -147,10 +159,20 @@ export function buildEnrichedSummaryLines(input: {
 }): string[] {
   const lines: string[] = [];
   const cat = (input.category ?? "").trim();
+  const trust = input.trust;
   const isRich =
     cat === "Vehicles" ||
     cat === "Real Estate" ||
-    /high.?value|boat|heavy/i.test(cat);
+    cat === "Heavy Equipment" ||
+    cat === "Construction" ||
+    cat === "Boats & Water" ||
+    cat === "Baby & Kids" ||
+    cat === "Photo & Video" ||
+    Boolean(trust?.operatorCertRequired) ||
+    Boolean(trust?.boaterLicenseRequired) ||
+    Boolean(trust?.droneCertRequired) ||
+    Boolean(trust?.houseRules) ||
+    /high.?value|boat|heavy|drone/i.test(cat);
 
   if (!isRich && !input.vehicle) {
     if (input.cancellationSummary) lines.push(input.cancellationSummary);
@@ -169,6 +191,42 @@ export function buildEnrichedSummaryLines(input: {
         ? `Insurance proof required — coverage active through ${input.insuranceActiveUntil}.`
         : "Insurance proof required before handoff.",
     );
+  }
+  if (trust?.operatorCertRequired) {
+    const kind = trust.operatorCertKind ?? "general_heavy";
+    const label =
+      kind === "forklift"
+        ? "forklift operator credential"
+        : kind === "crane"
+          ? "crane operator credential"
+          : kind === "excavator"
+            ? "excavator operator credential"
+            : "heavy-equipment operator credential";
+    lines.push(`Operator credential required: ${label} (attestation + document).`);
+  }
+  if (trust?.boaterLicenseRequired) {
+    lines.push(
+      "Boater / PWC / captain license attestation and document required before handoff.",
+    );
+  }
+  if (trust?.droneCertRequired) {
+    lines.push(
+      "FAA Part 107 and/or Remote ID attestation required (optional certificate upload).",
+    );
+  }
+  if (trust?.carSeatSanitizationRequired) {
+    lines.push(
+      "Car seat: host confirmed non-expired / recall-checked unit; renter sanitization acknowledgment required.",
+    );
+  }
+  if (trust?.houseRules?.trim()) {
+    lines.push(`House rules: ${trust.houseRules.trim()}`);
+  }
+  if (trust?.cleaningFeeUsd != null && trust.cleaningFeeUsd > 0) {
+    lines.push(`Cleaning fee: $${trust.cleaningFeeUsd.toFixed(2)}.`);
+  }
+  if (trust?.minAgeRequired) {
+    lines.push(`Minimum operator / driver age: ${trust.minAgeRequired}.`);
   }
   if (input.vehicle?.maxDeductible) {
     lines.push(`Host max deductible / card hold band: ${input.vehicle.maxDeductible}.`);
@@ -251,6 +309,7 @@ export function createRentalAgreementRecord(input: {
   const enrichedSummaryLines = buildEnrichedSummaryLines({
     category: input.commercial.category,
     vehicle: input.commercial.vehicle,
+    trust: input.commercial.trust,
     insuranceRequired: input.commercial.insuranceRequired,
     insuranceActiveUntil: input.commercial.insuranceActiveUntil,
     cancellationSummary: input.commercial.cancellationSummary,

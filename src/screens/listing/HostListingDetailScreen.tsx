@@ -541,6 +541,21 @@ export function HostListingDetailScreen({
         listing.category.trim() === "Construction" ? (
           <CategoryFactCard category={listing.category.trim()} className="mb-4" />
         ) : null}
+        {listing.category.trim() === "Boats & Water" ? (
+          <CategoryFactCard category="Boats & Water" className="mb-4" />
+        ) : null}
+        {listing.category.trim() === "Real Estate" ? (
+          <CategoryFactCard category="Real Estate" className="mb-4" />
+        ) : null}
+        {listing.category.trim() === "Photo & Video" ||
+        listing.category.trim() === "Drones" ||
+        listing.subcategory.trim() === "Drones" ? (
+          <CategoryFactCard category="Photo & Video" className="mb-4" />
+        ) : null}
+        {listing.category.trim() === "Baby & Kids" &&
+        listing.subcategory.trim() === "Car Seats" ? (
+          <CategoryFactCard category="Baby & Kids" className="mb-4" />
+        ) : null}
         {listingRequiresQrSticker(listing.modes) ? (
         <section
           className="mb-4 rounded-3xl border bg-white p-4 shadow-sm"

@@ -19,6 +19,19 @@ import {
   listingRequiresPhysicalDamage,
   listingIsCommercialTransport,
 } from "../../lib/listingRentRules";
+import {
+  listingCarSeatBlocksBooking,
+  listingCleaningFeeUsd,
+  listingHouseRulesText,
+  listingIsCarSeat,
+  listingIsDrone,
+  listingOperatorCertKind,
+  listingRequiresAgeGate,
+  listingRequiresBoaterLicense,
+  listingRequiresDroneCert,
+  listingRequiresOperatorCredential,
+  listingIsPwc,
+} from "../../lib/categoryTrustRules";
 import { uploadRentalInsuranceProof } from "../../lib/rentalInsuranceStorage";
 import {
   defaultLateReturnFeePolicyForCategory,
@@ -271,11 +284,31 @@ function BookingScreenLoaded({
   const [cdlMedia, setCdlMedia] = useState<MediaRef | null>(null);
   const [cdlBusy, setCdlBusy] = useState(false);
   const [agentProofAck, setAgentProofAck] = useState(false);
+  const [operatorCertAttested, setOperatorCertAttested] = useState(false);
+  const [operatorCertMedia, setOperatorCertMedia] = useState<MediaRef | null>(null);
+  const [operatorCertBusy, setOperatorCertBusy] = useState(false);
+  const [boaterLicenseAttested, setBoaterLicenseAttested] = useState(false);
+  const [boaterLicenseMedia, setBoaterLicenseMedia] = useState<MediaRef | null>(null);
+  const [boaterLicenseBusy, setBoaterLicenseBusy] = useState(false);
+  const [droneCertAttested, setDroneCertAttested] = useState(false);
+  const [droneCertMedia, setDroneCertMedia] = useState<MediaRef | null>(null);
+  const [droneCertBusy, setDroneCertBusy] = useState(false);
+  const [carSeatSanitizationAttested, setCarSeatSanitizationAttested] = useState(false);
+  const [carSeatRecallAckAttested, setCarSeatRecallAckAttested] = useState(false);
 
   const needsInsuranceProof = listingRequiresInsuranceProof(listing);
   const needsPhysicalDamage = listingRequiresPhysicalDamage(listing);
   const needsProRenter = listingProRentersOnly(listing);
   const needsCdl = listingRequiresCdl(listing);
+  const operatorCertKind = listingOperatorCertKind(listing);
+  const needsOperatorCert = listingRequiresOperatorCredential(listing);
+  const needsBoaterLicense = listingRequiresBoaterLicense(listing);
+  const needsDroneCert = listingRequiresDroneCert(listing);
+  const needsCarSeatGates = listingIsCarSeat(listing) && listing.modes.rent;
+  const carSeatListingBlocked = listingCarSeatBlocksBooking(listing);
+  const houseRulesText = listingHouseRulesText(listing);
+  const cleaningFeeUsd = listingCleaningFeeUsd(listing);
+  const needsAgeGate = listingRequiresAgeGate(listing);
   const usesAgentInsurance = listingUsesAgentToOwnerInsuranceProof(listing);
   const isCommercialTransport = listingIsCommercialTransport(listing);
   const ownerProofEmail = listingInsuranceOwnerProofEmail(listing);
@@ -421,6 +454,20 @@ function BookingScreenLoaded({
   const physicalDamageOk = !needsPhysicalDamage || physicalDamageAttested || usesAgentInsurance;
   const proRenterOk = !needsProRenter || proRenterAttested;
   const cdlOk = !needsCdl || (cdlAttested && Boolean(cdlMedia));
+  const operatorCertOk =
+    !needsOperatorCert || (operatorCertAttested && Boolean(operatorCertMedia));
+  const boaterLicenseOk =
+    !needsBoaterLicense || (boaterLicenseAttested && Boolean(boaterLicenseMedia));
+  const droneCertOk = !needsDroneCert || droneCertAttested;
+  const carSeatOk =
+    !needsCarSeatGates ||
+    (!carSeatListingBlocked &&
+      carSeatSanitizationAttested &&
+      carSeatRecallAckAttested);
+  const realEstateHouseRulesOk =
+    listing.category.trim() !== "Real Estate" ||
+    !listing.modes.rent ||
+    Boolean(houseRulesText);
 
   const breakdown: RentalPriceBreakdown = useMemo(
     () =>
@@ -442,7 +489,8 @@ function BookingScreenLoaded({
     [listing.vehicleExtras, selectedExtras, rentalDays],
   );
 
-  const totalWithExtras = Math.round((breakdown.totalUsd + extrasFeeUsd) * 100) / 100;
+  const totalWithExtras =
+    Math.round((breakdown.totalUsd + extrasFeeUsd + cleaningFeeUsd) * 100) / 100;
 
   const canConfirm =
     (!deliveryRequested || deliveryAddress.trim().length > 0) &&
@@ -452,11 +500,19 @@ function BookingScreenLoaded({
     physicalDamageOk &&
     proRenterOk &&
     cdlOk &&
+    operatorCertOk &&
+    boaterLicenseOk &&
+    droneCertOk &&
+    carSeatOk &&
+    realEstateHouseRulesOk &&
     !insuranceUploadBusy &&
     !proCredentialBusy &&
     !cdlBusy &&
+    !operatorCertBusy &&
+    !boaterLicenseBusy &&
+    !droneCertBusy &&
     (!isVehicleListing || macropointConsent) &&
-    (!isVehicleListing || ageGate.ok) &&
+    (!needsAgeGate || ageGate.ok) &&
     agreementAccepted;
 
   const renterDisplayName = useMemo(() => {
@@ -495,10 +551,21 @@ function BookingScreenLoaded({
       cancellationSummary,
       lateReturnSummary: lateReturnSummary ?? undefined,
       noShowSummary: noShowFeeUsd != null ? t.booking.noShowPolicyBody : undefined,
+      trust: {
+        operatorCertKind: operatorCertKind ?? undefined,
+        operatorCertRequired: needsOperatorCert,
+        boaterLicenseRequired: needsBoaterLicense,
+        droneCertRequired: needsDroneCert,
+        carSeatSanitizationRequired: needsCarSeatGates,
+        houseRules: houseRulesText || undefined,
+        cleaningFeeUsd: cleaningFeeUsd > 0 ? cleaningFeeUsd : undefined,
+        minAgeRequired: needsAgeGate ? ageGate.minAgeRequired : undefined,
+      },
       vehicle:
         isVehicleListing ||
         listing.category.trim() === "Real Estate" ||
-        needsFuelTracking
+        needsFuelTracking ||
+        needsBoaterLicense
           ? {
               maxDeductible: deductibleLabel || listing.handoff.insuranceMaxDeductible,
               minLiability: liabilityLabel || listing.handoff.insuranceMinLiability,
@@ -524,9 +591,12 @@ function BookingScreenLoaded({
           : undefined,
     });
   }, [
+    ageGate.minAgeRequired,
+    cleaningFeeUsd,
     deductibleLabel,
     fuelPolicySnapshot,
     homeTerritory,
+    houseRulesText,
     insuranceActiveUntil,
     isVehicleListing,
     liabilityLabel,
@@ -536,8 +606,14 @@ function BookingScreenLoaded({
     listing.handoff.insuranceMaxDeductible,
     listing.handoff.insuranceMinLiability,
     listing.vehicleExtras?.vehicleDelivery?.maxMiles,
+    needsAgeGate,
+    needsBoaterLicense,
+    needsCarSeatGates,
+    needsDroneCert,
     needsFuelTracking,
     needsInsuranceProof,
+    needsOperatorCert,
+    operatorCertKind,
     offeredExtraKeys,
     selectedExtras,
     t.booking,
@@ -598,10 +674,21 @@ function BookingScreenLoaded({
         cancellationSummary,
         lateReturnSummary: lateReturnSummary ?? undefined,
         noShowSummary: noShowFeeUsd != null ? t.booking.noShowPolicyBody : undefined,
+        trust: {
+          operatorCertKind: operatorCertKind ?? undefined,
+          operatorCertRequired: needsOperatorCert,
+          boaterLicenseRequired: needsBoaterLicense,
+          droneCertRequired: needsDroneCert,
+          carSeatSanitizationRequired: needsCarSeatGates,
+          houseRules: houseRulesText || undefined,
+          cleaningFeeUsd: cleaningFeeUsd > 0 ? cleaningFeeUsd : undefined,
+          minAgeRequired: needsAgeGate ? ageGate.minAgeRequired : undefined,
+        },
         vehicle:
           isVehicleListing ||
           listing.category.trim() === "Real Estate" ||
-          needsFuelTracking
+          needsFuelTracking ||
+          needsBoaterLicense
             ? {
                 maxDeductible: deductibleLabel || listing.handoff.insuranceMaxDeductible,
                 minLiability: liabilityLabel || listing.handoff.insuranceMinLiability,
@@ -688,6 +775,17 @@ function BookingScreenLoaded({
       proCredentialMedia: needsProRenter ? proCredentialMedia : undefined,
       cdlAttested: needsCdl ? cdlAttested : undefined,
       cdlMedia: needsCdl ? cdlMedia : undefined,
+      operatorCertKind: needsOperatorCert ? operatorCertKind ?? undefined : undefined,
+      operatorCertAttested: needsOperatorCert ? operatorCertAttested : undefined,
+      operatorCertMedia: needsOperatorCert ? operatorCertMedia : undefined,
+      boaterLicenseAttested: needsBoaterLicense ? boaterLicenseAttested : undefined,
+      boaterLicenseMedia: needsBoaterLicense ? boaterLicenseMedia : undefined,
+      droneCertAttested: needsDroneCert ? droneCertAttested : undefined,
+      droneCertMedia: needsDroneCert ? droneCertMedia : undefined,
+      carSeatSanitizationAttested: needsCarSeatGates ? carSeatSanitizationAttested : undefined,
+      carSeatRecallAckAttested: needsCarSeatGates ? carSeatRecallAckAttested : undefined,
+      houseRulesSnapshot: houseRulesText || undefined,
+      cleaningFeeUsd: cleaningFeeUsd > 0 ? cleaningFeeUsd : undefined,
       insuranceAgentProofAcknowledged: usesAgentInsurance ? agentProofAck : undefined,
       insuranceOwnerProofEmail: usesAgentInsurance ? ownerProofEmail || undefined : undefined,
       selectedVehicleExtras: selectedExtras,
@@ -1007,6 +1105,61 @@ function BookingScreenLoaded({
         listing.modes.rent ? (
           <CategoryFactCard category={listing.category.trim()} />
         ) : null}
+        {listing.category.trim() === "Boats & Water" && listing.modes.rent ? (
+          <CategoryFactCard category="Boats & Water" />
+        ) : null}
+        {listing.category.trim() === "Real Estate" && listing.modes.rent ? (
+          <CategoryFactCard category="Real Estate" />
+        ) : null}
+        {listingIsDrone(listing) && listing.modes.rent ? (
+          <CategoryFactCard category="Photo & Video" />
+        ) : null}
+        {needsCarSeatGates ? <CategoryFactCard category="Baby & Kids" /> : null}
+
+        {listing.category.trim() === "Real Estate" && houseRulesText ? (
+          <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+            <p className="text-sm font-semibold text-gray-900">{t.booking.houseRulesTitle}</p>
+            <p className="text-[13px] leading-snug whitespace-pre-wrap text-muted-foreground">
+              {houseRulesText}
+            </p>
+            {cleaningFeeUsd > 0 ? (
+              <p className="text-sm font-medium text-gray-900">
+                {t.booking.cleaningFeeLine(formatMoney(cleaningFeeUsd))}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {needsCarSeatGates && carSeatListingBlocked ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <p className="font-semibold">{t.booking.carSeatBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.carSeatBlockedBody}</p>
+          </div>
+        ) : null}
+
+        {needsCarSeatGates && !carSeatListingBlocked ? (
+          <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-rose-950">{t.booking.carSeatSafetyTitle}</p>
+            <label className="flex items-start gap-2 text-xs text-rose-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={carSeatRecallAckAttested}
+                onChange={(e) => setCarSeatRecallAckAttested(e.target.checked)}
+              />
+              <span>{t.booking.carSeatRecallAttest}</span>
+            </label>
+            <label className="flex items-start gap-2 text-xs text-rose-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={carSeatSanitizationAttested}
+                onChange={(e) => setCarSeatSanitizationAttested(e.target.checked)}
+              />
+              <span>{t.booking.carSeatSanitizationAttest}</span>
+            </label>
+          </div>
+        ) : null}
 
         {needsProRenter ? (
           <div className="rounded-xl border border-sky-200 bg-sky-50/70 p-4 space-y-3">
@@ -1109,6 +1262,177 @@ function BookingScreenLoaded({
               />
             </label>
             <p className="text-xs text-indigo-900/80">{t.booking.cdlHint}</p>
+          </div>
+        ) : null}
+
+        {needsOperatorCert ? (
+          <div className="rounded-xl border border-orange-200 bg-orange-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-orange-950">
+              {t.booking.operatorCertRequired(
+                operatorCertKind === "forklift"
+                  ? t.booking.operatorCertKindForklift
+                  : operatorCertKind === "crane"
+                    ? t.booking.operatorCertKindCrane
+                    : operatorCertKind === "excavator"
+                      ? t.booking.operatorCertKindExcavator
+                      : t.booking.operatorCertKindGeneral,
+              )}
+            </p>
+            <label className="flex items-start gap-2 text-xs text-orange-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={operatorCertAttested}
+                onChange={(e) => setOperatorCertAttested(e.target.checked)}
+              />
+              <span>{t.booking.operatorCertAttest}</span>
+            </label>
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-orange-300 bg-white px-3 py-2.5 text-sm font-semibold text-orange-950">
+              <Upload className="h-4 w-4" aria-hidden />
+              {operatorCertBusy
+                ? t.booking.insuranceUploading
+                : operatorCertMedia
+                  ? t.booking.operatorCertReplace
+                  : t.booking.operatorCertUpload}
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                className="hidden"
+                disabled={operatorCertBusy || !auth.userId}
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  event.target.value = "";
+                  if (!file || !auth.userId) return;
+                  setOperatorCertBusy(true);
+                  const rentalIdHint =
+                    insuranceDraftId ||
+                    (typeof crypto !== "undefined" && "randomUUID" in crypto
+                      ? crypto.randomUUID()
+                      : `rent-${Date.now()}`);
+                  void uploadRentalInsuranceProof({
+                    renterId: auth.userId,
+                    rentalId: `${rentalIdHint}-opcert`,
+                    file,
+                  })
+                    .then((result) => {
+                      setOperatorCertMedia(result.media);
+                      setInsuranceDraftId(rentalIdHint);
+                    })
+                    .finally(() => setOperatorCertBusy(false));
+                }}
+              />
+            </label>
+            <p className="text-xs text-orange-900/80">{t.booking.operatorCertHint}</p>
+          </div>
+        ) : null}
+
+        {needsBoaterLicense ? (
+          <div className="rounded-xl border border-cyan-200 bg-cyan-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-cyan-950">
+              {listingIsPwc(listing)
+                ? t.booking.pwcLicenseRequired
+                : t.booking.boaterLicenseRequired}
+            </p>
+            <label className="flex items-start gap-2 text-xs text-cyan-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={boaterLicenseAttested}
+                onChange={(e) => setBoaterLicenseAttested(e.target.checked)}
+              />
+              <span>
+                {listingIsPwc(listing)
+                  ? t.booking.pwcLicenseAttest
+                  : t.booking.boaterLicenseAttest}
+              </span>
+            </label>
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-cyan-300 bg-white px-3 py-2.5 text-sm font-semibold text-cyan-950">
+              <Upload className="h-4 w-4" aria-hidden />
+              {boaterLicenseBusy
+                ? t.booking.insuranceUploading
+                : boaterLicenseMedia
+                  ? t.booking.boaterLicenseReplace
+                  : t.booking.boaterLicenseUpload}
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                className="hidden"
+                disabled={boaterLicenseBusy || !auth.userId}
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  event.target.value = "";
+                  if (!file || !auth.userId) return;
+                  setBoaterLicenseBusy(true);
+                  const rentalIdHint =
+                    insuranceDraftId ||
+                    (typeof crypto !== "undefined" && "randomUUID" in crypto
+                      ? crypto.randomUUID()
+                      : `rent-${Date.now()}`);
+                  void uploadRentalInsuranceProof({
+                    renterId: auth.userId,
+                    rentalId: `${rentalIdHint}-boat`,
+                    file,
+                  })
+                    .then((result) => {
+                      setBoaterLicenseMedia(result.media);
+                      setInsuranceDraftId(rentalIdHint);
+                    })
+                    .finally(() => setBoaterLicenseBusy(false));
+                }}
+              />
+            </label>
+            <p className="text-xs text-cyan-900/80">{t.booking.boaterLicenseHint}</p>
+          </div>
+        ) : null}
+
+        {needsDroneCert ? (
+          <div className="rounded-xl border border-violet-200 bg-violet-50/70 p-4 space-y-3">
+            <p className="text-sm font-semibold text-violet-950">{t.booking.droneCertRequired}</p>
+            <label className="flex items-start gap-2 text-xs text-violet-950">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={droneCertAttested}
+                onChange={(e) => setDroneCertAttested(e.target.checked)}
+              />
+              <span>{t.booking.droneCertAttest}</span>
+            </label>
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-violet-300 bg-white px-3 py-2.5 text-sm font-semibold text-violet-950">
+              <Upload className="h-4 w-4" aria-hidden />
+              {droneCertBusy
+                ? t.booking.insuranceUploading
+                : droneCertMedia
+                  ? t.booking.droneCertReplace
+                  : t.booking.droneCertUpload}
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                className="hidden"
+                disabled={droneCertBusy || !auth.userId}
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  event.target.value = "";
+                  if (!file || !auth.userId) return;
+                  setDroneCertBusy(true);
+                  const rentalIdHint =
+                    insuranceDraftId ||
+                    (typeof crypto !== "undefined" && "randomUUID" in crypto
+                      ? crypto.randomUUID()
+                      : `rent-${Date.now()}`);
+                  void uploadRentalInsuranceProof({
+                    renterId: auth.userId,
+                    rentalId: `${rentalIdHint}-drone`,
+                    file,
+                  })
+                    .then((result) => {
+                      setDroneCertMedia(result.media);
+                      setInsuranceDraftId(rentalIdHint);
+                    })
+                    .finally(() => setDroneCertBusy(false));
+                }}
+              />
+            </label>
+            <p className="text-xs text-violet-900/80">{t.booking.droneCertHint}</p>
           </div>
         ) : null}
 
@@ -1427,7 +1751,7 @@ function BookingScreenLoaded({
           </div>
         ) : null}
 
-        {isVehicleListing && !ageGate.ok ? (
+        {needsAgeGate && !ageGate.ok ? (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
             <p className="font-semibold">{t.booking.ageGateTitle}</p>
             <p className="mt-1 text-[13px] leading-snug">
@@ -1440,7 +1764,7 @@ function BookingScreenLoaded({
           </div>
         ) : null}
 
-        {isVehicleListing && ageGate.ok && ageGate.youngDriver ? (
+        {needsAgeGate && ageGate.ok && ageGate.youngDriver ? (
           <div className="rounded-xl border border-border bg-card p-3 text-sm text-gray-800">
             <p className="font-semibold text-gray-900">{t.booking.ageGateYoungTitle}</p>
             <p className="mt-1 text-[13px] text-muted-foreground">

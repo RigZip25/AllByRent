@@ -215,6 +215,25 @@ export type RentalBooking = {
   cdlMedia?: MediaRef | null;
   cdlNote?: string;
   /**
+   * Heavy / Construction operator credential (forklift / crane / excavator / general).
+   * Attestation + document upload — not a vague pro checkbox alone.
+   */
+  operatorCertKind?: "forklift" | "crane" | "excavator" | "general_heavy";
+  operatorCertAttested?: boolean;
+  operatorCertMedia?: MediaRef | null;
+  /** Boater / PWC / captain license for motorboats & jet skis. */
+  boaterLicenseAttested?: boolean;
+  boaterLicenseMedia?: MediaRef | null;
+  /** FAA Part 107 and/or Remote ID attestation (drones). Optional cert upload. */
+  droneCertAttested?: boolean;
+  droneCertMedia?: MediaRef | null;
+  /** Car seat: renter sanitization / safety acknowledgment at booking. */
+  carSeatSanitizationAttested?: boolean;
+  carSeatRecallAckAttested?: boolean;
+  /** Frozen house rules / cleaning fee at booking (Real Estate). */
+  houseRulesSnapshot?: string;
+  cleaningFeeUsd?: number;
+  /**
    * Renter acknowledged agent→owner insurance proof path and saw owner email.
    */
   insuranceAgentProofAcknowledged?: boolean;
@@ -538,6 +557,27 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
     cdlAttested: Boolean(raw.cdlAttested),
     cdlMedia: raw.cdlMedia ?? null,
     cdlNote: raw.cdlNote,
+    operatorCertKind:
+      raw.operatorCertKind === "forklift" ||
+      raw.operatorCertKind === "crane" ||
+      raw.operatorCertKind === "excavator" ||
+      raw.operatorCertKind === "general_heavy"
+        ? raw.operatorCertKind
+        : undefined,
+    operatorCertAttested: Boolean(raw.operatorCertAttested),
+    operatorCertMedia: raw.operatorCertMedia ?? null,
+    boaterLicenseAttested: Boolean(raw.boaterLicenseAttested),
+    boaterLicenseMedia: raw.boaterLicenseMedia ?? null,
+    droneCertAttested: Boolean(raw.droneCertAttested),
+    droneCertMedia: raw.droneCertMedia ?? null,
+    carSeatSanitizationAttested: Boolean(raw.carSeatSanitizationAttested),
+    carSeatRecallAckAttested: Boolean(raw.carSeatRecallAckAttested),
+    houseRulesSnapshot:
+      typeof raw.houseRulesSnapshot === "string" ? raw.houseRulesSnapshot : undefined,
+    cleaningFeeUsd:
+      typeof raw.cleaningFeeUsd === "number" && Number.isFinite(raw.cleaningFeeUsd)
+        ? raw.cleaningFeeUsd
+        : undefined,
     insuranceAgentProofAcknowledged: Boolean(raw.insuranceAgentProofAcknowledged),
     insuranceOwnerProofEmail:
       typeof raw.insuranceOwnerProofEmail === "string"

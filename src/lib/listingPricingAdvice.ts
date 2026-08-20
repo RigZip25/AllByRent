@@ -28,6 +28,7 @@ const INSURANCE_BACKED_CATEGORIES = new Set([
   "Vehicles",
   "Heavy Equipment",
   "Boats & Water",
+  "Construction",
 ]);
 
 export function depositAdviceKind(category: string): DepositAdviceKind {

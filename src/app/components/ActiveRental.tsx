@@ -92,6 +92,12 @@ import {
   listingRequiresPhysicalDamage,
 } from "../../lib/listingRentRules";
 import {
+  listingRequiresBoaterLicense,
+  listingRequiresDroneCert,
+  listingRequiresOperatorCredential,
+  listingRequiresStartIdGate,
+} from "../../lib/categoryTrustRules";
+import {
   isPreTripInspectionReady,
   isReturnInspectionReady,
   listingRequiredWheelCount,
@@ -192,6 +198,8 @@ export function ActiveRental({
     [booking?.listingId],
   );
   const isVehicleRental = publishedListing?.category?.trim() === "Vehicles";
+  const needsStartIdGate =
+    publishedListing != null && listingRequiresStartIdGate(publishedListing);
   const needsPreTrip =
     publishedListing != null && listingRequiresPreTripInspection(publishedListing);
   const preTripWheelCount = useMemo(
@@ -218,6 +226,12 @@ export function ActiveRental({
   const usesAgentInsurance =
     publishedListing != null && listingUsesAgentToOwnerInsuranceProof(publishedListing);
   const needsCdl = publishedListing != null && listingRequiresCdl(publishedListing);
+  const needsOperatorCert =
+    publishedListing != null && listingRequiresOperatorCredential(publishedListing);
+  const needsBoaterLicense =
+    publishedListing != null && listingRequiresBoaterLicense(publishedListing);
+  const needsDroneCert =
+    publishedListing != null && listingRequiresDroneCert(publishedListing);
   const contactlessMode = booking?.fulfillmentMethod === "contactless";
   const qrTarget = useMemo(
     () => (booking ? resolveBookingQrTarget(booking) : { listingId: undefined, qrToken: undefined }),
@@ -508,6 +522,33 @@ export function ActiveRental({
     }
     if (
       mode === "pickup" &&
+      needsOperatorCert &&
+      (!booking?.operatorCertAttested || !booking?.operatorCertMedia) &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.operatorCertUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsBoaterLicense &&
+      (!booking?.boaterLicenseAttested || !booking?.boaterLicenseMedia) &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.boaterLicenseUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
+      needsDroneCert &&
+      !booking?.droneCertAttested &&
+      booking?.role === "renter"
+    ) {
+      setNotice(t.rentalDetail.droneCertUnlockBlocked);
+      return;
+    }
+    if (
+      mode === "pickup" &&
       needsPreTrip &&
       !isPreTripInspectionReady(booking?.preTripInspection, preTripWheelCount)
     ) {
@@ -523,7 +564,7 @@ export function ActiveRental({
       return;
     }
     if (
-      isVehicleRental &&
+      needsStartIdGate &&
       mode === "pickup" &&
       booking?.role === "renter" &&
       !isVehicleStartIdComplete(booking)
@@ -1926,7 +1967,7 @@ export function ActiveRental({
         />
       ) : null}
 
-      {booking && isVehicleRental ? (
+      {booking && needsStartIdGate ? (
         <VehicleStartIdGate
           open={startIdOpen}
           bookingId={booking.id}

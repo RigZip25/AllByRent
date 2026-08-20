@@ -944,6 +944,12 @@ export const en: AppMessages = {
     insuranceUnlockBlocked:
       "Upload active insurance proof before unlocking keys or location for this vehicle.",
     cdlUnlockBlocked: "CDL attestation and document are required before handoff can start.",
+    operatorCertUnlockBlocked:
+      "Operator credential attestation and document are required before handoff can start.",
+    boaterLicenseUnlockBlocked:
+      "Boater / PWC license attestation and document are required before handoff can start.",
+    droneCertUnlockBlocked:
+      "FAA Part 107 / Remote ID attestation is required before handoff can start.",
     agentProofPending:
       "Waiting for the host to confirm they received insurance proof from your agent.",
     agentProofReceivedMark: "I received insurance proof from the renter’s agent",
@@ -1637,6 +1643,23 @@ export const en: AppMessages = {
           label: "Expiry / manufacture date",
           placeholder: "e.g. Exp 2028-06 or Mfr 2019-03",
         },
+        carSeatExpiryDate: {
+          label: "Car seat expiry date",
+          placeholder: "YYYY-MM-DD or Exp 2028-06",
+          hint: "Required for car seats on rent — past dates block publish and booking.",
+        },
+        recallAcknowledged: {
+          label: "Recall check",
+          hint: "Confirm you checked NHTSA / manufacturer recalls for this seat.",
+        },
+        sanitizationAttested: {
+          label: "Sanitization",
+          hint: "Confirm the seat was cleaned / sanitized before listing.",
+        },
+        labelPhotoConfirmed: {
+          label: "Expiry label photo",
+          hint: "Confirm a clear photo of the expiry / manufacture label is on the listing.",
+        },
         hoursBand: { label: "Hours used" },
         dutyClass: { label: "Duty class" },
         jobScale: { label: "Scale" },
@@ -1648,6 +1671,16 @@ export const en: AppMessages = {
         parkingIncluded: { label: "Parking" },
         wifiIncluded: { label: "Wi‑Fi" },
         accessType: { label: "Access" },
+        houseRules: {
+          label: "House rules",
+          placeholder: "Quiet hours, guests, smoking, pets, checkout…",
+          hint: "Required for Real Estate rent — shown at booking and frozen on the agreement.",
+        },
+        cleaningFeeUsd: {
+          label: "Cleaning fee (USD)",
+          placeholder: "75",
+          hint: "Optional flat cleaning fee shown at booking and on the agreement.",
+        },
         useCase: { label: "Primary use" },
         transportSize: { label: "How it moves" },
       },
@@ -1841,6 +1874,12 @@ export const en: AppMessages = {
         expiry_known: "Expiry date known",
         mfr_date_known: "Manufacture date known",
         need_to_check: "Need to check before handoff",
+        acknowledged: "Recall checked / acknowledged",
+        not_checked: "Not checked yet",
+        attested: "Sanitized / attested",
+        not_yet: "Not yet",
+        photo_on_listing: "Label photo is on the listing",
+        will_add: "Will add label photo",
         under_2kw: "Under 2 kW",
         "2_5kw": "2–5 kW",
         "5_15kw": "5–15 kW",
@@ -2368,6 +2407,53 @@ export const en: AppMessages = {
     cdlHint:
       "Clear photo of your Commercial Driver’s License. Required before booking and before start.",
     cdlBadge: "CDL required",
+    operatorCertRequired: (kindLabel) =>
+      `This listing requires a valid ${kindLabel} before you can book.`,
+    operatorCertKindForklift: "forklift operator credential",
+    operatorCertKindCrane: "crane operator credential",
+    operatorCertKindExcavator: "excavator operator credential",
+    operatorCertKindGeneral: "heavy-equipment operator credential",
+    operatorCertAttest:
+      "I attest I hold a valid operator credential for this equipment and will present it at handoff.",
+    operatorCertUpload: "Upload operator credential photo / scan",
+    operatorCertReplace: "Replace operator credential photo",
+    operatorCertHint:
+      "Clear photo of your forklift / crane / excavator / heavy-equipment credential. Required before booking and before start.",
+    operatorCertBadge: "Operator credential required",
+    boaterLicenseRequired:
+      "This powered watercraft listing requires a valid boater / captain license.",
+    boaterLicenseAttest:
+      "I attest I hold a valid boater or captain license for this vessel and will present it at handoff.",
+    boaterLicenseUpload: "Upload boater / captain license photo",
+    boaterLicenseReplace: "Replace license photo",
+    boaterLicenseHint:
+      "Clear photo of your boater or captain license. Required before booking and before start.",
+    boaterLicenseBadge: "Boater license required",
+    pwcLicenseRequired:
+      "This PWC / jet ski listing requires a valid PWC or boater license where your state requires one.",
+    pwcLicenseAttest:
+      "I attest I hold a valid PWC / boater license (or am exempt where the law allows) and will present proof at handoff.",
+    droneCertRequired:
+      "This drone listing requires FAA Part 107 and/or Remote ID attestation before booking.",
+    droneCertAttest:
+      "I attest I am Part 107 certified and/or will comply with Remote ID rules for this flight.",
+    droneCertUpload: "Upload Part 107 certificate (optional)",
+    droneCertReplace: "Replace certificate photo",
+    droneCertHint:
+      "Attestation is required. Certificate upload is optional but recommended so the host can verify.",
+    droneCertBadge: "Part 107 / Remote ID",
+    houseRulesTitle: "House rules",
+    cleaningFeeLine: (amount) => `Cleaning fee: ${amount}`,
+    carSeatBlockedTitle: "This car seat cannot be booked",
+    carSeatBlockedBody:
+      "The host has not completed expiry, recall, sanitization, and label-photo checks — or the seat is past expiry. Ask them to update the listing.",
+    carSeatSafetyTitle: "Car seat safety acknowledgment",
+    carSeatRecallAttest:
+      "I acknowledge I reviewed this seat’s recall / expiry status on the listing and will install it per the manufacturer instructions.",
+    carSeatSanitizationAttest:
+      "I will sanitize / wipe down the seat before use with my child and will not use an expired or recalled unit.",
+    carSeatSafetyBadge: "Car seat safety gate",
+    guestIdBadge: "Guest ID at check-in",
     agentInsuranceTitle: "Insurance via your agent → owner",
     agentInsuranceBody:
       "For heavy / semi commercial transport, add coverage with your insurance agent. Your agent must email proof directly to the vehicle owner — this is not the lighter “add to personal auto + upload” path.",
@@ -2533,19 +2619,19 @@ export const en: AppMessages = {
       "Heavy Equipment": {
         title: "Commercial equipment rentals",
         summary:
-          "Heavy Equipment shelves rent to professionals by default. Renters attest pro use and may upload a credential. Physical damage insurance proof is required before handoff. Mandatory pre-trip inspection (exterior, interior, tires/rubber when applicable) blocks start until both sides confirm. Hosts can mark no-show after the pickup window.",
+          "Heavy Equipment shelves rent to professionals by default. Forklift / crane / excavator / general operator credentials are required where the subcategory calls for them (attestation + document). Physical damage insurance proof is required before handoff. Deposit is insurance-backed (deductible-sized hold), not full replacement. Mandatory pre-trip inspection blocks start until both sides confirm.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Keep “professionals only” on unless you truly want DIY renters. Require insurance proof with physical damage. Pre-trip photos (including tire/rubber condition when wheeled) protect both sides. Optional no-show fee is a soft deposit flag.",
+          "Keep “professionals only” on unless you truly want DIY renters. Require operator credentials for powered commercial gear. Require insurance proof with physical damage; set max deductible so the card hold matches. Pre-trip photos protect both sides.",
         whyGeoTitle: "Why proof before keys?",
         whyGeo:
-          "Commercial gear is high-loss if an uninsured renter damages it. Proof + pro attestation + pre-trip photos give you a review window before PIN, lockbox, or keys unlock.",
+          "Commercial gear is high-loss if an uninsured or unqualified renter damages it. Operator credential + PD proof + pre-trip photos give you a review window before PIN, lockbox, or keys unlock.",
         flowTitle: "End to end",
         flow:
-          "List equipment → pro-only + PD required → renter attests, uploads insurance → pre-trip inspection both confirm → handoff → return inspection → claims via insurance first.",
+          "List equipment → pro-only + PD + operator cert when required → renter attests, uploads credential + insurance → pre-trip both confirm → handoff → return inspection → claims via insurance first.",
         layersTitle: "Safety layers",
         layers:
-          "Pro attestation · physical damage insurance · pre-trip & return photo checklist · deductible hold · optional no-show fee · rental terms · QR / PIN handoff.",
+          "Operator credential · pro attestation · physical damage insurance · deductible-sized hold · pre-trip & return photos · optional no-show fee · rental terms · QR / PIN handoff.",
         claimsTitle: "If something goes wrong",
         claims:
           "Renter’s physical damage / equipment coverage is primary. Use uploaded proof with their insurer; the card hold matches your max deductible. No-show frees the calendar; dispute if needed.",
@@ -2553,22 +2639,102 @@ export const en: AppMessages = {
       Construction: {
         title: "Construction gear rentals",
         summary:
-          "Construction shelves default to professionals only and require physical damage insurance on the rent path. Mandatory pre-trip photo inspection applies before start. Hosts can mark no-show after the pickup window to free the calendar.",
+          "Construction shelves default to professionals only and require physical damage insurance on the rent path. Insurance-backed deposit (deductible-sized card hold) applies — not full tool replacement. Crane-class / heavy powered gear also requires an operator credential. Mandatory pre-trip photo inspection applies before start.",
         hostTipTitle: "For hosts",
         hostTip:
-          "Pros-only is on by default. Physical damage proof is mandatory before keys. Capture pre-trip condition photos (including rubber/tires when wheeled). Optional no-show fee is neighbor-soft, not airline-style.",
-        whyGeoTitle: "Why pro + PD?",
+          "Pros-only is on by default. Set max deductible so the hold is insurance-backed. Require operator credentials for crane-class and powered commercial shelves. Capture pre-trip condition photos.",
+        whyGeoTitle: "Why pro + PD + operator cert?",
         whyGeo:
-          "Job-site tools see hard use. Limiting to professionals, requiring physical damage, and locking handoff on pre-trip photos reduces uninsured loss.",
+          "Job-site tools see hard use. Limiting to professionals, requiring physical damage, operator credentials where needed, and locking handoff on pre-trip photos reduces uninsured loss.",
         flowTitle: "End to end",
         flow:
-          "List → pro-only + PD → renter attests and uploads proof → pre-trip both confirm → handoff → return.",
+          "List → pro-only + PD + operator cert when required → renter attests and uploads proof → pre-trip both confirm → handoff → return.",
         layersTitle: "Safety layers",
         layers:
-          "Pro attestation · physical damage insurance · pre-trip inspection · deductible hold · optional no-show · rental terms · QR handoff.",
+          "Operator credential · pro attestation · physical damage insurance · deductible hold · pre-trip inspection · optional no-show · rental terms · QR handoff.",
         claimsTitle: "If something goes wrong",
         claims:
           "Insurance first (physical damage), then deductible hold with photos. No-show cancels and frees dates; fee only if you configured one.",
+      },
+      "Boats & Water": {
+        title: "Boats & watercraft rentals",
+        summary:
+          "Powered boats and PWCs require boater / captain / PWC license attestation + document, and the same min-age gate as vehicles (default 25; hosts may opt in to 18–24 with a higher hold). Insurance-backed deposit applies. Fuel / handoff rules follow the listing.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Require insurance proof and set max deductible. For motorboats and jet skis, renters must attest and upload a license. Use young-driver opt-in only if you accept higher hold risk.",
+        whyGeoTitle: "Why license + age before handoff?",
+        whyGeo:
+          "Unlicensed or underage operators are a top watercraft loss driver. License + age gate + insurance proof lock PIN / keys until cleared.",
+        flowTitle: "End to end",
+        flow:
+          "List vessel → insurance + age policy → renter attests license + age → book → proof cleared → handoff → return.",
+        layersTitle: "Safety layers",
+        layers:
+          "Boater / PWC license · age gate · insurance · deductible hold · rental terms · QR / PIN handoff.",
+        claimsTitle: "If something goes wrong",
+        claims:
+          "Renter insurance is primary. License and age attestations support disputes; the card hold matches your deductible band.",
+      },
+      "Real Estate": {
+        title: "Short stays & house rentals",
+        summary:
+          "Hosts must publish house rules (required on rent). Optional cleaning fee shows at booking and freezes on the agreement. Guests complete ID (selfie / ID upload) at check-in — same start-ID pattern as vehicles. Deposit defaults toward one month of rent.",
+        hostTipTitle: "For hosts / landlords",
+        hostTip:
+          "Write clear house rules (quiet hours, guests, smoking, pets, checkout). Set cleaning fee if you charge one. Guest ID at start protects against no-shows and party bookings.",
+        whyGeoTitle: "Why ID at check-in?",
+        whyGeo:
+          "A booking confirmation alone can be forwarded. Start ID ties the guest on-site to the booking before access unlocks.",
+        flowTitle: "End to end",
+        flow:
+          "List stay → house rules + cleaning fee → guest books → sees rules / fee on agreement → start ID at check-in → stay → checkout.",
+        layersTitle: "Safety layers",
+        layers:
+          "House rules · cleaning fee · guest start ID · monthly-style deposit · rental terms · QR / PIN access when used.",
+        claimsTitle: "If something goes wrong",
+        claims:
+          "House rules and start ID support disputes. Deposit covers damage / excessive cleaning beyond the listed fee.",
+      },
+      "Photo & Video": {
+        title: "Drone & camera gear rentals",
+        summary:
+          "Drone listings require FAA Part 107 and/or Remote ID attestation before booking (certificate upload optional). Hosts still rely on insurance / deposit rules for high-value kits.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Mark drone kits clearly. Part 107 attestation is required for renters; optional cert upload helps you verify. Use a deductible-sized hold for expensive bodies.",
+        whyGeoTitle: "Why Part 107 / Remote ID?",
+        whyGeo:
+          "Uncertified drone flights create regulatory and liability risk. Attestation (and optional cert photo) gates booking and handoff.",
+        flowTitle: "End to end",
+        flow:
+          "List drone kit → renter attests Part 107 / Remote ID → optional cert upload → book → handoff → return.",
+        layersTitle: "Safety layers",
+        layers:
+          "Part 107 / Remote ID attestation · optional cert upload · deposit hold · rental terms · QR handoff.",
+        claimsTitle: "If something goes wrong",
+        claims:
+          "Renter coverage and deposit hold first. Attestation helps show the operator claimed compliance.",
+      },
+      "Baby & Kids": {
+        title: "Car seat safety rentals",
+        summary:
+          "Car seats have a hard safety gate: valid expiry date, recall acknowledgment, sanitization attestation, and label photo on the listing. Expired or incomplete seats cannot publish or book. Renters re-acknowledge recall and sanitization at booking.",
+        hostTipTitle: "For hosts",
+        hostTip:
+          "Enter expiry as YYYY-MM-DD (or Exp YYYY-MM). Check recalls before listing. Put a clear label photo on the listing. Never list an expired seat.",
+        whyGeoTitle: "Why a hard gate?",
+        whyGeo:
+          "Expired or recalled car seats are a child-safety failure mode — soft text fields are not enough. Publish and book both block until checks pass.",
+        flowTitle: "End to end",
+        flow:
+          "List seat with expiry + recall + sanitization + label photo → renter acknowledges at booking → handoff → return.",
+        layersTitle: "Safety layers",
+        layers:
+          "Expiry hard gate · recall ack · sanitization · label photo · renter booking attestations · rental terms.",
+        claimsTitle: "If something goes wrong",
+        claims:
+          "Host and renter attestations create a clear safety trail. Do not use seats that fail the gate.",
       },
     },
   },

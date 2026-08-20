@@ -1500,7 +1500,9 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                         </div>
                       ) : null}
 
-                      {draft.modes.rent && draft.category.trim() === "Vehicles" ? (
+                      {draft.modes.rent &&
+                      (draft.category.trim() === "Vehicles" ||
+                        draft.category.trim() === "Boats & Water") ? (
                         <div className="mt-3 rounded-xl border border-gray-200 bg-white/80 p-3">
                           <p className="text-[13px] font-semibold text-gray-900">
                             {modesCopy.youngDriverTitle}
