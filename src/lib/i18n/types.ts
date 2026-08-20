@@ -1477,6 +1477,8 @@ export type AppMessages = {
     costumeHygieneTitle: string;
     costumeHygieneBody: string;
     costumeHygieneAttest: string;
+    costumeHeatBlockedTitle: string;
+    costumeHeatBlockedBody: string;
     returnConditionPolicyLine: (policy: string) => string;
     returnConditionFallback: string;
     dryCleanReturnFeeLine: (amount: string) => string;

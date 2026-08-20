@@ -299,12 +299,28 @@ export function listingIsHighValueGearCategory(
   return cat === "Photo & Video" || cat === "Electronics & Tech" || cat === "Drones";
 }
 
+const COSTUME_INVENTORY_SUBS = new Set([
+  "halloween costumes",
+  "character costumes",
+  "period costumes",
+  "masks & makeup",
+  "theater costumes",
+  "film & tv props",
+  "professional makeup kits",
+  "full character suits",
+  "other",
+]);
+
 export function listingRequiresKitInventory(
   listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
 ): boolean {
   if (!rentOn(listing)) return false;
   if (listingIsHighValueGearCategory(listing)) return true;
-  return listingIsConstructionFormwork(listing);
+  if (listingIsConstructionFormwork(listing)) return true;
+  if (listingIsCostumeCategory(listing) && COSTUME_INVENTORY_SUBS.has(subKey(listing))) {
+    return true;
+  }
+  return false;
 }
 
 export function listingKitInventoryText(
@@ -366,6 +382,9 @@ export function listingRequiresLiabilityWaiver(
   }
   if (cat === "Bikes & Scooters") {
     if (sub === "mountain bikes" || sub === "racing bikes") return true;
+  }
+  if (cat === "Costume & Cosplay") {
+    if (sub === "animatronic props" || sub === "full character suits") return true;
   }
   return false;
 }
@@ -803,9 +822,10 @@ const COSTUME_HYGIENE_SUBS = new Set([
   "professional makeup kits",
   "wigs & accessories",
   "masks & makeup",
+  "full character suits",
 ]);
 
-/** Makeup kits / wigs / masks — hygiene / sanitization between renters. */
+/** Makeup kits / wigs / masks / full suits — hygiene / sanitization between renters. */
 export function listingRequiresCostumeHygiene(
   listing: Pick<ListingDraft, "category" | "subcategory" | "modes">,
 ): boolean {
@@ -824,6 +844,27 @@ export function listingCostumeHygieneBlocksBooking(
 ): boolean {
   if (!listingRequiresCostumeHygiene(listing)) return false;
   return !listingCostumeHygieneAttested(listing);
+}
+
+/** Full character / mascot suits — host must attest heat + visibility guidance shared. */
+export function listingRequiresCostumeHeatVisibility(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes">,
+): boolean {
+  if (!rentOn(listing) || !listingIsCostumeCategory(listing)) return false;
+  return subKey(listing) === "full character suits";
+}
+
+export function listingCostumeHeatVisibilityAttested(
+  listing: Pick<ListingDraft, "categorySpecs">,
+): boolean {
+  return (listing.categorySpecs?.heatVisibilityAttested ?? "").trim() === "attested";
+}
+
+export function listingCostumeHeatVisibilityBlocksBooking(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
+): boolean {
+  if (!listingRequiresCostumeHeatVisibility(listing)) return false;
+  return !listingCostumeHeatVisibilityAttested(listing);
 }
 
 

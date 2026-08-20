@@ -1497,8 +1497,8 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
       {
         key: "materialBand",
         type: "select",
-        required: false,
-        recommended: true,
+        required: true,
+        requiredIf: "rent",
         options: [
           "polyester",
           "cotton",
@@ -1507,6 +1507,144 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
           "foam_latex",
           "other_material",
         ],
+      },
+      {
+        key: "characterLabel",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Character Costumes"],
+      },
+      {
+        key: "costumeCompleteness",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Halloween Costumes",
+          "Character Costumes",
+          "Theater Costumes",
+          "Period Costumes",
+          "Full Character Suits",
+          "Other",
+        ],
+        options: ["full_set", "partial_set", "accessory_only"],
+      },
+      {
+        key: "audienceAgeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Halloween Costumes"],
+        options: ["kids_only", "adult_only", "all_ages"],
+      },
+      {
+        key: "glitterSmokePolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Halloween Costumes", "Character Costumes"],
+        options: [
+          "glitter_ok",
+          "no_glitter",
+          "no_smoke_fog",
+          "glitter_and_smoke_banned",
+        ],
+      },
+      {
+        key: "periodEraBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Period Costumes"],
+        options: [
+          "ancient_classical",
+          "medieval_renaissance",
+          "18th_19th",
+          "early_20th",
+          "mid_late_20th",
+          "fantasy_other_era",
+        ],
+      },
+      {
+        key: "alterationPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Period Costumes", "Theater Costumes", "Character Costumes"],
+        options: ["no_alterations", "pins_only", "tailor_ok_with_approval"],
+      },
+      {
+        key: "wigFiberBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Wigs & Accessories"],
+        options: ["synthetic", "human_hair", "fiber_blend", "lace_front", "unknown_fiber"],
+      },
+      {
+        key: "wigCapSizeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Wigs & Accessories"],
+        options: ["cap_petite", "cap_average", "cap_large", "cap_one_size"],
+      },
+      {
+        key: "styleResetPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Wigs & Accessories"],
+        options: ["return_styled", "reset_ok", "wash_cap_only"],
+      },
+      {
+        key: "cosmeticsSealedBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Masks & Makeup", "Professional Makeup Kits"],
+        options: ["sealed_only", "mixed_sealed_open", "open_shared"],
+      },
+      {
+        key: "maskContactType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Masks & Makeup"],
+        options: ["hard_mask", "foam_latex", "soft_fabric", "makeup_only", "mixed_contact"],
+      },
+      {
+        key: "brushCountBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Professional Makeup Kits"],
+        options: ["brushes_under_10", "brushes_10_25", "brushes_25_50", "brushes_50_plus"],
+      },
+      {
+        key: "propRoleBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Film & TV Props"],
+        options: ["hero_prop", "background_prop", "set_dressing", "mixed_prop_role"],
+      },
+      {
+        key: "fragileHandling",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Film & TV Props", "Animatronic Props"],
+        options: ["standard_care", "fragile_two_hand", "do_not_ship_loose"],
+      },
+      {
+        key: "looksafePolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Film & TV Props"],
+        options: ["replica_looksafe", "inert_prop", "not_a_weapon_prop"],
       },
       {
         key: "returnConditionPolicy",
@@ -1523,6 +1661,86 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         requiredIf: "rent",
       },
       {
+        key: "kitInventoryChecklist",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Halloween Costumes",
+          "Character Costumes",
+          "Period Costumes",
+          "Masks & Makeup",
+          "Theater Costumes",
+          "Film & TV Props",
+          "Professional Makeup Kits",
+          "Full Character Suits",
+          "Other",
+        ],
+      },
+      {
+        key: "animatronicPower",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Animatronic Props"],
+        options: ["battery", "wall_ac", "compressed_air", "none_static"],
+      },
+      {
+        key: "runtimeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Animatronic Props"],
+        options: ["runtime_under_30m", "runtime_30_120m", "runtime_continuous_plug", "runtime_unknown"],
+      },
+      {
+        key: "useEnvironment",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Animatronic Props"],
+        options: ["indoor_only", "outdoor_ok", "weather_sensitive"],
+      },
+      {
+        key: "operatorNotes",
+        type: "text",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Animatronic Props"],
+      },
+      {
+        key: "liabilityWaiverRequired",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Animatronic Props", "Full Character Suits"],
+        options: ["required", "not_required"],
+      },
+      {
+        key: "heatVisibilityAttested",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Full Character Suits"],
+        options: ["attested", "not_yet"],
+      },
+      {
+        key: "maxWearMinutesBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Full Character Suits"],
+        options: ["wear_under_15", "wear_15_30", "wear_30_45", "wear_host_guided"],
+      },
+      {
+        key: "spotterRequired",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Full Character Suits"],
+        options: ["spotter_required", "spotter_recommended", "spotter_not_required"],
+      },
+      {
         key: "sanitizationAttested",
         type: "select",
         required: true,
@@ -1531,6 +1749,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
           "Professional Makeup Kits",
           "Wigs & Accessories",
           "Masks & Makeup",
+          "Full Character Suits",
         ],
         options: ["attested", "not_yet"],
       },
@@ -1884,12 +2103,222 @@ export function areCategorySpecsValid(
 
   if (category.trim() === "Costume & Cosplay" && modes?.rent) {
     const sub = subcategory.trim();
+    const material = (values.materialBand ?? "").trim();
+    if (![
+      "polyester", "cotton", "blend", "leather_faux", "foam_latex", "other_material",
+    ].includes(material)) return false;
+
     if (
       sub === "Professional Makeup Kits" ||
       sub === "Wigs & Accessories" ||
-      sub === "Masks & Makeup"
+      sub === "Masks & Makeup" ||
+      sub === "Full Character Suits"
     ) {
       if ((values.sanitizationAttested ?? "").trim() !== "attested") return false;
+    }
+    if (sub === "Character Costumes" && !(values.characterLabel ?? "").trim()) return false;
+    if (
+      [
+        "Halloween Costumes",
+        "Character Costumes",
+        "Theater Costumes",
+        "Period Costumes",
+        "Full Character Suits",
+        "Other",
+      ].includes(sub)
+    ) {
+      if (
+        !["full_set", "partial_set", "accessory_only"].includes(
+          (values.costumeCompleteness ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
+    }
+    if (sub === "Halloween Costumes") {
+      if (!["kids_only", "adult_only", "all_ages"].includes((values.audienceAgeBand ?? "").trim())) {
+        return false;
+      }
+    }
+    if (sub === "Halloween Costumes" || sub === "Character Costumes") {
+      if (
+        ![
+          "glitter_ok",
+          "no_glitter",
+          "no_smoke_fog",
+          "glitter_and_smoke_banned",
+        ].includes((values.glitterSmokePolicy ?? "").trim())
+      ) {
+        return false;
+      }
+    }
+    if (sub === "Period Costumes") {
+      if (
+        ![
+          "ancient_classical",
+          "medieval_renaissance",
+          "18th_19th",
+          "early_20th",
+          "mid_late_20th",
+          "fantasy_other_era",
+        ].includes((values.periodEraBand ?? "").trim())
+      ) {
+        return false;
+      }
+    }
+    if (
+      sub === "Period Costumes" ||
+      sub === "Theater Costumes" ||
+      sub === "Character Costumes"
+    ) {
+      if (
+        !["no_alterations", "pins_only", "tailor_ok_with_approval"].includes(
+          (values.alterationPolicy ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
+    }
+    if (sub === "Wigs & Accessories") {
+      if (
+        !["synthetic", "human_hair", "fiber_blend", "lace_front", "unknown_fiber"].includes(
+          (values.wigFiberBand ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
+      if (
+        !["cap_petite", "cap_average", "cap_large", "cap_one_size"].includes(
+          (values.wigCapSizeBand ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
+      if (
+        !["return_styled", "reset_ok", "wash_cap_only"].includes(
+          (values.styleResetPolicy ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
+    }
+    if (sub === "Masks & Makeup" || sub === "Professional Makeup Kits") {
+      if (
+        !["sealed_only", "mixed_sealed_open", "open_shared"].includes(
+          (values.cosmeticsSealedBand ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
+    }
+    if (sub === "Masks & Makeup") {
+      if (
+        !["hard_mask", "foam_latex", "soft_fabric", "makeup_only", "mixed_contact"].includes(
+          (values.maskContactType ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
+    }
+    if (sub === "Professional Makeup Kits") {
+      if (
+        ![
+          "brushes_under_10",
+          "brushes_10_25",
+          "brushes_25_50",
+          "brushes_50_plus",
+        ].includes((values.brushCountBand ?? "").trim())
+      ) {
+        return false;
+      }
+    }
+    if (sub === "Film & TV Props") {
+      if (
+        !["hero_prop", "background_prop", "set_dressing", "mixed_prop_role"].includes(
+          (values.propRoleBand ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
+      if (
+        !["replica_looksafe", "inert_prop", "not_a_weapon_prop"].includes(
+          (values.looksafePolicy ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
+    }
+    if (sub === "Film & TV Props" || sub === "Animatronic Props") {
+      if (
+        !["standard_care", "fragile_two_hand", "do_not_ship_loose"].includes(
+          (values.fragileHandling ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
+    }
+    if (
+      [
+        "Halloween Costumes",
+        "Character Costumes",
+        "Period Costumes",
+        "Masks & Makeup",
+        "Theater Costumes",
+        "Film & TV Props",
+        "Professional Makeup Kits",
+        "Full Character Suits",
+        "Other",
+      ].includes(sub)
+    ) {
+      if (!(values.kitInventoryChecklist ?? "").trim()) return false;
+    }
+    if (sub === "Animatronic Props") {
+      if (
+        !["battery", "wall_ac", "compressed_air", "none_static"].includes(
+          (values.animatronicPower ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
+      if (
+        ![
+          "runtime_under_30m",
+          "runtime_30_120m",
+          "runtime_continuous_plug",
+          "runtime_unknown",
+        ].includes((values.runtimeBand ?? "").trim())
+      ) {
+        return false;
+      }
+      if (
+        !["indoor_only", "outdoor_ok", "weather_sensitive"].includes(
+          (values.useEnvironment ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
+      if (!(values.operatorNotes ?? "").trim()) return false;
+    }
+    if (sub === "Animatronic Props" || sub === "Full Character Suits") {
+      const waiver = (values.liabilityWaiverRequired ?? "").trim();
+      if (waiver !== "required" && waiver !== "not_required") return false;
+    }
+    if (sub === "Full Character Suits") {
+      if ((values.heatVisibilityAttested ?? "").trim() !== "attested") return false;
+      if (
+        !["wear_under_15", "wear_15_30", "wear_30_45", "wear_host_guided"].includes(
+          (values.maxWearMinutesBand ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
+      if (
+        !["spotter_required", "spotter_recommended", "spotter_not_required"].includes(
+          (values.spotterRequired ?? "").trim(),
+        )
+      ) {
+        return false;
+      }
     }
   }
 

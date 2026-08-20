@@ -611,7 +611,11 @@ export function ItemDetail({
               <CategoryFactCard category="Home & Kitchen" className="mt-3" />
             ) : null}
             {listing.modes.rent && listing.category.trim() === "Costume & Cosplay" ? (
-              <CategoryFactCard category="Costume & Cosplay" className="mt-3" />
+              <CategoryFactCard
+                category="Costume & Cosplay"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
             ) : null}
             {listing.modes.rent &&
             (listingProRentersOnly(listing) ||

@@ -621,7 +621,11 @@ export function HostListingDetailScreen({
           <CategoryFactCard category="Home & Kitchen" className="mb-4" />
         ) : null}
         {listing.category.trim() === "Costume & Cosplay" ? (
-          <CategoryFactCard category="Costume & Cosplay" className="mb-4" />
+          <CategoryFactCard
+            category="Costume & Cosplay"
+            subcategory={listing.subcategory}
+            className="mb-4"
+          />
         ) : null}
         {listing.modes.rent &&
         (listingProRentersOnly(listing) ||

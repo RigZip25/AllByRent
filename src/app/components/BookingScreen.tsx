@@ -104,6 +104,7 @@ import {
   listingRequiresCostumeReturnCondition,
   listingRequiresCostumeHygiene,
   listingCostumeHygieneBlocksBooking,
+  listingCostumeHeatVisibilityBlocksBooking,
   listingDryCleanReturnFeeUsd,
   listingReturnConditionPolicy,
 } from "../../lib/categoryTrustRules";
@@ -493,6 +494,7 @@ function BookingScreenLoaded({
   const needsCostumeReturn = listingRequiresCostumeReturnCondition(listing);
   const needsCostumeHygiene = listingRequiresCostumeHygiene(listing);
   const costumeHygieneBlocked = listingCostumeHygieneBlocksBooking(listing);
+  const costumeHeatVisibilityBlocked = listingCostumeHeatVisibilityBlocksBooking(listing);
   const dryCleanReturnFeeUsd = listingDryCleanReturnFeeUsd(listing);
   const returnConditionPolicy = listingReturnConditionPolicy(listing);
   const isCostumeListing = listingIsCostumeCategory(listing) && listing.modes.rent;
@@ -714,6 +716,7 @@ function BookingScreenLoaded({
   const costumeReturnOk = !needsCostumeReturn || costumeReturnConditionAck;
   const costumeHygieneOk =
     !needsCostumeHygiene || (!costumeHygieneBlocked && costumeHygieneAttested);
+  const costumeHeatOk = !costumeHeatVisibilityBlocked;
 
   const eScooterAgeOk = useMemo(() => {
     if (!needsEScooterAge) return true;
@@ -793,6 +796,7 @@ function BookingScreenLoaded({
     hygieneOk &&
     costumeReturnOk &&
     costumeHygieneOk &&
+    costumeHeatOk &&
     eScooterAgeOk &&
     !insuranceUploadBusy &&
     !proCredentialBusy &&
@@ -1689,7 +1693,9 @@ function BookingScreenLoaded({
         {isBikesListing ? <CategoryFactCard category="Bikes & Scooters" /> : null}
         {isPartyListing ? <CategoryFactCard category="Party & Events" /> : null}
         {isToolsListing ? <CategoryFactCard category="Tools & DIY" /> : null}
-        {isCostumeListing ? <CategoryFactCard category="Costume & Cosplay" /> : null}
+        {isCostumeListing ? (
+          <CategoryFactCard category="Costume & Cosplay" subcategory={listing.subcategory} />
+        ) : null}
         {isOfficeListing ? <CategoryFactCard category="Office & Business" /> : null}
         {isMusicListing ? <CategoryFactCard category="Music & Audio" /> : null}
 
@@ -2257,15 +2263,15 @@ function BookingScreenLoaded({
 
         {needsCostumeHygiene && costumeHygieneBlocked ? (
           <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
-            <p className="font-semibold">{t.booking.hygieneBlockedTitle}</p>
-            <p className="mt-1 text-[13px] leading-snug">{t.booking.hygieneBlockedBody}</p>
+            <p className="font-semibold">{t.booking.costumeHygieneBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.costumeHygieneBlockedBody}</p>
           </div>
         ) : null}
 
         {needsCostumeHygiene && !costumeHygieneBlocked ? (
           <div className="rounded-xl border border-teal-200 bg-teal-50/70 p-4 space-y-3">
-            <p className="text-sm font-semibold text-teal-950">{t.booking.hygieneTitle}</p>
-            <p className="text-[12px] text-teal-900/90">{t.booking.hygieneBody}</p>
+            <p className="text-sm font-semibold text-teal-950">{t.booking.costumeHygieneTitle}</p>
+            <p className="text-[12px] text-teal-900/90">{t.booking.costumeHygieneBody}</p>
             <label className="flex items-start gap-2 text-xs text-teal-950">
               <input
                 type="checkbox"
@@ -2273,8 +2279,15 @@ function BookingScreenLoaded({
                 checked={costumeHygieneAttested}
                 onChange={(e) => setCostumeHygieneAttested(e.target.checked)}
               />
-              <span>{t.booking.hygieneAttest}</span>
+              <span>{t.booking.costumeHygieneAttest}</span>
             </label>
+          </div>
+        ) : null}
+
+        {costumeHeatVisibilityBlocked ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <p className="font-semibold">{t.booking.costumeHeatBlockedTitle}</p>
+            <p className="mt-1 text-[13px] leading-snug">{t.booking.costumeHeatBlockedBody}</p>
           </div>
         ) : null}
         {needsEScooterAge && !eScooterAgeOk ? (
