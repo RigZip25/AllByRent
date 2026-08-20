@@ -9,7 +9,7 @@ import {
   type BrandListId,
 } from "./listingBrands";
 
-export type SpecFieldType = "text" | "number" | "select" | "brand";
+export type SpecFieldType = "text" | "number" | "select" | "brand" | "multiselect";
 
 /** Mode gate for required / visibility — e.g. renter insurance only when Rent is on. */
 export type SpecRequiredIf = "rent" | "sell";
@@ -220,6 +220,11 @@ function brandField(
   };
 }
 
+
+const PHOTO_KIT_ITEMS = ["camera_body","lens_primary","lens_secondary","batteries","charger","memory_cards","bag_case","tripod_plate","cables","filters","remote_trigger","other_accessories"] as const;
+const ELECTRONICS_KIT_ITEMS = ["main_device","charger_psu","power_cable","data_cables","case_sleeve","peripherals","adapters","remote","stand_mount","manuals","other_accessories"] as const;
+const ELECTRONICS_WIPE_SUBS = ["Laptops","Smart Home Devices","Network Gear","Servers & Workstations"] as const;
+
 export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
   {
     category: "Tools & DIY",
@@ -237,6 +242,56 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         required: false,
         recommended: true,
         options: VOLTAGE_OPTS,
+      },
+      {
+        key: "ladderHeightBand",
+        type: "select",
+        required: true,
+        subcategories: ["Ladders"],
+        options: ["under_6ft", "6_8ft", "8_12ft", "12_16ft", "16_24ft", "24_40ft", "over_40ft"],
+      },
+      {
+        key: "ladderDutyRating",
+        type: "select",
+        required: true,
+        subcategories: ["Ladders"],
+        options: ["type_iaa", "type_ia", "type_i", "type_ii", "type_iii"],
+      },
+      {
+        key: "weldProcess",
+        type: "select",
+        required: true,
+        subcategories: ["Welding Equipment"],
+        options: ["mig", "tig", "stick", "flux_core", "multi_process", "other_weld"],
+      },
+      {
+        key: "weldAmpBand",
+        type: "select",
+        required: true,
+        subcategories: ["Welding Equipment"],
+        options: ["under_140a", "140_200a", "200_300a", "300a_plus"],
+      },
+      {
+        key: "ppeIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Welding Equipment"],
+        options: ["helmet_gloves_included", "helmet_only", "renter_provides_ppe", "ppe_not_applicable"],
+      },
+      {
+        key: "scaffoldHeightBand",
+        type: "select",
+        required: true,
+        subcategories: ["Scaffolding Systems"],
+        options: ["under_10ft", "10_20ft", "20_40ft", "40ft_plus"],
+      },
+      {
+        key: "scaffoldLoadBand",
+        type: "select",
+        required: true,
+        subcategories: ["Scaffolding Systems"],
+        options: ["light_duty", "medium_duty", "heavy_duty", "special_duty"],
       },
       {
         key: "safetyBriefingRequired",
@@ -276,10 +331,34 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         options: ["body_only", "kit_lens", "full_kit", "accessories_only"],
       },
       {
-        key: "kitInventoryChecklist",
-        type: "text",
+        key: "kitInventoryItems",
+        type: "multiselect",
         required: true,
         requiredIf: "rent",
+        options: PHOTO_KIT_ITEMS,
+      },
+      {
+        key: "kitInventoryChecklist",
+        type: "text",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+      },
+      {
+        key: "droneWeightClass",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Drones"],
+        options: ["under_250g", "250g_to_55lb", "over_55lb"],
+      },
+      {
+        key: "remoteIdStatus",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Drones"],
+        options: ["broadcast_builtin", "broadcast_add_on", "rid_exempt_under_250g", "not_equipped"],
       },
     ],
   },
@@ -304,10 +383,26 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         ],
       },
       {
-        key: "kitInventoryChecklist",
-        type: "text",
+        key: "kitInventoryItems",
+        type: "multiselect",
         required: true,
         requiredIf: "rent",
+        options: ELECTRONICS_KIT_ITEMS,
+      },
+      {
+        key: "kitInventoryChecklist",
+        type: "text",
+        required: false,
+        recommended: true,
+        requiredIf: "rent",
+      },
+      {
+        key: "hostDataWipeStatus",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: [...ELECTRONICS_WIPE_SUBS],
+        options: ["wiped_before_list", "wipe_at_handoff", "account_unlinked", "renter_responsible"],
       },
     ],
   },
@@ -327,6 +422,27 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
           "commercial_batch",
           "not_applicable",
         ],
+      },
+      {
+        key: "voltageBand",
+        type: "select",
+        required: true,
+        subcategories: ["Commercial Coffee"],
+        options: ["120v_corded", "240v", "not_electric"],
+      },
+      {
+        key: "nsfCertified",
+        type: "select",
+        required: true,
+        subcategories: ["Commercial Coffee"],
+        options: ["nsf_listed", "not_nsf", "unknown"],
+      },
+      {
+        key: "installNeeds",
+        type: "select",
+        required: true,
+        subcategories: ["Commercial Coffee"],
+        options: ["countertop_plug", "plumbed_water", "hardwired_240v", "mobile_cart", "other_install"],
       },
     ],
   },
@@ -384,6 +500,20 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         requiredIf: "rent",
         subcategories: ["Tents", "Sleeping Bags", "Expedition Tents"],
       },
+      {
+        key: "sleepingBagTempBand",
+        type: "select",
+        required: true,
+        subcategories: ["Sleeping Bags"],
+        options: ["above_50f", "32_50f", "15_32f", "0_15f", "below_0f"],
+      },
+      {
+        key: "stoveFuelType",
+        type: "select",
+        required: true,
+        subcategories: ["Camp Cooking"],
+        options: ["isobutane", "white_gas", "propane", "alcohol", "wood", "electric", "multi_fuel"],
+      },
     ],
   },
   {
@@ -403,6 +533,30 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         requiredIf: "rent",
         subcategories: ["Snow Sports", "Water Sports", "Pro Water Sports"],
         options: ["required", "not_required"],
+      },
+      {
+        key: "dinSettingBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Snow Sports"],
+        options: ["under_3", "3_5", "5_8", "8_10", "10_plus", "not_ski_bindings"],
+      },
+      {
+        key: "helmetPolicy",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Snow Sports"],
+        options: ["renter_provides", "included", "not_required"],
+      },
+      {
+        key: "pfdIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Water Sports", "Pro Water Sports"],
+        options: ["included", "renter_provides", "not_applicable"],
       },
     ],
   },
@@ -452,26 +606,10 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
       {
         key: "minRiderAge",
         type: "number",
-        required: true,
-        requiredIf: "rent",
-        subcategories: ["Electric Scooters", "Professional Scooters", "E-Bikes Pro"],
-      },
-      {
-        key: "eBikeClass",
-        type: "select",
-        required: true,
-        requiredIf: "rent",
-        subcategories: ["E-Bikes Pro"],
-        options: ["class_1", "class_2", "class_3", "not_classified"],
-      },
-      {
-        key: "batteryRangeBand",
-        type: "select",
         required: false,
         recommended: true,
         requiredIf: "rent",
-        subcategories: ["E-Bikes Pro"],
-        options: ["under_20mi", "20_40mi", "40_60mi", "60mi_plus", "unknown_range"],
+        subcategories: ["Electric Scooters", "Professional Scooters"],
       },
     ],
   },
@@ -757,6 +895,45 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         subcategories: ["Lawn Mowers", "Ride-On Mowers", "Trimmers"],
         options: ["under_16in", "16_21in", "21_30in", "30in_plus", "not_applicable"],
       },
+      {
+        key: "stumpCapacityBand",
+        type: "select",
+        required: true,
+        subcategories: ["Stump Grinders"],
+        options: ["under_8in", "8_16in", "16_24in", "24in_plus"],
+      },
+      {
+        key: "ppeIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stump Grinders"],
+        options: ["eye_ear_gloves", "partial_ppe", "renter_provides_ppe"],
+      },
+      {
+        key: "liabilityWaiverRequired",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stump Grinders"],
+        options: ["required", "not_required"],
+      },
+      {
+        key: "insuranceMinLiability",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stump Grinders"],
+        options: ["liability_25_50", "liability_50_100", "liability_100_300", "liability_250_500"],
+      },
+      {
+        key: "insuranceMaxDeductible",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Stump Grinders"],
+        options: ["deductible_500", "deductible_1000", "deductible_2500", "full_coverage_required"],
+      },
     ],
   },
   {
@@ -822,6 +999,28 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
           "not_outdoor",
         ],
       },
+      {
+        key: "setPieceCountBand",
+        type: "select",
+        required: true,
+        subcategories: ["Tables & Chairs"],
+        options: ["1_4", "5_10", "11_25", "26_50", "50_plus"],
+      },
+      {
+        key: "tentSizeBand",
+        type: "select",
+        required: true,
+        subcategories: ["Tents & Canopies"],
+        options: ["10x10", "10x20", "20x20", "20x40", "larger", "pop_up_other"],
+      },
+      {
+        key: "cateringSanitizeAttested",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Serving Equipment", "Catering Equipment"],
+        options: ["attested", "need_to_sanitize"],
+      },
     ],
   },
   {
@@ -865,13 +1064,8 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
       {
         key: "maxUserWeightBand",
         type: "select",
-        required: true,
-        requiredIf: "rent",
-        subcategories: [
-          "Cardio Equipment",
-          "Commercial Treadmills",
-          "Weight Machines",
-        ],
+        required: false,
+        recommended: true,
         options: ["up_to_200lb", "up_to_250lb", "up_to_300lb", "300lb_plus", "not_rated"],
       },
       {
@@ -939,7 +1133,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: CAR_SEAT_SAFETY_SUBS,
+        subcategories: [...CAR_SEAT_SAFETY_SUBS, ...CRIB_SAFETY_SUBS],
         options: ["acknowledged", "not_checked"],
       },
       {
@@ -947,7 +1141,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: CAR_SEAT_SAFETY_SUBS,
+        subcategories: [...CAR_SEAT_SAFETY_SUBS, ...CRIB_SAFETY_SUBS],
         options: ["attested", "not_yet"],
       },
       {
@@ -957,6 +1151,53 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         requiredIf: "rent",
         subcategories: CAR_SEAT_SAFETY_SUBS,
         options: ["photo_on_listing", "will_add"],
+      },
+      {
+        key: "dropSideAcknowledged",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: CRIB_SAFETY_SUBS,
+        options: ["no_drop_side", "not_verified"],
+      },
+      {
+        key: "cpscCompliant",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: CRIB_SAFETY_SUBS,
+        options: ["cpsc_compliant", "need_to_verify"],
+      },
+      {
+        key: "mattressIncluded",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: CRIB_SAFETY_SUBS,
+        options: ["firm_mattress_included", "pack_n_play_pad", "mattress_not_included"],
+      },
+      {
+        key: "playCertStandard",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Play Equipment"],
+        options: ["astm_f1487", "cpsc_playground", "jpma", "other_cert", "not_certified"],
+      },
+      {
+        key: "playCapacityBand",
+        type: "select",
+        required: true,
+        subcategories: ["Commercial Play Equipment"],
+        options: ["kids_1_4", "kids_5_10", "kids_11_25", "kids_26_plus"],
+      },
+      {
+        key: "liabilityWaiverRequired",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Commercial Play Equipment"],
+        options: ["required", "not_required"],
       },
     ],
   },
@@ -1127,18 +1368,6 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         recommended: true,
         requiredIf: "rent",
       },
-      {
-        key: "sanitizationAttested",
-        type: "select",
-        required: true,
-        requiredIf: "rent",
-        subcategories: [
-          "Professional Makeup Kits",
-          "Wigs & Accessories",
-          "Masks & Makeup",
-        ],
-        options: ["attested", "not_yet"],
-      },
     ],
   },
   {
@@ -1280,6 +1509,11 @@ export function areCategorySpecsValid(
     ) {
       return false;
     }
+    if (field.type === "multiselect" && field.options) {
+      const parts = raw.split(",").map((p) => p.trim()).filter(Boolean);
+      if (parts.length === 0) return false;
+      if (parts.some((p) => !field.options!.includes(p))) return false;
+    }
     if (field.type === "brand" && raw === "other") {
       if (!(values.brandOther ?? "").trim()) return false;
     }
@@ -1387,17 +1621,56 @@ export function areCategorySpecsValid(
   }
 
 
-  if (category.trim() === "Costume & Cosplay" && modes?.rent) {
-    const sub = subcategory.trim();
-    if (
-      sub === "Professional Makeup Kits" ||
-      sub === "Wigs & Accessories" ||
-      sub === "Masks & Makeup"
-    ) {
-      if ((values.sanitizationAttested ?? "").trim() !== "attested") return false;
+  // Drones: weight class + Remote ID hardware (equipped or valid under-250g exempt).
+  if (
+    modes?.rent &&
+    (category.trim() === "Photo & Video" || category.trim() === "Drones") &&
+    (subcategory.trim() === "Drones" || category.trim() === "Drones")
+  ) {
+    const weight = (values.droneWeightClass ?? "").trim();
+    const rid = (values.remoteIdStatus ?? "").trim();
+    if (!["under_250g", "250g_to_55lb", "over_55lb"].includes(weight)) return false;
+    if (rid !== "broadcast_builtin" && rid !== "broadcast_add_on" && rid !== "rid_exempt_under_250g") return false;
+    if (rid === "rid_exempt_under_250g" && weight !== "under_250g") return false;
+  }
+
+  // Electronics wipe / unlink for privacy-sensitive shelves.
+  if (category.trim() === "Electronics & Tech" && modes?.rent) {
+    const wipeSubs = new Set(ELECTRONICS_WIPE_SUBS.map((s) => s.toLowerCase()));
+    if (wipeSubs.has(subcategory.trim().toLowerCase())) {
+      const wipe = (values.hostDataWipeStatus ?? "").trim();
+      if (!["wiped_before_list","wipe_at_handoff","account_unlinked","renter_responsible"].includes(wipe)) return false;
     }
   }
 
+  // Party serving / catering sanitize attest.
+  if (category.trim() === "Party & Events" && modes?.rent) {
+    const sub = subcategory.trim().toLowerCase();
+    if (sub === "serving equipment" || sub === "catering equipment") {
+      if ((values.cateringSanitizeAttested ?? "").trim() !== "attested") return false;
+    }
+  }
+
+
+  // Cribs & Beds: CPSC / recall / drop-side / mattress / sanitization hard gate.
+  if (
+    category.trim() === "Baby & Kids" &&
+    subcategory.trim() === "Cribs & Beds" &&
+    modes?.rent
+  ) {
+    if ((values.recallAcknowledged ?? "").trim() !== "acknowledged") return false;
+    if ((values.dropSideAcknowledged ?? "").trim() !== "no_drop_side") return false;
+    if ((values.cpscCompliant ?? "").trim() !== "cpsc_compliant") return false;
+    const mattress = (values.mattressIncluded ?? "").trim();
+    if (
+      mattress !== "firm_mattress_included" &&
+      mattress !== "pack_n_play_pad" &&
+      mattress !== "mattress_not_included"
+    ) {
+      return false;
+    }
+    if ((values.sanitizationAttested ?? "").trim() !== "attested") return false;
+  }
 
   return true;
 }
