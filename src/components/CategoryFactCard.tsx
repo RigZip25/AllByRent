@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, Shield } from "lucide-react";
 import { useMessages } from "../lib/i18n/react";
+import { listingIsSemiOrCommercialTrailer } from "../lib/listingRentRules";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -29,7 +30,8 @@ type Props = {
   subcategory?: string;
   /**
    * Prefer commercial / ≥26k / semi fact copy when present
-   * (VehiclesCommercial or commercial subcategory facts).
+   * (VehiclesCommercial). Also auto-detected for Commercial Trucks /
+   * Equipment Trailers / Tow Vehicles / semi shelves.
    */
   commercialTransport?: boolean;
   /** Prefer collapsed — long instruction bodies stay behind the chevron. */
@@ -47,16 +49,26 @@ export function CategoryFactCard({
   const t = useMessages();
   const catKey = category.trim();
   const subKeyName = subcategory?.trim() ?? "";
+  const shelfCommercial =
+    catKey === "Vehicles" &&
+    (commercialTransport ||
+      listingIsSemiOrCommercialTrailer({
+        category: catKey,
+        subcategory: subKeyName,
+        categorySpecs: {},
+      }));
   const subFact =
     subKeyName && t.categoryFacts.bySubcategory?.[catKey]
       ? (t.categoryFacts.bySubcategory[catKey]?.[subKeyName] as FactBlock | undefined)
       : undefined;
-  const commercialFact =
-    commercialTransport && catKey === "Vehicles"
-      ? (t.categoryFacts.byCategory.VehiclesCommercial as FactBlock | undefined)
-      : undefined;
+  const commercialFact = shelfCommercial
+    ? (t.categoryFacts.byCategory.VehiclesCommercial as FactBlock | undefined)
+    : undefined;
   const baseFact = t.categoryFacts.byCategory[catKey] as FactBlock | undefined;
-  const fact = commercialFact ?? subFact ?? baseFact;
+  // Commercial shelves must never fall through to the light Vehicles FAQ.
+  const fact = shelfCommercial
+    ? commercialFact
+    : (subFact ?? baseFact);
   const [open, setOpen] = useState(defaultExpanded);
   if (!fact) return null;
 
@@ -70,7 +82,7 @@ export function CategoryFactCard({
       className={`rounded-2xl border border-amber-200 bg-amber-50/80 px-3.5 py-3 ${className}`}
       data-category-fact={catKey}
       data-subcategory-fact={subKeyName || undefined}
-      data-commercial-fact={commercialTransport ? "true" : undefined}
+      data-commercial-fact={shelfCommercial ? "true" : undefined}
     >
       <button
         type="button"

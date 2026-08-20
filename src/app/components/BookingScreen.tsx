@@ -22,6 +22,7 @@ import {
   listingRequiresCdl,
   listingRequiresPhysicalDamage,
   listingIsCommercialTransport,
+  listingIsCommercialTransportShelf,
 } from "../../lib/listingRentRules";
 import {
   listingCarSeatBlocksBooking,
@@ -1643,7 +1644,7 @@ function BookingScreenLoaded({
           <CategoryFactCard
             category="Vehicles"
             subcategory={listing.subcategory}
-            commercialTransport={isCommercialTransport}
+            commercialTransport={listingIsCommercialTransportShelf(listing)}
           />
         ) : null}
         {(listing.category.trim() === "Heavy Equipment" ||

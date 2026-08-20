@@ -49,6 +49,7 @@ import {
   listingRequiresCdl,
   listingRequiresPhysicalDamage,
   listingIsCommercialTransport,
+  listingIsCommercialTransportShelf,
 } from "../../lib/listingRentRules";
 import {
   listingIsCarSeat,
@@ -553,7 +554,7 @@ export function HostListingDetailScreen({
           <CategoryFactCard
             category="Vehicles"
             subcategory={listing.subcategory}
-            commercialTransport={listingIsCommercialTransport(listing)}
+            commercialTransport={listingIsCommercialTransportShelf(listing)}
             className="mb-4"
           />
         ) : null}

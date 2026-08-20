@@ -14,7 +14,7 @@ import {
 } from "../../../lib/regionalDisplay";
 import { CategorySpecsFields } from "./CategorySpecsFields";
 import { CategoryFactCard } from "../../../components/CategoryFactCard";
-import { listingIsCommercialTransport } from "../../../lib/listingRentRules";
+import { listingIsCommercialTransportShelf } from "../../../lib/listingRentRules";
 import {
   getCategoryModeRules,
   requiresAssetIdentity,
@@ -385,7 +385,7 @@ export function Step2ItemInfo({
               <CategoryFactCard
                 category="Vehicles"
                 subcategory={draft.subcategory}
-                commercialTransport={listingIsCommercialTransport(draft)}
+                commercialTransport={listingIsCommercialTransportShelf(draft)}
               />
             ) : draft.category.trim() === "Heavy Equipment" ||
               draft.category.trim() === "Construction" ? (

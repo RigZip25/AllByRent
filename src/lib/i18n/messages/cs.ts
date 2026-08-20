@@ -3289,25 +3289,25 @@ export const cs: AppMessages = {
       VehiclesCommercial: {
         title: "Komerční doprava (≥26 000 lb / semi)",
         summary:
-          "Těžká vozidla a semi používají CDL + doklad agent→majitel, havarijní / PD krytí a vícenásobné fotky pneumatik — ne osobní upload jako u lehkých aut.",
+          "Toto není FAQ pro lehká auta. GVWR v lb (ne v dolarech) určuje povinné PD. CDL povinné. Doklad pojištění obvykle agent → e-mail majitele. Komerční prohlídka více pneumatik. Hold depozitu = komerční spoluúčast / PD — ne copy osobního auta.",
         hostTipTitle: "Pro komerční hostitele",
         hostTip:
-          "Zadej GVWR v lb. Od ≥26 000 lb nebo u semi / komerčních přívěsů vyžaduj CDL a nastav e-mail, kam agent nájemce pošle doklad. Nastav počet kol pro dualies / vícenápravové. Ověř komerční krytí u agenta — nejsme pojišťovna.",
+          "Zadej GVWR v librách. Od ≥26 000 lb nebo u Commercial Trucks / Equipment Trailers / semi vyžaduj CDL a nastav e-mail, kam agent nájemce pošle doklad. Nastav počet kol pro dualies a vícenápravové. Ověř komerční PD u agenta — nejsme pojišťovna.",
         whyGeoTitle: "Proč GPS pro PIN?",
         whyGeo:
-          "Stejné pravidlo přítomnosti jako u lehkých aut: PIN / schránka jen na místě vyzvednutí nebo přes QR vozidla.",
+          "I u komerčního předání platí přítomnost: PIN / schránka jen na místě vyzvednutí nebo přes QR vozidla — ne přeposlaný kód.",
         contactlessTitle: "Bezkontaktně / bez přítomnosti",
         contactless:
           "Doklad agent→majitel musí být schválený před jakýmkoli PIN, schránkou nebo klíči — i bez přítomnosti.",
         flowTitle: "Od začátku do konce",
         flow:
-          "Nabídnout → GVWR + CDL + e-mail agenta + počet kol + PD limity → rezervace s CDL → agent pošle doklad → předprohlídka více pneumatik → předání → prohlídka při vrácení.",
+          "Nabídnout → GVWR (lb) + CDL + e-mail agenta + počet kol + PD limity → rezervace s CDL → agent pošle doklad majiteli → předprohlídka více pneumatik → předání → prohlídka při vrácení.",
         layersTitle: "Vrstvy ochrany",
         layers:
-          "CDL · pojištění agent→majitel · PD · fotky pneumatik dle počtu kol · hold · geo PIN · podmínky.",
+          "CDL · pojištění agent→majitel · PD dle GVWR (lb) · fotky více pneumatik · hold na komerční spoluúčast · geo PIN · podmínky.",
         claimsTitle: "Když se něco pokazí (nároky)",
         claims:
-          "Komerční / PD pojištění nájemce je primární. Fotky karoserie a pneumatik pomáhají prokázat poškození. Uchovej e-mailovou komunikaci agenta u rezervace.",
+          "Komerční / PD pojištění nájemce je primární. Fotky karoserie a každé pneumatiky pomáhají prokázat poškození nebo výměnu. Uchovej e-maily agenta u rezervace.",
       },
       "Heavy Equipment": {
         title: "Půjčování komerční techniky",

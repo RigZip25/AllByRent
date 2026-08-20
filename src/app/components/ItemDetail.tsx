@@ -57,6 +57,7 @@ import { useMessages } from "../../lib/i18n/react";
 import { CategoryFactCard } from "../../components/CategoryFactCard";
 import {
   listingIsCommercialTransport,
+  listingIsCommercialTransportShelf,
   listingProRentersOnly,
   listingRequiresCdl,
   listingRequiresPhysicalDamage,
@@ -535,7 +536,7 @@ export function ItemDetail({
               <CategoryFactCard
                 category="Vehicles"
                 subcategory={listing.subcategory}
-                commercialTransport={listingIsCommercialTransport(listing)}
+                commercialTransport={listingIsCommercialTransportShelf(listing)}
                 className="mt-3"
               />
             ) : null}

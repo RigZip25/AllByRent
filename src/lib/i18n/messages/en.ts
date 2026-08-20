@@ -3297,25 +3297,25 @@ export const en: AppMessages = {
       VehiclesCommercial: {
         title: "Commercial transport (≥26,000 lb / semi)",
         summary:
-          "Heavy vehicles and semis use CDL + agent→owner insurance proof, physical damage coverage, and multi-tire pre-trip photos — not the light-car personal-upload path.",
+          "This is not the light-car neighbor FAQ. GVWR in lb (not dollar value) drives the physical-damage requirement. CDL required. Insurance proof usually goes agent → owner email. Multi-tire commercial inspection. Deposit hold tracks commercial deductible / PD — not personal-auto compact-car copy.",
         hostTipTitle: "For commercial hosts",
         hostTip:
-          "Enter GVWR in lb. At ≥26,000 lb or for semis / equipment trailers, require CDL and set the email where the renter’s agent must send proof. Set tire/wheel count for dualies / multi-axle. Confirm commercial coverage with your agent — we are not an insurer.",
+          "Enter GVWR in pounds. At ≥26,000 lb or on Commercial Trucks / Equipment Trailers / semis, require CDL and set the email where the renter’s insurance agent must send proof. Set wheel/tire count for dualies and multi-axle. Confirm commercial PD with your agent — we are not an insurer.",
         whyGeoTitle: "Why GPS for the PIN?",
         whyGeo:
-          "Same presence rule as light cars: PIN / lockbox only at the pickup spot or via vehicle QR — not a forwarded code.",
+          "Commercial handoffs still need presence: PIN / lockbox only at the pickup spot or via vehicle QR — not a forwarded code.",
         contactlessTitle: "Contactless / without co-presence",
         contactless:
-          "Agent→owner insurance must be cleared before any PIN, lockbox, or keys unlock — even without co-presence.",
+          "Agent→owner insurance proof must be cleared before any PIN, lockbox, or keys unlock — even without co-presence.",
         flowTitle: "End to end",
         flow:
-          "List → GVWR + CDL + agent proof email + wheel count + PD mins → renter books with CDL → agent emails proof → multi-tire pre-trip → handoff → return inspection.",
+          "List → GVWR (lb) + CDL + agent proof email + wheel count + PD mins → renter books with CDL → agent emails proof to owner → multi-tire pre-trip → handoff → return inspection.",
         layersTitle: "Safety layers",
         layers:
-          "CDL · agent→owner insurance · physical damage · wheel-count tire photos · deposit hold · geo PIN · signed terms.",
+          "CDL · agent→owner insurance · PD by GVWR (lb) · multi-tire photos · commercial deductible hold · geo PIN · signed terms.",
         claimsTitle: "If something goes wrong (claims)",
         claims:
-          "Renter commercial / PD coverage is primary. Tire and body photos help prove damage or swaps. Keep agent email threads with the booking.",
+          "Renter commercial / physical-damage coverage is primary. Body + every-tire photos help prove damage or swaps. Keep agent email threads with the booking.",
       },
       "Heavy Equipment": {
         title: "Commercial equipment rentals",

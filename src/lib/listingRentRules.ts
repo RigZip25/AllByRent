@@ -84,17 +84,29 @@ export function listingIsSemiOrCommercialTrailer(
 }
 
 /**
+ * Vehicle class for commercial transport FAQ / CDL / PD path —
+ * independent of rent mode (so listing Step2 shows the right fact card
+ * before the host picks Rent).
+ * Vehicles ≥ 26,000 lb OR semi / commercial trailer / commercial truck shelves.
+ */
+export function listingIsCommercialTransportShelf(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "handoff" | "categorySpecs">,
+): boolean {
+  if (listing.category.trim() !== "Vehicles") return false;
+  if (vehicleWeightRequiresPhysicalDamage(listingVehicleWeightLbs(listing))) return true;
+  return listingIsSemiOrCommercialTrailer(listing);
+}
+
+/**
  * Commercial transport rent path: CDL + agent→owner insurance proof.
- * Vehicles ≥ 26,000 lb OR semi / commercial trailer / commercial truck subcategories.
- * Does not replace pro-only commercial equipment shelves (Heavy Equipment / Construction).
+ * Rent mode + commercial shelf / ≥26k lb. Does not replace pro-only
+ * commercial equipment shelves (Heavy Equipment / Construction).
  */
 export function listingIsCommercialTransport(
   listing: Pick<ListingDraft, "category" | "subcategory" | "handoff" | "modes" | "categorySpecs">,
 ): boolean {
   if (!listing.modes?.rent) return false;
-  if (listing.category.trim() !== "Vehicles") return false;
-  if (vehicleWeightRequiresPhysicalDamage(listingVehicleWeightLbs(listing))) return true;
-  return listingIsSemiOrCommercialTrailer(listing);
+  return listingIsCommercialTransportShelf(listing);
 }
 
 /** CDL attestation + document required before booking/start for commercial transport. */

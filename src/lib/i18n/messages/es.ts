@@ -3280,25 +3280,25 @@ export const es: AppMessages = {
       VehiclesCommercial: {
         title: "Transporte comercial (≥26 000 lb / semi)",
         summary:
-          "Vehículos pesados y semis usan CDL + prueba agente→dueño, cobertura de daños físicos y fotos de varias llantas — no la ruta de subida personal de coches ligeros.",
+          "Esto no es el FAQ de coches ligeros. El GVWR en lb (no el valor en dólares) obliga el daño físico (PD). CDL obligatorio. La prueba de seguro suele ir agente → correo del dueño. Inspección comercial multi-llanta. La retención del depósito sigue el deducible / PD comercial — no el copy de auto personal.",
         hostTipTitle: "Para anfitriones comerciales",
         hostTip:
-          "Introduce el GVWR en lb. Desde ≥26 000 lb o en semis / remolques de equipo, exige CDL y configura el correo donde el agente del arrendatario debe enviar la prueba. Define el número de llantas para dualies / multi-eje. Confirma la cobertura comercial con tu agente — no somos aseguradora.",
+          "Introduce el GVWR en libras. Desde ≥26 000 lb o en Commercial Trucks / Equipment Trailers / semis, exige CDL y configura el correo donde el agente del arrendatario debe enviar la prueba. Define el nº de llantas para dualies y multi-eje. Confirma el PD comercial con tu agente — no somos aseguradora.",
         whyGeoTitle: "¿Por qué GPS para el PIN?",
         whyGeo:
-          "Misma regla de presencia que en coches ligeros: PIN / caja solo en el punto de recogida o vía QR del vehículo.",
+          "La entrega comercial también exige presencia: PIN / caja solo en el punto de recogida o vía QR del vehículo — no un código reenviado.",
         contactlessTitle: "Sin contacto / sin co-presencia",
         contactless:
           "La prueba agente→dueño debe estar aprobada antes de cualquier PIN, caja o llaves — incluso sin co-presencia.",
         flowTitle: "De punta a punta",
         flow:
-          "Publicar → GVWR + CDL + correo del agente + nº de llantas + mínimos PD → reserva con CDL → el agente envía la prueba → inspección multi-llanta → entrega → devolución.",
+          "Publicar → GVWR (lb) + CDL + correo del agente + nº de llantas + mínimos PD → reserva con CDL → el agente envía la prueba al dueño → inspección multi-llanta → entrega → devolución.",
         layersTitle: "Capas de seguridad",
         layers:
-          "CDL · seguro agente→dueño · daños físicos · fotos de llantas según nº · retención · geo PIN · términos.",
+          "CDL · seguro agente→dueño · PD por GVWR (lb) · fotos multi-llanta · retención de deducible comercial · geo PIN · términos.",
         claimsTitle: "Si algo sale mal (reclamaciones)",
         claims:
-          "La cobertura comercial / PD del arrendatario es primaria. Fotos de carrocería y llantas ayudan a probar daños. Conserva los correos del agente con la reserva.",
+          "La cobertura comercial / PD del arrendatario es primaria. Fotos de carrocería y de cada llanta ayudan a probar daños o cambios. Conserva los correos del agente con la reserva.",
       },
       "Heavy Equipment": {
         title: "Alquiler de equipo comercial",
