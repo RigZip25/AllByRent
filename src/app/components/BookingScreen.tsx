@@ -1655,7 +1655,10 @@ function BookingScreenLoaded({
           />
         ) : null}
         {listing.category.trim() === "Boats & Water" && listing.modes.rent ? (
-          <CategoryFactCard category="Boats & Water" />
+          <CategoryFactCard
+            category="Boats & Water"
+            subcategory={listing.subcategory}
+          />
         ) : null}
         {listing.category.trim() === "Real Estate" && listing.modes.rent ? (
           <CategoryFactCard

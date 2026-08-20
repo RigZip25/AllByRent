@@ -2605,6 +2605,7 @@ export const cs: AppMessages = {
         vehiclesOtherKind: { label: "Jaký druh vozidla", hint: "Přesuňte na pojmenovanou Vehicles polici, když sedí." },
         scooterClass: { label: "Třída koloběžky", hint: "Kick, standup e-scooter, seated nebo jiné — povinné u scooter polic." },
         bikesOtherKind: { label: "Jaký druh kola / koloběžky", hint: "Přesuňte na pojmenovanou Bikes polici, když sedí." },
+        boatsOtherKind: { label: "Jaký druh plavidla", hint: "Přesuňte na pojmenovanou Boats polici, když sedí." },
 },
       options: {
         cordless: "Aku / baterie",
@@ -4997,6 +4998,19 @@ export const cs: AppMessages = {
         bikes_kind_cargo: "Cargo",
         bikes_kind_adaptive: "Adaptivní",
         bikes_kind_mixed: "Smíšená kola / koloběžky",
+
+        // Boats & Water ~8.0 options
+        boats_kind_kayak: "Kajak / kánoe",
+        boats_kind_sup: "SUP",
+        boats_kind_fishing: "Rybářské",
+        boats_kind_inflatable: "Nafukovací",
+        boats_kind_jetski: "Jet ski",
+        boats_kind_motor: "Motorová loď",
+        boats_kind_pontoon: "Ponton",
+        boats_kind_dive: "Potápěčské",
+        boats_kind_charter: "Charter",
+        boats_kind_commercial: "Komerční rybolov",
+        boats_kind_mixed: "Smíšená plavidla",
         veh_special_emergency: "Emergency / zásah",
         veh_special_other: "Jiné special",
         veh_special_show: "Show / paráda",
@@ -8755,6 +8769,123 @@ export const cs: AppMessages = {
         },
 },
 
+
+      "Boats & Water": {
+        "Kayaks & Canoes": {
+          title: "Kajaky a kánoe — PFD + délka",
+          summary: "Délka, kapacita, motor a PFD politika pro paddle craft.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Pásmo délky, kapacita osob, motor, PFD politika a pojišťovací pásma." },
+            { q: "Je HIN povinné?", a: "Ne u nemotorových kajaků — HIN je povinné při motor yes nebo electric_only." },
+            { q: "PFD?", a: "Listing nastaví included, renter provides nebo not required — nepočítejte s vestami automaticky." },
+            { q: "Kauce?", a: "Kryje poškození trupu/výbavy a chybějící PFD — ne pojištění výletu." },
+            { q: "Partner promo?", a: "Žádný hard-sell outfitteru ani paddle pojištění." },
+          ],
+        },
+        "SUP Boards": {
+          title: "SUP — PFD + délka",
+          summary: "Délka, kapacita a PFD pro paddleboardy.",
+          qa: [
+            { q: "Co musí být uvedeno?", a: "Délka, kapacita, motor, PFD politika a pojištění." },
+            { q: "HIN?", a: "Není povinné u nemotorových SUP — povinné pokud je motor." },
+            { q: "Kauce?", a: "Kryje poškození boardu/ploutve a chybějící PFD." },
+            { q: "Partner promo?", a: "Žádný hard-sell SUP shopu." },
+          ],
+        },
+        "Fishing Boats": {
+          title: "Rybářské lodě — HIN + safety kit",
+          summary: "Motorové rybářské lodě: HIN, USCG kit a pojištění.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Délka, kapacita, motor, HIN, USCG-style kit a pojištění." },
+            { q: "Je HIN povinné?", a: "Ano u Fishing Boats — zadejte HIN/CIN/místní registraci před publish." },
+            { q: "Fotky?", a: "Obchůzka trupu (příď, záď, boky, paluba) před startem a při návratu." },
+            { q: "Kauce?", a: "Odpovídá pásmu spoluúčasti — ne pojištění rybářského výletu." },
+            { q: "Partner promo?", a: "Žádný hard-sell mariny ani pojišťovny lodí." },
+          ],
+        },
+        "Inflatable Boats": {
+          title: "Nafukovací — motor vs paddle",
+          summary: "PFD u nemotorových; HIN při motoru.",
+          qa: [
+            { q: "HIN?", a: "Povinné při motor yes nebo electric_only; volitelné u nemotorových." },
+            { q: "PFD?", a: "Nemotorové nafukovací zamrazí PFD included / renter provides / not required." },
+            { q: "Kauce?", a: "Kryje defekt/poškození a chybějící PFD." },
+            { q: "Partner promo?", a: "Žádný hard-sell prodejce nafukovacích lodí." },
+          ],
+        },
+        "Jet Skis": {
+          title: "Jet Ski — HIN + safety kit",
+          summary: "PWC: HIN, USCG kit, věk/licence a pojištění.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Délka, kapacita, motor, HIN, USCG kit a pojištění." },
+            { q: "Věk / licence?", a: "Bareboat: věk 25 + boater/PWC oprávnění, pokud to vyžaduje zákon a listing." },
+            { q: "Fotky?", a: "Obchůzka trupu před startem a stejné při návratu." },
+            { q: "Kauce?", a: "Odpovídá pásmu spoluúčasti — Evorios neprodává PWC pojištění." },
+            { q: "Partner promo?", a: "Žádný hard-sell řetězce půjčoven jet ski." },
+          ],
+        },
+        Motorboats: {
+          title: "Motorové lodě — captain mode + HIN",
+          summary: "HIN, USCG kit, captain vs bareboat a pojištění.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Délka, kapacita, motor, HIN, USCG kit, captain mode a pojištění." },
+            { q: "Bareboat vs captain?", a: "Bareboat: věk/licence. Captain included: host 18+ bez renter licence gate." },
+            { q: "Kauce?", a: "Odpovídá pásmu spoluúčasti na listingu." },
+            { q: "Partner promo?", a: "Žádný hard-sell charter brokera." },
+          ],
+        },
+        "Pontoon Boats": {
+          title: "Pontony — captain mode + HIN",
+          summary: "Stejné motorové brány jako u motorboats.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Délka, kapacita, motor, HIN, USCG kit, captain mode a pojištění." },
+            { q: "Captain included?", a: "Při captain_included platí věk hosta 18 a renter licence gate je vypnutý." },
+            { q: "Kauce?", a: "Odpovídá pásmu spoluúčasti — ne pojištění party lodi." },
+            { q: "Partner promo?", a: "Žádný hard-sell prodejce pontonů." },
+          ],
+        },
+        "Commercial Fishing": {
+          title: "Komerční rybolov — HIN + kit",
+          summary: "Motorové komerční rybářské craft: HIN, USCG kit, pojištění.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Délka, kapacita, motor, HIN, USCG kit a pojištění." },
+            { q: "Komerční použití?", a: "Zveřejněte skutečnou kapacitu a stav safety kit — kauce není pojištění úlovku." },
+            { q: "Fotky?", a: "Obchůzka trupu před startem a při návratu." },
+            { q: "Partner promo?", a: "Žádný hard-sell komerční rybářské pojišťovny." },
+          ],
+        },
+        "Dive Boats": {
+          title: "Potápěčské lodě — HIN + kit",
+          summary: "Motorové dive support: HIN, USCG kit, pojištění.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Délka, kapacita, motor, HIN, USCG kit a pojištění." },
+            { q: "Je dive gear v ceně?", a: "Jen co říká inventory listingu — lahve/regulátory se nepředpokládají." },
+            { q: "Kauce?", a: "Odpovídá pásmu spoluúčasti — ne pojištění potápěčské nehody." },
+            { q: "Partner promo?", a: "Žádný hard-sell dive shopu ani PADI." },
+          ],
+        },
+        "Charter Vessels": {
+          title: "Charter — captain + HIN",
+          summary: "Captain mode, HIN, USCG kit a pojištění pro charter.",
+          qa: [
+            { q: "Jaké brány platí?", a: "Délka, kapacita, motor, HIN, USCG kit, captain mode a pojištění." },
+            { q: "Potřebuji licenci?", a: "Captain included: host 18+, bez renter licence. Bareboat: věk 25 + credential dle potřeby." },
+            { q: "Kauce?", a: "Odpovídá pásmu spoluúčasti na listingu." },
+            { q: "Partner promo?", a: "Žádný hard-sell charter marketplace." },
+          ],
+        },
+        Other: {
+          title: "Ostatní plavidla — nejdřív pojmenovaná police",
+          summary: "Preferujte Kayak, SUP, Fishing, Inflatable, Jet Ski, Motorboat, Pontoon, Dive nebo Charter.",
+          qa: [
+            { q: "Mám použít Other?", a: "Přesuňte na pojmenovanou Boats polici, kdykoli sedí, aby platily HIN, PFD nebo captain brány." },
+            { q: "Co stále platí?", a: "Délka, kapacita, motor, pojištění a boatsOtherKind stále zamrznou u rent." },
+            { q: "HIN?", a: "Povinné u motorových craft (motor yes / electric_only) nebo na motorové polici." },
+            { q: "Kauce?", a: "Odpovídá pásmu spoluúčasti — ne pojištění výletu." },
+            { q: "Partner promo?", a: "Žádný hard-sell mariny." },
+          ],
+        },
+      },
       "Bikes & Scooters": {
         "Mountain Bikes": {
           title: "Horská kola — trail waiver + helma",

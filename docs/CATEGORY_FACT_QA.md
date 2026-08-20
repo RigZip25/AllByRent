@@ -204,4 +204,19 @@ Profile + per-sub FactCards + subcategory wiring already shipped (`bfb116d`). Ge
 
 **Option scoping:** prefix `bikes_*` on new option ids; keep existing e-bike `class_1`–`class_3` labels.
 
+### Boats & Water (~8.0) — shipped pattern
+
+| Layer | Pattern |
+|-------|---------|
+| All | Length, capacity, motor, insurance liability + deductible |
+| Powered | HIN required (Jet Ski, Motorboat, Pontoon, Fishing, Commercial Fishing, Dive, Charter, or motor yes/electric) |
+| Powered safety | USCG-style kit on powered shelves |
+| Captain | `captainMode` on Motorboats / Pontoon / Charter |
+| Paddle | PFD policy (+ count recommended) on Kayak / SUP / Inflatable |
+| Other | `boatsOtherKind` — prefer named shelf |
+| Deposit | Deductible-sized hold — not trip insurance |
+| FactCards | Per-sub Q→A EN/CS/ES; wire `subcategory` |
+
+**Option scoping:** prefix `boats_*` on new option ids.
+
 See also: [EVORIOS.md](./EVORIOS.md) (brand / product source of truth).

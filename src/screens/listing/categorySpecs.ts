@@ -2769,6 +2769,26 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         requiredIf: "rent",
         options: ["deductible_500", "deductible_1000", "deductible_2500", "full_coverage_required"],
       },
+      {
+        key: "boatsOtherKind",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: ["Other"],
+        options: [
+          "boats_kind_kayak",
+          "boats_kind_sup",
+          "boats_kind_fishing",
+          "boats_kind_inflatable",
+          "boats_kind_jetski",
+          "boats_kind_motor",
+          "boats_kind_pontoon",
+          "boats_kind_dive",
+          "boats_kind_charter",
+          "boats_kind_commercial",
+          "boats_kind_mixed",
+        ],
+      },
     ],
   },
   {
@@ -7512,6 +7532,21 @@ export function areCategorySpecsValid(
     ]);
     const powered = motorSubs.has(sub) || motor === "yes" || motor === "electric_only";
     if (powered && !(values.hinNumber ?? "").trim()) return false;
+    if (sub === "other") {
+      if (![
+        "boats_kind_kayak",
+        "boats_kind_sup",
+        "boats_kind_fishing",
+        "boats_kind_inflatable",
+        "boats_kind_jetski",
+        "boats_kind_motor",
+        "boats_kind_pontoon",
+        "boats_kind_dive",
+        "boats_kind_charter",
+        "boats_kind_commercial",
+        "boats_kind_mixed",
+      ].includes((values.boatsOtherKind ?? "").trim())) return false;
+    }
   }
 
 

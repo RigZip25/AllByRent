@@ -567,7 +567,11 @@ export function HostListingDetailScreen({
           />
         ) : null}
         {listing.category.trim() === "Boats & Water" ? (
-          <CategoryFactCard category="Boats & Water" className="mb-4" />
+          <CategoryFactCard
+            category="Boats & Water"
+            subcategory={listing.subcategory}
+            className="mb-4"
+          />
         ) : null}
         {listing.category.trim() === "Real Estate" ? (
           <CategoryFactCard

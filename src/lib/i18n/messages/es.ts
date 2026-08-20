@@ -2593,6 +2593,7 @@ export const es: AppMessages = {
         vehiclesOtherKind: { label: "Qué tipo de vehículo", hint: "Reubica a un estante Vehicles con nombre cuando quepa." },
         scooterClass: { label: "Clase de scooter", hint: "Kick, standup e-scooter, seated u otro — obligatorio en estantes scooter." },
         bikesOtherKind: { label: "Qué tipo de bici / scooter", hint: "Reubica a un estante Bikes con nombre cuando quepa." },
+        boatsOtherKind: { label: "Qué tipo de embarcación", hint: "Reubica a un estante Boats con nombre cuando quepa." },
 },
       options: {
         cordless: "Inalámbrico / batería",
@@ -4985,6 +4986,19 @@ export const es: AppMessages = {
         bikes_kind_cargo: "Relacionado cargo",
         bikes_kind_adaptive: "Relacionado adaptativo",
         bikes_kind_mixed: "Bicis / scooters mixtos",
+
+        // Boats & Water ~8.0 options
+        boats_kind_kayak: "Relacionado kayak / canoa",
+        boats_kind_sup: "Relacionado SUP",
+        boats_kind_fishing: "Relacionado pesca",
+        boats_kind_inflatable: "Relacionado inflable",
+        boats_kind_jetski: "Relacionado jet ski",
+        boats_kind_motor: "Relacionado lancha",
+        boats_kind_pontoon: "Relacionado pontón",
+        boats_kind_dive: "Relacionado buceo",
+        boats_kind_charter: "Relacionado charter",
+        boats_kind_commercial: "Relacionado pesca comercial",
+        boats_kind_mixed: "Embarcaciones mixtas",
         veh_special_emergency: "Emergencia / respuesta",
         veh_special_other: "Otro especial",
         veh_special_show: "Show / desfile",
@@ -8746,6 +8760,123 @@ export const es: AppMessages = {
         },
 },
 
+
+      "Boats & Water": {
+        "Kayaks & Canoes": {
+          title: "Kayaks y canoas — PFD + eslora",
+          summary: "Eslora, capacidad, motor y política PFD para paddle.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Banda de eslora, capacidad, motor, política PFD y bandas de seguro." },
+            { q: "¿Se exige HIN?", a: "No en kayaks sin motor — HIN es obligatorio si motor es yes o electric_only." },
+            { q: "¿PFD?", a: "El listing fija included, renter provides o not required — no asumas chalecos." },
+            { q: "¿Depósito?", a: "Cubre daño de casco/equipo y PFD faltantes — no seguro de viaje." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de outfitter o seguro paddle." },
+          ],
+        },
+        "SUP Boards": {
+          title: "SUP — PFD + eslora",
+          summary: "Eslora, capacidad y PFD para paddleboards.",
+          qa: [
+            { q: "¿Qué debe listarse?", a: "Eslora, capacidad, motor, PFD y seguro." },
+            { q: "¿HIN?", a: "No obligatorio en SUP sin motor — sí si hay motor." },
+            { q: "¿Depósito?", a: "Cubre daño de tabla/aleta y PFD faltantes." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de tienda SUP." },
+          ],
+        },
+        "Fishing Boats": {
+          title: "Pesca — HIN + kit de seguridad",
+          summary: "Embarcaciones de pesca a motor: HIN, kit USCG y seguro.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Eslora, capacidad, motor, HIN, kit tipo USCG y seguro." },
+            { q: "¿HIN obligatorio?", a: "Sí en Fishing Boats — ingresa HIN/CIN/registro local antes de publicar." },
+            { q: "¿Fotos?", a: "Recorrido de casco (proa, popa, babor, estribor, cubierta) al inicio y al retorno." },
+            { q: "¿Depósito?", a: "Coincide con la banda de deducible — no seguro de viaje de pesca." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de marina o seguro náutico." },
+          ],
+        },
+        "Inflatable Boats": {
+          title: "Inflatables — motor vs paddle",
+          summary: "PFD sin motor; HIN si es motorizado.",
+          qa: [
+            { q: "¿HIN?", a: "Obligatorio si motor es yes o electric_only; opcional sin motor." },
+            { q: "¿PFD?", a: "Inflatables sin motor congelan PFD included / renter provides / not required." },
+            { q: "¿Depósito?", a: "Cubre pinchazos/daño y PFD faltantes." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de tienda de inflables." },
+          ],
+        },
+        "Jet Skis": {
+          title: "Jet Skis — HIN + kit",
+          summary: "PWC: HIN, kit USCG, edad/licencia y seguro.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Eslora, capacidad, motor, HIN, kit USCG y seguro." },
+            { q: "¿Edad / licencia?", a: "Bareboat: edad 25 + credencial boater/PWC cuando lo exija la ley y el listing." },
+            { q: "¿Fotos?", a: "Recorrido de casco al inicio y al retorno." },
+            { q: "¿Depósito?", a: "Coincide con el deducible — Evorios no vende seguro PWC." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de cadena de alquiler de jet ski." },
+          ],
+        },
+        Motorboats: {
+          title: "Lanchas — captain mode + HIN",
+          summary: "HIN, kit USCG, captain vs bareboat y seguro.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Eslora, capacidad, motor, HIN, kit USCG, captain mode y seguro." },
+            { q: "¿Bareboat vs captain?", a: "Bareboat: edad/licencia. Captain included: huésped 18+ sin puerta de licencia del arrendatario." },
+            { q: "¿Depósito?", a: "Coincide con la banda de deducible del listing." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de broker de charter." },
+          ],
+        },
+        "Pontoon Boats": {
+          title: "Pontones — captain mode + HIN",
+          summary: "Mismas puertas motorizadas que motorboats.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Eslora, capacidad, motor, HIN, kit USCG, captain mode y seguro." },
+            { q: "¿Captain included?", a: "Con captain_included aplica edad 18 del huésped y se apaga la puerta de licencia." },
+            { q: "¿Depósito?", a: "Coincide con el deducible — no seguro de party boat." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de dealer de pontones." },
+          ],
+        },
+        "Commercial Fishing": {
+          title: "Pesca comercial — HIN + kit",
+          summary: "Craft de pesca comercial a motor: HIN, kit USCG, seguro.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Eslora, capacidad, motor, HIN, kit USCG y seguro." },
+            { q: "¿Uso comercial?", a: "Publica capacidad real y estado del kit — el depósito no es seguro de captura." },
+            { q: "¿Fotos?", a: "Recorrido de casco al inicio y al retorno." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de aseguradora de pesca comercial." },
+          ],
+        },
+        "Dive Boats": {
+          title: "Botes de buceo — HIN + kit",
+          summary: "Apoyo de buceo a motor: HIN, kit USCG, seguro.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Eslora, capacidad, motor, HIN, kit USCG y seguro." },
+            { q: "¿Equipo de buceo incluido?", a: "Solo lo que diga el inventario — no se asumen tanques/reguladores." },
+            { q: "¿Depósito?", a: "Coincide con el deducible — no seguro de accidente de buceo." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de dive shop o PADI." },
+          ],
+        },
+        "Charter Vessels": {
+          title: "Charter — captain + HIN",
+          summary: "Captain mode, HIN, kit USCG y seguro para charter.",
+          qa: [
+            { q: "¿Qué puertas aplican?", a: "Eslora, capacidad, motor, HIN, kit USCG, captain mode y seguro." },
+            { q: "¿Necesito licencia?", a: "Captain included: huésped 18+, sin puerta de licencia. Bareboat: edad 25 + credencial si aplica." },
+            { q: "¿Depósito?", a: "Coincide con la banda de deducible del listing." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de marketplace de charter." },
+          ],
+        },
+        Other: {
+          title: "Otras embarcaciones — elige estante con nombre",
+          summary: "Prefiere Kayak, SUP, Fishing, Inflatable, Jet Ski, Motorboat, Pontoon, Dive o Charter.",
+          qa: [
+            { q: "¿Debo usar Other?", a: "Reubica cuando un estante Boats con nombre encaje para aplicar HIN, PFD o captain." },
+            { q: "¿Qué sigue aplicando?", a: "Eslora, capacidad, motor, seguro y boatsOtherKind aún se congelan en rent." },
+            { q: "¿HIN?", a: "Obligatorio si es motorizado (motor yes / electric_only) o en estante motorizado." },
+            { q: "¿Depósito?", a: "Coincide con el deducible — no seguro de viaje." },
+            { q: "¿Promo de partner?", a: "Sin hard-sell de marina." },
+          ],
+        },
+      },
       "Bikes & Scooters": {
         "Mountain Bikes": {
           title: "MTB — waiver de trail + casco",
