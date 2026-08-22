@@ -1431,8 +1431,8 @@ export const cs: AppMessages = {
     },
     photos: {
       title: "Přidat fotky",
-      subtitle: (maxPhotos, maxVideos) =>
-        `Až ${maxPhotos} fotek a ${maxVideos} videí. Klepnutím zobrazíte náhled nebo nastavíte titulní. Dlouhým stiskem přeuspořádáte.`,
+      subtitle: (maxPhotos, _maxVideos) =>
+        `Až ${maxPhotos} fotek. Video do inzerátu nepřidáváme — sousedé uvidí fotky. Klepnutím náhled nebo titulní. Dlouhým stiskem přeuspořádáš.`,
       chooseLibrary: "Vybrat z knihovny",
       takePhoto: "Vyfotit",
       addVideo: "Přidat video",

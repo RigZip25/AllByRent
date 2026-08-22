@@ -679,15 +679,17 @@ export function Step1Photos({
           </button>
         </div>
         <div className="mt-2">
-          <button
-            type="button"
-            onClick={() => videoInputRef.current?.click()}
-            disabled={atMaxVideos}
-            className="w-full rounded-xl border-2 py-2.5 text-sm font-semibold disabled:opacity-50"
-            style={{ borderColor: PRIMARY_GREEN, color: PRIMARY_GREEN }}
-          >
-            {photosCopy.addVideo}
-          </button>
+          {MAX_LISTING_VIDEOS > 0 ? (
+            <button
+              type="button"
+              onClick={() => videoInputRef.current?.click()}
+              disabled={atMaxVideos}
+              className="w-full rounded-xl border-2 py-2.5 text-sm font-semibold disabled:opacity-50"
+              style={{ borderColor: PRIMARY_GREEN, color: PRIMARY_GREEN }}
+            >
+              {photosCopy.addVideo}
+            </button>
+          ) : null}
           {storageWarning ? (
             <p className="mt-2 text-xs font-semibold text-amber-700">{storageWarning}</p>
           ) : null}

@@ -47,4 +47,5 @@ export async function compressImageFiles(files: File[]): Promise<File[]> {
 }
 
 export const MAX_LISTING_PHOTOS = 12;
-export const MAX_LISTING_VIDEOS = 2;
+/** Video upload disabled — keep listings photo-only (storage + moderation risk). */
+export const MAX_LISTING_VIDEOS = 0;

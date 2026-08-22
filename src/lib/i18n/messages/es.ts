@@ -1418,8 +1418,8 @@ export const es: AppMessages = {
     },
     photos: {
       title: "Añadir fotos",
-      subtitle: (maxPhotos, maxVideos) =>
-        `Hasta ${maxPhotos} fotos y ${maxVideos} vídeos. Toca una foto para verla o elegir la portada. Mantén pulsado para reordenar.`,
+      subtitle: (maxPhotos, _maxVideos) =>
+        `Hasta ${maxPhotos} fotos. No añadimos vídeo al anuncio — los vecinos ven fotos. Toca para vista previa o portada. Mantén pulsado para reordenar.`,
       chooseLibrary: "Elegir de la galería",
       takePhoto: "Hacer foto",
       addVideo: "Añadir vídeo",

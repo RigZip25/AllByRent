@@ -689,6 +689,7 @@ function draftToRow(draft: ListingDraft, ownerId: string): Partial<SupabaseListi
       license_plate_state: draft.licensePlateState?.trim() || null,
       vehicle_extras: draft.vehicleExtras ?? emptyVehicleExtras(),
       category_specs: draft.categorySpecs ?? {},
+      instructions_url: draft.instructionsUrl?.trim() || null,
     },
     handoff: draft.handoff ?? {},
     qr_code: draft.qrToken ?? null,
@@ -758,7 +759,8 @@ function rowToDraft(row: SupabaseListingRow): ListingDraft {
             ),
           )
         : {},
-    instructionsUrl: "",
+    instructionsUrl:
+      typeof availability.instructions_url === "string" ? availability.instructions_url : "",
     modes,
     pricing:
       row.pricing && typeof row.pricing === "object"

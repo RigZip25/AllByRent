@@ -1418,8 +1418,8 @@ export const en: AppMessages = {
     },
     photos: {
       title: "Add photos",
-      subtitle: (maxPhotos, maxVideos) =>
-        `Up to ${maxPhotos} photos and ${maxVideos} videos. Tap a photo to preview or set the cover. Long-press to reorder.`,
+      subtitle: (maxPhotos, _maxVideos) =>
+        `Up to ${maxPhotos} photos. We don’t host listing video — use photos here. Tap to preview or set cover. Long-press to reorder.`,
       chooseLibrary: "Choose from library",
       takePhoto: "Take photo",
       addVideo: "Add video",
