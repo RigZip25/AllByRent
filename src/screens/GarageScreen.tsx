@@ -4,6 +4,7 @@ import { HostDashboard } from "../app/components/HostDashboard";
 import { HostGarageListSection, type HostGarageListMode } from "../app/components/HostGarageListSection";
 import { RoleModeSwitcher } from "../components/RoleModeSwitcher";
 import { GarageLookEditor } from "../components/GarageLookEditor";
+import { StoreLiveToggle } from "../components/StoreLiveToggle";
 import { useAuth } from "../hooks/AuthProvider";
 import type { AppMode } from "../lib/appMode";
 import { resolveHostAccountId } from "../lib/hostIdentity";
@@ -105,6 +106,8 @@ export function GarageScreen({
           )}
           <p className="mt-0.5 text-[13px] text-gray-500">{t.garage.subtitle}</p>
         </div>
+
+        <StoreLiveToggle onOpenProfile={() => onNavigate("profile")} />
 
         <div className="mb-3 flex gap-2">
           <button

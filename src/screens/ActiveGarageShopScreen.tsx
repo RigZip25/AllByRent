@@ -13,6 +13,11 @@ import { fetchRemoteProfile } from "../lib/supabaseProfile";
 import { loadUserProfile } from "../lib/userProfileStorage";
 import { resolveGarageAccent, type GarageIdentity } from "../lib/garageIdentity";
 import {
+  fetchStoreLiveByHostIds,
+  isStoreOpenForHost,
+  onStoreLiveChanged,
+} from "../lib/garageStoreLive";
+import {
   fetchGarageStorefrontRemote,
   onGarageIdentityChanged,
 } from "../lib/garageStorefrontSync";
@@ -118,7 +123,7 @@ export function ActiveGarageShopScreen({
   onOpenListing,
   onStockShelf,
 }: ActiveGarageShopScreenProps) {
-  const { common, garageSale } = useMessages();
+  const { common, garageSale, garageUi } = useMessages();
   const { garageAuction: auctionCopy, garageShare: shareCopy, garageShop: shopCopy } = garageSale;
   const auth = useAuth();
   const ownHostId = resolveHostAccountId(auth.userId);
@@ -148,7 +153,25 @@ export function ActiveGarageShopScreen({
   });
   const [openLabel, setOpenLabel] = useState(() => garageSaleOpenLabel(getGarageSaleSchedule()));
   const [openSaleTick, setOpenSaleTick] = useState(0);
+  const [storeOpen, setStoreOpen] = useState(() => isOwnGarage || isStoreOpenForHost(hostId));
   const openSale = useMemo(() => getActiveOpenSaleForHost(hostId), [hostId, openSaleTick, listings]);
+
+  useEffect(() => {
+    let mounted = true;
+    if (isOwnGarage || preview) {
+      setStoreOpen(true);
+      return () => {
+        mounted = false;
+      };
+    }
+    void fetchStoreLiveByHostIds([hostId]).then((map) => {
+      if (!mounted) return;
+      setStoreOpen(isStoreOpenForHost(hostId, map));
+    });
+    return onStoreLiveChanged((id, live) => {
+      if (id === hostId) setStoreOpen(live);
+    });
+  }, [hostId, isOwnGarage, preview]);
 
   const refreshCartCount = useCallback(
     () => setCartCount(getCartCount() + getDeviceOpenSaleCart().length),
@@ -281,6 +304,12 @@ export function ActiveGarageShopScreen({
       return;
     }
 
+    if (!storeOpen) {
+      setListings([]);
+      setLoading(false);
+      return;
+    }
+
     void fetchActiveListingsForCityRemote(city).then(async (all) => {
       const candidates = all.filter(
         (listing) =>
@@ -300,6 +329,7 @@ export function ActiveGarageShopScreen({
     refreshCartCount,
     refreshPendingWins,
     refreshOfferCount,
+    storeOpen,
   ]);
 
   useEffect(() => {
@@ -441,9 +471,9 @@ export function ActiveGarageShopScreen({
               </h1>
               <span
                 className="rounded-full px-2.5 py-1 text-[12px] font-bold uppercase tracking-wide text-white"
-                style={{ backgroundColor: shopAccent.color }}
+                style={{ backgroundColor: storeOpen || isOwnGarage ? shopAccent.color : "#6B7280" }}
               >
-                {shopCopy.openBadge}
+                {storeOpen || isOwnGarage ? shopCopy.openBadge : garageUi.storePausedBadge}
               </span>
             </div>
             <p className="text-[15px] text-gray-700">{openLabel}</p>
@@ -553,6 +583,19 @@ export function ActiveGarageShopScreen({
       <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
         {loading ? (
           <p className="py-16 text-center text-gray-500">{shopCopy.loadingShelf}</p>
+        ) : !storeOpen && !isOwnGarage && !preview ? (
+          <div className="rounded-2xl border bg-white p-6 text-center" style={{ borderColor: BORDER }}>
+            <p className="text-lg font-bold text-gray-900">{garageUi.storeClosedTitle}</p>
+            <p className="mt-2 text-[15px] text-gray-600">{garageUi.storeClosedBody}</p>
+            <button
+              type="button"
+              onClick={onBack}
+              className="mt-4 w-full rounded-xl border py-3.5 text-base font-bold"
+              style={{ borderColor: shopAccent.color, color: shopAccent.color }}
+            >
+              {shopCopy.backToYardSales}
+            </button>
+          </div>
         ) : listings.length === 0 ? (
           <div className="rounded-2xl border bg-white p-6 text-center" style={{ borderColor: BORDER }}>
             <p className="text-lg font-bold text-gray-900">{shopCopy.emptyTitle}</p>

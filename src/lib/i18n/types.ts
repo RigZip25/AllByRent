@@ -1666,6 +1666,22 @@ export type AppMessages = {
     deleteDraftBody: string;
     deleteDraftConfirm: string;
     deleteDraftAria: (title: string) => string;
+    storeLiveOnTitle: string;
+    storeLiveOffTitle: string;
+    storeLiveOnBody: string;
+    storeLiveOffBody: string;
+    storeLiveOpen: string;
+    storeLivePause: string;
+    storeLiveStripeRequired: string;
+    storeLiveStripeGateTitle: string;
+    storeLiveStripeGateBody: string;
+    storeLiveStripeCta: string;
+    storeLiveStripeOpening: string;
+    storeLiveOpenProfile: string;
+    storeLiveReadyHint: string;
+    storeClosedTitle: string;
+    storeClosedBody: string;
+    storePausedBadge: string;
   };
   rentalDetail: {
     title: string;

@@ -51,6 +51,7 @@ export function loadShelfListings(filter: ShelfListingFilter): ListingDraft[] {
   const subcategoryNorm = filter.subcategory ? normalize(filter.subcategory) : null;
 
   return loadPublishedListings().filter((listing) => {
+    // Sync path uses local store-Live cache (warmed by prior remote fetches).
     if (!isListingBrowsable(listing)) return false;
     if (normalize(listing.category) !== categoryNorm) return false;
     if (subcategoryNorm && normalize(listing.subcategory) !== subcategoryNorm) return false;
@@ -68,9 +69,9 @@ export async function fetchShelfListings(filter: ShelfListingFilter): Promise<Li
   const subcategoryNorm = filter.subcategory ? normalize(filter.subcategory) : null;
   const city = filter.city?.trim() || getActiveRentLocationLabel().trim() || getProfileCity().trim();
 
+  // fetchActiveListingsForCityRemote already applies store-Live + pause filters.
   const active = await fetchActiveListingsForCityRemote(city);
   return active.filter((listing) => {
-    if (!isListingBrowsable(listing)) return false;
     if (normalize(listing.category) !== categoryNorm) return false;
     if (subcategoryNorm && normalize(listing.subcategory) !== subcategoryNorm) return false;
     return true;

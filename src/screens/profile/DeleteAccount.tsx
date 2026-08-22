@@ -5,7 +5,7 @@ import { requestAccountDeletion, signInWithPasskey } from "../../lib/auth";
 import { dismissNativeKeyboard } from "../../lib/dismissKeyboard";
 import { fetchManageableListings } from "../../lib/hostAccess";
 import { useMessages } from "../../lib/i18n/react";
-import { isListingBrowsable } from "../../lib/listingStorage";
+import { isListingOnShelf } from "../../lib/listingStorage";
 import { resetAllAppData } from "../../lib/resetAppStorage";
 
 const BORDER = "#E8E6E0";
@@ -48,7 +48,7 @@ export function DeleteAccountScreen({
 
   const hasActiveListings = async (): Promise<boolean> => {
     const listings = await fetchManageableListings(auth.userId, auth.userEmail);
-    return listings.some(isListingBrowsable);
+    return listings.some(isListingOnShelf);
   };
 
   const handleRequestDeletion = () =>

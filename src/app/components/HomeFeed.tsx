@@ -158,7 +158,7 @@ export function HomeFeed({
     void fetchActiveListingsForCityRemote(fetchCity)
       .then(async (list) => {
         if (!mounted) return;
-        const browsable = list.filter(isListingBrowsable);
+        const browsable = list.filter((l) => isListingBrowsable(l));
         setListings(browsable);
         const hostIds = browsable.map((l) => l.hostId).filter(Boolean) as string[];
         const [names, storefronts] = await Promise.all([

@@ -14,6 +14,10 @@ import {
   normalizeHomeTerritory,
   normalizeTravelOutsideHomeArea,
 } from "./vehicleHomeTerritory";
+import {
+  fetchStoreLiveByHostIds,
+  isStoreOpenForHost,
+} from "./garageStoreLive";
 
 const LISTINGS_STORAGE_KEY = "allbyrent_published_listings";
 const PROFILE_CITY_KEY = "allbyrent_profile_city";
@@ -1040,22 +1044,39 @@ export async function fetchListingsByOwnerIdsRemote(ownerIds: string[]): Promise
   return drafts;
 }
 
-/** Live shelf + not paused — what neighbors should see in browse. */
-export function isListingBrowsable(listing: ListingDraft): boolean {
-  // Legacy pending_qr was a hard gate; those listings are browsable now too.
-  const live =
-    listing.listingStatus === "active" || listing.listingStatus === "pending_qr";
-  return live && !listing.paused;
+/** Host inventory after wizard — active / legacy pending_qr. Not necessarily neighbor-visible. */
+export function isListingOnShelf(listing: ListingDraft): boolean {
+  return listing.listingStatus === "active" || listing.listingStatus === "pending_qr";
+}
+
+/**
+ * Neighbor-visible in browse: on shelf, not item-paused, and host store is Live.
+ * Pass `storeLiveByHost` from `fetchStoreLiveByHostIds` when batching; otherwise local cache is used.
+ */
+export function isListingBrowsable(
+  listing: ListingDraft,
+  storeLiveByHost?: Record<string, boolean>,
+): boolean {
+  if (!isListingOnShelf(listing) || listing.paused) return false;
+  return isStoreOpenForHost(listing.hostId, storeLiveByHost);
+}
+
+async function filterNeighborVisible(listings: ListingDraft[]): Promise<ListingDraft[]> {
+  const hostIds = listings
+    .map((l) => l.hostId?.trim() ?? "")
+    .filter(Boolean);
+  const storeLiveByHost = await fetchStoreLiveByHostIds(hostIds);
+  return listings.filter((l) => isListingBrowsable(l, storeLiveByHost));
 }
 
 export async function fetchActiveListingsForCityRemote(city: string): Promise<ListingDraft[]> {
   const cityNorm = city.trim();
   if (!isSupabaseConfigured()) {
-    return loadPublishedListings().filter(isListingBrowsable);
+    return filterNeighborVisible(loadPublishedListings().filter(isListingOnShelf));
   }
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return loadPublishedListings().filter(isListingBrowsable);
+    return filterNeighborVisible(loadPublishedListings().filter(isListingOnShelf));
   }
   const query = supabase
     .from("listings")
@@ -1065,10 +1086,10 @@ export async function fetchActiveListingsForCityRemote(city: string): Promise<Li
     .order("updated_at", { ascending: false });
   const { data, error } = cityNorm ? await query.ilike("city", `%${cityNorm}%`) : await query;
   if (error || !data) {
-    return loadPublishedListings().filter(isListingBrowsable);
+    return filterNeighborVisible(loadPublishedListings().filter(isListingOnShelf));
   }
   return interleaveBoosted(
-    (data as SupabaseListingRow[]).map(rowToDraft).filter(isListingBrowsable),
+    await filterNeighborVisible((data as SupabaseListingRow[]).map(rowToDraft)),
   );
 }
 
@@ -1081,26 +1102,22 @@ export async function searchActiveListingsRemote(params: {
   const cityNorm = params.city.trim();
   const category = params.category?.trim() || "";
 
-  if (!isSupabaseConfigured()) {
-    return loadPublishedListings()
-      .filter(isListingBrowsable)
+  const matchLocal = (list: ListingDraft[]) =>
+    list
+      .filter(isListingOnShelf)
       .filter((l) => (category ? l.category === category : true))
       .filter((l) => {
         if (!q) return true;
         const hay = `${l.title} ${l.description} ${l.category} ${l.subcategory}`.toLowerCase();
         return hay.includes(q);
       });
+
+  if (!isSupabaseConfigured()) {
+    return filterNeighborVisible(matchLocal(loadPublishedListings()));
   }
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return loadPublishedListings()
-      .filter(isListingBrowsable)
-      .filter((l) => (category ? l.category === category : true))
-      .filter((l) => {
-        if (!q) return true;
-        const hay = `${l.title} ${l.description} ${l.category} ${l.subcategory}`.toLowerCase();
-        return hay.includes(q);
-      });
+    return filterNeighborVisible(matchLocal(loadPublishedListings()));
   }
 
   let queryBuilder = supabase
@@ -1120,16 +1137,9 @@ export async function searchActiveListingsRemote(params: {
 
   const { data, error } = await queryBuilder.limit(50);
   if (error || !data) {
-    return loadPublishedListings()
-      .filter(isListingBrowsable)
-      .filter((l) => (category ? l.category === category : true))
-      .filter((l) => {
-        if (!q) return true;
-        const hay = `${l.title} ${l.description} ${l.category} ${l.subcategory}`.toLowerCase();
-        return hay.includes(q);
-      });
+    return filterNeighborVisible(matchLocal(loadPublishedListings()));
   }
   return interleaveBoosted(
-    (data as SupabaseListingRow[]).map(rowToDraft).filter(isListingBrowsable),
+    await filterNeighborVisible((data as SupabaseListingRow[]).map(rowToDraft)),
   );
 }

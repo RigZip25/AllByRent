@@ -8,6 +8,7 @@ import { resolveHostAccountId } from "../../lib/hostIdentity";
 import { getProfileCity, savePublishedListingRemote, savePublishedListing, saveListingDraftProgress, stampListingDraftProgress, removePublishedListing, removePublishedListingRemote, fetchListingByIdRemote, getPublishedListingById } from "../../lib/listingStorage";
 import { syncAgentPrefsRemote, ensureBrowserTimeZoneCaptured } from "../../lib/agentPrefs";
 import { notifyGarageFollowersOfNewListing } from "../../lib/garageFollowNotify";
+import { getLocalStoreLive } from "../../lib/garageStoreLive";
 import { loadUserProfile, saveUserProfile } from "../../lib/userProfileStorage";
 import { getListingDisplayTitle, listingRequiresQrSticker } from "../../lib/listingQr";
 import {
@@ -21,7 +22,7 @@ import {
   startIdentityVerificationForListing,
   type SellerGoPublicStatus,
 } from "../../lib/sellerGoPublic";
-import { isFreeGiveaway, listingChargesMoney } from "../../lib/listingGift";
+import { isFreeGiveaway } from "../../lib/listingGift";
 import { PhoneVerifySheet } from "../../components/profile/PhoneVerifySheet";
 import { analyzeListingMediaPhotos } from "./listingAnalysis";
 import {
@@ -491,11 +492,14 @@ export function ListingWizard({
         recordDevicePublish(hostId);
       }
       const profile = loadUserProfile();
-      notifyGarageFollowersOfNewListing({
-        hostId,
-        hostName: profile.displayName,
-        listingTitle: getListingDisplayTitle(publishedDraft.title) || publishedDraft.title || "New listing",
-      });
+      // Neighbors only learn about new shelf items when the store is already Live.
+      if (hostId && getLocalStoreLive(hostId)) {
+        notifyGarageFollowersOfNewListing({
+          hostId,
+          hostName: profile.displayName,
+          listingTitle: getListingDisplayTitle(publishedDraft.title) || publishedDraft.title || "New listing",
+        });
+      }
       firePublishConfetti();
       setIsPublishing(false);
 
@@ -674,9 +678,8 @@ export function ListingWizard({
         const requiresPhone = listingRequiresPhoneKyc(withCleanText.modes, withCleanText.pricing);
         const status = await loadSellerGoPublicStatus(auth.userId, { requiresPhone });
         setGoPublicStatus(status);
-        // Signed in (+ phone if paid). Open checklist for soft Connect nudge on paid listings.
-        const needsPayouts = listingChargesMoney(withCleanText);
-        if (status.ready && (!needsPayouts || status.payoutsReady)) {
+        // Sign-in (+ phone if paid). Stripe Connect is required only when opening the store Live.
+        if (status.ready) {
           finalizePublish(withCleanText);
           return;
         }
@@ -1189,7 +1192,7 @@ export function ListingWizard({
             busy={goPublicBusy}
             error={goPublicError}
             errorCode={goPublicErrorCode}
-            showPayouts={listingChargesMoney(draft)}
+            showPayouts={false}
             onSignIn={handleChecklistSignIn}
             onVerifyIdentity={handleChecklistIdentity}
             onVerifyPhone={handleChecklistPhone}
@@ -1308,11 +1311,7 @@ export function ListingWizard({
         <ListingPublishSuccess
           title={getListingDisplayTitle(draft.title)}
           statusLine={publishStatusLine}
-          payoutNudge={Boolean(
-            goPublicStatus &&
-              !goPublicStatus.payoutsReady &&
-              listingChargesMoney(draft),
-          )}
+          payoutNudge={Boolean(goPublicStatus && !goPublicStatus.payoutsReady)}
           payoutBusy={goPublicBusy === "stripe"}
           onSetupPayouts={handleChecklistConnect}
           onPreviewShop={onPreviewShop ? () => onPreviewShop(draft.id) : undefined}

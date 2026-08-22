@@ -5,7 +5,8 @@ import type { PublicUserProfile } from "../lib/demoUserProfiles";
 import { useMessages } from "../lib/i18n/react";
 import { fetchRemoteProfile, type RemoteProfile } from "../lib/supabaseProfile";
 import { loadUserProfile, type UserProfile } from "../lib/userProfileStorage";
-import { fetchListingsByOwnerIdsRemote, loadPublishedListings } from "../lib/listingStorage";
+import { fetchListingsByOwnerIdsRemote, isListingBrowsable, loadPublishedListings } from "../lib/listingStorage";
+import { fetchStoreLiveByHostIds, isStoreOpenForHost } from "../lib/garageStoreLive";
 import type { ListingDraft } from "./listing/types";
 import { getListingDisplayTitle } from "../lib/listingQr";
 import { categoryEmoji } from "../lib/listingCardMeta";
@@ -19,9 +20,12 @@ function looksLikeUuid(id: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 }
 
-function mapDraftsToPublicListings(drafts: ListingDraft[]): PublicUserProfile["listings"] {
+function mapDraftsToPublicListings(
+  drafts: ListingDraft[],
+  storeLiveByHost?: Record<string, boolean>,
+): PublicUserProfile["listings"] {
   return drafts
-    .filter((listing) => listing.listingStatus === "active" && !listing.paused)
+    .filter((listing) => isListingBrowsable(listing, storeLiveByHost))
     .slice(0, 12)
     .map((listing) => ({
       id: listing.id,
@@ -65,9 +69,13 @@ function publicFromOwn(profile: UserProfile): PublicUserProfile {
   };
 }
 
-function listingsForHostLocal(hostId: string): PublicUserProfile["listings"] {
+function listingsForHostLocal(
+  hostId: string,
+  storeLiveByHost?: Record<string, boolean>,
+): PublicUserProfile["listings"] {
   return mapDraftsToPublicListings(
     loadPublishedListings().filter((listing) => listing.hostId === hostId),
+    storeLiveByHost,
   );
 }
 
@@ -93,11 +101,34 @@ export function PublicProfileScreen({
   const [remoteListings, setRemoteListings] = useState<PublicUserProfile["listings"] | null>(null);
   const [fetchedReviews, setFetchedReviews] = useState<PublicUserProfile["reviews"] | null>(null);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [storeLiveByHost, setStoreLiveByHost] = useState<Record<string, boolean>>({});
+  const [storeLiveReady, setStoreLiveReady] = useState(isSelf);
 
-  const localHostListings = useMemo(() => listingsForHostLocal(userId), [userId]);
-  const hostListings = remoteListings && remoteListings.length > 0 ? remoteListings : localHostListings;
+  useEffect(() => {
+    let mounted = true;
+    void fetchStoreLiveByHostIds([userId]).then((map) => {
+      if (!mounted) return;
+      setStoreLiveByHost(map);
+      setStoreLiveReady(true);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [userId]);
+
+  const localHostListings = useMemo(
+    () => listingsForHostLocal(userId, storeLiveByHost),
+    [userId, storeLiveByHost],
+  );
+  const neighborStoreOpen = isSelf || isStoreOpenForHost(userId, storeLiveByHost);
+  const hostListings =
+    !neighborStoreOpen && !isSelf
+      ? []
+      : remoteListings && remoteListings.length > 0
+        ? remoteListings
+        : localHostListings;
   const fallbackNeighbor: PublicUserProfile | null =
-    !isSelf && !remoteProfile && hostListings.length > 0
+    !isSelf && neighborStoreOpen && !remoteProfile && hostListings.length > 0
       ? {
           id: userId,
           displayName: t.neighbor,
@@ -114,17 +145,20 @@ export function PublicProfileScreen({
         }
       : null;
   const baseProfile = isSelf ? publicFromOwn(own) : remoteProfile ?? fallbackNeighbor;
-  const profile = baseProfile
-    ? {
-        ...baseProfile,
-        listings: hostListings.length > 0 ? hostListings : baseProfile.listings,
-        reviews:
-          baseProfile.reviews.length > 0
-            ? baseProfile.reviews
-            : (fetchedReviews ?? baseProfile.reviews),
-        reviewCount: fetchedReviews !== null ? fetchedReviews.length : baseProfile.reviewCount,
-      }
-    : null;
+  const profile =
+    !isSelf && storeLiveReady && !neighborStoreOpen
+      ? null
+      : baseProfile
+        ? {
+            ...baseProfile,
+            listings: hostListings.length > 0 ? hostListings : baseProfile.listings,
+            reviews:
+              baseProfile.reviews.length > 0
+                ? baseProfile.reviews
+                : (fetchedReviews ?? baseProfile.reviews),
+            reviewCount: fetchedReviews !== null ? fetchedReviews.length : baseProfile.reviewCount,
+          }
+        : null;
 
   useEffect(() => {
     setShowAllReviews(false);
@@ -155,12 +189,27 @@ export function PublicProfileScreen({
     }
     let mounted = true;
     setRemoteLoading(true);
-    void Promise.all([fetchRemoteProfile(userId), fetchListingsByOwnerIdsRemote([userId])])
-      .then(([remote, drafts]) => {
+    void Promise.all([
+      fetchRemoteProfile(userId),
+      fetchListingsByOwnerIdsRemote([userId]),
+      fetchStoreLiveByHostIds([userId]),
+    ])
+      .then(([remote, drafts, liveMap]) => {
         if (!mounted) return;
+        setStoreLiveByHost(liveMap);
+        setStoreLiveReady(true);
+        const open = isStoreOpenForHost(userId, liveMap);
+        if (!open) {
+          setRemoteProfile(null);
+          setRemoteListings([]);
+          return;
+        }
         setRemoteProfile(remote ? publicFromRemote(remote, t.neighbor) : null);
         setRemoteListings(
-          mapDraftsToPublicListings(drafts.filter((listing) => listing.hostId === userId)),
+          mapDraftsToPublicListings(
+            drafts.filter((listing) => listing.hostId === userId),
+            liveMap,
+          ),
         );
       })
       .finally(() => {

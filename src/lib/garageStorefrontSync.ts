@@ -2,6 +2,7 @@ import {
   normalizeGarageIdentity,
   type GarageIdentity,
 } from "./garageIdentity";
+import { setLocalStoreLive } from "./garageStoreLive";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 const GARAGE_IDENTITY_EVENT = "allbyrent:garage-identity";
@@ -61,15 +62,19 @@ export async function fetchGarageStorefrontsByHostIds(
   if (ids.length === 0 || !isSupabaseConfigured()) return {};
   const supabase = getSupabaseClient();
   if (!supabase) return {};
+  // store_live is selected only to warm garageStoreLive cache — Live flag source of truth stays there.
   const { data, error } = await supabase
     .from("garage_storefronts")
-    .select("host_id, shop_kind, accent_id, shop_name")
+    .select("host_id, shop_kind, accent_id, shop_name, store_live")
     .in("host_id", ids);
   if (error || !data) return {};
   const out: Record<string, GarageIdentity> = {};
   for (const row of data) {
     const hostId = typeof row.host_id === "string" ? row.host_id : "";
     if (!hostId) continue;
+    if ("store_live" in row) {
+      setLocalStoreLive(hostId, Boolean(row.store_live));
+    }
     out[hostId] = normalizeGarageIdentity({
       shopKind: row.shop_kind,
       accentId: row.accent_id,
