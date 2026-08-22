@@ -1530,9 +1530,9 @@ export const en: AppMessages = {
       searchPriceLink: (title) => `Search "${title} price new"`,
       searchPriceLinkLocal: (title, currency, country) =>
         `Search "${title}" new price in ${country} (${currency})`,
-      instructionsUrl: "Instructions / manual URL",
-      instructionsPlaceholder: "https://... link to manual or tutorial video",
-      instructionsHelper: "Shown as Instructions button on your listing",
+      instructionsUrl: "",
+      instructionsPlaceholder: "",
+      instructionsHelper: "",
       assetIdentityHint:
         "Your VIN is the car’s fingerprint — scan or type it, and Evorios fills make, model, and year.",
       vehicleFlowTitle: "Neighbor cars, done right",

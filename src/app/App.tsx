@@ -1394,14 +1394,6 @@ function AppRoutes() {
     setCurrentScreen("home");
   };
 
-  const handleOpenAttachment = (url: string, title?: string) => {
-    const trimmed = url.trim();
-    if (!trimmed) return;
-    setAttachmentUrl(trimmed);
-    setAttachmentTitle(title?.trim() ? title.trim() : "Attachment");
-    navigateTo("attachmentViewer");
-  };
-
   const handlePostRequest = (prefill?: ShelfPrefill) => {
     setPostRequestPrefill(prefill ?? null);
     navigateTo("postRequest");
@@ -2214,7 +2206,6 @@ function AppRoutes() {
             onBook={handleBook}
             onOpenGarageCart={handleOpenGarageCart}
             onOpenGarageShop={handleOpenGarageShopForListing}
-            onOpenAttachment={handleOpenAttachment}
             onViewHostProfile={handleViewPublicProfile}
             onOpenListingChat={handleOpenListingChat}
           />

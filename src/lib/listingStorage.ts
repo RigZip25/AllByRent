@@ -689,7 +689,7 @@ function draftToRow(draft: ListingDraft, ownerId: string): Partial<SupabaseListi
       license_plate_state: draft.licensePlateState?.trim() || null,
       vehicle_extras: draft.vehicleExtras ?? emptyVehicleExtras(),
       category_specs: draft.categorySpecs ?? {},
-      instructions_url: draft.instructionsUrl?.trim() || null,
+      instructions_url: null,
     },
     handoff: draft.handoff ?? {},
     qr_code: draft.qrToken ?? null,

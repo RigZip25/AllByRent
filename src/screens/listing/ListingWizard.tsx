@@ -33,10 +33,6 @@ import {
   moderateListingText,
 } from "./listingTextModeration";
 import {
-  messageForManualUrlModeration,
-  moderateListingManualUrl,
-} from "./listingManualUrlModeration";
-import {
   messageForVideoModeration,
   moderateListingMediaVideos,
 } from "./listingVideoModeration";
@@ -444,7 +440,7 @@ export function ListingWizard({
         ...sourceDraft,
         title: sanitizeUserText(sourceDraft.title).trim(),
         description: sanitizeUserText(sourceDraft.description).trim(),
-        instructionsUrl: sourceDraft.instructionsUrl.trim(),
+        instructionsUrl: "",
       };
       const normalizedDraft = applyFrictionlessDefaults(cleaned);
 
@@ -578,24 +574,11 @@ export function ListingWizard({
             return;
           }
 
-          const urlModeration = await moderateListingManualUrl(draft.instructionsUrl, {
-            title: cleanedTitle,
-            category: draft.category,
-            subcategory: draft.subcategory,
-          });
-          if (!urlModeration.ok) {
-            setTextGateMessage(
-              messageForManualUrlModeration(urlModeration.reasonCode, listing.itemInfo),
-            );
-            goToStep(LISTING_STEP.details, -1);
-            setIsPublishing(false);
-            return;
-          }
-
           finalizePublish({
             ...draft,
             title: cleanedTitle,
             description: cleanedDescription,
+            instructionsUrl: "",
           });
         } catch {
           setTextGateMessage(listing.itemInfo.moderationTextVerifyFailed);
@@ -680,25 +663,12 @@ export function ListingWizard({
           return;
         }
 
-        const urlModeration = await moderateListingManualUrl(draft.instructionsUrl, {
-          title: cleanedTitle,
-          category: draft.category,
-          subcategory: draft.subcategory,
-        });
-        if (!urlModeration.ok) {
-          setTextGateMessage(
-            messageForManualUrlModeration(urlModeration.reasonCode, listing.itemInfo),
-          );
-          goToStep(LISTING_STEP.details, -1);
-          setIsPublishing(false);
-          return;
-        }
-
         const saved = await persistDraftForGoPublic();
         const withCleanText = {
           ...saved,
           title: cleanedTitle,
           description: cleanedDescription,
+          instructionsUrl: "",
         };
         setDraft(withCleanText);
         const requiresPhone = listingRequiresPhoneKyc(withCleanText.modes, withCleanText.pricing);
@@ -980,18 +950,6 @@ export function ListingWizard({
             strike.hasCooldown
               ? listing.moderationCooldownWait(formatCooldownHours(strike.cooldownMs))
               : `${messageForTextModeration(moderation.reasonCode, listing.itemInfo)} ${listing.moderationSoftNudgeListing}`,
-          );
-          return;
-        }
-
-        const urlModeration = await moderateListingManualUrl(draft.instructionsUrl, {
-          title: cleanedTitle,
-          category: draft.category,
-          subcategory: draft.subcategory,
-        });
-        if (!urlModeration.ok) {
-          setTextGateMessage(
-            messageForManualUrlModeration(urlModeration.reasonCode, listing.itemInfo),
           );
           return;
         }

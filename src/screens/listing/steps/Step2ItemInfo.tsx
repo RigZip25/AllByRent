@@ -940,24 +940,6 @@ export function Step2ItemInfo({
         </div>
         ) : null}
 
-        <div className="mb-6">
-          <FieldLabel label={item.instructionsUrl} />
-          <input
-            type="url"
-            value={draft.instructionsUrl}
-            placeholder={item.instructionsPlaceholder}
-            className={inputClassName()}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                instructionsUrl: event.target.value,
-              }))
-            }
-          />
-          <p className="text-label mt-2 text-sm text-gray-500">
-            {item.instructionsHelper}
-          </p>
-        </div>
       </motion.div>
     </div>
   );

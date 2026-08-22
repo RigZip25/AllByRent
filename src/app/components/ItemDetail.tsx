@@ -92,7 +92,6 @@ interface ItemDetailProps {
   onBook: () => void;
   onOpenGarageCart?: () => void;
   onOpenGarageShop?: (hostId: string, listingId: string) => void;
-  onOpenAttachment: (url: string, title?: string) => void;
   onViewHostProfile?: (hostId: string) => void;
   /** Open in-app chat with the listing host (sell / gift). */
   onOpenListingChat?: (listingId: string, hostId: string) => void;
@@ -244,7 +243,6 @@ export function ItemDetail({
   onBook,
   onOpenGarageCart,
   onOpenGarageShop,
-  onOpenAttachment,
   onViewHostProfile,
   onOpenListingChat,
 }: ItemDetailProps) {
@@ -894,17 +892,6 @@ export function ItemDetail({
                   : t.item.questionsBeforeBook)}
             </p>
           </div>
-
-          {listing.instructionsUrl?.trim() ? (
-            <button
-              type="button"
-              onClick={() => onOpenAttachment(listing.instructionsUrl, t.item.instructions)}
-              className="w-full bg-card border border-border py-3 rounded-xl flex items-center justify-between px-4 hover:border-primary/50 transition-colors"
-            >
-              <span className="font-medium">{t.item.instructions}</span>
-              <span className="text-sm text-primary">{t.item.view}</span>
-            </button>
-          ) : null}
 
           {(listing.modes.rent || listing.modes.rentToOwn) ? (
           <div className="bg-muted/50 rounded-xl p-4">

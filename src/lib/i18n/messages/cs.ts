@@ -1543,9 +1543,9 @@ export const cs: AppMessages = {
       searchPriceLink: (title) => `Hledat „${title} nová cena“`,
       searchPriceLinkLocal: (title, currency, country) =>
         `Hledat „${title}“ nová cena ${country} (${currency})`,
-      instructionsUrl: "URL návodu / manuálu",
-      instructionsPlaceholder: "https://... odkaz na manuál nebo tutoriál",
-      instructionsHelper: "Zobrazí se jako tlačítko Pokyny u nabídky",
+      instructionsUrl: "",
+      instructionsPlaceholder: "",
+      instructionsHelper: "",
       assetIdentityHint:
         "VIN je otisk vozu — naskenuj nebo zadej a Evorios doplní značku, model a rok.",
       vehicleFlowTitle: "Sousedská auta, jak mají být",

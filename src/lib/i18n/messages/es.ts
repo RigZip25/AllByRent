@@ -1530,9 +1530,9 @@ export const es: AppMessages = {
       searchPriceLink: (title) => `Buscar "precio nuevo de ${title}"`,
       searchPriceLinkLocal: (title, currency, country) =>
         `Buscar "${title}" precio nuevo en ${country} (${currency})`,
-      instructionsUrl: "Enlace a instrucciones / manual",
-      instructionsPlaceholder: "https://... enlace al manual o al vídeo tutorial",
-      instructionsHelper: "Se muestra como botón de Instrucciones en tu anuncio",
+      instructionsUrl: "",
+      instructionsPlaceholder: "",
+      instructionsHelper: "",
       assetIdentityHint:
         "El VIN es la huella del coche — escanéalo o escríbelo y Evorios rellena marca, modelo y año.",
       vehicleFlowTitle: "Coches entre vecinos, bien hechos",
