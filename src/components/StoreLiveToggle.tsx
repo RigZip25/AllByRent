@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { ConnectSetupError } from "./payments/ConnectSetupError";
 import { useAuth } from "../hooks/AuthProvider";
+import { loadManageableListings } from "../lib/hostAccess";
 import {
   fetchStoreLiveByHostIds,
   getLocalStoreLive,
@@ -10,10 +11,7 @@ import {
 } from "../lib/garageStoreLive";
 import { resolveHostAccountId } from "../lib/hostIdentity";
 import { useMessages } from "../lib/i18n/react";
-import {
-  isListingOnShelf,
-  loadPublishedListings,
-} from "../lib/listingStorage";
+import { isListingOnShelf } from "../lib/listingStorage";
 import { startConnectOnboarding } from "../lib/repositories/connectRepository";
 import { loadSellerGoPublicStatus } from "../lib/sellerGoPublic";
 
@@ -26,10 +24,13 @@ type Props = {
   onOpenProfile?: () => void;
 };
 
-function hostHasShelf(hostId: string): boolean {
-  return loadPublishedListings().some(
-    (listing) =>
-      (listing.hostId?.trim() ?? "") === hostId && isListingOnShelf(listing),
+/** Same ownership rules as HostDashboard “On shelf” — include legacy rows without hostId. */
+function hostHasShelf(
+  authUserId: string | null | undefined,
+  authUserEmail: string | null | undefined,
+): boolean {
+  return loadManageableListings(authUserId ?? null, authUserEmail ?? null).some(
+    (listing) => isListingOnShelf(listing),
   );
 }
 
@@ -44,7 +45,7 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
   const hostId = resolveHostAccountId(auth.userId);
   const [storeLive, setStoreLive] = useState(() => getLocalStoreLive(hostId));
   const [garageFormed, setGarageFormed] = useState(() =>
-    hostId ? hostHasShelf(hostId) : false,
+    hostHasShelf(auth.userId, auth.userEmail),
   );
   const [payoutsReady, setPayoutsReady] = useState(false);
   const [statusLoading, setStatusLoading] = useState(true);
@@ -61,7 +62,7 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
       return;
     }
     setStoreLive(getLocalStoreLive(hostId));
-    setGarageFormed(hostHasShelf(hostId));
+    setGarageFormed(hostHasShelf(auth.userId, auth.userEmail));
     void fetchStoreLiveByHostIds([hostId]).then((map) => {
       if (Object.prototype.hasOwnProperty.call(map, hostId)) {
         setStoreLive(Boolean(map[hostId]));
@@ -70,15 +71,16 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
     return onStoreLiveChanged((id, live) => {
       if (id === hostId) setStoreLive(live);
     });
-  }, [hostId]);
+  }, [hostId, auth.userId, auth.userEmail]);
 
   useEffect(() => {
-    if (!hostId || typeof window === "undefined") return;
-    const refreshShelf = () => setGarageFormed(hostHasShelf(hostId));
+    if (typeof window === "undefined") return;
+    const refreshShelf = () =>
+      setGarageFormed(hostHasShelf(auth.userId, auth.userEmail));
     refreshShelf();
     window.addEventListener("evorios-listings-changed", refreshShelf);
     return () => window.removeEventListener("evorios-listings-changed", refreshShelf);
-  }, [hostId]);
+  }, [auth.userId, auth.userEmail]);
 
   // Only hit Connect status once the garage has something on the shelf (or is already Live).
   useEffect(() => {
