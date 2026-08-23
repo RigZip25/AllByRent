@@ -129,7 +129,13 @@ export function CategoryFactCard({
     let s = raw;
     s = s.replace(/\bWhat gates apply\?/gi, "What should I fill in?");
     s = s.replace(/\bWhat must be listed\?/gi, "What should I list?");
-    s = s.replace(/\bkitIncludes\b/g, "kit type");
+    s = s.replace(/\bkitIncludes\b/g, "what's included");
+    // Strip bare camelCase field tokens left in answers (encode leftovers).
+    s = s.replace(/\b[a-z]+[A-Z][a-zA-Z0-9]*\b/g, (token) => {
+      const known = /^(kit|device|person|season|snow|water|sports|power|tool|drill|use|transport|unique|cargo|special|tow|vehicles|eBike|adaptive|scooter|bikes|captain|boats|hand|structural|construction|house|liability)/;
+      if (!known.test(token)) return token;
+      return token.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toLowerCase()).trim();
+    });
     s = s.replace(/\bRent freezes\b/gi, "List");
     s = s.replace(/\bfreezes\b/gi, "records");
     s = s.replace(/\bfreeze\b/gi, "record");
