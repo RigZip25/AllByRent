@@ -1511,6 +1511,8 @@ export const cs: AppMessages = {
       subtitle: "Řekni sousedům, co vystavuješ.",
       subtitleYardSale: "Nejdřív fotka — u garážového výprodeje kategorii přeskočíme.",
       yardSaleBadge: "Na polici garážového výprodeje · Na prodej",
+      coverThumbLabel: "Titulní",
+      coverThumbEdit: "Upravit fotky",
       fieldTitle: "Název",
       titlePlaceholder: (example) => `např. ${example}`,
       categoryStepTitle: "Co nabízíš?",

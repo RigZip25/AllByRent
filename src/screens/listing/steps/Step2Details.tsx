@@ -8,9 +8,11 @@ export function Step2Details({
   setDraft,
   gateMessage = null,
   onDismissGateMessage,
+  onEditPhotos,
 }: StepProps & {
   gateMessage?: string | null;
   onDismissGateMessage?: () => void;
+  onEditPhotos?: () => void;
 }) {
   return (
     <div className="flex flex-col">
@@ -19,6 +21,7 @@ export function Step2Details({
         setDraft={setDraft}
         gateMessage={gateMessage}
         onDismissGateMessage={onDismissGateMessage}
+        onEditPhotos={onEditPhotos}
       />
       <Step3Modes draft={draft} setDraft={setDraft} />
     </div>

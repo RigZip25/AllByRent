@@ -808,6 +808,10 @@ export type AppMessages = {
       subtitle: string;
       subtitleYardSale: string;
       yardSaleBadge: string;
+      /** Mini cover photo thumb on details step. */
+      coverThumbLabel: string;
+      /** CTA under cover thumb — tap to edit photos. */
+      coverThumbEdit: string;
       fieldTitle: string;
       titlePlaceholder: (example: string) => string;
       categoryStepTitle: string;

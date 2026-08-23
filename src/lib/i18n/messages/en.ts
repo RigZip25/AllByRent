@@ -1498,6 +1498,8 @@ export const en: AppMessages = {
       subtitle: "Tell renters what you're listing.",
       subtitleYardSale: "Photo first — we skip categories on garage-sale shelves.",
       yardSaleBadge: "On your garage sale shelf · For sale",
+      coverThumbLabel: "Cover",
+      coverThumbEdit: "Edit photos",
       fieldTitle: "Title",
       titlePlaceholder: (example) => `e.g., ${example}`,
       categoryStepTitle: "What are you listing?",

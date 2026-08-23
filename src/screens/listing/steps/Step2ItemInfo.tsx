@@ -13,8 +13,6 @@ import {
   listingPricingMarket,
 } from "../../../lib/regionalDisplay";
 import { CategorySpecsFields } from "./CategorySpecsFields";
-import { CategoryFactCard } from "../../../components/CategoryFactCard";
-import { listingIsCommercialTransportShelf } from "../../../lib/listingRentRules";
 import {
   getCategoryModeRules,
   requiresAssetIdentity,
@@ -38,6 +36,8 @@ import {
 import { extractVinFromImage } from "../../../lib/vinOcr";
 import { applyAiSuggestionsToDraft } from "../applyAiSuggestions";
 import { listingTitleExample } from "../listingTitlePlaceholders";
+import { useCoverMediaUrl } from "../../../lib/useMediaUrl";
+import type { MediaRef } from "../../../lib/mediaStore";
 
 const GREEN = "#0D5C3A";
 
@@ -62,14 +62,64 @@ function inputClassName(extra = "") {
   return `text-body w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-800 outline-none transition-colors focus:border-green-700 ${extra}`;
 }
 
+function CoverMiniThumb({
+  cover,
+  label,
+  editLabel,
+  onEditPhotos,
+}: {
+  cover?: MediaRef | null;
+  label: string;
+  editLabel: string;
+  onEditPhotos?: () => void;
+}) {
+  const { url, status } = useCoverMediaUrl(cover ?? null);
+  return (
+    <button
+      type="button"
+      onClick={onEditPhotos}
+      disabled={!onEditPhotos}
+      className="mb-6 flex w-full items-center gap-3 rounded-2xl border border-gray-200 bg-white p-2.5 text-left transition-colors enabled:active:bg-gray-50 disabled:opacity-90"
+    >
+      <div
+        className="relative h-[80px] w-[80px] shrink-0 overflow-hidden rounded-xl bg-gray-100"
+        aria-hidden={!url}
+      >
+        {url ? (
+          <img src={url} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-gray-400">
+            <ImageIcon className="h-6 w-6" strokeWidth={1.75} />
+            <span className="text-[10px] font-medium">
+              {status === "loading" ? "…" : label}
+            </span>
+          </div>
+        )}
+        <span
+          className="absolute left-1.5 top-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
+          style={{ backgroundColor: GREEN }}
+        >
+          {label}
+        </span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-gray-800">{label}</p>
+        <p className="mt-0.5 text-xs text-gray-500">{editLabel}</p>
+      </div>
+    </button>
+  );
+}
+
 export function Step2ItemInfo({
   draft,
   setDraft,
   gateMessage = null,
   onDismissGateMessage,
+  onEditPhotos,
 }: StepProps & {
   gateMessage?: string | null;
   onDismissGateMessage?: () => void;
+  onEditPhotos?: () => void;
 }) {
   const { listing } = useMessages();
   const item = listing.itemInfo;
@@ -340,6 +390,13 @@ export function Step2ItemInfo({
           </div>
         ) : null}
 
+        <CoverMiniThumb
+          cover={draft.photos?.[0] ?? null}
+          label={item.coverThumbLabel}
+          editLabel={item.coverThumbEdit}
+          onEditPhotos={onEditPhotos}
+        />
+
         <div className="mb-6">
           <FieldLabel label={item.fieldTitle} required />
           <input
@@ -382,84 +439,6 @@ export function Step2ItemInfo({
         <>
         {showAssetIdentity ? (
           <div className="mb-6 space-y-4 rounded-2xl border bg-[#F8FAF9] p-4" style={{ borderColor: `${GREEN}33` }}>
-            {vinRequired ? (
-              <CategoryFactCard
-                category="Vehicles"
-                subcategory={draft.subcategory}
-                commercialTransport={listingIsCommercialTransportShelf(draft)}
-              />
-            ) : draft.category.trim() === "Heavy Equipment" ||
-              draft.category.trim() === "Construction" ? (
-              <CategoryFactCard
-                category={draft.category.trim()}
-                subcategory={draft.subcategory}
-              />
-            ) : draft.category.trim() === "Boats & Water" ? (
-              <CategoryFactCard
-                category="Boats & Water"
-                subcategory={draft.subcategory}
-              />
-            ) : draft.category.trim() === "Real Estate" ? (
-              <CategoryFactCard
-                category="Real Estate"
-                subcategory={draft.subcategory}
-              />
-            ) : draft.category.trim() === "Photo & Video" ||
-              draft.category.trim() === "Drones" ||
-              draft.subcategory.trim() === "Drones" ? (
-              <CategoryFactCard
-                category="Photo & Video"
-                subcategory={
-                  draft.subcategory.trim() === "Drones" || draft.category.trim() === "Drones"
-                    ? "Drones"
-                    : draft.subcategory
-                }
-              />
-            ) : draft.category.trim() === "Baby & Kids" ? (
-              <CategoryFactCard
-                category="Baby & Kids"
-              />
-            ) : draft.category.trim() === "Electronics & Tech" ? (
-              <CategoryFactCard
-                category="Electronics & Tech"
-                subcategory={draft.subcategory}
-              />
-            ) : draft.category.trim() === "Tools & DIY" ? (
-              <CategoryFactCard
-                category="Tools & DIY"
-                subcategory={draft.subcategory}
-              />
-            ) : draft.category.trim() === "Garden & Yard" ? (
-              <CategoryFactCard
-                category="Garden & Yard"
-                subcategory={draft.subcategory}
-              />
-            ) : draft.category.trim() === "Home & Kitchen" ? (
-              <CategoryFactCard
-                category="Home & Kitchen"
-                subcategory={draft.subcategory}
-              />
-            ) : draft.category.trim() === "Costume & Cosplay" ? (
-              <CategoryFactCard
-                category="Costume & Cosplay"
-                subcategory={draft.subcategory}
-              />
-            ) : draft.category.trim() === "Unique & Other" ? (
-              <CategoryFactCard
-                category="Unique & Other"
-                subcategory={draft.subcategory}
-              />
-            ) : draft.category.trim() === "Party & Events" ? (
-              <CategoryFactCard
-                category="Party & Events"
-                subcategory={draft.subcategory}
-              />
-            ) : draft.category.trim() === "Outdoor & Camping" ? (
-              <CategoryFactCard
-                category="Outdoor & Camping"
-                subcategory={draft.subcategory}
-              />
-            ) : null}
             <p className="text-[13px] leading-snug text-gray-600">
               {vinRequired
                 ? item.assetIdentityHint
@@ -763,44 +742,6 @@ export function Step2ItemInfo({
                 </button>
               ))}
             </div>
-          </div>
-        ) : null}
-
-        {!yardSaleListing &&
-        (draft.category.trim() === "Gym & Fitness" ||
-          draft.category.trim() === "Sports & Recreation" ||
-          draft.category.trim() === "Outdoor & Camping" ||
-          draft.category.trim() === "Bikes & Scooters" ||
-          draft.category.trim() === "Party & Events" ||
-          draft.category.trim() === "Office & Business" ||
-          draft.category.trim() === "Music & Audio" ||
-          draft.category.trim() === "Garden & Yard" ||
-          draft.category.trim() === "Home & Kitchen" ||
-          draft.category.trim() === "Tools & DIY" ||
-          draft.category.trim() === "Costume & Cosplay" ||
-          draft.category.trim() === "Unique & Other" ||
-          draft.category.trim() === "Electronics & Tech") ? (
-          <div className="mb-4">
-            <CategoryFactCard
-              category={draft.category.trim()}
-              subcategory={
-                draft.category.trim() === "Garden & Yard" ||
-                draft.category.trim() === "Electronics & Tech" ||
-                draft.category.trim() === "Costume & Cosplay" ||
-                draft.category.trim() === "Gym & Fitness" ||
-                draft.category.trim() === "Outdoor & Camping" ||
-                draft.category.trim() === "Party & Events" ||
-                draft.category.trim() === "Home & Kitchen" ||
-                draft.category.trim() === "Music & Audio" ||
-                draft.category.trim() === "Office & Business" ||
-                draft.category.trim() === "Sports & Recreation" ||
-                draft.category.trim() === "Tools & DIY" ||
-                draft.category.trim() === "Unique & Other" ||
-                draft.category.trim() === "Bikes & Scooters"
-                  ? draft.subcategory
-                  : undefined
-              }
-            />
           </div>
         ) : null}
 

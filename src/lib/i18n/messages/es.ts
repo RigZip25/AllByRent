@@ -1498,6 +1498,8 @@ export const es: AppMessages = {
       subtitle: "Cuéntales a quienes alquilan qué estás publicando.",
       subtitleYardSale: "Primero la foto: en las ventas de garaje nos saltamos las categorías.",
       yardSaleBadge: "En tu venta de garaje · En venta",
+      coverThumbLabel: "Portada",
+      coverThumbEdit: "Editar fotos",
       fieldTitle: "Título",
       titlePlaceholder: (example) => `p. ej., ${example}`,
       categoryStepTitle: "¿Qué vas a publicar?",

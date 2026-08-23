@@ -1431,6 +1431,7 @@ export function ListingWizard({
                 setDraft={setDraft}
                 gateMessage={textGateMessage}
                 onDismissGateMessage={() => setTextGateMessage(null)}
+                onEditPhotos={() => goToStep(LISTING_STEP.photos, -1)}
               />
             )}
           </motion.div>
