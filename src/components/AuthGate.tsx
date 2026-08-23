@@ -153,7 +153,7 @@ export function AuthGate({
   const [emailCooldownUntil, setEmailCooldownUntil] = useState<number>(0);
   const [nowMs, setNowMs] = useState<number>(() => Date.now());
   const [otpCode, setOtpCode] = useState("");
-  const showPasskey = useMemo(() => shouldShowPasskeyLogin(), []);
+  const [showPasskey, setShowPasskey] = useState(() => shouldShowPasskeyLogin());
 
   const canUseSupabase = useMemo(() => configured, [configured]);
   const showProfileFields = !returning || editDetails;
@@ -165,6 +165,7 @@ export function AuthGate({
 
   useEffect(() => {
     if (!open) return;
+    setShowPasskey(shouldShowPasskeyLogin());
     const next = hydrateAuthForm();
     setFullName(next.fullName);
     setPhone(next.phone);
@@ -177,7 +178,7 @@ export function AuthGate({
     if (initialStep) {
       setStep(initialStep);
     } else if (next.returning) {
-      // Stay on account so Face ID + prefilled summary are visible.
+      // Prefill summary; Face ID CTA only if this device already has a passkey.
       setStep("account");
     } else if (next.email) {
       setStep("confirm");

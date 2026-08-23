@@ -3,6 +3,7 @@ import { resolveSessionUserEmail } from "./authEmail";
 import { clearPendingAuthEmail } from "./authReturn";
 import { consumePendingAuthProfile, peekPendingAuthProfile } from "./pendingAuthProfile";
 import {
+  deviceHasPasskeyHint,
   isPasskeySupported,
   registerPasskey,
   signInWithPasskey as passkeySignIn,
@@ -280,8 +281,13 @@ export async function userHasPasskey(): Promise<boolean> {
   return profileHasPasskey();
 }
 
+/**
+ * Show “Continue with Face ID” on the sign-in sheet only when this device
+ * already enrolled a passkey. Fresh installs / first open → email OTP first;
+ * Face ID enable is offered after onboarding via PasskeySetup.
+ */
 export function shouldShowPasskeyLogin(): boolean {
-  return isPasskeySupported();
+  return isPasskeySupported() && deviceHasPasskeyHint();
 }
 
 export function shouldPromptEnablePasskey(): boolean {
