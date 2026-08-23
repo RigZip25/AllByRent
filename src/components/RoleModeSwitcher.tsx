@@ -1,5 +1,5 @@
 import type { AppMode } from "../lib/appMode";
-import { BRAND_GREEN } from "../lib/brand";
+import { BRAND_BROWSE_ORANGE, BRAND_GREEN } from "../lib/brand";
 import { useAppModeLabels, useMessages } from "../lib/i18n/react";
 
 const BORDER = "#E8E6E0";
@@ -25,6 +25,7 @@ export function RoleModeSwitcher({ active, onChange, className = "" }: RoleModeS
     >
       {(["rent", "earn"] as const).map((tab) => {
         const selected = active === tab;
+        const activeFill = tab === "rent" ? BRAND_BROWSE_ORANGE : BRAND_GREEN;
         return (
           <button
             key={tab}
@@ -36,7 +37,7 @@ export function RoleModeSwitcher({ active, onChange, className = "" }: RoleModeS
             }}
             className="min-h-[40px] flex-1 rounded-full px-3 py-2 text-[13px] font-bold transition-colors"
             style={{
-              backgroundColor: selected ? BRAND_GREEN : "transparent",
+              backgroundColor: selected ? activeFill : "transparent",
               color: selected ? "#fff" : "#6b7280",
             }}
           >

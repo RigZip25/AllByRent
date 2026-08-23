@@ -27,6 +27,7 @@ import {
   setPhotoPromptDeferred,
 } from "../lib/avatarStorage";
 import { getAppMode, type AppMode } from "../lib/appMode";
+import { BRAND_BROWSE_ORANGE } from "../lib/brand";
 import {
   getProfileDisplayLabel,
   getProfileLocationSummary,
@@ -126,6 +127,7 @@ function ModeToggle({ mode, onChange }: { mode: AppMode; onChange: (m: AppMode) 
     >
       {(["rent", "earn"] as const).map((tab) => {
         const active = mode === tab;
+        const activeFill = tab === "rent" ? BRAND_BROWSE_ORANGE : GREEN;
         return (
           <button
             key={tab}
@@ -135,7 +137,7 @@ function ModeToggle({ mode, onChange }: { mode: AppMode; onChange: (m: AppMode) 
             onClick={() => onChange(tab)}
             className="flex-1 rounded-full px-3 py-2 text-[13px] font-bold transition-colors"
             style={{
-              backgroundColor: active ? GREEN : "transparent",
+              backgroundColor: active ? activeFill : "transparent",
               color: active ? "white" : "#888",
             }}
           >
