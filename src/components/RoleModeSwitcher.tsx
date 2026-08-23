@@ -1,3 +1,4 @@
+import { Home, Search } from "lucide-react";
 import type { AppMode } from "../lib/appMode";
 import { BRAND_BROWSE_ORANGE, BRAND_GREEN } from "../lib/brand";
 import { useAppModeLabels, useMessages } from "../lib/i18n/react";
@@ -26,6 +27,7 @@ export function RoleModeSwitcher({ active, onChange, className = "" }: RoleModeS
       {(["rent", "earn"] as const).map((tab) => {
         const selected = active === tab;
         const activeFill = tab === "rent" ? BRAND_BROWSE_ORANGE : BRAND_GREEN;
+        const Icon = tab === "rent" ? Search : Home;
         return (
           <button
             key={tab}
@@ -35,12 +37,13 @@ export function RoleModeSwitcher({ active, onChange, className = "" }: RoleModeS
             onClick={() => {
               if (tab !== active) onChange(tab);
             }}
-            className="min-h-[40px] flex-1 rounded-full px-3 py-2 text-[13px] font-bold transition-colors"
+            className="inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-[13px] font-bold transition-colors"
             style={{
               backgroundColor: selected ? activeFill : "transparent",
               color: selected ? "#fff" : "#6b7280",
             }}
           >
+            <Icon className="h-4 w-4 shrink-0" strokeWidth={2.4} aria-hidden />
             {modeLabels[tab]}
           </button>
         );

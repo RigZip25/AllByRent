@@ -27,7 +27,7 @@ import {
   setPhotoPromptDeferred,
 } from "../lib/avatarStorage";
 import { getAppMode, type AppMode } from "../lib/appMode";
-import { BRAND_BROWSE_ORANGE } from "../lib/brand";
+import { RoleModeSwitcher } from "../components/RoleModeSwitcher";
 import {
   getProfileDisplayLabel,
   getProfileLocationSummary,
@@ -49,7 +49,7 @@ import { signOut } from "../lib/auth";
 import { fetchRemoteProfile } from "../lib/supabaseProfile";
 import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
 import { loadConnectStatus, startConnectOnboarding } from "../lib/repositories/connectRepository";
-import { useAppModeLabels, useLocaleControls, useMessages } from "../lib/i18n/react";
+import { useLocaleControls, useMessages } from "../lib/i18n/react";
 import type { AppLocale } from "../lib/i18n/types";
 
 const GREEN = "#0D5C3A";
@@ -116,37 +116,7 @@ function StatTile({ label, value }: { label: string; value: string }) {
 }
 
 function ModeToggle({ mode, onChange }: { mode: AppMode; onChange: (m: AppMode) => void }) {
-  const { profile: profileCopy } = useMessages();
-  const modeLabels = useAppModeLabels();
-  return (
-    <div
-      className="flex rounded-full border bg-white p-0.5"
-      style={{ borderColor: BORDER }}
-      role="tablist"
-      aria-label={profileCopy.preferredModeAria}
-    >
-      {(["rent", "earn"] as const).map((tab) => {
-        const active = mode === tab;
-        const activeFill = tab === "rent" ? BRAND_BROWSE_ORANGE : GREEN;
-        return (
-          <button
-            key={tab}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => onChange(tab)}
-            className="flex-1 rounded-full px-3 py-2 text-[13px] font-bold transition-colors"
-            style={{
-              backgroundColor: active ? activeFill : "transparent",
-              color: active ? "white" : "#888",
-            }}
-          >
-            {modeLabels[tab]}
-          </button>
-        );
-      })}
-    </div>
-  );
+  return <RoleModeSwitcher active={mode} onChange={onChange} />;
 }
 
 export function ProfileScreen({
