@@ -725,6 +725,7 @@ export type AppMessages = {
     goBackAria: string;
     returnToPreviousQr: string;
     analyzingPhotos: (mascot: string) => string;
+    analyzingPhotosHangHint: string;
     moderationCooldownWait: (seconds: number) => string;
     moderationSoftNudgeListing: string;
     moderationSoftNudgeChat: string;

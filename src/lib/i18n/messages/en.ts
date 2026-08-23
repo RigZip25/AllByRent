@@ -1404,6 +1404,7 @@ export const en: AppMessages = {
     goBackAria: "Go back",
     returnToPreviousQr: "You can return to your previous QR setup anytime.",
     analyzingPhotos: (mascot) => `${mascot} is analyzing your photos...`,
+    analyzingPhotosHangHint: "Usually a few seconds — still working…",
     moderationCooldownWait: (hours) =>
       `Please wait ${hours}s before trying again.`,
     moderationSoftNudgeListing: "Please use the platform for household items you can rent or sell.",

@@ -1417,6 +1417,7 @@ export const cs: AppMessages = {
     goBackAria: "Zpět",
     returnToPreviousQr: "K předchozímu nastavení QR se můžeš kdykoli vrátit.",
     analyzingPhotos: (mascot) => `${mascot} analyzuje tvoje fotky...`,
+    analyzingPhotosHangHint: "Obvykle pár sekund — pořád pracuji…",
     moderationCooldownWait: (hours) =>
       `Počkej prosím ${hours} s a zkus to znovu.`,
     moderationSoftNudgeListing: "Platformu používej pro domácí věci k půjčení nebo prodeji.",

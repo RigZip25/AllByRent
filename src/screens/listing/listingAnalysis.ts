@@ -7,9 +7,12 @@ import {
   listingPricingMarket,
   roundMoneyForSuggestion,
 } from "../../lib/regionalDisplay";
+import { downscaleBlobForVision } from "./photoUtils";
 import type { ListingAiSuggestions } from "./types";
 
-const ANALYSIS_PROMPT_VERSION = "2026-08-20-vehicle-year-color-v1";
+const ANALYSIS_PROMPT_VERSION = "2026-08-23-fast-cover-v1";
+/** Cover + one detail shot is enough for ID/pricing — more photos = slow payloads. */
+const MAX_ANALYSIS_PHOTOS = 2;
 
 const ANALYSIS_SYSTEM_PROMPT =
   "You are a product identification and local-market pricing expert. Analyze product photos and return accurate item details. Always respond in the same language the user's device is set to. Replacement/estimated values MUST use the marketplace currency given in the user message — never default to USD unless that is the marketplace currency.";
@@ -167,10 +170,11 @@ async function requestWithRetry<T>(run: () => Promise<T>, attempts = 3): Promise
 }
 
 async function blobToImagePart(blob: Blob): Promise<LlmImagePart> {
+  const lean = await downscaleBlobForVision(blob);
   return {
     type: "image",
-    mimeType: mediaTypeFromBlob(blob),
-    data: await blobToBase64(blob),
+    mimeType: mediaTypeFromBlob(lean),
+    data: await blobToBase64(lean),
   };
 }
 
@@ -316,7 +320,7 @@ async function requestListingAnalysis(imageBlocks: LlmImagePart[]): Promise<List
   const fullResponse = await requestWithRetry(async () => {
     const result = await postLlmChat({
       purpose: "vision",
-      max_tokens: 800,
+      max_tokens: 600,
       system: ANALYSIS_SYSTEM_PROMPT,
       messages: [
         {
@@ -350,8 +354,9 @@ export async function analyzeListingPhotos(
     throw new Error("No photos to analyze");
   }
 
+  const sampleUrls = photoUrls.slice(0, MAX_ANALYSIS_PHOTOS);
   const blobs = await Promise.all(
-    photoUrls.map(async (url) => {
+    sampleUrls.map(async (url) => {
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to read photo");
       return response.blob();
@@ -389,8 +394,9 @@ export async function analyzeListingPhoto(blob: Blob): Promise<ListingAiSuggesti
 }
 
 export async function analyzeListingMediaPhotos(photos: MediaRef[]): Promise<ListingAiSuggestions> {
+  const sample = photos.slice(0, MAX_ANALYSIS_PHOTOS);
   const blobs = await Promise.all(
-    photos.map(async (ref) => {
+    sample.map(async (ref) => {
       const blob = await getMediaBlob(ref.id);
       if (!blob) throw new Error("Missing photo");
       return blob;

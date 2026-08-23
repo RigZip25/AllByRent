@@ -390,6 +390,16 @@ export function Step2ItemInfo({
           </div>
         ) : null}
 
+        {draft.aiAnalysisPending ? (
+          <div
+            className="mb-4 flex items-center gap-2 rounded-xl border px-3 py-2.5 text-[13px] font-medium"
+            style={{ borderColor: `${GREEN}33`, backgroundColor: `${GREEN}08`, color: GREEN }}
+          >
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+            <span>{listing.analyzingPhotos(MASCOT_NAME)}</span>
+          </div>
+        ) : null}
+
         <CoverMiniThumb
           cover={draft.photos?.[0] ?? null}
           label={item.coverThumbLabel}

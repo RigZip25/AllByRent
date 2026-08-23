@@ -184,6 +184,7 @@ export function ListingWizard({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [photoGateMessage, setPhotoGateMessage] = useState<string | null>(null);
   const [photoModerationPending, setPhotoModerationPending] = useState(false);
+  const [photoProgressTick, setPhotoProgressTick] = useState(0);
   const [textGateMessage, setTextGateMessage] = useState<string | null>(null);
   const [textModerationPending, setTextModerationPending] = useState(false);
   const [phase, setPhase] = useState<WizardPhase>(() => {
@@ -267,6 +268,21 @@ export function ListingWizard({
       mounted = false;
     };
   }, [editingListingId, initialDraft]);
+
+  useEffect(() => {
+    const busy =
+      step === LISTING_STEP.photos &&
+      (photoModerationPending || draft.aiAnalysisPending);
+    if (!busy) {
+      setPhotoProgressTick(0);
+      return;
+    }
+    setPhotoProgressTick(0);
+    const id = window.setInterval(() => {
+      setPhotoProgressTick((n) => n + 1);
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [step, photoModerationPending, draft.aiAnalysisPending]);
 
   // Autosave unfinished drafts so Mr. Evorios can nudge if the host abandons mid-flow.
   useEffect(() => {
@@ -904,7 +920,8 @@ export function ListingWizard({
         }
 
         if (!draft.aiSuggestions) {
-          await runListingPhotoAnalysis();
+          // Don't block Continue — soft-fill details in the background.
+          void runListingPhotoAnalysis();
         }
         goToStep(LISTING_STEP.details, 1);
       } finally {
@@ -1062,11 +1079,18 @@ export function ListingWizard({
 
   const continueLabel =
     step === LISTING_STEP.photos && (draft.aiAnalysisPending || photoModerationPending) ? (
-      <span className="flex items-center justify-center gap-2">
-        <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-        {photoModerationPending && !draft.aiAnalysisPending
-          ? listing.photos.verifyingPhotos(MASCOT_NAME)
-          : listing.analyzingPhotos(MASCOT_NAME)}
+      <span className="flex flex-col items-center justify-center gap-0.5">
+        <span className="flex items-center justify-center gap-2">
+          <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+          {photoModerationPending && !draft.aiAnalysisPending
+            ? listing.photos.verifyingPhotos(MASCOT_NAME)
+            : listing.analyzingPhotos(MASCOT_NAME)}
+        </span>
+        {photoProgressTick >= 3 ? (
+          <span className="text-[11px] font-medium text-white/90">
+            {listing.analyzingPhotosHangHint}
+          </span>
+        ) : null}
       </span>
     ) : step === LISTING_STEP.details && textModerationPending ? (
       <span className="flex items-center justify-center gap-2">

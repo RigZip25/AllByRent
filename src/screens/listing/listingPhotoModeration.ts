@@ -1,6 +1,7 @@
 import { postLlmChat, type LlmImagePart } from "../../lib/llmClient";
 import type { MediaRef } from "../../lib/mediaStore";
 import { getMediaBlob } from "../../lib/mediaStore";
+import { downscaleBlobForVision } from "./photoUtils";
 
 export type ListingPhotoModerationReason =
   | "ok"
@@ -207,11 +208,12 @@ export async function moderateListingPhotoBlob(
   ctx: ListingPhotoModerationContext = {},
 ): Promise<ListingPhotoModerationResult> {
   try {
-    const image = await blobToImagePart(blob);
+    const lean = await downscaleBlobForVision(blob);
+    const image = await blobToImagePart(lean);
     const fullResponse = await requestWithRetry(async () => {
       const result = await postLlmChat({
         purpose: "vision",
-        max_tokens: 300,
+        max_tokens: 220,
         system: MODERATION_SYSTEM_PROMPT,
         messages: [
           {
@@ -240,6 +242,11 @@ export async function moderateListingPhotoBlob(
   }
 }
 
+/**
+ * Vision gate before Continue / re-analyze.
+ * Only the cover (and optionally a 2nd shot) — upload already moderated each photo,
+ * and sequential full-gallery checks felt hung.
+ */
 export async function moderateListingMediaPhotos(
   photos: MediaRef[],
   ctx: ListingPhotoModerationContext = {},
@@ -254,12 +261,16 @@ export async function moderateListingMediaPhotos(
     };
   }
 
-  for (const ref of photos) {
-    const blob = await getMediaBlob(ref.id);
-    if (!blob) {
-      return verificationFailedResult();
-    }
-    const result = await moderateListingPhotoBlob(blob, ctx);
+  const sample = photos.slice(0, Math.min(2, photos.length));
+  const results = await Promise.all(
+    sample.map(async (ref) => {
+      const blob = await getMediaBlob(ref.id);
+      if (!blob) return verificationFailedResult();
+      return moderateListingPhotoBlob(blob, ctx);
+    }),
+  );
+
+  for (const result of results) {
     if (!result.ok) return result;
   }
 
