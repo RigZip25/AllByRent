@@ -40,6 +40,8 @@ import { useMessages } from "../../lib/i18n/react";
 import type { AppMessages } from "../../lib/i18n/types";
 import { AvailabilityCalendar } from "../../components/availability/AvailabilityCalendar";
 import { CategoryFactCard } from "../../components/CategoryFactCard";
+import { useCoverMediaUrl } from "../../lib/useMediaUrl";
+import type { MediaRef } from "../../lib/mediaStore";
 import {
   fetchListingBusyIntervals,
   type BusyInterval,
@@ -63,6 +65,24 @@ import { listingRequiresCoiHostConfirm } from "../../lib/listingInsurance";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
+
+function HostListingCoverThumb({ cover }: { cover: MediaRef | null | undefined }) {
+  const { url } = useCoverMediaUrl(cover ?? null);
+  return (
+    <div
+      className="h-[72px] w-[72px] shrink-0 overflow-hidden rounded-2xl border bg-[#E8EEEA]"
+      style={{ borderColor: BORDER }}
+    >
+      {url ? (
+        <img src={url} alt="" className="h-full w-full object-cover" />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold text-gray-400">
+          —
+        </div>
+      )}
+    </div>
+  );
+}
 
 function HostListingOccupancyCalendar({ listing }: { listing: ListingDraft }) {
   const [busy, setBusy] = useState<BusyInterval[]>([]);
@@ -486,67 +506,28 @@ export function HostListingDetailScreen({
             <ArrowLeft className="h-4 w-4" style={{ color: GREEN }} />
             {t.back}
           </button>
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              disabled={saveBusy}
-              onClick={() => {
-                setActionError(null);
-                setConfirmDelete(true);
-              }}
-              className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-bold text-red-700 disabled:opacity-50"
-              style={{ borderColor: "#FECACA", backgroundColor: "#FEF2F2" }}
-              aria-label={t.deleteListing}
-            >
-              <Trash2 className="h-4 w-4" />
-              {t.deleteListing}
-            </button>
-            <button
-              type="button"
-              onClick={() => onEdit(listing.id)}
-              className="inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm font-bold"
-              style={{ borderColor: BORDER, color: GREEN }}
-            >
-              <Pencil className="h-4 w-4" />
-              {t.fullEdit}
-            </button>
+          <button
+            type="button"
+            onClick={() => onEdit(listing.id)}
+            className="inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm font-bold"
+            style={{ borderColor: BORDER, color: GREEN }}
+          >
+            <Pencil className="h-4 w-4" />
+            {t.fullEdit}
+          </button>
+        </div>
+        <div className="mt-3 flex items-start gap-3">
+          <HostListingCoverThumb cover={listing.photos?.[0] ?? null} />
+          <div className="min-w-0 flex-1">
+            <h1 className="text-[20px] font-extrabold leading-tight" style={{ color: GREEN }}>
+              {getListingDisplayTitle(listing.title)}
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              #{listing.id.substring(0, 8).toUpperCase()} ·{" "}
+              {listing.paused ? t.statusPaused : listing.listingStatus}
+            </p>
           </div>
         </div>
-        {confirmDelete ? (
-          <div
-            className="mt-3 rounded-2xl border p-3"
-            style={{ borderColor: "#FECACA", backgroundColor: "#FEF2F2" }}
-          >
-            <p className="text-[13px] font-semibold text-red-800">{t.deleteConfirm}</p>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                disabled={saveBusy}
-                onClick={() => setConfirmDelete(false)}
-                className="rounded-xl border bg-white py-2.5 text-sm font-bold text-gray-700"
-                style={{ borderColor: BORDER }}
-              >
-                {t.cancel}
-              </button>
-              <button
-                type="button"
-                disabled={saveBusy}
-                onClick={runDelete}
-                className="rounded-xl bg-red-600 py-2.5 text-sm font-bold text-white disabled:opacity-50"
-              >
-                {saveBusy ? t.deleting : t.yesDelete}
-              </button>
-            </div>
-            {actionError ? <p className="mt-2 text-center text-xs text-red-600">{actionError}</p> : null}
-          </div>
-        ) : null}
-        <h1 className="mt-3 text-[20px] font-extrabold" style={{ color: GREEN }}>
-          {getListingDisplayTitle(listing.title)}
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          #{listing.id.substring(0, 8).toUpperCase()} ·{" "}
-          {listing.paused ? t.statusPaused : listing.listingStatus}
-        </p>
       </header>
 
       <div className="screen-scroll flex-1 min-h-0 px-4 pb-6 pt-4">
