@@ -10,7 +10,7 @@ import { ProactiveAgentCard, wasAgentStepDismissed } from "../../components/agen
 import { hasRecentShare } from "../../lib/socialShare";
 import { agentTipsEnabled } from "../../lib/agentPrefs";
 import { loadNotificationPreferences } from "../../lib/notificationPreferences";
-import { resolveHostAccountId } from "../../lib/hostIdentity";
+import { resolveGarageHostId } from "../../lib/hostAccess";
 import { removePublishedListing, removePublishedListingRemote } from "../../lib/listingStorage";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 import {
@@ -245,7 +245,7 @@ export function HostDashboard({
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const hostId = resolveHostAccountId(auth.userId);
+  const hostId = resolveGarageHostId(auth.userId, auth.userEmail);
   const [storeLive, setStoreLive] = useState(() => getLocalStoreLive(hostId));
 
   useEffect(() => {
@@ -353,7 +353,7 @@ export function HostDashboard({
   const deleteDraft = async (listingId: string) => {
     setConfirmDeleteId(null);
     setDeletingId(listingId);
-    const ownerId = resolveHostAccountId(auth.userId) || auth.userId || "";
+    const ownerId = resolveGarageHostId(auth.userId, auth.userEmail) || auth.userId || "";
     try {
       if (ownerId) {
         await removePublishedListingRemote(listingId, ownerId);

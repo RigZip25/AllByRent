@@ -1,5 +1,6 @@
 /**
- * Cannot-relist borrowed item v1 — only owner_id may list; renters get no list CTA.
+ * Cannot-relist borrowed item v1 — only owner / household co-hosts may list;
+ * renters get no list CTA.
  */
 
 import {
@@ -7,6 +8,7 @@ import {
   type RentalBooking,
   type RentalStatus,
 } from "./rentalsStorage";
+import { getManageableHostIds } from "./hostAccess";
 
 const ACTIVE_BORROW_STATUSES: RentalStatus[] = [
   "pending_checkin",
@@ -50,11 +52,12 @@ export function listBorrowedListingIds(viewerId?: string | null): Set<string> {
 }
 
 /**
- * Publish guard: listing hostId must match signer; cannot publish as owner of a
- * listing id you are currently borrowing.
+ * Publish guard: listing hostId must be the signer or a garage they co-host;
+ * cannot publish as owner of a listing id you are currently borrowing.
  */
 export function assertOwnerOnlyPublish(opts: {
   userId: string;
+  userEmail?: string | null;
   listingHostId?: string | null;
   listingId: string;
 }): { ok: true } | { ok: false; reason: string } {
@@ -64,10 +67,13 @@ export function assertOwnerOnlyPublish(opts: {
   }
   const hostId = (opts.listingHostId ?? "").trim();
   if (hostId && hostId !== userId) {
-    return {
-      ok: false,
-      reason: "Only the item owner can publish or update this listing.",
-    };
+    const manageable = getManageableHostIds(userId, opts.userEmail ?? null);
+    if (!manageable.includes(hostId)) {
+      return {
+        ok: false,
+        reason: "Only the item owner or household co-hosts can publish or update this listing.",
+      };
+    }
   }
   if (isBorrowedByViewer({ listingId: opts.listingId, viewerId: userId })) {
     return {

@@ -9,6 +9,7 @@ import {
 import { loadUserProfile, updateGarageIdentity } from "../lib/userProfileStorage";
 import { useMessages } from "../lib/i18n/react";
 import { useAuth } from "../hooks/AuthProvider";
+import { resolveGarageHostId } from "../lib/hostAccess";
 import {
   emitGarageIdentityChanged,
   isGarageSlugAvailable,
@@ -45,7 +46,7 @@ export function GarageLookEditor({ onChanged }: { onChanged?: () => void }) {
   }) => {
     const next = updateGarageIdentity(patch).garageIdentity;
     emitGarageIdentityChanged(next);
-    const hostId = (auth.userId ?? loadUserProfile().id).trim();
+    const hostId = (resolveGarageHostId(auth.userId, auth.userEmail) || auth.userId || loadUserProfile().id).trim();
     const remote = await pushGarageStorefrontRemote(hostId, next);
     if (!remote.ok) {
       setNameError(remote.reason);
@@ -85,7 +86,7 @@ export function GarageLookEditor({ onChanged }: { onChanged?: () => void }) {
     }
     setSlugBusy(true);
     try {
-      const hostId = (auth.userId ?? loadUserProfile().id).trim();
+      const hostId = (resolveGarageHostId(auth.userId, auth.userEmail) || auth.userId || loadUserProfile().id).trim();
       const free = await isGarageSlugAvailable(slug, hostId);
       if (!free) {
         setNameError(t.garageUi.lookShopNameTaken);

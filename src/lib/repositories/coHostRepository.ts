@@ -18,6 +18,7 @@ import {
   pushCoHostRemote,
 } from "../coHost/coHostSupabaseSync";
 import { isSupabaseConfigured } from "../supabaseClient";
+import { setActiveGarageHostId } from "../hostAccess";
 
 function mergeCoHostRecords(remote: CoHostRecord[]): void {
   if (remote.length === 0) return;
@@ -69,6 +70,7 @@ export async function acceptCoHostInviteWithSync(
   const result = acceptCoHostInvite(inviteId, acceptorUserId);
   if (result.ok) {
     await pushCoHostRemote(result.record);
+    setActiveGarageHostId(result.record.hostId);
   }
   return result;
 }

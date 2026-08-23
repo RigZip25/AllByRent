@@ -12,7 +12,7 @@ import {
   getLocalStoreLive,
   onStoreLiveChanged,
 } from "../lib/garageStoreLive";
-import { resolveHostAccountId } from "../lib/hostIdentity";
+import { resolveGarageHostId } from "../lib/hostAccess";
 import { SocialShareButtons } from "../components/share/SocialShareButtons";
 import { hostGarageSharePayload } from "../lib/garageMarketingShare";
 import { garageSaleOpenLabel, getGarageSaleSchedule } from "../lib/garageSaleStorage";
@@ -57,7 +57,7 @@ export function GarageScreen({
   const [lookOpen, setLookOpen] = useState(false);
   const [listMode, setListMode] = useState<HostGarageListMode | null>(null);
   const [householdSetupDone, setHouseholdSetupDone] = useState(false);
-  const hostId = resolveHostAccountId(auth.userId);
+  const hostId = resolveGarageHostId(auth.userId, auth.userEmail);
   const [storeLive, setStoreLive] = useState(() => getLocalStoreLive(hostId));
 
   const showHouseholdSetup =

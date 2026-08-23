@@ -56,6 +56,7 @@ import {
   getActiveRentLocationLabel,
 } from "../lib/listingStorage";
 import { localizeCategoryLabel } from "../lib/i18n/categoryLabels";
+import { resolveGarageHostId } from "../lib/hostAccess";
 import { resolveHostAccountId } from "../lib/hostIdentity";
 import { useAuth } from "../hooks/AuthProvider";
 import type { ListingDraft } from "./listing/types";
@@ -126,7 +127,7 @@ export function ActiveGarageShopScreen({
   const { common, garageSale, garageUi } = useMessages();
   const { garageAuction: auctionCopy, garageShare: shareCopy, garageShop: shopCopy } = garageSale;
   const auth = useAuth();
-  const ownHostId = resolveHostAccountId(auth.userId);
+  const ownHostId = resolveGarageHostId(auth.userId, auth.userEmail) || resolveHostAccountId(auth.userId);
   const isOwnGarage = hostId === ownHostId;
   const [listings, setListings] = useState<ListingDraft[]>([]);
   const [loading, setLoading] = useState(true);

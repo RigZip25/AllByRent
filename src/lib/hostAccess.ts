@@ -9,6 +9,22 @@ import {
 import { resolveHostAccountEmail, resolveHostAccountId } from "./hostIdentity";
 
 const LEGACY_HOST_ID = "";
+const ACTIVE_GARAGE_HOST_KEY = "allbyrent_active_garage_host_id";
+const PROFILE_KEY = "allbyrent_user_profile";
+
+function readOwnShopName(): string {
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY);
+    if (!raw) return "";
+    const parsed = JSON.parse(raw) as {
+      garageIdentity?: { shopName?: unknown };
+    };
+    const name = parsed.garageIdentity?.shopName;
+    return typeof name === "string" ? name.trim() : "";
+  } catch {
+    return "";
+  }
+}
 
 /** Host id stamped on listings; legacy rows without hostId are unassigned until migrated. */
 export function getListingHostId(listing: ListingDraft): string {
@@ -23,6 +39,46 @@ export function getManageableHostIds(
   const email = resolveHostAccountEmail(authUserEmail);
   const coHostFor = getActiveCoHostHostIds(ownId, email);
   return Array.from(new Set([ownId, ...coHostFor].filter(Boolean)));
+}
+
+/**
+ * Shared household garage id for stocking / Live / storefront.
+ * Primary (own shop name) → own id. Active co-host without their own shop → primary’s id.
+ * Concurrent listings from Barbara / John / Peter / Joanna all stamp this same owner_id.
+ */
+export function resolveGarageHostId(
+  authUserId: string | null,
+  authUserEmail: string | null,
+): string {
+  const ownId = resolveHostAccountId(authUserId);
+  if (!ownId) return "";
+  const email = resolveHostAccountEmail(authUserEmail);
+  const coHostFor = getActiveCoHostHostIds(ownId, email).filter(Boolean);
+  const manageable = Array.from(new Set([ownId, ...coHostFor]));
+
+  try {
+    const preferred = localStorage.getItem(ACTIVE_GARAGE_HOST_KEY)?.trim() ?? "";
+    if (preferred && manageable.includes(preferred)) return preferred;
+  } catch {
+    /* ignore */
+  }
+
+  const ownShop = readOwnShopName();
+  // Household helpers join an existing garage — they stock that shelf, not a second one.
+  if (!ownShop && coHostFor.length > 0) {
+    return coHostFor[0]!;
+  }
+  return ownId;
+}
+
+export function setActiveGarageHostId(hostId: string): void {
+  const id = hostId.trim();
+  if (!id) return;
+  try {
+    localStorage.setItem(ACTIVE_GARAGE_HOST_KEY, id);
+  } catch {
+    /* ignore */
+  }
 }
 
 export function canManageListing(

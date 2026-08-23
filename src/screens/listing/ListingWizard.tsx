@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import confetti from "canvas-confetti";
 import { MASCOT_NAME } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
-import { resolveHostAccountId } from "../../lib/hostIdentity";
+import { resolveGarageHostId } from "../../lib/hostAccess";
 import { getProfileCity, savePublishedListingRemote, savePublishedListing, saveListingDraftProgress, stampListingDraftProgress, removePublishedListing, removePublishedListingRemote, fetchListingByIdRemote, getPublishedListingById } from "../../lib/listingStorage";
 import { syncAgentPrefsRemote, ensureBrowserTimeZoneCaptured } from "../../lib/agentPrefs";
 import { notifyGarageFollowersOfNewListing } from "../../lib/garageFollowNotify";
@@ -295,7 +295,7 @@ export function ListingWizard({
 
     ensureBrowserTimeZoneCaptured();
     const timer = window.setTimeout(() => {
-      const ownerId = resolveHostAccountId(auth.userId) || auth.userId;
+      const ownerId = resolveGarageHostId(auth.userId, auth.userEmail) || auth.userId;
       void saveListingDraftProgress(
         {
           ...draft,
@@ -344,7 +344,7 @@ export function ListingWizard({
   const persistDraftForGoPublic = useCallback(
     async (opts?: { syncRemote?: boolean }) => {
       // Prefer signed-in auth id so drafts started as guest/local reclaim correctly.
-      const hostId = resolveHostAccountId(auth.userId) || draft.hostId;
+      const hostId = resolveGarageHostId(auth.userId, auth.userEmail) || draft.hostId;
       const nextDraft = stampListingDraftProgress(
         {
           ...draft,
@@ -438,9 +438,10 @@ export function ListingWizard({
 
     window.setTimeout(() => {
       // Signed-in auth id wins so guest/local draft hostIds do not block publish.
-      const hostId = resolveHostAccountId(auth.userId) || sourceDraft.hostId || "";
+      const hostId = resolveGarageHostId(auth.userId, auth.userEmail) || sourceDraft.hostId || "";
       const ownerGate = assertOwnerOnlyPublish({
         userId: auth.userId ?? hostId,
+        userEmail: auth.userEmail,
         listingHostId: hostId,
         listingId: sourceDraft.id,
       });
@@ -554,7 +555,8 @@ export function ListingWizard({
 
           const ownerGate = assertOwnerOnlyPublish({
             userId: auth.userId ?? "",
-            listingHostId: draft.hostId,
+            userEmail: auth.userEmail,
+            listingHostId: draft.hostId || resolveGarageHostId(auth.userId, auth.userEmail),
             listingId: draft.id,
           });
           if (!ownerGate.ok) {
@@ -649,7 +651,8 @@ export function ListingWizard({
 
         const ownerGate = assertOwnerOnlyPublish({
           userId: auth.userId ?? "",
-          listingHostId: resolveHostAccountId(auth.userId) || draft.hostId,
+          listingHostId: resolveGarageHostId(auth.userId, auth.userEmail) || draft.hostId,
+          userEmail: auth.userEmail,
           listingId: draft.id,
         });
         if (!ownerGate.ok) {
@@ -751,10 +754,11 @@ export function ListingWizard({
           }
         }
 
-        const claimedHostId = resolveHostAccountId(auth.userId) || auth.userId || "";
+        const claimedHostId = resolveGarageHostId(auth.userId, auth.userEmail) || auth.userId || "";
         const ownerGate = assertOwnerOnlyPublish({
-          userId: claimedHostId,
-          // Claim draft under the signed-in host before ownership check.
+          userId: auth.userId ?? claimedHostId,
+          userEmail: auth.userEmail,
+          // Claim draft under the household garage host before ownership check.
           listingHostId: claimedHostId,
           listingId: draft.id,
         });
@@ -1125,7 +1129,7 @@ export function ListingWizard({
     }
 
     if (draft.listingStatus === "draft" && draft.id) {
-      const ownerId = resolveHostAccountId(auth.userId) || auth.userId;
+      const ownerId = resolveGarageHostId(auth.userId, auth.userEmail) || auth.userId;
       if (ownerId) {
         void removePublishedListingRemote(draft.id, ownerId);
       } else {
@@ -1144,7 +1148,7 @@ export function ListingWizard({
     setWizardStack([]);
 
     if (draft.id) {
-      const ownerId = resolveHostAccountId(auth.userId) || auth.userId;
+      const ownerId = resolveGarageHostId(auth.userId, auth.userEmail) || auth.userId;
       if (ownerId) {
         void removePublishedListingRemote(draft.id, ownerId);
       } else {

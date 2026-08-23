@@ -2,23 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Pause, Pencil, Play, QrCode, Trash2 } from "lucide-react";
 import QRCode from "qrcode";
 import { useAuth } from "../../hooks/AuthProvider";
-import { canManageListing } from "../../lib/hostAccess";
-import {
-  addListingToQrBulkQueue,
-  clearQrBulkQueue,
-  claimListingOwnershipIfUnassigned,
-  fetchListingByIdRemote,
-  getProfileCity,
-  getPublishedListingById,
-  isListingQueuedForBulk,
-  loadQrBulkQueueListingIds,
-  removeListingFromQrBulkQueue,
-  removePublishedListing,
-  removePublishedListingRemote,
-  updatePublishedListingRemote,
-  type PublishedListingPatch,
-} from "../../lib/listingStorage";
-import { resolveHostAccountId } from "../../lib/hostIdentity";
+import { canManageListing, resolveGarageHostId } from "../../lib/hostAccess";
 import type { ListingDraft } from "./types";
 import { QR_PDF_FILENAMES } from "../../lib/brand";
 import { generateQRStickerPdf, presentGeneratedPdf } from "../../lib/generateQRSticker";
@@ -219,7 +203,7 @@ export function HostListingDetailScreen({
       if (next && !next.hostId?.trim() && auth.userId) {
         const claimed = await claimListingOwnershipIfUnassigned(
           listingId,
-          resolveHostAccountId(auth.userId),
+          resolveGarageHostId(auth.userId, auth.userEmail),
         );
         setListing(claimed ?? next);
       } else {
@@ -353,7 +337,7 @@ export function HostListingDetailScreen({
     if (!patch) return;
 
     setSaveBusy(true);
-    const ownerId = resolveHostAccountId(auth.userId);
+    const ownerId = resolveGarageHostId(auth.userId, auth.userEmail);
     const result = await updatePublishedListingRemote(listing.id, patch, ownerId);
     setSaveBusy(false);
 
@@ -467,7 +451,7 @@ export function HostListingDetailScreen({
   }
 
   const runDelete = () => {
-    const ownerId = resolveHostAccountId(auth.userId);
+    const ownerId = resolveGarageHostId(auth.userId, auth.userEmail);
     if (saveBusy) return;
     setSaveBusy(true);
     setActionError(null);

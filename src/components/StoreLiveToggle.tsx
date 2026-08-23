@@ -12,7 +12,7 @@ import {
   pushStoreLiveRemote,
 } from "../lib/garageStoreLive";
 import { garageNeedsPublicName } from "../lib/garageIdentity";
-import { resolveHostAccountId } from "../lib/hostIdentity";
+import { resolveGarageHostId } from "../lib/hostAccess";
 import { useMessages } from "../lib/i18n/react";
 import { startConnectOnboarding } from "../lib/repositories/connectRepository";
 import { loadSellerGoPublicStatus } from "../lib/sellerGoPublic";
@@ -36,7 +36,7 @@ type Props = {
 export function StoreLiveToggle({ onOpenProfile }: Props) {
   const auth = useAuth();
   const t = useMessages();
-  const hostId = resolveHostAccountId(auth.userId);
+  const hostId = resolveGarageHostId(auth.userId, auth.userEmail);
   const [storeLive, setStoreLive] = useState(() => getLocalStoreLive(hostId));
   const [garageFormed, setGarageFormed] = useState(() =>
     hostHasShelfItems(auth.userId, auth.userEmail),

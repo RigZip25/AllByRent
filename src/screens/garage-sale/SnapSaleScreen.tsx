@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Camera, Loader2, ShoppingBag, Tag } from "lucide-react";
 import { BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
-import { resolveHostAccountId } from "../../lib/hostIdentity";
+import { resolveGarageHostId } from "../../lib/hostAccess";
 import { deleteMedia, putMediaBlob, type MediaRef } from "../../lib/mediaStore";
 import { useMediaUrl } from "../../lib/useMediaUrl";
 import { getPublishedListingById, savePublishedListing, savePublishedListingRemote } from "../../lib/listingStorage";
@@ -152,7 +152,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
   }, [auth.userId, onRequireAuth, copy.connectFailed]);
 
   const openHours = garageSaleOpenLabel(getGarageSaleSchedule());
-  const hostId = resolveHostAccountId(auth.userId);
+  const hostId = resolveGarageHostId(auth.userId, auth.userEmail);
   const garageSharePayload = useMemo(
     () =>
       hostGarageSharePayload({
@@ -225,7 +225,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
       }
 
       window.setTimeout(() => {
-        const nextHostId = resolveHostAccountId(auth.userId);
+        const nextHostId = resolveGarageHostId(auth.userId, auth.userEmail);
         const title = note.trim().slice(0, 60) || copy.defaultTitle;
         const draft = applyYardSaleListingDefaults(
           applyFrictionlessDefaults({

@@ -1,10 +1,9 @@
 import { useEffect, useState, startTransition } from "react";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { useAuth } from "../../hooks/AuthProvider";
-import { fetchManageableListings, loadManageableListings } from "../../lib/hostAccess";
+import { fetchManageableListings, loadManageableListings, resolveGarageHostId } from "../../lib/hostAccess";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { removePublishedListing, removePublishedListingRemote } from "../../lib/listingStorage";
-import { resolveHostAccountId } from "../../lib/hostIdentity";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 import type { ListingDraft } from "../../screens/listing/types";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
@@ -151,7 +150,7 @@ export function HostGarageListSection({
   const deleteDraft = async (listingId: string) => {
     setConfirmId(null);
     setDeletingId(listingId);
-    const ownerId = resolveHostAccountId(auth.userId) || auth.userId || "";
+    const ownerId = resolveGarageHostId(auth.userId, auth.userEmail) || auth.userId || "";
     try {
       if (ownerId) {
         await removePublishedListingRemote(listingId, ownerId);

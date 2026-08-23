@@ -3,8 +3,7 @@
  * Shelf listings (active) stay in host inventory; neighbors only see them when store is Live and item not paused.
  */
 
-import { loadManageableListings } from "./hostAccess";
-import { resolveHostAccountId } from "./hostIdentity";
+import { loadManageableListings, resolveGarageHostId } from "./hostAccess";
 import { loadPublishedListings } from "./listingStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
@@ -114,7 +113,7 @@ async function coerceOwnEmptyShelf(
 ): Promise<Record<string, boolean>> {
   const coerce = options?.coerceEmptyShelfFor;
   if (!coerce) return out;
-  const selfHostId = resolveHostAccountId(coerce.userId ?? null);
+  const selfHostId = resolveGarageHostId(coerce.userId ?? null, coerce.email ?? null);
   if (!selfHostId) return out;
   if (!out[selfHostId] && !getLocalStoreLive(selfHostId)) return out;
   if (hostHasShelfItems(coerce.userId, coerce.email)) return out;
@@ -152,7 +151,9 @@ export async function fetchStoreLiveByHostIds(
   }
 
   const coerce = options?.coerceEmptyShelfFor;
-  const selfHostId = coerce ? resolveHostAccountId(coerce.userId ?? null) : "";
+  const selfHostId = coerce
+    ? resolveGarageHostId(coerce.userId ?? null, coerce.email ?? null)
+    : "";
 
   for (const row of data) {
     const hostId = typeof row.host_id === "string" ? row.host_id : "";
@@ -234,7 +235,7 @@ export async function closeStoreIfShelfEmpty(
   authUserId: string | null | undefined,
   authUserEmail: string | null | undefined,
 ): Promise<void> {
-  const hostId = resolveHostAccountId(authUserId ?? null);
+  const hostId = resolveGarageHostId(authUserId ?? null, authUserEmail ?? null);
   if (!hostId) return;
   if (hostHasShelfItems(authUserId, authUserEmail)) return;
   await pushStoreLiveRemote(hostId, false);
