@@ -154,7 +154,7 @@ export const faq: AppMessages["faq"] = {
     },
     "host-payouts": {
       q: "How do hosts get paid?",
-      a: "Connect Stripe in Profile → payouts. Rental payouts land after successful return; platform fees are shown before you publish.",
+      a: "Connect Stripe in Profile → payouts on the account that owns the garage. Helpers do not receive that garage’s payouts. Rental payouts land after successful return; platform fees are shown before you publish.",
     },
     "deposit-release": {
       q: "When is my deposit released?",
@@ -165,8 +165,24 @@ export const faq: AppMessages["faq"] = {
       a: "Passkeys let you sign in with Face ID / fingerprint instead of typing the email code each time. After first sign-in, the app may offer to set one up — optional but faster. Sign-in codes still come by email.",
     },
     "co-host": {
-      q: "Can I add a co-host?",
-      a: "Profile → Co-hosts lets you invite someone to help manage your garage. They can respond to requests depending on permissions you set.",
+      q: "Can I add a co-host / helper?",
+      a: "Yes. During garage setup or Profile → Co-hosts, invite people by their own email. They sign in separately (code / Face ID), accept the invite, and can stock your shelf. They still keep their own garage if they want one. Payouts (Stripe) stay with the garage owner.",
+    },
+    "garage-switcher": {
+      q: "I help in another garage — how do I switch?",
+      a: "Open My Garage. If you belong to more than one garage, use Working in at the top to choose My garage or the shared one. Photos and + go into the garage you selected. Browse is always under your own login.",
+    },
+    "own-and-help": {
+      q: "We live next door and help each other — do we share one garage?",
+      a: "Not required. Each home can have its own garage and Stripe. Invite each other as helpers, then switch Working in when you stock their shelf. Same pattern for family in one house who want one shared storefront, or neighbors who each keep a shop.",
+    },
+    "stripe-garage-owner": {
+      q: "Whose Stripe gets paid when helpers stock the shelf?",
+      a: "Money always goes to the garage owner who connected Stripe for that storefront. Helpers can add listings; only the owner opens Live and receives payouts. If you opened Live on your phone with your bank, that is your garage — switch Working in before stocking someone else’s.",
+    },
+    "browse-own-login": {
+      q: "If Mom’s phone is open, can Dad browse as himself?",
+      a: "No — Browse and bookings follow whoever is signed in on that device. Dad uses his own phone (or signs out and into his email / Face ID). Helping on a shared garage does not change who you are when browsing or renting.",
     },
     "pause-listing": {
       q: "How do I pause a listing?",

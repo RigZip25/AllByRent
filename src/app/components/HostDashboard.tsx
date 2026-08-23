@@ -1,7 +1,7 @@
 import { useEffect, useState, startTransition, type ReactNode } from "react";
 import { DollarSign, Package, Plus, Share2, Trash2 } from "lucide-react";
 import { useAuth } from "../../hooks/AuthProvider";
-import { fetchManageableListings, loadManageableListings } from "../../lib/hostAccess";
+import { fetchActiveGarageListings, loadActiveGarageListings, onActiveGarageChanged } from "../../lib/hostAccess";
 import { getListingDisplayTitle, listingNeedsStickerReminder } from "../../lib/listingQr";
 import { loadRentalBookings, type RentalBooking } from "../../lib/rentalsStorage";
 import { deriveGarageShelfStatus } from "../../lib/garageShelfStatus";
@@ -240,7 +240,7 @@ export function HostDashboard({
 }) {
   const auth = useAuth();
   const t = useMessages();
-  const [listings, setListings] = useState<Awaited<ReturnType<typeof loadManageableListings>>>([]);
+  const [listings, setListings] = useState<Awaited<ReturnType<typeof loadActiveGarageListings>>>([]);
   const [bookings, setBookings] = useState<RentalBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -271,7 +271,7 @@ export function HostDashboard({
     setLoading(true);
 
     const syncLoad = () => {
-      const localListings = loadManageableListings(auth.userId, auth.userEmail);
+      const localListings = loadActiveGarageListings(auth.userId, auth.userEmail);
       const localBookings = loadRentalBookings();
       startTransition(() => {
         if (!mounted) return;
@@ -281,7 +281,7 @@ export function HostDashboard({
     };
 
     const refreshRemote = (markLoaded = false) => {
-      void fetchManageableListings(auth.userId, auth.userEmail)
+      void fetchActiveGarageListings(auth.userId, auth.userEmail)
         .then((next) => {
           if (!mounted) return;
           startTransition(() => setListings(next));
@@ -300,14 +300,19 @@ export function HostDashboard({
     };
     window.addEventListener("evorios-listings-changed", onListingsChanged);
     window.addEventListener("focus", onListingsChanged);
+    const offGarage = onActiveGarageChanged(() => {
+      syncLoad();
+      refreshRemote(false);
+    });
 
     return () => {
       mounted = false;
       window.clearTimeout(idleId);
       window.removeEventListener("evorios-listings-changed", onListingsChanged);
       window.removeEventListener("focus", onListingsChanged);
+      offGarage();
     };
-  }, [auth.userId, auth.userEmail]);
+  }, [auth.userId, auth.userEmail, hostId]);
 
   const drafts = listings
     .filter(isDraftListing)

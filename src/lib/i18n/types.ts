@@ -58,6 +58,10 @@ export type FaqItemId =
   | "deposit-release"
   | "passkey"
   | "co-host"
+  | "garage-switcher"
+  | "own-and-help"
+  | "stripe-garage-owner"
+  | "browse-own-login"
   | "pause-listing"
   | "edit-listing"
   | "boost-listing"
@@ -1632,9 +1636,11 @@ export type AppMessages = {
     nameLiveRequired: string;
     nameLiveConfirm: string;
     householdStep: (step: number, total: number) => string;
+    householdTitleKind: string;
     householdTitleName: string;
     householdTitlePeople: string;
     householdTitleDone: string;
+    householdBodyKind: string;
     householdBodyName: string;
     householdBodyPeople: string;
     householdBodyDone: string;
@@ -1647,7 +1653,22 @@ export type AppMessages = {
     householdMemberEmailRequired: string;
     householdAddMember: string;
     householdInviteNote: string;
+    householdContinueName: string;
     householdContinuePeople: string;
+    householdKindPersonalHint: string;
+    householdKindProHint: string;
+    householdSeatsLabel: string;
+    householdSeatsSolo: string;
+    householdSeatsFew: string;
+    householdSeatsMore: string;
+    householdSeatsNote: string;
+    switcherLabel: string;
+    switcherMyGarage: string;
+    switcherSharedGarage: string;
+    switcherMineHint: string;
+    switcherHelpingHint: string;
+    storeLiveHelperOnly: string;
+    storeLiveHelperBody: string;
     householdJustMe: string;
     householdSendInvites: string;
     householdContinueAlone: string;

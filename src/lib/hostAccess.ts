@@ -10,21 +10,6 @@ import { resolveHostAccountEmail, resolveHostAccountId } from "./hostIdentity";
 
 const LEGACY_HOST_ID = "";
 const ACTIVE_GARAGE_HOST_KEY = "allbyrent_active_garage_host_id";
-const PROFILE_KEY = "allbyrent_user_profile";
-
-function readOwnShopName(): string {
-  try {
-    const raw = localStorage.getItem(PROFILE_KEY);
-    if (!raw) return "";
-    const parsed = JSON.parse(raw) as {
-      garageIdentity?: { shopName?: unknown };
-    };
-    const name = parsed.garageIdentity?.shopName;
-    return typeof name === "string" ? name.trim() : "";
-  } catch {
-    return "";
-  }
-}
 
 /** Host id stamped on listings; legacy rows without hostId are unassigned until migrated. */
 export function getListingHostId(listing: ListingDraft): string {
@@ -42,9 +27,10 @@ export function getManageableHostIds(
 }
 
 /**
- * Shared household garage id for stocking / Live / storefront.
- * Primary (own shop name) → own id. Active co-host without their own shop → primary’s id.
- * Concurrent listings from Barbara / John / Peter / Joanna all stamp this same owner_id.
+ * Active garage for stocking / Live / shelf chrome.
+ * Default is always YOUR garage. Prefer a co-hosted garage only after an
+ * explicit switch (or a temporary prefer after accepting an invite).
+ * Barbara helping her daughter: keep own home garage, switch when helping.
  */
 export function resolveGarageHostId(
   authUserId: string | null,
@@ -63,12 +49,25 @@ export function resolveGarageHostId(
     /* ignore */
   }
 
-  const ownShop = readOwnShopName();
-  // Household helpers join an existing garage — they stock that shelf, not a second one.
-  if (!ownShop && coHostFor.length > 0) {
-    return coHostFor[0]!;
-  }
   return ownId;
+}
+
+export function getActiveGarageHostId(
+  authUserId: string | null,
+  authUserEmail: string | null,
+): string {
+  return resolveGarageHostId(authUserId, authUserEmail);
+}
+
+/** True when the signed-in user owns the active (or given) garage — not only helping. */
+export function isGaragePrimaryOwner(
+  authUserId: string | null,
+  garageHostId?: string | null,
+): boolean {
+  const ownId = resolveHostAccountId(authUserId);
+  if (!ownId) return false;
+  const target = (garageHostId ?? "").trim() || ownId;
+  return target === ownId;
 }
 
 export function setActiveGarageHostId(hostId: string): void {
@@ -76,9 +75,52 @@ export function setActiveGarageHostId(hostId: string): void {
   if (!id) return;
   try {
     localStorage.setItem(ACTIVE_GARAGE_HOST_KEY, id);
+    window.dispatchEvent(new CustomEvent("allbyrent:active-garage", { detail: { hostId: id } }));
   } catch {
     /* ignore */
   }
+}
+
+export function clearActiveGarageHostPreference(): void {
+  try {
+    localStorage.removeItem(ACTIVE_GARAGE_HOST_KEY);
+    window.dispatchEvent(new CustomEvent("allbyrent:active-garage", { detail: { hostId: "" } }));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function onActiveGarageChanged(listener: (hostId: string) => void): () => void {
+  const handler = (event: Event) => {
+    const detail = (event as CustomEvent<{ hostId?: string }>).detail;
+    listener((detail?.hostId ?? "").trim());
+  };
+  window.addEventListener("allbyrent:active-garage", handler);
+  return () => window.removeEventListener("allbyrent:active-garage", handler);
+}
+
+/** Shelf rows for the garage currently selected in the switcher. */
+export function loadActiveGarageListings(
+  authUserId: string | null,
+  authUserEmail: string | null,
+): ListingDraft[] {
+  const garageId = resolveGarageHostId(authUserId, authUserEmail);
+  return loadManageableListings(authUserId, authUserEmail).filter(
+    (listing) => getListingHostId(listing) === garageId || (!getListingHostId(listing) && garageId === resolveHostAccountId(authUserId)),
+  );
+}
+
+export async function fetchActiveGarageListings(
+  authUserId: string | null,
+  authUserEmail: string | null,
+): Promise<ListingDraft[]> {
+  const garageId = resolveGarageHostId(authUserId, authUserEmail);
+  const all = await fetchManageableListings(authUserId, authUserEmail);
+  return all.filter(
+    (listing) =>
+      getListingHostId(listing) === garageId ||
+      (!getListingHostId(listing) && garageId === resolveHostAccountId(authUserId)),
+  );
 }
 
 export function canManageListing(

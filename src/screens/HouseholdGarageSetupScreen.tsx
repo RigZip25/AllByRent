@@ -4,6 +4,8 @@ import { useAuth } from "../hooks/AuthProvider";
 import {
   slugifyGarageName,
   suggestHouseholdGarageNames,
+  accentsForKind,
+  type GarageShopKind,
 } from "../lib/garageIdentity";
 import {
   hasCompletedHouseholdGarageSetup,
@@ -18,13 +20,12 @@ import {
 } from "../lib/garageStorefrontSync";
 import {
   buildCoHostInviteUrlForInvite,
-  getActiveCoHostHostIds,
-  getPendingInvitesForEmail,
   type CoHostRecord,
 } from "../lib/coHostStorage";
 import { inviteCoHostWithSync } from "../lib/repositories/coHostRepository";
 import { useMessages } from "../lib/i18n/react";
 import { APP_ORIGIN } from "../lib/brand";
+import { setActiveGarageHostId } from "../lib/hostAccess";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -34,12 +35,12 @@ type MemberDraft = { name: string; email: string };
 
 type Props = {
   onDone: () => void;
-  onSkipAlone: () => void;
+  onSkipAlone?: () => void;
 };
 
 /**
- * First garage open: name the household storefront, then invite 0–3 people
- * on their own emails (each signs in / Face ID separately).
+ * First garage open: Personal/Pro + who shares, name + neighborhood, then invites.
+ * Everyone still owns this garage; invites add helpers who keep their own shops too.
  */
 export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
   const t = useMessages();
@@ -57,7 +58,11 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
     [profile.displayName, hostEmail, hostId],
   );
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [shopKind, setShopKind] = useState<GarageShopKind>(
+    profile.garageIdentity.shopKind || "personal",
+  );
+  const [seatHint, setSeatHint] = useState<"solo" | "few" | "more">("solo");
   const [shopName, setShopName] = useState(
     profile.garageIdentity.shopName || suggestions[0] || "",
   );
@@ -86,7 +91,10 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
       setError(t.garageUi.lookShopNameTaken);
       return false;
     }
+    const accentId = accentsForKind(shopKind)[0]?.id ?? profile.garageIdentity.accentId;
     const next = updateGarageIdentity({
+      shopKind,
+      accentId,
       shopName: trimmed,
       shopSlug: slug,
       neighborhood: neighborhood.trim(),
@@ -97,19 +105,15 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
       setError(remote.reason);
       return false;
     }
+    if (hostId) setActiveGarageHostId(hostId);
     return true;
   };
 
-  const finishSolo = async () => {
-    setBusy(true);
+  const goFromKind = () => {
     setError(null);
-    try {
-      const ok = await saveIdentity();
-      if (!ok) return;
-      markHouseholdGarageSetupDone();
-      onSkipAlone();
-    } finally {
-      setBusy(false);
+    setStep(2);
+    if (seatHint === "few" && members.length === 0) {
+      setMembers([{ name: "", email: "" }]);
     }
   };
 
@@ -119,7 +123,13 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
     try {
       const ok = await saveIdentity();
       if (!ok) return;
-      setStep(2);
+      if (seatHint === "solo") {
+        markHouseholdGarageSetupDone();
+        setCreatedInvites([]);
+        setStep(4);
+        return;
+      }
+      setStep(3);
     } finally {
       setBusy(false);
     }
@@ -151,7 +161,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
       }
       setCreatedInvites(invited);
       markHouseholdGarageSetupDone();
-      setStep(3);
+      setStep(4);
     } finally {
       setBusy(false);
     }
@@ -168,30 +178,95 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
     }
   };
 
+  const title =
+    step === 1
+      ? t.garageUi.householdTitleKind
+      : step === 2
+        ? t.garageUi.householdTitleName
+        : step === 3
+          ? t.garageUi.householdTitlePeople
+          : t.garageUi.householdTitleDone;
+  const body =
+    step === 1
+      ? t.garageUi.householdBodyKind
+      : step === 2
+        ? t.garageUi.householdBodyName
+        : step === 3
+          ? t.garageUi.householdBodyPeople
+          : t.garageUi.householdBodyDone;
+
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <header className="shrink-0 border-b bg-white px-4 pb-3 pt-[max(1rem,env(safe-area-inset-top,0px))]" style={{ borderColor: BORDER }}>
         <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
-          {t.garageUi.householdStep(step, 3)}
+          {t.garageUi.householdStep(step, 4)}
         </p>
         <h1 className="mt-1 text-[20px] font-extrabold" style={{ color: GREEN }}>
-          {step === 1
-            ? t.garageUi.householdTitleName
-            : step === 2
-              ? t.garageUi.householdTitlePeople
-              : t.garageUi.householdTitleDone}
+          {title}
         </h1>
-        <p className="mt-1 text-[13px] leading-snug text-gray-600">
-          {step === 1
-            ? t.garageUi.householdBodyName
-            : step === 2
-              ? t.garageUi.householdBodyPeople
-              : t.garageUi.householdBodyDone}
-        </p>
+        <p className="mt-1 text-[13px] leading-snug text-gray-600">{body}</p>
       </header>
 
       <div className="screen-scroll flex-1 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
         {step === 1 ? (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                ["personal", t.garageUi.lookPersonal, t.garageUi.householdKindPersonalHint],
+                ["pro", t.garageUi.lookPro, t.garageUi.householdKindProHint],
+              ] as const).map(([kind, label, hint]) => {
+                const active = shopKind === kind;
+                return (
+                  <button
+                    key={kind}
+                    type="button"
+                    onClick={() => setShopKind(kind)}
+                    className="rounded-2xl border px-3 py-3 text-left"
+                    style={{
+                      borderColor: active ? GREEN : BORDER,
+                      backgroundColor: active ? "#E8F5EE" : "#fff",
+                    }}
+                  >
+                    <p className="text-[14px] font-bold" style={{ color: active ? GREEN : "#111" }}>
+                      {label}
+                    </p>
+                    <p className="mt-1 text-[11px] leading-snug text-gray-500">{hint}</p>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+              {t.garageUi.householdSeatsLabel}
+            </p>
+            <div className="space-y-2">
+              {([
+                ["solo", t.garageUi.householdSeatsSolo],
+                ["few", t.garageUi.householdSeatsFew],
+                ["more", t.garageUi.householdSeatsMore],
+              ] as const).map(([id, label]) => {
+                const active = seatHint === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setSeatHint(id)}
+                    className="w-full rounded-xl border px-3 py-2.5 text-left text-[13px] font-semibold"
+                    style={{
+                      borderColor: active ? GREEN : BORDER,
+                      backgroundColor: active ? "#E8F5EE" : "#fff",
+                      color: active ? GREEN : "#374151",
+                    }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[12px] leading-relaxed text-gray-500">{t.garageUi.householdSeatsNote}</p>
+          </div>
+        ) : null}
+
+        {step === 2 ? (
           <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
               {suggestions.map((idea) => {
@@ -254,7 +329,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
           </div>
         ) : null}
 
-        {step === 2 ? (
+        {step === 3 ? (
           <div className="space-y-3">
             <p className="text-[13px] text-gray-600">{t.garageUi.householdPeopleHint}</p>
             {members.map((member, index) => (
@@ -324,7 +399,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
           </div>
         ) : null}
 
-        {step === 3 ? (
+        {step === 4 ? (
           <div className="space-y-3">
             <div className="rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
               <p className="text-[15px] font-bold" style={{ color: GREEN }}>
@@ -396,6 +471,17 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
 
       <div className="shrink-0 border-t bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]" style={{ borderColor: BORDER }}>
         {step === 1 ? (
+          <button
+            type="button"
+            onClick={goFromKind}
+            className="w-full rounded-xl py-3.5 text-[15px] font-bold text-white"
+            style={{ backgroundColor: GREEN }}
+          >
+            {t.garageUi.householdContinueName}
+          </button>
+        ) : null}
+
+        {step === 2 ? (
           <div className="flex flex-col gap-2">
             <button
               type="button"
@@ -404,25 +490,31 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
               className="w-full rounded-xl py-3.5 text-[15px] font-bold text-white disabled:opacity-60"
               style={{ backgroundColor: GREEN }}
             >
-              {busy ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : t.garageUi.householdContinuePeople}
+              {busy ? (
+                <Loader2 className="mx-auto h-5 w-5 animate-spin" />
+              ) : seatHint === "solo" ? (
+                t.garageUi.householdContinueAlone
+              ) : (
+                t.garageUi.householdContinuePeople
+              )}
             </button>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => void finishSolo()}
-              className="w-full py-2 text-center text-[13px] font-semibold text-gray-600 underline disabled:opacity-50"
-            >
-              {t.garageUi.householdJustMe}
-            </button>
-          </div>
-        ) : null}
-
-        {step === 2 ? (
-          <div className="flex gap-2">
             <button
               type="button"
               disabled={busy}
               onClick={() => setStep(1)}
+              className="w-full py-2 text-center text-[13px] font-semibold text-gray-600 underline disabled:opacity-50"
+            >
+              {t.common.back}
+            </button>
+          </div>
+        ) : null}
+
+        {step === 3 ? (
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setStep(2)}
               className="flex-1 rounded-xl border py-3 text-[14px] font-semibold text-gray-700 disabled:opacity-50"
               style={{ borderColor: BORDER }}
             >
@@ -446,7 +538,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
           </div>
         ) : null}
 
-        {step === 3 ? (
+        {step === 4 ? (
           <button
             type="button"
             onClick={onDone}
@@ -472,15 +564,9 @@ export function shouldShowHouseholdGarageSetup(opts: {
     markHouseholdGarageSetupDone();
     return false;
   }
-  // Co-hosts join an existing garage — they don't create a new household.
-  const uid = opts.userId?.trim() ?? "";
-  const email = opts.email?.trim() ?? "";
-  if (uid && getActiveCoHostHostIds(uid, email).length > 0) {
-    markHouseholdGarageSetupDone();
-    return false;
-  }
-  if (email && getPendingInvitesForEmail(email).length > 0) {
-    return false;
-  }
+  // Everyone keeps their own garage — even if they also accepted a co-host invite
+  // (Barbara next door to her daughter still names her own house garage).
+  void opts.userId;
+  void opts.email;
   return true;
 }

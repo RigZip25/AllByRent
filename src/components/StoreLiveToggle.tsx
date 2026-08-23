@@ -12,7 +12,12 @@ import {
   pushStoreLiveRemote,
 } from "../lib/garageStoreLive";
 import { garageNeedsPublicName } from "../lib/garageIdentity";
-import { resolveGarageHostId } from "../lib/hostAccess";
+import {
+  isGaragePrimaryOwner,
+  onActiveGarageChanged,
+  resolveGarageHostId,
+} from "../lib/hostAccess";
+import { resolveHostAccountId } from "../lib/hostIdentity";
 import { useMessages } from "../lib/i18n/react";
 import { startConnectOnboarding } from "../lib/repositories/connectRepository";
 import { loadSellerGoPublicStatus } from "../lib/sellerGoPublic";
@@ -28,27 +33,29 @@ type Props = {
 };
 
 /**
- * Garage Open/Pause tumbler. Hidden until the host has at least one shelf item
- * (or the store is already Live). Stripe Connect required before turning Live on.
- * First Live gently asks for a household garage name.
- * Empty shelf auto-closes Live.
+ * Garage Open/Pause tumbler for the *active* garage.
+ * Owner: Stripe Connect required before Live.
+ * Helper (invite): can stock the shelf; Live / payouts stay with the owner.
  */
 export function StoreLiveToggle({ onOpenProfile }: Props) {
   const auth = useAuth();
   const t = useMessages();
   const hostId = resolveGarageHostId(auth.userId, auth.userEmail);
+  const isOwner = isGaragePrimaryOwner(auth.userId, hostId);
   const [storeLive, setStoreLive] = useState(() => getLocalStoreLive(hostId));
   const [garageFormed, setGarageFormed] = useState(() =>
     hostHasShelfItems(auth.userId, auth.userEmail),
   );
   const [payoutsReady, setPayoutsReady] = useState(false);
   const [statusLoading, setStatusLoading] = useState(true);
-  /** Yellow Stripe CTA only after host tries to open (last step) — not on empty Garage home. */
   const [stripeGateRevealed, setStripeGateRevealed] = useState(false);
   const [nameSheetOpen, setNameSheetOpen] = useState(false);
   const [busy, setBusy] = useState<"toggle" | "stripe" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [, bump] = useState(0);
+
+  useEffect(() => onActiveGarageChanged(() => bump((n) => n + 1)), []);
 
   useEffect(() => {
     if (!hostId) {
@@ -67,7 +74,7 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
       if (cancelled) return;
       const stillFormed = hostHasShelfItems(auth.userId, auth.userEmail);
       setGarageFormed(stillFormed);
-      if (!stillFormed) {
+      if (!stillFormed && isOwner) {
         await closeStoreIfShelfEmpty(auth.userId, auth.userEmail);
         if (cancelled) return;
         setStoreLive(false);
@@ -86,14 +93,14 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
       cancelled = true;
       unsub();
     };
-  }, [hostId, auth.userId, auth.userEmail]);
+  }, [hostId, auth.userId, auth.userEmail, isOwner]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const refreshShelf = () => {
       const formed = hostHasShelfItems(auth.userId, auth.userEmail);
       setGarageFormed(formed);
-      if (!formed) {
+      if (!formed && isOwner) {
         setStoreLive(false);
         void closeStoreIfShelfEmpty(auth.userId, auth.userEmail);
       }
@@ -101,10 +108,17 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
     refreshShelf();
     window.addEventListener("evorios-listings-changed", refreshShelf);
     return () => window.removeEventListener("evorios-listings-changed", refreshShelf);
-  }, [auth.userId, auth.userEmail]);
+  }, [auth.userId, auth.userEmail, hostId, isOwner]);
 
   useEffect(() => {
     let mounted = true;
+    if (!isOwner) {
+      setStatusLoading(false);
+      setPayoutsReady(true);
+      return () => {
+        mounted = false;
+      };
+    }
     if (!hostId || (!garageFormed && !storeLive)) {
       setStatusLoading(false);
       setPayoutsReady(false);
@@ -124,11 +138,12 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
     return () => {
       mounted = false;
     };
-  }, [auth.userId, hostId, garageFormed, storeLive]);
+  }, [auth.userId, hostId, garageFormed, storeLive, isOwner]);
 
-  const needsStripe = !payoutsReady;
-  const canOpen = Boolean(hostId) && payoutsReady;
+  const needsStripe = isOwner && !payoutsReady;
+  const canOpen = Boolean(hostId) && isOwner && payoutsReady;
   const showStripeGate =
+    isOwner &&
     Boolean(hostId) &&
     garageFormed &&
     !storeLive &&
@@ -136,10 +151,10 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
     !statusLoading &&
     stripeGateRevealed;
   const showReadyHint =
-    Boolean(hostId) && garageFormed && !storeLive && canOpen && !statusLoading;
+    isOwner && Boolean(hostId) && garageFormed && !storeLive && canOpen && !statusLoading;
 
   const goLive = () => {
-    if (!hostId) return;
+    if (!hostId || !isOwner) return;
     setBusy("toggle");
     setStoreLive(true);
     void pushStoreLiveRemote(hostId, true)
@@ -158,6 +173,10 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
 
   const handleToggle = () => {
     if (!hostId || busy) return;
+    if (!isOwner) {
+      setError(t.garageUi.storeLiveHelperOnly);
+      return;
+    }
     setError(null);
     setErrorCode(null);
 
@@ -174,7 +193,10 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
 
     if (!storeLive) {
       const identity = loadUserProfile().garageIdentity;
-      if (garageNeedsPublicName(identity)) {
+      if (
+        hostId === resolveHostAccountId(auth.userId) &&
+        garageNeedsPublicName(identity)
+      ) {
         setNameSheetOpen(true);
         return;
       }
@@ -195,7 +217,7 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
   };
 
   const handleSetupStripe = () => {
-    if (busy) return;
+    if (busy || !isOwner) return;
     setBusy("stripe");
     setError(null);
     setErrorCode(null);
@@ -231,7 +253,11 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
               {storeLive ? t.garageUi.storeLiveOnTitle : t.garageUi.storeLiveOffTitle}
             </p>
             <p className="mt-0.5 text-[12px] leading-snug text-gray-500">
-              {storeLive ? t.garageUi.storeLiveOnBody : t.garageUi.storeLiveOffBody}
+              {isOwner
+                ? storeLive
+                  ? t.garageUi.storeLiveOnBody
+                  : t.garageUi.storeLiveOffBody
+                : t.garageUi.storeLiveHelperBody}
             </p>
           </div>
           <button
@@ -239,7 +265,7 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
             role="switch"
             aria-checked={storeLive}
             aria-label={storeLive ? t.garageUi.storeLivePause : t.garageUi.storeLiveOpen}
-            disabled={!hostId || busy === "toggle" || statusLoading}
+            disabled={!hostId || !isOwner || busy === "toggle" || statusLoading}
             onClick={handleToggle}
             className="relative h-8 w-[52px] shrink-0 rounded-full transition-colors disabled:opacity-50"
             style={{ backgroundColor: storeLive ? GREEN : "#D1D5DB" }}

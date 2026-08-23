@@ -1,7 +1,7 @@
 import { useEffect, useState, startTransition } from "react";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { useAuth } from "../../hooks/AuthProvider";
-import { fetchManageableListings, loadManageableListings, resolveGarageHostId } from "../../lib/hostAccess";
+import { fetchActiveGarageListings, loadActiveGarageListings, onActiveGarageChanged, resolveGarageHostId } from "../../lib/hostAccess";
 import { getListingDisplayTitle } from "../../lib/listingQr";
 import { removePublishedListing, removePublishedListingRemote } from "../../lib/listingStorage";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
@@ -69,7 +69,7 @@ export function HostGarageListSection({
     setLoading(true);
 
     const syncLoad = () => {
-      const localListings = loadManageableListings(auth.userId, auth.userEmail);
+      const localListings = loadActiveGarageListings(auth.userId, auth.userEmail);
       startTransition(() => {
         if (!mounted) return;
         setListings(localListings);
@@ -77,7 +77,7 @@ export function HostGarageListSection({
     };
 
     const refreshRemote = (markLoaded = false) => {
-      void fetchManageableListings(auth.userId, auth.userEmail)
+      void fetchActiveGarageListings(auth.userId, auth.userEmail)
         .then((next) => {
           if (!mounted) return;
           startTransition(() => setListings(next));
@@ -96,12 +96,17 @@ export function HostGarageListSection({
     };
     window.addEventListener("evorios-listings-changed", onListingsChanged);
     window.addEventListener("focus", onListingsChanged);
+    const offGarage = onActiveGarageChanged(() => {
+      syncLoad();
+      refreshRemote(false);
+    });
 
     return () => {
       mounted = false;
       window.clearTimeout(idleId);
       window.removeEventListener("evorios-listings-changed", onListingsChanged);
       window.removeEventListener("focus", onListingsChanged);
+      offGarage();
     };
   }, [auth.userId, auth.userEmail]);
 

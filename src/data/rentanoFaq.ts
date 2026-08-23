@@ -217,7 +217,27 @@ export const FAQ_META: FaqMeta[] = [
   {
     id: "co-host",
     section: "hosting",
-    keywords: ["cohost", "co-host", "partner", "family"],
+    keywords: ["cohost", "co-host", "partner", "family", "invite", "helper", "инвайт", "помощ"],
+  },
+  {
+    id: "garage-switcher",
+    section: "hosting",
+    keywords: ["switch", "working in", "active garage", "переключ", "гараж"],
+  },
+  {
+    id: "own-and-help",
+    section: "hosting",
+    keywords: ["neighbor", "next door", "two homes", "barbara", "daughter", "сосед", "два дома"],
+  },
+  {
+    id: "stripe-garage-owner",
+    section: "payments",
+    keywords: ["stripe", "payout", "owner", "helper", "who gets paid", "выплат", "страйп"],
+  },
+  {
+    id: "browse-own-login",
+    section: "account",
+    keywords: ["browse", "login", "face id", "same phone", "браузер", "логин"],
   },
   {
     id: "pause-listing",

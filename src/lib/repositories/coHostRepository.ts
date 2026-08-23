@@ -70,6 +70,7 @@ export async function acceptCoHostInviteWithSync(
   const result = acceptCoHostInvite(inviteId, acceptorUserId);
   if (result.ok) {
     await pushCoHostRemote(result.record);
+    // Land in the garage you just joined so stocking goes there; switcher can return home.
     setActiveGarageHostId(result.record.hostId);
   }
   return result;

@@ -153,8 +153,8 @@ export const faq: AppMessages["faq"] = {
       a: "Otevřete půjčku v Půjčky a zvolte Zrušit před vyzvednutím. Čekající žádost: kdykoli (autorizace karty se uvolní). Po přijetí: 48+ hodin před začátkem → plná refundace; 24–48 hodin → 50 %; pod 24 hodin → bez refundace půjčky. Zrušení hostitelem před vyzvednutím vrací nájemci 100 %.",
     },
     "host-payouts": {
-      q: "Jak dostávají hostitelé peníze?",
-      a: "Připojte Stripe v Profil → výplaty. Výplaty z půjček přijdou po úspěšném vrácení; poplatky platformy jsou vidět před publikací.",
+      q: "Jak hostitelé dostanou zaplaceno?",
+      a: "Připoj Stripe v Profil → výplaty na účtu majitele garáže. Pomocníci z té garáže výplaty nedostávají. Výplaty z půjčky přijdou po úspěšném vrácení; poplatky platformy vidíš před publikací.",
     },
     "deposit-release": {
       q: "Kdy se uvolní moje záloha?",
@@ -165,8 +165,24 @@ export const faq: AppMessages["faq"] = {
       a: "Passkey umožní přihlášení přes Face ID / otisk místo zadávání e-mailového kódu pokaždé. Po prvním přihlášení může aplikace nabídnout nastavení — volitelné, ale rychlejší. Přihlašovací kódy stále chodí e-mailem.",
     },
     "co-host": {
-      q: "Mohu přidat spoluhostitele?",
-      a: "Profil → Spoluhostitelé umožní pozvat někoho, kdo pomůže spravovat garáž. Může odpovídat na žádosti podle oprávnění, která nastavíte.",
+      q: "Můžu přidat spoluhostitele / pomocníka?",
+      a: "Ano. Při nastavení garáže nebo Profil → Spoluhostitelé pozvi lidi jejich e-mailem. Přihlásí se zvlášť (kód / Face ID), přijmou pozvánku a můžou plnit tvoji polici. Vlastní garáž jim zůstane, pokud chtějí. Výplaty (Stripe) zůstávají u majitele garáže.",
+    },
+    "garage-switcher": {
+      q: "Pomáhám v jiné garáži — jak přepnu?",
+      a: "Otevři Moje garáž. Pokud patříš do víc garáží, nahoře Pracuji v zvol Moje garáž nebo sdílenou. Fotky a + jdou do vybrané. Procházet je vždy pod tvým přihlášením.",
+    },
+    "own-and-help": {
+      q: "Bydlíme vedle sebe a pomáháme si — máme jednu společnou garáž?",
+      a: "Nemusíte. Každý dům může mít vlastní garáž a Stripe. Pozvěte se navzájem jako pomocníci a při plnění police přepínejte Pracuji v. Stejně pro rodinu v jednom domě se společnou výlohou, nebo sousedy s oddělenými obchody.",
+    },
+    "stripe-garage-owner": {
+      q: "Komu jde Stripe, když police plní pomocníci?",
+      a: "Peníze jdou majiteli garáže, který připojil Stripe k té výloze. Pomocníci můžou přidávat nabídky; Live a výplaty má jen majitel. Pokud jsi otevřel Live na svém telefonu se svou bankou, je to tvoje garáž — před plněním cizí přepni Pracuji v.",
+    },
+    "browse-own-login": {
+      q: "Když je otevřený telefon mámy, může táta procházet jako on?",
+      a: "Ne — Procházet a rezervace patří tomu, kdo je na zařízení přihlášený. Táta použije svůj telefon (nebo se odhlásí a přihlásí svým e-mailem / Face ID). Pomoc ve sdílené garáži nemění, kým jsi při prohlížení nebo půjčce.",
     },
     "pause-listing": {
       q: "Jak pozastavím nabídku?",

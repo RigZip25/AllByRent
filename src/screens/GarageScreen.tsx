@@ -3,6 +3,7 @@ import { ArrowLeft, Eye, Share2, Store } from "lucide-react";
 import { HostDashboard } from "../app/components/HostDashboard";
 import { HostGarageListSection, type HostGarageListMode } from "../app/components/HostGarageListSection";
 import { RoleModeSwitcher } from "../components/RoleModeSwitcher";
+import { GarageActiveSwitcher } from "../components/GarageActiveSwitcher";
 import { GarageLookEditor } from "../components/GarageLookEditor";
 import { StoreLiveToggle } from "../components/StoreLiveToggle";
 import { useAuth } from "../hooks/AuthProvider";
@@ -157,6 +158,8 @@ export function GarageScreen({
           )}
           <p className="mt-0.5 text-[13px] text-gray-500">{t.garage.subtitle}</p>
         </div>
+
+        <GarageActiveSwitcher />
 
         <StoreLiveToggle onOpenProfile={() => onNavigate("profile")} />
 

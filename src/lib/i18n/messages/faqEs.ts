@@ -154,7 +154,7 @@ export const faq: AppMessages["faq"] = {
     },
     "host-payouts": {
       q: "¿Cómo cobran los anfitriones?",
-      a: "Conecta Stripe en Perfil → cobros. Los cobros del alquiler llegan tras una devolución exitosa; las comisiones de la plataforma se muestran antes de publicar.",
+      a: "Conecta Stripe en Perfil → cobros en la cuenta dueña del garaje. Los ayudantes no reciben esos cobros. Los cobros del alquiler llegan tras una devolución exitosa; las comisiones de la plataforma se muestran antes de publicar.",
     },
     "deposit-release": {
       q: "¿Cuándo se libera mi depósito?",
@@ -165,8 +165,24 @@ export const faq: AppMessages["faq"] = {
       a: "Las passkeys te permiten iniciar sesión con Face ID / huella en vez de escribir el código de correo cada vez. Después del primer inicio de sesión, la app puede ofrecerte configurarla — es opcional, pero más rápido. Los códigos de acceso siguen llegando por correo.",
     },
     "co-host": {
-      q: "¿Puedo añadir un coanfitrión?",
-      a: "Perfil → Coanfitriones te permite invitar a alguien para que te ayude a gestionar el garaje. Puede responder a las solicitudes según los permisos que le des.",
+      q: "¿Puedo añadir un coanfitrión / ayudante?",
+      a: "Sí. En la configuración del garaje o Perfil → Coanfitriones invita con el correo de cada persona. Inician sesión por separado (código / Face ID), aceptan la invitación y pueden llenar tu estantería. Pueden conservar su propio garaje. Los cobros (Stripe) quedan con el dueño del garaje.",
+    },
+    "garage-switcher": {
+      q: "Ayudo en otro garaje — ¿cómo cambio?",
+      a: "Abre Mi garaje. Si perteneces a más de uno, usa Trabajando en arriba para elegir Mi garaje o el compartido. Las fotos y el + van al garaje seleccionado. Explorar siempre es con tu propio acceso.",
+    },
+    "own-and-help": {
+      q: "Vivimos al lado y nos ayudamos — ¿compartimos un solo garaje?",
+      a: "No es obligatorio. Cada casa puede tener su garaje y su Stripe. Invítense como ayudantes y cambien Trabajando en al stockear la estantería del otro. Igual para familia en una casa con un escaparate compartido, o vecinos con tiendas separadas.",
+    },
+    "stripe-garage-owner": {
+      q: "¿A quién paga Stripe si los ayudantes llenan la estantería?",
+      a: "El dinero va al dueño del garaje que conectó Stripe en ese escaparate. Los ayudantes pueden añadir anuncios; solo el dueño abre Live y cobra. Si abriste Live en tu teléfono con tu banco, ese es tu garaje — cambia Trabajando en antes de stockear el de otra persona.",
+    },
+    "browse-own-login": {
+      q: "Si el teléfono de mamá está abierto, ¿papá puede explorar como él?",
+      a: "No — Explorar y las reservas siguen a quien inició sesión en ese dispositivo. Papá usa su teléfono (o cierra sesión y entra con su correo / Face ID). Ayudar en un garaje compartido no cambia quién eres al explorar o alquilar.",
     },
     "pause-listing": {
       q: "¿Cómo pauso un anuncio?",

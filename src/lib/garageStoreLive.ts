@@ -3,7 +3,7 @@
  * Shelf listings (active) stay in host inventory; neighbors only see them when store is Live and item not paused.
  */
 
-import { loadManageableListings, resolveGarageHostId } from "./hostAccess";
+import { resolveGarageHostId, isGaragePrimaryOwner } from "./hostAccess";
 import { loadPublishedListings } from "./listingStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
@@ -89,14 +89,20 @@ export function isCountableShelfItem(listing: {
   return onShelf && !listing.paused;
 }
 
-/** True when this signed-in host still has ≥1 on-shelf listing (same rules as Garage “On shelf”). */
+/** True when the active garage still has ≥1 on-shelf listing. */
 export function hostHasShelfItems(
   authUserId: string | null | undefined,
   authUserEmail: string | null | undefined,
 ): boolean {
-  return loadManageableListings(authUserId ?? null, authUserEmail ?? null).some(
-    isCountableShelfItem,
-  );
+  const garageId = resolveGarageHostId(authUserId ?? null, authUserEmail ?? null);
+  if (!garageId) return false;
+  return loadPublishedListings().some((listing) => {
+    if (!isCountableShelfItem(listing)) return false;
+    const host = listing.hostId?.trim() ?? "";
+    if (host) return host === garageId;
+    // Legacy unassigned rows count only on the owner's own garage.
+    return garageId === (authUserId ?? "").trim();
+  });
 }
 
 type FetchStoreLiveOptions = {
@@ -113,6 +119,8 @@ async function coerceOwnEmptyShelf(
 ): Promise<Record<string, boolean>> {
   const coerce = options?.coerceEmptyShelfFor;
   if (!coerce) return out;
+  // Helpers must not auto-close someone else's Live from a partial local cache.
+  if (!isGaragePrimaryOwner(coerce.userId ?? null)) return out;
   const selfHostId = resolveGarageHostId(coerce.userId ?? null, coerce.email ?? null);
   if (!selfHostId) return out;
   if (!out[selfHostId] && !getLocalStoreLive(selfHostId)) return out;
@@ -163,7 +171,9 @@ export async function fetchStoreLiveByHostIds(
       live &&
       selfHostId &&
       hostId === selfHostId &&
-      !hostHasShelfItems(coerce?.userId, coerce?.email)
+      coerce &&
+      isGaragePrimaryOwner(coerce.userId ?? null, selfHostId) &&
+      !hostHasShelfItems(coerce.userId, coerce.email)
     ) {
       // Remote still says Live after an empty shelf — force close so UI cannot reopen.
       await pushStoreLiveRemote(hostId, false);
@@ -235,6 +245,7 @@ export async function closeStoreIfShelfEmpty(
   authUserId: string | null | undefined,
   authUserEmail: string | null | undefined,
 ): Promise<void> {
+  if (!isGaragePrimaryOwner(authUserId ?? null)) return;
   const hostId = resolveGarageHostId(authUserId ?? null, authUserEmail ?? null);
   if (!hostId) return;
   if (hostHasShelfItems(authUserId, authUserEmail)) return;
