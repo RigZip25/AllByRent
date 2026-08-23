@@ -34,9 +34,9 @@ function hostHasShelf(hostId: string): boolean {
 }
 
 /**
- * Garage Open/Pause tumbler. Stripe Connect (payoutsReady) required before turning Live on —
- * including for gift-only shelves. Stripe CTA only after the garage has shelf items
- * (last step before Live) — not on an empty My Garage home.
+ * Garage Open/Pause tumbler. Hidden until the host has at least one shelf item
+ * (or the store is already Live). Stripe Connect required before turning Live on.
+ * Stripe CTA only after the host tries to open — last step, not empty-garage friction.
  */
 export function StoreLiveToggle({ onOpenProfile }: Props) {
   const auth = useAuth();
@@ -116,6 +116,11 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
     stripeGateRevealed;
   const showReadyHint =
     Boolean(hostId) && garageFormed && !storeLive && canOpen && !statusLoading;
+
+  // Empty garage: no Live tumbler yet — stock the shelf first.
+  if (!garageFormed && !storeLive) {
+    return null;
+  }
 
   const handleToggle = () => {
     if (!hostId || busy) return;
