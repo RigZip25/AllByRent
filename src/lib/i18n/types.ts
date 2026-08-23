@@ -1620,6 +1620,17 @@ export type AppMessages = {
     lookAccent: string;
     lookShopName: string;
     lookShopNamePlaceholder: string;
+    lookShopNameRequired: string;
+    lookShopNameTaken: string;
+    lookShopNameWhen: string;
+    lookShopSlugHint: (slug: string) => string;
+    lookNeighborhood: string;
+    lookNeighborhoodPlaceholder: string;
+    lookNeighborhoodHint: string;
+    nameLiveTitle: string;
+    nameLiveBody: string;
+    nameLiveRequired: string;
+    nameLiveConfirm: string;
     share: string;
     shareShowcaseTitle: string;
     shareShowcaseBody: string;
@@ -3099,6 +3110,10 @@ export type YardSalesMessages = {
   emptyTitle: string;
   emptyBody: string;
   browseCta: string;
+  viewModeAria: string;
+  viewList: string;
+  viewMap: string;
+  mapApproxHint: string;
 };
 
 export type GarageCartMessages = {

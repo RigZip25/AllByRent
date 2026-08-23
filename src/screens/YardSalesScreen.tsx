@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ChevronRight, Star } from "lucide-react";
+import { ArrowLeft, ChevronRight, List, Map as MapIcon, Star } from "lucide-react";
 import { LocationAreaControls } from "../components/LocationAreaControls";
+import { GarageZipApproxMap } from "../components/GarageZipApproxMap";
 import { BRAND_AMBER, BRAND_GREEN } from "../lib/brand";
 import {
   fetchActiveListingsForCityRemote,
@@ -18,10 +19,14 @@ import { useAuth } from "../hooks/AuthProvider";
 import type { GarageSaleSchedule } from "../lib/garageSaleStorage";
 import { localizeCategoryLabel } from "../lib/i18n/categoryLabels";
 import { useMessages } from "../lib/i18n/react";
+import { fetchGarageStorefrontsByHostIds } from "../lib/garageStorefrontSync";
+import type { HostGarageMeta } from "../lib/garageDisplay";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
 const BORDER = "#E8E6E0";
+
+type ViewMode = "map" | "list";
 
 function YardSaleCard({
   event,
@@ -62,6 +67,9 @@ function YardSaleCard({
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-[16px] font-bold text-gray-900">{event.name}</p>
+        {event.neighborhood ? (
+          <p className="mt-0.5 text-[13px] font-semibold text-gray-600">{event.neighborhood}</p>
+        ) : null}
         <p
           className="mt-1 text-[15px] font-semibold"
           style={{ color: event.openStatus === "now" ? "#B45309" : "#6B7280" }}
@@ -97,6 +105,7 @@ export function YardSalesScreen({ onBack, onOpenGarage, onBrowseGear }: YardSale
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<YardSaleEvent[]>([]);
   const [locationEpoch, setLocationEpoch] = useState(0);
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   const city = getActiveRentLocationLabel().trim();
 
@@ -112,6 +121,21 @@ export function YardSalesScreen({ onBack, onOpenGarage, onBrowseGear }: YardSale
         ];
         const ownId = resolveHostAccountId(auth.userId);
         const schedules: Record<string, GarageSaleSchedule | null> = {};
+        const storefronts = await fetchGarageStorefrontsByHostIds(hostIds);
+        const hostMeta: Record<string, HostGarageMeta> = {};
+        for (const hostId of hostIds) {
+          const identity = storefronts[hostId];
+          if (!identity) continue;
+          hostMeta[hostId] = {
+            displayName: identity.shopName || "Neighbor",
+            rating: 0,
+            shopKind: identity.shopKind,
+            accentId: identity.accentId,
+            shopName: identity.shopName,
+            shopSlug: identity.shopSlug,
+            neighborhood: identity.neighborhood,
+          };
+        }
         await Promise.all(
           hostIds.map(async (hostId) => {
             if (hostId === ownId) {
@@ -122,7 +146,7 @@ export function YardSalesScreen({ onBack, onOpenGarage, onBrowseGear }: YardSale
           }),
         );
         if (!mounted) return;
-        setEvents(buildYardSaleEvents(active, schedules));
+        setEvents(buildYardSaleEvents(active, schedules, hostMeta));
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -134,6 +158,17 @@ export function YardSalesScreen({ onBack, onOpenGarage, onBrowseGear }: YardSale
 
   const openNowCount = useMemo(
     () => events.filter((event) => event.openStatus === "now" || event.openStatus === "today").length,
+    [events],
+  );
+
+  const mapPins = useMemo(
+    () =>
+      events.map((event) => ({
+        id: event.hostId,
+        name: event.name,
+        neighborhood: event.neighborhood || undefined,
+        openNow: event.openStatus === "now" || event.openStatus === "today",
+      })),
     [events],
   );
 
@@ -168,6 +203,39 @@ export function YardSalesScreen({ onBack, onOpenGarage, onBrowseGear }: YardSale
         />
 
         <div
+          className="mt-3 flex rounded-full border bg-white p-0.5"
+          style={{ borderColor: BORDER }}
+          role="tablist"
+          aria-label={copy.viewModeAria}
+        >
+          {(
+            [
+              { id: "list" as const, label: copy.viewList, Icon: List },
+              { id: "map" as const, label: copy.viewMap, Icon: MapIcon },
+            ] as const
+          ).map(({ id, label, Icon }) => {
+            const active = viewMode === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setViewMode(id)}
+                className="inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-bold transition-colors"
+                style={{
+                  backgroundColor: active ? AMBER : "transparent",
+                  color: active ? "#fff" : "#6b7280",
+                }}
+              >
+                <Icon className="h-4 w-4 shrink-0" strokeWidth={2.4} aria-hidden />
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div
           className="mt-3 rounded-xl px-3 py-2 text-[13px] font-medium"
           style={{ backgroundColor: `${AMBER}22`, color: "#92400E" }}
         >
@@ -200,6 +268,14 @@ export function YardSalesScreen({ onBack, onOpenGarage, onBrowseGear }: YardSale
               </button>
             ) : null}
           </div>
+        ) : viewMode === "map" ? (
+          <GarageZipApproxMap
+            areaLabel={city}
+            pins={mapPins}
+            onSelect={onOpenGarage}
+            approxHint={copy.mapApproxHint}
+            emptyLabel={copy.emptyTitle}
+          />
         ) : (
           events.map((event) => (
             <YardSaleCard

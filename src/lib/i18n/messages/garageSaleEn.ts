@@ -319,6 +319,11 @@ export const yardSales: AppMessages["yardSales"] = {
   emptyTitle: "No yard sales on the map yet",
   emptyBody: "Check back on weekends, or browse neighbor items for buy deals.",
   browseCta: "Browse the block →",
+  viewModeAria: "Map or list",
+  viewList: "List",
+  viewMap: "Map",
+  mapApproxHint:
+    "Approximate area by ZIP/city — exact addresses stay private. Same-street garages share one blob.",
 };
 
 export const garageCart: AppMessages["garageCart"] = {

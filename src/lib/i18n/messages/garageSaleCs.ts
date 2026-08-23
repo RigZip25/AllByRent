@@ -322,6 +322,11 @@ export const yardSales: AppMessages["yardSales"] = {
   emptyTitle: "Na mapě zatím žádné výprodeje",
   emptyBody: "Zkuste to o víkendu, nebo procházejte věci sousedů ke koupi.",
   browseCta: "Procházet blok →",
+  viewModeAria: "Mapa nebo seznam",
+  viewList: "Seznam",
+  viewMap: "Mapa",
+  mapApproxHint:
+    "Přibližná oblast podle PSČ/města — přesná adresa zůstává skrytá. Garáže ve stejné ulici sdílí jeden blob.",
 };
 
 export const garageCart: AppMessages["garageCart"] = {

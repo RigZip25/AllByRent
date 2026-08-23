@@ -15,6 +15,7 @@ export type YardSaleEvent = {
   name: string;
   rating: number;
   distance: string;
+  neighborhood: string;
   saleItemCount: number;
   openLabel: string;
   openStatus: YardSaleOpenStatus;
@@ -72,12 +73,13 @@ export function garageHasSaleItems(garage: GarageSummary): boolean {
 export function buildYardSaleEvents(
   listings: ListingDraft[],
   schedulesByHostId: Record<string, GarageSaleSchedule | null | undefined> = {},
+  hostMeta?: Record<string, import("./garageDisplay").HostGarageMeta>,
 ): YardSaleEvent[] {
-  const garages = groupListingsByGarage(listings).filter(garageHasSaleItems);
+  const garages = groupListingsByGarage(listings, hostMeta).filter(garageHasSaleItems);
 
   return garages
     .map((garage) => {
-      const trust = garageTrustLine(garage.hostId);
+      const trust = garageTrustLine(garage.hostId, hostMeta);
       const saleItems = garage.listings.filter((listing) => listing.modes.sell);
       const categories = [
         ...new Set(saleItems.map((listing) => listing.category).filter(Boolean)),
@@ -90,6 +92,7 @@ export function buildYardSaleEvents(
         name: trust.name,
         rating: trust.rating,
         distance: trust.distance,
+        neighborhood: trust.neighborhood || garage.neighborhood || "",
         saleItemCount: saleItems.length,
         categories,
         ...open,

@@ -319,6 +319,11 @@ export const yardSales: AppMessages["yardSales"] = {
   emptyTitle: "Todavía no hay ventas de garaje en el mapa",
   emptyBody: "Vuelve a mirar los fines de semana, o explora los artículos de los vecinos para encontrar chollos.",
   browseCta: "Explorar el barrio →",
+  viewModeAria: "Mapa o lista",
+  viewList: "Lista",
+  viewMap: "Mapa",
+  mapApproxHint:
+    "Zona aproximada por código postal/ciudad — la dirección exacta no se muestra. Varios garajes en la misma calle comparten el mismo blob.",
 };
 
 export const garageCart: AppMessages["garageCart"] = {

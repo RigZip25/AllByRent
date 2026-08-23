@@ -1,5 +1,6 @@
 import {
   normalizeGarageIdentity,
+  slugifyGarageName,
   type GarageIdentity,
 } from "./garageIdentity";
 import { setLocalStoreLive } from "./garageStoreLive";
@@ -40,19 +41,49 @@ export function onGarageIdentityChanged(
 export async function pushGarageStorefrontRemote(
   hostId: string | null | undefined,
   identity: GarageIdentity,
-): Promise<void> {
+): Promise<{ ok: true } | { ok: false; reason: string }> {
   const id = hostId?.trim() ?? "";
-  if (!id || !isUuid(id) || !isSupabaseConfigured()) return;
+  if (!id || !isUuid(id) || !isSupabaseConfigured()) return { ok: true };
   const supabase = getSupabaseClient();
-  if (!supabase) return;
+  if (!supabase) return { ok: true };
   const normalized = normalizeGarageIdentity(identity);
-  await supabase.from("garage_storefronts").upsert({
+  const { error } = await supabase.from("garage_storefronts").upsert({
     host_id: id,
     shop_kind: normalized.shopKind,
     accent_id: normalized.accentId,
     shop_name: normalized.shopName,
+    shop_slug: normalized.shopSlug,
+    neighborhood: normalized.neighborhood,
     updated_at: new Date().toISOString(),
   });
+  if (error) {
+    if (/shop_slug|unique|duplicate/i.test(error.message)) {
+      return { ok: false, reason: "That garage name is already taken. Try another." };
+    }
+    return { ok: false, reason: error.message || "Could not save garage look." };
+  }
+  return { ok: true };
+}
+
+/** True when slug is free (or owned by this host). */
+export async function isGarageSlugAvailable(
+  slug: string,
+  hostId: string | null | undefined,
+): Promise<boolean> {
+  const key = slugifyGarageName(slug);
+  if (!key) return false;
+  if (!isSupabaseConfigured()) return true;
+  const supabase = getSupabaseClient();
+  if (!supabase) return true;
+  const { data, error } = await supabase
+    .from("garage_storefronts")
+    .select("host_id, shop_slug")
+    .ilike("shop_slug", key)
+    .maybeSingle();
+  if (error || !data) return true;
+  const owner = typeof data.host_id === "string" ? data.host_id : "";
+  const self = hostId?.trim() ?? "";
+  return Boolean(self) && owner === self;
 }
 
 export async function fetchGarageStorefrontsByHostIds(
@@ -65,7 +96,7 @@ export async function fetchGarageStorefrontsByHostIds(
   // store_live is selected only to warm garageStoreLive cache — Live flag source of truth stays there.
   const { data, error } = await supabase
     .from("garage_storefronts")
-    .select("host_id, shop_kind, accent_id, shop_name, store_live")
+    .select("host_id, shop_kind, accent_id, shop_name, shop_slug, neighborhood, store_live")
     .in("host_id", ids);
   if (error || !data) return {};
   const out: Record<string, GarageIdentity> = {};
@@ -79,6 +110,8 @@ export async function fetchGarageStorefrontsByHostIds(
       shopKind: row.shop_kind,
       accentId: row.accent_id,
       shopName: row.shop_name,
+      shopSlug: row.shop_slug,
+      neighborhood: row.neighborhood,
     });
   }
   return out;

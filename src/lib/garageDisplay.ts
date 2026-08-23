@@ -47,19 +47,38 @@ export function garageTrustLine(
   name: string;
   rating: number;
   distance: string;
+  neighborhood: string;
 } {
   const meta = hostId ? hostMeta?.[hostId] : undefined;
   const customName =
     meta && "shopName" in meta && typeof meta.shopName === "string"
       ? meta.shopName.trim()
       : "";
+  const neighborhood =
+    meta && "neighborhood" in meta && typeof meta.neighborhood === "string"
+      ? meta.neighborhood.trim()
+      : "";
+  let selfNeighborhood = "";
+  try {
+    const self = loadUserProfile();
+    if (hostId && self.id && self.id === hostId) {
+      selfNeighborhood = self.garageIdentity?.neighborhood?.trim() ?? "";
+    }
+  } catch {
+    /* ignore */
+  }
   const name =
     customName ||
     garageDisplayName(hostId, meta ? { [hostId!]: meta.displayName } : undefined);
   const city = getProfileCity().trim().toLowerCase();
   const active = getActiveRentLocationLabel().trim().toLowerCase();
   const distance = city && active && city === active ? "Near you" : "Nearby";
-  return { name, rating: meta?.rating ?? 0, distance };
+  return {
+    name,
+    rating: meta?.rating ?? 0,
+    distance,
+    neighborhood: neighborhood || selfNeighborhood,
+  };
 }
 
 /** @deprecated Prefer "Nearby" — kept for call sites until distance is wired. */
@@ -183,6 +202,7 @@ export type GarageSummary = {
   name: string;
   rating: number;
   distance: string;
+  neighborhood?: string;
   itemCount: number;
   categories: string[];
   listings: ListingDraft[];
@@ -200,6 +220,8 @@ export type HostGarageMeta = {
   shopKind?: GarageShopKind;
   accentId?: GarageAccentId;
   shopName?: string;
+  shopSlug?: string;
+  neighborhood?: string;
 };
 
 export function groupListingsByGarage(
@@ -239,11 +261,13 @@ export function groupListingsByGarage(
     let accentSoft: string | undefined;
 
     const fromMeta =
-      meta?.accentId || meta?.shopKind
+      meta?.accentId || meta?.shopKind || meta?.shopName || meta?.neighborhood
         ? normalizeGarageIdentity({
             shopKind: meta.shopKind,
             accentId: meta.accentId,
             shopName: meta.shopName,
+            shopSlug: meta.shopSlug,
+            neighborhood: meta.neighborhood,
           })
         : null;
     const fromSelf =
@@ -262,6 +286,7 @@ export function groupListingsByGarage(
       name: trust.name,
       rating: trust.rating,
       distance: trust.distance,
+      neighborhood: trust.neighborhood || identity?.neighborhood || undefined,
       itemCount: items.length,
       categories,
       listings: items,

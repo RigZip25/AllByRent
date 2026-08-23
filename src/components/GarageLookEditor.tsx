@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   accentsForKind,
   resolveGarageAccent,
+  slugifyGarageName,
   type GarageAccentId,
   type GarageShopKind,
 } from "../lib/garageIdentity";
@@ -10,11 +11,16 @@ import { useMessages } from "../lib/i18n/react";
 import { useAuth } from "../hooks/AuthProvider";
 import {
   emitGarageIdentityChanged,
+  isGarageSlugAvailable,
   pushGarageStorefrontRemote,
 } from "../lib/garageStorefrontSync";
 
 const BORDER = "#E8E6E0";
 
+/**
+ * Optional garage look (colors + name + neighborhood).
+ * Naming is gently required only when going Live — not while stocking the shelf.
+ */
 export function GarageLookEditor({ onChanged }: { onChanged?: () => void }) {
   const t = useMessages();
   const auth = useAuth();
@@ -22,19 +28,30 @@ export function GarageLookEditor({ onChanged }: { onChanged?: () => void }) {
   const [shopKind, setShopKind] = useState<GarageShopKind>(initial.shopKind);
   const [accentId, setAccentId] = useState<GarageAccentId>(initial.accentId);
   const [shopName, setShopName] = useState(initial.shopName);
+  const [neighborhood, setNeighborhood] = useState(initial.neighborhood);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [slugBusy, setSlugBusy] = useState(false);
 
   const accents = accentsForKind(shopKind);
   const activeAccent = resolveGarageAccent({ shopKind, accentId });
+  const slugPreview = slugifyGarageName(shopName);
 
-  const persist = (patch: {
+  const persist = async (patch: {
     shopKind?: GarageShopKind;
     accentId?: GarageAccentId;
     shopName?: string;
+    shopSlug?: string;
+    neighborhood?: string;
   }) => {
     const next = updateGarageIdentity(patch).garageIdentity;
     emitGarageIdentityChanged(next);
     const hostId = (auth.userId ?? loadUserProfile().id).trim();
-    void pushGarageStorefrontRemote(hostId, next);
+    const remote = await pushGarageStorefrontRemote(hostId, next);
+    if (!remote.ok) {
+      setNameError(remote.reason);
+      return next;
+    }
+    setNameError(null);
     onChanged?.();
     return next;
   };
@@ -45,13 +62,44 @@ export function GarageLookEditor({ onChanged }: { onChanged?: () => void }) {
     const nextAccent = keep ? accentId : nextAccents[0]!.id;
     setShopKind(kind);
     setAccentId(nextAccent);
-    persist({ shopKind: kind, accentId: nextAccent });
+    void persist({ shopKind: kind, accentId: nextAccent });
   };
 
   const setAccent = (id: GarageAccentId) => {
     setAccentId(id);
-    persist({ accentId: id });
+    void persist({ accentId: id });
   };
+
+  const commitShopName = async () => {
+    const trimmed = shopName.trim();
+    setShopName(trimmed);
+    if (!trimmed) {
+      setNameError(null);
+      await persist({ shopName: "", shopSlug: "" });
+      return;
+    }
+    const slug = slugifyGarageName(trimmed);
+    if (!slug) {
+      setNameError(t.garageUi.lookShopNameRequired);
+      return;
+    }
+    setSlugBusy(true);
+    try {
+      const hostId = (auth.userId ?? loadUserProfile().id).trim();
+      const free = await isGarageSlugAvailable(slug, hostId);
+      if (!free) {
+        setNameError(t.garageUi.lookShopNameTaken);
+        return;
+      }
+      await persist({ shopName: trimmed, shopSlug: slug });
+    } finally {
+      setSlugBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    setNameError(null);
+  }, [shopName]);
 
   return (
     <div className="rounded-2xl border bg-white p-3.5" style={{ borderColor: BORDER }}>
@@ -77,8 +125,13 @@ export function GarageLookEditor({ onChanged }: { onChanged?: () => void }) {
             <p className="truncate text-[13px] font-bold" style={{ color: activeAccent.color }}>
               {shopName.trim() || t.garageUi.lookShopNamePlaceholder}
             </p>
-            <p className="text-[11px] font-semibold text-gray-500">
-              {shopKind === "pro" ? t.garageUi.lookPro : t.garageUi.lookPersonal}
+            <p className="truncate text-[11px] font-semibold text-gray-500">
+              {neighborhood.trim()
+                ? neighborhood.trim()
+                : shopKind === "pro"
+                  ? t.garageUi.lookPro
+                  : t.garageUi.lookPersonal}
+              {slugPreview ? ` · @${slugPreview}` : ""}
             </p>
           </div>
         </div>
@@ -136,10 +189,7 @@ export function GarageLookEditor({ onChanged }: { onChanged?: () => void }) {
               }}
             >
               {active ? (
-                <span
-                  className="block h-2.5 w-2.5 rounded-full bg-white"
-                  aria-hidden
-                />
+                <span className="block h-2.5 w-2.5 rounded-full bg-white" aria-hidden />
               ) : null}
             </button>
           );
@@ -156,14 +206,39 @@ export function GarageLookEditor({ onChanged }: { onChanged?: () => void }) {
           value={shopName}
           placeholder={t.garageUi.lookShopNamePlaceholder}
           onChange={(e) => setShopName(e.target.value)}
+          onBlur={() => void commitShopName()}
+          className="mt-1.5 w-full rounded-xl border bg-[#F9FAFB] px-3 py-2.5 text-[14px] outline-none"
+          style={{ borderColor: nameError ? "#FCA5A5" : BORDER }}
+        />
+        <p className="mt-1 text-[11px] leading-snug text-gray-500">{t.garageUi.lookShopNameWhen}</p>
+        {slugPreview ? (
+          <p className="mt-0.5 text-[11px] text-gray-500">
+            {t.garageUi.lookShopSlugHint(slugPreview)}
+            {slugBusy ? "…" : ""}
+          </p>
+        ) : null}
+        {nameError ? <p className="mt-1 text-[12px] font-semibold text-red-600">{nameError}</p> : null}
+      </label>
+
+      <label className="mt-3 block">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+          {t.garageUi.lookNeighborhood}
+        </span>
+        <input
+          type="text"
+          maxLength={40}
+          value={neighborhood}
+          placeholder={t.garageUi.lookNeighborhoodPlaceholder}
+          onChange={(e) => setNeighborhood(e.target.value)}
           onBlur={() => {
-            const trimmed = shopName.trim();
-            setShopName(trimmed);
-            persist({ shopName: trimmed });
+            const trimmed = neighborhood.trim();
+            setNeighborhood(trimmed);
+            void persist({ neighborhood: trimmed });
           }}
           className="mt-1.5 w-full rounded-xl border bg-[#F9FAFB] px-3 py-2.5 text-[14px] outline-none"
           style={{ borderColor: BORDER }}
         />
+        <p className="mt-1 text-[11px] leading-snug text-gray-500">{t.garageUi.lookNeighborhoodHint}</p>
       </label>
     </div>
   );
