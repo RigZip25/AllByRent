@@ -43,6 +43,7 @@ type Props = {
  * Everyone still owns this garage; invites add helpers who keep their own shops too.
  */
 export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
+  void onSkipAlone;
   const t = useMessages();
   const auth = useAuth();
   const profile = loadUserProfile();
