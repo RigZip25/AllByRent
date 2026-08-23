@@ -779,6 +779,7 @@ export const cs: AppMessages = {
     storeLiveStripeOpening: "Otevírám Stripe…",
     storeLiveOpenProfile: "Otevřít Profil → výplaty",
     storeLiveReadyHint: "Výplaty připravené — přepni, až budou sousedé moct prohlížet.",
+    storeLiveNeedShelfFirst: "Nejdřív něco dej na polici — teprve potom obchod otevři.",
     storeClosedTitle: "Obchod pozastavený",
     storeClosedBody: "Tahle garáž teď sousedům není otevřená.",
     storePausedBadge: "Pozastaveno",

@@ -759,6 +759,7 @@ export const es: AppMessages = {
     storeLiveStripeOpening: "Abriendo Stripe…",
     storeLiveOpenProfile: "Abrir Perfil → pagos",
     storeLiveReadyHint: "Pagos listos — activa el interruptor cuando quieras que los vecinos naveguen.",
+    storeLiveNeedShelfFirst: "Primero pon algo en la estantería — luego abre la tienda.",
     storeClosedTitle: "Tienda en pausa",
     storeClosedBody: "Este garaje no está abierto a los vecinos ahora mismo.",
     storePausedBadge: "En pausa",

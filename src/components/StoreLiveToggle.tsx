@@ -10,6 +10,10 @@ import {
 } from "../lib/garageStoreLive";
 import { resolveHostAccountId } from "../lib/hostIdentity";
 import { useMessages } from "../lib/i18n/react";
+import {
+  isListingOnShelf,
+  loadPublishedListings,
+} from "../lib/listingStorage";
 import { startConnectOnboarding } from "../lib/repositories/connectRepository";
 import { loadSellerGoPublicStatus } from "../lib/sellerGoPublic";
 
@@ -22,17 +26,30 @@ type Props = {
   onOpenProfile?: () => void;
 };
 
+function hostHasShelf(hostId: string): boolean {
+  return loadPublishedListings().some(
+    (listing) =>
+      (listing.hostId?.trim() ?? "") === hostId && isListingOnShelf(listing),
+  );
+}
+
 /**
  * Garage Open/Pause tumbler. Stripe Connect (payoutsReady) required before turning Live on —
- * including for gift-only shelves.
+ * including for gift-only shelves. Stripe CTA only after the garage has shelf items
+ * (last step before Live) — not on an empty My Garage home.
  */
 export function StoreLiveToggle({ onOpenProfile }: Props) {
   const auth = useAuth();
   const t = useMessages();
   const hostId = resolveHostAccountId(auth.userId);
   const [storeLive, setStoreLive] = useState(() => getLocalStoreLive(hostId));
+  const [garageFormed, setGarageFormed] = useState(() =>
+    hostId ? hostHasShelf(hostId) : false,
+  );
   const [payoutsReady, setPayoutsReady] = useState(false);
   const [statusLoading, setStatusLoading] = useState(true);
+  /** Yellow Stripe CTA only after host tries to open (last step) — not on empty Garage home. */
+  const [stripeGateRevealed, setStripeGateRevealed] = useState(false);
   const [busy, setBusy] = useState<"toggle" | "stripe" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(null);
@@ -40,9 +57,11 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
   useEffect(() => {
     if (!hostId) {
       setStoreLive(false);
+      setGarageFormed(false);
       return;
     }
     setStoreLive(getLocalStoreLive(hostId));
+    setGarageFormed(hostHasShelf(hostId));
     void fetchStoreLiveByHostIds([hostId]).then((map) => {
       if (Object.prototype.hasOwnProperty.call(map, hostId)) {
         setStoreLive(Boolean(map[hostId]));
@@ -54,7 +73,23 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
   }, [hostId]);
 
   useEffect(() => {
+    if (!hostId || typeof window === "undefined") return;
+    const refreshShelf = () => setGarageFormed(hostHasShelf(hostId));
+    refreshShelf();
+    window.addEventListener("evorios-listings-changed", refreshShelf);
+    return () => window.removeEventListener("evorios-listings-changed", refreshShelf);
+  }, [hostId]);
+
+  // Only hit Connect status once the garage has something on the shelf (or is already Live).
+  useEffect(() => {
     let mounted = true;
+    if (!hostId || (!garageFormed && !storeLive)) {
+      setStatusLoading(false);
+      setPayoutsReady(false);
+      return () => {
+        mounted = false;
+      };
+    }
     setStatusLoading(true);
     void loadSellerGoPublicStatus(auth.userId, { requiresPhone: false })
       .then((status) => {
@@ -67,17 +102,33 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
     return () => {
       mounted = false;
     };
-  }, [auth.userId]);
+  }, [auth.userId, hostId, garageFormed, storeLive]);
 
   const needsStripe = !payoutsReady;
   const canOpen = Boolean(hostId) && payoutsReady;
+  /** Stripe plaque = last step before Live: shelf ready + host tried to open (or payouts already checked). */
+  const showStripeGate =
+    Boolean(hostId) &&
+    garageFormed &&
+    !storeLive &&
+    needsStripe &&
+    !statusLoading &&
+    stripeGateRevealed;
+  const showReadyHint =
+    Boolean(hostId) && garageFormed && !storeLive && canOpen && !statusLoading;
 
   const handleToggle = () => {
     if (!hostId || busy) return;
     setError(null);
     setErrorCode(null);
 
+    if (!storeLive && !garageFormed) {
+      setError(t.garageUi.storeLiveNeedShelfFirst);
+      return;
+    }
+
     if (!storeLive && needsStripe) {
+      setStripeGateRevealed(true);
       setError(t.garageUi.storeLiveStripeRequired);
       return;
     }
@@ -155,7 +206,7 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
         </button>
       </div>
 
-      {!storeLive && needsStripe && !statusLoading ? (
+      {showStripeGate ? (
         <div
           className="mt-3 rounded-xl border px-3 py-2.5"
           style={{ borderColor: "#FDE68A", backgroundColor: "#FFFBEB" }}
@@ -194,7 +245,7 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
         </div>
       ) : null}
 
-      {!storeLive && canOpen && !statusLoading ? (
+      {showReadyHint ? (
         <p className="mt-2 text-[12px] text-gray-500">{t.garageUi.storeLiveReadyHint}</p>
       ) : null}
 

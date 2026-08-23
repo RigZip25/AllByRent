@@ -1679,6 +1679,8 @@ export type AppMessages = {
     storeLiveStripeOpening: string;
     storeLiveOpenProfile: string;
     storeLiveReadyHint: string;
+    /** Shown when host flips Live before any shelf item exists. */
+    storeLiveNeedShelfFirst: string;
     storeClosedTitle: string;
     storeClosedBody: string;
     storePausedBadge: string;
