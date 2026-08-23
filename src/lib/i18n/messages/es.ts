@@ -1599,9 +1599,9 @@ export const es: AppMessages = {
       vinMismatchUseVinCta: "Usar el vehículo del VIN",
       serialNumber: "Número de serie / equipo",
       serialNumberPlaceholder: "Número de serie del fabricante o ID del equipo",
-      serialNumberHelper: "Obligatorio: se guarda con el anuncio para la entrega y las reclamaciones.",
+      serialNumberHelper: "Obligatorio: deja claro qué unidad se entrega, para las dos partes.",
       serialNumberOptionalHelper:
-        "Opcional — añádelo si lo tienes. Ayuda en la entrega y reclamaciones; si no, omítelo.",
+        "Opcional, pero conviene en equipo de más valor. El número de serie en el anuncio protege a ambos si surge alguna duda.",
       moderationTextNotSuitable:
         "Esta descripción no se puede usar en un anuncio. Describe el artículo con claridad.",
       moderationTextCategoryMismatch:

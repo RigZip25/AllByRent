@@ -1599,9 +1599,9 @@ export const en: AppMessages = {
       vinMismatchUseVinCta: "Use VIN vehicle instead",
       serialNumber: "Serial / equipment number",
       serialNumberPlaceholder: "Manufacturer serial or equipment ID",
-      serialNumberHelper: "Required — saved with your listing for handoff and claims.",
+      serialNumberHelper: "Required — keeps the right unit clear at handoff for both of you.",
       serialNumberOptionalHelper:
-        "Optional — add it if you have it. Helps with handoff and claims; skip if you don’t.",
+        "Optional, but worth adding for higher-value gear. A serial on the listing helps both of you if anything needs sorting out later.",
       moderationTextNotSuitable:
         "This description can't be used for a listing. Please describe the item clearly.",
       moderationTextCategoryMismatch:

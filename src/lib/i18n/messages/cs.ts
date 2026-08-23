@@ -1612,9 +1612,9 @@ export const cs: AppMessages = {
       vinMismatchUseVinCta: "Použít vozidlo z VIN",
       serialNumber: "Sériové / výrobní číslo",
       serialNumberPlaceholder: "Sériové číslo výrobce nebo ID zařízení",
-      serialNumberHelper: "Povinné — uloží se k nabídce pro předání a reklamace.",
+      serialNumberHelper: "Povinné — ať je při předání jasné, o kterou jednotku jde, pro obě strany.",
       serialNumberOptionalHelper:
-        "Volitelné — vyplň, pokud ho máš. Pomůže při předání a reklamaci; jinak přeskoč.",
+        "Volitelné, ale u dražší techniky se vyplatí. Sériové číslo v nabídce chrání obě strany, kdyby později něco bylo potřeba vyjasnit.",
       moderationTextNotSuitable:
         "Tento popis nelze použít u nabídky. Popiš prosím předmět jasně a srozumitelně.",
       moderationTextCategoryMismatch:

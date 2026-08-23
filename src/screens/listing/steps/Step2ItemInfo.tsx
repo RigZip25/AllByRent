@@ -649,9 +649,6 @@ export function Step2ItemInfo({
                   }));
                 }}
               />
-              <p className="mt-1.5 text-[12px] text-gray-500">
-                {serialRequired ? item.serialNumberHelper : item.serialNumberOptionalHelper}
-              </p>
             </div>
             ) : null}
           </div>
