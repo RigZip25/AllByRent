@@ -397,7 +397,6 @@ export function Step2ItemInfo({
               <CategoryFactCard
                 category="Boats & Water"
                 subcategory={draft.subcategory}
-                defaultExpanded
               />
             ) : draft.category.trim() === "Real Estate" ? (
               <CategoryFactCard
@@ -414,24 +413,20 @@ export function Step2ItemInfo({
                     ? "Drones"
                     : draft.subcategory
                 }
-                defaultExpanded
               />
             ) : draft.category.trim() === "Baby & Kids" ? (
               <CategoryFactCard
                 category="Baby & Kids"
-                defaultExpanded
               />
             ) : draft.category.trim() === "Electronics & Tech" ? (
               <CategoryFactCard
                 category="Electronics & Tech"
                 subcategory={draft.subcategory}
-                defaultExpanded
               />
             ) : draft.category.trim() === "Tools & DIY" ? (
               <CategoryFactCard
                 category="Tools & DIY"
                 subcategory={draft.subcategory}
-                defaultExpanded
               />
             ) : draft.category.trim() === "Garden & Yard" ? (
               <CategoryFactCard
@@ -447,13 +442,11 @@ export function Step2ItemInfo({
               <CategoryFactCard
                 category="Costume & Cosplay"
                 subcategory={draft.subcategory}
-                defaultExpanded
               />
             ) : draft.category.trim() === "Unique & Other" ? (
               <CategoryFactCard
                 category="Unique & Other"
                 subcategory={draft.subcategory}
-                defaultExpanded
               />
             ) : draft.category.trim() === "Party & Events" ? (
               <CategoryFactCard

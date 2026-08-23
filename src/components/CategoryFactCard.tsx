@@ -113,8 +113,28 @@ export function CategoryFactCard({
   const tipLabel = fact.hostTipLinkLabel?.trim();
   // Soft optional link only — never hard-sell partner products in the collapsed card.
   const showTipLink = Boolean(tipHref && tipLabel);
-  const qa = fact.qa?.filter((item) => item.q?.trim() && item.a?.trim()) ?? [];
+  const qa =
+    fact.qa?.filter((item) => {
+      const q = item.q?.trim() ?? "";
+      const a = item.a?.trim() ?? "";
+      if (!q || !a) return false;
+      // Encode-agent junk — never show to hosts.
+      if (/partner\s*promo/i.test(q)) return false;
+      if (/hard-sell|affiliate hard-sell/i.test(a) && /no\b/i.test(a)) return false;
+      return true;
+    }) ?? [];
   const useQa = qa.length > 0;
+
+  const sanitizeFactText = (raw: string): string => {
+    let s = raw;
+    s = s.replace(/\bWhat gates apply\?/gi, "What should I fill in?");
+    s = s.replace(/\bWhat must be listed\?/gi, "What should I list?");
+    s = s.replace(/\bkitIncludes\b/g, "kit type");
+    s = s.replace(/\bRent freezes\b/gi, "List");
+    s = s.replace(/\bfreezes\b/gi, "records");
+    s = s.replace(/\bfreeze\b/gi, "record");
+    return s;
+  };
 
   return (
     <div
@@ -131,7 +151,9 @@ export function CategoryFactCard({
       >
         <Shield className="mt-0.5 h-4 w-4 shrink-0 text-amber-900" aria-hidden />
         <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-semibold text-amber-950">{fact.title}</p>
+          <p className="text-[13px] font-semibold text-amber-950">
+            {sanitizeFactText(fact.title)}
+          </p>
           {!open ? (
             <p className="mt-1 text-[12px] font-medium" style={{ color: GREEN }}>
               {t.categoryFacts.expand}
@@ -152,13 +174,13 @@ export function CategoryFactCard({
           {useQa ? (
             <>
               {fact.summary.trim() ? (
-                <p className="text-amber-900/90">{fact.summary}</p>
+                <p className="text-amber-900/90">{sanitizeFactText(fact.summary)}</p>
               ) : null}
               <ul className="space-y-2.5">
                 {qa.map((item) => (
                   <li key={item.q}>
-                    <p className="font-semibold text-amber-950">{item.q}</p>
-                    <p className="mt-0.5 text-amber-900/90">{item.a}</p>
+                    <p className="font-semibold text-amber-950">{sanitizeFactText(item.q)}</p>
+                    <p className="mt-0.5 text-amber-900/90">{sanitizeFactText(item.a)}</p>
                   </li>
                 ))}
               </ul>

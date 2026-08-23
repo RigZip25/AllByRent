@@ -1,249 +1,221 @@
 import type { CategoryFactBlock } from "../types";
 
-/** Canonical EN subcategory FactCards for Photo & Video */
+/** Canonical EN subcategory FactCards for Photo & Video — host-facing Q→A only. */
 export const subs_Photo_and_Video: Record<string, CategoryFactBlock> = {
-        "Camera Kits": {
-          title: "Camera kits \u2014 sensor, media, kit list",
-          summary: "Bodies and kits freeze sensor/mount, media policy, and inventory.",
-          qa: [
-            {
-              q: "What gates apply?",
-              a: "Model, kit class, sensor/mount, media include, and kit inventory items/checklist.",
-            },
-            {
-              q: "Body only vs full kit?",
-              a: "kitIncludes freezes body-only, kit lens, full kit, or accessories-only.",
-            },
-            {
-              q: "Deposit?",
-              a: "Covers drops and missing batteries/chargers/cards against the list.",
-            },
-            {
-              q: "Partner promo?",
-              a: "No retailer affiliate hard-sell.",
-            },
-          ],
-        },
-        "Action Cameras": {
-          title: "Action cameras \u2014 mount, media, sensor",
-          summary: "Action cams freeze sensor class, media, and mounts in the kit list.",
-          qa: [
-            {
-              q: "What must be listed?",
-              a: "Model, kit class, sensor/mount band, media policy, and inventory for mounts/batteries.",
-            },
-            {
-              q: "Waterproof housing?",
-              a: "Disclose in kit checklist \u2014 assume not included unless listed.",
-            },
-            {
-              q: "Media?",
-              a: "Hosts mark cards included, partial, renter brings, or internal-only.",
-            },
-            {
-              q: "Deposit?",
-              a: "Covers cracked housings and missing mounts.",
-            },
-          ],
-        },
-        "Tripods & Mounts": {
-          title: "Tripods \u2014 payload, head type",
-          summary: "Supports freeze payload band and head type before rent.",
-          qa: [
-            {
-              q: "What gates apply?",
-              a: "Payload band, head type, kit class, and inventory for plates/spreaders.",
-            },
-            {
-              q: "Will it hold my camera?",
-              a: "Payload band is the host\u2019s rated class \u2014 not a lab certification.",
-            },
-            {
-              q: "Head included?",
-              a: "Hosts mark ball, pan-tilt, fluid, gimbal head, legs-only, or other.",
-            },
-            {
-              q: "Deposit?",
-              a: "Covers bent legs and missing plates.",
-            },
-          ],
-        },
-        "Basic Lighting": {
-          title: "Basic lighting \u2014 class, power",
-          summary: "LED/flash kits freeze lighting class and power source.",
-          qa: [
-            {
-              q: "What must be listed?",
-              a: "Lighting class, power source, kit class, and stands/modifiers in inventory.",
-            },
-            {
-              q: "Battery or AC?",
-              a: "Power source freezes AC, battery, both, or passive modifiers only.",
-            },
-            {
-              q: "Deposit?",
-              a: "Covers broken mounts and missing softboxes \u2014 not lamp life insurance.",
-            },
-            {
-              q: "Partner promo?",
-              a: "No lighting-vendor affiliate hard-sell.",
-            },
-          ],
-        },
-        "Drones": {
-          title: "Drones \u2014 weight class, Remote ID",
-          summary: "Drone rentals freeze FAA-style weight class and Remote ID hardware status.",
-          qa: [
-            {
-              q: "What gates apply?",
-              a: "Weight class and Remote ID (built-in, add-on, or under-250g exempt). Exempt requires under-250g weight.",
-            },
-            {
-              q: "Pilot license?",
-              a: "Follow local law \u2014 Evorios freezes Remote ID facts; it does not issue certificates.",
-            },
-            {
-              q: "Kit?",
-              a: "Batteries, props, and controllers belong on the kit inventory.",
-            },
-            {
-              q: "Partner promo?",
-              a: "No drone-insurance affiliate hard-sell.",
-            },
-          ],
-        },
-        "Cinema Cameras": {
-          title: "Cinema cameras \u2014 sensor, media",
-          summary: "Cinema bodies freeze sensor class and media policy plus kit inventory.",
-          qa: [
-            {
-              q: "What gates apply?",
-              a: "Sensor/mount class, media include, kit class, and full inventory for cages/batteries.",
-            },
-            {
-              q: "Who brings media?",
-              a: "Media field freezes included vs renter-provided cinema media.",
-            },
-            {
-              q: "Deposit?",
-              a: "High-value deposit covers body and missing modules \u2014 not production insurance.",
-            },
-            {
-              q: "Partner promo?",
-              a: "No cinema-rental-house affiliate hard-sell.",
-            },
-          ],
-        },
-        "Professional Lenses": {
-          title: "Lenses \u2014 mount, focal band",
-          summary: "Lenses freeze mount and focal class before rent.",
-          qa: [
-            {
-              q: "What must be listed?",
-              a: "Mount type, focal band, model, and caps/hoods in kit inventory.",
-            },
-            {
-              q: "Will it fit my body?",
-              a: "Mount field is the gate \u2014 adapters only if listed in the kit.",
-            },
-            {
-              q: "Deposit?",
-              a: "Covers glass damage and missing caps \u2014 fungus disclosure belongs in notes.",
-            },
-            {
-              q: "Partner promo?",
-              a: "No lens-subscription affiliate hard-sell.",
-            },
-          ],
-        },
-        "Studio Lighting": {
-          title: "Studio lighting \u2014 class, power",
-          summary: "Studio lights freeze class and power like basic lighting with heavier kits.",
-          qa: [
-            {
-              q: "What gates apply?",
-              a: "Lighting class, power source, kit class, and inventory for stands/c-stands.",
-            },
-            {
-              q: "HMI / Fresnel?",
-              a: "Class field includes HMI/Fresnel \u2014 confirm power needs before pickup.",
-            },
-            {
-              q: "Deposit?",
-              a: "Covers heads and modifiers; bulbs disclosed separately in notes.",
-            },
-            {
-              q: "Partner promo?",
-              a: "No studio-expendables affiliate hard-sell.",
-            },
-          ],
-        },
-        "Stabilizers & Rigs": {
-          title: "Stabilizers \u2014 type, payload",
-          summary: "Gimbals and rigs freeze type and payload band.",
-          qa: [
-            {
-              q: "What must be listed?",
-              a: "Stabilizer type, payload band, kit class, and batteries/cages in inventory.",
-            },
-            {
-              q: "Payload?",
-              a: "Payload band is host-rated \u2014 balance and tune at handoff.",
-            },
-            {
-              q: "Deposit?",
-              a: "Covers motors and missing batteries/chargers.",
-            },
-            {
-              q: "Partner promo?",
-              a: "No gimbal-brand affiliate hard-sell.",
-            },
-          ],
-        },
-        "Broadcast Gear": {
-          title: "Broadcast \u2014 subtype, media",
-          summary: "Switchers and encoders freeze subtype and media/capture policy.",
-          qa: [
-            {
-              q: "What gates apply?",
-              a: "Broadcast subtype, media include, kit class, and I/O cables in inventory.",
-            },
-            {
-              q: "Switcher vs encoder?",
-              a: "Subtype stops wrong-box bookings for livestream days.",
-            },
-            {
-              q: "Deposit?",
-              a: "Covers ports and missing SDI/HDMI kits.",
-            },
-            {
-              q: "Partner promo?",
-              a: "No broadcast-integrator affiliate hard-sell.",
-            },
-          ],
-        },
-        "Other": {
-          title: "Photo other \u2014 re-shelf when named fits",
-          summary: "Catch-all still publishes kind and kit inventory.",
-          qa: [
-            {
-              q: "When use Other?",
-              a: "Only when no named Photo shelf fits.",
-            },
-            {
-              q: "What gates publish?",
-              a: "Kind, model, kit class, and kit inventory checklist.",
-            },
-            {
-              q: "Re-shelf?",
-              a: "Move to Camera Kits, Action, Tripods, Lighting, Drones, Cinema, Lenses, Stabilizers, or Broadcast when those gates fit.",
-            },
-            {
-              q: "Essays or promo?",
-              a: "No vague essays and no gear-affiliate hard-sell.",
-            },
-          ],
-        },
-      };
+  "Camera Kits": {
+    title: "Camera kit tips",
+    summary: "Say what you’re renting and what’s in the bag.",
+    qa: [
+      {
+        q: "What should I fill in?",
+        a: "Camera model, whether it’s body-only or a full kit, sensor/mount if you know it, and a short list of what’s included.",
+      },
+      {
+        q: "Body only or full kit?",
+        a: "Pick what the renter actually gets: body only, body + lens, full kit, or accessories only.",
+      },
+      {
+        q: "What about the deposit?",
+        a: "Use it for drops and missing batteries, chargers, or cards against your list.",
+      },
+      {
+        q: "Memory cards?",
+        a: "Say if cards are included, partial, or the renter should bring their own.",
+      },
+    ],
+  },
+  "Action Cameras": {
+    title: "Action camera tips",
+    summary: "Model, mounts, and what’s waterproof.",
+    qa: [
+      {
+        q: "What should I list?",
+        a: "Model, what’s in the kit (mounts, batteries), and whether a waterproof housing is included.",
+      },
+      {
+        q: "Is it waterproof?",
+        a: "Only if the housing is on your checklist — otherwise assume it isn’t.",
+      },
+      {
+        q: "Memory cards?",
+        a: "Mark whether cards are included or the renter brings their own.",
+      },
+      {
+        q: "Deposit?",
+        a: "Covers cracked housings and missing mounts.",
+      },
+    ],
+  },
+  "Tripods & Mounts": {
+    title: "Tripod tips",
+    summary: "How much weight it holds and what head is included.",
+    qa: [
+      {
+        q: "What should I fill in?",
+        a: "How much weight it can hold, head type (ball, fluid, etc.), and whether plates or a spreader are included.",
+      },
+      {
+        q: "Will it hold my camera?",
+        a: "Use the payload band you rate it for — it’s your guide, not a lab certificate.",
+      },
+      {
+        q: "Is a head included?",
+        a: "Say ball, pan-tilt, fluid, gimbal head, legs only, or other.",
+      },
+      {
+        q: "Deposit?",
+        a: "Covers bent legs and missing plates.",
+      },
+    ],
+  },
+  "Basic Lighting": {
+    title: "Lighting tips",
+    summary: "Light type, power, and what’s in the kit.",
+    qa: [
+      {
+        q: "What should I list?",
+        a: "Light type, power (AC, battery, or both), and stands or softboxes in the kit.",
+      },
+      {
+        q: "Battery or plug-in?",
+        a: "Say AC, battery, both, or modifiers only.",
+      },
+      {
+        q: "Deposit?",
+        a: "Covers broken mounts and missing softboxes — not bulb life.",
+      },
+    ],
+  },
+  Drones: {
+    title: "Drone tips",
+    summary: "Weight class and Remote ID matter for local rules.",
+    qa: [
+      {
+        q: "What should I fill in?",
+        a: "Weight class and Remote ID status (built-in, add-on, or under-250g exempt).",
+      },
+      {
+        q: "Does the renter need a license?",
+        a: "They must follow local law — Evorios records the facts; it doesn’t issue certificates.",
+      },
+      {
+        q: "What’s in the kit?",
+        a: "List batteries, props, and the controller.",
+      },
+      {
+        q: "Deposit?",
+        a: "Covers crashes and missing batteries or props.",
+      },
+    ],
+  },
+  "Cinema Cameras": {
+    title: "Cinema camera tips",
+    summary: "Body, media, and the full kit list.",
+    qa: [
+      {
+        q: "What should I fill in?",
+        a: "Sensor/mount class, whether media is included, and cages/batteries on the checklist.",
+      },
+      {
+        q: "Who brings media?",
+        a: "Say if cinema media is included or the renter provides it.",
+      },
+      {
+        q: "Deposit?",
+        a: "High-value deposit for the body and missing modules — not production insurance.",
+      },
+    ],
+  },
+  "Professional Lenses": {
+    title: "Lens tips",
+    summary: "Mount and focal length so it fits their body.",
+    qa: [
+      {
+        q: "What should I list?",
+        a: "Mount type, focal range, model, and caps/hoods in the kit.",
+      },
+      {
+        q: "Will it fit my camera?",
+        a: "Mount is the key — adapters only if you list them.",
+      },
+      {
+        q: "Deposit?",
+        a: "Covers glass damage and missing caps. Note fungus or haze in the description.",
+      },
+    ],
+  },
+  "Studio Lighting": {
+    title: "Studio lighting tips",
+    summary: "Class, power, and heavy stands.",
+    qa: [
+      {
+        q: "What should I fill in?",
+        a: "Lighting class, power source, and stands / C-stands in the inventory.",
+      },
+      {
+        q: "HMI or Fresnel?",
+        a: "Mark the class and confirm power needs before pickup.",
+      },
+      {
+        q: "Deposit?",
+        a: "Covers heads and modifiers; mention spare bulbs in the notes if needed.",
+      },
+    ],
+  },
+  "Stabilizers & Rigs": {
+    title: "Stabilizer tips",
+    summary: "Gimbal type and how much it can carry.",
+    qa: [
+      {
+        q: "What should I list?",
+        a: "Stabilizer type, payload band, and batteries or cages in the kit.",
+      },
+      {
+        q: "Payload?",
+        a: "Use the band you rate it for — balance and tune at handoff.",
+      },
+      {
+        q: "Deposit?",
+        a: "Covers motors and missing batteries or chargers.",
+      },
+    ],
+  },
+  "Broadcast Gear": {
+    title: "Broadcast gear tips",
+    summary: "Switcher, encoder, and cables.",
+    qa: [
+      {
+        q: "What should I fill in?",
+        a: "What kind of box it is, media/capture policy, and I/O cables in the kit.",
+      },
+      {
+        q: "Switcher or encoder?",
+        a: "Pick the right type so livestream renters don’t book the wrong box.",
+      },
+      {
+        q: "Deposit?",
+        a: "Covers ports and missing SDI/HDMI kits.",
+      },
+    ],
+  },
+  Other: {
+    title: "Other photo gear",
+    summary: "Use this only when no named shelf fits.",
+    qa: [
+      {
+        q: "When should I use Other?",
+        a: "Only when Camera Kits, Action, Tripods, Lighting, Drones, Cinema, Lenses, Stabilizers, or Broadcast don’t fit.",
+      },
+      {
+        q: "What should I publish?",
+        a: "What it is, the model, and a clear kit checklist.",
+      },
+      {
+        q: "Can I move it later?",
+        a: "Yes — re-shelve to a named Photo category when it fits better.",
+      },
+    ],
+  },
+};
 
 export const parentCategoryKey = "Photo & Video" as const;

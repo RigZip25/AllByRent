@@ -1,31 +1,27 @@
 import type { CategoryFactBlock } from "../types";
 
-/** Canonical EN FactCard for Photo & Video */
+/** Canonical EN FactCard for Photo & Video — host-facing Q→A only. */
 export const facts_Photo_and_Video: CategoryFactBlock = {
-          title: "Photo & video rental FAQ",
-          summary: "Short answers for kits, drones Remote ID, media, and deposit claims \u2014 no gear-insurance promo.",
-          qa: [
-            {
-              q: "What is required on Photo & Video rentals?",
-              a: "Brand, model, kit class, and a kit inventory. Drones also freeze weight class and Remote ID status.",
-            },
-            {
-              q: "Who brings memory cards?",
-              a: "Capture-media field freezes included, partial, renter brings, or internal-only.",
-            },
-            {
-              q: "Do drones need Remote ID?",
-              a: "Yes unless under-250g exempt \u2014 host marks built-in, add-on, or valid exempt. Mismatch blocks publish.",
-            },
-            {
-              q: "What does the deposit cover?",
-              a: "Body damage and missing kit pieces against the frozen list \u2014 not a production insurance policy.",
-            },
-            {
-              q: "Partner promo?",
-              a: "No camera-shop affiliate or lens-insurance hard-sell.",
-            },
-          ],
-        };
+  title: "Photo & video tips",
+  summary: "Say what the kit is, what’s included, and how the deposit works.",
+  qa: [
+    {
+      q: "What should I fill in?",
+      a: "Brand, model, whether it’s a body or full kit, and a short list of what’s in the bag. For drones, also weight class and Remote ID.",
+    },
+    {
+      q: "Who brings memory cards?",
+      a: "Say if cards are included, partial, or the renter should bring their own.",
+    },
+    {
+      q: "Do drones need Remote ID?",
+      a: "Usually yes unless under 250g exempt — mark built-in, add-on, or exempt. Wrong combo blocks publishing.",
+    },
+    {
+      q: "What does the deposit cover?",
+      a: "Damage to the body and missing pieces on your list — not production insurance.",
+    },
+  ],
+};
 
 export const categoryKey = "Photo & Video" as const;
