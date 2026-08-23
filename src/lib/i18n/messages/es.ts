@@ -1597,6 +1597,8 @@ export const es: AppMessages = {
       serialNumber: "Número de serie / equipo",
       serialNumberPlaceholder: "Número de serie del fabricante o ID del equipo",
       serialNumberHelper: "Obligatorio: se guarda con el anuncio para la entrega y las reclamaciones.",
+      serialNumberOptionalHelper:
+        "Opcional — añádelo si lo tienes. Ayuda en la entrega y reclamaciones; si no, omítelo.",
       moderationTextNotSuitable:
         "Esta descripción no se puede usar en un anuncio. Describe el artículo con claridad.",
       moderationTextCategoryMismatch:

@@ -1610,6 +1610,8 @@ export const cs: AppMessages = {
       serialNumber: "Sériové / výrobní číslo",
       serialNumberPlaceholder: "Sériové číslo výrobce nebo ID zařízení",
       serialNumberHelper: "Povinné — uloží se k nabídce pro předání a reklamace.",
+      serialNumberOptionalHelper:
+        "Volitelné — vyplň, pokud ho máš. Pomůže při předání a reklamaci; jinak přeskoč.",
       moderationTextNotSuitable:
         "Tento popis nelze použít u nabídky. Popiš prosím předmět jasně a srozumitelně.",
       moderationTextCategoryMismatch:

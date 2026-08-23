@@ -1597,6 +1597,8 @@ export const en: AppMessages = {
       serialNumber: "Serial / equipment number",
       serialNumberPlaceholder: "Manufacturer serial or equipment ID",
       serialNumberHelper: "Required — saved with your listing for handoff and claims.",
+      serialNumberOptionalHelper:
+        "Optional — add it if you have it. Helps with handoff and claims; skip if you don’t.",
       moderationTextNotSuitable:
         "This description can't be used for a listing. Please describe the item clearly.",
       moderationTextCategoryMismatch:

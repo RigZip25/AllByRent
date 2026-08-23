@@ -898,6 +898,8 @@ export type AppMessages = {
       serialNumber: string;
       serialNumberPlaceholder: string;
       serialNumberHelper: string;
+      /** Soft tip when serial is recommended but not required (Photo, Electronics, Drones). */
+      serialNumberOptionalHelper: string;
       /** Title/description NSFW, spam, or not about an item. */
       moderationTextNotSuitable: string;
       moderationTextCategoryMismatch: string;

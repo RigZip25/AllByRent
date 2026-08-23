@@ -1052,21 +1052,36 @@ export function calculateRentalPrices(
 }
 
 /**
- * Manufacturer serial / equipment ID — required for heavy machines, construction,
- * and high-value Photo / Electronics (claims + kit inventory).
- * Vehicles use VIN instead (serial would be redundant / wrongly block Continue).
+ * Manufacturer serial / equipment ID.
+ * Required only for heavy jobsite gear (claims + asset tracking).
+ * Photo / Electronics / Drones: optional recommendation — don't block Continue.
+ * Vehicles use VIN instead.
  */
 const SERIAL_REQUIRED_CATEGORIES = new Set([
   "Heavy Equipment",
   "Construction",
+]);
+
+const SERIAL_OPTIONAL_CATEGORIES = new Set([
   "Photo & Video",
   "Electronics & Tech",
   "Drones",
 ]);
 
-/** Heavy equipment / construction / high-value gear that needs a manufacturer serial. */
+/** Heavy equipment / construction — serial required to publish. */
 export function requiresAssetSerialNumber(category: string): boolean {
   return SERIAL_REQUIRED_CATEGORIES.has(category.trim());
+}
+
+/** High-value consumer gear — show serial as optional tip, never a hard gate. */
+export function suggestsAssetSerialNumber(category: string): boolean {
+  return SERIAL_OPTIONAL_CATEGORIES.has(category.trim());
+}
+
+export function showsAssetSerialNumber(category: string): boolean {
+  return (
+    requiresAssetSerialNumber(category) || suggestsAssetSerialNumber(category)
+  );
 }
 
 /** VIN required for all Vehicles subcategories (cars, trucks, trailers, ATVs, RVs…). */
@@ -1075,5 +1090,7 @@ export function requiresAssetVin(category: string): boolean {
 }
 
 export function requiresAssetIdentity(category: string): boolean {
-  return requiresAssetSerialNumber(category) || requiresAssetVin(category);
+  return (
+    showsAssetSerialNumber(category) || requiresAssetVin(category)
+  );
 }

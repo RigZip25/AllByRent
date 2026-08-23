@@ -87,7 +87,7 @@ export type ListingDraft = {
   condition: "new" | "like_new" | "good" | "fair" | "";
   description: string;
   replacementValue: string;
-  /** Manufacturer / equipment serial — required for vehicles, trailers, heavy equipment, construction. */
+  /** Manufacturer / equipment serial — required for heavy equipment & construction; optional tip for Photo / Electronics / Drones. */
   serialNumber: string;
   /** ISO VIN (17 chars) — required for Vehicles (incl. trailers); optional elsewhere with validation if set. */
   vin: string;

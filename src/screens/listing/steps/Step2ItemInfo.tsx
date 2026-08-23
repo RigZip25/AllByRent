@@ -20,6 +20,7 @@ import {
   requiresAssetIdentity,
   requiresAssetSerialNumber,
   requiresAssetVin,
+  showsAssetSerialNumber,
 } from "../listingItemCategories";
 import { isPlantListingSubcategory } from "../categorySpecs";
 import {
@@ -176,7 +177,7 @@ export function Step2ItemInfo({
   const showAssetIdentity = !yardSaleListing && requiresAssetIdentity(category);
   const vinRequired = requiresAssetVin(category);
   const serialRequired = requiresAssetSerialNumber(category);
-  const showSerialField = serialRequired;
+  const showSerialField = showsAssetSerialNumber(category);
   const vinFormat = draft.vin.trim() ? validateVinFormat(draft.vin) : null;
 
   const draftRef = useRef(draft);
@@ -460,7 +461,11 @@ export function Step2ItemInfo({
               />
             ) : null}
             <p className="text-[13px] leading-snug text-gray-600">
-              {vinRequired ? item.assetIdentityHint : item.serialNumberHelper}
+              {vinRequired
+                ? item.assetIdentityHint
+                : serialRequired
+                  ? item.serialNumberHelper
+                  : item.serialNumberOptionalHelper}
             </p>
 
             {vinRequired ? (
@@ -655,7 +660,9 @@ export function Step2ItemInfo({
                   }));
                 }}
               />
-              <p className="mt-1.5 text-[12px] text-gray-500">{item.serialNumberHelper}</p>
+              <p className="mt-1.5 text-[12px] text-gray-500">
+                {serialRequired ? item.serialNumberHelper : item.serialNumberOptionalHelper}
+              </p>
             </div>
             ) : null}
           </div>
