@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Eye, Share2, Store } from "lucide-react";
 import { HostDashboard } from "../app/components/HostDashboard";
 import { HostGarageListSection, type HostGarageListMode } from "../app/components/HostGarageListSection";
@@ -7,6 +7,11 @@ import { GarageLookEditor } from "../components/GarageLookEditor";
 import { StoreLiveToggle } from "../components/StoreLiveToggle";
 import { useAuth } from "../hooks/AuthProvider";
 import type { AppMode } from "../lib/appMode";
+import {
+  fetchStoreLiveByHostIds,
+  getLocalStoreLive,
+  onStoreLiveChanged,
+} from "../lib/garageStoreLive";
 import { resolveHostAccountId } from "../lib/hostIdentity";
 import { SocialShareButtons } from "../components/share/SocialShareButtons";
 import { hostGarageSharePayload } from "../lib/garageMarketingShare";
@@ -47,6 +52,26 @@ export function GarageScreen({
   const [lookOpen, setLookOpen] = useState(false);
   const [listMode, setListMode] = useState<HostGarageListMode | null>(null);
   const hostId = resolveHostAccountId(auth.userId);
+  const [storeLive, setStoreLive] = useState(() => getLocalStoreLive(hostId));
+
+  useEffect(() => {
+    if (!hostId) {
+      setStoreLive(false);
+      return;
+    }
+    setStoreLive(getLocalStoreLive(hostId));
+    void fetchStoreLiveByHostIds([hostId]).then((map) => {
+      if (Object.prototype.hasOwnProperty.call(map, hostId)) {
+        setStoreLive(Boolean(map[hostId]));
+      }
+    });
+    return onStoreLiveChanged((id, live) => {
+      if (id === hostId) {
+        setStoreLive(live);
+        if (!live) setShareOpen(false);
+      }
+    });
+  }, [hostId]);
 
   const sharePayload = useMemo(
     () =>
@@ -130,15 +155,17 @@ export function GarageScreen({
               <span className="truncate">{t.garageUi.previewNeighbor}</span>
             </button>
           ) : null}
-          <button
-            type="button"
-            onClick={() => setShareOpen((v) => !v)}
-            className="flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border bg-white px-2 py-2 text-[12px] font-semibold text-gray-700"
-            style={{ borderColor: BORDER }}
-          >
-            <Share2 className="h-4 w-4 shrink-0" />
-            <span className="truncate">{t.garageUi.share}</span>
-          </button>
+          {storeLive ? (
+            <button
+              type="button"
+              onClick={() => setShareOpen((v) => !v)}
+              className="flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border bg-white px-2 py-2 text-[12px] font-semibold text-gray-700"
+              style={{ borderColor: BORDER }}
+            >
+              <Share2 className="h-4 w-4 shrink-0" />
+              <span className="truncate">{t.garageUi.share}</span>
+            </button>
+          ) : null}
         </div>
 
         <RoleModeSwitcher active="earn" onChange={onRoleModeChange} />
@@ -157,7 +184,7 @@ export function GarageScreen({
           </div>
         ) : null}
 
-        {shareOpen ? (
+        {shareOpen && storeLive ? (
           <div className="mt-3 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
             <p className="mb-2 text-[13px] font-semibold text-gray-800">
               {t.garageUi.shareShowcaseTitle}
@@ -177,7 +204,7 @@ export function GarageScreen({
             onListItem={onStockGarage}
             onOpenListing={openHostListing}
             onResumeDraft={onResumeDraft}
-            onShareGarage={() => setShareOpen(true)}
+            onShareGarage={storeLive ? () => setShareOpen(true) : undefined}
             onViewProfile={onViewProfile}
             onOpenRental={onOpenRental}
             onOpenLive={() => setListMode("live")}

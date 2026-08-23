@@ -13,6 +13,11 @@ import { loadNotificationPreferences } from "../../lib/notificationPreferences";
 import { resolveHostAccountId } from "../../lib/hostIdentity";
 import { removePublishedListing, removePublishedListingRemote } from "../../lib/listingStorage";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
+import {
+  fetchStoreLiveByHostIds,
+  getLocalStoreLive,
+  onStoreLiveChanged,
+} from "../../lib/garageStoreLive";
 import type { ListingDraft } from "../../screens/listing/types";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMessages } from "../../lib/i18n/react";
@@ -240,6 +245,24 @@ export function HostDashboard({
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const hostId = resolveHostAccountId(auth.userId);
+  const [storeLive, setStoreLive] = useState(() => getLocalStoreLive(hostId));
+
+  useEffect(() => {
+    if (!hostId) {
+      setStoreLive(false);
+      return;
+    }
+    setStoreLive(getLocalStoreLive(hostId));
+    void fetchStoreLiveByHostIds([hostId]).then((map) => {
+      if (Object.prototype.hasOwnProperty.call(map, hostId)) {
+        setStoreLive(Boolean(map[hostId]));
+      }
+    });
+    return onStoreLiveChanged((id, live) => {
+      if (id === hostId) setStoreLive(live);
+    });
+  }, [hostId]);
 
   useEffect(() => {
     let mounted = true;
@@ -300,7 +323,6 @@ export function HostDashboard({
     .filter((b) => b.role === "host" && (b.status === "completed" || b.status === "active" || b.status === "overdue"))
     .reduce((sum, b) => sum + expectedHostNet(b), 0);
 
-  const hostId = resolveHostAccountId(auth.userId);
   const primaryDraft = drafts[0] ?? null;
   const showDraftNudge =
     Boolean(onResumeDraft) &&
@@ -308,7 +330,9 @@ export function HostDashboard({
     agentTipsEnabled(loadNotificationPreferences()) &&
     primaryDraft != null &&
     !wasAgentStepDismissed(`finish-draft-${primaryDraft.id}`);
+  /** Share only after store is Live (Stripe already required to flip Live). */
   const showShareNudge =
+    storeLive &&
     !showDraftNudge &&
     loadNotificationPreferences().agentTips &&
     published.length > 0 &&
@@ -375,7 +399,7 @@ export function HostDashboard({
       ) : null}
 
       <div className="mb-3 flex items-center justify-end gap-2">
-        {onShareGarage && published.length > 0 ? (
+        {onShareGarage && storeLive && published.length > 0 ? (
           <button
             type="button"
             onClick={onShareGarage}
