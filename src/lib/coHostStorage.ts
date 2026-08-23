@@ -108,6 +108,7 @@ export function inviteCoHost(
   hostId: string,
   email: string,
   hostEmail: string,
+  displayName?: string,
 ): InviteCoHostResult {
   const normalized = normalizeEmail(email);
   if (!isValidEmail(normalized)) {
@@ -135,11 +136,19 @@ export function inviteCoHost(
     id: createId(),
     hostId,
     email: normalized,
+    displayName: displayName?.trim().slice(0, 40) || undefined,
     status: "pending",
     invitedAt: new Date().toISOString(),
   };
   saveCoHostRecords([record, ...records]);
   return { ok: true, record };
+}
+
+/** Deep link for invitee: opens co-hosts / accept flow after install + sign-in. */
+export function buildCoHostInviteUrlForInvite(inviteId: string): string {
+  const id = inviteId.trim();
+  if (!id) return buildCoHostInviteUrl();
+  return `${getRuntimeAppOrigin()}/?screen=coHosts&invite=${encodeURIComponent(id)}&skipSplash=1`;
 }
 
 export function removeCoHost(hostId: string, coHostId: string): boolean {

@@ -45,8 +45,9 @@ export async function inviteCoHostWithSync(
   hostId: string,
   email: string,
   hostEmail: string,
+  displayName?: string,
 ): Promise<InviteCoHostResult> {
-  const result = inviteCoHost(hostId, email, hostEmail);
+  const result = inviteCoHost(hostId, email, hostEmail, displayName);
   if (result.ok) {
     await pushCoHostRemote(result.record);
   }

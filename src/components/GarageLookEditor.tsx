@@ -19,7 +19,7 @@ const BORDER = "#E8E6E0";
 
 /**
  * Optional garage look (colors + name + neighborhood).
- * Naming is gently required only when going Live — not while stocking the shelf.
+ * Name is usually set on first garage open; editable here anytime.
  */
 export function GarageLookEditor({ onChanged }: { onChanged?: () => void }) {
   const t = useMessages();

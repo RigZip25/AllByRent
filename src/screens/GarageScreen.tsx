@@ -16,7 +16,12 @@ import { resolveHostAccountId } from "../lib/hostIdentity";
 import { SocialShareButtons } from "../components/share/SocialShareButtons";
 import { hostGarageSharePayload } from "../lib/garageMarketingShare";
 import { garageSaleOpenLabel, getGarageSaleSchedule } from "../lib/garageSaleStorage";
+import { loadUserProfile } from "../lib/userProfileStorage";
 import { useMessages } from "../lib/i18n/react";
+import {
+  HouseholdGarageSetupScreen,
+  shouldShowHouseholdGarageSetup,
+} from "./HouseholdGarageSetupScreen";
 
 const GREEN_DARK = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -51,8 +56,18 @@ export function GarageScreen({
   const [shareOpen, setShareOpen] = useState(false);
   const [lookOpen, setLookOpen] = useState(false);
   const [listMode, setListMode] = useState<HostGarageListMode | null>(null);
+  const [householdSetupDone, setHouseholdSetupDone] = useState(false);
   const hostId = resolveHostAccountId(auth.userId);
   const [storeLive, setStoreLive] = useState(() => getLocalStoreLive(hostId));
+
+  const showHouseholdSetup =
+    !householdSetupDone &&
+    Boolean(auth.userId) &&
+    shouldShowHouseholdGarageSetup({
+      shopName: loadUserProfile().garageIdentity.shopName,
+      userId: auth.userId,
+      email: auth.userEmail,
+    });
 
   useEffect(() => {
     if (!hostId) {
@@ -85,6 +100,15 @@ export function GarageScreen({
   );
 
   const openHostListing = (listingId: string) => onNavigate(`hostListingDetail:${listingId}`);
+
+  if (showHouseholdSetup) {
+    return (
+      <HouseholdGarageSetupScreen
+        onDone={() => setHouseholdSetupDone(true)}
+        onSkipAlone={() => setHouseholdSetupDone(true)}
+      />
+    );
+  }
 
   if (listMode) {
     return (

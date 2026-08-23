@@ -1631,6 +1631,40 @@ export type AppMessages = {
     nameLiveBody: string;
     nameLiveRequired: string;
     nameLiveConfirm: string;
+    householdStep: (step: number, total: number) => string;
+    householdTitleName: string;
+    householdTitlePeople: string;
+    householdTitleDone: string;
+    householdBodyName: string;
+    householdBodyPeople: string;
+    householdBodyDone: string;
+    householdNameRequired: string;
+    householdYouAre: (name: string) => string;
+    householdPeopleHint: string;
+    householdMemberN: (n: number) => string;
+    householdMemberNamePh: string;
+    householdMemberEmailPh: string;
+    householdMemberEmailRequired: string;
+    householdAddMember: string;
+    householdInviteNote: string;
+    householdContinuePeople: string;
+    householdJustMe: string;
+    householdSendInvites: string;
+    householdContinueAlone: string;
+    householdSignInNeeded: string;
+    householdSoloDone: string;
+    householdShareLinks: string;
+    householdCopyInvite: string;
+    householdCopied: string;
+    householdOpenMail: string;
+    householdMailSubject: string;
+    householdMailBody: (
+      name: string,
+      garageName: string,
+      inviteUrl: string,
+      appOrigin: string,
+    ) => string;
+    householdEnterGarage: string;
     share: string;
     shareShowcaseTitle: string;
     shareShowcaseBody: string;
