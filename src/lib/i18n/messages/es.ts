@@ -6487,6 +6487,7 @@ export const es: AppMessages = {
     backToSticker: "← Volver a la pegatina",
     errorPdfGenerate: "No se pudo generar el PDF. Inténtalo de nuevo.",
     errorNoBulkItems: "Todavía no hay artículos en la cola del lote.",
+    errorBulkFull: "La hoja está llena (12 pegatinas). Imprime el lote o vacía la cola primero.",
     errorPdfPrepare: "No se pudo preparar el PDF. Inténtalo de nuevo.",
     errorVerifyFailed: "No se pudo verificar esa foto. Vuelve a hacerla con la pegatina QR claramente visible.",
   },

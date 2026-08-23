@@ -6503,6 +6503,7 @@ export const en: AppMessages = {
     backToSticker: "← Back to sticker",
     errorPdfGenerate: "Could not generate PDF. Please try again.",
     errorNoBulkItems: "No items in bulk queue yet.",
+    errorBulkFull: "This sheet is full (12 stickers). Print bulk or clear the queue first.",
     errorPdfPrepare: "Could not prepare the PDF. Please try again.",
     errorVerifyFailed: "Could not verify that photo. Retake with the QR sticker clearly visible.",
   },

@@ -615,44 +615,43 @@ export function loadQrBulkQueueListingIds(): string[] {
 function saveQrBulkQueueListingIds(ids: string[]): void {
   try {
     localStorage.setItem(QR_BULK_QUEUE_KEY, JSON.stringify(Array.from(new Set(ids))));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("evorios-qr-bulk-changed", { detail: { count: ids.length } }),
+      );
+    }
   } catch {
     /* ignore */
   }
 }
 
 export function isListingQueuedForBulk(id: string): boolean {
-  return loadQrBulkQueueListingIds().includes(id);
+  const key = id.trim();
+  if (!key) return false;
+  return loadQrBulkQueueListingIds().includes(key);
 }
 
-export function addListingToQrBulkQueue(id: string): number {
+/** Queue listing ids for bulk QR print. Does not rewrite listing rows (avoids remount/refetch side effects). */
+export function addListingToQrBulkQueue(id: string, capacity = 12): number {
+  const key = id.trim();
   const current = loadQrBulkQueueListingIds();
-  if (!current.includes(id)) {
-    current.push(id);
-    saveQrBulkQueueListingIds(current);
-  }
-  const listing = getPublishedListingById(id);
-  if (listing && !listing.qrQueuedForBulk) {
-    updateStoredListing({ ...listing, qrQueuedForBulk: true });
-  }
-  return loadQrBulkQueueListingIds().length;
+  if (!key) return current.length;
+  if (current.includes(key)) return current.length;
+  if (current.length >= capacity) return current.length;
+  current.push(key);
+  saveQrBulkQueueListingIds(current);
+  return current.length;
 }
 
 export function removeListingFromQrBulkQueue(id: string): number {
-  const next = loadQrBulkQueueListingIds().filter((itemId) => itemId !== id);
+  const key = id.trim();
+  const next = loadQrBulkQueueListingIds().filter((itemId) => itemId !== key);
   saveQrBulkQueueListingIds(next);
-  const listing = getPublishedListingById(id);
-  if (listing?.qrQueuedForBulk) {
-    updateStoredListing({ ...listing, qrQueuedForBulk: false });
-  }
   return next.length;
 }
 
 export function clearQrBulkQueue(): void {
   saveQrBulkQueueListingIds([]);
-  const listings = loadPublishedListings();
-  listings
-    .filter((l) => l.qrQueuedForBulk)
-    .forEach((l) => updateStoredListing({ ...l, qrQueuedForBulk: false }));
 }
 
 type SupabaseListingRow = {

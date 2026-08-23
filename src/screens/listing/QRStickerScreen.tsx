@@ -45,6 +45,7 @@ export function QRStickerScreen({
   const [actionsOpen, setActionsOpen] = useState(false);
   const [showOnScreenOpen, setShowOnScreenOpen] = useState(false);
   const [bulkCount, setBulkCount] = useState(() => loadQrBulkQueueListingIds().length);
+  const [queuedForBulk, setQueuedForBulk] = useState(() => isListingQueuedForBulk(draft.id));
   const emptySpotsLeft = Math.max(0, QR_SHEET_CAPACITY - bulkCount);
 
   const eligibleListings = useMemo(() => {
@@ -53,7 +54,20 @@ export function QRStickerScreen({
     return [draft, ...stored];
   }, [draft]);
 
-  const queuedForBulk = useMemo(() => isListingQueuedForBulk(draft.id), [draft.id]);
+  useEffect(() => {
+    setQueuedForBulk(isListingQueuedForBulk(draft.id));
+    setBulkCount(loadQrBulkQueueListingIds().length);
+  }, [draft.id]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sync = () => {
+      setQueuedForBulk(isListingQueuedForBulk(draft.id));
+      setBulkCount(loadQrBulkQueueListingIds().length);
+    };
+    window.addEventListener("evorios-qr-bulk-changed", sync);
+    return () => window.removeEventListener("evorios-qr-bulk-changed", sync);
+  }, [draft.id]);
 
   const publicQrUrl = getListingPublicUrl(draft);
   useEffect(() => {
@@ -329,11 +343,23 @@ export function QRStickerScreen({
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => {
-                    const next = queuedForBulk
-                      ? removeListingFromQrBulkQueue(draft.id)
-                      : addListingToQrBulkQueue(draft.id);
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (queuedForBulk) {
+                      const next = removeListingFromQrBulkQueue(draft.id);
+                      setBulkCount(next);
+                      setQueuedForBulk(false);
+                      return;
+                    }
+                    if (bulkCount >= QR_SHEET_CAPACITY) {
+                      setPdfError(t.errorBulkFull);
+                      return;
+                    }
+                    const next = addListingToQrBulkQueue(draft.id, QR_SHEET_CAPACITY);
                     setBulkCount(next);
+                    setQueuedForBulk(isListingQueuedForBulk(draft.id));
+                    setPdfError(null);
                   }}
                   className="w-full rounded-xl border-2 py-3 text-sm font-bold"
                   style={{ borderColor: GREEN, color: GREEN }}

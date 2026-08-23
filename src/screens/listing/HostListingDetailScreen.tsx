@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Pause, Pencil, Play, QrCode, Trash2 } from "lucide-react";
 import QRCode from "qrcode";
 import { useAuth } from "../../hooks/AuthProvider";
@@ -188,6 +188,7 @@ export function HostListingDetailScreen({
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [bulkCount, setBulkCount] = useState(() => loadQrBulkQueueListingIds().length);
+  const [queuedForBulk, setQueuedForBulk] = useState(() => isListingQueuedForBulk(listingId));
   const [showOnScreenOpen, setShowOnScreenOpen] = useState(false);
   const [activeEdit, setActiveEdit] = useState<QuickEditKey | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -195,7 +196,20 @@ export function HostListingDetailScreen({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const queuedForBulk = useMemo(() => isListingQueuedForBulk(listingId), [listingId]);
+  useEffect(() => {
+    setQueuedForBulk(isListingQueuedForBulk(listingId));
+    setBulkCount(loadQrBulkQueueListingIds().length);
+  }, [listingId]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sync = () => {
+      setQueuedForBulk(isListingQueuedForBulk(listingId));
+      setBulkCount(loadQrBulkQueueListingIds().length);
+    };
+    window.addEventListener("evorios-qr-bulk-changed", sync);
+    return () => window.removeEventListener("evorios-qr-bulk-changed", sync);
+  }, [listingId]);
 
   useEffect(() => {
     let mounted = true;
@@ -778,9 +792,18 @@ export function HostListingDetailScreen({
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  const next = queuedForBulk ? removeListingFromQrBulkQueue(listing.id) : addListingToQrBulkQueue(listing.id);
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  if (queuedForBulk) {
+                    const next = removeListingFromQrBulkQueue(listing.id);
+                    setBulkCount(next);
+                    setQueuedForBulk(false);
+                    return;
+                  }
+                  const next = addListingToQrBulkQueue(listing.id);
                   setBulkCount(next);
+                  setQueuedForBulk(isListingQueuedForBulk(listing.id));
                 }}
                 className="w-full rounded-xl border-2 py-3 text-sm font-bold"
                 style={{ borderColor: GREEN, color: GREEN }}

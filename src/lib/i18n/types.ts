@@ -2680,6 +2680,7 @@ export type AppMessages = {
     backToSticker: string;
     errorPdfGenerate: string;
     errorNoBulkItems: string;
+    errorBulkFull: string;
     errorPdfPrepare: string;
     errorVerifyFailed: string;
   };

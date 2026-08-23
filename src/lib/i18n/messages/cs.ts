@@ -6497,6 +6497,7 @@ export const cs: AppMessages = {
     backToSticker: "← Zpět ke samolepce",
     errorPdfGenerate: "PDF se nepodařilo vytvořit. Zkus to znovu.",
     errorNoBulkItems: "Ve hromadné frontě zatím nic není.",
+    errorBulkFull: "List je plný (12 štítků). Nejdřív vytiskni hromadně nebo frontu vyprázdni.",
     errorPdfPrepare: "PDF se nepodařilo připravit. Zkus to znovu.",
     errorVerifyFailed: "Fotku se nepodařilo ověřit. Pořiďte znovu s jasně viditelnou QR nálepkou.",
   },
