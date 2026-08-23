@@ -2,16 +2,16 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { ConnectSetupError } from "./payments/ConnectSetupError";
 import { useAuth } from "../hooks/AuthProvider";
-import { loadManageableListings } from "../lib/hostAccess";
 import {
+  closeStoreIfShelfEmpty,
   fetchStoreLiveByHostIds,
   getLocalStoreLive,
+  hostHasShelfItems,
   onStoreLiveChanged,
   pushStoreLiveRemote,
 } from "../lib/garageStoreLive";
 import { resolveHostAccountId } from "../lib/hostIdentity";
 import { useMessages } from "../lib/i18n/react";
-import { isListingOnShelf } from "../lib/listingStorage";
 import { startConnectOnboarding } from "../lib/repositories/connectRepository";
 import { loadSellerGoPublicStatus } from "../lib/sellerGoPublic";
 
@@ -24,20 +24,11 @@ type Props = {
   onOpenProfile?: () => void;
 };
 
-/** Same ownership rules as HostDashboard “On shelf” — include legacy rows without hostId. */
-function hostHasShelf(
-  authUserId: string | null | undefined,
-  authUserEmail: string | null | undefined,
-): boolean {
-  return loadManageableListings(authUserId ?? null, authUserEmail ?? null).some(
-    (listing) => isListingOnShelf(listing),
-  );
-}
-
 /**
  * Garage Open/Pause tumbler. Hidden until the host has at least one shelf item
  * (or the store is already Live). Stripe Connect required before turning Live on.
  * Stripe CTA only after the host tries to open — last step, not empty-garage friction.
+ * Empty shelf auto-closes Live.
  */
 export function StoreLiveToggle({ onOpenProfile }: Props) {
   const auth = useAuth();
@@ -45,7 +36,7 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
   const hostId = resolveHostAccountId(auth.userId);
   const [storeLive, setStoreLive] = useState(() => getLocalStoreLive(hostId));
   const [garageFormed, setGarageFormed] = useState(() =>
-    hostHasShelf(auth.userId, auth.userEmail),
+    hostHasShelfItems(auth.userId, auth.userEmail),
   );
   const [payoutsReady, setPayoutsReady] = useState(false);
   const [statusLoading, setStatusLoading] = useState(true);
@@ -62,21 +53,40 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
       return;
     }
     setStoreLive(getLocalStoreLive(hostId));
-    setGarageFormed(hostHasShelf(auth.userId, auth.userEmail));
-    void fetchStoreLiveByHostIds([hostId]).then((map) => {
+    const formed = hostHasShelfItems(auth.userId, auth.userEmail);
+    setGarageFormed(formed);
+    let cancelled = false;
+    void (async () => {
+      if (!formed) {
+        await closeStoreIfShelfEmpty(auth.userId, auth.userEmail);
+      }
+      if (cancelled) return;
+      const map = await fetchStoreLiveByHostIds([hostId]);
+      if (cancelled) return;
       if (Object.prototype.hasOwnProperty.call(map, hostId)) {
         setStoreLive(Boolean(map[hostId]));
+      } else {
+        setStoreLive(getLocalStoreLive(hostId));
       }
-    });
-    return onStoreLiveChanged((id, live) => {
+    })();
+    const unsub = onStoreLiveChanged((id, live) => {
       if (id === hostId) setStoreLive(live);
     });
+    return () => {
+      cancelled = true;
+      unsub();
+    };
   }, [hostId, auth.userId, auth.userEmail]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const refreshShelf = () =>
-      setGarageFormed(hostHasShelf(auth.userId, auth.userEmail));
+    const refreshShelf = () => {
+      const formed = hostHasShelfItems(auth.userId, auth.userEmail);
+      setGarageFormed(formed);
+      if (!formed) {
+        void closeStoreIfShelfEmpty(auth.userId, auth.userEmail);
+      }
+    };
     refreshShelf();
     window.addEventListener("evorios-listings-changed", refreshShelf);
     return () => window.removeEventListener("evorios-listings-changed", refreshShelf);

@@ -3,6 +3,9 @@
  * Shelf listings (active) stay in host inventory; neighbors only see them when store is Live and item not paused.
  */
 
+import { loadManageableListings } from "./hostAccess";
+import { resolveHostAccountId } from "./hostIdentity";
+import { isListingOnShelf, loadPublishedListings } from "./listingStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 const STORE_LIVE_KEY = "allbyrent_store_live_by_host";
@@ -133,6 +136,45 @@ export async function pushStoreLiveRemote(
     return { ok: false, reason: error.message || "Could not update store status." };
   }
   return { ok: true };
+}
+
+/** True when this signed-in host still has ≥1 on-shelf listing (same rules as Garage “On shelf”). */
+export function hostHasShelfItems(
+  authUserId: string | null | undefined,
+  authUserEmail: string | null | undefined,
+): boolean {
+  return loadManageableListings(authUserId ?? null, authUserEmail ?? null).some(
+    (listing) => isListingOnShelf(listing),
+  );
+}
+
+/**
+ * If the shelf is empty, force store Live off (local + remote).
+ * Call after deletes / when listings change so an empty garage cannot stay public.
+ */
+export async function closeStoreIfShelfEmpty(
+  authUserId: string | null | undefined,
+  authUserEmail: string | null | undefined,
+): Promise<void> {
+  const hostId = resolveHostAccountId(authUserId ?? null);
+  if (!hostId) return;
+  if (hostHasShelfItems(authUserId, authUserEmail)) return;
+  await pushStoreLiveRemote(hostId, false);
+}
+
+/** After a delete when we only know owner/host id (no email). Empty hostId rows count for this host. */
+export async function closeStoreIfShelfEmptyForHostId(
+  hostId: string | null | undefined,
+): Promise<void> {
+  const id = hostId?.trim() ?? "";
+  if (!id) return;
+  const hasShelf = loadPublishedListings().some((listing) => {
+    if (!isListingOnShelf(listing)) return false;
+    const listingHost = listing.hostId?.trim() ?? "";
+    return listingHost === id || listingHost === "";
+  });
+  if (hasShelf) return;
+  await pushStoreLiveRemote(id, false);
 }
 
 /** Neighbor-facing: shelf item + store Live + not paused. */

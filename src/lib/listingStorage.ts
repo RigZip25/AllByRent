@@ -217,17 +217,28 @@ export function removePublishedListing(id: string): void {
 
 export async function removePublishedListingRemote(id: string, ownerId: string): Promise<void> {
   removePublishedListing(id);
-  if (!isSupabaseConfigured()) return;
+  if (!isSupabaseConfigured()) {
+    const { closeStoreIfShelfEmptyForHostId } = await import("./garageStoreLive");
+    await closeStoreIfShelfEmptyForHostId(ownerId);
+    return;
+  }
   const supabase = getSupabaseClient();
-  if (!supabase) return;
+  if (!supabase) {
+    const { closeStoreIfShelfEmptyForHostId } = await import("./garageStoreLive");
+    await closeStoreIfShelfEmptyForHostId(ownerId);
+    return;
+  }
   // RLS scopes deletes to the signed-in owner. Prefer id-only so a mismatched
   // owner_id filter cannot silently no-op and let fetch merge resurrect the row.
   const byId = await supabase.from("listings").delete().eq("id", id);
-  if (!byId.error) return;
-  const oid = ownerId.trim();
-  if (oid) {
-    await supabase.from("listings").delete().eq("id", id).eq("owner_id", oid);
+  if (byId.error) {
+    const oid = ownerId.trim();
+    if (oid) {
+      await supabase.from("listings").delete().eq("id", id).eq("owner_id", oid);
+    }
   }
+  const { closeStoreIfShelfEmptyForHostId } = await import("./garageStoreLive");
+  await closeStoreIfShelfEmptyForHostId(ownerId);
 }
 
 /** Persist an in-progress wizard draft (local always; remote when signed in). */
