@@ -210,6 +210,12 @@ export function removePublishedListing(id: string): void {
         void deleteListingPhotosFromRemote(paths).catch(() => undefined);
       }
     }
+    const ownerId = victim?.hostId?.trim() ?? "";
+    if (ownerId) {
+      void import("./garageStoreLive").then(({ closeStoreIfShelfEmptyForHostId }) =>
+        closeStoreIfShelfEmptyForHostId(ownerId),
+      );
+    }
   } catch {
     /* ignore */
   }

@@ -254,7 +254,9 @@ export function HostDashboard({
       return;
     }
     setStoreLive(getLocalStoreLive(hostId));
-    void fetchStoreLiveByHostIds([hostId]).then((map) => {
+    void fetchStoreLiveByHostIds([hostId], {
+      coerceEmptyShelfFor: { userId: auth.userId, email: auth.userEmail },
+    }).then((map) => {
       if (Object.prototype.hasOwnProperty.call(map, hostId)) {
         setStoreLive(Boolean(map[hostId]));
       }
@@ -262,7 +264,7 @@ export function HostDashboard({
     return onStoreLiveChanged((id, live) => {
       if (id === hostId) setStoreLive(live);
     });
-  }, [hostId]);
+  }, [hostId, auth.userId, auth.userEmail]);
 
   useEffect(() => {
     let mounted = true;

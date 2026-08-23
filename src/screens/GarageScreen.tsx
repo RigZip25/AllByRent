@@ -60,7 +60,9 @@ export function GarageScreen({
       return;
     }
     setStoreLive(getLocalStoreLive(hostId));
-    void fetchStoreLiveByHostIds([hostId]).then((map) => {
+    void fetchStoreLiveByHostIds([hostId], {
+      coerceEmptyShelfFor: { userId: auth.userId, email: auth.userEmail },
+    }).then((map) => {
       if (Object.prototype.hasOwnProperty.call(map, hostId)) {
         setStoreLive(Boolean(map[hostId]));
       }
@@ -71,7 +73,7 @@ export function GarageScreen({
         if (!live) setShareOpen(false);
       }
     });
-  }, [hostId]);
+  }, [hostId, auth.userId, auth.userEmail]);
 
   const sharePayload = useMemo(
     () =>

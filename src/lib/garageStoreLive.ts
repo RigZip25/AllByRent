@@ -5,7 +5,7 @@
 
 import { loadManageableListings } from "./hostAccess";
 import { resolveHostAccountId } from "./hostIdentity";
-import { isListingOnShelf, loadPublishedListings } from "./listingStorage";
+import { loadPublishedListings } from "./listingStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 const STORE_LIVE_KEY = "allbyrent_store_live_by_host";
@@ -53,9 +53,10 @@ export function setLocalStoreLive(hostId: string, live: boolean): void {
   const id = hostId.trim();
   if (!id) return;
   const map = readLocalMap();
-  if (map[id] === live) return;
+  const prev = Boolean(map[id]);
   map[id] = live;
   writeLocalMap(map);
+  if (prev === live) return;
   if (typeof window !== "undefined") {
     try {
       window.dispatchEvent(
@@ -79,8 +80,52 @@ export function onStoreLiveChanged(
   return () => window.removeEventListener(STORE_LIVE_EVENT, handler);
 }
 
+/** Matches Garage “On shelf” counter: active (or legacy pending_qr) and not item-paused. */
+export function isCountableShelfItem(listing: {
+  listingStatus?: string;
+  paused?: boolean;
+}): boolean {
+  const status = listing.listingStatus ?? "";
+  const onShelf = status === "active" || status === "pending_qr";
+  return onShelf && !listing.paused;
+}
+
+/** True when this signed-in host still has ≥1 on-shelf listing (same rules as Garage “On shelf”). */
+export function hostHasShelfItems(
+  authUserId: string | null | undefined,
+  authUserEmail: string | null | undefined,
+): boolean {
+  return loadManageableListings(authUserId ?? null, authUserEmail ?? null).some(
+    isCountableShelfItem,
+  );
+}
+
+type FetchStoreLiveOptions = {
+  /** When set, never resurrect Live for this host if their shelf is empty. */
+  coerceEmptyShelfFor?: {
+    userId: string | null | undefined;
+    email: string | null | undefined;
+  };
+};
+
+async function coerceOwnEmptyShelf(
+  out: Record<string, boolean>,
+  options?: FetchStoreLiveOptions,
+): Promise<Record<string, boolean>> {
+  const coerce = options?.coerceEmptyShelfFor;
+  if (!coerce) return out;
+  const selfHostId = resolveHostAccountId(coerce.userId ?? null);
+  if (!selfHostId) return out;
+  if (!out[selfHostId] && !getLocalStoreLive(selfHostId)) return out;
+  if (hostHasShelfItems(coerce.userId, coerce.email)) return out;
+  await pushStoreLiveRemote(selfHostId, false);
+  out[selfHostId] = false;
+  return out;
+}
+
 export async function fetchStoreLiveByHostIds(
   hostIds: string[],
+  options?: FetchStoreLiveOptions,
 ): Promise<Record<string, boolean>> {
   const ids = [...new Set(hostIds.map((id) => id.trim()).filter(Boolean))];
   const local = readLocalMap();
@@ -90,27 +135,44 @@ export async function fetchStoreLiveByHostIds(
   }
 
   const uuids = ids.filter(isUuid);
-  if (uuids.length === 0 || !isSupabaseConfigured()) return out;
+  if (uuids.length === 0 || !isSupabaseConfigured()) {
+    return coerceOwnEmptyShelf(out, options);
+  }
   const supabase = getSupabaseClient();
-  if (!supabase) return out;
+  if (!supabase) {
+    return coerceOwnEmptyShelf(out, options);
+  }
 
   const { data, error } = await supabase
     .from("garage_storefronts")
     .select("host_id, store_live")
     .in("host_id", uuids);
-  if (error || !data) return out;
+  if (error || !data) {
+    return coerceOwnEmptyShelf(out, options);
+  }
+
+  const coerce = options?.coerceEmptyShelfFor;
+  const selfHostId = coerce ? resolveHostAccountId(coerce.userId ?? null) : "";
 
   for (const row of data) {
     const hostId = typeof row.host_id === "string" ? row.host_id : "";
     if (!hostId) continue;
-    const live = Boolean(row.store_live);
+    let live = Boolean(row.store_live);
+    if (
+      live &&
+      selfHostId &&
+      hostId === selfHostId &&
+      !hostHasShelfItems(coerce?.userId, coerce?.email)
+    ) {
+      // Remote still says Live after an empty shelf — force close so UI cannot reopen.
+      await pushStoreLiveRemote(hostId, false);
+      live = false;
+    } else {
+      setLocalStoreLive(hostId, live);
+    }
     out[hostId] = live;
-    // Keep local cache in sync for signed-in host browsing own feed.
-    const map = readLocalMap();
-    map[hostId] = live;
-    writeLocalMap(map);
   }
-  return out;
+  return coerceOwnEmptyShelf(out, options);
 }
 
 export async function pushStoreLiveRemote(
@@ -119,6 +181,7 @@ export async function pushStoreLiveRemote(
 ): Promise<{ ok: true } | { ok: false; reason: string }> {
   const id = hostId?.trim() ?? "";
   if (!id) return { ok: false, reason: "Sign in to open your store." };
+  // Always flip local first so UI cannot stay Live after an empty shelf.
   setLocalStoreLive(id, storeLive);
 
   if (!isUuid(id) || !isSupabaseConfigured()) {
@@ -127,25 +190,40 @@ export async function pushStoreLiveRemote(
   const supabase = getSupabaseClient();
   if (!supabase) return { ok: true };
 
+  const stamp = new Date().toISOString();
+  const { data: existing, error: readError } = await supabase
+    .from("garage_storefronts")
+    .select("host_id")
+    .eq("host_id", id)
+    .maybeSingle();
+
+  if (readError) {
+    return { ok: false, reason: readError.message || "Could not update store status." };
+  }
+
+  if (existing?.host_id) {
+    const { error } = await supabase
+      .from("garage_storefronts")
+      .update({ store_live: storeLive, updated_at: stamp })
+      .eq("host_id", id);
+    if (error) {
+      return { ok: false, reason: error.message || "Could not update store status." };
+    }
+    return { ok: true };
+  }
+
   const { error } = await supabase.from("garage_storefronts").upsert({
     host_id: id,
     store_live: storeLive,
-    updated_at: new Date().toISOString(),
+    shop_kind: "personal",
+    accent_id: "forest",
+    shop_name: "",
+    updated_at: stamp,
   });
   if (error) {
     return { ok: false, reason: error.message || "Could not update store status." };
   }
   return { ok: true };
-}
-
-/** True when this signed-in host still has ≥1 on-shelf listing (same rules as Garage “On shelf”). */
-export function hostHasShelfItems(
-  authUserId: string | null | undefined,
-  authUserEmail: string | null | undefined,
-): boolean {
-  return loadManageableListings(authUserId ?? null, authUserEmail ?? null).some(
-    (listing) => isListingOnShelf(listing),
-  );
 }
 
 /**
@@ -162,19 +240,33 @@ export async function closeStoreIfShelfEmpty(
   await pushStoreLiveRemote(hostId, false);
 }
 
-/** After a delete when we only know owner/host id (no email). Empty hostId rows count for this host. */
+/** After a delete when we only know owner/host id. Only that host’s rows count (not orphan empty hostIds). */
 export async function closeStoreIfShelfEmptyForHostId(
   hostId: string | null | undefined,
 ): Promise<void> {
   const id = hostId?.trim() ?? "";
   if (!id) return;
   const hasShelf = loadPublishedListings().some((listing) => {
-    if (!isListingOnShelf(listing)) return false;
-    const listingHost = listing.hostId?.trim() ?? "";
-    return listingHost === id || listingHost === "";
+    if (!isCountableShelfItem(listing)) return false;
+    return (listing.hostId?.trim() ?? "") === id;
   });
   if (hasShelf) return;
   await pushStoreLiveRemote(id, false);
+}
+
+/**
+ * After fetching remote store_live, never resurrect Live when the local shelf is empty.
+ */
+export function coerceStoreLiveForEmptyShelf(
+  hostId: string,
+  remoteLive: boolean,
+  authUserId: string | null | undefined,
+  authUserEmail: string | null | undefined,
+): boolean {
+  if (!remoteLive) return false;
+  if (hostHasShelfItems(authUserId, authUserEmail)) return true;
+  void pushStoreLiveRemote(hostId, false);
+  return false;
 }
 
 /** Neighbor-facing: shelf item + store Live + not paused. */

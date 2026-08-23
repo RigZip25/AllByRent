@@ -57,12 +57,19 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
     setGarageFormed(formed);
     let cancelled = false;
     void (async () => {
-      if (!formed) {
+      // Fetch first, then coerce empty shelf — never let remote Live resurrect after deletes.
+      const map = await fetchStoreLiveByHostIds([hostId], {
+        coerceEmptyShelfFor: { userId: auth.userId, email: auth.userEmail },
+      });
+      if (cancelled) return;
+      const stillFormed = hostHasShelfItems(auth.userId, auth.userEmail);
+      setGarageFormed(stillFormed);
+      if (!stillFormed) {
         await closeStoreIfShelfEmpty(auth.userId, auth.userEmail);
+        if (cancelled) return;
+        setStoreLive(false);
+        return;
       }
-      if (cancelled) return;
-      const map = await fetchStoreLiveByHostIds([hostId]);
-      if (cancelled) return;
       if (Object.prototype.hasOwnProperty.call(map, hostId)) {
         setStoreLive(Boolean(map[hostId]));
       } else {
@@ -84,6 +91,7 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
       const formed = hostHasShelfItems(auth.userId, auth.userEmail);
       setGarageFormed(formed);
       if (!formed) {
+        setStoreLive(false);
         void closeStoreIfShelfEmpty(auth.userId, auth.userEmail);
       }
     };
