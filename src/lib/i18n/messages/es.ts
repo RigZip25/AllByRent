@@ -439,7 +439,11 @@ export const es: AppMessages = {
     payouts: "Cobros",
     bankConnected: "Cuenta bancaria conectada",
     connectBank: "Conectar cuenta bancaria",
-    openingStripe: "Abriendo Stripe...",
+    openingStripe: "Abriendo cobros...",
+    connectEmbeddedTitle: "Configurar cobros",
+    connectEmbeddedBody: "Añade tu cuenta bancaria aquí — te quedas en Evorios, sin salir a otra web.",
+    connectEmbeddedDone: "Listo",
+    connectEmbeddedFailed: "No se pudo abrir la configuración de cobros. Inténtalo de nuevo.",
     payoutsEnabled: (last4) =>
       last4 ? `Cobros activados · **** ${last4}` : "Cobros activados",
     pendingVerification: "Verificación pendiente",

@@ -439,7 +439,11 @@ export const en: AppMessages = {
     payouts: "Payouts",
     bankConnected: "Bank account connected",
     connectBank: "Connect bank account",
-    openingStripe: "Opening Stripe...",
+    openingStripe: "Opening payouts...",
+    connectEmbeddedTitle: "Set up payouts",
+    connectEmbeddedBody: "Add your bank details here — you stay in Evorios, no redirect away.",
+    connectEmbeddedDone: "Done",
+    connectEmbeddedFailed: "Couldn’t open payouts setup. Try again.",
     payoutsEnabled: (last4) =>
       last4 ? `Payouts enabled · **** ${last4}` : "Payouts enabled",
     pendingVerification: "Pending verification",

@@ -3,6 +3,21 @@ import { ArrowLeft, Pause, Pencil, Play, QrCode, Trash2 } from "lucide-react";
 import QRCode from "qrcode";
 import { useAuth } from "../../hooks/AuthProvider";
 import { canManageListing, resolveGarageHostId } from "../../lib/hostAccess";
+import {
+  addListingToQrBulkQueue,
+  clearQrBulkQueue,
+  claimListingOwnershipIfUnassigned,
+  fetchListingByIdRemote,
+  getProfileCity,
+  getPublishedListingById,
+  isListingQueuedForBulk,
+  loadQrBulkQueueListingIds,
+  removeListingFromQrBulkQueue,
+  removePublishedListing,
+  removePublishedListingRemote,
+  updatePublishedListingRemote,
+  type PublishedListingPatch,
+} from "../../lib/listingStorage";
 import type { ListingDraft } from "./types";
 import { QR_PDF_FILENAMES } from "../../lib/brand";
 import { generateQRStickerPdf, presentGeneratedPdf } from "../../lib/generateQRSticker";

@@ -1,14 +1,14 @@
 import { fetchRemoteProfile } from "../supabaseProfile";
-import { isSupabaseConfigured } from "../supabaseClient";
+import { isSupabaseConfigured, getSupabaseClient } from "../supabaseClient";
 import {
   getSignInRequiredMessage,
   getStripeRequiredMessage,
   isPaymentsReady,
 } from "../config/production";
 import { createConnectAccountLink, getAccessToken, syncConnectAccountStatus } from "../stripePayments";
+import { openConnectOnboardingSheet } from "../connectOnboardingBus";
 import { isPhoneOtpClientEnabled } from "../phoneE164";
 import { isLocalPhoneVerified, refreshPhoneVerifiedFromRemote } from "../phoneKyc";
-import { getSupabaseClient } from "../supabaseClient";
 
 export type ConnectStatus = {
   connected: boolean;
@@ -19,7 +19,8 @@ export type ConnectStatus = {
 };
 
 export type ConnectOnboardingResult =
-  | { ok: true; url: string }
+  | { ok: true; mode: "embedded" }
+  | { ok: true; mode: "redirect"; url: string }
   | { ok: false; reason: string; code?: string };
 
 export async function loadConnectStatus(userId: string | null): Promise<ConnectStatus> {
@@ -51,7 +52,7 @@ export async function loadConnectStatus(userId: string | null): Promise<ConnectS
   };
 }
 
-export async function startConnectOnboarding(returnPath = "/?screen=profile"): Promise<ConnectOnboardingResult> {
+async function runConnectPrechecks(): Promise<{ ok: true } | { ok: false; reason: string; code?: string }> {
   if (!isPaymentsReady()) {
     return { ok: false, reason: getStripeRequiredMessage() };
   }
@@ -90,10 +91,29 @@ export async function startConnectOnboarding(returnPath = "/?screen=profile"): P
     }
   }
 
+  return { ok: true };
+}
+
+/**
+ * Prefer in-app embedded Connect onboarding; fall back to Account Link redirect
+ * if the sheet host is not mounted (tests / early boot).
+ */
+export async function startConnectOnboarding(
+  returnPath = "/?screen=profile",
+): Promise<ConnectOnboardingResult> {
+  const pre = await runConnectPrechecks();
+  if (!pre.ok) {
+    return { ok: false, reason: pre.reason, ...(pre.code ? { code: pre.code } : {}) };
+  }
+
+  if (openConnectOnboardingSheet({ returnPath })) {
+    return { ok: true, mode: "embedded" };
+  }
+
   const result = await createConnectAccountLink(returnPath);
   if (!result.ok) {
     return { ok: false, reason: result.reason, ...(result.code ? { code: result.code } : {}) };
   }
 
-  return { ok: true, url: result.url };
+  return { ok: true, mode: "redirect", url: result.url };
 }

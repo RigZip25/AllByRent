@@ -1,6 +1,6 @@
 import { fetchRemoteProfile } from "./supabaseProfile";
 import { isSupabaseConfigured } from "./supabaseClient";
-import { loadConnectStatus, startConnectOnboarding } from "./repositories/connectRepository";
+import { loadConnectStatus, startConnectOnboarding, type ConnectOnboardingResult } from "./repositories/connectRepository";
 import { loadUserProfile, saveUserProfile } from "./userProfileStorage";
 import { getAccessToken } from "./stripePayments";
 import { getRuntimeAppOrigin } from "./appOrigin";
@@ -398,6 +398,6 @@ export async function startIdentityVerificationForListing(
 
 export async function startConnectForListing(
   returnPath: string,
-): Promise<SellerGoPublicActionResult> {
+): Promise<ConnectOnboardingResult> {
   return startConnectOnboarding(returnPath);
 }

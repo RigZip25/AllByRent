@@ -4,7 +4,6 @@ import { applyCors, handleOptions } from "../../lib/cors";
 import { isStripeServerConfigured } from "../../lib/keys";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
-import { resolveConfiguredAppOrigin } from "../../lib/brand";
 import {
   ensureExpressConnectAccount,
   getConnectAlreadyComplete,
@@ -13,28 +12,14 @@ import {
 } from "../../lib/stripe/ensureConnectAccount";
 
 type Body = {
-  returnPath?: string;
   /** ISO country hint from the client (search/home country). */
   country?: string;
 };
 
-/** Stripe Account Links require https return URLs — never capacitor:// or ionic://. */
-function resolveConnectRedirectOrigin(req: VercelRequest): string {
-  const configured = resolveConfiguredAppOrigin().replace(/\/$/, "");
-  const header = typeof req.headers.origin === "string" ? req.headers.origin.replace(/\/$/, "") : "";
-  if (!header) return configured;
-  try {
-    const u = new URL(header);
-    if (u.protocol === "https:" && (u.hostname === "app.evorios.com" || u.hostname === "localhost")) {
-      return header;
-    }
-  } catch {
-    /* ignore */
-  }
-  return configured;
-}
-
-/** Fallback redirect onboarding — prefer connect_account_session + embedded UI. */
+/**
+ * Creates a Connect Account Session for embedded onboarding (no redirect to Stripe).
+ * Client uses the client_secret with @stripe/connect-js Account onboarding component.
+ */
 export default withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
   applyCors(res, typeof req.headers.origin === "string" ? req.headers.origin : undefined);
@@ -62,10 +47,6 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   }
 
   const body = (req.body ?? {}) as Body;
-  const returnPath =
-    typeof body.returnPath === "string" && body.returnPath.startsWith("/")
-      ? body.returnPath
-      : "/?screen=profile";
   const requestedCountry = typeof body.country === "string" ? body.country : null;
 
   const { data: profile, error: profileError } = await admin
@@ -87,18 +68,6 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   const secret = process.env.STRIPE_SECRET_KEY!;
   const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
-  const origin = resolveConnectRedirectOrigin(req);
-
-  const appendConnectQuery = (path: string, flag: "refresh" | "done"): string => {
-    try {
-      const url = new URL(path, `${origin}/`);
-      url.searchParams.set("connect", flag);
-      return url.toString();
-    } catch {
-      const join = path.includes("?") ? "&" : "?";
-      return `${origin}${path}${join}connect=${flag}`;
-    }
-  };
 
   try {
     const existingId = profile?.stripe_connect_account_id ?? null;
@@ -127,19 +96,21 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       return;
     }
 
-    const accountLink = await stripe.accountLinks.create({
+    const session = await stripe.accountSessions.create({
       account: ensured.accountId,
-      refresh_url: appendConnectQuery(returnPath, "refresh"),
-      return_url: appendConnectQuery(returnPath, "done"),
-      type: "account_onboarding",
+      components: {
+        account_onboarding: {
+          enabled: true,
+        },
+      },
     });
 
-    if (!accountLink.url) {
-      res.status(200).json({ ok: false, reason: "Stripe returned no onboarding URL." });
+    if (!session.client_secret) {
+      res.status(200).json({ ok: false, reason: "Stripe returned no account session secret." });
       return;
     }
 
-    res.status(200).json({ ok: true, url: accountLink.url });
+    res.status(200).json({ ok: true, clientSecret: session.client_secret });
   } catch (error) {
     const mapped = mapConnectStripeError(error);
     res.status(200).json({ ok: false, reason: mapped.reason, ...(mapped.code ? { code: mapped.code } : {}) });

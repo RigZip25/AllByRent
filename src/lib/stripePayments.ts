@@ -573,6 +573,74 @@ export async function createConnectAccountLink(returnPath: string): Promise<Conn
   return payload;
 }
 
+export type ConnectAccountSessionResult =
+  | { ok: true; clientSecret: string }
+  | { ok: false; reason: string; code?: string };
+
+/** Account Session for embedded Connect onboarding (stays in-app). */
+export async function createConnectAccountSession(): Promise<ConnectAccountSessionResult> {
+  if (!isStripePaymentsEnabled()) {
+    return { ok: false, reason: "Stripe not configured. Set VITE_STRIPE_PUBLISHABLE_KEY on Vercel." };
+  }
+
+  const token = await getAccessToken();
+  if (!token) {
+    return { ok: false, reason: "Sign in required — enter your email code again, then retry Connect." };
+  }
+
+  let res: Response;
+  try {
+    res = await fetch("/api/stripe/connect_account_session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        country: getSearchCountryCode(),
+      }),
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error instanceof Error ? error.message : "Network error calling Stripe Connect.",
+    };
+  }
+
+  let payload: ConnectAccountSessionResult & { error?: string; code?: string } = {
+    ok: false,
+    reason: "",
+  };
+  try {
+    payload = (await res.json()) as ConnectAccountSessionResult & { error?: string; code?: string };
+  } catch {
+    return { ok: false, reason: `Connect session failed (HTTP ${res.status}, invalid response).` };
+  }
+
+  if (!res.ok) {
+    return {
+      ok: false,
+      reason: friendlyConnectError(
+        responseFailureReason(payload) ?? `Connect session failed (${res.status})`,
+        payload.code,
+      ),
+      ...(payload.code ? { code: payload.code } : {}),
+    };
+  }
+  if (!payload.ok) {
+    return {
+      ok: false,
+      reason: friendlyConnectError(payload.reason ?? "Stripe Connect not configured", payload.code),
+      ...(payload.code ? { code: payload.code } : {}),
+    };
+  }
+  if (!("clientSecret" in payload) || !payload.clientSecret) {
+    return { ok: false, reason: "Missing account session secret from Stripe." };
+  }
+
+  return payload;
+}
+
 export type ConnectSyncResult =
   | {
       ok: true;

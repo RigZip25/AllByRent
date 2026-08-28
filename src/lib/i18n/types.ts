@@ -529,6 +529,10 @@ export type AppMessages = {
     bankConnected: string;
     connectBank: string;
     openingStripe: string;
+    connectEmbeddedTitle: string;
+    connectEmbeddedBody: string;
+    connectEmbeddedDone: string;
+    connectEmbeddedFailed: string;
     payoutsEnabled: (last4?: string) => string;
     pendingVerification: string;
     requiredPayouts: string;

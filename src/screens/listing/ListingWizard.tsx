@@ -22,6 +22,7 @@ import {
   startIdentityVerificationForListing,
   type SellerGoPublicStatus,
 } from "../../lib/sellerGoPublic";
+import { onConnectOnboardingDone } from "../../lib/connectOnboardingBus";
 import { isFreeGiveaway } from "../../lib/listingGift";
 import { PhoneVerifySheet } from "../../components/profile/PhoneVerifySheet";
 import { analyzeListingMediaPhotos } from "./listingAnalysis";
@@ -340,6 +341,13 @@ export function ListingWizard({
     if (phase !== "goPublic") return;
     void refreshGoPublicStatus();
   }, [phase, auth.userId, refreshGoPublicStatus]);
+
+  useEffect(() => {
+    if (phase !== "goPublic") return;
+    return onConnectOnboardingDone(() => {
+      void refreshGoPublicStatus();
+    });
+  }, [phase, refreshGoPublicStatus]);
 
   const persistDraftForGoPublic = useCallback(
     async (opts?: { syncRemote?: boolean }) => {
@@ -845,7 +853,9 @@ export function ListingWizard({
           }
           return;
         }
-        window.location.assign(result.url);
+        if (result.mode === "redirect") {
+          window.location.assign(result.url);
+        }
       } catch (error) {
         setGoPublicError(error instanceof Error ? error.message : "Stripe Connect failed.");
         setGoPublicErrorCode(null);

@@ -20,6 +20,7 @@ import {
   startConnectForListing,
   type SellerGoPublicStatus,
 } from "../../lib/sellerGoPublic";
+import { onConnectOnboardingDone } from "../../lib/connectOnboardingBus";
 import {
   buildInitialOfferPrefs,
   defaultAuctionOfferWindow,
@@ -128,6 +129,12 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
     void refreshSellerStatus();
   }, [refreshSellerStatus]);
 
+  useEffect(() => {
+    return onConnectOnboardingDone(() => {
+      void refreshSellerStatus();
+    });
+  }, [refreshSellerStatus]);
+
   const handleConnectStripe = useCallback(() => {
     void (async () => {
       setConnectBusy(true);
@@ -142,7 +149,9 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
           setError(result.reason);
           return;
         }
-        window.location.assign(result.url);
+        if (result.mode === "redirect") {
+          window.location.assign(result.url);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : copy.connectFailed);
       } finally {

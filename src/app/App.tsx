@@ -59,6 +59,7 @@ import type { SeoCategory } from "../lib/seo/rentCategories";
 import { formatSeoLocationLabel, type SeoLocation } from "../lib/seo/seoLocations";
 import { APP_ORIGIN, isSeoApexHost } from "../lib/brand";
 import { isOpsPath } from "../lib/ops/opsAuth";
+import { ConnectOnboardingHost } from "../components/ConnectOnboardingHost";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
 import { useBrowserBackTrap } from "../hooks/useBrowserBackTrap";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
@@ -2378,6 +2379,8 @@ function AppRoutes() {
       />
 
       <PasskeySetup open={passkeySetupOpen} onDone={() => setPasskeySetupOpen(false)} />
+
+      <ConnectOnboardingHost />
 
       <InstallHintToast
         mode="overlay"

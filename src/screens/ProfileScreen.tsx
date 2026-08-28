@@ -49,6 +49,7 @@ import { signOut } from "../lib/auth";
 import { fetchRemoteProfile } from "../lib/supabaseProfile";
 import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
 import { loadConnectStatus, startConnectOnboarding } from "../lib/repositories/connectRepository";
+import { onConnectOnboardingDone } from "../lib/connectOnboardingBus";
 import { useLocaleControls, useMessages } from "../lib/i18n/react";
 import type { AppLocale } from "../lib/i18n/types";
 
@@ -180,14 +181,18 @@ export function ProfileScreen({
   useEffect(() => {
     if (!auth.userId) return;
     let mounted = true;
-    void loadConnectStatus(auth.userId).then((status) => {
-      if (!mounted) return;
-      setStripeStatus({
-        connected: status.connected,
-        payoutsEnabled: status.payoutsEnabled,
-        last4: status.last4,
+    const refreshStripe = () => {
+      void loadConnectStatus(auth.userId).then((status) => {
+        if (!mounted) return;
+        setStripeStatus({
+          connected: status.connected,
+          payoutsEnabled: status.payoutsEnabled,
+          last4: status.last4,
+        });
       });
-    });
+    };
+    refreshStripe();
+    const stop = onConnectOnboardingDone(refreshStripe);
     void fetchRemoteProfile(auth.userId).then((remote) => {
       if (!mounted || !remote) return;
       const synced = syncUserProfileFromAuth({
@@ -224,6 +229,7 @@ export function ProfileScreen({
     });
     return () => {
       mounted = false;
+      stop();
     };
   }, [auth.userId, auth.userEmail]);
 
@@ -538,7 +544,9 @@ export function ProfileScreen({
                       setConnectErrorCode(result.code ?? null);
                       return;
                     }
-                    window.location.href = result.url;
+                    if (result.mode === "redirect") {
+                      window.location.href = result.url;
+                    }
                   })
                   .finally(() => setConnectBusy(false));
               }}

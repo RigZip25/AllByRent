@@ -20,6 +20,7 @@ import {
 import { resolveHostAccountId } from "../lib/hostIdentity";
 import { useMessages } from "../lib/i18n/react";
 import { startConnectOnboarding } from "../lib/repositories/connectRepository";
+import { onConnectOnboardingDone } from "../lib/connectOnboardingBus";
 import { loadSellerGoPublicStatus } from "../lib/sellerGoPublic";
 import { loadUserProfile } from "../lib/userProfileStorage";
 
@@ -127,16 +128,21 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
       };
     }
     setStatusLoading(true);
-    void loadSellerGoPublicStatus(auth.userId, { requiresPhone: false })
-      .then((status) => {
-        if (!mounted) return;
-        setPayoutsReady(Boolean(status.payoutsReady));
-      })
-      .finally(() => {
-        if (mounted) setStatusLoading(false);
-      });
+    const refreshPayouts = () => {
+      void loadSellerGoPublicStatus(auth.userId, { requiresPhone: false })
+        .then((status) => {
+          if (!mounted) return;
+          setPayoutsReady(Boolean(status.payoutsReady));
+        })
+        .finally(() => {
+          if (mounted) setStatusLoading(false);
+        });
+    };
+    refreshPayouts();
+    const stop = onConnectOnboardingDone(refreshPayouts);
     return () => {
       mounted = false;
+      stop();
     };
   }, [auth.userId, hostId, garageFormed, storeLive, isOwner]);
 
@@ -224,7 +230,9 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
     void startConnectOnboarding("/?screen=garage")
       .then((result) => {
         if (result.ok) {
-          window.location.assign(result.url);
+          if (result.mode === "redirect") {
+            window.location.assign(result.url);
+          }
           return;
         }
         if (result.code === "already_connected") {

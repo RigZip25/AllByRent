@@ -68,7 +68,8 @@ Screens → repositories (garage, payments, connect, coHost)
 | `POST /api/stripe/garage_checkout` | Garage cart PaymentIntent + order rows |
 | `POST /api/stripe/auction_checkout` | Auction winner pay |
 | `POST /api/stripe/boost` | Listing boost PaymentIntent |
-| `POST /api/stripe/connect_account_link` | Host payout onboarding |
+| `POST /api/stripe/connect_account_session` | Embedded Connect onboarding (Account Session `client_secret`) |
+| `POST /api/stripe/connect_account_link` | Fallback redirect Account Link onboarding |
 | `POST /api/stripe/webhook` | Payments, boosts, Connect |
 
 ### Webhook metadata

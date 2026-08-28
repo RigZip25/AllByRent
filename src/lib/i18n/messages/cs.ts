@@ -459,7 +459,11 @@ export const cs: AppMessages = {
     payouts: "Výplaty",
     bankConnected: "Bankovní účet připojen",
     connectBank: "Připojit bankovní účet",
-    openingStripe: "Otevírám Stripe...",
+    openingStripe: "Otevírám výplaty...",
+    connectEmbeddedTitle: "Nastavení výplat",
+    connectEmbeddedBody: "Přidejte bankovní údaje zde — zůstanete v Evorios, bez přesměrování pryč.",
+    connectEmbeddedDone: "Hotovo",
+    connectEmbeddedFailed: "Nepodařilo se otevřít nastavení výplat. Zkuste to znovu.",
     payoutsEnabled: (last4) =>
       last4 ? `Výplaty povoleny · **** ${last4}` : "Výplaty povoleny",
     pendingVerification: "Čeká na ověření",
