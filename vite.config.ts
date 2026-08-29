@@ -47,7 +47,7 @@ function pwaPlugin() {
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,jpg,jpeg,svg,woff2}'],
         importScripts: ['push-sw.js'],
         navigateFallback: '/index.html',
         // Main bundle can exceed the default 2 MiB precache cap after feature growth.

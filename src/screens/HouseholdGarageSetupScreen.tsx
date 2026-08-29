@@ -199,11 +199,6 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
     }
   };
 
-  const enterGarage = () => {
-    markHouseholdGarageSetupDone();
-    onDone();
-  };
-
   const title =
     step === 1
       ? t.garageUi.householdTitleKind
