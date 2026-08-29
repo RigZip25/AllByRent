@@ -10,20 +10,31 @@ import {
   emitConnectOnboardingDone,
   registerConnectOnboardingOpener,
 } from "../lib/connectOnboardingBus";
+import { connectAssets } from "../lib/connectAssets";
 import { createConnectAccountSession, syncConnectAccountStatus } from "../lib/stripePayments";
 import { getStripePublishableKey } from "../lib/stripeConfig";
-import { APP_NAME, BRAND_GREEN, BRAND_GREEN_LIGHT } from "../lib/brand";
+import {
+  APP_NAME,
+  BRAND_GREEN,
+  BRAND_GREEN_LIGHT,
+  BRAND_SECURE,
+  BRAND_SECURE_DEEP,
+  BRAND_SECURE_SOFT,
+} from "../lib/brand";
 import { useMessages } from "../lib/i18n/react";
 import { ConnectSetupError } from "./payments/ConnectSetupError";
 
-const SURFACE = "#F0F4F2";
+const SURFACE = "#F4F7F5";
 const PAPER = "#FFFEFA";
 const INK = "#0B3D2A";
 const MUTED = "#5C6B63";
 const LINE = "#D8E0DA";
 const MIST = "#E8F2EC";
 
-/** Force Connect embedded UI onto Evorios green — Stripe defaults to purple otherwise. */
+/**
+ * Green Evorios chrome + violet secure actions — matches the branded preview art
+ * and Stripe’s finance purple if a hosted SMS step still appears.
+ */
 const CONNECT_APPEARANCE = {
   overlays: "dialog" as const,
   variables: {
@@ -32,42 +43,41 @@ const CONNECT_APPEARANCE = {
     fontSizeBase: "15px",
     spacingUnit: "10px",
     borderRadius: "14px",
-    colorPrimary: BRAND_GREEN,
+    colorPrimary: BRAND_SECURE,
     colorBackground: PAPER,
     colorText: INK,
     colorSecondaryText: MUTED,
     colorBorder: LINE,
     colorDanger: "#B91C1C",
-    buttonPrimaryColorBackground: BRAND_GREEN,
-    buttonPrimaryColorBorder: BRAND_GREEN,
+    buttonPrimaryColorBackground: BRAND_SECURE,
+    buttonPrimaryColorBorder: BRAND_SECURE,
     buttonPrimaryColorText: "#FFFFFF",
-    buttonSecondaryColorBackground: MIST,
-    buttonSecondaryColorBorder: LINE,
-    buttonSecondaryColorText: BRAND_GREEN,
+    buttonSecondaryColorBackground: BRAND_SECURE_SOFT,
+    buttonSecondaryColorBorder: "#D8D6F5",
+    buttonSecondaryColorText: BRAND_SECURE_DEEP,
     buttonLabelFontWeight: "700",
-    actionPrimaryColorText: BRAND_GREEN_LIGHT,
+    actionPrimaryColorText: BRAND_SECURE,
     actionSecondaryColorText: MUTED,
-    badgeNeutralColorBackground: MIST,
-    badgeNeutralColorText: INK,
-    badgeNeutralColorBorder: LINE,
+    badgeNeutralColorBackground: BRAND_SECURE_SOFT,
+    badgeNeutralColorText: BRAND_SECURE_DEEP,
+    badgeNeutralColorBorder: "#D8D6F5",
     badgeSuccessColorBackground: "#D1FAE5",
     badgeSuccessColorText: BRAND_GREEN,
     badgeSuccessColorBorder: "#A7F3D0",
-    formAccentColor: BRAND_GREEN,
-    formHighlightColorBorder: BRAND_GREEN_LIGHT,
-    overlayBackdropColor: "rgba(6, 42, 28, 0.45)",
+    formAccentColor: BRAND_SECURE,
+    formHighlightColorBorder: BRAND_SECURE,
+    overlayBackdropColor: "rgba(6, 42, 28, 0.5)",
   },
 };
 
 type ConnectUiMode = "onboarding" | "management";
+type Phase = "intro" | "form";
 
-/**
- * Full-screen Evorios shell around Stripe Connect embedded components.
- * Appearance variables override Stripe’s default purple brand colors.
- */
+/** Full-screen Evorios payouts sheet with branded secure-check intro. */
 export function ConnectOnboardingHost() {
   const t = useMessages();
   const [open, setOpen] = useState(false);
+  const [phase, setPhase] = useState<Phase>("intro");
   const [connectInstance, setConnectInstance] = useState<StripeConnectInstance | null>(null);
   const [uiMode, setUiMode] = useState<ConnectUiMode>("onboarding");
   const [bootError, setBootError] = useState<string | null>(null);
@@ -80,21 +90,24 @@ export function ConnectOnboardingHost() {
       setBootErrorCode(null);
       setConnectInstance(null);
       setUiMode("onboarding");
+      setPhase("intro");
+      setBusy(false);
       setOpen(true);
     });
   }, []);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || phase !== "form") return;
 
     const key = getStripePublishableKey();
     if (!key) {
-      setBootError("Stripe not configured. Set VITE_STRIPE_PUBLISHABLE_KEY on Vercel.");
+      setBootError("Payouts aren’t configured yet. Try again later or contact support.");
       return;
     }
 
     let cancelled = false;
     setBusy(true);
+    setConnectInstance(null);
 
     void (async () => {
       const first = await createConnectAccountSession();
@@ -142,27 +155,37 @@ export function ConnectOnboardingHost() {
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, [open, phase]);
 
   const close = useCallback(() => {
     setOpen(false);
+    setPhase("intro");
     setConnectInstance(null);
     setBootError(null);
     setBootErrorCode(null);
+    setBusy(false);
   }, []);
 
   const handleExit = useCallback(() => {
     void (async () => {
       setBusy(true);
       try {
-        await syncConnectAccountStatus();
+        if (phase === "form") {
+          await syncConnectAccountStatus();
+        }
       } finally {
         emitConnectOnboardingDone();
         setBusy(false);
         close();
       }
     })();
-  }, [close]);
+  }, [close, phase]);
+
+  const startForm = useCallback(() => {
+    setBootError(null);
+    setBootErrorCode(null);
+    setPhase("form");
+  }, []);
 
   if (!open) return null;
 
@@ -178,31 +201,44 @@ export function ConnectOnboardingHost() {
       aria-modal="true"
       aria-labelledby="connect-onboarding-title"
       style={{
-        background: `linear-gradient(165deg, #062a1c 0%, ${BRAND_GREEN} 38%, #0a4a30 100%)`,
+        background: `linear-gradient(168deg, #041f16 0%, ${BRAND_GREEN} 42%, #0c3d2e 78%, #1e1a4a 100%)`,
       }}
     >
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.14]"
+        className="pointer-events-none absolute inset-0 opacity-[0.2]"
         style={{
           backgroundImage:
-            "radial-gradient(circle at 20% 10%, rgba(255,255,255,0.55) 0%, transparent 42%), radial-gradient(circle at 90% 80%, rgba(245,158,11,0.35) 0%, transparent 36%)",
+            "radial-gradient(ellipse at 15% 0%, rgba(255,255,255,0.35) 0%, transparent 45%), radial-gradient(ellipse at 100% 100%, rgba(99,91,255,0.45) 0%, transparent 48%)",
         }}
       />
 
-      <header
-        className="relative z-[1] flex shrink-0 items-start gap-3 px-4 pb-3 pt-[max(0.85rem,env(safe-area-inset-top))]"
-      >
+      <header className="relative z-[1] flex shrink-0 items-start gap-3 px-4 pb-3 pt-[max(0.85rem,env(safe-area-inset-top))]">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">
-            {APP_NAME}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">
+              {APP_NAME}
+            </p>
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/95"
+              style={{
+                backgroundColor: "rgba(99,91,255,0.32)",
+                border: "1px solid rgba(255,255,255,0.2)",
+              }}
+            >
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: BRAND_GREEN_LIGHT }} />
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "#C4C0FF" }} />
+              {t.profile.connectLaneBadge}
+            </span>
+          </div>
           <p
             id="connect-onboarding-title"
-            className="mt-1 text-[22px] font-extrabold leading-tight text-white"
+            className="mt-1.5 text-[22px] font-extrabold leading-tight text-white"
           >
-            {title}
+            {phase === "intro" ? t.profile.connectIntroTitle : title}
           </p>
-          <p className="mt-1.5 max-w-[34rem] text-[13px] leading-relaxed text-white/80">{body}</p>
+          <p className="mt-1.5 max-w-[34rem] text-[13px] leading-relaxed text-white/80">
+            {phase === "intro" ? t.profile.connectIntroBody : body}
+          </p>
         </div>
         <button
           type="button"
@@ -221,76 +257,125 @@ export function ConnectOnboardingHost() {
           borderColor: "rgba(255,255,255,0.28)",
         }}
       >
-        <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2 pt-2 sm:px-3">
-          {bootError ? (
-            <div className="space-y-3 px-2 py-3">
-              <ConnectSetupError message={bootError} code={bootErrorCode} />
+        {phase === "intro" ? (
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-2 pt-3">
+              <img
+                src={connectAssets.securePreview}
+                alt={t.profile.connectIntroAlt}
+                className="mx-auto w-full max-w-[420px] rounded-2xl object-contain shadow-md"
+                style={{ backgroundColor: PAPER }}
+              />
+              <p className="mx-auto mt-3 max-w-[28rem] text-center text-[12px] leading-relaxed" style={{ color: MUTED }}>
+                {t.profile.connectIntroHint}
+              </p>
+            </div>
+            <div className="shrink-0 space-y-2 border-t px-4 py-3" style={{ borderColor: "#D8D6F5", backgroundColor: BRAND_SECURE_SOFT }}>
               <button
                 type="button"
-                onClick={handleExit}
-                className="w-full rounded-xl py-3 text-sm font-bold text-white"
-                style={{ backgroundColor: BRAND_GREEN }}
+                onClick={startForm}
+                className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[15px] font-bold text-white active:opacity-90"
+                style={{ backgroundColor: BRAND_SECURE }}
               >
-                {t.profile.connectEmbeddedDone}
+                {t.profile.connectIntroCta}
               </button>
+              <p className="flex items-center justify-center gap-1.5 text-[11px] font-medium" style={{ color: BRAND_SECURE_DEEP }}>
+                <ShieldCheck className="h-3.5 w-3.5" />
+                {t.profile.connectSecureFooter}
+              </p>
             </div>
-          ) : null}
+          </div>
+        ) : (
+          <>
+            <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2 pt-2 sm:px-3">
+              {bootError ? (
+                <div className="space-y-3 px-2 py-3">
+                  <ConnectSetupError message={bootError} code={bootErrorCode} />
+                  <button
+                    type="button"
+                    onClick={() => setPhase("intro")}
+                    className="w-full rounded-xl py-3 text-sm font-bold text-white"
+                    style={{ backgroundColor: BRAND_SECURE }}
+                  >
+                    {t.profile.connectIntroBack}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExit}
+                    className="w-full rounded-xl py-3 text-sm font-bold"
+                    style={{ backgroundColor: MIST, color: BRAND_GREEN }}
+                  >
+                    {t.profile.connectEmbeddedDone}
+                  </button>
+                </div>
+              ) : null}
 
-          {!bootError && (busy || !connectInstance) ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-20" style={{ color: MUTED }}>
-              <Loader2 className="h-7 w-7 animate-spin" style={{ color: BRAND_GREEN }} />
-              <p className="text-[13px] font-medium">{t.profile.openingStripe}</p>
+              {!bootError && (busy || !connectInstance) ? (
+                <div className="relative flex flex-col items-center justify-center gap-3 px-2 py-6">
+                  <img
+                    src={connectAssets.securePreview}
+                    alt=""
+                    aria-hidden
+                    className="w-full max-w-[320px] rounded-2xl object-contain opacity-90 shadow-sm"
+                  />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-white/55 backdrop-blur-[2px]">
+                    <Loader2 className="h-7 w-7 animate-spin" style={{ color: BRAND_SECURE }} />
+                    <p className="text-[13px] font-medium" style={{ color: MUTED }}>
+                      {t.profile.openingStripe}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+
+              {!bootError && connectInstance ? (
+                <div
+                  className="overflow-hidden rounded-2xl border px-1 py-1"
+                  style={{
+                    borderColor: LINE,
+                    backgroundColor: PAPER,
+                  }}
+                >
+                  <ConnectComponentsProvider connectInstance={connectInstance}>
+                    {uiMode === "management" ? (
+                      <ConnectAccountManagement
+                        collectionOptions={{
+                          fields: "eventually_due",
+                          futureRequirements: "include",
+                        }}
+                        onLoadError={({ error }) => {
+                          setBootError(error.message || t.profile.connectEmbeddedFailed);
+                        }}
+                      />
+                    ) : (
+                      <ConnectAccountOnboarding
+                        onExit={handleExit}
+                        collectionOptions={{
+                          fields: "eventually_due",
+                          futureRequirements: "include",
+                        }}
+                        onLoadError={({ error }) => {
+                          setBootError(error.message || t.profile.connectEmbeddedFailed);
+                        }}
+                      />
+                    )}
+                  </ConnectComponentsProvider>
+                </div>
+              ) : null}
             </div>
-          ) : null}
 
-          {!bootError && connectInstance ? (
-            <div
-              className="overflow-hidden rounded-2xl border bg-[var(--connect-paper,#FFFEFA)] px-1 py-1"
-              style={{
-                borderColor: LINE,
-                // Help Connect inherit a calm surface (Stripe reads parent background).
-                ["--connect-paper" as string]: PAPER,
-                backgroundColor: PAPER,
-              }}
+            <footer
+              className="flex shrink-0 items-center justify-center gap-1.5 border-t px-4 py-2.5"
+              style={{ borderColor: "#D8D6F5", backgroundColor: BRAND_SECURE_SOFT }}
             >
-              <ConnectComponentsProvider connectInstance={connectInstance}>
-                {uiMode === "management" ? (
-                  <ConnectAccountManagement
-                    collectionOptions={{
-                      fields: "eventually_due",
-                      futureRequirements: "include",
-                    }}
-                    onLoadError={({ error }) => {
-                      setBootError(error.message || t.profile.connectEmbeddedFailed);
-                    }}
-                  />
-                ) : (
-                  <ConnectAccountOnboarding
-                    onExit={handleExit}
-                    collectionOptions={{
-                      fields: "eventually_due",
-                      futureRequirements: "include",
-                    }}
-                    onLoadError={({ error }) => {
-                      setBootError(error.message || t.profile.connectEmbeddedFailed);
-                    }}
-                  />
-                )}
-              </ConnectComponentsProvider>
-            </div>
-          ) : null}
-        </div>
-
-        <footer
-          className="flex shrink-0 items-center justify-center gap-1.5 border-t px-4 py-2.5"
-          style={{ borderColor: LINE, backgroundColor: MIST }}
-        >
-          <ShieldCheck className="h-3.5 w-3.5" style={{ color: BRAND_GREEN }} />
-          <p className="text-[11px] font-medium" style={{ color: MUTED }}>
-            {t.profile.connectSecureFooter}
-          </p>
-        </footer>
+              <ShieldCheck className="h-3.5 w-3.5" style={{ color: BRAND_SECURE }} />
+              <p className="text-[11px] font-medium" style={{ color: BRAND_SECURE_DEEP }}>
+                {t.profile.connectSecureFooter}
+              </p>
+            </footer>
+          </>
+        )}
       </div>
     </div>
   );
 }
+

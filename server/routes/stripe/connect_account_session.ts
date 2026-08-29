@@ -17,9 +17,8 @@ type Body = {
 };
 
 /**
- * Creates a Connect Account Session for embedded UI (no redirect to Stripe).
- * - Incomplete accounts → account_onboarding
- * - Already connected → account_management (update bank / payout details)
+ * Creates a Connect Account Session for embedded UI.
+ * Express: Stripe keeps loss liability; hosted SMS auth may still appear.
  */
 export default withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
@@ -105,6 +104,9 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
           : {
               account_onboarding: {
                 enabled: true,
+                features: {
+                  external_account_collection: true,
+                },
               },
             },
     });

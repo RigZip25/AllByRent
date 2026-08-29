@@ -23,11 +23,11 @@ import { startConnectOnboarding } from "../lib/repositories/connectRepository";
 import { onConnectOnboardingDone } from "../lib/connectOnboardingBus";
 import { loadSellerGoPublicStatus } from "../lib/sellerGoPublic";
 import { loadUserProfile } from "../lib/userProfileStorage";
+import { BRAND_SECURE, BRAND_SECURE_SOFT } from "../lib/brand";
 
 const GREEN = "#1A9E6E";
 const GREEN_DARK = "#0D5C3A";
 const BORDER = "#E8E6E0";
-const AMBER = "#B45309";
 
 type Props = {
   onOpenProfile?: () => void;
@@ -292,12 +292,12 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
         {showStripeGate ? (
           <div
             className="mt-3 rounded-xl border px-3 py-2.5"
-            style={{ borderColor: "#FDE68A", backgroundColor: "#FFFBEB" }}
+            style={{ borderColor: "#D8D6F5", backgroundColor: BRAND_SECURE_SOFT }}
           >
-            <p className="text-[13px] font-semibold" style={{ color: AMBER }}>
+            <p className="text-[13px] font-semibold" style={{ color: BRAND_SECURE }}>
               {t.garageUi.storeLiveStripeGateTitle}
             </p>
-            <p className="mt-1 text-[12px] leading-relaxed text-amber-900/90">
+            <p className="mt-1 text-[12px] leading-relaxed text-slate-700/90">
               {t.garageUi.storeLiveStripeGateBody}
             </p>
             <button
@@ -305,7 +305,7 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
               onClick={handleSetupStripe}
               disabled={busy === "stripe" || !hostId}
               className="mt-2.5 w-full rounded-xl py-2.5 text-[13px] font-bold text-white disabled:opacity-60"
-              style={{ backgroundColor: GREEN_DARK }}
+              style={{ backgroundColor: BRAND_SECURE }}
             >
               {busy === "stripe" ? (
                 <span className="inline-flex items-center justify-center gap-2">

@@ -31,6 +31,14 @@ export const BRAND_AMBER = "#F59E0B";
 /** Browse (rent) path accent — warm orange so it reads apart from Garage green. */
 export const BRAND_BROWSE_ORANGE = "#FF8A3D";
 export const BRAND_GREEN_LIGHT = "#1A9E6E";
+/**
+ * Secure-finance accent (payouts / Connect only).
+ * Matches Stripe’s hosted CTA purple so green chrome + violet actions feel like one system
+ * when SMS auth opens on connect.stripe.com — not a random clash.
+ */
+export const BRAND_SECURE = "#635BFF";
+export const BRAND_SECURE_SOFT = "#EEF0FF";
+export const BRAND_SECURE_DEEP = "#4F46E5";
 export const SPLASH_BG_DARK = "#062a1c";
 export const SPLASH_GRADIENT = `linear-gradient(165deg, ${SPLASH_BG_DARK} 0%, ${BRAND_GREEN} 42%, #0a3d28 100%)`;
 

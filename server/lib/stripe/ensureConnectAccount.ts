@@ -52,7 +52,7 @@ export async function getConnectAlreadyComplete(
         complete: true,
         reason: payoutsEnabled
           ? "Bank already connected — payouts are enabled. Tap refresh status or Go live."
-          : "Stripe onboarding already finished. Tap refresh status or Go live.",
+          : "Payout setup already finished. Tap refresh status or Go live.",
         last4: external?.last4 ?? null,
       };
     }
@@ -64,7 +64,8 @@ export async function getConnectAlreadyComplete(
 
 /**
  * Create Express Connect account if missing; return existing account id otherwise.
- * Does not open Account Links / Sessions.
+ * Express keeps loss liability with Stripe (platform does not own negative balances).
+ * Tradeoff: Stripe may show hosted SMS auth on connect.stripe.com.
  */
 export async function ensureExpressConnectAccount(params: {
   stripe: Stripe;
@@ -90,7 +91,6 @@ export async function ensureExpressConnectAccount(params: {
     return { ok: false, reason: countryResolved.reason };
   }
 
-  // Legacy Express create — works on platforms that completed the older Connect wizard.
   const account = await stripe.accounts.create({
     type: "express",
     country: countryResolved.country,

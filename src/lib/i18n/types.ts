@@ -536,6 +536,13 @@ export type AppMessages = {
     connectManageTitle: string;
     connectManageBody: string;
     tapToUpdatePayouts: string;
+    connectLaneBadge: string;
+    connectIntroTitle: string;
+    connectIntroBody: string;
+    connectIntroHint: string;
+    connectIntroAlt: string;
+    connectIntroCta: string;
+    connectIntroBack: string;
     connectSecureFooter: string;
     payoutsEnabled: (last4?: string) => string;
     pendingVerification: string;

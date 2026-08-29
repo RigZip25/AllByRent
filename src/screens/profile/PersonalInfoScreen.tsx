@@ -19,6 +19,7 @@ import {
 import { formatUsPhoneDisplay } from "../../lib/usPhoneFormat";
 import { loadConnectStatus, startConnectOnboarding } from "../../lib/repositories/connectRepository";
 import { onConnectOnboardingDone } from "../../lib/connectOnboardingBus";
+import { BRAND_SECURE } from "../../lib/brand";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -242,7 +243,7 @@ export function PersonalInfoScreen({
           {profileCopy.payouts}
         </p>
         <Row
-          icon={<CreditCard className="h-5 w-5" style={{ color: GREEN }} />}
+          icon={<CreditCard className="h-5 w-5" style={{ color: BRAND_SECURE }} />}
           label={stripeStatus.connected ? profileCopy.bankConnected : profileCopy.connectBank}
           value={payoutValue}
           onClick={openPayouts}
