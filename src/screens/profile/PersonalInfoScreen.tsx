@@ -209,7 +209,7 @@ export function PersonalInfoScreen({
     setConnectBusy(true);
     setConnectError(null);
     setConnectErrorCode(null);
-    void startConnectOnboarding("/?screen=personalInfo", { allowUpdate: true })
+    void startConnectOnboarding("/?screen=garage", { allowUpdate: true })
       .then((result) => {
         if (!result.ok) {
           setConnectError(

@@ -113,7 +113,7 @@ async function runConnectPrechecks(
  * if the sheet host is not mounted (tests / early boot).
  */
 export async function startConnectOnboarding(
-  returnPath = "/?screen=profile",
+  returnPath = "/?screen=garage",
   opts?: StartConnectOptions,
 ): Promise<ConnectOnboardingResult> {
   const pre = await runConnectPrechecks(opts);

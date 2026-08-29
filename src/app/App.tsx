@@ -130,6 +130,7 @@ import { IdentityVerificationScreen } from "../screens/IdentityVerificationScree
 import { AgentActivityScreen } from "../screens/AgentActivityScreen";
 import { BottomNav, type BottomNavTab } from "./components/BottomNav";
 import { removeStripeControllerIframes } from "../lib/stripeCleanup";
+import { onConnectOnboardingDone } from "../lib/connectOnboardingBus";
 import {
   clearYardSaleListingActive,
   isYardSaleListingActive,
@@ -763,6 +764,28 @@ function AppRoutes() {
     setCurrentScreen("notifications");
     clearBootQuery(["openNotifications", "skipSplash", "simulateUpdate"]);
   }, [boot.openNotifications, currentScreen]);
+
+  /** After Connect payouts sheet closes, land on the requested screen (default: garage). */
+  useEffect(() => {
+    return onConnectOnboardingDone((detail) => {
+      const raw = detail?.screen?.trim();
+      if (!raw) return;
+      const allowed: Screen[] = [
+        "garage",
+        "personalInfo",
+        "profile",
+        "more",
+        "listItem",
+        "snapSale",
+        "earnBusiness",
+      ];
+      if (!allowed.includes(raw as Screen)) return;
+      startTransition(() => {
+        setNavStack([]);
+        setCurrentScreen(raw as Screen);
+      });
+    });
+  }, []);
 
   const finishOnboardingToHome = useCallback(() => {
     completeOnboarding();

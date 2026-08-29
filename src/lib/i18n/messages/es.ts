@@ -448,11 +448,18 @@ export const es: AppMessages = {
     connectManageBody: "Actualiza tu cuenta bancaria o los datos de cobro — te quedas en Evorios.",
     tapToUpdatePayouts: "Toca para actualizar la cuenta",
     connectLaneBadge: "Cobros seguros",
-    connectIntroTitle: "Cobros seguros",
-    connectIntroBody: "Los vecinos te pagan con seguridad — Evorios usa Stripe para los cobros.",
-    connectIntroHint: "Después añadirás tu banco en un paso seguro dentro de Evorios.",
+    connectIntroTitle: "Cobra en Evorios",
+    connectIntroBody:
+      "Abrimos un enlace seguro de cobros para que los vecinos paguen con tarjeta alquileres y ventas — y el dinero llegue a tu banco.",
+    connectIntroHint:
+      "Tarda unos minutos una vez. Al terminar, volverás automáticamente a tu garaje.",
+    connectIntroPoints: [
+      "Verifica tu identidad (KYC) — obligatorio para cobrar",
+      "Conecta la cuenta bancaria donde quieres recibir el dinero",
+      "Luego activa Live — pagan en la app y cobras tras las operaciones",
+    ],
     connectIntroAlt: "Mr. Evorios con cobros seguros de Stripe",
-    connectIntroCta: "Continuar de forma segura",
+    connectIntroCta: "Configurar cobros",
     connectIntroBack: "Atrás",
     connectSecureFooter: "Datos bancarios cifrados dentro de Evorios",
     payoutsEnabled: (last4) =>

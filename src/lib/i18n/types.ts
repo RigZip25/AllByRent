@@ -540,6 +540,7 @@ export type AppMessages = {
     connectIntroTitle: string;
     connectIntroBody: string;
     connectIntroHint: string;
+    connectIntroPoints: [string, string, string];
     connectIntroAlt: string;
     connectIntroCta: string;
     connectIntroBack: string;

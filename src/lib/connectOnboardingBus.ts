@@ -23,14 +23,20 @@ export function openConnectOnboardingSheet(opts: ConnectOnboardingOpenOpts): boo
   return true;
 }
 
-export function emitConnectOnboardingDone(): void {
+export function emitConnectOnboardingDone(detail?: { screen?: string }): void {
   if (typeof window === "undefined") return;
-  window.dispatchEvent(new Event(CONNECT_ONBOARDING_DONE_EVENT));
+  window.dispatchEvent(
+    new CustomEvent(CONNECT_ONBOARDING_DONE_EVENT, { detail: detail ?? {} }),
+  );
 }
 
-export function onConnectOnboardingDone(cb: () => void): () => void {
+export function onConnectOnboardingDone(cb: (detail?: { screen?: string }) => void): () => void {
   if (typeof window === "undefined") return () => {};
-  const handler = () => cb();
+  const handler = (event: Event) => {
+    const detail =
+      event instanceof CustomEvent ? (event.detail as { screen?: string } | undefined) : undefined;
+    cb(detail);
+  };
   window.addEventListener(CONNECT_ONBOARDING_DONE_EVENT, handler);
   return () => window.removeEventListener(CONNECT_ONBOARDING_DONE_EVENT, handler);
 }

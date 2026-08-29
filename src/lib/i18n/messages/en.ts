@@ -448,11 +448,18 @@ export const en: AppMessages = {
     connectManageBody: "Update your bank account or payout details — you stay in Evorios.",
     tapToUpdatePayouts: "Tap to update bank details",
     connectLaneBadge: "Secure payouts",
-    connectIntroTitle: "Secure payouts",
-    connectIntroBody: "Neighbors pay you safely — Evorios runs payouts on Stripe.",
-    connectIntroHint: "Next you’ll add bank details in a secure step inside Evorios.",
+    connectIntroTitle: "Get paid on Evorios",
+    connectIntroBody:
+      "We set up a secure payout link so neighbors can pay by card for rentals and sales — and the money goes to your bank.",
+    connectIntroHint:
+      "Takes a few minutes once. When you’re done, you’ll return to your garage automatically.",
+    connectIntroPoints: [
+      "Verify your identity (KYC) — required for payouts",
+      "Connect the bank account where money should land",
+      "Then open Live — neighbors pay in-app, you get paid after deals",
+    ],
     connectIntroAlt: "Mr. Evorios with secure Stripe payouts",
-    connectIntroCta: "Continue securely",
+    connectIntroCta: "Set up payouts",
     connectIntroBack: "Back",
     connectSecureFooter: "Bank details stay encrypted inside Evorios",
     payoutsEnabled: (last4) =>

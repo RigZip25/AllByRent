@@ -78,6 +78,7 @@ export function ConnectOnboardingHost() {
   const t = useMessages();
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>("intro");
+  const [returnPath, setReturnPath] = useState("/?screen=garage");
   const [connectInstance, setConnectInstance] = useState<StripeConnectInstance | null>(null);
   const [uiMode, setUiMode] = useState<ConnectUiMode>("onboarding");
   const [bootError, setBootError] = useState<string | null>(null);
@@ -85,13 +86,14 @@ export function ConnectOnboardingHost() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    return registerConnectOnboardingOpener(() => {
+    return registerConnectOnboardingOpener((opts) => {
       setBootError(null);
       setBootErrorCode(null);
       setConnectInstance(null);
       setUiMode("onboarding");
       setPhase("intro");
       setBusy(false);
+      setReturnPath(opts.returnPath || "/?screen=garage");
       setOpen(true);
     });
   }, []);
@@ -174,12 +176,20 @@ export function ConnectOnboardingHost() {
           await syncConnectAccountStatus();
         }
       } finally {
-        emitConnectOnboardingDone();
+        let screen = "garage";
+        try {
+          const q = returnPath.includes("?") ? returnPath.split("?")[1] ?? "" : "";
+          const fromPath = new URLSearchParams(q).get("screen");
+          if (fromPath) screen = fromPath;
+        } catch {
+          /* keep garage */
+        }
+        emitConnectOnboardingDone({ screen });
         setBusy(false);
         close();
       }
     })();
-  }, [close, phase]);
+  }, [close, phase, returnPath]);
 
   const startForm = useCallback(() => {
     setBootError(null);
@@ -263,9 +273,25 @@ export function ConnectOnboardingHost() {
               <img
                 src={connectAssets.securePreview}
                 alt={t.profile.connectIntroAlt}
-                className="mx-auto h-auto max-h-[min(58vh,520px)] w-full max-w-[280px] rounded-2xl object-contain object-top"
+                className="mx-auto h-auto max-h-[min(42vh,380px)] w-full max-w-[260px] rounded-2xl object-contain object-top"
                 style={{ backgroundColor: "#FFFFFF" }}
               />
+              <ul className="mx-auto mt-3 max-w-[28rem] space-y-2 px-1">
+                {t.profile.connectIntroPoints.map((point) => (
+                  <li
+                    key={point}
+                    className="flex gap-2 text-[12px] leading-snug"
+                    style={{ color: INK }}
+                  >
+                    <span
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: BRAND_SECURE }}
+                      aria-hidden
+                    />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
               <p className="mx-auto mt-3 max-w-[28rem] text-center text-[12px] leading-relaxed" style={{ color: MUTED }}>
                 {t.profile.connectIntroHint}
               </p>

@@ -468,11 +468,18 @@ export const cs: AppMessages = {
     connectManageBody: "Aktualizujte bankovní účet nebo údaje pro výplaty — zůstanete v Evorios.",
     tapToUpdatePayouts: "Klepněte pro změnu účtu",
     connectLaneBadge: "Bezpečné výplaty",
-    connectIntroTitle: "Bezpečné výplaty",
-    connectIntroBody: "Sousedé ti platí bezpečně — Evorios běží výplaty na Stripe.",
-    connectIntroHint: "Pak přidáš banku v bezpečném kroku uvnitř Evorios.",
+    connectIntroTitle: "Dostávej peníze v Evorios",
+    connectIntroBody:
+      "Nastavíme bezpečné napojení výplat, aby sousedé mohli platit kartou za půjčky a prodeje — a peníze šly na tvůj účet.",
+    connectIntroHint:
+      "Jednou to zabere pár minut. Až skončíš, automaticky se vrátíš do své garáže.",
+    connectIntroPoints: [
+      "Ověř totožnost (KYC) — povinné pro výplaty",
+      "Připoj bankovní účet, kam mají peníze chodit",
+      "Pak zapni Live — sousedé platí v appce, ty dostaneš po dohodách",
+    ],
     connectIntroAlt: "Mr. Evorios s bezpečnými výplatami Stripe",
-    connectIntroCta: "Pokračovat bezpečně",
+    connectIntroCta: "Nastavit výplaty",
     connectIntroBack: "Zpět",
     connectSecureFooter: "Bankovní údaje zůstávají šifrované v Evorios",
     payoutsEnabled: (last4) =>
