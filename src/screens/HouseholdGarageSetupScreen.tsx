@@ -40,10 +40,9 @@ type Props = {
 
 /**
  * First garage open: Personal/Pro + who shares, name + neighborhood, then invites.
- * Everyone still owns this garage; invites add helpers who keep their own shops too.
+ * Full-screen above bottom nav (z-100) so Continue stays tappable.
  */
 export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
-  void onSkipAlone;
   const t = useMessages();
   const auth = useAuth();
   const profile = loadUserProfile();
@@ -76,6 +75,15 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
   const [createdInvites, setCreatedInvites] = useState<CoHostRecord[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  const enterGarage = () => {
+    markHouseholdGarageSetupDone();
+    if (onSkipAlone && (seatHint === "solo" || createdInvites.length === 0)) {
+      onSkipAlone();
+      return;
+    }
+    onDone();
+  };
+
   const saveIdentity = async (): Promise<boolean> => {
     const trimmed = shopName.trim();
     if (!trimmed) {
@@ -103,8 +111,12 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
     emitGarageIdentityChanged(next);
     const remote = await pushGarageStorefrontRemote(hostId, next);
     if (!remote.ok) {
-      setError(remote.reason);
-      return false;
+      // Hard-fail only on slug collision; other remote errors shouldn't block entering garage.
+      if (/taken|already|unique|duplicate|slug/i.test(remote.reason)) {
+        setError(remote.reason.includes("taken") ? t.garageUi.lookShopNameTaken : remote.reason);
+        return false;
+      }
+      console.warn("[household] storefront remote soft-fail:", remote.reason);
     }
     if (hostId) setActiveGarageHostId(hostId);
     return true;
@@ -137,6 +149,15 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
   };
 
   const sendInvites = async () => {
+    const toInvite = members.filter((m) => m.email.trim() || m.name.trim());
+    // Continue without people — no email / invite required.
+    if (toInvite.length === 0) {
+      setError(null);
+      markHouseholdGarageSetupDone();
+      setCreatedInvites([]);
+      setStep(4);
+      return;
+    }
     if (!hostId || !hostEmail) {
       setError(t.garageUi.householdSignInNeeded);
       return;
@@ -145,10 +166,9 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
     setError(null);
     try {
       const invited: CoHostRecord[] = [];
-      for (const member of members) {
+      for (const member of toInvite) {
         const email = member.email.trim();
         const name = member.name.trim();
-        if (!email && !name) continue;
         if (!email) {
           setError(t.garageUi.householdMemberEmailRequired);
           return;
@@ -179,6 +199,11 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
     }
   };
 
+  const enterGarage = () => {
+    markHouseholdGarageSetupDone();
+    onDone();
+  };
+
   const title =
     step === 1
       ? t.garageUi.householdTitleKind
@@ -197,32 +222,46 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
           : t.garageUi.householdBodyDone;
 
   return (
-    <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
-      <header className="shrink-0 border-b bg-white px-4 pb-3 pt-[max(1rem,env(safe-area-inset-top,0px))]" style={{ borderColor: BORDER }}>
+    <div
+      className="fixed inset-0 z-[110] flex flex-col bg-[#F0F4F2]"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="household-setup-title"
+    >
+      <header
+        className="shrink-0 border-b bg-white px-4 pb-3 pt-[max(1rem,env(safe-area-inset-top,0px))]"
+        style={{ borderColor: BORDER }}
+      >
         <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
           {t.garageUi.householdStep(step, 4)}
         </p>
-        <h1 className="mt-1 text-[20px] font-extrabold" style={{ color: GREEN }}>
+        <h1
+          id="household-setup-title"
+          className="mt-1 text-[20px] font-extrabold"
+          style={{ color: GREEN }}
+        >
           {title}
         </h1>
         <p className="mt-1 text-[13px] leading-snug text-gray-600">{body}</p>
       </header>
 
-      <div className="screen-scroll flex-1 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         {step === 1 ? (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-2">
-              {([
-                ["personal", t.garageUi.lookPersonal, t.garageUi.householdKindPersonalHint],
-                ["pro", t.garageUi.lookPro, t.garageUi.householdKindProHint],
-              ] as const).map(([kind, label, hint]) => {
+              {(
+                [
+                  ["personal", t.garageUi.lookPersonal, t.garageUi.householdKindPersonalHint],
+                  ["pro", t.garageUi.lookPro, t.garageUi.householdKindProHint],
+                ] as const
+              ).map(([kind, label, hint]) => {
                 const active = shopKind === kind;
                 return (
                   <button
                     key={kind}
                     type="button"
                     onClick={() => setShopKind(kind)}
-                    className="rounded-2xl border px-3 py-3 text-left"
+                    className="rounded-2xl border px-3 py-3 text-left touch-manipulation"
                     style={{
                       borderColor: active ? GREEN : BORDER,
                       backgroundColor: active ? "#E8F5EE" : "#fff",
@@ -240,18 +279,20 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
               {t.garageUi.householdSeatsLabel}
             </p>
             <div className="space-y-2">
-              {([
-                ["solo", t.garageUi.householdSeatsSolo],
-                ["few", t.garageUi.householdSeatsFew],
-                ["more", t.garageUi.householdSeatsMore],
-              ] as const).map(([id, label]) => {
+              {(
+                [
+                  ["solo", t.garageUi.householdSeatsSolo],
+                  ["few", t.garageUi.householdSeatsFew],
+                  ["more", t.garageUi.householdSeatsMore],
+                ] as const
+              ).map(([id, label]) => {
                 const active = seatHint === id;
                 return (
                   <button
                     key={id}
                     type="button"
                     onClick={() => setSeatHint(id)}
-                    className="w-full rounded-xl border px-3 py-2.5 text-left text-[13px] font-semibold"
+                    className="w-full rounded-xl border px-3 py-2.5 text-left text-[13px] font-semibold touch-manipulation"
                     style={{
                       borderColor: active ? GREEN : BORDER,
                       backgroundColor: active ? "#E8F5EE" : "#fff",
@@ -280,7 +321,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
                       setShopName(idea);
                       setError(null);
                     }}
-                    className="rounded-full border px-3 py-1.5 text-[12px] font-bold"
+                    className="rounded-full border px-3 py-1.5 text-[12px] font-bold touch-manipulation"
                     style={{
                       borderColor: active ? GREEN : BORDER,
                       backgroundColor: active ? "#E8F5EE" : "#fff",
@@ -324,7 +365,10 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
               <p className="mt-1 text-[11px] text-gray-500">{t.garageUi.lookNeighborhoodHint}</p>
             </label>
 
-            <p className="rounded-xl border bg-white px-3 py-2.5 text-[12px] leading-relaxed text-gray-600" style={{ borderColor: BORDER }}>
+            <p
+              className="rounded-xl border bg-white px-3 py-2.5 text-[12px] leading-relaxed text-gray-600"
+              style={{ borderColor: BORDER }}
+            >
               {t.garageUi.householdYouAre(profile.displayName || hostEmail || "You")}
             </p>
           </div>
@@ -346,7 +390,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
                   <button
                     type="button"
                     onClick={() => setMembers((list) => list.filter((_, i) => i !== index))}
-                    className="rounded-lg p-1.5 text-gray-400"
+                    className="rounded-lg p-1.5 text-gray-400 touch-manipulation"
                     aria-label={t.common.cancel}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -388,7 +432,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
               <button
                 type="button"
                 onClick={() => setMembers((list) => [...list, { name: "", email: "" }])}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed py-3 text-[13px] font-bold text-gray-700"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed py-3 text-[13px] font-bold text-gray-700 touch-manipulation"
                 style={{ borderColor: BORDER }}
               >
                 <Plus className="h-4 w-4" />
@@ -432,7 +476,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
                     <button
                       type="button"
                       onClick={() => void copyLink(invite)}
-                      className="mt-2 inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-[12px] font-bold"
+                      className="mt-2 inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-[12px] font-bold touch-manipulation"
                       style={{ borderColor: GREEN, color: GREEN }}
                     >
                       {copiedId === invite.id ? (
@@ -470,12 +514,15 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
         {error ? <p className="mt-3 text-[13px] font-semibold text-red-600">{error}</p> : null}
       </div>
 
-      <div className="shrink-0 border-t bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]" style={{ borderColor: BORDER }}>
+      <div
+        className="shrink-0 border-t bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]"
+        style={{ borderColor: BORDER }}
+      >
         {step === 1 ? (
           <button
             type="button"
             onClick={goFromKind}
-            className="w-full rounded-xl py-3.5 text-[15px] font-bold text-white"
+            className="w-full rounded-xl py-3.5 text-[15px] font-bold text-white touch-manipulation"
             style={{ backgroundColor: GREEN }}
           >
             {t.garageUi.householdContinueName}
@@ -488,7 +535,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
               type="button"
               disabled={busy}
               onClick={() => void goMembers()}
-              className="w-full rounded-xl py-3.5 text-[15px] font-bold text-white disabled:opacity-60"
+              className="w-full rounded-xl py-3.5 text-[15px] font-bold text-white disabled:opacity-60 touch-manipulation"
               style={{ backgroundColor: GREEN }}
             >
               {busy ? (
@@ -503,7 +550,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
               type="button"
               disabled={busy}
               onClick={() => setStep(1)}
-              className="w-full py-2 text-center text-[13px] font-semibold text-gray-600 underline disabled:opacity-50"
+              className="w-full py-2 text-center text-[13px] font-semibold text-gray-600 underline disabled:opacity-50 touch-manipulation"
             >
               {t.common.back}
             </button>
@@ -516,7 +563,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
               type="button"
               disabled={busy}
               onClick={() => setStep(2)}
-              className="flex-1 rounded-xl border py-3 text-[14px] font-semibold text-gray-700 disabled:opacity-50"
+              className="flex-1 rounded-xl border py-3 text-[14px] font-semibold text-gray-700 disabled:opacity-50 touch-manipulation"
               style={{ borderColor: BORDER }}
             >
               {t.common.back}
@@ -525,7 +572,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
               type="button"
               disabled={busy}
               onClick={() => void sendInvites()}
-              className="flex-[1.4] rounded-xl py-3 text-[14px] font-bold text-white disabled:opacity-60"
+              className="flex-[1.4] rounded-xl py-3 text-[14px] font-bold text-white disabled:opacity-60 touch-manipulation"
               style={{ backgroundColor: GREEN }}
             >
               {busy ? (
@@ -542,8 +589,8 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
         {step === 4 ? (
           <button
             type="button"
-            onClick={onDone}
-            className="w-full rounded-xl py-3.5 text-[15px] font-bold text-white"
+            onClick={enterGarage}
+            className="w-full rounded-xl py-3.5 text-[15px] font-bold text-white touch-manipulation"
             style={{ backgroundColor: GREEN }}
           >
             {t.garageUi.householdEnterGarage}
@@ -560,13 +607,10 @@ export function shouldShowHouseholdGarageSetup(opts: {
   email?: string | null;
 }): boolean {
   if (hasCompletedHouseholdGarageSetup()) return false;
-  // Already named elsewhere — don't force the wizard again.
   if (opts.shopName.trim()) {
     markHouseholdGarageSetupDone();
     return false;
   }
-  // Everyone keeps their own garage — even if they also accepted a co-host invite
-  // (Barbara next door to her daughter still names her own house garage).
   void opts.userId;
   void opts.email;
   return true;
