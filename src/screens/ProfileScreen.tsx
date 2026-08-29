@@ -2,23 +2,19 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Bell,
   ChevronRight,
-  CreditCard,
   Globe,
   HelpCircle,
   LogOut,
   MapPin,
   Settings,
   Shield,
-  Sparkles,
   Star,
-  User,
   Users,
 } from "lucide-react";
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { ProfilePhotoCapture } from "../components/profile/ProfilePhotoCapture";
 import { ProfilePhotoOnboarding } from "../components/profile/ProfilePhotoOnboarding";
 import { ProfileTrustBadges } from "../components/profile/ProfileTrustBadges";
-import { ConnectSetupError } from "../components/payments/ConnectSetupError";
 import { getHostResponseDisplay } from "../lib/hostResponseRate";
 import {
   hasAvatarPhoto,
@@ -42,14 +38,11 @@ import {
   type UserProfile,
 } from "../lib/userProfileStorage";
 import { formatBuildStamp } from "../lib/buildInfo";
-import { formatUsPhoneDisplay } from "../lib/usPhoneFormat";
 import { confirmAndResetAppData } from "../lib/resetAppStorage";
 import { useAuth } from "../hooks/AuthProvider";
 import { signOut } from "../lib/auth";
 import { fetchRemoteProfile } from "../lib/supabaseProfile";
 import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
-import { loadConnectStatus, startConnectOnboarding } from "../lib/repositories/connectRepository";
-import { onConnectOnboardingDone } from "../lib/connectOnboardingBus";
 import { useLocaleControls, useMessages } from "../lib/i18n/react";
 import type { AppLocale } from "../lib/i18n/types";
 
@@ -156,14 +149,6 @@ export function ProfileScreen({
   const mode = getAppMode();
   const locationSummary = useMemo(() => getProfileLocationSummary(), [profile]);
   const [recentReviews, setRecentReviews] = useState<{ rating: number; comment: string; createdAt: string }[]>([]);
-  const [stripeStatus, setStripeStatus] = useState<{ connected: boolean; payoutsEnabled: boolean; last4?: string | null }>({
-    connected: false,
-    payoutsEnabled: false,
-    last4: null,
-  });
-  const [connectBusy, setConnectBusy] = useState(false);
-  const [connectError, setConnectError] = useState<string | null>(null);
-  const [connectErrorCode, setConnectErrorCode] = useState<string | null>(null);
   const [publicProfileError, setPublicProfileError] = useState<string | null>(null);
   const authPromptedRef = useRef(false);
 
@@ -181,18 +166,6 @@ export function ProfileScreen({
   useEffect(() => {
     if (!auth.userId) return;
     let mounted = true;
-    const refreshStripe = () => {
-      void loadConnectStatus(auth.userId).then((status) => {
-        if (!mounted) return;
-        setStripeStatus({
-          connected: status.connected,
-          payoutsEnabled: status.payoutsEnabled,
-          last4: status.last4,
-        });
-      });
-    };
-    refreshStripe();
-    const stop = onConnectOnboardingDone(refreshStripe);
     void fetchRemoteProfile(auth.userId).then((remote) => {
       if (!mounted || !remote) return;
       const synced = syncUserProfileFromAuth({
@@ -220,16 +193,10 @@ export function ProfileScreen({
       if (remote.rating != null && Number.isFinite(remote.rating)) {
         next.host.rating = Number(remote.rating);
       }
-      setStripeStatus({
-        connected: Boolean(remote.stripe_connect_account_id),
-        payoutsEnabled: Boolean(remote.stripe_payouts_enabled),
-        last4: remote.stripe_bank_last4 ?? null,
-      });
       setProfile(refreshProfileStats(next, auth.userId));
     });
     return () => {
       mounted = false;
-      stop();
     };
   }, [auth.userId, auth.userEmail]);
 
@@ -285,14 +252,6 @@ export function ProfileScreen({
     updatePreferredMode(next);
     setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
     onPreferredModeChange?.(next);
-  };
-
-  const handleEditName = () => {
-    onOpenPersonalInfo?.("name");
-  };
-
-  const handleEditPhone = () => {
-    onOpenPersonalInfo?.("phone");
   };
 
   const openPublicProfile = () => {
@@ -470,14 +429,6 @@ export function ProfileScreen({
               onClick={onEditLocation}
             />
           </li>
-          <li>
-            <RowButton
-              icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label={profileCopy.name}
-              value={displayNameLabel}
-              onClick={handleEditName}
-            />
-          </li>
           {onOpenPersonalInfo ? (
             <li>
               <RowButton
@@ -488,20 +439,6 @@ export function ProfileScreen({
               />
             </li>
           ) : null}
-          <li>
-            <RowButton
-              icon={<Sparkles className="h-5 w-5" style={{ color: "#F59E0B" }} />}
-              label={profileCopy.phone}
-              value={
-                profile.phone?.trim()
-                  ? `${formatUsPhoneDisplay(profile.phone)}${
-                      profile.verification.phone ? ` · ${profileCopy.phoneVerifiedShort}` : ` · ${profileCopy.phoneVerifyNeeded}`
-                    }`
-                  : profileCopy.addPhone
-              }
-              onClick={handleEditPhone}
-            />
-          </li>
           {onOpenCoHosts ? (
             <li>
               <RowButton
@@ -510,51 +447,6 @@ export function ProfileScreen({
                 value={profileCopy.coHostsHint}
                 onClick={onOpenCoHosts}
               />
-            </li>
-          ) : null}
-        </ul>
-
-        <SectionTitle>{profileCopy.payouts}</SectionTitle>
-        <ul className="mb-4 flex flex-col gap-2">
-          <li>
-            <RowButton
-              icon={<CreditCard className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label={stripeStatus.connected ? profileCopy.bankConnected : profileCopy.connectBank}
-              value={
-                connectBusy
-                  ? profileCopy.openingStripe
-                  : stripeStatus.connected
-                    ? stripeStatus.payoutsEnabled
-                      ? `${profileCopy.payoutsEnabled(stripeStatus.last4 ?? undefined)} · ${profileCopy.tapToUpdatePayouts}`
-                      : profileCopy.pendingVerification
-                    : profileCopy.requiredPayouts
-              }
-              onClick={() => {
-                setConnectBusy(true);
-                setConnectError(null);
-                setConnectErrorCode(null);
-                void startConnectOnboarding("/?screen=profile", { allowUpdate: true })
-                  .then((result) => {
-                    if (!result.ok) {
-                      setConnectError(
-                        result.code === "phone_unverified"
-                          ? profileCopy.phoneVerifyNeeded
-                          : result.reason,
-                      );
-                      setConnectErrorCode(result.code ?? null);
-                      return;
-                    }
-                    if (result.mode === "redirect") {
-                      window.location.href = result.url;
-                    }
-                  })
-                  .finally(() => setConnectBusy(false));
-              }}
-            />
-          </li>
-          {connectError ? (
-            <li className="list-none">
-              <ConnectSetupError message={connectError} code={connectErrorCode} />
             </li>
           ) : null}
         </ul>

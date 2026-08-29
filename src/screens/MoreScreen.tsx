@@ -69,6 +69,7 @@ function MenuRow({
 
 export function MoreScreen({
   onProfile,
+  onAccountSettings,
   onRentals,
   onMessages,
   onFavorites,
@@ -80,6 +81,8 @@ export function MoreScreen({
   onFeedback,
 }: {
   onProfile: () => void;
+  /** Name, phone, bank payouts — dedicated settings hub (not the public profile). */
+  onAccountSettings: () => void;
   onRentals: () => void;
   onMessages?: () => void;
   onFavorites: () => void;
@@ -232,7 +235,7 @@ export function MoreScreen({
               icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label={t.more.accountSettings}
               hint={t.more.accountSettingsHint}
-              onClick={onProfile}
+              onClick={onAccountSettings}
             />
           </li>
         </ul>

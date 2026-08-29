@@ -99,7 +99,7 @@ async function runConnectPrechecks(
       return {
         ok: false,
         reason:
-          "Verify your phone by SMS before connecting payouts. Open Profile → Personal info → Phone.",
+          "Verify your phone by SMS before connecting payouts. Open Account settings → Phone.",
         code: "phone_unverified",
       };
     }

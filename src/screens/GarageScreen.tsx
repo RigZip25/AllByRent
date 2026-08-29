@@ -161,7 +161,7 @@ export function GarageScreen({
 
         <GarageActiveSwitcher />
 
-        <StoreLiveToggle onOpenProfile={() => onNavigate("profile")} />
+        <StoreLiveToggle onOpenProfile={() => onNavigate("personalInfo")} />
 
         <div className="mb-3 flex gap-2">
           <button

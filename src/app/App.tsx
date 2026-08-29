@@ -1619,6 +1619,15 @@ function AppRoutes() {
     }
     if (screen === "listItem" || screen === "startEarning") {
       navigateTo("listItem");
+      return;
+    }
+    if (screen === "personalInfo") {
+      handleOpenPersonalInfo();
+      return;
+    }
+    if (screen === "profile") {
+      handleOpenProfile();
+      return;
     }
   };
 
@@ -1992,6 +2001,7 @@ function AppRoutes() {
             onMrE={handleOpenMrE}
             onGarage={handleOpenGarageFromAccount}
             onProfile={handleOpenProfile}
+            onAccountSettings={() => handleOpenPersonalInfo()}
             onRentals={handleOpenRentals}
             onMessages={handleOpenMessages}
             onFavorites={handleOpenFavorites}

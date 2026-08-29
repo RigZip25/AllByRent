@@ -432,8 +432,8 @@ export const en: AppMessages = {
     phoneVerifiedShort: "Verified",
     phoneVerifyNeeded: "Verify to receive payouts",
     personalInfo: "Personal info",
-    settings: "Settings",
-    settingsHint: "Email, phone, and account",
+    settings: "Account settings",
+    settingsHint: "Name, phone, bank payouts",
     coHosts: "Co-hosts",
     coHostsHint: "Invite helpers for your listings",
     payouts: "Payouts",
@@ -512,7 +512,7 @@ export const en: AppMessages = {
     sendFeedback: "Help & feedback",
     sendFeedbackHint: "Report a problem or send an idea — we read these",
     accountSettings: "Account settings",
-    accountSettingsHint: "Name, phone, payouts, sign out",
+    accountSettingsHint: "Name, phone, bank payouts",
   },
   feedback: {
     title: "Help & feedback",
@@ -827,7 +827,7 @@ export const en: AppMessages = {
       "Set up payouts once, then flip Live. New shelf items go public automatically while your store is open.",
     storeLiveStripeCta: "Set up payouts",
     storeLiveStripeOpening: "Opening Stripe…",
-    storeLiveOpenProfile: "Open Profile → payouts",
+    storeLiveOpenProfile: "Open Account settings → payouts",
     storeLiveReadyHint: "Payouts ready — flip the switch when you want neighbors to browse.",
     storeLiveHelperOnly: "Only the garage owner can open or pause the store. You can still stock the shelf.",
     storeLiveHelperBody: "You’re helping in someone else’s garage — stock items here; Live and Stripe stay with the owner.",
@@ -6169,14 +6169,16 @@ export const en: AppMessages = {
   },
   profileDeep: {
     personalInfo: {
-      title: "Settings",
+      title: "Account settings",
       subtitle:
-        "Email is your sign-in address. Name and phone appear on your profile and rentals.",
+        "Bank payouts, phone, and name in one place. Email is your sign-in address.",
       email: "Email",
       emailChangeHint:
         "To use a different email, sign out and sign in again with that address. Changing email here is not supported yet.",
       displayName: "Display name",
       phone: "Phone",
+      payoutsHint:
+        "Connect or update the bank account that receives rental and garage sale payouts.",
       loadingEmail: "Loading sign-in email...",
       notSignedIn: "Not signed in",
       addName: "Add your name",

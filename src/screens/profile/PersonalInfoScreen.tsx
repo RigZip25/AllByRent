@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { ArrowLeft, BadgeCheck, Mail, Phone, User } from "lucide-react";
+import { ArrowLeft, BadgeCheck, CreditCard, Loader2, Mail, Phone, User } from "lucide-react";
 import { ProfileFieldEditSheet } from "../../components/profile/ProfileFieldEditSheet";
 import { PhoneVerifySheet } from "../../components/profile/PhoneVerifySheet";
+import { ConnectSetupError } from "../../components/payments/ConnectSetupError";
 import { useAuth } from "../../hooks/AuthProvider";
 import { useMessages } from "../../lib/i18n/react";
 import { fetchRemoteProfile, updateRemoteProfile } from "../../lib/supabaseProfile";
@@ -16,6 +17,8 @@ import {
   saveUserProfile,
 } from "../../lib/userProfileStorage";
 import { formatUsPhoneDisplay } from "../../lib/usPhoneFormat";
+import { loadConnectStatus, startConnectOnboarding } from "../../lib/repositories/connectRepository";
+import { onConnectOnboardingDone } from "../../lib/connectOnboardingBus";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -28,12 +31,14 @@ function Row({
   value,
   badge,
   onClick,
+  trailing,
 }: {
   icon: ReactNode;
   label: string;
   value: string;
   badge?: string | null;
   onClick?: () => void;
+  trailing?: ReactNode;
 }) {
   const inner = (
     <>
@@ -52,6 +57,7 @@ function Row({
           </p>
         ) : null}
       </div>
+      {trailing}
     </>
   );
 
@@ -90,6 +96,14 @@ export function PersonalInfoScreen({
   const [profile, setProfile] = useState(() => refreshProfileStats(loadUserProfile(), auth.userId));
   const [editing, setEditing] = useState<EditField>(null);
   const [phoneSheetOpen, setPhoneSheetOpen] = useState(false);
+  const [stripeStatus, setStripeStatus] = useState<{
+    connected: boolean;
+    payoutsEnabled: boolean;
+    last4?: string | null;
+  }>({ connected: false, payoutsEnabled: false, last4: null });
+  const [connectBusy, setConnectBusy] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
+  const [connectErrorCode, setConnectErrorCode] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialEdit === "name") setEditing("name");
@@ -121,12 +135,34 @@ export function PersonalInfoScreen({
       await refreshPhoneVerifiedFromRemote(auth.userId);
       if (!mounted) return;
       setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
+      setStripeStatus({
+        connected: Boolean(remote.stripe_connect_account_id),
+        payoutsEnabled: Boolean(remote.stripe_payouts_enabled),
+        last4: remote.stripe_bank_last4 ?? null,
+      });
     });
 
     return () => {
       mounted = false;
     };
   }, [auth.userId, auth.userEmail]);
+
+  useEffect(() => {
+    if (!auth.userId) return;
+    let mounted = true;
+    const refreshStripe = () => {
+      void loadConnectStatus(auth.userId).then((status) => {
+        if (!mounted) return;
+        setStripeStatus({
+          connected: status.connected,
+          payoutsEnabled: status.payoutsEnabled,
+          last4: status.last4,
+        });
+      });
+    };
+    refreshStripe();
+    return onConnectOnboardingDone(refreshStripe);
+  }, [auth.userId]);
 
   const email =
     auth.userEmail?.trim() ||
@@ -138,6 +174,14 @@ export function PersonalInfoScreen({
     : t.addPhone;
   const phoneVerified = Boolean(profile.verification.phone);
   const dob = profile.dateOfBirth?.trim() || t.addDateOfBirth;
+
+  const payoutValue = connectBusy
+    ? profileCopy.openingStripe
+    : stripeStatus.connected
+      ? stripeStatus.payoutsEnabled
+        ? `${profileCopy.payoutsEnabled(stripeStatus.last4 ?? undefined)} · ${profileCopy.tapToUpdatePayouts}`
+        : profileCopy.pendingVerification
+      : profileCopy.requiredPayouts;
 
   const saveName = (nextName: string) => {
     if (!nextName) return;
@@ -160,6 +204,26 @@ export function PersonalInfoScreen({
     }
   };
 
+  const openPayouts = () => {
+    setConnectBusy(true);
+    setConnectError(null);
+    setConnectErrorCode(null);
+    void startConnectOnboarding("/?screen=personalInfo", { allowUpdate: true })
+      .then((result) => {
+        if (!result.ok) {
+          setConnectError(
+            result.code === "phone_unverified" ? profileCopy.phoneVerifyNeeded : result.reason,
+          );
+          setConnectErrorCode(result.code ?? null);
+          return;
+        }
+        if (result.mode === "redirect") {
+          window.location.href = result.url;
+        }
+      })
+      .finally(() => setConnectBusy(false));
+  };
+
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <header className="shrink-0 flex items-center gap-3 border-b bg-white px-4 py-3" style={{ borderColor: BORDER }}>
@@ -173,6 +237,25 @@ export function PersonalInfoScreen({
 
       <div className="screen-scroll flex-1 space-y-3 p-4">
         <p className="text-[13px] text-gray-500">{t.subtitle}</p>
+
+        <p className="px-1 pt-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+          {profileCopy.payouts}
+        </p>
+        <Row
+          icon={<CreditCard className="h-5 w-5" style={{ color: GREEN }} />}
+          label={stripeStatus.connected ? profileCopy.bankConnected : profileCopy.connectBank}
+          value={payoutValue}
+          onClick={openPayouts}
+          trailing={
+            connectBusy ? <Loader2 className="h-4 w-4 shrink-0 animate-spin text-gray-400" /> : null
+          }
+        />
+        {connectError ? <ConnectSetupError message={connectError} code={connectErrorCode} /> : null}
+        <p className="px-1 text-[12px] leading-relaxed text-gray-500">{t.payoutsHint}</p>
+
+        <p className="px-1 pt-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+          {profileCopy.personalInfo}
+        </p>
         <Row icon={<Mail className="h-5 w-5" style={{ color: GREEN }} />} label={t.email} value={email} />
         <p className="px-1 text-[12px] leading-relaxed text-gray-500">{t.emailChangeHint}</p>
         <Row

@@ -432,8 +432,8 @@ export const es: AppMessages = {
     phoneVerifiedShort: "Verificado",
     phoneVerifyNeeded: "Verifica para cobrar",
     personalInfo: "Datos personales",
-    settings: "Ajustes",
-    settingsHint: "Correo, teléfono y cuenta",
+    settings: "Ajustes de la cuenta",
+    settingsHint: "Nombre, teléfono, cobros bancarios",
     coHosts: "Coanfitriones",
     coHostsHint: "Invita a ayudantes para tus anuncios",
     payouts: "Cobros",
@@ -512,7 +512,7 @@ export const es: AppMessages = {
     sendFeedback: "Ayuda y comentarios",
     sendFeedbackHint: "Reporta un problema o envía una idea — las leemos todas",
     accountSettings: "Ajustes de la cuenta",
-    accountSettingsHint: "Nombre, teléfono, cobros, cerrar sesión",
+    accountSettingsHint: "Nombre, teléfono, cobros bancarios",
   },
   feedback: {
     title: "Ayuda y comentarios",
@@ -827,7 +827,7 @@ export const es: AppMessages = {
       "Configura los pagos una vez y luego activa Live. Los artículos nuevos de la estantería son públicos mientras la tienda esté abierta.",
     storeLiveStripeCta: "Configurar pagos",
     storeLiveStripeOpening: "Abriendo Stripe…",
-    storeLiveOpenProfile: "Abrir Perfil → pagos",
+    storeLiveOpenProfile: "Abrir Ajustes → cobros",
     storeLiveReadyHint: "Pagos listos — activa el interruptor cuando quieras que los vecinos naveguen.",
     storeLiveHelperOnly: "Solo el dueño del garaje puede abrir o pausar la tienda. Tú puedes llenar la estantería.",
     storeLiveHelperBody: "Estás ayudando en el garaje de otra persona — añade artículos aquí; Live y Stripe quedan con el dueño.",
@@ -6151,14 +6151,16 @@ export const es: AppMessages = {
   },
   profileDeep: {
     personalInfo: {
-      title: "Ajustes",
+      title: "Ajustes de la cuenta",
       subtitle:
-        "El correo es tu dirección de acceso. El nombre y el teléfono aparecen en tu perfil y tus alquileres.",
+        "Cobros bancarios, teléfono y nombre en un solo sitio. El correo es tu dirección de acceso.",
       email: "Correo",
       emailChangeHint:
         "Para usar otro correo, cierra sesión y vuelve a iniciarla con esa dirección. Todavía no se puede cambiar el correo desde aquí.",
       displayName: "Nombre visible",
       phone: "Teléfono",
+      payoutsHint:
+        "Conecta o actualiza la cuenta bancaria donde recibes los cobros de alquileres y ventas.",
       loadingEmail: "Cargando el correo de acceso...",
       notSignedIn: "No estás conectado",
       addName: "Añade tu nombre",

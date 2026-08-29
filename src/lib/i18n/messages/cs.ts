@@ -452,8 +452,8 @@ export const cs: AppMessages = {
     phoneVerifiedShort: "Ověřeno",
     phoneVerifyNeeded: "Ověřte pro výplaty",
     personalInfo: "Osobní údaje",
-    settings: "Nastavení",
-    settingsHint: "E-mail, telefon a účet",
+    settings: "Nastavení účtu",
+    settingsHint: "Jméno, telefon, bankovní výplaty",
     coHosts: "Spoluhostitelé",
     coHostsHint: "Pozvěte pomocníky k vašim nabídkám",
     payouts: "Výplaty",
@@ -532,7 +532,7 @@ export const cs: AppMessages = {
     sendFeedback: "Pomoc a zpětná vazba",
     sendFeedbackHint: "Nahlaste problém nebo nápad — čteme to",
     accountSettings: "Nastavení účtu",
-    accountSettingsHint: "Jméno, telefon, výplaty, odhlášení",
+    accountSettingsHint: "Jméno, telefon, bankovní výplaty",
   },
   feedback: {
     title: "Pomoc a zpětná vazba",
@@ -847,7 +847,7 @@ export const cs: AppMessages = {
       "Nastav výplaty jednou a pak přepni Live. Nové položky na polici jsou veřejné, dokud je obchod otevřený.",
     storeLiveStripeCta: "Nastavit výplaty",
     storeLiveStripeOpening: "Otevírám Stripe…",
-    storeLiveOpenProfile: "Otevřít Profil → výplaty",
+    storeLiveOpenProfile: "Otevřít Nastavení účtu → výplaty",
     storeLiveReadyHint: "Výplaty připravené — přepni, až budou sousedé moct prohlížet.",
     storeLiveHelperOnly: "Obchod může otevřít nebo pozastavit jen majitel garáže. Police můžeš plnit.",
     storeLiveHelperBody: "Pomáháš v cizí garáži — sem dáváš věci; Live a Stripe zůstávají u majitele.",
@@ -6160,14 +6160,16 @@ export const cs: AppMessages = {
   },
   profileDeep: {
     personalInfo: {
-      title: "Nastavení",
+      title: "Nastavení účtu",
       subtitle:
-        "E-mail je tvoje přihlašovací adresa. Jméno a telefon se zobrazují na profilu a u půjček.",
+        "Bankovní výplaty, telefon a jméno na jednom místě. E-mail je tvoje přihlašovací adresa.",
       email: "E-mail",
       emailChangeHint:
         "Chcete-li použít jiný e-mail, odhlaste se a přihlaste se znovu s tou adresou. Změna e-mailu zde zatím není podporována.",
       displayName: "Zobrazované jméno",
       phone: "Telefon",
+      payoutsHint:
+        "Připojte nebo aktualizujte bankovní účet, kam chodí výplaty z půjček a prodejů.",
       loadingEmail: "Načítám přihlašovací e-mail...",
       notSignedIn: "Nejsi přihlášen(a)",
       addName: "Přidej jméno",

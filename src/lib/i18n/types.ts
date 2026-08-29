@@ -2404,6 +2404,7 @@ export type AppMessages = {
       emailChangeHint: string;
       displayName: string;
       phone: string;
+      payoutsHint: string;
       loadingEmail: string;
       notSignedIn: string;
       addName: string;
