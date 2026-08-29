@@ -153,6 +153,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
 
   const handleInvite = () => {
     setError(null);
+    setCopyHint(null);
     setBusy(true);
     void inviteCoHostWithSync(hostId, inviteEmail, hostEmail)
       .then((result) => {
@@ -164,9 +165,9 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
         if (result.emailSent) {
           setCopyHint(t.inviteEmailed);
         } else if (result.emailError) {
-          setCopyHint(t.inviteSavedEmailFailed(result.emailError));
+          setError(t.inviteSavedEmailFailed(result.emailError));
         } else {
-          setCopyHint(t.inviteSaved);
+          setError(t.inviteSavedEmailFailed(result.emailError || "email service unavailable"));
         }
         refresh();
       })

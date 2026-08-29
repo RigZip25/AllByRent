@@ -4,7 +4,11 @@ import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { resolveConfiguredAppOrigin } from "../../lib/brand";
 import { buildCoHostInviteEmail } from "../../lib/coHostInviteEmail";
-import { isTransactionalEmailConfigured, sendTransactionalEmail } from "../../lib/sendEmail";
+import {
+  isResendConfigured,
+  sendCoHostInviteViaSupabaseAuth,
+  sendTransactionalEmail,
+} from "../../lib/sendEmail";
 
 type Body = {
   inviteId?: string;
@@ -50,10 +54,11 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
-  if (!isTransactionalEmailConfigured()) {
+  const admin = getAdminClient();
+  if (!isResendConfigured() && !admin) {
     res.status(503).json({
       ok: false,
-      error: "Invite email is not configured yet. Ask support to set RESEND_API_KEY.",
+      error: "Invite email is not configured (need RESEND_API_KEY or Supabase admin).",
       code: "email_not_configured",
     });
     return;
@@ -82,7 +87,6 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
-  const admin = getAdminClient();
   if (admin && inviteId && isUuid(inviteId) && isUuid(caller.id)) {
     const { data: row } = await admin
       .from("co_hosts")
@@ -90,8 +94,6 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       .eq("id", inviteId)
       .maybeSingle();
 
-    // Soft check: if the row exists it must belong to the caller.
-    // Missing row is OK (local-first invite or sync race).
     if (row) {
       if (row.host_id !== caller.id) {
         res.status(403).json({ error: "Forbidden" });
@@ -113,26 +115,68 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       ? inviteUrlRaw
       : defaultInviteUrl(inviteId || undefined);
 
-  const mail = buildCoHostInviteEmail({
-    inviteeName: displayName || undefined,
-    hostDisplayName: hostDisplayName || undefined,
-    hostEmail: hostEmail || "host",
-    garageName: garageName || undefined,
-    inviteUrl,
-  });
+  // Prefer Resend (full co-host copy). Fall back to Supabase Auth mailer.
+  if (isResendConfigured()) {
+    const mail = buildCoHostInviteEmail({
+      inviteeName: displayName || undefined,
+      hostDisplayName: hostDisplayName || undefined,
+      hostEmail: hostEmail || "host",
+      garageName: garageName || undefined,
+      inviteUrl,
+    });
 
-  const sent = await sendTransactionalEmail({
-    to: email,
-    subject: mail.subject,
-    text: mail.text,
-    html: mail.html,
-    replyTo: hostEmail || undefined,
-  });
+    const sent = await sendTransactionalEmail({
+      to: email,
+      subject: mail.subject,
+      text: mail.text,
+      html: mail.html,
+      replyTo: hostEmail || undefined,
+    });
 
-  if (!sent.ok) {
+    if (sent.ok) {
+      res.status(200).json({ ok: true, id: sent.id ?? null, provider: sent.provider });
+      return;
+    }
+
+    // Resend configured but failed — try Supabase before giving up.
+    if (admin) {
+      const fallback = await sendCoHostInviteViaSupabaseAuth(admin, email, inviteUrl);
+      if (fallback.ok) {
+        res.status(200).json({
+          ok: true,
+          id: null,
+          provider: fallback.provider,
+          warning: sent.reason,
+        });
+        return;
+      }
+      res.status(502).json({
+        ok: false,
+        error: sent.reason,
+        code: "send_failed",
+        detail: fallback.reason,
+      });
+      return;
+    }
+
     res.status(502).json({ ok: false, error: sent.reason, code: "send_failed" });
     return;
   }
 
-  res.status(200).json({ ok: true, id: sent.id ?? null, provider: sent.provider });
+  if (!admin) {
+    res.status(503).json({
+      ok: false,
+      error: "Invite email is not configured.",
+      code: "email_not_configured",
+    });
+    return;
+  }
+
+  const fallback = await sendCoHostInviteViaSupabaseAuth(admin, email, inviteUrl);
+  if (!fallback.ok) {
+    res.status(502).json({ ok: false, error: fallback.reason, code: "send_failed" });
+    return;
+  }
+
+  res.status(200).json({ ok: true, id: null, provider: fallback.provider });
 });
