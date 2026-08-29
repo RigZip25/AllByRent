@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { AlertTriangle, ArrowLeft, KeyRound } from "lucide-react";
-import { useAuth } from "../../hooks/AuthProvider";
 import { requestAccountDeletion, signInWithPasskey } from "../../lib/auth";
 import { dismissNativeKeyboard } from "../../lib/dismissKeyboard";
-import { fetchManageableListings } from "../../lib/hostAccess";
 import { useMessages } from "../../lib/i18n/react";
-import { isListingOnShelf } from "../../lib/listingStorage";
 import { resetAllAppData } from "../../lib/resetAppStorage";
 
 const BORDER = "#E8E6E0";
@@ -20,7 +17,6 @@ export function DeleteAccountScreen({
   onBack: () => void;
   onDone: () => void;
 }) {
-  const auth = useAuth();
   const { common, profileDeep } = useMessages();
   const t = profileDeep.deleteAccount;
   const [phase, setPhase] = useState<Phase>("ready");
@@ -46,24 +42,15 @@ export function DeleteAccountScreen({
       setMessage(t.reauthSuccess);
     });
 
-  const hasActiveListings = async (): Promise<boolean> => {
-    const listings = await fetchManageableListings(auth.userId, auth.userEmail);
-    return listings.some(isListingOnShelf);
-  };
-
   const handleRequestDeletion = () =>
     run("delete", async () => {
-      if (await hasActiveListings()) {
-        setPhase("ready");
-        setError(t.activeListingsBlock);
-        return;
-      }
-
       const result = await requestAccountDeletion();
       if (!result.ok) {
         setPhase("ready");
         setError(
-          result.reason === "active_listings" ? t.activeListingsBlock : result.message,
+          result.reason === "active_deals" || result.reason === "active_listings"
+            ? t.activeDealsBlock
+            : result.message,
         );
         return;
       }
@@ -118,6 +105,9 @@ export function DeleteAccountScreen({
           <p className="mt-2 text-[14px] text-gray-600">
             {phase === "confirm" ? t.confirmTitle : t.body}
           </p>
+          {phase !== "confirm" ? (
+            <p className="mt-2 text-[13px] text-gray-500">{t.listingsNote}</p>
+          ) : null}
 
           {message && phase !== "confirm" ? (
             <div className="mt-4 whitespace-pre-wrap rounded-2xl border bg-[#F0FDF4] p-4 text-[13px] text-emerald-800">

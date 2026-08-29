@@ -6256,6 +6256,10 @@ export const cs: AppMessages = {
       successDone: "Hotovo",
       activeListingsBlock:
         "Ještě máš aktivní nabídky. Nejdřív smaž všechny nabídky a pak to zkus znovu.",
+      activeDealsBlock:
+        "Ještě máš otevřenou půjčku, rezervaci nebo objednávku. Nejdřív ji dokonči nebo zruš.",
+      listingsNote:
+        "Nabídky na polici nevadí — při smazání účtu je stáhneme. Blokují jen otevřené obchody.",
       reauthBusy: "Otevírám passkey...",
       reauthCta: "Znovu ověřit passkey",
       deleteBusy: "Mažu...",

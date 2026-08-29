@@ -6265,6 +6265,10 @@ export const en: AppMessages = {
       successDone: "Done",
       activeListingsBlock:
         "You still have active listings. Delete all listings first, then try again.",
+      activeDealsBlock:
+        "You still have an open rental, booking, or garage sale order. Finish or cancel it first, then try again.",
+      listingsNote:
+        "Shelf listings are fine — we’ll take them offline when you delete. Open deals block deletion.",
       reauthBusy: "Opening passkey...",
       reauthCta: "Re-auth with Passkey",
       deleteBusy: "Deleting...",

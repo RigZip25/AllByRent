@@ -6247,6 +6247,10 @@ export const es: AppMessages = {
       successDone: "Listo",
       activeListingsBlock:
         "Todavía tienes anuncios activos. Elimina todos los anuncios primero y vuelve a intentarlo.",
+      activeDealsBlock:
+        "Todavía tienes un alquiler, reserva o pedido de venta abierto. Termínalo o cancélalo primero.",
+      listingsNote:
+        "Los anuncios en la estantería no bloquean — los quitamos al borrar la cuenta. Solo bloquean tratos abiertos.",
       reauthBusy: "Abriendo passkey...",
       reauthCta: "Reautenticar con passkey",
       deleteBusy: "Eliminando...",

@@ -2484,6 +2484,8 @@ export type AppMessages = {
       successBody: string;
       successDone: string;
       activeListingsBlock: string;
+      activeDealsBlock: string;
+      listingsNote: string;
       reauthBusy: string;
       reauthCta: string;
       deleteBusy: string;
