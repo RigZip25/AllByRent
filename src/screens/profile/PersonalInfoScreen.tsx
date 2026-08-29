@@ -211,7 +211,7 @@ export function PersonalInfoScreen({
     setConnectBusy(true);
     setConnectError(null);
     setConnectErrorCode(null);
-    void startConnectOnboarding("/?screen=garage", { allowUpdate: true })
+    void startConnectOnboarding("/?screen=personalInfo", { allowUpdate: true })
       .then((result) => {
         if (!result.ok) {
           setConnectError(
@@ -221,7 +221,7 @@ export function PersonalInfoScreen({
           return;
         }
         if (result.mode === "redirect") {
-          window.location.href = result.url;
+          window.location.assign(result.url);
         }
       })
       .finally(() => setConnectBusy(false));

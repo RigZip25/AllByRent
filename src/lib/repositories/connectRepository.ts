@@ -109,8 +109,9 @@ async function runConnectPrechecks(
 }
 
 /**
- * Prefer in-app embedded Connect onboarding / management; fall back to Account Link redirect
- * if the sheet host is not mounted (tests / early boot).
+ * Prefer in-app embedded Connect for account management (already onboarded).
+ * First-time / incomplete onboarding uses Account Link redirect — Express SMS
+ * auth popups from the embedded component often fail silently on mobile Safari.
  */
 export async function startConnectOnboarding(
   returnPath = "/?screen=garage",
@@ -121,11 +122,25 @@ export async function startConnectOnboarding(
     return { ok: false, reason: pre.reason, ...(pre.code ? { code: pre.code } : {}) };
   }
 
-  if (openConnectOnboardingSheet({ returnPath })) {
+  const supabase = getSupabaseClient();
+  const userId = supabase ? (await supabase.auth.getUser()).data.user?.id ?? null : null;
+  const status = await loadConnectStatus(userId);
+  const needsOnboarding = !status.payoutsEnabled && !status.onboardingComplete;
+
+  // Incomplete Connect → hosted Account Link (reliable transition on iOS Safari).
+  if (needsOnboarding) {
+    const result = await createConnectAccountLink(returnPath);
+    if (!result.ok) {
+      return { ok: false, reason: result.reason, ...(result.code ? { code: result.code } : {}) };
+    }
+    return { ok: true, mode: "redirect", url: result.url };
+  }
+
+  // Already onboarded — open embedded Account Management (allowUpdate / profile).
+  if (opts?.allowUpdate && openConnectOnboardingSheet({ returnPath })) {
     return { ok: true, mode: "embedded" };
   }
 
-  // Redirect fallback is onboarding-only; manage requires the embedded sheet.
   if (opts?.allowUpdate) {
     return {
       ok: false,
@@ -133,10 +148,12 @@ export async function startConnectOnboarding(
     };
   }
 
-  const result = await createConnectAccountLink(returnPath);
-  if (!result.ok) {
-    return { ok: false, reason: result.reason, ...(result.code ? { code: result.code } : {}) };
-  }
-
-  return { ok: true, mode: "redirect", url: result.url };
+  // Setup flows already treated complete accounts as soft-stop in prechecks.
+  return {
+    ok: false,
+    code: "already_connected",
+    reason: status.payoutsEnabled
+      ? "Bank already connected — payouts are enabled. Tap refresh status or Go live."
+      : "Payout setup already finished. Tap refresh status or Go live.",
+  };
 }

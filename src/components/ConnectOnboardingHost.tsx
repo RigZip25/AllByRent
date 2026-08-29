@@ -91,10 +91,15 @@ export function ConnectOnboardingHost() {
       setBootErrorCode(null);
       setConnectInstance(null);
       setUiMode("onboarding");
-      setBusy(false);
+      setBusy(true);
       setReturnPath(opts.returnPath || "/?screen=garage");
-      setBootKey((k) => k + 1);
-      setOpen(true);
+      setOpen((wasOpen) => {
+        if (wasOpen) {
+          // Re-open while already visible — bump boot key after this commit.
+          queueMicrotask(() => setBootKey((k) => k + 1));
+        }
+        return true;
+      });
     });
   }, []);
 
@@ -104,60 +109,69 @@ export function ConnectOnboardingHost() {
     const key = getStripePublishableKey();
     if (!key) {
       setBootError("Payouts aren’t configured yet. Try again later or contact support.");
+      setBusy(false);
       return;
     }
 
     let cancelled = false;
     setBusy(true);
     setConnectInstance(null);
+    setBootError(null);
+    setBootErrorCode(null);
 
     void (async () => {
-      const first = await createConnectAccountSession();
-      if (cancelled) return;
-      if (!first.ok) {
-        setBootError(first.reason);
-        setBootErrorCode(first.code ?? null);
-        setBusy(false);
-        return;
-      }
+      try {
+        const first = await createConnectAccountSession();
+        if (cancelled) return;
+        if (!first.ok) {
+          setBootError(first.reason);
+          setBootErrorCode(first.code ?? null);
+          setBusy(false);
+          return;
+        }
 
-      setUiMode(first.mode);
-      let usedFirstSecret = false;
+        setUiMode(first.mode);
+        let usedFirstSecret = false;
 
-      const instance = loadConnectAndInitialize({
-        publishableKey: key,
-        fetchClientSecret: async () => {
-          if (!usedFirstSecret) {
-            usedFirstSecret = true;
-            return first.clientSecret;
-          }
-          const next = await createConnectAccountSession();
-          if (!next.ok) {
-            if (!cancelled) {
-              setBootError(next.reason);
-              setBootErrorCode(next.code ?? null);
+        const instance = loadConnectAndInitialize({
+          publishableKey: key,
+          fetchClientSecret: async () => {
+            if (!usedFirstSecret) {
+              usedFirstSecret = true;
+              return first.clientSecret;
             }
-            throw new Error(next.reason);
-          }
-          if (!cancelled) {
-            setUiMode(next.mode);
-            setBootError(null);
-            setBootErrorCode(null);
-          }
-          return next.clientSecret;
-        },
-        appearance: CONNECT_APPEARANCE,
-      });
+            const next = await createConnectAccountSession();
+            if (!next.ok) {
+              if (!cancelled) {
+                setBootError(next.reason);
+                setBootErrorCode(next.code ?? null);
+              }
+              throw new Error(next.reason);
+            }
+            if (!cancelled) {
+              setUiMode(next.mode);
+              setBootError(null);
+              setBootErrorCode(null);
+            }
+            return next.clientSecret;
+          },
+          appearance: CONNECT_APPEARANCE,
+        });
 
-      if (cancelled) return;
-      setConnectInstance(instance);
-      setBusy(false);
+        if (cancelled) return;
+        setConnectInstance(instance);
+        setBusy(false);
+      } catch (err) {
+        if (cancelled) return;
+        setBootError(err instanceof Error ? err.message : t.profile.connectEmbeddedFailed);
+        setBusy(false);
+      }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [open, bootKey]);
+  }, [open, bootKey, t.profile.connectEmbeddedFailed]);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -259,13 +273,13 @@ export function ConnectOnboardingHost() {
       </header>
 
       <div
-        className="relative z-[1] mx-3 mb-[max(0.75rem,env(safe-area-inset-bottom))] flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.35rem] border shadow-2xl sm:mx-auto sm:w-full sm:max-w-[480px]"
+        className="relative z-[1] mx-3 mb-[max(0.75rem,env(safe-area-inset-bottom))] flex min-h-0 flex-1 flex-col rounded-[1.35rem] border shadow-2xl sm:mx-auto sm:w-full sm:max-w-[480px]"
         style={{
           backgroundColor: SURFACE,
           borderColor: "rgba(255,255,255,0.28)",
         }}
       >
-        <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2 pt-2 sm:px-3">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-2 pt-2 sm:px-3">
           {bootError ? (
             <div className="space-y-3 px-2 py-3">
               <ConnectSetupError message={bootError} code={bootErrorCode} />
@@ -306,7 +320,7 @@ export function ConnectOnboardingHost() {
 
           {!bootError && connectInstance ? (
             <div
-              className="overflow-hidden rounded-2xl border px-1 py-1"
+              className="min-h-[320px] rounded-2xl border px-1 py-1"
               style={{
                 borderColor: LINE,
                 backgroundColor: PAPER,
