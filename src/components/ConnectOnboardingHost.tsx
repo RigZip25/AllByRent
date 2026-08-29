@@ -263,8 +263,8 @@ export function ConnectOnboardingHost() {
               <img
                 src={connectAssets.securePreview}
                 alt={t.profile.connectIntroAlt}
-                className="mx-auto w-full max-w-[420px] rounded-2xl object-contain shadow-md"
-                style={{ backgroundColor: PAPER }}
+                className="mx-auto h-auto max-h-[min(58vh,520px)] w-full max-w-[280px] rounded-2xl object-contain object-top"
+                style={{ backgroundColor: "#FFFFFF" }}
               />
               <p className="mx-auto mt-3 max-w-[28rem] text-center text-[12px] leading-relaxed" style={{ color: MUTED }}>
                 {t.profile.connectIntroHint}
