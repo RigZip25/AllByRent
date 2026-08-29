@@ -444,6 +444,9 @@ export const es: AppMessages = {
     connectEmbeddedBody: "Añade tu cuenta bancaria aquí — te quedas en Evorios, sin salir a otra web.",
     connectEmbeddedDone: "Listo",
     connectEmbeddedFailed: "No se pudo abrir la configuración de cobros. Inténtalo de nuevo.",
+    connectManageTitle: "Ajustes de cobros",
+    connectManageBody: "Actualiza tu cuenta bancaria o los datos de cobro — te quedas en Evorios.",
+    tapToUpdatePayouts: "Toca para actualizar la cuenta",
     payoutsEnabled: (last4) =>
       last4 ? `Cobros activados · **** ${last4}` : "Cobros activados",
     pendingVerification: "Verificación pendiente",

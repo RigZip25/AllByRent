@@ -464,6 +464,9 @@ export const cs: AppMessages = {
     connectEmbeddedBody: "Přidejte bankovní údaje zde — zůstanete v Evorios, bez přesměrování pryč.",
     connectEmbeddedDone: "Hotovo",
     connectEmbeddedFailed: "Nepodařilo se otevřít nastavení výplat. Zkuste to znovu.",
+    connectManageTitle: "Nastavení výplat",
+    connectManageBody: "Aktualizujte bankovní účet nebo údaje pro výplaty — zůstanete v Evorios.",
+    tapToUpdatePayouts: "Klepněte pro změnu účtu",
     payoutsEnabled: (last4) =>
       last4 ? `Výplaty povoleny · **** ${last4}` : "Výplaty povoleny",
     pendingVerification: "Čeká na ověření",

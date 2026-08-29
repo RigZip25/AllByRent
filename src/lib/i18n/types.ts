@@ -533,6 +533,9 @@ export type AppMessages = {
     connectEmbeddedBody: string;
     connectEmbeddedDone: string;
     connectEmbeddedFailed: string;
+    connectManageTitle: string;
+    connectManageBody: string;
+    tapToUpdatePayouts: string;
     payoutsEnabled: (last4?: string) => string;
     pendingVerification: string;
     requiredPayouts: string;

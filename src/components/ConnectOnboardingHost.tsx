@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { loadConnectAndInitialize, type StripeConnectInstance } from "@stripe/connect-js";
-import { ConnectAccountOnboarding, ConnectComponentsProvider } from "@stripe/react-connect-js";
+import {
+  ConnectAccountManagement,
+  ConnectAccountOnboarding,
+  ConnectComponentsProvider,
+} from "@stripe/react-connect-js";
 import {
   emitConnectOnboardingDone,
   registerConnectOnboardingOpener,
@@ -14,14 +18,17 @@ import { ConnectSetupError } from "./payments/ConnectSetupError";
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
 
+type ConnectUiMode = "onboarding" | "management";
+
 /**
- * Global host for embedded Stripe Connect onboarding.
+ * Global host for embedded Stripe Connect onboarding / account management.
  * Callers use startConnectOnboarding() → opens this sheet instead of redirecting to Stripe.
  */
 export function ConnectOnboardingHost() {
   const t = useMessages();
   const [open, setOpen] = useState(false);
   const [connectInstance, setConnectInstance] = useState<StripeConnectInstance | null>(null);
+  const [uiMode, setUiMode] = useState<ConnectUiMode>("onboarding");
   const [bootError, setBootError] = useState<string | null>(null);
   const [bootErrorCode, setBootErrorCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -31,6 +38,7 @@ export function ConnectOnboardingHost() {
       setBootError(null);
       setBootErrorCode(null);
       setConnectInstance(null);
+      setUiMode("onboarding");
       setOpen(true);
     });
   }, []);
@@ -47,47 +55,59 @@ export function ConnectOnboardingHost() {
     let cancelled = false;
     setBusy(true);
 
-    const instance = loadConnectAndInitialize({
-      publishableKey: key,
-      fetchClientSecret: async () => {
-        const result = await createConnectAccountSession();
-        if (!result.ok) {
-          if (!cancelled) {
-            setBootError(result.reason);
-            setBootErrorCode(result.code ?? null);
-            if (result.code === "already_connected") {
-              void syncConnectAccountStatus().then(() => {
-                emitConnectOnboardingDone();
-                setOpen(false);
-              });
-            }
-          }
-          throw new Error(result.reason);
-        }
-        if (!cancelled) {
-          setBootError(null);
-          setBootErrorCode(null);
-        }
-        return result.clientSecret;
-      },
-      appearance: {
-        overlays: "dialog",
-        variables: {
-          colorPrimary: GREEN,
-          buttonPrimaryColorText: "#ffffff",
-          colorText: "#111827",
-          colorSecondaryText: "#6B7280",
-          colorBorder: BORDER,
-          borderRadius: "12px",
-          fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
-        },
-      },
-    });
+    void (async () => {
+      const first = await createConnectAccountSession();
+      if (cancelled) return;
+      if (!first.ok) {
+        setBootError(first.reason);
+        setBootErrorCode(first.code ?? null);
+        setBusy(false);
+        return;
+      }
 
-    if (!cancelled) {
+      setUiMode(first.mode);
+      let usedFirstSecret = false;
+
+      const instance = loadConnectAndInitialize({
+        publishableKey: key,
+        fetchClientSecret: async () => {
+          if (!usedFirstSecret) {
+            usedFirstSecret = true;
+            return first.clientSecret;
+          }
+          const next = await createConnectAccountSession();
+          if (!next.ok) {
+            if (!cancelled) {
+              setBootError(next.reason);
+              setBootErrorCode(next.code ?? null);
+            }
+            throw new Error(next.reason);
+          }
+          if (!cancelled) {
+            setUiMode(next.mode);
+            setBootError(null);
+            setBootErrorCode(null);
+          }
+          return next.clientSecret;
+        },
+        appearance: {
+          overlays: "dialog",
+          variables: {
+            colorPrimary: GREEN,
+            buttonPrimaryColorText: "#ffffff",
+            colorText: "#111827",
+            colorSecondaryText: "#6B7280",
+            colorBorder: BORDER,
+            borderRadius: "12px",
+            fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+          },
+        },
+      });
+
+      if (cancelled) return;
       setConnectInstance(instance);
       setBusy(false);
-    }
+    })();
 
     return () => {
       cancelled = true;
@@ -116,6 +136,11 @@ export function ConnectOnboardingHost() {
 
   if (!open) return null;
 
+  const title =
+    uiMode === "management" ? t.profile.connectManageTitle : t.profile.connectEmbeddedTitle;
+  const body =
+    uiMode === "management" ? t.profile.connectManageBody : t.profile.connectEmbeddedBody;
+
   return (
     <div
       className="fixed inset-0 z-[90] flex items-end justify-center bg-black/45 px-0 pb-0 pt-8 sm:items-center sm:px-3 sm:pb-3 sm:pt-10"
@@ -127,9 +152,9 @@ export function ConnectOnboardingHost() {
         <div className="flex items-start gap-3 border-b px-4 pb-3 pt-4" style={{ borderColor: BORDER }}>
           <div className="min-w-0 flex-1">
             <p id="connect-onboarding-title" className="text-[17px] font-extrabold" style={{ color: GREEN }}>
-              {t.profile.connectEmbeddedTitle}
+              {title}
             </p>
-            <p className="mt-1 text-[13px] leading-relaxed text-gray-600">{t.profile.connectEmbeddedBody}</p>
+            <p className="mt-1 text-[13px] leading-relaxed text-gray-600">{body}</p>
           </div>
           <button
             type="button"
@@ -165,16 +190,28 @@ export function ConnectOnboardingHost() {
 
           {!bootError && connectInstance ? (
             <ConnectComponentsProvider connectInstance={connectInstance}>
-              <ConnectAccountOnboarding
-                onExit={handleExit}
-                collectionOptions={{
-                  fields: "eventually_due",
-                  futureRequirements: "include",
-                }}
-                onLoadError={({ error }) => {
-                  setBootError(error.message || t.profile.connectEmbeddedFailed);
-                }}
-              />
+              {uiMode === "management" ? (
+                <ConnectAccountManagement
+                  collectionOptions={{
+                    fields: "eventually_due",
+                    futureRequirements: "include",
+                  }}
+                  onLoadError={({ error }) => {
+                    setBootError(error.message || t.profile.connectEmbeddedFailed);
+                  }}
+                />
+              ) : (
+                <ConnectAccountOnboarding
+                  onExit={handleExit}
+                  collectionOptions={{
+                    fields: "eventually_due",
+                    futureRequirements: "include",
+                  }}
+                  onLoadError={({ error }) => {
+                    setBootError(error.message || t.profile.connectEmbeddedFailed);
+                  }}
+                />
+              )}
             </ConnectComponentsProvider>
           ) : null}
         </div>

@@ -17,8 +17,9 @@ type Body = {
 };
 
 /**
- * Creates a Connect Account Session for embedded onboarding (no redirect to Stripe).
- * Client uses the client_secret with @stripe/connect-js Account onboarding component.
+ * Creates a Connect Account Session for embedded UI (no redirect to Stripe).
+ * - Incomplete accounts → account_onboarding
+ * - Already connected → account_management (update bank / payout details)
  */
 export default withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
@@ -71,17 +72,10 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   try {
     const existingId = profile?.stripe_connect_account_id ?? null;
+    let mode: "onboarding" | "management" = "onboarding";
     if (existingId) {
       const gate = await getConnectAlreadyComplete(stripe, existingId);
-      if (gate.complete) {
-        res.status(200).json({
-          ok: false,
-          code: "already_connected",
-          reason: gate.reason,
-          last4: gate.last4,
-        });
-        return;
-      }
+      if (gate.complete) mode = "management";
     }
 
     const ensured = await ensureExpressConnectAccount({
@@ -98,11 +92,21 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
     const session = await stripe.accountSessions.create({
       account: ensured.accountId,
-      components: {
-        account_onboarding: {
-          enabled: true,
-        },
-      },
+      components:
+        mode === "management"
+          ? {
+              account_management: {
+                enabled: true,
+                features: {
+                  external_account_collection: true,
+                },
+              },
+            }
+          : {
+              account_onboarding: {
+                enabled: true,
+              },
+            },
     });
 
     if (!session.client_secret) {
@@ -110,7 +114,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       return;
     }
 
-    res.status(200).json({ ok: true, clientSecret: session.client_secret });
+    res.status(200).json({ ok: true, clientSecret: session.client_secret, mode });
   } catch (error) {
     const mapped = mapConnectStripeError(error);
     res.status(200).json({ ok: false, reason: mapped.reason, ...(mapped.code ? { code: mapped.code } : {}) });

@@ -525,7 +525,7 @@ export function ProfileScreen({
                   ? profileCopy.openingStripe
                   : stripeStatus.connected
                     ? stripeStatus.payoutsEnabled
-                      ? profileCopy.payoutsEnabled(stripeStatus.last4 ?? undefined)
+                      ? `${profileCopy.payoutsEnabled(stripeStatus.last4 ?? undefined)} · ${profileCopy.tapToUpdatePayouts}`
                       : profileCopy.pendingVerification
                     : profileCopy.requiredPayouts
               }
@@ -533,7 +533,7 @@ export function ProfileScreen({
                 setConnectBusy(true);
                 setConnectError(null);
                 setConnectErrorCode(null);
-                void startConnectOnboarding("/?screen=profile")
+                void startConnectOnboarding("/?screen=profile", { allowUpdate: true })
                   .then((result) => {
                     if (!result.ok) {
                       setConnectError(

@@ -23,6 +23,15 @@ export type ConnectOnboardingResult =
   | { ok: true; mode: "redirect"; url: string }
   | { ok: false; reason: string; code?: string };
 
+export type StartConnectOptions = {
+  /**
+   * When true (Profile), open embedded UI even if bank is already linked —
+   * Stripe Account Management lets the host update bank / payout details.
+   * Default false: Live / publish flows treat already-connected as a soft stop.
+   */
+  allowUpdate?: boolean;
+};
+
 export async function loadConnectStatus(userId: string | null): Promise<ConnectStatus> {
   if (!userId || !isSupabaseConfigured()) {
     return { connected: false, payoutsEnabled: false, onboardingComplete: false, last4: null };
@@ -52,7 +61,9 @@ export async function loadConnectStatus(userId: string | null): Promise<ConnectS
   };
 }
 
-async function runConnectPrechecks(): Promise<{ ok: true } | { ok: false; reason: string; code?: string }> {
+async function runConnectPrechecks(
+  opts?: StartConnectOptions,
+): Promise<{ ok: true } | { ok: false; reason: string; code?: string }> {
   if (!isPaymentsReady()) {
     return { ok: false, reason: getStripeRequiredMessage() };
   }
@@ -65,16 +76,19 @@ async function runConnectPrechecks(): Promise<{ ok: true } | { ok: false; reason
   const supabase = getSupabaseClient();
   const userId = supabase ? (await supabase.auth.getUser()).data.user?.id ?? null : null;
 
-  // Already linked — don't open Stripe again or scare the seller with a false platform error.
-  const existing = await loadConnectStatus(userId);
-  if (existing.payoutsEnabled || existing.onboardingComplete) {
-    return {
-      ok: false,
-      code: "already_connected",
-      reason: existing.payoutsEnabled
-        ? "Bank already connected — payouts are enabled. Tap refresh status or Go live."
-        : "Stripe onboarding already finished. Tap refresh status or Go live.",
-    };
+  // Setup flows (Live / publish): already linked is success, don't reopen.
+  // Profile allowUpdate: skip — open Account Management instead.
+  if (!opts?.allowUpdate) {
+    const existing = await loadConnectStatus(userId);
+    if (existing.payoutsEnabled || existing.onboardingComplete) {
+      return {
+        ok: false,
+        code: "already_connected",
+        reason: existing.payoutsEnabled
+          ? "Bank already connected — payouts are enabled. Tap refresh status or Go live."
+          : "Stripe onboarding already finished. Tap refresh status or Go live.",
+      };
+    }
   }
 
   // Phone KYC only when SMS OTP is actually enabled (same gate as Go Public checklist).
@@ -95,19 +109,28 @@ async function runConnectPrechecks(): Promise<{ ok: true } | { ok: false; reason
 }
 
 /**
- * Prefer in-app embedded Connect onboarding; fall back to Account Link redirect
+ * Prefer in-app embedded Connect onboarding / management; fall back to Account Link redirect
  * if the sheet host is not mounted (tests / early boot).
  */
 export async function startConnectOnboarding(
   returnPath = "/?screen=profile",
+  opts?: StartConnectOptions,
 ): Promise<ConnectOnboardingResult> {
-  const pre = await runConnectPrechecks();
+  const pre = await runConnectPrechecks(opts);
   if (!pre.ok) {
     return { ok: false, reason: pre.reason, ...(pre.code ? { code: pre.code } : {}) };
   }
 
   if (openConnectOnboardingSheet({ returnPath })) {
     return { ok: true, mode: "embedded" };
+  }
+
+  // Redirect fallback is onboarding-only; manage requires the embedded sheet.
+  if (opts?.allowUpdate) {
+    return {
+      ok: false,
+      reason: "Open the app to update payout details (in-app bank settings).",
+    };
   }
 
   const result = await createConnectAccountLink(returnPath);

@@ -444,6 +444,9 @@ export const en: AppMessages = {
     connectEmbeddedBody: "Add your bank details here — you stay in Evorios, no redirect away.",
     connectEmbeddedDone: "Done",
     connectEmbeddedFailed: "Couldn’t open payouts setup. Try again.",
+    connectManageTitle: "Payout settings",
+    connectManageBody: "Update your bank account or payout details — you stay in Evorios.",
+    tapToUpdatePayouts: "Tap to update bank details",
     payoutsEnabled: (last4) =>
       last4 ? `Payouts enabled · **** ${last4}` : "Payouts enabled",
     pendingVerification: "Pending verification",

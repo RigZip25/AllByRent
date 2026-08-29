@@ -574,10 +574,10 @@ export async function createConnectAccountLink(returnPath: string): Promise<Conn
 }
 
 export type ConnectAccountSessionResult =
-  | { ok: true; clientSecret: string }
+  | { ok: true; clientSecret: string; mode: "onboarding" | "management" }
   | { ok: false; reason: string; code?: string };
 
-/** Account Session for embedded Connect onboarding (stays in-app). */
+/** Account Session for embedded Connect onboarding / account management (stays in-app). */
 export async function createConnectAccountSession(): Promise<ConnectAccountSessionResult> {
   if (!isStripePaymentsEnabled()) {
     return { ok: false, reason: "Stripe not configured. Set VITE_STRIPE_PUBLISHABLE_KEY on Vercel." };
@@ -638,7 +638,11 @@ export async function createConnectAccountSession(): Promise<ConnectAccountSessi
     return { ok: false, reason: "Missing account session secret from Stripe." };
   }
 
-  return payload;
+  return {
+    ok: true,
+    clientSecret: payload.clientSecret,
+    mode: payload.mode === "management" ? "management" : "onboarding",
+  };
 }
 
 export type ConnectSyncResult =
