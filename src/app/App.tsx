@@ -2196,6 +2196,7 @@ function AppRoutes() {
           <PersonalInfoScreen
             initialEdit={personalInfoInitialEdit}
             onDeleteAccount={() => navigateTo("deleteAccount")}
+            onOpenCoHosts={() => navigateTo("coHosts")}
             onBack={() => {
               setPersonalInfoInitialEdit(undefined);
               handleBack();

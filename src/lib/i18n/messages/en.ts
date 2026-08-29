@@ -528,7 +528,7 @@ export const en: AppMessages = {
     sendFeedback: "Help & feedback",
     sendFeedbackHint: "Report a problem or send an idea — we read these",
     accountSettings: "Account settings",
-    accountSettingsHint: "Name, phone, bank payouts",
+    accountSettingsHint: "Name, phone, bank payouts, co-hosts",
   },
   feedback: {
     title: "Help & feedback",

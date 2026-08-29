@@ -528,7 +528,7 @@ export const es: AppMessages = {
     sendFeedback: "Ayuda y comentarios",
     sendFeedbackHint: "Reporta un problema o envía una idea — las leemos todas",
     accountSettings: "Ajustes de la cuenta",
-    accountSettingsHint: "Nombre, teléfono, cobros bancarios",
+    accountSettingsHint: "Nombre, teléfono, cobros, coanfitriones",
   },
   feedback: {
     title: "Ayuda y comentarios",

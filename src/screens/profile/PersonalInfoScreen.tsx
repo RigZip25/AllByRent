@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { ArrowLeft, BadgeCheck, CreditCard, Loader2, Mail, Phone, User } from "lucide-react";
+import { ArrowLeft, BadgeCheck, CreditCard, Loader2, Mail, Phone, User, Users } from "lucide-react";
 import { ProfileFieldEditSheet } from "../../components/profile/ProfileFieldEditSheet";
 import { PhoneVerifySheet } from "../../components/profile/PhoneVerifySheet";
 import { ConnectSetupError } from "../../components/payments/ConnectSetupError";
@@ -85,10 +85,12 @@ function Row({
 export function PersonalInfoScreen({
   onBack,
   onDeleteAccount,
+  onOpenCoHosts,
   initialEdit,
 }: {
   onBack: () => void;
   onDeleteAccount?: () => void;
+  onOpenCoHosts?: () => void;
   initialEdit?: "name" | "phone";
 }) {
   const auth = useAuth();
@@ -253,6 +255,20 @@ export function PersonalInfoScreen({
         />
         {connectError ? <ConnectSetupError message={connectError} code={connectErrorCode} /> : null}
         <p className="px-1 text-[12px] leading-relaxed text-gray-500">{t.payoutsHint}</p>
+
+        {onOpenCoHosts ? (
+          <>
+            <p className="px-1 pt-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+              {profileCopy.coHosts}
+            </p>
+            <Row
+              icon={<Users className="h-5 w-5" style={{ color: GREEN }} />}
+              label={profileCopy.coHosts}
+              value={profileCopy.coHostsHint}
+              onClick={onOpenCoHosts}
+            />
+          </>
+        ) : null}
 
         <p className="px-1 pt-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
           {profileCopy.personalInfo}
