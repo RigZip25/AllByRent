@@ -166,7 +166,7 @@ export const faq: AppMessages["faq"] = {
     },
     "co-host": {
       q: "Can I add a co-host / helper?",
-      a: "Yes. During garage setup or Profile → Co-hosts, invite people by their own email. They sign in separately (code / Face ID), accept the invite, and can stock your shelf. They still keep their own garage if they want one. Payouts (Stripe) stay with the garage owner.",
+      a: "Yes. During garage setup or Profile / Account settings → Co-hosts, invite people by their own email. We email them an invite link. They sign in separately (code / Face ID), accept the invite, and can stock your shelf. They still keep their own garage if they want one. Payouts (Stripe) stay with the garage owner.",
     },
     "garage-switcher": {
       q: "I help in another garage — how do I switch?",

@@ -1702,6 +1702,7 @@ export type AppMessages = {
       inviteUrl: string,
       appOrigin: string,
     ) => string;
+    householdEmailPartialFail: (failed: number, total: number) => string;
     householdEnterGarage: string;
     share: string;
     shareShowcaseTitle: string;
@@ -2460,7 +2461,9 @@ export type AppMessages = {
       emailLabel: string;
       emailPlaceholder: string;
       saving: string;
+      sending: string;
       saveInvite: string;
+      sendInvite: string;
       shareInviteLink: string;
       copyLink: string;
       inviteHint: string;
@@ -2476,6 +2479,8 @@ export type AppMessages = {
       copySuccess: string;
       copyFailed: string;
       inviteSaved: string;
+      inviteEmailed: string;
+      inviteSavedEmailFailed: (detail: string) => string;
       errInvalidEmail: string;
       errSelfInvite: string;
       errInvitePending: string;

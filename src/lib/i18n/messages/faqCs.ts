@@ -166,7 +166,7 @@ export const faq: AppMessages["faq"] = {
     },
     "co-host": {
       q: "Můžu přidat spoluhostitele / pomocníka?",
-      a: "Ano. Při nastavení garáže nebo Profil → Spoluhostitelé pozvi lidi jejich e-mailem. Přihlásí se zvlášť (kód / Face ID), přijmou pozvánku a můžou plnit tvoji polici. Vlastní garáž jim zůstane, pokud chtějí. Výplaty (Stripe) zůstávají u majitele garáže.",
+      a: "Ano. Při nastavení garáže nebo Profil / Nastavení → Spoluhostitelé pozvi lidi jejich e-mailem. Pozvánku pošleme e-mailem. Přihlásí se zvlášť (kód / Face ID), přijmou pozvánku a můžou plnit tvoji polici. Vlastní garáž jim zůstane, pokud chtějí. Výplaty (Stripe) zůstávají u majitele garáže.",
     },
     "garage-switcher": {
       q: "Pomáhám v jiné garáži — jak přepnu?",

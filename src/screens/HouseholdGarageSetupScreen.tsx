@@ -166,6 +166,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
     setError(null);
     try {
       const invited: CoHostRecord[] = [];
+      let emailFailures = 0;
       for (const member of toInvite) {
         const email = member.email.trim();
         const name = member.name.trim();
@@ -173,15 +174,22 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
           setError(t.garageUi.householdMemberEmailRequired);
           return;
         }
-        const result = await inviteCoHostWithSync(hostId, email, hostEmail, name || undefined);
+        const result = await inviteCoHostWithSync(hostId, email, hostEmail, name || undefined, {
+          garageName: shopName.trim() || undefined,
+          hostDisplayName: profile.displayName?.trim() || undefined,
+        });
         if (!result.ok) {
           setError(result.error);
           return;
         }
         invited.push(result.record);
+        if (!result.emailSent) emailFailures += 1;
       }
       setCreatedInvites(invited);
       markHouseholdGarageSetupDone();
+      if (emailFailures > 0) {
+        setError(t.garageUi.householdEmailPartialFail(emailFailures, invited.length));
+      }
       setStep(4);
     } finally {
       setBusy(false);

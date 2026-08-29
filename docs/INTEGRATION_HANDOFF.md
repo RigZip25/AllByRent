@@ -99,6 +99,8 @@ Express account + onboarding link; webhook syncs payout status to `profiles`.
 | `VITE_VAPID_PUBLIC_KEY` | Client subscribe |
 | `VAPID_PRIVATE_KEY` | `api/push/send.ts` |
 | `VAPID_SUBJECT` | mailto: contact |
+| `RESEND_API_KEY` | `api/cohosts/invite-email` (co-host invite emails) |
+| `EMAIL_FROM` | optional From override (default `Evorios <noreply@evorios.com>`) |
 
 After deploy: add DB trigger on new listings → push followers (`garage_follows` with prefs). Not required for core commerce.
 
@@ -123,5 +125,4 @@ Client-detectable env status lives in `src/lib/config/integrations.ts` (also use
 ## Intentionally deferred
 
 - Agent orchestrator (`api/agent/*`, `api/orchestrator/run.ts`) — post-launch
-- Co-host transactional email
 - Push fan-out DB triggers (code path exists; trigger is ops)

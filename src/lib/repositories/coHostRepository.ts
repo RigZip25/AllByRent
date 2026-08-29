@@ -9,7 +9,6 @@ import {
   removeCoHost,
   type AcceptCoHostResult,
   type CoHostRecord,
-  type InviteCoHostResult,
 } from "../coHostStorage";
 import {
   deleteCoHostRemote,
@@ -17,6 +16,7 @@ import {
   fetchPendingCoHostInvitesRemote,
   pushCoHostRemote,
 } from "../coHost/coHostSupabaseSync";
+import { sendCoHostInviteEmail } from "../coHostInviteEmail";
 import { isSupabaseConfigured } from "../supabaseClient";
 import { setActiveGarageHostId } from "../hostAccess";
 
@@ -42,17 +42,43 @@ export async function syncCoHostsFromRemote(hostId: string, email: string): Prom
   mergeCoHostRecords([...hostRows, ...pendingRows]);
 }
 
+export type InviteCoHostWithEmailResult =
+  | { ok: true; record: CoHostRecord; emailSent: boolean; emailError?: string }
+  | { ok: false; error: string };
+
 export async function inviteCoHostWithSync(
   hostId: string,
   email: string,
   hostEmail: string,
   displayName?: string,
-): Promise<InviteCoHostResult> {
+  options?: { garageName?: string; hostDisplayName?: string; sendEmail?: boolean },
+): Promise<InviteCoHostWithEmailResult> {
   const result = inviteCoHost(hostId, email, hostEmail, displayName);
-  if (result.ok) {
-    await pushCoHostRemote(result.record);
+  if (!result.ok) return result;
+
+  await pushCoHostRemote(result.record);
+
+  const shouldEmail = options?.sendEmail !== false;
+  if (!shouldEmail) {
+    return { ok: true, record: result.record, emailSent: false };
   }
-  return result;
+
+  const mailed = await sendCoHostInviteEmail({
+    record: result.record,
+    garageName: options?.garageName,
+    hostDisplayName: options?.hostDisplayName,
+  });
+
+  if (!mailed.ok) {
+    return {
+      ok: true,
+      record: result.record,
+      emailSent: false,
+      emailError: mailed.error,
+    };
+  }
+
+  return { ok: true, record: result.record, emailSent: true };
 }
 
 export async function removeCoHostWithSync(hostId: string, coHostId: string): Promise<boolean> {

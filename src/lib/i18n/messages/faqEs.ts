@@ -166,7 +166,7 @@ export const faq: AppMessages["faq"] = {
     },
     "co-host": {
       q: "¿Puedo añadir un coanfitrión / ayudante?",
-      a: "Sí. En la configuración del garaje o Perfil → Coanfitriones invita con el correo de cada persona. Inician sesión por separado (código / Face ID), aceptan la invitación y pueden llenar tu estantería. Pueden conservar su propio garaje. Los cobros (Stripe) quedan con el dueño del garaje.",
+      a: "Sí. En la configuración del garaje o Perfil / Ajustes → Coanfitriones invita con el correo de cada persona. Les enviamos la invitación por email. Inician sesión por separado (código / Face ID), aceptan y pueden llenar tu estantería. Pueden conservar su propio garaje. Los cobros (Stripe) quedan con el dueño del garaje.",
     },
     "garage-switcher": {
       q: "Ayudo en otro garaje — ¿cómo cambio?",

@@ -161,7 +161,13 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
           return;
         }
         setInviteEmail("");
-        setCopyHint(t.inviteSaved);
+        if (result.emailSent) {
+          setCopyHint(t.inviteEmailed);
+        } else if (result.emailError) {
+          setCopyHint(t.inviteSavedEmailFailed(result.emailError));
+        } else {
+          setCopyHint(t.inviteSaved);
+        }
         refresh();
       })
       .finally(() => setBusy(false));
@@ -272,7 +278,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
               style={{ backgroundColor: GREEN }}
             >
               <UserPlus className="h-4 w-4" />
-              {busy ? t.saving : t.saveInvite}
+              {busy ? t.sending : t.sendInvite}
             </button>
             <div className="mt-3 rounded-xl border px-3 py-3" style={{ borderColor: BORDER }}>
               <p className="text-[12px] font-semibold text-gray-700">{t.shareInviteLink}</p>

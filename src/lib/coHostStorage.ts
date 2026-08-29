@@ -1,7 +1,7 @@
 /**
  * Account-level co-hosts for a primary host (v1: all listings on that host account).
  * Persisted in localStorage; optional Supabase table in supabase/migrations/002_co_hosts.sql.
- * Email delivery of invites is deferred — invites are stored locally until accepted in-app.
+ * Invite emails are sent via /api/cohosts/invite-email (Resend).
  */
 
 import { getRuntimeAppOrigin } from "./appOrigin";
