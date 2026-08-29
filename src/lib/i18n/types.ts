@@ -536,6 +536,7 @@ export type AppMessages = {
     connectManageTitle: string;
     connectManageBody: string;
     tapToUpdatePayouts: string;
+    connectSecureFooter: string;
     payoutsEnabled: (last4?: string) => string;
     pendingVerification: string;
     requiredPayouts: string;

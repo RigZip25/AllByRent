@@ -447,6 +447,7 @@ export const es: AppMessages = {
     connectManageTitle: "Ajustes de cobros",
     connectManageBody: "Actualiza tu cuenta bancaria o los datos de cobro — te quedas en Evorios.",
     tapToUpdatePayouts: "Toca para actualizar la cuenta",
+    connectSecureFooter: "Datos bancarios cifrados · con Stripe",
     payoutsEnabled: (last4) =>
       last4 ? `Cobros activados · **** ${last4}` : "Cobros activados",
     pendingVerification: "Verificación pendiente",

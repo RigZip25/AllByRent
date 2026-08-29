@@ -447,6 +447,7 @@ export const en: AppMessages = {
     connectManageTitle: "Payout settings",
     connectManageBody: "Update your bank account or payout details — you stay in Evorios.",
     tapToUpdatePayouts: "Tap to update bank details",
+    connectSecureFooter: "Bank details stay encrypted · powered by Stripe",
     payoutsEnabled: (last4) =>
       last4 ? `Payouts enabled · **** ${last4}` : "Payouts enabled",
     pendingVerification: "Pending verification",

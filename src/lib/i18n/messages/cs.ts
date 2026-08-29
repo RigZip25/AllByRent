@@ -467,6 +467,7 @@ export const cs: AppMessages = {
     connectManageTitle: "Nastavení výplat",
     connectManageBody: "Aktualizujte bankovní účet nebo údaje pro výplaty — zůstanete v Evorios.",
     tapToUpdatePayouts: "Klepněte pro změnu účtu",
+    connectSecureFooter: "Bankovní údaje šifrované · přes Stripe",
     payoutsEnabled: (last4) =>
       last4 ? `Výplaty povoleny · **** ${last4}` : "Výplaty povoleny",
     pendingVerification: "Čeká na ověření",
