@@ -275,7 +275,7 @@ export function ConnectOnboardingHost() {
                 className="w-full rounded-xl py-3 text-sm font-bold text-white"
                 style={{ backgroundColor: BRAND_SECURE }}
               >
-                {t.common.tryAgain}
+                {t.systemUi.tryAgain}
               </button>
               <button
                 type="button"
