@@ -510,6 +510,7 @@ export const cs: AppMessages = {
     profileHint: "Profil a nastavení účtu",
     sectionActivity: "Aktivita",
     sectionGarage: "Tvoje garáž",
+    sectionAccount: "Účet",
     sectionSupport: "Podpora",
     rentals: "Půjčky",
     rentalsHint: "Aktivní, nadcházející a historie",

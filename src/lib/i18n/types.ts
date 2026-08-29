@@ -578,6 +578,7 @@ export type AppMessages = {
     profileHint: string;
     sectionActivity: string;
     sectionGarage: string;
+    sectionAccount: string;
     sectionSupport: string;
     rentals: string;
     rentalsHint: string;

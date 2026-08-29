@@ -134,6 +134,18 @@ export function MoreScreen({
           <ChevronRight className="h-5 w-5 shrink-0 text-gray-300" />
         </button>
 
+        <SectionTitle>{t.more.sectionAccount}</SectionTitle>
+        <ul className="mb-5 flex flex-col gap-2">
+          <li>
+            <MenuRow
+              icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+              label={t.more.accountSettings}
+              hint={t.more.accountSettingsHint}
+              onClick={onAccountSettings}
+            />
+          </li>
+        </ul>
+
         <SectionTitle>{t.more.sectionActivity}</SectionTitle>
         <ul className="mb-5 flex flex-col gap-2">
           <li>
@@ -230,14 +242,6 @@ export function MoreScreen({
               />
             </li>
           ) : null}
-          <li>
-            <MenuRow
-              icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label={t.more.accountSettings}
-              hint={t.more.accountSettingsHint}
-              onClick={onAccountSettings}
-            />
-          </li>
         </ul>
       </div>
     </div>

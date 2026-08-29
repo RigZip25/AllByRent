@@ -490,6 +490,7 @@ export const en: AppMessages = {
     profileHint: "Profile & account settings",
     sectionActivity: "Activity",
     sectionGarage: "Your garage",
+    sectionAccount: "Account",
     sectionSupport: "Support",
     rentals: "Rentals",
     rentalsHint: "Active, upcoming, and history",
