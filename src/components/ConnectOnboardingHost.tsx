@@ -196,7 +196,7 @@ export function ConnectOnboardingHost() {
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex flex-col"
+      className="fixed inset-0 z-[110] flex flex-col"
       role="dialog"
       aria-modal="true"
       aria-labelledby="connect-onboarding-title"
