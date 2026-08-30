@@ -107,7 +107,7 @@ export const garageSale: AppMessages["garageSale"] = {
     setupSignInBody: "Uložte položky na účet a pak je dejte na polici.",
     setupStripeTitle: "Zbývá poslední krok — dostat zaplaceno",
     setupStripeBody:
-      "Připojte finance (doklad + banka přes Stripe), aby vám sousedé mohli platit kartou. Na polici můžete dát věci teď a toto dokončit za chvíli.",
+      "Připojte finance (doklad + banka), aby vám sousedé mohli platit kartou. Na polici můžete dát věci teď a toto dokončit za chvíli.",
     signInContinue: "Přihlásit se a pokračovat",
     openingStripe: "Otevírám…",
     continueStripe: "Připojit finance",
@@ -416,7 +416,7 @@ export const earnBusiness: AppMessages["earnBusiness"] = {
   colBookingId: "ID rezervace",
   colGross: "Hrubá částka",
   colPlatformFee: "Poplatek platformy",
-  colStripeFee: "Poplatek Stripe",
+  colStripeFee: "Poplatek za zpracování",
   colRefunds: "Vrácení",
   colDelivery: "Doručení",
   colNet: "Čistá částka",
@@ -541,7 +541,7 @@ export const paymentsUi: AppMessages["paymentsUi"] = {
   and: "a",
   refund: "Reklamačním řádem",
   agreeSuffix:
-    "Platby kartou zpracovává Stripe; hostitelé dostávají výplaty přes Stripe Connect.",
+    "Platby kartou zpracovává bezpečně náš platební partner; hostitelé dostávají výplaty na propojený účet.",
   secureCheckout: "Bezpečná platba kartou je zapnutá",
   bookingWithoutPayment:
     "Platba kartou ještě není nastavená. Žádost půjde hostiteli — platbu lze domluvit po schválení.",
@@ -551,13 +551,13 @@ export const paymentsUi: AppMessages["paymentsUi"] = {
     "Platba kartou je dočasně nedostupná. Můžete prohlížet a ukládat věci — zkuste to brzy znovu.",
   connectGenericError:
     "Propojení výplat teď nejde. Zkuste to za chvíli — pokud to trvá, napište podpoře.",
-  connectPlatformTitle: "Je potřeba jednorázové nastavení Stripe platformy",
+  connectPlatformTitle: "Je potřeba jednorázové nastavení platební platformy",
   connectPlatformBody:
-    "Účet Evorios ve Stripe musí přijmout odpovědnosti Connect, než si prodejci mohou napojit banku. To se dělá v Stripe Dashboardu — ne v aplikaci.",
-  connectPlatformStep1: "Otevřete Platform profile ve Stripe",
+    "Než si prodejci mohou napojit banku, musí být dokončeno nastavení plateb Evorios. Jde o jednorázový krok operátora — pokud to vidíte, kontaktujte podporu.",
+  connectPlatformStep1: "Otevřete profil platební platformy",
   connectPlatformStep2: "Zkontrolujte / přijměte odpovědnost za ztráty u připojených účtů",
-  connectPlatformStep3: "Vraťte se sem a znovu klepněte Pokračovat se Stripe",
-  connectOpenDashboard: "Otevřít Stripe Dashboard →",
+  connectPlatformStep3: "Vraťte se sem a znovu klepněte Pokračovat",
+  connectOpenDashboard: "Otevřít nastavení plateb →",
   supabaseRequired:
     "Aplikace potřebuje živé připojení. Zkuste to za chvíli nebo kontaktujte podporu.",
   signInRequired: "Přihlaste se, nebo pokračujte jako host s e-mailem.",

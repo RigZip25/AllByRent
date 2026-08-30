@@ -107,7 +107,7 @@ export const garageSale: AppMessages["garageSale"] = {
     setupSignInBody: "Save items to your account, then publish to the shelf.",
     setupStripeTitle: "One last step — get paid",
     setupStripeBody:
-      "Connect finances (ID + bank via Stripe) so neighbors can pay you by card. You can put items on the shelf now and finish this in a minute.",
+      "Connect finances (ID + bank) so neighbors can pay you by card. You can put items on the shelf now and finish this in a minute.",
     signInContinue: "Sign in to continue",
     openingStripe: "Opening…",
     continueStripe: "Connect finances",
@@ -412,7 +412,7 @@ export const earnBusiness: AppMessages["earnBusiness"] = {
   colBookingId: "Booking ID",
   colGross: "Gross",
   colPlatformFee: "Platform fee",
-  colStripeFee: "Stripe fee",
+  colStripeFee: "Processing fee",
   colRefunds: "Refunds",
   colDelivery: "Delivery",
   colNet: "Net",
@@ -537,7 +537,7 @@ export const paymentsUi: AppMessages["paymentsUi"] = {
   and: "and",
   refund: "Refund Policy",
   agreeSuffix:
-    "Card charges are processed by Stripe; hosts are paid through Stripe Connect.",
+    "Card charges are processed securely by our payment partner; hosts receive payouts to their linked bank.",
   secureCheckout: "Secure card checkout enabled",
   bookingWithoutPayment:
     "Card checkout is not configured yet. Your request will be sent to the host — payment can be arranged after approval.",
@@ -547,13 +547,13 @@ export const paymentsUi: AppMessages["paymentsUi"] = {
     "Card checkout is temporarily unavailable. You can still browse and save items — try again shortly.",
   connectGenericError:
     "Couldn’t connect payouts right now. Try again in a moment — if it keeps failing, email support.",
-  connectPlatformTitle: "Stripe platform setup required (one-time)",
+  connectPlatformTitle: "Payment platform setup required (one-time)",
   connectPlatformBody:
-    "Your Evorios Stripe account must accept Connect responsibilities before sellers can link a bank. This is done in the Stripe Dashboard — not inside the app.",
-  connectPlatformStep1: "Open Platform profile in Stripe",
+    "Evorios payment setup must be finished before sellers can link a bank. This is a one-time operator step — contact support if you see this.",
+  connectPlatformStep1: "Open the payment platform profile",
   connectPlatformStep2: "Review / accept loss responsibilities for connected accounts",
-  connectPlatformStep3: "Return here and tap Continue with Stripe again",
-  connectOpenDashboard: "Open Stripe Dashboard →",
+  connectPlatformStep3: "Return here and tap Continue again",
+  connectOpenDashboard: "Open payment settings →",
   supabaseRequired:
     "This app needs a live connection to start. Please try again shortly or contact support.",
   signInRequired: "Sign in or continue as guest with your email.",

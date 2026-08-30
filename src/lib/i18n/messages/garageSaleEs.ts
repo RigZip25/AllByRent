@@ -107,7 +107,7 @@ export const garageSale: AppMessages["garageSale"] = {
     setupSignInBody: "Guarda artículos en tu cuenta y luego publícalos en la estantería.",
     setupStripeTitle: "¿Quieres cobrar? (opcional)",
     setupStripeBody:
-      "Para recibir dinero de los vecinos, verifica tu identidad y conecta un banco (con Stripe). Puedes poner artículos en la estantería ahora y terminar esto más tarde.",
+      "Para recibir dinero de los vecinos, verifica tu identidad y conecta un banco. Puedes poner artículos en la estantería ahora y terminar esto más tarde.",
     signInContinue: "Inicia sesión para continuar",
     openingStripe: "Abriendo…",
     continueStripe: "Configurar cobros",
@@ -412,7 +412,7 @@ export const earnBusiness: AppMessages["earnBusiness"] = {
   colBookingId: "ID de reserva",
   colGross: "Bruto",
   colPlatformFee: "Comisión de la plataforma",
-  colStripeFee: "Comisión de Stripe",
+  colStripeFee: "Comisión de procesamiento",
   colRefunds: "Reembolsos",
   colDelivery: "Entrega",
   colNet: "Neto",
@@ -537,7 +537,7 @@ export const paymentsUi: AppMessages["paymentsUi"] = {
   and: "y",
   refund: "Política de reembolsos",
   agreeSuffix:
-    "Los cargos con tarjeta los procesa Stripe; los anfitriones cobran a través de Stripe Connect.",
+    "Los cargos con tarjeta los procesa de forma segura nuestro socio de pagos; los anfitriones reciben cobros en su banco vinculado.",
   secureCheckout: "Pago seguro con tarjeta activado",
   bookingWithoutPayment:
     "El pago con tarjeta aún no está configurado. Tu solicitud se enviará al anfitrión — el pago se puede acordar tras la aprobación.",
@@ -547,13 +547,13 @@ export const paymentsUi: AppMessages["paymentsUi"] = {
     "El pago con tarjeta no está disponible temporalmente. Aun así puedes explorar y guardar artículos — inténtalo de nuevo en breve.",
   connectGenericError:
     "No se pudieron conectar los cobros ahora mismo. Inténtalo de nuevo en un momento — si sigue fallando, escribe a soporte.",
-  connectPlatformTitle: "Se requiere configuración de la plataforma Stripe (única vez)",
+  connectPlatformTitle: "Se requiere configuración de la plataforma de pagos (única vez)",
   connectPlatformBody:
-    "Tu cuenta de Stripe de Evorios debe aceptar las responsabilidades de Connect antes de que los vendedores puedan vincular un banco. Esto se hace en el panel de Stripe, no dentro de la app.",
-  connectPlatformStep1: "Abrir el perfil de plataforma en Stripe",
+    "Hay que completar la configuración de pagos de Evorios antes de que los vendedores puedan vincular un banco. Es un paso único del operador — contacta con soporte si lo ves.",
+  connectPlatformStep1: "Abrir el perfil de la plataforma de pagos",
   connectPlatformStep2: "Revisar / aceptar las responsabilidades de pérdidas de las cuentas conectadas",
-  connectPlatformStep3: "Vuelve aquí y toca de nuevo Continuar con Stripe",
-  connectOpenDashboard: "Abrir panel de Stripe →",
+  connectPlatformStep3: "Vuelve aquí y toca de nuevo Continuar",
+  connectOpenDashboard: "Abrir ajustes de pagos →",
   supabaseRequired:
     "Esta app necesita una conexión activa para empezar. Inténtalo de nuevo en breve o contacta con soporte.",
   signInRequired: "Inicia sesión o continúa como invitado con tu email.",

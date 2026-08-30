@@ -129,7 +129,7 @@ export const cs: AppMessages = {
     didYouMeanEmail: (email) => `Myslel(a) jsi ${email}?`,
     useSuggestedEmail: "Použít tuto adresu",
     faceIdCta: "Pokračovat přes Face ID",
-    faceIdHint: "Otevře tvůj existující účet — jméno, telefon i Stripe zůstanou propojené.",
+    faceIdHint: "Otevře tvůj existující účet — jméno, telefon i výplaty zůstanou propojené.",
     orEmail: "nebo e-mailem",
     returningHint: "Vítej zpět — použijeme uložené údaje.",
     freeToJoin: "Zdarma · Bez kreditní karty",
@@ -478,7 +478,7 @@ export const cs: AppMessages = {
       "Připoj bankovní účet, kam mají peníze chodit",
       "Pak zapni Live — sousedé platí v appce, ty dostaneš po dohodách",
     ],
-    connectIntroAlt: "Mr. Evorios s bezpečnými výplatami Stripe",
+    connectIntroAlt: "Mr. Evorios s bezpečnými výplatami",
     connectIntroCta: "Nastavit výplaty",
     connectIntroBack: "Zpět",
     connectSecureFooter: "Bankovní údaje zůstávají šifrované v Evorios",
@@ -492,7 +492,7 @@ export const cs: AppMessages = {
       "Bankovní účet je připojený. Sousedé platí v aplikaci — peníze dorazí na váš účet po dokončení obchodu.",
     connectReturnPendingTitle: "Odesláno ke kontrole",
     connectReturnPendingBody:
-      "Stripe ověřuje vaše údaje. Výplaty se zapnou po dokončení kontroly (často do jednoho dne).",
+      "Bezpečná kontrola ověřuje vaše údaje. Výplaty se zapnou po dokončení kontroly (často do jednoho dne).",
     connectReturnContinueTitle: "Skoro hotovo",
     connectReturnContinueBody:
       "Nastavení výplat ještě není dokončené. Klepněte níže na Připojit bankovní účet a pokračujte.",
@@ -755,7 +755,7 @@ export const cs: AppMessages = {
     guidesGarageTitle: "Moje garáž",
     guidesGarageBody: "Výloha, žádosti a výdělky",
     guidesProfileTitle: "Profil a výplaty",
-    guidesProfileBody: "Jméno, telefon, Stripe výplaty, odhlášení",
+    guidesProfileBody: "Jméno, telefon, výplaty, odhlášení",
   },
   garageUi: {
     shop: "Obchod",
@@ -797,7 +797,7 @@ export const cs: AppMessages = {
     switcherLabel: "Pracuji v",
     switcherMyGarage: "Moje garáž",
     switcherSharedGarage: "Sdílená garáž",
-    switcherMineHint: "Tvoje výloha · tvůj Stripe",
+    switcherMineHint: "Tvoje výloha · tvoje výplaty",
     switcherHelpingHint: "Pomáhám · výplaty zůstávají u majitele",
     householdTitleName: "Pojmenuj garáž",
     householdTitlePeople: "Kdo bude garáž používat?",
@@ -809,7 +809,7 @@ export const cs: AppMessages = {
     householdBodyDone:
       "Pošli odkazy na pozvánku ke stažení appky. Další lidi můžeš pozvat později v Spoluhostitelích.",
     householdNameRequired: "Abychom pokračovali, dej garáži jméno.",
-    householdYouAre: (name) => `Jsi č. 1 — ${name}. Výplaty (Stripe) zůstávají na tomto účtu.`,
+    householdYouAre: (name) => `Jsi č. 1 — ${name}. Výplaty zůstávají na tomto účtu.`,
     householdPeopleHint: "Začni 1–3 lidmi. Větší rodina nebo firma může pozvat další později.",
     householdMemberN: (n) => `Osoba ${n}`,
     householdMemberNamePh: "Jméno",
@@ -949,7 +949,7 @@ export const cs: AppMessages = {
     emailSupport: "Napsat podpoře",
     emailSupportHint: "Otevře e-mail s ID půjčky, aby podpora případ rychle našla.",
     depositNextRelease: "Další krok: uvolnit zadržení zálohy nájemci.",
-    depositNextClaim: "Další krok: hostitel může uplatnit zálohu (Stripe), pokud je stále ve lhůtě.",
+    depositNextClaim: "Další krok: hostitel může uplatnit zálohu, pokud je stále ve lhůtě.",
     depositNextSupport: "Další krok: napište podpoře kvůli rozdělené záloze — automatické stržení zatím není.",
     depositHeldDuringDispute: "Záloha zůstává zmrazená, dokud je spor otevřený. Uplatněte nebo uvolněte po vyřešení.",
     depositReleaseBtn: "Uvolnit zadržení",
@@ -1106,7 +1106,7 @@ export const cs: AppMessages = {
       `Hold na mýtné autorizován do ${amount} (spolu s kaucí).`,
     tollClaimCta: (amount) => `Označit mýtné k nároku (${amount})`,
     tollFlagged:
-      "Mýtné označeno pro okno nároku. Až dorazí účet podle SPZ, použij Claim deposit (nebo podporu pro rozdělení). Částečný Stripe capture zatím není — hold na škody zůstane.",
+      "Mýtné označeno pro okno nároku. Až dorazí účet podle SPZ, použij Claim deposit (nebo podporu pro rozdělení). Částečné stržení karty zatím není — hold na škody zůstane.",
     tollClaimed: "Mýtné zaznamenáno u této půjčky.",
     tollClaimFailed: "Stav nároku na mýtné se nepodařilo aktualizovat.",
     insuranceUnlockBlocked:
@@ -1228,7 +1228,7 @@ export const cs: AppMessages = {
     conditionPhotoEmpty: "Zatím bez fotky",
     invoiceTitle: "Faktura a pokuty",
     invoiceBody:
-      "Hostitel může vyúčtovat dolití paliva, poplatek $20 za palivo, pozdní vrácení, mýtné, pokuty, škody nebo vlastní částku. Nájemce platí v aplikaci, když je Stripe připojený.",
+      "Hostitel může vyúčtovat dolití paliva, poplatek $20 za palivo, pozdní vrácení, mýtné, pokuty, škody nebo vlastní částku. Nájemce platí v aplikaci, když jsou výplaty připojené.",
     invoiceCreate: "Nová faktura",
     invoiceAddLine: "Přidat položku",
     invoiceRemoveLine: "Odebrat položku",
@@ -1255,7 +1255,7 @@ export const cs: AppMessages = {
     invoiceKindDamage: "Škoda",
     invoiceKindCustom: "Vlastní",
     invoiceStripeScaffold:
-      "Platební odkaz Stripe Connect je připravený — faktury se na půjčce uloží i když platba kartou ještě není nastavená.",
+      "Platební odkaz kartou je připravený — faktury se na půjčce uloží i když platba kartou ještě není nastavená.",
     call: "Volat",
     phoneSharedAfterCheckin: "Telefonní čísla se sdílejí v chatu po check-inu",
     close: "Zavřít",
@@ -1335,7 +1335,7 @@ export const cs: AppMessages = {
     hosting: "Hostím",
     total: (amount) => `${amount} Kč celkem`,
     inclDelivery: (fee) => `· vč. ${fee} Kč doručení`,
-    stripe: "Stripe",
+    stripe: "Karta",
     escalated: "V kontrole — dohodněte se spolu nebo napište podpoře",
     returnsIn: (countdown) => `Vrácení za: ${countdown}`,
     overdueTimer: (overdue) => `Po termínu: ${overdue}`,
@@ -5237,7 +5237,7 @@ export const cs: AppMessages = {
         `Tip experta: u rezervací 30+ dní začni kolem ${example}. Drž cenu pod koupí nové — když měsíc stojí víc než věc, sousedé radši koupí. Uprav podle poptávky a opotřebení.`,
       securityDeposit: "Kauce",
       securityDepositHint:
-        "Povinné. Blokace na kartě přes Stripe — uvolní se po v pořádku vrácení. Tip: kauci = cena nové; zmizí → koupíš znovu. Zadej 0, pokud nechceš hold.",
+        "Povinné. Blokace na kartě — uvolní se po v pořádku vrácení. Tip: kauci = cena nové; zmizí → koupíš znovu. Zadej 0, pokud nechceš hold.",
       securityDepositHintInsurance:
         "U aut / techniky je základ pojištění nájemce. Hold nastav podle max. spoluúčasti (např. ≤ 2 500 → hold ~2 500) — ne celá cena auta. 0 jen pokud ti stačí jen pojištění.",
       securityDepositHintMonthly:
@@ -5340,7 +5340,7 @@ export const cs: AppMessages = {
         `💡 ${label}: výši blokace volíte vy. Pojištění drahých věcí přijde později — do té doby nastavte kauci, se kterou jsi v pohodě.`,
       salePrice: "Prodejní cena",
       sellNote:
-        "💡 Placené prodeje jdou přes Stripe. Nastav 0 Kč (nebo klepni na Zdarma) a daruj — bez platby, jen vyzvednutí.",
+        "💡 Placené prodeje jdou kartou. Nastav 0 Kč (nebo klepni na Zdarma) a daruj — bez platby, jen vyzvednutí.",
       giftNote:
         "🎁 Zdarma = Prodat za 0 Kč. Soused ti napíše kvůli vyzvednutí — bez karty, bez provize.",
       pricingTipRoi: (count) =>
@@ -5348,7 +5348,7 @@ export const cs: AppMessages = {
       pricingTipDefault:
         "Doplň cenu nové náhrady výše — pak navrhnu denní sazbu, kauci a prodejní tip, ať je to výdělečné. Políčka vyplním až po „Použít můj tip“.",
       pricingTipSuggestRent: (daily, deposit) =>
-        `Začal bych kolem ${daily}/den. Kauci nastav na cca ${deposit} — stejně jako cena nové. Když věc zmizí, koupíš novou; když vrátí v pohodě, Stripe hold uvolní. Klid pro obě strany.`,
+        `Začal bych kolem ${daily}/den. Kauci nastav na cca ${deposit} — stejně jako cena nové. Když věc zmizí, koupíš novou; když vrátí v pohodě, hold se uvolní. Klid pro obě strany.`,
       pricingTipSuggestRentInsurance: (daily, deposit) =>
         `Začal bych kolem ${daily}/den. Vyžaduj, ať nájemce přidá majetek do pojištění a nahraje doklad před vyzvednutím. Hold ~${deposit} (spoluúčast) — ne celá hodnota. Bez dokladu klíče nepředávej.`,
       pricingTipSuggestRentMonthlyDeposit: (daily, deposit) =>
@@ -5485,7 +5485,7 @@ export const cs: AppMessages = {
       tipEditing:
         "Zkontroluj změny a uložte — QR a stav nabídky zůstanou jak jsou.",
       tipNew:
-        "Další: přihlášení a uložení na polici. Obchod otevřeš v Moje garáž — před Live je nutný Stripe Connect.",
+        "Další: přihlášení a uložení na polici. Obchod otevřeš v Moje garáž — před Live jsou nutné výplaty.",
       saving: "Ukládám...",
       opening: "Otevírám...",
       saveChanges: "Uložit změny",
@@ -5510,13 +5510,13 @@ export const cs: AppMessages = {
       stripeFinishForm:
         "Skoro hotovo — dokončete doklad a účet v zabezpečeném formuláři a klepněte na obnovit.",
       stripePending:
-        "Ověřte doklad a připojte banku (přes Stripe), aby ti sousedé mohli bezpečně platit.",
+        "Ověřte doklad a připojte banku, aby ti sousedé mohli bezpečně platit.",
       openingStripe: "Otevírám...",
       continueStripe: "Připojit finance",
       refreshing: "Obnovuji...",
       refreshStatus: "Obnovit stav",
       tip: (mascot) =>
-        `${mascot}: Nejdřív na polici. Až budeš chtít sousedy, otevři obchod v Moje garáž — před Live je nutný Stripe Connect.`,
+        `${mascot}: Nejdřív na polici. Až budeš chtít sousedy, otevři obchod v Moje garáž — před Live jsou nutné výplaty.`,
       goingLive: "Ukládám na polici...",
       goLive: "Na polici",
       completeSteps: "Výše se přihlas a pokračuj",
@@ -5526,7 +5526,7 @@ export const cs: AppMessages = {
       connectThenLive: "Připojit finance →",
       goLiveWithoutPayouts: "Zatím na polici bez výplat",
       goLivePayoutHint:
-        "Položka zůstane na polici. Obchod otevři z Moje garáž, až bude Stripe hotový — platí i pro dárky.",
+        "Položka zůstane na polici. Obchod otevři z Moje garáž, až budou výplaty hotové — platí i pro dárky.",
       phoneTitle: "Ověřit telefon",
       phoneDone: "Telefon ověřen SMS kódem.",
       phonePending:
@@ -6332,7 +6332,7 @@ export const cs: AppMessages = {
       subtitle: "Jeden rychlý krok, než to dáš ven.",
       verifyOnceTitle: "Ověřit jednou",
       verifyOnceBody:
-        "Volitelný odznak navíc. Výplaty jdou přes Stripe Connect (doklad + banka), až budeš chtít přijímat peníze.",
+        "Volitelný odznak navíc. Výplaty jdou přes doklad + banku, až budeš chtít přijímat peníze.",
       signInHint: "Přihlas se a spusťte ověření identity.",
       starting: "Spouštím...",
       startCta: "Spustit ověření",
@@ -6537,7 +6537,7 @@ export const cs: AppMessages = {
     boostBody:
       "Boostnuté nabídky se zobrazují nahoře ve feedu — max. 1 boost na 5 organických.",
     boostActiveUntil: (when) => `Boost aktivní do ${when}`,
-    boostFailed: "Platba za boost selhala. Zkontroluj nastavení Stripe.",
+    boostFailed: "Platba za boost selhala. Zkontroluj nastavení plateb nebo to zkus znovu.",
     boostOpt24h: "2 Kč · 24 h",
     boostOpt7d: "5 Kč · 7 d",
     boostOpt30d: "10 Kč · 30 d",

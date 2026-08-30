@@ -123,7 +123,7 @@ export const en: AppMessages = {
     didYouMeanEmail: (email) => `Did you mean ${email}?`,
     useSuggestedEmail: "Use this address",
     faceIdCta: "Continue with Face ID",
-    faceIdHint: "Opens your existing account — name, phone, and Stripe stay linked.",
+    faceIdHint: "Opens your existing account — name, phone, and payouts stay linked.",
     orEmail: "or use email",
     returningHint: "Welcome back — we’ll use your saved details.",
     freeToJoin: "Free to join · No credit card",
@@ -458,7 +458,7 @@ export const en: AppMessages = {
       "Connect the bank account where money should land",
       "Then open Live — neighbors pay in-app, you get paid after deals",
     ],
-    connectIntroAlt: "Mr. Evorios with secure Stripe payouts",
+    connectIntroAlt: "Mr. Evorios with secure payouts",
     connectIntroCta: "Set up payouts",
     connectIntroBack: "Back",
     connectSecureFooter: "Bank details stay encrypted inside Evorios",
@@ -472,7 +472,7 @@ export const en: AppMessages = {
       "Bank connection looks good. Neighbors can pay in-app — money goes to your account after deals.",
     connectReturnPendingTitle: "Thanks — submitted for review",
     connectReturnPendingBody:
-      "Stripe is checking your details. Payouts unlock when verification finishes (often within a day).",
+      "Secure review is checking your details. Payouts unlock when verification finishes (often within a day).",
     connectReturnContinueTitle: "Almost there",
     connectReturnContinueBody:
       "Payout setup isn’t finished yet. Tap Connect bank account below to continue where you left off.",
@@ -495,7 +495,7 @@ export const en: AppMessages = {
     payoutsFlowHowTitle: "How money moves",
     payoutsFlowHowPay: "Neighbor pays by card in Evorios for a rental or sale.",
     payoutsFlowHowHold: "Payment is held securely until the deal completes.",
-    payoutsFlowHowBank: "Your net earnings transfer to the bank you linked — no Dashboard needed day to day.",
+    payoutsFlowHowBank: "Your net earnings transfer to the bank you linked — day to day you stay in Evorios.",
     payoutsFlowSecureNote: "Bank details are encrypted. You stay in Evorios except for the one-time secure bank setup.",
     payoutsFlowCtaSetup: "Set up payouts",
     payoutsFlowCtaContinue: "Continue bank setup",
@@ -735,7 +735,7 @@ export const en: AppMessages = {
     guidesGarageTitle: "My Garage",
     guidesGarageBody: "Your storefront, requests, and earnings",
     guidesProfileTitle: "Profile & payouts",
-    guidesProfileBody: "Name, phone, Stripe payouts, sign-out",
+    guidesProfileBody: "Name, phone, payouts, sign-out",
   },
   garageUi: {
     shop: "Shop",
@@ -777,7 +777,7 @@ export const en: AppMessages = {
     switcherLabel: "Working in",
     switcherMyGarage: "My garage",
     switcherSharedGarage: "Shared garage",
-    switcherMineHint: "Your storefront · your Stripe",
+    switcherMineHint: "Your storefront · your payouts",
     switcherHelpingHint: "Helping · payouts stay with the owner",
     householdTitleName: "Name your garage",
     householdTitlePeople: "Who uses this garage?",
@@ -789,7 +789,7 @@ export const en: AppMessages = {
     householdBodyDone:
       "Share invite links so they can download the app and walk into this garage. You can invite more later from Co-hosts.",
     householdNameRequired: "Give the garage a name to continue.",
-    householdYouAre: (name) => `You’re #1 — ${name}. Payouts (Stripe) stay on this account.`,
+    householdYouAre: (name) => `You’re #1 — ${name}. Payouts stay on this account.`,
     householdPeopleHint: "Start with 1–3 people. Larger families or companies can invite more later.",
     householdMemberN: (n) => `Person ${n}`,
     householdMemberNamePh: "Name",
@@ -929,7 +929,7 @@ export const en: AppMessages = {
     emailSupport: "Email support",
     emailSupportHint: "Opens email with your rental ID so support can find the case quickly.",
     depositNextRelease: "Next step: release the deposit hold to the renter.",
-    depositNextClaim: "Next step: host may claim the deposit hold (Stripe), if still within the claim window.",
+    depositNextClaim: "Next step: host may claim the deposit hold, if still within the claim window.",
     depositNextSupport: "Next step: email support to settle a split deposit — capture is not automated yet.",
     depositHeldDuringDispute: "Deposit hold stays frozen while the dispute is open. Claim/release after you resolve.",
     depositReleaseBtn: "Release hold",
@@ -1086,7 +1086,7 @@ export const en: AppMessages = {
       `Toll hold authorized up to ${amount} (combined with the security deposit).`,
     tollClaimCta: (amount) => `Flag toll for claim (${amount})`,
     tollFlagged:
-      "Toll flagged for the claim window. When the plate bill arrives, use Claim deposit (or support for a split). Partial Stripe capture is not enabled yet so the damage hold stays intact.",
+      "Toll flagged for the claim window. When the plate bill arrives, use Claim deposit (or support for a split). Partial card capture is not enabled yet so the damage hold stays intact.",
     tollClaimed: "Toll portion noted on this booking.",
     tollClaimFailed: "Couldn’t update toll claim status.",
     insuranceUnlockBlocked:
@@ -1215,7 +1215,7 @@ export const en: AppMessages = {
     conditionPhotoEmpty: "No photo yet",
     invoiceTitle: "Invoice & fines",
     invoiceBody:
-      "Host can bill fuel top-up, the $20 fuel fee, late return, tolls, fines, damage, or a custom amount. Renter pays in-app when Stripe is connected.",
+      "Host can bill fuel top-up, the $20 fuel fee, late return, tolls, fines, damage, or a custom amount. Renter pays in-app when payouts are connected.",
     invoiceCreate: "New invoice",
     invoiceAddLine: "Add line item",
     invoiceRemoveLine: "Remove line",
@@ -1242,7 +1242,7 @@ export const en: AppMessages = {
     invoiceKindDamage: "Damage",
     invoiceKindCustom: "Custom",
     invoiceStripeScaffold:
-      "Stripe Connect payment link is scaffolded — invoices still save on the rental when card pay isn’t configured yet.",
+      "Card payment link is scaffolded — invoices still save on the rental when card pay isn’t configured yet.",
     call: "Call",
     phoneSharedAfterCheckin: "Phone numbers are shared in chat after check-in",
     close: "Close",
@@ -1322,7 +1322,7 @@ export const en: AppMessages = {
     hosting: "Hosting",
     total: (amount) => `$${amount} total`,
     inclDelivery: (fee) => `· incl. $${fee} delivery`,
-    stripe: "Stripe",
+    stripe: "Card",
     escalated: "Under review — resolve together or email support",
     returnsIn: (countdown) => `Returns in: ${countdown}`,
     overdueTimer: (overdue) => `Overdue: ${overdue}`,
@@ -5220,7 +5220,7 @@ export const en: AppMessages = {
         `Expert tip: for 30+ day stays, start around ${example}. Keep it under buying new — if a month costs more than the item, neighbors will just buy. Adjust for demand and wear.`,
       securityDeposit: "Security deposit",
       securityDepositHint:
-        "Required. Held on the renter’s card via Stripe and released when you confirm a good return. Tip: match replace-new — if it’s gone, you can buy again. Enter 0 if you don’t want a hold.",
+        "Required. Held on the renter’s card and released when you confirm a good return. Tip: match replace-new — if it’s gone, you can buy again. Enter 0 if you don’t want a hold.",
       securityDepositHintInsurance:
         "For vehicles / equipment, primary protection is the renter’s insurance. Set the card hold to your max deductible (e.g. $2,500) — not the whole vehicle. Enter 0 only if you’re comfortable with insurance alone.",
       securityDepositHintMonthly:
@@ -5323,7 +5323,7 @@ export const en: AppMessages = {
         `💡 ${label}: you choose the hold amount. Insurance for expensive items comes later — until then, set a deposit you’re comfortable with.`,
       salePrice: "Sale price",
       sellNote:
-        "💡 Paid sales use Stripe. Set $0 (or tap Free above) to give it away — no payment, just arrange pickup.",
+        "💡 Paid sales use card checkout. Set $0 (or tap Free above) to give it away — no payment, just arrange pickup.",
       giftNote:
         "🎁 Free wrap: we list this as Sell at $0. Neighbors message you for pickup — no card charge, no platform fee.",
       pricingTipRoi: (count) =>
@@ -5331,7 +5331,7 @@ export const en: AppMessages = {
       pricingTipDefault:
         "Add replace-new value above, then I’ll suggest a daily rate, deposit, and sale ask that stay profitable — boxes stay empty until you tap Use my suggestion.",
       pricingTipSuggestRent: (daily, deposit) =>
-        `I’d start around ${daily}/day. Set the deposit to about ${deposit} — same as replace-new. If it’s gone, you can buy again; if they return it fine, Stripe releases the hold. That keeps both sides calm.`,
+        `I’d start around ${daily}/day. Set the deposit to about ${deposit} — same as replace-new. If it’s gone, you can buy again; if they return it fine, the hold releases. That keeps both sides calm.`,
       pricingTipSuggestRentInsurance: (daily, deposit) =>
         `I’d start around ${daily}/day. Require insurance proof before pickup. Card hold ~${deposit} — match your max deductible, not the whole vehicle. Without proof, don’t hand over keys.`,
       pricingTipSuggestRentMonthlyDeposit: (daily, deposit) =>
@@ -5468,7 +5468,7 @@ export const en: AppMessages = {
       tipEditing:
         "Review your changes, then save — your QR and listing status stay as they are.",
       tipNew:
-        "Next: sign in to save to your shelf. Open your store from My Garage when you’re ready — Stripe Connect is required before Live.",
+        "Next: sign in to save to your shelf. Open your store from My Garage when you’re ready — payouts are required before Live.",
       saving: "Saving...",
       opening: "Opening...",
       saveChanges: "Save changes",
@@ -6341,7 +6341,7 @@ export const en: AppMessages = {
       subtitle: "One quick step before you go live.",
       verifyOnceTitle: "Verify once",
       verifyOnceBody:
-        "Optional extra badge. Payouts use Stripe Connect (ID + bank) when you want to receive money.",
+        "Optional extra badge. Payouts use ID + bank when you want to receive money.",
       signInHint: "Sign in to start identity verification.",
       starting: "Starting...",
       startCta: "Start verification",
@@ -6546,7 +6546,7 @@ export const en: AppMessages = {
     boostBody:
       "Boosted listings show up near the top of the feed with a max of 1 boost per 5 organic.",
     boostActiveUntil: (when) => `Boost active until ${when}`,
-    boostFailed: "Boost checkout failed. Check Stripe configuration.",
+    boostFailed: "Boost checkout failed. Check payment configuration or try again.",
     boostOpt24h: "$2 · 24h",
     boostOpt7d: "$5 · 7d",
     boostOpt30d: "$10 · 30d",

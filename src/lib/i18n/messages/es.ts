@@ -123,7 +123,7 @@ export const es: AppMessages = {
     didYouMeanEmail: (email) => `¿Quisiste decir ${email}?`,
     useSuggestedEmail: "Usar esta dirección",
     faceIdCta: "Continuar con Face ID",
-    faceIdHint: "Abre tu cuenta existente — nombre, teléfono y Stripe siguen vinculados.",
+    faceIdHint: "Abre tu cuenta existente — nombre, teléfono y cobros siguen vinculados.",
     orEmail: "o usa el correo",
     returningHint: "Bienvenido de nuevo — usaremos tus datos guardados.",
     freeToJoin: "Únete gratis · Sin tarjeta",
@@ -458,7 +458,7 @@ export const es: AppMessages = {
       "Conecta la cuenta bancaria donde quieres recibir el dinero",
       "Luego activa Live — pagan en la app y cobras tras las operaciones",
     ],
-    connectIntroAlt: "Mr. Evorios con cobros seguros de Stripe",
+    connectIntroAlt: "Mr. Evorios con cobros seguros",
     connectIntroCta: "Configurar cobros",
     connectIntroBack: "Atrás",
     connectSecureFooter: "Datos bancarios cifrados dentro de Evorios",
@@ -472,7 +472,7 @@ export const es: AppMessages = {
       "La cuenta bancaria quedó conectada. Los vecinos pagan en la app y el dinero llega a tu banco tras cada trato.",
     connectReturnPendingTitle: "Enviado a revisión",
     connectReturnPendingBody:
-      "Stripe está verificando tus datos. Los pagos se activan cuando termine (a menudo en un día).",
+      "La verificación segura revisa tus datos. Los pagos se activan cuando termine (a menudo en un día).",
     connectReturnContinueTitle: "Casi listo",
     connectReturnContinueBody:
       "Aún falta terminar la configuración. Toca Conectar cuenta bancaria abajo para continuar.",
@@ -495,7 +495,7 @@ export const es: AppMessages = {
     payoutsFlowHowTitle: "Cómo se mueve el dinero",
     payoutsFlowHowPay: "El vecino paga con tarjeta en Evorios por un alquiler o venta.",
     payoutsFlowHowHold: "El pago se retiene de forma segura hasta completar el trato.",
-    payoutsFlowHowBank: "Tu neto se transfiere al banco vinculado — sin Panel día a día.",
+    payoutsFlowHowBank: "Tu neto se transfiere al banco vinculado — en el día a día te quedas en Evorios.",
     payoutsFlowSecureNote: "Los datos bancarios van cifrados. Te quedas en Evorios salvo la configuración bancaria única.",
     payoutsFlowCtaSetup: "Configurar pagos",
     payoutsFlowCtaContinue: "Continuar configuración",
@@ -735,7 +735,7 @@ export const es: AppMessages = {
     guidesGarageTitle: "Mi Garaje",
     guidesGarageBody: "Tu escaparate, solicitudes y ganancias",
     guidesProfileTitle: "Perfil y cobros",
-    guidesProfileBody: "Nombre, teléfono, cobros Stripe, cerrar sesión",
+    guidesProfileBody: "Nombre, teléfono, cobros, cerrar sesión",
   },
   garageUi: {
     shop: "Tienda",
@@ -777,7 +777,7 @@ export const es: AppMessages = {
     switcherLabel: "Trabajando en",
     switcherMyGarage: "Mi garaje",
     switcherSharedGarage: "Garaje compartido",
-    switcherMineHint: "Tu escaparate · tu Stripe",
+    switcherMineHint: "Tu escaparate · tus cobros",
     switcherHelpingHint: "Ayudando · los cobros quedan con el dueño",
     householdTitleName: "Nombra tu garaje",
     householdTitlePeople: "¿Quién usa este garaje?",
@@ -789,7 +789,7 @@ export const es: AppMessages = {
     householdBodyDone:
       "Comparte enlaces de invitación para que descarguen la app y entren a este garaje. Puedes invitar más después en Coanfitriones.",
     householdNameRequired: "Ponle nombre al garaje para continuar.",
-    householdYouAre: (name) => `Eres el nº 1 — ${name}. Los pagos (Stripe) quedan en esta cuenta.`,
+    householdYouAre: (name) => `Eres el nº 1 — ${name}. Los cobros quedan en esta cuenta.`,
     householdPeopleHint: "Empieza con 1–3 personas. Familias o empresas más grandes pueden invitar más después.",
     householdMemberN: (n) => `Persona ${n}`,
     householdMemberNamePh: "Nombre",
@@ -929,7 +929,7 @@ export const es: AppMessages = {
     emailSupport: "Escribir a soporte",
     emailSupportHint: "Abre el correo con el ID del alquiler para que soporte encuentre el caso rápido.",
     depositNextRelease: "Siguiente paso: liberar la retención de la fianza al arrendatario.",
-    depositNextClaim: "Siguiente paso: el anfitrión puede reclamar la fianza (Stripe), si sigue en plazo.",
+    depositNextClaim: "Siguiente paso: el anfitrión puede reclamar la fianza, si sigue en plazo.",
     depositNextSupport: "Siguiente paso: escribe a soporte para liquidar una fianza a medias — la captura aún no es automática.",
     depositHeldDuringDispute: "La fianza permanece congelada mientras la disputa esté abierta. Reclama o libera tras resolver.",
     depositReleaseBtn: "Liberar retención",
@@ -1092,7 +1092,7 @@ export const es: AppMessages = {
       `Retención de peajes autorizada hasta ${amount} (junto con el depósito).`,
     tollClaimCta: (amount) => `Marcar peaje para reclamar (${amount})`,
     tollFlagged:
-      "Peaje marcado para la ventana de reclamación. Cuando llegue la factura por matrícula, usa Claim deposit (o soporte para un reparto). La captura parcial de Stripe aún no está activa para no liberar el depósito por daños.",
+      "Peaje marcado para la ventana de reclamación. Cuando llegue la factura por matrícula, usa Claim deposit (o soporte para un reparto). La captura parcial con tarjeta aún no está activa para no liberar el depósito por daños.",
     tollClaimed: "Peaje anotado en esta reserva.",
     tollClaimFailed: "No se pudo actualizar el estado del peaje.",
     insuranceUnlockBlocked:
@@ -1214,7 +1214,7 @@ export const es: AppMessages = {
     conditionPhotoEmpty: "Aún no hay foto",
     invoiceTitle: "Factura y multas",
     invoiceBody:
-      "El anfitrión puede facturar combustible, la tarifa de $20, retraso, peajes, multas, daños o un importe personalizado. El inquilino paga en la app si Stripe está conectado.",
+      "El anfitrión puede facturar combustible, la tarifa de $20, retraso, peajes, multas, daños o un importe personalizado. El inquilino paga en la app si los cobros están conectados.",
     invoiceCreate: "Nueva factura",
     invoiceAddLine: "Añadir línea",
     invoiceRemoveLine: "Quitar línea",
@@ -1241,7 +1241,7 @@ export const es: AppMessages = {
     invoiceKindDamage: "Daños",
     invoiceKindCustom: "Personalizado",
     invoiceStripeScaffold:
-      "El enlace de pago Stripe Connect está preparado — las facturas se guardan en el alquiler aunque el pago con tarjeta aún no esté configurado.",
+      "El enlace de pago con tarjeta está preparado — las facturas se guardan en el alquiler aunque el pago con tarjeta aún no esté configurado.",
     call: "Llamar",
     phoneSharedAfterCheckin: "Los números de teléfono se comparten en el chat tras confirmar la recogida",
     close: "Cerrar",
@@ -1322,7 +1322,7 @@ export const es: AppMessages = {
     hosting: "De anfitrión",
     total: (amount) => `${amount} € en total`,
     inclDelivery: (fee) => `· incl. ${fee} € de entrega`,
-    stripe: "Stripe",
+    stripe: "Tarjeta",
     escalated: "En revisión — resuélvanlo juntos o escribid a soporte",
     returnsIn: (countdown) => `Se devuelve en: ${countdown}`,
     overdueTimer: (overdue) => `Fuera de plazo: ${overdue}`,
@@ -5225,7 +5225,7 @@ export const es: AppMessages = {
         `Consejo experto: para 30+ días, empieza cerca de ${example}. Manténlo por debajo de comprar nuevo: si un mes cuesta más que el artículo, el vecino compra. Ajusta por demanda y desgaste.`,
       securityDeposit: "Fianza",
       securityDepositHint:
-        "Obligatoria. Retención vía Stripe; se libera si vuelve bien. Consejo: fianza = reposición; si desaparece, compras otra. Pon 0 si no quieres retención.",
+        "Obligatoria. Retención en la tarjeta; se libera si vuelve bien. Consejo: fianza = reposición; si desaparece, compras otra. Pon 0 si no quieres retención.",
       securityDepositHintInsurance:
         "En vehículos / equipos, lo principal es el seguro del arrendatario. Alinea la retención con tu deducible máximo (p. ej. ≤ 2.500 → retención ~2.500) — no todo el coche. Pon 0 solo si te basta el seguro.",
       securityDepositHintMonthly:
@@ -5328,7 +5328,7 @@ export const es: AppMessages = {
         `💡 ${label}: tú eliges el importe. El seguro para artículos caros llega después; hasta entonces, pon una fianza con la que te sientas cómodo.`,
       salePrice: "Precio de venta",
       sellNote:
-        "💡 Las ventas de pago van con Stripe. Pon 0 € (o toca Gratis) para regalarlo — sin cobro, solo recogida.",
+        "💡 Las ventas de pago van con tarjeta. Pon 0 € (o toca Gratis) para regalarlo — sin cobro, solo recogida.",
       giftNote:
         "🎁 Gratis = Vender a 0 €. El vecino te escribe para recogerlo — sin tarjeta ni comisión.",
       pricingTipRoi: (count) =>
@@ -5336,7 +5336,7 @@ export const es: AppMessages = {
       pricingTipDefault:
         "Pon el valor de reposición arriba y te sugeriré tarifa diaria, fianza y venta para que sea rentable. Las casillas se llenan solo si tocas Usar mi sugerencia.",
       pricingTipSuggestRent: (daily, deposit) =>
-        `Yo empezaría en ${daily}/día. Pon la fianza en unos ${deposit} — igual que reposición. Si desaparece, compras otra; si vuelve bien, Stripe libera la retención. Tranquilidad para ambos.`,
+        `Yo empezaría en ${daily}/día. Pon la fianza en unos ${deposit} — igual que reposición. Si desaparece, compras otra; si vuelve bien, se libera la retención. Tranquilidad para ambos.`,
       pricingTipSuggestRentInsurance: (daily, deposit) =>
         `Yo empezaría en ${daily}/día. Exige que añadan el activo a su seguro y suban el comprobante antes de la recogida. Retención ~${deposit} (deducible) — no todo el vehículo. Sin prueba, no entregues llaves.`,
       pricingTipSuggestRentMonthlyDeposit: (daily, deposit) =>
@@ -5472,7 +5472,7 @@ export const es: AppMessages = {
       tipEditing:
         "Revisa los cambios y guarda: el QR y el estado del anuncio se quedan como están.",
       tipNew:
-        "Siguiente: inicia sesión para guardar en la estantería. Abre la tienda desde Mi garaje cuando estés listo — Stripe Connect es obligatorio antes de Live.",
+        "Siguiente: inicia sesión para guardar en la estantería. Abre la tienda desde Mi garaje cuando estés listo — los cobros son obligatorios antes de Live.",
       saving: "Guardando...",
       opening: "Abriendo...",
       saveChanges: "Guardar cambios",
@@ -5497,13 +5497,13 @@ export const es: AppMessages = {
       stripeFinishForm:
         "Ya casi: termina identidad + banco en el formulario seguro y luego toca actualizar.",
       stripePending:
-        "Verifica tu identidad y conecta un banco (con Stripe) para que los vecinos puedan pagarte de forma segura.",
+        "Verifica tu identidad y conecta un banco para que los vecinos puedan pagarte de forma segura.",
       openingStripe: "Abriendo...",
       continueStripe: "Conectar finanzas",
       refreshing: "Actualizando...",
       refreshStatus: "Actualizar estado",
       tip: (mascot) =>
-        `${mascot}: Primero a la estantería. Cuando quieras vecinos, abre la tienda en Mi garaje — Stripe Connect es obligatorio antes de Live.`,
+        `${mascot}: Primero a la estantería. Cuando quieras vecinos, abre la tienda en Mi garaje — los cobros son obligatorios antes de Live.`,
       goingLive: "Guardando en la estantería...",
       goLive: "A la estantería",
       completeSteps: "Inicia sesión arriba para continuar",
@@ -5513,7 +5513,7 @@ export const es: AppMessages = {
       connectThenLive: "Conectar finanzas →",
       goLiveWithoutPayouts: "A la estantería sin cobros por ahora",
       goLivePayoutHint:
-        "Tu artículo se queda en la estantería. Abre la tienda desde Mi garaje cuando Stripe esté listo — también obligatorio para regalos.",
+        "Tu artículo se queda en la estantería. Abre la tienda desde Mi garaje cuando los cobros estén listos — también obligatorio para regalos.",
       phoneTitle: "Verificar teléfono",
       phoneDone: "Teléfono verificado por SMS.",
       phonePending:
@@ -6323,7 +6323,7 @@ export const es: AppMessages = {
       subtitle: "Un paso rápido antes de publicar.",
       verifyOnceTitle: "Verifica una vez",
       verifyOnceBody:
-        "Insignia extra opcional. Los cobros usan Stripe Connect (identidad + banco) cuando quieras recibir dinero.",
+        "Insignia extra opcional. Los cobros usan identidad + banco cuando quieras recibir dinero.",
       signInHint: "Inicia sesión para empezar la verificación de identidad.",
       starting: "Empezando...",
       startCta: "Empezar verificación",
@@ -6528,7 +6528,7 @@ export const es: AppMessages = {
     boostBody:
       "Los anuncios impulsados aparecen cerca de la parte superior del feed, con un máximo de 1 impulso por cada 5 orgánicos.",
     boostActiveUntil: (when) => `Impulso activo hasta ${when}`,
-    boostFailed: "El pago del impulso falló. Revisa la configuración de Stripe.",
+    boostFailed: "El pago del impulso falló. Revisa la configuración de pagos o inténtalo de nuevo.",
     boostOpt24h: "2 € · 24 h",
     boostOpt7d: "5 € · 7 d",
     boostOpt30d: "10 € · 30 d",
