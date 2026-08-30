@@ -22,9 +22,6 @@ import {
   APP_NAME,
   BRAND_GREEN,
   BRAND_GREEN_LIGHT,
-  BRAND_SECURE,
-  BRAND_SECURE_DEEP,
-  BRAND_SECURE_SOFT,
 } from "../lib/brand";
 import { useMessages } from "../lib/i18n/react";
 import { ConnectSetupError } from "./payments/ConnectSetupError";
@@ -44,29 +41,29 @@ const CONNECT_APPEARANCE = {
     fontSizeBase: "15px",
     spacingUnit: "10px",
     borderRadius: "14px",
-    colorPrimary: BRAND_SECURE,
+    colorPrimary: BRAND_GREEN,
     colorBackground: PAPER,
     colorText: INK,
     colorSecondaryText: MUTED,
     colorBorder: LINE,
     colorDanger: "#B91C1C",
-    buttonPrimaryColorBackground: BRAND_SECURE,
-    buttonPrimaryColorBorder: BRAND_SECURE,
+    buttonPrimaryColorBackground: BRAND_GREEN,
+    buttonPrimaryColorBorder: BRAND_GREEN,
     buttonPrimaryColorText: "#FFFFFF",
-    buttonSecondaryColorBackground: BRAND_SECURE_SOFT,
-    buttonSecondaryColorBorder: "#D8D6F5",
-    buttonSecondaryColorText: BRAND_SECURE_DEEP,
+    buttonSecondaryColorBackground: MIST,
+    buttonSecondaryColorBorder: LINE,
+    buttonSecondaryColorText: BRAND_GREEN,
     buttonLabelFontWeight: "700",
-    actionPrimaryColorText: BRAND_SECURE,
+    actionPrimaryColorText: BRAND_GREEN,
     actionSecondaryColorText: MUTED,
-    badgeNeutralColorBackground: BRAND_SECURE_SOFT,
-    badgeNeutralColorText: BRAND_SECURE_DEEP,
-    badgeNeutralColorBorder: "#D8D6F5",
+    badgeNeutralColorBackground: MIST,
+    badgeNeutralColorText: BRAND_GREEN,
+    badgeNeutralColorBorder: LINE,
     badgeSuccessColorBackground: "#D1FAE5",
     badgeSuccessColorText: BRAND_GREEN,
     badgeSuccessColorBorder: "#A7F3D0",
-    formAccentColor: BRAND_SECURE,
-    formHighlightColorBorder: BRAND_SECURE,
+    formAccentColor: BRAND_GREEN,
+    formHighlightColorBorder: BRAND_GREEN,
     overlayBackdropColor: "rgba(6, 42, 28, 0.5)",
   },
 };
@@ -266,14 +263,14 @@ export function ConnectOnboardingHost() {
       aria-modal="true"
       aria-labelledby="connect-onboarding-title"
       style={{
-        background: `linear-gradient(168deg, #041f16 0%, ${BRAND_GREEN} 42%, #0c3d2e 78%, #1e1a4a 100%)`,
+        background: `linear-gradient(168deg, #041f16 0%, ${BRAND_GREEN} 48%, #0c3d2e 100%)`,
       }}
     >
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.2]"
+        className="pointer-events-none absolute inset-0 opacity-[0.22]"
         style={{
           backgroundImage:
-            "radial-gradient(ellipse at 15% 0%, rgba(255,255,255,0.35) 0%, transparent 45%), radial-gradient(ellipse at 100% 100%, rgba(99,91,255,0.45) 0%, transparent 48%)",
+            "radial-gradient(ellipse at 15% 0%, rgba(255,255,255,0.35) 0%, transparent 45%), radial-gradient(ellipse at 100% 100%, rgba(26,158,110,0.35) 0%, transparent 48%)",
         }}
       />
 
@@ -286,12 +283,11 @@ export function ConnectOnboardingHost() {
             <span
               className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/95"
               style={{
-                backgroundColor: "rgba(99,91,255,0.32)",
-                border: "1px solid rgba(255,255,255,0.2)",
+                backgroundColor: "rgba(26,158,110,0.35)",
+                border: "1px solid rgba(255,255,255,0.22)",
               }}
             >
               <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: BRAND_GREEN_LIGHT }} />
-              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "#C4C0FF" }} />
               {t.profile.connectLaneBadge}
             </span>
           </div>
@@ -328,25 +324,9 @@ export function ConnectOnboardingHost() {
               <img
                 src={connectAssets.securePreview}
                 alt={t.profile.connectIntroAlt}
-                className="mx-auto h-auto max-h-[min(42vh,380px)] w-full max-w-[260px] rounded-2xl object-contain object-top"
+                className="mx-auto h-auto max-h-[min(48vh,420px)] w-full max-w-[280px] rounded-2xl object-contain object-top"
                 style={{ backgroundColor: "#FFFFFF" }}
               />
-              <ul className="mx-auto mt-3 max-w-[28rem] space-y-2 px-1">
-                {t.profile.connectIntroPoints.map((point) => (
-                  <li
-                    key={point}
-                    className="flex gap-2 text-[12px] leading-snug"
-                    style={{ color: INK }}
-                  >
-                    <span
-                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
-                      style={{ backgroundColor: BRAND_SECURE }}
-                      aria-hidden
-                    />
-                    <span>{point}</span>
-                  </li>
-                ))}
-              </ul>
               <p
                 className="mx-auto mt-3 max-w-[28rem] text-center text-[12px] leading-relaxed"
                 style={{ color: MUTED }}
@@ -356,19 +336,19 @@ export function ConnectOnboardingHost() {
             </div>
             <div
               className="shrink-0 space-y-2 border-t px-4 py-3"
-              style={{ borderColor: "#D8D6F5", backgroundColor: BRAND_SECURE_SOFT }}
+              style={{ borderColor: LINE, backgroundColor: MIST }}
             >
               <button
                 type="button"
                 onClick={startForm}
                 className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[15px] font-bold text-white active:opacity-90"
-                style={{ backgroundColor: BRAND_SECURE }}
+                style={{ backgroundColor: BRAND_GREEN }}
               >
                 {t.profile.connectIntroCta}
               </button>
               <p
                 className="flex items-center justify-center gap-1.5 text-[11px] font-medium"
-                style={{ color: BRAND_SECURE_DEEP }}
+                style={{ color: BRAND_GREEN }}
               >
                 <ShieldCheck className="h-3.5 w-3.5" />
                 {t.profile.connectSecureFooter}
@@ -388,7 +368,7 @@ export function ConnectOnboardingHost() {
                       else retryBoot();
                     }}
                     className="w-full rounded-xl py-3 text-sm font-bold text-white"
-                    style={{ backgroundColor: BRAND_SECURE }}
+                    style={{ backgroundColor: BRAND_GREEN }}
                   >
                     {intent === "onboard" ? t.profile.connectIntroBack : t.systemUi.tryAgain}
                   </button>
@@ -408,11 +388,12 @@ export function ConnectOnboardingHost() {
                   <img
                     src={connectAssets.securePreview}
                     alt={t.profile.connectIntroAlt}
-                    className="w-full max-w-[320px] rounded-2xl object-contain opacity-90 shadow-sm"
+                    className="w-full max-w-[300px] rounded-2xl object-contain shadow-sm"
+                    style={{ backgroundColor: "#FFFFFF" }}
                   />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-white/55 backdrop-blur-[2px]">
-                    <Loader2 className="h-7 w-7 animate-spin" style={{ color: BRAND_SECURE }} />
-                    <p className="text-[13px] font-medium" style={{ color: MUTED }}>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-white/60 backdrop-blur-[2px]">
+                    <Loader2 className="h-7 w-7 animate-spin" style={{ color: BRAND_GREEN }} />
+                    <p className="px-4 text-center text-[13px] font-medium" style={{ color: MUTED }}>
                       {t.profile.openingStripe}
                     </p>
                   </div>
@@ -457,10 +438,10 @@ export function ConnectOnboardingHost() {
 
             <footer
               className="flex shrink-0 items-center justify-center gap-1.5 border-t px-4 py-2.5"
-              style={{ borderColor: "#D8D6F5", backgroundColor: BRAND_SECURE_SOFT }}
+              style={{ borderColor: LINE, backgroundColor: MIST }}
             >
-              <ShieldCheck className="h-3.5 w-3.5" style={{ color: BRAND_SECURE }} />
-              <p className="text-[11px] font-medium" style={{ color: BRAND_SECURE_DEEP }}>
+              <ShieldCheck className="h-3.5 w-3.5" style={{ color: BRAND_GREEN }} />
+              <p className="text-[11px] font-medium" style={{ color: BRAND_GREEN }}>
                 {t.profile.connectSecureFooter}
               </p>
             </footer>

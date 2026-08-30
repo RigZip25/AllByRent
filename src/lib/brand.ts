@@ -32,9 +32,8 @@ export const BRAND_AMBER = "#F59E0B";
 export const BRAND_BROWSE_ORANGE = "#FF8A3D";
 export const BRAND_GREEN_LIGHT = "#1A9E6E";
 /**
- * Secure-finance accent (payouts / Connect only).
- * Matches Stripe’s hosted CTA purple so green chrome + violet actions feel like one system
- * when SMS auth opens on connect.stripe.com — not a random clash.
+ * Secure-finance accent (legacy Connect purple). Prefer BRAND_GREEN for Evorios-first UI.
+ * Stripe-hosted Express chrome is branded in Dashboard, not via this token.
  */
 export const BRAND_SECURE = "#635BFF";
 export const BRAND_SECURE_SOFT = "#EEF0FF";

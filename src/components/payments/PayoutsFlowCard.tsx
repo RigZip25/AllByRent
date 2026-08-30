@@ -277,21 +277,6 @@ export function PayoutsFlowCard({
           <span className="mt-4 h-px min-w-[12px] flex-1 bg-[#E2E8E4]" aria-hidden />
           <StepDot index={3} label={t.payoutsFlowStepReady} state={step3} />
         </div>
-
-        {showArt ? (
-          <ul className="mt-4 space-y-2 px-0.5">
-            {t.connectIntroPoints.map((point) => (
-              <li key={point} className="flex gap-2.5 text-[13px] leading-snug" style={{ color: INK }}>
-                <span
-                  className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: GREEN }}
-                  aria-hidden
-                />
-                <span>{point}</span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
       </div>
 
       <div className="space-y-3 border-t px-4 py-4 sm:px-5" style={{ borderColor: BORDER }}>
