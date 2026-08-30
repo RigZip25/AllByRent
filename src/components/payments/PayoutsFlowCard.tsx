@@ -1,10 +1,9 @@
 import type { ReactNode } from "react";
 import { Check, CreditCard, Landmark, Loader2, ShieldCheck, Wallet } from "lucide-react";
-import { BRAND_SECURE, BRAND_SECURE_SOFT } from "../lib/brand";
-import { useMessages } from "../lib/i18n/react";
+import { BRAND_SECURE, BRAND_SECURE_SOFT } from "../../lib/brand";
+import { useMessages } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
-const GREEN_LIGHT = "#1A9E6E";
 const BORDER = "#E8E6E0";
 const INK = "#0B3D2A";
 

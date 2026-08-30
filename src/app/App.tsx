@@ -272,7 +272,6 @@ const BOOT_SCREEN_ALIASES: Partial<Record<string, Screen>> = {
   coHosts: "coHosts",
   /** Stripe Connect return from Account settings */
   personalInfo: "personalInfo",
-  earnBusiness: "earnBusiness",
   postRequest: "postRequest",
   activeRental: "activeRental",
   listingChat: "listingChat",
@@ -285,7 +284,6 @@ const BOOT_SCREEN_ALIASES: Partial<Record<string, Screen>> = {
   "like-to-do-list": "home",
   rental: "rentals",
   "earning-your-stuff": "earnBusiness",
-  earnBusiness: "earnBusiness",
   ops: "ops",
   admin: "ops",
   feedback: "feedback",
