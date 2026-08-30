@@ -9,9 +9,14 @@ import {
 import {
   emitConnectOnboardingDone,
   registerConnectOnboardingOpener,
+  type ConnectOnboardingIntent,
 } from "../lib/connectOnboardingBus";
 import { connectAssets } from "../lib/connectAssets";
-import { createConnectAccountSession, syncConnectAccountStatus } from "../lib/stripePayments";
+import {
+  createConnectAccountLink,
+  createConnectAccountSession,
+  syncConnectAccountStatus,
+} from "../lib/stripePayments";
 import { getStripePublishableKey } from "../lib/stripeConfig";
 import {
   APP_NAME,
@@ -31,10 +36,6 @@ const MUTED = "#5C6B63";
 const LINE = "#D8E0DA";
 const MIST = "#E8F2EC";
 
-/**
- * Green Evorios chrome + violet secure actions — matches the branded preview art
- * and Stripe’s finance purple if a hosted SMS step still appears.
- */
 const CONNECT_APPEARANCE = {
   overlays: "dialog" as const,
   variables: {
@@ -71,31 +72,40 @@ const CONNECT_APPEARANCE = {
 };
 
 type ConnectUiMode = "onboarding" | "management";
+type Phase = "intro" | "form";
 
-/** Full-screen Evorios payouts sheet — opens straight into Connect form (no double intro). */
+/**
+ * Evorios payouts sheet:
+ * 1) Branded intro with art (first-time)
+ * 2) Continue → hosted Account Link (reliable on mobile) or embedded management
+ */
 export function ConnectOnboardingHost() {
   const t = useMessages();
   const [open, setOpen] = useState(false);
+  const [phase, setPhase] = useState<Phase>("intro");
+  const [intent, setIntent] = useState<ConnectOnboardingIntent>("onboard");
   const [returnPath, setReturnPath] = useState("/?screen=garage");
   const [connectInstance, setConnectInstance] = useState<StripeConnectInstance | null>(null);
   const [uiMode, setUiMode] = useState<ConnectUiMode>("onboarding");
   const [bootError, setBootError] = useState<string | null>(null);
   const [bootErrorCode, setBootErrorCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-
   const [bootKey, setBootKey] = useState(0);
 
   useEffect(() => {
     return registerConnectOnboardingOpener((opts) => {
+      const nextIntent = opts.intent === "manage" ? "manage" : "onboard";
       setBootError(null);
       setBootErrorCode(null);
       setConnectInstance(null);
-      setUiMode("onboarding");
-      setBusy(true);
+      setUiMode(nextIntent === "manage" ? "management" : "onboarding");
+      setIntent(nextIntent);
+      setBusy(false);
       setReturnPath(opts.returnPath || "/?screen=garage");
+      // First-time: show art intro. Management: go straight to embedded form.
+      setPhase(nextIntent === "manage" ? "form" : "intro");
       setOpen((wasOpen) => {
-        if (wasOpen) {
-          // Re-open while already visible — bump boot key after this commit.
+        if (wasOpen && nextIntent === "manage") {
           queueMicrotask(() => setBootKey((k) => k + 1));
         }
         return true;
@@ -103,15 +113,9 @@ export function ConnectOnboardingHost() {
     });
   }, []);
 
+  // Boot Stripe / Account Link only after intro Continue (or immediately for manage).
   useEffect(() => {
-    if (!open) return;
-
-    const key = getStripePublishableKey();
-    if (!key) {
-      setBootError("Payouts aren’t configured yet. Try again later or contact support.");
-      setBusy(false);
-      return;
-    }
+    if (!open || phase !== "form") return;
 
     let cancelled = false;
     setBusy(true);
@@ -121,6 +125,27 @@ export function ConnectOnboardingHost() {
 
     void (async () => {
       try {
+        // First-time onboarding: hosted Account Link after the branded intro.
+        if (intent === "onboard") {
+          const link = await createConnectAccountLink(returnPath);
+          if (cancelled) return;
+          if (!link.ok) {
+            setBootError(link.reason);
+            setBootErrorCode(link.code ?? null);
+            setBusy(false);
+            return;
+          }
+          window.location.assign(link.url);
+          return;
+        }
+
+        const key = getStripePublishableKey();
+        if (!key) {
+          setBootError("Payouts aren’t configured yet. Try again later or contact support.");
+          setBusy(false);
+          return;
+        }
+
         const first = await createConnectAccountSession();
         if (cancelled) return;
         if (!first.ok) {
@@ -171,10 +196,11 @@ export function ConnectOnboardingHost() {
     return () => {
       cancelled = true;
     };
-  }, [open, bootKey, t.profile.connectEmbeddedFailed]);
+  }, [open, phase, intent, returnPath, bootKey, t.profile.connectEmbeddedFailed]);
 
   const close = useCallback(() => {
     setOpen(false);
+    setPhase("intro");
     setConnectInstance(null);
     setBootError(null);
     setBootErrorCode(null);
@@ -185,7 +211,9 @@ export function ConnectOnboardingHost() {
     void (async () => {
       setBusy(true);
       try {
-        await syncConnectAccountStatus();
+        if (phase === "form" && intent === "manage") {
+          await syncConnectAccountStatus();
+        }
       } finally {
         let screen = "garage";
         try {
@@ -200,7 +228,13 @@ export function ConnectOnboardingHost() {
         close();
       }
     })();
-  }, [close, returnPath]);
+  }, [close, phase, intent, returnPath]);
+
+  const startForm = useCallback(() => {
+    setBootError(null);
+    setBootErrorCode(null);
+    setPhase("form");
+  }, []);
 
   const retryBoot = useCallback(() => {
     setBootError(null);
@@ -212,9 +246,17 @@ export function ConnectOnboardingHost() {
   if (!open) return null;
 
   const title =
-    uiMode === "management" ? t.profile.connectManageTitle : t.profile.connectEmbeddedTitle;
+    phase === "intro"
+      ? t.profile.connectIntroTitle
+      : uiMode === "management"
+        ? t.profile.connectManageTitle
+        : t.profile.connectEmbeddedTitle;
   const body =
-    uiMode === "management" ? t.profile.connectManageBody : t.profile.connectEmbeddedBody;
+    phase === "intro"
+      ? t.profile.connectIntroBody
+      : uiMode === "management"
+        ? t.profile.connectManageBody
+        : t.profile.connectEmbeddedBody;
 
   return (
     <div
@@ -273,98 +315,157 @@ export function ConnectOnboardingHost() {
       </header>
 
       <div
-        className="relative z-[1] mx-3 mb-[max(0.75rem,env(safe-area-inset-bottom))] flex min-h-0 flex-1 flex-col rounded-[1.35rem] border shadow-2xl sm:mx-auto sm:w-full sm:max-w-[480px]"
+        className="relative z-[1] mx-3 mb-[max(0.75rem,env(safe-area-inset-bottom))] flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.35rem] border shadow-2xl sm:mx-auto sm:w-full sm:max-w-[480px]"
         style={{
           backgroundColor: SURFACE,
           borderColor: "rgba(255,255,255,0.28)",
         }}
       >
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-2 pt-2 sm:px-3">
-          {bootError ? (
-            <div className="space-y-3 px-2 py-3">
-              <ConnectSetupError message={bootError} code={bootErrorCode} />
-              <button
-                type="button"
-                onClick={retryBoot}
-                className="w-full rounded-xl py-3 text-sm font-bold text-white"
-                style={{ backgroundColor: BRAND_SECURE }}
-              >
-                {t.systemUi.tryAgain}
-              </button>
-              <button
-                type="button"
-                onClick={handleExit}
-                className="w-full rounded-xl py-3 text-sm font-bold"
-                style={{ backgroundColor: MIST, color: BRAND_GREEN }}
-              >
-                {t.profile.connectEmbeddedDone}
-              </button>
-            </div>
-          ) : null}
-
-          {!bootError && (busy || !connectInstance) ? (
-            <div className="relative flex flex-col items-center justify-center gap-3 px-2 py-6">
+        {phase === "intro" ? (
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-2 pt-3">
               <img
                 src={connectAssets.securePreview}
                 alt={t.profile.connectIntroAlt}
-                className="w-full max-w-[320px] rounded-2xl object-contain opacity-90 shadow-sm"
+                className="mx-auto h-auto max-h-[min(42vh,380px)] w-full max-w-[260px] rounded-2xl object-contain object-top"
+                style={{ backgroundColor: "#FFFFFF" }}
               />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-white/55 backdrop-blur-[2px]">
-                <Loader2 className="h-7 w-7 animate-spin" style={{ color: BRAND_SECURE }} />
-                <p className="text-[13px] font-medium" style={{ color: MUTED }}>
-                  {t.profile.openingStripe}
-                </p>
-              </div>
+              <ul className="mx-auto mt-3 max-w-[28rem] space-y-2 px-1">
+                {t.profile.connectIntroPoints.map((point) => (
+                  <li
+                    key={point}
+                    className="flex gap-2 text-[12px] leading-snug"
+                    style={{ color: INK }}
+                  >
+                    <span
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: BRAND_SECURE }}
+                      aria-hidden
+                    />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+              <p
+                className="mx-auto mt-3 max-w-[28rem] text-center text-[12px] leading-relaxed"
+                style={{ color: MUTED }}
+              >
+                {t.profile.connectIntroHint}
+              </p>
             </div>
-          ) : null}
-
-          {!bootError && connectInstance ? (
             <div
-              className="min-h-[320px] rounded-2xl border px-1 py-1"
-              style={{
-                borderColor: LINE,
-                backgroundColor: PAPER,
-              }}
+              className="shrink-0 space-y-2 border-t px-4 py-3"
+              style={{ borderColor: "#D8D6F5", backgroundColor: BRAND_SECURE_SOFT }}
             >
-              <ConnectComponentsProvider connectInstance={connectInstance}>
-                {uiMode === "management" ? (
-                  <ConnectAccountManagement
-                    collectionOptions={{
-                      fields: "eventually_due",
-                      futureRequirements: "include",
-                    }}
-                    onLoadError={({ error }) => {
-                      setBootError(error.message || t.profile.connectEmbeddedFailed);
-                    }}
-                  />
-                ) : (
-                  <ConnectAccountOnboarding
-                    onExit={handleExit}
-                    collectionOptions={{
-                      fields: "eventually_due",
-                      futureRequirements: "include",
-                    }}
-                    onLoadError={({ error }) => {
-                      setBootError(error.message || t.profile.connectEmbeddedFailed);
-                    }}
-                  />
-                )}
-              </ConnectComponentsProvider>
+              <button
+                type="button"
+                onClick={startForm}
+                className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[15px] font-bold text-white active:opacity-90"
+                style={{ backgroundColor: BRAND_SECURE }}
+              >
+                {t.profile.connectIntroCta}
+              </button>
+              <p
+                className="flex items-center justify-center gap-1.5 text-[11px] font-medium"
+                style={{ color: BRAND_SECURE_DEEP }}
+              >
+                <ShieldCheck className="h-3.5 w-3.5" />
+                {t.profile.connectSecureFooter}
+              </p>
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : (
+          <>
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-2 pt-2 sm:px-3">
+              {bootError ? (
+                <div className="space-y-3 px-2 py-3">
+                  <ConnectSetupError message={bootError} code={bootErrorCode} />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (intent === "onboard") setPhase("intro");
+                      else retryBoot();
+                    }}
+                    className="w-full rounded-xl py-3 text-sm font-bold text-white"
+                    style={{ backgroundColor: BRAND_SECURE }}
+                  >
+                    {intent === "onboard" ? t.profile.connectIntroBack : t.systemUi.tryAgain}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExit}
+                    className="w-full rounded-xl py-3 text-sm font-bold"
+                    style={{ backgroundColor: MIST, color: BRAND_GREEN }}
+                  >
+                    {t.profile.connectEmbeddedDone}
+                  </button>
+                </div>
+              ) : null}
 
-        <footer
-          className="flex shrink-0 items-center justify-center gap-1.5 border-t px-4 py-2.5"
-          style={{ borderColor: "#D8D6F5", backgroundColor: BRAND_SECURE_SOFT }}
-        >
-          <ShieldCheck className="h-3.5 w-3.5" style={{ color: BRAND_SECURE }} />
-          <p className="text-[11px] font-medium" style={{ color: BRAND_SECURE_DEEP }}>
-            {t.profile.connectSecureFooter}
-          </p>
-        </footer>
+              {!bootError && (busy || (intent === "manage" && !connectInstance)) ? (
+                <div className="relative flex flex-col items-center justify-center gap-3 px-2 py-6">
+                  <img
+                    src={connectAssets.securePreview}
+                    alt={t.profile.connectIntroAlt}
+                    className="w-full max-w-[320px] rounded-2xl object-contain opacity-90 shadow-sm"
+                  />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-white/55 backdrop-blur-[2px]">
+                    <Loader2 className="h-7 w-7 animate-spin" style={{ color: BRAND_SECURE }} />
+                    <p className="text-[13px] font-medium" style={{ color: MUTED }}>
+                      {t.profile.openingStripe}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+
+              {!bootError && connectInstance ? (
+                <div
+                  className="min-h-[320px] rounded-2xl border px-1 py-1"
+                  style={{
+                    borderColor: LINE,
+                    backgroundColor: PAPER,
+                  }}
+                >
+                  <ConnectComponentsProvider connectInstance={connectInstance}>
+                    {uiMode === "management" ? (
+                      <ConnectAccountManagement
+                        collectionOptions={{
+                          fields: "eventually_due",
+                          futureRequirements: "include",
+                        }}
+                        onLoadError={({ error }) => {
+                          setBootError(error.message || t.profile.connectEmbeddedFailed);
+                        }}
+                      />
+                    ) : (
+                      <ConnectAccountOnboarding
+                        onExit={handleExit}
+                        collectionOptions={{
+                          fields: "eventually_due",
+                          futureRequirements: "include",
+                        }}
+                        onLoadError={({ error }) => {
+                          setBootError(error.message || t.profile.connectEmbeddedFailed);
+                        }}
+                      />
+                    )}
+                  </ConnectComponentsProvider>
+                </div>
+              ) : null}
+            </div>
+
+            <footer
+              className="flex shrink-0 items-center justify-center gap-1.5 border-t px-4 py-2.5"
+              style={{ borderColor: "#D8D6F5", backgroundColor: BRAND_SECURE_SOFT }}
+            >
+              <ShieldCheck className="h-3.5 w-3.5" style={{ color: BRAND_SECURE }} />
+              <p className="text-[11px] font-medium" style={{ color: BRAND_SECURE_DEEP }}>
+                {t.profile.connectSecureFooter}
+              </p>
+            </footer>
+          </>
+        )}
       </div>
     </div>
   );
 }
-

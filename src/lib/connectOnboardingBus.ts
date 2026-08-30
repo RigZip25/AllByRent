@@ -1,5 +1,9 @@
+export type ConnectOnboardingIntent = "onboard" | "manage";
+
 export type ConnectOnboardingOpenOpts = {
   returnPath: string;
+  /** onboard = branded intro then Account Link; manage = embedded account settings. */
+  intent?: ConnectOnboardingIntent;
 };
 
 type Opener = (opts: ConnectOnboardingOpenOpts) => void;
@@ -16,7 +20,7 @@ export function registerConnectOnboardingOpener(fn: Opener): () => void {
   };
 }
 
-/** Opens embedded Connect sheet if host is mounted. Returns false → caller should use Account Link redirect. */
+/** Opens Connect sheet if host is mounted. Returns false → caller should fall back. */
 export function openConnectOnboardingSheet(opts: ConnectOnboardingOpenOpts): boolean {
   if (!opener) return false;
   opener(opts);

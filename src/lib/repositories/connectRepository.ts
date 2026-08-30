@@ -109,9 +109,9 @@ async function runConnectPrechecks(
 }
 
 /**
- * Prefer in-app embedded Connect for account management (already onboarded).
- * First-time / incomplete onboarding uses Account Link redirect — Express SMS
- * auth popups from the embedded component often fail silently on mobile Safari.
+ * Always open the in-app Connect sheet when mounted:
+ * - Incomplete onboarding → branded intro (art) → Account Link (reliable on mobile)
+ * - Already onboarded + allowUpdate → embedded Account Management
  */
 export async function startConnectOnboarding(
   returnPath = "/?screen=garage",
@@ -127,8 +127,10 @@ export async function startConnectOnboarding(
   const status = await loadConnectStatus(userId);
   const needsOnboarding = !status.payoutsEnabled && !status.onboardingComplete;
 
-  // Incomplete Connect → hosted Account Link (reliable transition on iOS Safari).
   if (needsOnboarding) {
+    if (openConnectOnboardingSheet({ returnPath, intent: "onboard" })) {
+      return { ok: true, mode: "embedded" };
+    }
     const result = await createConnectAccountLink(returnPath);
     if (!result.ok) {
       return { ok: false, reason: result.reason, ...(result.code ? { code: result.code } : {}) };
@@ -136,8 +138,7 @@ export async function startConnectOnboarding(
     return { ok: true, mode: "redirect", url: result.url };
   }
 
-  // Already onboarded — open embedded Account Management (allowUpdate / profile).
-  if (opts?.allowUpdate && openConnectOnboardingSheet({ returnPath })) {
+  if (opts?.allowUpdate && openConnectOnboardingSheet({ returnPath, intent: "manage" })) {
     return { ok: true, mode: "embedded" };
   }
 
@@ -148,7 +149,6 @@ export async function startConnectOnboarding(
     };
   }
 
-  // Setup flows already treated complete accounts as soft-stop in prechecks.
   return {
     ok: false,
     code: "already_connected",
