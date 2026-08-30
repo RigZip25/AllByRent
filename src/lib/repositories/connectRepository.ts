@@ -114,7 +114,7 @@ async function runConnectPrechecks(
  * - Already onboarded + allowUpdate → embedded Account Management
  */
 export async function startConnectOnboarding(
-  returnPath = "/?screen=garage",
+  returnPath = "/?screen=personalInfo",
   opts?: StartConnectOptions,
 ): Promise<ConnectOnboardingResult> {
   const pre = await runConnectPrechecks(opts);

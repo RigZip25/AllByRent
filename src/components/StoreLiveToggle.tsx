@@ -227,7 +227,7 @@ export function StoreLiveToggle({ onOpenProfile }: Props) {
     setBusy("stripe");
     setError(null);
     setErrorCode(null);
-    void startConnectOnboarding("/?screen=garage")
+    void startConnectOnboarding("/?screen=personalInfo")
       .then((result) => {
         if (result.ok) {
           if (result.mode === "redirect") {

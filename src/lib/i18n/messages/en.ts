@@ -465,7 +465,18 @@ export const en: AppMessages = {
     payoutsEnabled: (last4) =>
       last4 ? `Payouts enabled · **** ${last4}` : "Payouts enabled",
     pendingVerification: "Pending verification",
+    finishPayoutSetup: "Finish payout setup",
     requiredPayouts: "Required to receive payouts",
+    connectReturnSuccessTitle: "You’re set up to get paid",
+    connectReturnSuccessBody:
+      "Bank connection looks good. Neighbors can pay in-app — money goes to your account after deals.",
+    connectReturnPendingTitle: "Thanks — submitted for review",
+    connectReturnPendingBody:
+      "Stripe is checking your details. Payouts unlock when verification finishes (often within a day).",
+    connectReturnContinueTitle: "Almost there",
+    connectReturnContinueBody:
+      "Payout setup isn’t finished yet. Tap Connect bank account below to continue where you left off.",
+    connectReturnGotIt: "Got it",
     reviews: "Reviews",
     noComment: "No comment",
     trustPayments: "Trust & payments",

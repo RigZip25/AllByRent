@@ -27,18 +27,25 @@ export function openConnectOnboardingSheet(opts: ConnectOnboardingOpenOpts): boo
   return true;
 }
 
-export function emitConnectOnboardingDone(detail?: { screen?: string }): void {
+export function emitConnectOnboardingDone(detail?: {
+  screen?: string;
+  outcome?: "done" | "refresh" | "embedded";
+}): void {
   if (typeof window === "undefined") return;
   window.dispatchEvent(
     new CustomEvent(CONNECT_ONBOARDING_DONE_EVENT, { detail: detail ?? {} }),
   );
 }
 
-export function onConnectOnboardingDone(cb: (detail?: { screen?: string }) => void): () => void {
+export function onConnectOnboardingDone(
+  cb: (detail?: { screen?: string; outcome?: "done" | "refresh" | "embedded" }) => void,
+): () => void {
   if (typeof window === "undefined") return () => {};
   const handler = (event: Event) => {
     const detail =
-      event instanceof CustomEvent ? (event.detail as { screen?: string } | undefined) : undefined;
+      event instanceof CustomEvent
+        ? (event.detail as { screen?: string; outcome?: "done" | "refresh" | "embedded" } | undefined)
+        : undefined;
     cb(detail);
   };
   window.addEventListener(CONNECT_ONBOARDING_DONE_EVENT, handler);

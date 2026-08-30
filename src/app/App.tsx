@@ -130,7 +130,9 @@ import { IdentityVerificationScreen } from "../screens/IdentityVerificationScree
 import { AgentActivityScreen } from "../screens/AgentActivityScreen";
 import { BottomNav, type BottomNavTab } from "./components/BottomNav";
 import { removeStripeControllerIframes } from "../lib/stripeCleanup";
-import { onConnectOnboardingDone } from "../lib/connectOnboardingBus";
+import { onConnectOnboardingDone, emitConnectOnboardingDone } from "../lib/connectOnboardingBus";
+import { captureConnectReturnFromUrl, peekConnectReturn } from "../lib/connectReturn";
+import { syncConnectAccountStatus } from "../lib/stripePayments";
 import {
   clearYardSaleListingActive,
   isYardSaleListingActive,
@@ -268,6 +270,8 @@ const BOOT_SCREEN_ALIASES: Partial<Record<string, Screen>> = {
   listItem: "listItem",
   identity: "identity",
   coHosts: "coHosts",
+  /** Stripe Connect return from Account settings */
+  personalInfo: "personalInfo",
   postRequest: "postRequest",
   activeRental: "activeRental",
   listingChat: "listingChat",
@@ -561,6 +565,18 @@ function AppRoutes() {
     }
     // Invalid /rent/... path — fall through to normal app rather than trapping.
     if (boot.screen === "splash") return "splash";
+
+    // After Stripe Account Link: land in Account settings to confirm bank status
+    // (list/snap flows keep their resume screen so drafts aren't lost).
+    const connectReturn = captureConnectReturnFromUrl();
+    if (connectReturn) {
+      markIntroDone();
+      completeOnboarding();
+      const resume = resolveBootScreenParam(boot.screen);
+      if (resume === "listItem" || resume === "snapSale") return resume;
+      return "personalInfo";
+    }
+
     const bootScreen = resolveBootScreenParam(boot.screen);
     // Explicit screen= wins over listingId deep links (Stripe Connect return URLs).
     if (bootScreen) {
@@ -785,6 +801,40 @@ function AppRoutes() {
         setCurrentScreen(raw as Screen);
       });
     });
+  }, []);
+
+  /** Stripe Account Link return: sync status, celebrate in settings, clean URL. */
+  useEffect(() => {
+    const flag = captureConnectReturnFromUrl() ?? peekConnectReturn();
+    if (!flag) return;
+
+    markIntroDone();
+    completeOnboarding();
+
+    const params = new URLSearchParams(window.location.search);
+    const resume = resolveBootScreenParam(params.get("screen"));
+    const land: Screen =
+      resume === "listItem" || resume === "snapSale" ? resume : "personalInfo";
+
+    startTransition(() => {
+      setNavStack([]);
+      setCurrentScreen(land);
+    });
+
+    let cancelled = false;
+    void (async () => {
+      await syncConnectAccountStatus().catch(() => null);
+      if (cancelled) return;
+      emitConnectOnboardingDone({
+        screen: land,
+        outcome: flag === "done" ? "done" : "refresh",
+      });
+      clearBootQuery(["screen", "skipSplash", "connect", "listingId"]);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const finishOnboardingToHome = useCallback(() => {

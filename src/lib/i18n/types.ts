@@ -546,8 +546,19 @@ export type AppMessages = {
     connectIntroBack: string;
     connectSecureFooter: string;
     payoutsEnabled: (last4?: string) => string;
+    /** Submitted to Stripe; waiting on review / bank confirmation */
     pendingVerification: string;
+    /** Express account exists but host still needs to finish bank / KYC */
+    finishPayoutSetup: string;
     requiredPayouts: string;
+    /** After Stripe Account Link return */
+    connectReturnSuccessTitle: string;
+    connectReturnSuccessBody: string;
+    connectReturnPendingTitle: string;
+    connectReturnPendingBody: string;
+    connectReturnContinueTitle: string;
+    connectReturnContinueBody: string;
+    connectReturnGotIt: string;
     reviews: string;
     noComment: string;
     trustPayments: string;

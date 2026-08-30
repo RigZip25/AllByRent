@@ -38,8 +38,10 @@ const HOST_RESUME_SCREENS = new Set([
   "listingIntro",
   "snapSale",
   "profile",
+  "personalInfo",
   "identity",
   "coHosts",
+  "garage",
 ]);
 
 export function parseDeepLink(search = "", pathname = ""): ParsedDeepLink {

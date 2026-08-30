@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { ArrowLeft, BadgeCheck, CreditCard, Loader2, Mail, Phone, User, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  BadgeCheck,
+  CheckCircle2,
+  CreditCard,
+  Loader2,
+  Mail,
+  Phone,
+  User,
+  Users,
+} from "lucide-react";
 import { ProfileFieldEditSheet } from "../../components/profile/ProfileFieldEditSheet";
 import { PhoneVerifySheet } from "../../components/profile/PhoneVerifySheet";
 import { ConnectSetupError } from "../../components/payments/ConnectSetupError";
@@ -19,12 +29,18 @@ import {
 import { formatUsPhoneDisplay } from "../../lib/usPhoneFormat";
 import { loadConnectStatus, startConnectOnboarding } from "../../lib/repositories/connectRepository";
 import { onConnectOnboardingDone } from "../../lib/connectOnboardingBus";
+import {
+  consumeConnectReturn,
+  peekConnectReturn,
+  type ConnectReturnFlag,
+} from "../../lib/connectReturn";
 import { BRAND_SECURE } from "../../lib/brand";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
 
 type EditField = "name" | "phone" | "dob" | null;
+type ConnectCelebrateTone = "success" | "pending" | "continue";
 
 function Row({
   icon,
@@ -82,6 +98,16 @@ function Row({
   );
 }
 
+function connectCelebrateTone(
+  flag: ConnectReturnFlag | null,
+  status: { payoutsEnabled: boolean; onboardingComplete: boolean },
+): ConnectCelebrateTone {
+  if (flag === "refresh") return "continue";
+  if (status.payoutsEnabled) return "success";
+  if (status.onboardingComplete) return "pending";
+  return "continue";
+}
+
 export function PersonalInfoScreen({
   onBack,
   onDeleteAccount,
@@ -102,11 +128,16 @@ export function PersonalInfoScreen({
   const [stripeStatus, setStripeStatus] = useState<{
     connected: boolean;
     payoutsEnabled: boolean;
+    onboardingComplete: boolean;
     last4?: string | null;
-  }>({ connected: false, payoutsEnabled: false, last4: null });
+  }>({ connected: false, payoutsEnabled: false, onboardingComplete: false, last4: null });
   const [connectBusy, setConnectBusy] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
   const [connectErrorCode, setConnectErrorCode] = useState<string | null>(null);
+  const [connectReturnFlag, setConnectReturnFlag] = useState<ConnectReturnFlag | null>(() =>
+    peekConnectReturn(),
+  );
+  const [showConnectReturn, setShowConnectReturn] = useState(() => peekConnectReturn() !== null);
 
   useEffect(() => {
     if (initialEdit === "name") setEditing("name");
@@ -138,11 +169,15 @@ export function PersonalInfoScreen({
       await refreshPhoneVerifiedFromRemote(auth.userId);
       if (!mounted) return;
       setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
-      setStripeStatus({
+      // Do not treat "account id exists" as bank done — Express creates the account
+      // as soon as onboarding starts, before bank / KYC finish.
+      setStripeStatus((prev) => ({
+        ...prev,
         connected: Boolean(remote.stripe_connect_account_id),
         payoutsEnabled: Boolean(remote.stripe_payouts_enabled),
+        onboardingComplete: Boolean(remote.stripe_payouts_enabled) || prev.onboardingComplete,
         last4: remote.stripe_bank_last4 ?? null,
-      });
+      }));
     });
 
     return () => {
@@ -159,12 +194,19 @@ export function PersonalInfoScreen({
         setStripeStatus({
           connected: status.connected,
           payoutsEnabled: status.payoutsEnabled,
+          onboardingComplete: status.onboardingComplete,
           last4: status.last4,
         });
       });
     };
     refreshStripe();
-    return onConnectOnboardingDone(refreshStripe);
+    return onConnectOnboardingDone((detail) => {
+      refreshStripe();
+      if (detail?.outcome === "done" || detail?.outcome === "refresh") {
+        setConnectReturnFlag(detail.outcome);
+        setShowConnectReturn(true);
+      }
+    });
   }, [auth.userId]);
 
   const email =
@@ -180,11 +222,46 @@ export function PersonalInfoScreen({
 
   const payoutValue = connectBusy
     ? profileCopy.openingStripe
-    : stripeStatus.connected
-      ? stripeStatus.payoutsEnabled
-        ? `${profileCopy.payoutsEnabled(stripeStatus.last4 ?? undefined)} · ${profileCopy.tapToUpdatePayouts}`
-        : profileCopy.pendingVerification
-      : profileCopy.requiredPayouts;
+    : stripeStatus.payoutsEnabled
+      ? `${profileCopy.payoutsEnabled(stripeStatus.last4 ?? undefined)} · ${profileCopy.tapToUpdatePayouts}`
+      : stripeStatus.onboardingComplete
+        ? profileCopy.pendingVerification
+        : stripeStatus.connected
+          ? profileCopy.finishPayoutSetup
+          : profileCopy.requiredPayouts;
+
+  const celebrateTone = showConnectReturn
+    ? connectCelebrateTone(connectReturnFlag, stripeStatus)
+    : null;
+  const celebrateCopy =
+    celebrateTone === "success"
+      ? {
+          title: profileCopy.connectReturnSuccessTitle,
+          body: profileCopy.connectReturnSuccessBody,
+          border: "#A7F3D0",
+          bg: "#ECFDF5",
+        }
+      : celebrateTone === "pending"
+        ? {
+            title: profileCopy.connectReturnPendingTitle,
+            body: profileCopy.connectReturnPendingBody,
+            border: "#C4B5FD",
+            bg: "#F5F3FF",
+          }
+        : celebrateTone === "continue"
+          ? {
+              title: profileCopy.connectReturnContinueTitle,
+              body: profileCopy.connectReturnContinueBody,
+              border: "#FDE68A",
+              bg: "#FFFBEB",
+            }
+          : null;
+
+  const dismissConnectReturn = () => {
+    consumeConnectReturn();
+    setShowConnectReturn(false);
+    setConnectReturnFlag(null);
+  };
 
   const saveName = (nextName: string) => {
     if (!nextName) return;
@@ -241,12 +318,41 @@ export function PersonalInfoScreen({
       <div className="screen-scroll flex-1 space-y-3 p-4">
         <p className="text-[13px] text-gray-500">{t.subtitle}</p>
 
+        {celebrateCopy ? (
+          <div
+            className="rounded-2xl border p-4"
+            style={{ borderColor: celebrateCopy.border, backgroundColor: celebrateCopy.bg }}
+            role="status"
+          >
+            <div className="flex items-start gap-3">
+              <CheckCircle2
+                className="mt-0.5 h-6 w-6 shrink-0"
+                style={{ color: celebrateTone === "continue" ? "#B45309" : GREEN }}
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-[16px] font-bold" style={{ color: GREEN }}>
+                  {celebrateCopy.title}
+                </p>
+                <p className="mt-1 text-[13px] leading-relaxed text-gray-600">{celebrateCopy.body}</p>
+                <button
+                  type="button"
+                  onClick={dismissConnectReturn}
+                  className="mt-3 min-h-[40px] rounded-xl px-3 py-2 text-[13px] font-bold active:opacity-80"
+                  style={{ color: GREEN, backgroundColor: "rgba(13,92,58,0.08)" }}
+                >
+                  {profileCopy.connectReturnGotIt}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         <p className="px-1 pt-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
           {profileCopy.payouts}
         </p>
         <Row
           icon={<CreditCard className="h-5 w-5" style={{ color: BRAND_SECURE }} />}
-          label={stripeStatus.connected ? profileCopy.bankConnected : profileCopy.connectBank}
+          label={stripeStatus.payoutsEnabled ? profileCopy.bankConnected : profileCopy.connectBank}
           value={payoutValue}
           onClick={openPayouts}
           trailing={

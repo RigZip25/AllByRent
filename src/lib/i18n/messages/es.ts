@@ -465,7 +465,18 @@ export const es: AppMessages = {
     payoutsEnabled: (last4) =>
       last4 ? `Cobros activados · **** ${last4}` : "Cobros activados",
     pendingVerification: "Verificación pendiente",
+    finishPayoutSetup: "Termina la configuración de pagos",
     requiredPayouts: "Necesario para recibir cobros",
+    connectReturnSuccessTitle: "Listo para recibir pagos",
+    connectReturnSuccessBody:
+      "La cuenta bancaria quedó conectada. Los vecinos pagan en la app y el dinero llega a tu banco tras cada trato.",
+    connectReturnPendingTitle: "Enviado a revisión",
+    connectReturnPendingBody:
+      "Stripe está verificando tus datos. Los pagos se activan cuando termine (a menudo en un día).",
+    connectReturnContinueTitle: "Casi listo",
+    connectReturnContinueBody:
+      "Aún falta terminar la configuración. Toca Conectar cuenta bancaria abajo para continuar.",
+    connectReturnGotIt: "Entendido",
     reviews: "Reseñas",
     noComment: "Sin comentario",
     trustPayments: "Confianza y pagos",

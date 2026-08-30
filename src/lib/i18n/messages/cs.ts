@@ -485,7 +485,18 @@ export const cs: AppMessages = {
     payoutsEnabled: (last4) =>
       last4 ? `Výplaty povoleny · **** ${last4}` : "Výplaty povoleny",
     pendingVerification: "Čeká na ověření",
+    finishPayoutSetup: "Dokončete nastavení výplat",
     requiredPayouts: "Nutné pro příjem výplat",
+    connectReturnSuccessTitle: "Jste připraveni dostávat výplaty",
+    connectReturnSuccessBody:
+      "Bankovní účet je připojený. Sousedé platí v aplikaci — peníze dorazí na váš účet po dokončení obchodu.",
+    connectReturnPendingTitle: "Odesláno ke kontrole",
+    connectReturnPendingBody:
+      "Stripe ověřuje vaše údaje. Výplaty se zapnou po dokončení kontroly (často do jednoho dne).",
+    connectReturnContinueTitle: "Skoro hotovo",
+    connectReturnContinueBody:
+      "Nastavení výplat ještě není dokončené. Klepněte níže na Připojit bankovní účet a pokračujte.",
+    connectReturnGotIt: "Rozumím",
     reviews: "Recenze",
     noComment: "Bez komentáře",
     trustPayments: "Důvěra a platby",

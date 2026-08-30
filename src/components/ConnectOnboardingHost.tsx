@@ -84,7 +84,7 @@ export function ConnectOnboardingHost() {
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>("intro");
   const [intent, setIntent] = useState<ConnectOnboardingIntent>("onboard");
-  const [returnPath, setReturnPath] = useState("/?screen=garage");
+  const [returnPath, setReturnPath] = useState("/?screen=personalInfo");
   const [connectInstance, setConnectInstance] = useState<StripeConnectInstance | null>(null);
   const [uiMode, setUiMode] = useState<ConnectUiMode>("onboarding");
   const [bootError, setBootError] = useState<string | null>(null);
@@ -101,7 +101,7 @@ export function ConnectOnboardingHost() {
       setUiMode(nextIntent === "manage" ? "management" : "onboarding");
       setIntent(nextIntent);
       setBusy(false);
-      setReturnPath(opts.returnPath || "/?screen=garage");
+      setReturnPath(opts.returnPath || "/?screen=personalInfo");
       // First-time: show art intro. Management: go straight to embedded form.
       setPhase(nextIntent === "manage" ? "form" : "intro");
       setOpen((wasOpen) => {
@@ -215,15 +215,15 @@ export function ConnectOnboardingHost() {
           await syncConnectAccountStatus();
         }
       } finally {
-        let screen = "garage";
+        let screen = "personalInfo";
         try {
           const q = returnPath.includes("?") ? returnPath.split("?")[1] ?? "" : "";
           const fromPath = new URLSearchParams(q).get("screen");
           if (fromPath) screen = fromPath;
         } catch {
-          /* keep garage */
+          /* keep personalInfo */
         }
-        emitConnectOnboardingDone({ screen });
+        emitConnectOnboardingDone({ screen, outcome: "embedded" });
         setBusy(false);
         close();
       }

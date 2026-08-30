@@ -60,6 +60,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       bindGarageBidderToUser(next?.user?.id ?? null);
     });
 
+    /** After Stripe Account Link (or any leave/return), rehydrate session from storage. */
+    const rehydrateSession = () => {
+      void supabase.auth.getSession().then(({ data }) => {
+        if (!mounted) return;
+        if (data.session) {
+          setSession(data.session);
+          bindGarageBidderToUser(data.session.user?.id ?? null);
+          return;
+        }
+        void supabase.auth.refreshSession().then(({ data: refreshed }) => {
+          if (!mounted) return;
+          setSession(refreshed.session);
+          bindGarageBidderToUser(refreshed.session?.user?.id ?? null);
+        });
+      });
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") rehydrateSession();
+    };
+    const onPageShow = () => rehydrateSession();
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("focus", rehydrateSession);
+
     const onStorage = (event: StorageEvent) => {
       if (event.key !== AUTH_CALLBACK_RESUME_KEY) return;
       // Another tab finished the auth callback and wrote the resume flag.
@@ -90,6 +114,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       mounted = false;
       sub.unsubscribe();
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("focus", rehydrateSession);
       window.removeEventListener("storage", onStorage);
       if (channel) {
         try {
