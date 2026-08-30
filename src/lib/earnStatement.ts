@@ -1,10 +1,9 @@
 /**
  * Host earnings / tax statement ledger (v1).
  *
- * Assembled from app rental/booking records — not Stripe Balance Transactions.
- * Gap vs Stripe: Stripe processing fees, payout timing, and partial refunds are
- * not line-item accurate here. Use Stripe Dashboard / payouts as the source of
- * truth for bank deposits; this statement is a host-facing records ledger.
+ * Assembled from Evorios booking records so hosts can review deals in-app.
+ * Stripe processing fee line items and exact bank-batch timing may differ;
+ * Account settings → Payouts is where hosts manage the bank without leaving Evorios.
  */
 
 import { getLocale } from "./i18n";
@@ -16,8 +15,6 @@ import {
   loadRentalBookings,
   type RentalBooking,
 } from "./rentalsStorage";
-
-export const STRIPE_DASHBOARD_URL = "https://dashboard.stripe.com/";
 
 export type EarningsLedgerRow = {
   id: string;

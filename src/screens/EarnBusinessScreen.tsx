@@ -1,10 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDownRight,
   ArrowRight,
   ArrowUpRight,
+  CreditCard,
   Download,
-  ExternalLink,
   Lightbulb,
   Minus,
   Package,
@@ -17,7 +17,6 @@ import {
   type ListingEarnBreakdown,
 } from "../lib/earnStats";
 import {
-  STRIPE_DASHBOARD_URL,
   computeEarningsStatement,
   downloadEarningsStatementCsv,
   formatStatementDate,
@@ -25,6 +24,11 @@ import {
 } from "../lib/earnStatement";
 import { useLocale, useMessages } from "../lib/i18n/react";
 import type { EarnBusinessMessages } from "../lib/i18n/types";
+import { useAuth } from "../hooks/AuthProvider";
+import { loadConnectStatus, startConnectOnboarding } from "../lib/repositories/connectRepository";
+import { onConnectOnboardingDone } from "../lib/connectOnboardingBus";
+import { PayoutsFlowCard } from "../components/payments/PayoutsFlowCard";
+import { ConnectSetupError } from "../components/payments/ConnectSetupError";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -262,7 +266,13 @@ function buildNextMoves(
   return moves.slice(0, 3);
 }
 
-function StatementSection({ copy }: { copy: EarnBusinessMessages }) {
+function StatementSection({
+  copy,
+  onOpenPayoutSettings,
+}: {
+  copy: EarnBusinessMessages;
+  onOpenPayoutSettings?: () => void;
+}) {
   const locale = useLocale();
   const defaultYear = new Date().getFullYear();
   const [year, setYear] = useState(defaultYear);
@@ -376,16 +386,17 @@ function StatementSection({ copy }: { copy: EarnBusinessMessages }) {
               <Download className="h-3.5 w-3.5" aria-hidden="true" />
               {copy.downloadCsv}
             </button>
-            <a
-              href={STRIPE_DASHBOARD_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-xl border bg-white px-3 py-2 text-[13px] font-bold"
-              style={{ borderColor: BORDER, color: GREEN }}
-            >
-              {copy.stripePayoutsLink}
-              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-            </a>
+            {onOpenPayoutSettings ? (
+              <button
+                type="button"
+                onClick={onOpenPayoutSettings}
+                className="inline-flex items-center gap-1.5 rounded-xl border bg-white px-3 py-2 text-[13px] font-bold"
+                style={{ borderColor: BORDER, color: GREEN }}
+              >
+                <CreditCard className="h-3.5 w-3.5" aria-hidden="true" />
+                {copy.stripePayoutsLink}
+              </button>
+            ) : null}
           </div>
           <p className="text-[11px] leading-snug text-gray-500">{copy.disclaimer}</p>
           <p className="text-[11px] leading-snug text-gray-500">{copy.countryTaxNote}</p>
@@ -407,13 +418,18 @@ export function EarnBusinessScreen({
   onRentals: _onRentals,
   onStock,
   onGarage,
+  onOpenPayoutSettings,
 }: {
   onHome: () => void;
   onRentals: () => void;
   onStock?: () => void;
   onGarage?: () => void;
+  /** Account settings → bank / payouts (stay in Evorios). */
+  onOpenPayoutSettings?: () => void;
 }) {
+  const auth = useAuth();
   const copy = useMessages().earnBusiness;
+  const profileCopy = useMessages().profile;
   const stats = useMemo(() => computeEarnBusinessStats(), []);
   const stock = onStock ?? onHome;
   const garage = onGarage ?? onHome;
@@ -421,6 +437,81 @@ export function EarnBusinessScreen({
     () => buildNextMoves(stats, copy, { onStock: stock, onGarage: garage }),
     [stats, copy, stock, garage],
   );
+
+  const [stripeStatus, setStripeStatus] = useState({
+    connected: false,
+    payoutsEnabled: false,
+    onboardingComplete: false,
+    last4: null as string | null,
+  });
+  const [connectBusy, setConnectBusy] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
+  const [connectErrorCode, setConnectErrorCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!auth.userId) return;
+    let mounted = true;
+    const refresh = () => {
+      void loadConnectStatus(auth.userId).then((status) => {
+        if (!mounted) return;
+        setStripeStatus({
+          connected: status.connected,
+          payoutsEnabled: status.payoutsEnabled,
+          onboardingComplete: status.onboardingComplete,
+          last4: status.last4,
+        });
+      });
+    };
+    refresh();
+    return onConnectOnboardingDone(refresh);
+  }, [auth.userId]);
+
+  const openPayouts = () => {
+    setConnectBusy(true);
+    setConnectError(null);
+    setConnectErrorCode(null);
+    void startConnectOnboarding("/?screen=earnBusiness", { allowUpdate: true })
+      .then((result) => {
+        if (!result.ok) {
+          setConnectError(
+            result.code === "phone_unverified" ? profileCopy.phoneVerifyNeeded : result.reason,
+          );
+          setConnectErrorCode(result.code ?? null);
+          return;
+        }
+        if (result.mode === "redirect") {
+          window.location.assign(result.url);
+        }
+      })
+      .finally(() => setConnectBusy(false));
+  };
+
+  const refreshPayoutStatus = () => {
+    if (!auth.userId) return;
+    setConnectBusy(true);
+    void loadConnectStatus(auth.userId)
+      .then((status) => {
+        setStripeStatus({
+          connected: status.connected,
+          payoutsEnabled: status.payoutsEnabled,
+          onboardingComplete: status.onboardingComplete,
+          last4: status.last4,
+        });
+      })
+      .finally(() => setConnectBusy(false));
+  };
+
+  const onPayoutsPrimary = () => {
+    if (onOpenPayoutSettings && stripeStatus.payoutsEnabled) {
+      onOpenPayoutSettings();
+      return;
+    }
+    if (stripeStatus.onboardingComplete && !stripeStatus.payoutsEnabled) {
+      refreshPayoutStatus();
+      return;
+    }
+    openPayouts();
+  };
 
   const hasEarnings = stats.earnedThisMonth > 0 || stats.earnedLastMonth > 0 || stats.totalEarnedAllTime > 0;
   const growthPositive =
@@ -477,6 +568,23 @@ export function EarnBusinessScreen({
           />
         </div>
 
+        {auth.userId ? (
+          <div className="mb-4">
+            <PayoutsFlowCard
+              variant="compact"
+              status={stripeStatus}
+              busy={connectBusy}
+              onPrimary={onPayoutsPrimary}
+              onViewEarnings={undefined}
+              errorSlot={
+                connectError ? (
+                  <ConnectSetupError message={connectError} code={connectErrorCode} />
+                ) : null
+              }
+            />
+          </div>
+        ) : null}
+
         <div className="mb-4 flex gap-2">
           {hasEarnings ? (
             <>
@@ -496,7 +604,7 @@ export function EarnBusinessScreen({
           )}
         </div>
 
-        <StatementSection copy={copy} />
+        <StatementSection copy={copy} onOpenPayoutSettings={onOpenPayoutSettings ?? openPayouts} />
 
         <section className="mb-4">
           <h2 className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">

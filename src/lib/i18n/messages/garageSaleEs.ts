@@ -421,18 +421,18 @@ export const earnBusiness: AppMessages["earnBusiness"] = {
   emptyStatementBody:
     "Las reservas de anfitrión completadas aparecerán aquí al finalizar. La exportación CSV sigue disponible.",
   downloadCsv: "Descargar CSV",
-  stripePayoutsLink: "Abrir pagos y Panel de Stripe",
+  stripePayoutsLink: "Gestionar banco y pagos",
   disclaimer:
-    "Este extracto no constituye asesoramiento fiscal. Las cifras son para tu archivo y tu asesor. Confirma los depósitos en Stripe.",
+    "Este extracto no constituye asesoramiento fiscal. Las cifras son para tu archivo y tu asesor. Confirma los depósitos en Ajustes → Pagos.",
   countryTaxNote:
     "Las normas fiscales varían según el país — consulta a un asesor local sobre tus obligaciones.",
   usTaxFormsNote:
-    "Los formularios fiscales de EE. UU. pueden estar disponibles a través de Stripe para cuentas Connect elegibles.",
+    "Los formularios fiscales de EE. UU. para anfitriones elegibles se gestionan con tu cuenta de pagos segura cuando haga falta.",
   notAvailable: "—",
   feesEstimatedNote:
     "Algunas comisiones de la plataforma se estimaron con la tarifa vigente cuando no estaban guardadas en la reserva.",
   ledgerGapNote:
-    "Elaborado a partir de los registros de reserva de Evorios. Las comisiones de procesamiento de Stripe y los lotes exactos de pago no figuran línea a línea — usa el Panel de Stripe como complemento.",
+    "Elaborado a partir de las reservas de Evorios. Totales y comisiones se quedan aquí — cambia el banco en Ajustes sin salir de la app.",
 };
 
 export const qrScan: AppMessages["qrScan"] = {

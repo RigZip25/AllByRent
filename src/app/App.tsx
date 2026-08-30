@@ -272,6 +272,7 @@ const BOOT_SCREEN_ALIASES: Partial<Record<string, Screen>> = {
   coHosts: "coHosts",
   /** Stripe Connect return from Account settings */
   personalInfo: "personalInfo",
+  earnBusiness: "earnBusiness",
   postRequest: "postRequest",
   activeRental: "activeRental",
   listingChat: "listingChat",
@@ -2247,6 +2248,7 @@ function AppRoutes() {
             initialEdit={personalInfoInitialEdit}
             onDeleteAccount={() => navigateTo("deleteAccount")}
             onOpenCoHosts={() => navigateTo("coHosts")}
+            onOpenEarnings={() => navigateTo("earnBusiness")}
             onBack={() => {
               setPersonalInfoInitialEdit(undefined);
               handleBack();
@@ -2268,6 +2270,7 @@ function AppRoutes() {
             onRentals={handleOpenRentals}
             onStock={handleStartListing}
             onGarage={() => goToTab("garage")}
+            onOpenPayoutSettings={() => navigateTo("personalInfo")}
           />
         )}
 

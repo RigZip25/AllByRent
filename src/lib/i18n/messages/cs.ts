@@ -472,7 +472,7 @@ export const cs: AppMessages = {
     connectIntroBody:
       "Nastavíme bezpečné napojení výplat, aby sousedé mohli platit kartou za půjčky a prodeje — a peníze šly na tvůj účet.",
     connectIntroHint:
-      "Jednou to zabere pár minut. Až skončíš, automaticky se vrátíš do své garáže.",
+      "Jednou to zabere pár minut. Až skončíš, vrátíš se sem a ověříš, že výplaty jsou připravené.",
     connectIntroPoints: [
       "Ověř totožnost (KYC) — povinné pro výplaty",
       "Připoj bankovní účet, kam mají peníze chodit",
@@ -497,6 +497,31 @@ export const cs: AppMessages = {
     connectReturnContinueBody:
       "Nastavení výplat ještě není dokončené. Klepněte níže na Připojit bankovní účet a pokračujte.",
     connectReturnGotIt: "Rozumím",
+    payoutsFlowSetupTitle: "Dostávejte peníze za každý obchod",
+    payoutsFlowSetupBody:
+      "Jednorázové zabezpečené nastavení. Sousedé platí kartou v Evorios — výdělek přijde na účet po dokončení každého obchodu.",
+    payoutsFlowFinishTitle: "Dokončete připojení banky",
+    payoutsFlowFinishBody:
+      "Jste na půli cesty. Dokončete ověření a banku jednou — pak už nemusíte opouštět aplikaci kvůli běžným výplatám.",
+    payoutsFlowPendingTitle: "Probíhá ověření",
+    payoutsFlowPendingBody:
+      "Údaje byly odeslány. Kontrola obvykle skončí do dne. Můžete dál nabízet položky; výplaty se zapnou po dokončení.",
+    payoutsFlowReadyTitle: "Výplaty jsou zapnuté",
+    payoutsFlowReadyBody:
+      "Hotovo. Peníze z výpůjček a prodejů jdou automaticky na propojený účet — banku spravujete zde kdykoli.",
+    payoutsFlowStepVerify: "Ověřit ID",
+    payoutsFlowStepBank: "Propojit banku",
+    payoutsFlowStepReady: "Dostat výplatu",
+    payoutsFlowHowTitle: "Jak se pohybují peníze",
+    payoutsFlowHowPay: "Soused zaplatí kartou v Evorios za výpůjčku nebo prodej.",
+    payoutsFlowHowHold: "Platba je bezpečně držena do dokončení obchodu.",
+    payoutsFlowHowBank: "Čistá částka jde na propojený účet — bez Dashboardu v běžném dni.",
+    payoutsFlowSecureNote: "Bankovní údaje jsou šifrované. Zůstáváte v Evorios kromě jednorázového nastavení banky.",
+    payoutsFlowCtaSetup: "Nastavit výplaty",
+    payoutsFlowCtaContinue: "Pokračovat v nastavení",
+    payoutsFlowCtaRefresh: "Zkontrolovat stav",
+    payoutsFlowCtaUpdate: "Upravit banku",
+    payoutsFlowCtaEarnings: "Zobrazit výdělky",
     reviews: "Recenze",
     noComment: "Bez komentáře",
     trustPayments: "Důvěra a platby",
@@ -6198,7 +6223,7 @@ export const cs: AppMessages = {
       displayName: "Zobrazované jméno",
       phone: "Telefon",
       payoutsHint:
-        "Připojte nebo aktualizujte bankovní účet, kam chodí výplaty z půjček a prodejů.",
+        "Jednorázové nastavení banky. Poté obchody a výdělky zůstávají v Evorios — banku zde změníte kdykoli.",
       loadingEmail: "Načítám přihlašovací e-mail...",
       notSignedIn: "Nejsi přihlášen(a)",
       addName: "Přidej jméno",

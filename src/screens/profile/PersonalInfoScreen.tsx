@@ -4,8 +4,6 @@ import {
   ArrowLeft,
   BadgeCheck,
   CheckCircle2,
-  CreditCard,
-  Loader2,
   Mail,
   Phone,
   User,
@@ -14,6 +12,7 @@ import {
 import { ProfileFieldEditSheet } from "../../components/profile/ProfileFieldEditSheet";
 import { PhoneVerifySheet } from "../../components/profile/PhoneVerifySheet";
 import { ConnectSetupError } from "../../components/payments/ConnectSetupError";
+import { PayoutsFlowCard } from "../../components/payments/PayoutsFlowCard";
 import { useAuth } from "../../hooks/AuthProvider";
 import { useMessages } from "../../lib/i18n/react";
 import { fetchRemoteProfile, updateRemoteProfile } from "../../lib/supabaseProfile";
@@ -34,7 +33,6 @@ import {
   peekConnectReturn,
   type ConnectReturnFlag,
 } from "../../lib/connectReturn";
-import { BRAND_SECURE } from "../../lib/brand";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -112,11 +110,13 @@ export function PersonalInfoScreen({
   onBack,
   onDeleteAccount,
   onOpenCoHosts,
+  onOpenEarnings,
   initialEdit,
 }: {
   onBack: () => void;
   onDeleteAccount?: () => void;
   onOpenCoHosts?: () => void;
+  onOpenEarnings?: () => void;
   initialEdit?: "name" | "phone";
 }) {
   const auth = useAuth();
@@ -220,16 +220,6 @@ export function PersonalInfoScreen({
   const phoneVerified = Boolean(profile.verification.phone);
   const dob = profile.dateOfBirth?.trim() || t.addDateOfBirth;
 
-  const payoutValue = connectBusy
-    ? profileCopy.openingStripe
-    : stripeStatus.payoutsEnabled
-      ? `${profileCopy.payoutsEnabled(stripeStatus.last4 ?? undefined)} · ${profileCopy.tapToUpdatePayouts}`
-      : stripeStatus.onboardingComplete
-        ? profileCopy.pendingVerification
-        : stripeStatus.connected
-          ? profileCopy.finishPayoutSetup
-          : profileCopy.requiredPayouts;
-
   const celebrateTone = showConnectReturn
     ? connectCelebrateTone(connectReturnFlag, stripeStatus)
     : null;
@@ -304,6 +294,30 @@ export function PersonalInfoScreen({
       .finally(() => setConnectBusy(false));
   };
 
+  const refreshPayoutStatus = () => {
+    if (!auth.userId) return;
+    setConnectBusy(true);
+    setConnectError(null);
+    void loadConnectStatus(auth.userId)
+      .then((status) => {
+        setStripeStatus({
+          connected: status.connected,
+          payoutsEnabled: status.payoutsEnabled,
+          onboardingComplete: status.onboardingComplete,
+          last4: status.last4,
+        });
+      })
+      .finally(() => setConnectBusy(false));
+  };
+
+  const onPayoutsPrimary = () => {
+    if (stripeStatus.onboardingComplete && !stripeStatus.payoutsEnabled) {
+      refreshPayoutStatus();
+      return;
+    }
+    openPayouts();
+  };
+
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <header className="shrink-0 flex items-center gap-3 border-b bg-white px-4 py-3" style={{ borderColor: BORDER }}>
@@ -350,16 +364,17 @@ export function PersonalInfoScreen({
         <p className="px-1 pt-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
           {profileCopy.payouts}
         </p>
-        <Row
-          icon={<CreditCard className="h-5 w-5" style={{ color: BRAND_SECURE }} />}
-          label={stripeStatus.payoutsEnabled ? profileCopy.bankConnected : profileCopy.connectBank}
-          value={payoutValue}
-          onClick={openPayouts}
-          trailing={
-            connectBusy ? <Loader2 className="h-4 w-4 shrink-0 animate-spin text-gray-400" /> : null
+        <PayoutsFlowCard
+          status={stripeStatus}
+          busy={connectBusy}
+          onPrimary={onPayoutsPrimary}
+          onViewEarnings={onOpenEarnings}
+          errorSlot={
+            connectError ? (
+              <ConnectSetupError message={connectError} code={connectErrorCode} />
+            ) : null
           }
         />
-        {connectError ? <ConnectSetupError message={connectError} code={connectErrorCode} /> : null}
         <p className="px-1 text-[12px] leading-relaxed text-gray-500">{t.payoutsHint}</p>
 
         {onOpenCoHosts ? (

@@ -425,18 +425,18 @@ export const earnBusiness: AppMessages["earnBusiness"] = {
   emptyStatementBody:
     "Dokončené rezervace hostitele se zde zobrazí po skončení výpůjčky. Export CSV je k dispozici i pro prázdné období.",
   downloadCsv: "Stáhnout CSV",
-  stripePayoutsLink: "Otevřít výplaty a Dashboard Stripe",
+  stripePayoutsLink: "Spravovat účet a výplaty",
   disclaimer:
-    "Tento přehled není daňové poradenství. Částky slouží pro vaši evidenci a účetního. Vklady ověřte ve Stripe.",
+    "Tento přehled není daňové poradenství. Částky slouží pro vaši evidenci a účetního. Vklady ověřte v Nastavení → Výplaty.",
   countryTaxNote:
     "Daňová pravidla se liší podle země — konzultujte místního poradce ohledně povinností.",
   usTaxFormsNote:
-    "Daňové formuláře USA mohou být u způsobilých účtů Connect dostupné přes Stripe.",
+    "Daňové formuláře USA pro způsobilé hostitele se řeší přes zabezpečený výplatní účet, když je to potřeba.",
   notAvailable: "—",
   feesEstimatedNote:
     "Některé poplatky platformy byly odhadnuty podle aktuální sazby, pokud nebyly uloženy u rezervace.",
   ledgerGapNote:
-    "Sestaveno z rezervací v Evorios. Poplatky za zpracování Stripe a přesné dávky výplat zde nejsou po řádcích — jako doplněk použijte Stripe Dashboard.",
+    "Sestaveno z rezervací v Evorios. Součty a poplatky zůstávají tady — banku změníte v Nastavení bez opuštění aplikace.",
 };
 
 export const qrScan: AppMessages["qrScan"] = {

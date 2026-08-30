@@ -421,18 +421,18 @@ export const earnBusiness: AppMessages["earnBusiness"] = {
   emptyStatementBody:
     "Completed host bookings appear here once rentals finish. Export stays available for empty periods.",
   downloadCsv: "Download CSV",
-  stripePayoutsLink: "Open Stripe payouts & Dashboard",
+  stripePayoutsLink: "Manage bank & payouts",
   disclaimer:
-    "This statement is not tax advice. Figures are for your records and your accountant. Confirm deposits in Stripe.",
+    "This statement is not tax advice. Figures are for your records and your accountant. Confirm deposits in Account settings → Payouts.",
   countryTaxNote:
     "Tax rules vary by country — consult a local advisor for filing requirements.",
   usTaxFormsNote:
-    "US tax forms may be available via Stripe for eligible Connect accounts.",
+    "US tax forms for eligible hosts are handled through your secure payout account when required.",
   notAvailable: "—",
   feesEstimatedNote:
     "Some platform fees were estimated from the current rate when not stored on the booking.",
   ledgerGapNote:
-    "Built from Evorios booking records. Stripe processing fees and exact payout batches are not line-itemed here — use Stripe Dashboard as a supplement.",
+    "Built from Evorios bookings. Deal totals and fees stay here — change your bank anytime in Account settings without leaving the app.",
 };
 
 export const qrScan: AppMessages["qrScan"] = {

@@ -559,6 +559,28 @@ export type AppMessages = {
     connectReturnContinueTitle: string;
     connectReturnContinueBody: string;
     connectReturnGotIt: string;
+    /** Full payouts education card (settings + earnings) */
+    payoutsFlowSetupTitle: string;
+    payoutsFlowSetupBody: string;
+    payoutsFlowFinishTitle: string;
+    payoutsFlowFinishBody: string;
+    payoutsFlowPendingTitle: string;
+    payoutsFlowPendingBody: string;
+    payoutsFlowReadyTitle: string;
+    payoutsFlowReadyBody: string;
+    payoutsFlowStepVerify: string;
+    payoutsFlowStepBank: string;
+    payoutsFlowStepReady: string;
+    payoutsFlowHowTitle: string;
+    payoutsFlowHowPay: string;
+    payoutsFlowHowHold: string;
+    payoutsFlowHowBank: string;
+    payoutsFlowSecureNote: string;
+    payoutsFlowCtaSetup: string;
+    payoutsFlowCtaContinue: string;
+    payoutsFlowCtaRefresh: string;
+    payoutsFlowCtaUpdate: string;
+    payoutsFlowCtaEarnings: string;
     reviews: string;
     noComment: string;
     trustPayments: string;

@@ -452,7 +452,7 @@ export const es: AppMessages = {
     connectIntroBody:
       "Abrimos un enlace seguro de cobros para que los vecinos paguen con tarjeta alquileres y ventas — y el dinero llegue a tu banco.",
     connectIntroHint:
-      "Tarda unos minutos una vez. Al terminar, volverás automáticamente a tu garaje.",
+      "Tarda unos minutos una vez. Al terminar, volverás aquí para confirmar que los cobros están listos.",
     connectIntroPoints: [
       "Verifica tu identidad (KYC) — obligatorio para cobrar",
       "Conecta la cuenta bancaria donde quieres recibir el dinero",
@@ -477,6 +477,31 @@ export const es: AppMessages = {
     connectReturnContinueBody:
       "Aún falta terminar la configuración. Toca Conectar cuenta bancaria abajo para continuar.",
     connectReturnGotIt: "Entendido",
+    payoutsFlowSetupTitle: "Cobra por cada trato",
+    payoutsFlowSetupBody:
+      "Una configuración segura. Los vecinos pagan con tarjeta en Evorios — tus ganancias llegan al banco tras cada trato completado.",
+    payoutsFlowFinishTitle: "Termina de conectar tu banco",
+    payoutsFlowFinishBody:
+      "Vas a mitad de camino. Completa identidad y banco una vez — luego no hace falta salir de la app para los pagos del día a día.",
+    payoutsFlowPendingTitle: "Verificación en curso",
+    payoutsFlowPendingBody:
+      "Los datos ya se enviaron. La revisión suele terminar en un día. Puedes seguir publicando; los cobros se activan al completar.",
+    payoutsFlowReadyTitle: "Pagos activados",
+    payoutsFlowReadyBody:
+      "Listo. El dinero de alquileres y ventas va a tu banco vinculado automáticamente — gestiona la cuenta aquí cuando quieras.",
+    payoutsFlowStepVerify: "Verificar ID",
+    payoutsFlowStepBank: "Vincular banco",
+    payoutsFlowStepReady: "Cobrar",
+    payoutsFlowHowTitle: "Cómo se mueve el dinero",
+    payoutsFlowHowPay: "El vecino paga con tarjeta en Evorios por un alquiler o venta.",
+    payoutsFlowHowHold: "El pago se retiene de forma segura hasta completar el trato.",
+    payoutsFlowHowBank: "Tu neto se transfiere al banco vinculado — sin Panel día a día.",
+    payoutsFlowSecureNote: "Los datos bancarios van cifrados. Te quedas en Evorios salvo la configuración bancaria única.",
+    payoutsFlowCtaSetup: "Configurar pagos",
+    payoutsFlowCtaContinue: "Continuar configuración",
+    payoutsFlowCtaRefresh: "Comprobar estado",
+    payoutsFlowCtaUpdate: "Actualizar banco",
+    payoutsFlowCtaEarnings: "Ver ganancias",
     reviews: "Reseñas",
     noComment: "Sin comentario",
     trustPayments: "Confianza y pagos",
@@ -6189,7 +6214,7 @@ export const es: AppMessages = {
       displayName: "Nombre visible",
       phone: "Teléfono",
       payoutsHint:
-        "Conecta o actualiza la cuenta bancaria donde recibes los cobros de alquileres y ventas.",
+        "Configuración bancaria una vez. Después, tratos y ganancias se quedan en Evorios — actualiza el banco aquí cuando quieras.",
       loadingEmail: "Cargando el correo de acceso...",
       notSignedIn: "No estás conectado",
       addName: "Añade tu nombre",

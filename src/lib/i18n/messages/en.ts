@@ -452,7 +452,7 @@ export const en: AppMessages = {
     connectIntroBody:
       "We set up a secure payout link so neighbors can pay by card for rentals and sales — and the money goes to your bank.",
     connectIntroHint:
-      "Takes a few minutes once. When you’re done, you’ll return to your garage automatically.",
+      "Takes a few minutes once. When you’re done, you’ll return here to confirm payouts are ready.",
     connectIntroPoints: [
       "Verify your identity (KYC) — required for payouts",
       "Connect the bank account where money should land",
@@ -477,6 +477,31 @@ export const en: AppMessages = {
     connectReturnContinueBody:
       "Payout setup isn’t finished yet. Tap Connect bank account below to continue where you left off.",
     connectReturnGotIt: "Got it",
+    payoutsFlowSetupTitle: "Get paid for every deal",
+    payoutsFlowSetupBody:
+      "One secure setup. Neighbors pay by card in Evorios — your earnings land in your bank after each completed deal.",
+    payoutsFlowFinishTitle: "Finish connecting your bank",
+    payoutsFlowFinishBody:
+      "You’re partway through. Complete identity and bank details once — then you won’t need to leave the app for everyday payouts.",
+    payoutsFlowPendingTitle: "Verification in progress",
+    payoutsFlowPendingBody:
+      "Details were submitted. Secure review usually finishes within a day. You can keep listing; payouts unlock when this clears.",
+    payoutsFlowReadyTitle: "Payouts are on",
+    payoutsFlowReadyBody:
+      "You’re ready. Money from rentals and garage sales goes to your linked bank automatically — manage the account here anytime.",
+    payoutsFlowStepVerify: "Verify ID",
+    payoutsFlowStepBank: "Link bank",
+    payoutsFlowStepReady: "Get paid",
+    payoutsFlowHowTitle: "How money moves",
+    payoutsFlowHowPay: "Neighbor pays by card in Evorios for a rental or sale.",
+    payoutsFlowHowHold: "Payment is held securely until the deal completes.",
+    payoutsFlowHowBank: "Your net earnings transfer to the bank you linked — no Dashboard needed day to day.",
+    payoutsFlowSecureNote: "Bank details are encrypted. You stay in Evorios except for the one-time secure bank setup.",
+    payoutsFlowCtaSetup: "Set up payouts",
+    payoutsFlowCtaContinue: "Continue bank setup",
+    payoutsFlowCtaRefresh: "Check status",
+    payoutsFlowCtaUpdate: "Update bank details",
+    payoutsFlowCtaEarnings: "View earnings",
     reviews: "Reviews",
     noComment: "No comment",
     trustPayments: "Trust & payments",
@@ -6207,7 +6232,7 @@ export const en: AppMessages = {
       displayName: "Display name",
       phone: "Phone",
       payoutsHint:
-        "Connect or update the bank account that receives rental and garage sale payouts.",
+        "One-time bank setup. After that, deals and earnings stay in Evorios — update the bank here anytime.",
       loadingEmail: "Loading sign-in email...",
       notSignedIn: "Not signed in",
       addName: "Add your name",
