@@ -2456,6 +2456,13 @@ export type AppMessages = {
       addDateOfBirth: string;
       dateOfBirth: string;
       dateOfBirthHint: string;
+      dateOfBirthPickerHint: string;
+      dateOfBirthInvalid: string;
+      dateOfBirthAgePreview: (formatted: string, age: number) => string;
+      dateOfBirthWithAge: (formatted: string, age: number) => string;
+      birthdayTitle: string;
+      birthdayBody: (name: string, age: number, mascot: string) => string;
+      birthdayThanks: string;
       nameLabel: string;
       namePlaceholder: string;
       phoneLabel: string;

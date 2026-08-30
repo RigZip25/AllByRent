@@ -6231,6 +6231,16 @@ export const cs: AppMessages = {
       addDateOfBirth: "Přidat datum narození",
       dateOfBirth: "Datum narození",
       dateOfBirthHint: "Vyžadováno pro rezervaci vozidel (min. věk 25). Podle řidičáku.",
+      dateOfBirthPickerHint: "Vyber datum narození — používáme ho pro věk u vozidel a narozeninový pozdrav od Mr. Evorios.",
+      dateOfBirthInvalid: "Zvol platné datum v minulosti.",
+      dateOfBirthAgePreview: (formatted, age) => `${formatted} · ${age} let`,
+      dateOfBirthWithAge: (formatted, age) => `${formatted} · ${age} let`,
+      birthdayTitle: "Všechno nejlepší!",
+      birthdayBody: (name, age, mascot) =>
+        name && name !== "Evorios"
+          ? `${mascot} tady — všechno nejlepší k ${age}. narozeninám, ${name}! Jsme rádi, že jsi s námi v sousedství.`
+          : `${mascot} tady — všechno nejlepší k ${age}. narozeninám! Jsme rádi, že jsi s námi v sousedství.`,
+      birthdayThanks: "Díky!",
       nameLabel: "Jméno",
       namePlaceholder: "Tvoje jméno",
       phoneLabel: "Telefonní číslo",

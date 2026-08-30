@@ -8,13 +8,20 @@ import {
   Phone,
   User,
   Users,
+  Cake,
 } from "lucide-react";
 import { ProfileFieldEditSheet } from "../../components/profile/ProfileFieldEditSheet";
+import { DateOfBirthEditSheet } from "../../components/profile/DateOfBirthEditSheet";
+import {
+  ageYearsFromIso,
+  formatDobDisplay,
+  normalizeDobToIso,
+} from "../../lib/dateOfBirth";
+import { useLocale, useMessages } from "../../lib/i18n/react";
 import { PhoneVerifySheet } from "../../components/profile/PhoneVerifySheet";
 import { ConnectSetupError } from "../../components/payments/ConnectSetupError";
 import { PayoutsFlowCard } from "../../components/payments/PayoutsFlowCard";
 import { useAuth } from "../../hooks/AuthProvider";
-import { useMessages } from "../../lib/i18n/react";
 import { fetchRemoteProfile, updateRemoteProfile } from "../../lib/supabaseProfile";
 import { phoneDigitsForDisplay } from "../../lib/phoneE164";
 import { refreshPhoneVerifiedFromRemote } from "../../lib/phoneKyc";
@@ -122,6 +129,7 @@ export function PersonalInfoScreen({
   const auth = useAuth();
   const { common, profile: profileCopy, profileDeep } = useMessages();
   const t = profileDeep.personalInfo;
+  const locale = useLocale();
   const [profile, setProfile] = useState(() => refreshProfileStats(loadUserProfile(), auth.userId));
   const [editing, setEditing] = useState<EditField>(null);
   const [phoneSheetOpen, setPhoneSheetOpen] = useState(false);
@@ -218,7 +226,12 @@ export function PersonalInfoScreen({
     ? formatUsPhoneDisplay(profile.phone) || phoneDigitsForDisplay(profile.phone)
     : t.addPhone;
   const phoneVerified = Boolean(profile.verification.phone);
-  const dob = profile.dateOfBirth?.trim() || t.addDateOfBirth;
+  const dobIso = profile.dateOfBirth?.trim() || "";
+  const dobAge = ageYearsFromIso(dobIso);
+  const dob =
+    dobIso && dobAge !== null
+      ? t.dateOfBirthWithAge(formatDobDisplay(dobIso, locale), dobAge)
+      : t.addDateOfBirth;
 
   const celebrateTone = showConnectReturn
     ? connectCelebrateTone(connectReturnFlag, stripeStatus)
@@ -264,8 +277,8 @@ export function PersonalInfoScreen({
   };
 
   const saveDob = (raw: string) => {
-    const value = raw.trim();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return;
+    const value = normalizeDobToIso(raw);
+    if (!value) return;
     const next = updateProfileFields({ dateOfBirth: value });
     setProfile(refreshProfileStats(next, auth.userId));
     setEditing(null);
@@ -411,7 +424,7 @@ export function PersonalInfoScreen({
         />
         <p className="px-1 text-[12px] leading-relaxed text-gray-500">{t.phoneKycHint}</p>
         <Row
-          icon={<User className="h-5 w-5" style={{ color: GREEN }} />}
+          icon={<Cake className="h-5 w-5" style={{ color: GREEN }} />}
           label={t.dateOfBirth}
           value={dob}
           onClick={() => setEditing("dob")}
@@ -448,12 +461,9 @@ export function PersonalInfoScreen({
         onClose={() => setEditing(null)}
         onSave={saveName}
       />
-      <ProfileFieldEditSheet
+      <DateOfBirthEditSheet
         open={editing === "dob"}
-        title={t.dateOfBirth}
-        label={t.dateOfBirth}
         value={profile.dateOfBirth || ""}
-        placeholder="YYYY-MM-DD"
         onClose={() => setEditing(null)}
         onSave={saveDob}
       />

@@ -6240,6 +6240,16 @@ export const en: AppMessages = {
       addDateOfBirth: "Add date of birth",
       dateOfBirth: "Date of birth",
       dateOfBirthHint: "Required to book Vehicles (default min age 25). Matches your license.",
+      dateOfBirthPickerHint: "Pick your birth date — we use it for vehicle age checks and a birthday hello from Mr. Evorios.",
+      dateOfBirthInvalid: "Choose a valid date in the past.",
+      dateOfBirthAgePreview: (formatted, age) => `${formatted} · ${age} years old`,
+      dateOfBirthWithAge: (formatted, age) => `${formatted} · ${age} years old`,
+      birthdayTitle: "Happy birthday!",
+      birthdayBody: (name, age, mascot) =>
+        name && name !== "Evorios"
+          ? `${mascot} here — happy ${age}th birthday, ${name}! Glad you’re on the block with us.`
+          : `${mascot} here — happy ${age}th birthday! Glad you’re on the block with us.`,
+      birthdayThanks: "Thanks!",
       nameLabel: "Name",
       namePlaceholder: "Your name",
       phoneLabel: "Phone number",

@@ -60,6 +60,7 @@ import { formatSeoLocationLabel, type SeoLocation } from "../lib/seo/seoLocation
 import { APP_ORIGIN, isSeoApexHost } from "../lib/brand";
 import { isOpsPath } from "../lib/ops/opsAuth";
 import { ConnectOnboardingHost } from "../components/ConnectOnboardingHost";
+import { BirthdayGreetingHost } from "../components/BirthdayGreetingHost";
 import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
 import { useBrowserBackTrap } from "../hooks/useBrowserBackTrap";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
@@ -2466,6 +2467,15 @@ function AppRoutes() {
       <PasskeySetup open={passkeySetupOpen} onDone={() => setPasskeySetupOpen(false)} />
 
       <ConnectOnboardingHost />
+
+      <BirthdayGreetingHost
+        enabled={
+          currentScreen !== "splash" &&
+          currentScreen !== "installGate" &&
+          currentScreen !== "installHint" &&
+          !isOnboardingScreen(currentScreen)
+        }
+      />
 
       <InstallHintToast
         mode="overlay"

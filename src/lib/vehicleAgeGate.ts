@@ -5,7 +5,10 @@
 
 import type { ListingDraft } from "../screens/listing/types";
 import { listingCaptainMode, listingRequiresAgeGate } from "./categoryTrustRules";
+import { ageYearsFromDob, parseDob } from "./dateOfBirth";
 import { loadUserProfile } from "./userProfileStorage";
+
+export { ageYearsFromDob, parseDob } from "./dateOfBirth";
 
 export const DEFAULT_VEHICLE_MIN_AGE = 25;
 export const YOUNG_DRIVER_MIN_AGE = 18;
@@ -33,30 +36,6 @@ export type VehicleAgeGateResult =
         | "underage"
         | "hostBlocksYoung";
     };
-
-function parseDob(raw: string | null | undefined): Date | null {
-  if (!raw || typeof raw !== "string") return null;
-  const trimmed = raw.trim();
-  // YYYY-MM-DD preferred
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
-  if (m) {
-    const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
-    if (Number.isNaN(d.getTime())) return null;
-    return d;
-  }
-  const d = new Date(trimmed);
-  if (Number.isNaN(d.getTime())) return null;
-  return d;
-}
-
-export function ageYearsFromDob(dob: Date, now = new Date()): number {
-  let age = now.getUTCFullYear() - dob.getUTCFullYear();
-  const month = now.getUTCMonth() - dob.getUTCMonth();
-  if (month < 0 || (month === 0 && now.getUTCDate() < dob.getUTCDate())) {
-    age -= 1;
-  }
-  return age;
-}
 
 export function listingIsVehicleCategory(
   listing: Pick<ListingDraft, "category"> | null | undefined,
