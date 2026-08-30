@@ -4,6 +4,11 @@ export type ConnectOnboardingOpenOpts = {
   returnPath: string;
   /** onboard = branded intro then Account Link; manage = embedded account settings. */
   intent?: ConnectOnboardingIntent;
+  /**
+   * When true, skip the art intro (already shown on Account settings / earnings)
+   * and go straight to Account Link or management form.
+   */
+  skipIntro?: boolean;
 };
 
 type Opener = (opts: ConnectOnboardingOpenOpts) => void;

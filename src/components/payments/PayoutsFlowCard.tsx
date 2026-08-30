@@ -1,11 +1,16 @@
 import type { ReactNode } from "react";
-import { Check, CreditCard, Landmark, Loader2, ShieldCheck, Wallet } from "lucide-react";
-import { BRAND_SECURE, BRAND_SECURE_SOFT } from "../../lib/brand";
+import { Check, Landmark, Loader2, ShieldCheck } from "lucide-react";
+import { BRAND_GREEN, BRAND_GREEN_LIGHT } from "../../lib/brand";
+import { connectAssets } from "../../lib/connectAssets";
 import { useMessages } from "../../lib/i18n/react";
 
-const GREEN = "#0D5C3A";
-const BORDER = "#E8E6E0";
+const GREEN = BRAND_GREEN;
+const GREEN_SOFT = "#E8F2EC";
+const GREEN_MIST = "#F3F8F5";
+const BORDER = "#D8E0DA";
 const INK = "#0B3D2A";
+const MUTED = "#5C6B63";
+const PAPER = "#FFFEFA";
 
 export type PayoutsFlowStatus = {
   connected: boolean;
@@ -33,7 +38,7 @@ type Props = {
   errorSlot?: ReactNode;
 };
 
-function StepPill({
+function StepDot({
   index,
   label,
   state,
@@ -42,21 +47,27 @@ function StepPill({
   label: string;
   state: "done" | "current" | "todo";
 }) {
-  const bg =
-    state === "done" ? GREEN : state === "current" ? BRAND_SECURE : "#E8E6E0";
-  const color = state === "todo" ? "#6B7280" : "#FFFFFF";
+  const done = state === "done";
+  const current = state === "current";
   return (
     <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
       <span
-        className="flex h-8 w-8 items-center justify-center rounded-full text-[12px] font-extrabold"
-        style={{ backgroundColor: bg, color }}
+        className="flex h-8 w-8 items-center justify-center rounded-full text-[12px] font-bold"
+        style={{
+          backgroundColor: done || current ? GREEN : "#EEF3F0",
+          color: done || current ? "#FFFFFF" : MUTED,
+          boxShadow: current ? `0 0 0 4px ${GREEN_SOFT}` : undefined,
+        }}
         aria-hidden
       >
-        {state === "done" ? <Check className="h-4 w-4" strokeWidth={2.5} /> : index}
+        {done ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} /> : index}
       </span>
       <span
-        className="max-w-full text-center text-[11px] font-semibold leading-tight"
-        style={{ color: state === "todo" ? "#9CA3AF" : INK }}
+        className="max-w-full text-center text-[11px] leading-tight"
+        style={{
+          color: current || done ? INK : MUTED,
+          fontWeight: current ? 700 : 560,
+        }}
       >
         {label}
       </span>
@@ -65,8 +76,9 @@ function StepPill({
 }
 
 /**
- * Informative in-app payouts status: steps, how money moves, primary CTA.
- * Keeps hosts inside Evorios — Stripe hosted pages only when starting/finishing KYC.
+ * Account settings / earnings payouts panel.
+ * Full variant merges Mr. Evorios secure art with status, steps, and CTA —
+ * so hosts don’t see the same picture twice before bank setup.
  */
 export function PayoutsFlowCard({
   status,
@@ -79,6 +91,7 @@ export function PayoutsFlowCard({
   const { profile: t } = useMessages();
   const phase = resolvePayoutsFlowPhase(status);
   const compact = variant === "compact";
+  const showArt = !compact && (phase === "setup" || phase === "finish" || phase === "pending");
 
   const statusLabel =
     phase === "ready"
@@ -116,152 +129,205 @@ export function PayoutsFlowCard({
           ? t.payoutsFlowCtaContinue
           : t.payoutsFlowCtaSetup;
 
-  const step1: "done" | "current" | "todo" =
-    phase === "setup" ? "current" : "done";
+  const step1: "done" | "current" | "todo" = phase === "setup" ? "current" : "done";
   const step2: "done" | "current" | "todo" =
     phase === "setup" ? "todo" : phase === "finish" ? "current" : "done";
   const step3: "done" | "current" | "todo" =
     phase === "ready" ? "done" : phase === "pending" ? "current" : "todo";
 
-  const badgeBg =
+  const chipBg =
     phase === "ready"
-      ? "#D1FAE5"
+      ? GREEN_SOFT
       : phase === "pending"
-        ? BRAND_SECURE_SOFT
+        ? "#EEF2FF"
         : phase === "finish"
-          ? "#FEF3C7"
-          : "#F3F4F6";
-  const badgeColor =
+          ? "#FEF6E8"
+          : GREEN_MIST;
+  const chipColor =
     phase === "ready"
       ? GREEN
       : phase === "pending"
-        ? "#4338CA"
+        ? "#3730A3"
         : phase === "finish"
-          ? "#B45309"
-          : "#4B5563";
+          ? "#9A6700"
+          : MUTED;
+
+  if (compact) {
+    return (
+      <section
+        className="overflow-hidden rounded-2xl border"
+        style={{
+          borderColor: BORDER,
+          background: `linear-gradient(145deg, ${PAPER} 0%, ${GREEN_MIST} 100%)`,
+        }}
+        aria-labelledby="payouts-flow-title"
+      >
+        <div className="flex items-start gap-3 px-4 pt-4">
+          <span
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl"
+            style={{ backgroundColor: GREEN_SOFT, color: GREEN }}
+          >
+            <Landmark className="h-5 w-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p id="payouts-flow-title" className="text-[15px] font-bold leading-snug" style={{ color: GREEN }}>
+              {headline}
+            </p>
+            <p className="mt-1 text-[12px] leading-relaxed" style={{ color: MUTED }}>
+              {body}
+            </p>
+            <span
+              className="mt-2 inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+              style={{ backgroundColor: chipBg, color: chipColor }}
+            >
+              {statusLabel}
+            </span>
+          </div>
+        </div>
+        <div className="px-4 py-3">
+          <button
+            type="button"
+            onClick={onPrimary}
+            disabled={busy}
+            className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl px-4 text-[14px] font-bold text-white active:opacity-90 disabled:opacity-60"
+            style={{ backgroundColor: GREEN }}
+          >
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {cta}
+          </button>
+        </div>
+        {errorSlot ? <div className="px-4 pb-3">{errorSlot}</div> : null}
+      </section>
+    );
+  }
 
   return (
     <section
-      className={
-        compact
-          ? "overflow-hidden rounded-2xl border bg-white"
-          : "overflow-hidden rounded-[1.35rem] border bg-white shadow-sm"
-      }
-      style={{ borderColor: BORDER }}
+      className="overflow-hidden rounded-[1.5rem] border"
+      style={{
+        borderColor: BORDER,
+        background: PAPER,
+        boxShadow: "0 12px 32px rgba(11, 61, 42, 0.07)",
+      }}
       aria-labelledby="payouts-flow-title"
     >
       <div
-        className="relative px-4 pb-3 pt-4"
+        className="relative px-4 pb-4 pt-4 sm:px-5"
         style={{
           background:
             phase === "ready"
-              ? `linear-gradient(145deg, #F0FDF4 0%, #FFFFFF 55%, ${BRAND_SECURE_SOFT} 100%)`
-              : `linear-gradient(160deg, #FFFEFA 0%, #F4F7F5 50%, ${BRAND_SECURE_SOFT} 100%)`,
+              ? `linear-gradient(165deg, #ECF8F1 0%, ${PAPER} 55%, ${GREEN_MIST} 100%)`
+              : `linear-gradient(168deg, ${GREEN_MIST} 0%, ${PAPER} 40%, #F7FAF8 100%)`,
         }}
       >
-        <div className="flex items-start gap-3">
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+          style={{ backgroundColor: chipBg, color: chipColor }}
+        >
           <span
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
-            style={{
-              backgroundColor: phase === "ready" ? "#D1FAE5" : BRAND_SECURE_SOFT,
-              color: phase === "ready" ? GREEN : BRAND_SECURE,
-            }}
-          >
-            {phase === "ready" ? (
-              <Landmark className="h-5 w-5" />
-            ) : (
-              <CreditCard className="h-5 w-5" />
-            )}
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <p
-                id="payouts-flow-title"
-                className="text-[16px] font-extrabold leading-tight"
-                style={{ color: GREEN }}
-              >
-                {headline}
-              </p>
-              <span
-                className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
-                style={{ backgroundColor: badgeBg, color: badgeColor }}
-              >
-                {statusLabel}
-              </span>
-            </div>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-gray-600">{body}</p>
-          </div>
-        </div>
+            className="h-1.5 w-1.5 rounded-full"
+            style={{ backgroundColor: phase === "ready" ? BRAND_GREEN_LIGHT : chipColor }}
+          />
+          {statusLabel}
+        </span>
 
-        {!compact ? (
-          <div className="mt-4 flex items-start gap-1 rounded-2xl border bg-white/80 px-2 py-3" style={{ borderColor: BORDER }}>
-            <StepPill index={1} label={t.payoutsFlowStepVerify} state={step1} />
-            <span className="mt-3 h-px flex-1 bg-gray-200" aria-hidden />
-            <StepPill index={2} label={t.payoutsFlowStepBank} state={step2} />
-            <span className="mt-3 h-px flex-1 bg-gray-200" aria-hidden />
-            <StepPill index={3} label={t.payoutsFlowStepReady} state={step3} />
+        <h2
+          id="payouts-flow-title"
+          className="mt-3 text-[22px] font-extrabold leading-[1.15] tracking-tight"
+          style={{ color: GREEN }}
+        >
+          {headline}
+        </h2>
+        <p className="mt-2 text-[14px] leading-relaxed" style={{ color: MUTED }}>
+          {body}
+        </p>
+
+        {showArt ? (
+          <div className="mt-4 overflow-hidden rounded-[1.25rem] border bg-white" style={{ borderColor: BORDER }}>
+            <img
+              src={connectAssets.securePreview}
+              alt={t.connectIntroAlt}
+              className="mx-auto block h-auto w-full max-w-[280px] object-contain object-top"
+            />
+          </div>
+        ) : phase === "ready" ? (
+          <div
+            className="mt-4 flex items-center gap-3 rounded-[1.25rem] border px-4 py-3.5"
+            style={{ borderColor: "#A7F3D0", backgroundColor: "#ECFDF5" }}
+          >
+            <span
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
+              style={{ backgroundColor: "#D1FAE5", color: GREEN }}
+            >
+              <Landmark className="h-5 w-5" />
+            </span>
+            <p className="text-[13px] font-semibold leading-snug" style={{ color: GREEN }}>
+              {t.payoutsEnabled(status.last4 ?? undefined)}
+            </p>
           </div>
         ) : null}
-      </div>
 
-      {!compact ? (
-        <div className="space-y-3 border-t px-4 py-4" style={{ borderColor: BORDER }}>
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-gray-400">
-            {t.payoutsFlowHowTitle}
-          </p>
-          <ol className="space-y-2.5">
-            {(
-              [
-                { icon: Wallet, text: t.payoutsFlowHowPay },
-                { icon: ShieldCheck, text: t.payoutsFlowHowHold },
-                { icon: Landmark, text: t.payoutsFlowHowBank },
-              ] as const
-            ).map((row, i) => (
-              <li key={row.text} className="flex gap-3">
+        <div
+          className="mt-4 flex items-start gap-1 rounded-2xl border bg-white/80 px-2 py-3.5"
+          style={{ borderColor: BORDER }}
+        >
+          <StepDot index={1} label={t.payoutsFlowStepVerify} state={step1} />
+          <span className="mt-4 h-px min-w-[12px] flex-1 bg-[#E2E8E4]" aria-hidden />
+          <StepDot index={2} label={t.payoutsFlowStepBank} state={step2} />
+          <span className="mt-4 h-px min-w-[12px] flex-1 bg-[#E2E8E4]" aria-hidden />
+          <StepDot index={3} label={t.payoutsFlowStepReady} state={step3} />
+        </div>
+
+        {showArt ? (
+          <ul className="mt-4 space-y-2 px-0.5">
+            {t.connectIntroPoints.map((point) => (
+              <li key={point} className="flex gap-2.5 text-[13px] leading-snug" style={{ color: INK }}>
                 <span
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[12px] font-extrabold text-white"
-                  style={{ backgroundColor: i === 2 ? GREEN : BRAND_SECURE }}
-                >
-                  <row.icon className="h-4 w-4" />
-                </span>
-                <p className="pt-1 text-[13px] leading-snug text-gray-700">{row.text}</p>
+                  className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: GREEN }}
+                  aria-hidden
+                />
+                <span>{point}</span>
               </li>
             ))}
-          </ol>
-          <p className="flex items-center gap-1.5 text-[11px] leading-snug text-gray-500">
-            <ShieldCheck className="h-3.5 w-3.5 shrink-0" style={{ color: BRAND_SECURE }} />
-            {t.payoutsFlowSecureNote}
-          </p>
-        </div>
-      ) : null}
-
-      <div
-        className={`flex flex-col gap-2 border-t px-4 py-3 ${compact ? "" : "sm:flex-row"}`}
-        style={{ borderColor: BORDER }}
-      >
-        <button
-          type="button"
-          onClick={onPrimary}
-          disabled={busy}
-          className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl px-4 text-[14px] font-bold text-white active:opacity-90 disabled:opacity-60"
-          style={{ backgroundColor: phase === "ready" ? GREEN : BRAND_SECURE }}
-        >
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-          {cta}
-        </button>
-        {phase === "ready" && onViewEarnings ? (
-          <button
-            type="button"
-            onClick={onViewEarnings}
-            className="inline-flex min-h-[48px] flex-1 items-center justify-center rounded-xl border bg-white px-4 text-[14px] font-bold active:bg-gray-50"
-            style={{ borderColor: BORDER, color: GREEN }}
-          >
-            {t.payoutsFlowCtaEarnings}
-          </button>
+          </ul>
         ) : null}
       </div>
 
-      {errorSlot ? <div className="px-4 pb-3">{errorSlot}</div> : null}
+      <div className="space-y-3 border-t px-4 py-4 sm:px-5" style={{ borderColor: BORDER }}>
+        <p className="flex items-start gap-2 text-[12px] leading-snug" style={{ color: MUTED }}>
+          <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: GREEN }} />
+          {t.payoutsFlowSecureNote}
+        </p>
+
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <button
+            type="button"
+            onClick={onPrimary}
+            disabled={busy}
+            className="inline-flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white transition-opacity active:opacity-90 disabled:opacity-60"
+            style={{
+              background: `linear-gradient(180deg, ${BRAND_GREEN_LIGHT} 0%, ${GREEN} 100%)`,
+              boxShadow: "0 8px 18px rgba(13, 92, 58, 0.22)",
+            }}
+          >
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {cta}
+          </button>
+          {phase === "ready" && onViewEarnings ? (
+            <button
+              type="button"
+              onClick={onViewEarnings}
+              className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-2xl border bg-white px-4 text-[15px] font-bold active:bg-gray-50"
+              style={{ borderColor: BORDER, color: GREEN }}
+            >
+              {t.payoutsFlowCtaEarnings}
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      {errorSlot ? <div className="px-4 pb-4 sm:px-5">{errorSlot}</div> : null}
     </section>
   );
 }

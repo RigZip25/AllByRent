@@ -30,6 +30,10 @@ export type StartConnectOptions = {
    * Default false: Live / publish flows treat already-connected as a soft stop.
    */
   allowUpdate?: boolean;
+  /**
+   * Skip the Connect sheet art intro — Account settings already shows Mr. Evorios art.
+   */
+  skipIntro?: boolean;
 };
 
 export async function loadConnectStatus(userId: string | null): Promise<ConnectStatus> {
@@ -128,7 +132,7 @@ export async function startConnectOnboarding(
   const needsOnboarding = !status.payoutsEnabled && !status.onboardingComplete;
 
   if (needsOnboarding) {
-    if (openConnectOnboardingSheet({ returnPath, intent: "onboard" })) {
+    if (openConnectOnboardingSheet({ returnPath, intent: "onboard", skipIntro: opts?.skipIntro })) {
       return { ok: true, mode: "embedded" };
     }
     const result = await createConnectAccountLink(returnPath);
@@ -138,7 +142,7 @@ export async function startConnectOnboarding(
     return { ok: true, mode: "redirect", url: result.url };
   }
 
-  if (opts?.allowUpdate && openConnectOnboardingSheet({ returnPath, intent: "manage" })) {
+  if (opts?.allowUpdate && openConnectOnboardingSheet({ returnPath, intent: "manage", skipIntro: true })) {
     return { ok: true, mode: "embedded" };
   }
 

@@ -278,7 +278,7 @@ export function PersonalInfoScreen({
     setConnectBusy(true);
     setConnectError(null);
     setConnectErrorCode(null);
-    void startConnectOnboarding("/?screen=personalInfo", { allowUpdate: true })
+    void startConnectOnboarding("/?screen=personalInfo", { allowUpdate: true, skipIntro: true })
       .then((result) => {
         if (!result.ok) {
           setConnectError(

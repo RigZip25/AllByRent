@@ -102,10 +102,11 @@ export function ConnectOnboardingHost() {
       setIntent(nextIntent);
       setBusy(false);
       setReturnPath(opts.returnPath || "/?screen=personalInfo");
-      // First-time: show art intro. Management: go straight to embedded form.
-      setPhase(nextIntent === "manage" ? "form" : "intro");
+      // Art intro lives on Account settings when skipIntro; manage always goes to form.
+      const startAtForm = nextIntent === "manage" || Boolean(opts.skipIntro);
+      setPhase(startAtForm ? "form" : "intro");
       setOpen((wasOpen) => {
-        if (wasOpen && nextIntent === "manage") {
+        if (wasOpen && startAtForm) {
           queueMicrotask(() => setBootKey((k) => k + 1));
         }
         return true;
