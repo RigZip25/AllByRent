@@ -135,6 +135,10 @@ export type OnboardingMessages = {
     continueGuestCta: string;
     faceIdSubtitle: string;
     guestHint: string;
+    returningTitle: string;
+    returningSubtitle: string;
+    signInEmailCta: string;
+    returningHint: string;
   };
 
   guestShowcase: {

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { ScanFace } from "lucide-react";
+import { ScanFace, Mail } from "lucide-react";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN } from "../../lib/brand";
-import { shouldShowPasskeyLogin } from "../../lib/auth";
+import { isReturningAccountDevice, shouldShowPasskeyLogin } from "../../lib/auth";
 import { useMessages } from "../../lib/i18n/react";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 
@@ -17,14 +17,15 @@ type Props = {
 
 /**
  * Post-splash entry.
- * Guest = soft platform tour / browse first; Sign up only when they later take an action.
- * Face ID is opt-in on tap (never auto) so Explore as guest stays frictionless.
+ * New device: guest tour + Sign up + Sign in.
+ * Known account on this phone: Sign in only (Face ID / email) — no guest, no Sign up.
  */
 export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
   const t = useMessages();
   const copy = t.onboarding.authWelcome;
   const a = t.auth;
-  const [returning] = useState(() => shouldShowPasskeyLogin());
+  const [returning] = useState(() => isReturningAccountDevice());
+  const [faceId] = useState(() => shouldShowPasskeyLogin());
 
   return (
     <div className="screen onboarding-step mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-white">
@@ -45,10 +46,10 @@ export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
         </div>
 
         <h1 className="text-center text-[24px] font-extrabold leading-tight" style={{ color: GREEN }}>
-          {copy.title}
+          {returning ? copy.returningTitle : copy.title}
         </h1>
         <p className="mt-2 text-center text-[15px] leading-relaxed text-gray-600">
-          {returning ? copy.faceIdSubtitle : copy.subtitle}
+          {returning ? copy.returningSubtitle : copy.subtitle}
         </p>
       </div>
 
@@ -58,34 +59,34 @@ export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
       >
         {returning ? (
           <>
+            {faceId ? (
+              <button
+                type="button"
+                onClick={onSignIn}
+                className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[16px] font-bold text-white"
+                style={{ backgroundColor: GREEN }}
+              >
+                <ScanFace className="h-5 w-5" aria-hidden />
+                {a.faceIdCta}
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={onSignIn}
-              className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[16px] font-bold text-white"
-              style={{ backgroundColor: GREEN }}
+              className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[16px] font-bold"
+              style={
+                faceId
+                  ? { backgroundColor: AMBER, color: GREEN }
+                  : { backgroundColor: GREEN, color: "#fff" }
+              }
             >
-              <ScanFace className="h-5 w-5" aria-hidden />
-              {a.faceIdCta}
+              <Mail className="h-5 w-5" aria-hidden />
+              {copy.signInEmailCta}
             </button>
-            <button
-              type="button"
-              onClick={onContinueAsGuest}
-              className="flex min-h-[48px] w-full items-center justify-center rounded-xl py-3.5 text-[16px] font-bold"
-              style={{ backgroundColor: AMBER, color: GREEN }}
-            >
-              {copy.continueGuestCta}
-            </button>
-            <button
-              type="button"
-              onClick={onSignUp}
-              className="w-full py-2.5 text-center text-[15px] font-semibold text-gray-600 underline-offset-2 active:text-[#0D5C3A]"
-            >
-              {copy.signUpCta}
-            </button>
+            <p className="text-center text-[12px] leading-snug text-gray-400">{copy.returningHint}</p>
           </>
         ) : (
           <>
-            {/* Soft entry: see how the platform works before any account. */}
             <button
               type="button"
               onClick={onContinueAsGuest}
@@ -109,9 +110,9 @@ export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
             >
               {copy.signInCta}
             </button>
+            <p className="text-center text-[12px] leading-snug text-gray-400">{copy.guestHint}</p>
           </>
         )}
-        <p className="text-center text-[12px] leading-snug text-gray-400">{copy.guestHint}</p>
       </div>
     </div>
   );
