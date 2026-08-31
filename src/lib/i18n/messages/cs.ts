@@ -6225,6 +6225,7 @@ export const cs: AppMessages = {
       signInCta: "Přihlásit se",
       signUpCta: "Vytvořit účet",
       continueGuestCta: "Pokračovat jako host",
+      faceIdSubtitle: "Vítej zpět — odemkni Face ID, nebo použij e-mail.",
       guestHint: "Přihlásit se můžeš kdykoli v Nastavení.",
     },
   },

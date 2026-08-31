@@ -133,6 +133,7 @@ export type OnboardingMessages = {
     signInCta: string;
     signUpCta: string;
     continueGuestCta: string;
+    faceIdSubtitle: string;
     guestHint: string;
   };
 };

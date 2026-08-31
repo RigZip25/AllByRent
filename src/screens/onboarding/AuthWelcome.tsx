@@ -1,7 +1,10 @@
+import { useEffect, useRef, useState } from "react";
 import { ScanFace } from "lucide-react";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN } from "../../lib/brand";
+import { shouldShowPasskeyLogin, signInWithPasskey } from "../../lib/auth";
 import { useMessages } from "../../lib/i18n/react";
 import { onboardingAssets } from "../../lib/onboardingAssets";
+import { loadUserProfile } from "../../lib/userProfileStorage";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
@@ -13,10 +16,37 @@ type Props = {
   onContinueAsGuest: () => void;
 };
 
-/** Post-splash: Sign in, create account, or continue browsing as a guest. */
+/** Post-splash: Sign in (Face ID when available), create account, or continue as guest. */
 export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
   const t = useMessages();
   const copy = t.onboarding.authWelcome;
+  const a = t.auth;
+  const [offerFaceId] = useState(() => shouldShowPasskeyLogin());
+  const [faceIdBusy, setFaceIdBusy] = useState(false);
+  const autoTriedRef = useRef(false);
+
+  // Returning users: ask for Face ID as soon as welcome appears.
+  useEffect(() => {
+    if (!offerFaceId || autoTriedRef.current) return;
+    autoTriedRef.current = true;
+    const email = loadUserProfile().email?.trim() || undefined;
+    let cancelled = false;
+    setFaceIdBusy(true);
+    void (async () => {
+      try {
+        await signInWithPasskey(email);
+      } catch {
+        // Dismissed or no credential — keep Sign in / email path.
+      } finally {
+        if (!cancelled) setFaceIdBusy(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [offerFaceId]);
+
+  const primaryLabel = offerFaceId ? a.faceIdCta : copy.signInCta;
 
   return (
     <div className="screen onboarding-step mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-white">
@@ -39,7 +69,9 @@ export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
         <h1 className="text-center text-[24px] font-extrabold leading-tight" style={{ color: GREEN }}>
           {copy.title}
         </h1>
-        <p className="mt-2 text-center text-[15px] leading-relaxed text-gray-600">{copy.subtitle}</p>
+        <p className="mt-2 text-center text-[15px] leading-relaxed text-gray-600">
+          {offerFaceId ? copy.faceIdSubtitle : copy.subtitle}
+        </p>
       </div>
 
       <div
@@ -49,16 +81,18 @@ export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
         <button
           type="button"
           onClick={onSignIn}
-          className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[16px] font-bold text-white"
+          disabled={faceIdBusy}
+          className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[16px] font-bold text-white disabled:opacity-60"
           style={{ backgroundColor: GREEN }}
         >
           <ScanFace className="h-5 w-5" aria-hidden />
-          {copy.signInCta}
+          {faceIdBusy ? a.checking : primaryLabel}
         </button>
         <button
           type="button"
           onClick={onSignUp}
-          className="flex min-h-[48px] w-full items-center justify-center rounded-xl py-3.5 text-[16px] font-bold"
+          disabled={faceIdBusy}
+          className="flex min-h-[48px] w-full items-center justify-center rounded-xl py-3.5 text-[16px] font-bold disabled:opacity-60"
           style={{ backgroundColor: AMBER, color: GREEN }}
         >
           {copy.signUpCta}
@@ -66,7 +100,8 @@ export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
         <button
           type="button"
           onClick={onContinueAsGuest}
-          className="w-full py-2.5 text-center text-[15px] font-semibold text-gray-600 underline-offset-2 active:text-[#0D5C3A]"
+          disabled={faceIdBusy}
+          className="w-full py-2.5 text-center text-[15px] font-semibold text-gray-600 underline-offset-2 active:text-[#0D5C3A] disabled:opacity-60"
         >
           {copy.continueGuestCta}
         </button>

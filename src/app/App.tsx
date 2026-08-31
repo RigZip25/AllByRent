@@ -125,6 +125,7 @@ import {
   consumeLastOauthProvider,
   shouldPromptEnablePasskey,
   shouldShowPasskeyLogin,
+  signInWithPasskey,
   userHasPasskey,
 } from "../lib/auth";
 import { AuthGate } from "../components/AuthGate";
@@ -1353,6 +1354,14 @@ function AppRoutes() {
 
   const handleAuthWelcomeSignIn = useCallback(() => {
     clearPendingAuthEmail();
+    // Start Face ID in the same tap (iOS needs a user gesture); fall back to email sheet.
+    if (shouldShowPasskeyLogin()) {
+      const email = loadUserProfile().email?.trim() || undefined;
+      void signInWithPasskey(email).catch(() => {
+        showAuthGate(resolveAfterAuthWelcome());
+      });
+      return;
+    }
     showAuthGate(resolveAfterAuthWelcome());
   }, [showAuthGate]);
 

@@ -6216,6 +6216,7 @@ export const es: AppMessages = {
       signInCta: "Iniciar sesión",
       signUpCta: "Crear cuenta",
       continueGuestCta: "Continuar como invitado",
+      faceIdSubtitle: "Bienvenido de nuevo — desbloquea con Face ID o usa el email.",
       guestHint: "Puedes iniciar sesión cuando quieras en Ajustes.",
     },
   },

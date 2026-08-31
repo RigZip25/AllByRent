@@ -6234,6 +6234,7 @@ export const en: AppMessages = {
       signInCta: "Sign in",
       signUpCta: "Create account",
       continueGuestCta: "Continue as guest",
+      faceIdSubtitle: "Welcome back — unlock with Face ID, or use email.",
       guestHint: "You can sign in anytime from Settings.",
     },
   },
