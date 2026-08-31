@@ -65,6 +65,10 @@ export const es: AppMessages = {
   },
   auth: {
     intentTitle: "Inicia sesión o crea una cuenta",
+    signInTitle: "Iniciar sesión",
+    signInSubtitle: "Código por email o Face ID — bienvenido de nuevo.",
+    signUpTitle: "Crear cuenta",
+    signUpSubtitle: "Gratis. Nombre y zona ayudan a que te encuentren los vecinos.",
     intentListSubtitle:
       "Indica tus datos: te enviaremos un código de acceso por correo para que el borrador quede vinculado a ti.",
     intentListRentano: "Borrador guardado. Primero inicia sesión; los cobros puedes conectarlos más tarde.",

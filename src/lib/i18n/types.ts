@@ -187,6 +187,10 @@ export type AppMessages = {
   };
   auth: {
     intentTitle: string;
+    signInTitle: string;
+    signInSubtitle: string;
+    signUpTitle: string;
+    signUpSubtitle: string;
     intentListSubtitle: string;
     intentListRentano: string;
     intentBookSubtitle: string;

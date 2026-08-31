@@ -65,6 +65,10 @@ export const en: AppMessages = {
   },
   auth: {
     intentTitle: "Sign in or create account",
+    signInTitle: "Sign in",
+    signInSubtitle: "Email code or Face ID — welcome back.",
+    signUpTitle: "Create account",
+    signUpSubtitle: "Free to join. Name and area help neighbors find you.",
     intentListSubtitle:
       "Add your details — we'll email a sign-in code so your draft stays with you.",
     intentListRentano: "Draft saved. Sign in first — you can connect payouts later when you're ready.",
