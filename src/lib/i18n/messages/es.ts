@@ -6242,7 +6242,7 @@ export const es: AppMessages = {
       phonePlaceholderE164: "+34 612 345 678",
       phoneE164Hint: "Incluye el prefijo internacional para el SMS (E.164). Ejemplo: +34...",
       phoneKycHint:
-        "Verifica tu teléfono por SMS antes de conectar cobros o publicar anuncios de pago. La navegación y los anuncios gratuitos siguen disponibles.",
+        "Número de contacto opcional para vecinos y recogidas. No hace falta verificar por SMS.",
       phoneVerifyTitle: "Verificar teléfono",
       phoneVerifySubtitle:
         "Enviamos un código SMS de un solo uso. El teléfono verificado es necesario para recibir dinero y publicar anuncios de pago.",

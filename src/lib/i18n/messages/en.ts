@@ -6260,7 +6260,7 @@ export const en: AppMessages = {
       phonePlaceholderE164: "+1 555 555 5555",
       phoneE164Hint: "Include country code for SMS (E.164). US numbers may be entered without +1.",
       phoneKycHint:
-        "Verify your phone by SMS before connecting payouts or publishing paid listings. Browsing and free listings stay available.",
+        "Optional contact number for neighbors and pickup coordination. SMS verification is not required.",
       phoneVerifyTitle: "Verify phone",
       phoneVerifySubtitle:
         "We send a one-time SMS code. Verified phones are required to receive money and to publish paid listings.",
