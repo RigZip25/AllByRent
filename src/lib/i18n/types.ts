@@ -136,7 +136,29 @@ export type OnboardingMessages = {
     faceIdSubtitle: string;
     guestHint: string;
   };
+
+  guestShowcase: {
+    photosTitle: string;
+    photosBody: string;
+    enhanceTitle: string;
+    enhanceBody: string;
+    rolesTitle: string;
+    rolesBody: string;
+    roleRent: string;
+    roleRentHint: string;
+    roleSell: string;
+    roleSellHint: string;
+    roleGift: string;
+    roleGiftHint: string;
+    helpTitle: (mascot: string) => string;
+    helpBody: (mascot: string) => string;
+    nextCta: string;
+    signUpCta: string;
+    browseCta: string;
+    footerHint: string;
+  };
 };
+
 
 export type AppMessages = {
   tagline: string;

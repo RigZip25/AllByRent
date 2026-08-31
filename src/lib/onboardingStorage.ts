@@ -8,6 +8,8 @@ const PRODUCT_INTRO_DONE_KEY = "allbyrent_product_intro_done";
 const ROLE_CHOSEN_KEY = "allbyrent_role_chosen";
 /** Post-splash Sign in / Sign up / Continue as guest seen (or user already signed in). */
 const AUTH_WELCOME_DONE_KEY = "allbyrent_auth_welcome_done";
+/** Guest marketing showcase finished (or skipped to browse). */
+const GUEST_SHOWCASE_DONE_KEY = "allbyrent_guest_showcase_done";
 
 export function isOnboardingComplete(): boolean {
   try {
@@ -95,9 +97,26 @@ export function markAuthWelcomeDone(): void {
   }
 }
 
+export function hasGuestShowcaseDone(): boolean {
+  try {
+    return localStorage.getItem(GUEST_SHOWCASE_DONE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+export function markGuestShowcaseDone(): void {
+  try {
+    localStorage.setItem(GUEST_SHOWCASE_DONE_KEY, "true");
+  } catch {
+    /* ignore */
+  }
+}
+
 export function clearAuthWelcomeDone(): void {
   try {
     localStorage.removeItem(AUTH_WELCOME_DONE_KEY);
+    localStorage.removeItem(GUEST_SHOWCASE_DONE_KEY);
   } catch {
     /* ignore */
   }
@@ -127,6 +146,7 @@ export function clearOnboardingComplete(): void {
     localStorage.removeItem(PRODUCT_INTRO_DONE_KEY);
     localStorage.removeItem(ROLE_CHOSEN_KEY);
     localStorage.removeItem(AUTH_WELCOME_DONE_KEY);
+    localStorage.removeItem(GUEST_SHOWCASE_DONE_KEY);
   } catch {
     /* ignore */
   }
