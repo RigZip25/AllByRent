@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Globe,
+  LogIn,
   LogOut,
   Mail,
   Phone,
@@ -116,14 +117,17 @@ export function PersonalInfoScreen({
   onOpenCoHosts,
   onOpenEarnings,
   onSignedOut,
+  onSignIn,
   initialEdit,
 }: {
   onBack: () => void;
   onDeleteAccount?: () => void;
   onOpenCoHosts?: () => void;
   onOpenEarnings?: () => void;
-  /** After session ends — leave account screens (typically Home as guest). */
+  /** After session ends — leave account screens (typically Settings as guest). */
   onSignedOut?: () => void;
+  /** Guest: open AuthGate without replaying onboarding. */
+  onSignIn?: () => void;
   initialEdit?: "name" | "phone";
 }) {
   const auth = useAuth();
@@ -525,6 +529,16 @@ export function PersonalInfoScreen({
           >
             <LogOut className="h-4 w-4" />
             {authBusy ? profileCopy.signingOut : profileCopy.signOut}
+          </button>
+        ) : auth.configured && onSignIn ? (
+          <button
+            type="button"
+            onClick={onSignIn}
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-[15px] font-bold text-white"
+            style={{ backgroundColor: GREEN }}
+          >
+            <LogIn className="h-4 w-4" />
+            {profileCopy.signInCreate}
           </button>
         ) : null}
 

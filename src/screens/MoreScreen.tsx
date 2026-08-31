@@ -3,6 +3,7 @@ import {
   BookOpen,
   ChevronRight,
   HelpCircle,
+  LogIn,
   Mail,
   MessageSquareWarning,
 } from "lucide-react";
@@ -67,11 +68,14 @@ function MenuRow({
 /** Account + support only — activity is its own tab; garage lives under Home. */
 export function MoreScreen({
   onAccountSettings,
+  onSignIn,
   onMrE,
   onHowItWorks,
   onFeedback,
 }: {
   onAccountSettings: () => void;
+  /** Guest: open AuthGate (email / Face ID) without replaying onboarding. */
+  onSignIn?: () => void;
   onMrE: () => void;
   onHowItWorks?: () => void;
   onFeedback?: () => void;
@@ -92,6 +96,7 @@ export function MoreScreen({
   };
 
   const displayNameLabel = getProfileDisplayLabel(profile.displayName);
+  const signedIn = Boolean(auth.configured && auth.session);
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -101,22 +106,40 @@ export function MoreScreen({
         </h1>
         <p className="mb-4 text-[14px] text-gray-500">{t.more.subtitle}</p>
 
-        <button
-          type="button"
-          onClick={onAccountSettings}
-          className="mb-5 flex w-full items-center gap-4 rounded-3xl border bg-white p-4 text-left active:bg-[#F9FAFB]"
-          style={{ borderColor: BORDER }}
-        >
-          <ProfileAvatar avatarUrl={profile.avatarUrl} size={56} />
-          <div className="min-w-0 flex-1">
-            <p className="text-[18px] font-bold" style={{ color: GREEN }}>
-              {displayNameLabel}
+        {signedIn ? (
+          <button
+            type="button"
+            onClick={onAccountSettings}
+            className="mb-5 flex w-full items-center gap-4 rounded-3xl border bg-white p-4 text-left active:bg-[#F9FAFB]"
+            style={{ borderColor: BORDER }}
+          >
+            <ProfileAvatar avatarUrl={profile.avatarUrl} size={56} />
+            <div className="min-w-0 flex-1">
+              <p className="text-[18px] font-bold" style={{ color: GREEN }}>
+                {displayNameLabel}
+              </p>
+              <p className="mt-0.5 text-[13px] text-gray-500">{t.more.accountSettings}</p>
+              <p className="mt-0.5 text-[12px] text-gray-400">{t.more.accountSettingsHint}</p>
+            </div>
+            <ChevronRight className="h-5 w-5 shrink-0 text-gray-300" />
+          </button>
+        ) : auth.configured && onSignIn ? (
+          <div className="mb-5 rounded-3xl border bg-white p-4" style={{ borderColor: BORDER }}>
+            <p className="text-[16px] font-bold" style={{ color: GREEN }}>
+              {t.profile.signInCreate}
             </p>
-            <p className="mt-0.5 text-[13px] text-gray-500">{t.more.accountSettings}</p>
-            <p className="mt-0.5 text-[12px] text-gray-400">{t.more.accountSettingsHint}</p>
+            <p className="mt-1 text-[13px] text-gray-500">{t.more.signInHint}</p>
+            <button
+              type="button"
+              onClick={onSignIn}
+              className="mt-3 flex w-full min-h-[48px] items-center justify-center gap-2 rounded-2xl py-3 text-[15px] font-bold text-white"
+              style={{ backgroundColor: GREEN }}
+            >
+              <LogIn className="h-4 w-4" />
+              {t.common.signIn}
+            </button>
           </div>
-          <ChevronRight className="h-5 w-5 shrink-0 text-gray-300" />
-        </button>
+        ) : null}
 
         <SectionTitle>{t.more.sectionSupport}</SectionTitle>
         <ul className="mb-2 flex flex-col gap-2">

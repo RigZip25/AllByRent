@@ -589,6 +589,7 @@ export const cs: AppMessages = {
     sendFeedbackHint: "Nahlaste problém nebo nápad — čteme to",
     accountSettings: "Nastavení účtu",
     accountSettingsHint: "Foto, jméno, telefon, výplaty, spoluhostitelé",
+    signInHint: "E-mailový kód nebo Face ID — stejný účet, bez onboardingů.",
   },
   feedback: {
     title: "Pomoc a zpětná vazba",
