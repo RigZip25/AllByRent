@@ -50,10 +50,14 @@ export const cs: AppMessages = {
       "Zobrazuje pouze rezervované a hostitelem zablokované dny. Údaje o nájemci se zde neuvádějí.",
   },
   nav: {
-    home: "Procházet",
+    home: "Domů",
     stock: "Přidat",
-    garage: "Domácnost",
+    activity: "Aktivita",
     more: "Nastavení",
+  },
+  activity: {
+    title: "Aktivita",
+    subtitle: "Půjčky, zprávy a uložené položky",
   },
   splash: {
     chipGarage: "Tvoje výloha",
@@ -557,7 +561,7 @@ export const cs: AppMessages = {
   },
   more: {
     title: "Nastavení",
-    subtitle: "Rezervace, výdělky a účet",
+    subtitle: "Účet a nápověda",
     profileHint: "Nastavení účtu",
     sectionActivity: "Aktivita",
     sectionGarage: "Tvoje garáž",

@@ -1,22 +1,20 @@
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  Bell,
   BookOpen,
   ChevronRight,
-  ClipboardList,
-  Heart,
   HelpCircle,
   Mail,
-  MessageCircle,
   MessageSquareWarning,
-  TrendingUp,
-  Warehouse,
 } from "lucide-react";
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { useAuth } from "../hooks/AuthProvider";
 import { MASCOT_NAME, APP_NAME, SUPPORT_EMAIL } from "../lib/brand";
 import { useMessages } from "../lib/i18n/react";
-import { loadUserProfile, refreshProfileStats, getProfileDisplayLabel } from "../lib/userProfileStorage";
+import {
+  loadUserProfile,
+  refreshProfileStats,
+  getProfileDisplayLabel,
+} from "../lib/userProfileStorage";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -66,26 +64,14 @@ function MenuRow({
   );
 }
 
+/** Account + support only — activity is its own tab; garage lives under Home. */
 export function MoreScreen({
   onAccountSettings,
-  onRentals,
-  onMessages,
-  onFavorites,
-  onNotifications,
-  onEarnBusiness,
-  onGarage,
   onMrE,
   onHowItWorks,
   onFeedback,
 }: {
-  /** Single hub: photo, name, phone, payouts, co-hosts (was Profile + Account settings). */
   onAccountSettings: () => void;
-  onRentals: () => void;
-  onMessages?: () => void;
-  onFavorites: () => void;
-  onNotifications: () => void;
-  onEarnBusiness: () => void;
-  onGarage: () => void;
   onMrE: () => void;
   onHowItWorks?: () => void;
   onFeedback?: () => void;
@@ -131,64 +117,6 @@ export function MoreScreen({
           </div>
           <ChevronRight className="h-5 w-5 shrink-0 text-gray-300" />
         </button>
-
-        <SectionTitle>{t.more.sectionActivity}</SectionTitle>
-        <ul className="mb-5 flex flex-col gap-2">
-          <li>
-            <MenuRow
-              icon={<ClipboardList className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label={t.more.rentals}
-              hint={t.more.rentalsHint}
-              onClick={onRentals}
-            />
-          </li>
-          {onMessages ? (
-            <li>
-              <MenuRow
-                icon={<MessageCircle className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-                label={t.more.messages}
-                hint={t.more.messagesHint}
-                onClick={onMessages}
-              />
-            </li>
-          ) : null}
-          <li>
-            <MenuRow
-              icon={<Heart className="h-5 w-5" style={{ color: "#E11D48" }} />}
-              label={t.more.favorites}
-              hint={t.more.favoritesHint}
-              onClick={onFavorites}
-            />
-          </li>
-          <li>
-            <MenuRow
-              icon={<Bell className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label={t.more.notifications}
-              hint={t.more.notificationsHint}
-              onClick={onNotifications}
-            />
-          </li>
-        </ul>
-
-        <SectionTitle>{t.more.sectionGarage}</SectionTitle>
-        <ul className="mb-5 flex flex-col gap-2">
-          <li>
-            <MenuRow
-              icon={<Warehouse className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label={t.more.myGarage}
-              hint={t.more.myGarageHint}
-              onClick={onGarage}
-            />
-          </li>
-          <li>
-            <MenuRow
-              icon={<TrendingUp className="h-5 w-5" style={{ color: "#F59E0B" }} />}
-              label={t.more.earnDashboard}
-              hint={t.more.earnDashboardHint}
-              onClick={onEarnBusiness}
-            />
-          </li>
-        </ul>
 
         <SectionTitle>{t.more.sectionSupport}</SectionTitle>
         <ul className="mb-2 flex flex-col gap-2">

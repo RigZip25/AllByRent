@@ -1,4 +1,4 @@
-import { Plus, Search, Settings } from "lucide-react";
+import { Bell, Home, Plus, Settings } from "lucide-react";
 import { MASCOT_NAME } from "../../lib/brand";
 import { useMessages } from "../../lib/i18n/react";
 import rentanoImg from "../../imports/No_back_rentano.png";
@@ -6,7 +6,7 @@ import rentanoImg from "../../imports/No_back_rentano.png";
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";
 
-export type BottomNavTab = "home" | "mre" | "add" | "garage" | "more" | "none";
+export type BottomNavTab = "home" | "mre" | "add" | "activity" | "more" | "none";
 
 function runNavAction(action: () => void) {
   const active = document.activeElement;
@@ -16,9 +16,9 @@ function runNavAction(action: () => void) {
   action();
 }
 
-function NavIconBrowse({ active }: { active?: boolean }) {
+function NavIconHome({ active }: { active?: boolean }) {
   return (
-    <Search
+    <Home
       className="h-[26px] w-[26px]"
       strokeWidth={2}
       style={{ color: active ? GREEN : "#888" }}
@@ -38,18 +38,14 @@ function NavIconMrE({ active }: { active?: boolean }) {
   );
 }
 
-function NavIconGarage({ active }: { active?: boolean }) {
-  const c = active ? GREEN : "#888";
+function NavIconActivity({ active }: { active?: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" className="h-[26px] w-[26px]" fill="none" aria-hidden="true">
-      <path
-        d="M4 19V11L12 5l8 6v8H4Z"
-        stroke={c}
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path d="M9 19v-5h6v5" stroke={c} strokeWidth="2" strokeLinejoin="round" />
-    </svg>
+    <Bell
+      className="h-[26px] w-[26px]"
+      strokeWidth={2}
+      style={{ color: active ? GREEN : "#888" }}
+      aria-hidden
+    />
   );
 }
 
@@ -80,14 +76,14 @@ export function BottomNav({
   onHome,
   onMrE,
   onAdd,
-  onGarage,
+  onActivity,
   onMore,
 }: {
   activeTab?: BottomNavTab;
   onHome: () => void;
   onMrE: () => void;
   onAdd: () => void;
-  onGarage: () => void;
+  onActivity: () => void;
   onMore: () => void;
 }) {
   const mreLabel = MASCOT_NAME.replace("Mr. ", "Mr.");
@@ -104,8 +100,9 @@ export function BottomNav({
           type="button"
           onClick={() => runNavAction(onHome)}
           className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
+          aria-label="Home — browse or my garage"
         >
-          <NavIconBrowse active={activeTab === "home"} />
+          <NavIconHome active={activeTab === "home"} />
           <TabLabel active={activeTab === "home"}>{nav.home}</TabLabel>
         </button>
 
@@ -142,11 +139,12 @@ export function BottomNav({
 
         <button
           type="button"
-          onClick={() => runNavAction(onGarage)}
+          onClick={() => runNavAction(onActivity)}
           className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
+          aria-label="Activity — rentals, messages, favorites"
         >
-          <NavIconGarage active={activeTab === "garage"} />
-          <TabLabel active={activeTab === "garage"}>{nav.garage}</TabLabel>
+          <NavIconActivity active={activeTab === "activity"} />
+          <TabLabel active={activeTab === "activity"}>{nav.activity}</TabLabel>
         </button>
 
         <button

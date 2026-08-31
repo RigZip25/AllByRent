@@ -50,10 +50,14 @@ export const es: AppMessages = {
       "Muestra solo fechas reservadas o bloqueadas por el anfitrión. Aquí no aparecen datos del inquilino.",
   },
   nav: {
-    home: "Explorar",
+    home: "Inicio",
     stock: "Añadir",
-    garage: "Mi hogar",
+    activity: "Actividad",
     more: "Ajustes",
+  },
+  activity: {
+    title: "Actividad",
+    subtitle: "Alquileres, mensajes y guardados",
   },
   splash: {
     chipGarage: "Tu escaparate",
@@ -537,7 +541,7 @@ export const es: AppMessages = {
   },
   more: {
     title: "Ajustes",
-    subtitle: "Reservas, ganancias y cuenta",
+    subtitle: "Cuenta y ayuda",
     profileHint: "Ajustes de la cuenta",
     sectionActivity: "Actividad",
     sectionGarage: "Tu garaje",
