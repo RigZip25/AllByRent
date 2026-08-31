@@ -1156,7 +1156,9 @@ function AppRoutes() {
       setEditingListingReturn(null);
       setListingPrefill(null);
       setSelectedNeighborGarageHostId(hostId);
-      setFocusGarageItemId(listingId?.trim() || null);
+      // Guard: onClick may pass a MouseEvent if wired as onClick={handler}.
+      const focusId = typeof listingId === "string" ? listingId.trim() || null : null;
+      setFocusGarageItemId(focusId);
       setGarageShopPreview(true);
       setNavStack([]);
       setCurrentScreen("garageShop");
