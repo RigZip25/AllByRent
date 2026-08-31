@@ -13,6 +13,7 @@ import { isNetworkFetchError } from "./authErrors";
 import { emailOtpEntryError, isCompleteEmailOtpLength, normalizeEmailOtpInput } from "./authOtp";
 import { getRuntimeAppOrigin } from "./appOrigin";
 import { clearAuthWelcomeDone, isOnboardingComplete } from "./onboardingStorage";
+import { loadUserProfile } from "./userProfileStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 export type AuthProvider = "google" | "apple";
@@ -282,12 +283,20 @@ export async function userHasPasskey(): Promise<boolean> {
 }
 
 /**
- * Show “Continue with Face ID” on the sign-in sheet only when this device
- * already enrolled a passkey. Fresh installs / first open → email OTP first;
- * Face ID enable is offered after onboarding via PasskeySetup.
+ * Offer Face ID when this device enrolled a passkey, or a returning local
+ * profile has name+email (Keychain may still hold the credential). Fresh
+ * installs without a profile stay on email OTP first.
  */
 export function shouldShowPasskeyLogin(): boolean {
-  return isPasskeySupported() && deviceHasPasskeyHint();
+  if (!isPasskeySupported()) return false;
+  if (deviceHasPasskeyHint()) return true;
+  // Returning local profile — Face ID may still be in iCloud Keychain for this email.
+  try {
+    const profile = loadUserProfile();
+    return Boolean(profile.email?.trim() && profile.displayName?.trim());
+  } catch {
+    return false;
+  }
 }
 
 export function shouldPromptEnablePasskey(): boolean {
