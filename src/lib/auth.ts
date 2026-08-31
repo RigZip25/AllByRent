@@ -333,6 +333,8 @@ export async function signOut(): Promise<void> {
   if (!supabase) return;
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
+  // Drop mid-OTP email so next Sign in can open Face ID, not the code step.
+  clearPendingAuthEmail();
 }
 
 export async function requestAccountDeletion(): Promise<{

@@ -120,6 +120,7 @@ import {
   consumeAuthCallbackResume,
   consumeLastOauthProvider,
   shouldPromptEnablePasskey,
+  shouldShowPasskeyLogin,
   userHasPasskey,
 } from "../lib/auth";
 import { AuthGate } from "../components/AuthGate";
@@ -1026,6 +1027,8 @@ function AppRoutes() {
     goToTab("more");
   }, [goToTab]);
   const handleSignIn = useCallback(() => {
+    // Explicit Sign in → Face ID / account sheet, not a leftover OTP step.
+    clearPendingAuthEmail();
     showAuthGate("more");
   }, [showAuthGate]);
   const handleOpenRentals = useCallback(() => navigateTo("rentals"), [navigateTo]);
@@ -2490,7 +2493,9 @@ function AppRoutes() {
       <AuthGate
         open={authGateOpen}
         intent={authIntent}
-        initialStep={peekPendingAuthEmail() ? "confirm" : undefined}
+        initialStep={
+          peekPendingAuthEmail() && !shouldShowPasskeyLogin() ? "confirm" : undefined
+        }
         onDismiss={() => {
           setAuthGateOpen(false);
           if (currentScreen === "profile" && auth.configured && !auth.loading && !auth.session) {

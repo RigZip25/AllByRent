@@ -165,7 +165,8 @@ export function AuthGate({
 
   useEffect(() => {
     if (!open) return;
-    setShowPasskey(shouldShowPasskeyLogin());
+    const canPasskey = shouldShowPasskeyLogin();
+    setShowPasskey(canPasskey);
     const next = hydrateAuthForm();
     setFullName(next.fullName);
     setPhone(next.phone);
@@ -175,10 +176,12 @@ export function AuthGate({
     setEditDetails(false);
     setOtpCode("");
     setError(null);
-    if (initialStep) {
+    // Face ID first when this device has a passkey — don't jump to OTP confirm.
+    if (canPasskey) {
+      setStep("account");
+    } else if (initialStep) {
       setStep(initialStep);
     } else if (next.returning) {
-      // Prefill summary; Face ID CTA only if this device already has a passkey.
       setStep("account");
     } else if (next.email) {
       setStep("confirm");
@@ -186,6 +189,39 @@ export function AuthGate({
       setStep("account");
     }
   }, [open, initialStep]);
+
+  // Auto-prompt Face ID when the sheet opens (if this device enrolled a passkey).
+  useEffect(() => {
+    if (!open || !configured) return;
+    if (!shouldShowPasskeyLogin()) return;
+
+    const emailForPasskey = (hydrateAuthForm().email || "").trim() || undefined;
+    let cancelled = false;
+    setBusy("passkey");
+    setError(null);
+    void (async () => {
+      try {
+        await signInWithPasskey(emailForPasskey);
+      } catch (e) {
+        if (cancelled) return;
+        const message = formatAuthError(e);
+        // User dismissed the system sheet — keep the form quiet.
+        if (
+          /cancelled|canceled|NotAllowed|timed out|was not allowed|user denied/i.test(message)
+        ) {
+          return;
+        }
+        setError(message);
+        if (import.meta.env.DEV) console.error("[AuthGate] auto Face ID", e);
+      } finally {
+        if (!cancelled) setBusy(null);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, configured]);
 
   useEffect(() => {
     if (!open) return;
@@ -274,7 +310,7 @@ export function AuthGate({
 
   const handlePasskeyLogin = () => {
     void run("passkey", async () => {
-      await signInWithPasskey();
+      await signInWithPasskey(email.trim() || undefined);
     });
   };
 
