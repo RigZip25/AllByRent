@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import {
   ArrowLeft,
-  BadgeCheck,
   CheckCircle2,
   Mail,
   Phone,
@@ -18,21 +17,18 @@ import {
   normalizeDobToIso,
 } from "../../lib/dateOfBirth";
 import { useLocale, useMessages } from "../../lib/i18n/react";
-import { PhoneVerifySheet } from "../../components/profile/PhoneVerifySheet";
 import { ConnectSetupError } from "../../components/payments/ConnectSetupError";
 import { PayoutsFlowCard } from "../../components/payments/PayoutsFlowCard";
 import { useAuth } from "../../hooks/AuthProvider";
 import { fetchRemoteProfile, updateRemoteProfile } from "../../lib/supabaseProfile";
 import { phoneDigitsForDisplay } from "../../lib/phoneE164";
-import { refreshPhoneVerifiedFromRemote } from "../../lib/phoneKyc";
 import {
   loadUserProfile,
   refreshProfileStats,
   syncUserProfileFromAuth,
   updateProfileFields,
-  saveUserProfile,
 } from "../../lib/userProfileStorage";
-import { formatUsPhoneDisplay } from "../../lib/usPhoneFormat";
+import { formatUsPhoneDisplay, formatUsPhoneInput } from "../../lib/usPhoneFormat";
 import { loadConnectStatus, startConnectOnboarding } from "../../lib/repositories/connectRepository";
 import { onConnectOnboardingDone } from "../../lib/connectOnboardingBus";
 import {
@@ -51,14 +47,12 @@ function Row({
   icon,
   label,
   value,
-  badge,
   onClick,
   trailing,
 }: {
   icon: ReactNode;
   label: string;
   value: string;
-  badge?: string | null;
   onClick?: () => void;
   trailing?: ReactNode;
 }) {
@@ -72,12 +66,6 @@ function Row({
         <p className="truncate text-[15px] font-semibold" style={{ color: GREEN }}>
           {value}
         </p>
-        {badge ? (
-          <p className="mt-0.5 inline-flex items-center gap-1 text-[12px] font-semibold text-emerald-700">
-            <BadgeCheck className="h-3.5 w-3.5" />
-            {badge}
-          </p>
-        ) : null}
       </div>
       {trailing}
     </>
@@ -132,7 +120,6 @@ export function PersonalInfoScreen({
   const locale = useLocale();
   const [profile, setProfile] = useState(() => refreshProfileStats(loadUserProfile(), auth.userId));
   const [editing, setEditing] = useState<EditField>(null);
-  const [phoneSheetOpen, setPhoneSheetOpen] = useState(false);
   const [stripeStatus, setStripeStatus] = useState<{
     connected: boolean;
     payoutsEnabled: boolean;
@@ -149,7 +136,7 @@ export function PersonalInfoScreen({
 
   useEffect(() => {
     if (initialEdit === "name") setEditing("name");
-    if (initialEdit === "phone") setPhoneSheetOpen(true);
+    if (initialEdit === "phone") setEditing("phone");
   }, [initialEdit]);
 
   useEffect(() => {
@@ -174,7 +161,9 @@ export function PersonalInfoScreen({
       if (remote.date_of_birth?.trim()) {
         updateProfileFields({ dateOfBirth: remote.date_of_birth.trim() });
       }
-      await refreshPhoneVerifiedFromRemote(auth.userId);
+      if (remote.phone?.trim()) {
+        updateProfileFields({ phone: phoneDigitsForDisplay(remote.phone) || remote.phone });
+      }
       if (!mounted) return;
       setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
       // Do not treat "account id exists" as bank done — Express creates the account
@@ -225,7 +214,6 @@ export function PersonalInfoScreen({
   const phone = profile.phone?.trim()
     ? formatUsPhoneDisplay(profile.phone) || phoneDigitsForDisplay(profile.phone)
     : t.addPhone;
-  const phoneVerified = Boolean(profile.verification.phone);
   const dobIso = profile.dateOfBirth?.trim() || "";
   const dobAge = ageYearsFromIso(dobIso);
   const dob =
@@ -284,6 +272,18 @@ export function PersonalInfoScreen({
     setEditing(null);
     if (auth.userId) {
       void updateRemoteProfile(auth.userId, { date_of_birth: value }).catch(() => undefined);
+    }
+  };
+
+  const savePhone = (raw: string) => {
+    const formatted = formatUsPhoneInput(raw.trim()) || raw.trim();
+    if (!formatted) return;
+    const display = formatUsPhoneDisplay(formatted) || phoneDigitsForDisplay(formatted) || formatted;
+    const next = updateProfileFields({ phone: display });
+    setProfile(refreshProfileStats(next, auth.userId));
+    setEditing(null);
+    if (auth.userId) {
+      void updateRemoteProfile(auth.userId, { phone: display }).catch(() => undefined);
     }
   };
 
@@ -419,8 +419,7 @@ export function PersonalInfoScreen({
           icon={<Phone className="h-5 w-5" style={{ color: GREEN }} />}
           label={t.phone}
           value={phone}
-          badge={phoneVerified ? t.phoneVerifiedBadge : profile.phone?.trim() ? t.phoneNotVerified : null}
-          onClick={() => setPhoneSheetOpen(true)}
+          onClick={() => setEditing("phone")}
         />
         <p className="px-1 text-[12px] leading-relaxed text-gray-500">{t.phoneKycHint}</p>
         <Row
@@ -461,32 +460,21 @@ export function PersonalInfoScreen({
         onClose={() => setEditing(null)}
         onSave={saveName}
       />
+      <ProfileFieldEditSheet
+        open={editing === "phone"}
+        title={t.phone}
+        label={t.phoneLabel}
+        value={profile.phone}
+        inputType="tel"
+        placeholder={t.phonePlaceholder}
+        onClose={() => setEditing(null)}
+        onSave={savePhone}
+      />
       <DateOfBirthEditSheet
         open={editing === "dob"}
         value={profile.dateOfBirth || ""}
         onClose={() => setEditing(null)}
         onSave={saveDob}
-      />
-      <PhoneVerifySheet
-        open={phoneSheetOpen}
-        initialPhone={profile.phone}
-        alreadyVerified={phoneVerified}
-        onClose={() => {
-          setPhoneSheetOpen(false);
-          setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
-        }}
-        onVerified={(nextPhone) => {
-          const current = loadUserProfile();
-          saveUserProfile({
-            ...current,
-            phone: nextPhone,
-            verification: { ...current.verification, phone: true },
-          });
-          setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
-          if (auth.userId) {
-            void updateRemoteProfile(auth.userId, { phone: nextPhone }).catch(() => undefined);
-          }
-        }}
       />
     </div>
   );

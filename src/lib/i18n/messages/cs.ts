@@ -6251,7 +6251,7 @@ export const cs: AppMessages = {
       phonePlaceholderE164: "+420 777 123 456",
       phoneE164Hint: "Pro SMS uveďte mezinárodní předvolbu (E.164). Příklad: +420...",
       phoneKycHint:
-        "Ověřte telefon SMS kódem před připojením výplat nebo zveřejněním placených inzerátů. Procházení a bezplatné nabídky zůstávají dostupné.",
+        "Volitelné kontaktní číslo pro sousedy a předání. Ověření SMS není potřeba.",
       phoneVerifyTitle: "Ověřit telefon",
       phoneVerifySubtitle:
         "Pošleme jednorázový SMS kód. Ověřený telefon je nutný pro příjem peněz a zveřejnění placených inzerátů.",
