@@ -52,7 +52,7 @@ export const cs: AppMessages = {
   nav: {
     home: "Procházet",
     stock: "Přidat",
-    garage: "Garáž",
+    garage: "Moje garáž",
     more: "Účet",
   },
   splash: {

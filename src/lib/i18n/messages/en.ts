@@ -52,7 +52,7 @@ export const en: AppMessages = {
   nav: {
     home: "Browse",
     stock: "Stock",
-    garage: "Garage",
+    garage: "My Garage",
     more: "Account",
   },
   splash: {
