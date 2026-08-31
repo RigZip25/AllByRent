@@ -28,6 +28,8 @@ const GREEN = "#0D5C3A";
 
 type Step = "account" | "confirm";
 
+export type AuthGateMode = "signIn" | "signUp" | "auto";
+
 const EMAIL_COOLDOWN_SECONDS = 60;
 const EMAIL_RATE_LIMIT_COOLDOWN_SECONDS = 15 * 60;
 
@@ -99,12 +101,15 @@ function SummaryRow({ label, value, badge }: { label: string; value: string; bad
 export function AuthGate({
   open,
   intent = "generic",
+  mode = "auto",
   initialStep,
   onDismiss,
   onAuthenticated,
 }: {
   open: boolean;
   intent?: AuthIntent;
+  /** signIn = email/Face ID only; signUp = full profile; auto = hybrid (gated actions). */
+  mode?: AuthGateMode;
   initialStep?: Step;
   onDismiss?: () => void;
   onAuthenticated?: () => void;
@@ -156,7 +161,16 @@ export function AuthGate({
   const [showPasskey, setShowPasskey] = useState(() => shouldShowPasskeyLogin());
 
   const canUseSupabase = useMemo(() => configured, [configured]);
-  const showProfileFields = !returning || editDetails;
+  const isSignUp = mode === "signUp";
+  const isSignIn = mode === "signIn";
+  // Sign up always collects profile. Sign in is email (/ Face ID) only.
+  const showProfileFields = isSignUp || (!isSignIn && (!returning || editDetails));
+  const headerTitle = isSignUp ? a.signUpTitle : isSignIn ? a.signInTitle : copy.title;
+  const headerSubtitle = isSignUp
+    ? a.signUpSubtitle
+    : isSignIn
+      ? a.signInSubtitle
+      : copy.subtitle;
 
   useEffect(() => {
     if (!open || !session) return;
@@ -165,19 +179,19 @@ export function AuthGate({
 
   useEffect(() => {
     if (!open) return;
-    const canPasskey = shouldShowPasskeyLogin();
+    const canPasskey = !isSignUp && shouldShowPasskeyLogin();
     setShowPasskey(canPasskey);
     const next = hydrateAuthForm();
     setFullName(next.fullName);
     setPhone(next.phone);
     setEmail(next.email);
     setLocation(next.location);
-    setReturning(next.returning);
-    setEditDetails(false);
+    // Sign up always starts as a new profile form (not the returning summary).
+    setReturning(isSignUp ? false : next.returning);
+    setEditDetails(isSignUp);
     setOtpCode("");
     setError(null);
-    // Face ID first when this device has a passkey — don't jump to OTP confirm.
-    if (canPasskey) {
+    if (canPasskey || isSignUp || isSignIn) {
       setStep("account");
     } else if (initialStep) {
       setStep(initialStep);
@@ -188,11 +202,12 @@ export function AuthGate({
     } else {
       setStep("account");
     }
-  }, [open, initialStep]);
+  }, [open, initialStep, isSignUp, isSignIn]);
 
-  // Auto-prompt Face ID when the sheet opens (if this device enrolled a passkey).
+  // Auto-prompt Face ID on Sign in (not on Create account).
   useEffect(() => {
     if (!open || !configured) return;
+    if (isSignUp) return;
     if (!shouldShowPasskeyLogin()) return;
 
     const emailForPasskey = (hydrateAuthForm().email || "").trim() || undefined;
@@ -221,7 +236,7 @@ export function AuthGate({
     return () => {
       cancelled = true;
     };
-  }, [open, configured]);
+  }, [open, configured, isSignUp]);
 
   useEffect(() => {
     if (!open) return;
@@ -274,7 +289,9 @@ export function AuthGate({
     const correctingAddress =
       emailOverride != null && nextEmail.toLowerCase() !== email.trim().toLowerCase();
 
-    if (showProfileFields) {
+    if (isSignIn) {
+      // Returning sign-in: email is enough (Face ID is separate).
+    } else if (showProfileFields) {
       if (!fullName.trim()) {
         setError(a.nameRequired);
         return;
@@ -404,10 +421,10 @@ export function AuthGate({
         {step !== "confirm" ? <RentanoTip message={copy.rentano} className="mb-1" /> : null}
 
         <h2 className="mt-3 text-[22px] font-bold leading-tight" style={{ color: GREEN }}>
-          {step === "confirm" ? confirmTitle : copy.title}
+          {step === "confirm" ? confirmTitle : headerTitle}
         </h2>
         <p className="mt-1 text-[14px] text-gray-500">
-          {step === "confirm" ? confirmSubtitle : copy.subtitle}
+          {step === "confirm" ? confirmSubtitle : headerSubtitle}
         </p>
 
         {!canUseSupabase ? (

@@ -128,7 +128,7 @@ import {
   signInWithPasskey,
   userHasPasskey,
 } from "../lib/auth";
-import { AuthGate } from "../components/AuthGate";
+import { AuthGate, type AuthGateMode } from "../components/AuthGate";
 import { PasskeySetup } from "../components/PasskeySetup";
 import { DeleteAccountScreen } from "../screens/profile/DeleteAccount";
 import { CoHostsScreen } from "../screens/profile/CoHostsScreen";
@@ -706,6 +706,7 @@ function AppRoutes() {
   const [attachmentTitle, setAttachmentTitle] = useState<string | null>(null);
   const [postAuthTarget, setPostAuthTarget] = useState<Screen | null>(null);
   const [authGateOpen, setAuthGateOpen] = useState(false);
+  const [authGateMode, setAuthGateMode] = useState<AuthGateMode>("auto");
   const [authIntent, setAuthIntentState] = useState<AuthIntent>("generic");
   const [passkeySetupOpen, setPasskeySetupOpen] = useState(false);
   const [isLocatingHome, setIsLocatingHome] = useState(false);
@@ -896,12 +897,17 @@ function AppRoutes() {
   }, []);
 
   /** Push the screen we are leaving, then open the next screen (avoids stale currentScreen in the stack). */
-  const showAuthGate = useCallback((target: Screen, intentOverride?: AuthIntent) => {
+  const showAuthGate = useCallback((
+    target: Screen,
+    intentOverride?: AuthIntent,
+    mode: AuthGateMode = "auto",
+  ) => {
     const intent = intentOverride ?? screenToAuthIntent(target);
     setPostAuthTarget(target);
     setAuthReturn(target);
     setAuthIntent(intent);
     setAuthIntentState(intent);
+    setAuthGateMode(mode);
     setAuthGateOpen(true);
   }, []);
 
@@ -1075,7 +1081,7 @@ function AppRoutes() {
   const handleSignIn = useCallback(() => {
     // Explicit Sign in → Face ID / account sheet, not a leftover OTP step.
     clearPendingAuthEmail();
-    showAuthGate("more");
+    showAuthGate("more", "generic", "signIn");
   }, [showAuthGate]);
   const handleOpenRentals = useCallback(() => navigateTo("rentals"), [navigateTo]);
   const handleOpenMessages = useCallback(() => navigateTo("messages"), [navigateTo]);
@@ -1373,20 +1379,20 @@ function AppRoutes() {
 
   const handleAuthWelcomeSignIn = useCallback(() => {
     clearPendingAuthEmail();
-    // Face ID only on explicit Sign in tap (never auto) so guests can explore freely.
+    // Face ID only on explicit Sign in tap; fall back to email Sign in sheet (not Sign up).
     if (shouldShowPasskeyLogin()) {
       const email = loadUserProfile().email?.trim() || undefined;
       void signInWithPasskey(email).catch(() => {
-        showAuthGate(resolveAfterSignIn());
+        showAuthGate(resolveAfterSignIn(), "generic", "signIn");
       });
       return;
     }
-    showAuthGate(resolveAfterSignIn());
+    showAuthGate(resolveAfterSignIn(), "generic", "signIn");
   }, [showAuthGate]);
 
   const handleAuthWelcomeSignUp = useCallback(() => {
     clearPendingAuthEmail();
-    showAuthGate(resolveAfterSignIn());
+    showAuthGate(resolveAfterSignIn(), "generic", "signUp");
   }, [showAuthGate]);
 
   const handleInstallGateInstalled = useCallback(() => {
@@ -2571,8 +2577,11 @@ function AppRoutes() {
       <AuthGate
         open={authGateOpen}
         intent={authIntent}
+        mode={authGateMode}
         initialStep={
-          peekPendingAuthEmail() && !shouldShowPasskeyLogin() ? "confirm" : undefined
+          peekPendingAuthEmail() && !shouldShowPasskeyLogin() && authGateMode !== "signUp"
+            ? "confirm"
+            : undefined
         }
         onDismiss={() => {
           setAuthGateOpen(false);

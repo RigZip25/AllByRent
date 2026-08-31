@@ -65,6 +65,10 @@ export const cs: AppMessages = {
   },
   auth: {
     intentTitle: "Přihlásit se nebo založit účet",
+    signInTitle: "Přihlásit se",
+    signInSubtitle: "Kód e-mailem nebo Face ID — vítej zpět.",
+    signUpTitle: "Vytvořit účet",
+    signUpSubtitle: "Zdarma. Jméno a oblast pomůžou sousedům tě najít.",
     intentListSubtitle:
       "Doplň údaje — pošleme ti e-mailem přihlašovací kód, ať koncept zůstane u tebe.",
     intentListRentano:
