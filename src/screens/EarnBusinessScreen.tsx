@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDownRight,
+  ArrowLeft,
   ArrowRight,
   ArrowUpRight,
   CreditCard,
@@ -414,12 +415,14 @@ function StatementSection({
 }
 
 export function EarnBusinessScreen({
+  onBack,
   onHome,
   onRentals: _onRentals,
   onStock,
   onGarage,
   onOpenPayoutSettings,
 }: {
+  onBack?: () => void;
   onHome: () => void;
   onRentals: () => void;
   onStock?: () => void;
@@ -428,8 +431,11 @@ export function EarnBusinessScreen({
   onOpenPayoutSettings?: () => void;
 }) {
   const auth = useAuth();
-  const copy = useMessages().earnBusiness;
-  const profileCopy = useMessages().profile;
+  const messages = useMessages();
+  const copy = messages.earnBusiness;
+  const profileCopy = messages.profile;
+  const common = messages.common;
+  const earningsTitle = messages.garageUi.earnings;
   const stats = useMemo(() => computeEarnBusinessStats(), []);
   const stock = onStock ?? onHome;
   const garage = onGarage ?? onHome;
@@ -525,6 +531,19 @@ export function EarnBusinessScreen({
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
+      {onBack ? (
+        <header
+          className="flex shrink-0 items-center gap-3 border-b bg-white px-4 py-3"
+          style={{ borderColor: BORDER }}
+        >
+          <button type="button" onClick={onBack} className="p-2" aria-label={common.back}>
+            <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
+          </button>
+          <h1 className="text-[18px] font-bold" style={{ color: GREEN }}>
+            {earningsTitle}
+          </h1>
+        </header>
+      ) : null}
       <div className="screen-scroll flex-1 px-4 pb-4 pt-3">
         <div
           className="mb-3 rounded-3xl border bg-white p-5 shadow-sm"
