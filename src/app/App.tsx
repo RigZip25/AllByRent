@@ -8,6 +8,7 @@ import { InstallGateScreen } from "../screens/InstallGateScreen";
 import { InstallHintToast } from "../components/InstallHintToast";
 import { FirstHello } from "../screens/onboarding/FirstHello";
 import { AuthWelcome } from "../screens/onboarding/AuthWelcome";
+import { GuestShowcase } from "../screens/onboarding/GuestShowcase";
 import { WhatIsEvorios } from "../screens/onboarding/WhatIsEvorios";
 import { WhatDoYouWant } from "../screens/onboarding/WhatDoYouWant";
 import { WhereAreYou } from "../screens/onboarding/WhereAreYou";
@@ -94,6 +95,8 @@ import {
   hasAuthWelcomeDone,
   markAuthWelcomeDone,
   clearAuthWelcomeDone,
+  hasGuestShowcaseDone,
+  markGuestShowcaseDone,
 } from "../lib/onboardingStorage";
 import {
   getPublishedListingById,
@@ -165,6 +168,7 @@ type Screen =
   | "installGate"
   | "installHint"
   | "authWelcome"
+  | "guestShowcase"
   | "firstHello"
   | "whatIsEvorios"
   | "whatDoYouWant"
@@ -363,6 +367,7 @@ function screenToAuthIntent(screen: Screen): AuthIntent {
 /** When nav stack is empty, in-app Back still returns to the prior onboarding step. */
 const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
   authWelcome: "splash",
+  guestShowcase: "authWelcome",
   firstHello: "authWelcome",
   installHint: "firstHello",
   whatIsEvorios: "firstHello",
@@ -395,6 +400,7 @@ function isOnboardingScreen(screen: Screen): boolean {
   return (
     screen in ONBOARDING_BACK_FALLBACK ||
     screen === "authWelcome" ||
+    screen === "guestShowcase" ||
     screen === "firstHello" ||
     screen === "installHint" ||
     screen === "onboardingAllSet" ||
@@ -514,30 +520,20 @@ function cleanupSplashGlobals() {
 function resolvePostSplashScreen(): Screen {
   if (shouldShowInstallGate()) return "installGate";
   if (!hasAuthWelcomeDone()) return "authWelcome";
+  // Guest marketing tour in progress (Sign in / Sign up mark onboarding complete and skip this).
+  if (!hasGuestShowcaseDone() && !isOnboardingComplete()) return "guestShowcase";
   const resume = resolveOnboardingResumeScreen();
-  // Returning users → Home. New users → onboarding intro (Evorios hello / product).
+  // Returning users → Home. Incomplete legacy onboarding → resume that step.
   if (resume === "home") return "home";
   return resume;
 }
 
 /**
- * After Sign in / Sign up from welcome.
- * Returning (onboarding done) → Home. New accounts → Evorios intro.
- */
-function resolveAfterSignIn(): Screen {
-  const resume = resolveOnboardingResumeScreen();
-  if (resume === "home") return "home";
-  return resume;
-}
-
-/**
- * Guest path: soft tour of how the platform works, then browse Home.
- * Account is only required later when they list / book / message (requireAuth).
+ * Guest path: platform benefits showcase, then Sign up CTA (or browse Home).
  */
 function resolveGuestExplorePath(): Screen {
-  const resume = resolveOnboardingResumeScreen();
-  if (resume === "home") return "home";
-  return resume;
+  if (!hasGuestShowcaseDone() && !isOnboardingComplete()) return "guestShowcase";
+  return "home";
 }
 
 /** Screens the user was mid-flow on — never yank them back into role/location onboarding. */
@@ -574,7 +570,12 @@ function resolveScreenAfterAuth(storedTarget: Screen | null): Screen {
     }
   }
   // Returning signed-in users land on Home (browse). Garage stays for host flows.
-  if (storedTarget && storedTarget !== "authWelcome" && storedTarget !== "splash") {
+  if (
+    storedTarget &&
+    storedTarget !== "authWelcome" &&
+    storedTarget !== "splash" &&
+    storedTarget !== "guestShowcase"
+  ) {
     return storedTarget;
   }
   return "home";
@@ -1019,8 +1020,9 @@ function AppRoutes() {
     setAuthGateOpen(false);
     clearPendingAuthEmail();
     markAuthWelcomeDone();
-    // Sign in = existing account → skip guest tour permanently on this device.
-    if (authGateMode === "signIn") {
+    markGuestShowcaseDone();
+    // Sign in / Sign up → skip guest marketing tour permanently on this device.
+    if (authGateMode === "signIn" || authGateMode === "signUp") {
       completeOnboarding();
     }
     const restoredEditId = peekEditingListingReturn();
@@ -1029,11 +1031,14 @@ function AppRoutes() {
       setSelectedHostListingId(restoredEditId);
     }
     const target =
-      authGateMode === "signIn"
+      authGateMode === "signIn" || authGateMode === "signUp"
         ? resolveScreenAfterAuth(
             postAuthTarget && AUTH_RESUME_PRESERVE.has(postAuthTarget)
               ? postAuthTarget
-              : postAuthTarget && postAuthTarget !== "authWelcome" && postAuthTarget !== "splash"
+              : postAuthTarget &&
+                  postAuthTarget !== "authWelcome" &&
+                  postAuthTarget !== "splash" &&
+                  postAuthTarget !== "guestShowcase"
                 ? postAuthTarget
                 : "home",
           )
@@ -1049,6 +1054,7 @@ function AppRoutes() {
     if (!auth.session) return;
     // Already signed in on the welcome sheet → Home, not guest tour.
     markAuthWelcomeDone();
+    markGuestShowcaseDone();
     completeOnboarding();
     setNavStack([]);
     setCurrentScreen("home");
@@ -1390,7 +1396,7 @@ function AppRoutes() {
   }, []);
 
   const continueFromAuthWelcome = useCallback(() => {
-    // Guest: soft tour / browse — Sign up only when they later take an action.
+    // Guest: platform benefits showcase, then Sign up (or browse).
     markAuthWelcomeDone();
     setNavStack([]);
     setCurrentScreen(resolveGuestExplorePath());
@@ -1398,7 +1404,7 @@ function AppRoutes() {
 
   const handleAuthWelcomeSignIn = useCallback(() => {
     clearPendingAuthEmail();
-    // Existing account → land on Home after OTP/Face ID (not the guest onboarding tour).
+    // Existing account → Face ID / quick login first; land on Home (no guest tour).
     if (shouldShowPasskeyLogin()) {
       const email = loadUserProfile().email?.trim() || undefined;
       void signInWithPasskey(email).catch(() => {
@@ -1411,8 +1417,22 @@ function AppRoutes() {
 
   const handleAuthWelcomeSignUp = useCallback(() => {
     clearPendingAuthEmail();
-    showAuthGate(resolveAfterSignIn(), "generic", "signUp");
+    // Already chose Sign up — skip marketing; land on Home after account create.
+    showAuthGate("home", "generic", "signUp");
   }, [showAuthGate]);
+
+  const handleGuestShowcaseSignUp = useCallback(() => {
+    markGuestShowcaseDone();
+    clearPendingAuthEmail();
+    showAuthGate("home", "generic", "signUp");
+  }, [showAuthGate]);
+
+  const handleGuestShowcaseBrowse = useCallback(() => {
+    markGuestShowcaseDone();
+    completeOnboarding();
+    setNavStack([]);
+    setCurrentScreen("home");
+  }, []);
 
   const handleInstallGateInstalled = useCallback(() => {
     markInstallGateDone();
@@ -2006,6 +2026,14 @@ function AppRoutes() {
             onSignIn={handleAuthWelcomeSignIn}
             onSignUp={handleAuthWelcomeSignUp}
             onContinueAsGuest={continueFromAuthWelcome}
+          />
+        )}
+
+        {currentScreen === "guestShowcase" && (
+          <GuestShowcase
+            onSignUp={handleGuestShowcaseSignUp}
+            onBrowseAsGuest={handleGuestShowcaseBrowse}
+            onBack={handleBack}
           />
         )}
 
