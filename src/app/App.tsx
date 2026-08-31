@@ -520,10 +520,22 @@ function resolvePostSplashScreen(): Screen {
   return resume;
 }
 
-/** After guest continue or successful sign-in from the welcome sheet. */
-function resolveAfterAuthWelcome(): Screen {
+/**
+ * After Sign in / Sign up from welcome.
+ * Returning (onboarding done) → Home. New accounts → Evorios intro.
+ */
+function resolveAfterSignIn(): Screen {
   const resume = resolveOnboardingResumeScreen();
-  // Already in the system (onboarding done) → Home. Brand-new → walk through Evorios.
+  if (resume === "home") return "home";
+  return resume;
+}
+
+/**
+ * Guest path: soft tour of how the platform works, then browse Home.
+ * Account is only required later when they list / book / message (requireAuth).
+ */
+function resolveGuestExplorePath(): Screen {
+  const resume = resolveOnboardingResumeScreen();
   if (resume === "home") return "home";
   return resume;
 }
@@ -1014,7 +1026,7 @@ function AppRoutes() {
     if (!auth.session) return;
     markAuthWelcomeDone();
     setNavStack([]);
-    setCurrentScreen(resolveAfterAuthWelcome());
+    setCurrentScreen(resolveAfterSignIn());
   }, [currentScreen, auth.loading, auth.session]);
 
   const resetToHome = () => {
@@ -1353,27 +1365,28 @@ function AppRoutes() {
   }, []);
 
   const continueFromAuthWelcome = useCallback(() => {
+    // Guest: soft tour / browse — Sign up only when they later take an action.
     markAuthWelcomeDone();
     setNavStack([]);
-    setCurrentScreen(resolveAfterAuthWelcome());
+    setCurrentScreen(resolveGuestExplorePath());
   }, []);
 
   const handleAuthWelcomeSignIn = useCallback(() => {
     clearPendingAuthEmail();
-    // Start Face ID in the same tap (iOS needs a user gesture); fall back to email sheet.
+    // Face ID only on explicit Sign in tap (never auto) so guests can explore freely.
     if (shouldShowPasskeyLogin()) {
       const email = loadUserProfile().email?.trim() || undefined;
       void signInWithPasskey(email).catch(() => {
-        showAuthGate(resolveAfterAuthWelcome());
+        showAuthGate(resolveAfterSignIn());
       });
       return;
     }
-    showAuthGate(resolveAfterAuthWelcome());
+    showAuthGate(resolveAfterSignIn());
   }, [showAuthGate]);
 
   const handleAuthWelcomeSignUp = useCallback(() => {
     clearPendingAuthEmail();
-    showAuthGate(resolveAfterAuthWelcome());
+    showAuthGate(resolveAfterSignIn());
   }, [showAuthGate]);
 
   const handleInstallGateInstalled = useCallback(() => {
