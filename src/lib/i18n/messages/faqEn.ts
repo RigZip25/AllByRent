@@ -102,7 +102,7 @@ export const faq: AppMessages["faq"] = {
     },
     "bottom-nav": {
       q: "What do the bottom menu buttons do?",
-      a: "Home = browse hub & categories. Mr. Evorios = help (FAQ + chat). Green + = stock a new item. Garage = your storefront & earnings. More = profile, rentals, favorites, and How Evorios works. There is no search lupa in the footer.",
+      a: "Browse = nearby garages & categories. Mr. Evorios = help (FAQ + chat). Green + = stock a new item. Garage = your storefront & earnings. More = profile, rentals, favorites, and How Evorios works. There is no search lupa in the footer.",
     },
     "more-menu": {
       q: "What is in the More menu?",

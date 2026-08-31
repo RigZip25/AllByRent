@@ -50,7 +50,7 @@ export const es: AppMessages = {
       "Muestra solo fechas reservadas o bloqueadas por el anfitrión. Aquí no aparecen datos del inquilino.",
   },
   nav: {
-    home: "Inicio",
+    home: "Explorar",
     stock: "Añadir",
     garage: "Garaje",
     more: "Cuenta",
@@ -683,7 +683,7 @@ export const es: AppMessages = {
       },
       {
         q: "Los botones del menú, ¿qué hace cada pestaña?",
-        a: "Inicio = explorar. Mr. Evorios = consejos de ayuda + chat. + verde = publicar un artículo nuevo. Garaje = tu escaparate y ganancias. Más = perfil, alquileres, favoritos y Cómo funciona Evorios.",
+        a: "Explorar = explorar cerca. Mr. Evorios = consejos de ayuda + chat. + verde = publicar un artículo nuevo. Garaje = tu escaparate y ganancias. Más = perfil, alquileres, favoritos y Cómo funciona Evorios.",
       },
       {
         q: "¿Qué es Evorios, el mercado de hogares?",

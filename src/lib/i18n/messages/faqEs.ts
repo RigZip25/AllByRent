@@ -102,7 +102,7 @@ export const faq: AppMessages["faq"] = {
     },
     "bottom-nav": {
       q: "¿Qué hacen los botones del menú inferior?",
-      a: "Inicio = centro de exploración y categorías. Mr. Evorios = ayuda (preguntas frecuentes + chat). El + verde = publicar un artículo nuevo. Garaje = tu escaparate y ganancias. Más = perfil, alquileres, favoritos y Cómo funciona Evorios. No hay lupa de búsqueda en el pie de página.",
+      a: "Explorar = garajes y categorías cerca. Mr. Evorios = ayuda (preguntas frecuentes + chat). El + verde = publicar un artículo nuevo. Garaje = tu escaparate y ganancias. Más = perfil, alquileres, favoritos y Cómo funciona Evorios. No hay lupa de búsqueda en el pie de página.",
     },
     "more-menu": {
       q: "¿Qué hay en el menú Más?",

@@ -50,7 +50,7 @@ export const cs: AppMessages = {
       "Zobrazuje pouze rezervované a hostitelem zablokované dny. Údaje o nájemci se zde neuvádějí.",
   },
   nav: {
-    home: "Domů",
+    home: "Procházet",
     stock: "Přidat",
     garage: "Garáž",
     more: "Účet",
@@ -703,7 +703,7 @@ export const cs: AppMessages = {
       },
       {
         q: "Co dělají tlačítka dolního menu?",
-        a: "Domů = prohlížení. Mr. Evorios = tipy + chat. Zelené + = nová věc. Garáž = výloha a výdělky. Účet = profil, půjčky, oblíbené a Jak funguje Evorios.",
+        a: "Procházet = prohlížení v okolí. Mr. Evorios = tipy + chat. Zelené + = nová věc. Garáž = výloha a výdělky. Účet = profil, půjčky, oblíbené a Jak funguje Evorios.",
       },
       {
         q: "Co je Evorios — sousedský trh?",

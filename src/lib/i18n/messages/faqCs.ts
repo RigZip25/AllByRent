@@ -102,7 +102,7 @@ export const faq: AppMessages["faq"] = {
     },
     "bottom-nav": {
       q: "Co dělají tlačítka dolního menu?",
-      a: "Domů = hub a kategorie. Mr. Evorios = nápověda (FAQ + chat). Zelené + = nová věc. Garáž = vaše výloha a výdělky. Účet = profil, půjčky, oblíbené a Jak funguje Evorios. V patičce není lupa.",
+      a: "Procházet = garáže a kategorie v okolí. Mr. Evorios = nápověda (FAQ + chat). Zelené + = nová věc. Garáž = vaše výloha a výdělky. Účet = profil, půjčky, oblíbené a Jak funguje Evorios. V patičce není lupa.",
     },
     "more-menu": {
       q: "Co je v menu Účet?",
