@@ -50,10 +50,14 @@ export const en: AppMessages = {
       "Shows booked and host-blocked dates only. Renter details are never shown here.",
   },
   nav: {
-    home: "Browse",
+    home: "Home",
     stock: "Stock",
-    garage: "My Garage",
+    activity: "Activity",
     more: "Settings",
+  },
+  activity: {
+    title: "Activity",
+    subtitle: "Rentals, messages, and saved items",
   },
   splash: {
     chipGarage: "Your storefront",
@@ -537,7 +541,7 @@ export const en: AppMessages = {
   },
   more: {
     title: "Settings",
-    subtitle: "Bookings, earnings, and account",
+    subtitle: "Account and help",
     profileHint: "Account settings",
     sectionActivity: "Activity",
     sectionGarage: "Your garage",

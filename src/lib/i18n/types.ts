@@ -165,8 +165,12 @@ export type AppMessages = {
   nav: {
     home: string;
     stock: string;
-    garage: string;
+    activity: string;
     more: string;
+  };
+  activity: {
+    title: string;
+    subtitle: string;
   };
   splash: {
     chipGarage: string;

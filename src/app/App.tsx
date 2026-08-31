@@ -129,6 +129,7 @@ import { CoHostsScreen } from "../screens/profile/CoHostsScreen";
 import { PersonalInfoScreen } from "../screens/profile/PersonalInfoScreen";
 import { IdentityVerificationScreen } from "../screens/IdentityVerificationScreen";
 import { AgentActivityScreen } from "../screens/AgentActivityScreen";
+import { ActivityScreen } from "../screens/ActivityScreen";
 import { BottomNav, type BottomNavTab } from "./components/BottomNav";
 import { removeStripeControllerIframes } from "../lib/stripeCleanup";
 import { onConnectOnboardingDone, emitConnectOnboardingDone } from "../lib/connectOnboardingBus";
@@ -178,6 +179,7 @@ type Screen =
   | "mre"
   | "garage"
   | "more"
+  | "activity"
   | "howEvoriosWorks"
   | "messages"
   | "listingChat"
@@ -237,10 +239,15 @@ const BOTTOM_NAV_SCREENS = new Set<Screen>([
   "mre",
   "garage",
   "more",
+  "activity",
   "rentals",
   "profile",
   "favorites",
   "earnBusiness",
+  "messages",
+  "notifications",
+  "howEvoriosWorks",
+  "feedback",
   "subcategory",
 ]);
 
@@ -256,6 +263,7 @@ const TAB_BOOT_SCREENS: Partial<Record<string, Screen>> = {
   mre: "mre",
   garage: "garage",
   more: "more",
+  activity: "activity",
   profile: "profile",
   rentals: "rentals",
   favorites: "favorites",
@@ -297,26 +305,34 @@ function resolveBootScreenParam(raw: string | null): Screen | null {
 }
 
 function bottomNavTabForScreen(screen: Screen): BottomNavTab {
-  // Browse (Home tab) vs My Garage — keep highlight honest.
-  if (screen === "garage") return "garage";
+  // Home tab covers Browse + My Garage (role switcher).
   if (
+    screen === "garage" ||
     screen === "browseHub" ||
     screen === "home" ||
     screen === "yardSaleHub" ||
     screen === "yardSales" ||
-    screen === "openGarageSale"
+    screen === "openGarageSale" ||
+    screen === "earnBusiness"
   ) {
     return "home";
   }
   if (screen === "mre") return "mre";
-  if (screen === "more") return "more";
   if (
+    screen === "activity" ||
     screen === "rentals" ||
-    screen === "profile" ||
     screen === "favorites" ||
-    screen === "earnBusiness" ||
     screen === "messages" ||
-    screen === "howEvoriosWorks"
+    screen === "notifications"
+  ) {
+    return "activity";
+  }
+  if (
+    screen === "more" ||
+    screen === "profile" ||
+    screen === "personalInfo" ||
+    screen === "howEvoriosWorks" ||
+    screen === "feedback"
   ) {
     return "more";
   }
@@ -991,6 +1007,10 @@ function AppRoutes() {
   }, []);
 
   const handleOpenHome = useCallback(() => {
+    if (getAppMode() === "earn") {
+      goToTab("garage");
+      return;
+    }
     setAppMode("rent");
     goToTab("home");
   }, [goToTab]);
@@ -999,11 +1019,8 @@ function AppRoutes() {
     setAppMode("earn");
     goToTab("garage");
   }, [goToTab]);
-  const handleOpenGarageFromAccount = useCallback(() => {
-    setAppMode("earn");
-    navigateTo("garage");
-  }, [navigateTo]);
   const handleOpenMore = useCallback(() => goToTab("more"), [goToTab]);
+  const handleOpenActivity = useCallback(() => goToTab("activity"), [goToTab]);
   const handleOpenRentals = useCallback(() => navigateTo("rentals"), [navigateTo]);
   const handleOpenMessages = useCallback(() => navigateTo("messages"), [navigateTo]);
   const handleOpenRentalChat = useCallback(
@@ -2075,16 +2092,19 @@ function AppRoutes() {
           />
         )}
 
-        {currentScreen === "more" && (
-          <MoreScreen
-            onMrE={handleOpenMrE}
-            onGarage={handleOpenGarageFromAccount}
-            onAccountSettings={() => handleOpenPersonalInfo()}
+        {currentScreen === "activity" && (
+          <ActivityScreen
             onRentals={handleOpenRentals}
             onMessages={handleOpenMessages}
             onFavorites={handleOpenFavorites}
             onNotifications={handleOpenNotifications}
-            onEarnBusiness={handleOpenBusiness}
+          />
+        )}
+
+        {currentScreen === "more" && (
+          <MoreScreen
+            onMrE={handleOpenMrE}
+            onAccountSettings={() => handleOpenPersonalInfo()}
             onHowItWorks={() => navigateTo("howEvoriosWorks")}
             onFeedback={() => navigateTo("feedback")}
           />
@@ -2450,7 +2470,7 @@ function AppRoutes() {
             onHome={handleOpenHome}
             onMrE={handleOpenMrE}
             onAdd={handleStartListing}
-            onGarage={handleOpenGarage}
+            onActivity={handleOpenActivity}
             onMore={handleOpenMore}
           />
         ) : null}
