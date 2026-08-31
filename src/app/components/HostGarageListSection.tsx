@@ -1,5 +1,5 @@
 import { useEffect, useState, startTransition } from "react";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowLeft, Trash2 } from "lucide-react";
 import { useAuth } from "../../hooks/AuthProvider";
 import { fetchActiveGarageListings, loadActiveGarageListings, onActiveGarageChanged, resolveGarageHostId } from "../../lib/hostAccess";
 import { getListingDisplayTitle } from "../../lib/listingQr";
@@ -55,7 +55,7 @@ export function HostGarageListSection({
   onBack,
   onOpenListing,
   onResumeDraft,
-  onListItem,
+  onListItem: _onListItem,
 }: HostGarageListSectionProps) {
   const auth = useAuth();
   const t = useMessages();
@@ -187,15 +187,7 @@ export function HostGarageListSection({
             {mode === "drafts" ? t.garageUi.draftsSection : t.garageUi.liveSection}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onListItem}
-          className="flex items-center gap-1 rounded-full px-3 py-2 text-sm font-semibold"
-          style={{ color: GREEN }}
-        >
-          <Plus className="h-4 w-4" />
-          {t.garageUi.newListing}
-        </button>
+        {/* New listings: footer + Stock only — no second “New” in garage lists. */}
       </div>
 
       {loading && rows.length === 0 ? (
@@ -206,16 +198,19 @@ export function HostGarageListSection({
           style={{ borderColor: BORDER }}
         >
           <p className="text-base font-semibold text-gray-800">{emptyTitle}</p>
-          <p className="mt-1 text-sm text-gray-500">{emptyBody}</p>
-          <button
-            type="button"
-            onClick={onListItem}
-            className="mt-4 inline-flex items-center gap-1 rounded-xl px-4 py-2.5 text-sm font-bold text-white"
-            style={{ backgroundColor: GREEN_DARK }}
-          >
-            <Plus className="h-4 w-4" />
-            {t.garageUi.newListing}
-          </button>
+          <p className="mt-2 text-sm leading-relaxed text-gray-500">
+            {mode === "drafts" ? emptyBody : t.garageUi.noListingsStockHint}
+          </p>
+          {mode !== "drafts" ? (
+            <div
+              className="stock-nudge-arrow mt-5 flex flex-col items-center"
+              aria-label={t.garageUi.noListingsStockArrowAria}
+              role="img"
+            >
+              <ArrowDown className="h-8 w-8" strokeWidth={2.5} aria-hidden />
+              <ArrowDown className="-mt-4 h-8 w-8 opacity-40" strokeWidth={2.5} aria-hidden />
+            </div>
+          ) : null}
         </div>
       ) : (
         <ul className="space-y-2">

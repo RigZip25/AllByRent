@@ -839,6 +839,9 @@ export const en: AppMessages = {
     newListing: "New",
     loading: "Loading your garage...",
     noListingsYet: "No listings yet",
+    noListingsStockHint:
+      "Start a listing anytime — drafts save so you can finish later. Tap the green + Stock below.",
+    noListingsStockArrowAria: "Look down — use the green + Stock button in the footer",
     noListingsBodyBefore: "Start a listing anytime — drafts save so you can finish later. Tap",
     noListingsBodyAfter: "above.",
     signInForDrafts: "Sign in so drafts sync to this account and show up here on any device.",

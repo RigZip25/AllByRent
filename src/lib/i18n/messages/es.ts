@@ -839,6 +839,9 @@ export const es: AppMessages = {
     newListing: "Nuevo",
     loading: "Cargando tu garaje...",
     noListingsYet: "Todavía no hay anuncios",
+    noListingsStockHint:
+      "Empieza un anuncio cuando quieras — los borradores se guardan. Toca el + Stock verde abajo.",
+    noListingsStockArrowAria: "Mira abajo — usa el botón verde + Stock en la barra inferior",
     noListingsBodyBefore: "Empieza un anuncio cuando quieras — los borradores se guardan para terminarlos después. Toca",
     noListingsBodyAfter: "arriba.",
     signInForDrafts: "Inicia sesión para que los borradores se sincronicen con tu cuenta y aparezcan aquí en cualquier dispositivo.",

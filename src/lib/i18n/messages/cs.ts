@@ -859,6 +859,9 @@ export const cs: AppMessages = {
     newListing: "Nová",
     loading: "Načítám tvoji garáž...",
     noListingsYet: "Zatím žádné nabídky",
+    noListingsStockHint:
+      "Nabídku můžeš kdykoli začít — koncepty se uloží. Klepni na zelené + Stock dole.",
+    noListingsStockArrowAria: "Podívej se dolů — použij zelené + Stock ve spodní liště",
     noListingsBodyBefore: "Nabídku můžeš kdykoli začít — koncepty se uloží a dokončíš je později. Klepni na",
     noListingsBodyAfter: "výše.",
     signInForDrafts: "Přihlas se, ať se koncepty syncnou s účtem a uvidíš je tady na jakémkoli zařízení.",

@@ -1,5 +1,5 @@
 import { useEffect, useState, startTransition, type ReactNode } from "react";
-import { DollarSign, Package, Plus, Share2, Trash2 } from "lucide-react";
+import { ArrowDown, DollarSign, Package, Share2, Trash2 } from "lucide-react";
 import { useAuth } from "../../hooks/AuthProvider";
 import { fetchActiveGarageListings, loadActiveGarageListings, onActiveGarageChanged } from "../../lib/hostAccess";
 import { getListingDisplayTitle, listingNeedsStickerReminder } from "../../lib/listingQr";
@@ -218,7 +218,7 @@ function ListingRow({
 }
 
 export function HostDashboard({
-  onListItem,
+  onListItem: _onListItem,
   onOpenListing,
   onResumeDraft,
   onShareGarage,
@@ -489,15 +489,7 @@ export function HostDashboard({
           <h3 className="text-[15px] font-bold" style={{ color: GREEN_DARK }}>
             {t.garageUi.yourListings}
           </h3>
-          <button
-            type="button"
-            onClick={onListItem}
-            className="flex items-center gap-1 text-sm font-semibold"
-            style={{ color: GREEN }}
-          >
-            <Plus className="h-4 w-4" />
-            {t.garageUi.newListing}
-          </button>
+          {/* New listings go through footer + Stock — avoid a second “New” here. */}
         </div>
 
         {loading && listings.length === 0 ? (
@@ -508,18 +500,17 @@ export function HostDashboard({
             style={{ borderColor: BORDER }}
           >
             <p className="text-base font-semibold text-gray-800">{t.garageUi.noListingsYet}</p>
-            <p className="mt-1 text-sm text-gray-500">
-              {t.garageUi.noListingsBodyBefore}{" "}
-              <button
-                type="button"
-                onClick={onListItem}
-                className="font-semibold underline"
-                style={{ color: GREEN }}
-              >
-                {t.garageUi.newListing}
-              </button>{" "}
-              {t.garageUi.noListingsBodyAfter}
+            <p className="mt-2 text-sm leading-relaxed text-gray-500">
+              {t.garageUi.noListingsStockHint}
             </p>
+            <div
+              className="stock-nudge-arrow mt-5 flex flex-col items-center"
+              aria-label={t.garageUi.noListingsStockArrowAria}
+              role="img"
+            >
+              <ArrowDown className="h-8 w-8" strokeWidth={2.5} aria-hidden />
+              <ArrowDown className="-mt-4 h-8 w-8 opacity-40" strokeWidth={2.5} aria-hidden />
+            </div>
             {!auth.userId ? (
               <p className="mt-3 text-[12px] text-gray-500">{t.garageUi.signInForDrafts}</p>
             ) : null}

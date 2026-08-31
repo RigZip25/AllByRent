@@ -1760,7 +1760,12 @@ export type AppMessages = {
     newListing: string;
     loading: string;
     noListingsYet: string;
+    /** Empty garage: point hosts to footer + Stock (not a second “New”). */
+    noListingsStockHint: string;
+    noListingsStockArrowAria: string;
+    /** @deprecated Prefer noListingsStockHint — kept briefly for safe rollouts. */
     noListingsBodyBefore: string;
+    /** @deprecated Prefer noListingsStockHint */
     noListingsBodyAfter: string;
     signInForDrafts: string;
     draftBadge: string;

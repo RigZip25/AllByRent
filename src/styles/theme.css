@@ -1623,6 +1623,32 @@
     }
   }
 
+  /* Empty My Garage → nudge hosts to footer + Stock (not a second “New”). */
+  @keyframes stock-nudge-arrow {
+    0%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.45;
+    }
+    50% {
+      transform: translateY(12px);
+      opacity: 1;
+    }
+  }
+
+  .stock-nudge-arrow {
+    animation: stock-nudge-arrow 1.4s ease-in-out infinite;
+    color: #0d5c3a;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stock-nudge-arrow {
+      animation: none;
+      opacity: 0.85;
+      transform: translateY(4px);
+    }
+  }
+
   /* Live install guide — one animated step instead of a static wall */
   .install-live-guide {
     display: flex;
