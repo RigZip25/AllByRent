@@ -556,9 +556,9 @@ export const cs: AppMessages = {
     resetApp: "Resetovat aplikaci",
   },
   more: {
-    title: "Více",
-    subtitle: "Účet, rezervace a nastavení",
-    profileHint: "Profil a nastavení účtu",
+    title: "Účet",
+    subtitle: "Rezervace, výdělky a nastavení",
+    profileHint: "Nastavení účtu",
     sectionActivity: "Aktivita",
     sectionGarage: "Tvoje garáž",
     sectionAccount: "Účet",
@@ -584,7 +584,7 @@ export const cs: AppMessages = {
     sendFeedback: "Pomoc a zpětná vazba",
     sendFeedbackHint: "Nahlaste problém nebo nápad — čteme to",
     accountSettings: "Nastavení účtu",
-    accountSettingsHint: "Jméno, telefon, výplaty, spoluhostitelé",
+    accountSettingsHint: "Foto, jméno, telefon, výplaty, spoluhostitelé",
   },
   feedback: {
     title: "Pomoc a zpětná vazba",

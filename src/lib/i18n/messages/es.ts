@@ -536,9 +536,9 @@ export const es: AppMessages = {
     resetApp: "Restablecer la app",
   },
   more: {
-    title: "Más",
-    subtitle: "Cuenta, reservas y ajustes de la app",
-    profileHint: "Perfil y ajustes de cuenta",
+    title: "Cuenta",
+    subtitle: "Reservas, ganancias y ajustes",
+    profileHint: "Ajustes de la cuenta",
     sectionActivity: "Actividad",
     sectionGarage: "Tu garaje",
     sectionAccount: "Cuenta",
@@ -564,7 +564,7 @@ export const es: AppMessages = {
     sendFeedback: "Ayuda y comentarios",
     sendFeedbackHint: "Reporta un problema o envía una idea — las leemos todas",
     accountSettings: "Ajustes de la cuenta",
-    accountSettingsHint: "Nombre, teléfono, cobros, coanfitriones",
+    accountSettingsHint: "Foto, nombre, teléfono, cobros, coanfitriones",
   },
   feedback: {
     title: "Ayuda y comentarios",

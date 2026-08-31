@@ -7,7 +7,6 @@ import {
   LogOut,
   MapPin,
   Settings,
-  Shield,
   Star,
   Users,
 } from "lucide-react";
@@ -120,7 +119,6 @@ export function ProfileScreen({
   onOpenNotifications,
   onOpenCoHosts,
   onOpenPersonalInfo,
-  onOpenIdentity,
   onOpenAgentActivity: _onOpenAgentActivity,
   onViewPublicProfile,
   onRequireAuth,
@@ -132,7 +130,6 @@ export function ProfileScreen({
   onOpenNotifications: () => void;
   onOpenCoHosts?: () => void;
   onOpenPersonalInfo?: (field?: "name" | "phone") => void;
-  onOpenIdentity?: () => void;
   onOpenAgentActivity?: () => void;
   onViewPublicProfile?: (userId?: string) => void;
   onRequireAuth?: () => void;
@@ -473,30 +470,6 @@ export function ProfileScreen({
 
         <SectionTitle>{profileCopy.trustPayments}</SectionTitle>
         <ul className="mb-4 flex flex-col gap-2">
-          <li>
-            <RowButton
-              icon={<Shield className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label={profileCopy.verification}
-              value={
-                profile.verification.identity
-                  ? profileCopy.fullyVerified
-                  : profileCopy.completeId
-              }
-              onClick={() => {
-                if (onOpenIdentity) {
-                  onOpenIdentity();
-                  return;
-                }
-                try {
-                  const url = new URL(window.location.href);
-                  url.searchParams.set("screen", "identity");
-                  window.location.href = url.toString();
-                } catch {
-                  window.location.href = "/?screen=identity";
-                }
-              }}
-            />
-          </li>
           <li>
             <RowButton
               icon={<Star className="h-5 w-5" style={{ color: AMBER }} />}
