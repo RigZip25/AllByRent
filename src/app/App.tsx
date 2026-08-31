@@ -515,14 +515,16 @@ function resolvePostSplashScreen(): Screen {
   if (shouldShowInstallGate()) return "installGate";
   if (!hasAuthWelcomeDone()) return "authWelcome";
   const resume = resolveOnboardingResumeScreen();
-  if (resume === "home") return landAfterOnboarding();
+  // Returning users → Home. New users → onboarding intro (Evorios hello / product).
+  if (resume === "home") return "home";
   return resume;
 }
 
 /** After guest continue or successful sign-in from the welcome sheet. */
 function resolveAfterAuthWelcome(): Screen {
   const resume = resolveOnboardingResumeScreen();
-  if (resume === "home") return landAfterOnboarding();
+  // Already in the system (onboarding done) → Home. Brand-new → walk through Evorios.
+  if (resume === "home") return "home";
   return resume;
 }
 
@@ -555,7 +557,11 @@ function resolveScreenAfterAuth(storedTarget: Screen | null): Screen {
       return "whereAreYou";
     }
   }
-  return storedTarget ?? landAfterOnboarding();
+  // Returning signed-in users land on Home (browse). Garage stays for host flows.
+  if (storedTarget && storedTarget !== "authWelcome" && storedTarget !== "splash") {
+    return storedTarget;
+  }
+  return "home";
 }
 
 function bootScreenForDeepLink(target: DeepLinkTarget | null): Screen | null {
