@@ -12,7 +12,7 @@ import {
 import { isNetworkFetchError } from "./authErrors";
 import { emailOtpEntryError, isCompleteEmailOtpLength, normalizeEmailOtpInput } from "./authOtp";
 import { getRuntimeAppOrigin } from "./appOrigin";
-import { isOnboardingComplete } from "./onboardingStorage";
+import { clearAuthWelcomeDone, isOnboardingComplete } from "./onboardingStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 export type AuthProvider = "google" | "apple";
@@ -335,6 +335,8 @@ export async function signOut(): Promise<void> {
   if (error) throw error;
   // Drop mid-OTP email so next Sign in can open Face ID, not the code step.
   clearPendingAuthEmail();
+  // Next cold start (and post–sign-out welcome) should offer Sign in again.
+  clearAuthWelcomeDone();
 }
 
 export async function requestAccountDeletion(): Promise<{

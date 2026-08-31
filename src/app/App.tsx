@@ -7,6 +7,7 @@ import { SplashScreen } from "./components/SplashScreen";
 import { InstallGateScreen } from "../screens/InstallGateScreen";
 import { InstallHintToast } from "../components/InstallHintToast";
 import { FirstHello } from "../screens/onboarding/FirstHello";
+import { AuthWelcome } from "../screens/onboarding/AuthWelcome";
 import { WhatIsEvorios } from "../screens/onboarding/WhatIsEvorios";
 import { WhatDoYouWant } from "../screens/onboarding/WhatDoYouWant";
 import { WhereAreYou } from "../screens/onboarding/WhereAreYou";
@@ -90,6 +91,9 @@ import {
   markProductIntroDone,
   markRoleChosen,
   resolveOnboardingResumeScreen,
+  hasAuthWelcomeDone,
+  markAuthWelcomeDone,
+  clearAuthWelcomeDone,
 } from "../lib/onboardingStorage";
 import {
   getPublishedListingById,
@@ -159,6 +163,7 @@ type Screen =
   | "splash"
   | "installGate"
   | "installHint"
+  | "authWelcome"
   | "firstHello"
   | "whatIsEvorios"
   | "whatDoYouWant"
@@ -356,7 +361,8 @@ function screenToAuthIntent(screen: Screen): AuthIntent {
 
 /** When nav stack is empty, in-app Back still returns to the prior onboarding step. */
 const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
-  firstHello: "splash",
+  authWelcome: "splash",
+  firstHello: "authWelcome",
   installHint: "firstHello",
   whatIsEvorios: "firstHello",
   whatDoYouWant: "whatIsEvorios",
@@ -387,6 +393,7 @@ function landAfterOnboarding(): Screen {
 function isOnboardingScreen(screen: Screen): boolean {
   return (
     screen in ONBOARDING_BACK_FALLBACK ||
+    screen === "authWelcome" ||
     screen === "firstHello" ||
     screen === "installHint" ||
     screen === "onboardingAllSet" ||
@@ -505,6 +512,14 @@ function cleanupSplashGlobals() {
 
 function resolvePostSplashScreen(): Screen {
   if (shouldShowInstallGate()) return "installGate";
+  if (!hasAuthWelcomeDone()) return "authWelcome";
+  const resume = resolveOnboardingResumeScreen();
+  if (resume === "home") return landAfterOnboarding();
+  return resume;
+}
+
+/** After guest continue or successful sign-in from the welcome sheet. */
+function resolveAfterAuthWelcome(): Screen {
   const resume = resolveOnboardingResumeScreen();
   if (resume === "home") return landAfterOnboarding();
   return resume;
@@ -974,6 +989,7 @@ function AppRoutes() {
   const finishAuthFlow = useCallback(() => {
     setAuthGateOpen(false);
     clearPendingAuthEmail();
+    markAuthWelcomeDone();
     const restoredEditId = peekEditingListingReturn();
     if (restoredEditId) {
       setEditingListingId(restoredEditId);
@@ -984,6 +1000,15 @@ function AppRoutes() {
     setCurrentScreen(target);
     setPostAuthTarget(null);
   }, [resolvePostAuthScreen]);
+
+  useEffect(() => {
+    if (currentScreen !== "authWelcome") return;
+    if (auth.loading) return;
+    if (!auth.session) return;
+    markAuthWelcomeDone();
+    setNavStack([]);
+    setCurrentScreen(resolveAfterAuthWelcome());
+  }, [currentScreen, auth.loading, auth.session]);
 
   const resetToHome = () => {
     setNavStack([]);
@@ -1023,9 +1048,11 @@ function AppRoutes() {
   const handleOpenMore = useCallback(() => goToTab("more"), [goToTab]);
   const handleOpenActivity = useCallback(() => goToTab("activity"), [goToTab]);
   const handleSignedOut = useCallback(() => {
-    // Land on Settings so Sign in is one tap — AuthGate, not onboarding.
-    goToTab("more");
-  }, [goToTab]);
+    // Back to the post-splash welcome: Sign in / Sign up / Continue as guest.
+    clearAuthWelcomeDone();
+    setNavStack([]);
+    setCurrentScreen("authWelcome");
+  }, []);
   const handleSignIn = useCallback(() => {
     // Explicit Sign in → Face ID / account sheet, not a leftover OTP step.
     clearPendingAuthEmail();
@@ -1318,12 +1345,27 @@ function AppRoutes() {
     setCurrentScreen(resolvePostSplashScreen());
   }, []);
 
+  const continueFromAuthWelcome = useCallback(() => {
+    markAuthWelcomeDone();
+    setNavStack([]);
+    setCurrentScreen(resolveAfterAuthWelcome());
+  }, []);
+
+  const handleAuthWelcomeSignIn = useCallback(() => {
+    clearPendingAuthEmail();
+    showAuthGate(resolveAfterAuthWelcome());
+  }, [showAuthGate]);
+
+  const handleAuthWelcomeSignUp = useCallback(() => {
+    clearPendingAuthEmail();
+    showAuthGate(resolveAfterAuthWelcome());
+  }, [showAuthGate]);
+
   const handleInstallGateInstalled = useCallback(() => {
     markInstallGateDone();
     setNavStack([]);
     // Gate is done — resolve again without re-entering installGate.
-    const resume = resolveOnboardingResumeScreen();
-    setCurrentScreen(resume === "home" ? landAfterOnboarding() : resume);
+    setCurrentScreen(resolvePostSplashScreen());
   }, []);
 
   const continueAfterHello = useCallback(() => {
@@ -1903,6 +1945,14 @@ function AppRoutes() {
         {currentScreen === "installGate" && (
           <InstallGateScreen
             onInstalledContinue={handleInstallGateInstalled}
+          />
+        )}
+
+        {currentScreen === "authWelcome" && (
+          <AuthWelcome
+            onSignIn={handleAuthWelcomeSignIn}
+            onSignUp={handleAuthWelcomeSignUp}
+            onContinueAsGuest={continueFromAuthWelcome}
           />
         )}
 
