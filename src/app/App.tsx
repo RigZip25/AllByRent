@@ -1021,6 +1021,10 @@ function AppRoutes() {
   }, [goToTab]);
   const handleOpenMore = useCallback(() => goToTab("more"), [goToTab]);
   const handleOpenActivity = useCallback(() => goToTab("activity"), [goToTab]);
+  const handleSignedOut = useCallback(() => {
+    setAppMode("rent");
+    goToTab("home");
+  }, [goToTab]);
   const handleOpenRentals = useCallback(() => navigateTo("rentals"), [navigateTo]);
   const handleOpenMessages = useCallback(() => navigateTo("messages"), [navigateTo]);
   const handleOpenRentalChat = useCallback(
@@ -2243,6 +2247,7 @@ function AppRoutes() {
             onOpenAgentActivity={() => navigateTo("agentActivity")}
             onPreferredModeChange={handlePreferredModeChange}
             onViewPublicProfile={handleViewPublicProfile}
+            onSignedOut={handleSignedOut}
             onRequireAuth={() => {
               if (auth.configured && !auth.session) {
                 showAuthGate("profile");
@@ -2272,6 +2277,7 @@ function AppRoutes() {
             onDeleteAccount={() => navigateTo("deleteAccount")}
             onOpenCoHosts={() => navigateTo("coHosts")}
             onOpenEarnings={() => navigateTo("earnBusiness")}
+            onSignedOut={handleSignedOut}
             onBack={() => {
               setPersonalInfoInitialEdit(undefined);
               handleBack();
