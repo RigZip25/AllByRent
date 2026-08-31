@@ -53,7 +53,7 @@ export const es: AppMessages = {
     home: "Explorar",
     stock: "Añadir",
     garage: "Mi hogar",
-    more: "Cuenta",
+    more: "Ajustes",
   },
   splash: {
     chipGarage: "Tu escaparate",
@@ -536,8 +536,8 @@ export const es: AppMessages = {
     resetApp: "Restablecer la app",
   },
   more: {
-    title: "Cuenta",
-    subtitle: "Reservas, ganancias y ajustes",
+    title: "Ajustes",
+    subtitle: "Reservas, ganancias y cuenta",
     profileHint: "Ajustes de la cuenta",
     sectionActivity: "Actividad",
     sectionGarage: "Tu garaje",

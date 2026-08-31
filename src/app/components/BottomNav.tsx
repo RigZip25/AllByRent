@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Plus, Search, Settings } from "lucide-react";
 import { MASCOT_NAME } from "../../lib/brand";
 import { useMessages } from "../../lib/i18n/react";
 import rentanoImg from "../../imports/No_back_rentano.png";
@@ -16,18 +16,14 @@ function runNavAction(action: () => void) {
   action();
 }
 
-function NavIconHome({ active }: { active?: boolean }) {
-  const c = active ? GREEN : "#888";
+function NavIconBrowse({ active }: { active?: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" className="h-[26px] w-[26px]" fill="none" aria-hidden="true">
-      <path
-        d="M4 10 L12 4 L20 10 V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V10Z"
-        stroke={c}
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path d="M9 20v-6h6v6" stroke={c} strokeWidth="2" strokeLinejoin="round" />
-    </svg>
+    <Search
+      className="h-[26px] w-[26px]"
+      strokeWidth={2}
+      style={{ color: active ? GREEN : "#888" }}
+      aria-hidden
+    />
   );
 }
 
@@ -68,18 +64,14 @@ function TabLabel({ children, active }: { children: string; active: boolean }) {
   );
 }
 
-function NavIconMore({ active }: { active?: boolean }) {
-  const c = active ? GREEN : "#888";
+function NavIconSettings({ active }: { active?: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" className="h-[26px] w-[26px]" fill="none" aria-hidden="true">
-      <circle cx="12" cy="8" r="3.25" stroke={c} strokeWidth="2" />
-      <path
-        d="M5.5 19.25c.9-3.1 3.2-4.75 6.5-4.75s5.6 1.65 6.5 4.75"
-        stroke={c}
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
+    <Settings
+      className="h-[26px] w-[26px]"
+      strokeWidth={2}
+      style={{ color: active ? GREEN : "#888" }}
+      aria-hidden
+    />
   );
 }
 
@@ -113,7 +105,7 @@ export function BottomNav({
           onClick={() => runNavAction(onHome)}
           className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
         >
-          <NavIconHome active={activeTab === "home"} />
+          <NavIconBrowse active={activeTab === "home"} />
           <TabLabel active={activeTab === "home"}>{nav.home}</TabLabel>
         </button>
 
@@ -161,9 +153,9 @@ export function BottomNav({
           type="button"
           onClick={() => runNavAction(onMore)}
           className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
-          aria-label="More — account and settings"
+          aria-label="Settings — account and preferences"
         >
-          <NavIconMore active={activeTab === "more"} />
+          <NavIconSettings active={activeTab === "more"} />
           <TabLabel active={activeTab === "more"}>{nav.more}</TabLabel>
         </button>
       </div>
