@@ -122,6 +122,7 @@ export function ProfileScreen({
   onOpenAgentActivity: _onOpenAgentActivity,
   onViewPublicProfile,
   onRequireAuth,
+  onSignedOut,
   onPreferredModeChange,
 }: {
   onRentals: () => void;
@@ -133,6 +134,8 @@ export function ProfileScreen({
   onOpenAgentActivity?: () => void;
   onViewPublicProfile?: (userId?: string) => void;
   onRequireAuth?: () => void;
+  /** After session ends — leave account screens (typically Home as guest). */
+  onSignedOut?: () => void;
   onPreferredModeChange?: (mode: AppMode) => void;
 }) {
   const auth = useAuth();
@@ -537,6 +540,9 @@ export function ProfileScreen({
               if (!auth.configured) return;
               setAuthBusy(true);
               void signOut()
+                .then(() => {
+                  onSignedOut?.();
+                })
                 .catch(() => undefined)
                 .finally(() => setAuthBusy(false));
             }}

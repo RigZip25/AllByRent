@@ -115,12 +115,15 @@ export function PersonalInfoScreen({
   onDeleteAccount,
   onOpenCoHosts,
   onOpenEarnings,
+  onSignedOut,
   initialEdit,
 }: {
   onBack: () => void;
   onDeleteAccount?: () => void;
   onOpenCoHosts?: () => void;
   onOpenEarnings?: () => void;
+  /** After session ends — leave account screens (typically Home as guest). */
+  onSignedOut?: () => void;
   initialEdit?: "name" | "phone";
 }) {
   const auth = useAuth();
@@ -511,6 +514,9 @@ export function PersonalInfoScreen({
             onClick={() => {
               setAuthBusy(true);
               void signOut()
+                .then(() => {
+                  onSignedOut?.();
+                })
                 .catch(() => undefined)
                 .finally(() => setAuthBusy(false));
             }}
