@@ -12,7 +12,7 @@ import {
 import { isNetworkFetchError } from "./authErrors";
 import { emailOtpEntryError, isCompleteEmailOtpLength, normalizeEmailOtpInput } from "./authOtp";
 import { getRuntimeAppOrigin } from "./appOrigin";
-import { clearAuthWelcomeDone, isOnboardingComplete } from "./onboardingStorage";
+import { clearAuthWelcomeDone, hasDeviceKnownAccount, isOnboardingComplete } from "./onboardingStorage";
 import { loadUserProfile } from "./userProfileStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
@@ -291,6 +291,21 @@ export function shouldShowPasskeyLogin(): boolean {
   if (!isPasskeySupported()) return false;
   if (deviceHasPasskeyHint()) return true;
   // Returning local profile — Face ID may still be in iCloud Keychain for this email.
+  try {
+    const profile = loadUserProfile();
+    return Boolean(profile.email?.trim() && profile.displayName?.trim());
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Device “snapshot”: this phone already had a real account.
+ * Used so AuthWelcome offers Sign in only (no guest / Sign up).
+ */
+export function isReturningAccountDevice(): boolean {
+  if (hasDeviceKnownAccount()) return true;
+  if (deviceHasPasskeyHint()) return true;
   try {
     const profile = loadUserProfile();
     return Boolean(profile.email?.trim() && profile.displayName?.trim());

@@ -10,6 +10,8 @@ const ROLE_CHOSEN_KEY = "allbyrent_role_chosen";
 const AUTH_WELCOME_DONE_KEY = "allbyrent_auth_welcome_done";
 /** Guest marketing showcase finished (or skipped to browse). */
 const GUEST_SHOWCASE_DONE_KEY = "allbyrent_guest_showcase_done";
+/** This phone already signed in / signed up (device “fingerprint” for welcome). */
+const DEVICE_KNOWN_ACCOUNT_KEY = "allbyrent_device_known_account";
 
 export function isOnboardingComplete(): boolean {
   try {
@@ -113,6 +115,31 @@ export function markGuestShowcaseDone(): void {
   }
 }
 
+
+export function markDeviceKnownAccount(): void {
+  try {
+    localStorage.setItem(DEVICE_KNOWN_ACCOUNT_KEY, "true");
+  } catch {
+    /* ignore */
+  }
+}
+
+export function clearDeviceKnownAccount(): void {
+  try {
+    localStorage.removeItem(DEVICE_KNOWN_ACCOUNT_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function hasDeviceKnownAccount(): boolean {
+  try {
+    return localStorage.getItem(DEVICE_KNOWN_ACCOUNT_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
 export function clearAuthWelcomeDone(): void {
   try {
     localStorage.removeItem(AUTH_WELCOME_DONE_KEY);
@@ -147,6 +174,7 @@ export function clearOnboardingComplete(): void {
     localStorage.removeItem(ROLE_CHOSEN_KEY);
     localStorage.removeItem(AUTH_WELCOME_DONE_KEY);
     localStorage.removeItem(GUEST_SHOWCASE_DONE_KEY);
+    localStorage.removeItem(DEVICE_KNOWN_ACCOUNT_KEY);
   } catch {
     /* ignore */
   }

@@ -97,6 +97,7 @@ import {
   clearAuthWelcomeDone,
   hasGuestShowcaseDone,
   markGuestShowcaseDone,
+  markDeviceKnownAccount,
 } from "../lib/onboardingStorage";
 import {
   getPublishedListingById,
@@ -1024,6 +1025,7 @@ function AppRoutes() {
     // Sign in / Sign up → skip guest marketing tour permanently on this device.
     if (authGateMode === "signIn" || authGateMode === "signUp") {
       completeOnboarding();
+      markDeviceKnownAccount();
     }
     const restoredEditId = peekEditingListingReturn();
     if (restoredEditId) {
@@ -1055,6 +1057,7 @@ function AppRoutes() {
     // Already signed in on the welcome sheet → Home, not guest tour.
     markAuthWelcomeDone();
     markGuestShowcaseDone();
+    markDeviceKnownAccount();
     completeOnboarding();
     setNavStack([]);
     setCurrentScreen("home");
