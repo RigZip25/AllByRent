@@ -569,6 +569,7 @@ export const es: AppMessages = {
     sendFeedbackHint: "Reporta un problema o envía una idea — las leemos todas",
     accountSettings: "Ajustes de la cuenta",
     accountSettingsHint: "Foto, nombre, teléfono, cobros, coanfitriones",
+    signInHint: "Código por email o Face ID — misma cuenta, sin onboarding.",
   },
   feedback: {
     title: "Ayuda y comentarios",

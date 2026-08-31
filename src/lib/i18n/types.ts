@@ -648,6 +648,7 @@ export type AppMessages = {
     sendFeedbackHint: string;
     accountSettings: string;
     accountSettingsHint: string;
+    signInHint: string;
   };
   feedback: {
     title: string;

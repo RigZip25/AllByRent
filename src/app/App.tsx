@@ -1022,9 +1022,12 @@ function AppRoutes() {
   const handleOpenMore = useCallback(() => goToTab("more"), [goToTab]);
   const handleOpenActivity = useCallback(() => goToTab("activity"), [goToTab]);
   const handleSignedOut = useCallback(() => {
-    setAppMode("rent");
-    goToTab("home");
+    // Land on Settings so Sign in is one tap — AuthGate, not onboarding.
+    goToTab("more");
   }, [goToTab]);
+  const handleSignIn = useCallback(() => {
+    showAuthGate("more");
+  }, [showAuthGate]);
   const handleOpenRentals = useCallback(() => navigateTo("rentals"), [navigateTo]);
   const handleOpenMessages = useCallback(() => navigateTo("messages"), [navigateTo]);
   const handleOpenRentalChat = useCallback(
@@ -2109,6 +2112,7 @@ function AppRoutes() {
           <MoreScreen
             onMrE={handleOpenMrE}
             onAccountSettings={() => handleOpenPersonalInfo()}
+            onSignIn={handleSignIn}
             onHowItWorks={() => navigateTo("howEvoriosWorks")}
             onFeedback={() => navigateTo("feedback")}
           />
@@ -2278,6 +2282,7 @@ function AppRoutes() {
             onOpenCoHosts={() => navigateTo("coHosts")}
             onOpenEarnings={() => navigateTo("earnBusiness")}
             onSignedOut={handleSignedOut}
+            onSignIn={handleSignIn}
             onBack={() => {
               setPersonalInfoInitialEdit(undefined);
               handleBack();
