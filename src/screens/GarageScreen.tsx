@@ -176,7 +176,7 @@ export function GarageScreen({
           {onPreviewAsNeighbor ? (
             <button
               type="button"
-              onClick={onPreviewAsNeighbor}
+              onClick={() => onPreviewAsNeighbor()}
               className="flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border bg-white px-2 py-2 text-[12px] font-semibold text-gray-700"
               style={{ borderColor: BORDER }}
             >
