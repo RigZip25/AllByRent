@@ -6228,6 +6228,14 @@ export const en: AppMessages = {
       nextHint: "Next: pick where to look, or open your shelf.",
       continueCta: "Continue →",
     },
+    authWelcome: {
+      title: "Welcome to Evorios",
+      subtitle: "Sign in to save your garage and messages — or browse nearby as a guest.",
+      signInCta: "Sign in",
+      signUpCta: "Create account",
+      continueGuestCta: "Continue as guest",
+      guestHint: "You can sign in anytime from Settings.",
+    },
   },
   profileDeep: {
     personalInfo: {

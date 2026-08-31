@@ -6,6 +6,8 @@ const INTRO_DONE_KEY = "allbyrent_intro_done";
 const PRODUCT_INTRO_DONE_KEY = "allbyrent_product_intro_done";
 /** User chose earn vs rent on WhatDoYouWant (or explicitly skipped that step). */
 const ROLE_CHOSEN_KEY = "allbyrent_role_chosen";
+/** Post-splash Sign in / Sign up / Continue as guest seen (or user already signed in). */
+const AUTH_WELCOME_DONE_KEY = "allbyrent_auth_welcome_done";
 
 export function isOnboardingComplete(): boolean {
   try {
@@ -77,6 +79,30 @@ export function markRoleChosen(): void {
   }
 }
 
+export function hasAuthWelcomeDone(): boolean {
+  try {
+    return localStorage.getItem(AUTH_WELCOME_DONE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+export function markAuthWelcomeDone(): void {
+  try {
+    localStorage.setItem(AUTH_WELCOME_DONE_KEY, "true");
+  } catch {
+    /* ignore */
+  }
+}
+
+export function clearAuthWelcomeDone(): void {
+  try {
+    localStorage.removeItem(AUTH_WELCOME_DONE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export type OnboardingResumeScreen =
   | "firstHello"
   | "whatIsEvorios"
@@ -100,6 +126,7 @@ export function clearOnboardingComplete(): void {
     localStorage.removeItem(INTRO_DONE_KEY);
     localStorage.removeItem(PRODUCT_INTRO_DONE_KEY);
     localStorage.removeItem(ROLE_CHOSEN_KEY);
+    localStorage.removeItem(AUTH_WELCOME_DONE_KEY);
   } catch {
     /* ignore */
   }

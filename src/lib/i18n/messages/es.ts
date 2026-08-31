@@ -6210,6 +6210,14 @@ export const es: AppMessages = {
       nextHint: "Siguiente: elige dónde buscar, o abre tu garaje.",
       continueCta: "Continuar →",
     },
+    authWelcome: {
+      title: "Bienvenido a Evorios",
+      subtitle: "Inicia sesión para guardar tu garage y mensajes — o explora como invitado.",
+      signInCta: "Iniciar sesión",
+      signUpCta: "Crear cuenta",
+      continueGuestCta: "Continuar como invitado",
+      guestHint: "Puedes iniciar sesión cuando quieras en Ajustes.",
+    },
   },
   profileDeep: {
     personalInfo: {

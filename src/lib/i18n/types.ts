@@ -127,6 +127,14 @@ export type OnboardingMessages = {
     nextHint: string;
     continueCta: string;
   };
+  authWelcome: {
+    title: string;
+    subtitle: string;
+    signInCta: string;
+    signUpCta: string;
+    continueGuestCta: string;
+    guestHint: string;
+  };
 };
 
 export type AppMessages = {

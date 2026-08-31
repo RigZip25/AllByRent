@@ -6219,6 +6219,14 @@ export const cs: AppMessages = {
       nextHint: "Pak: vyber, kde hledat, nebo otevři polici.",
       continueCta: "Pokračovat →",
     },
+    authWelcome: {
+      title: "Vítej v Evorios",
+      subtitle: "Přihlas se, ať máš garáž a zprávy u sebe — nebo prohlížej jako host.",
+      signInCta: "Přihlásit se",
+      signUpCta: "Vytvořit účet",
+      continueGuestCta: "Pokračovat jako host",
+      guestHint: "Přihlásit se můžeš kdykoli v Nastavení.",
+    },
   },
   profileDeep: {
     personalInfo: {
