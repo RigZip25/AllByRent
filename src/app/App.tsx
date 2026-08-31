@@ -1055,7 +1055,7 @@ function AppRoutes() {
     [auth.configured, auth.session, auth.userId, auth.userEmail, navigateTo, showAuthGate],
   );
   const handleOpenFavorites = useCallback(() => navigateTo("favorites"), [navigateTo]);
-  const handleOpenBusiness = useCallback(() => goToTab("earnBusiness"), [goToTab]);
+  const handleOpenBusiness = useCallback(() => navigateTo("earnBusiness"), [navigateTo]);
 
   const handleOpenPersonalInfo = useCallback(
     (field?: "name" | "phone") => {
@@ -1570,6 +1570,10 @@ function AppRoutes() {
       }
       if (currentScreen === "yardSaleHub") {
         setCurrentScreen(landAfterOnboarding());
+        return stack;
+      }
+      if (currentScreen === "earnBusiness") {
+        setCurrentScreen("garage");
         return stack;
       }
       if (currentScreen === "home" || currentScreen === "garage") {
@@ -2267,6 +2271,7 @@ function AppRoutes() {
 
         {currentScreen === "earnBusiness" && (
           <EarnBusinessScreen
+            onBack={handleBack}
             onHome={handleOpenHome}
             onRentals={handleOpenRentals}
             onStock={handleStartListing}
