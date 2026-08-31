@@ -53,7 +53,7 @@ export const cs: AppMessages = {
     home: "Procházet",
     stock: "Přidat",
     garage: "Domácnost",
-    more: "Účet",
+    more: "Nastavení",
   },
   splash: {
     chipGarage: "Tvoje výloha",
@@ -556,8 +556,8 @@ export const cs: AppMessages = {
     resetApp: "Resetovat aplikaci",
   },
   more: {
-    title: "Účet",
-    subtitle: "Rezervace, výdělky a nastavení",
+    title: "Nastavení",
+    subtitle: "Rezervace, výdělky a účet",
     profileHint: "Nastavení účtu",
     sectionActivity: "Aktivita",
     sectionGarage: "Tvoje garáž",
