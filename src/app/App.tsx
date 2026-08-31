@@ -562,6 +562,10 @@ function resolveScreenAfterAuth(storedTarget: Screen | null): Screen {
   if (storedTarget && AUTH_RESUME_PRESERVE.has(storedTarget)) {
     return storedTarget;
   }
+  // Existing-account Sign in asks for Home — never replay the guest soft-tour.
+  if (storedTarget === "home") {
+    return "home";
+  }
   if (!isOnboardingComplete()) {
     const resume = resolveOnboardingResumeScreen();
     if (resume !== "home") return resume;
@@ -1015,24 +1019,39 @@ function AppRoutes() {
     setAuthGateOpen(false);
     clearPendingAuthEmail();
     markAuthWelcomeDone();
+    // Sign in = existing account → skip guest tour permanently on this device.
+    if (authGateMode === "signIn") {
+      completeOnboarding();
+    }
     const restoredEditId = peekEditingListingReturn();
     if (restoredEditId) {
       setEditingListingId(restoredEditId);
       setSelectedHostListingId(restoredEditId);
     }
-    const target = resolvePostAuthScreen();
+    const target =
+      authGateMode === "signIn"
+        ? resolveScreenAfterAuth(
+            postAuthTarget && AUTH_RESUME_PRESERVE.has(postAuthTarget)
+              ? postAuthTarget
+              : postAuthTarget && postAuthTarget !== "authWelcome" && postAuthTarget !== "splash"
+                ? postAuthTarget
+                : "home",
+          )
+        : resolvePostAuthScreen();
     setNavStack([]);
     setCurrentScreen(target);
     setPostAuthTarget(null);
-  }, [resolvePostAuthScreen]);
+  }, [authGateMode, postAuthTarget, resolvePostAuthScreen]);
 
   useEffect(() => {
     if (currentScreen !== "authWelcome") return;
     if (auth.loading) return;
     if (!auth.session) return;
+    // Already signed in on the welcome sheet → Home, not guest tour.
     markAuthWelcomeDone();
+    completeOnboarding();
     setNavStack([]);
-    setCurrentScreen(resolveAfterSignIn());
+    setCurrentScreen("home");
   }, [currentScreen, auth.loading, auth.session]);
 
   const resetToHome = () => {
@@ -1379,15 +1398,15 @@ function AppRoutes() {
 
   const handleAuthWelcomeSignIn = useCallback(() => {
     clearPendingAuthEmail();
-    // Face ID only on explicit Sign in tap; fall back to email Sign in sheet (not Sign up).
+    // Existing account → land on Home after OTP/Face ID (not the guest onboarding tour).
     if (shouldShowPasskeyLogin()) {
       const email = loadUserProfile().email?.trim() || undefined;
       void signInWithPasskey(email).catch(() => {
-        showAuthGate(resolveAfterSignIn(), "generic", "signIn");
+        showAuthGate("home", "generic", "signIn");
       });
       return;
     }
-    showAuthGate(resolveAfterSignIn(), "generic", "signIn");
+    showAuthGate("home", "generic", "signIn");
   }, [showAuthGate]);
 
   const handleAuthWelcomeSignUp = useCallback(() => {
