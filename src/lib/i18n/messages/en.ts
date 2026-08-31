@@ -50,7 +50,7 @@ export const en: AppMessages = {
       "Shows booked and host-blocked dates only. Renter details are never shown here.",
   },
   nav: {
-    home: "Home",
+    home: "Browse",
     stock: "Stock",
     garage: "Garage",
     more: "Account",
@@ -683,7 +683,7 @@ export const en: AppMessages = {
       },
       {
         q: "Menu buttons — what does each tab do?",
-        a: "Home = browse. Mr. Evorios = help tips + chat. Green + = list a new item. Garage = your storefront & earnings. More = profile, rentals, favorites, and How Evorios works.",
+        a: "Browse = nearby garages & listings. Mr. Evorios = help tips + chat. Green + = list a new item. Garage = your storefront & earnings. More = profile, rentals, favorites, and How Evorios works.",
       },
       {
         q: "What is Evorios — household marketplace?",

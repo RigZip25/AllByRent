@@ -297,9 +297,9 @@ function resolveBootScreenParam(raw: string | null): Screen | null {
 }
 
 function bottomNavTabForScreen(screen: Screen): BottomNavTab {
-  // Home tab opens Garage — treat Garage as the Home land for nav highlight.
+  // Browse (Home tab) vs My Garage — keep highlight honest.
+  if (screen === "garage") return "garage";
   if (
-    screen === "garage" ||
     screen === "browseHub" ||
     screen === "home" ||
     screen === "yardSaleHub" ||
@@ -358,8 +358,8 @@ const LISTING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
 };
 
 /**
- * Primary app land screen. Home tab and post-onboarding land here — Garage first
- * while we grow host stores; neighbor browse stays reachable but is not the default.
+ * Post-onboarding land. Still Garage (host storefront) so new hosts land in their
+ * shop; the Home tab opens the neighbor browse feed separately.
  */
 const PRIMARY_LAND_SCREEN: Screen = "garage";
 
@@ -991,8 +991,8 @@ function AppRoutes() {
   }, []);
 
   const handleOpenHome = useCallback(() => {
-    setAppMode("earn");
-    goToTab(landAfterOnboarding());
+    setAppMode("rent");
+    goToTab("home");
   }, [goToTab]);
   const handleOpenMrE = useCallback(() => goToTab("mre"), [goToTab]);
   const handleOpenGarage = useCallback(() => {
@@ -1365,7 +1365,7 @@ function AppRoutes() {
         goToTab("garage");
         return;
       }
-      // Browse mode still opens the neighbor feed; Home tab itself always opens Garage.
+      // Browse mode → neighbor feed (same destination as the Home / Browse tab).
       goToTab("home");
     },
     [goToTab],
