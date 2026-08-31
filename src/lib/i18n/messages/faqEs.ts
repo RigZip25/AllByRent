@@ -37,7 +37,7 @@ export const faq: AppMessages["faq"] = {
       a: "Abre Inicio → usa las etiquetas de categoría en el centro de exploración, o la franja del feed bajo Alquilar/Comprar. Toca una categoría en Más → Cómo funciona Evorios (o la pantalla de introducción) para desplegar las subcategorías particulares y profesionales. Al publicar con +, elige las mismas categorías en el asistente. No hay lupa de búsqueda en el pie de página.",
     },
     "garage-tab": {
-      q: "¿Qué es la pestaña Mi garaje?",
+      q: "¿Qué es la pestaña Mi hogar?",
       a: "La pestaña Garaje es el escaparate de tu casa — anuncios activos, solicitudes de reserva y estadísticas. Ajustes (icono de engranaje) abre tu perfil. Publica artículos cuando quieras con el botón central +.",
     },
     "location-rent": {
@@ -66,11 +66,11 @@ export const faq: AppMessages["faq"] = {
     },
     "qr-sticker": {
       q: "¿Por qué necesito una pegatina QR?",
-      a: "Para alquileres, el QR vincula el artículo físico con tu anuncio. No hace falta impresora para empezar — muestra el código desde el teléfono en la entrega. Imprime una pegatina después (o en lote desde Mi garaje) si quieres. No pedimos foto de la pegatina impresa.",
+      a: "Para alquileres, el QR vincula el artículo físico con tu anuncio. No hace falta impresora para empezar — muestra el código desde el teléfono en la entrega. Imprime una pegatina después (o en lote desde Mi hogar) si quieres. No pedimos foto de la pegatina impresa.",
     },
     "pickup-delivery": {
       q: "¿Cómo funcionan la recogida y la entrega?",
-      a: "Los anuncios nuevos empiezan con valores por defecto razonables para el barrio (horario entre semana en el porche). Después de publicar, abre el anuncio desde Mi garaje → Edición completa (o ediciones rápidas en la pantalla de detalle) para configurar recogida en persona / sin contacto y kilómetros y tarifas de entrega. La dirección exacta se comparte con el inquilino confirmado tras la reserva.",
+      a: "Los anuncios nuevos empiezan con valores por defecto razonables para el barrio (horario entre semana en el porche). Después de publicar, abre el anuncio desde Mi hogar → Edición completa (o ediciones rápidas en la pantalla de detalle) para configurar recogida en persona / sin contacto y kilómetros y tarifas de entrega. La dirección exacta se comparte con el inquilino confirmado tras la reserva.",
     },
     "book-item": {
       q: "¿Cómo alquilo un artículo?",
@@ -94,7 +94,7 @@ export const faq: AppMessages["faq"] = {
     },
     "availability-step5": {
       q: "¿Cómo configuro la disponibilidad o pauso un anuncio?",
-      a: "Abre Mi garaje → toca el anuncio:\\n• Pausar / Reanudar oculta o restaura el artículo en la exploración sin borrarlo.\\n• Edita los horarios de disponibilidad (entre semana / fin de semana) desde la edición rápida o la Edición completa.\\n• Eliminar borra el anuncio para siempre, tanto de tu garaje como del servidor.",
+      a: "Abre Mi hogar → toca el anuncio:\\n• Pausar / Reanudar oculta o restaura el artículo en la exploración sin borrarlo.\\n• Edita los horarios de disponibilidad (entre semana / fin de semana) desde la edición rápida o la Edición completa.\\n• Eliminar borra el anuncio para siempre, tanto de tu garaje como del servidor.",
     },
     "skip-onboarding": {
       q: "¿Puedo saltarme el registro inicial?",
@@ -102,11 +102,11 @@ export const faq: AppMessages["faq"] = {
     },
     "bottom-nav": {
       q: "¿Qué hacen los botones del menú inferior?",
-      a: "Explorar = garajes y categorías cerca. Mr. Evorios = ayuda (preguntas frecuentes + chat). El + verde = publicar un artículo nuevo. Garaje = tu escaparate y ganancias. Más = perfil, alquileres, favoritos y Cómo funciona Evorios. No hay lupa de búsqueda en el pie de página.",
+      a: "Explorar = hogares y categorías cerca. Mr. Evorios = ayuda (preguntas frecuentes + chat). El + verde = publicar un artículo nuevo. Hogar = tu escaparate y ganancias. Más = perfil, alquileres, favoritos y Cómo funciona Evorios. No hay lupa de búsqueda en el pie de página.",
     },
     "more-menu": {
       q: "¿Qué hay en el menú Más?",
-      a: "Más incluye tu tarjeta de perfil, Alquileres, Mensajes (chat dentro de la app), Favoritos, Notificaciones, el acceso directo a Mi garaje, el panel de ganancias, la guía interactiva Cómo funciona Evorios y el chat con Mr. Evorios.",
+      a: "Más incluye tu tarjeta de perfil, Alquileres, Mensajes (chat dentro de la app), Favoritos, Notificaciones, el acceso directo a Mi hogar, el panel de ganancias, la guía interactiva Cómo funciona Evorios y el chat con Mr. Evorios.",
     },
     "in-app-chat": {
       q: "¿Cómo escribo a un vecino dentro de la app?",
@@ -170,7 +170,7 @@ export const faq: AppMessages["faq"] = {
     },
     "garage-switcher": {
       q: "Ayudo en otro garaje — ¿cómo cambio?",
-      a: "Abre Mi garaje. Si perteneces a más de uno, usa Trabajando en arriba para elegir Mi garaje o el compartido. Las fotos y el + van al garaje seleccionado. Explorar siempre es con tu propio acceso.",
+      a: "Abre Mi hogar. Si perteneces a más de uno, usa Trabajando en arriba para elegir Mi hogar o el compartido. Las fotos y el + van al garaje seleccionado. Explorar siempre es con tu propio acceso.",
     },
     "own-and-help": {
       q: "Vivimos al lado y nos ayudamos — ¿compartimos un solo garaje?",
@@ -186,7 +186,7 @@ export const faq: AppMessages["faq"] = {
     },
     "pause-listing": {
       q: "¿Cómo pauso un anuncio?",
-      a: "Mi garaje → abre el anuncio → Pausar anuncio. Desaparece de la exploración al instante. Toca Reanudar cuando estés listo otra vez. Usa Eliminar solo si quieres quitarlo para siempre.",
+      a: "Mi hogar → abre el anuncio → Pausar anuncio. Desaparece de la exploración al instante. Toca Reanudar cuando estés listo otra vez. Usa Eliminar solo si quieres quitarlo para siempre.",
     },
     "edit-listing": {
       q: "¿Cómo edito un anuncio publicado?",
