@@ -2079,7 +2079,6 @@ function AppRoutes() {
           <MoreScreen
             onMrE={handleOpenMrE}
             onGarage={handleOpenGarageFromAccount}
-            onProfile={handleOpenProfile}
             onAccountSettings={() => handleOpenPersonalInfo()}
             onRentals={handleOpenRentals}
             onMessages={handleOpenMessages}
@@ -2221,7 +2220,6 @@ function AppRoutes() {
             onOpenNotifications={handleOpenNotifications}
             onOpenCoHosts={() => navigateTo("coHosts")}
             onOpenPersonalInfo={handleOpenPersonalInfo}
-            onOpenIdentity={() => navigateTo("identity")}
             onOpenAgentActivity={() => navigateTo("agentActivity")}
             onPreferredModeChange={handlePreferredModeChange}
             onViewPublicProfile={handleViewPublicProfile}
@@ -2240,7 +2238,7 @@ function AppRoutes() {
             onOpenListing={handleOpenListingFromFeed}
             onOpenProfileSettings={
               auth.userId && selectedPublicProfileUserId === auth.userId
-                ? handleOpenProfile
+                ? () => handleOpenPersonalInfo()
                 : undefined
             }
           />

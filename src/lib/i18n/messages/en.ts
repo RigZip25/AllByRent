@@ -536,9 +536,9 @@ export const en: AppMessages = {
     resetApp: "Reset app",
   },
   more: {
-    title: "More",
-    subtitle: "Account, bookings, and app settings",
-    profileHint: "Profile & account settings",
+    title: "Account",
+    subtitle: "Bookings, earnings, and settings",
+    profileHint: "Account settings",
     sectionActivity: "Activity",
     sectionGarage: "Your garage",
     sectionAccount: "Account",
@@ -564,7 +564,7 @@ export const en: AppMessages = {
     sendFeedback: "Help & feedback",
     sendFeedbackHint: "Report a problem or send an idea — we read these",
     accountSettings: "Account settings",
-    accountSettingsHint: "Name, phone, bank payouts, co-hosts",
+    accountSettingsHint: "Photo, name, phone, payouts, co-hosts",
   },
   feedback: {
     title: "Help & feedback",

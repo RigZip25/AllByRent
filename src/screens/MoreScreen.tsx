@@ -10,7 +10,6 @@ import {
   MessageCircle,
   MessageSquareWarning,
   TrendingUp,
-  User,
   Warehouse,
 } from "lucide-react";
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
@@ -68,7 +67,6 @@ function MenuRow({
 }
 
 export function MoreScreen({
-  onProfile,
   onAccountSettings,
   onRentals,
   onMessages,
@@ -80,8 +78,7 @@ export function MoreScreen({
   onHowItWorks,
   onFeedback,
 }: {
-  onProfile: () => void;
-  /** Name, phone, bank payouts — dedicated settings hub (not the public profile). */
+  /** Single hub: photo, name, phone, payouts, co-hosts (was Profile + Account settings). */
   onAccountSettings: () => void;
   onRentals: () => void;
   onMessages?: () => void;
@@ -120,7 +117,7 @@ export function MoreScreen({
 
         <button
           type="button"
-          onClick={onProfile}
+          onClick={onAccountSettings}
           className="mb-5 flex w-full items-center gap-4 rounded-3xl border bg-white p-4 text-left active:bg-[#F9FAFB]"
           style={{ borderColor: BORDER }}
         >
@@ -129,22 +126,11 @@ export function MoreScreen({
             <p className="text-[18px] font-bold" style={{ color: GREEN }}>
               {displayNameLabel}
             </p>
-            <p className="mt-0.5 text-[13px] text-gray-500">{t.more.profileHint}</p>
+            <p className="mt-0.5 text-[13px] text-gray-500">{t.more.accountSettings}</p>
+            <p className="mt-0.5 text-[12px] text-gray-400">{t.more.accountSettingsHint}</p>
           </div>
           <ChevronRight className="h-5 w-5 shrink-0 text-gray-300" />
         </button>
-
-        <SectionTitle>{t.more.sectionAccount}</SectionTitle>
-        <ul className="mb-5 flex flex-col gap-2">
-          <li>
-            <MenuRow
-              icon={<User className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
-              label={t.more.accountSettings}
-              hint={t.more.accountSettingsHint}
-              onClick={onAccountSettings}
-            />
-          </li>
-        </ul>
 
         <SectionTitle>{t.more.sectionActivity}</SectionTitle>
         <ul className="mb-5 flex flex-col gap-2">

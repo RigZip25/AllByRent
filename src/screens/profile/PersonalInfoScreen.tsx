@@ -3,28 +3,37 @@ import type { ReactNode } from "react";
 import {
   ArrowLeft,
   CheckCircle2,
+  Globe,
+  LogOut,
   Mail,
   Phone,
   User,
   Users,
   Cake,
 } from "lucide-react";
+import { ProfileAvatar } from "../../components/profile/ProfileAvatar";
 import { ProfileFieldEditSheet } from "../../components/profile/ProfileFieldEditSheet";
 import { DateOfBirthEditSheet } from "../../components/profile/DateOfBirthEditSheet";
+import { ProfilePhotoCapture } from "../../components/profile/ProfilePhotoCapture";
 import {
   ageYearsFromIso,
   formatDobDisplay,
   normalizeDobToIso,
 } from "../../lib/dateOfBirth";
-import { useLocale, useMessages } from "../../lib/i18n/react";
+import { hasAvatarPhoto, saveAvatarPhoto } from "../../lib/avatarStorage";
+import { useLocaleControls, useLocale, useMessages } from "../../lib/i18n/react";
+import type { AppLocale } from "../../lib/i18n/types";
 import { ConnectSetupError } from "../../components/payments/ConnectSetupError";
 import { PayoutsFlowCard } from "../../components/payments/PayoutsFlowCard";
 import { useAuth } from "../../hooks/AuthProvider";
+import { signOut } from "../../lib/auth";
 import { fetchRemoteProfile, updateRemoteProfile } from "../../lib/supabaseProfile";
 import { phoneDigitsForDisplay } from "../../lib/phoneE164";
 import {
+  getProfileDisplayLabel,
   loadUserProfile,
   refreshProfileStats,
+  setProfileAvatarUrl,
   syncUserProfileFromAuth,
   updateProfileFields,
 } from "../../lib/userProfileStorage";
@@ -118,8 +127,13 @@ export function PersonalInfoScreen({
   const { common, profile: profileCopy, profileDeep } = useMessages();
   const t = profileDeep.personalInfo;
   const locale = useLocale();
+  const localeControls = useLocaleControls();
   const [profile, setProfile] = useState(() => refreshProfileStats(loadUserProfile(), auth.userId));
   const [editing, setEditing] = useState<EditField>(null);
+  const [captureMode, setCaptureMode] = useState<"camera" | "library" | null>(null);
+  const [authBusy, setAuthBusy] = useState(false);
+  const hasPhoto = hasAvatarPhoto((auth.userId ?? profile.id).trim() || profile.id);
+  const displayNameLabel = getProfileDisplayLabel(profile.displayName);
   const [stripeStatus, setStripeStatus] = useState<{
     connected: boolean;
     payoutsEnabled: boolean;
@@ -184,10 +198,8 @@ export function PersonalInfoScreen({
 
   useEffect(() => {
     if (!auth.userId) return;
-    let mounted = true;
     const refreshStripe = () => {
       void loadConnectStatus(auth.userId).then((status) => {
-        if (!mounted) return;
         setStripeStatus({
           connected: status.connected,
           payoutsEnabled: status.payoutsEnabled,
@@ -331,6 +343,14 @@ export function PersonalInfoScreen({
     openPayouts();
   };
 
+  const persistPhoto = async (blob: Blob) => {
+    const ownerId = (auth.userId ?? profile.id).trim() || loadUserProfile().id.trim();
+    if (!ownerId) return;
+    const dataUrl = await saveAvatarPhoto(ownerId, blob);
+    setProfileAvatarUrl(dataUrl);
+    setProfile(refreshProfileStats(loadUserProfile(), auth.userId));
+  };
+
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
       <header className="shrink-0 flex items-center gap-3 border-b bg-white px-4 py-3" style={{ borderColor: BORDER }}>
@@ -344,6 +364,28 @@ export function PersonalInfoScreen({
 
       <div className="screen-scroll flex-1 space-y-3 p-4">
         <p className="text-[13px] text-gray-500">{t.subtitle}</p>
+
+        <div className="flex items-center gap-4 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
+          <ProfileAvatar
+            avatarUrl={profile.avatarUrl}
+            size={64}
+            showHint={!hasPhoto}
+            onClick={() => setCaptureMode("camera")}
+          />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[16px] font-bold" style={{ color: GREEN }}>
+              {displayNameLabel}
+            </p>
+            <button
+              type="button"
+              onClick={() => setCaptureMode("camera")}
+              className="mt-1 text-[13px] font-semibold underline"
+              style={{ color: GREEN }}
+            >
+              {profileCopy.addProfilePhoto}
+            </button>
+          </div>
+        </div>
 
         {celebrateCopy ? (
           <div
@@ -430,6 +472,56 @@ export function PersonalInfoScreen({
         />
         <p className="px-1 text-[12px] leading-relaxed text-gray-500">{t.dateOfBirthHint}</p>
 
+        <p className="px-1 pt-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+          {profileCopy.preferences}
+        </p>
+        <Row
+          icon={<Globe className="h-5 w-5" style={{ color: GREEN }} />}
+          label={profileCopy.language}
+          value={
+            localeControls.auto
+              ? localeControls.pageTranslateLang
+                ? profileCopy.languageAutoTranslated(
+                    localeControls.pageTranslateLabel || localeControls.pageTranslateLang,
+                  )
+                : profileCopy.languageAuto
+              : profileCopy.languageValue(localeControls.labels[localeControls.locale])
+          }
+          onClick={() => {
+            if (localeControls.auto) {
+              localeControls.setLocale("en");
+              return;
+            }
+            const order = localeControls.supported;
+            const idx = order.indexOf(localeControls.locale);
+            const next = order[idx + 1];
+            if (next) {
+              localeControls.setLocale(next as AppLocale);
+              return;
+            }
+            localeControls.setLocaleAuto();
+          }}
+        />
+        <p className="px-1 text-[12px] leading-relaxed text-gray-500">{profileCopy.languageHint}</p>
+
+        {auth.configured && auth.session ? (
+          <button
+            type="button"
+            disabled={authBusy}
+            onClick={() => {
+              setAuthBusy(true);
+              void signOut()
+                .catch(() => undefined)
+                .finally(() => setAuthBusy(false));
+            }}
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border bg-white py-3 text-[15px] font-semibold text-gray-500 disabled:opacity-60"
+            style={{ borderColor: BORDER }}
+          >
+            <LogOut className="h-4 w-4" />
+            {authBusy ? profileCopy.signingOut : profileCopy.signOut}
+          </button>
+        ) : null}
+
         {auth.configured && auth.session && onDeleteAccount ? (
           <div className="mt-6 rounded-2xl border bg-white p-4" style={{ borderColor: "#FECACA" }}>
             <p className="text-[12px] font-semibold uppercase tracking-wide text-red-500/80">
@@ -475,6 +567,15 @@ export function PersonalInfoScreen({
         value={profile.dateOfBirth || ""}
         onClose={() => setEditing(null)}
         onSave={saveDob}
+      />
+      <ProfilePhotoCapture
+        open={captureMode !== null}
+        mode={captureMode ?? "camera"}
+        onClose={() => setCaptureMode(null)}
+        onCaptured={(blob) => {
+          setCaptureMode(null);
+          void persistPhoto(blob);
+        }}
       />
     </div>
   );
