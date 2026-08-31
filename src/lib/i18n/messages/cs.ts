@@ -18,7 +18,7 @@ export const cs: AppMessages = {
   tagline: "Sousedé půjčují, co potřebuješ — půjč si poblíž, nebo vystav svoje.",
   taglineShort: "Půjč si poblíž. Vystav svoje.",
   modes: {
-    earn: "Moje garáž",
+    earn: "Moje domácnost",
     rent: "Procházet",
   },
   common: {
@@ -52,7 +52,7 @@ export const cs: AppMessages = {
   nav: {
     home: "Procházet",
     stock: "Přidat",
-    garage: "Moje garáž",
+    garage: "Domácnost",
     more: "Účet",
   },
   splash: {
@@ -423,9 +423,9 @@ export const cs: AppMessages = {
     languageValue: (label) => label,
     languageHint:
       "Automaticky podle telefonu. Angličtina a čeština jsou vestavěné; ostatní jazyky (polština, španělština, francouzština...) se přeloží ihned — jako Google Translate.",
-    defaultExperience: "Procházet nebo Moje garáž",
+    defaultExperience: "Procházet nebo Moje domácnost",
     defaultExperienceHint:
-      "Procházet je feed bloku; Moje garáž je výloha. Přepínejte Domů nebo Garáž — nebo vystavte přes +.",
+      "Procházet je feed bloku; Moje domácnost je výloha. Přepínejte Domů nebo Garáž — nebo vystavte přes +.",
     yourStats: "Tvoje statistiky",
     asRenter: "Jako nájemce",
     asHost: "Jako hostitel",
@@ -571,7 +571,7 @@ export const cs: AppMessages = {
     favoritesHint: "Uložené nabídky",
     notifications: "Oznámení",
     notificationsHint: "Rezervace, zprávy, aktualizace",
-    myGarage: "Moje garáž",
+    myGarage: "Moje domácnost",
     myGarageHint: "Nabídky, žádosti a výdělky",
     earnDashboard: "Přehled výdělků",
     earnDashboardHint: "Tržby a výkon nabídek",
@@ -623,7 +623,7 @@ export const cs: AppMessages = {
     steps: {
       idea: { title: "Myšlenka", subtitle: "Domy jako výlohy" },
       modes: { title: "Půjčit · Prodat · Darovat", subtitle: "Tři způsoby sdílení" },
-      navigate: { title: "Kam klepnout", subtitle: "Domů, +, Garáž, Více" },
+      navigate: { title: "Kam klepnout", subtitle: "Procházet, +, Domácnost, Účet" },
       categories: { title: "Kategorie a podkategorie", subtitle: "Co je na bloku" },
     },
     ideaBody1: (appName) =>
@@ -632,7 +632,7 @@ export const cs: AppMessages = {
       "Foťák na focení, židle do nového bytu, batoh na služební cestu? Sousedé půjčují. Máš co doma leží? Vystav to — jedna garážová výloha, ne skladiště.",
     rememberTitle: "Pamatujte",
     rememberBody:
-      "Stejný profil na prohlížení i hostování. Mezi Procházet a Moje garáž přepneš v Profilu.",
+      "Stejný profil na prohlížení i hostování. Mezi Procházet a Moje domácnost přepneš v Profilu.",
     modeRentTitle: "Půjčit",
     modeRentBody: "Půjč si na den nebo týden — nebo vydělávej, když si někdo půjčí od tebe.",
     modeSellTitle: "Prodat",
@@ -641,10 +641,10 @@ export const cs: AppMessages = {
     modeGiftBody: "Předej věci zdarma — při vystavení nastav Prodej na 0 Kč.",
     navHomeTitle: "Domů",
     navHomeBody:
-      "Domů otevře garáže poblíž. Filtr Vše · Půjčit · Koupit, nebo Garážové výprodeje. Vystavujte přes + nebo Moje garáž.",
+      "Domů otevře garáže poblíž. Filtr Vše · Půjčit · Koupit, nebo Garážové výprodeje. Vystavujte přes + nebo Moje domácnost.",
     navStockTitle: "Zelené + (Přidat)",
     navStockBody: "Vystav něco z garáže — fotky, kategorie, půjčka a/nebo prodej.",
-    navGarageTitle: "Garáž",
+    navGarageTitle: "Domácnost",
     navGarageBody: "Tvoje výloha: nabídky, koncepty a nástroje hostitele.",
     navMoreTitle: "Více / Zprávy",
     navMoreBody: (mascot) =>
@@ -661,7 +661,7 @@ export const cs: AppMessages = {
     pro: "Pro / byznys",
   },
   garage: {
-    title: "Moje garáž",
+    title: "Moje domácnost",
     subtitle: "Tvoje výloha z domu",
   },
   mrEvorios: {
@@ -703,15 +703,15 @@ export const cs: AppMessages = {
       },
       {
         q: "Co dělají tlačítka dolního menu?",
-        a: "Procházet = prohlížení v okolí. Mr. Evorios = tipy + chat. Zelené + = nová věc. Garáž = výloha a výdělky. Účet = profil, půjčky, oblíbené a Jak funguje Evorios.",
+        a: "Procházet = prohlížení v okolí. Mr. Evorios = tipy + chat. Zelené + = nová věc. Domácnost = výloha a výdělky. Účet = profil, půjčky, oblíbené a Jak funguje Evorios.",
       },
       {
         q: "Co je Evorios — sousedský trh?",
         a: "Evorios je sousedský trh: každý dům může půjčovat, prodávat nebo darovat z garážové výlohy. Procházej blízké garáže, nebo naplňte vlastní polici.",
       },
       {
-        q: "Profil vs Garáž — jaký je rozdíl?",
-        a: "Garáž = nabídky, žádosti a výdělky. Profil (v More) = jméno, foto, telefon, výplaty a odhlášení. Mezi Procházet a Moje garáž přepínáš kdykoli.",
+        q: "Profil vs Domácnost — jaký je rozdíl?",
+        a: "Domácnost = nabídky, žádosti a výdělky. Profil (v More) = jméno, foto, telefon, výplaty a odhlášení. Mezi Procházet a Moje domácnost přepínáš kdykoli.",
       },
       {
         q: "Jak vystavím první věc?",
@@ -732,8 +732,8 @@ export const cs: AppMessages = {
         a: "Evorios je sousedský trh: každý dům může půjčovat, prodávat nebo darovat z garážové výlohy. Procházej blízké garáže, nebo naplňte vlastní polici.",
       },
       {
-        q: "Profil vs Garáž — jaký je rozdíl?",
-        a: "Garáž = nabídky, žádosti a výdělky. Profil (v More) = jméno, foto, telefon, výplaty a odhlášení. Mezi Procházet a Moje garáž přepínáš kdykoli.",
+        q: "Profil vs Domácnost — jaký je rozdíl?",
+        a: "Domácnost = nabídky, žádosti a výdělky. Profil (v More) = jméno, foto, telefon, výplaty a odhlášení. Mezi Procházet a Moje domácnost přepínáš kdykoli.",
       },
       {
         q: "Jak přepnu na Procházet?",
@@ -747,12 +747,12 @@ export const cs: AppMessages = {
     guidesTitle: "Rychlé starty",
     guidesHint: "Skočte rovnou na správné místo v aplikaci",
     guidesHowTitle: (appName) => `Jak funguje ${appName}`,
-    guidesHowBody: "Kategorie, Procházet vs Garáž, kam klepnout",
+    guidesHowBody: "Kategorie, Procházet vs Domácnost, kam klepnout",
     guidesBrowseTitle: "Procházet okolí",
     guidesBrowseBody: "Otevřít Domů a feed bloku",
     guidesListTitle: "Přidat nabídku",
     guidesListBody: "Fotky → detaily → publikovat přes zelené +",
-    guidesGarageTitle: "Moje garáž",
+    guidesGarageTitle: "Moje domácnost",
     guidesGarageBody: "Výloha, žádosti a výdělky",
     guidesProfileTitle: "Profil a výplaty",
     guidesProfileBody: "Jméno, telefon, výplaty, odhlášení",
@@ -795,8 +795,8 @@ export const cs: AppMessages = {
     householdSeatsNote:
       "Pomocníci mají vlastní přihlášení a můžou mít i vlastní garáž. Přepínačem zvolíš, kam teď dáváš věci.",
     switcherLabel: "Pracuji v",
-    switcherMyGarage: "Moje garáž",
-    switcherSharedGarage: "Sdílená garáž",
+    switcherMyGarage: "Moje domácnost",
+    switcherSharedGarage: "Sdílená domácnost",
     switcherMineHint: "Tvoje výloha · tvoje výplaty",
     switcherHelpingHint: "Pomáhám · výplaty zůstávají u majitele",
     householdTitleName: "Pojmenuj garáž",
@@ -895,7 +895,7 @@ export const cs: AppMessages = {
     storeLiveOnTitle: "Obchod otevřený",
     storeLiveOffTitle: "Obchod pozastavený",
     storeLiveOnBody: "Sousedé vidí tvůj profil a položky na polici, které nejsou pozastavené.",
-    storeLiveOffBody: "Police zůstává v Moje garáž — sousedé neuvidí profil ani produkty, dokud neotevřeš.",
+    storeLiveOffBody: "Police zůstává v Moje domácnost — sousedé neuvidí profil ani produkty, dokud neotevřeš.",
     storeLiveOpen: "Otevřít obchod",
     storeLivePause: "Pozastavit obchod",
     storeLiveStripeRequired: "Než otevřeš obchod, připoj výplaty — platí i pro dárky zdarma.",
@@ -1464,7 +1464,7 @@ export const cs: AppMessages = {
         bookings: {
           title: "Žádné žádosti o půjčku",
           body: "Nové půjčky, okna vyzvednutí a vrácení a změny rozvrhu u tvých věcí se objeví tady.",
-          hint: "Vystav vybavení z Moje garáž (nebo +), abys začal(a) dostávat žádosti.",
+          hint: "Vystav vybavení z Moje domácnost (nebo +), abys začal(a) dostávat žádosti.",
         },
         messages: {
           title: "Žádné zprávy od nájemců",
@@ -5481,14 +5481,14 @@ export const cs: AppMessages = {
         `Doručení ≤${distanceLabel} · ${fee} Kč tam i zpět${weight}`,
       handoffDeliveryNoFee: (distanceLabel, weight) => `Doručení ≤${distanceLabel}${weight}`,
       handoffNotSet: "Nenastaveno",
-      handoffAdjustHint: "Hodiny vyzvednutí a doručení — upravíte po zveřejnění v Moje garáž.",
+      handoffAdjustHint: "Hodiny vyzvednutí a doručení — upravíte po zveřejnění v Moje domácnost.",
       paused: "Pozastaveno",
       availableDefault: "Dostupné · Po-Pá 9:00-17:00",
       untitled: "Bez názvu",
       tipEditing:
         "Zkontroluj změny a uložte — QR a stav nabídky zůstanou jak jsou.",
       tipNew:
-        "Další: přihlášení a uložení na polici. Obchod otevřeš v Moje garáž — před Live jsou nutné výplaty.",
+        "Další: přihlášení a uložení na polici. Obchod otevřeš v Moje domácnost — před Live jsou nutné výplaty.",
       saving: "Ukládám...",
       opening: "Otevírám...",
       saveChanges: "Uložit změny",
@@ -5498,7 +5498,7 @@ export const cs: AppMessages = {
     goPublic: {
       backToReview: "← Zpět na kontrolu",
       title: "Skoro hotovo",
-      subtitle: "Přihlas se a dej položku na polici. Obchod otevřeš později v Moje garáž.",
+      subtitle: "Přihlas se a dej položku na polici. Obchod otevřeš později v Moje domácnost.",
       checkingSetup: "Kontroluji nastavení prodejce...",
       signInTitle: "Přihlásit se",
       signInDone: "Účet je připravený — koncept zůstane u tebe.",
@@ -5519,7 +5519,7 @@ export const cs: AppMessages = {
       refreshing: "Obnovuji...",
       refreshStatus: "Obnovit stav",
       tip: (mascot) =>
-        `${mascot}: Nejdřív na polici. Až budeš chtít sousedy, otevři obchod v Moje garáž — před Live jsou nutné výplaty.`,
+        `${mascot}: Nejdřív na polici. Až budeš chtít sousedy, otevři obchod v Moje domácnost — před Live jsou nutné výplaty.`,
       goingLive: "Ukládám na polici...",
       goLive: "Na polici",
       completeSteps: "Výše se přihlas a pokračuj",
@@ -5529,7 +5529,7 @@ export const cs: AppMessages = {
       connectThenLive: "Připojit finance →",
       goLiveWithoutPayouts: "Zatím na polici bez výplat",
       goLivePayoutHint:
-        "Položka zůstane na polici. Obchod otevři z Moje garáž, až budou výplaty hotové — platí i pro dárky.",
+        "Položka zůstane na polici. Obchod otevři z Moje domácnost, až budou výplaty hotové — platí i pro dárky.",
       phoneTitle: "Ověřit telefon",
       phoneDone: "Telefon ověřen SMS kódem.",
       phonePending:
@@ -5547,7 +5547,7 @@ export const cs: AppMessages = {
       backToListings: "Zpět na moje nabídky",
       payoutNudgeTitle: "Chceš otevřít obchod?",
       payoutNudgeBody:
-        "Připoj výplaty a pak přepni Live v Moje garáž. Sousedé tě neuvidí, dokud obchod neotevřeš.",
+        "Připoj výplaty a pak přepni Live v Moje domácnost. Sousedé tě neuvidí, dokud obchod neotevřeš.",
       payoutNudgeCta: "Připojit výplaty",
       previewAsNeighbor: "Náhled jako soused",
     },
@@ -6141,7 +6141,7 @@ export const cs: AppMessages = {
         subtitle: "Prázdný byt, služební cesta, nebo to nechceš vlastnit — sežeň to poblíž.",
         cta: "Hledat poblíž →",
       },
-      footer: "Mezi Moje garáž a Procházet můžeš přepínat kdykoli.",
+      footer: "Mezi Moje domácnost a Procházet můžeš přepínat kdykoli.",
     },
     location: {
       title: "Kde máme hledat?",
@@ -6165,7 +6165,7 @@ export const cs: AppMessages = {
     },
     allSet: {
       title: "Hotovo — jsi uvnitř",
-      subtitle: "Domů = půjčit poblíž. Moje garáž = vystavit, co máš.",
+      subtitle: "Domů = půjčit poblíž. Moje domácnost = vystavit, co máš.",
       exploreCta: "Co je poblíž →",
       stockGarageCta: "Otevřít Moji garáž →",
     },
@@ -6187,7 +6187,7 @@ export const cs: AppMessages = {
       },
       categoriesTitle: "Podle kategorie",
       categoriesHint: "Foto, domov, kemp, batohy, kola, párty — klepni a rozbalí se.",
-      footer: "Vystav přes + nebo Moje garáž.",
+      footer: "Vystav přes + nebo Moje domácnost.",
     },
     firstHello: {
       bubbles: [

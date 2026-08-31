@@ -18,7 +18,7 @@ export const es: AppMessages = {
   tagline: "Los vecinos comparten lo que necesitas: pide cerca o publica lo tuyo.",
   taglineShort: "Pide cerca. Comparte lo tuyo.",
   modes: {
-    earn: "Mi Garaje",
+    earn: "Mi hogar",
     rent: "Explorar",
   },
   common: {
@@ -52,7 +52,7 @@ export const es: AppMessages = {
   nav: {
     home: "Explorar",
     stock: "Añadir",
-    garage: "Mi garaje",
+    garage: "Mi hogar",
     more: "Cuenta",
   },
   splash: {
@@ -411,9 +411,9 @@ export const es: AppMessages = {
     languageValue: (label) => label,
     languageHint:
       "El automático sigue tu móvil. Inglés, checo y español usan nuestra interfaz integrada; otros idiomas (polaco, francés...) se traducen al instante — como Google Translate.",
-    defaultExperience: "Explorar o Mi Garaje",
+    defaultExperience: "Explorar o Mi hogar",
     defaultExperienceHint:
-      "Explorar es el listado del barrio; Mi Garaje es tu escaparate. Cambia cuando quieras en Inicio o Garaje, o publica con +.",
+      "Explorar es el listado del barrio; Mi hogar es tu escaparate. Cambia cuando quieras en Inicio o Garaje, o publica con +.",
     yourStats: "Tus estadísticas",
     asRenter: "Como inquilino",
     asHost: "Como anfitrión",
@@ -551,7 +551,7 @@ export const es: AppMessages = {
     favoritesHint: "Anuncios guardados",
     notifications: "Notificaciones",
     notificationsHint: "Reservas, mensajes, actualizaciones",
-    myGarage: "Mi Garaje",
+    myGarage: "Mi hogar",
     myGarageHint: "Anuncios, solicitudes y ganancias",
     earnDashboard: "Panel de ganancias",
     earnDashboardHint: "Ingresos y rendimiento de los anuncios",
@@ -603,7 +603,7 @@ export const es: AppMessages = {
     steps: {
       idea: { title: "La idea", subtitle: "Los hogares como escaparates" },
       modes: { title: "Alquilar · Vender · Regalar", subtitle: "Tres formas de compartir" },
-      navigate: { title: "Dónde tocar", subtitle: "Inicio, +, Garaje, Más" },
+      navigate: { title: "Dónde tocar", subtitle: "Explorar, +, Hogar, Cuenta" },
       categories: { title: "Categorías y subcategorías", subtitle: "Qué hay en el barrio" },
     },
     ideaBody1: (appName) =>
@@ -612,7 +612,7 @@ export const es: AppMessages = {
       "¿Cámara para un rodaje, silla para un piso nuevo, mochila para un viaje de trabajo? Los vecinos comparten. ¿Tienes sitio en el garaje? Publica lo que no usas: un escaparate, no un trastero.",
     rememberTitle: "Recuerda",
     rememberBody:
-      "El mismo perfil para explorar y para ser anfitrión. Cambia cuando quieras entre Explorar y Mi Garaje en el Perfil.",
+      "El mismo perfil para explorar y para ser anfitrión. Cambia cuando quieras entre Explorar y Mi hogar en el Perfil.",
     modeRentTitle: "Alquilar",
     modeRentBody: "Toma algo prestado por un día o una semana — o gana dinero cuando alguien alquile de tu garaje.",
     modeSellTitle: "Vender",
@@ -621,10 +621,10 @@ export const es: AppMessages = {
     modeGiftBody: "Regala cosas gratis — pon el precio de Vender a 0 € al publicar.",
     navHomeTitle: "Inicio",
     navHomeBody:
-      "Inicio abre los garajes cerca de ti. Filtra Todo · Alquilar · Comprar, o abre Ventas de garaje. Publica desde + o Mi Garaje.",
+      "Inicio abre los garajes cerca de ti. Filtra Todo · Alquilar · Comprar, o abre Ventas de garaje. Publica desde + o Mi hogar.",
     navStockTitle: "El + verde (Añadir)",
     navStockBody: "Publica algo de tu garaje — fotos, categoría, alquiler y/o venta.",
-    navGarageTitle: "Garaje",
+    navGarageTitle: "Hogar",
     navGarageBody: "El escaparate de tu hogar: anuncios, borradores y herramientas de anfitrión.",
     navMoreTitle: "Más / Mensajes",
     navMoreBody: (mascot) =>
@@ -641,7 +641,7 @@ export const es: AppMessages = {
     pro: "Profesional / negocio",
   },
   garage: {
-    title: "Mi Garaje",
+    title: "Mi hogar",
     subtitle: "El escaparate de tu hogar",
   },
   mrEvorios: {
@@ -683,15 +683,15 @@ export const es: AppMessages = {
       },
       {
         q: "Los botones del menú, ¿qué hace cada pestaña?",
-        a: "Explorar = explorar cerca. Mr. Evorios = consejos de ayuda + chat. + verde = publicar un artículo nuevo. Garaje = tu escaparate y ganancias. Más = perfil, alquileres, favoritos y Cómo funciona Evorios.",
+        a: "Explorar = explorar cerca. Mr. Evorios = consejos de ayuda + chat. + verde = publicar un artículo nuevo. Hogar = tu escaparate y ganancias. Más = perfil, alquileres, favoritos y Cómo funciona Evorios.",
       },
       {
         q: "¿Qué es Evorios, el mercado de hogares?",
         a: "Evorios es un mercado de vecinos: cada hogar puede alquilar, vender o regalar desde un escaparate de garaje. Explora garajes cercanos, o llena tu propia estantería para el barrio.",
       },
       {
-        q: "Perfil frente a Garaje, ¿cuál es la diferencia?",
-        a: "Garaje = tus anuncios, solicitudes y ganancias. Perfil (dentro de Más) = nombre, foto, teléfono, cobros y cerrar sesión. Cambia entre Explorar y Mi Garaje cuando quieras desde el menú inferior.",
+        q: "Perfil frente a Hogar, ¿cuál es la diferencia?",
+        a: "Hogar = tus anuncios, solicitudes y ganancias. Perfil (dentro de Más) = nombre, foto, teléfono, cobros y cerrar sesión. Cambia entre Explorar y Mi hogar cuando quieras desde el menú inferior.",
       },
       {
         q: "¿Cómo publico mi primer artículo?",
@@ -701,7 +701,7 @@ export const es: AppMessages = {
     quickTipsEarn: [
       {
         q: "¿Cómo lleno mi garaje?",
-        a: "Toca el + verde en el menú inferior y sigue el asistente de publicación. Los artículos publicados aparecen en Mi Garaje para que los vecinos los encuentren.",
+        a: "Toca el + verde en el menú inferior y sigue el asistente de publicación. Los artículos publicados aparecen en Mi hogar para que los vecinos los encuentren.",
       },
       {
         q: "¿Qué categorías puedo publicar?",
@@ -712,8 +712,8 @@ export const es: AppMessages = {
         a: "Evorios es un mercado de vecinos: cada hogar puede alquilar, vender o regalar desde un escaparate de garaje. Explora garajes cercanos, o llena tu propia estantería para el barrio.",
       },
       {
-        q: "Perfil frente a Garaje, ¿cuál es la diferencia?",
-        a: "Garaje = tus anuncios, solicitudes y ganancias. Perfil (dentro de Más) = nombre, foto, teléfono, cobros y cerrar sesión. Cambia entre Explorar y Mi Garaje cuando quieras desde el menú inferior.",
+        q: "Perfil frente a Hogar, ¿cuál es la diferencia?",
+        a: "Hogar = tus anuncios, solicitudes y ganancias. Perfil (dentro de Más) = nombre, foto, teléfono, cobros y cerrar sesión. Cambia entre Explorar y Mi hogar cuando quieras desde el menú inferior.",
       },
       {
         q: "¿Cómo cambio a Explorar?",
@@ -727,12 +727,12 @@ export const es: AppMessages = {
     guidesTitle: "Empezar rápido",
     guidesHint: "Salta al sitio correcto de la app",
     guidesHowTitle: (appName) => `Cómo funciona ${appName}`,
-    guidesHowBody: "Categorías, Explorar frente a Garaje, dónde tocar",
+    guidesHowBody: "Categorías, Explorar frente a Hogar, dónde tocar",
     guidesBrowseTitle: "Explorar cerca",
     guidesBrowseBody: "Abre Inicio y mira el listado del barrio",
     guidesListTitle: "Publicar algo",
     guidesListBody: "Fotos → detalles → publicar con el + verde",
-    guidesGarageTitle: "Mi Garaje",
+    guidesGarageTitle: "Mi hogar",
     guidesGarageBody: "Tu escaparate, solicitudes y ganancias",
     guidesProfileTitle: "Perfil y cobros",
     guidesProfileBody: "Nombre, teléfono, cobros, cerrar sesión",
@@ -775,8 +775,8 @@ export const es: AppMessages = {
     householdSeatsNote:
       "Los ayudantes mantienen su propio acceso y pueden tener su propio garaje. Cambia en cuál stockeas cuando quieras.",
     switcherLabel: "Trabajando en",
-    switcherMyGarage: "Mi garaje",
-    switcherSharedGarage: "Garaje compartido",
+    switcherMyGarage: "Mi hogar",
+    switcherSharedGarage: "Hogar compartido",
     switcherMineHint: "Tu escaparate · tus cobros",
     switcherHelpingHint: "Ayudando · los cobros quedan con el dueño",
     householdTitleName: "Nombra tu garaje",
@@ -875,7 +875,7 @@ export const es: AppMessages = {
     storeLiveOnTitle: "Tienda abierta",
     storeLiveOffTitle: "Tienda en pausa",
     storeLiveOnBody: "Los vecinos pueden ver tu perfil y los artículos de la estantería que no estén en pausa.",
-    storeLiveOffBody: "Tu estantería sigue en Mi garaje — los vecinos no verán tu perfil ni productos hasta que abras.",
+    storeLiveOffBody: "Tu estantería sigue en Mi hogar — los vecinos no verán tu perfil ni productos hasta que abras.",
     storeLiveOpen: "Abrir tienda",
     storeLivePause: "Pausar tienda",
     storeLiveStripeRequired: "Conecta los pagos antes de abrir la tienda — también obligatorio para regalos.",
@@ -1451,7 +1451,7 @@ export const es: AppMessages = {
         bookings: {
           title: "Sin solicitudes de reserva",
           body: "Nuevos alquileres, franjas de recogida y devolución, y cambios de horario para tus artículos aparecerán aquí.",
-          hint: "Publica material desde Mi Garaje (o +) para empezar a recibir solicitudes.",
+          hint: "Publica material desde Mi hogar (o +) para empezar a recibir solicitudes.",
         },
         messages: {
           title: "Sin mensajes de inquilinos",
@@ -1546,7 +1546,7 @@ export const es: AppMessages = {
     deleteBody: "Se quitará de tu garaje de forma permanente. No se puede deshacer.",
     deleteConfirmCta: "Sí, eliminar",
     listingActive: "En tu estantería",
-    savedFinishQr: "En estantería — imprime pegatinas cuando quieras desde Mi garaje",
+    savedFinishQr: "En estantería — imprime pegatinas cuando quieras desde Mi hogar",
     intro: {
       slideSnapTitle: "Haz una foto de tu garaje",
       slideSnapTip: "Haz una foto de lo que tienes en el estante: yo te ayudo con el resto.",
@@ -5468,14 +5468,14 @@ export const es: AppMessages = {
         `Entrega ≤${distanceLabel} · ${fee} € ida y vuelta${weight}`,
       handoffDeliveryNoFee: (distanceLabel, weight) => `Entrega ≤${distanceLabel}${weight}`,
       handoffNotSet: "Sin definir",
-      handoffAdjustHint: "Horario de recogida y entrega: ajústalo después de publicar en Mi Garaje.",
+      handoffAdjustHint: "Horario de recogida y entrega: ajústalo después de publicar en Mi hogar.",
       paused: "Pausado",
       availableDefault: "Disponible · lun-vie 9:00-17:00",
       untitled: "Artículo sin título",
       tipEditing:
         "Revisa los cambios y guarda: el QR y el estado del anuncio se quedan como están.",
       tipNew:
-        "Siguiente: inicia sesión para guardar en la estantería. Abre la tienda desde Mi garaje cuando estés listo — los cobros son obligatorios antes de Live.",
+        "Siguiente: inicia sesión para guardar en la estantería. Abre la tienda desde Mi hogar cuando estés listo — los cobros son obligatorios antes de Live.",
       saving: "Guardando...",
       opening: "Abriendo...",
       saveChanges: "Guardar cambios",
@@ -5485,7 +5485,7 @@ export const es: AppMessages = {
     goPublic: {
       backToReview: "← Volver a revisar",
       title: "Casi listo",
-      subtitle: "Inicia sesión para poner este artículo en tu estantería. Abrir la tienda viene después en Mi garaje.",
+      subtitle: "Inicia sesión para poner este artículo en tu estantería. Abrir la tienda viene después en Mi hogar.",
       checkingSetup: "Comprobando tu configuración de vendedor...",
       signInTitle: "Iniciar sesión",
       signInDone: "Cuenta lista: tu borrador se queda contigo.",
@@ -5506,7 +5506,7 @@ export const es: AppMessages = {
       refreshing: "Actualizando...",
       refreshStatus: "Actualizar estado",
       tip: (mascot) =>
-        `${mascot}: Primero a la estantería. Cuando quieras vecinos, abre la tienda en Mi garaje — los cobros son obligatorios antes de Live.`,
+        `${mascot}: Primero a la estantería. Cuando quieras vecinos, abre la tienda en Mi hogar — los cobros son obligatorios antes de Live.`,
       goingLive: "Guardando en la estantería...",
       goLive: "A la estantería",
       completeSteps: "Inicia sesión arriba para continuar",
@@ -5516,7 +5516,7 @@ export const es: AppMessages = {
       connectThenLive: "Conectar finanzas →",
       goLiveWithoutPayouts: "A la estantería sin cobros por ahora",
       goLivePayoutHint:
-        "Tu artículo se queda en la estantería. Abre la tienda desde Mi garaje cuando los cobros estén listos — también obligatorio para regalos.",
+        "Tu artículo se queda en la estantería. Abre la tienda desde Mi hogar cuando los cobros estén listos — también obligatorio para regalos.",
       phoneTitle: "Verificar teléfono",
       phoneDone: "Teléfono verificado por SMS.",
       phonePending:
@@ -5534,7 +5534,7 @@ export const es: AppMessages = {
       backToListings: "Volver a mis anuncios",
       payoutNudgeTitle: "¿Listo para abrir la tienda?",
       payoutNudgeBody:
-        "Conecta los pagos y luego activa Live en Mi garaje. Los vecinos no te verán hasta que la tienda esté abierta.",
+        "Conecta los pagos y luego activa Live en Mi hogar. Los vecinos no te verán hasta que la tienda esté abierta.",
       payoutNudgeCta: "Conectar pagos",
       previewAsNeighbor: "Vista previa como vecino",
     },
@@ -6125,14 +6125,14 @@ export const es: AppMessages = {
       stockGarage: {
         title: "Tengo cosas para compartir",
         subtitle: "Publícalas: gana algo o pásalas a otro.",
-        cta: "Abrir Mi Garaje →",
+        cta: "Abrir Mi hogar →",
       },
       browseBlock: {
         title: "Necesito pedir o comprar",
         subtitle: "Piso vacío, viaje de trabajo o algo que no quieres comprar — búscalo cerca.",
         cta: "Buscar cerca →",
       },
-      footer: "Cambia entre Mi Garaje y Explorar cuando quieras.",
+      footer: "Cambia entre Mi hogar y Explorar cuando quieras.",
     },
     location: {
       title: "¿Dónde buscamos?",
@@ -6156,9 +6156,9 @@ export const es: AppMessages = {
     },
     allSet: {
       title: "Listo",
-      subtitle: "Inicio: pedir cerca. Mi Garaje: compartir lo que tienes.",
+      subtitle: "Inicio: pedir cerca. Mi hogar: compartir lo que tienes.",
       exploreCta: "Ver qué hay cerca →",
-      stockGarageCta: "Abrir Mi Garaje →",
+      stockGarageCta: "Abrir Mi hogar →",
     },
     browseHub: {
       title: "Cerca de ti",
@@ -6178,7 +6178,7 @@ export const es: AppMessages = {
       },
       categoriesTitle: "Explorar por categoría",
       categoriesHint: "Foto, hogar, camping, mochilas, bicis, fiesta: toca para desplegar.",
-      footer: "Comparte desde + o Mi Garaje.",
+      footer: "Comparte desde + o Mi hogar.",
     },
     firstHello: {
       bubbles: [
@@ -6621,7 +6621,7 @@ export const es: AppMessages = {
     moreItemsBody:
       "Añade cada artículo a la cola del lote desde su pantalla de QR, y luego usa «Imprimir lote» cuando estés listo.",
     addAnotherItem: "+ Añadir otro artículo",
-    comeBackHint: "Puedes reabrir este QR cuando quieras desde Mi garaje para imprimir o verificar.",
+    comeBackHint: "Puedes reabrir este QR cuando quieras desde Mi hogar para imprimir o verificar.",
     verifyingQr: "Verificando QR...",
     takeVerificationPhoto: "📸 Hacer foto de verificación",
     verificationHint:

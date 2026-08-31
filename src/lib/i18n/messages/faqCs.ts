@@ -37,7 +37,7 @@ export const faq: AppMessages["faq"] = {
       a: "Otevřete Domů → použijte čipy kategorií na hubu, nebo pás ve feedu pod Půjčit/Koupit. V Účet → Jak funguje Evorios (nebo úvod) klepněte na kategorii a rozbalte podkategorie. Při vystavení přes + vyberte stejné kategorie ve wizardu. V patičce není lupa.",
     },
     "garage-tab": {
-      q: "Co je záložka Moje garáž?",
+      q: "Co je záložka Moje domácnost?",
       a: "Záložka Garáž je výloha vaší domácnosti — aktivní nabídky, žádosti o rezervaci a statistiky. Nastavení (ozubené kolo) otevře profil. Věci přidáte kdykoli středovým tlačítkem +.",
     },
     "location-rent": {
@@ -70,7 +70,7 @@ export const faq: AppMessages["faq"] = {
     },
     "pickup-delivery": {
       q: "Jak funguje vyzvednutí a doručení?",
-      a: "Nové nabídky začínají s rozumnými sousedskými výchozími hodnotami (všední hodiny na verandě). Po publikaci otevřete nabídku z Moje garáž → Úplná úprava (nebo rychlé úpravy na detailu) a nastavte osobní / bezkontaktní vyzvednutí a kilometry a poplatky za doručení. Přesná adresa se sdílí s potvrzeným nájemcem po rezervaci.",
+      a: "Nové nabídky začínají s rozumnými sousedskými výchozími hodnotami (všední hodiny na verandě). Po publikaci otevřete nabídku z Moje domácnost → Úplná úprava (nebo rychlé úpravy na detailu) a nastavte osobní / bezkontaktní vyzvednutí a kilometry a poplatky za doručení. Přesná adresa se sdílí s potvrzeným nájemcem po rezervaci.",
     },
     "book-item": {
       q: "Jak si půjčím věc?",
@@ -94,7 +94,7 @@ export const faq: AppMessages["faq"] = {
     },
     "availability-step5": {
       q: "Jak nastavím dostupnost nebo pozastavím nabídku?",
-      a: "Otevřete Moje garáž → klepněte na nabídku:\n• Pozastavit / Obnovit skryje nebo vrátí věc do procházení bez smazání.\n• Upravte časy dostupnosti (všední dny / víkend) z rychlé úpravy nebo Úplné úpravy.\n• Smazat trvale odstraní nabídku z garáže i ze serveru.",
+      a: "Otevřete Moje domácnost → klepněte na nabídku:\n• Pozastavit / Obnovit skryje nebo vrátí věc do procházení bez smazání.\n• Upravte časy dostupnosti (všední dny / víkend) z rychlé úpravy nebo Úplné úpravy.\n• Smazat trvale odstraní nabídku z garáže i ze serveru.",
     },
     "skip-onboarding": {
       q: "Mohu přeskočit onboarding?",
@@ -102,11 +102,11 @@ export const faq: AppMessages["faq"] = {
     },
     "bottom-nav": {
       q: "Co dělají tlačítka dolního menu?",
-      a: "Procházet = garáže a kategorie v okolí. Mr. Evorios = nápověda (FAQ + chat). Zelené + = nová věc. Garáž = vaše výloha a výdělky. Účet = profil, půjčky, oblíbené a Jak funguje Evorios. V patičce není lupa.",
+      a: "Procházet = nabídky a kategorie v okolí. Mr. Evorios = nápověda (FAQ + chat). Zelené + = nová věc. Domácnost = vaše výloha a výdělky. Účet = profil, půjčky, oblíbené a Jak funguje Evorios. V patičce není lupa.",
     },
     "more-menu": {
       q: "Co je v menu Účet?",
-      a: "Účet obsahuje kartu profilu, Půjčky, Zprávy (chat v aplikaci), Oblíbené, Oznámení, zkratku Moje garáž, přehled výdělků, interaktivního průvodce Jak funguje Evorios a chat s Mr. Evorios.",
+      a: "Účet obsahuje kartu profilu, Půjčky, Zprávy (chat v aplikaci), Oblíbené, Oznámení, zkratku Moje domácnost, přehled výdělků, interaktivního průvodce Jak funguje Evorios a chat s Mr. Evorios.",
     },
     "in-app-chat": {
       q: "Jak napíšu sousedovi v aplikaci?",
@@ -170,7 +170,7 @@ export const faq: AppMessages["faq"] = {
     },
     "garage-switcher": {
       q: "Pomáhám v jiné garáži — jak přepnu?",
-      a: "Otevři Moje garáž. Pokud patříš do víc garáží, nahoře Pracuji v zvol Moje garáž nebo sdílenou. Fotky a + jdou do vybrané. Procházet je vždy pod tvým přihlášením.",
+      a: "Otevři Moje domácnost. Pokud patříš do víc garáží, nahoře Pracuji v zvol Moje domácnost nebo sdílenou. Fotky a + jdou do vybrané. Procházet je vždy pod tvým přihlášením.",
     },
     "own-and-help": {
       q: "Bydlíme vedle sebe a pomáháme si — máme jednu společnou garáž?",
@@ -186,7 +186,7 @@ export const faq: AppMessages["faq"] = {
     },
     "pause-listing": {
       q: "Jak pozastavím nabídku?",
-      a: "Moje garáž → otevřete nabídku → Pozastavit nabídku. Okamžitě zmizí z procházení. Klepněte Obnovit, až budete připraveni. Smazat použijte jen když ji chcete pryč navždy.",
+      a: "Moje domácnost → otevřete nabídku → Pozastavit nabídku. Okamžitě zmizí z procházení. Klepněte Obnovit, až budete připraveni. Smazat použijte jen když ji chcete pryč navždy.",
     },
     "edit-listing": {
       q: "Jak upravím publikovanou nabídku?",
