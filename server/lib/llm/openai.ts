@@ -49,8 +49,20 @@ export async function completeOpenAiChat(
     body: JSON.stringify({
       model,
       max_tokens: request.max_tokens,
-      temperature: 0.4,
+      temperature: request.temperature ?? 0.4,
       messages: toOpenAiMessages(request),
+      ...(request.jsonSchema
+        ? {
+            response_format: {
+              type: "json_schema",
+              json_schema: {
+                name: request.jsonSchema.name,
+                schema: request.jsonSchema.schema,
+                strict: true,
+              },
+            },
+          }
+        : {}),
     }),
   });
 

@@ -19,6 +19,36 @@ function toGeminiContents(messages: LlmMessage[]) {
   }));
 }
 
+/** Gemini rejects standard JSON Schema keywords it does not implement. */
+const GEMINI_UNSUPPORTED_KEYS = new Set([
+  "additionalProperties",
+  "$schema",
+  "definitions",
+  "$defs",
+  "patternProperties",
+  "const",
+]);
+
+function toGeminiSchema(node: unknown): unknown {
+  if (Array.isArray(node)) return node.map((item) => toGeminiSchema(item));
+  if (!node || typeof node !== "object") return node;
+
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+    if (GEMINI_UNSUPPORTED_KEYS.has(key)) continue;
+    // Gemini expresses optionality with `nullable`, not a union of types.
+    if (key === "type" && Array.isArray(value)) {
+      const types = value.filter((entry): entry is string => typeof entry === "string");
+      const concrete = types.find((entry) => entry !== "null");
+      if (concrete) out.type = concrete;
+      if (types.includes("null")) out.nullable = true;
+      continue;
+    }
+    out[key] = toGeminiSchema(value);
+  }
+  return out;
+}
+
 export async function completeGeminiChat(
   request: LlmChatRequest,
   model: string,
@@ -30,12 +60,19 @@ export async function completeGeminiChat(
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
+  const generationConfig: Record<string, unknown> = {
+    maxOutputTokens: request.max_tokens,
+    temperature: request.temperature ?? 0.4,
+  };
+
+  if (request.jsonSchema) {
+    generationConfig.responseMimeType = "application/json";
+    generationConfig.responseSchema = toGeminiSchema(request.jsonSchema.schema);
+  }
+
   const body: Record<string, unknown> = {
     contents: toGeminiContents(request.messages),
-    generationConfig: {
-      maxOutputTokens: request.max_tokens,
-      temperature: 0.4,
-    },
+    generationConfig,
   };
 
   if (request.system?.trim()) {
