@@ -1608,13 +1608,13 @@ export const cs: AppMessages = {
       deleteLabel: "Smazat",
       videosHeading: (count, max) => `Videa (${count}/${max})`,
       loadingVideo: "Načítám video...",
-      aiFillsTitle: "Evorios doplní další krok",
+      aiFillsTitle: "Evorios navrhne kategorii",
       aiFillsBody: (mascot) =>
-        `Klepni na Pokračovat — ${mascot} navrhne název, popis, stav a hodnotu z fotek (asi 10-30 sekund). Na dalším kroku to můžeš upravit.`,
+        `Klepni na Pokračovat — ${mascot} se podívá na fotku a navrhne kategorii k potvrzení, pak doplní detaily, které vidí.`,
       reanalyzing: "Znovu analyzuji...",
       reanalyze: "Znovu analyzovat fotky",
       tipDefault: (mascot) =>
-        `Přidej aspoň jednu fotku a klepni na Pokračovat — ${mascot} navrhne název a popis, které můžeš doladit.`,
+        `Přidej aspoň jednu fotku a klepni na Pokračovat — ${mascot} navrhne kategorii a ty ji potvrdíš.`,
       tipYardSale: (mascot) =>
         `Přidej fotku z výprodejového stolu — ${mascot} doplní název a cenu.`,
       tipAnalyzed: "Fotky jsem prošel — zkontroluj detaily a oprav, co sedí špatně.",
@@ -1692,7 +1692,7 @@ export const cs: AppMessages = {
       fieldTitle: "Název",
       titlePlaceholder: (example) => `např. ${example}`,
       categoryStepTitle: "Co nabízíš?",
-      categoryStepSubtitle: "Klepni na kategorii — pak zvol domácí, pro, nebo obojí.",
+      categoryStepSubtitle: "Hledej, nebo klepni na kategorii a uvidíš, co sedí.",
       categoryAiHint: (mascot) =>
         `Nejsi si jistý(á)? ${mascot} umí navrhnout polici z fotek.`,
       subcategoryStepTitle: "Vyber polici",

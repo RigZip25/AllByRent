@@ -1595,13 +1595,13 @@ export const en: AppMessages = {
       deleteLabel: "Delete",
       videosHeading: (count, max) => `Videos (${count}/${max})`,
       loadingVideo: "Loading video...",
-      aiFillsTitle: "Evorios fills the next step",
+      aiFillsTitle: "Evorios suggests the category next",
       aiFillsBody: (mascot) =>
-        `Tap Continue — ${mascot} suggests title, description, condition, and value from your photos (about 10-30 seconds). You can edit anything on the next step.`,
+        `Tap Continue — ${mascot} reads the photo and suggests a category for you to confirm, then fills in the details it can see.`,
       reanalyzing: "Re-analyzing...",
       reanalyze: "Re-analyze photos",
       tipDefault: (mascot) =>
-        `Add at least one photo, then tap Continue — ${mascot} drafts the title and description for you to tweak.`,
+        `Add at least one photo, then tap Continue — ${mascot} suggests the category and you confirm it.`,
       tipYardSale: (mascot) =>
         `Add a photo of what's on your sale table — ${mascot} fills title & price next.`,
       tipAnalyzed: "I analyzed your photos — check the details step and tweak anything I got wrong.",
@@ -1681,7 +1681,7 @@ export const en: AppMessages = {
       fieldTitle: "Title",
       titlePlaceholder: (example) => `e.g., ${example}`,
       categoryStepTitle: "What are you listing?",
-      categoryStepSubtitle: "Tap a category — then choose personal, pro, or both.",
+      categoryStepSubtitle: "Search, or tap a category to see what fits.",
       categoryAiHint: (mascot) =>
         `Unsure? ${mascot} can suggest the shelf from your photos later.`,
       subcategoryStepTitle: "Pick the shelf",

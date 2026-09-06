@@ -1595,13 +1595,13 @@ export const es: AppMessages = {
       deleteLabel: "Eliminar",
       videosHeading: (count, max) => `Vídeos (${count}/${max})`,
       loadingVideo: "Cargando vídeo...",
-      aiFillsTitle: "Evorios rellena el siguiente paso",
+      aiFillsTitle: "Evorios propone la categoría",
       aiFillsBody: (mascot) =>
-        `Toca Continuar: ${mascot} propone título, descripción, estado y valor a partir de tus fotos (unos 10-30 s). Puedes editarlo en el siguiente paso.`,
+        `Toca Continuar: ${mascot} mira la foto y propone una categoría para que la confirmes, y luego rellena los detalles que ve.`,
       reanalyzing: "Analizando de nuevo...",
       reanalyze: "Volver a analizar las fotos",
       tipDefault: (mascot) =>
-        `Añade al menos una foto y toca Continuar: ${mascot} propone el título y la descripción para que los ajustes.`,
+        `Añade al menos una foto y toca Continuar: ${mascot} propone la categoría y tú la confirmas.`,
       tipYardSale: (mascot) =>
         `Añade una foto de lo que tienes en tu mesa de venta: ${mascot} rellenará el título y el precio después.`,
       tipAnalyzed: "He analizado tus fotos: revisa los detalles y corrige lo que no cuadre.",
@@ -1680,7 +1680,7 @@ export const es: AppMessages = {
       fieldTitle: "Título",
       titlePlaceholder: (example) => `p. ej., ${example}`,
       categoryStepTitle: "¿Qué vas a publicar?",
-      categoryStepSubtitle: "Toca una categoría; luego elige particular, pro o ambos.",
+      categoryStepSubtitle: "Busca, o toca una categoría para ver qué encaja.",
       categoryAiHint: (mascot) =>
         `¿Dudas? ${mascot} puede sugerir la estantería a partir de tus fotos.`,
       subcategoryStepTitle: "Elige la estantería",
