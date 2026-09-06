@@ -56,8 +56,8 @@ export const APP_MODE_LABELS = {
 } as const;
 
 export const APP_MODE_DESCRIPTIONS = {
-  earn: "Your home business cell — list, price, and share from your garage storefront.",
-  rent: "Browse neighbor cells — borrow, buy, or pick up nearby.",
+  earn: "Open your shop on the block — list, price, and share from your garage.",
+  rent: "Browse nearby shops — borrow, buy, or pick up useful things.",
 } as const;
 
 /** Onboarding card copy — single source for garage storefront narrative */

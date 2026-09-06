@@ -25,7 +25,7 @@ Open your garage storefront. Browse the block. Borrow, buy, or gift nearby.
 
 ## Full description
 
-Evorios is a neighborly marketplace where every home can be a business cell.
+Evorios is a neighborly marketplace where every home can open a shop on the block.
 
 Open your Garage Showcase to list tools, gear, and everyday items — rent them out, sell them, or gift them on the block. Browse nearby storefronts when you need something for a project, a party, or a weekend trip.
 

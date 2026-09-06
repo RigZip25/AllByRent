@@ -144,9 +144,9 @@ const NAV_HINTS: Array<{
   {
     patterns: [/маркетплейс/i, /marketplace/i, /household/i, /домохозяйств/i, /бизнес\s*ячейк/i],
     answer:
-      `${APP_NAME} is a neighborhood marketplace: each household is a business cell that can rent, sell, or gift from its garage. Open More → How Evorios works for the full tour, or Home for category chips.`,
+      `${APP_NAME} is a neighborhood marketplace: each home can open a shop on the block to rent, sell, or gift useful things. Open More → How Evorios works for the full tour, or Home for category chips.`,
     answerRu:
-      `${APP_NAME} — соседский маркетплейс: каждое домохозяйство — бизнес-ячейка (гараж-витрина), где можно сдавать в аренду, продавать или дарить. Тур: More → How Evorios works. Категории — на Home.`,
+      `${APP_NAME} — соседский маркетплейс: каждый дом может открыть свою витрину на районе, чтобы сдавать, продавать или дарить полезные вещи. Тур: More → How Evorios works. Категории — на Home.`,
   },
 ];
 

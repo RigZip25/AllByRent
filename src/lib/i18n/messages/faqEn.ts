@@ -26,7 +26,7 @@ export const faq: AppMessages["faq"] = {
     },
     "what-is": {
       q: "What is Evorios?",
-      a: "Evorios is a neighborhood marketplace: every household is a business cell — a garage storefront on the block. Neighbors rent, sell, or gift (Sell at $0). Browse categories on Home, or stock your garage with the green + button.",
+      a: "Evorios is a neighborhood marketplace where every home can open a shop on the block. Neighbors rent, sell, or gift (Sell at $0). Browse categories on Home, or stock your garage with the green + button.",
     },
     "home-feed": {
       q: "How does Home work?",

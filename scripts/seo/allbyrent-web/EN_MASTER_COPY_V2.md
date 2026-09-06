@@ -4,7 +4,7 @@ Goal: bring EN homepage copy to ~9/10 on clarity, nativeness, brand voice, and f
 
 ## What changed (editorial)
 
-- Removed **business cell** → **Every home can open a shop on the block**
+- Replaced the old technical household metaphor → **Every home can open a shop on the block**
 - H1: **Your home is already a business.** (keeps highlight span)
 - Fixed grammar: *A few steps turn…*
 - Meta: dropped *idle stuff*; clearer trust line
@@ -30,4 +30,4 @@ Or in Cursor agent on AllByRent-Web: run the script / apply `en-master-copy-v2.j
 
 ## After EN ships
 
-Re-translate / re-edit locales from this EN master (especially the old *business cell* line and H1). Do not blindly machine-refresh whole pages without editorial pass.
+Re-translate / re-edit locales from this EN master (especially the old technical household metaphor and H1). Do not blindly machine-refresh whole pages without editorial pass.
