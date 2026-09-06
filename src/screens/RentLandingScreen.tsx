@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { APP_NAME, SEO_ORIGIN, BRAND_GREEN, BRAND_AMBER } from "../lib/brand";
 import type { ListingDraft } from "./listing/types";
 import { ListingFeedCard, offerTypeFromModes } from "../app/components/ListingFeedCard";
+import { CategoryIcon } from "../components/CategoryIcon";
 import { getRelatedSeoCategories, type SeoCategory } from "../lib/seo/rentCategories";
 import {
   formatSeoLocationLabel,
@@ -118,9 +119,7 @@ export function RentLandingScreen({
 
       <main className="flex-1 space-y-8 px-5 py-6">
         <section className="space-y-3">
-          <p className="text-2xl" aria-hidden="true">
-            {category.icon}
-          </p>
+          <CategoryIcon category={category.name} emoji={category.icon} size={44} />
           <h1 className="text-[28px] font-bold leading-tight tracking-tight" style={{ color: BRAND_GREEN }}>
             {meta.h1}
           </h1>
@@ -322,14 +321,15 @@ export function RentLandingScreen({
                 <li key={cat.slug}>
                   <a
                     href={rentLandingAbsoluteUrl(path)}
-                    className="inline-block rounded-lg border px-3 py-1.5 text-sm"
+                    className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm"
                     style={{ borderColor: "#E8E6E0" }}
                     onClick={(e) => {
                       e.preventDefault();
                       onNavigateRentPath(path);
                     }}
                   >
-                    {cat.icon} {cat.name}
+                    <CategoryIcon category={cat.name} emoji={cat.icon} size={22} />
+                    {cat.name}
                   </a>
                 </li>
               );
