@@ -4,7 +4,7 @@ import { APP_NAME, BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../../lib/brand
 import { useMessages } from "../../lib/i18n/react";
 import guestBookHandoff from "../../imports/onboarding/evorios_guest_book_handoff.png";
 import guestBrowseNeighborhood from "../../imports/onboarding/evorios_guest_browse_neighborhood.png";
-import guestEnhanceProjector from "../../imports/onboarding/evorios_guest_enhance_projector.png";
+import guestEnhanceInventory from "../../imports/onboarding/evorios_guest_enhance_inventory.png";
 import guestHelpGateway from "../../imports/onboarding/evorios_guest_help_gateway.png";
 import guestHookGarage from "../../imports/onboarding/evorios_guest_hook_garage.png";
 import guestModesExchange from "../../imports/onboarding/evorios_guest_modes_exchange.png";
@@ -75,7 +75,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
         id: "enhance",
         title: copy.enhanceTitle,
         body: copy.enhanceBody,
-        visual: { kind: "image", src: guestEnhanceProjector },
+        visual: { kind: "image", src: guestEnhanceInventory },
       },
       {
         id: "book",
