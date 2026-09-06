@@ -143,6 +143,13 @@ export function isDetailsReadyForCopy(draft: ListingDraft): boolean {
   return isDetailsAndPricingValid(draft, { ignoreCopy: true });
 }
 
+/** True while the reviewed data is complete and copy is still missing. */
+export function needsGeneratedCopy(draft: ListingDraft): boolean {
+  // A host who wrote only one half still gets the other half drafted.
+  if (draft.title.trim() && draft.description.trim()) return false;
+  return isDetailsReadyForCopy(draft);
+}
+
 export function isListingStepValid(step: number, draft: ListingDraft): boolean {
   switch (step) {
     case LISTING_STEP.category:

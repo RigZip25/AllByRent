@@ -91,8 +91,8 @@ import {
 } from "../../lib/yardSaleListing";
 import {
   effectiveListingType,
-  isDetailsReadyForCopy,
   isListingStepValid,
+  needsGeneratedCopy,
 } from "./validation";
 import { useLocale, useMessages } from "../../lib/i18n/react";
 
@@ -1246,9 +1246,8 @@ export function ListingWizard({
   const copyReady =
     step === LISTING_STEP.details &&
     !isYardSaleListingActive() &&
-    !draft.title.trim() &&
     fieldFill.status !== "pending" &&
-    isDetailsReadyForCopy(draft);
+    needsGeneratedCopy(draft);
 
   useEffect(() => {
     if (!copyReady || copyPending || copyRequestedRef.current) return;
