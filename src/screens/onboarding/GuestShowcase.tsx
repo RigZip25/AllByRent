@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../../lib/brand";
 import { useMessages } from "../../lib/i18n/react";
@@ -45,62 +45,78 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
   const copy = t.onboarding.guestShowcase;
   const [index, setIndex] = useState(0);
 
-  const slides: { id: SlideId; title: string; body: string; visual: SlideVisual }[] = [
-    {
-      id: "hook",
-      title: copy.hookTitle,
-      body: copy.hookBody,
-      visual: { kind: "image", src: guestHookGarage },
-    },
-    {
-      id: "browse",
-      title: copy.browseTitle,
-      body: copy.browseBody,
-      visual: { kind: "image", src: guestBrowseNeighborhood },
-    },
-    {
-      id: "modes",
-      title: copy.modesTitle,
-      body: copy.modesBody,
-      visual: { kind: "image", src: guestModesExchange },
-    },
-    {
-      id: "snap",
-      title: copy.snapTitle,
-      body: copy.snapBody,
-      visual: { kind: "image", src: guestSnapBike },
-    },
-    {
-      id: "enhance",
-      title: copy.enhanceTitle,
-      body: copy.enhanceBody,
-      visual: { kind: "image", src: guestEnhanceProjector },
-    },
-    {
-      id: "book",
-      title: copy.bookTitle,
-      body: [copy.bookBody, copy.trustBody].filter(Boolean).join(" "),
-      visual: { kind: "image", src: guestBookHandoff },
-    },
-    {
-      id: "yard",
-      title: copy.yardTitle,
-      body: copy.yardBody,
-      visual: { kind: "image", src: guestYardNetwork },
-    },
-    {
-      id: "share",
-      title: copy.shareTitle,
-      body: copy.shareBody,
-      visual: { kind: "image", src: guestShareNetwork },
-    },
-    {
-      id: "help",
-      title: copy.helpTitle(MASCOT_NAME),
-      body: copy.helpBody(MASCOT_NAME),
-      visual: { kind: "image", src: guestHelpGateway },
-    },
-  ];
+  const slides: { id: SlideId; title: string; body: string; visual: SlideVisual }[] = useMemo(
+    () => [
+      {
+        id: "hook",
+        title: copy.hookTitle,
+        body: copy.hookBody,
+        visual: { kind: "image", src: guestHookGarage },
+      },
+      {
+        id: "browse",
+        title: copy.browseTitle,
+        body: copy.browseBody,
+        visual: { kind: "image", src: guestBrowseNeighborhood },
+      },
+      {
+        id: "modes",
+        title: copy.modesTitle,
+        body: copy.modesBody,
+        visual: { kind: "image", src: guestModesExchange },
+      },
+      {
+        id: "snap",
+        title: copy.snapTitle,
+        body: copy.snapBody,
+        visual: { kind: "image", src: guestSnapBike },
+      },
+      {
+        id: "enhance",
+        title: copy.enhanceTitle,
+        body: copy.enhanceBody,
+        visual: { kind: "image", src: guestEnhanceProjector },
+      },
+      {
+        id: "book",
+        title: copy.bookTitle,
+        body: [copy.bookBody, copy.trustBody].filter(Boolean).join(" "),
+        visual: { kind: "image", src: guestBookHandoff },
+      },
+      {
+        id: "yard",
+        title: copy.yardTitle,
+        body: copy.yardBody,
+        visual: { kind: "image", src: guestYardNetwork },
+      },
+      {
+        id: "share",
+        title: copy.shareTitle,
+        body: copy.shareBody,
+        visual: { kind: "image", src: guestShareNetwork },
+      },
+      {
+        id: "help",
+        title: copy.helpTitle(MASCOT_NAME),
+        body: copy.helpBody(MASCOT_NAME),
+        visual: { kind: "image", src: guestHelpGateway },
+      },
+    ],
+    [copy],
+  );
+
+  useEffect(() => {
+    const images = slides
+      .map((slide) => slide.visual)
+      .filter((visual): visual is Extract<SlideVisual, { kind: "image" }> => visual.kind === "image")
+      .map((visual) => visual.src);
+
+    images.forEach((src) => {
+      const image = new Image();
+      image.decoding = "async";
+      image.src = src;
+    });
+  }, [slides]);
 
   const isLast = index >= slides.length - 1;
   const slide = slides[index]!;
@@ -241,7 +257,9 @@ function SlideArt({
           src={visual.src}
           alt=""
           className="block aspect-[4/5] w-full object-cover object-center"
+          decoding="async"
           draggable={false}
+          loading="eager"
         />
       </div>
     );
@@ -252,7 +270,9 @@ function SlideArt({
       src={visual.src}
       alt=""
       className="h-auto max-h-[44vh] w-full object-contain drop-shadow-lg"
+      decoding="async"
       draggable={false}
+      loading="eager"
     />
   );
 }
