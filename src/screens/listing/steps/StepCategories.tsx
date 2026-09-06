@@ -379,7 +379,7 @@ export function StepCategories({
                 className="inline-flex items-center gap-1.5 rounded-full border bg-white px-2.5 py-1 text-[12px] font-semibold"
                 style={{ borderColor: phase === "subcategory" ? GREEN : BORDER, color: GREEN }}
               >
-                <ShelfIcon source={selectedSubIcon} size={20} />
+                <ShelfIcon source={selectedSubIcon} size={24} />
                 {localizeCategoryLabel(draft.subcategory)}
               </button>
             </>

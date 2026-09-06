@@ -983,7 +983,7 @@ export function HomeFeed({
                             }}
                           >
                             <span className="shrink-0" aria-hidden>
-                              <ShelfIcon source={sub} size={20} inverted={subActive} />
+                              <ShelfIcon source={sub} size={26} inverted={subActive} />
                             </span>
                             <span className="min-w-0 [overflow-wrap:anywhere]">
                               {localizeCategoryLabel(sub.label)}
