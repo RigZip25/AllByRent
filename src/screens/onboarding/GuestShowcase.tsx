@@ -5,7 +5,7 @@ import { useMessages } from "../../lib/i18n/react";
 import guestBookHandoffV2 from "../../imports/onboarding/evorios_guest_book_handoff_v2.png";
 import guestBrowseNeighborhood from "../../imports/onboarding/evorios_guest_browse_neighborhood.png";
 import guestEnhanceInventory from "../../imports/onboarding/evorios_guest_enhance_inventory.png";
-import guestHelpGateway from "../../imports/onboarding/evorios_guest_help_gateway.png";
+import guestHelpGatewayV2 from "../../imports/onboarding/evorios_guest_help_gateway_v2.png";
 import guestHookGarage from "../../imports/onboarding/evorios_guest_hook_garage.png";
 import guestModesExchange from "../../imports/onboarding/evorios_guest_modes_exchange.png";
 import guestSnapBikeV2 from "../../imports/onboarding/evorios_guest_snap_bike_v2.png";
@@ -99,7 +99,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
         id: "help",
         title: copy.helpTitle(MASCOT_NAME),
         body: copy.helpBody(MASCOT_NAME),
-        visual: { kind: "image", src: guestHelpGateway },
+        visual: { kind: "image", src: guestHelpGatewayV2 },
       },
     ],
     [copy],
