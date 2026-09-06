@@ -11,6 +11,43 @@ import { BRAND_OTHER } from "./listingBrands";
 
 const INCH_PATTERN = /(\d+(?:\.\d+)?)\s*-?\s*inch(?:es)?/i;
 
+const TV_PATTERN = /\b(tv|television|smart\s*tv|screen|display|monitor)\b/i;
+const PROJECTOR_PATTERN = /\b(projector|home\s*theater)\b/i;
+const ART_PATTERN = /\b(painting|artwork|wall\s*art|canvas|framed\s*art|picture\s*frame|print|poster|sculpture)\b/i;
+
+function suggestionText(suggestions: ListingAiSuggestions): string {
+  return [
+    suggestions.title,
+    suggestions.category,
+    suggestions.subcategory,
+    suggestions.description,
+    suggestions.brand,
+    suggestions.model,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function categoryOverrideForSuggestions(suggestions: ListingAiSuggestions): string {
+  const text = suggestionText(suggestions);
+  if (ART_PATTERN.test(text)) return "Unique & Other";
+  if (TV_PATTERN.test(text) || PROJECTOR_PATTERN.test(text)) return "Electronics & Tech";
+  return "";
+}
+
+function preferredSubcategoryForText(category: string, text: string): string {
+  if (category === "Electronics & Tech") {
+    if (PROJECTOR_PATTERN.test(text)) return "Projectors";
+    if (TV_PATTERN.test(text)) return "Display Systems";
+  }
+
+  if (category === "Unique & Other" && ART_PATTERN.test(text)) {
+    return "Art & Sculpture";
+  }
+
+  return "";
+}
+
 const GENERIC_MODEL_WORDS = [
   "laptop",
   "notebook",
@@ -33,7 +70,12 @@ function matchAiSubcategory(
   matchedCategory: string,
   aiSubcategory: string,
   grade: CategoryGrade | "",
+  contextText = aiSubcategory,
 ): string {
+  const preferred = preferredSubcategoryForText(matchedCategory, contextText);
+  const mergedLabels = getMergedSubcategories(matchedCategory).map((item) => item.label);
+  if (preferred && mergedLabels.includes(preferred)) return preferred;
+
   const subs = grade
     ? getSubcategories(matchedCategory, grade)
     : getMergedSubcategories(matchedCategory);
@@ -318,7 +360,8 @@ export function applyAiSuggestionsToDraft(
   current: ListingDraft,
   suggestions: ListingAiSuggestions,
 ): ListingDraft {
-  const matchedCategory = matchListingCategory(suggestions.category);
+  const matchedCategory =
+    categoryOverrideForSuggestions(suggestions) || matchListingCategory(suggestions.category);
   const nextCategory = current.category || matchedCategory || current.category;
   const suggestedGrade =
     current.grade ||
@@ -327,17 +370,17 @@ export function applyAiSuggestionsToDraft(
       : "") ||
     "";
   const matchedSubcategory = nextCategory
-    ? matchAiSubcategory(nextCategory, suggestions.subcategory, suggestedGrade)
+    ? matchAiSubcategory(nextCategory, suggestions.subcategory, suggestedGrade, suggestionText(suggestions))
     : "";
   const nextSubcategory =
     current.subcategory ||
     (nextCategory ? matchedSubcategory : current.subcategory);
   const nextGrade =
     current.grade ||
-    suggestedGrade ||
     (nextCategory && nextSubcategory
       ? gradeForSubcategory(nextCategory, nextSubcategory)
       : "") ||
+    suggestedGrade ||
     current.grade;
   const plantListing = isPlantListingSubcategory(nextSubcategory);
   const nextCondition = plantListing
