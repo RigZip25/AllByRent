@@ -1,4 +1,5 @@
 import { Emoji } from "../app/components/Emoji";
+import type { CATEGORY_DISPLAY_ORDER } from "../screens/listing/listingItemCategories";
 import babyKids from "../imports/categories/baby-kids.webp";
 import bikesScooters from "../imports/categories/bikes-scooters.webp";
 import boatsWater from "../imports/categories/boats-water.webp";
@@ -20,11 +21,17 @@ import toolsDiy from "../imports/categories/tools-diy.webp";
 import uniqueOther from "../imports/categories/unique-other.webp";
 import vehicles from "../imports/categories/vehicles.webp";
 
+/** Every category the taxonomy puts in front of a host, as a literal union. */
+type BrowsableCategory = (typeof CATEGORY_DISPLAY_ORDER)[number];
+
 /**
  * Artwork per top-level category, keyed by the canonical English name that
  * `CATEGORIES` uses — localized labels are display-only and never keys here.
+ *
+ * Keyed by the union on purpose: a category added to the browse order without
+ * artwork fails the typecheck instead of shipping an iconless tile.
  */
-const CATEGORY_ART: Record<string, string> = {
+const CATEGORY_ART: Record<BrowsableCategory, string> = {
   "Baby & Kids": babyKids,
   "Bikes & Scooters": bikesScooters,
   "Boats & Water": boatsWater,
@@ -55,7 +62,7 @@ const OPTICAL_SCALE = 1.25;
 
 export function categoryArtSrc(category: string | null | undefined): string | null {
   if (!category) return null;
-  return CATEGORY_ART[category.trim()] ?? null;
+  return CATEGORY_ART[category.trim() as BrowsableCategory] ?? null;
 }
 
 /**
