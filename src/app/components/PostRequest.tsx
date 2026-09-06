@@ -19,6 +19,7 @@ import {
   type CategoryCatalogEntry,
 } from "../../lib/homeCategoryPicks";
 import type { SubcategoryItem } from "../../screens/listing/listingItemCategories";
+import { CategoryIcon } from "../../components/CategoryIcon";
 import { ShelfIcon } from "../../components/ShelfIcon";
 import { buildRequestSharePayload, requestShareUrl } from "../../lib/socialShare";
 
@@ -213,9 +214,7 @@ function CategoryPicker({
                 aria-expanded={open}
                 className="flex w-full items-center gap-2 px-3 py-2.5 text-left active:bg-[#F7FBF8]"
               >
-                <span className="text-[18px]" aria-hidden>
-                  {entry.icon}
-                </span>
+                <CategoryIcon category={entry.name} emoji={entry.icon} size={24} />
                 <span className="min-w-0 flex-1 text-[13px] font-bold text-gray-900">
                   {localizeCategoryLabel(entry.name)}
                   {picked ? (

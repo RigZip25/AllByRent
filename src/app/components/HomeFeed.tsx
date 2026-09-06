@@ -17,6 +17,7 @@ import {
   type BrowseInterest,
 } from "../../lib/homeFeedStorage";
 import { getAllCategoryChips, getCategoryCatalog } from "../../lib/homeCategoryPicks";
+import { CategoryIcon } from "../../components/CategoryIcon";
 import { ShelfIcon } from "../../components/ShelfIcon";
 import type { SubcategoryItem } from "../../screens/listing/listingItemCategories";
 import {
@@ -571,7 +572,7 @@ export function HomeFeed({
                 className="inline-flex max-w-[220px] shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-bold text-white"
                 style={{ backgroundColor: GREEN }}
               >
-                <span aria-hidden>{icon}</span>
+                <CategoryIcon category={interest.category} emoji={icon} size={18} />
                 <span className="truncate">{interestLabel(interest)}</span>
                 <X className="h-3.5 w-3.5 shrink-0" />
               </button>
@@ -827,9 +828,7 @@ export function HomeFeed({
                         onClick={() => toggleCategoryWide(cat.name)}
                         className="flex min-w-0 flex-1 items-center gap-1.5 px-2.5 py-2.5 text-left"
                       >
-                        <span className="shrink-0 text-[15px]" aria-hidden>
-                          {cat.icon}
-                        </span>
+                        <CategoryIcon category={cat.name} emoji={cat.icon} size={24} />
                         <span
                           className="min-w-0 flex-1 text-[12px] font-bold leading-snug [overflow-wrap:anywhere]"
                           style={{ color: active ? GREEN_DARK : "#374151" }}
@@ -943,11 +942,18 @@ export function HomeFeed({
                     <ChevronLeft className="h-5 w-5" />
                   </button>
                   <div className="min-w-0 flex-1">
-                    <h2 className="truncate text-[17px] font-extrabold" style={{ color: GREEN_DARK }}>
-                      <span className="mr-1.5" aria-hidden>
-                        {browseCategories.find((c) => c.name === subSheetCategory)?.icon ?? "📦"}
-                      </span>
-                      {localizeCategoryLabel(subSheetCategory)}
+                    <h2
+                      className="flex items-center gap-1.5 text-[17px] font-extrabold"
+                      style={{ color: GREEN_DARK }}
+                    >
+                      <CategoryIcon
+                        category={subSheetCategory}
+                        emoji={
+                          browseCategories.find((c) => c.name === subSheetCategory)?.icon ?? "📦"
+                        }
+                        size={24}
+                      />
+                      <span className="truncate">{localizeCategoryLabel(subSheetCategory)}</span>
                     </h2>
                     <p className="text-[12px] text-gray-500">{home.subcategoryTitle}</p>
                   </div>
