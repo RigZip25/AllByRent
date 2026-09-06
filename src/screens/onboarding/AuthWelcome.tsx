@@ -48,7 +48,7 @@ export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
         <h1 className="text-center text-[24px] font-extrabold leading-tight" style={{ color: GREEN }}>
           {returning ? copy.returningTitle : copy.title}
         </h1>
-        <p className="mt-2 text-center text-[15px] leading-relaxed text-gray-600">
+        <p className="mt-2 whitespace-pre-line text-center text-[15px] leading-relaxed text-gray-600">
           {returning ? copy.returningSubtitle : copy.subtitle}
         </p>
       </div>
@@ -110,7 +110,9 @@ export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
             >
               {copy.signInCta}
             </button>
-            <p className="text-center text-[12px] leading-snug text-gray-400">{copy.guestHint}</p>
+            {copy.guestHint ? (
+              <p className="text-center text-[12px] leading-snug text-gray-400">{copy.guestHint}</p>
+            ) : null}
           </>
         )}
       </div>
