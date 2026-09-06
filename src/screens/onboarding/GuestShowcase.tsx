@@ -3,7 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../../lib/brand";
 import { useMessages } from "../../lib/i18n/react";
 import { onboardingAssets } from "../../lib/onboardingAssets";
-import guestHookGarage from "../../imports/onboarding/evorios_guest_hook_garage.png";
+import guestBookGarage from "../../imports/onboarding/evorios_guest_book_garage.png";
 import listingSnap from "../../imports/listing_snap.png";
 import listingMagic from "../../imports/listing_magic.png";
 import listingShare from "../../imports/listing_share.png";
@@ -46,7 +46,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
       id: "hook",
       title: copy.hookTitle,
       body: copy.hookBody,
-      visual: { kind: "image", src: guestHookGarage },
+      visual: { kind: "placeholder", artId: "hook" },
     },
     {
       id: "browse",
@@ -76,7 +76,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
       id: "book",
       title: copy.bookTitle,
       body: `${copy.bookBody} ${copy.trustBody}`,
-      visual: { kind: "placeholder", artId: "book" },
+      visual: { kind: "image", src: guestBookGarage },
     },
     {
       id: "yard",
