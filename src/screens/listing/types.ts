@@ -263,14 +263,14 @@ export type Step6ReviewProps = Step7ReviewProps;
 
 /** Fast-path listing wizard step ids (labels via listing.steps.* / getSteps). */
 export const LISTING_STEP = {
-  category: 1,
-  photos: 2,
+  photos: 1,
+  category: 2,
   details: 3,
   review: 4,
 } as const;
 
 /** Bump when step order changes so resume remapping stays correct. */
-export const WIZARD_FLOW_VERSION = 3;
+export const WIZARD_FLOW_VERSION = 4;
 
 export const STEPS = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }] as const;
 
@@ -286,8 +286,8 @@ export function getSteps(listing: {
   };
 }) {
   return [
-    { id: 1 as const, name: listing.steps.category },
-    { id: 2 as const, name: listing.steps.photos },
+    { id: 1 as const, name: listing.steps.photos },
+    { id: 2 as const, name: listing.steps.category },
     { id: 3 as const, name: listing.steps.detailsPricing },
     { id: 4 as const, name: listing.steps.reviewPublish },
   ];
@@ -295,31 +295,40 @@ export function getSteps(listing: {
 
 /** @deprecated Prefer getSteps(getMessages().listing) — EN snapshot only. */
 export const LISTING_STEP_LABELS = [
-  "Category",
   "Photos",
+  "Category",
   "Details & pricing",
   "Review & publish",
 ] as const;
 
 /**
- * Remap older drafts onto category → photos → details → review.
+ * Remap older drafts onto photos → category → details → review.
  * v1: photos → details → review (3 steps)
  * v2: category → details → photos → review
- * v3+: current order
+ * v3: category → photos → details → review
+ * v4+: current order
  */
 export function normalizeWizardResumeStep(
   wizardStep: number | undefined,
   flowVersion: number | undefined,
 ): number {
-  // No saved progress → always start at category (never treat as legacy photos).
+  // No saved progress → always start at photos.
   if (typeof wizardStep !== "number" || !Number.isFinite(wizardStep) || wizardStep < 1) {
-    return LISTING_STEP.category;
+    return LISTING_STEP.photos;
   }
   const raw = Math.floor(wizardStep);
   const version = flowVersion ?? 1;
 
   if (version >= WIZARD_FLOW_VERSION) {
     return Math.min(Math.max(raw, 1), TOTAL_LISTING_STEPS);
+  }
+
+  // v3: category=1, photos=2, details=3, review=4 → photos-first v4.
+  if (version === 3) {
+    if (raw <= 1) return LISTING_STEP.category;
+    if (raw === 2) return LISTING_STEP.photos;
+    if (raw === 3) return LISTING_STEP.details;
+    return LISTING_STEP.review;
   }
 
   // v2: category=1, details=2, photos=3, review=4 → photos before details
@@ -335,15 +344,13 @@ export function normalizeWizardResumeStep(
   return LISTING_STEP.review;
 }
 
-/** First step for a brand-new listing (optional shelf prefill skips category). */
+/** First step for a brand-new listing. Shelf prefill still seeds category, but photos stay first. */
 export function initialListingWizardStep(prefill?: {
   category?: string;
   subcategory?: string;
 } | null): number {
-  if (prefill?.category?.trim() && prefill?.subcategory?.trim()) {
-    return LISTING_STEP.photos;
-  }
-  return LISTING_STEP.category;
+  void prefill;
+  return LISTING_STEP.photos;
 }
 
 export const DELIVERY_DISTANCE_TIERS = [5, 10, 15, 25, 50] as const;
