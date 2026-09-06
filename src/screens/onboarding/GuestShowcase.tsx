@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../../lib/brand";
 import { useMessages } from "../../lib/i18n/react";
 import { onboardingAssets } from "../../lib/onboardingAssets";
+import guestBrowseNeighborhood from "../../imports/onboarding/evorios_guest_browse_neighborhood.png";
 import guestHookGarage from "../../imports/onboarding/evorios_guest_hook_garage.png";
 import listingSnap from "../../imports/listing_snap.png";
 import listingMagic from "../../imports/listing_magic.png";
@@ -52,7 +53,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
       id: "browse",
       title: copy.browseTitle,
       body: copy.browseBody,
-      visual: { kind: "image", src: onboardingAssets.browseBlock, framed: true },
+      visual: { kind: "image", src: guestBrowseNeighborhood },
     },
     {
       id: "modes",
