@@ -15,6 +15,17 @@ import gardenStumpGrinders from "../imports/subcategories/garden-stump-grinders.
 import gardenTillersCultivators from "../imports/subcategories/garden-tillers-cultivators.webp";
 import gardenTrees from "../imports/subcategories/garden-trees.webp";
 import gardenTrimmers from "../imports/subcategories/garden-trimmers.webp";
+import homeBakingEquipment from "../imports/subcategories/home-baking-equipment.webp";
+import homeBeverageSystems from "../imports/subcategories/home-beverage-systems.webp";
+import homeBlendersJuicers from "../imports/subcategories/home-blenders-juicers.webp";
+import homeCateringEquipment from "../imports/subcategories/home-catering-equipment.webp";
+import homeCleaningAppliances from "../imports/subcategories/home-cleaning-appliances.webp";
+import homeCoffeeMakers from "../imports/subcategories/home-coffee-makers.webp";
+import homeCommercialCoffee from "../imports/subcategories/home-commercial-coffee.webp";
+import homeFoodProcessorsPro from "../imports/subcategories/home-food-processors-pro.webp";
+import homeIndustrialMixers from "../imports/subcategories/home-industrial-mixers.webp";
+import homeOther from "../imports/subcategories/home-other.webp";
+import homeStandMixers from "../imports/subcategories/home-stand-mixers.webp";
 import toolsHandTools from "../imports/subcategories/tools-hand-tools.webp";
 import toolsIndustrialDrills from "../imports/subcategories/tools-industrial-drills.webp";
 import toolsLadders from "../imports/subcategories/tools-ladders.webp";
@@ -53,6 +64,17 @@ export const SUBCATEGORY_ART = {
   "garden-tillers-cultivators": gardenTillersCultivators,
   "garden-trees": gardenTrees,
   "garden-trimmers": gardenTrimmers,
+  "home-baking-equipment": homeBakingEquipment,
+  "home-beverage-systems": homeBeverageSystems,
+  "home-blenders-juicers": homeBlendersJuicers,
+  "home-catering-equipment": homeCateringEquipment,
+  "home-cleaning-appliances": homeCleaningAppliances,
+  "home-coffee-makers": homeCoffeeMakers,
+  "home-commercial-coffee": homeCommercialCoffee,
+  "home-food-processors-pro": homeFoodProcessorsPro,
+  "home-industrial-mixers": homeIndustrialMixers,
+  "home-other": homeOther,
+  "home-stand-mixers": homeStandMixers,
   "tools-hand-tools": toolsHandTools,
   "tools-industrial-drills": toolsIndustrialDrills,
   "tools-ladders": toolsLadders,
