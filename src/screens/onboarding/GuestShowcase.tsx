@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../../lib/brand";
 import { useMessages } from "../../lib/i18n/react";
-import guestBookHandoff from "../../imports/onboarding/evorios_guest_book_handoff.png";
+import guestBookHandoffV2 from "../../imports/onboarding/evorios_guest_book_handoff_v2.png";
 import guestBrowseNeighborhood from "../../imports/onboarding/evorios_guest_browse_neighborhood.png";
 import guestEnhanceInventory from "../../imports/onboarding/evorios_guest_enhance_inventory.png";
 import guestHelpGateway from "../../imports/onboarding/evorios_guest_help_gateway.png";
@@ -81,7 +81,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
         id: "book",
         title: copy.bookTitle,
         body: [copy.bookBody, copy.trustBody].filter(Boolean).join(" "),
-        visual: { kind: "image", src: guestBookHandoff },
+        visual: { kind: "image", src: guestBookHandoffV2 },
       },
       {
         id: "yard",
