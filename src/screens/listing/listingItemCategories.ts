@@ -1,4 +1,5 @@
 import type { CategoryGlyphId } from "../../components/categoryGlyphs";
+import type { SubcategoryArtId } from "../../components/subcategoryArt";
 import { finalizeRentalPriceSuggestion } from "../../lib/listingPricingAdvice";
 
 export type CategoryGrade = "personal" | "professional";
@@ -8,6 +9,8 @@ export type SubcategoryItem = {
   emoji: string;
   /** Custom SVG when Unicode emoji is a poor match. */
   glyph?: CategoryGlyphId;
+  /** Illustration, once one has been drawn for this shelf. */
+  art?: SubcategoryArtId;
 };
 
 export type CategoryData = {
@@ -21,24 +24,29 @@ function sub(label: string, emoji: string, glyph?: CategoryGlyphId): Subcategory
   return glyph ? { label, emoji, glyph } : { label, emoji };
 }
 
+/** A shelf whose illustration is drawn; the emoji stays as the fallback. */
+function subArt(label: string, emoji: string, art: SubcategoryArtId): SubcategoryItem {
+  return { label, emoji, art };
+}
+
 export const CATEGORIES: Record<string, CategoryData> = {
   "Tools & DIY": {
     icon: "🔧",
     personal: [
-      sub("Hand Tools", "🛠️"),
-      sub("Power Drills", "🔩", "power-drill"),
-      sub("Measuring Tools", "📏"),
-      sub("Ladders", "🪜"),
-      sub("Painting Tools", "🖌️"),
-      sub("Other", "➕"),
+      subArt("Hand Tools", "🛠️", "tools-hand-tools"),
+      subArt("Power Drills", "🔩", "tools-power-drills"),
+      subArt("Measuring Tools", "📏", "tools-measuring-tools"),
+      subArt("Ladders", "🪜", "tools-ladders"),
+      subArt("Painting Tools", "🖌️", "tools-painting-tools"),
+      subArt("Other", "➕", "tools-other"),
     ],
     professional: [
-      sub("Industrial Drills", "⚙️", "industrial-drill"),
-      sub("Welding Equipment", "🔥", "welding"),
-      sub("Scaffolding Systems", "🧱", "scaffolding"),
-      sub("Laser Measuring", "🔦", "laser-measure"),
-      sub("Power Saws", "🪚", "power-saw"),
-      sub("Other", "➕"),
+      subArt("Industrial Drills", "⚙️", "tools-industrial-drills"),
+      subArt("Welding Equipment", "🔥", "tools-welding-equipment"),
+      subArt("Scaffolding Systems", "🧱", "tools-scaffolding-systems"),
+      subArt("Laser Measuring", "🔦", "tools-laser-measuring"),
+      subArt("Power Saws", "🪚", "tools-power-saws"),
+      subArt("Other", "➕", "tools-other"),
     ],
   },
   "Photo & Video": {

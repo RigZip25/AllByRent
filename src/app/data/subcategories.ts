@@ -9,6 +9,7 @@ export interface Subcategory {
   label: string;
   emoji: string;
   glyph?: SubcategoryItem["glyph"];
+  art?: SubcategoryItem["art"];
 }
 
 export interface CategoryData {
@@ -34,6 +35,7 @@ function mapSubcategoryList(
     label: item.label,
     emoji: item.emoji,
     ...(item.glyph ? { glyph: item.glyph } : {}),
+    ...(item.art ? { art: item.art } : {}),
   }));
 }
 
