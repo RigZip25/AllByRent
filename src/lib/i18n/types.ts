@@ -893,8 +893,6 @@ export type AppMessages = {
       tipDefault: (mascot: string) => string;
       tipYardSale: (mascot: string) => string;
       tipAnalyzed: string;
-      /** Shown when host skipped category — AI will suggest shelf too. */
-      tipDecideShelf: (mascot: string) => string;
       previewAria: string;
       closePreviewAria: string;
       setAsCover: string;
@@ -915,6 +913,46 @@ export type AppMessages = {
       moderationVideoNotListable: string;
       moderationBadVideo: string;
     };
+    /** AI-first category detection: entry, suggestion, listing type, manual fallback. */
+    aiCategory: {
+      startTitle: string;
+      takePhoto: string;
+      takePhotoHint: (app: string) => string;
+      browseManually: string;
+      choosePhoto: string;
+      analyzingTitle: (app: string) => string;
+      analyzingBody: string;
+      matchTitle: (app: string) => string;
+      confirm: string;
+      change: string;
+      choicesTitle: string;
+      chooseAnother: string;
+      /** Score is an internal ranking signal, so the copy never mentions numbers. */
+      reasonLowConfidence: (app: string) => string;
+      reasonTimeout: string;
+      reasonNetwork: string;
+      reasonInvalid: (app: string) => string;
+      reasonUnsupported: string;
+      reasonUnavailable: (app: string) => string;
+      reasonNoPhotos: string;
+      tryAgain: string;
+      backToPhotos: string;
+      listingTypeTitle: string;
+      listingTypeSubtitle: string;
+      changeListingType: string;
+      lastUsed: (label: string) => string;
+      searchPlaceholder: string;
+      noResults: string;
+      suggested: string;
+      recent: string;
+      allCategories: string;
+      preparingDetails: (app: string) => string;
+      detailsProgress: (app: string, ready: number, total: number) => string;
+      detailsRemaining: (count: number) => string;
+      detailsFailed: string;
+      writingCopy: (app: string) => string;
+      writingCopyFailed: string;
+    };
     itemInfo: {
       title: string;
       titleYardSale: string;
@@ -929,23 +967,16 @@ export type AppMessages = {
       titlePlaceholder: (example: string) => string;
       categoryStepTitle: string;
       categoryStepSubtitle: string;
-      /** Escape hatch — skip shelf pick; AI fills from photos. */
-      letAiDecideFromPhotos: (mascot: string) => string;
       categoryAiHint: (mascot: string) => string;
-      gradeStepTitle: string;
-      gradeStepSubtitle: string;
       subcategoryStepTitle: string;
       subcategoryStepSubtitle: string;
       confirmCategoryTitle: string;
       confirmCategorySubtitle: string;
       selectionConfirmed: string;
       changeCategory: string;
-      changeGrade: string;
       changeSubcategory: string;
       personalGradeHint: string;
       professionalGradeHint: string;
-      bothGrades: string;
-      bothGradesHint: string;
       category: string;
       selectCategory: string;
       grade: string;

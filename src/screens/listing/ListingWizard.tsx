@@ -25,7 +25,17 @@ import {
 import { onConnectOnboardingDone } from "../../lib/connectOnboardingBus";
 import { isFreeGiveaway } from "../../lib/listingGift";
 import { PhoneVerifySheet } from "../../components/profile/PhoneVerifySheet";
-import { analyzeListingMediaPhotos } from "./listingAnalysis";
+import { trackEvent } from "../../lib/analytics";
+import {
+  classifyListingPhotos,
+  type ClassificationOutcome,
+} from "./ai/listingClassifier";
+import {
+  applyFilledFieldsToSpecs,
+  fillListingFieldsFromPhotos,
+} from "./ai/listingFieldFill";
+import { generateListingCopyFromConfirmedData } from "./ai/listingCopy";
+import { buildConfirmedCopyFacts } from "./ai/copyFacts";
 import {
   messageForPhotoModeration,
   moderateListingMediaPhotos,
@@ -79,9 +89,12 @@ import {
   applyYardSaleListingDefaults,
   isYardSaleListingActive,
 } from "../../lib/yardSaleListing";
-import { applyAiSuggestionsToDraft } from "./applyAiSuggestions";
-import { isListingStepValid } from "./validation";
-import { useMessages } from "../../lib/i18n/react";
+import {
+  effectiveListingType,
+  isDetailsReadyForCopy,
+  isListingStepValid,
+} from "./validation";
+import { useLocale, useMessages } from "../../lib/i18n/react";
 
 function createPrefilledListingDraft(prefill?: ShelfPrefill | null): ListingDraft {
   const draft = createInitialListingDraft();
@@ -154,7 +167,15 @@ export function ListingWizard({
 }) {
   const auth = useAuth();
   const t = useMessages();
+  const locale = useLocale();
   const listing = t.listing;
+  const specFieldLabels = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(listing.specs.fields).map(([key, value]) => [key, value.label]),
+      ),
+    [listing.specs.fields],
+  );
   const isEditing = (() => {
     const status =
       initialDraft?.listingStatus ??
@@ -188,6 +209,18 @@ export function ListingWizard({
   const [photoProgressTick, setPhotoProgressTick] = useState(0);
   const [textGateMessage, setTextGateMessage] = useState<string | null>(null);
   const [textModerationPending, setTextModerationPending] = useState(false);
+  /** Latest photo classification; suggestions only, never applied on its own. */
+  const [classification, setClassification] = useState<ClassificationOutcome | null>(null);
+  const [classifyPending, setClassifyPending] = useState(false);
+  const [fieldFill, setFieldFill] = useState<{
+    status: "idle" | "pending" | "done" | "failed";
+    detected: number;
+    total: number;
+  }>({ status: "idle", detected: 0, total: 0 });
+  const [copyPending, setCopyPending] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
+  const copyRequestedRef = useRef(false);
+  const reportedFieldEditsRef = useRef<Set<string>>(new Set());
   const [phase, setPhase] = useState<WizardPhase>(() => {
     const cached =
       initialDraft ??
@@ -933,15 +966,29 @@ export function ListingWizard({
           }
         }
 
-        if (!draft.aiSuggestions) {
-          await runListingPhotoAnalysis();
+        if (isYardSaleListingActive()) {
+          goToStep(LISTING_STEP.details, 1);
+          return;
         }
-        goToStep(
-          isYardSaleListingActive() ? LISTING_STEP.details : LISTING_STEP.category,
-          1,
-        );
+
+        goToStep(LISTING_STEP.category, 1);
+        // Classification runs on the category step so the host sees progress
+        // there instead of a frozen Continue button.
+        if (!draft.categoryDecision) {
+          void runCategoryClassification();
+        }
       } finally {
         setPhotoModerationPending(false);
+      }
+      return;
+    }
+
+    if (step === LISTING_STEP.category) {
+      if (!canContinue) return;
+      goToStep(LISTING_STEP.details, 1);
+      // The confirmed category decides which field schema the AI may fill.
+      if (!draft.aiFields && draft.photos.length > 0) {
+        void runFieldFill();
       }
       return;
     }
@@ -1002,34 +1049,30 @@ export function ListingWizard({
     goToStep(step + 1, 1);
   };
 
-  const handleLetAiDecideCategory = () => {
-    setDraft((current) => ({
-      ...current,
-      category: "",
-      subcategory: "",
-      grade: "",
-      categorySpecs: {},
-    }));
-    goToStep(LISTING_STEP.photos, 1);
+  /** Host chose to skip the photo suggestion and browse the taxonomy. */
+  const handleBrowseCategoriesManually = () => {
+    trackEvent("manual_category_opened", { from: "entry" });
+    setClassification(null);
+    goToStep(LISTING_STEP.category, 1);
   };
 
-  /** Soft-fill details from photos — call only after moderation passed. */
-  const runListingPhotoAnalysis = async (): Promise<ListingDraft | null> => {
+  /**
+   * Classifies the photos into an existing category.
+   *
+   * Never throws and never writes the category: the result is a suggestion the
+   * host confirms on the category step.
+   */
+  const runCategoryClassification = async (): Promise<ClassificationOutcome | null> => {
+    if (draft.photos.length === 0) return null;
+    setClassifyPending(true);
     setDraft((current) => ({ ...current, aiAnalysisPending: true }));
     try {
-      const suggestions = await analyzeListingMediaPhotos(draft.photos);
-      let appliedDraft: ListingDraft | null = null;
-      setDraft((current) => {
-        appliedDraft = applyAiSuggestionsToDraft(current, suggestions);
-        return appliedDraft;
-      });
-      return appliedDraft;
-    } catch (error) {
+      const outcome = await classifyListingPhotos(draft.photos);
+      setClassification(outcome);
+      return outcome;
+    } finally {
+      setClassifyPending(false);
       setDraft((current) => ({ ...current, aiAnalysisPending: false }));
-      if (import.meta.env.DEV) {
-        console.warn("AI photo analysis failed:", error);
-      }
-      return null;
     }
   };
 
@@ -1096,8 +1139,140 @@ export function ListingWizard({
     }
 
     if (!allowed) return;
-    await runListingPhotoAnalysis();
+    const outcome = await runCategoryClassification();
+    // Re-running from the photos step is a request for a fresh suggestion, so
+    // send the host to the category step to act on it.
+    if (outcome && step === LISTING_STEP.photos) {
+      goToStep(LISTING_STEP.category, 1);
+    }
   };
+
+  /** Fills the confirmed category's field schema from the photos, once. */
+  const runFieldFill = async () => {
+    const listingType = effectiveListingType(draft);
+    if (!draft.category || !draft.subcategory || !listingType) return;
+    if (draft.photos.length === 0) return;
+
+    setFieldFill({ status: "pending", detected: 0, total: 0 });
+    const outcome = await fillListingFieldsFromPhotos({
+      category: draft.category,
+      subcategory: draft.subcategory,
+      listingType,
+      itemName: draft.categoryDecision?.itemName ?? "",
+      photos: draft.photos,
+      modes: draft.modes,
+      labels: specFieldLabels,
+    });
+
+    if (outcome.status === "filled") {
+      setDraft((current) => {
+        const { specs, appliedKeys } = applyFilledFieldsToSpecs(
+          current.categorySpecs ?? {},
+          outcome.fields,
+        );
+        const detectedCondition =
+          classification && "attributes" in classification
+            ? classification.attributes.condition
+            : null;
+        return {
+          ...current,
+          categorySpecs: specs,
+          aiFields: outcome.fields,
+          aiFilledSpecKeys: appliedKeys,
+          // Condition is only ever set when wear was actually visible.
+          condition:
+            current.condition ||
+            (detectedCondition === "new" ||
+            detectedCondition === "like_new" ||
+            detectedCondition === "good" ||
+            detectedCondition === "fair"
+              ? detectedCondition
+              : current.condition),
+        };
+      });
+      setFieldFill({ status: "done", detected: outcome.detected, total: outcome.total });
+      return;
+    }
+
+    setFieldFill({
+      status: outcome.status === "failed" ? "failed" : "idle",
+      detected: 0,
+      total: 0,
+    });
+  };
+
+  /** Title + description from confirmed data, once the details are complete. */
+  const runCopyGeneration = async (): Promise<{ title: string; description: string } | null> => {
+    const listingType = effectiveListingType(draft);
+    if (!listingType) return null;
+
+    setCopyPending(true);
+    setCopyFailed(false);
+    try {
+      const outcome = await generateListingCopyFromConfirmedData({
+        category: draft.category,
+        subcategory: draft.subcategory,
+        listingType,
+        itemName: draft.categoryDecision?.itemName || draft.subcategory,
+        facts: buildConfirmedCopyFacts(draft, specFieldLabels),
+        locale,
+      });
+
+      if (outcome.status !== "ready") {
+        setCopyFailed(true);
+        return null;
+      }
+
+      setDraft((current) => ({
+        ...current,
+        title: current.title.trim() || outcome.title,
+        description: current.description.trim() || outcome.description,
+      }));
+      return { title: outcome.title, description: outcome.description };
+    } finally {
+      setCopyPending(false);
+    }
+  };
+
+  const runCopyGenerationRef = useRef(runCopyGeneration);
+  runCopyGenerationRef.current = runCopyGeneration;
+
+  /**
+   * Copy is written once the details step has everything it needs.
+   *
+   * Waiting for `isDetailsReadyForCopy` is what enforces "category confirmed,
+   * listing type chosen, AI fields reviewed, required fields filled".
+   */
+  const copyReady =
+    step === LISTING_STEP.details &&
+    !isYardSaleListingActive() &&
+    !draft.title.trim() &&
+    fieldFill.status !== "pending" &&
+    isDetailsReadyForCopy(draft);
+
+  useEffect(() => {
+    if (!copyReady || copyPending || copyRequestedRef.current) return;
+    copyRequestedRef.current = true;
+    void runCopyGenerationRef.current();
+  }, [copyReady, copyPending]);
+
+  // Report once per field when the host corrects an AI-filled value.
+  useEffect(() => {
+    const aiKeys = draft.aiFilledSpecKeys ?? [];
+    if (aiKeys.length === 0 || !draft.aiFields) return;
+    for (const key of aiKeys) {
+      if (reportedFieldEditsRef.current.has(key)) continue;
+      const filled = draft.aiFields.find((field) => field.fieldKey === key)?.value ?? "";
+      const current = (draft.categorySpecs?.[key] ?? "").trim();
+      if (!filled || !current || current === filled.trim()) continue;
+      reportedFieldEditsRef.current.add(key);
+      trackEvent("ai_fields_edited", {
+        fieldKey: key,
+        categoryId: draft.categoryDecision?.categoryId ?? null,
+        subcategoryId: draft.categoryDecision?.subcategoryId ?? null,
+      });
+    }
+  }, [draft.aiFields, draft.aiFilledSpecKeys, draft.categoryDecision, draft.categorySpecs]);
 
   const continueLabel =
     step === LISTING_STEP.photos && (draft.aiAnalysisPending || photoModerationPending) ? (
@@ -1458,6 +1633,7 @@ export function ListingWizard({
                 draft={draft}
                 setDraft={setDraft}
                 onAnalyzePhotos={() => void handleAnalyzePhotos()}
+                onBrowseCategories={handleBrowseCategoriesManually}
                 gateMessage={photoGateMessage}
                 onDismissGateMessage={() => setPhotoGateMessage(null)}
               />
@@ -1466,7 +1642,10 @@ export function ListingWizard({
                 key={draft.id || "new-listing"}
                 draft={draft}
                 setDraft={setDraft}
-                onLetAiDecide={handleLetAiDecideCategory}
+                classification={classification}
+                classifyPending={classifyPending}
+                onRetryClassification={() => void runCategoryClassification()}
+                onBackToPhotos={() => goToStep(LISTING_STEP.photos, -1)}
                 registerPhaseBack={(fn) => {
                   categoryPhaseBackRef.current = fn;
                 }}
@@ -1478,6 +1657,12 @@ export function ListingWizard({
                 gateMessage={textGateMessage}
                 onDismissGateMessage={() => setTextGateMessage(null)}
                 onEditPhotos={() => goToStep(LISTING_STEP.photos, -1)}
+                aiFieldStatus={fieldFill.status}
+                aiFieldsDetected={fieldFill.detected}
+                aiFieldsTotal={fieldFill.total}
+                copyPending={copyPending}
+                copyFailed={copyFailed}
+                onRetryFieldFill={() => void runFieldFill()}
               />
             )}
           </motion.div>
