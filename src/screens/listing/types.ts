@@ -46,6 +46,26 @@ export type ListingAiSuggestions = {
   color?: string;
 };
 
+export type ListingCategorySource = "ai_confirmed" | "manual" | "prefill";
+
+/** Audit trail for how the category was chosen — AI suggests, the host decides. */
+export type ListingCategoryDecision = {
+  itemName: string;
+  categoryId: string;
+  subcategoryId: string;
+  source: ListingCategorySource;
+  /** Internal ranking score of the confirmed AI suggestion (never shown). */
+  score?: number;
+  decidedAt: string;
+};
+
+export type ListingAiField = {
+  fieldKey: string;
+  value: string | null;
+  confidence: "high" | "medium" | "low";
+  source: "image" | "user_input" | "inferred";
+};
+
 export type ListingPublishStatus =
   | "draft"
   | "published"
@@ -83,7 +103,16 @@ export type ListingDraft = {
   title: string;
   category: string;
   subcategory: string;
+  /** Shelf the subcategory lives on (addresses CATEGORIES[category][grade]). */
   grade: "personal" | "professional" | "";
+  /** Host's explicit "how are you listing it?" answer — never inferred by AI. */
+  listingType?: "personal" | "professional" | "";
+  /** How this category was reached; absent on drafts created before AI-first. */
+  categoryDecision?: ListingCategoryDecision | null;
+  /** Structured attributes returned for the confirmed category's field schema. */
+  aiFields?: ListingAiField[] | null;
+  /** Spec keys prefilled by AI, so later host edits can be reported. */
+  aiFilledSpecKeys?: string[];
   condition: "new" | "like_new" | "good" | "fair" | "";
   description: string;
   replacementValue: string;
@@ -398,6 +427,10 @@ export function createInitialListingDraft(): ListingDraft {
     category: "",
     subcategory: "",
     grade: "",
+    listingType: "",
+    categoryDecision: null,
+    aiFields: null,
+    aiFilledSpecKeys: [],
     condition: "",
     description: "",
     replacementValue: "",

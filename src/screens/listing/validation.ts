@@ -19,13 +19,16 @@ import {
   listingRequiresHostWheelCount,
 } from "../../lib/preTripInspection";
 
-function isDetailsAndPricingValid(draft: ListingDraft): boolean {
+function isDetailsAndPricingValid(
+  draft: ListingDraft,
+  options?: { ignoreCopy?: boolean },
+): boolean {
   const yardSaleListing = isYardSaleListingActive();
   const plantListing = isPlantListingSubcategory(draft.subcategory);
   const { modes, pricing, category } = draft;
   const rules = getCategoryModeRules(category, draft.subcategory);
   const itemInfoValid =
-    draft.title.trim() !== "" &&
+    (options?.ignoreCopy || draft.title.trim() !== "") &&
     (yardSaleListing ||
       (draft.category.trim() !== "" && draft.subcategory.trim() !== "")) &&
     draft.condition !== "" &&
@@ -120,14 +123,36 @@ function isDetailsAndPricingValid(draft: ListingDraft): boolean {
   return true;
 }
 
+/**
+ * Host's Personal/Professional answer.
+ *
+ * Drafts created before the explicit question only carry the shelf grade, so it
+ * stands in for the answer and those drafts stay resumable.
+ */
+export function effectiveListingType(draft: ListingDraft): "personal" | "professional" | "" {
+  return draft.listingType || draft.grade || "";
+}
+
+/**
+ * Everything a title and description may be built from is confirmed.
+ *
+ * Copy generation waits for this so the description never describes a detail
+ * the host has not reviewed.
+ */
+export function isDetailsReadyForCopy(draft: ListingDraft): boolean {
+  return isDetailsAndPricingValid(draft, { ignoreCopy: true });
+}
+
 export function isListingStepValid(step: number, draft: ListingDraft): boolean {
   switch (step) {
     case LISTING_STEP.category:
       if (isYardSaleListingActive()) return true;
+      // Category, shelf, and an explicit listing type are all host decisions.
       return (
         draft.category.trim() !== "" &&
         draft.grade.trim() !== "" &&
-        draft.subcategory.trim() !== ""
+        draft.subcategory.trim() !== "" &&
+        effectiveListingType(draft) !== ""
       );
 
     case LISTING_STEP.details:
