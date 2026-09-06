@@ -2,10 +2,10 @@ import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../../lib/brand";
 import { useMessages } from "../../lib/i18n/react";
-import { onboardingAssets } from "../../lib/onboardingAssets";
 import guestBookHandoff from "../../imports/onboarding/evorios_guest_book_handoff.png";
 import guestBrowseNeighborhood from "../../imports/onboarding/evorios_guest_browse_neighborhood.png";
 import guestEnhanceProjector from "../../imports/onboarding/evorios_guest_enhance_projector.png";
+import guestHelpGateway from "../../imports/onboarding/evorios_guest_help_gateway.png";
 import guestHookGarage from "../../imports/onboarding/evorios_guest_hook_garage.png";
 import guestModesExchange from "../../imports/onboarding/evorios_guest_modes_exchange.png";
 import guestSnapBike from "../../imports/onboarding/evorios_guest_snap_bike.png";
@@ -98,7 +98,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
       id: "help",
       title: copy.helpTitle(MASCOT_NAME),
       body: copy.helpBody(MASCOT_NAME),
-      visual: { kind: "image", src: onboardingAssets.mrEvoriosFull },
+      visual: { kind: "image", src: guestHelpGateway },
     },
   ];
 
