@@ -721,7 +721,7 @@ export function Step1Photos({
           </>
         )}
         <div className="mt-2">
-          {MAX_LISTING_VIDEOS > 0 ? (
+          {MAX_LISTING_VIDEOS > 0 && !isEntryState ? (
             <button
               type="button"
               onClick={() => videoInputRef.current?.click()}
@@ -743,7 +743,8 @@ export function Step1Photos({
         </div>
       </div>
 
-      <div className="space-y-2">
+      {/* Empty slots would only repeat what the entry buttons already offer. */}
+      <div className={`space-y-2 ${isEntryState ? "hidden" : ""}`}>
         {renderSlot(0, "aspect-[4/3] w-full", { fit: "cover" })}
 
         {Array.from({ length: thumbRowCount }, (_, row) => (
