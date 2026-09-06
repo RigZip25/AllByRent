@@ -9,6 +9,7 @@ import {
   applyFilledFieldsToSpecs,
 } from "../../src/screens/listing/ai/listingFieldFill";
 import { getCategorySpecFields } from "../../src/screens/listing/categorySpecs";
+import { getSubcategoryLabels } from "../../src/screens/listing/listingItemCategories";
 
 const ALLOWED: AllowedField[] = [
   { key: "brand", type: "brand", required: true, options: ["Sony", "Canon", "Nikon"] },
@@ -152,6 +153,27 @@ describe("schema handed to the model", () => {
     expect(keys).not.toContain("tripodHeadType");
     expect(payload.find((field) => field.key === "kitIncludes")?.options).toContain("full_kit");
     expect(payload.find((field) => field.key === "model")?.required).toBe(true);
+  });
+
+  it("follows the shelf the host's listing type opens", () => {
+    const modes = { rent: true, sell: false };
+    const fieldsFor = (shelf: string[]) =>
+      new Set(
+        shelf.flatMap((label) =>
+          allowedFieldsPayload(getCategorySpecFields("Photo & Video", label, modes), modes).map(
+            (field) => field.key,
+          ),
+        ),
+      );
+
+    const personalShelf = getSubcategoryLabels("Photo & Video", "personal");
+    const proShelf = getSubcategoryLabels("Photo & Video", "professional");
+    expect(proShelf).not.toEqual(personalShelf);
+
+    // A professional-only shelf carries fields the personal shelf never asks for.
+    const personalFields = fieldsFor(personalShelf);
+    const proOnlyFields = [...fieldsFor(proShelf)].filter((key) => !personalFields.has(key));
+    expect(proOnlyFields).toContain("stabilizerType");
   });
 
   it("uses a professional subcategory's own schema", () => {
