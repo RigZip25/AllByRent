@@ -154,8 +154,8 @@ function SubPickList({
                 active ? "bg-primary/10 font-semibold text-primary" : "text-gray-700 hover:bg-muted/60"
               }`}
             >
-              <span className="mt-px w-4 shrink-0 text-center" aria-hidden>
-                <ShelfIcon source={item} size={17} />
+              <span className="w-6 shrink-0 text-center" aria-hidden>
+                <ShelfIcon source={item} size={24} />
               </span>
               <span className="min-w-0 [overflow-wrap:anywhere]">
                 {localizeCategoryLabel(item.label)}

@@ -1,4 +1,5 @@
 import type { CategoryGlyphId } from "../../components/categoryGlyphs";
+import type { SubcategoryArtId } from "../../components/subcategoryArt";
 import { finalizeRentalPriceSuggestion } from "../../lib/listingPricingAdvice";
 
 export type CategoryGrade = "personal" | "professional";
@@ -8,6 +9,8 @@ export type SubcategoryItem = {
   emoji: string;
   /** Custom SVG when Unicode emoji is a poor match. */
   glyph?: CategoryGlyphId;
+  /** Illustration, once one has been drawn for this shelf. */
+  art?: SubcategoryArtId;
 };
 
 export type CategoryData = {
@@ -21,24 +24,29 @@ function sub(label: string, emoji: string, glyph?: CategoryGlyphId): Subcategory
   return glyph ? { label, emoji, glyph } : { label, emoji };
 }
 
+/** A shelf whose illustration is drawn; the emoji stays as the fallback. */
+function subArt(label: string, emoji: string, art: SubcategoryArtId): SubcategoryItem {
+  return { label, emoji, art };
+}
+
 export const CATEGORIES: Record<string, CategoryData> = {
   "Tools & DIY": {
     icon: "🔧",
     personal: [
-      sub("Hand Tools", "🛠️"),
-      sub("Power Drills", "🔩", "power-drill"),
-      sub("Measuring Tools", "📏"),
-      sub("Ladders", "🪜"),
-      sub("Painting Tools", "🖌️"),
-      sub("Other", "➕"),
+      subArt("Hand Tools", "🛠️", "tools-hand-tools"),
+      subArt("Power Drills", "🔩", "tools-power-drills"),
+      subArt("Measuring Tools", "📏", "tools-measuring-tools"),
+      subArt("Ladders", "🪜", "tools-ladders"),
+      subArt("Painting Tools", "🖌️", "tools-painting-tools"),
+      subArt("Other", "➕", "tools-other"),
     ],
     professional: [
-      sub("Industrial Drills", "⚙️", "industrial-drill"),
-      sub("Welding Equipment", "🔥", "welding"),
-      sub("Scaffolding Systems", "🧱", "scaffolding"),
-      sub("Laser Measuring", "🔦", "laser-measure"),
-      sub("Power Saws", "🪚", "power-saw"),
-      sub("Other", "➕"),
+      subArt("Industrial Drills", "⚙️", "tools-industrial-drills"),
+      subArt("Welding Equipment", "🔥", "tools-welding-equipment"),
+      subArt("Scaffolding Systems", "🧱", "tools-scaffolding-systems"),
+      subArt("Laser Measuring", "🔦", "tools-laser-measuring"),
+      subArt("Power Saws", "🪚", "tools-power-saws"),
+      subArt("Other", "➕", "tools-other"),
     ],
   },
   "Photo & Video": {
@@ -197,26 +205,26 @@ export const CATEGORIES: Record<string, CategoryData> = {
   "Garden & Yard": {
     icon: "🌿",
     personal: [
-      sub("Lawn Mowers", "🌿", "lawn-mower"),
-      sub("Trimmers", "✂️"),
-      sub("Leaf Blowers", "🍃"),
-      sub("Garden Tools", "🧰"),
-      sub("Sprinklers", "💦"),
-      sub("Trees", "🌳"),
-      sub("Shrubs & Bushes", "🌲"),
-      sub("Perennials", "🌺"),
-      sub("Seasonal Flowers", "🌸"),
-      sub("Houseplants & Seedlings", "🪴"),
-      sub("Other", "➕"),
+      subArt("Lawn Mowers", "🌿", "garden-lawn-mowers"),
+      subArt("Trimmers", "✂️", "garden-trimmers"),
+      subArt("Leaf Blowers", "🍃", "garden-leaf-blowers"),
+      subArt("Garden Tools", "🧰", "garden-garden-tools"),
+      subArt("Sprinklers", "💦", "garden-sprinklers"),
+      subArt("Trees", "🌳", "garden-trees"),
+      subArt("Shrubs & Bushes", "🌲", "garden-shrubs-bushes"),
+      subArt("Perennials", "🌺", "garden-perennials"),
+      subArt("Seasonal Flowers", "🌸", "garden-seasonal-flowers"),
+      subArt("Houseplants & Seedlings", "🪴", "garden-houseplants-seedlings"),
+      subArt("Other", "➕", "garden-other"),
     ],
     professional: [
-      sub("Ride-On Mowers", "🚜"),
-      sub("Tillers & Cultivators", "⚙️"),
-      sub("Stump Grinders", "🪵"),
-      sub("Irrigation Systems", "🚰"),
-      sub("Landscape Equipment", "🌳"),
-      sub("Nursery Stock", "🌱"),
-      sub("Other", "➕"),
+      subArt("Ride-On Mowers", "🚜", "garden-ride-on-mowers"),
+      subArt("Tillers & Cultivators", "⚙️", "garden-tillers-cultivators"),
+      subArt("Stump Grinders", "🪵", "garden-stump-grinders"),
+      subArt("Irrigation Systems", "🚰", "garden-irrigation-systems"),
+      subArt("Landscape Equipment", "🌳", "garden-landscape-equipment"),
+      subArt("Nursery Stock", "🌱", "garden-nursery-stock"),
+      subArt("Other", "➕", "garden-other"),
     ],
   },
   "Party & Events": {

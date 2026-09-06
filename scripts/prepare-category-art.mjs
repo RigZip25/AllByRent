@@ -1,10 +1,10 @@
 /**
- * Turns the raw category artwork into small transparent icons.
+ * Turns raw category and subcategory artwork into small transparent icons.
  *
- * The source renders sit on a warm off-white card with a soft shadow. Icons
- * replace emoji in chips and tiles, so that card has to go: the background is
- * flood-filled away from the edges, leftover shadow specks are dropped, and the
- * subject is trimmed and re-centred on a square canvas.
+ * Icons replace emoji in chips and tiles, so whatever the render sits on has to
+ * go. Sources arrive two ways: some already carry an alpha channel, others sit
+ * on a painted card with a soft shadow. Both end the same — subject trimmed,
+ * re-centred on a square canvas, written as WebP at twice its largest use.
  *
  * Run: node scripts/prepare-category-art.mjs   (add --check to verify only)
  */
@@ -14,8 +14,11 @@ import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SOURCE_DIR = path.join(root, "src/imports/categories/raw");
-const OUT_DIR = path.join(root, "src/imports/categories");
+
+const ART_SETS = [
+  { name: "categories", dir: path.join(root, "src/imports/categories") },
+  { name: "subcategories", dir: path.join(root, "src/imports/subcategories") },
+];
 
 /** Output edge in px: 2x the largest place an icon is drawn (64px tiles). */
 const SIZE = 128;
@@ -27,6 +30,8 @@ const MIN_ISLAND_SHARE = 0.002;
 const HAIRLINE_PX = 3;
 /** Breathing room around the subject, as a share of the trimmed edge. */
 const PADDING_SHARE = 0.04;
+/** Below this share of clear pixels a source is treated as having no alpha. */
+const ALPHA_PRESENT_SHARE = 0.05;
 
 function sampleBackground(data, width, height, channels) {
   const samples = [];
@@ -172,6 +177,15 @@ function boundingBox(isBackground, width, height) {
   return { top, left, right, bottom };
 }
 
+/** True when the source was delivered already cut out. */
+function hasUsableAlpha(data, width, height, channels) {
+  let clear = 0;
+  for (let i = 3; i < data.length; i += channels) {
+    if (data[i] === 0) clear += 1;
+  }
+  return clear / (width * height) > ALPHA_PRESENT_SHARE;
+}
+
 async function prepare(sourcePath) {
   const { data, info } = await sharp(sourcePath)
     .ensureAlpha()
@@ -179,19 +193,27 @@ async function prepare(sourcePath) {
     .toBuffer({ resolveWithObject: true });
   const { width, height, channels } = info;
 
-  const background = sampleBackground(data, width, height, channels);
-  const isBackground = fillFromEdges(data, width, height, channels, background);
-  dropSpecks(isBackground, width, height);
-
-  const alpha = new Uint8Array(isBackground.length).fill(255);
-  for (let idx = 0; idx < isBackground.length; idx += 1) {
-    if (isBackground[idx]) alpha[idx] = 0;
-  }
-  featherEdges(alpha, data, isBackground, width, height, channels, background);
-
   const cut = Buffer.from(data);
-  for (let idx = 0; idx < isBackground.length; idx += 1) {
-    cut[idx * channels + 3] = alpha[idx];
+  let isBackground;
+
+  if (hasUsableAlpha(data, width, height, channels)) {
+    isBackground = new Uint8Array(width * height);
+    for (let idx = 0; idx < isBackground.length; idx += 1) {
+      if (data[idx * channels + 3] === 0) isBackground[idx] = 1;
+    }
+  } else {
+    const background = sampleBackground(data, width, height, channels);
+    isBackground = fillFromEdges(data, width, height, channels, background);
+    dropSpecks(isBackground, width, height);
+
+    const alpha = new Uint8Array(isBackground.length).fill(255);
+    for (let idx = 0; idx < isBackground.length; idx += 1) {
+      if (isBackground[idx]) alpha[idx] = 0;
+    }
+    featherEdges(alpha, data, isBackground, width, height, channels, background);
+    for (let idx = 0; idx < isBackground.length; idx += 1) {
+      cut[idx * channels + 3] = alpha[idx];
+    }
   }
 
   const box = boundingBox(isBackground, width, height);
@@ -217,31 +239,38 @@ async function prepare(sourcePath) {
 }
 
 const checkOnly = process.argv.includes("--check");
-await mkdir(OUT_DIR, { recursive: true });
-
-const sources = (await readdir(SOURCE_DIR)).filter((name) => name.endsWith(".png")).sort();
-if (sources.length === 0) throw new Error(`no source art in ${SOURCE_DIR}`);
-
 const stale = [];
-for (const name of sources) {
-  const slug = name.replace(/\.png$/, "");
-  const outPath = path.join(OUT_DIR, `${slug}.webp`);
-  const next = await prepare(path.join(SOURCE_DIR, name));
+let prepared = 0;
 
-  if (checkOnly) {
-    const current = await readFile(outPath).catch(() => null);
-    if (!current || !current.equals(next)) stale.push(slug);
-    continue;
+for (const set of ART_SETS) {
+  const sourceDir = path.join(set.dir, "raw");
+  const sources = (await readdir(sourceDir).catch(() => []))
+    .filter((name) => name.endsWith(".png"))
+    .sort();
+  if (sources.length === 0) throw new Error(`no source art in ${sourceDir}`);
+  await mkdir(set.dir, { recursive: true });
+
+  for (const name of sources) {
+    const slug = name.replace(/\.png$/, "");
+    const outPath = path.join(set.dir, `${slug}.webp`);
+    const next = await prepare(path.join(sourceDir, name));
+
+    if (checkOnly) {
+      const current = await readFile(outPath).catch(() => null);
+      if (!current || !current.equals(next)) stale.push(`${set.name}/${slug}`);
+      continue;
+    }
+
+    await writeFile(outPath, next);
+    prepared += 1;
+    console.log(`${set.name}/${slug}.webp — ${(next.length / 1024).toFixed(1)} kB`);
   }
-
-  await writeFile(outPath, next);
-  console.log(`${slug}.webp — ${(next.length / 1024).toFixed(1)} kB`);
 }
 
 if (checkOnly && stale.length > 0) {
-  console.error(`Category art is out of date: ${stale.join(", ")}`);
+  console.error(`Art is out of date: ${stale.join(", ")}`);
   console.error("Run: npm run art:categories");
   process.exit(1);
 }
 
-console.log(checkOnly ? "Category art is up to date." : `Prepared ${sources.length} icons.`);
+console.log(checkOnly ? "Art is up to date." : `Prepared ${prepared} icons.`);

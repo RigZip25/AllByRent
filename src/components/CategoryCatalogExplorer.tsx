@@ -19,8 +19,8 @@ function SubList({ items }: { items: SubcategoryItem[] }) {
           key={item.label}
           className="flex min-w-0 items-start gap-1.5 py-1.5 text-[14px] leading-snug text-gray-700"
         >
-          <span className="mt-px w-4 shrink-0 text-center" aria-hidden>
-            <ShelfIcon source={item} size={18} />
+          <span className="w-6 shrink-0 text-center" aria-hidden>
+            <ShelfIcon source={item} size={24} />
           </span>
           <span className="min-w-0 [overflow-wrap:anywhere]">
             {localizeCategoryLabel(item.label)}
