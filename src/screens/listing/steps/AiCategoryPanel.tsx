@@ -58,7 +58,7 @@ export function AiMatchCard({
           className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide"
           style={{ backgroundColor: `${GREEN_SOFT}1A`, color: GREEN_SOFT }}
         >
-          <Sparkles className="h-3.5 w-3.5" />
+          <Sparkles className="h-3.5 w-3.5 shrink-0" />
           {copy.matchTitle(APP_NAME)}
         </span>
         <h3 className="mt-1 text-xl font-bold text-gray-900">
@@ -110,7 +110,7 @@ export function AiChoicesCard({
           className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide"
           style={{ backgroundColor: `${GREEN_SOFT}1A`, color: GREEN_SOFT }}
         >
-          <Sparkles className="h-3.5 w-3.5" />
+          <Sparkles className="h-3.5 w-3.5 shrink-0" />
           {itemName || copy.choicesTitle}
         </span>
         <h3 className="mt-2 text-[17px] font-bold text-gray-900">{copy.choicesTitle}</h3>

@@ -67,6 +67,8 @@ function TileButton({
   label,
   hint,
   selected,
+  /** Highlighted as a likely answer without claiming the host chose it. */
+  suggested,
   onClick,
 }: {
   emoji?: string;
@@ -74,6 +76,7 @@ function TileButton({
   label: string;
   hint?: string;
   selected?: boolean;
+  suggested?: boolean;
   onClick: () => void;
 }) {
   return (
@@ -85,8 +88,8 @@ function TileButton({
         minHeight: hint ? 120 : 112,
         padding: 14,
         borderRadius: 16,
-        borderColor: selected ? GREEN : BORDER,
-        borderWidth: selected ? 2 : 1,
+        borderColor: selected ? GREEN : suggested ? GREEN_SOFT : BORDER,
+        borderWidth: selected || suggested ? 2 : 1,
         backgroundColor: selected ? `${GREEN}0D` : "#FFFFFF",
         boxShadow: selected ? `0 0 0 3px ${GREEN}22` : "none",
       }}
@@ -96,7 +99,7 @@ function TileButton({
           className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full text-white"
           style={{ backgroundColor: GREEN }}
         >
-          <Check className="h-3 w-3" strokeWidth={3} />
+          <Check className="h-3 w-3 shrink-0" strokeWidth={3} />
         </span>
       ) : null}
       {icon ? (
@@ -450,7 +453,7 @@ export function StepCategories({
               style={{ borderColor: BORDER, color: GREEN }}
               aria-label={common.back}
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-5 w-5 shrink-0" />
             </button>
           ) : null}
           <div className="min-w-0 flex-1">
@@ -665,17 +668,16 @@ export function StepCategories({
                 emoji="🏠"
                 label={item.personal}
                 hint={item.personalGradeHint}
-                selected={listingType === "personal" || (!listingType && preferredListingType === "personal")}
+                selected={listingType === "personal"}
+                suggested={!listingType && preferredListingType === "personal"}
                 onClick={() => pickListingType("personal")}
               />
               <TileButton
                 emoji="🛠️"
                 label={item.professional}
                 hint={item.professionalGradeHint}
-                selected={
-                  listingType === "professional" ||
-                  (!listingType && preferredListingType === "professional")
-                }
+                selected={listingType === "professional"}
+                suggested={!listingType && preferredListingType === "professional"}
                 onClick={() => pickListingType("professional")}
               />
               {preferredListingType && !listingType ? (
