@@ -17,11 +17,11 @@ const svg = `
     </linearGradient>
   </defs>
   <rect x="54" y="54" width="122" height="26" rx="13" fill="#F59E0B"/>
-  <g transform="translate(64 306)">
+  <g transform="translate(64 286)">
     <text x="0" y="0" font-family="Inter, Arial, sans-serif" font-size="66" font-weight="800" fill="#FFFFFF" letter-spacing="-1.8">Evorios</text>
-    <text x="0" y="82" font-family="Inter, Arial, sans-serif" font-size="46" font-weight="800" fill="#FDE68A" letter-spacing="-1.2">Everything nearby.</text>
-    <text x="0" y="144" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="650" fill="#EAF7EF">Rent · Sell · Gift</text>
-    <text x="0" y="184" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="650" fill="#EAF7EF">from your neighborhood.</text>
+    <text x="0" y="82" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="800" fill="#FDE68A" letter-spacing="-0.9">More around you</text>
+    <text x="0" y="132" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="800" fill="#FDE68A" letter-spacing="-0.9">than you think.</text>
+    <text x="0" y="196" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="650" fill="#EAF7EF">Rent · Sell · Gift</text>
   </g>
 </svg>`;
 
@@ -32,4 +32,4 @@ const png = new Resvg(svg, {
   },
 }).render().asPng();
 
-writeFileSync(resolve(root, "public/og/evorios-everything-nearby.png"), png);
+writeFileSync(resolve(root, "public/og/evorios-share-v2.png"), png);

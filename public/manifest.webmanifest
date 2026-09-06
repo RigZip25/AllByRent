@@ -1,7 +1,7 @@
 {
-  "name": "Evorios — Neighborly Marketplace",
+  "name": "Evorios — Your neighborhood marketplace",
   "short_name": "Evorios Market",
-  "description": "Neighborly marketplace — every home is a business cell that can rent, sell, or gift on the block.",
+  "description": "Discover useful things nearby—or turn what you own into a storefront.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
