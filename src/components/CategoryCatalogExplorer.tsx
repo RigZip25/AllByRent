@@ -5,6 +5,7 @@ import { localizeCategoryLabel } from "../lib/i18n/categoryLabels";
 import { useMessages } from "../lib/i18n/react";
 import { getCategoryCatalog, type CategoryCatalogEntry } from "../lib/homeCategoryPicks";
 import type { SubcategoryItem } from "../screens/listing/listingItemCategories";
+import { CategoryIcon } from "./CategoryIcon";
 import { ShelfIcon } from "./ShelfIcon";
 
 const GREEN = BRAND_GREEN;
@@ -51,9 +52,7 @@ function CategoryExpandRow({
         aria-expanded={open}
         className="flex min-h-[48px] w-full items-center gap-2.5 px-3.5 py-3 text-left active:bg-[#F7FBF8]"
       >
-        <span className="text-[20px]" aria-hidden>
-          {entry.icon}
-        </span>
+        <CategoryIcon category={entry.name} emoji={entry.icon} size={26} />
         <span className="min-w-0 flex-1 text-[15px] font-semibold text-gray-900">
           {localizeCategoryLabel(entry.name)}
         </span>
