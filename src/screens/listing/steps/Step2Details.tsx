@@ -15,6 +15,7 @@ function AiDetailsBanner({
   copyPending,
   copyFailed,
   onRetry,
+  onRetryCopy,
 }: {
   status: "idle" | "pending" | "done" | "failed";
   detected: number;
@@ -22,6 +23,7 @@ function AiDetailsBanner({
   copyPending: boolean;
   copyFailed: boolean;
   onRetry?: () => void;
+  onRetryCopy?: () => void;
 }) {
   const { listing } = useMessages();
   const copy = listing.aiCategory;
@@ -74,7 +76,19 @@ function AiDetailsBanner({
         ) : null}
 
         {copyFailed && !copyPending ? (
-          <p className="mt-1 text-[12px] font-semibold text-amber-800">{copy.writingCopyFailed}</p>
+          <div className="mt-1 flex flex-wrap items-center gap-3">
+            <p className="text-[12px] font-semibold text-amber-800">{copy.writingCopyFailed}</p>
+            {onRetryCopy ? (
+              <button
+                type="button"
+                onClick={onRetryCopy}
+                className="text-[12px] font-bold underline"
+                style={{ color: GREEN }}
+              >
+                {copy.tryAgain}
+              </button>
+            ) : null}
+          </div>
         ) : null}
       </div>
     </div>
@@ -94,6 +108,7 @@ export function Step2Details({
   copyPending = false,
   copyFailed = false,
   onRetryFieldFill,
+  onRetryCopy,
 }: StepProps & {
   gateMessage?: string | null;
   onDismissGateMessage?: () => void;
@@ -104,6 +119,7 @@ export function Step2Details({
   copyPending?: boolean;
   copyFailed?: boolean;
   onRetryFieldFill?: () => void;
+  onRetryCopy?: () => void;
 }) {
   return (
     <div className="flex flex-col">
@@ -114,6 +130,7 @@ export function Step2Details({
         copyPending={copyPending}
         copyFailed={copyFailed}
         onRetry={onRetryFieldFill}
+        onRetryCopy={onRetryCopy}
       />
       <Step2ItemInfo
         draft={draft}
