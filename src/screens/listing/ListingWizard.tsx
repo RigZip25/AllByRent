@@ -934,10 +934,12 @@ export function ListingWizard({
         }
 
         if (!draft.aiSuggestions) {
-          // Don't block Continue — soft-fill details in the background.
-          void runListingPhotoAnalysis();
+          await runListingPhotoAnalysis();
         }
-        goToStep(LISTING_STEP.details, 1);
+        goToStep(
+          isYardSaleListingActive() ? LISTING_STEP.details : LISTING_STEP.category,
+          1,
+        );
       } finally {
         setPhotoModerationPending(false);
       }
@@ -1012,16 +1014,22 @@ export function ListingWizard({
   };
 
   /** Soft-fill details from photos — call only after moderation passed. */
-  const runListingPhotoAnalysis = async () => {
+  const runListingPhotoAnalysis = async (): Promise<ListingDraft | null> => {
     setDraft((current) => ({ ...current, aiAnalysisPending: true }));
     try {
       const suggestions = await analyzeListingMediaPhotos(draft.photos);
-      setDraft((current) => applyAiSuggestionsToDraft(current, suggestions));
+      let appliedDraft: ListingDraft | null = null;
+      setDraft((current) => {
+        appliedDraft = applyAiSuggestionsToDraft(current, suggestions);
+        return appliedDraft;
+      });
+      return appliedDraft;
     } catch (error) {
       setDraft((current) => ({ ...current, aiAnalysisPending: false }));
       if (import.meta.env.DEV) {
         console.warn("AI photo analysis failed:", error);
       }
+      return null;
     }
   };
 
