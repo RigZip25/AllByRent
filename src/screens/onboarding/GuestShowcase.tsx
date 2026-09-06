@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../../lib/brand";
 import { useMessages } from "../../lib/i18n/react";
@@ -16,44 +16,110 @@ type Props = {
   onBack?: () => void;
 };
 
-type SlideId = "photos" | "enhance" | "roles" | "help";
+type SlideId =
+  | "hook"
+  | "browse"
+  | "modes"
+  | "snap"
+  | "enhance"
+  | "stock"
+  | "book"
+  | "trust"
+  | "yard"
+  | "share"
+  | "help"
+  | "cta";
+
+type SlideVisual =
+  | { kind: "image"; src: string; framed?: boolean }
+  | { kind: "placeholder"; artId: string };
 
 /**
- * Guest-only visual pitch — big pictures, short lines, then Sign up.
- * Sign in / Sign up from AuthWelcome skip this.
+ * Guest-only platform tour — full capability story, then Sign up.
+ * Missing art uses labeled placeholders until assets are added.
  */
 export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
   const t = useMessages();
   const copy = t.onboarding.guestShowcase;
   const [index, setIndex] = useState(0);
 
-  const slides: { id: SlideId; image: string; title: string; body: string; framed: boolean }[] = [
-    { id: "photos", image: listingSnap, title: copy.photosTitle, body: copy.photosBody, framed: true },
-    { id: "enhance", image: listingMagic, title: copy.enhanceTitle, body: copy.enhanceBody, framed: true },
+  const slides: { id: SlideId; title: string; body: string; visual: SlideVisual }[] = [
     {
-      id: "roles",
-      image: onboardingAssets.garageRoles,
-      title: copy.rolesTitle,
-      body: copy.rolesBody,
-      framed: false,
+      id: "hook",
+      title: copy.hookTitle,
+      body: copy.hookBody,
+      visual: { kind: "placeholder", artId: "hook" },
+    },
+    {
+      id: "browse",
+      title: copy.browseTitle,
+      body: copy.browseBody,
+      visual: { kind: "image", src: onboardingAssets.browseBlock, framed: true },
+    },
+    {
+      id: "modes",
+      title: copy.modesTitle,
+      body: copy.modesBody,
+      visual: { kind: "image", src: onboardingAssets.garageRoles },
+    },
+    {
+      id: "snap",
+      title: copy.snapTitle,
+      body: copy.snapBody,
+      visual: { kind: "image", src: listingSnap, framed: true },
+    },
+    {
+      id: "enhance",
+      title: copy.enhanceTitle,
+      body: copy.enhanceBody,
+      visual: { kind: "image", src: listingMagic, framed: true },
+    },
+    {
+      id: "stock",
+      title: copy.stockTitle,
+      body: copy.stockBody,
+      visual: { kind: "image", src: onboardingAssets.stockGarage },
+    },
+    {
+      id: "book",
+      title: copy.bookTitle,
+      body: copy.bookBody,
+      visual: { kind: "placeholder", artId: "book" },
+    },
+    {
+      id: "trust",
+      title: copy.trustTitle,
+      body: copy.trustBody,
+      visual: { kind: "placeholder", artId: "trust" },
+    },
+    {
+      id: "yard",
+      title: copy.yardTitle,
+      body: copy.yardBody,
+      visual: { kind: "placeholder", artId: "yard" },
+    },
+    {
+      id: "share",
+      title: copy.shareTitle,
+      body: copy.shareBody,
+      visual: { kind: "image", src: listingShare, framed: true },
     },
     {
       id: "help",
-      image: listingShare,
       title: copy.helpTitle(MASCOT_NAME),
       body: copy.helpBody(MASCOT_NAME),
-      framed: true,
+      visual: { kind: "image", src: onboardingAssets.mrEvoriosFull },
+    },
+    {
+      id: "cta",
+      title: copy.ctaTitle,
+      body: copy.ctaBody,
+      visual: { kind: "placeholder", artId: "cta" },
     },
   ];
 
   const isLast = index >= slides.length - 1;
   const slide = slides[index]!;
-
-  useEffect(() => {
-    if (isLast) return;
-    const id = window.setTimeout(() => setIndex((i) => Math.min(i + 1, slides.length - 1)), 3200);
-    return () => window.clearTimeout(id);
-  }, [index, isLast, slides.length]);
 
   return (
     <div
@@ -71,41 +137,20 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
         ) : (
           <span className="w-14" aria-hidden />
         )}
-        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">{APP_NAME}</p>
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+          {APP_NAME} · {index + 1}/{slides.length}
+        </p>
         <button type="button" onClick={onBrowseAsGuest} className="text-[15px] font-semibold text-gray-600">
           {t.common.skip}
         </button>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3">
-        <div className="mx-auto flex min-h-[42vh] max-w-[300px] items-center justify-center">
-          {slide.framed ? (
-            <div
-              className="relative w-[min(100%,240px)] overflow-hidden rounded-[28px] border-[7px] bg-black shadow-[0_24px_60px_rgba(13,92,58,0.22)]"
-              style={{ borderColor: "#1C2B22" }}
-            >
-              <div
-                className="absolute left-1/2 top-1.5 z-10 h-1.5 w-16 -translate-x-1/2 rounded-full bg-[#2A2A2A]"
-                aria-hidden
-              />
-              <img
-                src={slide.image}
-                alt=""
-                className="block aspect-[9/14] w-full object-cover object-center"
-                draggable={false}
-              />
-            </div>
-          ) : (
-            <img
-              src={slide.image}
-              alt=""
-              className="h-auto max-h-[42vh] w-full object-contain drop-shadow-lg"
-              draggable={false}
-            />
-          )}
+        <div className="mx-auto flex min-h-[38vh] max-w-[300px] items-center justify-center">
+          <SlideArt visual={slide.visual} label={copy.artPlaceholder} />
         </div>
 
-        <div className="mb-3 mt-4 flex justify-center gap-1.5">
+        <div className="mb-3 mt-4 flex flex-wrap justify-center gap-1.5">
           {slides.map((s, i) => (
             <button
               key={s.id}
@@ -113,7 +158,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
               onClick={() => setIndex(i)}
               className="h-1.5 rounded-full transition-all"
               style={{
-                width: i === index ? 28 : 10,
+                width: i === index ? 22 : 8,
                 backgroundColor: i === index ? GREEN : "#D1D5DB",
               }}
               aria-label={s.title}
@@ -122,7 +167,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
         </div>
 
         <h1
-          className="text-center text-[24px] font-extrabold leading-tight tracking-tight"
+          className="text-center text-[22px] font-extrabold leading-tight tracking-tight"
           style={{ color: GREEN }}
         >
           {slide.title}
@@ -131,7 +176,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
           {slide.body}
         </p>
 
-        {slide.id === "roles" ? (
+        {slide.id === "modes" ? (
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             {[copy.roleRent, copy.roleSell, copy.roleGift].map((label) => (
               <span
@@ -164,6 +209,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
             >
               {copy.browseCta}
             </button>
+            <p className="text-center text-[12px] leading-snug text-gray-400">{copy.footerHint}</p>
           </>
         ) : (
           <button
@@ -178,5 +224,57 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
         )}
       </div>
     </div>
+  );
+}
+
+function SlideArt({
+  visual,
+  label,
+}: {
+  visual: SlideVisual;
+  label: (id: string) => string;
+}) {
+  if (visual.kind === "placeholder") {
+    return (
+      <div
+        className="flex aspect-[9/14] w-[min(100%,240px)] flex-col items-center justify-center rounded-[28px] border-2 border-dashed px-4 text-center"
+        style={{ borderColor: `${GREEN}55`, backgroundColor: "#F3FAF6" }}
+      >
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Placeholder</p>
+        <p className="mt-2 text-[15px] font-bold" style={{ color: GREEN }}>
+          {label(visual.artId)}
+        </p>
+        <p className="mt-1 font-mono text-[12px] text-gray-400">art:{visual.artId}</p>
+      </div>
+    );
+  }
+
+  if (visual.framed) {
+    return (
+      <div
+        className="relative w-[min(100%,240px)] overflow-hidden rounded-[28px] border-[7px] bg-black shadow-[0_24px_60px_rgba(13,92,58,0.22)]"
+        style={{ borderColor: "#1C2B22" }}
+      >
+        <div
+          className="absolute left-1/2 top-1.5 z-10 h-1.5 w-16 -translate-x-1/2 rounded-full bg-[#2A2A2A]"
+          aria-hidden
+        />
+        <img
+          src={visual.src}
+          alt=""
+          className="block aspect-[9/14] w-full object-cover object-center"
+          draggable={false}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={visual.src}
+      alt=""
+      className="h-auto max-h-[38vh] w-full object-contain drop-shadow-lg"
+      draggable={false}
+    />
   );
 }
