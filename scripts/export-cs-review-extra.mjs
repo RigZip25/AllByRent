@@ -120,7 +120,7 @@ const seoMetaRows = [
   row(
     "28 · SEO · rent landing meta",
     "seo.meta.intro.hub",
-    "{{app}} is a neighborhood marketplace: every home is a business cell with a garage storefront. Browse {{noun}} near you, or stock your garage and earn when neighbors need them.",
+    "{{app}} is a neighborhood marketplace where every home can open a shop on the block. Browse {{noun}} near you, or stock your garage and earn when neighbors need them.",
   ),
 ];
 

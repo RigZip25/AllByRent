@@ -21,7 +21,7 @@
 #     → app robots.txt Disallow: /rent/ and /__seo/
 #
 # Indexing discipline:
-#   - Empty city page = founding CTA (business cell / open garage), not a dead end.
+#   - Empty city page = founding CTA (open a shop on the block), not a dead end.
 #   - Index a wide CEE net (CZ/SK/PL majors) so organic + social can cold-start anywhere
 #     in the launch region — including Poznań, Brno, Košice, etc.
 #   - Do NOT sitemap every city on Earth (doorway risk). Add a city to seoLocations when

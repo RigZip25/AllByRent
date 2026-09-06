@@ -616,7 +616,7 @@ export const en: AppMessages = {
       categories: { title: "Categories & subcategories", subtitle: "What’s on the block" },
     },
     ideaBody1: (appName) =>
-      `${appName} is a neighborhood marketplace. Each household is a business cell — your garage is the storefront for the block.`,
+      `${appName} is a neighborhood marketplace. Every home can open a shop on the block — your garage is the storefront neighbors can browse.`,
     ideaBody2:
       "Need a camera for a shoot, a chair for a new flat, or a bag for a work trip? Neighbors share. Own a shelf? List what you’re not using — one garage storefront, not a storage unit.",
     rememberTitle: "Remember",

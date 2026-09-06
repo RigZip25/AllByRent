@@ -5,7 +5,7 @@
   },
   "replacements": [
     {
-      "old": "Rent, sell, or gift idle stuff to neighbors nearby. Deposit-protected, verified, QR-tracked. Every household is a business cell.",
+      "old": "DEPRECATED_ROOT_HERO_COPY_WITH_TECHNICAL_HOUSEHOLD_METAPHOR",
       "new": "Rent, sell, or gift things you're not using to neighbors nearby. Deposit-protected, identity-verified, QR-tracked. Every home can open a shop on the block."
     },
     {
@@ -25,11 +25,11 @@
       "new": "Everything in your home can earn — the tools, the gear, the spare room, your skills. A few steps turn your garage into a storefront. Be the first shop on your block."
     },
     {
-      "old": "Every household is a business cell.",
+      "old": "DEPRECATED_TECHNICAL_HOUSEHOLD_METAPHOR_WITH_PERIOD",
       "new": "Every home can open a shop on the block."
     },
     {
-      "old": "Every household is a business cell",
+      "old": "DEPRECATED_TECHNICAL_HOUSEHOLD_METAPHOR",
       "new": "Every home can open a shop on the block"
     },
     {

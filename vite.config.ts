@@ -26,7 +26,7 @@ function pwaPlugin() {
         name: 'Evorios — Neighborly Marketplace',
         short_name: 'Evorios Market',
         description:
-          'Neighborly marketplace — every home is a business cell that can rent, sell, or gift on the block.',
+          'Rent, sell, or gift useful things within your neighborhood.',
         theme_color: '#0D5C3A',
         background_color: '#062a1c',
         display: 'standalone',

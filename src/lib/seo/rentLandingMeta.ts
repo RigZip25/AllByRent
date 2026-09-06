@@ -58,7 +58,7 @@ export function buildRentLandingMeta(params: {
     canonicalUrl: rentLandingAbsoluteUrl(path),
     robots: SEO_CATEGORY_HUBS_INDEXABLE ? "index,follow" : "noindex,follow",
     h1: `Rent ${noun} from neighbors`,
-    intro: `${APP_NAME} is a neighborhood marketplace: every home is a business cell with a garage storefront. Browse ${noun} near you, or stock your garage and earn when neighbors need them.`,
+    intro: `${APP_NAME} is a neighborhood marketplace where every home can open a shop on the block. Browse ${noun} near you, or stock your garage and earn when neighbors need them.`,
   };
 }
 
