@@ -9,7 +9,7 @@ import guestHelpGateway from "../../imports/onboarding/evorios_guest_help_gatewa
 import guestHookGarage from "../../imports/onboarding/evorios_guest_hook_garage.png";
 import guestModesExchange from "../../imports/onboarding/evorios_guest_modes_exchange.png";
 import guestSnapBikeV2 from "../../imports/onboarding/evorios_guest_snap_bike_v2.png";
-import guestYardNetwork from "../../imports/onboarding/evorios_guest_yard_network.png";
+import guestYardNetworkV2 from "../../imports/onboarding/evorios_guest_yard_network_v2.png";
 import guestShareNetwork from "../../imports/onboarding/evorios_guest_share_network.png";
 
 const GREEN = BRAND_GREEN;
@@ -87,7 +87,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
         id: "yard",
         title: copy.yardTitle,
         body: copy.yardBody,
-        visual: { kind: "image", src: guestYardNetwork },
+        visual: { kind: "image", src: guestYardNetworkV2 },
       },
       {
         id: "share",
