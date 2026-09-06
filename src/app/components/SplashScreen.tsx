@@ -1,7 +1,7 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { Bike, Camera, Car, Guitar, Home, MapPin, Tent } from "lucide-react";
+import { Bike, Camera, Car, Guitar, Home, Tent } from "lucide-react";
 import mascotImg from "../../imports/rentano_splash_transparent.png";
 import evoriosSplashImg from "../../imports/evorios_splash_garage.png";
 import { EvoriosWordmark } from "../../components/EvoriosWordmark";
@@ -83,17 +83,6 @@ function getRowPos(index: number) {
   };
 }
 
-function TrustChip({ icon, label }: { icon: ReactNode; label: string }) {
-  return (
-    <div className="flex items-center gap-2 text-[clamp(0.78rem,3.2vw,0.95rem)] font-medium text-[#0D5C3A]/88">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0D5C3A]/10">
-        {icon}
-      </span>
-      <span>{label}</span>
-    </div>
-  );
-}
-
 type SplashScreenProps = {
   onDone: () => void;
   /** `?screen=splash` — static full layout, no auto-advance */
@@ -124,56 +113,52 @@ function SplashArtOnly() {
   );
 }
 
-function SplashStaticPreview() {
-  const messages = useMessages();
+function SplashStatic({
+  onDone,
+  preview,
+}: {
+  onDone: () => void;
+  preview: boolean;
+}) {
+  useEffect(() => {
+    if (preview) return;
+
+    const timer = setTimeout(onDone, T_AUTO_ADVANCE);
+    return () => clearTimeout(timer);
+  }, [onDone, preview]);
 
   return (
-    <div className="splash-v2-overlay splash-static-overlay flex flex-col overflow-hidden">
-      <div className="splash-v2-safe splash-static-layout relative flex min-h-0 flex-1 flex-col">
-        <div className="splash-static-hero flex flex-col items-center justify-center gap-3 px-5">
-          <h1 className="text-[clamp(2rem,10.5vw,3.25rem)] leading-none">
-            <EvoriosWordmark variant="splash-light" />
-          </h1>
+    <div
+      className="splash-v2-overlay splash-static-overlay flex flex-col overflow-hidden"
+      role={preview ? undefined : "button"}
+      tabIndex={preview ? undefined : 0}
+      onClick={preview ? undefined : onDone}
+      onKeyDown={
+        preview
+          ? undefined
+          : (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onDone();
+              }
+            }
+      }
+      aria-label={preview ? undefined : "Continue"}
+    >
+      <div className="splash-v2-safe relative flex min-h-0 flex-1 flex-col">
+        <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center p-3">
           <img
-            src={mascotImg}
-            alt={MASCOT_NAME}
+            src={evoriosSplashImg}
+            alt="Evorios open garage welcome"
             draggable={false}
-            className="h-[min(42vw,12.5rem)] w-[min(42vw,12.5rem)] object-contain select-none"
+            className="splash-static-artwork"
           />
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {[Camera, Bike, Tent, Car, Guitar, Home].map((Icon, i) => (
-              <span
-                key={i}
-                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#0D5C3A]/15 bg-white shadow-sm"
-              >
-                <Icon className="h-5 w-5" style={{ color: BRAND_GREEN }} strokeWidth={1.75} />
-              </span>
-            ))}
-          </div>
-          <div className="splash-static-copy shrink-0 pt-1 text-center">
-            <p className="text-[clamp(0.95rem,4vw,1.15rem)] font-medium leading-snug text-[#0D5C3A]/85">
-              {messages.tagline}
-            </p>
-            <p className="mt-1 text-[clamp(0.82rem,3.5vw,1rem)] font-semibold tracking-wide text-[#0D5C3A]/65">
-              {messages.taglineShort}
-            </p>
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-              <TrustChip
-                icon={<Home className="h-4 w-4 text-[#0D5C3A]" strokeWidth={2} />}
-                label={messages.splash.chipGarage}
-              />
-              <span className="text-[#0D5C3A]/25">·</span>
-              <TrustChip
-                icon={<MapPin className="h-4 w-4 text-[#0D5C3A]" strokeWidth={2} />}
-                label={messages.splash.chipBlock}
-              />
-            </div>
-          </div>
         </div>
-
-        <footer className="shrink-0 px-5 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-2">
-          <p className="text-center text-xs text-[#0D5C3A]/50">Static splash preview — no auto-advance</p>
-        </footer>
+        {preview ? (
+          <p className="pointer-events-none shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] text-center text-xs text-[#0D5C3A]/45">
+            Static splash preview — tap disabled
+          </p>
+        ) : null}
       </div>
     </div>
   );
@@ -358,10 +343,8 @@ export function SplashScreen({
     <SplashArtOnly />
   ) : dynamicPreview ? (
     <SplashDynamic onDone={onDone} preview />
-  ) : preview ? (
-    <SplashStaticPreview />
   ) : (
-    <SplashDynamic onDone={onDone} preview={false} />
+    <SplashStatic onDone={onDone} preview={preview} />
   );
 
   return createPortal(content, document.body);
