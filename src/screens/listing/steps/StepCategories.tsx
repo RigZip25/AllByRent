@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Check, ChevronLeft } from "lucide-react";
 import type { StepProps } from "../types";
 import { Emoji } from "../../../app/components/Emoji";
+import { CategoryIcon } from "../../../components/CategoryIcon";
 import { ShelfIcon } from "../../../components/ShelfIcon";
 import { APP_NAME } from "../../../lib/brand";
 import { localizeCategoryLabel } from "../../../lib/i18n/categoryLabels";
@@ -32,6 +33,7 @@ type StepCategoriesProps = StepProps & {
 function TileButton({
   emoji,
   icon,
+  category,
   label,
   hint,
   selected,
@@ -39,6 +41,8 @@ function TileButton({
 }: {
   emoji?: string;
   icon?: SubcategoryItem;
+  /** Canonical category name, when the tile stands for a whole category. */
+  category?: string;
   label: string;
   hint?: string;
   selected?: boolean;
@@ -69,6 +73,8 @@ function TileButton({
       ) : null}
       {icon ? (
         <ShelfIcon source={icon} size={48} />
+      ) : category ? (
+        <CategoryIcon category={category} emoji={emoji} size={48} />
       ) : emoji ? (
         <Emoji emoji={emoji} size={48} />
       ) : null}
@@ -328,7 +334,7 @@ export function StepCategories({
             className="inline-flex items-center gap-1.5 rounded-full border bg-white px-2.5 py-1 text-[12px] font-semibold"
             style={{ borderColor: phase === "category" ? GREEN : BORDER, color: GREEN }}
           >
-            <Emoji emoji={selectedCategoryIcon} size={16} />
+            <CategoryIcon category={draft.category} emoji={selectedCategoryIcon} size={18} />
             {localizeCategoryLabel(draft.category)}
           </button>
           {gradePick || draft.grade ? (
@@ -395,6 +401,7 @@ export function StepCategories({
                 {categoryChips.map((chip) => (
                   <TileButton
                     key={chip.name}
+                    category={chip.name}
                     emoji={chip.icon}
                     label={localizeCategoryLabel(chip.name)}
                     selected={draft.category === chip.name}
