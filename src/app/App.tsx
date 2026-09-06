@@ -4,8 +4,6 @@ import { AppBrandHeader } from "../components/AppBrandHeader";
 import { OfflineScreen } from "./components/OfflineScreen";
 import { GarageShopMissingScreen } from "./components/GarageShopMissingScreen";
 import { SplashScreen } from "./components/SplashScreen";
-import { InstallGateScreen } from "../screens/InstallGateScreen";
-import { InstallHintToast } from "../components/InstallHintToast";
 import { FirstHello } from "../screens/onboarding/FirstHello";
 import { AuthWelcome } from "../screens/onboarding/AuthWelcome";
 import { GuestShowcase } from "../screens/onboarding/GuestShowcase";
@@ -117,12 +115,6 @@ import {
 } from "../lib/deepLinks";
 import type { ShelfPrefill } from "../lib/shelfListings";
 import { isSimulateUpdateRequested } from "../lib/pwaUpdateStorage";
-import {
-  markInstallGateDone,
-  markInstallHintSeen,
-  shouldShowInstallGate,
-  shouldShowInstallHint,
-} from "../lib/pwaInstallGate";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import {
   consumeAuthCallbackResume,
@@ -166,8 +158,6 @@ type YardSaleHubChoice = "browse" | "host";
 
 type Screen =
   | "splash"
-  | "installGate"
-  | "installHint"
   | "authWelcome"
   | "guestShowcase"
   | "firstHello"
@@ -370,14 +360,12 @@ const ONBOARDING_BACK_FALLBACK: Partial<Record<Screen, Screen>> = {
   authWelcome: "splash",
   guestShowcase: "authWelcome",
   firstHello: "authWelcome",
-  installHint: "firstHello",
   whatIsEvorios: "firstHello",
   whatDoYouWant: "whatIsEvorios",
   whereAreYou: "whatDoYouWant",
   whereAreYouManual: "whereAreYou",
   whereAreYouHeading: "whereAreYou",
   onboardingAllSet: "whereAreYou",
-  installGate: "splash",
 };
 
 /** Listing flow only — used when the nav stack is empty (not onboarding fallbacks). */
@@ -403,9 +391,7 @@ function isOnboardingScreen(screen: Screen): boolean {
     screen === "authWelcome" ||
     screen === "guestShowcase" ||
     screen === "firstHello" ||
-    screen === "installHint" ||
-    screen === "onboardingAllSet" ||
-    screen === "installGate"
+    screen === "onboardingAllSet"
   );
 }
 
@@ -519,7 +505,6 @@ function cleanupSplashGlobals() {
 }
 
 function resolvePostSplashScreen(): Screen {
-  if (shouldShowInstallGate()) return "installGate";
   if (!hasAuthWelcomeDone()) return "authWelcome";
   // Guest marketing tour in progress (Sign in / Sign up mark onboarding complete and skip this).
   if (!hasGuestShowcaseDone() && !isOnboardingComplete()) return "guestShowcase";
@@ -1326,25 +1311,6 @@ function AppRoutes() {
     if (currentScreen === "firstHello") {
       markIntroDone();
       setNavStack([]);
-      if (shouldShowInstallHint()) {
-        setCurrentScreen("installHint");
-        return;
-      }
-      setCurrentScreen(
-        isOnboardingComplete()
-          ? landAfterOnboarding()
-          : hasProductIntro()
-            ? hasRoleChoice()
-              ? "whereAreYou"
-              : "whatDoYouWant"
-            : "whatIsEvorios",
-      );
-      return;
-    }
-
-    if (currentScreen === "installHint") {
-      markInstallHintSeen();
-      setNavStack([]);
       setCurrentScreen(
         isOnboardingComplete()
           ? landAfterOnboarding()
@@ -1437,13 +1403,6 @@ function AppRoutes() {
     setCurrentScreen("home");
   }, []);
 
-  const handleInstallGateInstalled = useCallback(() => {
-    markInstallGateDone();
-    setNavStack([]);
-    // Gate is done — resolve again without re-entering installGate.
-    setCurrentScreen(resolvePostSplashScreen());
-  }, []);
-
   const continueAfterHello = useCallback(() => {
     if (isOnboardingComplete()) {
       setNavStack([]);
@@ -1463,16 +1422,8 @@ function AppRoutes() {
 
   const handleContinueFromHello = () => {
     markIntroDone();
-    if (shouldShowInstallHint()) {
-      navigateTo("installHint");
-      return;
-    }
     continueAfterHello();
   };
-
-  const handleInstallHintDone = useCallback(() => {
-    continueAfterHello();
-  }, [continueAfterHello]);
 
   const handleContinueFromProductIntro = () => {
     markProductIntroDone();
@@ -1663,11 +1614,6 @@ function AppRoutes() {
         const previous = stack[stack.length - 1];
         setCurrentScreen(previous);
         return stack.slice(0, -1);
-      }
-      if (currentScreen === "installGate") {
-        // Stay on the install coach — going back to splash auto-advances and
-        // used to skip the instructions after the gate was marked done.
-        return stack;
       }
       if (currentScreen === "createOpenSale") {
         setCurrentScreen(sellPathListingId ? "sellPathChoice" : "openGarageSale");
@@ -2018,12 +1964,6 @@ function AppRoutes() {
           />
         )}
 
-        {currentScreen === "installGate" && (
-          <InstallGateScreen
-            onInstalledContinue={handleInstallGateInstalled}
-          />
-        )}
-
         {currentScreen === "authWelcome" && (
           <AuthWelcome
             onSignIn={handleAuthWelcomeSignIn}
@@ -2044,15 +1984,6 @@ function AppRoutes() {
           <FirstHello
             onNext={handleContinueFromHello}
             onSkip={skipOnboarding}
-            onBack={handleBack}
-          />
-        )}
-
-        {currentScreen === "installHint" && (
-          <InstallHintToast
-            mode="step"
-            enabled
-            onDone={handleInstallHintDone}
             onBack={handleBack}
           />
         )}
@@ -2649,18 +2580,6 @@ function AppRoutes() {
       <BirthdayGreetingHost
         enabled={
           currentScreen !== "splash" &&
-          currentScreen !== "installGate" &&
-          currentScreen !== "installHint" &&
-          !isOnboardingScreen(currentScreen)
-        }
-      />
-
-      <InstallHintToast
-        mode="overlay"
-        enabled={
-          currentScreen !== "splash" &&
-          currentScreen !== "installGate" &&
-          currentScreen !== "installHint" &&
           !isOnboardingScreen(currentScreen)
         }
       />
