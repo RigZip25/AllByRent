@@ -22,20 +22,17 @@ type SlideId =
   | "modes"
   | "snap"
   | "enhance"
-  | "stock"
   | "book"
-  | "trust"
   | "yard"
   | "share"
-  | "help"
-  | "cta";
+  | "help";
 
 type SlideVisual =
   | { kind: "image"; src: string; framed?: boolean }
   | { kind: "placeholder"; artId: string };
 
 /**
- * Guest-only platform tour — full capability story, then Sign up.
+ * Guest platform tour (9 slides) — then Sign up on the last screen.
  * Missing art uses labeled placeholders until assets are added.
  */
 export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
@@ -75,22 +72,10 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
       visual: { kind: "image", src: listingMagic, framed: true },
     },
     {
-      id: "stock",
-      title: copy.stockTitle,
-      body: copy.stockBody,
-      visual: { kind: "image", src: onboardingAssets.stockGarage },
-    },
-    {
       id: "book",
       title: copy.bookTitle,
-      body: copy.bookBody,
+      body: `${copy.bookBody} ${copy.trustBody}`,
       visual: { kind: "placeholder", artId: "book" },
-    },
-    {
-      id: "trust",
-      title: copy.trustTitle,
-      body: copy.trustBody,
-      visual: { kind: "placeholder", artId: "trust" },
     },
     {
       id: "yard",
@@ -109,12 +94,6 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
       title: copy.helpTitle(MASCOT_NAME),
       body: copy.helpBody(MASCOT_NAME),
       visual: { kind: "image", src: onboardingAssets.mrEvoriosFull },
-    },
-    {
-      id: "cta",
-      title: copy.ctaTitle,
-      body: copy.ctaBody,
-      visual: { kind: "placeholder", artId: "cta" },
     },
   ];
 
@@ -145,12 +124,12 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
         </button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3">
-        <div className="mx-auto flex min-h-[38vh] max-w-[300px] items-center justify-center">
+      <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+        <div className="mx-auto flex min-h-[44vh] w-full max-w-[360px] items-center justify-center">
           <SlideArt visual={slide.visual} label={copy.artPlaceholder} />
         </div>
 
-        <div className="mb-3 mt-4 flex flex-wrap justify-center gap-1.5">
+        <div className="mb-3 mt-3 flex justify-center gap-1.5">
           {slides.map((s, i) => (
             <button
               key={s.id}
@@ -158,7 +137,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
               onClick={() => setIndex(i)}
               className="h-1.5 rounded-full transition-all"
               style={{
-                width: i === index ? 22 : 8,
+                width: i === index ? 20 : 7,
                 backgroundColor: i === index ? GREEN : "#D1D5DB",
               }}
               aria-label={s.title}
@@ -172,12 +151,12 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
         >
           {slide.title}
         </h1>
-        <p className="mx-auto mt-2 max-w-[320px] text-center text-[15px] leading-snug text-gray-600">
+        <p className="mx-auto mt-2 max-w-[340px] text-center text-[15px] leading-snug text-gray-600">
           {slide.body}
         </p>
 
         {slide.id === "modes" ? (
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
             {[copy.roleRent, copy.roleSell, copy.roleGift].map((label) => (
               <span
                 key={label}
@@ -237,7 +216,7 @@ function SlideArt({
   if (visual.kind === "placeholder") {
     return (
       <div
-        className="flex aspect-[9/14] w-[min(100%,240px)] flex-col items-center justify-center rounded-[28px] border-2 border-dashed px-4 text-center"
+        className="flex aspect-[4/5] w-full flex-col items-center justify-center rounded-[24px] border-2 border-dashed px-4 text-center"
         style={{ borderColor: `${GREEN}55`, backgroundColor: "#F3FAF6" }}
       >
         <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Placeholder</p>
@@ -252,7 +231,7 @@ function SlideArt({
   if (visual.framed) {
     return (
       <div
-        className="relative w-[min(100%,240px)] overflow-hidden rounded-[28px] border-[7px] bg-black shadow-[0_24px_60px_rgba(13,92,58,0.22)]"
+        className="relative w-full overflow-hidden rounded-[24px] border-[6px] bg-black shadow-[0_20px_48px_rgba(13,92,58,0.2)]"
         style={{ borderColor: "#1C2B22" }}
       >
         <div
@@ -262,7 +241,7 @@ function SlideArt({
         <img
           src={visual.src}
           alt=""
-          className="block aspect-[9/14] w-full object-cover object-center"
+          className="block aspect-[4/5] w-full object-cover object-center"
           draggable={false}
         />
       </div>
@@ -273,7 +252,7 @@ function SlideArt({
     <img
       src={visual.src}
       alt=""
-      className="h-auto max-h-[38vh] w-full object-contain drop-shadow-lg"
+      className="h-auto max-h-[44vh] w-full object-contain drop-shadow-lg"
       draggable={false}
     />
   );
