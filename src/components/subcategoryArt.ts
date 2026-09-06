@@ -1,3 +1,14 @@
+import babyBabyCarriers from "../imports/subcategories/baby-baby-carriers.webp";
+import babyCarSeats from "../imports/subcategories/baby-car-seats.webp";
+import babyChildcareEquipment from "../imports/subcategories/baby-childcare-equipment.webp";
+import babyCommercialPlayEquipment from "../imports/subcategories/baby-commercial-play-equipment.webp";
+import babyCribsBeds from "../imports/subcategories/baby-cribs-beds.webp";
+import babyEducationalTools from "../imports/subcategories/baby-educational-tools.webp";
+import babyGroupActivityGear from "../imports/subcategories/baby-group-activity-gear.webp";
+import babyOther from "../imports/subcategories/baby-other.webp";
+import babySafetySystems from "../imports/subcategories/baby-safety-systems.webp";
+import babyStrollers from "../imports/subcategories/baby-strollers.webp";
+import babyToysGames from "../imports/subcategories/baby-toys-games.webp";
 import gardenGardenTools from "../imports/subcategories/garden-garden-tools.webp";
 import gardenHouseplantsSeedlings from "../imports/subcategories/garden-houseplants-seedlings.webp";
 import gardenIrrigationSystems from "../imports/subcategories/garden-irrigation-systems.webp";
@@ -47,6 +58,17 @@ import toolsWeldingEquipment from "../imports/subcategories/tools-welding-equipm
  * and keep drawing their emoji.
  */
 export const SUBCATEGORY_ART = {
+  "baby-baby-carriers": babyBabyCarriers,
+  "baby-car-seats": babyCarSeats,
+  "baby-childcare-equipment": babyChildcareEquipment,
+  "baby-commercial-play-equipment": babyCommercialPlayEquipment,
+  "baby-cribs-beds": babyCribsBeds,
+  "baby-educational-tools": babyEducationalTools,
+  "baby-group-activity-gear": babyGroupActivityGear,
+  "baby-other": babyOther,
+  "baby-safety-systems": babySafetySystems,
+  "baby-strollers": babyStrollers,
+  "baby-toys-games": babyToysGames,
   "garden-garden-tools": gardenGardenTools,
   "garden-houseplants-seedlings": gardenHouseplantsSeedlings,
   "garden-irrigation-systems": gardenIrrigationSystems,
