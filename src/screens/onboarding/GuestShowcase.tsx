@@ -5,6 +5,7 @@ import { useMessages } from "../../lib/i18n/react";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 import guestBrowseNeighborhood from "../../imports/onboarding/evorios_guest_browse_neighborhood.png";
 import guestHookGarage from "../../imports/onboarding/evorios_guest_hook_garage.png";
+import guestModesExchange from "../../imports/onboarding/evorios_guest_modes_exchange.png";
 import listingSnap from "../../imports/listing_snap.png";
 import listingMagic from "../../imports/listing_magic.png";
 import listingShare from "../../imports/listing_share.png";
@@ -59,7 +60,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
       id: "modes",
       title: copy.modesTitle,
       body: copy.modesBody,
-      visual: { kind: "image", src: onboardingAssets.garageRoles },
+      visual: { kind: "image", src: guestModesExchange },
     },
     {
       id: "snap",
