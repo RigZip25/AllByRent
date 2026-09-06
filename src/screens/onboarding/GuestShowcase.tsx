@@ -79,7 +79,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
     {
       id: "book",
       title: copy.bookTitle,
-      body: `${copy.bookBody} ${copy.trustBody}`,
+      body: [copy.bookBody, copy.trustBody].filter(Boolean).join(" "),
       visual: { kind: "image", src: guestBookHandoff },
     },
     {
@@ -124,9 +124,13 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
         <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
           {APP_NAME} · {index + 1}/{slides.length}
         </p>
-        <button type="button" onClick={onBrowseAsGuest} className="text-[15px] font-semibold text-gray-600">
-          {t.common.skip}
-        </button>
+        {isLast ? (
+          <span className="w-14" aria-hidden />
+        ) : (
+          <button type="button" onClick={onBrowseAsGuest} className="text-[15px] font-semibold text-gray-600">
+            {t.common.skip}
+          </button>
+        )}
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
@@ -177,24 +181,14 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
 
       <div className="shrink-0 space-y-2.5 px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-2">
         {isLast ? (
-          <>
-            <button
-              type="button"
-              onClick={onSignUp}
-              className="flex min-h-[52px] w-full items-center justify-center rounded-2xl py-3.5 text-[17px] font-bold text-white shadow-[0_10px_28px_rgba(13,92,58,0.28)]"
-              style={{ backgroundColor: GREEN }}
-            >
-              {copy.signUpCta}
-            </button>
-            <button
-              type="button"
-              onClick={onBrowseAsGuest}
-              className="w-full py-2.5 text-center text-[14px] font-semibold text-gray-500"
-            >
-              {copy.browseCta}
-            </button>
-            <p className="text-center text-[12px] leading-snug text-gray-400">{copy.footerHint}</p>
-          </>
+          <button
+            type="button"
+            onClick={onSignUp}
+            className="flex min-h-[52px] w-full items-center justify-center rounded-2xl py-3.5 text-[17px] font-bold text-white shadow-[0_10px_28px_rgba(13,92,58,0.28)]"
+            style={{ backgroundColor: GREEN }}
+          >
+            {copy.signUpCta}
+          </button>
         ) : (
           <button
             type="button"
