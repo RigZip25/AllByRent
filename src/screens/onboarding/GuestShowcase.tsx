@@ -10,7 +10,7 @@ import guestHookGarage from "../../imports/onboarding/evorios_guest_hook_garage.
 import guestModesExchange from "../../imports/onboarding/evorios_guest_modes_exchange.png";
 import guestSnapBikeV2 from "../../imports/onboarding/evorios_guest_snap_bike_v2.png";
 import guestYardNetworkV2 from "../../imports/onboarding/evorios_guest_yard_network_v2.png";
-import guestShareNetwork from "../../imports/onboarding/evorios_guest_share_network.png";
+import guestShareNetworkV2 from "../../imports/onboarding/evorios_guest_share_network_v2.png";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
@@ -93,7 +93,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
         id: "share",
         title: copy.shareTitle,
         body: copy.shareBody,
-        visual: { kind: "image", src: guestShareNetwork },
+        visual: { kind: "image", src: guestShareNetworkV2 },
       },
       {
         id: "help",
