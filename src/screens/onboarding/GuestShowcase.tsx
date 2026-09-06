@@ -8,7 +8,7 @@ import guestEnhanceProjector from "../../imports/onboarding/evorios_guest_enhanc
 import guestHelpGateway from "../../imports/onboarding/evorios_guest_help_gateway.png";
 import guestHookGarage from "../../imports/onboarding/evorios_guest_hook_garage.png";
 import guestModesExchange from "../../imports/onboarding/evorios_guest_modes_exchange.png";
-import guestSnapBike from "../../imports/onboarding/evorios_guest_snap_bike.png";
+import guestSnapBikeV2 from "../../imports/onboarding/evorios_guest_snap_bike_v2.png";
 import guestYardNetwork from "../../imports/onboarding/evorios_guest_yard_network.png";
 import guestShareNetwork from "../../imports/onboarding/evorios_guest_share_network.png";
 
@@ -69,7 +69,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
         id: "snap",
         title: copy.snapTitle,
         body: copy.snapBody,
-        visual: { kind: "image", src: guestSnapBike },
+        visual: { kind: "image", src: guestSnapBikeV2 },
       },
       {
         id: "enhance",
