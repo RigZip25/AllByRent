@@ -3,7 +3,7 @@ import { ScanFace, Mail } from "lucide-react";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN } from "../../lib/brand";
 import { isReturningAccountDevice, shouldShowPasskeyLogin } from "../../lib/auth";
 import { useMessages } from "../../lib/i18n/react";
-import { onboardingAssets } from "../../lib/onboardingAssets";
+import authWelcomeShowcase from "../../imports/onboarding/evorios_auth_welcome_showcase.png";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
@@ -36,12 +36,12 @@ export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
         <div className="mx-auto mb-4 max-w-[280px]">
           <img
-            src={onboardingAssets.garageRoles}
+            src={authWelcomeShowcase}
             alt=""
-            className="h-auto max-h-[200px] w-full object-contain"
+            className="h-auto max-h-[220px] w-full object-contain"
             draggable={false}
-            width={560}
-            height={400}
+            width={1536}
+            height={1024}
           />
         </div>
 
