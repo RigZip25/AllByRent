@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { buildConfirmedCopyFacts } from "../../src/screens/listing/ai/copyFacts";
 import { createInitialListingDraft } from "../../src/screens/listing/types";
+import { needsGeneratedCopy } from "../../src/screens/listing/validation";
 
 const completeLlmChat = vi.fn();
 
@@ -100,7 +101,51 @@ describe("confirmed facts from the draft", () => {
     expect(values).not.toContain("1800");
   });
 
+  it("passes choice fields as the label the host saw, not the stored token", () => {
+    const draft = {
+      ...createInitialListingDraft(),
+      category: "Photo & Video",
+      subcategory: "Camera Kits",
+      categorySpecs: { kitIncludes: "body_only" },
+    };
+
+    const facts = buildConfirmedCopyFacts(
+      draft,
+      { kitIncludes: "What's in the kit" },
+      { body_only: "Body / item only" },
+    );
+
+    expect(facts).toContainEqual({
+      label: "What's in the kit",
+      value: "Body / item only",
+    });
+  });
+
   it("returns nothing to assert when the host filled nothing in", () => {
     expect(buildConfirmedCopyFacts(createInitialListingDraft())).toEqual([]);
+  });
+});
+
+describe("when copy gets written", () => {
+  const ready = {
+    ...createInitialListingDraft(),
+    category: "Photo & Video",
+    subcategory: "Camera Kits",
+    condition: "good" as const,
+    replacementValue: "1800",
+    modes: { rent: false, sell: false, rentToOwn: false, gift: true },
+    categorySpecs: { brand: "Sony", model: "A7 III", kitIncludes: "body_only" },
+  };
+
+  it("waits for the details the description would be built from", () => {
+    expect(needsGeneratedCopy({ ...ready, condition: "" })).toBe(false);
+    expect(needsGeneratedCopy(ready)).toBe(true);
+  });
+
+  it("still drafts the description when the host wrote only a title", () => {
+    expect(needsGeneratedCopy({ ...ready, title: "My own camera title" })).toBe(true);
+    expect(
+      needsGeneratedCopy({ ...ready, title: "My own camera title", description: "Mine too" }),
+    ).toBe(false);
   });
 });

@@ -1214,7 +1214,7 @@ export function ListingWizard({
         subcategory: draft.subcategory,
         listingType,
         itemName: draft.categoryDecision?.itemName || draft.subcategory,
-        facts: buildConfirmedCopyFacts(draft, specFieldLabels),
+        facts: buildConfirmedCopyFacts(draft, specFieldLabels, listing.specs.options),
         locale,
       });
 
@@ -1662,6 +1662,7 @@ export function ListingWizard({
                 copyPending={copyPending}
                 copyFailed={copyFailed}
                 onRetryFieldFill={() => void runFieldFill()}
+                onRetryCopy={() => void runCopyGeneration()}
               />
             )}
           </motion.div>

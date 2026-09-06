@@ -1,4 +1,4 @@
-import { getCategorySpecFields } from "../categorySpecs";
+import { getCategorySpecFields, type SpecFieldDef } from "../categorySpecs";
 import type { ListingDraft } from "../types";
 import type { ListingCopyFact } from "./listingCopy";
 
@@ -13,6 +13,24 @@ const CONDITION_LABELS: Record<string, string> = {
 };
 
 /**
+ * Choice fields are stored as tokens like `body_only`, which read as noise in a
+ * description. The host saw the option's label, so that is the confirmed fact.
+ */
+function readableSpecValue(
+  field: SpecFieldDef,
+  value: string,
+  optionLabels?: Record<string, string>,
+): string {
+  if (field.type !== "select" && field.type !== "multiselect") return value;
+  return value
+    .split(",")
+    .map((token) => token.trim())
+    .filter(Boolean)
+    .map((token) => optionLabels?.[token] ?? token)
+    .join(", ");
+}
+
+/**
  * Confirmed facts for title/description generation.
  *
  * Only values the host has seen on the details step are included, which is what
@@ -21,6 +39,7 @@ const CONDITION_LABELS: Record<string, string> = {
 export function buildConfirmedCopyFacts(
   draft: ListingDraft,
   labels?: Record<string, string>,
+  optionLabels?: Record<string, string>,
 ): ListingCopyFact[] {
   const facts: ListingCopyFact[] = [];
 
@@ -42,7 +61,10 @@ export function buildConfirmedCopyFacts(
     if (EXCLUDED_SPEC_KEYS.test(field.key)) continue;
     const value = draft.categorySpecs?.[field.key]?.trim();
     if (!value) continue;
-    facts.push({ label: labels?.[field.key] ?? field.key, value });
+    facts.push({
+      label: labels?.[field.key] ?? field.key,
+      value: readableSpecValue(field, value, optionLabels),
+    });
   }
 
   return facts;
