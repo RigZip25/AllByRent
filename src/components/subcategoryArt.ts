@@ -1,3 +1,20 @@
+import gardenGardenTools from "../imports/subcategories/garden-garden-tools.webp";
+import gardenHouseplantsSeedlings from "../imports/subcategories/garden-houseplants-seedlings.webp";
+import gardenIrrigationSystems from "../imports/subcategories/garden-irrigation-systems.webp";
+import gardenLandscapeEquipment from "../imports/subcategories/garden-landscape-equipment.webp";
+import gardenLawnMowers from "../imports/subcategories/garden-lawn-mowers.webp";
+import gardenLeafBlowers from "../imports/subcategories/garden-leaf-blowers.webp";
+import gardenNurseryStock from "../imports/subcategories/garden-nursery-stock.webp";
+import gardenOther from "../imports/subcategories/garden-other.webp";
+import gardenPerennials from "../imports/subcategories/garden-perennials.webp";
+import gardenRideOnMowers from "../imports/subcategories/garden-ride-on-mowers.webp";
+import gardenSeasonalFlowers from "../imports/subcategories/garden-seasonal-flowers.webp";
+import gardenShrubsBushes from "../imports/subcategories/garden-shrubs-bushes.webp";
+import gardenSprinklers from "../imports/subcategories/garden-sprinklers.webp";
+import gardenStumpGrinders from "../imports/subcategories/garden-stump-grinders.webp";
+import gardenTillersCultivators from "../imports/subcategories/garden-tillers-cultivators.webp";
+import gardenTrees from "../imports/subcategories/garden-trees.webp";
+import gardenTrimmers from "../imports/subcategories/garden-trimmers.webp";
 import toolsHandTools from "../imports/subcategories/tools-hand-tools.webp";
 import toolsIndustrialDrills from "../imports/subcategories/tools-industrial-drills.webp";
 import toolsLadders from "../imports/subcategories/tools-ladders.webp";
@@ -19,6 +36,23 @@ import toolsWeldingEquipment from "../imports/subcategories/tools-welding-equipm
  * and keep drawing their emoji.
  */
 export const SUBCATEGORY_ART = {
+  "garden-garden-tools": gardenGardenTools,
+  "garden-houseplants-seedlings": gardenHouseplantsSeedlings,
+  "garden-irrigation-systems": gardenIrrigationSystems,
+  "garden-landscape-equipment": gardenLandscapeEquipment,
+  "garden-lawn-mowers": gardenLawnMowers,
+  "garden-leaf-blowers": gardenLeafBlowers,
+  "garden-nursery-stock": gardenNurseryStock,
+  "garden-other": gardenOther,
+  "garden-perennials": gardenPerennials,
+  "garden-ride-on-mowers": gardenRideOnMowers,
+  "garden-seasonal-flowers": gardenSeasonalFlowers,
+  "garden-shrubs-bushes": gardenShrubsBushes,
+  "garden-sprinklers": gardenSprinklers,
+  "garden-stump-grinders": gardenStumpGrinders,
+  "garden-tillers-cultivators": gardenTillersCultivators,
+  "garden-trees": gardenTrees,
+  "garden-trimmers": gardenTrimmers,
   "tools-hand-tools": toolsHandTools,
   "tools-industrial-drills": toolsIndustrialDrills,
   "tools-ladders": toolsLadders,
