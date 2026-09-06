@@ -34,11 +34,11 @@ export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
-        <div className="mx-auto mb-4 max-w-[280px]">
+        <div className="mx-auto mb-5 max-w-[340px]">
           <img
             src={authWelcomeShowcase}
             alt=""
-            className="h-auto max-h-[220px] w-full object-contain"
+            className="h-auto max-h-[250px] w-full object-contain"
             draggable={false}
             width={1536}
             height={1024}
