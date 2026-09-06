@@ -967,7 +967,6 @@ export type AppMessages = {
       titlePlaceholder: (example: string) => string;
       categoryStepTitle: string;
       categoryStepSubtitle: string;
-      categoryAiHint: (mascot: string) => string;
       subcategoryStepTitle: string;
       subcategoryStepSubtitle: string;
       confirmCategoryTitle: string;

@@ -1681,8 +1681,6 @@ export const es: AppMessages = {
       titlePlaceholder: (example) => `p. ej., ${example}`,
       categoryStepTitle: "¿Qué vas a publicar?",
       categoryStepSubtitle: "Busca, o toca una categoría para ver qué encaja.",
-      categoryAiHint: (mascot) =>
-        `¿Dudas? ${mascot} puede sugerir la estantería a partir de tus fotos.`,
       subcategoryStepTitle: "Elige la estantería",
       subcategoryStepSubtitle: "Elige la opción más cercana; los detalles vienen después.",
       confirmCategoryTitle: "Confirma la estantería",

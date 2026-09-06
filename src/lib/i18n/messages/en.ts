@@ -1682,8 +1682,6 @@ export const en: AppMessages = {
       titlePlaceholder: (example) => `e.g., ${example}`,
       categoryStepTitle: "What are you listing?",
       categoryStepSubtitle: "Search, or tap a category to see what fits.",
-      categoryAiHint: (mascot) =>
-        `Unsure? ${mascot} can suggest the shelf from your photos later.`,
       subcategoryStepTitle: "Pick the shelf",
       subcategoryStepSubtitle: "Choose the closest match — you can refine details next.",
       confirmCategoryTitle: "Confirm your shelf",

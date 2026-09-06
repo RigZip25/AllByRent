@@ -1693,8 +1693,6 @@ export const cs: AppMessages = {
       titlePlaceholder: (example) => `např. ${example}`,
       categoryStepTitle: "Co nabízíš?",
       categoryStepSubtitle: "Hledej, nebo klepni na kategorii a uvidíš, co sedí.",
-      categoryAiHint: (mascot) =>
-        `Nejsi si jistý(á)? ${mascot} umí navrhnout polici z fotek.`,
       subcategoryStepTitle: "Vyber polici",
       subcategoryStepSubtitle: "Zvol nejbližší shodu — detaily doplníš dál.",
       confirmCategoryTitle: "Potvrď polici",
