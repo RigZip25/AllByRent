@@ -1,3 +1,5 @@
+import { execFileSync } from 'node:child_process'
+import fs from 'node:fs'
 import { createRequire } from 'node:module'
 import { defineConfig, loadEnv } from 'vite'
 import path from 'path'
@@ -121,6 +123,41 @@ function pwaPlugin() {
 }
 
 
+function commitTimeIso(): string | null {
+  const fromEnv = process.env.SOURCE_DATE_EPOCH
+  if (fromEnv && Number.isFinite(Number(fromEnv))) {
+    return new Date(Number(fromEnv) * 1000).toISOString()
+  }
+  try {
+    const iso = execFileSync('git', ['log', '-1', '--format=%cI'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim()
+    return iso ? new Date(iso).toISOString() : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * `public/` is copied verbatim, so the legacy service workers land in `dist/`
+ * even when the PWA plugin is off. Inside a Capacitor WebView they would cache
+ * the wrong paths, so drop them from store bundles.
+ */
+function stripWebServiceWorkers() {
+  if (process.env.CAPACITOR_BUILD !== '1') return null
+  return {
+    name: 'strip-web-service-workers',
+    apply: 'build' as const,
+    closeBundle() {
+      for (const file of ['sw.js', 'push-sw.js']) {
+        const target = path.resolve(__dirname, 'dist', file)
+        if (fs.existsSync(target)) fs.rmSync(target)
+      }
+    },
+  }
+}
+
 function figmaAssetResolver() {
   return {
     name: 'figma-asset-resolver',
@@ -139,7 +176,9 @@ export default defineConfig(({ mode }) => {
     process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ??
     process.env.VERCEL_DEPLOYMENT_ID?.slice(0, 12) ??
     (mode === 'production' ? 'unknown' : 'dev')
-  const appBuildTime = new Date().toISOString()
+  // Wall-clock time made every build produce different bundle hashes, which hid
+  // real bundle changes in review. The commit date is stable for a given source.
+  const appBuildTime = commitTimeIso() ?? new Date().toISOString()
   // HTTPS only when VITE_DEV_HTTPS=true (Safari on iPhone blocks self-signed IP certs).
   const useHttps = process.env.VITE_DEV_HTTPS === 'true'
   const githubRepo =
@@ -161,6 +200,7 @@ export default defineConfig(({ mode }) => {
     react(),
     tailwindcss(),
     pwaPlugin(),
+    stripWebServiceWorkers(),
   ].filter(Boolean),
   resolve: {
     alias: {
