@@ -13,6 +13,7 @@
     "art:categories": "node ./scripts/prepare-category-art.mjs",
     "art:categories:check": "node ./scripts/prepare-category-art.mjs --check",
     "check:i18n-keys": "node ./scripts/check-i18n-unique-keys.mjs",
+    "check:migrations": "node ./scripts/check-migrations.mjs",
     "typecheck": "node ./scripts/check-i18n-unique-keys.mjs && tsc -b --pretty false",
     "dev": "vite",
     "dev:https": "set VITE_DEV_HTTPS=true&& vite",
