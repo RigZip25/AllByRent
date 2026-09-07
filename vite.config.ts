@@ -218,6 +218,12 @@ export default defineConfig(({ mode }) => {
         changeOrigin: true,
         secure: false,
       },
+      '/api/listing': {
+        // Listing AI endpoints are serverless — proxy to the deployed API in dev.
+        target: env.VITE_DEV_API_ORIGIN || 'http://127.0.0.1:3000',
+        changeOrigin: true,
+        secure: false,
+      },
       '/api/proxy/anthropic': {
         target: 'https://api.anthropic.com',
         changeOrigin: true,

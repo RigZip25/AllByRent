@@ -9,7 +9,7 @@ import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import type { StepProps } from "../types";
 import { RentanoHint } from "../../../components/RentanoHint";
-import { MASCOT_NAME } from "../../../lib/brand";
+import { APP_NAME, MASCOT_NAME } from "../../../lib/brand";
 import { isYardSaleListingActive } from "../../../lib/yardSaleListing";
 import { processPhotoWithPhotoRoom } from "../photoroomApi";
 import {
@@ -41,16 +41,20 @@ export function Step1Photos({
   draft,
   setDraft,
   onAnalyzePhotos,
+  onBrowseCategories,
   gateMessage = null,
   onDismissGateMessage,
 }: StepProps & {
   onAnalyzePhotos?: () => void;
+  /** Manual fallback from the entry screen — skips photo-led classification. */
+  onBrowseCategories?: () => void;
   /** Moderation / gate message from Continue (wizard). */
   gateMessage?: string | null;
   onDismissGateMessage?: () => void;
 }) {
   const { listing } = useMessages();
   const photosCopy = listing.photos;
+  const aiCopy = listing.aiCategory;
   const libraryInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -70,13 +74,13 @@ export function Step1Photos({
 
   const atMax = draft.photos.length >= MAX_LISTING_PHOTOS;
   const atMaxVideos = draft.videos.length >= MAX_LISTING_VIDEOS;
-  const rentanoMessage = draft.aiSuggestions
+  /** First screen of the flow: no photo yet, so lead with the photo-first choice. */
+  const isEntryState = draft.photos.length === 0 && processingIndex === null;
+  const rentanoMessage = draft.categoryDecision
     ? photosCopy.tipAnalyzed
     : isYardSaleListingActive()
       ? photosCopy.tipYardSale(MASCOT_NAME)
-      : !draft.category.trim()
-        ? photosCopy.tipDecideShelf(MASCOT_NAME)
-        : photosCopy.tipDefault(MASCOT_NAME);
+      : photosCopy.tipDefault(MASCOT_NAME);
 
   const clampToMaxSlots = (value: number) => Math.max(5, Math.min(MAX_LISTING_PHOTOS, value));
 
@@ -652,34 +656,72 @@ export function Step1Photos({
       />
 
       <div className="mb-4">
-        <h2 className="text-xl font-bold" style={{ color: PRIMARY_GREEN }}>
-          {photosCopy.title}
-        </h2>
-        <p className="mt-1 text-sm text-gray-500">
-          {photosCopy.subtitle(MAX_LISTING_PHOTOS, MAX_LISTING_VIDEOS)}
-        </p>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={openLibraryPicker}
-            disabled={atMax}
-            className="w-full rounded-xl border-2 py-2.5 text-sm font-semibold disabled:opacity-50"
-            style={{ borderColor: PRIMARY_GREEN, color: PRIMARY_GREEN }}
-          >
-            {photosCopy.chooseLibrary}
-          </button>
-          <button
-            type="button"
-            onClick={openCameraPicker}
-            disabled={atMax}
-            className="w-full rounded-xl py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-            style={{ backgroundColor: PRIMARY_GREEN }}
-          >
-            {photosCopy.takePhoto}
-          </button>
-        </div>
+        {isEntryState ? (
+          <>
+            <h2 className="text-xl font-bold" style={{ color: PRIMARY_GREEN }}>
+              {aiCopy.startTitle}
+            </h2>
+            <button
+              type="button"
+              onClick={openCameraPicker}
+              className="mt-3 w-full rounded-xl py-3 text-[15px] font-bold text-white"
+              style={{ backgroundColor: PRIMARY_GREEN }}
+            >
+              {aiCopy.takePhoto}
+            </button>
+            <p className="mt-2 text-center text-[13px] text-gray-500">
+              {aiCopy.takePhotoHint(APP_NAME)}
+            </p>
+            <button
+              type="button"
+              onClick={openLibraryPicker}
+              className="mt-3 w-full rounded-xl border-2 py-2.5 text-sm font-semibold"
+              style={{ borderColor: PRIMARY_GREEN, color: PRIMARY_GREEN }}
+            >
+              {aiCopy.choosePhoto}
+            </button>
+            {onBrowseCategories ? (
+              <button
+                type="button"
+                onClick={onBrowseCategories}
+                className="mt-4 w-full text-[14px] font-semibold text-gray-600 underline underline-offset-2"
+              >
+                {aiCopy.browseManually}
+              </button>
+            ) : null}
+          </>
+        ) : (
+          <>
+            <h2 className="text-xl font-bold" style={{ color: PRIMARY_GREEN }}>
+              {photosCopy.title}
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">
+              {photosCopy.subtitle(MAX_LISTING_PHOTOS, MAX_LISTING_VIDEOS)}
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={openLibraryPicker}
+                disabled={atMax}
+                className="w-full rounded-xl border-2 py-2.5 text-sm font-semibold disabled:opacity-50"
+                style={{ borderColor: PRIMARY_GREEN, color: PRIMARY_GREEN }}
+              >
+                {photosCopy.chooseLibrary}
+              </button>
+              <button
+                type="button"
+                onClick={openCameraPicker}
+                disabled={atMax}
+                className="w-full rounded-xl py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                style={{ backgroundColor: PRIMARY_GREEN }}
+              >
+                {photosCopy.takePhoto}
+              </button>
+            </div>
+          </>
+        )}
         <div className="mt-2">
-          {MAX_LISTING_VIDEOS > 0 ? (
+          {MAX_LISTING_VIDEOS > 0 && !isEntryState ? (
             <button
               type="button"
               onClick={() => videoInputRef.current?.click()}
@@ -701,7 +743,8 @@ export function Step1Photos({
         </div>
       </div>
 
-      <div className="space-y-2">
+      {/* Empty slots would only repeat what the entry buttons already offer. */}
+      <div className={`space-y-2 ${isEntryState ? "hidden" : ""}`}>
         {renderSlot(0, "aspect-[4/3] w-full", { fit: "cover" })}
 
         {Array.from({ length: thumbRowCount }, (_, row) => (
@@ -785,13 +828,13 @@ export function Step1Photos({
         />
       ) : null}
 
-      {onAnalyzePhotos ? (
+      {onAnalyzePhotos && draft.photos.length > 0 ? (
         <div className="mt-5 rounded-2xl bg-white p-4 shadow-sm">
           <p className="text-sm font-semibold text-gray-900">{photosCopy.aiFillsTitle}</p>
           <p className="mt-1 text-xs text-gray-500">
             {photosCopy.aiFillsBody(MASCOT_NAME)}
           </p>
-          {draft.aiSuggestions ? (
+          {draft.categoryDecision ? (
             <button
               type="button"
               onClick={onAnalyzePhotos}
