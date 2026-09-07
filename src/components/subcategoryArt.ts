@@ -43,6 +43,17 @@ import costumePeriodCostumes from "../imports/subcategories/costume-period-costu
 import costumeProfessionalMakeupKits from "../imports/subcategories/costume-professional-makeup-kits.webp";
 import costumeTheaterCostumes from "../imports/subcategories/costume-theater-costumes.webp";
 import costumeWigsAccessories from "../imports/subcategories/costume-wigs-accessories.webp";
+import estateBackyardOutdoor from "../imports/subcategories/estate-backyard-outdoor.webp";
+import estateCommercialSpace from "../imports/subcategories/estate-commercial-space.webp";
+import estateEventVenues from "../imports/subcategories/estate-event-venues.webp";
+import estateGaragesStorage from "../imports/subcategories/estate-garages-storage.webp";
+import estateOther from "../imports/subcategories/estate-other.webp";
+import estateParkingSpots from "../imports/subcategories/estate-parking-spots.webp";
+import estateRetailSpace from "../imports/subcategories/estate-retail-space.webp";
+import estateRoomsSpaces from "../imports/subcategories/estate-rooms-spaces.webp";
+import estateSharedOffices from "../imports/subcategories/estate-shared-offices.webp";
+import estateStudioSpace from "../imports/subcategories/estate-studio-space.webp";
+import estateWarehouseStorage from "../imports/subcategories/estate-warehouse-storage.webp";
 import gardenGardenTools from "../imports/subcategories/garden-garden-tools.webp";
 import gardenHouseplantsSeedlings from "../imports/subcategories/garden-houseplants-seedlings.webp";
 import gardenIrrigationSystems from "../imports/subcategories/garden-irrigation-systems.webp";
@@ -247,6 +258,17 @@ export const SUBCATEGORY_ART = {
   "costume-professional-makeup-kits": costumeProfessionalMakeupKits,
   "costume-theater-costumes": costumeTheaterCostumes,
   "costume-wigs-accessories": costumeWigsAccessories,
+  "estate-backyard-outdoor": estateBackyardOutdoor,
+  "estate-commercial-space": estateCommercialSpace,
+  "estate-event-venues": estateEventVenues,
+  "estate-garages-storage": estateGaragesStorage,
+  "estate-other": estateOther,
+  "estate-parking-spots": estateParkingSpots,
+  "estate-retail-space": estateRetailSpace,
+  "estate-rooms-spaces": estateRoomsSpaces,
+  "estate-shared-offices": estateSharedOffices,
+  "estate-studio-space": estateStudioSpace,
+  "estate-warehouse-storage": estateWarehouseStorage,
   "garden-garden-tools": gardenGardenTools,
   "garden-houseplants-seedlings": gardenHouseplantsSeedlings,
   "garden-irrigation-systems": gardenIrrigationSystems,
