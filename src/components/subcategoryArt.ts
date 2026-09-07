@@ -70,6 +70,17 @@ import sportsSnowSports from "../imports/subcategories/sports-snow-sports.webp";
 import sportsTeamSportsGear from "../imports/subcategories/sports-team-sports-gear.webp";
 import sportsTimingSystems from "../imports/subcategories/sports-timing-systems.webp";
 import sportsWaterSports from "../imports/subcategories/sports-water-sports.webp";
+import techBroadcastEquipment from "../imports/subcategories/tech-broadcast-equipment.webp";
+import techDisplaySystems from "../imports/subcategories/tech-display-systems.webp";
+import techGamingGear from "../imports/subcategories/tech-gaming-gear.webp";
+import techLaptops from "../imports/subcategories/tech-laptops.webp";
+import techNetworkGear from "../imports/subcategories/tech-network-gear.webp";
+import techOther from "../imports/subcategories/tech-other.webp";
+import techProAudio from "../imports/subcategories/tech-pro-audio.webp";
+import techProjectors from "../imports/subcategories/tech-projectors.webp";
+import techServersWorkstations from "../imports/subcategories/tech-servers-workstations.webp";
+import techSmartHomeDevices from "../imports/subcategories/tech-smart-home-devices.webp";
+import techSpeakers from "../imports/subcategories/tech-speakers.webp";
 import toolsHandTools from "../imports/subcategories/tools-hand-tools.webp";
 import toolsIndustrialDrills from "../imports/subcategories/tools-industrial-drills.webp";
 import toolsLadders from "../imports/subcategories/tools-ladders.webp";
@@ -163,6 +174,17 @@ export const SUBCATEGORY_ART = {
   "sports-team-sports-gear": sportsTeamSportsGear,
   "sports-timing-systems": sportsTimingSystems,
   "sports-water-sports": sportsWaterSports,
+  "tech-broadcast-equipment": techBroadcastEquipment,
+  "tech-display-systems": techDisplaySystems,
+  "tech-gaming-gear": techGamingGear,
+  "tech-laptops": techLaptops,
+  "tech-network-gear": techNetworkGear,
+  "tech-other": techOther,
+  "tech-pro-audio": techProAudio,
+  "tech-projectors": techProjectors,
+  "tech-servers-workstations": techServersWorkstations,
+  "tech-smart-home-devices": techSmartHomeDevices,
+  "tech-speakers": techSpeakers,
   "tools-hand-tools": toolsHandTools,
   "tools-industrial-drills": toolsIndustrialDrills,
   "tools-ladders": toolsLadders,
