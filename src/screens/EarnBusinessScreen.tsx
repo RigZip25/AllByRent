@@ -469,7 +469,13 @@ export function EarnBusinessScreen({
       });
     };
     refresh();
-    return onConnectOnboardingDone(refresh);
+    const unsubscribe = onConnectOnboardingDone(refresh);
+    // The guard was never flipped, so a late payout status could land on an
+    // unmounted screen.
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
   }, [auth.userId]);
 
   const openPayouts = () => {

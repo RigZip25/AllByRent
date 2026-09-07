@@ -72,7 +72,7 @@ content = content.replace(
 );
 
 content = content.replace(
-  /      <div className="screen-footer bg-card border-t border-border px-4 sm:px-6 py-3 flex items-center justify-around">[\s\S]*?      <\/div>\n    <\/div>\n  \);\n}/,
+  / {6}<div className="screen-footer bg-card border-t border-border px-4 sm:px-6 py-3 flex items-center justify-around">[\s\S]*? {6}<\/div>\n {4}<\/div>\n {2}\);\n}/,
   `      <BottomNav activeTab="none" onHome={onBack} onPostRequest={onPostRequest} />\n    </div>\n  );\n}`
 );
 

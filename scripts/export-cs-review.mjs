@@ -8,10 +8,8 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { createRequire } from "node:module";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const require = createRequire(import.meta.url);
 
 // Prefer tsx-register if available via dynamic import of .ts
 async function loadMessages() {
@@ -139,7 +137,7 @@ function walk(obj, prefix = "", out = []) {
 }
 
 function getByPath(root, path) {
-  const tokens = path.replace(/\(\)$/, "").match(/[^.\[\]]+|\[\d+\]/g) || [];
+  const tokens = path.replace(/\(\)$/, "").match(/[^.[\]]+|\[\d+\]/g) || [];
   let cur = root;
   for (const t of tokens) {
     if (cur == null) return undefined;
