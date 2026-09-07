@@ -37,6 +37,17 @@ import homeFoodProcessorsPro from "../imports/subcategories/home-food-processors
 import homeIndustrialMixers from "../imports/subcategories/home-industrial-mixers.webp";
 import homeOther from "../imports/subcategories/home-other.webp";
 import homeStandMixers from "../imports/subcategories/home-stand-mixers.webp";
+import partyCateringEquipment from "../imports/subcategories/party-catering-equipment.webp";
+import partyEventLighting from "../imports/subcategories/party-event-lighting.webp";
+import partyGamesActivities from "../imports/subcategories/party-games-activities.webp";
+import partyOther from "../imports/subcategories/party-other.webp";
+import partyPartyDecor from "../imports/subcategories/party-party-decor.webp";
+import partyPhotoBooths from "../imports/subcategories/party-photo-booths.webp";
+import partyServingEquipment from "../imports/subcategories/party-serving-equipment.webp";
+import partySoundSystems from "../imports/subcategories/party-sound-systems.webp";
+import partyStageRisers from "../imports/subcategories/party-stage-risers.webp";
+import partyTablesChairs from "../imports/subcategories/party-tables-chairs.webp";
+import partyTentsCanopies from "../imports/subcategories/party-tents-canopies.webp";
 import toolsHandTools from "../imports/subcategories/tools-hand-tools.webp";
 import toolsIndustrialDrills from "../imports/subcategories/tools-industrial-drills.webp";
 import toolsLadders from "../imports/subcategories/tools-ladders.webp";
@@ -97,6 +108,17 @@ export const SUBCATEGORY_ART = {
   "home-industrial-mixers": homeIndustrialMixers,
   "home-other": homeOther,
   "home-stand-mixers": homeStandMixers,
+  "party-catering-equipment": partyCateringEquipment,
+  "party-event-lighting": partyEventLighting,
+  "party-games-activities": partyGamesActivities,
+  "party-other": partyOther,
+  "party-party-decor": partyPartyDecor,
+  "party-photo-booths": partyPhotoBooths,
+  "party-serving-equipment": partyServingEquipment,
+  "party-sound-systems": partySoundSystems,
+  "party-stage-risers": partyStageRisers,
+  "party-tables-chairs": partyTablesChairs,
+  "party-tents-canopies": partyTentsCanopies,
   "tools-hand-tools": toolsHandTools,
   "tools-industrial-drills": toolsIndustrialDrills,
   "tools-ladders": toolsLadders,
