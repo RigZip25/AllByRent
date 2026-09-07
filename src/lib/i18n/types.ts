@@ -1358,6 +1358,9 @@ export type AppMessages = {
     title: string;
     heavyItem: string;
     rentalLength: string;
+    goBackAria: string;
+    fewerDaysAria: string;
+    moreDaysAria: string;
     days: (n: number) => string;
     hostMinimum: (period: string) => string;
     longTermTip: string;

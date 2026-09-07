@@ -1513,9 +1513,10 @@ function BookingScreenLoaded({
         <button
           type="button"
           onClick={onBack}
-          className="p-2 hover:bg-muted rounded-full transition-colors"
+          aria-label={t.booking.goBackAria}
+          className="min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-muted rounded-full transition-colors"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden />
         </button>
         <h1 className="font-semibold flex-1">{t.booking.title}</h1>
       </div>
@@ -1537,17 +1538,19 @@ function BookingScreenLoaded({
             <button
               type="button"
               onClick={() => setRentalDays((d) => Math.max(minRentalDays, d - 1))}
-              className="h-9 w-9 rounded-lg border border-border text-lg font-bold"
+              aria-label={t.booking.fewerDaysAria}
+              className="h-11 w-11 rounded-lg border border-border text-lg font-bold"
             >
               −
             </button>
-            <span className="min-w-[4rem] text-center font-semibold">
+            <span className="min-w-[4rem] text-center font-semibold" aria-live="polite">
               {t.booking.days(rentalDays)}
             </span>
             <button
               type="button"
               onClick={() => setRentalDays((d) => Math.min(90, d + 1))}
-              className="h-9 w-9 rounded-lg border border-border text-lg font-bold"
+              aria-label={t.booking.moreDaysAria}
+              className="h-11 w-11 rounded-lg border border-border text-lg font-bold"
             >
               +
             </button>

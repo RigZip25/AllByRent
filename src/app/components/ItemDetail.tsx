@@ -393,8 +393,13 @@ export function ItemDetail({
     return (
       <div className="screen flex flex-col bg-background">
         <div className="shrink-0 border-b border-border px-4 py-3">
-          <button type="button" onClick={onBack} className="p-2 hover:bg-muted rounded-full">
-            <ArrowLeft className="w-5 h-5" />
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label={t.listing.goBackAria}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full hover:bg-muted"
+          >
+            <ArrowLeft className="w-5 h-5" aria-hidden />
           </button>
         </div>
         <div className="flex flex-1 items-center justify-center p-6 text-sm text-muted-foreground">
@@ -408,8 +413,13 @@ export function ItemDetail({
     return (
       <div className="screen flex flex-col bg-background">
         <div className="shrink-0 border-b border-border px-4 py-3 flex items-center gap-3">
-          <button type="button" onClick={onBack} className="p-2 hover:bg-muted rounded-full">
-            <ArrowLeft className="w-5 h-5" />
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label={t.listing.goBackAria}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full hover:bg-muted"
+          >
+            <ArrowLeft className="w-5 h-5" aria-hidden />
           </button>
           <h1 className="font-semibold flex-1">{t.item.notFound}</h1>
         </div>
@@ -434,9 +444,10 @@ export function ItemDetail({
       <div className="shrink-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-3 sm:px-4 py-3 flex items-center gap-3">
         <button
           onClick={onBack}
-          className="p-2 hover:bg-muted rounded-full transition-colors"
+          aria-label={t.listing.goBackAria}
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors hover:bg-muted"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden />
         </button>
         <h1 className="font-semibold flex-1 truncate">{title}</h1>
         <button
