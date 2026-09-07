@@ -15,6 +15,13 @@ import guestShareNetworkV2 from "../../imports/onboarding/evorios_guest_share_ne
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
 
+/**
+ * iOS Safari resolves `vh` against the full screen, so 44vh of art plus the
+ * caption used to run under the browser toolbars. Cap the art by what the
+ * visible viewport can spare instead; in the installed app the 44vh wins.
+ */
+const ART_MAX_HEIGHT = "min(44vh, calc(100dvh - 340px))";
+
 type Props = {
   onSignUp: () => void;
   onBrowseAsGuest: () => void;
@@ -150,7 +157,10 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
-        <div className="mx-auto flex min-h-[44vh] w-full max-w-[360px] items-center justify-center">
+        <div
+          className="mx-auto flex w-full max-w-[360px] items-center justify-center"
+          style={{ minHeight: ART_MAX_HEIGHT }}
+        >
           <SlideArt visual={slide.visual} label={copy.artPlaceholder} />
         </div>
 
@@ -269,7 +279,8 @@ function SlideArt({
     <img
       src={visual.src}
       alt=""
-      className="h-auto max-h-[44vh] w-full object-contain drop-shadow-lg"
+      style={{ maxHeight: ART_MAX_HEIGHT }}
+      className="h-auto w-full object-contain drop-shadow-lg"
       decoding="async"
       draggable={false}
       loading="eager"
