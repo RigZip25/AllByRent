@@ -11,6 +11,17 @@ import bikesOther from "../imports/subcategories/bikes-other.webp";
 import bikesProfessionalScooters from "../imports/subcategories/bikes-professional-scooters.webp";
 import bikesRacingBikes from "../imports/subcategories/bikes-racing-bikes.webp";
 import bikesRoadBikes from "../imports/subcategories/bikes-road-bikes.webp";
+import boatsCharterVessels from "../imports/subcategories/boats-charter-vessels.webp";
+import boatsCommercialFishing from "../imports/subcategories/boats-commercial-fishing.webp";
+import boatsDiveBoats from "../imports/subcategories/boats-dive-boats.webp";
+import boatsFishingBoats from "../imports/subcategories/boats-fishing-boats.webp";
+import boatsInflatableBoats from "../imports/subcategories/boats-inflatable-boats.webp";
+import boatsJetSkis from "../imports/subcategories/boats-jet-skis.webp";
+import boatsKayaksCanoes from "../imports/subcategories/boats-kayaks-canoes.webp";
+import boatsMotorboats from "../imports/subcategories/boats-motorboats.webp";
+import boatsOther from "../imports/subcategories/boats-other.webp";
+import boatsPontoonBoats from "../imports/subcategories/boats-pontoon-boats.webp";
+import boatsSupBoards from "../imports/subcategories/boats-sup-boards.webp";
 import babyCarSeats from "../imports/subcategories/baby-car-seats.webp";
 import babyChildcareEquipment from "../imports/subcategories/baby-childcare-equipment.webp";
 import babyCommercialPlayEquipment from "../imports/subcategories/baby-commercial-play-equipment.webp";
@@ -214,6 +225,17 @@ export const SUBCATEGORY_ART = {
   "bikes-professional-scooters": bikesProfessionalScooters,
   "bikes-racing-bikes": bikesRacingBikes,
   "bikes-road-bikes": bikesRoadBikes,
+  "boats-charter-vessels": boatsCharterVessels,
+  "boats-commercial-fishing": boatsCommercialFishing,
+  "boats-dive-boats": boatsDiveBoats,
+  "boats-fishing-boats": boatsFishingBoats,
+  "boats-inflatable-boats": boatsInflatableBoats,
+  "boats-jet-skis": boatsJetSkis,
+  "boats-kayaks-canoes": boatsKayaksCanoes,
+  "boats-motorboats": boatsMotorboats,
+  "boats-other": boatsOther,
+  "boats-pontoon-boats": boatsPontoonBoats,
+  "boats-sup-boards": boatsSupBoards,
   "costume-animatronic-props": costumeAnimatronicProps,
   "costume-character-costumes": costumeCharacterCostumes,
   "costume-film-tv-props": costumeFilmTvProps,
