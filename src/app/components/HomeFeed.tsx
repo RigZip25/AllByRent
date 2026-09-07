@@ -62,6 +62,11 @@ const BORDER = "#E8E6E0";
 const SHEET_PANEL =
   "max-h-[min(88dvh,720px)] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] rounded-t-3xl bg-white px-4 pt-3 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))]";
 const SHEET_SCROLL_END = "h-10 w-full shrink-0";
+/** Filters sheet: only the middle scrolls, so Clear and Done never drift off screen. */
+const FILTERS_PANEL =
+  "flex max-h-[min(88dvh,720px)] flex-col rounded-t-3xl bg-white pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))]";
+const FILTERS_BODY =
+  "min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] px-4";
 
 const RADIUS_PRESETS = [
   CLUSTER_RADIUS_DEFAULT_MI,
@@ -876,8 +881,8 @@ export function HomeFeed({
             aria-label={home.closeFiltersAria}
             onClick={closeFilters}
           />
-          <div className={SHEET_PANEL} role="dialog" aria-label={home.filtersTitle}>
-            <div className="mb-4 flex items-center justify-between">
+          <div className={FILTERS_PANEL} role="dialog" aria-label={home.filtersTitle}>
+            <div className="mb-3 flex shrink-0 items-center justify-between px-4">
               <h2 className="text-[18px] font-extrabold" style={{ color: GREEN_DARK }}>
                 {home.filtersTitle}
               </h2>
@@ -891,89 +896,95 @@ export function HomeFeed({
               </button>
             </div>
 
-            <section className="mb-5">
-              <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-400">
-                {home.categoryTitle}
-              </h3>
-              <button
-                type="button"
-                onClick={() => {
-                  clearFocus();
-                  setSubSheetCategory(null);
-                }}
-                className="mb-2 w-full rounded-xl border px-3 py-2.5 text-left text-[13px] font-bold"
-                style={{
-                  backgroundColor: focus ? "white" : GREEN_DARK,
-                  color: focus ? "#444" : "white",
-                  borderColor: focus ? BORDER : GREEN_DARK,
-                }}
-              >
-                {home.allCategories}
-              </button>
-              <div className="grid grid-cols-2 gap-2">
-                {browseCategories.map((cat) => {
-                  const active = categoryHasInterest(cat.name);
-                  const subCount = interests.filter(
-                    (i) => i.category === cat.name && i.subcategory,
-                  ).length;
-                  return (
-                    <div
-                      key={cat.name}
-                      className="flex min-w-0 overflow-hidden rounded-xl border"
-                      style={{
-                        borderColor: active ? GREEN_DARK : BORDER,
-                        backgroundColor: active ? `${GREEN}14` : "white",
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => toggleCategoryWide(cat.name)}
-                        className="flex min-w-0 flex-1 items-center gap-1.5 px-2.5 py-2.5 text-left"
+            <div className={FILTERS_BODY}>
+              <section className="mb-5">
+                <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-400">
+                  {home.categoryTitle}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearFocus();
+                    setSubSheetCategory(null);
+                  }}
+                  className="mb-2 w-full rounded-xl border px-3 py-2.5 text-left text-[13px] font-bold"
+                  style={{
+                    backgroundColor: focus ? "white" : GREEN_DARK,
+                    color: focus ? "#444" : "white",
+                    borderColor: focus ? BORDER : GREEN_DARK,
+                  }}
+                >
+                  {home.allCategories}
+                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  {browseCategories.map((cat) => {
+                    const active = categoryHasInterest(cat.name);
+                    const subCount = interests.filter(
+                      (i) => i.category === cat.name && i.subcategory,
+                    ).length;
+                    return (
+                      <div
+                        key={cat.name}
+                        className="flex min-w-0 overflow-hidden rounded-xl border"
+                        style={{
+                          borderColor: active ? GREEN_DARK : BORDER,
+                          backgroundColor: active ? `${GREEN}14` : "white",
+                        }}
                       >
-                        <CategoryIcon category={cat.name} emoji={cat.icon} size={24} />
-                        <span
-                          className="min-w-0 flex-1 text-[12px] font-bold leading-snug [overflow-wrap:anywhere]"
-                          style={{ color: active ? GREEN_DARK : "#374151" }}
+                        <button
+                          type="button"
+                          onClick={() => toggleCategoryWide(cat.name)}
+                          className="flex min-w-0 flex-1 items-center gap-1.5 px-2.5 py-2.5 text-left"
                         >
-                          {localizeCategoryLabel(cat.name)}
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openSubSheet(cat.name)}
-                        className="relative flex w-9 shrink-0 items-center justify-center border-l"
-                        style={{ borderColor: active ? `${GREEN_DARK}33` : BORDER }}
-                        aria-label={home.subcategoryTitle}
-                        aria-haspopup="dialog"
-                      >
-                        <ChevronDown className="h-4 w-4" style={{ color: GREEN_DARK }} />
-                        {subCount > 0 ? (
+                          <CategoryIcon category={cat.name} emoji={cat.icon} size={24} />
                           <span
-                            className="absolute right-1 top-1 flex h-3.5 min-w-[14px] items-center justify-center rounded-full px-0.5 text-[9px] font-bold text-white"
-                            style={{ backgroundColor: GREEN_DARK }}
+                            className="min-w-0 flex-1 text-[12px] font-bold leading-snug [overflow-wrap:anywhere]"
+                            style={{ color: active ? GREEN_DARK : "#374151" }}
                           >
-                            {subCount}
+                            {localizeCategoryLabel(cat.name)}
                           </span>
-                        ) : null}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-              <p className="mt-2 text-[11px] leading-snug text-gray-500">
-                {home.subcategoryHint}
-              </p>
-            </section>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openSubSheet(cat.name)}
+                          className="relative flex w-9 shrink-0 items-center justify-center border-l"
+                          style={{ borderColor: active ? `${GREEN_DARK}33` : BORDER }}
+                          aria-label={home.subcategoryTitle}
+                          aria-haspopup="dialog"
+                        >
+                          <ChevronDown className="h-4 w-4" style={{ color: GREEN_DARK }} />
+                          {subCount > 0 ? (
+                            <span
+                              className="absolute right-1 top-1 flex h-3.5 min-w-[14px] items-center justify-center rounded-full px-0.5 text-[9px] font-bold text-white"
+                              style={{ backgroundColor: GREEN_DARK }}
+                            >
+                              {subCount}
+                            </span>
+                          ) : null}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="mt-2 text-[11px] leading-snug text-gray-500">
+                  {home.subcategoryHint}
+                </p>
+              </section>
 
-            <section className="mb-5">
-              <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-400">
-                {home.distanceTitle}
-              </h3>
-              <p className="mb-2 text-[13px] text-gray-500">{home.distanceHint}</p>
-              {radiusButtons}
-            </section>
+              <section className="mb-5">
+                <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-400">
+                  {home.distanceTitle}
+                </h3>
+                <p className="mb-2 text-[13px] text-gray-500">{home.distanceHint}</p>
+                {radiusButtons}
+              </section>
+              <div className={SHEET_SCROLL_END} aria-hidden />
+            </div>
 
-            <div className="flex gap-2">
+            <div
+              className="mt-3 flex shrink-0 gap-2 border-t px-4 pt-3"
+              style={{ borderColor: BORDER }}
+            >
               <button
                 type="button"
                 onClick={clearFiltersAndClose}
@@ -996,7 +1007,6 @@ export function HomeFeed({
                 {home.done}
               </button>
             </div>
-            <div className={SHEET_SCROLL_END} aria-hidden />
           </div>
 
           {subSheetCategory ? (
