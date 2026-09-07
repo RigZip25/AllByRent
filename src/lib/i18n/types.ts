@@ -330,10 +330,6 @@ export type AppMessages = {
     stepCoachLater: string;
   };
   home: {
-    priceAny: string;
-    priceUnder25: string;
-    price25to75: string;
-    price75plus: string;
     backToBrowseAria: string;
     setBlock: string;
     setBlockAria: string;
@@ -373,9 +369,20 @@ export type AppMessages = {
     subcategoryTitle: string;
     subcategoryHint: string;
     wholeCategory: string;
-    yourPicks: string;
     allCategories: string;
-    priceTitle: string;
+    /** @param items matching items @param garages garages holding them */
+    focusCount: (items: number, garages: number) => string;
+    focusChange: string;
+    focusClearAria: string;
+    sortTitle: string;
+    sortSuggested: string;
+    sortPrice: string;
+    sortDistance: string;
+    sortPriceAsc: string;
+    sortPriceDesc: string;
+    sortDistanceAsc: string;
+    sortDistanceDesc: string;
+    sortFlipAria: string;
     distanceTitle: string;
     distanceHint: string;
     locationSheetTitle: string;

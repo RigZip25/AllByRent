@@ -40,6 +40,9 @@ export function garageDisplayName(
   return "Neighbor's Garage";
 }
 
+const NEAR_YOU_LABEL = "Near you";
+const NEARBY_LABEL = "Nearby";
+
 export function garageTrustLine(
   hostId: string | undefined,
   hostMeta?: Record<string, HostGarageMeta | { displayName: string; rating: number }>,
@@ -72,7 +75,7 @@ export function garageTrustLine(
     garageDisplayName(hostId, meta ? { [hostId!]: meta.displayName } : undefined);
   const city = getProfileCity().trim().toLowerCase();
   const active = getActiveRentLocationLabel().trim().toLowerCase();
-  const distance = city && active && city === active ? "Near you" : "Nearby";
+  const distance = city && active && city === active ? NEAR_YOU_LABEL : NEARBY_LABEL;
   return {
     name,
     rating: meta?.rating ?? 0,
@@ -110,19 +113,6 @@ export function listingPrimaryPrice(draft: ListingDraft): number | null {
     return Number.isFinite(sale) ? sale : null;
   }
   return null;
-}
-
-export function listingMatchesPriceRange(
-  draft: ListingDraft,
-  min: number | null,
-  max: number | null,
-): boolean {
-  if (min == null && max == null) return true;
-  const price = listingPrimaryPrice(draft);
-  if (price == null) return false;
-  if (min != null && price < min) return false;
-  if (max != null && price > max) return false;
-  return true;
 }
 
 export function listingMatchesCategory(draft: ListingDraft, category: string | null): boolean {
@@ -223,6 +213,25 @@ export type HostGarageMeta = {
   shopSlug?: string;
   neighborhood?: string;
 };
+
+/** Cheapest item on the shelf — the price a "cheapest first" sort should rank on. */
+export function garageMinPrice(garage: GarageSummary): number | null {
+  let min: number | null = null;
+  for (const listing of garage.listings) {
+    const price = listingPrimaryPrice(listing);
+    if (price == null) continue;
+    if (min == null || price < min) min = price;
+  }
+  return min;
+}
+
+/**
+ * Coarse proximity: same city as the browsing area, or further out.
+ * Listings carry no coordinates yet, so this is two buckets, not miles.
+ */
+export function garageProximityRank(garage: GarageSummary): number {
+  return garage.distance === NEAR_YOU_LABEL ? 0 : 1;
+}
 
 export function groupListingsByGarage(
   listings: ListingDraft[],
