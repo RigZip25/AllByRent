@@ -81,8 +81,8 @@ const SHORT_TERM_CATEGORIES = new Set([
 
 const LONG_TERM_CATEGORIES = new Set([
   "Electronics & Tech",
-  "Home & Kitchen",
-  "Furniture",
+  "Kitchen Equipment",
+  "Home & Office Furniture",
   "Gym & Fitness",
   "Baby & Kids",
   "Office & Business",

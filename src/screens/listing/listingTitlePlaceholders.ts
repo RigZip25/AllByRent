@@ -39,14 +39,28 @@ const BY_SUBCATEGORY: Record<string, string> = {
   "Network Gear": "Mesh Wi‑Fi system (3 nodes)",
   "Display Systems": "55″ TV on rolling stand",
 
-  // Home & Kitchen
+  // Kitchen Equipment
   "Coffee Makers": "Espresso machine + grinder",
   "Baking Equipment": "Stand mixer with bowls",
   "Stand Mixers": "KitchenAid stand mixer",
   "Blenders & Juicers": "High-power blender",
   "Cleaning Appliances": "Robot vacuum",
-  "Commercial Coffee": "Commercial espresso machine",
+  "Cooking Appliances": "Air fryer, 6 qt",
+  "Commercial Coffee Equipment": "Commercial espresso machine",
+  "Commercial Cooking Equipment": "Two-burner countertop range",
   "Catering Equipment": "Chafing dishes (set of 3)",
+
+  // Home & Office Furniture
+  "Living Room Furniture": "Two-seat sofa, grey",
+  "Bedroom Furniture": "Queen bed frame + slats",
+  "Storage & Shelving": "5-shelf bookcase",
+  "Outdoor Furniture": "Patio table + 4 chairs",
+  "Office Desks & Chairs": "Standing desk, height adjustable",
+  "Reception Furniture": "Reception desk + 2 chairs",
+  "Conference Furniture": "Conference table seats 8",
+  "Event Furniture": "Folding banquet tables",
+  "Display & Retail Furniture": "Glass display case, lit",
+  "Commercial Storage & Shelving": "Steel racking, 4 bays",
 
   // Outdoor & Camping
   Tents: "4-person camping tent",
@@ -145,7 +159,6 @@ const BY_SUBCATEGORY: Record<string, string> = {
   Printers: "Color laser printer",
   "Monitors & Displays": "27″ monitor with stand",
   "Webcams & Streaming": "4K webcam + ring light",
-  "Office Furniture": "Folding banquet tables",
   "POS Systems": "POS tablet + receipt printer",
 
   // Heavy Equipment
@@ -187,7 +200,8 @@ const BY_CATEGORY: Record<string, string> = {
   "Tools & DIY": "Milwaukee compact drill kit",
   "Photo & Video": "Mirrorless camera kit",
   "Electronics & Tech": "Laptop for weekend project",
-  "Home & Kitchen": "Stand mixer with bowls",
+  "Kitchen Equipment": "Stand mixer with bowls",
+  "Home & Office Furniture": "Standing desk, height adjustable",
   "Outdoor & Camping": "4-person camping tent",
   "Sports & Recreation": "Ski set or paddleboard",
   "Bikes & Scooters": "Mountain bike, size M",

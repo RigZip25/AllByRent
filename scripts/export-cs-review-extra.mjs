@@ -65,7 +65,8 @@ for (const en of Object.keys(CATEGORY_LABELS_CS)) {
 const SEARCH_NOUNS = {
   "Tools & DIY": "tools",
   "Garden & Yard": "garden and yard gear",
-  "Home & Kitchen": "home and kitchen items",
+  "Home & Office Furniture": "furniture",
+  "Kitchen Equipment": "kitchen equipment",
   "Baby & Kids": "baby and kids gear",
   "Party & Events": "party and event gear",
   "Sports & Recreation": "sports gear",

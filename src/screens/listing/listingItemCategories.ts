@@ -27,6 +27,11 @@ function subArt(label: string, emoji: string, art: SubcategoryArtId): Subcategor
   return { label, emoji, art };
 }
 
+/** A shelf whose illustration hasn't been drawn yet — the emoji stands in. */
+function sub(label: string, emoji: string): SubcategoryItem {
+  return { label, emoji };
+}
+
 export const CATEGORIES: Record<string, CategoryData> = {
   "Tools & DIY": {
     icon: "🔧",
@@ -85,22 +90,44 @@ export const CATEGORIES: Record<string, CategoryData> = {
       subArt("Other", "➕", "tech-other"),
     ],
   },
-  "Home & Kitchen": {
+  "Home & Office Furniture": {
+    icon: "🛋️",
+    personal: [
+      sub("Living Room Furniture", "🛋️"),
+      sub("Bedroom Furniture", "🛏️"),
+      subArt("Tables & Chairs", "🪑", "party-tables-chairs"),
+      sub("Storage & Shelving", "🗄️"),
+      sub("Outdoor Furniture", "⛱️"),
+      sub("Other", "➕"),
+    ],
+    professional: [
+      subArt("Office Desks & Chairs", "🪑", "office-office-furniture"),
+      sub("Reception Furniture", "🛎️"),
+      sub("Conference Furniture", "🗣️"),
+      sub("Event Furniture", "🎪"),
+      sub("Display & Retail Furniture", "🏪"),
+      sub("Commercial Storage & Shelving", "📦"),
+      sub("Other", "➕"),
+    ],
+  },
+  "Kitchen Equipment": {
     icon: "🍳",
     personal: [
       subArt("Coffee Makers", "☕", "home-coffee-makers"),
       subArt("Baking Equipment", "🧁", "home-baking-equipment"),
       subArt("Stand Mixers", "🥣", "home-stand-mixers"),
       subArt("Blenders & Juicers", "🍹", "home-blenders-juicers"),
+      sub("Cooking Appliances", "🍳"),
       subArt("Cleaning Appliances", "🧹", "home-cleaning-appliances"),
       subArt("Other", "➕", "home-other"),
     ],
     professional: [
-      subArt("Commercial Coffee", "☕", "home-commercial-coffee"),
+      sub("Commercial Cooking Equipment", "🔥"),
+      subArt("Commercial Coffee Equipment", "☕", "home-commercial-coffee"),
       subArt("Catering Equipment", "🍽️", "home-catering-equipment"),
       subArt("Industrial Mixers", "🏭", "home-industrial-mixers"),
-      subArt("Food Processors Pro", "🥗", "home-food-processors-pro"),
-      subArt("Beverage Systems", "🧃", "home-beverage-systems"),
+      subArt("Food Preparation Equipment", "🥗", "home-food-processors-pro"),
+      subArt("Refrigeration & Beverage Systems", "🧃", "home-beverage-systems"),
       subArt("Other", "➕", "home-other"),
     ],
   },
@@ -307,7 +334,6 @@ export const CATEGORIES: Record<string, CategoryData> = {
       subArt("Printers", "🖨️", "office-printers"),
       subArt("Monitors & Displays", "🖥️", "office-monitors-displays"),
       subArt("Webcams & Streaming", "📹", "office-webcams-streaming"),
-      subArt("Office Furniture", "🪑", "office-office-furniture"),
       subArt("Presentation Gear", "📊", "office-presentation-gear"),
       subArt("Other", "➕", "office-other"),
     ],
@@ -424,7 +450,8 @@ export const CATEGORIES: Record<string, CategoryData> = {
 export const CATEGORY_DISPLAY_ORDER = [
   "Tools & DIY",
   "Garden & Yard",
-  "Home & Kitchen",
+  "Home & Office Furniture",
+  "Kitchen Equipment",
   "Baby & Kids",
   "Party & Events",
   "Sports & Recreation",
@@ -542,7 +569,69 @@ function matchOption<T extends string>(options: readonly T[], aiValue: string): 
   return wordMatch ?? "";
 }
 
+/**
+ * Categories that were renamed or split. Listings, saved browse picks and old
+ * /rent links all store the display name, so the old name has to keep resolving.
+ */
+const RENAMED_CATEGORIES: Record<string, string> = {
+  "Home & Kitchen": "Kitchen Equipment",
+  // Never shipped as a category, but the AI prompt and pricing rules used it.
+  Furniture: "Home & Office Furniture",
+};
+
+/** Shelves that moved or were renamed with their category, keyed `category::shelf`. */
+const RENAMED_SHELVES: Record<string, { category: string; subcategory: string }> = {
+  "Home & Kitchen::Commercial Coffee": {
+    category: "Kitchen Equipment",
+    subcategory: "Commercial Coffee Equipment",
+  },
+  "Home & Kitchen::Food Processors Pro": {
+    category: "Kitchen Equipment",
+    subcategory: "Food Preparation Equipment",
+  },
+  "Home & Kitchen::Beverage Systems": {
+    category: "Kitchen Equipment",
+    subcategory: "Refrigeration & Beverage Systems",
+  },
+  "Office & Business::Office Furniture": {
+    category: "Home & Office Furniture",
+    subcategory: "Office Desks & Chairs",
+  },
+};
+
+/** The name a category goes by today, for values stored before a rename. */
+export function canonicalCategoryName(category: string): string {
+  const name = category.trim();
+  return RENAMED_CATEGORIES[name] ?? name;
+}
+
+/** Where a stored category/shelf pair lives today. */
+export function canonicalShelf(
+  category: string,
+  subcategory: string,
+): { category: string; subcategory: string } {
+  const cat = category.trim();
+  const sub = subcategory.trim();
+  const moved = RENAMED_SHELVES[`${cat}::${sub}`];
+  if (moved) return moved;
+  return { category: canonicalCategoryName(cat), subcategory: sub };
+}
+
+/**
+ * Names a category has ever been stored under, newest first — for queries that
+ * filter on the stored string instead of hydrating rows first.
+ */
+export function categoryQueryNames(category: string): string[] {
+  const canonical = canonicalCategoryName(category);
+  const legacy = Object.entries(RENAMED_CATEGORIES)
+    .filter(([, current]) => current === canonical)
+    .map(([old]) => old);
+  return [canonical, ...legacy];
+}
+
 export function matchListingCategory(value: string): ListingCategory | "" {
+  const renamed = canonicalCategoryName(value);
+  if (renamed in CATEGORIES) return renamed as ListingCategory;
   const match = matchOption(CATEGORY_NAMES, value);
   return match || "";
 }
@@ -627,7 +716,17 @@ export const CATEGORY_MODES: Record<string, CategoryModeRules> = {
     showDailyRate: true,
     showMonthlyRate: true,
   },
-  "Home & Kitchen": {
+  "Kitchen Equipment": {
+    rent: true,
+    sell: true,
+    rentToOwn: false,
+    gift: true,
+    replacementValueLabel: "Estimated Replacement Value",
+    replacementValueHelper: "Cost to buy new",
+    showDailyRate: true,
+    showMonthlyRate: true,
+  },
+  "Home & Office Furniture": {
     rent: true,
     sell: true,
     rentToOwn: false,
@@ -854,7 +953,7 @@ export function calculateRentalPrices(
   let monthly = 0;
   let deposit = 0;
 
-  switch (category) {
+  switch (canonicalCategoryName(category)) {
     case "Tools & DIY": {
       const pct = v < 200 ? 0.14 : v < 500 ? 0.27 : v < 2000 ? 0.18 : 0.1;
       daily = Math.round(v * pct * d);
@@ -969,7 +1068,7 @@ export function calculateRentalPrices(
       deposit = Math.round(v * 0.25);
       break;
     }
-    case "Home & Kitchen": {
+    case "Kitchen Equipment": {
       ({ daily, weekly, monthly, deposit } = calculateTieredRentalPrices(
         v,
         d,
@@ -981,7 +1080,7 @@ export function calculateRentalPrices(
       ));
       break;
     }
-    case "Furniture": {
+    case "Home & Office Furniture": {
       ({ daily, weekly, monthly, deposit } = calculateTieredRentalPrices(
         v,
         d,

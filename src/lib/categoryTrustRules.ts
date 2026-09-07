@@ -156,14 +156,14 @@ export {
 
 const WELDING_SUBS = new Set(["welding equipment"]);
 const STUMP_GRINDER_SUBS = new Set(["stump grinders"]);
-const COMMERCIAL_COFFEE_SUBS = new Set(["commercial coffee"]);
+const COMMERCIAL_COFFEE_SUBS = new Set(["commercial coffee equipment"]);
 
 /**
- * Home & Kitchen (~8.0): personal appliances gate on capacity + return-clean;
+ * Kitchen Equipment (~8.0): personal appliances gate on capacity + return-clean;
  * food-contact shelves attest sanitize; commercial coffee / catering / processors
  * add voltage, NSF, install, kit inventory. Spec option + field-label keys are
  * GLOBAL in i18n — never reuse bare `mixed` / `single` / `none` with new meanings.
- * Publish gates: `areCategorySpecsValid` Home & Kitchen P0 block in categorySpecs.ts.
+ * Publish gates: `areCategorySpecsValid` Kitchen Equipment P0 block in categorySpecs.ts.
  */
 
 export function listingIsWeldingEquipment(
@@ -182,7 +182,7 @@ export function listingIsCommercialCoffee(
   listing: Pick<ListingDraft, "category" | "subcategory">,
 ): boolean {
   return (
-    listing.category.trim() === "Home & Kitchen" && COMMERCIAL_COFFEE_SUBS.has(subKey(listing))
+    listing.category.trim() === "Kitchen Equipment" && COMMERCIAL_COFFEE_SUBS.has(subKey(listing))
   );
 }
 

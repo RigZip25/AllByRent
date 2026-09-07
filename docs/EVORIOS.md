@@ -8,7 +8,7 @@
 
 **Product strategy:** household neighborhood marketplace — **breadth first**; deepen one category when demand spikes (not mass P1 on every shelf).
 
-**Category ~8.0 encode:** one category at a time; never parallel-edit shared `options` / `fields` in `messages/*.ts`. Shared `listing.categorySpecs.options` **and** `fields` keys must stay unique (`TS1117` blocks prod) — CI: `npm run check:i18n-keys`. Prefer scoped option ids — see CATEGORY_FACT_QA. **Shipped ~8.0:** Home & Kitchen, Music & Audio, Office & Business, Outdoor & Camping, Photo & Video, Sports & Recreation, Tools & DIY, Unique & Other, Vehicles, Bikes & Scooters, Boats & Water, Construction. **Verified earlier:** Real Estate (`bfb116d`).
+**Category ~8.0 encode:** one category at a time; never parallel-edit shared `options` / `fields` in `messages/*.ts`. Shared `listing.categorySpecs.options` **and** `fields` keys must stay unique (`TS1117` blocks prod) — CI: `npm run check:i18n-keys`. Prefer scoped option ids — see CATEGORY_FACT_QA. **Shipped ~8.0:** Kitchen Equipment, Music & Audio, Office & Business, Outdoor & Camping, Photo & Video, Sports & Recreation, Tools & DIY, Unique & Other, Vehicles, Bikes & Scooters, Boats & Water, Construction. **Verified earlier:** Real Estate (`bfb116d`).
 
 **Walk the app screen-by-screen:** [FLOW_AUDIT.md](FLOW_AUDIT.md) — what to change at each step (✅ / 🟡 / 🟠 / 🔴).
 

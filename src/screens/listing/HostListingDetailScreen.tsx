@@ -664,9 +664,16 @@ export function HostListingDetailScreen({
             className="mb-4"
           />
         ) : null}
-        {listing.category.trim() === "Home & Kitchen" ? (
+        {listing.category.trim() === "Kitchen Equipment" ? (
           <CategoryFactCard
-            category="Home & Kitchen"
+            category="Kitchen Equipment"
+            subcategory={listing.subcategory}
+            className="mb-4"
+          />
+        ) : null}
+        {listing.category.trim() === "Home & Office Furniture" ? (
+          <CategoryFactCard
+            category="Home & Office Furniture"
             subcategory={listing.subcategory}
             className="mb-4"
           />

@@ -99,11 +99,11 @@ Boost screen ($2/24h, $5/7d, $10/30d)
 - Stripe Connect bank account (required before first payout)
 
 ## Categories
-20 categories × Personal / Professional grade
-Each category: 6 subcategories (last one always "Other")
+21 categories × Personal / Professional grade
+Each category: 6–7 subcategories per grade (last one always "Other")
 File: src/screens/listing/listingItemCategories.ts
 Pricing coefficients from real market × 0.85 (15% cheaper)
-Long-term base: month (Electronics, Furniture, Home & Kitchen)
+Long-term base: month (Electronics, Home & Office Furniture, Kitchen Equipment)
 Short-term base: day (Tools, Photo & Video, Party & Events)
 
 ## Transaction modes

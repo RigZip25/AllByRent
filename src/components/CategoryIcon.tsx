@@ -10,6 +10,7 @@ import gardenYard from "../imports/categories/garden-yard.webp";
 import gymFitness from "../imports/categories/gym-fitness.webp";
 import heavyEquipment from "../imports/categories/heavy-equipment.webp";
 import homeKitchen from "../imports/categories/home-kitchen.webp";
+import homeOfficeFurniture from "../imports/subcategories/office-office-furniture.webp";
 import musicAudio from "../imports/categories/music-audio.webp";
 import officeBusiness from "../imports/categories/office-business.webp";
 import outdoorCamping from "../imports/categories/outdoor-camping.webp";
@@ -41,7 +42,9 @@ const CATEGORY_ART: Record<BrowsableCategory, string> = {
   "Garden & Yard": gardenYard,
   "Gym & Fitness": gymFitness,
   "Heavy Equipment": heavyEquipment,
-  "Home & Kitchen": homeKitchen,
+  // Stands in with the desk-and-chair shelf art until this category is drawn.
+  "Home & Office Furniture": homeOfficeFurniture,
+  "Kitchen Equipment": homeKitchen,
   "Music & Audio": musicAudio,
   "Office & Business": officeBusiness,
   "Outdoor & Camping": outdoorCamping,

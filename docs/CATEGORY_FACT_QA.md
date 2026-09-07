@@ -71,7 +71,7 @@ All listing `categorySpecs` select **values** share **one flat** `listing.catego
 
 **2026-08-20:** Real Estate clearance/`none`/Gym `ground_floor_easy` option collisions fixed (`e9f787a`). Home inject dropped colliding field labels (`kitInventoryChecklist`, `photoConditionChecklist`, `cateringSanitizeAttested`) — reuse existing global labels.
 
-### Home & Kitchen (~8.0) — shipped pattern
+### Kitchen Equipment (~8.0) — shipped pattern
 
 | Layer | Pattern |
 |-------|---------|
@@ -99,11 +99,19 @@ All listing `categorySpecs` select **values** share **one flat** `listing.catego
 
 | Layer | Pattern |
 |-------|---------|
-| Furniture | Type, size/seats, condition — **no** device wipe |
 | Devices | `deviceHasStorage` + wipe when `has_storage`; POS unknown/storage and Servers always wipe |
 | Pro | Large-format width/ink; POS payment readiness; copier duty/finishers; conference seats; server form + rack notes |
 | Deposit | Physical damage + missing kit — not cyber insurance |
 | FactCards | Per-sub Q→A; subcategory already wired on listing/booking |
+
+### Home & Office Furniture — structure only
+
+| Layer | Pattern |
+|-------|---------|
+| Household | Living room / bedroom / tables & chairs / storage / outdoor — brand, model, condition; type + size option sets still to be written |
+| Pro | Office desks & chairs, reception, conference, event, display & retail, commercial storage — reuse `officeFurnitureType`, `furnitureSeatOrSizeBand`, `furnitureConditionGrade` moved out of Office & Business |
+| Deposit | Damage, stains, missing hardware — not a cleaning fee |
+| Wipe | None: device wipe stays on Printers / POS / Servers |
 
 ### Outdoor & Camping (~8.0) — shipped pattern
 

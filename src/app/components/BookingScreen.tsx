@@ -1687,9 +1687,15 @@ function BookingScreenLoaded({
             subcategory={listing.subcategory}
           />
         ) : null}
-        {listing.category.trim() === "Home & Kitchen" && listing.modes.rent ? (
+        {listing.category.trim() === "Kitchen Equipment" && listing.modes.rent ? (
           <CategoryFactCard
-            category="Home & Kitchen"
+            category="Kitchen Equipment"
+            subcategory={listing.subcategory}
+          />
+        ) : null}
+        {listing.category.trim() === "Home & Office Furniture" && listing.modes.rent ? (
+          <CategoryFactCard
+            category="Home & Office Furniture"
             subcategory={listing.subcategory}
           />
         ) : null}

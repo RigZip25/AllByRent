@@ -656,9 +656,16 @@ export function ItemDetail({
                 className="mt-3"
               />
             ) : null}
-            {listing.modes.rent && listing.category.trim() === "Home & Kitchen" ? (
+            {listing.modes.rent && listing.category.trim() === "Kitchen Equipment" ? (
               <CategoryFactCard
-                category="Home & Kitchen"
+                category="Kitchen Equipment"
+                subcategory={listing.subcategory}
+                className="mt-3"
+              />
+            ) : null}
+            {listing.modes.rent && listing.category.trim() === "Home & Office Furniture" ? (
+              <CategoryFactCard
+                category="Home & Office Furniture"
                 subcategory={listing.subcategory}
                 className="mt-3"
               />

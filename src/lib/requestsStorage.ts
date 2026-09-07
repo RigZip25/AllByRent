@@ -1,4 +1,5 @@
 import type { ShelfPrefill } from "./shelfListings";
+import { categoryQueryNames } from "../screens/listing/listingItemCategories";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 const REQUESTS_KEY = "allbyrent_requests_v1";
@@ -147,7 +148,8 @@ export async function fetchRequestsForShelfRemote(filter: {
   const { data, error } = await supabase
     .from("requests")
     .select("*")
-    .eq("category", filter.category)
+    // Asks posted before a category was renamed still belong on this shelf.
+    .in("category", categoryQueryNames(filter.category))
     .eq("subcategory", filter.subcategory)
     .ilike("location_label", `%${filter.locationLabel}%`)
     .order("created_at", { ascending: false })
