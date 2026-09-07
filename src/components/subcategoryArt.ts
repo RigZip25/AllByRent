@@ -127,6 +127,17 @@ import techServersWorkstations from "../imports/subcategories/tech-servers-works
 import techSmartHomeDevices from "../imports/subcategories/tech-smart-home-devices.webp";
 import techSpeakers from "../imports/subcategories/tech-speakers.webp";
 import toolsHandTools from "../imports/subcategories/tools-hand-tools.webp";
+import vehiclesAtvs from "../imports/subcategories/vehicles-atvs.webp";
+import vehiclesCargoVans from "../imports/subcategories/vehicles-cargo-vans.webp";
+import vehiclesCarsTrucks from "../imports/subcategories/vehicles-cars-trucks.webp";
+import vehiclesCommercialTrucks from "../imports/subcategories/vehicles-commercial-trucks.webp";
+import vehiclesEquipmentTrailers from "../imports/subcategories/vehicles-equipment-trailers.webp";
+import vehiclesMotorcycles from "../imports/subcategories/vehicles-motorcycles.webp";
+import vehiclesOther from "../imports/subcategories/vehicles-other.webp";
+import vehiclesRvsCampers from "../imports/subcategories/vehicles-rvs-campers.webp";
+import vehiclesSpecialVehicles from "../imports/subcategories/vehicles-special-vehicles.webp";
+import vehiclesTowVehicles from "../imports/subcategories/vehicles-tow-vehicles.webp";
+import vehiclesTrailers from "../imports/subcategories/vehicles-trailers.webp";
 import toolsIndustrialDrills from "../imports/subcategories/tools-industrial-drills.webp";
 import toolsLadders from "../imports/subcategories/tools-ladders.webp";
 import toolsLaserMeasuring from "../imports/subcategories/tools-laser-measuring.webp";
@@ -286,6 +297,17 @@ export const SUBCATEGORY_ART = {
   "tools-power-saws": toolsPowerSaws,
   "tools-scaffolding-systems": toolsScaffoldingSystems,
   "tools-welding-equipment": toolsWeldingEquipment,
+  "vehicles-atvs": vehiclesAtvs,
+  "vehicles-cargo-vans": vehiclesCargoVans,
+  "vehicles-cars-trucks": vehiclesCarsTrucks,
+  "vehicles-commercial-trucks": vehiclesCommercialTrucks,
+  "vehicles-equipment-trailers": vehiclesEquipmentTrailers,
+  "vehicles-motorcycles": vehiclesMotorcycles,
+  "vehicles-other": vehiclesOther,
+  "vehicles-rvs-campers": vehiclesRvsCampers,
+  "vehicles-special-vehicles": vehiclesSpecialVehicles,
+  "vehicles-tow-vehicles": vehiclesTowVehicles,
+  "vehicles-trailers": vehiclesTrailers,
 } as const;
 
 export type SubcategoryArtId = keyof typeof SUBCATEGORY_ART;
