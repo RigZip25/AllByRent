@@ -5,7 +5,8 @@ import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient } from "../../lib/passkey/supabaseAdmin";
 import { syncRentalPaymentFromIntent } from "../../lib/stripe/syncRentalPaymentIntent";
 
-async function readRawBody(req: any): Promise<Buffer> {
+/** Stripe verifies the signature against the untouched bytes, so read the stream itself. */
+async function readRawBody(req: AsyncIterable<Buffer | string>): Promise<Buffer> {
   const chunks: Buffer[] = [];
   for await (const chunk of req) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
   return Buffer.concat(chunks);
@@ -31,7 +32,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
-  const raw = await readRawBody(req);
+  const raw = await readRawBody(req as unknown as AsyncIterable<Buffer | string>);
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(raw, sig, webhookSecret);

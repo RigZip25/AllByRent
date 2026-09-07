@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import {
   BookOpen,
   ChevronRight,
+  FileText,
   HelpCircle,
   LogIn,
   Mail,
@@ -9,7 +10,14 @@ import {
 } from "lucide-react";
 import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { useAuth } from "../hooks/AuthProvider";
-import { MASCOT_NAME, APP_NAME, SUPPORT_EMAIL } from "../lib/brand";
+import {
+  MASCOT_NAME,
+  APP_NAME,
+  PRIVACY_URL,
+  REFUND_POLICY_URL,
+  SUPPORT_EMAIL,
+  TERMS_URL,
+} from "../lib/brand";
 import { useMessages } from "../lib/i18n/react";
 import {
   loadUserProfile,
@@ -179,6 +187,23 @@ export function MoreScreen({
               />
             </li>
           ) : null}
+        </ul>
+
+        <SectionTitle>{t.more.sectionLegal}</SectionTitle>
+        <ul className="mb-2 flex flex-col gap-2">
+          {[
+            { label: t.paymentsUi.terms, url: TERMS_URL },
+            { label: t.paymentsUi.privacy, url: PRIVACY_URL },
+            { label: t.paymentsUi.refund, url: REFUND_POLICY_URL },
+          ].map((doc) => (
+            <li key={doc.url}>
+              <MenuRow
+                icon={<FileText className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+                label={doc.label}
+                onClick={() => window.open(doc.url, "_blank", "noopener,noreferrer")}
+              />
+            </li>
+          ))}
         </ul>
       </div>
     </div>

@@ -101,6 +101,19 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
+  /**
+   * Releasing an authorization is the renter's own cancellation (handled above).
+   * Money that already moved to the host may only be sent back by the host or
+   * support — otherwise a renter could refund themselves after the handoff.
+   */
+  if (!isOwner) {
+    res.status(403).json({
+      error: "Only the host can refund a captured payment",
+      refundStatus: "contact_support",
+    });
+    return;
+  }
+
   const chargeable = intent.amount_received || intent.amount || 0;
   let amountCents =
     typeof body.amountCents === "number" && Number.isFinite(body.amountCents)

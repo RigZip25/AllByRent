@@ -389,7 +389,7 @@ export function CategorySpecsFields({
     );
     if (shelfFields.length === 0) return;
     setDraft((current) => {
-      let nextDraft = softFillEmptyCategorySpecs(current);
+      const nextDraft = softFillEmptyCategorySpecs(current);
       const specs = nextDraft.categorySpecs ?? {};
       let changed = nextDraft !== current;
       const next = { ...specs };

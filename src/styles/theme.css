@@ -1467,6 +1467,8 @@
     right: 0;
     flex-shrink: 0;
     z-index: 20;
+    /* Keeps "Book now" and "Continue to pay" clear of the iOS home indicator. */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   /**

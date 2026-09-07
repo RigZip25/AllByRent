@@ -113,13 +113,36 @@ export function validateGarageSellLines(input: {
   return { ok: true, lines, subtotalCents };
 }
 
+/**
+ * The awaiting-checkout lot state is written by the host and names both the
+ * winner and the amount, so it — not the buyer's request — decides the charge.
+ */
+function readAwaitingCheckout(
+  state: unknown,
+): { winnerBidderId: string; winningBidUsd: number; runnerUpAttempt: number } | null {
+  if (!state || typeof state !== "object") return null;
+  const record = state as Record<string, unknown>;
+  if (record.status !== "awaiting_checkout") return null;
+  const amount = Number(record.winningBidUsd);
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  const attempt = Number(record.runnerUpAttempt);
+  return {
+    winnerBidderId: typeof record.winnerBidderId === "string" ? record.winnerBidderId : "",
+    winningBidUsd: amount,
+    runnerUpAttempt: Number.isFinite(attempt) ? Math.max(1, Math.round(attempt)) : 1,
+  };
+}
+
 export function validateAuctionListing(input: {
   hostId: string;
   listingId: string;
   listing: GarageListingRow | null;
   lot: GarageLotRow | null;
   winningBidUsd: number;
-}): { ok: true; title: string; bidCents: number } | { ok: false; error: string } {
+  buyerId: string;
+}):
+  | { ok: true; title: string; bidCents: number; runnerUpAttempt: number }
+  | { ok: false; error: string } {
   const row = input.listing;
   if (!row) return { ok: false, error: "Listing unavailable" };
   if (row.owner_id !== input.hostId) return { ok: false, error: "Listing host mismatch" };
@@ -129,9 +152,22 @@ export function validateAuctionListing(input: {
   const status = lotStatus(input.lot?.state);
   if (status === "sold") return { ok: false, error: "Item already sold" };
   if (!(input.winningBidUsd > 0)) return { ok: false, error: "Invalid winning bid" };
+
+  const awaiting = readAwaitingCheckout(input.lot?.state);
+  if (!awaiting) {
+    return { ok: false, error: "Auction result is not confirmed for this lot yet" };
+  }
+  if (awaiting.winnerBidderId && awaiting.winnerBidderId !== input.buyerId) {
+    return { ok: false, error: "This lot is reserved for another bidder" };
+  }
+  if (Math.round(awaiting.winningBidUsd * 100) !== Math.round(input.winningBidUsd * 100)) {
+    return { ok: false, error: "Amount does not match the winning bid" };
+  }
+
   return {
     ok: true,
     title: (row.title ?? "Sale item").slice(0, 200),
-    bidCents: Math.round(input.winningBidUsd * 100),
+    bidCents: Math.round(awaiting.winningBidUsd * 100),
+    runnerUpAttempt: awaiting.runnerUpAttempt,
   };
 }

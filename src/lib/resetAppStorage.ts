@@ -121,6 +121,13 @@ export function consumeResetAppBeforeBoot(): boolean {
   if (typeof window === "undefined") return false;
   const params = new URLSearchParams(window.location.search);
   if (!isResetAppQueryParam(params)) return false;
+  // A tapped link is not consent: outside dev, anyone could send ?resetApp=1
+  // and wipe a neighbor's drafts and unsynced listings.
+  if (!import.meta.env.DEV && !window.confirm(getMessages().systemUi.resetConfirm)) {
+    const next = resolvePostResetUrl();
+    if (next) window.history.replaceState({}, "", next);
+    return false;
+  }
   void resetAllAppData();
   return true;
 }

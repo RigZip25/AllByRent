@@ -153,9 +153,6 @@ function parseModerationResponse(
   else if (prohibited || reasonCode === "prohibited_item") reasonCode = "prohibited_item";
   else if (!isListableItem) reasonCode = "not_an_item";
   else if (categorySet && matchesCategory === false) reasonCode = "category_mismatch";
-  else if (reasonCode === "ok" && categorySet && matchesCategory === false) {
-    reasonCode = "category_mismatch";
-  }
 
   // When category is empty, never hard-block on category_mismatch from the model.
   if (!categorySet && reasonCode === "category_mismatch") {

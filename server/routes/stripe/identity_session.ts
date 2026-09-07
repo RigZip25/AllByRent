@@ -29,7 +29,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
-  const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as any });
+  const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
   const body = (req.body ?? {}) as Body;
   const returnUrl =
     typeof body.returnUrl === "string" && body.returnUrl.trim()

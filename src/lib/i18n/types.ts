@@ -686,6 +686,7 @@ export type AppMessages = {
     sectionGarage: string;
     sectionAccount: string;
     sectionSupport: string;
+    sectionLegal: string;
     rentals: string;
     rentalsHint: string;
     messages: string;
@@ -1357,6 +1358,9 @@ export type AppMessages = {
     title: string;
     heavyItem: string;
     rentalLength: string;
+    goBackAria: string;
+    fewerDaysAria: string;
+    moreDaysAria: string;
     days: (n: number) => string;
     hostMinimum: (period: string) => string;
     longTermTip: string;

@@ -53,9 +53,9 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const body = (req.body ?? {}) as Body;
   const listingId = typeof body.listingId === "string" ? body.listingId.trim() : "";
   const hostId = typeof body.hostId === "string" ? body.hostId.trim() : "";
+  // Both values are cross-checked against the lot state below; the request only
+  // states what the buyer believes they won.
   const winningBidUsd = typeof body.winningBidUsd === "number" ? body.winningBidUsd : 0;
-  const runnerUpAttempt =
-    typeof body.runnerUpAttempt === "number" ? Math.max(1, Math.round(body.runnerUpAttempt)) : 1;
 
   if (!listingId || !hostId || winningBidUsd <= 0) {
     res.status(400).json({ error: "listingId, hostId, and winningBidUsd are required" });
@@ -91,6 +91,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     listing: (listingRow as GarageListingRow | null) ?? null,
     lot: (lotRow as GarageLotRow | null) ?? null,
     winningBidUsd,
+    buyerId: user.id,
   });
   if (!validated.ok) {
     res.status(409).json({ ok: false, error: validated.error });
@@ -124,8 +125,8 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       listing_id: listingId,
       host_id: hostId,
       buyer_id: user.id,
-      winning_bid_usd: String(winningBidUsd),
-      runner_up_attempt: String(runnerUpAttempt),
+      winning_bid_usd: String(bidCents / 100),
+      runner_up_attempt: String(validated.runnerUpAttempt),
       platform_fee_cents: String(platformFeeCents),
       fee_paid_by: "seller",
     },
@@ -142,7 +143,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     winning_bid_cents: bidCents,
     platform_fee_cents: platformFeeCents,
     total_cents: amountCents,
-    runner_up_attempt: runnerUpAttempt,
+    runner_up_attempt: validated.runnerUpAttempt,
     status: "pending",
   });
 

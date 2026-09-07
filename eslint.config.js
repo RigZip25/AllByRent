@@ -25,6 +25,15 @@ export default tseslint.config(
     },
   },
   {
+    files: ["server/**/*.ts", "api/**/*.ts", "scripts/**/*.{mjs,cjs,js}", "*.config.{ts,js}"],
+    languageOptions: {
+      globals: globals.node,
+    },
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
+  {
     files: ["public/sw.js"],
     languageOptions: {
       globals: globals.serviceworker,

@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { enforceProxyGuard } from "../../lib/proxyGuard";
 
 const CENSUS_BASE = "https://geocoding.geo.census.gov/geocoder";
 
@@ -17,6 +18,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader("Allow", "GET, OPTIONS");
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  // Address pickers type a few queries; anything beyond that is someone else
+  // using us as their free geocoder against our Census quota.
+  const guard = await enforceProxyGuard(req, res, {
+    route: "geocode-us",
+    maxAnon: 40,
+    maxAuthed: 120,
+  });
+  if (!guard) return;
 
   const benchmark =
     typeof req.query.benchmark === "string" ? req.query.benchmark : "Public_AR_Current";

@@ -120,9 +120,8 @@ export function HomeFeed({
   const [isLocating, setIsLocating] = useState(false);
   const [locateError, setLocateError] = useState<string | null>(null);
   const [locationEpoch, setLocationEpoch] = useState(0);
-  const { updateAvailable, updateJustCompleted, simulateUpdateNotification } = usePwaUpdate();
+  const { updateAvailable, updateJustCompleted } = usePwaUpdate();
   const showBellBadge = updateAvailable || updateJustCompleted;
-  const bellTapRef = useRef({ count: 0, openTimer: 0 });
   const autoOpenedLocationSheet = useRef(false);
 
   const city = getActiveRentLocationLabel().trim();
@@ -132,19 +131,7 @@ export function HomeFeed({
   const interests = useMemo(() => (focus ? [focus] : []), [focus]);
 
   const handleBellPress = () => {
-    const taps = bellTapRef.current;
-    taps.count += 1;
-    window.clearTimeout(taps.openTimer);
-    if (taps.count >= 5) {
-      taps.count = 0;
-      simulateUpdateNotification();
-      onOpenNotifications();
-      return;
-    }
-    taps.openTimer = window.setTimeout(() => {
-      taps.count = 0;
-      onOpenNotifications();
-    }, 450);
+    onOpenNotifications();
   };
 
   useEffect(() => {

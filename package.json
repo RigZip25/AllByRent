@@ -1,7 +1,7 @@
 {
   "name": "evorios",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "Evorios — Garage Showcase (PWA + Capacitor store apps)",
   "type": "module",
   "packageManager": "npm@10.9.3",
@@ -13,10 +13,13 @@
     "art:categories": "node ./scripts/prepare-category-art.mjs",
     "art:categories:check": "node ./scripts/prepare-category-art.mjs --check",
     "check:i18n-keys": "node ./scripts/check-i18n-unique-keys.mjs",
+    "check:migrations": "node ./scripts/check-migrations.mjs",
     "typecheck": "node ./scripts/check-i18n-unique-keys.mjs && tsc -b --pretty false",
     "dev": "vite",
     "dev:https": "set VITE_DEV_HTTPS=true&& vite",
-    "lint": "node ./node_modules/eslint/bin/eslint.js src",
+    "lint": "node ./node_modules/eslint/bin/eslint.js src server api scripts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "seo:sitemap": "node ./scripts/generate-rent-sitemap.mjs",
     "seo:indexnow": "node ./scripts/seo/submit-indexnow.mjs",
     "start": "vite",
@@ -137,6 +140,7 @@
     "typescript-eslint": "^8.40.0",
     "vite": "6.3.5",
     "vite-plugin-pwa": "^0.21.2",
+    "vitest": "^3.2.7",
     "workbox-window": "^7.4.1"
   },
   "overrides": {

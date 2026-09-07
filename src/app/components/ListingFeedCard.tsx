@@ -114,12 +114,17 @@ export function ListingFeedCard({
         </div>
 
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-          <div className="flex items-center gap-0.5">
-            <Star className="w-3 h-3 fill-accent text-accent" />
-            <span className="font-medium text-foreground">{rating}</span>
-            <span>({reviews})</span>
-          </div>
-          <span>·</span>
+          {/* No stars until a review exists — a zero rating reads as a bad host. */}
+          {reviews > 0 ? (
+            <>
+              <div className="flex items-center gap-0.5">
+                <Star className="w-3 h-3 fill-accent text-accent" aria-hidden />
+                <span className="font-medium text-foreground">{rating}</span>
+                <span>({reviews})</span>
+              </div>
+              <span>·</span>
+            </>
+          ) : null}
           <span>{distance}</span>
         </div>
 

@@ -9,7 +9,6 @@ import {
   Headphones,
   ScanLine,
   MessageCircle,
-  CheckCircle2,
   Share2,
   Calendar,
   Camera,
@@ -48,7 +47,7 @@ import {
 } from "../../lib/garageShopStorage";
 import { ListingPhotoGallery } from "../../components/listings/ListingPhotoGallery";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
-import { APP_NAME, MASCOT_NAME } from "../../lib/brand";
+import { MASCOT_NAME } from "../../lib/brand";
 import { parseUsdToCents } from "../../lib/insurance";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
 import { buildListingSharePayload, listingShareUrl } from "../../lib/socialShare";
@@ -394,8 +393,13 @@ export function ItemDetail({
     return (
       <div className="screen flex flex-col bg-background">
         <div className="shrink-0 border-b border-border px-4 py-3">
-          <button type="button" onClick={onBack} className="p-2 hover:bg-muted rounded-full">
-            <ArrowLeft className="w-5 h-5" />
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label={t.listing.goBackAria}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full hover:bg-muted"
+          >
+            <ArrowLeft className="w-5 h-5" aria-hidden />
           </button>
         </div>
         <div className="flex flex-1 items-center justify-center p-6 text-sm text-muted-foreground">
@@ -409,8 +413,13 @@ export function ItemDetail({
     return (
       <div className="screen flex flex-col bg-background">
         <div className="shrink-0 border-b border-border px-4 py-3 flex items-center gap-3">
-          <button type="button" onClick={onBack} className="p-2 hover:bg-muted rounded-full">
-            <ArrowLeft className="w-5 h-5" />
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label={t.listing.goBackAria}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full hover:bg-muted"
+          >
+            <ArrowLeft className="w-5 h-5" aria-hidden />
           </button>
           <h1 className="font-semibold flex-1">{t.item.notFound}</h1>
         </div>
@@ -435,9 +444,10 @@ export function ItemDetail({
       <div className="shrink-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-3 sm:px-4 py-3 flex items-center gap-3">
         <button
           onClick={onBack}
-          className="p-2 hover:bg-muted rounded-full transition-colors"
+          aria-label={t.listing.goBackAria}
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors hover:bg-muted"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden />
         </button>
         <h1 className="font-semibold flex-1 truncate">{title}</h1>
         <button
@@ -867,13 +877,10 @@ export function ItemDetail({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="font-semibold">{t.item.garageHost}</span>
-                    <CheckCircle2 className="w-4 h-4 text-primary" />
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {onViewHostProfile
-                      ? t.item.viewPublicProfile
-                      : t.item.verifiedHost(APP_NAME)}
-                  </p>
+                  {onViewHostProfile ? (
+                    <p className="text-sm text-muted-foreground">{t.item.viewPublicProfile}</p>
+                  ) : null}
                 </div>
               </button>
               {canRent || listing.modes.sell ? (

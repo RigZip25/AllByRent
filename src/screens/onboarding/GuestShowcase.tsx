@@ -207,14 +207,25 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
 
       <div className="shrink-0 space-y-2.5 px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-2">
         {isLast ? (
-          <button
-            type="button"
-            onClick={onSignUp}
-            className="flex min-h-[52px] w-full items-center justify-center rounded-2xl py-3.5 text-[17px] font-bold text-white shadow-[0_10px_28px_rgba(13,92,58,0.28)]"
-            style={{ backgroundColor: GREEN }}
-          >
-            {copy.signUpCta}
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={onSignUp}
+              className="flex min-h-[52px] w-full items-center justify-center rounded-2xl py-3.5 text-[17px] font-bold text-white shadow-[0_10px_28px_rgba(13,92,58,0.28)]"
+              style={{ backgroundColor: GREEN }}
+            >
+              {copy.signUpCta}
+            </button>
+            {/* The guest exit is on every other slide; finishing the tour must not remove it. */}
+            <button
+              type="button"
+              onClick={onBrowseAsGuest}
+              className="flex min-h-[48px] w-full items-center justify-center rounded-2xl border bg-white py-3 text-[15px] font-semibold text-gray-700"
+              style={{ borderColor: "#E8E6E0" }}
+            >
+              {copy.browseCta}
+            </button>
+          </>
         ) : (
           <button
             type="button"
