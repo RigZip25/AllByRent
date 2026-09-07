@@ -1,4 +1,14 @@
 import babyBabyCarriers from "../imports/subcategories/baby-baby-carriers.webp";
+import babyCarSeats from "../imports/subcategories/baby-car-seats.webp";
+import babyChildcareEquipment from "../imports/subcategories/baby-childcare-equipment.webp";
+import babyCommercialPlayEquipment from "../imports/subcategories/baby-commercial-play-equipment.webp";
+import babyCribsBeds from "../imports/subcategories/baby-cribs-beds.webp";
+import babyEducationalTools from "../imports/subcategories/baby-educational-tools.webp";
+import babyGroupActivityGear from "../imports/subcategories/baby-group-activity-gear.webp";
+import babyOther from "../imports/subcategories/baby-other.webp";
+import babySafetySystems from "../imports/subcategories/baby-safety-systems.webp";
+import babyStrollers from "../imports/subcategories/baby-strollers.webp";
+import babyToysGames from "../imports/subcategories/baby-toys-games.webp";
 import bikesAdaptiveBikes from "../imports/subcategories/bikes-adaptive-bikes.webp";
 import bikesCargoBikes from "../imports/subcategories/bikes-cargo-bikes.webp";
 import bikesCruisers from "../imports/subcategories/bikes-cruisers.webp";
@@ -22,16 +32,6 @@ import boatsMotorboats from "../imports/subcategories/boats-motorboats.webp";
 import boatsOther from "../imports/subcategories/boats-other.webp";
 import boatsPontoonBoats from "../imports/subcategories/boats-pontoon-boats.webp";
 import boatsSupBoards from "../imports/subcategories/boats-sup-boards.webp";
-import babyCarSeats from "../imports/subcategories/baby-car-seats.webp";
-import babyChildcareEquipment from "../imports/subcategories/baby-childcare-equipment.webp";
-import babyCommercialPlayEquipment from "../imports/subcategories/baby-commercial-play-equipment.webp";
-import babyCribsBeds from "../imports/subcategories/baby-cribs-beds.webp";
-import babyEducationalTools from "../imports/subcategories/baby-educational-tools.webp";
-import babyGroupActivityGear from "../imports/subcategories/baby-group-activity-gear.webp";
-import babyOther from "../imports/subcategories/baby-other.webp";
-import babySafetySystems from "../imports/subcategories/baby-safety-systems.webp";
-import babyStrollers from "../imports/subcategories/baby-strollers.webp";
-import babyToysGames from "../imports/subcategories/baby-toys-games.webp";
 import constructionConcreteMixers from "../imports/subcategories/construction-concrete-mixers.webp";
 import constructionCraneLifting from "../imports/subcategories/construction-crane-lifting.webp";
 import constructionExcavationTools from "../imports/subcategories/construction-excavation-tools.webp";
@@ -65,6 +65,17 @@ import estateRoomsSpaces from "../imports/subcategories/estate-rooms-spaces.webp
 import estateSharedOffices from "../imports/subcategories/estate-shared-offices.webp";
 import estateStudioSpace from "../imports/subcategories/estate-studio-space.webp";
 import estateWarehouseStorage from "../imports/subcategories/estate-warehouse-storage.webp";
+import furnitureBedroomFurniture from "../imports/subcategories/furniture-bedroom-furniture.webp";
+import furnitureCommercialStorageShelving from "../imports/subcategories/furniture-commercial-storage-shelving.webp";
+import furnitureConferenceFurniture from "../imports/subcategories/furniture-conference-furniture.webp";
+import furnitureDisplayRetailFurniture from "../imports/subcategories/furniture-display-retail-furniture.webp";
+import furnitureEventFurniture from "../imports/subcategories/furniture-event-furniture.webp";
+import furnitureLivingRoomFurniture from "../imports/subcategories/furniture-living-room-furniture.webp";
+import furnitureOfficeDesksChairs from "../imports/subcategories/furniture-office-desks-chairs.webp";
+import furnitureOutdoorFurniture from "../imports/subcategories/furniture-outdoor-furniture.webp";
+import furnitureReceptionFurniture from "../imports/subcategories/furniture-reception-furniture.webp";
+import furnitureStorageShelving from "../imports/subcategories/furniture-storage-shelving.webp";
+import furnitureTablesChairs from "../imports/subcategories/furniture-tables-chairs.webp";
 import gardenGardenTools from "../imports/subcategories/garden-garden-tools.webp";
 import gardenHouseplantsSeedlings from "../imports/subcategories/garden-houseplants-seedlings.webp";
 import gardenIrrigationSystems from "../imports/subcategories/garden-irrigation-systems.webp";
@@ -131,7 +142,6 @@ import officeCommercialCopiers from "../imports/subcategories/office-commercial-
 import officeConferenceSystems from "../imports/subcategories/office-conference-systems.webp";
 import officeLargeFormatPrinters from "../imports/subcategories/office-large-format-printers.webp";
 import officeMonitorsDisplays from "../imports/subcategories/office-monitors-displays.webp";
-import officeOfficeFurniture from "../imports/subcategories/office-office-furniture.webp";
 import officeOther from "../imports/subcategories/office-other.webp";
 import officePosSystems from "../imports/subcategories/office-pos-systems.webp";
 import officePresentationGear from "../imports/subcategories/office-presentation-gear.webp";
@@ -194,6 +204,16 @@ import techServersWorkstations from "../imports/subcategories/tech-servers-works
 import techSmartHomeDevices from "../imports/subcategories/tech-smart-home-devices.webp";
 import techSpeakers from "../imports/subcategories/tech-speakers.webp";
 import toolsHandTools from "../imports/subcategories/tools-hand-tools.webp";
+import toolsIndustrialDrills from "../imports/subcategories/tools-industrial-drills.webp";
+import toolsLadders from "../imports/subcategories/tools-ladders.webp";
+import toolsLaserMeasuring from "../imports/subcategories/tools-laser-measuring.webp";
+import toolsMeasuringTools from "../imports/subcategories/tools-measuring-tools.webp";
+import toolsOther from "../imports/subcategories/tools-other.webp";
+import toolsPaintingTools from "../imports/subcategories/tools-painting-tools.webp";
+import toolsPowerDrills from "../imports/subcategories/tools-power-drills.webp";
+import toolsPowerSaws from "../imports/subcategories/tools-power-saws.webp";
+import toolsScaffoldingSystems from "../imports/subcategories/tools-scaffolding-systems.webp";
+import toolsWeldingEquipment from "../imports/subcategories/tools-welding-equipment.webp";
 import uniqueArtSculpture from "../imports/subcategories/unique-art-sculpture.webp";
 import uniqueCollectibles from "../imports/subcategories/unique-collectibles.webp";
 import uniqueCustomBuilds from "../imports/subcategories/unique-custom-builds.webp";
@@ -216,16 +236,6 @@ import vehiclesRvsCampers from "../imports/subcategories/vehicles-rvs-campers.we
 import vehiclesSpecialVehicles from "../imports/subcategories/vehicles-special-vehicles.webp";
 import vehiclesTowVehicles from "../imports/subcategories/vehicles-tow-vehicles.webp";
 import vehiclesTrailers from "../imports/subcategories/vehicles-trailers.webp";
-import toolsIndustrialDrills from "../imports/subcategories/tools-industrial-drills.webp";
-import toolsLadders from "../imports/subcategories/tools-ladders.webp";
-import toolsLaserMeasuring from "../imports/subcategories/tools-laser-measuring.webp";
-import toolsMeasuringTools from "../imports/subcategories/tools-measuring-tools.webp";
-import toolsOther from "../imports/subcategories/tools-other.webp";
-import toolsPaintingTools from "../imports/subcategories/tools-painting-tools.webp";
-import toolsPowerDrills from "../imports/subcategories/tools-power-drills.webp";
-import toolsPowerSaws from "../imports/subcategories/tools-power-saws.webp";
-import toolsScaffoldingSystems from "../imports/subcategories/tools-scaffolding-systems.webp";
-import toolsWeldingEquipment from "../imports/subcategories/tools-welding-equipment.webp";
 
 /**
  * Artwork for individual shelves, keyed by an id the taxonomy points at.
@@ -303,6 +313,17 @@ export const SUBCATEGORY_ART = {
   "estate-shared-offices": estateSharedOffices,
   "estate-studio-space": estateStudioSpace,
   "estate-warehouse-storage": estateWarehouseStorage,
+  "furniture-bedroom-furniture": furnitureBedroomFurniture,
+  "furniture-commercial-storage-shelving": furnitureCommercialStorageShelving,
+  "furniture-conference-furniture": furnitureConferenceFurniture,
+  "furniture-display-retail-furniture": furnitureDisplayRetailFurniture,
+  "furniture-event-furniture": furnitureEventFurniture,
+  "furniture-living-room-furniture": furnitureLivingRoomFurniture,
+  "furniture-office-desks-chairs": furnitureOfficeDesksChairs,
+  "furniture-outdoor-furniture": furnitureOutdoorFurniture,
+  "furniture-reception-furniture": furnitureReceptionFurniture,
+  "furniture-storage-shelving": furnitureStorageShelving,
+  "furniture-tables-chairs": furnitureTablesChairs,
   "garden-garden-tools": gardenGardenTools,
   "garden-houseplants-seedlings": gardenHouseplantsSeedlings,
   "garden-irrigation-systems": gardenIrrigationSystems,
@@ -369,7 +390,6 @@ export const SUBCATEGORY_ART = {
   "office-conference-systems": officeConferenceSystems,
   "office-large-format-printers": officeLargeFormatPrinters,
   "office-monitors-displays": officeMonitorsDisplays,
-  "office-office-furniture": officeOfficeFurniture,
   "office-other": officeOther,
   "office-pos-systems": officePosSystems,
   "office-presentation-gear": officePresentationGear,
