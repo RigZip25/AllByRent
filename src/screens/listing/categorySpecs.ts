@@ -8333,7 +8333,7 @@ export function areCategorySpecsValid(
       if (!reqText("kitInventoryChecklist", 6)) return false;
     }
     if (sub === "Other") {
-      if (!reqSelect("homeKitchenOtherKind", ["coffee", "baking", "mixer", "blender_juicer", "cleaning", "catering", "beverage", "commercial_foodservice", "mixed"])) return false;
+      if (!reqSelect("homeKitchenOtherKind", ["kind_coffee", "kind_baking", "kind_mixer", "kind_blender_juicer", "kind_cleaning", "kind_catering", "kind_beverage", "kind_commercial_foodservice", "kind_mixed"])) return false;
       if (!reqSelect("homeKitchenPieceBand", ["single_piece", "multi_piece"])) return false;
       if (!reqSelect("photoConditionChecklist", ["overall_photos", "overall_plus_flaws", "all_pieces_and_flaws"])) return false;
       if ((values.homeKitchenPieceBand ?? "").trim() === "multi_piece" && !reqText("kitInventoryChecklist", 6)) return false;

@@ -12,6 +12,16 @@ type Body = {
   durationHours?: number;
 };
 
+/**
+ * Price → duration, mirroring the tiers offered on the share screen. The client
+ * must not be able to invent its own pairing (30 days for $0.50).
+ */
+const BOOST_TIERS = new Map<number, number>([
+  [200, 24],
+  [500, 24 * 7],
+  [1000, 24 * 30],
+]);
+
 export default withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
   applyCors(res, typeof req.headers.origin === "string" ? req.headers.origin : undefined);
@@ -43,8 +53,8 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const amountCents = typeof body.amountCents === "number" ? Math.round(body.amountCents) : 0;
   const durationHours = typeof body.durationHours === "number" ? Math.round(body.durationHours) : 0;
 
-  if (!listingId || amountCents < 50 || durationHours < 1) {
-    res.status(400).json({ error: "listingId, amountCents (≥50), and durationHours (≥1) are required" });
+  if (!listingId || BOOST_TIERS.get(amountCents) !== durationHours) {
+    res.status(400).json({ error: "listingId and a known boost tier are required" });
     return;
   }
 
