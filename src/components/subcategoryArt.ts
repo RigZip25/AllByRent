@@ -182,6 +182,17 @@ import techServersWorkstations from "../imports/subcategories/tech-servers-works
 import techSmartHomeDevices from "../imports/subcategories/tech-smart-home-devices.webp";
 import techSpeakers from "../imports/subcategories/tech-speakers.webp";
 import toolsHandTools from "../imports/subcategories/tools-hand-tools.webp";
+import uniqueArtSculpture from "../imports/subcategories/unique-art-sculpture.webp";
+import uniqueCollectibles from "../imports/subcategories/unique-collectibles.webp";
+import uniqueCustomBuilds from "../imports/subcategories/unique-custom-builds.webp";
+import uniqueHobbyEquipment from "../imports/subcategories/unique-hobby-equipment.webp";
+import uniqueIndustrialOddities from "../imports/subcategories/unique-industrial-oddities.webp";
+import uniqueOther from "../imports/subcategories/unique-other.webp";
+import uniqueProfessionalProps from "../imports/subcategories/unique-professional-props.webp";
+import uniqueRareInstruments from "../imports/subcategories/unique-rare-instruments.webp";
+import uniqueSeasonalItems from "../imports/subcategories/unique-seasonal-items.webp";
+import uniqueSpecialtyEquipment from "../imports/subcategories/unique-specialty-equipment.webp";
+import uniqueUnusualItems from "../imports/subcategories/unique-unusual-items.webp";
 import vehiclesAtvs from "../imports/subcategories/vehicles-atvs.webp";
 import vehiclesCargoVans from "../imports/subcategories/vehicles-cargo-vans.webp";
 import vehiclesCarsTrucks from "../imports/subcategories/vehicles-cars-trucks.webp";
@@ -407,6 +418,17 @@ export const SUBCATEGORY_ART = {
   "tools-power-saws": toolsPowerSaws,
   "tools-scaffolding-systems": toolsScaffoldingSystems,
   "tools-welding-equipment": toolsWeldingEquipment,
+  "unique-art-sculpture": uniqueArtSculpture,
+  "unique-collectibles": uniqueCollectibles,
+  "unique-custom-builds": uniqueCustomBuilds,
+  "unique-hobby-equipment": uniqueHobbyEquipment,
+  "unique-industrial-oddities": uniqueIndustrialOddities,
+  "unique-other": uniqueOther,
+  "unique-professional-props": uniqueProfessionalProps,
+  "unique-rare-instruments": uniqueRareInstruments,
+  "unique-seasonal-items": uniqueSeasonalItems,
+  "unique-specialty-equipment": uniqueSpecialtyEquipment,
+  "unique-unusual-items": uniqueUnusualItems,
   "vehicles-atvs": vehiclesAtvs,
   "vehicles-cargo-vans": vehiclesCargoVans,
   "vehicles-cars-trucks": vehiclesCarsTrucks,
