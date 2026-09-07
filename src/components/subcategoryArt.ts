@@ -37,6 +37,17 @@ import homeFoodProcessorsPro from "../imports/subcategories/home-food-processors
 import homeIndustrialMixers from "../imports/subcategories/home-industrial-mixers.webp";
 import homeOther from "../imports/subcategories/home-other.webp";
 import homeStandMixers from "../imports/subcategories/home-stand-mixers.webp";
+import outdoorBackpacks from "../imports/subcategories/outdoor-backpacks.webp";
+import outdoorBaseCampEquipment from "../imports/subcategories/outdoor-base-camp-equipment.webp";
+import outdoorCampCooking from "../imports/subcategories/outdoor-camp-cooking.webp";
+import outdoorExpeditionTents from "../imports/subcategories/outdoor-expedition-tents.webp";
+import outdoorGroupShelters from "../imports/subcategories/outdoor-group-shelters.webp";
+import outdoorNavigationGps from "../imports/subcategories/outdoor-navigation-gps.webp";
+import outdoorOther from "../imports/subcategories/outdoor-other.webp";
+import outdoorProfessionalNavigation from "../imports/subcategories/outdoor-professional-navigation.webp";
+import outdoorSleepingBags from "../imports/subcategories/outdoor-sleeping-bags.webp";
+import outdoorSurvivalGear from "../imports/subcategories/outdoor-survival-gear.webp";
+import outdoorTents from "../imports/subcategories/outdoor-tents.webp";
 import partyCateringEquipment from "../imports/subcategories/party-catering-equipment.webp";
 import partyEventLighting from "../imports/subcategories/party-event-lighting.webp";
 import partyGamesActivities from "../imports/subcategories/party-games-activities.webp";
@@ -119,6 +130,17 @@ export const SUBCATEGORY_ART = {
   "home-industrial-mixers": homeIndustrialMixers,
   "home-other": homeOther,
   "home-stand-mixers": homeStandMixers,
+  "outdoor-backpacks": outdoorBackpacks,
+  "outdoor-base-camp-equipment": outdoorBaseCampEquipment,
+  "outdoor-camp-cooking": outdoorCampCooking,
+  "outdoor-expedition-tents": outdoorExpeditionTents,
+  "outdoor-group-shelters": outdoorGroupShelters,
+  "outdoor-navigation-gps": outdoorNavigationGps,
+  "outdoor-other": outdoorOther,
+  "outdoor-professional-navigation": outdoorProfessionalNavigation,
+  "outdoor-sleeping-bags": outdoorSleepingBags,
+  "outdoor-survival-gear": outdoorSurvivalGear,
+  "outdoor-tents": outdoorTents,
   "party-catering-equipment": partyCateringEquipment,
   "party-event-lighting": partyEventLighting,
   "party-games-activities": partyGamesActivities,
