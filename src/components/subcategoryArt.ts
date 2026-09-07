@@ -21,6 +21,17 @@ import babyOther from "../imports/subcategories/baby-other.webp";
 import babySafetySystems from "../imports/subcategories/baby-safety-systems.webp";
 import babyStrollers from "../imports/subcategories/baby-strollers.webp";
 import babyToysGames from "../imports/subcategories/baby-toys-games.webp";
+import costumeAnimatronicProps from "../imports/subcategories/costume-animatronic-props.webp";
+import costumeCharacterCostumes from "../imports/subcategories/costume-character-costumes.webp";
+import costumeFilmTvProps from "../imports/subcategories/costume-film-tv-props.webp";
+import costumeFullCharacterSuits from "../imports/subcategories/costume-full-character-suits.webp";
+import costumeHalloweenCostumes from "../imports/subcategories/costume-halloween-costumes.webp";
+import costumeMasksMakeup from "../imports/subcategories/costume-masks-makeup.webp";
+import costumeOther from "../imports/subcategories/costume-other.webp";
+import costumePeriodCostumes from "../imports/subcategories/costume-period-costumes.webp";
+import costumeProfessionalMakeupKits from "../imports/subcategories/costume-professional-makeup-kits.webp";
+import costumeTheaterCostumes from "../imports/subcategories/costume-theater-costumes.webp";
+import costumeWigsAccessories from "../imports/subcategories/costume-wigs-accessories.webp";
 import gardenGardenTools from "../imports/subcategories/garden-garden-tools.webp";
 import gardenHouseplantsSeedlings from "../imports/subcategories/garden-houseplants-seedlings.webp";
 import gardenIrrigationSystems from "../imports/subcategories/garden-irrigation-systems.webp";
@@ -181,6 +192,17 @@ export const SUBCATEGORY_ART = {
   "bikes-professional-scooters": bikesProfessionalScooters,
   "bikes-racing-bikes": bikesRacingBikes,
   "bikes-road-bikes": bikesRoadBikes,
+  "costume-animatronic-props": costumeAnimatronicProps,
+  "costume-character-costumes": costumeCharacterCostumes,
+  "costume-film-tv-props": costumeFilmTvProps,
+  "costume-full-character-suits": costumeFullCharacterSuits,
+  "costume-halloween-costumes": costumeHalloweenCostumes,
+  "costume-masks-makeup": costumeMasksMakeup,
+  "costume-other": costumeOther,
+  "costume-period-costumes": costumePeriodCostumes,
+  "costume-professional-makeup-kits": costumeProfessionalMakeupKits,
+  "costume-theater-costumes": costumeTheaterCostumes,
+  "costume-wigs-accessories": costumeWigsAccessories,
   "garden-garden-tools": gardenGardenTools,
   "garden-houseplants-seedlings": gardenHouseplantsSeedlings,
   "garden-irrigation-systems": gardenIrrigationSystems,
