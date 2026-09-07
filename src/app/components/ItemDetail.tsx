@@ -22,6 +22,7 @@ import {
 } from "../../lib/favoritesStorage";
 import { useAuth } from "../../hooks/AuthProvider";
 import { SignInPrompt } from "../../components/SignInPrompt";
+import { ModerationMenu } from "../../components/moderation/ModerationMenu";
 import {
   fetchListingByIdRemote,
   getActiveRentLocationLabel,
@@ -460,6 +461,13 @@ export function ItemDetail({
             className={`w-5 h-5 ${favorited ? "fill-[#E11D48] text-[#E11D48]" : "text-muted-foreground"}`}
           />
         </button>
+        <ModerationMenu
+          targetKind="listing"
+          targetId={itemId}
+          reportedUserId={listing?.hostId ?? null}
+          evidence={[title, listing?.description ?? ""].filter(Boolean).join("\n\n")}
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors hover:bg-muted"
+        />
       </div>
 
       <div className="screen-scroll flex-1 min-h-0 pb-24">

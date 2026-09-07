@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Flag } from "lucide-react";
 import { useAuth } from "../hooks/AuthProvider";
 import {
   appendChatMessageLocal,
@@ -11,6 +12,8 @@ import {
   type ChatMessage,
 } from "../lib/messagesStorage";
 import { MASCOT_NAME } from "../lib/brand";
+import { ReportSheet } from "./moderation/ReportSheet";
+import { isUserBlocked, onBlocksChanged, unblockUser } from "../lib/moderation/blockStorage";
 import { useMessages } from "../lib/i18n/react";
 import { moderatePeerChatMessage } from "../lib/peerChatModeration";
 import {
@@ -48,7 +51,7 @@ export function PeerChatPanel({
   onRequireAuth,
 }: PeerChatPanelProps) {
   const auth = useAuth();
-  const { peerChat, common, listing } = useMessages();
+  const { peerChat, common, listing, moderation } = useMessages();
   const mascotHandle = MASCOT_NAME.replace(/\s+/g, "").toLowerCase();
   const threadKey = rentalId
     ? rentalThreadKey(rentalId)
@@ -62,7 +65,14 @@ export function PeerChatPanel({
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [gateMessage, setGateMessage] = useState<string | null>(null);
+  const [reported, setReported] = useState<ChatMessage | null>(null);
+  const [blocked, setBlocked] = useState(() => isUserBlocked(peerId));
   const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setBlocked(isUserBlocked(peerId));
+    return onBlocksChanged(() => setBlocked(isUserBlocked(peerId)));
+  }, [peerId]);
 
   useEffect(() => {
     setMessages(loadChatMessagesLocal(threadKey));
@@ -241,8 +251,23 @@ export function PeerChatPanel({
                 style={!mine ? { border: `1px solid ${BORDER}` } : undefined}
               >
                 {m.body}
-                <div className={`mt-1 text-[10px] ${mine ? "text-white/70" : "text-gray-400"}`}>
+                <div
+                  className={`mt-1 flex items-center gap-2 text-[10px] ${
+                    mine ? "text-white/70" : "text-gray-400"
+                  }`}
+                >
                   {new Date(m.createdAt).toLocaleString()}
+                  {mine ? null : (
+                    <button
+                      type="button"
+                      onClick={() => setReported(m)}
+                      aria-label={moderation.reportMessage}
+                      title={moderation.reportMessage}
+                      className="ml-auto flex h-6 w-6 touch-manipulation items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                    >
+                      <Flag className="h-3 w-3" aria-hidden />
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -256,7 +281,25 @@ export function PeerChatPanel({
         </p>
       ) : null}
 
-      {readOnly ? null : (
+      {blocked ? (
+        <div
+          className={`flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-700 ${
+            embedded ? "mt-3" : "mt-2"
+          }`}
+        >
+          <span className="flex-1">{moderation.blockedNotice}</span>
+          <button
+            type="button"
+            onClick={() => void unblockUser({ viewerId: auth.userId, blockedId: peerId })}
+            className="min-h-9 touch-manipulation rounded-lg border bg-white px-3 py-1.5 text-xs font-semibold"
+            style={{ borderColor: BORDER, color: GREEN }}
+          >
+            {moderation.unblockUser}
+          </button>
+        </div>
+      ) : null}
+
+      {readOnly || blocked ? null : (
       <div
         className={`flex gap-2 ${embedded ? "mt-3" : "shrink-0 border-t bg-white px-0 pt-3"}`}
         style={{ borderColor: BORDER }}
@@ -283,6 +326,17 @@ export function PeerChatPanel({
         </button>
       </div>
       )}
+
+      {reported ? (
+        <ReportSheet
+          targetKind="message"
+          targetId={reported.id}
+          targetThreadKey={threadKey}
+          reportedUserId={reported.senderId}
+          evidence={reported.body}
+          onClose={() => setReported(null)}
+        />
+      ) : null}
     </div>
   );
 }
