@@ -48,6 +48,17 @@ import partySoundSystems from "../imports/subcategories/party-sound-systems.webp
 import partyStageRisers from "../imports/subcategories/party-stage-risers.webp";
 import partyTablesChairs from "../imports/subcategories/party-tables-chairs.webp";
 import partyTentsCanopies from "../imports/subcategories/party-tents-canopies.webp";
+import sportsCoachingEquipment from "../imports/subcategories/sports-coaching-equipment.webp";
+import sportsCompetitionGear from "../imports/subcategories/sports-competition-gear.webp";
+import sportsFishingGear from "../imports/subcategories/sports-fishing-gear.webp";
+import sportsOther from "../imports/subcategories/sports-other.webp";
+import sportsProWaterSports from "../imports/subcategories/sports-pro-water-sports.webp";
+import sportsRacketSports from "../imports/subcategories/sports-racket-sports.webp";
+import sportsSkating from "../imports/subcategories/sports-skating.webp";
+import sportsSnowSports from "../imports/subcategories/sports-snow-sports.webp";
+import sportsTeamSportsGear from "../imports/subcategories/sports-team-sports-gear.webp";
+import sportsTimingSystems from "../imports/subcategories/sports-timing-systems.webp";
+import sportsWaterSports from "../imports/subcategories/sports-water-sports.webp";
 import toolsHandTools from "../imports/subcategories/tools-hand-tools.webp";
 import toolsIndustrialDrills from "../imports/subcategories/tools-industrial-drills.webp";
 import toolsLadders from "../imports/subcategories/tools-ladders.webp";
@@ -119,6 +130,17 @@ export const SUBCATEGORY_ART = {
   "party-stage-risers": partyStageRisers,
   "party-tables-chairs": partyTablesChairs,
   "party-tents-canopies": partyTentsCanopies,
+  "sports-coaching-equipment": sportsCoachingEquipment,
+  "sports-competition-gear": sportsCompetitionGear,
+  "sports-fishing-gear": sportsFishingGear,
+  "sports-other": sportsOther,
+  "sports-pro-water-sports": sportsProWaterSports,
+  "sports-racket-sports": sportsRacketSports,
+  "sports-skating": sportsSkating,
+  "sports-snow-sports": sportsSnowSports,
+  "sports-team-sports-gear": sportsTeamSportsGear,
+  "sports-timing-systems": sportsTimingSystems,
+  "sports-water-sports": sportsWaterSports,
   "tools-hand-tools": toolsHandTools,
   "tools-industrial-drills": toolsIndustrialDrills,
   "tools-ladders": toolsLadders,
