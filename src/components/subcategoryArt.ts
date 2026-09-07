@@ -111,6 +111,7 @@ import homeCateringEquipment from "../imports/subcategories/home-catering-equipm
 import homeCleaningAppliances from "../imports/subcategories/home-cleaning-appliances.webp";
 import homeCoffeeMakers from "../imports/subcategories/home-coffee-makers.webp";
 import homeCommercialCoffee from "../imports/subcategories/home-commercial-coffee.webp";
+import homeCommercialCookingEquipment from "../imports/subcategories/home-commercial-cooking-equipment.webp";
 import homeFoodProcessorsPro from "../imports/subcategories/home-food-processors-pro.webp";
 import homeIndustrialMixers from "../imports/subcategories/home-industrial-mixers.webp";
 import homeOther from "../imports/subcategories/home-other.webp";
@@ -348,6 +349,7 @@ export const SUBCATEGORY_ART = {
   "home-cleaning-appliances": homeCleaningAppliances,
   "home-coffee-makers": homeCoffeeMakers,
   "home-commercial-coffee": homeCommercialCoffee,
+  "home-commercial-cooking-equipment": homeCommercialCookingEquipment,
   "home-food-processors-pro": homeFoodProcessorsPro,
   "home-industrial-mixers": homeIndustrialMixers,
   "home-other": homeOther,

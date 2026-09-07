@@ -122,7 +122,7 @@ export const CATEGORIES: Record<string, CategoryData> = {
       subArt("Other", "➕", "home-other"),
     ],
     professional: [
-      sub("Commercial Cooking Equipment", "🔥"),
+      subArt("Commercial Cooking Equipment", "🔥", "home-commercial-cooking-equipment"),
       subArt("Commercial Coffee Equipment", "☕", "home-commercial-coffee"),
       subArt("Catering Equipment", "🍽️", "home-catering-equipment"),
       subArt("Industrial Mixers", "🏭", "home-industrial-mixers"),
