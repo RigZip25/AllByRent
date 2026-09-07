@@ -38,6 +38,17 @@ import gardenStumpGrinders from "../imports/subcategories/garden-stump-grinders.
 import gardenTillersCultivators from "../imports/subcategories/garden-tillers-cultivators.webp";
 import gardenTrees from "../imports/subcategories/garden-trees.webp";
 import gardenTrimmers from "../imports/subcategories/garden-trimmers.webp";
+import gymBoxingEquipment from "../imports/subcategories/gym-boxing-equipment.webp";
+import gymCardioEquipment from "../imports/subcategories/gym-cardio-equipment.webp";
+import gymCommercialTreadmills from "../imports/subcategories/gym-commercial-treadmills.webp";
+import gymCompetitionGear from "../imports/subcategories/gym-competition-gear.webp";
+import gymFreeWeights from "../imports/subcategories/gym-free-weights.webp";
+import gymOther from "../imports/subcategories/gym-other.webp";
+import gymRecoveryTools from "../imports/subcategories/gym-recovery-tools.webp";
+import gymResistanceBands from "../imports/subcategories/gym-resistance-bands.webp";
+import gymTrainingSystems from "../imports/subcategories/gym-training-systems.webp";
+import gymWeightMachines from "../imports/subcategories/gym-weight-machines.webp";
+import gymYogaPilates from "../imports/subcategories/gym-yoga-pilates.webp";
 import homeBakingEquipment from "../imports/subcategories/home-baking-equipment.webp";
 import homeBeverageSystems from "../imports/subcategories/home-beverage-systems.webp";
 import homeBlendersJuicers from "../imports/subcategories/home-blenders-juicers.webp";
@@ -165,6 +176,17 @@ export const SUBCATEGORY_ART = {
   "garden-tillers-cultivators": gardenTillersCultivators,
   "garden-trees": gardenTrees,
   "garden-trimmers": gardenTrimmers,
+  "gym-boxing-equipment": gymBoxingEquipment,
+  "gym-cardio-equipment": gymCardioEquipment,
+  "gym-commercial-treadmills": gymCommercialTreadmills,
+  "gym-competition-gear": gymCompetitionGear,
+  "gym-free-weights": gymFreeWeights,
+  "gym-other": gymOther,
+  "gym-recovery-tools": gymRecoveryTools,
+  "gym-resistance-bands": gymResistanceBands,
+  "gym-training-systems": gymTrainingSystems,
+  "gym-weight-machines": gymWeightMachines,
+  "gym-yoga-pilates": gymYogaPilates,
   "home-baking-equipment": homeBakingEquipment,
   "home-beverage-systems": homeBeverageSystems,
   "home-blenders-juicers": homeBlendersJuicers,
