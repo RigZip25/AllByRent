@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { getUspsWebToolsUserId } from "../../lib/keys";
+import { enforceProxyGuard } from "../../lib/proxyGuard";
 
 export type UspsValidatedAddress = {
   address2: string;
@@ -36,6 +37,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader("Allow", "GET, OPTIONS");
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  const guard = await enforceProxyGuard(req, res, {
+    route: "geocode-usps",
+    maxAnon: 40,
+    maxAuthed: 120,
+  });
+  if (!guard) return;
 
   const userId = getUspsWebToolsUserId();
   if (!userId) {

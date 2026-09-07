@@ -3017,6 +3017,12 @@ function BookingScreenLoaded({
                       file,
                     })
                       .then((result) => {
+                        // A proof only the renter's device can see is no proof:
+                        // the host opens it from the server before handoff.
+                        if (result.remote === "failed") {
+                          setInsuranceUploadError(t.booking.insuranceUploadFailed);
+                          return;
+                        }
                         setInsuranceProof(result.media);
                         setInsuranceProofPath(result.path);
                         setInsuranceProofUrl(result.publicUrl);

@@ -10,7 +10,13 @@ export async function uploadRentalInsuranceProof(params: {
   renterId: string;
   rentalId: string;
   file: File;
-}): Promise<{ media: MediaRef; path: string; publicUrl: string | null }> {
+}): Promise<{
+  media: MediaRef;
+  path: string;
+  publicUrl: string | null;
+  /** The host reads the proof from the server, so a failed upload must not pass as saved. */
+  remote: "uploaded" | "unconfigured" | "failed";
+}> {
   const saved = await putMediaBlob(params.file, { kind: "image" });
   if (!saved.ok) {
     throw new Error(saved.message || "Could not save insurance photo on this device.");
@@ -21,12 +27,12 @@ export async function uploadRentalInsuranceProof(params: {
   };
 
   if (!isSupabaseConfigured()) {
-    return { media, path: "", publicUrl: null };
+    return { media, path: "", publicUrl: null, remote: "unconfigured" };
   }
 
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return { media, path: "", publicUrl: null };
+    return { media, path: "", publicUrl: null, remote: "unconfigured" };
   }
 
   const ext = params.file.name.split(".").pop()?.toLowerCase() || "jpg";
@@ -36,9 +42,8 @@ export async function uploadRentalInsuranceProof(params: {
     contentType: params.file.type || "image/jpeg",
   });
   if (error) {
-    // Local media still works for this device; host may only see it after sync retry.
     console.warn("insurance proof upload failed:", error.message);
-    return { media, path: "", publicUrl: null };
+    return { media, path: "", publicUrl: null, remote: "failed" };
   }
 
   const { data } = supabase.storage.from("listing-verification").getPublicUrl(path);
@@ -46,5 +51,6 @@ export async function uploadRentalInsuranceProof(params: {
     media: { ...media, storagePath: path },
     path,
     publicUrl: data.publicUrl || null,
+    remote: "uploaded",
   };
 }

@@ -55,12 +55,17 @@ export function HomeFeedCard({
 
         <p className="mt-1.5 flex flex-wrap items-center gap-1 text-[13px] font-semibold leading-snug text-gray-800">
           <span>{trust.name}</span>
-          <span className="text-gray-400">·</span>
-          <span className="inline-flex items-center gap-0.5">
-            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
-            {trust.rating.toFixed(1)}
-          </span>
-          <span className="text-gray-400">·</span>
+          <span className="text-gray-500">·</span>
+          {/* Nothing computes host ratings yet, so 0.0 would libel every new host. */}
+          {trust.rating > 0 ? (
+            <>
+              <span className="inline-flex items-center gap-0.5">
+                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
+                {trust.rating.toFixed(1)}
+              </span>
+              <span className="text-gray-500">·</span>
+            </>
+          ) : null}
           <span>{trust.distance}</span>
         </p>
 
