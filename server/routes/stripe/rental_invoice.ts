@@ -34,6 +34,26 @@ type Body = {
 
 const PLATFORM_FEE_RATE = 0.12;
 
+/** Invoices live in the `rental_invoices` JSON column written by the host. */
+function findInvoice(
+  raw: unknown,
+  invoiceId: string,
+): { status: string; totalCents: number } | null {
+  if (!Array.isArray(raw)) return null;
+  for (const entry of raw) {
+    if (!entry || typeof entry !== "object") continue;
+    const record = entry as Record<string, unknown>;
+    if (record.id !== invoiceId) continue;
+    const total = Number(record.totalCents);
+    if (!Number.isFinite(total)) return null;
+    return {
+      status: typeof record.status === "string" ? record.status : "unknown",
+      totalCents: Math.round(total),
+    };
+  }
+  return null;
+}
+
 export default withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
   applyCors(res, typeof req.headers.origin === "string" ? req.headers.origin : undefined);
@@ -75,7 +95,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   const { data: rental, error: rentalError } = await admin
     .from("rentals")
-    .select("id, renter_id, owner_id, listing_id, status")
+    .select("id, renter_id, owner_id, listing_id, status, rental_invoices")
     .eq("id", rentalId)
     .maybeSingle();
 
@@ -87,6 +107,24 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   // Renter pays; host (owner) must have Connect payouts.
   if (rental.renter_id !== user.id) {
     res.status(403).json({ error: "Only the renter can pay this invoice" });
+    return;
+  }
+
+  // The host wrote the invoice; the renter must not be able to restate its total.
+  const invoice = findInvoice(rental.rental_invoices, invoiceId);
+  if (!invoice) {
+    res.status(404).json({ error: "Invoice not found on this rental" });
+    return;
+  }
+  if (invoice.status !== "open" && invoice.status !== "payment_pending") {
+    res.status(409).json({ error: `Invoice is ${invoice.status}` });
+    return;
+  }
+  if (amountCents !== invoice.totalCents) {
+    res.status(409).json({
+      error: "Amount does not match the invoice total",
+      expectedCents: invoice.totalCents,
+    });
     return;
   }
 

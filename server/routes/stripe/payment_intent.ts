@@ -67,7 +67,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   const { data: rental, error: rentalError } = await admin
     .from("rentals")
-    .select("id, renter_id, owner_id, listing_id, stripe_payment_intent_id")
+    .select("id, renter_id, owner_id, listing_id, stripe_payment_intent_id, rental_total_cents")
     .eq("id", rentalId)
     .maybeSingle();
 
@@ -83,6 +83,21 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   if (rental.listing_id !== listingId || rental.owner_id !== ownerId) {
     res.status(400).json({ error: "Listing or owner mismatch" });
+    return;
+  }
+
+  // Charge the booking total both sides can see, not a number from this request.
+  const bookedTotalCents =
+    typeof rental.rental_total_cents === "number" ? Math.round(rental.rental_total_cents) : 0;
+  if (bookedTotalCents < 50) {
+    res.status(400).json({ error: "Booking has no payable total" });
+    return;
+  }
+  if (amountCents !== bookedTotalCents) {
+    res.status(409).json({
+      error: "Amount does not match the booking total",
+      expectedCents: bookedTotalCents,
+    });
     return;
   }
 
