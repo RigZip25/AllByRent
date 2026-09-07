@@ -72,6 +72,7 @@ import furnitureDisplayRetailFurniture from "../imports/subcategories/furniture-
 import furnitureEventFurniture from "../imports/subcategories/furniture-event-furniture.webp";
 import furnitureLivingRoomFurniture from "../imports/subcategories/furniture-living-room-furniture.webp";
 import furnitureOfficeDesksChairs from "../imports/subcategories/furniture-office-desks-chairs.webp";
+import furnitureOther from "../imports/subcategories/furniture-other.webp";
 import furnitureOutdoorFurniture from "../imports/subcategories/furniture-outdoor-furniture.webp";
 import furnitureReceptionFurniture from "../imports/subcategories/furniture-reception-furniture.webp";
 import furnitureStorageShelving from "../imports/subcategories/furniture-storage-shelving.webp";
@@ -321,6 +322,7 @@ export const SUBCATEGORY_ART = {
   "furniture-event-furniture": furnitureEventFurniture,
   "furniture-living-room-furniture": furnitureLivingRoomFurniture,
   "furniture-office-desks-chairs": furnitureOfficeDesksChairs,
+  "furniture-other": furnitureOther,
   "furniture-outdoor-furniture": furnitureOutdoorFurniture,
   "furniture-reception-furniture": furnitureReceptionFurniture,
   "furniture-storage-shelving": furnitureStorageShelving,

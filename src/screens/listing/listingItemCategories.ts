@@ -27,11 +27,6 @@ function subArt(label: string, emoji: string, art: SubcategoryArtId): Subcategor
   return { label, emoji, art };
 }
 
-/** A shelf whose illustration hasn't been drawn yet — the emoji stands in. */
-function sub(label: string, emoji: string): SubcategoryItem {
-  return { label, emoji };
-}
-
 export const CATEGORIES: Record<string, CategoryData> = {
   "Tools & DIY": {
     icon: "🔧",
@@ -98,7 +93,7 @@ export const CATEGORIES: Record<string, CategoryData> = {
       subArt("Tables & Chairs", "🪑", "furniture-tables-chairs"),
       subArt("Storage & Shelving", "🗄️", "furniture-storage-shelving"),
       subArt("Outdoor Furniture", "⛱️", "furniture-outdoor-furniture"),
-      sub("Other", "➕"),
+      subArt("Other", "➕", "furniture-other"),
     ],
     professional: [
       subArt("Office Desks & Chairs", "🪑", "furniture-office-desks-chairs"),
@@ -107,7 +102,7 @@ export const CATEGORIES: Record<string, CategoryData> = {
       subArt("Event Furniture", "🎪", "furniture-event-furniture"),
       subArt("Display & Retail Furniture", "🏪", "furniture-display-retail-furniture"),
       subArt("Commercial Storage & Shelving", "📦", "furniture-commercial-storage-shelving"),
-      sub("Other", "➕"),
+      subArt("Other", "➕", "furniture-other"),
     ],
   },
   "Kitchen Equipment": {
