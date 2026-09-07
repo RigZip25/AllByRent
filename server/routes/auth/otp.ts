@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { applyCors, handleOptions } from "../../lib/cors";
 import { getSupabaseAnonKey, getSupabaseUrl } from "../../lib/keys";
+import { enforceProxyGuard } from "../../lib/proxyGuard";
 
 const GOTRUE_API_VERSION = "2024-01-01";
 
@@ -25,6 +26,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader("Allow", "POST, OPTIONS");
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  // Sending a code costs an email and reveals nothing, so throttle by caller.
+  const guard = await enforceProxyGuard(req, res, {
+    route: "auth-otp",
+    maxAnon: 10,
+    maxAuthed: 10,
+    windowMs: 10 * 60_000,
+  });
+  if (!guard) return;
 
   const baseUrl = normalizeBaseUrl(getSupabaseUrl());
   const anonKey = getSupabaseAnonKey()?.trim();

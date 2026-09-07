@@ -218,17 +218,6 @@ export default defineConfig(({ mode }) => {
         changeOrigin: true,
         secure: false,
       },
-      '/api/proxy/anthropic': {
-        target: 'https://api.anthropic.com',
-        changeOrigin: true,
-        secure: true,
-        rewrite: () => '/v1/messages',
-        headers: {
-          'x-api-key': env.ANTHROPIC_API_KEY || env.VITE_ANTHROPIC_API_KEY || '',
-          'anthropic-version': '2023-06-01',
-          'anthropic-beta': 'prompt-caching-2024-07-31',
-        },
-      },
       '/api/proxy/photoroom': {
         target: 'https://image-api.photoroom.com',
         changeOrigin: true,
