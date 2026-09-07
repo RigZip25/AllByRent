@@ -3,6 +3,7 @@ import { APP_NAME, BRAND_AMBER, BRAND_GREEN, SEO_ORIGIN, SUPPORT_EMAIL } from ".
 import {
   attemptOpsLogin,
   getOpsCredentials,
+  isOpsConfigured,
   isOpsSessionActive,
   opsLogout,
 } from "../../lib/ops/opsAuth";
@@ -125,7 +126,7 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
   const refreshInbox = async () => {
     setInboxLoading(true);
     const local = loadLocalFeedback();
-    const opsPass = getOpsCredentials().password;
+    const opsPass = getOpsCredentials()?.password ?? "";
     const remote = await fetchRemoteFeedback(opsPass);
     setInbox(mergeFeedbackInbox(local, remote));
     setInboxWarning(
@@ -218,7 +219,7 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
 
   const setFeedbackStatus = async (row: PlatformFeedback, status: FeedbackStatus) => {
     updateLocalFeedbackStatus(row.id, status);
-    await patchRemoteFeedbackStatus(getOpsCredentials().password, row.id, status);
+    await patchRemoteFeedbackStatus(getOpsCredentials()?.password ?? "", row.id, status);
     await refreshInbox();
     flash(statusLabel(status));
   };
@@ -250,7 +251,11 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
                 setAuthed(true);
                 refresh();
               } else {
-                setLoginError("Неверный логин или пароль.");
+                setLoginError(
+                  isOpsConfigured()
+                    ? "Неверный логин или пароль."
+                    : "Консоль не настроена: задайте VITE_OPS_USER и VITE_OPS_PASSWORD в окружении деплоя.",
+                );
               }
             }}
           >

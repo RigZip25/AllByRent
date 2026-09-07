@@ -5,14 +5,20 @@
 
 const SESSION_KEY = "abr_ops_session_v1";
 
-/** Defaults so the owner can sign in before env is set. Change via Vercel env. */
-const DEFAULT_USER = "ed";
-const DEFAULT_PASSWORD = "GarageOps26";
-
-export function getOpsCredentials(): { user: string; password: string } {
-  const user = String(import.meta.env.VITE_OPS_USER ?? "").trim() || DEFAULT_USER;
-  const password = String(import.meta.env.VITE_OPS_PASSWORD ?? "").trim() || DEFAULT_PASSWORD;
+/**
+ * No built-in fallback: a shipped default password is readable in the client
+ * bundle, and this console can change platform fees and SEO flags.
+ * Set VITE_OPS_USER / VITE_OPS_PASSWORD in the deploy environment.
+ */
+export function getOpsCredentials(): { user: string; password: string } | null {
+  const user = String(import.meta.env.VITE_OPS_USER ?? "").trim();
+  const password = String(import.meta.env.VITE_OPS_PASSWORD ?? "").trim();
+  if (!user || !password) return null;
   return { user, password };
+}
+
+export function isOpsConfigured(): boolean {
+  return getOpsCredentials() !== null;
 }
 
 export function isOpsSessionActive(): boolean {
@@ -42,6 +48,7 @@ export function setOpsSessionActive(active: boolean): void {
 
 export function attemptOpsLogin(user: string, password: string): boolean {
   const expected = getOpsCredentials();
+  if (!expected) return false;
   const ok =
     user.trim().toLowerCase() === expected.user.toLowerCase() &&
     password === expected.password;

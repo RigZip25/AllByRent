@@ -7,11 +7,11 @@ type FeedbackStatus = "new" | "seen" | "done";
 const KINDS = new Set<FeedbackKind>(["help", "complaint", "idea", "other"]);
 const STATUSES = new Set<FeedbackStatus>(["new", "seen", "done"]);
 
+/** No fallback: an unset env must lock the ops inbox, not open it to a shipped default. */
 function expectedOpsKey(): string {
   return (
     String(process.env.OPS_PASSWORD ?? "").trim() ||
-    String(process.env.VITE_OPS_PASSWORD ?? "").trim() ||
-    "GarageOps26"
+    String(process.env.VITE_OPS_PASSWORD ?? "").trim()
   );
 }
 
