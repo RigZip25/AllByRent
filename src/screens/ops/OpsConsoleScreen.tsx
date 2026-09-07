@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN, SEO_ORIGIN, SUPPORT_EMAIL } from "../../lib/brand";
+import { OpsReportsQueue } from "./OpsReportsQueue";
 import {
   attemptOpsLogin,
   getOpsCredentials,
@@ -461,6 +462,8 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
             )}
           </ul>
         </section>
+
+        <OpsReportsQueue />
 
         {/* Pulse */}
         <section aria-label="Пульс">

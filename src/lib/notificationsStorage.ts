@@ -1,4 +1,5 @@
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
+import { withoutBlocked } from "./moderation/blockStorage";
 import { loadInAppNotifications, pushInAppNotification } from "./inAppNotifications";
 import type { Session } from "@supabase/supabase-js";
 
@@ -158,16 +159,19 @@ export async function fetchNotificationsRemote(recipientId: string): Promise<Not
     .order("created_at", { ascending: false })
     .limit(50);
   if (error || !data) return [];
-  return (data as unknown as Array<{
-    id: string;
-    recipient_id: string;
-    actor_id: string | null;
-    type: NotificationType;
-    title: string;
-    body: string;
-    read_at: string | null;
-    created_at: string;
-  }>).map(rowToNotification);
+  return withoutBlocked(
+    (data as unknown as Array<{
+      id: string;
+      recipient_id: string;
+      actor_id: string | null;
+      type: NotificationType;
+      title: string;
+      body: string;
+      read_at: string | null;
+      created_at: string;
+    }>).map(rowToNotification),
+    (n) => n.actorId,
+  );
 }
 
 export function mergeWithLocalNotifications(remote: Notification[]): Notification[] {

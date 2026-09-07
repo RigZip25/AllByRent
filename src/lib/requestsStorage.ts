@@ -1,4 +1,5 @@
 import type { ShelfPrefill } from "./shelfListings";
+import { withoutBlocked } from "./moderation/blockStorage";
 import { categoryQueryNames } from "../screens/listing/listingItemCategories";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
@@ -124,6 +125,14 @@ export async function createRequestRemote(params: {
 }
 
 export async function fetchRequestsForShelfRemote(filter: {
+  category: string;
+  subcategory: string;
+  locationLabel: string;
+}): Promise<WantedRequest[]> {
+  return withoutBlocked(await loadShelfRequests(filter), (r) => r.renterId);
+}
+
+async function loadShelfRequests(filter: {
   category: string;
   subcategory: string;
   locationLabel: string;

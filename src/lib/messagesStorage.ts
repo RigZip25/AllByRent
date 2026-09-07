@@ -1,4 +1,5 @@
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
+import { withoutBlocked } from "./moderation/blockStorage";
 import { createNotificationRemote } from "./notificationsStorage";
 import { APP_NAME } from "./brand";
 
@@ -358,7 +359,10 @@ export function listChatThreadsLocal(viewerId: string | null): ChatThreadSummary
     }
   }
 
-  return threads.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  return withoutBlocked(
+    threads.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+    (t) => t.peerId,
+  );
 }
 
 export async function fetchRecentChatThreadsRemote(viewerId: string): Promise<ChatThreadSummary[]> {
@@ -391,5 +395,8 @@ export async function fetchRecentChatThreadsRemote(viewerId: string): Promise<Ch
       messageCount: 1,
     });
   }
-  return [...byKey.values()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  return withoutBlocked(
+    [...byKey.values()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+    (t) => t.peerId,
+  );
 }

@@ -198,7 +198,7 @@ export const faq: AppMessages["faq"] = {
     },
     "report-issue": {
       q: "¿Cómo denuncio a un usuario o un anuncio?",
-      a: "Escribe a support@evorios.com con el enlace del anuncio o el nombre del vecino: revisamos cada denuncia. En emergencias, llama primero a las autoridades locales. Para reclamaciones por daños, incluye fotos y fechas.",
+      a: "Toca el “⋯” en un anuncio o perfil, o la banderita en un mensaje, elige un motivo y envía: un moderador lee cada denuncia. En el mismo menú puedes bloquear a la persona: sus anuncios y mensajes se ocultan y no podrá escribirte. También puedes escribir a support@evorios.com. En emergencias, llama primero a las autoridades locales. Para reclamaciones por daños, incluye fotos y fechas.",
     },
     "app-update": {
       q: "La app me pidió actualizar — ¿qué hago?",
