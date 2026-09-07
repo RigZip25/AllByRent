@@ -244,8 +244,11 @@ export function HomeFeed({
   const browseCategories = useMemo(() => getAllCategoryChips(), []);
   const categoryCatalog = useMemo(() => getCategoryCatalog(), []);
 
+  // The Rent/Buy chip narrows the feed like any filter, so it counts and it clears.
   const activeFilterCount =
-    (clusterRadiusMi !== CLUSTER_RADIUS_DEFAULT_MI ? 1 : 0) + interests.length;
+    (modeChip !== "all" ? 1 : 0) +
+    (clusterRadiusMi !== CLUSTER_RADIUS_DEFAULT_MI ? 1 : 0) +
+    interests.length;
 
   const modeChips: { id: ModeChip; label: string }[] = [
     { id: "all", label: home.modeAny },
@@ -334,10 +337,17 @@ export function HomeFeed({
   const clearFilters = () => {
     setFocus(null);
     setSubSheetCategory(null);
+    setModeChip("all");
     setSortKey("suggested");
     setSortAscending(true);
     setClusterRadiusMi(CLUSTER_RADIUS_DEFAULT_MI);
     setClusterRadiusState(CLUSTER_RADIUS_DEFAULT_MI);
+  };
+
+  /** From the sheet: close it too, so the cleared feed is the confirmation. */
+  const clearFiltersAndClose = () => {
+    clearFilters();
+    setFiltersOpen(false);
   };
 
   const postRequestFromFilters = () => {
@@ -470,7 +480,7 @@ export function HomeFeed({
     </div>
   );
 
-  const emptyIsFiltered = Boolean(focus);
+  const emptyIsFiltered = Boolean(focus) || modeChip !== "all";
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -805,7 +815,7 @@ export function HomeFeed({
               <button
                 type="button"
                 onClick={clearFilters}
-                className="mt-3 text-[14px] font-semibold text-gray-500 underline"
+                className="mt-3 min-h-[44px] touch-manipulation px-4 text-[14px] font-semibold text-gray-500 underline"
               >
                 {home.clearFilters}
               </button>
@@ -966,16 +976,21 @@ export function HomeFeed({
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={clearFilters}
-                className="flex-1 rounded-xl border-2 py-3 text-[15px] font-bold"
-                style={{ borderColor: BORDER, color: "#555" }}
+                onClick={clearFiltersAndClose}
+                disabled={activeFilterCount === 0}
+                className="min-h-[52px] flex-1 touch-manipulation rounded-xl border-2 py-3 text-[15px] font-bold"
+                style={{
+                  borderColor: BORDER,
+                  color: "#555",
+                  opacity: activeFilterCount === 0 ? 0.45 : 1,
+                }}
               >
                 {home.clearFilters}
               </button>
               <button
                 type="button"
                 onClick={closeFilters}
-                className="flex-[1.4] rounded-xl py-3 text-[15px] font-bold text-white"
+                className="min-h-[52px] flex-[1.4] touch-manipulation rounded-xl py-3 text-[15px] font-bold text-white"
                 style={{ backgroundColor: GREEN_DARK }}
               >
                 {home.done}
