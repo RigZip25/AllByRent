@@ -32,6 +32,17 @@ import babyOther from "../imports/subcategories/baby-other.webp";
 import babySafetySystems from "../imports/subcategories/baby-safety-systems.webp";
 import babyStrollers from "../imports/subcategories/baby-strollers.webp";
 import babyToysGames from "../imports/subcategories/baby-toys-games.webp";
+import constructionConcreteMixers from "../imports/subcategories/construction-concrete-mixers.webp";
+import constructionCraneLifting from "../imports/subcategories/construction-crane-lifting.webp";
+import constructionExcavationTools from "../imports/subcategories/construction-excavation-tools.webp";
+import constructionFormworkBasic from "../imports/subcategories/construction-formwork-basic.webp";
+import constructionHandToolsPro from "../imports/subcategories/construction-hand-tools-pro.webp";
+import constructionLargeConcreteEquipment from "../imports/subcategories/construction-large-concrete-equipment.webp";
+import constructionOther from "../imports/subcategories/construction-other.webp";
+import constructionProfessionalFormwork from "../imports/subcategories/construction-professional-formwork.webp";
+import constructionSafetyEquipment from "../imports/subcategories/construction-safety-equipment.webp";
+import constructionSiteLighting from "../imports/subcategories/construction-site-lighting.webp";
+import constructionStructuralEquipment from "../imports/subcategories/construction-structural-equipment.webp";
 import costumeAnimatronicProps from "../imports/subcategories/costume-animatronic-props.webp";
 import costumeCharacterCostumes from "../imports/subcategories/costume-character-costumes.webp";
 import costumeFilmTvProps from "../imports/subcategories/costume-film-tv-props.webp";
@@ -258,6 +269,17 @@ export const SUBCATEGORY_ART = {
   "boats-other": boatsOther,
   "boats-pontoon-boats": boatsPontoonBoats,
   "boats-sup-boards": boatsSupBoards,
+  "construction-concrete-mixers": constructionConcreteMixers,
+  "construction-crane-lifting": constructionCraneLifting,
+  "construction-excavation-tools": constructionExcavationTools,
+  "construction-formwork-basic": constructionFormworkBasic,
+  "construction-hand-tools-pro": constructionHandToolsPro,
+  "construction-large-concrete-equipment": constructionLargeConcreteEquipment,
+  "construction-other": constructionOther,
+  "construction-professional-formwork": constructionProfessionalFormwork,
+  "construction-safety-equipment": constructionSafetyEquipment,
+  "construction-site-lighting": constructionSiteLighting,
+  "construction-structural-equipment": constructionStructuralEquipment,
   "costume-animatronic-props": costumeAnimatronicProps,
   "costume-character-costumes": costumeCharacterCostumes,
   "costume-film-tv-props": costumeFilmTvProps,

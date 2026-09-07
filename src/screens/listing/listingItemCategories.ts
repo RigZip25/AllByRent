@@ -19,12 +19,10 @@ export type CategoryData = {
   professional: SubcategoryItem[];
 };
 
-/** Shorthand for subcategory rows — last slot is always Other (➕). */
-function sub(label: string, emoji: string, glyph?: CategoryGlyphId): SubcategoryItem {
-  return glyph ? { label, emoji, glyph } : { label, emoji };
-}
-
-/** A shelf whose illustration is drawn; the emoji stays as the fallback. */
+/**
+ * Shorthand for subcategory rows — last slot is always Other (➕).
+ * Every shelf is illustrated; the emoji stays as the fallback.
+ */
 function subArt(label: string, emoji: string, art: SubcategoryArtId): SubcategoryItem {
   return { label, emoji, art };
 }
@@ -344,20 +342,20 @@ export const CATEGORIES: Record<string, CategoryData> = {
   Construction: {
     icon: "🏗️",
     personal: [
-      sub("Concrete Mixers", "🧱", "concrete-mixer"),
-      sub("Safety Equipment", "🦺"),
-      sub("Site Lighting", "🔦"),
-      sub("Hand Tools Pro", "🔨"),
-      sub("Formwork Basic", "🪵"),
-      sub("Other", "➕"),
+      subArt("Concrete Mixers", "🧱", "construction-concrete-mixers"),
+      subArt("Safety Equipment", "🦺", "construction-safety-equipment"),
+      subArt("Site Lighting", "🔦", "construction-site-lighting"),
+      subArt("Hand Tools Pro", "🔨", "construction-hand-tools-pro"),
+      subArt("Formwork Basic", "🪵", "construction-formwork-basic"),
+      subArt("Other", "➕", "construction-other"),
     ],
     professional: [
-      sub("Large Concrete Equipment", "🚧"),
-      sub("Crane & Lifting", "🏗️"),
-      sub("Professional Formwork", "🪵"),
-      sub("Excavation Tools", "⛏️"),
-      sub("Structural Equipment", "🧱"),
-      sub("Other", "➕"),
+      subArt("Large Concrete Equipment", "🚧", "construction-large-concrete-equipment"),
+      subArt("Crane & Lifting", "🏗️", "construction-crane-lifting"),
+      subArt("Professional Formwork", "🪵", "construction-professional-formwork"),
+      subArt("Excavation Tools", "⛏️", "construction-excavation-tools"),
+      subArt("Structural Equipment", "🧱", "construction-structural-equipment"),
+      subArt("Other", "➕", "construction-other"),
     ],
   },
   "Costume & Cosplay": {
