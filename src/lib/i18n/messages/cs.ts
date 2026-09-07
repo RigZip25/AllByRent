@@ -582,6 +582,7 @@ export const cs: AppMessages = {
     sectionGarage: "Tvoje garáž",
     sectionAccount: "Účet",
     sectionSupport: "Podpora",
+    sectionLegal: "Právní informace",
     rentals: "Půjčky",
     rentalsHint: "Aktivní, nadcházející a historie",
     messages: "Zprávy",

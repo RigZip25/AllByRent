@@ -686,6 +686,7 @@ export type AppMessages = {
     sectionGarage: string;
     sectionAccount: string;
     sectionSupport: string;
+    sectionLegal: string;
     rentals: string;
     rentalsHint: string;
     messages: string;

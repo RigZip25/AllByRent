@@ -9,7 +9,6 @@ import {
   Headphones,
   ScanLine,
   MessageCircle,
-  CheckCircle2,
   Share2,
   Calendar,
   Camera,
@@ -48,7 +47,7 @@ import {
 } from "../../lib/garageShopStorage";
 import { ListingPhotoGallery } from "../../components/listings/ListingPhotoGallery";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
-import { APP_NAME, MASCOT_NAME } from "../../lib/brand";
+import { MASCOT_NAME } from "../../lib/brand";
 import { parseUsdToCents } from "../../lib/insurance";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
 import { buildListingSharePayload, listingShareUrl } from "../../lib/socialShare";
@@ -867,13 +866,10 @@ export function ItemDetail({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="font-semibold">{t.item.garageHost}</span>
-                    <CheckCircle2 className="w-4 h-4 text-primary" />
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {onViewHostProfile
-                      ? t.item.viewPublicProfile
-                      : t.item.verifiedHost(APP_NAME)}
-                  </p>
+                  {onViewHostProfile ? (
+                    <p className="text-sm text-muted-foreground">{t.item.viewPublicProfile}</p>
+                  ) : null}
                 </div>
               </button>
               {canRent || listing.modes.sell ? (

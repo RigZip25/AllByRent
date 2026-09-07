@@ -558,6 +558,7 @@ export const es: AppMessages = {
     sectionGarage: "Tu garaje",
     sectionAccount: "Cuenta",
     sectionSupport: "Soporte",
+    sectionLegal: "Información legal",
     rentals: "Alquileres",
     rentalsHint: "Activos, próximos e historial",
     messages: "Mensajes",

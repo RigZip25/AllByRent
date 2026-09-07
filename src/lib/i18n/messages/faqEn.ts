@@ -198,7 +198,7 @@ export const faq: AppMessages["faq"] = {
     },
     "report-issue": {
       q: "How do I report a user or listing?",
-      a: "Open the listing or rental thread → Report. For emergencies call local authorities first. Include photos and dates for damage claims.",
+      a: "Email support@evorios.com with the listing link or the neighbor's name — we review every report. For emergencies call local authorities first. Include photos and dates for damage claims.",
     },
     "app-update": {
       q: "The app asked me to update — what should I do?",
