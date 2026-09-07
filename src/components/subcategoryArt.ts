@@ -59,6 +59,17 @@ import partySoundSystems from "../imports/subcategories/party-sound-systems.webp
 import partyStageRisers from "../imports/subcategories/party-stage-risers.webp";
 import partyTablesChairs from "../imports/subcategories/party-tables-chairs.webp";
 import partyTentsCanopies from "../imports/subcategories/party-tents-canopies.webp";
+import photoActionCameras from "../imports/subcategories/photo-action-cameras.webp";
+import photoBasicLighting from "../imports/subcategories/photo-basic-lighting.webp";
+import photoBroadcastGear from "../imports/subcategories/photo-broadcast-gear.webp";
+import photoCameraKits from "../imports/subcategories/photo-camera-kits.webp";
+import photoCinemaCameras from "../imports/subcategories/photo-cinema-cameras.webp";
+import photoDrones from "../imports/subcategories/photo-drones.webp";
+import photoOther from "../imports/subcategories/photo-other.webp";
+import photoProfessionalLenses from "../imports/subcategories/photo-professional-lenses.webp";
+import photoStabilizersRigs from "../imports/subcategories/photo-stabilizers-rigs.webp";
+import photoStudioLighting from "../imports/subcategories/photo-studio-lighting.webp";
+import photoTripodsMounts from "../imports/subcategories/photo-tripods-mounts.webp";
 import sportsCoachingEquipment from "../imports/subcategories/sports-coaching-equipment.webp";
 import sportsCompetitionGear from "../imports/subcategories/sports-competition-gear.webp";
 import sportsFishingGear from "../imports/subcategories/sports-fishing-gear.webp";
@@ -163,6 +174,17 @@ export const SUBCATEGORY_ART = {
   "party-stage-risers": partyStageRisers,
   "party-tables-chairs": partyTablesChairs,
   "party-tents-canopies": partyTentsCanopies,
+  "photo-action-cameras": photoActionCameras,
+  "photo-basic-lighting": photoBasicLighting,
+  "photo-broadcast-gear": photoBroadcastGear,
+  "photo-camera-kits": photoCameraKits,
+  "photo-cinema-cameras": photoCinemaCameras,
+  "photo-drones": photoDrones,
+  "photo-other": photoOther,
+  "photo-professional-lenses": photoProfessionalLenses,
+  "photo-stabilizers-rigs": photoStabilizersRigs,
+  "photo-studio-lighting": photoStudioLighting,
+  "photo-tripods-mounts": photoTripodsMounts,
   "sports-coaching-equipment": sportsCoachingEquipment,
   "sports-competition-gear": sportsCompetitionGear,
   "sports-fishing-gear": sportsFishingGear,
