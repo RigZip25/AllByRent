@@ -60,6 +60,17 @@ import gymResistanceBands from "../imports/subcategories/gym-resistance-bands.we
 import gymTrainingSystems from "../imports/subcategories/gym-training-systems.webp";
 import gymWeightMachines from "../imports/subcategories/gym-weight-machines.webp";
 import gymYogaPilates from "../imports/subcategories/gym-yoga-pilates.webp";
+import heavyAirCompressors from "../imports/subcategories/heavy-air-compressors.webp";
+import heavyForklifts from "../imports/subcategories/heavy-forklifts.webp";
+import heavyGenerators from "../imports/subcategories/heavy-generators.webp";
+import heavyHeavyPumps from "../imports/subcategories/heavy-heavy-pumps.webp";
+import heavyHydraulicEquipment from "../imports/subcategories/heavy-hydraulic-equipment.webp";
+import heavyIndustrialCompressors from "../imports/subcategories/heavy-industrial-compressors.webp";
+import heavyIndustrialGenerators from "../imports/subcategories/heavy-industrial-generators.webp";
+import heavyOther from "../imports/subcategories/heavy-other.webp";
+import heavyPressureWashers from "../imports/subcategories/heavy-pressure-washers.webp";
+import heavyPumps from "../imports/subcategories/heavy-pumps.webp";
+import heavyWinches from "../imports/subcategories/heavy-winches.webp";
 import homeBakingEquipment from "../imports/subcategories/home-baking-equipment.webp";
 import homeBeverageSystems from "../imports/subcategories/home-beverage-systems.webp";
 import homeBlendersJuicers from "../imports/subcategories/home-blenders-juicers.webp";
@@ -242,6 +253,17 @@ export const SUBCATEGORY_ART = {
   "gym-training-systems": gymTrainingSystems,
   "gym-weight-machines": gymWeightMachines,
   "gym-yoga-pilates": gymYogaPilates,
+  "heavy-air-compressors": heavyAirCompressors,
+  "heavy-forklifts": heavyForklifts,
+  "heavy-generators": heavyGenerators,
+  "heavy-heavy-pumps": heavyHeavyPumps,
+  "heavy-hydraulic-equipment": heavyHydraulicEquipment,
+  "heavy-industrial-compressors": heavyIndustrialCompressors,
+  "heavy-industrial-generators": heavyIndustrialGenerators,
+  "heavy-other": heavyOther,
+  "heavy-pressure-washers": heavyPressureWashers,
+  "heavy-pumps": heavyPumps,
+  "heavy-winches": heavyWinches,
   "home-baking-equipment": homeBakingEquipment,
   "home-beverage-systems": homeBeverageSystems,
   "home-blenders-juicers": homeBlendersJuicers,
