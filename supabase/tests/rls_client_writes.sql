@@ -237,4 +237,24 @@ begin
   reset role;
 end $$;
 
+do $$
+begin
+  -- An operator working straight against the database (SQL editor, psql) must
+  -- still be able to fix a row by hand.
+  update public.listings
+  set boosted_until = now() + interval '7 days', boosted_tier = 1
+  where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+  if not exists (
+    select 1 from public.listings
+    where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' and boosted_until is not null
+  ) then
+    raise exception 'a direct database session must not be treated as an app client';
+  end if;
+
+  update public.listings
+  set boosted_until = null, boosted_tier = null
+  where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+end $$;
+
 select 'rls_client_writes: all checks passed' as result;
