@@ -72,6 +72,7 @@ import furnitureDisplayRetailFurniture from "../imports/subcategories/furniture-
 import furnitureEventFurniture from "../imports/subcategories/furniture-event-furniture.webp";
 import furnitureLivingRoomFurniture from "../imports/subcategories/furniture-living-room-furniture.webp";
 import furnitureOfficeDesksChairs from "../imports/subcategories/furniture-office-desks-chairs.webp";
+import furnitureOther from "../imports/subcategories/furniture-other.webp";
 import furnitureOutdoorFurniture from "../imports/subcategories/furniture-outdoor-furniture.webp";
 import furnitureReceptionFurniture from "../imports/subcategories/furniture-reception-furniture.webp";
 import furnitureStorageShelving from "../imports/subcategories/furniture-storage-shelving.webp";
@@ -123,6 +124,7 @@ import homeCleaningAppliances from "../imports/subcategories/home-cleaning-appli
 import homeCoffeeMakers from "../imports/subcategories/home-coffee-makers.webp";
 import homeCommercialCoffee from "../imports/subcategories/home-commercial-coffee.webp";
 import homeCommercialCookingEquipment from "../imports/subcategories/home-commercial-cooking-equipment.webp";
+import homeCookingAppliances from "../imports/subcategories/home-cooking-appliances.webp";
 import homeFoodProcessorsPro from "../imports/subcategories/home-food-processors-pro.webp";
 import homeIndustrialMixers from "../imports/subcategories/home-industrial-mixers.webp";
 import homeOther from "../imports/subcategories/home-other.webp";
@@ -320,6 +322,7 @@ export const SUBCATEGORY_ART = {
   "furniture-event-furniture": furnitureEventFurniture,
   "furniture-living-room-furniture": furnitureLivingRoomFurniture,
   "furniture-office-desks-chairs": furnitureOfficeDesksChairs,
+  "furniture-other": furnitureOther,
   "furniture-outdoor-furniture": furnitureOutdoorFurniture,
   "furniture-reception-furniture": furnitureReceptionFurniture,
   "furniture-storage-shelving": furnitureStorageShelving,
@@ -371,6 +374,7 @@ export const SUBCATEGORY_ART = {
   "home-coffee-makers": homeCoffeeMakers,
   "home-commercial-coffee": homeCommercialCoffee,
   "home-commercial-cooking-equipment": homeCommercialCookingEquipment,
+  "home-cooking-appliances": homeCookingAppliances,
   "home-food-processors-pro": homeFoodProcessorsPro,
   "home-industrial-mixers": homeIndustrialMixers,
   "home-other": homeOther,
