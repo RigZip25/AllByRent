@@ -60,6 +60,17 @@ import homeFoodProcessorsPro from "../imports/subcategories/home-food-processors
 import homeIndustrialMixers from "../imports/subcategories/home-industrial-mixers.webp";
 import homeOther from "../imports/subcategories/home-other.webp";
 import homeStandMixers from "../imports/subcategories/home-stand-mixers.webp";
+import musicAmplifiers from "../imports/subcategories/music-amplifiers.webp";
+import musicDrums from "../imports/subcategories/music-drums.webp";
+import musicGuitarsBass from "../imports/subcategories/music-guitars-bass.webp";
+import musicKeyboards from "../imports/subcategories/music-keyboards.webp";
+import musicMicrophones from "../imports/subcategories/music-microphones.webp";
+import musicMixingConsoles from "../imports/subcategories/music-mixing-consoles.webp";
+import musicOther from "../imports/subcategories/music-other.webp";
+import musicPaSystems from "../imports/subcategories/music-pa-systems.webp";
+import musicPortableSpeakers from "../imports/subcategories/music-portable-speakers.webp";
+import musicRecordingGear from "../imports/subcategories/music-recording-gear.webp";
+import musicStudioMonitors from "../imports/subcategories/music-studio-monitors.webp";
 import outdoorBackpacks from "../imports/subcategories/outdoor-backpacks.webp";
 import outdoorBaseCampEquipment from "../imports/subcategories/outdoor-base-camp-equipment.webp";
 import outdoorCampCooking from "../imports/subcategories/outdoor-camp-cooking.webp";
@@ -198,6 +209,17 @@ export const SUBCATEGORY_ART = {
   "home-industrial-mixers": homeIndustrialMixers,
   "home-other": homeOther,
   "home-stand-mixers": homeStandMixers,
+  "music-amplifiers": musicAmplifiers,
+  "music-drums": musicDrums,
+  "music-guitars-bass": musicGuitarsBass,
+  "music-keyboards": musicKeyboards,
+  "music-microphones": musicMicrophones,
+  "music-mixing-consoles": musicMixingConsoles,
+  "music-other": musicOther,
+  "music-pa-systems": musicPaSystems,
+  "music-portable-speakers": musicPortableSpeakers,
+  "music-recording-gear": musicRecordingGear,
+  "music-studio-monitors": musicStudioMonitors,
   "outdoor-backpacks": outdoorBackpacks,
   "outdoor-base-camp-equipment": outdoorBaseCampEquipment,
   "outdoor-camp-cooking": outdoorCampCooking,
