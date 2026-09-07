@@ -1,0 +1,71 @@
+.choose {
+  padding: 24px 22px calc(20px + var(--rz-safe-bottom));
+  gap: 22px;
+  background:
+    radial-gradient(700px 360px at 0% 0%, rgba(242, 185, 13, 0.1), transparent 50%),
+    var(--rz-ink);
+}
+
+.choose__header {
+  display: grid;
+  gap: 10px;
+}
+
+.choose__lede {
+  margin: 0;
+  max-width: 34ch;
+  line-height: 1.45;
+}
+
+.choose__options {
+  display: grid;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.path-card {
+  text-align: left;
+  padding: 18px 18px 16px;
+  border-radius: var(--rz-radius-lg);
+  border: 1px solid var(--rz-line-strong);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+  display: grid;
+  gap: 6px;
+  transition:
+    border-color 180ms var(--rz-ease),
+    background 180ms var(--rz-ease),
+    transform 180ms var(--rz-ease);
+}
+
+.path-card:hover {
+  border-color: rgba(232, 238, 245, 0.35);
+}
+
+.path-card.is-selected {
+  border-color: var(--rz-accent);
+  background:
+    linear-gradient(180deg, rgba(242, 185, 13, 0.12), rgba(255, 255, 255, 0.02));
+}
+
+.path-card__kicker {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rz-accent);
+}
+
+.path-card__title {
+  font-family: var(--rz-font-display);
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+}
+
+.path-card__text {
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.choose__footer {
+  margin-top: 8px;
+}

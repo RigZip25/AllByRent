@@ -1,0 +1,117 @@
+.splash {
+  padding: 28px 22px 24px;
+  justify-content: space-between;
+  background:
+    radial-gradient(900px 420px at 70% 18%, rgba(242, 185, 13, 0.16), transparent 55%),
+    linear-gradient(180deg, #151b26 0%, #0a0c0f 55%, #07090c 100%);
+}
+
+.splash__atmosphere {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.splash__beam {
+  position: absolute;
+  top: -10%;
+  right: -20%;
+  width: 70%;
+  height: 55%;
+  background: linear-gradient(135deg, rgba(232, 238, 245, 0.12), transparent 60%);
+  filter: blur(8px);
+  animation: rz-beam 6s ease-in-out infinite;
+}
+
+.splash__road {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: 18%;
+  height: 34%;
+  background:
+    linear-gradient(180deg, transparent, rgba(20, 24, 32, 0.9) 30%, #0a0c0f),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 28px,
+      rgba(242, 185, 13, 0.18) 28px 46px,
+      transparent 46px 86px
+    );
+  opacity: 0.55;
+  transform: perspective(400px) rotateX(58deg);
+  transform-origin: center bottom;
+}
+
+.splash__rig {
+  position: absolute;
+  width: 78%;
+  height: 120px;
+  left: 11%;
+  bottom: 34%;
+  border-radius: 18px 42px 14px 14px;
+  background:
+    linear-gradient(180deg, #d7dee8 0%, #9aa6b8 45%, #6d788a 100%);
+  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.45);
+  opacity: 0.9;
+}
+
+.splash__rig::before {
+  content: "";
+  position: absolute;
+  left: 10%;
+  top: -42px;
+  width: 42%;
+  height: 52px;
+  border-radius: 14px 18px 0 0;
+  background: linear-gradient(180deg, #eef3f8, #aeb8c7);
+}
+
+.splash__rig::after {
+  content: "";
+  position: absolute;
+  right: 14%;
+  top: 28%;
+  width: 18%;
+  height: 34%;
+  border-radius: 8px;
+  background: rgba(10, 12, 15, 0.35);
+}
+
+.splash__top {
+  position: relative;
+  z-index: 1;
+}
+
+.splash__copy {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding-top: 40%;
+}
+
+.splash__title {
+  margin-top: 14px;
+  font-size: clamp(2.5rem, 10vw, 3.35rem);
+}
+
+.splash__lede {
+  margin: 16px 0 0;
+  max-width: 28ch;
+  font-size: 1.02rem;
+  line-height: 1.45;
+}
+
+.splash__footer {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.splash__note {
+  margin: 0;
+  text-align: center;
+  font-size: 0.82rem;
+}

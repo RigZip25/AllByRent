@@ -1,0 +1,27 @@
+:root {
+  /* RigZIP — industrial premium */
+  --rz-ink: #0a0c0f;
+  --rz-ink-2: #141820;
+  --rz-steel: #1c2430;
+  --rz-slate: #2a3444;
+  --rz-mist: #e8eef5;
+  --rz-paper: #f4f6f8;
+  --rz-mute: #8b95a5;
+  --rz-line: rgba(232, 238, 245, 0.12);
+  --rz-line-strong: rgba(232, 238, 245, 0.22);
+  --rz-accent: #f2b90d;
+  --rz-accent-deep: #c99208;
+  --rz-ok: #3dba7a;
+  --rz-danger: #e35d4b;
+
+  --rz-font-display: "Syne", system-ui, sans-serif;
+  --rz-font-body: "DM Sans", system-ui, sans-serif;
+
+  --rz-radius-sm: 10px;
+  --rz-radius-md: 16px;
+  --rz-radius-lg: 22px;
+
+  --rz-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --rz-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --rz-phone-max: 430px;
+}
