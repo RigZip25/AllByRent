@@ -82,6 +82,17 @@ import musicPaSystems from "../imports/subcategories/music-pa-systems.webp";
 import musicPortableSpeakers from "../imports/subcategories/music-portable-speakers.webp";
 import musicRecordingGear from "../imports/subcategories/music-recording-gear.webp";
 import musicStudioMonitors from "../imports/subcategories/music-studio-monitors.webp";
+import officeCommercialCopiers from "../imports/subcategories/office-commercial-copiers.webp";
+import officeConferenceSystems from "../imports/subcategories/office-conference-systems.webp";
+import officeLargeFormatPrinters from "../imports/subcategories/office-large-format-printers.webp";
+import officeMonitorsDisplays from "../imports/subcategories/office-monitors-displays.webp";
+import officeOfficeFurniture from "../imports/subcategories/office-office-furniture.webp";
+import officeOther from "../imports/subcategories/office-other.webp";
+import officePosSystems from "../imports/subcategories/office-pos-systems.webp";
+import officePresentationGear from "../imports/subcategories/office-presentation-gear.webp";
+import officePrinters from "../imports/subcategories/office-printers.webp";
+import officeServerEquipment from "../imports/subcategories/office-server-equipment.webp";
+import officeWebcamsStreaming from "../imports/subcategories/office-webcams-streaming.webp";
 import outdoorBackpacks from "../imports/subcategories/outdoor-backpacks.webp";
 import outdoorBaseCampEquipment from "../imports/subcategories/outdoor-base-camp-equipment.webp";
 import outdoorCampCooking from "../imports/subcategories/outdoor-camp-cooking.webp";
@@ -253,6 +264,17 @@ export const SUBCATEGORY_ART = {
   "music-portable-speakers": musicPortableSpeakers,
   "music-recording-gear": musicRecordingGear,
   "music-studio-monitors": musicStudioMonitors,
+  "office-commercial-copiers": officeCommercialCopiers,
+  "office-conference-systems": officeConferenceSystems,
+  "office-large-format-printers": officeLargeFormatPrinters,
+  "office-monitors-displays": officeMonitorsDisplays,
+  "office-office-furniture": officeOfficeFurniture,
+  "office-other": officeOther,
+  "office-pos-systems": officePosSystems,
+  "office-presentation-gear": officePresentationGear,
+  "office-printers": officePrinters,
+  "office-server-equipment": officeServerEquipment,
+  "office-webcams-streaming": officeWebcamsStreaming,
   "outdoor-backpacks": outdoorBackpacks,
   "outdoor-base-camp-equipment": outdoorBaseCampEquipment,
   "outdoor-camp-cooking": outdoorCampCooking,
