@@ -1,4 +1,16 @@
 import babyBabyCarriers from "../imports/subcategories/baby-baby-carriers.webp";
+import bikesAdaptiveBikes from "../imports/subcategories/bikes-adaptive-bikes.webp";
+import bikesCargoBikes from "../imports/subcategories/bikes-cargo-bikes.webp";
+import bikesCruisers from "../imports/subcategories/bikes-cruisers.webp";
+import bikesEBikes from "../imports/subcategories/bikes-e-bikes.webp";
+import bikesEBikesPro from "../imports/subcategories/bikes-e-bikes-pro.webp";
+import bikesElectricScooters from "../imports/subcategories/bikes-electric-scooters.webp";
+import bikesKidsBikes from "../imports/subcategories/bikes-kids-bikes.webp";
+import bikesMountainBikes from "../imports/subcategories/bikes-mountain-bikes.webp";
+import bikesOther from "../imports/subcategories/bikes-other.webp";
+import bikesProfessionalScooters from "../imports/subcategories/bikes-professional-scooters.webp";
+import bikesRacingBikes from "../imports/subcategories/bikes-racing-bikes.webp";
+import bikesRoadBikes from "../imports/subcategories/bikes-road-bikes.webp";
 import babyCarSeats from "../imports/subcategories/baby-car-seats.webp";
 import babyChildcareEquipment from "../imports/subcategories/baby-childcare-equipment.webp";
 import babyCommercialPlayEquipment from "../imports/subcategories/baby-commercial-play-equipment.webp";
@@ -124,6 +136,18 @@ export const SUBCATEGORY_ART = {
   "baby-safety-systems": babySafetySystems,
   "baby-strollers": babyStrollers,
   "baby-toys-games": babyToysGames,
+  "bikes-adaptive-bikes": bikesAdaptiveBikes,
+  "bikes-cargo-bikes": bikesCargoBikes,
+  "bikes-cruisers": bikesCruisers,
+  "bikes-e-bikes": bikesEBikes,
+  "bikes-e-bikes-pro": bikesEBikesPro,
+  "bikes-electric-scooters": bikesElectricScooters,
+  "bikes-kids-bikes": bikesKidsBikes,
+  "bikes-mountain-bikes": bikesMountainBikes,
+  "bikes-other": bikesOther,
+  "bikes-professional-scooters": bikesProfessionalScooters,
+  "bikes-racing-bikes": bikesRacingBikes,
+  "bikes-road-bikes": bikesRoadBikes,
   "garden-garden-tools": gardenGardenTools,
   "garden-houseplants-seedlings": gardenHouseplantsSeedlings,
   "garden-irrigation-systems": gardenIrrigationSystems,
