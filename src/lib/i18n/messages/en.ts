@@ -2260,7 +2260,7 @@ export const en: AppMessages = {
         beverageSystemType: { label: "Beverage system type" },
         beverageGasOrSyrupKit: { label: "CO\u2082 / syrup kit" },
         beveragePlumbStatus: { label: "Plumbing status" },
-        homeKitchenOtherKind: { label: "What kind of item", hint: "Re-shelf to a named Home & Kitchen shelf when one fits." },
+        homeKitchenOtherKind: { label: "What kind of item", hint: "Re-shelf to a named Kitchen Equipment shelf when one fits." },
         homeKitchenPieceBand: { label: "Single or multi-piece" },
         guitarInstrumentForm: { label: "Guitar / bass form" },
         guitarCableIncluded: { label: "Instrument cable" },
@@ -4389,7 +4389,7 @@ export const en: AppMessages = {
         wireless_remote: "Wireless remote",
         youth: "Youth",
 
-        // Home & Kitchen ~8.0 options
+        // Kitchen Equipment ~8.0 options
         "1000_1500w": "1000\u20131500 W",
         "100_200": "100\u2013200 guests",
         "120v_outlets": "120V outlets",

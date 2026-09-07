@@ -2296,7 +2296,7 @@ export const cs: AppMessages = {
         beverageSystemType: { label: "Beverage system type" },
         beverageGasOrSyrupKit: { label: "CO\u2082 / syrup kit" },
         beveragePlumbStatus: { label: "Plumbing status" },
-        homeKitchenOtherKind: { label: "O jak\u00fd typ jde", hint: "P\u0159esu\u0148te na pojmenovanou polici Home & Kitchen, pokud sed\u00ed." },
+        homeKitchenOtherKind: { label: "O jak\u00fd typ jde", hint: "P\u0159esu\u0148te na pojmenovanou polici Kuchy\u0148sk\u00e9 vybaven\u00ed, pokud sed\u00ed." },
         homeKitchenPieceBand: { label: "Single or multi-piece" },
         guitarInstrumentForm: { label: "Guitar / bass form" },
         guitarCableIncluded: { label: "Instrument cable" },
@@ -4410,7 +4410,7 @@ export const cs: AppMessages = {
         wireless_remote: "Wireless remote",
         youth: "Dětské / youth",
 
-        // Home & Kitchen ~8.0 options
+        // Kitchen Equipment ~8.0 options
         "1000_1500w": "1000\u20131500 W",
         "100_200": "100\u2013200 host\u016f",
         "120v_outlets": "Z\u00e1suvky 120V",

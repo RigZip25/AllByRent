@@ -24,7 +24,7 @@ READ ALL VISIBLE TEXT — brand names, model numbers, size markings, specificati
 Return ONLY valid JSON, no other text:
 {
   "title": "Brand + Model + key spec (max 80 chars)",
-  "category": "MUST be exactly one of: Outdoor & Camping, Electronics & Tech, Photo & Video, Garden & Yard, Drones, Party & Events, Gym & Fitness, Boats & Water, Real Estate, Furniture, Music & Audio, Vehicles, Costume & Cosplay, Tools & DIY, Heavy Equipment, Construction, Bikes & Scooters, Home & Kitchen, Office & Business, Unique & Other",
+  "category": "MUST be exactly one of: Outdoor & Camping, Electronics & Tech, Photo & Video, Garden & Yard, Drones, Party & Events, Gym & Fitness, Boats & Water, Real Estate, Home & Office Furniture, Music & Audio, Vehicles, Costume & Cosplay, Tools & DIY, Heavy Equipment, Construction, Bikes & Scooters, Kitchen Equipment, Office & Business, Unique & Other",
   "subcategory": "2-3 word description fitting the category",
   "grade": "personal or professional",
   "condition": "new or like_new or good or fair",

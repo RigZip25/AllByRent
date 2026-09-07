@@ -1,5 +1,9 @@
 import type { ListingDraft } from "../screens/listing/types";
 import { WIZARD_FLOW_VERSION } from "../screens/listing/types";
+import {
+  canonicalShelf,
+  categoryQueryNames,
+} from "../screens/listing/listingItemCategories";
 import type { MediaRef } from "./mediaStore";
 import { applyGiftAsZeroSell } from "./listingGift";
 import {
@@ -330,10 +334,15 @@ function normalizeListingDraft(raw: ListingDraft): ListingDraft {
     legacyStatus === "pending_sticker" ? "pending_qr" : raw.listingStatus;
   const hostId =
     typeof raw.hostId === "string" && raw.hostId.trim() ? raw.hostId.trim() : "";
+  // Categories get renamed and shelves get moved; a listing keeps the name it
+  // was saved with, so the whole app reads the current one from here on.
+  const shelf = canonicalShelf(raw.category ?? "", raw.subcategory ?? "");
 
   const base: ListingDraft = {
     ...raw,
     hostId,
+    category: shelf.category,
+    subcategory: shelf.subcategory,
     listingStatus: status,
     wizardStep:
       typeof raw.wizardStep === "number" && raw.wizardStep >= 1 && raw.wizardStep <= 4
@@ -1144,7 +1153,8 @@ export async function searchActiveListingsRemote(params: {
     .order("updated_at", { ascending: false });
 
   if (cityNorm) queryBuilder = queryBuilder.ilike("city", `%${cityNorm}%`);
-  if (category) queryBuilder = queryBuilder.eq("category", category);
+  // Rows keep the category name they were saved with, so match the old ones too.
+  if (category) queryBuilder = queryBuilder.in("category", categoryQueryNames(category));
   if (q) {
     queryBuilder = queryBuilder.or(
       `title.ilike.%${q}%,description.ilike.%${q}%,subcategory.ilike.%${q}%`,

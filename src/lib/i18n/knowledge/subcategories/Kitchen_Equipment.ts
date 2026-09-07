@@ -1,7 +1,7 @@
 import type { CategoryFactBlock } from "../types";
 
-/** Canonical EN subcategory FactCards for Home & Kitchen — host-facing Q→A only. */
-export const subs_Home_and_Kitchen: Record<string, CategoryFactBlock> = {
+/** Canonical EN subcategory FactCards for Kitchen Equipment — host-facing Q→A only. */
+export const subs_Kitchen_Equipment: Record<string, CategoryFactBlock> = {
   "Coffee Makers": {
     title: "Coffee makers tips",
     summary: "Short answers for drip, espresso, and pod makers.",
@@ -82,6 +82,24 @@ export const subs_Home_and_Kitchen: Record<string, CategoryFactBlock> = {
       },
     ],
   },
+  "Cooking Appliances": {
+    title: "Cooking appliances tips",
+    summary: "Short answers for grills, fryers, and countertop cookers.",
+    qa: [
+      {
+        q: "What should I list?",
+        a: "Model, capacity band, what ships in the kit, and the return-clean policy. Food-contact parts need the sanitize attestation.",
+      },
+      {
+        q: "Who cleans grease and food residue?",
+        a: "The return-clean policy decides — wash/dry, rinse, or host sanitizes. Say it before the booking, not after.",
+      },
+      {
+        q: "Fuel or power?",
+        a: "Name it in the description: propane, charcoal, or the outlet the unit needs. Renters plan the site around it.",
+      },
+    ],
+  },
   "Cleaning Appliances": {
     title: "Cleaning appliances tips",
     summary: "Short answers for vacs, carpet cleaners, and steam.",
@@ -104,7 +122,25 @@ export const subs_Home_and_Kitchen: Record<string, CategoryFactBlock> = {
       },
     ],
   },
-  "Commercial Coffee": {
+  "Commercial Cooking Equipment": {
+    title: "Commercial cooking equipment tips",
+    summary: "Short answers for ranges, fryers, and holding cabinets.",
+    qa: [
+      {
+        q: "What must the host list?",
+        a: "Voltage, NSF listing status, install needs, the kit checklist, and the food-contact sanitize attestation.",
+      },
+      {
+        q: "Why do install needs matter?",
+        a: "A hardwired or gas-fired unit that the site cannot feed fails the event — put the hookup on the listing.",
+      },
+      {
+        q: "Is NSF certification from Evorios?",
+        a: "No — the host declares NSF status; we do not certify.",
+      },
+    ],
+  },
+  "Commercial Coffee Equipment": {
     title: "Commercial coffee tips",
     summary: "Short answers for café and event brew systems.",
     qa: [
@@ -162,7 +198,7 @@ export const subs_Home_and_Kitchen: Record<string, CategoryFactBlock> = {
       },
     ],
   },
-  "Food Processors Pro": {
+  "Food Preparation Equipment": {
     title: "Pro processors tips",
     summary: "Short answers for batch and continuous-feed processors.",
     qa: [
@@ -184,7 +220,7 @@ export const subs_Home_and_Kitchen: Record<string, CategoryFactBlock> = {
       },
     ],
   },
-  "Beverage Systems": {
+  "Refrigeration & Beverage Systems": {
     title: "Beverage systems tips",
     summary: "Short answers for kegerators, soda, and towers.",
     qa: [
@@ -208,7 +244,7 @@ export const subs_Home_and_Kitchen: Record<string, CategoryFactBlock> = {
     qa: [
       {
         q: "When use Other?",
-        a: "Only when no named Home & Kitchen shelf fits. Named shelves carry capacity, sanitize, NSF, or kit details renters expect.",
+        a: "Only when no named Kitchen Equipment shelf fits. Named shelves carry capacity, sanitize, NSF, or kit details renters expect.",
       },
       {
         q: "What still requirements publish?",
@@ -222,4 +258,4 @@ export const subs_Home_and_Kitchen: Record<string, CategoryFactBlock> = {
   },
 };
 
-export const parentCategoryKey = "Home & Kitchen" as const;
+export const parentCategoryKey = "Kitchen Equipment" as const;

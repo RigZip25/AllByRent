@@ -26,7 +26,8 @@ const APP_ORIGIN = "https://app.evorios.com";
 const CATEGORY_NAMES = [
   "Tools & DIY",
   "Garden & Yard",
-  "Home & Kitchen",
+  "Home & Office Furniture",
+  "Kitchen Equipment",
   "Baby & Kids",
   "Party & Events",
   "Sports & Recreation",

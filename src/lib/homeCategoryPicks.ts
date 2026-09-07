@@ -4,7 +4,8 @@ import { CATEGORIES, CATEGORY_NAMES, type SubcategoryItem } from "../screens/lis
 export const HOME_CATEGORY_PICKS = [
   "Tools & DIY",
   "Garden & Yard",
-  "Home & Kitchen",
+  "Home & Office Furniture",
+  "Kitchen Equipment",
   "Baby & Kids",
   "Party & Events",
   "Sports & Recreation",

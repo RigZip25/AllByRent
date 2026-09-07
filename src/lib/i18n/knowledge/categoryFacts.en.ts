@@ -15,7 +15,8 @@ import { facts_Party_and_Events } from "./categories/Party_and_Events";
 import { facts_Tools_and_DIY } from "./categories/Tools_and_DIY";
 import { facts_Unique_and_Other } from "./categories/Unique_and_Other";
 import { facts_Garden_and_Yard } from "./categories/Garden_and_Yard";
-import { facts_Home_and_Kitchen } from "./categories/Home_and_Kitchen";
+import { facts_Kitchen_Equipment } from "./categories/Kitchen_Equipment";
+import { facts_Home_and_Office_Furniture } from "./categories/Home_and_Office_Furniture";
 import { facts_Office_and_Business } from "./categories/Office_and_Business";
 import { facts_Music_and_Audio } from "./categories/Music_and_Audio";
 import { facts_Costume_and_Cosplay } from "./categories/Costume_and_Cosplay";
@@ -26,7 +27,8 @@ import { subs_Sports_and_Recreation } from "./subcategories/Sports_and_Recreatio
 import { subs_Photo_and_Video } from "./subcategories/Photo_and_Video";
 import { subs_Office_and_Business } from "./subcategories/Office_and_Business";
 import { subs_Music_and_Audio } from "./subcategories/Music_and_Audio";
-import { subs_Home_and_Kitchen } from "./subcategories/Home_and_Kitchen";
+import { subs_Kitchen_Equipment } from "./subcategories/Kitchen_Equipment";
+import { subs_Home_and_Office_Furniture } from "./subcategories/Home_and_Office_Furniture";
 import { subs_Real_Estate } from "./subcategories/Real_Estate";
 import { subs_Vehicles } from "./subcategories/Vehicles";
 import { subs_Construction } from "./subcategories/Construction";
@@ -62,7 +64,8 @@ export const categoryFactsEn: CategoryFactsBundle = {
     "Tools & DIY": facts_Tools_and_DIY,
     "Unique & Other": facts_Unique_and_Other,
     "Garden & Yard": facts_Garden_and_Yard,
-    "Home & Kitchen": facts_Home_and_Kitchen,
+    "Kitchen Equipment": facts_Kitchen_Equipment,
+    "Home & Office Furniture": facts_Home_and_Office_Furniture,
     "Office & Business": facts_Office_and_Business,
     "Music & Audio": facts_Music_and_Audio,
     "Costume & Cosplay": facts_Costume_and_Cosplay,
@@ -75,7 +78,8 @@ export const categoryFactsEn: CategoryFactsBundle = {
     "Photo & Video": subs_Photo_and_Video,
     "Office & Business": subs_Office_and_Business,
     "Music & Audio": subs_Music_and_Audio,
-    "Home & Kitchen": subs_Home_and_Kitchen,
+    "Kitchen Equipment": subs_Kitchen_Equipment,
+    "Home & Office Furniture": subs_Home_and_Office_Furniture,
     "Real Estate": subs_Real_Estate,
     Vehicles: subs_Vehicles,
     Construction: subs_Construction,

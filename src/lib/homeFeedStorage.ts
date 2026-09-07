@@ -1,3 +1,5 @@
+import { canonicalShelf } from "../screens/listing/listingItemCategories";
+
 const QUERY_KEY = "evorios_home_query";
 const MODE_KEY = "evorios_home_mode";
 const LENS_KEY = "evorios_home_lens";
@@ -19,9 +21,12 @@ export function browseInterestKey(interest: BrowseInterest): string {
 export function normalizeBrowseInterests(raw: BrowseInterest[]): BrowseInterest[] {
   const byKey = new Map<string, BrowseInterest>();
   for (const item of raw) {
-    const category = item.category?.trim() ?? "";
+    // A pick saved before a category was renamed would filter the feed to a
+    // shelf that no longer exists, so it follows the shelf to its new name.
+    const shelf = canonicalShelf(item.category ?? "", item.subcategory ?? "");
+    const category = shelf.category;
     if (!category) continue;
-    const subcategory = item.subcategory?.trim() || undefined;
+    const subcategory = shelf.subcategory || undefined;
     const next: BrowseInterest = subcategory ? { category, subcategory } : { category };
     byKey.set(browseInterestKey(next), next);
   }

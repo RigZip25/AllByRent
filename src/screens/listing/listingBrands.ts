@@ -17,6 +17,7 @@ export type BrandListId =
   | "music"
   | "baby"
   | "office"
+  | "furniture"
   | "heavy"
   | "construction";
 
@@ -128,6 +129,18 @@ const OFFICE_GLOBAL = [
   "HP", "Brother", "Epson", "Canon", "Dell", "Lenovo", "Apple", "Logitech", "Microsoft",
 ] as const;
 
+const FURNITURE_NA = [
+  "IKEA", "Ashley", "La-Z-Boy", "Herman Miller", "Steelcase", "HON", "Knoll", "West Elm",
+  "Pottery Barn", "Sauder",
+] as const;
+const FURNITURE_EU = [
+  "IKEA", "JYSK", "Vitra", "BoConcept", "Kinnarps", "Sedus", "USM", "Steelcase",
+  "Herman Miller", "Actiu",
+] as const;
+const FURNITURE_LATAM = [
+  "Tok&Stok", "Mobly", "Madesa", "IKEA", "Ashley", "Steelcase", "Herman Miller", "Vitra",
+] as const;
+
 const HEAVY_NA = [
   "Honda", "Generac", "Caterpillar", "John Deere", "Bobcat", "Kubota", "Makita", "DeWalt", "Milwaukee", "Wacker Neuson",
 ] as const;
@@ -176,6 +189,10 @@ function listFor(id: BrandListId, region: BrandRegion): string[] {
       return mergeRegional(BABY_NA, BABY_EU, BABY_LATAM);
     case "office":
       return withFallback(OFFICE_GLOBAL);
+    case "furniture":
+      if (region === "eu") return mergeRegional(FURNITURE_EU, FURNITURE_NA, FURNITURE_LATAM);
+      if (region === "latam") return mergeRegional(FURNITURE_LATAM, FURNITURE_NA, FURNITURE_EU);
+      return mergeRegional(FURNITURE_NA, FURNITURE_EU, FURNITURE_LATAM);
     case "heavy":
       if (region === "eu") return mergeRegional(HEAVY_EU, HEAVY_NA, HEAVY_LATAM);
       if (region === "latam") return mergeRegional(HEAVY_LATAM, HEAVY_NA, HEAVY_EU);

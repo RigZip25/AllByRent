@@ -8,6 +8,7 @@ import {
   brandsForList,
   type BrandListId,
 } from "./listingBrands";
+import { canonicalShelf } from "./listingItemCategories";
 
 export type SpecFieldType = "text" | "number" | "select" | "brand" | "multiselect";
 
@@ -1325,7 +1326,62 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
   },
 
   {
-    category: "Home & Kitchen",
+    // Household shelves carry brand / model / condition only: the type and size
+    // option sets below are desk-and-table shaped, so sofas and beds wait for
+    // their own ones rather than answering the wrong question.
+    category: "Home & Office Furniture",
+    fields: [
+      brandField("furniture", { required: false, recommended: true }),
+      {
+        key: "model",
+        type: "text",
+        required: false,
+        recommended: true,
+      },
+      {
+        key: "officeFurnitureType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Office Desks & Chairs",
+          "Reception Furniture",
+          "Conference Furniture",
+          "Event Furniture",
+          "Display & Retail Furniture",
+          "Commercial Storage & Shelving",
+        ],
+        options: ["desk", "chair", "standing_desk", "filing_cabinet", "bookshelf_storage", "conference_table", "other_office_furniture"],
+      },
+      {
+        key: "furnitureSeatOrSizeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Tables & Chairs",
+          "Storage & Shelving",
+          "Office Desks & Chairs",
+          "Reception Furniture",
+          "Conference Furniture",
+          "Event Furniture",
+          "Display & Retail Furniture",
+          "Commercial Storage & Shelving",
+        ],
+        options: ["single_seat", "desk_compact", "desk_standard", "table_4_6", "table_7_plus", "cabinet_drawer_unit", "not_sized"],
+      },
+      {
+        key: "furnitureConditionGrade",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        options: ["like_new_office", "light_wear_office", "visible_wear_office", "functional_imperfections_office"],
+      },
+    ],
+  },
+
+  {
+    category: "Kitchen Equipment",
     fields: [
       brandField("kitchen", { required: false, recommended: true }),
       {
@@ -1338,11 +1394,13 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
           "Coffee Makers",
           "Stand Mixers",
           "Blenders & Juicers",
+          "Cooking Appliances",
           "Cleaning Appliances",
-          "Commercial Coffee",
+          "Commercial Cooking Equipment",
+          "Commercial Coffee Equipment",
           "Industrial Mixers",
-          "Food Processors Pro",
-          "Beverage Systems",
+          "Food Preparation Equipment",
+          "Refrigeration & Beverage Systems",
         ],
       },
       {
@@ -1369,12 +1427,14 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
           "Baking Equipment",
           "Stand Mixers",
           "Blenders & Juicers",
+          "Cooking Appliances",
           "Cleaning Appliances",
-          "Commercial Coffee",
+          "Commercial Cooking Equipment",
+          "Commercial Coffee Equipment",
           "Catering Equipment",
           "Industrial Mixers",
-          "Food Processors Pro",
-          "Beverage Systems",
+          "Food Preparation Equipment",
+          "Refrigeration & Beverage Systems",
           "Other",
         ],
       },
@@ -1400,10 +1460,12 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
           "Baking Equipment",
           "Stand Mixers",
           "Blenders & Juicers",
+          "Cooking Appliances",
           "Catering Equipment",
+          "Commercial Cooking Equipment",
           "Industrial Mixers",
-          "Food Processors Pro",
-          "Beverage Systems",
+          "Food Preparation Equipment",
+          "Refrigeration & Beverage Systems",
         ],
         options: ["attested", "not_yet"],
       },
@@ -1700,21 +1762,21 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         key: "voltageBand",
         type: "select",
         required: true,
-        subcategories: ["Commercial Coffee", "Industrial Mixers", "Food Processors Pro", "Beverage Systems"],
+        subcategories: ["Commercial Cooking Equipment", "Commercial Coffee Equipment", "Industrial Mixers", "Food Preparation Equipment", "Refrigeration & Beverage Systems"],
         options: ["120v_corded", "240v", "not_electric"],
       },
       {
         key: "nsfCertified",
         type: "select",
         required: true,
-        subcategories: ["Commercial Coffee", "Industrial Mixers", "Food Processors Pro", "Beverage Systems", "Catering Equipment"],
+        subcategories: ["Commercial Cooking Equipment", "Commercial Coffee Equipment", "Industrial Mixers", "Food Preparation Equipment", "Refrigeration & Beverage Systems", "Catering Equipment"],
         options: ["nsf_listed", "not_nsf", "unknown"],
       },
       {
         key: "installNeeds",
         type: "select",
         required: true,
-        subcategories: ["Commercial Coffee", "Beverage Systems"],
+        subcategories: ["Commercial Cooking Equipment", "Commercial Coffee Equipment", "Refrigeration & Beverage Systems"],
         options: ["countertop_plug", "plumbed_water", "hardwired_240v", "mobile_cart", "other_install"],
       },
       {
@@ -1722,7 +1784,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: ["Commercial Coffee"],
+        subcategories: ["Commercial Coffee Equipment"],
         options: [
           "espresso_1_group",
           "espresso_2_group",
@@ -1739,7 +1801,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: ["Commercial Coffee"],
+        subcategories: ["Commercial Coffee Equipment"],
         options: ["required_on_site", "included_inline", "not_required", "unknown"],
       },
       {
@@ -1747,7 +1809,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: ["Commercial Coffee"],
+        subcategories: ["Commercial Coffee Equipment"],
         options: [
           "event_day_rental",
           "cafe_weekend",
@@ -1874,7 +1936,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: ["Food Processors Pro"],
+        subcategories: ["Food Preparation Equipment"],
         options: [
           "under_3qt",
           "3_5qt",
@@ -1889,7 +1951,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: ["Food Processors Pro"],
+        subcategories: ["Food Preparation Equipment"],
         options: [
           "batch_bowl",
           "continuous_feed",
@@ -1903,7 +1965,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: ["Food Processors Pro"],
+        subcategories: ["Food Preparation Equipment"],
         options: [
           "basic_blade",
           "disc_set_3_5",
@@ -1917,7 +1979,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: ["Beverage Systems"],
+        subcategories: ["Refrigeration & Beverage Systems"],
         options: [
           "kegerator",
           "soda_fountain",
@@ -1933,7 +1995,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: ["Beverage Systems"],
+        subcategories: ["Refrigeration & Beverage Systems"],
         options: [
           "co2_included",
           "syrup_lines_included",
@@ -1947,7 +2009,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "select",
         required: true,
         requiredIf: "rent",
-        subcategories: ["Beverage Systems"],
+        subcategories: ["Refrigeration & Beverage Systems"],
         options: [
           "self_contained",
           "needs_water_line",
@@ -4760,30 +4822,6 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         options: ["built_in_mic", "no_mic", "external_mic_kit"],
       },
       {
-        key: "officeFurnitureType",
-        type: "select",
-        required: true,
-        requiredIf: "rent",
-        subcategories: ["Office Furniture"],
-        options: ["desk", "chair", "standing_desk", "filing_cabinet", "bookshelf_storage", "conference_table", "other_office_furniture"],
-      },
-      {
-        key: "furnitureSeatOrSizeBand",
-        type: "select",
-        required: true,
-        requiredIf: "rent",
-        subcategories: ["Office Furniture"],
-        options: ["single_seat", "desk_compact", "desk_standard", "table_4_6", "table_7_plus", "cabinet_drawer_unit", "not_sized"],
-      },
-      {
-        key: "furnitureConditionGrade",
-        type: "select",
-        required: true,
-        requiredIf: "rent",
-        subcategories: ["Office Furniture"],
-        options: ["like_new_office", "light_wear_office", "visible_wear_office", "functional_imperfections_office"],
-      },
-      {
         key: "presentationDeviceType",
         type: "select",
         required: true,
@@ -6324,10 +6362,12 @@ function fieldMatchesSubcategory(field: SpecFieldDef, subcategory: string): bool
 
 /** Required fields first, then recommended, then optional. */
 export function getCategorySpecFields(
-  category: string,
-  subcategory: string,
+  categoryInput: string,
+  subcategoryInput: string,
   modes?: SpecModeContext | null,
 ): SpecFieldDef[] {
+  // A listing saved before a category was renamed still gets its shelf's fields.
+  const { category, subcategory } = canonicalShelf(categoryInput, subcategoryInput);
   const profile = CATEGORY_SPEC_PROFILES.find((p) => p.category === category);
   if (!profile) return [];
   const matched = profile.fields.filter((field) =>
@@ -6349,11 +6389,14 @@ export function getCategorySpecFields(
 }
 
 export function areCategorySpecsValid(
-  category: string,
-  subcategory: string,
+  categoryInput: string,
+  subcategoryInput: string,
   specs: Record<string, string> | undefined,
   modes?: SpecModeContext | null,
 ): boolean {
+  // Same reason as above: the shelf gates below must not silently skip a
+  // listing that still carries its pre-rename category name.
+  const { category, subcategory } = canonicalShelf(categoryInput, subcategoryInput);
   const fields = getCategorySpecFields(category, subcategory, modes);
   const values = specs ?? {};
   for (const field of fields) {
@@ -6466,11 +6509,6 @@ export function areCategorySpecsValid(
     if (sub === "Webcams & Streaming") {
       if (!reqSelect("webcamResBand", ["720p", "1080p", "1440p_plus", "unknown_webcam_res"])) return false;
       if (!reqSelect("webcamMicIncluded", ["built_in_mic", "no_mic", "external_mic_kit"])) return false;
-    }
-    if (sub === "Office Furniture") {
-      if (!reqSelect("officeFurnitureType", ["desk", "chair", "standing_desk", "filing_cabinet", "bookshelf_storage", "conference_table", "other_office_furniture"])) return false;
-      if (!reqSelect("furnitureSeatOrSizeBand", ["single_seat", "desk_compact", "desk_standard", "table_4_6", "table_7_plus", "cabinet_drawer_unit", "not_sized"])) return false;
-      if (!reqSelect("furnitureConditionGrade", ["like_new_office", "light_wear_office", "visible_wear_office", "functional_imperfections_office"])) return false;
     }
     if (sub === "Presentation Gear") {
       if (!reqSelect("presentationDeviceType", ["projector", "portable_screen", "presenter_clicker", "flipchart", "conference_display", "other_presentation"])) return false;
@@ -8159,8 +8197,41 @@ export function areCategorySpecsValid(
   }
 
 
-// Home & Kitchen P0 gates by shelf.
-  if (category.trim() === "Home & Kitchen" && modes?.rent) {
+// Home & Office Furniture P0 gates by shelf.
+  if (category.trim() === "Home & Office Furniture" && modes?.rent) {
+    const sub = subcategory.trim();
+    const reqSelect = (key: string, allowed: string[]) => allowed.includes((values[key] ?? "").trim());
+
+    if (!reqSelect("furnitureConditionGrade", [
+      "like_new_office", "light_wear_office", "visible_wear_office", "functional_imperfections_office",
+    ])) return false;
+
+    const sizedSubs = new Set([
+      "Tables & Chairs", "Storage & Shelving", "Office Desks & Chairs", "Reception Furniture",
+      "Conference Furniture", "Event Furniture", "Display & Retail Furniture",
+      "Commercial Storage & Shelving",
+    ]);
+    if (sizedSubs.has(sub)) {
+      if (!reqSelect("furnitureSeatOrSizeBand", [
+        "single_seat", "desk_compact", "desk_standard", "table_4_6", "table_7_plus",
+        "cabinet_drawer_unit", "not_sized",
+      ])) return false;
+    }
+
+    const typedSubs = new Set([
+      "Office Desks & Chairs", "Reception Furniture", "Conference Furniture", "Event Furniture",
+      "Display & Retail Furniture", "Commercial Storage & Shelving",
+    ]);
+    if (typedSubs.has(sub)) {
+      if (!reqSelect("officeFurnitureType", [
+        "desk", "chair", "standing_desk", "filing_cabinet", "bookshelf_storage",
+        "conference_table", "other_office_furniture",
+      ])) return false;
+    }
+  }
+
+// Kitchen Equipment P0 gates by shelf.
+  if (category.trim() === "Kitchen Equipment" && modes?.rent) {
     const sub = subcategory.trim();
     const reqSelect = (key: string, allowed: string[]) => allowed.includes((values[key] ?? "").trim());
     const reqText = (key: string, min = 3) => (values[key] ?? "").trim().length >= min;
@@ -8213,7 +8284,7 @@ export function areCategorySpecsValid(
       if (!reqSelect("filterIncluded", ["hepa_included", "standard_filter_included", "filter_not_included", "washable_filter", "not_applicable"])) return false;
       if (!reqSelect("emptyReturnAttested", ["empty_required", "host_empties", "not_applicable"])) return false;
     }
-    if (sub === "Commercial Coffee") {
+    if (sub === "Commercial Coffee Equipment") {
       if (!reqSelect("voltageBand", ["120v_corded", "240v", "not_electric"])) return false;
       if (!reqSelect("nsfCertified", ["nsf_listed", "not_nsf", "unknown"])) return false;
       if (!reqSelect("installNeeds", ["countertop_plug", "plumbed_water", "hardwired_240v", "mobile_cart", "other_install"])) return false;
@@ -8241,7 +8312,7 @@ export function areCategorySpecsValid(
       if ((values.foodContactSanitizeAttested ?? "").trim() !== "attested") return false;
       if (!reqText("kitInventoryChecklist", 6)) return false;
     }
-    if (sub === "Food Processors Pro") {
+    if (sub === "Food Preparation Equipment") {
       if (!reqSelect("processorBowlCapacityBand", ["under_3qt", "3_5qt", "5_8qt", "8qt_plus", "continuous_feed", "unknown_bowl"])) return false;
       if (!reqSelect("processorFeedType", ["batch_bowl", "continuous_feed", "combo", "vegetable_cutter", "other_processor"])) return false;
       if (!reqSelect("discBladeKitBand", ["basic_blade", "disc_set_3_5", "disc_set_6_plus", "renter_provides_discs", "not_applicable"])) return false;
@@ -8251,7 +8322,7 @@ export function areCategorySpecsValid(
       const discs = (values.discBladeKitBand ?? "").trim();
       if ((discs === "disc_set_3_5" || discs === "disc_set_6_plus") && !reqText("kitInventoryChecklist", 6)) return false;
     }
-    if (sub === "Beverage Systems") {
+    if (sub === "Refrigeration & Beverage Systems") {
       if (!reqSelect("beverageSystemType", ["kegerator", "soda_fountain", "juice_dispenser", "cold_brew_tower", "slushie", "water_hydration", "other_beverage"])) return false;
       if (!reqSelect("beverageGasOrSyrupKit", ["co2_included", "syrup_lines_included", "co2_and_syrup", "renter_provides", "not_needed"])) return false;
       if (!reqSelect("beveragePlumbStatus", ["self_contained", "needs_water_line", "needs_drain", "water_and_drain", "unknown_plumb"])) return false;

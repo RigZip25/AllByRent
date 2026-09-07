@@ -64,24 +64,6 @@ export const subs_Office_and_Business: Record<string, CategoryFactBlock> = {
       },
     ],
   },
-  "Office Furniture": {
-    title: "Office furniture tips",
-    summary: "Desks and chairs skip device wipe; list type, size/seats, and condition.",
-    qa: [
-      {
-        q: "What should I fill in?",
-        a: "Furniture type, size/seat band, and condition grade. No device storage wipe on this shelf.",
-      },
-      {
-        q: "Assembly?",
-        a: "Publish what ships assembled vs flat-pack in notes/kit list. Deposit covers missing hardware.",
-      },
-      {
-        q: "Data wipe?",
-        a: "Not required for furniture—use Printers/POS/Servers for devices with storage.",
-      },
-    ],
-  },
   "Presentation Gear": {
     title: "Presentation tips",
     summary: "Projectors and screens list device type, brightness/size, and storage/wipe when networked.",

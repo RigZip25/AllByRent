@@ -23,7 +23,8 @@ export type SeoCategory = {
 const SEARCH_NOUNS: Partial<Record<ListingCategory, string>> = {
   "Tools & DIY": "tools",
   "Garden & Yard": "garden and yard gear",
-  "Home & Kitchen": "home and kitchen items",
+  "Home & Office Furniture": "furniture",
+  "Kitchen Equipment": "kitchen equipment",
   "Baby & Kids": "baby and kids gear",
   "Party & Events": "party and event gear",
   "Sports & Recreation": "sports gear",
@@ -54,10 +55,16 @@ function buildSeoCategories(): SeoCategory[] {
 
 export const SEO_CATEGORIES: readonly SeoCategory[] = buildSeoCategories();
 
+/** Slugs that were indexed under a category's old name. */
+const LEGACY_SLUGS: Record<string, string> = {
+  "home-and-kitchen": slugifyCategoryName("Kitchen Equipment"),
+};
+
 export function getSeoCategoryBySlug(slug: string): SeoCategory | null {
   const key = slug.trim().toLowerCase();
   if (!key) return null;
-  return SEO_CATEGORIES.find((c) => c.slug === key) ?? null;
+  const current = LEGACY_SLUGS[key] ?? key;
+  return SEO_CATEGORIES.find((c) => c.slug === current) ?? null;
 }
 
 export function getRelatedSeoCategories(slug: string, limit = 6): SeoCategory[] {

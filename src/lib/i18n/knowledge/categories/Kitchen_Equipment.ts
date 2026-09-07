@@ -1,8 +1,8 @@
 import type { CategoryFactBlock } from "../types";
 
-/** Canonical EN FactCard for Home & Kitchen — host-facing Q→A only. */
-export const facts_Home_and_Kitchen: CategoryFactBlock = {
-  title: "Home & kitchen rental FAQ",
+/** Canonical EN FactCard for Kitchen Equipment — host-facing Q→A only. */
+export const facts_Kitchen_Equipment: CategoryFactBlock = {
+  title: "Kitchen equipment rental FAQ",
   summary: "Short answers for appliances and commercial brew systems.",
   qa: [
     {
@@ -28,4 +28,4 @@ export const facts_Home_and_Kitchen: CategoryFactBlock = {
   ],
 };
 
-export const categoryKey = "Home & Kitchen" as const;
+export const categoryKey = "Kitchen Equipment" as const;
