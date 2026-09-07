@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Capacitor } from "@capacitor/core";
 import { Copy, Loader2, Share2 } from "lucide-react";
 import { APP_NAME } from "../../lib/brand";
 import type { ListingDraft } from "./types";
@@ -386,6 +387,9 @@ export function ListingShareScreen({
           />
         </div>
 
+        {/* Boost is a digital purchase: App Store and Play require their own billing,
+            so the native shells cannot sell it through Stripe. */}
+        {Capacitor.isNativePlatform() ? null : (
         <div className="rounded-3xl border bg-white p-4" style={{ borderColor: BORDER }}>
           <p className="text-[13px] font-semibold text-gray-700">{t.boostTitle}</p>
           <p className="mt-1 text-[12px] text-gray-500">
@@ -427,6 +431,7 @@ export function ListingShareScreen({
           </div>
           )}
         </div>
+        )}
 
         <button
           type="button"
