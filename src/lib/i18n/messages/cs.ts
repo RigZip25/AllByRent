@@ -183,15 +183,11 @@ export const cs: AppMessages = {
     stepCoachLater: "Až se otevře Sdílet, hledejte toto",
   },
   home: {
-    priceAny: "Jakákoli cena",
-    priceUnder25: "Do 25 Kč",
-    price25to75: "25-75 Kč",
-    price75plus: "75 Kč+",
     backToBrowseAria: "Zpět",
     setBlock: "Kde jsi teď?",
     setBlockAria: "Nastavit, kde jsi teď",
     changeBlockAria: "Změnit aktuální oblast",
-    filtersAria: "Filtry ceny a vzdálenosti",
+    filtersAria: "Filtry kategorií a vzdálenosti",
     filters: "Filtry",
     bookingsAria: "Rezervace",
     notificationsAria: "Oznámení",
@@ -229,9 +225,24 @@ export const cs: AppMessages = {
     subcategoryTitle: "Podkategorie",
     subcategoryHint: "Šipkou u kategorie otevřete její police ve vyskakovacím okně.",
     wholeCategory: "Celá kategorie",
-    yourPicks: "Tvoje volby",
     allCategories: "Všechny kategorie",
-    priceTitle: "Cena",
+    focusCount: (items, garages) => {
+      const itemWord = items === 1 ? "věc" : items >= 2 && items <= 4 ? "věci" : "věcí";
+      const garageWord =
+        garages === 1 ? "garáži" : garages >= 2 && garages <= 4 ? "garážích" : "garážích";
+      return `${items} ${itemWord} v ${garages} ${garageWord} v okolí`;
+    },
+    focusChange: "Změnit polici",
+    focusClearAria: "Zrušit tuto polici",
+    sortTitle: "Řadit",
+    sortSuggested: "Doporučené",
+    sortPrice: "Cena",
+    sortDistance: "Vzdálenost",
+    sortPriceAsc: "Od nejlevnějšího",
+    sortPriceDesc: "Od nejdražšího",
+    sortDistanceAsc: "Od nejbližšího",
+    sortDistanceDesc: "Od nejvzdálenějšího",
+    sortFlipAria: "Obrátit řazení",
     distanceTitle: "Vzdálenost",
     distanceHint: "Začni blízko — okruh rozšiř, když je kolem řídko.",
     locationSheetTitle: "Jak daleko hledat",

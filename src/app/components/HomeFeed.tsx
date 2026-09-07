@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, ClipboardList, MapPin, ChevronRight, ChevronDown, ChevronLeft, Share2, SlidersHorizontal, X } from "lucide-react";
+import { ArrowUpDown, Bell, ClipboardList, MapPin, ChevronRight, ChevronDown, ChevronLeft, Share2, SlidersHorizontal, X } from "lucide-react";
 import { GarageLensCard } from "./GarageLensCard";
 import { RoleModeSwitcher } from "../../components/RoleModeSwitcher";
 import { AddressLocationPicker } from "../../components/AddressLocationPicker";
@@ -33,10 +33,11 @@ import {
   isOnboardingComplete,
 } from "../../lib/onboardingStorage";
 import {
+  garageMinPrice,
+  garageProximityRank,
   groupListingsByGarage,
   listingMatchesBrowseInterests,
   listingMatchesModeChip,
-  listingMatchesPriceRange,
   type HostGarageMeta,
   type ModeChip,
 } from "../../lib/garageDisplay";
@@ -68,6 +69,9 @@ const RADIUS_PRESETS = [
   CLUSTER_RADIUS_MAX_MI,
 ] as const;
 
+/** Feed order: the shelf's own ranking, or by price / proximity in either direction. */
+type SortKey = "suggested" | "price" | "distance";
+
 type HomeFeedProps = {
   onNavigate: (screen: string) => void;
   onOpenNotifications: () => void;
@@ -92,9 +96,13 @@ export function HomeFeed({
   const messages = useMessages();
   const { home, common, whereAreYouManual, catalog } = messages;
   const [modeChip, setModeChip] = useState<ModeChip>(() => loadHomeFeedMode());
-  const [interests, setInterests] = useState<BrowseInterest[]>(() => loadHomeFeedInterests());
+  // One shelf at a time: picking another category replaces the pick instead of piling up.
+  const [focus, setFocus] = useState<BrowseInterest | null>(
+    () => loadHomeFeedInterests()[0] ?? null,
+  );
   const [subSheetCategory, setSubSheetCategory] = useState<string | null>(null);
-  const [pricePresetId, setPricePresetId] = useState("any");
+  const [sortKey, setSortKey] = useState<SortKey>("suggested");
+  const [sortAscending, setSortAscending] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -116,16 +124,7 @@ export function HomeFeed({
   const needsLocation = !hasRentLocationSetup();
   const countryCode = getSearchCountryCode();
 
-  const pricePresets = useMemo(
-    () => [
-      { id: "any", label: home.priceAny, min: null as number | null, max: null as number | null },
-      { id: "under25", label: home.priceUnder25, min: null, max: 25 },
-      { id: "25to75", label: home.price25to75, min: 25, max: 75 },
-      { id: "75plus", label: home.price75plus, min: 75, max: null },
-    ],
-    [home.priceAny, home.priceUnder25, home.price25to75, home.price75plus],
-  );
-  const pricePreset = pricePresets.find((p) => p.id === pricePresetId) ?? pricePresets[0];
+  const interests = useMemo(() => (focus ? [focus] : []), [focus]);
 
   const handleBellPress = () => {
     const taps = bellTapRef.current;
@@ -148,8 +147,8 @@ export function HomeFeed({
   }, [modeChip]);
 
   useEffect(() => {
-    saveHomeFeedInterests(interests);
-  }, [interests]);
+    saveHomeFeedInterests(focus ? [focus] : []);
+  }, [focus]);
 
   useEffect(() => {
     let mounted = true;
@@ -204,10 +203,9 @@ export function HomeFeed({
       listings.filter(
         (l) =>
           listingMatchesModeChip(l, modeChip) &&
-          listingMatchesBrowseInterests(l, interests) &&
-          listingMatchesPriceRange(l, pricePreset.min, pricePreset.max),
+          listingMatchesBrowseInterests(l, interests),
       ),
-    [listings, modeChip, interests, pricePreset],
+    [listings, modeChip, interests],
   );
 
   const garages = useMemo(
@@ -215,8 +213,31 @@ export function HomeFeed({
     [filteredListings, hostMeta],
   );
 
+  const sortedGarages = useMemo(() => {
+    if (sortKey === "suggested") return garages;
+    const direction = sortAscending ? 1 : -1;
+    return [...garages].sort((a, b) => {
+      if (sortKey === "distance") {
+        return (garageProximityRank(a) - garageProximityRank(b)) * direction;
+      }
+      const priceA = garageMinPrice(a);
+      const priceB = garageMinPrice(b);
+      // Shelves with no price stay at the bottom whichever way the sort points.
+      if (priceA == null || priceB == null) {
+        if (priceA == null && priceB == null) return 0;
+        return priceA == null ? 1 : -1;
+      }
+      return (priceA - priceB) * direction;
+    });
+  }, [garages, sortKey, sortAscending]);
+
   const newGarages = useMemo(
     () => garages.filter((g) => g.isNew).slice(0, 8),
+    [garages],
+  );
+
+  const focusItemCount = useMemo(
+    () => garages.reduce((sum, g) => sum + g.itemCount, 0),
     [garages],
   );
 
@@ -224,9 +245,7 @@ export function HomeFeed({
   const categoryCatalog = useMemo(() => getCategoryCatalog(), []);
 
   const activeFilterCount =
-    (pricePresetId !== "any" ? 1 : 0) +
-    (clusterRadiusMi !== CLUSTER_RADIUS_DEFAULT_MI ? 1 : 0) +
-    interests.length;
+    (clusterRadiusMi !== CLUSTER_RADIUS_DEFAULT_MI ? 1 : 0) + interests.length;
 
   const modeChips: { id: ModeChip; label: string }[] = [
     { id: "all", label: home.modeAny },
@@ -242,45 +261,63 @@ export function HomeFeed({
 
   const interestsSummary = interests.map(interestLabel).join(", ");
 
-  const primaryInterest = interests[0] ?? null;
+  const focusShelf = useMemo(() => {
+    if (!focus?.subcategory) return null;
+    const entry = categoryCatalog.find((c) => c.name === focus.category);
+    if (!entry) return null;
+    return (
+      [...entry.personal, ...entry.professional].find(
+        (sub) => sub.label === focus.subcategory,
+      ) ?? null
+    );
+  }, [categoryCatalog, focus]);
 
-  const categoryHasInterest = (categoryName: string) =>
-    interests.some((i) => i.category === categoryName);
+  const sortOptions: { id: SortKey; label: string }[] = [
+    { id: "suggested", label: home.sortSuggested },
+    { id: "price", label: home.sortPrice },
+    { id: "distance", label: home.sortDistance },
+  ];
+
+  const sortDirectionLabel =
+    sortKey === "price"
+      ? sortAscending
+        ? home.sortPriceAsc
+        : home.sortPriceDesc
+      : sortAscending
+        ? home.sortDistanceAsc
+        : home.sortDistanceDesc;
+
+  const categoryHasInterest = (categoryName: string) => focus?.category === categoryName;
 
   const isCategoryWideSelected = (categoryName: string) =>
-    interests.some((i) => i.category === categoryName && !i.subcategory);
+    focus?.category === categoryName && !focus.subcategory;
 
   const isSubcategorySelected = (categoryName: string, subcategory: string) =>
-    interests.some(
-      (i) => i.category === categoryName && i.subcategory === subcategory,
-    );
+    focus?.category === categoryName && focus.subcategory === subcategory;
 
-  const removeInterest = (interest: BrowseInterest) => {
-    const key = browseInterestKey(interest);
-    setInterests((prev) => prev.filter((i) => browseInterestKey(i) !== key));
-  };
+  const clearFocus = () => setFocus(null);
 
   const toggleCategoryWide = (categoryName: string) => {
-    setInterests((prev) => {
-      const hasWide = prev.some((i) => i.category === categoryName && !i.subcategory);
-      const withoutCat = prev.filter((i) => i.category !== categoryName);
-      if (hasWide) return withoutCat;
-      return [...withoutCat, { category: categoryName }];
-    });
+    setFocus((prev) =>
+      prev && prev.category === categoryName && !prev.subcategory
+        ? null
+        : { category: categoryName },
+    );
   };
 
-  const toggleSubcategory = (categoryName: string, subcategory: string) => {
-    setInterests((prev) => {
-      const key = browseInterestKey({ category: categoryName, subcategory });
-      const exists = prev.some((i) => browseInterestKey(i) === key);
-      const withoutWide = prev.filter(
-        (i) => !(i.category === categoryName && !i.subcategory),
-      );
-      if (exists) {
-        return withoutWide.filter((i) => browseInterestKey(i) !== key);
-      }
-      return [...withoutWide, { category: categoryName, subcategory }];
-    });
+  /** Picking a shelf is the final choice — hand the screen back to the results. */
+  const pickSubcategory = (categoryName: string, subcategory: string) => {
+    const same =
+      focus?.category === categoryName && focus?.subcategory === subcategory;
+    setFocus(same ? null : { category: categoryName, subcategory });
+    setSubSheetCategory(null);
+    setFiltersOpen(false);
+  };
+
+  const pickWholeCategory = (categoryName: string) => {
+    toggleCategoryWide(categoryName);
+    setSubSheetCategory(null);
+    setFiltersOpen(false);
   };
 
   const openSubSheet = (categoryName: string) => {
@@ -295,24 +332,25 @@ export function HomeFeed({
   };
 
   const clearFilters = () => {
-    setInterests([]);
+    setFocus(null);
     setSubSheetCategory(null);
-    setPricePresetId("any");
+    setSortKey("suggested");
+    setSortAscending(true);
     setClusterRadiusMi(CLUSTER_RADIUS_DEFAULT_MI);
     setClusterRadiusState(CLUSTER_RADIUS_DEFAULT_MI);
   };
 
   const postRequestFromFilters = () => {
     onPostRequest({
-      category: primaryInterest?.category,
-      subcategory: primaryInterest?.subcategory,
+      category: focus?.category,
+      subcategory: focus?.subcategory,
     });
   };
 
   const shareLookingFor = async () => {
     const labels =
       interestsSummary ||
-      localizeCategoryLabel(primaryInterest?.category ?? "") ||
+      localizeCategoryLabel(focus?.category ?? "") ||
       "gear";
     const area = city || "nearby";
     const text = home.shareLookingFor(labels, area, APP_NAME);
@@ -432,7 +470,7 @@ export function HomeFeed({
     </div>
   );
 
-  const emptyIsFiltered = Boolean(interests.length > 0 || pricePresetId !== "any");
+  const emptyIsFiltered = Boolean(focus);
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -561,53 +599,126 @@ export function HomeFeed({
               </button>
             );
           })}
-          {interests.map((interest) => {
-            const icon =
-              browseCategories.find((c) => c.name === interest.category)?.icon ?? "📦";
-            return (
-              <button
-                key={browseInterestKey(interest)}
-                type="button"
-                onClick={() => removeInterest(interest)}
-                className="inline-flex max-w-[220px] shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-bold text-white"
-                style={{ backgroundColor: GREEN }}
-              >
-                <CategoryIcon category={interest.category} emoji={icon} size={18} />
-                <span className="truncate">{interestLabel(interest)}</span>
-                <X className="h-3.5 w-3.5 shrink-0" />
-              </button>
-            );
-          })}
-          {pricePresetId !== "any" ? (
-            <button
-              type="button"
-              onClick={() => setPricePresetId("any")}
-              className="inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-bold text-white"
-              style={{ backgroundColor: GREEN }}
-            >
-              {pricePreset.label}
-              <X className="h-3.5 w-3.5" />
-            </button>
-          ) : null}
         </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3">
-        <button
-          type="button"
-          onClick={onYardSales}
-          className="mb-3 flex w-full items-center justify-between gap-2 rounded-2xl border bg-white px-3.5 py-3 text-left active:bg-gray-50"
-          style={{ borderColor: BORDER }}
-          aria-label={home.yardSalesEntryAria}
-        >
-          <span>
-            <span className="block text-[14px] font-bold" style={{ color: GREEN_DARK }}>
-              {home.yardSalesEntry}
+        {focus ? (
+          <section
+            className="mb-3 rounded-2xl border-2 bg-white px-4 py-4"
+            style={{ borderColor: GREEN_DARK }}
+            aria-label={interestLabel(focus)}
+          >
+            <div className="flex items-start gap-3">
+              <span
+                className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-2xl"
+                style={{ backgroundColor: `${GREEN}14` }}
+                aria-hidden
+              >
+                {focusShelf ? (
+                  <ShelfIcon source={focusShelf} size={56} />
+                ) : (
+                  <CategoryIcon
+                    category={focus.category}
+                    emoji={
+                      browseCategories.find((c) => c.name === focus.category)?.icon ?? "📦"
+                    }
+                    size={56}
+                  />
+                )}
+              </span>
+              <div className="min-w-0 flex-1">
+                {focus.subcategory ? (
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                    {localizeCategoryLabel(focus.category)}
+                  </p>
+                ) : null}
+                <h2
+                  className="text-[20px] font-extrabold leading-tight [overflow-wrap:anywhere]"
+                  style={{ color: GREEN_DARK }}
+                >
+                  {localizeCategoryLabel(focus.subcategory ?? focus.category)}
+                </h2>
+                <p className="mt-1 text-[13px] text-gray-500">
+                  {home.focusCount(focusItemCount, garages.length)}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={clearFocus}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100"
+                aria-label={home.focusClearAria}
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFiltersOpen(true)}
+              className="mt-3 w-full rounded-xl border-2 py-2.5 text-[14px] font-bold"
+              style={{ borderColor: BORDER, color: GREEN_DARK }}
+            >
+              {home.focusChange}
+            </button>
+          </section>
+        ) : (
+          <button
+            type="button"
+            onClick={onYardSales}
+            className="mb-3 flex w-full items-center justify-between gap-2 rounded-2xl border bg-white px-3.5 py-3 text-left active:bg-gray-50"
+            style={{ borderColor: BORDER }}
+            aria-label={home.yardSalesEntryAria}
+          >
+            <span>
+              <span className="block text-[14px] font-bold" style={{ color: GREEN_DARK }}>
+                {home.yardSalesEntry}
+              </span>
+              <span className="mt-0.5 block text-[12px] text-gray-500">{home.yardSalesEntryHint}</span>
             </span>
-            <span className="mt-0.5 block text-[12px] text-gray-500">{home.yardSalesEntryHint}</span>
-          </span>
-          <ChevronRight className="h-4 w-4 shrink-0" style={{ color: GREEN }} />
-        </button>
+            <ChevronRight className="h-4 w-4 shrink-0" style={{ color: GREEN }} />
+          </button>
+        )}
+
+        {garages.length > 1 ? (
+          <div className="mb-3 flex flex-wrap items-center gap-1.5">
+            <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+              {home.sortTitle}
+            </span>
+            {sortOptions.map((option) => {
+              const active = sortKey === option.id;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => {
+                    setSortKey(option.id);
+                    setSortAscending(true);
+                  }}
+                  className="shrink-0 rounded-full px-3 py-1.5 text-[12px] font-bold"
+                  style={{
+                    backgroundColor: active ? GREEN_DARK : "white",
+                    color: active ? "white" : "#666",
+                    border: `1px solid ${active ? GREEN_DARK : BORDER}`,
+                  }}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+            {sortKey !== "suggested" ? (
+              <button
+                type="button"
+                onClick={() => setSortAscending((prev) => !prev)}
+                className="inline-flex shrink-0 items-center gap-1 rounded-full border bg-white px-3 py-1.5 text-[12px] font-bold"
+                style={{ borderColor: GREEN_DARK, color: GREEN_DARK }}
+                aria-label={home.sortFlipAria}
+              >
+                <ArrowUpDown className="h-3.5 w-3.5" aria-hidden />
+                {sortDirectionLabel}
+              </button>
+            ) : null}
+          </div>
+        ) : null}
 
         <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
           {home.garagesNearYou}
@@ -704,7 +815,7 @@ export function HomeFeed({
 
         {garages.length > 0 ? (
           <ul className="space-y-3 pb-2">
-            {garages.map((garage) => (
+            {sortedGarages.map((garage) => (
               <li key={garage.hostId || garage.name}>
                 <GarageLensCard
                   garage={garage}
@@ -774,36 +885,17 @@ export function HomeFeed({
               <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-400">
                 {home.categoryTitle}
               </h3>
-              {interests.length > 0 ? (
-                <div className="mb-3">
-                  <p className="mb-1.5 text-[12px] font-semibold text-gray-500">{home.yourPicks}</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {interests.map((interest) => (
-                      <button
-                        key={browseInterestKey(interest)}
-                        type="button"
-                        onClick={() => removeInterest(interest)}
-                        className="inline-flex max-w-full items-center gap-1 rounded-full px-2.5 py-1.5 text-[12px] font-bold text-white"
-                        style={{ backgroundColor: GREEN }}
-                      >
-                        <span className="truncate">{interestLabel(interest)}</span>
-                        <X className="h-3.5 w-3.5 shrink-0" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
               <button
                 type="button"
                 onClick={() => {
-                  setInterests([]);
+                  clearFocus();
                   setSubSheetCategory(null);
                 }}
                 className="mb-2 w-full rounded-xl border px-3 py-2.5 text-left text-[13px] font-bold"
                 style={{
-                  backgroundColor: interests.length === 0 ? GREEN_DARK : "white",
-                  color: interests.length === 0 ? "white" : "#444",
-                  borderColor: interests.length === 0 ? GREEN_DARK : BORDER,
+                  backgroundColor: focus ? "white" : GREEN_DARK,
+                  color: focus ? "#444" : "white",
+                  borderColor: focus ? BORDER : GREEN_DARK,
                 }}
               >
                 {home.allCategories}
@@ -861,32 +953,6 @@ export function HomeFeed({
               <p className="mt-2 text-[11px] leading-snug text-gray-500">
                 {home.subcategoryHint}
               </p>
-            </section>
-
-            <section className="mb-5">
-              <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-400">
-                {home.priceTitle}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {pricePresets.map((preset) => {
-                  const active = pricePresetId === preset.id;
-                  return (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => setPricePresetId(preset.id)}
-                      className="rounded-full px-3 py-2 text-[13px] font-bold"
-                      style={{
-                        backgroundColor: active ? GREEN_DARK : "white",
-                        color: active ? "white" : "#444",
-                        border: `1px solid ${active ? GREEN_DARK : BORDER}`,
-                      }}
-                    >
-                      {preset.label}
-                    </button>
-                  );
-                })}
-              </div>
             </section>
 
             <section className="mb-5">
@@ -974,7 +1040,7 @@ export function HomeFeed({
                           <button
                             key={`${sectionKey}:${sub.label}`}
                             type="button"
-                            onClick={() => toggleSubcategory(subSheetCategory, sub.label)}
+                            onClick={() => pickSubcategory(subSheetCategory, sub.label)}
                             className="flex min-w-0 items-start gap-1.5 rounded-xl border px-2.5 py-2 text-left text-[12px] font-semibold leading-snug"
                             style={{
                               backgroundColor: subActive ? GREEN_DARK : "white",
@@ -997,7 +1063,7 @@ export function HomeFeed({
                     <div className="space-y-4">
                       <button
                         type="button"
-                        onClick={() => toggleCategoryWide(subSheetCategory)}
+                        onClick={() => pickWholeCategory(subSheetCategory)}
                         className="w-full rounded-xl border px-3 py-3 text-left text-[13px] font-bold"
                         style={{
                           backgroundColor: wideActive ? GREEN_DARK : "white",
