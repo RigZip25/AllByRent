@@ -16,6 +16,7 @@ import { normalizeLateReturnFeeSnapshot } from "./lateReturnFee";
 import type { RentalInvoice } from "./rentalInvoice";
 import { mergeRentalInvoices, normalizeRentalInvoices } from "./rentalInvoice";
 import { conditionPhotoFromPath, mergeConditionPhoto } from "./rentalConditionPhotos";
+import { fetchPublicProfilesByIds, type PublicProfile } from "./supabaseProfile";
 
 export type { RentalInvoice, RentalInvoiceLine, RentalInvoiceLineKind } from "./rentalInvoice";
 
@@ -527,6 +528,7 @@ export function rentalBookingFromRemoteRow(
   row: SupabaseRentalRow,
   userId: string,
   listingTitle?: string,
+  counterparty?: PublicProfile | null,
 ): RentalBooking {
   const role: RentalRole = row.owner_id === userId ? "host" : "renter";
   const counterpartyId = role === "host" ? row.renter_id : row.owner_id;
@@ -546,9 +548,12 @@ export function rentalBookingFromRemoteRow(
     startDate: row.start_date,
     endDate: row.end_date,
     counterpartyId,
-    counterpartyName: role === "host" ? "Renter" : "Host",
-    counterpartyIdentityVerified: false,
-    counterpartyPhoneVerified: false,
+    // "Host" and "Renter" are what a row alone can say. The name and the badges
+    // come from the public projection of their profile, when we have it.
+    counterpartyName:
+      counterparty?.displayName || (role === "host" ? "Renter" : "Host"),
+    counterpartyIdentityVerified: Boolean(counterparty?.identityVerified),
+    counterpartyPhoneVerified: Boolean(counterparty?.phoneVerified),
     listingId: row.listing_id,
     pickupLabel:
       fulfillmentMethod === "delivery"
@@ -884,12 +889,39 @@ export function resolveMergedRentalStatus(
   return localRank >= remoteRank ? local : remote;
 }
 
+/**
+ * Names a rental row falls back to when it has no profile to go on. Neither
+ * side of a merge should let one of these win over a person's actual name.
+ */
+const PLACEHOLDER_COUNTERPARTY_NAMES = new Set(["host", "renter", "unknown", "neighbor"]);
+
+function isPlaceholderName(name: string | undefined): boolean {
+  const trimmed = (name ?? "").trim();
+  return trimmed === "" || PLACEHOLDER_COUNTERPARTY_NAMES.has(trimmed.toLowerCase());
+}
+
+export function mergeCounterpartyName(
+  local: string | undefined,
+  remote: string | undefined,
+): string {
+  if (!isPlaceholderName(local)) return local!.trim();
+  if (!isPlaceholderName(remote)) return remote!.trim();
+  return (local ?? "").trim() || (remote ?? "").trim();
+}
+
 function mergeRentalBooking(local: RentalBooking, remote: RentalBooking): RentalBooking {
   const status = resolveMergedRentalStatus(local.status, remote.status);
   return normalizeBooking({
     ...remote,
     ...local,
     status,
+    // Local wins the rest of the row, which used to mean a booking that had
+    // once synced kept calling the other person "Host" forever.
+    counterpartyName: mergeCounterpartyName(local.counterpartyName, remote.counterpartyName),
+    counterpartyIdentityVerified:
+      remote.counterpartyIdentityVerified || local.counterpartyIdentityVerified,
+    counterpartyPhoneVerified:
+      remote.counterpartyPhoneVerified || local.counterpartyPhoneVerified,
     pickupPin: remote.pickupPin ?? local.pickupPin,
     returnPin: remote.returnPin ?? local.returnPin,
     hostHandedOverAt: remote.hostHandedOverAt ?? local.hostHandedOverAt,
@@ -1156,6 +1188,13 @@ export async function syncRentalsFromRemote(userId: string): Promise<RentalBooki
   const rows = await fetchRentalsForUserRemote(userId);
   const remoteBookings: RentalBooking[] = [];
 
+  // One query for every counterparty on the list: the rental row knows their id
+  // and nothing else, and a rental screen full of people called "Host" is not
+  // worth a request per booking.
+  const counterparties = await fetchPublicProfilesByIds(
+    rows.map((row) => (row.owner_id === userId ? row.renter_id : row.owner_id)),
+  );
+
   for (const row of rows) {
     const localListing = getPublishedListingById(row.listing_id);
     let title = localListing?.title;
@@ -1163,7 +1202,10 @@ export async function syncRentalsFromRemote(userId: string): Promise<RentalBooki
       const remoteListing = await fetchListingByIdRemote(row.listing_id);
       title = remoteListing?.title;
     }
-    remoteBookings.push(rentalBookingFromRemoteRow(row, userId, title));
+    const counterpartyId = row.owner_id === userId ? row.renter_id : row.owner_id;
+    remoteBookings.push(
+      rentalBookingFromRemoteRow(row, userId, title, counterparties[counterpartyId]),
+    );
   }
 
   const byId = new Map<string, RentalBooking>();

@@ -3,7 +3,7 @@ import { ProfileAvatar } from "../components/profile/ProfileAvatar";
 import { BadgeCheck, Shield, Star as StarIcon } from "lucide-react";
 import type { PublicUserProfile } from "../lib/demoUserProfiles";
 import { useMessages } from "../lib/i18n/react";
-import { fetchRemoteProfile, type RemoteProfile } from "../lib/supabaseProfile";
+import { fetchPublicProfile, type PublicProfile } from "../lib/supabaseProfile";
 import { loadUserProfile, type UserProfile } from "../lib/userProfileStorage";
 import { fetchListingsByOwnerIdsRemote, isListingBrowsable, loadPublishedListings } from "../lib/listingStorage";
 import { fetchStoreLiveByHostIds, isStoreOpenForHost } from "../lib/garageStoreLive";
@@ -37,15 +37,15 @@ function mapDraftsToPublicListings(
     }));
 }
 
-function publicFromRemote(profile: RemoteProfile, neighborLabel: string): PublicUserProfile {
+function publicFromRemote(profile: PublicProfile, neighborLabel: string): PublicUserProfile {
   return {
     id: profile.id,
-    displayName: profile.display_name?.trim() || neighborLabel,
-    memberSince: profile.created_at,
+    displayName: profile.displayName || neighborLabel,
+    memberSince: profile.createdAt ?? new Date().toISOString(),
     avatarUrl: null,
-    identityVerified: Boolean(profile.identity_verified),
-    phoneVerified: Boolean(profile.phone_verified),
-    rating: profile.rating ?? 0,
+    identityVerified: profile.identityVerified,
+    phoneVerified: profile.phoneVerified,
+    rating: profile.rating,
     transactionCount: 0,
     reviewCount: 0,
     noShowCount: 0,
@@ -198,7 +198,7 @@ export function PublicProfileScreen({
     let mounted = true;
     setRemoteLoading(true);
     void Promise.all([
-      fetchRemoteProfile(userId),
+      fetchPublicProfile(userId),
       fetchListingsByOwnerIdsRemote([userId]),
       fetchStoreLiveByHostIds([userId]),
     ])

@@ -9,7 +9,7 @@ import { GarageShopItemCard } from "../components/garage-shop/GarageShopItemCard
 import { GarageSharePanel } from "../components/share/GarageSharePanel";
 import { getHostPendingOffers, ensureAcceptedOffersInCart } from "../lib/garageOfferStorage";
 import { garageDisplayName, garageNameFromDisplayName } from "../lib/garageDisplay";
-import { fetchRemoteProfile } from "../lib/supabaseProfile";
+import { fetchPublicProfile } from "../lib/supabaseProfile";
 import { loadUserProfile } from "../lib/userProfileStorage";
 import { resolveGarageAccent, type GarageIdentity } from "../lib/garageIdentity";
 import {
@@ -216,15 +216,15 @@ export function ActiveGarageShopScreen({
       };
     }
 
-    void Promise.all([fetchRemoteProfile(hostId), fetchGarageStorefrontRemote(hostId)]).then(
-      ([remote, storefront]) => {
+    void Promise.all([fetchPublicProfile(hostId), fetchGarageStorefrontRemote(hostId)]).then(
+      ([profile, storefront]) => {
         if (!mounted) return;
         if (storefront) {
-          applyIdentity(storefront, remote?.display_name);
+          applyIdentity(storefront, profile?.displayName);
           return;
         }
-        if (remote?.display_name?.trim()) {
-          setGarageName(garageNameFromDisplayName(remote.display_name));
+        if (profile?.displayName) {
+          setGarageName(garageNameFromDisplayName(profile.displayName));
         }
       },
     );

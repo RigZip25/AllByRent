@@ -33,27 +33,82 @@ export async function fetchRemoteProfile(userId: string): Promise<RemoteProfile 
   return data as RemoteProfile;
 }
 
-/** Batch-load display names for garage cards / trust lines. */
-export async function fetchRemoteProfileNamesByIds(
+/**
+ * What one person may know about another: a name, a rating, the trust badges
+ * and how long they have been around. `profiles` itself is readable only by its
+ * owner, so every cross-user read goes through the `public_profiles` view
+ * (migration 057) instead of the table.
+ */
+export type PublicProfile = {
+  id: string;
+  displayName: string;
+  rating: number;
+  identityVerified: boolean;
+  phoneVerified: boolean;
+  createdAt: string | null;
+};
+
+const PUBLIC_PROFILE_COLUMNS =
+  "id, display_name, rating, identity_verified, phone_verified, created_at";
+
+function publicProfileFromRow(row: Record<string, unknown>): PublicProfile | null {
+  const id = typeof row.id === "string" ? row.id : "";
+  if (!id) return null;
+  return {
+    id,
+    displayName: (row.display_name as string | null)?.trim() || "",
+    rating: typeof row.rating === "number" ? row.rating : 0,
+    identityVerified: Boolean(row.identity_verified),
+    phoneVerified: Boolean(row.phone_verified),
+    createdAt: typeof row.created_at === "string" ? row.created_at : null,
+  };
+}
+
+export async function fetchPublicProfilesByIds(
   userIds: string[],
-): Promise<Record<string, { displayName: string; rating: number; createdAt: string | null }>> {
+): Promise<Record<string, PublicProfile>> {
   const ids = [...new Set(userIds.map((id) => id.trim()).filter(Boolean))];
   if (ids.length === 0 || !isSupabaseConfigured()) return {};
   const supabase = getSupabaseClient();
   if (!supabase) return {};
   const { data, error } = await supabase
-    .from("profiles")
-    .select("id, display_name, rating, created_at")
+    .from("public_profiles")
+    .select(PUBLIC_PROFILE_COLUMNS)
     .in("id", ids);
   if (error || !data) return {};
-  const out: Record<string, { displayName: string; rating: number; createdAt: string | null }> = {};
+  const out: Record<string, PublicProfile> = {};
   for (const row of data) {
-    const id = typeof row.id === "string" ? row.id : "";
-    if (!id) continue;
+    const profile = publicProfileFromRow(row as Record<string, unknown>);
+    if (profile) out[profile.id] = profile;
+  }
+  return out;
+}
+
+export async function fetchPublicProfile(userId: string): Promise<PublicProfile | null> {
+  const id = userId.trim();
+  if (!id || !isSupabaseConfigured()) return null;
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("public_profiles")
+    .select(PUBLIC_PROFILE_COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
+  if (error || !data) return null;
+  return publicProfileFromRow(data as Record<string, unknown>);
+}
+
+/** Batch-load display names for garage cards / trust lines. */
+export async function fetchRemoteProfileNamesByIds(
+  userIds: string[],
+): Promise<Record<string, { displayName: string; rating: number; createdAt: string | null }>> {
+  const profiles = await fetchPublicProfilesByIds(userIds);
+  const out: Record<string, { displayName: string; rating: number; createdAt: string | null }> = {};
+  for (const [id, profile] of Object.entries(profiles)) {
     out[id] = {
-      displayName: (row.display_name as string | null)?.trim() || "Neighbor",
-      rating: typeof row.rating === "number" ? row.rating : 0,
-      createdAt: typeof row.created_at === "string" ? row.created_at : null,
+      displayName: profile.displayName || "Neighbor",
+      rating: profile.rating,
+      createdAt: profile.createdAt,
     };
   }
   return out;

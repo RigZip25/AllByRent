@@ -146,7 +146,7 @@ import {
   type RentalBooking,
 } from "../../lib/rentalsStorage";
 import { createNotificationRemote } from "../../lib/notificationsStorage";
-import { fetchRemoteProfile } from "../../lib/supabaseProfile";
+import { fetchPublicProfile } from "../../lib/supabaseProfile";
 import { isSupabaseConfigured } from "../../lib/supabaseClient";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
 import { CategoryFactCard } from "../../components/CategoryFactCard";
@@ -543,9 +543,9 @@ function BookingScreenLoaded({
     const hostId = listing.hostId?.trim();
     if (!hostId) return;
     let mounted = true;
-    void fetchRemoteProfile(hostId).then((remote) => {
-      if (!mounted || !remote?.display_name?.trim()) return;
-      setHostDisplayName(remote.display_name.trim());
+    void fetchPublicProfile(hostId).then((profile) => {
+      if (!mounted || !profile?.displayName) return;
+      setHostDisplayName(profile.displayName);
     });
     return () => {
       mounted = false;

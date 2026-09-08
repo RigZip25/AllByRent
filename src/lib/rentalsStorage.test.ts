@@ -3,6 +3,7 @@ import {
   getActiveBookings,
   getUpcomingBookings,
   isUpcomingBooking,
+  mergeCounterpartyName,
   resolveMergedRentalStatus,
   type RentalBooking,
   type RentalStatus,
@@ -56,6 +57,22 @@ describe("resolveMergedRentalStatus", () => {
   it("is stable when both sides agree", () => {
     expect(resolveMergedRentalStatus("active", "active")).toBe("active");
     expect(resolveMergedRentalStatus("cancelled", "cancelled")).toBe("cancelled");
+  });
+});
+
+describe("mergeCounterpartyName", () => {
+  it("keeps a real name over the label a bare row falls back to", () => {
+    expect(mergeCounterpartyName("Dana", "Host")).toBe("Dana");
+    expect(mergeCounterpartyName("Host", "Dana")).toBe("Dana");
+    expect(mergeCounterpartyName("Renter", "Marco")).toBe("Marco");
+    expect(mergeCounterpartyName("Unknown", "Marco")).toBe("Marco");
+    expect(mergeCounterpartyName("", "Marco")).toBe("Marco");
+  });
+
+  it("falls back to a label when that is all either side has", () => {
+    expect(mergeCounterpartyName("Host", "Host")).toBe("Host");
+    expect(mergeCounterpartyName("", "Renter")).toBe("Renter");
+    expect(mergeCounterpartyName(undefined, undefined)).toBe("");
   });
 });
 
