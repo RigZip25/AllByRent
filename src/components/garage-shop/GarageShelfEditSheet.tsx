@@ -1,5 +1,3 @@
-import { useMessages } from "../../lib/i18n/react";
-import { sanitizeImageBlob } from "../../lib/imageSanitize";
 import { useCallback, useRef, useState } from "react";
 import { Camera, Loader2, Trash2, X } from "lucide-react";
 import { deleteMedia, type MediaRef } from "../../lib/mediaStore";
@@ -14,6 +12,9 @@ import {
 import { getGarageSaleOfferPrefs } from "../../lib/garageSaleOfferStorage";
 import type { GarageListingSaleMode } from "../../lib/garageSaleOfferStorage";
 import type { ListingDraft } from "../../screens/listing/types";
+import { useAccessibleOverlay } from "../../lib/a11yOverlay";
+import { useMessages } from "../../lib/i18n/react";
+import { sanitizeImageBlob } from "../../lib/imageSanitize";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
@@ -45,6 +46,7 @@ export function GarageShelfEditSheet({
   const [saleMode, setSaleMode] = useState<GarageListingSaleMode>(prefs?.saleMode ?? "open");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useAccessibleOverlay(true, onClose, "garage-shelf-edit");
 
   const thumb = photo.thumbId ? { ...photo, id: photo.thumbId } : photo;
   const { url } = useMediaUrl(thumb);
@@ -124,7 +126,10 @@ export function GarageShelfEditSheet({
     <div className="garage-shelf-edit fixed inset-0 z-50 flex items-end justify-center bg-black/40">
       <button type="button" className="absolute inset-0" aria-label="Close" onClick={onClose} />
       <div
-        className="relative max-h-[90dvh] w-full max-w-[390px] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] rounded-t-3xl border bg-white px-4 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] pt-4"
+        role="dialog"
+        aria-modal="true"
+        aria-label={copy.title}
+        className="relative max-h-[90dvh] w-full max-w-[430px] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] rounded-t-3xl border bg-white px-4 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] pt-4"
         style={{ borderColor: BORDER }}
       >
         <div className="mb-3 flex items-start justify-between gap-3">
@@ -134,7 +139,13 @@ export function GarageShelfEditSheet({
             </p>
             <h2 className="text-lg font-bold text-gray-900">{copy.title}</h2>
           </div>
-          <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-full border" style={{ borderColor: BORDER }}>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border"
+            style={{ borderColor: BORDER }}
+            aria-label="Close"
+          >
             <X className="h-4 w-4 text-red-600" />
           </button>
         </div>
@@ -204,7 +215,7 @@ export function GarageShelfEditSheet({
         <label className="mt-3 block text-sm font-semibold text-gray-700">
           {copy.priceLabel}
           <div className="relative mt-1">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
             <input
               type="text"
               inputMode="decimal"

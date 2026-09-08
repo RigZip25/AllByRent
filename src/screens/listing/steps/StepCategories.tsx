@@ -315,7 +315,7 @@ export function StepCategories({
               ? "listing-field-subcategory"
               : undefined
       }
-      className="mx-auto w-full max-w-[390px] bg-[#F9FAFB] px-4 pb-8 pt-5"
+      className="mx-auto w-full max-w-[430px] bg-[#F9FAFB] px-4 pb-8 pt-5"
     >
       <div className="mb-4 flex items-start gap-2">
         {phase !== "category" ? (

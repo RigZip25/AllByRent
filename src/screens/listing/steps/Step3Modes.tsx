@@ -47,7 +47,9 @@ import { listingRequiresFuelTracking } from "../../../lib/rentalFuelPolicy";
 import { getHomeLocation } from "../../../lib/listingStorage";
 import { getSearchCountryCode } from "../../../lib/locationCountry";
 import { useMessages } from "../../../lib/i18n/react";
-import { currencySymbol, formatMoney, roundMoneyForSuggestion } from "../../../lib/regionalDisplay";
+import { formatMoney, roundMoneyForSuggestion } from "../../../lib/regionalDisplay";
+import { FieldLabel } from "../../../components/forms/FieldLabel";
+import { MoneyInput } from "../../../components/forms/MoneyInput";
 
 const GREEN = "#0D5C3A";
 
@@ -108,60 +110,6 @@ function getDefaultMinimumPeriod(category: string): MinimumRentalPeriod {
 
 const selectClassName =
   "w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-800 outline-none transition-colors focus:border-green-700";
-
-function FieldLabel({
-  label,
-  required = false,
-}: {
-  label: string;
-  required?: boolean;
-}) {
-  return (
-    <label className="mb-1.5 block text-sm font-medium text-gray-700">
-      {label}
-      {required ? <span className="text-red-500"> *</span> : null}
-    </label>
-  );
-}
-
-function MoneyInput({
-  value,
-  onChange,
-  onBlur,
-  id,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  onBlur?: () => void;
-  id?: string;
-}) {
-  const symbol = currencySymbol();
-  return (
-    <motion.div className="relative" layout="position">
-      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
-        {symbol}
-      </span>
-      <input
-        id={id}
-        type="text"
-        inputMode="decimal"
-        autoComplete="off"
-        value={value}
-        placeholder=""
-        onChange={(event) => {
-          // Keep only digits + one decimal point while typing (no type=number empty/0 quirks).
-          const raw = event.target.value.replace(/,/g, ".").replace(/[^\d.]/g, "");
-          const parts = raw.split(".");
-          const next =
-            parts.length <= 1 ? raw : `${parts[0]}.${parts.slice(1).join("")}`;
-          onChange(next);
-        }}
-        onBlur={onBlur}
-        className="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-8 pr-4 text-gray-800 outline-none transition-colors focus:border-green-700"
-      />
-    </motion.div>
-  );
-}
 
 function ModeNote({ children }: { children: ReactNode }) {
   return <p className="mt-3 text-xs leading-relaxed text-gray-500">{children}</p>;
@@ -827,7 +775,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
 
   return (
     <motion.div
-      className="mx-auto w-full max-w-[390px] bg-[#F9FAFB] px-4 pb-8 pt-5"
+      className="mx-auto w-full max-w-[430px] bg-[#F9FAFB] px-4 pb-8 pt-5"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
@@ -894,6 +842,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                         {...rateFieldMotion}
                       >
                         <FieldLabel
+                          htmlFor="listing-field-daily-rate"
                           label={modesCopy.dailyRate}
                           required={periodRateFields.required === "daily"}
                         />
@@ -912,6 +861,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                         {...rateFieldMotion}
                       >
                         <FieldLabel
+                          htmlFor="listing-field-weekly-rate"
                           label={modesCopy.weeklyRate}
                           required={periodRateFields.required === "weekly"}
                         />
@@ -930,6 +880,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                         {...rateFieldMotion}
                       >
                         <FieldLabel
+                          htmlFor="listing-field-monthly-rate"
                           label={modesCopy.monthlyRate}
                           required={periodRateFields.required === "monthly"}
                         />
@@ -955,7 +906,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                       {!(draft.vehicleExtras?.unlimitedMiles?.enabled) ? (
                         <div className="mt-3 space-y-3">
                           <div>
-                            <FieldLabel label={modesCopy.includedMilesPerDay} required />
+                            <FieldLabel htmlFor="listing-field-included-miles" label={modesCopy.includedMilesPerDay} required />
                             <input
                               id="listing-field-included-miles"
                               type="number"
@@ -980,7 +931,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                             </p>
                           </div>
                           <div>
-                            <FieldLabel label={modesCopy.overagePerMile} required />
+                            <FieldLabel htmlFor="listing-field-overage-per-mile" label={modesCopy.overagePerMile} required />
                             <MoneyInput
                               id="listing-field-overage-per-mile"
                               value={draft.categorySpecs?.overagePerMile ?? "0.35"}
@@ -1049,7 +1000,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                           className="overflow-hidden"
                         >
                           <div className="mt-3">
-                            <FieldLabel label={modesCopy.longTermMonthlyRate} required />
+                            <FieldLabel htmlFor="listing-field-long-term-monthly-rate" label={modesCopy.longTermMonthlyRate} required />
                             <MoneyInput
                               id="listing-field-long-term-monthly-rate"
                               value={draft.pricing.longTermMonthlyRate ?? ""}
@@ -1086,7 +1037,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                   ) : null}
 
                   <motion.div layout="position">
-                    <FieldLabel label={modesCopy.securityDeposit} required />
+                    <FieldLabel htmlFor="listing-field-security-deposit" label={modesCopy.securityDeposit} required />
                     <MoneyInput
                       id="listing-field-security-deposit"
                       value={draft.pricing.securityDeposit}
@@ -1818,10 +1769,14 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                               {offer.enabled ? (
                                 <div className="mt-2 space-y-2 pl-6">
                                   <div>
-                                    <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                                    <label
+                                      htmlFor={`listing-vehicle-extra-${row.key}-price`}
+                                      className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+                                    >
                                       {row.priceLabel}
                                     </label>
                                     <MoneyInput
+                                      id={`listing-vehicle-extra-${row.key}-price`}
                                       value={offer.price}
                                       onChange={(value) => {
                                         setDraft((c) => {
@@ -1841,10 +1796,14 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                                   </div>
                                   {row.key === "vehicleDelivery" ? (
                                     <div>
-                                      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                                      <label
+                                        htmlFor="listing-vehicle-extra-delivery-radius"
+                                        className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+                                      >
                                         {modesCopy.extraDeliveryRadius}
                                       </label>
                                       <input
+                                        id="listing-vehicle-extra-delivery-radius"
                                         type="number"
                                         min={1}
                                         max={100}
@@ -1906,10 +1865,14 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                       </label>
                       {draft.handoff.tollHoldEnabled ? (
                         <div className="mt-2 pl-6">
-                          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                          <label
+                            htmlFor="listing-field-toll-hold-amount"
+                            className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+                          >
                             {modesCopy.tollHoldAmount}
                           </label>
                           <MoneyInput
+                            id="listing-field-toll-hold-amount"
                             value={draft.handoff.tollHoldAmountUsd || "50"}
                             onChange={(value) => {
                               setDraft((c) => ({
@@ -2017,7 +1980,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                 onToggle={() => toggleMode("sell")}
               >
                 <motion.div layout="position">
-                  <FieldLabel label={modesCopy.salePrice} required />
+                  <FieldLabel htmlFor="listing-field-sale-price" label={modesCopy.salePrice} required />
                   <MoneyInput
                     id="listing-field-sale-price"
                     value={draft.pricing.salePrice}
@@ -2072,7 +2035,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
       />
 
       {showRestrictedModesNote ? (
-        <p className="mt-4 text-center text-xs italic text-gray-400">
+        <p className="mt-4 text-center text-xs italic text-gray-500">
           {modesCopy.restrictedModesNote}
         </p>
       ) : null}

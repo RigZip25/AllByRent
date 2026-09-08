@@ -77,7 +77,7 @@ export function WhatDoYouWant({ onEarn, onSave, onSkip, onBack }: WhatDoYouWantP
   const { roleChoice: copy } = useOnboardingCopy();
 
   return (
-    <div className="screen onboarding-step mx-auto w-full max-w-[390px] bg-white">
+    <div className="screen onboarding-step mx-auto w-full max-w-[430px] bg-white">
       <OnboardingTopBar onBack={onBack} onSkip={onSkip} />
       <div className="role-choice-header shrink-0 px-4 pb-2 pt-1 text-center">
         <h1 className="role-choice-page-title text-2xl font-bold" style={{ color: GREEN }}>
@@ -112,7 +112,7 @@ export function WhatDoYouWant({ onEarn, onSave, onSkip, onBack }: WhatDoYouWantP
         />
       </div>
 
-      <p className="role-choice-footer shrink-0 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] text-center text-xs text-gray-400">
+      <p className="role-choice-footer shrink-0 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] text-center text-xs text-gray-500">
         {copy.footer}
       </p>
     </div>

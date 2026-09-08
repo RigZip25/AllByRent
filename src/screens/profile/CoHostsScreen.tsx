@@ -220,7 +220,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
 
         {pendingForYou.length > 0 ? (
           <section className="mb-5">
-            <p className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+            <p className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-500">
               {t.invitationsForYou}
             </p>
             <ul className="flex flex-col gap-2">
@@ -265,7 +265,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
         ) : null}
 
         <section className="mb-5">
-          <p className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+          <p className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-500">
             {t.inviteSection}
           </p>
           <div
@@ -324,7 +324,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
 
         {pendingCoHosts.length > 0 ? (
           <section className="mb-5">
-            <p className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+            <p className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-500">
               {t.pendingInvites}
             </p>
             <ul className="flex flex-col gap-2">
@@ -346,7 +346,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
         ) : null}
 
         <section>
-          <p className="mb-2 flex items-center gap-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+          <p className="mb-2 flex items-center gap-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-500">
             <Users className="h-3.5 w-3.5" />
             {t.activeCoHosts(activeCoHosts.length)}
           </p>

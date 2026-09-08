@@ -130,7 +130,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
 
   return (
     <div
-      className="screen onboarding-step mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden"
+      className="screen onboarding-step mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden"
       style={{
         background:
           "radial-gradient(120% 80% at 50% 0%, #E8F5EE 0%, #FFFFFF 55%, #FFF8E8 100%)",
@@ -144,7 +144,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
         ) : (
           <span className="w-14" aria-hidden />
         )}
-        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">
           {APP_NAME} · {index + 1}/{slides.length}
         </p>
         {isLast ? (

@@ -72,7 +72,7 @@ function Row({
         {icon}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">{label}</p>
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">{label}</p>
         <p className="truncate text-[15px] font-semibold" style={{ color: GREEN }}>
           {value}
         </p>
@@ -430,7 +430,7 @@ export function PersonalInfoScreen({
           </div>
         ) : null}
 
-        <p className="px-1 pt-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+        <p className="px-1 pt-1 text-[12px] font-semibold uppercase tracking-wide text-gray-500">
           {profileCopy.payouts}
         </p>
         <PayoutsFlowCard
@@ -448,7 +448,7 @@ export function PersonalInfoScreen({
 
         {onOpenCoHosts ? (
           <>
-            <p className="px-1 pt-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+            <p className="px-1 pt-2 text-[12px] font-semibold uppercase tracking-wide text-gray-500">
               {profileCopy.coHosts}
             </p>
             <Row
@@ -460,7 +460,7 @@ export function PersonalInfoScreen({
           </>
         ) : null}
 
-        <p className="px-1 pt-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+        <p className="px-1 pt-2 text-[12px] font-semibold uppercase tracking-wide text-gray-500">
           {profileCopy.personalInfo}
         </p>
         <Row icon={<Mail className="h-5 w-5" style={{ color: GREEN }} />} label={t.email} value={email} />
@@ -490,7 +490,7 @@ export function PersonalInfoScreen({
         />
         <p className="px-1 text-[12px] leading-relaxed text-gray-500">{t.dateOfBirthHint}</p>
 
-        <p className="px-1 pt-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+        <p className="px-1 pt-2 text-[12px] font-semibold uppercase tracking-wide text-gray-500">
           {profileCopy.preferences}
         </p>
         <Row

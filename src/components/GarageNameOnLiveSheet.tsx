@@ -103,7 +103,7 @@ export function GarageNameOnLiveSheet({ open, onNamed, onCancel }: Props) {
       aria-modal="true"
       aria-labelledby="garage-name-live-title"
     >
-      <div className="w-full max-w-[390px] overflow-hidden rounded-3xl bg-white shadow-2xl">
+      <div className="w-full max-w-[430px] overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div className="border-b px-5 pb-4 pt-5" style={{ borderColor: BORDER }}>
           <p id="garage-name-live-title" className="text-[17px] font-extrabold" style={{ color: GREEN }}>
             {t.garageUi.nameLiveTitle}
@@ -137,7 +137,7 @@ export function GarageNameOnLiveSheet({ open, onNamed, onCancel }: Props) {
           </div>
 
           <label className="block">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
               {t.garageUi.lookShopName}
             </span>
             <input
@@ -158,7 +158,7 @@ export function GarageNameOnLiveSheet({ open, onNamed, onCancel }: Props) {
           </label>
 
           <label className="block">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
               {t.garageUi.lookNeighborhood}
             </span>
             <input

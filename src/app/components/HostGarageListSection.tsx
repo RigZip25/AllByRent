@@ -36,7 +36,7 @@ function ListingThumb({ listing }: { listing: ListingDraft }) {
     return <img src={url} alt="" className="h-full w-full object-cover" loading="lazy" />;
   }
   return (
-    <span className="text-xs font-bold uppercase tracking-wide text-gray-400" aria-hidden>
+    <span className="text-xs font-bold uppercase tracking-wide text-gray-500" aria-hidden>
       {(listing.title || t.garageUi.itemFallback).slice(0, 1)}
     </span>
   );

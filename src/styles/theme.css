@@ -8,14 +8,17 @@
   --card-foreground: #1a1a1a;
   --popover: #ffffff;
   --popover-foreground: #1a1a1a;
-  --primary: #1A9E6E;
+  /* Primary green darkened for small text/links on white (Stage 17 / X7). */
+  --primary: #0D5C3A;
+  --primary-text: #0D5C3A;
   --primary-foreground: #ffffff;
   --secondary: #F0F4F2;
   --secondary-foreground: #1a1a1a;
   --muted: #e5e9e7;
   --muted-foreground: #6b7280;
-  --accent: #F0B429;
-  --accent-foreground: #1a1a1a;
+  --accent: #F59E0B;
+  /* Dark text on amber CTAs for contrast (Stage 17 / X6). */
+  --accent-foreground: #042016;
   --destructive: #d4183d;
   --destructive-foreground: #ffffff;
   --border: rgba(0, 0, 0, 0.1);
@@ -24,7 +27,7 @@
   --switch-background: #cbced4;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #1A9E6E;
+  --ring: #0D5C3A;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -1469,6 +1472,15 @@
     z-index: 20;
     /* Keeps "Book now" and "Continue to pay" clear of the iOS home indicator. */
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /** Amber primary CTA with dark text for WCAG contrast (Stage 17 / X6). */
+  .btn-cta-amber {
+    background-color: #f59e0b;
+    color: #042016;
+  }
+  .btn-cta-amber:hover {
+    background-color: color-mix(in srgb, #f59e0b 90%, #000);
   }
 
   /**

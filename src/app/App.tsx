@@ -67,6 +67,7 @@ import { AuthProvider, useAuth } from "../hooks/AuthProvider";
 import { useRentalLifecycleSweep } from "../hooks/useRentalLifecycleSweep";
 import { RequireAuthProvider } from "../hooks/RequireAuth";
 import { PageTranslateBridge } from "../components/PageTranslateBridge";
+import { Toaster } from "sonner";
 import {
   consumeAuthReturn,
   clearPendingAuthEmail,
@@ -2724,6 +2725,16 @@ export default function App() {
         <AuthProvider>
           <PageTranslateBridge />
           <AppRoutes />
+          <Toaster
+            position="top-center"
+            richColors
+            closeButton
+            toastOptions={{
+              classNames: {
+                toast: "font-sans",
+              },
+            }}
+          />
         </AuthProvider>
       </PwaInstallProvider>
     </PwaUpdateProvider>

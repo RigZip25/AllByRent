@@ -20,7 +20,7 @@ export function YardSaleHubScreen({ onBack, onChoose }: YardSaleHubScreenProps) 
   const copy = garageSale.yardSaleHub;
 
   return (
-    <div className="screen onboarding-step mx-auto w-full max-w-[390px] bg-[#FFF9F0]">
+    <div className="screen onboarding-step mx-auto w-full max-w-[430px] bg-[#FFF9F0]">
       <div className="browse-hub-header shrink-0 px-4 pb-3 pt-[max(1rem,calc(env(safe-area-inset-top,0px)+0.5rem))]">
         <div className="relative mb-3 flex min-h-10 items-center justify-center">
           <button

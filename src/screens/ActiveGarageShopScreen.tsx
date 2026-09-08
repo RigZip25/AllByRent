@@ -763,7 +763,11 @@ export function ActiveGarageShopScreen({
       </div>
 
       {toast ? (
-        <div className="pointer-events-none fixed bottom-24 left-1/2 z-40 -translate-x-1/2 rounded-full bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-lg">
+        <div
+          role="status"
+          aria-live="polite"
+          className="pointer-events-none fixed bottom-24 left-1/2 z-40 -translate-x-1/2 rounded-full bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-lg"
+        >
           {toast}
         </div>
       ) : null}

@@ -20,7 +20,7 @@ export function WhatIsEvorios({ onContinue, onSkip, onBack }: Props) {
   const intro = t.onboarding.productIntro;
 
   return (
-    <div className="screen onboarding-step mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-white">
+    <div className="screen onboarding-step mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden bg-white">
       <OnboardingTopBar onBack={onBack} onSkip={onSkip} />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
@@ -35,7 +35,7 @@ export function WhatIsEvorios({ onContinue, onSkip, onBack }: Props) {
           />
         </div>
 
-        <p className="text-center text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+        <p className="text-center text-[12px] font-semibold uppercase tracking-wide text-gray-500">
           {APP_NAME}
         </p>
         <h1 className="mt-1 text-center text-[22px] font-extrabold leading-tight" style={{ color: GREEN }}>
@@ -44,7 +44,7 @@ export function WhatIsEvorios({ onContinue, onSkip, onBack }: Props) {
         <p className="mt-2 text-center text-[15px] leading-relaxed text-gray-600">{intro.body}</p>
 
         <div className="mt-5">
-          <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+          <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">
             {intro.catalogTitle}
           </p>
           <div className="mt-2">

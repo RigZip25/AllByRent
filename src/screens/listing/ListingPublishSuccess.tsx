@@ -51,7 +51,7 @@ export function ListingPublishSuccess({
 
   return (
     <motion.div
-      className="mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col items-center justify-center bg-[#F9FAFB] px-6 text-center"
+      className="mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col items-center justify-center bg-[#F9FAFB] px-6 text-center"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
     >

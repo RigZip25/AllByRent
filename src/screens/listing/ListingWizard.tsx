@@ -1306,7 +1306,7 @@ export const ListingWizard = forwardRef<
   if (loadingEdit) {
     return (
       <div
-        className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col items-center justify-center overflow-hidden px-6"
+        className="relative mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col items-center justify-center overflow-hidden px-6"
         style={{ backgroundColor: BACKGROUND }}
       >
         <Loader2 className="h-8 w-8 animate-spin" style={{ color: PRIMARY_GREEN }} aria-hidden />
@@ -1318,7 +1318,7 @@ export const ListingWizard = forwardRef<
   if (phase === "goPublic") {
     return (
       <div
-        className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden"
+        className="relative mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden"
         style={{ backgroundColor: BACKGROUND }}
       >
         <header className="shrink-0 bg-white px-4 pb-3 pt-4">
@@ -1433,7 +1433,7 @@ export const ListingWizard = forwardRef<
   if (phase === "qrStory") {
     return (
       <div
-        className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden"
+        className="relative mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden"
         style={{ backgroundColor: BACKGROUND }}
       >
         <QRStoryScreen
@@ -1447,7 +1447,7 @@ export const ListingWizard = forwardRef<
   if (phase === "qrSticker") {
     return (
       <div
-        className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden"
+        className="relative mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden"
         style={{ backgroundColor: BACKGROUND }}
       >
         <QRStickerScreen
@@ -1464,7 +1464,7 @@ export const ListingWizard = forwardRef<
   if (phase === "success") {
     return (
       <div
-        className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden"
+        className="relative mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden"
         style={{ backgroundColor: BACKGROUND }}
       >
         <ListingPublishSuccess
@@ -1492,7 +1492,7 @@ export const ListingWizard = forwardRef<
   if (phase === "share") {
     return (
       <div
-        className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden"
+        className="relative mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden"
         style={{ backgroundColor: BACKGROUND }}
       >
         <ListingShareScreen
@@ -1505,7 +1505,7 @@ export const ListingWizard = forwardRef<
 
   return (
     <div
-      className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden"
+      className="relative mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden"
       style={{ backgroundColor: BACKGROUND }}
     >
       <header className="shrink-0 bg-white px-4 pb-3 pt-4">

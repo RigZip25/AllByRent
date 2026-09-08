@@ -18,7 +18,7 @@ export function Step6QR({ draft, setDraft }: StepProps) {
 
   return (
     <motion.div
-      className="mx-auto w-full max-w-[390px] bg-[#F9FAFB] px-4 pb-8 pt-5"
+      className="mx-auto w-full max-w-[430px] bg-[#F9FAFB] px-4 pb-8 pt-5"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
@@ -43,7 +43,7 @@ export function Step6QR({ draft, setDraft }: StepProps) {
 
       <div className="mb-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
         <p className="font-semibold text-gray-900">{qr.requiredTitle}</p>
-        <p className="mt-1 text-sm text-gray-400">
+        <p className="mt-1 text-sm text-gray-500">
           {qr.requiredBody}
         </p>
       </div>

@@ -1,6 +1,5 @@
 import { useMessages } from "../../lib/i18n/react";
-import { useEffect, useMemo, useState } from "react";
-import { X } from "lucide-react";
+import { useMemo, useState } from "react";
 import type { ListingDraft } from "../../screens/listing/types";
 import { placeBidWithSync } from "../../lib/repositories/garageRepository";
 import {
@@ -13,7 +12,8 @@ import {
   getOpenSaleForListing,
   placeOpenSaleBidAuthoritative,
 } from "../../lib/openSale";
-import { pushOverlay, removeOverlay } from "../../lib/overlayBackStack";
+import { AccessibleBottomSheet } from "../a11y/AccessibleBottomSheet";
+import { fieldErrorProps } from "../../lib/a11yFieldError";
 
 const GREEN = "#0D5C3A";
 const BLUE = "#2563EB";
@@ -50,11 +50,7 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
   const [amount, setAmount] = useState(String(minBidUsd));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    pushOverlay("garage-bid", onClose);
-    return () => removeOverlay("garage-bid");
-  }, [onClose]);
+  const bidField = fieldErrorProps("garage-bid-amount", error);
 
   const submit = () => {
     if (busy) return;
@@ -119,104 +115,94 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
   };
 
   return (
-    <div className="garage-bid-sheet fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0">
-      <button type="button" className="absolute inset-0" aria-label={common.close} onClick={onClose} />
-      <div
-        className="relative w-full max-w-[390px] max-h-[90dvh] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] rounded-t-3xl border bg-white px-4 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] pt-4"
-        style={{ borderColor: BORDER }}
-      >
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: BLUE }}>
-              {openSale ? "Open Sale bid" : offerCopy.placeBidTitle}
-            </p>
-            <h2 className="text-lg font-bold text-gray-900">
-              {listing.title || shopCopy.saleItemFallback}
-            </h2>
-            <p className="mt-1 text-sm text-gray-500">
-              {offerCopy.highBidBuyNow(
-                highBid ? formatShopUsd(highBid.amountUsd) : formatShopUsd(offer.startingBidUsd),
-                formatShopUsd(offer.buyNowUsd),
-              )}
-            </p>
-            <p className="mt-1 text-[12px] font-medium text-gray-600">
-              {formatAuctionWindowLabel({ startsAt: offer.startsAt, endsAt: offer.endsAt })}
-            </p>
-            {openSale?.status === "presale" ? (
-              <p className="mt-2 text-[12px] leading-snug text-amber-900">
-                Presale — bid goes in your cart now (green if leading). Live window starts soon.
-              </p>
-            ) : null}
-          </div>
+    <AccessibleBottomSheet
+      open
+      onClose={onClose}
+      overlayId="garage-bid"
+      title={listing.title || shopCopy.saleItemFallback}
+      closeAriaLabel={offerCopy.closeBidAria || common.close}
+      panelClassName="pb-[max(1rem,env(safe-area-inset-bottom))]"
+    >
+      <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: BLUE }}>
+        {openSale ? "Open Sale bid" : offerCopy.placeBidTitle}
+      </p>
+      <p className="mt-1 text-sm text-gray-500">
+        {offerCopy.highBidBuyNow(
+          highBid ? formatShopUsd(highBid.amountUsd) : formatShopUsd(offer.startingBidUsd),
+          formatShopUsd(offer.buyNowUsd),
+        )}
+      </p>
+      <p className="mt-1 text-[12px] font-medium text-gray-600">
+        {formatAuctionWindowLabel({ startsAt: offer.startsAt, endsAt: offer.endsAt })}
+      </p>
+      {openSale?.status === "presale" ? (
+        <p className="mt-2 text-[12px] leading-snug text-amber-900">
+          Presale — bid goes in your cart now (green if leading). Live window starts soon.
+        </p>
+      ) : null}
+
+      <div className="mb-3 mt-3 flex gap-2">
+        {quickBids.map((bid) => (
           <button
+            key={bid}
             type="button"
-            onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-full border bg-white"
-            style={{ borderColor: BORDER }}
-            aria-label={offerCopy.closeBidAria}
+            onClick={() => {
+              setAmount(String(bid));
+              setError(null);
+            }}
+            className="flex-1 rounded-xl border py-2 text-sm font-bold"
+            style={{
+              borderColor: Number(amount) === bid ? BLUE : BORDER,
+              color: Number(amount) === bid ? BLUE : "#374151",
+              backgroundColor: Number(amount) === bid ? `${BLUE}10` : "#fff",
+            }}
           >
-            <X className="h-4 w-4 text-red-600" />
+            {formatShopUsd(bid)}
           </button>
-        </div>
-
-        <div className="mb-3 flex gap-2">
-          {quickBids.map((bid) => (
-            <button
-              key={bid}
-              type="button"
-              onClick={() => {
-                setAmount(String(bid));
-                setError(null);
-              }}
-              className="flex-1 rounded-xl border py-2 text-sm font-bold"
-              style={{
-                borderColor: Number(amount) === bid ? BLUE : BORDER,
-                color: Number(amount) === bid ? BLUE : "#374151",
-                backgroundColor: Number(amount) === bid ? `${BLUE}10` : "#fff",
-              }}
-            >
-              {formatShopUsd(bid)}
-            </button>
-          ))}
-        </div>
-
-        <label className="block text-sm font-semibold text-gray-700">
-          {offerCopy.yourBidLabel}
-          <div className="relative mt-1.5">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-            <input
-              type="number"
-              inputMode="decimal"
-              min={minBidUsd}
-              step={offer.minIncrementUsd}
-              value={amount}
-              onChange={(event) => {
-                setAmount(event.target.value);
-                setError(null);
-              }}
-              className="w-full rounded-xl border py-3 pl-7 pr-3 text-base font-semibold"
-              style={{ borderColor: BORDER }}
-            />
-          </div>
-        </label>
-        <p className="mt-1 text-xs text-gray-500">{offerCopy.minNextBid(formatShopUsd(minBidUsd))}</p>
-
-        {error ? <p className="mt-2 text-sm font-medium text-red-600">{error}</p> : null}
-
-        <p className="mt-3 text-xs leading-relaxed text-gray-500">{auctionCopy.bidTerms}</p>
-        <p className="mt-1 text-xs leading-relaxed text-gray-500">{auctionCopy.bidRulesNote}</p>
-
-        <button
-          type="button"
-          onClick={submit}
-          disabled={busy}
-          className="mt-4 w-full rounded-xl py-3.5 text-base font-bold text-white disabled:opacity-60"
-          style={{ backgroundColor: GREEN }}
-        >
-          {busy ? "…" : offerCopy.confirmBid}
-          {!busy && openSale ? " → cart" : ""}
-        </button>
+        ))}
       </div>
-    </div>
+
+      <label className="block text-sm font-semibold text-gray-700" htmlFor={bidField.input.id}>
+        {offerCopy.yourBidLabel}
+        <div className="relative mt-1.5">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+            $
+          </span>
+          <input
+            {...bidField.input}
+            type="number"
+            inputMode="decimal"
+            min={minBidUsd}
+            step={offer.minIncrementUsd}
+            value={amount}
+            onChange={(event) => {
+              setAmount(event.target.value);
+              setError(null);
+            }}
+            className="w-full rounded-xl border py-3 pl-7 pr-3 text-base font-semibold"
+            style={{ borderColor: error ? "#f87171" : BORDER }}
+          />
+        </div>
+      </label>
+      <p className="mt-1 text-xs text-gray-500">{offerCopy.minNextBid(formatShopUsd(minBidUsd))}</p>
+
+      {bidField.errorMessage ? (
+        <p {...bidField.errorMessage} className="mt-2 text-sm font-medium text-red-600" />
+      ) : null}
+
+      <p className="mt-3 text-xs leading-relaxed text-gray-500">{auctionCopy.bidTerms}</p>
+      <p className="mt-1 text-xs leading-relaxed text-gray-500">{auctionCopy.bidRulesNote}</p>
+
+      <button
+        type="button"
+        onClick={submit}
+        disabled={busy}
+        className="mt-4 w-full rounded-xl py-3.5 text-base font-bold text-white disabled:opacity-60"
+        style={{ backgroundColor: GREEN }}
+      >
+        {busy ? "…" : offerCopy.confirmBid}
+        {!busy && openSale ? " → cart" : ""}
+      </button>
+    </AccessibleBottomSheet>
   );
 }

@@ -64,7 +64,7 @@ export function WhereAreYouManual({ onBack, onContinue, onSkip, hint }: WhereAre
   const nearLabel = selectedLocation?.primaryLine ?? selectedLocation?.city;
 
   return (
-    <div className="screen mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-white">
+    <div className="screen mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden bg-white">
       <OnboardingTopBar onBack={onBack} onSkip={onSkip} />
       <div className="screen-scroll flex min-h-0 flex-1 flex-col px-4 pb-6 pt-2">
         <div className="shrink-0 text-center">

@@ -61,7 +61,7 @@ const SURFACE = "#F0F4F2";
 
 function SectionTitle({ children }: { children: string }) {
   return (
-    <p className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+    <p className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-500">
       {children}
     </p>
   );
@@ -483,7 +483,7 @@ export function ProfileScreen({
                   {r.comment ? (
                     <p className="mt-1 text-[13px] leading-relaxed text-gray-600">{r.comment}</p>
                   ) : (
-                    <p className="mt-1 text-[13px] text-gray-400">{profileCopy.noComment}</p>
+                    <p className="mt-1 text-[13px] text-gray-500">{profileCopy.noComment}</p>
                   )}
                 </li>
               ))}
@@ -627,7 +627,7 @@ export function ProfileScreen({
 
         {auth.configured && auth.session ? (
           <div className="mt-3 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
-            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">
               {profileCopy.authSection}
             </p>
             <p className="mt-1 text-[13px] text-gray-600">
@@ -638,7 +638,7 @@ export function ProfileScreen({
           </div>
         ) : auth.configured ? (
           <div className="mt-3 rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
-            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">
               {profileCopy.authSection}
             </p>
             <p className="mt-1 text-[13px] text-gray-600">{profileCopy.notSignedIn}</p>
@@ -655,7 +655,7 @@ export function ProfileScreen({
 
         {import.meta.env.DEV ? (
           <p
-            className="mt-4 text-center text-[11px] text-gray-400"
+            className="mt-4 text-center text-[11px] text-gray-500"
             title="Deployment id — compare after a release"
           >
             {formatBuildStamp()}

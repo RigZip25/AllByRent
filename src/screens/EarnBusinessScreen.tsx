@@ -44,7 +44,7 @@ function TrendIcon({ trend }: { trend: EarningsTrend }) {
   if (trend === "down") {
     return <ArrowDownRight className="h-4 w-4 text-red-500" aria-hidden="true" />;
   }
-  return <Minus className="h-4 w-4 text-gray-400" aria-hidden="true" />;
+  return <Minus className="h-4 w-4 text-gray-500" aria-hidden="true" />;
 }
 
 function KpiChip({ label, value }: { label: string; value: string }) {
@@ -53,7 +53,7 @@ function KpiChip({ label, value }: { label: string; value: string }) {
       className="flex min-w-0 flex-1 flex-col rounded-xl border bg-white px-3 py-2.5"
       style={{ borderColor: BORDER }}
     >
-      <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+      <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-gray-500">
         {label}
       </p>
       <p className="mt-0.5 truncate text-[15px] font-bold" style={{ color: GREEN }}>
@@ -97,7 +97,7 @@ function Sparkline({
                   background: `linear-gradient(180deg, ${GOLD} 0%, ${GREEN_LIGHT} 100%)`,
                 }}
               />
-              <span className="text-[10px] font-medium text-gray-400">{point.label}</span>
+              <span className="text-[10px] font-medium text-gray-500">{point.label}</span>
             </div>
           );
         })}
@@ -299,7 +299,7 @@ function StatementSection({
     <section className="mb-4">
       <div className="mb-2 flex flex-wrap items-end justify-between gap-2 px-1">
         <div className="min-w-0">
-          <h2 className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+          <h2 className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">
             {copy.statementTitle}
           </h2>
           <p className="mt-0.5 text-[12px] leading-snug text-gray-500">{copy.statementSubtitle}</p>
@@ -408,7 +408,7 @@ function StatementSection({
           {statement.feesPartiallyEstimated ? (
             <p className="text-[11px] leading-snug text-gray-500">{copy.feesEstimatedNote}</p>
           ) : null}
-          <p className="text-[11px] leading-snug text-gray-400">{copy.ledgerGapNote}</p>
+          <p className="text-[11px] leading-snug text-gray-500">{copy.ledgerGapNote}</p>
         </div>
       </div>
     </section>
@@ -643,7 +643,7 @@ export function EarnBusinessScreen({
         <StatementSection copy={copy} onOpenPayoutSettings={onOpenPayoutSettings ?? openPayouts} />
 
         <section className="mb-4">
-          <h2 className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+          <h2 className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-500">
             {copy.growingTitle}
           </h2>
           <ul className="space-y-2">
@@ -684,7 +684,7 @@ export function EarnBusinessScreen({
         </section>
 
         <section className="mb-3">
-          <h2 className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+          <h2 className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-500">
             {copy.byListing}
           </h2>
           {stats.perListing.length === 0 ? (
@@ -725,7 +725,7 @@ export function EarnBusinessScreen({
           )}
         </section>
 
-        <p className="px-1 text-center text-[11px] text-gray-400">
+        <p className="px-1 text-center text-[11px] text-gray-500">
           {copy.activeListings(stats.liveCount)}
         </p>
       </div>

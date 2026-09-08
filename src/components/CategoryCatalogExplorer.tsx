@@ -56,7 +56,7 @@ function CategoryExpandRow({
         <span className="min-w-0 flex-1 text-[15px] font-semibold text-gray-900">
           {localizeCategoryLabel(entry.name)}
         </span>
-        <span className="shrink-0 text-[13px] font-medium text-gray-400">
+        <span className="shrink-0 text-[13px] font-medium text-gray-500">
           {entry.personal.length + entry.professional.length}
         </span>
         <ChevronDown
@@ -69,7 +69,7 @@ function CategoryExpandRow({
         <div className="space-y-3.5 border-t px-3.5 pb-3.5 pt-3" style={{ borderColor: BORDER }}>
           {entry.personal.length > 0 ? (
             <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                 {householdLabel}
               </p>
               <SubList items={entry.personal} />
@@ -77,7 +77,7 @@ function CategoryExpandRow({
           ) : null}
           {entry.professional.length > 0 ? (
             <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                 {proLabel}
               </p>
               <SubList items={entry.professional} />

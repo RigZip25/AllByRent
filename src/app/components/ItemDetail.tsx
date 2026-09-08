@@ -1019,7 +1019,7 @@ export function ItemDetail({
           <button
             type="button"
             onClick={handleBuy}
-            className="flex-1 bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-[#0D5C3A] py-3 px-4 rounded-xl transition-colors font-bold"
+            className="btn-cta-amber flex-1 hover:opacity-95 py-3 px-4 rounded-xl transition-colors font-bold"
           >
             {t.item.buyWithPrice(formatShopUsd(shopOffer.buyNowUsd))}
           </button>
@@ -1036,7 +1036,7 @@ export function ItemDetail({
                 setShareOpen(true);
               }
             }}
-            className="flex-1 bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-[#0D5C3A] py-3 px-4 rounded-xl transition-colors font-bold"
+            className="btn-cta-amber flex-1 hover:opacity-95 py-3 px-4 rounded-xl transition-colors font-bold"
           >
             {t.item.freeArrangePickup}
           </button>

@@ -149,7 +149,7 @@ export function ProfilePhotoOnboarding({
 
         <button
           type="button"
-          className="mt-6 pb-2 text-center text-[12px] text-gray-400 underline"
+          className="mt-6 pb-2 text-center text-[12px] text-gray-500 underline"
           onClick={skipForNow}
         >
           {t.remindLater}

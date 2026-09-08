@@ -86,7 +86,7 @@ export function GarageActiveSwitcher({ onChanged }: { onChanged?: () => void }) 
 
   return (
     <div className="mb-3">
-      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
         {t.garageUi.switcherLabel}
       </p>
       <div className="relative">

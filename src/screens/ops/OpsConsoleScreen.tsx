@@ -606,7 +606,7 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
                         <p className="text-[14px] font-bold" style={{ color: BRAND_GREEN }}>
                           {row.name}
                           {row.district ? ` · ${row.district}` : ""}{" "}
-                          <span className="font-semibold text-gray-400">({row.country})</span>
+                          <span className="font-semibold text-gray-500">({row.country})</span>
                         </p>
                         {row.notes ? (
                           <p className="mt-0.5 text-[12px]" style={{ color: MUTED }}>

@@ -98,7 +98,7 @@ export function NotificationPreferencesPanel() {
 
       {follows.length > 0 ? (
         <div className="mt-4 border-t pt-3" style={{ borderColor: BORDER }}>
-          <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+          <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">
             {p.garagesYouFollow}
           </p>
           <ul className="mt-2 space-y-2">
@@ -143,7 +143,7 @@ export function NotificationPreferencesPanel() {
         </div>
       ) : null}
 
-      <p className="mt-3 text-[11px] leading-snug text-gray-400">{p.pushFooter}</p>
+      <p className="mt-3 text-[11px] leading-snug text-gray-500">{p.pushFooter}</p>
     </div>
   );
 }

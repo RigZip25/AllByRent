@@ -117,11 +117,11 @@ export function GarageLensCard({
                   <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
                   {garage.rating.toFixed(1)}
                 </span>
-                <span className="text-gray-400">·</span>
+                <span className="text-gray-500">·</span>
               </>
             ) : null}
             <span>{garage.distance}</span>
-            <span className="text-gray-400">·</span>
+            <span className="text-gray-500">·</span>
             <span>
               {garage.itemCount} on shelf
             </span>

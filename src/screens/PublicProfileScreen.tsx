@@ -328,7 +328,7 @@ export function PublicProfileScreen({
 
         {profile.reviews.length > 0 && !blocked ? (
           <>
-            <h3 className="mb-2 mt-5 text-[13px] font-semibold uppercase tracking-wide text-gray-400">
+            <h3 className="mb-2 mt-5 text-[13px] font-semibold uppercase tracking-wide text-gray-500">
               {t.reviews}
             </h3>
             <ul className="flex flex-col gap-2">
@@ -360,7 +360,7 @@ export function PublicProfileScreen({
 
         {profile.listings.length > 0 && !blocked ? (
           <>
-            <h3 className="mb-2 mt-5 text-[13px] font-semibold uppercase tracking-wide text-gray-400">
+            <h3 className="mb-2 mt-5 text-[13px] font-semibold uppercase tracking-wide text-gray-500">
               {t.listings}
             </h3>
             <ul className="flex flex-col gap-2">
@@ -388,7 +388,7 @@ export function PublicProfileScreen({
         ) : null}
 
         {!isSelf ? (
-          <p className="mt-6 text-[12px] leading-relaxed text-gray-400">{t.privacyNote}</p>
+          <p className="mt-6 text-[12px] leading-relaxed text-gray-500">{t.privacyNote}</p>
         ) : null}
       </div>
     </div>

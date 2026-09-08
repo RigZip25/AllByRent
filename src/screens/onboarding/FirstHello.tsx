@@ -228,7 +228,7 @@ export function FirstHello({
     activeIndex !== null ? BUBBLES[activeIndex].slice(0, typedChars) : "";
 
   return (
-    <div className="screen relative mx-auto w-full max-w-[390px] bg-white">
+    <div className="screen relative mx-auto w-full max-w-[430px] bg-white">
       <OnboardingTopBar onSkip={onSkip} onBack={onBack} />
       <div className="first-hello-main">
         <div className="first-hello-top">

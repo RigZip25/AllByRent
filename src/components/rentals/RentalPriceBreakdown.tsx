@@ -39,7 +39,7 @@ export function RentalPriceBreakdownView({
     <div
       className={`space-y-2 rounded-xl border border-gray-100 bg-white ${compact ? "p-3" : "p-4 shadow-sm"}`}
     >
-      <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">{copy.title}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{copy.title}</p>
       <Line
         label={
           breakdown.pricingBasis === "monthly" && breakdown.monthlyRateUsd

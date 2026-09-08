@@ -32,7 +32,7 @@ import {
   completeOnboarding,
   isOnboardingComplete,
 } from "../../lib/onboardingStorage";
-import { pushOverlay, removeOverlay } from "../../lib/overlayBackStack";
+import { useAccessibleOverlay } from "../../lib/a11yOverlay";
 import {
   garageMinPrice,
   garageProximityRank,
@@ -55,7 +55,7 @@ import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMessages } from "../../lib/i18n/react";
 import { MrRentano } from "./MrRentano";
 
-const GREEN = "#1A9E6E";
+const GREEN = "#0D5C3A";
 const GREEN_DARK = "#0D5C3A";
 const BORDER = "#E8E6E0";
 
@@ -387,11 +387,8 @@ export function HomeFeed({
     setLocateError(null);
   };
 
-  useEffect(() => {
-    if (!locationSheetOpen) return;
-    pushOverlay("home-location-sheet", closeLocationSheet);
-    return () => removeOverlay("home-location-sheet");
-  }, [locationSheetOpen]);
+  useAccessibleOverlay(filtersOpen, closeFilters, "home-filters-sheet");
+  useAccessibleOverlay(locationSheetOpen, closeLocationSheet, "home-location-sheet");
 
   useEffect(() => {
     if (!needsLocation || autoOpenedLocationSheet.current) return;
@@ -533,7 +530,7 @@ export function HomeFeed({
               <span className="shrink-0 text-[12px] font-semibold text-gray-500">
                 {home.withinMiles(clusterRadiusMi)}
               </span>
-              <ChevronDown className="h-4 w-4 shrink-0 text-gray-400" aria-hidden />
+              <ChevronDown className="h-4 w-4 shrink-0 text-gray-500" aria-hidden />
             </button>
           )}
         </div>
@@ -638,7 +635,7 @@ export function HomeFeed({
               </span>
               <div className="min-w-0 flex-1">
                 {focus.subcategory ? (
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                     {localizeCategoryLabel(focus.category)}
                   </p>
                 ) : null}
@@ -690,7 +687,7 @@ export function HomeFeed({
 
         {garages.length > 1 ? (
           <div className="mb-3 flex flex-wrap items-center gap-1.5">
-            <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+            <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
               {home.sortTitle}
             </span>
             {sortOptions.map((option) => {
@@ -729,7 +726,7 @@ export function HomeFeed({
           </div>
         ) : null}
 
-        <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+        <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-500">
           {home.garagesNearYou}
         </p>
 
@@ -875,7 +872,12 @@ export function HomeFeed({
             aria-label={home.closeFiltersAria}
             onClick={closeFilters}
           />
-          <div className={FILTERS_PANEL} role="dialog" aria-label={home.filtersTitle}>
+          <div
+            className={FILTERS_PANEL}
+            role="dialog"
+            aria-modal="true"
+            aria-label={home.filtersTitle}
+          >
             <div className="mb-3 flex shrink-0 items-center justify-between px-4">
               <h2 className="text-[18px] font-extrabold" style={{ color: GREEN_DARK }}>
                 {home.filtersTitle}
@@ -883,7 +885,7 @@ export function HomeFeed({
               <button
                 type="button"
                 onClick={closeFilters}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-gray-100"
                 aria-label={common.close}
               >
                 <X className="h-5 w-5 text-red-600" />
@@ -892,7 +894,7 @@ export function HomeFeed({
 
             <div className={FILTERS_BODY}>
               <section className="mb-5">
-                <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-400">
+                <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-500">
                   {home.categoryTitle}
                 </h3>
                 <button
@@ -941,7 +943,7 @@ export function HomeFeed({
                         <button
                           type="button"
                           onClick={() => openSubSheet(cat.name)}
-                          className="relative flex w-9 shrink-0 items-center justify-center border-l"
+                          className="relative flex min-w-[44px] shrink-0 items-center justify-center border-l"
                           style={{ borderColor: active ? `${GREEN_DARK}33` : BORDER }}
                           aria-label={home.subcategoryTitle}
                           aria-haspopup="dialog"
@@ -966,7 +968,7 @@ export function HomeFeed({
               </section>
 
               <section className="mb-5">
-                <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-400">
+                <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-500">
                   {home.distanceTitle}
                 </h3>
                 <p className="mb-2 text-[13px] text-gray-500">{home.distanceHint}</p>
@@ -1014,13 +1016,14 @@ export function HomeFeed({
               <div
                 className={SHEET_PANEL}
                 role="dialog"
+                aria-modal="true"
                 aria-label={`${localizeCategoryLabel(subSheetCategory)} · ${home.subcategoryTitle}`}
               >
                 <div className="mb-4 flex items-center gap-2">
                   <button
                     type="button"
                     onClick={closeSubSheet}
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border bg-white"
+                    className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full border bg-white"
                     style={{ borderColor: BORDER, color: GREEN_DARK }}
                     aria-label={common.back}
                   >
@@ -1094,7 +1097,7 @@ export function HomeFeed({
                       </button>
                       {entry.personal.length > 0 ? (
                         <div>
-                          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                             {catalog.household}
                           </p>
                           {renderSubGrid(entry.personal, "personal")}
@@ -1102,7 +1105,7 @@ export function HomeFeed({
                       ) : null}
                       {entry.professional.length > 0 ? (
                         <div>
-                          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                             {catalog.pro}
                           </p>
                           {renderSubGrid(entry.professional, "professional")}
@@ -1137,6 +1140,7 @@ export function HomeFeed({
           <div
             className={SHEET_PANEL}
             role="dialog"
+            aria-modal="true"
             aria-label={
               locationSheetMode === "pick" ? home.setBlockSheetTitle : home.locationSheetTitle
             }
@@ -1148,7 +1152,7 @@ export function HomeFeed({
               <button
                 type="button"
                 onClick={closeLocationSheet}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-gray-100"
                 aria-label={common.close}
               >
                 <X className="h-5 w-5 text-red-600" />
@@ -1243,7 +1247,7 @@ export function HomeFeed({
                   {home.locationSheetHint}
                 </p>
 
-                <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-400">
+                <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-500">
                   {home.distanceTitle}
                 </h3>
                 {radiusButtons}

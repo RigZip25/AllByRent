@@ -8,6 +8,8 @@ import {
 } from "../../lib/garageOfferStorage";
 import { formatShopUsd, type ShopOffer } from "../../lib/garageShopStorage";
 import type { ListingDraft } from "../../screens/listing/types";
+import { useAccessibleOverlay } from "../../lib/a11yOverlay";
+import { fieldErrorProps } from "../../lib/a11yFieldError";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
@@ -29,6 +31,8 @@ export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated, onOpenC
   const active = useMemo(() => getMyActiveOffer(listing.id), [listing.id]);
   const [counterAmount, setCounterAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const counterField = fieldErrorProps("garage-my-offer-amount", error);
+  useAccessibleOverlay(true, onClose, "garage-my-offer");
 
   if (!active) return null;
 
@@ -68,7 +72,10 @@ export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated, onOpenC
     <div className="garage-my-offer-sheet fixed inset-0 z-50 flex items-end justify-center bg-black/40">
       <button type="button" className="absolute inset-0" aria-label={common.close} onClick={onClose} />
       <div
-        className="relative w-full max-w-[390px] max-h-[90dvh] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] rounded-t-3xl border bg-white px-4 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] pt-4"
+        role="dialog"
+        aria-modal="true"
+        aria-label={copy.myOfferTitle}
+        className="relative w-full max-w-[430px] max-h-[90dvh] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] rounded-t-3xl border bg-white px-4 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] pt-4"
         style={{ borderColor: BORDER }}
       >
         <div className="mb-3 flex items-start justify-between">
@@ -83,7 +90,13 @@ export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated, onOpenC
                 : `${copy.hostWants} ${formatShopUsd(active.amountUsd)}`}
             </p>
           </div>
-          <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-full border" style={{ borderColor: BORDER }}>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border"
+            style={{ borderColor: BORDER }}
+            aria-label={common.close}
+          >
             <X className="h-4 w-4 text-red-600" />
           </button>
         </div>
@@ -99,11 +112,12 @@ export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated, onOpenC
               <Check className="h-4 w-4" />
               {copy.acceptCounter} {formatShopUsd(active.amountUsd)}
             </button>
-            <label className="mt-3 block text-sm font-semibold text-gray-700">
+            <label className="mt-3 block text-sm font-semibold text-gray-700" htmlFor={counterField.input.id}>
               {copy.newOfferLabel}
               <div className="relative mt-1.5">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                 <input
+                  {...counterField.input}
                   type="number"
                   value={counterAmount}
                   onChange={(event) => {
@@ -111,7 +125,7 @@ export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated, onOpenC
                     setError(null);
                   }}
                   className="w-full rounded-xl border py-3 pl-7 pr-3"
-                  style={{ borderColor: BORDER }}
+                  style={{ borderColor: error ? "#f87171" : BORDER }}
                 />
               </div>
             </label>
@@ -130,7 +144,9 @@ export function GarageMyOfferSheet({ listing, offer, onClose, onUpdated, onOpenC
           </p>
         )}
 
-        {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
+        {counterField.errorMessage ? (
+          <p {...counterField.errorMessage} className="mt-2 text-sm text-red-600" />
+        ) : null}
       </div>
     </div>
   );

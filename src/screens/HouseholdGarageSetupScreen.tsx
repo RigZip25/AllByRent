@@ -235,7 +235,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
         className="shrink-0 border-b bg-white px-4 pb-3 pt-[max(1rem,env(safe-area-inset-top,0px))]"
         style={{ borderColor: BORDER }}
       >
-        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">
           {t.garageUi.householdStep(step, 4)}
         </p>
         <h1
@@ -278,7 +278,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
                 );
               })}
             </div>
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
               {t.garageUi.householdSeatsLabel}
             </p>
             <div className="space-y-2">
@@ -338,7 +338,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
             </div>
 
             <label className="block">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                 {t.garageUi.lookShopName}
               </span>
               <input
@@ -353,7 +353,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
             </label>
 
             <label className="block">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                 {t.garageUi.lookNeighborhood}
               </span>
               <input
@@ -393,7 +393,7 @@ export function HouseholdGarageSetupScreen({ onDone, onSkipAlone }: Props) {
                   <button
                     type="button"
                     onClick={() => setMembers((list) => list.filter((_, i) => i !== index))}
-                    className="rounded-lg p-1.5 text-gray-400 touch-manipulation"
+                    className="rounded-lg p-1.5 text-gray-500 touch-manipulation"
                     aria-label={t.common.cancel}
                   >
                     <Trash2 className="h-4 w-4" />

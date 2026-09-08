@@ -54,7 +54,7 @@ export function ProactiveAgentCard({
       <button
         type="button"
         onClick={handleDismiss}
-        className="absolute right-3 top-3 rounded-full p-1 text-gray-400 hover:bg-gray-100"
+        className="absolute right-3 top-3 rounded-full p-1 text-gray-500 hover:bg-gray-100"
         aria-label="Dismiss suggestion"
       >
         <X className="h-4 w-4" />
@@ -67,7 +67,7 @@ export function ProactiveAgentCard({
           <Sparkles className="h-5 w-5" style={{ color: AMBER }} aria-hidden />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
             {MASCOT_NAME} suggests
           </p>
           <p className="mt-0.5 text-[15px] font-bold" style={{ color: GREEN }}>

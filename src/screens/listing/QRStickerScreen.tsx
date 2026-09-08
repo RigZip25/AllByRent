@@ -206,7 +206,7 @@ export function QRStickerScreen({
 
   return (
     <motion.div
-      className="mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col bg-white"
+      className="mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col bg-white"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
     >
@@ -428,7 +428,7 @@ export function QRStickerScreen({
           onClick={() => setActionsOpen(false)}
         >
           <div
-            className="flex max-h-[85vh] w-full max-w-[390px] flex-col rounded-2xl bg-white p-5 shadow-xl"
+            className="flex max-h-[85vh] w-full max-w-[430px] flex-col rounded-2xl bg-white p-5 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-base font-bold" style={{ color: GREEN }}>

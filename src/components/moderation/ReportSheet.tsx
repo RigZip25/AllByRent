@@ -90,7 +90,7 @@ export function ReportSheet({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
       <button type="button" className="absolute inset-0" aria-label={common.close} onClick={onClose} />
       <div
-        className="relative w-full max-w-[390px] max-h-[90dvh] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] rounded-t-3xl border bg-white px-4 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] pt-4"
+        className="relative w-full max-w-[430px] max-h-[90dvh] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] rounded-t-3xl border bg-white px-4 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] pt-4"
         style={{ borderColor: BORDER }}
         role="dialog"
         aria-modal="true"

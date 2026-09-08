@@ -72,7 +72,7 @@ export function ListingIntro({
   const slideWidthPercent = 100 / slides.length;
 
   return (
-    <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-white">
+    <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden bg-white">
       <header
         className="flex shrink-0 items-center justify-between border-b px-4 py-2"
         style={{ borderColor: `${PRIMARY_GREEN}33` }}

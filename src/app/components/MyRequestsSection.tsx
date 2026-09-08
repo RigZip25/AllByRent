@@ -112,7 +112,7 @@ export function MyRequestsSection({
                       {request.description}
                     </span>
                   </span>
-                  <span className="shrink-0 text-[11px] font-semibold text-gray-400">
+                  <span className="shrink-0 text-[11px] font-semibold text-gray-500">
                     {statusLabel(request)}
                   </span>
                   <ChevronRight className="mt-0.5 h-4 w-4 shrink-0" style={{ color: GREEN }} />

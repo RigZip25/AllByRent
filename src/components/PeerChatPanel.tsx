@@ -293,7 +293,7 @@ export function PeerChatPanel({
                 {m.body}
                 <div
                   className={`mt-1 flex items-center gap-2 text-[10px] ${
-                    failed ? "text-amber-800" : mine ? "text-white/70" : "text-gray-400"
+                    failed ? "text-amber-800" : mine ? "text-white/70" : "text-gray-500"
                   }`}
                 >
                   {new Date(m.createdAt).toLocaleString()}
@@ -305,7 +305,7 @@ export function PeerChatPanel({
                       onClick={() => setReported(m)}
                       aria-label={moderation.reportMessage}
                       title={moderation.reportMessage}
-                      className="ml-auto flex h-6 w-6 touch-manipulation items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                      className="ml-auto flex h-6 w-6 touch-manipulation items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-600"
                     >
                       <Flag className="h-3 w-3" aria-hidden />
                     </button>

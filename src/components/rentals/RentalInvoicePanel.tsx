@@ -343,7 +343,7 @@ export function RentalInvoicePanel({
                   type="button"
                   aria-label={copy.invoiceRemoveLine}
                   onClick={() => setLines((prev) => prev.filter((_, i) => i !== idx))}
-                  className="text-sm text-gray-400 hover:text-red-600"
+                  className="text-sm text-gray-500 hover:text-red-600"
                 >
                   ×
                 </button>

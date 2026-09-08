@@ -4,7 +4,7 @@ import { useMessages } from "../../lib/i18n/react";
 export function OfflineScreen({ onRetry }: { onRetry?: () => void }) {
   const { systemUi: t } = useMessages();
   return (
-    <div className="screen mx-auto flex h-full w-full max-w-[390px] flex-col items-center justify-center bg-white px-6 text-center">
+    <div className="screen mx-auto flex h-full w-full max-w-[430px] flex-col items-center justify-center bg-white px-6 text-center">
       <p className="text-4xl" aria-hidden>
         📡
       </p>

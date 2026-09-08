@@ -127,7 +127,7 @@ export function PasskeySetup({
       <div
         role="dialog"
         aria-modal="true"
-        className="relative w-full max-w-[390px] rounded-3xl bg-white p-5 shadow-2xl"
+        className="relative w-full max-w-[430px] rounded-3xl bg-white p-5 shadow-2xl"
         onClick={(event) => event.stopPropagation()}
       >
         <button

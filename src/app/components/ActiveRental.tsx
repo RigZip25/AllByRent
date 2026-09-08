@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   ScanLine,
   Shield,
   MessageCircle,
@@ -13,6 +12,7 @@ import {
   Mail,
 } from "lucide-react";
 import { useEffect, useMemo, useState, useCallback } from "react";
+import { BackIconButton } from "../../components/a11y/BackIconButton";
 import { useAuth } from "../../hooks/AuthProvider";
 import {
   loadRentalBookings,
@@ -1316,12 +1316,7 @@ export function ActiveRental({
     return (
       <div className="screen bg-background flex flex-col">
         <div className="shrink-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-3 sm:px-4 py-3 flex items-center gap-3">
-          <button
-            onClick={onBack}
-            className="p-2 hover:bg-muted rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <BackIconButton label={t.common.back} onClick={onBack} className="hover:bg-muted" />
           <h1 className="font-semibold flex-1">{t.rentalDetail.title}</h1>
         </div>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
@@ -1343,12 +1338,7 @@ export function ActiveRental({
   return (
     <div className="screen bg-background flex flex-col">
       <div className="shrink-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-3 sm:px-4 py-3 flex items-center gap-3">
-        <button
-          onClick={onBack}
-          className="p-2 hover:bg-muted rounded-full transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
+        <BackIconButton label={t.common.back} onClick={onBack} className="hover:bg-muted" />
         <h1 className="font-semibold flex-1">{t.rentalDetail.title}</h1>
       </div>
 
@@ -2827,7 +2817,7 @@ export function ActiveRental({
                 ) : null}
 
                 <div>
-                  <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+                  <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">
                     {t.rentalDetail.evidence}
                   </p>
                   <div className="mt-2 grid grid-cols-3 gap-2">
@@ -2842,7 +2832,7 @@ export function ActiveRental({
                         />
                       ))}
                   </div>
-                  <p className="mt-2 text-[11px] text-gray-400">{t.rentalDetail.visibleToBoth}</p>
+                  <p className="mt-2 text-[11px] text-gray-500">{t.rentalDetail.visibleToBoth}</p>
                 </div>
 
                 {dispute.status !== "resolved" ? (

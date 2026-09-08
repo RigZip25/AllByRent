@@ -267,7 +267,7 @@ export function NotificationsScreen({
 
       <div className="screen-scroll flex-1 px-4 py-6" role="tabpanel">
         {auth.userId && canOfferPush ? (
-          <div className="mx-auto mb-4 max-w-[390px] rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
+          <div className="mx-auto mb-4 max-w-[430px] rounded-2xl border bg-white p-4" style={{ borderColor: BORDER }}>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-gray-900">{n.pushTitle}</p>
@@ -312,13 +312,13 @@ export function NotificationsScreen({
           </div>
         ) : null}
 
-        <div className="mx-auto mb-4 max-w-[390px]">
+        <div className="mx-auto mb-4 max-w-[430px]">
           <NotificationPreferencesPanel />
         </div>
 
         {messageItems.length > 0 ? (
-          <div className="mx-auto mb-6 max-w-[390px]">
-            <p className="mb-3 px-1 text-[13px] font-semibold uppercase tracking-wide text-gray-400">
+          <div className="mx-auto mb-6 max-w-[430px]">
+            <p className="mb-3 px-1 text-[13px] font-semibold uppercase tracking-wide text-gray-500">
               {n.messagesSection}
             </p>
             <ul className="flex flex-col gap-3">
@@ -344,7 +344,7 @@ export function NotificationsScreen({
                         {item.title}
                       </p>
                       <p className="mt-0.5 text-[14px] leading-snug text-gray-500">{item.body}</p>
-                      <p className="mt-2 text-[11px] text-gray-400">
+                      <p className="mt-2 text-[11px] text-gray-500">
                         {new Date(item.createdAt).toLocaleString()}
                       </p>
                     </div>
@@ -356,8 +356,8 @@ export function NotificationsScreen({
         ) : null}
 
         {filteredItems.length > 0 ? (
-          <div className="mx-auto mb-6 max-w-[390px]">
-            <p className="mb-3 px-1 text-[13px] font-semibold uppercase tracking-wide text-gray-400">
+          <div className="mx-auto mb-6 max-w-[430px]">
+            <p className="mb-3 px-1 text-[13px] font-semibold uppercase tracking-wide text-gray-500">
               {n.inbox}
             </p>
             <ul className="flex flex-col gap-3">
@@ -392,7 +392,7 @@ export function NotificationsScreen({
                           ) : null}
                         </div>
                         <p className="mt-0.5 text-[14px] leading-snug text-gray-500">{item.body}</p>
-                        <p className="mt-2 text-[11px] text-gray-400">
+                        <p className="mt-2 text-[11px] text-gray-500">
                           {new Date(item.createdAt).toLocaleString()}
                         </p>
                       </div>
@@ -407,8 +407,8 @@ export function NotificationsScreen({
           </div>
         ) : null}
         {showUpdateInTab && (updateAvailable || updateJustCompleted) ? (
-          <div className="mx-auto mb-6 max-w-[390px]">
-            <p className="mb-3 px-1 text-[13px] font-semibold uppercase tracking-wide text-gray-400">
+          <div className="mx-auto mb-6 max-w-[430px]">
+            <p className="mb-3 px-1 text-[13px] font-semibold uppercase tracking-wide text-gray-500">
               {n.appUpdates}
             </p>
             <ul className="flex flex-col gap-3">
@@ -439,7 +439,7 @@ export function NotificationsScreen({
             </h2>
             <p className="mt-2 text-[15px] leading-relaxed text-gray-500">{empty.body}</p>
             {"hint" in empty && empty.hint ? (
-              <p className="mt-2 text-[13px] leading-relaxed text-gray-400">{empty.hint}</p>
+              <p className="mt-2 text-[13px] leading-relaxed text-gray-500">{empty.hint}</p>
             ) : null}
           </div>
         ) : null}
@@ -449,7 +449,7 @@ export function NotificationsScreen({
         ) : null}
 
         {tab === "all" && !updateAvailable && !updateJustCompleted ? (
-          <p className="mx-auto mt-6 max-w-[320px] text-center text-[13px] leading-relaxed text-gray-400">
+          <p className="mx-auto mt-6 max-w-[320px] text-center text-[13px] leading-relaxed text-gray-500">
             {n.modeFooter}
           </p>
         ) : null}

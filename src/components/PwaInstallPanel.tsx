@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ExternalLink, Share } from "lucide-react";
-import { APP_NAME, BRAND_AMBER, BRAND_GREEN, PWA_SHORT_NAME } from "../lib/brand";
+import { APP_NAME, BRAND_AMBER, BRAND_CTA_ON_AMBER, BRAND_GREEN, PWA_SHORT_NAME } from "../lib/brand";
 import { useMessages } from "../lib/i18n/react";
 import { PWA_INSTALL_DISMISS_DAYS } from "../lib/pwaInstall";
 
@@ -128,7 +128,7 @@ export function PwaInstallPanel({
                 type="button"
                 onClick={onInstall}
                 className="mt-2.5 inline-flex w-full items-center justify-center rounded-full px-4 py-2.5 text-sm font-bold shadow-md transition-opacity active:opacity-90"
-                style={{ backgroundColor: BRAND_AMBER, color: BRAND_GREEN }}
+                style={{ backgroundColor: BRAND_AMBER, color: BRAND_CTA_ON_AMBER }}
               >
                 {t.installShort(PWA_SHORT_NAME)}
               </button>

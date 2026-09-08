@@ -105,7 +105,7 @@ function ModalShell({
         <motion.div
           role="dialog"
           aria-modal="true"
-          className="w-full max-w-[390px] overflow-hidden rounded-3xl bg-white shadow-2xl"
+          className="w-full max-w-[430px] overflow-hidden rounded-3xl bg-white shadow-2xl"
           initial={{ y: 18, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 18, opacity: 0 }}
@@ -389,7 +389,7 @@ export function ListingSummary({
 
   if (!listing) {
     return (
-      <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden" style={{ backgroundColor: BACKGROUND }}>
+      <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden" style={{ backgroundColor: BACKGROUND }}>
         <header className="shrink-0 bg-white px-4 pb-3 pt-4">
           <div className="relative flex items-center justify-center">
             <button
@@ -451,7 +451,7 @@ export function ListingSummary({
   };
 
   return (
-    <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden" style={{ backgroundColor: BACKGROUND }}>
+    <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden" style={{ backgroundColor: BACKGROUND }}>
       <header className="shrink-0 bg-white px-4 pb-3 pt-4">
         <div className="relative flex items-center justify-center">
           <button

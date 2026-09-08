@@ -22,6 +22,7 @@ import { loadUserProfile } from "../lib/userProfileStorage";
 import { useMessages } from "../lib/i18n/react";
 import { RentanoTip } from "./RentanoTip";
 import { AddressLocationPicker } from "./AddressLocationPicker";
+import { fieldErrorProps } from "../lib/a11yFieldError";
 import type { LocationSuggestion } from "../lib/geocoding";
 
 const BORDER = "#E8E6E0";
@@ -161,6 +162,22 @@ export function AuthGate({
   const [otpCode, setOtpCode] = useState("");
   const [showPasskey, setShowPasskey] = useState(() => shouldShowPasskeyLogin());
 
+  const accountErrorField =
+    error === a.nameRequired
+      ? "auth-name"
+      : error === a.locationRequired
+        ? "auth-email"
+        : "auth-email";
+  const nameField = fieldErrorProps(
+    "auth-name",
+    step === "account" && accountErrorField === "auth-name" ? error : null,
+  );
+  const emailField = fieldErrorProps(
+    "auth-email",
+    step === "account" && accountErrorField === "auth-email" ? error : null,
+  );
+  const otpField = fieldErrorProps("auth-otp", step === "confirm" ? error : null);
+
   const canUseSupabase = useMemo(() => configured, [configured]);
   const isSignUp = mode === "signUp";
   const isSignIn = mode === "signIn";
@@ -248,7 +265,20 @@ export function AuthGate({
   useEffect(() => {
     if (!open) return;
     pushOverlay("auth-gate", () => onDismiss?.());
-    return () => removeOverlay("auth-gate");
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onDismiss?.();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      removeOverlay("auth-gate");
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
   }, [open, onDismiss]);
 
   if (!open) return null;
@@ -405,7 +435,7 @@ export function AuthGate({
       className="fixed inset-0 z-[90] overflow-y-auto overscroll-y-contain bg-black/45 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]"
       onClick={() => onDismiss?.()}
     >
-      <div className="mx-auto flex min-h-min w-full max-w-[390px] justify-center py-2">
+      <div className="mx-auto flex min-h-min w-full max-w-[430px] justify-center py-2">
         <div
           role="dialog"
           aria-modal="true"
@@ -416,7 +446,7 @@ export function AuthGate({
           <button
             type="button"
             onClick={onDismiss}
-            className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#374151]"
+            className="absolute right-4 top-4 inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-[#F3F4F6] text-[#374151]"
             aria-label={a.closeAria}
           >
             <X className="h-5 w-5 text-red-600" />
@@ -441,7 +471,19 @@ export function AuthGate({
         ) : null}
 
         {error ? (
-          <div className="mt-3 rounded-2xl border bg-[#FEF2F2] p-3 text-[13px] text-red-700">{error}</div>
+          <div
+            id={
+              step === "confirm"
+                ? otpField.errorId
+                : accountErrorField === "auth-name"
+                  ? nameField.errorId
+                  : emailField.errorId
+            }
+            role="alert"
+            className="mt-3 rounded-2xl border bg-[#FEF2F2] p-3 text-[13px] text-red-700"
+          >
+            {error}
+          </div>
         ) : null}
 
         {step === "account" ? (
@@ -461,7 +503,7 @@ export function AuthGate({
                 <p className="mt-2 text-center text-[12px] text-gray-500">{a.faceIdHint}</p>
                 <div className="my-4 flex items-center gap-3">
                   <div className="h-px flex-1 bg-gray-200" />
-                  <span className="text-[12px] font-medium text-gray-400">{a.orEmail}</span>
+                  <span className="text-[12px] font-medium text-gray-500">{a.orEmail}</span>
                   <div className="h-px flex-1 bg-gray-200" />
                 </div>
               </div>
@@ -497,7 +539,7 @@ export function AuthGate({
                   {a.nameLabel}
                 </label>
                 <input
-                  id="auth-name"
+                  {...nameField.input}
                   type="text"
                   autoComplete="name"
                   autoFocus={!showPasskey}
@@ -514,7 +556,7 @@ export function AuthGate({
               {a.emailLabel}
             </label>
             <input
-              id="auth-email"
+              {...emailField.input}
               type="email"
               inputMode="email"
               autoComplete="email"
@@ -532,7 +574,7 @@ export function AuthGate({
             {showProfileFields ? (
               <>
                 <label className="mt-3 block text-[13px] font-semibold text-gray-600" htmlFor="auth-phone">
-                  {a.phoneLabel} <span className="font-normal text-gray-400">{a.phoneOptional}</span>
+                  {a.phoneLabel} <span className="font-normal text-gray-500">{a.phoneOptional}</span>
                 </label>
                 <input
                   id="auth-phone"
@@ -650,7 +692,7 @@ export function AuthGate({
               {a.otpLabel}
             </label>
             <input
-              id="auth-otp"
+              {...otpField.input}
               type="text"
               inputMode="numeric"
               autoComplete="one-time-code"
@@ -664,7 +706,7 @@ export function AuthGate({
               className={`w-full rounded-2xl border bg-white px-4 py-3 text-center outline-none focus:ring-2 focus:ring-[#0D5C3A]/30 ${
                 otpCode.length > 0
                   ? "text-[22px] font-bold tracking-[0.35em] tabular-nums text-gray-900"
-                  : "text-[15px] font-normal tracking-normal text-gray-900 placeholder:text-[14px] placeholder:font-normal placeholder:tracking-normal placeholder:text-gray-400"
+                  : "text-[15px] font-normal tracking-normal text-gray-900 placeholder:text-[14px] placeholder:font-normal placeholder:tracking-normal placeholder:text-gray-500"
               }`}
               style={{ borderColor: BORDER }}
             />
@@ -696,7 +738,7 @@ export function AuthGate({
           </div>
         ) : null}
 
-        <p className="mt-4 text-center text-[12px] text-gray-400">{a.freeToJoin}</p>
+        <p className="mt-4 text-center text-[12px] text-gray-500">{a.freeToJoin}</p>
         </div>
       </div>
     </div>

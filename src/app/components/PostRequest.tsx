@@ -232,7 +232,7 @@ function CategoryPicker({
                     </span>
                   ) : null}
                 </span>
-                <span className="shrink-0 text-[11px] font-medium text-gray-400">
+                <span className="shrink-0 text-[11px] font-medium text-gray-500">
                   {entry.personal.length + entry.professional.length}
                 </span>
                 <ChevronDown
@@ -242,12 +242,12 @@ function CategoryPicker({
               </button>
               {open ? (
                 <div className="space-y-3 border-t px-3 pb-3 pt-2.5" style={{ borderColor: BORDER }}>
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                     {selectSubcategoryLabel}
                   </p>
                   {entry.personal.length > 0 ? (
                     <div>
-                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
                         {householdLabel}
                       </p>
                       <SubPickList
@@ -259,7 +259,7 @@ function CategoryPicker({
                   ) : null}
                   {entry.professional.length > 0 ? (
                     <div>
-                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
                         {proLabel}
                       </p>
                       <SubPickList

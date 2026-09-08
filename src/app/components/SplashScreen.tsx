@@ -208,7 +208,7 @@ function SplashDynamic({ onDone, preview }: { onDone: () => void; preview: boole
     >
       <div className="splash-v2-safe relative flex min-h-0 flex-1 flex-col">
         <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-5 pb-2">
-          <div className="relative flex h-[clamp(19rem,52dvh,30rem)] w-full max-w-[390px] items-center justify-center">
+          <div className="relative flex h-[clamp(19rem,52dvh,30rem)] w-full max-w-[430px] items-center justify-center">
             {/* Orbit around Mr. Evorios, then settle into the row below */}
             <AnimatePresence>
               {showIcons &&
@@ -298,7 +298,7 @@ function SplashDynamic({ onDone, preview }: { onDone: () => void; preview: boole
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className="mt-1 w-full max-w-[390px] px-2 text-center"
+                className="mt-1 w-full max-w-[430px] px-2 text-center"
               >
                 <p className="text-[clamp(0.95rem,4.2vw,1.75rem)] font-medium leading-snug text-[#0D5C3A]/90">
                   {messages.tagline}
