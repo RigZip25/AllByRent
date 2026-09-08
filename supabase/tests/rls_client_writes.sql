@@ -92,7 +92,11 @@ begin
     now()
   );
 
-  -- R10: a review needs a rental both people took part in.
+  -- R10 / V4: reviews need a completed rental both people took part in.
+  update public.rentals
+  set status = 'completed'
+  where id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+
   blocked := false;
   begin
     insert into public.reviews (id, rental_id, reviewer_id, reviewee_id, role, rating)

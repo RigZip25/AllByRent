@@ -280,18 +280,20 @@ alter table public.reviews
   foreign key (rental_id) references public.rentals (id) on delete set null;
 
 -- ---------------------------------------------------------------------------
--- public_profiles: expose reviews_count
+-- public_profiles: expose reviews_count (drop+create — cannot insert a column
+-- mid-list with CREATE OR REPLACE VIEW)
 -- ---------------------------------------------------------------------------
-create or replace view public.public_profiles as
+drop view if exists public.public_profiles;
+create view public.public_profiles as
 select
   id,
   display_name,
   rating,
-  reviews_count,
   identity_verified,
   phone_verified,
   created_at,
-  avatar_path
+  avatar_path,
+  reviews_count
 from public.profiles;
 
 alter view public.public_profiles set (security_invoker = false);
