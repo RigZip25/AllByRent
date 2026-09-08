@@ -2,8 +2,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Bike, Camera, Car, Guitar, Home, MapPin, Tent } from "lucide-react";
-import mascotImg from "../../imports/rentano_splash_transparent.png";
-import evoriosSplashImg from "../../imports/evorios_splash_garage.png";
+import mascotImg from "../../imports/rentano_splash_transparent.webp";
+import evoriosSplashImg from "../../imports/evorios_splash_garage.webp";
 import { EvoriosWordmark } from "../../components/EvoriosWordmark";
 import { BRAND_GREEN, MASCOT_NAME } from "../../lib/brand";
 import { useMessages } from "../../lib/i18n/react";
@@ -117,7 +117,7 @@ function SplashArtOnly() {
           />
         </div>
         <p className="pointer-events-none shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] text-center text-xs text-[#0D5C3A]/45">
-          Art only — <code className="rounded bg-[#0D5C3A]/8 px-1">evorios_splash_garage.png</code>
+          Art only — <code className="rounded bg-[#0D5C3A]/8 px-1">evorios_splash_garage.webp</code>
         </p>
       </div>
     </div>

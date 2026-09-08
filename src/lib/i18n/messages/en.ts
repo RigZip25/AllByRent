@@ -354,6 +354,8 @@ export const en: AppMessages = {
     noMatches: (query) => `No matches for “${query}”`,
     noMatchesHint: "Try fewer keywords, or post a request so hosts know what to list.",
     postRequestFor: (query) => `Post request for “${query}”`,
+    asksTitle: "Neighbors asking here",
+    asksHint: (city) => `Open requests on this shelf in ${city}`,
     empty: {
       rentanoEarn: (category, city) =>
         `Zero competition in ${category} in ${city}. First host takes all the demand.`,
@@ -370,6 +372,8 @@ export const en: AppMessages = {
       recentRequests: (city) => `Recent requests near ${city}`,
       wanted: "Wanted",
       listToFulfill: "List to fulfill →",
+      openAsk: "Open request",
+      guestAsksHint: "Sign in to answer a request or post your own.",
     },
     founding: {
       listFirstCta: "List your first item",
@@ -612,6 +616,8 @@ export const en: AppMessages = {
       "Open an active rental and tap Message, or message a seller from a listing — threads show up here.",
     rental: "Rental",
     buyGift: "Buy / gift",
+    request: "Request",
+    requestFallback: "Request chat",
     tapToDiscuss: "Tap to discuss pickup details",
   },
   howItWorks: {
@@ -755,6 +761,13 @@ export const en: AppMessages = {
     guidesProfileBody: "Name, phone, payouts, sign-out",
   },
   garageUi: {
+    asksTitle: "Your requests",
+    asksHint: "What you asked neighbors for",
+    asksEmpty: "You haven't asked for anything yet.",
+    asksEmptyCta: "Ask neighbors for something",
+    asksOpenCount: (n) => (n === 1 ? "1 open" : `${n} open`),
+    asksSeeAll: "See all",
+    asksBack: "Back to garage",
     shop: "Shop",
     previewNeighbor: "Neighbor view",
     lookShow: "Garage look · personal / pro",
@@ -942,6 +955,12 @@ export const en: AppMessages = {
     outcomeFavorRenter: "Favor renter",
     outcomeFavorHost: "Favor host",
     outcomeSplit: "Split / compromise",
+    disputeDepositReleasedTitle: "Dispute resolved — hold released",
+    disputeDepositReleasedBody:
+      "The deposit hold on the renter's card has been released. Banks can take a few days to show it.",
+    disputeClaimWindowTitle: "Dispute resolved — claim the deposit",
+    disputeClaimWindowBody: (hours) =>
+      `You have ${hours} hours to claim what you are owed from the deposit hold. Anything you do not claim is released back to the renter.`,
     outcomeWithdrawn: "Withdraw dispute",
     waitingCounterpartyAck: "Waiting for the other party to accept this resolution.",
     acceptResolution: "Accept resolution",
@@ -963,6 +982,8 @@ export const en: AppMessages = {
     depositStatusReleased: "Deposit: released",
     depositStatusClaimed: "Deposit: claimed by host",
     depositHoldActiveBody: "Hold is active. Owner can claim within 48h after return; otherwise release to renter.",
+    depositActionFailed: "That didn't go through. The hold is unchanged — try again.",
+    depositAutoReleaseHint: (date) => `If nobody claims against it, the hold lifts on ${date}.`,
     resolvedCalm: (outcome) => `Dispute resolved (${outcome}). Thank you for handling this carefully.`,
     underReviewCalm: "Under review — both parties can still add evidence. Resolve together or email support.",
     rentalItemFallback: "Rental item",
@@ -1260,11 +1281,10 @@ export const en: AppMessages = {
     invoiceKindFine: "Fine / penalty",
     invoiceKindNoShow: "No-show",
     invoiceKindDamage: "Damage",
+    invoiceKindExtension: "Extra days",
     invoiceKindCustom: "Custom",
     invoiceStripeScaffold:
       "Card payment link is scaffolded — invoices still save on the rental when card pay isn’t configured yet.",
-    call: "Call",
-    phoneSharedAfterCheckin: "Phone numbers are shared in chat after check-in",
     close: "Close",
     beforeCheckIn: "Before you check in",
     inspectItem: "Inspect the item for any existing damage",
@@ -1300,7 +1320,7 @@ export const en: AppMessages = {
     cancelRefundReleased: "Any card authorization is being released.",
     datesAdjustTitle: "Change rental dates",
     datesAdjustBody:
-      "Extend when later days are still free on the calendar. Early return is always available — finish handoff when you’re done.",
+      "Extend when later days are still free on the calendar — the extra days are charged before the end date moves. Early return is always available: finish handoff when you’re done.",
     extendBooking: "Extend booking",
     extendNewEnd: "New end date",
     extendConfirm: "Confirm extension",
@@ -1308,13 +1328,14 @@ export const en: AppMessages = {
     extendUnavailable: "Those dates aren’t free — pick another end day.",
     extendInvalid: "Choose an end date after the current one.",
     extendSuccess: (date) => `Extended through ${date}.`,
-    earlyReturn: "Return early",
-    earlyReturnConfirmBody:
-      "Shorten this rental to today. You’ll still complete the return handoff with the host. Pricing adjustments (if any) are handled between you — calendar days free up immediately.",
-    earlyReturnConfirm: "Yes, end early today",
-    earlyReturnWorking: "Updating...",
-    earlyReturnInvalid: "Early return isn’t available for this status.",
-    earlyReturnSuccess: (date) => `Rental end set to ${date}. Complete return handoff when ready.`,
+    extendQuote: (days, amount) =>
+      `${days === 1 ? "1 extra day" : `${days} extra days`} · ${amount}`,
+    extendPayCta: (amount) => `Add to charges · ${amount}`,
+    extendInvoiceIssued:
+      "The extra days are in Charges below. The end date moves once you pay them.",
+    extendPaidNote: "Extra days are charged at the host’s daily rate.",
+    earlyReturnHint:
+      "Done early? Return it whenever you like — the rental ends once the host accepts the return. The booked days stay charged as agreed.",
     cancelRefundFullProcessing:
       "A full refund was submitted — banks can take a few business days to show it.",
     cancelRefundPartialProcessing: (percent) =>
@@ -1382,11 +1403,14 @@ export const en: AppMessages = {
     cancelBooking: "Cancel booking",
     runningLateTitle: (ownerName) => `Send a message to ${ownerName}?`,
     runningLateBody:
-      "They'll get a push and in-app message. If they reply OK, the no-show timer resets.",
+      "The host sees this on the booking, and no-show is held off for an hour from now.",
     runningLateDefault: "I'm running a bit late, be there soon.",
     runningLateNotifTitle: "Renter running late",
     runningLateNotifBody: (message) =>
-      `${message} — tap to acknowledge and pause no-show timer.`,
+      `${message} — no-show is held off for an hour.`,
+    runningLateFromRenter: (message) => `Running late: “${message}”`,
+    runningLateAck: "Got it",
+    runningLateAcknowledged: "You told them you'll wait",
   },
   rentalStatus: {
     pending_approval: "Awaiting approval",
@@ -1623,6 +1647,8 @@ export const en: AppMessages = {
       enhancementUnavailable:
         "Photo saved as-is — background polish wasn't available this time.",
       couldntAddPhoto: "Couldn't add this photo. Please try again.",
+      heicFailed:
+        "This iPhone photo (HEIC) couldn't be read here. Take a new shot, or switch Settings \u2192 Camera \u2192 Formats to \u201cMost Compatible\u201d and pick it again.",
       moderationNotListable:
         "We couldn't use this photo for a listing — it doesn't look like a clear product photo. Please try another shot of the item itself.",
       moderationProhibitedItem:
@@ -1633,6 +1659,7 @@ export const en: AppMessages = {
         "This photo is a bit hard to use — maybe weak lighting, blur, or the item isn't clearly visible. Try another angle with the item front and center.",
       moderationVerifyFailed:
         "We couldn't confirm this photo. That can happen with weak lighting, a blurry shot, an unclear item, or a photo that doesn't look like a listing. Please try another photo.",
+      moderationPhotoNumber: (position) => `Photo ${position}: `,
       verifyingPhotos: (mascot) => `${mascot} is checking your photos...`,
       moderationVideoNotListable:
         "We couldn't use this video for a listing — it doesn't look like a clear demo of the item. Please try another take of the item itself.",
@@ -6046,6 +6073,62 @@ export const en: AppMessages = {
     whenFlexible: "Flexible / ASAP",
     whenRange: (start, end) => `${start} - ${end}`,
     whenFrom: (start) => `From ${start}`,
+    signInTitle: "Sign in to ask your neighbors",
+    signInBody:
+      "A request goes out with your name so neighbors know who to reply to. Sign in first — it takes a minute.",
+    moderationEmpty: "Write a line about what you need.",
+    moderationTooShort: "A few more words, so neighbors know what to look for.",
+    moderationPhone:
+      "Leave the phone number out — anyone can read a request. Neighbors reply in the app.",
+    moderationEmail:
+      "Leave the email out — anyone can read a request. Neighbors reply in the app.",
+    moderationAddress:
+      "Leave the street address out — anyone can read a request. Share it in chat once someone replies.",
+    moderationOffPlatform: "Keep it in the app — WhatsApp and the like are not allowed here.",
+    moderationAbusive: "Let's keep it neighborly. Reword that and try again.",
+    savedLocallyTitle: "Saved on this device only",
+    savedLocallyBody: "We couldn't reach the neighborhood. Retry to publish it for neighbors.",
+    retryPublish: "Retry",
+    retrying: "Retrying…",
+    notifiedNeighbors: (n) =>
+      n === 1 ? "1 neighbor with this kind of item was notified." : `${n} neighbors with this kind of item were notified.`,
+    notifiedNobody: "Nobody stocks this shelf yet — share the link and we'll keep looking.",
+    neighborNotifyTitle: (subcategory) => `Wanted nearby: ${subcategory}`,
+    neighborNotifyBody: (city, need) => `A neighbor in ${city} is looking: ${need}`,
+    authorNotifyTitle: "Someone listed what you asked for",
+    authorNotifyBody: (listingTitle) => `${listingTitle} just went up near you. Take a look.`,
+  },
+  requestDetail: {
+    notFoundTitle: "Request not found",
+    notFoundBody: "This request may have expired or been withdrawn.",
+    yourAsk: "Your request",
+    statusOpen: "Open",
+    statusFulfilled: "Found",
+    statusCancelled: "Closed",
+    statusExpired: "Expired",
+    expiresInDays: (n) => (n === 1 ? "Expires tomorrow" : `Expires in ${n} days`),
+    expiresToday: "Expires today",
+    expiredBody: "Requests run for 30 days. Reopen it to put it back in front of neighbors.",
+    fulfilledBody: "You marked this as found. Neighbors no longer see it.",
+    cancelledBody: "You closed this request. Neighbors no longer see it.",
+    manageTitle: "Manage your request",
+    markFulfilled: "Mark as found",
+    reopen: "Reopen",
+    cancelAsk: "Close request",
+    deleteAsk: "Delete",
+    deleteConfirm: "Delete this request? Neighbors will stop seeing it.",
+    editText: "Edit text",
+    saveText: "Save",
+    cancelEdit: "Cancel",
+    updateFailed: "Couldn't update the request. Try again.",
+    messageAuthor: "Message the neighbor",
+    messageAuthorHint: "Have it? Say hello before you list it.",
+    budgetRent: (label) => `Up to ${label}/day`,
+    budgetBuy: (label) => `Up to ${label} to buy`,
+    withinRadius: (label) => `Within ${label}`,
+    needBy: (range) => `Needed ${range}`,
+    haveThisCta: "I have this — list it",
+    postedAgo: (date) => `Posted ${date}`,
   },
   faq,
   categoryFacts: categoryFactsEn,
@@ -6194,6 +6277,8 @@ export const en: AppMessages = {
     closedReadOnly: "Chat is closed for this rental. You can still read the history.",
     listingChatFallback: "Listing chat",
     listingChatSubtitle: "Chat about pickup · push when they reply",
+    requestChatFallback: "Request chat",
+    requestChatSubtitle: "About what your neighbor is looking for",
     moderationBlocked:
       "Message can't be sent — please keep communication respectful.",
     moderationOffPlatform:
@@ -6818,6 +6903,12 @@ export const en: AppMessages = {
     yesDelete: "Yes, delete",
     deleting: "Deleting...",
     deleteFailed: "Could not delete listing. Try again.",
+    deleteBlockedLiveRental: (count) =>
+      count === 1
+        ? "One rental on this listing is booked, out, or in dispute. Deleting it would delete that rental for both of you — finish or cancel it first."
+        : `${count} rentals on this listing are booked, out, or in dispute. Deleting it would delete them for both sides — finish or cancel them first.`,
+    pauseKeepsLiveRental:
+      "Pausing only stops new bookings. The rental already running carries on as agreed.",
     editAria: (label) => `Edit ${label}`,
     editTitle: (field) => `Edit ${field}`,
     editDailyPrice: "Daily price",

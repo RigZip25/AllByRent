@@ -3,7 +3,6 @@ import {
   ScanLine,
   Shield,
   MessageCircle,
-  Phone,
   CheckCircle2,
   Clock,
   Lock,
@@ -55,6 +54,7 @@ import { RentanoTip } from "../../components/RentanoTip";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
 import { DepositHoldActions } from "../../components/payments/DepositHoldActions";
 import { useMediaUrl } from "../../lib/useMediaUrl";
+import { useRentalDocumentUrl } from "../../lib/privateDocumentUrl";
 import {
   computeRentalPriceBreakdown,
   formatUsd,
@@ -74,13 +74,14 @@ import { completeHostNoShow } from "../../lib/rentalNoShowActions";
 import { listingNoShowFeeUsd } from "../../lib/noShowPolicy";
 import { RentalLifecyclePolicySheet } from "../../components/rentals/RentalLifecyclePolicySheet";
 import { formatMoney } from "../../lib/regionalDisplay";
+import { settleResolvedDispute } from "../../lib/disputeSettlement";
+import { bookingAllowsExtension } from "../../lib/rentalExtendReturn";
 import {
-  bookingAllowsEarlyReturn,
-  bookingAllowsExtension,
-  canEarlyReturnBooking,
-  canExtendRental,
-} from "../../lib/rentalExtendReturn";
-import { addDaysIso, todayIsoLocal } from "../../lib/availabilityBusy";
+  quoteRentalExtension,
+  requestRentalExtension,
+  type ExtensionQuote,
+} from "../../lib/rentalExtensionApi";
+import { addDaysIso } from "../../lib/availabilityBusy";
 import { getHomeLocation, getPublishedListingById } from "../../lib/listingStorage";
 import {
   listingRequiresCoiHostConfirm,
@@ -190,9 +191,7 @@ export function ActiveRental({
   const [extendDate, setExtendDate] = useState("");
   const [extendBusy, setExtendBusy] = useState(false);
   const [extendError, setExtendError] = useState<string | null>(null);
-  const [earlyReturnOpen, setEarlyReturnOpen] = useState(false);
-  const [earlyReturnBusy, setEarlyReturnBusy] = useState(false);
-  const [earlyReturnError, setEarlyReturnError] = useState<string | null>(null);
+  const [extendQuote, setExtendQuote] = useState<ExtensionQuote | null>(null);
   const [odometerOpen, setOdometerOpen] = useState(false);
   const [odometerValue, setOdometerValue] = useState("");
   const [odometerError, setOdometerError] = useState<string | null>(null);
@@ -336,7 +335,13 @@ export function ActiveRental({
     : undefined;
 
   const insuranceMedia = useMediaUrl(booking?.insuranceProofMedia ?? null);
-  const insuranceImageUrl = booking?.insuranceProofUrl || insuranceMedia.url;
+  // The proof lives in a private bucket: the host has no copy on this device
+  // and signs a link for it, the renter usually still has the blob.
+  const insuranceDocument = useRentalDocumentUrl(
+    booking?.insuranceProofPath,
+    booking?.insuranceProofUrl,
+  );
+  const insuranceImageUrl = insuranceMedia.url || insuranceDocument.url;
 
   useEffect(() => {
     setChatOpen(initialChatOpen);
@@ -366,8 +371,21 @@ export function ActiveRental({
     refreshDispute();
   }, [refreshDispute]);
 
-  const mode: "pickup" | "return" =
-    booking?.status === "pending_checkin" ? "pickup" : "return";
+  /**
+   * Which handoff this rental is at, if there is one at all.
+   *
+   * Everything that is not on the way to a pickup or a return has nothing left
+   * to scan: a cancelled booking, a no-show, a rental already back, one under
+   * dispute. Those used to fall through to "return", so the screen offered to
+   * accept the return of an item that was never handed over.
+   */
+  const handoffStage: "pickup" | "return" | null =
+    booking?.status === "pending_checkin" || booking?.status === "upcoming"
+      ? "pickup"
+      : booking?.status === "active" || booking?.status === "overdue"
+        ? "return"
+        : null;
+  const mode: "pickup" | "return" = handoffStage ?? "return";
 
   const overdueWarning =
     booking?.status === "overdue"
@@ -412,7 +430,7 @@ export function ActiveRental({
       booking.role === "host" &&
       !booking.noShowMarkedAt &&
       booking.pickupScheduledAt &&
-      canMarkNoShow(booking.pickupScheduledAt) &&
+      canMarkNoShow(booking.pickupScheduledAt, Date.now(), booking.pickupGraceUntil) &&
       (booking.status === "no_show" ||
         booking.status === "pending_checkin" ||
         booking.status === "upcoming"),
@@ -545,6 +563,7 @@ export function ActiveRental({
 
   const openScanner = () => {
     setNotice(null);
+    if (!handoffStage) return;
     if (mode === "pickup" && !agreementFullySigned(booking?.rentalAgreement)) {
       setNotice(t.rentalAgreement.blockHandoff);
       return;
@@ -555,7 +574,7 @@ export function ActiveRental({
       listingRequiresInsuranceProof(publishedListing) &&
       !usesAgentInsurance &&
       !booking?.insuranceProofMedia &&
-      !booking?.insuranceProofUrl;
+      !booking?.insuranceProofPath;
     if (needsInsurance && booking?.role === "renter") {
       setNotice(t.rentalDetail.insuranceUnlockBlocked);
       return;
@@ -969,6 +988,8 @@ export function ActiveRental({
           pin,
           odometerMiles,
           conditionPhoto,
+          // The condition photo is uploaded under this person's folder.
+          uploaderId: auth.userId ?? undefined,
           fuelLevelEighths: resolvedFuel ?? undefined,
           defLevelEighths: tracksDef ? resolvedDef ?? undefined : undefined,
           prepaidFullTank: extras?.prepaidFullTank,
@@ -1171,8 +1192,11 @@ export function ActiveRental({
   const canCancelHere = Boolean(booking && canCancelAcceptedBooking(booking));
   const showExtend =
     Boolean(booking?.role === "renter" && booking && bookingAllowsExtension(booking.status));
-  const showEarlyReturn =
-    Boolean(booking?.role === "renter" && booking && bookingAllowsEarlyReturn(booking.status));
+  /** Bringing it back sooner is the return handoff, done sooner. */
+  const showEarlyReturnHint = Boolean(
+    booking?.role === "renter" &&
+      (booking?.status === "active" || booking?.status === "overdue"),
+  );
 
   const cancelRefundPreview = useMemo(() => {
     if (!booking || !cancelAssessment) return "";
@@ -1196,69 +1220,64 @@ export function ActiveRental({
     setExtendDate(addDaysIso(booking.endDate, 1));
   }, [booking?.id, booking?.endDate]);
 
-  const handleExtend = useCallback(async () => {
+  /** Price the extra days. The server owns both the rate and the calendar. */
+  const handleQuoteExtension = useCallback(async () => {
+    if (!booking) return;
+    setExtendBusy(true);
+    setExtendError(null);
+    setExtendQuote(null);
+    try {
+      const result = await quoteRentalExtension({
+        rentalId: booking.id,
+        newEndDate: extendDate,
+      });
+      if (!result.ok) {
+        setExtendError(result.reason);
+        return;
+      }
+      setExtendQuote(result.quote);
+    } finally {
+      setExtendBusy(false);
+    }
+  }, [booking, extendDate]);
+
+  /**
+   * Bill for the days. The end date moves when the invoice is paid — or right
+   * away where there is no card to charge.
+   */
+  const handleRequestExtension = useCallback(async () => {
     if (!booking) return;
     setExtendBusy(true);
     setExtendError(null);
     try {
-      const listing = booking.listingId
-        ? getPublishedListingById(booking.listingId)
-        : null;
-      const result = await canExtendRental({
-        booking,
+      const result = await requestRentalExtension({
+        rentalId: booking.id,
         newEndDate: extendDate,
-        fallbackBlocked: listing?.blockedDates ?? [],
       });
       if (!result.ok) {
-        setExtendError(
-          result.reason === "busy"
-            ? t.rentalDetail.extendUnavailable
-            : t.rentalDetail.extendInvalid,
-        );
+        setExtendError(result.reason);
         return;
       }
-      const dueAt = new Date(`${result.newEndDate}T23:59:59`).toISOString();
-      setBookings(
-        updateBooking(booking.id, {
-          endDate: result.newEndDate,
-          returnDueAt: dueAt,
-          status: booking.status === "overdue" ? "active" : booking.status,
-        }),
-      );
+      if (result.applied) {
+        const dueAt = new Date(`${result.quote.newEndDate}T23:59:59`).toISOString();
+        setBookings(
+          updateBooking(booking.id, {
+            endDate: result.quote.newEndDate,
+            returnDueAt: dueAt,
+            status: booking.status === "overdue" ? "active" : booking.status,
+          }),
+        );
+        setNotice(t.rentalDetail.extendSuccess(result.quote.newEndDate));
+      } else {
+        setBookings(updateBooking(booking.id, { invoices: result.invoices }));
+        setNotice(t.rentalDetail.extendInvoiceIssued);
+      }
       setExtendOpen(false);
-      setNotice(t.rentalDetail.extendSuccess(result.newEndDate));
+      setExtendQuote(null);
     } finally {
       setExtendBusy(false);
     }
   }, [booking, extendDate, t.rentalDetail]);
-
-  const handleEarlyReturn = useCallback(() => {
-    if (!booking) return;
-    setEarlyReturnBusy(true);
-    setEarlyReturnError(null);
-    try {
-      const result = canEarlyReturnBooking({
-        booking,
-        newEndDate: todayIsoLocal(),
-      });
-      if (!result.ok) {
-        setEarlyReturnError(t.rentalDetail.earlyReturnInvalid);
-        return;
-      }
-      const dueAt = new Date(`${result.newEndDate}T23:59:59`).toISOString();
-      setBookings(
-        updateBooking(booking.id, {
-          endDate: result.newEndDate,
-          returnDueAt: dueAt,
-          status: booking.status === "overdue" ? "active" : booking.status,
-        }),
-      );
-      setEarlyReturnOpen(false);
-      setNotice(t.rentalDetail.earlyReturnSuccess(result.newEndDate));
-    } finally {
-      setEarlyReturnBusy(false);
-    }
-  }, [booking, t.rentalDetail]);
 
   const handleConfirmCancel = useCallback(async () => {
     if (!booking || !auth.userId) return;
@@ -1452,7 +1471,7 @@ export function ActiveRental({
           </div>
         ) : null}
 
-        {showExtend || showEarlyReturn ? (
+        {showExtend || showEarlyReturnHint ? (
           <div className="rounded-xl border border-border bg-card p-4 space-y-3">
             <p className="text-[14px] font-bold text-gray-900">{t.rentalDetail.datesAdjustTitle}</p>
             <p className="text-[13px] leading-relaxed text-gray-600">
@@ -1480,9 +1499,21 @@ export function ActiveRental({
                         className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm"
                         min={addDaysIso(booking!.endDate, 1)}
                         value={extendDate}
-                        onChange={(e) => setExtendDate(e.target.value)}
+                        onChange={(e) => {
+                          setExtendDate(e.target.value);
+                          setExtendQuote(null);
+                        }}
                       />
                     </label>
+                    <p className="text-[12px] text-gray-600">{t.rentalDetail.extendPaidNote}</p>
+                    {extendQuote ? (
+                      <p className="text-[13px] font-bold text-gray-900">
+                        {t.rentalDetail.extendQuote(
+                          extendQuote.extraDays,
+                          `$${formatUsd(extendQuote.totalCents / 100)}`,
+                        )}
+                      </p>
+                    ) : null}
                     {extendError ? (
                       <p className="text-xs font-semibold text-red-600">{extendError}</p>
                     ) : null}
@@ -1490,15 +1521,26 @@ export function ActiveRental({
                       <button
                         type="button"
                         disabled={extendBusy}
-                        onClick={() => void handleExtend()}
+                        onClick={() =>
+                          void (extendQuote ? handleRequestExtension() : handleQuoteExtension())
+                        }
                         className="rounded-xl bg-primary px-4 py-2.5 text-[13px] font-bold text-white disabled:opacity-60"
                       >
-                        {extendBusy ? t.rentalDetail.extendChecking : t.rentalDetail.extendConfirm}
+                        {extendBusy
+                          ? t.rentalDetail.extendChecking
+                          : extendQuote
+                            ? t.rentalDetail.extendPayCta(
+                                `$${formatUsd(extendQuote.totalCents / 100)}`,
+                              )
+                            : t.rentalDetail.extendConfirm}
                       </button>
                       <button
                         type="button"
                         disabled={extendBusy}
-                        onClick={() => setExtendOpen(false)}
+                        onClick={() => {
+                          setExtendOpen(false);
+                          setExtendQuote(null);
+                        }}
                         className="rounded-xl border border-border bg-white px-4 py-2.5 text-[13px] font-bold text-gray-700"
                       >
                         {t.rentalDetail.close}
@@ -1508,48 +1550,10 @@ export function ActiveRental({
                 )}
               </div>
             ) : null}
-            {showEarlyReturn ? (
-              <div>
-                {!earlyReturnOpen ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEarlyReturnOpen(true);
-                      setEarlyReturnError(null);
-                    }}
-                    className="rounded-xl border border-border bg-white px-4 py-2.5 text-[13px] font-bold text-gray-800"
-                  >
-                    {t.rentalDetail.earlyReturn}
-                  </button>
-                ) : (
-                  <div className="mt-1 space-y-2 rounded-xl border border-amber-100 bg-amber-50/70 p-3">
-                    <p className="text-[13px] text-amber-950">{t.rentalDetail.earlyReturnConfirmBody}</p>
-                    {earlyReturnError ? (
-                      <p className="text-xs font-semibold text-red-600">{earlyReturnError}</p>
-                    ) : null}
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        disabled={earlyReturnBusy}
-                        onClick={() => handleEarlyReturn()}
-                        className="rounded-xl bg-amber-800 px-4 py-2.5 text-[13px] font-bold text-white disabled:opacity-60"
-                      >
-                        {earlyReturnBusy
-                          ? t.rentalDetail.earlyReturnWorking
-                          : t.rentalDetail.earlyReturnConfirm}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={earlyReturnBusy}
-                        onClick={() => setEarlyReturnOpen(false)}
-                        className="rounded-xl border border-border bg-white px-4 py-2.5 text-[13px] font-bold text-gray-700"
-                      >
-                        {t.rentalDetail.close}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+            {showEarlyReturnHint ? (
+              <p className="rounded-xl border border-border bg-muted/40 px-3 py-2.5 text-[13px] leading-relaxed text-gray-700">
+                {t.rentalDetail.earlyReturnHint}
+              </p>
             ) : null}
           </div>
         ) : null}
@@ -1829,54 +1833,56 @@ export function ActiveRental({
           </div>
         ) : null}
 
-        <div className="bg-gradient-to-br from-primary/5 to-accent/5 border-2 border-primary/20 rounded-xl p-6">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-32 h-32 bg-white rounded-xl flex items-center justify-center mb-4 border-2 border-primary/10">
-              <ScanLine className="w-16 h-16 text-primary" />
-            </div>
+        {handoffStage ? (
+          <div className="bg-gradient-to-br from-primary/5 to-accent/5 border-2 border-primary/20 rounded-xl p-6">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-32 h-32 bg-white rounded-xl flex items-center justify-center mb-4 border-2 border-primary/10">
+                <ScanLine className="w-16 h-16 text-primary" />
+              </div>
 
-            <h3 className="font-bold text-lg mb-2">
-              {mode === "pickup"
-                ? booking.role === "host"
-                  ? t.rentalDetail.scanHandOver
-                  : t.rentalDetail.scanReceive
-                : booking.role === "renter"
-                  ? t.rentalDetail.scanReturnItem
-                  : t.rentalDetail.scanAcceptReturn}
-            </h3>
+              <h3 className="font-bold text-lg mb-2">
+                {mode === "pickup"
+                  ? booking.role === "host"
+                    ? t.rentalDetail.scanHandOver
+                    : t.rentalDetail.scanReceive
+                  : booking.role === "renter"
+                    ? t.rentalDetail.scanReturnItem
+                    : t.rentalDetail.scanAcceptReturn}
+              </h3>
 
-            <p className="text-sm text-muted-foreground mb-6 leading-relaxed max-w-xs">
-              {mode === "pickup"
-                ? booking.role === "host"
-                  ? t.rentalDetail.scanHandOverBody
-                  : t.rentalDetail.scanReceiveBody
-                : booking.role === "renter"
-                  ? t.rentalDetail.scanReturnItemBody
-                  : t.rentalDetail.scanAcceptReturnBody}
-            </p>
+              <p className="text-sm text-muted-foreground mb-6 leading-relaxed max-w-xs">
+                {mode === "pickup"
+                  ? booking.role === "host"
+                    ? t.rentalDetail.scanHandOverBody
+                    : t.rentalDetail.scanReceiveBody
+                  : booking.role === "renter"
+                    ? t.rentalDetail.scanReturnItemBody
+                    : t.rentalDetail.scanAcceptReturnBody}
+              </p>
 
-            <button
-              type="button"
-              onClick={openScanner}
-              disabled={alreadyConfirmed}
-              className="w-full bg-primary hover:bg-primary/90 text-white py-3.5 rounded-xl transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {alreadyConfirmed
-                ? t.rentalDetail.waitingOtherSide
-                : t.rentalDetail.scanQrCode}
-            </button>
-
-            {booking?.role === "host" && !alreadyConfirmed ? (
               <button
                 type="button"
-                onClick={() => setShowItemQrOpen(true)}
-                className="mt-3 w-full border-2 border-primary/30 text-primary py-3.5 rounded-xl transition-colors font-medium"
+                onClick={openScanner}
+                disabled={alreadyConfirmed}
+                className="w-full bg-primary hover:bg-primary/90 text-white py-3.5 rounded-xl transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {t.rentalDetail.showItemQr}
+                {alreadyConfirmed
+                  ? t.rentalDetail.waitingOtherSide
+                  : t.rentalDetail.scanQrCode}
               </button>
-            ) : null}
+
+              {booking?.role === "host" && !alreadyConfirmed ? (
+                <button
+                  type="button"
+                  onClick={() => setShowItemQrOpen(true)}
+                  className="mt-3 w-full border-2 border-primary/30 text-primary py-3.5 rounded-xl transition-colors font-medium"
+                >
+                  {t.rentalDetail.showItemQr}
+                </button>
+              ) : null}
+            </div>
           </div>
-        </div>
+        ) : null}
 
         {renterPickupLocation ? (
           <div className="bg-card rounded-xl border border-border p-4">
@@ -1983,7 +1989,7 @@ export function ActiveRental({
                 {t.rentalDetail.geoPinGateHint}
               </p>
             ) : null}
-            {booking.role === "host" ? (
+            {handoffStage && booking.role === "host" ? (
               <div className="mt-3 rounded-lg bg-muted p-3 text-sm">
                 <div className="font-medium">
                   {mode === "pickup" ? t.rentalDetail.pickupPin : t.rentalDetail.returnPin}:{" "}
@@ -1995,17 +2001,17 @@ export function ActiveRental({
                   {t.rentalDetail.pinShareHint}
                 </div>
               </div>
-            ) : (
+            ) : handoffStage ? (
               <div className="mt-3 rounded-lg bg-muted p-3 text-sm">
                 {t.rentalDetail.askHostForPin(
                   mode === "pickup" ? t.rentalDetail.pinStagePickup : t.rentalDetail.pinStageReturn,
                 )}
               </div>
-            )}
+            ) : null}
           </div>
         ) : null}
 
-        {booking?.insuranceProofMedia || booking?.insuranceProofUrl || booking?.insuranceActiveUntil ? (
+        {booking?.insuranceProofMedia || booking?.insuranceProofPath || booking?.insuranceActiveUntil ? (
           <div className="bg-card rounded-xl border border-amber-200 p-4">
             <div className="mb-2 flex items-center gap-2">
               <Shield className="h-5 w-5 text-amber-800" aria-hidden />
@@ -2087,32 +2093,22 @@ export function ActiveRental({
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setChatOpen(true)}
-                className="flex items-center justify-center gap-2 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span className="text-sm font-medium">
-                  {chatWindow?.mode === "post_rental_tolls"
-                    ? t.rentalDetail.messagePostRental
-                    : chatWindow?.readOnly
-                      ? t.rentalDetail.messageClosed
-                      : t.rentalDetail.message}
-                </span>
-              </button>
-
-              <button
-                type="button"
-                disabled
-                title={t.rentalDetail.phoneSharedAfterCheckin}
-                className="flex items-center justify-center gap-2 py-2.5 border border-border rounded-lg opacity-50 cursor-not-allowed"
-              >
-                <Phone className="w-4 h-4" />
-                <span className="text-sm font-medium">{t.rentalDetail.call}</span>
-              </button>
-            </div>
+            {/* Chat is the whole channel: no phone number is exchanged, so a
+                permanently greyed "Call" button only promised one. */}
+            <button
+              type="button"
+              onClick={() => setChatOpen(true)}
+              className="flex w-full items-center justify-center gap-2 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span className="text-sm font-medium">
+                {chatWindow?.mode === "post_rental_tolls"
+                  ? t.rentalDetail.messagePostRental
+                  : chatWindow?.readOnly
+                    ? t.rentalDetail.messageClosed
+                    : t.rentalDetail.message}
+              </span>
+            </button>
           </div>
         </div>
 
@@ -2274,7 +2270,7 @@ export function ActiveRental({
           </div>
         ) : null}
 
-        {needsPreTrip && booking && (mode === "pickup" || booking.status === "pending_checkin" || booking.status === "upcoming") ? (
+        {needsPreTrip && booking && handoffStage === "pickup" ? (
           <PreTripInspectionPanel
             stage="pickup"
             role={booking.role}
@@ -2288,9 +2284,7 @@ export function ActiveRental({
           />
         ) : null}
 
-        {needsPreTrip &&
-        booking &&
-        (booking.status === "active" || booking.status === "overdue" || mode === "return") ? (
+        {needsPreTrip && booking && handoffStage === "return" ? (
           <PreTripInspectionPanel
             stage="return"
             role={booking.role}
@@ -2328,22 +2322,20 @@ export function ActiveRental({
           </div>
         ) : null}
 
-{booking &&
+        {booking &&
         (booking.pickupConditionPhoto ||
           booking.returnConditionPhoto ||
-          booking.status === "active" ||
-          booking.status === "overdue" ||
+          handoffStage === "return" ||
           booking.status === "completed" ||
-          mode === "return") ? (
+          booking.status === "disputed") ? (
           <RentalConditionPhotos
             pickupPhoto={booking.pickupConditionPhoto}
             returnPhoto={booking.returnConditionPhoto}
             showReturn={
               Boolean(booking.returnConditionPhoto) ||
-              booking.status === "active" ||
-              booking.status === "overdue" ||
+              handoffStage === "return" ||
               booking.status === "completed" ||
-              mode === "return"
+              booking.status === "disputed"
             }
           />
         ) : null}
@@ -2884,13 +2876,12 @@ export function ActiveRental({
                                 dispute,
                                 actorId: auth.userId!,
                               })
-                                .then((d) => {
+                                .then(async (d) => {
                                   setDispute(d);
-                                  updateBooking(booking.id, {
-                                    status: "completed",
-                                    completedAt: new Date().toISOString(),
-                                    paymentOnHold: false,
-                                    disputeEscalated: false,
+                                  await settleResolvedDispute({
+                                    booking,
+                                    outcome: d.resolutionOutcome ?? "split",
+                                    actorUserId: auth.userId!,
                                   });
                                   setBookings(loadRentalBookings());
                                 })
@@ -2946,13 +2937,12 @@ export function ActiveRental({
                                 actorId: auth.userId!,
                                 outcome: "withdrawn",
                               })
-                                .then((d) => {
+                                .then(async (d) => {
                                   setDispute(d);
-                                  updateBooking(booking.id, {
-                                    status: "completed",
-                                    completedAt: new Date().toISOString(),
-                                    paymentOnHold: false,
-                                    disputeEscalated: false,
+                                  await settleResolvedDispute({
+                                    booking,
+                                    outcome: "withdrawn",
+                                    actorUserId: auth.userId!,
                                   });
                                   setBookings(loadRentalBookings());
                                 })
@@ -2985,8 +2975,10 @@ export function ActiveRental({
                   role={booking.role}
                   depositStatus={booking.depositStatus}
                   depositAmountCents={booking.depositAmountCents}
+                  depositClaimDeadlineAt={booking.depositClaimDeadlineAt}
                   disputeFrozen={isDisputeActive(dispute)}
                   disputeOutcome={dispute.resolutionOutcome ?? null}
+                  onSettled={() => setBookings(loadRentalBookings())}
                 />
 
                 <a

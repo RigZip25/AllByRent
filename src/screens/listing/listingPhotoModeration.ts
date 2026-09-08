@@ -20,6 +20,8 @@ export type ListingPhotoModerationResult = {
   isListableItem: boolean;
   /** null when host category is empty (Evorios-decide) or model skipped the check. */
   matchesCategory: boolean | null;
+  /** 1-based position of the photo that failed, when a gallery was checked. */
+  photoNumber?: number;
 };
 
 export type ListingPhotoModerationContext = {
@@ -239,10 +241,67 @@ export async function moderateListingPhotoBlob(
   }
 }
 
+/** A vision call takes a second or two; three at a time keeps twelve photos bearable. */
+const GALLERY_CONCURRENCY = 3;
+
 /**
- * Vision gate before Continue / re-analyze.
- * Only the cover (and optionally a 2nd shot) — upload already moderated each photo,
- * and sequential full-gallery checks felt hung.
+ * Verdicts already paid for, keyed by the photo and by the shelf it was judged
+ * against. The gallery is checked twice — once on the photos step, again once
+ * the shelf is known — and without this the second pass would re-bill every
+ * photo whose answer cannot have changed.
+ */
+const verdicts = new Map<string, ListingPhotoModerationResult>();
+const VERDICT_LIMIT = 240;
+
+function verdictKey(mediaId: string, ctx: ListingPhotoModerationContext): string {
+  const category = (ctx.category ?? "").trim().toLowerCase();
+  const subcategory = (ctx.subcategory ?? "").trim().toLowerCase();
+  return `${mediaId}|${category}|${subcategory}`;
+}
+
+function rememberVerdict(key: string, result: ListingPhotoModerationResult) {
+  // A failure to reach the model says nothing about the photo — ask again.
+  if (result.reasonCode === "verification_failed") return;
+  if (verdicts.size >= VERDICT_LIMIT) {
+    const oldest = verdicts.keys().next();
+    if (!oldest.done) verdicts.delete(oldest.value);
+  }
+  verdicts.set(key, result);
+}
+
+/**
+ * Carry the verdict from the upload check over to the stored photo, so the
+ * gate on Continue does not pay a second time for an answer it already has.
+ */
+export function rememberPhotoModerationVerdict(
+  mediaId: string,
+  ctx: ListingPhotoModerationContext,
+  result: ListingPhotoModerationResult,
+) {
+  rememberVerdict(verdictKey(mediaId, ctx), result);
+}
+
+async function moderateStoredPhoto(
+  ref: MediaRef,
+  ctx: ListingPhotoModerationContext,
+): Promise<ListingPhotoModerationResult> {
+  const key = verdictKey(ref.id, ctx);
+  const known = verdicts.get(key);
+  if (known) return known;
+
+  const blob = await getMediaBlob(ref.id);
+  if (!blob) return verificationFailedResult();
+  const result = await moderateListingPhotoBlob(blob, ctx);
+  rememberVerdict(key, result);
+  return result;
+}
+
+/**
+ * Vision gate on Continue, on re-analyze and once the shelf is picked.
+ *
+ * Every photo is checked, not a sample of two: the eleven photos after the
+ * cover reach the same neighbours, and a shelf mismatch cannot be seen at all
+ * until the host has picked a shelf, which happens after this step.
  */
 export async function moderateListingMediaPhotos(
   photos: MediaRef[],
@@ -258,17 +317,30 @@ export async function moderateListingMediaPhotos(
     };
   }
 
-  const sample = photos.slice(0, Math.min(2, photos.length));
-  const results = await Promise.all(
-    sample.map(async (ref) => {
-      const blob = await getMediaBlob(ref.id);
-      if (!blob) return verificationFailedResult();
-      return moderateListingPhotoBlob(blob, ctx);
-    }),
+  const results: (ListingPhotoModerationResult | undefined)[] = new Array(photos.length);
+  let next = 0;
+  let rejected = false;
+
+  const worker = async () => {
+    for (;;) {
+      // One bad photo stops the rest: the host has to deal with it either way.
+      if (rejected) return;
+      const index = next;
+      next += 1;
+      if (index >= photos.length) return;
+      const result = await moderateStoredPhoto(photos[index], ctx);
+      results[index] = result;
+      if (!result.ok) rejected = true;
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: Math.min(GALLERY_CONCURRENCY, photos.length) }, worker),
   );
 
-  for (const result of results) {
-    if (!result.ok) return result;
+  for (let index = 0; index < results.length; index += 1) {
+    const result = results[index];
+    if (result && !result.ok) return { ...result, photoNumber: index + 1 };
   }
 
   return {
@@ -286,6 +358,7 @@ export type ListingPhotoModerationCopy = {
   moderationCategoryMismatch: string;
   moderationBadAngle: string;
   moderationVerifyFailed: string;
+  moderationPhotoNumber: (position: number) => string;
 };
 
 export function messageForPhotoModeration(
@@ -307,4 +380,14 @@ export function messageForPhotoModeration(
     default:
       return copy.moderationNotListable;
   }
+}
+
+/** Same message, but says which shot it is — the cover is rarely the problem one. */
+export function messageForGalleryModeration(
+  result: ListingPhotoModerationResult,
+  copy: ListingPhotoModerationCopy,
+): string {
+  const message = messageForPhotoModeration(result.reasonCode, copy);
+  if (!result.photoNumber || result.photoNumber < 2) return message;
+  return `${copy.moderationPhotoNumber(result.photoNumber)}${message}`;
 }

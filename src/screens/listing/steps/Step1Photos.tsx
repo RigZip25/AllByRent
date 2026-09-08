@@ -15,6 +15,7 @@ import { processPhotoWithPhotoRoom } from "../photoroomApi";
 import {
   messageForPhotoModeration,
   moderateListingPhotoBlob,
+  rememberPhotoModerationVerdict,
 } from "../listingPhotoModeration";
 import {
   messageForVideoModeration,
@@ -23,10 +24,20 @@ import {
 import { MAX_LISTING_PHOTOS, MAX_LISTING_VIDEOS } from "../photoUtils";
 import { sanitizeImageBlob } from "../../../lib/imageSanitize";
 import { putMediaBlob, deleteMedia, type MediaRef } from "../../../lib/mediaStore";
+import { putPhotoWithThumbnail } from "../../../lib/photoIngest";
 import { useMediaUrl } from "../../../lib/useMediaUrl";
 import { useMessages } from "../../../lib/i18n/react";
 
 const PRIMARY_GREEN = "#0D5C3A";
+
+/** A live photo or HEIC the browser refused to decode — a format problem, not a retry. */
+class HeicConversionError extends Error {
+  constructor(cause: unknown) {
+    super("HEIC conversion failed");
+    this.name = "HeicConversionError";
+    this.cause = cause;
+  }
+}
 
 function reorderArray<T>(items: T[], from: number, to: number): T[] {
   if (from === to || from < 0 || to < 0 || from >= items.length || to >= items.length) {
@@ -100,35 +111,6 @@ export function Step1Photos({
     cameraInputRef.current?.click();
   }, [atMax]);
 
-  const createThumbnail = async (blob: Blob): Promise<Blob> => {
-    const bitmap = await createImageBitmap(blob);
-    // Retina phone grids need ~900–1200px; 420px looked soft/blurry on cover + thumbs.
-    const dpr =
-      typeof window !== "undefined" && Number.isFinite(window.devicePixelRatio)
-        ? Math.min(3, Math.max(1, window.devicePixelRatio))
-        : 2;
-    const maxSize = Math.round(480 * dpr);
-    const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
-    const width = Math.max(1, Math.round(bitmap.width * scale));
-    const height = Math.max(1, Math.round(bitmap.height * scale));
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      bitmap.close();
-      return blob;
-    }
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(bitmap, 0, 0, width, height);
-    bitmap.close();
-    const thumb = await new Promise<Blob | null>((resolve) => {
-      canvas.toBlob(resolve, "image/jpeg", 0.88);
-    });
-    return thumb ?? blob;
-  };
-
   /**
    * Detach camera File shells so IndexedDB / PhotoRoom always see a plain Blob,
    * and drop EXIF on the way: a phone photo carries the shooting location, and
@@ -147,30 +129,24 @@ export function Step1Photos({
     return sanitized.blob;
   };
 
-  const appendPhotoBlob = async (blob: Blob) => {
-    const put = await putMediaBlob(blob, { kind: "image" });
+  const appendPhotoBlob = async (blob: Blob): Promise<MediaRef> => {
+    // Already sanitized by normalizePhotoBlob on the way in.
+    const put = await putPhotoWithThumbnail(blob, { sanitize: false });
     if (!put.ok) {
       setStorageWarning(put.message);
       throw new Error(put.message);
     }
     if (put.warning) setStorageWarning(put.warning);
 
-    let ref: MediaRef = put.ref;
-    try {
-      const thumbBlob = await createThumbnail(blob);
-      const thumbPut = await putMediaBlob(thumbBlob, { kind: "image", thumbForId: ref.id });
-      if (thumbPut.ok) {
-        ref = { ...ref, thumbId: thumbPut.ref.id };
-      }
-    } catch {
-      // Best-effort thumbnail generation; full-size still works.
-    }
+    const ref: MediaRef = put.ref;
 
     setDraft((current) => ({
       ...current,
       photos: [...current.photos, ref],
       aiSuggestions: null,
     }));
+
+    return ref;
   };
 
   const isHeicLike = (file: File) => {
@@ -187,23 +163,28 @@ export function Step1Photos({
   const maybeConvertHeicToJpeg = async (file: File): Promise<File> => {
     if (!isHeicLike(file)) return file;
 
-    // Lazy-load to avoid penalizing non-iOS users.
-    const mod = await import("heic2any");
-    const heic2any = (mod as unknown as { default: (opts: unknown) => Promise<Blob | Blob[]> })
-      .default;
+    try {
+      // Lazy-load to avoid penalizing non-iOS users.
+      const mod = await import("heic2any");
+      const heic2any = (mod as unknown as { default: (opts: unknown) => Promise<Blob | Blob[]> })
+        .default;
 
-    const converted = await heic2any({
-      blob: file,
-      toType: "image/jpeg",
-      quality: 0.9,
-    });
+      const converted = await heic2any({
+        blob: file,
+        toType: "image/jpeg",
+        quality: 0.9,
+      });
 
-    const blob = Array.isArray(converted) ? converted[0] : converted;
-    const baseName = file.name.replace(/\.[^.]+$/, "") || "photo";
-    return new File([blob], `${baseName}.jpg`, {
-      type: "image/jpeg",
-      lastModified: Date.now(),
-    });
+      const blob = Array.isArray(converted) ? converted[0] : converted;
+      const baseName = file.name.replace(/\.[^.]+$/, "") || "photo";
+      return new File([blob], `${baseName}.jpg`, {
+        type: "image/jpeg",
+        lastModified: Date.now(),
+      });
+    } catch (error) {
+      // "Try again" is useless advice for a format the browser cannot decode.
+      throw new HeicConversionError(error);
+    }
   };
 
   const handleFilesSelected = async (files: File[]) => {
@@ -255,13 +236,22 @@ export function Step1Photos({
           // Silent fallback — don't nag; photo still saved.
         }
 
-        await appendPhotoBlob(blob);
+        const ref = await appendPhotoBlob(blob);
+        rememberPhotoModerationVerdict(
+          ref.id,
+          { category: draft.category, subcategory: draft.subcategory },
+          moderation,
+        );
         nextIndex += 1;
       } catch (error) {
         // Keep going through the batch: one unreadable file used to drop every
         // photo the host picked after it.
         console.warn("[listing] Couldn't add photo", error);
-        setPhotoWarning(photosCopy.couldntAddPhoto);
+        setPhotoWarning(
+          error instanceof HeicConversionError
+            ? photosCopy.heicFailed
+            : photosCopy.couldntAddPhoto,
+        );
         setErrorIndex(targetIndex);
         continue;
       } finally {
@@ -495,11 +485,7 @@ export function Step1Photos({
     /** Cover / large slots: use full blob so the hero isn’t a soft 420px thumb. */
     preferFull?: boolean;
   }) {
-    const displayRef =
-      preferFull || !media.thumbId
-        ? media
-        : { id: media.thumbId, mimeType: "image/jpeg" as const };
-    const { url } = useMediaUrl(displayRef);
+    const { url } = useMediaUrl(media, { prefer: preferFull ? "full" : "thumb" });
     const [failed, setFailed] = useState(false);
     return (
       <div
@@ -841,7 +827,7 @@ function PhotoPreviewOverlay({
   const { listing, common } = useMessages();
   const photosCopy = listing.photos;
   const media = photos[index];
-  const { url } = useMediaUrl(media);
+  const { url } = useMediaUrl(media, { prefer: "full" });
   const hasPrev = index > 0;
   const hasNext = index < photos.length - 1;
   const startRef = useRef<{ x: number; y: number } | null>(null);

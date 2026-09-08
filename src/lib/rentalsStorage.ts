@@ -15,6 +15,8 @@ import type { LateReturnFeeSnapshot } from "./lateReturnFee";
 import { normalizeLateReturnFeeSnapshot } from "./lateReturnFee";
 import type { RentalInvoice } from "./rentalInvoice";
 import { mergeRentalInvoices, normalizeRentalInvoices } from "./rentalInvoice";
+import { conditionPhotoFromPath, mergeConditionPhoto } from "./rentalConditionPhotos";
+import { fetchPublicProfilesByIds, type PublicProfile } from "./supabaseProfile";
 
 export type { RentalInvoice, RentalInvoiceLine, RentalInvoiceLineKind } from "./rentalInvoice";
 
@@ -179,10 +181,23 @@ export type RentalBooking = {
   runningLateMessage?: string;
   runningLateSentAt?: string;
   runningLateAcknowledged?: boolean;
+  /**
+   * Until when a heads-up from the renter holds off the no-show. Stamped by the
+   * database from the moment the note arrives, so neither device's clock and no
+   * repeated tap can stretch it.
+   */
+  pickupGraceUntil?: string;
   stripePayment?: boolean;
   /** Security deposit hold (Stripe manual-capture PI). */
   depositAmountCents?: number;
+  /**
+   * Where the hold stands: `held`, `released`, `claimed`, or a raw Stripe
+   * status while it is being set up. Written by the payment routes and the
+   * webhook, read from the rental row on sync — the client cannot change it.
+   */
   depositStatus?: string;
+  /** Last moment the host can claim against the hold; the server sets it. */
+  depositClaimDeadlineAt?: string;
   /** Source listing id for re-book flows. */
   listingId?: string;
   /**
@@ -418,6 +433,9 @@ type SupabaseRentalRow = {
   safely_policy_id?: string | null;
   insurance_fee_cents?: number;
   deposit_amount_cents?: number;
+  deposit_status?: string | null;
+  deposit_claim_deadline_at?: string | null;
+  late_fee_cents?: number | null;
   stripe_payment_intent_id?: string | null;
   stripe_payment_status?: string | null;
   rental_total_cents?: number;
@@ -433,6 +451,12 @@ type SupabaseRentalRow = {
   insurance_proof_url?: string | null;
   insurance_active_until?: string | null;
   insurance_policy_note?: string | null;
+  pickup_condition_photo_path?: string | null;
+  return_condition_photo_path?: string | null;
+  running_late_message?: string | null;
+  running_late_sent_at?: string | null;
+  running_late_acknowledged_at?: string | null;
+  pickup_grace_until?: string | null;
   rental_agreement?: RentalAgreementRecord | null;
   rental_invoices?: unknown;
   created_at: string;
@@ -514,6 +538,7 @@ export function rentalBookingFromRemoteRow(
   row: SupabaseRentalRow,
   userId: string,
   listingTitle?: string,
+  counterparty?: PublicProfile | null,
 ): RentalBooking {
   const role: RentalRole = row.owner_id === userId ? "host" : "renter";
   const counterpartyId = role === "host" ? row.renter_id : row.owner_id;
@@ -533,9 +558,12 @@ export function rentalBookingFromRemoteRow(
     startDate: row.start_date,
     endDate: row.end_date,
     counterpartyId,
-    counterpartyName: role === "host" ? "Renter" : "Host",
-    counterpartyIdentityVerified: false,
-    counterpartyPhoneVerified: false,
+    // "Host" and "Renter" are what a row alone can say. The name and the badges
+    // come from the public projection of their profile, when we have it.
+    counterpartyName:
+      counterparty?.displayName || (role === "host" ? "Renter" : "Host"),
+    counterpartyIdentityVerified: Boolean(counterparty?.identityVerified),
+    counterpartyPhoneVerified: Boolean(counterparty?.phoneVerified),
     listingId: row.listing_id,
     pickupLabel:
       fulfillmentMethod === "delivery"
@@ -559,6 +587,10 @@ export function rentalBookingFromRemoteRow(
     renterReturnedAt: row.renter_returned_at ?? undefined,
     hostAcceptedReturnAt: row.host_accepted_return_at ?? undefined,
     depositAmountCents: row.deposit_amount_cents ?? undefined,
+    // The hold is settled by the payment routes and the webhook; the row is the
+    // only place both devices can read the same answer.
+    depositStatus: row.deposit_status ?? undefined,
+    depositClaimDeadlineAt: row.deposit_claim_deadline_at ?? undefined,
     stripePayment: Boolean(row.stripe_payment_intent_id),
     paymentOnHold:
       Boolean(row.stripe_payment_intent_id) &&
@@ -583,6 +615,12 @@ export function rentalBookingFromRemoteRow(
           storagePath: row.insurance_proof_path,
         }
       : undefined,
+    pickupConditionPhoto: conditionPhotoFromPath(row.pickup_condition_photo_path) ?? null,
+    returnConditionPhoto: conditionPhotoFromPath(row.return_condition_photo_path) ?? null,
+    runningLateMessage: row.running_late_message ?? undefined,
+    runningLateSentAt: row.running_late_sent_at ?? undefined,
+    runningLateAcknowledged: Boolean(row.running_late_acknowledged_at),
+    pickupGraceUntil: row.pickup_grace_until ?? undefined,
     rentalAgreement: row.rental_agreement ?? null,
     invoices: normalizeRentalInvoices(row.rental_invoices),
   });
@@ -842,14 +880,62 @@ const STATUS_PROGRESS_RANK: Record<RentalStatus, number> = {
   completed: 10,
 };
 
+/**
+ * Which of two versions of the same booking describes what actually happened.
+ *
+ * "The further along, the truer" was the whole rule, and it made `cancelled`
+ * the weakest status there is: a booking cancelled on the phone came back as
+ * active the next time the other device synced, complete with a live timer and
+ * a return to hand over. Two statuses are not a matter of progress:
+ *
+ * — a cancelled rental never restarts, and
+ * — a dispute outlives the completion it is arguing about.
+ */
+export function resolveMergedRentalStatus(
+  local: RentalStatus,
+  remote: RentalStatus,
+): RentalStatus {
+  if (local === remote) return local;
+  if (local === "cancelled" || remote === "cancelled") return "cancelled";
+  if (local === "disputed" || remote === "disputed") return "disputed";
+  const localRank = STATUS_PROGRESS_RANK[local] ?? 0;
+  const remoteRank = STATUS_PROGRESS_RANK[remote] ?? 0;
+  return localRank >= remoteRank ? local : remote;
+}
+
+/**
+ * Names a rental row falls back to when it has no profile to go on. Neither
+ * side of a merge should let one of these win over a person's actual name.
+ */
+const PLACEHOLDER_COUNTERPARTY_NAMES = new Set(["host", "renter", "unknown", "neighbor"]);
+
+function isPlaceholderName(name: string | undefined): boolean {
+  const trimmed = (name ?? "").trim();
+  return trimmed === "" || PLACEHOLDER_COUNTERPARTY_NAMES.has(trimmed.toLowerCase());
+}
+
+export function mergeCounterpartyName(
+  local: string | undefined,
+  remote: string | undefined,
+): string {
+  if (!isPlaceholderName(local)) return local!.trim();
+  if (!isPlaceholderName(remote)) return remote!.trim();
+  return (local ?? "").trim() || (remote ?? "").trim();
+}
+
 function mergeRentalBooking(local: RentalBooking, remote: RentalBooking): RentalBooking {
-  const localRank = STATUS_PROGRESS_RANK[local.status] ?? 0;
-  const remoteRank = STATUS_PROGRESS_RANK[remote.status] ?? 0;
-  const status = localRank >= remoteRank ? local.status : remote.status;
+  const status = resolveMergedRentalStatus(local.status, remote.status);
   return normalizeBooking({
     ...remote,
     ...local,
     status,
+    // Local wins the rest of the row, which used to mean a booking that had
+    // once synced kept calling the other person "Host" forever.
+    counterpartyName: mergeCounterpartyName(local.counterpartyName, remote.counterpartyName),
+    counterpartyIdentityVerified:
+      remote.counterpartyIdentityVerified || local.counterpartyIdentityVerified,
+    counterpartyPhoneVerified:
+      remote.counterpartyPhoneVerified || local.counterpartyPhoneVerified,
     pickupPin: remote.pickupPin ?? local.pickupPin,
     returnPin: remote.returnPin ?? local.returnPin,
     hostHandedOverAt: remote.hostHandedOverAt ?? local.hostHandedOverAt,
@@ -858,14 +944,35 @@ function mergeRentalBooking(local: RentalBooking, remote: RentalBooking): Rental
     hostAcceptedReturnAt: remote.hostAcceptedReturnAt ?? local.hostAcceptedReturnAt,
     pickupConfirmedAt: remote.pickupConfirmedAt ?? local.pickupConfirmedAt,
     returnConfirmedAt: remote.returnConfirmedAt ?? local.returnConfirmedAt,
+    // The hold is settled by the payment routes and the webhook, so the row is
+    // the truth and a device can only hold a stale opinion about it.
+    depositStatus: remote.depositStatus ?? local.depositStatus,
+    depositClaimDeadlineAt: remote.depositClaimDeadlineAt ?? local.depositClaimDeadlineAt,
+    // Keep the record of the end together with the status that says it ended.
+    cancelledAt: local.cancelledAt ?? remote.cancelledAt,
+    cancelledBy: local.cancelledBy ?? remote.cancelledBy,
+    cancelReason: local.cancelReason ?? remote.cancelReason,
+    completedAt: local.completedAt ?? remote.completedAt,
     review: local.review ?? remote.review,
-    runningLateMessage: local.runningLateMessage ?? remote.runningLateMessage,
-    runningLateSentAt: local.runningLateSentAt ?? remote.runningLateSentAt,
-    runningLateAcknowledged: local.runningLateAcknowledged ?? remote.runningLateAcknowledged,
+    runningLateMessage: remote.runningLateMessage ?? local.runningLateMessage,
+    runningLateSentAt: remote.runningLateSentAt ?? local.runningLateSentAt,
+    runningLateAcknowledged:
+      remote.runningLateAcknowledged || local.runningLateAcknowledged,
+    // The database stamps the grace; a device only reports what it was told.
+    pickupGraceUntil: remote.pickupGraceUntil ?? local.pickupGraceUntil,
     disputeEscalated: local.disputeEscalated ?? remote.disputeEscalated,
     rentalAgreement: mergeRentalAgreementRecords(
       local.rentalAgreement,
       remote.rentalAgreement,
+    ),
+    // The device that took the photo has the blob; the other one has the path.
+    pickupConditionPhoto: mergeConditionPhoto(
+      local.pickupConditionPhoto,
+      remote.pickupConditionPhoto,
+    ),
+    returnConditionPhoto: mergeConditionPhoto(
+      local.returnConditionPhoto,
+      remote.returnConditionPhoto,
     ),
     invoices: mergeRentalInvoices(local.invoices, remote.invoices),
   });
@@ -888,8 +995,12 @@ export async function updateRentalRemote(
     renterReceivedAt?: string | null;
     renterReturnedAt?: string | null;
     hostAcceptedReturnAt?: string | null;
+    pickupConditionPhotoPath?: string | null;
+    returnConditionPhotoPath?: string | null;
+    runningLateMessage?: string | null;
+    runningLateSentAt?: string | null;
+    runningLateAcknowledgedAt?: string | null;
     rentalAgreement?: RentalAgreementRecord | null;
-    invoices?: RentalInvoice[] | null;
   },
 ): Promise<void> {
   if (!isSupabaseConfigured()) return;
@@ -913,19 +1024,36 @@ export async function updateRentalRemote(
   if (patch.hostAcceptedReturnAt !== undefined) {
     row.host_accepted_return_at = patch.hostAcceptedReturnAt;
   }
+  if (patch.pickupConditionPhotoPath !== undefined) {
+    row.pickup_condition_photo_path = patch.pickupConditionPhotoPath;
+  }
+  if (patch.returnConditionPhotoPath !== undefined) {
+    row.return_condition_photo_path = patch.returnConditionPhotoPath;
+  }
+  if (patch.runningLateMessage !== undefined) {
+    row.running_late_message = patch.runningLateMessage;
+  }
+  if (patch.runningLateSentAt !== undefined) {
+    row.running_late_sent_at = patch.runningLateSentAt;
+  }
+  if (patch.runningLateAcknowledgedAt !== undefined) {
+    row.running_late_acknowledged_at = patch.runningLateAcknowledgedAt;
+  }
   if (patch.rentalAgreement !== undefined) {
     row.rental_agreement = patch.rentalAgreement;
-  }
-  if (patch.invoices !== undefined) {
-    row.rental_invoices = patch.invoices ?? [];
   }
   if (Object.keys(row).length === 0) return;
 
   const { error } = await supabase.from("rentals").update(row).eq("id", rentalId);
   if (error) {
-    // Local state remains; host/renter can retry. Column may be missing until migration.
-    if (patch.invoices !== undefined && (error.message ?? "").toLowerCase().includes("rental_invoices")) {
-      const { rental_invoices: _omit, ...without } = row;
+    // Local state remains; host/renter can retry. Columns may be missing until
+    // the matching migration has been applied to this project.
+    const message = (error.message ?? "").toLowerCase();
+    const missing = Object.keys(row).filter((column) => message.includes(column));
+    if (missing.length > 0) {
+      const without = Object.fromEntries(
+        Object.entries(row).filter(([column]) => !missing.includes(column)),
+      );
       if (Object.keys(without).length > 0) {
         await supabase.from("rentals").update(without).eq("id", rentalId);
       }
@@ -951,12 +1079,30 @@ function remotePatchFromBooking(patch: Partial<RentalBooking>): Parameters<typeo
   if (patch.hostAcceptedReturnAt !== undefined) {
     remote.hostAcceptedReturnAt = patch.hostAcceptedReturnAt ?? null;
   }
+  if (patch.runningLateMessage !== undefined) {
+    remote.runningLateMessage = patch.runningLateMessage ?? null;
+  }
+  if (patch.runningLateSentAt !== undefined) {
+    remote.runningLateSentAt = patch.runningLateSentAt ?? null;
+  }
+  if (patch.runningLateAcknowledged !== undefined) {
+    remote.runningLateAcknowledgedAt = patch.runningLateAcknowledged
+      ? new Date().toISOString()
+      : null;
+  }
   if (patch.rentalAgreement !== undefined) {
     remote.rentalAgreement = patch.rentalAgreement ?? null;
   }
-  if (patch.invoices !== undefined) {
-    remote.invoices = patch.invoices ?? [];
+  // Only the uploaded copy is worth syncing: a local media id means nothing on
+  // the other device.
+  if (patch.pickupConditionPhoto?.storagePath) {
+    remote.pickupConditionPhotoPath = patch.pickupConditionPhoto.storagePath;
   }
+  if (patch.returnConditionPhoto?.storagePath) {
+    remote.returnConditionPhotoPath = patch.returnConditionPhoto.storagePath;
+  }
+  // Invoices are not in this list: `/api/rentals/invoice` writes them, and the
+  // database reverts anything a device sends (migration 053).
   return remote;
 }
 
@@ -1077,6 +1223,13 @@ export async function syncRentalsFromRemote(userId: string): Promise<RentalBooki
   const rows = await fetchRentalsForUserRemote(userId);
   const remoteBookings: RentalBooking[] = [];
 
+  // One query for every counterparty on the list: the rental row knows their id
+  // and nothing else, and a rental screen full of people called "Host" is not
+  // worth a request per booking.
+  const counterparties = await fetchPublicProfilesByIds(
+    rows.map((row) => (row.owner_id === userId ? row.renter_id : row.owner_id)),
+  );
+
   for (const row of rows) {
     const localListing = getPublishedListingById(row.listing_id);
     let title = localListing?.title;
@@ -1084,7 +1237,10 @@ export async function syncRentalsFromRemote(userId: string): Promise<RentalBooki
       const remoteListing = await fetchListingByIdRemote(row.listing_id);
       title = remoteListing?.title;
     }
-    remoteBookings.push(rentalBookingFromRemoteRow(row, userId, title));
+    const counterpartyId = row.owner_id === userId ? row.renter_id : row.owner_id;
+    remoteBookings.push(
+      rentalBookingFromRemoteRow(row, userId, title, counterparties[counterpartyId]),
+    );
   }
 
   const byId = new Map<string, RentalBooking>();
@@ -1103,10 +1259,13 @@ export async function syncRentalsFromRemote(userId: string): Promise<RentalBooki
 
 export function loadRentalBookings(): RentalBooking[] {
   try {
+    // A new shape used to mean a clean slate: shipping a release wiped every
+    // booking on the device, including an active rental with a PIN to hand over,
+    // and on a device with Supabase switched off there was nothing to sync back.
+    // `normalizeBooking` fills in what a older record is missing, so the version
+    // is now a record of what was last read, not a reason to delete.
     if (localStorage.getItem(RENTALS_VERSION_KEY) !== RENTALS_VERSION) {
-      localStorage.removeItem(RENTALS_KEY);
       localStorage.setItem(RENTALS_VERSION_KEY, RENTALS_VERSION);
-      return [];
     }
     const raw = localStorage.getItem(RENTALS_KEY);
     if (!raw) return [];
@@ -1152,16 +1311,50 @@ export function getPendingApprovalWaiting(bookings: RentalBooking[]): RentalBook
   return bookings.filter((b) => b.role === "renter" && b.status === "pending_approval");
 }
 
-export function getActiveBookings(bookings: RentalBooking[]): RentalBooking[] {
+/**
+ * A confirmed booking that has not started yet.
+ *
+ * The `upcoming` status exists in the type and in the server's vocabulary, but
+ * nothing in the app ever wrote it, so the Upcoming tab was empty for everyone
+ * while next week's booking sat under Active next to a rental in progress. The
+ * calendar answers this better than a status does: a booking is upcoming until
+ * the day it starts, or until somebody scans at the handoff.
+ */
+export function isUpcomingBooking(booking: RentalBooking, now = new Date()): boolean {
+  if (booking.status !== "pending_checkin" && booking.status !== "upcoming") return false;
+  if (booking.hostHandedOverAt || booking.renterReceivedAt || booking.pickupConfirmedAt) {
+    return false;
+  }
+  return startsAfterToday(booking.startDate, now);
+}
+
+/** True when the first day of the rental is still ahead, in local time. */
+function startsAfterToday(startDate: string, now: Date): boolean {
+  const [year, month, day] = startDate.split("-").map((part) => Number.parseInt(part, 10));
+  if (!year || !month || !day) return false;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  return new Date(year, month - 1, day).getTime() > today;
+}
+
+export function getActiveBookings(
+  bookings: RentalBooking[],
+  now = new Date(),
+): RentalBooking[] {
   return bookings.filter((b) => {
     if (b.status === "pending_approval") return false;
     if (b.status === "no_show" && b.noShowMarkedAt) return false;
-    return ["pending_checkin", "active", "overdue", "disputed", "no_show"].includes(b.status);
+    if (isUpcomingBooking(b, now)) return false;
+    return ["pending_checkin", "upcoming", "active", "overdue", "disputed", "no_show"].includes(
+      b.status,
+    );
   });
 }
 
-export function getUpcomingBookings(bookings: RentalBooking[]): RentalBooking[] {
-  return bookings.filter((b) => b.status === "upcoming");
+export function getUpcomingBookings(
+  bookings: RentalBooking[],
+  now = new Date(),
+): RentalBooking[] {
+  return bookings.filter((b) => isUpcomingBooking(b, now));
 }
 
 export function getHistoryBookings(bookings: RentalBooking[]): RentalBooking[] {

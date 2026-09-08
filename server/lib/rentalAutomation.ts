@@ -1,7 +1,12 @@
-import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 import { isStripeServerConfigured } from "./keys";
+import { insertNotification } from "./notifications";
+import {
+  assessLateFeeFromHandoff,
+  fetchListingHandoff,
+  issueLateFeeInvoice,
+} from "./rentalLateFee";
 
 const MS_MIN = 60_000;
 /** Soft no-show suggest — align with client NO_SHOW_MARK_AFTER_MS (2h). */
@@ -29,71 +34,57 @@ type RentalRow = {
   late_fee_applied_at: string | null;
   overdue_hour_notified_at: string | null;
   owner_recovery_notified_at: string | null;
+  /** Set by the database when the renter says they are running late. */
+  pickup_grace_until?: string | null;
   safely_escalated_at: string | null;
   rental_total_cents: number;
   safely_policy_id: string | null;
 };
 
-type ListingHandoff = {
-  lateReturnFeeEnabled?: boolean;
-  lateReturnGraceMinutes?: number;
-  lateReturnFlatFeeUsd?: string;
-  lateReturnPerHourFeeUsd?: string;
-};
+const RENTAL_AUTOMATION_COLUMNS =
+  "id, listing_id, owner_id, renter_id, status, pickup_at, due_at, start_date, end_date, no_show_renter_notified_at, no_show_automation_at, no_show_fee_cents, late_fee_cents, late_fee_applied_at, overdue_hour_notified_at, owner_recovery_notified_at, safely_escalated_at, rental_total_cents, safely_policy_id";
 
-function parseUsdToCents(raw: string | number | undefined | null): number {
-  if (raw == null) return 0;
-  const n =
-    typeof raw === "number"
-      ? raw
-      : Number.parseFloat(String(raw).replace(/^\$/, "").trim());
-  if (!Number.isFinite(n) || n <= 0) return 0;
-  return Math.round(n * 100);
-}
-
-function assessLateFeeFromHandoff(
-  handoff: ListingHandoff | null | undefined,
-  dueMs: number,
-  nowMs: number,
-): { pastGrace: boolean; feeCents: number; summary: string | null } {
-  if (!handoff?.lateReturnFeeEnabled) {
-    return { pastGrace: nowMs > dueMs, feeCents: 0, summary: null };
-  }
-  const graceMinutes =
-    typeof handoff.lateReturnGraceMinutes === "number" &&
-    Number.isFinite(handoff.lateReturnGraceMinutes)
-      ? Math.max(0, Math.round(handoff.lateReturnGraceMinutes))
-      : 30;
-  const flatCents = parseUsdToCents(handoff.lateReturnFlatFeeUsd ?? "20");
-  const perHourCents = parseUsdToCents(handoff.lateReturnPerHourFeeUsd ?? "15");
-  const graceEndsMs = dueMs + graceMinutes * MS_MIN;
-  const pastGrace = nowMs > graceEndsMs;
-  if (!pastGrace) {
-    return { pastGrace: false, feeCents: 0, summary: null };
-  }
-  const billableMs = Math.max(0, nowMs - graceEndsMs);
-  const billableHours = Math.max(1, Math.ceil(billableMs / (60 * MS_MIN)));
-  const feeCents = flatCents + billableHours * perHourCents;
-  const parts: string[] = [`${graceMinutes}m grace`];
-  if (flatCents > 0) parts.push(`$${(flatCents / 100).toFixed(2)} flat`);
-  if (perHourCents > 0) parts.push(`$${(perHourCents / 100).toFixed(2)}/hr`);
-  return { pastGrace: true, feeCents, summary: parts.join(" · ") };
-}
-
-async function insertNotification(
+/**
+ * The rentals the automation walks.
+ *
+ * `pickup_grace_until` arrived with migration 058, and a project that has not
+ * run it yet would otherwise get an error for the whole select and no no-show
+ * handling at all — so a missing column costs the grace, not the cron.
+ */
+async function fetchAutomationRentals(
   admin: SupabaseClient,
-  input: { recipientId: string; actorId: string | null; type: string; title: string; body: string },
-): Promise<void> {
-  const id = randomUUID();
-  await admin.from("notifications").insert({
-    id,
-    recipient_id: input.recipientId,
-    actor_id: input.actorId,
-    type: input.type,
-    title: input.title,
-    body: input.body,
-    read_at: null,
-  });
+  statuses: string[],
+  presentColumn: "pickup_at" | "due_at",
+): Promise<RentalRow[]> {
+  const query = () =>
+    admin
+      .from("rentals")
+      .select(`${RENTAL_AUTOMATION_COLUMNS}, pickup_grace_until`)
+      .in("status", statuses)
+      .not(presentColumn, "is", null);
+
+  const { data, error } = await query();
+  if (!error) return (data ?? []) as RentalRow[];
+
+  const { data: fallback } = await admin
+    .from("rentals")
+    .select(RENTAL_AUTOMATION_COLUMNS)
+    .in("status", statuses)
+    .not(presentColumn, "is", null);
+  return (fallback ?? []) as RentalRow[];
+}
+
+/**
+ * The first moment a rental counts as a no-show: two hours after the pickup
+ * window, or the end of the grace the renter's "running late" note bought.
+ */
+export function noShowDueAtMs(rental: Pick<RentalRow, "pickup_at" | "pickup_grace_until">): number {
+  const pickupMs = new Date(rental.pickup_at ?? "").getTime();
+  const graceMs = rental.pickup_grace_until
+    ? new Date(rental.pickup_grace_until).getTime()
+    : Number.NaN;
+  const base = pickupMs + NO_SHOW_SUGGEST_MS;
+  return Number.isNaN(graceMs) ? base : Math.max(base, graceMs);
 }
 
 export async function runNoShowAutomation(admin: SupabaseClient): Promise<{
@@ -106,15 +97,11 @@ export async function runNoShowAutomation(admin: SupabaseClient): Promise<{
   let suggested = 0;
   let autoCancelled = 0;
 
-  const { data: rows } = await admin
-    .from("rentals")
-    .select(
-      "id, listing_id, owner_id, renter_id, status, pickup_at, due_at, start_date, end_date, no_show_renter_notified_at, no_show_automation_at, no_show_fee_cents, late_fee_cents, late_fee_applied_at, overdue_hour_notified_at, owner_recovery_notified_at, safely_escalated_at, rental_total_cents, safely_policy_id",
-    )
-    .in("status", ["pending_checkin", "upcoming", "no_show"])
-    .not("pickup_at", "is", null);
-
-  const rentals = (rows ?? []) as RentalRow[];
+  const rentals = await fetchAutomationRentals(
+    admin,
+    ["pending_checkin", "upcoming", "no_show"],
+    "pickup_at",
+  );
 
   for (const rental of rentals) {
     const pickupMs = new Date(rental.pickup_at!).getTime();
@@ -122,10 +109,19 @@ export async function runNoShowAutomation(admin: SupabaseClient): Promise<{
 
     const elapsed = now - pickupMs;
 
+    const noShowDueMs = noShowDueAtMs(rental);
+    const graceUntilMs = rental.pickup_grace_until
+      ? new Date(rental.pickup_grace_until).getTime()
+      : Number.NaN;
+    // Someone who has just told the host they are on the way does not need to
+    // be told the window opened.
+    const inGrace = !Number.isNaN(graceUntilMs) && now < graceUntilMs;
+
     if (
       (rental.status === "pending_checkin" || rental.status === "upcoming") &&
       elapsed >= 30 * MS_MIN &&
-      !rental.no_show_renter_notified_at
+      !rental.no_show_renter_notified_at &&
+      !inGrace
     ) {
       await insertNotification(admin, {
         recipientId: rental.renter_id,
@@ -144,7 +140,7 @@ export async function runNoShowAutomation(admin: SupabaseClient): Promise<{
     // Soft suggest: status → no_show, calendar still busy until host confirms or auto-cancel.
     if (
       (rental.status === "pending_checkin" || rental.status === "upcoming") &&
-      elapsed >= NO_SHOW_SUGGEST_MS &&
+      now >= noShowDueMs &&
       !rental.no_show_automation_at
     ) {
       await admin
@@ -241,15 +237,7 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
   let recoveryNotices = 0;
   let safelyEscalations = 0;
 
-  const { data: rows } = await admin
-    .from("rentals")
-    .select(
-      "id, listing_id, owner_id, renter_id, status, pickup_at, due_at, start_date, end_date, no_show_renter_notified_at, no_show_automation_at, no_show_fee_cents, late_fee_cents, late_fee_applied_at, overdue_hour_notified_at, owner_recovery_notified_at, safely_escalated_at, rental_total_cents, safely_policy_id",
-    )
-    .in("status", ["active", "overdue"])
-    .not("due_at", "is", null);
-
-  const rentals = (rows ?? []) as RentalRow[];
+  const rentals = await fetchAutomationRentals(admin, ["active", "overdue"], "due_at");
 
   for (const rental of rentals) {
     const dueMs = new Date(rental.due_at!).getTime();
@@ -262,16 +250,7 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
     }
 
     if (overdueMs >= MS_MIN && !rental.overdue_hour_notified_at) {
-      const { data: listingRow } = await admin
-        .from("listings")
-        .select("handoff")
-        .eq("id", rental.listing_id)
-        .maybeSingle();
-
-      const handoff =
-        listingRow?.handoff && typeof listingRow.handoff === "object"
-          ? (listingRow.handoff as ListingHandoff)
-          : null;
+      const handoff = await fetchListingHandoff(admin, rental.listing_id);
 
       const late = assessLateFeeFromHandoff(handoff, dueMs, now);
       let body =
@@ -279,7 +258,7 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
       if (late.summary) {
         body += ` Policy: ${late.summary}.`;
         if (late.pastGrace && late.feeCents > 0) {
-          body += ` Estimated late fee so far: $${(late.feeCents / 100).toFixed(2)} (host confirms via invoice).`;
+          body += ` So far that is $${(late.feeCents / 100).toFixed(2)}, invoiced when the item comes back.`;
         }
       }
 
@@ -299,6 +278,10 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
     }
 
     if (overdueMs >= 24 * 60 * MS_MIN && !rental.owner_recovery_notified_at) {
+      // A day out with no sign of the item: the fee stops being an estimate,
+      // whether or not the rental is ever handed back.
+      await issueLateFeeInvoice(admin, { rental, atMs: now });
+
       await insertNotification(admin, {
         recipientId: rental.owner_id,
         actorId: rental.renter_id,
@@ -344,6 +327,162 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
   }
 
   return { overdueNotices, recoveryNotices, safelyEscalations };
+}
+
+/** How long the host has to claim against the hold once the item is back. */
+const DEPOSIT_CLAIM_WINDOW_MS = 48 * 60 * MS_MIN;
+
+export type DepositRow = {
+  id: string;
+  owner_id: string;
+  renter_id: string;
+  status: string;
+  deposit_status: string | null;
+  deposit_amount_cents: number;
+  deposit_claim_deadline_at: string | null;
+  stripe_deposit_payment_intent_id: string | null;
+  returned_at: string | null;
+  picked_up_at: string | null;
+  cancelled_at: string | null;
+  end_date: string;
+};
+
+export type DisputeRow = {
+  rental_id: string;
+  status: string;
+  resolution_outcome: string | null;
+  resolved_at: string | null;
+};
+
+/**
+ * When the hold on this rental should come off by itself, or null while it is
+ * somebody's decision to make.
+ *
+ * The hold is money the renter cannot spend, so it needs an end even when
+ * nobody does anything. A booking that ended before the item ever changed hands
+ * has nothing to inspect, so it ends immediately; a finished rental gives the
+ * host the claim window they are promised and then lifts; a dispute holds
+ * everything until the two sides agree, and then follows the outcome.
+ */
+export function depositReleaseDueAt(
+  rental: DepositRow,
+  dispute: DisputeRow | undefined,
+): number | null {
+  if (dispute && dispute.status !== "resolved") return null;
+
+  if (dispute?.status === "resolved") {
+    const resolvedMs = dispute.resolved_at ? Date.parse(dispute.resolved_at) : Date.now();
+    // The host is owed something: they get a fresh window to claim it, and a
+    // partial claim releases the rest. A split used to return null here, which
+    // left the renter's card held with nobody due to act.
+    if (dispute.resolution_outcome === "favor_host" || dispute.resolution_outcome === "split") {
+      return resolvedMs + DEPOSIT_CLAIM_WINDOW_MS;
+    }
+    return resolvedMs;
+  }
+
+  // Cancelled or a no-show before pickup: the item never left the host.
+  if (rental.status === "cancelled" && !rental.picked_up_at) {
+    return rental.cancelled_at ? Date.parse(rental.cancelled_at) : Date.now();
+  }
+
+  if (rental.status !== "completed" && rental.status !== "cancelled") return null;
+
+  if (rental.deposit_claim_deadline_at) return Date.parse(rental.deposit_claim_deadline_at);
+  if (rental.returned_at) return Date.parse(rental.returned_at) + DEPOSIT_CLAIM_WINDOW_MS;
+  return Date.parse(`${rental.end_date}T23:59:59.999Z`) + DEPOSIT_CLAIM_WINDOW_MS;
+}
+
+/**
+ * Lift the holds nobody is entitled to keep.
+ *
+ * Completing a rental never released the deposit, and neither did cancelling
+ * one before pickup: the hold sat on the renter's card until the host happened
+ * to press a button, which for most rentals meant until the authorization
+ * expired on Stripe's side, weeks later, with no record either side could see.
+ */
+export async function runDepositSettlementAutomation(admin: SupabaseClient): Promise<{
+  released: number;
+  failed: number;
+}> {
+  let released = 0;
+  let failed = 0;
+
+  if (!isStripeServerConfigured()) return { released, failed };
+
+  const { data: rows } = await admin
+    .from("rentals")
+    .select(
+      "id, owner_id, renter_id, status, deposit_status, deposit_amount_cents, deposit_claim_deadline_at, stripe_deposit_payment_intent_id, returned_at, picked_up_at, cancelled_at, end_date",
+    )
+    .in("status", ["completed", "cancelled", "no_show"])
+    .in("deposit_status", ["held", "requires_capture"])
+    .not("stripe_deposit_payment_intent_id", "is", null);
+
+  const rentals = (rows ?? []) as DepositRow[];
+  if (rentals.length === 0) return { released, failed };
+
+  const { data: disputeRows } = await admin
+    .from("disputes")
+    .select("rental_id, status, resolution_outcome, resolved_at")
+    .in(
+      "rental_id",
+      rentals.map((rental) => rental.id),
+    );
+
+  const disputes = new Map<string, DisputeRow>();
+  for (const dispute of (disputeRows ?? []) as DisputeRow[]) {
+    disputes.set(dispute.rental_id, dispute);
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion,
+  });
+  const now = Date.now();
+
+  for (const rental of rentals) {
+    const dueAt = depositReleaseDueAt(rental, disputes.get(rental.id));
+    if (dueAt == null || Number.isNaN(dueAt) || now < dueAt) continue;
+
+    try {
+      const intent = await stripe.paymentIntents.retrieve(
+        rental.stripe_deposit_payment_intent_id!,
+      );
+      if (intent.status === "succeeded") {
+        // Already captured; the webhook will catch up on the label.
+        await admin.from("rentals").update({ deposit_status: "claimed" }).eq("id", rental.id);
+        continue;
+      }
+      if (intent.status !== "canceled") {
+        await stripe.paymentIntents.cancel(intent.id);
+      }
+    } catch {
+      failed += 1;
+      continue;
+    }
+
+    await admin.from("rentals").update({ deposit_status: "released" }).eq("id", rental.id);
+
+    const amount = `$${(Math.max(0, rental.deposit_amount_cents) / 100).toFixed(2)}`;
+    await insertNotification(admin, {
+      recipientId: rental.renter_id,
+      actorId: null,
+      type: "general",
+      title: "Deposit hold released",
+      body: `The ${amount} hold on your card was released. It can take a few days for your bank to show it.`,
+    });
+    await insertNotification(admin, {
+      recipientId: rental.owner_id,
+      actorId: null,
+      type: "general",
+      title: "Deposit hold released",
+      body: `The ${amount} hold on this rental was released — the claim window has passed.`,
+    });
+
+    released += 1;
+  }
+
+  return { released, failed };
 }
 
 type PendingApprovalRow = {

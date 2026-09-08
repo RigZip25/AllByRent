@@ -43,6 +43,9 @@ jobs:
       - name: Category art is in sync
         run: npm run art:categories:check
 
+      - name: Illustrations ship as WebP
+        run: npm run art:illustrations:check
+
   migrations:
     runs-on: ubuntu-latest
     services:

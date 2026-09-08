@@ -15,7 +15,8 @@ type ListingPhotoGalleryProps = {
 };
 
 function GalleryImage({ media }: { media: MediaRef }) {
-  const { url } = useMediaUrl(media);
+  // Full-screen is the one place the original is worth its bytes.
+  const { url } = useMediaUrl(media, { prefer: "full" });
   const { common } = useMessages();
   return url ? (
     <img

@@ -11,11 +11,15 @@ import {
   requireHostPayoutAccount,
   resolveHostStripeCurrency,
 } from "../../lib/stripe/connectPayout";
+import { readInvoices } from "../../lib/rentalInvoices";
 
 /**
- * Host-issued post-rental invoice / fine payment (Connect destination charge).
- * Renter pays; host receives funds minus platform fee — same pattern as rental PI.
- * Invoice records live on the client booking until a dedicated table exists.
+ * The renter pays an invoice the host raised (Connect destination charge:
+ * the host receives it minus the platform fee, as with the rental itself).
+ *
+ * The invoice must already exist on the rental — `/api/rentals/invoice` puts it
+ * there — and the amount must match what it says. Otherwise the person being
+ * charged would be naming the charge.
  */
 
 type LineBody = {
@@ -33,26 +37,6 @@ type Body = {
 };
 
 const PLATFORM_FEE_RATE = 0.12;
-
-/** Invoices live in the `rental_invoices` JSON column written by the host. */
-function findInvoice(
-  raw: unknown,
-  invoiceId: string,
-): { status: string; totalCents: number } | null {
-  if (!Array.isArray(raw)) return null;
-  for (const entry of raw) {
-    if (!entry || typeof entry !== "object") continue;
-    const record = entry as Record<string, unknown>;
-    if (record.id !== invoiceId) continue;
-    const total = Number(record.totalCents);
-    if (!Number.isFinite(total)) return null;
-    return {
-      status: typeof record.status === "string" ? record.status : "unknown",
-      totalCents: Math.round(total),
-    };
-  }
-  return null;
-}
 
 export default withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
@@ -111,7 +95,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   }
 
   // The host wrote the invoice; the renter must not be able to restate its total.
-  const invoice = findInvoice(rental.rental_invoices, invoiceId);
+  const invoice = readInvoices(rental.rental_invoices).find((entry) => entry.id === invoiceId);
   if (!invoice) {
     res.status(404).json({ error: "Invoice not found on this rental" });
     return;
@@ -178,52 +162,19 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
-  // Ensure invoice row exists on rentals.rental_invoices so webhook can mark paid.
-  const { data: rentalRow } = await admin
-    .from("rentals")
-    .select("rental_invoices")
-    .eq("id", rentalId)
-    .maybeSingle();
-  const existing = Array.isArray(rentalRow?.rental_invoices)
-    ? (rentalRow!.rental_invoices as Array<Record<string, unknown>>)
-    : [];
+  // The invoice is the host's; paying it only moves it to awaiting-payment so
+  // the webhook has something to mark paid. Its lines and total stay as issued.
   const now = new Date().toISOString();
-  const lines = Array.isArray(body.lines)
-    ? body.lines.slice(0, 12).map((l, i) => ({
-        id: `line-${i}`,
-        kind: (l.kind || "custom").slice(0, 32),
-        label: (l.label || l.kind || "item").slice(0, 120),
-        amountCents: Math.round(Number(l.amountCents) || 0),
-      }))
-    : [];
-  let found = false;
-  const nextInvoices = existing.map((inv) => {
-    if (inv?.id !== invoiceId) return inv;
-    found = true;
-    return {
-      ...inv,
-      status: "payment_pending",
-      stripePaymentIntentId: paymentIntent.id,
-      totalCents: amountCents,
-      note: note || inv.note,
-      lines: lines.length ? lines : inv.lines,
-      updatedAt: now,
-    };
-  });
-  if (!found) {
-    nextInvoices.push({
-      id: invoiceId,
-      rentalId,
-      status: "payment_pending",
-      stripePaymentIntentId: paymentIntent.id,
-      totalCents: amountCents,
-      note: note || undefined,
-      lines,
-      createdAt: now,
-      updatedAt: now,
-      createdByRole: "host",
-    });
-  }
+  const nextInvoices = readInvoices(rental.rental_invoices).map((inv) =>
+    inv.id === invoiceId
+      ? {
+          ...inv,
+          status: "payment_pending" as const,
+          stripePaymentIntentId: paymentIntent.id,
+          updatedAt: now,
+        }
+      : inv,
+  );
   await admin.from("rentals").update({ rental_invoices: nextInvoices }).eq("id", rentalId);
 
   res.status(200).json({

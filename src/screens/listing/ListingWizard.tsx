@@ -8,6 +8,8 @@ import { resolveGarageHostId } from "../../lib/hostAccess";
 import { getProfileCity, savePublishedListingRemote, savePublishedListing, saveListingDraftProgress, stampListingDraftProgress, removePublishedListing, removePublishedListingRemote, fetchListingByIdRemote, getPublishedListingById } from "../../lib/listingStorage";
 import { syncAgentPrefsRemote, ensureBrowserTimeZoneCaptured } from "../../lib/agentPrefs";
 import { notifyGarageFollowersOfNewListing } from "../../lib/garageFollowNotify";
+import { notifyRequestAuthorOfListing } from "../../lib/requestNotifications";
+import { fetchRequestByIdRemote } from "../../lib/requestsStorage";
 import { getLocalStoreLive } from "../../lib/garageStoreLive";
 import { loadUserProfile, saveUserProfile } from "../../lib/userProfileStorage";
 import { getListingDisplayTitle, listingRequiresQrSticker } from "../../lib/listingQr";
@@ -27,7 +29,7 @@ import { isFreeGiveaway } from "../../lib/listingGift";
 import { PhoneVerifySheet } from "../../components/profile/PhoneVerifySheet";
 import { analyzeListingMediaPhotos } from "./listingAnalysis";
 import {
-  messageForPhotoModeration,
+  messageForGalleryModeration,
   moderateListingMediaPhotos,
 } from "./listingPhotoModeration";
 import {
@@ -81,16 +83,21 @@ import {
 } from "../../lib/yardSaleListing";
 import { applyAiSuggestionsToDraft } from "./applyAiSuggestions";
 import { isListingStepValid } from "./validation";
+import { pinMedia, unpinMedia } from "../../lib/mediaStore";
 import { useMessages } from "../../lib/i18n/react";
 
 function createPrefilledListingDraft(prefill?: ShelfPrefill | null): ListingDraft {
   const draft = createInitialListingDraft();
   if (!prefill?.category) return draft;
   const subcategory = prefill.subcategory?.trim() ?? "";
+  // What the neighbor actually asked for. Carrying only category and shelf made
+  // the host retype the need they had just read.
+  const need = prefill.requestId ? (prefill.query?.trim() ?? "") : "";
   return {
     ...draft,
     category: prefill.category,
     subcategory,
+    description: need || draft.description,
     grade: subcategory ? gradeForSubcategory(prefill.category, subcategory) : draft.grade,
   };
 }
@@ -155,6 +162,7 @@ export function ListingWizard({
   const auth = useAuth();
   const t = useMessages();
   const listing = t.listing;
+  const answeredRequestId = initialPrefill?.requestId?.trim() || null;
   const isEditing = (() => {
     const status =
       initialDraft?.listingStatus ??
@@ -272,9 +280,30 @@ export function ListingWizard({
     };
   }, [editingListingId, initialDraft]);
 
+  // A shelf mismatch is about the shelf that was picked; picking another one
+  // makes the warning stale before the next check has anything to say.
+  useEffect(() => {
+    setPhotoGateMessage(null);
+  }, [draft.category, draft.subcategory]);
+
+  // The gallery under construction is not eviction material: adding the twelfth
+  // photo used to be able to free space by dropping the first.
+  const draftMediaIds = useMemo(
+    () => [
+      ...draft.photos.flatMap((photo) => [photo.id, photo.thumbId]),
+      ...draft.videos.map((video) => video.id),
+    ],
+    [draft.photos, draft.videos],
+  );
+
+  useEffect(() => {
+    pinMedia(draftMediaIds);
+    return () => unpinMedia(draftMediaIds);
+  }, [draftMediaIds]);
+
   useEffect(() => {
     const busy =
-      step === LISTING_STEP.photos &&
+      (step === LISTING_STEP.photos || step === LISTING_STEP.category) &&
       (photoModerationPending || draft.aiAnalysisPending);
     if (!busy) {
       setPhotoProgressTick(0);
@@ -520,6 +549,22 @@ export function ListingWizard({
         recordDevicePublish(hostId);
         void savePublishedListingRemote(publishedDraft, hostId).then((result) => {
           setPhotosPending(result.photosPending);
+        });
+      }
+      // Answering an ask: the renter who asked hears about it, and closes their
+      // own request — RLS keeps that lifecycle with the author, not the host.
+      if (answeredRequestId) {
+        void fetchRequestByIdRemote(answeredRequestId).then((request) => {
+          if (!request || request.status !== "open") return;
+          void notifyRequestAuthorOfListing({
+            request,
+            listingId: publishedDraft.id,
+            actorId: auth.userId,
+            title: t.postRequest.authorNotifyTitle,
+            body: t.postRequest.authorNotifyBody(
+              getListingDisplayTitle(publishedDraft.title) || publishedDraft.title,
+            ),
+          });
         });
       }
       const profile = loadUserProfile();
@@ -883,6 +928,82 @@ export function ListingWizard({
     })();
   };
 
+  /**
+   * Vision gate over the whole gallery, not a sample of two.
+   *
+   * It runs twice on the way to details — on the photos step, and again once a
+   * shelf is picked, because "this is not that shelf" is the one verdict the
+   * first pass cannot reach. Verdicts are cached per photo and per shelf, so
+   * the second pass only pays for what actually changed.
+   */
+  const runGalleryModerationGate = async (options: {
+    softNudge: boolean;
+    videos: boolean;
+  }): Promise<boolean> => {
+    setPhotoGateMessage(null);
+    if (isInModerationCooldown(auth.userId)) {
+      setPhotoGateMessage(
+        listing.moderationCooldownWait(
+          formatCooldownHours(getModerationCooldownRemaining(auth.userId)),
+        ),
+      );
+      return false;
+    }
+
+    setPhotoModerationPending(true);
+    try {
+      const moderation = await moderateListingMediaPhotos(draft.photos, {
+        category: draft.category,
+        subcategory: draft.subcategory,
+      });
+      if (!moderation.ok) {
+        const strike = recordModerationStrike({
+          userId: auth.userId,
+          severe:
+            moderation.reasonCode === "nsfw" || moderation.reasonCode === "prohibited_item",
+        });
+        const message = messageForGalleryModeration(moderation, listing.photos);
+        setPhotoGateMessage(
+          strike.hasCooldown
+            ? listing.moderationCooldownWait(formatCooldownHours(strike.cooldownMs))
+            : options.softNudge
+              ? `${message} ${listing.moderationSoftNudgeListing}`
+              : message,
+        );
+        return false;
+      }
+
+      if (options.videos && draft.videos.length > 0) {
+        const videoModeration = await moderateListingMediaVideos(draft.videos, {
+          category: draft.category,
+          subcategory: draft.subcategory,
+        });
+        if (!videoModeration.ok) {
+          const strike = recordModerationStrike({
+            userId: auth.userId,
+            severe:
+              videoModeration.reasonCode === "nsfw" ||
+              videoModeration.reasonCode === "prohibited_item",
+          });
+          setPhotoGateMessage(
+            strike.hasCooldown
+              ? listing.moderationCooldownWait(formatCooldownHours(strike.cooldownMs))
+              : messageForVideoModeration(videoModeration.reasonCode, {
+                  ...listing.photos,
+                  moderationBadVideo: listing.photos.moderationBadVideo,
+                  moderationVideoNotListable: listing.photos.moderationVideoNotListable,
+                }),
+          );
+          return false;
+        }
+      }
+
+      return true;
+    } finally {
+      setPhotoModerationPending(false);
+    }
+  };
+
   const handleContinue = async () => {
     if (step === LISTING_STEP.photos) {
       if (
@@ -894,73 +1015,26 @@ export function ListingWizard({
         return;
       }
 
-      setPhotoGateMessage(null);
-      if (isInModerationCooldown(auth.userId)) {
-        setPhotoGateMessage(
-          listing.moderationCooldownWait(
-            formatCooldownHours(getModerationCooldownRemaining(auth.userId)),
-          ),
-        );
-        return;
+      if (!(await runGalleryModerationGate({ softNudge: true, videos: true }))) return;
+
+      if (!draft.aiSuggestions) {
+        await runListingPhotoAnalysis();
       }
+      goToStep(
+        isYardSaleListingActive() ? LISTING_STEP.details : LISTING_STEP.category,
+        1,
+      );
+      return;
+    }
 
-      setPhotoModerationPending(true);
-      try {
-        // Always re-moderate on Continue (including already-enhanced photos).
-        const moderation = await moderateListingMediaPhotos(draft.photos, {
-          category: draft.category,
-          subcategory: draft.subcategory,
-        });
-        if (!moderation.ok) {
-          const strike = recordModerationStrike({
-            userId: auth.userId,
-            severe:
-              moderation.reasonCode === "nsfw" ||
-              moderation.reasonCode === "prohibited_item",
-          });
-              setPhotoGateMessage(
-            strike.hasCooldown
-              ? listing.moderationCooldownWait(formatCooldownHours(strike.cooldownMs))
-              : `${messageForPhotoModeration(moderation.reasonCode, listing.photos)} ${listing.moderationSoftNudgeListing}`,
-          );
-          return;
-        }
+    if (step === LISTING_STEP.category) {
+      if (!canContinue || photoModerationPending) return;
 
-        if (draft.videos.length > 0) {
-          const videoModeration = await moderateListingMediaVideos(draft.videos, {
-            category: draft.category,
-            subcategory: draft.subcategory,
-          });
-          if (!videoModeration.ok) {
-            const strike = recordModerationStrike({
-              userId: auth.userId,
-              severe:
-                videoModeration.reasonCode === "nsfw" ||
-                videoModeration.reasonCode === "prohibited_item",
-            });
-            setPhotoGateMessage(
-              strike.hasCooldown
-                ? listing.moderationCooldownWait(formatCooldownHours(strike.cooldownMs))
-                : messageForVideoModeration(videoModeration.reasonCode, {
-                    ...listing.photos,
-                    moderationBadVideo: listing.photos.moderationBadVideo,
-                    moderationVideoNotListable: listing.photos.moderationVideoNotListable,
-                  }),
-            );
-            return;
-          }
-        }
+      // The shelf is known only now, so this is the first time the photos can
+      // be held against it.
+      if (!(await runGalleryModerationGate({ softNudge: true, videos: false }))) return;
 
-        if (!draft.aiSuggestions) {
-          await runListingPhotoAnalysis();
-        }
-        goToStep(
-          isYardSaleListingActive() ? LISTING_STEP.details : LISTING_STEP.category,
-          1,
-        );
-      } finally {
-        setPhotoModerationPending(false);
-      }
+      goToStep(step + 1, 1);
       return;
     }
 
@@ -1061,64 +1135,13 @@ export function ListingWizard({
       return;
     }
 
-    setPhotoGateMessage(null);
-    if (isInModerationCooldown(auth.userId)) {
-      setPhotoGateMessage(
-        listing.moderationCooldownWait(
-          formatCooldownHours(getModerationCooldownRemaining(auth.userId)),
-        ),
-      );
-      return;
-    }
-
-    setPhotoModerationPending(true);
-    let allowed = false;
-    try {
-      const moderation = await moderateListingMediaPhotos(draft.photos, {
-        category: draft.category,
-        subcategory: draft.subcategory,
-      });
-      if (!moderation.ok) {
-        const strike = recordModerationStrike({
-          userId: auth.userId,
-          severe:
-            moderation.reasonCode === "nsfw" ||
-            moderation.reasonCode === "prohibited_item",
-        });
-        setPhotoGateMessage(
-          strike.hasCooldown
-            ? listing.moderationCooldownWait(formatCooldownHours(strike.cooldownMs))
-            : messageForPhotoModeration(moderation.reasonCode, listing.photos),
-        );
-        return;
-      }
-      if (draft.videos.length > 0) {
-        const videoModeration = await moderateListingMediaVideos(draft.videos, {
-          category: draft.category,
-          subcategory: draft.subcategory,
-        });
-        if (!videoModeration.ok) {
-          setPhotoGateMessage(
-            messageForVideoModeration(videoModeration.reasonCode, {
-              ...listing.photos,
-              moderationBadVideo: listing.photos.moderationBadVideo,
-              moderationVideoNotListable: listing.photos.moderationVideoNotListable,
-            }),
-          );
-          return;
-        }
-      }
-      allowed = true;
-    } finally {
-      setPhotoModerationPending(false);
-    }
-
-    if (!allowed) return;
+    if (!(await runGalleryModerationGate({ softNudge: false, videos: true }))) return;
     await runListingPhotoAnalysis();
   };
 
   const continueLabel =
-    step === LISTING_STEP.photos && (draft.aiAnalysisPending || photoModerationPending) ? (
+    (step === LISTING_STEP.photos || step === LISTING_STEP.category) &&
+    (draft.aiAnalysisPending || photoModerationPending) ? (
       <span className="flex flex-col items-center justify-center gap-0.5">
         <span className="flex items-center justify-center gap-2">
           <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
@@ -1147,9 +1170,11 @@ export function ListingWizard({
         draft.aiAnalysisPending ||
         draft.photoEnhancementPending ||
         photoModerationPending
-      : step === LISTING_STEP.details
-        ? !canContinue || textModerationPending
-        : !canContinue;
+      : step === LISTING_STEP.category
+        ? !canContinue || photoModerationPending
+        : step === LISTING_STEP.details
+          ? !canContinue || textModerationPending
+          : !canContinue;
 
   const handleDiscard = () => {
     setShowDiscardDialog(false);
@@ -1507,6 +1532,14 @@ export function ListingWizard({
 
       {!isLastStep ? (
         <footer className="shrink-0 border-t border-[#E5E7EB] bg-white px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-4">
+          {step === LISTING_STEP.category && photoGateMessage ? (
+            <p
+              role="status"
+              className="mb-3 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700"
+            >
+              {photoGateMessage}
+            </p>
+          ) : null}
           <button
             type="button"
             onClick={() => void handleContinue()}

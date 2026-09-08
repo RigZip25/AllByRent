@@ -354,6 +354,8 @@ export const es: AppMessages = {
     noMatches: (query) => `Sin resultados para «${query}»`,
     noMatchesHint: "Prueba con menos palabras clave, o publica una solicitud para que los anfitriones sepan qué publicar.",
     postRequestFor: (query) => `Publicar solicitud de «${query}»`,
+    asksTitle: "Vecinos preguntando aquí",
+    asksHint: (city) => `Solicitudes abiertas en este estante en ${city}`,
     empty: {
       rentanoEarn: (category, city) =>
         `Sin competencia en ${category} en ${city}. El primer anfitrión se lleva toda la demanda.`,
@@ -370,6 +372,8 @@ export const es: AppMessages = {
       recentRequests: (city) => `Solicitudes recientes cerca de ${city}`,
       wanted: "Se busca",
       listToFulfill: "Publica para cubrir la demanda →",
+      openAsk: "Abrir solicitud",
+      guestAsksHint: "Inicia sesión para responder una solicitud o publicar la tuya.",
     },
     founding: {
       listFirstCta: "Publica tu primer artículo",
@@ -612,6 +616,8 @@ export const es: AppMessages = {
       "Abre un alquiler activo y toca Mensaje, o escribe a un vendedor desde un anuncio — las conversaciones aparecerán aquí.",
     rental: "Alquiler",
     buyGift: "Comprar / regalo",
+    request: "Solicitud",
+    requestFallback: "Chat de solicitud",
     tapToDiscuss: "Toca para hablar de los detalles de recogida",
   },
   howItWorks: {
@@ -755,6 +761,13 @@ export const es: AppMessages = {
     guidesProfileBody: "Nombre, teléfono, cobros, cerrar sesión",
   },
   garageUi: {
+    asksTitle: "Tus solicitudes",
+    asksHint: "Lo que pediste a tus vecinos",
+    asksEmpty: "Todavía no has pedido nada.",
+    asksEmptyCta: "Pedir algo a los vecinos",
+    asksOpenCount: (n) => (n === 1 ? "1 abierta" : `${n} abiertas`),
+    asksSeeAll: "Ver todas",
+    asksBack: "Volver al garaje",
     shop: "Tienda",
     previewNeighbor: "Vista de vecino",
     lookShow: "Aspecto del garaje · personal / pro",
@@ -942,6 +955,12 @@ export const es: AppMessages = {
     outcomeFavorRenter: "A favor del arrendatario",
     outcomeFavorHost: "A favor del anfitrión",
     outcomeSplit: "Dividir / acuerdo",
+    disputeDepositReleasedTitle: "Disputa resuelta: retención liberada",
+    disputeDepositReleasedBody:
+      "La retención del depósito en la tarjeta del inquilino se ha liberado. Los bancos pueden tardar unos días en mostrarlo.",
+    disputeClaimWindowTitle: "Disputa resuelta: reclama el depósito",
+    disputeClaimWindowBody: (hours) =>
+      `Tienes ${hours} horas para reclamar lo que se te debe de la retención del depósito. Lo que no reclames se devuelve al inquilino.`,
     outcomeWithdrawn: "Retirar disputa",
     waitingCounterpartyAck: "Esperando a que la otra parte acepte esta resolución.",
     acceptResolution: "Aceptar resolución",
@@ -963,6 +982,8 @@ export const es: AppMessages = {
     depositStatusReleased: "Fianza: liberada",
     depositStatusClaimed: "Fianza: reclamada por el anfitrión",
     depositHoldActiveBody: "Retención activa. El propietario puede reclamar en 48 h tras la devolución; si no, liberar al arrendatario.",
+    depositActionFailed: "No se pudo completar. La retención sigue igual — inténtalo de nuevo.",
+    depositAutoReleaseHint: (date) => `Si nadie reclama, la retención se libera el ${date}.`,
     resolvedCalm: (outcome) => `Disputa resuelta (${outcome}). Gracias por tratarlo con cuidado.`,
     underReviewCalm: "En revisión — ambas partes pueden seguir añadiendo pruebas. Resuélvanlo juntos o escribid a soporte.",
     rentalItemFallback: "Artículo alquilado",
@@ -1259,11 +1280,10 @@ export const es: AppMessages = {
     invoiceKindFine: "Multa / sanción",
     invoiceKindNoShow: "No-show",
     invoiceKindDamage: "Daños",
+    invoiceKindExtension: "Días extra",
     invoiceKindCustom: "Personalizado",
     invoiceStripeScaffold:
       "El enlace de pago con tarjeta está preparado — las facturas se guardan en el alquiler aunque el pago con tarjeta aún no esté configurado.",
-    call: "Llamar",
-    phoneSharedAfterCheckin: "Los números de teléfono se comparten en el chat tras confirmar la recogida",
     close: "Cerrar",
     beforeCheckIn: "Antes de confirmar la recogida",
     inspectItem: "Revisa el artículo por si tiene algún daño previo",
@@ -1299,7 +1319,7 @@ export const es: AppMessages = {
     cancelRefundReleased: "Se está liberando cualquier autorización de tarjeta.",
     datesAdjustTitle: "Cambiar fechas del alquiler",
     datesAdjustBody:
-      "Amplía solo si los días siguientes siguen libres en el calendario. La devolución anticipada siempre es posible: completa la entrega cuando termines.",
+      "Amplía solo si los días siguientes siguen libres en el calendario: los días extra se cobran antes de mover la fecha de fin. La devolución anticipada siempre es posible: completa la entrega cuando termines.",
     extendBooking: "Prolongar reserva",
     extendNewEnd: "Nueva fecha de fin",
     extendConfirm: "Confirmar ampliación",
@@ -1307,14 +1327,14 @@ export const es: AppMessages = {
     extendUnavailable: "Esas fechas no están libres: elige otro día de fin.",
     extendInvalid: "Elige una fecha de fin posterior a la actual.",
     extendSuccess: (date) => `Ampliado hasta el ${date}.`,
-    earlyReturn: "Devolver antes",
-    earlyReturnConfirmBody:
-      "Acorta este alquiler a hoy. Seguirás completando la devolución con el anfitrión. Los ajustes de precio (si los hay) los resolvéis entre vosotros: el calendario se libera al momento.",
-    earlyReturnConfirm: "Sí, terminar hoy",
-    earlyReturnWorking: "Actualizando...",
-    earlyReturnInvalid: "La devolución anticipada no está disponible en este estado.",
-    earlyReturnSuccess: (date) =>
-      `Fin del alquiler fijado en ${date}. Completa la devolución cuando estés listo.`,
+    extendQuote: (days, amount) =>
+      `${days === 1 ? "1 día extra" : `${days} días extra`} · ${amount}`,
+    extendPayCta: (amount) => `Añadir a los cargos · ${amount}`,
+    extendInvoiceIssued:
+      "Los días extra están en Cargos, abajo. La fecha de fin cambia cuando los pagues.",
+    extendPaidNote: "Los días extra se cobran a la tarifa diaria del anfitrión.",
+    earlyReturnHint:
+      "¿Terminaste antes? Devuélvelo cuando quieras: el alquiler acaba cuando el anfitrión acepta la devolución. Los días reservados se cobran según lo acordado.",
     cancelRefundFullProcessing:
       "Se envió un reembolso completo: los bancos pueden tardar unos días hábiles en mostrarlo.",
     cancelRefundPartialProcessing: (percent) =>
@@ -1382,11 +1402,14 @@ export const es: AppMessages = {
     cancelBooking: "Cancelar reserva",
     runningLateTitle: (ownerName) => `¿Enviar un mensaje a ${ownerName}?`,
     runningLateBody:
-      "Recibirá un push y un mensaje en la app. Si responde OK, el temporizador de ausencia se reinicia.",
+      "El anfitrión lo ve en la reserva y la ausencia se aplaza una hora desde ahora.",
     runningLateDefault: "Voy con un poco de retraso, llego enseguida.",
     runningLateNotifTitle: "El inquilino llega tarde",
     runningLateNotifBody: (message) =>
-      `${message} — toca para confirmarlo y pausar el temporizador de ausencia.`,
+      `${message} — la ausencia se aplaza una hora.`,
+    runningLateFromRenter: (message) => `Llega tarde: «${message}»`,
+    runningLateAck: "Entendido",
+    runningLateAcknowledged: "Le dijiste que esperarás",
   },
   rentalStatus: {
     pending_approval: "Esperando aprobación",
@@ -1623,6 +1646,8 @@ export const es: AppMessages = {
       enhancementUnavailable:
         "Foto guardada tal cual — el retoque de fondo no estaba disponible esta vez.",
       couldntAddPhoto: "No se pudo añadir esta foto. Inténtalo de nuevo.",
+      heicFailed:
+        "Esta foto de iPhone (HEIC) no se pudo leer aquí. Hazla de nuevo, o cambia Ajustes \u2192 Cámara \u2192 Formatos a \u00abMás compatible\u00bb y vuelve a elegirla.",
       moderationNotListable:
         "No pudimos usar esta foto en el anuncio : no parece una foto clara del producto. Prueba otra foto del artículo en sí.",
       moderationProhibitedItem:
@@ -1633,6 +1658,7 @@ export const es: AppMessages = {
         "Esta foto es un poco difícil de usar : puede ser poca luz, estar borrosa o que el artículo no se vea bien. Prueba otro ángulo con el artículo bien a la vista.",
       moderationVerifyFailed:
         "No pudimos confirmar esta foto. A veces pasa por poca luz, una imagen borrosa, un artículo poco claro o una foto que no parece de un anuncio. Prueba con otra foto.",
+      moderationPhotoNumber: (position) => `Foto ${position}: `,
       verifyingPhotos: (mascot) => `${mascot} está revisando tus fotos...`,
       moderationVideoNotListable:
         "No pudimos usar este vídeo en el anuncio : no parece una demostración clara del artículo. Prueba otra toma del artículo en sí.",
@@ -6028,6 +6054,65 @@ export const es: AppMessages = {
     whenFlexible: "Flexible / cuanto antes",
     whenRange: (start, end) => `${start} - ${end}`,
     whenFrom: (start) => `Desde ${start}`,
+    signInTitle: "Inicia sesión para preguntar a tus vecinos",
+    signInBody:
+      "La solicitud sale con tu nombre para que los vecinos sepan a quién responder. Inicia sesión primero — es un minuto.",
+    moderationEmpty: "Escribe una línea sobre lo que necesitas.",
+    moderationTooShort: "Unas palabras más, para que los vecinos sepan qué buscar.",
+    moderationPhone:
+      "Deja fuera el teléfono — cualquiera puede leer una solicitud. Los vecinos responden en la app.",
+    moderationEmail:
+      "Deja fuera el correo — cualquiera puede leer una solicitud. Los vecinos responden en la app.",
+    moderationAddress:
+      "Deja fuera la dirección — cualquiera puede leer una solicitud. Compártela en el chat cuando alguien responda.",
+    moderationOffPlatform: "Sigamos en la app — WhatsApp y similares no se permiten aquí.",
+    moderationAbusive: "Mantengámoslo entre vecinos. Reescríbelo e inténtalo otra vez.",
+    savedLocallyTitle: "Guardada solo en este dispositivo",
+    savedLocallyBody:
+      "No pudimos llegar al vecindario. Reinténtalo para publicarla ante los vecinos.",
+    retryPublish: "Reintentar",
+    retrying: "Reintentando…",
+    notifiedNeighbors: (n) =>
+      n === 1
+        ? "Avisamos a 1 vecino que tiene algo así."
+        : `Avisamos a ${n} vecinos que tienen algo así.`,
+    notifiedNobody: "Todavía nadie surte este estante — comparte el enlace y seguimos buscando.",
+    neighborNotifyTitle: (subcategory) => `Se busca cerca: ${subcategory}`,
+    neighborNotifyBody: (city, need) => `Un vecino en ${city} busca: ${need}`,
+    authorNotifyTitle: "Alguien publicó lo que pediste",
+    authorNotifyBody: (listingTitle) => `${listingTitle} acaba de aparecer cerca. Échale un ojo.`,
+  },
+  requestDetail: {
+    notFoundTitle: "Solicitud no encontrada",
+    notFoundBody: "Puede que esta solicitud haya caducado o que su autor la retirara.",
+    yourAsk: "Tu solicitud",
+    statusOpen: "Abierta",
+    statusFulfilled: "Resuelta",
+    statusCancelled: "Cerrada",
+    statusExpired: "Caducada",
+    expiresInDays: (n) => (n === 1 ? "Caduca mañana" : `Caduca en ${n} días`),
+    expiresToday: "Caduca hoy",
+    expiredBody: "Las solicitudes duran 30 días. Reábrela para volver a mostrarla a los vecinos.",
+    fulfilledBody: "La marcaste como resuelta. Los vecinos ya no la ven.",
+    cancelledBody: "Cerraste esta solicitud. Los vecinos ya no la ven.",
+    manageTitle: "Gestiona tu solicitud",
+    markFulfilled: "Marcar como resuelta",
+    reopen: "Reabrir",
+    cancelAsk: "Cerrar solicitud",
+    deleteAsk: "Eliminar",
+    deleteConfirm: "¿Eliminar esta solicitud? Los vecinos dejarán de verla.",
+    editText: "Editar texto",
+    saveText: "Guardar",
+    cancelEdit: "Cancelar",
+    updateFailed: "No se pudo actualizar la solicitud. Inténtalo otra vez.",
+    messageAuthor: "Escribir al vecino",
+    messageAuthorHint: "¿Lo tienes? Saluda antes de publicarlo.",
+    budgetRent: (label) => `Hasta ${label}/día`,
+    budgetBuy: (label) => `Hasta ${label} por comprarlo`,
+    withinRadius: (label) => `A menos de ${label}`,
+    needBy: (range) => `Se necesita ${range}`,
+    haveThisCta: "Lo tengo — publicarlo",
+    postedAgo: (date) => `Publicada ${date}`,
   },
   faq,
   categoryFacts: resolveCategoryFacts(categoryFactsEsOverlay),
@@ -6176,6 +6261,8 @@ export const es: AppMessages = {
     closedReadOnly: "El chat de este alquiler está cerrado. Aún puedes leer el historial.",
     listingChatFallback: "Chat del anuncio",
     listingChatSubtitle: "Chat sobre la recogida · push cuando respondan",
+    requestChatFallback: "Chat de solicitud",
+    requestChatSubtitle: "Sobre lo que busca tu vecino",
     moderationBlocked:
       "No se puede enviar el mensaje: mantén una comunicación respetuosa.",
     moderationOffPlatform:
@@ -6802,6 +6889,12 @@ export const es: AppMessages = {
     yesDelete: "Sí, eliminar",
     deleting: "Eliminando...",
     deleteFailed: "No se pudo eliminar el anuncio. Inténtalo de nuevo.",
+    deleteBlockedLiveRental: (count) =>
+      count === 1
+        ? "Hay un alquiler reservado, en curso o en disputa en este anuncio. Eliminarlo borraría ese alquiler para los dos: termínalo o cancélalo primero."
+        : `Hay ${count} alquileres reservados, en curso o en disputa en este anuncio. Eliminarlo los borraría para ambas partes: termínalos o cancélalos primero.`,
+    pauseKeepsLiveRental:
+      "Pausar solo detiene nuevas reservas. El alquiler que ya está en curso sigue según lo acordado.",
     editAria: (label) => `Editar ${label}`,
     editTitle: (field) => `Editar ${field}`,
     editDailyPrice: "Precio diario",

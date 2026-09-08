@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
-import rentanoImg from "../imports/No_back_rentano.png";
+import rentanoImg from "../imports/No_back_rentano.webp";
 
 const PRIMARY_GREEN = "#0D5C3A";
 

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { claimDepositHold, releaseDepositHold } from "../../lib/stripePayments";
 import { isStripePaymentsEnabled } from "../../lib/stripeConfig";
-import { useMessages } from "../../lib/i18n/react";
+import { useLocale, useMessages } from "../../lib/i18n/react";
+import { updateBooking } from "../../lib/rentalsStorage";
 import type { DisputeResolutionOutcome } from "../../lib/disputesStorage";
 
 const GREEN = "#0D5C3A";
@@ -11,19 +12,26 @@ export function DepositHoldActions({
   role,
   depositStatus,
   depositAmountCents,
+  depositClaimDeadlineAt,
   disputeFrozen = false,
   disputeOutcome = null,
+  onSettled,
 }: {
   rentalId: string;
   role: "host" | "renter";
   depositStatus?: string;
   depositAmountCents?: number;
+  /** When the hold lifts by itself, so the screen can say so. */
+  depositClaimDeadlineAt?: string;
   /** When an open/under_review dispute is active, freeze claim/release UI. */
   disputeFrozen?: boolean;
   /** After resolve — surface the clear next Stripe step (manual). */
   disputeOutcome?: DisputeResolutionOutcome | null;
+  /** Called once the hold has actually moved, so the screen can reload it. */
+  onSettled?: () => void;
 }) {
   const t = useMessages();
+  const locale = useLocale();
   const [busy, setBusy] = useState<"release" | "claim" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [partialUsd, setPartialUsd] = useState("");
@@ -59,6 +67,16 @@ export function DepositHoldActions({
     );
   }
 
+  const deadlineMs = depositClaimDeadlineAt ? Date.parse(depositClaimDeadlineAt) : NaN;
+  const autoReleaseHint = Number.isFinite(deadlineMs)
+    ? t.rentalDetail.depositAutoReleaseHint(
+        new Date(deadlineMs).toLocaleDateString(locale, {
+          month: "short",
+          day: "numeric",
+        }),
+      )
+    : null;
+
   const nextStep =
     disputeOutcome === "favor_renter"
       ? t.rentalDetail.depositNextRelease
@@ -68,13 +86,28 @@ export function DepositHoldActions({
           ? t.rentalDetail.depositNextSupport
           : null;
 
+  /**
+   * The route settles the hold in Stripe and on the rental row. Recording it on
+   * the booking too is what makes the screen agree with the money: before this,
+   * a released hold still read "hold is active" until something else happened
+   * to reload the rental, and the other side never saw the change at all.
+   */
+  const recordSettlement = (status: "released" | "claimed") => {
+    updateBooking(rentalId, { depositStatus: status });
+    onSettled?.();
+  };
+
   const handleRelease = () => {
     setBusy("release");
     setMessage(null);
     void releaseDepositHold(rentalId)
       .then((r) => {
-        if (!r.ok) setMessage(r.error ?? t.rentalDetail.depositStatusReleased);
-        else setMessage(t.rentalDetail.depositStatusReleased);
+        if (!r.ok) {
+          setMessage(r.error ?? t.rentalDetail.depositActionFailed);
+          return;
+        }
+        setMessage(t.rentalDetail.depositStatusReleased);
+        recordSettlement("released");
       })
       .finally(() => setBusy(null));
   };
@@ -100,14 +133,17 @@ export function DepositHoldActions({
       reason: amountCents != null ? "partial_deposit_claim" : "full_deposit_claim",
     })
       .then((r) => {
-        if (!r.ok) setMessage(r.error ?? t.rentalDetail.depositStatusClaimed);
-        else {
-          setMessage(
-            amountCents != null
-              ? t.rentalDetail.depositPartialClaimed
-              : t.rentalDetail.depositStatusClaimed,
-          );
+        if (!r.ok) {
+          setMessage(r.error ?? t.rentalDetail.depositActionFailed);
+          return;
         }
+        setMessage(
+          amountCents != null
+            ? t.rentalDetail.depositPartialClaimed
+            : t.rentalDetail.depositStatusClaimed,
+        );
+        // A partial capture releases the remainder, so either way the hold is done.
+        recordSettlement("claimed");
       })
       .finally(() => setBusy(null));
   };
@@ -120,6 +156,9 @@ export function DepositHoldActions({
       <p className="text-xs text-muted-foreground">
         {nextStep ?? t.rentalDetail.depositHoldActiveBody}
       </p>
+      {autoReleaseHint ? (
+        <p className="text-xs text-muted-foreground">{autoReleaseHint}</p>
+      ) : null}
       <p className="text-[11px] text-muted-foreground">{t.rentalDetail.depositPartialHint}</p>
       {message ? <p className="text-xs text-gray-700">{message}</p> : null}
       {role === "host" ? (

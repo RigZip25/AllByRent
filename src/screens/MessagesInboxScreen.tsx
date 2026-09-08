@@ -19,14 +19,16 @@ type Props = {
   onBack: () => void;
   onOpenRentalChat: (rentalId: string) => void;
   onOpenListingChat: (listingId: string, peerId: string) => void;
+  onOpenRequestChat: (requestId: string, peerId: string) => void;
 };
 
-function threadTitle(thread: ChatThreadSummary): string {
+function threadTitle(thread: ChatThreadSummary, requestFallback: string): string {
   if (thread.kind === "rental" && thread.rentalId) {
     const booking = loadRentalBookings().find((b) => b.id === thread.rentalId);
     if (booking?.itemTitle) return booking.itemTitle;
     return "Rental chat";
   }
+  if (thread.kind === "request") return requestFallback;
   if (thread.listingId) {
     const listing = getPublishedListingById(thread.listingId);
     if (listing) return getListingDisplayTitle(listing.title) || listing.title || "Listing chat";
@@ -44,7 +46,12 @@ function mergeThreads(local: ChatThreadSummary[], remote: ChatThreadSummary[]): 
   return [...map.values()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
-export function MessagesInboxScreen({ onBack, onOpenRentalChat, onOpenListingChat }: Props) {
+export function MessagesInboxScreen({
+  onBack,
+  onOpenRentalChat,
+  onOpenListingChat,
+  onOpenRequestChat,
+}: Props) {
   const auth = useAuth();
   const copy = useMessages();
   const [remote, setRemote] = useState<ChatThreadSummary[]>([]);
@@ -139,7 +146,9 @@ export function MessagesInboxScreen({ onBack, onOpenRentalChat, onOpenListingCha
                   type="button"
                   onClick={() => {
                     if (thread.kind === "rental" && thread.rentalId) onOpenRentalChat(thread.rentalId);
-                    else if (thread.listingId) onOpenListingChat(thread.listingId, thread.peerId);
+                    else if (thread.kind === "request" && thread.requestId) {
+                      onOpenRequestChat(thread.requestId, thread.peerId);
+                    } else if (thread.listingId) onOpenListingChat(thread.listingId, thread.peerId);
                   }}
                   className="flex w-full items-start gap-3 rounded-2xl border bg-white px-4 py-3.5 text-left active:bg-gray-50"
                   style={{ borderColor: BORDER }}
@@ -153,14 +162,18 @@ export function MessagesInboxScreen({ onBack, onOpenRentalChat, onOpenListingCha
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
                       <p className="truncate text-[15px] font-semibold" style={{ color: GREEN }}>
-                        {threadTitle(thread)}
+                        {threadTitle(thread, copy.messages.requestFallback)}
                       </p>
                       <span className="shrink-0 text-[11px] text-gray-400">
                         {new Date(thread.updatedAt).toLocaleDateString()}
                       </span>
                     </div>
                     <p className="mt-0.5 text-[12px] font-medium uppercase tracking-wide text-gray-400">
-                      {thread.kind === "rental" ? copy.messages.rental : copy.messages.buyGift}
+                      {thread.kind === "rental"
+                        ? copy.messages.rental
+                        : thread.kind === "request"
+                          ? copy.messages.request
+                          : copy.messages.buyGift}
                     </p>
                     <p className="mt-1 line-clamp-2 text-[13px] text-gray-600">{thread.preview}</p>
                   </div>

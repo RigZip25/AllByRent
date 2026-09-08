@@ -52,6 +52,7 @@ export function canSuggestSoftNoShow(
     RentalBooking,
     | "status"
     | "pickupScheduledAt"
+    | "pickupGraceUntil"
     | "noShowMarkedAt"
     | "hostHandedOverAt"
     | "renterReceivedAt"
@@ -67,6 +68,9 @@ export function canSuggestSoftNoShow(
   if (!booking.pickupScheduledAt) return false;
   const pickup = new Date(booking.pickupScheduledAt).getTime();
   if (Number.isNaN(pickup)) return false;
+  // A renter who said they were on the way is not a no-show yet.
+  const grace = booking.pickupGraceUntil ? new Date(booking.pickupGraceUntil).getTime() : Number.NaN;
+  if (!Number.isNaN(grace) && nowMs < grace) return false;
   return nowMs - pickup >= NO_SHOW_MARK_AFTER_MS;
 }
 
@@ -118,7 +122,6 @@ export type NoShowResolution = {
   noShowFeeCents?: number;
   noShowFeeStatus?: "none" | "flagged" | "claimed" | "disputed";
   noShowNote?: string;
-  depositStatus?: RentalBooking["depositStatus"];
 };
 
 /**
@@ -151,9 +154,8 @@ export function buildHostNoShowPatch(input: {
     patch.noShowFeeStatus = "none";
     patch.noShowNote =
       "Host marked no-show. Trip price kept (0% rental refund). Calendar freed. Deposit released when held.";
-    if (input.booking.depositStatus === "held") {
-      patch.depositStatus = "released";
-    }
+    // Whether the hold actually came off is the payment route's answer, not
+    // this one's — `completeHostNoShow` records what it gets back.
   }
   return patch;
 }

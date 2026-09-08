@@ -26,6 +26,7 @@ import {
 
 } from "../../lib/shelfListings";
 import { fetchRequestsForShelfRemote, type WantedRequest } from "../../lib/requestsStorage";
+import { ShelfRequestsCard } from "./ShelfRequestsCard";
 
 import { categoryIdFromName } from "../../screens/listing/listingItemCategories";
 import type { ListingDraft } from "../../screens/listing/types";
@@ -173,6 +174,9 @@ interface SubcategoryProps {
   /** Opens AuthGate so the user can unlock/participate. */
   onUnlock: () => void;
 
+  /** Opens a neighbor's ask in full. */
+  onOpenRequest?: (requestId: string) => void;
+
 }
 
 
@@ -192,6 +196,8 @@ export function Subcategory({
   onItemSelect,
 
   onUnlock,
+
+  onOpenRequest,
 
 }: SubcategoryProps) {
   const auth = useAuth();
@@ -529,6 +535,13 @@ export function Subcategory({
             >
               {t.shelf.backToSubcategories}
             </button>
+            {/* A guest sees what neighbors are asking for here, not just a lock. */}
+            <ShelfRequestsCard
+              requests={requests}
+              cityName={cityName}
+              hint={t.shelf.empty.guestAsksHint}
+              onOpenRequest={(request) => onOpenRequest?.(request.id)}
+            />
           </div>
         ) : showEmptyState ? (
 
@@ -559,9 +572,12 @@ export function Subcategory({
                 category: r.category,
                 subcategory: r.subcategory,
                 city: cityName,
-                query: r.description.slice(0, 120),
+                query: r.description.slice(0, 200),
+                requestId: r.id,
               })
             }
+
+            onOpenRequest={(r) => onOpenRequest?.(r.id)}
 
             onShare={handleShare}
 
@@ -572,6 +588,23 @@ export function Subcategory({
           <div className="p-4 space-y-4">
 
             <CategoryFactCard category={category} />
+
+            {/* Asks used to vanish as soon as the shelf had a single listing. */}
+            <ShelfRequestsCard
+              requests={requests}
+              cityName={cityName}
+              showFulfillCta={appMode === "earn"}
+              onOpenRequest={(r) => onOpenRequest?.(r.id)}
+              onFulfillRequest={(r) =>
+                onStartListing({
+                  category: r.category,
+                  subcategory: r.subcategory,
+                  city: cityName,
+                  query: r.description.slice(0, 200),
+                  requestId: r.id,
+                })
+              }
+            />
 
             <FoundingHostPromo
               appMode={appMode}

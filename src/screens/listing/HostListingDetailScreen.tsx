@@ -61,6 +61,7 @@ import {
   listingRequiresDriverRecordAttestation,
 } from "../../lib/categoryTrustRules";
 import { listingRequiresCoiHostConfirm } from "../../lib/listingInsurance";
+import { countLiveRentalsForListing } from "../../lib/borrowedItemGuard";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -194,6 +195,9 @@ export function HostListingDetailScreen({
   const [editError, setEditError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  // Deleting a listing takes its rentals with it, so a booked, out, or disputed
+  // rental has to end before the listing can.
+  const liveRentals = countLiveRentalsForListing({ listingId });
 
   useEffect(() => {
     setQueuedForBulk(isListingQueuedForBulk(listingId));
@@ -476,7 +480,14 @@ export function HostListingDetailScreen({
     };
     if (ownerId) {
       void removePublishedListingRemote(listing!.id, ownerId)
-        .then(finish)
+        .then((result) => {
+          if (!result.ok) {
+            setActionError(result.reason || t.deleteFailed);
+            setConfirmDelete(false);
+            return;
+          }
+          finish();
+        })
         .catch(() => {
           setActionError(t.deleteFailed);
           setConfirmDelete(false);
@@ -982,7 +993,17 @@ export function HostListingDetailScreen({
               {listing.paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
               {listing.paused ? t.unpauseListing : t.pauseListing}
             </button>
-            {!confirmDelete ? (
+            {liveRentals > 0 && !listing.paused ? (
+              <p className="text-[12px] text-gray-500">{t.pauseKeepsLiveRental}</p>
+            ) : null}
+            {liveRentals > 0 ? (
+              <p
+                className="rounded-xl border px-3 py-2.5 text-[12px] font-semibold text-amber-900"
+                style={{ borderColor: "#FDE68A", backgroundColor: "#FFFBEB" }}
+              >
+                {t.deleteBlockedLiveRental(liveRentals)}
+              </p>
+            ) : !confirmDelete ? (
               <button
                 type="button"
                 disabled={saveBusy}

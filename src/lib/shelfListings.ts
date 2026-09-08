@@ -15,6 +15,8 @@ export type ShelfPrefill = {
   city?: string;
   /** Optional freeform keywords to include in Post Request copy. */
   query?: string;
+  /** Set when a host is answering a neighbor's ask, so the author hears about it. */
+  requestId?: string;
 };
 
 /** True when browse context is complete enough to skip category selection. */

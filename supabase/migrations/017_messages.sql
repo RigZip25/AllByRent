@@ -27,5 +27,16 @@ create policy "messages_insert_sender"
   with check (sender_id = auth.uid());
 
 -- Enable realtime replication (required for Supabase Realtime Postgres Changes).
-alter publication supabase_realtime add table public.messages;
+-- Guarded so re-applying the file is not an error.
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'messages'
+  ) then
+    alter publication supabase_realtime add table public.messages;
+  end if;
+end $$;
 

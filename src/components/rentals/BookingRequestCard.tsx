@@ -99,7 +99,7 @@ export function BookingRequestCard({
               fulfillmentMethod: booking.fulfillmentMethod,
               insuranceRequired: Boolean(
                 booking.insuranceProofMedia ||
-                  booking.insuranceProofUrl ||
+                  booking.insuranceProofPath ||
                   booking.insuranceActiveUntil,
               ),
               insuranceActiveUntil: booking.insuranceActiveUntil,

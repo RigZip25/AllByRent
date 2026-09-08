@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowDown, Gavel, ShoppingBag, Tag, Users } from "lucide-rea
 import { BRAND_AMBER, BRAND_GREEN } from "../../lib/brand";
 import { markGarageSaleRulesSeen } from "../../lib/garageSaleRulesStorage";
 import { onboardingAssets } from "../../lib/onboardingAssets";
-import listingSnap from "../../imports/listing_snap.png";
+import listingSnap from "../../imports/listing_snap.webp";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;

@@ -146,7 +146,7 @@ import {
   type RentalBooking,
 } from "../../lib/rentalsStorage";
 import { createNotificationRemote } from "../../lib/notificationsStorage";
-import { fetchRemoteProfile } from "../../lib/supabaseProfile";
+import { fetchPublicProfile } from "../../lib/supabaseProfile";
 import { isSupabaseConfigured } from "../../lib/supabaseClient";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
 import { CategoryFactCard } from "../../components/CategoryFactCard";
@@ -543,9 +543,9 @@ function BookingScreenLoaded({
     const hostId = listing.hostId?.trim();
     if (!hostId) return;
     let mounted = true;
-    void fetchRemoteProfile(hostId).then((remote) => {
-      if (!mounted || !remote?.display_name?.trim()) return;
-      setHostDisplayName(remote.display_name.trim());
+    void fetchPublicProfile(hostId).then((profile) => {
+      if (!mounted || !profile?.displayName) return;
+      setHostDisplayName(profile.displayName);
     });
     return () => {
       mounted = false;
@@ -1199,6 +1199,11 @@ function BookingScreenLoaded({
       endDate,
       createdAt: bookedIso,
       bookedAt: bookedIso,
+      // The same two moments the rental row is created with. Without them on
+      // the local booking the host has no pickup time to measure a no-show
+      // against, and no due time to be late from, until a sync brings them back.
+      pickupScheduledAt: new Date(`${startDate}T14:00:00`).toISOString(),
+      returnDueAt: new Date(`${endDate}T23:59:59`).toISOString(),
       lateReturnFee: lateReturnSnapshot,
       listingId: listing.id,
       itemQrToken: listing.qrToken?.trim() || listing.id,
@@ -1234,7 +1239,6 @@ function BookingScreenLoaded({
       manualBooking: true,
       insuranceProofMedia: insuranceProof,
       insuranceProofPath: insuranceProofPath || undefined,
-      insuranceProofUrl: insuranceProofUrl || undefined,
       insuranceActiveUntil: needsInsuranceProof ? insuranceActiveUntil : undefined,
       physicalDamageAttested: needsPhysicalDamage ? physicalDamageAttested || usesAgentInsurance : undefined,
       proRenterAttested: needsProRenter ? proRenterAttested : undefined,
@@ -1363,8 +1367,8 @@ function BookingScreenLoaded({
 
   const persistRentalRow = async (id: string, booking: RentalBooking): Promise<void> => {
     if (!auth.userId || !listing.hostId) return;
-    const pickupAt = new Date(`${startDate}T14:00:00`).toISOString();
-    const dueAt = new Date(`${endDate}T23:59:59`).toISOString();
+    const pickupAt = booking.pickupScheduledAt ?? new Date(`${startDate}T14:00:00`).toISOString();
+    const dueAt = booking.returnDueAt ?? new Date(`${endDate}T23:59:59`).toISOString();
     const row = toSupabaseRentalInsert({
       id,
       listingId: listing.id,
@@ -1385,7 +1389,9 @@ function BookingScreenLoaded({
       dueAt,
       stripePaymentStatus: booking.stripePayment ? "requires_payment_method" : undefined,
       insuranceProofPath: booking.insuranceProofPath ?? null,
-      insuranceProofUrl: booking.insuranceProofUrl ?? null,
+      // The link the renter used expires, so the row keeps the path and the
+      // host signs a fresh one when they open the document.
+      insuranceProofUrl: null,
       insuranceActiveUntil: booking.insuranceActiveUntil ?? null,
       insurancePolicyNote: booking.insurancePolicyNote ?? null,
       rentalAgreement: booking.rentalAgreement ?? null,
@@ -2406,7 +2412,8 @@ function BookingScreenLoaded({
                         : `rent-${Date.now()}`);
                     void uploadRentalInsuranceProof({
                       renterId: auth.userId,
-                      rentalId: `${rentalIdHint}-pro`,
+                      rentalId: rentalIdHint,
+                      kind: "credential",
                       file,
                     })
                       .then((result) => {
@@ -2458,7 +2465,8 @@ function BookingScreenLoaded({
                       : `rent-${Date.now()}`);
                   void uploadRentalInsuranceProof({
                     renterId: auth.userId,
-                    rentalId: `${rentalIdHint}-cdl`,
+                    rentalId: rentalIdHint,
+                    kind: "cdl",
                     file,
                   })
                     .then((result) => {
@@ -2574,7 +2582,8 @@ function BookingScreenLoaded({
                       : `rent-${Date.now()}`);
                   void uploadRentalInsuranceProof({
                     renterId: auth.userId,
-                    rentalId: `${rentalIdHint}-opcert`,
+                    rentalId: rentalIdHint,
+                    kind: "operator_cert",
                     file,
                   })
                     .then((result) => {
@@ -2633,7 +2642,8 @@ function BookingScreenLoaded({
                       : `rent-${Date.now()}`);
                   void uploadRentalInsuranceProof({
                     renterId: auth.userId,
-                    rentalId: `${rentalIdHint}-boat`,
+                    rentalId: rentalIdHint,
+                    kind: "boater_license",
                     file,
                   })
                     .then((result) => {
@@ -2684,7 +2694,8 @@ function BookingScreenLoaded({
                       : `rent-${Date.now()}`);
                   void uploadRentalInsuranceProof({
                     renterId: auth.userId,
-                    rentalId: `${rentalIdHint}-drone`,
+                    rentalId: rentalIdHint,
+                    kind: "drone_cert",
                     file,
                   })
                     .then((result) => {
@@ -3025,7 +3036,7 @@ function BookingScreenLoaded({
                         }
                         setInsuranceProof(result.media);
                         setInsuranceProofPath(result.path);
-                        setInsuranceProofUrl(result.publicUrl);
+                        setInsuranceProofUrl(result.signedUrl);
                         setInsuranceDraftId(rentalIdHint);
                       })
                       .catch((error) => {

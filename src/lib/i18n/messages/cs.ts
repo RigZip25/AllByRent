@@ -370,6 +370,8 @@ export const cs: AppMessages = {
     noMatches: (query) => `Žádné shody pro „${query}“`,
     noMatchesHint: "Zkus méně slov, nebo pošlete žádost, ať hostitelé vědí, co vystavit.",
     postRequestFor: (query) => `Poslat žádost o „${query}“`,
+    asksTitle: "Sousedé tu shánějí",
+    asksHint: (city) => `Otevřené žádosti na téhle polici v ${city}`,
     empty: {
       rentanoEarn: (category, city) =>
         `V ${category} v ${city} zatím nikdo nic nemá. Kdo vystaví první, bere poptávku.`,
@@ -386,6 +388,8 @@ export const cs: AppMessages = {
       recentRequests: (city) => `Nedávné žádosti poblíž ${city}`,
       wanted: "Hledá se",
       listToFulfill: "Vystavit a splnit →",
+      openAsk: "Otevřít žádost",
+      guestAsksHint: "Přihlaste se, ať můžete odpovědět nebo poslat vlastní žádost.",
     },
     founding: {
       listFirstCta: "Vystavit první položku",
@@ -636,6 +640,8 @@ export const cs: AppMessages = {
       "Otevři aktivní půjčku a klepni na Zpráva, nebo napiš prodejci z nabídky — vlákna se objeví tady.",
     rental: "Půjčka",
     buyGift: "Nákup / dar",
+    request: "Žádost",
+    requestFallback: "Chat k žádosti",
     tapToDiscuss: "Klepni pro domluvu vyzvednutí",
   },
   howItWorks: {
@@ -779,6 +785,13 @@ export const cs: AppMessages = {
     guidesProfileBody: "Jméno, telefon, výplaty, odhlášení",
   },
   garageUi: {
+    asksTitle: "Vaše žádosti",
+    asksHint: "Co jste sháněli u sousedů",
+    asksEmpty: "Zatím jste o nic nepožádali.",
+    asksEmptyCta: "Zeptat se sousedů",
+    asksOpenCount: (n) => (n === 1 ? "1 otevřená" : `Otevřených: ${n}`),
+    asksSeeAll: "Zobrazit vše",
+    asksBack: "Zpět do garáže",
     shop: "Obchod",
     previewNeighbor: "Pohled souseda",
     lookShow: "Vzhled garáže · osobní / pro",
@@ -966,6 +979,12 @@ export const cs: AppMessages = {
     outcomeFavorRenter: "Ve prospěch nájemce",
     outcomeFavorHost: "Ve prospěch hostitele",
     outcomeSplit: "Rozdělit / kompromis",
+    disputeDepositReleasedTitle: "Spor vyřešen — blokace uvolněna",
+    disputeDepositReleasedBody:
+      "Blokace kauce na kartě nájemce byla uvolněna. Bankám může pár dní trvat, než se to zobrazí.",
+    disputeClaimWindowTitle: "Spor vyřešen — vyžádej kauci",
+    disputeClaimWindowBody: (hours) =>
+      `Na vyžádání toho, co ti patří z blokované kauce, máš ${hours} hodin. Co si nevyžádáš, se vrátí nájemci.`,
     outcomeWithdrawn: "Stáhnout spor",
     waitingCounterpartyAck: "Čeká se, až druhá strana přijme toto řešení.",
     acceptResolution: "Přijmout řešení",
@@ -987,6 +1006,8 @@ export const cs: AppMessages = {
     depositStatusReleased: "Záloha: uvolněna",
     depositStatusClaimed: "Záloha: uplatněna hostitelem",
     depositHoldActiveBody: "Zadržení je aktivní. Majitel může uplatnit do 48 h po vrácení; jinak uvolnit nájemci.",
+    depositActionFailed: "Neprošlo to. Zadržení zůstává, jak bylo — zkuste to znovu.",
+    depositAutoReleaseHint: (date) => `Pokud si nikdo nic nenárokuje, zadržení skončí ${date}.`,
     resolvedCalm: (outcome) => `Spor vyřešen (${outcome}). Děkujeme za ohleduplný postup.`,
     underReviewCalm: "V kontrole — obě strany mohou dál přidávat důkazy. Dohodněte se spolu nebo napište podpoře.",
     rentalItemFallback: "Půjčená položka",
@@ -1277,11 +1298,10 @@ export const cs: AppMessages = {
     invoiceKindFine: "Pokuta",
     invoiceKindNoShow: "Nedostavení",
     invoiceKindDamage: "Škoda",
+    invoiceKindExtension: "Dny navíc",
     invoiceKindCustom: "Vlastní",
     invoiceStripeScaffold:
       "Platební odkaz kartou je připravený — faktury se na půjčce uloží i když platba kartou ještě není nastavená.",
-    call: "Volat",
-    phoneSharedAfterCheckin: "Telefonní čísla se sdílejí v chatu po check-inu",
     close: "Zavřít",
     beforeCheckIn: "Než provedete check-in",
     inspectItem: "Prohlédněte položku kvůli existujícímu poškození",
@@ -1317,7 +1337,7 @@ export const cs: AppMessages = {
     cancelRefundReleased: "Autorizace karty se uvolňuje.",
     datesAdjustTitle: "Změnit termín půjčky",
     datesAdjustBody:
-      "Prodloužení jen když jsou další dny volné v kalendáři. Předčasný návrat je vždy možný — dokonči předání, až skončíš.",
+      "Prodloužení jen když jsou další dny volné v kalendáři — dny navíc se platí, než se datum konce posune. Předčasný návrat je vždy možný: dokonči předání, až skončíš.",
     extendBooking: "Prodloužit rezervaci",
     extendNewEnd: "Nové datum konce",
     extendConfirm: "Potvrdit prodloužení",
@@ -1325,13 +1345,14 @@ export const cs: AppMessages = {
     extendUnavailable: "Tyto dny nejsou volné — zvol jiné datum konce.",
     extendInvalid: "Zvol datum konce po součém konci.",
     extendSuccess: (date) => `Prodlouženo do ${date}.`,
-    earlyReturn: "Vrátit dříve",
-    earlyReturnConfirmBody:
-      "Zkrať půjčku na dnešek. Předání při návratu s hostitelem stejně dokončíš. Úpravy ceny řešíte mezi sebou — dny v kalendáři se uvolní hned.",
-    earlyReturnConfirm: "Ano, skončit dnes",
-    earlyReturnWorking: "Ukládám...",
-    earlyReturnInvalid: "Předčasný návrat u tohoto stavu nejde.",
-    earlyReturnSuccess: (date) => `Konec půjčky nastaven na ${date}. Dokonči předání při návratu.`,
+    extendQuote: (days, amount) =>
+      `${days === 1 ? "1 den navíc" : `${days} dny navíc`} · ${amount}`,
+    extendPayCta: (amount) => `Přidat k platbám · ${amount}`,
+    extendInvoiceIssued:
+      "Dny navíc jsou v Platbách níže. Datum konce se posune, až je zaplatíš.",
+    extendPaidNote: "Dny navíc se účtují denní sazbou hostitele.",
+    earlyReturnHint:
+      "Hotovo dřív? Vrať to, kdy chceš — půjčka končí, jakmile hostitel návrat přijme. Rezervované dny zůstávají účtované podle dohody.",
     cancelRefundFullProcessing:
       "Byla odeslána plná refundace — banky ji mohou zobrazit až za několik pracovních dní.",
     cancelRefundPartialProcessing: (percent) =>
@@ -1399,11 +1420,14 @@ export const cs: AppMessages = {
     cancelBooking: "Zrušit rezervaci",
     runningLateTitle: (ownerName) => `Poslat zprávu ${ownerName}?`,
     runningLateBody:
-      "Dostanou push a zprávu v aplikaci. Když odpoví OK, časovač nedostavení se resetuje.",
+      "Hostitel to uvidí u rezervace a nedostavení se odloží o hodinu.",
     runningLateDefault: "Mám menší zpoždění, brzy budu.",
     runningLateNotifTitle: "Nájemce má zpoždění",
     runningLateNotifBody: (message) =>
-      `${message} — klepnutím potvrďte a pozastavte časovač nedostavení.`,
+      `${message} — nedostavení je odloženo o hodinu.`,
+    runningLateFromRenter: (message) => `Zdrží se: „${message}“`,
+    runningLateAck: "Rozumím",
+    runningLateAcknowledged: "Dal jsi vědět, že počkáš",
   },
   rentalStatus: {
     pending_approval: "Čeká na schválení",
@@ -1640,6 +1664,8 @@ export const cs: AppMessages = {
       enhancementUnavailable:
         "Fotka uložena tak, jak je — vylepšení pozadí teď nebylo k dispozici.",
       couldntAddPhoto: "Fotku se nepodařilo přidat. Zkus to prosím znovu.",
+      heicFailed:
+        "Tuto fotku z iPhonu (HEIC) se tady nepodařilo přečíst. Vyfoť ji znovu, nebo v Nastavení \u2192 Fotoaparát \u2192 Formáty zvol \u201eNejvyšší kompatibilita\u201c a vyber ji znovu.",
       moderationNotListable:
         "Tuto fotku jsme u nabídky nemohli použít — nevypadá jako jasná fotka produktu. Zkus prosím jinou fotku samotné věci.",
       moderationProhibitedItem:
@@ -1650,6 +1676,7 @@ export const cs: AppMessages = {
         "Tuto fotku je trochu těžké použít — možná je málo světla, je rozmazaná, nebo věc není dobře vidět. Zkus jiný úhel s věcí jasně ve středu.",
       moderationVerifyFailed:
         "Fotku se nepodařilo potvrdit. Často to bývá slabé světlo, rozmazaný záběr, nejasná věc, nebo fotka, která nevypadá jako nabídka. Zkus prosím jinou fotku.",
+      moderationPhotoNumber: (position) => `Fotka ${position}: `,
       verifyingPhotos: (mascot) => `${mascot} kontroluje tvoje fotky...`,
       moderationVideoNotListable:
         "Toto video jsme u nabídky nemohli použít — nevypadá jako jasná ukázka předmětu. Zkus prosím jiný záběr samotné věci.",
@@ -6041,6 +6068,65 @@ export const cs: AppMessages = {
     whenFlexible: "Flexibilní / co nejdřív",
     whenRange: (start, end) => `${start} - ${end}`,
     whenFrom: (start) => `Od ${start}`,
+    signInTitle: "Přihlaste se a zeptejte se sousedů",
+    signInBody:
+      "Poptávka jde ven s vaším jménem, aby sousedé věděli, komu odpovědět. Nejdřív se přihlaste — je to na minutu.",
+    moderationEmpty: "Napište řádek o tom, co potřebujete.",
+    moderationTooShort: "Ještě pár slov, ať sousedé vědí, co hledat.",
+    moderationPhone:
+      "Telefon sem nepište — poptávku si může přečíst kdokoli. Sousedé odpovídají v aplikaci.",
+    moderationEmail:
+      "E-mail sem nepište — poptávku si může přečíst kdokoli. Sousedé odpovídají v aplikaci.",
+    moderationAddress:
+      "Adresu sem nepište — poptávku si může přečíst kdokoli. Pošlete ji v chatu, až se někdo ozve.",
+    moderationOffPlatform: "Zůstaňme v aplikaci — WhatsApp a podobné tu nejsou povolené.",
+    moderationAbusive: "Buďme na sebe hodní. Přeformulujte to a zkuste to znovu.",
+    savedLocallyTitle: "Uloženo jen v tomto zařízení",
+    savedLocallyBody:
+      "Nepodařilo se spojit se sousedstvím. Zkuste to znovu, ať poptávku uvidí sousedé.",
+    retryPublish: "Zkusit znovu",
+    retrying: "Zkouším…",
+    notifiedNeighbors: (n) =>
+      n === 1
+        ? "Upozornili jsme 1 souseda, který takovou věc má."
+        : `Upozornili jsme sousedy s takovou věcí: ${n}.`,
+    notifiedNobody: "Tuhle polici zatím nikdo neplní — sdílejte odkaz, hledáme dál.",
+    neighborNotifyTitle: (subcategory) => `Poblíž se shání: ${subcategory}`,
+    neighborNotifyBody: (city, need) => `Soused v ${city} hledá: ${need}`,
+    authorNotifyTitle: "Někdo vystavil to, co sháníte",
+    authorNotifyBody: (listingTitle) => `${listingTitle} se právě objevil poblíž. Mrkněte na to.`,
+  },
+  requestDetail: {
+    notFoundTitle: "Poptávka nenalezena",
+    notFoundBody: "Tahle poptávka nejspíš vypršela nebo ji autor stáhl.",
+    yourAsk: "Vaše poptávka",
+    statusOpen: "Otevřená",
+    statusFulfilled: "Vyřešeno",
+    statusCancelled: "Uzavřená",
+    statusExpired: "Vypršela",
+    expiresInDays: (n) => (n === 1 ? "Vyprší zítra" : `Vyprší za ${n} dní`),
+    expiresToday: "Vyprší dnes",
+    expiredBody: "Poptávky běží 30 dní. Otevřete ji znovu a sousedé ji zase uvidí.",
+    fulfilledBody: "Označili jste to za vyřešené. Sousedé už poptávku nevidí.",
+    cancelledBody: "Poptávku jste uzavřeli. Sousedé ji už nevidí.",
+    manageTitle: "Spravovat poptávku",
+    markFulfilled: "Označit za vyřešené",
+    reopen: "Otevřít znovu",
+    cancelAsk: "Uzavřít poptávku",
+    deleteAsk: "Smazat",
+    deleteConfirm: "Smazat tuhle poptávku? Sousedům zmizí.",
+    editText: "Upravit text",
+    saveText: "Uložit",
+    cancelEdit: "Zrušit",
+    updateFailed: "Poptávku se nepodařilo upravit. Zkuste to znovu.",
+    messageAuthor: "Napsat sousedovi",
+    messageAuthorHint: "Máte to? Ozvěte se dřív, než to vystavíte.",
+    budgetRent: (label) => `Až ${label}/den`,
+    budgetBuy: (label) => `Až ${label} za koupi`,
+    withinRadius: (label) => `Do ${label}`,
+    needBy: (range) => `Potřeba ${range}`,
+    haveThisCta: "Mám to — vystavit",
+    postedAgo: (date) => `Zveřejněno ${date}`,
   },
   faq,
   categoryFacts: resolveCategoryFacts(categoryFactsCsOverlay),
@@ -6189,6 +6275,8 @@ export const cs: AppMessages = {
     closedReadOnly: "Chat u této půjčky je uzavřený. Historii si stále můžeš přečíst.",
     listingChatFallback: "Chat k nabídce",
     listingChatSubtitle: "Chat o vyzvednutí · push při odpovědi",
+    requestChatFallback: "Chat k žádosti",
+    requestChatSubtitle: "O tom, co soused shání",
     moderationBlocked:
       "Zprávu nelze odeslat — komunikuj prosím slušně a s respektem.",
     moderationOffPlatform:
@@ -6816,6 +6904,12 @@ export const cs: AppMessages = {
     yesDelete: "Ano, smazat",
     deleting: "Mažu...",
     deleteFailed: "Nabídku se nepodařilo smazat. Zkus znovu.",
+    deleteBlockedLiveRental: (count) =>
+      count === 1
+        ? "Jedna půjčka na této nabídce je rezervovaná, venku nebo ve sporu. Smazáním by zmizela i ta půjčka — oběma stranám. Nejdřív ji dokonči nebo zruš."
+        : `${count} půjčky na této nabídce jsou rezervované, venku nebo ve sporu. Smazáním by zmizely oběma stranám — nejdřív je dokonči nebo zruš.`,
+    pauseKeepsLiveRental:
+      "Pauza zastaví jen nové rezervace. Už běžící půjčka pokračuje podle dohody.",
     editAria: (label) => `Upravit ${label}`,
     editTitle: (field) => `Upravit ${field}`,
     editDailyPrice: "Denní cena",

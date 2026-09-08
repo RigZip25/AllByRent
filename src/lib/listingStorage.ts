@@ -14,6 +14,7 @@ import {
   hasRemoteListingPhoto,
   uploadListingPhotosToRemote,
 } from "./listingPhotoStorage";
+import { getAccessToken } from "./stripePayments";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 import { emptyVehicleExtras, normalizeVehicleExtras } from "./vehicleExtras";
 import {
@@ -236,30 +237,45 @@ export function removePublishedListing(id: string): void {
   }
 }
 
-export async function removePublishedListingRemote(id: string, ownerId: string): Promise<void> {
-  removePublishedListing(id);
-  if (!isSupabaseConfigured()) {
+export type RemoveListingResult = { ok: true } | { ok: false; reason: string };
+
+/**
+ * Delete the listing everywhere, or nowhere.
+ *
+ * The local copy used to go first and the remote error was ignored, so a
+ * refused delete left the host with no listing on their device and the row
+ * still live — and since migration 059 refuses to delete a listing with a
+ * rental booked, out, or in dispute, that refusal is now a normal answer.
+ */
+export async function removePublishedListingRemote(
+  id: string,
+  ownerId: string,
+): Promise<RemoveListingResult> {
+  const finishLocally = async (): Promise<RemoveListingResult> => {
+    removePublishedListing(id);
     const { closeStoreIfShelfEmptyForHostId } = await import("./garageStoreLive");
     await closeStoreIfShelfEmptyForHostId(ownerId);
-    return;
-  }
+    return { ok: true };
+  };
+
+  if (!isSupabaseConfigured()) return finishLocally();
   const supabase = getSupabaseClient();
-  if (!supabase) {
-    const { closeStoreIfShelfEmptyForHostId } = await import("./garageStoreLive");
-    await closeStoreIfShelfEmptyForHostId(ownerId);
-    return;
-  }
+  if (!supabase) return finishLocally();
+
   // RLS scopes deletes to the signed-in owner. Prefer id-only so a mismatched
   // owner_id filter cannot silently no-op and let fetch merge resurrect the row.
   const byId = await supabase.from("listings").delete().eq("id", id);
   if (byId.error) {
     const oid = ownerId.trim();
-    if (oid) {
-      await supabase.from("listings").delete().eq("id", id).eq("owner_id", oid);
+    const retry = oid
+      ? await supabase.from("listings").delete().eq("id", id).eq("owner_id", oid)
+      : null;
+    if (!retry || retry.error) {
+      return { ok: false, reason: (retry?.error ?? byId.error).message };
     }
   }
-  const { closeStoreIfShelfEmptyForHostId } = await import("./garageStoreLive");
-  await closeStoreIfShelfEmptyForHostId(ownerId);
+
+  return finishLocally();
 }
 
 /** Persist an in-progress wizard draft (local always; remote when signed in). */
@@ -990,6 +1006,31 @@ export async function savePublishedListingRemote(
   return { ok: !error, photosPending };
 }
 
+/** Ask the server to stamp the listing verified for a photo it can see. */
+async function confirmQrVerificationRemote(params: {
+  listingId: string;
+  path: string;
+}): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const token = await getAccessToken();
+  if (!token) return { ok: false, reason: "Sign in again to finish verification." };
+
+  try {
+    const res = await fetch("/api/listings/verify-qr", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(params),
+    });
+    const payload = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+    if (res.ok && payload.ok) return { ok: true };
+    return { ok: false, reason: payload.error ?? "Could not verify this listing." };
+  } catch {
+    return { ok: false, reason: "Could not reach the server to verify this listing." };
+  }
+}
+
 export async function uploadQrVerificationPhotoRemote(params: {
   listingId: string;
   ownerId: string;
@@ -1009,16 +1050,10 @@ export async function uploadQrVerificationPhotoRemote(params: {
     });
   if (uploadError) throw uploadError;
 
-  const { error: updateError } = await supabase
-    .from("listings")
-    .update({
-      qr_verification_photo_path: path,
-      qr_verified_at: new Date().toISOString(),
-      listing_status: "active",
-    })
-    .eq("id", params.listingId)
-    .eq("owner_id", params.ownerId);
-  if (updateError) throw updateError;
+  // "Verified" is a claim about a photo that exists, so the server checks the
+  // object is really in the bucket before it stamps the listing.
+  const verified = await confirmQrVerificationRemote({ listingId: params.listingId, path });
+  if (!verified.ok) throw new Error(verified.reason);
 
   // Update local cache for instant UX.
   const listing = getPublishedListingById(params.listingId);
@@ -1034,6 +1069,7 @@ export async function uploadQrVerificationPhotoRemote(params: {
         createdAt: Date.now(),
         sizeBytes: params.file.size,
         storagePath: path,
+        storageBucket: "listing-verification",
       },
     });
   }

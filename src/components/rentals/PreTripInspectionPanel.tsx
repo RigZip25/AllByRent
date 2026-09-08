@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Camera, CheckCircle2, Shield } from "lucide-react";
-import { putUserPhoto, type MediaRef } from "../../lib/mediaStore";
+import { type MediaRef } from "../../lib/mediaStore";
+import { putPhotoWithThumbnail } from "../../lib/photoIngest";
 import { useMediaUrl } from "../../lib/useMediaUrl";
 import { useMessages } from "../../lib/i18n/react";
 import {
@@ -130,7 +131,7 @@ function AreaEditor({
                 e.target.value = "";
                 if (!file) return;
                 setBusy(true);
-                void putUserPhoto(file, { kind: "image" })
+                void putPhotoWithThumbnail(file)
                   .then((result) => {
                     if (result.ok) onPatch({ photo: result.ref });
                   })

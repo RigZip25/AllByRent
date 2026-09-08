@@ -1,4 +1,4 @@
-import { getMediaBlob, type MediaRef } from "./mediaStore";
+import { getMediaBlob, withPinnedMedia, type MediaRef } from "./mediaStore";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 
 export const LISTING_PHOTOS_BUCKET = "listing-photos";
@@ -95,6 +95,19 @@ export async function uploadListingPhotosToRemote(params: {
   const supabase = getSupabaseClient();
   if (!supabase) return { photos: params.photos, pending: 0 };
 
+  // Uploading a gallery is also the moment a photo is most likely to be
+  // written next to it, so hold every blob until the last one is in storage.
+  return withPinnedMedia(
+    params.photos.flatMap((photo) => [photo.id, photo.thumbId]),
+    () => uploadEachPhoto(params),
+  );
+}
+
+async function uploadEachPhoto(params: {
+  listingId: string;
+  ownerId: string;
+  photos: ListingPhotoRef[];
+}): Promise<ListingPhotoUploadResult> {
   const uploaded: ListingPhotoRef[] = [];
   let pending = 0;
 

@@ -12,6 +12,8 @@
     "assets:generate": "capacitor-assets generate --ios --android --iconBackgroundColor '#062a1c' --iconBackgroundColorDark '#062a1c' --splashBackgroundColor '#062a1c' --splashBackgroundColorDark '#062a1c'",
     "art:categories": "node ./scripts/prepare-category-art.mjs",
     "art:categories:check": "node ./scripts/prepare-category-art.mjs --check",
+    "art:illustrations": "node ./scripts/optimize-illustrations.mjs",
+    "art:illustrations:check": "node ./scripts/optimize-illustrations.mjs --check",
     "check:i18n-keys": "node ./scripts/check-i18n-unique-keys.mjs",
     "check:migrations": "node ./scripts/check-migrations.mjs",
     "typecheck": "node ./scripts/check-i18n-unique-keys.mjs && tsc -b --pretty false",

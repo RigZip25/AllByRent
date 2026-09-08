@@ -11,6 +11,8 @@ export type RentalInvoiceLineKind =
   | "fine"
   | "no_show"
   | "damage"
+  /** Extra days on a running rental, paid before the end date moves. */
+  | "extension"
   | "custom";
 
 export type RentalInvoiceLine = {
@@ -34,7 +36,8 @@ export type RentalInvoice = {
   rentalId: string;
   createdAt: string;
   updatedAt: string;
-  createdByRole: "host";
+  /** `system` is the platform charging a policy the host set, e.g. a late fee. */
+  createdByRole: "host" | "system";
   status: RentalInvoiceStatus;
   lines: RentalInvoiceLine[];
   /** Optional host note shown to renter. */
@@ -42,6 +45,8 @@ export type RentalInvoice = {
   totalCents: number;
   stripePaymentIntentId?: string;
   paidAt?: string;
+  /** Paying this invoice is what moves the rental's end date. */
+  extension?: { newEndDate: string; extraDays: number };
 };
 
 export const INVOICE_LINE_PRESETS: ReadonlyArray<{
@@ -90,32 +95,6 @@ export function createEmptyInvoiceLine(
   };
 }
 
-export function createRentalInvoice(params: {
-  rentalId: string;
-  lines: RentalInvoiceLine[];
-  note?: string;
-}): RentalInvoice {
-  const now = new Date().toISOString();
-  const lines = params.lines
-    .map((line) => ({
-      ...line,
-      amountCents: Math.max(0, Math.round(line.amountCents || 0)),
-      label: line.label.trim() || line.kind,
-    }))
-    .filter((line) => line.amountCents >= 50 || line.kind === "custom");
-  return {
-    id: newId("inv"),
-    rentalId: params.rentalId,
-    createdAt: now,
-    updatedAt: now,
-    createdByRole: "host",
-    status: "open",
-    lines,
-    note: params.note?.trim() || undefined,
-    totalCents: sumInvoiceLines(lines),
-  };
-}
-
 export function normalizeRentalInvoices(raw: unknown): RentalInvoice[] {
   if (!Array.isArray(raw)) return [];
   const out: RentalInvoice[] = [];
@@ -139,7 +118,7 @@ export function normalizeRentalInvoices(raw: unknown): RentalInvoice[] {
       rentalId: typeof r.rentalId === "string" ? r.rentalId : "",
       createdAt: typeof r.createdAt === "string" ? r.createdAt : new Date().toISOString(),
       updatedAt: typeof r.updatedAt === "string" ? r.updatedAt : new Date().toISOString(),
-      createdByRole: "host",
+      createdByRole: r.createdByRole === "system" ? "system" : "host",
       status: (r.status as RentalInvoiceStatus) || "open",
       lines,
       note: typeof r.note === "string" ? r.note : undefined,
@@ -150,6 +129,13 @@ export function normalizeRentalInvoices(raw: unknown): RentalInvoice[] {
       stripePaymentIntentId:
         typeof r.stripePaymentIntentId === "string" ? r.stripePaymentIntentId : undefined,
       paidAt: typeof r.paidAt === "string" ? r.paidAt : undefined,
+      extension:
+        r.extension && typeof r.extension.newEndDate === "string"
+          ? {
+              newEndDate: r.extension.newEndDate,
+              extraDays: Math.max(0, Math.round(Number(r.extension.extraDays) || 0)),
+            }
+          : undefined,
     });
   }
   return out;
@@ -201,6 +187,7 @@ export function mergeRentalInvoices(
       status,
       lines,
       paidAt: inv.paidAt || prev.paidAt,
+      extension: inv.extension ?? prev.extension,
       stripePaymentIntentId: inv.stripePaymentIntentId || prev.stripePaymentIntentId,
       totalCents: inv.totalCents || prev.totalCents,
       note: inv.note || prev.note,

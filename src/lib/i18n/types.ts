@@ -497,6 +497,8 @@ export type AppMessages = {
     noMatches: (query: string) => string;
     noMatchesHint: string;
     postRequestFor: (query: string) => string;
+    asksTitle: string;
+    asksHint: (city: string) => string;
     empty: {
       rentanoEarn: (category: string, city: string) => string;
       rentanoRent: string;
@@ -512,6 +514,8 @@ export type AppMessages = {
       recentRequests: (city: string) => string;
       wanted: string;
       listToFulfill: string;
+      openAsk: string;
+      guestAsksHint: string;
     };
     founding: {
       listFirstCta: string;
@@ -739,6 +743,8 @@ export type AppMessages = {
     emptyBody: string;
     rental: string;
     buyGift: string;
+    request: string;
+    requestFallback: string;
     tapToDiscuss: string;
   };
   howItWorks: {
@@ -910,6 +916,8 @@ export type AppMessages = {
       nextPhotoAria: string;
       enhancementUnavailable: string;
       couldntAddPhoto: string;
+      /** iPhone HEIC the browser could not decode — a format problem, not a retry. */
+      heicFailed: string;
       /** NSFW / not a listable item — calm, non-graphic. */
       moderationNotListable: string;
       /** Weapons, drugs, and other banned goods. */
@@ -919,6 +927,8 @@ export type AppMessages = {
       moderationBadAngle: string;
       /** Fail-closed when vision API errors. */
       moderationVerifyFailed: string;
+      /** Prefix that points at the photo a gallery check stopped on. */
+      moderationPhotoNumber: (position: number) => string;
       verifyingPhotos: (mascot: string) => string;
       moderationVideoNotListable: string;
       moderationBadVideo: string;
@@ -1733,8 +1743,68 @@ export type AppMessages = {
     whenFlexible: string;
     whenRange: (start: string, end: string) => string;
     whenFrom: (start: string) => string;
+    signInTitle: string;
+    signInBody: string;
+    moderationEmpty: string;
+    moderationTooShort: string;
+    moderationPhone: string;
+    moderationEmail: string;
+    moderationAddress: string;
+    moderationOffPlatform: string;
+    moderationAbusive: string;
+    savedLocallyTitle: string;
+    savedLocallyBody: string;
+    retryPublish: string;
+    retrying: string;
+    /** @param n neighbors reached */
+    notifiedNeighbors: (n: number) => string;
+    notifiedNobody: string;
+    neighborNotifyTitle: (subcategory: string) => string;
+    neighborNotifyBody: (city: string, need: string) => string;
+    authorNotifyTitle: string;
+    authorNotifyBody: (listingTitle: string) => string;
+  };
+  requestDetail: {
+    notFoundTitle: string;
+    notFoundBody: string;
+    yourAsk: string;
+    statusOpen: string;
+    statusFulfilled: string;
+    statusCancelled: string;
+    statusExpired: string;
+    /** @param n whole days left */
+    expiresInDays: (n: number) => string;
+    expiresToday: string;
+    expiredBody: string;
+    fulfilledBody: string;
+    cancelledBody: string;
+    manageTitle: string;
+    markFulfilled: string;
+    reopen: string;
+    cancelAsk: string;
+    deleteAsk: string;
+    deleteConfirm: string;
+    editText: string;
+    saveText: string;
+    cancelEdit: string;
+    updateFailed: string;
+    messageAuthor: string;
+    messageAuthorHint: string;
+    budgetRent: (label: string) => string;
+    budgetBuy: (label: string) => string;
+    withinRadius: (label: string) => string;
+    needBy: (range: string) => string;
+    haveThisCta: string;
+    postedAgo: (date: string) => string;
   };
   garageUi: {
+    asksTitle: string;
+    asksHint: string;
+    asksEmpty: string;
+    asksEmptyCta: string;
+    asksOpenCount: (n: number) => string;
+    asksSeeAll: string;
+    asksBack: string;
     shop: string;
     previewNeighbor: string;
     lookShow: string;
@@ -1916,6 +1986,11 @@ export type AppMessages = {
     outcomeFavorRenter: string;
     outcomeFavorHost: string;
     outcomeSplit: string;
+    /** What happens to the hold once the two sides agree. */
+    disputeDepositReleasedTitle: string;
+    disputeDepositReleasedBody: string;
+    disputeClaimWindowTitle: string;
+    disputeClaimWindowBody: (hours: number) => string;
     outcomeWithdrawn: string;
     waitingCounterpartyAck: string;
     acceptResolution: string;
@@ -1936,6 +2011,10 @@ export type AppMessages = {
     depositStatusReleased: string;
     depositStatusClaimed: string;
     depositHoldActiveBody: string;
+    /** Shown when releasing or claiming the hold did not go through. */
+    depositActionFailed: string;
+    /** Says when the hold lifts on its own if nobody claims against it. */
+    depositAutoReleaseHint: (date: string) => string;
     resolvedCalm: (outcome: string) => string;
     underReviewCalm: string;
     rentalItemFallback: string;
@@ -2166,10 +2245,9 @@ export type AppMessages = {
     invoiceKindFine: string;
     invoiceKindNoShow: string;
     invoiceKindDamage: string;
+    invoiceKindExtension: string;
     invoiceKindCustom: string;
     invoiceStripeScaffold: string;
-    call: string;
-    phoneSharedAfterCheckin: string;
     close: string;
     beforeCheckIn: string;
     inspectItem: string;
@@ -2207,12 +2285,13 @@ export type AppMessages = {
     extendUnavailable: string;
     extendInvalid: string;
     extendSuccess: (date: string) => string;
-    earlyReturn: string;
-    earlyReturnConfirmBody: string;
-    earlyReturnConfirm: string;
-    earlyReturnWorking: string;
-    earlyReturnInvalid: string;
-    earlyReturnSuccess: (date: string) => string;
+    /** Price of the extra days, before the renter commits to them. */
+    extendQuote: (days: number, amount: string) => string;
+    extendPayCta: (amount: string) => string;
+    extendInvoiceIssued: string;
+    extendPaidNote: string;
+    /** Bringing it back sooner does not shorten what was paid for. */
+    earlyReturnHint: string;
     cancelRefundFullProcessing: string;
     cancelRefundPartialProcessing: (percent: number) => string;
     cancelRefundNone: string;
@@ -2274,6 +2353,10 @@ export type AppMessages = {
     runningLateDefault: string;
     runningLateNotifTitle: string;
     runningLateNotifBody: (message: string) => string;
+    /** The note as the host reads it, on their own card. */
+    runningLateFromRenter: (message: string) => string;
+    runningLateAck: string;
+    runningLateAcknowledged: string;
   };
   rentalStatus: {
     pending_approval: string;
@@ -2552,6 +2635,8 @@ export type AppMessages = {
     closedReadOnly: string;
     listingChatFallback: string;
     listingChatSubtitle: string;
+    requestChatFallback: string;
+    requestChatSubtitle: string;
     moderationBlocked: string;
     moderationOffPlatform: string;
     moderationVerifyFailed: string;
@@ -2980,6 +3065,9 @@ export type AppMessages = {
     yesDelete: string;
     deleting: string;
     deleteFailed: string;
+    /** Why the listing cannot be deleted while it is booked or out. */
+    deleteBlockedLiveRental: (count: number) => string;
+    pauseKeepsLiveRental: string;
     editAria: (label: string) => string;
     editTitle: (field: string) => string;
     editDailyPrice: string;

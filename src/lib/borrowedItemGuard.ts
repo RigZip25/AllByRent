@@ -51,6 +51,38 @@ export function listBorrowedListingIds(viewerId?: string | null): Set<string> {
   return out;
 }
 
+/** Rental statuses that still hold a claim on the item, from either side. */
+const LIVE_RENTAL_STATUSES: RentalStatus[] = [
+  "pending_approval",
+  "pending_checkin",
+  "upcoming",
+  "active",
+  "overdue",
+  "disputed",
+  "no_show",
+];
+
+/**
+ * Rentals on a listing that are not over yet.
+ *
+ * Deleting a listing takes its rentals with it — the row cascades — so a host
+ * about to delete needs to know whether anything is still riding on it. The
+ * database refuses the delete outright (migration 059); this is what lets the
+ * screen say so before the host tries.
+ */
+export function countLiveRentalsForListing(opts: {
+  listingId?: string | null;
+  bookings?: RentalBooking[];
+}): number {
+  const listingId = (opts.listingId ?? "").trim();
+  if (!listingId) return 0;
+  const bookings = opts.bookings ?? loadRentalBookings();
+  return bookings.filter(
+    (booking) =>
+      booking.listingId === listingId && LIVE_RENTAL_STATUSES.includes(booking.status),
+  ).length;
+}
+
 /**
  * Publish guard: listing hostId must be the signer or a garage they co-host;
  * cannot publish as owner of a listing id you are currently borrowing.

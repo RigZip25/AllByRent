@@ -65,10 +65,22 @@ export function formatPickupWindow(startIso: string, endIso: string): string {
   return `Pickup: ${datePart}, ${startTime}–${endTime}`;
 }
 
-export function canMarkNoShow(pickupScheduledAt: string, now = Date.now()): boolean {
+/**
+ * When the host may first mark a no-show: two hours after the pickup window,
+ * or the end of the grace a "running late" note bought, whichever is later.
+ */
+export function canMarkNoShow(
+  pickupScheduledAt: string,
+  now = Date.now(),
+  pickupGraceUntil?: string,
+): boolean {
   const pickup = new Date(pickupScheduledAt).getTime();
   if (Number.isNaN(pickup)) return false;
-  return now - pickup >= NO_SHOW_MARK_AFTER_MS;
+  const grace = pickupGraceUntil ? new Date(pickupGraceUntil).getTime() : Number.NaN;
+  const earliest = Number.isNaN(grace)
+    ? pickup + NO_SHOW_MARK_AFTER_MS
+    : Math.max(pickup + NO_SHOW_MARK_AFTER_MS, grace);
+  return now >= earliest;
 }
 
 export function isReviewWindowOpen(completedAt: string | undefined, now = Date.now()): boolean {

@@ -3,7 +3,6 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import {
   createEmptyInvoiceLine,
-  createRentalInvoice,
   INVOICE_LINE_PRESETS,
   sumInvoiceLines,
   upsertInvoiceOnList,
@@ -11,6 +10,7 @@ import {
   type RentalInvoiceLine,
   type RentalInvoiceLineKind,
 } from "../../lib/rentalInvoice";
+import { issueRentalInvoiceRemote, voidRentalInvoiceRemote } from "../../lib/rentalInvoiceApi";
 import { assessLateReturnFee } from "../../lib/lateReturnFee";
 import { createRentalInvoicePaymentIntent } from "../../lib/stripePayments";
 import { isStripePaymentsEnabled } from "../../lib/stripeConfig";
@@ -40,6 +40,8 @@ function lineKindLabel(
       return copy.invoiceKindNoShow;
     case "damage":
       return copy.invoiceKindDamage;
+    case "extension":
+      return copy.invoiceKindExtension;
     default:
       return copy.invoiceKindCustom;
   }
@@ -122,6 +124,8 @@ export function RentalInvoicePanel({
   const [payClientSecret, setPayClientSecret] = useState<string | null>(null);
   const [payingInvoiceId, setPayingInvoiceId] = useState<string | null>(null);
   const [payBusy, setPayBusy] = useState(false);
+  const [issuing, setIssuing] = useState(false);
+  const [voidingId, setVoidingId] = useState<string | null>(null);
 
   const stripePromise = useMemo(() => {
     const key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string | undefined;
@@ -158,7 +162,7 @@ export function RentalInvoicePanel({
     ]);
   };
 
-  const issueInvoice = () => {
+  const issueInvoice = async () => {
     setError(null);
     const prepared = lines
       .map((line) => ({
@@ -171,16 +175,20 @@ export function RentalInvoicePanel({
       setError(copy.invoiceNeedLine);
       return;
     }
-    const invoice = createRentalInvoice({
+    // The invoice is written on the server: the device that raises it is not
+    // allowed to write the column the renter is charged from.
+    setIssuing(true);
+    const result = await issueRentalInvoiceRemote({
       rentalId: booking.id,
       lines: prepared,
       note,
     });
-    if (invoice.totalCents < 50) {
-      setError(copy.invoiceNeedLine);
+    setIssuing(false);
+    if (!result.ok) {
+      setError(result.reason);
       return;
     }
-    onChange(upsertInvoiceOnList(invoices, invoice));
+    onChange(result.invoices);
     setBuilderOpen(false);
     setLines([createEmptyInvoiceLine("custom", lineKindLabel("custom", copy))]);
     setNote("");
@@ -242,16 +250,18 @@ export function RentalInvoicePanel({
     setPayingInvoiceId(null);
   };
 
-  const voidInvoice = (invoiceId: string) => {
+  const voidInvoice = async (invoiceId: string) => {
     const inv = invoices.find((i) => i.id === invoiceId);
     if (!inv) return;
-    onChange(
-      upsertInvoiceOnList(invoices, {
-        ...inv,
-        status: "void",
-        updatedAt: new Date().toISOString(),
-      }),
-    );
+    setError(null);
+    setVoidingId(invoiceId);
+    const result = await voidRentalInvoiceRemote({ rentalId: booking.id, invoiceId });
+    setVoidingId(null);
+    if (!result.ok) {
+      setError(result.reason);
+      return;
+    }
+    onChange(result.invoices);
   };
 
   const canBuild =
@@ -361,8 +371,9 @@ export function RentalInvoicePanel({
             </p>
             <button
               type="button"
-              onClick={issueInvoice}
-              className="rounded-xl px-4 py-2 text-sm font-semibold text-white"
+              disabled={issuing}
+              onClick={() => void issueInvoice()}
+              className="rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
               style={{ backgroundColor: GREEN }}
             >
               {copy.invoiceSend}
@@ -423,8 +434,9 @@ export function RentalInvoicePanel({
                   {isHost && (inv.status === "open" || inv.status === "payment_pending") ? (
                     <button
                       type="button"
-                      onClick={() => voidInvoice(inv.id)}
-                      className="rounded-lg border px-3 py-1.5 text-xs font-medium text-gray-600"
+                      disabled={voidingId === inv.id}
+                      onClick={() => void voidInvoice(inv.id)}
+                      className="rounded-lg border px-3 py-1.5 text-xs font-medium text-gray-600 disabled:opacity-60"
                       style={{ borderColor: BORDER }}
                     >
                       {copy.invoiceVoid}
