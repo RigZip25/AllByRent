@@ -1199,6 +1199,11 @@ function BookingScreenLoaded({
       endDate,
       createdAt: bookedIso,
       bookedAt: bookedIso,
+      // The same two moments the rental row is created with. Without them on
+      // the local booking the host has no pickup time to measure a no-show
+      // against, and no due time to be late from, until a sync brings them back.
+      pickupScheduledAt: new Date(`${startDate}T14:00:00`).toISOString(),
+      returnDueAt: new Date(`${endDate}T23:59:59`).toISOString(),
       lateReturnFee: lateReturnSnapshot,
       listingId: listing.id,
       itemQrToken: listing.qrToken?.trim() || listing.id,
@@ -1362,8 +1367,8 @@ function BookingScreenLoaded({
 
   const persistRentalRow = async (id: string, booking: RentalBooking): Promise<void> => {
     if (!auth.userId || !listing.hostId) return;
-    const pickupAt = new Date(`${startDate}T14:00:00`).toISOString();
-    const dueAt = new Date(`${endDate}T23:59:59`).toISOString();
+    const pickupAt = booking.pickupScheduledAt ?? new Date(`${startDate}T14:00:00`).toISOString();
+    const dueAt = booking.returnDueAt ?? new Date(`${endDate}T23:59:59`).toISOString();
     const row = toSupabaseRentalInsert({
       id,
       listingId: listing.id,
