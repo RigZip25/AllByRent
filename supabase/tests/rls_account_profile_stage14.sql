@@ -47,13 +47,15 @@ declare
   left_count int;
   owner uuid;
 begin
-  select count(*), max(owner_id)
-    into left_count, owner
+  select count(*) into left_count
     from public.rentals
     where id = '22222222-2222-4222-8222-222222222222';
   if left_count <> 1 then
     raise exception 'rental was cascaded away on host delete';
   end if;
+  select owner_id into owner
+    from public.rentals
+    where id = '22222222-2222-4222-8222-222222222222';
   if owner is not null then
     raise exception 'owner_id was %, expected null tombstone', owner;
   end if;
