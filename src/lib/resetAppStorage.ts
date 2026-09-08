@@ -1,4 +1,5 @@
 import { Capacitor } from "@capacitor/core";
+import { DB_NAME as MEDIA_DB_NAME } from "./mediaStore";
 import { dismissNativeKeyboard } from "./dismissKeyboard";
 import { getMessages } from "./i18n";
 
@@ -51,6 +52,32 @@ async function unregisterServiceWorkers(): Promise<void> {
   await Promise.all(registrations.map((registration) => registration.unregister()));
 }
 
+/**
+ * Photo blobs live in IndexedDB, which a reset used to leave untouched — the
+ * heaviest thing on the device survived the wipe it was meant to include.
+ */
+async function clearMediaDatabase(): Promise<void> {
+  if (typeof indexedDB === "undefined") return;
+  await new Promise<void>((resolve) => {
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+    try {
+      const request = indexedDB.deleteDatabase(MEDIA_DB_NAME);
+      request.onsuccess = done;
+      request.onerror = done;
+      // Another tab holding the database open would block us indefinitely.
+      request.onblocked = done;
+      window.setTimeout(done, 1500);
+    } catch {
+      done();
+    }
+  });
+}
+
 async function clearCacheStorage(): Promise<void> {
   if (!("caches" in window)) return;
   const names = await caches.keys();
@@ -95,7 +122,11 @@ export async function resetAllAppData(): Promise<void> {
   }
   try {
     clearWebStorage();
-    await Promise.all([unregisterServiceWorkers(), clearCacheStorage()]);
+    await Promise.all([
+      unregisterServiceWorkers(),
+      clearCacheStorage(),
+      clearMediaDatabase(),
+    ]);
   } catch {
     try {
       clearWebStorage();

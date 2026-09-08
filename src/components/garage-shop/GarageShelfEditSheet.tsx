@@ -1,4 +1,5 @@
 import { useMessages } from "../../lib/i18n/react";
+import { sanitizeImageBlob } from "../../lib/imageSanitize";
 import { useCallback, useRef, useState } from "react";
 import { Camera, Loader2, Trash2, X } from "lucide-react";
 import { deleteMedia, putMediaBlob, type MediaRef } from "../../lib/mediaStore";
@@ -76,12 +77,18 @@ export function GarageShelfEditSheet({
       setBusy(true);
       setError(null);
       try {
-        const main = await putMediaBlob(file, { kind: "image" });
+        // Drop EXIF (shooting location included) before the photo is stored.
+        const sanitized = await sanitizeImageBlob(file);
+        if (!sanitized.stripped) {
+          setError(copy.photoLoadFailed);
+          return;
+        }
+        const main = await putMediaBlob(sanitized.blob, { kind: "image" });
         if (!main.ok) {
           setError(main.message);
           return;
         }
-        const thumbBlob = await createThumbnail(file);
+        const thumbBlob = await createThumbnail(sanitized.blob);
         const thumbResult = await putMediaBlob(thumbBlob, { kind: "image", thumbForId: main.ref.id });
         const next: MediaRef = { ...main.ref, thumbId: thumbResult.ok ? thumbResult.ref.id : undefined };
         if (photo.id !== listing.photos[0]?.id) {

@@ -21,6 +21,7 @@ import {
   moderateListingVideoBlob,
 } from "../listingVideoModeration";
 import { MAX_LISTING_PHOTOS, MAX_LISTING_VIDEOS } from "../photoUtils";
+import { sanitizeImageBlob } from "../../../lib/imageSanitize";
 import { putMediaBlob, deleteMedia, type MediaRef } from "../../../lib/mediaStore";
 import { useMediaUrl } from "../../../lib/useMediaUrl";
 import { useMessages } from "../../../lib/i18n/react";
@@ -128,14 +129,22 @@ export function Step1Photos({
     return thumb ?? blob;
   };
 
-  /** Detach camera File shells so IndexedDB / PhotoRoom always see a plain Blob. */
+  /**
+   * Detach camera File shells so IndexedDB / PhotoRoom always see a plain Blob,
+   * and drop EXIF on the way: a phone photo carries the shooting location, and
+   * this is the image neighbours get to see.
+   */
   const normalizePhotoBlob = async (input: Blob): Promise<Blob> => {
     const buffer = await input.arrayBuffer();
     if (!buffer.byteLength) {
       throw new Error("Photo is empty. Try again or pick from the library.");
     }
     const type = (input.type || "").trim() || "image/jpeg";
-    return new Blob([buffer], { type });
+    const sanitized = await sanitizeImageBlob(new Blob([buffer], { type }));
+    if (!sanitized.stripped) {
+      throw new Error("Couldn't process this photo. Try again or pick another one.");
+    }
+    return sanitized.blob;
   };
 
   const appendPhotoBlob = async (blob: Blob) => {
@@ -249,10 +258,12 @@ export function Step1Photos({
         await appendPhotoBlob(blob);
         nextIndex += 1;
       } catch (error) {
+        // Keep going through the batch: one unreadable file used to drop every
+        // photo the host picked after it.
         console.warn("[listing] Couldn't add photo", error);
         setPhotoWarning(photosCopy.couldntAddPhoto);
         setErrorIndex(targetIndex);
-        break;
+        continue;
       } finally {
         setProcessingIndex(null);
         setDraft((current) => ({ ...current, photoEnhancementPending: false }));

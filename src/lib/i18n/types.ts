@@ -1345,6 +1345,9 @@ export type AppMessages = {
       isOn: string;
       shareListing: string;
       backToListings: string;
+      photosPendingTitle: string;
+      photosPendingBody: string;
+      photosPendingRetry: string;
       payoutNudgeTitle: string;
       payoutNudgeBody: string;
       payoutNudgeCta: string;

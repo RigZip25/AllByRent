@@ -5545,6 +5545,10 @@ export const en: AppMessages = {
       isOn: "is on",
       shareListing: "Share listing",
       backToListings: "Back to my listings",
+      photosPendingTitle: "Photos are still on this phone",
+      photosPendingBody:
+        "The listing is live for you, but neighbours won't see it until the photos finish uploading. Stay on Wi-Fi and try again.",
+      photosPendingRetry: "Upload photos again",
       payoutNudgeTitle: "Ready to open your store?",
       payoutNudgeBody:
         "Connect payouts, then flip Live in My Garage. Neighbors won’t see you until the store is open.",

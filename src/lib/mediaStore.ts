@@ -1,3 +1,5 @@
+import { sanitizeImageBlob } from "./imageSanitize";
+
 export type MediaKind = "image" | "video";
 
 export type MediaRef = {
@@ -36,7 +38,7 @@ type MediaStoreLimits = {
   maxItems: number;
 };
 
-const DB_NAME = "allbyrent_media";
+export const DB_NAME = "allbyrent_media";
 const DB_VERSION = 1;
 const STORE = "media";
 
@@ -291,6 +293,24 @@ export async function putMediaBlob(
   }
 }
 
+/**
+ * Store a photo a person just supplied, without its metadata.
+ *
+ * Best-effort on purpose: condition and hand-off photos are evidence in a
+ * running rental, so a device that cannot re-encode should still be able to
+ * attach one rather than lose the record.
+ */
+export async function putUserPhoto(
+  blob: Blob,
+  opts: { kind: MediaKind; id?: string; thumbForId?: string; limits?: Partial<MediaStoreLimits> },
+): Promise<MediaPutResult> {
+  const sanitized = await sanitizeImageBlob(blob);
+  if (!sanitized.stripped) {
+    console.warn("[media] storing a photo without stripping its metadata");
+  }
+  return putMediaBlob(sanitized.blob, opts);
+}
+
 export async function getMediaBlob(id: string): Promise<Blob | null> {
   if (!id) return null;
   const record = await withStore("readonly", async (store) => {
@@ -324,6 +344,26 @@ export async function getThumbIdFor(id: string): Promise<string | null> {
   const records = await listAllRecords();
   const thumb = records.find((r) => r.thumbForId === id);
   return thumb?.id ?? null;
+}
+
+/** Ids currently held, optionally narrowed to one id prefix. */
+export async function listMediaIds(prefix?: string): Promise<string[]> {
+  const records = await withStore("readonly", listAllRecords);
+  const ids = records.map((record) => record.id);
+  return prefix ? ids.filter((id) => id.startsWith(prefix)) : ids;
+}
+
+export async function deleteMediaMany(ids: string[]): Promise<number> {
+  let removed = 0;
+  for (const id of ids) {
+    try {
+      await deleteMedia(id);
+      removed += 1;
+    } catch {
+      /* keep going: one stuck record must not stop the sweep */
+    }
+  }
+  return removed;
 }
 
 export async function getMediaStats(): Promise<{

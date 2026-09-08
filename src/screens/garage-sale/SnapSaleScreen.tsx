@@ -1,4 +1,5 @@
 import { useMessages } from "../../lib/i18n/react";
+import { sanitizeImageBlob } from "../../lib/imageSanitize";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Camera, Loader2, ShoppingBag, Tag } from "lucide-react";
 import { BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../../lib/brand";
@@ -196,12 +197,18 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
         await deleteMedia(photo.id);
         if (photo.thumbId) await deleteMedia(photo.thumbId);
       }
-      const main = await putMediaBlob(file, { kind: "image" });
+      // Drop EXIF (shooting location included) before the photo is stored.
+      const sanitized = await sanitizeImageBlob(file);
+      if (!sanitized.stripped) {
+        setError(copy.photoLoadFailed);
+        return;
+      }
+      const main = await putMediaBlob(sanitized.blob, { kind: "image" });
       if (!main.ok) {
         setError(main.message);
         return;
       }
-      const thumbBlob = await createThumbnail(file);
+      const thumbBlob = await createThumbnail(sanitized.blob);
       const thumb = await putMediaBlob(thumbBlob, { kind: "image", thumbForId: main.ref.id });
       const ref: MediaRef = {
         ...main.ref,

@@ -80,16 +80,23 @@ export async function deleteListingPhotosFromRemote(paths: string[]): Promise<vo
   if (error) throw error;
 }
 
+export type ListingPhotoUploadResult = {
+  photos: ListingPhotoRef[];
+  /** Photos a neighbour still cannot see, because they exist only on this device. */
+  pending: number;
+};
+
 export async function uploadListingPhotosToRemote(params: {
   listingId: string;
   ownerId: string;
   photos: ListingPhotoRef[];
-}): Promise<ListingPhotoRef[]> {
-  if (!isSupabaseConfigured()) return params.photos;
+}): Promise<ListingPhotoUploadResult> {
+  if (!isSupabaseConfigured()) return { photos: params.photos, pending: 0 };
   const supabase = getSupabaseClient();
-  if (!supabase) return params.photos;
+  if (!supabase) return { photos: params.photos, pending: 0 };
 
   const uploaded: ListingPhotoRef[] = [];
+  let pending = 0;
 
   for (const photo of params.photos) {
     const blob = await getMediaBlob(photo.id);
@@ -101,7 +108,9 @@ export async function uploadListingPhotosToRemote(params: {
       continue;
     }
 
+    // Local blob evicted and never uploaded: nothing left to publish.
     if (!blob) {
+      pending += 1;
       uploaded.push(photo);
       continue;
     }
@@ -113,19 +122,34 @@ export async function uploadListingPhotosToRemote(params: {
       photo.mimeType,
       "full",
     );
-    await uploadBlob({ path: storagePath, blob, mimeType: photo.mimeType });
+
+    // One unlucky photo must not abandon the rest of the gallery.
+    try {
+      await uploadBlob({ path: storagePath, blob, mimeType: photo.mimeType });
+    } catch (error) {
+      console.warn("listing photo upload failed:", error);
+      pending += 1;
+      uploaded.push(photo);
+      continue;
+    }
 
     let thumbStoragePath = photo.thumbStoragePath;
     if (thumbBlob && thumbBlob.size > 0) {
       const thumbId = photo.thumbId?.trim() || `${photo.id}_thumb`;
-      thumbStoragePath = buildListingPhotoPath(
+      const thumbPath = buildListingPhotoPath(
         params.ownerId,
         params.listingId,
         thumbId,
         photo.mimeType,
         "thumb",
       );
-      await uploadBlob({ path: thumbStoragePath, blob: thumbBlob, mimeType: photo.mimeType });
+      try {
+        await uploadBlob({ path: thumbPath, blob: thumbBlob, mimeType: photo.mimeType });
+        thumbStoragePath = thumbPath;
+      } catch (error) {
+        // The full-size photo carries the listing; a missing thumb only costs bytes.
+        console.warn("listing thumbnail upload failed:", error);
+      }
     }
 
     uploaded.push({
@@ -135,5 +159,10 @@ export async function uploadListingPhotosToRemote(params: {
     });
   }
 
-  return uploaded;
+  return { photos: uploaded, pending };
+}
+
+/** True when a neighbour would open this listing and find no photo at all. */
+export function hasRemoteListingPhoto(photos: ListingPhotoRef[] | undefined): boolean {
+  return (photos ?? []).some((photo) => Boolean(photo.storagePath?.trim()));
 }

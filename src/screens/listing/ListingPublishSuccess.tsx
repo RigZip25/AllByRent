@@ -11,6 +11,10 @@ const AMBER = "#F59E0B";
 type ListingPublishSuccessProps = {
   title: string;
   statusLine?: string;
+  /** Photos that stayed on this device, so the listing looks empty to others. */
+  photosPending?: number;
+  photosRetryBusy?: boolean;
+  onRetryPhotos?: () => void;
   payoutNudge?: boolean;
   payoutBusy?: boolean;
   onSetupPayouts?: () => void;
@@ -24,6 +28,9 @@ type ListingPublishSuccessProps = {
 export function ListingPublishSuccess({
   title,
   statusLine,
+  photosPending = 0,
+  photosRetryBusy,
+  onRetryPhotos,
   payoutNudge,
   payoutBusy,
   onSetupPayouts,
@@ -64,6 +71,38 @@ export function ListingPublishSuccess({
       <p className="mt-3 rounded-full px-3 py-1 text-xs font-bold text-white" style={{ backgroundColor: GREEN }}>
         {statusLine ?? listing.listingActive}
       </p>
+
+      {photosPending > 0 ? (
+        <div
+          className="mt-5 w-full max-w-sm rounded-2xl border px-4 py-3.5 text-left"
+          style={{ borderColor: "#FECDCA", backgroundColor: "#FEF3F2" }}
+        >
+          <p className="text-sm font-bold" style={{ color: "#912018" }}>
+            {success.photosPendingTitle}
+          </p>
+          <p className="mt-1 text-[13px] leading-relaxed" style={{ color: "#912018" }}>
+            {success.photosPendingBody}
+          </p>
+          {onRetryPhotos ? (
+            <button
+              type="button"
+              onClick={onRetryPhotos}
+              disabled={photosRetryBusy}
+              className="mt-3 w-full touch-manipulation rounded-xl py-2.5 text-sm font-bold text-white disabled:opacity-60"
+              style={{ backgroundColor: GREEN }}
+            >
+              {photosRetryBusy ? (
+                <span className="inline-flex items-center justify-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {success.photosPendingRetry}
+                </span>
+              ) : (
+                success.photosPendingRetry
+              )}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       {payoutNudge ? (
         <div

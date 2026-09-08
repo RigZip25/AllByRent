@@ -202,6 +202,8 @@ export function ListingWizard({
     return "steps";
   });
   const [isPublishing, setIsPublishing] = useState(false);
+  const [photosPending, setPhotosPending] = useState(0);
+  const [photosRetryBusy, setPhotosRetryBusy] = useState(false);
   const [goPublicStatus, setGoPublicStatus] = useState<SellerGoPublicStatus | null>(null);
   const [goPublicLoading, setGoPublicLoading] = useState(false);
   const [goPublicBusy, setGoPublicBusy] = useState<GoPublicBusy>(null);
@@ -488,7 +490,9 @@ export function ListingWizard({
         // Always persist locally first so My Garage can show the listing immediately.
         savePublishedListing(savedDraft);
         if (hostId) {
-          void savePublishedListingRemote(savedDraft, hostId);
+          void savePublishedListingRemote(savedDraft, hostId).then((result) => {
+            setPhotosPending(result.photosPending);
+          });
         }
         setIsPublishing(false);
         onExit("finished");
@@ -513,8 +517,10 @@ export function ListingWizard({
       // Always persist locally first so My Garage can show the listing immediately.
       savePublishedListing(publishedDraft);
       if (hostId) {
-        void savePublishedListingRemote(publishedDraft, hostId);
         recordDevicePublish(hostId);
+        void savePublishedListingRemote(publishedDraft, hostId).then((result) => {
+          setPhotosPending(result.photosPending);
+        });
       }
       const profile = loadUserProfile();
       // Neighbors only learn about new shelf items when the store is already Live.
@@ -535,6 +541,18 @@ export function ListingWizard({
         setPhase("success");
       }
     }, 900);
+  };
+
+  const retryPhotoUpload = async () => {
+    const hostId = resolveGarageHostId(auth.userId, auth.userEmail) || draft.hostId || "";
+    if (!hostId) return;
+    setPhotosRetryBusy(true);
+    try {
+      const result = await savePublishedListingRemote(draft, hostId);
+      setPhotosPending(result.photosPending);
+    } finally {
+      setPhotosRetryBusy(false);
+    }
   };
 
   const publishStatusLine = isGiftOrSellOnly(draft)
@@ -1357,6 +1375,9 @@ export function ListingWizard({
         <ListingPublishSuccess
           title={getListingDisplayTitle(draft.title)}
           statusLine={publishStatusLine}
+          photosPending={photosPending}
+          photosRetryBusy={photosRetryBusy}
+          onRetryPhotos={() => void retryPhotoUpload()}
           payoutNudge={Boolean(goPublicStatus && !goPublicStatus.payoutsReady)}
           payoutBusy={goPublicBusy === "stripe"}
           onSetupPayouts={handleChecklistConnect}

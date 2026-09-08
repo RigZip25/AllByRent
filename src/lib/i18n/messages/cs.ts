@@ -5566,6 +5566,10 @@ export const cs: AppMessages = {
       isOn: "je na",
       shareListing: "Sdílet nabídku",
       backToListings: "Zpět na moje nabídky",
+      photosPendingTitle: "Fotky jsou zatím jen v tomto telefonu",
+      photosPendingBody:
+        "Inzerát vidíš ty, ale sousedé ho neuvidí, dokud se fotky nenahrají. Zůstaň na Wi-Fi a zkus to znovu.",
+      photosPendingRetry: "Nahrát fotky znovu",
       payoutNudgeTitle: "Chceš otevřít obchod?",
       payoutNudgeBody:
         "Připoj výplaty a pak přepni Live v Moje domácnost. Sousedé tě neuvidí, dokud obchod neotevřeš.",

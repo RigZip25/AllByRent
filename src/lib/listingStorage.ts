@@ -1,5 +1,6 @@
 import type { ListingDraft } from "../screens/listing/types";
 import { withoutBlocked } from "./moderation/blockStorage";
+import { deleteMediaMany } from "./mediaStore";
 import { WIZARD_FLOW_VERSION } from "../screens/listing/types";
 import {
   canonicalShelf,
@@ -10,6 +11,7 @@ import { applyGiftAsZeroSell } from "./listingGift";
 import {
   collectListingPhotoStoragePaths,
   deleteListingPhotosFromRemote,
+  hasRemoteListingPhoto,
   uploadListingPhotosToRemote,
 } from "./listingPhotoStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
@@ -214,6 +216,14 @@ export function removePublishedListing(id: string): void {
       if (paths.length > 0) {
         void deleteListingPhotosFromRemote(paths).catch(() => undefined);
       }
+    }
+    // The blobs on this device outlive the listing otherwise, and a discarded
+    // draft leaves the biggest files behind.
+    const localMediaIds = [...(victim?.photos ?? []), ...(victim?.videos ?? [])]
+      .flatMap((media) => [media.id, media.thumbId])
+      .filter((id): id is string => Boolean(id?.trim()));
+    if (localMediaIds.length > 0) {
+      void deleteMediaMany(localMediaIds).catch(() => undefined);
     }
     const ownerId = victim?.hostId?.trim() ?? "";
     if (ownerId) {
@@ -898,11 +908,21 @@ function createInitialHandoffFallback(): ListingDraft["handoff"] {
   };
 }
 
-export async function savePublishedListingRemote(draft: ListingDraft, ownerId: string): Promise<void> {
+export type RemoteListingSaveResult = {
+  /** False when the listing row itself could not be written. */
+  ok: boolean;
+  /** Photos that stayed on this device, so neighbours would see an empty listing. */
+  photosPending: number;
+};
+
+export async function savePublishedListingRemote(
+  draft: ListingDraft,
+  ownerId: string,
+): Promise<RemoteListingSaveResult> {
   const normalizedOwnerId = ownerId.trim();
   if (!normalizedOwnerId) {
     savePublishedListing(draft);
-    return;
+    return { ok: false, photosPending: 0 };
   }
   const stamped: ListingDraft = {
     ...draft,
@@ -910,11 +930,11 @@ export async function savePublishedListingRemote(draft: ListingDraft, ownerId: s
   };
   savePublishedListing(stamped);
   if (!isSupabaseConfigured()) {
-    return;
+    return { ok: true, photosPending: 0 };
   }
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return;
+    return { ok: true, photosPending: 0 };
   }
 
   // Upsert listing metadata first (no local blob photos) so My Garage can load it
@@ -931,14 +951,18 @@ export async function savePublishedListingRemote(draft: ListingDraft, ownerId: s
   const previousPaths = collectListingPhotoStoragePaths(previous?.photos ?? []);
 
   let photos = stamped.photos;
+  let photosPending = 0;
   try {
-    photos = await uploadListingPhotosToRemote({
+    const upload = await uploadListingPhotosToRemote({
       listingId: stamped.id,
       ownerId: normalizedOwnerId,
       photos: stamped.photos,
     });
+    photos = upload.photos;
+    photosPending = upload.pending;
   } catch (error) {
     console.warn("uploadListingPhotosToRemote failed:", error);
+    photosPending = (stamped.photos ?? []).filter((photo) => !photo.storagePath?.trim()).length;
   }
 
   const nextPaths = collectListingPhotoStoragePaths(photos);
@@ -962,6 +986,8 @@ export async function savePublishedListingRemote(draft: ListingDraft, ownerId: s
   if (error) {
     console.warn("savePublishedListingRemote failed:", error.message);
   }
+
+  return { ok: !error, photosPending };
 }
 
 export async function uploadQrVerificationPhotoRemote(params: {
@@ -1084,6 +1110,15 @@ export function isListingBrowsable(
   storeLiveByHost?: Record<string, boolean>,
 ): boolean {
   if (!isListingOnShelf(listing) || listing.paused) return false;
+  // Photos that never reached storage exist only on the host's phone, so to a
+  // neighbour the card would be blank. Local-only mode has no neighbours.
+  if (
+    isSupabaseConfigured() &&
+    (listing.photos ?? []).length > 0 &&
+    !hasRemoteListingPhoto(listing.photos)
+  ) {
+    return false;
+  }
   return isStoreOpenForHost(listing.hostId, storeLiveByHost);
 }
 

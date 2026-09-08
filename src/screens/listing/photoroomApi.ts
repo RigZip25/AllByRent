@@ -1,4 +1,9 @@
-import { getMediaBlob, putMediaBlob } from "../../lib/mediaStore";
+import {
+  deleteMediaMany,
+  getMediaBlob,
+  listMediaIds,
+  putMediaBlob,
+} from "../../lib/mediaStore";
 
 type PhotoRoomEditOptions = {
   backgroundColor?: string;
@@ -273,4 +278,26 @@ export async function processPhotoWithPhotoRoom(
   } finally {
     inFlight.delete(key);
   }
+}
+
+/**
+ * Drop enhancement results whose cache entry has expired or vanished.
+ *
+ * The localStorage entry is what makes a cached edit findable; the blob behind
+ * it is the big part, and nothing used to delete it, so a host who added many
+ * photos kept every intermediate version on the phone forever.
+ */
+export async function prunePhotoRoomMediaCache(): Promise<number> {
+  const prefix = "photoroom:edit:";
+  let ids: string[];
+  try {
+    ids = await listMediaIds(prefix);
+  } catch {
+    return 0;
+  }
+  if (ids.length === 0) return 0;
+
+  const orphans = ids.filter((id) => readCache(id.slice(prefix.length)) === null);
+  if (orphans.length === 0) return 0;
+  return deleteMediaMany(orphans);
 }
