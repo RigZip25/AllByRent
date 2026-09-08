@@ -1,5 +1,6 @@
 import type Stripe from "stripe";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { applyPaidExtension } from "../rentalExtension";
 
 type StoredInvoice = {
   id?: string;
@@ -7,12 +8,16 @@ type StoredInvoice = {
   stripePaymentIntentId?: string;
   paidAt?: string;
   updatedAt?: string;
+  totalCents?: number;
+  extension?: { newEndDate: string; extraDays: number };
   [key: string]: unknown;
 };
 
 /**
- * Mark a host-issued invoice paid (or payment_pending) inside rentals.rental_invoices.
- * Invoices are primarily client-authored; webhook is the durable paid sync.
+ * Mark an invoice paid (or awaiting payment) inside rentals.rental_invoices.
+ *
+ * This is where an invoice becomes paid — nothing else may write that word —
+ * and where paying for extra days moves the rental's end date.
  */
 async function syncRentalInvoiceFromIntent(
   admin: SupabaseClient,
@@ -33,10 +38,12 @@ async function syncRentalInvoiceFromIntent(
   const now = new Date().toISOString();
 
   let found = false;
+  let paidExtension: StoredInvoice | null = null;
   const next = list.map((inv) => {
     if (inv?.id !== invoiceId) return inv;
     found = true;
     if (intent.status === "succeeded") {
+      if (inv.extension && inv.status !== "paid") paidExtension = inv;
       return {
         ...inv,
         status: "paid",
@@ -77,6 +84,17 @@ async function syncRentalInvoiceFromIntent(
   }
 
   await admin.from("rentals").update({ rental_invoices: next }).eq("id", rentalId);
+
+  if (paidExtension) {
+    const invoice = paidExtension as StoredInvoice;
+    await applyPaidExtension(admin, {
+      rentalId,
+      invoice: {
+        extension: invoice.extension,
+        totalCents: Math.max(0, Math.round(Number(invoice.totalCents) || 0)),
+      },
+    });
+  }
 }
 
 export async function syncRentalPaymentFromIntent(

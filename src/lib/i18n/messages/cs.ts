@@ -1331,7 +1331,7 @@ export const cs: AppMessages = {
     cancelRefundReleased: "Autorizace karty se uvolňuje.",
     datesAdjustTitle: "Změnit termín půjčky",
     datesAdjustBody:
-      "Prodloužení jen když jsou další dny volné v kalendáři. Předčasný návrat je vždy možný — dokonči předání, až skončíš.",
+      "Prodloužení jen když jsou další dny volné v kalendáři — dny navíc se platí, než se datum konce posune. Předčasný návrat je vždy možný: dokonči předání, až skončíš.",
     extendBooking: "Prodloužit rezervaci",
     extendNewEnd: "Nové datum konce",
     extendConfirm: "Potvrdit prodloužení",
@@ -1339,6 +1339,12 @@ export const cs: AppMessages = {
     extendUnavailable: "Tyto dny nejsou volné — zvol jiné datum konce.",
     extendInvalid: "Zvol datum konce po součém konci.",
     extendSuccess: (date) => `Prodlouženo do ${date}.`,
+    extendQuote: (days, amount) =>
+      `${days === 1 ? "1 den navíc" : `${days} dny navíc`} · ${amount}`,
+    extendPayCta: (amount) => `Přidat k platbám · ${amount}`,
+    extendInvoiceIssued:
+      "Dny navíc jsou v Platbách níže. Datum konce se posune, až je zaplatíš.",
+    extendPaidNote: "Dny navíc se účtují denní sazbou hostitele.",
     earlyReturnHint:
       "Hotovo dřív? Vrať to, kdy chceš — půjčka končí, jakmile hostitel návrat přijme. Rezervované dny zůstávají účtované podle dohody.",
     cancelRefundFullProcessing:

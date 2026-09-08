@@ -2280,6 +2280,11 @@ export type AppMessages = {
     extendUnavailable: string;
     extendInvalid: string;
     extendSuccess: (date: string) => string;
+    /** Price of the extra days, before the renter commits to them. */
+    extendQuote: (days: number, amount: string) => string;
+    extendPayCta: (amount: string) => string;
+    extendInvoiceIssued: string;
+    extendPaidNote: string;
     /** Bringing it back sooner does not shorten what was paid for. */
     earlyReturnHint: string;
     cancelRefundFullProcessing: string;

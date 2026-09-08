@@ -1313,7 +1313,7 @@ export const es: AppMessages = {
     cancelRefundReleased: "Se está liberando cualquier autorización de tarjeta.",
     datesAdjustTitle: "Cambiar fechas del alquiler",
     datesAdjustBody:
-      "Amplía solo si los días siguientes siguen libres en el calendario. La devolución anticipada siempre es posible: completa la entrega cuando termines.",
+      "Amplía solo si los días siguientes siguen libres en el calendario: los días extra se cobran antes de mover la fecha de fin. La devolución anticipada siempre es posible: completa la entrega cuando termines.",
     extendBooking: "Prolongar reserva",
     extendNewEnd: "Nueva fecha de fin",
     extendConfirm: "Confirmar ampliación",
@@ -1321,6 +1321,12 @@ export const es: AppMessages = {
     extendUnavailable: "Esas fechas no están libres: elige otro día de fin.",
     extendInvalid: "Elige una fecha de fin posterior a la actual.",
     extendSuccess: (date) => `Ampliado hasta el ${date}.`,
+    extendQuote: (days, amount) =>
+      `${days === 1 ? "1 día extra" : `${days} días extra`} · ${amount}`,
+    extendPayCta: (amount) => `Añadir a los cargos · ${amount}`,
+    extendInvoiceIssued:
+      "Los días extra están en Cargos, abajo. La fecha de fin cambia cuando los pagues.",
+    extendPaidNote: "Los días extra se cobran a la tarifa diaria del anfitrión.",
     earlyReturnHint:
       "¿Terminaste antes? Devuélvelo cuando quieras: el alquiler acaba cuando el anfitrión acepta la devolución. Los días reservados se cobran según lo acordado.",
     cancelRefundFullProcessing:

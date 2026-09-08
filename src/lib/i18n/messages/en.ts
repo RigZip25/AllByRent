@@ -1314,7 +1314,7 @@ export const en: AppMessages = {
     cancelRefundReleased: "Any card authorization is being released.",
     datesAdjustTitle: "Change rental dates",
     datesAdjustBody:
-      "Extend when later days are still free on the calendar. Early return is always available — finish handoff when you’re done.",
+      "Extend when later days are still free on the calendar — the extra days are charged before the end date moves. Early return is always available: finish handoff when you’re done.",
     extendBooking: "Extend booking",
     extendNewEnd: "New end date",
     extendConfirm: "Confirm extension",
@@ -1322,6 +1322,12 @@ export const en: AppMessages = {
     extendUnavailable: "Those dates aren’t free — pick another end day.",
     extendInvalid: "Choose an end date after the current one.",
     extendSuccess: (date) => `Extended through ${date}.`,
+    extendQuote: (days, amount) =>
+      `${days === 1 ? "1 extra day" : `${days} extra days`} · ${amount}`,
+    extendPayCta: (amount) => `Add to charges · ${amount}`,
+    extendInvoiceIssued:
+      "The extra days are in Charges below. The end date moves once you pay them.",
+    extendPaidNote: "Extra days are charged at the host’s daily rate.",
     earlyReturnHint:
       "Done early? Return it whenever you like — the rental ends once the host accepts the return. The booked days stay charged as agreed.",
     cancelRefundFullProcessing:

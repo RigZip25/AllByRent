@@ -74,7 +74,12 @@ import { completeHostNoShow } from "../../lib/rentalNoShowActions";
 import { listingNoShowFeeUsd } from "../../lib/noShowPolicy";
 import { RentalLifecyclePolicySheet } from "../../components/rentals/RentalLifecyclePolicySheet";
 import { formatMoney } from "../../lib/regionalDisplay";
-import { bookingAllowsExtension, canExtendRental } from "../../lib/rentalExtendReturn";
+import { bookingAllowsExtension } from "../../lib/rentalExtendReturn";
+import {
+  quoteRentalExtension,
+  requestRentalExtension,
+  type ExtensionQuote,
+} from "../../lib/rentalExtensionApi";
 import { addDaysIso } from "../../lib/availabilityBusy";
 import { getHomeLocation, getPublishedListingById } from "../../lib/listingStorage";
 import {
@@ -185,6 +190,7 @@ export function ActiveRental({
   const [extendDate, setExtendDate] = useState("");
   const [extendBusy, setExtendBusy] = useState(false);
   const [extendError, setExtendError] = useState<string | null>(null);
+  const [extendQuote, setExtendQuote] = useState<ExtensionQuote | null>(null);
   const [odometerOpen, setOdometerOpen] = useState(false);
   const [odometerValue, setOdometerValue] = useState("");
   const [odometerError, setOdometerError] = useState<string | null>(null);
@@ -1213,37 +1219,60 @@ export function ActiveRental({
     setExtendDate(addDaysIso(booking.endDate, 1));
   }, [booking?.id, booking?.endDate]);
 
-  const handleExtend = useCallback(async () => {
+  /** Price the extra days. The server owns both the rate and the calendar. */
+  const handleQuoteExtension = useCallback(async () => {
+    if (!booking) return;
+    setExtendBusy(true);
+    setExtendError(null);
+    setExtendQuote(null);
+    try {
+      const result = await quoteRentalExtension({
+        rentalId: booking.id,
+        newEndDate: extendDate,
+      });
+      if (!result.ok) {
+        setExtendError(result.reason);
+        return;
+      }
+      setExtendQuote(result.quote);
+    } finally {
+      setExtendBusy(false);
+    }
+  }, [booking, extendDate]);
+
+  /**
+   * Bill for the days. The end date moves when the invoice is paid — or right
+   * away where there is no card to charge.
+   */
+  const handleRequestExtension = useCallback(async () => {
     if (!booking) return;
     setExtendBusy(true);
     setExtendError(null);
     try {
-      const listing = booking.listingId
-        ? getPublishedListingById(booking.listingId)
-        : null;
-      const result = await canExtendRental({
-        booking,
+      const result = await requestRentalExtension({
+        rentalId: booking.id,
         newEndDate: extendDate,
-        fallbackBlocked: listing?.blockedDates ?? [],
       });
       if (!result.ok) {
-        setExtendError(
-          result.reason === "busy"
-            ? t.rentalDetail.extendUnavailable
-            : t.rentalDetail.extendInvalid,
-        );
+        setExtendError(result.reason);
         return;
       }
-      const dueAt = new Date(`${result.newEndDate}T23:59:59`).toISOString();
-      setBookings(
-        updateBooking(booking.id, {
-          endDate: result.newEndDate,
-          returnDueAt: dueAt,
-          status: booking.status === "overdue" ? "active" : booking.status,
-        }),
-      );
+      if (result.applied) {
+        const dueAt = new Date(`${result.quote.newEndDate}T23:59:59`).toISOString();
+        setBookings(
+          updateBooking(booking.id, {
+            endDate: result.quote.newEndDate,
+            returnDueAt: dueAt,
+            status: booking.status === "overdue" ? "active" : booking.status,
+          }),
+        );
+        setNotice(t.rentalDetail.extendSuccess(result.quote.newEndDate));
+      } else {
+        setBookings(updateBooking(booking.id, { invoices: result.invoices }));
+        setNotice(t.rentalDetail.extendInvoiceIssued);
+      }
       setExtendOpen(false);
-      setNotice(t.rentalDetail.extendSuccess(result.newEndDate));
+      setExtendQuote(null);
     } finally {
       setExtendBusy(false);
     }
@@ -1469,9 +1498,21 @@ export function ActiveRental({
                         className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm"
                         min={addDaysIso(booking!.endDate, 1)}
                         value={extendDate}
-                        onChange={(e) => setExtendDate(e.target.value)}
+                        onChange={(e) => {
+                          setExtendDate(e.target.value);
+                          setExtendQuote(null);
+                        }}
                       />
                     </label>
+                    <p className="text-[12px] text-gray-600">{t.rentalDetail.extendPaidNote}</p>
+                    {extendQuote ? (
+                      <p className="text-[13px] font-bold text-gray-900">
+                        {t.rentalDetail.extendQuote(
+                          extendQuote.extraDays,
+                          `$${formatUsd(extendQuote.totalCents / 100)}`,
+                        )}
+                      </p>
+                    ) : null}
                     {extendError ? (
                       <p className="text-xs font-semibold text-red-600">{extendError}</p>
                     ) : null}
@@ -1479,15 +1520,26 @@ export function ActiveRental({
                       <button
                         type="button"
                         disabled={extendBusy}
-                        onClick={() => void handleExtend()}
+                        onClick={() =>
+                          void (extendQuote ? handleRequestExtension() : handleQuoteExtension())
+                        }
                         className="rounded-xl bg-primary px-4 py-2.5 text-[13px] font-bold text-white disabled:opacity-60"
                       >
-                        {extendBusy ? t.rentalDetail.extendChecking : t.rentalDetail.extendConfirm}
+                        {extendBusy
+                          ? t.rentalDetail.extendChecking
+                          : extendQuote
+                            ? t.rentalDetail.extendPayCta(
+                                `$${formatUsd(extendQuote.totalCents / 100)}`,
+                              )
+                            : t.rentalDetail.extendConfirm}
                       </button>
                       <button
                         type="button"
                         disabled={extendBusy}
-                        onClick={() => setExtendOpen(false)}
+                        onClick={() => {
+                          setExtendOpen(false);
+                          setExtendQuote(null);
+                        }}
                         className="rounded-xl border border-border bg-white px-4 py-2.5 text-[13px] font-bold text-gray-700"
                       >
                         {t.rentalDetail.close}
