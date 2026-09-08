@@ -83,6 +83,7 @@ import {
 } from "../../lib/yardSaleListing";
 import { applyAiSuggestionsToDraft } from "./applyAiSuggestions";
 import { isListingStepValid } from "./validation";
+import { pinMedia, unpinMedia } from "../../lib/mediaStore";
 import { useMessages } from "../../lib/i18n/react";
 
 function createPrefilledListingDraft(prefill?: ShelfPrefill | null): ListingDraft {
@@ -284,6 +285,21 @@ export function ListingWizard({
   useEffect(() => {
     setPhotoGateMessage(null);
   }, [draft.category, draft.subcategory]);
+
+  // The gallery under construction is not eviction material: adding the twelfth
+  // photo used to be able to free space by dropping the first.
+  const draftMediaIds = useMemo(
+    () => [
+      ...draft.photos.flatMap((photo) => [photo.id, photo.thumbId]),
+      ...draft.videos.map((video) => video.id),
+    ],
+    [draft.photos, draft.videos],
+  );
+
+  useEffect(() => {
+    pinMedia(draftMediaIds);
+    return () => unpinMedia(draftMediaIds);
+  }, [draftMediaIds]);
 
   useEffect(() => {
     const busy =
