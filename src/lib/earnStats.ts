@@ -1,3 +1,4 @@
+import { toIsoDateLocal } from "./availabilityBusy";
 import { loadPublishedListings } from "./listingStorage";
 import { getListingDisplayTitle } from "./listingQr";
 import {
@@ -117,9 +118,9 @@ function buildLast7Days(completed: RentalBooking[], now: Date): DailyEarningPoin
     const day = new Date(now);
     day.setHours(12, 0, 0, 0);
     day.setDate(day.getDate() - offset);
-    const date = day.toISOString().slice(0, 10);
+    const date = toIsoDateLocal(day);
     const amountUsd = completed
-      .filter((b) => bookingEarnedAt(b).toISOString().slice(0, 10) === date)
+      .filter((b) => toIsoDateLocal(bookingEarnedAt(b)) === date)
       .reduce((sum, b) => sum + bookingHostNet(b), 0);
     points.push({
       date,
