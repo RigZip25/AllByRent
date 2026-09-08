@@ -115,7 +115,14 @@ export function MessagesInboxScreen({
             <h1 className="truncate text-[18px] font-extrabold" style={{ color: GREEN }}>
               {copy.messages.title}
             </h1>
-            <p className="text-[12px] text-gray-500">{copy.messages.subtitle}</p>
+            <p className="text-[12px] text-gray-500">
+              {copy.messages.subtitle}
+              {threads.some((t) => (t.unreadCount ?? 0) > 0)
+                ? ` · ${copy.messages.unreadCount(
+                    threads.reduce((sum, t) => sum + (t.unreadCount ?? 0), 0),
+                  )}`
+                : ""}
+            </p>
           </div>
         </div>
       </header>
@@ -151,7 +158,10 @@ export function MessagesInboxScreen({
                     } else if (thread.listingId) onOpenListingChat(thread.listingId, thread.peerId);
                   }}
                   className="flex w-full items-start gap-3 rounded-2xl border bg-white px-4 py-3.5 text-left active:bg-gray-50"
-                  style={{ borderColor: BORDER }}
+                  style={{
+                    borderColor: BORDER,
+                    backgroundColor: (thread.unreadCount ?? 0) > 0 ? "#F7FBF8" : undefined,
+                  }}
                 >
                   <div
                     className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
@@ -177,6 +187,15 @@ export function MessagesInboxScreen({
                     </p>
                     <p className="mt-1 line-clamp-2 text-[13px] text-gray-600">{thread.preview}</p>
                   </div>
+                  {(thread.unreadCount ?? 0) > 0 ? (
+                    <span
+                      className="mt-1 shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
+                      style={{ backgroundColor: GREEN }}
+                      aria-label={copy.messages.unreadCount(thread.unreadCount ?? 0)}
+                    >
+                      {thread.unreadCount}
+                    </span>
+                  ) : null}
                 </button>
               </li>
             ))}

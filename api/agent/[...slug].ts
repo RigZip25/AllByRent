@@ -8,6 +8,7 @@ import marketing from "@allbyrent/server/routes/agent/marketing";
 import market from "@allbyrent/server/routes/agent/market";
 import pricing from "@allbyrent/server/routes/agent/pricing";
 import safety from "@allbyrent/server/routes/agent/safety";
+import { isAgentScaffoldEnabled } from "@allbyrent/server/lib/agentScaffold";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 
@@ -47,6 +48,14 @@ function routeKey(req: VercelRequest): string {
 }
 
 export default function handler(req: VercelRequest, res: VercelResponse): unknown {
+  if (!isAgentScaffoldEnabled()) {
+    res.status(410).json({
+      ok: false,
+      error: "Agent scaffolding is disabled in this environment.",
+      code: "agent_scaffold_disabled",
+    });
+    return;
+  }
   const key = routeKey(req);
   const routeHandler = ROUTES[key];
   if (!routeHandler) {

@@ -101,6 +101,7 @@ npm run build:native
 - [ ] Replace Play SHA-256 in `public/.well-known/assetlinks.json`, then redeploy
 - [ ] Sign with your team in Xcode / Play App Signing
 - [ ] TestFlight + Play internal testing, then submit for review
+- [ ] Fill **App Review Information** from [store/LISTING.md](./store/LISTING.md) — **Explore as guest** demo path + `review@evorios.com` test notes
 
 ## Important
 

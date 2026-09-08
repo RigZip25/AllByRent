@@ -1,6 +1,7 @@
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 import { withoutBlocked } from "./moderation/blockStorage";
 import { loadInAppNotifications, pushInAppNotification } from "./inAppNotifications";
+import { mayDeliverNotification } from "./notificationDelivery";
 import type { Session } from "@supabase/supabase-js";
 
 async function trySendWebPush(input: {
@@ -103,6 +104,7 @@ export async function createNotificationRemote(params: {
   skipLocal?: boolean;
 }): Promise<void> {
   if (!params.skipLocal) {
+    // Local toast respects this device's toggles (also enforced inside pushInAppNotification).
     pushInAppNotification({
       type: params.type === "booking_request" ? "booking_request" : "general",
       title: params.title,
@@ -110,7 +112,16 @@ export async function createNotificationRemote(params: {
       rentalId: params.rentalId,
       listingId: params.listingId,
     });
+    if (
+      !mayDeliverNotification(
+        params.type === "booking_request" ? "booking_request" : "listing_update",
+      )
+    ) {
+      return;
+    }
   }
+
+  // Peer-targeted inserts still go to the server; the recipient's device applies prefs on delivery.
 
   if (!isSupabaseConfigured()) return;
   const supabase = getSupabaseClient();

@@ -652,6 +652,8 @@ export const cs: AppMessages = {
     request: "Žádost",
     requestFallback: "Chat k žádosti",
     tapToDiscuss: "Klepni pro domluvu vyzvednutí",
+    unread: "Nepřečtené",
+    unreadCount: (n) => (n === 1 ? "1 nepřečtená" : `${n} nepřečtených`),
   },
   howItWorks: {
     title: (appName) => `Jak funguje ${appName}`,
@@ -780,6 +782,8 @@ export const cs: AppMessages = {
     quickTipsHint: "Klepni na otázku — odpověď se rozbalí",
     chatPrompt: (mascot) =>
       `Nenašli jsi to ve FAQ? Zeptejte se ${mascot} níže — napište nebo klepněte na mikrofon.`,
+    aiDisclaimer:
+      "Odpovědi AI můžou být chybné. Pro pravidla použijte FAQ. Ceny a detaily bereme z dat vaší garáže, když jsou k dispozici.",
     guidesTitle: "Rychlé starty",
     guidesHint: "Skočte rovnou na správné místo v aplikaci",
     guidesHowTitle: (appName) => `Jak funguje ${appName}`,
@@ -6386,6 +6390,9 @@ export const cs: AppMessages = {
       "Chat a platby držte v aplikaci. WhatsApp, Telegram, předávání telefonu a platby mimo (Venmo, Zelle, Cash App atd.) nejsou povolené.",
     moderationVerifyFailed:
       "Zprávu se nepodařilo ověřit. Zkus to prosím za chvíli znovu.",
+    sendFailed: "Zpráva nedorazila. Je zpět v poli — klepni na Odeslat a zkus to znovu.",
+    sendFailedShort: "Nedoručeno",
+    sending: "Odesílám…",
   },
   onboarding: {
     roleChoice: {

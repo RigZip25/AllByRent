@@ -628,6 +628,8 @@ export const en: AppMessages = {
     request: "Request",
     requestFallback: "Request chat",
     tapToDiscuss: "Tap to discuss pickup details",
+    unread: "Unread",
+    unreadCount: (n) => (n === 1 ? "1 unread" : `${n} unread`),
   },
   howItWorks: {
     title: (appName) => `How ${appName} works`,
@@ -756,6 +758,8 @@ export const en: AppMessages = {
     quickTipsHint: "Tap a question to expand the answer",
     chatPrompt: (mascot) =>
       `Didn't find it in FAQ? Ask ${mascot} below — type or tap the mic.`,
+    aiDisclaimer:
+      "AI answers can be wrong. Prefer FAQ for policy. Listing prices and details come from your garage data when available.",
     guidesTitle: "Quick starts",
     guidesHint: "Jump to the right place in the app",
     guidesHowTitle: (appName) => `How ${appName} works`,
@@ -6350,6 +6354,9 @@ export const en: AppMessages = {
       "Keep chat and payments in the app. WhatsApp, Telegram, phone-number handoffs, and pay-outside links (Venmo, Zelle, Cash App, etc.) aren’t allowed.",
     moderationVerifyFailed:
       "Couldn't verify this message. Please try again in a moment.",
+    sendFailed: "Message wasn’t delivered. It’s back in the box — tap Send to retry.",
+    sendFailedShort: "Not delivered",
+    sending: "Sending…",
   },
   onboarding: {
     roleChoice: {

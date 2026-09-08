@@ -10,6 +10,7 @@ import { isAnthropicConfigured } from "../../lib/anthropicClient";
 import { findLocalRentanoAnswer, queryLooksNonEnglish } from "../../lib/rentanoLocalAnswer";
 import { sendRentanoMessage, type RentanoChatTurn } from "../../lib/rentanoChatApi";
 import type { RentanoRequestContext } from "../../lib/rentanoPrompt";
+import { buildListingAiContext } from "../../lib/listingAiContext";
 
 const PRIMARY_GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -120,7 +121,16 @@ export function RentanoChatPanel({
           return;
         }
 
-        const reply = await sendRentanoMessage(historyForApi, apiContext);
+        const groundedContext: RentanoRequestContext = {
+          ...apiContext,
+          listingContext:
+            apiContext.listingContext ??
+            buildListingAiContext({
+              userId: apiContext.userId,
+              draft: null,
+            }),
+        };
+        const reply = await sendRentanoMessage(historyForApi, groundedContext);
         setMessages((prev) => [...prev, { id: nextId(), role: "assistant", content: reply }]);
       } catch (err) {
         const message =
@@ -184,6 +194,12 @@ export function RentanoChatPanel({
         <p className="mb-2 text-center text-[11px] font-medium uppercase tracking-wide text-[#9CA3AF]">
           {stepLabel}
           {apiContext.stepName ? ` · ${apiContext.stepName}` : ""}
+        </p>
+      ) : null}
+
+      {configured ? (
+        <p className="mb-2 rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-[11px] leading-snug text-amber-950">
+          {t.mrEvorios.aiDisclaimer}
         </p>
       ) : null}
 

@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import orchestratorRun from "@allbyrent/server/routes/orchestrator/run";
+import { isAgentScaffoldEnabled } from "@allbyrent/server/lib/agentScaffold";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 
@@ -33,6 +34,14 @@ function routeKey(req: VercelRequest): string {
 }
 
 export default function handler(req: VercelRequest, res: VercelResponse): unknown {
+  if (!isAgentScaffoldEnabled()) {
+    res.status(410).json({
+      ok: false,
+      error: "Agent scaffolding is disabled in this environment.",
+      code: "agent_scaffold_disabled",
+    });
+    return;
+  }
   const key = routeKey(req);
   const routeHandler = ROUTES[key];
   if (!routeHandler) {

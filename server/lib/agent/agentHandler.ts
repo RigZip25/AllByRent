@@ -3,6 +3,7 @@ import { applyCors, handleOptions } from "../cors";
 import { withApiErrorHandling } from "../safeHandler";
 import { requireAgentKey } from "../agentAuth";
 import { logAgentAction } from "../agentLogs";
+import { isAgentScaffoldEnabled } from "../agentScaffold";
 
 export function agentHandler(params: {
   action: string;
@@ -11,6 +12,15 @@ export function agentHandler(params: {
   return withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
     if (handleOptions(req, res)) return;
     applyCors(res, typeof req.headers.origin === "string" ? req.headers.origin : undefined);
+
+    if (!isAgentScaffoldEnabled()) {
+      res.status(410).json({
+        ok: false,
+        error: "Agent scaffolding is disabled in this environment.",
+        code: "agent_scaffold_disabled",
+      });
+      return;
+    }
 
     const auth = requireAgentKey(req);
     if (!auth.ok) {

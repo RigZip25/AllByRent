@@ -628,6 +628,8 @@ export const es: AppMessages = {
     request: "Solicitud",
     requestFallback: "Chat de solicitud",
     tapToDiscuss: "Toca para hablar de los detalles de recogida",
+    unread: "Sin leer",
+    unreadCount: (n) => (n === 1 ? "1 sin leer" : `${n} sin leer`),
   },
   howItWorks: {
     title: (appName) => `Cómo funciona ${appName}`,
@@ -756,6 +758,8 @@ export const es: AppMessages = {
     quickTipsHint: "Toca una pregunta para ver la respuesta",
     chatPrompt: (mascot) =>
       `¿No lo encontraste en el FAQ? Pregunta a ${mascot} abajo — escribe o toca el micro.`,
+    aiDisclaimer:
+      "Las respuestas de la IA pueden fallar. Prefiere el FAQ para políticas. Precios y detalles salen de los datos de tu garaje cuando están disponibles.",
     guidesTitle: "Empezar rápido",
     guidesHint: "Salta al sitio correcto de la app",
     guidesHowTitle: (appName) => `Cómo funciona ${appName}`,
@@ -6372,6 +6376,9 @@ export const es: AppMessages = {
       "Mantén el chat y los pagos en la app. No se permiten WhatsApp, Telegram, pasar el teléfono ni pagar fuera (Venmo, Zelle, Cash App, etc.).",
     moderationVerifyFailed:
       "No se pudo verificar este mensaje. Inténtalo de nuevo en un momento.",
+    sendFailed: "El mensaje no se entregó. Volvió al cuadro — toca Enviar para reintentar.",
+    sendFailedShort: "No entregado",
+    sending: "Enviando…",
   },
   onboarding: {
     roleChoice: {

@@ -58,4 +58,6 @@ export {
   resolveEndedOpenSales,
   clearOpenSaleCartLines,
   syncOpenSaleLotPayFromRemote,
+  syncOpenSaleBansFromRemote,
+  mergeOpenSaleBansFromRemote,
 } from "./bidCart";

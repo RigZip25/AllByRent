@@ -119,7 +119,6 @@ export function ProfileScreen({
   onOpenNotifications,
   onOpenCoHosts,
   onOpenPersonalInfo,
-  onOpenAgentActivity: _onOpenAgentActivity,
   onViewPublicProfile,
   onRequireAuth,
   onSignedOut,
@@ -131,7 +130,6 @@ export function ProfileScreen({
   onOpenNotifications: () => void;
   onOpenCoHosts?: () => void;
   onOpenPersonalInfo?: (field?: "name" | "phone") => void;
-  onOpenAgentActivity?: () => void;
   onViewPublicProfile?: (userId?: string) => void;
   onRequireAuth?: () => void;
   /** After session ends — leave account screens (typically Home as guest). */

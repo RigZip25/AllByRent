@@ -7,6 +7,7 @@ import { syncUserProfileFromAuth } from "../lib/userProfileStorage";
 import { fetchRemoteProfile } from "../lib/supabaseProfile";
 import { syncBlocksFromRemote } from "../lib/moderation/blockStorage";
 import { bindGarageBidderToUser } from "../lib/garageAuctionState";
+import { syncOpenSaleBansFromRemote } from "../lib/openSale";
 
 type AuthContextValue = {
   configured: boolean;
@@ -50,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!mounted) return;
         setSession(data.session);
         bindGarageBidderToUser(data.session?.user?.id ?? null);
+        if (data.session?.user?.id) void syncOpenSaleBansFromRemote();
       })
       .finally(() => {
         if (!mounted) return;
@@ -59,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const sub = onAuthStateChange((_event, next) => {
       setSession(next);
       bindGarageBidderToUser(next?.user?.id ?? null);
+      if (next?.user?.id) void syncOpenSaleBansFromRemote();
     });
 
     /** After Stripe Account Link (or any leave/return), rehydrate session from storage. */

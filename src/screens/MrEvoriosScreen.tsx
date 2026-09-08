@@ -16,6 +16,7 @@ import { APP_NAME, MASCOT_NAME } from "../lib/brand";
 import { useAppModeLabels, useMessages } from "../lib/i18n/react";
 import { getAppMode } from "../lib/appMode";
 import { useAuth } from "../hooks/AuthProvider";
+import { buildListingAiContext } from "../lib/listingAiContext";
 import rentanoImg from "../imports/No_back_rentano.webp";
 
 const GREEN = "#0D5C3A";
@@ -221,6 +222,7 @@ export function MrEvoriosScreen({
       appMode,
       userRole: appMode === "earn" ? ("host" as const) : ("renter" as const),
       userId: auth.userId ?? undefined,
+      listingContext: buildListingAiContext({ userId: auth.userId }),
     }),
     [auth.userId, appMode],
   );

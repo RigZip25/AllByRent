@@ -51,6 +51,8 @@ export type EvoriosRequestContext = {
   userRole?: "host" | "renter";
   userId?: string;
   draftSummary?: string;
+  /** Published / focused listing facts for grounded answers. */
+  listingContext?: string;
 };
 
 const LISTING_STEP_HINTS: Record<number, string> = {
@@ -94,6 +96,7 @@ export function buildEvoriosUserContext(context: EvoriosRequestContext): string 
   }
   if (context.userRole) lines.push(`Role: ${context.userRole}`);
   if (context.draftSummary) lines.push(`Listing draft:\n${context.draftSummary}`);
+  if (context.listingContext) lines.push(`Live listing data:\n${context.listingContext}`);
   const stepGuide = buildListingStepGuidance(context.step);
   if (stepGuide) lines.push(stepGuide);
   return lines.join("\n");

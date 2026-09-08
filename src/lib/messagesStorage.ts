@@ -15,6 +15,10 @@ export type ChatMessage = {
   recipientId: string;
   body: string;
   createdAt: string;
+  /** Optimistic send state — omitted once confirmed. */
+  sendStatus?: "pending" | "failed";
+  /** Client temp id used to dedupe when the server row arrives. */
+  clientId?: string;
 };
 
 export type ChatThreadKind = "rental" | "listing" | "request";
@@ -30,6 +34,7 @@ export type ChatThreadSummary = {
   preview: string;
   updatedAt: string;
   messageCount: number;
+  unreadCount?: number;
 };
 
 type RemoteMessageRow = {
@@ -44,6 +49,8 @@ type RemoteMessageRow = {
 };
 
 const LOCAL_KEY = "abr_chat_messages_v1";
+const THREAD_READS_KEY = "abr_chat_thread_reads_v1";
+const CHAT_UNREAD_EVENT = "evorios-chat-unread";
 
 function safeUuid(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -54,6 +61,69 @@ function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     value,
   );
+}
+
+function loadThreadReads(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem(THREAD_READS_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, string>;
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveThreadReads(map: Record<string, string>): void {
+  try {
+    localStorage.setItem(THREAD_READS_KEY, JSON.stringify(map));
+    window.dispatchEvent(new Event(CHAT_UNREAD_EVENT));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function markChatThreadRead(threadKey: string, at = new Date().toISOString()): void {
+  const map = loadThreadReads();
+  map[threadKey] = at;
+  saveThreadReads(map);
+}
+
+export function getChatThreadLastReadAt(threadKey: string): string | null {
+  return loadThreadReads()[threadKey] ?? null;
+}
+
+export function countUnreadInThread(
+  threadKey: string,
+  viewerId: string | null | undefined,
+): number {
+  if (!viewerId) return 0;
+  const list = loadChatMessagesLocal(threadKey);
+  const lastRead = getChatThreadLastReadAt(threadKey);
+  return list.filter((m) => {
+    if (m.senderId === viewerId) return false;
+    if (m.sendStatus === "pending" || m.sendStatus === "failed") return false;
+    if (!lastRead) return true;
+    return m.createdAt > lastRead;
+  }).length;
+}
+
+export function countUnreadChatMessages(viewerId: string | null | undefined): number {
+  if (!viewerId) return 0;
+  return listChatThreadsLocal(viewerId).reduce(
+    (sum, thread) => sum + (thread.unreadCount ?? countUnreadInThread(thread.threadKey, viewerId)),
+    0,
+  );
+}
+
+export function onChatUnreadChange(cb: () => void): () => void {
+  const handler = () => cb();
+  window.addEventListener(CHAT_UNREAD_EVENT, handler);
+  window.addEventListener("storage", handler);
+  return () => {
+    window.removeEventListener(CHAT_UNREAD_EVENT, handler);
+    window.removeEventListener("storage", handler);
+  };
 }
 
 export function rentalThreadKey(rentalId: string): string {
@@ -140,11 +210,61 @@ export function appendChatMessageLocal(message: ChatMessage): void {
   const key = threadKeyForMessage(message);
   const list = Array.isArray(all[key]) ? all[key] : [];
   if (list.some((m) => m.id === message.id)) {
-    all[key] = list;
+    all[key] = list.map((m) =>
+      m.id === message.id ? { ...m, ...message, sendStatus: undefined } : m,
+    );
   } else {
-    all[key] = [...list, message].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    // Replace optimistic bubble when the server row (or twin) arrives.
+    const optimisticIdx = list.findIndex(
+      (m) =>
+        (message.clientId && m.clientId === message.clientId) ||
+        (m.sendStatus === "pending" &&
+          m.senderId === message.senderId &&
+          m.body === message.body &&
+          Math.abs(new Date(m.createdAt).getTime() - new Date(message.createdAt).getTime()) <
+            120_000),
+    );
+    if (optimisticIdx >= 0) {
+      const next = [...list];
+      next[optimisticIdx] = { ...message, sendStatus: undefined, clientId: undefined };
+      all[key] = next.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    } else {
+      all[key] = [...list, message].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    }
   }
   saveLocalAll(all);
+  window.dispatchEvent(new Event(CHAT_UNREAD_EVENT));
+}
+
+export function updateChatMessageLocal(
+  threadKey: string,
+  messageId: string,
+  patch: Partial<ChatMessage>,
+): void {
+  const all = loadLocalAll();
+  const key =
+    threadKey.startsWith("rental:") ||
+    threadKey.startsWith("listing:") ||
+    threadKey.startsWith("request:")
+      ? threadKey
+      : rentalThreadKey(threadKey);
+  const list = Array.isArray(all[key]) ? all[key] : [];
+  all[key] = list.map((m) => (m.id === messageId ? { ...m, ...patch } : m));
+  saveLocalAll(all);
+}
+
+export function removeChatMessageLocal(threadKey: string, messageId: string): void {
+  const all = loadLocalAll();
+  const key =
+    threadKey.startsWith("rental:") ||
+    threadKey.startsWith("listing:") ||
+    threadKey.startsWith("request:")
+      ? threadKey
+      : rentalThreadKey(threadKey);
+  const list = Array.isArray(all[key]) ? all[key] : [];
+  all[key] = list.filter((m) => m.id !== messageId);
+  saveLocalAll(all);
+  window.dispatchEvent(new Event(CHAT_UNREAD_EVENT));
 }
 
 function rowToMessage(row: RemoteMessageRow): ChatMessage {
@@ -379,6 +499,7 @@ export function listChatThreadsLocal(viewerId: string | null): ChatThreadSummary
         preview: last.body,
         updatedAt: last.createdAt,
         messageCount: list.length,
+        unreadCount: countUnreadInThread(key, viewerId),
       });
     } else if (key.startsWith("request:")) {
       const parts = key.split(":");
@@ -391,6 +512,7 @@ export function listChatThreadsLocal(viewerId: string | null): ChatThreadSummary
         preview: last.body,
         updatedAt: last.createdAt,
         messageCount: list.length,
+        unreadCount: countUnreadInThread(key, viewerId),
       });
     } else {
       const rentalId = key.replace(/^rental:/, "") || last.rentalId || "";
@@ -402,6 +524,7 @@ export function listChatThreadsLocal(viewerId: string | null): ChatThreadSummary
         preview: last.body,
         updatedAt: last.createdAt,
         messageCount: list.length,
+        unreadCount: countUnreadInThread(key, viewerId),
       });
     }
   }

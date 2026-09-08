@@ -333,3 +333,51 @@ export async function pushOpenSaleLotResultRemote(result: OpenSaleLotPayRemote):
     { onConflict: "event_id,listing_id" },
   );
 }
+
+/** Pull the signed-in user's Open Sale ban into a local map entry. */
+export async function fetchOwnOpenSaleBanRemote(): Promise<{
+  bidderId: string;
+  bannedUntil: string;
+} | null> {
+  if (!supabaseReady()) return null;
+  const supabase = getSupabaseClient()!;
+  const { data: sessionData } = await supabase.auth.getSession();
+  const userId = sessionData.session?.user?.id;
+  if (!userId || !isUuid(userId)) return null;
+  const { data, error } = await supabase
+    .from("open_sale_bans")
+    .select("bidder_id, banned_until")
+    .eq("bidder_id", userId)
+    .maybeSingle();
+  if (error || !data?.banned_until) return null;
+  return { bidderId: data.bidder_id as string, bannedUntil: data.banned_until as string };
+}
+
+/** Host pushes a missed-payment ban to the open_sale_bans table via API. */
+export async function pushOpenSaleBanRemote(params: {
+  bidderId: string;
+  days?: number;
+  reason?: string;
+}): Promise<void> {
+  if (!supabaseReady() || !isUuid(params.bidderId)) return;
+  const supabase = getSupabaseClient()!;
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData.session?.access_token;
+  if (!token) return;
+  try {
+    await fetch("/api/open-sale/ban", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        bidderId: params.bidderId,
+        days: params.days ?? 30,
+        reason: params.reason ?? "missed_payment",
+      }),
+    });
+  } catch {
+    /* local ban still applies; cron/admin may catch up */
+  }
+}
