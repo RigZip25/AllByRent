@@ -1,0 +1,269 @@
+@import "./tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  font-family: var(--rz-font-body);
+  font-optical-sizing: auto;
+  background:
+    radial-gradient(1200px 700px at 50% -10%, #243044 0%, transparent 55%),
+    radial-gradient(800px 500px at 100% 20%, rgba(242, 185, 13, 0.08), transparent 50%),
+    linear-gradient(180deg, #0e1218 0%, var(--rz-ink) 40%, #07090c 100%);
+  color: var(--rz-mist);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  background: none;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.app-shell {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.phone {
+  width: min(100%, var(--rz-phone-max));
+  min-height: min(100dvh - 32px, 920px);
+  height: min(100dvh - 32px, 920px);
+  border-radius: 28px;
+  overflow: hidden;
+  position: relative;
+  background: var(--rz-ink);
+  border: 1px solid var(--rz-line-strong);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 40px 80px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+}
+
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.screen-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--rz-font-display);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.brand-mark__icon {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+}
+
+.brand-mark__text {
+  font-size: 1.35rem;
+}
+
+.brand-mark__text span {
+  color: var(--rz-accent);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 22px;
+  border-radius: var(--rz-radius-md);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition:
+    transform 180ms var(--rz-ease),
+    background 180ms var(--rz-ease),
+    opacity 180ms var(--rz-ease),
+    border-color 180ms var(--rz-ease);
+}
+
+.btn:active {
+  transform: scale(0.985);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn--primary {
+  background: var(--rz-accent);
+  color: var(--rz-ink);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: #ffc933;
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--rz-mist);
+  border: 1px solid var(--rz-line-strong);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  border-color: rgba(232, 238, 245, 0.4);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.field {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border-radius: var(--rz-radius-md);
+  border: 1px solid var(--rz-line-strong);
+  background: rgba(255, 255, 255, 0.03);
+  outline: none;
+  transition: border-color 160ms var(--rz-ease);
+}
+
+.field:focus {
+  border-color: var(--rz-accent);
+}
+
+.muted {
+  color: var(--rz-mute);
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rz-accent);
+}
+
+.h1 {
+  font-family: var(--rz-font-display);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+  margin: 0;
+}
+
+.h2 {
+  font-family: var(--rz-font-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0;
+}
+
+@keyframes rz-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rz-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rz-beam {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.rise {
+  animation: rz-rise 700ms var(--rz-ease) both;
+}
+
+.rise-delay-1 {
+  animation-delay: 80ms;
+}
+.rise-delay-2 {
+  animation-delay: 160ms;
+}
+.rise-delay-3 {
+  animation-delay: 240ms;
+}
+.rise-delay-4 {
+  animation-delay: 320ms;
+}
+
+@media (max-width: 520px) {
+  .app-shell {
+    padding: 0;
+  }
+
+  .phone {
+    width: 100%;
+    height: 100dvh;
+    min-height: 100dvh;
+    border-radius: 0;
+    border: 0;
+    box-shadow: none;
+  }
+}
