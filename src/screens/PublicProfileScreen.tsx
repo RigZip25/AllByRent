@@ -12,6 +12,8 @@ import { getListingDisplayTitle } from "../lib/listingQr";
 import { categoryEmoji } from "../lib/listingCardMeta";
 import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
 import { useAuth } from "../hooks/AuthProvider";
+import { ModerationMenu } from "../components/moderation/ModerationMenu";
+import { isUserBlocked, onBlocksChanged } from "../lib/moderation/blockStorage";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -91,7 +93,7 @@ export function PublicProfileScreen({
   onOpenProfileSettings?: () => void;
 }) {
   const auth = useAuth();
-  const { common, profileDeep } = useMessages();
+  const { common, moderation, profileDeep } = useMessages();
   const t = profileDeep.publicProfile;
   const own = loadUserProfile();
   const ownUserId = (auth.userId ?? own.id).trim();
@@ -103,6 +105,12 @@ export function PublicProfileScreen({
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [storeLiveByHost, setStoreLiveByHost] = useState<Record<string, boolean>>({});
   const [storeLiveReady, setStoreLiveReady] = useState(isSelf);
+  const [blocked, setBlocked] = useState(() => isUserBlocked(userId));
+
+  useEffect(() => {
+    setBlocked(isUserBlocked(userId));
+    return onBlocksChanged(() => setBlocked(isUserBlocked(userId)));
+  }, [userId]);
 
   useEffect(() => {
     let mounted = true;
@@ -250,9 +258,12 @@ export function PublicProfileScreen({
         <button type="button" onClick={onBack} className="text-[15px] font-semibold" style={{ color: GREEN }}>
           {common.back}
         </button>
-        <h1 className="text-[18px] font-bold" style={{ color: GREEN }}>
+        <h1 className="flex-1 truncate text-[18px] font-bold" style={{ color: GREEN }}>
           {isSelf ? t.yourPublicProfile : profile.displayName}
         </h1>
+        {isSelf ? null : (
+          <ModerationMenu targetKind="profile" targetId={userId} reportedUserId={userId} />
+        )}
       </header>
 
       <div className="screen-scroll flex-1 px-4 pb-6">
@@ -305,7 +316,16 @@ export function PublicProfileScreen({
           </div>
         </div>
 
-        {profile.reviews.length > 0 ? (
+        {blocked ? (
+          <p
+            className="mt-4 rounded-2xl border bg-white p-4 text-[14px] leading-relaxed text-gray-600"
+            style={{ borderColor: BORDER }}
+          >
+            {moderation.blockedNotice}
+          </p>
+        ) : null}
+
+        {profile.reviews.length > 0 && !blocked ? (
           <>
             <h3 className="mb-2 mt-5 text-[13px] font-semibold uppercase tracking-wide text-gray-400">
               {t.reviews}
@@ -337,7 +357,7 @@ export function PublicProfileScreen({
           </>
         ) : null}
 
-        {profile.listings.length > 0 ? (
+        {profile.listings.length > 0 && !blocked ? (
           <>
             <h3 className="mb-2 mt-5 text-[13px] font-semibold uppercase tracking-wide text-gray-400">
               {t.listings}

@@ -198,7 +198,7 @@ export const faq: AppMessages["faq"] = {
     },
     "report-issue": {
       q: "Jak nahlásím uživatele nebo nabídku?",
-      a: "Napište na support@evorios.com odkaz na nabídku nebo jméno souseda — každé nahlášení prověřujeme. Při nouzi nejdřív volejte místní úřady. U škod uveďte fotky a data.",
+      a: "Klepněte na “⋯” u nabídky nebo profilu, případně na vlaječku u zprávy, vyberte důvod a odešlete — každé nahlášení čte moderátor. Ve stejné nabídce člověka zablokujete: jeho nabídky a zprávy zmizí a nemůže vám psát. Napsat můžete i na support@evorios.com. Při nouzi nejdřív volejte místní úřady. U škod uveďte fotky a data.",
     },
     "app-update": {
       q: "Aplikace chtěla aktualizaci — co mám udělat?",

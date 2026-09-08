@@ -5,6 +5,7 @@ import { resolveSessionUserEmail } from "../lib/authEmail";
 import { AUTH_CALLBACK_RESUME_KEY, completeAuthCallbackFromUrl, onAuthStateChange } from "../lib/auth";
 import { syncUserProfileFromAuth } from "../lib/userProfileStorage";
 import { fetchRemoteProfile } from "../lib/supabaseProfile";
+import { syncBlocksFromRemote } from "../lib/moderation/blockStorage";
 import { bindGarageBidderToUser } from "../lib/garageAuctionState";
 
 type AuthContextValue = {
@@ -139,6 +140,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       userId: user.id,
       userEmail,
     });
+
+    // The block list must follow the account, not the device.
+    void syncBlocksFromRemote(user.id);
 
     void fetchRemoteProfile(user.id).then((remote) => {
       if (!remote) return;

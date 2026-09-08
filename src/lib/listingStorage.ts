@@ -1,4 +1,5 @@
 import type { ListingDraft } from "../screens/listing/types";
+import { withoutBlocked } from "./moderation/blockStorage";
 import { WIZARD_FLOW_VERSION } from "../screens/listing/types";
 import {
   canonicalShelf,
@@ -1087,11 +1088,13 @@ export function isListingBrowsable(
 }
 
 async function filterNeighborVisible(listings: ListingDraft[]): Promise<ListingDraft[]> {
-  const hostIds = listings
+  // A blocked neighbour disappears from browse before anything else is decided.
+  const visible = withoutBlocked(listings, (l) => l.hostId);
+  const hostIds = visible
     .map((l) => l.hostId?.trim() ?? "")
     .filter(Boolean);
   const storeLiveByHost = await fetchStoreLiveByHostIds(hostIds);
-  return listings.filter((l) => isListingBrowsable(l, storeLiveByHost));
+  return visible.filter((l) => isListingBrowsable(l, storeLiveByHost));
 }
 
 export async function fetchActiveListingsForCityRemote(city: string): Promise<ListingDraft[]> {

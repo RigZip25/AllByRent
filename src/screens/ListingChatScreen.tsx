@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import { PeerChatPanel } from "../components/PeerChatPanel";
+import { ModerationMenu } from "../components/moderation/ModerationMenu";
 import { getPublishedListingById } from "../lib/listingStorage";
 import { getListingDisplayTitle } from "../lib/listingQr";
 import { BRAND_GREEN } from "../lib/brand";
@@ -40,6 +41,12 @@ export function ListingChatScreen({ listingId, peerId, onBack, onRequireAuth }: 
             </h1>
             <p className="text-[12px] text-gray-500">{peerChat.listingChatSubtitle}</p>
           </div>
+          <ModerationMenu
+            targetKind="profile"
+            targetId={peerId}
+            targetThreadKey={listingId}
+            reportedUserId={peerId}
+          />
         </div>
       </header>
 

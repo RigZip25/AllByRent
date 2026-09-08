@@ -2501,6 +2501,46 @@ export type AppMessages = {
   signInPrompt: {
     cta: string;
   };
+  moderation: {
+    reportListing: string;
+    reportMessage: string;
+    reportUser: string;
+    reportRequest: string;
+    blockUser: string;
+    unblockUser: string;
+    blockedBadge: string;
+    blockedNotice: string;
+    blockConfirmTitle: string;
+    blockConfirmBody: string;
+    unblockConfirmBody: string;
+    sheetTitle: string;
+    sheetSubtitle: string;
+    reasonLabel: string;
+    detailsLabel: string;
+    detailsPlaceholder: string;
+    detailsRequired: string;
+    submit: string;
+    submitting: string;
+    cancel: string;
+    thanksTitle: string;
+    thanksBody: string;
+    alsoBlock: string;
+    alreadyReported: string;
+    signInNeeded: string;
+    reasons: {
+      harassment: string;
+      scam: string;
+      off_platform: string;
+      sexual: string;
+      hate: string;
+      violence: string;
+      illegal_item: string;
+      not_as_described: string;
+      spam: string;
+      other: string;
+    };
+    moreActionsAria: string;
+  };
   peerChat: {
     title: string;
     tip: (mascotHandle: string) => string;
