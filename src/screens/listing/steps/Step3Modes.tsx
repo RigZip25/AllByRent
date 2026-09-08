@@ -128,10 +128,12 @@ function MoneyInput({
   value,
   onChange,
   onBlur,
+  id,
 }: {
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
+  id?: string;
 }) {
   const symbol = currencySymbol();
   return (
@@ -140,6 +142,7 @@ function MoneyInput({
         {symbol}
       </span>
       <input
+        id={id}
         type="text"
         inputMode="decimal"
         autoComplete="off"
@@ -324,11 +327,18 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
     if (!draft.modes.rent || draft.category.trim() !== "Vehicles") return;
     setDraft((current) => {
       const specs = current.categorySpecs ?? {};
-      if ((specs.includedMilesPerDay ?? "").trim()) return current;
-      return {
-        ...current,
-        categorySpecs: { ...specs, includedMilesPerDay: "250" },
-      };
+      const next = { ...specs };
+      let changed = false;
+      if (!(specs.includedMilesPerDay ?? "").trim()) {
+        next.includedMilesPerDay = "250";
+        changed = true;
+      }
+      if (!(specs.overagePerMile ?? "").trim()) {
+        next.overagePerMile = "0.35";
+        changed = true;
+      }
+      if (!changed) return current;
+      return { ...current, categorySpecs: next };
     });
   }, [draft.modes.rent, draft.category, setDraft]);
 
@@ -538,8 +548,13 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
         changed = true;
       }
 
-      // Do not auto-enable Rent — that forced QR stickers onto hosts who only wanted Sell.
-      // Validation on Continue requires at least one allowed mode.
+      // Rent-only shelves (e.g. Real Estate): auto-enable rent so Continue is not silently blocked.
+      // Do not auto-enable Rent when Sell/Gift are also allowed — that forced QR onto sell-only hosts.
+      const rentOnly = rules.rent && !rules.sell && !rules.gift;
+      if (rentOnly && !nextModes.rent) {
+        nextModes.rent = true;
+        changed = true;
+      }
 
       return changed ? { ...current, modes: nextModes } : current;
     });
@@ -836,7 +851,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
         ) : null}
       </div>
 
-      <div className="space-y-3">
+      <div id="listing-field-modes" className="space-y-3">
         {visibleModeCards.map((card) => {
           if (card.key === "rent") {
             return (
@@ -883,6 +898,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                           required={periodRateFields.required === "daily"}
                         />
                         <MoneyInput
+                          id="listing-field-daily-rate"
                           value={draft.pricing.dailyRate}
                           onChange={(value) => updatePricing("dailyRate", value)}
                         />
@@ -900,6 +916,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                           required={periodRateFields.required === "weekly"}
                         />
                         <MoneyInput
+                          id="listing-field-weekly-rate"
                           value={draft.pricing.weeklyRate}
                           onChange={(value) => updatePricing("weeklyRate", value)}
                         />
@@ -917,6 +934,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                           required={periodRateFields.required === "monthly"}
                         />
                         <MoneyInput
+                          id="listing-field-monthly-rate"
                           value={draft.pricing.monthlyRate}
                           onChange={(value) => updatePricing("monthlyRate", value)}
                         />
@@ -924,6 +942,68 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                     ) : null}
                   </AnimatePresence>
 
+                  {draft.modes.rent && draft.category.trim() === "Vehicles" ? (
+                    <motion.div
+                      layout="position"
+                      id="listing-field-mileage-policy"
+                      className="rounded-2xl border border-gray-100 bg-white p-4"
+                    >
+                      <p className="text-sm font-semibold text-gray-900">
+                        {modesCopy.mileagePolicyTitle}
+                      </p>
+                      <p className="mt-0.5 text-xs text-gray-500">{modesCopy.mileagePolicyBody}</p>
+                      {!(draft.vehicleExtras?.unlimitedMiles?.enabled) ? (
+                        <div className="mt-3 space-y-3">
+                          <div>
+                            <FieldLabel label={modesCopy.includedMilesPerDay} required />
+                            <input
+                              id="listing-field-included-miles"
+                              type="number"
+                              min={0}
+                              inputMode="numeric"
+                              className={selectClassName}
+                              value={draft.categorySpecs?.includedMilesPerDay ?? "250"}
+                              placeholder="250"
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                setDraft((c) => ({
+                                  ...c,
+                                  categorySpecs: {
+                                    ...(c.categorySpecs ?? {}),
+                                    includedMilesPerDay: value,
+                                  },
+                                }));
+                              }}
+                            />
+                            <p className="mt-1.5 text-xs text-gray-500">
+                              {modesCopy.includedMilesPerDayHint}
+                            </p>
+                          </div>
+                          <div>
+                            <FieldLabel label={modesCopy.overagePerMile} required />
+                            <MoneyInput
+                              id="listing-field-overage-per-mile"
+                              value={draft.categorySpecs?.overagePerMile ?? "0.35"}
+                              onChange={(value) => {
+                                setDraft((c) => ({
+                                  ...c,
+                                  categorySpecs: {
+                                    ...(c.categorySpecs ?? {}),
+                                    overagePerMile: value,
+                                  },
+                                }));
+                              }}
+                            />
+                            <p className="mt-1.5 text-xs text-gray-500">
+                              {modesCopy.overagePerMileHint}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-xs text-gray-500">
+                          {modesCopy.extraUnlimitedMilesHint}
+                        </p>
+                      )}
                   {showLongTermOption ? (
                   <motion.div layout="position" className="rounded-2xl border border-gray-100 bg-white p-4">
                     <div className="flex items-start justify-between gap-3">
@@ -971,6 +1051,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                           <div className="mt-3">
                             <FieldLabel label={modesCopy.longTermMonthlyRate} required />
                             <MoneyInput
+                              id="listing-field-long-term-monthly-rate"
                               value={draft.pricing.longTermMonthlyRate ?? ""}
                               onChange={(value) => updatePricing("longTermMonthlyRate", value)}
                             />
@@ -1007,6 +1088,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                   <motion.div layout="position">
                     <FieldLabel label={modesCopy.securityDeposit} required />
                     <MoneyInput
+                      id="listing-field-security-deposit"
                       value={draft.pricing.securityDeposit}
                       onChange={(value) => updatePricing("securityDeposit", value)}
                     />
@@ -1256,6 +1338,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                           <label className="block text-xs font-semibold uppercase tracking-wide text-violet-950">
                             {modesCopy.wheelCountLabel}
                             <input
+                              id="listing-field-wheel-count"
                               type="number"
                               inputMode="numeric"
                               min={2}
@@ -1280,6 +1363,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                           <label className="block text-xs font-semibold uppercase tracking-wide text-violet-950">
                             {modesCopy.insuranceOwnerProofEmail}
                             <input
+                              id="listing-field-insurance-email"
                               type="email"
                               className={`${selectClassName} mt-1.5`}
                               value={draft.handoff.insuranceOwnerProofEmail ?? ""}
@@ -1653,65 +1737,6 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                     </motion.div>
                   ) : null}
 
-                  {draft.modes.rent && draft.category.trim() === "Vehicles" ? (
-                    <motion.div
-                      layout="position"
-                      className="rounded-2xl border border-gray-100 bg-white p-4"
-                    >
-                      <p className="text-sm font-semibold text-gray-900">
-                        {modesCopy.mileagePolicyTitle}
-                      </p>
-                      <p className="mt-0.5 text-xs text-gray-500">{modesCopy.mileagePolicyBody}</p>
-                      {!(draft.vehicleExtras?.unlimitedMiles?.enabled) ? (
-                        <div className="mt-3 space-y-3">
-                          <div>
-                            <FieldLabel label={modesCopy.includedMilesPerDay} required />
-                            <input
-                              type="number"
-                              min={0}
-                              inputMode="numeric"
-                              className={selectClassName}
-                              value={draft.categorySpecs?.includedMilesPerDay ?? "250"}
-                              placeholder="250"
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                setDraft((c) => ({
-                                  ...c,
-                                  categorySpecs: {
-                                    ...(c.categorySpecs ?? {}),
-                                    includedMilesPerDay: value,
-                                  },
-                                }));
-                              }}
-                            />
-                            <p className="mt-1.5 text-xs text-gray-500">
-                              {modesCopy.includedMilesPerDayHint}
-                            </p>
-                          </div>
-                          <div>
-                            <FieldLabel label={modesCopy.overagePerMile} required />
-                            <MoneyInput
-                              value={draft.categorySpecs?.overagePerMile ?? ""}
-                              onChange={(value) => {
-                                setDraft((c) => ({
-                                  ...c,
-                                  categorySpecs: {
-                                    ...(c.categorySpecs ?? {}),
-                                    overagePerMile: value,
-                                  },
-                                }));
-                              }}
-                            />
-                            <p className="mt-1.5 text-xs text-gray-500">
-                              {modesCopy.overagePerMileHint}
-                            </p>
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="mt-2 text-xs text-gray-500">
-                          {modesCopy.extraUnlimitedMilesHint}
-                        </p>
-                      )}
                     </motion.div>
                   ) : null}
 
@@ -1994,6 +2019,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                 <motion.div layout="position">
                   <FieldLabel label={modesCopy.salePrice} required />
                   <MoneyInput
+                    id="listing-field-sale-price"
                     value={draft.pricing.salePrice}
                     onChange={(value) => updatePricing("salePrice", value)}
                     onBlur={commitSalePrice}

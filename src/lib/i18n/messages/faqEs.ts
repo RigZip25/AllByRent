@@ -70,7 +70,7 @@ export const faq: AppMessages["faq"] = {
     },
     "pickup-delivery": {
       q: "¿Cómo funcionan la recogida y la entrega?",
-      a: "Los anuncios nuevos empiezan con valores por defecto razonables para el barrio (horario entre semana en el porche). Después de publicar, abre el anuncio desde Mi hogar → Edición completa (o ediciones rápidas en la pantalla de detalle) para configurar recogida en persona / sin contacto y kilómetros y tarifas de entrega. La dirección exacta se comparte con el inquilino confirmado tras la reserva.",
+      a: "Los anuncios nuevos incluyen recogida y disponibilidad en el paso Detalles (horario de porche entre semana por defecto). Configura recogida en persona / sin contacto y entrega (km y tarifas) antes de publicar. La dirección exacta se comparte con un inquilino confirmado tras la reserva.",
     },
     "book-item": {
       q: "¿Cómo alquilo un artículo?",
@@ -94,7 +94,7 @@ export const faq: AppMessages["faq"] = {
     },
     "availability-step5": {
       q: "¿Cómo configuro la disponibilidad o pauso un anuncio?",
-      a: "Abre Mi hogar → toca el anuncio:\\n• Pausar / Reanudar oculta o restaura el artículo en la exploración sin borrarlo.\\n• Edita los horarios de disponibilidad (entre semana / fin de semana) desde la edición rápida o la Edición completa.\\n• Eliminar borra el anuncio para siempre, tanto de tu garaje como del servidor.",
+      a: "En Detalles del asistente (o Mi hogar → Edición completa):\n• Configura horarios de recogida y fechas bloqueadas.\n• Pausar / Reanudar en Mi hogar oculta o restaura el artículo sin borrarlo.\n• Eliminar quita el anuncio de tu garaje y del servidor de forma permanente.",
     },
     "skip-onboarding": {
       q: "¿Puedo saltarme el registro inicial?",

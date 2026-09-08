@@ -254,6 +254,7 @@ export type Step7ReviewProps = StepProps & {
   profileCity: string;
   isPublishing: boolean;
   isEditing?: boolean;
+  publishError?: string | null;
   onPublish: () => void;
   onGoToStep: (step: number) => void;
 };

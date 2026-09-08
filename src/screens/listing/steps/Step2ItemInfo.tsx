@@ -407,9 +407,10 @@ export function Step2ItemInfo({
           onEditPhotos={onEditPhotos}
         />
 
-        <div className="mb-6">
+        <div id="listing-field-title" className="mb-6">
           <FieldLabel label={item.fieldTitle} required />
           <input
+            id="listing-field-title-input"
             type="text"
             maxLength={80}
             value={draft.title}
@@ -536,6 +537,7 @@ export function Step2ItemInfo({
                   <>
                 <FieldLabel label={item.vin} required={vinRequired} />
                 <input
+                  id="listing-field-vin"
                   type="text"
                   inputMode="text"
                   autoCapitalize="characters"
@@ -626,9 +628,10 @@ export function Step2ItemInfo({
             ) : null}
 
             {showSerialField ? (
-            <div>
+            <div id="listing-field-serial-number">
               <FieldLabel label={item.serialNumber} required={serialRequired} />
               <input
+                id="listing-field-serial-number-input"
                 type="text"
                 autoCorrect="off"
                 spellCheck={false}
@@ -755,7 +758,7 @@ export function Step2ItemInfo({
         {!yardSaleListing ? <CategorySpecsFields draft={draft} setDraft={setDraft} /> : null}
 
         {!plantListing ? (
-        <div className="mb-6">
+        <div id="listing-field-condition" className="mb-6">
           <FieldLabel label={item.condition} required />
           <div className="grid grid-cols-2 gap-2">
             {conditionOptions.map((option) => {
@@ -850,13 +853,14 @@ export function Step2ItemInfo({
         </motion.div>
 
         {!plantListing ? (
-        <div className="mb-6">
+        <div id="listing-field-replacement-value" className="mb-6">
           <FieldLabel label={replacementValueLabel} required />
           <div className="relative">
             <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
               {moneySymbol}
             </span>
             <input
+              id="listing-field-replacement-value-input"
               type="number"
               min={0}
               value={draft.replacementValue}

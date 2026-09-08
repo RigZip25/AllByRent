@@ -70,7 +70,7 @@ export const faq: AppMessages["faq"] = {
     },
     "pickup-delivery": {
       q: "How do pickup and delivery work?",
-      a: "New listings start with sensible neighborhood defaults (weekday porch hours). After publish, open the listing from My Garage → Full edit (or quick edits on the detail screen) to set in-person / contactless pickup and delivery miles & fees. Exact address is shared with a confirmed renter after booking.",
+      a: "New listings include pickup and availability on the Details step (weekday porch hours by default). Set in-person / contactless pickup and delivery miles & fees there before publish. Exact address is shared with a confirmed renter after booking.",
     },
     "book-item": {
       q: "How do I rent an item?",
@@ -94,7 +94,7 @@ export const faq: AppMessages["faq"] = {
     },
     "availability-step5": {
       q: "How do I set availability or pause a listing?",
-      a: "Open My Garage → tap the listing:\\n• Pause / Unpause hides or restores the item in browse without deleting it.\\n• Edit availability times (weekdays / weekend) from the detail quick-edit or Full edit.\\n• Delete permanently removes the listing from your garage and the server.",
+      a: "On Details in the listing wizard (or My Garage → Full edit):\\n• Set weekday / weekend pickup hours and blocked dates.\\n• Pause / Unpause from My Garage hides or restores the item in browse without deleting it.\\n• Delete permanently removes the listing from your garage and the server.",
     },
     "skip-onboarding": {
       q: "Can I skip onboarding?",

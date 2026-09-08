@@ -840,6 +840,29 @@ export type AppMessages = {
   listing: {
     stepOf: (step: number, total: number) => string;
     continue: string;
+    validation: {
+      addPhoto: string;
+      pickCategory: string;
+      pickGrade: string;
+      pickSubcategory: string;
+      enterTitle: string;
+      pickCondition: string;
+      enterReplacementValue: string;
+      enterSerial: string;
+      enterVin: string;
+      completeCategorySpecs: string;
+      pickMode: string;
+      enterDailyRate: string;
+      enterWeeklyRate: string;
+      enterMonthlyRate: string;
+      enterSecurityDeposit: string;
+      enterLongTermRate: string;
+      enterSalePrice: string;
+      enterIncludedMiles: string;
+      enterOveragePerMile: string;
+      enterInsuranceEmail: string;
+      enterWheelCount: string;
+    };
     editListing: string;
     goPublicTitle: string;
     howQrWorks: string;
@@ -932,6 +955,8 @@ export type AppMessages = {
       verifyingPhotos: (mascot: string) => string;
       moderationVideoNotListable: string;
       moderationBadVideo: string;
+      clearRejectedPhotos: string;
+      retryWithNewPhotos: string;
     };
     itemInfo: {
       title: string;
@@ -1295,6 +1320,7 @@ export type AppMessages = {
       priceSet: string;
       free: string;
       ratePerDay: (rate: string) => string;
+      ratePerMonth: (rate: string) => string;
       handoffInPerson: string;
       handoffContactless: string;
       handoffHeavy: string;

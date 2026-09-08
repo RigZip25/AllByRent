@@ -8,6 +8,7 @@ import { localizeCategoryLabel } from "../../../lib/i18n/categoryLabels";
 import { useMessages } from "../../../lib/i18n/react";
 import { formatDistanceFromMiles, formatWeightFromLbs } from "../../../lib/regionalDisplay";
 import { isPlantListingSubcategory } from "../categorySpecs";
+import { getCategoryModeRules } from "../listingItemCategories";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F0B429";
@@ -54,29 +55,33 @@ export function Step7Review({
   profileCity,
   isPublishing,
   isEditing = false,
+  publishError = null,
   onPublish,
   onGoToStep,
 }: Step7ReviewProps) {
   const t = useMessages();
   const review = t.listing.review;
   const itemInfo = t.listing.itemInfo;
+  const modeRules = getCategoryModeRules(draft.category, draft.subcategory);
+  const preferMonthlyRate =
+    draft.modes.rent && modeRules.showMonthlyRate && !modeRules.showDailyRate;
 
   const conditionLabel =
     isPlantListingSubcategory(draft.subcategory)
       ? null
       : draft.condition === "new"
-      ? itemInfo.conditionNew
-      : draft.condition === "like_new"
-        ? itemInfo.conditionLikeNew
-        : draft.condition === "good"
-          ? itemInfo.conditionGood
-          : draft.condition === "fair"
-            ? itemInfo.conditionFair
-            : null;
+        ? itemInfo.conditionNew
+        : draft.condition === "like_new"
+          ? itemInfo.conditionLikeNew
+          : draft.condition === "good"
+            ? itemInfo.conditionGood
+            : draft.condition === "fair"
+              ? itemInfo.conditionFair
+              : null;
   const conditionClassName =
     !isPlantListingSubcategory(draft.subcategory) && draft.condition
-    ? CONDITION_STYLE_CLASSES[draft.condition]
-    : null;
+      ? CONDITION_STYLE_CLASSES[draft.condition]
+      : null;
 
   const gradeLabel =
     draft.grade === "professional"
@@ -85,7 +90,6 @@ export function Step7Review({
         ? itemInfo.personal
         : null;
 
-  // Show subcategory + grade when both are set.
   const categoryDetail = [
     draft.subcategory ? localizeCategoryLabel(draft.subcategory) : null,
     gradeLabel,
@@ -108,8 +112,15 @@ export function Step7Review({
           : "";
       parts.push(
         fee
-          ? review.handoffDelivery(formatDistanceFromMiles(miles, undefined, { plus: false }), fee, weight)
-          : review.handoffDeliveryNoFee(formatDistanceFromMiles(miles, undefined, { plus: false }), weight),
+          ? review.handoffDelivery(
+              formatDistanceFromMiles(miles, undefined, { plus: false }),
+              fee,
+              weight,
+            )
+          : review.handoffDeliveryNoFee(
+              formatDistanceFromMiles(miles, undefined, { plus: false }),
+              weight,
+            ),
       );
     }
     return parts.length > 0 ? parts.join(" · ") : review.handoffNotSet;
@@ -117,12 +128,21 @@ export function Step7Review({
 
   const modeRows: { icon: string; label: string; detail: string }[] = [];
   if (draft.modes.rent) {
-    const rate = formatMoney(draft.pricing.dailyRate);
-    modeRows.push({
-      icon: "🔑",
-      label: review.rent,
-      detail: rate ? review.ratePerDay(rate) : review.rateSet,
-    });
+    if (preferMonthlyRate) {
+      const rate = formatMoney(draft.pricing.monthlyRate);
+      modeRows.push({
+        icon: "🔑",
+        label: review.rent,
+        detail: rate ? review.ratePerMonth(rate) : review.rateSet,
+      });
+    } else {
+      const rate = formatMoney(draft.pricing.dailyRate);
+      modeRows.push({
+        icon: "🔑",
+        label: review.rent,
+        detail: rate ? review.ratePerDay(rate) : review.rateSet,
+      });
+    }
   }
   if (draft.modes.sell) {
     const sale = Number.parseFloat((draft.pricing.salePrice || "").replace(/[^0-9.]/g, ""));
@@ -138,7 +158,9 @@ export function Step7Review({
   }
 
   const previewTitle = draft.title.trim() || review.untitled;
-  const previewPrice = draft.pricing.dailyRate?.trim() || "—";
+  const previewPrice = preferMonthlyRate
+    ? draft.pricing.monthlyRate?.trim() || "—"
+    : draft.pricing.dailyRate?.trim() || "—";
   const previewOfferType = offerTypeFromModes(draft.modes, draft.pricing.salePrice);
 
   return (
@@ -156,6 +178,15 @@ export function Step7Review({
           {review.subtitle}
         </p>
       </div>
+
+      {publishError ? (
+        <p
+          role="alert"
+          className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
+        >
+          {publishError}
+        </p>
+      ) : null}
 
       <div className="overflow-hidden rounded-2xl bg-white shadow-md">
         <button
@@ -252,12 +283,17 @@ export function Step7Review({
             </ul>
           </button>
 
-          <div className="mt-4 border-t border-gray-100 pt-4">
-            <p className="text-sm text-gray-600">{handoffSummary}</p>
-            <p className="mt-1 text-xs text-gray-400">
-              {review.handoffAdjustHint}
-            </p>
-          </div>
+          <button
+            type="button"
+            onClick={() => onGoToStep(LISTING_STEP.details)}
+            className="mt-4 w-full border-t border-gray-100 pt-4 text-left"
+          >
+            <div className="mb-1 flex items-center justify-between">
+              <p className="text-sm text-gray-600">{handoffSummary}</p>
+              <EditLink label={t.common.edit} onClick={() => onGoToStep(LISTING_STEP.details)} />
+            </div>
+            <p className="mt-1 text-xs text-gray-400">{review.handoffAdjustHint}</p>
+          </button>
 
           <div className="mt-4 border-t border-gray-100 pt-4">
             <p className="flex items-center gap-1.5 text-sm text-gray-600">
@@ -266,19 +302,26 @@ export function Step7Review({
             </p>
           </div>
 
-          <div className="mt-3 w-full border-t border-gray-100 pt-3">
-            <p className="flex items-center gap-2 text-sm font-medium text-gray-800">
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: draft.paused ? AMBER : GREEN }}
-              />
-              {draft.paused ? (
-                <span style={{ color: AMBER }}>{review.paused}</span>
-              ) : (
-                <span style={{ color: GREEN }}>{review.availableDefault}</span>
-              )}
-            </p>
-          </div>
+          <button
+            type="button"
+            onClick={() => onGoToStep(LISTING_STEP.details)}
+            className="mt-3 w-full border-t border-gray-100 pt-3 text-left"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <p className="flex items-center gap-2 text-sm font-medium text-gray-800">
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: draft.paused ? AMBER : GREEN }}
+                />
+                {draft.paused ? (
+                  <span style={{ color: AMBER }}>{review.paused}</span>
+                ) : (
+                  <span style={{ color: GREEN }}>{review.availableDefault}</span>
+                )}
+              </p>
+              <EditLink label={t.common.edit} onClick={() => onGoToStep(LISTING_STEP.details)} />
+            </div>
+          </button>
         </div>
       </div>
 

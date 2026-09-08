@@ -432,7 +432,11 @@ export function CategorySpecsFields({
   };
 
   return (
-    <div className="mb-6 space-y-4 rounded-2xl border bg-[#F8FAF9] p-4" style={{ borderColor: `${GREEN}33` }}>
+    <div
+      id="listing-field-category-specs"
+      className="mb-6 space-y-4 rounded-2xl border bg-[#F8FAF9] p-4"
+      style={{ borderColor: `${GREEN}33` }}
+    >
       <div>
         <p className="text-[14px] font-semibold" style={{ color: GREEN }}>
           {specsCopy.sectionTitle}

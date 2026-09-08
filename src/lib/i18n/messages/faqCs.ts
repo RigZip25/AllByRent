@@ -70,7 +70,7 @@ export const faq: AppMessages["faq"] = {
     },
     "pickup-delivery": {
       q: "Jak funguje vyzvednutí a doručení?",
-      a: "Nové nabídky začínají s rozumnými sousedskými výchozími hodnotami (všední hodiny na verandě). Po publikaci otevřete nabídku z Moje domácnost → Úplná úprava (nebo rychlé úpravy na detailu) a nastavte osobní / bezkontaktní vyzvednutí a kilometry a poplatky za doručení. Přesná adresa se sdílí s potvrzeným nájemcem po rezervaci.",
+      a: "Nové nabídky mají vyzvednutí a dostupnost už v kroku Detaily (výchozí všední hodiny). Nastavte osobní / bezkontaktní vyzvednutí a doručení (km a poplatky) před publikací. Přesná adresa se sdílí až s potvrzeným nájemcem.",
     },
     "book-item": {
       q: "Jak si půjčím věc?",
@@ -94,7 +94,7 @@ export const faq: AppMessages["faq"] = {
     },
     "availability-step5": {
       q: "Jak nastavím dostupnost nebo pozastavím nabídku?",
-      a: "Otevřete Moje domácnost → klepněte na nabídku:\n• Pozastavit / Obnovit skryje nebo vrátí věc do procházení bez smazání.\n• Upravte časy dostupnosti (všední dny / víkend) z rychlé úpravy nebo Úplné úpravy.\n• Smazat trvale odstraní nabídku z garáže i ze serveru.",
+      a: "V kroku Detaily ve wizardu (nebo Garáž → Úplná úprava):\n• Nastavte hodiny vyzvednutí a blokované termíny.\n• Pauza / Obnovit v Garáži skryje nebo vrátí položku bez smazání.\n• Smazat trvale odstraní nabídku z garáže a serveru.",
     },
     "skip-onboarding": {
       q: "Mohu přeskočit onboarding?",

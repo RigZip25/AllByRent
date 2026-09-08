@@ -305,7 +305,18 @@ export function StepCategories({
   const showBothShelves = gradePick === "both";
 
   return (
-    <div className="mx-auto w-full max-w-[390px] bg-[#F9FAFB] px-4 pb-8 pt-5">
+    <div
+      id={
+        phase === "category"
+          ? "listing-field-category"
+          : phase === "grade"
+            ? "listing-field-grade"
+            : phase === "subcategory"
+              ? "listing-field-subcategory"
+              : undefined
+      }
+      className="mx-auto w-full max-w-[390px] bg-[#F9FAFB] px-4 pb-8 pt-5"
+    >
       <div className="mb-4 flex items-start gap-2">
         {phase !== "category" ? (
           <button
