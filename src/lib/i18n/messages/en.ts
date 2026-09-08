@@ -1646,6 +1646,7 @@ export const en: AppMessages = {
         "This photo is a bit hard to use — maybe weak lighting, blur, or the item isn't clearly visible. Try another angle with the item front and center.",
       moderationVerifyFailed:
         "We couldn't confirm this photo. That can happen with weak lighting, a blurry shot, an unclear item, or a photo that doesn't look like a listing. Please try another photo.",
+      moderationPhotoNumber: (position) => `Photo ${position}: `,
       verifyingPhotos: (mascot) => `${mascot} is checking your photos...`,
       moderationVideoNotListable:
         "We couldn't use this video for a listing — it doesn't look like a clear demo of the item. Please try another take of the item itself.",

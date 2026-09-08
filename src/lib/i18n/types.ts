@@ -925,6 +925,8 @@ export type AppMessages = {
       moderationBadAngle: string;
       /** Fail-closed when vision API errors. */
       moderationVerifyFailed: string;
+      /** Prefix that points at the photo a gallery check stopped on. */
+      moderationPhotoNumber: (position: number) => string;
       verifyingPhotos: (mascot: string) => string;
       moderationVideoNotListable: string;
       moderationBadVideo: string;

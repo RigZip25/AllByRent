@@ -1663,6 +1663,7 @@ export const cs: AppMessages = {
         "Tuto fotku je trochu těžké použít — možná je málo světla, je rozmazaná, nebo věc není dobře vidět. Zkus jiný úhel s věcí jasně ve středu.",
       moderationVerifyFailed:
         "Fotku se nepodařilo potvrdit. Často to bývá slabé světlo, rozmazaný záběr, nejasná věc, nebo fotka, která nevypadá jako nabídka. Zkus prosím jinou fotku.",
+      moderationPhotoNumber: (position) => `Fotka ${position}: `,
       verifyingPhotos: (mascot) => `${mascot} kontroluje tvoje fotky...`,
       moderationVideoNotListable:
         "Toto video jsme u nabídky nemohli použít — nevypadá jako jasná ukázka předmětu. Zkus prosím jiný záběr samotné věci.",

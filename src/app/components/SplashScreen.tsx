@@ -117,7 +117,7 @@ function SplashArtOnly() {
           />
         </div>
         <p className="pointer-events-none shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] text-center text-xs text-[#0D5C3A]/45">
-          Art only — <code className="rounded bg-[#0D5C3A]/8 px-1">evorios_splash_garage.png</code>
+          Art only — <code className="rounded bg-[#0D5C3A]/8 px-1">evorios_splash_garage.webp</code>
         </p>
       </div>
     </div>

@@ -15,6 +15,7 @@ import { processPhotoWithPhotoRoom } from "../photoroomApi";
 import {
   messageForPhotoModeration,
   moderateListingPhotoBlob,
+  rememberPhotoModerationVerdict,
 } from "../listingPhotoModeration";
 import {
   messageForVideoModeration,
@@ -147,7 +148,7 @@ export function Step1Photos({
     return sanitized.blob;
   };
 
-  const appendPhotoBlob = async (blob: Blob) => {
+  const appendPhotoBlob = async (blob: Blob): Promise<MediaRef> => {
     const put = await putMediaBlob(blob, { kind: "image" });
     if (!put.ok) {
       setStorageWarning(put.message);
@@ -171,6 +172,8 @@ export function Step1Photos({
       photos: [...current.photos, ref],
       aiSuggestions: null,
     }));
+
+    return ref;
   };
 
   const isHeicLike = (file: File) => {
@@ -255,7 +258,12 @@ export function Step1Photos({
           // Silent fallback — don't nag; photo still saved.
         }
 
-        await appendPhotoBlob(blob);
+        const ref = await appendPhotoBlob(blob);
+        rememberPhotoModerationVerdict(
+          ref.id,
+          { category: draft.category, subcategory: draft.subcategory },
+          moderation,
+        );
         nextIndex += 1;
       } catch (error) {
         // Keep going through the batch: one unreadable file used to drop every

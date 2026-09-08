@@ -1646,6 +1646,7 @@ export const es: AppMessages = {
         "Esta foto es un poco difícil de usar : puede ser poca luz, estar borrosa o que el artículo no se vea bien. Prueba otro ángulo con el artículo bien a la vista.",
       moderationVerifyFailed:
         "No pudimos confirmar esta foto. A veces pasa por poca luz, una imagen borrosa, un artículo poco claro o una foto que no parece de un anuncio. Prueba con otra foto.",
+      moderationPhotoNumber: (position) => `Foto ${position}: `,
       verifyingPhotos: (mascot) => `${mascot} está revisando tus fotos...`,
       moderationVideoNotListable:
         "No pudimos usar este vídeo en el anuncio : no parece una demostración clara del artículo. Prueba otra toma del artículo en sí.",
