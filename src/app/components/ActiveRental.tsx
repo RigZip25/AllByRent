@@ -373,8 +373,21 @@ export function ActiveRental({
     refreshDispute();
   }, [refreshDispute]);
 
-  const mode: "pickup" | "return" =
-    booking?.status === "pending_checkin" ? "pickup" : "return";
+  /**
+   * Which handoff this rental is at, if there is one at all.
+   *
+   * Everything that is not on the way to a pickup or a return has nothing left
+   * to scan: a cancelled booking, a no-show, a rental already back, one under
+   * dispute. Those used to fall through to "return", so the screen offered to
+   * accept the return of an item that was never handed over.
+   */
+  const handoffStage: "pickup" | "return" | null =
+    booking?.status === "pending_checkin" || booking?.status === "upcoming"
+      ? "pickup"
+      : booking?.status === "active" || booking?.status === "overdue"
+        ? "return"
+        : null;
+  const mode: "pickup" | "return" = handoffStage ?? "return";
 
   const overdueWarning =
     booking?.status === "overdue"
@@ -552,6 +565,7 @@ export function ActiveRental({
 
   const openScanner = () => {
     setNotice(null);
+    if (!handoffStage) return;
     if (mode === "pickup" && !agreementFullySigned(booking?.rentalAgreement)) {
       setNotice(t.rentalAgreement.blockHandoff);
       return;
@@ -1838,54 +1852,56 @@ export function ActiveRental({
           </div>
         ) : null}
 
-        <div className="bg-gradient-to-br from-primary/5 to-accent/5 border-2 border-primary/20 rounded-xl p-6">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-32 h-32 bg-white rounded-xl flex items-center justify-center mb-4 border-2 border-primary/10">
-              <ScanLine className="w-16 h-16 text-primary" />
-            </div>
+        {handoffStage ? (
+          <div className="bg-gradient-to-br from-primary/5 to-accent/5 border-2 border-primary/20 rounded-xl p-6">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-32 h-32 bg-white rounded-xl flex items-center justify-center mb-4 border-2 border-primary/10">
+                <ScanLine className="w-16 h-16 text-primary" />
+              </div>
 
-            <h3 className="font-bold text-lg mb-2">
-              {mode === "pickup"
-                ? booking.role === "host"
-                  ? t.rentalDetail.scanHandOver
-                  : t.rentalDetail.scanReceive
-                : booking.role === "renter"
-                  ? t.rentalDetail.scanReturnItem
-                  : t.rentalDetail.scanAcceptReturn}
-            </h3>
+              <h3 className="font-bold text-lg mb-2">
+                {mode === "pickup"
+                  ? booking.role === "host"
+                    ? t.rentalDetail.scanHandOver
+                    : t.rentalDetail.scanReceive
+                  : booking.role === "renter"
+                    ? t.rentalDetail.scanReturnItem
+                    : t.rentalDetail.scanAcceptReturn}
+              </h3>
 
-            <p className="text-sm text-muted-foreground mb-6 leading-relaxed max-w-xs">
-              {mode === "pickup"
-                ? booking.role === "host"
-                  ? t.rentalDetail.scanHandOverBody
-                  : t.rentalDetail.scanReceiveBody
-                : booking.role === "renter"
-                  ? t.rentalDetail.scanReturnItemBody
-                  : t.rentalDetail.scanAcceptReturnBody}
-            </p>
+              <p className="text-sm text-muted-foreground mb-6 leading-relaxed max-w-xs">
+                {mode === "pickup"
+                  ? booking.role === "host"
+                    ? t.rentalDetail.scanHandOverBody
+                    : t.rentalDetail.scanReceiveBody
+                  : booking.role === "renter"
+                    ? t.rentalDetail.scanReturnItemBody
+                    : t.rentalDetail.scanAcceptReturnBody}
+              </p>
 
-            <button
-              type="button"
-              onClick={openScanner}
-              disabled={alreadyConfirmed}
-              className="w-full bg-primary hover:bg-primary/90 text-white py-3.5 rounded-xl transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {alreadyConfirmed
-                ? t.rentalDetail.waitingOtherSide
-                : t.rentalDetail.scanQrCode}
-            </button>
-
-            {booking?.role === "host" && !alreadyConfirmed ? (
               <button
                 type="button"
-                onClick={() => setShowItemQrOpen(true)}
-                className="mt-3 w-full border-2 border-primary/30 text-primary py-3.5 rounded-xl transition-colors font-medium"
+                onClick={openScanner}
+                disabled={alreadyConfirmed}
+                className="w-full bg-primary hover:bg-primary/90 text-white py-3.5 rounded-xl transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {t.rentalDetail.showItemQr}
+                {alreadyConfirmed
+                  ? t.rentalDetail.waitingOtherSide
+                  : t.rentalDetail.scanQrCode}
               </button>
-            ) : null}
+
+              {booking?.role === "host" && !alreadyConfirmed ? (
+                <button
+                  type="button"
+                  onClick={() => setShowItemQrOpen(true)}
+                  className="mt-3 w-full border-2 border-primary/30 text-primary py-3.5 rounded-xl transition-colors font-medium"
+                >
+                  {t.rentalDetail.showItemQr}
+                </button>
+              ) : null}
+            </div>
           </div>
-        </div>
+        ) : null}
 
         {renterPickupLocation ? (
           <div className="bg-card rounded-xl border border-border p-4">
@@ -1992,7 +2008,7 @@ export function ActiveRental({
                 {t.rentalDetail.geoPinGateHint}
               </p>
             ) : null}
-            {booking.role === "host" ? (
+            {handoffStage && booking.role === "host" ? (
               <div className="mt-3 rounded-lg bg-muted p-3 text-sm">
                 <div className="font-medium">
                   {mode === "pickup" ? t.rentalDetail.pickupPin : t.rentalDetail.returnPin}:{" "}
@@ -2004,13 +2020,13 @@ export function ActiveRental({
                   {t.rentalDetail.pinShareHint}
                 </div>
               </div>
-            ) : (
+            ) : handoffStage ? (
               <div className="mt-3 rounded-lg bg-muted p-3 text-sm">
                 {t.rentalDetail.askHostForPin(
                   mode === "pickup" ? t.rentalDetail.pinStagePickup : t.rentalDetail.pinStageReturn,
                 )}
               </div>
-            )}
+            ) : null}
           </div>
         ) : null}
 
@@ -2283,7 +2299,7 @@ export function ActiveRental({
           </div>
         ) : null}
 
-        {needsPreTrip && booking && (mode === "pickup" || booking.status === "pending_checkin" || booking.status === "upcoming") ? (
+        {needsPreTrip && booking && handoffStage === "pickup" ? (
           <PreTripInspectionPanel
             stage="pickup"
             role={booking.role}
@@ -2297,9 +2313,7 @@ export function ActiveRental({
           />
         ) : null}
 
-        {needsPreTrip &&
-        booking &&
-        (booking.status === "active" || booking.status === "overdue" || mode === "return") ? (
+        {needsPreTrip && booking && handoffStage === "return" ? (
           <PreTripInspectionPanel
             stage="return"
             role={booking.role}
@@ -2337,22 +2351,20 @@ export function ActiveRental({
           </div>
         ) : null}
 
-{booking &&
+        {booking &&
         (booking.pickupConditionPhoto ||
           booking.returnConditionPhoto ||
-          booking.status === "active" ||
-          booking.status === "overdue" ||
+          handoffStage === "return" ||
           booking.status === "completed" ||
-          mode === "return") ? (
+          booking.status === "disputed") ? (
           <RentalConditionPhotos
             pickupPhoto={booking.pickupConditionPhoto}
             returnPhoto={booking.returnConditionPhoto}
             showReturn={
               Boolean(booking.returnConditionPhoto) ||
-              booking.status === "active" ||
-              booking.status === "overdue" ||
+              handoffStage === "return" ||
               booking.status === "completed" ||
-              mode === "return"
+              booking.status === "disputed"
             }
           />
         ) : null}

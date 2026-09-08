@@ -212,12 +212,6 @@ export function RentalCard({
     !booking.review &&
     isReviewWindowOpen(booking.completedAt, now);
 
-  const handleAction = (patch: Partial<RentalBooking>) => (e: React.MouseEvent) => {
-    e.stopPropagation();
-    updateBooking(booking.id, patch);
-    onRefresh();
-  };
-
   const disputeSubtext = useMemo(() => {
     if (booking.status !== "disputed") return null;
     if (booking.disputeEscalated) return t.rentalCard.underReview;
@@ -313,7 +307,10 @@ export function RentalCard({
               <ActionButton
                 label={t.rentalCard.returnNow}
                 variant="cta"
-                onClick={handleAction({ status: "completed", completedAt: new Date().toISOString() })}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpen?.();
+                }}
               />
               <ActionButton label={t.rentalCard.extendBooking} variant="secondary" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
             </>
