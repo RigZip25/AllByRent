@@ -1,5 +1,5 @@
 import { getMessages } from "./i18n";
-import { listingHasOverlappingRental } from "./availabilityBusy";
+import { formatIsoDateLabel, listingHasOverlappingRental, BUSY_RENTAL_STATUSES, rangesOverlap, approvalDeadlineFromCreatedAt } from "./availabilityBusy";
 import { fetchListingByIdRemote, getPublishedListingById } from "./listingStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 import type { MediaRef } from "./mediaStore";
@@ -598,7 +598,7 @@ export function rentalBookingFromRemoteRow(
       row.status === "pending_approval",
     approvalDeadline:
       row.status === "pending_approval"
-        ? new Date(new Date(row.created_at).getTime() + 24 * 60 * 60 * 1000).toISOString()
+        ? approvalDeadlineFromCreatedAt(row.created_at)
         : undefined,
     manualBooking: row.status === "pending_approval",
     insuranceProofPath: row.insurance_proof_path ?? undefined,
@@ -863,6 +863,22 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
 
 export function appendRentalBooking(booking: RentalBooking): RentalBooking[] {
   const bookings = loadRentalBookings();
+  const listingId = booking.listingId?.trim();
+  if (listingId && booking.startDate && booking.endDate) {
+    const overlap = bookings.some(
+      (existing) =>
+        existing.listingId === listingId &&
+        existing.id !== booking.id &&
+        (BUSY_RENTAL_STATUSES as readonly string[]).includes(existing.status) &&
+        rangesOverlap(
+          { start: booking.startDate, end: booking.endDate },
+          { start: existing.startDate, end: existing.endDate },
+        ),
+    );
+    if (overlap) {
+      throw new Error("Those dates overlap an existing booking for this listing.");
+    }
+  }
   const next = [normalizeBooking(booking), ...bookings];
   saveRentalBookings(next);
   return next;
@@ -1491,11 +1507,7 @@ export function getHistoryBookings(bookings: RentalBooking[]): RentalBooking[] {
 }
 
 export function formatRentalDateRange(start: string, end: string): string {
-  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
-  const s = new Date(start);
-  const e = new Date(end);
-  if (Number.isNaN(s.getTime()) || Number.isNaN(e.getTime())) return `${start} – ${end}`;
-  return `${s.toLocaleDateString(undefined, opts)} – ${e.toLocaleDateString(undefined, opts)}`;
+  return `${formatIsoDateLabel(start)} – ${formatIsoDateLabel(end)}`;
 }
 
 export function getRentalStatusLabel(status: RentalStatus): string {

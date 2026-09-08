@@ -59,9 +59,16 @@ export function formatPickupWindow(startIso: string, endIso: string): string {
     month: "short",
     day: "numeric",
   });
-  const timeFmt: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "2-digit" };
+  const timeFmt: Intl.DateTimeFormatOptions = {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  };
   const startTime = start.toLocaleTimeString(undefined, timeFmt);
-  const endTime = end.toLocaleTimeString(undefined, timeFmt);
+  const endTime = end.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
   return `Pickup: ${datePart}, ${startTime}–${endTime}`;
 }
 

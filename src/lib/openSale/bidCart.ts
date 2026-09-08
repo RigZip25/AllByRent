@@ -428,6 +428,10 @@ export function resolveEndedOpenSales(now = Date.now()): void {
 
 /** Unpaid winner → ban + next-highest bid gets the lot. */
 export function cascadeUnpaidOpenSaleLots(now = Date.now()): void {
+  // Offline cascade trusted the device clock (Stage 16 / W11). Server automation
+  // owns pay_by expiry; skip while offline so a skewed clock cannot forfeit winners.
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return;
+
   const pay = readLotPay();
   let changed = false;
   const events = listOpenSaleEvents();

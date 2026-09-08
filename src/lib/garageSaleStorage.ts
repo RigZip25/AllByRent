@@ -15,6 +15,8 @@ export type GarageSaleSchedule = {
   daysOfWeek: number[];
   startTime: string;
   endTime: string;
+  /** IANA zone for open-hours evaluation (Stage 16 / W9). */
+  timeZone?: string;
 };
 
 export type GarageSalePresetId = "today" | "saturday" | "weekend";
@@ -107,10 +109,15 @@ function normalizeSchedule(raw: Partial<GarageSaleSchedule> | null | undefined):
     : [];
   const startTime = raw?.startTime && isValidTime(raw.startTime) ? raw.startTime : DEFAULT_SCHEDULE.startTime;
   const endTime = raw?.endTime && isValidTime(raw.endTime) ? raw.endTime : DEFAULT_SCHEDULE.endTime;
+  const timeZone =
+    typeof raw?.timeZone === "string" && raw.timeZone.trim()
+      ? raw.timeZone.trim()
+      : undefined;
   return {
     daysOfWeek: days.length > 0 ? days : DEFAULT_SCHEDULE.daysOfWeek,
     startTime,
     endTime,
+    ...(timeZone ? { timeZone } : {}),
   };
 }
 
@@ -152,7 +159,15 @@ export function getGarageSaleSchedule(): GarageSaleSchedule {
 
 export function setGarageSaleSchedule(schedule: GarageSaleSchedule): void {
   try {
-    const normalized = normalizeSchedule(schedule);
+    const withZone: GarageSaleSchedule = {
+      ...schedule,
+      timeZone:
+        schedule.timeZone?.trim() ||
+        (typeof Intl !== "undefined"
+          ? Intl.DateTimeFormat().resolvedOptions().timeZone
+          : undefined),
+    };
+    const normalized = normalizeSchedule(withZone);
     localStorage.setItem(SCHEDULE_KEY, JSON.stringify(normalized));
     localStorage.removeItem(LEGACY_WINDOW_KEY);
     window.dispatchEvent(new Event("evorios-garage-schedule"));
