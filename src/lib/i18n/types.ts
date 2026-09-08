@@ -3677,6 +3677,8 @@ export type PaymentsUiMessages = {
 export type SystemUiMessages = {
   offlineTitle: string;
   offlineBody: (appName: string) => string;
+  offlineBannerTitle: string;
+  offlineBannerBody: (appName: string) => string;
   tryAgain: string;
   setupTitle: string;
   setupSupportBefore: string;
@@ -3686,9 +3688,13 @@ export type SystemUiMessages = {
   reloadApp: string;
   resetLocalData: string;
   resetConfirm: string;
+  storageFullTitle: string;
+  storageFullBody: string;
   garageMissingTitle: string;
   garageMissingBody: (appName: string) => string;
   browseYardSales: string;
   goBack: string;
+  bootFailedTitle: string;
+  bootFailedBody: string;
 };
 

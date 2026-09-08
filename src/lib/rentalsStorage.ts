@@ -1002,10 +1002,10 @@ export async function updateRentalRemote(
     runningLateAcknowledgedAt?: string | null;
     rentalAgreement?: RentalAgreementRecord | null;
   },
-): Promise<void> {
-  if (!isSupabaseConfigured()) return;
+): Promise<boolean> {
+  if (!isSupabaseConfigured()) return true;
   const supabase = getSupabaseClient();
-  if (!supabase) return;
+  if (!supabase) return true;
 
   const row: Record<string, string | null | RentalAgreementRecord | RentalInvoice[]> = {};
   if (patch.status !== undefined) row.status = patch.status;
@@ -1042,7 +1042,7 @@ export async function updateRentalRemote(
   if (patch.rentalAgreement !== undefined) {
     row.rental_agreement = patch.rentalAgreement;
   }
-  if (Object.keys(row).length === 0) return;
+  if (Object.keys(row).length === 0) return true;
 
   const { error } = await supabase.from("rentals").update(row).eq("id", rentalId);
   if (error) {
@@ -1055,10 +1055,13 @@ export async function updateRentalRemote(
         Object.entries(row).filter(([column]) => !missing.includes(column)),
       );
       if (Object.keys(without).length > 0) {
-        await supabase.from("rentals").update(without).eq("id", rentalId);
+        const retry = await supabase.from("rentals").update(without).eq("id", rentalId);
+        return !retry.error;
       }
     }
+    return false;
   }
+  return true;
 }
 
 function remotePatchFromBooking(patch: Partial<RentalBooking>): Parameters<typeof updateRentalRemote>[1] {
@@ -1109,6 +1112,127 @@ function remotePatchFromBooking(patch: Partial<RentalBooking>): Parameters<typeo
 function shouldSyncBookingPatch(patch: Partial<RentalBooking>): boolean {
   return Object.keys(remotePatchFromBooking(patch)).length > 0;
 }
+
+const RENTAL_SYNC_QUEUE_KEY = "allbyrent_rental_sync_queue";
+
+type RentalSyncQueueItem = {
+  id: string;
+  patch: Parameters<typeof updateRentalRemote>[1];
+  queuedAt: number;
+  attempts: number;
+};
+
+function loadRentalSyncQueue(): RentalSyncQueueItem[] {
+  try {
+    const raw = localStorage.getItem(RENTAL_SYNC_QUEUE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((row) => {
+        if (!row || typeof row !== "object") return null;
+        const id = typeof (row as { id?: unknown }).id === "string" ? (row as { id: string }).id.trim() : "";
+        const patch = (row as { patch?: unknown }).patch;
+        if (!id || !patch || typeof patch !== "object") return null;
+        const queuedAt =
+          typeof (row as { queuedAt?: unknown }).queuedAt === "number"
+            ? (row as { queuedAt: number }).queuedAt
+            : Date.now();
+        const attempts =
+          typeof (row as { attempts?: unknown }).attempts === "number"
+            ? (row as { attempts: number }).attempts
+            : 0;
+        return {
+          id,
+          patch: patch as Parameters<typeof updateRentalRemote>[1],
+          queuedAt,
+          attempts,
+        };
+      })
+      .filter((row): row is RentalSyncQueueItem => Boolean(row));
+  } catch {
+    return [];
+  }
+}
+
+function saveRentalSyncQueue(items: RentalSyncQueueItem[]): void {
+  try {
+    if (items.length === 0) {
+      localStorage.removeItem(RENTAL_SYNC_QUEUE_KEY);
+      return;
+    }
+    localStorage.setItem(RENTAL_SYNC_QUEUE_KEY, JSON.stringify(items));
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Merge a remote patch into the durable offline queue (latest field wins). */
+export function enqueueRentalRemoteSync(
+  id: string,
+  patch: Parameters<typeof updateRentalRemote>[1],
+): void {
+  const trimmed = id.trim();
+  if (!trimmed || Object.keys(patch).length === 0) return;
+  const queue = loadRentalSyncQueue();
+  const existing = queue.find((item) => item.id === trimmed);
+  if (existing) {
+    existing.patch = { ...existing.patch, ...patch };
+    existing.queuedAt = Date.now();
+  } else {
+    queue.push({ id: trimmed, patch, queuedAt: Date.now(), attempts: 0 });
+  }
+  saveRentalSyncQueue(queue);
+  void flushRentalSyncQueue();
+}
+
+let rentalSyncFlushInFlight: Promise<void> | null = null;
+
+/** Push queued rental edits when the device is online again. */
+export async function flushRentalSyncQueue(): Promise<void> {
+  if (typeof navigator !== "undefined" && !navigator.onLine) return;
+  if (rentalSyncFlushInFlight) return rentalSyncFlushInFlight;
+
+  rentalSyncFlushInFlight = (async () => {
+    const queue = loadRentalSyncQueue();
+    if (queue.length === 0) return;
+
+    const remaining: RentalSyncQueueItem[] = [];
+    for (const item of queue) {
+      try {
+        const ok = await updateRentalRemote(item.id, item.patch);
+        if (!ok) {
+          remaining.push({ ...item, attempts: item.attempts + 1 });
+        }
+      } catch {
+        remaining.push({ ...item, attempts: item.attempts + 1 });
+      }
+    }
+    // Cap runaway retries but keep the latest patch for later reconnects.
+    saveRentalSyncQueue(
+      remaining
+        .filter((item) => item.attempts < 20)
+        .slice(-40),
+    );
+  })().finally(() => {
+    rentalSyncFlushInFlight = null;
+  });
+
+  return rentalSyncFlushInFlight;
+}
+
+function installRentalSyncQueueListeners(): void {
+  if (typeof window === "undefined") return;
+  window.addEventListener("online", () => {
+    void flushRentalSyncQueue();
+  });
+  // Flush once after load in case edits were queued while offline.
+  window.setTimeout(() => {
+    void flushRentalSyncQueue();
+  }, 0);
+}
+
+installRentalSyncQueueListeners();
 
 export function toSupabaseRentalInsert(params: {
   id: string;
@@ -1298,7 +1422,7 @@ export function updateBooking(
   });
   saveRentalBookings(next);
   if (shouldSyncBookingPatch(patch)) {
-    void updateRentalRemote(id, remotePatchFromBooking(patch));
+    enqueueRentalRemoteSync(id, remotePatchFromBooking(patch));
   }
   return next;
 }

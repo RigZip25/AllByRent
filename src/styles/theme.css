@@ -366,9 +366,9 @@
     user-select: none;
   }
 
-  /** Evorios wordmark — splash + header (Outfit display, Evo/rios split, ™) */
+  /** Evorios wordmark — splash + header (system stack; no remote font fetch). */
   .evorios-wordmark {
-    font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     font-weight: 800;
     line-height: 1;
     display: inline-flex;
@@ -391,7 +391,7 @@
   }
 
   .evorios-wordmark-tm {
-    font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     font-size: 0.36em;
     font-weight: 700;
     line-height: 1;

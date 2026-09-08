@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { APP_NAME } from "../../lib/brand";
 import { getMessages } from "../../lib/i18n";
+import { resetAllAppData } from "../../lib/resetAppStorage";
 
 type Props = { children: ReactNode };
 type State = { error: Error | null };
@@ -37,14 +38,7 @@ export class AppErrorBoundary extends Component<Props, State> {
             type="button"
             className="text-[13px] text-gray-500 underline"
             onClick={() => {
-              try {
-                localStorage.removeItem("allbyrent_rental_bookings");
-                localStorage.removeItem("allbyrent_rental_bookings_version");
-                localStorage.removeItem("allbyrent_user_profile");
-              } catch {
-                /* ignore */
-              }
-              window.location.reload();
+              void resetAllAppData();
             }}
           >
             {t.resetLocalData}

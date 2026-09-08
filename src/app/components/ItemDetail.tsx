@@ -259,11 +259,18 @@ export function ItemDetail({
 
   useEffect(() => {
     let mounted = true;
-    void fetchListingByIdRemote(itemId).then((next) => {
-      if (!mounted) return;
-      setListing(next);
-      setLoading(false);
-    });
+    void fetchListingByIdRemote(itemId)
+      .then((next) => {
+        if (!mounted) return;
+        setListing(next);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setListing((current) => current);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
     return () => {
       mounted = false;
     };

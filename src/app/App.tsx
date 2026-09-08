@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect, useRef, startTransition } from "react";
 import { formatGeolocationErrorMessage, resolveHomeLocation } from "../lib/geolocation";
 import { AppBrandHeader } from "../components/AppBrandHeader";
-import { OfflineScreen } from "./components/OfflineScreen";
+import { OfflineBanner } from "./components/OfflineBanner";
+import { StorageFullBanner } from "./components/StorageFullBanner";
 import { GarageShopMissingScreen } from "./components/GarageShopMissingScreen";
 import { SplashScreen } from "./components/SplashScreen";
 import { FirstHello } from "../screens/onboarding/FirstHello";
@@ -743,6 +744,7 @@ function AppRoutes() {
   const [isOnline, setIsOnline] = useState(
     () => typeof navigator === "undefined" || navigator.onLine,
   );
+  const [storageFullNotice, setStorageFullNotice] = useState(false);
   /** `?screen=splash` static layout · `&dynamic=1` animated · `&art=1` PNG only */
   const [splashPreview] = useState(() => boot.screen === "splash" && !boot.splashDynamicPreview);
   const [splashArtOnly] = useState(() => boot.splashArtOnly);
@@ -757,6 +759,12 @@ function AppRoutes() {
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
     };
+  }, []);
+
+  useEffect(() => {
+    const onStorageFull = () => setStorageFullNotice(true);
+    window.addEventListener("evorios-listing-storage-full", onStorageFull);
+    return () => window.removeEventListener("evorios-listing-storage-full", onStorageFull);
   }, []);
 
   // Deep links / OAuth skip React splash — still dismiss native launch splash.
@@ -2023,19 +2031,17 @@ function AppRoutes() {
     return <SetupRequiredScreen />;
   }
 
-  if (!isOnline) {
-    return (
-      <div className="app-shell">
-        <div className="app-container bg-background">
-          <OfflineScreen onRetry={() => setIsOnline(typeof navigator === "undefined" || navigator.onLine)} />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <RequireAuthProvider requireAuth={requireAuth}>
     <div className="app-shell">
+      {!isOnline ? (
+        <OfflineBanner
+          onRetry={() => setIsOnline(typeof navigator === "undefined" || navigator.onLine)}
+        />
+      ) : null}
+      {storageFullNotice ? (
+        <StorageFullBanner onDismiss={() => setStorageFullNotice(false)} />
+      ) : null}
       <div
         className={`app-container bg-background ${showBrandHeader ? "app-container--with-brand" : ""} ${showBottomNav ? "app-container--with-bottom-nav" : ""}`}
       >

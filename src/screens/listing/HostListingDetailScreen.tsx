@@ -217,19 +217,25 @@ export function HostListingDetailScreen({
   useEffect(() => {
     let mounted = true;
     setLoading((current) => current || !getPublishedListingById(listingId));
-    void fetchListingByIdRemote(listingId).then(async (next) => {
-      if (!mounted) return;
-      if (next && !next.hostId?.trim() && auth.userId) {
-        const claimed = await claimListingOwnershipIfUnassigned(
-          listingId,
-          resolveGarageHostId(auth.userId, auth.userEmail),
-        );
-        setListing(claimed ?? next);
-      } else {
-        setListing(next);
-      }
-      setLoading(false);
-    });
+    void fetchListingByIdRemote(listingId)
+      .then(async (next) => {
+        if (!mounted) return;
+        if (next && !next.hostId?.trim() && auth.userId) {
+          const claimed = await claimListingOwnershipIfUnassigned(
+            listingId,
+            resolveGarageHostId(auth.userId, auth.userEmail),
+          );
+          setListing(claimed ?? next);
+        } else {
+          setListing(next);
+        }
+      })
+      .catch(() => {
+        /* keep cached listing if any */
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
     return () => {
       mounted = false;
     };
