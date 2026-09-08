@@ -955,6 +955,12 @@ export const es: AppMessages = {
     outcomeFavorRenter: "A favor del arrendatario",
     outcomeFavorHost: "A favor del anfitrión",
     outcomeSplit: "Dividir / acuerdo",
+    disputeDepositReleasedTitle: "Disputa resuelta: retención liberada",
+    disputeDepositReleasedBody:
+      "La retención del depósito en la tarjeta del inquilino se ha liberado. Los bancos pueden tardar unos días en mostrarlo.",
+    disputeClaimWindowTitle: "Disputa resuelta: reclama el depósito",
+    disputeClaimWindowBody: (hours) =>
+      `Tienes ${hours} horas para reclamar lo que se te debe de la retención del depósito. Lo que no reclames se devuelve al inquilino.`,
     outcomeWithdrawn: "Retirar disputa",
     waitingCounterpartyAck: "Esperando a que la otra parte acepte esta resolución.",
     acceptResolution: "Aceptar resolución",

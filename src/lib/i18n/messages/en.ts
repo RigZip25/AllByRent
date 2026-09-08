@@ -955,6 +955,12 @@ export const en: AppMessages = {
     outcomeFavorRenter: "Favor renter",
     outcomeFavorHost: "Favor host",
     outcomeSplit: "Split / compromise",
+    disputeDepositReleasedTitle: "Dispute resolved — hold released",
+    disputeDepositReleasedBody:
+      "The deposit hold on the renter's card has been released. Banks can take a few days to show it.",
+    disputeClaimWindowTitle: "Dispute resolved — claim the deposit",
+    disputeClaimWindowBody: (hours) =>
+      `You have ${hours} hours to claim what you are owed from the deposit hold. Anything you do not claim is released back to the renter.`,
     outcomeWithdrawn: "Withdraw dispute",
     waitingCounterpartyAck: "Waiting for the other party to accept this resolution.",
     acceptResolution: "Accept resolution",

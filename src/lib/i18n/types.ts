@@ -1986,6 +1986,11 @@ export type AppMessages = {
     outcomeFavorRenter: string;
     outcomeFavorHost: string;
     outcomeSplit: string;
+    /** What happens to the hold once the two sides agree. */
+    disputeDepositReleasedTitle: string;
+    disputeDepositReleasedBody: string;
+    disputeClaimWindowTitle: string;
+    disputeClaimWindowBody: (hours: number) => string;
     outcomeWithdrawn: string;
     waitingCounterpartyAck: string;
     acceptResolution: string;

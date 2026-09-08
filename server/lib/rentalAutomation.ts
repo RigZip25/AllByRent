@@ -372,10 +372,12 @@ export function depositReleaseDueAt(
 
   if (dispute?.status === "resolved") {
     const resolvedMs = dispute.resolved_at ? Date.parse(dispute.resolved_at) : Date.now();
-    // The host won the argument: they get a fresh window to actually claim.
-    if (dispute.resolution_outcome === "favor_host") return resolvedMs + DEPOSIT_CLAIM_WINDOW_MS;
-    // A split is settled by hand; support tells us when it is done.
-    if (dispute.resolution_outcome === "split") return null;
+    // The host is owed something: they get a fresh window to claim it, and a
+    // partial claim releases the rest. A split used to return null here, which
+    // left the renter's card held with nobody due to act.
+    if (dispute.resolution_outcome === "favor_host" || dispute.resolution_outcome === "split") {
+      return resolvedMs + DEPOSIT_CLAIM_WINDOW_MS;
+    }
     return resolvedMs;
   }
 

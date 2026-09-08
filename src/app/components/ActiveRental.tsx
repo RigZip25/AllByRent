@@ -74,6 +74,7 @@ import { completeHostNoShow } from "../../lib/rentalNoShowActions";
 import { listingNoShowFeeUsd } from "../../lib/noShowPolicy";
 import { RentalLifecyclePolicySheet } from "../../components/rentals/RentalLifecyclePolicySheet";
 import { formatMoney } from "../../lib/regionalDisplay";
+import { settleResolvedDispute } from "../../lib/disputeSettlement";
 import { bookingAllowsExtension } from "../../lib/rentalExtendReturn";
 import {
   quoteRentalExtension,
@@ -2875,13 +2876,12 @@ export function ActiveRental({
                                 dispute,
                                 actorId: auth.userId!,
                               })
-                                .then((d) => {
+                                .then(async (d) => {
                                   setDispute(d);
-                                  updateBooking(booking.id, {
-                                    status: "completed",
-                                    completedAt: new Date().toISOString(),
-                                    paymentOnHold: false,
-                                    disputeEscalated: false,
+                                  await settleResolvedDispute({
+                                    booking,
+                                    outcome: d.resolutionOutcome ?? "split",
+                                    actorUserId: auth.userId!,
                                   });
                                   setBookings(loadRentalBookings());
                                 })
@@ -2937,13 +2937,12 @@ export function ActiveRental({
                                 actorId: auth.userId!,
                                 outcome: "withdrawn",
                               })
-                                .then((d) => {
+                                .then(async (d) => {
                                   setDispute(d);
-                                  updateBooking(booking.id, {
-                                    status: "completed",
-                                    completedAt: new Date().toISOString(),
-                                    paymentOnHold: false,
-                                    disputeEscalated: false,
+                                  await settleResolvedDispute({
+                                    booking,
+                                    outcome: "withdrawn",
+                                    actorUserId: auth.userId!,
                                   });
                                   setBookings(loadRentalBookings());
                                 })

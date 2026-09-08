@@ -979,6 +979,12 @@ export const cs: AppMessages = {
     outcomeFavorRenter: "Ve prospěch nájemce",
     outcomeFavorHost: "Ve prospěch hostitele",
     outcomeSplit: "Rozdělit / kompromis",
+    disputeDepositReleasedTitle: "Spor vyřešen — blokace uvolněna",
+    disputeDepositReleasedBody:
+      "Blokace kauce na kartě nájemce byla uvolněna. Bankám může pár dní trvat, než se to zobrazí.",
+    disputeClaimWindowTitle: "Spor vyřešen — vyžádej kauci",
+    disputeClaimWindowBody: (hours) =>
+      `Na vyžádání toho, co ti patří z blokované kauce, máš ${hours} hodin. Co si nevyžádáš, se vrátí nájemci.`,
     outcomeWithdrawn: "Stáhnout spor",
     waitingCounterpartyAck: "Čeká se, až druhá strana přijme toto řešení.",
     acceptResolution: "Přijmout řešení",

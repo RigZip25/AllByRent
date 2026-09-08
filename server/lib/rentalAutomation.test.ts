@@ -101,10 +101,11 @@ describe("depositReleaseDueAt", () => {
     ).toBe(Date.parse(resolved) + CLAIM_WINDOW);
   });
 
-  it("leaves a split to support", () => {
+  it("gives the host the same window to claim their share of a split", () => {
+    const resolved = "2026-03-06T10:00:00.000Z";
     expect(
-      depositReleaseDueAt(rental(), dispute({ resolution_outcome: "split" })),
-    ).toBeNull();
+      depositReleaseDueAt(rental(), dispute({ resolution_outcome: "split", resolved_at: resolved })),
+    ).toBe(Date.parse(resolved) + CLAIM_WINDOW);
   });
 
   it("keeps the hold while the rental is still running", () => {
