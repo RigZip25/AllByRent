@@ -12,7 +12,7 @@ import {
 import { isNetworkFetchError } from "./authErrors";
 import { emailOtpEntryError, isCompleteEmailOtpLength, normalizeEmailOtpInput } from "./authOtp";
 import { getRuntimeAppOrigin } from "./appOrigin";
-import { clearAuthWelcomeDone, hasDeviceKnownAccount, isOnboardingComplete } from "./onboardingStorage";
+import { hasDeviceKnownAccount, isOnboardingComplete } from "./onboardingStorage";
 import { loadUserProfile } from "./userProfileStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 import { clearUserScopedLocalData } from "./clearUserScopedLocalData";
