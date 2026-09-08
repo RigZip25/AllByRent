@@ -137,6 +137,7 @@ export function RentalInvoicePanel({
         policy: booking.lateReturnFee,
         returnDueAt: booking.returnDueAt,
         endDate: booking.endDate,
+        timeZone: booking.timezone,
       });
       if (assessment.pastGrace && assessment.feeCents >= 50) {
         setLines([

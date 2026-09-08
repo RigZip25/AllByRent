@@ -1,3 +1,4 @@
+import { resolveTimeZone, zonedEndOfDay } from "../../lib/zonedTime";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
 import { applyCors, handleOptions } from "../../lib/cors";
@@ -14,6 +15,7 @@ function claimDeadlinePassed(rental: {
   deposit_claim_deadline_at: string | null;
   returned_at: string | null;
   end_date: string;
+  timezone?: string | null;
 }): boolean {
   if (rental.deposit_claim_deadline_at) {
     return Date.now() > new Date(rental.deposit_claim_deadline_at).getTime();
@@ -21,7 +23,8 @@ function claimDeadlinePassed(rental: {
   if (rental.returned_at) {
     return Date.now() > new Date(rental.returned_at).getTime() + CLAIM_WINDOW_MS;
   }
-  const end = new Date(`${rental.end_date}T23:59:59.999Z`);
+  const end = zonedEndOfDay(rental.end_date, resolveTimeZone(rental.timezone));
+  if (!end) return false;
   return Date.now() > end.getTime() + CLAIM_WINDOW_MS;
 }
 

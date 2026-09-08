@@ -1,3 +1,4 @@
+import { resolveTimeZone, zonedEndOfDay } from "./zonedTime";
 import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
@@ -32,7 +33,21 @@ type RentalRow = {
   safely_escalated_at: string | null;
   rental_total_cents: number;
   safely_policy_id: string | null;
+  timezone?: string | null;
 };
+
+/**
+ * The agreed return instant. `due_at` is stamped at booking time; rentals that
+ * predate it fall back to the end of the last rented day in the rental's zone.
+ */
+function rentalDueMs(rental: Pick<RentalRow, "due_at" | "end_date" | "timezone">): number | null {
+  if (rental.due_at) {
+    const ms = new Date(rental.due_at).getTime();
+    if (!Number.isNaN(ms)) return ms;
+  }
+  const fallback = zonedEndOfDay(String(rental.end_date), resolveTimeZone(rental.timezone));
+  return fallback ? fallback.getTime() : null;
+}
 
 type ListingHandoff = {
   lateReturnFeeEnabled?: boolean;
@@ -241,19 +256,29 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
   let recoveryNotices = 0;
   let safelyEscalations = 0;
 
-  const { data: rows } = await admin
+  const OVERDUE_COLUMNS =
+    "id, listing_id, owner_id, renter_id, status, pickup_at, due_at, start_date, end_date, no_show_renter_notified_at, no_show_automation_at, no_show_fee_cents, late_fee_cents, late_fee_applied_at, overdue_hour_notified_at, owner_recovery_notified_at, safely_escalated_at, rental_total_cents, safely_policy_id";
+
+  const zoned = await admin
     .from("rentals")
-    .select(
-      "id, listing_id, owner_id, renter_id, status, pickup_at, due_at, start_date, end_date, no_show_renter_notified_at, no_show_automation_at, no_show_fee_cents, late_fee_cents, late_fee_applied_at, overdue_hour_notified_at, owner_recovery_notified_at, safely_escalated_at, rental_total_cents, safely_policy_id",
-    )
-    .in("status", ["active", "overdue"])
-    .not("due_at", "is", null);
+    .select(`${OVERDUE_COLUMNS}, timezone`)
+    .in("status", ["active", "overdue"]);
+
+  let rows = zoned.data;
+  // Deployments that have not run migration 049 yet have no timezone column.
+  if (zoned.error) {
+    const retry = await admin
+      .from("rentals")
+      .select(OVERDUE_COLUMNS)
+      .in("status", ["active", "overdue"]);
+    rows = retry.data;
+  }
 
   const rentals = (rows ?? []) as RentalRow[];
 
   for (const rental of rentals) {
-    const dueMs = new Date(rental.due_at!).getTime();
-    if (Number.isNaN(dueMs) || now <= dueMs) continue;
+    const dueMs = rentalDueMs(rental);
+    if (dueMs == null || now <= dueMs) continue;
 
     const overdueMs = now - dueMs;
 

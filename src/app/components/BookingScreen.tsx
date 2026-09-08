@@ -199,8 +199,15 @@ import {
   fetchListingBusyIntervals,
   isRangeBusy,
   parseIsoDateLocal,
+  todayIsoLocal,
   type BusyInterval,
 } from "../../lib/availabilityBusy";
+import {
+  resolvePickupInstantIso,
+  resolvePickupWindowIso,
+  resolveReturnDeadlineIso,
+} from "../../lib/rentalPickupTime";
+import { deviceTimeZone } from "../../lib/zonedTime";
 
 const GREEN = "#0D5C3A";
 
@@ -221,9 +228,7 @@ function minimumPeriodToDays(period: MinimumRentalPeriod | string | undefined): 
 }
 
 function defaultStartIso(): string {
-  const d = new Date();
-  d.setDate(d.getDate() + 2);
-  return d.toISOString().slice(0, 10);
+  return addDaysIso(todayIsoLocal(), 2);
 }
 
 function fulfillmentOptions(
@@ -332,7 +337,7 @@ function BookingScreenLoaded({
     options.find((o) => !o.disabled)?.id ?? options[0]?.id ?? "pickup";
   const minRentalDays = minimumPeriodToDays(listing.pricing.minimumPeriod);
 
-  const [rentalDays, setRentalDays] = useState(() => Math.max(2, minRentalDays));
+  const [rentalDays, setRentalDays] = useState(() => minRentalDays);
   const [fulfillment, setFulfillment] = useState<FulfillmentMethod>(defaultFulfillment);
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
@@ -1028,6 +1033,8 @@ function BookingScreenLoaded({
           : t.booking.pickupInPerson;
 
     const approvalDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const bookingTimeZone = deviceTimeZone();
+    const pickupWindow = resolvePickupWindowIso(startDate, listing.handoff, bookingTimeZone);
 
     const extrasLabels = offeredExtraKeys
       .filter((key) => selectedExtras[key])
@@ -1223,7 +1230,11 @@ function BookingScreenLoaded({
       fulfillmentMethod: fulfillment,
       deliveryAddress: deliveryRequested ? deliveryAddress.trim() : undefined,
       contactlessInstructions: listing.handoff.contactlessInstructions || undefined,
-      pickupWindowStart: new Date().toISOString(),
+      timezone: bookingTimeZone,
+      pickupScheduledAt: pickupWindow?.start,
+      pickupWindowStart: pickupWindow?.start ?? new Date().toISOString(),
+      pickupWindowEnd: pickupWindow?.end,
+      returnDueAt: resolveReturnDeadlineIso(endDate, bookingTimeZone) ?? undefined,
       stripePayment: withStripePayment,
       paymentOnHold: withStripePayment,
       depositAmountCents,
@@ -1363,8 +1374,10 @@ function BookingScreenLoaded({
 
   const persistRentalRow = async (id: string, booking: RentalBooking): Promise<void> => {
     if (!auth.userId || !listing.hostId) return;
-    const pickupAt = new Date(`${startDate}T14:00:00`).toISOString();
-    const dueAt = new Date(`${endDate}T23:59:59`).toISOString();
+    const timeZone = booking.timezone ?? deviceTimeZone();
+    const pickupAt =
+      booking.pickupScheduledAt ?? resolvePickupInstantIso(startDate, listing.handoff, timeZone);
+    const dueAt = booking.returnDueAt ?? resolveReturnDeadlineIso(endDate, timeZone);
     const row = toSupabaseRentalInsert({
       id,
       listingId: listing.id,
@@ -1383,6 +1396,7 @@ function BookingScreenLoaded({
       rentalTotalCents: Math.round(totalWithExtras * 100),
       pickupAt,
       dueAt,
+      timezone: timeZone,
       stripePaymentStatus: booking.stripePayment ? "requires_payment_method" : undefined,
       insuranceProofPath: booking.insuranceProofPath ?? null,
       insuranceProofUrl: booking.insuranceProofUrl ?? null,
@@ -1564,8 +1578,8 @@ function BookingScreenLoaded({
             </p>
           ) : null}
           <p className="mt-2 text-xs text-muted-foreground">
-            {new Date(startDate).toLocaleDateString()} –{" "}
-            {new Date(endDate).toLocaleDateString()}
+            {(parseIsoDateLocal(startDate) ?? new Date(startDate)).toLocaleDateString()} –{" "}
+            {(parseIsoDateLocal(endDate) ?? new Date(endDate)).toLocaleDateString()}
           </p>
           <p className="mt-3 text-xs font-medium text-muted-foreground">
             {t.booking.selectRentalDates}

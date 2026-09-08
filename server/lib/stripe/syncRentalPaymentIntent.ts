@@ -1,3 +1,4 @@
+import { resolveTimeZone, zonedEndOfDay } from "../zonedTime";
 import type Stripe from "stripe";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -103,16 +104,18 @@ export async function syncRentalPaymentFromIntent(
       patch.deposit_status = "held";
       const { data: rental } = await admin
         .from("rentals")
-        .select("returned_at, end_date, deposit_claim_deadline_at")
+        .select("returned_at, end_date, deposit_claim_deadline_at, timezone")
         .eq("id", rentalId)
         .maybeSingle();
 
       if (rental && !rental.deposit_claim_deadline_at) {
         const base = rental.returned_at
           ? new Date(rental.returned_at)
-          : new Date(`${rental.end_date}T23:59:59.999Z`);
-        const deadline = new Date(base.getTime() + 48 * 60 * 60 * 1000);
-        patch.deposit_claim_deadline_at = deadline.toISOString();
+          : zonedEndOfDay(String(rental.end_date), resolveTimeZone(rental.timezone));
+        if (base) {
+          const deadline = new Date(base.getTime() + 48 * 60 * 60 * 1000);
+          patch.deposit_claim_deadline_at = deadline.toISOString();
+        }
       }
     }
 

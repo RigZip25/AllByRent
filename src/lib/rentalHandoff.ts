@@ -1,3 +1,5 @@
+import { resolveReturnDeadlineIso } from "./rentalPickupTime";
+import { resolveTimeZone } from "./zonedTime";
 import { getAccessToken } from "./stripePayments";
 import type { MediaRef } from "./mediaStore";
 import type { RentalBooking, RentalRole } from "./rentalsStorage";
@@ -70,7 +72,8 @@ function mergeLocalHandoff(
       patch.pickupConfirmedAt = booking.pickupConfirmedAt ?? now;
       patch.returnPin = booking.returnPin ?? generatePin();
       if (!booking.returnDueAt && booking.endDate) {
-        patch.returnDueAt = new Date(`${booking.endDate}T23:59:59.000Z`).toISOString();
+        patch.returnDueAt =
+          resolveReturnDeadlineIso(booking.endDate, resolveTimeZone(booking.timezone)) ?? undefined;
       }
     }
     return {

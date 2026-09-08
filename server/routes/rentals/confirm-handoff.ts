@@ -1,3 +1,4 @@
+import { resolveTimeZone, zonedEndOfDayIso } from "../../lib/zonedTime";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { applyCors, handleOptions } from "../../lib/cors";
 import { withApiErrorHandling } from "../../lib/safeHandler";
@@ -118,7 +119,10 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       patch.picked_up_at = rental.picked_up_at ?? now;
       if (!rental.return_pin) patch.return_pin = generatePin();
       if (!rental.due_at && rental.end_date) {
-        patch.due_at = new Date(`${rental.end_date}T23:59:59.000Z`).toISOString();
+        patch.due_at = zonedEndOfDayIso(
+          String(rental.end_date),
+          resolveTimeZone(rental.timezone as string | null | undefined),
+        );
       }
     }
   } else {
