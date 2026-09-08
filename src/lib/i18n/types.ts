@@ -916,6 +916,8 @@ export type AppMessages = {
       nextPhotoAria: string;
       enhancementUnavailable: string;
       couldntAddPhoto: string;
+      /** iPhone HEIC the browser could not decode — a format problem, not a retry. */
+      heicFailed: string;
       /** NSFW / not a listable item — calm, non-graphic. */
       moderationNotListable: string;
       /** Weapons, drugs, and other banned goods. */

@@ -1636,6 +1636,8 @@ export const en: AppMessages = {
       enhancementUnavailable:
         "Photo saved as-is — background polish wasn't available this time.",
       couldntAddPhoto: "Couldn't add this photo. Please try again.",
+      heicFailed:
+        "This iPhone photo (HEIC) couldn't be read here. Take a new shot, or switch Settings \u2192 Camera \u2192 Formats to \u201cMost Compatible\u201d and pick it again.",
       moderationNotListable:
         "We couldn't use this photo for a listing — it doesn't look like a clear product photo. Please try another shot of the item itself.",
       moderationProhibitedItem:

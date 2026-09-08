@@ -1636,6 +1636,8 @@ export const es: AppMessages = {
       enhancementUnavailable:
         "Foto guardada tal cual — el retoque de fondo no estaba disponible esta vez.",
       couldntAddPhoto: "No se pudo añadir esta foto. Inténtalo de nuevo.",
+      heicFailed:
+        "Esta foto de iPhone (HEIC) no se pudo leer aquí. Hazla de nuevo, o cambia Ajustes \u2192 Cámara \u2192 Formatos a \u00abMás compatible\u00bb y vuelve a elegirla.",
       moderationNotListable:
         "No pudimos usar esta foto en el anuncio : no parece una foto clara del producto. Prueba otra foto del artículo en sí.",
       moderationProhibitedItem:

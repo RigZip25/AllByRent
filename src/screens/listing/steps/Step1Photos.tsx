@@ -29,6 +29,15 @@ import { useMessages } from "../../../lib/i18n/react";
 
 const PRIMARY_GREEN = "#0D5C3A";
 
+/** A live photo or HEIC the browser refused to decode — a format problem, not a retry. */
+class HeicConversionError extends Error {
+  constructor(cause: unknown) {
+    super("HEIC conversion failed");
+    this.name = "HeicConversionError";
+    this.cause = cause;
+  }
+}
+
 function reorderArray<T>(items: T[], from: number, to: number): T[] {
   if (from === to || from < 0 || to < 0 || from >= items.length || to >= items.length) {
     return items;
@@ -190,23 +199,28 @@ export function Step1Photos({
   const maybeConvertHeicToJpeg = async (file: File): Promise<File> => {
     if (!isHeicLike(file)) return file;
 
-    // Lazy-load to avoid penalizing non-iOS users.
-    const mod = await import("heic2any");
-    const heic2any = (mod as unknown as { default: (opts: unknown) => Promise<Blob | Blob[]> })
-      .default;
+    try {
+      // Lazy-load to avoid penalizing non-iOS users.
+      const mod = await import("heic2any");
+      const heic2any = (mod as unknown as { default: (opts: unknown) => Promise<Blob | Blob[]> })
+        .default;
 
-    const converted = await heic2any({
-      blob: file,
-      toType: "image/jpeg",
-      quality: 0.9,
-    });
+      const converted = await heic2any({
+        blob: file,
+        toType: "image/jpeg",
+        quality: 0.9,
+      });
 
-    const blob = Array.isArray(converted) ? converted[0] : converted;
-    const baseName = file.name.replace(/\.[^.]+$/, "") || "photo";
-    return new File([blob], `${baseName}.jpg`, {
-      type: "image/jpeg",
-      lastModified: Date.now(),
-    });
+      const blob = Array.isArray(converted) ? converted[0] : converted;
+      const baseName = file.name.replace(/\.[^.]+$/, "") || "photo";
+      return new File([blob], `${baseName}.jpg`, {
+        type: "image/jpeg",
+        lastModified: Date.now(),
+      });
+    } catch (error) {
+      // "Try again" is useless advice for a format the browser cannot decode.
+      throw new HeicConversionError(error);
+    }
   };
 
   const handleFilesSelected = async (files: File[]) => {
@@ -269,7 +283,11 @@ export function Step1Photos({
         // Keep going through the batch: one unreadable file used to drop every
         // photo the host picked after it.
         console.warn("[listing] Couldn't add photo", error);
-        setPhotoWarning(photosCopy.couldntAddPhoto);
+        setPhotoWarning(
+          error instanceof HeicConversionError
+            ? photosCopy.heicFailed
+            : photosCopy.couldntAddPhoto,
+        );
         setErrorIndex(targetIndex);
         continue;
       } finally {

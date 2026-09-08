@@ -1653,6 +1653,8 @@ export const cs: AppMessages = {
       enhancementUnavailable:
         "Fotka uložena tak, jak je — vylepšení pozadí teď nebylo k dispozici.",
       couldntAddPhoto: "Fotku se nepodařilo přidat. Zkus to prosím znovu.",
+      heicFailed:
+        "Tuto fotku z iPhonu (HEIC) se tady nepodařilo přečíst. Vyfoť ji znovu, nebo v Nastavení \u2192 Fotoaparát \u2192 Formáty zvol \u201eNejvyšší kompatibilita\u201c a vyber ji znovu.",
       moderationNotListable:
         "Tuto fotku jsme u nabídky nemohli použít — nevypadá jako jasná fotka produktu. Zkus prosím jinou fotku samotné věci.",
       moderationProhibitedItem:
