@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   depositReleaseDueAt,
+  noShowDueAtMs,
   type DepositRow,
   type DisputeRow,
 } from "./rentalAutomation";
@@ -131,5 +132,30 @@ describe("depositReleaseDueAt", () => {
     const due = depositReleaseDueAt(rental({ returned_at: "2026-03-05T18:00:00.000Z" }), undefined);
     expect(due).not.toBeNull();
     expect(due! - Date.parse("2026-03-05T18:00:00.000Z")).toBeLessThanOrEqual(3 * DAY);
+  });
+});
+
+describe("noShowDueAtMs", () => {
+  const pickup = "2026-03-01T15:00:00.000Z";
+  const pickupMs = Date.parse(pickup);
+
+  it("is two hours after the pickup window when nobody said anything", () => {
+    expect(noShowDueAtMs({ pickup_at: pickup, pickup_grace_until: null })).toBe(
+      pickupMs + 2 * 60 * 60 * 1000,
+    );
+  });
+
+  it("waits for the grace a running-late note bought", () => {
+    const grace = new Date(pickupMs + 3 * 60 * 60 * 1000).toISOString();
+    expect(noShowDueAtMs({ pickup_at: pickup, pickup_grace_until: grace })).toBe(
+      Date.parse(grace),
+    );
+  });
+
+  it("never brings the no-show forward", () => {
+    const grace = new Date(pickupMs + 30 * 60 * 1000).toISOString();
+    expect(noShowDueAtMs({ pickup_at: pickup, pickup_grace_until: grace })).toBe(
+      pickupMs + 2 * 60 * 60 * 1000,
+    );
   });
 });

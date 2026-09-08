@@ -1407,11 +1407,14 @@ export const cs: AppMessages = {
     cancelBooking: "Zrušit rezervaci",
     runningLateTitle: (ownerName) => `Poslat zprávu ${ownerName}?`,
     runningLateBody:
-      "Dostanou push a zprávu v aplikaci. Když odpoví OK, časovač nedostavení se resetuje.",
+      "Hostitel to uvidí u rezervace a nedostavení se odloží o hodinu.",
     runningLateDefault: "Mám menší zpoždění, brzy budu.",
     runningLateNotifTitle: "Nájemce má zpoždění",
     runningLateNotifBody: (message) =>
-      `${message} — klepnutím potvrďte a pozastavte časovač nedostavení.`,
+      `${message} — nedostavení je odloženo o hodinu.`,
+    runningLateFromRenter: (message) => `Zdrží se: „${message}“`,
+    runningLateAck: "Rozumím",
+    runningLateAcknowledged: "Dal jsi vědět, že počkáš",
   },
   rentalStatus: {
     pending_approval: "Čeká na schválení",

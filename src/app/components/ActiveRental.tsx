@@ -423,7 +423,7 @@ export function ActiveRental({
       booking.role === "host" &&
       !booking.noShowMarkedAt &&
       booking.pickupScheduledAt &&
-      canMarkNoShow(booking.pickupScheduledAt) &&
+      canMarkNoShow(booking.pickupScheduledAt, Date.now(), booking.pickupGraceUntil) &&
       (booking.status === "no_show" ||
         booking.status === "pending_checkin" ||
         booking.status === "upcoming"),

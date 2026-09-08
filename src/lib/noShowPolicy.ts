@@ -52,6 +52,7 @@ export function canSuggestSoftNoShow(
     RentalBooking,
     | "status"
     | "pickupScheduledAt"
+    | "pickupGraceUntil"
     | "noShowMarkedAt"
     | "hostHandedOverAt"
     | "renterReceivedAt"
@@ -67,6 +68,9 @@ export function canSuggestSoftNoShow(
   if (!booking.pickupScheduledAt) return false;
   const pickup = new Date(booking.pickupScheduledAt).getTime();
   if (Number.isNaN(pickup)) return false;
+  // A renter who said they were on the way is not a no-show yet.
+  const grace = booking.pickupGraceUntil ? new Date(booking.pickupGraceUntil).getTime() : Number.NaN;
+  if (!Number.isNaN(grace) && nowMs < grace) return false;
   return nowMs - pickup >= NO_SHOW_MARK_AFTER_MS;
 }
 

@@ -181,6 +181,12 @@ export type RentalBooking = {
   runningLateMessage?: string;
   runningLateSentAt?: string;
   runningLateAcknowledged?: boolean;
+  /**
+   * Until when a heads-up from the renter holds off the no-show. Stamped by the
+   * database from the moment the note arrives, so neither device's clock and no
+   * repeated tap can stretch it.
+   */
+  pickupGraceUntil?: string;
   stripePayment?: boolean;
   /** Security deposit hold (Stripe manual-capture PI). */
   depositAmountCents?: number;
@@ -447,6 +453,10 @@ type SupabaseRentalRow = {
   insurance_policy_note?: string | null;
   pickup_condition_photo_path?: string | null;
   return_condition_photo_path?: string | null;
+  running_late_message?: string | null;
+  running_late_sent_at?: string | null;
+  running_late_acknowledged_at?: string | null;
+  pickup_grace_until?: string | null;
   rental_agreement?: RentalAgreementRecord | null;
   rental_invoices?: unknown;
   created_at: string;
@@ -607,6 +617,10 @@ export function rentalBookingFromRemoteRow(
       : undefined,
     pickupConditionPhoto: conditionPhotoFromPath(row.pickup_condition_photo_path) ?? null,
     returnConditionPhoto: conditionPhotoFromPath(row.return_condition_photo_path) ?? null,
+    runningLateMessage: row.running_late_message ?? undefined,
+    runningLateSentAt: row.running_late_sent_at ?? undefined,
+    runningLateAcknowledged: Boolean(row.running_late_acknowledged_at),
+    pickupGraceUntil: row.pickup_grace_until ?? undefined,
     rentalAgreement: row.rental_agreement ?? null,
     invoices: normalizeRentalInvoices(row.rental_invoices),
   });
@@ -940,9 +954,12 @@ function mergeRentalBooking(local: RentalBooking, remote: RentalBooking): Rental
     cancelReason: local.cancelReason ?? remote.cancelReason,
     completedAt: local.completedAt ?? remote.completedAt,
     review: local.review ?? remote.review,
-    runningLateMessage: local.runningLateMessage ?? remote.runningLateMessage,
-    runningLateSentAt: local.runningLateSentAt ?? remote.runningLateSentAt,
-    runningLateAcknowledged: local.runningLateAcknowledged ?? remote.runningLateAcknowledged,
+    runningLateMessage: remote.runningLateMessage ?? local.runningLateMessage,
+    runningLateSentAt: remote.runningLateSentAt ?? local.runningLateSentAt,
+    runningLateAcknowledged:
+      remote.runningLateAcknowledged || local.runningLateAcknowledged,
+    // The database stamps the grace; a device only reports what it was told.
+    pickupGraceUntil: remote.pickupGraceUntil ?? local.pickupGraceUntil,
     disputeEscalated: local.disputeEscalated ?? remote.disputeEscalated,
     rentalAgreement: mergeRentalAgreementRecords(
       local.rentalAgreement,
@@ -980,6 +997,9 @@ export async function updateRentalRemote(
     hostAcceptedReturnAt?: string | null;
     pickupConditionPhotoPath?: string | null;
     returnConditionPhotoPath?: string | null;
+    runningLateMessage?: string | null;
+    runningLateSentAt?: string | null;
+    runningLateAcknowledgedAt?: string | null;
     rentalAgreement?: RentalAgreementRecord | null;
     invoices?: RentalInvoice[] | null;
   },
@@ -1010,6 +1030,15 @@ export async function updateRentalRemote(
   }
   if (patch.returnConditionPhotoPath !== undefined) {
     row.return_condition_photo_path = patch.returnConditionPhotoPath;
+  }
+  if (patch.runningLateMessage !== undefined) {
+    row.running_late_message = patch.runningLateMessage;
+  }
+  if (patch.runningLateSentAt !== undefined) {
+    row.running_late_sent_at = patch.runningLateSentAt;
+  }
+  if (patch.runningLateAcknowledgedAt !== undefined) {
+    row.running_late_acknowledged_at = patch.runningLateAcknowledgedAt;
   }
   if (patch.rentalAgreement !== undefined) {
     row.rental_agreement = patch.rentalAgreement;
@@ -1053,6 +1082,17 @@ function remotePatchFromBooking(patch: Partial<RentalBooking>): Parameters<typeo
   if (patch.renterReturnedAt !== undefined) remote.renterReturnedAt = patch.renterReturnedAt ?? null;
   if (patch.hostAcceptedReturnAt !== undefined) {
     remote.hostAcceptedReturnAt = patch.hostAcceptedReturnAt ?? null;
+  }
+  if (patch.runningLateMessage !== undefined) {
+    remote.runningLateMessage = patch.runningLateMessage ?? null;
+  }
+  if (patch.runningLateSentAt !== undefined) {
+    remote.runningLateSentAt = patch.runningLateSentAt ?? null;
+  }
+  if (patch.runningLateAcknowledged !== undefined) {
+    remote.runningLateAcknowledgedAt = patch.runningLateAcknowledged
+      ? new Date().toISOString()
+      : null;
   }
   if (patch.rentalAgreement !== undefined) {
     remote.rentalAgreement = patch.rentalAgreement ?? null;

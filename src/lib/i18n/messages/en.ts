@@ -1390,11 +1390,14 @@ export const en: AppMessages = {
     cancelBooking: "Cancel booking",
     runningLateTitle: (ownerName) => `Send a message to ${ownerName}?`,
     runningLateBody:
-      "They'll get a push and in-app message. If they reply OK, the no-show timer resets.",
+      "The host sees this on the booking, and no-show is held off for an hour from now.",
     runningLateDefault: "I'm running a bit late, be there soon.",
     runningLateNotifTitle: "Renter running late",
     runningLateNotifBody: (message) =>
-      `${message} — tap to acknowledge and pause no-show timer.`,
+      `${message} — no-show is held off for an hour.`,
+    runningLateFromRenter: (message) => `Running late: “${message}”`,
+    runningLateAck: "Got it",
+    runningLateAcknowledged: "You told them you'll wait",
   },
   rentalStatus: {
     pending_approval: "Awaiting approval",

@@ -201,7 +201,7 @@ export function RentalCard({
     booking.role === "host" &&
     !booking.noShowMarkedAt &&
     booking.pickupScheduledAt &&
-    canMarkNoShow(booking.pickupScheduledAt, now) &&
+    canMarkNoShow(booking.pickupScheduledAt, now, booking.pickupGraceUntil) &&
     (booking.status === "no_show" ||
       booking.status === "pending_checkin" ||
       booking.status === "upcoming");
@@ -316,6 +316,36 @@ export function RentalCard({
             </>
           ) : (
             <ActionButton label={t.rentalCard.requestReturn} variant="danger" onClick={(e) => { e.stopPropagation(); onOpen?.(); }} />
+          )}
+        </div>
+      ) : null}
+
+      {/* The heads-up, on the phone of the person waiting for it. */}
+      {tab === "active" &&
+      booking.role === "host" &&
+      booking.runningLateSentAt &&
+      !booking.pickupConfirmedAt &&
+      !booking.noShowMarkedAt ? (
+        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
+          <p className="text-[13px] text-amber-950">
+            {t.rentalCard.runningLateFromRenter(booking.runningLateMessage ?? "")}
+          </p>
+          {booking.runningLateAcknowledged ? (
+            <p className="mt-1 text-[12px] font-semibold text-amber-800">
+              {t.rentalCard.runningLateAcknowledged}
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                updateBooking(booking.id, { runningLateAcknowledged: true });
+                onRefresh();
+              }}
+              className="mt-2 rounded-lg bg-amber-800 px-3 py-1.5 text-[12px] font-bold text-white"
+            >
+              {t.rentalCard.runningLateAck}
+            </button>
           )}
         </div>
       ) : null}
@@ -477,8 +507,7 @@ export function RentalCard({
 
       <RunningLateSheet
         open={runningLateOpen}
-        bookingId={booking.id}
-        ownerName={booking.counterpartyName}
+        booking={booking}
         onClose={() => setRunningLateOpen(false)}
         onSent={onRefresh}
       />

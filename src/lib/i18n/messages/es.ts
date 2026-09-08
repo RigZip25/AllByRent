@@ -1389,11 +1389,14 @@ export const es: AppMessages = {
     cancelBooking: "Cancelar reserva",
     runningLateTitle: (ownerName) => `¿Enviar un mensaje a ${ownerName}?`,
     runningLateBody:
-      "Recibirá un push y un mensaje en la app. Si responde OK, el temporizador de ausencia se reinicia.",
+      "El anfitrión lo ve en la reserva y la ausencia se aplaza una hora desde ahora.",
     runningLateDefault: "Voy con un poco de retraso, llego enseguida.",
     runningLateNotifTitle: "El inquilino llega tarde",
     runningLateNotifBody: (message) =>
-      `${message} — toca para confirmarlo y pausar el temporizador de ausencia.`,
+      `${message} — la ausencia se aplaza una hora.`,
+    runningLateFromRenter: (message) => `Llega tarde: «${message}»`,
+    runningLateAck: "Entendido",
+    runningLateAcknowledged: "Le dijiste que esperarás",
   },
   rentalStatus: {
     pending_approval: "Esperando aprobación",

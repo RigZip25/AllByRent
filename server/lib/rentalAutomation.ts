@@ -29,6 +29,8 @@ type RentalRow = {
   late_fee_applied_at: string | null;
   overdue_hour_notified_at: string | null;
   owner_recovery_notified_at: string | null;
+  /** Set by the database when the renter says they are running late. */
+  pickup_grace_until?: string | null;
   safely_escalated_at: string | null;
   rental_total_cents: number;
   safely_policy_id: string | null;
@@ -96,6 +98,52 @@ async function insertNotification(
   });
 }
 
+const RENTAL_AUTOMATION_COLUMNS =
+  "id, listing_id, owner_id, renter_id, status, pickup_at, due_at, start_date, end_date, no_show_renter_notified_at, no_show_automation_at, no_show_fee_cents, late_fee_cents, late_fee_applied_at, overdue_hour_notified_at, owner_recovery_notified_at, safely_escalated_at, rental_total_cents, safely_policy_id";
+
+/**
+ * The rentals the automation walks.
+ *
+ * `pickup_grace_until` arrived with migration 058, and a project that has not
+ * run it yet would otherwise get an error for the whole select and no no-show
+ * handling at all — so a missing column costs the grace, not the cron.
+ */
+async function fetchAutomationRentals(
+  admin: SupabaseClient,
+  statuses: string[],
+  presentColumn: "pickup_at" | "due_at",
+): Promise<RentalRow[]> {
+  const query = () =>
+    admin
+      .from("rentals")
+      .select(`${RENTAL_AUTOMATION_COLUMNS}, pickup_grace_until`)
+      .in("status", statuses)
+      .not(presentColumn, "is", null);
+
+  const { data, error } = await query();
+  if (!error) return (data ?? []) as RentalRow[];
+
+  const { data: fallback } = await admin
+    .from("rentals")
+    .select(RENTAL_AUTOMATION_COLUMNS)
+    .in("status", statuses)
+    .not(presentColumn, "is", null);
+  return (fallback ?? []) as RentalRow[];
+}
+
+/**
+ * The first moment a rental counts as a no-show: two hours after the pickup
+ * window, or the end of the grace the renter's "running late" note bought.
+ */
+export function noShowDueAtMs(rental: Pick<RentalRow, "pickup_at" | "pickup_grace_until">): number {
+  const pickupMs = new Date(rental.pickup_at ?? "").getTime();
+  const graceMs = rental.pickup_grace_until
+    ? new Date(rental.pickup_grace_until).getTime()
+    : Number.NaN;
+  const base = pickupMs + NO_SHOW_SUGGEST_MS;
+  return Number.isNaN(graceMs) ? base : Math.max(base, graceMs);
+}
+
 export async function runNoShowAutomation(admin: SupabaseClient): Promise<{
   reminded: number;
   suggested: number;
@@ -106,15 +154,11 @@ export async function runNoShowAutomation(admin: SupabaseClient): Promise<{
   let suggested = 0;
   let autoCancelled = 0;
 
-  const { data: rows } = await admin
-    .from("rentals")
-    .select(
-      "id, listing_id, owner_id, renter_id, status, pickup_at, due_at, start_date, end_date, no_show_renter_notified_at, no_show_automation_at, no_show_fee_cents, late_fee_cents, late_fee_applied_at, overdue_hour_notified_at, owner_recovery_notified_at, safely_escalated_at, rental_total_cents, safely_policy_id",
-    )
-    .in("status", ["pending_checkin", "upcoming", "no_show"])
-    .not("pickup_at", "is", null);
-
-  const rentals = (rows ?? []) as RentalRow[];
+  const rentals = await fetchAutomationRentals(
+    admin,
+    ["pending_checkin", "upcoming", "no_show"],
+    "pickup_at",
+  );
 
   for (const rental of rentals) {
     const pickupMs = new Date(rental.pickup_at!).getTime();
@@ -122,10 +166,19 @@ export async function runNoShowAutomation(admin: SupabaseClient): Promise<{
 
     const elapsed = now - pickupMs;
 
+    const noShowDueMs = noShowDueAtMs(rental);
+    const graceUntilMs = rental.pickup_grace_until
+      ? new Date(rental.pickup_grace_until).getTime()
+      : Number.NaN;
+    // Someone who has just told the host they are on the way does not need to
+    // be told the window opened.
+    const inGrace = !Number.isNaN(graceUntilMs) && now < graceUntilMs;
+
     if (
       (rental.status === "pending_checkin" || rental.status === "upcoming") &&
       elapsed >= 30 * MS_MIN &&
-      !rental.no_show_renter_notified_at
+      !rental.no_show_renter_notified_at &&
+      !inGrace
     ) {
       await insertNotification(admin, {
         recipientId: rental.renter_id,
@@ -144,7 +197,7 @@ export async function runNoShowAutomation(admin: SupabaseClient): Promise<{
     // Soft suggest: status → no_show, calendar still busy until host confirms or auto-cancel.
     if (
       (rental.status === "pending_checkin" || rental.status === "upcoming") &&
-      elapsed >= NO_SHOW_SUGGEST_MS &&
+      now >= noShowDueMs &&
       !rental.no_show_automation_at
     ) {
       await admin
@@ -241,15 +294,7 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
   let recoveryNotices = 0;
   let safelyEscalations = 0;
 
-  const { data: rows } = await admin
-    .from("rentals")
-    .select(
-      "id, listing_id, owner_id, renter_id, status, pickup_at, due_at, start_date, end_date, no_show_renter_notified_at, no_show_automation_at, no_show_fee_cents, late_fee_cents, late_fee_applied_at, overdue_hour_notified_at, owner_recovery_notified_at, safely_escalated_at, rental_total_cents, safely_policy_id",
-    )
-    .in("status", ["active", "overdue"])
-    .not("due_at", "is", null);
-
-  const rentals = (rows ?? []) as RentalRow[];
+  const rentals = await fetchAutomationRentals(admin, ["active", "overdue"], "due_at");
 
   for (const rental of rentals) {
     const dueMs = new Date(rental.due_at!).getTime();

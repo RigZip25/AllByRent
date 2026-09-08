@@ -2342,6 +2342,10 @@ export type AppMessages = {
     runningLateDefault: string;
     runningLateNotifTitle: string;
     runningLateNotifBody: (message: string) => string;
+    /** The note as the host reads it, on their own card. */
+    runningLateFromRenter: (message: string) => string;
+    runningLateAck: string;
+    runningLateAcknowledged: string;
   };
   rentalStatus: {
     pending_approval: string;
