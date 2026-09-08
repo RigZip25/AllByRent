@@ -139,6 +139,7 @@ import {
 import {
   appendRentalBooking,
   createRentalRemote,
+  findLocalBookingConflict,
   toSupabaseRentalInsert,
   updateBooking,
   updateRentalRemote,
@@ -195,6 +196,7 @@ import { getSearchCountryCode } from "../../lib/locationCountry";
 import { AvailabilityCalendar } from "../../components/availability/AvailabilityCalendar";
 import {
   addDaysIso,
+  calendarMonthDays,
   daysInclusive,
   fetchListingBusyIntervals,
   isRangeBusy,
@@ -211,7 +213,10 @@ import { deviceTimeZone } from "../../lib/zonedTime";
 
 const GREEN = "#0D5C3A";
 
-function minimumPeriodToDays(period: MinimumRentalPeriod | string | undefined): number {
+function minimumPeriodToDays(
+  period: MinimumRentalPeriod | string | undefined,
+  startDate: string,
+): number {
   switch (period) {
     case "3 days":
       return 3;
@@ -219,8 +224,10 @@ function minimumPeriodToDays(period: MinimumRentalPeriod | string | undefined): 
       return 7;
     case "2 weeks":
       return 14;
+    // A month is what the host said: the calendar month from the start date,
+    // which is 28 to 31 days rather than a flat 30.
     case "1 month":
-      return 30;
+      return calendarMonthDays(startDate);
     case "1 day":
     default:
       return 1;
@@ -335,9 +342,9 @@ function BookingScreenLoaded({
   const options = useMemo(() => fulfillmentOptions(listing, t.booking), [listing, t.booking]);
   const defaultFulfillment =
     options.find((o) => !o.disabled)?.id ?? options[0]?.id ?? "pickup";
-  const minRentalDays = minimumPeriodToDays(listing.pricing.minimumPeriod);
-
-  const [rentalDays, setRentalDays] = useState(() => minRentalDays);
+  const [rentalDays, setRentalDays] = useState(() =>
+    minimumPeriodToDays(listing.pricing.minimumPeriod, defaultStartIso()),
+  );
   const [fulfillment, setFulfillment] = useState<FulfillmentMethod>(defaultFulfillment);
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
@@ -347,6 +354,10 @@ function BookingScreenLoaded({
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
   const [startDate, setStartDate] = useState(defaultStartIso);
+  const minRentalDays = useMemo(
+    () => minimumPeriodToDays(listing.pricing.minimumPeriod, startDate),
+    [listing.pricing.minimumPeriod, startDate],
+  );
   const [hostDisplayName, setHostDisplayName] = useState(t.booking.hostFallback);
   const [insuranceProof, setInsuranceProof] = useState<MediaRef | null>(null);
   const [insuranceProofPath, setInsuranceProofPath] = useState("");
@@ -1429,6 +1440,16 @@ function BookingScreenLoaded({
       setPaymentError(null);
       void (async () => {
         const booking = buildBooking(id, false);
+        const conflict = findLocalBookingConflict({
+          listingId: listing.id,
+          startDate,
+          endDate,
+          ignoreBookingId: id,
+        });
+        if (conflict) {
+          setPaymentError(t.booking.datesBlocked);
+          return;
+        }
         try {
           if (isSupabaseConfigured()) {
             await persistRentalRow(id, booking);

@@ -1,5 +1,10 @@
 import { getMessages } from "./i18n";
-import { listingHasOverlappingRental, parseIsoDateLocal } from "./availabilityBusy";
+import {
+  BUSY_RENTAL_STATUSES,
+  listingHasOverlappingRental,
+  parseIsoDateLocal,
+  rangesOverlap,
+} from "./availabilityBusy";
 import { fetchListingByIdRemote, getPublishedListingById } from "./listingStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 import type { MediaRef } from "./mediaStore";
@@ -826,6 +831,34 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
     returnConditionPhoto: raw.returnConditionPhoto ?? null,
     invoices: normalizeRentalInvoices(raw.invoices),
   };
+}
+
+/**
+ * A booking already on this device that occupies the same days.
+ *
+ * The database rejects overlaps (migration 035), but bookings can be written
+ * locally with no database at all, and that path had nothing stopping a host
+ * from double-booking the same item.
+ */
+export function findLocalBookingConflict(params: {
+  listingId: string;
+  startDate: string;
+  endDate: string;
+  ignoreBookingId?: string;
+}): RentalBooking | null {
+  const listingId = params.listingId.trim();
+  if (!listingId || !params.startDate || !params.endDate) return null;
+  const busy = new Set<string>(BUSY_RENTAL_STATUSES);
+  const range = { start: params.startDate, end: params.endDate };
+  return (
+    loadRentalBookings().find(
+      (booking) =>
+        booking.id !== params.ignoreBookingId &&
+        booking.listingId?.trim() === listingId &&
+        busy.has(booking.status) &&
+        rangesOverlap(range, { start: booking.startDate, end: booking.endDate }),
+    ) ?? null
+  );
 }
 
 export function appendRentalBooking(booking: RentalBooking): RentalBooking[] {
