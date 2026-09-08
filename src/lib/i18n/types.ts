@@ -94,6 +94,15 @@ export type OnboardingMessages = {
     subtitle: string;
     exploreCta: string;
     stockGarageCta: string;
+    profileHeading: (appName: string) => string;
+    typeLabel: string;
+    blockLabel: string;
+    focusLabel: string;
+    accountPersonal: string;
+    accountPro: string;
+    visiting: string;
+    onMyBlock: string;
+    exploreTag: string;
   };
   browseHub: {
     title: string;
@@ -194,6 +203,9 @@ export type AppMessages = {
     next: string;
     loading: string;
     signIn: string;
+    /** Trust badge on a counterparty name. */
+    idVerifiedAria: string;
+    phoneVerifiedAria: string;
   };
   /** Public occupancy calendar (listing + booking + host). */
   availabilityCalendar: {
@@ -216,6 +228,13 @@ export type AppMessages = {
     stock: string;
     activity: string;
     more: string;
+    /** Screen-reader label for the whole bottom bar. */
+    mainAria: string;
+    homeAria: string;
+    mreAria: (mascot: string) => string;
+    addAria: string;
+    activityAria: string;
+    moreAria: string;
   };
   activity: {
     title: string;
@@ -364,6 +383,7 @@ export type AppMessages = {
     modeAny: string;
     modeRent: string;
     modeBuy: string;
+    modeFree: string;
     filtersTitle: string;
     categoryTitle: string;
     subcategoryTitle: string;
@@ -1073,6 +1093,12 @@ export type AppMessages = {
     specs: {
       sectionTitle: string;
       sectionHint: string;
+      /**
+       * Honest note when locale is not English: field chrome may be localized,
+       * but many option values remain English until a full native pass.
+       * Empty in `en`.
+       */
+      englishContentNote: string;
       selectPlaceholder: string;
       recommendedBadge: string;
       requiredBadge: string;
@@ -2491,6 +2517,11 @@ export type AppMessages = {
   categoryFacts: {
     expand: string;
     collapse: string;
+    /**
+     * Honest note when most FAQ shelves still ship in English.
+     * Empty in `en`. Shown on FactCards in cs/es.
+     */
+    englishContentNote: string;
     byCategory: Partial<
       Record<
         string,
@@ -3131,6 +3162,41 @@ export type AppMessages = {
   addressPicker: AddressPickerMessages;
   geo: GeoMessages;
   systemUi: SystemUiMessages;
+  /** After publishing a sell listing — choose live shelf vs Open Sale. */
+  sellPathChoice: {
+    title: string;
+    intro: string;
+    liveTitle: string;
+    liveBody: string;
+    liveCta: string;
+    openSaleTitle: string;
+    openSaleBody: string;
+    openSaleCta: string;
+    snapTitle: string;
+    snapBody: string;
+    snapCta: string;
+  };
+  /** Host screen to schedule an Open Sale from garage lots. */
+  openSaleCreate: {
+    title: string;
+    subtitle: string;
+    whenStarts: string;
+    startSoon: string;
+    startIn1h: string;
+    startTomorrow: string;
+    liveWindow: string;
+    minutes: (m: number) => string;
+    liveHint: string;
+    mirrorTitle: (count: number) => string;
+    mirrorBody: string;
+    emptyListings: string;
+    saleItemFallback: string;
+    minStep: (min: string, step: string) => string;
+    pickOneError: string;
+    creating: string;
+    publishCta: string;
+    snapMoreCta: string;
+  };
 };
 
 export type RentalAgreementMessages = {

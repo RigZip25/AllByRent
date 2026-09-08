@@ -6,7 +6,7 @@
  */
 import { useState } from "react";
 import { ChevronDown, Shield } from "lucide-react";
-import { useMessages } from "../lib/i18n/react";
+import { useLocale, useMessages } from "../lib/i18n/react";
 import { listingIsSemiOrCommercialTrailer } from "../lib/listingRentRules";
 
 const GREEN = "#0D5C3A";
@@ -76,6 +76,7 @@ export function CategoryFactCard({
   className = "",
 }: Props) {
   const t = useMessages();
+  const locale = useLocale();
   const catKey = category.trim();
   const subKeyName = subcategory?.trim() ?? "";
   const shelfCommercial =
@@ -160,6 +161,11 @@ export function CategoryFactCard({
           <p className="text-[13px] font-semibold text-amber-950">
             {sanitizeFactText(fact.title)}
           </p>
+          {locale !== "en" && t.categoryFacts.englishContentNote ? (
+            <p className="mt-1 text-[11px] leading-snug text-amber-900/75">
+              {t.categoryFacts.englishContentNote}
+            </p>
+          ) : null}
           {!open ? (
             <p className="mt-1 text-[12px] font-medium" style={{ color: GREEN }}>
               {t.categoryFacts.expand}

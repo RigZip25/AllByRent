@@ -33,6 +33,8 @@ export const en: AppMessages = {
     next: "Next",
     loading: "Loading...",
     signIn: "Sign in",
+    idVerifiedAria: "ID verified",
+    phoneVerifiedAria: "Phone verified",
   },
   availabilityCalendar: {
     legendAvailable: "Available · Open",
@@ -54,6 +56,12 @@ export const en: AppMessages = {
     stock: "Stock",
     activity: "Activity",
     more: "Settings",
+    mainAria: "Main navigation",
+    homeAria: "Home — browse or my garage",
+    mreAria: (mascot) => `Open ${mascot} assistant`,
+    addAria: "Stock an item in your garage",
+    activityAria: "Activity — rentals, messages, favorites",
+    moreAria: "Settings — account and preferences",
   },
   activity: {
     title: "Activity",
@@ -214,6 +222,7 @@ export const en: AppMessages = {
     modeAny: "All",
     modeRent: "Rent",
     modeBuy: "Buy",
+    modeFree: "Free",
     filtersTitle: "Filters",
     categoryTitle: "Categories",
     subcategoryTitle: "Subcategories",
@@ -1749,9 +1758,10 @@ export const en: AppMessages = {
       searchPriceLink: (title) => `Search "${title} price new"`,
       searchPriceLinkLocal: (title, currency, country) =>
         `Search "${title}" new price in ${country} (${currency})`,
-      instructionsUrl: "",
-      instructionsPlaceholder: "",
-      instructionsHelper: "",
+      instructionsUrl: "Product manual (optional)",
+      instructionsPlaceholder: "https://… official manual or support page",
+      instructionsHelper:
+        "Link to the manufacturer manual or a clear how-to. Optional — leave blank if you don’t have one.",
       assetIdentityHint:
         "Your VIN is the car’s fingerprint — scan or type it, and Evorios fills make, model, and year.",
       vehicleFlowTitle: "Neighbor cars, done right",
@@ -1818,6 +1828,7 @@ export const en: AppMessages = {
     specs: {
       sectionTitle: "Category details",
       sectionHint: "Required fields unlock Continue.",
+      englishContentNote: "",
       selectPlaceholder: "Select...",
       requiredBadge: "Required",
       recommendedBadge: "Recommended",
@@ -1829,7 +1840,7 @@ export const en: AppMessages = {
         brand: {
           label: "Brand",
           placeholder: "Select a brand...",
-          hint: "",
+          hint: "Pick the name on the label — or Unbranded / Other.",
         },
         model: { label: "Model", placeholder: "Exact model name or number" },
         powerSource: { label: "Power source" },
@@ -6179,7 +6190,10 @@ export const en: AppMessages = {
     postedAgo: (date) => `Posted ${date}`,
   },
   faq,
-  categoryFacts: categoryFactsEn,
+  categoryFacts: {
+    ...categoryFactsEn,
+    englishContentNote: "",
+  },
   preTripInspection: {
     pickupTitle: "Pre-trip inspection (required)",
     pickupBody:
@@ -6378,6 +6392,15 @@ export const en: AppMessages = {
       subtitle: "Home = borrow nearby. My Garage = share what you own.",
       exploreCta: "See what’s nearby →",
       stockGarageCta: "Open My Garage →",
+      profileHeading: (appName) => `Your ${appName} profile`,
+      typeLabel: "Type",
+      blockLabel: "Block",
+      focusLabel: "Focus",
+      accountPersonal: "Individual",
+      accountPro: "Pro / business",
+      visiting: "Visiting",
+      onMyBlock: "On my block",
+      exploreTag: "Explore",
     },
     browseHub: {
       title: "Near you",
@@ -7075,5 +7098,42 @@ export const en: AppMessages = {
     goBack: "Go back",
     bootFailedTitle: "Couldn't start the app",
     bootFailedBody: "Reload to try again. If it keeps happening, email support@evorios.com.",
+  },
+  sellPathChoice: {
+    title: "How do you want to sell?",
+    intro:
+      "Live in your garage anytime — or run a short Open Sale (30–60 min) where neighbors bid from their cart.",
+    liveTitle: "Live in my garage",
+    liveBody: "On the main shelf now. Neighbors can buy at your price. No timed auction.",
+    liveCta: "Keep live →",
+    openSaleTitle: "Open Sale from garage",
+    openSaleBody:
+      "Pick this item (and others). Main garage goes inactive with an Auction badge until the sale ends.",
+    openSaleCta: "Plan Open Sale →",
+    snapTitle: "Open Sale + snap more",
+    snapBody:
+      "Start an Open Sale and photograph extra lots straight onto the sale shelf — not a transfer from the store.",
+    snapCta: "Open Sale + camera →",
+  },
+  openSaleCreate: {
+    title: "Open Sale",
+    subtitle: "Presale → 30–60 min live bids → one checkout",
+    whenStarts: "When it starts",
+    startSoon: "In ~10 min",
+    startIn1h: "In 1 hour",
+    startTomorrow: "Tomorrow 9am",
+    liveWindow: "Live window",
+    minutes: (m) => `${m} min`,
+    liveHint: "Keep it short — people lose interest if it drags.",
+    mirrorTitle: (count) => `Mirror from garage (${count} selected)`,
+    mirrorBody:
+      "Selected cards go inactive in the main shop with an Auction badge. Neighbors bid from cart (green = leading, gray = outbid).",
+    emptyListings: "No sell listings yet — snap items onto the sale instead.",
+    saleItemFallback: "Sale item",
+    minStep: (min, step) => `Min $${min} · step $${step}`,
+    pickOneError: "Pick at least one item",
+    creating: "Creating…",
+    publishCta: "Publish Open Sale",
+    snapMoreCta: "Snap more lots onto this sale →",
   },
 };

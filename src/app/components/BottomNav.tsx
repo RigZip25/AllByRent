@@ -93,14 +93,14 @@ export function BottomNav({
     <nav
       className="bottom-nav-bar flex shrink-0 items-center border-t bg-white px-1 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] pt-2"
       style={{ borderColor: BORDER, minHeight: 80 }}
-      aria-label="Main navigation"
+      aria-label={nav.mainAria}
     >
       <div className="mx-auto flex w-full max-w-md items-end justify-around">
         <button
           type="button"
           onClick={() => runNavAction(onHome)}
           className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
-          aria-label="Home — browse or my garage"
+          aria-label={nav.homeAria}
         >
           <NavIconHome active={activeTab === "home"} />
           <TabLabel active={activeTab === "home"}>{nav.home}</TabLabel>
@@ -110,7 +110,7 @@ export function BottomNav({
           type="button"
           onClick={() => runNavAction(onMrE)}
           className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
-          aria-label={`Open ${MASCOT_NAME} assistant`}
+          aria-label={nav.mreAria(MASCOT_NAME)}
         >
           <NavIconMrE active={activeTab === "mre"} />
           <TabLabel active={activeTab === "mre"}>{mreLabel}</TabLabel>
@@ -120,7 +120,7 @@ export function BottomNav({
           type="button"
           onClick={() => runNavAction(onAdd)}
           className="relative z-10 -mt-7 flex min-h-[44px] min-w-[64px] touch-manipulation flex-col items-center justify-end gap-1"
-          aria-label="Stock an item in your garage"
+          aria-label={nav.addAria}
         >
           <div
             className="flex h-[60px] w-[60px] items-center justify-center rounded-full border-4 border-white shadow-lg"
@@ -141,7 +141,7 @@ export function BottomNav({
           type="button"
           onClick={() => runNavAction(onActivity)}
           className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
-          aria-label="Activity — rentals, messages, favorites"
+          aria-label={nav.activityAria}
         >
           <NavIconActivity active={activeTab === "activity"} />
           <TabLabel active={activeTab === "activity"}>{nav.activity}</TabLabel>
@@ -151,7 +151,7 @@ export function BottomNav({
           type="button"
           onClick={() => runNavAction(onMore)}
           className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
-          aria-label="Settings — account and preferences"
+          aria-label={nav.moreAria}
         >
           <NavIconSettings active={activeTab === "more"} />
           <TabLabel active={activeTab === "more"}>{nav.more}</TabLabel>

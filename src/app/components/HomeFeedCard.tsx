@@ -1,11 +1,12 @@
 import { Star } from "lucide-react";
 import type { ListingDraft } from "../../screens/listing/types";
 import {
-  activeModeLabels,
+  activeModeChips,
   formatListingPriceLine,
   garageTrustLine,
 } from "../../lib/garageDisplay";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
+import { useMessages } from "../../lib/i18n/react";
 
 const GREEN_DARK = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -19,9 +20,11 @@ export function HomeFeedCard({
   onSelect: () => void;
   hostMeta?: Record<string, { displayName: string; rating: number }>;
 }) {
+  const { home } = useMessages();
   const trust = garageTrustLine(listing.hostId, hostMeta);
   const price = formatListingPriceLine(listing);
-  const modes = activeModeLabels(listing);
+  const modes = activeModeChips(listing);
+  const modeLabels = { rent: home.modeRent, buy: home.modeBuy, free: home.modeFree };
   const cover = listing.photos[0] ?? null;
   const { url } = useCoverMediaUrl(cover);
 
@@ -76,10 +79,10 @@ export function HomeFeedCard({
               className="rounded-md px-2 py-0.5 text-[11px] font-bold text-white"
               style={{
                 backgroundColor:
-                  mode === "Buy" ? "#3B82F6" : mode === "Free" || mode === "Gift" ? "#F59E0B" : GREEN_DARK,
+                  mode === "buy" ? "#3B82F6" : mode === "free" ? "#F59E0B" : GREEN_DARK,
               }}
             >
-              {mode}
+              {modeLabels[mode]}
             </span>
           ))}
         </div>
