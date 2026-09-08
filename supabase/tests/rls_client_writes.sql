@@ -93,9 +93,13 @@ begin
   );
 
   -- R10 / V4: reviews need a completed rental both people took part in.
+  -- Status transitions to completed are service-role only (053), so elevate briefly.
+  reset role;
   update public.rentals
   set status = 'completed'
   where id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+  set local role authenticated;
+  set local request.jwt.claim.sub = '22222222-2222-4222-8222-222222222222';
 
   blocked := false;
   begin
