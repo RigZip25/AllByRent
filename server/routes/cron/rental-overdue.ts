@@ -1,6 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { isCronAuthorized } from "../../lib/cronAuth";
-import { runOverdueAutomation } from "../../lib/rentalAutomation";
+import {
+  runDepositSettlementAutomation,
+  runOverdueAutomation,
+} from "../../lib/rentalAutomation";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient } from "../../lib/passkey/supabaseAdmin";
 
@@ -22,5 +25,13 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   }
 
   const result = await runOverdueAutomation(admin);
-  res.status(200).json({ ok: true, ...result });
+  // The tail of a rental in one pass: the return that is late, and the hold
+  // that should already be off the renter's card.
+  const deposits = await runDepositSettlementAutomation(admin);
+  res.status(200).json({
+    ok: true,
+    ...result,
+    depositsReleased: deposits.released,
+    depositReleaseFailures: deposits.failed,
+  });
 });

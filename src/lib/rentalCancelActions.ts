@@ -8,7 +8,8 @@ import {
 import { getMessages } from "./i18n";
 import { createNotificationRemote } from "./notificationsStorage";
 import { updateBooking, type RentalBooking } from "./rentalsStorage";
-import { refundRentalPayment, releaseDepositHold } from "./stripePayments";
+import { refundRentalPayment } from "./stripePayments";
+import { releaseDepositHoldIfLive } from "./depositSettlement";
 
 export type CancelRefundUiStatus =
   | "none"
@@ -93,10 +94,8 @@ export async function cancelAcceptedBooking(params: {
     refundPercent: assessment.refundPercent,
   });
 
-  // Best-effort deposit release (uncaptured hold).
-  if (params.booking.depositStatus === "held" || params.booking.depositAmountCents) {
-    void releaseDepositHold(params.booking.id);
-  }
+  // The hold comes off with the booking — nothing was handed over to inspect.
+  const depositStatus = await releaseDepositHoldIfLive(params.booking);
 
   const cancelledAt = new Date().toISOString();
   const trimmedReason = params.cancelReason?.trim() || undefined;
@@ -110,7 +109,7 @@ export async function cancelAcceptedBooking(params: {
       params.role === "host" ? t.rentalDetail.hostReliabilityNote : undefined,
     cancelRefundPercent: assessment.refundPercent,
     cancelRefundStatus: refundStatus,
-    depositStatus: params.booking.depositStatus === "held" ? "released" : params.booking.depositStatus,
+    depositStatus,
   });
 
   const recipientId = params.booking.counterpartyId;

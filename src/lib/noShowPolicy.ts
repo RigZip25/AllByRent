@@ -118,7 +118,6 @@ export type NoShowResolution = {
   noShowFeeCents?: number;
   noShowFeeStatus?: "none" | "flagged" | "claimed" | "disputed";
   noShowNote?: string;
-  depositStatus?: RentalBooking["depositStatus"];
 };
 
 /**
@@ -151,9 +150,8 @@ export function buildHostNoShowPatch(input: {
     patch.noShowFeeStatus = "none";
     patch.noShowNote =
       "Host marked no-show. Trip price kept (0% rental refund). Calendar freed. Deposit released when held.";
-    if (input.booking.depositStatus === "held") {
-      patch.depositStatus = "released";
-    }
+    // Whether the hold actually came off is the payment route's answer, not
+    // this one's — `completeHostNoShow` records what it gets back.
   }
   return patch;
 }

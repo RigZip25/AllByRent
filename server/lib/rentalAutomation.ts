@@ -346,6 +346,160 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
   return { overdueNotices, recoveryNotices, safelyEscalations };
 }
 
+/** How long the host has to claim against the hold once the item is back. */
+const DEPOSIT_CLAIM_WINDOW_MS = 48 * 60 * MS_MIN;
+
+export type DepositRow = {
+  id: string;
+  owner_id: string;
+  renter_id: string;
+  status: string;
+  deposit_status: string | null;
+  deposit_amount_cents: number;
+  deposit_claim_deadline_at: string | null;
+  stripe_deposit_payment_intent_id: string | null;
+  returned_at: string | null;
+  picked_up_at: string | null;
+  cancelled_at: string | null;
+  end_date: string;
+};
+
+export type DisputeRow = {
+  rental_id: string;
+  status: string;
+  resolution_outcome: string | null;
+  resolved_at: string | null;
+};
+
+/**
+ * When the hold on this rental should come off by itself, or null while it is
+ * somebody's decision to make.
+ *
+ * The hold is money the renter cannot spend, so it needs an end even when
+ * nobody does anything. A booking that ended before the item ever changed hands
+ * has nothing to inspect, so it ends immediately; a finished rental gives the
+ * host the claim window they are promised and then lifts; a dispute holds
+ * everything until the two sides agree, and then follows the outcome.
+ */
+export function depositReleaseDueAt(
+  rental: DepositRow,
+  dispute: DisputeRow | undefined,
+): number | null {
+  if (dispute && dispute.status !== "resolved") return null;
+
+  if (dispute?.status === "resolved") {
+    const resolvedMs = dispute.resolved_at ? Date.parse(dispute.resolved_at) : Date.now();
+    // The host won the argument: they get a fresh window to actually claim.
+    if (dispute.resolution_outcome === "favor_host") return resolvedMs + DEPOSIT_CLAIM_WINDOW_MS;
+    // A split is settled by hand; support tells us when it is done.
+    if (dispute.resolution_outcome === "split") return null;
+    return resolvedMs;
+  }
+
+  // Cancelled or a no-show before pickup: the item never left the host.
+  if (rental.status === "cancelled" && !rental.picked_up_at) {
+    return rental.cancelled_at ? Date.parse(rental.cancelled_at) : Date.now();
+  }
+
+  if (rental.status !== "completed" && rental.status !== "cancelled") return null;
+
+  if (rental.deposit_claim_deadline_at) return Date.parse(rental.deposit_claim_deadline_at);
+  if (rental.returned_at) return Date.parse(rental.returned_at) + DEPOSIT_CLAIM_WINDOW_MS;
+  return Date.parse(`${rental.end_date}T23:59:59.999Z`) + DEPOSIT_CLAIM_WINDOW_MS;
+}
+
+/**
+ * Lift the holds nobody is entitled to keep.
+ *
+ * Completing a rental never released the deposit, and neither did cancelling
+ * one before pickup: the hold sat on the renter's card until the host happened
+ * to press a button, which for most rentals meant until the authorization
+ * expired on Stripe's side, weeks later, with no record either side could see.
+ */
+export async function runDepositSettlementAutomation(admin: SupabaseClient): Promise<{
+  released: number;
+  failed: number;
+}> {
+  let released = 0;
+  let failed = 0;
+
+  if (!isStripeServerConfigured()) return { released, failed };
+
+  const { data: rows } = await admin
+    .from("rentals")
+    .select(
+      "id, owner_id, renter_id, status, deposit_status, deposit_amount_cents, deposit_claim_deadline_at, stripe_deposit_payment_intent_id, returned_at, picked_up_at, cancelled_at, end_date",
+    )
+    .in("status", ["completed", "cancelled", "no_show"])
+    .in("deposit_status", ["held", "requires_capture"])
+    .not("stripe_deposit_payment_intent_id", "is", null);
+
+  const rentals = (rows ?? []) as DepositRow[];
+  if (rentals.length === 0) return { released, failed };
+
+  const { data: disputeRows } = await admin
+    .from("disputes")
+    .select("rental_id, status, resolution_outcome, resolved_at")
+    .in(
+      "rental_id",
+      rentals.map((rental) => rental.id),
+    );
+
+  const disputes = new Map<string, DisputeRow>();
+  for (const dispute of (disputeRows ?? []) as DisputeRow[]) {
+    disputes.set(dispute.rental_id, dispute);
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion,
+  });
+  const now = Date.now();
+
+  for (const rental of rentals) {
+    const dueAt = depositReleaseDueAt(rental, disputes.get(rental.id));
+    if (dueAt == null || Number.isNaN(dueAt) || now < dueAt) continue;
+
+    try {
+      const intent = await stripe.paymentIntents.retrieve(
+        rental.stripe_deposit_payment_intent_id!,
+      );
+      if (intent.status === "succeeded") {
+        // Already captured; the webhook will catch up on the label.
+        await admin.from("rentals").update({ deposit_status: "claimed" }).eq("id", rental.id);
+        continue;
+      }
+      if (intent.status !== "canceled") {
+        await stripe.paymentIntents.cancel(intent.id);
+      }
+    } catch {
+      failed += 1;
+      continue;
+    }
+
+    await admin.from("rentals").update({ deposit_status: "released" }).eq("id", rental.id);
+
+    const amount = `$${(Math.max(0, rental.deposit_amount_cents) / 100).toFixed(2)}`;
+    await insertNotification(admin, {
+      recipientId: rental.renter_id,
+      actorId: null,
+      type: "general",
+      title: "Deposit hold released",
+      body: `The ${amount} hold on your card was released. It can take a few days for your bank to show it.`,
+    });
+    await insertNotification(admin, {
+      recipientId: rental.owner_id,
+      actorId: null,
+      type: "general",
+      title: "Deposit hold released",
+      body: `The ${amount} hold on this rental was released — the claim window has passed.`,
+    });
+
+    released += 1;
+  }
+
+  return { released, failed };
+}
+
 type PendingApprovalRow = {
   id: string;
   owner_id: string;
