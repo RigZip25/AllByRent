@@ -141,4 +141,18 @@ describe("validateGarageSellLines", () => {
     if (!result.ok) return;
     expect(result.lines[0]?.priceCents).toBe(4250);
   });
+
+  it("blocks sell when the listing has an active rental", () => {
+    const result = validateGarageSellLines({
+      hostId: HOST,
+      listingIds: ["listing-1"],
+      listings: [listing()],
+      lots: [lot({ status: "active" })],
+      buyerId: "buyer-1",
+      rentalBlockedListingIds: ["listing-1"],
+    });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error).toMatch(/active rental/i);
+  });
 });

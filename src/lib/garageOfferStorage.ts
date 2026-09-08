@@ -17,7 +17,8 @@ export type GarageOfferStatus =
   | "pending_buyer"
   | "accepted"
   | "declined"
-  | "withdrawn";
+  | "withdrawn"
+  | "expired";
 
 export type GarageNeighborOffer = {
   id: string;
@@ -29,7 +30,12 @@ export type GarageNeighborOffer = {
   listingTitle: string;
   createdAt: string;
   updatedAt: string;
+  /** ISO deadline to pay after accept (~45 min). */
+  payByIso?: string;
 };
+
+/** Minutes the buyer has to pay after an offer is accepted. */
+export const GARAGE_OFFER_PAY_MINUTES = 45;
 
 function readOffers(): GarageNeighborOffer[] {
   try {
@@ -178,6 +184,61 @@ function activateMultiBuyerAuction(listingId: string, listingTitle: string): voi
   }
 
   globalThis.dispatchEvent(new Event("evorios-garage-offers"));
+}
+
+function payByFromNow(minutes = GARAGE_OFFER_PAY_MINUTES): string {
+  return new Date(Date.now() + minutes * 60_000).toISOString();
+}
+
+function removeAcceptedFromCart(listingId: string): void {
+  try {
+    const raw = localStorage.getItem("evorios_garage_cart");
+    if (!raw) return;
+    const lines = JSON.parse(raw) as Array<{ listingId: string }>;
+    if (!Array.isArray(lines)) return;
+    const next = lines.filter((line) => line.listingId !== listingId);
+    if (next.length === lines.length) return;
+    localStorage.setItem("evorios_garage_cart", JSON.stringify(next));
+    window.dispatchEvent(new Event("evorios-garage-cart"));
+  } catch {
+    /* */
+  }
+}
+
+/**
+ * Accepted deals that were never paid → expire, clear cart hold, return to shelf.
+ * Call on shop load alongside auction resolve.
+ */
+export function resolveExpiredAcceptedOffers(now = Date.now()): void {
+  const offers = readOffers();
+  let changed = false;
+  const next = offers.map((offer) => {
+    if (offer.status !== "accepted") return offer;
+    const payBy = offer.payByIso ? new Date(offer.payByIso).getTime() : Number.NaN;
+    // Legacy accepted rows without payBy: give them a window from updatedAt.
+    const deadline = Number.isNaN(payBy)
+      ? new Date(offer.updatedAt).getTime() + GARAGE_OFFER_PAY_MINUTES * 60_000
+      : payBy;
+    if (deadline > now) return offer;
+    changed = true;
+    removeAcceptedFromCart(offer.listingId);
+    const expired: GarageNeighborOffer = {
+      ...offer,
+      status: "expired",
+      payByIso: undefined,
+      updatedAt: new Date().toISOString(),
+    };
+    syncOfferRemote(expired);
+    if (offer.buyerId === getGarageBidderId()) {
+      pushInAppNotification({
+        type: "general",
+        title: "Offer expired",
+        body: `${offer.listingTitle} — payment window ended. The item is back on the shelf.`,
+      });
+    }
+    return expired;
+  });
+  if (changed) writeOffers(next);
 }
 
 /** Accepted deal waiting for the buyer to pay (cart checkout). */
@@ -343,7 +404,12 @@ export function hostAcceptOffer(
 
   const updated = readOffers().map((item) =>
     item.id === offerId
-      ? { ...item, status: "accepted" as const, updatedAt: new Date().toISOString() }
+      ? {
+          ...item,
+          status: "accepted" as const,
+          payByIso: payByFromNow(),
+          updatedAt: new Date().toISOString(),
+        }
       : item,
   );
   writeOffers(updated);
@@ -357,8 +423,8 @@ export function hostAcceptOffer(
     type: "general",
     title: result.addedToCart ? "Offer accepted — pay in Cart" : "Offer accepted",
     body: result.addedToCart
-      ? `${offer.listingTitle} — ${formatShopUsd(offer.amountUsd)}. Checkout to finish.`
-      : `${offer.listingTitle} — buyer notified to pay ${formatShopUsd(offer.amountUsd)}.`,
+      ? `${offer.listingTitle} — ${formatShopUsd(offer.amountUsd)}. Checkout within ${GARAGE_OFFER_PAY_MINUTES} min.`
+      : `${offer.listingTitle} — buyer notified to pay ${formatShopUsd(offer.amountUsd)} within ${GARAGE_OFFER_PAY_MINUTES} min.`,
   });
 
   return { ok: true };
@@ -464,7 +530,12 @@ export function buyerAcceptCounter(
 
   const updated = readOffers().map((item) =>
     item.id === offerId
-      ? { ...item, status: "accepted" as const, updatedAt: new Date().toISOString() }
+      ? {
+          ...item,
+          status: "accepted" as const,
+          payByIso: payByFromNow(),
+          updatedAt: new Date().toISOString(),
+        }
       : item,
   );
   writeOffers(updated);
@@ -477,7 +548,7 @@ export function buyerAcceptCounter(
   pushInAppNotification({
     type: "general",
     title: "Deal! Pay in Cart",
-    body: `${offer.listingTitle} — ${formatShopUsd(offer.amountUsd)}. Checkout to finish.`,
+    body: `${offer.listingTitle} — ${formatShopUsd(offer.amountUsd)}. Checkout within ${GARAGE_OFFER_PAY_MINUTES} min.`,
   });
 
   return { ok: true };

@@ -1,5 +1,6 @@
 import type { ListingDraft } from "../screens/listing/types";
 import { getLotState } from "./garageAuctionState";
+import { getOpenSaleLotPayState } from "./openSale/bidCart";
 import { loadRentalBookings, type RentalBooking } from "./rentalsStorage";
 import { getAcceptedOfferForListing } from "./garageOfferStorage";
 
@@ -9,7 +10,8 @@ export type GarageShelfStatusKind =
   | "rented"
   | "sold"
   | "paused"
-  | "pending_payment";
+  | "pending_payment"
+  | "ended";
 
 export type GarageShelfStatus = {
   kind: GarageShelfStatusKind;
@@ -32,7 +34,7 @@ function bookingsForListing(listingId: string): RentalBooking[] {
 
 /**
  * Live shelf status for garage storefront + host dashboard.
- * Priority: sold → rented → reserved → pending payment → paused → available.
+ * Priority: sold → rented → reserved → pending payment → ended → paused → available.
  */
 export function deriveGarageShelfStatus(listing: ListingDraft): GarageShelfStatus {
   const lot = getLotState(listing.id);
@@ -54,6 +56,11 @@ export function deriveGarageShelfStatus(listing: ListingDraft): GarageShelfStatu
 
   if (getAcceptedOfferForListing(listing.id)) {
     return { kind: "pending_payment", actionable: false };
+  }
+
+  const openPay = getOpenSaleLotPayState(listing.id);
+  if (lot.status === "expired_no_bids" || openPay?.status === "returned") {
+    return { kind: "ended", actionable: false };
   }
 
   if (listing.paused) {

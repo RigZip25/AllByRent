@@ -7,7 +7,7 @@ import { GarageMyOfferSheet } from "../components/garage-shop/GarageMyOfferSheet
 import { GarageShelfEditSheet } from "../components/garage-shop/GarageShelfEditSheet";
 import { GarageShopItemCard } from "../components/garage-shop/GarageShopItemCard";
 import { GarageSharePanel } from "../components/share/GarageSharePanel";
-import { getHostPendingOffers, ensureAcceptedOffersInCart } from "../lib/garageOfferStorage";
+import { getHostPendingOffers, ensureAcceptedOffersInCart, resolveExpiredAcceptedOffers } from "../lib/garageOfferStorage";
 import { garageDisplayName, garageNameFromDisplayName } from "../lib/garageDisplay";
 import { fetchPublicProfile } from "../lib/supabaseProfile";
 import { loadUserProfile } from "../lib/userProfileStorage";
@@ -37,11 +37,15 @@ import {
 } from "../lib/garageShopStorage";
 import {
   OPEN_SALE_EVENTS_EVENT,
+  cancelOpenSaleEventAuthoritative,
   cascadeUnpaidOpenSaleLots,
+  endOpenSaleEventAuthoritative,
   formatCountdown,
   getActiveOpenSaleForHost,
   getDeviceOpenSaleCart,
+  relistOpenSaleReturnedLot,
   resolveEndedOpenSales,
+  syncOpenSaleLotPayFromRemote,
   syncOpenSalesFromRemote,
 } from "../lib/openSale";
 import { isFreeGiveaway } from "../lib/listingGift";
@@ -272,10 +276,21 @@ export function ActiveGarageShopScreen({
   const loadShelf = useCallback(() => {
     const applyCandidates = async (candidates: ListingDraft[]) => {
       const listingIds = candidates.map((listing) => listing.id);
+      const hostIdByListing = Object.fromEntries(
+        candidates.map((listing) => [listing.id, listing.hostId ?? hostId]),
+      );
       await syncGarageFromRemote({ hostId, userId: auth.userId, listingIds });
       await syncOpenSalesFromRemote(hostId);
-      resolveEndedAuctions(listingIds);
-      resolveExpiredWinnerCheckouts(listingIds);
+      try {
+        const { listOpenSaleEvents } = await import("../lib/openSale/eventStorage");
+        const all = listOpenSaleEvents().filter((e) => e.hostId === hostId);
+        await syncOpenSaleLotPayFromRemote(all.map((e) => e.id));
+      } catch {
+        /* */
+      }
+      resolveEndedAuctions(listingIds, hostIdByListing);
+      resolveExpiredWinnerCheckouts(listingIds, hostIdByListing);
+      resolveExpiredAcceptedOffers();
       resolveEndedOpenSales();
       cascadeUnpaidOpenSaleLots();
       setOpenSaleTick((n) => n + 1);
@@ -479,11 +494,47 @@ export function ActiveGarageShopScreen({
             </div>
             <p className="text-[15px] text-gray-700">{openLabel}</p>
             {openSale ? (
-              <p className="mt-1 text-[13px] font-bold text-amber-900">
-                {openSale.status === "presale"
-                  ? `Open Sale · starts in ${formatCountdown(openSale.startsAt)} · ${openSale.lots.length} lots`
-                  : `Open Sale live · ends ${formatCountdown(openSale.endsAt)} · ${openSale.lots.length} lots`}
-              </p>
+              <div className="mt-1 space-y-1">
+                <p className="text-[13px] font-bold text-amber-900">
+                  {openSale.status === "presale"
+                    ? `Open Sale · starts in ${formatCountdown(openSale.startsAt)} · ${openSale.lots.length} lots`
+                    : `Open Sale live · ends ${formatCountdown(openSale.endsAt)} · ${openSale.lots.length} lots`}
+                </p>
+                {isOwnGarage && !preview ? (
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void endOpenSaleEventAuthoritative(openSale.id).then(() => {
+                          resolveEndedOpenSales();
+                          cascadeUnpaidOpenSaleLots();
+                          setOpenSaleTick((n) => n + 1);
+                          loadShelf();
+                          showToast("Open Sale closed");
+                        });
+                      }}
+                      className="rounded-lg border px-2.5 py-1.5 text-[12px] font-bold"
+                      style={{ borderColor: AMBER, color: "#92400E" }}
+                    >
+                      End sale now
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void cancelOpenSaleEventAuthoritative(openSale.id).then(() => {
+                          setOpenSaleTick((n) => n + 1);
+                          loadShelf();
+                          showToast("Open Sale cancelled");
+                        });
+                      }}
+                      className="rounded-lg border px-2.5 py-1.5 text-[12px] font-bold text-red-700"
+                      style={{ borderColor: "#FECACA" }}
+                    >
+                      Cancel sale
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             ) : null}
           </div>
           {!preview ? (
@@ -674,6 +725,15 @@ export function ActiveGarageShopScreen({
                         onShare={
                           isOwnGarage && !preview
                             ? (item) => setShareItemTarget(item)
+                            : undefined
+                        }
+                        onRelist={
+                          isOwnGarage && !preview
+                            ? (item) => {
+                                relistOpenSaleReturnedLot(item.id, item.hostId ?? hostId);
+                                loadShelf();
+                                showToast(shopCopy.shelfUpdated);
+                              }
                             : undefined
                         }
                       />

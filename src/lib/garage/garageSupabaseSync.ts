@@ -60,6 +60,7 @@ export async function pushNeighborOfferRemote(offer: GarageNeighborOffer): Promi
     listing_title: offer.listingTitle,
     created_at: offer.createdAt,
     updated_at: offer.updatedAt,
+    pay_by: offer.payByIso ?? null,
   });
 }
 
@@ -71,7 +72,7 @@ export async function fetchNeighborOffersRemote(params: {
   const supabase = getSupabaseClient()!;
   let query = supabase
     .from("garage_neighbor_offers")
-    .select("id, listing_id, host_id, buyer_id, amount_cents, status, listing_title, created_at, updated_at");
+    .select("id, listing_id, host_id, buyer_id, amount_cents, status, listing_title, created_at, updated_at, pay_by");
   if (params.hostId && isUuid(params.hostId)) {
     query = query.eq("host_id", params.hostId);
   }
@@ -81,7 +82,33 @@ export async function fetchNeighborOffersRemote(params: {
     query = query.in("listing_id", ids);
   }
   const { data, error } = await query.order("updated_at", { ascending: false });
-  if (error || !data) return [];
+  if (error || !data) {
+    // Older DBs without pay_by: fall back without the column.
+    let fallback = supabase
+      .from("garage_neighbor_offers")
+      .select("id, listing_id, host_id, buyer_id, amount_cents, status, listing_title, created_at, updated_at");
+    if (params.hostId && isUuid(params.hostId)) {
+      fallback = fallback.eq("host_id", params.hostId);
+    }
+    if (params.listingIds?.length) {
+      const ids = params.listingIds.filter(isUuid);
+      if (ids.length === 0) return [];
+      fallback = fallback.in("listing_id", ids);
+    }
+    const second = await fallback.order("updated_at", { ascending: false });
+    if (second.error || !second.data) return [];
+    return second.data.map((row) => ({
+      id: row.id as string,
+      listingId: row.listing_id as string,
+      hostId: row.host_id as string,
+      buyerId: row.buyer_id as string,
+      amountUsd: (row.amount_cents as number) / 100,
+      status: row.status as GarageNeighborOffer["status"],
+      listingTitle: (row.listing_title as string) ?? "",
+      createdAt: row.created_at as string,
+      updatedAt: row.updated_at as string,
+    }));
+  }
   return data.map((row) => ({
     id: row.id as string,
     listingId: row.listing_id as string,
@@ -92,6 +119,7 @@ export async function fetchNeighborOffersRemote(params: {
     listingTitle: (row.listing_title as string) ?? "",
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
+    payByIso: (row.pay_by as string | null) ?? undefined,
   }));
 }
 
@@ -234,4 +262,74 @@ export async function fetchGarageFollowsRemote(followerId: string): Promise<Gara
     notifyNewListings: Boolean(row.notify_new_listings),
     notifyOpenHouse: Boolean(row.notify_open_house ?? true),
   }));
+}
+
+export type OpenSaleLotPayRemote = {
+  eventId: string;
+  listingId: string;
+  status: "awaiting_checkout" | "sold" | "returned";
+  winnerBidderId?: string;
+  amountUsd?: number;
+  payByIso?: string;
+  forfeitedBidderIds?: string[];
+  reason?: "no_bids" | "cascade_exhausted" | string;
+};
+
+export async function fetchOpenSaleLotResultsRemote(params: {
+  eventIds?: string[];
+  listingIds?: string[];
+}): Promise<OpenSaleLotPayRemote[]> {
+  if (!supabaseReady()) return [];
+  const supabase = getSupabaseClient()!;
+  let query = supabase
+    .from("open_sale_lot_results")
+    .select(
+      "event_id, listing_id, status, winner_bidder_id, amount_cents, pay_by, forfeited_bidder_ids, reason",
+    );
+  if (params.eventIds?.length) {
+    const ids = params.eventIds.filter(isUuid);
+    if (ids.length === 0) return [];
+    query = query.in("event_id", ids);
+  }
+  if (params.listingIds?.length) {
+    const ids = params.listingIds.filter(isUuid);
+    if (ids.length === 0) return [];
+    query = query.in("listing_id", ids);
+  }
+  const { data, error } = await query;
+  if (error || !data) return [];
+  return data.map((row) => ({
+    eventId: row.event_id as string,
+    listingId: row.listing_id as string,
+    status: row.status as OpenSaleLotPayRemote["status"],
+    winnerBidderId: (row.winner_bidder_id as string | null) ?? undefined,
+    amountUsd:
+      typeof row.amount_cents === "number" ? (row.amount_cents as number) / 100 : undefined,
+    payByIso: (row.pay_by as string | null) ?? undefined,
+    forfeitedBidderIds: Array.isArray(row.forfeited_bidder_ids)
+      ? (row.forfeited_bidder_ids as string[])
+      : [],
+    reason: (row.reason as string | null) ?? undefined,
+  }));
+}
+
+/** Best-effort push after local resolve (service writes preferred via cron). */
+export async function pushOpenSaleLotResultRemote(result: OpenSaleLotPayRemote): Promise<void> {
+  if (!supabaseReady() || !isUuid(result.eventId) || !isUuid(result.listingId)) return;
+  const supabase = getSupabaseClient()!;
+  await supabase.from("open_sale_lot_results").upsert(
+    {
+      event_id: result.eventId,
+      listing_id: result.listingId,
+      status: result.status,
+      winner_bidder_id: result.winnerBidderId ?? null,
+      amount_cents:
+        result.amountUsd != null ? Math.round(result.amountUsd * 100) : null,
+      pay_by: result.payByIso ?? null,
+      forfeited_bidder_ids: result.forfeitedBidderIds ?? [],
+      reason: result.reason ?? null,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "event_id,listing_id" },
+  );
 }

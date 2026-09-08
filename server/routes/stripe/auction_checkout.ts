@@ -93,15 +93,30 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     .maybeSingle();
 
   // Highest bid on the ledger — the charge comes from this, not from a lot
-  // state the host can invent.
+  // state the host can invent. Tie-break: earliest placed_at (first highest).
   const { data: bidRows } = await admin
     .from("garage_bids")
-    .select("listing_id, bidder_id, amount_cents")
+    .select("listing_id, bidder_id, amount_cents, placed_at")
     .eq("listing_id", listingId)
     .order("amount_cents", { ascending: false })
+    .order("placed_at", { ascending: true })
     .limit(1);
 
   const topBid = (bidRows?.[0] as { listing_id: string; bidder_id: string; amount_cents: number } | undefined) ?? null;
+
+  const { data: rentalRows } = await admin
+    .from("rentals")
+    .select("listing_id, status")
+    .eq("listing_id", listingId)
+    .in("status", [
+      "active",
+      "overdue",
+      "pending_checkin",
+      "upcoming",
+      "pending_approval",
+      "disputed",
+    ])
+    .limit(1);
 
   const validated = validateAuctionListing({
     hostId,
@@ -111,6 +126,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     winningBidUsd,
     buyerId: user.id,
     topBid,
+    rentalBlocked: (rentalRows?.length ?? 0) > 0,
   });
   if (!validated.ok) {
     res.status(409).json({ ok: false, error: validated.error });

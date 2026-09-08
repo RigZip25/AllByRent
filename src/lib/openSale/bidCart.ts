@@ -1,4 +1,4 @@
-import { getGarageBidderId, notifyOutbidIfNeeded } from "../garageAuctionState";
+import { getGarageBidderId, notifyOutbidIfNeeded, relistGarageLot } from "../garageAuctionState";
 import {
   getOpenSaleEvent,
   getOpenSaleLot,
@@ -14,6 +14,11 @@ import {
 } from "./types";
 import { getHighBid, type GarageBid } from "../garageShopStorage";
 import { pushInAppNotification } from "../inAppNotifications";
+import {
+  fetchOpenSaleLotResultsRemote,
+  pushOpenSaleLotResultRemote,
+  type OpenSaleLotPayRemote,
+} from "../garage/garageSupabaseSync";
 
 const CART_KEY = "evorios_open_sale_cart";
 const BAN_KEY = "evorios_open_sale_bans";
@@ -82,6 +87,77 @@ function writeLotPay(map: LotPayMap): void {
     window.dispatchEvent(new Event("evorios-open-sale-lot-pay"));
   } catch {
     /* */
+  }
+}
+
+export function clearOpenSaleLotPayState(listingId: string): void {
+  const map = readLotPay();
+  if (!map[listingId]) return;
+  delete map[listingId];
+  writeLotPay(map);
+}
+
+export function mergeOpenSaleLotPayFromRemote(remote: OpenSaleLotPayRemote[]): void {
+  if (remote.length === 0) return;
+  const map = readLotPay();
+  for (const row of remote) {
+    if (row.status === "awaiting_checkout" && row.winnerBidderId && row.amountUsd != null && row.payByIso) {
+      map[row.listingId] = {
+        status: "awaiting_checkout",
+        winnerBidderId: row.winnerBidderId,
+        amountUsd: row.amountUsd,
+        payByIso: row.payByIso,
+        forfeitedBidderIds: row.forfeitedBidderIds ?? [],
+      };
+    } else if (row.status === "sold" && row.winnerBidderId && row.amountUsd != null) {
+      map[row.listingId] = {
+        status: "sold",
+        winnerBidderId: row.winnerBidderId,
+        amountUsd: row.amountUsd,
+        soldAt: new Date().toISOString(),
+      };
+    } else if (row.status === "returned") {
+      map[row.listingId] = {
+        status: "returned",
+        reason: row.reason === "cascade_exhausted" ? "cascade_exhausted" : "no_bids",
+      };
+    }
+  }
+  writeLotPay(map);
+}
+
+/** Pull server lot results into local pay map (G2). */
+export async function syncOpenSaleLotPayFromRemote(eventIds: string[]): Promise<void> {
+  const remote = await fetchOpenSaleLotResultsRemote({ eventIds });
+  mergeOpenSaleLotPayFromRemote(remote);
+}
+
+function pushLotPayRemote(eventId: string, listingId: string, state: LotPayState): void {
+  if (state.status === "awaiting_checkout") {
+    void pushOpenSaleLotResultRemote({
+      eventId,
+      listingId,
+      status: "awaiting_checkout",
+      winnerBidderId: state.winnerBidderId,
+      amountUsd: state.amountUsd,
+      payByIso: state.payByIso,
+      forfeitedBidderIds: state.forfeitedBidderIds,
+    });
+  } else if (state.status === "sold") {
+    void pushOpenSaleLotResultRemote({
+      eventId,
+      listingId,
+      status: "sold",
+      winnerBidderId: state.winnerBidderId,
+      amountUsd: state.amountUsd,
+    });
+  } else {
+    void pushOpenSaleLotResultRemote({
+      eventId,
+      listingId,
+      status: "returned",
+      reason: state.reason,
+    });
   }
 }
 
@@ -303,6 +379,7 @@ export function resolveEndedOpenSales(now = Date.now()): void {
           payByIso: payByFromNow(),
           forfeitedBidderIds: [],
         };
+        pushLotPayRemote(event.id, lot.listingId, pay[lot.listingId]);
         changed = true;
         if (high.bidderId === getGarageBidderId()) {
           pushInAppNotification({
@@ -313,6 +390,7 @@ export function resolveEndedOpenSales(now = Date.now()): void {
         }
       } else {
         pay[lot.listingId] = { status: "returned", reason: "no_bids" };
+        pushLotPayRemote(event.id, lot.listingId, pay[lot.listingId]);
         changed = true;
       }
     }
@@ -325,6 +403,13 @@ export function resolveEndedOpenSales(now = Date.now()): void {
 export function cascadeUnpaidOpenSaleLots(now = Date.now()): void {
   const pay = readLotPay();
   let changed = false;
+  const events = listOpenSaleEvents();
+  const eventByListing = new Map<string, string>();
+  for (const event of events) {
+    for (const lot of event.lots) {
+      eventByListing.set(lot.listingId, event.id);
+    }
+  }
 
   for (const [listingId, state] of Object.entries(pay)) {
     if (state.status !== "awaiting_checkout") continue;
@@ -340,7 +425,13 @@ export function cascadeUnpaidOpenSaleLots(now = Date.now()): void {
       const excluded = new Set(forfeited);
       for (const bid of bids) {
         if (bid.listingId !== listingId || excluded.has(bid.bidderId)) continue;
-        if (!next || bid.amountUsd > next.amountUsd) next = bid;
+        if (
+          !next ||
+          bid.amountUsd > next.amountUsd ||
+          (bid.amountUsd === next.amountUsd && bid.placedAt < next.placedAt)
+        ) {
+          next = bid;
+        }
       }
     } catch {
       next = null;
@@ -364,10 +455,18 @@ export function cascadeUnpaidOpenSaleLots(now = Date.now()): void {
     } else {
       pay[listingId] = { status: "returned", reason: "cascade_exhausted" };
     }
+    const eventId = eventByListing.get(listingId);
+    if (eventId) pushLotPayRemote(eventId, listingId, pay[listingId]);
     changed = true;
   }
 
   if (changed) writeLotPay(pay);
+}
+
+/** Host relist after open-sale return / classic expired_no_bids. */
+export function relistOpenSaleReturnedLot(listingId: string, hostId: string): void {
+  clearOpenSaleLotPayState(listingId);
+  relistGarageLot(listingId, hostId);
 }
 
 export function markOpenSaleLotPaid(listingId: string, bidderId = getGarageBidderId()): void {

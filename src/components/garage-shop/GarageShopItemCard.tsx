@@ -31,6 +31,7 @@ const STATUS_COLORS: Record<GarageShelfStatusKind, string> = {
   sold: "#4B5563",
   paused: "#6B7280",
   pending_payment: "#C2410C",
+  ended: "#6B7280",
 };
 
 type GarageShopItemCardProps = {
@@ -44,6 +45,7 @@ type GarageShopItemCardProps = {
   onViewMyOffer: (listing: ListingDraft, offer: ShopOffer) => void;
   onEdit?: (listing: ListingDraft) => void;
   onShare?: (listing: ListingDraft) => void;
+  onRelist?: (listing: ListingDraft) => void;
 };
 
 function CoverThumb({
@@ -93,6 +95,7 @@ export function GarageShopItemCard({
   onViewMyOffer,
   onEdit,
   onShare,
+  onRelist,
 }: GarageShopItemCardProps) {
   const { garageOffers: offerCopy, garageShop: shopCopy } = useMessages().garageSale;
   const offer = getShopOffer(listing);
@@ -132,7 +135,9 @@ export function GarageShopItemCard({
             ? shopCopy.statusPaused
             : shelf.kind === "pending_payment"
               ? shopCopy.statusPendingPayment
-              : shopCopy.statusAvailable;
+              : shelf.kind === "ended"
+                ? shopCopy.statusEnded
+                : shopCopy.statusAvailable;
   const unavailable = !shelf.actionable;
   const freeGiveaway = isFreeGiveaway(listing);
   const rentOnly = Boolean(listing.modes.rent && !listing.modes.sell && !offer);
@@ -316,6 +321,16 @@ export function GarageShopItemCard({
 
           {hostManage && !preview ? (
             <>
+              {shelf.kind === "ended" && onRelist ? (
+                <button
+                  type="button"
+                  onClick={() => onRelist(listing)}
+                  className="inline-flex items-center gap-1 rounded-xl px-3 py-2 text-[13px] font-bold text-white"
+                  style={{ backgroundColor: GREEN }}
+                >
+                  {shopCopy.relistCta}
+                </button>
+              ) : null}
               <button
                 type="button"
                 onClick={() => onEdit?.(listing)}

@@ -2343,6 +2343,7 @@ function AppRoutes() {
               setCurrentScreen("garageShop");
             }}
             onRequireAuth={() => showAuthGate("garageCart", "book")}
+            onMessageSeller={(listingId, peerId) => handleOpenListingChat(listingId, peerId)}
           />
         )}
 
