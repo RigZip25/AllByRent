@@ -2,6 +2,7 @@ import { getAccessToken } from "./stripePayments";
 import type { MediaRef } from "./mediaStore";
 import type { RentalBooking, RentalRole } from "./rentalsStorage";
 import { generatePin, loadRentalBookings, updateBooking } from "./rentalsStorage";
+import { uploadRentalConditionPhoto } from "./rentalConditionPhotos";
 import { agreementFullySigned } from "./rentalAgreement";
 import { getMessages } from "./i18n";
 
@@ -173,6 +174,32 @@ function applyExtras(
 }
 
 /**
+ * Put the condition photo in the private bucket, so the rental carries it
+ * instead of the phone that took it.
+ *
+ * Failure keeps the local photo: the person confirming a handoff in a parking
+ * garage should not be blocked by an upload, and the sweep on the next sync
+ * will not lose what is already on the booking.
+ */
+async function storeConditionPhoto(params: {
+  uploaderId?: string;
+  rentalId: string;
+  stage: HandoffStage;
+  media?: MediaRef | null;
+}): Promise<MediaRef | null | undefined> {
+  if (!params.media || !params.uploaderId) return params.media;
+  if (params.media.storagePath) return params.media;
+
+  const uploaded = await uploadRentalConditionPhoto({
+    uploaderId: params.uploaderId,
+    rentalId: params.rentalId,
+    stage: params.stage,
+    media: params.media,
+  });
+  return uploaded.ok ? uploaded.media : params.media;
+}
+
+/**
  * Confirm one side of QR+PIN handoff (host or renter).
  * Tries server API first; falls back to local dual-confirm.
  * Contactless pickup: renter alone completing QR/PIN starts the rental.
@@ -186,6 +213,8 @@ export async function confirmHandoffSide(input: {
   odometerMiles?: number;
   /** Optional condition proof photo at this handoff. */
   conditionPhoto?: MediaRef | null;
+  /** Who is confirming — the condition photo is stored under their folder. */
+  uploaderId?: string;
   /** Fuel gauge eighths (1–8) when listing requires fuel tracking. */
   fuelLevelEighths?: number;
   /** DEF gauge eighths (1–8) for diesel. */
@@ -255,6 +284,18 @@ export async function confirmHandoffSide(input: {
     }
   }
 
+  // The PIN checks are behind us, so this handoff is happening: put the
+  // condition photo where the other side can see it before recording it.
+  const extras = {
+    ...input,
+    conditionPhoto: await storeConditionPhoto({
+      uploaderId: input.uploaderId,
+      rentalId: booking.id,
+      stage: input.stage,
+      media: input.conditionPhoto,
+    }),
+  };
+
   const token = await getAccessToken();
   if (token) {
     try {
@@ -284,7 +325,7 @@ export async function confirmHandoffSide(input: {
           returnConfirmedAt: payload.returnedAt ?? booking.returnConfirmedAt,
           returnDueAt: payload.dueAt ?? booking.returnDueAt,
         };
-        applyExtras(patch, input);
+        applyExtras(patch, extras);
         if (patch.status === "completed") {
           patch.completedAt = booking.completedAt ?? new Date().toISOString();
         }
@@ -313,7 +354,7 @@ export async function confirmHandoffSide(input: {
   }
 
   const { patch, waitingOther, completedStage } = mergeLocalHandoff(booking, input.role, input.stage);
-  applyExtras(patch, input);
+  applyExtras(patch, extras);
   const nextList = updateBooking(booking.id, patch);
   const next = nextList.find((b) => b.id === booking.id) ?? { ...booking, ...patch };
   return { ok: true, booking: next, waitingOther, completedStage };
