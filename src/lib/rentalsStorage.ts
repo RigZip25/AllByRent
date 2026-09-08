@@ -1194,7 +1194,7 @@ export async function flushRentalSyncQueue(): Promise<void> {
   if (rentalSyncFlushInFlight) return rentalSyncFlushInFlight;
 
   rentalSyncFlushInFlight = (async () => {
-    let queue = loadRentalSyncQueue();
+    const queue = loadRentalSyncQueue();
     if (queue.length === 0) return;
 
     const remaining: RentalSyncQueueItem[] = [];
