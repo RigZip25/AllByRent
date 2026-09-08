@@ -1,5 +1,5 @@
 import { clearDeviceKnownAccount, clearAuthWelcomeDone } from "./onboardingStorage";
-import { createDefaultProfile, saveUserProfile } from "./userProfileStorage";
+import { clearUserProfileLocal } from "./userProfileStorage";
 
 /**
  * Keys that hold the signed-in user's bookings, cart, chats, and profile on this device.
@@ -9,7 +9,6 @@ const USER_SCOPED_KEYS = [
   "allbyrent_rental_bookings",
   "allbyrent_rental_bookings_version",
   "allbyrent_rental_sync_queue",
-  "allbyrent_user_profile",
   "abr_chat_messages_v1",
   "abr_chat_thread_reads_v1",
   "allbyrent_in_app_notifications",
@@ -47,9 +46,5 @@ export function clearUserScopedLocalData(): void {
   clearDeviceKnownAccount();
   // Keep AUTH_WELCOME_DONE cleared so AuthWelcome reappears with Explore as guest.
   clearAuthWelcomeDone();
-  try {
-    saveUserProfile(createDefaultProfile());
-  } catch {
-    /* ignore */
-  }
+  clearUserProfileLocal();
 }

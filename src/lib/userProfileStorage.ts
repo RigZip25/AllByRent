@@ -141,6 +141,14 @@ function migrateLegacyProfile(parsed: Record<string, unknown>): Partial<UserProf
   return patch;
 }
 
+export function clearUserProfileLocal(): void {
+  try {
+    localStorage.removeItem(PROFILE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function loadUserProfile(): UserProfile {
   try {
     const raw = localStorage.getItem(PROFILE_KEY);
