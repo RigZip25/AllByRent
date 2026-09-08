@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  ArrowLeft,
   DollarSign,
   ShoppingCart,
   Key,
@@ -8,6 +7,7 @@ import {
   Check,
   Info,
 } from "lucide-react";
+import { BackIconButton } from "../../components/a11y/BackIconButton";
 
 type OfferType = "rent" | "sell" | "rentToOwn" | "gift";
 
@@ -39,12 +39,7 @@ export function ListItem({ onBack, onPublish }: { onBack: () => void; onPublish:
   return (
     <div className="screen bg-background flex flex-col">
       <div className="shrink-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-3 sm:px-4 py-3 flex items-center gap-3">
-        <button
-          onClick={onBack}
-          className="p-2 hover:bg-muted rounded-full transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
+        <BackIconButton label="Back" onClick={onBack} className="hover:bg-muted" />
         <h1 className="font-semibold flex-1">List Your Item</h1>
       </div>
 

@@ -28,9 +28,9 @@ export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
   const [faceId] = useState(() => shouldShowPasskeyLogin());
 
   return (
-    <div className="screen onboarding-step mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-white">
+    <div className="screen onboarding-step mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden bg-white">
       <div className="flex shrink-0 items-center justify-center px-4 pb-1 pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))]">
-        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">{APP_NAME}</p>
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">{APP_NAME}</p>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
@@ -83,7 +83,7 @@ export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
               <Mail className="h-5 w-5" aria-hidden />
               {copy.signInEmailCta}
             </button>
-            <p className="text-center text-[12px] leading-snug text-gray-400">{copy.returningHint}</p>
+            <p className="text-center text-[12px] leading-snug text-gray-500">{copy.returningHint}</p>
           </>
         ) : (
           <>
@@ -111,7 +111,7 @@ export function AuthWelcome({ onSignIn, onSignUp, onContinueAsGuest }: Props) {
               {copy.signInCta}
             </button>
             {copy.guestHint ? (
-              <p className="text-center text-[12px] leading-snug text-gray-400">{copy.guestHint}</p>
+              <p className="text-center text-[12px] leading-snug text-gray-500">{copy.guestHint}</p>
             ) : null}
           </>
         )}

@@ -1,5 +1,5 @@
 import { Share, Smartphone, X } from "lucide-react";
-import { APP_NAME, BRAND_AMBER, BRAND_GREEN, PWA_SHORT_NAME } from "../lib/brand";
+import { APP_NAME, BRAND_AMBER, BRAND_CTA_ON_AMBER, BRAND_GREEN, PWA_SHORT_NAME } from "../lib/brand";
 import { useMessages } from "../lib/i18n/react";
 
 type PwaInstallBannerProps = {
@@ -78,7 +78,7 @@ export function PwaInstallBanner({
               type="button"
               onClick={onInstall}
               className="mt-2.5 rounded-full px-4 py-2 text-xs font-bold shadow-md transition-opacity hover:opacity-95"
-              style={{ backgroundColor: BRAND_AMBER, color: BRAND_GREEN }}
+              style={{ backgroundColor: BRAND_AMBER, color: BRAND_CTA_ON_AMBER }}
             >
               {pwa.installShort(PWA_SHORT_NAME)}
             </button>

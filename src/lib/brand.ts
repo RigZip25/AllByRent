@@ -28,8 +28,11 @@ export const PWA_DESCRIPTION_RU =
 
 export const BRAND_GREEN = "#0D5C3A";
 export const BRAND_AMBER = "#F59E0B";
+/** Text on amber CTAs — darker than BRAND_GREEN for ≥4.5:1 on #F59E0B (Stage 17 / X6). */
+export const BRAND_CTA_ON_AMBER = "#042016";
 /** Browse (rent) path accent — warm orange so it reads apart from Garage green. */
 export const BRAND_BROWSE_ORANGE = "#FF8A3D";
+/** Large/icon accent only — do not use for small body/link text on white (use BRAND_GREEN). */
 export const BRAND_GREEN_LIGHT = "#1A9E6E";
 /**
  * Secure-finance accent (legacy Connect purple). Prefer BRAND_GREEN for Evorios-first UI.

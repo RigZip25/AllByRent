@@ -38,25 +38,9 @@ import { applyAiSuggestionsToDraft } from "../applyAiSuggestions";
 import { listingTitleExample } from "../listingTitlePlaceholders";
 import { useCoverMediaUrl } from "../../../lib/useMediaUrl";
 import type { MediaRef } from "../../../lib/mediaStore";
+import { FieldLabel } from "../../../components/forms/FieldLabel";
 
 const GREEN = "#0D5C3A";
-
-function FieldLabel({
-  label,
-  required = false,
-}: {
-  label: string;
-  required?: boolean;
-}) {
-  return (
-    <div className="mb-2">
-      <span className="text-label text-sm font-semibold uppercase tracking-wide text-gray-500">
-        {label}
-        {required ? <span className="text-red-500"> *</span> : null}
-      </span>
-    </div>
-  );
-}
 
 function inputClassName(extra = "") {
   return `text-body w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-800 outline-none transition-colors focus:border-green-700 ${extra}`;
@@ -88,7 +72,7 @@ function CoverMiniThumb({
         {url ? (
           <img src={url} alt="" className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-gray-400">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-gray-500">
             <ImageIcon className="h-6 w-6" strokeWidth={1.75} />
             <span className="text-[10px] font-medium">
               {status === "loading" ? "…" : label}
@@ -363,7 +347,7 @@ export function Step2ItemInfo({
     (isDescriptionUserEdited || !draft.aiSuggestions);
 
   return (
-    <div className="mx-auto w-full max-w-[390px] bg-[#F9FAFB] px-4 pb-8 pt-5">
+    <div className="mx-auto w-full max-w-[430px] bg-[#F9FAFB] px-4 pb-8 pt-5">
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -408,7 +392,7 @@ export function Step2ItemInfo({
         />
 
         <div id="listing-field-title" className="mb-6">
-          <FieldLabel label={item.fieldTitle} required />
+          <FieldLabel htmlFor="listing-field-title-input" label={item.fieldTitle} required />
           <input
             id="listing-field-title-input"
             type="text"
@@ -424,7 +408,7 @@ export function Step2ItemInfo({
             }}
           />
           {draft.title.length >= 70 ? (
-            <p className="text-label mt-1.5 text-right text-gray-400">
+            <p className="text-label mt-1.5 text-right text-gray-500">
               {draft.title.length}/80
             </p>
           ) : null}
@@ -535,7 +519,7 @@ export function Step2ItemInfo({
                 ) : null}
                 {(vinRequired || draft.vin.trim()) ? (
                   <>
-                <FieldLabel label={item.vin} required={vinRequired} />
+                <FieldLabel htmlFor="listing-field-vin" label={item.vin} required={vinRequired} />
                 <input
                   id="listing-field-vin"
                   type="text"
@@ -629,7 +613,7 @@ export function Step2ItemInfo({
 
             {showSerialField ? (
             <div id="listing-field-serial-number">
-              <FieldLabel label={item.serialNumber} required={serialRequired} />
+              <FieldLabel htmlFor="listing-field-serial-number-input" label={item.serialNumber} required={serialRequired} />
               <input
                 id="listing-field-serial-number-input"
                 type="text"
@@ -758,8 +742,14 @@ export function Step2ItemInfo({
         {!yardSaleListing ? <CategorySpecsFields draft={draft} setDraft={setDraft} /> : null}
 
         {!plantListing ? (
-        <div id="listing-field-condition" className="mb-6">
-          <FieldLabel label={item.condition} required />
+        <div id="listing-field-condition" className="mb-6" role="group" aria-labelledby="listing-field-condition-label">
+          <p
+            id="listing-field-condition-label"
+            className="text-label mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500"
+          >
+            {item.condition}
+            <span className="text-red-500"> *</span>
+          </p>
           <div className="grid grid-cols-2 gap-2">
             {conditionOptions.map((option) => {
               const selected = draft.condition === option.value;
@@ -807,9 +797,10 @@ export function Step2ItemInfo({
               : { duration: 0.2 }
           }
         >
-          <FieldLabel label={item.description} />
+          <FieldLabel htmlFor="listing-field-description" label={item.description} />
           <motion.div className="relative" initial={false} animate={{ opacity: 1 }}>
             <textarea
+              id="listing-field-description"
               maxLength={1000}
               value={draft.description}
               placeholder={item.descriptionPlaceholder}
@@ -825,7 +816,7 @@ export function Step2ItemInfo({
                 }));
               }}
             />
-            <span className="text-label pointer-events-none absolute bottom-3 right-4 text-gray-400">
+            <span className="text-label pointer-events-none absolute bottom-3 right-4 text-gray-500">
               {draft.description.length}/1000
             </span>
           </motion.div>
@@ -854,7 +845,7 @@ export function Step2ItemInfo({
 
         {!plantListing ? (
         <div id="listing-field-replacement-value" className="mb-6">
-          <FieldLabel label={replacementValueLabel} required />
+          <FieldLabel htmlFor="listing-field-replacement-value-input" label={replacementValueLabel} required />
           <div className="relative">
             <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
               {moneySymbol}

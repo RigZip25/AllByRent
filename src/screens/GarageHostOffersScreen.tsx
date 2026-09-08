@@ -143,7 +143,7 @@ export function GarageHostOffersScreen({ hostId, onBack }: GarageHostOffersScree
                   {copy.counterLabel}
                   <div className="mt-1 flex gap-2">
                     <div className="relative flex-1">
-                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                       <input
                         type="number"
                         value={counterDraft[offer.id] ?? ""}

@@ -30,7 +30,7 @@ function QuickTipsAccordion({ tips }: { tips: { q: string; a: string }[] }) {
 
   return (
     <div className="mb-4">
-      <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+      <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">
         {t.mrEvorios.quickTipsTitle}
       </p>
       <p className="mt-0.5 text-[13px] text-gray-500">{t.mrEvorios.quickTipsHint}</p>
@@ -146,7 +146,7 @@ function GuidesPanel({
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">
           {t.mrEvorios.guidesTitle}
         </p>
         <p className="mt-0.5 text-[13px] text-gray-500">{t.mrEvorios.guidesHint}</p>

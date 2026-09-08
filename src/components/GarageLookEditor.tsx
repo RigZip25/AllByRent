@@ -164,7 +164,7 @@ export function GarageLookEditor({ onChanged }: { onChanged?: () => void }) {
         })}
       </div>
 
-      <p className="mt-3 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+      <p className="mt-3 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
         {t.garageUi.lookAccent}
       </p>
       <div className="mt-2 flex flex-wrap gap-2.5" role="radiogroup" aria-label={t.garageUi.lookAccent}>
@@ -198,7 +198,7 @@ export function GarageLookEditor({ onChanged }: { onChanged?: () => void }) {
       </div>
 
       <label className="mt-3 block">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
           {t.garageUi.lookShopName}
         </span>
         <input
@@ -222,7 +222,7 @@ export function GarageLookEditor({ onChanged }: { onChanged?: () => void }) {
       </label>
 
       <label className="mt-3 block">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
           {t.garageUi.lookNeighborhood}
         </span>
         <input

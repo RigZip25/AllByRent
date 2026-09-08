@@ -261,7 +261,7 @@ export function AddressLocationPicker({
         maxRows={3}
       />
 
-      <p className="text-center text-xs text-gray-400">
+      <p className="text-center text-xs text-gray-500">
         {countryCode === "US"
           ? variant === "area"
             ? copy.zipOrCityExample(getCountrySearchExample("US"))

@@ -239,7 +239,7 @@ export function LocationAreaControls({
             <span className="shrink-0 text-[12px] font-semibold text-gray-500">
               {home.withinMiles(clusterRadiusMi)}
             </span>
-            <ChevronDown className="h-4 w-4 shrink-0 text-gray-400" aria-hidden />
+            <ChevronDown className="h-4 w-4 shrink-0 text-gray-500" aria-hidden />
           </button>
         ) : (
           <div className="flex items-start gap-2">
@@ -401,7 +401,7 @@ export function LocationAreaControls({
                 <p className="mb-4 text-[13px] leading-relaxed text-gray-500">
                   {home.locationSheetHint}
                 </p>
-                <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-400">
+                <h3 className="mb-2 text-[13px] font-bold uppercase tracking-wide text-gray-500">
                   {home.distanceTitle}
                 </h3>
                 {radiusButtons}

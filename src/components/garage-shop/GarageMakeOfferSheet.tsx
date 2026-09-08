@@ -7,6 +7,8 @@ import { useAuth } from "../../hooks/AuthProvider";
 import { SignInPrompt } from "../SignInPrompt";
 import type { ListingDraft } from "../../screens/listing/types";
 import type { ShopOffer } from "../../lib/garageShopStorage";
+import { useAccessibleOverlay } from "../../lib/a11yOverlay";
+import { fieldErrorProps } from "../../lib/a11yFieldError";
 
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
@@ -35,6 +37,8 @@ export function GarageMakeOfferSheet({
   );
   const [amount, setAmount] = useState(String(suggested));
   const [error, setError] = useState<string | null>(null);
+  const offerField = fieldErrorProps("garage-offer-amount", error);
+  useAccessibleOverlay(true, onClose, "garage-make-offer");
 
   const submit = () => {
     if (!auth.userId) {
@@ -63,7 +67,10 @@ export function GarageMakeOfferSheet({
     <div className="garage-offer-sheet fixed inset-0 z-50 flex items-end justify-center bg-black/40">
       <button type="button" className="absolute inset-0" aria-label={common.close} onClick={onClose} />
       <div
-        className="relative w-full max-w-[390px] max-h-[90dvh] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] rounded-t-3xl border bg-white px-4 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] pt-4"
+        role="dialog"
+        aria-modal="true"
+        aria-label={copy.sheetEyebrow}
+        className="relative w-full max-w-[430px] max-h-[90dvh] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] rounded-t-3xl border bg-white px-4 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] pt-4"
         style={{ borderColor: BORDER }}
       >
         <div className="mb-3 flex items-start justify-between gap-3">
@@ -93,11 +100,12 @@ export function GarageMakeOfferSheet({
           <SignInPrompt message={copy.signInForOfferPrompt} intent="book" />
         ) : (
           <>
-            <label className="block text-[15px] font-semibold text-gray-700">
+            <label className="block text-[15px] font-semibold text-gray-700" htmlFor={offerField.input.id}>
               {copy.yourOfferLabel}
               <div className="relative mt-1.5">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                 <input
+                  {...offerField.input}
                   type="number"
                   inputMode="decimal"
                   max={offer.buyNowUsd - 0.01}
@@ -107,12 +115,14 @@ export function GarageMakeOfferSheet({
                     setError(null);
                   }}
                   className="w-full rounded-xl border py-3 pl-7 pr-3 text-base font-semibold"
-                  style={{ borderColor: BORDER }}
+                  style={{ borderColor: error ? "#f87171" : BORDER }}
                 />
               </div>
             </label>
 
-            {error ? <p className="mt-2 text-[15px] font-medium text-red-600">{error}</p> : null}
+            {offerField.errorMessage ? (
+              <p {...offerField.errorMessage} className="mt-2 text-[15px] font-medium text-red-600" />
+            ) : null}
 
             <p className="mt-3 text-[14px] leading-relaxed text-gray-600">{copy.sheetTerms}</p>
 

@@ -78,7 +78,7 @@ export function WhereAreYou({
   const { location: copy } = useOnboardingCopy();
 
   return (
-    <div className="screen onboarding-step mx-auto w-full max-w-[390px] bg-white">
+    <div className="screen onboarding-step mx-auto w-full max-w-[430px] bg-white">
       <OnboardingTopBar onBack={onBack} onSkip={onSkip} />
       <div className="where-are-you-header shrink-0 px-4 pb-2 pt-1 text-center">
         <h1 className="where-are-you-page-title text-2xl font-bold" style={{ color: GREEN }}>

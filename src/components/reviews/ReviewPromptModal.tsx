@@ -84,7 +84,7 @@ export function ReviewPromptModal({
             className="mt-2 w-full resize-none rounded-2xl border bg-white px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/20"
             style={{ borderColor: BORDER }}
           />
-          <p className="mt-2 text-[11px] text-gray-400">{copy.blindHint}</p>
+          <p className="mt-2 text-[11px] text-gray-500">{copy.blindHint}</p>
         </div>
 
         <button

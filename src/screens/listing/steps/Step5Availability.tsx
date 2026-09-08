@@ -146,7 +146,7 @@ export function Step5Availability({ draft, setDraft }: StepProps) {
   };
   return (
     <motion.div
-      className="mx-auto w-full max-w-[390px] bg-[#F9FAFB] px-4 pb-8 pt-5"
+      className="mx-auto w-full max-w-[430px] bg-[#F9FAFB] px-4 pb-8 pt-5"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}

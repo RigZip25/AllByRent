@@ -76,7 +76,7 @@ function ListingThumb({ listing }: { listing: ListingDraft }) {
     );
   }
   return (
-    <span className="text-xs font-bold uppercase tracking-wide text-gray-400" aria-hidden>
+    <span className="text-xs font-bold uppercase tracking-wide text-gray-500" aria-hidden>
       {(listing.title || t.garageUi.itemFallback).slice(0, 1)}
     </span>
   );

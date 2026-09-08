@@ -32,7 +32,7 @@ export function YouAreAllSet({ onExplore, onBack, onSkip }: YouAreAllSetProps) {
   const goals = tags;
 
   return (
-    <div className="screen mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-white">
+    <div className="screen mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden bg-white">
       {onBack || onSkip ? (
         <OnboardingTopBar onBack={onBack} onSkip={onSkip ?? onExplore} />
       ) : null}
@@ -52,7 +52,7 @@ export function YouAreAllSet({ onExplore, onBack, onSkip }: YouAreAllSetProps) {
         </div>
 
         <div className="mt-6 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
             {copy.profileHeading(APP_NAME)}
           </p>
           <dl className="mt-3 space-y-2.5 text-sm">

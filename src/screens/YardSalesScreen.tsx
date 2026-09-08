@@ -85,16 +85,16 @@ function YardSaleCard({
                 <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
                 {event.rating.toFixed(1)}
               </span>
-              <span className="text-gray-400">·</span>
+              <span className="text-gray-500">·</span>
             </>
           ) : null}
           <span>{event.distance}</span>
-          <span className="text-gray-400">·</span>
+          <span className="text-gray-500">·</span>
           <span>{copy.forSale(event.saleItemCount)}</span>
         </p>
         <p className="mt-1 line-clamp-1 text-[14px] font-medium text-gray-600">{categoryLine}</p>
       </div>
-      <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-gray-400" aria-hidden />
+      <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-gray-500" aria-hidden />
     </button>
   );
 }

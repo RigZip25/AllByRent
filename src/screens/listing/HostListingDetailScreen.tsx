@@ -76,7 +76,7 @@ function HostListingCoverThumb({ cover }: { cover: MediaRef | null | undefined }
       {url ? (
         <img src={url} alt="" className="h-full w-full object-cover" />
       ) : (
-        <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold text-gray-400">
+        <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold text-gray-500">
           —
         </div>
       )}
@@ -786,7 +786,7 @@ export function HostListingDetailScreen({
         >
           <div className="flex items-center gap-3">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F9FAFB]">
-              {qrDataUrl ? <img src={qrDataUrl} alt={t.qrAlt} className="h-14 w-14" /> : <QrCode className="h-10 w-10 text-gray-400" />}
+              {qrDataUrl ? <img src={qrDataUrl} alt={t.qrAlt} className="h-14 w-14" /> : <QrCode className="h-10 w-10 text-gray-500" />}
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-gray-900">{t.qrForListing}</p>
@@ -864,7 +864,7 @@ export function HostListingDetailScreen({
         ) : null}
 
         <section className="rounded-3xl border bg-white p-5" style={{ borderColor: BORDER }}>
-          <h2 className="text-[13px] font-bold uppercase tracking-wide text-gray-400">{t.details}</h2>
+          <h2 className="text-[13px] font-bold uppercase tracking-wide text-gray-500">{t.details}</h2>
           <dl className="mt-3 space-y-3 text-sm">
             <DetailRow
               label={t.labelTitle}
@@ -959,7 +959,7 @@ export function HostListingDetailScreen({
         </section>
 
         <section className="mt-4 rounded-3xl border bg-white p-5" style={{ borderColor: BORDER }}>
-          <h2 className="text-[13px] font-bold uppercase tracking-wide text-gray-400">
+          <h2 className="text-[13px] font-bold uppercase tracking-wide text-gray-500">
             {t.bookingCalendarTitle}
           </h2>
           <p className="mt-1 text-[13px] text-gray-500">{t.bookingCalendarHint}</p>
@@ -969,7 +969,7 @@ export function HostListingDetailScreen({
         </section>
 
         <section className="mt-4 rounded-3xl border bg-white p-5" style={{ borderColor: BORDER }}>
-          <h2 className="text-[13px] font-bold uppercase tracking-wide text-gray-400">{t.manage}</h2>
+          <h2 className="text-[13px] font-bold uppercase tracking-wide text-gray-500">{t.manage}</h2>
           <p className="mt-1 text-[13px] text-gray-500">
             {t.manageHint}
           </p>
@@ -1058,7 +1058,7 @@ export function HostListingDetailScreen({
 
       {activeEdit ? (
         <div className="absolute inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-4 pt-10">
-          <div className="w-full max-w-[390px] overflow-hidden rounded-3xl bg-white shadow-2xl">
+          <div className="w-full max-w-[430px] overflow-hidden rounded-3xl bg-white shadow-2xl">
             <div className="border-b px-5 pb-4 pt-5" style={{ borderColor: BORDER }}>
               <p className="text-[15px] font-extrabold" style={{ color: GREEN }}>
                 {t.editTitle(editFieldLabel)}

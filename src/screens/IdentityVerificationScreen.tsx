@@ -34,7 +34,7 @@ export function IdentityVerificationScreen({ onBack }: { onBack: () => void }) {
       </header>
 
       <div className="screen-scroll flex-1 p-4">
-        <div className="mx-auto max-w-[390px] rounded-3xl border bg-white p-5" style={{ borderColor: BORDER }}>
+        <div className="mx-auto max-w-[430px] rounded-3xl border bg-white p-5" style={{ borderColor: BORDER }}>
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#F0FDF4]">
               <ShieldCheck className="h-5 w-5" style={{ color: GREEN }} />

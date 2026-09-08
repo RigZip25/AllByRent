@@ -58,7 +58,7 @@ export function QRStoryScreen({ onGotIt, onSkip }: QRStoryScreenProps) {
 
   return (
     <motion.div
-      className="mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col bg-white"
+      className="mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col bg-white"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
@@ -74,7 +74,7 @@ export function QRStoryScreen({ onGotIt, onSkip }: QRStoryScreenProps) {
       </div>
 
       <footer className="shrink-0 border-t border-gray-100 bg-white px-4 pb-6 pt-4">
-        <div className="mb-3 flex items-center justify-between text-xs font-semibold text-gray-400">
+        <div className="mb-3 flex items-center justify-between text-xs font-semibold text-gray-500">
           <span>{t.slideOf(step + 1, 3)}</span>
           <span className="rounded-full bg-gray-100 px-2 py-1">{t.mascotGuided(MASCOT_NAME)}</span>
         </div>

@@ -55,7 +55,7 @@ function AreaPhotoThumb({ media }: { media: MediaRef | null | undefined }) {
   if (!media || !url) {
     return (
       <div
-        className="flex h-20 w-full items-center justify-center rounded-xl border border-dashed bg-gray-50 text-gray-400"
+        className="flex h-20 w-full items-center justify-center rounded-xl border border-dashed bg-gray-50 text-gray-500"
         style={{ borderColor: BORDER }}
       >
         <Camera className="h-5 w-5" aria-hidden />

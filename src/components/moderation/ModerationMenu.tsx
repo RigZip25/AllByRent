@@ -94,7 +94,7 @@ export function ModerationMenu({
             }}
           />
           <div
-            className="relative w-full max-w-[390px] rounded-t-3xl border bg-white px-4 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] pt-4"
+            className="relative w-full max-w-[430px] rounded-t-3xl border bg-white px-4 pb-[max(3.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] pt-4"
             style={{ borderColor: BORDER }}
             role="dialog"
             aria-modal="true"

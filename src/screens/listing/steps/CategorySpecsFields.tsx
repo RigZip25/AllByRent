@@ -54,11 +54,13 @@ function inputClassName(extra = "") {
 }
 
 function FieldLabel({
+  htmlFor,
   label,
   required,
   recommended,
   recommendedLabel,
 }: {
+  htmlFor: string;
   label: string;
   required: boolean;
   recommended?: boolean;
@@ -66,10 +68,13 @@ function FieldLabel({
 }) {
   return (
     <div className="mb-2 flex flex-wrap items-center gap-2">
-      <span className="text-label text-sm font-semibold uppercase tracking-wide text-gray-500">
+      <label
+        htmlFor={htmlFor}
+        className="text-label text-sm font-semibold uppercase tracking-wide text-gray-500"
+      >
         {label}
         {required ? <span className="text-red-500"> *</span> : null}
-      </span>
+      </label>
       {!required && recommended ? (
         <span
           className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
@@ -118,9 +123,11 @@ function YearStepperField({
     onChange(String(clampYear(current + delta)));
   };
 
+  const fieldId = `listing-spec-${field.key}`;
   return (
     <div>
       <FieldLabel
+        htmlFor={fieldId}
         label={label}
         required={required}
         recommended={field.recommended}
@@ -128,6 +135,7 @@ function YearStepperField({
       />
       <div className="flex items-stretch gap-2">
         <input
+          id={fieldId}
           type="number"
           inputMode="numeric"
           min={YEAR_MIN}
@@ -142,7 +150,7 @@ function YearStepperField({
             type="button"
             aria-label={stepUpLabel}
             disabled={current != null && current >= max}
-            className="flex h-1/2 min-h-[22px] items-center justify-center px-3 text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40"
+            className="flex h-1/2 min-h-[44px] items-center justify-center px-3 text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40"
             onClick={() => nudge(1)}
           >
             <ChevronUp className="h-4 w-4" strokeWidth={2.5} />
@@ -152,7 +160,7 @@ function YearStepperField({
             type="button"
             aria-label={stepDownLabel}
             disabled={current != null && current <= YEAR_MIN}
-            className="flex h-1/2 min-h-[22px] items-center justify-center px-3 text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40"
+            className="flex h-1/2 min-h-[44px] items-center justify-center px-3 text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40"
             onClick={() => nudge(-1)}
           >
             <ChevronDown className="h-4 w-4" strokeWidth={2.5} />
@@ -199,6 +207,7 @@ function SpecFieldControl({
   yearStepDownLabel: string;
   required: boolean;
 }) {
+  const fieldId = `listing-spec-${field.key}`;
   if (field.key === "year" && field.type === "number") {
     return (
       <YearStepperField
@@ -220,12 +229,14 @@ function SpecFieldControl({
     return (
       <div>
         <FieldLabel
+          htmlFor={fieldId}
           label={label}
           required={required}
           recommended={field.recommended}
           recommendedLabel={recommendedLabel}
         />
         <select
+          id={fieldId}
           value={value}
           className={inputClassName()}
           onChange={(event) => onChange(event.target.value)}
@@ -243,6 +254,7 @@ function SpecFieldControl({
         </select>
         {value === BRAND_OTHER ? (
           <input
+            id={`${fieldId}-other`}
             type="text"
             value={brandOther ?? ""}
             placeholder={otherPlaceholder}
@@ -271,16 +283,27 @@ function SpecFieldControl({
       );
     };
     return (
-      <div>
-        <FieldLabel
-          label={label}
-          required={required}
-          recommended={field.recommended}
-          recommendedLabel={recommendedLabel}
-        />
+      <div role="group" aria-labelledby={`${fieldId}-label`}>
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <span
+            id={`${fieldId}-label`}
+            className="text-label text-sm font-semibold uppercase tracking-wide text-gray-500"
+          >
+            {label}
+            {required ? <span className="text-red-500"> *</span> : null}
+          </span>
+          {!required && field.recommended ? (
+            <span
+              className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+              style={{ backgroundColor: `${AMBER}18`, color: AMBER }}
+            >
+              {recommendedLabel}
+            </span>
+          ) : null}
+        </div>
         <div className="space-y-2 rounded-2xl border border-gray-200 bg-white px-3 py-3">
           {field.options.map((opt) => (
-            <label key={opt} className="flex items-start gap-2 text-sm text-gray-800">
+            <label key={opt} className="flex min-h-[44px] items-start gap-2 text-sm text-gray-800">
               <input
                 type="checkbox"
                 className="mt-0.5"
@@ -300,12 +323,14 @@ function SpecFieldControl({
     return (
       <div>
         <FieldLabel
+          htmlFor={fieldId}
           label={label}
           required={required}
           recommended={field.recommended}
           recommendedLabel={recommendedLabel}
         />
         <select
+          id={fieldId}
           value={value}
           className={inputClassName()}
           onChange={(event) => onChange(event.target.value)}
@@ -325,12 +350,13 @@ function SpecFieldControl({
   return (
     <div>
       <FieldLabel
+        htmlFor={fieldId}
         label={label}
         required={required}
         recommended={field.recommended}
         recommendedLabel={recommendedLabel}
       />
-      <input
+      <input id={fieldId}
         type={field.type === "number" ? "number" : "text"}
         inputMode={field.type === "number" ? "decimal" : "text"}
         min={field.type === "number" ? 0 : undefined}

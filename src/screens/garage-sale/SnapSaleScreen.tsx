@@ -496,7 +496,7 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
           <label className="mt-3 block">
             <span className="text-xs font-medium text-gray-500">{copy.priceLabel}</span>
             <div className="relative mt-1">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
                 {currencySymbol()}
               </span>
               <input

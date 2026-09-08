@@ -269,7 +269,7 @@ export function RentanoChatPanel({
           {t.mrEvorios.listeningHint}
         </p>
       ) : input.trim() && !loading ? (
-        <p className="mb-2 text-center text-[11px] text-gray-400">{t.mrEvorios.editThenSend}</p>
+        <p className="mb-2 text-center text-[11px] text-gray-500">{t.mrEvorios.editThenSend}</p>
       ) : null}
 
       <div
@@ -315,7 +315,7 @@ export function RentanoChatPanel({
           placeholder={
             speech.listening ? t.mrEvorios.placeholderListening : t.mrEvorios.placeholderIdle
           }
-          className="max-h-28 min-h-[48px] min-w-0 flex-1 resize-none bg-transparent py-2 text-[15px] outline-none placeholder:text-gray-400"
+          className="max-h-28 min-h-[48px] min-w-0 flex-1 resize-none bg-transparent py-2 text-[15px] outline-none placeholder:text-gray-500"
           disabled={loading}
           aria-label={`Message to ${MASCOT_NAME}`}
         />

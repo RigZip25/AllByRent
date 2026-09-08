@@ -64,7 +64,7 @@ export function PwaUpdateSuccessCard({ onDismiss }: { onDismiss: () => void }) {
         <p className="mt-0.5 text-[14px] leading-snug text-gray-500">
           {t.versionUpdatedBody(APP_NAME)}
         </p>
-        <p className="mt-1 text-[11px] text-gray-400">{formatBuildStamp()}</p>
+        <p className="mt-1 text-[11px] text-gray-500">{formatBuildStamp()}</p>
         <button
           type="button"
           onClick={onDismiss}
@@ -120,7 +120,7 @@ export function PwaUpdateConfirmSheet({
         role="dialog"
         aria-modal="true"
         aria-labelledby="pwa-update-title"
-        className="w-full max-w-[390px] rounded-3xl bg-white p-5 shadow-2xl"
+        className="w-full max-w-[430px] rounded-3xl bg-white p-5 shadow-2xl"
         onClick={(event) => event.stopPropagation()}
       >
         <div
@@ -135,7 +135,7 @@ export function PwaUpdateConfirmSheet({
         <p className="mt-2 text-center text-[15px] leading-relaxed text-gray-500">
           {t.installUpdateBody}
         </p>
-        <p className="mt-2 text-center text-[11px] text-gray-400">{formatBuildStamp()}</p>
+        <p className="mt-2 text-center text-[11px] text-gray-500">{formatBuildStamp()}</p>
         <div className="mt-5 flex flex-col gap-2.5">
           <button
             type="button"

@@ -267,7 +267,7 @@ export function RentalCard({
               <InsuredLabel modes={booking.listingModes} compact />
             ) : null}
             {booking.stripePayment ? (
-              <span className="text-[10px] font-semibold text-gray-400">{t.rentalCard.stripe}</span>
+              <span className="text-[10px] font-semibold text-gray-500">{t.rentalCard.stripe}</span>
             ) : null}
           </div>
           {disputeSubtext ? (

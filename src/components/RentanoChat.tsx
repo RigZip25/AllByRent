@@ -102,7 +102,7 @@ function MenuRow({
         </p>
         <p className="mt-0.5 text-[13px] leading-snug text-gray-500">{subtitle}</p>
       </div>
-      <ChevronRight className="h-5 w-5 shrink-0 text-gray-400" />
+      <ChevronRight className="h-5 w-5 shrink-0 text-gray-500" />
     </button>
   );
 }
@@ -204,7 +204,7 @@ export function RentanoChatSheet({
             role="dialog"
             aria-modal="true"
             aria-labelledby="rentano-chat-title"
-            className="fixed bottom-0 left-1/2 z-[71] flex max-h-[min(92dvh,720px)] w-full max-w-[390px] -translate-x-1/2 flex-col rounded-t-3xl bg-white shadow-2xl"
+            className="fixed bottom-0 left-1/2 z-[71] flex max-h-[min(92dvh,720px)] w-full max-w-[430px] -translate-x-1/2 flex-col rounded-t-3xl bg-white shadow-2xl"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}

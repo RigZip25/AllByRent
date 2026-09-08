@@ -174,11 +174,11 @@ export function MessagesInboxScreen({
                       <p className="truncate text-[15px] font-semibold" style={{ color: GREEN }}>
                         {threadTitle(thread, copy.messages.requestFallback)}
                       </p>
-                      <span className="shrink-0 text-[11px] text-gray-400">
+                      <span className="shrink-0 text-[11px] text-gray-500">
                         {new Date(thread.updatedAt).toLocaleDateString()}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-[12px] font-medium uppercase tracking-wide text-gray-400">
+                    <p className="mt-0.5 text-[12px] font-medium uppercase tracking-wide text-gray-500">
                       {thread.kind === "rental"
                         ? copy.messages.rental
                         : thread.kind === "request"

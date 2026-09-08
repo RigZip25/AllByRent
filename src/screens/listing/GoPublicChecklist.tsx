@@ -153,7 +153,7 @@ export function GoPublicChecklist({
 
   return (
     <motion.div
-      className="mx-auto flex min-h-full w-full max-w-[390px] flex-col bg-[#F9FAFB] px-4 pb-8 pt-5"
+      className="mx-auto flex min-h-full w-full max-w-[430px] flex-col bg-[#F9FAFB] px-4 pb-8 pt-5"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}

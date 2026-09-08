@@ -165,7 +165,7 @@ export function Step7Review({
 
   return (
     <motion.div
-      className="mx-auto w-full max-w-[390px] bg-[#F9FAFB] px-4 pb-28 pt-5"
+      className="mx-auto w-full max-w-[430px] bg-[#F9FAFB] px-4 pb-28 pt-5"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
@@ -263,7 +263,7 @@ export function Step7Review({
             className="mt-4 w-full border-t border-gray-100 pt-4 text-left"
           >
             <div className="mb-2 flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                 {review.modes}
               </p>
               <EditLink label={t.common.edit} onClick={() => onGoToStep(LISTING_STEP.details)} />
@@ -292,7 +292,7 @@ export function Step7Review({
               <p className="text-sm text-gray-600">{handoffSummary}</p>
               <EditLink label={t.common.edit} onClick={() => onGoToStep(LISTING_STEP.details)} />
             </div>
-            <p className="mt-1 text-xs text-gray-400">{review.handoffAdjustHint}</p>
+            <p className="mt-1 text-xs text-gray-500">{review.handoffAdjustHint}</p>
           </button>
 
           <div className="mt-4 border-t border-gray-100 pt-4">

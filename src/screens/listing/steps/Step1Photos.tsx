@@ -463,12 +463,12 @@ export function Step1Photos({
                 transition={{ duration: 1.2, repeat: Infinity }}
                 className="mb-2 h-10 w-10 rounded-xl bg-gray-200"
               />
-              <span className="text-xs text-gray-400">{photosCopy.enhancing}</span>
+              <span className="text-xs text-gray-500">{photosCopy.enhancing}</span>
             </>
           ) : isError ? (
             <span className="text-xs text-red-500">{photosCopy.tapToRetry}</span>
           ) : (
-            <Plus className="h-5 w-5 text-gray-400" strokeWidth={1.75} />
+            <Plus className="h-5 w-5 text-gray-500" strokeWidth={1.75} />
           )}
         </button>
       </div>
@@ -623,7 +623,7 @@ export function Step1Photos({
   };
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-[390px] flex-col bg-[#F9FAFB] px-4 pb-4 pt-5">
+    <div className="mx-auto flex min-h-full w-full max-w-[430px] flex-col bg-[#F9FAFB] px-4 pb-4 pt-5">
       <input
         ref={libraryInputRef}
         type="file"
@@ -771,7 +771,7 @@ export function Step1Photos({
         ) : null}
         {draft.videos.length > 0 ? (
           <div className="rounded-2xl bg-white p-3 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
               {photosCopy.videosHeading(draft.videos.length, MAX_LISTING_VIDEOS)}
             </p>
             <div className="mt-2 grid grid-cols-1 gap-3">
@@ -1011,7 +1011,7 @@ function VideoPreview({ video, onRemove }: { video: MediaRef; onRemove: () => vo
       {status === "ready" && url ? (
         <video src={url} controls className="h-[180px] w-full object-cover" />
       ) : (
-        <div className="flex h-[180px] w-full items-center justify-center text-sm text-gray-400">
+        <div className="flex h-[180px] w-full items-center justify-center text-sm text-gray-500">
           {photosCopy.loadingVideo}
         </div>
       )}

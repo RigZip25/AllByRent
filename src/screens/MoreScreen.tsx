@@ -32,7 +32,7 @@ const SURFACE = "#F0F4F2";
 
 function SectionTitle({ children }: { children: string }) {
   return (
-    <p className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+    <p className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wide text-gray-500">
       {children}
     </p>
   );
@@ -127,7 +127,7 @@ export function MoreScreen({
                 {displayNameLabel}
               </p>
               <p className="mt-0.5 text-[13px] text-gray-500">{t.more.accountSettings}</p>
-              <p className="mt-0.5 text-[12px] text-gray-400">{t.more.accountSettingsHint}</p>
+              <p className="mt-0.5 text-[12px] text-gray-500">{t.more.accountSettingsHint}</p>
             </div>
             <ChevronRight className="h-5 w-5 shrink-0 text-gray-300" />
           </button>

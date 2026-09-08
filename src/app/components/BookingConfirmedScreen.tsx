@@ -65,7 +65,7 @@ export function BookingConfirmedScreen({
                   {t.booking.total(booking.totalUsd.toFixed(2))}
                 </p>
               ) : null}
-              <p className="mt-2 text-[11px] text-gray-400">
+              <p className="mt-2 text-[11px] text-gray-500">
                 {t.booking.ref(booking.id.slice(0, 8))}
               </p>
             </div>

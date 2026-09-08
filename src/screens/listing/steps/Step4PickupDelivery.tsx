@@ -168,7 +168,7 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
 
   return (
     <motion.div
-      className="mx-auto w-full max-w-[390px] bg-[#F9FAFB] px-4 pb-8 pt-5"
+      className="mx-auto w-full max-w-[430px] bg-[#F9FAFB] px-4 pb-8 pt-5"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
@@ -329,7 +329,7 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
               </button>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-gray-400">$</span>
+              <span className="text-gray-500">$</span>
               <input
                 type="text"
                 inputMode="decimal"
@@ -340,7 +340,7 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
               />
             </div>
             {parsedFee !== null && parsedFee > 0 ? (
-              <p className="mt-1 text-[11px] text-gray-400">
+              <p className="mt-1 text-[11px] text-gray-500">
                 {pickup.usingEnteredFee}
               </p>
             ) : null}
@@ -356,7 +356,7 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
           onClick={() => setEstimateOpen(false)}
         >
           <div
-            className="w-full max-w-[390px] rounded-2xl bg-white p-5 shadow-xl"
+            className="w-full max-w-[430px] rounded-2xl bg-white p-5 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-base font-bold" style={{ color: GREEN }}>
@@ -376,7 +376,7 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">
                   {pickup.estimatePerMile}{" "}
-                  <span className="text-gray-400">
+                  <span className="text-gray-500">
                     ${formatDeliveryFee(DELIVERY_FEE_PER_MILE_ROUND_TRIP_USD)} ×{" "}
                     {formatDistanceFromMiles(maxMiles, undefined, { plus: false })}
                   </span>
@@ -390,11 +390,11 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
                   <span className="text-gray-600">
                     {pickup.estimateHeavy}{" "}
                     {estimate.poundsOverThreshold > 0 ? (
-                      <span className="text-gray-400">
+                      <span className="text-gray-500">
                         ({formatPoundsOverLabel(estimate.poundsOverThreshold)})
                       </span>
                     ) : (
-                      <span className="text-gray-400">{pickup.estimateNoSurcharge}</span>
+                      <span className="text-gray-500">{pickup.estimateNoSurcharge}</span>
                     )}
                   </span>
                   <span className="font-semibold text-gray-900">
@@ -408,7 +408,7 @@ export function Step4PickupDelivery({ draft, setDraft }: StepProps) {
                   ${formatDeliveryFee(estimate.suggested)}
                 </span>
               </div>
-              <p className="text-[11px] text-gray-400">{estimate.roundTripNote}</p>
+              <p className="text-[11px] text-gray-500">{estimate.roundTripNote}</p>
             </div>
 
             <div className="mt-4 flex gap-2">

@@ -35,13 +35,13 @@ export function RentanoFaqPanel({
         className="flex items-center gap-2 rounded-2xl border bg-[#F9FAFB] px-3 py-2.5"
         style={{ borderColor: BORDER }}
       >
-        <Search className="h-4 w-4 shrink-0 text-gray-400" />
+        <Search className="h-4 w-4 shrink-0 text-gray-500" />
         <input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={faq.panel.searchPlaceholder}
-          className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-gray-400"
+          className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-gray-500"
           aria-label={faq.panel.searchAria}
         />
       </div>
@@ -58,7 +58,7 @@ export function RentanoFaqPanel({
         <div className="flex flex-col gap-4">
           {[...byCategory.entries()].map(([category, items]) => (
             <section key={category}>
-              <h3 className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-400">
+              <h3 className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-500">
                 {category}
               </h3>
               <ul className="flex flex-col gap-2">

@@ -279,7 +279,7 @@ export function RentalsScreen({
         {tab === "history" ? (
           <div className="mt-3 space-y-2">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
               <input
                 type="search"
                 value={searchQuery}
@@ -365,7 +365,7 @@ export function RentalsScreen({
               </p>
               <p className="text-[13px] text-gray-600">{pendingCheckin.itemTitle}</p>
             </div>
-            <ChevronRight className="h-5 w-5 text-gray-400" />
+            <ChevronRight className="h-5 w-5 text-gray-500" />
           </button>
         ) : null}
 

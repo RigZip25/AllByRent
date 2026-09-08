@@ -232,9 +232,9 @@ export function ListingShareScreen({
   };
 
   return (
-    <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[390px] flex-col overflow-hidden bg-[#F9FAFB]">
+    <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[430px] flex-col overflow-hidden bg-[#F9FAFB]">
       <div className="shrink-0 border-b bg-white px-5 pb-4 pt-4" style={{ borderColor: BORDER }}>
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">{t.optionalNextStep}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{t.optionalNextStep}</p>
         <h2 className="mt-1 text-[18px] font-extrabold" style={{ color: GREEN }}>
           {t.title}
         </h2>
@@ -323,7 +323,7 @@ export function ListingShareScreen({
             <a
               href={selectedCard?.objectUrl ?? "#"}
               download={selectedCard?.filename ?? undefined}
-              className={`flex items-center justify-center gap-2 rounded-xl border bg-white px-3 py-2.5 text-[13px] font-semibold ${selectedCard ? "text-gray-700" : "text-gray-400 pointer-events-none"}`}
+              className={`flex items-center justify-center gap-2 rounded-xl border bg-white px-3 py-2.5 text-[13px] font-semibold ${selectedCard ? "text-gray-700" : "text-gray-500 pointer-events-none"}`}
               style={{ borderColor: BORDER }}
             >
               {t.downloadPng}
