@@ -9,6 +9,7 @@ import { formatAuthError } from "../lib/authErrors";
 import { suggestCorrectedEmail } from "../lib/emailDomainSuggest";
 import { detectCurrentLocation, formatGeolocationErrorMessage } from "../lib/geolocation";
 import { getHomeLocation, setHomeLocation } from "../lib/listingStorage";
+import { pushOverlay, removeOverlay } from "../lib/overlayBackStack";
 import { peekPendingAuthProfile, savePendingAuthProfile } from "../lib/pendingAuthProfile";
 import {
   emailOtpEntryError,
@@ -243,6 +244,12 @@ export function AuthGate({
     const id = window.setInterval(() => setNowMs(Date.now()), 500);
     return () => window.clearInterval(id);
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    pushOverlay("auth-gate", () => onDismiss?.());
+    return () => removeOverlay("auth-gate");
+  }, [open, onDismiss]);
 
   if (!open) return null;
 

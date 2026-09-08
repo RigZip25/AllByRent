@@ -56,8 +56,7 @@ import {
 } from "../lib/hostAccess";
 import { syncGarageFromRemote } from "../lib/repositories/garageRepository";
 import {
-  fetchActiveListingsForCityRemote,
-  getActiveRentLocationLabel,
+  fetchListingsByOwnerIdsRemote,
 } from "../lib/listingStorage";
 import { localizeCategoryLabel } from "../lib/i18n/categoryLabels";
 import { resolveGarageHostId } from "../lib/hostAccess";
@@ -147,7 +146,6 @@ export function ActiveGarageShopScreen({
   const [toast, setToast] = useState<string | null>(null);
   const [pendingWins, setPendingWins] = useState(() => getMyPendingWinnerCheckouts());
   const seenPendingWinIdsRef = useRef<Set<string>>(new Set());
-  const city = getActiveRentLocationLabel().trim();
   const [garageName, setGarageName] = useState(() => garageDisplayName(hostId));
   const [shopAccent, setShopAccent] = useState(() => {
     if (isOwnGarage) {
@@ -326,7 +324,9 @@ export function ActiveGarageShopScreen({
       return;
     }
 
-    void fetchActiveListingsForCityRemote(city).then(async (all) => {
+    // Fetch by hostId — wide-radius feed items must not vanish when the viewer
+    // city differs from the host's city.
+    void fetchListingsByOwnerIdsRemote([hostId]).then(async (all) => {
       const candidates = all.filter(
         (listing) =>
           listing.listingStatus === "active" &&
@@ -337,7 +337,6 @@ export function ActiveGarageShopScreen({
     });
   }, [
     auth.userId,
-    city,
     hostId,
     isOwnGarage,
     loadOwnShelfCandidates,

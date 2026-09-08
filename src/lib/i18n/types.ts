@@ -2661,6 +2661,9 @@ export type AppMessages = {
     closedReadOnly: string;
     listingChatFallback: string;
     listingChatSubtitle: string;
+    listingChatMissingTitle: string;
+    listingChatMissingBody: string;
+    listingChatMissingCta: string;
     requestChatFallback: string;
     requestChatSubtitle: string;
     moderationBlocked: string;

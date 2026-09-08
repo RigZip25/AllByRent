@@ -6309,6 +6309,9 @@ export const es: AppMessages = {
     closedReadOnly: "El chat de este alquiler está cerrado. Aún puedes leer el historial.",
     listingChatFallback: "Chat del anuncio",
     listingChatSubtitle: "Chat sobre la recogida · push cuando respondan",
+    listingChatMissingTitle: "Este enlace de chat está incompleto",
+    listingChatMissingBody: "Abre Mensajes para encontrar tus conversaciones, o vuelve atrás e inténtalo de nuevo.",
+    listingChatMissingCta: "Abrir Mensajes",
     requestChatFallback: "Chat de solicitud",
     requestChatSubtitle: "Sobre lo que busca tu vecino",
     moderationBlocked:

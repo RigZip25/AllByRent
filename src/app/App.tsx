@@ -32,7 +32,7 @@ import { PostRequest } from "./components/PostRequest";
 import { RequestDetail } from "./components/RequestDetail";
 import { ActiveRental } from "./components/ActiveRental";
 import { ListingIntro } from "../screens/listing/ListingIntro";
-import { ListingWizard } from "../screens/listing/ListingWizard";
+import { ListingWizard, type ListingWizardHandle } from "../screens/listing/ListingWizard";
 import { HostListingDetailScreen } from "../screens/listing/HostListingDetailScreen";
 import { AttachmentViewerScreen } from "../screens/AttachmentViewerScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
@@ -46,7 +46,7 @@ import { GarageWinnerCheckoutScreen } from "../screens/GarageWinnerCheckoutScree
 import { MoreScreen } from "../screens/MoreScreen";
 import { HowEvoriosWorksScreen } from "../screens/HowEvoriosWorksScreen";
 import { MessagesInboxScreen } from "../screens/MessagesInboxScreen";
-import { ListingChatScreen } from "../screens/ListingChatScreen";
+import { ListingChatScreen, ListingChatMissingScreen } from "../screens/ListingChatScreen";
 import { RequestChatScreen } from "../screens/RequestChatScreen";
 import { MrEvoriosScreen } from "../screens/MrEvoriosScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
@@ -83,6 +83,8 @@ import {
 } from "../lib/authReturn";
 import { markGoPublicPending } from "../lib/sellerGoPublic";
 import { getAppMode, setAppMode, type AppMode } from "../lib/appMode";
+import { persistPendingCoHostInvite } from "../lib/coHostStorage";
+import { popOverlay } from "../lib/overlayBackStack";
 import {
   completeOnboarding,
   hasRoleChoice,
@@ -456,6 +458,7 @@ function readBootQuery() {
       listingChatListingId: null as string | null,
       listingChatPeerId: null as string | null,
       requestChatRequestId: null as string | null,
+      inviteId: null as string | null,
     };
   }
   const params = new URLSearchParams(window.location.search);
@@ -487,6 +490,7 @@ function readBootQuery() {
     listingChatListingId: params.get("listingId")?.trim() || null,
     listingChatPeerId: params.get("peerId")?.trim() || null,
     requestChatRequestId: params.get("requestId")?.trim() || null,
+    inviteId: params.get("invite")?.trim() || null,
   };
 }
 
@@ -602,6 +606,10 @@ function AppRoutes() {
   const bootRent = useRef(readBootRentLanding()).current;
   const bootOps = useRef(readBootOps()).current;
   const handledSessionTokenRef = useRef<string | null>(null);
+  const listingWizardRef = useRef<ListingWizardHandle | null>(null);
+  if (boot.inviteId) {
+    persistPendingCoHostInvite(boot.inviteId);
+  }
   const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
     if (bootOps) {
       markIntroDone();
@@ -632,7 +640,20 @@ function AppRoutes() {
     if (bootScreen) {
       markIntroDone();
       completeOnboarding();
+      // Bare listingChat without thread ids would render an empty shell.
+      if (
+        bootScreen === "listingChat" &&
+        (!boot.listingChatListingId || !boot.listingChatPeerId)
+      ) {
+        return "messages";
+      }
       return bootScreen;
+    }
+    // Invite deep link without a resolved screen still opens co-hosts.
+    if (boot.inviteId && (boot.skipSplash || bootDeepLink.skipSplash)) {
+      markIntroDone();
+      completeOnboarding();
+      return "coHosts";
     }
     const deepScreen = bootScreenForDeepLink(bootDeepLink.target);
     // Intentional skip only (share/deep links, OAuth). Do NOT skip branded splash
@@ -658,7 +679,10 @@ function AppRoutes() {
   const [rentLandingLocation, setRentLandingLocation] = useState<SeoLocation | null>(
     () => bootRent.location,
   );
-  const [navStack, setNavStack] = useState<Screen[]>([]);
+  // Guest browse deep links seed Home underneath so Back doesn't land on host garage.
+  const [navStack, setNavStack] = useState<Screen[]>(() =>
+    bootDeepLink.target ? ["home"] : [],
+  );
   const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
     bootDeepLink.target?.kind === "listing" ? bootDeepLink.target.listingId : null,
   );
@@ -747,18 +771,19 @@ function AppRoutes() {
     markIntroDone();
     completeOnboarding();
     setGarageShopPreview(false);
+    // Seed Home under deep-linked browse surfaces so Back returns to search.
     if (bootDeepLink.target.kind === "garage") {
       setSelectedNeighborGarageHostId(bootDeepLink.target.hostId);
       setFocusGarageItemId(bootDeepLink.target.itemId ?? null);
-      setNavStack([]);
+      setNavStack(["home"]);
       setCurrentScreen("garageShop");
     } else if (bootDeepLink.target.kind === "request") {
       setSelectedRequestId(bootDeepLink.target.requestId);
-      setNavStack([]);
+      setNavStack(["home"]);
       setCurrentScreen("requestDetail");
     } else {
       setSelectedItemId(bootDeepLink.target.listingId);
-      setNavStack([]);
+      setNavStack(["home"]);
       setCurrentScreen("itemDetail");
     }
     if (typeof window !== "undefined") {
@@ -771,6 +796,12 @@ function AppRoutes() {
     }
     clearBootQuery(deepLinkQueryKeys());
   }, [bootDeepLink.target, bootDeepLink.skipSplash]);
+
+  useEffect(() => {
+    if (!boot.inviteId) return;
+    persistPendingCoHostInvite(boot.inviteId);
+    clearBootQuery(["invite"]);
+  }, [boot.inviteId]);
 
   useEffect(() => {
     removeStripeControllerIframes();
@@ -824,11 +855,30 @@ function AppRoutes() {
     if (resolved) {
       markIntroDone();
       completeOnboarding();
-      setNavStack([]);
-      setCurrentScreen(resolved);
-      clearBootQuery(["screen", "skipSplash", "connect", "listingId", "rentalId", "chat", "peerId"]);
+      if (
+        resolved === "listingChat" &&
+        (!boot.listingChatListingId || !boot.listingChatPeerId)
+      ) {
+        setListingChatListingId(null);
+        setListingChatPeerId(null);
+        setNavStack([]);
+        setCurrentScreen("messages");
+      } else {
+        setNavStack([]);
+        setCurrentScreen(resolved);
+      }
+      clearBootQuery([
+        "screen",
+        "skipSplash",
+        "connect",
+        "listingId",
+        "rentalId",
+        "chat",
+        "peerId",
+        "invite",
+      ]);
     }
-  }, [boot.screen]);
+  }, [boot.screen, boot.listingChatListingId, boot.listingChatPeerId]);
 
   useEffect(() => {
     if (!boot.openNotifications) return;
@@ -1639,6 +1689,15 @@ function AppRoutes() {
   };
 
   const handleBack = useCallback(() => {
+    // Overlays (AuthGate, sheets, discard) take Back before screen navigation.
+    if (popOverlay()) return;
+
+    // Listing wizard owns its internal step / discard flow.
+    if (currentScreen === "listItem") {
+      const consumed = listingWizardRef.current?.handleBack();
+      if (consumed !== false) return;
+    }
+
     setNavStack((stack) => {
       if (stack.length > 0) {
         const previous = stack[stack.length - 1];
@@ -1670,6 +1729,13 @@ function AppRoutes() {
       if (currentScreen === "garageShop") {
         setGarageShopPreview(false);
         setFocusGarageItemId(null);
+        const neighborShop = Boolean(selectedNeighborGarageHostId);
+        setSelectedNeighborGarageHostId(null);
+        // Neighbor shop from browse: back to Home when not in earn mode.
+        if (neighborShop && getAppMode() !== "earn") {
+          setCurrentScreen("home");
+          return stack;
+        }
         setCurrentScreen("garage");
         return stack;
       }
@@ -1690,15 +1756,30 @@ function AppRoutes() {
         return stack;
       }
       if (currentScreen === "yardSaleHub") {
-        setCurrentScreen(landAfterOnboarding());
+        setCurrentScreen("home");
         return stack;
       }
       if (currentScreen === "earnBusiness") {
         setCurrentScreen("garage");
         return stack;
       }
+      if (currentScreen === "itemDetail" || currentScreen === "requestDetail") {
+        setCurrentScreen("home");
+        return stack;
+      }
+      if (currentScreen === "publicProfile") {
+        setSelectedPublicProfileUserId(null);
+        setCurrentScreen("profile");
+        return stack;
+      }
+      if (currentScreen === "listingChat") {
+        setListingChatListingId(null);
+        setListingChatPeerId(null);
+        setCurrentScreen("messages");
+        return stack;
+      }
       if (currentScreen === "home" || currentScreen === "garage") {
-        // Garage is the primary root — stay put.
+        // True root — stay in the app (no exitApp from native shell).
         return stack;
       }
       if (
@@ -1733,9 +1814,23 @@ function AppRoutes() {
       setCurrentScreen(landAfterOnboarding());
       return stack;
     });
-  }, [currentScreen]);
+  }, [currentScreen, selectedNeighborGarageHostId, sellPathListingId]);
 
-  useBrowserBackTrap(!isStandalonePwa() && currentScreen !== "splash", handleBack);
+  useBrowserBackTrap(
+    !isStandalonePwa() &&
+      currentScreen !== "splash" &&
+      currentScreen !== "rentLanding" &&
+      currentScreen !== "ops",
+    handleBack,
+  );
+
+  useEffect(() => {
+    const onHardwareBack = () => {
+      handleBack();
+    };
+    window.addEventListener("evorios:hardware-back", onHardwareBack);
+    return () => window.removeEventListener("evorios:hardware-back", onHardwareBack);
+  }, [handleBack]);
 
   useEffect(() => {
     if (!auth.configured) return;
@@ -1990,15 +2085,18 @@ function AppRoutes() {
             }}
             onOpenApp={() => {
               if (isSeoApexHost()) {
-                window.location.assign(`${APP_ORIGIN}/?skipSplash=1&skipInstall=1`);
+                window.location.assign(
+                  `${APP_ORIGIN}/?screen=home&skipSplash=1&skipInstall=1`,
+                );
                 return;
               }
               if (rentLandingLocation) {
                 setTripDestination(formatSeoLocationLabel(rentLandingLocation));
               }
               window.history.pushState({}, "", "/");
+              setAppMode("rent");
               setNavStack([]);
-              setCurrentScreen(landAfterOnboarding());
+              setCurrentScreen("home");
             }}
             onNavigateRentPath={handleRentLandingNavigate}
           />
@@ -2245,6 +2343,22 @@ function AppRoutes() {
             peerId={listingChatPeerId}
             onBack={handleBack}
             onRequireAuth={() => showAuthGate("listingChat", "message")}
+          />
+        )}
+
+        {currentScreen === "listingChat" && (!listingChatListingId || !listingChatPeerId) && (
+          <ListingChatMissingScreen
+            onBack={() => {
+              setListingChatListingId(null);
+              setListingChatPeerId(null);
+              handleBack();
+            }}
+            onOpenMessages={() => {
+              setListingChatListingId(null);
+              setListingChatPeerId(null);
+              setNavStack([]);
+              setCurrentScreen("messages");
+            }}
           />
         )}
 
@@ -2538,6 +2652,7 @@ function AppRoutes() {
 
         {currentScreen === "listItem" && (
           <ListingWizard
+            ref={listingWizardRef}
             initialPrefill={listingPrefill}
             initialDraft={editingListingId ? getPublishedListingById(editingListingId) : null}
             editingListingId={editingListingId}

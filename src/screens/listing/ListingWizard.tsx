@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, forwardRef } from "react";
 import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import confetti from "canvas-confetti";
@@ -86,6 +86,7 @@ import {
   scrollToListingFieldAnchor,
 } from "./validation";
 import { pinMedia, unpinMedia } from "../../lib/mediaStore";
+import { pushOverlay, removeOverlay } from "../../lib/overlayBackStack";
 import { useMessages } from "../../lib/i18n/react";
 
 function createPrefilledListingDraft(prefill?: ShelfPrefill | null): ListingDraft {
@@ -140,27 +141,38 @@ function firePublishConfetti() {
   });
 }
 
-export function ListingWizard({
-  initialPrefill,
-  initialDraft,
-  editingListingId,
-  onExit,
-  onRequireAuth,
-  onPreviewShop,
-  onPlanOpenSale,
-}: {
-  initialPrefill?: ShelfPrefill | null;
-  initialDraft?: ListingDraft | null;
-  editingListingId?: string | null;
-  /** finished = published/saved; discarded = user cancelled the wizard. */
-  onExit: (reason?: "finished" | "discarded") => void;
-  /** Open AuthGate and resume this listing after sign-in. */
-  onRequireAuth?: (listingId: string) => void;
-  /** Open own garage in neighbor-preview mode (optionally focus a listing). */
-  onPreviewShop?: (listingId?: string) => void;
-  /** After sell publish — jump into Open Sale path choice. */
-  onPlanOpenSale?: (listingId: string) => void;
-}) {
+export type ListingWizardHandle = {
+  /** @returns true when the wizard consumed the back press */
+  handleBack: () => boolean;
+};
+
+export const ListingWizard = forwardRef<
+  ListingWizardHandle,
+  {
+    initialPrefill?: ShelfPrefill | null;
+    initialDraft?: ListingDraft | null;
+    editingListingId?: string | null;
+    /** finished = published/saved; discarded = user cancelled the wizard. */
+    onExit: (reason?: "finished" | "discarded") => void;
+    /** Open AuthGate and resume this listing after sign-in. */
+    onRequireAuth?: (listingId: string) => void;
+    /** Open own garage in neighbor-preview mode (optionally focus a listing). */
+    onPreviewShop?: (listingId?: string) => void;
+    /** After sell publish — jump into Open Sale path choice. */
+    onPlanOpenSale?: (listingId: string) => void;
+  }
+>(function ListingWizard(
+  {
+    initialPrefill,
+    initialDraft,
+    editingListingId,
+    onExit,
+    onRequireAuth,
+    onPreviewShop,
+    onPlanOpenSale,
+  },
+  ref,
+) {
   const auth = useAuth();
   const t = useMessages();
   const listing = t.listing;
@@ -497,40 +509,63 @@ export function ListingWizard({
     setPublishError(null);
   };
 
-  const handleBack = () => {
+  const handleBack = (): boolean => {
     if (phase !== "steps") {
       if (phase === "goPublic") {
         setPhase("steps");
         setStep(TOTAL_LISTING_STEPS);
-        return;
+        return true;
       }
       // Within the same listing's publish flow, treat Back as returning to the prior phase.
       if (phase === "share") {
         setPhase("success");
-        return;
+        return true;
       }
       if (phase === "qrSticker") {
         setPhase("qrStory");
-        return;
+        return true;
       }
       if (phase === "qrStory") {
         setPhase("steps");
-        return;
+        return true;
       }
       // Success screen: back means return to listings (same as Done).
       onExit("finished");
-      return;
+      return true;
     }
 
     if (step === 1) {
-      if (categoryPhaseBackRef.current?.()) return;
+      if (categoryPhaseBackRef.current?.()) return true;
       discardDialogOpenedAtRef.current = Date.now();
       setShowDiscardDialog(true);
-      return;
+      return true;
     }
 
     goToStep(step - 1, -1);
+    return true;
   };
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      handleBack: () => handleBack(),
+    }),
+    // handleBack closes over phase/step; refresh when those change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- wizard back is intentional
+    [phase, step, showDiscardDialog],
+  );
+
+  useEffect(() => {
+    if (!showDiscardDialog) return;
+    pushOverlay("listing-discard", () => setShowDiscardDialog(false));
+    return () => removeOverlay("listing-discard");
+  }, [showDiscardDialog]);
+
+  useEffect(() => {
+    if (!showDeleteDialog) return;
+    pushOverlay("listing-delete", () => setShowDeleteDialog(false));
+    return () => removeOverlay("listing-delete");
+  }, [showDeleteDialog]);
 
   const finalizePublish = (sourceDraft: ListingDraft = draft) => {
     setIsPublishing(true);
@@ -1700,6 +1735,6 @@ export function ListingWizard({
       </AnimatePresence>
     </div>
   );
-}
+});
 
 export type { ListingDraft } from "./types";

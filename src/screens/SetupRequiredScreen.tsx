@@ -23,6 +23,16 @@ export function SetupRequiredScreen() {
           </a>
           {t.setupSupportAfter}
         </p>
+        <button
+          type="button"
+          onClick={() => {
+            window.location.reload();
+          }}
+          className="mt-6 rounded-xl px-6 py-3 text-sm font-bold text-white"
+          style={{ backgroundColor: GREEN }}
+        >
+          {t.tryAgain}
+        </button>
       </div>
     </div>
   );

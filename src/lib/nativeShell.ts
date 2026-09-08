@@ -133,12 +133,10 @@ export async function initNativeShell(): Promise<void> {
     /* plugin unavailable in some simulators */
   }
 
-  await CapApp.addListener("backButton", ({ canGoBack }) => {
-    if (canGoBack) {
-      window.history.back();
-      return;
-    }
-    void CapApp.exitApp();
+  // Never exit on the first hardware Back — the app owns navigation.
+  // Root screens (home/garage, empty stack, no overlay) no-op inside handleBack.
+  await CapApp.addListener("backButton", () => {
+    window.dispatchEvent(new CustomEvent("evorios:hardware-back"));
   });
 
   await CapApp.addListener("appUrlOpen", ({ url }) => {

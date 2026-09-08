@@ -6323,6 +6323,9 @@ export const cs: AppMessages = {
     closedReadOnly: "Chat u této půjčky je uzavřený. Historii si stále můžeš přečíst.",
     listingChatFallback: "Chat k nabídce",
     listingChatSubtitle: "Chat o vyzvednutí · push při odpovědi",
+    listingChatMissingTitle: "Tento odkaz na chat je neúplný",
+    listingChatMissingBody: "Otevřete Zprávy a najděte konverzace, nebo se vraťte a zkuste to znovu.",
+    listingChatMissingCta: "Otevřít Zprávy",
     requestChatFallback: "Chat k žádosti",
     requestChatSubtitle: "O tom, co soused shání",
     moderationBlocked:
