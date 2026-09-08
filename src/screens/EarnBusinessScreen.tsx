@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import {
   computeEarnBusinessStats,
+  computeEarnBusinessStatsFresh,
   formatUsd,
   type EarningsTrend,
   type ListingEarnBreakdown,
@@ -436,7 +437,7 @@ export function EarnBusinessScreen({
   const profileCopy = messages.profile;
   const common = messages.common;
   const earningsTitle = messages.garageUi.earnings;
-  const stats = useMemo(() => computeEarnBusinessStats(), []);
+  const [stats, setStats] = useState(() => computeEarnBusinessStats());
   const stock = onStock ?? onHome;
   const garage = onGarage ?? onHome;
   const moves = useMemo(
@@ -453,6 +454,16 @@ export function EarnBusinessScreen({
   const [connectBusy, setConnectBusy] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
   const [connectErrorCode, setConnectErrorCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    void computeEarnBusinessStatsFresh(auth.userId).then((next) => {
+      if (mounted) setStats(next);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [auth.userId]);
 
   useEffect(() => {
     if (!auth.userId) return;

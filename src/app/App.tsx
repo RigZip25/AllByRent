@@ -649,8 +649,9 @@ function AppRoutes() {
       }
       return bootScreen;
     }
-    // Invite deep link without a resolved screen still opens co-hosts.
-    if (boot.inviteId && (boot.skipSplash || bootDeepLink.skipSplash)) {
+    // Invite deep link without a resolved screen still opens co-hosts
+    // (even when splash ran — `?invite=` alone must not land on an empty home).
+    if (boot.inviteId) {
       markIntroDone();
       completeOnboarding();
       return "coHosts";
@@ -2469,6 +2470,7 @@ function AppRoutes() {
             onOpenNotifications={handleOpenNotifications}
             onOpenCoHosts={() => navigateTo("coHosts")}
             onOpenPersonalInfo={handleOpenPersonalInfo}
+            onOpenIdentity={() => navigateTo("identity")}
             onPreferredModeChange={handlePreferredModeChange}
             onViewPublicProfile={handleViewPublicProfile}
             onSignedOut={handleSignedOut}

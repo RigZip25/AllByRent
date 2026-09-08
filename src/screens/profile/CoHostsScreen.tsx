@@ -10,7 +10,6 @@ import {
 import { useMessages } from "../../lib/i18n/react";
 import {
   acceptCoHostInviteWithSync,
-  activateCoHostInviteWithSync,
   declineCoHostInviteWithSync,
   getCoHostsForHost,
   getPendingInvitesForEmail,
@@ -51,28 +50,19 @@ function localizeCoHostError(
 function CoHostRow({
   record,
   onRemove,
-  onActivate,
   statusActive,
   statusPending,
-  markActive,
   remove,
   removeAria,
 }: {
   record: CoHostRecord;
   onRemove: () => void;
-  onActivate?: () => void;
   statusActive: string;
   statusPending: string;
-  markActive: string;
   remove: string;
   removeAria: (email: string) => string;
 }) {
-  const statusLabel =
-    record.status === "active"
-      ? statusActive
-      : record.acceptedAt
-        ? statusActive
-        : statusPending;
+  const statusLabel = record.status === "active" ? statusActive : statusPending;
 
   return (
     <li
@@ -90,16 +80,6 @@ function CoHostRow({
         <p className="text-[13px] text-gray-500">{statusLabel}</p>
       </div>
       <div className="flex shrink-0 flex-col gap-1">
-        {record.status === "pending" && onActivate ? (
-          <button
-            type="button"
-            onClick={onActivate}
-            className="rounded-lg px-2 py-1 text-[12px] font-semibold text-white"
-            style={{ backgroundColor: GREEN }}
-          >
-            {markActive}
-          </button>
-        ) : null}
         <button
           type="button"
           onClick={onRemove}
@@ -165,22 +145,17 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
   }, [inviteUrl, t.copyFailed, t.copySuccess]);
 
   useEffect(() => {
-    void syncCoHostsFromRemote(hostId, hostEmail).then(() => refresh());
+    const pendingId = peekPendingCoHostInvite();
+    void syncCoHostsFromRemote(hostId, hostEmail, { inviteId: pendingId }).then(() => refresh());
   }, [hostEmail, hostId, refresh]);
 
-  // Resume `?invite=` deep link: keep the invite visible and ready to accept.
+  // Resume `?invite=` deep link: fetch by id and keep the invite ready to accept.
   useEffect(() => {
     const pendingId = peekPendingCoHostInvite();
     if (!pendingId) return;
     setResumeInviteId(pendingId);
-    void syncCoHostsFromRemote(hostId, hostEmail).then(() => {
+    void syncCoHostsFromRemote(hostId, hostEmail, { inviteId: pendingId }).then(() => {
       refresh();
-      const forYou = getPendingInvitesForEmail(hostEmail);
-      if (forYou.some((invite) => invite.id === pendingId)) {
-        // Invite is on this device for the signed-in email — leave it for Accept.
-        return;
-      }
-      // Still keep the id so a later sync / email match can surface it.
     });
   }, [hostEmail, hostId, refresh]);
 
@@ -359,12 +334,8 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
                   record={record}
                   statusActive={t.statusActive}
                   statusPending={t.statusPending}
-                  markActive={t.markActive}
                   remove={t.remove}
                   removeAria={t.removeAria}
-                  onActivate={() => {
-                    void activateCoHostInviteWithSync(hostId, record.id).then(() => refresh());
-                  }}
                   onRemove={() => {
                     void removeCoHostWithSync(hostId, record.id).then(() => refresh());
                   }}
@@ -395,7 +366,6 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
                   record={record}
                   statusActive={t.statusActive}
                   statusPending={t.statusPending}
-                  markActive={t.markActive}
                   remove={t.remove}
                   removeAria={t.removeAria}
                   onRemove={() => {

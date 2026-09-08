@@ -1,16 +1,35 @@
+import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
+
 const AVATAR_DATA_KEY = "allbyrent_avatar_data";
 const AVATAR_PATH_KEY = "allbyrent_avatar_path";
 
-/** Logical Supabase path: avatars/{user_id}.jpg */
+/** Object name inside the public `avatars` bucket: `{user_id}.jpg`. */
+export function getAvatarObjectName(userId: string): string {
+  return `${userId}.jpg`;
+}
+
+/** @deprecated use getAvatarObjectName — kept for localStorage path equality. */
 export function getAvatarStoragePath(userId: string): string {
-  return `avatars/${userId}.jpg`;
+  return getAvatarObjectName(userId);
+}
+
+export function publicAvatarUrl(avatarPath: string | null | undefined): string | null {
+  const path = avatarPath?.trim();
+  if (!path) return null;
+  const baseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+  if (!baseUrl) return null;
+  return `${baseUrl.replace(/\/$/, "")}/storage/v1/object/public/avatars/${path.replace(/^\/+/, "")}`;
 }
 
 export function hasAvatarPhoto(userId: string): boolean {
   try {
     const path = localStorage.getItem(AVATAR_PATH_KEY);
     const data = localStorage.getItem(AVATAR_DATA_KEY);
-    return Boolean(data && path === getAvatarStoragePath(userId));
+    const expected = getAvatarObjectName(userId);
+    // Accept legacy `avatars/{id}.jpg` keys written before Stage 14.
+    return Boolean(
+      data && (path === expected || path === `avatars/${userId}.jpg`),
+    );
   } catch {
     return false;
   }
@@ -26,21 +45,21 @@ export function loadAvatarDataUrl(userId: string): string | null {
 }
 
 /**
- * Demo: persists JPEG as data URL in localStorage at logical path avatars/{userId}.jpg.
- * When VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY are set, also uploads via Storage REST API.
+ * Persists JPEG locally and uploads to the public `avatars` bucket when signed in.
+ * Also stamps `profiles.avatar_path` so public_profiles can show the photo.
  */
 export async function saveAvatarPhoto(userId: string, jpegBlob: Blob): Promise<string> {
-  const path = getAvatarStoragePath(userId);
+  const objectName = getAvatarObjectName(userId);
   const dataUrl = await blobToDataUrl(jpegBlob);
 
   try {
     localStorage.setItem(AVATAR_DATA_KEY, dataUrl);
-    localStorage.setItem(AVATAR_PATH_KEY, path);
+    localStorage.setItem(AVATAR_PATH_KEY, objectName);
   } catch {
     /* quota */
   }
 
-  await trySupabaseUpload(path, jpegBlob);
+  await trySupabaseUpload(userId, objectName, jpegBlob);
   return dataUrl;
 }
 
@@ -81,25 +100,22 @@ function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
-async function trySupabaseUpload(path: string, blob: Blob): Promise<void> {
-  const baseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
-  if (!baseUrl || !anonKey) return;
+async function trySupabaseUpload(
+  userId: string,
+  objectName: string,
+  blob: Blob,
+): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
 
-  const url = `${baseUrl.replace(/\/$/, "")}/storage/v1/object/${path}`;
-  try {
-    await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${anonKey}`,
-        "Content-Type": "image/jpeg",
-        "x-upsert": "true",
-      },
-      body: blob,
-    });
-  } catch {
-    /* offline demo */
-  }
+  const { error } = await supabase.storage.from("avatars").upload(objectName, blob, {
+    contentType: "image/jpeg",
+    upsert: true,
+  });
+  if (error) return;
+
+  await supabase.from("profiles").update({ avatar_path: objectName }).eq("id", userId);
 }
 
 /** Center-crop to square, min 200×200, export JPEG */

@@ -1,6 +1,5 @@
 import {
   acceptCoHostInvite,
-  activateCoHostInvite,
   declineCoHostInvite,
   getCoHostsForHost,
   getPendingInvitesForEmail,
@@ -11,7 +10,9 @@ import {
   type CoHostRecord,
 } from "../coHostStorage";
 import {
+  acceptCoHostInviteRemote,
   deleteCoHostRemote,
+  fetchCoHostInviteByIdRemote,
   fetchCoHostsForHostRemote,
   fetchPendingCoHostInvitesRemote,
   pushCoHostRemote,
@@ -33,13 +34,23 @@ function mergeCoHostRecords(remote: CoHostRecord[]): void {
   }
 }
 
-export async function syncCoHostsFromRemote(hostId: string, email: string): Promise<void> {
+export async function syncCoHostsFromRemote(
+  hostId: string,
+  email: string,
+  options?: { inviteId?: string | null },
+): Promise<void> {
   if (!isSupabaseConfigured()) return;
-  const [hostRows, pendingRows] = await Promise.all([
+  const inviteId = options?.inviteId?.trim() || null;
+  const [hostRows, pendingRows, byId] = await Promise.all([
     fetchCoHostsForHostRemote(hostId),
     fetchPendingCoHostInvitesRemote(email),
+    inviteId ? fetchCoHostInviteByIdRemote(inviteId) : Promise.resolve(null),
   ]);
-  mergeCoHostRecords([...hostRows, ...pendingRows]);
+  mergeCoHostRecords([
+    ...hostRows,
+    ...pendingRows,
+    ...(byId ? [byId] : []),
+  ]);
 }
 
 export type InviteCoHostWithEmailResult =
@@ -93,10 +104,17 @@ export async function acceptCoHostInviteWithSync(
   inviteId: string,
   acceptorUserId: string,
 ): Promise<AcceptCoHostResult> {
+  // Prefer server accept (RLS invitee policy) so local-only rows still activate remotely.
+  const remote = await acceptCoHostInviteRemote(inviteId, acceptorUserId);
+  if (remote) {
+    mergeCoHostRecords([remote]);
+    setActiveGarageHostId(remote.hostId);
+    return { ok: true, record: remote };
+  }
+
   const result = acceptCoHostInvite(inviteId, acceptorUserId);
   if (result.ok) {
     await pushCoHostRemote(result.record);
-    // Land in the garage you just joined so stocking goes there; switcher can return home.
     setActiveGarageHostId(result.record.hostId);
   }
   return result;
@@ -112,18 +130,12 @@ export async function declineCoHostInviteWithSync(inviteId: string): Promise<boo
   return declined;
 }
 
-export async function activateCoHostInviteWithSync(hostId: string, coHostId: string): Promise<boolean> {
-  const records = getCoHostsForHost(hostId);
-  const current = records.find((row) => row.id === coHostId);
-  const activated = activateCoHostInvite(hostId, coHostId);
-  if (activated && current) {
-    await pushCoHostRemote({
-      ...current,
-      status: "active",
-      acceptedAt: new Date().toISOString(),
-    });
-  }
-  return activated;
+/** Hosts cannot activate invites; invitee must Accept (Stage 14 / P6a). */
+export async function activateCoHostInviteWithSync(
+  _hostId: string,
+  _coHostId: string,
+): Promise<boolean> {
+  return false;
 }
 
 export { getCoHostsForHost, getPendingInvitesForEmail };

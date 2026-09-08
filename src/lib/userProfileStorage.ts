@@ -9,6 +9,7 @@ import {
 } from "./listingStorage";
 import { hasAvatarPhoto, loadAvatarDataUrl } from "./avatarStorage";
 import { readLastKnownFullName } from "./pendingAuthProfile";
+import { loadRentalBookings } from "./rentalsStorage";
 import {
   DEFAULT_GARAGE_IDENTITY,
   normalizeGarageIdentity,
@@ -221,6 +222,10 @@ export function refreshProfileStats(
   authUserId: string | null = null,
 ): UserProfile {
   const listingsCount = countOwnListings(authUserId ?? profile.id);
+  // Count rentals where this user is the renter (role stamped at sync time).
+  const completedAsRenter = loadRentalBookings().filter(
+    (b) => b.role === "renter" && b.status === "completed",
+  ).length;
   const host = stripLegacyDemoHostStats({
     ...profile.host,
     listingsCount,
@@ -229,6 +234,10 @@ export function refreshProfileStats(
     ...profile,
     avatarUrl: hasAvatarPhoto(profile.id) ? loadAvatarDataUrl(profile.id) : null,
     host,
+    renter: {
+      ...profile.renter,
+      completedRentals: completedAsRenter,
+    },
     preferredMode: getAppMode(),
   };
 }
@@ -304,6 +313,8 @@ export function updateProfileFields(
       | "avatarUrl"
       | "garageIdentity"
       | "dateOfBirth"
+      | "notificationsEnabled"
+      | "verification"
     >
   >,
 ): UserProfile {
@@ -311,6 +322,9 @@ export function updateProfileFields(
   const next = {
     ...profile,
     ...patch,
+    verification: patch.verification
+      ? { ...profile.verification, ...patch.verification }
+      : profile.verification,
     garageIdentity: patch.garageIdentity
       ? normalizeGarageIdentity(patch.garageIdentity)
       : profile.garageIdentity,
