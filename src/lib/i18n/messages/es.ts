@@ -285,7 +285,6 @@ export const es: AppMessages = {
     messageSellHint: "Abre Mensaje para chatear con el vendedor dentro de la app (recibirá un push si lo tiene activado).",
     messageRentHint: "El chat en la app con el propietario se abre en cuanto se confirme tu reserva.",
     viewPublicProfile: "Toca para ver el perfil público",
-    verifiedHost: (appName) => `Anfitrión verificado en ${appName}`,
     startBookingAria: "Iniciar reserva para contactar con el anfitrión",
     messageSellerAria: "Escribir al vendedor",
     messagingOpensWithBooking: "Los mensajes se abren con una reserva",
@@ -1442,7 +1441,9 @@ export const es: AppMessages = {
     comment: "Comentario",
     placeholder: "Nota rápida (opcional)...",
     blindHint:
-      "Reseña a ciegas: ninguna de las partes ve la reseña de la otra hasta que ambas se hayan enviado.",
+      "Reseña a ciegas: ninguna de las partes ve la reseña de la otra hasta que ambas se hayan enviado — o tras 14 días.",
+    disputeFiveStarBlocked:
+      "Hay una disputa abierta, así que las cinco estrellas no están disponibles hasta que se resuelva.",
     submit: "Enviar reseña",
     starsAria: (n) => `${n} estrellas`,
   },

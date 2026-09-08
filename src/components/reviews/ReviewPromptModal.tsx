@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Star, X } from "lucide-react";
 import { RentanoTip } from "../RentanoTip";
 import { useMessages } from "../../lib/i18n/react";
@@ -11,17 +11,31 @@ export function ReviewPromptModal({
   title,
   onClose,
   onSubmit,
+  maxRating = 5,
+  disputeHint,
 }: {
   open: boolean;
   title: string;
   onClose: () => void;
   onSubmit: (rating: number, comment: string) => void;
+  /** Cap stars while an open dispute is active (Stage 18 / V9). */
+  maxRating?: number;
+  disputeHint?: string;
 }) {
   const { reviewPrompt: copy, common } = useMessages();
-  const [rating, setRating] = useState(5);
+  const cappedMax = Math.min(5, Math.max(1, maxRating));
+  const [rating, setRating] = useState(cappedMax);
   const [comment, setComment] = useState("");
 
-  const canSubmit = useMemo(() => rating >= 1 && rating <= 5, [rating]);
+  useEffect(() => {
+    if (!open) return;
+    setRating((current) => Math.min(current, cappedMax));
+  }, [open, cappedMax]);
+
+  const canSubmit = useMemo(
+    () => rating >= 1 && rating <= cappedMax,
+    [rating, cappedMax],
+  );
 
   if (!open) return null;
 
@@ -44,7 +58,12 @@ export function ReviewPromptModal({
             </h2>
             <p className="mt-0.5 text-[13px] text-gray-500">{title}</p>
           </div>
-          <button type="button" onClick={onClose} aria-label={common.close}>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={common.close}
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center"
+          >
             <X className="h-5 w-5 text-red-600" />
           </button>
         </div>
@@ -56,22 +75,29 @@ export function ReviewPromptModal({
         <div className="mt-4">
           <p className="text-[13px] font-semibold text-gray-700">{copy.rating}</p>
           <div className="mt-2 flex items-center gap-2">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <button
-                key={n}
-                type="button"
-                onClick={() => setRating(n)}
-                className="rounded-full p-2"
-                aria-label={copy.starsAria(n)}
-              >
-                <Star
-                  className="h-6 w-6"
-                  style={{ color: n <= rating ? "#F59E0B" : "#D1D5DB" }}
-                  fill={n <= rating ? "#F59E0B" : "transparent"}
-                />
-              </button>
-            ))}
+            {[1, 2, 3, 4, 5].map((n) => {
+              const disabled = n > cappedMax;
+              return (
+                <button
+                  key={n}
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => setRating(n)}
+                  className="rounded-full p-2 disabled:opacity-35"
+                  aria-label={copy.starsAria(n)}
+                >
+                  <Star
+                    className="h-6 w-6"
+                    style={{ color: n <= rating ? "#F59E0B" : "#D1D5DB" }}
+                    fill={n <= rating ? "#F59E0B" : "transparent"}
+                  />
+                </button>
+              );
+            })}
           </div>
+          {cappedMax < 5 && disputeHint ? (
+            <p className="mt-2 text-[12px] leading-snug text-amber-900">{disputeHint}</p>
+          ) : null}
         </div>
 
         <div className="mt-3">

@@ -445,7 +445,6 @@ export type AppMessages = {
     messageSellHint: string;
     messageRentHint: string;
     viewPublicProfile: string;
-    verifiedHost: (appName: string) => string;
     startBookingAria: string;
     messageSellerAria: string;
     messagingOpensWithBooking: string;
@@ -2431,6 +2430,7 @@ export type AppMessages = {
     comment: string;
     placeholder: string;
     blindHint: string;
+    disputeFiveStarBlocked: string;
     submit: string;
     starsAria: (n: number) => string;
   };

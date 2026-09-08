@@ -93,7 +93,9 @@ export async function submitReviewRemote(params: Omit<Review, "id" | "createdAt"
 
   const { error } = await supabase.from("reviews").insert(row);
   if (error) {
-    // ignore; local copy already saved
+    // Drop the optimistic local copy so the UI can retry after a policy reject.
+    saveLocalReviews(local.filter((item) => item.id !== review.id));
+    throw new Error(error.message || "Review insert failed");
   }
   return review;
 }

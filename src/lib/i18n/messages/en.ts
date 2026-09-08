@@ -285,7 +285,6 @@ export const en: AppMessages = {
     messageSellHint: "Open Message for an in-app chat with the seller (they get a push if enabled).",
     messageRentHint: "In-app chat with the owner opens once your booking is confirmed.",
     viewPublicProfile: "Tap to view public profile",
-    verifiedHost: (appName) => `Verified host on ${appName}`,
     startBookingAria: "Start booking to contact host",
     messageSellerAria: "Message seller",
     messagingOpensWithBooking: "Messaging opens with a booking",
@@ -1443,7 +1442,9 @@ export const en: AppMessages = {
     comment: "Comment",
     placeholder: "Quick note (optional)...",
     blindHint:
-      "Blind review: neither side sees the other’s review until both are submitted.",
+      "Blind review: neither side sees the other’s review until both are submitted — or after 14 days.",
+    disputeFiveStarBlocked:
+      "An open dispute is active, so five stars are unavailable until it is resolved.",
     submit: "Submit review",
     starsAria: (n) => `${n} stars`,
   },
