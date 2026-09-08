@@ -125,15 +125,39 @@ revoke all on function public.is_active_co_host_of(uuid) from public;
 grant execute on function public.is_active_co_host_of(uuid) to authenticated;
 
 -- ─── P9a: revealed reviews readable by anyone (blind until both sides) ──────
+-- Count via SECURITY DEFINER so the policy does not re-enter RLS on reviews
+-- (plain `select count(*) from reviews` recurses infinitely).
+
+create or replace function public.review_pair_revealed(p_rental_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select (
+    select count(*)::integer from public.reviews where rental_id = p_rental_id
+  ) >= 2;
+$$;
+
+revoke all on function public.review_pair_revealed(uuid) from public;
+grant execute on function public.review_pair_revealed(uuid) to anon, authenticated, service_role;
 
 drop policy if exists "reviews_select_public_after_reveal" on public.reviews;
 create policy "reviews_select_public_after_reveal"
   on public.reviews for select
   using (
     reviewee_id is not null
-    and (
-      select count(*) from public.reviews r2 where r2.rental_id = reviews.rental_id
-    ) >= 2
+    and public.review_pair_revealed(rental_id)
+  );
+
+-- Same recursion trap on the original blind-review policy (011).
+drop policy if exists "reviews_select_after_both_submitted" on public.reviews;
+create policy "reviews_select_after_both_submitted"
+  on public.reviews for select
+  using (
+    reviewee_id = auth.uid()
+    and public.review_pair_revealed(rental_id)
   );
 
 -- ─── P11a: public avatars leave the owner's device ──────────────────────────

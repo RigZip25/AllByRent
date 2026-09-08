@@ -46,6 +46,11 @@ select
           and tablename = 'reviews'
           and policyname = 'reviews_select_public_after_reveal'
       )
+      and exists (
+        select 1 from pg_proc p
+        join pg_namespace n on n.oid = p.pronamespace
+        where n.nspname = 'public' and p.proname = 'review_pair_revealed'
+      )
       then 1 else 0 end
   ) as reviews_public_reveal,
   (
