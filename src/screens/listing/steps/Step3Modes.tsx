@@ -47,7 +47,7 @@ import { listingRequiresFuelTracking } from "../../../lib/rentalFuelPolicy";
 import { getHomeLocation } from "../../../lib/listingStorage";
 import { getSearchCountryCode } from "../../../lib/locationCountry";
 import { useMessages } from "../../../lib/i18n/react";
-import { currencySymbol, formatMoney, roundMoneyForSuggestion } from "../../../lib/regionalDisplay";
+import { formatMoney, roundMoneyForSuggestion } from "../../../lib/regionalDisplay";
 import { FieldLabel } from "../../../components/forms/FieldLabel";
 import { MoneyInput } from "../../../components/forms/MoneyInput";
 
