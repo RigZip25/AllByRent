@@ -38,7 +38,7 @@ select
   (select count(*)::int from pg_trigger
      where tgname = 'disputes_guard_resolution') as r7_dispute_trg,
 
-  -- R12: profile trust columns
+  -- R12: profile trust columns (expect 3)
   (select count(*)::int from information_schema.columns
      where table_schema = 'public' and table_name = 'profiles'
        and column_name in ('identity_verified', 'stripe_payouts_enabled', 'phone_verified')
