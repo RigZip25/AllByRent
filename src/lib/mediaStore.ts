@@ -10,10 +10,16 @@ export type MediaRef = {
   sizeBytes: number;
   /** Optional thumbnail media id (stored as a separate blob). */
   thumbId?: string;
-  /** Supabase Storage path after cloud sync (public bucket). */
+  /** Supabase Storage path after cloud sync. */
   storagePath?: string;
   /** Optional thumbnail path in Supabase Storage. */
   thumbStoragePath?: string;
+  /**
+   * Which bucket `storagePath` lives in. Absent means the public listing
+   * gallery; documents sit in a private bucket and need a signed link, so a
+   * public URL built for them would only ever be a broken image.
+   */
+  storageBucket?: "listing-photos" | "listing-verification";
 };
 
 /**

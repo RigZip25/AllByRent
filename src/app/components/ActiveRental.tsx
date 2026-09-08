@@ -55,6 +55,7 @@ import { RentanoTip } from "../../components/RentanoTip";
 import { RentalPriceBreakdownView } from "../../components/rentals/RentalPriceBreakdown";
 import { DepositHoldActions } from "../../components/payments/DepositHoldActions";
 import { useMediaUrl } from "../../lib/useMediaUrl";
+import { useRentalDocumentUrl } from "../../lib/privateDocumentUrl";
 import {
   computeRentalPriceBreakdown,
   formatUsd,
@@ -336,7 +337,13 @@ export function ActiveRental({
     : undefined;
 
   const insuranceMedia = useMediaUrl(booking?.insuranceProofMedia ?? null);
-  const insuranceImageUrl = booking?.insuranceProofUrl || insuranceMedia.url;
+  // The proof lives in a private bucket: the host has no copy on this device
+  // and signs a link for it, the renter usually still has the blob.
+  const insuranceDocument = useRentalDocumentUrl(
+    booking?.insuranceProofPath,
+    booking?.insuranceProofUrl,
+  );
+  const insuranceImageUrl = insuranceMedia.url || insuranceDocument.url;
 
   useEffect(() => {
     setChatOpen(initialChatOpen);
@@ -555,7 +562,7 @@ export function ActiveRental({
       listingRequiresInsuranceProof(publishedListing) &&
       !usesAgentInsurance &&
       !booking?.insuranceProofMedia &&
-      !booking?.insuranceProofUrl;
+      !booking?.insuranceProofPath;
     if (needsInsurance && booking?.role === "renter") {
       setNotice(t.rentalDetail.insuranceUnlockBlocked);
       return;
@@ -2005,7 +2012,7 @@ export function ActiveRental({
           </div>
         ) : null}
 
-        {booking?.insuranceProofMedia || booking?.insuranceProofUrl || booking?.insuranceActiveUntil ? (
+        {booking?.insuranceProofMedia || booking?.insuranceProofPath || booking?.insuranceActiveUntil ? (
           <div className="bg-card rounded-xl border border-amber-200 p-4">
             <div className="mb-2 flex items-center gap-2">
               <Shield className="h-5 w-5 text-amber-800" aria-hidden />

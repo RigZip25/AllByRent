@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getListingPhotoPublicUrl } from "./listingPhotoStorage";
 import { getMediaBlob, type MediaRef } from "./mediaStore";
+import { signRentalDocumentUrl } from "./privateDocumentUrl";
 
 type MediaUrlState =
   | { status: "idle"; url: null }
@@ -8,7 +9,10 @@ type MediaUrlState =
   | { status: "ready"; url: string }
   | { status: "missing"; url: null };
 
-type MediaUrlInput = Pick<MediaRef, "id" | "mimeType" | "storagePath" | "thumbStoragePath" | "thumbId">;
+type MediaUrlInput = Pick<
+  MediaRef,
+  "id" | "mimeType" | "storagePath" | "thumbStoragePath" | "thumbId" | "storageBucket"
+>;
 
 export function useMediaUrl(ref: MediaUrlInput | null | undefined): MediaUrlState {
   const id = ref?.id ?? "";
@@ -16,9 +20,10 @@ export function useMediaUrl(ref: MediaUrlInput | null | undefined): MediaUrlStat
   const mimeType = ref?.mimeType ?? "";
   const storagePath = ref?.storagePath?.trim() ?? "";
   const thumbStoragePath = ref?.thumbStoragePath?.trim() ?? "";
+  const privateDocument = ref?.storageBucket === "listing-verification";
   const key = useMemo(
-    () => `${id}|${thumbId}|${mimeType}|${thumbStoragePath}|${storagePath}`,
-    [id, thumbId, mimeType, thumbStoragePath, storagePath],
+    () => `${id}|${thumbId}|${mimeType}|${thumbStoragePath}|${storagePath}|${privateDocument}`,
+    [id, thumbId, mimeType, thumbStoragePath, storagePath, privateDocument],
   );
   const [state, setState] = useState<MediaUrlState>({ status: "idle", url: null });
 
@@ -31,16 +36,18 @@ export function useMediaUrl(ref: MediaUrlInput | null | undefined): MediaUrlStat
       return () => undefined;
     }
 
-    const remoteCandidates = [thumbStoragePath, storagePath].filter(Boolean);
-    for (const path of remoteCandidates) {
-      const remoteUrl = getListingPhotoPublicUrl(path);
-      if (remoteUrl) {
-        setState({ status: "ready", url: remoteUrl });
-        return () => undefined;
+    if (!privateDocument) {
+      const remoteCandidates = [thumbStoragePath, storagePath].filter(Boolean);
+      for (const path of remoteCandidates) {
+        const remoteUrl = getListingPhotoPublicUrl(path);
+        if (remoteUrl) {
+          setState({ status: "ready", url: remoteUrl });
+          return () => undefined;
+        }
       }
     }
 
-    if (!thumbId && !id) {
+    if (!thumbId && !id && !storagePath) {
       setState({ status: "missing", url: null });
       return () => undefined;
     }
@@ -58,6 +65,18 @@ export function useMediaUrl(ref: MediaUrlInput | null | undefined): MediaUrlStat
           return;
         }
       }
+
+      // The other side of the rental has no blob on this device; a document in
+      // the private bucket opens through a signed link instead.
+      if (privateDocument && storagePath) {
+        const signed = await signRentalDocumentUrl(storagePath);
+        if (cancelled) return;
+        if (signed) {
+          setState({ status: "ready", url: signed });
+          return;
+        }
+      }
+
       if (!cancelled) setState({ status: "missing", url: null });
     })();
 
@@ -65,7 +84,7 @@ export function useMediaUrl(ref: MediaUrlInput | null | undefined): MediaUrlStat
       cancelled = true;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [key, id, thumbId, storagePath, thumbStoragePath]);
+  }, [key, id, thumbId, storagePath, thumbStoragePath, privateDocument]);
 
   return state;
 }

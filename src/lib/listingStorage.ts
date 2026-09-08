@@ -14,6 +14,7 @@ import {
   hasRemoteListingPhoto,
   uploadListingPhotosToRemote,
 } from "./listingPhotoStorage";
+import { getAccessToken } from "./stripePayments";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 import { emptyVehicleExtras, normalizeVehicleExtras } from "./vehicleExtras";
 import {
@@ -990,6 +991,31 @@ export async function savePublishedListingRemote(
   return { ok: !error, photosPending };
 }
 
+/** Ask the server to stamp the listing verified for a photo it can see. */
+async function confirmQrVerificationRemote(params: {
+  listingId: string;
+  path: string;
+}): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const token = await getAccessToken();
+  if (!token) return { ok: false, reason: "Sign in again to finish verification." };
+
+  try {
+    const res = await fetch("/api/listings/verify-qr", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(params),
+    });
+    const payload = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+    if (res.ok && payload.ok) return { ok: true };
+    return { ok: false, reason: payload.error ?? "Could not verify this listing." };
+  } catch {
+    return { ok: false, reason: "Could not reach the server to verify this listing." };
+  }
+}
+
 export async function uploadQrVerificationPhotoRemote(params: {
   listingId: string;
   ownerId: string;
@@ -1009,16 +1035,10 @@ export async function uploadQrVerificationPhotoRemote(params: {
     });
   if (uploadError) throw uploadError;
 
-  const { error: updateError } = await supabase
-    .from("listings")
-    .update({
-      qr_verification_photo_path: path,
-      qr_verified_at: new Date().toISOString(),
-      listing_status: "active",
-    })
-    .eq("id", params.listingId)
-    .eq("owner_id", params.ownerId);
-  if (updateError) throw updateError;
+  // "Verified" is a claim about a photo that exists, so the server checks the
+  // object is really in the bucket before it stamps the listing.
+  const verified = await confirmQrVerificationRemote({ listingId: params.listingId, path });
+  if (!verified.ok) throw new Error(verified.reason);
 
   // Update local cache for instant UX.
   const listing = getPublishedListingById(params.listingId);
@@ -1034,6 +1054,7 @@ export async function uploadQrVerificationPhotoRemote(params: {
         createdAt: Date.now(),
         sizeBytes: params.file.size,
         storagePath: path,
+        storageBucket: "listing-verification",
       },
     });
   }

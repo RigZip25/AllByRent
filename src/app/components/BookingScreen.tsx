@@ -1234,7 +1234,6 @@ function BookingScreenLoaded({
       manualBooking: true,
       insuranceProofMedia: insuranceProof,
       insuranceProofPath: insuranceProofPath || undefined,
-      insuranceProofUrl: insuranceProofUrl || undefined,
       insuranceActiveUntil: needsInsuranceProof ? insuranceActiveUntil : undefined,
       physicalDamageAttested: needsPhysicalDamage ? physicalDamageAttested || usesAgentInsurance : undefined,
       proRenterAttested: needsProRenter ? proRenterAttested : undefined,
@@ -1385,7 +1384,9 @@ function BookingScreenLoaded({
       dueAt,
       stripePaymentStatus: booking.stripePayment ? "requires_payment_method" : undefined,
       insuranceProofPath: booking.insuranceProofPath ?? null,
-      insuranceProofUrl: booking.insuranceProofUrl ?? null,
+      // The link the renter used expires, so the row keeps the path and the
+      // host signs a fresh one when they open the document.
+      insuranceProofUrl: null,
       insuranceActiveUntil: booking.insuranceActiveUntil ?? null,
       insurancePolicyNote: booking.insurancePolicyNote ?? null,
       rentalAgreement: booking.rentalAgreement ?? null,
@@ -2406,7 +2407,8 @@ function BookingScreenLoaded({
                         : `rent-${Date.now()}`);
                     void uploadRentalInsuranceProof({
                       renterId: auth.userId,
-                      rentalId: `${rentalIdHint}-pro`,
+                      rentalId: rentalIdHint,
+                      kind: "credential",
                       file,
                     })
                       .then((result) => {
@@ -2458,7 +2460,8 @@ function BookingScreenLoaded({
                       : `rent-${Date.now()}`);
                   void uploadRentalInsuranceProof({
                     renterId: auth.userId,
-                    rentalId: `${rentalIdHint}-cdl`,
+                    rentalId: rentalIdHint,
+                    kind: "cdl",
                     file,
                   })
                     .then((result) => {
@@ -2574,7 +2577,8 @@ function BookingScreenLoaded({
                       : `rent-${Date.now()}`);
                   void uploadRentalInsuranceProof({
                     renterId: auth.userId,
-                    rentalId: `${rentalIdHint}-opcert`,
+                    rentalId: rentalIdHint,
+                    kind: "operator_cert",
                     file,
                   })
                     .then((result) => {
@@ -2633,7 +2637,8 @@ function BookingScreenLoaded({
                       : `rent-${Date.now()}`);
                   void uploadRentalInsuranceProof({
                     renterId: auth.userId,
-                    rentalId: `${rentalIdHint}-boat`,
+                    rentalId: rentalIdHint,
+                    kind: "boater_license",
                     file,
                   })
                     .then((result) => {
@@ -2684,7 +2689,8 @@ function BookingScreenLoaded({
                       : `rent-${Date.now()}`);
                   void uploadRentalInsuranceProof({
                     renterId: auth.userId,
-                    rentalId: `${rentalIdHint}-drone`,
+                    rentalId: rentalIdHint,
+                    kind: "drone_cert",
                     file,
                   })
                     .then((result) => {
@@ -3025,7 +3031,7 @@ function BookingScreenLoaded({
                         }
                         setInsuranceProof(result.media);
                         setInsuranceProofPath(result.path);
-                        setInsuranceProofUrl(result.publicUrl);
+                        setInsuranceProofUrl(result.signedUrl);
                         setInsuranceDraftId(rentalIdHint);
                       })
                       .catch((error) => {
