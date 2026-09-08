@@ -1,3 +1,4 @@
+import { syncServerClock } from "../lib/serverClock";
 import { useMessages } from "../lib/i18n/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Inbox, ShoppingCart, Share2, Store, Trophy, X } from "lucide-react";
@@ -272,6 +273,8 @@ export function ActiveGarageShopScreen({
   const loadShelf = useCallback(() => {
     const applyCandidates = async (candidates: ListingDraft[]) => {
       const listingIds = candidates.map((listing) => listing.id);
+      // Closing lots and expiring payment windows both read the clock.
+      await syncServerClock();
       await syncGarageFromRemote({ hostId, userId: auth.userId, listingIds });
       await syncOpenSalesFromRemote(hostId);
       resolveEndedAuctions(listingIds);

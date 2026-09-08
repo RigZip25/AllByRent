@@ -1,3 +1,4 @@
+import { serverNow, syncServerClock } from "../lib/serverClock";
 import { useMessages } from "../lib/i18n/react";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
@@ -77,13 +78,14 @@ export function GarageWinnerCheckoutScreen({
   useEffect(() => {
     if (!checkout) return undefined;
     const tick = () => {
-      const ms = new Date(checkout.payByIso).getTime() - Date.now();
+      const ms = new Date(checkout.payByIso).getTime() - serverNow();
       if (ms <= 0) {
         setCountdown(auctionCopy.timeExpired);
         return;
       }
       setCountdown(auctionCopy.minutesLeft(Math.ceil(ms / 60_000)));
     };
+    void syncServerClock();
     tick();
     const timer = window.setInterval(tick, 10_000);
     return () => window.clearInterval(timer);

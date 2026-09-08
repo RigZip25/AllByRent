@@ -1,3 +1,4 @@
+import { syncServerClock } from "../lib/serverClock";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import {
@@ -135,6 +136,7 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
   ]);
 
   const refresh = () => {
+    void syncServerClock();
     resolveEndedOpenSales();
     cascadeUnpaidOpenSaleLots();
     setLines(getCartLines());

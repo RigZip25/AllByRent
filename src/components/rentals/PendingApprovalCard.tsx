@@ -1,3 +1,4 @@
+import { approvalDeadlineIso } from "../../lib/expirePendingApprovals";
 import { useMemo, useState } from "react";
 import { useAuth } from "../../hooks/AuthProvider";
 import { useNow } from "../../hooks/useNow";
@@ -29,11 +30,12 @@ export function PendingApprovalCard({
   const [busy, setBusy] = useState(false);
   const now = useNow(30_000);
   const ownerTimeLeft = useMemo(() => {
-    if (!booking.approvalDeadline) return null;
-    const parts = getCountdownParts(booking.approvalDeadline, now);
+    const deadline = approvalDeadlineIso(booking);
+    if (!deadline) return null;
+    const parts = getCountdownParts(deadline, now);
     if (parts.totalMs <= 0) return t.expired;
     return formatCountdownShort(parts);
-  }, [booking.approvalDeadline, now, t.expired]);
+  }, [booking, now, t.expired]);
 
   const handleCancel = async () => {
     const renterUserId = auth.userId;

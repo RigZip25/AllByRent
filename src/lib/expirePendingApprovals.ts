@@ -15,11 +15,30 @@ function partiesForBooking(
   return { hostId: viewerUserId, renterId: booking.counterpartyId };
 }
 
+/**
+ * When an unanswered request auto-cancels.
+ *
+ * The cron measures 24 hours from `created_at`, so the app has to read the same
+ * clock: a deadline stamped on the device drifts from the row the server sees.
+ */
+export function approvalDeadlineMs(booking: RentalBooking): number | null {
+  const fromCreatedAt = booking.createdAt
+    ? new Date(booking.createdAt).getTime() + MS_DAY
+    : Number.NaN;
+  if (Number.isFinite(fromCreatedAt)) return fromCreatedAt;
+  const stored = booking.approvalDeadline ? new Date(booking.approvalDeadline).getTime() : Number.NaN;
+  return Number.isFinite(stored) ? stored : null;
+}
+
+export function approvalDeadlineIso(booking: RentalBooking): string | null {
+  const ms = approvalDeadlineMs(booking);
+  return ms == null ? null : new Date(ms).toISOString();
+}
+
 function isApprovalExpired(booking: RentalBooking, now = Date.now()): boolean {
   if (booking.status !== "pending_approval") return false;
-  if (!booking.approvalDeadline) return false;
-  const deadline = new Date(booking.approvalDeadline).getTime();
-  return Number.isFinite(deadline) && deadline <= now;
+  const deadline = approvalDeadlineMs(booking);
+  return deadline != null && deadline <= now;
 }
 
 export async function expirePendingApprovalBooking(
