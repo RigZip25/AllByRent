@@ -5,7 +5,7 @@ import {
   LLM_MAX_TOKENS_CAP,
   LLM_MAX_TOKENS_DEFAULT,
   resolveLlmModel,
-} from "./llm/provider";
+} from "./provider";
 
 describe("llm provider guards", () => {
   it("clamps max_tokens to a hard ceiling", () => {
