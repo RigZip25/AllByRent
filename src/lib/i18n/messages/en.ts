@@ -6325,6 +6325,9 @@ export const en: AppMessages = {
     closedReadOnly: "Chat is closed for this rental. You can still read the history.",
     listingChatFallback: "Listing chat",
     listingChatSubtitle: "Chat about pickup · push when they reply",
+    listingChatMissingTitle: "This chat link is incomplete",
+    listingChatMissingBody: "Open Messages to find your conversations, or go back and try again.",
+    listingChatMissingCta: "Open Messages",
     requestChatFallback: "Request chat",
     requestChatSubtitle: "About what your neighbor is looking for",
     moderationBlocked:

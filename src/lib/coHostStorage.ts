@@ -151,6 +151,44 @@ export function buildCoHostInviteUrlForInvite(inviteId: string): string {
   return `${getRuntimeAppOrigin()}/?screen=coHosts&invite=${encodeURIComponent(id)}&skipSplash=1`;
 }
 
+const PENDING_COHOST_INVITE_KEY = "evorios_pending_cohost_invite";
+
+/** Persist `?invite=` across splash / auth so CoHostsScreen can resume accept. */
+export function persistPendingCoHostInvite(inviteId: string): void {
+  const id = inviteId.trim();
+  if (!id) return;
+  try {
+    sessionStorage.setItem(PENDING_COHOST_INVITE_KEY, id);
+    localStorage.setItem(PENDING_COHOST_INVITE_KEY, id);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function peekPendingCoHostInvite(): string | null {
+  try {
+    return (
+      sessionStorage.getItem(PENDING_COHOST_INVITE_KEY) ??
+      localStorage.getItem(PENDING_COHOST_INVITE_KEY)
+    );
+  } catch {
+    return null;
+  }
+}
+
+export function consumePendingCoHostInvite(): string | null {
+  try {
+    const value =
+      sessionStorage.getItem(PENDING_COHOST_INVITE_KEY) ??
+      localStorage.getItem(PENDING_COHOST_INVITE_KEY);
+    sessionStorage.removeItem(PENDING_COHOST_INVITE_KEY);
+    localStorage.removeItem(PENDING_COHOST_INVITE_KEY);
+    return value?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
 export function removeCoHost(hostId: string, coHostId: string): boolean {
   const records = loadCoHostRecords();
   const next = records.filter((r) => !(r.hostId === hostId && r.id === coHostId));

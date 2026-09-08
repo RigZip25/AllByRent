@@ -9,6 +9,7 @@ import {
   sanitizePhoneOtpUserReason,
 } from "../../lib/phoneE164";
 import { sendPhoneVerificationCode, verifyPhoneVerificationCode } from "../../lib/phoneKyc";
+import { pushOverlay, removeOverlay } from "../../lib/overlayBackStack";
 import { useMessages } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
@@ -50,6 +51,12 @@ export function PhoneVerifySheet({
     setBusy(null);
     setStep(alreadyVerified && initialPhone.trim() ? "done" : "phone");
   }, [open, initialPhone, alreadyVerified]);
+
+  useEffect(() => {
+    if (!open) return;
+    pushOverlay("phone-verify", onClose);
+    return () => removeOverlay("phone-verify");
+  }, [open, onClose]);
 
   if (!open) return null;
 

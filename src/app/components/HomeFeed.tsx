@@ -32,6 +32,7 @@ import {
   completeOnboarding,
   isOnboardingComplete,
 } from "../../lib/onboardingStorage";
+import { pushOverlay, removeOverlay } from "../../lib/overlayBackStack";
 import {
   garageMinPrice,
   garageProximityRank,
@@ -385,6 +386,12 @@ export function HomeFeed({
     setSelectedLocation(null);
     setLocateError(null);
   };
+
+  useEffect(() => {
+    if (!locationSheetOpen) return;
+    pushOverlay("home-location-sheet", closeLocationSheet);
+    return () => removeOverlay("home-location-sheet");
+  }, [locationSheetOpen]);
 
   useEffect(() => {
     if (!needsLocation || autoOpenedLocationSheet.current) return;

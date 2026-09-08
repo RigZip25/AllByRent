@@ -17,6 +17,7 @@ import {
 } from "../lib/listingStorage";
 import { getCountryEmptyHint, getSearchCountryCode } from "../lib/locationCountry";
 import { completeOnboarding, isOnboardingComplete } from "../lib/onboardingStorage";
+import { pushOverlay, removeOverlay } from "../lib/overlayBackStack";
 import { useMessages } from "../lib/i18n/react";
 
 const GREEN = "#1A9E6E";
@@ -88,6 +89,12 @@ export function LocationAreaControls({
     setSelectedLocation(null);
     setLocateError(null);
   };
+
+  useEffect(() => {
+    if (!locationSheetOpen) return;
+    pushOverlay("location-sheet", closeLocationSheet);
+    return () => removeOverlay("location-sheet");
+  }, [locationSheetOpen]);
 
   useEffect(() => {
     if (!autoOpenIfMissing || !needsLocation || autoOpened.current) return;

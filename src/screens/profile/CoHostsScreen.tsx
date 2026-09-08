@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Copy, Mail, Trash2, UserPlus, Users } from "lucide-react";
 import { useAuth } from "../../hooks/AuthProvider";
-import { buildCoHostInviteUrl } from "../../lib/coHostStorage";
+import {
+  buildCoHostInviteUrl,
+  buildCoHostInviteUrlForInvite,
+  peekPendingCoHostInvite,
+  consumePendingCoHostInvite,
+} from "../../lib/coHostStorage";
 import { useMessages } from "../../lib/i18n/react";
 import {
   acceptCoHostInviteWithSync,
@@ -122,8 +127,31 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
   const [busy, setBusy] = useState(false);
   const [copyHint, setCopyHint] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
+  const [shareInviteId, setShareInviteId] = useState<string | null>(null);
+  const [resumeInviteId, setResumeInviteId] = useState<string | null>(() => peekPendingCoHostInvite());
 
-  const inviteUrl = useMemo(() => buildCoHostInviteUrl(), []);
+  const refresh = useCallback(() => setVersion((v) => v + 1), []);
+
+  const coHosts = useMemo(() => getCoHostsForHost(hostId), [hostId, version]);
+  const pendingForYou = useMemo(() => {
+    const list = getPendingInvitesForEmail(hostEmail);
+    if (!resumeInviteId) return list;
+    return [...list].sort((a, b) => {
+      if (a.id === resumeInviteId) return -1;
+      if (b.id === resumeInviteId) return 1;
+      return 0;
+    });
+  }, [hostEmail, resumeInviteId, version]);
+
+  const activeCoHosts = coHosts.filter((r) => r.status === "active");
+  const pendingCoHosts = coHosts.filter((r) => r.status === "pending");
+
+  const inviteUrl = useMemo(() => {
+    if (shareInviteId) return buildCoHostInviteUrlForInvite(shareInviteId);
+    const latestPending = pendingCoHosts[0];
+    if (latestPending) return buildCoHostInviteUrlForInvite(latestPending.id);
+    return buildCoHostInviteUrl();
+  }, [pendingCoHosts, shareInviteId]);
 
   const copyInviteLink = useCallback(async () => {
     try {
@@ -136,19 +164,24 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
     }
   }, [inviteUrl, t.copyFailed, t.copySuccess]);
 
-  const refresh = useCallback(() => setVersion((v) => v + 1), []);
-
-  const coHosts = useMemo(() => getCoHostsForHost(hostId), [hostId, version]);
-  const pendingForYou = useMemo(
-    () => getPendingInvitesForEmail(hostEmail),
-    [hostEmail, version],
-  );
-
-  const activeCoHosts = coHosts.filter((r) => r.status === "active");
-  const pendingCoHosts = coHosts.filter((r) => r.status === "pending");
-
   useEffect(() => {
     void syncCoHostsFromRemote(hostId, hostEmail).then(() => refresh());
+  }, [hostEmail, hostId, refresh]);
+
+  // Resume `?invite=` deep link: keep the invite visible and ready to accept.
+  useEffect(() => {
+    const pendingId = peekPendingCoHostInvite();
+    if (!pendingId) return;
+    setResumeInviteId(pendingId);
+    void syncCoHostsFromRemote(hostId, hostEmail).then(() => {
+      refresh();
+      const forYou = getPendingInvitesForEmail(hostEmail);
+      if (forYou.some((invite) => invite.id === pendingId)) {
+        // Invite is on this device for the signed-in email — leave it for Accept.
+        return;
+      }
+      // Still keep the id so a later sync / email match can surface it.
+    });
   }, [hostEmail, hostId, refresh]);
 
   const handleInvite = () => {
@@ -162,6 +195,7 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
           return;
         }
         setInviteEmail("");
+        setShareInviteId(result.record.id);
         if (result.emailSent) {
           setCopyHint(t.inviteEmailed);
         } else if (result.emailError) {
@@ -181,6 +215,10 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
         return;
       }
       setError(null);
+      if (peekPendingCoHostInvite() === inviteId) {
+        consumePendingCoHostInvite();
+      }
+      setResumeInviteId((current) => (current === inviteId ? null : current));
       refresh();
     });
   };
@@ -215,7 +253,13 @@ export function CoHostsScreen({ onBack }: { onBack: () => void }) {
                 <li
                   key={invite.id}
                   className="rounded-2xl border bg-white p-4"
-                  style={{ borderColor: BORDER }}
+                  style={{
+                    borderColor: invite.id === resumeInviteId ? GREEN : BORDER,
+                    boxShadow:
+                      invite.id === resumeInviteId
+                        ? `0 0 0 1px ${GREEN}`
+                        : undefined,
+                  }}
                 >
                   <p className="text-[15px] font-semibold text-gray-900">{t.inviteCardTitle}</p>
                   <p className="mt-1 text-[13px] text-gray-500">{t.inviteCardBody(invite.email)}</p>

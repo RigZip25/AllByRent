@@ -1,5 +1,5 @@
 import { useMessages } from "../../lib/i18n/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
 import type { ListingDraft } from "../../screens/listing/types";
 import { placeBidWithSync } from "../../lib/repositories/garageRepository";
@@ -13,6 +13,7 @@ import {
   getOpenSaleForListing,
   placeOpenSaleBidAuthoritative,
 } from "../../lib/openSale";
+import { pushOverlay, removeOverlay } from "../../lib/overlayBackStack";
 
 const GREEN = "#0D5C3A";
 const BLUE = "#2563EB";
@@ -48,6 +49,11 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
 
   const [amount, setAmount] = useState(String(minBidUsd));
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    pushOverlay("garage-bid", onClose);
+    return () => removeOverlay("garage-bid");
+  }, [onClose]);
 
   const submit = () => {
     const value = Number.parseFloat(amount);
