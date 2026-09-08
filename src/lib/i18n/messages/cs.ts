@@ -304,7 +304,7 @@ export const cs: AppMessages = {
     notAvailable: "Momentálně nedostupné",
     yourListing: "Toto je tvoje nabídka.",
     sellerMissing: "Profil prodejce chybí — zkus to později.",
-    depositProtection: "Ochrana zálohy",
+    depositProtection: "Blokace zálohy",
     depositProtectionOnRentals: (label) => `${label} u půjček`,
     closeAvailabilityAria: "Zavřít dostupnost",
     pausedAvailabilityBanner:
@@ -378,7 +378,7 @@ export const cs: AppMessages = {
       rentanoRent: "Někdo poblíž může mít přesně to, co hledáš",
       badgeEarn: "🏆 Volné místo — jsi první",
       badgeRent: "📣 Tady se to hledá",
-      subtextEarn: "Kdo vystaví brzy, vydělá víc — bez konkurence, všichni zájemci u tebe",
+      subtextEarn: "Kdo vystaví brzy, má méně konkurence — poptávka v okolí jde k tobě",
       subtextRent: "Hostitelé vystavují tam, kde se ptají. Buď první, kdo se zeptá.",
       listFirstCta: "Vystavit první položku →",
       postRequestCta: "Poslat žádost →",
@@ -399,11 +399,11 @@ export const cs: AppMessages = {
       badgeFounding: "Zakládající hostitel",
       badgeCommunity: "Raná komunita",
       firstHosts: "Prvních 1 000 hostitelů",
-      titleEarnPrefix: "3 měsíce",
-      titleEarnHighlight: "vystavení zdarma",
+      titleEarnPrefix: "Vystav",
+      titleEarnHighlight: "zdarma",
       titleRent: "Pomozte naplnit tuto polici jako první",
       bodyEarn: (subcategory) =>
-        `Startovací nabídka pro rané hostitele v ${subcategory} — nízká konkurence, priorita umístění, dokud rosteme.`,
+        `Buď mezi prvními hostiteli v ${subcategory} — méně konkurence, dokud sousedé plní tuhle polici.`,
       bodyRent: (subcategory) =>
         `Napište, co potřebuješ v ${subcategory}. Tvoje žádost signalizuje poptávku — první hostitelé vystavují tam, kde se sousedé ptají.`,
       launchOffer: "Startovací nabídka · omezená místa",
@@ -1250,9 +1250,9 @@ export const cs: AppMessages = {
     insuranceProofAlt: "Doklad pojištění",
     insuranceOpenFull: "Otevřít ve velké velikosti",
     insuranceProofMissing: "Fotka dokladu na tomto zařízení zatím není.",
-    depositProtection: "Ochrana zálohy",
+    depositProtection: "Blokace zálohy",
     depositProtectionBody:
-      "Na kartě může být blokace na bezpečnostní zálohu. Uvolní se, když hostitel potvrdí vrácení v pořádku.",
+      "Dočasná blokace na kartě za bezpečnostní zálohu. Uvolní se, když hostitel potvrdí vrácení v pořádku.",
     ownerContact: "Kontakt majitele",
     renterContact: "Kontakt nájemce",
     hostFallback: "Hostitel",
@@ -5548,7 +5548,7 @@ export const cs: AppMessages = {
       subtitle: "Jedinečný QR kód identifikuje věc a potvrzuje každé předání.",
       requiredTitle: "QR kód je povinný",
       requiredBody:
-        "Každé předání je dohledatelné, zlepšuje bezpečnost a podporuje ochranu kauce, když se něco pokazí.",
+        "Každé předání je dohledatelné, zlepšuje bezpečnost a podporuje blokaci zálohy, když se něco pokazí.",
       afterPublishing: "Po zveřejnění můžete:",
       emailPrint: "📧 Poslat e-mailem sobě a vytisknout později",
       printLabel:
@@ -5682,7 +5682,7 @@ export const cs: AppMessages = {
       "Doručení tam i zpět je jeden poplatek za dovezení před začátkem půjčky a vyzvednutí po konci.",
     depositHoldNote: (label, amount) =>
       `${label}. Po platbě půjčky může být autorizována blokace karty ${amount} — uvolní se při vrácení.`,
-    depositHoldTitle: (label) => `Blokace ${label}`,
+    depositHoldTitle: (label) => label,
     depositHoldBody: (amount) =>
       `Autorizujeme ${amount} na kartě. Blokace se uvolní, když majitel potvrdí vrácení v pořádku.`,
     cancellationPolicyTitle: "Zrušení",
@@ -6382,7 +6382,7 @@ export const cs: AppMessages = {
       subtitle: "Půjč si poblíž, nebo udělej rychlý výprodej.",
       trustModes: "Půjčit · Prodat · Darovat",
       trustDeposit: "Kauce je blokovaná",
-      trustVerified: "Ověření hostitelé",
+      trustVerified: "Místní hostitelé",
       findGear: {
         title: "Půjčit poblíž",
         subtitle: "Foťáky, nábytek, kemp, kola kolem tebe",

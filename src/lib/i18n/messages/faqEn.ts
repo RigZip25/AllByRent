@@ -86,7 +86,7 @@ export const faq: AppMessages["faq"] = {
     },
     "payments": {
       q: "How do payments work?",
-      a: "Rentals: pay the rental total, then a separate deposit protection hold if the host set a deposit. Payments run through Stripe — Evorios does not store your card. Hosts connect Stripe for payouts.",
+      a: "Rentals: pay the rental total, then a separate deposit hold on your card if the host set a deposit. Payments run through Stripe — Evorios does not store your card. Hosts connect Stripe for payouts.",
     },
     "dispute": {
       q: "Something went wrong with a rental — what now?",

@@ -45,7 +45,7 @@ type SlideVisual =
 
 /**
  * Guest platform tour (9 slides) — then Sign up on the last screen.
- * Missing art uses labeled placeholders until assets are added.
+ * Missing art uses a quiet blank surface (no Placeholder / art:id chrome).
  */
 export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
   const t = useMessages();
@@ -161,7 +161,7 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
           className="mx-auto flex w-full max-w-[360px] items-center justify-center"
           style={{ minHeight: ART_MAX_HEIGHT }}
         >
-          <SlideArt visual={slide.visual} label={copy.artPlaceholder} />
+          <SlideArt visual={slide.visual} />
         </div>
 
         <div className="mb-3 mt-3 flex justify-center gap-1.5">
@@ -244,23 +244,16 @@ export function GuestShowcase({ onSignUp, onBrowseAsGuest, onBack }: Props) {
 
 function SlideArt({
   visual,
-  label,
 }: {
   visual: SlideVisual;
-  label: (id: string) => string;
 }) {
   if (visual.kind === "placeholder") {
     return (
       <div
-        className="flex aspect-[4/5] w-full flex-col items-center justify-center rounded-[24px] border-2 border-dashed px-4 text-center"
-        style={{ borderColor: `${GREEN}55`, backgroundColor: "#F3FAF6" }}
-      >
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Placeholder</p>
-        <p className="mt-2 text-[15px] font-bold" style={{ color: GREEN }}>
-          {label(visual.artId)}
-        </p>
-        <p className="mt-1 font-mono text-[12px] text-gray-400">art:{visual.artId}</p>
-      </div>
+        className="aspect-[4/5] w-full rounded-[24px]"
+        style={{ backgroundColor: "#F3FAF6" }}
+        aria-hidden
+      />
     );
   }
 

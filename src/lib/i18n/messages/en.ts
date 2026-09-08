@@ -292,7 +292,7 @@ export const en: AppMessages = {
     notAvailable: "Not available right now",
     yourListing: "This is your listing.",
     sellerMissing: "Seller profile is missing — try again later.",
-    depositProtection: "Deposit protection",
+    depositProtection: "Deposit hold",
     depositProtectionOnRentals: (label) => `${label} on rentals`,
     closeAvailabilityAria: "Close availability",
     pausedAvailabilityBanner:
@@ -362,7 +362,7 @@ export const en: AppMessages = {
       rentanoRent: "Someone nearby might have exactly what you need",
       badgeEarn: "🏆 Pioneer spot available",
       badgeRent: "📣 High demand signal",
-      subtextEarn: "Early hosts earn 3× more — no competition, all the renters",
+      subtextEarn: "Early hosts face less competition — more of the neighborhood demand",
       subtextRent: "Hosts list where renters ask. Be first to ask.",
       listFirstCta: "List your first item →",
       postRequestCta: "Post a Request →",
@@ -383,11 +383,11 @@ export const en: AppMessages = {
       badgeFounding: "Founding Host",
       badgeCommunity: "Early Community",
       firstHosts: "First 1,000 hosts",
-      titleEarnPrefix: "3 months",
-      titleEarnHighlight: "free listing",
+      titleEarnPrefix: "List",
+      titleEarnHighlight: "for free",
       titleRent: "Help fill this shelf first",
       bodyEarn: (subcategory) =>
-        `Launch offer for early hosts in ${subcategory} — low competition, priority placement while we grow.`,
+        `Be among the first hosts in ${subcategory} — less competition while neighbors fill this shelf.`,
       bodyRent: (subcategory) =>
         `Post what you need in ${subcategory}. Your request signals demand — the first hosts list where neighbors ask.`,
       launchOffer: "Launch offer · limited spots",
@@ -1233,9 +1233,9 @@ export const en: AppMessages = {
     insuranceProofAlt: "Insurance proof",
     insuranceOpenFull: "Open full size",
     insuranceProofMissing: "Proof photo isn’t available on this device yet.",
-    depositProtection: "Deposit protection",
+    depositProtection: "Deposit hold",
     depositProtectionBody:
-      "A card hold may cover the security deposit. It is released when the host confirms the item was returned in good condition.",
+      "A temporary card hold for the security deposit. It is released when the host confirms the item was returned in good condition.",
     ownerContact: "Owner contact",
     renterContact: "Renter contact",
     hostFallback: "Host",
@@ -5527,7 +5527,7 @@ export const en: AppMessages = {
       subtitle: "A unique QR code identifies your item and confirms every handoff.",
       requiredTitle: "QR code is required",
       requiredBody:
-        "It keeps every handoff traceable, improves security, and supports deposit protection if something goes wrong.",
+        "It keeps every handoff traceable, improves security, and supports deposit holds if something goes wrong.",
       afterPublishing: "After publishing you can:",
       emailPrint: "📧 Email it to yourself and print later",
       printLabel:
@@ -5661,7 +5661,7 @@ export const en: AppMessages = {
       "Round-trip delivery is one fee for drop-off before your rental starts and pickup after it ends.",
     depositHoldNote: (label, amount) =>
       `${label}. A ${amount} card hold may be authorized after rental payment — released when the item is returned.`,
-    depositHoldTitle: (label) => `${label} hold`,
+    depositHoldTitle: (label) => label,
     depositHoldBody: (amount) =>
       `We'll authorize ${amount} on your card. The hold is released when the owner confirms the item was returned in good condition.`,
     cancellationPolicyTitle: "Cancellation",
@@ -6384,7 +6384,7 @@ export const en: AppMessages = {
       subtitle: "Borrow nearby or run a quick sale.",
       trustModes: "Rent · Sell · Gift",
       trustDeposit: "Deposit held",
-      trustVerified: "Verified hosts",
+      trustVerified: "Local hosts",
       findGear: {
         title: "Borrow nearby",
         subtitle: "Cameras, furniture, camping, bikes around you",

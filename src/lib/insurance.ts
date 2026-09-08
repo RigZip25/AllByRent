@@ -1,9 +1,11 @@
 export type InsuranceQuote = {
-  provider: "safely" | "estimate";
+  /** Live partner is not connected; only `unavailable` until policies exist. */
+  provider: "unavailable" | "safely" | "estimate";
   feeCents: number;
   currency: "USD";
   policyId?: string | null;
   isEstimate: boolean;
+  available?: boolean;
 };
 
 function roundCents(value: number): number {
@@ -18,11 +20,8 @@ export function parseUsdToCents(raw: string): number {
 }
 
 /**
- * Fallback fee model used when Safely isn't configured.
- * Tuned to be:
- * - monotonic with replacement value
- * - gently increasing with duration
- * - with a small minimum to avoid $0 bookings
+ * Local fee model kept for future partner wiring / tests only.
+ * Booking must not charge this until a real policy is issued.
  */
 export function estimateInsuranceFeeCents(input: {
   replacementValueCents: number;
@@ -36,7 +35,8 @@ export function estimateInsuranceFeeCents(input: {
   return roundCents(base * durationMultiplier);
 }
 
-export async function fetchSafelyInsuranceQuote(input: {
+/** Quote endpoint is a stub until a real insurance partner is connected. */
+export async function fetchSafelyInsuranceQuote(_input: {
   replacementValueCents: number;
   rentalDays: number;
   startDateISO: string;
@@ -47,36 +47,34 @@ export async function fetchSafelyInsuranceQuote(input: {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        replacementValueCents: input.replacementValueCents,
-        rentalDays: input.rentalDays,
-        startDateISO: input.startDateISO,
-        endDateISO: input.endDateISO,
+        replacementValueCents: _input.replacementValueCents,
+        rentalDays: _input.rentalDays,
+        startDateISO: _input.startDateISO,
+        endDateISO: _input.endDateISO,
       }),
     });
-    if (!res.ok) throw new Error(`Safely quote failed: ${res.status}`);
+    if (!res.ok) throw new Error(`Insurance quote unavailable: ${res.status}`);
     const data = (await res.json()) as Partial<InsuranceQuote>;
-    if (typeof data.feeCents !== "number" || data.feeCents < 0) {
-      throw new Error("Safely quote: invalid fee");
+    if (data.provider === "safely" && typeof data.feeCents === "number" && data.feeCents >= 0) {
+      return {
+        provider: "safely",
+        feeCents: roundCents(data.feeCents),
+        currency: "USD",
+        policyId: typeof data.policyId === "string" ? data.policyId : null,
+        isEstimate: Boolean(data.isEstimate),
+        available: true,
+      };
     }
-    return {
-      provider: data.provider === "safely" ? "safely" : "estimate",
-      feeCents: roundCents(data.feeCents),
-      currency: "USD",
-      policyId: typeof data.policyId === "string" ? data.policyId : null,
-      isEstimate: Boolean(data.isEstimate),
-    };
   } catch {
-    const feeCents = estimateInsuranceFeeCents({
-      replacementValueCents: input.replacementValueCents,
-      rentalDays: input.rentalDays,
-    });
-    return {
-      provider: "estimate",
-      feeCents,
-      currency: "USD",
-      policyId: null,
-      isEstimate: true,
-    };
+    /* fall through — treat as unavailable */
   }
-}
 
+  return {
+    provider: "unavailable",
+    feeCents: 0,
+    currency: "USD",
+    policyId: null,
+    isEstimate: false,
+    available: false,
+  };
+}

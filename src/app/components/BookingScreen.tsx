@@ -1381,8 +1381,8 @@ function BookingScreenLoaded({
       deliveryAddress: booking.deliveryAddress,
       pickupPin: booking.pickupPin,
       returnPin: booking.returnPin,
-      safelyPolicyId: null,
-      insuranceFeeCents: 0,
+      safelyPolicyId: null, // no partner policy until Safely (or similar) is live
+      insuranceFeeCents: 0, // never charge an estimate-as-insurance fee
       depositAmountCents,
       rentalTotalCents: Math.round(totalWithExtras * 100),
       pickupAt,
