@@ -9,7 +9,7 @@ import { useMessages } from "../../lib/i18n/react";
 const GREEN = "#0D5C3A";
 const AMBER = "#F59E0B";
 
-type ChecklistBusy = null | "identity" | "stripe" | "refresh" | "phone";
+type ChecklistBusy = null | "stripe" | "refresh" | "phone";
 
 type Props = {
   status: SellerGoPublicStatus | null;
@@ -21,7 +21,6 @@ type Props = {
   /** Hide Connect when listing cannot take card money (free giveaway). */
   showPayouts?: boolean;
   onSignIn: () => void;
-  onVerifyIdentity: () => void;
   onVerifyPhone: () => void;
   onConnectBank: () => void;
   onRefresh: () => void;

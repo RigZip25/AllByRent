@@ -5,5 +5,5 @@ export { Step2Details } from "./Step2Details";
 export { Step3Modes } from "./Step3Modes";
 export { Step4PickupDelivery } from "./Step4PickupDelivery";
 export { Step5Availability } from "./Step5Availability";
-export { Step6QR } from "./Step6QR";
+/** Step6QR is unused in the frictionless wizard — QR is forced ready post-publish. */
 export { Step7Review } from "./Step7Review";

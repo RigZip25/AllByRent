@@ -1326,9 +1326,7 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
   },
 
   {
-    // Household shelves carry brand / model / condition only: the type and size
-    // option sets below are desk-and-table shaped, so sofas and beds wait for
-    // their own ones rather than answering the wrong question.
+    // Home shelves get type + size; office shelves keep desk/table option sets.
     category: "Home & Office Furniture",
     fields: [
       brandField("furniture", { required: false, recommended: true }),
@@ -1337,6 +1335,55 @@ export const CATEGORY_SPEC_PROFILES: readonly CategorySpecProfile[] = [
         type: "text",
         required: false,
         recommended: true,
+      },
+      {
+        key: "homeFurnitureType",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Living Room Furniture",
+          "Bedroom Furniture",
+          "Outdoor Furniture",
+          "Other",
+        ],
+        options: [
+          "sofa",
+          "loveseat",
+          "sectional",
+          "armchair",
+          "coffee_table",
+          "bed_frame",
+          "mattress",
+          "dresser_chest",
+          "nightstand",
+          "outdoor_dining_set",
+          "outdoor_lounge_set",
+          "other_home_furniture",
+        ],
+      },
+      {
+        key: "homeFurnitureSizeBand",
+        type: "select",
+        required: true,
+        requiredIf: "rent",
+        subcategories: [
+          "Living Room Furniture",
+          "Bedroom Furniture",
+          "Outdoor Furniture",
+          "Other",
+        ],
+        options: [
+          "seats_1",
+          "seats_2",
+          "seats_3_plus",
+          "twin_full",
+          "queen_king",
+          "compact_piece",
+          "standard_piece",
+          "large_set",
+          "not_sized",
+        ],
       },
       {
         key: "officeFurnitureType",
@@ -8205,6 +8252,21 @@ export function areCategorySpecsValid(
     if (!reqSelect("furnitureConditionGrade", [
       "like_new_office", "light_wear_office", "visible_wear_office", "functional_imperfections_office",
     ])) return false;
+
+    const homeTypedSubs = new Set([
+      "Living Room Furniture", "Bedroom Furniture", "Outdoor Furniture", "Other",
+    ]);
+    if (homeTypedSubs.has(sub)) {
+      if (!reqSelect("homeFurnitureType", [
+        "sofa", "loveseat", "sectional", "armchair", "coffee_table", "bed_frame",
+        "mattress", "dresser_chest", "nightstand", "outdoor_dining_set",
+        "outdoor_lounge_set", "other_home_furniture",
+      ])) return false;
+      if (!reqSelect("homeFurnitureSizeBand", [
+        "seats_1", "seats_2", "seats_3_plus", "twin_full", "queen_king",
+        "compact_piece", "standard_piece", "large_set", "not_sized",
+      ])) return false;
+    }
 
     const sizedSubs = new Set([
       "Tables & Chairs", "Storage & Shelving", "Office Desks & Chairs", "Reception Furniture",

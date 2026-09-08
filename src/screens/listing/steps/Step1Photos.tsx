@@ -648,7 +648,7 @@ export function Step1Photos({
         onChange={(event) => void handleVideoSelected(event.target.files?.[0])}
       />
 
-      <div className="mb-4">
+      <div id="listing-field-photos" className="mb-4">
         <h2 className="text-xl font-bold" style={{ color: PRIMARY_GREEN }}>
           {photosCopy.title}
         </h2>
@@ -691,9 +691,42 @@ export function Step1Photos({
             <p className="mt-2 text-xs font-semibold text-amber-700">{storageWarning}</p>
           ) : null}
         {photoWarning || gateMessage ? (
-          <p className="mt-2 text-xs font-semibold text-amber-700">
-            {photoWarning || gateMessage}
-          </p>
+          <div className="mt-2 space-y-2">
+            <p className="text-xs font-semibold text-amber-700">
+              {photoWarning || gateMessage}
+            </p>
+            {gateMessage ? (
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDraft((current) => ({
+                      ...current,
+                      photos: [],
+                      videos: [],
+                      aiSuggestions: null,
+                      aiAnalysisPending: false,
+                    }));
+                    onDismissGateMessage?.();
+                  }}
+                  className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900"
+                >
+                  {photosCopy.clearRejectedPhotos}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onDismissGateMessage?.();
+                    openLibraryPicker();
+                  }}
+                  className="rounded-lg px-3 py-1.5 text-xs font-semibold text-white"
+                  style={{ backgroundColor: PRIMARY_GREEN }}
+                >
+                  {photosCopy.retryWithNewPhotos}
+                </button>
+              </div>
+            ) : null}
+          </div>
         ) : null}
         </div>
       </div>

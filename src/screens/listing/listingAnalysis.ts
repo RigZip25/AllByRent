@@ -312,31 +312,56 @@ function resolveSuggestedYear(parsed: {
   return min ?? max;
 }
 
+/** Total wall-clock budget so aiAnalysisPending cannot hang forever. */
+const ANALYSIS_TIMEOUT_MS = 28_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      reject(new Error(`${label} timed out after ${ms}ms`));
+    }, ms);
+    promise.then(
+      (value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        window.clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
 async function requestListingAnalysis(imageBlocks: LlmImagePart[]): Promise<ListingAiSuggestions> {
   if (imageBlocks.length === 0) {
     throw new Error("No photos to analyze");
   }
 
-  const fullResponse = await requestWithRetry(async () => {
-    const result = await postLlmChat({
-      purpose: "vision",
-      max_tokens: 600,
-      system: ANALYSIS_SYSTEM_PROMPT,
-      messages: [
-        {
-          role: "user",
-          content: [
-            ...imageBlocks,
-            {
-              type: "text",
-              text: buildAnalysisUserPrompt(),
-            },
-          ],
-        },
-      ],
-    });
-    return result.text;
-  });
+  const fullResponse = await withTimeout(
+    requestWithRetry(async () => {
+      const result = await postLlmChat({
+        purpose: "vision",
+        max_tokens: 600,
+        system: ANALYSIS_SYSTEM_PROMPT,
+        messages: [
+          {
+            role: "user",
+            content: [
+              ...imageBlocks,
+              {
+                type: "text",
+                text: buildAnalysisUserPrompt(),
+              },
+            ],
+          },
+        ],
+      });
+      return result.text;
+    }),
+    ANALYSIS_TIMEOUT_MS,
+    "Photo analysis",
+  );
 
   if (!fullResponse.trim()) {
     throw new Error("Empty AI response");

@@ -736,6 +736,7 @@ function draftToRow(draft: ListingDraft, ownerId: string): Partial<SupabaseListi
       blocked_dates: draft.blockedDates ?? [],
       paused: draft.paused ?? false,
       wizard_step: draft.wizardStep ?? null,
+      wizard_flow_version: draft.wizardFlowVersion ?? null,
       nudge_count: draft.nudgeCount ?? 0,
       last_nudged_at: draft.lastNudgedAt ?? null,
       qr_ready: draft.qrReady ?? false,
@@ -776,6 +777,10 @@ function rowToDraft(row: SupabaseListingRow): ListingDraft {
     listingStatus: (row.listing_status as ListingDraft["listingStatus"]) ?? "draft",
     wizardStep:
       typeof availability.wizard_step === "number" ? availability.wizard_step : undefined,
+    wizardFlowVersion:
+      typeof availability.wizard_flow_version === "number"
+        ? Math.floor(availability.wizard_flow_version)
+        : undefined,
     updatedAt: row.updated_at,
     nudgeCount: typeof availability.nudge_count === "number" ? availability.nudge_count : undefined,
     lastNudgedAt:

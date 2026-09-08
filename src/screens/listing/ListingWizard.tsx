@@ -21,7 +21,6 @@ import {
   markGoPublicPending,
   shouldResumeGoPublicChecklist,
   startConnectForListing,
-  startIdentityVerificationForListing,
   type SellerGoPublicStatus,
 } from "../../lib/sellerGoPublic";
 import { onConnectOnboardingDone } from "../../lib/connectOnboardingBus";
@@ -82,7 +81,10 @@ import {
   isYardSaleListingActive,
 } from "../../lib/yardSaleListing";
 import { applyAiSuggestionsToDraft } from "./applyAiSuggestions";
-import { isListingStepValid } from "./validation";
+import {
+  getFirstListingStepFailure,
+  scrollToListingFieldAnchor,
+} from "./validation";
 import { pinMedia, unpinMedia } from "../../lib/mediaStore";
 import { useMessages } from "../../lib/i18n/react";
 
@@ -107,7 +109,7 @@ const BACKGROUND = "#F9FAFB";
 
 type SlideDirection = 1 | -1;
 type WizardPhase = "steps" | "goPublic" | "qrStory" | "qrSticker" | "share" | "success";
-type GoPublicBusy = null | "identity" | "stripe" | "refresh" | "phone";
+type GoPublicBusy = null | "stripe" | "refresh" | "phone";
 
 const slideVariants = {
   enter: (direction: SlideDirection) => ({
@@ -196,6 +198,8 @@ export function ListingWizard({
   const [photoProgressTick, setPhotoProgressTick] = useState(0);
   const [textGateMessage, setTextGateMessage] = useState<string | null>(null);
   const [textModerationPending, setTextModerationPending] = useState(false);
+  const [continueBlockedMessage, setContinueBlockedMessage] = useState<string | null>(null);
+  const [publishError, setPublishError] = useState<string | null>(null);
   const [phase, setPhase] = useState<WizardPhase>(() => {
     const cached =
       initialDraft ??
@@ -228,6 +232,11 @@ export function ListingWizard({
   const deleteDialogOpenedAtRef = useRef(0);
   const discardDialogOpenedAtRef = useRef(0);
   const deleteInFlightRef = useRef(false);
+  const prevPhotoCountRef = useRef(draft.photos?.length ?? 0);
+  const draftRef = useRef(draft);
+  const stepRef = useRef(step);
+  draftRef.current = draft;
+  stepRef.current = step;
 
   const openDeleteDialog = () => {
     deleteDialogOpenedAtRef.current = Date.now();
@@ -317,6 +326,7 @@ export function ListingWizard({
   }, [step, photoModerationPending, draft.aiAnalysisPending]);
 
   // Autosave unfinished drafts so Mr. Evorios can nudge if the host abandons mid-flow.
+  // Local save is immediate on first photo + flush on hide; remote stays debounced.
   useEffect(() => {
     if ((phase !== "steps" && phase !== "goPublic") || isPublishing || loadingEdit) return;
     const meaningful =
@@ -326,8 +336,24 @@ export function ListingWizard({
     if (!meaningful) return;
 
     ensureBrowserTimeZoneCaptured();
+    const ownerId = resolveGarageHostId(auth.userId, auth.userEmail) || auth.userId;
+    const photoCount = draft.photos?.length ?? 0;
+    const firstPhotoJustAdded = prevPhotoCountRef.current === 0 && photoCount > 0;
+    prevPhotoCountRef.current = photoCount;
+
+    if (firstPhotoJustAdded) {
+      void saveListingDraftProgress(
+        {
+          ...draft,
+          hostId: ownerId || draft.hostId || undefined,
+        },
+        ownerId,
+        step,
+        { syncRemote: false },
+      );
+    }
+
     const timer = window.setTimeout(() => {
-      const ownerId = resolveGarageHostId(auth.userId, auth.userEmail) || auth.userId;
       void saveListingDraftProgress(
         {
           ...draft,
@@ -342,6 +368,39 @@ export function ListingWizard({
     }, 1200);
     return () => window.clearTimeout(timer);
   }, [auth.userId, draft, isPublishing, loadingEdit, phase, step]);
+
+  // Flush local draft when the app backgrounds or the tab hides.
+  useEffect(() => {
+    const flushLocal = () => {
+      if ((phase !== "steps" && phase !== "goPublic") || isPublishing || loadingEdit) return;
+      const current = draftRef.current;
+      const currentStep = stepRef.current;
+      const meaningful =
+        (current.photos?.length ?? 0) > 0 ||
+        current.title.trim().length > 0 ||
+        currentStep > 1;
+      if (!meaningful) return;
+      const ownerId = resolveGarageHostId(auth.userId, auth.userEmail) || auth.userId;
+      void saveListingDraftProgress(
+        {
+          ...current,
+          hostId: ownerId || current.hostId || undefined,
+        },
+        ownerId,
+        currentStep,
+        { syncRemote: false },
+      );
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flushLocal();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", flushLocal);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", flushLocal);
+    };
+  }, [auth.userEmail, auth.userId, isPublishing, loadingEdit, phase]);
 
   const refreshGoPublicStatus = useCallback(async () => {
     setGoPublicLoading(true);
@@ -413,7 +472,6 @@ export function ListingWizard({
     [auth.userId, draft],
   );
 
-  const canContinue = isListingStepValid(step, draft);
   const progress = (step / TOTAL_LISTING_STEPS) * 100;
   const isLastStep = step === TOTAL_LISTING_STEPS;
 
@@ -435,6 +493,8 @@ export function ListingWizard({
   const goToStep = (nextStep: number, nextDirection: SlideDirection) => {
     setDirection(nextDirection);
     setStep(nextStep);
+    setContinueBlockedMessage(null);
+    setPublishError(null);
   };
 
   const handleBack = () => {
@@ -612,14 +672,13 @@ export function ListingWizard({
       void (async () => {
         setIsPublishing(true);
         setTextGateMessage(null);
+        setPublishError(null);
         try {
           if (isInModerationCooldown(auth.userId)) {
-            setTextGateMessage(
-              listing.moderationCooldownWait(
-                formatCooldownHours(getModerationCooldownRemaining(auth.userId)),
-              ),
+            const message = listing.moderationCooldownWait(
+              formatCooldownHours(getModerationCooldownRemaining(auth.userId)),
             );
-            goToStep(LISTING_STEP.details, -1);
+            setPublishError(message);
             setIsPublishing(false);
             return;
           }
@@ -631,7 +690,7 @@ export function ListingWizard({
             listingId: draft.id,
           });
           if (!ownerGate.ok) {
-            setTextGateMessage(ownerGate.reason);
+            setPublishError(ownerGate.reason);
             setIsPublishing(false);
             return;
           }
@@ -657,12 +716,11 @@ export function ListingWizard({
               userId: auth.userId,
               severe: moderation.reasonCode === "unsafe",
             });
-            setTextGateMessage(
+            setPublishError(
               strike.hasCooldown
                 ? listing.moderationCooldownWait(formatCooldownHours(strike.cooldownMs))
                 : messageForTextModeration(moderation.reasonCode, listing.itemInfo),
             );
-            goToStep(LISTING_STEP.details, -1);
             setIsPublishing(false);
             return;
           }
@@ -674,8 +732,7 @@ export function ListingWizard({
             instructionsUrl: "",
           });
         } catch {
-          setTextGateMessage(listing.itemInfo.moderationTextVerifyFailed);
-          goToStep(LISTING_STEP.details, -1);
+          setPublishError(listing.itemInfo.moderationTextVerifyFailed);
           setIsPublishing(false);
         }
       })();
@@ -867,28 +924,6 @@ export function ListingWizard({
     setPhoneSheetOpen(true);
   };
 
-  const handleChecklistIdentity = () => {
-    void (async () => {
-      setGoPublicBusy("identity");
-      setGoPublicError(null);
-      try {
-        const saved = await persistDraftForGoPublic({ syncRemote: false });
-        const result = await startIdentityVerificationForListing(
-          listingWizardReturnPath(saved.id),
-        );
-        if (!result.ok) {
-          setGoPublicError(result.reason);
-          return;
-        }
-        window.location.assign(result.url);
-      } catch (error) {
-        setGoPublicError(error instanceof Error ? error.message : "Verification failed.");
-      } finally {
-        setGoPublicBusy(null);
-      }
-    })();
-  };
-
   const handleChecklistConnect = () => {
     void (async () => {
       setGoPublicBusy("stripe");
@@ -1005,16 +1040,29 @@ export function ListingWizard({
   };
 
   const handleContinue = async () => {
-    if (step === LISTING_STEP.photos) {
-      if (
-        draft.photos.length === 0 ||
-        draft.aiAnalysisPending ||
-        draft.photoEnhancementPending ||
-        photoModerationPending
-      ) {
-        return;
-      }
+    setContinueBlockedMessage(null);
 
+    const validationCopy = listing.validation;
+    const failure = getFirstListingStepFailure(step, draft, validationCopy);
+    const pendingBusy =
+      (step === LISTING_STEP.photos &&
+        (draft.aiAnalysisPending ||
+          draft.photoEnhancementPending ||
+          photoModerationPending)) ||
+      (step === LISTING_STEP.category && photoModerationPending) ||
+      (step === LISTING_STEP.details && textModerationPending);
+
+    if (pendingBusy) return;
+
+    if (failure) {
+      setContinueBlockedMessage(failure.message);
+      window.requestAnimationFrame(() => {
+        scrollToListingFieldAnchor(failure.anchorId);
+      });
+      return;
+    }
+
+    if (step === LISTING_STEP.photos) {
       if (!(await runGalleryModerationGate({ softNudge: true, videos: true }))) return;
 
       if (!draft.aiSuggestions) {
@@ -1028,8 +1076,6 @@ export function ListingWizard({
     }
 
     if (step === LISTING_STEP.category) {
-      if (!canContinue || photoModerationPending) return;
-
       // The shelf is known only now, so this is the first time the photos can
       // be held against it.
       if (!(await runGalleryModerationGate({ softNudge: true, videos: false }))) return;
@@ -1039,8 +1085,6 @@ export function ListingWizard({
     }
 
     if (step === LISTING_STEP.details) {
-      if (!canContinue || textModerationPending) return;
-
       setTextGateMessage(null);
       if (isInModerationCooldown(auth.userId)) {
         setTextGateMessage(
@@ -1089,7 +1133,6 @@ export function ListingWizard({
       return;
     }
 
-    if (!canContinue) return;
     if (isLastStep) return;
     goToStep(step + 1, 1);
   };
@@ -1166,15 +1209,14 @@ export function ListingWizard({
 
   const continueDisabled =
     step === LISTING_STEP.photos
-      ? draft.photos.length === 0 ||
-        draft.aiAnalysisPending ||
+      ? draft.aiAnalysisPending ||
         draft.photoEnhancementPending ||
         photoModerationPending
       : step === LISTING_STEP.category
-        ? !canContinue || photoModerationPending
+        ? photoModerationPending
         : step === LISTING_STEP.details
-          ? !canContinue || textModerationPending
-          : !canContinue;
+          ? textModerationPending
+          : false;
 
   const handleDiscard = () => {
     setShowDiscardDialog(false);
@@ -1189,15 +1231,7 @@ export function ListingWizard({
       return;
     }
 
-    if (draft.listingStatus === "draft" && draft.id) {
-      const ownerId = resolveGarageHostId(auth.userId, auth.userEmail) || auth.userId;
-      if (ownerId) {
-        void removePublishedListingRemote(draft.id, ownerId);
-      } else {
-        removePublishedListing(draft.id);
-      }
-    }
-
+    // Soft exit — keep the draft in storage. Explicit trash still hard-deletes.
     onExit("discarded");
   };
 
@@ -1283,7 +1317,6 @@ export function ListingWizard({
             errorCode={goPublicErrorCode}
             showPayouts={false}
             onSignIn={handleChecklistSignIn}
-            onVerifyIdentity={handleChecklistIdentity}
             onVerifyPhone={handleChecklistPhone}
             onConnectBank={handleChecklistConnect}
             onRefresh={() => {
@@ -1496,6 +1529,7 @@ export function ListingWizard({
                 profileCity={profileCity}
                 isPublishing={isPublishing}
                 isEditing={isEditing}
+                publishError={publishError}
                 onPublish={handlePublish}
                 onGoToStep={(target) => goToStep(target, -1)}
               />
@@ -1538,6 +1572,14 @@ export function ListingWizard({
               className="mb-3 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700"
             >
               {photoGateMessage}
+            </p>
+          ) : null}
+          {continueBlockedMessage ? (
+            <p
+              role="status"
+              className="mb-3 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800"
+            >
+              {continueBlockedMessage}
             </p>
           ) : null}
           <button
