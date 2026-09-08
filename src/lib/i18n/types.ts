@@ -2006,6 +2006,10 @@ export type AppMessages = {
     depositStatusReleased: string;
     depositStatusClaimed: string;
     depositHoldActiveBody: string;
+    /** Shown when releasing or claiming the hold did not go through. */
+    depositActionFailed: string;
+    /** Says when the hold lifts on its own if nobody claims against it. */
+    depositAutoReleaseHint: (date: string) => string;
     resolvedCalm: (outcome: string) => string;
     underReviewCalm: string;
     rentalItemFallback: string;

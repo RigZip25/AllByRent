@@ -976,6 +976,8 @@ export const es: AppMessages = {
     depositStatusReleased: "Fianza: liberada",
     depositStatusClaimed: "Fianza: reclamada por el anfitrión",
     depositHoldActiveBody: "Retención activa. El propietario puede reclamar en 48 h tras la devolución; si no, liberar al arrendatario.",
+    depositActionFailed: "No se pudo completar. La retención sigue igual — inténtalo de nuevo.",
+    depositAutoReleaseHint: (date) => `Si nadie reclama, la retención se libera el ${date}.`,
     resolvedCalm: (outcome) => `Disputa resuelta (${outcome}). Gracias por tratarlo con cuidado.`,
     underReviewCalm: "En revisión — ambas partes pueden seguir añadiendo pruebas. Resuélvanlo juntos o escribid a soporte.",
     rentalItemFallback: "Artículo alquilado",

@@ -3006,8 +3006,10 @@ export function ActiveRental({
                   role={booking.role}
                   depositStatus={booking.depositStatus}
                   depositAmountCents={booking.depositAmountCents}
+                  depositClaimDeadlineAt={booking.depositClaimDeadlineAt}
                   disputeFrozen={isDisputeActive(dispute)}
                   disputeOutcome={dispute.resolutionOutcome ?? null}
+                  onSettled={() => setBookings(loadRentalBookings())}
                 />
 
                 <a

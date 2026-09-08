@@ -183,7 +183,14 @@ export type RentalBooking = {
   stripePayment?: boolean;
   /** Security deposit hold (Stripe manual-capture PI). */
   depositAmountCents?: number;
+  /**
+   * Where the hold stands: `held`, `released`, `claimed`, or a raw Stripe
+   * status while it is being set up. Written by the payment routes and the
+   * webhook, read from the rental row on sync — the client cannot change it.
+   */
   depositStatus?: string;
+  /** Last moment the host can claim against the hold; the server sets it. */
+  depositClaimDeadlineAt?: string;
   /** Source listing id for re-book flows. */
   listingId?: string;
   /**
@@ -419,6 +426,9 @@ type SupabaseRentalRow = {
   safely_policy_id?: string | null;
   insurance_fee_cents?: number;
   deposit_amount_cents?: number;
+  deposit_status?: string | null;
+  deposit_claim_deadline_at?: string | null;
+  late_fee_cents?: number | null;
   stripe_payment_intent_id?: string | null;
   stripe_payment_status?: string | null;
   rental_total_cents?: number;
@@ -562,6 +572,10 @@ export function rentalBookingFromRemoteRow(
     renterReturnedAt: row.renter_returned_at ?? undefined,
     hostAcceptedReturnAt: row.host_accepted_return_at ?? undefined,
     depositAmountCents: row.deposit_amount_cents ?? undefined,
+    // The hold is settled by the payment routes and the webhook; the row is the
+    // only place both devices can read the same answer.
+    depositStatus: row.deposit_status ?? undefined,
+    depositClaimDeadlineAt: row.deposit_claim_deadline_at ?? undefined,
     stripePayment: Boolean(row.stripe_payment_intent_id),
     paymentOnHold:
       Boolean(row.stripe_payment_intent_id) &&
@@ -884,6 +898,10 @@ function mergeRentalBooking(local: RentalBooking, remote: RentalBooking): Rental
     hostAcceptedReturnAt: remote.hostAcceptedReturnAt ?? local.hostAcceptedReturnAt,
     pickupConfirmedAt: remote.pickupConfirmedAt ?? local.pickupConfirmedAt,
     returnConfirmedAt: remote.returnConfirmedAt ?? local.returnConfirmedAt,
+    // The hold is settled by the payment routes and the webhook, so the row is
+    // the truth and a device can only hold a stale opinion about it.
+    depositStatus: remote.depositStatus ?? local.depositStatus,
+    depositClaimDeadlineAt: remote.depositClaimDeadlineAt ?? local.depositClaimDeadlineAt,
     // Keep the record of the end together with the status that says it ended.
     cancelledAt: local.cancelledAt ?? remote.cancelledAt,
     cancelledBy: local.cancelledBy ?? remote.cancelledBy,

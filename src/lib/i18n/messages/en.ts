@@ -976,6 +976,8 @@ export const en: AppMessages = {
     depositStatusReleased: "Deposit: released",
     depositStatusClaimed: "Deposit: claimed by host",
     depositHoldActiveBody: "Hold is active. Owner can claim within 48h after return; otherwise release to renter.",
+    depositActionFailed: "That didn't go through. The hold is unchanged — try again.",
+    depositAutoReleaseHint: (date) => `If nobody claims against it, the hold lifts on ${date}.`,
     resolvedCalm: (outcome) => `Dispute resolved (${outcome}). Thank you for handling this carefully.`,
     underReviewCalm: "Under review — both parties can still add evidence. Resolve together or email support.",
     rentalItemFallback: "Rental item",

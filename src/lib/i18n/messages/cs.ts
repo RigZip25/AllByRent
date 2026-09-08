@@ -1000,6 +1000,8 @@ export const cs: AppMessages = {
     depositStatusReleased: "Záloha: uvolněna",
     depositStatusClaimed: "Záloha: uplatněna hostitelem",
     depositHoldActiveBody: "Zadržení je aktivní. Majitel může uplatnit do 48 h po vrácení; jinak uvolnit nájemci.",
+    depositActionFailed: "Neprošlo to. Zadržení zůstává, jak bylo — zkuste to znovu.",
+    depositAutoReleaseHint: (date) => `Pokud si nikdo nic nenárokuje, zadržení skončí ${date}.`,
     resolvedCalm: (outcome) => `Spor vyřešen (${outcome}). Děkujeme za ohleduplný postup.`,
     underReviewCalm: "V kontrole — obě strany mohou dál přidávat důkazy. Dohodněte se spolu nebo napište podpoře.",
     rentalItemFallback: "Půjčená položka",

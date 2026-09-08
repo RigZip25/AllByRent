@@ -388,7 +388,9 @@ export function RentalCard({
             role={booking.role}
             depositStatus={booking.depositStatus}
             depositAmountCents={booking.depositAmountCents}
+            depositClaimDeadlineAt={booking.depositClaimDeadlineAt}
             disputeFrozen={booking.status === "disputed"}
+            onSettled={onRefresh}
           />
         </div>
       ) : null}
@@ -400,6 +402,8 @@ export function RentalCard({
             role={booking.role}
             depositStatus={booking.depositStatus}
             depositAmountCents={booking.depositAmountCents}
+            depositClaimDeadlineAt={booking.depositClaimDeadlineAt}
+            onSettled={onRefresh}
           />
         </div>
       ) : null}
