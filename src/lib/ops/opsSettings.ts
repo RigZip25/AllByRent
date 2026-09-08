@@ -159,15 +159,18 @@ export function resetOpsSettings(): OpsSettings {
   return { ...DEFAULTS };
 }
 
-/** Effective rental platform fee (promo wins when set). */
+/**
+ * Fee the booking UI shows. Must match the server hard-codes
+ * (`RENTAL_PLATFORM_FEE_RATE` / garage `PLATFORM_FEE_RATE`). Ops localStorage
+ * overrides are notes for the owner only — they must not change what guests
+ * are quoted, because the charge is computed on the server.
+ */
 export function getEffectiveRentalFeeRate(): number {
-  const s = loadOpsSettings();
-  if (s.promoRentalFeeRate !== null) return s.promoRentalFeeRate;
-  return s.rentalFeeRate;
+  return DEFAULT_RENTAL_FEE;
 }
 
 export function getSellFeeRate(): number {
-  return loadOpsSettings().sellFeeRate;
+  return DEFAULT_SELL_FEE;
 }
 
 export function getOpsClusterDefaultMi(): number {

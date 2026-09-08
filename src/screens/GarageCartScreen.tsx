@@ -178,6 +178,7 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
   };
 
   const beginCheckout = (kind: "buynow" | "opensale" = "buynow") => {
+    if (busy) return;
     setCheckoutKind(kind);
     const input =
       kind === "opensale"

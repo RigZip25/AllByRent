@@ -1,6 +1,4 @@
-import type { GarageLotState } from "../garageAuctionState";
 import {
-  getLotState,
   markAuctionCheckoutComplete,
   markBuyNowSold,
   mergeLotStatesFromRemote,
@@ -34,7 +32,6 @@ import {
   fetchSaleScheduleRemote,
   followGarageRemote,
   pushGarageBidRemote,
-  pushLotStateRemote,
   pushNeighborOfferRemote,
   pushOfferPrefsRemote,
   pushSaleScheduleRemote,
@@ -70,18 +67,16 @@ export async function syncGarageFromRemote(params: GarageSyncParams): Promise<vo
   if (follows.length > 0 && userId) saveGarageFollowsFromRemote(follows);
 }
 
-async function persistLotState(listingId: string, hostId: string, state?: GarageLotState): Promise<void> {
-  await pushLotStateRemote(listingId, hostId, state ?? getLotState(listingId));
-}
-
 export async function completeBuyNowSale(params: {
   listingId: string;
   hostId: string;
   priceUsd: number;
   listingTitle?: string;
 }): Promise<void> {
+  // Local UX only. Stripe webhook stamps garage_lot_states after
+  // payment_intent.succeeded — the client must not mark the lot sold first.
+  void params.hostId;
   markBuyNowSold(params.listingId, params.priceUsd, params.listingTitle);
-  await persistLotState(params.listingId, params.hostId);
 }
 
 export async function completeAuctionPayment(params: {
@@ -90,8 +85,8 @@ export async function completeAuctionPayment(params: {
   priceUsd: number;
   listingTitle?: string;
 }): Promise<void> {
+  void params.hostId;
   markAuctionCheckoutComplete(params.listingId, params.priceUsd, params.listingTitle);
-  await persistLotState(params.listingId, params.hostId);
 }
 
 export async function placeBidWithSync(input: Parameters<typeof placeGarageBid>[0]) {

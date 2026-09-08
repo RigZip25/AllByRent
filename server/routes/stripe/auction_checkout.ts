@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { randomUUID } from "crypto";
 import { applyCors, handleOptions } from "../../lib/cors";
 import { isStripeServerConfigured } from "../../lib/keys";
+import { stripeKeyModeMismatch } from "../../lib/stripe/ensureConnectAccount";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
@@ -35,6 +36,12 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   if (!isStripeServerConfigured()) {
     res.status(200).json({ ok: false, reason: "Stripe not configured" });
+    return;
+  }
+
+  const mismatch = stripeKeyModeMismatch();
+  if (mismatch) {
+    res.status(200).json({ ok: false, code: mismatch.code, reason: mismatch.reason });
     return;
   }
 
@@ -85,6 +92,17 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     .eq("listing_id", listingId)
     .maybeSingle();
 
+  // Highest bid on the ledger — the charge comes from this, not from a lot
+  // state the host can invent.
+  const { data: bidRows } = await admin
+    .from("garage_bids")
+    .select("listing_id, bidder_id, amount_cents")
+    .eq("listing_id", listingId)
+    .order("amount_cents", { ascending: false })
+    .limit(1);
+
+  const topBid = (bidRows?.[0] as { listing_id: string; bidder_id: string; amount_cents: number } | undefined) ?? null;
+
   const validated = validateAuctionListing({
     hostId,
     listingId,
@@ -92,6 +110,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     lot: (lotRow as GarageLotRow | null) ?? null,
     winningBidUsd,
     buyerId: user.id,
+    topBid,
   });
   if (!validated.ok) {
     res.status(409).json({ ok: false, error: validated.error });

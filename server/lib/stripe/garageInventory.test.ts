@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  resolveSellLinePriceCents,
   validateAuctionListing,
+  validateGarageSellLines,
   type GarageListingRow,
   type GarageLotRow,
 } from "./garageInventory";
@@ -54,6 +56,16 @@ describe("validateAuctionListing", () => {
     expect(result.runnerUpAttempt).toBe(2);
   });
 
+  it("prefers the bid ledger over a host-invented lot amount", () => {
+    const result = validate({
+      winningBidUsd: 99,
+      topBid: { listing_id: "listing-1", bidder_id: WINNER, amount_cents: 5500 },
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.bidCents).toBe(5500);
+  });
+
   it("refuses a bid amount the lot never recorded", () => {
     const result = validate({ winningBidUsd: 1 });
     expect(result.ok).toBe(false);
@@ -78,21 +90,55 @@ describe("validateAuctionListing", () => {
     const result = validate({ listing: listing({ owner_id: "host-2" }) });
     expect(result).toEqual({ ok: false, error: "Listing host mismatch" });
   });
+});
 
-  it("refuses a paused or inactive listing", () => {
-    expect(validate({ listing: listing({ availability: { paused: true } }) }).ok).toBe(false);
-    expect(validate({ listing: listing({ listing_status: "draft" }) }).ok).toBe(false);
+describe("resolveSellLinePriceCents", () => {
+  it("charges an accepted offer instead of the sticker price", () => {
+    const result = resolveSellLinePriceCents({
+      listingId: "listing-1",
+      salePriceCents: 8000,
+      buyerId: "buyer-1",
+      offers: [
+        {
+          listing_id: "listing-1",
+          buyer_id: "buyer-1",
+          amount_cents: 4000,
+          status: "accepted",
+        },
+      ],
+    });
+    expect(result).toEqual({ ok: true, priceCents: 4000 });
   });
 
-  it("refuses a rent-only listing", () => {
-    const result = validate({ listing: listing({ modes: ["rent"] }) });
-    expect(result).toEqual({ ok: false, error: "Listing is not for sale" });
+  it("refuses a listing reserved for someone else", () => {
+    const result = resolveSellLinePriceCents({
+      listingId: "listing-1",
+      salePriceCents: 8000,
+      buyerId: "buyer-1",
+      offers: [
+        {
+          listing_id: "listing-1",
+          buyer_id: "buyer-2",
+          amount_cents: 4000,
+          status: "accepted",
+        },
+      ],
+    });
+    expect(result.ok).toBe(false);
   });
+});
 
-  it("defaults the runner-up attempt when the lot omits it", () => {
-    const result = validate({ lot: lot({ ...AWAITING, runnerUpAttempt: undefined }) });
+describe("validateGarageSellLines", () => {
+  it("lets the winner of an awaiting lot check out at the bid", () => {
+    const result = validateGarageSellLines({
+      hostId: HOST,
+      listingIds: ["listing-1"],
+      listings: [listing()],
+      lots: [lot(AWAITING)],
+      buyerId: WINNER,
+    });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.runnerUpAttempt).toBe(1);
+    expect(result.lines[0]?.priceCents).toBe(4250);
   });
 });

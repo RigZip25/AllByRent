@@ -18,13 +18,13 @@ import { getEffectiveRentalFeeRate } from "./ops/opsSettings";
 
 import { formatDistanceFromMiles } from "./regionalDisplay";
 
-/** Default platform service fee (12%). Runtime value may come from Ops console. */
+/** Default platform service fee (12%). Must match server `RENTAL_PLATFORM_FEE_RATE`. */
 export const PLATFORM_SERVICE_FEE_RATE = 0.12;
 
 /** @deprecated Use PLATFORM_SERVICE_FEE_RATE */
 export const DEMO_SERVICE_FEE_RATE = PLATFORM_SERVICE_FEE_RATE;
 
-/** Effective rental fee rate (Ops promo / override when set). */
+/** Effective rental fee rate shown in the booking UI (server charges the same). */
 export function getPlatformServiceFeeRate(): number {
   try {
     return getEffectiveRentalFeeRate();

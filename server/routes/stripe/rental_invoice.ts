@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
 import { applyCors, handleOptions } from "../../lib/cors";
 import { isStripeServerConfigured } from "../../lib/keys";
+import { stripeKeyModeMismatch } from "../../lib/stripe/ensureConnectAccount";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
@@ -49,6 +50,12 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   if (!isStripeServerConfigured()) {
     res.status(200).json({ ok: false, reason: "Stripe not configured" });
+    return;
+  }
+
+  const mismatch = stripeKeyModeMismatch();
+  if (mismatch) {
+    res.status(200).json({ ok: false, code: mismatch.code, reason: mismatch.reason });
     return;
   }
 
@@ -112,6 +119,8 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
+  const chargeCents = invoice.totalCents;
+
   const hostPayout = await requireHostPayoutAccount(admin, rental.owner_id);
   if (hostPayout.ok === false) {
     res.status(400).json({ ok: false, error: hostPayout.error });
@@ -122,7 +131,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
 
   const customerId = await getOrCreateStripeCustomer(stripe, admin, user.id, user.email);
-  const applicationFeeCents = platformFeeFromGrossTotal(amountCents, PLATFORM_FEE_RATE);
+  const applicationFeeCents = platformFeeFromGrossTotal(chargeCents, PLATFORM_FEE_RATE);
   const destination = destinationChargeFields(hostPayout.account.accountId, applicationFeeCents);
   const currency = await resolveHostStripeCurrency(admin, rental.owner_id);
 
@@ -147,7 +156,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   if (lineSummary) metadata.invoice_lines = lineSummary;
 
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: amountCents,
+    amount: chargeCents,
     currency,
     customer: customerId,
     capture_method: "automatic",

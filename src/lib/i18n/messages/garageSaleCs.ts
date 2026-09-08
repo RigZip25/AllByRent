@@ -359,7 +359,7 @@ export const garageCart: AppMessages["garageCart"] = {
 };
 
 export const earnBusiness: AppMessages["earnBusiness"] = {
-  earnedThisMonth: "Vyděláno tento měsíc",
+  earnedThisMonth: "Vyděláno tento měsíc (odhad)",
   allTime: "Celkem",
   projectedByMonthEnd: (amount) => `Odhad ${amount} do konce měsíce`,
   kpiThisMonth: "Tento měsíc",

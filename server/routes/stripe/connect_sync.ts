@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
 import { applyCors, handleOptions } from "../../lib/cors";
 import { isStripeServerConfigured } from "../../lib/keys";
+import { stripeKeyModeMismatch } from "../../lib/stripe/ensureConnectAccount";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 
@@ -25,6 +26,12 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   if (!isStripeServerConfigured()) {
     res.status(200).json({ ok: false, reason: "Stripe not configured" });
+    return;
+  }
+
+  const mismatch = stripeKeyModeMismatch();
+  if (mismatch) {
+    res.status(200).json({ ok: false, code: mismatch.code, reason: mismatch.reason });
     return;
   }
 
@@ -78,9 +85,9 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const onboardingComplete = detailsSubmitted || payoutsEnabled || chargesEnabled;
   const last4 = bankLast4FromAccount(account);
 
-  // Persist payouts when Stripe says so; also mark enabled once charges work.
-  const nextPayouts =
-    payoutsEnabled || chargesEnabled || Boolean(profile?.stripe_payouts_enabled);
+  // Persist only when Stripe says payouts are enabled. charges_enabled alone
+  // used to flip this flag and open checkout while money still had nowhere to go.
+  const nextPayouts = payoutsEnabled;
   await admin
     .from("profiles")
     .update({

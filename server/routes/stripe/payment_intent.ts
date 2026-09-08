@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
 import { applyCors, handleOptions } from "../../lib/cors";
 import { isStripeServerConfigured } from "../../lib/keys";
+import { stripeKeyModeMismatch } from "../../lib/stripe/ensureConnectAccount";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
@@ -11,6 +12,11 @@ import {
   requireHostPayoutAccount,
   resolveHostStripeCurrency,
 } from "../../lib/stripe/connectPayout";
+import {
+  quoteRentalFloorCents,
+  resolvePayableRentalCents,
+  RENTAL_PLATFORM_FEE_RATE,
+} from "../../lib/rentalQuote";
 
 type Body = {
   rentalId?: string;
@@ -18,9 +24,6 @@ type Body = {
   ownerId?: string;
   amountCents?: number;
 };
-
-/** Matches client PLATFORM fee on rental totals (taxable + 12%). */
-const RENTAL_PLATFORM_FEE_RATE = 0.12;
 
 export default withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
@@ -33,6 +36,12 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   if (!isStripeServerConfigured()) {
     res.status(200).json({ ok: false, reason: "Stripe not configured" });
+    return;
+  }
+
+  const mismatch = stripeKeyModeMismatch();
+  if (mismatch) {
+    res.status(200).json({ ok: false, code: mismatch.code, reason: mismatch.reason });
     return;
   }
 
@@ -54,8 +63,8 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const ownerId = typeof body.ownerId === "string" ? body.ownerId.trim() : "";
   const amountCents = typeof body.amountCents === "number" ? Math.round(body.amountCents) : 0;
 
-  if (!rentalId || !listingId || !ownerId || amountCents < 50) {
-    res.status(400).json({ error: "rentalId, listingId, ownerId, and amountCents (≥50) are required" });
+  if (!rentalId || !listingId || !ownerId) {
+    res.status(400).json({ error: "rentalId, listingId, and ownerId are required" });
     return;
   }
 
@@ -67,7 +76,9 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   const { data: rental, error: rentalError } = await admin
     .from("rentals")
-    .select("id, renter_id, owner_id, listing_id, stripe_payment_intent_id, rental_total_cents")
+    .select(
+      "id, renter_id, owner_id, listing_id, start_date, end_date, stripe_payment_intent_id, rental_total_cents",
+    )
     .eq("id", rentalId)
     .maybeSingle();
 
@@ -86,26 +97,51 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
-  // Charge the booking total both sides can see, not a number from this request.
-  const bookedTotalCents =
-    typeof rental.rental_total_cents === "number" ? Math.round(rental.rental_total_cents) : 0;
-  if (bookedTotalCents < 50) {
-    res.status(400).json({ error: "Booking has no payable total" });
+  const { data: listingRow } = await admin
+    .from("listings")
+    .select("pricing")
+    .eq("id", listingId)
+    .maybeSingle();
+
+  const floor = quoteRentalFloorCents({
+    pricing: (listingRow?.pricing as { dailyRate?: unknown } | null) ?? null,
+    startDate: rental.start_date,
+    endDate: rental.end_date,
+  });
+  if (!floor.ok) {
+    res.status(400).json({ error: "Listing has no payable rate for these dates" });
     return;
   }
-  if (amountCents !== bookedTotalCents) {
+
+  const bookedTotalCents =
+    typeof rental.rental_total_cents === "number" ? Math.round(rental.rental_total_cents) : 0;
+  // Never charge less than the listing floor. A client that booked $0.50 for a
+  // $200 weekend is raised to the floor; delivery/extras above the floor stay.
+  const chargeCents = resolvePayableRentalCents({
+    bookedTotalCents,
+    floorCents: floor.floorCents,
+  });
+
+  if (amountCents > 0 && amountCents !== chargeCents) {
     res.status(409).json({
-      error: "Amount does not match the booking total",
-      expectedCents: bookedTotalCents,
+      error: "Amount does not match the payable booking total",
+      expectedCents: chargeCents,
     });
     return;
+  }
+
+  if (chargeCents !== bookedTotalCents) {
+    await admin
+      .from("rentals")
+      .update({ rental_total_cents: chargeCents })
+      .eq("id", rentalId);
   }
 
   const secret = process.env.STRIPE_SECRET_KEY!;
   const stripe = new Stripe(secret, { apiVersion: "2025-01-27.acacia" as Stripe.LatestApiVersion });
 
   const customerId = await getOrCreateStripeCustomer(stripe, admin, user.id, user.email);
-  const applicationFeeCents = platformFeeFromGrossTotal(amountCents, RENTAL_PLATFORM_FEE_RATE);
+  const applicationFeeCents = platformFeeFromGrossTotal(chargeCents, RENTAL_PLATFORM_FEE_RATE);
   const destination = destinationChargeFields(hostPayout.account.accountId, applicationFeeCents);
   const currency = await resolveHostStripeCurrency(admin, ownerId);
 
@@ -119,7 +155,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   };
 
   const createParams: Stripe.PaymentIntentCreateParams = {
-    amount: amountCents,
+    amount: chargeCents,
     currency,
     customer: customerId,
     capture_method: "manual",
@@ -136,7 +172,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       if (
         existing.status !== "canceled" &&
         existing.status !== "succeeded" &&
-        existing.amount === amountCents &&
+        existing.amount === chargeCents &&
         existing.currency === currency
       ) {
         paymentIntent = existing;

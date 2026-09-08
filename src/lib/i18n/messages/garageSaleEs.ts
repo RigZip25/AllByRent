@@ -356,7 +356,7 @@ export const garageCart: AppMessages["garageCart"] = {
 };
 
 export const earnBusiness: AppMessages["earnBusiness"] = {
-  earnedThisMonth: "Ganado este mes",
+  earnedThisMonth: "Ganado este mes (estimación)",
   allTime: "Total histórico",
   projectedByMonthEnd: (amount) => `Proyección de ${amount} a fin de mes`,
   kpiThisMonth: "Este mes",
