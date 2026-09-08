@@ -1,18 +1,72 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+/**
+ * @vitest-environment node
+ */
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const QUEUE_KEY = "allbyrent_rental_sync_queue";
 
+function installMemoryStorage(): void {
+  const map = new Map<string, string>();
+  const storage: Storage = {
+    get length() {
+      return map.size;
+    },
+    clear() {
+      map.clear();
+    },
+    getItem(key: string) {
+      return map.has(key) ? map.get(key)! : null;
+    },
+    key(index: number) {
+      return [...map.keys()][index] ?? null;
+    },
+    removeItem(key: string) {
+      map.delete(key);
+    },
+    setItem(key: string, value: string) {
+      map.set(key, String(value));
+    },
+  };
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    value: storage,
+  });
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: {
+      localStorage: storage,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      dispatchEvent: () => true,
+      setTimeout: (fn: () => void) => {
+        // Avoid auto-flush from module install during offline assertions.
+        void fn;
+        return 0;
+      },
+    },
+  });
+  Object.defineProperty(globalThis, "navigator", {
+    configurable: true,
+    value: { onLine: true },
+  });
+}
+
+beforeEach(() => {
+  installMemoryStorage();
+  vi.resetModules();
+});
+
 afterEach(() => {
-  localStorage.removeItem(QUEUE_KEY);
-  Object.defineProperty(navigator, "onLine", { configurable: true, get: () => true });
   vi.restoreAllMocks();
   vi.resetModules();
 });
 
 describe("rental sync queue", () => {
   it("merges patches for the same rental id while offline", async () => {
-    Object.defineProperty(navigator, "onLine", { configurable: true, get: () => false });
-    vi.resetModules();
+    Object.defineProperty(globalThis.navigator, "onLine", {
+      configurable: true,
+      get: () => false,
+    });
     vi.doMock("./supabaseClient", () => ({
       isSupabaseConfigured: () => true,
       getSupabaseClient: () => null,
@@ -35,8 +89,10 @@ describe("rental sync queue", () => {
   });
 
   it("clears the queue after a successful flush", async () => {
-    Object.defineProperty(navigator, "onLine", { configurable: true, get: () => false });
-    vi.resetModules();
+    Object.defineProperty(globalThis.navigator, "onLine", {
+      configurable: true,
+      get: () => false,
+    });
     vi.doMock("./supabaseClient", () => ({
       isSupabaseConfigured: () => true,
       getSupabaseClient: () => ({
@@ -52,7 +108,10 @@ describe("rental sync queue", () => {
     mod.enqueueRentalRemoteSync("rental-1", { status: "cancelled" });
     expect(JSON.parse(localStorage.getItem(QUEUE_KEY)!)).toHaveLength(1);
 
-    Object.defineProperty(navigator, "onLine", { configurable: true, get: () => true });
+    Object.defineProperty(globalThis.navigator, "onLine", {
+      configurable: true,
+      get: () => true,
+    });
     await mod.flushRentalSyncQueue();
     expect(JSON.parse(localStorage.getItem(QUEUE_KEY) || "[]")).toEqual([]);
   });
