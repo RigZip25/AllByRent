@@ -46,10 +46,11 @@ export type PublicProfile = {
   identityVerified: boolean;
   phoneVerified: boolean;
   createdAt: string | null;
+  avatarPath: string | null;
 };
 
 const PUBLIC_PROFILE_COLUMNS =
-  "id, display_name, rating, identity_verified, phone_verified, created_at";
+  "id, display_name, rating, identity_verified, phone_verified, created_at, avatar_path";
 
 function publicProfileFromRow(row: Record<string, unknown>): PublicProfile | null {
   const id = typeof row.id === "string" ? row.id : "";
@@ -61,6 +62,7 @@ function publicProfileFromRow(row: Record<string, unknown>): PublicProfile | nul
     identityVerified: Boolean(row.identity_verified),
     phoneVerified: Boolean(row.phone_verified),
     createdAt: typeof row.created_at === "string" ? row.created_at : null,
+    avatarPath: typeof row.avatar_path === "string" ? row.avatar_path : null,
   };
 }
 

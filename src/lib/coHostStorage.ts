@@ -87,16 +87,14 @@ export function getPendingInvitesForEmail(email: string): CoHostRecord[] {
 
 export function getActiveCoHostHostIds(
   userId: string,
-  email: string,
+  _email: string,
 ): string[] {
-  const norm = normalizeEmail(email);
+  // Active only after the invitee accepted and bound their auth user id.
+  // Matching by email alone let a host "Mark active" unlock tools without consent.
+  const uid = userId.trim();
+  if (!uid) return [];
   return loadCoHostRecords()
-    .filter(
-      (r) =>
-        r.status === "active" &&
-        (r.coHostUserId === userId ||
-          (norm.length > 0 && normalizeEmail(r.email) === norm)),
-    )
+    .filter((r) => r.status === "active" && r.coHostUserId === uid)
     .map((r) => r.hostId);
 }
 
@@ -233,19 +231,10 @@ export function declineCoHostInvite(inviteId: string): boolean {
   return true;
 }
 
-/** Primary host can activate a pending invite without email delivery. */
-export function activateCoHostInvite(hostId: string, coHostId: string): boolean {
-  const records = loadCoHostRecords();
-  const index = records.findIndex((r) => r.hostId === hostId && r.id === coHostId);
-  if (index < 0) return false;
-  const current = records[index]!;
-  if (current.status !== "pending") return false;
-  const next = records.slice();
-  next[index] = {
-    ...current,
-    status: "active",
-    acceptedAt: new Date().toISOString(),
-  };
-  saveCoHostRecords(next);
-  return true;
+/**
+ * @deprecated Hosts must not activate invites unilaterally (Stage 14 / P6a).
+ * Kept as a no-op so old call sites fail closed instead of granting access.
+ */
+export function activateCoHostInvite(_hostId: string, _coHostId: string): boolean {
+  return false;
 }

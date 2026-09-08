@@ -1,7 +1,8 @@
-import { loadPublishedListings } from "./listingStorage";
+import { loadPublishedListings, fetchListingsByOwnerIdsRemote } from "./listingStorage";
 import { getListingDisplayTitle } from "./listingQr";
 import {
   loadRentalBookings,
+  syncRentalsFromRemote,
   type RentalBooking,
 } from "./rentalsStorage";
 import {
@@ -331,4 +332,19 @@ export function computeEarnBusinessStats(now = new Date()): EarnBusinessStats {
     growthTips,
     totalEarnedUsd: totalEarnedAllTime,
   };
+}
+
+/** Pull remote rentals + own listings before computing — fixes empty Earn on a new device. */
+export async function computeEarnBusinessStatsFresh(
+  userId: string | null | undefined,
+  now = new Date(),
+): Promise<EarnBusinessStats> {
+  const id = userId?.trim();
+  if (id) {
+    await Promise.all([
+      syncRentalsFromRemote(id).catch(() => undefined),
+      fetchListingsByOwnerIdsRemote([id]).catch(() => []),
+    ]);
+  }
+  return computeEarnBusinessStats(now);
 }

@@ -55,6 +55,42 @@ export async function fetchPendingCoHostInvitesRemote(email: string): Promise<Co
   return data.map(rowToRecord);
 }
 
+/** Deep-link resume: load one pending invite by id (RLS: invitee email or host). */
+export async function fetchCoHostInviteByIdRemote(inviteId: string): Promise<CoHostRecord | null> {
+  if (!supabaseReady() || !isUuid(inviteId)) return null;
+  const supabase = getSupabaseClient()!;
+  const { data, error } = await supabase
+    .from("co_hosts")
+    .select("id, host_id, co_host_email, co_host_user_id, status, invited_at, accepted_at")
+    .eq("id", inviteId)
+    .maybeSingle();
+  if (error || !data) return null;
+  return rowToRecord(data);
+}
+
+/** Invitee accept under RLS `co_hosts_accept_invitee` (migration 063). */
+export async function acceptCoHostInviteRemote(
+  inviteId: string,
+  acceptorUserId: string,
+): Promise<CoHostRecord | null> {
+  if (!supabaseReady() || !isUuid(inviteId) || !isUuid(acceptorUserId)) return null;
+  const supabase = getSupabaseClient()!;
+  const acceptedAt = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("co_hosts")
+    .update({
+      status: "active",
+      co_host_user_id: acceptorUserId,
+      accepted_at: acceptedAt,
+    })
+    .eq("id", inviteId)
+    .eq("status", "pending")
+    .select("id, host_id, co_host_email, co_host_user_id, status, invited_at, accepted_at")
+    .maybeSingle();
+  if (error || !data) return null;
+  return rowToRecord(data);
+}
+
 export async function pushCoHostRemote(record: CoHostRecord): Promise<void> {
   if (!supabaseReady() || !isUuid(record.hostId)) return;
   const supabase = getSupabaseClient()!;

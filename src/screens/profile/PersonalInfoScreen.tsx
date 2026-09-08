@@ -298,7 +298,14 @@ export function PersonalInfoScreen({
     const formatted = formatUsPhoneInput(raw.trim()) || raw.trim();
     if (!formatted) return;
     const display = formatUsPhoneDisplay(formatted) || phoneDigitsForDisplay(formatted) || formatted;
-    const next = updateProfileFields({ phone: display });
+    // Contact number on file ≠ SMS-verified; never imply a verified badge from this path.
+    const next = updateProfileFields({
+      phone: display,
+      verification: {
+        ...loadUserProfile().verification,
+        phone: false,
+      },
+    });
     setProfile(refreshProfileStats(next, auth.userId));
     setEditing(null);
     if (auth.userId) {
@@ -467,7 +474,11 @@ export function PersonalInfoScreen({
         <Row
           icon={<Phone className="h-5 w-5" style={{ color: GREEN }} />}
           label={t.phone}
-          value={phone}
+          value={
+            profile.phone
+              ? `${phone}${profile.verification.phone ? ` · ${t.phoneVerifiedBadge}` : ""}`
+              : phone
+          }
           onClick={() => setEditing("phone")}
         />
         <p className="px-1 text-[12px] leading-relaxed text-gray-500">{t.phoneKycHint}</p>

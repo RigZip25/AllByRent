@@ -4,6 +4,7 @@ import { BadgeCheck, Shield, Star as StarIcon } from "lucide-react";
 import type { PublicUserProfile } from "../lib/demoUserProfiles";
 import { useMessages } from "../lib/i18n/react";
 import { fetchPublicProfile, type PublicProfile } from "../lib/supabaseProfile";
+import { publicAvatarUrl } from "../lib/avatarStorage";
 import { loadUserProfile, type UserProfile } from "../lib/userProfileStorage";
 import { fetchListingsByOwnerIdsRemote, isListingBrowsable, loadPublishedListings } from "../lib/listingStorage";
 import { fetchStoreLiveByHostIds, isStoreOpenForHost } from "../lib/garageStoreLive";
@@ -42,7 +43,7 @@ function publicFromRemote(profile: PublicProfile, neighborLabel: string): Public
     id: profile.id,
     displayName: profile.displayName || neighborLabel,
     memberSince: profile.createdAt ?? new Date().toISOString(),
-    avatarUrl: null,
+    avatarUrl: publicAvatarUrl(profile.avatarPath),
     identityVerified: profile.identityVerified,
     phoneVerified: profile.phoneVerified,
     rating: profile.rating,

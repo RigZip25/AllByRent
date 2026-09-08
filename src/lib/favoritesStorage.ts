@@ -54,9 +54,9 @@ export async function syncFavoritesFromRemote(userId: string): Promise<string[]>
   if (error || !data) return loadFavoriteListingIds();
 
   const ids = (data as { listing_id: string }[]).map((row) => row.listing_id);
-  const merged = [...new Set([...ids, ...loadFavoriteListingIds()])];
-  saveFavoriteListingIds(merged);
-  return merged;
+  // Remote is source of truth when signed in — union restored locally-removed favorites (P14a).
+  saveFavoriteListingIds(ids);
+  return ids;
 }
 
 async function persistFavoriteRemote(

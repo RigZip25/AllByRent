@@ -7,6 +7,7 @@ import {
   LogOut,
   MapPin,
   Settings,
+  Shield,
   Star,
   Users,
 } from "lucide-react";
@@ -42,8 +43,15 @@ import { useAuth } from "../hooks/AuthProvider";
 import { signOut } from "../lib/auth";
 import { fetchRemoteProfile } from "../lib/supabaseProfile";
 import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
+import { syncRentalsFromRemote } from "../lib/rentalsStorage";
 import { useLocaleControls, useMessages } from "../lib/i18n/react";
 import type { AppLocale } from "../lib/i18n/types";
+import { isStripeIdentityClientEnabled } from "../lib/stripeIdentityConfig";
+import {
+  canOfferWebPush,
+  subscribeToPush,
+  savePushSubscriptionRemote,
+} from "../lib/pushNotifications";
 
 const GREEN = "#0D5C3A";
 const GREEN_LIGHT = "#1A9E6E";
@@ -119,6 +127,7 @@ export function ProfileScreen({
   onOpenNotifications,
   onOpenCoHosts,
   onOpenPersonalInfo,
+  onOpenIdentity,
   onViewPublicProfile,
   onRequireAuth,
   onSignedOut,
@@ -130,6 +139,7 @@ export function ProfileScreen({
   onOpenNotifications: () => void;
   onOpenCoHosts?: () => void;
   onOpenPersonalInfo?: (field?: "name" | "phone") => void;
+  onOpenIdentity?: () => void;
   onViewPublicProfile?: (userId?: string) => void;
   onRequireAuth?: () => void;
   /** After session ends — leave account screens (typically Home as guest). */
@@ -203,6 +213,18 @@ export function ProfileScreen({
     authPromptedRef.current = true;
     onRequireAuth?.();
   }, [auth.configured, auth.loading, auth.session, onRequireAuth]);
+
+  useEffect(() => {
+    if (!auth.userId) return;
+    let mounted = true;
+    void syncRentalsFromRemote(auth.userId).then(() => {
+      if (!mounted) return;
+      setProfile((prev) => refreshProfileStats(prev, auth.userId));
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [auth.userId]);
 
   useEffect(() => {
     if (!auth.userId) return;
@@ -518,9 +540,42 @@ export function ProfileScreen({
               icon={<Bell className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
               label={profileCopy.notifications}
               value={profile.notificationsEnabled ? profileCopy.on : profileCopy.off}
-              onClick={onOpenNotifications}
+              onClick={() => {
+                const enabled = !profile.notificationsEnabled;
+                const next = updateProfileFields({ notificationsEnabled: enabled });
+                setProfile(refreshProfileStats(next, auth.userId));
+                if (enabled && canOfferWebPush() && auth.userId) {
+                  void subscribeToPush().then((result) => {
+                    if (result.ok) {
+                      void savePushSubscriptionRemote(auth.userId!, result.subscription);
+                    }
+                  });
+                }
+              }}
             />
+            <button
+              type="button"
+              onClick={onOpenNotifications}
+              className="mt-1.5 px-1 text-[12px] font-semibold"
+              style={{ color: GREEN_LIGHT }}
+            >
+              {profileCopy.notifications}
+            </button>
           </li>
+          {onOpenIdentity && isStripeIdentityClientEnabled() ? (
+            <li>
+              <RowButton
+                icon={<Shield className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
+                label={profileCopy.verification}
+                value={
+                  profile.verification.identity
+                    ? profileCopy.fullyVerified
+                    : profileCopy.completeId
+                }
+                onClick={onOpenIdentity}
+              />
+            </li>
+          ) : null}
           <li>
             <RowButton
               icon={<HelpCircle className="h-5 w-5" style={{ color: GREEN_LIGHT }} />}
