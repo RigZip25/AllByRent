@@ -1,4 +1,5 @@
 import type { ListingDraft } from "../screens/listing/types";
+import { deleteMediaMany } from "./mediaStore";
 import { WIZARD_FLOW_VERSION } from "../screens/listing/types";
 import {
   canonicalShelf,
@@ -214,6 +215,14 @@ export function removePublishedListing(id: string): void {
       if (paths.length > 0) {
         void deleteListingPhotosFromRemote(paths).catch(() => undefined);
       }
+    }
+    // The blobs on this device outlive the listing otherwise, and a discarded
+    // draft leaves the biggest files behind.
+    const localMediaIds = [...(victim?.photos ?? []), ...(victim?.videos ?? [])]
+      .flatMap((media) => [media.id, media.thumbId])
+      .filter((id): id is string => Boolean(id?.trim()));
+    if (localMediaIds.length > 0) {
+      void deleteMediaMany(localMediaIds).catch(() => undefined);
     }
     const ownerId = victim?.hostId?.trim() ?? "";
     if (ownerId) {

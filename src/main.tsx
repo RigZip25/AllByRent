@@ -7,6 +7,7 @@ import {
   installNativeApiBridge,
   initNativeShell,
 } from "./lib/nativeShell";
+import { scheduleMediaHousekeeping } from "./lib/mediaHousekeeping.ts";
 import { consumeResetAppBeforeBoot } from "./lib/resetAppStorage.ts";
 import { redirectShareLinkToApp } from "./lib/shareLinkRedirect.ts";
 import "./styles/index.css";
@@ -29,6 +30,7 @@ async function boot(): Promise<void> {
         <App />
       </AppErrorBoundary>,
     );
+    scheduleMediaHousekeeping();
   }
 }
 

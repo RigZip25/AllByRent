@@ -346,6 +346,26 @@ export async function getThumbIdFor(id: string): Promise<string | null> {
   return thumb?.id ?? null;
 }
 
+/** Ids currently held, optionally narrowed to one id prefix. */
+export async function listMediaIds(prefix?: string): Promise<string[]> {
+  const records = await withStore("readonly", listAllRecords);
+  const ids = records.map((record) => record.id);
+  return prefix ? ids.filter((id) => id.startsWith(prefix)) : ids;
+}
+
+export async function deleteMediaMany(ids: string[]): Promise<number> {
+  let removed = 0;
+  for (const id of ids) {
+    try {
+      await deleteMedia(id);
+      removed += 1;
+    } catch {
+      /* keep going: one stuck record must not stop the sweep */
+    }
+  }
+  return removed;
+}
+
 export async function getMediaStats(): Promise<{
   ok: true;
   items: number;
