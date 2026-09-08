@@ -5,7 +5,8 @@ import { ArrowLeft, Camera, Loader2, ShoppingBag, Tag } from "lucide-react";
 import { BRAND_AMBER, BRAND_GREEN, MASCOT_NAME } from "../../lib/brand";
 import { useAuth } from "../../hooks/AuthProvider";
 import { resolveGarageHostId } from "../../lib/hostAccess";
-import { deleteMedia, putMediaBlob, type MediaRef } from "../../lib/mediaStore";
+import { deleteMedia, type MediaRef } from "../../lib/mediaStore";
+import { putPhotoWithThumbnail } from "../../lib/photoIngest";
 import { useMediaUrl } from "../../lib/useMediaUrl";
 import { getPublishedListingById, savePublishedListing, savePublishedListingRemote } from "../../lib/listingStorage";
 import { GarageSharePanel } from "../../components/share/GarageSharePanel";
@@ -46,30 +47,6 @@ type SnapSaleScreenProps = {
 };
 
 type SaleMode = GarageListingSaleMode;
-
-async function createThumbnail(blob: Blob): Promise<Blob> {
-  const bitmap = await createImageBitmap(blob);
-  const maxSize = 420;
-  const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    bitmap.close();
-    return blob;
-  }
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  bitmap.close();
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((thumb) => {
-      if (!thumb) reject(new Error("Thumbnail failed"));
-      else resolve(thumb);
-    }, "image/jpeg", 0.82);
-  });
-}
 
 function PhotoPreview({ photo }: { photo: MediaRef }) {
   const thumb = photo.thumbId ? { ...photo, id: photo.thumbId } : photo;
@@ -203,18 +180,12 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
         setError(copy.photoLoadFailed);
         return;
       }
-      const main = await putMediaBlob(sanitized.blob, { kind: "image" });
+      const main = await putPhotoWithThumbnail(sanitized.blob, { sanitize: false });
       if (!main.ok) {
         setError(main.message);
         return;
       }
-      const thumbBlob = await createThumbnail(sanitized.blob);
-      const thumb = await putMediaBlob(thumbBlob, { kind: "image", thumbForId: main.ref.id });
-      const ref: MediaRef = {
-        ...main.ref,
-        thumbId: thumb.ok ? thumb.ref.id : undefined,
-      };
-      setPhoto(ref);
+      setPhoto(main.ref);
     } catch {
       setError(copy.photoLoadFailed);
     } finally {

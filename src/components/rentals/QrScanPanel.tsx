@@ -10,7 +10,8 @@ import {
   type HandoffCoords,
   type PresenceProof,
 } from "../../lib/handoffPresence";
-import { putUserPhoto, type MediaRef } from "../../lib/mediaStore";
+import { type MediaRef } from "../../lib/mediaStore";
+import { putPhotoWithThumbnail } from "../../lib/photoIngest";
 import { RentanoTip } from "../RentanoTip";
 
 const GREEN = "#0D5C3A";
@@ -344,7 +345,7 @@ export function QrScanPanel({
                   const file = e.target.files?.[0];
                   if (!file) return;
                   setPhotoBusy(true);
-                  void putUserPhoto(file, { kind: "image" })
+                  void putPhotoWithThumbnail(file)
                     .then((result) => {
                       if (result.ok) setConditionPhoto(result.ref);
                     })

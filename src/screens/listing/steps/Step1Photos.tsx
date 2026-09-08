@@ -24,6 +24,7 @@ import {
 import { MAX_LISTING_PHOTOS, MAX_LISTING_VIDEOS } from "../photoUtils";
 import { sanitizeImageBlob } from "../../../lib/imageSanitize";
 import { putMediaBlob, deleteMedia, type MediaRef } from "../../../lib/mediaStore";
+import { putPhotoWithThumbnail } from "../../../lib/photoIngest";
 import { useMediaUrl } from "../../../lib/useMediaUrl";
 import { useMessages } from "../../../lib/i18n/react";
 
@@ -110,35 +111,6 @@ export function Step1Photos({
     cameraInputRef.current?.click();
   }, [atMax]);
 
-  const createThumbnail = async (blob: Blob): Promise<Blob> => {
-    const bitmap = await createImageBitmap(blob);
-    // Retina phone grids need ~900–1200px; 420px looked soft/blurry on cover + thumbs.
-    const dpr =
-      typeof window !== "undefined" && Number.isFinite(window.devicePixelRatio)
-        ? Math.min(3, Math.max(1, window.devicePixelRatio))
-        : 2;
-    const maxSize = Math.round(480 * dpr);
-    const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
-    const width = Math.max(1, Math.round(bitmap.width * scale));
-    const height = Math.max(1, Math.round(bitmap.height * scale));
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      bitmap.close();
-      return blob;
-    }
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(bitmap, 0, 0, width, height);
-    bitmap.close();
-    const thumb = await new Promise<Blob | null>((resolve) => {
-      canvas.toBlob(resolve, "image/jpeg", 0.88);
-    });
-    return thumb ?? blob;
-  };
-
   /**
    * Detach camera File shells so IndexedDB / PhotoRoom always see a plain Blob,
    * and drop EXIF on the way: a phone photo carries the shooting location, and
@@ -158,23 +130,15 @@ export function Step1Photos({
   };
 
   const appendPhotoBlob = async (blob: Blob): Promise<MediaRef> => {
-    const put = await putMediaBlob(blob, { kind: "image" });
+    // Already sanitized by normalizePhotoBlob on the way in.
+    const put = await putPhotoWithThumbnail(blob, { sanitize: false });
     if (!put.ok) {
       setStorageWarning(put.message);
       throw new Error(put.message);
     }
     if (put.warning) setStorageWarning(put.warning);
 
-    let ref: MediaRef = put.ref;
-    try {
-      const thumbBlob = await createThumbnail(blob);
-      const thumbPut = await putMediaBlob(thumbBlob, { kind: "image", thumbForId: ref.id });
-      if (thumbPut.ok) {
-        ref = { ...ref, thumbId: thumbPut.ref.id };
-      }
-    } catch {
-      // Best-effort thumbnail generation; full-size still works.
-    }
+    const ref: MediaRef = put.ref;
 
     setDraft((current) => ({
       ...current,
@@ -521,11 +485,7 @@ export function Step1Photos({
     /** Cover / large slots: use full blob so the hero isn’t a soft 420px thumb. */
     preferFull?: boolean;
   }) {
-    const displayRef =
-      preferFull || !media.thumbId
-        ? media
-        : { id: media.thumbId, mimeType: "image/jpeg" as const };
-    const { url } = useMediaUrl(displayRef);
+    const { url } = useMediaUrl(media, { prefer: preferFull ? "full" : "thumb" });
     const [failed, setFailed] = useState(false);
     return (
       <div
@@ -867,7 +827,7 @@ function PhotoPreviewOverlay({
   const { listing, common } = useMessages();
   const photosCopy = listing.photos;
   const media = photos[index];
-  const { url } = useMediaUrl(media);
+  const { url } = useMediaUrl(media, { prefer: "full" });
   const hasPrev = index > 0;
   const hasNext = index < photos.length - 1;
   const startRef = useRef<{ x: number; y: number } | null>(null);
