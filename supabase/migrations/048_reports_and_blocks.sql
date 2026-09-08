@@ -5,6 +5,16 @@
 -- an ops queue; blocks are enforced by the client on every surface that shows
 -- someone else's content, and here so a blocked person cannot write to you.
 
+-- The state guard below calls the helper from 047. If that migration was
+-- skipped, the trigger installs cleanly and then fails on every update, so say
+-- so here instead.
+do $$
+begin
+  if to_regprocedure('public.is_trusted_writer()') is null then
+    raise exception 'apply 047_trusted_writer_guards.sql first: public.is_trusted_writer() is missing';
+  end if;
+end $$;
+
 create table if not exists public.content_reports (
   id uuid primary key,
   -- What is being reported. `message` carries the thread key so the moderator
