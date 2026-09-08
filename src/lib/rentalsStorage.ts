@@ -847,10 +847,31 @@ const STATUS_PROGRESS_RANK: Record<RentalStatus, number> = {
   completed: 10,
 };
 
+/**
+ * Which of two versions of the same booking describes what actually happened.
+ *
+ * "The further along, the truer" was the whole rule, and it made `cancelled`
+ * the weakest status there is: a booking cancelled on the phone came back as
+ * active the next time the other device synced, complete with a live timer and
+ * a return to hand over. Two statuses are not a matter of progress:
+ *
+ * — a cancelled rental never restarts, and
+ * — a dispute outlives the completion it is arguing about.
+ */
+export function resolveMergedRentalStatus(
+  local: RentalStatus,
+  remote: RentalStatus,
+): RentalStatus {
+  if (local === remote) return local;
+  if (local === "cancelled" || remote === "cancelled") return "cancelled";
+  if (local === "disputed" || remote === "disputed") return "disputed";
+  const localRank = STATUS_PROGRESS_RANK[local] ?? 0;
+  const remoteRank = STATUS_PROGRESS_RANK[remote] ?? 0;
+  return localRank >= remoteRank ? local : remote;
+}
+
 function mergeRentalBooking(local: RentalBooking, remote: RentalBooking): RentalBooking {
-  const localRank = STATUS_PROGRESS_RANK[local.status] ?? 0;
-  const remoteRank = STATUS_PROGRESS_RANK[remote.status] ?? 0;
-  const status = localRank >= remoteRank ? local.status : remote.status;
+  const status = resolveMergedRentalStatus(local.status, remote.status);
   return normalizeBooking({
     ...remote,
     ...local,
@@ -863,6 +884,11 @@ function mergeRentalBooking(local: RentalBooking, remote: RentalBooking): Rental
     hostAcceptedReturnAt: remote.hostAcceptedReturnAt ?? local.hostAcceptedReturnAt,
     pickupConfirmedAt: remote.pickupConfirmedAt ?? local.pickupConfirmedAt,
     returnConfirmedAt: remote.returnConfirmedAt ?? local.returnConfirmedAt,
+    // Keep the record of the end together with the status that says it ended.
+    cancelledAt: local.cancelledAt ?? remote.cancelledAt,
+    cancelledBy: local.cancelledBy ?? remote.cancelledBy,
+    cancelReason: local.cancelReason ?? remote.cancelReason,
+    completedAt: local.completedAt ?? remote.completedAt,
     review: local.review ?? remote.review,
     runningLateMessage: local.runningLateMessage ?? remote.runningLateMessage,
     runningLateSentAt: local.runningLateSentAt ?? remote.runningLateSentAt,
@@ -1138,10 +1164,13 @@ export async function syncRentalsFromRemote(userId: string): Promise<RentalBooki
 
 export function loadRentalBookings(): RentalBooking[] {
   try {
+    // A new shape used to mean a clean slate: shipping a release wiped every
+    // booking on the device, including an active rental with a PIN to hand over,
+    // and on a device with Supabase switched off there was nothing to sync back.
+    // `normalizeBooking` fills in what a older record is missing, so the version
+    // is now a record of what was last read, not a reason to delete.
     if (localStorage.getItem(RENTALS_VERSION_KEY) !== RENTALS_VERSION) {
-      localStorage.removeItem(RENTALS_KEY);
       localStorage.setItem(RENTALS_VERSION_KEY, RENTALS_VERSION);
-      return [];
     }
     const raw = localStorage.getItem(RENTALS_KEY);
     if (!raw) return [];
