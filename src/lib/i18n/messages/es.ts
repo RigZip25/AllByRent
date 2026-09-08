@@ -7038,6 +7038,9 @@ export const es: AppMessages = {
     offlineTitle: "Estás sin conexión",
     offlineBody: (appName) =>
       `${appName} necesita conexión. Revisa el Wi‑Fi o los datos móviles e inténtalo de nuevo.`,
+    offlineBannerTitle: "Estás sin conexión",
+    offlineBannerBody: (appName) =>
+      `Mostrando pantallas guardadas. Algunas acciones en ${appName} necesitan conexión.`,
     tryAgain: "Intentar de nuevo",
     setupTitle: "Enseguida volvemos",
     setupSupportBefore: "Si esto sigue pasando, escribe a ",
@@ -7048,10 +7051,15 @@ export const es: AppMessages = {
     resetLocalData: "Restablecer datos locales y recargar",
     resetConfirm:
       "¿Restablecer todos los datos de la app? Se borrarán el registro, el perfil, los anuncios y los alquileres.",
+    storageFullTitle: "El almacenamiento del dispositivo está lleno",
+    storageFullBody:
+      "No se pudo guardar el borrador del anuncio. Libera espacio o elimina borradores antiguos e inténtalo de nuevo.",
     garageMissingTitle: "Garaje no encontrado",
     garageMissingBody: (appName) =>
       `Este enlace de garaje puede estar desactualizado o el anfitrión eliminó su escaparate. Explora otras ventas de garaje en ${appName}.`,
     browseYardSales: "Explorar ventas de garaje",
     goBack: "Volver",
+    bootFailedTitle: "No se pudo iniciar la app",
+    bootFailedBody: "Vuelve a cargar. Si sigue pasando, escribe a support@evorios.com.",
   },
 };

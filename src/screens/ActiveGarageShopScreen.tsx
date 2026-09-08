@@ -273,48 +273,58 @@ export function ActiveGarageShopScreen({
 
   const loadShelf = useCallback(() => {
     const applyCandidates = async (candidates: ListingDraft[]) => {
-      const listingIds = candidates.map((listing) => listing.id);
-      const hostIdByListing = Object.fromEntries(
-        candidates.map((listing) => [listing.id, listing.hostId ?? hostId]),
-      );
-      await syncGarageFromRemote({ hostId, userId: auth.userId, listingIds });
-      await syncOpenSalesFromRemote(hostId);
       try {
-        const { listOpenSaleEvents } = await import("../lib/openSale/eventStorage");
-        const all = listOpenSaleEvents().filter((e) => e.hostId === hostId);
-        await syncOpenSaleLotPayFromRemote(all.map((e) => e.id));
-      } catch {
-        /* */
-      }
-      resolveEndedAuctions(listingIds, hostIdByListing);
-      resolveExpiredWinnerCheckouts(listingIds, hostIdByListing);
-      resolveExpiredAcceptedOffers();
-      resolveEndedOpenSales();
-      cascadeUnpaidOpenSaleLots();
-      setOpenSaleTick((n) => n + 1);
-      // Show every live rent / paid-sell / free listing (not only priced shop offers).
-      const shelf = candidates.filter((listing) => {
-        if (getLotState(listing.id).status === "sold") return true;
-        return (
-          listing.modes.rent ||
-          listing.modes.sell ||
-          listing.modes.gift ||
-          isFreeGiveaway(listing)
+        const listingIds = candidates.map((listing) => listing.id);
+        const hostIdByListing = Object.fromEntries(
+          candidates.map((listing) => [listing.id, listing.hostId ?? hostId]),
         );
-      });
-      if (!preview) {
-        const sellShelf = shelf.filter((listing) => getShopOffer(listing));
-        const added = ensureAcceptedOffersInCart(sellShelf);
-        if (added) refreshCartCount();
+        await syncGarageFromRemote({ hostId, userId: auth.userId, listingIds });
+        await syncOpenSalesFromRemote(hostId);
+        try {
+          const { listOpenSaleEvents } = await import("../lib/openSale/eventStorage");
+          const all = listOpenSaleEvents().filter((e) => e.hostId === hostId);
+          await syncOpenSaleLotPayFromRemote(all.map((e) => e.id));
+        } catch {
+          /* */
+        }
+        resolveEndedAuctions(listingIds, hostIdByListing);
+        resolveExpiredWinnerCheckouts(listingIds, hostIdByListing);
+        resolveExpiredAcceptedOffers();
+        resolveEndedOpenSales();
+        cascadeUnpaidOpenSaleLots();
+        setOpenSaleTick((n) => n + 1);
+        // Show every live rent / paid-sell / free listing (not only priced shop offers).
+        const shelf = candidates.filter((listing) => {
+          if (getLotState(listing.id).status === "sold") return true;
+          return (
+            listing.modes.rent ||
+            listing.modes.sell ||
+            listing.modes.gift ||
+            isFreeGiveaway(listing)
+          );
+        });
+        if (!preview) {
+          const sellShelf = shelf.filter((listing) => getShopOffer(listing));
+          const added = ensureAcceptedOffersInCart(sellShelf);
+          if (added) refreshCartCount();
+        }
+        setListings(shelf);
+        refreshPendingWins();
+        refreshOfferCount();
+      } catch {
+        setListings([]);
+      } finally {
+        setLoading(false);
       }
-      setListings(shelf);
-      refreshPendingWins();
-      refreshOfferCount();
-      setLoading(false);
     };
 
     if (isOwnGarage) {
-      void loadOwnShelfCandidates().then(applyCandidates);
+      void loadOwnShelfCandidates()
+        .then(applyCandidates)
+        .catch(() => {
+          setListings([]);
+          setLoading(false);
+        });
       return;
     }
 
@@ -326,15 +336,20 @@ export function ActiveGarageShopScreen({
 
     // Fetch by hostId — wide-radius feed items must not vanish when the viewer
     // city differs from the host's city.
-    void fetchListingsByOwnerIdsRemote([hostId]).then(async (all) => {
-      const candidates = all.filter(
-        (listing) =>
-          listing.listingStatus === "active" &&
-          (listing.hostId ?? "") === hostId &&
-          (listing.modes.sell || listing.modes.rent || listing.modes.gift || isFreeGiveaway(listing)),
-      );
-      await applyCandidates(candidates);
-    });
+    void fetchListingsByOwnerIdsRemote([hostId])
+      .then(async (all) => {
+        const candidates = all.filter(
+          (listing) =>
+            listing.listingStatus === "active" &&
+            (listing.hostId ?? "") === hostId &&
+            (listing.modes.sell || listing.modes.rent || listing.modes.gift || isFreeGiveaway(listing)),
+        );
+        await applyCandidates(candidates);
+      })
+      .catch(() => {
+        setListings([]);
+        setLoading(false);
+      });
   }, [
     auth.userId,
     hostId,

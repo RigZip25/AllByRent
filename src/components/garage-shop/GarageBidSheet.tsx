@@ -49,6 +49,7 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
 
   const [amount, setAmount] = useState(String(minBidUsd));
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     pushOverlay("garage-bid", onClose);
@@ -56,11 +57,15 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
   }, [onClose]);
 
   const submit = () => {
+    if (busy) return;
     const value = Number.parseFloat(amount);
     if (!Number.isFinite(value)) {
       setError(offerCopy.validAmount);
       return;
     }
+
+    setBusy(true);
+    setError(null);
 
     if (openSale) {
       const cover = listing.photos[0];
@@ -74,14 +79,19 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
         photoThumbId: cover?.thumbId,
         photoThumbStoragePath: cover?.thumbStoragePath,
         photoStoragePath: cover?.storagePath,
-      }).then((result) => {
-        if (!result.ok) {
-          setError(result.reason);
-          return;
-        }
-        onBidPlaced();
-        onClose();
-      });
+      })
+        .then((result) => {
+          if (!result.ok) {
+            setError(result.reason);
+            return;
+          }
+          onBidPlaced();
+          onClose();
+        })
+        .catch(() => {
+          setError(offerCopy.validAmount);
+        })
+        .finally(() => setBusy(false));
       return;
     }
 
@@ -93,14 +103,19 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
       endsAt: offer.endsAt,
       startsAt: offer.startsAt,
       listingTitle: listing.title || shopCopy.saleItemFallback,
-    }).then((result) => {
-      if (!result.ok) {
-        setError(result.reason);
-        return;
-      }
-      onBidPlaced();
-      onClose();
-    });
+    })
+      .then((result) => {
+        if (!result.ok) {
+          setError(result.reason);
+          return;
+        }
+        onBidPlaced();
+        onClose();
+      })
+      .catch(() => {
+        setError(offerCopy.validAmount);
+      })
+      .finally(() => setBusy(false));
   };
 
   return (
@@ -194,11 +209,12 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
         <button
           type="button"
           onClick={submit}
-          className="mt-4 w-full rounded-xl py-3.5 text-base font-bold text-white"
+          disabled={busy}
+          className="mt-4 w-full rounded-xl py-3.5 text-base font-bold text-white disabled:opacity-60"
           style={{ backgroundColor: GREEN }}
         >
-          {offerCopy.confirmBid}
-          {openSale ? " → cart" : ""}
+          {busy ? "…" : offerCopy.confirmBid}
+          {!busy && openSale ? " → cart" : ""}
         </button>
       </div>
     </div>

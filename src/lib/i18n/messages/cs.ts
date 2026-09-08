@@ -7053,6 +7053,9 @@ export const cs: AppMessages = {
     offlineTitle: "Jsi offline",
     offlineBody: (appName) =>
       `${appName} potřebuje připojení. Zkontroluj Wi‑Fi nebo mobilní data a zkus to znovu.`,
+    offlineBannerTitle: "Jsi offline",
+    offlineBannerBody: (appName) =>
+      `Zobrazují se uložené obrazovky. Některé akce v ${appName} potřebují připojení.`,
     tryAgain: "Zkusit znovu",
     setupTitle: "Hned jsme zpět",
     setupSupportBefore: "Pokud to trvá, napište na ",
@@ -7063,10 +7066,15 @@ export const cs: AppMessages = {
     resetLocalData: "Resetovat místní data a znovu načíst",
     resetConfirm:
       "Resetovat všechna data aplikace? Onboarding, profil, nabídky i půjčky budou vymazány.",
+    storageFullTitle: "Úložiště zařízení je plné",
+    storageFullBody:
+      "Koncept nabídky se nepodařilo uložit. Uvolněte místo nebo smažte staré koncepty a zkuste to znovu.",
     garageMissingTitle: "Garáž nenalezena",
     garageMissingBody: (appName) =>
       `Tento odkaz na garáž může být zastaralý, nebo hostitel vitrínu odstranil. Procházej jiné výprodeje na ${appName}.`,
     browseYardSales: "Procházet výprodeje",
     goBack: "Zpět",
+    bootFailedTitle: "Aplikaci se nepodařilo spustit",
+    bootFailedBody: "Načtěte znovu. Pokud to trvá, napište na support@evorios.com.",
   },
 };

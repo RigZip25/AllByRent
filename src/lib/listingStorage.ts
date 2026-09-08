@@ -168,35 +168,131 @@ export function setProfileLocation(location: ProfileLocation): void {
 export function savePublishedListing(
   draft: ListingDraft,
   opts?: { emitChange?: boolean },
-): void {
+): { ok: true } | { ok: false; reason: string } {
+  const existing = loadPublishedListings();
+  const normalized = normalizeListingDraft(draft);
+  const next = existing.filter((item) => item.id !== normalized.id);
+  next.unshift(normalized);
+
+  const write = (rows: ListingDraft[]): boolean => {
+    localStorage.setItem(LISTINGS_STORAGE_KEY, JSON.stringify(rows));
+    return true;
+  };
+
   try {
-    const existing = loadPublishedListings();
-    const normalized = normalizeListingDraft(draft);
-    const next = existing.filter((item) => item.id !== normalized.id);
-    next.unshift(normalized);
-    localStorage.setItem(LISTINGS_STORAGE_KEY, JSON.stringify(next));
-    if (opts?.emitChange !== false && typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("evorios-listings-changed", { detail: { id: normalized.id } }));
+    write(next);
+  } catch (error) {
+    if (!isQuotaExceededError(error)) {
+      return { ok: false, reason: "Could not save listing to device storage." };
     }
+    // Free space: drop other abandoned drafts first, keep the row we just edited.
+    const pruned = pruneListingsForQuota(next, normalized.id);
+    try {
+      write(pruned);
+    } catch (retryError) {
+      if (isQuotaExceededError(retryError)) {
+        notifyListingStorageFull();
+        return {
+          ok: false,
+          reason: "Device storage is full. Free space or remove old drafts, then try again.",
+        };
+      }
+      return { ok: false, reason: "Could not save listing to device storage." };
+    }
+  }
+
+  if (opts?.emitChange !== false && typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("evorios-listings-changed", { detail: { id: normalized.id } }));
+  }
+  return { ok: true };
+}
+
+const REMOVED_TOMBSTONES_KEY = "allbyrent_removed_listing_tombstones";
+/** Keep deletes from resurrecting via a stale remote merge for a long time. */
+const REMOVED_TOMBSTONE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+type ListingTombstone = { id: string; removedAt: number };
+
+function loadListingTombstones(): ListingTombstone[] {
+  try {
+    const raw = localStorage.getItem(REMOVED_TOMBSTONES_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    const now = Date.now();
+    return parsed
+      .map((row) => {
+        if (!row || typeof row !== "object") return null;
+        const id = typeof (row as { id?: unknown }).id === "string" ? (row as { id: string }).id.trim() : "";
+        const removedAt =
+          typeof (row as { removedAt?: unknown }).removedAt === "number"
+            ? (row as { removedAt: number }).removedAt
+            : 0;
+        if (!id || !Number.isFinite(removedAt) || removedAt <= 0) return null;
+        if (now - removedAt > REMOVED_TOMBSTONE_TTL_MS) return null;
+        return { id, removedAt };
+      })
+      .filter((row): row is ListingTombstone => Boolean(row));
+  } catch {
+    return [];
+  }
+}
+
+function persistListingTombstones(rows: ListingTombstone[]): void {
+  try {
+    localStorage.setItem(REMOVED_TOMBSTONES_KEY, JSON.stringify(rows));
   } catch {
     /* ignore */
   }
 }
 
-const recentlyRemovedListingIds = new Set<string>();
+function isQuotaExceededError(error: unknown): boolean {
+  return (
+    error instanceof DOMException &&
+    (error.name === "QuotaExceededError" || error.code === 22)
+  );
+}
+
+/** Drop oldest other drafts so a quota write can succeed. */
+function pruneListingsForQuota(rows: ListingDraft[], keepId: string): ListingDraft[] {
+  const keep = keepId.trim();
+  const drafts = rows
+    .filter((row) => row.listingStatus === "draft" && row.id !== keep)
+    .sort((a, b) => {
+      const aMs = a.updatedAt ? Date.parse(a.updatedAt) : 0;
+      const bMs = b.updatedAt ? Date.parse(b.updatedAt) : 0;
+      return (Number.isFinite(aMs) ? aMs : 0) - (Number.isFinite(bMs) ? bMs : 0);
+    });
+  if (drafts.length === 0) return rows;
+  const dropIds = new Set(drafts.slice(0, Math.max(1, Math.ceil(drafts.length / 2))).map((d) => d.id));
+  return rows.filter((row) => !dropIds.has(row.id));
+}
+
+function notifyListingStorageFull(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent("evorios-listing-storage-full"));
+}
 
 /** Listings removed locally that should not be resurrected by a stale remote merge. */
 export function noteListingRemovedLocally(id: string): void {
   const trimmed = id.trim();
   if (!trimmed) return;
-  recentlyRemovedListingIds.add(trimmed);
-  if (typeof window !== "undefined") {
-    window.setTimeout(() => recentlyRemovedListingIds.delete(trimmed), 60_000);
-  }
+  const now = Date.now();
+  const next = loadListingTombstones().filter((row) => row.id !== trimmed);
+  next.push({ id: trimmed, removedAt: now });
+  persistListingTombstones(next);
 }
 
 export function isListingRecentlyRemoved(id: string): boolean {
-  return recentlyRemovedListingIds.has(id.trim());
+  const trimmed = id.trim();
+  if (!trimmed) return false;
+  return loadListingTombstones().some((row) => row.id === trimmed);
+}
+
+export function clearListingRemovedTombstone(id: string): void {
+  const trimmed = id.trim();
+  if (!trimmed) return;
+  persistListingTombstones(loadListingTombstones().filter((row) => row.id !== trimmed));
 }
 
 export function removePublishedListing(id: string): void {
@@ -307,7 +403,10 @@ export async function saveListingDraftProgress(
   opts?: { syncRemote?: boolean },
 ): Promise<ListingDraft> {
   const stamped = stampListingDraftProgress(draft, ownerId, wizardStep);
-  savePublishedListing(stamped);
+  const local = savePublishedListing(stamped);
+  if (!local.ok) {
+    throw new Error(local.reason);
+  }
   if (ownerId && opts?.syncRemote !== false) {
     try {
       await savePublishedListingRemote(stamped, ownerId);

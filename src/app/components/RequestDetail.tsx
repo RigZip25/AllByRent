@@ -77,17 +77,25 @@ export function RequestDetail({
     let cancelled = false;
     setLoading(true);
     setMissing(false);
-    void fetchRequestByIdRemote(requestId).then((row) => {
-      if (cancelled) return;
-      if (!row) {
+    void fetchRequestByIdRemote(requestId)
+      .then((row) => {
+        if (cancelled) return;
+        if (!row) {
+          setRequest(null);
+          setMissing(true);
+        } else {
+          setRequest(row);
+          setMissing(false);
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
         setRequest(null);
         setMissing(true);
-      } else {
-        setRequest(row);
-        setMissing(false);
-      }
-      setLoading(false);
-    });
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
     return () => {
       cancelled = true;
     };

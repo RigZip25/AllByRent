@@ -141,7 +141,6 @@ import {
   createRentalRemote,
   toSupabaseRentalInsert,
   updateBooking,
-  updateRentalRemote,
   type FulfillmentMethod,
   type RentalBooking,
 } from "../../lib/rentalsStorage";
@@ -281,11 +280,17 @@ export function BookingScreen({
 
   useEffect(() => {
     let mounted = true;
-    void fetchListingByIdRemote(listingId).then((next) => {
-      if (!mounted) return;
-      setListing(next);
-      setLoading(false);
-    });
+    void fetchListingByIdRemote(listingId)
+      .then((next) => {
+        if (!mounted) return;
+        setListing(next);
+      })
+      .catch(() => {
+        /* keep cached listing if any */
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
     return () => {
       mounted = false;
     };
@@ -1400,7 +1405,6 @@ function BookingScreenLoaded({
   };
 
   const cancelPendingRental = (id: string) => {
-    void updateRentalRemote(id, { status: "cancelled" });
     updateBooking(id, { status: "cancelled" });
   };
 

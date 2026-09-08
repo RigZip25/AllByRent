@@ -7052,6 +7052,9 @@ export const en: AppMessages = {
     offlineTitle: "You're offline",
     offlineBody: (appName) =>
       `${appName} needs a connection. Check Wi‑Fi or mobile data and try again.`,
+    offlineBannerTitle: "You're offline",
+    offlineBannerBody: (appName) =>
+      `Showing saved screens. Some actions in ${appName} need a connection.`,
     tryAgain: "Try again",
     setupTitle: "We'll be right back",
     setupSupportBefore: "If this keeps happening, email ",
@@ -7062,10 +7065,15 @@ export const en: AppMessages = {
     resetLocalData: "Reset local data & reload",
     resetConfirm:
       "Reset all app data? Onboarding, profile, listings, and rentals will be cleared.",
+    storageFullTitle: "Device storage is full",
+    storageFullBody:
+      "Your listing draft could not be saved. Free some space or remove old drafts, then try again.",
     garageMissingTitle: "Garage not found",
     garageMissingBody: (appName) =>
       `This garage link may be outdated or the host removed their showcase. Browse other yard sales on ${appName}.`,
     browseYardSales: "Browse yard sales",
     goBack: "Go back",
+    bootFailedTitle: "Couldn't start the app",
+    bootFailedBody: "Reload to try again. If it keeps happening, email support@evorios.com.",
   },
 };

@@ -362,7 +362,7 @@ export const ListingWizard = forwardRef<
         ownerId,
         step,
         { syncRemote: false },
-      );
+      ).catch(() => undefined);
     }
 
     const timer = window.setTimeout(() => {
@@ -374,9 +374,11 @@ export const ListingWizard = forwardRef<
         },
         ownerId,
         step,
-      ).then(() => {
-        if (ownerId) void syncAgentPrefsRemote(ownerId);
-      });
+      )
+        .then(() => {
+          if (ownerId) void syncAgentPrefsRemote(ownerId);
+        })
+        .catch(() => undefined);
     }, 1200);
     return () => window.clearTimeout(timer);
   }, [auth.userId, draft, isPublishing, loadingEdit, phase, step]);
@@ -401,7 +403,7 @@ export const ListingWizard = forwardRef<
         ownerId,
         currentStep,
         { syncRemote: false },
-      );
+      ).catch(() => undefined);
     };
     const onVisibility = () => {
       if (document.visibilityState === "hidden") flushLocal();

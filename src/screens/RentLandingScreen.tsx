@@ -79,11 +79,18 @@ export function RentLandingScreen({
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    void fetchRentLandingListings({ category, location }).then((rows) => {
-      if (cancelled) return;
-      setListings(rows);
-      setLoading(false);
-    });
+    void fetchRentLandingListings({ category, location })
+      .then((rows) => {
+        if (cancelled) return;
+        setListings(rows);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setListings([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
     return () => {
       cancelled = true;
     };
