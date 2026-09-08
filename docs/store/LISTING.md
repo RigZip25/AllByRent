@@ -53,7 +53,7 @@ Typical answers for this marketplace (review & adjust in console):
 
 | Topic | Suggested |
 |-------|-----------|
-| Unrestricted web access | No |
+| Unrestricted web access | No — Stripe Connect opens in the in-app Browser and returns to the app |
 | Gambling | No |
 | Contests | No (unless you add contests later) |
 | Parental controls | No |
@@ -64,8 +64,10 @@ Typical answers for this marketplace (review & adjust in console):
 | Mature / suggestive themes | None |
 | Medical / treatment info | None |
 | Horror / fear themes | None |
+| User-generated content | Yes — listings, photos, peer chat, AI assistant |
+| Age gate | Privacy policy: not intended for users under 18 |
 
-Expected overall band: **4+ / Everyone** if listings stay family-safe; raise if user-generated listings can include mature goods.
+Expected overall band: **17+ / Mature 17+** (Apple) and **Mature** (Google Play). Peer chat, UGC listings/photos, and an AI assistant rule out 4+ / Everyone; the privacy policy already says the product is not for anyone under 18. Re-answer both store questionnaires to that band before submission.
 
 ## Screenshot shot list (capture on device / Simulator)
 

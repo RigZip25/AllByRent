@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, ShieldCheck, X } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
 import { loadConnectAndInitialize, type StripeConnectInstance } from "@stripe/connect-js";
 import {
   ConnectAccountManagement,
@@ -130,6 +132,26 @@ export function ConnectOnboardingHost() {
           if (!link.ok) {
             setBootError(link.reason);
             setBootErrorCode(link.code ?? null);
+            setBusy(false);
+            return;
+          }
+          // Native: open Stripe's hosted flow in the system browser so the
+          // WebView never leaves the app shell. return_url is still
+          // https://app.evorios.com (Stripe requires https); Universal Links
+          // and browserFinished both bring the host back to sync.
+          if (Capacitor.isNativePlatform()) {
+            const finished = await Browser.addListener("browserFinished", () => {
+              void finished.remove();
+              void syncConnectAccountStatus()
+                .then(() => {
+                  emitConnectOnboardingDone({ outcome: "done" });
+                  setOpen(false);
+                })
+                .catch(() => {
+                  setBusy(false);
+                });
+            });
+            await Browser.open({ url: link.url });
             setBusy(false);
             return;
           }

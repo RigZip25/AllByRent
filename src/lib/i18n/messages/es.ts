@@ -1455,7 +1455,7 @@ export const es: AppMessages = {
     demoUpdateAdded: "Notificación de actualización de demostración añadida.",
     demoShowUpdate: "Demo: mostrar notificación de actualización",
     pushTitle: "Notificaciones push",
-    pushBody: "Actualizaciones de reservas, recordatorios y mensajes — incluso con la app cerrada.",
+    pushBody: "Actualizaciones de reservas, recordatorios y mensajes mientras tienes la app abierta o instalada como PWA.",
     enabling: "Activando...",
     enabled: "Activado",
     enable: "Activar",

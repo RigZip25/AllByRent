@@ -1,0 +1,11 @@
+One-line patch for the live marketing Privacy page (evorios.com/privacy.html).
+
+The App Store seller for bundle `com.elflogistics.evorios` is ELF Logistics LLC.
+Section 1 ("Who We Are") must name that same entity, or App Review will reject
+the mismatch against the privacy URL.
+
+FIND:
+  Evorios LLC, a Wyoming limited liability company ("Evorios," "we," "us," "our"), operates the Evorios platform
+
+REPLACE WITH:
+  ELF Logistics LLC, a limited liability company doing business as Evorios ("Evorios," "we," "us," "our"), operates the Evorios platform

@@ -17,7 +17,9 @@ const config: CapacitorConfig = {
   server: {
     androidScheme: "https",
     allowNavigation: [
-      "app.evorios.com",
+      // app.evorios.com deliberately omitted: Stripe Connect onboarding used to
+      // window.location.assign into it and leave the host in an empty WebView
+      // on another origin. Account Links open in @capacitor/browser instead.
       "evorios.com",
       "*.stripe.com",
       "*.supabase.co",

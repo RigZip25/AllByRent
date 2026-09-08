@@ -1456,7 +1456,7 @@ export const en: AppMessages = {
     demoUpdateAdded: "Demo update notification added.",
     demoShowUpdate: "Demo: show update notification",
     pushTitle: "Push notifications",
-    pushBody: "Booking updates, reminders, and messages — even when the app is closed.",
+    pushBody: "Booking updates, reminders, and messages while you have the app open or installed as a PWA.",
     enabling: "Enabling...",
     enabled: "Enabled",
     enable: "Enable",

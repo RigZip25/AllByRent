@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 import { FALLBACK_VAPID_PUBLIC_KEY } from "./vapidPublicKey";
 import { isStandalonePwa } from "./pwaInstall";
@@ -92,6 +93,9 @@ export async function requestPushPermission(): Promise<NotificationPermission> {
 
 export function canOfferWebPush(): boolean {
   if (typeof window === "undefined") return false;
+  // Native builds have no FCM / APNs plugin yet. Offering the toggle there
+  // promises pushes "when the app is closed" that the binary cannot deliver.
+  if (Capacitor.isNativePlatform()) return false;
   if (!window.isSecureContext) return false;
   return "serviceWorker" in navigator && "Notification" in window && "PushManager" in window;
 }

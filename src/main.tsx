@@ -34,5 +34,16 @@ async function boot(): Promise<void> {
   }
 }
 
-void boot();
+void (async () => {
+  try {
+    await boot();
+  } catch (error) {
+    console.error("[boot] failed", error);
+  } finally {
+    // launchAutoHide is false: without this a thrown plugin or a missing
+    // root node leaves the native splash up forever.
+    const { hideNativeSplash } = await import("./lib/nativeShell");
+    await hideNativeSplash();
+  }
+})();
 
