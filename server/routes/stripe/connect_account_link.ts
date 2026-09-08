@@ -18,14 +18,18 @@ type Body = {
   country?: string;
 };
 
-/** Stripe Account Links require https return URLs — never capacitor:// or ionic://. */
+/** Stripe Account Links require https return URLs — never capacitor:// or ionic://.
+ *  Android's WebView origin is `https://localhost`; treating that as the redirect
+ *  origin sent Stripe back to a host that does not resolve outside the device.
+ */
 function resolveConnectRedirectOrigin(req: VercelRequest): string {
   const configured = resolveConfiguredAppOrigin().replace(/\/$/, "");
   const header = typeof req.headers.origin === "string" ? req.headers.origin.replace(/\/$/, "") : "";
   if (!header) return configured;
   try {
     const u = new URL(header);
-    if (u.protocol === "https:" && (u.hostname === "app.evorios.com" || u.hostname === "localhost")) {
+    // Only the real production app host may override the configured origin.
+    if (u.protocol === "https:" && u.hostname === "app.evorios.com") {
       return header;
     }
   } catch {

@@ -37,6 +37,13 @@ ensure_node
 echo "node $(node -v)"
 echo "npm $(npm -v)"
 
+# Without these the store binary boots into "needs configuration" and never
+# talks to Supabase. Fail the build here instead of shipping that shell.
+if [ -z "${VITE_SUPABASE_URL:-}" ] || [ -z "${VITE_SUPABASE_ANON_KEY:-}" ]; then
+  echo "VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set in Xcode Cloud environment variables." >&2
+  exit 1
+fi
+
 # Xcode Cloud has had npm concurrency flakes; keep installs conservative.
 npm config set maxsockets 3
 
@@ -45,6 +52,7 @@ npm ci
 
 echo "==> Build web bundle + cap sync ios (ios/App/App/public is gitignored)"
 CAPACITOR_BUILD=1 npm run build
+node ./scripts/check-native-bundle.mjs
 npx cap sync ios
 
 echo "==> Verifying CapApp-SPM path packages"

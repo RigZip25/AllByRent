@@ -1473,7 +1473,7 @@ export const cs: AppMessages = {
     demoUpdateAdded: "Demo oznámení o aktualizaci přidáno.",
     demoShowUpdate: "Demo: zobrazit oznámení o aktualizaci",
     pushTitle: "Push oznámení",
-    pushBody: "Aktualizace rezervací, připomínky a zprávy — i když je aplikace zavřená.",
+    pushBody: "Aktualizace rezervací, připomínky a zprávy, když máš aplikaci otevřenou nebo nainstalovanou jako PWA.",
     enabling: "Zapínám...",
     enabled: "Zapnuto",
     enable: "Zapnout",

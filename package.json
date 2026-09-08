@@ -8,7 +8,7 @@
   "scripts": {
     "prebuild": "node ./scripts/check-i18n-unique-keys.mjs && node ./scripts/generate-rent-sitemap.mjs",
     "build": "tsc -b --pretty false && vite build",
-    "build:native": "CAPACITOR_BUILD=1 npm run build && npx cap sync",
+    "build:native": "CAPACITOR_BUILD=1 npm run build && node ./scripts/check-native-bundle.mjs && npx cap sync",
     "assets:generate": "capacitor-assets generate --ios --android --iconBackgroundColor '#062a1c' --iconBackgroundColorDark '#062a1c' --splashBackgroundColor '#062a1c' --splashBackgroundColorDark '#062a1c'",
     "art:categories": "node ./scripts/prepare-category-art.mjs",
     "art:categories:check": "node ./scripts/prepare-category-art.mjs --check",
@@ -37,6 +37,7 @@
     "@allbyrent/server": "file:./server",
     "@capacitor-community/in-app-review": "^8.0.0",
     "@capacitor/app": "^8.1.1",
+    "@capacitor/browser": "^8.0.4",
     "@capacitor/core": "^8.5.0",
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/keyboard": "^8.0.5",

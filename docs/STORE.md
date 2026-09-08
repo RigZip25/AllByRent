@@ -29,8 +29,14 @@ Web PWA continues to work. Store builds skip the service worker (`CAPACITOR_BUIL
 3. **Android:** **Android Studio** + SDK 35+
 4. Apple Developer + Google Play Console (you have accounts)
 5. Create listings:
-   - App Store Connect → Bundle ID `com.elflogistics.evorios` (ELF Logistics LLC)
+   - App Store Connect → Bundle ID `com.elflogistics.evorios`
    - Play Console → package `com.evorios.app`
+6. **Legal entity must match the privacy policy.** The App Store seller on this
+   bundle is **ELF Logistics LLC**. Section 1 of
+   https://evorios.com/privacy.html must name the same entity (for example
+   `ELF Logistics LLC, doing business as Evorios`), not a different LLC. Store
+   reviewers compare the two. A one-line patch for that page is in
+   `public/legal/PRIVACY_ENTITY_PATCH.txt`.
 
 ## Build & open native projects
 
@@ -57,9 +63,14 @@ iOS uses Capacitor **SPM** (`ios/App/CapApp-SPM/Package.swift`). Plugin packages
 
 This is wired in [`ios/App/ci_scripts/ci_post_clone.sh`](../ios/App/ci_scripts/ci_post_clone.sh), which Xcode Cloud runs after clone and **before** resolving Swift packages. Keep that script executable (`chmod +x`).
 
-Optional: set the same `VITE_*` secrets you use on Vercel in the Xcode Cloud workflow environment so the bundled WebView has production client config.
+**Required environment variables** in the Xcode Cloud workflow (same values as Vercel):
 
-Regenerate icons after changing `resources/icon.png` / `resources/splash.png`:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+The post-clone script exits with code 1 if either is empty — otherwise the archive would ship a shell that only shows “needs configuration”.
+
+Regenerate icons after changing `resources/icon.png` / `resources/icon-only.png` / `resources/splash.png`:
 
 ```bash
 npm run assets:generate
