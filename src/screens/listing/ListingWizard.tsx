@@ -8,6 +8,8 @@ import { resolveGarageHostId } from "../../lib/hostAccess";
 import { getProfileCity, savePublishedListingRemote, savePublishedListing, saveListingDraftProgress, stampListingDraftProgress, removePublishedListing, removePublishedListingRemote, fetchListingByIdRemote, getPublishedListingById } from "../../lib/listingStorage";
 import { syncAgentPrefsRemote, ensureBrowserTimeZoneCaptured } from "../../lib/agentPrefs";
 import { notifyGarageFollowersOfNewListing } from "../../lib/garageFollowNotify";
+import { notifyRequestAuthorOfListing } from "../../lib/requestNotifications";
+import { fetchRequestByIdRemote } from "../../lib/requestsStorage";
 import { getLocalStoreLive } from "../../lib/garageStoreLive";
 import { loadUserProfile, saveUserProfile } from "../../lib/userProfileStorage";
 import { getListingDisplayTitle, listingRequiresQrSticker } from "../../lib/listingQr";
@@ -87,10 +89,14 @@ function createPrefilledListingDraft(prefill?: ShelfPrefill | null): ListingDraf
   const draft = createInitialListingDraft();
   if (!prefill?.category) return draft;
   const subcategory = prefill.subcategory?.trim() ?? "";
+  // What the neighbor actually asked for. Carrying only category and shelf made
+  // the host retype the need they had just read.
+  const need = prefill.requestId ? (prefill.query?.trim() ?? "") : "";
   return {
     ...draft,
     category: prefill.category,
     subcategory,
+    description: need || draft.description,
     grade: subcategory ? gradeForSubcategory(prefill.category, subcategory) : draft.grade,
   };
 }
@@ -155,6 +161,7 @@ export function ListingWizard({
   const auth = useAuth();
   const t = useMessages();
   const listing = t.listing;
+  const answeredRequestId = initialPrefill?.requestId?.trim() || null;
   const isEditing = (() => {
     const status =
       initialDraft?.listingStatus ??
@@ -520,6 +527,22 @@ export function ListingWizard({
         recordDevicePublish(hostId);
         void savePublishedListingRemote(publishedDraft, hostId).then((result) => {
           setPhotosPending(result.photosPending);
+        });
+      }
+      // Answering an ask: the renter who asked hears about it, and closes their
+      // own request — RLS keeps that lifecycle with the author, not the host.
+      if (answeredRequestId) {
+        void fetchRequestByIdRemote(answeredRequestId).then((request) => {
+          if (!request || request.status !== "open") return;
+          void notifyRequestAuthorOfListing({
+            request,
+            listingId: publishedDraft.id,
+            actorId: auth.userId,
+            title: t.postRequest.authorNotifyTitle,
+            body: t.postRequest.authorNotifyBody(
+              getListingDisplayTitle(publishedDraft.title) || publishedDraft.title,
+            ),
+          });
         });
       }
       const profile = loadUserProfile();

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Eye, Share2, Store } from "lucide-react";
 import { HostDashboard } from "../app/components/HostDashboard";
 import { HostGarageListSection, type HostGarageListMode } from "../app/components/HostGarageListSection";
+import { MyRequestsSection } from "../app/components/MyRequestsSection";
 import { RoleModeSwitcher } from "../components/RoleModeSwitcher";
 import { GarageActiveSwitcher } from "../components/GarageActiveSwitcher";
 import { GarageLookEditor } from "../components/GarageLookEditor";
@@ -227,6 +228,13 @@ export function GarageScreen({
             />
           </div>
         ) : null}
+
+        <div className="mt-4">
+          <MyRequestsSection
+            onOpenRequest={(requestId) => onNavigate(`requestDetail:${requestId}`)}
+            onPostRequest={() => onNavigate("postRequest")}
+          />
+        </div>
 
         <div className="mt-4">
           <HostDashboard

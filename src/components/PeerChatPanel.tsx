@@ -7,6 +7,7 @@ import {
   listingThreadKey,
   loadChatMessagesLocal,
   rentalThreadKey,
+  requestThreadKey,
   sendChatMessageRemote,
   subscribeToChatMessagesRemote,
   type ChatMessage,
@@ -29,6 +30,8 @@ const GREEN = "#0D5C3A";
 type PeerChatPanelProps = {
   rentalId?: string | null;
   listingId?: string | null;
+  /** Ask thread: answering a neighbor's "looking for" request. */
+  requestId?: string | null;
   peerId: string;
   itemTitle?: string;
   /** Compact embed (e.g. inside ActiveRental card). */
@@ -43,6 +46,7 @@ type PeerChatPanelProps = {
 export function PeerChatPanel({
   rentalId,
   listingId,
+  requestId,
   peerId,
   itemTitle,
   embedded = false,
@@ -55,10 +59,10 @@ export function PeerChatPanel({
   const mascotHandle = MASCOT_NAME.replace(/\s+/g, "").toLowerCase();
   const threadKey = rentalId
     ? rentalThreadKey(rentalId)
-    : listingId && (auth.userId || peerId)
+    : listingId
       ? listingThreadKey(listingId, auth.userId ?? "local", peerId)
-      : listingId
-        ? `listing:${listingId}:local`
+      : requestId
+        ? requestThreadKey(requestId, auth.userId ?? "local", peerId)
         : "unknown";
 
   const [messages, setMessages] = useState<ChatMessage[]>(() => loadChatMessagesLocal(threadKey));
@@ -80,6 +84,7 @@ export function PeerChatPanel({
     void fetchChatMessagesRemote({
       rentalId,
       listingId,
+      requestId,
       peerId,
       viewerId: auth.userId,
     }).then((remote) => {
@@ -90,8 +95,9 @@ export function PeerChatPanel({
     const sub = subscribeToChatMessagesRemote({
       rentalId,
       listingId,
+      requestId,
       onInsert: (message) => {
-        if (listingId && auth.userId) {
+        if ((listingId || requestId) && auth.userId) {
           const pair = new Set([auth.userId, peerId]);
           if (!pair.has(message.senderId) || !pair.has(message.recipientId)) return;
         }
@@ -106,7 +112,7 @@ export function PeerChatPanel({
       cancelled = true;
       sub.unsubscribe();
     };
-  }, [threadKey, rentalId, listingId, peerId, auth.userId]);
+  }, [threadKey, rentalId, listingId, requestId, peerId, auth.userId]);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
@@ -166,6 +172,7 @@ export function PeerChatPanel({
             : `msg-${Date.now()}`,
         rentalId: rentalId ?? null,
         listingId: listingId ?? null,
+        requestId: requestId ?? null,
         senderId: auth.userId,
         recipientId: peerId,
         body,
@@ -177,6 +184,7 @@ export function PeerChatPanel({
         await sendChatMessageRemote({
           rentalId,
           listingId,
+          requestId,
           senderId: auth.userId,
           recipientId: peerId,
           body,

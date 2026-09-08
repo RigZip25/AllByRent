@@ -2,6 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 import { MrRentanoAnimated } from "./MrRentanoAnimated";
 import { CategoryFactCard } from "../../components/CategoryFactCard";
+import { ShelfRequestsCard } from "./ShelfRequestsCard";
 import type { AppMode } from "../../lib/appMode";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
 import { useMessages } from "../../lib/i18n/react";
@@ -25,6 +26,7 @@ interface EmptySubcategoryShelfProps {
   onStartListing: () => void;
   onShare: () => void;
   onFulfillRequest?: (request: WantedRequest) => void;
+  onOpenRequest?: (request: WantedRequest) => void;
 }
 
 export function EmptySubcategoryShelf({
@@ -39,6 +41,7 @@ export function EmptySubcategoryShelf({
   onStartListing,
   onShare,
   onFulfillRequest,
+  onOpenRequest,
 }: EmptySubcategoryShelfProps) {
   const t = useMessages();
   const isEarn = appMode === "earn";
@@ -151,42 +154,29 @@ export function EmptySubcategoryShelf({
         ) : null}
       </div>
 
-      {(requests && requests.length > 0) || (fullRequests && fullRequests.length > 0) ? (
-        <div
-          className="rounded-3xl border bg-white p-4"
-          style={{ borderColor: BORDER }}
-        >
+      {fullRequests && fullRequests.length > 0 ? (
+        <ShelfRequestsCard
+          requests={fullRequests}
+          cityName={cityDisplay}
+          hint={isEarn ? empty.rentersAsking : empty.recentRequests(cityDisplay)}
+          showFulfillCta={isEarn}
+          onOpenRequest={onOpenRequest}
+          onFulfillRequest={onFulfillRequest}
+        />
+      ) : requests && requests.length > 0 ? (
+        <div className="rounded-3xl border bg-white p-4" style={{ borderColor: BORDER }}>
           <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">
             {isEarn ? empty.rentersAsking : empty.recentRequests(cityDisplay)}
           </p>
           <ul className="mt-3 space-y-2">
-            {(fullRequests ?? []).slice(0, 3).map((r) => (
+            {requests.slice(0, 3).map((r) => (
               <li key={r.id} className="rounded-2xl border p-3" style={{ borderColor: BORDER }}>
                 <p className="text-sm font-semibold" style={{ color: GREEN_DARK }}>
-                  {r.subcategory || r.category || empty.wanted}
+                  {empty.wanted}
                 </p>
-                <p className="mt-1 text-sm text-gray-600 line-clamp-2">{r.description}</p>
-                {isEarn && onFulfillRequest ? (
-                  <button
-                    type="button"
-                    onClick={() => onFulfillRequest(r)}
-                    className="mt-2 text-[13px] font-bold"
-                    style={{ color: GREEN }}
-                  >
-                    {empty.listToFulfill}
-                  </button>
-                ) : null}
+                <p className="mt-1 line-clamp-2 text-sm text-gray-600">{r.description}</p>
               </li>
             ))}
-            {!fullRequests?.length &&
-              requests?.slice(0, 3).map((r) => (
-                <li key={r.id} className="rounded-2xl border p-3" style={{ borderColor: BORDER }}>
-                  <p className="text-sm font-semibold" style={{ color: GREEN_DARK }}>
-                    {empty.wanted}
-                  </p>
-                  <p className="mt-1 text-sm text-gray-600 line-clamp-2">{r.description}</p>
-                </li>
-              ))}
           </ul>
         </div>
       ) : null}

@@ -497,6 +497,8 @@ export type AppMessages = {
     noMatches: (query: string) => string;
     noMatchesHint: string;
     postRequestFor: (query: string) => string;
+    asksTitle: string;
+    asksHint: (city: string) => string;
     empty: {
       rentanoEarn: (category: string, city: string) => string;
       rentanoRent: string;
@@ -512,6 +514,8 @@ export type AppMessages = {
       recentRequests: (city: string) => string;
       wanted: string;
       listToFulfill: string;
+      openAsk: string;
+      guestAsksHint: string;
     };
     founding: {
       listFirstCta: string;
@@ -739,6 +743,8 @@ export type AppMessages = {
     emptyBody: string;
     rental: string;
     buyGift: string;
+    request: string;
+    requestFallback: string;
     tapToDiscuss: string;
   };
   howItWorks: {
@@ -1733,8 +1739,68 @@ export type AppMessages = {
     whenFlexible: string;
     whenRange: (start: string, end: string) => string;
     whenFrom: (start: string) => string;
+    signInTitle: string;
+    signInBody: string;
+    moderationEmpty: string;
+    moderationTooShort: string;
+    moderationPhone: string;
+    moderationEmail: string;
+    moderationAddress: string;
+    moderationOffPlatform: string;
+    moderationAbusive: string;
+    savedLocallyTitle: string;
+    savedLocallyBody: string;
+    retryPublish: string;
+    retrying: string;
+    /** @param n neighbors reached */
+    notifiedNeighbors: (n: number) => string;
+    notifiedNobody: string;
+    neighborNotifyTitle: (subcategory: string) => string;
+    neighborNotifyBody: (city: string, need: string) => string;
+    authorNotifyTitle: string;
+    authorNotifyBody: (listingTitle: string) => string;
+  };
+  requestDetail: {
+    notFoundTitle: string;
+    notFoundBody: string;
+    yourAsk: string;
+    statusOpen: string;
+    statusFulfilled: string;
+    statusCancelled: string;
+    statusExpired: string;
+    /** @param n whole days left */
+    expiresInDays: (n: number) => string;
+    expiresToday: string;
+    expiredBody: string;
+    fulfilledBody: string;
+    cancelledBody: string;
+    manageTitle: string;
+    markFulfilled: string;
+    reopen: string;
+    cancelAsk: string;
+    deleteAsk: string;
+    deleteConfirm: string;
+    editText: string;
+    saveText: string;
+    cancelEdit: string;
+    updateFailed: string;
+    messageAuthor: string;
+    messageAuthorHint: string;
+    budgetRent: (label: string) => string;
+    budgetBuy: (label: string) => string;
+    withinRadius: (label: string) => string;
+    needBy: (range: string) => string;
+    haveThisCta: string;
+    postedAgo: (date: string) => string;
   };
   garageUi: {
+    asksTitle: string;
+    asksHint: string;
+    asksEmpty: string;
+    asksEmptyCta: string;
+    asksOpenCount: (n: number) => string;
+    asksSeeAll: string;
+    asksBack: string;
     shop: string;
     previewNeighbor: string;
     lookShow: string;
@@ -2552,6 +2618,8 @@ export type AppMessages = {
     closedReadOnly: string;
     listingChatFallback: string;
     listingChatSubtitle: string;
+    requestChatFallback: string;
+    requestChatSubtitle: string;
     moderationBlocked: string;
     moderationOffPlatform: string;
     moderationVerifyFailed: string;

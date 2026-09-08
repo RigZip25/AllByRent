@@ -47,6 +47,7 @@ import { MoreScreen } from "../screens/MoreScreen";
 import { HowEvoriosWorksScreen } from "../screens/HowEvoriosWorksScreen";
 import { MessagesInboxScreen } from "../screens/MessagesInboxScreen";
 import { ListingChatScreen } from "../screens/ListingChatScreen";
+import { RequestChatScreen } from "../screens/RequestChatScreen";
 import { MrEvoriosScreen } from "../screens/MrEvoriosScreen";
 import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { EarnBusinessScreen } from "../screens/EarnBusinessScreen";
@@ -185,6 +186,7 @@ type Screen =
   | "howEvoriosWorks"
   | "messages"
   | "listingChat"
+  | "requestChat"
   | "neighborGarage"
   | "garageShop"
   | "garageCart"
@@ -286,6 +288,7 @@ const BOOT_SCREEN_ALIASES: Partial<Record<string, Screen>> = {
   postRequest: "postRequest",
   activeRental: "activeRental",
   listingChat: "listingChat",
+  requestChat: "requestChat",
   messages: "messages",
   "verification-phone": "home",
   "verification-code": "home",
@@ -451,6 +454,7 @@ function readBootQuery() {
       chat: false,
       listingChatListingId: null as string | null,
       listingChatPeerId: null as string | null,
+      requestChatRequestId: null as string | null,
     };
   }
   const params = new URLSearchParams(window.location.search);
@@ -481,6 +485,7 @@ function readBootQuery() {
     chat: params.get("chat") === "1",
     listingChatListingId: params.get("listingId")?.trim() || null,
     listingChatPeerId: params.get("peerId")?.trim() || null,
+    requestChatRequestId: params.get("requestId")?.trim() || null,
   };
 }
 
@@ -664,6 +669,12 @@ function AppRoutes() {
   );
   const [listingChatPeerId, setListingChatPeerId] = useState<string | null>(() =>
     boot.screen === "listingChat" ? boot.listingChatPeerId : null,
+  );
+  const [requestChatRequestId, setRequestChatRequestId] = useState<string | null>(() =>
+    boot.screen === "requestChat" ? boot.requestChatRequestId : null,
+  );
+  const [requestChatPeerId, setRequestChatPeerId] = useState<string | null>(() =>
+    boot.screen === "requestChat" ? boot.listingChatPeerId : null,
   );
   const [personalInfoInitialEdit, setPersonalInfoInitialEdit] = useState<"name" | "phone" | undefined>(
     undefined,
@@ -915,6 +926,7 @@ function AppRoutes() {
       screen === "hostListingDetail" ||
       screen === "activeRental" ||
       screen === "listingChat" ||
+      screen === "requestChat" ||
       screen === "identity" ||
       screen === "agentActivity" ||
       screen === "personalInfo" ||
@@ -1111,6 +1123,21 @@ function AppRoutes() {
       setListingChatListingId(listingId);
       setListingChatPeerId(peerId);
       navigateTo("listingChat");
+    },
+    [navigateTo],
+  );
+  const handleOpenRequestChat = useCallback(
+    (requestId: string, peerId: string) => {
+      setRequestChatRequestId(requestId);
+      setRequestChatPeerId(peerId);
+      navigateTo("requestChat");
+    },
+    [navigateTo],
+  );
+  const handleOpenRequest = useCallback(
+    (requestId: string) => {
+      setSelectedRequestId(requestId);
+      navigateTo("requestDetail");
     },
     [navigateTo],
   );
@@ -1772,6 +1799,12 @@ function AppRoutes() {
       handleOpenListingFromFeed(id);
       return;
     }
+    if (screen.startsWith("requestDetail:")) {
+      const id = screen.slice("requestDetail:".length).trim();
+      if (!id) return;
+      handleOpenRequest(id);
+      return;
+    }
     if (screen.startsWith("hostListingDetail:")) {
       const id = screen.slice("hostListingDetail:".length).trim();
       if (!id) return;
@@ -1789,6 +1822,10 @@ function AppRoutes() {
     }
     if (screen === "listItem" || screen === "startEarning") {
       navigateTo("listItem");
+      return;
+    }
+    if (screen === "postRequest") {
+      handlePostRequest();
       return;
     }
     if (screen === "personalInfo") {
@@ -2195,6 +2232,7 @@ function AppRoutes() {
             onBack={handleBack}
             onOpenRentalChat={handleOpenRentalChat}
             onOpenListingChat={handleOpenListingChat}
+            onOpenRequestChat={handleOpenRequestChat}
           />
         )}
 
@@ -2204,6 +2242,15 @@ function AppRoutes() {
             peerId={listingChatPeerId}
             onBack={handleBack}
             onRequireAuth={() => showAuthGate("listingChat", "message")}
+          />
+        )}
+
+        {currentScreen === "requestChat" && requestChatRequestId && requestChatPeerId && (
+          <RequestChatScreen
+            requestId={requestChatRequestId}
+            peerId={requestChatPeerId}
+            onBack={handleBack}
+            onRequireAuth={() => showAuthGate("requestChat", "message")}
           />
         )}
 
@@ -2406,6 +2453,7 @@ function AppRoutes() {
             onStartListing={handleStartListing}
             onItemSelect={handleItemSelect}
             onUnlock={() => requireAuth("generic")}
+            onOpenRequest={handleOpenRequest}
           />
         )}
 
@@ -2429,6 +2477,7 @@ function AppRoutes() {
               setSelectedRequestId(null);
               handleStartListing(prefill);
             }}
+            onMessageAuthor={handleOpenRequestChat}
             onHome={handleOpenHome}
           />
         )}

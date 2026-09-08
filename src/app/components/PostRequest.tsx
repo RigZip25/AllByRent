@@ -7,7 +7,16 @@ import { RentanoTip } from "../../components/RentanoTip";
 import { useAuth } from "../../hooks/AuthProvider";
 import { SignInPrompt } from "../../components/SignInPrompt";
 import { getActiveRentLocationLabel } from "../../lib/listingStorage";
-import { createRequestRemote } from "../../lib/requestsStorage";
+import {
+  createRequestRemote,
+  publishPendingRequest,
+  type WantedRequest,
+} from "../../lib/requestsStorage";
+import { notifyNeighborsOfRequest } from "../../lib/requestNotifications";
+import {
+  messageForRequestText,
+  moderateRequestText,
+} from "../../lib/requestTextModeration";
 import { SocialShareButtons } from "../../components/share/SocialShareButtons";
 import { MASCOT_NAME } from "../../lib/brand";
 import { localizeCategoryLabel } from "../../lib/i18n/categoryLabels";
@@ -387,7 +396,11 @@ export function PostRequest({
   const [busy, setBusy] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [posted, setPosted] = useState(false);
-  const [postedRequestId, setPostedRequestId] = useState<string | null>(null);
+  const [postedRequest, setPostedRequest] = useState<WantedRequest | null>(null);
+  const [pendingPublish, setPendingPublish] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+  const [neighborsNotified, setNeighborsNotified] = useState<number | null>(null);
+  const postedRequestId = postedRequest?.id ?? null;
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const stepId = steps[stepIndex] ?? "category";
@@ -494,6 +507,11 @@ export function PostRequest({
         setSubmitError(copy.errorDescription);
         return false;
       }
+      const checked = moderateRequestText(description);
+      if (!checked.ok) {
+        setSubmitError(messageForRequestText(checked.reason, copy));
+        return false;
+      }
       if (!intent) {
         setSubmitError(copy.errorPickIntent);
         return false;
@@ -510,16 +528,25 @@ export function PostRequest({
     }
   };
 
+  const announceToNeighbors = (request: WantedRequest) => {
+    void notifyNeighborsOfRequest({
+      request,
+      title: copy.neighborNotifyTitle(localizeCategoryLabel(request.subcategory)),
+      body: copy.neighborNotifyBody(
+        request.locationLabel || copy.yourArea,
+        request.description.slice(0, 140),
+      ),
+    })
+      .then(setNeighborsNotified)
+      .catch(() => setNeighborsNotified(0));
+  };
+
   const handlePostRequest = () => {
     if (busy) return;
     if (!category || !subcategory) {
       setSubmitError(
         lockedContext ? copy.errorMissingCategoryLocked : copy.errorPickCategory,
       );
-      return;
-    }
-    if (!description.trim()) {
-      setSubmitError(copy.errorDescription);
       return;
     }
     if (!intent) {
@@ -531,12 +558,13 @@ export function PostRequest({
       return;
     }
 
-    const meta = [
-      intentLabel(intent, copy),
-      budgetLine(intent, budget, selectedRadiusMi, copy),
-      whenText,
-    ].join(" · ");
-    const fullDescription = `${description.trim()}\n\n${meta}`;
+    // The requests table is world-readable: a phone number or a street address
+    // typed in here would be published to the open internet.
+    const checked = moderateRequestText(description);
+    if (!checked.ok) {
+      setSubmitError(messageForRequestText(checked.reason, copy));
+      return;
+    }
 
     setSubmitError(null);
     setBusy(true);
@@ -544,16 +572,36 @@ export function PostRequest({
       renterId: auth.userId,
       category,
       subcategory,
-      description: fullDescription,
+      description: checked.cleaned,
       locationLabel: locationLabel || copy.yourArea,
       startDate: datesFlexible ? undefined : startDate || undefined,
       endDate: datesFlexible ? undefined : endDate || undefined,
+      intent,
+      budgetCents: budget * 100,
+      radiusMiles: selectedRadiusMi,
     })
       .then((created) => {
-        setPostedRequestId(created.id);
+        setPostedRequest(created.request);
         setPosted(true);
+        if (created.ok && created.savedRemotely) {
+          announceToNeighbors(created.request);
+        } else {
+          setPendingPublish(true);
+        }
       })
       .finally(() => setBusy(false));
+  };
+
+  const handleRetryPublish = () => {
+    if (!postedRequest || retrying) return;
+    setRetrying(true);
+    void publishPendingRequest(postedRequest)
+      .then((result) => {
+        if (!result.ok) return;
+        setPendingPublish(false);
+        announceToNeighbors(postedRequest);
+      })
+      .finally(() => setRetrying(false));
   };
 
   const tipForStep =
@@ -574,6 +622,30 @@ export function PostRequest({
           ? copy.stepTiming
           : copy.stepReview;
 
+  // Asking is signed-in work: the ask carries a name and neighbors reply to it.
+  // Finding that out on the last button after four steps was the old behavior.
+  if (!auth.userId) {
+    return (
+      <div className="screen flex flex-col bg-background">
+        <div className="z-10 flex shrink-0 items-center gap-3 border-b border-border bg-card/80 px-3 py-3 backdrop-blur-sm sm:px-4">
+          <button
+            type="button"
+            onClick={onBack}
+            className="rounded-full p-2 transition-colors hover:bg-muted"
+            aria-label={t.common.back}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h1 className="flex-1 truncate font-semibold">{copy.title}</h1>
+        </div>
+        <div className="screen-scroll min-h-0 flex-1 space-y-5 p-4">
+          <RentanoTip message={copy.signInBody} />
+          <SignInPrompt message={copy.signInTitle} intent="generic" />
+        </div>
+      </div>
+    );
+  }
+
   if (posted) {
     return (
       <div className="screen flex flex-col bg-background">
@@ -581,6 +653,30 @@ export function PostRequest({
           <h1 className="flex-1 font-semibold">{copy.postedTitle}</h1>
         </div>
         <div className="screen-scroll min-h-0 flex-1 space-y-5 p-4 pb-24">
+          {pendingPublish ? (
+            <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4">
+              <p className="text-[14px] font-semibold text-amber-900">
+                {copy.savedLocallyTitle}
+              </p>
+              <p className="mt-1 text-[13px] leading-snug text-amber-800">
+                {copy.savedLocallyBody}
+              </p>
+              <button
+                type="button"
+                onClick={handleRetryPublish}
+                disabled={retrying}
+                className="mt-3 w-full rounded-xl border border-amber-400 bg-white py-2.5 text-[13px] font-semibold text-amber-900 disabled:opacity-60"
+              >
+                {retrying ? copy.retrying : copy.retryPublish}
+              </button>
+            </div>
+          ) : neighborsNotified != null ? (
+            <p className="rounded-2xl border bg-white px-4 py-3 text-[13px] font-medium" style={{ borderColor: BORDER, color: GREEN }}>
+              {neighborsNotified > 0
+                ? copy.notifiedNeighbors(neighborsNotified)
+                : copy.notifiedNobody}
+            </p>
+          ) : null}
           <RentanoTip message={copy.shareNowBody} />
           <RequestPreviewCard
             category={category}

@@ -9,13 +9,15 @@ export type ChatMessage = {
   rentalId: string | null;
   /** Listing thread id, when chatting about a buy/gift item. */
   listingId: string | null;
+  /** Ask thread id, when answering a neighbor's "looking for" request. */
+  requestId?: string | null;
   senderId: string;
   recipientId: string;
   body: string;
   createdAt: string;
 };
 
-export type ChatThreadKind = "rental" | "listing";
+export type ChatThreadKind = "rental" | "listing" | "request";
 
 export type ChatThreadSummary = {
   kind: ChatThreadKind;
@@ -23,6 +25,7 @@ export type ChatThreadSummary = {
   threadKey: string;
   rentalId?: string;
   listingId?: string;
+  requestId?: string;
   peerId: string;
   preview: string;
   updatedAt: string;
@@ -33,6 +36,7 @@ type RemoteMessageRow = {
   id: string;
   rental_id: string | null;
   listing_id: string | null;
+  request_id?: string | null;
   sender_id: string;
   recipient_id: string;
   body: string;
@@ -61,6 +65,11 @@ export function listingThreadKey(listingId: string, userA: string, userB: string
   return `listing:${listingId}:${a}:${b}`;
 }
 
+export function requestThreadKey(requestId: string, userA: string, userB: string): string {
+  const [a, b] = [userA, userB].sort();
+  return `request:${requestId}:${a}:${b}`;
+}
+
 function loadLocalAll(): Record<string, ChatMessage[]> {
   try {
     const raw = localStorage.getItem(LOCAL_KEY);
@@ -71,13 +80,14 @@ function loadLocalAll(): Record<string, ChatMessage[]> {
     const next: Record<string, ChatMessage[]> = {};
     for (const [key, list] of Object.entries(parsed)) {
       if (!Array.isArray(list)) continue;
-      const normalizedKey = key.startsWith("rental:") || key.startsWith("listing:")
-        ? key
-        : rentalThreadKey(key);
+      const anchored =
+        key.startsWith("rental:") || key.startsWith("listing:") || key.startsWith("request:");
+      const normalizedKey = anchored ? key : rentalThreadKey(key);
       const normalizedList = list.map((m) => ({
         ...m,
-        rentalId: m.rentalId ?? (key.startsWith("listing:") ? null : key.replace(/^rental:/, "")),
+        rentalId: m.rentalId ?? (anchored && !key.startsWith("rental:") ? null : key.replace(/^rental:/, "")),
         listingId: m.listingId ?? null,
+        requestId: m.requestId ?? null,
       }));
       next[normalizedKey] = [...(next[normalizedKey] ?? []), ...normalizedList].sort((a, b) =>
         a.createdAt.localeCompare(b.createdAt),
@@ -102,15 +112,21 @@ function threadKeyForMessage(message: ChatMessage): string {
   if (message.listingId) {
     return listingThreadKey(message.listingId, message.senderId, message.recipientId);
   }
+  if (message.requestId) {
+    return requestThreadKey(message.requestId, message.senderId, message.recipientId);
+  }
   return rentalThreadKey(message.id);
 }
 
 export function loadChatMessagesLocal(threadKey: string): ChatMessage[] {
   const all = loadLocalAll();
   // Legacy: callers may still pass bare rentalId
-  const key = threadKey.startsWith("rental:") || threadKey.startsWith("listing:")
-    ? threadKey
-    : rentalThreadKey(threadKey);
+  const key =
+    threadKey.startsWith("rental:") ||
+    threadKey.startsWith("listing:") ||
+    threadKey.startsWith("request:")
+      ? threadKey
+      : rentalThreadKey(threadKey);
   return Array.isArray(all[key]) ? all[key] : [];
 }
 
@@ -136,6 +152,7 @@ function rowToMessage(row: RemoteMessageRow): ChatMessage {
     id: row.id,
     rentalId: row.rental_id,
     listingId: row.listing_id,
+    requestId: row.request_id ?? null,
     senderId: row.sender_id,
     recipientId: row.recipient_id,
     body: row.body,
@@ -146,6 +163,7 @@ function rowToMessage(row: RemoteMessageRow): ChatMessage {
 export async function fetchChatMessagesRemote(input: {
   rentalId?: string | null;
   listingId?: string | null;
+  requestId?: string | null;
   peerId?: string | null;
   viewerId?: string | null;
 }): Promise<ChatMessage[]> {
@@ -164,11 +182,19 @@ export async function fetchChatMessagesRemote(input: {
     return (data as unknown as RemoteMessageRow[]).map(rowToMessage);
   }
 
-  if (input.listingId && isUuid(input.listingId)) {
+  // Listing and ask threads are per-pair: the same anchor can carry a separate
+  // conversation with every neighbor, so the pair filter is applied after read.
+  const pairAnchor = input.listingId
+    ? { column: "listing_id", id: input.listingId }
+    : input.requestId
+      ? { column: "request_id", id: input.requestId }
+      : null;
+
+  if (pairAnchor && isUuid(pairAnchor.id)) {
     const { data, error } = await supabase
       .from("messages")
       .select("*")
-      .eq("listing_id", input.listingId)
+      .eq(pairAnchor.column, pairAnchor.id)
       .order("created_at", { ascending: true })
       .limit(200);
     if (error || !data) return [];
@@ -197,6 +223,7 @@ async function notifyChatPeer(input: {
   body: string;
   rentalId?: string | null;
   listingId?: string | null;
+  requestId?: string | null;
   itemTitle?: string;
 }): Promise<void> {
   if (!isUuid(input.recipientId) || !isUuid(input.senderId)) return;
@@ -212,6 +239,8 @@ async function notifyChatPeer(input: {
     url = `/?screen=activeRental&rentalId=${encodeURIComponent(input.rentalId)}&chat=1&skipSplash=1`;
   } else if (input.listingId) {
     url = `/?screen=listingChat&listingId=${encodeURIComponent(input.listingId)}&peerId=${encodeURIComponent(input.senderId)}&skipSplash=1`;
+  } else if (input.requestId) {
+    url = `/?screen=requestChat&requestId=${encodeURIComponent(input.requestId)}&peerId=${encodeURIComponent(input.senderId)}&skipSplash=1`;
   }
 
   await createNotificationRemote({
@@ -230,6 +259,7 @@ async function notifyChatPeer(input: {
 export async function sendChatMessageRemote(input: {
   rentalId?: string | null;
   listingId?: string | null;
+  requestId?: string | null;
   senderId: string;
   recipientId: string;
   body: string;
@@ -248,7 +278,8 @@ export async function sendChatMessageRemote(input: {
   if (!isUuid(input.senderId) || !isUuid(input.recipientId)) return null;
   if (input.rentalId && !isUuid(input.rentalId)) return null;
   if (input.listingId && !isUuid(input.listingId)) return null;
-  if (!input.rentalId && !input.listingId) return null;
+  if (input.requestId && !isUuid(input.requestId)) return null;
+  if (!input.rentalId && !input.listingId && !input.requestId) return null;
 
   const id = safeUuid();
   const row: Record<string, string | null> = {
@@ -259,6 +290,7 @@ export async function sendChatMessageRemote(input: {
     recipient_id: input.recipientId,
     body: input.body,
   };
+  if (input.requestId) row.request_id = input.requestId;
 
   const { error } = await supabase.from("messages").insert(row);
   if (error) {
@@ -275,6 +307,7 @@ export async function sendChatMessageRemote(input: {
 export function subscribeToChatMessagesRemote(input: {
   rentalId?: string | null;
   listingId?: string | null;
+  requestId?: string | null;
   onInsert: (message: ChatMessage) => void;
 }): { unsubscribe: () => void } {
   if (!isSupabaseConfigured()) return { unsubscribe: () => undefined };
@@ -285,7 +318,9 @@ export function subscribeToChatMessagesRemote(input: {
     ? `rental_id=eq.${input.rentalId}`
     : input.listingId && isUuid(input.listingId)
       ? `listing_id=eq.${input.listingId}`
-      : null;
+      : input.requestId && isUuid(input.requestId)
+        ? `request_id=eq.${input.requestId}`
+        : null;
   if (!filter) return { unsubscribe: () => undefined };
 
   const channel = supabase
@@ -345,6 +380,18 @@ export function listChatThreadsLocal(viewerId: string | null): ChatThreadSummary
         updatedAt: last.createdAt,
         messageCount: list.length,
       });
+    } else if (key.startsWith("request:")) {
+      const parts = key.split(":");
+      const requestId = parts[1] ?? last.requestId ?? "";
+      threads.push({
+        kind: "request",
+        threadKey: key,
+        requestId,
+        peerId,
+        preview: last.body,
+        updatedAt: last.createdAt,
+        messageCount: list.length,
+      });
     } else {
       const rentalId = key.replace(/^rental:/, "") || last.rentalId || "";
       threads.push({
@@ -385,10 +432,11 @@ export async function fetchRecentChatThreadsRemote(viewerId: string): Promise<Ch
     if (byKey.has(key)) continue;
     const peerId = m.senderId === viewerId ? m.recipientId : m.senderId;
     byKey.set(key, {
-      kind: m.rentalId ? "rental" : "listing",
+      kind: m.rentalId ? "rental" : m.requestId ? "request" : "listing",
       threadKey: key,
       rentalId: m.rentalId ?? undefined,
       listingId: m.listingId ?? undefined,
+      requestId: m.requestId ?? undefined,
       peerId,
       preview: m.body,
       updatedAt: m.createdAt,
