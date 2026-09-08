@@ -517,6 +517,8 @@ export function RentalCard({
           open={reviewModalOpen}
           title={`for ${booking.counterpartyName}`}
           onClose={() => setReviewModalOpen(false)}
+          maxRating={booking.status === "disputed" ? 4 : 5}
+          disputeHint={t.reviewPrompt.disputeFiveStarBlocked}
           onSubmit={(rating, comment) => {
             const reviewerId = auth.userId;
             if (!reviewerId) return;
@@ -533,6 +535,9 @@ export function RentalCard({
                   review: { rating, leftAt: new Date().toISOString() },
                 });
                 onRefresh();
+              })
+              .catch(() => {
+                /* policy reject */
               })
               .finally(() => setReviewModalOpen(false));
           }}

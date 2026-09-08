@@ -43,6 +43,7 @@ export type PublicProfile = {
   id: string;
   displayName: string;
   rating: number;
+  reviewsCount: number;
   identityVerified: boolean;
   phoneVerified: boolean;
   createdAt: string | null;
@@ -50,7 +51,7 @@ export type PublicProfile = {
 };
 
 const PUBLIC_PROFILE_COLUMNS =
-  "id, display_name, rating, identity_verified, phone_verified, created_at, avatar_path";
+  "id, display_name, rating, reviews_count, identity_verified, phone_verified, created_at, avatar_path";
 
 function publicProfileFromRow(row: Record<string, unknown>): PublicProfile | null {
   const id = typeof row.id === "string" ? row.id : "";
@@ -59,6 +60,7 @@ function publicProfileFromRow(row: Record<string, unknown>): PublicProfile | nul
     id,
     displayName: (row.display_name as string | null)?.trim() || "",
     rating: typeof row.rating === "number" ? row.rating : 0,
+    reviewsCount: typeof row.reviews_count === "number" ? row.reviews_count : 0,
     identityVerified: Boolean(row.identity_verified),
     phoneVerified: Boolean(row.phone_verified),
     createdAt: typeof row.created_at === "string" ? row.created_at : null,

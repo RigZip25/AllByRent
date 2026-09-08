@@ -297,7 +297,6 @@ export const cs: AppMessages = {
       "Otevři Zprávu pro chat v aplikaci s prodejcem (dostane push, pokud má zapnuto).",
     messageRentHint: "Chat v aplikaci s majitelem se otevře po potvrzení rezervace.",
     viewPublicProfile: "Klepni pro veřejný profil",
-    verifiedHost: (appName) => `Ověřený hostitel na ${appName}`,
     startBookingAria: "Začít rezervaci a kontaktovat hostitele",
     messageSellerAria: "Napsat prodejci",
     messagingOpensWithBooking: "Zprávy se otevřou s rezervací",
@@ -1460,7 +1459,9 @@ export const cs: AppMessages = {
     comment: "Komentář",
     placeholder: "Krátká poznámka (volitelné)...",
     blindHint:
-      "Slepá recenze: ani jedna strana neuvidí recenzi druhé, dokud neodešlou obě.",
+      "Slepá recenze: ani jedna strana neuvidí recenzi druhé, dokud neodešlou obě — nebo po 14 dnech.",
+    disputeFiveStarBlocked:
+      "Probíhá otevřený spor, proto pět hvězd není dostupných, dokud se nevyřeší.",
     submit: "Odeslat recenzi",
     starsAria: (n) => `${n} hvězd`,
   },

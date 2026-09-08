@@ -48,7 +48,7 @@ function publicFromRemote(profile: PublicProfile, neighborLabel: string): Public
     phoneVerified: profile.phoneVerified,
     rating: profile.rating,
     transactionCount: 0,
-    reviewCount: 0,
+    reviewCount: profile.reviewsCount,
     noShowCount: 0,
     listings: [],
     reviews: [],

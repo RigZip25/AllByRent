@@ -150,6 +150,10 @@
     {
       "path": "/api/cron/garage-sale-close",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/review-reminders",
+      "schedule": "0 * * * *"
     }
   ]
 }

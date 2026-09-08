@@ -5,6 +5,7 @@ import rentalOverdue from "@allbyrent/server/routes/cron/rental-overdue";
 import rentalPendingExpiry from "@allbyrent/server/routes/cron/rental-pending-expiry";
 import abandonedListingNudge from "@allbyrent/server/routes/cron/abandoned-listing-nudge";
 import garageSaleClose from "@allbyrent/server/routes/cron/garage-sale-close";
+import reviewReminders from "@allbyrent/server/routes/cron/review-reminders";
 
 type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 
@@ -14,6 +15,7 @@ const ROUTES: Record<string, Handler> = {
   "rental-pending-expiry": rentalPendingExpiry,
   "abandoned-listing-nudge": abandonedListingNudge,
   "garage-sale-close": garageSaleClose,
+  "review-reminders": reviewReminders,
 };
 
 function routeKey(req: VercelRequest): string {

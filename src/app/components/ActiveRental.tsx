@@ -2596,6 +2596,13 @@ export function ActiveRental({
           open={reviewOpen}
           title={`for ${booking.counterpartyName}`}
           onClose={() => setReviewOpen(false)}
+          maxRating={
+            booking.status === "disputed" ||
+            (dispute != null && dispute.status !== "resolved")
+              ? 4
+              : 5
+          }
+          disputeHint={t.reviewPrompt.disputeFiveStarBlocked}
           onSubmit={(rating, comment) => {
             const reviewerId = auth.userId;
             if (!reviewerId) return;
@@ -2612,6 +2619,9 @@ export function ActiveRental({
                   review: { rating, leftAt: new Date().toISOString() },
                 });
                 setBookings(loadRentalBookings());
+              })
+              .catch(() => {
+                /* policy reject — keep modal closed; user can retry */
               })
               .finally(() => setReviewOpen(false));
           }}
