@@ -117,7 +117,7 @@ async function mediaRefToObjectUrl(ref: MediaRef | undefined): Promise<string | 
 async function getRentanoLogoUrl(): Promise<string | null> {
   try {
     // shipped in repo at src/imports
-    const mod = await import("../imports/rentano_full.png");
+    const mod = await import("../imports/rentano_full.webp");
     return (mod as { default: string }).default;
   } catch {
     return null;

@@ -3,7 +3,7 @@ import { ScanFace, Mail } from "lucide-react";
 import { APP_NAME, BRAND_AMBER, BRAND_GREEN } from "../../lib/brand";
 import { isReturningAccountDevice, shouldShowPasskeyLogin } from "../../lib/auth";
 import { useMessages } from "../../lib/i18n/react";
-import authWelcomeShowcase from "../../imports/onboarding/evorios_auth_welcome_showcase.png";
+import authWelcomeShowcase from "../../imports/onboarding/evorios_auth_welcome_showcase.webp";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;

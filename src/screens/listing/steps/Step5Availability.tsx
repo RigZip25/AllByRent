@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import availabilityImg from "../../../imports/availability.png";
+import availabilityImg from "../../../imports/availability.webp";
 import { RentanoHint } from "../../../components/RentanoHint";
 import type { StepProps } from "../types";
 import { useMessages } from "../../../lib/i18n/react";

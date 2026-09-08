@@ -1,7 +1,7 @@
 /** Connect / payouts art — files in src/imports/connect/ */
 import evoriosStripeTransition from "../imports/connect/evorios_stripe_transition.jpg";
 import evoriosConnectSecureLegacy from "../imports/connect/evorios_connect_secure.jpg";
-import mrEvoriosHeadIcon from "../imports/connect/mr_evorios_head_icon.png";
+import mrEvoriosHeadIcon from "../imports/connect/mr_evorios_head_icon.webp";
 
 export const connectAssets = {
   /**

@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import qrStory1 from "../../imports/qr_story_1.png";
-import qrStory2 from "../../imports/qr_story_2.png";
-import qrStory3 from "../../imports/qr_story_3.png";
+import qrStory1 from "../../imports/qr_story_1.webp";
+import qrStory2 from "../../imports/qr_story_2.webp";
+import qrStory3 from "../../imports/qr_story_3.webp";
 import { MASCOT_NAME } from "../../lib/brand";
 import { RentanoHint } from "../../components/RentanoHint";
 import { useMessages } from "../../lib/i18n/react";

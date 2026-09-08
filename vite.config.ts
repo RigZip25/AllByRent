@@ -49,7 +49,13 @@ function pwaPlugin() {
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,jpg,jpeg,svg,webp,woff2}'],
+        // Precache the shell only. Illustrations and category art are cached
+        // when a screen actually asks for one (see the image rule below);
+        // precaching all of it made the first launch download the whole app.
+        globPatterns: ['**/*.{js,css,html,ico,svg,woff2}', 'pwa-*.png'],
+        // HEIC conversion and PDF export are 2 MB of code for two rare
+        // actions; they load on demand and are cached once used.
+        globIgnores: ['**/heic2any-*.js', '**/export-pdf-*.js'],
         importScripts: ['push-sw.js'],
         navigateFallback: '/index.html',
         // Main bundle can exceed the default 2 MiB precache cap after feature growth.
@@ -83,14 +89,27 @@ function pwaPlugin() {
               cacheableResponse: { statuses: [0, 200] },
             },
           },
-          // Cache remote images (e.g. externally-linked manuals/screenshots).
+          // The chunks left out of the precache. File names carry a content
+          // hash, so a cached one can never be stale.
+          {
+            urlPattern: ({ request, url, sameOrigin }) =>
+              sameOrigin && request.destination === 'script' && url.pathname.includes('/assets/'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'allbyrent-code',
+              expiration: { maxEntries: 40, maxAgeSeconds: 30 * 24 * 60 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          // Every image: our own art, now that it is not precached, and remote
+          // ones (externally linked manuals, listing photos from storage).
           {
             urlPattern: ({ request }) => request.destination === 'image',
             handler: 'CacheFirst',
             options: {
               cacheName: 'allbyrent-images',
               expiration: {
-                maxEntries: 200,
+                maxEntries: 400,
                 maxAgeSeconds: 30 * 24 * 60 * 60,
               },
               cacheableResponse: { statuses: [0, 200] },

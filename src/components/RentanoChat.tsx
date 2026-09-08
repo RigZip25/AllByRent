@@ -9,7 +9,7 @@ import {
   X,
 } from "lucide-react";
 import { MASCOT_NAME } from "../lib/brand";
-import rentanoImg from "../imports/No_back_rentano.png";
+import rentanoImg from "../imports/No_back_rentano.webp";
 import type { ListingDraft } from "../screens/listing/types";
 import { getSteps } from "../screens/listing/types";
 import type { AppMode } from "../lib/appMode";
