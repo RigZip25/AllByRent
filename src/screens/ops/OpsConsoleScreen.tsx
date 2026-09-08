@@ -662,8 +662,10 @@ export function OpsConsoleScreen({ onExitToApp }: OpsConsoleScreenProps) {
             Комиссии платформы
           </h2>
           <p className="mt-1 text-[12px]" style={{ color: MUTED }}>
-            Сейчас аренда: <strong>{pctLabel(pulse.rentalFeeRate)}</strong>
-            {pulse.promoActive ? " (промо)" : ""} · Продажа:{" "}
+            Начисление всегда 12% / 10% на сервере. Поля ниже — заметки владельца, на
+            чек гостя не влияют. Сейчас в UI:{" "}
+            <strong>{pctLabel(pulse.rentalFeeRate)}</strong>
+            {pulse.promoActive ? " (промо в заметках)" : ""} · Продажа:{" "}
             <strong>{pctLabel(pulse.sellFeeRate)}</strong>
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">

@@ -64,11 +64,74 @@ export type ValidatedGarageLine = {
   priceCents: number;
 };
 
+export type AcceptedOfferRow = {
+  listing_id: string;
+  buyer_id: string;
+  amount_cents: number;
+  status: string;
+};
+
+export type BidRow = {
+  listing_id: string;
+  bidder_id: string;
+  amount_cents: number;
+};
+
+/**
+ * What the buyer pays for one sell line.
+ *
+ * An accepted neighbour offer beats the shelf price — otherwise a $40 deal
+ * was charged as the $80 sticker. A winning bid awaiting checkout does the
+ * same. Guests (no buyer id) only ever see the shelf price.
+ */
+export function resolveSellLinePriceCents(input: {
+  listingId: string;
+  salePriceCents: number;
+  buyerId?: string | null;
+  offers?: AcceptedOfferRow[];
+  lotState?: unknown;
+}): { ok: true; priceCents: number } | { ok: false; error: string } {
+  const buyerId = input.buyerId?.trim() || "";
+  if (buyerId && input.offers?.length) {
+    const acceptedForOther = input.offers.find(
+      (offer) =>
+        offer.listing_id === input.listingId &&
+        offer.status === "accepted" &&
+        offer.buyer_id !== buyerId,
+    );
+    if (acceptedForOther) {
+      return { ok: false, error: "Item is reserved for another buyer" };
+    }
+    const mine = input.offers.find(
+      (offer) =>
+        offer.listing_id === input.listingId &&
+        offer.status === "accepted" &&
+        offer.buyer_id === buyerId &&
+        offer.amount_cents >= 50,
+    );
+    if (mine) {
+      return { ok: true, priceCents: Math.round(mine.amount_cents) };
+    }
+  }
+
+  const awaiting = readAwaitingCheckout(input.lotState);
+  if (awaiting && buyerId && awaiting.winnerBidderId === buyerId) {
+    return { ok: true, priceCents: Math.round(awaiting.winningBidUsd * 100) };
+  }
+
+  if (input.salePriceCents < 50) {
+    return { ok: false, error: "Listing has no valid sale price" };
+  }
+  return { ok: true, priceCents: input.salePriceCents };
+}
+
 export function validateGarageSellLines(input: {
   hostId: string;
   listingIds: string[];
   listings: GarageListingRow[];
   lots: GarageLotRow[];
+  buyerId?: string | null;
+  offers?: AcceptedOfferRow[];
 }): { ok: true; lines: ValidatedGarageLine[]; subtotalCents: number } | { ok: false; error: string } {
   const byId = new Map(input.listings.map((row) => [row.id, row]));
   const lotById = new Map(input.lots.map((row) => [row.listing_id, row]));
@@ -91,18 +154,29 @@ export function validateGarageSellLines(input: {
     if (isPaused(row.availability)) {
       return { ok: false, error: "Listing is paused" };
     }
-    const status = lotStatus(lotById.get(listingId)?.state);
-    if (isLotUnavailable(status)) {
+    const lotState = lotById.get(listingId)?.state;
+    const status = lotStatus(lotState);
+    // A winner checking out their own reserved lot is allowed through.
+    const awaiting = readAwaitingCheckout(lotState);
+    const buyerIsWinner =
+      Boolean(input.buyerId) && awaiting?.winnerBidderId === input.buyerId;
+    if (status === "sold" || (status === "awaiting_checkout" && !buyerIsWinner)) {
       return { ok: false, error: "Item already sold or reserved" };
     }
     const priceUsd = parseSalePriceUsd(row.pricing);
-    if (priceUsd == null || priceUsd <= 0) {
-      return { ok: false, error: "Listing has no valid sale price" };
-    }
+    const salePriceCents = priceUsd != null && priceUsd > 0 ? Math.round(priceUsd * 100) : 0;
+    const priced = resolveSellLinePriceCents({
+      listingId,
+      salePriceCents,
+      buyerId: input.buyerId,
+      offers: input.offers,
+      lotState,
+    });
+    if (!priced.ok) return priced;
     lines.push({
       listingId,
       title: (row.title ?? "Sale item").slice(0, 200),
-      priceCents: Math.round(priceUsd * 100),
+      priceCents: priced.priceCents,
     });
   }
 
@@ -140,6 +214,8 @@ export function validateAuctionListing(input: {
   lot: GarageLotRow | null;
   winningBidUsd: number;
   buyerId: string;
+  /** Highest live bid on the listing; when set, it — not the lot JSON — is the charge. */
+  topBid?: BidRow | null;
 }):
   | { ok: true; title: string; bidCents: number; runnerUpAttempt: number }
   | { ok: false; error: string } {
@@ -157,6 +233,24 @@ export function validateAuctionListing(input: {
   if (!awaiting) {
     return { ok: false, error: "Auction result is not confirmed for this lot yet" };
   }
+
+  // Prefer the bid ledger over the host-written lot amount: a lot state the
+  // host can invent would otherwise invent the charge too.
+  if (input.topBid) {
+    if (input.topBid.bidder_id !== input.buyerId) {
+      return { ok: false, error: "This lot is reserved for another bidder" };
+    }
+    if (input.topBid.amount_cents < 50) {
+      return { ok: false, error: "Invalid winning bid" };
+    }
+    return {
+      ok: true,
+      title: (row.title ?? "Sale item").slice(0, 200),
+      bidCents: Math.round(input.topBid.amount_cents),
+      runnerUpAttempt: awaiting.runnerUpAttempt,
+    };
+  }
+
   if (awaiting.winnerBidderId && awaiting.winnerBidderId !== input.buyerId) {
     return { ok: false, error: "This lot is reserved for another bidder" };
   }

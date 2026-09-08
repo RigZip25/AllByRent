@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { applyCors, handleOptions } from "../../lib/cors";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
+import { stripeKeyModeMismatch } from "../../lib/stripe/ensureConnectAccount";
 
 type Body = {
   returnUrl?: string;
@@ -26,6 +27,12 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const secret = process.env.STRIPE_SECRET_KEY;
   if (!secret) {
     res.status(200).json({ ok: false, reason: "Stripe not configured" });
+    return;
+  }
+
+  const mismatch = stripeKeyModeMismatch();
+  if (mismatch) {
+    res.status(200).json({ ok: false, code: mismatch.code, reason: mismatch.reason });
     return;
   }
 

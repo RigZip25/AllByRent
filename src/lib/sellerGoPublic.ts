@@ -85,8 +85,9 @@ export type SellerGoPublicStatus = {
   bankLast4: string | null;
   /**
    * Can publish / go live.
-   * Sign-in always required. Paid listings also require verified phone.
-   * Stripe Connect remains optional until the host wants card payouts.
+   * Sign-in always required. Paid listings also require verified phone and
+   * finished Connect payouts — otherwise the renter pays and the money has
+   * nowhere to land.
    */
   ready: boolean;
   /** Host finished Connect enough to receive payouts. */
@@ -115,8 +116,10 @@ export function resolveSellerGoPublicNextStep(
 ): SellerGoPublicStep {
   if (!status.signedIn) return "sign_in";
   if (status.requiresPhone && !status.phoneVerified) return "phone";
-  // Highlight optional Connect until done — go-live does not require it.
-  if (!status.payoutsEnabled && !status.onboardingComplete) return "stripe";
+  // Paid listings need payouts enabled before the shelf goes live.
+  if (status.requiresPhone && !status.payoutsEnabled) {
+    return "stripe";
+  }
   return "ready";
 }
 
@@ -155,7 +158,10 @@ export function listingRequiresPhoneKyc(
 function isPayoutsReady(
   status: Pick<SellerGoPublicStatus, "payoutsEnabled" | "onboardingComplete">,
 ): boolean {
-  return Boolean(status.payoutsEnabled || status.onboardingComplete);
+  // onboardingComplete alone is not enough — charges can be on while payouts
+  // are still blocked, which is exactly the M10/M11 hole.
+  void status.onboardingComplete;
+  return Boolean(status.payoutsEnabled);
 }
 
 export async function loadSellerGoPublicStatus(
@@ -175,7 +181,8 @@ export async function loadSellerGoPublicStatus(
       payoutsEnabled: false,
       onboardingComplete: false,
     });
-    const ready = signedIn && (!requiresPhone || phoneVerified);
+    // Offline / unsigned: a paid listing cannot go live without Connect.
+    const ready = signedIn && (!requiresPhone || false);
     return {
       signedIn,
       phoneVerified,
@@ -222,7 +229,10 @@ export async function loadSellerGoPublicStatus(
     onboardingComplete: connect.onboardingComplete,
   });
   const payoutsReady = isPayoutsReady(connect);
-  const ready = !requiresPhone || phoneVerified;
+  // Paid listings (phone KYC required) also need Connect before go-live —
+  // otherwise the renter pays and the host cannot receive the money.
+  const ready =
+    (!requiresPhone || phoneVerified) && (!requiresPhone || payoutsReady);
 
   return {
     signedIn: true,

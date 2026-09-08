@@ -869,6 +869,9 @@ export async function boostListingRemote(input: {
   boostedTier: number;
   ownerId: string;
 }): Promise<void> {
+  // Optimistic local only. Writing boosted_until from the device is refused by
+  // listings_protect_boost (046/047); the Stripe webhook is the one that stamps
+  // the column after payment succeeds.
   const listing = getPublishedListingById(input.listingId);
   if (listing) {
     updateStoredListing({
@@ -877,18 +880,6 @@ export async function boostListingRemote(input: {
       boostedTier: input.boostedTier,
     });
   }
-
-  if (!isSupabaseConfigured()) return;
-  const supabase = getSupabaseClient();
-  if (!supabase) return;
-  await supabase
-    .from("listings")
-    .update({
-      boosted_until: input.boostedUntil,
-      boosted_tier: input.boostedTier,
-    })
-    .eq("id", input.listingId)
-    .eq("owner_id", input.ownerId);
 }
 
 function createInitialPricingFallback(): ListingDraft["pricing"] {

@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { randomUUID } from "crypto";
 import { applyCors, handleOptions } from "../../lib/cors";
 import { isStripeServerConfigured } from "../../lib/keys";
+import { stripeKeyModeMismatch } from "../../lib/stripe/ensureConnectAccount";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
 import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
@@ -41,6 +42,12 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   if (!isStripeServerConfigured()) {
     res.status(200).json({ ok: false, reason: "Stripe not configured" });
+    return;
+  }
+
+  const mismatch = stripeKeyModeMismatch();
+  if (mismatch) {
+    res.status(200).json({ ok: false, code: mismatch.code, reason: mismatch.reason });
     return;
   }
 
@@ -96,11 +103,28 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     .select("listing_id, state")
     .in("listing_id", listingIds);
 
+  // Accepted offers for this buyer (and any other reserved offers on these
+  // listings) so the charge matches the handshake, not the sticker price.
+  const { data: offerRows } = user
+    ? await admin
+        .from("garage_neighbor_offers")
+        .select("listing_id, buyer_id, amount_cents, status")
+        .in("listing_id", listingIds)
+        .eq("status", "accepted")
+    : { data: [] as unknown[] };
+
   const validated = validateGarageSellLines({
     hostId,
     listingIds,
     listings: (listingRows ?? []) as GarageListingRow[],
     lots: (lotRows ?? []) as GarageLotRow[],
+    buyerId: user?.id ?? null,
+    offers: (offerRows ?? []) as {
+      listing_id: string;
+      buyer_id: string;
+      amount_cents: number;
+      status: string;
+    }[],
   });
   if (!validated.ok) {
     res.status(409).json({ ok: false, error: validated.error });

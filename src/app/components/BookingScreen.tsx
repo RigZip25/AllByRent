@@ -1405,6 +1405,7 @@ function BookingScreenLoaded({
   };
 
   const handleConfirm = () => {
+    if (confirmBusy) return;
     if (!canSubmitBookingRequest(auth.userId, listing.hostId)) {
       setPaymentError(getSignInRequiredMessage());
       return;
@@ -1481,7 +1482,11 @@ function BookingScreenLoaded({
           setDepositClientSecret(deposit.clientSecret);
           return;
         }
+        // Rental auth already succeeded — do not leave the booking hanging.
+        // Finalize without a deposit hold and surface the error for a later retry.
+        setPendingDepositCents(0);
         setPaymentError(deposit.reason);
+        finalizeAfterPayment(bookingId);
       })().finally(() => setConfirmBusy(false));
       return;
     }
