@@ -194,16 +194,25 @@ import { getSearchCountryCode } from "../../lib/locationCountry";
 import { AvailabilityCalendar } from "../../components/availability/AvailabilityCalendar";
 import {
   addDaysIso,
+  addMonthsIso,
+  approvalDeadlineFromCreatedAt,
   daysInclusive,
+  endOfUtcDayIso,
   fetchListingBusyIntervals,
+  formatIsoDateLabel,
   isRangeBusy,
+  localHmOnDateToIso,
   parseIsoDateLocal,
+  todayIsoLocal,
   type BusyInterval,
 } from "../../lib/availabilityBusy";
 
 const GREEN = "#0D5C3A";
 
-function minimumPeriodToDays(period: MinimumRentalPeriod | string | undefined): number {
+function minimumPeriodToDays(
+  period: MinimumRentalPeriod | string | undefined,
+  fromIso = todayIsoLocal(),
+): number {
   switch (period) {
     case "3 days":
       return 3;
@@ -211,8 +220,11 @@ function minimumPeriodToDays(period: MinimumRentalPeriod | string | undefined): 
       return 7;
     case "2 weeks":
       return 14;
-    case "1 month":
-      return 30;
+    case "1 month": {
+      // Calendar month from the booking start day (Stage 16 / W6), not a flat 30.
+      const end = addMonthsIso(fromIso, 1);
+      return Math.max(1, daysInclusive(fromIso, end) - 1);
+    }
     case "1 day":
     default:
       return 1;
@@ -220,9 +232,21 @@ function minimumPeriodToDays(period: MinimumRentalPeriod | string | undefined): 
 }
 
 function defaultStartIso(): string {
-  const d = new Date();
-  d.setDate(d.getDate() + 2);
-  return d.toISOString().slice(0, 10);
+  return addDaysIso(todayIsoLocal(), 2);
+}
+
+function hostPickupHmForDate(listing: ListingDraft, dateIso: string): string {
+  const day = parseIsoDateLocal(dateIso.slice(0, 10));
+  const dow = day?.getDay() ?? new Date().getDay();
+  const weekend = dow === 0 || dow === 6;
+  const hm = weekend
+    ? listing.handoff.inPersonWeekendTimeStart || listing.handoff.inPersonTimeStart
+    : listing.handoff.inPersonTimeStart;
+  return (hm || "09:00").trim();
+}
+
+function pickupAtForBooking(listing: ListingDraft, startDate: string): string {
+  return localHmOnDateToIso(startDate, hostPickupHmForDate(listing, startDate));
 }
 
 function fulfillmentOptions(
@@ -335,9 +359,11 @@ function BookingScreenLoaded({
   const options = useMemo(() => fulfillmentOptions(listing, t.booking), [listing, t.booking]);
   const defaultFulfillment =
     options.find((o) => !o.disabled)?.id ?? options[0]?.id ?? "pickup";
-  const minRentalDays = minimumPeriodToDays(listing.pricing.minimumPeriod);
 
-  const [rentalDays, setRentalDays] = useState(() => Math.max(2, minRentalDays));
+  const [startDate, setStartDate] = useState(defaultStartIso);
+  const minRentalDays = minimumPeriodToDays(listing.pricing.minimumPeriod, startDate);
+
+  const [rentalDays, setRentalDays] = useState(() => Math.max(1, minRentalDays));
   const [fulfillment, setFulfillment] = useState<FulfillmentMethod>(defaultFulfillment);
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
@@ -346,7 +372,6 @@ function BookingScreenLoaded({
   const [pendingDepositCents, setPendingDepositCents] = useState(0);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
-  const [startDate, setStartDate] = useState(defaultStartIso);
   const [hostDisplayName, setHostDisplayName] = useState(t.booking.hostFallback);
   const [insuranceProof, setInsuranceProof] = useState<MediaRef | null>(null);
   const [insuranceProofPath, setInsuranceProofPath] = useState("");
@@ -1032,7 +1057,8 @@ function BookingScreenLoaded({
           ? t.booking.pickupContactless
           : t.booking.pickupInPerson;
 
-    const approvalDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const bookedIso = new Date().toISOString();
+    const approvalDeadline = approvalDeadlineFromCreatedAt(bookedIso);
 
     const extrasLabels = offeredExtraKeys
       .filter((key) => selectedExtras[key])
@@ -1046,8 +1072,6 @@ function BookingScreenLoaded({
           }),
         );
       });
-
-    const bookedIso = new Date().toISOString();
 
     const rentalAgreement = createRentalAgreementRecord({
       locale: getLocale(),
@@ -1204,11 +1228,10 @@ function BookingScreenLoaded({
       endDate,
       createdAt: bookedIso,
       bookedAt: bookedIso,
-      // The same two moments the rental row is created with. Without them on
-      // the local booking the host has no pickup time to measure a no-show
-      // against, and no due time to be late from, until a sync brings them back.
-      pickupScheduledAt: new Date(`${startDate}T14:00:00`).toISOString(),
-      returnDueAt: new Date(`${endDate}T23:59:59`).toISOString(),
+      // Same instants the rental row is created with — host hours for pickup,
+      // UTC end-of-day for due (Stage 16 / W1 + W7).
+      pickupScheduledAt: pickupAtForBooking(listing, startDate),
+      returnDueAt: endOfUtcDayIso(endDate),
       lateReturnFee: lateReturnSnapshot,
       listingId: listing.id,
       itemQrToken: listing.qrToken?.trim() || listing.id,
@@ -1233,7 +1256,7 @@ function BookingScreenLoaded({
       fulfillmentMethod: fulfillment,
       deliveryAddress: deliveryRequested ? deliveryAddress.trim() : undefined,
       contactlessInstructions: listing.handoff.contactlessInstructions || undefined,
-      pickupWindowStart: new Date().toISOString(),
+      pickupWindowStart: pickupAtForBooking(listing, startDate),
       stripePayment: withStripePayment,
       paymentOnHold: withStripePayment,
       depositAmountCents,
@@ -1366,14 +1389,21 @@ function BookingScreenLoaded({
         listingId: listing.id,
       });
     }
-    appendRentalBooking(booking);
+    try {
+      appendRentalBooking(booking);
+    } catch (error) {
+      setPaymentError(
+        error instanceof Error ? error.message : t.booking.datesBlocked,
+      );
+      return;
+    }
     onConfirmed(id);
   };
 
   const persistRentalRow = async (id: string, booking: RentalBooking): Promise<void> => {
     if (!auth.userId || !listing.hostId) return;
-    const pickupAt = booking.pickupScheduledAt ?? new Date(`${startDate}T14:00:00`).toISOString();
-    const dueAt = booking.returnDueAt ?? new Date(`${endDate}T23:59:59`).toISOString();
+    const pickupAt = booking.pickupScheduledAt ?? pickupAtForBooking(listing, startDate);
+    const dueAt = booking.returnDueAt ?? endOfUtcDayIso(endDate);
     const row = toSupabaseRentalInsert({
       id,
       listingId: listing.id,
@@ -1579,8 +1609,7 @@ function BookingScreenLoaded({
             </p>
           ) : null}
           <p className="mt-2 text-xs text-muted-foreground">
-            {new Date(startDate).toLocaleDateString()} –{" "}
-            {new Date(endDate).toLocaleDateString()}
+            {formatIsoDateLabel(startDate)} – {formatIsoDateLabel(endDate)}
           </p>
           <p className="mt-3 text-xs font-medium text-muted-foreground">
             {t.booking.selectRentalDates}

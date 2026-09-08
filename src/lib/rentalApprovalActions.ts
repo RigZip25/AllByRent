@@ -30,7 +30,8 @@ export async function approveRentalBooking(
   const home = getHomeLocation();
   const handoffPatch: Partial<RentalBooking> = {
     status: "pending_checkin",
-    pickupWindowStart: new Date().toISOString(),
+    // Keep the scheduled pickup from booking — do not reset to "now" (Stage 16 / W13).
+    pickupWindowStart: booking.pickupScheduledAt ?? booking.pickupWindowStart,
     approvalDeadline: undefined,
     paymentOnHold: false,
   };

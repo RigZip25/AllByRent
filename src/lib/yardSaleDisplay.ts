@@ -8,6 +8,7 @@ import {
 import type { GarageSaleSchedule } from "./garageSaleStorage";
 import { garageSaleOpenLabel } from "./garageSaleStorage";
 import { getMessages } from "./i18n";
+import { localMinutesInTimeZone } from "./availabilityBusy";
 
 export type YardSaleOpenStatus = "now" | "today" | "weekend" | "scheduled" | "unset";
 
@@ -53,8 +54,7 @@ export function openStatusFromSchedule(
   }
 
   const summary = garageSaleOpenLabel(schedule);
-  const day = now.getDay();
-  const minutes = now.getHours() * 60 + now.getMinutes();
+  const { dayOfWeek: day, minutes } = localMinutesInTimeZone(now, schedule.timeZone);
   const start = parseHm(schedule.startTime);
   const end = parseHm(schedule.endTime);
   const isOpenDay = schedule.daysOfWeek.includes(day);

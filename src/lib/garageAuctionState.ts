@@ -210,6 +210,8 @@ function assignAwaitingCheckout(
  * Call when loading the shop and periodically while open.
  */
 export function resolveEndedAuctions(listingIds: string[], hostIdByListing?: Record<string, string>): void {
+  // Device clock must not reopen or settle ended lots while offline (Stage 16 / W10).
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return;
   const map = readLotStates();
   const now = Date.now();
   let changed = false;
@@ -260,6 +262,7 @@ export function resolveExpiredWinnerCheckouts(
   listingIds: string[],
   hostIdByListing?: Record<string, string>,
 ): void {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return;
   const map = readLotStates();
   const now = Date.now();
   let changed = false;

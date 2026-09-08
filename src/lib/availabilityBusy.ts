@@ -43,8 +43,105 @@ export function todayIsoLocal(): string {
 
 export function addMonthsIso(iso: string, months: number): string {
   const base = parseIsoDateLocal(iso) ?? new Date();
-  const next = new Date(base.getFullYear(), base.getMonth() + months, base.getDate());
-  return toIsoDateLocal(next);
+  const targetMonth = new Date(base.getFullYear(), base.getMonth() + months, 1);
+  const lastDay = new Date(
+    targetMonth.getFullYear(),
+    targetMonth.getMonth() + 1,
+    0,
+  ).getDate();
+  const day = Math.min(base.getDate(), lastDay);
+  return toIsoDateLocal(
+    new Date(targetMonth.getFullYear(), targetMonth.getMonth(), day),
+  );
+}
+
+/** UTC end-of-calendar-day for `due_at` / deposit windows (Stage 16 / W1). */
+export function endOfUtcDayIso(dateIso: string): string {
+  const day = dateIso.trim().slice(0, 10);
+  return `${day}T23:59:59.000Z`;
+}
+
+/**
+ * Interpret HH:mm on a YYYY-MM-DD as a local wall-clock instant, then ISO.
+ * Used for host handoff hours → `pickup_at` (Stage 16 / W7).
+ */
+export function localHmOnDateToIso(dateIso: string, hm: string): string {
+  const base = parseIsoDateLocal(dateIso.slice(0, 10));
+  if (!base) return new Date().toISOString();
+  const match = /^(\d{1,2}):(\d{2})$/.exec(hm.trim());
+  const hours = match ? Number(match[1]) : 9;
+  const minutes = match ? Number(match[2]) : 0;
+  base.setHours(
+    Number.isFinite(hours) ? Math.min(23, Math.max(0, hours)) : 9,
+    Number.isFinite(minutes) ? Math.min(59, Math.max(0, minutes)) : 0,
+    0,
+    0,
+  );
+  return base.toISOString();
+}
+
+/** Format YYYY-MM-DD without UTC midnight day-shift (Stage 16 / W5). */
+export function formatIsoDateLabel(
+  dateIso: string,
+  opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" },
+): string {
+  const d = parseIsoDateLocal(dateIso.slice(0, 10));
+  if (!d) return dateIso;
+  return d.toLocaleDateString(undefined, opts);
+}
+
+/** Pending-approval expiry: always `created_at + 24h` (Stage 16 / W12). */
+export function approvalDeadlineFromCreatedAt(createdAtIso: string): string {
+  const ms = new Date(createdAtIso).getTime();
+  const base = Number.isFinite(ms) ? ms : Date.now();
+  return new Date(base + 24 * 60 * 60 * 1000).toISOString();
+}
+
+/** Calendar-month length in days for the month containing `dateIso`. */
+export function daysInMonthContaining(dateIso: string): number {
+  const base = parseIsoDateLocal(dateIso.slice(0, 10)) ?? new Date();
+  return new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+}
+
+/**
+ * Minutes since local midnight for an IANA zone (Stage 16 / W9).
+ * Falls back to the device zone when `timeZone` is missing/invalid.
+ */
+export function localMinutesInTimeZone(now: Date, timeZone?: string | null): {
+  dayOfWeek: number;
+  minutes: number;
+} {
+  try {
+    const fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: timeZone || undefined,
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    });
+    const parts = fmt.formatToParts(now);
+    const weekday = parts.find((p) => p.type === "weekday")?.value ?? "";
+    const hour = Number(parts.find((p) => p.type === "hour")?.value ?? now.getHours());
+    const minute = Number(parts.find((p) => p.type === "minute")?.value ?? now.getMinutes());
+    const dowMap: Record<string, number> = {
+      Sun: 0,
+      Mon: 1,
+      Tue: 2,
+      Wed: 3,
+      Thu: 4,
+      Fri: 5,
+      Sat: 6,
+    };
+    return {
+      dayOfWeek: dowMap[weekday] ?? now.getDay(),
+      minutes: hour * 60 + minute,
+    };
+  } catch {
+    return {
+      dayOfWeek: now.getDay(),
+      minutes: now.getHours() * 60 + now.getMinutes(),
+    };
+  }
 }
 
 export function addDaysIso(iso: string, days: number): string {
