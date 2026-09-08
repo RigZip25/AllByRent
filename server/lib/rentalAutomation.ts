@@ -1,7 +1,12 @@
-import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 import { isStripeServerConfigured } from "./keys";
+import { insertNotification } from "./notifications";
+import {
+  assessLateFeeFromHandoff,
+  fetchListingHandoff,
+  issueLateFeeInvoice,
+} from "./rentalLateFee";
 
 const MS_MIN = 60_000;
 /** Soft no-show suggest — align with client NO_SHOW_MARK_AFTER_MS (2h). */
@@ -35,68 +40,6 @@ type RentalRow = {
   rental_total_cents: number;
   safely_policy_id: string | null;
 };
-
-type ListingHandoff = {
-  lateReturnFeeEnabled?: boolean;
-  lateReturnGraceMinutes?: number;
-  lateReturnFlatFeeUsd?: string;
-  lateReturnPerHourFeeUsd?: string;
-};
-
-function parseUsdToCents(raw: string | number | undefined | null): number {
-  if (raw == null) return 0;
-  const n =
-    typeof raw === "number"
-      ? raw
-      : Number.parseFloat(String(raw).replace(/^\$/, "").trim());
-  if (!Number.isFinite(n) || n <= 0) return 0;
-  return Math.round(n * 100);
-}
-
-function assessLateFeeFromHandoff(
-  handoff: ListingHandoff | null | undefined,
-  dueMs: number,
-  nowMs: number,
-): { pastGrace: boolean; feeCents: number; summary: string | null } {
-  if (!handoff?.lateReturnFeeEnabled) {
-    return { pastGrace: nowMs > dueMs, feeCents: 0, summary: null };
-  }
-  const graceMinutes =
-    typeof handoff.lateReturnGraceMinutes === "number" &&
-    Number.isFinite(handoff.lateReturnGraceMinutes)
-      ? Math.max(0, Math.round(handoff.lateReturnGraceMinutes))
-      : 30;
-  const flatCents = parseUsdToCents(handoff.lateReturnFlatFeeUsd ?? "20");
-  const perHourCents = parseUsdToCents(handoff.lateReturnPerHourFeeUsd ?? "15");
-  const graceEndsMs = dueMs + graceMinutes * MS_MIN;
-  const pastGrace = nowMs > graceEndsMs;
-  if (!pastGrace) {
-    return { pastGrace: false, feeCents: 0, summary: null };
-  }
-  const billableMs = Math.max(0, nowMs - graceEndsMs);
-  const billableHours = Math.max(1, Math.ceil(billableMs / (60 * MS_MIN)));
-  const feeCents = flatCents + billableHours * perHourCents;
-  const parts: string[] = [`${graceMinutes}m grace`];
-  if (flatCents > 0) parts.push(`$${(flatCents / 100).toFixed(2)} flat`);
-  if (perHourCents > 0) parts.push(`$${(perHourCents / 100).toFixed(2)}/hr`);
-  return { pastGrace: true, feeCents, summary: parts.join(" · ") };
-}
-
-async function insertNotification(
-  admin: SupabaseClient,
-  input: { recipientId: string; actorId: string | null; type: string; title: string; body: string },
-): Promise<void> {
-  const id = randomUUID();
-  await admin.from("notifications").insert({
-    id,
-    recipient_id: input.recipientId,
-    actor_id: input.actorId,
-    type: input.type,
-    title: input.title,
-    body: input.body,
-    read_at: null,
-  });
-}
 
 const RENTAL_AUTOMATION_COLUMNS =
   "id, listing_id, owner_id, renter_id, status, pickup_at, due_at, start_date, end_date, no_show_renter_notified_at, no_show_automation_at, no_show_fee_cents, late_fee_cents, late_fee_applied_at, overdue_hour_notified_at, owner_recovery_notified_at, safely_escalated_at, rental_total_cents, safely_policy_id";
@@ -307,16 +250,7 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
     }
 
     if (overdueMs >= MS_MIN && !rental.overdue_hour_notified_at) {
-      const { data: listingRow } = await admin
-        .from("listings")
-        .select("handoff")
-        .eq("id", rental.listing_id)
-        .maybeSingle();
-
-      const handoff =
-        listingRow?.handoff && typeof listingRow.handoff === "object"
-          ? (listingRow.handoff as ListingHandoff)
-          : null;
+      const handoff = await fetchListingHandoff(admin, rental.listing_id);
 
       const late = assessLateFeeFromHandoff(handoff, dueMs, now);
       let body =
@@ -324,7 +258,7 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
       if (late.summary) {
         body += ` Policy: ${late.summary}.`;
         if (late.pastGrace && late.feeCents > 0) {
-          body += ` Estimated late fee so far: $${(late.feeCents / 100).toFixed(2)} (host confirms via invoice).`;
+          body += ` So far that is $${(late.feeCents / 100).toFixed(2)}, invoiced when the item comes back.`;
         }
       }
 
@@ -344,6 +278,10 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
     }
 
     if (overdueMs >= 24 * 60 * MS_MIN && !rental.owner_recovery_notified_at) {
+      // A day out with no sign of the item: the fee stops being an estimate,
+      // whether or not the rental is ever handed back.
+      await issueLateFeeInvoice(admin, { rental, atMs: now });
+
       await insertNotification(admin, {
         recipientId: rental.owner_id,
         actorId: rental.renter_id,

@@ -1001,7 +1001,6 @@ export async function updateRentalRemote(
     runningLateSentAt?: string | null;
     runningLateAcknowledgedAt?: string | null;
     rentalAgreement?: RentalAgreementRecord | null;
-    invoices?: RentalInvoice[] | null;
   },
 ): Promise<void> {
   if (!isSupabaseConfigured()) return;
@@ -1042,9 +1041,6 @@ export async function updateRentalRemote(
   }
   if (patch.rentalAgreement !== undefined) {
     row.rental_agreement = patch.rentalAgreement;
-  }
-  if (patch.invoices !== undefined) {
-    row.rental_invoices = patch.invoices ?? [];
   }
   if (Object.keys(row).length === 0) return;
 
@@ -1105,9 +1101,8 @@ function remotePatchFromBooking(patch: Partial<RentalBooking>): Parameters<typeo
   if (patch.returnConditionPhoto?.storagePath) {
     remote.returnConditionPhotoPath = patch.returnConditionPhoto.storagePath;
   }
-  if (patch.invoices !== undefined) {
-    remote.invoices = patch.invoices ?? [];
-  }
+  // Invoices are not in this list: `/api/rentals/invoice` writes them, and the
+  // database reverts anything a device sends (migration 053).
   return remote;
 }
 

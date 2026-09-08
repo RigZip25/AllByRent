@@ -1275,6 +1275,7 @@ export const en: AppMessages = {
     invoiceKindFine: "Fine / penalty",
     invoiceKindNoShow: "No-show",
     invoiceKindDamage: "Damage",
+    invoiceKindExtension: "Extra days",
     invoiceKindCustom: "Custom",
     invoiceStripeScaffold:
       "Card payment link is scaffolded — invoices still save on the rental when card pay isn’t configured yet.",

@@ -2240,6 +2240,7 @@ export type AppMessages = {
     invoiceKindFine: string;
     invoiceKindNoShow: string;
     invoiceKindDamage: string;
+    invoiceKindExtension: string;
     invoiceKindCustom: string;
     invoiceStripeScaffold: string;
     close: string;

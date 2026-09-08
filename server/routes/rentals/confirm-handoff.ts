@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { applyCors, handleOptions } from "../../lib/cors";
 import { withApiErrorHandling } from "../../lib/safeHandler";
 import { getAdminClient, getUserFromBearer } from "../../lib/passkey/supabaseAdmin";
+import { issueLateFeeInvoice } from "../../lib/rentalLateFee";
 
 type Body = {
   rentalId?: string;
@@ -57,7 +58,7 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   const { data: rental, error } = await admin
     .from("rentals")
     .select(
-      "id, owner_id, renter_id, status, booking_mode, pickup_pin, return_pin, host_handed_over_at, renter_received_at, renter_returned_at, host_accepted_return_at, picked_up_at, returned_at, due_at, end_date",
+      "id, listing_id, owner_id, renter_id, status, booking_mode, pickup_pin, return_pin, host_handed_over_at, renter_received_at, renter_returned_at, host_accepted_return_at, picked_up_at, returned_at, due_at, end_date, late_fee_applied_at",
     )
     .eq("id", rentalId)
     .maybeSingle();
@@ -183,6 +184,23 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
   if (updateError || !updated) {
     res.status(500).json({ error: updateError?.message ?? "Failed to update rental" });
     return;
+  }
+
+  // The return is the moment the late fee stops accruing, so it is the moment
+  // it can be charged for real rather than quoted in a notification.
+  if (patch.renter_returned_at) {
+    await issueLateFeeInvoice(admin, {
+      rental: {
+        id: rental.id,
+        owner_id: rental.owner_id,
+        renter_id: rental.renter_id,
+        listing_id: rental.listing_id ?? null,
+        due_at: rental.due_at,
+        end_date: rental.end_date,
+        late_fee_applied_at: rental.late_fee_applied_at,
+      },
+      atMs: new Date(patch.renter_returned_at).getTime(),
+    });
   }
 
   res.status(200).json({

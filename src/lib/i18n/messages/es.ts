@@ -1274,6 +1274,7 @@ export const es: AppMessages = {
     invoiceKindFine: "Multa / sanción",
     invoiceKindNoShow: "No-show",
     invoiceKindDamage: "Daños",
+    invoiceKindExtension: "Días extra",
     invoiceKindCustom: "Personalizado",
     invoiceStripeScaffold:
       "El enlace de pago con tarjeta está preparado — las facturas se guardan en el alquiler aunque el pago con tarjeta aún no esté configurado.",

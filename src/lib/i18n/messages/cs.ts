@@ -1292,6 +1292,7 @@ export const cs: AppMessages = {
     invoiceKindFine: "Pokuta",
     invoiceKindNoShow: "Nedostavení",
     invoiceKindDamage: "Škoda",
+    invoiceKindExtension: "Dny navíc",
     invoiceKindCustom: "Vlastní",
     invoiceStripeScaffold:
       "Platební odkaz kartou je připravený — faktury se na půjčce uloží i když platba kartou ještě není nastavená.",
