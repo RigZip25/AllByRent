@@ -66,6 +66,7 @@ import { PwaInstallProvider } from "../hooks/PwaInstallProvider";
 import { useBrowserBackTrap } from "../hooks/useBrowserBackTrap";
 import { PwaUpdateProvider } from "../hooks/PwaUpdateProvider";
 import { AuthProvider, useAuth } from "../hooks/AuthProvider";
+import { useRentalLifecycleSweep } from "../hooks/useRentalLifecycleSweep";
 import { RequireAuthProvider } from "../hooks/RequireAuth";
 import { PageTranslateBridge } from "../components/PageTranslateBridge";
 import {
@@ -594,6 +595,8 @@ function bootItemIdForDeepLink(target: DeepLinkTarget | null): string | null {
 
 function AppRoutes() {
   const auth = useAuth();
+  // Requests that expired, pickups nobody came to, no-shows never confirmed.
+  useRentalLifecycleSweep();
   const boot = readBootQuery();
   const bootDeepLink = useRef(readBootDeepLink()).current;
   const bootRent = useRef(readBootRentLanding()).current;

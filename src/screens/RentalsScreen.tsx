@@ -13,8 +13,7 @@ import { BookingRequestCard } from "../components/rentals/BookingRequestCard";
 import { PendingApprovalCard } from "../components/rentals/PendingApprovalCard";
 import { RentalCard } from "../components/rentals/RentalCard";
 import { getAppMode } from "../lib/appMode";
-import { expireStalePendingApprovals } from "../lib/expirePendingApprovals";
-import { applySoftNoShowSuggestions } from "../lib/rentalNoShowActions";
+import { runRentalLifecycleSweep } from "../lib/rentalLifecycleSweep";
 import {
   getActiveBookings,
   getHistoryBookings,
@@ -207,17 +206,12 @@ export function RentalsScreen({
       setBookings([]);
       return;
     }
-    void expireStalePendingApprovals(userId)
-      .then(() =>
-        syncRentalsFromRemote(userId)
-          .then((remote) => setBookings(applySoftNoShowSuggestions(remote)))
-          .catch(() => setBookings(applySoftNoShowSuggestions(loadRentalBookings()))),
-      )
-      .catch(() => {
-        void syncRentalsFromRemote(userId)
-          .then((remote) => setBookings(applySoftNoShowSuggestions(remote)))
-          .catch(() => setBookings(applySoftNoShowSuggestions(loadRentalBookings())));
-      });
+    // The deadline sweep runs app-wide; here it only has to happen before the
+    // list is drawn, so an expired request never shows as still waiting.
+    void runRentalLifecycleSweep(userId, { force: true })
+      .then(() => syncRentalsFromRemote(userId))
+      .then((remote) => setBookings(remote))
+      .catch(() => setBookings(loadRentalBookings()));
   }, [auth.userId]);
 
   const hostRequests = useMemo(
