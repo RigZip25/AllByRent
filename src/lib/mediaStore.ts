@@ -38,7 +38,7 @@ type MediaStoreLimits = {
   maxItems: number;
 };
 
-const DB_NAME = "allbyrent_media";
+export const DB_NAME = "allbyrent_media";
 const DB_VERSION = 1;
 const STORE = "media";
 

@@ -258,10 +258,12 @@ export function Step1Photos({
         await appendPhotoBlob(blob);
         nextIndex += 1;
       } catch (error) {
+        // Keep going through the batch: one unreadable file used to drop every
+        // photo the host picked after it.
         console.warn("[listing] Couldn't add photo", error);
         setPhotoWarning(photosCopy.couldntAddPhoto);
         setErrorIndex(targetIndex);
-        break;
+        continue;
       } finally {
         setProcessingIndex(null);
         setDraft((current) => ({ ...current, photoEnhancementPending: false }));
