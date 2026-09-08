@@ -3065,6 +3065,9 @@ export type AppMessages = {
     yesDelete: string;
     deleting: string;
     deleteFailed: string;
+    /** Why the listing cannot be deleted while it is booked or out. */
+    deleteBlockedLiveRental: (count: number) => string;
+    pauseKeepsLiveRental: string;
     editAria: (label: string) => string;
     editTitle: (field: string) => string;
     editDailyPrice: string;

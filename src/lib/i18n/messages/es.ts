@@ -6889,6 +6889,12 @@ export const es: AppMessages = {
     yesDelete: "Sí, eliminar",
     deleting: "Eliminando...",
     deleteFailed: "No se pudo eliminar el anuncio. Inténtalo de nuevo.",
+    deleteBlockedLiveRental: (count) =>
+      count === 1
+        ? "Hay un alquiler reservado, en curso o en disputa en este anuncio. Eliminarlo borraría ese alquiler para los dos: termínalo o cancélalo primero."
+        : `Hay ${count} alquileres reservados, en curso o en disputa en este anuncio. Eliminarlo los borraría para ambas partes: termínalos o cancélalos primero.`,
+    pauseKeepsLiveRental:
+      "Pausar solo detiene nuevas reservas. El alquiler que ya está en curso sigue según lo acordado.",
     editAria: (label) => `Editar ${label}`,
     editTitle: (field) => `Editar ${field}`,
     editDailyPrice: "Precio diario",

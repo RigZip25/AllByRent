@@ -158,7 +158,9 @@ export function HostGarageListSection({
     const ownerId = resolveGarageHostId(auth.userId, auth.userEmail) || auth.userId || "";
     try {
       if (ownerId) {
-        await removePublishedListingRemote(listingId, ownerId);
+        // A listing with a live rental cannot be deleted, so the card stays.
+        const result = await removePublishedListingRemote(listingId, ownerId);
+        if (!result.ok) return;
       } else {
         removePublishedListing(listingId);
       }

@@ -6903,6 +6903,12 @@ export const en: AppMessages = {
     yesDelete: "Yes, delete",
     deleting: "Deleting...",
     deleteFailed: "Could not delete listing. Try again.",
+    deleteBlockedLiveRental: (count) =>
+      count === 1
+        ? "One rental on this listing is booked, out, or in dispute. Deleting it would delete that rental for both of you — finish or cancel it first."
+        : `${count} rentals on this listing are booked, out, or in dispute. Deleting it would delete them for both sides — finish or cancel them first.`,
+    pauseKeepsLiveRental:
+      "Pausing only stops new bookings. The rental already running carries on as agreed.",
     editAria: (label) => `Edit ${label}`,
     editTitle: (field) => `Edit ${field}`,
     editDailyPrice: "Daily price",

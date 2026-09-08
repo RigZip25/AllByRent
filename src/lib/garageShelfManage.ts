@@ -93,7 +93,10 @@ export async function removeGarageShelfItem(
   // Await remote delete so a Garage refresh cannot re-hydrate the row from Supabase.
   if (ownerId) {
     try {
-      await removePublishedListingRemote(listingId, ownerId);
+      // A refused delete stays refused: the database keeps a listing whose
+      // rental is still running, and the local copy has to match.
+      const result = await removePublishedListingRemote(listingId, ownerId);
+      if (!result.ok) return result;
     } catch {
       removePublishedListing(listingId);
     }

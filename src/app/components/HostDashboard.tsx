@@ -361,7 +361,10 @@ export function HostDashboard({
     const ownerId = resolveGarageHostId(auth.userId, auth.userEmail) || auth.userId || "";
     try {
       if (ownerId) {
-        await removePublishedListingRemote(listingId, ownerId);
+        // The database refuses to delete a listing with a live rental; the row
+        // stays, so the card has to stay with it.
+        const result = await removePublishedListingRemote(listingId, ownerId);
+        if (!result.ok) return;
       } else {
         removePublishedListing(listingId);
       }

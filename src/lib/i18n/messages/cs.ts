@@ -6904,6 +6904,12 @@ export const cs: AppMessages = {
     yesDelete: "Ano, smazat",
     deleting: "Mažu...",
     deleteFailed: "Nabídku se nepodařilo smazat. Zkus znovu.",
+    deleteBlockedLiveRental: (count) =>
+      count === 1
+        ? "Jedna půjčka na této nabídce je rezervovaná, venku nebo ve sporu. Smazáním by zmizela i ta půjčka — oběma stranám. Nejdřív ji dokonči nebo zruš."
+        : `${count} půjčky na této nabídce jsou rezervované, venku nebo ve sporu. Smazáním by zmizely oběma stranám — nejdřív je dokonči nebo zruš.`,
+    pauseKeepsLiveRental:
+      "Pauza zastaví jen nové rezervace. Už běžící půjčka pokračuje podle dohody.",
     editAria: (label) => `Upravit ${label}`,
     editTitle: (field) => `Upravit ${field}`,
     editDailyPrice: "Denní cena",

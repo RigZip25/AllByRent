@@ -237,30 +237,45 @@ export function removePublishedListing(id: string): void {
   }
 }
 
-export async function removePublishedListingRemote(id: string, ownerId: string): Promise<void> {
-  removePublishedListing(id);
-  if (!isSupabaseConfigured()) {
+export type RemoveListingResult = { ok: true } | { ok: false; reason: string };
+
+/**
+ * Delete the listing everywhere, or nowhere.
+ *
+ * The local copy used to go first and the remote error was ignored, so a
+ * refused delete left the host with no listing on their device and the row
+ * still live — and since migration 059 refuses to delete a listing with a
+ * rental booked, out, or in dispute, that refusal is now a normal answer.
+ */
+export async function removePublishedListingRemote(
+  id: string,
+  ownerId: string,
+): Promise<RemoveListingResult> {
+  const finishLocally = async (): Promise<RemoveListingResult> => {
+    removePublishedListing(id);
     const { closeStoreIfShelfEmptyForHostId } = await import("./garageStoreLive");
     await closeStoreIfShelfEmptyForHostId(ownerId);
-    return;
-  }
+    return { ok: true };
+  };
+
+  if (!isSupabaseConfigured()) return finishLocally();
   const supabase = getSupabaseClient();
-  if (!supabase) {
-    const { closeStoreIfShelfEmptyForHostId } = await import("./garageStoreLive");
-    await closeStoreIfShelfEmptyForHostId(ownerId);
-    return;
-  }
+  if (!supabase) return finishLocally();
+
   // RLS scopes deletes to the signed-in owner. Prefer id-only so a mismatched
   // owner_id filter cannot silently no-op and let fetch merge resurrect the row.
   const byId = await supabase.from("listings").delete().eq("id", id);
   if (byId.error) {
     const oid = ownerId.trim();
-    if (oid) {
-      await supabase.from("listings").delete().eq("id", id).eq("owner_id", oid);
+    const retry = oid
+      ? await supabase.from("listings").delete().eq("id", id).eq("owner_id", oid)
+      : null;
+    if (!retry || retry.error) {
+      return { ok: false, reason: (retry?.error ?? byId.error).message };
     }
   }
-  const { closeStoreIfShelfEmptyForHostId } = await import("./garageStoreLive");
-  await closeStoreIfShelfEmptyForHostId(ownerId);
+
+  return finishLocally();
 }
 
 /** Persist an in-progress wizard draft (local always; remote when signed in). */
