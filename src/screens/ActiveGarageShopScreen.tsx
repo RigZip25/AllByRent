@@ -284,6 +284,8 @@ export function ActiveGarageShopScreen({
           const { listOpenSaleEvents } = await import("../lib/openSale/eventStorage");
           const all = listOpenSaleEvents().filter((e) => e.hostId === hostId);
           await syncOpenSaleLotPayFromRemote(all.map((e) => e.id));
+          const { syncOpenSaleBansFromRemote } = await import("../lib/openSale/bidCart");
+          await syncOpenSaleBansFromRemote();
         } catch {
           /* */
         }

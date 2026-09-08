@@ -78,6 +78,7 @@ export function BottomNav({
   onAdd,
   onActivity,
   onMore,
+  activityBadgeCount = 0,
 }: {
   activeTab?: BottomNavTab;
   onHome: () => void;
@@ -85,9 +86,12 @@ export function BottomNav({
   onAdd: () => void;
   onActivity: () => void;
   onMore: () => void;
+  /** Unread chats (and similar) — shown on the Activity bell. */
+  activityBadgeCount?: number;
 }) {
   const mreLabel = MASCOT_NAME.replace("Mr. ", "Mr.");
   const { nav } = useMessages();
+  const badge = activityBadgeCount > 0 ? Math.min(activityBadgeCount, 99) : 0;
 
   return (
     <nav
@@ -140,10 +144,20 @@ export function BottomNav({
         <button
           type="button"
           onClick={() => runNavAction(onActivity)}
-          className="flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
+          className="relative flex min-h-[44px] min-w-[52px] touch-manipulation flex-col items-center justify-end gap-1 py-1"
           aria-label={nav.activityAria}
         >
-          <NavIconActivity active={activeTab === "activity"} />
+          <span className="relative inline-flex">
+            <NavIconActivity active={activeTab === "activity"} />
+            {badge > 0 ? (
+              <span
+                className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
+                style={{ backgroundColor: GREEN }}
+              >
+                {badge}
+              </span>
+            ) : null}
+          </span>
           <TabLabel active={activeTab === "activity"}>{nav.activity}</TabLabel>
         </button>
 

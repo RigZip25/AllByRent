@@ -16,6 +16,8 @@ import { getHighBid, type GarageBid } from "../garageShopStorage";
 import { pushInAppNotification } from "../inAppNotifications";
 import {
   fetchOpenSaleLotResultsRemote,
+  fetchOwnOpenSaleBanRemote,
+  pushOpenSaleBanRemote,
   pushOpenSaleLotResultRemote,
   type OpenSaleLotPayRemote,
 } from "../garage/garageSupabaseSync";
@@ -171,6 +173,31 @@ export function banOpenSaleBidder(bidderId: string, now = Date.now()): void {
   const map = readBans();
   map[bidderId] = new Date(now + OPEN_SALE_BAN_DAYS * 86_400_000).toISOString();
   writeBans(map);
+  void pushOpenSaleBanRemote({ bidderId, days: OPEN_SALE_BAN_DAYS });
+}
+
+/** Merge server ban row(s) into localStorage (C6). */
+export function mergeOpenSaleBansFromRemote(
+  rows: Array<{ bidderId: string; bannedUntil: string }>,
+): void {
+  if (rows.length === 0) return;
+  const map = readBans();
+  let changed = false;
+  for (const row of rows) {
+    if (!row.bidderId || !row.bannedUntil) continue;
+    const prev = map[row.bidderId];
+    if (!prev || new Date(row.bannedUntil).getTime() > new Date(prev).getTime()) {
+      map[row.bidderId] = row.bannedUntil;
+      changed = true;
+    }
+  }
+  if (changed) writeBans(map);
+}
+
+/** Pull the signed-in user's ban from open_sale_bans into localStorage. */
+export async function syncOpenSaleBansFromRemote(): Promise<void> {
+  const own = await fetchOwnOpenSaleBanRemote();
+  if (own) mergeOpenSaleBansFromRemote([own]);
 }
 
 export function getOpenSaleCartLines(_bidderId = getGarageBidderId()): OpenSaleCartLine[] {

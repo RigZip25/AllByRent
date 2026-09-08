@@ -1,3 +1,5 @@
+import { mayDeliverNotification, type InAppNotificationKind } from "./notificationDelivery";
+
 const NOTIF_KEY = "allbyrent_in_app_notifications";
 
 export type InAppNotification = {
@@ -6,7 +8,7 @@ export type InAppNotification = {
   body: string;
   createdAt: string;
   read: boolean;
-  type: "booking_request" | "running_late" | "return" | "general";
+  type: InAppNotificationKind;
   rentalId?: string;
   listingId?: string;
 };
@@ -24,6 +26,7 @@ export function loadInAppNotifications(): InAppNotification[] {
 export function pushInAppNotification(
   notification: Omit<InAppNotification, "id" | "createdAt" | "read">,
 ): void {
+  if (!mayDeliverNotification(notification.type)) return;
   const list = loadInAppNotifications();
   list.unshift({
     ...notification,

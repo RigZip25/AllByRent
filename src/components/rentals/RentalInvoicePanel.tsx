@@ -14,6 +14,7 @@ import { issueRentalInvoiceRemote, voidRentalInvoiceRemote } from "../../lib/ren
 import { assessLateReturnFee } from "../../lib/lateReturnFee";
 import { createRentalInvoicePaymentIntent } from "../../lib/stripePayments";
 import { isStripePaymentsEnabled } from "../../lib/stripeConfig";
+import { isPaymentsReady, getStripeRequiredMessage } from "../../lib/config/production";
 import { formatUsd } from "../../lib/rentalPricing";
 import { useMessages } from "../../lib/i18n/react";
 import type { RentalBooking } from "../../lib/rentalsStorage";
@@ -196,6 +197,10 @@ export function RentalInvoicePanel({
 
   const startPay = async (invoice: RentalInvoice) => {
     setError(null);
+    if (!isPaymentsReady()) {
+      setError(getStripeRequiredMessage());
+      return;
+    }
     setPayBusy(true);
     const result = await createRentalInvoicePaymentIntent({
       rentalId: booking.id,
@@ -211,16 +216,6 @@ export function RentalInvoicePanel({
     setPayBusy(false);
     if (!result.ok) {
       setError(result.reason);
-      // Still mark payment_pending locally when Stripe is unavailable — scaffold record.
-      if (!isStripePaymentsEnabled()) {
-        onChange(
-          upsertInvoiceOnList(invoices, {
-            ...invoice,
-            status: "open",
-            updatedAt: new Date().toISOString(),
-          }),
-        );
-      }
       return;
     }
     onChange(
@@ -419,6 +414,7 @@ export function RentalInvoicePanel({
                 </div>
                 <div className="flex flex-col gap-1">
                   {!isHost &&
+                  isPaymentsReady() &&
                   (inv.status === "open" || inv.status === "payment_pending") &&
                   inv.totalCents >= 50 ? (
                     <button
@@ -430,6 +426,14 @@ export function RentalInvoicePanel({
                     >
                       {copy.invoicePayCta}
                     </button>
+                  ) : null}
+                  {!isHost &&
+                  !isPaymentsReady() &&
+                  (inv.status === "open" || inv.status === "payment_pending") &&
+                  inv.totalCents >= 50 ? (
+                    <p className="max-w-[10rem] text-right text-[10px] leading-snug text-amber-800">
+                      {getStripeRequiredMessage()}
+                    </p>
                   ) : null}
                   {isHost && (inv.status === "open" || inv.status === "payment_pending") ? (
                     <button

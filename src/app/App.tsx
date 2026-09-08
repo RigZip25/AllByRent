@@ -14,7 +14,6 @@ import { WhereAreYou } from "../screens/onboarding/WhereAreYou";
 import { WhereAreYouHeading } from "../screens/onboarding/WhereAreYouHeading";
 import { WhereAreYouManual } from "../screens/onboarding/WhereAreYouManual";
 import { YouAreAllSet } from "../screens/onboarding/YouAreAllSet";
-import { BrowseHubScreen } from "../screens/BrowseHubScreen";
 import { YardSaleHubScreen } from "../screens/YardSaleHubScreen";
 import { YardSalesScreen } from "../screens/YardSalesScreen";
 import { OpenGarageSaleScreen } from "../screens/OpenGarageSaleScreen";
@@ -25,7 +24,6 @@ import { SellPathChoiceScreen } from "../screens/open-sale/SellPathChoiceScreen"
 import { CreateOpenSaleScreen } from "../screens/open-sale/CreateOpenSaleScreen";
 import { GarageHostOffersScreen } from "../screens/GarageHostOffersScreen";
 import { HomeFeed } from "./components/HomeFeed";
-import { Subcategory } from "./components/Subcategory";
 import { ItemDetail } from "./components/ItemDetail";
 import { BookingScreen } from "./components/BookingScreen";
 import { BookingConfirmedScreen } from "./components/BookingConfirmedScreen";
@@ -35,7 +33,6 @@ import { ActiveRental } from "./components/ActiveRental";
 import { ListingIntro } from "../screens/listing/ListingIntro";
 import { ListingWizard, type ListingWizardHandle } from "../screens/listing/ListingWizard";
 import { HostListingDetailScreen } from "../screens/listing/HostListingDetailScreen";
-import { AttachmentViewerScreen } from "../screens/AttachmentViewerScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { RentalsScreen } from "../screens/RentalsScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
@@ -135,7 +132,6 @@ import { DeleteAccountScreen } from "../screens/profile/DeleteAccount";
 import { CoHostsScreen } from "../screens/profile/CoHostsScreen";
 import { PersonalInfoScreen } from "../screens/profile/PersonalInfoScreen";
 import { IdentityVerificationScreen } from "../screens/IdentityVerificationScreen";
-import { AgentActivityScreen } from "../screens/AgentActivityScreen";
 import { ActivityScreen } from "../screens/ActivityScreen";
 import { BottomNav, type BottomNavTab } from "./components/BottomNav";
 import { removeStripeControllerIframes } from "../lib/stripeCleanup";
@@ -157,6 +153,10 @@ import {
   saveHomeFeedCategory,
 } from "../lib/homeFeedStorage";
 import { hideNativeSplash } from "../lib/nativeShell";
+import {
+  countUnreadChatMessages,
+  onChatUnreadChange,
+} from "../lib/messagesStorage";
 
 type BrowseHubChoice = "findGear" | "yardSales";
 type YardSaleHubChoice = "browse" | "host";
@@ -172,7 +172,6 @@ type Screen =
   | "whereAreYouHeading"
   | "whereAreYouManual"
   | "onboardingAllSet"
-  | "browseHub"
   | "yardSaleHub"
   | "openGarageSale"
   | "snapSale"
@@ -191,12 +190,10 @@ type Screen =
   | "messages"
   | "listingChat"
   | "requestChat"
-  | "neighborGarage"
   | "garageShop"
   | "garageCart"
   | "garageWinnerCheckout"
   | "notifications"
-  | "subcategory"
   | "itemDetail"
   | "requestDetail"
   | "booking"
@@ -206,13 +203,11 @@ type Screen =
   | "listingIntro"
   | "listItem"
   | "hostListingDetail"
-  | "attachmentViewer"
   | "rentals"
   | "profile"
   | "favorites"
   | "earnBusiness"
   | "identity"
-  | "agentActivity"
   | "deleteAccount"
   | "coHosts"
   | "personalInfo"
@@ -222,7 +217,6 @@ type Screen =
   | "feedback";
 
 const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
-  "browseHub",
   "yardSaleHub",
   "openGarageSale",
   "snapSale",
@@ -239,7 +233,6 @@ const HIDE_BRAND_HEADER_SCREENS = new Set<Screen>([
 ]);
 
 const BOTTOM_NAV_SCREENS = new Set<Screen>([
-  "browseHub",
   "yardSaleHub",
   "openGarageSale",
   "home",
@@ -256,12 +249,11 @@ const BOTTOM_NAV_SCREENS = new Set<Screen>([
   "notifications",
   "howEvoriosWorks",
   "feedback",
-  "subcategory",
 ]);
 
 const TAB_BOOT_SCREENS: Partial<Record<string, Screen>> = {
   home: "home",
-  browseHub: "browseHub",
+  browseHub: "home",
   yardSaleHub: "yardSaleHub",
   yardSales: "yardSales",
   garageShop: "garageShop",
@@ -317,7 +309,6 @@ function bottomNavTabForScreen(screen: Screen): BottomNavTab {
   // Home tab covers Browse + My Garage (role switcher).
   if (
     screen === "garage" ||
-    screen === "browseHub" ||
     screen === "home" ||
     screen === "yardSaleHub" ||
     screen === "yardSales" ||
@@ -602,6 +593,14 @@ function AppRoutes() {
   const auth = useAuth();
   // Requests that expired, pickups nobody came to, no-shows never confirmed.
   useRentalLifecycleSweep();
+  const [messagesUnread, setMessagesUnread] = useState(() =>
+    countUnreadChatMessages(auth.userId),
+  );
+  useEffect(() => {
+    const refresh = () => setMessagesUnread(countUnreadChatMessages(auth.userId));
+    refresh();
+    return onChatUnreadChange(refresh);
+  }, [auth.userId]);
   const boot = readBootQuery();
   const bootDeepLink = useRef(readBootDeepLink()).current;
   const bootRent = useRef(readBootRentLanding()).current;
@@ -717,7 +716,6 @@ function AppRoutes() {
   );
   const [garageShopPreview, setGarageShopPreview] = useState(false);
   const [winnerCheckoutListingId, setWinnerCheckoutListingId] = useState<string | null>(null);
-  const [selectedCategory] = useState<string | null>(null);
   const [listingPrefill, setListingPrefill] = useState<ShelfPrefill | null>(null);
   const [openSalePrefillListingIds, setOpenSalePrefillListingIds] = useState<string[]>([]);
   const [sellPathListingId, setSellPathListingId] = useState<string | null>(null);
@@ -732,8 +730,6 @@ function AppRoutes() {
     return peekEditingListingReturn();
   });
   const [postRequestPrefill, setPostRequestPrefill] = useState<ShelfPrefill | null>(null);
-  const [attachmentUrl, setAttachmentUrl] = useState<string | null>(null);
-  const [attachmentTitle, setAttachmentTitle] = useState<string | null>(null);
   const [postAuthTarget, setPostAuthTarget] = useState<Screen | null>(null);
   const [authGateOpen, setAuthGateOpen] = useState(false);
   const [authGateMode, setAuthGateMode] = useState<AuthGateMode>("auto");
@@ -890,7 +886,7 @@ function AppRoutes() {
 
   useEffect(() => {
     if (!boot.openNotifications) return;
-    if (currentScreen !== "browseHub" && currentScreen !== "home" && currentScreen !== "notifications") return;
+    if (currentScreen !== "home" && currentScreen !== "notifications") return;
     setNavStack([]);
     setCurrentScreen("notifications");
     clearBootQuery(["openNotifications", "skipSplash", "simulateUpdate"]);
@@ -989,7 +985,6 @@ function AppRoutes() {
       screen === "listingChat" ||
       screen === "requestChat" ||
       screen === "identity" ||
-      screen === "agentActivity" ||
       screen === "personalInfo" ||
       screen === "coHosts" ||
       screen === "deleteAccount";
@@ -1037,8 +1032,7 @@ function AppRoutes() {
     const stored = consumeAuthReturn();
     const candidate = (postAuthTarget ?? stored) as Screen | null;
     const validScreens: Screen[] = [
-      "browseHub",
-      "yardSaleHub",
+          "yardSaleHub",
       "openGarageSale",
       "home",
       "yardSales",
@@ -1055,11 +1049,9 @@ function AppRoutes() {
       "rentals",
       "favorites",
       "earnBusiness",
-      "subcategory",
       "itemDetail",
       "requestDetail",
       "identity",
-      "agentActivity",
       "coHosts",
       "publicProfile",
       "snapSale",
@@ -1890,10 +1882,6 @@ function AppRoutes() {
     maybePromptPasskey();
   }, [auth.configured, auth.loading, auth.session, authGateOpen, finishAuthFlow, resolvePostAuthScreen]);
 
-  const handleBackFromSubcategory = () => {
-    handleBack();
-  };
-
   const handlePost = () => {
     resetToHome();
   };
@@ -2181,12 +2169,6 @@ function AppRoutes() {
             onExplore={finishOnboardingToHome}
             onBack={handleBack}
             onSkip={finishOnboardingToHome}
-          />
-        )}
-
-        {currentScreen === "browseHub" && (
-          <BrowseHubScreen
-            onChoose={handleBrowseHubChoice}
           />
         )}
 
@@ -2487,7 +2469,6 @@ function AppRoutes() {
             onOpenNotifications={handleOpenNotifications}
             onOpenCoHosts={() => navigateTo("coHosts")}
             onOpenPersonalInfo={handleOpenPersonalInfo}
-            onOpenAgentActivity={() => navigateTo("agentActivity")}
             onPreferredModeChange={handlePreferredModeChange}
             onViewPublicProfile={handleViewPublicProfile}
             onSignedOut={handleSignedOut}
@@ -2552,10 +2533,6 @@ function AppRoutes() {
           <IdentityVerificationScreen onBack={handleBack} />
         )}
 
-        {currentScreen === "agentActivity" && (
-          <AgentActivityScreen onBack={handleBack} />
-        )}
-
         {currentScreen === "notifications" && (
           <NotificationsScreen
             onBack={handleBack}
@@ -2565,19 +2542,6 @@ function AppRoutes() {
               setSelectedBookingId(bookingId);
               navigateTo("activeRental");
             }}
-          />
-        )}
-
-        {currentScreen === "subcategory" && selectedCategory && (
-          <Subcategory
-            category={selectedCategory}
-            appMode={getAppMode()}
-            onBack={handleBackFromSubcategory}
-            onPostRequest={handlePostRequest}
-            onStartListing={handleStartListing}
-            onItemSelect={handleItemSelect}
-            onUnlock={() => requireAuth("generic")}
-            onOpenRequest={handleOpenRequest}
           />
         )}
 
@@ -2694,18 +2658,6 @@ function AppRoutes() {
           />
         )}
 
-        {currentScreen === "attachmentViewer" && attachmentUrl && (
-          <AttachmentViewerScreen
-            url={attachmentUrl}
-            title={attachmentTitle ?? undefined}
-            onBack={() => {
-              setAttachmentUrl(null);
-              setAttachmentTitle(null);
-              handleBack();
-            }}
-          />
-        )}
-
         {currentScreen === "deleteAccount" && (
           <DeleteAccountScreen
             onBack={handleBack}
@@ -2725,6 +2677,7 @@ function AppRoutes() {
             onAdd={handleStartListing}
             onActivity={handleOpenActivity}
             onMore={handleOpenMore}
+            activityBadgeCount={messagesUnread}
           />
         ) : null}
       </div>

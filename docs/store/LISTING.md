@@ -69,6 +69,22 @@ Typical answers for this marketplace (review & adjust in console):
 
 Expected overall band: **17+ / Mature 17+** (Apple) and **Mature** (Google Play). Peer chat, UGC listings/photos, and an AI assistant rule out 4+ / Everyone; the privacy policy already says the product is not for anyone under 18. Re-answer both store questionnaires to that band before submission.
 
+## App Review Information (paste into App Store Connect / Play Console)
+
+**Demo path without an account:** On the welcome screen tap **Explore as guest**. Reviewers can browse neighborhood garages, open listings, and walk through the guest showcase without signing in. Payments, chat send, and hosting flows ask to sign in when needed.
+
+**Test account (signed-in review):**
+
+| Field | Value |
+|-------|--------|
+| Email | `review@evorios.com` |
+| Sign-in | Email one-time code (OTP) — use the code issued for App Review, or contact `support@evorios.com` if a fresh code is needed |
+| Notes | Identity / payouts use Stripe test mode in non-production builds. Boost purchase is hidden on native store builds. |
+
+**What to try as guest:** Home feed → open a garage shop → open a listing → attempt Book / Message (auth gate) → More → FAQ via Mr. Evorios.
+
+**What to try signed in:** Create a draft listing (photos → category), open Messages, open Rentals, Profile → payouts (Stripe Connect opens in the system browser and returns to the app).
+
 ## Screenshot shot list (capture on device / Simulator)
 
 Starter web captures (phone viewport) are in `docs/store/screenshots/` — replace with signed-in device shots before submission.

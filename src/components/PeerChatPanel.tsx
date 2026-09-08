@@ -6,10 +6,13 @@ import {
   fetchChatMessagesRemote,
   listingThreadKey,
   loadChatMessagesLocal,
+  markChatThreadRead,
+  removeChatMessageLocal,
   rentalThreadKey,
   requestThreadKey,
   sendChatMessageRemote,
   subscribeToChatMessagesRemote,
+  updateChatMessageLocal,
   type ChatMessage,
 } from "../lib/messagesStorage";
 import { MASCOT_NAME } from "../lib/brand";
@@ -80,6 +83,7 @@ export function PeerChatPanel({
 
   useEffect(() => {
     setMessages(loadChatMessagesLocal(threadKey));
+    markChatThreadRead(threadKey);
     let cancelled = false;
     void fetchChatMessagesRemote({
       rentalId,
@@ -91,6 +95,7 @@ export function PeerChatPanel({
       if (cancelled || remote.length === 0) return;
       for (const m of remote) appendChatMessageLocal(m);
       setMessages(loadChatMessagesLocal(threadKey));
+      markChatThreadRead(threadKey);
     });
     const sub = subscribeToChatMessagesRemote({
       rentalId,
@@ -102,10 +107,10 @@ export function PeerChatPanel({
           if (!pair.has(message.senderId) || !pair.has(message.recipientId)) return;
         }
         appendChatMessageLocal(message);
-        setMessages((prev) => {
-          if (prev.some((m) => m.id === message.id)) return prev;
-          return [...prev, message].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-        });
+        setMessages(loadChatMessagesLocal(threadKey));
+        if (message.senderId !== auth.userId) {
+          markChatThreadRead(threadKey);
+        }
       },
     });
     return () => {
@@ -137,15 +142,15 @@ export function PeerChatPanel({
 
     setSending(true);
     try {
-      const moderation = await moderatePeerChatMessage(rawBody);
-      if (!moderation.ok) {
-        if (moderation.reasonCode === "off_platform") {
+      const moderationResult = await moderatePeerChatMessage(rawBody);
+      if (!moderationResult.ok) {
+        if (moderationResult.reasonCode === "off_platform") {
           setGateMessage(peerChat.moderationOffPlatform);
           return;
         }
         const strike = recordModerationStrike({
           userId: auth.userId,
-          severe: moderation.reasonCode === "blocked",
+          severe: moderationResult.reasonCode === "blocked",
         });
         if (strike.hasCooldown) {
           setGateMessage(
@@ -153,7 +158,7 @@ export function PeerChatPanel({
               formatCooldownHours(strike.cooldownMs),
             )}`,
           );
-        } else if (moderation.reasonCode === "verification_failed") {
+        } else if (moderationResult.reasonCode === "verification_failed") {
           setGateMessage(peerChat.moderationVerifyFailed);
         } else {
           setGateMessage(
@@ -163,13 +168,14 @@ export function PeerChatPanel({
         return;
       }
 
-      const body = moderation.cleanedBody;
-      setText("");
+      const body = moderationResult.cleanedBody;
+      const clientId =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `msg-${Date.now()}`;
       const msg: ChatMessage = {
-        id:
-          typeof crypto !== "undefined" && "randomUUID" in crypto
-            ? crypto.randomUUID()
-            : `msg-${Date.now()}`,
+        id: clientId,
+        clientId,
         rentalId: rentalId ?? null,
         listingId: listingId ?? null,
         requestId: requestId ?? null,
@@ -177,11 +183,13 @@ export function PeerChatPanel({
         recipientId: peerId,
         body,
         createdAt: new Date().toISOString(),
+        sendStatus: "pending",
       };
+      setText("");
       appendChatMessageLocal(msg);
       setMessages((prev) => [...prev, msg]);
       try {
-        await sendChatMessageRemote({
+        const remote = await sendChatMessageRemote({
           rentalId,
           listingId,
           requestId,
@@ -190,8 +198,26 @@ export function PeerChatPanel({
           body,
           itemTitle,
         });
+        if (remote?.id) {
+          // Swap optimistic id for the server id so realtime insert does not duplicate.
+          removeChatMessageLocal(threadKey, clientId);
+          const confirmed: ChatMessage = {
+            ...msg,
+            id: remote.id,
+            sendStatus: undefined,
+            clientId: undefined,
+          };
+          appendChatMessageLocal(confirmed);
+          setMessages(loadChatMessagesLocal(threadKey));
+        } else {
+          updateChatMessageLocal(threadKey, clientId, { sendStatus: undefined });
+          setMessages(loadChatMessagesLocal(threadKey));
+        }
       } catch {
-        // Local bubble already shown; peer may still get push from notify fallback.
+        updateChatMessageLocal(threadKey, clientId, { sendStatus: "failed" });
+        setMessages(loadChatMessagesLocal(threadKey));
+        setText(body);
+        setGateMessage(peerChat.sendFailed);
       }
     } catch {
       setGateMessage(peerChat.moderationVerifyFailed);
@@ -250,21 +276,29 @@ export function PeerChatPanel({
         ) : (
           messages.map((m) => {
             const mine = Boolean(auth.userId && m.senderId === auth.userId);
+            const failed = m.sendStatus === "failed";
+            const pending = m.sendStatus === "pending";
             return (
               <div
                 key={m.id}
                 className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
-                  mine ? "ml-auto bg-[#0D5C3A] text-white" : "bg-white text-gray-800"
+                  failed
+                    ? "ml-auto border border-amber-300 bg-amber-50 text-amber-950"
+                    : mine
+                      ? "ml-auto bg-[#0D5C3A] text-white"
+                      : "bg-white text-gray-800"
                 }`}
-                style={!mine ? { border: `1px solid ${BORDER}` } : undefined}
+                style={!mine && !failed ? { border: `1px solid ${BORDER}` } : undefined}
               >
                 {m.body}
                 <div
                   className={`mt-1 flex items-center gap-2 text-[10px] ${
-                    mine ? "text-white/70" : "text-gray-400"
+                    failed ? "text-amber-800" : mine ? "text-white/70" : "text-gray-400"
                   }`}
                 >
                   {new Date(m.createdAt).toLocaleString()}
+                  {pending ? <span>· {peerChat.sending}</span> : null}
+                  {failed ? <span>· {peerChat.sendFailedShort}</span> : null}
                   {mine ? null : (
                     <button
                       type="button"
@@ -325,9 +359,9 @@ export function PeerChatPanel({
         />
         <button
           type="button"
-          disabled={!text.trim() || sending}
           onClick={() => void send()}
-          className="rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+          disabled={sending || !text.trim()}
+          className="rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
           style={{ backgroundColor: GREEN }}
         >
           {common.send}

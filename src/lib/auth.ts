@@ -12,9 +12,10 @@ import {
 import { isNetworkFetchError } from "./authErrors";
 import { emailOtpEntryError, isCompleteEmailOtpLength, normalizeEmailOtpInput } from "./authOtp";
 import { getRuntimeAppOrigin } from "./appOrigin";
-import { clearAuthWelcomeDone, hasDeviceKnownAccount, isOnboardingComplete } from "./onboardingStorage";
+import { hasDeviceKnownAccount, isOnboardingComplete } from "./onboardingStorage";
 import { loadUserProfile } from "./userProfileStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
+import { clearUserScopedLocalData } from "./clearUserScopedLocalData";
 
 export type AuthProvider = "google" | "apple";
 
@@ -302,10 +303,10 @@ export function shouldShowPasskeyLogin(): boolean {
 /**
  * Device “snapshot”: this phone already had a real account.
  * Used so AuthWelcome offers Sign in only (no guest / Sign up).
+ * Passkey alone does not hide Explore as guest after an intentional sign-out.
  */
 export function isReturningAccountDevice(): boolean {
   if (hasDeviceKnownAccount()) return true;
-  if (deviceHasPasskeyHint()) return true;
   try {
     const profile = loadUserProfile();
     return Boolean(profile.email?.trim() && profile.displayName?.trim());
@@ -359,8 +360,8 @@ export async function signOut(): Promise<void> {
   if (error) throw error;
   // Drop mid-OTP email so next Sign in can open Face ID, not the code step.
   clearPendingAuthEmail();
-  // Next cold start (and post–sign-out welcome) should offer Sign in again.
-  clearAuthWelcomeDone();
+  // Clear bookings/cart/profile leftovers and restore Explore as guest on AuthWelcome.
+  clearUserScopedLocalData();
 }
 
 export async function requestAccountDeletion(): Promise<{

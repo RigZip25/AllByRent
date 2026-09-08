@@ -766,6 +766,8 @@ export type AppMessages = {
     request: string;
     requestFallback: string;
     tapToDiscuss: string;
+    unread: string;
+    unreadCount: (n: number) => string;
   };
   howItWorks: {
     title: (appName: string) => string;
@@ -844,6 +846,7 @@ export type AppMessages = {
     quickTipsTitle: string;
     quickTipsHint: string;
     chatPrompt: (mascot: string) => string;
+    aiDisclaimer: string;
     guidesTitle: string;
     guidesHint: string;
     guidesHowTitle: (appName: string) => string;
@@ -2700,6 +2703,9 @@ export type AppMessages = {
     moderationBlocked: string;
     moderationOffPlatform: string;
     moderationVerifyFailed: string;
+    sendFailed: string;
+    sendFailedShort: string;
+    sending: string;
   };
   onboarding: OnboardingMessages;
   profileDeep: {

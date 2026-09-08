@@ -14,6 +14,7 @@ import type { ListingDraft } from "../screens/listing/types";
 import { getSteps } from "../screens/listing/types";
 import type { AppMode } from "../lib/appMode";
 import { summarizeListingDraft } from "../lib/listingDraftSummary";
+import { buildListingAiContext } from "../lib/listingAiContext";
 import {
   buildRentanoUserContext,
   type RentanoRequestContext,
@@ -64,6 +65,10 @@ function buildApiContext(context?: RentanoChatContext): RentanoRequestContext {
           : undefined,
     userId: context?.userId,
     draftSummary: context?.draft ? summarizeListingDraft(context.draft) : undefined,
+    listingContext: buildListingAiContext({
+      userId: context?.userId,
+      draft: context?.draft ?? null,
+    }),
   };
 }
 

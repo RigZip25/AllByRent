@@ -15,11 +15,24 @@ import {
   offTopicRedirectAnswer,
   queryLooksNonEnglish,
 } from "./rentanoLocalAnswer";
+import {
+  looksLikeMaskedHostileProfanity,
+  looksLikeOffPlatformContact,
+} from "./peerChatModeration";
 
 export type RentanoChatTurn = {
   role: "user" | "assistant";
   content: string;
 };
+
+function moderateAiReply(text: string): string {
+  const trimmed = text.trim();
+  if (!trimmed) return trimmed;
+  if (looksLikeOffPlatformContact(trimmed) || looksLikeMaskedHostileProfanity(trimmed)) {
+    return "I can help with Evorios listings, bookings, and garage tips — but I won’t share off-platform contact or pay-outside instructions. Ask about something in the app and I’ll help.";
+  }
+  return trimmed;
+}
 
 function buildSystemPrompt(context: RentanoRequestContext, lastUserText?: string): string {
   const parts = [
@@ -33,6 +46,8 @@ function buildSystemPrompt(context: RentanoRequestContext, lastUserText?: string
     "Keep replies short (2–4 sentences unless the user asks for detail). Use bullet lists only when listing options.",
     "Mirror the language of the latest user message exactly (do not default to English).",
     "If the user goes off-topic: soft redirect only — glad to help with listing/promotion/platform; not enough data outside the app; suggest a general LLM; do not answer the off-topic request.",
+    "Never invent listing prices, availability, or host details. Prefer Live listing data / draft facts from context when the user asks about a specific item.",
+    "Never suggest WhatsApp, Telegram, Venmo, Zelle, Cash App, or other off-platform contact/pay channels.",
   );
   if (lastUserText && queryLooksNonEnglish(lastUserText)) {
     parts.push(
@@ -77,7 +92,7 @@ export async function sendRentanoMessage(
     messages,
   });
 
-  const text = data.text;
+  const text = moderateAiReply(data.text);
   if (!text) {
     throw new Error("Empty AI response");
   }
