@@ -3,7 +3,6 @@ import {
   ScanLine,
   Shield,
   MessageCircle,
-  Phone,
   CheckCircle2,
   Clock,
   Lock,
@@ -2112,32 +2111,22 @@ export function ActiveRental({
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setChatOpen(true)}
-                className="flex items-center justify-center gap-2 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span className="text-sm font-medium">
-                  {chatWindow?.mode === "post_rental_tolls"
-                    ? t.rentalDetail.messagePostRental
-                    : chatWindow?.readOnly
-                      ? t.rentalDetail.messageClosed
-                      : t.rentalDetail.message}
-                </span>
-              </button>
-
-              <button
-                type="button"
-                disabled
-                title={t.rentalDetail.phoneSharedAfterCheckin}
-                className="flex items-center justify-center gap-2 py-2.5 border border-border rounded-lg opacity-50 cursor-not-allowed"
-              >
-                <Phone className="w-4 h-4" />
-                <span className="text-sm font-medium">{t.rentalDetail.call}</span>
-              </button>
-            </div>
+            {/* Chat is the whole channel: no phone number is exchanged, so a
+                permanently greyed "Call" button only promised one. */}
+            <button
+              type="button"
+              onClick={() => setChatOpen(true)}
+              className="flex w-full items-center justify-center gap-2 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span className="text-sm font-medium">
+                {chatWindow?.mode === "post_rental_tolls"
+                  ? t.rentalDetail.messagePostRental
+                  : chatWindow?.readOnly
+                    ? t.rentalDetail.messageClosed
+                    : t.rentalDetail.message}
+              </span>
+            </button>
           </div>
         </div>
 

@@ -1278,8 +1278,6 @@ export const en: AppMessages = {
     invoiceKindCustom: "Custom",
     invoiceStripeScaffold:
       "Card payment link is scaffolded — invoices still save on the rental when card pay isn’t configured yet.",
-    call: "Call",
-    phoneSharedAfterCheckin: "Phone numbers are shared in chat after check-in",
     close: "Close",
     beforeCheckIn: "Before you check in",
     inspectItem: "Inspect the item for any existing damage",

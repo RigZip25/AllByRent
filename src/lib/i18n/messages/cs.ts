@@ -1295,8 +1295,6 @@ export const cs: AppMessages = {
     invoiceKindCustom: "Vlastní",
     invoiceStripeScaffold:
       "Platební odkaz kartou je připravený — faktury se na půjčce uloží i když platba kartou ještě není nastavená.",
-    call: "Volat",
-    phoneSharedAfterCheckin: "Telefonní čísla se sdílejí v chatu po check-inu",
     close: "Zavřít",
     beforeCheckIn: "Než provedete check-in",
     inspectItem: "Prohlédněte položku kvůli existujícímu poškození",

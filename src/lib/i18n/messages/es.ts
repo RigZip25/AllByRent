@@ -1277,8 +1277,6 @@ export const es: AppMessages = {
     invoiceKindCustom: "Personalizado",
     invoiceStripeScaffold:
       "El enlace de pago con tarjeta está preparado — las facturas se guardan en el alquiler aunque el pago con tarjeta aún no esté configurado.",
-    call: "Llamar",
-    phoneSharedAfterCheckin: "Los números de teléfono se comparten en el chat tras confirmar la recogida",
     close: "Cerrar",
     beforeCheckIn: "Antes de confirmar la recogida",
     inspectItem: "Revisa el artículo por si tiene algún daño previo",

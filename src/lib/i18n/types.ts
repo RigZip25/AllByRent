@@ -2242,8 +2242,6 @@ export type AppMessages = {
     invoiceKindDamage: string;
     invoiceKindCustom: string;
     invoiceStripeScaffold: string;
-    call: string;
-    phoneSharedAfterCheckin: string;
     close: string;
     beforeCheckIn: string;
     inspectItem: string;
