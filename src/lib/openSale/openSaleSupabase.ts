@@ -267,3 +267,25 @@ export async function syncOpenSalesFromRemote(hostId: string): Promise<void> {
     /* */
   }
 }
+
+export async function cancelOpenSaleEventAuthoritative(eventId: string): Promise<void> {
+  const { cancelOpenSaleEvent } = await import("./eventStorage");
+  cancelOpenSaleEvent(eventId);
+  if (!supabaseReady() || !isUuid(eventId)) return;
+  const supabase = getSupabaseClient()!;
+  await supabase
+    .from("open_sale_events")
+    .update({ status: "cancelled", updated_at: new Date().toISOString() })
+    .eq("id", eventId);
+}
+
+export async function endOpenSaleEventAuthoritative(eventId: string): Promise<void> {
+  const { markOpenSaleEnded } = await import("./eventStorage");
+  markOpenSaleEnded(eventId);
+  if (!supabaseReady() || !isUuid(eventId)) return;
+  const supabase = getSupabaseClient()!;
+  await supabase
+    .from("open_sale_events")
+    .update({ status: "ended", updated_at: new Date().toISOString() })
+    .eq("id", eventId);
+}

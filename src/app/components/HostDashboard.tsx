@@ -154,6 +154,7 @@ function ListingRow({
     if (shelf.kind === "reserved") return t.garageUi.statusReserved;
     if (shelf.kind === "sold") return t.garageUi.statusSold;
     if (shelf.kind === "pending_payment") return t.garageUi.statusPendingPayment;
+    if (shelf.kind === "ended") return t.garageSale.garageShop.statusEnded;
     if (shelf.kind === "paused" || listing.paused) return t.garageUi.statusPaused;
     if (listingNeedsStickerReminder(listing)) return t.garageUi.statusNeedsQr;
     return t.garageUi.statusAvailable;

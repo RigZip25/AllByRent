@@ -3,6 +3,7 @@ import {
   garageTrustLine,
   groupListingsByGarage,
   type GarageSummary,
+  type HostGarageMeta,
 } from "./garageDisplay";
 import type { GarageSaleSchedule } from "./garageSaleStorage";
 import { garageSaleOpenLabel } from "./garageSaleStorage";
@@ -13,7 +14,8 @@ export type YardSaleOpenStatus = "now" | "today" | "weekend" | "scheduled" | "un
 export type YardSaleEvent = {
   hostId: string;
   name: string;
-  rating: number;
+  /** Average review rating; null when the host has no reviews yet. */
+  rating: number | null;
   distance: string;
   neighborhood: string;
   saleItemCount: number;
@@ -36,9 +38,14 @@ function parseHm(value: string): number {
   return h * 60 + m;
 }
 
-function openStatusFromSchedule(
+/**
+ * Open-now / today badges require the store to be live.
+ * Schedule-open but paused → scheduled with a paused label.
+ */
+export function openStatusFromSchedule(
   schedule: GarageSaleSchedule | null | undefined,
   now = new Date(),
+  storeLive = true,
 ): { openLabel: string; openStatus: YardSaleOpenStatus } {
   const copy = getMessages().garageSale.openGarageSale;
   if (!schedule || schedule.daysOfWeek.length === 0) {
@@ -52,6 +59,10 @@ function openStatusFromSchedule(
   const end = parseHm(schedule.endTime);
   const isOpenDay = schedule.daysOfWeek.includes(day);
   const inWindow = end > start ? minutes >= start && minutes < end : minutes >= start || minutes < end;
+
+  if (!storeLive) {
+    return { openLabel: copy.storePausedWithSummary(summary), openStatus: "scheduled" };
+  }
 
   if (isOpenDay && inWindow) {
     return { openLabel: copy.openNowWithSummary(summary), openStatus: "now" };
@@ -73,7 +84,8 @@ export function garageHasSaleItems(garage: GarageSummary): boolean {
 export function buildYardSaleEvents(
   listings: ListingDraft[],
   schedulesByHostId: Record<string, GarageSaleSchedule | null | undefined> = {},
-  hostMeta?: Record<string, import("./garageDisplay").HostGarageMeta>,
+  hostMeta?: Record<string, HostGarageMeta>,
+  storeLiveByHostId: Record<string, boolean> = {},
 ): YardSaleEvent[] {
   const garages = groupListingsByGarage(listings, hostMeta).filter(garageHasSaleItems);
 
@@ -85,12 +97,15 @@ export function buildYardSaleEvents(
         ...new Set(saleItems.map((listing) => listing.category).filter(Boolean)),
       ].slice(0, 3);
       const schedule = schedulesByHostId[garage.hostId];
-      const open = openStatusFromSchedule(schedule ?? null);
+      const storeLive = storeLiveByHostId[garage.hostId] !== false;
+      const open = openStatusFromSchedule(schedule ?? null, new Date(), storeLive);
+      const rating =
+        typeof trust.rating === "number" && trust.rating > 0 ? trust.rating : null;
 
       return {
         hostId: garage.hostId,
         name: trust.name,
-        rating: trust.rating,
+        rating,
         distance: trust.distance,
         neighborhood: trust.neighborhood || garage.neighborhood || "",
         saleItemCount: saleItems.length,

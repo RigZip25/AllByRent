@@ -146,6 +146,10 @@
     {
       "path": "/api/cron/abandoned-listing-nudge",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/garage-sale-close",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

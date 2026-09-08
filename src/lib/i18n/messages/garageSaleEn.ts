@@ -54,6 +54,7 @@ export const garageSale: AppMessages["garageSale"] = {
     hoursNotSet: "Hours not set",
     openNowWithSummary: (summary) => `Open now · ${summary}`,
     todayWithSummary: (summary) => `Today · ${summary}`,
+    storePausedWithSummary: (summary) => `Paused · ${summary}`,
     presetToday: "Today",
     presetSaturday: "Saturday",
     presetWeekend: "Weekend",
@@ -149,6 +150,8 @@ export const garageSale: AppMessages["garageSale"] = {
     statusRented: "Rented",
     statusPaused: "Paused",
     statusPendingPayment: "Pending payment",
+    statusEnded: "Ended",
+    relistCta: "Relist",
     modeRent: "Rent",
     modeSell: "Sale",
     modeFree: "Free",
@@ -175,6 +178,8 @@ export const garageSale: AppMessages["garageSale"] = {
   garageAuction: {
     bidTerms:
       "By bidding you agree: auction ends when the garage closes. The high bidder pays at checkout within 30 minutes. If they don't pay, the lot goes to the next-highest bidder.",
+    bidRulesNote:
+      "Bids can't be withdrawn. If two bids match, the first one placed wins.",
     checkoutTerms:
       "Pay at checkout now. You have 30 minutes after the auction ends — if payment isn't completed, the lot automatically goes to the next-highest bidder.",
     runnerUpTitle: "You're the next bidder",
@@ -335,6 +340,7 @@ export const garageCart: AppMessages["garageCart"] = {
   paymentCompleteBody:
     "Direct buy — no offers needed. Message the seller to pick a convenient pickup time.",
   sellerNotified: "The seller was notified that you paid.",
+  messageSeller: "Message seller",
   backToGarage: "Back to garage →",
   emptyTitle: "Cart is empty",
   emptyBody: "Buy now items from an open garage shelf.",
@@ -353,6 +359,7 @@ export const garageCart: AppMessages["garageCart"] = {
   payAmount: (total) => `Pay ${total}`,
   signInOrGuest: "Sign in, or continue as guest with your email.",
   validEmail: "Enter a valid email for your receipt.",
+  openSaleSignInRequired: "Sign in to pay Open Sale wins — guest checkout is for Buy now only.",
 };
 
 export const earnBusiness: AppMessages["earnBusiness"] = {

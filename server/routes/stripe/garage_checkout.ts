@@ -10,6 +10,7 @@ import { getOrCreateStripeCustomer } from "../../lib/stripe/customer";
 import { destinationChargeFields, requireHostPayoutAccount, resolveHostStripeCurrency } from "../../lib/stripe/connectPayout";
 import {
   buyerChargeFromSubtotalCents,
+  listingIdsBlockedByRentals,
   platformFeeFromSubtotalCents,
   validateGarageSellLines,
   type GarageListingRow,
@@ -113,6 +114,19 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
         .eq("status", "accepted")
     : { data: [] as unknown[] };
 
+  const { data: rentalRows } = await admin
+    .from("rentals")
+    .select("listing_id, status")
+    .in("listing_id", listingIds)
+    .in("status", [
+      "active",
+      "overdue",
+      "pending_checkin",
+      "upcoming",
+      "pending_approval",
+      "disputed",
+    ]);
+
   const validated = validateGarageSellLines({
     hostId,
     listingIds,
@@ -125,6 +139,9 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
       amount_cents: number;
       status: string;
     }[],
+    rentalBlockedListingIds: listingIdsBlockedByRentals(
+      (rentalRows ?? []) as { listing_id: string; status: string }[],
+    ),
   });
   if (!validated.ok) {
     res.status(409).json({ ok: false, error: validated.error });

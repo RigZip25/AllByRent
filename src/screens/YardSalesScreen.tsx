@@ -21,6 +21,8 @@ import { localizeCategoryLabel } from "../lib/i18n/categoryLabels";
 import { useMessages } from "../lib/i18n/react";
 import { fetchGarageStorefrontsByHostIds } from "../lib/garageStorefrontSync";
 import type { HostGarageMeta } from "../lib/garageDisplay";
+import { fetchStoreLiveByHostIds } from "../lib/garageStoreLive";
+import { fetchReviewsForUserRemote } from "../lib/reviewsStorage";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
@@ -77,11 +79,15 @@ function YardSaleCard({
           {event.openLabel}
         </p>
         <p className="mt-1 flex flex-wrap items-center gap-1 text-[14px] font-semibold text-gray-800">
-          <span className="inline-flex items-center gap-0.5">
-            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
-            {event.rating.toFixed(1)}
-          </span>
-          <span className="text-gray-400">·</span>
+          {event.rating != null ? (
+            <>
+              <span className="inline-flex items-center gap-0.5">
+                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
+                {event.rating.toFixed(1)}
+              </span>
+              <span className="text-gray-400">·</span>
+            </>
+          ) : null}
           <span>{event.distance}</span>
           <span className="text-gray-400">·</span>
           <span>{copy.forSale(event.saleItemCount)}</span>
@@ -122,22 +128,40 @@ export function YardSalesScreen({ onBack, onOpenGarage, onBrowseGear }: YardSale
         const ownId = resolveHostAccountId(auth.userId);
         const schedules: Record<string, GarageSaleSchedule | null> = {};
         const storefronts = await fetchGarageStorefrontsByHostIds(hostIds);
-        const hostMeta: Record<string, HostGarageMeta> = {};
+        const storeLiveMap = await fetchStoreLiveByHostIds(hostIds);
+        const storeLiveByHost: Record<string, boolean> = {};
         for (const hostId of hostIds) {
-          const identity = storefronts[hostId];
-          if (!identity) continue;
-          hostMeta[hostId] = {
-            displayName: identity.shopName || "Neighbor",
-            rating: 0,
-            shopKind: identity.shopKind,
-            accentId: identity.accentId,
-            shopName: identity.shopName,
-            shopSlug: identity.shopSlug,
-            neighborhood: identity.neighborhood,
-          };
+          storeLiveByHost[hostId] = storeLiveMap[hostId] !== false;
         }
+        const visibleHostIds = hostIds.filter(
+          (hostId) => hostId === ownId || storeLiveByHost[hostId] !== false,
+        );
+        const visibleListings = active.filter((listing) => {
+          const host = listing.hostId?.trim();
+          return host && visibleHostIds.includes(host);
+        });
+        const hostMeta: Record<string, HostGarageMeta> = {};
         await Promise.all(
-          hostIds.map(async (hostId) => {
+          visibleHostIds.map(async (hostId) => {
+            const identity = storefronts[hostId];
+            const reviews = await fetchReviewsForUserRemote(hostId);
+            const rating =
+              reviews.length > 0
+                ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+                : 0;
+            hostMeta[hostId] = {
+              displayName: identity?.shopName || "Neighbor",
+              rating,
+              shopKind: identity?.shopKind,
+              accentId: identity?.accentId,
+              shopName: identity?.shopName,
+              shopSlug: identity?.shopSlug,
+              neighborhood: identity?.neighborhood,
+            };
+          }),
+        );
+        await Promise.all(
+          visibleHostIds.map(async (hostId) => {
             if (hostId === ownId) {
               schedules[hostId] = getGarageSaleSchedule();
               return;
@@ -146,7 +170,7 @@ export function YardSalesScreen({ onBack, onOpenGarage, onBrowseGear }: YardSale
           }),
         );
         if (!mounted) return;
-        setEvents(buildYardSaleEvents(active, schedules, hostMeta));
+        setEvents(buildYardSaleEvents(visibleListings, schedules, hostMeta, storeLiveByHost));
       })
       .finally(() => {
         if (mounted) setLoading(false);

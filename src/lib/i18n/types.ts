@@ -3194,6 +3194,7 @@ export type GarageSaleMessages = {
     hoursNotSet: string;
     openNowWithSummary: (summary: string) => string;
     todayWithSummary: (summary: string) => string;
+    storePausedWithSummary: (summary: string) => string;
     presetToday: string;
     presetSaturday: string;
     presetWeekend: string;
@@ -3281,6 +3282,8 @@ export type GarageSaleMessages = {
     statusRented: string;
     statusPaused: string;
     statusPendingPayment: string;
+    statusEnded: string;
+    relistCta: string;
     modeRent: string;
     modeSell: string;
     modeFree: string;
@@ -3306,6 +3309,7 @@ export type GarageSaleMessages = {
   };
   garageAuction: {
     bidTerms: string;
+    bidRulesNote: string;
     checkoutTerms: string;
     runnerUpTitle: string;
     runnerUpSubtitle: string;
@@ -3449,6 +3453,7 @@ export type GarageCartMessages = {
   paymentComplete: (total: string) => string;
   paymentCompleteBody: string;
   sellerNotified: string;
+  messageSeller: string;
   backToGarage: string;
   emptyTitle: string;
   emptyBody: string;
@@ -3466,6 +3471,7 @@ export type GarageCartMessages = {
   payAmount: (total: string) => string;
   signInOrGuest: string;
   validEmail: string;
+  openSaleSignInRequired: string;
 };
 
 export type EarnBusinessMessages = {

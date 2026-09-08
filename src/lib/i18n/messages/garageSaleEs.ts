@@ -54,6 +54,7 @@ export const garageSale: AppMessages["garageSale"] = {
     hoursNotSet: "Horario sin definir",
     openNowWithSummary: (summary) => `Abierto ahora · ${summary}`,
     todayWithSummary: (summary) => `Hoy · ${summary}`,
+    storePausedWithSummary: (summary) => `En pausa · ${summary}`,
     presetToday: "Hoy",
     presetSaturday: "Sábado",
     presetWeekend: "Fin de semana",
@@ -149,6 +150,8 @@ export const garageSale: AppMessages["garageSale"] = {
     statusRented: "Alquilado",
     statusPaused: "Pausado",
     statusPendingPayment: "Pago pendiente",
+    statusEnded: "Finalizado",
+    relistCta: "Volver a publicar",
     modeRent: "Alquiler",
     modeSell: "Venta",
     modeFree: "Gratis",
@@ -175,6 +178,8 @@ export const garageSale: AppMessages["garageSale"] = {
   garageAuction: {
     bidTerms:
       "Al pujar aceptas: la subasta termina cuando cierra el garaje. El mejor postor paga al finalizar en un plazo de 30 minutos. Si no paga, el lote pasa al siguiente mejor postor.",
+    bidRulesNote:
+      "Las pujas no se pueden retirar. Si hay empate, gana la primera puja colocada.",
     checkoutTerms:
       "Paga ahora al finalizar. Tienes 30 minutos tras el fin de la subasta — si no completas el pago, el lote pasa automáticamente al siguiente mejor postor.",
     runnerUpTitle: "Eres el siguiente postor",
@@ -335,6 +340,7 @@ export const garageCart: AppMessages["garageCart"] = {
   paymentCompleteBody:
     "Compra directa — sin necesidad de ofertas. Escribe al vendedor para acordar una hora de recogida.",
   sellerNotified: "Se avisó al vendedor de que has pagado.",
+  messageSeller: "Escribir al vendedor",
   backToGarage: "Volver al garaje →",
   emptyTitle: "El carrito está vacío",
   emptyBody: "Compra ya artículos de una estantería de garaje abierto.",
@@ -353,6 +359,7 @@ export const garageCart: AppMessages["garageCart"] = {
   payAmount: (total) => `Pagar ${total}`,
   signInOrGuest: "Inicia sesión, o continúa como invitado con tu email.",
   validEmail: "Introduce un email válido para tu recibo.",
+  openSaleSignInRequired: "Inicia sesión para pagar victorias de Open Sale — el invitado solo vale para Comprar ya.",
 };
 
 export const earnBusiness: AppMessages["earnBusiness"] = {

@@ -1,5 +1,6 @@
 import { getGarageSaleOfferPrefs } from "./garageSaleOfferStorage";
 import { getBestBidExcluding, getHighBid, type GarageBid } from "./garageShopStorage";
+import { pushLotStateRemote } from "./garage/garageSupabaseSync";
 import { pushInAppNotification } from "./inAppNotifications";
 
 const LOT_STATE_KEY = "evorios_garage_lot_state";
@@ -208,10 +209,11 @@ function assignAwaitingCheckout(
  * Close ended auctions: assign winner checkout or mark no-bids expired.
  * Call when loading the shop and periodically while open.
  */
-export function resolveEndedAuctions(listingIds: string[]): void {
+export function resolveEndedAuctions(listingIds: string[], hostIdByListing?: Record<string, string>): void {
   const map = readLotStates();
   const now = Date.now();
   let changed = false;
+  const pushed: Array<{ listingId: string; hostId: string; state: GarageLotState }> = [];
 
   for (const listingId of listingIds) {
     const current = map[listingId] ?? { status: "active" as const };
@@ -238,19 +240,30 @@ export function resolveEndedAuctions(listingIds: string[]): void {
     } else {
       map[listingId] = { status: "expired_no_bids", endedAt: new Date().toISOString() };
     }
+    const hostId = hostIdByListing?.[listingId];
+    if (hostId && map[listingId]) {
+      pushed.push({ listingId, hostId, state: map[listingId] });
+    }
     changed = true;
   }
 
   if (changed) writeLotStates(map);
+  for (const item of pushed) {
+    void pushLotStateRemote(item.listingId, item.hostId, item.state);
+  }
 }
 
 /**
  * Winner did not pay in time — lot passes to the next-highest bidder (same 30-min window).
  */
-export function resolveExpiredWinnerCheckouts(listingIds: string[]): void {
+export function resolveExpiredWinnerCheckouts(
+  listingIds: string[],
+  hostIdByListing?: Record<string, string>,
+): void {
   const map = readLotStates();
   const now = Date.now();
   let changed = false;
+  const pushed: Array<{ listingId: string; hostId: string; state: GarageLotState }> = [];
 
   for (const listingId of listingIds) {
     const current = map[listingId];
@@ -288,10 +301,25 @@ export function resolveExpiredWinnerCheckouts(listingIds: string[]): void {
     } else {
       map[listingId] = { status: "expired_no_bids", endedAt: new Date().toISOString() };
     }
+    const hostId = hostIdByListing?.[listingId];
+    if (hostId && map[listingId]) {
+      pushed.push({ listingId, hostId, state: map[listingId] });
+    }
     changed = true;
   }
 
   if (changed) writeLotStates(map);
+  for (const item of pushed) {
+    void pushLotStateRemote(item.listingId, item.hostId, item.state);
+  }
+}
+
+/** Reset a dead ended lot so the host can sell again. */
+export function relistGarageLot(listingId: string, hostId: string): void {
+  const map = readLotStates();
+  map[listingId] = { status: "active" };
+  writeLotStates(map);
+  void pushLotStateRemote(listingId, hostId, { status: "active" });
 }
 
 export function notifyOutbidIfNeeded(listingId: string, listingTitle: string, previousLeader: GarageBid | null): void {

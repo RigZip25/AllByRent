@@ -183,6 +183,7 @@ export function GarageBidSheet({ listing, offer, onClose, onBidPlaced }: GarageB
         {error ? <p className="mt-2 text-sm font-medium text-red-600">{error}</p> : null}
 
         <p className="mt-3 text-xs leading-relaxed text-gray-500">{auctionCopy.bidTerms}</p>
+        <p className="mt-1 text-xs leading-relaxed text-gray-500">{auctionCopy.bidRulesNote}</p>
 
         <button
           type="button"

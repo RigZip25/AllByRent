@@ -587,14 +587,14 @@ export function SnapSaleScreen({ onBack, onViewShop, onRequireAuth }: SnapSaleSc
 
         <button
           type="button"
-          disabled={!canPublish || (!canPublishLive && !sellerLoading)}
+          disabled={!canPublish || sellerLoading || !canPublishLive}
           onClick={publishToShelf}
           className="mt-5 w-full rounded-xl py-3.5 text-base font-bold disabled:opacity-50"
           style={{ backgroundColor: AMBER, color: GREEN }}
         >
           {busy
             ? copy.publishing
-            : canPublishLive || sellerLoading
+            : canPublishLive
               ? copy.publishCta
               : copy.finishSetupFirst}
         </button>

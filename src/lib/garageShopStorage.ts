@@ -192,7 +192,10 @@ function readBids(): GarageBid[] {
 export function getBidsForListing(listingId: string): GarageBid[] {
   return readBids()
     .filter((bid) => bid.listingId === listingId)
-    .sort((a, b) => b.amountUsd - a.amountUsd);
+    .sort(
+      (a, b) =>
+        b.amountUsd - a.amountUsd || a.placedAt.localeCompare(b.placedAt),
+    );
 }
 
 export function clearBidsForListing(listingId: string): void {
@@ -215,7 +218,13 @@ export function getBestBidExcluding(listingId: string, excludedBidderIds: string
   let best: GarageBid | null = null;
   for (const bid of getBidsForListing(listingId)) {
     if (excluded.has(bid.bidderId)) continue;
-    if (!best || bid.amountUsd > best.amountUsd) best = bid;
+    if (
+      !best ||
+      bid.amountUsd > best.amountUsd ||
+      (bid.amountUsd === best.amountUsd && bid.placedAt < best.placedAt)
+    ) {
+      best = bid;
+    }
   }
   return best;
 }
@@ -322,7 +331,7 @@ export function mergeBidsFromRemote(remote: GarageBid[]): void {
   }
   const merged: GarageBid[] = [];
   for (const bids of byListing.values()) {
-    bids.sort((a, b) => b.amountUsd - a.amountUsd || b.placedAt.localeCompare(a.placedAt));
+    bids.sort((a, b) => b.amountUsd - a.amountUsd || a.placedAt.localeCompare(b.placedAt));
     merged.push(...bids);
   }
   writeJson(BIDS_KEY, merged);

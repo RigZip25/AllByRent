@@ -77,6 +77,32 @@ export type BidRow = {
   amount_cents: number;
 };
 
+export type RentalBusyRow = {
+  listing_id: string;
+  status: string;
+};
+
+/** Rentals that block selling the same listing (G11). */
+export const BLOCKING_RENTAL_STATUSES = [
+  "active",
+  "overdue",
+  "pending_checkin",
+  "upcoming",
+  "pending_approval",
+  "disputed",
+] as const;
+
+export function listingIdsBlockedByRentals(rentals: RentalBusyRow[]): Set<string> {
+  const blocked = new Set<string>();
+  const allowed = new Set<string>(BLOCKING_RENTAL_STATUSES);
+  for (const rental of rentals) {
+    if (allowed.has(rental.status) && rental.listing_id) {
+      blocked.add(rental.listing_id);
+    }
+  }
+  return blocked;
+}
+
 /**
  * What the buyer pays for one sell line.
  *
@@ -132,9 +158,15 @@ export function validateGarageSellLines(input: {
   lots: GarageLotRow[];
   buyerId?: string | null;
   offers?: AcceptedOfferRow[];
+  /** Listings with an active / reserved rental — cannot sell. */
+  rentalBlockedListingIds?: Set<string> | string[];
 }): { ok: true; lines: ValidatedGarageLine[]; subtotalCents: number } | { ok: false; error: string } {
   const byId = new Map(input.listings.map((row) => [row.id, row]));
   const lotById = new Map(input.lots.map((row) => [row.listing_id, row]));
+  const rentalBlocked =
+    input.rentalBlockedListingIds instanceof Set
+      ? input.rentalBlockedListingIds
+      : new Set(input.rentalBlockedListingIds ?? []);
   const lines: ValidatedGarageLine[] = [];
 
   for (const listingId of input.listingIds) {
@@ -153,6 +185,9 @@ export function validateGarageSellLines(input: {
     }
     if (isPaused(row.availability)) {
       return { ok: false, error: "Listing is paused" };
+    }
+    if (rentalBlocked.has(listingId)) {
+      return { ok: false, error: "Item has an active rental and cannot be sold" };
     }
     const lotState = lotById.get(listingId)?.state;
     const status = lotStatus(lotState);
@@ -216,6 +251,7 @@ export function validateAuctionListing(input: {
   buyerId: string;
   /** Highest live bid on the listing; when set, it — not the lot JSON — is the charge. */
   topBid?: BidRow | null;
+  rentalBlocked?: boolean;
 }):
   | { ok: true; title: string; bidCents: number; runnerUpAttempt: number }
   | { ok: false; error: string } {
@@ -225,6 +261,9 @@ export function validateAuctionListing(input: {
   if (row.listing_status !== "active") return { ok: false, error: "Listing is not active" };
   if (!modesIncludeSell(row.modes)) return { ok: false, error: "Listing is not for sale" };
   if (isPaused(row.availability)) return { ok: false, error: "Listing is paused" };
+  if (input.rentalBlocked) {
+    return { ok: false, error: "Item has an active rental and cannot be sold" };
+  }
   const status = lotStatus(input.lot?.state);
   if (status === "sold") return { ok: false, error: "Item already sold" };
   if (!(input.winningBidUsd > 0)) return { ok: false, error: "Invalid winning bid" };

@@ -77,9 +77,15 @@ type GarageCartScreenProps = {
   onBack: () => void;
   onCheckoutComplete: () => void;
   onRequireAuth?: () => void;
+  onMessageSeller?: (listingId: string, hostId: string) => void;
 };
 
-export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: GarageCartScreenProps) {
+export function GarageCartScreen({
+  onBack,
+  onCheckoutComplete,
+  onRequireAuth,
+  onMessageSeller,
+}: GarageCartScreenProps) {
   const { garageCart: copy } = useMessages();
   const auth = useAuth();
   const signedIn = Boolean(auth.session);
@@ -95,7 +101,12 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [guestMode, setGuestMode] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
-  const [paidSuccess, setPaidSuccess] = useState<{ garageName: string; totalLabel: string } | null>(null);
+  const [paidSuccess, setPaidSuccess] = useState<{
+    garageName: string;
+    totalLabel: string;
+    listingId?: string;
+    hostId?: string;
+  } | null>(null);
   const [checkoutKind, setCheckoutKind] = useState<"buynow" | "opensale">("buynow");
 
   const greenCheckoutInput = useMemo(
@@ -163,9 +174,13 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
 
   const finishCheckout = () => {
     if (!checkoutInput) return;
+    const firstLine =
+      checkoutKind === "opensale" ? greenLines[0] : lines[0];
     const summary = {
       garageName: checkoutInput.garageName,
       totalLabel: formatShopUsd(checkoutInput.totalUsd),
+      listingId: firstLine?.listingId,
+      hostId: checkoutInput.hostId,
     };
     const complete =
       checkoutKind === "opensale" ? completeOpenSaleWinsCheckout : completeGarageCartCheckout;
@@ -180,6 +195,11 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
   const beginCheckout = (kind: "buynow" | "opensale" = "buynow") => {
     if (busy) return;
     setCheckoutKind(kind);
+    if (kind === "opensale" && !signedIn) {
+      setPaymentError(copy.openSaleSignInRequired);
+      onRequireAuth?.();
+      return;
+    }
     const input =
       kind === "opensale"
         ? greenCheckoutInput
@@ -222,6 +242,8 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
     paymentsReady &&
     (signedIn || (guestMode && isValidEmail(guestEmail)));
 
+  const canPayOpenSale = paymentsReady && signedIn;
+
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F9FAFB]">
       <header
@@ -255,10 +277,20 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
               {copy.paymentCompleteBody}
             </p>
             <p className="mt-2 text-[14px] text-gray-500">{copy.sellerNotified}</p>
+            {onMessageSeller && paidSuccess.listingId && paidSuccess.hostId ? (
+              <button
+                type="button"
+                onClick={() => onMessageSeller(paidSuccess.listingId!, paidSuccess.hostId!)}
+                className="mt-6 w-full rounded-xl py-3.5 text-base font-bold text-white"
+                style={{ backgroundColor: GREEN }}
+              >
+                {copy.messageSeller}
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={onCheckoutComplete}
-              className="mt-6 w-full rounded-xl py-3.5 text-base font-bold"
+              className={`w-full rounded-xl py-3.5 text-base font-bold ${onMessageSeller && paidSuccess.listingId ? "mt-3" : "mt-6"}`}
               style={{ backgroundColor: AMBER, color: GREEN }}
             >
               {copy.backToGarage}
@@ -324,14 +356,16 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
                 {greenLines.length > 0 ? (
                   <button
                     type="button"
-                    disabled={busy || !canPay}
+                    disabled={busy || !canPayOpenSale}
                     onClick={() => beginCheckout("opensale")}
                     className="mt-2 w-full rounded-xl py-3 text-sm font-bold text-white disabled:opacity-60"
                     style={{ backgroundColor: GREEN }}
                   >
                     {busy
                       ? copy.preparing
-                      : `Pay ${greenLines.length} win${greenLines.length === 1 ? "" : "s"} · ${formatShopUsd(greenCheckoutInput?.totalUsd ?? 0)}`}
+                      : !signedIn
+                        ? copy.signInCta
+                        : `Pay ${greenLines.length} win${greenLines.length === 1 ? "" : "s"} · ${formatShopUsd(greenCheckoutInput?.totalUsd ?? 0)}`}
                   </button>
                 ) : (
                   <p className="mt-2 text-center text-[12px] text-gray-500">
@@ -403,7 +437,7 @@ export function GarageCartScreen({ onBack, onCheckoutComplete, onRequireAuth }: 
                 ) : null}
                 <StripePaymentForm
                   clientSecret={clientSecret}
-                  totalLabel={formatShopUsd(totals.totalUsd)}
+                  totalLabel={formatShopUsd(checkoutInput?.totalUsd ?? totals.totalUsd)}
                   onSuccess={finishCheckout}
                   onError={setPaymentError}
                 />

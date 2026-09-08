@@ -54,6 +54,7 @@ export const garageSale: AppMessages["garageSale"] = {
     hoursNotSet: "Hodiny nejsou nastavené",
     openNowWithSummary: (summary) => `Otevřeno teď · ${summary}`,
     todayWithSummary: (summary) => `Dnes · ${summary}`,
+    storePausedWithSummary: (summary) => `Pozastaveno · ${summary}`,
     presetToday: "Dnes",
     presetSaturday: "Sobota",
     presetWeekend: "Víkend",
@@ -149,6 +150,8 @@ export const garageSale: AppMessages["garageSale"] = {
     statusRented: "Půjčeno",
     statusPaused: "Pozastaveno",
     statusPendingPayment: "Čeká na platbu",
+    statusEnded: "Ukončeno",
+    relistCta: "Znovu vystavit",
     modeRent: "Půjčka",
     modeSell: "Prodej",
     modeFree: "Zdarma",
@@ -175,6 +178,8 @@ export const garageSale: AppMessages["garageSale"] = {
   garageAuction: {
     bidTerms:
       "Přihazováním souhlasíte: aukce končí se zavřením garáže. Nejvyšší nabídka platí checkout do 30 minut. Jinak lot přechází na dalšího.",
+    bidRulesNote:
+      "Příhoz nelze stáhnout. Při stejné částce vyhrává dřívější příhoz.",
     checkoutTerms:
       "Zaplaťte teď v checkoutu. Máte 30 minut od konce aukce — jinak lot automaticky přejde na dalšího přihazujícího.",
     runnerUpTitle: "Jste další přihazující",
@@ -338,6 +343,7 @@ export const garageCart: AppMessages["garageCart"] = {
   paymentCompleteBody:
     "Přímý nákup — bez nabídek. Napište prodejci a domluvte vyzvednutí.",
   sellerNotified: "Prodejce byl upozorněn, že jste zaplatili.",
+  messageSeller: "Napsat prodejci",
   backToGarage: "Zpět do garáže →",
   emptyTitle: "Košík je prázdný",
   emptyBody: "Koupit hned z otevřené police v garáži.",
@@ -356,6 +362,7 @@ export const garageCart: AppMessages["garageCart"] = {
   payAmount: (total) => `Zaplatit ${total}`,
   signInOrGuest: "Přihlaste se, nebo pokračujte jako host s e-mailem.",
   validEmail: "Zadejte platný e-mail pro účtenku.",
+  openSaleSignInRequired: "Pro platbu výher Open Sale se přihlaste — host platí jen u Koupit hned.",
 };
 
 export const earnBusiness: AppMessages["earnBusiness"] = {
