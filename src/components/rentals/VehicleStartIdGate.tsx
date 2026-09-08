@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ScanFace, X } from "lucide-react";
-import { putMediaBlob, type MediaRef } from "../../lib/mediaStore";
+import { putUserPhoto, type MediaRef } from "../../lib/mediaStore";
 import {
   buildVehicleStartIdPatch,
   resolveVehicleStartIdProfileLink,
@@ -49,7 +49,7 @@ export function VehicleStartIdGate({
     if (!file) return;
     setBusy(true);
     setError(null);
-    void putMediaBlob(file, { kind: "image" })
+    void putUserPhoto(file, { kind: "image" })
       .then((result) => {
         if (result.ok) setter(result.ref);
         else setError(copy.startIdSelfieFailed);

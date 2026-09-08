@@ -1,3 +1,5 @@
+import { sanitizeImageBlob } from "./imageSanitize";
+
 export type MediaKind = "image" | "video";
 
 export type MediaRef = {
@@ -289,6 +291,24 @@ export async function putMediaBlob(
   } catch (error) {
     return { ok: false, message: formatPutError(error) };
   }
+}
+
+/**
+ * Store a photo a person just supplied, without its metadata.
+ *
+ * Best-effort on purpose: condition and hand-off photos are evidence in a
+ * running rental, so a device that cannot re-encode should still be able to
+ * attach one rather than lose the record.
+ */
+export async function putUserPhoto(
+  blob: Blob,
+  opts: { kind: MediaKind; id?: string; thumbForId?: string; limits?: Partial<MediaStoreLimits> },
+): Promise<MediaPutResult> {
+  const sanitized = await sanitizeImageBlob(blob);
+  if (!sanitized.stripped) {
+    console.warn("[media] storing a photo without stripping its metadata");
+  }
+  return putMediaBlob(sanitized.blob, opts);
 }
 
 export async function getMediaBlob(id: string): Promise<Blob | null> {

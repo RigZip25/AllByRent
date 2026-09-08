@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Camera, CheckCircle2, Shield } from "lucide-react";
-import { putMediaBlob, type MediaRef } from "../../lib/mediaStore";
+import { putUserPhoto, type MediaRef } from "../../lib/mediaStore";
 import { useMediaUrl } from "../../lib/useMediaUrl";
 import { useMessages } from "../../lib/i18n/react";
 import {
@@ -130,7 +130,7 @@ function AreaEditor({
                 e.target.value = "";
                 if (!file) return;
                 setBusy(true);
-                void putMediaBlob(file, { kind: "image" })
+                void putUserPhoto(file, { kind: "image" })
                   .then((result) => {
                     if (result.ok) onPatch({ photo: result.ref });
                   })
