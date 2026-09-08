@@ -1234,16 +1234,50 @@ export function getPendingApprovalWaiting(bookings: RentalBooking[]): RentalBook
   return bookings.filter((b) => b.role === "renter" && b.status === "pending_approval");
 }
 
-export function getActiveBookings(bookings: RentalBooking[]): RentalBooking[] {
+/**
+ * A confirmed booking that has not started yet.
+ *
+ * The `upcoming` status exists in the type and in the server's vocabulary, but
+ * nothing in the app ever wrote it, so the Upcoming tab was empty for everyone
+ * while next week's booking sat under Active next to a rental in progress. The
+ * calendar answers this better than a status does: a booking is upcoming until
+ * the day it starts, or until somebody scans at the handoff.
+ */
+export function isUpcomingBooking(booking: RentalBooking, now = new Date()): boolean {
+  if (booking.status !== "pending_checkin" && booking.status !== "upcoming") return false;
+  if (booking.hostHandedOverAt || booking.renterReceivedAt || booking.pickupConfirmedAt) {
+    return false;
+  }
+  return startsAfterToday(booking.startDate, now);
+}
+
+/** True when the first day of the rental is still ahead, in local time. */
+function startsAfterToday(startDate: string, now: Date): boolean {
+  const [year, month, day] = startDate.split("-").map((part) => Number.parseInt(part, 10));
+  if (!year || !month || !day) return false;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  return new Date(year, month - 1, day).getTime() > today;
+}
+
+export function getActiveBookings(
+  bookings: RentalBooking[],
+  now = new Date(),
+): RentalBooking[] {
   return bookings.filter((b) => {
     if (b.status === "pending_approval") return false;
     if (b.status === "no_show" && b.noShowMarkedAt) return false;
-    return ["pending_checkin", "active", "overdue", "disputed", "no_show"].includes(b.status);
+    if (isUpcomingBooking(b, now)) return false;
+    return ["pending_checkin", "upcoming", "active", "overdue", "disputed", "no_show"].includes(
+      b.status,
+    );
   });
 }
 
-export function getUpcomingBookings(bookings: RentalBooking[]): RentalBooking[] {
-  return bookings.filter((b) => b.status === "upcoming");
+export function getUpcomingBookings(
+  bookings: RentalBooking[],
+  now = new Date(),
+): RentalBooking[] {
+  return bookings.filter((b) => isUpcomingBooking(b, now));
 }
 
 export function getHistoryBookings(bookings: RentalBooking[]): RentalBooking[] {
