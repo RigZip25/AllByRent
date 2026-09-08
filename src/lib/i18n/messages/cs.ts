@@ -1653,6 +1653,8 @@ export const cs: AppMessages = {
       enhancementUnavailable:
         "Fotka uložena tak, jak je — vylepšení pozadí teď nebylo k dispozici.",
       couldntAddPhoto: "Fotku se nepodařilo přidat. Zkus to prosím znovu.",
+      heicFailed:
+        "Tuto fotku z iPhonu (HEIC) se tady nepodařilo přečíst. Vyfoť ji znovu, nebo v Nastavení \u2192 Fotoaparát \u2192 Formáty zvol \u201eNejvyšší kompatibilita\u201c a vyber ji znovu.",
       moderationNotListable:
         "Tuto fotku jsme u nabídky nemohli použít — nevypadá jako jasná fotka produktu. Zkus prosím jinou fotku samotné věci.",
       moderationProhibitedItem:
@@ -1663,6 +1665,7 @@ export const cs: AppMessages = {
         "Tuto fotku je trochu těžké použít — možná je málo světla, je rozmazaná, nebo věc není dobře vidět. Zkus jiný úhel s věcí jasně ve středu.",
       moderationVerifyFailed:
         "Fotku se nepodařilo potvrdit. Často to bývá slabé světlo, rozmazaný záběr, nejasná věc, nebo fotka, která nevypadá jako nabídka. Zkus prosím jinou fotku.",
+      moderationPhotoNumber: (position) => `Fotka ${position}: `,
       verifyingPhotos: (mascot) => `${mascot} kontroluje tvoje fotky...`,
       moderationVideoNotListable:
         "Toto video jsme u nabídky nemohli použít — nevypadá jako jasná ukázka předmětu. Zkus prosím jiný záběr samotné věci.",

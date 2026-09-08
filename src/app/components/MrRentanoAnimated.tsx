@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { MASCOT_NAME } from "../../lib/brand";
-import frame1 from "../../imports/image-7.png";
-import frame2 from "../../imports/image-8.png";
-import frame3 from "../../imports/image-9.png";
-import frame4 from "../../imports/image-10.png";
+import frame1 from "../../imports/image-7.webp";
+import frame2 from "../../imports/image-8.webp";
+import frame3 from "../../imports/image-9.webp";
+import frame4 from "../../imports/image-10.webp";
 
 interface MrRentanoAnimatedProps {
   size?: number;

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, Mic, MicOff, Send } from "lucide-react";
-import rentanoImg from "../../imports/No_back_rentano.png";
+import rentanoImg from "../../imports/No_back_rentano.webp";
 import { MASCOT_NAME } from "../../lib/brand";
 import { useSpeechRecognition } from "../../hooks/useSpeechRecognition";
 import { useRequireAuth } from "../../hooks/RequireAuth";

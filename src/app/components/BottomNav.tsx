@@ -1,7 +1,7 @@
 import { Bell, Home, Plus, Settings } from "lucide-react";
 import { MASCOT_NAME } from "../../lib/brand";
 import { useMessages } from "../../lib/i18n/react";
-import rentanoImg from "../../imports/No_back_rentano.png";
+import rentanoImg from "../../imports/No_back_rentano.webp";
 
 const BORDER = "#E8E6E0";
 const GREEN = "#0D5C3A";

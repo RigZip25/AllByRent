@@ -128,10 +128,56 @@ function totalBytes(records: MediaRecord[]): number {
   return records.reduce((sum, r) => sum + (Number.isFinite(r.sizeBytes) ? r.sizeBytes : 0), 0);
 }
 
+/**
+ * Media that is being published right now.
+ *
+ * Eviction is least-recently-used across the whole store, and the first photo
+ * of a twelve-photo listing is exactly the least recently used one by the time
+ * the last is added — so the sweep that makes room for photo twelve could take
+ * photo one with it, and the host would publish a gallery with a hole. Anything
+ * held here is off limits until the work that holds it is done; if that means
+ * no room can be freed, the write fails loudly instead.
+ */
+const pinnedIds = new Set<string>();
+
+export function pinMedia(ids: Iterable<string | undefined>): void {
+  for (const id of ids) {
+    if (id) pinnedIds.add(id);
+  }
+}
+
+export function unpinMedia(ids: Iterable<string | undefined>): void {
+  for (const id of ids) {
+    if (id) pinnedIds.delete(id);
+  }
+}
+
+/** Keep these blobs through whatever `run` does — an upload, a publish. */
+export async function withPinnedMedia<T>(
+  ids: Iterable<string | undefined>,
+  run: () => Promise<T>,
+): Promise<T> {
+  const held = [...ids].filter((id): id is string => Boolean(id));
+  pinMedia(held);
+  try {
+    return await run();
+  } finally {
+    unpinMedia(held);
+  }
+}
+
+function isPinned(record: MediaRecord): boolean {
+  if (pinnedIds.has(record.id)) return true;
+  // A pinned photo keeps its thumbnail: the grid would otherwise fall back to
+  // decoding the full-size blob for every tile.
+  return Boolean(record.thumbForId && pinnedIds.has(record.thumbForId));
+}
+
 function pickEvictionCandidates(records: MediaRecord[]): MediaRecord[] {
   // Evict thumbnails first, then least-recently-used.
-  const thumbs = records.filter((r) => r.thumbForId);
-  const nonThumbs = records.filter((r) => !r.thumbForId);
+  const evictable = records.filter((r) => !isPinned(r));
+  const thumbs = evictable.filter((r) => r.thumbForId);
+  const nonThumbs = evictable.filter((r) => !r.thumbForId);
   thumbs.sort((a, b) => a.lastAccessedAt - b.lastAccessedAt);
   nonThumbs.sort((a, b) => a.lastAccessedAt - b.lastAccessedAt);
   return [...thumbs, ...nonThumbs];

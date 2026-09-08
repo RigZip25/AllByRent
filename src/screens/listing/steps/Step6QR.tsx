@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import qrItemImg from "../../../imports/qr_item.png";
+import qrItemImg from "../../../imports/qr_item.webp";
 import { RentanoHint } from "../../../components/RentanoHint";
 import type { StepProps } from "../types";
 import { useMessages } from "../../../lib/i18n/react";

@@ -2,7 +2,8 @@ import { useMessages } from "../../lib/i18n/react";
 import { sanitizeImageBlob } from "../../lib/imageSanitize";
 import { useCallback, useRef, useState } from "react";
 import { Camera, Loader2, Trash2, X } from "lucide-react";
-import { deleteMedia, putMediaBlob, type MediaRef } from "../../lib/mediaStore";
+import { deleteMedia, type MediaRef } from "../../lib/mediaStore";
+import { putPhotoWithThumbnail } from "../../lib/photoIngest";
 import { useMediaUrl } from "../../lib/useMediaUrl";
 import {
   garageShelfHasActivity,
@@ -24,30 +25,6 @@ type GarageShelfEditSheetProps = {
   onSaved: () => void;
   onRemoved: () => void;
 };
-
-async function createThumbnail(blob: Blob): Promise<Blob> {
-  const bitmap = await createImageBitmap(blob);
-  const maxSize = 420;
-  const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    bitmap.close();
-    return blob;
-  }
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  bitmap.close();
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((thumb) => {
-      if (!thumb) reject(new Error("Thumbnail failed"));
-      else resolve(thumb);
-    }, "image/jpeg", 0.82);
-  });
-}
 
 export function GarageShelfEditSheet({
   listing,
@@ -83,14 +60,12 @@ export function GarageShelfEditSheet({
           setError(copy.photoLoadFailed);
           return;
         }
-        const main = await putMediaBlob(sanitized.blob, { kind: "image" });
+        const main = await putPhotoWithThumbnail(sanitized.blob, { sanitize: false });
         if (!main.ok) {
           setError(main.message);
           return;
         }
-        const thumbBlob = await createThumbnail(sanitized.blob);
-        const thumbResult = await putMediaBlob(thumbBlob, { kind: "image", thumbForId: main.ref.id });
-        const next: MediaRef = { ...main.ref, thumbId: thumbResult.ok ? thumbResult.ref.id : undefined };
+        const next: MediaRef = main.ref;
         if (photo.id !== listing.photos[0]?.id) {
           await deleteMedia(photo.id);
           if (photo.thumbId) await deleteMedia(photo.thumbId);

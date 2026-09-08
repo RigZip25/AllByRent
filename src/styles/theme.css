@@ -322,7 +322,7 @@
     padding-right: env(safe-area-inset-right, 0px);
   }
 
-  /** Evorios static splash — open garage artwork (src/imports/evorios_splash_garage.png) */
+  /** Evorios static splash — open garage artwork (src/imports/evorios_splash_garage.webp) */
   .splash-static-overlay {
     background: #eef2ea;
   }

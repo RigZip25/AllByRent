@@ -15,6 +15,7 @@ import type { LateReturnFeeSnapshot } from "./lateReturnFee";
 import { normalizeLateReturnFeeSnapshot } from "./lateReturnFee";
 import type { RentalInvoice } from "./rentalInvoice";
 import { mergeRentalInvoices, normalizeRentalInvoices } from "./rentalInvoice";
+import { conditionPhotoFromPath, mergeConditionPhoto } from "./rentalConditionPhotos";
 
 export type { RentalInvoice, RentalInvoiceLine, RentalInvoiceLineKind } from "./rentalInvoice";
 
@@ -433,6 +434,8 @@ type SupabaseRentalRow = {
   insurance_proof_url?: string | null;
   insurance_active_until?: string | null;
   insurance_policy_note?: string | null;
+  pickup_condition_photo_path?: string | null;
+  return_condition_photo_path?: string | null;
   rental_agreement?: RentalAgreementRecord | null;
   rental_invoices?: unknown;
   created_at: string;
@@ -583,6 +586,8 @@ export function rentalBookingFromRemoteRow(
           storagePath: row.insurance_proof_path,
         }
       : undefined,
+    pickupConditionPhoto: conditionPhotoFromPath(row.pickup_condition_photo_path) ?? null,
+    returnConditionPhoto: conditionPhotoFromPath(row.return_condition_photo_path) ?? null,
     rentalAgreement: row.rental_agreement ?? null,
     invoices: normalizeRentalInvoices(row.rental_invoices),
   });
@@ -867,6 +872,15 @@ function mergeRentalBooking(local: RentalBooking, remote: RentalBooking): Rental
       local.rentalAgreement,
       remote.rentalAgreement,
     ),
+    // The device that took the photo has the blob; the other one has the path.
+    pickupConditionPhoto: mergeConditionPhoto(
+      local.pickupConditionPhoto,
+      remote.pickupConditionPhoto,
+    ),
+    returnConditionPhoto: mergeConditionPhoto(
+      local.returnConditionPhoto,
+      remote.returnConditionPhoto,
+    ),
     invoices: mergeRentalInvoices(local.invoices, remote.invoices),
   });
 }
@@ -888,6 +902,8 @@ export async function updateRentalRemote(
     renterReceivedAt?: string | null;
     renterReturnedAt?: string | null;
     hostAcceptedReturnAt?: string | null;
+    pickupConditionPhotoPath?: string | null;
+    returnConditionPhotoPath?: string | null;
     rentalAgreement?: RentalAgreementRecord | null;
     invoices?: RentalInvoice[] | null;
   },
@@ -913,6 +929,12 @@ export async function updateRentalRemote(
   if (patch.hostAcceptedReturnAt !== undefined) {
     row.host_accepted_return_at = patch.hostAcceptedReturnAt;
   }
+  if (patch.pickupConditionPhotoPath !== undefined) {
+    row.pickup_condition_photo_path = patch.pickupConditionPhotoPath;
+  }
+  if (patch.returnConditionPhotoPath !== undefined) {
+    row.return_condition_photo_path = patch.returnConditionPhotoPath;
+  }
   if (patch.rentalAgreement !== undefined) {
     row.rental_agreement = patch.rentalAgreement;
   }
@@ -923,9 +945,14 @@ export async function updateRentalRemote(
 
   const { error } = await supabase.from("rentals").update(row).eq("id", rentalId);
   if (error) {
-    // Local state remains; host/renter can retry. Column may be missing until migration.
-    if (patch.invoices !== undefined && (error.message ?? "").toLowerCase().includes("rental_invoices")) {
-      const { rental_invoices: _omit, ...without } = row;
+    // Local state remains; host/renter can retry. Columns may be missing until
+    // the matching migration has been applied to this project.
+    const message = (error.message ?? "").toLowerCase();
+    const missing = Object.keys(row).filter((column) => message.includes(column));
+    if (missing.length > 0) {
+      const without = Object.fromEntries(
+        Object.entries(row).filter(([column]) => !missing.includes(column)),
+      );
       if (Object.keys(without).length > 0) {
         await supabase.from("rentals").update(without).eq("id", rentalId);
       }
@@ -953,6 +980,14 @@ function remotePatchFromBooking(patch: Partial<RentalBooking>): Parameters<typeo
   }
   if (patch.rentalAgreement !== undefined) {
     remote.rentalAgreement = patch.rentalAgreement ?? null;
+  }
+  // Only the uploaded copy is worth syncing: a local media id means nothing on
+  // the other device.
+  if (patch.pickupConditionPhoto?.storagePath) {
+    remote.pickupConditionPhotoPath = patch.pickupConditionPhoto.storagePath;
+  }
+  if (patch.returnConditionPhoto?.storagePath) {
+    remote.returnConditionPhotoPath = patch.returnConditionPhoto.storagePath;
   }
   if (patch.invoices !== undefined) {
     remote.invoices = patch.invoices ?? [];

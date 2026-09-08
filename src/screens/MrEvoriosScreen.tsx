@@ -16,7 +16,7 @@ import { APP_NAME, MASCOT_NAME } from "../lib/brand";
 import { useAppModeLabels, useMessages } from "../lib/i18n/react";
 import { getAppMode } from "../lib/appMode";
 import { useAuth } from "../hooks/AuthProvider";
-import rentanoImg from "../imports/No_back_rentano.png";
+import rentanoImg from "../imports/No_back_rentano.webp";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";

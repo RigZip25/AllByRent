@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowDown, Clock, ShoppingBag } from "lucide-react";
 import { BRAND_AMBER, BRAND_GREEN } from "../../lib/brand";
 import { markGarageWorkflowSeen } from "../../lib/garageWorkflowStorage";
 import { onboardingAssets } from "../../lib/onboardingAssets";
-import listingSnap from "../../imports/listing_snap.png";
+import listingSnap from "../../imports/listing_snap.webp";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;

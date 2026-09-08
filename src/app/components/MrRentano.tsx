@@ -1,5 +1,5 @@
 import { MASCOT_NAME } from "../../lib/brand";
-import mrRentanoImg from "../../imports/No_back_rentano.png";
+import mrRentanoImg from "../../imports/No_back_rentano.webp";
 
 export function MrRentano({ size = 120, className = "", waving: _waving = false }: { size?: number; className?: string; waving?: boolean }) {
   return (

@@ -1,4 +1,5 @@
 import { getMediaBlob, type MediaRef } from "./mediaStore";
+import { getListingPhotoPublicUrl } from "./listingPhotoStorage";
 import { APP_NAME } from "./brand";
 
 export type ShareCardFormat = "landscape" | "square" | "story";
@@ -107,21 +108,23 @@ function formatDailyRate(dailyRate: string): string | null {
   return `$${Math.round(n)}/day`;
 }
 
-async function mediaRefToObjectUrl(ref: MediaRef | undefined): Promise<string | null> {
-  if (!ref?.id) return null;
-  const blob = await getMediaBlob(ref.id);
-  if (!blob) return null;
-  return URL.createObjectURL(blob);
-}
+type CoverSource = { url: string; revoke: boolean };
 
-async function getRentanoLogoUrl(): Promise<string | null> {
-  try {
-    // shipped in repo at src/imports
-    const mod = await import("../imports/rentano_full.png");
-    return (mod as { default: string }).default;
-  } catch {
-    return null;
-  }
+/**
+ * The cover for the card. On the device that shot the photo it is the blob in
+ * IndexedDB; on any other device — a new phone, a reinstall, a host who shares
+ * a listing from last summer — only the uploaded copy exists, and reading just
+ * IndexedDB is what left those cards as a plain green rectangle.
+ */
+async function resolveCoverSource(ref: MediaRef | undefined): Promise<CoverSource | null> {
+  if (!ref?.id) return null;
+
+  const blob = await getMediaBlob(ref.id);
+  if (blob) return { url: URL.createObjectURL(blob), revoke: true };
+
+  const remote =
+    getListingPhotoPublicUrl(ref.storagePath) ?? getListingPhotoPublicUrl(ref.thumbStoragePath);
+  return remote ? { url: remote, revoke: false } : null;
 }
 
 async function generateOne(input: {
@@ -198,21 +201,6 @@ async function generateOne(input: {
   ctx.fillText(cta, 40 + 24, dims.height - 96);
   ctx.restore();
 
-  // Rentano small corner
-  const rentanoLogo = await getRentanoLogoUrl();
-  if (rentanoLogo) {
-    try {
-      const img = await loadImage(rentanoLogo);
-      const size = 56;
-      ctx.save();
-      ctx.globalAlpha = 0.9;
-      ctx.drawImage(img, dims.width - size - 36, dims.height - size - 30, size, size);
-      ctx.restore();
-    } catch {
-      // ignore
-    }
-  }
-
   const blob: Blob = await new Promise((resolve, reject) => {
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("PNG generation failed"))), "image/png");
   });
@@ -227,7 +215,11 @@ export async function generateListingShareCards(input: {
   dailyRate: string;
   photos: MediaRef[];
 }): Promise<GeneratedShareCard[]> {
-  const coverUrl = await mediaRefToObjectUrl(input.photos?.[0]);
+  const cover =
+    (await resolveCoverSource(input.photos?.[0])) ??
+    // The first photo may be the one that never uploaded; the gallery still has others.
+    (await firstAvailableCover(input.photos));
+  const coverUrl = cover?.url ?? null;
   const title = input.title?.trim() || "Listing";
 
   const cards = await Promise.all([
@@ -236,11 +228,24 @@ export async function generateListingShareCards(input: {
     generateOne({ format: "story", title, dailyRate: input.dailyRate, coverUrl }),
   ]);
 
-  if (coverUrl) {
-    // Note: coverUrl is an objectUrl for a MediaStore blob; safe to revoke after draw.
-    try { URL.revokeObjectURL(coverUrl); } catch { /* ignore */ }
+  if (cover?.revoke) {
+    try {
+      URL.revokeObjectURL(cover.url);
+    } catch {
+      /* ignore */
+    }
   }
 
   return cards;
+}
+
+async function firstAvailableCover(
+  photos: MediaRef[] | undefined,
+): Promise<CoverSource | null> {
+  for (const photo of (photos ?? []).slice(1)) {
+    const source = await resolveCoverSource(photo);
+    if (source) return source;
+  }
+  return null;
 }
 

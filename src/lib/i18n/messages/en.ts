@@ -1636,6 +1636,8 @@ export const en: AppMessages = {
       enhancementUnavailable:
         "Photo saved as-is — background polish wasn't available this time.",
       couldntAddPhoto: "Couldn't add this photo. Please try again.",
+      heicFailed:
+        "This iPhone photo (HEIC) couldn't be read here. Take a new shot, or switch Settings \u2192 Camera \u2192 Formats to \u201cMost Compatible\u201d and pick it again.",
       moderationNotListable:
         "We couldn't use this photo for a listing — it doesn't look like a clear product photo. Please try another shot of the item itself.",
       moderationProhibitedItem:
@@ -1646,6 +1648,7 @@ export const en: AppMessages = {
         "This photo is a bit hard to use — maybe weak lighting, blur, or the item isn't clearly visible. Try another angle with the item front and center.",
       moderationVerifyFailed:
         "We couldn't confirm this photo. That can happen with weak lighting, a blurry shot, an unclear item, or a photo that doesn't look like a listing. Please try another photo.",
+      moderationPhotoNumber: (position) => `Photo ${position}: `,
       verifyingPhotos: (mascot) => `${mascot} is checking your photos...`,
       moderationVideoNotListable:
         "We couldn't use this video for a listing — it doesn't look like a clear demo of the item. Please try another take of the item itself.",

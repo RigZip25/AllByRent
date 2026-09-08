@@ -3,9 +3,9 @@ import { ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 import { MASCOT_NAME } from "../../lib/brand";
 import { RentanoHint } from "../../components/RentanoHint";
-import listingSnap from "../../imports/listing_snap.png";
-import listingMagic from "../../imports/listing_magic.png";
-import listingShare from "../../imports/listing_share.png";
+import listingSnap from "../../imports/listing_snap.webp";
+import listingMagic from "../../imports/listing_magic.webp";
+import listingShare from "../../imports/listing_share.webp";
 import { useMessages } from "../../lib/i18n/react";
 
 const PRIMARY_GREEN = "#0D5C3A";

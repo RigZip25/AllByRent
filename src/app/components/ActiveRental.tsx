@@ -976,6 +976,8 @@ export function ActiveRental({
           pin,
           odometerMiles,
           conditionPhoto,
+          // The condition photo is uploaded under this person's folder.
+          uploaderId: auth.userId ?? undefined,
           fuelLevelEighths: resolvedFuel ?? undefined,
           defLevelEighths: tracksDef ? resolvedDef ?? undefined : undefined,
           prepaidFullTank: extras?.prepaidFullTank,
