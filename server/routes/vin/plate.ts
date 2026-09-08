@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { applyCors, handleOptions } from "../../lib/cors";
 
 /**
  * Proxy US license plate → VIN via PlateToVIN (optional key).
@@ -30,16 +31,10 @@ function normalizeState(raw: string): string {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const origin = typeof req.headers.origin === "string" ? req.headers.origin : "*";
-  res.setHeader("Access-Control-Allow-Origin", origin);
-  res.setHeader("Vary", "Origin");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  const origin = typeof req.headers.origin === "string" ? req.headers.origin : undefined;
+  applyCors(res, origin);
   res.setHeader("Cache-Control", "private, max-age=300");
-
-  if (req.method === "OPTIONS") {
-    return res.status(204).end();
-  }
+  if (handleOptions(req, res)) return;
 
   if (req.method !== "GET" && req.method !== "POST") {
     res.setHeader("Allow", "GET, POST, OPTIONS");

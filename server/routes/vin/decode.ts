@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { applyCors, handleOptions } from "../../lib/cors";
 
 const NHTSA_BASE = "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues";
 
@@ -12,15 +13,10 @@ function isPlausibleVin(vin: string): boolean {
 
 /** Proxy NHTSA VIN decode — browser CORS + consistent error shape. */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const origin = typeof req.headers.origin === "string" ? req.headers.origin : "*";
-  res.setHeader("Access-Control-Allow-Origin", origin);
-  res.setHeader("Vary", "Origin");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  const origin = typeof req.headers.origin === "string" ? req.headers.origin : undefined;
+  applyCors(res, origin);
   res.setHeader("Cache-Control", "public, max-age=86400");
-
-  if (req.method === "OPTIONS") {
-    return res.status(204).end();
-  }
+  if (handleOptions(req, res)) return;
 
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET, OPTIONS");

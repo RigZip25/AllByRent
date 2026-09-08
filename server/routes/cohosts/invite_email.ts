@@ -31,12 +31,9 @@ function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
 }
 
-function defaultInviteUrl(inviteId?: string): string {
+function defaultInviteUrl(inviteId: string): string {
   const origin = resolveConfiguredAppOrigin();
-  if (inviteId?.trim()) {
-    return `${origin}/?screen=coHosts&invite=${encodeURIComponent(inviteId.trim())}&skipSplash=1`;
-  }
-  return `${origin}/?screen=coHosts&skipSplash=1`;
+  return `${origin}/?screen=coHosts&invite=${encodeURIComponent(inviteId)}&skipSplash=1`;
 }
 
 export default withApiErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
@@ -81,39 +78,58 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     return;
   }
 
+  if (!inviteId || !isUuid(inviteId)) {
+    res.status(400).json({ error: "Valid inviteId required" });
+    return;
+  }
+
+  if (!admin) {
+    res.status(503).json({
+      ok: false,
+      error: "Invite email is not configured.",
+      code: "email_not_configured",
+    });
+    return;
+  }
+
+  if (!isUuid(caller.id)) {
+    res.status(403).json({ error: "Forbidden" });
+    return;
+  }
+
+  const { data: row } = await admin
+    .from("co_hosts")
+    .select("id, host_id, co_host_email, status")
+    .eq("id", inviteId)
+    .maybeSingle();
+
+  if (!row) {
+    res.status(404).json({ error: "Invite not found" });
+    return;
+  }
+  if (row.host_id !== caller.id) {
+    res.status(403).json({ error: "Forbidden" });
+    return;
+  }
+  if (normalizeEmail(String(row.co_host_email ?? "")) !== email) {
+    res.status(400).json({ error: "Invite email mismatch" });
+    return;
+  }
+  if (row.status !== "pending") {
+    res.status(400).json({ error: "Invite is no longer pending" });
+    return;
+  }
+
   const hostEmail = normalizeEmail(caller.email ?? "");
   if (hostEmail && email === hostEmail) {
     res.status(400).json({ error: "You cannot invite yourself." });
     return;
   }
 
-  if (admin && inviteId && isUuid(inviteId) && isUuid(caller.id)) {
-    const { data: row } = await admin
-      .from("co_hosts")
-      .select("id, host_id, co_host_email, status")
-      .eq("id", inviteId)
-      .maybeSingle();
-
-    if (row) {
-      if (row.host_id !== caller.id) {
-        res.status(403).json({ error: "Forbidden" });
-        return;
-      }
-      if (normalizeEmail(String(row.co_host_email ?? "")) !== email) {
-        res.status(400).json({ error: "Invite email mismatch" });
-        return;
-      }
-      if (row.status !== "pending") {
-        res.status(400).json({ error: "Invite is no longer pending" });
-        return;
-      }
-    }
-  }
-
   const inviteUrl =
     inviteUrlRaw && /^https?:\/\//i.test(inviteUrlRaw)
       ? inviteUrlRaw
-      : defaultInviteUrl(inviteId || undefined);
+      : defaultInviteUrl(inviteId);
 
   // Prefer Resend (full co-host copy). Fall back to Supabase Auth mailer.
   if (isResendConfigured()) {
@@ -139,35 +155,21 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
     }
 
     // Resend configured but failed — try Supabase before giving up.
-    if (admin) {
-      const fallback = await sendCoHostInviteViaSupabaseAuth(admin, email, inviteUrl);
-      if (fallback.ok) {
-        res.status(200).json({
-          ok: true,
-          id: null,
-          provider: fallback.provider,
-          warning: sent.reason,
-        });
-        return;
-      }
-      res.status(502).json({
-        ok: false,
-        error: sent.reason,
-        code: "send_failed",
-        detail: fallback.reason,
+    const fallback = await sendCoHostInviteViaSupabaseAuth(admin, email, inviteUrl);
+    if (fallback.ok) {
+      res.status(200).json({
+        ok: true,
+        id: null,
+        provider: fallback.provider,
+        warning: sent.reason,
       });
       return;
     }
-
-    res.status(502).json({ ok: false, error: sent.reason, code: "send_failed" });
-    return;
-  }
-
-  if (!admin) {
-    res.status(503).json({
+    res.status(502).json({
       ok: false,
-      error: "Invite email is not configured.",
-      code: "email_not_configured",
+      error: sent.reason,
+      code: "send_failed",
+      detail: fallback.reason,
     });
     return;
   }
