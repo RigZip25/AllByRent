@@ -1,3 +1,4 @@
+import { serverNow } from "../serverClock";
 import { getGarageBidderId, notifyOutbidIfNeeded } from "../garageAuctionState";
 import {
   getOpenSaleEvent,
@@ -85,13 +86,13 @@ function writeLotPay(map: LotPayMap): void {
   }
 }
 
-export function isOpenSaleBidderBanned(bidderId = getGarageBidderId(), now = Date.now()): boolean {
+export function isOpenSaleBidderBanned(bidderId = getGarageBidderId(), now = serverNow()): boolean {
   const until = readBans()[bidderId];
   if (!until) return false;
   return new Date(until).getTime() > now;
 }
 
-export function banOpenSaleBidder(bidderId: string, now = Date.now()): void {
+export function banOpenSaleBidder(bidderId: string, now = serverNow()): void {
   const map = readBans();
   map[bidderId] = new Date(now + OPEN_SALE_BAN_DAYS * 86_400_000).toISOString();
   writeBans(map);
@@ -174,7 +175,7 @@ export function placeOpenSaleCartBid(input: {
   const lot = getOpenSaleLot(event, input.listingId);
   if (!lot) return { ok: false, reason: "Item is not on this Open Sale" };
 
-  const now = Date.now();
+  const now = serverNow();
   const hardMs = new Date(event.hardEndsAt).getTime();
   const endsMs = new Date(event.endsAt).getTime();
   if (now >= hardMs || (event.status === "live" && now >= endsMs)) {
@@ -269,14 +270,14 @@ export function dropGrayLinesFromCart(bidderId = getGarageBidderId()): void {
 }
 
 function payByFromNow(): string {
-  return new Date(Date.now() + OPEN_SALE_PAY_MINUTES * 60_000).toISOString();
+  return new Date(serverNow() + OPEN_SALE_PAY_MINUTES * 60_000).toISOString();
 }
 
 /**
  * When soft/hard end hits: assign each lot to high bidder → awaiting_checkout.
  * Cascade unpaid separately.
  */
-export function resolveEndedOpenSales(now = Date.now()): void {
+export function resolveEndedOpenSales(now = serverNow()): void {
   const events = listOpenSaleEvents();
   const pay = readLotPay();
   let changed = false;
@@ -322,7 +323,7 @@ export function resolveEndedOpenSales(now = Date.now()): void {
 }
 
 /** Unpaid winner → ban + next-highest bid gets the lot. */
-export function cascadeUnpaidOpenSaleLots(now = Date.now()): void {
+export function cascadeUnpaidOpenSaleLots(now = serverNow()): void {
   const pay = readLotPay();
   let changed = false;
 
@@ -393,7 +394,7 @@ export function getOpenSaleLotPayState(listingId: string): LotPayState | null {
   return readLotPay()[listingId] ?? null;
 }
 
-export function formatCountdown(targetIso: string, now = Date.now()): string {
+export function formatCountdown(targetIso: string, now = serverNow()): string {
   const ms = new Date(targetIso).getTime() - now;
   if (ms <= 0) return "0:00";
   const totalSec = Math.floor(ms / 1000);

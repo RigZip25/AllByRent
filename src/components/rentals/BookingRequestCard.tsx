@@ -1,3 +1,4 @@
+import { approvalDeadlineIso } from "../../lib/expirePendingApprovals";
 import { useMemo, useState } from "react";
 import { useAuth } from "../../hooks/AuthProvider";
 import { useNow } from "../../hooks/useNow";
@@ -44,11 +45,12 @@ export function BookingRequestCard({
   const [agreementExpanded, setAgreementExpanded] = useState(false);
   const now = useNow(30_000);
   const timerLabel = useMemo(() => {
-    if (!booking.approvalDeadline) return copy.autoCancelledSoon;
-    const parts = getCountdownParts(booking.approvalDeadline, now);
+    const deadline = approvalDeadlineIso(booking);
+    if (!deadline) return copy.autoCancelledSoon;
+    const parts = getCountdownParts(deadline, now);
     if (parts.totalMs <= 0) return copy.autoCancelledSoon;
     return copy.autoCancelledIn(formatCountdownShort(parts));
-  }, [booking.approvalDeadline, copy, now]);
+  }, [booking, copy, now]);
 
   const hostDisplayName = useMemo(() => {
     const profile = loadUserProfile();

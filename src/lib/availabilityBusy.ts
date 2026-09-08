@@ -43,8 +43,18 @@ export function todayIsoLocal(): string {
 
 export function addMonthsIso(iso: string, months: number): string {
   const base = parseIsoDateLocal(iso) ?? new Date();
-  const next = new Date(base.getFullYear(), base.getMonth() + months, base.getDate());
+  const year = base.getFullYear();
+  const month = base.getMonth() + months;
+  // Clamp to the target month's length: Jan 31 + 1 month is Feb 28, not Mar 3.
+  const lastDayOfTargetMonth = new Date(year, month + 1, 0).getDate();
+  const next = new Date(year, month, Math.min(base.getDate(), lastDayOfTargetMonth));
   return toIsoDateLocal(next);
+}
+
+/** Length of the calendar month starting on `iso`, in inclusive days. */
+export function calendarMonthDays(iso: string): number {
+  const monthEnd = addDaysIso(addMonthsIso(iso, 1), -1);
+  return Math.max(1, daysInclusive(iso, monthEnd));
 }
 
 export function addDaysIso(iso: string, days: number): string {
@@ -58,8 +68,11 @@ export function daysInclusive(startIso: string, endIso: string): number {
   const start = parseIsoDateLocal(startIso);
   const end = parseIsoDateLocal(endIso);
   if (!start || !end) return 0;
-  const ms = end.getTime() - start.getTime();
-  return Math.floor(ms / 86_400_000) + 1;
+  // Counted on the calendar, not in milliseconds: a range spanning a clock
+  // change is 23 or 25 hours long and would otherwise come out a day short.
+  const startDay = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+  const endDay = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
+  return Math.round((endDay - startDay) / 86_400_000) + 1;
 }
 
 function normalizeInterval(raw: unknown): BusyInterval | null {

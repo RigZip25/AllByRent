@@ -10,6 +10,7 @@ import {
 import { scheduleMediaHousekeeping } from "./lib/mediaHousekeeping.ts";
 import { consumeResetAppBeforeBoot } from "./lib/resetAppStorage.ts";
 import { redirectShareLinkToApp } from "./lib/shareLinkRedirect.ts";
+import { syncServerClock } from "./lib/serverClock.ts";
 import "./styles/index.css";
 
 async function boot(): Promise<void> {
@@ -31,6 +32,9 @@ async function boot(): Promise<void> {
       </AppErrorBoundary>,
     );
     scheduleMediaHousekeeping();
+    // Auction closings and payment windows are decided against this, so learn
+    // how far the device clock is off before anyone can bid.
+    void syncServerClock();
   }
 }
 

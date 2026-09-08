@@ -1,5 +1,10 @@
 import { getMessages } from "./i18n";
-import { listingHasOverlappingRental } from "./availabilityBusy";
+import {
+  BUSY_RENTAL_STATUSES,
+  listingHasOverlappingRental,
+  parseIsoDateLocal,
+  rangesOverlap,
+} from "./availabilityBusy";
 import { fetchListingByIdRemote, getPublishedListingById } from "./listingStorage";
 import { getSupabaseClient, isSupabaseConfigured } from "./supabaseClient";
 import type { MediaRef } from "./mediaStore";
@@ -107,6 +112,8 @@ export type RentalBooking = {
   pickupWindowEnd?: string;
   pickupScheduledAt?: string;
   returnDueAt?: string;
+  /** IANA zone the rental dates mean; deadlines are wall-clock in this zone. */
+  timezone?: string;
   overdueSince?: string;
   disputeEvidenceDeadline?: string;
   disputeEscalated?: boolean;
@@ -423,6 +430,8 @@ type SupabaseRentalRow = {
   rental_total_cents?: number;
   pickup_at?: string | null;
   due_at?: string | null;
+  /** IANA zone the dates are expressed in; null on rentals created before migration 049. */
+  timezone?: string | null;
   picked_up_at?: string | null;
   returned_at?: string | null;
   host_handed_over_at?: string | null;
@@ -554,6 +563,7 @@ export function rentalBookingFromRemoteRow(
     returnConfirmedAt: row.returned_at ?? undefined,
     returnDueAt: row.due_at ?? undefined,
     pickupScheduledAt: row.pickup_at ?? undefined,
+    timezone: row.timezone ?? undefined,
     hostHandedOverAt: row.host_handed_over_at ?? undefined,
     renterReceivedAt: row.renter_received_at ?? undefined,
     renterReturnedAt: row.renter_returned_at ?? undefined,
@@ -823,6 +833,34 @@ function normalizeBooking(raw: RentalBooking): RentalBooking {
   };
 }
 
+/**
+ * A booking already on this device that occupies the same days.
+ *
+ * The database rejects overlaps (migration 035), but bookings can be written
+ * locally with no database at all, and that path had nothing stopping a host
+ * from double-booking the same item.
+ */
+export function findLocalBookingConflict(params: {
+  listingId: string;
+  startDate: string;
+  endDate: string;
+  ignoreBookingId?: string;
+}): RentalBooking | null {
+  const listingId = params.listingId.trim();
+  if (!listingId || !params.startDate || !params.endDate) return null;
+  const busy = new Set<string>(BUSY_RENTAL_STATUSES);
+  const range = { start: params.startDate, end: params.endDate };
+  return (
+    loadRentalBookings().find(
+      (booking) =>
+        booking.id !== params.ignoreBookingId &&
+        booking.listingId?.trim() === listingId &&
+        busy.has(booking.status) &&
+        rangesOverlap(range, { start: booking.startDate, end: booking.endDate }),
+    ) ?? null
+  );
+}
+
 export function appendRentalBooking(booking: RentalBooking): RentalBooking[] {
   const bookings = loadRentalBookings();
   const next = [normalizeBooking(booking), ...bookings];
@@ -984,6 +1022,7 @@ export function toSupabaseRentalInsert(params: {
   rentalTotalCents?: number;
   pickupAt?: string | null;
   dueAt?: string | null;
+  timezone?: string | null;
   insuranceProofPath?: string | null;
   insuranceProofUrl?: string | null;
   insuranceActiveUntil?: string | null;
@@ -1010,6 +1049,7 @@ export function toSupabaseRentalInsert(params: {
     rental_total_cents: Math.max(0, Math.round(params.rentalTotalCents ?? 0)),
     pickup_at: params.pickupAt ?? null,
     due_at: params.dueAt ?? null,
+    timezone: params.timezone ?? null,
     insurance_proof_path: params.insuranceProofPath ?? null,
     insurance_proof_url: params.insuranceProofUrl ?? null,
     insurance_active_until: params.insuranceActiveUntil ?? null,
@@ -1048,6 +1088,13 @@ export async function createRentalRemote(row: Omit<SupabaseRentalRow, "created_a
     if (row.rental_agreement != null && (msg.includes("rental_agreement") || msg.includes("schema cache"))) {
       const { rental_agreement: _omit, ...withoutAgreement } = row;
       const retry = await supabase.from("rentals").insert(withoutAgreement);
+      if (retry.error) throw retry.error;
+      return;
+    }
+    // Same for the zone column (migration 049).
+    if (row.timezone != null && msg.includes("timezone")) {
+      const { timezone: _omitZone, ...withoutZone } = row;
+      const retry = await supabase.from("rentals").insert(withoutZone);
       if (retry.error) throw retry.error;
       return;
     }
@@ -1175,10 +1222,14 @@ export function getHistoryBookings(bookings: RentalBooking[]): RentalBooking[] {
 
 export function formatRentalDateRange(start: string, end: string): string {
   const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
-  const s = new Date(start);
-  const e = new Date(end);
+  // Date-only strings are calendar days, so parse them locally: new Date("2026-03-15")
+  // is UTC midnight and renders as the 14th anywhere west of Greenwich.
+  const s = parseIsoDateLocal(start) ?? new Date(start);
+  const e = parseIsoDateLocal(end) ?? new Date(end);
   if (Number.isNaN(s.getTime()) || Number.isNaN(e.getTime())) return `${start} – ${end}`;
-  return `${s.toLocaleDateString(undefined, opts)} – ${e.toLocaleDateString(undefined, opts)}`;
+  const startLabel = s.toLocaleDateString(undefined, opts);
+  const endLabel = e.toLocaleDateString(undefined, opts);
+  return startLabel === endLabel ? startLabel : `${startLabel} – ${endLabel}`;
 }
 
 export function getRentalStatusLabel(status: RentalStatus): string {

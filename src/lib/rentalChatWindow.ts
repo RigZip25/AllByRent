@@ -1,3 +1,5 @@
+import { resolveReturnDeadlineIso } from "./rentalPickupTime";
+import { resolveTimeZone } from "./zonedTime";
 /**
  * Active-rental chat lifecycle: open during the trip; auto-close (read-only)
  * when completed — except Vehicles / commercial / fuel rentals, which keep an
@@ -52,6 +54,7 @@ function rentalEndAnchorIso(booking: RentalBooking): string {
     booking.returnConfirmedAt ||
     booking.hostAcceptedReturnAt ||
     booking.renterReturnedAt ||
+    resolveReturnDeadlineIso(booking.endDate, resolveTimeZone(booking.timezone)) ||
     `${booking.endDate}T23:59:59.999Z`
   );
 }

@@ -1,3 +1,4 @@
+import { serverNow } from "../serverClock";
 import {
   OPEN_SALE_HARD_AFTER_END_MS,
   OPEN_SALE_LIVE_MINUTES,
@@ -31,7 +32,7 @@ function writeEvents(events: OpenSaleEvent[]): void {
   }
 }
 
-function refreshStatus(event: OpenSaleEvent, now = Date.now()): OpenSaleStatus {
+function refreshStatus(event: OpenSaleEvent, now = serverNow()): OpenSaleStatus {
   if (event.status === "cancelled" || event.status === "ended") return event.status;
   const start = new Date(event.startsAt).getTime();
   const hard = new Date(event.hardEndsAt).getTime();
@@ -42,7 +43,7 @@ function refreshStatus(event: OpenSaleEvent, now = Date.now()): OpenSaleStatus {
 }
 
 /** Recompute status from clocks (local). Call on load / tick. */
-export function syncOpenSaleStatuses(now = Date.now()): OpenSaleEvent[] {
+export function syncOpenSaleStatuses(now = serverNow()): OpenSaleEvent[] {
   const events = readEvents();
   let changed = false;
   const next = events.map((event) => {
@@ -131,7 +132,7 @@ export function createOpenSaleEvent(input: {
     startsAt: input.startsAt,
     liveMinutes: input.liveMinutes,
   });
-  const now = Date.now();
+  const now = serverNow();
   const status = refreshStatus(
     {
       id: "",
@@ -200,7 +201,7 @@ export function markOpenSaleEnded(eventId: string): void {
 /** Extend soft endsAt when a bid lands in the soft-close window; never past hardEndsAt. */
 export function maybeExtendOpenSaleSoftClose(
   eventId: string,
-  now = Date.now(),
+  now = serverNow(),
 ): OpenSaleEvent | null {
   const events = readEvents();
   const idx = events.findIndex((e) => e.id === eventId);

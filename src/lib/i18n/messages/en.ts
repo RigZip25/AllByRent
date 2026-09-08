@@ -6840,6 +6840,10 @@ export const en: AppMessages = {
     bookingCalendarTitle: "Occupancy calendar",
     bookingCalendarHint:
       "Booked and blocked dates appear in gray. Neighbors only see busy days — never who rented.",
+    manageAvailability: "Manage availability",
+    noBlockedPeriods: "No blocked periods yet.",
+    blockedPeriodsCount: (count) =>
+      count === 1 ? "1 blocked period" : `${count} blocked periods`,
   },
   garageSale,
   yardSales,

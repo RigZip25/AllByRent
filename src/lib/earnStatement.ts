@@ -1,3 +1,4 @@
+import { toIsoDateLocal } from "./availabilityBusy";
 /**
  * Host earnings / tax statement ledger (v1).
  *
@@ -134,7 +135,7 @@ function toLedgerRow(booking: RentalBooking): EarningsLedgerRow {
   const when = bookingEventDate(booking);
   const dateIso = Number.isNaN(when.getTime())
     ? booking.endDate.slice(0, 10)
-    : when.toISOString().slice(0, 10);
+    : toIsoDateLocal(when);
   const gross = bookingGross(booking);
   const platformFee = bookingPlatformFee(booking);
   const refunds = bookingRefunds(booking);

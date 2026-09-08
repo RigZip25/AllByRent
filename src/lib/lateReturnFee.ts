@@ -1,3 +1,4 @@
+import { resolveTimeZone, zonedEndOfDay } from "./zonedTime";
 /**
  * Host-configured late return fee — defaults match common car-share norms
  * (short grace, then flat late fee + hourly additional usage).
@@ -157,14 +158,16 @@ export function normalizeLateReturnFeeSnapshot(
 export function resolveReturnDueMs(input: {
   returnDueAt?: string | null;
   endDate?: string | null;
+  /** Zone the rental dates mean; the deadline is the end of that day there. */
+  timeZone?: string | null;
 }): number | null {
   if (input.returnDueAt) {
     const ms = new Date(input.returnDueAt).getTime();
     if (!Number.isNaN(ms)) return ms;
   }
   if (input.endDate) {
-    const ms = new Date(`${input.endDate}T23:59:59.000Z`).getTime();
-    if (!Number.isNaN(ms)) return ms;
+    const ms = zonedEndOfDay(input.endDate, resolveTimeZone(input.timeZone))?.getTime();
+    if (ms != null && !Number.isNaN(ms)) return ms;
   }
   return null;
 }
@@ -185,6 +188,7 @@ export function assessLateReturnFee(input: {
   policy: LateReturnFeeSnapshot | LateReturnFeePolicy | null | undefined;
   returnDueAt?: string | null;
   endDate?: string | null;
+  timeZone?: string | null;
   nowMs?: number;
 }): LateReturnFeeAssessment {
   const now = input.nowMs ?? Date.now();

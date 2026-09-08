@@ -1,3 +1,4 @@
+import { serverNow } from "./serverClock";
 import { getGarageSaleOfferPrefs } from "./garageSaleOfferStorage";
 import { getBestBidExcluding, getHighBid, type GarageBid } from "./garageShopStorage";
 import { pushInAppNotification } from "./inAppNotifications";
@@ -87,7 +88,7 @@ function writeLotStatesInternal(map: LotStateMap): void {
 }
 
 function payByFromNow(): string {
-  return new Date(Date.now() + GARAGE_AUCTION_PAY_MINUTES * 60_000).toISOString();
+  return new Date(serverNow() + GARAGE_AUCTION_PAY_MINUTES * 60_000).toISOString();
 }
 
 export function getLotState(listingId: string): GarageLotState {
@@ -100,7 +101,7 @@ export function isLotOnShelf(listingId: string): boolean {
 }
 
 export function isAuctionTimeActive(startsAt: string, endsAt: string): boolean {
-  const now = Date.now();
+  const now = serverNow();
   return now >= new Date(startsAt).getTime() && now < new Date(endsAt).getTime();
 }
 
@@ -210,7 +211,7 @@ function assignAwaitingCheckout(
  */
 export function resolveEndedAuctions(listingIds: string[]): void {
   const map = readLotStates();
-  const now = Date.now();
+  const now = serverNow();
   let changed = false;
 
   for (const listingId of listingIds) {
@@ -249,7 +250,7 @@ export function resolveEndedAuctions(listingIds: string[]): void {
  */
 export function resolveExpiredWinnerCheckouts(listingIds: string[]): void {
   const map = readLotStates();
-  const now = Date.now();
+  const now = serverNow();
   let changed = false;
 
   for (const listingId of listingIds) {

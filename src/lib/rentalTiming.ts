@@ -61,7 +61,11 @@ export function formatPickupWindow(startIso: string, endIso: string): string {
   });
   const timeFmt: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "2-digit" };
   const startTime = start.toLocaleTimeString(undefined, timeFmt);
-  const endTime = end.toLocaleTimeString(undefined, timeFmt);
+  const endTime = end.toLocaleTimeString(undefined, {
+    ...timeFmt,
+    // Without the zone, "9:00–11:00" means different moments to host and renter.
+    timeZoneName: "short",
+  });
   return `Pickup: ${datePart}, ${startTime}–${endTime}`;
 }
 

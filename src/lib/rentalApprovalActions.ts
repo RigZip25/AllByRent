@@ -30,7 +30,9 @@ export async function approveRentalBooking(
   const home = getHomeLocation();
   const handoffPatch: Partial<RentalBooking> = {
     status: "pending_checkin",
-    pickupWindowStart: new Date().toISOString(),
+    // The window is the host's own hours on the start date, stamped at booking.
+    pickupWindowStart:
+      booking.pickupScheduledAt ?? booking.pickupWindowStart ?? new Date().toISOString(),
     approvalDeadline: undefined,
     paymentOnHold: false,
   };

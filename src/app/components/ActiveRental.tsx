@@ -69,6 +69,8 @@ import {
   cancelSupportMailto,
 } from "../../lib/rentalCancelActions";
 import { assessLateReturnFee, formatLateReturnPolicySummary } from "../../lib/lateReturnFee";
+import { resolveReturnDeadlineIso } from "../../lib/rentalPickupTime";
+import { resolveTimeZone } from "../../lib/zonedTime";
 import { canMarkNoShow } from "../../lib/rentalTiming";
 import { completeHostNoShow } from "../../lib/rentalNoShowActions";
 import { listingNoShowFeeUsd } from "../../lib/noShowPolicy";
@@ -378,6 +380,7 @@ export function ActiveRental({
             policy: booking.lateReturnFee,
             returnDueAt: booking.returnDueAt,
             endDate: booking.endDate,
+            timeZone: booking.timezone,
           });
           if (!assessment.pastGrace || assessment.feeCents <= 0) return base;
           return `${base} ${t.rentalDetail.lateFeeDueBanner(formatMoney(assessment.feeCents / 100))}`;
@@ -1217,11 +1220,14 @@ export function ActiveRental({
         );
         return;
       }
-      const dueAt = new Date(`${result.newEndDate}T23:59:59`).toISOString();
+      const dueAt = resolveReturnDeadlineIso(
+        result.newEndDate,
+        resolveTimeZone(booking.timezone),
+      );
       setBookings(
         updateBooking(booking.id, {
           endDate: result.newEndDate,
-          returnDueAt: dueAt,
+          returnDueAt: dueAt ?? undefined,
           status: booking.status === "overdue" ? "active" : booking.status,
         }),
       );
@@ -1245,11 +1251,14 @@ export function ActiveRental({
         setEarlyReturnError(t.rentalDetail.earlyReturnInvalid);
         return;
       }
-      const dueAt = new Date(`${result.newEndDate}T23:59:59`).toISOString();
+      const dueAt = resolveReturnDeadlineIso(
+        result.newEndDate,
+        resolveTimeZone(booking.timezone),
+      );
       setBookings(
         updateBooking(booking.id, {
           endDate: result.newEndDate,
-          returnDueAt: dueAt,
+          returnDueAt: dueAt ?? undefined,
           status: booking.status === "overdue" ? "active" : booking.status,
         }),
       );

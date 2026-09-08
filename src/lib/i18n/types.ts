@@ -3001,6 +3001,9 @@ export type AppMessages = {
     timesHhMmError: string;
     bookingCalendarTitle: string;
     bookingCalendarHint: string;
+    manageAvailability: string;
+    noBlockedPeriods: string;
+    blockedPeriodsCount: (count: number) => string;
   };
   garageSale: GarageSaleMessages;
   yardSales: YardSalesMessages;

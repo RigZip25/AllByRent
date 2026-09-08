@@ -6838,6 +6838,14 @@ export const cs: AppMessages = {
     bookingCalendarTitle: "Kalendář obsazenosti",
     bookingCalendarHint:
       "Rezervované a zablokované dny jsou šedé. Sousedé vidí jen obsazené dny — nikdy kdo si půjčil.",
+    manageAvailability: "Spravovat dostupnost",
+    noBlockedPeriods: "Zatím žádná blokovaná období.",
+    blockedPeriodsCount: (count) =>
+      count === 1
+        ? "1 blokované období"
+        : count < 5
+          ? `${count} blokovaná období`
+          : `${count} blokovaných období`,
   },
   garageSale,
   yardSales,

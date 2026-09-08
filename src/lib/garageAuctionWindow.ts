@@ -1,3 +1,5 @@
+import { serverNow } from "./serverClock";
+import { deviceTimeZone, timeZoneLabel } from "./zonedTime";
 import {
   formatTime12h,
   getGarageSaleSchedule,
@@ -54,17 +56,17 @@ export function defaultAuctionWindow(schedule?: GarageSaleSchedule): AuctionWind
   return computeNextAuctionWindow(schedule ?? getGarageSaleSchedule());
 }
 
-export function isAuctionBiddingOpen(window: AuctionWindow, now = Date.now()): boolean {
+export function isAuctionBiddingOpen(window: AuctionWindow, now = serverNow()): boolean {
   const startMs = new Date(window.startsAt).getTime();
   const endMs = new Date(window.endsAt).getTime();
   return now >= startMs && now < endMs;
 }
 
-export function isAuctionNotStarted(window: AuctionWindow, now = Date.now()): boolean {
+export function isAuctionNotStarted(window: AuctionWindow, now = serverNow()): boolean {
   return now < new Date(window.startsAt).getTime();
 }
 
-export function isAuctionEnded(window: AuctionWindow, now = Date.now()): boolean {
+export function isAuctionEnded(window: AuctionWindow, now = serverNow()): boolean {
   return now >= new Date(window.endsAt).getTime();
 }
 
@@ -85,15 +87,22 @@ function formatShortDate(date: Date): string {
   return date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 }
 
-/** e.g. "Sat · 9am – 1pm" or "Today · 9am – 1pm" */
+/** "1pm CDT" — a closing time without its zone means two different moments. */
+function formatClockWithZone(date: Date): string {
+  const time = formatTime12h(
+    `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`,
+  );
+  const zone = timeZoneLabel(deviceTimeZone(), undefined, date);
+  return zone ? `${time} ${zone}` : time;
+}
+
+/** e.g. "Sat · 9am – 1pm CDT" or "Today · 9am – 1pm CDT" */
 export function formatAuctionWindowLabel(window: AuctionWindow): string {
   const start = new Date(window.startsAt);
   const end = new Date(window.endsAt);
   const dayLabel = formatShortDate(start);
   const endSameDay = isSameCalendarDay(start, end);
-  const endTime = formatTime12h(
-    `${String(end.getHours()).padStart(2, "0")}:${String(end.getMinutes()).padStart(2, "0")}`,
-  );
+  const endTime = formatClockWithZone(end);
   if (isAuctionNotStarted(window)) {
     const startTime = formatTime12h(
       `${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`,
@@ -108,7 +117,7 @@ export function formatAuctionWindowLabel(window: AuctionWindow): string {
 
 /** Compact line for shop cards — status-aware. */
 export function formatAuctionTiming(window: AuctionWindow): string {
-  const now = Date.now();
+  const now = serverNow();
   const endMs = new Date(window.endsAt).getTime();
   const startMs = new Date(window.startsAt).getTime();
 
@@ -124,10 +133,7 @@ export function formatAuctionTiming(window: AuctionWindow): string {
   const msLeft = endMs - now;
   const hours = Math.floor(msLeft / 3_600_000);
   const minutes = Math.floor((msLeft % 3_600_000) / 60_000);
-  const end = new Date(window.endsAt);
-  const closes = formatTime12h(
-    `${String(end.getHours()).padStart(2, "0")}:${String(end.getMinutes()).padStart(2, "0")}`,
-  );
+  const closes = formatClockWithZone(new Date(window.endsAt));
   if (hours > 0) return `Closes ${closes} · ${hours}h ${minutes}m left`;
   return `Closes ${closes} · ${minutes}m left`;
 }

@@ -1,3 +1,4 @@
+import { todayIsoLocal } from "./availabilityBusy";
 import { getAppMode, setAppMode, type AppMode } from "./appMode";
 import { countOwnListings } from "./hostAccess";
 import {
@@ -107,7 +108,7 @@ function createDefaultProfile(authUserId?: string | null): UserProfile {
     phone: "",
     bio: "",
     dateOfBirth: "",
-    memberSince: new Date().toISOString().slice(0, 10),
+    memberSince: todayIsoLocal(),
     preferredMode: getAppMode(),
     avatarUrl: id ? loadAvatarDataUrl(id) : null,
     verification: {
