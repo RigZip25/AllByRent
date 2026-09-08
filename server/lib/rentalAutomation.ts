@@ -303,14 +303,14 @@ export async function runOverdueAutomation(admin: SupabaseClient): Promise<{
         .eq("id", rental.id);
 
       const policyNote = rental.safely_policy_id
-        ? ` Safely policy ${rental.safely_policy_id} flagged for escalation.`
-        : " No Safely policy on file — notify support manually.";
+        ? ` Partner policy ${rental.safely_policy_id} flagged for escalation.`
+        : " No partner policy on file — notify support manually.";
 
       await insertNotification(admin, {
         recipientId: rental.owner_id,
         actorId: null,
         type: "general",
-        title: "Safely escalation (48h overdue)",
+        title: "Overdue escalation (48h)",
         body: `Rental is 48+ hours overdue.${policyNote}`,
       });
 

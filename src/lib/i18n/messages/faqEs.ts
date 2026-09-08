@@ -86,7 +86,7 @@ export const faq: AppMessages["faq"] = {
     },
     "payments": {
       q: "¿Cómo funcionan los pagos?",
-      a: "Alquileres: pagas el total del alquiler y, aparte, una retención de protección del depósito si el anfitrión la configuró. Los pagos pasan por Stripe — Evorios no guarda tu tarjeta. Los anfitriones conectan Stripe para cobrar.",
+      a: "Alquileres: pagas el total del alquiler y, aparte, una retención de fianza en la tarjeta si el anfitrión la configuró. Los pagos pasan por Stripe — Evorios no guarda tu tarjeta. Los anfitriones conectan Stripe para cobrar.",
     },
     "dispute": {
       q: "Algo salió mal con un alquiler — ¿qué hago?",

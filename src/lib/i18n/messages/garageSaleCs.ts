@@ -536,7 +536,7 @@ export const rentalPrice: AppMessages["rentalPrice"] = {
   roundTripDelivery: "Doprava tam i zpět",
   heavySurcharge: "Příplatek za těžkou věc",
   heavySurchargeWithOver: (over) => `Příplatek za těžkou věc (${over})`,
-  depositProtection: "Ochrana kauce",
+  depositProtection: "Blokace kauce",
   platformFee: "Poplatek platformy",
   total: "Celkem",
 };

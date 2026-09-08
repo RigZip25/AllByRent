@@ -145,14 +145,14 @@ Deno.serve(async (req) => {
         .update({ safely_escalated_at: new Date().toISOString() })
         .eq("id", rental.id);
       const policyNote = rental.safely_policy_id
-        ? ` Policy ${rental.safely_policy_id}.`
-        : "";
+        ? ` Partner policy ${rental.safely_policy_id}.`
+        : " No partner policy on file — notify support manually.";
       await admin.from("notifications").insert({
         id: crypto.randomUUID(),
         recipient_id: rental.owner_id,
         actor_id: null,
         type: "general",
-        title: "Safely escalation (48h overdue)",
+        title: "Overdue escalation (48h)",
         body: `Rental is 48+ hours overdue.${policyNote}`,
       });
       safelyEscalations += 1;

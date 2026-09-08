@@ -86,7 +86,7 @@ export const faq: AppMessages["faq"] = {
     },
     "payments": {
       q: "Jak fungují platby?",
-      a: "Půjčky: zaplatíte celkovou cenu půjčení, pak samostatnou zálohu (ochrana vkladu), pokud ji hostitel nastavil. Platby jdou přes Stripe — Evorios neukládá kartu. Hostitelé připojí Stripe pro výplaty. Měna odpovídá zemi, kde máte nastavený blok.",
+      a: "Půjčky: zaplatíte celkovou cenu půjčení, pak samostatnou blokaci zálohy na kartě, pokud ji hostitel nastavil. Platby jdou přes Stripe — Evorios neukládá kartu. Hostitelé připojí Stripe pro výplaty. Měna odpovídá zemi, kde máte nastavený blok.",
     },
     "dispute": {
       q: "S půjčkou se něco pokazilo — co teď?",

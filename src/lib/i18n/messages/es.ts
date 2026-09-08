@@ -292,7 +292,7 @@ export const es: AppMessages = {
     notAvailable: "No disponible ahora mismo",
     yourListing: "Este es tu anuncio.",
     sellerMissing: "Falta el perfil del vendedor — inténtalo de nuevo más tarde.",
-    depositProtection: "Protección de fianza",
+    depositProtection: "Retención de fianza",
     depositProtectionOnRentals: (label) => `${label} en alquileres`,
     closeAvailabilityAria: "Cerrar disponibilidad",
     pausedAvailabilityBanner:
@@ -362,7 +362,7 @@ export const es: AppMessages = {
       rentanoRent: "Alguien cerca puede tener justo lo que necesitas",
       badgeEarn: "🏆 Plaza de pionero disponible",
       badgeRent: "📣 Señal de alta demanda",
-      subtextEarn: "Los primeros anfitriones ganan 3 veces más: sin competencia, todos los que alquilan",
+      subtextEarn: "Los primeros anfitriones enfrentan menos competencia: más demanda del barrio",
       subtextRent: "Los anfitriones publican donde se pregunta. Sé el primero en preguntar.",
       listFirstCta: "Publica tu primer artículo →",
       postRequestCta: "Publicar una solicitud →",
@@ -383,11 +383,11 @@ export const es: AppMessages = {
       badgeFounding: "Anfitrión fundador",
       badgeCommunity: "Comunidad pionera",
       firstHosts: "Los primeros 1.000 anfitriones",
-      titleEarnPrefix: "3 meses",
-      titleEarnHighlight: "de publicación gratis",
+      titleEarnPrefix: "Publica",
+      titleEarnHighlight: "gratis",
       titleRent: "Ayuda a llenar esta estantería primero",
       bodyEarn: (subcategory) =>
-        `Oferta de lanzamiento para los primeros anfitriones en ${subcategory} — poca competencia, colocación prioritaria mientras crecemos.`,
+        `Sé de los primeros anfitriones en ${subcategory} — menos competencia mientras los vecinos llenan este estante.`,
       bodyRent: (subcategory) =>
         `Publica lo que necesitas en ${subcategory}. Tu solicitud señala demanda — los primeros anfitriones publican donde preguntan los vecinos.`,
       launchOffer: "Oferta de lanzamiento · plazas limitadas",
@@ -1232,9 +1232,9 @@ export const es: AppMessages = {
     insuranceProofAlt: "Comprobante de seguro",
     insuranceOpenFull: "Abrir tamaño completo",
     insuranceProofMissing: "La foto del comprobante aún no está en este dispositivo.",
-    depositProtection: "Protección de fianza",
+    depositProtection: "Retención de fianza",
     depositProtectionBody:
-      "Una retención en la tarjeta puede cubrir la fianza. Se libera cuando el anfitrión confirma que el artículo se devolvió en buen estado.",
+      "Una retención temporal en la tarjeta por la fianza. Se libera cuando el anfitrión confirma que el artículo se devolvió en buen estado.",
     ownerContact: "Contacto del propietario",
     renterContact: "Contacto del inquilino",
     hostFallback: "Anfitrión",
@@ -5530,7 +5530,7 @@ export const es: AppMessages = {
       subtitle: "Un código QR único identifica tu artículo y confirma cada entrega.",
       requiredTitle: "El código QR es obligatorio",
       requiredBody:
-        "Mantiene cada entrega rastreable, mejora la seguridad y respalda la protección de la fianza si algo va mal.",
+        "Mantiene cada entrega rastreable, mejora la seguridad y respalda la retención de fianza si algo va mal.",
       afterPublishing: "Después de publicar puedes:",
       emailPrint: "📧 Enviártelo por email e imprimirlo más tarde",
       printLabel:
@@ -5664,7 +5664,7 @@ export const es: AppMessages = {
       "La entrega de ida y vuelta es una sola tarifa por dejarlo antes de que empiece tu alquiler y recogerlo después de que termine.",
     depositHoldNote: (label, amount) =>
       `${label}. Puede autorizarse una retención de ${amount} en la tarjeta tras el pago del alquiler — se libera cuando se devuelve el artículo.`,
-    depositHoldTitle: (label) => `Retención de ${label}`,
+    depositHoldTitle: (label) => label,
     depositHoldBody: (amount) =>
       `Autorizaremos ${amount} en tu tarjeta. La retención se libera cuando el propietario confirma que el artículo se devolvió en buen estado.`,
     cancellationPolicyTitle: "Cancelación",
@@ -6368,7 +6368,7 @@ export const es: AppMessages = {
       subtitle: "Pide cerca o monta una venta rápida.",
       trustModes: "Alquilar · Vender · Regalar",
       trustDeposit: "Fianza retenida",
-      trustVerified: "Anfitriones verificados",
+      trustVerified: "Anfitriones locales",
       findGear: {
         title: "Pedir cerca",
         subtitle: "Cámaras, muebles, camping, bicis a tu alrededor",

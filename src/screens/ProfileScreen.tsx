@@ -600,12 +600,14 @@ export function ProfileScreen({
           {profileCopy.resetApp}
         </button>
 
-        <p
-          className="mt-4 text-center text-[11px] text-gray-400"
-          title="Deployment id — compare after a release"
-        >
-          {formatBuildStamp()}
-        </p>
+        {import.meta.env.DEV ? (
+          <p
+            className="mt-4 text-center text-[11px] text-gray-400"
+            title="Deployment id — compare after a release"
+          >
+            {formatBuildStamp()}
+          </p>
+        ) : null}
       </div>
 
       <ProfilePhotoCapture

@@ -184,4 +184,4 @@ export const LISTING_MODE_LABELS = {
  * @deprecated Prefer `getMessages().item.depositProtection` / `rentalPrice.depositProtection`
  * (or rentals.depositProtection). Kept for non-UI / legacy imports.
  */
-export const DEPOSIT_PROTECTION_LABEL = "Deposit protection";
+export const DEPOSIT_PROTECTION_LABEL = "Deposit hold";

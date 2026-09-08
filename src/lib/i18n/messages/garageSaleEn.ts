@@ -532,7 +532,7 @@ export const rentalPrice: AppMessages["rentalPrice"] = {
   roundTripDelivery: "Round-trip delivery",
   heavySurcharge: "Heavy item surcharge",
   heavySurchargeWithOver: (over) => `Heavy item surcharge (${over})`,
-  depositProtection: "Deposit protection",
+  depositProtection: "Deposit hold",
   platformFee: "Platform fee",
   total: "Total",
 };
