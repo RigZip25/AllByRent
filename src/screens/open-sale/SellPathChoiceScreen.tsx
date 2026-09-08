@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ArrowLeft, Camera, Gavel, Store } from "lucide-react";
 import { BRAND_AMBER, BRAND_GREEN } from "../../lib/brand";
+import { useMessages } from "../../lib/i18n/react";
 
 const GREEN = BRAND_GREEN;
 const AMBER = BRAND_AMBER;
@@ -25,6 +26,8 @@ export function SellPathChoiceScreen({
   onBack,
   onChoose,
 }: SellPathChoiceScreenProps) {
+  const { sellPathChoice: copy, common } = useMessages();
+
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#FFF9F0]">
       <div
@@ -37,13 +40,13 @@ export function SellPathChoiceScreen({
             onClick={onBack}
             className="flex h-10 w-10 items-center justify-center rounded-full border bg-white"
             style={{ borderColor: BORDER }}
-            aria-label="Back"
+            aria-label={common.back}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-bold" style={{ color: GREEN }}>
-              How do you want to sell?
+            <h1 className="text-xl font-bold leading-snug" style={{ color: GREEN }}>
+              {copy.title}
             </h1>
             <p className="truncate text-[13px] text-gray-600">{listingTitle}</p>
           </div>
@@ -51,30 +54,27 @@ export function SellPathChoiceScreen({
       </div>
 
       <div className="screen-scroll flex flex-1 flex-col gap-3 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
-        <p className="text-sm text-gray-600">
-          Live in your garage anytime — or run a short Open Sale (30–60 min) where neighbors bid from
-          their cart.
-        </p>
+        <p className="text-sm text-gray-600">{copy.intro}</p>
 
         <PathCard
           icon={<Store className="h-5 w-5" style={{ color: GREEN }} />}
-          title="Live in my garage"
-          body="On the main shelf now. Neighbors can buy at your price. No timed auction."
-          cta="Keep live →"
+          title={copy.liveTitle}
+          body={copy.liveBody}
+          cta={copy.liveCta}
           onClick={() => onChoose("live")}
         />
         <PathCard
           icon={<Gavel className="h-5 w-5" style={{ color: GREEN }} />}
-          title="Open Sale from garage"
-          body="Pick this item (and others). Main garage goes inactive with an Auction badge until the sale ends."
-          cta="Plan Open Sale →"
+          title={copy.openSaleTitle}
+          body={copy.openSaleBody}
+          cta={copy.openSaleCta}
           onClick={() => onChoose("open_sale_pick")}
         />
         <PathCard
           icon={<Camera className="h-5 w-5" style={{ color: GREEN }} />}
-          title="Open Sale + snap more"
-          body="Start an Open Sale and photograph extra lots straight onto the sale shelf — not a transfer from the store."
-          cta="Open Sale + camera →"
+          title={copy.snapTitle}
+          body={copy.snapBody}
+          cta={copy.snapCta}
           onClick={() => onChoose("open_sale_snap")}
         />
       </div>
@@ -114,7 +114,7 @@ function PathCard({
             {title}
           </p>
           <p className="mt-1 text-[13px] leading-snug text-gray-600">{body}</p>
-          <p className="mt-2 text-[13px] font-bold" style={{ color: AMBER }}>
+          <p className="mt-2 text-[13px] font-bold leading-snug" style={{ color: AMBER }}>
             {cta}
           </p>
         </div>

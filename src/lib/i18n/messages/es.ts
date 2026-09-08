@@ -33,6 +33,8 @@ export const es: AppMessages = {
     next: "Siguiente",
     loading: "Cargando...",
     signIn: "Iniciar sesión",
+    idVerifiedAria: "Identidad verificada",
+    phoneVerifiedAria: "Teléfono verificado",
   },
   availabilityCalendar: {
     legendAvailable: "Disponible · Libre",
@@ -53,7 +55,13 @@ export const es: AppMessages = {
     home: "Inicio",
     stock: "Añadir",
     activity: "Actividad",
-    more: "Ajustes",
+    more: "Cuenta",
+    mainAria: "Navegación principal",
+    homeAria: "Inicio — explorar o mi garaje",
+    mreAria: (mascot) => `Abrir asistente ${mascot}`,
+    addAria: "Añadir un artículo a tu garaje",
+    activityAria: "Actividad — alquileres, mensajes, favoritos",
+    moreAria: "Cuenta — ajustes y preferencias",
   },
   activity: {
     title: "Actividad",
@@ -102,7 +110,7 @@ export const es: AppMessages = {
     detecting: "Detectando...",
     areaPlaceholder: "Código postal o ciudad",
     areaEmptyHint: "Código postal o ciudad de tu país",
-    sendCode: "Enviar código de acceso",
+    sendCode: "Enviar código",
     sending: "Enviando...",
     resendIn: (seconds) => `Reenviar en ${seconds}s`,
     agreePrefix: "Al continuar aceptas las",
@@ -214,6 +222,7 @@ export const es: AppMessages = {
     modeAny: "Todo",
     modeRent: "Alquilar",
     modeBuy: "Comprar",
+    modeFree: "Gratis",
     filtersTitle: "Filtros",
     categoryTitle: "Categorías",
     subcategoryTitle: "Subcategorías",
@@ -342,7 +351,7 @@ export const es: AppMessages = {
     greetingAnon: "Qué bien que estés entre los primeros. Esto apenas empieza.",
     unlockBody:
       "Desbloquea esta estantería con un código de acceso para ver anuncios, publicar una solicitud y guardar favoritos.",
-    unlockCta: "Consigue el código de acceso para desbloquear →",
+    unlockCta: "Obtener código →",
     backToSubcategories: "Volver a subcategorías",
     searchPlaceholder: "Buscar en esta estantería...",
     find: "Buscar",
@@ -1748,9 +1757,10 @@ export const es: AppMessages = {
       searchPriceLink: (title) => `Buscar "precio nuevo de ${title}"`,
       searchPriceLinkLocal: (title, currency, country) =>
         `Buscar "${title}" precio nuevo en ${country} (${currency})`,
-      instructionsUrl: "",
-      instructionsPlaceholder: "",
-      instructionsHelper: "",
+      instructionsUrl: "Manual del producto (opcional)",
+      instructionsPlaceholder: "https://… manual oficial o página de soporte",
+      instructionsHelper:
+        "Enlace al manual del fabricante o a una guía clara. Opcional — déjalo vacío si no tienes uno.",
       assetIdentityHint:
         "El VIN es la huella del coche — escanéalo o escríbelo y Evorios rellena marca, modelo y año.",
       vehicleFlowTitle: "Coches entre vecinos, bien hechos",
@@ -1817,6 +1827,8 @@ export const es: AppMessages = {
     specs: {
       sectionTitle: "Detalles de la categoría",
       sectionHint: "Los campos obligatorios desbloquean Continuar.",
+      englishContentNote:
+        "Algunos detalles y opciones de categoría siguen en inglés — la traducción completa llegará después.",
       selectPlaceholder: "Elegir...",
       requiredBadge: "Obligatorio",
       recommendedBadge: "Recomendado",
@@ -1828,7 +1840,7 @@ export const es: AppMessages = {
         brand: {
           label: "Marca",
           placeholder: "Elige una marca...",
-          hint: "",
+          hint: "Elige el nombre de la etiqueta — o Sin marca / Otra.",
         },
         model: { label: "Modelo", placeholder: "Modelo exacto" },
         powerSource: { label: "Fuente de energía", placeholder: "Elegir..." },
@@ -1848,7 +1860,10 @@ export const es: AppMessages = {
         seasonRating: { label: "Temporada", placeholder: "Elegir..." },
         packedWeightBand: { label: "Peso empacado" },
         packedWeight: { label: "Peso empacado", placeholder: "p. ej. 1,9 kg" },
-        sizeOrLength: { label: "Talla / longitud", placeholder: "p. ej. 170 cm" },
+        sizeOrLength: {
+          label: "Talla / longitud", placeholder: "p. ej. 170 cm",
+          hint: "Usa el número estampado en el equipo cuando puedas.",
+        },
         skillLevel: { label: "Nivel", placeholder: "Elegir..." },
         frameOrWheelBand: { label: "Talla de cuadro / rueda" },
         frameOrWheelSize: { label: "Talla de cuadro / rueda", placeholder: "p. ej. 54 cm" },
@@ -2285,7 +2300,10 @@ export const es: AppMessages = {
           hint: "Obligatoria en alquiler — fechas pasadas bloquean publicar y reservar.",
         },
         ladderHeightBand: { label: "Altura de escalera" },
-        ladderDutyRating: { label: "Clase de carga (ANSI)" },
+        ladderDutyRating: {
+          label: "Clase de carga (ANSI)",
+          hint: "Clase de carga Type IAA / IA / I / II / III.",
+        },
         weldProcess: { label: "Proceso de soldadura" },
         weldAmpBand: { label: "Amperaje" },
         ppeIncluded: { label: "EPP incluido" },
@@ -2419,7 +2437,10 @@ export const es: AppMessages = {
         sportsOtherKind: { label: "Qué tipo de artículo", hint: "Reubica a un estante Sports con nombre cuando encaje." },
         nsfCertified: { label: "NSF" },
         installNeeds: { label: "Instalación" },
-        dropSideAcknowledged: { label: "Estado drop-side" },
+        dropSideAcknowledged: {
+          label: "Estado drop-side",
+          hint: "Las cunas drop-side están prohibidas en EE. UU. — confirma que esta no lo es.",
+        },
         cpscCompliant: { label: "Cumplimiento CPSC" },
         mattressIncluded: { label: "Colchón" },
         playCertStandard: { label: "Certificación de juego" },
@@ -2487,11 +2508,26 @@ export const es: AppMessages = {
         jobScale: { label: "Escala del trabajo" },
         ppeRiskTier: { label: "Nivel de riesgo EPI", hint: "EPI blando omite COI tipo grúa." },
         ppeSizeBand: { label: "Talla EPI" },
-        ppeStandardRegion: { label: "Norma EPI" },
-        ppeInspectionStatus: { label: "Estado de inspección" },
-        craneCapacityTonsBand: { label: "Capacidad (toneladas)" },
-        craneOperatorMode: { label: "Bare vs con operador" },
-        formworkPieceCountBand: { label: "Cantidad de piezas" },
+        ppeStandardRegion: {
+          label: "Norma EPI",
+          hint: "Clase ANSI / EN de la etiqueta — lo declara el anfitrión, no es certificación de la plataforma.",
+        },
+        ppeInspectionStatus: {
+          label: "Estado de inspección",
+          hint: "El EPI anticaídas necesita etiqueta vigente. El EPI blando puede marcarse como no requerido.",
+        },
+        craneCapacityTonsBand: {
+          label: "Capacidad (toneladas)",
+          hint: "Capacidad nominal de elevación — obligatorio en grúas y elevación.",
+        },
+        craneOperatorMode: {
+          label: "Bare vs con operador",
+          hint: "Con operador se omite la credencial de grúa del arrendatario.",
+        },
+        formworkPieceCountBand: {
+          label: "Cantidad de piezas",
+          hint: "Cuántos paneles / tirantes / puntales van con el kit.",
+        },
         powerOutput: { label: "Potencia", placeholder: "p. ej. 5 kW" },
         clothingSize: { label: "Talla", placeholder: "Elegir..." },
         fits: { label: "Para quién", placeholder: "Elegir..." },
@@ -2628,9 +2664,18 @@ export const es: AppMessages = {
         },
         helmetPolicy: { label: "Política de casco" },
         lockPolicy: { label: "Política de candado / robo" },
-        overnightStorageRule: { label: "Almacenamiento nocturno / exterior" },
-        chargerIncluded: { label: "¿Cargador incluido?" },
-        batteryChargeBand: { label: "Carga esperada en la entrega" },
+        overnightStorageRule: {
+          label: "Almacenamiento nocturno / exterior",
+          hint: "Dónde puede quedarse la bici por la noche — dejarla fuera de noche suele anular reclamaciones.",
+        },
+        chargerIncluded: {
+          label: "¿Cargador incluido?",
+          hint: "Si el ladrillo de corriente / cargador USB va con el altavoz.",
+        },
+        batteryChargeBand: {
+          label: "Carga esperada en la entrega",
+          hint: "Para altavoces a batería / híbridos — banda SOC suave esperada al devolver. No es un medidor preciso.",
+        },
         cargoPayloadBand: { label: "Carga útil" },
         childPassengerPolicy: { label: "Política de pasajeros infantiles" },
         adaptiveBikeType: { label: "Tipo de bici adaptativa" },
@@ -2639,7 +2684,10 @@ export const es: AppMessages = {
           placeholder: "16",
           hint: "Los e-patinetes suelen exigir 16+ — pon tu norma local.",
         },
-        eBikeClass: { label: "Clase de e-bike" },
+        eBikeClass: {
+          label: "Clase de e-bike",
+          hint: "US Class 1–3. Obligatorio en E-Bikes y bicis con Electric = sí.",
+        },
         batteryRangeBand: { label: "Autonomía de batería" },
         setupTeardownFeeUsd: {
           label: "Tarifa montaje / desmontaje (USD)",
@@ -6163,7 +6211,11 @@ export const es: AppMessages = {
     postedAgo: (date) => `Publicada ${date}`,
   },
   faq,
-  categoryFacts: resolveCategoryFacts(categoryFactsEsOverlay),
+  categoryFacts: {
+    ...resolveCategoryFacts(categoryFactsEsOverlay),
+    englishContentNote:
+      "La mayoría de las fichas de categoría siguen en inglés. Vehicles tiene traducción; el resto llega más adelante.",
+  },
   preTripInspection: {
     pickupTitle: "Inspección previa (obligatoria)",
     pickupBody:
@@ -6360,8 +6412,17 @@ export const es: AppMessages = {
     allSet: {
       title: "Listo",
       subtitle: "Inicio: pedir cerca. Mi hogar: compartir lo que tienes.",
-      exploreCta: "Ver qué hay cerca →",
+      exploreCta: "Ver cerca →",
       stockGarageCta: "Abrir Mi hogar →",
+      profileHeading: (appName) => `Tu perfil ${appName}`,
+      typeLabel: "Tipo",
+      blockLabel: "Barrio",
+      focusLabel: "Enfoque",
+      accountPersonal: "Particular",
+      accountPro: "Pro / negocio",
+      visiting: "De visita",
+      onMyBlock: "En mi bloque",
+      exploreTag: "Explorar",
     },
     browseHub: {
       title: "Cerca de ti",
@@ -7061,5 +7122,42 @@ export const es: AppMessages = {
     goBack: "Volver",
     bootFailedTitle: "No se pudo iniciar la app",
     bootFailedBody: "Vuelve a cargar. Si sigue pasando, escribe a support@evorios.com.",
+  },
+sellPathChoice: {
+    title: "¿Cómo quieres vender?",
+    intro:
+      "Déjalo en vivo en tu garaje cuando quieras — o lanza un Open Sale corto (30–60 min) donde los vecinos pujan desde el carrito.",
+    liveTitle: "En vivo en mi garaje",
+    liveBody: "Ya en el estante principal. Los vecinos compran a tu precio. Sin subasta cronometrada.",
+    liveCta: "Dejar en vivo →",
+    openSaleTitle: "Open Sale desde el garaje",
+    openSaleBody:
+      "Elige este artículo (y otros). El garaje principal queda inactivo con insignia de Subasta hasta que termine.",
+    openSaleCta: "Planear Open Sale →",
+    snapTitle: "Open Sale + fotos extra",
+    snapBody:
+      "Empieza un Open Sale y fotografía lotes extra directo al estante de la venta — no es un traslado desde la tienda.",
+    snapCta: "Open Sale + cámara →",
+  },
+  openSaleCreate: {
+    title: "Open Sale",
+    subtitle: "Preventa → 30–60 min de pujas en vivo → un checkout",
+    whenStarts: "Cuándo empieza",
+    startSoon: "En ~10 min",
+    startIn1h: "En 1 hora",
+    startTomorrow: "Mañana 9:00",
+    liveWindow: "Ventana en vivo",
+    minutes: (m) => `${m} min`,
+    liveHint: "Manténlo corto — si se alarga, la gente pierde interés.",
+    mirrorTitle: (count) => `Espejo desde el garaje (${count} seleccionados)`,
+    mirrorBody:
+      "Las tarjetas elegidas pasan a inactivas en la tienda principal con insignia de Subasta. Los vecinos pujan desde el carrito (verde = va ganando, gris = superado).",
+    emptyListings: "Aún no hay anuncios de venta — fotografía artículos directo a la venta.",
+    saleItemFallback: "Artículo en venta",
+    minStep: (min, step) => `Mín $${min} · paso $${step}`,
+    pickOneError: "Elige al menos un artículo",
+    creating: "Creando…",
+    publishCta: "Publicar Open Sale",
+    snapMoreCta: "Fotografiar más lotes en esta venta →",
   },
 };

@@ -1,3 +1,5 @@
+import { useMessages } from "../../lib/i18n/react";
+
 const GREEN = "#0D5C3A";
 
 export function CounterpartyName({
@@ -11,16 +13,21 @@ export function CounterpartyName({
   phoneVerified: boolean;
   onClick?: () => void;
 }) {
+  const { common } = useMessages();
   const content = (
     <span className="inline-flex flex-wrap items-center gap-1">
       <span className={onClick ? "underline-offset-2 hover:underline" : ""}>{name}</span>
       {identityVerified ? (
-        <span className="text-[13px]" title="ID verified" aria-label="ID verified">
+        <span className="text-[13px]" title={common.idVerifiedAria} aria-label={common.idVerifiedAria}>
           ✅
         </span>
       ) : null}
       {phoneVerified ? (
-        <span className="text-[13px]" title="Phone verified" aria-label="Phone verified">
+        <span
+          className="text-[13px]"
+          title={common.phoneVerifiedAria}
+          aria-label={common.phoneVerifiedAria}
+        >
           📱
         </span>
       ) : null}

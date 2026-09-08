@@ -3,7 +3,7 @@ import { APP_NAME } from "../../lib/brand";
 import { onboardingAssets } from "../../lib/onboardingAssets";
 import { getAppMode } from "../../lib/appMode";
 import { getRentContext } from "../../lib/listingStorage";
-import { getProfileLocationSummary } from "../../lib/userProfileStorage";
+import { getProfileLocationSummary, loadUserProfile } from "../../lib/userProfileStorage";
 import { useAppModeLabels, useMessages, useOnboardingCopy } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
@@ -14,23 +14,21 @@ type YouAreAllSetProps = {
   onSkip?: () => void;
 };
 
-function accountTypeLabel(): string {
-  return "Individual";
-}
-
 export function YouAreAllSet({ onExplore, onBack, onSkip }: YouAreAllSetProps) {
   const { allSet: copy } = useOnboardingCopy();
   const modeLabels = useAppModeLabels();
   const { tagline } = useMessages();
   const location = getProfileLocationSummary();
   const mode = getAppMode();
+  const shopKind = loadUserProfile().garageIdentity?.shopKind === "pro" ? "pro" : "personal";
+  const accountType = shopKind === "pro" ? copy.accountPro : copy.accountPersonal;
   const tags: string[] = [];
   if (mode === "earn") tags.push(modeLabels.earn);
   if (mode === "rent") tags.push(modeLabels.rent);
   const context = getRentContext();
-  if (context === "trip") tags.push("Visiting");
-  if (context === "home") tags.push("On my block");
-  if (tags.length === 0) tags.push("Explore");
+  if (context === "trip") tags.push(copy.visiting);
+  if (context === "home") tags.push(copy.onMyBlock);
+  if (tags.length === 0) tags.push(copy.exploreTag);
   const goals = tags;
 
   return (
@@ -55,21 +53,21 @@ export function YouAreAllSet({ onExplore, onBack, onSkip }: YouAreAllSetProps) {
 
         <div className="mt-6 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-            Your {APP_NAME} profile
+            {copy.profileHeading(APP_NAME)}
           </p>
           <dl className="mt-3 space-y-2.5 text-sm">
             <div className="flex justify-between gap-3">
-              <dt className="text-gray-500">Type</dt>
-              <dd className="font-semibold text-gray-900">{accountTypeLabel()}</dd>
+              <dt className="text-gray-500">{copy.typeLabel}</dt>
+              <dd className="font-semibold text-gray-900">{accountType}</dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-gray-500">Block</dt>
+              <dt className="text-gray-500">{copy.blockLabel}</dt>
               <dd className="max-w-[58%] text-right font-semibold text-gray-900">
                 {location}
               </dd>
             </div>
             <div>
-              <dt className="text-gray-500">Focus</dt>
+              <dt className="text-gray-500">{copy.focusLabel}</dt>
               <dd className="mt-2 flex flex-wrap gap-2">
                 {goals.map((tag) => (
                   <span
@@ -88,7 +86,7 @@ export function YouAreAllSet({ onExplore, onBack, onSkip }: YouAreAllSetProps) {
         <button
           type="button"
           onClick={onExplore}
-          className="btn-primary mt-auto w-full rounded-xl py-3.5 text-base font-bold text-white"
+          className="btn-primary mt-auto h-auto min-h-[56px] w-full rounded-xl px-3 py-3.5 text-base font-bold leading-snug text-white"
           style={{ backgroundColor: GREEN }}
         >
           {copy.exploreCta}

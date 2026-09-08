@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useMemo, useState } from "react";
 import { BRAND_AMBER, BRAND_GREEN } from "../../lib/brand";
+import { useMessages } from "../../lib/i18n/react";
 import { loadPublishedListings } from "../../lib/listingStorage";
 import { parseSalePrice } from "../../lib/garageShopStorage";
 import { setGarageSaleOfferPrefs } from "../../lib/garageSaleOfferStorage";
@@ -43,6 +44,7 @@ export function CreateOpenSaleScreen({
   onCreated,
   onSnapMore,
 }: CreateOpenSaleScreenProps) {
+  const { openSaleCreate: copy, common } = useMessages();
   const sellListings = useMemo(
     () =>
       loadPublishedListings().filter(
@@ -91,7 +93,7 @@ export function CreateOpenSaleScreen({
   const handleCreate = () => {
     setError(null);
     if (selectedListings.length === 0) {
-      setError("Pick at least one item");
+      setError(copy.pickOneError);
       return;
     }
     setBusy(true);
@@ -149,28 +151,28 @@ export function CreateOpenSaleScreen({
             onClick={onBack}
             className="flex h-10 w-10 items-center justify-center rounded-full border bg-white"
             style={{ borderColor: BORDER }}
-            aria-label="Back"
+            aria-label={common.back}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: GREEN }} />
           </button>
           <div className="min-w-0 flex-1">
             <h1 className="text-xl font-bold" style={{ color: GREEN }}>
-              Open Sale
+              {copy.title}
             </h1>
-            <p className="text-[13px] text-gray-600">Presale → 30–60 min live bids → one checkout</p>
+            <p className="text-[13px] text-gray-600">{copy.subtitle}</p>
           </div>
         </div>
       </div>
 
       <div className="screen-scroll flex flex-1 flex-col gap-4 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
         <section>
-          <p className="text-xs font-bold uppercase tracking-wide text-gray-500">When it starts</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-gray-500">{copy.whenStarts}</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {(
               [
-                ["soon", "In ~10 min"],
-                ["in1h", "In 1 hour"],
-                ["tomorrow", "Tomorrow 9am"],
+                ["soon", copy.startSoon],
+                ["in1h", copy.startIn1h],
+                ["tomorrow", copy.startTomorrow],
               ] as const
             ).map(([id, label]) => (
               <button
@@ -191,7 +193,7 @@ export function CreateOpenSaleScreen({
         </section>
 
         <section>
-          <p className="text-xs font-bold uppercase tracking-wide text-gray-500">Live window</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-gray-500">{copy.liveWindow}</p>
           <div className="mt-2 flex gap-2">
             {OPEN_SALE_LIVE_MINUTES.map((m) => (
               <button
@@ -205,25 +207,22 @@ export function CreateOpenSaleScreen({
                   color: GREEN,
                 }}
               >
-                {m} min
+                {copy.minutes(m)}
               </button>
             ))}
           </div>
-          <p className="mt-1.5 text-[12px] text-gray-500">Keep it short — people lose interest if it drags.</p>
+          <p className="mt-1.5 text-[12px] text-gray-500">{copy.liveHint}</p>
         </section>
 
         <section>
           <p className="text-xs font-bold uppercase tracking-wide text-gray-500">
-            Mirror from garage ({selectedListings.length} selected)
+            {copy.mirrorTitle(selectedListings.length)}
           </p>
-          <p className="mt-1 text-[12px] text-gray-500">
-            Selected cards go inactive in the main shop with an Auction badge. Neighbors bid from cart
-            (green = leading, gray = outbid).
-          </p>
+          <p className="mt-1 text-[12px] text-gray-500">{copy.mirrorBody}</p>
           <ul className="mt-2 flex flex-col gap-2">
             {sellListings.length === 0 ? (
               <p className="rounded-xl border bg-white px-3 py-4 text-sm text-gray-500" style={{ borderColor: BORDER }}>
-                No sell listings yet — snap items onto the sale instead.
+                {copy.emptyListings}
               </p>
             ) : (
               sellListings.map((listing) => {
@@ -243,10 +242,10 @@ export function CreateOpenSaleScreen({
                     />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-bold text-gray-900">
-                        {listing.title || "Sale item"}
+                        {listing.title || copy.saleItemFallback}
                       </p>
                       <p className="text-[12px] text-gray-500">
-                        Min ${min} · step ${defaultStep(min)}
+                        {copy.minStep(String(min), String(defaultStep(min)))}
                       </p>
                     </div>
                   </label>
@@ -262,20 +261,20 @@ export function CreateOpenSaleScreen({
           type="button"
           disabled={busy}
           onClick={handleCreate}
-          className="w-full rounded-xl py-3.5 text-base font-bold text-white disabled:opacity-60"
+          className="w-full rounded-xl px-3 py-3.5 text-base font-bold leading-snug text-white disabled:opacity-60"
           style={{ backgroundColor: GREEN }}
         >
-          {busy ? "Creating…" : "Publish Open Sale"}
+          {busy ? copy.creating : copy.publishCta}
         </button>
 
         {onSnapMore ? (
           <button
             type="button"
             onClick={onSnapMore}
-            className="w-full rounded-xl border-2 py-3 text-sm font-bold"
+            className="w-full rounded-xl border-2 px-3 py-3 text-sm font-bold leading-snug"
             style={{ borderColor: AMBER, color: GREEN }}
           >
-            Snap more lots onto this sale →
+            {copy.snapMoreCta}
           </button>
         ) : null}
       </div>

@@ -577,7 +577,7 @@ export function AuthGate({
               type="button"
               disabled={!canRequestEmail}
               onClick={handleSendConfirmationCode}
-              className="mt-4 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-bold text-white disabled:opacity-60"
+              className="mt-4 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl px-3 py-3 text-center text-[15px] font-bold leading-snug text-white disabled:opacity-60"
               style={{ backgroundColor: GREEN }}
             >
               <Mail className="h-5 w-5" />

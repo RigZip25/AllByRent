@@ -175,16 +175,26 @@ export function formatListingPriceLine(draft: ListingDraft): string {
   return "Ask";
 }
 
-export function activeModeLabels(draft: ListingDraft): string[] {
-  const labels: string[] = [];
-  if (draft.modes.rent) labels.push("Rent");
+export type ListingModeChip = "rent" | "buy" | "free";
+
+/** Mode chips for feed cards — keys stay locale-stable; labels come from i18n. */
+export function activeModeChips(draft: ListingDraft): ListingModeChip[] {
+  const chips: ListingModeChip[] = [];
+  if (draft.modes.rent) chips.push("rent");
   if (draft.modes.sell) {
     const sale = Number.parseFloat((draft.pricing.salePrice || "").replace(/[^0-9.]/g, ""));
-    labels.push(Number.isFinite(sale) && sale <= 0 ? "Free" : "Buy");
+    chips.push(Number.isFinite(sale) && sale <= 0 ? "free" : "buy");
   } else if (draft.modes.gift) {
-    labels.push("Free");
+    chips.push("free");
   }
-  return labels.length ? labels : ["Rent"];
+  return chips.length ? chips : ["rent"];
+}
+
+export function activeModeLabels(
+  draft: ListingDraft,
+  labels: { rent: string; buy: string; free: string },
+): string[] {
+  return activeModeChips(draft).map((chip) => labels[chip]);
 }
 
 export type GarageSummary = {

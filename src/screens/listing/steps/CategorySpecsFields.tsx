@@ -9,7 +9,7 @@ import {
 import { softFillEmptyCategorySpecs } from "../applyAiSuggestions";
 import { BRAND_OTHER, BRAND_UNBRANDED } from "../listingBrands";
 import type { ListingDraft } from "../types";
-import { useMessages } from "../../../lib/i18n/react";
+import { useLocale, useMessages } from "../../../lib/i18n/react";
 import { listingRequiresBoatIdentity } from "../../../lib/categoryTrustRules";
 import {
   listingIsElectricBike,
@@ -351,6 +351,7 @@ export function CategorySpecsFields({
   draft: ListingDraft;
   setDraft: Dispatch<SetStateAction<ListingDraft>>;
 }) {
+  const locale = useLocale();
   const { listing } = useMessages();
   const specsCopy = listing.specs;
   const modes = draft.modes;
@@ -442,6 +443,11 @@ export function CategorySpecsFields({
           {specsCopy.sectionTitle}
         </p>
         <p className="mt-1 text-[13px] leading-snug text-gray-600">{specsCopy.sectionHint}</p>
+        {locale !== "en" && specsCopy.englishContentNote ? (
+          <p className="mt-2 rounded-xl border border-amber-200/80 bg-amber-50/80 px-3 py-2 text-[12px] leading-snug text-amber-950/90">
+            {specsCopy.englishContentNote}
+          </p>
+        ) : null}
       </div>
       {fields.map((field) => {
         const labels = specsCopy.fields[field.key];
