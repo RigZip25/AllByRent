@@ -5549,6 +5549,10 @@ export const es: AppMessages = {
       isOn: "está en",
       shareListing: "Compartir anuncio",
       backToListings: "Volver a mis anuncios",
+      photosPendingTitle: "Las fotos siguen solo en este teléfono",
+      photosPendingBody:
+        "El anuncio está activo para ti, pero los vecinos no lo verán hasta que las fotos terminen de subir. Quédate en Wi-Fi e inténtalo otra vez.",
+      photosPendingRetry: "Volver a subir las fotos",
       payoutNudgeTitle: "¿Listo para abrir la tienda?",
       payoutNudgeBody:
         "Conecta los pagos y luego activa Live en Mi hogar. Los vecinos no te verán hasta que la tienda esté abierta.",
