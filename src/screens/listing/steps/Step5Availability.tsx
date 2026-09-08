@@ -130,9 +130,15 @@ export function Step5Availability({ draft, setDraft }: StepProps) {
   };
   const addBlockedPeriod = () => {
     if (!blockStart || !blockEnd) return;
+    const start = blockStart <= blockEnd ? blockStart : blockEnd;
+    const end = blockStart <= blockEnd ? blockEnd : blockStart;
     setDraft((current) => ({
       ...current,
-      blockedDates: [...current.blockedDates, { start: blockStart, end: blockEnd }],
+      blockedDates: current.blockedDates.some(
+        (period) => period.start === start && period.end === end,
+      )
+        ? current.blockedDates
+        : [...current.blockedDates, { start, end }],
     }));
     setBlockStart("");
     setBlockEnd("");

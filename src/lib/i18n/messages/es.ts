@@ -6824,6 +6824,10 @@ export const es: AppMessages = {
     bookingCalendarTitle: "Calendario de ocupación",
     bookingCalendarHint:
       "Las fechas reservadas y bloqueadas aparecen en gris. Los vecinos solo ven días ocupados — nunca quién alquiló.",
+    manageAvailability: "Gestionar disponibilidad",
+    noBlockedPeriods: "Aún no hay periodos bloqueados.",
+    blockedPeriodsCount: (count) =>
+      count === 1 ? "1 periodo bloqueado" : `${count} periodos bloqueados`,
   },
   garageSale,
   yardSales,

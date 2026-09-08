@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { ArrowLeft, Pause, Pencil, Play, QrCode, Trash2 } from "lucide-react";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { ArrowLeft, CalendarDays, Pause, Pencil, Play, QrCode, Trash2 } from "lucide-react";
 import QRCode from "qrcode";
 import { useAuth } from "../../hooks/AuthProvider";
 import { canManageListing, resolveGarageHostId } from "../../lib/hostAccess";
@@ -39,6 +39,7 @@ import { useMessages } from "../../lib/i18n/react";
 import type { AppMessages } from "../../lib/i18n/types";
 import { AvailabilityCalendar } from "../../components/availability/AvailabilityCalendar";
 import { CategoryFactCard } from "../../components/CategoryFactCard";
+import { Step5Availability } from "./steps/Step5Availability";
 import { useCoverMediaUrl } from "../../lib/useMediaUrl";
 import type { MediaRef } from "../../lib/mediaStore";
 import {
@@ -194,6 +195,47 @@ export function HostListingDetailScreen({
   const [editError, setEditError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [availabilityDraft, setAvailabilityDraft] = useState<ListingDraft | null>(null);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+
+  const patchAvailabilityDraft: Dispatch<SetStateAction<ListingDraft>> = (value) => {
+    setAvailabilityDraft((current) => {
+      if (!current) return current;
+      return typeof value === "function"
+        ? (value as (prev: ListingDraft) => ListingDraft)(current)
+        : value;
+    });
+  };
+
+  const saveAvailability = async () => {
+    if (!listing || !availabilityDraft || saveBusy) return;
+    setAvailabilityError(null);
+    setSaveBusy(true);
+    const ownerId = resolveGarageHostId(auth.userId, auth.userEmail);
+    const result = await updatePublishedListingRemote(
+      listing.id,
+      {
+        blockedDates: availabilityDraft.blockedDates,
+        paused: availabilityDraft.paused,
+        handoff: {
+          inPersonDays: availabilityDraft.handoff.inPersonDays,
+          inPersonTimeStart: availabilityDraft.handoff.inPersonTimeStart,
+          inPersonTimeEnd: availabilityDraft.handoff.inPersonTimeEnd,
+          inPersonWeekendTimeStart: availabilityDraft.handoff.inPersonWeekendTimeStart,
+          inPersonWeekendTimeEnd: availabilityDraft.handoff.inPersonWeekendTimeEnd,
+        },
+      },
+      ownerId,
+    );
+    setSaveBusy(false);
+    if (!result.ok) {
+      setAvailabilityError(result.reason);
+      return;
+    }
+    setListing(result.listing);
+    setAvailabilityDraft(null);
+    setVersion((v) => v + 1);
+  };
 
   useEffect(() => {
     setQueuedForBulk(isListingQueuedForBulk(listingId));
@@ -949,6 +991,23 @@ export function HostListingDetailScreen({
           <div className="mt-3">
             <HostListingOccupancyCalendar listing={listing} />
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              setAvailabilityError(null);
+              setAvailabilityDraft(listing);
+            }}
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-bold"
+            style={{ borderColor: GREEN, color: GREEN }}
+          >
+            <CalendarDays className="h-4 w-4" />
+            {t.manageAvailability}
+          </button>
+          <p className="mt-2 text-[12px] text-gray-500">
+            {listing.blockedDates.length > 0
+              ? t.blockedPeriodsCount(listing.blockedDates.length)
+              : t.noBlockedPeriods}
+          </p>
         </section>
 
         <section className="mt-4 rounded-3xl border bg-white p-5" style={{ borderColor: BORDER }}>
@@ -1103,6 +1162,44 @@ export function HostListingDetailScreen({
                 {saveBusy ? t.saving : t.save}
               </button>
             </div>
+          </div>
+        </div>
+      ) : null}
+
+      {availabilityDraft ? (
+        <div className="absolute inset-0 z-50 flex flex-col bg-[#F9FAFB]">
+          <header
+            className="shrink-0 bg-white px-4 pb-3 pt-4"
+            style={{ borderBottom: `1px solid ${BORDER}` }}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setAvailabilityDraft(null);
+                  setAvailabilityError(null);
+                }}
+                className="flex items-center gap-2 text-sm font-semibold text-gray-600"
+              >
+                <ArrowLeft className="h-4 w-4" style={{ color: GREEN }} />
+                {t.cancel}
+              </button>
+              <button
+                type="button"
+                onClick={() => void saveAvailability()}
+                disabled={saveBusy}
+                className="rounded-xl px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
+                style={{ backgroundColor: GREEN }}
+              >
+                {saveBusy ? t.saving : t.save}
+              </button>
+            </div>
+            {availabilityError ? (
+              <p className="mt-2 text-xs font-semibold text-red-600">{availabilityError}</p>
+            ) : null}
+          </header>
+          <div className="screen-scroll min-h-0 flex-1">
+            <Step5Availability draft={availabilityDraft} setDraft={patchAvailabilityDraft} />
           </div>
         </div>
       ) : null}
