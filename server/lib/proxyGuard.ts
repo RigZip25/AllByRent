@@ -1,12 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getUserFromBearer } from "./passkey/supabaseAdmin";
+import { getAdminClient, getUserFromBearer } from "./passkey/supabaseAdmin";
 
 type RateBucket = {
   resetAt: number;
   count: number;
 };
 
-/** In-memory buckets — fine for single serverless isolate; best-effort across cold starts. */
+/** In-memory fallback when admin DB / RPC is unavailable (per-isolate on Vercel). */
 const buckets = new Map<string, RateBucket>();
 
 export type ProxyRateLimitOpts = {
@@ -22,6 +22,13 @@ export type ProxyRateLimitOpts = {
   requireAuth?: boolean;
 };
 
+type TokenResult = {
+  ok: boolean;
+  remaining: number;
+  retryAfterSec: number;
+  source: "db" | "memory";
+};
+
 function clientIp(req: VercelRequest): string {
   const forwarded = req.headers["x-forwarded-for"];
   if (typeof forwarded === "string" && forwarded.trim()) {
@@ -35,11 +42,7 @@ function clientIp(req: VercelRequest): string {
   return "unknown";
 }
 
-function takeToken(key: string, max: number, windowMs: number): {
-  ok: boolean;
-  remaining: number;
-  retryAfterSec: number;
-} {
+function takeTokenMemory(key: string, max: number, windowMs: number): TokenResult {
   const now = Date.now();
   let bucket = buckets.get(key);
   if (!bucket || now >= bucket.resetAt) {
@@ -51,6 +54,7 @@ function takeToken(key: string, max: number, windowMs: number): {
       ok: false,
       remaining: 0,
       retryAfterSec: Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)),
+      source: "memory",
     };
   }
   bucket.count += 1;
@@ -58,7 +62,49 @@ function takeToken(key: string, max: number, windowMs: number): {
     ok: true,
     remaining: Math.max(0, max - bucket.count),
     retryAfterSec: Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)),
+    source: "memory",
   };
+}
+
+async function takeTokenDb(
+  key: string,
+  max: number,
+  windowMs: number,
+): Promise<TokenResult | null> {
+  const admin = getAdminClient();
+  if (!admin) return null;
+  try {
+    const { data, error } = await admin.rpc("take_rate_limit_token", {
+      p_key: key,
+      p_max: max,
+      p_window_ms: windowMs,
+    });
+    if (error || !data || typeof data !== "object") return null;
+    const row = data as { ok?: unknown; remaining?: unknown; retry_after_sec?: unknown };
+    return {
+      ok: Boolean(row.ok),
+      remaining: typeof row.remaining === "number" ? Math.max(0, row.remaining) : 0,
+      retryAfterSec:
+        typeof row.retry_after_sec === "number" ? Math.max(1, Math.ceil(row.retry_after_sec)) : 1,
+      source: "db",
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Prefer durable Postgres counter (migration 062) when service role is available;
+ * fall back to in-memory buckets for local / misconfigured environments.
+ */
+export async function takeRateLimitToken(
+  key: string,
+  max: number,
+  windowMs: number,
+): Promise<TokenResult> {
+  const fromDb = await takeTokenDb(key, max, windowMs);
+  if (fromDb) return fromDb;
+  return takeTokenMemory(key, max, windowMs);
 }
 
 /**
@@ -84,10 +130,11 @@ export async function enforceProxyGuard(
   const max = authed ? opts.maxAuthed : opts.maxAnon;
   const subject = authed ? `u:${user!.id}` : `ip:${clientIp(req)}`;
   const key = `${opts.route}:${subject}`;
-  const result = takeToken(key, max, windowMs);
+  const result = await takeRateLimitToken(key, max, windowMs);
 
   res.setHeader("X-RateLimit-Limit", String(max));
   res.setHeader("X-RateLimit-Remaining", String(result.remaining));
+  res.setHeader("X-RateLimit-Source", result.source);
 
   if (!result.ok) {
     res.setHeader("Retry-After", String(result.retryAfterSec));

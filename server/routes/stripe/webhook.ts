@@ -43,6 +43,24 @@ export default withApiErrorHandling(async function handler(req: VercelRequest, r
 
   const admin = getAdminClient();
 
+  // Idempotency: skip duplicate Stripe deliveries of the same event.id.
+  if (admin) {
+    const { error: insertError } = await admin.from("stripe_webhook_events").insert({
+      event_id: event.id,
+      event_type: event.type,
+    });
+    if (insertError) {
+      const code = (insertError as { code?: string }).code;
+      const message = String((insertError as { message?: string }).message ?? "");
+      if (code === "23505" || /duplicate|unique/i.test(message)) {
+        res.status(200).json({ received: true, duplicate: true });
+        return;
+      }
+      // Table missing / transient DB error — continue processing rather than drop money events.
+      console.warn("[stripe/webhook] idempotency insert failed", insertError);
+    }
+  }
+
   if (event.type.startsWith("identity.verification_session.")) {
     const session = event.data.object as Stripe.Identity.VerificationSession;
     const userId = (session.metadata as { supabase_user_id?: string })?.supabase_user_id;

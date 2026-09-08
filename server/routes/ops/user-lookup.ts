@@ -1,12 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { getAdminClient } from "../../lib/passkey/supabaseAdmin";
 
-/** No fallback: this route exposes auth users, so an unset env must lock it, not open it. */
+/** No fallback to VITE_*: that env ships in the client bundle. Server ops use OPS_PASSWORD only. */
 function expectedOpsKey(): string {
-  return (
-    String(process.env.OPS_PASSWORD ?? "").trim() ||
-    String(process.env.VITE_OPS_PASSWORD ?? "").trim()
-  );
+  return String(process.env.OPS_PASSWORD ?? "").trim();
 }
 
 function authorizeOps(req: VercelRequest): boolean {

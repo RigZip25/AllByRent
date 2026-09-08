@@ -11,12 +11,9 @@ type ReportStatus = "new" | "reviewing" | "actioned" | "dismissed";
 
 const STATUSES = new Set<ReportStatus>(["new", "reviewing", "actioned", "dismissed"]);
 
-/** No fallback: an unset env must lock the queue, not open it to a shipped default. */
+/** No fallback to VITE_*: that env ships in the client bundle. Server ops use OPS_PASSWORD only. */
 function expectedOpsKey(): string {
-  return (
-    String(process.env.OPS_PASSWORD ?? "").trim() ||
-    String(process.env.VITE_OPS_PASSWORD ?? "").trim()
-  );
+  return String(process.env.OPS_PASSWORD ?? "").trim();
 }
 
 function authorizeOps(req: VercelRequest): boolean {

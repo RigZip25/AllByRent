@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { applyCors, handleOptions } from "../lib/cors";
 import { withApiErrorHandling } from "../lib/safeHandler";
 import { completeLlmChat } from "../lib/llm/complete";
+import { clampLlmMaxTokens } from "../lib/llm/provider";
 import type { LlmChatRequest, LlmMessage } from "../lib/llm/types";
 import { enforceProxyGuard } from "../lib/proxyGuard";
 
@@ -47,13 +48,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // Auth preferred (keyed limits); anonymous still allowed with stricter IP cap for draft moderation.
   const guard = await enforceProxyGuard(req, res, {
     route: "llm",
     maxAuthed: 60,
-    maxAnon: 20,
+    maxAnon: 0,
     windowMs: 60_000,
-    requireAuth: false,
+    requireAuth: true,
   });
   if (!guard) return;
 
@@ -70,11 +70,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: "messages are required" });
   }
 
-  const maxTokens = Number(raw.max_tokens);
   const body: LlmChatRequest = {
     system: typeof raw.system === "string" ? raw.system : undefined,
     messages,
-    max_tokens: Number.isFinite(maxTokens) && maxTokens > 0 ? maxTokens : 900,
+    max_tokens: clampLlmMaxTokens(raw.max_tokens),
+    // Model is allowlisted server-side in resolveLlmModel; unknown values fall back.
     model: typeof raw.model === "string" ? raw.model : undefined,
     purpose: raw.purpose === "vision" ? "vision" : "chat",
   };

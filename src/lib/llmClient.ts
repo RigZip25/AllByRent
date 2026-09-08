@@ -60,7 +60,7 @@ async function authHeaders(): Promise<Record<string, string>> {
     const token = await getAccessToken();
     if (token) return { Authorization: `Bearer ${token}` };
   } catch {
-    // ignore — anonymous draft moderation still allowed server-side
+    // ignore — Bearer preferred; server requires auth for /api/proxy/llm
   }
   return {};
 }

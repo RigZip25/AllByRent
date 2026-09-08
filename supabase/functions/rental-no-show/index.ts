@@ -12,12 +12,14 @@ const NO_SHOW_SUGGEST_MS = 2 * 60 * MS_MIN;
 const NO_SHOW_AUTO_CANCEL_MS = 24 * 60 * MS_MIN;
 
 Deno.serve(async (req) => {
-  const cronSecret = Deno.env.get("CRON_SECRET");
-  if (cronSecret) {
-    const auth = req.headers.get("Authorization");
-    if (auth !== `Bearer ${cronSecret}`) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
-    }
+  const cronSecret = Deno.env.get("CRON_SECRET")?.trim();
+  // Always require CRON_SECRET — an unset secret must 401, never open the job.
+  if (!cronSecret) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+  const auth = req.headers.get("Authorization");
+  if (auth !== `Bearer ${cronSecret}`) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
   const url = Deno.env.get("SUPABASE_URL");

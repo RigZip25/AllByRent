@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { applyCors, handleOptions } from "../../lib/cors";
 import { getUspsWebToolsUserId } from "../../lib/keys";
 import { enforceProxyGuard } from "../../lib/proxyGuard";
 
@@ -24,14 +25,9 @@ function escapeXml(value: string): string {
  * Requires USPS_WEBTOOLS_USER_ID on the server. Does not return coordinates; pair with Census.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const origin = typeof req.headers.origin === "string" ? req.headers.origin : "*";
-  res.setHeader("Access-Control-Allow-Origin", origin);
-  res.setHeader("Vary", "Origin");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-
-  if (req.method === "OPTIONS") {
-    return res.status(204).end();
-  }
+  const origin = typeof req.headers.origin === "string" ? req.headers.origin : undefined;
+  applyCors(res, origin);
+  if (handleOptions(req, res)) return;
 
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET, OPTIONS");

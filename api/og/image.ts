@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 import sharp from "sharp";
+import { isAllowedOgPhotoUrl } from "@allbyrent/server/lib/ogPhotoAllowlist";
 
 const FONT_FAMILY = "OgSans";
 
@@ -259,7 +260,7 @@ function buildOgSvg(input: {
 }
 
 async function loadPhotoDataUri(photoUrl: string): Promise<string | undefined> {
-  if (!/^https:\/\//i.test(photoUrl)) return undefined;
+  if (!isAllowedOgPhotoUrl(photoUrl)) return undefined;
   try {
     const response = await fetch(photoUrl, {
       signal: AbortSignal.timeout(4000),

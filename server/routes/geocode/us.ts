@@ -1,18 +1,14 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { applyCors, handleOptions } from "../../lib/cors";
 import { enforceProxyGuard } from "../../lib/proxyGuard";
 
 const CENSUS_BASE = "https://geocoding.geo.census.gov/geocoder";
 
 /** Proxy US Census geocoder — browser cannot call census.gov directly (no CORS). */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const origin = typeof req.headers.origin === "string" ? req.headers.origin : "*";
-  res.setHeader("Access-Control-Allow-Origin", origin);
-  res.setHeader("Vary", "Origin");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-
-  if (req.method === "OPTIONS") {
-    return res.status(204).end();
-  }
+  const origin = typeof req.headers.origin === "string" ? req.headers.origin : undefined;
+  applyCors(res, origin);
+  if (handleOptions(req, res)) return;
 
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET, OPTIONS");

@@ -26,22 +26,21 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     if (!admin) {
       return res.status(503).json({ error: "Auth service is not configured." });
     }
-    const { data: profile, error } = await admin
+    // Always return 200 with the same shape whether or not a passkey exists
+    // (avoid email enumeration via 404 vs 200).
+    const { data: profile } = await admin
       .from("profiles")
       .select("passkey_credential_id, passkey_transports")
       .eq("email", email)
       .maybeSingle();
-    if (error || !profile?.passkey_credential_id) {
-      return res.status(404).json({
-        error: "No passkey registered for this account. Use email sign-in.",
-      });
+    if (profile?.passkey_credential_id) {
+      allowCredentials = [
+        {
+          id: profile.passkey_credential_id,
+          transports: (profile.passkey_transports ?? []) as AuthenticatorTransport[],
+        },
+      ];
     }
-    allowCredentials = [
-      {
-        id: profile.passkey_credential_id,
-        transports: (profile.passkey_transports ?? []) as AuthenticatorTransport[],
-      },
-    ];
   }
 
   const rpID = getPasskeyRpIdForRequest(origin);
