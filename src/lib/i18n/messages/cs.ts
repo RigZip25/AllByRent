@@ -1338,13 +1338,8 @@ export const cs: AppMessages = {
     extendUnavailable: "Tyto dny nejsou volné — zvol jiné datum konce.",
     extendInvalid: "Zvol datum konce po součém konci.",
     extendSuccess: (date) => `Prodlouženo do ${date}.`,
-    earlyReturn: "Vrátit dříve",
-    earlyReturnConfirmBody:
-      "Zkrať půjčku na dnešek. Předání při návratu s hostitelem stejně dokončíš. Úpravy ceny řešíte mezi sebou — dny v kalendáři se uvolní hned.",
-    earlyReturnConfirm: "Ano, skončit dnes",
-    earlyReturnWorking: "Ukládám...",
-    earlyReturnInvalid: "Předčasný návrat u tohoto stavu nejde.",
-    earlyReturnSuccess: (date) => `Konec půjčky nastaven na ${date}. Dokonči předání při návratu.`,
+    earlyReturnHint:
+      "Hotovo dřív? Vrať to, kdy chceš — půjčka končí, jakmile hostitel návrat přijme. Rezervované dny zůstávají účtované podle dohody.",
     cancelRefundFullProcessing:
       "Byla odeslána plná refundace — banky ji mohou zobrazit až za několik pracovních dní.",
     cancelRefundPartialProcessing: (percent) =>

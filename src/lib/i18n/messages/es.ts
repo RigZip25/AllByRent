@@ -1320,14 +1320,8 @@ export const es: AppMessages = {
     extendUnavailable: "Esas fechas no están libres: elige otro día de fin.",
     extendInvalid: "Elige una fecha de fin posterior a la actual.",
     extendSuccess: (date) => `Ampliado hasta el ${date}.`,
-    earlyReturn: "Devolver antes",
-    earlyReturnConfirmBody:
-      "Acorta este alquiler a hoy. Seguirás completando la devolución con el anfitrión. Los ajustes de precio (si los hay) los resolvéis entre vosotros: el calendario se libera al momento.",
-    earlyReturnConfirm: "Sí, terminar hoy",
-    earlyReturnWorking: "Actualizando...",
-    earlyReturnInvalid: "La devolución anticipada no está disponible en este estado.",
-    earlyReturnSuccess: (date) =>
-      `Fin del alquiler fijado en ${date}. Completa la devolución cuando estés listo.`,
+    earlyReturnHint:
+      "¿Terminaste antes? Devuélvelo cuando quieras: el alquiler acaba cuando el anfitrión acepta la devolución. Los días reservados se cobran según lo acordado.",
     cancelRefundFullProcessing:
       "Se envió un reembolso completo: los bancos pueden tardar unos días hábiles en mostrarlo.",
     cancelRefundPartialProcessing: (percent) =>

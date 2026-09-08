@@ -1321,13 +1321,8 @@ export const en: AppMessages = {
     extendUnavailable: "Those dates aren’t free — pick another end day.",
     extendInvalid: "Choose an end date after the current one.",
     extendSuccess: (date) => `Extended through ${date}.`,
-    earlyReturn: "Return early",
-    earlyReturnConfirmBody:
-      "Shorten this rental to today. You’ll still complete the return handoff with the host. Pricing adjustments (if any) are handled between you — calendar days free up immediately.",
-    earlyReturnConfirm: "Yes, end early today",
-    earlyReturnWorking: "Updating...",
-    earlyReturnInvalid: "Early return isn’t available for this status.",
-    earlyReturnSuccess: (date) => `Rental end set to ${date}. Complete return handoff when ready.`,
+    earlyReturnHint:
+      "Done early? Return it whenever you like — the rental ends once the host accepts the return. The booked days stay charged as agreed.",
     cancelRefundFullProcessing:
       "A full refund was submitted — banks can take a few business days to show it.",
     cancelRefundPartialProcessing: (percent) =>

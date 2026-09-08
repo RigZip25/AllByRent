@@ -1,6 +1,11 @@
 /**
- * Extension + early return — product capability for every rental category.
- * Extension only when the new end date stays free on the listing calendar.
+ * Extending a rental, for every category.
+ *
+ * Only into days the listing calendar still has free. There is no counterpart
+ * for returning early: the rental was paid to its end date, so bringing the
+ * item back sooner is the return handoff happening sooner, not a shorter
+ * booking — moving the end date used to free days the renter had paid for and
+ * let the host book them out from under them.
  */
 
 import {
@@ -9,7 +14,6 @@ import {
   fetchListingBusyIntervals,
   isRangeBusy,
   parseIsoDateLocal,
-  todayIsoLocal,
   type BusyInterval,
 } from "./availabilityBusy";
 import type { RentalBooking } from "./rentalsStorage";
@@ -17,10 +21,6 @@ import type { RentalBooking } from "./rentalsStorage";
 export type ExtendAvailabilityResult =
   | { ok: true; extraDays: number; newEndDate: string }
   | { ok: false; reason: "invalid" | "not_later" | "busy" | "no_listing" };
-
-export type EarlyReturnResult =
-  | { ok: true; newEndDate: string; daysShortened: number }
-  | { ok: false; reason: "invalid" | "not_earlier" | "before_start" | "not_active" };
 
 /** Days after current endDate that must be free (exclusive of current booking occupancy). */
 export function extensionProbeInterval(
@@ -84,31 +84,6 @@ export async function canExtendRental(params: {
   };
 }
 
-export function canEarlyReturnBooking(params: {
-  booking: Pick<RentalBooking, "startDate" | "endDate" | "status">;
-  newEndDate?: string;
-}): EarlyReturnResult {
-  const { booking } = params;
-  if (
-    booking.status !== "active" &&
-    booking.status !== "overdue" &&
-    booking.status !== "pending_checkin"
-  ) {
-    return { ok: false, reason: "not_active" };
-  }
-
-  const candidate = params.newEndDate?.trim() || todayIsoLocal();
-  if (!parseIsoDateLocal(candidate)) return { ok: false, reason: "invalid" };
-  if (candidate < booking.startDate) return { ok: false, reason: "before_start" };
-  if (candidate >= booking.endDate) return { ok: false, reason: "not_earlier" };
-
-  return {
-    ok: true,
-    newEndDate: candidate,
-    daysShortened: daysInclusive(addDaysIso(candidate, 1), booking.endDate),
-  };
-}
-
 /** Statuses where renter/host may request an extension. */
 export function bookingAllowsExtension(status: RentalBooking["status"]): boolean {
   return (
@@ -119,7 +94,3 @@ export function bookingAllowsExtension(status: RentalBooking["status"]): boolean
   );
 }
 
-/** Statuses where early return is supported (always, product-wise). */
-export function bookingAllowsEarlyReturn(status: RentalBooking["status"]): boolean {
-  return status === "active" || status === "overdue" || status === "pending_checkin";
-}

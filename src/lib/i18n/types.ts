@@ -2279,12 +2279,8 @@ export type AppMessages = {
     extendUnavailable: string;
     extendInvalid: string;
     extendSuccess: (date: string) => string;
-    earlyReturn: string;
-    earlyReturnConfirmBody: string;
-    earlyReturnConfirm: string;
-    earlyReturnWorking: string;
-    earlyReturnInvalid: string;
-    earlyReturnSuccess: (date: string) => string;
+    /** Bringing it back sooner does not shorten what was paid for. */
+    earlyReturnHint: string;
     cancelRefundFullProcessing: string;
     cancelRefundPartialProcessing: (percent: number) => string;
     cancelRefundNone: string;
