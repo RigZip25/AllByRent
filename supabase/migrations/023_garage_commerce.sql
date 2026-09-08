@@ -60,9 +60,11 @@ alter table public.garage_order_lines enable row level security;
 alter table public.garage_auction_payments enable row level security;
 alter table public.garage_follows enable row level security;
 
+drop policy if exists garage_orders_select on public.garage_orders;
 create policy garage_orders_select on public.garage_orders
   for select using (auth.uid() = buyer_id or auth.uid() = host_id);
 
+drop policy if exists garage_order_lines_select on public.garage_order_lines;
 create policy garage_order_lines_select on public.garage_order_lines
   for select using (
     exists (
@@ -71,14 +73,18 @@ create policy garage_order_lines_select on public.garage_order_lines
     )
   );
 
+drop policy if exists garage_auction_payments_select on public.garage_auction_payments;
 create policy garage_auction_payments_select on public.garage_auction_payments
   for select using (auth.uid() = buyer_id or auth.uid() = host_id);
 
+drop policy if exists garage_follows_select on public.garage_follows;
 create policy garage_follows_select on public.garage_follows
   for select using (auth.uid() = follower_id or auth.uid() = host_id);
 
+drop policy if exists garage_follows_insert on public.garage_follows;
 create policy garage_follows_insert on public.garage_follows
   for insert with check (auth.uid() = follower_id);
 
+drop policy if exists garage_follows_delete on public.garage_follows;
 create policy garage_follows_delete on public.garage_follows
   for delete using (auth.uid() = follower_id);

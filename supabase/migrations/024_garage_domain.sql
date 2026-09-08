@@ -63,43 +63,54 @@ alter table public.garage_sale_schedules enable row level security;
 alter table public.garage_sale_offer_prefs enable row level security;
 
 -- Bids: anyone authenticated can read bids on active listings; insert own bid
+drop policy if exists garage_bids_select on public.garage_bids;
 create policy garage_bids_select on public.garage_bids
   for select using (auth.uid() is not null);
 
+drop policy if exists garage_bids_insert on public.garage_bids;
 create policy garage_bids_insert on public.garage_bids
   for insert with check (auth.uid() is not null);
 
 -- Neighbor offers: host and buyer can read/update their offers
+drop policy if exists garage_neighbor_offers_select on public.garage_neighbor_offers;
 create policy garage_neighbor_offers_select on public.garage_neighbor_offers
   for select using (auth.uid() = host_id or auth.uid() = buyer_id);
 
+drop policy if exists garage_neighbor_offers_insert on public.garage_neighbor_offers;
 create policy garage_neighbor_offers_insert on public.garage_neighbor_offers
   for insert with check (auth.uid() = buyer_id);
 
+drop policy if exists garage_neighbor_offers_update on public.garage_neighbor_offers;
 create policy garage_neighbor_offers_update on public.garage_neighbor_offers
   for update using (auth.uid() = host_id or auth.uid() = buyer_id);
 
 -- Lot states: public read for shop; host can upsert
+drop policy if exists garage_lot_states_select on public.garage_lot_states;
 create policy garage_lot_states_select on public.garage_lot_states
   for select using (true);
 
+drop policy if exists garage_lot_states_upsert on public.garage_lot_states;
 create policy garage_lot_states_upsert on public.garage_lot_states
   for all using (auth.uid() = host_id)
   with check (auth.uid() = host_id);
 
 -- Schedules + prefs: host only
+drop policy if exists garage_sale_schedules_host on public.garage_sale_schedules;
 create policy garage_sale_schedules_host on public.garage_sale_schedules
   for all using (auth.uid() = host_id)
   with check (auth.uid() = host_id);
 
+drop policy if exists garage_sale_offer_prefs_host on public.garage_sale_offer_prefs;
 create policy garage_sale_offer_prefs_host on public.garage_sale_offer_prefs
   for all using (auth.uid() = host_id)
   with check (auth.uid() = host_id);
 
 -- garage_orders insert for buyers (checkout API uses service role; client read-only)
+drop policy if exists garage_orders_insert_buyer on public.garage_orders;
 create policy garage_orders_insert_buyer on public.garage_orders
   for insert with check (auth.uid() = buyer_id);
 
+drop policy if exists garage_order_lines_insert on public.garage_order_lines;
 create policy garage_order_lines_insert on public.garage_order_lines
   for insert with check (
     exists (
@@ -108,12 +119,14 @@ create policy garage_order_lines_insert on public.garage_order_lines
     )
   );
 
+drop policy if exists garage_auction_payments_insert on public.garage_auction_payments;
 create policy garage_auction_payments_insert on public.garage_auction_payments
   for insert with check (auth.uid() = buyer_id);
 
 alter table public.garage_follows
   add column if not exists notify_open_house boolean not null default true;
 
+drop policy if exists garage_follows_update on public.garage_follows;
 create policy garage_follows_update on public.garage_follows
   for update using (auth.uid() = follower_id)
   with check (auth.uid() = follower_id);
