@@ -20,6 +20,8 @@ type Props = {
   onOpenRentalChat: (rentalId: string) => void;
   onOpenListingChat: (listingId: string, peerId: string) => void;
   onOpenRequestChat: (requestId: string, peerId: string) => void;
+  onBrowse?: () => void;
+  onOpenRentals?: () => void;
 };
 
 function threadTitle(thread: ChatThreadSummary, requestFallback: string): string {
@@ -51,19 +53,36 @@ export function MessagesInboxScreen({
   onOpenRentalChat,
   onOpenListingChat,
   onOpenRequestChat,
+  onBrowse,
+  onOpenRentals,
 }: Props) {
   const auth = useAuth();
   const copy = useMessages();
   const [remote, setRemote] = useState<ChatThreadSummary[]>([]);
   const [tick, setTick] = useState(0);
+  const [syncing, setSyncing] = useState(false);
+  const [syncFailed, setSyncFailed] = useState(false);
 
   useEffect(() => {
     setTick((n) => n + 1);
-    if (!auth.userId) return;
+    if (!auth.userId) {
+      setSyncing(false);
+      setSyncFailed(false);
+      return;
+    }
     let cancelled = false;
-    void fetchRecentChatThreadsRemote(auth.userId).then((rows) => {
-      if (!cancelled) setRemote(rows);
-    });
+    setSyncing(true);
+    setSyncFailed(false);
+    void fetchRecentChatThreadsRemote(auth.userId)
+      .then((rows) => {
+        if (!cancelled) setRemote(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setSyncFailed(true);
+      })
+      .finally(() => {
+        if (!cancelled) setSyncing(false);
+      });
     return () => {
       cancelled = true;
     };
@@ -134,6 +153,15 @@ export function MessagesInboxScreen({
           </p>
         ) : null}
 
+        {auth.userId && syncing ? (
+          <p className="mb-3 text-center text-[12px] text-gray-500">{copy.messages.syncing}</p>
+        ) : null}
+        {auth.userId && syncFailed ? (
+          <p className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-[12px] text-amber-950">
+            {copy.messages.syncFailed}
+          </p>
+        ) : null}
+
         {threads.length === 0 ? (
           <div
             className="mt-2 flex flex-col items-center rounded-2xl border bg-white px-4 py-10 text-center"
@@ -144,6 +172,28 @@ export function MessagesInboxScreen({
               {copy.messages.emptyTitle}
             </p>
             <p className="mt-1 max-w-xs text-[13px] text-gray-500">{copy.messages.emptyBody}</p>
+            <div className="mt-5 flex w-full max-w-xs flex-col gap-2">
+              {onBrowse ? (
+                <button
+                  type="button"
+                  onClick={onBrowse}
+                  className="w-full rounded-xl py-3 text-[14px] font-bold text-white"
+                  style={{ backgroundColor: GREEN }}
+                >
+                  {copy.messages.emptyBrowseCta}
+                </button>
+              ) : null}
+              {onOpenRentals ? (
+                <button
+                  type="button"
+                  onClick={onOpenRentals}
+                  className="w-full rounded-xl border-2 py-3 text-[14px] font-bold"
+                  style={{ borderColor: GREEN, color: GREEN }}
+                >
+                  {copy.messages.emptyRentalsCta}
+                </button>
+              ) : null}
+            </div>
           </div>
         ) : (
           <ul className="flex flex-col gap-2">

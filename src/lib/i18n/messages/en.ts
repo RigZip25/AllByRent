@@ -204,6 +204,11 @@ export const en: AppMessages = {
     newGarageBadge: "New",
     proGarageBadge: "Pro",
     loadingGarages: "Loading nearby...",
+    loadErrorTitle: "Couldn't load nearby garages",
+    loadErrorBody: "Check your connection and try again. Cached results stay on screen when we have them.",
+    emptyNoLocationTitle: "Tell us where you are",
+    emptyNoLocationBody:
+      "Set your neighborhood or city so we can show garages near you — not the whole world.",
     emptyFilteredTitle: "Nothing matching yet",
     emptyBlockTitle: "Quiet here — for now",
     emptyFilteredBody: (labels) =>
@@ -622,6 +627,10 @@ export const en: AppMessages = {
     emptyTitle: "No conversations yet",
     emptyBody:
       "Open an active rental and tap Message, or message a seller from a listing — threads show up here.",
+    emptyBrowseCta: "Browse nearby",
+    emptyRentalsCta: "Open rentals",
+    syncing: "Syncing conversations…",
+    syncFailed: "Couldn't sync messages. Showing what we have on this device.",
     rental: "Rental",
     buyGift: "Buy / gift",
     request: "Request",
@@ -1477,6 +1486,10 @@ export const en: AppMessages = {
     messagesSection: "Messages",
     inbox: "Inbox",
     loading: "Loading...",
+    loadErrorTitle: "Couldn't load notifications",
+    loadErrorBody: "Check your connection and try again.",
+    emptyBrowseCta: "Browse nearby",
+    emptyRentalsCta: "Open rentals",
     appUpdates: "App updates",
     markAsRead: "Mark as read",
     notification: "Notification",
@@ -5630,6 +5643,12 @@ export const en: AppMessages = {
         "Paid listings require a verified phone before going on the shelf. Free (gift) listings can save without this step.",
       phoneBlockPayouts:
         "Verify your phone before connecting finances. This protects payouts for you and your neighbors.",
+      couldNotCheckSellerSetup: "Could not check seller setup.",
+      couldNotPrepareChecklist: "Could not prepare go-public checklist.",
+      signInToPublish: "Sign in to publish your listing.",
+      couldNotPublish: "Could not publish your listing.",
+      signInFromProfileHint: "Sign in from More → Profile, then return here.",
+      stripeConnectFailed: "Stripe Connect failed.",
     },
     success: {
       title: "On your shelf!",
@@ -6287,6 +6306,8 @@ export const en: AppMessages = {
     emptyTitle: "No favorites yet",
     emptyBody: "Tap the heart on a listing to save it here.",
     browseCta: "Browse nearby",
+    syncing: "Syncing favorites…",
+    syncFailed: "Couldn't sync favorites. Showing what we have on this device.",
     listingFallback: "Listing",
     removeAria: (title) => `Remove ${title} from favorites`,
     ratePerDay: (rate) => `$${rate}/day`,
@@ -6560,6 +6581,8 @@ export const en: AppMessages = {
       phoneRequiredForPayouts:
         "Verify your phone by SMS before connecting payouts or going public with paid listings.",
       phoneVerifyCta: "Verify phone",
+      saveFailed: "Couldn't save. Check your connection and try again.",
+      saving: "Saving…",
     },
     coHosts: {
       title: "Co-hosts",
@@ -6642,6 +6665,9 @@ export const en: AppMessages = {
     publicProfile: {
       loading: "Loading profile...",
       notFound: "Profile not found.",
+      storePausedTitle: "Store paused",
+      storePausedBody:
+        "This neighbor’s garage is on pause right now — their profile and shelf are hidden until they reopen.",
       yourPublicProfile: "Your public profile",
       settingsHint:
         "Add your photo, email, and name in Profile settings — neighbors only see what you choose to share publicly.",

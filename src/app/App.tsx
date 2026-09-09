@@ -2324,6 +2324,8 @@ function AppRoutes() {
             onOpenRentalChat={handleOpenRentalChat}
             onOpenListingChat={handleOpenListingChat}
             onOpenRequestChat={handleOpenRequestChat}
+            onBrowse={handleOpenHome}
+            onOpenRentals={handleOpenRentals}
           />
         )}
 
@@ -2541,6 +2543,7 @@ function AppRoutes() {
             onBack={handleBack}
             mode={getAppMode()}
             onOpenRentals={handleOpenRentals}
+            onBrowse={handleOpenHome}
             onOpenRental={(bookingId) => {
               setSelectedBookingId(bookingId);
               navigateTo("activeRental");

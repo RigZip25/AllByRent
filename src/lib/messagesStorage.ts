@@ -546,7 +546,8 @@ export async function fetchRecentChatThreadsRemote(viewerId: string): Promise<Ch
     .or(`sender_id.eq.${viewerId},recipient_id.eq.${viewerId}`)
     .order("created_at", { ascending: false })
     .limit(120);
-  if (error || !data) return [];
+  if (error) throw error;
+  if (!data) return [];
 
   const byKey = new Map<string, ChatThreadSummary>();
   for (const raw of data as unknown as RemoteMessageRow[]) {

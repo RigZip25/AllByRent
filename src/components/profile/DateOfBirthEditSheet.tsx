@@ -15,13 +15,17 @@ const BORDER = "#E8E6E0";
 export function DateOfBirthEditSheet({
   open,
   value,
+  error,
+  saving,
   onClose,
   onSave,
 }: {
   open: boolean;
   value: string;
+  error?: string | null;
+  saving?: boolean;
   onClose: () => void;
-  onSave: (iso: string) => void;
+  onSave: (iso: string) => void | Promise<void>;
 }) {
   const t = useMessages().profileDeep.personalInfo;
   const common = useMessages().common;
@@ -41,7 +45,7 @@ export function DateOfBirthEditSheet({
   return (
     <div
       className="fixed inset-0 z-[95] flex items-end justify-center bg-black/45 p-4"
-      onClick={onClose}
+      onClick={saving ? undefined : onClose}
     >
       <div
         role="dialog"
@@ -63,7 +67,7 @@ export function DateOfBirthEditSheet({
               {t.dateOfBirth}
             </h2>
           </div>
-          <button type="button" onClick={onClose} aria-label={common.close}>
+          <button type="button" onClick={onClose} aria-label={common.close} disabled={saving}>
             <X className="h-5 w-5 text-red-600" />
           </button>
         </div>
@@ -78,7 +82,8 @@ export function DateOfBirthEditSheet({
             min={dobPickerMinIso()}
             max={dobPickerMaxIso()}
             onChange={(e) => setDraft(e.target.value)}
-            className="mt-2 w-full rounded-2xl border bg-white px-3 py-3 text-[16px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/20"
+            disabled={saving}
+            className="mt-2 w-full rounded-2xl border bg-white px-3 py-3 text-[16px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/20 disabled:opacity-60"
             style={{ borderColor: BORDER, color: GREEN }}
           />
         </label>
@@ -94,27 +99,34 @@ export function DateOfBirthEditSheet({
           <p className="mt-3 text-[13px] font-semibold text-red-600">{t.dateOfBirthInvalid}</p>
         ) : null}
 
+        {error ? (
+          <p className="mt-3 text-[13px] font-semibold text-red-600" role="alert">
+            {error}
+          </p>
+        ) : null}
+
         <div className="mt-4 grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl border px-4 py-3 text-[14px] font-semibold text-gray-700"
+            disabled={saving}
+            className="rounded-2xl border px-4 py-3 text-[14px] font-semibold text-gray-700 disabled:opacity-60"
             style={{ borderColor: BORDER }}
           >
             {common.cancel}
           </button>
           <button
             type="button"
-            disabled={!canSave}
+            disabled={!canSave || saving}
             onClick={() => {
               const iso = normalizeDobToIso(draft);
               if (!iso) return;
-              onSave(iso);
+              void onSave(iso);
             }}
             className="rounded-2xl px-4 py-3 text-[14px] font-bold text-white disabled:opacity-60"
             style={{ backgroundColor: GREEN }}
           >
-            {common.save}
+            {saving ? t.saving : common.save}
           </button>
         </div>
       </div>

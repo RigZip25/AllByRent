@@ -77,6 +77,7 @@ type NotificationsScreenProps = {
   mode?: AppMode;
   onOpenRentals?: () => void;
   onOpenRental?: (bookingId: string) => void;
+  onBrowse?: () => void;
 };
 
 export function NotificationsScreen({
@@ -84,9 +85,11 @@ export function NotificationsScreen({
   mode: modeProp,
   onOpenRentals,
   onOpenRental,
+  onBrowse,
 }: NotificationsScreenProps) {
   const t = useMessages();
   const n = t.notifications;
+  const { systemUi } = t;
   const mode = modeProp ?? getAppMode();
   const auth = useAuth();
   const [tab, setTab] = useState<NotificationTab>("all");
@@ -113,6 +116,8 @@ export function NotificationsScreen({
   const [items, setItems] = useState<Notification[]>([]);
   const [localMessages, setLocalMessages] = useState<InAppNotification[]>(() => loadInAppNotifications());
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     const userId = auth.userId;
@@ -130,14 +135,20 @@ export function NotificationsScreen({
         listingId: item.listingId ?? null,
       }));
       setItems(local);
+      setLoadError(false);
       return;
     }
     let mounted = true;
     setLoading(true);
+    setLoadError(false);
     void fetchNotificationsRemote(userId)
       .then((data) => {
         if (!mounted) return;
         setItems(mergeWithLocalNotifications(data));
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setLoadError(true);
       })
       .finally(() => {
         if (!mounted) return;
@@ -146,7 +157,7 @@ export function NotificationsScreen({
     return () => {
       mounted = false;
     };
-  }, [auth.userId]);
+  }, [auth.userId, reloadToken]);
 
   const messageItems = useMemo(() => {
     if (tab !== "messages") return [];
@@ -189,7 +200,7 @@ export function NotificationsScreen({
     filteredItems.length > 0 ||
     messageItems.length > 0 ||
     (showUpdateInTab && (updateAvailable || updateJustCompleted));
-  const showEmptyState = !loading && !hasInboxItems;
+  const showEmptyState = !loading && !loadError && !hasInboxItems;
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -426,6 +437,23 @@ export function NotificationsScreen({
           </div>
         ) : null}
 
+        {loadError && !hasInboxItems ? (
+          <div className="mx-auto flex max-w-[340px] flex-col items-center py-8 text-center">
+            <p className="text-[18px] font-bold" style={{ color: GREEN }}>
+              {n.loadErrorTitle}
+            </p>
+            <p className="mt-2 text-[14px] leading-relaxed text-gray-500">{n.loadErrorBody}</p>
+            <button
+              type="button"
+              onClick={() => setReloadToken((x) => x + 1)}
+              className="mt-5 w-full rounded-xl py-3 text-[15px] font-bold text-white"
+              style={{ backgroundColor: GREEN }}
+            >
+              {systemUi.tryAgain}
+            </button>
+          </div>
+        ) : null}
+
         {showEmptyState ? (
           <div className="mx-auto flex max-w-[340px] flex-col items-center py-8 text-center">
             <div
@@ -441,6 +469,28 @@ export function NotificationsScreen({
             {"hint" in empty && empty.hint ? (
               <p className="mt-2 text-[13px] leading-relaxed text-gray-500">{empty.hint}</p>
             ) : null}
+            <div className="mt-5 flex w-full flex-col gap-2">
+              {onBrowse ? (
+                <button
+                  type="button"
+                  onClick={onBrowse}
+                  className="w-full rounded-xl py-3 text-[15px] font-bold text-white"
+                  style={{ backgroundColor: GREEN }}
+                >
+                  {n.emptyBrowseCta}
+                </button>
+              ) : null}
+              {onOpenRentals ? (
+                <button
+                  type="button"
+                  onClick={onOpenRentals}
+                  className="w-full rounded-xl border-2 py-3 text-[15px] font-bold"
+                  style={{ borderColor: GREEN, color: GREEN }}
+                >
+                  {n.emptyRentalsCta}
+                </button>
+              ) : null}
+            </div>
           </div>
         ) : null}
 

@@ -368,6 +368,10 @@ export type AppMessages = {
     newGarageBadge: string;
     proGarageBadge: string;
     loadingGarages: string;
+    loadErrorTitle: string;
+    loadErrorBody: string;
+    emptyNoLocationTitle: string;
+    emptyNoLocationBody: string;
     emptyFilteredTitle: string;
     emptyBlockTitle: string;
     emptyFilteredBody: (labels: string) => string;
@@ -760,6 +764,10 @@ export type AppMessages = {
     signInHint: string;
     emptyTitle: string;
     emptyBody: string;
+    emptyBrowseCta: string;
+    emptyRentalsCta: string;
+    syncing: string;
+    syncFailed: string;
     rental: string;
     buyGift: string;
     request: string;
@@ -1403,6 +1411,12 @@ export type AppMessages = {
       phoneCta: string;
       phoneRequiredPaid: string;
       phoneBlockPayouts: string;
+      couldNotCheckSellerSetup: string;
+      couldNotPrepareChecklist: string;
+      signInToPublish: string;
+      couldNotPublish: string;
+      signInFromProfileHint: string;
+      stripeConnectFailed: string;
     };
     success: {
       title: string;
@@ -2462,6 +2476,10 @@ export type AppMessages = {
     messagesSection: string;
     inbox: string;
     loading: string;
+    loadErrorTitle: string;
+    loadErrorBody: string;
+    emptyBrowseCta: string;
+    emptyRentalsCta: string;
     appUpdates: string;
     markAsRead: string;
     notification: string;
@@ -2640,6 +2658,8 @@ export type AppMessages = {
     emptyTitle: string;
     emptyBody: string;
     browseCta: string;
+    syncing: string;
+    syncFailed: string;
     listingFallback: string;
     removeAria: (title: string) => string;
     ratePerDay: (rate: string) => string;
@@ -2756,6 +2776,8 @@ export type AppMessages = {
       phoneVerifyDone: string;
       phoneRequiredForPayouts: string;
       phoneVerifyCta: string;
+      saveFailed: string;
+      saving: string;
     };
     coHosts: {
       title: string;
@@ -2829,6 +2851,8 @@ export type AppMessages = {
     publicProfile: {
       loading: string;
       notFound: string;
+      storePausedTitle: string;
+      storePausedBody: string;
       yourPublicProfile: string;
       settingsHint: string;
       openSettings: string;

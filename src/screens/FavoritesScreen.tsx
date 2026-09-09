@@ -89,13 +89,28 @@ export function FavoritesScreen({
   const auth = useAuth();
   const { favorites: copy, common } = useMessages();
   const [favoriteIds, setFavoriteIds] = useState(() => loadFavoriteListingIds());
+  const [syncing, setSyncing] = useState(false);
+  const [syncFailed, setSyncFailed] = useState(false);
 
   useEffect(() => {
-    if (!auth.userId) return;
+    if (!auth.userId) {
+      setSyncing(false);
+      setSyncFailed(false);
+      return;
+    }
     let mounted = true;
-    void syncFavoritesFromRemote(auth.userId).then((ids) => {
-      if (mounted) setFavoriteIds(ids);
-    });
+    setSyncing(true);
+    setSyncFailed(false);
+    void syncFavoritesFromRemote(auth.userId)
+      .then((ids) => {
+        if (mounted) setFavoriteIds(ids);
+      })
+      .catch(() => {
+        if (mounted) setSyncFailed(true);
+      })
+      .finally(() => {
+        if (mounted) setSyncing(false);
+      });
     return () => {
       mounted = false;
     };
@@ -143,7 +158,15 @@ export function FavoritesScreen({
       </header>
 
       <div className="screen-scroll flex-1 px-4 pb-4 pt-4">
-        {favorites.length === 0 ? (
+        {syncing ? (
+          <p className="mb-3 text-center text-[12px] text-gray-500">{copy.syncing}</p>
+        ) : null}
+        {syncFailed ? (
+          <p className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-[12px] text-amber-950">
+            {copy.syncFailed}
+          </p>
+        ) : null}
+        {favorites.length === 0 && !syncing ? (
           <div
             className="mx-auto mt-4 max-w-[300px] rounded-2xl border bg-white px-5 py-10 text-center"
             style={{ borderColor: BORDER }}

@@ -139,6 +139,8 @@ export function PersonalInfoScreen({
   const [editing, setEditing] = useState<EditField>(null);
   const [captureMode, setCaptureMode] = useState<"camera" | "library" | null>(null);
   const [authBusy, setAuthBusy] = useState(false);
+  const [fieldSaveError, setFieldSaveError] = useState<string | null>(null);
+  const [fieldSaving, setFieldSaving] = useState(false);
   const hasPhoto = hasAvatarPhoto((auth.userId ?? profile.id).trim() || profile.id);
   const displayNameLabel = getProfileDisplayLabel(profile.displayName);
   const [stripeStatus, setStripeStatus] = useState<{
@@ -273,31 +275,61 @@ export function PersonalInfoScreen({
     setConnectReturnFlag(null);
   };
 
-  const saveName = (nextName: string) => {
+  const saveName = async (nextName: string) => {
     if (!nextName) return;
+    setFieldSaveError(null);
+    if (auth.userId) {
+      setFieldSaving(true);
+      try {
+        await updateRemoteProfile(auth.userId, { display_name: nextName });
+      } catch {
+        setFieldSaveError(t.saveFailed);
+        setFieldSaving(false);
+        return;
+      }
+      setFieldSaving(false);
+    }
     const next = updateProfileFields({ displayName: nextName });
     setProfile(refreshProfileStats(next, auth.userId));
     setEditing(null);
-    if (auth.userId) {
-      void updateRemoteProfile(auth.userId, { display_name: nextName }).catch(() => undefined);
-    }
   };
 
-  const saveDob = (raw: string) => {
+  const saveDob = async (raw: string) => {
     const value = normalizeDobToIso(raw);
     if (!value) return;
+    setFieldSaveError(null);
+    if (auth.userId) {
+      setFieldSaving(true);
+      try {
+        await updateRemoteProfile(auth.userId, { date_of_birth: value });
+      } catch {
+        setFieldSaveError(t.saveFailed);
+        setFieldSaving(false);
+        return;
+      }
+      setFieldSaving(false);
+    }
     const next = updateProfileFields({ dateOfBirth: value });
     setProfile(refreshProfileStats(next, auth.userId));
     setEditing(null);
-    if (auth.userId) {
-      void updateRemoteProfile(auth.userId, { date_of_birth: value }).catch(() => undefined);
-    }
   };
 
-  const savePhone = (raw: string) => {
+  const savePhone = async (raw: string) => {
     const formatted = formatUsPhoneInput(raw.trim()) || raw.trim();
     if (!formatted) return;
     const display = formatUsPhoneDisplay(formatted) || phoneDigitsForDisplay(formatted) || formatted;
+    setFieldSaveError(null);
+    if (auth.userId) {
+      setFieldSaving(true);
+      try {
+        await updateRemoteProfile(auth.userId, { phone: display });
+      } catch {
+        setFieldSaveError(t.saveFailed);
+        setFieldSaving(false);
+        return;
+      }
+      setFieldSaving(false);
+    }
     // Contact number on file ≠ SMS-verified; never imply a verified badge from this path.
     const next = updateProfileFields({
       phone: display,
@@ -308,9 +340,6 @@ export function PersonalInfoScreen({
     });
     setProfile(refreshProfileStats(next, auth.userId));
     setEditing(null);
-    if (auth.userId) {
-      void updateRemoteProfile(auth.userId, { phone: display }).catch(() => undefined);
-    }
   };
 
   const openPayouts = () => {
@@ -580,7 +609,12 @@ export function PersonalInfoScreen({
         label={t.nameLabel}
         value={profile.displayName}
         placeholder={t.namePlaceholder}
-        onClose={() => setEditing(null)}
+        error={fieldSaveError}
+        saving={fieldSaving}
+        onClose={() => {
+          setFieldSaveError(null);
+          setEditing(null);
+        }}
         onSave={saveName}
       />
       <ProfileFieldEditSheet
@@ -590,13 +624,23 @@ export function PersonalInfoScreen({
         value={profile.phone}
         inputType="tel"
         placeholder={t.phonePlaceholder}
-        onClose={() => setEditing(null)}
+        error={fieldSaveError}
+        saving={fieldSaving}
+        onClose={() => {
+          setFieldSaveError(null);
+          setEditing(null);
+        }}
         onSave={savePhone}
       />
       <DateOfBirthEditSheet
         open={editing === "dob"}
         value={profile.dateOfBirth || ""}
-        onClose={() => setEditing(null)}
+        error={fieldSaveError}
+        saving={fieldSaving}
+        onClose={() => {
+          setFieldSaveError(null);
+          setEditing(null);
+        }}
         onSave={saveDob}
       />
       <ProfilePhotoCapture

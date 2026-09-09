@@ -204,6 +204,12 @@ export const es: AppMessages = {
     newGarageBadge: "Nuevo",
     proGarageBadge: "Pro",
     loadingGarages: "Cargando cerca...",
+    loadErrorTitle: "No se pudieron cargar los garajes cercanos",
+    loadErrorBody:
+      "Revisa tu conexión e inténtalo de nuevo. Si hay resultados guardados, siguen en pantalla.",
+    emptyNoLocationTitle: "Dinos dónde estás",
+    emptyNoLocationBody:
+      "Elige tu barrio o ciudad para mostrar garajes cerca de ti — no todo el mundo.",
     emptyFilteredTitle: "Sin resultados todavía",
     emptyBlockTitle: "Aquí aún hay poca oferta",
     emptyFilteredBody: (labels) =>
@@ -622,6 +628,10 @@ export const es: AppMessages = {
     emptyTitle: "Todavía no hay conversaciones",
     emptyBody:
       "Abre un alquiler activo y toca Mensaje, o escribe a un vendedor desde un anuncio — las conversaciones aparecerán aquí.",
+    emptyBrowseCta: "Explorar cerca",
+    emptyRentalsCta: "Abrir alquileres",
+    syncing: "Sincronizando conversaciones…",
+    syncFailed: "No se pudieron sincronizar los mensajes. Mostramos lo que hay en este dispositivo.",
     rental: "Alquiler",
     buyGift: "Comprar / regalo",
     request: "Solicitud",
@@ -1476,6 +1486,10 @@ export const es: AppMessages = {
     messagesSection: "Mensajes",
     inbox: "Bandeja de entrada",
     loading: "Cargando...",
+    loadErrorTitle: "No se pudieron cargar las notificaciones",
+    loadErrorBody: "Revisa tu conexión e inténtalo de nuevo.",
+    emptyBrowseCta: "Explorar cerca",
+    emptyRentalsCta: "Abrir alquileres",
     appUpdates: "Actualizaciones de la app",
     markAsRead: "Marcar como leído",
     notification: "Notificación",
@@ -5670,6 +5684,12 @@ export const es: AppMessages = {
         "Los anuncios de pago requieren un teléfono verificado antes de ir a la estantería. Los anuncios gratuitos (regalo) pueden guardarse sin este paso.",
       phoneBlockPayouts:
         "Verifica tu teléfono antes de conectar finanzas. Así protegemos los cobros para ti y para tus vecinos.",
+      couldNotCheckSellerSetup: "No se pudo comprobar la configuración de vendedor.",
+      couldNotPrepareChecklist: "No se pudo preparar la lista para publicar.",
+      signInToPublish: "Inicia sesión para publicar tu anuncio.",
+      couldNotPublish: "No se pudo publicar tu anuncio.",
+      signInFromProfileHint: "Inicia sesión en Más → Perfil y vuelve aquí.",
+      stripeConnectFailed: "Falló Stripe Connect.",
     },
     success: {
       title: "¡En tu estantería!",
@@ -6309,6 +6329,8 @@ export const es: AppMessages = {
     emptyTitle: "Todavía no hay favoritos",
     emptyBody: "Toca el corazón de un anuncio para guardarlo aquí.",
     browseCta: "Explorar cerca",
+    syncing: "Sincronizando favoritos…",
+    syncFailed: "No se pudieron sincronizar los favoritos. Mostramos lo que hay en este dispositivo.",
     listingFallback: "Anuncio",
     removeAria: (title) => `Quitar ${title} de favoritos`,
     ratePerDay: (rate) => `${rate} €/día`,
@@ -6582,6 +6604,8 @@ export const es: AppMessages = {
       phoneRequiredForPayouts:
         "Verifica tu teléfono por SMS antes de conectar cobros o publicar anuncios de pago.",
       phoneVerifyCta: "Verificar teléfono",
+      saveFailed: "No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.",
+      saving: "Guardando…",
     },
     coHosts: {
       title: "Coanfitriones",
@@ -6664,6 +6688,9 @@ export const es: AppMessages = {
     publicProfile: {
       loading: "Cargando perfil...",
       notFound: "Perfil no encontrado.",
+      storePausedTitle: "Tienda en pausa",
+      storePausedBody:
+        "El garaje de este vecino está en pausa ahora — su perfil y estantería están ocultos hasta que lo reabra.",
       yourPublicProfile: "Tu perfil público",
       settingsHint:
         "Añade tu foto, correo y nombre en los ajustes del Perfil: los vecinos solo ven lo que decides compartir públicamente.",
