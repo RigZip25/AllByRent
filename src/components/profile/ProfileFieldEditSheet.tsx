@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { formatUsPhoneDisplay, formatUsPhoneInput, normalizeUsPhoneForStorage } from "../../lib/usPhoneFormat";
+import { useMessages } from "../../lib/i18n/react";
 
 const GREEN = "#0D5C3A";
 const BORDER = "#E8E6E0";
@@ -12,6 +13,8 @@ export function ProfileFieldEditSheet({
   value,
   inputType = "text",
   placeholder,
+  error,
+  saving,
   onClose,
   onSave,
 }: {
@@ -21,9 +24,12 @@ export function ProfileFieldEditSheet({
   value: string;
   inputType?: "text" | "tel";
   placeholder?: string;
+  error?: string | null;
+  saving?: boolean;
   onClose: () => void;
-  onSave: (next: string) => void;
+  onSave: (next: string) => void | Promise<void>;
 }) {
+  const { common, profileDeep } = useMessages();
   const [draft, setDraft] = useState(value);
 
   useEffect(() => {
@@ -39,7 +45,7 @@ export function ProfileFieldEditSheet({
   return (
     <div
       className="fixed inset-0 z-[95] flex items-end justify-center bg-black/45 p-4"
-      onClick={onClose}
+      onClick={saving ? undefined : onClose}
     >
       <div
         role="dialog"
@@ -52,7 +58,7 @@ export function ProfileFieldEditSheet({
           <h2 className="text-[18px] font-extrabold" style={{ color: GREEN }}>
             {title}
           </h2>
-          <button type="button" onClick={onClose} aria-label="Close">
+          <button type="button" onClick={onClose} aria-label={common.close} disabled={saving}>
             <X className="h-5 w-5 text-red-600" />
           </button>
         </div>
@@ -69,30 +75,38 @@ export function ProfileFieldEditSheet({
             }
             placeholder={placeholder}
             autoFocus
-            className="mt-2 w-full rounded-2xl border bg-white px-3 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/20"
+            disabled={saving}
+            className="mt-2 w-full rounded-2xl border bg-white px-3 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0D5C3A]/20 disabled:opacity-60"
             style={{ borderColor: BORDER }}
           />
         </label>
+
+        {error ? (
+          <p className="mt-3 text-[13px] font-semibold text-red-600" role="alert">
+            {error}
+          </p>
+        ) : null}
 
         <div className="mt-4 grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl border px-4 py-3 text-[14px] font-semibold text-gray-700"
+            disabled={saving}
+            className="rounded-2xl border px-4 py-3 text-[14px] font-semibold text-gray-700 disabled:opacity-60"
             style={{ borderColor: BORDER }}
           >
-            Cancel
+            {common.cancel}
           </button>
           <button
             type="button"
-            disabled={!canSave}
-            onClick={() =>
-              onSave(inputType === "tel" ? normalizeUsPhoneForStorage(trimmed) : trimmed)
-            }
+            disabled={!canSave || saving}
+            onClick={() => {
+              void onSave(inputType === "tel" ? normalizeUsPhoneForStorage(trimmed) : trimmed);
+            }}
             className="rounded-2xl px-4 py-3 text-[14px] font-bold text-white disabled:opacity-60"
             style={{ backgroundColor: GREEN }}
           >
-            Save
+            {saving ? profileDeep.personalInfo.saving : common.save}
           </button>
         </div>
       </div>

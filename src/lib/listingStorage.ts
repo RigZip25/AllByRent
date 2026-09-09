@@ -1482,6 +1482,7 @@ export async function fetchActiveListingsForCityRemote(
         await filterNeighborVisible((data as SupabaseListingRow[]).map(rowToDraft)),
       );
     }
+    // Radius RPC failed — fall through to city query, then local cache.
   }
 
   const query = supabase
@@ -1495,8 +1496,15 @@ export async function fetchActiveListingsForCityRemote(
   const { data, error } = cityNorm
     ? await query.or(`city_key.eq.${cityKey},city.ilike.%${cityNorm}%`)
     : await query.limit(0); // G9: refuse worldwide without a center
-  if (error || !data) {
-    return filterNeighborVisible(loadPublishedListings().filter(isListingOnShelf));
+  if (error) {
+    const local = await filterNeighborVisible(loadPublishedListings().filter(isListingOnShelf));
+    if (local.length > 0) return local;
+    throw error;
+  }
+  if (!data) {
+    const local = await filterNeighborVisible(loadPublishedListings().filter(isListingOnShelf));
+    if (local.length > 0) return local;
+    throw new Error("Could not load nearby listings");
   }
   return interleaveBoosted(
     await filterNeighborVisible((data as SupabaseListingRow[]).map(rowToDraft)),

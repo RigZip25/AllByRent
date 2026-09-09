@@ -210,6 +210,12 @@ export const cs: AppMessages = {
     newGarageBadge: "Nové",
     proGarageBadge: "Pro",
     loadingGarages: "Načítám okolí...",
+    loadErrorTitle: "Nepodařilo se načíst garáže poblíž",
+    loadErrorBody:
+      "Zkontroluj připojení a zkus to znovu. Uložené výsledky zůstanou na obrazovce, pokud je máme.",
+    emptyNoLocationTitle: "Řekni nám, kde jsi",
+    emptyNoLocationBody:
+      "Nastav čtvrť nebo město, abychom ukázali garáže poblíž — ne celý svět.",
     emptyFilteredTitle: "Nic zatím nesedí",
     emptyBlockTitle: "Tady je zatím klid",
     emptyFilteredBody: (labels) =>
@@ -646,6 +652,10 @@ export const cs: AppMessages = {
     emptyTitle: "Zatím žádné konverzace",
     emptyBody:
       "Otevři aktivní půjčku a klepni na Zpráva, nebo napiš prodejci z nabídky — vlákna se objeví tady.",
+    emptyBrowseCta: "Procházet poblíž",
+    emptyRentalsCta: "Otevřít půjčky",
+    syncing: "Synchronizuji konverzace…",
+    syncFailed: "Zprávy se nepodařilo synchronizovat. Ukazujeme, co je na tomto zařízení.",
     rental: "Půjčka",
     buyGift: "Nákup / dar",
     request: "Žádost",
@@ -1494,6 +1504,10 @@ export const cs: AppMessages = {
     messagesSection: "Zprávy",
     inbox: "Doručené",
     loading: "Načítám...",
+    loadErrorTitle: "Nepodařilo se načíst oznámení",
+    loadErrorBody: "Zkontroluj připojení a zkus to znovu.",
+    emptyBrowseCta: "Procházet poblíž",
+    emptyRentalsCta: "Otevřít půjčky",
     appUpdates: "Aktualizace aplikace",
     markAsRead: "Označit jako přečtené",
     notification: "Oznámení",
@@ -5688,6 +5702,12 @@ export const cs: AppMessages = {
         "Placené inzeráty vyžadují ověřený telefon před uložením na polici. Bezplatné (dar) inzeráty lze uložit bez tohoto kroku.",
       phoneBlockPayouts:
         "Před připojením financí ověřte telefon. Chrání to výplaty pro vás i sousedy.",
+      couldNotCheckSellerSetup: "Nepodařilo se zkontrolovat nastavení prodejce.",
+      couldNotPrepareChecklist: "Nepodařilo se připravit kontrolní seznam pro publikaci.",
+      signInToPublish: "Přihlas se, abys mohl zveřejnit nabídku.",
+      couldNotPublish: "Nabídku se nepodařilo zveřejnit.",
+      signInFromProfileHint: "Přihlas se ve Více → Profil a vrať se sem.",
+      stripeConnectFailed: "Stripe Connect selhal.",
     },
     success: {
       title: "Na polici!",
@@ -6323,6 +6343,8 @@ export const cs: AppMessages = {
     emptyTitle: "Zatím žádné oblíbené",
     emptyBody: "Klepni na srdce u nabídky a ulož ji sem.",
     browseCta: "Procházet poblíž",
+    syncing: "Synchronizuji oblíbené…",
+    syncFailed: "Oblíbené se nepodařilo synchronizovat. Ukazujeme, co je na tomto zařízení.",
     listingFallback: "Nabídka",
     removeAria: (title) => `Odebrat ${title} z oblíbených`,
     ratePerDay: (rate) => `${rate} Kč/den`,
@@ -6596,6 +6618,8 @@ export const cs: AppMessages = {
       phoneRequiredForPayouts:
         "Před připojením výplat nebo zveřejněním placených inzerátů ověřte telefon SMS kódem.",
       phoneVerifyCta: "Ověřit telefon",
+      saveFailed: "Nepodařilo se uložit. Zkontroluj připojení a zkus to znovu.",
+      saving: "Ukládám…",
     },
     coHosts: {
       title: "Spoluhostitelé",
@@ -6678,6 +6702,9 @@ export const cs: AppMessages = {
     publicProfile: {
       loading: "Načítám profil...",
       notFound: "Profil nenalezen.",
+      storePausedTitle: "Obchod na pauzi",
+      storePausedBody:
+        "Garáž tohoto souseda je právě na pauzi — profil a police jsou skryté, dokud je znovu neotevře.",
       yourPublicProfile: "Tvůj veřejný profil",
       settingsHint:
         "Fotku, e-mail a jméno doplníte v nastavení Profilu — sousedé uvidí jen to, co zveřejníte.",

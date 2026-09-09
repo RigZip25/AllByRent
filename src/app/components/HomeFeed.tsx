@@ -100,7 +100,7 @@ export function HomeFeed({
   onRoleModeChange,
 }: HomeFeedProps) {
   const messages = useMessages();
-  const { home, common, whereAreYouManual, catalog } = messages;
+  const { home, common, whereAreYouManual, catalog, systemUi } = messages;
   const [modeChip, setModeChip] = useState<ModeChip>(() => loadHomeFeedMode());
   // One shelf at a time: picking another category replaces the pick instead of piling up.
   const [focus, setFocus] = useState<BrowseInterest | null>(
@@ -112,6 +112,8 @@ export function HomeFeed({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
   const [listings, setListings] = useState<Awaited<ReturnType<typeof fetchActiveListingsForCityRemote>>>([]);
   const [hostMeta, setHostMeta] = useState<Record<string, HostGarageMeta>>({});
   const [clusterRadiusMi, setClusterRadiusState] = useState(() => getClusterRadiusMi());
@@ -146,6 +148,7 @@ export function HomeFeed({
   useEffect(() => {
     let mounted = true;
     setLoading(true);
+    setLoadError(false);
     void fetchActiveListingsForCityRemote(city, {
       radiusMi: clusterRadiusMi,
     })
@@ -182,6 +185,10 @@ export function HomeFeed({
         }
         setHostMeta(merged);
       })
+      .catch(() => {
+        if (!mounted) return;
+        setLoadError(true);
+      })
       .finally(() => {
         if (mounted) setLoading(false);
       });
@@ -189,7 +196,7 @@ export function HomeFeed({
     return () => {
       mounted = false;
     };
-  }, [city, clusterRadiusMi, locationEpoch]);
+  }, [city, clusterRadiusMi, locationEpoch, reloadToken]);
 
   const filteredListings = useMemo(
     () =>
@@ -477,6 +484,20 @@ export function HomeFeed({
   );
 
   const emptyIsFiltered = Boolean(focus) || modeChip !== "all";
+  const showInitialSkeleton = loading && garages.length === 0 && !loadError;
+  const showLoadError = !loading && loadError && garages.length === 0;
+  const showEmptyState = !loading && !loadError && garages.length === 0;
+
+  const emptyTitle = needsLocation
+    ? home.emptyNoLocationTitle
+    : emptyIsFiltered
+      ? home.emptyFilteredTitle
+      : home.emptyBlockTitle;
+  const emptyBody = needsLocation
+    ? home.emptyNoLocationBody
+    : emptyIsFiltered && interests.length > 0
+      ? home.emptyFilteredBody(interestsSummary)
+      : home.emptyBlockBody;
 
   return (
     <div className="screen flex flex-col overflow-hidden bg-[#F0F4F2]">
@@ -749,73 +770,124 @@ export function HomeFeed({
           </div>
         ) : null}
 
-        {loading && garages.length === 0 ? (
-          <p className="py-10 text-center text-[14px] text-gray-500">{home.loadingGarages}</p>
+        {showInitialSkeleton ? (
+          <ul className="space-y-3 pb-2" aria-busy="true" aria-label={home.loadingGarages}>
+            {[0, 1, 2].map((i) => (
+              <li
+                key={`skel-${i}`}
+                className="animate-pulse rounded-2xl border bg-white p-4"
+                style={{ borderColor: BORDER }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-xl bg-gray-200" />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="h-3 w-2/3 rounded bg-gray-200" />
+                    <div className="h-3 w-1/2 rounded bg-gray-100" />
+                  </div>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <div className="h-14 w-14 rounded-xl bg-gray-100" />
+                  <div className="h-14 w-14 rounded-xl bg-gray-100" />
+                </div>
+              </li>
+            ))}
+          </ul>
         ) : null}
 
-        {!loading && garages.length === 0 ? (
+        {loading && garages.length > 0 ? (
+          <p className="mb-2 text-center text-[12px] text-gray-500">{home.loadingGarages}</p>
+        ) : null}
+
+        {showLoadError ? (
           <div className="mx-auto mt-6 max-w-[340px] text-center">
             <MrRentano size={56} className="mx-auto" />
             <p className="mt-3 text-[18px] font-bold" style={{ color: GREEN_DARK }}>
-              {emptyIsFiltered ? home.emptyFilteredTitle : home.emptyBlockTitle}
+              {home.loadErrorTitle}
             </p>
-            <p className="mt-2 text-[14px] leading-relaxed text-gray-600">
-              {mascotSays(
-                interests.length > 0
-                  ? home.emptyFilteredBody(interestsSummary)
-                  : home.emptyBlockBody,
-              )}
-            </p>
-            {interests.length > 0 ? (
-              <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-                {interests.map((interest) => (
-                  <span
-                    key={browseInterestKey(interest)}
-                    className="rounded-full border bg-white px-2.5 py-1 text-[11px] font-semibold text-gray-700"
-                    style={{ borderColor: BORDER }}
-                  >
-                    {interestLabel(interest)}
-                  </span>
-                ))}
-              </div>
-            ) : null}
+            <p className="mt-2 text-[14px] leading-relaxed text-gray-600">{home.loadErrorBody}</p>
             <button
               type="button"
-              onClick={postRequestFromFilters}
+              onClick={() => setReloadToken((n) => n + 1)}
               className="mt-5 w-full rounded-xl py-3.5 text-[15px] font-bold text-white"
               style={{ backgroundColor: GREEN_DARK }}
             >
-              {home.postRequest}
+              {systemUi.tryAgain}
             </button>
-            <button
-              type="button"
-              onClick={() => void shareLookingFor()}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border-2 py-3 text-[15px] font-bold"
-              style={{ borderColor: GREEN_DARK, color: GREEN_DARK }}
-            >
-              <Share2 className="h-4 w-4" />
-              {home.shareNeighbors}
-            </button>
-            {shareStatus ? (
-              <p className="mt-2 text-[12px] font-medium text-gray-500">{shareStatus}</p>
-            ) : null}
-            <button
-              type="button"
-              onClick={onStockGarage}
-              className="mt-3 w-full rounded-xl border-2 py-3 text-[15px] font-bold"
-              style={{ borderColor: BORDER, color: "#555" }}
-            >
-              {home.stockGarage}
-            </button>
-            {activeFilterCount > 0 ? (
+          </div>
+        ) : null}
+
+        {showEmptyState ? (
+          <div className="mx-auto mt-6 max-w-[340px] text-center">
+            <MrRentano size={56} className="mx-auto" />
+            <p className="mt-3 text-[18px] font-bold" style={{ color: GREEN_DARK }}>
+              {emptyTitle}
+            </p>
+            <p className="mt-2 text-[14px] leading-relaxed text-gray-600">
+              {mascotSays(emptyBody)}
+            </p>
+            {needsLocation ? (
               <button
                 type="button"
-                onClick={clearFilters}
-                className="mt-3 min-h-[44px] touch-manipulation px-4 text-[14px] font-semibold text-gray-500 underline"
+                onClick={() => openLocationSheet("pick")}
+                className="mt-5 w-full rounded-xl py-3.5 text-[15px] font-bold text-white"
+                style={{ backgroundColor: GREEN_DARK }}
               >
-                {home.clearFilters}
+                {home.setBlock}
               </button>
-            ) : null}
+            ) : (
+              <>
+                {interests.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+                    {interests.map((interest) => (
+                      <span
+                        key={browseInterestKey(interest)}
+                        className="rounded-full border bg-white px-2.5 py-1 text-[11px] font-semibold text-gray-700"
+                        style={{ borderColor: BORDER }}
+                      >
+                        {interestLabel(interest)}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={postRequestFromFilters}
+                  className="mt-5 w-full rounded-xl py-3.5 text-[15px] font-bold text-white"
+                  style={{ backgroundColor: GREEN_DARK }}
+                >
+                  {home.postRequest}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void shareLookingFor()}
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border-2 py-3 text-[15px] font-bold"
+                  style={{ borderColor: GREEN_DARK, color: GREEN_DARK }}
+                >
+                  <Share2 className="h-4 w-4" />
+                  {home.shareNeighbors}
+                </button>
+                {shareStatus ? (
+                  <p className="mt-2 text-[12px] font-medium text-gray-500">{shareStatus}</p>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={onStockGarage}
+                  className="mt-3 w-full rounded-xl border-2 py-3 text-[15px] font-bold"
+                  style={{ borderColor: BORDER, color: "#555" }}
+                >
+                  {home.stockGarage}
+                </button>
+                {activeFilterCount > 0 ? (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="mt-3 min-h-[44px] touch-manipulation px-4 text-[14px] font-semibold text-gray-500 underline"
+                  >
+                    {home.clearFilters}
+                  </button>
+                ) : null}
+              </>
+            )}
           </div>
         ) : null}
 
@@ -832,7 +904,7 @@ export function HomeFeed({
           </ul>
         ) : null}
 
-        {!loading && garages.length > 0 ? (
+        {!loading && !loadError && garages.length > 0 ? (
           <div className="mt-4 rounded-2xl border bg-white px-4 py-3.5 text-center" style={{ borderColor: BORDER }}>
             <p className="text-[14px] font-semibold text-gray-700">{home.cantFind}</p>
             <p className="mt-1 text-[13px] text-gray-500">

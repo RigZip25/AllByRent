@@ -240,6 +240,22 @@ export function PublicProfileScreen({
     );
   }
 
+  if (!isSelf && storeLiveReady && !neighborStoreOpen) {
+    return (
+      <div className="screen flex flex-col bg-[#F0F4F2] p-4">
+        <button type="button" onClick={onBack} className="text-[15px] font-semibold" style={{ color: GREEN }}>
+          {common.back}
+        </button>
+        <div className="mx-auto mt-10 max-w-[320px] text-center">
+          <p className="text-[18px] font-bold" style={{ color: GREEN }}>
+            {t.storePausedTitle}
+          </p>
+          <p className="mt-2 text-[14px] leading-relaxed text-gray-600">{t.storePausedBody}</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!profile) {
     return (
       <div className="screen flex flex-col bg-[#F0F4F2] p-4">

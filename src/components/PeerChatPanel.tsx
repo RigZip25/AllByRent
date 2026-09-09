@@ -15,6 +15,7 @@ import {
   updateChatMessageLocal,
   type ChatMessage,
 } from "../lib/messagesStorage";
+import { isSupabaseConfigured } from "../lib/supabaseClient";
 import { MASCOT_NAME } from "../lib/brand";
 import { ReportSheet } from "./moderation/ReportSheet";
 import { isUserBlocked, onBlocksChanged, unblockUser } from "../lib/moderation/blockStorage";
@@ -209,9 +210,15 @@ export function PeerChatPanel({
           };
           appendChatMessageLocal(confirmed);
           setMessages(loadChatMessagesLocal(threadKey));
-        } else {
+        } else if (!isSupabaseConfigured()) {
+          // Local-only mode — keep the bubble without a pending spinner.
           updateChatMessageLocal(threadKey, clientId, { sendStatus: undefined });
           setMessages(loadChatMessagesLocal(threadKey));
+        } else {
+          updateChatMessageLocal(threadKey, clientId, { sendStatus: "failed" });
+          setMessages(loadChatMessagesLocal(threadKey));
+          setText(body);
+          setGateMessage(peerChat.sendFailed);
         }
       } catch {
         updateChatMessageLocal(threadKey, clientId, { sendStatus: "failed" });

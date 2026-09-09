@@ -432,14 +432,14 @@ export const ListingWizard = forwardRef<
       return status;
     } catch (error) {
       setGoPublicError(
-        error instanceof Error ? error.message : "Could not check seller setup.",
+        error instanceof Error ? error.message : t.listing.goPublic.couldNotCheckSellerSetup,
       );
       return null;
     } finally {
       setGoPublicLoading(false);
       setGoPublicBusy(null);
     }
-  }, [auth.userId, draft.modes, draft.pricing]);
+  }, [auth.userId, draft.modes, draft.pricing, t.listing.goPublic.couldNotCheckSellerSetup]);
 
   useEffect(() => {
     if (phase !== "goPublic") return;
@@ -872,7 +872,7 @@ export const ListingWizard = forwardRef<
       } catch (error) {
         setIsPublishing(false);
         setGoPublicError(
-          error instanceof Error ? error.message : "Could not prepare go-public checklist.",
+          error instanceof Error ? error.message : t.listing.goPublic.couldNotPrepareChecklist,
         );
         setPhase("goPublic");
       }
@@ -894,7 +894,7 @@ export const ListingWizard = forwardRef<
           setGoPublicError(
             status.requiresPhone && !status.phoneVerified
               ? t.listing.goPublic.phoneRequiredPaid
-              : "Sign in to publish your listing.",
+              : t.listing.goPublic.signInToPublish,
           );
           setIsPublishing(false);
           return;
@@ -939,7 +939,7 @@ export const ListingWizard = forwardRef<
         setIsPublishing(false);
         setGoPublicBusy(null);
         setGoPublicError(
-          error instanceof Error ? error.message : "Could not publish your listing.",
+          error instanceof Error ? error.message : t.listing.goPublic.couldNotPublish,
         );
       }
     })();
@@ -952,7 +952,7 @@ export const ListingWizard = forwardRef<
         onRequireAuth(saved.id);
         return;
       }
-      setGoPublicError("Sign in from More → Profile, then return here.");
+      setGoPublicError(t.listing.goPublic.signInFromProfileHint);
     })();
   };
 
@@ -992,7 +992,7 @@ export const ListingWizard = forwardRef<
           window.location.assign(result.url);
         }
       } catch (error) {
-        setGoPublicError(error instanceof Error ? error.message : "Stripe Connect failed.");
+        setGoPublicError(error instanceof Error ? error.message : t.listing.goPublic.stripeConnectFailed);
         setGoPublicErrorCode(null);
       } finally {
         setGoPublicBusy(null);

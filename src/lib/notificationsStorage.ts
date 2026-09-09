@@ -169,7 +169,8 @@ export async function fetchNotificationsRemote(recipientId: string): Promise<Not
     .eq("recipient_id", recipientId)
     .order("created_at", { ascending: false })
     .limit(50);
-  if (error || !data) return [];
+  if (error) throw error;
+  if (!data) return [];
   return withoutBlocked(
     (data as unknown as Array<{
       id: string;
