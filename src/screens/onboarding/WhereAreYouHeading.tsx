@@ -141,7 +141,11 @@ export function WhereAreYouHeading({ onBack, onContinue, onSkip }: WhereAreYouHe
 
   const handleContinue = () => {
     if (!selectedLocation) return;
-    setTripDestination(selectedLocation.label);
+    setTripDestination({
+      displayName: selectedLocation.label,
+      lat: selectedLocation.lat,
+      lng: selectedLocation.lng,
+    });
     onContinue(selectedLocation.label);
   };
 

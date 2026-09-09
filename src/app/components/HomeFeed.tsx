@@ -146,9 +146,9 @@ export function HomeFeed({
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    // Default radius stays city-scoped; wider radii pull a broader shelf until geo filter lands.
-    const fetchCity = clusterRadiusMi > CLUSTER_RADIUS_DEFAULT_MI ? "" : city;
-    void fetchActiveListingsForCityRemote(fetchCity)
+    void fetchActiveListingsForCityRemote(city, {
+      radiusMi: clusterRadiusMi,
+    })
       .then(async (list) => {
         if (!mounted) return;
         const browsable = list.filter((l) => isListingBrowsable(l));

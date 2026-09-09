@@ -82,7 +82,11 @@ import {
   type ExtensionQuote,
 } from "../../lib/rentalExtensionApi";
 import { addDaysIso } from "../../lib/availabilityBusy";
-import { getHomeLocation, getPublishedListingById } from "../../lib/listingStorage";
+import {
+  fetchListingAccessInstructions,
+  getHomeLocation,
+  getPublishedListingById,
+} from "../../lib/listingStorage";
 import {
   listingRequiresCoiHostConfirm,
   listingRequiresInsuranceProof,
@@ -328,11 +332,27 @@ export function ActiveRental({
     }
     return null;
   }, [booking]);
+  const [accessInstructions, setAccessInstructions] = useState<string | null>(null);
   const resolvedContactlessInstructions = contactlessMode
     ? booking?.contactlessInstructions?.trim() ||
+      accessInstructions?.trim() ||
       publishedListing?.handoff?.contactlessInstructions?.trim() ||
       undefined
     : undefined;
+
+  useEffect(() => {
+    if (!contactlessMode || !booking?.listingId) {
+      setAccessInstructions(null);
+      return;
+    }
+    let mounted = true;
+    void fetchListingAccessInstructions(booking.listingId).then((value) => {
+      if (mounted) setAccessInstructions(value);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [contactlessMode, booking?.listingId]);
 
   const insuranceMedia = useMediaUrl(booking?.insuranceProofMedia ?? null);
   // The proof lives in a private bucket: the host has no copy on this device

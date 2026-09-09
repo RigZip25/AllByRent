@@ -687,8 +687,8 @@ export async function searchPlaces(
     if (merged.length > 0) return merged.slice(0, 12);
 
     return [];
-  } catch {
-    return [];
+  } catch (error) {
+    throw error instanceof Error ? error : new Error("Places search failed");
   }
 }
 
