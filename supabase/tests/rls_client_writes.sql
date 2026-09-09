@@ -34,7 +34,9 @@ do $$
 declare
   blocked boolean;
 begin
-  -- R11: a booking may not name a host who does not own the listing.
+  -- Q8 / R11: clients cannot insert rentals (owner mismatch or otherwise).
+  -- Migration 068 dropped the participant INSERT policy; the create API inserts
+  -- as the service role after quoting the total from the listing.
   set local role authenticated;
   set local request.jwt.claim.sub = '22222222-2222-4222-8222-222222222222';
 
@@ -53,9 +55,26 @@ begin
     blocked := true;
   end;
   if not blocked then
-    raise exception 'R11: a renter could name themselves host of someone else''s listing';
+    raise exception 'Q8: a renter could still insert a rental row';
   end if;
 
+  blocked := false;
+  begin
+    insert into public.rentals (id, listing_id, owner_id, renter_id, start_date, end_date)
+    values (
+      'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+      'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      '11111111-1111-4111-8111-111111111111',
+      '22222222-2222-4222-8222-222222222222',
+      current_date,
+      current_date + 1
+    );
+  exception when others then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'Q8: a legitimate-looking client insert still reached rentals';
+  end if;
   -- R8: a bid may not be filed under another account's id.
   blocked := false;
   begin

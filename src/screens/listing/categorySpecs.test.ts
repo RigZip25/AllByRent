@@ -66,6 +66,7 @@ const GATE_TOKENS = parseGateTokens();
 const NUMERIC_HINTS: Record<string, string> = {
   minRiderAge: "16",
   wheelCount: "4",
+  year: "2018",
 };
 
 function futureDate(): string {
@@ -174,6 +175,31 @@ describe("category specs", () => {
     for (const { category, subcategory } of withRequired) {
       expect(areCategorySpecsValid(category, subcategory, {}, { rent: true })).toBe(false);
     }
+  });
+
+  it("rejects a manufacture year outside 1950…currentYear+1", () => {
+    const modes = { rent: true } as SpecModeContext;
+    const base = {
+      make: "Toyota",
+      model: "Camry",
+      color: "black",
+      transmission: "automatic",
+      fuelType: "gasoline",
+      vehicleWeightLbs: "3200",
+      insuranceMinLiability: "liability_25_50",
+      insuranceMaxDeductible: "deductible_500",
+    };
+    expect(areCategorySpecsValid("Vehicles", "Cars", { ...base, year: "1" }, modes)).toBe(false);
+    expect(areCategorySpecsValid("Vehicles", "Cars", { ...base, year: "1899" }, modes)).toBe(false);
+    expect(
+      areCategorySpecsValid(
+        "Vehicles",
+        "Cars",
+        { ...base, year: String(new Date().getFullYear() + 2) },
+        modes,
+      ),
+    ).toBe(false);
+    expect(areCategorySpecsValid("Vehicles", "Cars", { ...base, year: "2018" }, modes)).toBe(true);
   });
 
   it("keeps listings saved under the old category names editable", () => {

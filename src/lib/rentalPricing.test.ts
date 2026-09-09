@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   PLATFORM_SERVICE_FEE_RATE,
+  breakdownFromStoredBooking,
   computeRentalPriceBreakdown,
 } from "./rentalPricing";
 
@@ -100,5 +101,38 @@ describe("computeRentalPriceBreakdown", () => {
     const cents = Math.round(breakdown.totalUsd * 100);
     expect(cents).toBe(11199);
     expect(breakdown.totalUsd * 100).toBeCloseTo(cents, 6);
+  });
+});
+
+describe("breakdownFromStoredBooking", () => {
+  it("never treats the grand total as a one-day rate", () => {
+    const breakdown = breakdownFromStoredBooking({
+      startDate: "2026-03-01",
+      endDate: "2026-03-03",
+      totalUsd: 168,
+    });
+
+    expect(breakdown.rentalDays).toBe(3);
+    expect(breakdown.totalUsd).toBe(168);
+    expect(breakdown.serviceFeeUsd).toBe(0);
+    // Old bug: dailyRateUsd = total, rentalDays = 1 → fee on top → ~188.
+    expect(breakdown.totalUsd).toBeLessThan(180);
+    expect(breakdown.dailyRateUsd).toBeCloseTo(56, 6);
+  });
+
+  it("keeps an explicit subtotal and fee split", () => {
+    const breakdown = breakdownFromStoredBooking({
+      startDate: "2026-03-01",
+      endDate: "2026-03-03",
+      totalUsd: 168,
+      rentalSubtotalUsd: 150,
+      serviceFeeUsd: 18,
+    });
+
+    expect(breakdown.rentalDays).toBe(3);
+    expect(breakdown.dailyRateUsd).toBe(50);
+    expect(breakdown.rentalSubtotalUsd).toBe(150);
+    expect(breakdown.serviceFeeUsd).toBe(18);
+    expect(breakdown.totalUsd).toBe(168);
   });
 });

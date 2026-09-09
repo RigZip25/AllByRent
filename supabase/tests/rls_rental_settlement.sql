@@ -1,4 +1,4 @@
--- Behaviour checks for 053_rental_settlement_guards.sql.
+-- Behaviour checks for 053_rental_settlement_guards.sql (+ Q8 / migration 068).
 -- Runs as part of: node ./scripts/check-migrations.mjs
 
 grant usage on schema public to authenticated, anon, service_role;
@@ -18,46 +18,58 @@ values ('e1111111-1111-4111-8111-111111111111', 'd1111111-1111-4111-8111-1111111
 do $$
 declare
   row_after public.rentals;
+  blocked boolean;
 begin
   set local role authenticated;
   set local request.jwt.claim.sub = 'd2222222-2222-4222-8222-222222222222';
 
-  -- A booking that claims to be paid for and already picked up.
+  -- Q8: participants no longer insert rentals — /api/rentals/create does.
+  blocked := false;
+  begin
+    insert into public.rentals (
+      id, listing_id, owner_id, renter_id, status, start_date, end_date,
+      stripe_payment_status, deposit_status, rental_total_cents,
+      host_handed_over_at, renter_received_at, picked_up_at
+    ) values (
+      'f1111111-1111-4111-8111-111111111111',
+      'e1111111-1111-4111-8111-111111111111',
+      'd1111111-1111-4111-8111-111111111111',
+      'd2222222-2222-4222-8222-222222222222',
+      'active',
+      current_date,
+      current_date + 2,
+      'succeeded',
+      'released',
+      12000,
+      now(),
+      now(),
+      now()
+    );
+  exception when others then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'Q8: a client could still insert a rental row';
+  end if;
+
+  reset role;
+
+  -- Seed the way the create route does (service role / postgres).
   insert into public.rentals (
-    id, listing_id, owner_id, renter_id, status, start_date, end_date,
-    stripe_payment_status, deposit_status, rental_total_cents,
-    host_handed_over_at, renter_received_at, picked_up_at
+    id, listing_id, owner_id, renter_id, status, start_date, end_date, rental_total_cents
   ) values (
     'f1111111-1111-4111-8111-111111111111',
     'e1111111-1111-4111-8111-111111111111',
     'd1111111-1111-4111-8111-111111111111',
     'd2222222-2222-4222-8222-222222222222',
-    'active',
+    'pending_approval',
     current_date,
     current_date + 2,
-    'succeeded',
-    'released',
-    12000,
-    now(),
-    now(),
-    now()
+    12000
   );
 
-  select * into row_after from public.rentals
-  where id = 'f1111111-1111-4111-8111-111111111111';
-
-  if row_after.stripe_payment_status is not null then
-    raise exception 'a new booking could declare itself paid: %', row_after.stripe_payment_status;
-  end if;
-  if row_after.deposit_status is not null then
-    raise exception 'a new booking could declare its deposit released';
-  end if;
-  if row_after.host_handed_over_at is not null or row_after.picked_up_at is not null then
-    raise exception 'a new booking could declare the item handed over';
-  end if;
-  if row_after.status <> 'pending_approval' then
-    raise exception 'a new booking could start out active, status is %', row_after.status;
-  end if;
+  set local role authenticated;
+  set local request.jwt.claim.sub = 'd2222222-2222-4222-8222-222222222222';
 
   -- The renter marks the payment succeeded after the fact.
   update public.rentals

@@ -6454,6 +6454,10 @@ export function areCategorySpecsValid(
       const n = Number(raw);
       if (!Number.isFinite(n) || n < 0) return false;
       if (field.key === "wheelCount" && (n < 2 || n > 26)) return false;
+      if (field.key === "year") {
+        const maxYear = new Date().getFullYear() + 1;
+        if (n < 1950 || n > maxYear) return false;
+      }
     }
     if (
       (field.type === "select" || field.type === "brand") &&
@@ -6688,8 +6692,13 @@ export function areCategorySpecsValid(
       const n = Number((values[key] ?? "").trim());
       return Number.isFinite(n) && n >= 0;
     };
+    const reqYear = () => {
+      const n = Number((values.year ?? "").trim());
+      const maxYear = new Date().getFullYear() + 1;
+      return Number.isFinite(n) && n >= 1950 && n <= maxYear;
+    };
 
-    if (!reqText("make") || !reqText("model") || !reqNum("year")) return false;
+    if (!reqText("make") || !reqText("model") || !reqYear()) return false;
     if (!reqSelect("transmission", ["automatic", "manual", "cvt", "other"])) return false;
     if (!reqSelect("fuelType", ["gasoline", "diesel", "hybrid", "electric", "other"])) return false;
     if (!reqNum("vehicleWeightLbs")) return false;

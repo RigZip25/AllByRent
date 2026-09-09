@@ -1432,8 +1432,8 @@ function BookingScreenLoaded({
     onConfirmed(id);
   };
 
-  const persistRentalRow = async (id: string, booking: RentalBooking): Promise<void> => {
-    if (!auth.userId || !listing.hostId) return;
+  const persistRentalRow = async (id: string, booking: RentalBooking): Promise<number> => {
+    if (!auth.userId || !listing.hostId) return Math.round(totalWithExtras * 100);
     const pickupAt = booking.pickupScheduledAt ?? pickupAtForBooking(listing, startDate);
     const dueAt = booking.returnDueAt ?? endOfUtcDayIso(endDate);
     const row = toSupabaseRentalInsert({
@@ -1465,7 +1465,8 @@ function BookingScreenLoaded({
       renterAttestations:
         booking.renterAttestations ?? buildRenterAttestationSnapshot(booking),
     });
-    await createRentalRemote(row);
+    const created = await createRentalRemote(row);
+    return created.rentalTotalCents;
   };
 
   const cancelPendingRental = (id: string) => {
@@ -1509,28 +1510,26 @@ function BookingScreenLoaded({
     setPaymentError(null);
     void (async () => {
       try {
-        await persistRentalRow(id, booking);
+        const rentalTotalCents = await persistRentalRow(id, booking);
+        const amountCents = Math.max(50, rentalTotalCents);
+        const pi = await createRentalPaymentIntent({
+          rentalId: id,
+          listingId: listing.id,
+          ownerId: listing.hostId!,
+          amountCents,
+        });
+
+        if (!pi.ok) {
+          setPaymentError(pi.reason);
+          cancelPendingRental(id);
+          return;
+        }
+
+        setPendingBookingId(id);
+        setPaymentClientSecret(pi.clientSecret);
       } catch (error) {
         setPaymentError(error instanceof Error ? error.message : t.booking.failedToSave);
-        return;
       }
-
-      const amountCents = Math.max(50, Math.round(totalWithExtras * 100));
-      const pi = await createRentalPaymentIntent({
-        rentalId: id,
-        listingId: listing.id,
-        ownerId: listing.hostId!,
-        amountCents,
-      });
-
-      if (!pi.ok) {
-        setPaymentError(pi.reason);
-        cancelPendingRental(id);
-        return;
-      }
-
-      setPendingBookingId(id);
-      setPaymentClientSecret(pi.clientSecret);
     })().finally(() => setConfirmBusy(false));
   };
 
