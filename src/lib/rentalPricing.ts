@@ -12,6 +12,8 @@ import {
 
 } from "./deliveryPricing";
 
+import { daysInclusive } from "./availabilityBusy";
+
 import type { ListingDraft } from "../screens/listing/types";
 
 import { getEffectiveRentalFeeRate } from "./ops/opsSettings";
@@ -255,7 +257,71 @@ export function computeRentalPriceBreakdown(input: {
 
 }
 
+/**
+ * Rebuild a price panel from a saved booking without inventing a daily rate
+ * from the grand total (ActiveRental used to do that and overstated the fee).
+ */
+export function breakdownFromStoredBooking(booking: {
+  startDate: string;
+  endDate: string;
+  totalUsd: number;
+  rentalSubtotalUsd?: number;
+  serviceFeeUsd?: number;
+  deliveryRequested?: boolean;
+  deliveryFee?: number;
+  deliveryRoundTripUsd?: number;
+  heavySurchargeUsd?: number;
+  poundsOverThreshold?: number;
+  itemWeightLbs?: number | null;
+  insuranceFeeUsd?: number;
+}): RentalPriceBreakdown {
+  const rentalDays = Math.max(1, daysInclusive(booking.startDate, booking.endDate));
+  const deliveryRoundTripUsd =
+    booking.deliveryRoundTripUsd ??
+    (booking.heavySurchargeUsd
+      ? Math.max(0, (booking.deliveryFee ?? 0) - (booking.heavySurchargeUsd ?? 0))
+      : booking.deliveryFee ?? 0);
+  const heavySurchargeUsd = booking.heavySurchargeUsd ?? 0;
+  const deliveryFeeUsd = booking.deliveryFee ?? deliveryRoundTripUsd + heavySurchargeUsd;
+  const deliveryRequested = Boolean(booking.deliveryRequested && deliveryFeeUsd > 0);
 
+  if (booking.rentalSubtotalUsd !== undefined && booking.serviceFeeUsd !== undefined) {
+    const rentalSubtotalUsd = Math.max(0, booking.rentalSubtotalUsd);
+    const dailyRateUsd = rentalDays > 0 ? rentalSubtotalUsd / rentalDays : rentalSubtotalUsd;
+    return {
+      rentalDays,
+      dailyRateUsd,
+      rentalSubtotalUsd,
+      deliveryRequested,
+      deliveryRoundTripUsd: deliveryRequested ? Math.max(0, deliveryRoundTripUsd) : 0,
+      heavySurchargeUsd: deliveryRequested ? Math.max(0, heavySurchargeUsd) : 0,
+      poundsOverThreshold: booking.poundsOverThreshold ?? 0,
+      itemWeightLbs: booking.itemWeightLbs,
+      deliveryFeeUsd: deliveryRequested ? Math.max(0, deliveryFeeUsd) : 0,
+      serviceFeeUsd: Math.max(0, booking.serviceFeeUsd),
+      insuranceFeeUsd: Math.max(0, booking.insuranceFeeUsd ?? 0),
+      totalUsd: Math.max(0, booking.totalUsd),
+    };
+  }
+
+  // Remote-synced rows often only keep the payable total. Show that total as
+  // the rental line — do not call computeRentalPriceBreakdown with total-as-daily.
+  const totalUsd = Math.max(0, booking.totalUsd);
+  return {
+    rentalDays,
+    dailyRateUsd: rentalDays > 0 ? totalUsd / rentalDays : totalUsd,
+    rentalSubtotalUsd: totalUsd,
+    deliveryRequested: false,
+    deliveryRoundTripUsd: 0,
+    heavySurchargeUsd: 0,
+    poundsOverThreshold: 0,
+    itemWeightLbs: booking.itemWeightLbs,
+    deliveryFeeUsd: 0,
+    serviceFeeUsd: 0,
+    insuranceFeeUsd: 0,
+    totalUsd,
+  };
+}
 
 export function breakdownForListingBooking(
 

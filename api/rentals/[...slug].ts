@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import confirmHandoff from "@allbyrent/server/routes/rentals/confirm-handoff";
+import create from "@allbyrent/server/routes/rentals/create";
 import extend from "@allbyrent/server/routes/rentals/extend";
 import invoice from "@allbyrent/server/routes/rentals/invoice";
 
@@ -8,6 +9,7 @@ type Handler = (req: VercelRequest, res: VercelResponse) => unknown;
 
 const ROUTES: Record<string, Handler> = {
   "confirm-handoff": confirmHandoff,
+  create,
   extend,
   invoice,
 };

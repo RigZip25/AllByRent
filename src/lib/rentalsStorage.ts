@@ -1359,12 +1359,14 @@ export function toSupabaseRentalInsert(params: {
   };
 }
 
-export async function createRentalRemote(row: Omit<SupabaseRentalRow, "created_at" | "updated_at">): Promise<void> {
+/**
+ * Create a booking through `/api/rentals/create`, which quotes `rental_total_cents`
+ * from the listing. Direct client inserts are closed by migration 068 (Q8).
+ */
+export async function createRentalRemote(
+  row: Omit<SupabaseRentalRow, "created_at" | "updated_at">,
+): Promise<{ rentalTotalCents: number }> {
   if (!isSupabaseConfigured()) {
-    throw new Error("Database not configured");
-  }
-  const supabase = getSupabaseClient();
-  if (!supabase) {
     throw new Error("Database not configured");
   }
 
@@ -1379,30 +1381,70 @@ export async function createRentalRemote(row: Omit<SupabaseRentalRow, "created_a
     throw new Error(getMessages().booking.datesBlocked);
   }
 
-  const { error } = await supabase.from("rentals").insert(row);
-  if (error) {
-    const msg = error.message?.toLowerCase() ?? "";
-    if (msg.includes("overlap") || msg.includes("blocked availability")) {
-      throw new Error(getMessages().booking.datesBlocked);
-    }
-    // Migration may not be applied yet — retry without newer jsonb columns.
-    if (
-      (row.rental_agreement != null || row.renter_attestations != null) &&
-      (msg.includes("rental_agreement") ||
-        msg.includes("renter_attestations") ||
-        msg.includes("schema cache"))
-    ) {
-      const {
-        rental_agreement: _omitAgreement,
-        renter_attestations: _omitAttestations,
-        ...withoutJsonb
-      } = row;
-      const retry = await supabase.from("rentals").insert(withoutJsonb);
-      if (retry.error) throw retry.error;
-      return;
-    }
-    throw error;
+  const { getAccessToken } = await import("./stripePayments");
+  const token = await getAccessToken();
+  if (!token) {
+    throw new Error(getMessages().booking.failedToSave);
   }
+
+  let payload: {
+    ok?: boolean;
+    error?: string;
+    rentalTotalCents?: number;
+  };
+  let status = 0;
+  try {
+    const res = await fetch("/api/rentals/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        id: row.id,
+        listingId: row.listing_id,
+        ownerId: row.owner_id,
+        status: row.status,
+        startDate: row.start_date,
+        endDate: row.end_date,
+        bookingMode: row.booking_mode,
+        deliveryAddress: row.delivery_address,
+        pickupPin: row.pickup_pin,
+        returnPin: row.return_pin,
+        safelyPolicyId: row.safely_policy_id,
+        insuranceFeeCents: row.insurance_fee_cents,
+        depositAmountCents: row.deposit_amount_cents,
+        claimedTotalCents: row.rental_total_cents,
+        pickupAt: row.pickup_at,
+        dueAt: row.due_at,
+        stripePaymentStatus: row.stripe_payment_status,
+        insuranceProofPath: row.insurance_proof_path,
+        insuranceProofUrl: row.insurance_proof_url,
+        insuranceActiveUntil: row.insurance_active_until,
+        insurancePolicyNote: row.insurance_policy_note,
+        rentalAgreement: row.rental_agreement,
+        renterAttestations: row.renter_attestations,
+      }),
+    });
+    status = res.status;
+    payload = (await res.json()) as typeof payload;
+  } catch {
+    throw new Error(getMessages().booking.failedToSave);
+  }
+
+  if (status === 409 || (payload.error ?? "").toLowerCase().includes("overlap")) {
+    throw new Error(getMessages().booking.datesBlocked);
+  }
+  if (status >= 400 || !payload.ok) {
+    throw new Error(payload.error ?? getMessages().booking.failedToSave);
+  }
+
+  const rentalTotalCents =
+    typeof payload.rentalTotalCents === "number" && Number.isFinite(payload.rentalTotalCents)
+      ? Math.max(0, Math.round(payload.rentalTotalCents))
+      : Math.max(0, Math.round(row.rental_total_cents ?? 0));
+
+  return { rentalTotalCents };
 }
 
 export async function fetchRentalsForUserRemote(userId: string): Promise<SupabaseRentalRow[]> {

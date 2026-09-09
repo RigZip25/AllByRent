@@ -1,4 +1,4 @@
--- Behaviour checks for 056_rental_condition_photos.sql.
+-- Behaviour checks for 056_rental_condition_photos.sql (+ Q8 / migration 068).
 -- Runs as part of: node ./scripts/check-migrations.mjs
 
 grant usage on schema public to authenticated, anon, service_role;
@@ -15,34 +15,25 @@ insert into public.profiles (id) values
 insert into public.listings (id, owner_id, listing_status)
 values ('0b111111-1111-4111-8111-111111111111', '0a111111-1111-4111-8111-111111111111', 'active');
 
+-- Bookings are created by the server (Q8). Seed without a condition photo.
+insert into public.rentals (
+  id, listing_id, owner_id, renter_id, status, start_date, end_date
+) values (
+  '0c111111-1111-4111-8111-111111111111',
+  '0b111111-1111-4111-8111-111111111111',
+  '0a111111-1111-4111-8111-111111111111',
+  '0a222222-2222-4222-8222-222222222222',
+  'pending_approval',
+  current_date,
+  current_date + 2
+);
+
 do $$
 declare
   row_after public.rentals;
 begin
   set local role authenticated;
   set local request.jwt.claim.sub = '0a222222-2222-4222-8222-222222222222';
-
-  -- A photo cannot arrive with the booking: nothing has been handed over yet.
-  insert into public.rentals (
-    id, listing_id, owner_id, renter_id, status, start_date, end_date,
-    pickup_condition_photo_path
-  ) values (
-    '0c111111-1111-4111-8111-111111111111',
-    '0b111111-1111-4111-8111-111111111111',
-    '0a111111-1111-4111-8111-111111111111',
-    '0a222222-2222-4222-8222-222222222222',
-    'pending_approval',
-    current_date,
-    current_date + 2,
-    '0a222222-2222-4222-8222-222222222222/0c111111-1111-4111-8111-111111111111/condition_pickup_1.jpg'
-  );
-
-  select * into row_after from public.rentals
-  where id = '0c111111-1111-4111-8111-111111111111';
-
-  if row_after.pickup_condition_photo_path is not null then
-    raise exception 'a booking could carry a condition photo before the handoff';
-  end if;
 
   -- The renter photographs the item at pickup.
   update public.rentals

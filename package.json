@@ -8,7 +8,7 @@
   "scripts": {
     "prebuild": "node ./scripts/check-i18n-unique-keys.mjs && node ./scripts/generate-rent-sitemap.mjs",
     "build": "tsc -b --pretty false && vite build",
-    "build:native": "CAPACITOR_BUILD=1 npm run build && node ./scripts/check-native-bundle.mjs && npx cap sync",
+    "build:native": "CAPACITOR_BUILD=1 npm run build && npm run cap:sync",
     "assets:generate": "capacitor-assets generate --ios --android --iconBackgroundColor '#062a1c' --iconBackgroundColorDark '#062a1c' --splashBackgroundColor '#062a1c' --splashBackgroundColorDark '#062a1c'",
     "art:categories": "node ./scripts/prepare-category-art.mjs",
     "art:categories:check": "node ./scripts/prepare-category-art.mjs --check",
@@ -16,6 +16,7 @@
     "art:illustrations:check": "node ./scripts/optimize-illustrations.mjs --check",
     "check:i18n-keys": "node ./scripts/check-i18n-unique-keys.mjs",
     "check:migrations": "node ./scripts/check-migrations.mjs",
+    "check:native-bundle": "node ./scripts/check-native-bundle.mjs",
     "typecheck": "node ./scripts/check-i18n-unique-keys.mjs && tsc -b --pretty false",
     "dev": "vite",
     "dev:https": "set VITE_DEV_HTTPS=true&& vite",
@@ -26,7 +27,7 @@
     "seo:indexnow": "node ./scripts/seo/submit-indexnow.mjs",
     "start": "vite",
     "preview": "vite preview",
-    "cap:sync": "npx cap sync",
+    "cap:sync": "node ./scripts/check-native-bundle.mjs && npx cap sync",
     "cap:ios": "npx cap open ios",
     "cap:android": "npx cap open android"
   },

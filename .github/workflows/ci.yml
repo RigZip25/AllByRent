@@ -97,3 +97,19 @@ jobs:
 
       - name: No web service worker in the store bundle
         run: node ./scripts/check-native-bundle.mjs
+
+      - name: Capacitor sync Android
+        run: npx cap sync android
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Assemble debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon

@@ -56,7 +56,7 @@ import { DepositHoldActions } from "../../components/payments/DepositHoldActions
 import { useMediaUrl } from "../../lib/useMediaUrl";
 import { useRentalDocumentUrl } from "../../lib/privateDocumentUrl";
 import {
-  computeRentalPriceBreakdown,
+  breakdownFromStoredBooking,
   formatUsd,
   type RentalPriceBreakdown,
 } from "../../lib/rentalPricing";
@@ -463,49 +463,7 @@ export function ActiveRental({
 
   const priceBreakdown = useMemo<RentalPriceBreakdown | null>(() => {
     if (!booking) return null;
-    if (
-      booking.rentalSubtotalUsd !== undefined &&
-      booking.serviceFeeUsd !== undefined
-    ) {
-      const rentalDays = Math.max(
-        1,
-        Math.round(
-          (new Date(booking.endDate).getTime() - new Date(booking.startDate).getTime()) /
-            (1000 * 60 * 60 * 24),
-        ) + 1,
-      );
-      const daily =
-        rentalDays > 0 ? (booking.rentalSubtotalUsd ?? 0) / rentalDays : booking.rentalSubtotalUsd ?? 0;
-      const deliveryRoundTripUsd =
-        booking.deliveryRoundTripUsd ??
-        (booking.heavySurchargeUsd
-          ? Math.max(0, (booking.deliveryFee ?? 0) - (booking.heavySurchargeUsd ?? 0))
-          : booking.deliveryFee ?? 0);
-      const heavySurchargeUsd = booking.heavySurchargeUsd ?? 0;
-      return {
-        rentalDays,
-        dailyRateUsd: daily,
-        rentalSubtotalUsd: booking.rentalSubtotalUsd ?? 0,
-        deliveryRequested: Boolean(booking.deliveryRequested && (booking.deliveryFee ?? 0) > 0),
-        deliveryRoundTripUsd,
-        heavySurchargeUsd,
-        poundsOverThreshold: booking.poundsOverThreshold ?? 0,
-        itemWeightLbs: booking.itemWeightLbs,
-        deliveryFeeUsd: booking.deliveryFee ?? 0,
-        serviceFeeUsd: booking.serviceFeeUsd ?? 0,
-        insuranceFeeUsd: booking.insuranceFeeUsd ?? 0,
-        totalUsd: booking.totalUsd,
-      };
-    }
-    const deliveryRoundTripUsd = booking.deliveryRoundTripUsd ?? booking.deliveryFee ?? 0;
-    return computeRentalPriceBreakdown({
-      dailyRateUsd: booking.totalUsd,
-      rentalDays: 1,
-      deliveryRequested: Boolean(booking.deliveryRequested),
-      deliveryRoundTripUsd,
-      heavySurchargeUsd: booking.heavySurchargeUsd ?? 0,
-      itemWeightLbs: booking.itemWeightLbs,
-    });
+    return breakdownFromStoredBooking(booking);
   }, [booking]);
 
   const pickupMapsUrl = renterPickupLocation
