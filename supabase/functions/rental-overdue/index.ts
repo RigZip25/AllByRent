@@ -148,14 +148,15 @@ Deno.serve(async (req) => {
         .eq("id", rental.id);
       const policyNote = rental.safely_policy_id
         ? ` Partner policy ${rental.safely_policy_id}.`
-        : " No partner policy on file — notify support manually.";
+        : "";
+      // L5: do not invent partner-policy follow-up when no policy exists.
       await admin.from("notifications").insert({
         id: crypto.randomUUID(),
         recipient_id: rental.owner_id,
         actor_id: null,
         type: "general",
         title: "Overdue escalation (48h)",
-        body: `Rental is 48+ hours overdue.${policyNote}`,
+        body: `Rental is 48+ hours overdue.${policyNote} Contact the renter and support if the item is still out.`,
       });
       safelyEscalations += 1;
     }

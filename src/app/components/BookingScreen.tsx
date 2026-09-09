@@ -176,6 +176,7 @@ import {
   buildEnrichedSummaryLines,
   RENTAL_AGREEMENT_VERSION,
 } from "../../lib/rentalAgreement";
+import { buildRenterAttestationSnapshot } from "../../lib/rentalAttestations";
 import { RentalAgreementSignBlock } from "../../components/rentals/RentalAgreementPanel";
 import { RentalLifecyclePolicySheet } from "../../components/rentals/RentalLifecyclePolicySheet";
 import { loadUserProfile } from "../../lib/userProfileStorage";
@@ -600,8 +601,9 @@ function BookingScreenLoaded({
 
   useEffect(() => {
     if (!needsInsuranceProof) return;
-    // Default: policy must cover through the rental end date.
-    setInsuranceActiveUntil((current) => current || endDate);
+    // L7: do not let the renter invent a policy end date — freeze to rental end.
+    // Host still reviews the uploaded document before handoff.
+    setInsuranceActiveUntil(endDate);
   }, [needsInsuranceProof, endDate]);
 
   const deliveryRequested = fulfillment === "delivery";
@@ -1073,6 +1075,34 @@ function BookingScreenLoaded({
         );
       });
 
+    const renterAttestations = buildRenterAttestationSnapshot({
+      physicalDamageAttested: needsPhysicalDamage
+        ? physicalDamageAttested || usesAgentInsurance
+        : undefined,
+      proRenterAttested: needsProRenter ? proRenterAttested : undefined,
+      cdlAttested: needsCdl ? cdlAttested : undefined,
+      operatorCertAttested: needsOperatorCert ? operatorCertAttested : undefined,
+      boaterLicenseAttested: needsBoaterLicense ? boaterLicenseAttested : undefined,
+      driverLicenseValidAttested: needsDriverRecordAttestation
+        ? driverLicenseValidAttested
+        : undefined,
+      driverRecordSoftAttested: needsDriverRecordAttestation
+        ? driverRecordSoftAttested
+        : undefined,
+      motorcycleEndorsementAttested: needsMotorcycleEndorsement
+        ? motorcycleEndorsementAttested
+        : undefined,
+      ohvTerrainWaiverAttested: needsOhvTerrainWaiver
+        ? ohvTerrainWaiverAttested
+        : undefined,
+      uscgSafetyAck: needsUscgSafety ? uscgSafetyAck : undefined,
+      droneCertAttested: needsDroneCert ? droneCertAttested : undefined,
+      droneRemoteIdAck: needsDroneCert ? droneRemoteIdAck : undefined,
+      safetyBriefingAck: needsSafetyBriefing ? safetyBriefingAck : undefined,
+      ppeAckAttested: needsPpeAck ? ppeAckAttested : undefined,
+      liabilityWaiverAttested: needsLiabilityWaiver ? liabilityWaiverAttested : undefined,
+    }, bookedIso);
+
     const rentalAgreement = createRentalAgreementRecord({
       locale: getLocale(),
       commercial: {
@@ -1088,6 +1118,7 @@ function BookingScreenLoaded({
         fulfillmentMethod: fulfillment,
         insuranceRequired: needsInsuranceProof,
         insuranceActiveUntil: needsInsuranceProof ? insuranceActiveUntil : undefined,
+        renterAttestations,
         cancellationSummary,
         lateReturnSummary: lateReturnSummary ?? undefined,
         noShowSummary: noShowFeeUsd != null ? t.booking.noShowPolicyBody : undefined,
@@ -1373,6 +1404,7 @@ function BookingScreenLoaded({
           : undefined,
       fuelPolicy: fuelPolicySnapshot,
       rentalAgreement,
+      renterAttestations,
     };
   };
 
@@ -1430,6 +1462,8 @@ function BookingScreenLoaded({
       insuranceActiveUntil: booking.insuranceActiveUntil ?? null,
       insurancePolicyNote: booking.insurancePolicyNote ?? null,
       rentalAgreement: booking.rentalAgreement ?? null,
+      renterAttestations:
+        booking.renterAttestations ?? buildRenterAttestationSnapshot(booking),
     });
     await createRentalRemote(row);
   };
@@ -3021,15 +3055,18 @@ function BookingScreenLoaded({
             ) : null}
 
             <label className="block text-xs font-medium text-amber-950">
-              {t.booking.insuranceActiveUntil}
+              {t.booking.insuranceActiveUntilClaimed}
               <input
                 type="date"
                 value={insuranceActiveUntil}
-                min={endDate}
-                onChange={(event) => setInsuranceActiveUntil(event.target.value)}
-                className="mt-1 w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm text-gray-900"
+                readOnly
+                aria-readonly="true"
+                className="mt-1 w-full rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 text-sm text-gray-900"
               />
             </label>
+            <p className="text-[11px] leading-snug text-amber-900/80">
+              {t.booking.insuranceActiveUntilClaimedHint}
+            </p>
             {!insuranceActiveOk && insuranceActiveUntil ? (
               <p className="text-xs font-semibold text-red-600">
                 {t.booking.insuranceMustCoverRental}

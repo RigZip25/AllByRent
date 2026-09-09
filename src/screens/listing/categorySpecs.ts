@@ -7665,6 +7665,8 @@ export function areCategorySpecsValid(
     ]);
     const powered = motorSubs.has(sub) || motor === "yes" || motor === "electric_only";
     if (powered && !(values.hinNumber ?? "").trim()) return false;
+    // L10: powered craft must declare USCG kit complete before publish.
+    if (powered && (values.uscgSafetyKitConfirmed ?? "").trim() !== "kit_complete") return false;
     if (sub === "other") {
       if (![
         "boats_kind_kayak",

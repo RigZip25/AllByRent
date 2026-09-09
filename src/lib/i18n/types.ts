@@ -1494,6 +1494,8 @@ export type AppMessages = {
     insuranceHostRequires: (details: string) => string;
     insuranceCoverageLeadNote: (date: string, leadDays: number) => string;
     insuranceActiveUntil: string;
+    insuranceActiveUntilClaimed: string;
+    insuranceActiveUntilClaimedHint: string;
     insuranceMustCoverRental: string;
     insuranceUpload: string;
     insuranceReplace: string;

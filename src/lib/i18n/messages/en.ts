@@ -1106,10 +1106,10 @@ export const en: AppMessages = {
       "PIN and lockbox codes unlock only when your phone is at the handoff spot (or you scan the item QR). Keeps the booker from unlocking for someone else across town.",
     startIdTitle: "Start ID check",
     startIdBody:
-      "Upload a clear photo of your driver's license and a selfie, confirm date of birth, and attest you're the booked driver before the PIN unlocks. Face match stays best-effort when a profile photo exists.",
+      "Upload a clear photo of your driver's license and a selfie, confirm date of birth, and attest you're the booked driver before the PIN unlocks. Photos stay on this trip for the host to review — Evorios does not run automated face match in this version.",
     startIdBookerFallback: "Booked driver",
-    startIdProfileVerified: "Linked to verified identity on your account",
-    startIdProfileLinked: "Linked to your profile photo",
+    startIdProfileVerified: "Linked to ID verification on your account (host still reviews trip photos)",
+    startIdProfileLinked: "Linked to your profile photo (host still reviews trip photos)",
     startIdProfileHint: "Add a profile photo later to strengthen future checks",
     startIdLicenseAdd: "Photo of driver's license",
     startIdLicenseAdded: "License photo saved ✓",
@@ -1261,7 +1261,7 @@ export const en: AppMessages = {
     renterContact: "Renter contact",
     hostFallback: "Host",
     renterFallback: "Renter",
-    verifiedOnEvorios: "Verified on Evorios",
+    verifiedOnEvorios: "ID on file — host reviews trip photos",
     tapToViewProfile: "Tap to view public profile",
     message: "Message",
     messagePostRental: "Tolls & fines chat",
@@ -5739,6 +5739,9 @@ export const en: AppMessages = {
         ? `Have the vehicle on your policy by the rental start (${date}).`
         : `Have the vehicle on your policy by ${date} (${leadDays} day${leadDays === 1 ? "" : "s"} before start).`,
     insuranceActiveUntil: "Policy active through",
+    insuranceActiveUntilClaimed: "Coverage must stay active through (rental end)",
+    insuranceActiveUntilClaimedHint:
+      "This date is fixed to your rental end. Upload a document that covers the whole trip — the host reviews it before handoff. Evorios does not OCR the policy.",
     insuranceMustCoverRental: "Coverage must stay active through the rental end date.",
     insuranceUpload: "Upload insurance photo",
     insuranceReplace: "Replace insurance photo",

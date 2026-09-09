@@ -34,6 +34,9 @@ export function listingRequiresInsuranceProof(
   if (listingRequiresPhysicalDamage(listing)) return true;
   if (isCommercialEquipmentCategory(listing.category)) return true;
   if (listingRequiresStumpGrinderInsurance(listing)) return true;
+  // L3: Vehicles and Boats always require proof — host cannot opt out.
+  const cat = listing.category.trim();
+  if (cat === "Vehicles" || cat === "Boats & Water") return true;
   if (listing.handoff.requireInsuranceProof === false) return false;
   if (listing.handoff.requireInsuranceProof === true) return true;
   return categoryRequiresInsuranceProof(listing.category);

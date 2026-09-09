@@ -26,6 +26,7 @@ import {
   listingRequiresPhysicalDamage,
   listingVehicleWeightLbs,
   physicalDamageIsMandatory,
+  insuranceProofIsMandatory,
   VEHICLE_PHYSICAL_DAMAGE_WEIGHT_KG,
   VEHICLE_PHYSICAL_DAMAGE_WEIGHT_LBS,
 } from "../../../lib/listingRentRules";
@@ -1070,11 +1071,12 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                           type="checkbox"
                           className="mt-0.5"
                           checked={
-                            listingRequiresPhysicalDamage(draft) ||
+                            insuranceProofIsMandatory(draft) ||
                             draft.handoff.requireInsuranceProof !== false
                           }
-                          disabled={listingRequiresPhysicalDamage(draft)}
+                          disabled={insuranceProofIsMandatory(draft)}
                           onChange={(e) => {
+                            if (insuranceProofIsMandatory(draft)) return;
                             const on = e.target.checked;
                             setDraft((c) => ({
                               ...c,
@@ -1084,7 +1086,7 @@ export function Step3Modes({ draft, setDraft }: StepProps) {
                         />
                         <span>{modesCopy.insuranceRequirementToggle}</span>
                       </label>
-                      {listingRequiresPhysicalDamage(draft) ||
+                      {insuranceProofIsMandatory(draft) ||
                       draft.handoff.requireInsuranceProof !== false ? (
                         <div className="mt-3">
                           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-amber-950">
