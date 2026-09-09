@@ -1113,10 +1113,12 @@ export const es: AppMessages = {
       "PIN y códigos de caja solo se desbloquean cuando tu teléfono está en el punto (o escaneas el QR del artículo). Evita que quien reserva desbloquee para otra persona al otro lado de la ciudad.",
     startIdTitle: "Comprobación de identidad al inicio",
     startIdBody:
-      "Sube una foto clara de tu licencia y un selfie, confirma la fecha de nacimiento y declara que eres el conductor de la reserva antes de que se desbloquee el PIN. El face-match sigue siendo best-effort si hay foto de perfil.",
+      "Sube una foto clara de tu licencia y un selfie, confirma la fecha de nacimiento y declara que eres el conductor de la reserva antes de que se desbloquee el PIN. Las fotos quedan en este viaje para que el anfitrión las revise — Evorios no hace face-match automático en esta versión.",
     startIdBookerFallback: "Conductor de la reserva",
-    startIdProfileVerified: "Vinculado a identidad verificada de tu cuenta",
-    startIdProfileLinked: "Vinculado a tu foto de perfil",
+    startIdProfileVerified:
+      "Vinculado a la verificación de ID de tu cuenta (el anfitrión sigue revisando las fotos del viaje)",
+    startIdProfileLinked:
+      "Vinculado a tu foto de perfil (el anfitrión sigue revisando las fotos del viaje)",
     startIdProfileHint: "Añade una foto de perfil más tarde para reforzar comprobaciones",
     startIdLicenseAdd: "Foto de la licencia de conducir",
     startIdLicenseAdded: "Foto de licencia guardada ✓",
@@ -1261,7 +1263,7 @@ export const es: AppMessages = {
     renterContact: "Contacto del inquilino",
     hostFallback: "Anfitrión",
     renterFallback: "Inquilino",
-    verifiedOnEvorios: "Verificado en Evorios",
+    verifiedOnEvorios: "ID en archivo — el anfitrión revisa fotos del viaje",
     tapToViewProfile: "Toca para ver el perfil público",
     message: "Mensaje",
     messagePostRental: "Chat peajes y multas",
@@ -5780,6 +5782,9 @@ export const es: AppMessages = {
         ? `Ten el vehículo en tu póliza desde el inicio del alquiler (${date}).`
         : `Ten el vehículo en tu póliza desde el ${date} (${leadDays} día${leadDays === 1 ? "" : "s"} antes del inicio).`,
     insuranceActiveUntil: "Póliza activa hasta",
+    insuranceActiveUntilClaimed: "La cobertura debe seguir activa hasta (fin del alquiler)",
+    insuranceActiveUntilClaimedHint:
+      "Esta fecha está fija al fin del alquiler. Sube un documento que cubra todo el viaje — el anfitrión lo revisa antes de la entrega. Evorios no hace OCR de la póliza.",
     insuranceMustCoverRental: "La cobertura debe seguir activa hasta el fin del alquiler.",
     insuranceUpload: "Subir foto del seguro",
     insuranceReplace: "Reemplazar foto del seguro",
@@ -6027,7 +6032,8 @@ export const es: AppMessages = {
     driverRecordSoftAttest: "Declaro historial limpio en 36 meses (auto-declaración).",
     driverLicenseState: "Estado de la licencia (opcional)",
     driverLicenseLast4: "Últimos 4 (opcional)",
-    driverRecordHonestNote: "Evorios no compra MVR en esta versión.",
+    driverRecordHonestNote:
+      "Evorios no compra informes MVR en esta versión. Una declaración falsa puede llevar a cancelación / disputa / ban — el anfitrión puede pedir ver tu licencia física en la entrega.",
     driverRecordBadge: "Licencia / historial",
     coiStructuredRequired: "Este anuncio requiere COI estructurado.",
     coiHostConfirmHint: "El anfitrión debe confirmar COI antes de desbloquear.",

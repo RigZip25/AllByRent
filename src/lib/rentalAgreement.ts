@@ -1,3 +1,6 @@
+import { formatAttestationAgreementLines } from "./rentalAttestations";
+import type { RenterAttestationSnapshot } from "./rentalAttestations";
+
 /**
  * Versioned platform rental agreement + clickwrap e-accept records.
  * Not legal advice; ESIGN/UETA-style acceptance is common in the US but not magic.
@@ -28,6 +31,8 @@ export type RentalAgreementCommercialSnapshot = {
   fulfillmentMethod?: string;
   insuranceRequired?: boolean;
   insuranceActiveUntil?: string;
+  /** Stage 21 L9: frozen attestation checkboxes at accept time. */
+  renterAttestations?: RenterAttestationSnapshot | null;
   cancellationSummary?: string;
   lateReturnSummary?: string;
   noShowSummary?: string;
@@ -574,16 +579,19 @@ export function createRentalAgreementRecord(input: {
 }): RentalAgreementRecord {
   const locale = (input.locale ?? "en").slice(0, 2).toLowerCase();
   const termsText = getRentalAgreementTermsText(locale);
-  const enrichedSummaryLines = buildEnrichedSummaryLines({
-    category: input.commercial.category,
-    vehicle: input.commercial.vehicle,
-    trust: input.commercial.trust,
-    insuranceRequired: input.commercial.insuranceRequired,
-    insuranceActiveUntil: input.commercial.insuranceActiveUntil,
-    cancellationSummary: input.commercial.cancellationSummary,
-    lateReturnSummary: input.commercial.lateReturnSummary,
-    noShowSummary: input.commercial.noShowSummary,
-  });
+  const enrichedSummaryLines = [
+    ...buildEnrichedSummaryLines({
+      category: input.commercial.category,
+      vehicle: input.commercial.vehicle,
+      trust: input.commercial.trust,
+      insuranceRequired: input.commercial.insuranceRequired,
+      insuranceActiveUntil: input.commercial.insuranceActiveUntil,
+      cancellationSummary: input.commercial.cancellationSummary,
+      lateReturnSummary: input.commercial.lateReturnSummary,
+      noShowSummary: input.commercial.noShowSummary,
+    }),
+    ...formatAttestationAgreementLines(input.commercial.renterAttestations),
+  ];
   return {
     termsVersion: RENTAL_AGREEMENT_VERSION,
     locale,

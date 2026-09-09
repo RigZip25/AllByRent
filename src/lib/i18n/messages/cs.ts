@@ -1131,10 +1131,12 @@ export const cs: AppMessages = {
       "PIN a kódy schránky se odemknou jen když je telefon u místa předání (nebo naskenujete QR na věci). Brání tomu, aby rezervující odemkl za někoho jiného přes město.",
     startIdTitle: "Kontrola identity na startu",
     startIdBody:
-      "Nahraj jasnou fotku řidičského průkazu a selfie, potvrď datum narození a potvrď, že jsi rezervovaný řidič, než se odemkne PIN. Face-match zůstává best-effort, pokud existuje fotka profilu.",
+      "Nahraj jasnou fotku řidičského průkazu a selfie, potvrď datum narození a potvrď, že jsi rezervovaný řidič, než se odemkne PIN. Fotky zůstanou u této půjčky ke kontrole hostitelem — Evorios v této verzi nedělá automatické porovnání obličeje.",
     startIdBookerFallback: "Rezervovaný řidič",
-    startIdProfileVerified: "Propojeno s ověřenou identitou na účtu",
-    startIdProfileLinked: "Propojeno s fotkou profilu",
+    startIdProfileVerified:
+      "Propojeno s ověřením identity na účtu (hostitel stejně kontroluje fotky z cesty)",
+    startIdProfileLinked:
+      "Propojeno s fotkou profilu (hostitel stejně kontroluje fotky z cesty)",
     startIdProfileHint: "Později přidej fotku profilu pro silnější kontroly",
     startIdLicenseAdd: "Fotka řidičského průkazu",
     startIdLicenseAdded: "Fotka průkazu uložena ✓",
@@ -1279,7 +1281,7 @@ export const cs: AppMessages = {
     renterContact: "Kontakt nájemce",
     hostFallback: "Hostitel",
     renterFallback: "Nájemce",
-    verifiedOnEvorios: "Ověřeno na Evorios",
+    verifiedOnEvorios: "Doklad v profilu — hostitel kontroluje fotky z cesty",
     tapToViewProfile: "Klepnutím zobrazíte veřejný profil",
     message: "Zpráva",
     messagePostRental: "Chat mýtné a pokuty",
@@ -5798,6 +5800,9 @@ export const cs: AppMessages = {
         ? `Měj vozidlo na pojistce od začátku půjčky (${date}).`
         : `Měj vozidlo na pojistce od ${date} (${leadDays} d${leadDays === 1 ? "en" : "ny"} před začátkem).`,
     insuranceActiveUntil: "Pojištění aktivní do",
+    insuranceActiveUntilClaimed: "Krytí musí platit do (konec půjčky)",
+    insuranceActiveUntilClaimedHint:
+      "Toto datum je pevně na konec půjčky. Nahraj dokument, který kryje celou cestu — hostitel ho zkontroluje před předáním. Evorios nedělá OCR pojistky.",
     insuranceMustCoverRental: "Krytí musí platit až do konce půjčení.",
     insuranceUpload: "Nahrát fotku pojištění",
     insuranceReplace: "Nahradit fotku pojištění",
@@ -6041,7 +6046,8 @@ export const cs: AppMessages = {
     driverRecordSoftAttest: "Prohlašuji čistý záznam za 36 měsíců (sebeprohlášení).",
     driverLicenseState: "Stát řidičáku (volitelné)",
     driverLicenseLast4: "Poslední 4 číslice (volitelné)",
-    driverRecordHonestNote: "Evorios nekupuje MVR v této verzi.",
+    driverRecordHonestNote:
+      "Evorios v této verzi nekupuje MVR reporty. Falešné prohlášení může vést ke zrušení / sporu / banu — hostitel si může vyžádat fyzický průkaz při předání.",
     driverRecordBadge: "Řidičák / záznam",
     coiStructuredRequired: "Tento inzerát vyžaduje strukturované COI.",
     coiHostConfirmHint: "Hostitel musí potvrdit přijetí COI před odemčením.",

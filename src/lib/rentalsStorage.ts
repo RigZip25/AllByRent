@@ -7,6 +7,12 @@ import {
   mergeRentalAgreementRecords,
   type RentalAgreementRecord,
 } from "./rentalAgreement";
+import {
+  applyRenterAttestationSnapshot,
+  buildRenterAttestationSnapshot,
+  isRenterAttestationSnapshot,
+  type RenterAttestationSnapshot,
+} from "./rentalAttestations";
 import type { PreTripInspectionRecord } from "./preTripInspection";
 import { normalizeInspectionRecord } from "./preTripInspection";
 import type { FuelPolicySnapshot } from "./rentalFuelPolicy";
@@ -323,6 +329,11 @@ export type RentalBooking = {
   driverLicenseState?: string;
   driverLicenseLast4?: string;
   /**
+   * Durable remote snapshot of trust checkboxes (Stage 21). Synced to
+   * `rentals.renter_attestations` so a second host device / dispute has proof.
+   */
+  renterAttestations?: RenterAttestationSnapshot | null;
+  /**
    * Heavy / Construction P2: structured Certificate of Insurance fields
    * (beyond photo-only). Host still confirms proof received before unlock.
    */
@@ -458,6 +469,7 @@ type SupabaseRentalRow = {
   running_late_acknowledged_at?: string | null;
   pickup_grace_until?: string | null;
   rental_agreement?: RentalAgreementRecord | null;
+  renter_attestations?: RenterAttestationSnapshot | null;
   rental_invoices?: unknown;
   created_at: string;
   updated_at: string;
@@ -622,6 +634,12 @@ export function rentalBookingFromRemoteRow(
     runningLateAcknowledged: Boolean(row.running_late_acknowledged_at),
     pickupGraceUntil: row.pickup_grace_until ?? undefined,
     rentalAgreement: row.rental_agreement ?? null,
+    renterAttestations: isRenterAttestationSnapshot(row.renter_attestations)
+      ? row.renter_attestations
+      : null,
+    ...applyRenterAttestationSnapshot(
+      isRenterAttestationSnapshot(row.renter_attestations) ? row.renter_attestations : null,
+    ),
     invoices: normalizeRentalInvoices(row.rental_invoices),
   });
 }
@@ -1017,13 +1035,17 @@ export async function updateRentalRemote(
     runningLateSentAt?: string | null;
     runningLateAcknowledgedAt?: string | null;
     rentalAgreement?: RentalAgreementRecord | null;
+    renterAttestations?: RenterAttestationSnapshot | null;
   },
 ): Promise<boolean> {
   if (!isSupabaseConfigured()) return true;
   const supabase = getSupabaseClient();
   if (!supabase) return true;
 
-  const row: Record<string, string | null | RentalAgreementRecord | RentalInvoice[]> = {};
+  const row: Record<
+    string,
+    string | null | RentalAgreementRecord | RentalInvoice[] | RenterAttestationSnapshot
+  > = {};
   if (patch.status !== undefined) row.status = patch.status;
   if (patch.startDate !== undefined) row.start_date = patch.startDate;
   if (patch.endDate !== undefined) row.end_date = patch.endDate;
@@ -1057,6 +1079,9 @@ export async function updateRentalRemote(
   }
   if (patch.rentalAgreement !== undefined) {
     row.rental_agreement = patch.rentalAgreement;
+  }
+  if (patch.renterAttestations !== undefined) {
+    row.renter_attestations = patch.renterAttestations;
   }
   if (Object.keys(row).length === 0) return true;
 
@@ -1111,6 +1136,34 @@ function remotePatchFromBooking(patch: Partial<RentalBooking>): Parameters<typeo
   }
   if (patch.rentalAgreement !== undefined) {
     remote.rentalAgreement = patch.rentalAgreement ?? null;
+  }
+  // Rebuild attestation snapshot whenever any trust checkbox changes so remote
+  // stays the source of truth for disputes (Stage 21 L1).
+  const attestationTouched = [
+    "physicalDamageAttested",
+    "proRenterAttested",
+    "cdlAttested",
+    "operatorCertAttested",
+    "boaterLicenseAttested",
+    "driverLicenseValidAttested",
+    "driverRecordSoftAttested",
+    "motorcycleEndorsementAttested",
+    "ohvTerrainWaiverAttested",
+    "uscgSafetyAck",
+    "droneCertAttested",
+    "droneRemoteIdAck",
+    "safetyBriefingAck",
+    "ppeAckAttested",
+    "liabilityWaiverAttested",
+    "startIdDriverMatchAttested",
+    "startIdCheckedAt",
+    "renterAttestations",
+  ].some((key) => key in patch);
+  if (attestationTouched) {
+    remote.renterAttestations =
+      patch.renterAttestations !== undefined
+        ? patch.renterAttestations
+        : buildRenterAttestationSnapshot(patch);
   }
   // Only the uploaded copy is worth syncing: a local media id means nothing on
   // the other device.
@@ -1275,6 +1328,7 @@ export function toSupabaseRentalInsert(params: {
   insuranceActiveUntil?: string | null;
   insurancePolicyNote?: string | null;
   rentalAgreement?: RentalAgreementRecord | null;
+  renterAttestations?: RenterAttestationSnapshot | null;
 }): Omit<SupabaseRentalRow, "created_at" | "updated_at"> {
   return {
     id: params.id,
@@ -1301,6 +1355,7 @@ export function toSupabaseRentalInsert(params: {
     insurance_active_until: params.insuranceActiveUntil ?? null,
     insurance_policy_note: params.insurancePolicyNote ?? null,
     rental_agreement: params.rentalAgreement ?? null,
+    renter_attestations: params.renterAttestations ?? null,
   };
 }
 
@@ -1330,10 +1385,19 @@ export async function createRentalRemote(row: Omit<SupabaseRentalRow, "created_a
     if (msg.includes("overlap") || msg.includes("blocked availability")) {
       throw new Error(getMessages().booking.datesBlocked);
     }
-    // Migration may not be applied yet — retry without agreement jsonb.
-    if (row.rental_agreement != null && (msg.includes("rental_agreement") || msg.includes("schema cache"))) {
-      const { rental_agreement: _omit, ...withoutAgreement } = row;
-      const retry = await supabase.from("rentals").insert(withoutAgreement);
+    // Migration may not be applied yet — retry without newer jsonb columns.
+    if (
+      (row.rental_agreement != null || row.renter_attestations != null) &&
+      (msg.includes("rental_agreement") ||
+        msg.includes("renter_attestations") ||
+        msg.includes("schema cache"))
+    ) {
+      const {
+        rental_agreement: _omitAgreement,
+        renter_attestations: _omitAttestations,
+        ...withoutJsonb
+      } = row;
+      const retry = await supabase.from("rentals").insert(withoutJsonb);
       if (retry.error) throw retry.error;
       return;
     }

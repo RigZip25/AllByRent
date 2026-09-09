@@ -768,6 +768,8 @@ export function listingRequiresSafetyBriefing(
   const cat = listing.category.trim();
   const flag = (listing.categorySpecs?.safetyBriefingRequired ?? "").trim();
   if (flag === "not_required") return false;
+  // L12: personal generators / pressure washers need a soft operator safety ack.
+  if (listingIsMotorizedSoftGate(listing)) return true;
   if (cat === "Garden & Yard") {
     if (flag === "required") return true;
     // Stump grinders default to briefing; ride-ons only when host marks required.
@@ -785,6 +787,15 @@ export function listingRequiresSafetyBriefing(
   );
 }
 
+/** Heavy Equipment generators / washers: renter ack only — no host pre-confirm. */
+export function listingIsMotorizedSoftGate(
+  listing: Pick<ListingDraft, "category" | "subcategory">,
+): boolean {
+  if (listing.category.trim() !== "Heavy Equipment") return false;
+  const sub = subKey(listing);
+  return sub === "generators" || sub === "pressure washers";
+}
+
 export function listingSafetyBriefingHostReady(
   listing: Pick<ListingDraft, "categorySpecs">,
 ): boolean {
@@ -795,6 +806,8 @@ export function listingSafetyBriefingBlocksBooking(
   listing: Pick<ListingDraft, "category" | "subcategory" | "modes" | "categorySpecs">,
 ): boolean {
   if (!listingRequiresSafetyBriefing(listing)) return false;
+  // Soft motorized shelves only need the renter checkbox at booking.
+  if (listingIsMotorizedSoftGate(listing)) return false;
   return !listingSafetyBriefingHostReady(listing);
 }
 

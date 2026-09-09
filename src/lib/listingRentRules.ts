@@ -198,3 +198,13 @@ export function physicalDamageIsMandatory(
   if (isCommercialEquipmentCategory(listing.category)) return true;
   return listingIsCommercialTransport(listing);
 }
+
+/** Vehicles / Boats: insurance proof is mandatory (Stage 21 L3). */
+export function insuranceProofIsMandatory(
+  listing: Pick<ListingDraft, "category" | "subcategory" | "handoff" | "modes" | "categorySpecs">,
+): boolean {
+  if (!listing.modes?.rent) return false;
+  if (physicalDamageIsMandatory(listing)) return true;
+  const cat = listing.category.trim();
+  return cat === "Vehicles" || cat === "Boats & Water" || isCommercialEquipmentCategory(cat);
+}
