@@ -108,16 +108,22 @@ export function AddressLocationPicker({
         saveUsState(zipState);
       }
 
-      const results = await searchPlaces(trimmed, {
-        near: searchNear,
-        countryCode,
-        usState: effectiveState,
-        cityHint: homeCityHint,
-        granularity,
-      });
-      setSuggestions(results);
-      setShowSuggestions(results.length > 0);
-      setSearchError(results.length === 0);
+      try {
+        const results = await searchPlaces(trimmed, {
+          near: searchNear,
+          countryCode,
+          usState: effectiveState,
+          cityHint: homeCityHint,
+          granularity,
+        });
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
+        setSearchError(results.length === 0);
+      } catch {
+        setSuggestions([]);
+        setShowSuggestions(false);
+        setSearchError(true);
+      }
       setIsLoading(false);
     }, 400);
 

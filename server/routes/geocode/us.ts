@@ -28,13 +28,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     typeof req.query.benchmark === "string" ? req.query.benchmark : "Public_AR_Current";
   const format = "json";
 
-  const street = typeof req.query.street === "string" ? req.query.street.trim() : "";
-  const city = typeof req.query.city === "string" ? req.query.city.trim() : "";
-  const state = typeof req.query.state === "string" ? req.query.state.trim() : "";
-  const zip = typeof req.query.zip === "string" ? req.query.zip.trim() : "";
-  const x = typeof req.query.x === "string" ? req.query.x.trim() : "";
-  const y = typeof req.query.y === "string" ? req.query.y.trim() : "";
-  const mode = typeof req.query.mode === "string" ? req.query.mode.trim() : "";
+  const street = typeof req.query.street === "string" ? req.query.street.trim().slice(0, 200) : "";
+  const city = typeof req.query.city === "string" ? req.query.city.trim().slice(0, 200) : "";
+  const state = typeof req.query.state === "string" ? req.query.state.trim().slice(0, 40) : "";
+  const zip = typeof req.query.zip === "string" ? req.query.zip.trim().slice(0, 20) : "";
+  const x = typeof req.query.x === "string" ? req.query.x.trim().slice(0, 40) : "";
+  const y = typeof req.query.y === "string" ? req.query.y.trim().slice(0, 40) : "";
+  const mode = typeof req.query.mode === "string" ? req.query.mode.trim().slice(0, 40) : "";
 
   let upstream: URL;
   if (x && y && mode === "geographies") {
@@ -53,8 +53,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (typeof address !== "string" || !address.trim()) {
       return res.status(400).json({ error: "Missing address or street query parameter" });
     }
+    if (address.trim().length > 200) {
+      return res.status(400).json({ error: "Address query too long" });
+    }
     upstream = new URL(`${CENSUS_BASE}/locations/onelineaddress`);
-    upstream.searchParams.set("address", address.trim());
+    upstream.searchParams.set("address", address.trim().slice(0, 200));
   }
 
   upstream.searchParams.set("benchmark", benchmark);

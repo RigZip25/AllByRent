@@ -1,5 +1,11 @@
 import type { ListingDraft } from "../screens/listing/types";
-import { getActiveRentLocationLabel, getProfileCity } from "./listingStorage";
+import {
+  getActiveRentLocationLabel,
+  getBrowseCenter,
+  getListingCoords,
+  getProfileCity,
+} from "./listingStorage";
+import { milesBetween } from "./geoLocality";
 
 const CATEGORY_EMOJI: Record<string, string> = {
   tools: "🔧",
@@ -25,7 +31,15 @@ export function hostTrustFromId(_hostId: string | undefined): {
   return { rating: 0, reviews: 0 };
 }
 
-export function listingDistanceLabel(_hostId: string | undefined): string {
+export function listingDistanceLabel(listingId: string | undefined): string {
+  const center = getBrowseCenter();
+  const coords = listingId ? getListingCoords(listingId) : null;
+  if (center && coords) {
+    const mi = milesBetween(center, coords);
+    if (mi < 0.5) return "Near you";
+    if (mi < 10) return `${mi.toFixed(1)} mi`;
+    return `${Math.round(mi)} mi`;
+  }
   const city = getProfileCity().trim().toLowerCase();
   const active = getActiveRentLocationLabel().trim().toLowerCase();
   if (city && active && city === active) return "Near you";
@@ -41,6 +55,6 @@ export function listingCardMeta(listing: ListingDraft): {
   return {
     rating: trust.rating,
     reviews: trust.reviews,
-    distance: listingDistanceLabel(listing.hostId),
+    distance: listingDistanceLabel(listing.id),
   };
 }

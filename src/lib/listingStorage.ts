@@ -26,6 +26,10 @@ import {
   fetchStoreLiveByHostIds,
   isStoreOpenForHost,
 } from "./garageStoreLive";
+import {
+  cityKeyFromLabel,
+  localityLabelFromParts,
+} from "./geoLocality";
 
 const LISTINGS_STORAGE_KEY = "allbyrent_published_listings";
 const PROFILE_CITY_KEY = "allbyrent_profile_city";
@@ -37,6 +41,12 @@ const QR_BULK_QUEUE_KEY = "allbyrent_qr_bulk_queue_listing_ids";
 export type RentLocationContext = "home" | "trip";
 
 export type ProfileLocation = {
+  displayName: string;
+  lat: number;
+  lng: number;
+};
+
+export type TripDestination = {
   displayName: string;
   lat: number;
   lng: number;
@@ -62,9 +72,11 @@ export function setRentContext(context: RentLocationContext): void {
 
 export function getProfileCity(): string {
   const home = getHomeLocation();
-  if (home) return home.displayName;
+  if (home) {
+    return localityLabelFromParts({ label: home.displayName });
+  }
   try {
-    return localStorage.getItem(PROFILE_CITY_KEY) ?? "";
+    return localityLabelFromParts({ label: localStorage.getItem(PROFILE_CITY_KEY) ?? "" });
   } catch {
     return "";
   }
@@ -108,9 +120,13 @@ export function getHomeLocation(): ProfileLocation | null {
 
 export function setHomeLocation(location: ProfileLocation): void {
   setRentContext("home");
-  setProfileCity(location.displayName);
+  const locality = localityLabelFromParts({ label: location.displayName });
+  setProfileCity(locality);
   try {
-    localStorage.setItem(PROFILE_LOCATION_KEY, JSON.stringify(location));
+    localStorage.setItem(
+      PROFILE_LOCATION_KEY,
+      JSON.stringify({ ...location, displayName: locality }),
+    );
   } catch {
     /* ignore */
   }
@@ -121,23 +137,84 @@ export function setHomeLocation(location: ProfileLocation): void {
   } catch {
     /* ignore */
   }
+  void syncActiveListingsGeoForHost(locality, location.lat, location.lng);
 }
 
 export function getTripDestination(): string {
+  return getTripDestinationLocation()?.displayName ?? "";
+}
+
+export function getTripDestinationLocation(): TripDestination | null {
   try {
-    return localStorage.getItem(TRIP_DESTINATION_KEY) ?? "";
+    const raw = localStorage.getItem(TRIP_DESTINATION_KEY);
+    if (!raw) return null;
+    if (raw.startsWith("{")) {
+      const parsed = JSON.parse(raw) as TripDestination;
+      if (
+        typeof parsed.displayName === "string" &&
+        typeof parsed.lat === "number" &&
+        typeof parsed.lng === "number"
+      ) {
+        return {
+          displayName: localityLabelFromParts({ label: parsed.displayName }),
+          lat: parsed.lat,
+          lng: parsed.lng,
+        };
+      }
+      return null;
+    }
+    // Legacy string-only trip destination (G8).
+    const label = localityLabelFromParts({ label: raw });
+    return label ? { displayName: label, lat: 0, lng: 0 } : null;
   } catch {
-    return "";
+    return null;
   }
 }
 
-export function setTripDestination(displayName: string): void {
+export function setTripDestination(
+  displayNameOrLocation: string | TripDestination,
+): void {
   setRentContext("trip");
   try {
-    localStorage.setItem(TRIP_DESTINATION_KEY, displayName);
+    if (typeof displayNameOrLocation === "string") {
+      const locality = localityLabelFromParts({ label: displayNameOrLocation });
+      localStorage.setItem(TRIP_DESTINATION_KEY, locality);
+      return;
+    }
+    const locality = localityLabelFromParts({
+      label: displayNameOrLocation.displayName,
+    });
+    localStorage.setItem(
+      TRIP_DESTINATION_KEY,
+      JSON.stringify({
+        displayName: locality,
+        lat: displayNameOrLocation.lat,
+        lng: displayNameOrLocation.lng,
+      }),
+    );
   } catch {
     /* ignore */
   }
+}
+
+/** Viewer center for radius browse (home or trip). */
+export function getBrowseCenter(): { lat: number; lng: number } | null {
+  const context = getRentContext();
+  if (context === "trip") {
+    const trip = getTripDestinationLocation();
+    if (trip && Number.isFinite(trip.lat) && Number.isFinite(trip.lng) && (trip.lat !== 0 || trip.lng !== 0)) {
+      return { lat: trip.lat, lng: trip.lng };
+    }
+  }
+  const home = getHomeLocation();
+  if (home && Number.isFinite(home.lat) && Number.isFinite(home.lng)) {
+    return { lat: home.lat, lng: home.lng };
+  }
+  const trip = getTripDestinationLocation();
+  if (trip && Number.isFinite(trip.lat) && Number.isFinite(trip.lng) && (trip.lat !== 0 || trip.lng !== 0)) {
+    return { lat: trip.lat, lng: trip.lng };
+  }
+  return null;
 }
 
 /** Label shown on Home Feed — follows last at-home vs trip choice. */
@@ -793,6 +870,9 @@ type SupabaseListingRow = {
   id: string;
   owner_id: string;
   city?: string;
+  lat?: number | null;
+  lng?: number | null;
+  city_key?: string | null;
   title: string;
   category: string;
   subcategory: string;
@@ -813,11 +893,104 @@ type SupabaseListingRow = {
   updated_at: string;
 };
 
+function publicHandoffPayload(handoff: ListingDraft["handoff"] | undefined) {
+  if (!handoff || typeof handoff !== "object") return {};
+  const { contactlessInstructions: _secret, ...rest } = handoff;
+  return rest;
+}
+
+async function upsertListingAccessSecrets(
+  listingId: string,
+  ownerId: string,
+  instructions: string,
+): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
+  const trimmed = instructions.trim();
+  if (!trimmed) {
+    await supabase.from("listing_access_secrets").delete().eq("listing_id", listingId);
+    return;
+  }
+  await supabase.from("listing_access_secrets").upsert(
+    {
+      listing_id: listingId,
+      owner_id: ownerId,
+      contactless_instructions: trimmed,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "listing_id" },
+  );
+}
+
+export async function fetchListingAccessInstructions(
+  listingId: string,
+): Promise<string | null> {
+  if (!isSupabaseConfigured()) return null;
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("listing_access_secrets")
+    .select("contactless_instructions")
+    .eq("listing_id", listingId)
+    .maybeSingle();
+  if (error || !data) return null;
+  const value = (data as { contactless_instructions?: string }).contactless_instructions;
+  return typeof value === "string" ? value : null;
+}
+
+async function syncActiveListingsGeoForHost(
+  city: string,
+  lat: number,
+  lng: number,
+): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.id) return;
+  await supabase
+    .from("listings")
+    .update({
+      city,
+      city_key: cityKeyFromLabel(city),
+      lat,
+      lng,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("owner_id", user.id)
+    .in("listing_status", ["active", "draft", "paused"]);
+}
+
+const listingCoordsById = new Map<string, { lat: number; lng: number }>();
+
+export function getListingCoords(listingId: string): { lat: number; lng: number } | null {
+  return listingCoordsById.get(listingId) ?? null;
+}
+
+function rememberListingCoords(row: SupabaseListingRow): void {
+  if (
+    typeof row.lat === "number" &&
+    typeof row.lng === "number" &&
+    Number.isFinite(row.lat) &&
+    Number.isFinite(row.lng)
+  ) {
+    listingCoordsById.set(row.id, { lat: row.lat, lng: row.lng });
+  }
+}
+
 function draftToRow(draft: ListingDraft, ownerId: string): Partial<SupabaseListingRow> {
+  const home = getHomeLocation();
+  const city = getProfileCity();
   return {
     id: draft.id,
     owner_id: ownerId,
-    city: getProfileCity(),
+    city,
+    city_key: city ? cityKeyFromLabel(city) : null,
+    lat: home?.lat ?? null,
+    lng: home?.lng ?? null,
     title: draft.title ?? "",
     category: draft.category ?? "",
     subcategory: draft.subcategory ?? "",
@@ -847,13 +1020,14 @@ function draftToRow(draft: ListingDraft, ownerId: string): Partial<SupabaseListi
       category_specs: draft.categorySpecs ?? {},
       instructions_url: null,
     },
-    handoff: draft.handoff ?? {},
+    handoff: publicHandoffPayload(draft.handoff),
     qr_code: draft.qrToken ?? null,
     listing_status: draft.listingStatus ?? "draft",
   };
 }
 
 function rowToDraft(row: SupabaseListingRow): ListingDraft {
+  rememberListingCoords(row);
   const availability =
     row.availability && typeof row.availability === "object"
       ? (row.availability as Record<string, unknown>)
@@ -1056,6 +1230,12 @@ export async function savePublishedListingRemote(
     .upsert(draftToRow({ ...stamped, photos: earlyPhotos }, normalizedOwnerId), { onConflict: "id" });
   if (earlyError) {
     console.warn("savePublishedListingRemote early upsert failed:", earlyError.message);
+  } else {
+    await upsertListingAccessSecrets(
+      stamped.id,
+      normalizedOwnerId,
+      stamped.handoff?.contactlessInstructions ?? "",
+    );
   }
 
   const previous = getPublishedListingById(stamped.id);
@@ -1096,6 +1276,12 @@ export async function savePublishedListingRemote(
     .upsert(draftToRow(syncedDraft, normalizedOwnerId), { onConflict: "id" });
   if (error) {
     console.warn("savePublishedListingRemote failed:", error.message);
+  } else {
+    await upsertListingAccessSecrets(
+      syncedDraft.id,
+      normalizedOwnerId,
+      syncedDraft.handoff?.contactlessInstructions ?? "",
+    );
   }
 
   return { ok: !error, photosPending };
@@ -1263,8 +1449,19 @@ async function filterNeighborVisible(listings: ListingDraft[]): Promise<ListingD
   return visible.filter((l) => isListingBrowsable(l, storeLiveByHost));
 }
 
-export async function fetchActiveListingsForCityRemote(city: string): Promise<ListingDraft[]> {
+export async function fetchActiveListingsForCityRemote(
+  city: string,
+  options?: { radiusMi?: number; center?: { lat: number; lng: number } | null },
+): Promise<ListingDraft[]> {
   const cityNorm = city.trim();
+  const center = options?.center ?? getBrowseCenter();
+  const radiusMi = options?.radiusMi;
+
+  if (!cityNorm && !center) {
+    // G9: no location center and no city → empty shelf, not the world.
+    return [];
+  }
+
   if (!isSupabaseConfigured()) {
     return filterNeighborVisible(loadPublishedListings().filter(isListingOnShelf));
   }
@@ -1272,13 +1469,32 @@ export async function fetchActiveListingsForCityRemote(city: string): Promise<Li
   if (!supabase) {
     return filterNeighborVisible(loadPublishedListings().filter(isListingOnShelf));
   }
+
+  if (center && radiusMi && radiusMi > 0) {
+    const { data, error } = await supabase.rpc("listings_within_radius", {
+      p_lat: center.lat,
+      p_lng: center.lng,
+      p_radius_mi: radiusMi,
+      p_limit: 200,
+    });
+    if (!error && data) {
+      return interleaveBoosted(
+        await filterNeighborVisible((data as SupabaseListingRow[]).map(rowToDraft)),
+      );
+    }
+  }
+
   const query = supabase
     .from("listings")
     .select("*")
     .eq("listing_status", "active")
     .order("boosted_until", { ascending: false, nullsFirst: false })
     .order("updated_at", { ascending: false });
-  const { data, error } = cityNorm ? await query.ilike("city", `%${cityNorm}%`) : await query;
+
+  const cityKey = cityNorm ? cityKeyFromLabel(cityNorm) : "";
+  const { data, error } = cityNorm
+    ? await query.or(`city_key.eq.${cityKey},city.ilike.%${cityNorm}%`)
+    : await query.limit(0); // G9: refuse worldwide without a center
   if (error || !data) {
     return filterNeighborVisible(loadPublishedListings().filter(isListingOnShelf));
   }
@@ -1302,8 +1518,10 @@ export async function searchActiveListingsRemote(params: {
       .filter((l) => (category ? l.category === category : true))
       .filter((l) => {
         if (!q) return true;
-        const hay = `${l.title} ${l.description} ${l.category} ${l.subcategory}`.toLowerCase();
-        return hay.includes(q);
+        const specs = Object.values(l.categorySpecs ?? {}).join(" ");
+        const hay = `${l.title} ${l.description} ${l.category} ${l.subcategory} ${l.vin} ${l.serialNumber} ${specs}`.toLowerCase();
+        const tokens = q.split(/\s+/).filter(Boolean).slice(0, 6);
+        return tokens.every((token) => hay.includes(token));
       });
 
   if (!isSupabaseConfigured()) {
@@ -1321,7 +1539,10 @@ export async function searchActiveListingsRemote(params: {
     .order("boosted_until", { ascending: false, nullsFirst: false })
     .order("updated_at", { ascending: false });
 
-  if (cityNorm) queryBuilder = queryBuilder.ilike("city", `%${cityNorm}%`);
+  if (cityNorm) {
+    const cityKey = cityKeyFromLabel(cityNorm);
+    queryBuilder = queryBuilder.or(`city_key.eq.${cityKey},city.ilike.%${cityNorm}%`);
+  }
   // Rows keep the category name they were saved with, so match the old ones too.
   if (category) queryBuilder = queryBuilder.in("category", categoryQueryNames(category));
   if (q) {

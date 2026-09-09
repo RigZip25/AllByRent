@@ -49,13 +49,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  const street = typeof req.query.street === "string" ? req.query.street.trim() : "";
-  const city = typeof req.query.city === "string" ? req.query.city.trim() : "";
-  const state = typeof req.query.state === "string" ? req.query.state.trim() : "";
-  const zip = typeof req.query.zip === "string" ? req.query.zip.trim() : "";
+  const street = typeof req.query.street === "string" ? req.query.street.trim().slice(0, 200) : "";
+  const city = typeof req.query.city === "string" ? req.query.city.trim().slice(0, 200) : "";
+  const state = typeof req.query.state === "string" ? req.query.state.trim().slice(0, 40) : "";
+  const zip = typeof req.query.zip === "string" ? req.query.zip.trim().slice(0, 20) : "";
 
   if (!street && !city && !zip) {
     return res.status(400).json({ error: "Provide street, city, or zip" });
+  }
+  if (street.length + city.length + state.length + zip.length > 200) {
+    return res.status(400).json({ error: "Address query too long" });
   }
 
   const xml = `<AddressValidateRequest USERID="${escapeXml(userId)}"><Address ID="0"><Address1></Address1><Address2>${escapeXml(street)}</Address2><City>${escapeXml(city)}</City><State>${escapeXml(state)}</State><Zip5>${escapeXml(zip)}</Zip5></Address></AddressValidateRequest>`;
